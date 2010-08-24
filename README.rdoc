@@ -1,0 +1,7 @@
+= Opscode Expander
+
+=== NOTE:
+Internal Use Only
+
+= What's This?
+Opscode's internal parallelized Chef-Solr-Indexer Implementation

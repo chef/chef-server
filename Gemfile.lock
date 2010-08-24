@@ -1,0 +1,64 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    abstract (1.0.0)
+    addressable (2.1.1)
+    amqp (0.6.7)
+      eventmachine (>= 0.12.4)
+    bunny (0.6.0)
+    chef (0.9.9)
+      bunny (>= 0.6.0)
+      erubis
+      extlib
+      highline
+      json (>= 1.4.4, <= 1.4.6)
+      mixlib-authentication (>= 1.1.0)
+      mixlib-cli (>= 1.1.0)
+      mixlib-config (>= 1.1.0)
+      mixlib-log (>= 1.1.0)
+      moneta
+      ohai (>= 0.5.7)
+      rest-client (>= 1.0.4, <= 1.5.1)
+      uuidtools
+    chef-solr (0.9.9)
+      chef (= 0.9.9)
+      libxml-ruby (>= 1.1.3)
+      uuidtools (>= 2.0.0)
+    em-http-request (0.2.11)
+      addressable (>= 2.0.0)
+      eventmachine (>= 0.12.9)
+    erubis (2.6.6)
+      abstract (>= 1.0.0)
+    eventmachine (0.12.10)
+    extlib (0.9.15)
+    highline (1.6.1)
+    json (1.4.6)
+    libxml-ruby (1.1.4)
+    mixlib-authentication (1.1.4)
+      mixlib-log
+    mixlib-cli (1.2.0)
+    mixlib-config (1.1.2)
+    mixlib-log (1.1.0)
+    moneta (0.6.0)
+    ohai (0.5.7)
+      extlib
+      json (>= 1.4.4, <= 1.4.6)
+      mixlib-cli
+      mixlib-config
+      mixlib-log
+      systemu
+    rest-client (1.0.4)
+    systemu (1.2.0)
+    uuidtools (2.1.1)
+    yajl-ruby (0.7.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  amqp (~> 0.6.7)
+  chef-solr (= 0.9.9)
+  em-http-request (~> 0.2.11)
+  eventmachine (~> 0.12.10)
+  mixlib-log (~> 1.1.0)
+  yajl-ruby (~> 0.7.7)
