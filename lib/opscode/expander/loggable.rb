@@ -1,4 +1,4 @@
-require 'logger'
+require 'mixlib/log'
 
 module Opscode
   module Expander
@@ -6,9 +6,14 @@ module Opscode
       class Logger
         include Mixlib::Log
 
+        def init(*args)
+          @logger = nil
+          super
+        end
+
         [:debug,:info,:warn,:error, :fatal].each do |level|
           class_eval(<<-LOG_METHOD, __FILE__, __LINE__)
-            def #{level}(message, &block)
+            def #{level}(message=nil, &block)
               @logger.#{level}(message, &block)
             end
           LOG_METHOD
@@ -17,6 +22,7 @@ module Opscode
 
       LOGGER = Logger.new
       LOGGER.init
+      LOGGER.level = :debug
 
       def log
         LOGGER
@@ -25,3 +31,4 @@ module Opscode
     end
   end
 end
+

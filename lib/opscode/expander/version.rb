@@ -1,7 +1,13 @@
+require "chef/shell_out"
+require 'chef/mixin/shell_out'
+
 module Opscode
   module Expander
-    rev = `git rev-parse HEAD`.strip
+    extend Chef::Mixin::ShellOut
+
+    rev = shell_out('git rev-parse HEAD').stdout.strip
     VERSION = "0.1.0"
-    VERSION <<  "(r#{rev})" unless rev.empty?
+    VERSION <<  " (#{rev})" unless rev.empty?
+
   end
 end

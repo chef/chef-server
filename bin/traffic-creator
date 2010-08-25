@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+require "rubygems"
+
+require 'bunny'
+
+TOTAL_QUEUES = 1024
+MESSAGE = "F" * (16)
+
+CONFIG = {:user => "guest", :pass => "guest", :vhost => "/testing",
+          :host => "localhost"}
+
+puts "Using rabbitmq config #{CONFIG}"
+
+puts "connecting to rabbitmq"
+amqp_client = Bunny.new(CONFIG)
+amqp_client.start
+
+puts "declaring the opscode topic exchange"
+
+exchange = amqp_client.exchange("opscode-platform", :durable => true, :type => :topic)
+
+puts "sending"
+
+sent_messages = 0
+until sent_messages > 10_000
+  0.upto(TOTAL_QUEUES) do |topic|
+    sent_messages += 1
+    puts "key: scro.vnode_#{topic} (#{sent_messages} / 10,000)"
+    exchange.publish(MESSAGE, :key => "scro.vnode_#{topic}", :immediate => true)
+    break if sent_messages > 10_000
+  end
+end
+puts "done"

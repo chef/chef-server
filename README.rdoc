@@ -4,4 +4,4 @@
 Internal Use Only
 
 = What's This?
-Opscode's internal parallelized Chef-Solr-Indexer Implementation
+Opscode's parallelized Chef-Solr-Indexer Implementation.
