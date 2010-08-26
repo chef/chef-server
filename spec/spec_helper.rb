@@ -1,4 +1,5 @@
 require 'pp'
+require 'stringio'
 require 'rubygems'
 require 'bunny'
 $:.unshift(File.dirname(__FILE__) + '/../lib/')

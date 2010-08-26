@@ -9,6 +9,7 @@ require 'opscode/expander/version'
 require 'opscode/expander/loggable'
 
 require 'opscode/expander/vnode'
+require 'opscode/expander/vnode_supervisor'
 
 module Opscode
   module Expander
@@ -27,9 +28,9 @@ module Opscode
           log.debug { "declaring topic exchange #{TOPIC_EXCHANGE.inspect}" }
           MQ.topic(TOPIC_EXCHANGE, :durable => true)
 
-          0.upto(VNODES) do |vnode_number|
-            VNode.new(vnode_number).start
-          end
+          # :TODO: this needs to be the subset of vnodes this node should have,
+          # not the full list.
+          VNodeSupervisor.new.start((0..VNODES).to_a)
         end
         
       end
