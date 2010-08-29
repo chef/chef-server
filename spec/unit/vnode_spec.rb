@@ -2,7 +2,6 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 require 'opscode/expander/vnode_supervisor'
 require 'opscode/expander/vnode'
-require 'fiber'
 
 describe Expander::VNode do
   before do

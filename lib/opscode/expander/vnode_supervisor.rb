@@ -1,22 +1,21 @@
 require 'yajl'
-require 'uuidtools'
 require 'eventmachine'
 require 'amqp'
 require 'mq'
-require 'chef/shell_out'
-require 'chef/mixin/shell_out'
 require 'opscode/expander/loggable'
+require 'opscode/expander/node'
 require 'opscode/expander/vnode'
+require 'opscode/expander/vnode_table'
 
 module Opscode
   module Expander
     class VNodeSupervisor
       include Loggable
-      include Chef::Mixin::ShellOut
 
       def initialize
         @vnodes = {}
-        @global_vnode_table = {}
+        @vnode_table = VNodeTable.new
+        @local_node  = Node.local_node
         @queue_name, @guid = nil, nil
       end
 
@@ -57,8 +56,10 @@ module Opscode
       end
 
       def start_gossip_publisher
-        EM.add_periodic_timer(30) do
-          gossip_queue.publish(Yajl::Encoder.encode({:vnode_table_update => vnode_status}))
+        EM.add_periodic_timer(10) do
+          current_vnode_status = vnode_status
+          current_vnode_status[:action] = 'update'
+          gossip_exchange.publish(Yajl::Encoder.encode(current_vnode_status))
         end
       end
 
@@ -69,21 +70,29 @@ module Opscode
 
         gossip_queue.subscribe(:ack => true, :confirm => subscription_confirmed) do |header, message|
           log.debug { "Received gossip message on queue #{gossip_queue_name}: #{message}"}
-          update_global_vnode_table(message)
+          @vnode_table.update_table(message)
+          log.debug { "Current vnode table: #{@vnode_table.vnodes_by_node.inspect}" }
           header.ack
         end
       end
 
       def vnode_status
-        {:guid => guid, :hostname => hostname_f, :pid => Process.pid, :vnodes => vnodes}
+        status = @local_node.to_hash
+        status[:vnodes] = vnodes
+        status
+      end
+
+      def initiate_vnode_recovery(vnode_id)
+        raise "TODO"
+        #gossip_queue.publish(Yajl::Encoder.encode({:x}))
       end
 
       def update_global_vnode_table(message)
         Mutex.new.synchronize do
-          parsed_message = Yajl::Parser.parse(message)
-          if parsed_message.respond_to?(:key?) && (update = parsed_message["vnode_table_update"])
+          if message.respond_to?(:key?) && (update = message["vnode_table_update"])
             log.debug { "updating the vnode table for node #{update["guid"]} with nodes [#{update["vnodes"].sort.join(',')}]" }
-            @global_vnode_table[update["guid"]] = update["vnodes"]
+            vnodes = update["vnodes"]
+            @global_vnode_table[update["guid"]] = {:vnodes => vnodes, :vnode_count => vnodes.size}
           else
             log.error { "invalid vnode table update received: #{parsed_message.inspect}" }
           end
@@ -99,34 +108,32 @@ module Opscode
         end
       end
 
+      def gossip_exchange
+        Mutex.new.synchronize do
+          @gossip_exchange ||= begin
+            log.debug { "declaring gossip exchange opscode-platfrom-gossip" }
+            MQ.fanout("opscode-platform-gossip")
+          end
+        end
+      end
+
       def gossip_queue
         Mutex.new.synchronize do
           @gossip_queue ||= begin
             log.debug { "declaring gossip queue #{gossip_queue_name}"}
-            MQ.queue(gossip_queue_name, :exclusive => true)
+            q = MQ.queue(gossip_queue_name, :exclusive => true)
+            q.bind(gossip_exchange)
+            q
           end
         end
       end
 
       def gossip_queue_name
-        return @gossip_queue_name if @gossip_queue_name
-        @gossip_queue_name = "#{hostname_f}--#{Process.pid}--#{guid}--gossip"
+        @local_node.gossip_queue_name
       end
 
       def control_queue_name
-        return @control_queue_name if @control_queue_name
-        @control_queue_name = "#{hostname_f}--#{Process.pid}--#{guid}--control"
-      end
-
-      def guid
-        Mutex.new.synchronize do
-          return @guid if @guid
-          @guid = UUIDTools::UUID.random_create.to_s
-        end
-      end
-
-      def hostname_f
-        @hostname ||= shell_out!("hostname -f").stdout.strip
+        @local_node.control_queue_name
       end
 
     end
