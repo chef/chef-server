@@ -16,11 +16,11 @@ describe Expander::VNode do
   end
 
   it "has a queue named after its vnode number" do
-    @vnode.queue_name.should == "vnode_2342"
+    @vnode.queue_name.should == "vnode-2342"
   end
 
-  it "has a binding key for its vnode number" do
-    @vnode.binding_key.should == "*.vnode_2342"
+  it "has a control queue name" do
+    @vnode.control_queue_name.should == "vnode-2342-control"
   end
 
   describe "when connecting to rabbitmq" do

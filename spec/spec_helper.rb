@@ -35,3 +35,13 @@ ERROR
   end
   exit(1)
 end
+
+module ::AMQP
+  def self.hard_reset!
+    MQ.reset
+    stop
+    EM.stop
+    Thread.current[:mq], @conn = nil, nil
+  end
+end
+

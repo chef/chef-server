@@ -1,10 +1,17 @@
 #!/usr/bin/env ruby
 require "rubygems"
 
+require 'pp'
 require 'bunny'
+require 'yajl'
+require 'uuidtools'
+require 'chef/node'
+require 'benchmark'
 
-TOTAL_QUEUES = 1024
-MESSAGE = "F" * (16)
+MESSAGES_TO_SEND = 1_000
+
+NODE_JSON = IO.read(File.expand_path(File.dirname(__FILE__) + '/../data/sample_node.json'))
+NODE = Chef::Node.json_create(Yajl::Parser.parse(NODE_JSON)).to_hash
 
 CONFIG = {:user => "guest", :pass => "guest", :vhost => "/testing",
           :host => "localhost"}
@@ -15,19 +22,32 @@ puts "connecting to rabbitmq"
 amqp_client = Bunny.new(CONFIG)
 amqp_client.start
 
-puts "declaring the opscode topic exchange"
-
-exchange = amqp_client.exchange("opscode-platform", :durable => true, :type => :topic)
-
-puts "sending"
-
-sent_messages = 0
-until sent_messages > 10_000
-  0.upto(TOTAL_QUEUES) do |topic|
-    sent_messages += 1
-    puts "key: scro.vnode_#{topic} (#{sent_messages} / 10,000)"
-    exchange.publish(MESSAGE, :key => "scro.vnode_#{topic}", :immediate => true)
-    break if sent_messages > 10_000
-  end
+puts 'declaring queues'
+queues = {}
+0.upto(1023) do |vnode|
+  queues[vnode] = amqp_client.queue("vnode-#{vnode}")
 end
-puts "done"
+  
+
+puts "sending #{MESSAGES_TO_SEND} messages"
+start_time = Time.now
+sent_messages = 0
+1.upto(MESSAGES_TO_SEND) do
+  index_data = {:action => :add}
+  index_data[:payload] = {:item => NODE}
+  index_data[:payload][:type] = :node
+  index_data[:payload][:database] = :testdb
+
+  id = UUIDTools::UUID.random_create
+  vnode = id.to_i % 1024
+  index_data[:payload][:id] = id.to_s
+
+  puts "queue: vnode-#{vnode} (#{sent_messages} / #{MESSAGES_TO_SEND})"
+  queues[vnode].publish(Yajl::Encoder.encode(index_data))
+  sent_messages += 1
+end
+end_time = Time.now
+
+total_time = end_time - start_time
+rate = MESSAGES_TO_SEND.to_f / total_time
+puts "done (#{total_time}s, #{rate} msg/s)"

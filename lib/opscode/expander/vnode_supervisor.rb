@@ -12,18 +12,39 @@ module Opscode
     class VNodeSupervisor
       include Loggable
 
+      attr_reader :vnode_table
+
+      attr_reader :local_node
+
       def initialize
         @vnodes = {}
-        @vnode_table = VNodeTable.new
+        @vnode_table = VNodeTable.new(self)
         @local_node  = Node.local_node
         @queue_name, @guid = nil, nil
       end
 
       def start(vnode_ids)
-        start_control_listener
-        start_gossip_listener
-        start_gossip_publisher
+        @local_node.start do |message|
+          process_control_message(message)
+        end
+
+        #start_vnode_table_publisher
+
         Array(vnode_ids).each { |vnode_id| spawn_vnode(vnode_id) }
+      end
+
+      def stop
+        @local_node.stop
+
+        #log.debug { "stopping vnode table updater" }
+        #@vnode_table_publisher.cancel
+
+        log.info { "Stopping VNode queue subscribers"}
+        @vnodes.each do |vnode_number, vnode|
+          log.debug { "Stopping consumer on VNode #{vnode_number}"}
+          vnode.stop
+        end
+        
       end
 
       def vnode_added(vnode)
@@ -37,103 +58,67 @@ module Opscode
       end
 
       def vnodes
-        @vnodes.keys
+        @vnodes.keys.sort
       end
 
       def spawn_vnode(vnode_number)
         VNode.new(vnode_number, self).start
       end
 
-      def start_control_listener
-        subscription_confirmed = Proc.new do
-          log.info("Listening for control updates on #{control_queue_name}")
-        end
-
-        control_queue.subscribe(:ack => true, :confirm => subscription_confirmed) do |header, message|
-          log.debug { "Received control message on queue #{control_queue_name}: #{message}"}
-          header.ack
-        end
+      def release_vnode
+        # TODO
       end
 
-      def start_gossip_publisher
-        EM.add_periodic_timer(10) do
-          current_vnode_status = vnode_status
-          current_vnode_status[:action] = 'update'
-          gossip_exchange.publish(Yajl::Encoder.encode(current_vnode_status))
-        end
-      end
-
-      def start_gossip_listener
-        subscription_confirmed = Proc.new do
-          log.info("Listening for gossip updates on #{gossip_queue_name}")
-        end
-
-        gossip_queue.subscribe(:ack => true, :confirm => subscription_confirmed) do |header, message|
-          log.debug { "Received gossip message on queue #{gossip_queue_name}: #{message}"}
-          @vnode_table.update_table(message)
-          log.debug { "Current vnode table: #{@vnode_table.vnodes_by_node.inspect}" }
-          header.ack
+      def process_control_message(message)
+        control_message = parse_symbolic(message)
+        case control_message[:action]
+        when "claim_vnode"
+          spawn_vnode(control_message[:vnode_id])
+        when "recover_vnode"
+          recover_vnode(control_message[:vnode_id])
+        when "release_vnodes"
+          raise "todo"
+          release_vnode()
+        when "update_vnode_table"
+          @vnode_table.update_table(control_message[:data])
+        when "vnode_table_publish"
+          publish_vnode_table
+        when "status"
+          publish_status_to(control_message[:rsvp])
+        else
+          log.error { "invalid control message #{control_message.inspect}" }
         end
       end
 
-      def vnode_status
-        status = @local_node.to_hash
-        status[:vnodes] = vnodes
-        status
+
+      def start_vnode_table_publisher
+        @vnode_table_publisher = EM.add_periodic_timer(10) { publish_vnode_table }
       end
 
-      def initiate_vnode_recovery(vnode_id)
-        raise "TODO"
-        #gossip_queue.publish(Yajl::Encoder.encode({:x}))
+      def publish_vnode_table
+        status_update = @local_node.to_hash
+        status_update[:vnodes] = vnodes
+        status_update[:update] = :add
+        @local_node.broadcast_message(Yajl::Encoder.encode({:action => :update_vnode_table, :data => status_update}))
       end
 
-      def update_global_vnode_table(message)
-        Mutex.new.synchronize do
-          if message.respond_to?(:key?) && (update = message["vnode_table_update"])
-            log.debug { "updating the vnode table for node #{update["guid"]} with nodes [#{update["vnodes"].sort.join(',')}]" }
-            vnodes = update["vnodes"]
-            @global_vnode_table[update["guid"]] = {:vnodes => vnodes, :vnode_count => vnodes.size}
-          else
-            log.error { "invalid vnode table update received: #{parsed_message.inspect}" }
-          end
+      def publish_status_to(return_queue)
+        status_update = @local_node.to_hash
+        status_update[:vnodes] = vnodes
+        MQ.queue(return_queue).publish(Yajl::Encoder.encode(status_update))
+      end
+
+      def recover_vnode(vnode_id)
+        if @vnode_table.local_node_is_leader?
+          log.debug { "Recovering vnode: #{vnode_id}" }
+          @local_node.shared_message(Yajl::Encoder.encode({:action => :claim_vnode, :vnode_id => vnode_id}))
+        else
+          log.debug { "Ignoring :recover_vnode message because this node is not the leader" }
         end
       end
 
-      def control_queue
-        Mutex.new.synchronize do
-          @control_queue ||= begin
-            log.debug { "declaring control queue #{control_queue_name}" }
-            MQ.queue(control_queue_name, :exclusive => true)
-          end
-        end
-      end
-
-      def gossip_exchange
-        Mutex.new.synchronize do
-          @gossip_exchange ||= begin
-            log.debug { "declaring gossip exchange opscode-platfrom-gossip" }
-            MQ.fanout("opscode-platform-gossip")
-          end
-        end
-      end
-
-      def gossip_queue
-        Mutex.new.synchronize do
-          @gossip_queue ||= begin
-            log.debug { "declaring gossip queue #{gossip_queue_name}"}
-            q = MQ.queue(gossip_queue_name, :exclusive => true)
-            q.bind(gossip_exchange)
-            q
-          end
-        end
-      end
-
-      def gossip_queue_name
-        @local_node.gossip_queue_name
-      end
-
-      def control_queue_name
-        @local_node.control_queue_name
+      def parse_symbolic(message)
+        Yajl::Parser.new(:symbolize_keys => true).parse(message)
       end
 
     end

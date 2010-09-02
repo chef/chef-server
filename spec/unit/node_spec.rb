@@ -37,12 +37,20 @@ describe Expander::Node do
       @node.pid.should == @pid
     end
 
-    it "generates a control queue name" do
-      @node.control_queue_name.should == "fermi.local--12345--93226974-6d0b-4ca6-8d42-124dd55e0076--control"
+    it "names its shared control queue using a constant/consistent name" do
+      @node.shared_control_queue_name.should == "opscode-platform-control--shared"
     end
 
-    it "generates a gossip queue name" do
-      @node.gossip_queue_name.should == "fermi.local--12345--93226974-6d0b-4ca6-8d42-124dd55e0076--gossip"
+    it "names its exclusive control queue after its hostname, pid, and guid" do
+      @node.exclusive_control_queue_name.should == "fermi.local--12345--93226974-6d0b-4ca6-8d42-124dd55e0076--exclusive-control"
+    end
+
+    it "names its broadcast control queue after its hostname, pid, and guid" do
+      @node.broadcast_control_queue_name.should == "fermi.local--12345--93226974-6d0b-4ca6-8d42-124dd55e0076--broadcast"
+    end
+
+    it "names the broadcast control exchange using a consistent name" do
+      @node.broadcast_control_exchange_name.should == 'opscode-platfrom-control--broadcast'
     end
 
     it "generates its hash from a string concatenting the hostname, pid and guid" do
@@ -85,4 +93,67 @@ describe Expander::Node do
       @node.guid.should match /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
     end
   end
+
+  describe "when sending and receiving messages" do
+    include Chef::Mixin::ShellOut
+
+    before do
+      @guid = "93226974-6d0b-4ca6-8d42-124dd55e0076"
+      @hostname_f = "fermi.local"
+      @pid = rand(10000)
+      @node = Expander::Node.new(@guid, @hostname_f, @pid)
+      @log_stream = StringIO.new
+      @node.log.init(@log_stream)
+    end
+
+    it "receives messages on the broadcast exchange" do
+      messages = []
+
+      AMQP.start(OPSCODE_EXPANDER_MQ_CONFIG) do
+        @node.start do |message|
+          messages << message
+        end
+
+        @node.broadcast_message("hello everybody")
+
+        EM.add_timer(0.1) {AMQP.hard_reset!}
+      end
+
+      messages.should == ["hello everybody"]
+    end
+
+    it "receives messages on its exclusive queue" do
+      messages = []
+
+      AMQP.start(OPSCODE_EXPANDER_MQ_CONFIG) do
+        @node.start do |message|
+          messages << message
+        end
+
+        @node.direct_message("hello node")
+
+        EM.add_timer(0.1) {AMQP.hard_reset!}
+      end
+
+      messages.should == ["hello node"]
+    end
+
+    it "receives messages on the shared queue" do
+      messages = []
+
+      AMQP.start(OPSCODE_EXPANDER_MQ_CONFIG) do
+        @node.start do |message|
+          messages << message
+        end
+
+        @node.shared_message("hello one of N")
+
+        EM.add_timer(0.1) {AMQP.hard_reset!}
+      end
+
+      messages.should == ["hello one of N"]
+    end
+
+  end
+
 end

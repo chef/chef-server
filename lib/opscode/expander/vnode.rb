@@ -1,7 +1,9 @@
 require 'eventmachine'
 require 'amqp'
 require 'mq'
+
 require 'opscode/expander/loggable'
+require 'opscode/expander/solrizer'
 
 module Opscode
   module Expander
@@ -17,7 +19,7 @@ module Opscode
         @supervisor   = supervisor
         @queue    = nil
         @stopped  = false
-        @supervise_interval = opts[:supervise_interval] || 1
+        @supervise_interval = opts[:supervise_interval] || 30
       end
 
       def start
@@ -29,8 +31,8 @@ module Opscode
         end
 
         queue.subscribe(:ack => true, :confirm => subscription_confirmed) do |headers, payload|
-          log.info  {"RCVD: queue(#{queue_name}); size(#{payload.size} bytes); time(#{Time.now.to_i});"}
-          log.debug {"got #{payload} on queue #{queue_name}"}
+          log.debug {"got #{payload} size(#{payload.size} bytes) on queue #{queue_name}"}
+          Solrizer.new(payload).run
           headers.ack
         end
 
@@ -54,12 +56,10 @@ module Opscode
       end
 
       def stop
-        Mutex.new.synchronize do
-          log.info {"Cancelling subscription on queue #{queue_name.inspect}"}
-          queue.unsubscribe if queue.subscribed?
-          @supervisor.vnode_removed(self)
-          @stopped = true
-        end
+        log.debug {"Cancelling subscription on queue #{queue_name.inspect}"}
+        queue.unsubscribe if queue.subscribed?
+        @supervisor.vnode_removed(self)
+        @stopped = true
       end
 
       def stopped?
@@ -67,23 +67,18 @@ module Opscode
       end
 
       def queue
-        Mutex.new.synchronize do
-          return @queue if @queue
-
+        @queue ||= begin
           log.debug { "declaring queue #{queue_name}" }
-          @queue = MQ.queue(queue_name, :passive => false, :durable => false)
-          log.debug { "binding queue #{queue_name} to exchange #{TOPIC_EXCHANGE} with key #{binding_key}"}
-          @queue.bind(TOPIC_EXCHANGE, :key => binding_key)
-          @queue
+          MQ.queue(queue_name, :passive => false, :durable => true)
         end
       end
 
       def queue_name
-        "vnode_#{@vnode_number}"
+        "vnode-#{@vnode_number}"
       end
 
-      def binding_key
-        "*.#{queue_name}"
+      def control_queue_name
+        "#{queue_name}-control"
       end
 
     end

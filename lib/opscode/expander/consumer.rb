@@ -3,13 +3,12 @@ require 'em-http-request'
 require 'mq'
 require 'amqp'
 
-require 'chef/solr/index'
-
 require 'opscode/expander/version'
 require 'opscode/expander/loggable'
 
-require 'opscode/expander/vnode'
 require 'opscode/expander/vnode_supervisor'
+
+require 'opscode/expander/config'
 
 module Opscode
   module Expander
@@ -18,21 +17,32 @@ module Opscode
       include Loggable
 
       def self.start
+        @vnode_supervisor = VNodeSupervisor.new
+        Kernel.trap(:INT)  { stop(:INT) }
+        Kernel.trap(:TERM) { stop(:INT) }
+
+        CLI.parse_options(ARGV)
+
         log.info("Opscode Expander #{VERSION} starting up.")
-        log.debug("Starting Index Queue Consumer")
 
         AMQP.start(:user => "guest", :pass => "guest", :vhost => "/testing") do
-          log.debug { "Setting prefetch count to 1"}
-          MQ.prefetch(1)
+          log.debug { "Setting prefetch count to 5"}
+          MQ.prefetch(5)
 
-          log.debug { "declaring topic exchange #{TOPIC_EXCHANGE.inspect}" }
-          MQ.topic(TOPIC_EXCHANGE, :durable => true)
-
-          # :TODO: this needs to be the subset of vnodes this node should have,
-          # not the full list.
-          VNodeSupervisor.new.start((0..VNODES).to_a)
+          vnodes = Config.instance.vnode_numbers
+          log.info("Starting Consumers for vnodes #{vnodes.first}-#{vnodes.last}")
+          @vnode_supervisor.start(vnodes)
         end
         
+      end
+
+      def self.stop(signal)
+        log.info { "Stopping opscode-expander on signal (#{signal})" }
+        @vnode_supervisor.stop
+        EM.add_timer(3) do
+          AMQP.stop
+          EM.stop
+        end
       end
 
     end

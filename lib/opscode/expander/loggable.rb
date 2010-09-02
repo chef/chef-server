@@ -22,7 +22,7 @@ module Opscode
 
       LOGGER = Logger.new
       LOGGER.init
-      LOGGER.level = :debug
+      LOGGER.level = :info
 
       def log
         LOGGER
