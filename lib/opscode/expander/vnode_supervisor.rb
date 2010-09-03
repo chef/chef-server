@@ -2,15 +2,47 @@ require 'yajl'
 require 'eventmachine'
 require 'amqp'
 require 'mq'
+require 'opscode/expander/version'
 require 'opscode/expander/loggable'
 require 'opscode/expander/node'
 require 'opscode/expander/vnode'
 require 'opscode/expander/vnode_table'
+require 'opscode/expander/configuration'
 
 module Opscode
   module Expander
     class VNodeSupervisor
       include Loggable
+      extend  Loggable
+
+      def self.start
+        @vnode_supervisor = new
+        Kernel.trap(:INT)  { stop(:INT) }
+        Kernel.trap(:TERM) { stop(:TERM) }
+
+        Expander.init_config(ARGV)
+
+        log.info("Opscode Expander #{VERSION} starting up.")
+
+        AMQP.start(Expander.config.amqp_config) do
+          log.debug { "Setting prefetch count to 5"}
+          MQ.prefetch(5)
+
+          vnodes = Expander.config.vnode_numbers
+          log.info("Starting Consumers for vnodes #{vnodes.min}-#{vnodes.max}")
+          @vnode_supervisor.start(vnodes)
+        end
+        
+      end
+
+      def self.stop(signal)
+        log.info { "Stopping opscode-expander on signal (#{signal})" }
+        @vnode_supervisor.stop
+        EM.add_timer(3) do
+          AMQP.stop
+          EM.stop
+        end
+      end
 
       attr_reader :vnode_table
 
@@ -85,9 +117,14 @@ module Opscode
           publish_vnode_table
         when "status"
           publish_status_to(control_message[:rsvp])
+        when "set_log_level"
+          set_log_level(control_message[:level], control_message[:rsvp])
         else
           log.error { "invalid control message #{control_message.inspect}" }
         end
+      rescue Exception => e
+        log.error { "Error processing a control message."}
+        log.error { "#{e.class.name}: #{e.message}\n#{e.backtrace.join("\n")}" }
       end
 
 
@@ -106,6 +143,13 @@ module Opscode
         status_update = @local_node.to_hash
         status_update[:vnodes] = vnodes
         MQ.queue(return_queue).publish(Yajl::Encoder.encode(status_update))
+      end
+
+      def set_log_level(level, rsvp_to)
+        log.info { "setting log level to #{level} due to command from #{rsvp_to}" }
+        new_log_level = (Expander.config.log_level = level.to_sym)
+        reply = {:level => new_log_level, :node => @local_node.to_hash}
+        MQ.queue(rsvp_to).publish(Yajl::Encoder.encode(reply))
       end
 
       def recover_vnode(vnode_id)

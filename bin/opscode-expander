@@ -6,6 +6,6 @@ require "bundler/setup"
 $:.unshift(File.dirname(__FILE__) + '/../lib/')
 
 require 'opscode/expander'
-require 'opscode/expander/consumer'
+require 'opscode/expander/vnode_supervisor'
 
-Opscode::Expander::Consumer.start
+Opscode::Expander::VNodeSupervisor.start

@@ -63,8 +63,9 @@ describe Expander::VNodeSupervisor do
     end
 
     it "publishes the vnode table when it receives a :vnode_table_publish message" do
+      pending "add amqp boilerplate to spec example"
       update_message = Yajl::Encoder.encode({:action => :vnode_table_publish})
-      @vnode_supervisor.process_control_message
+      @vnode_supervisor.process_control_message(update_message)
     end
 
     describe "and it is the leader" do

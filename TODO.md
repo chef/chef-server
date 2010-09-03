@@ -10,7 +10,7 @@
 * Turn vnode table gossiping back on
 * timestamp vnode table updates
 * periodically scan the vnode table and prune stale entries
-
+* vnode release protocol (for nodes joining an existing cluster)
 
 ## MIGHT ##
 * measure the rate of messages, total and per-org (?)

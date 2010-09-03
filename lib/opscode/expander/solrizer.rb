@@ -1,5 +1,6 @@
 require 'yajl'
 require 'fast_xs'
+require 'em-http-request'
 require 'opscode/expander/loggable'
 require 'opscode/expander/flattener'
 

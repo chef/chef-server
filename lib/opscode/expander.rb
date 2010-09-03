@@ -12,9 +12,5 @@ module Opscode
     SHARED_CONTROL_QUEUE_NAME = "opscode-platform-control--shared"
     BROADCAST_CONTROL_EXCHANGE_NAME = 'opscode-platfrom-control--broadcast'
 
-    AMQP_CONFIG = {:user => "guest", :pass => "guest", :vhost => "/testing",
-              :host => "localhost"}
-
-
   end
 end

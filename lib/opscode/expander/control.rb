@@ -6,6 +6,7 @@ require 'mq'
 require 'highline'
 
 require 'opscode/expander/node'
+require 'opscode/expander/configuration'
 
 require 'pp'
 
@@ -14,6 +15,7 @@ module Opscode
     class Control
 
       def self.run(argv)
+        Expander.init_config(ARGV)
         new(argv).run
       end
 
@@ -55,6 +57,7 @@ module Opscode
 
       desc "Show this message"
       def help
+        puts "Opscode Expander #{VERSION}"
         puts "Usage: opscode-expanderctl COMMAND"
         puts
         puts "Commands:"
@@ -66,16 +69,25 @@ module Opscode
       desc "display the aggregate queue backlog"
       def queue_depth
         h = HighLine.new
-        total_messages = 0
+        message_counts = []
 
-        amqp_client = Bunny.new(AMQP_CONFIG)
+        amqp_client = Bunny.new(Expander.config.amqp_config)
         amqp_client.start
 
         0.upto(VNODES - 1) do |vnode|
           q = amqp_client.queue("vnode-#{vnode}")
-          total_messages += q.status[:message_count]
+          message_counts << q.status[:message_count]
         end
-        puts "  total messages: #{total_messages}"
+        total_messages = message_counts.inject(0) { |sum, count| sum + count }
+        max = message_counts.max
+        min = message_counts.min
+
+        avg = total_messages.to_f / message_counts.size.to_f
+
+        puts "  total messages:       #{total_messages}"
+        puts "  average queue depth:  #{avg}"
+        puts "  max queue depth:      #{max}"
+        puts "  min queue depth:      #{min}" 
       ensure
         amqp_client.stop if defined?(amqp_client) && amqp_client
       end
@@ -87,7 +99,7 @@ module Opscode
 
         total_messages = 0
 
-        amqp_client = Bunny.new(AMQP_CONFIG)
+        amqp_client = Bunny.new(Expander.config.amqp_config)
         amqp_client.start
 
         0.upto(VNODES - 1) do |vnode|
@@ -112,7 +124,7 @@ module Opscode
 
         print("Collecting status info from the cluster...")
 
-        AMQP.start(AMQP_CONFIG) do
+        AMQP.start(Expander.config.amqp_config) do
           node = Expander::Node.local_node
           node.exclusive_control_queue.subscribe do |header, message|
             status = Yajl::Parser.parse(message)
@@ -133,6 +145,35 @@ module Opscode
         puts
         puts h.list(node_status, :columns_across, 4)
         puts
+      end
+
+      desc "sets the log level of all nodes in the cluster"
+      def log_level
+        @argv.shift
+        level = @argv.first
+        acceptable_levels = %w{debug info warn error fatal}
+        unless acceptable_levels.include?(level)
+          puts "Log level must be one of #{acceptable_levels.join(', ')}"
+          exit 1
+        end
+
+        h = HighLine.new
+        response_mutex = Mutex.new
+        
+        responses = [h.color("Host", :bold), h.color("PID", :bold), h.color("GUID", :bold), h.color("Log Level", :bold)]
+        AMQP.start(Expander.config.amqp_config) do
+          node = Expander::Node.local_node
+          node.exclusive_control_queue.subscribe do |header, message|
+            reply = Yajl::Parser.parse(message)
+            n = reply['node']
+            response_mutex.synchronize do
+              responses << n["hostname_f"] << n["pid"].to_s << n["guid"] << reply["level"]
+            end
+          end
+          node.broadcast_message(Yajl::Encoder.encode({:action => :set_log_level, :level => level, :rsvp => node.exclusive_control_queue_name}))
+          EM.add_timer(2) { AMQP.stop; EM.stop }
+        end
+        puts h.list(responses, :columns_across, 4)
       end
 
 
