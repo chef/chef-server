@@ -49,7 +49,7 @@ describe Expander::VNodeSupervisor do
   end
 
   it "periodically publishes its list of vnodes to the gossip queue" do
-    pending
+    pending("disabled until cluster healing is implemented")
   end
 
   describe "when responding to control messages" do
@@ -63,7 +63,7 @@ describe Expander::VNodeSupervisor do
     end
 
     it "publishes the vnode table when it receives a :vnode_table_publish message" do
-      pending "add amqp boilerplate to spec example"
+      pending "disabled until cluster healing is implemented"
       update_message = Yajl::Encoder.encode({:action => :vnode_table_publish})
       @vnode_supervisor.process_control_message(update_message)
     end
@@ -85,6 +85,7 @@ describe Expander::VNodeSupervisor do
       end
 
       it "waits before re-advertising a vnode as available" do
+        pending("not yet implemented")
         vnode_table_update = Expander::Node.local_node.to_hash
         vnode_table_update[:vnodes] = (0...16).to_a
         vnode_table_update[:update] = :add

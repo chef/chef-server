@@ -1,25 +1,27 @@
 #!/usr/bin/env ruby
 require "rubygems"
+require "bundler/setup"
+
+$:.unshift(File.expand_path(File.dirname(__FILE__) + '/../lib'))
 
 require 'pp'
 require 'bunny'
 require 'yajl'
 require 'uuidtools'
-require 'chef/node'
-require 'benchmark'
+
+require 'opscode/expander/configuration'
+
+Opscode::Expander.init_config(ARGV)
 
 MESSAGES_TO_SEND = 1_000
 
 NODE_JSON = IO.read(File.expand_path(File.dirname(__FILE__) + '/../data/sample_node.json'))
-NODE = Chef::Node.json_create(Yajl::Parser.parse(NODE_JSON)).to_hash
+NODE = Yajl::Parser.parse(NODE_JSON)
 
-CONFIG = {:user => "guest", :pass => "guest", :vhost => "/testing",
-          :host => "localhost"}
-
-puts "Using rabbitmq config #{CONFIG}"
+puts "Using rabbitmq config #{Opscode::Expander.config.amqp_config.inspect}"
 
 puts "connecting to rabbitmq"
-amqp_client = Bunny.new(CONFIG)
+amqp_client = Bunny.new(Opscode::Expander.config.amqp_config)
 amqp_client.start
 
 puts 'declaring queues'

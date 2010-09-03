@@ -1,8 +1,7 @@
 require 'uuidtools'
 require 'amqp'
 require 'mq'
-require 'chef/shell_out'
-require 'chef/mixin/shell_out'
+require 'open3'
 
 require 'opscode/expander/loggable'
 
@@ -11,8 +10,6 @@ module Opscode
     class Node
 
       include Loggable
-
-      extend Chef::Mixin::ShellOut
 
       def self.from_hash(node_info)
         new(node_info[:guid], node_info[:hostname_f], node_info[:pid])
@@ -28,7 +25,7 @@ module Opscode
       end
 
       def self.hostname_f
-        @hostname ||= shell_out!("hostname -f").stdout.strip
+        @hostname ||= Open3.popen3("hostname -f") {|stdin, stdout, stderr| stdout.read }.strip
       end
 
       attr_reader :guid

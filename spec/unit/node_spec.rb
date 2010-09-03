@@ -95,7 +95,6 @@ describe Expander::Node do
   end
 
   describe "when sending and receiving messages" do
-    include Chef::Mixin::ShellOut
 
     before do
       @guid = "93226974-6d0b-4ca6-8d42-124dd55e0076"
