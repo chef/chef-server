@@ -9,4 +9,4 @@ erl_crash.dump
 *.rake_tasks~
 .idea
 *.rbc
-
+conf/opscode-expander.rb
