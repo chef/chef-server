@@ -82,7 +82,7 @@ describe Expander::Node do
     end
 
     it "uses the current machine's hostname -f for the hostname" do
-      @node.hostname_f.should == "fermi.local"
+      @node.hostname_f.should == %x(hostname -f).strip
     end
 
     it "uses the current process id for the pid" do
