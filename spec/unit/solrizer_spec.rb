@@ -3,6 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 require 'stringio'
 require 'opscode/expander/solrizer'
 require 'yajl'
+require 'rexml/document'
 
 describe Expander::Solrizer do
 
@@ -43,26 +44,34 @@ describe Expander::Solrizer do
       @solrizer.obj_type.should == "node"
     end
 
-    it "generates the flattened and expanded representation of the object" do
-      @solrizer.flattened_object.should == {"foo"                    => ["bar"],
-                                            "X_bar"                  => ["baz"],
-                                            "foo_X"                  => ["baz"],
-                                            "foo_bar"                => ["baz"],
-                                            "bar"                    => ["baz"],
-                                            "X_CHEF_id_CHEF_X"       =>["2342"],
-                                            "X_CHEF_database_CHEF_X" =>["testdb"],
-                                            "X_CHEF_type_CHEF_X"     =>["node"]}
+    describe "when flattening to XML" do
+      before do
+        @expected_fields = {"foo"                    => ["bar"],
+                            "X_bar"                  => ["baz"],
+                            "foo_X"                  => ["baz"],
+                            "foo_bar"                => ["baz"],
+                            "bar"                    => ["baz"],
+                            "X_CHEF_id_CHEF_X"       => ["2342"],
+                            "X_CHEF_database_CHEF_X" => ["testdb"],
+                            "X_CHEF_type_CHEF_X"     => ["node"]}
+      end
+      it "generates the flattened and expanded representation of the object" do
+        @solrizer.flattened_object.should == @expected_fields
+      end
+      
+      it "converts the flattened and expanded object to compact readable XML" do
+        got = Hash.new { |h, k| h[k] = [] }
+        doc = REXML::Document.new(@solrizer.pointyize_add)
+        doc.elements.each('add/doc/field') do |field|
+          name = field.attributes["name"]
+          val = field.text
+          got[name] << val
+        end
+        got.should == @expected_fields
+      end
     end
-
-    it "converts the flattened and expanded object to compact readable XML" do
-      expected=<<-POINTY_BRACKETS4LIFE
-<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<add><doc><field name=\"foo\">bar</field><field name=\"X_bar\">baz</field><field name=\"foo_X\">baz</field><field name=\"foo_bar\">baz</field><field name=\"bar\">baz</field><field name=\"X_CHEF_id_CHEF_X\">2342</field><field name=\"X_CHEF_database_CHEF_X\">testdb</field><field name=\"X_CHEF_type_CHEF_X\">node</field></doc></add>
-POINTY_BRACKETS4LIFE
-      @solrizer.pointyize_add.should == expected
-    end
-
   end
+    
 
   describe "when created with a delete reques" do
     before do
