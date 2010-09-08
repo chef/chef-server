@@ -14,10 +14,11 @@ module Opscode
       DELETE  = "delete"
       SKIP    = "skip"
 
-      ITEM     = "item"
-      ID       = "id"
-      TYPE     = "type"
-      DATABASE = "database"
+      ITEM        = "item"
+      ID          = "id"
+      TYPE        = "type"
+      DATABASE    = "database"
+      ENQUEUED_AT = "enqueued_at"
 
       X_CHEF_id_CHEF_X        = 'X_CHEF_id_CHEF_X'
       X_CHEF_database_CHEF_X  = 'X_CHEF_database_CHEF_X'
@@ -37,7 +38,8 @@ module Opscode
 
       attr_reader :database
 
-      def initialize(object_command_json)
+      def initialize(object_command_json, &on_completion_block)
+        @on_completion_block = on_completion_block
         if parsed_message    = parse(object_command_json)
           @action           = parsed_message["action"]
           @indexer_payload  = parsed_message["payload"]
@@ -53,6 +55,7 @@ module Opscode
         @database    = @indexer_payload[DATABASE]
         @obj_id      = @indexer_payload[ID]
         @obj_type    = @indexer_payload[TYPE]
+        @enqueued_at = @indexer_payload[ENQUEUED_AT]
       end
 
       def parse(serialized_object)
@@ -68,20 +71,22 @@ module Opscode
         when DELETE
           delete
         when SKIP
+          completed
           log.info { "not indexing this item because of malformed JSON"}
         else
+          completed
           log.error { "cannot index object becuase it has an invalid action #{@action}" }
         end
       end
 
-      def add
-        post_to_solr(pointyize_add)
+      def add(&block)
+        post_to_solr(pointyize_add, &block)
       rescue Exception => e
         log.error { "#{e.class.name}: #{e.message}\n#{e.backtrace.join("\n")}"}
       end
 
-      def delete
-        post_to_solr(pointyize_delete)
+      def delete(&block)
+        post_to_solr(pointyize_delete, &block)
       rescue Exception => e
         log.error { "#{e.class.name}: #{e.message}\n#{e.backtrace.join("\n")}"}
       end
@@ -111,6 +116,16 @@ module Opscode
 
       # Takes a flattened hash where the values are arrays and converts it into
       # a dignified XML document suitable for POST to Solr.
+      # The general structure of the output document is like this:
+      #   <?xml version="1.0" encoding="UTF-8"?>
+      #   <add>
+      #     <doc>
+      #       <field name="key">value</field>
+      #       <field name="key">another_value</field>
+      #       <field name="other_key">yet another value</field>
+      #     </doc>
+      #   </add>
+      # The document as generated has minimal newlines and formatting, however.
       def pointyize_add
         xml = ""
         xml << START_XML << ADD_DOC
@@ -142,16 +157,25 @@ module Opscode
         xml
       end
 
-      def post_to_solr(document)
+      def post_to_solr(document, &block)
         log.debug("POSTing document to SOLR:\n#{document}")
         http_req = EventMachine::HttpRequest.new(solr_url).post(:body => document, :timeout => 180, :head => CONTENT_TYPE_XML)
         http_req.callback do
+          completed
           if http_req.response_header.status == 200
-            log.info { "successfully indexed #{indexed_object} t(#{Time.now.to_i})" }
+            log.info { "indexed #{indexed_object} transit-time[#{transit_time}s]" }
           else
             log.error { "Failed to post to solr: #{indexed_object}" }
           end
         end
+      end
+
+      def completed
+        @on_completion_block.call
+      end
+
+      def transit_time
+        Time.now.utc.to_i - @enqueued_at
       end
 
       def solr_url
@@ -159,7 +183,7 @@ module Opscode
       end
 
       def indexed_object
-        "#{@obj_type}[#{@obj_id}] in database #{@database}"
+        "#{@obj_type}[#{@obj_id}] database[#{@database}]"
       end
 
     end

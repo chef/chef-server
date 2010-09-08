@@ -39,6 +39,7 @@ sent_messages = 0
   index_data[:payload] = {:item => NODE}
   index_data[:payload][:type] = :node
   index_data[:payload][:database] = :testdb
+  index_data[:payload][:enqueued_at] = Time.now.utc.to_i
 
   id = UUIDTools::UUID.random_create
   vnode = id.to_i % 1024

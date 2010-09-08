@@ -32,8 +32,8 @@ module Opscode
 
         queue.subscribe(:ack => true, :confirm => subscription_confirmed) do |headers, payload|
           log.debug {"got #{payload} size(#{payload.size} bytes) on queue #{queue_name}"}
-          Solrizer.new(payload).run
-          headers.ack
+          solrizer = Solrizer.new(payload) { headers.ack }
+          solrizer.run
         end
 
       rescue MQ::Error => e

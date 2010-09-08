@@ -15,24 +15,36 @@ module Opscode
       include Loggable
       extend  Loggable
 
+      def self.start_cluster_worker
+        @vnode_supervisor = new
+        trap_signals
+        start_event_loop
+      end
+
       def self.start
         @vnode_supervisor = new
-        Kernel.trap(:INT)  { stop(:INT) }
-        Kernel.trap(:TERM) { stop(:TERM) }
+        trap_signals
 
         Expander.init_config(ARGV)
 
         log.info("Opscode Expander #{VERSION} starting up.")
+        start_event_loop
+      end
 
+      def self.start_event_loop
         AMQP.start(Expander.config.amqp_config) do
-          log.debug { "Setting prefetch count to 5"}
-          MQ.prefetch(5)
+          log.debug { "Setting prefetch count to 1"}
+          MQ.prefetch(1)
 
           vnodes = Expander.config.vnode_numbers
           log.info("Starting Consumers for vnodes #{vnodes.min}-#{vnodes.max}")
           @vnode_supervisor.start(vnodes)
         end
-        
+      end
+
+      def self.trap_signals
+        Kernel.trap(:INT)  { stop(:INT) }
+        Kernel.trap(:TERM) { stop(:TERM) }
       end
 
       def self.stop(signal)
