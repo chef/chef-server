@@ -6,4 +6,9 @@ Spec::Rake::SpecTask.new(:spec) do |spec|
   spec.spec_files = FileList['spec/**/*_spec.rb']
 end
 
+desc "install gem dependencies"
+task :bundle do
+  system("bundle install")
+end
+
 task :default => :spec
