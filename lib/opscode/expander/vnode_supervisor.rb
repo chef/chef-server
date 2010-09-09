@@ -17,8 +17,21 @@ module Opscode
 
       def self.start_cluster_worker
         @vnode_supervisor = new
+        @original_ppid = Process.ppid
         trap_signals
-        start_event_loop
+        AMQP.start(Expander.config.amqp_config) do
+          start_consumers
+          await_parent_death
+        end
+      end
+
+      def self.await_parent_death
+        @awaiting_parent_death = EM.add_periodic_timer(1) do
+          unless Process.ppid == @original_ppid
+            @awaiting_parent_death.cancel
+            stop("master process death")
+          end
+        end
       end
 
       def self.start
@@ -28,18 +41,19 @@ module Opscode
         Expander.init_config(ARGV)
 
         log.info("Opscode Expander #{VERSION} starting up.")
-        start_event_loop
+
+        AMQP.start(Expander.config.amqp_config) do
+          start_consumers
+        end
       end
 
-      def self.start_event_loop
-        AMQP.start(Expander.config.amqp_config) do
-          log.debug { "Setting prefetch count to 1"}
-          MQ.prefetch(1)
+      def self.start_consumers
+        log.debug { "Setting prefetch count to 1"}
+        MQ.prefetch(1)
 
-          vnodes = Expander.config.vnode_numbers
-          log.info("Starting Consumers for vnodes #{vnodes.min}-#{vnodes.max}")
-          @vnode_supervisor.start(vnodes)
-        end
+        vnodes = Expander.config.vnode_numbers
+        log.info("Starting Consumers for vnodes #{vnodes.min}-#{vnodes.max}")
+        @vnode_supervisor.start(vnodes)
       end
 
       def self.trap_signals
