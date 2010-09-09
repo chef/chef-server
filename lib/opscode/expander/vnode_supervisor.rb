@@ -19,6 +19,10 @@ module Opscode
         @vnode_supervisor = new
         @original_ppid = Process.ppid
         trap_signals
+
+        vnodes = Expander.config.vnode_numbers
+        $0 = "opscode-expander worker ##{Expander.config.index} (vnodes #{vnodes.min}-#{vnodes.max})"
+        
         AMQP.start(Expander.config.amqp_config) do
           start_consumers
           await_parent_death
