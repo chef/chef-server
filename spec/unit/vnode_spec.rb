@@ -27,12 +27,10 @@ describe Expander::VNode do
     it "disconnects if there is another subscriber" do
       b = Bunny.new(OPSCODE_EXPANDER_MQ_CONFIG)
       b.start
-      b.exchange("opscode-platform", :type => :topic)
       q = b.queue(@vnode.queue_name)
       t = Thread.new { q.subscribe { |message| nil }}
 
       AMQP.start(OPSCODE_EXPANDER_MQ_CONFIG) do
-        MQ.topic('foo')
         EM.add_timer(0.5) do
           AMQP.stop
           EM.stop
