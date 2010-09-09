@@ -4,6 +4,27 @@ require 'opscode/expander/vnode_supervisor'
 
 module Opscode
   module Expander
+    #==ClusterSupervisor
+    # Manages a cluster of opscode-expander processes. Usually this class will
+    # be instantiated from the opscode-expander-cluster executable.
+    #
+    # ClusterSupervisor works by forking the desired number of processes, then
+    # running VNodeSupervisor.start_cluster_worker within the forked process.
+    # ClusterSupervisor keeps track of the process ids of its children, and will
+    # periodically attempt to reap them in a non-blocking call. If they are
+    # reaped, ClusterSupervisor knows they died and need to be respawned.
+    #
+    # The child processes are responsible for checking on the master process and
+    # dying if the master has died (VNodeSupervisor does this when started in 
+    # with start_cluster_worker).
+    #
+    #===TODO:
+    # * This implementation currently assumes there is only one cluster, so it
+    #   will claim all of the vnodes. It may be advantageous to allow multiple
+    #   clusters.
+    # * There is no heartbeat implementation at this time, so a zombified child
+    #   process will not be automatically killed--This behavior is left to the
+    #   meatcloud for now.
     class ClusterSupervisor
       include Loggable
 
