@@ -20,6 +20,8 @@ module Opscode
         end
       end
 
+      # TODO: it's admittedly janky to set up the default logging this way.
+      STDOUT.sync = true
       LOGGER = Logger.new
       LOGGER.init
       LOGGER.level = :debug
