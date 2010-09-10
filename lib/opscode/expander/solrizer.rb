@@ -79,14 +79,14 @@ module Opscode
         end
       end
 
-      def add(&block)
-        post_to_solr(pointyize_add, &block)
+      def add
+        post_to_solr(pointyize_add) { "indexed #{indexed_object} transit-time[#{transit_time}s]" }
       rescue Exception => e
         log.error { "#{e.class.name}: #{e.message}\n#{e.backtrace.join("\n")}"}
       end
 
-      def delete(&block)
-        post_to_solr(pointyize_delete, &block)
+      def delete
+        post_to_solr(pointyize_delete) { "deleted #{indexed_object} transit-time[#{transit_time}s]"}
       rescue Exception => e
         log.error { "#{e.class.name}: #{e.message}\n#{e.backtrace.join("\n")}"}
       end
@@ -157,13 +157,13 @@ module Opscode
         xml
       end
 
-      def post_to_solr(document, &block)
+      def post_to_solr(document, &logger_block)
         log.debug("POSTing document to SOLR:\n#{document}")
         http_req = EventMachine::HttpRequest.new(solr_url).post(:body => document, :timeout => 180, :head => CONTENT_TYPE_XML)
         http_req.callback do
           completed
           if http_req.response_header.status == 200
-            log.info { "indexed #{indexed_object} transit-time[#{transit_time}s]" }
+            log.info(&logger_block)
           else
             log.error { "Failed to post to solr: #{indexed_object}" }
           end
