@@ -168,6 +168,10 @@ module Opscode
             log.error { "Failed to post to solr: #{indexed_object}" }
           end
         end
+        http_req.errback do
+          completed
+          log.error { "Failed to post to solr (connection error): #{indexed_object}" }
+        end
       end
 
       def completed
