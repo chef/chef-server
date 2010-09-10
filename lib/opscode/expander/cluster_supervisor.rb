@@ -1,5 +1,6 @@
 require 'opscode/expander/loggable'
 require 'opscode/expander/version'
+require 'opscode/expander/configuration'
 require 'opscode/expander/vnode_supervisor'
 
 module Opscode
