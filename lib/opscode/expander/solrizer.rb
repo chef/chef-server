@@ -159,7 +159,7 @@ module Opscode
 
       def post_to_solr(document, &logger_block)
         log.debug("POSTing document to SOLR:\n#{document}")
-        http_req = EventMachine::HttpRequest.new(solr_url).post(:body => document, :timeout => 600, :head => CONTENT_TYPE_XML)
+        http_req = EventMachine::HttpRequest.new(solr_url).post(:body => document, :timeout => 1200, :head => CONTENT_TYPE_XML)
         http_req.callback do
           completed
           if http_req.response_header.status == 200
