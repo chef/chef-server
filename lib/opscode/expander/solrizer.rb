@@ -131,9 +131,14 @@ module Opscode
       ID_CLOSE    = "</id>"
       END_ADD_DOC = "</doc></add>\n"
       END_DELETE  = "</delete>\n"
-      FIELD_ATTR  = '<field name="'
-      FIELD_ATTR_END = '">'
+      START_CONTENT = '<field name="content">'
       CLOSE_FIELD = "</field>"
+
+      FLD_CHEF_ID_FMT = '<field name="X_CHEF_id_CHEF_X">%s</field>'
+      FLD_CHEF_DB_FMT = '<field name="X_CHEF_database_CHEF_X">%s</field>'
+      FLD_CHEF_TY_FMT = '<field name="X_CHEF_type_CHEF_X">%s</field>'
+
+      KEYVAL_FMT = "%s__=__%s "
 
       # Takes a flattened hash where the values are arrays and converts it into
       # a dignified XML document suitable for POST to Solr.
@@ -141,25 +146,28 @@ module Opscode
       #   <?xml version="1.0" encoding="UTF-8"?>
       #   <add>
       #     <doc>
-      #       <field name="key">value</field>
-      #       <field name="key">another_value</field>
-      #       <field name="other_key">yet another value</field>
+      #       <field name="content">
+      #           key__=__value
+      #           key__=__another_value
+      #           other_key__=__yet another value
+      #       </field>
       #     </doc>
       #   </add>
       # The document as generated has minimal newlines and formatting, however.
       def pointyize_add
         xml = ""
         xml << START_XML << ADD_DOC
+        xml << (FLD_CHEF_ID_FMT % @obj_id)
+        xml << (FLD_CHEF_DB_FMT % @database)
+        xml << (FLD_CHEF_TY_FMT % @obj_type)
+        xml << START_CONTENT
 
         flattened_object.each do |field, values|
           values.each do |v|
-            xml << FIELD_ATTR
-            xml << field
-            xml << FIELD_ATTR_END
-            xml << v.fast_xs
-            xml << CLOSE_FIELD
+            xml << (KEYVAL_FMT % [field, v.fast_xs])
           end
         end
+        xml << CLOSE_FIELD      # ends content
         xml << END_ADD_DOC
         xml
       end
