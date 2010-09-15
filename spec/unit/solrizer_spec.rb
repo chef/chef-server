@@ -44,8 +44,41 @@ describe Expander::Solrizer do
       @solrizer.obj_type.should == "node"
     end
 
-    describe "when flattening to XML" do
+###############################################################################
+# /!\ WARNING!!! /!\
+# There is an ordering dependency between the tests here.
+# All tests that expect expando fields off **MUST** come
+# before tests that expect expando fields on.
+###############################################################################
+
+    describe "when flattening to XML without expando fields" do
       before do
+        @expected_fields = {"foo"                    => ["bar"],
+                            "foo_bar"                => ["baz"],
+                            "bar"                    => ["baz"],
+                            "X_CHEF_id_CHEF_X"       => ["2342"],
+                            "X_CHEF_database_CHEF_X" => ["testdb"],
+                            "X_CHEF_type_CHEF_X"     => ["node"]}
+      end
+      it "generates the flattened and expanded representation of the object" do
+        @solrizer.flattened_object.should == @expected_fields
+      end
+
+      it "converts the flattened and expanded object to compact readable XML" do
+        got = Hash.new { |h, k| h[k] = [] }
+        doc = REXML::Document.new(@solrizer.pointyize_add)
+        doc.elements.each('add/doc/field') do |field|
+          name = field.attributes["name"]
+          val = field.text
+          got[name] << val
+        end
+        got.should == @expected_fields
+      end
+    end
+
+    describe "when flattening to XML with expando fields" do
+      before do
+        Expander::Flattener.enable_expando_fields
         @expected_fields = {"foo"                    => ["bar"],
                             "X_bar"                  => ["baz"],
                             "foo_X"                  => ["baz"],

@@ -8,6 +8,42 @@ module Opscode
     # memory use of opscode-expander.
     class Flattener
 
+      # including this module into Flattener will enable 'expando' fields.
+      module ExpandoFieldsOn
+        def add_field_value(keys, value)
+          value = value.to_s
+          each_expando_field(keys) { |expando_field| @flattened_item[expando_field] << value }
+          @flattened_item[keys.join(UNDERSCORE)] << value
+          @flattened_item[keys.last] << value
+        end
+
+        def each_expando_field(keys)
+          return if keys.size == 1
+          0.upto(keys.size - 1) do |index|
+            original = keys[index]
+            keys[index] = X
+            yield keys.join(UNDERSCORE)
+            keys[index] = original
+          end
+        end
+      end
+
+      # Including this module (default setting) disables the expando fields
+      # feature. This can be overridden by including ExpandoFieldsOn
+      module ExpandoFieldsOff
+        def add_field_value(keys, value)
+          value = value.to_s
+          @flattened_item[keys.join(UNDERSCORE)] << value
+          @flattened_item[keys.last] << value
+        end
+      end
+
+      include ExpandoFieldsOff
+
+      def self.enable_expando_fields
+        include ExpandoFieldsOn
+      end
+
       UNDERSCORE              = '_'
       X                       = 'X'
 
@@ -31,7 +67,16 @@ module Opscode
         end
 
         @flattened_item.each_value { |values| values.uniq! }
+        remove_blacklisted_keys
         @flattened_item
+      end
+
+      def remove_blacklisted_keys
+        Expander.config.blacklisted_fieldnames.each do |blacklist_regex|
+          @flattened_item.keys.each do |key|
+            @flattened_item.delete(key) if key.match(blacklist_regex)
+          end
+        end
       end
 
       def flatten_each(keys, values)
@@ -48,23 +93,6 @@ module Opscode
         end
       end
 
-      def add_field_value(keys, value)
-        value = value.to_s
-        each_expando_field(keys) { |expando_field| @flattened_item[expando_field] << value }
-        @flattened_item[keys.join(UNDERSCORE)] << value
-        @flattened_item[keys.last] << value
-      end
-
-      def each_expando_field(keys)
-        return if keys.size == 1
-        0.upto(keys.size - 1) do |index|
-          original = keys[index]
-          keys[index] = X
-          yield keys.join(UNDERSCORE)
-          keys[index] = original
-        end
-      end
-      
     end
   end
 end
