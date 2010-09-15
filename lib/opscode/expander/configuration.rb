@@ -2,6 +2,7 @@ require 'pp'
 require 'optparse'
 require 'singleton'
 
+require 'opscode/expander/flattener'
 require 'opscode/expander/loggable'
 require 'opscode/expander/version'
 
@@ -54,6 +55,8 @@ module Opscode
       end
 
       class Base
+
+        include Loggable
 
         def self.from_chef_compat_config(file)
           config = ChefCompatibleConfig.new
@@ -120,6 +123,8 @@ module Opscode
 
         configurable :log_level, :info
 
+        configurable :blacklisted_fieldnames, []
+
         # override the setter for log_level to also actually set the level
         def log_level=(level)
           if level #don't accept nil for an answer
@@ -128,6 +133,14 @@ module Opscode
             @log_level = log_level
           end
           level
+        end
+
+        # Enables expando fields. This is irreversible (requires restart to undo)
+        def enable_expando_fields=(enable_expando)
+          if enable_expando
+            log.info { "expando fields enabled" }
+            Flattener.enable_expando_fields
+          end
         end
 
         def initialize
