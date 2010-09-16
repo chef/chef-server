@@ -109,6 +109,8 @@ module Opscode
           invalid("The cluster size (node-count) cannot be smaller than the index") unless node_count >= index.to_i
         end
 
+        configurable :ps_tag, ""
+
         configurable :solr_url, "http://localhost:8983"
 
         configurable :amqp_host, '0.0.0.0'
