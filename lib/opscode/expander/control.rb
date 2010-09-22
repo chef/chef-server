@@ -15,8 +15,8 @@ module Opscode
     class Control
 
       def self.run(argv)
-        Expander.init_config(ARGV)
-        new(argv).run
+        remaining_args_after_opts = Expander.init_config(ARGV)
+        new(remaining_args_after_opts).run
       end
 
       def self.desc(description)

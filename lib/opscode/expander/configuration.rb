@@ -15,13 +15,13 @@ module Opscode
 
     def self.init_config(argv)
       config.apply_defaults
-      Configuration::CLI.parse_options(argv)
+      remaining_opts_after_parse = Configuration::CLI.parse_options(argv)
       # Need to be able to override the default config file location on the command line
       config_file_to_use = Configuration::CLI.config.config_file || config.config_file
       config.merge_config(Configuration::Base.from_chef_compat_config(config_file_to_use))
       # But for all other config options, the CLI config should win over config file
       config.merge_config(Configuration::CLI.config)
-      config
+      remaining_opts_after_parse
     end
 
     class ChefCompatibleConfig
@@ -108,6 +108,8 @@ module Opscode
           invalid("You must specify the cluster size as an integer") unless node_count.kind_of?(Integer)
           invalid("The cluster size (node-count) cannot be smaller than the index") unless node_count >= index.to_i
         end
+
+        configurable :ps_tag, ""
 
         configurable :solr_url, "http://localhost:8983"
 

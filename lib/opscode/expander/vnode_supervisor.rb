@@ -21,7 +21,8 @@ module Opscode
         trap_signals
 
         vnodes = Expander.config.vnode_numbers
-        $0 = "opscode-expander worker ##{Expander.config.index} (vnodes #{vnodes.min}-#{vnodes.max})"
+
+        $0 = "opscode-expander#{Expander.config.ps_tag} worker ##{Expander.config.index} (vnodes #{vnodes.min}-#{vnodes.max})"
         
         AMQP.start(Expander.config.amqp_config) do
           start_consumers
