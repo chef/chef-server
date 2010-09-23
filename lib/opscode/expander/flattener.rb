@@ -1,3 +1,5 @@
+require 'opscode/expander/configuration'
+
 module Opscode
   module Expander
     # Flattens and expands nested Hashes representing Chef objects (e.g, Nodes,
