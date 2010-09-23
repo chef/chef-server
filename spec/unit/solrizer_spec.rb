@@ -9,10 +9,16 @@ describe Expander::Solrizer do
 
   describe "when created with an add request" do
     before do
-      @indexer_payload = {:item => {:foo => {:bar => :baz}}, :type => :node, :database => :testdb, :id => "2342"}
+      @now = Time.now.utc.to_i
+      @indexer_payload = {:item => {:foo => {:bar => :baz}},
+                          :type => :node,
+                          :database => :testdb,
+                          :id => "2342",
+                          :enqueued_at => @now}
+
       @update_object = {:action => "add", :payload => @indexer_payload}
       @update_json = Yajl::Encoder.encode(@update_object)
-      @solrizer = Expander::Solrizer.new(@update_json)
+      @solrizer = Expander::Solrizer.new(@update_json) { :no_op }
 
       @log_stream = StringIO.new
       @solrizer.log.init(@log_stream)
@@ -21,7 +27,8 @@ describe Expander::Solrizer do
     it "extracts the indexing-specific payload from the update message" do
       @solrizer.indexer_payload.should == { 'item' => {'foo' => {'bar' => "baz"}},
                                             'type' => 'node',
-                                            'database' => 'testdb', 'id' => "2342"}
+                                            'database' => 'testdb', 'id' => "2342",
+                                            "enqueued_at"=>@now}
     end
 
     it "extracts the action from the update message" do
@@ -44,6 +51,47 @@ describe Expander::Solrizer do
       @solrizer.obj_type.should == "node"
     end
 
+    it "extracts the time the object was enqueued from the message" do
+      @solrizer.enqueued_at.should == @now
+    end
+
+    it "is eql to another Solrizer object that has the same object type, id, database, action, and enqueued_at time" do
+      eql_solrizer = Expander::Solrizer.new(@update_json)
+      @solrizer.should eql eql_solrizer
+    end
+
+    it "is not eql to another Solrizer if the enqueued_at time is different" do
+      update_hash = @update_object.dup
+      update_hash[:payload] = update_hash[:payload].merge({:enqueued_at => (Time.now.utc.to_i + 10000)})
+      update_json = Yajl::Encoder.encode(update_hash)
+      uneql_solrizer = Expander::Solrizer.new(update_json)
+      @solrizer.should_not eql(uneql_solrizer)
+    end
+
+    it "is not eql to another Solrizer if the object id is different" do
+      update_hash = @update_object.dup
+      update_hash[:payload] = update_hash[:payload].merge({:id => 12345})
+      update_json = Yajl::Encoder.encode(update_hash)
+      uneql_solrizer = Expander::Solrizer.new(update_json)
+      @solrizer.should_not eql(uneql_solrizer)
+    end
+
+    it "is not eql to another Solrizer if the database is different" do
+      update_hash = @update_object.dup
+      update_hash[:payload] = update_hash[:payload].merge({:database => "nononono"})
+      update_json = Yajl::Encoder.encode(update_hash)
+      uneql_solrizer = Expander::Solrizer.new(update_json)
+      @solrizer.should_not eql(uneql_solrizer)
+    end
+
+    it "is not eql to another Solrizer if the action is different" do
+      update_hash = @update_object.dup
+      update_hash[:action] = :delete
+      update_json = Yajl::Encoder.encode(update_hash)
+      uneql_solrizer = Expander::Solrizer.new(update_json)
+      @solrizer.should_not eql(uneql_solrizer)
+    end
+
 ###############################################################################
 # /!\ WARNING!!! /!\
 # There is an ordering dependency between the tests here.
@@ -53,6 +101,7 @@ describe Expander::Solrizer do
 
     describe "when flattening to XML without expando fields" do
       before do
+        Expander.config.blacklisted_fieldnames = []
         @expected_fields = {"foo"                    => ["bar"],
                             "foo_bar"                => ["baz"],
                             "bar"                    => ["baz"],
@@ -103,10 +152,36 @@ describe Expander::Solrizer do
         got.should == @expected_fields
       end
     end
-  end
-    
 
-  describe "when created with a delete reques" do
+    describe "when no HTTP request is in progress" do
+
+      it "does not report that an HTTP request is in progress" do
+        Expander::Solrizer.http_requests_active?.should be_false
+      end
+
+    end
+
+    describe "when an HTTP request is in progress" do
+      before do
+        Expander::Solrizer.clear_http_requests
+        @solrizer.http_request_started
+      end
+
+      it "registers the in-progress HTTP request" do
+        Expander::Solrizer.http_requests_active?.should be_true
+      end
+
+      it "removes itself from the list of active http requests when the request completes" do
+        @solrizer.completed
+        Expander::Solrizer.http_requests_active?.should be_false
+      end
+
+    end
+
+
+  end
+
+  describe "when created with a delete request" do
     before do
       @indexer_payload = {:id => "2342"}
       @update_object = {:action => "add", :payload => @indexer_payload}
