@@ -1,3 +1,4 @@
+require 'set'
 require 'yajl'
 require 'fast_xs'
 require 'em-http-request'
@@ -7,6 +8,24 @@ require 'opscode/expander/flattener'
 module Opscode
   module Expander
     class Solrizer
+
+      @active_http_requests = Set.new
+
+      def self.http_request_started(instance)
+        @active_http_requests << instance
+      end
+
+      def self.http_request_completed(instance)
+        @active_http_requests.delete(instance)
+      end
+
+      def self.http_requests_active?
+        !@active_http_requests.empty?
+      end
+
+      def self.clear_http_requests
+        @active_http_requests.clear
+      end
 
       include Loggable
 
@@ -37,6 +56,8 @@ module Opscode
       attr_reader :obj_type
 
       attr_reader :database
+
+      attr_reader :enqueued_at
 
       def initialize(object_command_json, &on_completion_block)
         @on_completion_block = on_completion_block
@@ -168,6 +189,8 @@ module Opscode
       def post_to_solr(document, &logger_block)
         log.debug("POSTing document to SOLR:\n#{document}")
         http_req = EventMachine::HttpRequest.new(solr_url).post(:body => document, :timeout => 1200, :head => CONTENT_TYPE_XML)
+        http_request_started
+
         http_req.callback do
           completed
           if http_req.response_header.status == 200
@@ -183,6 +206,7 @@ module Opscode
       end
 
       def completed
+        self.class.http_request_completed(self)
         @on_completion_block.call
       end
 
@@ -196,6 +220,18 @@ module Opscode
 
       def indexed_object
         "#{@obj_type}[#{@obj_id}] database[#{@database}]"
+      end
+
+      def http_request_started
+        self.class.http_request_started(self)
+      end
+
+      def eql?(other)
+        other.hash == hash
+      end
+
+      def hash
+        "#{action}#{indexed_object}#@enqueued_at#{self.class.name}".hash
       end
 
     end

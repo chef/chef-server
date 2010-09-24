@@ -62,14 +62,33 @@ module Opscode
       end
 
       def self.trap_signals
-        Kernel.trap(:INT)  { stop(:INT) }
-        Kernel.trap(:TERM) { stop(:TERM) }
+        Kernel.trap(:INT)  { stop_immediately(:INT) }
+        Kernel.trap(:TERM) { stop_gracefully(:TERM) }
       end
 
-      def self.stop(signal)
-        log.info { "Stopping opscode-expander on signal (#{signal})" }
+      def self.stop_immediately(signal)
+        log.info { "Initiating immediate shutdown on signal (#{signal})" }
         @vnode_supervisor.stop
-        EM.add_timer(3) do
+        EM.add_timer(1) do
+          AMQP.stop
+          EM.stop
+        end
+      end
+
+      def self.stop_gracefully(signal)
+        log.info { "Initiating graceful shutdown on signal (#{signal})" }
+        @vnode_supervisor.stop
+        wait_for_http_requests_to_complete
+      end
+
+      def self.wait_for_http_requests_to_complete
+        if Expander::Solrizer.http_requests_active?
+          log.info { "waiting for in progress HTTP Requests to complete"}
+          EM.add_timer(1) do
+            wait_for_http_requests_to_complete
+          end
+        else
+          log.info { "HTTP requests completed, shutting down"}
           AMQP.stop
           EM.stop
         end
