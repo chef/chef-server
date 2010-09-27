@@ -60,6 +60,7 @@ module Opscode
       attr_reader :enqueued_at
 
       def initialize(object_command_json, &on_completion_block)
+        @start_time = Time.now.to_f
         @on_completion_block = on_completion_block
         if parsed_message    = parse(object_command_json)
           @action           = parsed_message["action"]
@@ -101,7 +102,13 @@ module Opscode
       end
 
       def add
-        post_to_solr(pointyize_add) { "indexed #{indexed_object} transit-time[#{transit_time}s]" }
+        post_to_solr(pointyize_add) do
+          ["indexed #{indexed_object}",
+           "transit[#{transit_time}s]",
+           "xml[#{@xml_time}s]",
+           "solr-post[#{@solr_post_time}]"
+          ].join(" ")
+        end
       rescue Exception => e
         log.error { "#{e.class.name}: #{e.message}\n#{e.backtrace.join("\n")}"}
       end
@@ -169,6 +176,7 @@ module Opscode
         end
         xml << CLOSE_FIELD      # ends content
         xml << END_ADD_DOC
+        @xml_time = Time.now.to_f - @start_time
         xml
       end
 
@@ -206,6 +214,7 @@ module Opscode
       end
 
       def completed
+        @solr_post_time = Time.now.to_f - @start_time
         self.class.http_request_completed(self)
         @on_completion_block.call
       end
