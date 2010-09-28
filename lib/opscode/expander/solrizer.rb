@@ -104,9 +104,9 @@ module Opscode
       def add
         post_to_solr(pointyize_add) do
           ["indexed #{indexed_object}",
-           "transit[#{transit_time}s]",
-           "xml[#{@xml_time}s]",
-           "solr-post[#{@solr_post_time}]"
+           "transit,xml,solr-post |",
+           [transit_time, @xml_time, @solr_post_time].join(","),
+           "|"
           ].join(" ")
         end
       rescue Exception => e
