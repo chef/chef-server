@@ -39,6 +39,9 @@ module Opscode
       DATABASE    = "database"
       ENQUEUED_AT = "enqueued_at"
 
+      DATA_BAG_ITEM = "data_bag_item"
+      DATA_BAG      = "data_bag"
+
       X_CHEF_id_CHEF_X        = 'X_CHEF_id_CHEF_X'
       X_CHEF_database_CHEF_X  = 'X_CHEF_database_CHEF_X'
       X_CHEF_type_CHEF_X      = 'X_CHEF_type_CHEF_X'
@@ -78,6 +81,7 @@ module Opscode
         @obj_id      = @indexer_payload[ID]
         @obj_type    = @indexer_payload[TYPE]
         @enqueued_at = @indexer_payload[ENQUEUED_AT]
+        @data_bag = @obj_type == DATA_BAG_ITEM ? @chef_object[DATA_BAG] : nil
       end
 
       def parse(serialized_object)
@@ -144,6 +148,7 @@ module Opscode
       FLD_CHEF_ID_FMT = '<field name="X_CHEF_id_CHEF_X">%s</field>'
       FLD_CHEF_DB_FMT = '<field name="X_CHEF_database_CHEF_X">%s</field>'
       FLD_CHEF_TY_FMT = '<field name="X_CHEF_type_CHEF_X">%s</field>'
+      FLD_DATA_BAG    = '<field name="data_bag">%s</field>'
 
       KEYVAL_FMT = "%s__=__%s "
 
@@ -175,6 +180,7 @@ module Opscode
           end
         end
         xml << CLOSE_FIELD      # ends content
+        xml << (FLD_DATA_BAG % @data_bag) if @data_bag
         xml << END_ADD_DOC
         @xml_time = Time.now.to_f - @start_time
         xml
