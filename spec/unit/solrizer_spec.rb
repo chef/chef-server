@@ -106,7 +106,6 @@ describe Expander::Solrizer do
 
       it "contains a data_bag field with the right name" do
         doc = REXML::Document.new(@solrizer.pointyize_add)
-        puts @solrizer.pointyize_add
         flds = doc.elements.to_a("add/doc/field[@name='data_bag']")
         flds.size.should == 1
         flds.first.text.should == "stuff"
@@ -124,13 +123,7 @@ describe Expander::Solrizer do
 
     describe "when flattening to XML" do
       before do
-        sep = "__=__"
-        @expected_content = [["foo", "bar"],
-                             ["foo_bar", "baz"],
-                             ["bar", "baz"],
-                             ["X_CHEF_id_CHEF_X", "2342"],
-                             ["X_CHEF_database_CHEF_X", "testdb"],
-                             ["X_CHEF_type_CHEF_X", "node"]].map { |x| x.join(sep) }
+        @sep = "__=__"
 
         @expected_object = {"foo"                    => ["bar"],
                             "foo_bar"                => ["baz"],
@@ -157,7 +150,8 @@ describe Expander::Solrizer do
         doc = REXML::Document.new(@solrizer.pointyize_add)
         doc.elements.each("add/doc/field[@name='content']") do |content|
           raw = content.text
-          @expected_content.each do |s|
+          @expected_object.each do |k, v|
+            s = "%s#{@sep}%s" % [k, v]
             raw.index(s).should_not be_nil
           end
         end
