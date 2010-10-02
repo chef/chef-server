@@ -173,14 +173,15 @@ module Opscode
         xml << (FLD_CHEF_DB_FMT % @database)
         xml << (FLD_CHEF_TY_FMT % @obj_type)
         xml << START_CONTENT
-
+        content = ""
         flattened_object.each do |field, values|
           values.each do |v|
-            xml << (KEYVAL_FMT % [field, v.fast_xs])
+            content << (KEYVAL_FMT % [field, v])
           end
         end
+        xml << content.fast_xs
         xml << CLOSE_FIELD      # ends content
-        xml << (FLD_DATA_BAG % @data_bag) if @data_bag
+        xml << (FLD_DATA_BAG % @data_bag.fast_xs) if @data_bag
         xml << END_ADD_DOC
         @xml_time = Time.now.to_f - @start_time
         xml
