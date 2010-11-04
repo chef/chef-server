@@ -6,6 +6,7 @@ require 'yajl'
 require 'rexml/document'
 
 describe Expander::Solrizer do
+  SEP = "__=__"
 
   describe "when created with an add request" do
     before do
@@ -22,6 +23,7 @@ describe Expander::Solrizer do
 
       @log_stream = StringIO.new
       @solrizer.log.init(@log_stream)
+      @expected_fields = %w(X_CHEF_id_CHEF_X X_CHEF_database_CHEF_X X_CHEF_type_CHEF_X)
     end
 
     it "extracts the indexing-specific payload from the update message" do
@@ -92,64 +94,95 @@ describe Expander::Solrizer do
       @solrizer.should_not eql(uneql_solrizer)
     end
 
-###############################################################################
-# /!\ WARNING!!! /!\
-# There is an ordering dependency between the tests here.
-# All tests that expect expando fields off **MUST** come
-# before tests that expect expando fields on.
-###############################################################################
-
-    describe "when flattening to XML without expando fields" do
+    describe "when flattening to XML" do
       before do
-        Expander.config.blacklisted_fieldnames = []
-        @expected_fields = {"foo"                    => ["bar"],
+        @expected_object = {"foo"                    => ["bar"],
                             "foo_bar"                => ["baz"],
                             "bar"                    => ["baz"],
                             "X_CHEF_id_CHEF_X"       => ["2342"],
                             "X_CHEF_database_CHEF_X" => ["testdb"],
                             "X_CHEF_type_CHEF_X"     => ["node"]}
-      end
-      it "generates the flattened and expanded representation of the object" do
-        @solrizer.flattened_object.should == @expected_fields
+        @expected_fields = %w(X_CHEF_id_CHEF_X X_CHEF_database_CHEF_X X_CHEF_type_CHEF_X)
       end
 
-      it "converts the flattened and expanded object to compact readable XML" do
-        got = Hash.new { |h, k| h[k] = [] }
+      it "generates the flattened and expanded representation of the object" do
+        @solrizer.flattened_object.should == @expected_object
+      end
+
+      it "has the expected fields in the document" do
         doc = REXML::Document.new(@solrizer.pointyize_add)
-        doc.elements.each('add/doc/field') do |field|
-          name = field.attributes["name"]
-          val = field.text
-          got[name] << val
+        flds = doc.elements.to_a("add/doc/field").map {|f| f.attributes["name"] }
+        @expected_fields.each do |field|
+          flds.should include(field)
         end
-        got.should == @expected_fields
+      end
+
+      it "the content field contains key value pairs delimited with the right separator" do
+        doc = REXML::Document.new(@solrizer.pointyize_add)
+        doc.elements.each("add/doc/field[@name='content']") do |content|
+          raw = content.text
+          @expected_object.each do |k, v|
+            s = "%s#{SEP}%s" % [k, v]
+            raw.index(s).should_not be_nil
+          end
+        end
       end
     end
 
-    describe "when flattening to XML with expando fields" do
+    describe "when flattening data to XML that needs XML escaping" do
       before do
-        Expander::Flattener.enable_expando_fields
-        @expected_fields = {"foo"                    => ["bar"],
-                            "X_bar"                  => ["baz"],
-                            "foo_X"                  => ["baz"],
-                            "foo_bar"                => ["baz"],
-                            "bar"                    => ["baz"],
-                            "X_CHEF_id_CHEF_X"       => ["2342"],
-                            "X_CHEF_database_CHEF_X" => ["testdb"],
-                            "X_CHEF_type_CHEF_X"     => ["node"]}
+        @indexer_payload[:type] = :role
+        @indexer_payload[:item] = { "a&w" => "<rootbeer/>" }
+        update_object = {:action => "add", :payload => @indexer_payload}
+        update_json = Yajl::Encoder.encode(update_object)
+        @solrizer = Expander::Solrizer.new(update_json) { :no_op }
+        @solrizer.log.init(@log_stream)
       end
-      it "generates the flattened and expanded representation of the object" do
-        @solrizer.flattened_object.should == @expected_fields
+
+      it "the content field contains escaped keys and values" do
+        raw = @solrizer.pointyize_add
+        raw.should match("a&amp;w#{SEP}&lt;rootbeer/&gt;")
       end
-      
-      it "converts the flattened and expanded object to compact readable XML" do
-        got = Hash.new { |h, k| h[k] = [] }
+    end
+
+    describe "when flattening data bag XML" do
+      before do
+        @indexer_payload[:type] = :data_bag_item
+        @indexer_payload[:item] = {:k1 => "v1", "data_bag" => "stuff"}
+        update_object = {:action => "add", :payload => @indexer_payload}
+        update_json = Yajl::Encoder.encode(update_object)
+        @solrizer = Expander::Solrizer.new(update_json) { :no_op }
+        @solrizer.log.init(@log_stream)
+        @expected_fields << "data_bag"
+      end
+
+      it "contains a data_bag field with the right name" do
         doc = REXML::Document.new(@solrizer.pointyize_add)
-        doc.elements.each('add/doc/field') do |field|
-          name = field.attributes["name"]
-          val = field.text
-          got[name] << val
+        flds = doc.elements.to_a("add/doc/field[@name='data_bag']")
+        flds.size.should == 1
+        flds.first.text.should == "stuff"
+      end
+
+      it "has the expected fields in the document" do
+        doc = REXML::Document.new(@solrizer.pointyize_add)
+        flds = doc.elements.to_a("add/doc/field").map {|f| f.attributes["name"] }
+        @expected_fields.each do |field|
+          flds.should include(field)
         end
-        got.should == @expected_fields
+      end
+      describe "and data bag name needs escaping" do
+        before do
+          @indexer_payload[:item] = {:k1 => "v1", "data_bag" => "a&w>"}
+          update_object = {:action => "add", :payload => @indexer_payload}
+          update_json = Yajl::Encoder.encode(update_object)
+          @solrizer = Expander::Solrizer.new(update_json) { :no_op }
+          @solrizer.log.init(@log_stream)
+        end
+
+        it "contains a data_bag field with an escaped name" do
+          raw = @solrizer.pointyize_add
+          raw.should match("data_bag#{SEP}a&amp;w&gt;")
+        end
       end
     end
 
