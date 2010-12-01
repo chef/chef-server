@@ -25,23 +25,28 @@ describe Expander::VNode do
 
   describe "when connecting to rabbitmq" do
     it "disconnects if there is another subscriber" do
-      b = Bunny.new(OPSCODE_EXPANDER_MQ_CONFIG)
-      b.start
-      q = b.queue(@vnode.queue_name)
-      t = Thread.new { q.subscribe { |message| nil }}
+      begin
+        q = nil
+        b = Bunny.new(OPSCODE_EXPANDER_MQ_CONFIG)
+        b.start
+        q = b.queue(@vnode.queue_name, :passive => false, :durable => true, :exclusive => false, :auto_delete => false)
+        t = Thread.new { q.subscribe { |message| nil }}
 
-      AMQP.start(OPSCODE_EXPANDER_MQ_CONFIG) do
-        EM.add_timer(0.5) do
-          AMQP.stop
-          EM.stop
+        AMQP.start(OPSCODE_EXPANDER_MQ_CONFIG) do
+          EM.add_timer(0.5) do
+            AMQP.stop
+            EM.stop
+          end
+          @vnode.start
         end
-        @vnode.start
-      end
-      t.kill
-      b.stop
+        t.kill
 
-      @vnode.should be_stopped
-      @log_stream.string.should match(/Detected extra consumers/)
+        @vnode.should be_stopped
+        @log_stream.string.should match(/Detected extra consumers/)
+      ensure
+        q && q.delete
+        b.stop
+      end
     end
 
     it "calls back to the supervisor when it subscribes to the queue" do
