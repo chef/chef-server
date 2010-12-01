@@ -122,7 +122,7 @@ describe Expander::Solrizer do
         doc.elements.each("add/doc/field[@name='content']") do |content|
           raw = content.text
           @expected_object.each do |k, v|
-            s = "%s#{SEP}%s" % [k, v]
+            s = "#{k}#{SEP}#{v.first}"
             raw.index(s).should_not be_nil
           end
         end
