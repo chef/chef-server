@@ -9,11 +9,22 @@ require 'opscode/expander/vnode'
 require 'opscode/expander/vnode_table'
 require 'opscode/expander/configuration'
 
+module ::AMQP
+  def self.hard_reset!
+    MQ.reset rescue nil
+    stop
+    EM.stop rescue nil
+    Thread.current[:mq], @conn = nil, nil
+  end
+end
+
 module Opscode
   module Expander
     class VNodeSupervisor
       include Loggable
       extend  Loggable
+
+      COULD_NOT_CONNECT = /Could not connect to server/.freeze
 
       def self.start_cluster_worker
         @vnode_supervisor = new
@@ -47,8 +58,22 @@ module Opscode
 
         log.info("Opscode Expander #{VERSION} starting up.")
 
-        AMQP.start(Expander.config.amqp_config) do
-          start_consumers
+        begin
+          AMQP.start(Expander.config.amqp_config) do
+            start_consumers
+          end
+        rescue AMQP::Error => e
+          if e.message =~ COULD_NOT_CONNECT
+            log.error { "Could not connect to rabbitmq. Make sure it is running and correctly configured." }
+            log.error { e.message }
+
+            AMQP.hard_reset!
+
+            sleep 5
+            retry
+          else
+            raise
+          end
         end
       end
 
