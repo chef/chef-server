@@ -19,6 +19,8 @@ MESSAGES_TO_SEND = 10_000
 NUM_RAND_KEY_PAIRS = 50
 NUM_RAND_VALUE_PAIRS = 50
 
+PERSISTENT_MESSAGES = true
+
 KEYS = NUM_RAND_VALUE_PAIRS.words
 
 SAMPLE_NODES = []
@@ -38,7 +40,7 @@ amqp_client.start
 puts 'declaring queues'
 queues = {}
 0.upto(1023) do |vnode|
-  queues[vnode] = amqp_client.queue("vnode-#{vnode}")
+  queues[vnode] = amqp_client.queue("vnode-#{vnode}", :durable => true)
 end
   
 def add_rand_keys(node)
@@ -64,7 +66,9 @@ sent_messages = 0
   index_data[:payload][:id] = id
 
   puts "queue: vnode-#{vnode} (#{sent_messages} / #{MESSAGES_TO_SEND})"
-  queues[vnode].publish(Yajl::Encoder.encode(index_data))
+  amqp_client.tx_select if PERSISTENT_MESSAGES
+  queues[vnode].publish(Yajl::Encoder.encode(index_data), :persistent => PERSISTENT_MESSAGES)
+  amqp_client.tx_commit if PERSISTENT_MESSAGES
   sent_messages += 1
 end
 end_time = Time.now
