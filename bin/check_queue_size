@@ -47,7 +47,7 @@ Dir.chdir(File.join(File.expand_path(File.dirname(__FILE__)), "..")) do
     amqp_client.start
 
     0.upto(Expander::VNODES - 1) do |vnode|
-      q = amqp_client.queue("vnode-#{vnode}")
+      q = amqp_client.queue("vnode-#{vnode}", :durable => true)
       message_counts << q.status[:message_count]
     end
     total_messages = message_counts.inject(:+)
@@ -64,7 +64,7 @@ Dir.chdir(File.join(File.expand_path(File.dirname(__FILE__)), "..")) do
     end
 
   ensure
-    amqp_client.stop if defined?(amqp_client) && amqp_client
+    amqp_client.stop if defined?(amqp_client) && amqp_client && amqp_client.connected?
   end
   
 end
