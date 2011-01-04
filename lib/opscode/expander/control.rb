@@ -42,6 +42,9 @@ module Opscode
         end
       end
 
+      #--
+      # TODO: this is confusing and unneeded. Just whitelist the methods
+      # that map to commands and use +send+
       def self.compile
         run_method = "def run; case @argv.first;"
         descriptions.each do |method_name, command_name, desc|
@@ -75,7 +78,7 @@ module Opscode
         amqp_client.start
 
         0.upto(VNODES - 1) do |vnode|
-          q = amqp_client.queue("vnode-#{vnode}")
+          q = amqp_client.queue("vnode-#{vnode}", :durable => true)
           message_counts << q.status[:message_count]
         end
         total_messages = message_counts.inject(0) { |sum, count| sum + count }
@@ -103,7 +106,7 @@ module Opscode
         amqp_client.start
 
         0.upto(VNODES - 1) do |vnode|
-          q = amqp_client.queue("vnode-#{vnode}")
+          q = amqp_client.queue("vnode-#{vnode}", :durable => true)
           status = q.status
           # returns {:message_count => method.message_count, :consumer_count => method.consumer_count}
           queue_status << vnode.to_s << status[:message_count].to_s << status[:consumer_count].to_s

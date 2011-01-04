@@ -83,7 +83,7 @@ module Opscode
       def exclusive_control_queue
         @exclusive_control_queue ||= begin
           log.debug { "declaring exclusive control queue #{exclusive_control_queue_name}" }
-          MQ.queue(exclusive_control_queue_name, :exclusive => true)
+          MQ.queue(exclusive_control_queue_name)
         end
       end
 
@@ -101,7 +101,7 @@ module Opscode
       def broadcast_control_queue
         @broadcast_control_queue ||= begin
           log.debug { "declaring broadcast control queue #{broadcast_control_queue_name}"}
-          q = MQ.queue(broadcast_control_queue_name, :exclusive => true)
+          q = MQ.queue(broadcast_control_queue_name)
           log.debug { "binding broadcast control queue to broadcast control exchange"}
           q.bind(broadcast_control_exchange)
           q
