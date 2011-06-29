@@ -1,4 +1,4 @@
-DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth deps/webmachine
+DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth deps/webmachine deps/neotoma
 
 all: compile
 

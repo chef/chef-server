@@ -3,3 +3,4 @@ deps/*
 apps/*/ebin/*
 .DS_Store
 apps/*/.eunit
+apps/chef_rest/src/lucene.erl
