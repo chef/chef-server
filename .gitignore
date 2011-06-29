@@ -1,0 +1,5 @@
+rel/chef_api/*
+deps/*
+apps/*/ebin/*
+.DS_Store
+apps/*/.eunit
