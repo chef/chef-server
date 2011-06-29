@@ -1,0 +1,16 @@
+{application, chef_common,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+		  couchbeam,
+		  ejson,
+		  ibrowse,
+		  mochiweb,
+		  oauth
+                 ]},
+  {env, []}
+ ]}.

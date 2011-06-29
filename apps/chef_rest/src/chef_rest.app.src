@@ -1,0 +1,14 @@
+{application, chef_rest,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+		  mochiweb,
+		  webmachine
+                 ]},
+  {mod, { chef_rest_app, []}},
+  {env, []}
+ ]}.
