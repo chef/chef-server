@@ -1,0 +1,51 @@
+This is the Erlang implementation of Chef's REST API.
+
+Currently implemented endpoints are:
+
+* Search: /organizations/<org_id>/search/<obj_type>
+
+Note: Parameters are enclosed in angle brackets
+
+Building chef_api (tl;dr version)
+---------------------------------
+1) Install Erlang R14B03 or later
+
+2) Run 'make rel'
+
+3) 'cd rel/chef_api;bin/chef_api start'
+
+4) Profit!
+
+Building chef_api (longer version)
+----------------------------------
+1) Install Erlang R14B03 or later
+
+2) (Optional) Build dialyzer PLT which includes erts, kernel, stdlib, crypto,
+   and public_key. If you've never done this before, use the command below:
+
+   dialyzer --build_plt --apps erts kernel stdlib crypto public_key
+
+3) Run 'make'. This will download all dependencies and compile all code.
+
+4) Run 'make test'. This will execute the test suites for chef_rest and
+   chef_common. All tests should pass.
+
+5) (Optional) If you've got an up to date PLT file (see #2) you can use
+   dialyzer to perform static analysis on chef_api. Running 'make dialyzer'
+   will perform analysis against chef_rest and chef_common.
+
+6) chef_api is designed to be deployed as a standalone OTP release. You can
+   build a release via either 'make rel' or 'make devrel'. The devrel target
+   is highly recommended for developers working on chef_api directly. This
+   target symlinks all dependencies and application so the release doesn't
+   have to be rebuilt each time code is changed.
+
+   If a release has been built via 'make devrel' you can rebuild and load
+   changed code into the running chef_api instance via 'make update'.
+   NOTE: This performs a warm reboot of the Erlang VM so any application
+   state will be totally lost.
+
+7) You can start the chef_api release with an interactive shell via the
+   command below:
+
+   cd rel/chef_api;bin/chef_api console
