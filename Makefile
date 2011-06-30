@@ -20,6 +20,16 @@ distclean:
 	@rm -rf deps
 	@./rebar clean
 
+test: eunit
+
+eunit:
+	@./rebar skip_deps=true eunit
+
+dialyze: dialyzer
+
+dialyzer:
+	dialyzer -Wrace_conditions -Wspecdiffs apps/*/ebin
+
 rel: rel/chef_api
 
 devrel: rel
