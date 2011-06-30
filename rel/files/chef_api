@@ -52,6 +52,21 @@ NODETOOL="$ERTS_PATH/escript $ERTS_PATH/nodetool $NAME_ARG $COOKIE_ARG"
 
 # Check the first argument for instructions
 case "$1" in
+    runit)
+        # Make sure there is not already a node running
+        RES=`$NODETOOL ping`
+        if [ "$RES" = "pong" ]; then
+            echo "Node is already running!"
+            exit 1
+        fi
+        HEART_COMMAND="$RUNNER_BASE_DIR/bin/$SCRIPT start"
+        export HEART_COMMAND
+        mkdir -p $PIPE_DIR
+        shift # remove $1
+        # no -daemon and no exec for use with runit
+        $ERTS_PATH/run_erl $PIPE_DIR $RUNNER_LOG_DIR "$RUNNER_BASE_DIR/bin/$SCRIPT console $@" 2>&1
+        ;;
+
     start)
         # Make sure there is not already a node running
         RES=`$NODETOOL ping`
