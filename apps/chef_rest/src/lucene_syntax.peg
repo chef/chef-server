@@ -1,4 +1,4 @@
-query <- star_star / (expression / space)* `[N || N <- Node, N /= [<<" ">>]]`;
+query <- star_star / (expression / space)* `case is_list(Node) of true -> [N || N <- Node, N /= [<<" ">>]]; false -> Node end`;
 
 star_star <- "*:*";
 
@@ -33,7 +33,7 @@ required_op <- !valid_letter op:'+' arg:(term / string);
 
 prohibited_op <- !valid_letter op:'-' arg:(field / field_range / term / string);
 
-boost_op <- arg:(term / string) '^' param:fuzzy_param;
+boost_op <- arg:(term / string) '^' param:fuzzy_param; 
 
 fuzzy_op <- arg:(term / string) '~' param:fuzzy_param?;
 
