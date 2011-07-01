@@ -1,10 +1,10 @@
-query <- star_star / (expression / space)*;
+query <- star_star / (expression / space)* `[N || N <- Node, N /= [<<" ">>]]`;
 
 star_star <- "*:*";
 
 expression <- operation / group / field_phrase / field / field_range / term / string;
 
-term <- keyword valid_letter+ / !keyword valid_letter+;
+term <- keyword valid_letter+ / !keyword valid_letter+ `list_to_binary(Node)`;
 
 field <- name:field_name ":" arg:(term / group / string);
 
@@ -13,7 +13,7 @@ field_phrase <- name:field_name ':' '"' str:(term (space term)*) '"';
 field_range <- field_name ":" (("[" range_entry " TO " range_entry "]") /
                                ("{" range_entry " TO " range_entry "}"));
 
-field_name <- !keyword valid_letter+;
+field_name <- !keyword valid_letter+ `list_to_binary(Node)`;
 
 range_entry <- valid_letter+ / "*";
 
