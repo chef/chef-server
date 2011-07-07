@@ -70,6 +70,9 @@ chef_rest_get(Url, Path, User, PrivateKey) ->
     Result = ibrowse:send_req(erlang:binary_to_list(Url), SignedHeaderStrings, get),
     Result.
 
+extract_orgnames([{struct, OrgList}]) ->
+    [ ej:get({<<"name">>}, Org) || {<<"organization">>, Org} <- OrgList ].
+    
 %
 % Assumes get:
 %
@@ -81,8 +84,7 @@ is_user_associated_with_org(OpscodeConfig, UserName, OrgName) ->
     URL = iolist_to_binary([ OpscodeConfig#opscode_config.account_api_url, Path]),
     {ok, "200", _Headers, JsonText} = chef_rest_get(URL, Path, OpscodeConfig#opscode_config.webui_user_name, OpscodeConfig#opscode_config.webui_private_key),
     OrgList = mochijson2:decode(JsonText),
-    ?debugVal(OrgList),
-    lists:member(OrgName, OrgList).
+    lists:member(OrgName, extract_orgnames(OrgList)).
 
 
 
