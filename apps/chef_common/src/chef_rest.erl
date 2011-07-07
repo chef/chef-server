@@ -29,9 +29,11 @@
 -export([
 	 make_opscode_config/0,
 	 is_user_associated_with_org/3,
-	 chef_rest_get/3
+	 chef_rest_get/4
 %	 chef_rest_json/4
          ]).
+
+-include_lib("eunit/include/eunit.hrl").
 
 
 %% -record (user_config, { user_name = null,
@@ -56,10 +58,10 @@ make_opscode_config() ->
 		      chef_api_url      = <<"http://localhost:4000">>
 		    }.
 		      
-chef_rest_get(Url, User, PrivateKey) ->
+chef_rest_get(Url, Path, User, PrivateKey) ->
     HttpTime = httpd_util:rfc1123_date(),
-    Path =  <<"/users/platform-superuser/organizations">>,
     SignedHeaders = chef_authn:sign_request(PrivateKey, <<"">>, User, <<"GET">>, HttpTime, Path),
+    ?debugVal(Url), ?debugVal(Path), ?debugVal(User),
     SignedHeaderStrings = [
 			   {"Accept", "application/json"}
 %			   , {"Content-type:", "application/json"}
@@ -75,8 +77,9 @@ chef_rest_get(Url, User, PrivateKey) ->
 %   ok.  
 -spec is_user_associated_with_org(any(), user_id(), organization_name()) -> binary(). % true|false when finished					 
 is_user_associated_with_org(OpscodeConfig, UserName, OrgName) ->
-    Path = iolist_to_binary([ OpscodeConfig#opscode_config.account_api_url, "/users/", UserName, "/organizations" ]),
-    chef_rest_get(Path, UserName, OpscodeConfig#opscode_config.webui_private_key).
+    Path = iolist_to_binary([ "/users/", UserName, "/organizations" ]),
+    URL = iolist_to_binary([ OpscodeConfig#opscode_config.account_api_url, Path]),
+    chef_rest_get(URL, Path, UserName, OpscodeConfig#opscode_config.webui_private_key).
     % HttpTime = httpd_util:rfc1123_date(),
     %% TODO add x-ops-request-source header once I know what it means
     % SignedHeaders = chef_authn:sign_request(OpscodeConfig#opscode_config.webui_private_key,
