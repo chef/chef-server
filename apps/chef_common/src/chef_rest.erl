@@ -51,9 +51,8 @@
 
 make_opscode_config() ->
     {ok, WebuiKey} = file:read_file("apps/chef_common/test/webui_priv.pem"),
-    #opscode_config { webui_user_name   = <<"foo">>,
+    #opscode_config { webui_user_name   = <<"platform-superuser">>,
 		      webui_private_key = WebuiKey,
-%		      account_api_url   = <<"http://localhost:4042/organizations/skynet">>,
 		      account_api_url   = <<"http://localhost:4042">>,
 		      chef_api_url      = <<"http://localhost:4000">>
 		    }.
@@ -61,14 +60,15 @@ make_opscode_config() ->
 chef_rest_get(Url, Path, User, PrivateKey) ->
     HttpTime = httpd_util:rfc1123_date(),
     SignedHeaders = chef_authn:sign_request(PrivateKey, <<"">>, User, <<"GET">>, HttpTime, Path),
-    ?debugVal(Url), ?debugVal(Path), ?debugVal(User),
+%    ?debugVal(Url), ?debugVal(Path), ?debugVal(User),
     SignedHeaderStrings = [
 			   {"Accept", "application/json"}
 %			   , {"Content-type:", "application/json"}
 			    |
 			   [ {erlang:binary_to_list(K), erlang:binary_to_list(V)} || {K,V} <- SignedHeaders ] ] ,
-    io:format("Headers: ~p~n", [SignedHeaderStrings]),
-    Result = ibrowse:send_req(erlang:binary_to_list(Url), SignedHeaderStrings, get).
+%    io:format("Headers: ~p~n", [SignedHeaderStrings]),
+    Result = ibrowse:send_req(erlang:binary_to_list(Url), SignedHeaderStrings, get),
+    Result.
 
 %
 % Assumes get:
@@ -79,12 +79,15 @@ chef_rest_get(Url, Path, User, PrivateKey) ->
 is_user_associated_with_org(OpscodeConfig, UserName, OrgName) ->
     Path = iolist_to_binary([ "/users/", UserName, "/organizations" ]),
     URL = iolist_to_binary([ OpscodeConfig#opscode_config.account_api_url, Path]),
-    chef_rest_get(URL, Path, UserName, OpscodeConfig#opscode_config.webui_private_key).
-    % HttpTime = httpd_util:rfc1123_date(),
-    %% TODO add x-ops-request-source header once I know what it means
-    % SignedHeaders = chef_authn:sign_request(OpscodeConfig#opscode_config.webui_private_key,
-    %					    <<"">>, UserName, <<"GET">>, HttpTime, Path),
-    % Result = ibrowse:send_req(erlang:binary_to_list(Path), SignedHeaders, get).
+    {ok, "200", _Headers, JsonText} = chef_rest_get(URL, Path, OpscodeConfig#opscode_config.webui_user_name, OpscodeConfig#opscode_config.webui_private_key),
+    OrgList = mochijson2:decode(JsonText),
+    ?debugVal(OrgList),
+    lists:member(OrgName, OrgList).
+
+
+
+
+
     
     
 
