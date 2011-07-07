@@ -51,7 +51,8 @@ make_opscode_config() ->
     {ok, WebuiKey} = file:read_file("apps/chef_common/test/webui_priv.pem"),
     #opscode_config { webui_user_name   = <<"foo">>,
 		      webui_private_key = WebuiKey,
-		      account_api_url   = <<"http://localhost:4042/organizations/skynet">>,
+%		      account_api_url   = <<"http://localhost:4042/organizations/skynet">>,
+		      account_api_url   = <<"http://localhost:4042">>,
 		      chef_api_url      = <<"http://localhost:4000">>
 		    }.
 		      
