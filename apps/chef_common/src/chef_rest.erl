@@ -28,6 +28,7 @@
 
 -export([
 	 make_opscode_config/0,
+	 is_user_associated_with_org/2,
 	 is_user_associated_with_org/3,
 	 chef_rest_get/4
 %	 chef_rest_json/4
@@ -86,6 +87,9 @@ is_user_associated_with_org(OpscodeConfig, UserName, OrgName) ->
     OrgList = mochijson2:decode(JsonText),
     lists:member(OrgName, extract_orgnames(OrgList)).
 
+is_user_associated_with_org(UserName, OrgName) ->
+    Config = make_opscode_config(),
+    is_user_associated_with_org(Config, UserName, OrgName).
 
 
 

@@ -74,7 +74,7 @@ malformed_request(Req, State) ->
         end,
     {Malformed, Req1, State2}.
 
-is_authorized(Req, State) ->
+verify_request_signature(Req, State) ->
     OrgName = wrq:path_info(organization_id, Req),
     UserName = wrq:get_req_header("x-ops-userid", Req),
     S = chef_otto:connect(),
@@ -102,6 +102,22 @@ is_authorized(Req, State) ->
                     {false, Req1, State1#state{couchbeam = S}}
             end
     end.
+    
+is_authorized(Req, State) ->
+    OrgName = wrq:path_info(organization_id, Req),
+    UserName = wrq:get_req_header("x-ops-userid", Req),
+    case verify_request_signature(Req,State) of
+	{true, Req1, State1} ->
+	    case chef_rest:is_user_associated_with_org(UserName, OrgName) of
+		true -> {true, Req1, State1};
+		false -> 
+		    Msg = bad_auth_message(not_member_of_org),
+		    Json = mochijson2:encode(Msg),
+                    Req2 = wrq:set_resp_body(Json, Req),
+		    {false, Req2, State1}
+	    end;
+	Other -> Other
+    end.	  
 
 body_or_default(Req, Default) ->
     case wrq:req_body(Req) of
@@ -122,15 +138,16 @@ bad_auth_message({missing_headers, Missing}) ->
 bad_auth_message(bad_clock) ->
     {struct, [{<<"error">>, [<<"check clock">>]}]};
 bad_auth_message(bad_sign_desc) ->
-    {struct, [{<<"error">>, [<<"bag signing description">>]}]};
+    {struct, [{<<"error">>, [<<"bad signing description">>]}]};
 bad_auth_message(org_not_found) ->
     {struct, [{<<"error">>, [<<"organization not found">>]}]};
 bad_auth_message({bad_query, RawQuery}) ->
     {struct, [{<<"error">>, [<<"invalid search query">>]},
               {<<"query">>, RawQuery}]};
+bad_auth_message(not_member_of_org) -> 
+    {struct, [{<<"error">>, [<<"Not a member of the organization">>]}]};
 bad_auth_message(_) ->
     {struct, [{<<"error">>, [<<"problem with headers">>]}]}.
-
 
 
 
