@@ -42,6 +42,7 @@
 -export([
          hash_string/1,
          hash_file/1,
+         sign_request/5,
          sign_request/6,
          authenticate_user_request/6,
          validate_headers/2
@@ -160,6 +161,13 @@ canonicalize_request(BodyHash, UserId, Method, Time, Path) ->
                                             BodyHash,
                                             Time,
                                             UserId])).
+
+-spec sign_request(private_key(), user_id(), http_method(),
+                   http_time(), http_path()) ->
+      [{binary(), binary()}].
+%% @doc Sign an HTTP request without a body (primarily GET)
+sign_request(PrivateKey, User, Method, Time, Path) ->
+    sign_request(PrivateKey, <<"">>, User, Method, Time, Path).
 
 %% @doc Sign an HTTP request so it can be sent to a Chef server.
 %%

@@ -108,7 +108,7 @@ is_authorized(Req, State) ->
     UserName = wrq:get_req_header("x-ops-userid", Req),
     case verify_request_signature(Req,State) of
 	{true, Req1, State1} ->
-	    case chef_rest:is_user_associated_with_org(UserName, OrgName) of
+	    case chef_permissions:is_user_with_org(UserName, OrgName) of
 		true -> {true, Req1, State1};
 		false -> 
 		    Msg = bad_auth_message(not_member_of_org),

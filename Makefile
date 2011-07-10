@@ -42,6 +42,10 @@ devrel: rel
 	@/bin/echo  Run \'make update\' to pick up changes in a running VM.
 
 rel/chef_api: compile
+	@/bin/echo
+	@/bin/echo Make sure opscode-chef and opscode-chef-api share the same parent directory.
+	@/bin/echo Otherwise release generation will fail.
+	@/bin/echo
 	@./rebar generate
 
 relclean:
