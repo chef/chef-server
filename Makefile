@@ -25,6 +25,12 @@ test: eunit
 eunit:
 	@./rebar skip_deps=true eunit
 
+test-common:
+	@./rebar skip_deps=true eunit app=chef_common
+
+test-rest:
+	@./rebar skip_deps=true eunit app=chef_rest
+
 dialyze: dialyzer
 
 dialyzer:
