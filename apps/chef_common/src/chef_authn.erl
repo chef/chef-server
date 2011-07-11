@@ -23,8 +23,6 @@
 % This module is an Erlang port of the mixlib-authentication Ruby gem.
 % It can be used to sign HTTP requests to send to a Chef server or to
 % validate such requests (for server implementation).
-%
-%
 -module(chef_authn).
 
 -define(buf_size, 16384).

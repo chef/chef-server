@@ -32,7 +32,8 @@ is_user_with_org(User, OrgName) ->
             OrgNames = [ej:get({<<"name">>}, Org) || {<<"organization">>, Org} <- Struct],
             lists:member(OrgName, OrgNames);
         Error ->
-            error_logger:error_msg("Error checking membership for ~p in org ~p: ~p~n", [User, OrgName, Error]),
+            error_logger:error_msg("Error checking membership for ~p in org ~p: ~p~n",
+                                   [User, OrgName, Error]),
             false
     end.
 
