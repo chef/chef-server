@@ -64,7 +64,7 @@ malformed_request(Req, State) ->
             % chef_authn:validate_headers(GetHeader, 300),
             % transform query first to avoid possible db fetch for org
             % guid for bad queries
-            Query = transform_query(wrq:get_qs_value("q", Req)),
+            Query = transform_query(http_uri:decode(wrq:get_qs_value("q", Req))),
             {false, Req, State1#state{solr_query = Query}}
         catch
             throw:Why ->
@@ -225,6 +225,7 @@ to_json(Req, State = #state{couchbeam = S, solr_query = Query}) ->
     end.
 
 transform_query(RawQuery) when is_binary(RawQuery) ->
+    io:format("~p~n", [RawQuery]),
     case chef_lucene:parse(RawQuery) of
         Query when is_binary(Query) ->
             ibrowse_lib:url_encode(binary_to_list(Query));
@@ -243,18 +244,15 @@ execute_solr_query(Query, ObjType, Db, S) ->
     SolrData = mochijson2:decode(SolrDataRaw),
     DocList = ej:get({<<"response">>, <<"docs">>}, SolrData),
     Ids = [ ej:get({<<"X_CHEF_id_CHEF_X">>}, Doc) || Doc <- DocList ],
-    JSONDocs = case chef_otto:bulk_get(S, ?db_for_guid(Db), Ids) of
-		   [] ->
-		       [];
-		   Docs ->
-		       %% remove couchdb revision ID from results, mark as objects for JSON
-		       %% encoding.
-		       [{struct, lists:keydelete(<<"_rev">>, 1, Doc)} || Doc <- Docs]
-	       end,
-    Ans = {struct,[
+    Docs = chef_otto:bulk_get(S, ?db_for_guid(Db), Ids),
+    %% remove couchdb revision ID from results, mark as objects for JSON
+    %% encoding.
+    JSONDocs = [{lists:keydelete(<<"_rev">>, 1, Doc)} || Doc <- Docs],
+    io:format("~p~n", [JSONDocs]),
+    Ans = {[
             {<<"rows">>, JSONDocs},
             {<<"start">>, 0},
             {<<"total">>, length(JSONDocs)}
           ]},
-    mochijson2:encode(Ans).
+    ejson:encode(Ans).
 
