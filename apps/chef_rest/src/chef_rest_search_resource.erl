@@ -61,7 +61,7 @@ malformed_request(Req, State) ->
     {GetHeader, State1} = get_header_fun(Req, State),
     {Malformed, Req1, State2} =
         try
-            chef_authn:validate_headers(GetHeader, 300),
+            % chef_authn:validate_headers(GetHeader, 300),
             % transform query first to avoid possible db fetch for org
             % guid for bad queries
             Query = transform_query(wrq:get_qs_value("q", Req)),
@@ -74,50 +74,65 @@ malformed_request(Req, State) ->
         end,
     {Malformed, Req1, State2}.
 
+%% verify_request_signature(Req, State) ->
+%%     OrgName = wrq:path_info(organization_id, Req),
+%%     UserName = wrq:get_req_header("x-ops-userid", Req),
+%%     S = chef_otto:connect(),
+%%     case chef_otto:fetch_user_or_client_cert(S, OrgName, UserName) of
+%%         not_found ->
+%%             NoCertMsg = bad_auth_message(no_cert),
+%%             {false,
+%%              wrq:set_resp_body(mochijson2:encode(NoCertMsg), Req), State};
+%%         CertInfo ->
+%%             Cert = ?gv(cert, CertInfo),
+%%             OrgId = ?gv(org_guid, CertInfo, State#state.organization_guid),
+%%             Body = body_or_default(Req, <<>>),
+%%             HTTPMethod = iolist_to_binary(atom_to_list(wrq:method(Req))),
+%%             Path = iolist_to_binary(wrq:path(Req)),
+%%             {GetHeader, State1} = get_header_fun(Req, State),
+%%             case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
+%%                                                       Path, Body, Cert, 300) of
+%%                 {name, _} ->
+%%                     {true, Req,
+%%                      State1#state{organization_guid = OrgId, couchbeam = S}};
+%%                 {no_authn, Reason} ->
+%%                     Msg = bad_auth_message(Reason),
+%%                     Json = mochijson2:encode(Msg),
+%%                     Req1 = wrq:set_resp_body(Json, Req),
+%%                     {false, Req1, State1#state{couchbeam = S}}
+%%             end
+%%     end.
+
 verify_request_signature(Req, State) ->
     OrgName = wrq:path_info(organization_id, Req),
     UserName = wrq:get_req_header("x-ops-userid", Req),
     S = chef_otto:connect(),
     case chef_otto:fetch_user_or_client_cert(S, OrgName, UserName) of
-        not_found ->
-            NoCertMsg = bad_auth_message(no_cert),
-            {false,
-             wrq:set_resp_body(mochijson2:encode(NoCertMsg), Req), State};
-        CertInfo ->
-            Cert = ?gv(cert, CertInfo),
+	not_found ->
+	    {false, Req, State};
+	CertInfo ->
             OrgId = ?gv(org_guid, CertInfo, State#state.organization_guid),
-            Body = body_or_default(Req, <<>>),
-            HTTPMethod = iolist_to_binary(atom_to_list(wrq:method(Req))),
-            Path = iolist_to_binary(wrq:path(Req)),
-            {GetHeader, State1} = get_header_fun(Req, State),
-            case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
-                                                      Path, Body, Cert, 300) of
-                {name, _} ->
-                    {true, Req,
-                     State1#state{organization_guid = OrgId, couchbeam = S}};
-                {no_authn, Reason} ->
-                    Msg = bad_auth_message(Reason),
-                    Json = mochijson2:encode(Msg),
-                    Req1 = wrq:set_resp_body(Json, Req),
-                    {false, Req1, State1#state{couchbeam = S}}
-            end
+	    {true, Req, State#state{organization_guid=OrgId, couchbeam=S}}
     end.
-    
+
 is_authorized(Req, State) ->
-    OrgName = wrq:path_info(organization_id, Req),
-    UserName = wrq:get_req_header("x-ops-userid", Req),
-    case verify_request_signature(Req,State) of
-	{true, Req1, State1} ->
-	    case chef_permissions:is_user_with_org(UserName, OrgName) of
-		true -> {true, Req1, State1};
-		false -> 
-		    Msg = bad_auth_message(not_member_of_org),
-		    Json = mochijson2:encode(Msg),
-                    Req2 = wrq:set_resp_body(Json, Req),
-		    {false, Req2, State1}
-	    end;
-	Other -> Other
-    end.	  
+    verify_request_signature(Req, State).
+
+%% is_authorized(Req, State) ->
+%%     OrgName = wrq:path_info(organization_id, Req),
+%%     UserName = wrq:get_req_header("x-ops-userid", Req),
+%%     case verify_request_signature(Req,State) of
+%% 	{true, Req1, State1} ->
+%% 	    case chef_permissions:is_user_with_org(UserName, OrgName) of
+%% 		true -> {true, Req1, State1};
+%% 		false -> 
+%% 		    Msg = bad_auth_message(not_member_of_org),
+%% 		    Json = mochijson2:encode(Msg),
+%%                     Req2 = wrq:set_resp_body(Json, Req),
+%% 		    {false, Req2, State1}
+%% 	    end;
+%% 	Other -> Other
+%%     end.	  
 
 body_or_default(Req, Default) ->
     case wrq:req_body(Req) of
@@ -184,6 +199,7 @@ fetch_org_guid(Req, #state{ organization_guid = Id, couchbeam = S}) ->
             Id;
         undefined ->
             OrgName = list_to_binary(wrq:path_info(organization_id, Req)),
+            io:format("OrgName: ~p~n", [OrgName]),
             case chef_otto:fetch_org_id(S, OrgName) of
                 not_found -> throw(org_not_found);
                 Guid -> Guid
@@ -209,7 +225,7 @@ to_json(Req, State = #state{couchbeam = S, solr_query = Query}) ->
     end.
 
 transform_query(RawQuery) when is_binary(RawQuery) ->
-    case lucene_syntax:parse(RawQuery) of
+    case chef_lucene:parse(RawQuery) of
         Query when is_binary(Query) ->
             ibrowse_lib:url_encode(binary_to_list(Query));
         _ ->
@@ -220,20 +236,25 @@ transform_query(RawQuery) when is_list(RawQuery) ->
 
 execute_solr_query(Query, ObjType, Db, S) ->
     Url = solr_query_url(ObjType, Db, Query),
+    io:format("~p~n", [lists:flatten(Url)]),
     SolrDataRaw = solr_query(Url),
     % FIXME: Probably want a solr module that knows how to query solr
     % and parse its responses.
     SolrData = mochijson2:decode(SolrDataRaw),
     DocList = ej:get({<<"response">>, <<"docs">>}, SolrData),
     Ids = [ ej:get({<<"X_CHEF_id_CHEF_X">>}, Doc) || Doc <- DocList ],
-    Docs = chef_otto:bulk_get(S, ?db_for_guid(Db), Ids),
-    % remove couchdb revision ID from results, mark as objects for JSON
-    % encoding.
-    JSONDocs = [ {lists:keydelete(<<"_rev">>, 1, Doc)} || Doc <- Docs ],
-    Ans = {[
+    JSONDocs = case chef_otto:bulk_get(S, ?db_for_guid(Db), Ids) of
+		   [] ->
+		       [];
+		   Docs ->
+		       %% remove couchdb revision ID from results, mark as objects for JSON
+		       %% encoding.
+		       [{struct, lists:keydelete(<<"_rev">>, 1, Doc)} || Doc <- Docs]
+	       end,
+    Ans = {struct,[
             {<<"rows">>, JSONDocs},
             {<<"start">>, 0},
-            {<<"total">>, length(Docs)}
-           ]},
-    couchbeam_util:json_encode(Ans).
+            {<<"total">>, length(JSONDocs)}
+          ]},
+    mochijson2:encode(Ans).
 
