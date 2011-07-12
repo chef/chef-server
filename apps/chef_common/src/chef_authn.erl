@@ -49,7 +49,7 @@
 -include_lib("public_key/include/public_key.hrl").
 
 -type calendar_time() :: { non_neg_integer(),  non_neg_integer(),  non_neg_integer() }.
--type calendar_date() :: { non_neg_integer(),  non_neg_integer(),  non_neg_integer() }.
+-type calendar_date() :: { integer(),  1..12, 1..31 }.
 
 -type http_body() :: binary() | pid().
 -type user_id() :: binary().
@@ -90,10 +90,10 @@ hash_file(F, Ctx) ->
 
 
 
--spec(time_iso8601({calendar_date(), calendar_time()} | now) -> binary()).
 %% @doc Converts Erlang time-tuple to iso8601 formatted date string.
 %%
 %% Example output looks like <<"2003-12-13T18:30:02Z">>
+-spec(time_iso8601(erlang_time() | 'now') -> binary()).
 time_iso8601(now) ->
     time_iso8601(calendar:universal_time());
 time_iso8601({{Year, Month, Day}, {Hour, Min, Sec}}) ->
@@ -103,9 +103,9 @@ time_iso8601({{Year, Month, Day}, {Hour, Min, Sec}}) ->
                                                [Year, Month, Day,
                                                 Hour, Min, Sec]))).
 
--spec(time_iso8601_to_date_time(string()|binary()) -> erlang_time()).
 %% @doc Convert an iso8601 time string to Erlang date time
 %% representation.
+-spec(time_iso8601_to_date_time(string()|binary()) -> erlang_time()).
 time_iso8601_to_date_time(ATime) when is_binary(ATime) ->
     time_iso8601_to_date_time(binary_to_list(ATime));
 time_iso8601_to_date_time(ATime) ->
@@ -339,12 +339,14 @@ sig_from_headers(GetHeader, I, Acc) ->
             sig_from_headers(GetHeader, I+1, [Part|Acc])
     end.
 
+%-spec time_in_bounds(undefined | string() | binary(), pos_integer()) -> boolean().
 time_in_bounds(undefined, _Skew) ->
     false;
 time_in_bounds(ReqTime, Skew) ->
     Now = calendar:now_to_universal_time(erlang:now()),
     time_in_bounds(time_iso8601_to_date_time(ReqTime), Now, Skew).
 
+-spec time_in_bounds(erlang_time(), erlang_time(), pos_integer() ) -> boolean().
 time_in_bounds(T1, T2, Skew) ->
     S1 = calendar:datetime_to_gregorian_seconds(T1),
     S2 = calendar:datetime_to_gregorian_seconds(T2),
