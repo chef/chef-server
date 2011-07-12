@@ -21,11 +21,21 @@
 % @end
 -module(chef_rest_client).
 
--export([get_raw/4,
-         get_cooked/4]).
+-include_lib("chef_common/include/chef_rest_client.hrl").
 
-get_cooked(Url, Path, User, PrivateKey) ->
-    case do_chef_get(Url, Path, User, PrivateKey) of
+-export([request/2,
+         make_webui_account_chef_rest_client/1]).
+
+make_webui_account_chef_rest_client(UserName) when is_list(UserName) ->
+    {ok, BaseUrl} = application:get_env(chef_common, account_api_url),
+    {ok, PrivateKey} = chef_keyring:get_key(webui),
+    #chef_rest_client{base_url = BaseUrl,
+                      user_name = UserName,
+                      private_key = PrivateKey,
+                      request_source = web}.
+
+request(ChefClient = #chef_rest_client{}, Path) ->
+    case do_chef_get(ChefClient, Path) of
         {ok, "200", _Headers, Json} ->
             {ok, ejson:decode(Json)};
         %% Treat all other response codes as errors
@@ -35,13 +45,24 @@ get_cooked(Url, Path, User, PrivateKey) ->
             Error
     end.
 
-get_raw(Url, Path, User, PrivateKey) ->
-    do_chef_get(Url, Path, User, PrivateKey).
-
 %% Internal functions
-do_chef_get(Url, Path, User, PrivateKey) ->
+do_chef_get(#chef_rest_client{base_url = BaseUrl,
+                              user_name = UserName,
+                              private_key = PrivateKey,
+                              request_source = RequestSource},
+            Path) ->
+    Url = BaseUrl ++ Path,
+    ExtraHeaders = case RequestSource of
+                       web ->
+                           [{"x_ops_request_source", "web"}];
+                       user ->
+                           []
+                   end,
+    do_chef_get(Url, Path, UserName, PrivateKey, ExtraHeaders).
+
+do_chef_get(Url, Path, User, PrivateKey, ExtraHeaders) ->
     Headers0 = generate_signed_headers(PrivateKey, User, <<"GET">>, Path),
-    Headers = [{"x_ops_request_source", "web"} | [{"Accept", "application/json"}|Headers0]],
+    Headers = [{"Accept", "application/json"}|Headers0] ++ ExtraHeaders,
     ibrowse:send_req(Url, Headers, get).
 
 generate_signed_headers(PrivateKey, User, Method, Path) ->
