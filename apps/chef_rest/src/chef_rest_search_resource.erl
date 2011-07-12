@@ -23,7 +23,6 @@
                 organization_name,
                 object_type,
                 user_name,
-                cert,
                 header_fun = undefined,
                 couchbeam = undefined,
                 solr_query = undefined,
@@ -57,26 +56,10 @@ get_header_fun(_Req, State) ->
 resource_exists(Req, State) ->
     {true, Req, State}.
 
-malformed_request(Req, State) ->
-    {GetHeader, State1} = get_header_fun(Req, State),
-    {Malformed, Req1, State2} =
-        try
-            chef_authn:validate_headers(GetHeader, 300),
-            % transform query first to avoid possible db fetch for org
-            % guid for bad queries
-            Query = transform_query(wrq:get_qs_value("q", Req)),
-            {false, Req, State1#state{solr_query = Query}}
-        catch
-            throw:Why ->
-                Msg = bad_auth_message(Why),
-                NewReq = wrq:set_resp_body(mochijson2:encode(Msg), Req),
-                {true, NewReq, State1}
-        end,
-    {Malformed, Req1, State2}.
-
-is_authorized(Req, State) ->
+verify_request_signature(Req, State) ->
     OrgName = wrq:path_info(organization_id, Req),
     UserName = wrq:get_req_header("x-ops-userid", Req),
+    % TODO Quit leaking this
     S = chef_otto:connect(),
     case chef_otto:fetch_user_or_client_cert(S, OrgName, UserName) of
         not_found ->
@@ -99,9 +82,43 @@ is_authorized(Req, State) ->
                     Msg = bad_auth_message(Reason),
                     Json = mochijson2:encode(Msg),
                     Req1 = wrq:set_resp_body(Json, Req),
+                    % TODO This is a needless mutation
                     {false, Req1, State1#state{couchbeam = S}}
             end
     end.
+
+is_authorized(Req, State) ->
+    OrgName = list_to_binary(wrq:path_info(organization_id, Req)),
+    UserName = wrq:get_req_header("x-ops-userid", Req),
+    case verify_request_signature(Req,State) of
+	{true, Req1, State1} ->
+	    case chef_permissions:is_user_with_org(UserName, OrgName) of
+		true -> {true, Req1, State1};
+		false -> 
+		    Msg = bad_auth_message(not_member_of_org),
+		    Json = mochijson2:encode(Msg),
+                    Req2 = wrq:set_resp_body(Json, Req),
+		    {false, Req2, State1}
+	    end;
+	Other -> Other
+    end.	  
+
+malformed_request(Req, State) ->
+    {GetHeader, State1} = get_header_fun(Req, State),
+    {Malformed, Req1, State2} =
+        try
+            chef_authn:validate_headers(GetHeader, 300),
+            %% transform query first to avoid possible db fetch for org
+            %% guid for bad queries
+            Query = transform_query(http_uri:decode(wrq:get_qs_value("q", Req))),
+            {false, Req, State1#state{solr_query = Query}}
+        catch
+            throw:Why ->
+                Msg = bad_auth_message(Why),
+                NewReq = wrq:set_resp_body(mochijson2:encode(Msg), Req),
+                {true, NewReq, State1}
+        end,
+    {Malformed, Req1, State2}.
 
 body_or_default(Req, Default) ->
     case wrq:req_body(Req) of
@@ -122,15 +139,16 @@ bad_auth_message({missing_headers, Missing}) ->
 bad_auth_message(bad_clock) ->
     {struct, [{<<"error">>, [<<"check clock">>]}]};
 bad_auth_message(bad_sign_desc) ->
-    {struct, [{<<"error">>, [<<"bag signing description">>]}]};
+    {struct, [{<<"error">>, [<<"bad signing description">>]}]};
 bad_auth_message(org_not_found) ->
     {struct, [{<<"error">>, [<<"organization not found">>]}]};
 bad_auth_message({bad_query, RawQuery}) ->
     {struct, [{<<"error">>, [<<"invalid search query">>]},
               {<<"query">>, RawQuery}]};
+bad_auth_message(not_member_of_org) -> 
+    {struct, [{<<"error">>, [<<"Not a member of the organization">>]}]};
 bad_auth_message(_) ->
     {struct, [{<<"error">>, [<<"problem with headers">>]}]}.
-
 
 
 
@@ -167,6 +185,7 @@ fetch_org_guid(Req, #state{ organization_guid = Id, couchbeam = S}) ->
             Id;
         undefined ->
             OrgName = list_to_binary(wrq:path_info(organization_id, Req)),
+            io:format("OrgName: ~p~n", [OrgName]),
             case chef_otto:fetch_org_id(S, OrgName) of
                 not_found -> throw(org_not_found);
                 Guid -> Guid
@@ -192,7 +211,8 @@ to_json(Req, State = #state{couchbeam = S, solr_query = Query}) ->
     end.
 
 transform_query(RawQuery) when is_binary(RawQuery) ->
-    case lucene_syntax:parse(RawQuery) of
+    io:format("~p~n", [RawQuery]),
+    case chef_lucene:parse(RawQuery) of
         Query when is_binary(Query) ->
             ibrowse_lib:url_encode(binary_to_list(Query));
         _ ->
@@ -203,6 +223,7 @@ transform_query(RawQuery) when is_list(RawQuery) ->
 
 execute_solr_query(Query, ObjType, Db, S) ->
     Url = solr_query_url(ObjType, Db, Query),
+    io:format("~p~n", [lists:flatten(Url)]),
     SolrDataRaw = solr_query(Url),
     % FIXME: Probably want a solr module that knows how to query solr
     % and parse its responses.
@@ -210,13 +231,14 @@ execute_solr_query(Query, ObjType, Db, S) ->
     DocList = ej:get({<<"response">>, <<"docs">>}, SolrData),
     Ids = [ ej:get({<<"X_CHEF_id_CHEF_X">>}, Doc) || Doc <- DocList ],
     Docs = chef_otto:bulk_get(S, ?db_for_guid(Db), Ids),
-    % remove couchdb revision ID from results, mark as objects for JSON
-    % encoding.
-    JSONDocs = [ {lists:keydelete(<<"_rev">>, 1, Doc)} || Doc <- Docs ],
+    %% remove couchdb revision ID from results, mark as objects for JSON
+    %% encoding.
+    JSONDocs = [{lists:keydelete(<<"_rev">>, 1, Doc)} || Doc <- Docs],
+    io:format("~p~n", [JSONDocs]),
     Ans = {[
             {<<"rows">>, JSONDocs},
             {<<"start">>, 0},
-            {<<"total">>, length(Docs)}
-           ]},
-    couchbeam_util:json_encode(Ans).
+            {<<"total">>, length(JSONDocs)}
+          ]},
+    ejson:encode(Ans).
 
