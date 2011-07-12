@@ -212,9 +212,11 @@ sig_header_items(Sig) ->
         {L, I} <- lists:zip(Lines, lists:seq(1, length(Lines))) ].
 
 %% @doc Split a binary into chunks of size N
+%-spec sig_to_list(binary(), pos_integer()) -> [binary()]. % TODO PROBLEMATIC
 sig_to_list(Sig, N) ->
     lists:reverse(sig_to_list(Sig, N, [])).
 
+-spec sig_to_list(binary(), pos_integer(), any()) -> [binary()].
 sig_to_list(Sig, N, Acc) ->
     case iolist_size(Sig) =< N of
         true ->
@@ -348,6 +350,7 @@ time_in_bounds(T1, T2, Skew) ->
     S2 = calendar:datetime_to_gregorian_seconds(T2),
     (S2 - S1) < Skew.
 
+-spec parse_signing_description('undefined' | binary()) -> [{binary(),binary()}].
 parse_signing_description(undefined) ->
     [];
 parse_signing_description(Desc) ->
@@ -371,6 +374,7 @@ parse_signing_description(Desc) ->
 % public_key_lines([Line|Rest], Acc) ->
 %     public_key_lines(Rest, [Line|Acc]).
 
+-spec read_cert(binary()) -> term().  %% der_decode only spec's term
 read_cert(Bin) when is_binary(Bin) ->
     Cert = public_key:pem_entry_decode(hd(public_key:pem_decode(Bin))),
     TbsCert = Cert#'Certificate'.tbsCertificate,
