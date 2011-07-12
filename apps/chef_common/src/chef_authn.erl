@@ -51,6 +51,7 @@
 -type calendar_time() :: { non_neg_integer(),  non_neg_integer(),  non_neg_integer() }.
 -type calendar_date() :: { integer(),  1..12, 1..31 }.
 
+-type get_header_fun() :: fun((header_name()) -> header_value()).
 -type http_body() :: binary() | pid().
 -type user_id() :: binary().
 -type http_method() :: binary().
@@ -60,10 +61,12 @@
 -type sha_hash64() :: binary().
 -type erlang_time() :: {calendar_date(), calendar_time()}.
 -type private_key() :: binary().
+-type raw_public_key() :: binary().
 -type header_name() :: binary().
 -type header_value() :: binary() | 'undefined'.
 -type header_fun() :: fun((header_name()) -> header_value()).
 -type time_skew() :: non_neg_integer().
+
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -289,13 +292,13 @@ validate_sign_description(GetHeader) ->
 %%
 %% `PublicKey' is a binary containing an RSA public key in PEM format.
 %%
--spec authenticate_user_request(fun((header_name()) -> header_value()),
+-spec authenticate_user_request(get_header_fun(),
                                    http_method(),
                                    http_path(),
                                    http_body(),
-                                   public_key(),
+				   raw_public_key(),
                                    time_skew()) ->
-    {name, user_id()} | {no_authn, Reason::term()}.
+				       {name, user_id()} | {no_authn, Reason::term()}.
 authenticate_user_request(GetHeader, Method, Path, Body, PublicKey, TimeSkew) ->
     try
         validate_headers(GetHeader, TimeSkew),
@@ -303,6 +306,13 @@ authenticate_user_request(GetHeader, Method, Path, Body, PublicKey, TimeSkew) ->
     catch
         throw:Why -> {no_authn, Why}
     end.
+
+-spec do_authenticate_user_request(get_header_fun(), 
+				   http_method(),
+				   http_path(),
+				   http_body(),
+				   raw_public_key() ) 
+				  ->  {name, user_id()} | {no_authn, bad_sig}.
 
 do_authenticate_user_request(GetHeader, Method, Path, Body, PublicKey) ->
     % NOTE: signing description validation and time_skew validation
@@ -320,7 +330,7 @@ do_authenticate_user_request(GetHeader, Method, Path, Body, PublicKey) ->
         error:{badmatch, _} -> {no_authn, bad_sig}
     end.
 
--spec decrypt_sig(binary(), binary()) -> binary() | decrypt_failed.
+-spec decrypt_sig(binary(), raw_public_key()) -> binary() | decrypt_failed.
 decrypt_sig(Sig, PublicCert) ->
     PK = read_cert(PublicCert),
     try
