@@ -88,11 +88,12 @@ verify_request_signature(Req, State) ->
     end.
 
 is_authorized(Req, State) ->
-    OrgName = list_to_binary(wrq:path_info(organization_id, Req)),
+    OrgName = wrq:path_info(organization_id, Req),
     UserName = wrq:get_req_header("x-ops-userid", Req),
+    ChefClient = chef_rest_client:make_webui_account_chef_rest_client(UserName),
     case verify_request_signature(Req,State) of
 	{true, Req1, State1} ->
-	    case chef_permissions:is_user_with_org(UserName, OrgName) of
+	    case chef_permissions:is_user_with_org(ChefClient, UserName, OrgName) of
 		true -> {true, Req1, State1};
 		false -> 
 		    Msg = bad_auth_message(not_member_of_org),
