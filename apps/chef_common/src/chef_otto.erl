@@ -28,34 +28,16 @@
          fetch_auth_join/2,
          connect/0,
          connect/2,
-         bulk_get/3,
-         start0/0
+         bulk_get/3
          ]).
 
 -type couchbeam_server() :: any().
 -type http_port() :: non_neg_integer().
 -type db_key() :: binary() | string().
 
+-include("chef_otto.hrl").
+
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
-
--define(user_db, "opscode_account").
--define(auth_join_db, "opscode_account").
-
--define(mixlib_auth_user_design,
-        "Mixlib::Authorization::Models::User-e8e718b2cc7860fc5d5beb40adc8511a").
-
--define(mixlib_auth_org_design,
-        "Mixlib::Authorization::Models::Organization-eed4ffc4a127815b935ff840706c19de").
-
--define(mixlib_auth_client_design,
-        "Mixlib::Authorization::Models::Client-fec21b157b76e08b86e92ef7cbc2be81").
-
--define(mixlib_auth_join_design,
-        "Mixlib::Authorization::AuthJoin-25834c5a8d6a9586adb05320f3f725e8").
-
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--endif.
 
 -spec connect() -> couchbeam_server().
 connect() ->
@@ -198,79 +180,3 @@ fetch_auth_join(Server, ObjectId) when is_binary(ObjectId) ->
     end;
 fetch_auth_join(Server, ObjectId) when is_list(ObjectId) ->
     fetch_auth_join(Server, list_to_binary(ObjectId)).
-
-start0() ->
-    application:start(sasl),
-    application:start(crypto),
-    application:start(ibrowse),
-    application:start(couchbeam),
-    {ok, chef_otto_start}.
-
-
--ifdef(TEST).
-otto_integration_test_() ->
-    {ok, chef_otto_start} = chef_otto:start0(),
-    S = chef_otto:connect(),
-    [{"fetch_user found",
-      fun() ->
-              Got = chef_otto:fetch_user(S, "clownco-org-admin"),
-              ?assertEqual(<<"ClowncoOrgAdmin">>,
-                           ?gv(<<"display_name">>, Got))
-      end},
-
-     {"fetch_user not found",
-      fun() ->
-              ?assertEqual({user_not_found, not_in_view},
-                           chef_otto:fetch_user(S, "fred-is-not-found"))
-      end},
-
-     {"fetch_org",
-      fun() ->
-              Org = chef_otto:fetch_org(S, <<"clownco">>),
-              ?assertEqual(<<"clownco-validator">>,
-                           ?gv(<<"clientname">>, Org))
-      end
-     },
-
-
-     {"fetch_org not found",
-      fun() ->
-              ?assertEqual({org_not_found, not_in_view},
-                           chef_otto:fetch_org(S, <<"no-such-org">>))
-              % FIXME: how can we test the case when org is in view,
-              % but not found in the db.  Need to either manipulate a
-              % test couchdb or introduce some mocks.
-      end
-     },
-
-     {"fetch_client",
-      fun() ->
-              OID = ?gv(<<"guid">>, chef_otto:fetch_org(S, <<"clownco">>)),
-              Client = chef_otto:fetch_client(S, OID, <<"clownco-validator">>),
-              ?assertEqual(<<"clownco">>, ?gv(<<"orgname">>, Client))
-      end
-     },
-
-     {"fetch_client no such client",
-      fun() ->
-              Org = ?gv(<<"guid">>, chef_otto:fetch_org(S, <<"clownco">>)),
-              ?assertEqual(not_found,
-                           chef_otto:fetch_client(S, Org,
-                                                  <<"not-a-known-client">>))
-      end
-     },
-
-     {"fetch_client with missing org",
-      fun() ->
-              OID = chef_otto:fetch_org_id(S, <<"no-such-org">>),
-              ?assertEqual(not_found,
-                           chef_otto:fetch_client(S, OID,
-                                                  <<"not-a-known-client">>))
-      end
-     }
-
-
-
-     ].
-    
--endif.
