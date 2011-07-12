@@ -26,7 +26,10 @@
 
 -export([is_user_with_org/3]).
 
-is_user_with_org(ChefClient = #chef_rest_client{}, User, OrgName) when is_list(User), is_list(OrgName) ->
+-spec is_user_with_org(#chef_rest_client{}, string(), string()) -> boolean().
+
+is_user_with_org(ChefClient = #chef_rest_client{}, User, OrgName)
+  when is_list(User), is_list(OrgName) ->
     OrgNameBinary = list_to_binary(OrgName),
     Path = "/users/" ++ ibrowse_lib:url_encode(User) ++ "/organizations",
     case chef_rest_client:request(ChefClient, Path) of

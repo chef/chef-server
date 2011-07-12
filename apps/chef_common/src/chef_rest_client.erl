@@ -26,6 +26,8 @@
 -export([request/2,
          make_webui_account_chef_rest_client/1]).
 
+-spec make_webui_account_chef_rest_client(string()) -> #chef_rest_client{}.
+
 make_webui_account_chef_rest_client(UserName) when is_list(UserName) ->
     {ok, BaseUrl} = application:get_env(chef_common, account_api_url),
     {ok, PrivateKey} = chef_keyring:get_key(webui),
@@ -33,6 +35,9 @@ make_webui_account_chef_rest_client(UserName) when is_list(UserName) ->
                       user_name = UserName,
                       private_key = PrivateKey,
                       request_source = web}.
+
+-spec request(#chef_rest_client{}, string()) ->
+    {ok, term()} | {error, {string(), string() | binary()}} | {error, term()}.
 
 request(ChefClient = #chef_rest_client{}, Path) ->
     case do_chef_get(ChefClient, Path) of
@@ -42,7 +47,7 @@ request(ChefClient = #chef_rest_client{}, Path) ->
         {ok, Code, _Headers, Body} ->
             {error, {Code, Body}};
         Error ->
-            Error
+            {error, Error}
     end.
 
 %% Internal functions
@@ -68,8 +73,14 @@ do_chef_get(Url, Path, User, PrivateKey, ExtraHeaders) ->
 generate_signed_headers(PrivateKey, User, Method, Path) ->
     Time = httpd_util:rfc1123_date(),
     SignedHeaders = chef_authn:sign_request(PrivateKey, User, Method, Time, Path),
-    % TODO: control the type of K and V *before* getting in here
+    % TODO: control the type of K and V *before* getting in here It
+    % looks like ibrowse only requires that header names be atom or
+    % string, but values can be iolist.  It might be worth
+    % investigating whether ibrowse can be taught how to handle header
+    % names that are binaries to avoid conversion.
     [{ensure_list(K), ensure_list(V)} || {K, V} <- SignedHeaders].
+
+-spec ensure_list(binary()) -> list().
 
 ensure_list(B) when is_binary(B) ->
     binary_to_list(B);
