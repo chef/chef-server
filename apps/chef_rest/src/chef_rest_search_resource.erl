@@ -23,7 +23,6 @@
                 organization_name,
                 object_type,
                 user_name,
-                cert,
                 header_fun = undefined,
                 couchbeam = undefined,
                 solr_query = undefined,
@@ -57,13 +56,60 @@ get_header_fun(_Req, State) ->
 resource_exists(Req, State) ->
     {true, Req, State}.
 
+verify_request_signature(Req, State) ->
+    OrgName = wrq:path_info(organization_id, Req),
+    UserName = wrq:get_req_header("x-ops-userid", Req),
+    % TODO Quit leaking this
+    S = chef_otto:connect(),
+    case chef_otto:fetch_user_or_client_cert(S, OrgName, UserName) of
+        not_found ->
+            NoCertMsg = bad_auth_message(no_cert),
+            {false,
+             wrq:set_resp_body(mochijson2:encode(NoCertMsg), Req), State};
+        CertInfo ->
+            Cert = ?gv(cert, CertInfo),
+            OrgId = ?gv(org_guid, CertInfo, State#state.organization_guid),
+            Body = body_or_default(Req, <<>>),
+            HTTPMethod = iolist_to_binary(atom_to_list(wrq:method(Req))),
+            Path = iolist_to_binary(wrq:path(Req)),
+            {GetHeader, State1} = get_header_fun(Req, State),
+            case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
+                                                      Path, Body, Cert, 300) of
+                {name, _} ->
+                    {true, Req,
+                     State1#state{organization_guid = OrgId, couchbeam = S}};
+                {no_authn, Reason} ->
+                    Msg = bad_auth_message(Reason),
+                    Json = mochijson2:encode(Msg),
+                    Req1 = wrq:set_resp_body(Json, Req),
+                    % TODO This is a needless mutation
+                    {false, Req1, State1#state{couchbeam = S}}
+            end
+    end.
+
+is_authorized(Req, State) ->
+    OrgName = list_to_binary(wrq:path_info(organization_id, Req)),
+    UserName = wrq:get_req_header("x-ops-userid", Req),
+    case verify_request_signature(Req,State) of
+	{true, Req1, State1} ->
+	    case chef_permissions:is_user_with_org(UserName, OrgName) of
+		true -> {true, Req1, State1};
+		false -> 
+		    Msg = bad_auth_message(not_member_of_org),
+		    Json = mochijson2:encode(Msg),
+                    Req2 = wrq:set_resp_body(Json, Req),
+		    {false, Req2, State1}
+	    end;
+	Other -> Other
+    end.	  
+
 malformed_request(Req, State) ->
     {GetHeader, State1} = get_header_fun(Req, State),
     {Malformed, Req1, State2} =
         try
-            % chef_authn:validate_headers(GetHeader, 300),
-            % transform query first to avoid possible db fetch for org
-            % guid for bad queries
+            chef_authn:validate_headers(GetHeader, 300),
+            %% transform query first to avoid possible db fetch for org
+            %% guid for bad queries
             Query = transform_query(http_uri:decode(wrq:get_qs_value("q", Req))),
             {false, Req, State1#state{solr_query = Query}}
         catch
@@ -73,66 +119,6 @@ malformed_request(Req, State) ->
                 {true, NewReq, State1}
         end,
     {Malformed, Req1, State2}.
-
-%% verify_request_signature(Req, State) ->
-%%     OrgName = wrq:path_info(organization_id, Req),
-%%     UserName = wrq:get_req_header("x-ops-userid", Req),
-%%     S = chef_otto:connect(),
-%%     case chef_otto:fetch_user_or_client_cert(S, OrgName, UserName) of
-%%         not_found ->
-%%             NoCertMsg = bad_auth_message(no_cert),
-%%             {false,
-%%              wrq:set_resp_body(mochijson2:encode(NoCertMsg), Req), State};
-%%         CertInfo ->
-%%             Cert = ?gv(cert, CertInfo),
-%%             OrgId = ?gv(org_guid, CertInfo, State#state.organization_guid),
-%%             Body = body_or_default(Req, <<>>),
-%%             HTTPMethod = iolist_to_binary(atom_to_list(wrq:method(Req))),
-%%             Path = iolist_to_binary(wrq:path(Req)),
-%%             {GetHeader, State1} = get_header_fun(Req, State),
-%%             case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
-%%                                                       Path, Body, Cert, 300) of
-%%                 {name, _} ->
-%%                     {true, Req,
-%%                      State1#state{organization_guid = OrgId, couchbeam = S}};
-%%                 {no_authn, Reason} ->
-%%                     Msg = bad_auth_message(Reason),
-%%                     Json = mochijson2:encode(Msg),
-%%                     Req1 = wrq:set_resp_body(Json, Req),
-%%                     {false, Req1, State1#state{couchbeam = S}}
-%%             end
-%%     end.
-
-verify_request_signature(Req, State) ->
-    OrgName = wrq:path_info(organization_id, Req),
-    UserName = wrq:get_req_header("x-ops-userid", Req),
-    S = chef_otto:connect(),
-    case chef_otto:fetch_user_or_client_cert(S, OrgName, UserName) of
-	not_found ->
-	    {false, Req, State};
-	CertInfo ->
-            OrgId = ?gv(org_guid, CertInfo, State#state.organization_guid),
-	    {true, Req, State#state{organization_guid=OrgId, couchbeam=S}}
-    end.
-
-is_authorized(Req, State) ->
-    verify_request_signature(Req, State).
-
-%% is_authorized(Req, State) ->
-%%     OrgName = wrq:path_info(organization_id, Req),
-%%     UserName = wrq:get_req_header("x-ops-userid", Req),
-%%     case verify_request_signature(Req,State) of
-%% 	{true, Req1, State1} ->
-%% 	    case chef_permissions:is_user_with_org(UserName, OrgName) of
-%% 		true -> {true, Req1, State1};
-%% 		false -> 
-%% 		    Msg = bad_auth_message(not_member_of_org),
-%% 		    Json = mochijson2:encode(Msg),
-%%                     Req2 = wrq:set_resp_body(Json, Req),
-%% 		    {false, Req2, State1}
-%% 	    end;
-%% 	Other -> Other
-%%     end.	  
 
 body_or_default(Req, Default) ->
     case wrq:req_body(Req) of

@@ -27,7 +27,7 @@
 get_cooked(Url, Path, User, PrivateKey) ->
     case do_chef_get(Url, Path, User, PrivateKey) of
         {ok, "200", _Headers, Json} ->
-            {ok, mochijson2:decode(Json)};
+            {ok, ejson:decode(Json)};
         %% Treat all other response codes as errors
         {ok, Code, _Headers, Body} ->
             {error, {Code, Body}};
@@ -41,10 +41,16 @@ get_raw(Url, Path, User, PrivateKey) ->
 %% Internal functions
 do_chef_get(Url, Path, User, PrivateKey) ->
     Headers0 = generate_signed_headers(PrivateKey, User, <<"GET">>, Path),
-    Headers = [{"Accept", "application/json"}|Headers0],
+    Headers = [{"x_ops_request_source", "web"} | [{"Accept", "application/json"}|Headers0]],
     ibrowse:send_req(Url, Headers, get).
 
 generate_signed_headers(PrivateKey, User, Method, Path) ->
     Time = httpd_util:rfc1123_date(),
     SignedHeaders = chef_authn:sign_request(PrivateKey, User, Method, Time, Path),
-    [{binary_to_list(K), binary_to_list(V)} || {K, V} <- SignedHeaders].
+    % TODO: control the type of K and V *before* getting in here
+    [{ensure_list(K), ensure_list(V)} || {K, V} <- SignedHeaders].
+
+ensure_list(B) when is_binary(B) ->
+    binary_to_list(B);
+ensure_list(T) ->
+    T.
