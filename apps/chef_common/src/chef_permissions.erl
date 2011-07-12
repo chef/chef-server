@@ -22,26 +22,24 @@
 % @doc Various functions for checking permissions
 -module(chef_permissions).
 
--export([is_user_with_org/2]).
+-include_lib("chef_common/include/chef_rest_client.hrl").
 
-is_user_with_org(User, OrgName) when is_binary(OrgName) ->
-    {Path, URL} = build_org_url_path(User),
-    {ok, WebuiUser} = application:get_env(chef_common, webui_user),
-    {ok, WebuiPrivateKey} = chef_keyring:get_key(webui),
-    io:format("~p~n-----~p~n", [User, WebuiPrivateKey]),
-    case chef_rest_client:get_cooked(URL, Path, User, WebuiPrivateKey) of
+-export([is_user_with_org/3]).
+
+-spec is_user_with_org(#chef_rest_client{}, string(), string()) -> boolean().
+
+is_user_with_org(ChefClient = #chef_rest_client{}, User, OrgName)
+  when is_list(User), is_list(OrgName) ->
+    OrgNameBinary = list_to_binary(OrgName),
+    Path = "/users/" ++ ibrowse_lib:url_encode(User) ++ "/organizations",
+    case chef_rest_client:request(ChefClient, Path) of
         {ok, Organizations} ->
-	    IsUserInOrg = fun(Org) -> ej:get({<<"name">>}, ej:get({<<"organization">>}, Org)) =:= OrgName end,
+	    IsUserInOrg = fun(Org) ->
+                              ej:get({<<"organization">>, <<"name">>}, Org) =:= OrgNameBinary
+                          end,
 	    lists:any(IsUserInOrg, Organizations);
         Error ->
-	    io:format("Not OK :(~n"),
             error_logger:error_msg("Error checking membership for ~p in org ~p: ~p~n",
                                    [User, OrgName, Error]),
             false
     end.
-
-%% Internal functions
-build_org_url_path(User) ->
-    {ok, ApiURL} = application:get_env(chef_common, account_api_url),
-    Path = lists:flatten(io_lib:format("/users/~s/organizations", [User])),
-    {Path, ApiURL ++ Path}.

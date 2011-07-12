@@ -48,6 +48,10 @@
 
 -include_lib("public_key/include/public_key.hrl").
 
+-type calendar_time() :: { non_neg_integer(),  non_neg_integer(),  non_neg_integer() }.
+-type calendar_date() :: { integer(),  1..12, 1..31 }.
+
+-type get_header_fun() :: fun((header_name()) -> header_value()).
 -type http_body() :: binary() | pid().
 -type user_id() :: binary().
 -type http_method() :: binary().
@@ -55,12 +59,14 @@
 -type iso8601_time() :: binary().
 -type http_path() :: binary().
 -type sha_hash64() :: binary().
--type erlang_time() :: {calendar:date(), calendar:time()}.
+-type erlang_time() :: {calendar_date(), calendar_time()}.
 -type private_key() :: binary().
+-type raw_public_key() :: binary().
 -type header_name() :: binary().
 -type header_value() :: binary() | 'undefined'.
 -type header_fun() :: fun((header_name()) -> header_value()).
 -type time_skew() :: non_neg_integer().
+
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -76,6 +82,7 @@ hash_string(Str) ->
 hash_file(F) ->
     hash_file(F, crypto:sha_init()).
 
+-spec hash_file(file:io_device(),binary()) -> sha_hash64().
 hash_file(F, Ctx) ->
     case io:get_chars(F, "", ?buf_size) of
         eof ->
@@ -86,10 +93,10 @@ hash_file(F, Ctx) ->
 
 
 
--spec(time_iso8601({calendar:date(), calendar:time()} | now) -> binary()).
 %% @doc Converts Erlang time-tuple to iso8601 formatted date string.
 %%
 %% Example output looks like <<"2003-12-13T18:30:02Z">>
+-spec(time_iso8601(erlang_time() | 'now') -> binary()).
 time_iso8601(now) ->
     time_iso8601(calendar:universal_time());
 time_iso8601({{Year, Month, Day}, {Hour, Min, Sec}}) ->
@@ -99,9 +106,9 @@ time_iso8601({{Year, Month, Day}, {Hour, Min, Sec}}) ->
                                                [Year, Month, Day,
                                                 Hour, Min, Sec]))).
 
--spec(time_iso8601_to_date_time(string()|binary()) -> erlang_time()).
 %% @doc Convert an iso8601 time string to Erlang date time
 %% representation.
+-spec(time_iso8601_to_date_time(string()|binary()) -> erlang_time()).
 time_iso8601_to_date_time(ATime) when is_binary(ATime) ->
     time_iso8601_to_date_time(binary_to_list(ATime));
 time_iso8601_to_date_time(ATime) ->
@@ -109,7 +116,7 @@ time_iso8601_to_date_time(ATime) ->
         [ list_to_integer(S) || S <- string:tokens(ATime, "-T:Z") ],
     {{Year, Month, Day}, {Hour, Min, Sec}}.
 
--spec(canonical_time(string() | binary()) -> binary()).
+-spec(canonical_time(string() | binary()) -> iso8601_time()).
 %% @doc Convert a string or binary HTTP request time to iso8601 format
 canonical_time(T) when is_binary(T) ->
     canonical_time(binary_to_list(T));
@@ -118,6 +125,7 @@ canonical_time(T) when is_list(T) ->
 
 %% @doc Canonicalize an HTTP request path by removing doubled slashes
 %% and trailing slash (except for case of root path).
+-spec  canonical_path(binary()) -> binary().
 canonical_path(Path = <<"/">>) ->
     Path;
 canonical_path(Path) ->
@@ -126,6 +134,7 @@ canonical_path(Path) ->
                "", [{return, binary}]).
 
 %% @doc Canonicalize HTTP method as all uppercase binary
+
 canonical_method(Method) ->
     list_to_binary(string:to_upper(binary_to_list(Method))).
 
@@ -197,6 +206,7 @@ xops_header(I) ->
 %% line feeds evry 60 characters and build up a list of
 %% X-Ops-Authorization-i header tuples.
 %%
+-spec sig_header_items(binary()) -> [{binary(),binary()}].
 sig_header_items(Sig) ->
     % Ruby's Base64.encode64 method inserts line feeds every 60
     % encoded characters.
@@ -205,9 +215,11 @@ sig_header_items(Sig) ->
         {L, I} <- lists:zip(Lines, lists:seq(1, length(Lines))) ].
 
 %% @doc Split a binary into chunks of size N
+%-spec sig_to_list(binary(), pos_integer()) -> [binary()]. % TODO PROBLEMATIC
 sig_to_list(Sig, N) ->
     lists:reverse(sig_to_list(Sig, N, [])).
 
+-spec sig_to_list(binary(), pos_integer(), any()) -> [binary()].
 sig_to_list(Sig, N, Acc) ->
     case iolist_size(Sig) =< N of
         true ->
@@ -280,13 +292,13 @@ validate_sign_description(GetHeader) ->
 %%
 %% `PublicKey' is a binary containing an RSA public key in PEM format.
 %%
--spec authenticate_user_request(fun((header_name()) -> header_value()),
+-spec authenticate_user_request(get_header_fun(),
                                    http_method(),
                                    http_path(),
                                    http_body(),
-                                   public_key(),
+				   raw_public_key(),
                                    time_skew()) ->
-    {name, user_id()} | {no_authn, Reason::term()}.
+				       {name, user_id()} | {no_authn, Reason::term()}.
 authenticate_user_request(GetHeader, Method, Path, Body, PublicKey, TimeSkew) ->
     try
         validate_headers(GetHeader, TimeSkew),
@@ -294,6 +306,13 @@ authenticate_user_request(GetHeader, Method, Path, Body, PublicKey, TimeSkew) ->
     catch
         throw:Why -> {no_authn, Why}
     end.
+
+-spec do_authenticate_user_request(get_header_fun(), 
+				   http_method(),
+				   http_path(),
+				   http_body(),
+				   raw_public_key() ) 
+				  ->  {name, user_id()} | {no_authn, bad_sig}.
 
 do_authenticate_user_request(GetHeader, Method, Path, Body, PublicKey) ->
     % NOTE: signing description validation and time_skew validation
@@ -311,7 +330,7 @@ do_authenticate_user_request(GetHeader, Method, Path, Body, PublicKey) ->
         error:{badmatch, _} -> {no_authn, bad_sig}
     end.
 
--spec decrypt_sig(binary(), binary()) -> binary() | decrypt_failed.
+-spec decrypt_sig(binary(), raw_public_key()) -> binary() | decrypt_failed.
 decrypt_sig(Sig, PublicCert) ->
     PK = read_cert(PublicCert),
     try
@@ -330,17 +349,20 @@ sig_from_headers(GetHeader, I, Acc) ->
             sig_from_headers(GetHeader, I+1, [Part|Acc])
     end.
 
+-spec time_in_bounds(undefined | string() | binary(), pos_integer()) -> boolean().
 time_in_bounds(undefined, _Skew) ->
     false;
 time_in_bounds(ReqTime, Skew) ->
     Now = calendar:now_to_universal_time(erlang:now()),
     time_in_bounds(time_iso8601_to_date_time(ReqTime), Now, Skew).
 
+-spec time_in_bounds(erlang_time(), erlang_time(), pos_integer() ) -> boolean().
 time_in_bounds(T1, T2, Skew) ->
     S1 = calendar:datetime_to_gregorian_seconds(T1),
     S2 = calendar:datetime_to_gregorian_seconds(T2),
     (S2 - S1) < Skew.
 
+-spec parse_signing_description('undefined' | binary()) -> [{binary(),binary()}].
 parse_signing_description(undefined) ->
     [];
 parse_signing_description(Desc) ->
@@ -364,6 +386,7 @@ parse_signing_description(Desc) ->
 % public_key_lines([Line|Rest], Acc) ->
 %     public_key_lines(Rest, [Line|Acc]).
 
+-spec read_cert(binary()) -> term().  %% der_decode only spec's term
 read_cert(Bin) when is_binary(Bin) ->
     Cert = public_key:pem_entry_decode(hd(public_key:pem_decode(Bin))),
     TbsCert = Cert#'Certificate'.tbsCertificate,
