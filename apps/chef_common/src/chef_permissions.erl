@@ -30,11 +30,9 @@ is_user_with_org(User, OrgName) when is_binary(OrgName) ->
     {ok, WebuiPrivateKey} = chef_keyring:get_key(webui),
     io:format("~p~n-----~p~n", [User, WebuiPrivateKey]),
     case chef_rest_client:get_cooked(URL, Path, User, WebuiPrivateKey) of
-        {ok, [{Organizations}]} ->
-            OrgNames = [Org || {<<"organization">>, Org} <- Organizations,
-		               ej:get({<<"name">>}, Org) =:= OrgName],
-	    io:format("OK! ~p in ~p from ~p~n", [OrgName, OrgNames, Organizations]),
-            length(OrgNames) > 0;
+        {ok, Organizations} ->
+	    IsUserInOrg = fun(Org) -> ej:get({<<"name">>}, ej:get({<<"organization">>}, Org)) =:= OrgName end,
+	    lists:any(IsUserInOrg, Organizations);
         Error ->
 	    io:format("Not OK :(~n"),
             error_logger:error_msg("Error checking membership for ~p in org ~p: ~p~n",
