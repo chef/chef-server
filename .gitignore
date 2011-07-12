@@ -3,4 +3,5 @@ deps/*
 apps/*/ebin/*
 .DS_Store
 apps/*/.eunit
-apps/chef_rest/src/lucene_syntax.erl
+apps/chef_rest/src/lucene.erl
+apps/chef_rest/src/chef_lucene.erl

@@ -1,10 +1,10 @@
-query <- star_star / (expression / space)* `case is_list(Node) of true -> [N || N <- Node, N /= [<<" ">>]]; false -> Node end`;
+query <- star_star / (expression / space)*;
 
 star_star <- "*:*";
 
 expression <- operation / group / field_phrase / field / field_range / term / string;
 
-term <- keyword valid_letter+ / !keyword valid_letter+ `list_to_binary(Node)`;
+term <- keyword valid_letter+ / !keyword valid_letter+;
 
 field <- name:field_name ":" arg:(term / group / string);
 
@@ -13,7 +13,7 @@ field_phrase <- name:field_name ':' '"' str:(term (space term)*) '"';
 field_range <- field_name ":" (("[" range_entry " TO " range_entry "]") /
                                ("{" range_entry " TO " range_entry "}"));
 
-field_name <- !keyword valid_letter+ `list_to_binary(Node)`;
+field_name <- !keyword valid_letter+;
 
 range_entry <- valid_letter+ / "*";
 
@@ -33,7 +33,7 @@ required_op <- !valid_letter op:'+' arg:(term / string);
 
 prohibited_op <- !valid_letter op:'-' arg:(field / field_range / term / string);
 
-boost_op <- arg:(term / string) '^' param:fuzzy_param; 
+boost_op <- arg:(term / string) '^' param:fuzzy_param;
 
 fuzzy_op <- arg:(term / string) '~' param:fuzzy_param?;
 

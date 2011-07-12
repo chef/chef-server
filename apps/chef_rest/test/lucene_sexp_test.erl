@@ -9,20 +9,20 @@ lucene_query_test_() ->
              {"a1 b2 c3", [<<"a1">>, <<"b2">>, <<"c3">>]},
              {"afield:aterm", [[{field,<<"afield">>}, {term,<<"aterm">>}]]}
             ],
-    [ ?_assertEqual(Want, lucene_syntax:parse(In)) || {In, Want} <- Tests ].
+    [ ?_assertEqual(Want, lucene:parse(In)) || {In, Want} <- Tests ].
 
 term_whitespace_test_() ->
     RawTerms = [<<" leading">>, <<"trailing ">>],
     Terms = [<<"leading">>, <<"trailing">>],
     Tests = lists:zip(RawTerms, Terms),
-    [ ?_assertEqual(T, hd(lucene_syntax:parse(R))) || {R, T} <- Tests ].
+    [ ?_assertEqual(T, hd(lucene:parse(R))) || {R, T} <- Tests ].
 
 term_keyword_test_() ->
     Keywords = [<<"AND">>, <<"OR">>, <<"NOT">>],
     Prefixed = [ <<"X", K/binary>> || K <- Keywords ],
     Suffixed = [ <<K/binary, "X">> || K <- Keywords ],
     Tests = Prefixed ++ Suffixed,
-    [ ?_assertEqual(K, hd(lucene_syntax:parse(K))) || K <- Tests ].
+    [ ?_assertEqual(K, hd(lucene:parse(K))) || K <- Tests ].
 
 term_special_chars_test_() ->
     SpecialChars = ["!", "(", ")", "{", "}", "[", "]",
@@ -30,7 +30,7 @@ term_special_chars_test_() ->
     Formats = ["foo~sbar", "~sb", "a~s", "a~sb"],
     Terms = [ ?i2b(io_lib:format(F, ["\\" ++ C])) ||
                 F <- Formats, C <- SpecialChars ],
-    [ ?_assertEqual(T, hd(lucene_syntax:parse(T))) || T <- Terms ].
+    [ ?_assertEqual(T, hd(lucene:parse(T))) || T <- Terms ].
 
 field_range_test_() ->
     Kinds = [{{incl, left}, "["},
@@ -54,7 +54,7 @@ field_range_test_() ->
                {"afield", "*", "end"},
                {"afield", "*", "*"}],
     [ ?_assertEqual(ExpectFun(Kind, Field, S, E),
-                    hd(lucene_syntax:parse(QueryFun(Kind, Field, S, E))))
+                    hd(lucene:parse(QueryFun(Kind, Field, S, E))))
       || Kind <- [incl, excl], {Field, S, E} <- Queries ].
 
 groups_test_() ->
@@ -62,19 +62,19 @@ groups_test_() ->
              {<<"(a1 b1 c1)">>, [{group, [<<"a1">>, <<"b1">>, <<"c1">>]}]},
              {<<"abc (x y z) jj">>,
               [<<"abc">>, {group, [<<"x">>, <<"y">>, <<"z">>]}, <<"jj">>]}],
-    [ ?_assertEqual(Expect, lucene_syntax:parse(I)) || {I, Expect} <- Tests ].
+    [ ?_assertEqual(Expect, lucene:parse(I)) || {I, Expect} <- Tests ].
 
 boolean_ops_on_single_terms_test_() ->
     Ops = ["AND", "&&", "OR", "||"],
     Tests = [{?i2b(io_lib:format("foo ~s bar", [Op])),
               {list_to_atom(Op), <<"foo">>, [<<"bar">>]}} || Op <- Ops ],
-    [ ?_assertEqual(E, hd(lucene_syntax:parse(I))) || {I, E} <- Tests ].
+    [ ?_assertEqual(E, hd(lucene:parse(I))) || {I, E} <- Tests ].
 
 multiple_booleans_test() ->
     Query = "t1 AND t2 OR t3 AND t4",
     Expect = [{'AND',<<"t1">>,
                [{'OR',<<"t2">>, [{'AND',<<"t3">>, [<<"t4">>]}]}]}],
-    ?assertEqual(Expect, lucene_syntax:parse(Query)).
+    ?assertEqual(Expect, lucene:parse(Query)).
 
 groups_and_booleans_test_() ->
     Tests = [
@@ -87,7 +87,7 @@ groups_and_booleans_test_() ->
                 {group, [{'AND', <<"a">>, [<<"d">>]}]},
                 [{group, [{'&&', <<"a">>, [<<"b">>]}]}]}]}
             ],
-    [ ?_assertEqual(E, lucene_syntax:parse(I)) || {I, E} <- Tests ].
+    [ ?_assertEqual(E, lucene:parse(I)) || {I, E} <- Tests ].
 
 not_queries_test_() ->
     Tests = [
@@ -100,7 +100,7 @@ not_queries_test_() ->
              {"a !(b OR c)", [<<"a">>,
                               {'!', {group, [{'OR', <<"b">>, [<<"c">>]}]}}]}
             ],
-    [ ?_assertEqual(E, lucene_syntax:parse(I)) || {I, E} <- Tests ].
+    [ ?_assertEqual(E, lucene:parse(I)) || {I, E} <- Tests ].
 
 required_and_prohibited_prefixes_test_() ->
     % FIXME: should we change the parsing to only accept prohibited
@@ -115,12 +115,12 @@ required_and_prohibited_prefixes_test_() ->
     Tests = [ {?i2b(io_lib:format(In, [Op])), InsertOp(L, ?i2b(Op))}
               || Op <- Prefixes,
                  {In, L} <- Formats ],
-    [ ?_assertEqual(E, lucene_syntax:parse(I)) || {I, E} <- Tests ].
+    [ ?_assertEqual(E, lucene:parse(I)) || {I, E} <- Tests ].
 
 ignore_inner_special_chars_in_terms_test_() ->
     Specials = ["+", "-", "*", "?", "_", "."],
     Terms = [ ?i2b(io_lib:format("foo~sbar", [S])) || S <- Specials ],
-    [ ?_assertEqual([T], lucene_syntax:parse(T)) || T <- Terms].
+    [ ?_assertEqual([T], lucene:parse(T)) || T <- Terms].
 
 phrase_query_test_() ->
     Phrases = [{"\"single\"", {phrase, <<"single">>}},
@@ -132,14 +132,14 @@ phrase_query_test_() ->
                % prohibited phrase
                {"-\"one two\"", {<<"-">>, {phrase, <<"one two">>}}}
                ],
-    [ ?_assertEqual(E, hd(lucene_syntax:parse(I))) || {I, E} <- Phrases ].
+    [ ?_assertEqual(E, hd(lucene:parse(I))) || {I, E} <- Phrases ].
 
 not_queries_on_phrases_test_() ->
     Queries = [
                {"a NOT \"b c\"", [<<"a">>, {'NOT', {phrase, <<"b c">>}}]},
                {"a !\"b c\"", [<<"a">>, {'!', {phrase, <<"b c">>}}]},
                {"a ! \"b c\"", [<<"a">>, {'!', {phrase, <<"b c">>}}]}],
-    [ ?_assertEqual(E, lucene_syntax:parse(I)) || {I, E} <- Queries ].
+    [ ?_assertEqual(E, lucene:parse(I)) || {I, E} <- Queries ].
 
 field_labeled_queries_test_() ->
     Tests = [
@@ -149,19 +149,19 @@ field_labeled_queries_test_() ->
                 {term, {group, [<<"a">>, <<"b">>, <<"c">>]}}]]},
              {"afield:\"a b\"", [[{field, <<"afield">>}, {term, {phrase, <<"a b">>}}]]}
             ],
-    [ ?_assertEqual(E, lucene_syntax:parse(I)) || {I, E} <- Tests ].
+    [ ?_assertEqual(E, lucene:parse(I)) || {I, E} <- Tests ].
 
 term_boosting_test_() ->
     Tests = [{"word^0.5", {boost, <<"word">>, 0.5}},
              {"\"one two\"^10", {boost, {phrase, <<"one two">>}, 10}}
             ],
-    [ ?_assertEqual(E, hd(lucene_syntax:parse(I))) || {I, E} <- Tests ].
+    [ ?_assertEqual(E, hd(lucene:parse(I))) || {I, E} <- Tests ].
 
 fuzzy_query_test_() ->
     Tests = [{"word~", {fuzzy, <<"word">>}},
              {"word~0.5", {fuzzy, <<"word">>, 0.5}},
              {"\"one two\"~10", {fuzzy, {phrase, <<"one two">>}, 10}}],
-    [ ?_assertEqual(E, hd(lucene_syntax:parse(I))) || {I, E} <- Tests ].
+    [ ?_assertEqual(E, hd(lucene:parse(I))) || {I, E} <- Tests ].
 
 % TODO
 % - fields and boolean, unary ops
