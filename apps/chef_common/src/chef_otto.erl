@@ -31,7 +31,12 @@
          bulk_get/3
          ]).
 
--type couchbeam_server() :: any().
+%% This should include the couchbeam.hrl file and refer to the 'server' record.
+-type couchbeam_server() :: {'server',
+			     string(),
+			     integer(),
+			     string(),
+			     [] | [{atom(),any()}]}.
 -type http_port() :: non_neg_integer().
 -type db_key() :: binary() | string().
 
@@ -69,6 +74,7 @@ fetch_user(Server, User) when is_binary(User) ->
 fetch_user(Server, User) when is_list(User) ->
     fetch_user(Server, list_to_binary(User)).
 
+-spec fetch_all_users(couchbeam_server()) -> any(). % TODO: Figure out how to tighten the return value.
 fetch_all_users(Server) ->
     {ok, Db} = couchbeam:open_db(Server, ?user_db, []),
     {ok, View} = couchbeam:view(Db, {?mixlib_auth_user_design, "by_username"},
