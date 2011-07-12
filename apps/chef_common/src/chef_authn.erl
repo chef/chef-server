@@ -339,7 +339,7 @@ sig_from_headers(GetHeader, I, Acc) ->
             sig_from_headers(GetHeader, I+1, [Part|Acc])
     end.
 
-%-spec time_in_bounds(undefined | string() | binary(), pos_integer()) -> boolean().
+-spec time_in_bounds(undefined | string() | binary(), pos_integer()) -> boolean().
 time_in_bounds(undefined, _Skew) ->
     false;
 time_in_bounds(ReqTime, Skew) ->
