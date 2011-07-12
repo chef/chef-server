@@ -3,9 +3,13 @@
 %%% @author Seth Falcon <seth@opscode.com>
 %%% @copyright (C) 2011, Opscode, Inc.
 %%% @doc
-%%%
+%%% REST resource for submitting searches for Chef resources
 %%% @end
-%%% Created : 13 Mar 2011 by Christopher Brown <cb@opscode.com>
+%% @author Chris Brown <cb@opscode.com>
+%% @author John Keiser <jkeiser@opscode.com>
+%% @author Kevin Smith <kevin@opscode.com>
+%% @copyright Copyright 2011 Opscode, Inc.
+%% @version 0.1
 %%%-------------------------------------------------------------------
 -module(chef_rest_search_resource).
 
