@@ -48,6 +48,9 @@
 
 -include_lib("public_key/include/public_key.hrl").
 
+-type calendar_time() :: { non_neg_integer(),  non_neg_integer(),  non_neg_integer() }.
+-type calendar_date() :: { non_neg_integer(),  non_neg_integer(),  non_neg_integer() }.
+
 -type http_body() :: binary() | pid().
 -type user_id() :: binary().
 -type http_method() :: binary().
@@ -55,7 +58,7 @@
 -type iso8601_time() :: binary().
 -type http_path() :: binary().
 -type sha_hash64() :: binary().
--type erlang_time() :: {calendar:date(), calendar:time()}.
+-type erlang_time() :: {calendar_date(), calendar_time()}.
 -type private_key() :: binary().
 -type header_name() :: binary().
 -type header_value() :: binary() | 'undefined'.
@@ -76,6 +79,7 @@ hash_string(Str) ->
 hash_file(F) ->
     hash_file(F, crypto:sha_init()).
 
+-spec hash_file(file:io_device(),binary()) -> sha_hash64().
 hash_file(F, Ctx) ->
     case io:get_chars(F, "", ?buf_size) of
         eof ->
@@ -86,7 +90,7 @@ hash_file(F, Ctx) ->
 
 
 
--spec(time_iso8601({calendar:date(), calendar:time()} | now) -> binary()).
+-spec(time_iso8601({calendar_date(), calendar_time()} | now) -> binary()).
 %% @doc Converts Erlang time-tuple to iso8601 formatted date string.
 %%
 %% Example output looks like <<"2003-12-13T18:30:02Z">>
@@ -109,7 +113,7 @@ time_iso8601_to_date_time(ATime) ->
         [ list_to_integer(S) || S <- string:tokens(ATime, "-T:Z") ],
     {{Year, Month, Day}, {Hour, Min, Sec}}.
 
--spec(canonical_time(string() | binary()) -> binary()).
+-spec(canonical_time(string() | binary()) -> iso8601_time()).
 %% @doc Convert a string or binary HTTP request time to iso8601 format
 canonical_time(T) when is_binary(T) ->
     canonical_time(binary_to_list(T));
@@ -118,6 +122,7 @@ canonical_time(T) when is_list(T) ->
 
 %% @doc Canonicalize an HTTP request path by removing doubled slashes
 %% and trailing slash (except for case of root path).
+-spec  canonical_path(binary()) -> binary().
 canonical_path(Path = <<"/">>) ->
     Path;
 canonical_path(Path) ->
@@ -126,6 +131,7 @@ canonical_path(Path) ->
                "", [{return, binary}]).
 
 %% @doc Canonicalize HTTP method as all uppercase binary
+
 canonical_method(Method) ->
     list_to_binary(string:to_upper(binary_to_list(Method))).
 
@@ -197,6 +203,7 @@ xops_header(I) ->
 %% line feeds evry 60 characters and build up a list of
 %% X-Ops-Authorization-i header tuples.
 %%
+-spec sig_header_items(binary()) -> [{binary(),binary()}].
 sig_header_items(Sig) ->
     % Ruby's Base64.encode64 method inserts line feeds every 60
     % encoded characters.
