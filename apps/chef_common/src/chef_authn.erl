@@ -181,7 +181,7 @@ canonicalize_request(BodyHash, UserId, Method, Time, Path) ->
 
 -spec sign_request(private_key(), user_id(), http_method(),
                    http_time(), http_path()) ->
-      [{binary(), binary()}].
+      [{binary(), binary()}, ...].
 %% @doc Sign an HTTP request without a body (primarily GET)
 sign_request(PrivateKey, User, Method, Time, Path) ->
     sign_request(PrivateKey, <<"">>, User, Method, Time, Path).

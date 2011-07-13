@@ -72,7 +72,7 @@ do_chef_get(Url, Path, User, PrivateKey, ExtraHeaders) ->
 
 generate_signed_headers(PrivateKey, User, Method, Path) ->
     Time = httpd_util:rfc1123_date(),
-    SignedHeaders = chef_authn:sign_request(PrivateKey, User, Method, Time, Path),
+    SignedHeaders = chef_authn:sign_request(PrivateKey, list_to_binary(User), Method, Time, Path),
     % TODO: control the type of K and V *before* getting in here It
     % looks like ibrowse only requires that header names be atom or
     % string, but values can be iolist.  It might be worth
@@ -80,9 +80,9 @@ generate_signed_headers(PrivateKey, User, Method, Path) ->
     % names that are binaries to avoid conversion.
     [{ensure_list(K), ensure_list(V)} || {K, V} <- SignedHeaders].
 
--spec ensure_list(binary()) -> list().
+-spec ensure_list(binary() | list()) -> list().
 
 ensure_list(B) when is_binary(B) ->
     binary_to_list(B);
-ensure_list(T) ->
+ensure_list(T) when is_list(T) ->
     T.
