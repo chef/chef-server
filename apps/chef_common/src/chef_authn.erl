@@ -193,7 +193,7 @@ sign_request(PrivateKey, User, Method, Time, Path) ->
 %%
 -spec sign_request(private_key(), http_body(), user_id(), http_method(),
                    http_time(), http_path()) ->
-    [{binary(), binary()}].
+    [{binary(), binary()}, ...].
 sign_request(PrivateKey, Body, User, Method, Time, Path) ->
     CTime = canonical_time(Time),
     HashedBody = hashed_body(Body),
