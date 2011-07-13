@@ -69,7 +69,7 @@ verify_request_signature(Req, State) ->
         not_found ->
             NoCertMsg = bad_auth_message(no_cert),
             {false,
-             wrq:set_resp_body(mochijson2:encode(NoCertMsg), Req), State};
+             wrq:set_resp_body(ejson:encode(NoCertMsg), Req), State};
         CertInfo ->
             Cert = ?gv(cert, CertInfo),
             OrgId = ?gv(org_guid, CertInfo, State#state.organization_guid),
@@ -84,7 +84,7 @@ verify_request_signature(Req, State) ->
                      State1#state{organization_guid = OrgId, couchbeam = S}};
                 {no_authn, Reason} ->
                     Msg = bad_auth_message(Reason),
-                    Json = mochijson2:encode(Msg),
+                    Json = ejson:encode(Msg),
                     Req1 = wrq:set_resp_body(Json, Req),
                     % TODO This is a needless mutation
                     {false, Req1, State1#state{couchbeam = S}}
@@ -101,7 +101,7 @@ is_authorized(Req, State) ->
 		true -> {true, Req1, State1};
 		false -> 
 		    Msg = bad_auth_message(not_member_of_org),
-		    Json = mochijson2:encode(Msg),
+		    Json = ejson:encode(Msg),
                     Req2 = wrq:set_resp_body(Json, Req),
 		    {false, Req2, State1}
 	    end;
@@ -120,7 +120,7 @@ malformed_request(Req, State) ->
         catch
             throw:Why ->
                 Msg = bad_auth_message(Why),
-                NewReq = wrq:set_resp_body(mochijson2:encode(Msg), Req),
+                NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),
                 {true, NewReq, State1}
         end,
     {Malformed, Req1, State2}.
@@ -209,7 +209,7 @@ to_json(Req, State = #state{couchbeam = S, solr_query = Query}) ->
     catch
         throw:org_not_found ->
             NoOrg = bad_auth_message(org_not_found),
-            Req1 = wrq:set_resp_body(mochijson2:encode(NoOrg), Req),
+            Req1 = wrq:set_resp_body(ejson:encode(NoOrg), Req),
             {{halt, 404}, Req1, State};
         throw:_X ->
             {{halt, 500}, Req, State}
@@ -232,7 +232,7 @@ execute_solr_query(Query, ObjType, Db, S) ->
     SolrDataRaw = solr_query(Url),
     % FIXME: Probably want a solr module that knows how to query solr
     % and parse its responses.
-    SolrData = mochijson2:decode(SolrDataRaw),
+    SolrData = ejson:decode(SolrDataRaw),
     DocList = ej:get({<<"response">>, <<"docs">>}, SolrData),
     Ids = [ ej:get({<<"X_CHEF_id_CHEF_X">>}, Doc) || Doc <- DocList ],
     Docs = chef_otto:bulk_get(S, ?db_for_guid(Db), Ids),
