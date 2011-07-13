@@ -61,7 +61,6 @@
 -type http_path() :: binary().
 -type sha_hash64() :: binary().
 -type erlang_time() :: {calendar_date(), calendar_time()}.
--type private_key() :: term().
 -type raw_public_key() :: binary().
 -type header_name() :: binary().
 -type header_value() :: binary() | 'undefined'.
@@ -179,7 +178,7 @@ canonicalize_request(BodyHash, UserId, Method, Time, Path) ->
                                             Time,
                                             UserId])).
 
--spec sign_request(private_key(), user_id(), http_method(),
+-spec sign_request(rsa_private_key(), user_id(), http_method(),
                    http_time(), http_path()) ->
       [{binary(), binary()}, ...].
 %% @doc Sign an HTTP request without a body (primarily GET)
@@ -191,7 +190,7 @@ sign_request(PrivateKey, User, Method, Time, Path) ->
 %% Returns a list of header tuples that should be included in the
 %% final HTTP request.
 %%
--spec sign_request(private_key(), http_body(), user_id(), http_method(),
+-spec sign_request(rsa_private_key(), http_body(), user_id(), http_method(),
                    http_time(), http_path()) ->
     [{binary(), binary()}, ...].
 sign_request(PrivateKey, Body, User, Method, Time, Path) ->
