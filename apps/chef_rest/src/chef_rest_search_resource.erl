@@ -190,7 +190,6 @@ fetch_org_guid(Req, #state{ organization_guid = Id, couchbeam = S}) ->
             Id;
         undefined ->
             OrgName = list_to_binary(wrq:path_info(organization_id, Req)),
-            io:format("OrgName: ~p~n", [OrgName]),
             case chef_otto:fetch_org_id(S, OrgName) of
                 not_found -> throw(org_not_found);
                 Guid -> Guid
@@ -216,7 +215,6 @@ to_json(Req, State = #state{couchbeam = S, solr_query = Query}) ->
     end.
 
 transform_query(RawQuery) when is_binary(RawQuery) ->
-    io:format("~p~n", [RawQuery]),
     case chef_lucene:parse(RawQuery) of
         Query when is_binary(Query) ->
             ibrowse_lib:url_encode(binary_to_list(Query));
@@ -228,7 +226,6 @@ transform_query(RawQuery) when is_list(RawQuery) ->
 
 execute_solr_query(Query, ObjType, Db, S) ->
     Url = solr_query_url(ObjType, Db, Query),
-    io:format("~p~n", [lists:flatten(Url)]),
     SolrDataRaw = solr_query(Url),
     % FIXME: Probably want a solr module that knows how to query solr
     % and parse its responses.
@@ -239,7 +236,6 @@ execute_solr_query(Query, ObjType, Db, S) ->
     %% remove couchdb revision ID from results, mark as objects for JSON
     %% encoding.
     JSONDocs = [{lists:keydelete(<<"_rev">>, 1, Doc)} || Doc <- Docs],
-    io:format("~p~n", [JSONDocs]),
     Ans = {[
             {<<"rows">>, JSONDocs},
             {<<"start">>, 0},
