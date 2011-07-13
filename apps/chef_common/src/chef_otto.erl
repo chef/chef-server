@@ -112,8 +112,8 @@ fetch_orgs_for_user(Server, User) when is_binary(User) ->
                                               {Doc} = ?gv(<<"doc">>, Row),
                                               ?gv(<<"organization">>, Doc)
                                           end, Rows);
-                            Error ->
-                                Error
+                            {error, Why} ->
+                                {error, Why}
                         end,
         Orgs = bulk_get(Server, ?user_db, OrgAccountIds),
         [ ?gv(<<"name">>, Org) || Org <- Orgs ]
@@ -121,8 +121,8 @@ fetch_orgs_for_user(Server, User) when is_binary(User) ->
 fetch_orgs_for_user(Server, User) when is_list(User) ->
     fetch_orgs_for_user(Server, list_to_binary(User)).
 
--spec fetch_all_users(couchbeam_server()) -> any(). % TODO: Figure out how to tighten the return value.
-
+-spec fetch_all_users(couchbeam_server()) -> [term()] | {error, term()}.
+% Return a list of all user documents
 fetch_all_users(Server) ->
     {ok, Db} = couchbeam:open_db(Server, ?user_db, []),
     {ok, View} = couchbeam:view(Db, {?mixlib_auth_user_design, "by_username"},
@@ -130,13 +130,12 @@ fetch_all_users(Server) ->
     case couchbeam_view:fetch(View) of
         {ok, {Res}} ->
             ?gv(<<"rows">>, Res);
-        Error ->
-            Error
+        {error, Why} ->
+            {error, Why}
     end.
 
-
-
 -spec fetch_org_id(couchbeam_server(), binary()) -> binary() | not_found.
+% @doc Return the org GUID for a given organization name.
 fetch_org_id(Server, OrgName) when is_binary(OrgName) ->
     case fetch_org(Server, OrgName) of
         {org_not_found, _} -> not_found;
@@ -147,6 +146,7 @@ fetch_org_id(Server, OrgName) when is_binary(OrgName) ->
     [tuple()]
         | {org_not_found, not_in_view}
         | {org_not_found, {no_doc, binary()}}.
+% @doc Return the organization document for a given organization name.
 fetch_org(Server, OrgName) when is_binary(OrgName) ->
     {ok, Db} = couchbeam:open_db(Server, ?user_db, []),
     {ok, View} = couchbeam:view(Db, {?mixlib_auth_org_design, "by_name"},
