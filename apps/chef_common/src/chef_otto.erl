@@ -27,6 +27,7 @@
          fetch_user_or_client_cert/3,
          fetch_auth_join/2,
          fetch_orgs_for_user/2,
+         is_user_in_org/3,
          connect/0,
          connect/2,
          bulk_get/3
@@ -58,6 +59,8 @@ connect(Host, Port) ->
                                                        not_in_view}
                                                     | {user_not_found,
                                                        {no_doc, binary()}}.
+% @doc Return the user document for the username specified by `User'
+%
 fetch_user(Server, User) when is_binary(User) ->
     {ok, Db} = couchbeam:open_db(Server, ?user_db, []),
     {ok, View} = couchbeam:view(Db, {?mixlib_auth_user_design, "by_username"},
@@ -74,6 +77,20 @@ fetch_user(Server, User) when is_binary(User) ->
     end;
 fetch_user(Server, User) when is_list(User) ->
     fetch_user(Server, list_to_binary(User)).
+
+
+-spec is_user_in_org(couchbeam_server(), db_key(), db_key()) -> boolean().
+% @doc Return true if `User' is in `Org' and false otherwise.
+is_user_in_org(Server, User, Org) when is_binary(Org) ->
+    try
+        lists:member(Org, fetch_orgs_for_user(Server, User))
+    catch
+        Error:Why ->
+            error_logger:error_report({Error, Why}),
+            false
+    end;
+is_user_in_org(Server, User, Org) when is_list(Org) ->
+    is_user_in_org(Server, User, list_to_binary(Org)).
 
 -spec fetch_orgs_for_user(couchbeam_server(), db_key()) -> [binary()].
 % @doc Return the list of organization names that username `User' is associated with
