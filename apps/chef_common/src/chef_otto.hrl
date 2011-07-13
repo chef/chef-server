@@ -12,3 +12,6 @@
 
 -define(mixlib_auth_join_design,
         "Mixlib::Authorization::AuthJoin-25834c5a8d6a9586adb05320f3f725e8").
+
+-define(organization_user_design,
+        "OrganizationUser-5c1085b0dd852acf9c74bbfe97f66406").

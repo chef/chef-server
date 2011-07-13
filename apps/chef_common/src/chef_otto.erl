@@ -26,6 +26,7 @@
          fetch_client/3,
          fetch_user_or_client_cert/3,
          fetch_auth_join/2,
+         fetch_orgs_for_user/2,
          connect/0,
          connect/2,
          bulk_get/3
@@ -74,7 +75,37 @@ fetch_user(Server, User) when is_binary(User) ->
 fetch_user(Server, User) when is_list(User) ->
     fetch_user(Server, list_to_binary(User)).
 
+-spec fetch_orgs_for_user(couchbeam_server(), db_key()) -> [binary()].
+% @doc Return the list of organization names that username `User' is associated with
+%
+fetch_orgs_for_user(Server, User) when is_binary(User) ->
+    case fetch_user(Server, User) of
+        {user_not_found, Why} ->
+            {user_not_found, Why};
+        UserDoc ->
+            UserId = ?gv(<<"_id">>, UserDoc),
+        {ok, Db} = couchbeam:open_db(Server, ?user_db, []),
+        {ok, View} = couchbeam:view(Db, {?organization_user_design,
+                                         "by_organizations_for_user"},
+                                    [{key, UserId}, {include_docs, true}]),
+        OrgAccountIds = case couchbeam_view:fetch(View) of
+                            {ok, {Res}} ->
+                                Rows = ?gv(<<"rows">>, Res),
+                                lists:map(fun({Row}) ->
+                                              {Doc} = ?gv(<<"doc">>, Row),
+                                              ?gv(<<"organization">>, Doc)
+                                          end, Rows);
+                            Error ->
+                                Error
+                        end,
+        Orgs = bulk_get(Server, ?user_db, OrgAccountIds),
+        [ ?gv(<<"name">>, Org) || Org <- Orgs ]
+    end;
+fetch_orgs_for_user(Server, User) when is_list(User) ->
+    fetch_orgs_for_user(Server, list_to_binary(User)).
+
 -spec fetch_all_users(couchbeam_server()) -> any(). % TODO: Figure out how to tighten the return value.
+
 fetch_all_users(Server) ->
     {ok, Db} = couchbeam:open_db(Server, ?user_db, []),
     {ok, View} = couchbeam:view(Db, {?mixlib_auth_user_design, "by_username"},
