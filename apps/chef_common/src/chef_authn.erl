@@ -38,6 +38,7 @@
                            <<"X-Ops-Content-Hash">>]).
 
 -export([
+         extract_private_key/1,
          hash_string/1,
          hash_file/1,
          sign_request/5,
@@ -71,6 +72,15 @@
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
+
+-spec extract_private_key(binary()) -> term() | {error, bad_key}.
+extract_private_key(RawKey) ->
+    case catch public_key:pem_decode(RawKey) of
+        [{Type, Der, _}] ->
+            public_key:der_decode(Type, Der);
+        [] ->
+            {error, bad_key}
+    end.
 
 -spec(hash_string(string()|binary()) -> sha_hash64()).
 %% @doc Base 64 encoded SHA1 of `Str'
@@ -188,7 +198,7 @@ sign_request(PrivateKey, Body, User, Method, Time, Path) ->
     CTime = canonical_time(Time),
     HashedBody = hashed_body(Body),
     SignThis = canonicalize_request(HashedBody, User, Method, CTime, Path),
-    Sig = base64:encode(public_key:encrypt_private(SignThis, RSAKey)),
+    Sig = base64:encode(public_key:encrypt_private(SignThis, PrivateKey)),
     [{<<"X-Ops-Content-Hash">>, HashedBody},
      {<<"X-Ops-UserId">>, User},
      {<<"X-Ops-Sign">>, <<"version=1.0">>},
@@ -446,7 +456,8 @@ canonicalize_request_test() ->
     ?assertEqual(?expected_sign_string, Val2).
 
 sign_request_test() ->
-    {ok, Private_key} = file:read_file("../test/private_key"),
+    {ok, RawKey} = file:read_file("../test/private_key"),
+    Private_key = extract_private_key(RawKey),
     AuthLine = fun(I) -> lists:nth(I, ?X_OPS_AUTHORIZATION_LINES) end,
     EXPECTED_SIGN_RESULT =
         [
@@ -497,7 +508,8 @@ make_skew_time() ->
     (NowEpoch - ReqTimeEpoch) + 100.
     
 authenticate_user_request_test_() ->
-    {ok, Private_key} = file:read_file("../test/private_key"),
+    {ok, RawKey} = file:read_file("../test/private_key"),
+    Private_key = extract_private_key(RawKey),
     {ok, Public_key} = file:read_file("../test/example_cert.pem"),
     Headers = sign_request(Private_key, ?body, ?user, <<"post">>,
                            ?request_time_http, ?path),
@@ -625,7 +637,8 @@ authenticate_user_request_test_() ->
      ].
 
 validate_headers_test_() ->
-    {ok, Private_key} = file:read_file("../test/private_key"),
+    {ok, RawKey} = file:read_file("../test/private_key"),
+    Private_key = extract_private_key(RawKey),
     Headers = sign_request(Private_key, ?body, ?user, <<"post">>,
                            httpd_util:rfc1123_date(), ?path),
     GetHeader = fun(X) -> proplists:get_value(X, Headers) end,
