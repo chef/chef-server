@@ -36,7 +36,7 @@ make_webui_account_chef_rest_client(UserName) when is_list(UserName) ->
                       private_key = PrivateKey,
                       request_source = web}.
 
--spec request(#chef_rest_client{}, string()) ->
+-spec request(#chef_rest_client{}, binary()) ->
     {ok, term()} | {error, {string(), string() | binary()}} | {error, term()}.
 
 request(ChefClient = #chef_rest_client{}, Path) ->
