@@ -89,9 +89,16 @@ init_keyring([], Keys) ->
 init_keyring([{Name, Path}|T], Keys) ->
     case file:read_file(Path) of
         {ok, RawKey} ->
-            init_keyring(T, dict:store(Name, RawKey, Keys));
+            case catch public_key:pem_decode(RawKey) of
+                [{Type, Der, _}] ->
+                    PrivateKey = public_key:der_decode(Type, Der),
+                    init_keyring(T, dict:store(Name, PrivateKey, Keys));
+                [] ->
+                    error_logger:error_msg("Failed to decode PEM file ~s for ~p~n", [Path, Name]),
+                    {error, bad_key}
+            end;
         Error ->
-            error_logger:error_msg("Error loading key '~p' on path ~p: ~p~n", [Name, Path, Error]),
+            error_logger:error_msg("Error reading file ~s for ~p: ~p~n", [Path, Name, Error]),
             Error
     end.
 

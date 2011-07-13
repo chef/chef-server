@@ -9,8 +9,11 @@
 lookup_test_() ->
     {foreach, ?SETUP,
      [fun() ->
-              ?assertMatch({ok, <<"test.">>},
-                             chef_keyring:get_key(webui)) end,
+              {ok, Key} = chef_keyring:get_key(webui),
+              ?assertEqual(11, size(Key)),
+              Key1 = tuple_to_list(Key),
+              ['RSAPrivateKey', 'two-prime', FirstInt|_] = Key1,
+              ?assert(is_integer(FirstInt)) end,
       fun() ->
               ?assertMatch({error, unknown_key},
                            chef_keyring:get_key(admin)) end]}.

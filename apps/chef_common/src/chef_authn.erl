@@ -60,7 +60,7 @@
 -type http_path() :: binary().
 -type sha_hash64() :: binary().
 -type erlang_time() :: {calendar_date(), calendar_time()}.
--type private_key() :: binary().
+-type private_key() :: term().
 -type raw_public_key() :: binary().
 -type header_name() :: binary().
 -type header_value() :: binary() | 'undefined'.
@@ -185,8 +185,6 @@ sign_request(PrivateKey, User, Method, Time, Path) ->
                    http_time(), http_path()) ->
     [{binary(), binary()}].
 sign_request(PrivateKey, Body, User, Method, Time, Path) ->
-    {'RSAPrivateKey', Der, _} = hd(public_key:pem_decode(PrivateKey)),
-    RSAKey = public_key:der_decode('RSAPrivateKey', Der),
     CTime = canonical_time(Time),
     HashedBody = hashed_body(Body),
     SignThis = canonicalize_request(HashedBody, User, Method, CTime, Path),
