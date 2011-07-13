@@ -33,12 +33,8 @@
          bulk_get/3
          ]).
 
-%% This should include the couchbeam.hrl file and refer to the 'server' record.
--type couchbeam_server() :: {'server',
-			     string(),
-			     integer(),
-			     string(),
-			     [] | [{atom(),any()}]}.
+-include_lib("couchbeam/include/couchbeam.hrl").
+
 -type http_port() :: non_neg_integer().
 -type db_key() :: binary() | string().
 
@@ -46,15 +42,15 @@
 
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
 
--spec connect() -> couchbeam_server().
+-spec connect() -> couchbeam:server().
 connect() ->
     connect("localhost", 5984).
 
--spec connect(string(), http_port()) -> couchbeam_server().
+-spec connect(string(), http_port()) -> couchbeam:server().
 connect(Host, Port) ->
     couchbeam:server_connection(Host, Port, "", []).
 
--spec fetch_user(couchbeam_server(), db_key()) -> [tuple()]
+-spec fetch_user(couchbeam:server(), db_key()) -> [tuple()]
                                                     | {user_not_found,
                                                        not_in_view}
                                                     | {user_not_found,
@@ -79,7 +75,7 @@ fetch_user(Server, User) when is_list(User) ->
     fetch_user(Server, list_to_binary(User)).
 
 
--spec is_user_in_org(couchbeam_server(), db_key(), db_key()) -> boolean().
+-spec is_user_in_org(couchbeam:server(), db_key(), db_key()) -> boolean().
 % @doc Return true if `User' is in `Org' and false otherwise.
 is_user_in_org(Server, User, Org) when is_binary(Org) ->
     try
@@ -92,7 +88,7 @@ is_user_in_org(Server, User, Org) when is_binary(Org) ->
 is_user_in_org(Server, User, Org) when is_list(Org) ->
     is_user_in_org(Server, User, list_to_binary(Org)).
 
--spec fetch_orgs_for_user(couchbeam_server(), db_key()) -> [binary()].
+-spec fetch_orgs_for_user(couchbeam:server(), db_key()) -> [binary()].
 % @doc Return the list of organization names that username `User' is associated with
 %
 fetch_orgs_for_user(Server, User) when is_binary(User) ->
@@ -121,7 +117,7 @@ fetch_orgs_for_user(Server, User) when is_binary(User) ->
 fetch_orgs_for_user(Server, User) when is_list(User) ->
     fetch_orgs_for_user(Server, list_to_binary(User)).
 
--spec fetch_all_users(couchbeam_server()) -> [term()] | {error, term()}.
+-spec fetch_all_users(couchbeam:server()) -> [term()] | {error, term()}.
 % Return a list of all user documents
 fetch_all_users(Server) ->
     {ok, Db} = couchbeam:open_db(Server, ?user_db, []),
@@ -134,7 +130,7 @@ fetch_all_users(Server) ->
             {error, Why}
     end.
 
--spec fetch_org_id(couchbeam_server(), binary()) -> binary() | not_found.
+-spec fetch_org_id(couchbeam:server(), binary()) -> binary() | not_found.
 % @doc Return the org GUID for a given organization name.
 fetch_org_id(Server, OrgName) when is_binary(OrgName) ->
     case fetch_org(Server, OrgName) of
@@ -142,7 +138,7 @@ fetch_org_id(Server, OrgName) when is_binary(OrgName) ->
         Org when is_list(Org) -> ?gv(<<"guid">>, Org)
     end.
 
--spec fetch_org(couchbeam_server(), binary()) ->
+-spec fetch_org(couchbeam:server(), binary()) ->
     [tuple()]
         | {org_not_found, not_in_view}
         | {org_not_found, {no_doc, binary()}}.
@@ -164,7 +160,7 @@ fetch_org(Server, OrgName) when is_binary(OrgName) ->
 fetch_org(Server, OrgName) when is_list(OrgName) ->
     fetch_org(Server, list_to_binary(OrgName)).
 
--spec fetch_client(couchbeam_server(), binary() | not_found,
+-spec fetch_client(couchbeam:server(), binary() | not_found,
                    binary() | string()) -> [tuple()] | not_found.
 fetch_client(Server, OrgId, ClientName)
   when is_binary(ClientName), is_binary(OrgId) ->
@@ -188,7 +184,7 @@ fetch_client(_Server, not_found, _ClientName) ->
     not_found.
 
 % FIXME: do we want to distinguish between client not found and org not found?
--spec fetch_user_or_client_cert(couchbeam_server(), db_key(), db_key()) ->
+-spec fetch_user_or_client_cert(couchbeam:server(), db_key(), db_key()) ->
     [tuple()] | not_found.
 fetch_user_or_client_cert(Server, OrgName, ClientName)
   when is_binary(OrgName), is_binary(ClientName) ->
@@ -210,7 +206,7 @@ fetch_user_or_client_cert(Server, OrgName, ClientName)
                               list_to_binary(ClientName)).
 
 
--spec bulk_get(couchbeam_server(), string(), [binary()]) ->
+-spec bulk_get(couchbeam:server(), string(), [binary()]) ->
     [[tuple()]].
 bulk_get(Server, DbName, Ids) ->
     {ok, Db} = couchbeam:open_db(Server, DbName, []),
@@ -222,7 +218,7 @@ bulk_get(Server, DbName, Ids) ->
      couchbeam_view:fold(View, DocCollector).
 
 
--spec fetch_auth_join(couchbeam_server(), db_key()) -> [tuple()]
+-spec fetch_auth_join(couchbeam:server(), db_key()) -> [tuple()]
                                                     | {not_found, term()}.
 fetch_auth_join(Server, ObjectId) when is_binary(ObjectId) ->
     {ok, Db} = couchbeam:open_db(Server, ?auth_join_db, []),
