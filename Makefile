@@ -9,6 +9,9 @@ all: compile
 compile: $(GRAMMARS)
 	@./rebar compile
 
+compile_skip:
+	@./rebar compile skip_deps=true
+
 $(GRAMMARS): $(DEPS) $(NEOTOMA)
 	@apps/chef_rest/priv/neotoma apps/chef_rest/priv/lucene.peg lucene lucene_sexp
 	@apps/chef_rest/priv/neotoma apps/chef_rest/priv/lucene.peg chef_lucene lucene_txfm
@@ -34,7 +37,7 @@ distclean:
 
 test: eunit
 
-eunit: compile
+eunit:
 	@./rebar skip_deps=true eunit
 
 test-common:
