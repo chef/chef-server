@@ -29,6 +29,7 @@
                 user_name,
                 header_fun = undefined,
                 couchbeam = undefined,
+                solr_url = undefined,
                 solr_query = undefined,
                 end_time,
                 batch_size = 5
@@ -118,8 +119,9 @@ malformed_request(Req, State) ->
             chef_authn:validate_headers(GetHeader, 300),
             %% transform query first to avoid possible db fetch for org
             %% guid for bad queries
-            Query = transform_query(http_uri:decode(wrq:get_qs_value("q", Req))),
-            {false, Req, State1#state{solr_query = Query}}
+            Query = chef_solr:transform_query(http_uri:decode(wrq:get_qs_value("q", Req))),
+            % TODO Configure the location of solr
+            {false, Req, State1#state{solr_url = "http://localhost:8983/solr", solr_query = Query}}
         catch
             throw:Why ->
                 Msg = bad_auth_message(Why),
@@ -166,27 +168,6 @@ allowed_methods(Req, State) ->
 content_types_provided(ReqData, State) ->
     {[{"application/json", to_json}], ReqData, State}.
 
-solr_query_url(ObjType, Db, Query) ->
-    Fq = "%2BX_CHEF_type_CHEF_X%3A~s+%2BX_CHEF_database_CHEF_X%3Achef_~s",
-    Url = "/solr/select?fq=" ++ Fq ++ "&indent=off&q=~s"
-        "&start=0"
-        "&rows=500"
-        "&wt=json"
-        "&sort=",
-    io_lib:format(Url, [ObjType, Db, Query]).
-
-% /solr/select?
-    % fq=%2BX_CHEF_type_CHEF_X%3Anode+%2BX_CHEF_database_CHEF_X%3Achef_288da1c090ff45c987346d2829257256
-    % &indent=off
-    % &q=content%3Aattr1__%3D__v%2A
-
-% solr:
-solr_query(Path) ->
-    % FIXME: error handling
-    Url = "http://localhost:8983" ++ Path,
-    {ok, _Code, _Head, Body} = ibrowse:send_req(Url, [], get),
-    Body.
-
 fetch_org_guid(Req, #state{ organization_guid = Id, couchbeam = S}) ->
     case Id of
         Id when is_binary(Id) ->
@@ -199,7 +180,7 @@ fetch_org_guid(Req, #state{ organization_guid = Id, couchbeam = S}) ->
             end
     end.
 
-to_json(Req, State = #state{couchbeam = S, solr_query = Query,
+to_json(Req, State = #state{couchbeam = S, solr_url = SolrUrl, solr_query = Query,
                             batch_size = BatchSize}) ->
     % FIXME: probably want to have a request parsing method and
     % implement the valid_request callback.  In that case, we'll put
@@ -208,34 +189,19 @@ to_json(Req, State = #state{couchbeam = S, solr_query = Query,
     ObjType = wrq:path_info(object_type, Req),
     try
         Db = fetch_org_guid(Req, State),
-        {execute_solr_query(Query, ObjType, Db, S, BatchSize), Req, State}
+        Ids = chef_solr:search(SolrUrl, Query, Db, ObjType),
+        {fetch_search_results_from_couch(S, Db, Ids, BatchSize), Req, State}
     catch
         throw:org_not_found ->
             NoOrg = bad_auth_message(org_not_found),
             Req1 = wrq:set_resp_body(ejson:encode(NoOrg), Req),
             {{halt, 404}, Req1, State};
-        throw:_X ->
+        throw:X ->
+	    io:format("500! ~s~n", X),
             {{halt, 500}, Req, State}
     end.
 
-transform_query(RawQuery) when is_binary(RawQuery) ->
-    case chef_lucene:parse(RawQuery) of
-        Query when is_binary(Query) ->
-            ibrowse_lib:url_encode(binary_to_list(Query));
-        _ ->
-            throw({bad_query, RawQuery})
-    end;
-transform_query(RawQuery) when is_list(RawQuery) ->
-    transform_query(list_to_binary(RawQuery)).
-
-execute_solr_query(Query, ObjType, Db, S, BatchSize) ->
-    Url = solr_query_url(ObjType, Db, Query),
-    SolrDataRaw = solr_query(Url),
-    % FIXME: Probably want a solr module that knows how to query solr
-    % and parse its responses.
-    SolrData = ejson:decode(SolrDataRaw),
-    DocList = ej:get({<<"response">>, <<"docs">>}, SolrData),
-    Ids = [ ej:get({<<"X_CHEF_id_CHEF_X">>}, Doc) || Doc <- DocList ],
+fetch_search_results_from_couch(S, Db, Ids, BatchSize) ->
     Ans0 = search_result_start(0, length(Ids)),
     Ans1 = fetch_result_rows(Ids, BatchSize, S, ?db_for_guid(Db), Ans0),
     search_result_finish(Ans1).
