@@ -232,14 +232,64 @@ execute_solr_query(Query, ObjType, Db, S) ->
     SolrData = ejson:decode(SolrDataRaw),
     DocList = ej:get({<<"response">>, <<"docs">>}, SolrData),
     Ids = [ ej:get({<<"X_CHEF_id_CHEF_X">>}, Doc) || Doc <- DocList ],
-    Docs = chef_otto:bulk_get(S, ?db_for_guid(Db), Ids),
-    %% remove couchdb revision ID from results, mark as objects for JSON
-    %% encoding.
-    JSONDocs = [{lists:keydelete(<<"_rev">>, 1, Doc)} || Doc <- Docs],
-    Ans = {[
-            {<<"rows">>, JSONDocs},
-            {<<"start">>, 0},
-            {<<"total">>, length(JSONDocs)}
-          ]},
-    ejson:encode(Ans).
+    Ans0 = search_result_start(0, length(Ids)),
+    Ans1 = fetch_result_rows(Ids, 5, S, ?db_for_guid(Db), Ans0),
+    search_result_finish(Ans1).
 
+    % Docs = chef_otto:bulk_get(S, ?db_for_guid(Db), Ids),
+    % %% remove couchdb revision ID from results, mark as objects for JSON
+    % %% encoding.
+    % JSONDocs = [{lists:keydelete(<<"_rev">>, 1, Doc)} || Doc <- Docs],
+    % Ans = {[
+    %         {<<"rows">>, JSONDocs},
+    %         {<<"start">>, 0},
+    %         {<<"total">>, length(JSONDocs)}
+    %       ]},
+    % ejson:encode(Ans).
+
+% @doc Fetch a list of `Ids' in batches of size `BatchSize'.
+%
+% Each batch is fetched from connection `S' and database `Db'.
+% Results are cons'd onto `Acc' with each batch separated by
+% ``<<",">>''.
+%
+% Each set of results is processed to remove the _rev key and encode
+% to JSON using ejson.  The ejson return value is post-processed to
+% remove the JSON array markers.  The caller is responsible for adding
+% this back to create valid JSON.
+%
+fetch_result_rows(Ids = [_H | _T], BatchSize, S, Db, Acc) ->
+    fetch_result_rows(safe_split(BatchSize, Ids), BatchSize, S, Db, Acc);
+fetch_result_rows({Ids, []}, _BatchSize, S, Db, Acc) ->
+    Docs = chef_otto:bulk_get(S, Db, Ids),
+    [encode_result_rows(Docs) | Acc];
+fetch_result_rows({Ids, Rest}, BatchSize, S, Db, Acc) ->
+    Next = safe_split(BatchSize, Rest),
+    Docs = chef_otto:bulk_get(S, Db, Ids),
+    fetch_result_rows(Next, BatchSize, S, Db,
+                      [<<",">>, encode_result_rows(Docs) | Acc]).
+
+encode_result_rows(Items) ->
+    CleanItems = [{lists:keydelete(<<"_rev">>, 1, Item)} || Item <- Items],
+    Bin = ejson:encode(CleanItems),
+    %% remove leading '[' and trailing ']' so that we can add to this
+    %% result.
+    binary:part(Bin, {1, size(Bin) - 2}).
+
+safe_split(N, L) ->
+    try
+        lists:split(N, L)
+    catch
+        error:badarg ->
+            {L, []}
+    end.
+
+search_result_start(Start, Total) ->
+    % {"total":Total,"start":Start,"rows":[i1, i2]}
+    ["\"rows\":[", ",",
+     integer_to_list(Start), "\"start\":", ",",
+     integer_to_list(Total), "\"total\":", "{"].
+
+search_result_finish(Result) ->
+    %% TODO: is iolist_to_binary needed?
+    iolist_to_binary(lists:reverse([<<"]}">>|Result])).
