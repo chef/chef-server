@@ -23,6 +23,8 @@
 
 -include_lib("chef_common/include/chef_rest_client.hrl").
 
+-include_lib("chef_common/include/ej.hrl").
+
 -export([request/2,
          make_webui_account_chef_rest_client/1]).
 
@@ -37,7 +39,8 @@ make_webui_account_chef_rest_client(UserName) when is_list(UserName) ->
                       request_source = web}.
 
 -spec request(#chef_rest_client{}, binary()) ->
-    {ok, term()} | {error, {string(), string() | binary()}} | {error, term()}.
+		     {ok, json_object()} | %% the {struct, ...} should be replaced by json_object()
+		     {error, {string(), string() | binary()}} | {error, term()}.
 
 request(ChefClient = #chef_rest_client{}, Path) ->
     case do_chef_get(ChefClient, Path) of
