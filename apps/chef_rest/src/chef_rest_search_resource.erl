@@ -30,7 +30,8 @@
                 header_fun = undefined,
                 couchbeam = undefined,
                 solr_query = undefined,
-                end_time
+                end_time,
+                batch_size = 5
 }).
 
 -include_lib("webmachine/include/webmachine.hrl").
@@ -40,8 +41,10 @@
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
 
 init(_Any) ->
+    {ok, BatchSize} = application:get_env(chef_rest, bulk_fetch_batch_size),
     State = #state{start_time = chef_rest_util:iso_8601_utc(),
-                   resource = atom_to_list(?MODULE)},
+                   resource = atom_to_list(?MODULE),
+                   batch_size = BatchSize},
     {ok, State}.
 
 get_header_fun(Req, State = #state{header_fun = HFun})
@@ -196,7 +199,8 @@ fetch_org_guid(Req, #state{ organization_guid = Id, couchbeam = S}) ->
             end
     end.
 
-to_json(Req, State = #state{couchbeam = S, solr_query = Query}) ->
+to_json(Req, State = #state{couchbeam = S, solr_query = Query,
+                            batch_size = BatchSize}) ->
     % FIXME: probably want to have a request parsing method and
     % implement the valid_request callback.  In that case, we'll put
     % the parsed/validated OrgName and ObjType into fields in the
@@ -204,7 +208,7 @@ to_json(Req, State = #state{couchbeam = S, solr_query = Query}) ->
     ObjType = wrq:path_info(object_type, Req),
     try
         Db = fetch_org_guid(Req, State),
-        {execute_solr_query(Query, ObjType, Db, S), Req, State}
+        {execute_solr_query(Query, ObjType, Db, S, BatchSize), Req, State}
     catch
         throw:org_not_found ->
             NoOrg = bad_auth_message(org_not_found),
@@ -224,7 +228,7 @@ transform_query(RawQuery) when is_binary(RawQuery) ->
 transform_query(RawQuery) when is_list(RawQuery) ->
     transform_query(list_to_binary(RawQuery)).
 
-execute_solr_query(Query, ObjType, Db, S) ->
+execute_solr_query(Query, ObjType, Db, S, BatchSize) ->
     Url = solr_query_url(ObjType, Db, Query),
     SolrDataRaw = solr_query(Url),
     % FIXME: Probably want a solr module that knows how to query solr
@@ -233,19 +237,8 @@ execute_solr_query(Query, ObjType, Db, S) ->
     DocList = ej:get({<<"response">>, <<"docs">>}, SolrData),
     Ids = [ ej:get({<<"X_CHEF_id_CHEF_X">>}, Doc) || Doc <- DocList ],
     Ans0 = search_result_start(0, length(Ids)),
-    Ans1 = fetch_result_rows(Ids, 5, S, ?db_for_guid(Db), Ans0),
+    Ans1 = fetch_result_rows(Ids, BatchSize, S, ?db_for_guid(Db), Ans0),
     search_result_finish(Ans1).
-
-    % Docs = chef_otto:bulk_get(S, ?db_for_guid(Db), Ids),
-    % %% remove couchdb revision ID from results, mark as objects for JSON
-    % %% encoding.
-    % JSONDocs = [{lists:keydelete(<<"_rev">>, 1, Doc)} || Doc <- Docs],
-    % Ans = {[
-    %         {<<"rows">>, JSONDocs},
-    %         {<<"start">>, 0},
-    %         {<<"total">>, length(JSONDocs)}
-    %       ]},
-    % ejson:encode(Ans).
 
 % @doc Fetch a list of `Ids' in batches of size `BatchSize'.
 %
