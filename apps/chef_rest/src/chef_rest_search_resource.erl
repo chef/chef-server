@@ -167,7 +167,7 @@ solr_query_url(ObjType, Db, Query) ->
     Fq = "%2BX_CHEF_type_CHEF_X%3A~s+%2BX_CHEF_database_CHEF_X%3Achef_~s",
     Url = "/solr/select?fq=" ++ Fq ++ "&indent=off&q=~s"
         "&start=0"
-        "&rows=20"
+        "&rows=500"
         "&wt=json"
         "&sort=",
     io_lib:format(Url, [ObjType, Db, Query]).
