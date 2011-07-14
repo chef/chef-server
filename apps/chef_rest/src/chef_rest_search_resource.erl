@@ -258,7 +258,9 @@ execute_solr_query(Query, ObjType, Db, S) ->
 % remove the JSON array markers.  The caller is responsible for adding
 % this back to create valid JSON.
 %
-fetch_result_rows(Ids = [_H | _T], BatchSize, S, Db, Acc) ->
+fetch_result_rows([], _BatchSize, _S, _Db, Acc) ->
+    Acc;
+fetch_result_rows(Ids, BatchSize, S, Db, Acc) when is_list(Ids) ->
     fetch_result_rows(safe_split(BatchSize, Ids), BatchSize, S, Db, Acc);
 fetch_result_rows({Ids, []}, _BatchSize, S, Db, Acc) ->
     Docs = chef_otto:bulk_get(S, Db, Ids),
