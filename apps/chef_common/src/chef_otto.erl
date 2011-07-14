@@ -1,21 +1,21 @@
-%
-% License:: Apache License, Version 2.0
-%
-% Licensed under the Apache License, Version 2.0 (the "License");
-% you may not use this file except in compliance with the License.
-% You may obtain a copy of the License at
-% 
-%     http://www.apache.org/licenses/LICENSE-2.0
-% 
-% Unless required by applicable law or agreed to in writing, software
-% distributed under the License is distributed on an "AS IS" BASIS,
-% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-% See the License for the specific language governing permissions and
-% limitations under the License.
-%
-% @copyright Copyright 2011 Opscode, Inc.
-% @version 0.0.2
-% @end
+%%%
+%%% License:: Apache License, Version 2.0
+%%%
+%%% Licensed under the Apache License, Version 2.0 (the "License");
+%%% you may not use this file except in compliance with the License.
+%%% You may obtain a copy of the License at
+%%%
+%%%     http://www.apache.org/licenses/LICENSE-2.0
+%%%
+%%% Unless required by applicable law or agreed to in writing, software
+%%% distributed under the License is distributed on an "AS IS" BASIS,
+%%% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%%% See the License for the specific language governing permissions and
+%%% limitations under the License.
+%%%
+%%% @copyright Copyright 2011 Opscode, Inc.
+%%% @version 0.0.2
+%%% @end
 -module(chef_otto).
 
 -export([
@@ -55,14 +55,14 @@ connect(Host, Port) ->
                                                        not_in_view}
                                                     | {user_not_found,
                                                        {no_doc, binary()}}.
-% @doc Return the user document for the username specified by `User'
-%
+%% @doc Return the user document for the username specified by `User'
+%%
 fetch_user(Server, User) when is_binary(User) ->
     {ok, Db} = couchbeam:open_db(Server, ?user_db, []),
     {ok, View} = couchbeam:view(Db, {?mixlib_auth_user_design, "by_username"},
                                 [{key, User}]),
     case couchbeam_view:first(View) of
-        {ok, {Row}} ->  
+        {ok, {Row}} ->
             UserId = ?gv(<<"id">>, Row),
             case couchbeam:open_doc(Db, UserId) of
                 {error, not_found} -> {user_not_found, {no_doc, UserId}};
@@ -76,7 +76,7 @@ fetch_user(Server, User) when is_list(User) ->
 
 
 -spec is_user_in_org(couchbeam:server(), db_key(), db_key()) -> boolean().
-% @doc Return true if `User' is in `Org' and false otherwise.
+%% @doc Return true if `User' is in `Org' and false otherwise.
 is_user_in_org(Server, User, Org) when is_binary(Org) ->
     try
         lists:member(Org, fetch_orgs_for_user(Server, User))
@@ -89,8 +89,8 @@ is_user_in_org(Server, User, Org) when is_list(Org) ->
     is_user_in_org(Server, User, list_to_binary(Org)).
 
 -spec fetch_orgs_for_user(couchbeam:server(), db_key()) -> [binary()].
-% @doc Return the list of organization names that username `User' is associated with
-%
+%% @doc Return the list of organization names that username `User' is associated with
+%%
 fetch_orgs_for_user(Server, User) when is_binary(User) ->
     case fetch_user(Server, User) of
         {user_not_found, Why} ->
@@ -118,7 +118,7 @@ fetch_orgs_for_user(Server, User) when is_list(User) ->
     fetch_orgs_for_user(Server, list_to_binary(User)).
 
 -spec fetch_all_users(couchbeam:server()) -> [term()] | {error, term()}.
-% Return a list of all user documents
+%% Return a list of all user documents
 fetch_all_users(Server) ->
     {ok, Db} = couchbeam:open_db(Server, ?user_db, []),
     {ok, View} = couchbeam:view(Db, {?mixlib_auth_user_design, "by_username"},
@@ -131,7 +131,7 @@ fetch_all_users(Server) ->
     end.
 
 -spec fetch_org_id(couchbeam:server(), binary()) -> binary() | not_found.
-% @doc Return the org GUID for a given organization name.
+%% @doc Return the org GUID for a given organization name.
 fetch_org_id(Server, OrgName) when is_binary(OrgName) ->
     case fetch_org(Server, OrgName) of
         {org_not_found, _} -> not_found;
@@ -142,7 +142,7 @@ fetch_org_id(Server, OrgName) when is_binary(OrgName) ->
     [tuple()]
         | {org_not_found, not_in_view}
         | {org_not_found, {no_doc, binary()}}.
-% @doc Return the organization document for a given organization name.
+%% @doc Return the organization document for a given organization name.
 fetch_org(Server, OrgName) when is_binary(OrgName) ->
     {ok, Db} = couchbeam:open_db(Server, ?user_db, []),
     {ok, View} = couchbeam:view(Db, {?mixlib_auth_org_design, "by_name"},
@@ -183,7 +183,7 @@ fetch_client(Server, OrgId, ClientName) when is_list(ClientName), is_binary(OrgI
 fetch_client(_Server, not_found, _ClientName) ->
     not_found.
 
-% FIXME: do we want to distinguish between client not found and org not found?
+%% FIXME: do we want to distinguish between client not found and org not found?
 -spec fetch_user_or_client_cert(couchbeam:server(), db_key(), db_key()) ->
     [tuple()] | not_found.
 fetch_user_or_client_cert(Server, OrgName, ClientName)
