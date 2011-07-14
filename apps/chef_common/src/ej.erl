@@ -35,17 +35,7 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--type json_string() :: binary().
--type json_null()   :: null.
--type json_number() :: integer() | float().
--type json_array()  :: [json_term()].
--type json_plist()  :: [{json_string(), json_term()}].
--type json_object() :: {struct, json_plist()}.
--type json_term()   :: json_string() | json_number() | json_array() |
-                       json_object() | json_null().
-
--type key_type()    :: binary() | integer() | first | last | new.
--type key_tuple()   :: {key_type()}.
+-include_lib("chef_common/include/ej.hrl").
 
 %% @doc Extract a value from `Obj'
 %%
