@@ -10,9 +10,14 @@
 -record(couch_mock_info, {valid,
                           success_val}).
 
+set_app_env() ->
+    application:set_env(chef_common, couchdb_host, "localhost"),
+    application:set_env(chef_common, couchdb_port, 5984).
+
 mock_lookup(#couch_mock_info{valid=Valid,
                              success_val=SuccVal}) ->
     [meck:new(M) || M <- [couchbeam, couchbeam_view]],
+    set_app_env(),
     meck:expect(couchbeam, server_connection, fun(_, _, _, _) -> cn end),
     meck:expect(couchbeam, open_db, fun(_, _, _) -> {ok, db} end),
     meck:expect(couchbeam, view, fun(db, {D, S},
@@ -34,6 +39,7 @@ mock_lookup(#couch_mock_info{valid=Valid,
 mock_bulk_lookup(#couch_mock_info{valid=Valid,
                                   success_val=SuccVal}) ->
     [meck:new(M) || M <- [couchbeam, couchbeam_view]],
+    set_app_env(),
     meck:expect(couchbeam, server_connection, fun(_, _, _, _) -> cn end),
     meck:expect(couchbeam, open_db, fun(_, _, _) -> {ok, db} end),
     meck:expect(couchbeam, view, fun(db, {D, S}, [{key, Name}]) ->
