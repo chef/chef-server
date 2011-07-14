@@ -26,12 +26,11 @@
 -include_lib("chef_common/include/ej.hrl").
 
 -export([request/2,
-         make_webui_account_chef_rest_client/1]).
+         make_webui_account_chef_rest_client/2]).
 
--spec make_webui_account_chef_rest_client(string()) -> #chef_rest_client{}.
+-spec make_webui_account_chef_rest_client(string(), string()) -> #chef_rest_client{}.
 
-make_webui_account_chef_rest_client(UserName) when is_list(UserName) ->
-    {ok, BaseUrl} = application:get_env(chef_common, account_api_url),
+make_webui_account_chef_rest_client(BaseUrl, UserName) when is_list(UserName) ->
     {ok, PrivateKey} = chef_keyring:get_key(webui),
     #chef_rest_client{base_url = BaseUrl,
                       user_name = UserName,
