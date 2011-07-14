@@ -20,11 +20,36 @@
 % @end
 -module(chef_solr).
 
--export([search/4, transform_query/1]).
+-export([search/2, make_query_from_params/1, add_org_guid_to_query/2]).
 
-search(SolrUrl, Query, CouchDb, ObjType) ->
-    Url = SolrUrl ++ make_solr_query_url(Query, CouchDb, ObjType),
-    io:format("~s~n", [Url]),
+-include_lib("webmachine/include/webmachine.hrl").
+
+-record(chef_solr_query, {query_string :: string(),
+                          filter_query :: string(),
+			  start :: integer(),
+                          rows :: integer(),
+                          sort :: string()}).
+
+make_query_from_params(Req) ->
+    % TODO: super awesome error messages
+    % TODO: verify that FilterQuery, Start, Rows and Sort have correct values
+    ObjType = wrq:path_info(object_type, Req),
+    QueryString = transform_query(http_uri:decode(wrq:get_qs_value("q", Req))),
+    FilterQuery = make_fq_type(ObjType),
+    {Start, _Any} = string:to_integer(http_uri:decode(wrq:get_qs_value("start", Req))),
+    {Rows, _Any} = string:to_integer(http_uri:decode(wrq:get_qs_value("rows", Req))),
+    Sort = http_uri:decode(wrq:get_qs_value("sort", Req)),
+    #chef_solr_query{query_string = QueryString,
+                     filter_query = FilterQuery,
+                     start = Start,
+                     rows = Rows,
+                     sort = Sort}.
+
+add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery}, OrgGuid) ->
+    Query#chef_solr_query{filter_query = "+X_CHEF_database_CHEF_X:chef_" ++ binary_to_list(OrgGuid) ++ " " ++ FilterQuery}.
+
+search(SolrUrl, Query) ->
+    Url = SolrUrl ++ make_solr_query_url(Query),
     % FIXME: error handling
     {ok, _Code, _Head, Body} = ibrowse:send_req(Url, [], get),
     SolrData = ejson:decode(Body),
@@ -36,7 +61,7 @@ transform_query(RawQuery) when is_list(RawQuery) ->
 transform_query(RawQuery) ->
     case chef_lucene:parse(RawQuery) of
         Query when is_binary(Query) ->
-            ibrowse_lib:url_encode(binary_to_list(Query));
+            binary_to_list(Query);
         _ ->
             throw({bad_query, RawQuery})
     end.
@@ -49,17 +74,16 @@ transform_query(RawQuery) ->
     % &indent=off
     % &q=content%3Aattr1__%3D__v%2A
 
-make_solr_query_url(Query, CouchDb, ObjType) ->
-    Fq = ibrowse_lib:url_encode("+X_CHEF_database_CHEF_X:chef_" ++ binary_to_list(CouchDb) ++ " " ++ make_fq_type(ObjType)),
+make_solr_query_url(#chef_solr_query{query_string = Query, filter_query = FilterQuery, start = Start, rows = Rows, sort = Sort}) ->
     Url = "/select?"
         "fq=~s"
         "&indent=off"
         "&q=~s"
-        "&start=0"
-        "&rows=500"
+        "&start=~i"
+        "&rows=~i"
         "&wt=json"
-        "&sort=",
-    io_lib:format(Url, [Fq, Query]).
+        "&sort=~s",
+    io_lib:format(Url, [ ibrowse_lib:url_encode(FilterQuery), ibrowse_lib:url_encode(Query), Start, Rows, ibrowse_lib:url_encode(Sort)] ).
 
 make_fq_type(ObjType) when ObjType =:= "node";
                            ObjType =:= "role";

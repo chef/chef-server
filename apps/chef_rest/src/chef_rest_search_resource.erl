@@ -31,6 +31,7 @@
                 couchbeam = undefined,
                 solr_url = undefined,
                 solr_query = undefined,
+		org_guid = undefined,
                 end_time,
                 batch_size = 5
 }).
@@ -43,9 +44,11 @@
 
 init(_Any) ->
     {ok, BatchSize} = application:get_env(chef_rest, bulk_fetch_batch_size),
+    {ok, SolrUrl} = application:get_env(chef_rest, solr_url),
     State = #state{start_time = chef_rest_util:iso_8601_utc(),
                    resource = atom_to_list(?MODULE),
-                   batch_size = BatchSize},
+                   batch_size = BatchSize,
+                   solr_url = SolrUrl },
     {ok, State}.
 
 get_header_fun(Req, State = #state{header_fun = HFun})
@@ -61,8 +64,17 @@ get_header_fun(Req, State = #state{header_fun = HFun})
 get_header_fun(_Req, State) ->
     {State#state.header_fun, State}.
 
-resource_exists(Req, State) ->
-    {true, Req, State}.
+resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
+    try
+        OrgGuid = fetch_org_guid(Req, State),
+        Query = chef_solr:add_org_guid_to_query(QueryWithoutGuid, OrgGuid),
+        {true, Req, State#state{org_guid = OrgGuid, solr_query = Query}}
+    catch
+        throw:org_not_found ->
+            NoOrg = bad_auth_message(org_not_found),
+            Req1 = wrq:set_resp_body(ejson:encode(NoOrg), Req),
+            {false, Req1, State}
+    end.
 
 verify_request_signature(Req, State) ->
     OrgName = wrq:path_info(organization_id, Req),
@@ -117,11 +129,10 @@ malformed_request(Req, State) ->
     {Malformed, Req1, State2} =
         try
             chef_authn:validate_headers(GetHeader, 300),
-            %% transform query first to avoid possible db fetch for org
-            %% guid for bad queries
-            Query = chef_solr:transform_query(http_uri:decode(wrq:get_qs_value("q", Req))),
-            % TODO Configure the location of solr
-            {false, Req, State1#state{solr_url = "http://localhost:8983/solr", solr_query = Query}}
+            % We fill in most stuff here in order to validate the query, but we don't add
+            % the organization database until resource_exists() (where we get the org id).
+            Query = chef_solr:make_query_from_params(Req),
+            {false, Req, State1#state{solr_query = Query}}
         catch
             throw:Why ->
                 Msg = bad_auth_message(Why),
@@ -180,22 +191,15 @@ fetch_org_guid(Req, #state{ organization_guid = Id, couchbeam = S}) ->
             end
     end.
 
-to_json(Req, State = #state{couchbeam = S, solr_url = SolrUrl, solr_query = Query,
+to_json(Req, State = #state{couchbeam = S,
+                            solr_url = SolrUrl,
+                            solr_query = Query,
+                            org_guid = OrgGuid,
                             batch_size = BatchSize}) ->
-    % FIXME: probably want to have a request parsing method and
-    % implement the valid_request callback.  In that case, we'll put
-    % the parsed/validated OrgName and ObjType into fields in the
-    % resource state record and they will be available here.
-    ObjType = wrq:path_info(object_type, Req),
     try
-        Db = fetch_org_guid(Req, State),
-        Ids = chef_solr:search(SolrUrl, Query, Db, ObjType),
-        {fetch_search_results_from_couch(S, Db, Ids, BatchSize), Req, State}
+        Ids = chef_solr:search(SolrUrl, Query),
+        {fetch_search_results_from_couch(S, OrgGuid, Ids, BatchSize), Req, State}
     catch
-        throw:org_not_found ->
-            NoOrg = bad_auth_message(org_not_found),
-            Req1 = wrq:set_resp_body(ejson:encode(NoOrg), Req),
-            {{halt, 404}, Req1, State};
         throw:X ->
 	    io:format("500! ~s~n", X),
             {{halt, 500}, Req, State}
