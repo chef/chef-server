@@ -24,7 +24,7 @@ clean:
 	@rm -f $(GRAMMARS)
 
 update: compile
-	@cd rel/chef_api;bin/chef_api restart
+	@cd rel/erchef;bin/erchef restart
 
 allclean:
 	@./rebar clean
@@ -51,26 +51,31 @@ dialyze: dialyzer
 dialyzer:
 	dialyzer -Wrace_conditions -Wspecdiffs apps/*/ebin
 
-rel: rel/chef_api
+rel: rel/erchef
 
 devrel: rel
 	@/bin/echo -n Symlinking deps and apps into release
-	@$(foreach dep,$(wildcard deps/*), /bin/echo -n .;rm -rf rel/chef_api/lib/$(shell basename $(dep))-* \
-           && ln -sf $(abspath $(dep)) rel/chef_api/lib;)
-	@$(foreach app,$(wildcard apps/*), /bin/echo -n .;rm -rf rel/chef_api/lib/$(shell basename $(app))-* \
-           && ln -sf $(abspath $(app)) rel/chef_api/lib;)
+	@$(foreach dep,$(wildcard deps/*), /bin/echo -n .;rm -rf rel/erchef/lib/$(shell basename $(dep))-* \
+           && ln -sf $(abspath $(dep)) rel/erchef/lib;)
+	@$(foreach app,$(wildcard apps/*), /bin/echo -n .;rm -rf rel/erchef/lib/$(shell basename $(app))-* \
+           && ln -sf $(abspath $(app)) rel/erchef/lib;)
 	@/bin/echo done.
 	@/bin/echo  Run \'make update\' to pick up changes in a running VM.
 
-rel/chef_api: compile
-	@/bin/echo
-	@/bin/echo Make sure opscode-chef and opscode-chef-api share the same parent directory.
-	@/bin/echo Otherwise release generation will fail.
+rel/erchef: compile
+	@/bin/echo 'building OTP release package for'
+	@/bin/echo '                _          _  '
+	@/bin/echo '               | |        | | '
+	@/bin/echo ' _   ,_    __  | |     _  | | '
+	@/bin/echo '|/  /  |  /    |/ \   |/  |/  '
+	@/bin/echo '|__/   |_/\___/|   |_/|__/|__/'
+	@/bin/echo '                          |\  '
+	@/bin/echo '                          |/  '
 	@/bin/echo
 	@./rebar generate
 
 relclean:
-	@rm -rf rel/chef_api
+	@rm -rf rel/erchef
 
 $(DEPS):
 	@./rebar get-deps

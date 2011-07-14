@@ -6,17 +6,17 @@ Currently implemented endpoints are:
 
 Note: Parameters are enclosed in angle brackets
 
-Building chef_api (tl;dr version)
+Building erchef (tl;dr version)
 ---------------------------------
 1) Install Erlang R14B03 or later
 
 2) Run 'make rel'
 
-3) 'cd rel/chef_api;bin/chef_api start'
+3) 'cd rel/erchef;bin/erchef start'
 
 4) Profit!
 
-Building chef_api (longer version)
+Building erchef (longer version)
 ----------------------------------
 1) Install Erlang R14B03 or later
 
@@ -31,21 +31,21 @@ Building chef_api (longer version)
    chef_common. All tests should pass.
 
 5) (Optional) If you've got an up to date PLT file (see #2) you can use
-   dialyzer to perform static analysis on chef_api. Running 'make dialyzer'
+   dialyzer to perform static analysis on erchef. Running 'make dialyzer'
    will perform analysis against chef_rest and chef_common.
 
-6) chef_api is designed to be deployed as a standalone OTP release. You can
+6) erchef is designed to be deployed as a standalone OTP release. You can
    build a release via either 'make rel' or 'make devrel'. The devrel target
-   is highly recommended for developers working on chef_api directly. This
+   is highly recommended for developers working on erchef directly. This
    target symlinks all dependencies and application so the release doesn't
    have to be rebuilt each time code is changed.
 
    If a release has been built via 'make devrel' you can rebuild and load
-   changed code into the running chef_api instance via 'make update'.
+   changed code into the running erchef instance via 'make update'.
    NOTE: This performs a warm reboot of the Erlang VM so any application
    state will be totally lost.
 
-7) You can start the chef_api release with an interactive shell via the
+7) You can start the erchef release with an interactive shell via the
    command below:
 
-   cd rel/chef_api;bin/chef_api console
+   cd rel/erchef;bin/erchef console

@@ -1,4 +1,5 @@
 rel/chef_api/*
+rel/erchef/*
 deps/*
 apps/*/ebin/*
 .DS_Store
