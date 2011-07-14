@@ -44,7 +44,9 @@
 
 -spec connect() -> couchbeam:server().
 connect() ->
-    connect("localhost", 5984).
+    {ok, Host} = application:get_env(chef_common, couchdb_host),
+    {ok, Port} = application:get_env(chef_common, couchdb_port),
+    connect(Host, Port).
 
 -spec connect(string(), http_port()) -> couchbeam:server().
 connect(Host, Port) ->

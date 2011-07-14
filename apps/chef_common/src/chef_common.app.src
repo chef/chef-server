@@ -12,6 +12,6 @@
                   mochiweb,
                   oauth
                  ]},
-  {mod, {chef_common_app, []}},
+  %%{mod, {chef_common_app, []}},
   {env, []}
  ]}.

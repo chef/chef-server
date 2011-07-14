@@ -25,6 +25,9 @@
 -export([start/2, stop/1]).
 
 start(_StartType, _StartArgs) ->
+    ConfigFile = filename:absname(filename:join(["etc", "ibrowse", "ibrowse.config"])),
+    error_logger:info_msg("Loading ibrowse configuration from ~s~n", [ConfigFile]),
+    ok = ibrowse:rescan_config(ConfigFile),
     chef_common_sup:start_link().
 
 stop(_State) ->
