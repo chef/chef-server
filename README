@@ -49,3 +49,11 @@ Building erchef (longer version)
    command below:
 
    cd rel/erchef;bin/erchef console
+
+Deploying to rs-preprod
+-----------------------
+
+    knife ec2 server create -G rs-preprod,platform-server \
+        --flavor m1.small -I ami-9a9c6bf3 \
+        -x ubuntu -r 'role[opscode-erchef],role[rs-preprod]' \
+        -i ~/.ssh/opscode-preprod-20101208
