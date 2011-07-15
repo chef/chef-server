@@ -53,8 +53,12 @@ search(SolrUrl, Query) ->
     % FIXME: error handling
     {ok, _Code, _Head, Body} = ibrowse:send_req(Url, [], get),
     SolrData = ejson:decode(Body),
-    DocList = ej:get({<<"response">>, <<"docs">>}, SolrData),
-    [ ej:get({<<"X_CHEF_id_CHEF_X">>}, Doc) || Doc <- DocList ].
+    Response = ej:get({<<"response">>}, SolrData),
+    Start = ej:get({<<"start">>}, Response),
+    NumFound = ej:get({<<"numFound">>}, Response),
+    DocList = ej:get({<<"docs">>}, Response),
+    Ids = [ ej:get({<<"X_CHEF_id_CHEF_X">>}, Doc) || Doc <- DocList ],
+    { ok, Start, NumFound, Ids }.
 
 transform_query(RawQuery) when is_list(RawQuery) ->
     transform_query(list_to_binary(RawQuery));
@@ -79,8 +83,8 @@ make_solr_query_url(#chef_solr_query{query_string = Query, filter_query = Filter
         "fq=~s"
         "&indent=off"
         "&q=~s"
-        "&start=~i"
-        "&rows=~i"
+        "&start=~B"
+        "&rows=~B"
         "&wt=json"
         "&sort=~s",
     io_lib:format(Url, [ ibrowse_lib:url_encode(FilterQuery), ibrowse_lib:url_encode(Query), Start, Rows, ibrowse_lib:url_encode(Sort)] ).

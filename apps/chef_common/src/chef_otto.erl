@@ -217,7 +217,7 @@ bulk_get(Server, DbName, Ids) ->
                            {Doc} = ?gv(<<"doc">>, Row),
                            [Doc|Acc]
                    end,
-     couchbeam_view:fold(View, DocCollector).
+    lists:reverse(couchbeam_view:fold(View, DocCollector)).
 
 
 -spec fetch_auth_join(couchbeam:server(), db_key()) -> [tuple()]

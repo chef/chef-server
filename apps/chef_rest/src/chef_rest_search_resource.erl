@@ -197,16 +197,16 @@ to_json(Req, State = #state{couchbeam = S,
                             org_guid = OrgGuid,
                             batch_size = BatchSize}) ->
     try
-        Ids = chef_solr:search(SolrUrl, Query),
-        {fetch_search_results_from_couch(S, OrgGuid, Ids, BatchSize), Req, State}
+        {ok, Start, NumFound, Ids} = chef_solr:search(SolrUrl, Query),
+        {make_search_results(S, OrgGuid, Ids, BatchSize, Start, NumFound), Req, State}
     catch
         throw:X ->
 	    io:format("500! ~s~n", X),
             {{halt, 500}, Req, State}
     end.
 
-fetch_search_results_from_couch(S, Db, Ids, BatchSize) ->
-    Ans0 = search_result_start(0, length(Ids)),
+make_search_results(S, Db, Ids, BatchSize, Start, NumFound) ->
+    Ans0 = search_result_start(Start, NumFound),
     Ans1 = fetch_result_rows(Ids, BatchSize, S, ?db_for_guid(Db), Ans0),
     search_result_finish(Ans1).
 
