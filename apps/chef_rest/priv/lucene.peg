@@ -6,7 +6,7 @@ expression <- operation / group / field_phrase / field / field_range / term / st
 
 term <- keyword valid_letter+ / !keyword valid_letter+;
 
-field <- name:field_name ":" arg:(term / group / string);
+field <- name:field_name ":" arg:(fuzzy_op / term / group / string);
 
 field_phrase <- name:field_name ':' '"' str:(term (space term)*) '"';
 

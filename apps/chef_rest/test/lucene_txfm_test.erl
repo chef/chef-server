@@ -156,8 +156,13 @@ term_boosting_test_() ->
     [ ?_assertEqual(?i2b(I), chef_lucene:parse(I)) || I <- Tests ].
 
 fuzzy_query_test_() ->
-    Tests = ["word~", "word~0.5", "\"one two\"~10"],
+    Tests = ["word~", "word~0.5"],
     [ ?_assertEqual(?i2b(I), chef_lucene:parse(I)) || I <- Tests ].
+
+fielded_fuzzy_query_test_() ->
+    Tests = [{"afield:word~", <<"content:afield__=__word~">>},
+             {"afield:word~0.5", <<"content:afield__=__word~0.5">>}],
+    [ ?_assertEqual(Expect, chef_lucene:parse(I)) || {I, Expect} <- Tests ].
 
 star_star_test() ->
     ?assertEqual(<<"*:*">>, chef_lucene:parse(<<"*:*">>)).

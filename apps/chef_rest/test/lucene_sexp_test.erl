@@ -159,9 +159,17 @@ term_boosting_test_() ->
 
 fuzzy_query_test_() ->
     Tests = [{"word~", {fuzzy, <<"word">>}},
-             {"word~0.5", {fuzzy, <<"word">>, 0.5}},
-             {"\"one two\"~10", {fuzzy, {phrase, <<"one two">>}, 10}}],
+             {"word~0.5", {fuzzy, <<"word">>, 0.5}}],
     [ ?_assertEqual(E, hd(lucene:parse(I))) || {I, E} <- Tests ].
+
+fielded_fuzzy_query_test_() ->
+    Tests = [{"afield:word~", [{field, <<"afield">>}, {term, {fuzzy, <<"word">>}}]},
+             {"afield:word~0.5", [{field, <<"afield">>}, {term, {fuzzy, <<"word">>, 0.5}}]}],
+    [ ?_assertEqual(E, hd(lucene:parse(I))) || {I, E} <- Tests ].
+
+%% TODO: support for proximity queries?
+%%     {"\"one two\"~10", {proximity, {phrase, <<"one two">>}, 10}}],
+%% as well as then a fielded version
 
 % TODO
 % - fields and boolean, unary ops
