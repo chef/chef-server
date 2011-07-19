@@ -95,4 +95,4 @@ make_fq_type(ObjType) when ObjType =:= "node";
                            ObjType =:= "environment" ->
     "+X_CHEF_type_CHEF_X:" ++ ObjType;
 make_fq_type(ObjType) ->
-    "+X_CHEF_type_CHEF:data_bag +data_bag:" ++ ObjType.
+    "+X_CHEF_type_CHEF_X:data_bag_item +data_bag:" ++ ObjType.
