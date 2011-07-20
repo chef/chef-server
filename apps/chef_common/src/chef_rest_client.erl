@@ -27,6 +27,7 @@
 
 -export([request/2,
          make_webui_chef_rest_client/2,
+         generate_signed_headers/3,
          make_chef_rest_client/3]).
 
 
@@ -92,6 +93,24 @@ generate_signed_headers(PrivateKey, User, Method, Path) ->
     % investigating whether ibrowse can be taught how to handle header
     % names that are binaries to avoid conversion.
     [{ensure_list(K), ensure_list(V)} || {K, V} <- SignedHeaders].
+
+%% For testing
+generate_signed_headers(#chef_rest_client{base_url = BaseUrl,
+                                          user_name = UserName,
+                                          private_key = PrivateKey,
+                                          request_source = RequestSource},
+                        Path, Method) ->
+    Url = BaseUrl ++ Path,
+    ExtraHeaders = case RequestSource of
+                       web ->
+                           [{"x_ops_request_source", "web"}];
+                       user ->
+                           []
+                   end,
+    Headers0 = generate_signed_headers(PrivateKey, UserName, Method, Path),
+    Headers = [{"Accept", "application/json"}|Headers0] ++ ExtraHeaders,
+    {Url, Headers}.
+
 
 -spec ensure_list(binary() | list()) -> list().
 

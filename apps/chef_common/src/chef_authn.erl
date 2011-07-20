@@ -24,6 +24,7 @@
 % It can be used to sign HTTP requests to send to a Chef server or to
 % validate such requests (for server implementation).
 -module(chef_authn).
+-include_lib("eunit/include/eunit.hrl").
 
 -define(buf_size, 16384).
 -define(signing_version, <<"1.0">>).

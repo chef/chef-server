@@ -1,0 +1,159 @@
+-module(search_resource_test).
+
+-include_lib("eunit/include/eunit.hrl").
+
+%% -define(dispatch_file, "../priv/dispatch.conf").
+-define(dispatch_file, "../../apps/chef_rest/priv/dispatch.conf").
+
+%% FIXME: this is copy/paste from the chef_rest_search_resource module
+-record(state, {start_time,
+                resource,
+                organization_guid,
+                organization_name,
+                object_type,
+                user_name,
+                header_fun = undefined,
+                couchbeam = undefined,
+                solr_url = undefined,
+                solr_query = undefined,
+		org_guid = undefined,
+                end_time,
+                batch_size = 5
+}).
+%% /FIXME
+
+malformed_request_test_() ->
+    {setup,
+     fun() ->
+             application:start(crypto)
+     end,
+     fun(_) ->
+             stopping
+     end,
+     malformed_request_tests()}.
+
+malformed_request_tests() ->
+    {foreach,
+     fun() ->
+             meck:new(wrq)
+     end,
+     fun(_) ->
+             meck:unload(wrq)
+     end,
+    [
+     {"properly formed",
+      fun() ->
+              {ok, KeyBin} = file:read_file("../test/akey.pem"),
+              PrivateKey = chef_authn:extract_private_key(KeyBin),
+              Time = httpd_util:rfc1123_date(),
+              Path = "does-not-matter-comes-from-meck-mocks",
+              SignedHeadersBin =
+                  chef_authn:sign_request(PrivateKey, <<"alice">>, <<"GET">>, Time, Path),
+              meck:expect(wrq, get_req_header,
+                          fun(HName, _Req) -> proplists:get_value(HName, SignedHeadersBin) end),
+              meck:expect(wrq, path_info, fun(object_type, _Req) -> "node" end),
+              meck:expect(wrq, get_qs_value, fun("q", _Req) ->
+                                                     "myquery";
+                                                ("start", _Req) ->
+                                                     "0";
+                                                ("rows", _Req) ->
+                                                     "20";
+                                                ("sort", _Req) ->
+                                                     "X_CHEF_id_CHEF_X+asc"
+                                             end),
+              {IsMalformed, _Req1, State} =
+                  chef_rest_search_resource:malformed_request(mocked, #state{}),
+              ?assertEqual(false, IsMalformed),
+              SolrQuery = State#state.solr_query,
+              %% FIXME: this is a record defined in chef_solr
+              ?assertEqual({chef_solr_query, "myquery", "+X_CHEF_type_CHEF_X:node",
+                            0, 20, "X_CHEF_id_CHEF_X+asc"}, SolrQuery),
+              ?assert(meck:validate(wrq))
+      end},
+
+     %% {"q param defaults to '*:*'",
+     %%  fun() ->
+     %%          {ok, KeyBin} = file:read_file("../test/akey.pem"),
+     %%          PrivateKey = chef_authn:extract_private_key(KeyBin),
+     %%          Time = httpd_util:rfc1123_date(),
+     %%          Path = "/organizations/oc/search/nodes?q=myquery",
+     %%          SignedHeadersBin =
+     %%              chef_authn:sign_request(PrivateKey, <<"alice">>, <<"GET">>, Time, Path),
+     %%          meck:expect(wrq, get_req_header,
+     %%                      fun(HName, _Req) -> proplists:get_value(HName, SignedHeadersBin) end),
+     %%          meck:expect(wrq, path_info, fun(object_type, _Req) -> "nodes" end),
+     %%          meck:expect(wrq, get_qs_value, fun("q", _Req) ->
+     %%                                                 undefined;
+     %%                                            ("start", _Req) ->
+     %%                                                 "0";
+     %%                                            ("rows", _Req) ->
+     %%                                                 "20";
+     %%                                            ("sort", _Req) ->
+     %%                                                 "X_CHEF_id_CHEF_X+asc"
+     %%                                         end),
+     %%          {IsMalformed, _Req1, _State} =
+     %%              chef_rest_search_resource:malformed_request(mocked, #state{}),
+     %%          ?assertEqual(false, IsMalformed),
+     %%          ?assert(meck:validate(wrq))
+     %%  end},
+
+
+     {"missing all auth headers",
+      fun() ->
+              meck:expect(wrq, get_req_header, fun(_HName, _Req) -> undefined end),
+              meck:expect(wrq, set_resp_body, fun(Body, _Req) -> Body end),
+              {IsMalformed, GotMsg, _State} =
+                  chef_rest_search_resource:malformed_request(mocked, #state{}),
+              ErrorMsg = list_to_binary("{\"error\":[\"missing auth headers\"],"
+                                        "\"missing_headers\":["
+                                        "\"X-Ops-UserId\",\"X-Ops-Timestamp\""
+                                        ",\"X-Ops-Sign\",\"X-Ops-Content-Hash\"]}"),
+              ?assertEqual({true, ErrorMsg}, {IsMalformed, GotMsg}),
+              ?assert(meck:validate(wrq))
+      end},
+
+     {"missing X-Ops-Timestamp header",
+      fun() ->
+              meck:expect(wrq, get_req_header,
+                          fun(HName, _Req) ->
+                                  Headers = lists:keydelete(<<"X-Ops-Timestamp">>, 1,
+                                                            all_auth_headers()),
+                                  proplists:get_value(HName, Headers)
+                          end),
+              meck:expect(wrq, set_resp_body, fun(Body, _Req) -> Body end),
+              {IsMalformed, GotMsg, _State} =
+                  chef_rest_search_resource:malformed_request(mocked, #state{}),
+              ErrorMsg = list_to_binary("{\"error\":[\"missing auth headers\"],"
+                                        "\"missing_headers\":[\"X-Ops-Timestamp\"]}"),
+              ?assertEqual({true, ErrorMsg}, {IsMalformed, GotMsg}),
+              ?assert(meck:validate(wrq))
+      end}
+
+     %% {"missing all query params",
+     %%  fun() ->
+     %%          meck:expect(wrq, get_req_header,
+     %%                      fun(HName, _Req) ->
+     %%                              Headers = lists:keydelete(<<"X-Ops-Timestamp">>, 1,
+     %%                                                        all_auth_headers()),
+     %%                              proplists:get_value(HName, all_auth_headers())
+     %%                      end),
+     %%          meck:expect(wrq, set_resp_body, fun(Body, _Req) -> Body end),
+
+     %%  end}
+
+    ]}.
+
+
+all_auth_headers() ->
+    [
+     {<<"X-Ops-Content-Hash">>, "1"},
+     {<<"X-Ops-UserId">>, <<"2">>},
+     {<<"X-Ops-Sign">>, <<"3">>},
+     {<<"X-Ops-Timestamp">>, <<"4">>},
+     {<<"X-Ops-Authorization-1">>, <<"10">>},
+     {<<"X-Ops-Authorization-2">>, <<"20">>},
+     {<<"X-Ops-Authorization-3">>, <<"30">>},
+     {<<"X-Ops-Authorization-4">>, <<"40">>},
+     {<<"X-Ops-Authorization-5">>, <<"50">>},
+     {<<"X-Ops-Authorization-6">>, <<"60">>}].
+
