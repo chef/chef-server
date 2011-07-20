@@ -139,8 +139,11 @@ canonical_path(Path = <<"/">>) ->
     Path;
 canonical_path(Path) ->
     NoDoubles = re:replace(Path, "/+/", <<"/">>, [{return, binary}, global]),
-    re:replace(NoDoubles, "/$", % fix emacs erlang-mode: "
-               "", [{return, binary}]).
+    Path1 = re:replace(NoDoubles, "/$", % fix emacs erlang-mode: "
+                       "", [{return, binary}]),
+    %% remove query parameters
+    re:replace(Path1, "\\?.*$", "", [{return, binary}]).
+
 
 %% @doc Canonicalize HTTP method as all uppercase binary
 
@@ -404,6 +407,7 @@ read_cert(Bin) when is_binary(Bin) ->
 -ifdef(TEST).
 
 -define(path, <<"/organizations/clownco">>).
+-define(path_with_query, <<"/organizations/clownco?a=1&b=2">>).
 -define(hashed_path, <<"YtBWDn1blGGuFIuKksdwXzHU9oE=">>).
 
 -define(body, <<"Spec Body">>).
@@ -435,6 +439,11 @@ read_cert(Bin) when is_binary(Bin) ->
 
 hashed_path_test() ->
     ?assertEqual(?hashed_path, hash_string(canonical_path(?path))).
+
+hashed_path_query_params_are_ignored_test() ->
+    %% for X-Ops_sign: version=1.0, query params are not included in
+    %% the hash of the path for request verification.
+    ?assertEqual(?hashed_path, hash_string(canonical_path(?path_with_query))).
 
 hashed_body_test() ->
     ?assertEqual(?hashed_body, hashed_body(?body)).
