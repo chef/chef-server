@@ -1,0 +1,13 @@
+{application, fast_log,
+ [
+  {description, "Simple, fast application logging"},
+  {vsn, "0.1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+		  sasl
+                 ]},
+  {mod, { fast_log_app, []}},
+  {env, []}
+ ]}.

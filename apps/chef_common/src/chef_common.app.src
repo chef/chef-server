@@ -10,7 +10,8 @@
                   ejson,
                   ibrowse,
                   mochiweb,
-                  oauth
+                  oauth,
+		  fast_log
                  ]},
   %%{mod, {chef_common_app, []}},
   {env, []}
