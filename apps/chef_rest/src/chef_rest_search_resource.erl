@@ -51,18 +51,39 @@ init(_Any) ->
                    solr_url = SolrUrl },
     {ok, State}.
 
-get_header_fun(Req, State = #state{header_fun = HFun})
-  when HFun =:= undefined ->
-    GetHeader = fun(H) ->
-                        case wrq:get_req_header(H, Req) of
-                            B when is_binary(B) -> B;
-                            S when is_list(S) -> iolist_to_binary(S);
-                            undefined -> undefined
-                        end
-                end,
-    {GetHeader, State#state{header_fun = GetHeader}};
-get_header_fun(_Req, State) ->
-    {State#state.header_fun, State}.
+malformed_request(Req, State) ->
+    {GetHeader, State1} = get_header_fun(Req, State),
+    {Malformed, Req1, State2} =
+        try
+            chef_authn:validate_headers(GetHeader, 300),
+            % We fill in most stuff here in order to validate the query, but we don't add
+            % the organization database until resource_exists() (where we get the org id).
+            Query = chef_solr:make_query_from_params(Req),
+            {false, Req, State1#state{solr_query = Query}}
+        catch
+            throw:Why ->
+                Msg = bad_auth_message(Why),
+                NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),
+                {true, NewReq, State1}
+        end,
+    {Malformed, Req1, State2}.
+
+is_authorized(Req, State) ->
+    OrgName = list_to_binary(wrq:path_info(organization_id, Req)),
+    UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
+    S = chef_otto:connect(),
+    case verify_request_signature(Req, State) of
+	{true, Req1, State1} ->
+	    case chef_otto:is_user_in_org(S, UserName, OrgName) of
+		true -> {true, Req1, State1};
+		false ->
+		    Msg = bad_auth_message(not_member_of_org),
+		    Json = ejson:encode(Msg),
+                    Req2 = wrq:set_resp_body(Json, Req),
+		    {false, Req2, State1}
+	    end;
+	Other -> Other
+    end.
 
 resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
     try
@@ -75,6 +96,19 @@ resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
             Req1 = wrq:set_resp_body(ejson:encode(NoOrg), Req),
             {false, Req1, State}
     end.
+
+get_header_fun(Req, State = #state{header_fun = HFun})
+  when HFun =:= undefined ->
+    GetHeader = fun(H) ->
+                        case wrq:get_req_header(H, Req) of
+                            B when is_binary(B) -> B;
+                            S when is_list(S) -> iolist_to_binary(S);
+                            undefined -> undefined
+                        end
+                end,
+    {GetHeader, State#state{header_fun = GetHeader}};
+get_header_fun(_Req, State) ->
+    {State#state.header_fun, State}.
 
 verify_request_signature(Req, State) ->
     OrgName = wrq:path_info(organization_id, Req),
@@ -107,40 +141,6 @@ verify_request_signature(Req, State) ->
             end
     end.
 
-is_authorized(Req, State) ->
-    OrgName = list_to_binary(wrq:path_info(organization_id, Req)),
-    UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
-    S = chef_otto:connect(),
-    case verify_request_signature(Req, State) of
-	{true, Req1, State1} ->
-	    case chef_otto:is_user_in_org(S, UserName, OrgName) of
-		true -> {true, Req1, State1};
-		false -> 
-		    Msg = bad_auth_message(not_member_of_org),
-		    Json = ejson:encode(Msg),
-                    Req2 = wrq:set_resp_body(Json, Req),
-		    {false, Req2, State1}
-	    end;
-	Other -> Other
-    end.	  
-
-malformed_request(Req, State) ->
-    {GetHeader, State1} = get_header_fun(Req, State),
-    {Malformed, Req1, State2} =
-        try
-            chef_authn:validate_headers(GetHeader, 300),
-            % We fill in most stuff here in order to validate the query, but we don't add
-            % the organization database until resource_exists() (where we get the org id).
-            Query = chef_solr:make_query_from_params(Req),
-            {false, Req, State1#state{solr_query = Query}}
-        catch
-            throw:Why ->
-                Msg = bad_auth_message(Why),
-                NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),
-                {true, NewReq, State1}
-        end,
-    {Malformed, Req1, State2}.
-
 body_or_default(Req, Default) ->
     case wrq:req_body(Req) of
         undefined -> Default;
@@ -166,12 +166,10 @@ bad_auth_message(org_not_found) ->
 bad_auth_message({bad_query, RawQuery}) ->
     {[{<<"error">>, [<<"invalid search query">>]},
               {<<"query">>, RawQuery}]};
-bad_auth_message(not_member_of_org) -> 
+bad_auth_message(not_member_of_org) ->
     {[{<<"error">>, [<<"Not a member of the organization">>]}]};
 bad_auth_message(_) ->
     {[{<<"error">>, [<<"problem with headers">>]}]}.
-
-
 
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
