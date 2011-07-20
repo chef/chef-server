@@ -150,26 +150,26 @@ body_or_default(Req, Default) ->
 % FIXME: perhaps rename as these aren't just auth related messages,
 % but the organization seems useful.
 bad_auth_message(bad_sig) ->
-    {struct, [{<<"error">>, [<<"bag signature">>]}]};
+    {[{<<"error">>, [<<"bad signature">>]}]};
 bad_auth_message(no_cert) ->
-    {struct, [{<<"error">>, [<<"user, client, or organization not found">>]}]};
+    {[{<<"error">>, [<<"user, client, or organization not found">>]}]};
 bad_auth_message({missing_headers, Missing}) ->
-    {struct, [{<<"error">>,
+    {[{<<"error">>,
                [<<"missing auth headers">>]},
               {<<"missing_headers">>, Missing}]};
 bad_auth_message(bad_clock) ->
-    {struct, [{<<"error">>, [<<"check clock">>]}]};
+    {[{<<"error">>, [<<"check clock">>]}]};
 bad_auth_message(bad_sign_desc) ->
-    {struct, [{<<"error">>, [<<"bad signing description">>]}]};
+    {[{<<"error">>, [<<"bad signing description">>]}]};
 bad_auth_message(org_not_found) ->
-    {struct, [{<<"error">>, [<<"organization not found">>]}]};
+    {[{<<"error">>, [<<"organization not found">>]}]};
 bad_auth_message({bad_query, RawQuery}) ->
-    {struct, [{<<"error">>, [<<"invalid search query">>]},
+    {[{<<"error">>, [<<"invalid search query">>]},
               {<<"query">>, RawQuery}]};
 bad_auth_message(not_member_of_org) -> 
-    {struct, [{<<"error">>, [<<"Not a member of the organization">>]}]};
+    {[{<<"error">>, [<<"Not a member of the organization">>]}]};
 bad_auth_message(_) ->
-    {struct, [{<<"error">>, [<<"problem with headers">>]}]}.
+    {[{<<"error">>, [<<"problem with headers">>]}]}.
 
 
 
