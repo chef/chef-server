@@ -43,12 +43,7 @@ malformed_request_tests() ->
     [
      {"properly formed",
       fun() ->
-              {ok, KeyBin} = file:read_file("../test/akey.pem"),
-              PrivateKey = chef_authn:extract_private_key(KeyBin),
-              Time = httpd_util:rfc1123_date(),
-              Path = "does-not-matter-comes-from-meck-mocks",
-              SignedHeadersBin =
-                  chef_authn:sign_request(PrivateKey, <<"alice">>, <<"GET">>, Time, Path),
+              SignedHeadersBin = get_signed_headers(),
               meck:expect(wrq, get_req_header,
                           fun(HName, _Req) -> proplists:get_value(HName, SignedHeadersBin) end),
               meck:expect(wrq, path_info, fun(object_type, _Req) -> "node" end),
@@ -73,12 +68,7 @@ malformed_request_tests() ->
 
      {"q param defaults to '*:*'",
       fun() ->
-              {ok, KeyBin} = file:read_file("../test/akey.pem"),
-              PrivateKey = chef_authn:extract_private_key(KeyBin),
-              Time = httpd_util:rfc1123_date(),
-              Path = "does-not-matter-comes-from-meck-mocks",
-              SignedHeadersBin =
-                  chef_authn:sign_request(PrivateKey, <<"alice">>, <<"GET">>, Time, Path),
+              SignedHeadersBin = get_signed_headers(),
               meck:expect(wrq, get_req_header,
                           fun(HName, _Req) -> proplists:get_value(HName, SignedHeadersBin) end),
               meck:expect(wrq, path_info, fun(object_type, _Req) -> "node" end),
@@ -124,11 +114,6 @@ malformed_request_tests() ->
                                   proplists:get_value(HName, Headers)
                           end),
               meck:expect(wrq, set_resp_body, fun(Body, _Req) -> Body end),
-
-
-
-
-
               {IsMalformed, GotMsg, _State} =
                   chef_rest_search_resource:malformed_request(mocked, #state{}),
               ErrorMsg = list_to_binary("{\"error\":[\"missing required authentication header(s) "
@@ -140,12 +125,7 @@ malformed_request_tests() ->
 
      {"time out of bounds",
       fun() ->
-              {ok, KeyBin} = file:read_file("../test/akey.pem"),
-              PrivateKey = chef_authn:extract_private_key(KeyBin),
-              Time = httpd_util:rfc1123_date(),
-              Path = "does-not-matter-comes-from-meck-mocks",
-              SignedHeadersBin =
-                  chef_authn:sign_request(PrivateKey, <<"alice">>, <<"GET">>, Time, Path),
+              SignedHeadersBin = get_signed_headers(),
               SignedHeadersBin1 = lists:keyreplace(<<"X-Ops-Timestamp">>, 1, SignedHeadersBin,
                                                    {<<"X-Ops-Timestamp">>, <<"2011-06-21T19:06:35Z">>}),
               meck:expect(wrq, get_req_header,
@@ -173,6 +153,13 @@ malformed_request_tests() ->
       end}
 
     ]}.
+
+get_signed_headers() ->
+    {ok, KeyBin} = file:read_file("../test/akey.pem"),
+    PrivateKey = chef_authn:extract_private_key(KeyBin),
+    Time = httpd_util:rfc1123_date(),
+    Path = "does-not-matter-comes-from-meck-mocks",
+    chef_authn:sign_request(PrivateKey, <<"alice">>, <<"GET">>, Time, Path).
 
 
 all_auth_headers() ->
