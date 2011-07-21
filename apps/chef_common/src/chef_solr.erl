@@ -34,7 +34,12 @@ make_query_from_params(Req) ->
     % TODO: super awesome error messages
     % TODO: verify that FilterQuery, Start, Rows and Sort have correct values
     ObjType = wrq:path_info(object_type, Req),
-    QueryString = transform_query(http_uri:decode(wrq:get_qs_value("q", Req))),
+    QueryString = case wrq:get_qs_value("q", Req) of
+                      undefined ->
+                          "*:*";                % default query string
+                      Query ->
+                          transform_query(http_uri:decode(Query))
+                  end,
     FilterQuery = make_fq_type(ObjType),
     {Start, _Any} = string:to_integer(http_uri:decode(wrq:get_qs_value("start", Req))),
     {Rows, _Any} = string:to_integer(http_uri:decode(wrq:get_qs_value("rows", Req))),

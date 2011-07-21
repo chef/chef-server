@@ -71,31 +71,35 @@ malformed_request_tests() ->
               ?assert(meck:validate(wrq))
       end},
 
-     %% {"q param defaults to '*:*'",
-     %%  fun() ->
-     %%          {ok, KeyBin} = file:read_file("../test/akey.pem"),
-     %%          PrivateKey = chef_authn:extract_private_key(KeyBin),
-     %%          Time = httpd_util:rfc1123_date(),
-     %%          Path = "/organizations/oc/search/nodes?q=myquery",
-     %%          SignedHeadersBin =
-     %%              chef_authn:sign_request(PrivateKey, <<"alice">>, <<"GET">>, Time, Path),
-     %%          meck:expect(wrq, get_req_header,
-     %%                      fun(HName, _Req) -> proplists:get_value(HName, SignedHeadersBin) end),
-     %%          meck:expect(wrq, path_info, fun(object_type, _Req) -> "nodes" end),
-     %%          meck:expect(wrq, get_qs_value, fun("q", _Req) ->
-     %%                                                 undefined;
-     %%                                            ("start", _Req) ->
-     %%                                                 "0";
-     %%                                            ("rows", _Req) ->
-     %%                                                 "20";
-     %%                                            ("sort", _Req) ->
-     %%                                                 "X_CHEF_id_CHEF_X+asc"
-     %%                                         end),
-     %%          {IsMalformed, _Req1, _State} =
-     %%              chef_rest_search_resource:malformed_request(mocked, #state{}),
-     %%          ?assertEqual(false, IsMalformed),
-     %%          ?assert(meck:validate(wrq))
-     %%  end},
+     {"q param defaults to '*:*'",
+      fun() ->
+              {ok, KeyBin} = file:read_file("../test/akey.pem"),
+              PrivateKey = chef_authn:extract_private_key(KeyBin),
+              Time = httpd_util:rfc1123_date(),
+              Path = "does-not-matter-comes-from-meck-mocks",
+              SignedHeadersBin =
+                  chef_authn:sign_request(PrivateKey, <<"alice">>, <<"GET">>, Time, Path),
+              meck:expect(wrq, get_req_header,
+                          fun(HName, _Req) -> proplists:get_value(HName, SignedHeadersBin) end),
+              meck:expect(wrq, path_info, fun(object_type, _Req) -> "node" end),
+              meck:expect(wrq, get_qs_value, fun("q", _Req) ->
+                                                     undefined;
+                                                ("start", _Req) ->
+                                                     "0";
+                                                ("rows", _Req) ->
+                                                     "20";
+                                                ("sort", _Req) ->
+                                                     "X_CHEF_id_CHEF_X+asc"
+                                             end),
+              {IsMalformed, _Req1, State} =
+                  chef_rest_search_resource:malformed_request(mocked, #state{}),
+              ?assertEqual(false, IsMalformed),
+              %% FIXME: this is a record defined in chef_solr
+              SolrQuery = State#state.solr_query,
+              ?assertEqual({chef_solr_query, "*:*", "+X_CHEF_type_CHEF_X:node",
+                            0, 20, "X_CHEF_id_CHEF_X+asc"}, SolrQuery),
+              ?assert(meck:validate(wrq))
+      end},
 
 
      {"missing all auth headers",
