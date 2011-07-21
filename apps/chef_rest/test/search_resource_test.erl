@@ -108,10 +108,9 @@ malformed_request_tests() ->
               meck:expect(wrq, set_resp_body, fun(Body, _Req) -> Body end),
               {IsMalformed, GotMsg, _State} =
                   chef_rest_search_resource:malformed_request(mocked, #state{}),
-              ErrorMsg = list_to_binary("{\"error\":[\"missing auth headers\"],"
-                                        "\"missing_headers\":["
-                                        "\"X-Ops-UserId\",\"X-Ops-Timestamp\""
-                                        ",\"X-Ops-Sign\",\"X-Ops-Content-Hash\"]}"),
+              ErrorMsg = list_to_binary("{\"error\":[\"missing required authentication header(s) "
+                                        "'X-Ops-UserId', 'X-Ops-Timestamp', "
+                                        "'X-Ops-Sign', 'X-Ops-Content-Hash'\"]}"),
               ?assertEqual({true, ErrorMsg}, {IsMalformed, GotMsg}),
               ?assert(meck:validate(wrq))
       end},
@@ -125,25 +124,53 @@ malformed_request_tests() ->
                                   proplists:get_value(HName, Headers)
                           end),
               meck:expect(wrq, set_resp_body, fun(Body, _Req) -> Body end),
+
+
+
+
+
               {IsMalformed, GotMsg, _State} =
                   chef_rest_search_resource:malformed_request(mocked, #state{}),
-              ErrorMsg = list_to_binary("{\"error\":[\"missing auth headers\"],"
-                                        "\"missing_headers\":[\"X-Ops-Timestamp\"]}"),
+              ErrorMsg = list_to_binary("{\"error\":[\"missing required authentication header(s) "
+                                        "'X-Ops-Timestamp'\"]}"),
+              ?assertEqual({true, ErrorMsg}, {IsMalformed, GotMsg}),
+              ?assert(meck:validate(wrq))
+      end},
+
+
+     {"time out of bounds",
+      fun() ->
+              {ok, KeyBin} = file:read_file("../test/akey.pem"),
+              PrivateKey = chef_authn:extract_private_key(KeyBin),
+              Time = httpd_util:rfc1123_date(),
+              Path = "does-not-matter-comes-from-meck-mocks",
+              SignedHeadersBin =
+                  chef_authn:sign_request(PrivateKey, <<"alice">>, <<"GET">>, Time, Path),
+              SignedHeadersBin1 = lists:keyreplace(<<"X-Ops-Timestamp">>, 1, SignedHeadersBin,
+                                                   {<<"X-Ops-Timestamp">>, <<"2011-06-21T19:06:35Z">>}),
+              meck:expect(wrq, get_req_header,
+                          fun(HName, _Req) -> proplists:get_value(HName, SignedHeadersBin1) end),
+              meck:expect(wrq, path_info, fun(object_type, _Req) -> "node" end),
+              meck:expect(wrq, get_qs_value, fun("q", _Req) ->
+                                                     "myquery";
+                                                ("start", _Req) ->
+                                                     "0";
+                                                ("rows", _Req) ->
+                                                     "20";
+                                                ("sort", _Req) ->
+                                                     "X_CHEF_id_CHEF_X+asc"
+                                             end),
+              meck:expect(wrq, set_resp_body, fun(Body, _Req) -> Body end),
+
+              {IsMalformed, GotMsg, _State} =
+                  chef_rest_search_resource:malformed_request(mocked, #state{}),
+              ?assertEqual(true, IsMalformed),
+
+              ErrorMsg = list_to_binary("{\"error\":[\"Failed to authenticate as alice."
+                                        " Synchronize the clock on your host.\"]}"),
               ?assertEqual({true, ErrorMsg}, {IsMalformed, GotMsg}),
               ?assert(meck:validate(wrq))
       end}
-
-     %% {"missing all query params",
-     %%  fun() ->
-     %%          meck:expect(wrq, get_req_header,
-     %%                      fun(HName, _Req) ->
-     %%                              Headers = lists:keydelete(<<"X-Ops-Timestamp">>, 1,
-     %%                                                        all_auth_headers()),
-     %%                              proplists:get_value(HName, all_auth_headers())
-     %%                      end),
-     %%          meck:expect(wrq, set_resp_body, fun(Body, _Req) -> Body end),
-
-     %%  end}
 
     ]}.
 

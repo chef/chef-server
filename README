@@ -58,11 +58,13 @@ Deploying to rs-preprod
         -x ubuntu -r 'role[opscode-erchef],role[rs-preprod]' \
         -i ~/.ssh/opscode-preprod-20101208
 
-Error Cases
------------
+Search Error Cases
+------------------
 
+- [X] missing signature
+- [X] q param defaults to "*:*"
+- [X] request time out of bounds
 - bad signature
-- missing signature
 - not in org
 - no such org
 - no such user

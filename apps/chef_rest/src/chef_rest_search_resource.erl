@@ -62,7 +62,7 @@ malformed_request(Req, State) ->
             {false, Req, State1#state{solr_query = Query}}
         catch
             throw:Why ->
-                Msg = bad_auth_message(Why),
+                Msg = malformed_request_message(Why, GetHeader),
                 NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),
                 {true, NewReq, State1}
         end,
@@ -256,3 +256,29 @@ search_result_start(Start, Total) ->
 search_result_finish(Result) ->
     %% TODO: is iolist_to_binary needed?
     iolist_to_binary(lists:reverse([<<"]}">>|Result])).
+
+malformed_request_message(bad_clock, GetHeader) ->
+    User = case GetHeader(<<"X-Ops-UserId">>) of
+               undefined ->
+                   <<"">>;
+               UID ->
+                   UID
+           end,
+    Msg = iolist_to_binary([<<"Failed to authenticate as ">>, User,
+                            <<". Synchronize the clock on your host.">>]),
+    {[{<<"error">>, [Msg]}]};
+malformed_request_message({missing_headers, Missing}, _GetHeader) ->
+    Msg = iolist_to_binary([
+                            <<"missing required authentication header(s) ">>,
+                            bin_str_join(Missing, <<", ">>)]),
+    {[{<<"error">>, [Msg]}]}.
+
+bin_str_join(L, Sep) ->
+    bin_str_join(L, Sep, []).
+
+bin_str_join([H], _Sep, Acc) ->
+    lists:reverse([<<"'">>, H, <<"'">>|Acc]);
+bin_str_join([H | T], Sep, Acc) ->
+    bin_str_join(T, Sep, [Sep, <<"'">>, H, <<"'">> | Acc]).
+
+
