@@ -66,7 +66,7 @@ init(_Any) ->
     {ok, State}.
 
 malformed_request(Req, State) ->
-    % This is the first method we get called on, so this is where we get the organization name from the path.
+    % This is the first method we get called on, so this is where we send stats for org name.
     OrgName = wrq:path_info(organization_id, Req),
     State1 = State#state{organization_name = OrgName},
     send_stat(received_with_org, State1),
