@@ -23,19 +23,17 @@
 -export([send/3]).
 
 send(Server, Port, Metrics) ->
-    send_payload(Server, Port, string:join([ make_metric_line(Key, Value, Type) || {Key, Value, Type} <- Metrics ], "")).
+    send_payload(Server, Port, [ make_metric_line(Key, Value, Type) || {Key, Value, Type} <- Metrics ]).
 
 send_payload(Server, Port, Payload) ->
-    Length = length(Payload),
+    Length = iolist_size(Payload),
     Packet = io_lib:format("1|~B~n~s", [Length, Payload]),
-    io:format("~s", [Packet]),
     {ok, Socket} = gen_udp:open(0),
-%    try
-%        ok = gen_udp:send(Socket, Server, Port, Packet)
-%    after
+    try
+        ok = gen_udp:send(Socket, Server, Port, Packet)
+    after
         gen_udp:close(Socket)
-%    end.
-.
+    end.
 
 make_metric_line(Key, Value, Type) when is_integer(Value) ->
     io_lib:format("~s:~B|~s~n", [Key, Value, Type]);
