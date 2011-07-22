@@ -2,9 +2,6 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
-%% -define(dispatch_file, "../priv/dispatch.conf").
--define(dispatch_file, "../../apps/chef_rest/priv/dispatch.conf").
-
 %% FIXME: this is copy/paste from the chef_rest_search_resource module
 -record(state, {start_time,
                 resource,
@@ -45,19 +42,19 @@ malformed_request_tests() ->
       fun() ->
               SignedHeadersBin = get_signed_headers(),
               meck:expect(wrq, get_req_header,
-                          fun(HName, _Req) -> proplists:get_value(HName, SignedHeadersBin) end),
-              meck:expect(wrq, path_info, fun(object_type, _Req) -> "node" end),
-              meck:expect(wrq, get_qs_value, fun("q", _Req) ->
+                          fun(HName, req_mock) -> proplists:get_value(HName, SignedHeadersBin) end),
+              meck:expect(wrq, path_info, fun(object_type, req_mock) -> "node" end),
+              meck:expect(wrq, get_qs_value, fun("q", req_mock) ->
                                                      "myquery";
-                                                ("start", _Req) ->
+                                                ("start", req_mock) ->
                                                      "0";
-                                                ("rows", _Req) ->
+                                                ("rows", req_mock) ->
                                                      "20";
-                                                ("sort", _Req) ->
+                                                ("sort", req_mock) ->
                                                      "X_CHEF_id_CHEF_X+asc"
                                              end),
               {IsMalformed, _Req1, State} =
-                  chef_rest_search_resource:malformed_request(mocked, #state{}),
+                  chef_rest_search_resource:malformed_request(req_mock, #state{}),
               ?assertEqual(false, IsMalformed),
               SolrQuery = State#state.solr_query,
               %% FIXME: this is a record defined in chef_solr
@@ -70,19 +67,19 @@ malformed_request_tests() ->
       fun() ->
               SignedHeadersBin = get_signed_headers(),
               meck:expect(wrq, get_req_header,
-                          fun(HName, _Req) -> proplists:get_value(HName, SignedHeadersBin) end),
-              meck:expect(wrq, path_info, fun(object_type, _Req) -> "node" end),
-              meck:expect(wrq, get_qs_value, fun("q", _Req) ->
+                          fun(HName, req_mock) -> proplists:get_value(HName, SignedHeadersBin) end),
+              meck:expect(wrq, path_info, fun(object_type, req_mock) -> "node" end),
+              meck:expect(wrq, get_qs_value, fun("q", req_mock) ->
                                                      undefined;
-                                                ("start", _Req) ->
+                                                ("start", req_mock) ->
                                                      "0";
-                                                ("rows", _Req) ->
+                                                ("rows", req_mock) ->
                                                      "20";
-                                                ("sort", _Req) ->
+                                                ("sort", req_mock) ->
                                                      "X_CHEF_id_CHEF_X+asc"
                                              end),
               {IsMalformed, _Req1, State} =
-                  chef_rest_search_resource:malformed_request(mocked, #state{}),
+                  chef_rest_search_resource:malformed_request(req_mock, #state{}),
               ?assertEqual(false, IsMalformed),
               %% FIXME: this is a record defined in chef_solr
               SolrQuery = State#state.solr_query,
@@ -94,10 +91,10 @@ malformed_request_tests() ->
 
      {"missing all auth headers",
       fun() ->
-              meck:expect(wrq, get_req_header, fun(_HName, _Req) -> undefined end),
-              meck:expect(wrq, set_resp_body, fun(Body, _Req) -> Body end),
+              meck:expect(wrq, get_req_header, fun(_HName, req_mock) -> undefined end),
+              meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
               {IsMalformed, GotMsg, _State} =
-                  chef_rest_search_resource:malformed_request(mocked, #state{}),
+                  chef_rest_search_resource:malformed_request(req_mock, #state{}),
               ErrorMsg = list_to_binary("{\"error\":[\"missing required authentication header(s) "
                                         "'X-Ops-UserId', 'X-Ops-Timestamp', "
                                         "'X-Ops-Sign', 'X-Ops-Content-Hash'\"]}"),
@@ -108,14 +105,14 @@ malformed_request_tests() ->
      {"missing X-Ops-Timestamp header",
       fun() ->
               meck:expect(wrq, get_req_header,
-                          fun(HName, _Req) ->
+                          fun(HName, req_mock) ->
                                   Headers = lists:keydelete(<<"X-Ops-Timestamp">>, 1,
                                                             all_auth_headers()),
                                   proplists:get_value(HName, Headers)
                           end),
-              meck:expect(wrq, set_resp_body, fun(Body, _Req) -> Body end),
+              meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
               {IsMalformed, GotMsg, _State} =
-                  chef_rest_search_resource:malformed_request(mocked, #state{}),
+                  chef_rest_search_resource:malformed_request(req_mock, #state{}),
               ErrorMsg = list_to_binary("{\"error\":[\"missing required authentication header(s) "
                                         "'X-Ops-Timestamp'\"]}"),
               ?assertEqual({true, ErrorMsg}, {IsMalformed, GotMsg}),
@@ -129,21 +126,21 @@ malformed_request_tests() ->
               SignedHeadersBin1 = lists:keyreplace(<<"X-Ops-Timestamp">>, 1, SignedHeadersBin,
                                                    {<<"X-Ops-Timestamp">>, <<"2011-06-21T19:06:35Z">>}),
               meck:expect(wrq, get_req_header,
-                          fun(HName, _Req) -> proplists:get_value(HName, SignedHeadersBin1) end),
-              meck:expect(wrq, path_info, fun(object_type, _Req) -> "node" end),
-              meck:expect(wrq, get_qs_value, fun("q", _Req) ->
+                          fun(HName, req_mock) -> proplists:get_value(HName, SignedHeadersBin1) end),
+              meck:expect(wrq, path_info, fun(object_type, req_mock) -> "node" end),
+              meck:expect(wrq, get_qs_value, fun("q", req_mock) ->
                                                      "myquery";
-                                                ("start", _Req) ->
+                                                ("start", req_mock) ->
                                                      "0";
-                                                ("rows", _Req) ->
+                                                ("rows", req_mock) ->
                                                      "20";
-                                                ("sort", _Req) ->
+                                                ("sort", req_mock) ->
                                                      "X_CHEF_id_CHEF_X+asc"
                                              end),
-              meck:expect(wrq, set_resp_body, fun(Body, _Req) -> Body end),
+              meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
 
               {IsMalformed, GotMsg, _State} =
-                  chef_rest_search_resource:malformed_request(mocked, #state{}),
+                  chef_rest_search_resource:malformed_request(req_mock, #state{}),
               ?assertEqual(true, IsMalformed),
 
               ErrorMsg = list_to_binary("{\"error\":[\"Failed to authenticate as alice."
