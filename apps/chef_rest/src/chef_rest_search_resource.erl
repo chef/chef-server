@@ -19,6 +19,7 @@
          resource_exists/2,
          allowed_methods/2,
          content_types_provided/2,
+         finish_request/2,
          to_json/2]).
 
 -record(state, {start_time,
@@ -31,8 +32,12 @@
                 couchbeam = undefined,
                 solr_url = undefined,
                 solr_query = undefined,
-		org_guid = undefined,
-                end_time,
+                estatsd_server = undefined,
+                estatsd_port = undefined,
+                hostname,
+                request_type,
+                couch_time = 0.0,
+                solr_time = 0.0,
                 batch_size = 5
 }).
 
@@ -43,33 +48,43 @@
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
 
 init(_Any) ->
+    % TODO move solr/estatsd config out to chef_rest_sup or chef_rest_app
     {ok, BatchSize} = application:get_env(chef_rest, bulk_fetch_batch_size),
     {ok, SolrUrl} = application:get_env(chef_rest, solr_url),
-    State = #state{start_time = chef_rest_util:iso_8601_utc(),
+    {ok, EstatsdServer} = application:get_env(chef_rest, estatsd_server),
+    {ok, EstatsdPort} = application:get_env(chef_rest, estatsd_port),
+    State = #state{start_time = now(),
                    resource = atom_to_list(?MODULE),
                    batch_size = BatchSize,
-                   solr_url = SolrUrl },
+                   solr_url = SolrUrl,
+                   % TODO IPv6?
+                   estatsd_server = inet:getaddr(EstatsdServer, inet),
+                   estatsd_port = EstatsdPort,
+                   hostname = hostname(),
+                   request_type = "search.get" },
+    send_stat(received, State),
     {ok, State}.
 
 malformed_request(Req, State) ->
-    {GetHeader, State1} = get_header_fun(Req, State),
-    {Malformed, Req1, State2} =
-        try
-            chef_authn:validate_headers(GetHeader, 300),
-            % We fill in most stuff here in order to validate the query, but we don't add
-            % the organization database until resource_exists() (where we get the org id).
-            Query = chef_solr:make_query_from_params(Req),
-            {false, Req, State1#state{solr_query = Query}}
-        catch
-            throw:Why ->
-                Msg = malformed_request_message(Why, GetHeader),
-                NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),
-                {true, NewReq, State1}
-        end,
-    {Malformed, Req1, State2}.
+    % This is the first method we get called on, so this is where we get the organization name from the path.
+    OrgName = wrq:path_info(organization_id, Req),
+    State1 = State#state{organization_name = OrgName},
+    send_stat(received_with_org, State1),
+    {GetHeader, State2} = get_header_fun(Req, State1),
+    try
+        chef_authn:validate_headers(GetHeader, 300),
+        % We fill in most stuff here in order to validate the query, but we don't add
+        % the organization database until resource_exists() (where we get the org id).
+        Query = chef_solr:make_query_from_params(Req),
+        {false, Req, State2#state{solr_query = Query}}
+    catch
+        throw:Why ->
+            Msg = malformed_request_message(Why, GetHeader),
+            NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),
+            {true, NewReq, State2}
+    end.
 
-is_authorized(Req, State) ->
-    OrgName = list_to_binary(wrq:path_info(organization_id, Req)),
+is_authorized(Req, State = #state{organization_name = OrgName}) ->
     UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
     S = chef_otto:connect(),
     case verify_request_signature(Req, State) of
@@ -89,7 +104,7 @@ resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
     try
         OrgGuid = fetch_org_guid(Req, State),
         Query = chef_solr:add_org_guid_to_query(QueryWithoutGuid, OrgGuid),
-        {true, Req, State#state{org_guid = OrgGuid, solr_query = Query}}
+        {true, Req, State#state{organization_guid = OrgGuid, solr_query = Query}}
     catch
         throw:org_not_found ->
             NoOrg = bad_auth_message(org_not_found),
@@ -110,8 +125,7 @@ get_header_fun(Req, State = #state{header_fun = HFun})
 get_header_fun(_Req, State) ->
     {State#state.header_fun, State}.
 
-verify_request_signature(Req, State) ->
-    OrgName = wrq:path_info(organization_id, Req),
+verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
     UserName = wrq:get_req_header("x-ops-userid", Req),
     % TODO Quit leaking this
     S = chef_otto:connect(),
@@ -121,8 +135,8 @@ verify_request_signature(Req, State) ->
             {false,
              wrq:set_resp_body(ejson:encode(NoCertMsg), Req), State};
         CertInfo ->
+            % TODO this causes us to fetch the organization a second time.  Keep it and pass it in instead.
             Cert = ?gv(cert, CertInfo),
-            OrgId = ?gv(org_guid, CertInfo, State#state.organization_guid),
             Body = body_or_default(Req, <<>>),
             HTTPMethod = iolist_to_binary(atom_to_list(wrq:method(Req))),
             Path = iolist_to_binary(wrq:path(Req)),
@@ -131,7 +145,7 @@ verify_request_signature(Req, State) ->
                                                       Path, Body, Cert, 300) of
                 {name, _} ->
                     {true, Req,
-                     State1#state{organization_guid = OrgId, couchbeam = S}};
+                     State1#state{couchbeam = S}};
                 {no_authn, Reason} ->
                     Msg = bad_auth_message(Reason),
                     Json = ejson:encode(Msg),
@@ -192,7 +206,7 @@ fetch_org_guid(Req, #state{ organization_guid = Id, couchbeam = S}) ->
 to_json(Req, State = #state{couchbeam = S,
                             solr_url = SolrUrl,
                             solr_query = Query,
-                            org_guid = OrgGuid,
+                            organization_guid = OrgGuid,
                             batch_size = BatchSize}) ->
     try
         {ok, Start, NumFound, Ids} = chef_solr:search(SolrUrl, Query),
@@ -202,6 +216,10 @@ to_json(Req, State = #state{couchbeam = S,
 	    io:format("500! ~s~n", X),
             {{halt, 500}, Req, State}
     end.
+
+finish_request(Req, State) ->
+    send_stat(completed, State, Req),
+    {true, Req, State}.
 
 make_search_results(S, Db, Ids, BatchSize, Start, NumFound) ->
     Ans0 = search_result_start(Start, NumFound),
@@ -284,4 +302,39 @@ bin_str_join([H], _Sep, Acc) ->
 bin_str_join([H | T], Sep, Acc) ->
     bin_str_join(T, Sep, [Sep, <<"'">>, H, <<"'">> | Acc]).
 
+hostname() ->
+    FullyQualified = net_adm:localhost(),
+    Dot = string:chr(FullyQualified, $.),
+    case Dot of
+        0 -> FullyQualified;
+	_Any -> string:substr(FullyQualified, 1, Dot-1)
+    end.
 
+send_stat(received, State = #state{request_type = RequestType, hostname = HostName}) ->
+    send_stats(State, [{"system.erchefAPI.application.allRequests", 1, "m"},
+                       {"system.erchefAPI.application.byRequestType." ++ RequestType, 1, "m"},
+                       {"system.erchefAPI." ++ HostName ++ ".allRequests", 1, "m"}]);
+send_stat(received_with_org, State = #state{organization_name = OrgName}) ->
+    send_stats(State, [{"system.erchefAPI.application.byOrgname." ++ OrgName, 1, "m"}]).
+
+send_stat(completed,
+          State = #state{
+            request_type = RequestType,
+            organization_name = OrgName,
+            hostname = HostName,
+            start_time = StartTime,
+            couch_time = CouchTime,
+            solr_time = SolrTime},
+          Req) ->
+    % TODO record and report auth, couch and solr time
+    RequestTime = timer:now_diff(now(), StartTime),
+    StatusCode = integer_to_list(wrq:response_code(Req)),
+    send_stats(State, [{"system.erchefAPI.application.byStatusCode." ++ StatusCode, 1, "m"},
+                       {"system.erchefAPI." ++ HostName ++ ".byStatusCode." ++ StatusCode, 1, "m"},
+                       {"system.timers.erchefAPI.application.allRequests", RequestTime, "h"},
+                       {"system.timers.erchefAPI.application.byRequestType." ++ RequestType, RequestTime, "h"},
+                       {"system.timers.erchefAPI.application.byOrgname." ++ OrgName, RequestTime, "h"},
+                       {"system.timers.erchefAPI." ++ HostName ++ ".allRequests", RequestTime, "h"}]).
+
+send_stats(#state{estatsd_server = EstatsdServer, estatsd_port = EstatsdPort}, Stats) ->
+    stats_hero:send(EstatsdServer, EstatsdPort, Stats).
