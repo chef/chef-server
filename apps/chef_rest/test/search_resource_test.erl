@@ -88,6 +88,29 @@ malformed_request_tests() ->
               ?assert(meck:validate(wrq))
       end},
 
+     {"bad query; unable to parse",
+      fun() ->
+              SignedHeadersBin = get_signed_headers(),
+              meck:expect(wrq, get_req_header,
+                          fun(HName, req_mock) -> proplists:get_value(HName, SignedHeadersBin) end),
+              meck:expect(wrq, path_info, fun(object_type, req_mock) -> "node" end),
+              meck:expect(wrq, get_qs_value, fun("q", req_mock) ->
+                                                     "a[b";
+                                                ("start", req_mock) ->
+                                                     "0";
+                                                ("rows", req_mock) ->
+                                                     "20";
+                                                ("sort", req_mock) ->
+                                                     "X_CHEF_id_CHEF_X+asc"
+                                             end),
+              meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
+              {IsMalformed, GotMsg, _State} =
+                  chef_rest_search_resource:malformed_request(req_mock, #state{}),
+              ErrorMsg = <<"{\"error\":[\"invalid search query: 'a[b'\"]}">>,
+              ?assertEqual(true, IsMalformed),
+              ?assertEqual(ErrorMsg, GotMsg),
+              ?assert(meck:validate(wrq))
+      end},
 
      {"missing all auth headers",
       fun() ->

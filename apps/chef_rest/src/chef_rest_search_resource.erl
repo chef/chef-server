@@ -271,6 +271,9 @@ malformed_request_message({missing_headers, Missing}, _GetHeader) ->
     Msg = iolist_to_binary([
                             <<"missing required authentication header(s) ">>,
                             bin_str_join(Missing, <<", ">>)]),
+    {[{<<"error">>, [Msg]}]};
+malformed_request_message({bad_query, Query}, _GetHeader) ->
+    Msg = iolist_to_binary([<<"invalid search query: '">>, Query, <<"'">>]),
     {[{<<"error">>, [Msg]}]}.
 
 bin_str_join(L, Sep) ->
