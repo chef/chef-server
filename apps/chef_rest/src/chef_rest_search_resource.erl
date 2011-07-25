@@ -66,15 +66,17 @@ init(_Any) ->
     {ok, State}.
 
 malformed_request(Req, State) ->
-    % This is the first method we get called on, so this is where we send stats for org name.
+    % This is the first method we get called on, so this is where we
+    % send stats for org name.
     OrgName = wrq:path_info(organization_id, Req),
     State1 = State#state{organization_name = OrgName},
     send_stat(received, State1),
     {GetHeader, State2} = get_header_fun(Req, State1),
     try
         chef_authn:validate_headers(GetHeader, 300),
-        % We fill in most stuff here in order to validate the query, but we don't add
-        % the organization database until resource_exists() (where we get the org id).
+        % We fill in most stuff here in order to validate the query,
+        % but we don't add the organization database until
+        % resource_exists() (where we get the org id).
         Query = chef_solr:make_query_from_params(Req),
         {false, Req, State2#state{solr_query = Query}}
     catch
