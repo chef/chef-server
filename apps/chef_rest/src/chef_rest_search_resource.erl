@@ -94,7 +94,7 @@ is_authorized(Req, State = #state{organization_name = OrgName}) ->
 	    case chef_otto:is_user_in_org(S, UserName, OrgName) of
 		true -> {true, Req1, State1};
 		false ->
-		    Msg = bad_auth_message(not_member_of_org),
+		    Msg = error_json(not_member_of_org),
 		    Json = ejson:encode(Msg),
                     Req2 = wrq:set_resp_body(Json, Req),
 		    {false, Req2, State1}
@@ -109,7 +109,7 @@ resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
         {true, Req, State#state{organization_guid = OrgGuid, solr_query = Query}}
     catch
         throw:org_not_found ->
-            NoOrg = bad_auth_message(org_not_found),
+            NoOrg = error_json(org_not_found),
             Req1 = wrq:set_resp_body(ejson:encode(NoOrg), Req),
             {false, Req1, State}
     end.
@@ -133,7 +133,7 @@ verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
     S = chef_otto:connect(),
     case chef_otto:fetch_user_or_client_cert(S, OrgName, UserName) of
         not_found ->
-            NoCertMsg = bad_auth_message(no_cert),
+            NoCertMsg = error_json(no_cert),
             {false,
              wrq:set_resp_body(ejson:encode(NoCertMsg), Req), State};
         CertInfo ->
@@ -149,7 +149,7 @@ verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
                     {true, Req,
                      State1#state{couchbeam = S}};
                 {no_authn, Reason} ->
-                    Msg = bad_auth_message(Reason),
+                    Msg = error_json(Reason),
                     Json = ejson:encode(Msg),
                     Req1 = wrq:set_resp_body(Json, Req),
                     % TODO This is a needless mutation
@@ -163,28 +163,26 @@ body_or_default(Req, Default) ->
         Body -> Body
     end.
 
-% FIXME: perhaps rename as these aren't just auth related messages,
-% but the organization seems useful.
-bad_auth_message(bad_sig) ->
+error_json(bad_sig) ->
     {[{<<"error">>, [<<"bad signature">>]}]};
-bad_auth_message(no_cert) ->
+error_json(no_cert) ->
     {[{<<"error">>, [<<"user, client, or organization not found">>]}]};
-bad_auth_message({missing_headers, Missing}) ->
+error_json({missing_headers, Missing}) ->
     {[{<<"error">>,
                [<<"missing auth headers">>]},
               {<<"missing_headers">>, Missing}]};
-bad_auth_message(bad_clock) ->
+error_json(bad_clock) ->
     {[{<<"error">>, [<<"check clock">>]}]};
-bad_auth_message(bad_sign_desc) ->
+error_json(bad_sign_desc) ->
     {[{<<"error">>, [<<"bad signing description">>]}]};
-bad_auth_message(org_not_found) ->
+error_json(org_not_found) ->
     {[{<<"error">>, [<<"organization not found">>]}]};
-bad_auth_message({bad_query, RawQuery}) ->
+error_json({bad_query, RawQuery}) ->
     {[{<<"error">>, [<<"invalid search query">>]},
               {<<"query">>, RawQuery}]};
-bad_auth_message(not_member_of_org) ->
+error_json(not_member_of_org) ->
     {[{<<"error">>, [<<"Not a member of the organization">>]}]};
-bad_auth_message(_) ->
+error_json(_) ->
     {[{<<"error">>, [<<"problem with headers">>]}]}.
 
 allowed_methods(Req, State) ->
