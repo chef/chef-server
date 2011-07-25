@@ -22,6 +22,8 @@
 
 -export([send/3]).
 
+% TODO use the gen_event pattern
+
 send(Server, Port, Metrics) ->
     send_payload(Server, Port, [ make_metric_line(Key, Value, Type) || {Key, Value, Type} <- Metrics ]).
 

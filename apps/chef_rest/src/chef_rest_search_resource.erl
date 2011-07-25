@@ -70,7 +70,7 @@ malformed_request(Req, State) ->
     % send stats for org name.
     OrgName = wrq:path_info(organization_id, Req),
     State1 = State#state{organization_name = OrgName},
-    send_stat(received, State1),
+    send_stat(received, Req, State1),
     {GetHeader, State2} = get_header_fun(Req, State1),
     try
         chef_authn:validate_headers(GetHeader, 300),
@@ -220,7 +220,7 @@ to_json(Req, State = #state{couchbeam = S,
     end.
 
 finish_request(Req, State) ->
-    send_stat(completed, State, Req),
+    send_stat(completed, Req, State),
     {true, Req, State}.
 
 make_search_results(S, Db, Ids, BatchSize, Start, NumFound) ->
@@ -313,33 +313,33 @@ hostname() ->
     end.
 
 send_stat(received,
+          _Any,
           State = #state{
             request_type = RequestType,
             hostname = HostName,
             organization_name = OrgName}) ->
     send_stats(State, [{"erchefAPI.application.allRequests", 1, "m"},
-                       {"erchefAPI.application.byRequestType." ++ RequestType, 1, "m"},
-                       {"erchefAPI." ++ HostName ++ ".allRequests", 1, "m"},
-                       {"system.erchefAPI.application.byOrgname." ++ OrgName, 1, "m"}]).
-
+                       {["erchefAPI.application.byRequestType.", RequestType], 1, "m"},
+                       {["erchefAPI.", HostName, ".allRequests"], 1, "m"},
+                       {["erchefAPI.application.byOrgname.", OrgName], 1, "m"}]);
 send_stat(completed,
+          Req,
           State = #state{
             request_type = RequestType,
             hostname = HostName,
             organization_name = OrgName,
             start_time = StartTime,
             couch_time = _CouchTime,
-            solr_time = _SolrTime},
-          Req) ->
+            solr_time = _SolrTime}) ->
     % TODO record and report auth, couch and solr time
     RequestTime = timer:now_diff(now(), StartTime) / 1000000.0,
     StatusCode = integer_to_list(wrq:response_code(Req)),
-    send_stats(State, [{"erchefAPI.application.byStatusCode." ++ StatusCode, 1, "m"},
-                       {"erchefAPI." ++ HostName ++ ".byStatusCode." ++ StatusCode, 1, "m"},
+    send_stats(State, [{["erchefAPI.application.byStatusCode.", StatusCode], 1, "m"},
+                       {["erchefAPI.", HostName, ".byStatusCode.", StatusCode], 1, "m"},
                        {"erchefAPI.application.allRequests", RequestTime, "h"},
-                       {"erchefAPI.application.byRequestType." ++ RequestType, RequestTime, "h"},
-                       {"erchefAPI.application.byOrgname." ++ OrgName, RequestTime, "h"},
-                       {"erchefAPI." ++ HostName ++ ".allRequests", RequestTime, "h"}]).
+                       {["erchefAPI.application.byRequestType.", RequestType], RequestTime, "h"},
+                       {["erchefAPI.application.byOrgname.", OrgName], RequestTime, "h"},
+                       {["erchefAPI.", HostName, ".allRequests"], RequestTime, "h"}]).
 
 send_stats(#state{estatsd_server = EstatsdServer, estatsd_port = EstatsdPort}, Stats) ->
     stats_hero:send(EstatsdServer, EstatsdPort, Stats).
