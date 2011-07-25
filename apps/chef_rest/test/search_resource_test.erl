@@ -21,6 +21,16 @@
                 solr_time = 0.0,
                 batch_size = 5
 }).
+
+make_state() ->
+    #state{start_time = now(),
+           resource = "chef_rest_search_resource",
+           batch_size = 5,
+           solr_url = "http://solr_url.local",
+           estatsd_server = "127.0.0.1",
+           estatsd_port = 3365,
+           hostname = net_adm:localhost(),
+           request_type = "search.get"}.
 %% /FIXME
 
 malformed_request_test_() ->
@@ -62,7 +72,7 @@ malformed_request_tests() ->
                                                      "X_CHEF_id_CHEF_X+asc"
                                              end),
               {IsMalformed, _Req1, State} =
-                  chef_rest_search_resource:malformed_request(req_mock, #state{}),
+                  chef_rest_search_resource:malformed_request(req_mock, make_state()),
               ?assertEqual(false, IsMalformed),
               ?assertEqual("testorg", State#state.organization_name),
               SolrQuery = State#state.solr_query,
@@ -92,7 +102,7 @@ malformed_request_tests() ->
                                                      "X_CHEF_id_CHEF_X+asc"
                                              end),
               {IsMalformed, _Req1, State} =
-                  chef_rest_search_resource:malformed_request(req_mock, #state{}),
+                  chef_rest_search_resource:malformed_request(req_mock, make_state()),
               ?assertEqual(false, IsMalformed),
               %% FIXME: this is a record defined in chef_solr
               SolrQuery = State#state.solr_query,
@@ -122,7 +132,7 @@ malformed_request_tests() ->
                                              end),
               meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
               {IsMalformed, GotMsg, _State} =
-                  chef_rest_search_resource:malformed_request(req_mock, #state{}),
+                  chef_rest_search_resource:malformed_request(req_mock, make_state()),
               ErrorMsg = <<"{\"error\":[\"invalid search query: 'a[b'\"]}">>,
               ?assertEqual(true, IsMalformed),
               ?assertEqual(ErrorMsg, GotMsg),
@@ -137,7 +147,7 @@ malformed_request_tests() ->
                                           end),
               meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
               {IsMalformed, GotMsg, _State} =
-                  chef_rest_search_resource:malformed_request(req_mock, #state{}),
+                  chef_rest_search_resource:malformed_request(req_mock, make_state()),
               ErrorMsg = list_to_binary("{\"error\":[\"missing required authentication header(s) "
                                         "'X-Ops-UserId', 'X-Ops-Timestamp', "
                                         "'X-Ops-Sign', 'X-Ops-Content-Hash'\"]}"),
@@ -158,7 +168,7 @@ malformed_request_tests() ->
                                           end),
               meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
               {IsMalformed, GotMsg, _State} =
-                  chef_rest_search_resource:malformed_request(req_mock, #state{}),
+                  chef_rest_search_resource:malformed_request(req_mock, make_state()),
               ErrorMsg = list_to_binary("{\"error\":[\"missing required authentication header(s) "
                                         "'X-Ops-Timestamp'\"]}"),
               ?assertEqual({true, ErrorMsg}, {IsMalformed, GotMsg}),
@@ -190,7 +200,7 @@ malformed_request_tests() ->
               meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
 
               {IsMalformed, GotMsg, _State} =
-                  chef_rest_search_resource:malformed_request(req_mock, #state{}),
+                  chef_rest_search_resource:malformed_request(req_mock, make_state()),
               ?assertEqual(true, IsMalformed),
 
               ErrorMsg = list_to_binary("{\"error\":[\"Failed to authenticate as alice."
