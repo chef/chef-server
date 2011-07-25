@@ -26,7 +26,7 @@
 
 -record(chef_solr_query, {query_string :: string(),
                           filter_query :: string(),
-			  start :: integer(),
+                          start :: integer(),
                           rows :: integer(),
                           sort :: string()}).
 
@@ -84,7 +84,8 @@ transform_query(RawQuery) ->
     % &indent=off
     % &q=content%3Aattr1__%3D__v%2A
 
-make_solr_query_url(#chef_solr_query{query_string = Query, filter_query = FilterQuery, start = Start, rows = Rows, sort = Sort}) ->
+make_solr_query_url(#chef_solr_query{query_string = Query, filter_query = FilterQuery,
+                                     start = Start, rows = Rows, sort = Sort}) ->
     Url = "/select?"
         "fq=~s"
         "&indent=off"
