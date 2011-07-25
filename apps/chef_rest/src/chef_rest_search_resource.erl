@@ -48,6 +48,9 @@
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
 
 init(_Any) ->
+    %% Initialize random number gen for this process
+    {T1, T2, T3} = erlang:now(),
+    random:seed(T1, T2, T3),
     % TODO move solr/estatsd config out to chef_rest_sup or chef_rest_app
     {ok, BatchSize} = application:get_env(chef_rest, bulk_fetch_batch_size),
     {ok, EstatsdServer} = application:get_env(chef_rest, estatsd_server),
@@ -64,6 +67,7 @@ init(_Any) ->
     {ok, State}.
 
 malformed_request(Req, State) ->
+    State1 = read_req_id(Req, State),
     % This is the first method we get called on, so this is where we
     % send stats for org name.
     OrgName = wrq:path_info(organization_id, Req),
@@ -304,7 +308,7 @@ hostname() ->
     Dot = string:chr(FullyQualified, $.),
     case Dot of
         0 -> FullyQualified;
-	_Any -> string:substr(FullyQualified, 1, Dot-1)
+	_Any -> string:substr(FullyQualified, 1, Dot - 1)
     end.
 
 send_stat(received,
@@ -338,3 +342,13 @@ send_stat(completed,
 
 send_stats(#state{estatsd_server = EstatsdServer, estatsd_port = EstatsdPort}, Stats) ->
     stats_hero:send(EstatsdServer, EstatsdPort, Stats).
+
+read_req_id(Req, State) ->
+    {ok, ReqHeaderName} = application:get_env(chef_rest, req_id_header_name),
+    ReqId = case wrq:get_req_header(ReqHeaderName, Req) of
+                undefined ->
+                    [$b,$o,$g,$u,$s|integer_to_list(random:uniform(500000))];
+                HV ->
+                    HV
+            end,
+    State#state{reqid=ReqId}.
