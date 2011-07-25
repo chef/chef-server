@@ -328,8 +328,8 @@ send_stat(completed,
             hostname = HostName,
             organization_name = OrgName,
             start_time = StartTime,
-            couch_time = CouchTime,
-            solr_time = SolrTime},
+            couch_time = _CouchTime,
+            solr_time = _SolrTime},
           Req) ->
     % TODO record and report auth, couch and solr time
     RequestTime = timer:now_diff(now(), StartTime) / 1000000.0,
