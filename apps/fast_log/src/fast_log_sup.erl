@@ -45,7 +45,6 @@ start_link() ->
 
 init([]) ->
     Children = build_children(application:get_env(fast_log, loggers)),
-    io:format("Children: ~p~n", [Children]),
     {ok, { {one_for_one, 5, 10}, Children} }.
 
 %% Internal functions
