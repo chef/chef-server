@@ -69,12 +69,14 @@ Search Error Cases
 - no such org
 - no such user
 - no such client
-- bad query (can't parse)
+- [X] bad query (can't parse)
 - invalid extra params (rows=foo, rows=-10)
 - params: start, rows, sort, q.  Do we actually support sort?
   - default values for start, rows, sort
 - verify that user can't manipulate filter to escape org guid filter
-- bad type (not a node, role, client, or environment)
+- bad type (not a node, role, client, or environment). Do we need to
+  validate data bag?
+
 
 Stuff
 -----
