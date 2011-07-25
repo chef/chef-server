@@ -23,6 +23,7 @@
          to_json/2]).
 
 -record(state, {start_time,
+                reqid,
                 resource,
                 organization_guid,
                 organization_name,
@@ -30,7 +31,6 @@
                 user_name,
                 header_fun = undefined,
                 couchbeam = undefined,
-                solr_url = undefined,
                 solr_query = undefined,
                 estatsd_server = undefined,
                 estatsd_port = undefined,
@@ -50,7 +50,6 @@
 init(_Any) ->
     % TODO move solr/estatsd config out to chef_rest_sup or chef_rest_app
     {ok, BatchSize} = application:get_env(chef_rest, bulk_fetch_batch_size),
-    {ok, SolrUrl} = application:get_env(chef_rest, solr_url),
     {ok, EstatsdServer} = application:get_env(chef_rest, estatsd_server),
     % TODO IPv6?
     {ok, EstatsdServerIp} = inet:getaddr(EstatsdServer, inet),
@@ -58,7 +57,6 @@ init(_Any) ->
     State = #state{start_time = now(),
                    resource = atom_to_list(?MODULE),
                    batch_size = BatchSize,
-                   solr_url = SolrUrl,
                    estatsd_server = EstatsdServerIp,
                    estatsd_port = EstatsdPort,
                    hostname = hostname(),
@@ -204,12 +202,11 @@ fetch_org_guid(Req, #state{ organization_guid = Id, couchbeam = S}) ->
     end.
 
 to_json(Req, State = #state{couchbeam = S,
-                            solr_url = SolrUrl,
                             solr_query = Query,
                             organization_guid = OrgGuid,
                             batch_size = BatchSize}) ->
     try
-        {ok, Start, NumFound, Ids} = chef_solr:search(SolrUrl, Query),
+        {ok, Start, NumFound, Ids} = chef_solr:search(Query),
         {make_search_results(S, OrgGuid, Ids, BatchSize, Start, NumFound), Req, State}
     catch
         throw:X ->

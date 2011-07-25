@@ -20,7 +20,7 @@
 % @end
 -module(chef_solr).
 
--export([search/2, make_query_from_params/1, add_org_guid_to_query/2]).
+-export([search/1, make_query_from_params/1, add_org_guid_to_query/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
 
@@ -53,7 +53,8 @@ make_query_from_params(Req) ->
 add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery}, OrgGuid) ->
     Query#chef_solr_query{filter_query = "+X_CHEF_database_CHEF_X:chef_" ++ binary_to_list(OrgGuid) ++ " " ++ FilterQuery}.
 
-search(SolrUrl, Query) ->
+search(Query) ->
+    {ok, SolrUrl} = application:get_env(chef_common, solr_url),
     Url = SolrUrl ++ make_solr_query_url(Query),
     % FIXME: error handling
     {ok, _Code, _Head, Body} = ibrowse:send_req(Url, [], get),
