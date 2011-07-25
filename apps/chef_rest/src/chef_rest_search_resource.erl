@@ -60,7 +60,7 @@ init(_Any) ->
                    batch_size = BatchSize,
                    solr_url = SolrUrl,
                    estatsd_server = EstatsdServerIp,
-                   estatsd_port = list_to_integer(EstatsdPort),
+                   estatsd_port = EstatsdPort,
                    hostname = hostname(),
                    request_type = "search.get" },
     {ok, State}.
