@@ -36,8 +36,6 @@
                 estatsd_port = undefined,
                 hostname,
                 request_type,
-                couch_time = 0.0,
-                solr_time = 0.0,
                 batch_size = 5
 }).
 
@@ -71,21 +69,21 @@ malformed_request(Req, State) ->
     % This is the first method we get called on, so this is where we
     % send stats for org name.
     OrgName = wrq:path_info(organization_id, Req),
-    State1 = State#state{organization_name = OrgName},
-    send_stat(received, Req, State1),
-    {GetHeader, State2} = get_header_fun(Req, State1),
+    State2 = State1#state{organization_name = OrgName},
+    send_stat(received, Req, State2),
+    {GetHeader, State3} = get_header_fun(Req, State2),
     try
         chef_authn:validate_headers(GetHeader, 300),
         % We fill in most stuff here in order to validate the query,
         % but we don't add the organization database until
         % resource_exists() (where we get the org id).
         Query = chef_solr:make_query_from_params(Req),
-        {false, Req, State2#state{solr_query = Query}}
+        {false, Req, State3#state{solr_query = Query}}
     catch
         throw:Why ->
             Msg = malformed_request_message(Why, GetHeader),
             NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),
-            {true, NewReq, State2}
+            {true, NewReq, State3}
     end.
 
 is_authorized(Req, State = #state{organization_name = OrgName}) ->
@@ -311,25 +309,20 @@ hostname() ->
 	_Any -> string:substr(FullyQualified, 1, Dot - 1)
     end.
 
-send_stat(received,
-          _Any,
-          State = #state{
-            request_type = RequestType,
-            hostname = HostName,
-            organization_name = OrgName}) ->
+send_stat(received,_Any, #state{request_type=RequestType,
+                                hostname=HostName,
+                                organization_name=OrgName,
+                                reqid=ReqId}=State) ->
     send_stats(State, [{"erchefAPI.application.allRequests", 1, "m"},
                        {["erchefAPI.application.byRequestType.", RequestType], 1, "m"},
                        {["erchefAPI.", HostName, ".allRequests"], 1, "m"},
-                       {["erchefAPI.application.byOrgname.", OrgName], 1, "m"}]);
-send_stat(completed,
-          Req,
-          State = #state{
-            request_type = RequestType,
-            hostname = HostName,
-            organization_name = OrgName,
-            start_time = StartTime,
-            couch_time = _CouchTime,
-            solr_time = _SolrTime}) ->
+                       {["erchefAPI.application.byOrgname.", OrgName], 1, "m"}]),
+    fast_log:info(erchef, ReqId, "request started");
+send_stat(completed, Req, #state{request_type=RequestType,
+                                 hostname=HostName,
+                                 organization_name=OrgName,
+                                 start_time=StartTime,
+                                 reqid=ReqId}=State) ->
     % TODO record and report auth, couch and solr time
     RequestTime = timer:now_diff(now(), StartTime) / 1000000.0,
     StatusCode = integer_to_list(wrq:response_code(Req)),
@@ -338,13 +331,14 @@ send_stat(completed,
                        {"erchefAPI.application.allRequests", RequestTime, "h"},
                        {["erchefAPI.application.byRequestType.", RequestType], RequestTime, "h"},
                        {["erchefAPI.application.byOrgname.", OrgName], RequestTime, "h"},
-                       {["erchefAPI.", HostName, ".allRequests"], RequestTime, "h"}]).
+                       {["erchefAPI.", HostName, ".allRequests"], RequestTime, "h"}]),
+    fast_log:info(erchef, ReqId, "request processing time: ~f", RequestTime).
 
 send_stats(#state{estatsd_server = EstatsdServer, estatsd_port = EstatsdPort}, Stats) ->
     stats_hero:send(EstatsdServer, EstatsdPort, Stats).
 
 read_req_id(Req, State) ->
-    {ok, ReqHeaderName} = application:get_env(chef_rest, req_id_header_name),
+    {ok, ReqHeaderName} = application:get_env(chef_rest, reqid_header_name),
     ReqId = case wrq:get_req_header(ReqHeaderName, Req) of
                 undefined ->
                     [$b,$o,$g,$u,$s|integer_to_list(random:uniform(500000))];
