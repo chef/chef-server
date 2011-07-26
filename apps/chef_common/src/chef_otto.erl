@@ -209,14 +209,17 @@ fetch_user_or_client_cert(Server, OrgName, ClientName)
 
 
 -spec bulk_get(couchbeam:server(), string(), [binary()]) ->
-    [[tuple()]].
+    [[tuple()]] | [].
 bulk_get(Server, DbName, Ids) ->
     {ok, Db} = couchbeam:open_db(Server, DbName, []),
     {ok, View} = couchbeam:all_docs(Db, [{keys, Ids}, {include_docs, true}]),
     DocCollector = fun({Row}, Acc) ->
-                           {Doc} = ?gv(<<"doc">>, Row),
-                           [Doc|Acc]
-                   end,
+                           case ?gv(<<"doc">>, Row) of
+                               {Doc} ->
+                                   [Doc|Acc];
+                               _ ->
+                                   Acc
+                           end end,
     lists:reverse(couchbeam_view:fold(View, DocCollector)).
 
 

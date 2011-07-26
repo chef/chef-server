@@ -226,12 +226,22 @@ fetch_result_rows(Ids, BatchSize, S, Db, Acc) when is_list(Ids) ->
     fetch_result_rows(safe_split(BatchSize, Ids), BatchSize, S, Db, Acc);
 fetch_result_rows({Ids, []}, _BatchSize, S, Db, Acc) ->
     Docs = chef_otto:bulk_get(S, Db, Ids),
-    [encode_result_rows(Docs) | Acc];
+    encode_results(Docs, Acc);
 fetch_result_rows({Ids, Rest}, BatchSize, S, Db, Acc) ->
     Next = safe_split(BatchSize, Rest),
     Docs = chef_otto:bulk_get(S, Db, Ids),
     fetch_result_rows(Next, BatchSize, S, Db,
-                      [<<",">>, encode_result_rows(Docs) | Acc]).
+                      encode_results(Docs, <<",">>, Acc)).
+
+encode_results([], Acc) ->
+    Acc;
+encode_results(Results, Acc) ->
+    [encode_result_rows(Results) | Acc].
+
+encode_results([], _Prefix, Acc) ->
+    Acc;
+encode_results(Results, Prefix, Acc) ->
+    [Prefix, encode_result_rows(Results) | Acc].
 
 encode_result_rows(Items) ->
     CleanItems = [{lists:keydelete(<<"_rev">>, 1, Item)} || Item <- Items],
