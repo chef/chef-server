@@ -178,13 +178,13 @@ fetch_client_test_() ->
        fun() ->
                S = chef_otto:connect(),
                Org = ?gv(<<"guid">>, chef_otto:fetch_org(S, <<"clownco">>)),
-               ?assertEqual(not_found,
+               ?assertEqual({not_found, client},
                             chef_otto:fetch_client(S, Org,
                                                    <<"not-a-known-client">>)) end},
       {"fetch_client with missing org",
         fun() ->
                 S = chef_otto:connect(),
                 OID = chef_otto:fetch_org_id(S, <<"not-a-known-org">>),
-                ?assertEqual(not_found,
+                ?assertEqual({not_found, org},
                              chef_otto:fetch_client(S, OID,
                                                     <<"clownco-validator">>)) end}]}.

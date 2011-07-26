@@ -178,12 +178,12 @@ fetch_client(Server, OrgId, ClientName)
                 {error, not_found} -> not_found;
                 {ok, {ClientDoc}} -> ClientDoc
             end;
-        {ok, []} -> not_found
+        {ok, []} -> {not_found, client}
     end;
 fetch_client(Server, OrgId, ClientName) when is_list(ClientName), is_binary(OrgId) ->
     fetch_client(Server, OrgId, list_to_binary(ClientName));
 fetch_client(_Server, not_found, _ClientName) ->
-    not_found.
+    {not_found, org}.
 
 %% FIXME: do we want to distinguish between client not found and org not found?
 -spec fetch_user_or_client_cert(couchbeam:server(), db_key(), db_key()) ->
@@ -194,7 +194,7 @@ fetch_user_or_client_cert(Server, OrgName, ClientName)
         {user_not_found, _} ->
             OrgId = fetch_org_id(Server, OrgName),
             case fetch_client(Server, OrgId, ClientName) of
-                not_found -> not_found;
+                {not_found, What} -> {not_found, What};
                 Client when is_list(Client) ->
                     Cert = ?gv(<<"certificate">>, Client),
                     [{cert, Cert}, {type, client}, {org_guid, OrgId}]
