@@ -41,17 +41,41 @@ make_query_from_params(Req) ->
                           transform_query(http_uri:decode(Query))
                   end,
     FilterQuery = make_fq_type(ObjType),
-    {Start, _Any} = string:to_integer(http_uri:decode(wrq:get_qs_value("start", Req))),
-    {Rows, _Any} = string:to_integer(http_uri:decode(wrq:get_qs_value("rows", Req))),
-    Sort = http_uri:decode(wrq:get_qs_value("sort", Req)),
+    Start = decode(nonneg_int, "start", Req, 0),
+    Rows = decode(nonneg_int, "rows", Req, 1000),
+    %% 'sort' param is ignored and hardcoded because indexing
+    %% scheme doesn't support sorting since there is only one field.
+    Sort = "X_CHEF_id_CHEF_X+asc",
     #chef_solr_query{query_string = QueryString,
                      filter_query = FilterQuery,
                      start = Start,
                      rows = Rows,
                      sort = Sort}.
 
-add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery}, OrgGuid) ->
-    Query#chef_solr_query{filter_query = "+X_CHEF_database_CHEF_X:chef_" ++ binary_to_list(OrgGuid) ++ " " ++ FilterQuery}.
+decode(nonneg_int, Key, Req, Default) ->
+    {Int, Orig} =
+        case wrq:get_qs_value(Key, Req) of
+            undefined ->
+                {Default, default};
+            Value ->
+                try
+                    {list_to_integer(http_uri:decode(Value)), Value}
+                catch
+                    error:badarg ->
+                        throw({bad_param, {Key, Value}})
+                end
+        end,
+    validate_non_neg(Key, Int, Orig).
+
+validate_non_neg(Key, Int, OrigValue) when Int < 0 ->
+    throw({bad_param, {Key, OrigValue}});
+validate_non_neg(_Key, Int, _OrigValue) ->
+    Int.
+
+add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery},
+                      OrgGuid) ->
+    Query#chef_solr_query{filter_query = "+X_CHEF_database_CHEF_X:chef_" ++
+                              binary_to_list(OrgGuid) ++ " " ++ FilterQuery}.
 
 search(Query) ->
     {ok, SolrUrl} = application:get_env(chef_common, solr_url),
@@ -84,8 +108,13 @@ transform_query(RawQuery) ->
     % &indent=off
     % &q=content%3Aattr1__%3D__v%2A
 
-make_solr_query_url(#chef_solr_query{query_string = Query, filter_query = FilterQuery,
-                                     start = Start, rows = Rows, sort = Sort}) ->
+make_solr_query_url(#chef_solr_query{
+                       query_string = Query,
+                       %% ensure we filter on an org ID
+                       filter_query = FilterQuery = "+X_CHEF_database_CHEF_X:chef_" ++ _Rest,
+                       start = Start,
+                       rows = Rows,
+                       sort = Sort}) ->
     Url = "/select?"
         "fq=~s"
         "&indent=off"
@@ -94,7 +123,10 @@ make_solr_query_url(#chef_solr_query{query_string = Query, filter_query = Filter
         "&rows=~B"
         "&wt=json"
         "&sort=~s",
-    io_lib:format(Url, [ ibrowse_lib:url_encode(FilterQuery), ibrowse_lib:url_encode(Query), Start, Rows, ibrowse_lib:url_encode(Sort)] ).
+    io_lib:format(Url, [ibrowse_lib:url_encode(FilterQuery),
+                        ibrowse_lib:url_encode(Query),
+                        Start, Rows,
+                        ibrowse_lib:url_encode(Sort)]).
 
 make_fq_type(ObjType) when ObjType =:= "node";
                            ObjType =:= "role";
