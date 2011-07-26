@@ -657,7 +657,7 @@ validate_headers_test_() ->
                   GetHeader2 = fun(X) -> proplists:get_value(X, Headers2) end,
                   ?assertThrow({missing_headers, [H]}, validate_headers(GetHeader2, 10))
           end || H <- ?required_headers ],
-    [?_assertEqual(ok, validate_headers(GetHeader, 1)),
+    [?_assertEqual(ok, validate_headers(GetHeader, 10)),
      ?_assertThrow({missing_headers, ?required_headers},
                    validate_headers(fun(_X) -> undefined end, 0)) ]
         ++ MissingOneTests.
