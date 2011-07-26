@@ -1,7 +1,7 @@
 DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
        deps/webmachine deps/neotoma deps/meck
 
-GRAMMARS = apps/chef_rest/src/lucene.erl apps/chef_rest/src/chef_lucene.erl
+GRAMMARS = apps/chef_common/src/lucene.erl apps/chef_common/src/chef_lucene.erl
 NEOTOMA = deps/neotoma/ebin/neotoma.app
 
 all: compile
@@ -13,8 +13,8 @@ compile_skip:
 	@./rebar compile skip_deps=true
 
 $(GRAMMARS): $(DEPS) $(NEOTOMA)
-	@apps/chef_rest/priv/neotoma apps/chef_rest/priv/lucene.peg lucene lucene_sexp
-	@apps/chef_rest/priv/neotoma apps/chef_rest/priv/lucene.peg chef_lucene lucene_txfm
+	@apps/chef_common/priv/neotoma apps/chef_common/priv/lucene.peg lucene lucene_sexp
+	@apps/chef_common/priv/neotoma apps/chef_common/priv/lucene.peg chef_lucene lucene_txfm
 
 $(NEOTOMA):
 	@cd deps/neotoma;make

@@ -4,7 +4,7 @@ deps/*
 apps/*/ebin/*
 .DS_Store
 apps/*/.eunit
-apps/chef_rest/src/lucene.erl
-apps/chef_rest/src/chef_lucene.erl
+apps/chef_common/src/lucene.erl
+apps/chef_common/src/chef_lucene.erl
 *.beam
 *~
