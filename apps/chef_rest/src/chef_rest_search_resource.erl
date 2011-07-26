@@ -307,8 +307,7 @@ send_stat(completed, Req, #state{request_type=RequestType,
                                  organization_name=OrgName,
                                  start_time=StartTime,
                                  reqid=ReqId}=State) ->
-    % TODO record and report auth, couch and solr time
-    RequestTime = timer:now_diff(now(), StartTime) / 1000000.0,
+    RequestTime = timer:now_diff(now(), StartTime) div 1000,
     StatusCode = integer_to_list(wrq:response_code(Req)),
     send_stats(State, [{["erchefAPI.application.byStatusCode.", StatusCode], 1, "m"},
                        {["erchefAPI.", HostName, ".byStatusCode.", StatusCode], 1, "m"},
