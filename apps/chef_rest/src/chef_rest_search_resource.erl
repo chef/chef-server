@@ -22,24 +22,8 @@
          finish_request/2,
          to_json/2]).
 
--record(state, {start_time,
-                reqid,
-                resource,
-                organization_guid,
-                organization_name,
-                object_type,
-                user_name,
-                header_fun = undefined,
-                couchbeam = undefined,
-                solr_query = undefined,
-                estatsd_server = undefined,
-                estatsd_port = undefined,
-                hostname,
-                request_type,
-                batch_size = 5
-}).
-
 -include_lib("webmachine/include/webmachine.hrl").
+-include("chef_rest_search_resource.hrl").
 
 -define(db_for_guid(X), [<<"chef_">>, X]).
 -define(gv(X,L), proplists:get_value(X, L)).

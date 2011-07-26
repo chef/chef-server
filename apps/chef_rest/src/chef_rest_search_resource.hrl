@@ -1,0 +1,16 @@
+-record(state, {start_time,
+                reqid,
+                resource,
+                organization_guid,
+                organization_name,
+                object_type,
+                user_name,
+                header_fun = undefined,
+                couchbeam = undefined,
+                solr_query = undefined,
+                estatsd_server = undefined,
+                estatsd_port = undefined,
+                hostname,
+                request_type,
+                batch_size = 5
+}).

@@ -1,32 +1,12 @@
 -module(search_resource_test).
 
 -include_lib("eunit/include/eunit.hrl").
-
-%% FIXME: this is copy/paste from the chef_rest_search_resource module
--record(state, {start_time,
-                resource,
-                organization_guid,
-                organization_name,
-                object_type,
-                user_name,
-                header_fun = undefined,
-                couchbeam = undefined,
-                solr_url = undefined,
-                solr_query = undefined,
-                estatsd_server = undefined,
-                estatsd_port = undefined,
-                hostname,
-                request_type,
-                couch_time = 0.0,
-                solr_time = 0.0,
-                batch_size = 5
-}).
+-include("../src/chef_rest_search_resource.hrl").
 
 make_state() ->
     #state{start_time = now(),
            resource = "chef_rest_search_resource",
            batch_size = 5,
-           solr_url = "http://solr_url.local",
            estatsd_server = "127.0.0.1",
            estatsd_port = 3365,
            hostname = net_adm:localhost(),
@@ -36,7 +16,8 @@ make_state() ->
 malformed_request_test_() ->
     {setup,
      fun() ->
-             application:start(crypto)
+             application:start(crypto),
+             application:set_env(chef_rest, reqid_header_name, "X-Request-Id")
      end,
      fun(_) ->
              stopping
@@ -46,10 +27,14 @@ malformed_request_test_() ->
 malformed_request_tests() ->
     {foreach,
      fun() ->
-             meck:new(wrq)
+             meck:new(wrq),
+             meck:new(fast_log),
+             meck:expect(fast_log, info, fun(_, _, _) -> ok end),
+             meck:expect(fast_log, info, fun(_, _, _, _) -> ok end),
+             application:set_env(chef_rest, reqid_header_name, "X-Request-Id")
      end,
      fun(_) ->
-             meck:unload(wrq)
+             meck:unload()
      end,
     [
      {"properly formed",
