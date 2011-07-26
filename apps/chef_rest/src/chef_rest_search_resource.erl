@@ -285,6 +285,9 @@ malformed_request_message({missing_headers, Missing}, _GetHeader) ->
     {[{<<"error">>, [Msg]}]};
 malformed_request_message({bad_query, Query}, _GetHeader) ->
     Msg = iolist_to_binary([<<"invalid search query: '">>, Query, <<"'">>]),
+    {[{<<"error">>, [Msg]}]};
+malformed_request_message({bad_param, {Param, Value}}, _GetHeader) ->
+    Msg = iolist_to_binary([<<"invalid '">>, Param, <<"' value: '">>, Value, <<"'">>]),
     {[{<<"error">>, [Msg]}]}.
 
 bin_str_join(L, Sep) ->

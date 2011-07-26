@@ -27,7 +27,6 @@ bad_time([Path]) ->
     Headers1 = lists:keyreplace("X-Ops-Timestamp", 1, Headers0,
                                 {"X-Ops-Timestamp", "2011-06-21T19:06:35Z"}),
     Headers = [{"Accept", "application/json"}, {"X-CHEF-VERSION", "0.10.0"} | Headers1],
-    ?debugVal(Headers),
     ibrowse:send_req(Url, Headers, get, [], [{ssl_options, []}]).
 
 missing([Path]) ->
@@ -42,7 +41,6 @@ missing([Path]) ->
     Headers1 = lists:keydelete("X-Ops-Timestamp", 1, Headers0),
     Headers2 = lists:keydelete("X-Ops-Content-Hash", 1, Headers1),
     Headers = [{"Accept", "application/json"}, {"X-CHEF-VERSION", "0.10.0"} | Headers2],
-    ?debugVal(Headers),
     ibrowse:send_req(Url, Headers, get, [], [{ssl_options, []}]).
     
 bad_query() ->
@@ -55,6 +53,17 @@ bad_query() ->
     Client = chef_rest_client:make_chef_rest_client("https://api.opscode.com", "seth", Private),
     {Url, Headers0} = chef_rest_client:generate_signed_headers(Client, "/organizations/userprimary/search/role?q=a[b", <<"GET">>),
     Headers = [{"Accept", "application/json"}, {"X-CHEF-VERSION", "0.10.0"} | Headers0],
-    ?debugVal(Headers),
+    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, []}]).
+
+bad_start() ->
+    application:start(crypto),
+    ssl:start(),
+    ibrowse:start(),
+    PFile = "/Users/seth/oc/environments/orgs/userprimary/.chef/seth.pem",
+    {ok, PBin} = file:read_file(PFile),
+    Private = chef_authn:extract_private_key(PBin),
+    Client = chef_rest_client:make_chef_rest_client("https://api.opscode.com", "seth", Private),
+    {Url, Headers0} = chef_rest_client:generate_signed_headers(Client, "/organizations/userprimary/search/role?q=ab&start=abc", <<"GET">>),
+    Headers = [{"Accept", "application/json"}, {"X-CHEF-VERSION", "0.10.0"} | Headers0],
     ibrowse:send_req(Url, Headers, get, [], [{ssl_options, []}]).
     
