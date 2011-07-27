@@ -328,7 +328,7 @@ send_stat(completed, Req, #state{request_type=RequestType,
                        {["erchefAPI.application.byRequestType.", RequestType], RequestTime, "h"},
                        {["erchefAPI.application.byOrgname.", OrgName], RequestTime, "h"},
                        {["erchefAPI.", HostName, ".allRequests"], RequestTime, "h"}]),
-    fast_log:info(erchef, ReqId, "request processing time: ~f", RequestTime).
+    fast_log:info(erchef, ReqId, "request processing time: ~B", [RequestTime]).
 
 send_stats(#state{estatsd_server = EstatsdServer, estatsd_port = EstatsdPort}, Stats) ->
     stats_hero:send(EstatsdServer, EstatsdPort, Stats).
