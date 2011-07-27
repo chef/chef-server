@@ -16,6 +16,7 @@
 -export([init/1,
          malformed_request/2,
          is_authorized/2,
+         forbidden/2,
          resource_exists/2,
          allowed_methods/2,
          content_types_provided/2,
@@ -74,22 +75,23 @@ malformed_request(Req, State) ->
             {true, NewReq, State3}
     end.
 
-is_authorized(Req, State = #state{organization_name = OrgName}) ->
-    UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
-    S = chef_otto:connect(),
+is_authorized(Req, State) ->
     case verify_request_signature(Req, State) of
 	{true, Req1, State1} ->
-	    case chef_otto:is_user_in_org(S, UserName, OrgName) of
-		true -> {true, Req1, State1};
-		false ->
-		    Msg = is_authorized_message(not_member_of_org, UserName,
-                                                OrgName),
-		    Json = ejson:encode(Msg),
-                    Req2 = wrq:set_resp_body(Json, Req),
-		    {?www_auth_header, Req2, State1}
-	    end;
+            {true, Req1, State1};
 	{false, ReqOther, StateOther} ->
             {?www_auth_header, ReqOther, StateOther}
+    end.
+
+forbidden(Req, State = #state{organization_name = OrgName}) ->
+    UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
+    S = chef_otto:connect(),
+    case chef_otto:is_user_in_org(S, UserName, OrgName) of
+        true ->
+            {false, Req, State};
+        false ->
+            Msg = is_authorized_message(not_member_of_org, UserName, OrgName),
+            {true, wrq:set_resp_body(ejson:encode(Msg), Req), State}
     end.
 
 resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
