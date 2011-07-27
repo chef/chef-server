@@ -28,6 +28,7 @@
 -define(db_for_guid(X), [<<"chef_">>, X]).
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
+-define(www_auth_header, "X-Ops-Sign version=\"1.0\"").
 
 init(_Any) ->
     %% Initialize random number gen for this process
@@ -85,10 +86,10 @@ is_authorized(Req, State = #state{organization_name = OrgName}) ->
                                                 OrgName),
 		    Json = ejson:encode(Msg),
                     Req2 = wrq:set_resp_body(Json, Req),
-		    {false, Req2, State1}
+		    {?www_auth_header, Req2, State1}
 	    end;
 	{false, ReqOther, StateOther} ->
-            {{halt, 401}, ReqOther, StateOther}
+            {?www_auth_header, ReqOther, StateOther}
     end.
 
 resource_exists(Req, State = #state{solr_query = QueryWithoutGuid,
