@@ -34,7 +34,7 @@ make_query_from_params_test_() ->
               Expect = #chef_solr_query{
                               query_string = "myquery",
                               filter_query = "+X_CHEF_type_CHEF_X:node",
-                              sort = "X_CHEF_id_CHEF_X+asc",
+                              sort = "X_CHEF_id_CHEF_X asc",
                               start = 2,
                               rows = 5},
               ?assertEqual(Expect, Query),
@@ -50,7 +50,7 @@ make_query_from_params_test_() ->
               Expect = #chef_solr_query{
                               query_string = "*:*",
                               filter_query = "+X_CHEF_type_CHEF_X:node",
-                              sort = "X_CHEF_id_CHEF_X+asc",
+                              sort = "X_CHEF_id_CHEF_X asc",
                               start = 0,
                               rows = 1000},
               ?assertEqual(Expect, Query),
@@ -128,7 +128,7 @@ search_test_() ->
                 query_string = "*:*",
                 %% note the missing org filter
                 filter_query = "+X_CHEF_type_CHEF_X:node",
-                sort = "X_CHEF_id_CHEF_X+asc",
+                sort = "X_CHEF_id_CHEF_X asc",
                 start = 0,
                 rows = 1000},
               ?assertError(function_clause, chef_solr:search(Query)),

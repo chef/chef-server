@@ -45,7 +45,7 @@ make_query_from_params(Req) ->
     Rows = decode(nonneg_int, "rows", Req, 1000),
     %% 'sort' param is ignored and hardcoded because indexing
     %% scheme doesn't support sorting since there is only one field.
-    Sort = "X_CHEF_id_CHEF_X+asc",
+    Sort = "X_CHEF_id_CHEF_X asc",
     #chef_solr_query{query_string = QueryString,
                      filter_query = FilterQuery,
                      start = Start,

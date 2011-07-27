@@ -63,7 +63,7 @@ malformed_request_tests() ->
               SolrQuery = State#state.solr_query,
               %% FIXME: this is a record defined in chef_solr
               ?assertEqual({chef_solr_query, "myquery", "+X_CHEF_type_CHEF_X:node",
-                            0, 20, "X_CHEF_id_CHEF_X+asc"}, SolrQuery),
+                            0, 20, "X_CHEF_id_CHEF_X asc"}, SolrQuery),
               ?assert(meck:validate(wrq))
       end},
 
@@ -92,7 +92,7 @@ malformed_request_tests() ->
               %% FIXME: this is a record defined in chef_solr
               SolrQuery = State#state.solr_query,
               ?assertEqual({chef_solr_query, "*:*", "+X_CHEF_type_CHEF_X:node",
-                            0, 20, "X_CHEF_id_CHEF_X+asc"}, SolrQuery),
+                            0, 20, "X_CHEF_id_CHEF_X asc"}, SolrQuery),
               ?assert(meck:validate(wrq))
       end},
 
