@@ -29,7 +29,6 @@
 -define(db_for_guid(X), [<<"chef_">>, X]).
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
--define(www_auth_header, "X-Ops-Sign version=\"1.0\"").
 
 init(_Any) ->
     %% Initialize random number gen for this process
@@ -80,7 +79,7 @@ is_authorized(Req, State) ->
 	{true, Req1, State1} ->
             {true, Req1, State1};
 	{false, ReqOther, StateOther} ->
-            {?www_auth_header, ReqOther, StateOther}
+            {"X-Ops-Sign version=\"1.0\"", ReqOther, StateOther}
     end.
 
 forbidden(Req, State = #state{organization_name = OrgName}) ->
