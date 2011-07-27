@@ -107,7 +107,10 @@ resource_exists(Req, State = #state{solr_query = QueryWithoutGuid,
         {true, Req, State#state{organization_guid = OrgGuid, solr_query = Query}}
     catch
         throw:org_not_found ->
-            NoOrg = error_json(org_not_found),
+            %% Not sure we can ever get here; user in org check will
+            %% have failed with 401 if no such org.
+            NoOrg = resource_exists_message(org_not_found, 
+                                            wrq:path_info(organization_id, Req)),
             Req1 = wrq:set_resp_body(ejson:encode(NoOrg), Req),
             {false, Req1, State}
     end.
@@ -148,7 +151,7 @@ verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
                      State1#state{couchbeam = S,
                                   organization_guid = ?gv(org_guid, CertInfo)}};
                 {no_authn, Reason} ->
-                    Msg = error_json(Reason),
+                    Msg = verify_request_message(Reason, UserName, OrgName),
                     Json = ejson:encode(Msg),
                     Req1 = wrq:set_resp_body(Json, Req),
                     {false, Req1, State1}
@@ -161,7 +164,8 @@ body_or_default(Req, Default) ->
         Body -> Body
     end.
 
-is_authorized_message(not_member_of_org, User, Org) ->
+is_authorized_message(Type, User, Org) when Type =:= not_member_of_org;
+                                            Type =:= bad_sig ->
     Msg = iolist_to_binary([<<"'">>, User, <<"' not authorized to search '">>,
                             Org, <<"'.">>]),
     {[{<<"error">>, [Msg]}]};
@@ -170,6 +174,10 @@ is_authorized_message(org_not_found, _User, Org) ->
                             <<"' does not exist.">>]),
     {[{<<"error">>, [Msg]}]}.
 
+resource_exists_message(org_not_found, Org) ->
+    Msg = iolist_to_binary([<<"organization '">>, Org,
+                            <<"' does not exist.">>]),
+    {[{<<"error">>, [Msg]}]}.
 
 verify_request_message({not_found, client}, User, _Org) ->
     Msg = iolist_to_binary([<<"Failed to authenticate as '">>, User, <<"'. ">>,
@@ -179,24 +187,9 @@ verify_request_message({not_found, client}, User, _Org) ->
 verify_request_message({not_found, org}, _User, Org) ->
     Msg = iolist_to_binary([<<"organization '">>, Org,
                             <<"' does not exist.">>]),
-    {[{<<"error">>, [Msg]}]}.
-
-
-error_json(bad_sig) ->
-    {[{<<"error">>, [<<"bad signature">>]}]};
-error_json(no_cert) ->
-%% {\"error\":[\"Failed to authenticate as seth-xxx-yyy. Ensure that your node_name and client key are correct.\"]}"}
-    {[{<<"error">>, [<<"user, client, or organization not found">>]}]};
-error_json({missing_headers, Missing}) ->
-    {[{<<"error">>,
-               [<<"missing auth headers">>]},
-              {<<"missing_headers">>, Missing}]};
-error_json(bad_clock) ->
-    {[{<<"error">>, [<<"check clock">>]}]};
-error_json(bad_sign_desc) ->
-    {[{<<"error">>, [<<"bad signing description">>]}]};
-error_json(_) ->
-    {[{<<"error">>, [<<"problem with headers">>]}]}.
+    {[{<<"error">>, [Msg]}]};
+verify_request_message(bad_sig, User, Org) ->
+    is_authorized_message(bad_sig, User, Org).
 
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
