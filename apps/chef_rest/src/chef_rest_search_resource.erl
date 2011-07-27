@@ -47,6 +47,9 @@ init(_Any) ->
                    hostname = hostname(),
                    request_type = "search.get" },
     {ok, State}.
+%% {{trace, "/tmp/traces"}, State}.
+%% then in console: wmtrace_resource:add_dispatch_rule("wmtrace", "/tmp/traces").
+%% then go to localhost:WXYZ/wmtrace
 
 malformed_request(Req, State) ->
     State1 = read_req_id(Req, State),
