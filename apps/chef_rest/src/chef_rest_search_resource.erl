@@ -78,17 +78,27 @@ is_authorized(Req, State = #state{organization_name = OrgName}) ->
 	    case chef_otto:is_user_in_org(S, UserName, OrgName) of
 		true -> {true, Req1, State1};
 		false ->
-		    Msg = error_json(not_member_of_org),
+		    Msg = is_authorized_message(not_member_of_org, UserName,
+                                                OrgName),
 		    Json = ejson:encode(Msg),
                     Req2 = wrq:set_resp_body(Json, Req),
 		    {false, Req2, State1}
 	    end;
-	Other -> Other
+	{false, ReqOther, StateOther} ->
+            {{halt, 401}, ReqOther, StateOther}
     end.
 
-resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
+resource_exists(Req, State = #state{solr_query = QueryWithoutGuid,
+                                    organization_guid = OrgGuid0}) ->
     try
-        OrgGuid = fetch_org_guid(Req, State),
+        %% avoid a db hit if we've already found the org guid as part
+        %% of client lookup to do authentication.
+        OrgGuid = case OrgGuid0 of
+                      undefined ->
+                          fetch_org_guid(Req, State);
+                      _ ->
+                          OrgGuid0
+                  end,
         Query = chef_solr:add_org_guid_to_query(QueryWithoutGuid, OrgGuid),
         {true, Req, State#state{organization_guid = OrgGuid, solr_query = Query}}
     catch
@@ -113,15 +123,15 @@ get_header_fun(_Req, State) ->
 
 verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
     UserName = wrq:get_req_header("x-ops-userid", Req),
-    % TODO Quit leaking this
     S = chef_otto:connect(),
     case chef_otto:fetch_user_or_client_cert(S, OrgName, UserName) of
-        not_found ->
-            NoCertMsg = error_json(no_cert),
-            {false,
-             wrq:set_resp_body(ejson:encode(NoCertMsg), Req), State};
+        {not_found, What} ->
+            NotFoundMsg = verify_request_message({not_found, What},
+                                                 UserName, OrgName),
+            {false, wrq:set_resp_body(ejson:encode(NotFoundMsg), Req), State};
         CertInfo ->
-            % TODO this causes us to fetch the organization a second time.  Keep it and pass it in instead.
+            %% TODO this causes us to fetch the organization a second
+            %% time.  Keep it and pass it in instead.
             Cert = ?gv(cert, CertInfo),
             Body = body_or_default(Req, <<>>),
             HTTPMethod = iolist_to_binary(atom_to_list(wrq:method(Req))),
@@ -131,13 +141,13 @@ verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
                                                       Path, Body, Cert, 300) of
                 {name, _} ->
                     {true, Req,
-                     State1#state{couchbeam = S}};
+                     State1#state{couchbeam = S,
+                                  organization_guid = ?gv(org_guid, CertInfo)}};
                 {no_authn, Reason} ->
                     Msg = error_json(Reason),
                     Json = ejson:encode(Msg),
                     Req1 = wrq:set_resp_body(Json, Req),
-                    % TODO This is a needless mutation
-                    {false, Req1, State1#state{couchbeam = S}}
+                    {false, Req1, State1}
             end
     end.
 
@@ -147,9 +157,31 @@ body_or_default(Req, Default) ->
         Body -> Body
     end.
 
+is_authorized_message(not_member_of_org, User, Org) ->
+    Msg = iolist_to_binary([<<"'">>, User, <<"' not authorized to search '">>,
+                            Org, <<"'.">>]),
+    {[{<<"error">>, [Msg]}]};
+is_authorized_message(org_not_found, _User, Org) ->
+    Msg = iolist_to_binary([<<"organization '">>, Org,
+                            <<"' does not exist.">>]),
+    {[{<<"error">>, [Msg]}]}.
+
+
+verify_request_message({not_found, client}, User, _Org) ->
+    Msg = iolist_to_binary([<<"Failed to authenticate as '">>, User, <<"'. ">>,
+                            <<"Ensure that your node_name and client key ">>,
+                            <<"are correct.">>]),
+    {[{<<"error">>, [Msg]}]};
+verify_request_message({not_found, org}, _User, Org) ->
+    Msg = iolist_to_binary([<<"organization '">>, Org,
+                            <<"' does not exist.">>]),
+    {[{<<"error">>, [Msg]}]}.
+
+
 error_json(bad_sig) ->
     {[{<<"error">>, [<<"bad signature">>]}]};
 error_json(no_cert) ->
+%% {\"error\":[\"Failed to authenticate as seth-xxx-yyy. Ensure that your node_name and client key are correct.\"]}"}
     {[{<<"error">>, [<<"user, client, or organization not found">>]}]};
 error_json({missing_headers, Missing}) ->
     {[{<<"error">>,
@@ -159,13 +191,6 @@ error_json(bad_clock) ->
     {[{<<"error">>, [<<"check clock">>]}]};
 error_json(bad_sign_desc) ->
     {[{<<"error">>, [<<"bad signing description">>]}]};
-error_json(org_not_found) ->
-    {[{<<"error">>, [<<"organization not found">>]}]};
-error_json({bad_query, RawQuery}) ->
-    {[{<<"error">>, [<<"invalid search query">>]},
-              {<<"query">>, RawQuery}]};
-error_json(not_member_of_org) ->
-    {[{<<"error">>, [<<"Not a member of the organization">>]}]};
 error_json(_) ->
     {[{<<"error">>, [<<"problem with headers">>]}]}.
 
