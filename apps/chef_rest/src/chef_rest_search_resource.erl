@@ -92,17 +92,9 @@ is_authorized(Req, State = #state{organization_name = OrgName}) ->
             {?www_auth_header, ReqOther, StateOther}
     end.
 
-resource_exists(Req, State = #state{solr_query = QueryWithoutGuid,
-                                    organization_guid = OrgGuid0}) ->
+resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
     try
-        %% avoid a db hit if we've already found the org guid as part
-        %% of client lookup to do authentication.
-        OrgGuid = case OrgGuid0 of
-                      undefined ->
-                          fetch_org_guid(Req, State);
-                      _ ->
-                          OrgGuid0
-                  end,
+        OrgGuid = fetch_org_guid(Req, State),
         Query = chef_solr:add_org_guid_to_query(QueryWithoutGuid, OrgGuid),
         {true, Req, State#state{organization_guid = OrgGuid, solr_query = Query}}
     catch
