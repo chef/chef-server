@@ -201,7 +201,12 @@ to_json(Req, State = #state{couchbeam = S,
     end.
 
 finish_request(Req, State) ->
-    send_stat(completed, Req, State),
+    try
+        send_stat(completed, Req, State)
+    catch
+        X:Y ->
+            error_logger:error_report({X, Y, erlang:get_stacktrace()})
+    end,
     {true, Req, State}.
 
 make_search_results(S, Db, Ids, BatchSize, Start, NumFound) ->
