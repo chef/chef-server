@@ -196,7 +196,7 @@ to_json(Req, State = #state{couchbeam = S,
         {make_search_results(S, OrgGuid, Ids, BatchSize, Start, NumFound), Req, State}
     catch
         throw:X ->
-	    io:format("500! ~s~n", X),
+	    io:format("500! ~p~n", [X]),
             {{halt, 500}, Req, State}
     end.
 
