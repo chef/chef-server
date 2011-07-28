@@ -16,6 +16,7 @@
 -export([init/1,
          malformed_request/2,
          is_authorized/2,
+         forbidden/2,
          resource_exists/2,
          allowed_methods/2,
          content_types_provided/2,
@@ -73,40 +74,36 @@ malformed_request(Req, State) ->
             {true, NewReq, State3}
     end.
 
-is_authorized(Req, State = #state{organization_name = OrgName}) ->
-    UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
-    S = chef_otto:connect(),
+is_authorized(Req, State) ->
     case verify_request_signature(Req, State) of
 	{true, Req1, State1} ->
-	    case chef_otto:is_user_in_org(S, UserName, OrgName) of
-		true -> {true, Req1, State1};
-		false ->
-		    Msg = is_authorized_message(not_member_of_org, UserName,
-                                                OrgName),
-		    Json = ejson:encode(Msg),
-                    Req2 = wrq:set_resp_body(Json, Req),
-		    {false, Req2, State1}
-	    end;
+            {true, Req1, State1};
 	{false, ReqOther, StateOther} ->
-            {{halt, 401}, ReqOther, StateOther}
+            {"X-Ops-Sign version=\"1.0\"", ReqOther, StateOther}
     end.
 
-resource_exists(Req, State = #state{solr_query = QueryWithoutGuid,
-                                    organization_guid = OrgGuid0}) ->
+forbidden(Req, State = #state{organization_name = OrgName}) ->
+    UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
+    S = chef_otto:connect(),
+    case chef_otto:is_user_in_org(S, UserName, OrgName) of
+        true ->
+            {false, Req, State};
+        false ->
+            Msg = is_authorized_message(not_member_of_org, UserName, OrgName),
+            {true, wrq:set_resp_body(ejson:encode(Msg), Req), State}
+    end.
+
+resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
     try
-        %% avoid a db hit if we've already found the org guid as part
-        %% of client lookup to do authentication.
-        OrgGuid = case OrgGuid0 of
-                      undefined ->
-                          fetch_org_guid(Req, State);
-                      _ ->
-                          OrgGuid0
-                  end,
+        OrgGuid = fetch_org_guid(Req, State),
         Query = chef_solr:add_org_guid_to_query(QueryWithoutGuid, OrgGuid),
         {true, Req, State#state{organization_guid = OrgGuid, solr_query = Query}}
     catch
         throw:org_not_found ->
-            NoOrg = error_json(org_not_found),
+            %% Not sure we can ever get here; user in org check will
+            %% have failed with 401 if no such org.
+            NoOrg = resource_exists_message(org_not_found, 
+                                            wrq:path_info(organization_id, Req)),
             Req1 = wrq:set_resp_body(ejson:encode(NoOrg), Req),
             {false, Req1, State}
     end.
@@ -147,7 +144,7 @@ verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
                      State1#state{couchbeam = S,
                                   organization_guid = ?gv(org_guid, CertInfo)}};
                 {no_authn, Reason} ->
-                    Msg = error_json(Reason),
+                    Msg = verify_request_message(Reason, UserName, OrgName),
                     Json = ejson:encode(Msg),
                     Req1 = wrq:set_resp_body(Json, Req),
                     {false, Req1, State1}
@@ -160,7 +157,8 @@ body_or_default(Req, Default) ->
         Body -> Body
     end.
 
-is_authorized_message(not_member_of_org, User, Org) ->
+is_authorized_message(Type, User, Org) when Type =:= not_member_of_org;
+                                            Type =:= bad_sig ->
     Msg = iolist_to_binary([<<"'">>, User, <<"' not authorized to search '">>,
                             Org, <<"'.">>]),
     {[{<<"error">>, [Msg]}]};
@@ -169,6 +167,10 @@ is_authorized_message(org_not_found, _User, Org) ->
                             <<"' does not exist.">>]),
     {[{<<"error">>, [Msg]}]}.
 
+resource_exists_message(org_not_found, Org) ->
+    Msg = iolist_to_binary([<<"organization '">>, Org,
+                            <<"' does not exist.">>]),
+    {[{<<"error">>, [Msg]}]}.
 
 verify_request_message({not_found, client}, User, _Org) ->
     Msg = iolist_to_binary([<<"Failed to authenticate as '">>, User, <<"'. ">>,
@@ -178,24 +180,9 @@ verify_request_message({not_found, client}, User, _Org) ->
 verify_request_message({not_found, org}, _User, Org) ->
     Msg = iolist_to_binary([<<"organization '">>, Org,
                             <<"' does not exist.">>]),
-    {[{<<"error">>, [Msg]}]}.
-
-
-error_json(bad_sig) ->
-    {[{<<"error">>, [<<"bad signature">>]}]};
-error_json(no_cert) ->
-%% {\"error\":[\"Failed to authenticate as seth-xxx-yyy. Ensure that your node_name and client key are correct.\"]}"}
-    {[{<<"error">>, [<<"user, client, or organization not found">>]}]};
-error_json({missing_headers, Missing}) ->
-    {[{<<"error">>,
-               [<<"missing auth headers">>]},
-              {<<"missing_headers">>, Missing}]};
-error_json(bad_clock) ->
-    {[{<<"error">>, [<<"check clock">>]}]};
-error_json(bad_sign_desc) ->
-    {[{<<"error">>, [<<"bad signing description">>]}]};
-error_json(_) ->
-    {[{<<"error">>, [<<"problem with headers">>]}]}.
+    {[{<<"error">>, [Msg]}]};
+verify_request_message(bad_sig, User, Org) ->
+    is_authorized_message(bad_sig, User, Org).
 
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
