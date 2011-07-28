@@ -163,7 +163,9 @@ fetch_org(Server, OrgName) when is_list(OrgName) ->
     fetch_org(Server, list_to_binary(OrgName)).
 
 -spec fetch_client(couchbeam:server(), binary() | not_found,
-                   binary() | string()) -> [tuple()] | not_found.
+                   binary() | string()) ->
+                          [tuple()] | {not_found, client}
+                              | {not_found, org}.
 fetch_client(Server, OrgId, ClientName)
   when is_binary(ClientName), is_binary(OrgId) ->
     ChefDb = [<<"chef_">>, OrgId],
@@ -174,8 +176,7 @@ fetch_client(Server, OrgId, ClientName)
         {ok, {Row}} ->
             ClientId = ?gv(<<"id">>, Row),
             case couchbeam:open_doc(Db, ClientId) of
-                % {client_not_found, {no_doc, ClientId}}
-                {error, not_found} -> not_found;
+                {error, not_found} -> {not_found, client};
                 {ok, {ClientDoc}} -> ClientDoc
             end;
         {ok, []} -> {not_found, client}
@@ -187,14 +188,17 @@ fetch_client(_Server, not_found, _ClientName) ->
 
 %% FIXME: do we want to distinguish between client not found and org not found?
 -spec fetch_user_or_client_cert(couchbeam:server(), db_key(), db_key()) ->
-    [tuple()] | not_found.
+                                       [tuple()]
+                                           | {not_found, client}
+                                           | {not_found, org}.
 fetch_user_or_client_cert(Server, OrgName, ClientName)
   when is_binary(OrgName), is_binary(ClientName) ->
     case fetch_user(Server, ClientName) of
         {user_not_found, _} ->
             OrgId = fetch_org_id(Server, OrgName),
             case fetch_client(Server, OrgId, ClientName) of
-                {not_found, What} -> {not_found, What};
+                {not_found, What} ->
+                    {not_found, What};
                 Client when is_list(Client) ->
                     Cert = ?gv(<<"certificate">>, Client),
                     [{cert, Cert}, {type, client}, {org_guid, OrgId}]
