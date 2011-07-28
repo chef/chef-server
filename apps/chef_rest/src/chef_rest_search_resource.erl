@@ -31,9 +31,6 @@
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
 
 init(_Any) ->
-    %% Initialize random number gen for this process
-    {T1, T2, T3} = erlang:now(),
-    random:seed(T1, T2, T3),
     % TODO move solr/estatsd config out to chef_rest_sup or chef_rest_app
     {ok, BatchSize} = application:get_env(chef_rest, bulk_fetch_batch_size),
     {ok, EstatsdServer} = application:get_env(chef_rest, estatsd_server),
@@ -357,7 +354,7 @@ read_req_id(Req, State) ->
     {ok, ReqHeaderName} = application:get_env(chef_rest, reqid_header_name),
     ReqId = case wrq:get_req_header(ReqHeaderName, Req) of
                 undefined ->
-                    [$b,$o,$g,$u,$s|integer_to_list(random:uniform(500000))];
+                    binary_to_list(base64:encode(term_to_binary(make_ref())));
                 HV ->
                     HV
             end,
