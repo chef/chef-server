@@ -64,16 +64,15 @@ Search Error Cases
 - [X] missing signature
 - [X] q param defaults to "*:*"
 - [X] request time out of bounds
-- bad signature
-- not in org
-- no such org
-- no such user
-- no such client
+- [X] bad signature
+- [X] not in org
+- [X] no such org
+- [X} no such user/client.  these are the same from the search resource level.
 - [X] bad query (can't parse)
-- invalid extra params (rows=foo, rows=-10)
-- params: start, rows, sort, q.  Do we actually support sort?
+- [X] invalid extra params (rows=foo, rows=-10)
+- [X] params: start, rows, sort, q.  Do we actually support sort?
   - default values for start, rows, sort
-- verify that user can't manipulate filter to escape org guid filter
+- [X] verify that user can't manipulate filter to escape org guid filter
 - bad type (not a node, role, client, or environment). Do we need to
   validate data bag?
 
