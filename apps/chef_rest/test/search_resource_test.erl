@@ -298,7 +298,37 @@ is_authorized_tests() ->
               ?assertEqual(true, IsAuth),
               ?assert(meck:validate(wrq)),
               ?assert(meck:validate(chef_otto))
-      end}]}.
+      end},
+
+     {"not authorized: key mismatch",
+      fun() ->
+              HeaderFun = make_header_fun(),
+              meck:expect(wrq, get_req_header,
+                          fun(HName, req_mock) -> HeaderFun(HName) end),
+              meck:expect(wrq, path_info, fun(object_type, req_mock) ->
+                                                  "node";
+                                             (organization_id, req_mock) ->
+                                                  "testorg"
+                                          end),
+              meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
+              meck:expect(chef_otto, connect, fun() -> mock_otto_connect end),
+              meck:expect(chef_otto, fetch_user_or_client_cert,
+                          fun(mock_otto_connect, "mock-org", "alice") ->
+                                  {ok, Cert} = file:read_file("../test/other_cert.pem"),
+                                  [{cert, Cert}]
+                          end),
+              meck:expect(wrq, req_body, fun(req_mock) -> undefined end),
+              meck:expect(wrq, method, fun(req_mock) -> 'GET' end),
+              meck:expect(wrq, path, fun(req_mock) -> "does-not-matter-comes-from-meck-mocks" end),
+              {IsAuth, Req, _State} =
+                  chef_rest_search_resource:is_authorized(req_mock, make_state()),
+              WantMsg = <<"{\"error\":[\"'alice' not authorized to search 'mock-org'.\"]}">>,
+              ?assertEqual("X-Ops-Sign version=\"1.0\"", IsAuth),
+              ?assertEqual(WantMsg, Req),
+              ?assert(meck:validate(wrq)),
+              ?assert(meck:validate(chef_otto))
+      end}
+]}.
 
 
 get_signed_headers() ->
