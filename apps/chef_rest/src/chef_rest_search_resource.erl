@@ -118,6 +118,14 @@ get_header_fun(Req, State = #state{header_fun = HFun})
 get_header_fun(_Req, State) ->
     {State#state.header_fun, State}.
 
+-spec verify_request_signature(#wm_reqdata{}, #state{}) ->
+                                      {boolean(), #wm_reqdata{}, #state{}}.
+%% @doc Perform request signature verification (authenticate)
+%% 
+%% Fetches user or client certificate and uses it verify the signature
+%% on the request.  If the request cannot be verified, then the
+%% returned `#wm_reqdata{}' record will have a response body
+%% explaining why.
 verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
     UserName = wrq:get_req_header("x-ops-userid", Req),
     S = chef_otto:connect(),
