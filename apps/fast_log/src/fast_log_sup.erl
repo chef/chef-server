@@ -35,9 +35,7 @@
 %% ===================================================================
 
 start_link() ->
-    Res = supervisor:start_link({local, ?MODULE}, ?MODULE, []),
-    io:format("Sup start: ~p~n", [Res]),
-    Res.
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% ===================================================================
 %% Supervisor callbacks
