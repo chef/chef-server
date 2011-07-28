@@ -327,8 +327,129 @@ is_authorized_tests() ->
               ?assertEqual(WantMsg, Req),
               ?assert(meck:validate(wrq)),
               ?assert(meck:validate(chef_otto))
+      end},
+
+     {"user/client not found",
+      fun() ->
+              HeaderFun = make_header_fun(),
+              meck:expect(wrq, get_req_header,
+                          fun(HName, req_mock) -> HeaderFun(HName) end),
+              meck:expect(wrq, path_info, fun(object_type, req_mock) ->
+                                                  "node";
+                                             (organization_id, req_mock) ->
+                                                  "testorg"
+                                          end),
+              meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
+              meck:expect(chef_otto, connect, fun() -> mock_otto_connect end),
+              meck:expect(chef_otto, fetch_user_or_client_cert,
+                          fun(mock_otto_connect, "mock-org", "alice") ->
+                                  {not_found, client}
+                          end),
+              meck:expect(wrq, req_body, fun(req_mock) -> undefined end),
+              meck:expect(wrq, method, fun(req_mock) -> 'GET' end),
+              meck:expect(wrq, path, fun(req_mock) -> "does-not-matter-comes-from-meck-mocks" end),
+              {IsAuth, Req, _State} =
+                  chef_rest_search_resource:is_authorized(req_mock, make_state()),
+              WantMsg = iolist_to_binary(["{\"error\":[\"",
+                                          "Failed to authenticate as '", "alice", "'. ",
+                                          "Ensure that your node_name and client key ",
+                                          "are correct.", "\"]}"]),
+              ?assertEqual("X-Ops-Sign version=\"1.0\"", IsAuth),
+              ?assertEqual(WantMsg, Req),
+              ?assert(meck:validate(wrq)),
+              ?assert(meck:validate(chef_otto))
+      end},
+
+     {"org not found",
+      fun() ->
+              HeaderFun = make_header_fun(),
+              meck:expect(wrq, get_req_header,
+                          fun(HName, req_mock) -> HeaderFun(HName) end),
+              meck:expect(wrq, path_info, fun(object_type, req_mock) ->
+                                                  "node";
+                                             (organization_id, req_mock) ->
+                                                  "testorg"
+                                          end),
+              meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
+              meck:expect(chef_otto, connect, fun() -> mock_otto_connect end),
+              meck:expect(chef_otto, fetch_user_or_client_cert,
+                          fun(mock_otto_connect, "mock-org", "alice") ->
+                                  {not_found, org}
+                          end),
+              meck:expect(wrq, req_body, fun(req_mock) -> undefined end),
+              meck:expect(wrq, method, fun(req_mock) -> 'GET' end),
+              meck:expect(wrq, path, fun(req_mock) -> "does-not-matter-comes-from-meck-mocks" end),
+              {IsAuth, Req, _State} =
+                  chef_rest_search_resource:is_authorized(req_mock, make_state()),
+              WantMsg = <<"{\"error\":[\"organization 'mock-org' does not exist.\"]}">>,
+              ?assertEqual("X-Ops-Sign version=\"1.0\"", IsAuth),
+              ?assertEqual(WantMsg, Req),
+              ?assert(meck:validate(wrq)),
+              ?assert(meck:validate(chef_otto))
       end}
 ]}.
+
+
+forbidden_test_() ->
+    {setup,
+     fun() ->
+             application:start(crypto),
+             application:set_env(chef_rest, reqid_header_name, "X-Request-Id")
+     end,
+     fun(_) ->
+             stopping
+     end,
+     forbidden_tests()}.
+
+forbidden_tests() ->
+    {foreach,
+     fun() ->
+             meck:new(wrq),
+             meck:new(fast_log),
+             meck:new(chef_otto),
+             meck:expect(fast_log, info, fun(_, _, _) -> ok end),
+             meck:expect(fast_log, info, fun(_, _, _, _) -> ok end),
+             application:set_env(chef_rest, reqid_header_name, "X-Request-Id")
+     end,
+     fun(_) ->
+             meck:unload()
+     end,
+    [
+     {"NOT forbidden",
+      fun() ->
+              meck:expect(wrq, get_req_header,
+                          fun("x-ops-userid", req_mock) -> "alice" end),
+              meck:expect(chef_otto, connect, fun() -> mock_otto_connect end),
+              meck:expect(chef_otto, is_user_in_org,
+                          fun(mock_otto_connect, <<"alice">>, "mock-org") ->
+                                  true
+                          end),
+              {IsForbidden, _Req, _State} =
+                  chef_rest_search_resource:forbidden(req_mock, make_state()),
+              ?assertEqual(false, IsForbidden),
+              ?assert(meck:validate(wrq)),
+              ?assert(meck:validate(chef_otto))
+      end},
+
+     {"403 forbidden",
+      fun() ->
+              meck:expect(wrq, get_req_header,
+                          fun("x-ops-userid", req_mock) -> "alice" end),
+              meck:expect(chef_otto, connect, fun() -> mock_otto_connect end),
+              meck:expect(chef_otto, is_user_in_org,
+                          fun(mock_otto_connect, <<"alice">>, "mock-org") ->
+                                  false
+                          end),
+              meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
+              {IsForbidden, Req, _State} =
+                  chef_rest_search_resource:forbidden(req_mock, make_state()),
+              WantMsg = <<"{\"error\":[\"'alice' not authorized to search 'mock-org'.\"]}">>,
+              ?assertEqual(true, IsForbidden),
+              ?assertEqual(WantMsg, Req),
+              ?assert(meck:validate(wrq)),
+              ?assert(meck:validate(chef_otto))
+      end}
+    ]}.
 
 
 get_signed_headers() ->
