@@ -10,6 +10,7 @@ make_state() ->
            estatsd_server = "127.0.0.1",
            estatsd_port = 3365,
            hostname = net_adm:localhost(),
+           organization_name = "mock-org",
            request_type = "search.get"}.
 %% /FIXME
 
@@ -198,15 +199,19 @@ malformed_request_tests() ->
 
      {"missing X-Ops-Timestamp header",
       fun() ->
+              HeaderFun = make_header_fun(),
               meck:expect(wrq, get_req_header,
-                          fun(HName, req_mock) ->
-                                  Headers = lists:keydelete(<<"X-Ops-Timestamp">>, 1,
-                                                            all_auth_headers()),
-                                  proplists:get_value(HName, Headers)
+                          fun("x-ops-timestamp", req_mock) ->
+                                  undefined;
+                             (HName, req_mock) ->
+                                  HeaderFun(HName)
                           end),
-              meck:expect(wrq, path_info, fun(organization_id, req_mock) ->
+              meck:expect(wrq, path_info, fun(object_type, req_mock) ->
+                                                  "node";
+                                             (organization_id, req_mock) ->
                                                   "testorg"
                                           end),
+              meck:expect(wrq, get_qs_value, fun(_, req_mock) -> undefined end),
               meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
               {IsMalformed, GotMsg, _State} =
                   chef_rest_search_resource:malformed_request(req_mock, make_state()),
@@ -220,8 +225,8 @@ malformed_request_tests() ->
      {"time out of bounds",
       fun() ->
               SignedHeadersBin = get_signed_headers(),
-              SignedHeadersBin1 = lists:keyreplace(<<"X-Ops-Timestamp">>, 1, SignedHeadersBin,
-                                                   {<<"X-Ops-Timestamp">>, <<"2011-06-21T19:06:35Z">>}),
+              SignedHeadersBin1 = lists:keyreplace("x-ops-timestamp", 1, SignedHeadersBin,
+                                                   {"x-ops-timestamp", <<"2011-06-21T19:06:35Z">>}),
               meck:expect(wrq, get_req_header,
                           fun(HName, req_mock) -> proplists:get_value(HName, SignedHeadersBin1) end),
               meck:expect(wrq, path_info, fun(object_type, req_mock) ->
@@ -229,17 +234,8 @@ malformed_request_tests() ->
                                              (organization_id, req_mock) ->
                                                   "testorg"
                                           end),
-              meck:expect(wrq, get_qs_value, fun("q", req_mock) ->
-                                                     "myquery";
-                                                ("start", req_mock) ->
-                                                     "0";
-                                                ("rows", req_mock) ->
-                                                     "20";
-                                                ("sort", req_mock) ->
-                                                     "X_CHEF_id_CHEF_X+asc"
-                                             end),
+              meck:expect(wrq, get_qs_value, fun(_, req_mock) -> undefined end),
               meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
-
               {IsMalformed, GotMsg, _State} =
                   chef_rest_search_resource:malformed_request(req_mock, make_state()),
               ?assertEqual(true, IsMalformed),
@@ -252,24 +248,76 @@ malformed_request_tests() ->
 
     ]}.
 
+is_authorized_test_() ->
+    {setup,
+     fun() ->
+             application:start(crypto),
+             application:set_env(chef_rest, reqid_header_name, "X-Request-Id")
+     end,
+     fun(_) ->
+             stopping
+     end,
+     is_authorized_tests()}.
+
+is_authorized_tests() ->
+    {foreach,
+     fun() ->
+             meck:new(wrq),
+             meck:new(fast_log),
+             meck:new(chef_otto),
+             meck:expect(fast_log, info, fun(_, _, _) -> ok end),
+             meck:expect(fast_log, info, fun(_, _, _, _) -> ok end),
+             application:set_env(chef_rest, reqid_header_name, "X-Request-Id")
+     end,
+     fun(_) ->
+             meck:unload()
+     end,
+    [
+     {"is authorized YES",
+      fun() ->
+              HeaderFun = make_header_fun(),
+              meck:expect(wrq, get_req_header,
+                          fun(HName, req_mock) -> HeaderFun(HName) end),
+              meck:expect(wrq, path_info, fun(object_type, req_mock) ->
+                                                  "node";
+                                             (organization_id, req_mock) ->
+                                                  "testorg"
+                                          end),
+              meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
+              meck:expect(chef_otto, connect, fun() -> mock_otto_connect end),
+              meck:expect(chef_otto, fetch_user_or_client_cert,
+                          fun(mock_otto_connect, "mock-org", "alice") ->
+                                  {ok, Cert} = file:read_file("../test/acert.pem"),
+                                  [{cert, Cert}]
+                          end),
+              meck:expect(wrq, req_body, fun(req_mock) -> undefined end),
+              meck:expect(wrq, method, fun(req_mock) -> 'GET' end),
+              meck:expect(wrq, path, fun(req_mock) -> "does-not-matter-comes-from-meck-mocks" end),
+              {IsAuth, _Req, _State} =
+                  chef_rest_search_resource:is_authorized(req_mock, make_state()),
+              ?assertEqual(true, IsAuth),
+              ?assert(meck:validate(wrq)),
+              ?assert(meck:validate(chef_otto))
+      end}]}.
+
+
 get_signed_headers() ->
     {ok, KeyBin} = file:read_file("../test/akey.pem"),
     PrivateKey = chef_authn:extract_private_key(KeyBin),
     Time = httpd_util:rfc1123_date(),
     Path = "does-not-matter-comes-from-meck-mocks",
-    chef_authn:sign_request(PrivateKey, <<"alice">>, <<"GET">>, Time, Path).
+    Headers = chef_authn:sign_request(PrivateKey, <<"alice">>, <<"GET">>,
+                                      Time, Path),
+    [ {string:to_lower(binary_to_list(K)), binary_to_list(V)} || {K, V} <- Headers ].
 
+make_header_fun() ->
+    Headers = get_signed_headers(),
+    fun(H) ->
+            proplists:get_value(normalize_header_name(H), Headers)
+    end.
 
-all_auth_headers() ->
-    [
-     {<<"X-Ops-Content-Hash">>, "1"},
-     {<<"X-Ops-UserId">>, <<"2">>},
-     {<<"X-Ops-Sign">>, <<"3">>},
-     {<<"X-Ops-Timestamp">>, <<"4">>},
-     {<<"X-Ops-Authorization-1">>, <<"10">>},
-     {<<"X-Ops-Authorization-2">>, <<"20">>},
-     {<<"X-Ops-Authorization-3">>, <<"30">>},
-     {<<"X-Ops-Authorization-4">>, <<"40">>},
-     {<<"X-Ops-Authorization-5">>, <<"50">>},
-     {<<"X-Ops-Authorization-6">>, <<"60">>}].
+normalize_header_name(H) when is_binary(H) ->
+    normalize_header_name(binary_to_list(H));
+normalize_header_name(H) ->
+    string:to_lower(H).
 
