@@ -76,6 +76,29 @@ Search Error Cases
 - bad type (not a node, role, client, or environment). Do we need to
   validate data bag?
 
+Data Bag Queries
+----------------
+
+Ruby code goes to couchdb prior to each request to verify the list of
+known data bags.  If data bag is not found, returns 404, otherwise
+continues with search.  We need to either repro that call or do the
+following which should save on calls to couch for the common case.
+
+1. Execute data bag search.  If we get results, go to #2, otherwise #3
+
+2. (solr returned IDs) Fetch objects from couch using IDs from solr.
+   If no results, go to #3, otherwise #4.
+
+3. (no objects found for IDs, or no IDs from solr) Fetch list of data
+   bags from couch.  If searched for data bag exists, return empty
+   result set 200, otherwise return 404.
+
+4. Return result set 200.
+
+So we need:
+
+- [ ] chef_otto:data_bag_exists(S, Db, BagName) -> boolean()
+- [ ] implement logic as above.
 
 Stuff
 -----
