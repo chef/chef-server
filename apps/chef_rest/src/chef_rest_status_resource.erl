@@ -21,7 +21,6 @@ init(_Any) ->
     {ok, <<"{}">>}.
 
 allowed_methods(Req, State) ->
-    io:format("Header: ~p~n", [wrq:get_req_header("Content-Type", Req)]),
     {['GET'], Req, State}.
 
 content_types_provided(Req, State) ->
