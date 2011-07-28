@@ -98,7 +98,7 @@ resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
     catch
         throw:org_not_found ->
             %% Not sure we can ever get here; user in org check will
-            %% have failed with 401 if no such org.
+            %% have failed with 403 if no such org.
             NoOrg = resource_exists_message(org_not_found, 
                                             wrq:path_info(organization_id, Req)),
             Req1 = wrq:set_resp_body(ejson:encode(NoOrg), Req),
@@ -108,7 +108,11 @@ resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
 get_header_fun(Req, State = #state{header_fun = HFun})
   when HFun =:= undefined ->
     GetHeader = fun(H) ->
-                        case wrq:get_req_header(H, Req) of
+                        Name = case is_binary(H) of
+                                   true -> binary_to_list(H);
+                                   false -> H
+                               end,
+                        case wrq:get_req_header(string:to_lower(Name), Req) of
                             B when is_binary(B) -> B;
                             S when is_list(S) -> iolist_to_binary(S);
                             undefined -> undefined
