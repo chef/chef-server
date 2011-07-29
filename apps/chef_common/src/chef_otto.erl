@@ -30,7 +30,8 @@
          is_user_in_org/3,
          connect/0,
          connect/2,
-         bulk_get/3
+         bulk_get/3,
+         data_bag_exists/3
          ]).
 
 -include_lib("couchbeam/include/couchbeam.hrl").
@@ -239,3 +240,24 @@ fetch_auth_join(Server, ObjectId) when is_binary(ObjectId) ->
     end;
 fetch_auth_join(Server, ObjectId) when is_list(ObjectId) ->
     fetch_auth_join(Server, list_to_binary(ObjectId)).
+
+
+-spec data_bag_exists(couchbeam:server(), binary(), binary() | string()) ->
+                             [tuple()] | {not_found, client}
+                                 | {not_found, org}.
+%% @doc Return true if there is a data bag named `DataBag' in the
+%% specified org.
+%% 
+%% 
+data_bag_exists(Server, OrgId, DataBag)
+  when is_binary(DataBag), is_binary(OrgId) ->
+    ChefDb = [<<"chef_">>, OrgId],
+    {ok, Db} = couchbeam:open_db(Server, ChefDb, []),
+    {ok, View} = couchbeam:view(Db, {"data_bags", "all_id"},
+                                [{key, DataBag}]),
+    case couchbeam_view:first(View) of
+        {ok, {_Row}} -> true;
+        {ok, []} -> false
+    end;
+data_bag_exists(Server, OrgId, DataBag) when is_list(DataBag), is_binary(OrgId) ->
+    data_bag_exists(Server, OrgId, list_to_binary(DataBag)).

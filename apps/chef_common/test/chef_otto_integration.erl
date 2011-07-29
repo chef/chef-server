@@ -113,6 +113,17 @@ mock_fetch_orgs_for_user() ->
                                               "by_organizations_for_user", <<"1234">>}],
                                       success_val={[<<"clownco">>, {<<"_id">>, <<"1234">>}]}}).
 
+mock_data_bag_exists() ->
+    mock_lookup(#couch_mock_info{valid=[{?mixlib_auth_org_design,
+                                         "by_name", <<"clownco">>},
+                                        {"data_bags", "all_id",
+                                         <<"user-bag">>}],
+                                 success_val= {[
+                                                {<<"guid">>,
+                                                 <<"test-guid">>},
+                                                {<<"orgname">>,
+                                                 <<"clownco">>}]}}).
+
 fetch_user_test_() ->
     {foreach,
      fun() -> mock_fetch_user() end,
@@ -188,3 +199,22 @@ fetch_client_test_() ->
                 ?assertEqual({not_found, org},
                              chef_otto:fetch_client(S, OID,
                                                     <<"clownco-validator">>)) end}]}.
+
+data_bag_exists_test_() ->
+    {foreach,
+     fun() -> mock_data_bag_exists() end,
+     fun(_) -> teardown_couch_view_lookup() end,
+     [{"data_bag_exists YES",
+       fun() ->
+               S = chef_otto:connect(),
+               OID = ?gv(<<"guid">>, chef_otto:fetch_org(S, <<"clownco">>)),
+               ?assertEqual(true, chef_otto:data_bag_exists(S, OID, <<"user-bag">>))
+       end},
+
+      {"data_bag_exists NO",
+       fun() ->
+               S = chef_otto:connect(),
+               OID = ?gv(<<"guid">>, chef_otto:fetch_org(S, <<"clownco">>)),
+               ?assertEqual(false, chef_otto:data_bag_exists(S, OID, <<"no-such-bag">>))
+       end}
+     ]}.
