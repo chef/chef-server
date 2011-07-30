@@ -1,14 +1,7 @@
 -module(chef_solr_test).
 
 -include_lib("eunit/include/eunit.hrl").
-
-%% FIXME: copied from chef_solr
--record(chef_solr_query, {query_string :: string(),
-                          filter_query :: string(),
-                          start :: integer(),
-                          rows :: integer(),
-                          sort :: string()}).
-%% /FIXME
+-include("../src/chef_solr.hrl").
 
 expect_params(Params) ->
     meck:expect(wrq, get_qs_value, fun(Key, req_mock) ->
@@ -32,11 +25,12 @@ make_query_from_params_test_() ->
               expect_params(Params),
               Query = chef_solr:make_query_from_params(req_mock),
               Expect = #chef_solr_query{
-                              query_string = "myquery",
-                              filter_query = "+X_CHEF_type_CHEF_X:node",
-                              sort = "X_CHEF_id_CHEF_X asc",
-                              start = 2,
-                              rows = 5},
+                query_string = "myquery",
+                filter_query = "+X_CHEF_type_CHEF_X:node",
+                sort = "X_CHEF_id_CHEF_X asc",
+                start = 2,
+                rows = 5,
+                index = node},
               ?assertEqual(Expect, Query),
               ?assert(meck:validate(wrq))
       end},
@@ -44,15 +38,16 @@ make_query_from_params_test_() ->
      {"default values",
       fun() ->
               meck:expect(wrq, path_info,
-                          fun(object_type, req_mock) -> "node" end),
+                          fun(object_type, req_mock) -> "role" end),
               expect_params([]),
               Query = chef_solr:make_query_from_params(req_mock),
               Expect = #chef_solr_query{
                               query_string = "*:*",
-                              filter_query = "+X_CHEF_type_CHEF_X:node",
+                              filter_query = "+X_CHEF_type_CHEF_X:role",
                               sort = "X_CHEF_id_CHEF_X asc",
                               start = 0,
-                              rows = 1000},
+                              rows = 1000,
+                              index = role},
               ?assertEqual(Expect, Query),
               ?assert(meck:validate(wrq))
       end},
@@ -105,6 +100,22 @@ make_query_from_params_test_() ->
               ?assertThrow({bad_param, {"rows", "-5"}},
                            chef_solr:make_query_from_params(req_mock)),
               ?assert(meck:validate(wrq))
+      end},
+
+     {"index type",
+      fun() ->
+              Tests = [{"node", node}, {"role", role}, {"client", client},
+                       {"environment", environment},
+                       {"adbag", {data_bag, "adbag"}}],
+              Types = [ T || {T, _} <- Tests],
+              meck:sequence(wrq, path_info, 2, Types),
+              expect_params([]),                % defaults
+              lists:foreach(
+                fun({_, Want}) ->
+                        Query = chef_solr:make_query_from_params(req_mock),
+                        ?assertEqual(Want, Query#chef_solr_query.index)
+                end, Tests),
+              ?assert(meck:validate(wrq))
       end}
       
     ]}.
@@ -133,6 +144,5 @@ search_test_() ->
                 rows = 1000},
               ?assertError(function_clause, chef_solr:search(Query)),
               ?assert(meck:validate(wrq)),
-              %% ?assert(meck:validate(chef_solr)),
               ?assert(meck:validate(ibrowse))
       end}]}.

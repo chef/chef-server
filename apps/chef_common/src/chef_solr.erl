@@ -23,12 +23,7 @@
 -export([search/1, make_query_from_params/1, add_org_guid_to_query/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
-
--record(chef_solr_query, {query_string :: string(),
-                          filter_query :: string(),
-                          start :: integer(),
-                          rows :: integer(),
-                          sort :: string()}).
+-include("chef_solr.hrl").
 
 make_query_from_params(Req) ->
     % TODO: super awesome error messages
@@ -50,7 +45,8 @@ make_query_from_params(Req) ->
                      filter_query = FilterQuery,
                      start = Start,
                      rows = Rows,
-                     sort = Sort}.
+                     sort = Sort,
+                     index = index_type(ObjType)}.
 
 decode(nonneg_int, Key, Req, Default) ->
     {Int, Orig} =
@@ -135,3 +131,14 @@ make_fq_type(ObjType) when ObjType =:= "node";
     "+X_CHEF_type_CHEF_X:" ++ ObjType;
 make_fq_type(ObjType) ->
     "+X_CHEF_type_CHEF_X:data_bag_item +data_bag:" ++ ObjType.
+
+index_type("node") ->
+    'node';
+index_type("role") ->
+    'role';
+index_type("client") ->
+    'client';
+index_type("environment") ->
+    'environment';
+index_type(DataBag) ->
+    {'data_bag', DataBag}.
