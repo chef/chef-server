@@ -133,8 +133,6 @@ search_test_() ->
     [
      {"error if org filter not set",
       fun() ->
-              meck:expect(ibrowse, send_req,
-                          fun(Url, [], get) -> {ok, "200", [], Url} end),
               Query = #chef_solr_query{
                 query_string = "*:*",
                 %% note the missing org filter
@@ -142,10 +140,31 @@ search_test_() ->
                 sort = "X_CHEF_id_CHEF_X asc",
                 start = 0,
                 rows = 1000},
-              ?assertError(function_clause, chef_solr:search(Query)),
-              ?assert(meck:validate(wrq)),
+              ?assertError(function_clause, chef_solr:search(Query))
+      end},
+
+     {"parse non-empty solr result",
+      fun() ->
+              Docs = [{[{<<"X_CHEF_id_CHEF_X">>, "d1"}]},
+                      {[{<<"X_CHEF_id_CHEF_X">>, "d2"}]}],
+              Solr = {[{<<"response">>,
+                        {[{<<"start">>, 2},
+                          {<<"numFound">>, 10},
+                          {<<"docs">>, Docs}]}}]},
+              SolrJson = ejson:encode(Solr),
+              meck:expect(ibrowse, send_req,
+                          fun(_Url, [], get) -> {ok, "200", [], SolrJson} end),
+              Query0 = #chef_solr_query{
+                query_string = "*:*",
+                filter_query = "+X_CHEF_type_CHEF_X:node",
+                sort = "X_CHEF_id_CHEF_X asc",
+                start = 0,
+                rows = 1000},
+              Query1 = chef_solr:add_org_guid_to_query(Query0, <<"0123abc">>),
+              ?assertEqual({ok, 2, 10, ["d1", "d2"]}, chef_solr:search(Query1)),
               ?assert(meck:validate(ibrowse))
-      end}]}.
+     end}
+    ]}.
 
 add_org_guid_to_query_test() ->
     Query0 = #chef_solr_query{
