@@ -68,6 +68,8 @@ validate_non_neg(Key, Int, OrigValue) when Int < 0 ->
 validate_non_neg(_Key, Int, _OrigValue) ->
     Int.
 
+-spec add_org_guid_to_query(#chef_solr_query{}, binary()) ->
+                                   #chef_solr_query{}.
 add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery},
                       OrgGuid) ->
     Query#chef_solr_query{filter_query = "+X_CHEF_database_CHEF_X:chef_" ++

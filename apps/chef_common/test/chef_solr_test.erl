@@ -146,3 +146,16 @@ search_test_() ->
               ?assert(meck:validate(wrq)),
               ?assert(meck:validate(ibrowse))
       end}]}.
+
+add_org_guid_to_query_test() ->
+    Query0 = #chef_solr_query{
+      query_string = "*:*",
+      filter_query = "+X_CHEF_type_CHEF_X:role",
+      sort = "X_CHEF_id_CHEF_X asc",
+      start = 0,
+      rows = 1000,
+      index = role},
+    Query1 = chef_solr:add_org_guid_to_query(Query0, <<"0123abc">>),
+    ?assertEqual("+X_CHEF_database_CHEF_X:chef_0123abc "
+                 "+X_CHEF_type_CHEF_X:role",
+                 Query1#chef_solr_query.filter_query).
