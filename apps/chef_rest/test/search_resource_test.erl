@@ -2,6 +2,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include("../src/chef_rest_search_resource.hrl").
+-include("../../chef_common/src/chef_solr.hrl").
 
 make_state() ->
     #state{start_time = now(),
@@ -63,8 +64,13 @@ malformed_request_tests() ->
               ?assertEqual("testorg", State#state.organization_name),
               SolrQuery = State#state.solr_query,
               %% FIXME: this is a record defined in chef_solr
-              ?assertEqual({chef_solr_query, "myquery", "+X_CHEF_type_CHEF_X:node",
-                            0, 20, "X_CHEF_id_CHEF_X asc"}, SolrQuery),
+              ?assertEqual(#chef_solr_query{
+                              query_string = "myquery",
+                              filter_query = "+X_CHEF_type_CHEF_X:node",
+                              start = 0, rows = 20,
+                              sort = "X_CHEF_id_CHEF_X asc",
+                              index = node},
+                           SolrQuery),
               ?assert(meck:validate(wrq))
       end},
 
@@ -92,8 +98,12 @@ malformed_request_tests() ->
               ?assertEqual(false, IsMalformed),
               %% FIXME: this is a record defined in chef_solr
               SolrQuery = State#state.solr_query,
-              ?assertEqual({chef_solr_query, "*:*", "+X_CHEF_type_CHEF_X:node",
-                            0, 20, "X_CHEF_id_CHEF_X asc"}, SolrQuery),
+              ?assertEqual(#chef_solr_query{
+                              query_string = "*:*",
+                              filter_query = "+X_CHEF_type_CHEF_X:node",
+                              start = 0, rows = 20,
+                              sort = "X_CHEF_id_CHEF_X asc",
+                              index = node}, SolrQuery),
               ?assert(meck:validate(wrq))
       end},
 
