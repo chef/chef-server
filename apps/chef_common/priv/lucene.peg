@@ -15,7 +15,7 @@ field_range <- field_name ":" (("[" range_entry " TO " range_entry "]") /
 
 field_name <- !keyword valid_letter+;
 
-range_entry <- valid_letter+ / "*";
+range_entry <- "*" / valid_letter+;
 
 group <- '(' group:query ')';
 
@@ -46,7 +46,7 @@ keyword <- "AND" / "OR" / "NOT";
 
 valid_letter <- start_letter+ ([a-zA-Z0-9*?_+.-] / '\\' special_char)*;
 
-start_letter <- [a-zA-Z0-9_.] / '\\' special_char;
+start_letter <- [a-zA-Z0-9_.*] / '\\' special_char;
 
 space <- [ \t]+;
 

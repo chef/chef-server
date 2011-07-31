@@ -167,12 +167,12 @@ fielded_fuzzy_query_test_() ->
 star_star_test() ->
     ?assertEqual(<<"*:*">>, chef_lucene:parse(<<"*:*">>)).
 
-% % TODO
-% % - fields and boolean, unary ops
-% % - range queries and boolean, unary ops
-% % - failure modes
-% %   - invalid queries
-% %   - queries with invalid/lone NOT/!
+leading_star_test() ->
+    ?assertEqual(<<"content:afield__=__*">>, chef_lucene:parse("afield:*")).
 
-
-
+wildcard_query_test_() ->
+    Tests = [
+             {"afield:cr?p", <<"content:afield__=__cr?p">>},
+             {"afield:c???", <<"content:afield__=__c???">>}
+            ],
+    [ ?_assertEqual(Expect, chef_lucene:parse(I)) || {I, Expect} <- Tests ].
