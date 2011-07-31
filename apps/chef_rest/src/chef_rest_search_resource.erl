@@ -24,6 +24,7 @@
          to_json/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
+-include("../../chef_common/src/chef_solr.hrl").
 -include("chef_rest_search_resource.hrl").
 
 -define(db_for_guid(X), [<<"chef_">>, X]).
@@ -48,6 +49,9 @@ init(_Any) ->
 %% {{trace, "/tmp/traces"}, State}.
 %% then in console: wmtrace_resource:add_dispatch_rule("wmtrace", "/tmp/traces").
 %% then go to localhost:WXYZ/wmtrace
+
+allowed_methods(Req, State) ->
+    {['GET'], Req, State}.
 
 malformed_request(Req, State) ->
     State1 = read_req_id(Req, State),
@@ -193,9 +197,6 @@ verify_request_message({not_found, org}, _User, Org) ->
 verify_request_message(bad_sig, User, Org) ->
     is_authorized_message(bad_sig, User, Org).
 
-allowed_methods(Req, State) ->
-    {['GET'], Req, State}.
-
 content_types_provided(ReqData, State) ->
     {[{"application/json", to_json}], ReqData, State}.
 
@@ -215,13 +216,22 @@ to_json(Req, State = #state{couchbeam = S,
                             solr_query = Query,
                             organization_guid = OrgGuid,
                             batch_size = BatchSize}) ->
-    try
-        {ok, Start, NumFound, Ids} = chef_solr:search(Query),
-        {make_search_results(S, OrgGuid, Ids, BatchSize, Start, NumFound), Req, State}
-    catch
-        throw:X ->
-	    io:format("500! ~p~n", [X]),
-            {{halt, 500}, Req, State}
+    {ok, Start, NumFound, Ids} = chef_solr:search(Query),
+    {NumFound, Ans} = make_search_results(S, OrgGuid, Ids, BatchSize,
+                                          Start, NumFound),
+    case Query#chef_solr_query.index of
+        {data_bag, BagName} when NumFound =:= 0 ->
+            case chef_otto:data_bag_exists(S, OrgGuid, BagName) of
+                true ->
+                    {Ans, Req, State};
+                false ->
+                    Msg = iolist_to_binary([<<"I don't know how to search for ">>,
+                                            BagName, <<" data objects.">>]),
+                    Json = ejson:encode({[{<<"error">>, [Msg]}]}),
+                    {{halt, 404}, wrq:set_resp_body(Json, Req), State}
+            end;
+        _Else ->
+            {Ans, Req, State}
     end.
 
 finish_request(Req, State) ->
@@ -235,8 +245,9 @@ finish_request(Req, State) ->
 
 make_search_results(S, Db, Ids, BatchSize, Start, NumFound) ->
     Ans0 = search_result_start(Start, NumFound),
-    Ans1 = fetch_result_rows(Ids, BatchSize, S, ?db_for_guid(Db), Ans0),
-    search_result_finish(Ans1).
+    {N, Ans1} = fetch_result_rows(Ids, BatchSize, S, ?db_for_guid(Db),
+                                  {0, Ans0}),
+    {N, search_result_finish(Ans1)}.
 
 % @doc Fetch a list of `Ids' in batches of size `BatchSize'.
 %
@@ -249,18 +260,19 @@ make_search_results(S, Db, Ids, BatchSize, Start, NumFound) ->
 % remove the JSON array markers.  The caller is responsible for adding
 % this back to create valid JSON.
 %
-fetch_result_rows([], _BatchSize, _S, _Db, Acc) ->
-    Acc;
-fetch_result_rows(Ids, BatchSize, S, Db, Acc) when is_list(Ids) ->
-    fetch_result_rows(safe_split(BatchSize, Ids), BatchSize, S, Db, Acc);
-fetch_result_rows({Ids, []}, _BatchSize, S, Db, Acc) ->
+fetch_result_rows([], _BatchSize, _S, _Db, {N, Acc}) ->
+    {N, Acc};
+fetch_result_rows(Ids, BatchSize, S, Db, {N, Acc}) when is_list(Ids) ->
+    fetch_result_rows(safe_split(BatchSize, Ids), BatchSize, S, Db, {N, Acc});
+fetch_result_rows({Ids, []}, _BatchSize, S, Db, {N, Acc}) ->
     Docs = chef_otto:bulk_get(S, Db, Ids),
-    encode_results(Docs, Acc);
-fetch_result_rows({Ids, Rest}, BatchSize, S, Db, Acc) ->
+    {N + length(Docs), encode_results(Docs, Acc)};
+fetch_result_rows({Ids, Rest}, BatchSize, S, Db, {N, Acc}) ->
     Next = safe_split(BatchSize, Rest),
     Docs = chef_otto:bulk_get(S, Db, Ids),
     fetch_result_rows(Next, BatchSize, S, Db,
-                      encode_results(Docs, <<",">>, Acc)).
+                      {N + length(Docs),
+                       encode_results(Docs, <<",">>, Acc)}).
 
 encode_results([], Acc) ->
     Acc;
