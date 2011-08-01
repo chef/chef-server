@@ -13,7 +13,23 @@ make_state() ->
            hostname = net_adm:localhost(),
            organization_name = "mock-org",
            request_type = "search.get"}.
-%% /FIXME
+
+init_test_() ->
+    {foreach,
+     fun() ->
+             application:set_env(chef_rest, bulk_fetch_batch_size, 10),
+             application:set_env(chef_rest, estatsd_server, "192.168.4.50"),
+             application:set_env(chef_rest, estatsd_port, 5656)
+     end,
+     fun(_) -> stopping end,
+     [{"init basic",
+       fun() ->
+               {ok, State} = chef_rest_search_resource:init(ignored),
+               ?assertEqual(10, State#state.batch_size),
+               ?assertEqual(5656, State#state.estatsd_port),
+               ?assertEqual("chef_rest_search_resource", State#state.resource)
+       end}
+     ]}.
 
 malformed_request_test_() ->
     {setup,
@@ -460,6 +476,62 @@ forbidden_tests() ->
               ?assert(meck:validate(chef_otto))
       end}
     ]}.
+
+resource_exists_test_() ->
+    {foreach,
+     fun() ->
+             meck:new([wrq, chef_otto])
+     end,
+     fun(_) -> 
+             meck:unload()
+     end,
+     [
+      {"org not found",
+       fun() ->
+               meck:expect(wrq, path_info,
+                           fun(organization_id, req_mock) -> "mock-org" end),
+               meck:expect(chef_otto, fetch_org_id,
+                           fun(_, <<"mock-org">>) -> not_found end),
+               meck:expect(wrq, set_resp_body,
+                           fun(Msg, req_mock) -> Msg end),
+               {Exists, Msg, _State} =
+                   chef_rest_search_resource:resource_exists(req_mock,
+                                                             make_state()),
+               WantMsg = iolist_to_binary(["{\"error\":[\""
+                                           "organization 'mock-org' does "
+                                           "not exist.\"]}"]),
+               ?assertEqual(false, Exists),
+               ?assertEqual(WantMsg, Msg),
+               ?assert(meck:validate(wrq)),
+               ?assert(meck:validate(chef_otto))
+       end
+      },
+
+      {"org guid already set",
+       fun() ->
+               Query = #chef_solr_query{query_string = "myquery",
+                                        filter_query = "+X_CHEF_type_CHEF_X:node",
+                                        start = 0, rows = 20,
+                                        sort = "X_CHEF_id_CHEF_X asc",
+                                        index = node},
+               State0 = make_state(),
+               State1 = State0#state{couchbeam = cb_mock,
+                                    organization_guid = <<"123abc">>,
+                                    solr_query = Query},
+               meck:expect(wrq, path_info,
+                           fun(organization_id, req_mock) -> "mock-org" end),
+               {Exists, _Req, State2} =
+                   chef_rest_search_resource:resource_exists(req_mock, State1),
+               ?assertEqual(true, Exists),
+               ?assertEqual("+X_CHEF_database_CHEF_X:chef_123abc "
+                            "+X_CHEF_type_CHEF_X:node",
+                            State2#state.solr_query#chef_solr_query.filter_query),
+               ?assert(meck:validate(wrq)),
+               ?assert(meck:validate(chef_otto))
+       end
+      }
+
+     ]}.
 
 
 get_signed_headers() ->
