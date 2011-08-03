@@ -216,30 +216,21 @@ to_json(Req, State = #state{couchbeam = S,
                             solr_query = Query,
                             organization_guid = OrgGuid,
                             batch_size = BatchSize}) ->
-    error_logger:info_msg("1~n"),
-    {ok, Start, NumFound, Ids} = chef_solr:search(Query),
-    error_logger:info_msg("2~n"),
-    {NumFound, Ans} = make_search_results(S, OrgGuid, Ids, BatchSize,
-                                          Start, NumFound),
-    error_logger:info_msg("3~n"),
+    {ok, Start, SolrNumFound, Ids} = chef_solr:search(Query),
+    {DbNumFound, Ans} = make_search_results(S, OrgGuid, Ids, BatchSize,
+                                          Start, SolrNumFound),
     case Query#chef_solr_query.index of
-        {data_bag, BagName} when NumFound =:= 0 ->
-            error_logger:info_msg("4~n"),
+        {data_bag, BagName} when DbNumFound =:= 0 ->
             case chef_otto:data_bag_exists(S, OrgGuid, BagName) of
                 true ->
-                    error_logger:info_msg("5~n"),
                     {Ans, Req, State};
                 false ->
-                    error_logger:info_msg("6~n"),
                     Msg = iolist_to_binary([<<"I don't know how to search for ">>,
                                             BagName, <<" data objects.">>]),
-                    error_logger:info_msg("7~n"),
                     Json = ejson:encode({[{<<"error">>, [Msg]}]}),
-                    error_logger:info_msg("8~n"),
                     {{halt, 404}, wrq:set_resp_body(Json, Req), State}
             end;
         _Else ->
-            error_logger:info_msg("9~n"),
             {Ans, Req, State}
     end.
 
