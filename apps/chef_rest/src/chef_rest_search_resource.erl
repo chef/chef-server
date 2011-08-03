@@ -32,7 +32,6 @@
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
 
 init(_Any) ->
-    % TODO move solr/estatsd config out to chef_rest_sup or chef_rest_app
     {ok, BatchSize} = application:get_env(chef_rest, bulk_fetch_batch_size),
     {ok, EstatsdServer} = application:get_env(chef_rest, estatsd_server),
     % TODO IPv6?
@@ -72,6 +71,7 @@ malformed_request(Req, State) ->
         throw:Why ->
             Msg = malformed_request_message(Why, GetHeader),
             NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),
+            log_request_time("Malformed request", State),
             {true, NewReq, State3}
     end.
 
@@ -80,6 +80,7 @@ is_authorized(Req, State) ->
 	{true, Req1, State1} ->
             {true, Req1, State1};
 	{false, ReqOther, StateOther} ->
+            log_request_time("Signature verification failed", State),
             {"X-Ops-Sign version=\"1.0\"", ReqOther, StateOther}
     end.
 
@@ -90,6 +91,7 @@ forbidden(Req, State = #state{organization_name = OrgName}) ->
         true ->
             {false, Req, State};
         false ->
+            log_request_time("User is not in requested org", State),
             Msg = is_authorized_message(not_member_of_org, UserName, OrgName),
             {true, wrq:set_resp_body(ejson:encode(Msg), Req), State}
     end.
@@ -106,6 +108,7 @@ resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
             NoOrg = resource_exists_message(org_not_found, 
                                             wrq:path_info(organization_id, Req)),
             Req1 = wrq:set_resp_body(ejson:encode(NoOrg), Req),
+            log_request_time("Requested org not found", State),
             {false, Req1, State}
     end.
 
@@ -228,6 +231,7 @@ to_json(Req, State = #state{couchbeam = S,
                     Msg = iolist_to_binary([<<"I don't know how to search for ">>,
                                             BagName, <<" data objects.">>]),
                     Json = ejson:encode({[{<<"error">>, [Msg]}]}),
+                    log_request_time("Requested data bag does not exist", State),
                     {{halt, 404}, wrq:set_resp_body(Json, Req), State}
             end;
         _Else ->
@@ -359,8 +363,7 @@ send_stat(received,_Any, #state{request_type=RequestType,
 send_stat(completed, Req, #state{request_type=RequestType,
                                  hostname=HostName,
                                  organization_name=OrgName,
-                                 start_time=StartTime,
-                                 reqid=ReqId}=State) ->
+                                 start_time=StartTime}=State) ->
     RequestTime = timer:now_diff(now(), StartTime) div 1000,
     StatusCode = integer_to_list(wrq:response_code(Req)),
     send_stats(State, [{["erchefAPI.application.byStatusCode.", StatusCode], 1, "m"},
@@ -369,7 +372,25 @@ send_stat(completed, Req, #state{request_type=RequestType,
                        {["erchefAPI.application.byRequestType.", RequestType], RequestTime, "h"},
                        {["erchefAPI.application.byOrgname.", OrgName], RequestTime, "h"},
                        {["erchefAPI.", HostName, ".allRequests"], RequestTime, "h"}]),
+    log_request_time(State).
+
+%% Totally nasty hack but I can't bring myself to add another path to
+%% rebar.config's sub_dirs. There's got to be a better way....
+-ifndef(TEST).
+log_request_time(#state{reqid=ReqId, start_time=StartTime}) ->
+    RequestTime = timer:now_diff(now(), StartTime) div 1000,
     fast_log:info(erchef, ReqId, "request processing time: ~B", [RequestTime]).
+
+log_request_time(Msg, #state{reqid=ReqId, start_time=StartTime}) ->
+    RequestTime = timer:now_diff(now(), StartTime) div 1000,
+    fast_log:info(erchef, ReqId, "request failed: ~s ~B", [Msg, RequestTime]).
+-endif.
+
+-ifdef(TEST).
+log_request_time(_) -> ok.
+
+log_request_time(_, _) -> ok.
+-endif.
 
 send_stats(#state{estatsd_server = EstatsdServer, estatsd_port = EstatsdPort}, Stats) ->
     stats_hero:send(EstatsdServer, EstatsdPort, Stats).
