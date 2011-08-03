@@ -17,3 +17,7 @@
 
 ## Tweak GC to run more often
 -env ERL_FULLSWEEP_AFTER 10
+
+## Increase logfile size to 10M
+-env RUN_ERL_LOG_MAXSIZE 10000000
+
