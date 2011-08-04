@@ -474,6 +474,24 @@ forbidden_tests() ->
               ?assertEqual(WantMsg, Req),
               ?assert(meck:validate(wrq)),
               ?assert(meck:validate(chef_otto))
+      end},
+     {"Unexpected DB error",
+      fun() ->
+              meck:expect(wrq, get_req_header,
+                          fun("x-ops-userid", req_mock) -> "alice" end),
+              meck:expect(chef_otto, connect, fun() -> mock_otto_connect end),
+              meck:expect(chef_otto, is_user_in_org,
+                          fun(mock_otto_connect, <<"alice">>, "mock-org") ->
+                                  {error, failed}
+                          end),
+              meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
+              {IsForbidden, Req, _State} =
+                  chef_rest_search_resource:forbidden(req_mock, make_state()),
+              WantMsg = <<"{\"error\":[\"Failed to verify user 'alice' as a member of organization 'mock-org'.\"]}">>,
+              ?assertEqual(true, IsForbidden),
+              ?assertEqual(WantMsg, Req),
+              ?assert(meck:validate(wrq)),
+              ?assert(meck:validate(chef_otto))
       end}
     ]}.
 

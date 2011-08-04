@@ -95,9 +95,10 @@ forbidden(Req, State = #state{organization_name = OrgName}) ->
             Msg = is_authorized_message(not_member_of_org, UserName, OrgName),
             {true, wrq:set_resp_body(ejson:encode(Msg), Req), State};
         Error ->
-            Msg = lists:flatten(io_lib:format("Failure verifying user's ~p membership in org ~p: ~p",
-                                              [UserName, OrgName, Error])),
-            log_
+            log_request_time("Failure verifying user's ~p membership in org ~p: ~p",
+                             [UserName, OrgName, Error], State),
+            Msg = is_authorized_message(unverified_org_membership, UserName, OrgName),
+            {true, wrq:set_resp_body(ejson:encode(Msg), Req), State}
     end.
 
 resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
@@ -180,6 +181,11 @@ body_or_default(Req, Default) ->
 is_authorized_message(Type, User, Org) when Type =:= not_member_of_org;
                                             Type =:= bad_sig ->
     Msg = iolist_to_binary([<<"'">>, User, <<"' not authorized to search '">>,
+                            Org, <<"'.">>]),
+    {[{<<"error">>, [Msg]}]};
+is_authorized_message(unverified_org_membership, User, Org) ->
+    Msg = iolist_to_binary([<<"Failed to verify user '">>, User,
+                            <<"' as a member of organization '">>,
                             Org, <<"'.">>]),
     {[{<<"error">>, [Msg]}]};
 is_authorized_message(org_not_found, _User, Org) ->
