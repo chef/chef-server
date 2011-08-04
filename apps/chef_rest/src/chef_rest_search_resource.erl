@@ -401,12 +401,12 @@ log_request_time(#state{reqid=ReqId, start_time=StartTime}) ->
 
 log_request_time(Msg, #state{reqid=ReqId, start_time=StartTime}) ->
     RequestTime = timer:now_diff(now(), StartTime) div 1000,
-    fast_log:error(erchef, ReqId, "request failed: ~s ~B", [Msg, RequestTime]).
+    fast_log:err(erchef, ReqId, "request failed: ~s ~B", [Msg, RequestTime]).
 
 log_request_time(Format, Args, #state{reqid=ReqId, start_time=StartTime}) ->
     RequestTime = timer:now_diff(now(), StartTime) div 1000,
     Msg = lists:flatten(io_lib:format(Format, Args)),
-    fast_log:error(erchef, ReqId, "request failed: ~s ~B", [Msg, RequestTime]).
+    fast_log:err(erchef, ReqId, "request failed: ~s ~B", [Msg, RequestTime]).
 
 -endif.
 
