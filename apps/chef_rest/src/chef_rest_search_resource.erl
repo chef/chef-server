@@ -371,8 +371,9 @@ hostname() ->
 
 send_stat(received,_Any, #state{request_type=RequestType,
                                 hostname=HostName,
-                                organization_name=OrgName,
+                                organization_name=OrgName0,
                                 reqid=ReqId}=State) ->
+    OrgName = normalize_org_for_stats(OrgName0),
     send_stats(State, [{"erchefAPI.application.allRequests", 1, "m"},
                        {["erchefAPI.application.byRequestType.", RequestType], 1, "m"},
                        {["erchefAPI.", HostName, ".allRequests"], 1, "m"},
@@ -380,8 +381,9 @@ send_stat(received,_Any, #state{request_type=RequestType,
     fast_log:info(erchef, ReqId, "request started");
 send_stat(completed, Req, #state{request_type=RequestType,
                                  hostname=HostName,
-                                 organization_name=OrgName,
+                                 organization_name=OrgName0,
                                  start_time=StartTime}=State) ->
+    OrgName = normalize_org_for_stats(OrgName0),
     RequestTime = timer:now_diff(now(), StartTime) div 1000,
     StatusCode = integer_to_list(wrq:response_code(Req)),
     send_stats(State, [{["erchefAPI.application.byStatusCode.", StatusCode], 1, "m"},
@@ -391,6 +393,11 @@ send_stat(completed, Req, #state{request_type=RequestType,
                        {["erchefAPI.application.byOrgname.", OrgName], RequestTime, "h"},
                        {["erchefAPI.", HostName, ".allRequests"], RequestTime, "h"}]),
     log_request_time(State).
+
+normalize_org_for_stats(undefined) ->
+    "undefined";
+normalize_org_for_stats(Org) ->
+    Org.
 
 %% Totally nasty hack but I can't bring myself to add another path to
 %% rebar.config's sub_dirs. There's got to be a better way....
