@@ -93,7 +93,11 @@ forbidden(Req, State = #state{organization_name = OrgName}) ->
         false ->
             log_request_time("User is not in requested org", State),
             Msg = is_authorized_message(not_member_of_org, UserName, OrgName),
-            {true, wrq:set_resp_body(ejson:encode(Msg), Req), State}
+            {true, wrq:set_resp_body(ejson:encode(Msg), Req), State};
+        Error ->
+            Msg = lists:flatten(io_lib:format("Failure verifying user's ~p membership in org ~p: ~p",
+                                              [UserName, OrgName, Error])),
+            log_
     end.
 
 resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
@@ -383,13 +387,21 @@ log_request_time(#state{reqid=ReqId, start_time=StartTime}) ->
 
 log_request_time(Msg, #state{reqid=ReqId, start_time=StartTime}) ->
     RequestTime = timer:now_diff(now(), StartTime) div 1000,
-    fast_log:info(erchef, ReqId, "request failed: ~s ~B", [Msg, RequestTime]).
+    fast_log:error(erchef, ReqId, "request failed: ~s ~B", [Msg, RequestTime]).
+
+log_request_time(Format, Args, #state{reqid=ReqId, start_time=StartTime}) ->
+    RequestTime = timer:now_diff(now(), StartTime) div 1000,
+    Msg = lists:flatten(io_lib:format(Format, Args)),
+    fast_log:error(erchef, ReqId, "request failed: ~s ~B", [Msg, RequestTime]).
+
 -endif.
 
 -ifdef(TEST).
 log_request_time(_) -> ok.
 
 log_request_time(_, _) -> ok.
+
+log_request_time(_, _, _) -> ok.
 -endif.
 
 send_stats(#state{estatsd_server = EstatsdServer, estatsd_port = EstatsdPort}, Stats) ->

@@ -78,15 +78,14 @@ fetch_user(Server, User) when is_list(User) ->
     fetch_user(Server, list_to_binary(User)).
 
 
--spec is_user_in_org(couchbeam:server(), db_key(), db_key()) -> boolean().
+-spec is_user_in_org(couchbeam:server(), db_key(), db_key()) -> boolean() | {error, any()}.
 %% @doc Return true if `User' is in `Org' and false otherwise.
 is_user_in_org(Server, User, Org) when is_binary(Org) ->
-    try
-        lists:member(Org, fetch_orgs_for_user(Server, User))
-    catch
-        Error:Why ->
-            error_logger:error_report({Error, Why}),
-            false
+    case fetch_orgs_for_user(Server, User) of
+        Orgs when is_list(Orgs) ->
+            lists:member(Org, Orgs);
+        Error ->
+            Error
     end;
 is_user_in_org(Server, User, Org) when is_list(Org) ->
     is_user_in_org(Server, User, list_to_binary(Org)).
