@@ -84,6 +84,12 @@ is_authorized(Req, State) ->
             {"X-Ops-Sign version=\"1.0\"", ReqOther, StateOther}
     end.
 
+%% If the requester is a client then the org membership check for
+%% the client is performed when we fetch the client's cert.
+%% If the requester is a user then we still need to verify the
+%% user is a member of the org.
+forbidden(Req, #state{requester_type=client}=State) ->
+    {false, Req, State};
 forbidden(Req, State = #state{organization_name = OrgName}) ->
     UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
     S = chef_otto:connect(),
@@ -154,6 +160,7 @@ verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
             %% TODO this causes us to fetch the organization a second
             %% time.  Keep it and pass it in instead.
             Cert = ?gv(cert, CertInfo),
+            RequesterType = ?gv(type, CertInfo),
             Body = body_or_default(Req, <<>>),
             HTTPMethod = iolist_to_binary(atom_to_list(wrq:method(Req))),
             Path = iolist_to_binary(wrq:path(Req)),
@@ -163,7 +170,8 @@ verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
                 {name, _} ->
                     {true, Req,
                      State1#state{couchbeam = S,
-                                  organization_guid = ?gv(org_guid, CertInfo)}};
+                                  organization_guid = ?gv(org_guid, CertInfo),
+                                  requester_type=RequesterType}};
                 {no_authn, Reason} ->
                     Msg = verify_request_message(Reason, UserName, OrgName),
                     Json = ejson:encode(Msg),

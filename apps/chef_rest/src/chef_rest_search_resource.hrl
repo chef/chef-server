@@ -1,5 +1,6 @@
 -record(state, {start_time,
                 reqid,
+                requester_type,
                 resource,
                 organization_guid,
                 organization_name,

@@ -14,6 +14,10 @@ make_state() ->
            organization_name = "mock-org",
            request_type = "search.get"}.
 
+make_authorized_state(Type) ->
+    State = make_state(),
+    State#state{requester_type=Type}.
+
 init_test_() ->
     {foreach,
      fun() ->
@@ -299,7 +303,7 @@ is_authorized_tests() ->
              meck:unload()
      end,
     [
-     {"is authorized YES",
+     {"is user authorized YES",
       fun() ->
               HeaderFun = make_header_fun(),
               meck:expect(wrq, get_req_header,
@@ -314,14 +318,45 @@ is_authorized_tests() ->
               meck:expect(chef_otto, fetch_user_or_client_cert,
                           fun(mock_otto_connect, "mock-org", "alice") ->
                                   {ok, Cert} = file:read_file("../test/acert.pem"),
-                                  [{cert, Cert}]
+                                  [{cert, Cert},
+                                   {type, user}]
                           end),
               meck:expect(wrq, req_body, fun(req_mock) -> undefined end),
               meck:expect(wrq, method, fun(req_mock) -> 'GET' end),
               meck:expect(wrq, path, fun(req_mock) -> "does-not-matter-comes-from-meck-mocks" end),
-              {IsAuth, _Req, _State} =
+              {IsAuth, _Req, State} =
                   chef_rest_search_resource:is_authorized(req_mock, make_state()),
               ?assertEqual(true, IsAuth),
+              ?assertMatch(user, State#state.requester_type),
+              ?assert(meck:validate(wrq)),
+              ?assert(meck:validate(chef_otto))
+      end},
+
+     {"is client authorized YES",
+      fun() ->
+              HeaderFun = make_header_fun(),
+              meck:expect(wrq, get_req_header,
+                          fun(HName, req_mock) -> HeaderFun(HName) end),
+              meck:expect(wrq, path_info, fun(object_type, req_mock) ->
+                                                  "node";
+                                             (organization_id, req_mock) ->
+                                                  "testorg"
+                                          end),
+              meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
+              meck:expect(chef_otto, connect, fun() -> mock_otto_connect end),
+              meck:expect(chef_otto, fetch_user_or_client_cert,
+                          fun(mock_otto_connect, "mock-org", "alice") ->
+                                  {ok, Cert} = file:read_file("../test/acert.pem"),
+                                  [{cert, Cert},
+                                   {type, client}]
+                          end),
+              meck:expect(wrq, req_body, fun(req_mock) -> undefined end),
+              meck:expect(wrq, method, fun(req_mock) -> 'GET' end),
+              meck:expect(wrq, path, fun(req_mock) -> "does-not-matter-comes-from-meck-mocks" end),
+              {IsAuth, _Req, State} =
+                  chef_rest_search_resource:is_authorized(req_mock, make_state()),
+              ?assertEqual(true, IsAuth),
+              ?assertMatch(client, State#state.requester_type),
               ?assert(meck:validate(wrq)),
               ?assert(meck:validate(chef_otto))
       end},
@@ -385,7 +420,6 @@ is_authorized_tests() ->
               ?assert(meck:validate(wrq)),
               ?assert(meck:validate(chef_otto))
       end},
-
      {"org not found",
       fun() ->
               HeaderFun = make_header_fun(),
@@ -441,7 +475,7 @@ forbidden_tests() ->
              meck:unload()
      end,
     [
-     {"NOT forbidden",
+     {"NOT forbidden user",
       fun() ->
               meck:expect(wrq, get_req_header,
                           fun("x-ops-userid", req_mock) -> "alice" end),
@@ -451,13 +485,29 @@ forbidden_tests() ->
                                   true
                           end),
               {IsForbidden, _Req, _State} =
-                  chef_rest_search_resource:forbidden(req_mock, make_state()),
+                  chef_rest_search_resource:forbidden(req_mock, make_authorized_state(user)),
               ?assertEqual(false, IsForbidden),
               ?assert(meck:validate(wrq)),
               ?assert(meck:validate(chef_otto))
       end},
 
-     {"403 forbidden",
+     {"NOT forbidden client",
+      fun() ->
+              meck:expect(wrq, get_req_header,
+                          fun("x-ops-userid", req_mock) -> "alice" end),
+              meck:expect(chef_otto, connect, fun() -> mock_otto_connect end),
+              meck:expect(chef_otto, is_user_in_org,
+                          fun(mock_otto_connect, <<"alice">>, "mock-org") ->
+                                  true
+                          end),
+              {IsForbidden, _Req, _State} =
+                  chef_rest_search_resource:forbidden(req_mock, make_authorized_state(client)),
+              ?assertEqual(false, IsForbidden),
+              ?assert(meck:validate(wrq)),
+              ?assert(meck:validate(chef_otto))
+      end},
+
+     {"403 forbidden user",
       fun() ->
               meck:expect(wrq, get_req_header,
                           fun("x-ops-userid", req_mock) -> "alice" end),
@@ -468,7 +518,7 @@ forbidden_tests() ->
                           end),
               meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
               {IsForbidden, Req, _State} =
-                  chef_rest_search_resource:forbidden(req_mock, make_state()),
+                  chef_rest_search_resource:forbidden(req_mock, make_authorized_state(user)),
               WantMsg = <<"{\"error\":[\"'alice' not authorized to search 'mock-org'.\"]}">>,
               ?assertEqual(true, IsForbidden),
               ?assertEqual(WantMsg, Req),
