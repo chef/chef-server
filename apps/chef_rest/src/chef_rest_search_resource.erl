@@ -307,6 +307,12 @@ fetch_result_rows({Ids, Rest}, BatchSize, S, Db, {N, Acc}) ->
                       {N + length(Docs),
                        encode_results(Docs, <<",">>, Acc)}).
 
+%% Catch the case where we're building results ending with
+%% a dangling comma and strip it out. Completely ugly since
+%% we're assuming the separator is a comma.
+%% FIXME Refactor into a more readable/understandable design
+encode_results([], [<<",">>|Acc]) ->
+    Acc;
 encode_results([], Acc) ->
     Acc;
 encode_results(Results, Acc) ->

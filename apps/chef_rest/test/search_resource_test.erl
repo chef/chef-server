@@ -553,7 +553,7 @@ resource_exists_test_() ->
      fun() ->
              meck:new([wrq, chef_otto])
      end,
-     fun(_) -> 
+     fun(_) ->
              meck:unload()
      end,
      [
@@ -603,6 +603,58 @@ resource_exists_test_() ->
       }
 
      ]}.
+
+to_json_test_() ->
+    {setup,
+     fun() ->
+             application:start(crypto),
+             set_env()
+     end,
+     fun(_) ->
+             stopping
+     end,
+     json_test_generator(450)}.
+
+mock_query_pipeline(Size) ->
+    meck:expect(chef_solr, search, fun(_) ->
+                                           Ids = lists:seq(1, Size),
+                                           {ok, 1, Size, Ids} end).
+
+json_test_generator(Count) ->
+    {generator,
+     fun() ->
+             if Count > 0 ->
+                     [json_test(Count) | json_test_generator(Count - 3)];
+                true ->
+                     []
+             end
+     end}.
+
+json_test(Count) ->
+    fun() ->
+            meck:new([chef_otto, chef_solr]),
+            meck:expect(chef_otto, bulk_get, fun(_, _, Ids) ->
+                                                     R = [[{<<"_rev">>, Id},
+                                                          {<<"id">>, Id}] || Id <- Ids],
+                                                     case random:uniform() > 0.49 of
+                                                         true ->
+                                                             tl(R);
+                                                         false ->
+                                                             R
+                                                     end end),
+            mock_query_pipeline(Count),
+            State = make_state(),
+            State1 = State#state{solr_query=#chef_solr_query{index=node}, couchbeam=couchbeam_mock,
+                                 batch_size=5, organization_guid=test},
+            {Json, _Req, _State} = chef_rest_search_resource:to_json(req_mock, State1),
+            try
+                ejson:decode(Json)
+            catch
+                throw:_Why ->
+                    ?debugFmt("INVALID JSON: ~p~n", [Json]),
+                    erlang:halt(1)
+            end,
+            meck:unload() end.
 
 
 get_signed_headers() ->
