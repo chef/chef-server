@@ -71,7 +71,7 @@ malformed_request(Req, State) ->
         throw:Why ->
             Msg = malformed_request_message(Why, GetHeader),
             NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),
-            log_request_time("Malformed request", State),
+            log_request_time("Malformed request ~p", [Why], State),
             {true, NewReq, State3}
     end.
 
@@ -80,7 +80,6 @@ is_authorized(Req, State) ->
 	{true, Req1, State1} ->
             {true, Req1, State1};
 	{false, ReqOther, StateOther} ->
-            log_request_time("Signature verification failed", State),
             {"X-Ops-Sign version=\"1.0\"", ReqOther, StateOther}
     end.
 
@@ -97,11 +96,12 @@ forbidden(Req, State = #state{organization_name = OrgName}) ->
         true ->
             {false, Req, State};
         false ->
-            log_request_time("User is not in requested org", State),
+            log_request_time("User '~s' is not in org '~s'",
+                             [UserName, OrgName], State),
             Msg = is_authorized_message(not_member_of_org, UserName, OrgName),
             {true, wrq:set_resp_body(ejson:encode(Msg), Req), State};
         Error ->
-            log_request_time("Failure verifying user's ~p membership in org ~p: ~p",
+            log_request_time("Failure verifying user '~p' in org '~p': ~p",
                              [UserName, OrgName, Error], State),
             Msg = is_authorized_message(unverified_org_membership, UserName, OrgName),
             {true, wrq:set_resp_body(ejson:encode(Msg), Req), State}
@@ -116,10 +116,10 @@ resource_exists(Req, State = #state{solr_query = QueryWithoutGuid}) ->
         throw:org_not_found ->
             %% Not sure we can ever get here; user in org check will
             %% have failed with 403 if no such org.
-            NoOrg = resource_exists_message(org_not_found, 
-                                            wrq:path_info(organization_id, Req)),
+            OrgName = wrq:path_info(organization_id, Req),
+            NoOrg = resource_exists_message(org_not_found, OrgName),
             Req1 = wrq:set_resp_body(ejson:encode(NoOrg), Req),
-            log_request_time("Requested org not found", State),
+            log_request_time("Org '~s' not found", [OrgName], State),
             {false, Req1, State}
     end.
 
@@ -155,6 +155,8 @@ verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
         {not_found, What} ->
             NotFoundMsg = verify_request_message({not_found, What},
                                                  UserName, OrgName),
+            log_request_time("Signature verification failed ~p",
+                             [{not_found, What}], State),
             {false, wrq:set_resp_body(ejson:encode(NotFoundMsg), Req), State};
         CertInfo ->
             %% TODO this causes us to fetch the organization a second
@@ -176,6 +178,8 @@ verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
                     Msg = verify_request_message(Reason, UserName, OrgName),
                     Json = ejson:encode(Msg),
                     Req1 = wrq:set_resp_body(Json, Req),
+                    log_request_time("Signature verification failed ~p",
+                                     [Reason], State),
                     {false, Req1, State1}
             end
     end.
@@ -249,7 +253,8 @@ to_json(Req, State = #state{couchbeam = S,
                     Msg = iolist_to_binary([<<"I don't know how to search for ">>,
                                             BagName, <<" data objects.">>]),
                     Json = ejson:encode({[{<<"error">>, [Msg]}]}),
-                    log_request_time("Requested data bag does not exist", State),
+                    log_request_time("Data bag '~s' does not exist",
+                                     [BagName], State),
                     {{halt, 404}, wrq:set_resp_body(Json, Req), State}
             end;
         _Else ->
