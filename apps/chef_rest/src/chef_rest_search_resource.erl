@@ -170,8 +170,9 @@ verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
             HTTPMethod = iolist_to_binary(atom_to_list(wrq:method(Req))),
             Path = iolist_to_binary(wrq:path(Req)),
             {GetHeader, State1} = get_header_fun(Req, State),
+            %% FIXME: time skew should move to app config
             case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
-                                                      Path, Body, Cert, 300) of
+                                                      Path, Body, Cert, 900) of
                 {name, _} ->
                     {true, Req,
                      State1#state{couchbeam = S,
