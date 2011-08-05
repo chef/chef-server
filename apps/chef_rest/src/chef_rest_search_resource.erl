@@ -61,7 +61,10 @@ malformed_request(Req, State) ->
     send_stat(received, Req, State2),
     {GetHeader, State3} = get_header_fun(Req, State2),
     try
-        chef_authn:validate_headers(GetHeader, 300),
+        %% FIXME: this needs to be pulled out to config,
+        %% but according to mixlib-authentication/lib/mixlib/authentication/signatureverification.rb:78
+        %% we should use 15*60
+        chef_authn:validate_headers(GetHeader, 900),
         % We fill in most stuff here in order to validate the query,
         % but we don't add the organization database until
         % resource_exists() (where we get the org id).

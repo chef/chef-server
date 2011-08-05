@@ -66,7 +66,7 @@
 -type header_name() :: binary().
 -type header_value() :: binary() | 'undefined'.
 -type header_fun() :: fun((header_name()) -> header_value()).
--type time_skew() :: non_neg_integer().
+-type time_skew() :: non_neg_integer().         % in seconds
 
 
 -ifdef(TEST).
