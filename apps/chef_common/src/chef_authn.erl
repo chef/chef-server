@@ -304,11 +304,11 @@ validate_sign_description(GetHeader) ->
 %% `PublicKey' is a binary containing an RSA public key in PEM format.
 %%
 -spec authenticate_user_request(get_header_fun(),
-                                   http_method(),
-                                   http_path(),
-                                   http_body(),
-				   raw_public_key(),
-                                   time_skew()) ->
+                                http_method(),
+                                http_path(),
+                                http_body(),
+                                raw_public_key(),
+                                time_skew()) ->
 				       {name, user_id()} | {no_authn, Reason::term()}.
 authenticate_user_request(GetHeader, Method, Path, Body, PublicKey, TimeSkew) ->
     try

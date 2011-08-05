@@ -282,7 +282,8 @@ is_authorized_test_() ->
     {setup,
      fun() ->
              application:start(crypto),
-             application:set_env(chef_rest, reqid_header_name, "X-Request-Id")
+             application:set_env(chef_rest, reqid_header_name, "X-Request-Id"),
+             application:set_env(chef_rest, auth_skew, 900)
      end,
      fun(_) ->
              stopping
