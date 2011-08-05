@@ -1,6 +1,7 @@
 -record(state, {start_time,
                 reqid,
                 requester_type,
+                auth_skew,
                 resource,
                 organization_guid,
                 organization_name,

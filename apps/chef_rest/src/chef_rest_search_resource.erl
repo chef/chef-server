@@ -37,11 +37,13 @@ init(_Any) ->
     % TODO IPv6?
     {ok, EstatsdServerIp} = inet:getaddr(EstatsdServer, inet),
     {ok, EstatsdPort} = application:get_env(chef_rest, estatsd_port),
+    {ok, AuthSkew} = application:get_env(chef_rest, auth_skew),
     State = #state{start_time = now(),
                    resource = atom_to_list(?MODULE),
                    batch_size = BatchSize,
                    estatsd_server = EstatsdServerIp,
                    estatsd_port = EstatsdPort,
+                   auth_skew = AuthSkew,
                    hostname = hostname(),
                    request_type = "search.get" },
     {ok, State}.
@@ -151,7 +153,8 @@ get_header_fun(_Req, State) ->
 %% on the request.  If the request cannot be verified, then the
 %% returned `#wm_reqdata{}' record will have a response body
 %% explaining why.
-verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
+verify_request_signature(Req, State = #state{organization_name = OrgName,
+                                             auth_skew = AuthSkew}) ->
     UserName = wrq:get_req_header("x-ops-userid", Req),
     S = chef_otto:connect(),
     case chef_otto:fetch_user_or_client_cert(S, OrgName, UserName) of
@@ -170,7 +173,6 @@ verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
             HTTPMethod = iolist_to_binary(atom_to_list(wrq:method(Req))),
             Path = iolist_to_binary(wrq:path(Req)),
             {GetHeader, State1} = get_header_fun(Req, State),
-            {ok, AuthSkew} = application:get_env(chef_rest, auth_skew),
             case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
                                                       Path, Body, Cert, AuthSkew) of
                 {name, _} ->

@@ -14,6 +14,14 @@ make_state() ->
            organization_name = "mock-org",
            request_type = "search.get"}.
 
+set_env() ->
+    application:set_env(chef_rest, bulk_fetch_batch_size, 10),
+    application:set_env(chef_rest, estatsd_server, "192.168.4.50"),
+    application:set_env(chef_rest, estatsd_port, 5656),
+    application:set_env(chef_rest, auth_skew, 900),
+    application:set_env(chef_rest, reqid_header_name, "X-Request-Id").
+
+
 make_authorized_state(Type) ->
     State = make_state(),
     State#state{requester_type=Type}.
@@ -21,9 +29,7 @@ make_authorized_state(Type) ->
 init_test_() ->
     {foreach,
      fun() ->
-             application:set_env(chef_rest, bulk_fetch_batch_size, 10),
-             application:set_env(chef_rest, estatsd_server, "192.168.4.50"),
-             application:set_env(chef_rest, estatsd_port, 5656)
+             set_env()
      end,
      fun(_) -> stopping end,
      [{"init basic",
@@ -39,7 +45,7 @@ malformed_request_test_() ->
     {setup,
      fun() ->
              application:start(crypto),
-             application:set_env(chef_rest, reqid_header_name, "X-Request-Id")
+             set_env()
      end,
      fun(_) ->
              stopping
@@ -52,8 +58,7 @@ malformed_request_tests() ->
              meck:new(wrq),
              meck:new(fast_log),
              meck:expect(fast_log, info, fun(_, _, _) -> ok end),
-             meck:expect(fast_log, info, fun(_, _, _, _) -> ok end),
-             application:set_env(chef_rest, reqid_header_name, "X-Request-Id")
+             meck:expect(fast_log, info, fun(_, _, _, _) -> ok end)
      end,
      fun(_) ->
              meck:unload()
@@ -282,8 +287,7 @@ is_authorized_test_() ->
     {setup,
      fun() ->
              application:start(crypto),
-             application:set_env(chef_rest, reqid_header_name, "X-Request-Id"),
-             application:set_env(chef_rest, auth_skew, 900)
+             set_env()
      end,
      fun(_) ->
              stopping
@@ -297,8 +301,7 @@ is_authorized_tests() ->
              meck:new(fast_log),
              meck:new(chef_otto),
              meck:expect(fast_log, info, fun(_, _, _) -> ok end),
-             meck:expect(fast_log, info, fun(_, _, _, _) -> ok end),
-             application:set_env(chef_rest, reqid_header_name, "X-Request-Id")
+             meck:expect(fast_log, info, fun(_, _, _, _) -> ok end)
      end,
      fun(_) ->
              meck:unload()
@@ -455,7 +458,7 @@ forbidden_test_() ->
     {setup,
      fun() ->
              application:start(crypto),
-             application:set_env(chef_rest, reqid_header_name, "X-Request-Id")
+             set_env()
      end,
      fun(_) ->
              stopping
@@ -469,8 +472,7 @@ forbidden_tests() ->
              meck:new(fast_log),
              meck:new(chef_otto),
              meck:expect(fast_log, info, fun(_, _, _) -> ok end),
-             meck:expect(fast_log, info, fun(_, _, _, _) -> ok end),
-             application:set_env(chef_rest, reqid_header_name, "X-Request-Id")
+             meck:expect(fast_log, info, fun(_, _, _, _) -> ok end)
      end,
      fun(_) ->
              meck:unload()
