@@ -71,7 +71,7 @@ malformed_request(Req, State) ->
         throw:Why ->
             Msg = malformed_request_message(Why, GetHeader),
             NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),
-            log_request_time("Malformed request ~p", [Why], State),
+            log_request_time("Malformed request ~p", [Why], State3),
             {true, NewReq, State3}
     end.
 
@@ -179,7 +179,7 @@ verify_request_signature(Req, State = #state{organization_name = OrgName}) ->
                     Json = ejson:encode(Msg),
                     Req1 = wrq:set_resp_body(Json, Req),
                     log_request_time("Signature verification failed ~p",
-                                     [Reason], State),
+                                     [Reason], State1),
                     {false, Req1, State1}
             end
     end.
