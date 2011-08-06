@@ -322,7 +322,7 @@ is_authorized_tests() ->
               meck:expect(chef_otto, fetch_user_or_client_cert,
                           fun(mock_otto_connect, "mock-org", "alice") ->
                                   {ok, Cert} = file:read_file("../test/acert.pem"),
-                                  [{cert, Cert},
+                                  [{key_data, {cert, Cert}},
                                    {type, user}]
                           end),
               meck:expect(wrq, req_body, fun(req_mock) -> undefined end),
@@ -335,6 +335,37 @@ is_authorized_tests() ->
               ?assert(meck:validate(wrq)),
               ?assert(meck:validate(chef_otto))
       end},
+
+     {"is user authorized no cert YES",
+      fun() ->
+              HeaderFun = make_header_fun(),
+              meck:expect(wrq, get_req_header,
+                          fun(HName, req_mock) -> HeaderFun(HName) end),
+              meck:expect(wrq, path_info, fun(object_type, req_mock) ->
+                                                  "node";
+                                             (organization_id, req_mock) ->
+                                                  "testorg"
+                                          end),
+              meck:expect(wrq, set_resp_body, fun(Body, req_mock) -> Body end),
+              meck:expect(chef_otto, connect, fun() -> mock_otto_connect end),
+              meck:expect(chef_otto, fetch_user_or_client_cert,
+                          fun(mock_otto_connect, "mock-org", "alice") ->
+                                  KeyPath = "../test/akey_public.pem",
+                                  {ok, PubKey} = file:read_file(KeyPath),
+                                  [{key_data, {key, PubKey}},
+                                   {type, user}]
+                          end),
+              meck:expect(wrq, req_body, fun(req_mock) -> undefined end),
+              meck:expect(wrq, method, fun(req_mock) -> 'GET' end),
+              meck:expect(wrq, path, fun(req_mock) -> "does-not-matter-comes-from-meck-mocks" end),
+              {IsAuth, _Req, State} =
+                  chef_rest_search_resource:is_authorized(req_mock, make_state()),
+              ?assertEqual(true, IsAuth),
+              ?assertMatch(user, State#state.requester_type),
+              ?assert(meck:validate(wrq)),
+              ?assert(meck:validate(chef_otto))
+      end},
+
 
      {"is client authorized YES",
       fun() ->
@@ -351,7 +382,7 @@ is_authorized_tests() ->
               meck:expect(chef_otto, fetch_user_or_client_cert,
                           fun(mock_otto_connect, "mock-org", "alice") ->
                                   {ok, Cert} = file:read_file("../test/acert.pem"),
-                                  [{cert, Cert},
+                                  [{key_data, {cert, Cert}},
                                    {type, client}]
                           end),
               meck:expect(wrq, req_body, fun(req_mock) -> undefined end),
@@ -380,7 +411,7 @@ is_authorized_tests() ->
               meck:expect(chef_otto, fetch_user_or_client_cert,
                           fun(mock_otto_connect, "mock-org", "alice") ->
                                   {ok, Cert} = file:read_file("../test/other_cert.pem"),
-                                  [{cert, Cert}]
+                                  [{key_data, {cert, Cert}}]
                           end),
               meck:expect(wrq, req_body, fun(req_mock) -> undefined end),
               meck:expect(wrq, method, fun(req_mock) -> 'GET' end),

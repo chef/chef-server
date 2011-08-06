@@ -4,9 +4,9 @@
 % Licensed under the Apache License, Version 2.0 (the "License");
 % you may not use this file except in compliance with the License.
 % You may obtain a copy of the License at
-% 
+%
 %     http://www.apache.org/licenses/LICENSE-2.0
-% 
+%
 % Unless required by applicable law or agreed to in writing, software
 % distributed under the License is distributed on an "AS IS" BASIS,
 % WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@
 % validate such requests (for server implementation).
 -module(chef_authn).
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("public_key/include/public_key.hrl").
 
 -define(buf_size, 16384).
 -define(signing_version, <<"1.0">>).
@@ -62,12 +63,12 @@
 -type http_path() :: binary().
 -type sha_hash64() :: binary().
 -type erlang_time() :: {calendar_date(), calendar_time()}.
--type raw_public_key() :: binary().
+-type public_key_data() :: {cert, binary()} | {key, binary()}.
 -type header_name() :: binary().
 -type header_value() :: binary() | 'undefined'.
 -type header_fun() :: fun((header_name()) -> header_value()).
 -type time_skew() :: non_neg_integer().         % in seconds
-
+%% -type rsa_public_key() :: public_key:rsa_public_key().
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -307,7 +308,7 @@ validate_sign_description(GetHeader) ->
                                 http_method(),
                                 http_path(),
                                 http_body(),
-                                raw_public_key(),
+                                public_key_data(),
                                 time_skew()) ->
 				       {name, user_id()} | {no_authn, Reason::term()}.
 authenticate_user_request(GetHeader, Method, Path, Body, PublicKey, TimeSkew) ->
@@ -318,11 +319,11 @@ authenticate_user_request(GetHeader, Method, Path, Body, PublicKey, TimeSkew) ->
         throw:Why -> {no_authn, Why}
     end.
 
--spec do_authenticate_user_request(get_header_fun(), 
+-spec do_authenticate_user_request(get_header_fun(),
 				   http_method(),
 				   http_path(),
 				   http_body(),
-				   raw_public_key() ) 
+				   public_key_data() )
 				  ->  {name, user_id()} | {no_authn, bad_sig}.
 
 do_authenticate_user_request(GetHeader, Method, Path, Body, PublicKey) ->
@@ -341,9 +342,9 @@ do_authenticate_user_request(GetHeader, Method, Path, Body, PublicKey) ->
         error:{badmatch, _} -> {no_authn, bad_sig}
     end.
 
--spec decrypt_sig(binary(), raw_public_key()) -> binary() | decrypt_failed.
-decrypt_sig(Sig, PublicCert) ->
-    PK = read_cert(PublicCert),
+-spec decrypt_sig(binary(), public_key_data()) -> binary() | decrypt_failed.
+decrypt_sig(Sig, KeyData) ->
+    PK = read_key_data(KeyData),
     try
         public_key:decrypt_public(base64:decode(Sig), PK)
     catch
@@ -380,25 +381,23 @@ parse_signing_description(Desc) ->
     [ {Key, Value} ||
         [Key, Value] <- [ re:split(KV, "=") || KV <- re:split(Desc, ";") ] ].
 
-% % --
-% %% at some point, the functions in the public_key module should be
-% %% sufficient, but for now we need the following to read in an RSA
-% %% public key.
-% read_rsa_public_key(Key) ->
-%     Bin = erlang:iolist_to_binary(public_key_lines(re:split(Key, "\n"), [])),
-%     Spki = public_key:der_decode('SubjectPublicKeyInfo', base64:mime_decode(Bin)),
-%     {_, _, {0, KeyDer}} = Spki,
-%     public_key:der_decode('RSAPublicKey', KeyDer).
+-spec read_key_data(public_key_data()) -> rsa_public_key().
+read_key_data({cert, Data}) when is_binary(Data) ->
+    read_cert(Data);
+read_key_data({key, Data}) ->
+    read_public_key(Data).
 
-% public_key_lines([<<"-----BEGIN PUBLIC KEY-----">>|Rest], Acc) ->
-%     public_key_lines(Rest, Acc);
-% public_key_lines([<<"-----END PUBLIC KEY-----">>|_Rest], Acc) ->
-%     lists:reverse(Acc);
-% public_key_lines([Line|Rest], Acc) ->
-%     public_key_lines(Rest, [Line|Acc]).
+-spec read_public_key(binary()) -> rsa_public_key().
+read_public_key(Bin) ->
+    case public_key:pem_decode(Bin) of
+        [{'SubjectPublicKeyInfo', _, _} = PubEntry] ->
+            public_key:pem_entry_decode(PubEntry);
+        [{'RSAPublicKey', Der, _}] ->
+            public_key:der_decode('RSAPublicKey', Der)
+    end.
 
--spec read_cert(binary()) -> term().  %% der_decode only spec's term
-read_cert(Bin) when is_binary(Bin) ->
+-spec read_cert(binary()) -> rsa_public_key().  %% der_decode only spec's term
+read_cert(Bin) ->
     Cert = public_key:pem_entry_decode(hd(public_key:pem_decode(Bin))),
     TbsCert = Cert#'Certificate'.tbsCertificate,
     Spki = TbsCert#'TBSCertificate'.subjectPublicKeyInfo,
@@ -454,7 +453,7 @@ canonical_time_test() ->
     % but doesn't correspond to the HTTP rfc2616 format
     % Time = "Thu Jan 01 12:00:00 -0000 2009",
     ?assertEqual(?request_time_iso8601, canonical_time(?request_time_http)).
-    
+
 canonicalize_request_test() ->
     Val1 = canonicalize_request(?hashed_body, ?user, <<"post">>, ?request_time_iso8601, ?path),
     ?assertEqual(?expected_sign_string, Val1),
@@ -488,7 +487,18 @@ sign_request_test() ->
 decrypt_sig_test() ->
     AuthSig = iolist_to_binary(?X_OPS_AUTHORIZATION_LINES),
     {ok, Public_key} = file:read_file("../test/example_cert.pem"),
-    ?assertEqual(?expected_sign_string, decrypt_sig(AuthSig, Public_key)).
+    ?assertEqual(?expected_sign_string,
+                 decrypt_sig(AuthSig, {cert, Public_key})).
+
+decrypt_sig_fail_platform_style_test() ->
+    AuthSig = iolist_to_binary(?X_OPS_AUTHORIZATION_LINES),
+    {ok, Bin} = file:read_file("../test/platform_public_key_example.pem"),
+    ?assertEqual(decrypt_failed, decrypt_sig(AuthSig, {key, Bin})).
+
+decrypt_sig_fail_spki_test() ->
+    AuthSig = iolist_to_binary(?X_OPS_AUTHORIZATION_LINES),
+    {ok, Bin} = file:read_file("../test/spki_public.pem"),
+    ?assertEqual(decrypt_failed, decrypt_sig(AuthSig, {key, Bin})).
 
 time_in_bounds_test() ->
     T1 = {{2011,1,26},{2,3,0}},
@@ -515,11 +525,12 @@ make_skew_time() ->
     NowEpoch = calendar:datetime_to_gregorian_seconds(
                  calendar:now_to_universal_time(erlang:now())),
     (NowEpoch - ReqTimeEpoch) + 100.
-    
+
 authenticate_user_request_test_() ->
     {ok, RawKey} = file:read_file("../test/private_key"),
     Private_key = extract_private_key(RawKey),
-    {ok, Public_key} = file:read_file("../test/example_cert.pem"),
+    {ok, Public_key0} = file:read_file("../test/example_cert.pem"),
+    Public_key = {cert, Public_key0},
     Headers = sign_request(Private_key, ?body, ?user, <<"post">>,
                            ?request_time_http, ?path),
     GetHeader = fun(X) -> proplists:get_value(X, Headers) end,
@@ -572,7 +583,8 @@ authenticate_user_request_test_() ->
       fun() ->
               {ok, Other_key} = file:read_file("../test/other_cert.pem"),
               BadKey = authenticate_user_request(GetHeader, <<"post">>, ?path,
-                                                 ?body, Other_key, TimeSkew),
+                                                 ?body, {cert, Other_key},
+                                                 TimeSkew),
               ?assertEqual({no_authn, bad_sig}, BadKey)
       end
       },
@@ -673,5 +685,21 @@ read_cert_test() ->
     {ok, Bin} = file:read_file("../test/example_cert.pem"),
     Cert = read_cert(Bin),
     ?assertEqual('RSAPublicKey', erlang:element(1, Cert)).
+
+read_public_key_platform_test() ->
+    %% platform-style key
+    {ok, Bin} = file:read_file("../test/platform_public_key_example.pem"),
+    PubKey = read_public_key(Bin),
+    Coded = public_key:encrypt_public(<<"open sesame">>, PubKey),
+    ?assert(is_binary(Coded)).
+
+read_public_key_spki_test() ->
+    %% platform-style key
+    {ok, Bin} = file:read_file("../test/spki_public.pem"),
+    %% verify valid key, by encrypting something, will error if
+    %% key is bad.
+    PubKey = read_public_key(Bin),
+    Coded = public_key:encrypt_public(<<"open sesame">>, PubKey),
+    ?assert(is_binary(Coded)).
 
 -endif.

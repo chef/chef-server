@@ -186,11 +186,18 @@ fetch_client(Server, OrgId, ClientName) when is_list(ClientName), is_binary(OrgI
 fetch_client(_Server, not_found, _ClientName) ->
     {not_found, org}.
 
-%% FIXME: do we want to distinguish between client not found and org not found?
 -spec fetch_user_or_client_cert(couchbeam:server(), db_key(), db_key()) ->
-                                       [tuple()]
-                                           | {not_found, client}
-                                           | {not_found, org}.
+                                       [{atom(), atom() | binary()}]
+                                           | {'not_found', 'client' | 'org'}.
+%% @doc Given a name and an org, find either a user or a client.
+%% 
+%% Looks for a user first, then a client.  The fact that users and
+%% clients are in the same name space is a known limitation of the
+%% system.  We examine the user/client record and return the
+%% certificate containing the actor's public key.  Some legacy records
+%% are present in the database that do not have certificates and have
+%% only a public key.  For these cases, we return the key tagged with
+%% 'key' instead of 'cert'.
 fetch_user_or_client_cert(Server, OrgName, ClientName)
   when is_binary(OrgName), is_binary(ClientName) ->
     case fetch_user(Server, ClientName) of
@@ -200,17 +207,37 @@ fetch_user_or_client_cert(Server, OrgName, ClientName)
                 {not_found, What} ->
                     {not_found, What};
                 Client when is_list(Client) ->
-                    Cert = ?gv(<<"certificate">>, Client),
-                    [{cert, Cert}, {type, client}, {org_guid, OrgId}]
+                    [find_key_data(Client), {type, client}, {org_guid, OrgId}]
             end;
         UserDoc ->
-            [{cert, ?gv(<<"certificate">>, UserDoc)}, {type, user}]
+            [find_key_data(UserDoc), {type, user}]
     end;
 fetch_user_or_client_cert(Server, OrgName, ClientName)
   when is_list(OrgName), is_list(ClientName) ->
     fetch_user_or_client_cert(Server, list_to_binary(OrgName),
                               list_to_binary(ClientName)).
 
+-spec find_key_data([{binary(), term()}]) ->
+                           {key_data, {cert, binary()} | {key, binary()}}.
+%% Some of Our user data lacks a certificate and has a public key
+%% instead.  We look first for certificate, then for public_key.  If
+%% both are not found, we'll crash with some detail of the badly
+%% formed user record.
+%% 
+find_key_data(ClientOrUser) ->
+    Cert = ?gv(<<"certificate">>, ClientOrUser),
+    Key = ?gv(<<"public_key">>, ClientOrUser),
+    KeyData = case {Cert, Key} of
+                  {Cert, _} when is_binary(Cert) ->
+                      {cert, Cert};
+                  {undefined, Key} when is_binary(Key) ->
+                      {key, Key};
+                  _ ->
+                      error_logger:error_report({error, {no_cert_or_key,
+                                                         ClientOrUser}}),
+                      erlang:error({error, no_cert_or_key})
+              end,
+    {key_data, KeyData}.
 
 -spec bulk_get(couchbeam:server(), string(), [binary()]) ->
     [[tuple()]] | [].

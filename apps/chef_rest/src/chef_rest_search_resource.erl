@@ -167,14 +167,15 @@ verify_request_signature(Req, State = #state{organization_name = OrgName,
         CertInfo ->
             %% TODO this causes us to fetch the organization a second
             %% time.  Keep it and pass it in instead.
-            Cert = ?gv(cert, CertInfo),
+            KeyData = ?gv(key_data, CertInfo),
             RequesterType = ?gv(type, CertInfo),
             Body = body_or_default(Req, <<>>),
             HTTPMethod = iolist_to_binary(atom_to_list(wrq:method(Req))),
             Path = iolist_to_binary(wrq:path(Req)),
             {GetHeader, State1} = get_header_fun(Req, State),
             case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
-                                                      Path, Body, Cert, AuthSkew) of
+                                                      Path, Body, KeyData,
+                                                      AuthSkew) of
                 {name, _} ->
                     {true, Req,
                      State1#state{couchbeam = S,
@@ -269,12 +270,23 @@ to_json(Req, State = #state{couchbeam = S,
 
 finish_request(Req, State) ->
     try
-        send_stat(completed, Req, State)
+        case wrq:response_code(Req) of
+            500 ->
+                %% sanitize response body
+                log_request_time("unexpected 500", State),
+                Msg = <<"internal service error">>,
+                Json = ejson:encode({[{<<"error">>, [Msg]}]}),
+                Req1 = wrq:set_resp_header("Content-Type",
+                                           "application/json", Req),
+                {true, wrq:set_resp_body(Json, Req1), State};
+            _ ->
+                send_stat(completed, Req, State),
+                {true, Req, State}
+        end
     catch
         X:Y ->
             error_logger:error_report({X, Y, erlang:get_stacktrace()})
-    end,
-    {true, Req, State}.
+    end.
 
 make_search_results(S, Db, Ids, BatchSize, Start, NumFound) ->
     Ans0 = search_result_start(Start, NumFound),
