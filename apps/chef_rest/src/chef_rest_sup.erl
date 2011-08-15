@@ -35,6 +35,12 @@ upgrade() ->
 %% @spec init([]) -> SupervisorTree
 %% @doc supervisor callback.
 init([]) ->
+    case dark_launch:is_enabled("sql_users") of
+        true ->
+            chef_sql:connect();
+        false ->
+            ok
+    end,
     {ok, Ip} = application:get_env(chef_rest, ip),
     {ok, Port} = application:get_env(chef_rest, port),
     {ok, Dispatch} = file:consult(filename:join(

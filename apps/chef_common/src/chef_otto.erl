@@ -40,6 +40,7 @@
 -type db_key() :: binary() | string().
 
 -include("chef_otto.hrl").
+-include("chef_sql.hrl").
 
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
 
@@ -52,6 +53,30 @@ connect() ->
 -spec connect(string(), http_port()) -> couchbeam:server().
 connect(Host, Port) ->
     couchbeam:server_connection(Host, Port, "", []).
+
+
+fetch_user(_Server, User, true) ->
+    Username = case User of
+                   Str when is_list(Str) ->
+                       Str;
+                   Bin when is_binary(Bin) ->
+                       binary_to_list(Bin)
+               end,
+    case chef_sql:fetch_user(Username) of
+        not_found ->
+            {user_not_found, sql};
+        #chef_user{pubkey_version = Version, public_key = Key, id = Id} ->
+            case Version of
+                0 ->
+                    [{<<"public_key">>, Key}, {<<"_id">>, Id}];
+                1 ->
+                    [{<<"certificate">>, Key}, {<<"_id">>, Id}]
+            end;
+        Error ->
+            Error
+    end;
+fetch_user(Server, User, false) ->
+    fetch_user(Server, User).
 
 -spec fetch_user(couchbeam:server(), db_key()) -> [tuple()]
                                                     | {user_not_found,
@@ -94,7 +119,7 @@ is_user_in_org(Server, User, Org) when is_list(Org) ->
 %% @doc Return the list of organization names that username `User' is associated with
 %%
 fetch_orgs_for_user(Server, User) when is_binary(User) ->
-    case fetch_user(Server, User) of
+    case fetch_user(Server, User, dark_launch:is_enabled("sql_users")) of
         {user_not_found, Why} ->
             {user_not_found, Why};
         UserDoc ->
@@ -200,7 +225,7 @@ fetch_client(_Server, not_found, _ClientName) ->
 %% 'key' instead of 'cert'.
 fetch_user_or_client_cert(Server, OrgName, ClientName)
   when is_binary(OrgName), is_binary(ClientName) ->
-    case fetch_user(Server, ClientName) of
+    case fetch_user(Server, ClientName, dark_launch:is_enabled("sql_users")) of
         {user_not_found, _} ->
             OrgId = fetch_org_id(Server, OrgName),
             case fetch_client(Server, OrgId, ClientName) of

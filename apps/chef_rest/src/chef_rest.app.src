@@ -6,6 +6,8 @@
   {applications, [
                   kernel,
                   stdlib,
+                  crypto,
+                  emysql,
 		  mochiweb,
 		  webmachine,
 		  chef_common,

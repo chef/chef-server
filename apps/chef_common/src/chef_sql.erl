@@ -3,20 +3,13 @@
 -export([fetch_user/1,
          connect/0]).
 
+-include("chef_sql.hrl").
 -include_lib("emysql/include/emysql.hrl").
 
 -define(fetch_user_sql,
         iolist_to_binary(["SELECT `id`, `authz_id`, `username`, ",
                           "`pubkey_version`, `public_key` ",
                           "FROM `users` WHERE (`username` = ?) LIMIT 1"])).
-
-%% a bit odd, but field names have to match column names for helper
-%% function to work.
--record(chef_user, {'id',
-                    'authz_id',
-                    'username',
-                    'pubkey_version',
-                    'public_key'}).
 
 %% @doc Establish a connection pool to the database.
 %% 
