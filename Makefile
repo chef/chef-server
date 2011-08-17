@@ -59,8 +59,6 @@ devrel: rel
 	@/bin/echo -n Symlinking deps and apps into release
 	@$(foreach dep,$(wildcard deps/*), /bin/echo -n .;rm -rf rel/erchef/lib/$(shell basename $(dep))-* \
            && ln -sf $(abspath $(dep)) rel/erchef/lib;)
-	@$(foreach app,$(wildcard apps/*), /bin/echo -n .;rm -rf rel/erchef/lib/$(shell basename $(app))-* \
-           && ln -sf $(abspath $(app)) rel/erchef/lib;)
 	@/bin/echo done.
 	@/bin/echo  Run \'make update\' to pick up changes in a running VM.
 
