@@ -2,43 +2,30 @@ DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
        deps/webmachine deps/neotoma deps/meck deps/chef_common deps/chef_rest \
        deps/emysql
 
-GRAMMARS = deps/chef_common/src/lucene.erl deps/chef_common/src/chef_lucene.erl
-NEOTOMA = deps/neotoma/ebin/neotoma.app
-
 all: compile
 
-compile: $(GRAMMARS)
+compile: $(DEPS)
 	@./rebar compile
 
 compile_skip:
 	@./rebar compile skip_deps=true
 
-$(GRAMMARS): $(DEPS) $(NEOTOMA)
-	@deps/chef_common/priv/neotoma deps/chef_common/priv/lucene.peg lucene lucene_sexp
-	@deps/chef_common/priv/neotoma deps/chef_common/priv/lucene.peg chef_lucene lucene_txfm
-
-$(NEOTOMA):
-	@cd deps/neotoma;make
-
 clean:
 	@./rebar skip_deps=true clean
-	@rm -f $(GRAMMARS)
 
 update: compile
 	@cd rel/erchef;bin/erchef restart
 
 allclean:
 	@./rebar clean
-	@rm -f $(GRAMMARS)
 
 distclean:
 	@rm -rf deps
 	@./rebar clean
-	@rm -f $(GRAMMARS)
 
 test: eunit
 
-eunit: compile
+eunit:
 	@./rebar eunit app=chef_common,chef_rest
 
 test-common:
