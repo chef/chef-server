@@ -2,6 +2,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include("../src/chef_otto.hrl").
+-include("../src/chef_sql.hrl").
 
 -define(DEPS, [sasl, crypto, ibrowse, couchbeam]).
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
@@ -79,7 +80,7 @@ mock_bulk_lookup(#couch_mock_info{valid=Valid,
                                       end).
 
 teardown_couch_view_lookup() ->
-    [meck:unload(M) || M <- [couchbeam, couchbeam_view]].
+    meck:unload().
 
 mock_fetch_user() ->
     mock_lookup(#couch_mock_info{valid=[{?mixlib_auth_user_design,
@@ -139,9 +140,49 @@ fetch_user_test_() ->
                ?assertMatch({user_not_found, not_in_view},
                             chef_otto:fetch_user(S, "fred-is-not-found")) end}]}.
 
+fetch_user_sql_test_() ->
+    {foreach,
+     fun() ->
+             meck:new(dark_launch),
+             meck:new(chef_sql)
+     end,
+     fun(_) -> teardown_couch_view_lookup() end,
+     [{"fetch_user SQL found",
+       fun() ->
+               S = chef_otto:connect(),
+               meck:expect(chef_sql, fetch_user,
+                           fun("clownco-org-admin") ->
+                                   #chef_user{id = <<"123">>,
+                                              authz_id = <<"456">>,
+                                              username = <<"clownco-org-admin">>,
+                                              pubkey_version = 1,
+                                              public_key = <<"key data">>}
+                           end),
+               Got = chef_otto:fetch_user(S, "clownco-org-admin", true),
+               ?assertMatch(<<"123">>, ?gv(<<"_id">>, Got))
+       end},
+
+      {"fetch_user SQL not found",
+       fun() ->
+               S = chef_otto:connect(),
+               meck:expect(chef_sql, fetch_user,
+                           fun("fred-is-not-found") ->
+                                   not_found
+                           end),
+               ?assertMatch({user_not_found, sql},
+                            chef_otto:fetch_user(S, "fred-is-not-found", true))
+       end}]}.
+    
+
+
 fetch_orgs_for_user_test_() ->
     {foreach,
-     fun() -> mock_fetch_orgs_for_user() end,
+     fun() ->
+             mock_fetch_orgs_for_user(),
+             meck:new(dark_launch),
+             meck:expect(dark_launch, is_enabled,
+                         fun("sql_users") -> false end)
+     end,
      fun(_) -> teardown_couch_view_lookup() end,
      [{"fetch_orgs_for_user found",
        fun() ->
@@ -153,6 +194,42 @@ fetch_orgs_for_user_test_() ->
        fun() ->
                S = chef_otto:connect(),
                ?assertMatch({user_not_found, not_in_view},
+                            chef_otto:fetch_orgs_for_user(S, "fred-is-not-found"))
+       end}]}.
+
+fetch_orgs_for_user_sql_test_() ->
+    {foreach,
+     fun() ->
+             mock_fetch_orgs_for_user(),
+             meck:new(dark_launch),
+             meck:new(chef_sql),
+             meck:expect(dark_launch, is_enabled,
+                         fun("sql_users") -> true end)
+     end,
+     fun(_) -> teardown_couch_view_lookup() end,
+     [{"fetch_orgs_for_user SQL found",
+       fun() ->
+               S = chef_otto:connect(),
+               meck:expect(chef_sql, fetch_user,
+                           fun("clownco-org-admin") ->
+                                   #chef_user{id = <<"1234">>,
+                                              authz_id = <<"456">>,
+                                              username = <<"clownco-org-admin">>,
+                                              pubkey_version = 1,
+                                              public_key = <<"key data">>}
+                           end),
+               Got = chef_otto:fetch_orgs_for_user(S, "clownco-org-admin"),
+               ?assertMatch([<<"clownco">>], Got)
+       end},
+
+      {"fetch_orgs_for_user SQL not found",
+       fun() ->
+               S = chef_otto:connect(),
+               meck:expect(chef_sql, fetch_user,
+                           fun("fred-is-not-found") ->
+                                   not_found
+                           end),
+               ?assertMatch({user_not_found, sql},
                             chef_otto:fetch_orgs_for_user(S, "fred-is-not-found"))
        end}]}.
 

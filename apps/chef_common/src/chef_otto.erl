@@ -20,6 +20,7 @@
 
 -export([
          fetch_user/2,
+         fetch_user/3,
          fetch_all_users/1,
          fetch_org/2,
          fetch_org_id/2,
