@@ -1,7 +1,8 @@
 DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
-       deps/webmachine deps/neotoma deps/meck
+       deps/webmachine deps/neotoma deps/meck deps/chef_common deps/chef_rest \
+       deps/emysql
 
-GRAMMARS = apps/chef_common/src/lucene.erl apps/chef_common/src/chef_lucene.erl
+GRAMMARS = deps/chef_common/src/lucene.erl deps/chef_common/src/chef_lucene.erl
 NEOTOMA = deps/neotoma/ebin/neotoma.app
 
 all: compile
@@ -13,8 +14,8 @@ compile_skip:
 	@./rebar compile skip_deps=true
 
 $(GRAMMARS): $(DEPS) $(NEOTOMA)
-	@apps/chef_common/priv/neotoma apps/chef_common/priv/lucene.peg lucene lucene_sexp
-	@apps/chef_common/priv/neotoma apps/chef_common/priv/lucene.peg chef_lucene lucene_txfm
+	@deps/chef_common/priv/neotoma deps/chef_common/priv/lucene.peg lucene lucene_sexp
+	@deps/chef_common/priv/neotoma deps/chef_common/priv/lucene.peg chef_lucene lucene_txfm
 
 $(NEOTOMA):
 	@cd deps/neotoma;make
@@ -37,19 +38,20 @@ distclean:
 
 test: eunit
 
-eunit:
-	@./rebar skip_deps=true eunit
+eunit: compile
+	@./rebar eunit app=chef_common,chef_rest
 
 test-common:
-	@./rebar skip_deps=true eunit app=chef_common
+	@./rebar eunit app=chef_common
 
 test-rest:
-	@./rebar skip_deps=true eunit app=chef_rest
+	@./rebar eunit app=chef_rest
 
-dialyze: dialyzer
+## KAS: Temporarily disabling dialyzer target until project structure is sorted
+#dialyze: dialyzer
 
-dialyzer:
-	dialyzer -Wrace_conditions -Wspecdiffs apps/*/ebin
+#dialyzer:
+#	dialyzer -Wrace_conditions -Wspecdiffs apps/*/ebin
 
 rel: rel/erchef
 
@@ -57,8 +59,8 @@ devrel: rel
 	@/bin/echo -n Symlinking deps and apps into release
 	@$(foreach dep,$(wildcard deps/*), /bin/echo -n .;rm -rf rel/erchef/lib/$(shell basename $(dep))-* \
            && ln -sf $(abspath $(dep)) rel/erchef/lib;)
-	@$(foreach app,$(wildcard apps/*), /bin/echo -n .;rm -rf rel/erchef/lib/$(shell basename $(app))-* \
-           && ln -sf $(abspath $(app)) rel/erchef/lib;)
+##	@$(foreach app,$(wildcard apps/*), /bin/echo -n .;rm -rf rel/erchef/lib/$(shell basename $(app))-* \
+##           && ln -sf $(abspath $(app)) rel/erchef/lib;)
 	@/bin/echo done.
 	@/bin/echo  Run \'make update\' to pick up changes in a running VM.
 
