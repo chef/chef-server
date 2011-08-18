@@ -1,0 +1,16 @@
+{application, erchef_itests,
+ [
+  {description, "Integration Tests for Erchef"},
+  {vsn, git},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  crypto,
+                  ssl,
+                  ibrowse,
+                  chef_common
+                 ]},
+  {mod, {erchef_itests_app, []}},
+  {env, []}
+ ]}.
