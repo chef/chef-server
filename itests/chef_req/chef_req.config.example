@@ -1,0 +1,3 @@
+{private_key, "/abs/path/to/your/client.pem"}.
+{api_root, "https://api.opscode.com"}.
+{client_name, "CLIENT-NAME"}.
