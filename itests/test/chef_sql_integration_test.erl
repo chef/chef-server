@@ -15,7 +15,7 @@ fetch_user_test_() ->
              application:start(crypto),
              application:start(emysql),
              ok = chef_sql:connect(),
-
+             chef_sql_statements:initialize(),
              ok
      end,
      fun(_) -> cleanup end,
