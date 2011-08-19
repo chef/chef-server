@@ -14,16 +14,21 @@ fetch_user_test_() ->
              application:set_env(chef_common, mysql_pool_size, 5),
              application:start(crypto),
              application:start(emysql),
-             Got = chef_sql:connect(),
-             ?debugVal(Got),
+             ok = chef_sql:connect(),
+
              ok
      end,
      fun(_) -> cleanup end,
      [
       {"fetch_user found",
        fun() ->
-               Got = chef_sql:fetch_user("clownco-org-admin"),
-               ?debugVal(Got)
+               User = chef_sql:fetch_user("clownco-org-admin"),
+               ?assertEqual(<<"clownco-org-admin">>, User#chef_user.username)
+       end},
+      {"fetch_user not found",
+       fun() ->
+               ?assertEqual(not_found, chef_sql:fetch_user("i-am-not-a-user"))
        end}
+
      ]}.
 
