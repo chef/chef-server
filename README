@@ -1,3 +1,7 @@
+===============
+erchef - README
+===============
+
 This is the Erlang implementation of Chef's REST API.
 
 Currently implemented endpoints are:
@@ -16,8 +20,9 @@ Building erchef (tl;dr version)
 
 4) Profit!
 
-Building erchef (longer version)
-----------------------------------
+
+Building erchef for development (longer version)
+------------------------------------------------
 1) Install Erlang R14B03 or later
 
 2) (Optional) Build dialyzer PLT which includes erts, kernel, stdlib, crypto,
@@ -25,16 +30,37 @@ Building erchef (longer version)
 
    dialyzer --build_plt --apps erts kernel stdlib crypto public_key
 
-3) Run 'make'. This will download all dependencies and compile all code.
+3) The erchef application is itself composed of a few separate OTP
+   applications.  For development work you will want to clone the
+   following git repos:
 
-4) Run 'make test'. This will execute the test suites for chef_rest and
+         git clone git@github.com:opscode/fast-log-erlang.git fast_log
+         git clone git@github.com:opscode/chef-api-common-erlang.git chef_common
+         git clone git@github.com:opscode/chef-api-rest-erlang.git chef_rest
+         # and the top level project (where this file lives)
+         git clone git@github.com:opscode/opscode-chef-api-erlang.git erchef
+
+   Once cloned, you will want to create symlinks as follows so that
+   the dependencies get resolved to your local dev setup:
+
+        cd erchef
+        mkdir -p deps
+        cd deps
+        ln -s ../../fast_log
+        ln -s ../../chef_common
+        ln -s ../../chef_rest
+
+4) Run 'make'. This will download all dependencies (the ones that you
+   didn't symlink) and compile all code.
+
+5) Run 'make test'. This will execute the test suites for chef_rest and
    chef_common. All tests should pass.
 
-5) (Optional) If you've got an up to date PLT file (see #2) you can use
+6) (Optional) If you've got an up to date PLT file (see #2) you can use
    dialyzer to perform static analysis on erchef. Running 'make dialyzer'
    will perform analysis against chef_rest and chef_common.
 
-6) erchef is designed to be deployed as a standalone OTP release. You can
+7) erchef is designed to be deployed as a standalone OTP release. You can
    build a release via either 'make rel' or 'make devrel'. The devrel target
    is highly recommended for developers working on erchef directly. This
    target symlinks all dependencies and application so the release doesn't
@@ -50,34 +76,69 @@ Building erchef (longer version)
 
    cd rel/erchef;bin/erchef console
 
+
+Release tagging and branching
+-----------------------------
+
+To tag a new release:
+
+1) In the top-level project (opscode-chef-api-erlang) edit
+   rel/reltool.config and increment the version.  The version
+   specified in reltool.config is the OTP release version.  We don't
+   yet use the OTP release upgrade process.  When we do, this version
+   will be important.  Check in the change to master.
+
+2) Merge your changes into the release branch.
+
+3) On the release branch, edit rebar.config and set the version and
+   tag of the chef_rest dep appropriately.  Details on tagging chef_rest
+   and other component apps is below.
+
+4) Create a git tag.  E.g.
+
+       git tag 0.2.2
+       git push --tags opscode
+
+5) Edit data bag to set opscode-erchef-revision to "0.2.2".
+
+To tag a component app (e.g. chef_common):
+
+1) Merge code to release branch.
+
+2) Edit rebar.config to update all deps to explicit versions and
+   tags/SHAs
+
+3) git tag, git push --tags
+
+In general, you will want to work on chef_common first, then
+chef_rest, then the top-level project because at present the
+dependency tree looks like:
+
+
+   erchef <-- chef_rest <-- chef_common
+
+
 Deploying to rs-preprod
 -----------------------
+
+Here's an EC2 provisioning command for rs-preprod:
 
     knife ec2 server create -G rs-preprod,platform-server \
         --flavor m1.small -I ami-9a9c6bf3 \
         -x ubuntu -r 'role[opscode-erchef],role[rs-preprod]' \
         -i ~/.ssh/opscode-preprod-20101208
 
-Search Error Cases
-------------------
+For other deployment details, see the opscode-erchef cookbook.
 
-- [X] missing signature
-- [X] q param defaults to "*:*"
-- [X] request time out of bounds
-- [X] bad signature
-- [X] not in org
-- [X] no such org
-- [X} no such user/client.  these are the same from the search resource level.
-- [X] bad query (can't parse)
-- [X] invalid extra params (rows=foo, rows=-10)
-- [X] params: start, rows, sort, q.  Do we actually support sort?
-  - default values for start, rows, sort
-- [X] verify that user can't manipulate filter to escape org guid filter
-- bad type (not a node, role, client, or environment). Do we need to
-  validate data bag?
+
+Other Notes
+-----------
+
+Request signing ignores query parameters.  This is by design.
+
 
 Data Bag Queries
-----------------
+~~~~~~~~~~~~~~~~
 
 Ruby code goes to couchdb prior to each request to verify the list of
 known data bags.  If data bag is not found, returns 404, otherwise
@@ -95,13 +156,21 @@ following which should save on calls to couch for the common case.
 
 4. Return result set 200.
 
-So we need:
 
-- [ ] chef_otto:data_bag_exists(S, Db, BagName) -> boolean()
-- [ ] implement logic as above.
+Search Error Cases
+~~~~~~~~~~~~~~~~~~
 
-Stuff
------
-
-Request signing ignores query parameters (!)
-
+- [X] missing signature
+- [X] q param defaults to "*:*"
+- [X] request time out of bounds
+- [X] bad signature
+- [X] not in org
+- [X] no such org
+- [X} no such user/client.  these are the same from the search resource level.
+- [X] bad query (can't parse)
+- [X] invalid extra params (rows=foo, rows=-10)
+- [X] params: start, rows, sort, q.  Do we actually support sort?
+  - default values for start, rows, sort
+- [X] verify that user can't manipulate filter to escape org guid filter
+- bad type (not a node, role, client, or environment). Do we need to
+  validate data bag?
