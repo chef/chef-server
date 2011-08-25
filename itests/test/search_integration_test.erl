@@ -28,7 +28,44 @@ search_test_() ->
                        ?assertEqual([], ej:get({"rows"}, Json)),
                        ?assertEqual(0, ej:get({"start"}, Json))
                end}
-       end]}.
+       end,
+
+       fun(ReqConfig) ->
+               {"data bag does not exist search as clownco-org-admin",
+               fun() ->
+                       Path = search_path("clownco", "no_such_bag", "*:*"),
+                       {ok, "404", _H, Body} = chef_req:request(get, Path,
+                                                                ReqConfig),
+                       Expect = "{\"error\":[\"I don't know "
+                           "how to search for no_such_bag "
+                           "data objects.\"]}",
+                       ?assertEqual(Expect, Body)
+               end}
+       end,
+
+      {"unknown user",
+       fun() ->
+               KeyPath = "../test/akey.pem",
+               Config = chef_req:make_config("http://localhost",
+                                             "no-such-user", KeyPath),
+                       Path = search_path("clownco", "node",
+                                          "no_field:not_exist"),
+               {ok, "401", _H, Body} = chef_req:request(get, Path, Config)
+               %% TODO: validate error message in Body
+       end},
+
+      {"bad key",
+       fun() ->
+               KeyPath = "../test/akey.pem",
+               Config = chef_req:make_config("http://localhost",
+                                             "clownco-org-admin", KeyPath),
+                       Path = search_path("clownco", "node",
+                                          "no_field:not_exist"),
+               {ok, "401", _H, _Body} = chef_req:request(get, Path, Config)
+               %% TODO: validate error message in Boyd
+       end}
+
+     ]}.
 
 
 search_path(Org, Type, Query) ->

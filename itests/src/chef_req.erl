@@ -32,9 +32,11 @@ load_config(Path) ->
     make_config(ApiRoot, Name, PrivatePath).
 
 start_apps() ->
-    ensure_started(crypto),
-    ok = ssl:start(),
-    {ok, _} = ibrowse:start(),
+    [ ensure_started(M) || M <- [crypto, public_key, ssl] ],
+    case ibrowse:start() of
+        {ok, _} -> ok;
+        {error,{already_started, _}} -> ok
+    end,
     ok.
 
 ensure_started(M) ->
