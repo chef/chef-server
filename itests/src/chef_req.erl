@@ -20,12 +20,7 @@ main([]) ->
 main([Path]) ->
     ok = start_apps(),
     %% FIXME: for now, config file location is  hard coded
-    {ok, Config} = file:consult("chef_req.config"),
-
-    KeyPath = ?gv(private_key, Config),
-    ApiRoot = ?gv(api_root, Config),
-    Name = ?gv(client_name, Config),
-    ReqConfig = make_config(ApiRoot, Name, KeyPath),
+    ReqConfig = load_config("./chef_req.config"),
 
     {ok, Code, Head, Body} = request(get, Path, ReqConfig),
     io:format(standard_error, "~s ~s~n", [Code, Path]),
@@ -84,11 +79,6 @@ method_to_bin(delete) ->
     <<"DELETE">>;
 method_to_bin(head) ->
     <<"HEAD">>.
-
-load_private_key(Config) ->
-    PFile = ?gv(private_key, Config),
-    {ok, PBin} = file:read_file(PFile),
-    chef_authn:extract_private_key(PBin).
 
 make_headers(Method, ApiRoot, Path, Name, Private, Body) ->
     Client = chef_rest_client:make_chef_rest_client(ApiRoot, Name, Private),

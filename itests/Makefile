@@ -9,6 +9,9 @@ compile: $(DEPS)
 compile_skip:
 	@$(REBAR) compile skip_deps=true
 
+escript:
+	@$(REBAR) compile escriptize skip_deps=true
+
 clean:
 	@$(REBAR) skip_deps=true clean
 
