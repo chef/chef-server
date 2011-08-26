@@ -1,6 +1,10 @@
 -module(chef_req).
 
--export([request/3, request/4, make_config/3, start_apps/0]).
+-export([request/3,
+         request/4,
+         make_config/3,
+         clone_config/3,
+         start_apps/0]).
 
 -include("chef_req.hrl").
 -include_lib("eunit/include/eunit.hrl").
@@ -30,8 +34,8 @@ main([Path]) ->
     io:format(standard_error, "~s~n", ["----------------"]),
     io:format("~s~n", [Body]).
 
-request(get, Path, ReqConfig) ->
-    request(get, Path, [], ReqConfig).
+request(Method, Path, ReqConfig) ->
+    request(Method, Path, [], ReqConfig).
 
 request(Method, Path, Body,
         #req_config{api_root = ApiRoot, name = Name, private_key = Private}) ->
@@ -39,10 +43,16 @@ request(Method, Path, Body,
                                   Name, Private, Body),
     ibrowse:send_req(Url, Headers, Method, Body, [{ssl_options, []}]).
 
+make_config(ApiRoot, Name, {key, Key}) ->
+    Private = chef_authn:extract_private_key(Key),
+    #req_config{api_root = ApiRoot, name = Name, private_key = Private};
 make_config(ApiRoot, Name, KeyPath) ->
     {ok, PBin} = file:read_file(KeyPath),
-    Private = chef_authn:extract_private_key(PBin),
-    #req_config{api_root = ApiRoot, name = Name, private_key = Private}.
+    make_config(ApiRoot, Name, {key, PBin}).
+
+clone_config(#req_config{}=Config, Name, Key) ->
+    Private = chef_authn:extract_private_key(Key),
+    Config#req_config{name = Name, private_key = Private}.
 
 load_config(Path) ->
     {ok, Config} = file:consult(Path),
@@ -83,7 +93,7 @@ method_to_bin(head) ->
 make_headers(Method, ApiRoot, Path, Name, Private, Body) ->
     Client = chef_rest_client:make_chef_rest_client(ApiRoot, Name, Private),
     {Url, Headers0} = chef_rest_client:generate_signed_headers(Client, Path,
-                                                               Method),
+                                                               Method, Body),
     Headers1 = header_for_body(Body, Headers0),
     {Url, [{"Accept", "application/json"},
            {"X-CHEF-VERSION", ?CHEF_VERSION} | Headers1]}.
