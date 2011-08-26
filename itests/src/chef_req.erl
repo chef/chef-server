@@ -9,6 +9,31 @@
 
 -define(gv(K, L), proplists:get_value(K, L)).
 
+-export([main/1]).
+
+main([]) ->
+    Msg = "chef_req PATH\n\n"
+        "Make Chef API requests\n"
+        "Uses ./chef_req.config\n"
+        "PATH example: /organizations/your-org/roles\n",
+    io:format(Msg);
+main([Path]) ->
+    ok = start_apps(),
+    %% FIXME: for now, config file location is  hard coded
+    {ok, Config} = file:consult("chef_req.config"),
+
+    KeyPath = ?gv(private_key, Config),
+    ApiRoot = ?gv(api_root, Config),
+    Name = ?gv(client_name, Config),
+    ReqConfig = make_config(ApiRoot, Name, KeyPath),
+
+    {ok, Code, Head, Body} = request(get, Path, ReqConfig),
+    io:format(standard_error, "~s ~s~n", [Code, Path]),
+    io:format(standard_error, "~s~n", ["----------------"]),
+    [ io:format(standard_error, "~s:~s~n", [K, V])
+      || {K, V} <- Head ],
+    io:format(standard_error, "~s~n", ["----------------"]),
+    io:format("~s~n", [Body]).
 
 request(get, Path, ReqConfig) ->
     request(get, Path, [], ReqConfig).
