@@ -1,10 +1,6 @@
 rel/chef_api/*
 rel/erchef/*
 deps/*
-apps/*/ebin/*
 .DS_Store
-apps/*/.eunit
-apps/chef_common/src/lucene.erl
-apps/chef_common/src/chef_lucene.erl
 *.beam
 *~
