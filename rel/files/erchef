@@ -162,8 +162,17 @@ case "$1" in
         exec $CMD
         ;;
 
+    clear_cache)
+        if [ $# -ne 2 ]; then
+            echo "Usage: $SCRIPT clear_cache <cache_name>"
+            exit 1
+        fi
+        shift
+        $NODETOOL rpc chef_cache clear $1
+        ;;
+
     *)
-        echo "Usage: $SCRIPT {start|stop|restart|reboot|ping|console|console_clean|attach}"
+        echo "Usage: $SCRIPT {start|stop|restart|reboot|ping|console|console_clean|attach|clear_cache}"
         exit 1
         ;;
 esac
