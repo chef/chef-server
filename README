@@ -174,3 +174,28 @@ Search Error Cases
 - [X] verify that user can't manipulate filter to escape org guid filter
 - bad type (not a node, role, client, or environment). Do we need to
   validate data bag?
+
+
+brew install mysql (maybe you will need to follow brew info mysql
+instructions for first setup).
+
+mysql.server start
+
+mysql -uroot
+  create database opscode_chef;
+  create database opscode_chef_test;
+  create user 'dev'@'localhost' identified by 'opensesame';
+  grant all privileges on opscode_chef.* to 'dev'@'localhost';
+
+Edit /etc/opscode/dark_launch_features.json
+{
+"quick_start":true,
+"new_theme":true,
+"sql_users":true
+}
+
+Get latest mixlib-authorization.  In that project run:
+bundle exec rake db:remigrate
+bundle exec rake db:remigrate_test
+
+Now run setup:test 
