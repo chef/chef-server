@@ -18,11 +18,30 @@ basic_node_create_test_() ->
              test_utils:test_cleanup(ignore)
      end,
      fun({UserConfig, ClientConfig}) ->
-             [basic_node_tests_for_config(UserConfig),
-              basic_node_tests_for_config(ClientConfig)]
+             [basic_node_create_tests_for_config(UserConfig),
+              basic_node_create_tests_for_config(ClientConfig),
+              basic_node_list_tests_for_config(UserConfig)]
      end}.
 
-basic_node_tests_for_config(#req_config{name = Name}=ReqConfig) ->
+basic_node_list_tests_for_config(#req_config{name = Name}=ReqConfig) ->
+    Label = " (" ++ Name ++ ")",
+    {NodeName, NodeJson} = sample_node(),
+    [
+     {"list nodes" ++ Label,
+      fun() ->
+              Path = "/organizations/clownco/nodes",
+              {ok, Code, _H, Body} = chef_req:request(get, Path, ReqConfig),
+              ?assertEqual("200", Code),
+              NodeList = ejson:decode(Body),
+              ?assert(is_list(NodeList)),
+              ?assert(is_binary(hd(NodeList)))
+              %% FIXME: we need to instrument the db so that we have a
+              %% known node table state and then test for nodes.
+      end}
+    ].
+              
+
+basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
     Label = " (" ++ Name ++ ")",
     {NodeName, NodeJson} = sample_node(),
     [
