@@ -14,7 +14,8 @@ basic_node_create_test_() ->
              {ReqConfig, ClientConfig}
      end,
      fun({_, #req_config{name = Name}=ReqConfig}) ->
-             chef_req:delete_client("clownco", Name, ReqConfig)
+             chef_req:delete_client("clownco", Name, ReqConfig),
+             test_utils:test_cleanup(ignore)
      end,
      fun({UserConfig, ClientConfig}) ->
              [basic_node_tests_for_config(UserConfig),
