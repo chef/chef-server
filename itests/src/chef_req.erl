@@ -4,6 +4,10 @@
          request/4,
          make_config/3,
          clone_config/3,
+
+         make_client/3,
+         delete_client/3,
+
          start_apps/0]).
 
 -include("chef_req.hrl").
@@ -41,7 +45,8 @@ request(Method, Path, Body,
         #req_config{api_root = ApiRoot, name = Name, private_key = Private}) ->
     {Url, Headers} = make_headers(method_to_bin(Method), ApiRoot, Path,
                                   Name, Private, Body),
-    ibrowse:send_req(Url, Headers, Method, Body, [{ssl_options, []}]).
+    ibrowse:send_req(Url, Headers, Method, Body,
+                     [{ssl_options, []}, {response_format, binary}]).
 
 make_config(ApiRoot, Name, {key, Key}) ->
     Private = chef_authn:extract_private_key(Key),
@@ -49,6 +54,20 @@ make_config(ApiRoot, Name, {key, Key}) ->
 make_config(ApiRoot, Name, KeyPath) ->
     {ok, PBin} = file:read_file(KeyPath),
     make_config(ApiRoot, Name, {key, PBin}).
+
+make_client(Org, ClientName, Config) ->
+    Path = "/organizations/" ++ Org ++ "/clients",
+    ReqBody = iolist_to_binary([<<"{\"name\":\"">>, ClientName, <<"\"}">>]),
+    {ok, "201", _H, Body} = request(post, Path, ReqBody, Config),
+    Client = ejson:decode(Body),
+    ClientConfig = clone_config(Config, ClientName,
+                                ej:get({<<"private_key">>}, Client)),
+    {Client, ClientConfig}.
+
+delete_client(Org, ClientName, Config) ->
+    Path = "/organizations/" ++ Org ++ "/clients/" ++ ClientName,
+    {ok, Code, _H, _Body} = request(delete, Path, Config),
+    Code.
 
 clone_config(#req_config{}=Config, Name, Key) ->
     Private = chef_authn:extract_private_key(Key),
@@ -102,3 +121,4 @@ header_for_body([], Headers) ->
     Headers;
 header_for_body(_, Headers) ->
     [{"content-type", "application/json"}|Headers].
+

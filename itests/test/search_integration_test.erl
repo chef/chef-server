@@ -3,58 +3,6 @@
 -include("../src/chef_req.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
-create_node_as_user_test_() ->
-    {setup,
-     fun() ->
-             ok = chef_req:start_apps(),
-             KeyPath = "/tmp/opscode-platform-test/clownco-org-admin.pem",
-             chef_req:make_config("http://localhost",
-                                  "clownco-org-admin", KeyPath)
-     end,
-     fun(_X) ->
-             stopping
-     end,
-     fun(ReqConfig) ->
-             [
-              {"empty node search as clownco-org-admin",
-                fun() ->
-                        Path = "/organizations/clownco/nodes",
-                        NodeJson = sample_node(),
-                        {ok, Code, _H, Body} = chef_req:request(post, Path, NodeJson, ReqConfig),
-                       ?debugVal(Code),
-                       ?debugVal(_H),
-                       ?debugVal(Body)
-                end}]
-     end}.
-
-%% create_node_as_client_test_() ->
-%%     {setup,
-%%      fun() ->
-%%              ok = chef_req:start_apps(),
-%%              KeyPath = "/tmp/opscode-platform-test/clownco-org-admin.pem",
-%%              ReqConfig = chef_req:make_config("http://localhost",
-%%                                               "clownco-org-admin", KeyPath),
-%%              {_, ClientConfig} = make_client("clownco", "client01", ReqConfig),
-%%              ClientConfig
-%%      end,
-%%      fun(#req_config{name = Name}=ReqConfig) ->
-%%              delete_client("clownco", Name, ReqConfig)
-%%      end,
-%%      fun(ReqConfig) ->
-%%              [
-%%               {"create a node",
-%%                fun() ->
-%%                        NodeJson = sample_node(),
-%%                        Path = "/organizations/clownco/nodes",
-%%                        {ok, Code, _H, Body} = chef_req:request(post, Path, NodeJson, ReqConfig),
-%%                        ?debugVal(Code),
-%%                        ?debugVal(_H),
-%%                        ?debugVal(Body)
-%%                end}
-
-%%              ]
-%%      end}.
-    
 search_as_client_test_() ->
     {setup,
      fun() ->
@@ -191,9 +139,3 @@ delete_client(Org, ClientName, Config) ->
     Path = "/organizations/" ++ Org ++ "/clients/" ++ ClientName,
     {ok, Code, _H, _Body} = chef_req:request(delete, Path, Config),
     Code.
-    
-        
-sample_node() ->
- <<"{\"normal\":{\"is_anyone\":\"no\"},\"name\":\"n1\",\"override\":{},"
-   "\"default\":{},\"json_class\":\"Chef::Node\",\"automatic\":{},"
-   "\"chef_environment\":\"_default\",\"run_list\":[],\"chef_type\":\"node\"}">>.
