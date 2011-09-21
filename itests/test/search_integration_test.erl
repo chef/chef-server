@@ -191,8 +191,7 @@ delete_client(Org, ClientName, Config) ->
     Path = "/organizations/" ++ Org ++ "/clients/" ++ ClientName,
     {ok, Code, _H, _Body} = chef_req:request(delete, Path, Config),
     Code.
-    
-        
+
 sample_node() ->
  <<"{\"normal\":{\"is_anyone\":\"no\"},\"name\":\"n1\",\"override\":{},"
    "\"default\":{},\"json_class\":\"Chef::Node\",\"automatic\":{},"
