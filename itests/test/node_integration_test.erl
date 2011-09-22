@@ -8,19 +8,23 @@ basic_node_create_test_() ->
      fun() ->
              ok = chef_req:start_apps(),
              KeyPath = "/tmp/opscode-platform-test/clownco-org-admin.pem",
-             ReqConfig = chef_req:make_config("http://localhost",
+             ReqConfig = chef_req:make_config("http://localhost:4848",
                                               "clownco-org-admin", KeyPath),
              {_, ClientConfig} = chef_req:make_client("clownco", "client01", ReqConfig),
-             {ReqConfig, ClientConfig}
+             {_, WeakClientConfig} = chef_req:make_client("clownco", "client02", ReqConfig),
+             chef_req:remove_client_from_group("clownco", "client02", "clients", ReqConfig),
+             {ReqConfig, ClientConfig, WeakClientConfig}
      end,
-     fun({_, #req_config{name = Name}=ReqConfig}) ->
-             chef_req:delete_client("clownco", Name, ReqConfig),
+     fun({ReqConfig, _, _}) ->
+             "200" = chef_req:delete_client("clownco", "client01", ReqConfig),
+             "200" = chef_req:delete_client("clownco", "client02", ReqConfig),
              test_utils:test_cleanup(ignore)
      end,
-     fun({UserConfig, ClientConfig}) ->
+     fun({UserConfig, ClientConfig, WeakClientConfig}) ->
              [basic_node_create_tests_for_config(UserConfig),
               basic_node_create_tests_for_config(ClientConfig),
-              basic_node_list_tests_for_config(UserConfig)]
+              basic_node_list_tests_for_config(UserConfig),
+              node_permissions_tests(UserConfig, WeakClientConfig)]
      end}.
 
 basic_node_list_tests_for_config(#req_config{name = Name}=ReqConfig) ->
@@ -39,7 +43,21 @@ basic_node_list_tests_for_config(#req_config{name = Name}=ReqConfig) ->
               %% known node table state and then test for nodes.
       end}
     ].
-              
+
+node_permissions_tests(UserConfig, WeakClientConfig) ->              
+    [
+     {"POST without create on nodes container",
+       fun() ->
+               Path = "/organizations/clownco/nodes",
+               {_, Node403} = sample_node(),
+               {ok, Code, _H, Body} = chef_req:request(post, Path, Node403,
+                                                        WeakClientConfig),
+               ?assertEqual("403", Code),
+               %% FIXME: we'll want to customize the message
+               ?assertEqual(<<"forbidden">>, Body)
+       end}
+
+    ].
 
 basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
     Label = " (" ++ Name ++ ")",
