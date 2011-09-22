@@ -53,8 +53,7 @@ node_permissions_tests(UserConfig, WeakClientConfig) ->
                {ok, Code, _H, Body} = chef_req:request(post, Path, Node403,
                                                         WeakClientConfig),
                ?assertEqual("403", Code),
-               %% FIXME: we'll want to customize the message
-               ?assertEqual(<<"forbidden">>, Body)
+               ?assertEqual(<<"missing create permission">>, Body)
        end}
 
     ].
