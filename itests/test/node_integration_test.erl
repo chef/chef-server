@@ -8,7 +8,7 @@ basic_node_create_test_() ->
      fun() ->
              ok = chef_req:start_apps(),
              KeyPath = "/tmp/opscode-platform-test/clownco-org-admin.pem",
-             ReqConfig = chef_req:make_config("http://localhost:4848",
+             ReqConfig = chef_req:make_config("http://localhost",
                                               "clownco-org-admin", KeyPath),
              {_, ClientConfig} = chef_req:make_client("clownco", "client01", ReqConfig),
              {_, WeakClientConfig} = chef_req:make_client("clownco", "client02", ReqConfig),
