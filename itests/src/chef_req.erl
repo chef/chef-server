@@ -7,6 +7,7 @@
 
          make_client/3,
          delete_client/3,
+         remove_client_from_group/4,
 
          start_apps/0]).
 
@@ -69,6 +70,31 @@ delete_client(Org, ClientName, Config) ->
     {ok, Code, _H, _Body} = request(delete, Path, Config),
     Code.
 
+remove_client_from_group(Org, ClientName, GroupName, Config) ->
+    Path = "/organizations/" ++ Org ++ "/groups/" ++ GroupName,
+    {ok, "200", _H0, Body1} = request(get, Path, Config),
+    Group0 = ejson:decode(Body1),
+    Actors = ej:get({<<"actors">>}, Group0),
+    NewActors = lists:delete(ensure_bin(ClientName), Actors),
+    Group1 = ej:set({<<"actors">>}, Group0, NewActors),
+    PutGroup = make_group_for_put(Group1),
+    {ok, "200", _H1, _Body2} = request(put, Path, ejson:encode(PutGroup), Config),
+    ok.
+
+make_group_for_put(Group) ->
+    {[{<<"groupname">>, ej:get({<<"groupname">>}, Group)},
+      {<<"orgname">>, ej:get({<<"orgname">>}, Group)},
+      {<<"actors">>,
+       %% The asymmetry is impressive here.  We GET a flat structure
+       %% of actors which consists of both users and clients.  When we
+       %% PUT we must specify both users and clients.  I believe that
+       %% items of the wrong type are ignored so the simple
+       %% duplication approach should be sufficient.
+       {[{<<"users">>, ej:get({<<"actors">>}, Group)},
+         {<<"clients">>, ej:get({<<"actors">>}, Group)},
+         {<<"groups">>, ej:get({<<"groups">>}, Group)}]}
+       }]}.
+
 clone_config(#req_config{}=Config, Name, Key) ->
     Private = chef_authn:extract_private_key(Key),
     Config#req_config{name = Name, private_key = Private}.
@@ -121,4 +147,9 @@ header_for_body([], Headers) ->
     Headers;
 header_for_body(_, Headers) ->
     [{"content-type", "application/json"}|Headers].
+
+ensure_bin(L) when is_list(L) ->
+    list_to_binary(L);
+ensure_bin(B) when is_binary(B) ->
+    B.
 
