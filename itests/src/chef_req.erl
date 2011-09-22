@@ -63,7 +63,7 @@ make_client(Org, ClientName, Config) ->
     Client = ejson:decode(Body),
     ClientConfig = clone_config(Config, ClientName,
                                 ej:get({<<"private_key">>}, Client)),
-    {Client, ClientConfig}.
+    ClientConfig.
 
 delete_client(Org, ClientName, Config) ->
     Path = "/organizations/" ++ Org ++ "/clients/" ++ ClientName,
