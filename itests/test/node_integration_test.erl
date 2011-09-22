@@ -29,7 +29,6 @@ basic_node_create_test_() ->
 
 basic_node_list_tests_for_config(#req_config{name = Name}=ReqConfig) ->
     Label = " (" ++ Name ++ ")",
-    {NodeName, NodeJson} = sample_node(),
     [
      {"list nodes" ++ Label,
       fun() ->
@@ -44,18 +43,25 @@ basic_node_list_tests_for_config(#req_config{name = Name}=ReqConfig) ->
       end}
     ].
 
-node_permissions_tests(UserConfig, WeakClientConfig) ->              
+node_permissions_tests(_UserConfig, WeakClientConfig) ->
     [
      {"POST without create on nodes container",
        fun() ->
                Path = "/organizations/clownco/nodes",
                {_, Node403} = sample_node(),
                {ok, Code, _H, Body} = chef_req:request(post, Path, Node403,
-                                                        WeakClientConfig),
+                                                       WeakClientConfig),
                ?assertEqual("403", Code),
                ?assertEqual(<<"missing create permission">>, Body)
+       end},
+     {"GET without read on nodes container",
+       fun() ->
+               Path = "/organizations/clownco/nodes",
+               {ok, Code, _H, Body} = chef_req:request(get, Path,
+                                                       WeakClientConfig),
+               ?assertEqual("403", Code),
+               ?assertEqual(<<"missing read permission">>, Body)
        end}
-
     ].
 
 basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
