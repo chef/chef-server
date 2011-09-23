@@ -24,22 +24,74 @@ node_endpoint_test_() ->
              test_utils:test_cleanup(ignore)
      end,
      fun({UserConfig, ClientConfig, WeakClientConfig}) ->
-             [basic_node_create_tests_for_config(UserConfig),
+             [basic_named_node_ops(UserConfig),
+              basic_named_node_ops(ClientConfig),
+              basic_node_create_tests_for_config(UserConfig),
               basic_node_create_tests_for_config(ClientConfig),
               basic_node_list_tests_for_config(UserConfig),
               basic_node_list_tests_for_config(ClientConfig),
               node_permissions_tests(UserConfig, WeakClientConfig)]
      end}.
 
+basic_named_node_ops(#req_config{name = Name}=ReqConfig) ->
+    Label = " (" ++ Name ++ ")",
+    {AName, AUrl} = create_node("clownco", ReqConfig),
+    Path = "/organizations/clownco/nodes/",
+    [
+     {"GET a non-existing node" ++ Label,
+      fun() ->
+              NoName = "a-node-that-does-not-exist-xxx",
+              NoNodePath = Path ++ NoName,
+              {ok, Code, _H, Body} = chef_req:request(get, NoNodePath, ReqConfig),
+              ?assertEqual("404", Code),
+              Expect = iolist_to_binary(["{\"error\":[\"node '", NoName,
+                                         "' not found\"]}"]),
+              ?assertEqual(Expect, Body)
+      end},
+
+     {"Fetch, modify, verify, and delete a node" ++ Label,
+      fun() ->
+              %% GET the node
+              NodePath = Path ++ AName,
+              {ok, GetCode, _H1, Body1} = chef_req:request(get, NodePath, ReqConfig),
+              ?assertEqual("200", GetCode),
+              TheNode = ejson:decode(Body1),
+              ?assertEqual(AName, ej:get({<<"name">>}, TheNode)),
+
+              %% modify and PUT it back
+              NewNode = ej:set({<<"normal">>}, TheNode, {[{<<"volume">>, 11}]}),
+              NewNodeJson = ejson:encode(NewNode),
+              {ok, PutCode, _H2, Body2} = chef_req:request(put, NodePath,
+                                                           NewNodeJson, ReqConfig),
+              ?assertEqual("200", PutCode),
+              ?assertEqual(NewNodeJson, Body2),
+
+              %% GET it and verify it has the new attribute
+              {ok, GetCode2, _H3, Body3} = chef_req:request(get, NodePath, ReqConfig),
+              ?assertEqual("200", GetCode2),
+              GotNode = ejson:decode(Body3),
+              ?assertEqual(11, ej:get({<<"normal">>, <<"volume">>}, GotNode)),
+              
+              %% DELETE it
+              {ok, DelCode, _H4, Body4} = chef_req:request(delete, NodePath, ReqConfig),
+              ?assertEqual("200", DelCode),
+              ?assertEqual(NewNodeJson, Body4),
+
+              %% verify we get a 404
+              {ok, GetCode3, _H5, _Body5} = chef_req:request(get, NodePath, ReqConfig),
+              ?assertEqual("404", GetCode3)
+      end}
+    ].
+
 basic_node_list_tests_for_config(#req_config{name = Name}=ReqConfig) ->
     Label = " (" ++ Name ++ ")",
+    Path = "/organizations/clownco/nodes",
     {foreach,
      fun() -> ok = db_tool:truncate_nodes_table() end,
      fun(_) -> cleanup end,
      [
       {"list nodes, empty nodes table" ++ Label,
        fun() ->
-               Path = "/organizations/clownco/nodes",
                {ok, Code, _H, Body} = chef_req:request(get, Path, ReqConfig),
                ?assertEqual("200", Code),
                NodeList = ejson:decode(Body),
@@ -49,7 +101,6 @@ basic_node_list_tests_for_config(#req_config{name = Name}=ReqConfig) ->
       {"list nodes, single node" ++ Label,
        fun() ->
                {AName, AUrl} = create_node("clownco", ReqConfig),
-               Path = "/organizations/clownco/nodes",
                {ok, Code, _H, Body} = chef_req:request(get, Path, ReqConfig),
                ?assertEqual("200", Code),
                NodeList = ejson:decode(Body),
@@ -68,10 +119,10 @@ basic_node_list_tests_for_config(#req_config{name = Name}=ReqConfig) ->
      ]}.
 
 node_permissions_tests(_UserConfig, WeakClientConfig) ->
+    Path = "/organizations/clownco/nodes",
     [
      {"POST without create on nodes container",
        fun() ->
-               Path = "/organizations/clownco/nodes",
                {_, Node403} = sample_node(),
                {ok, Code, _H, Body} = chef_req:request(post, Path, Node403,
                                                        WeakClientConfig),
@@ -80,7 +131,6 @@ node_permissions_tests(_UserConfig, WeakClientConfig) ->
        end},
      {"GET without read on nodes container",
        fun() ->
-               Path = "/organizations/clownco/nodes",
                {ok, Code, _H, Body} = chef_req:request(get, Path,
                                                        WeakClientConfig),
                ?assertEqual("403", Code),
@@ -91,10 +141,10 @@ node_permissions_tests(_UserConfig, WeakClientConfig) ->
 basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
     Label = " (" ++ Name ++ ")",
     {NodeName, NodeJson} = sample_node(),
+    Path = "/organizations/clownco/nodes",
     [
      {"create a new node" ++ Label,
       fun() ->
-              Path = "/organizations/clownco/nodes",
               {ok, Code, _H, Body} = chef_req:request(post, Path, NodeJson, ReqConfig),
               ?assertEqual("201", Code),
               NodeUrl = <<"http://localhost/organizations/clownco/nodes/", NodeName/binary>>,
@@ -105,7 +155,6 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
      {"conflict when node name already exists" ++ Label,
       %% Note that this test assumes the previous "create a new node" test ran successfully
       fun() ->
-              Path = "/organizations/clownco/nodes",
               {ok, Code, _H, Body} = chef_req:request(post, Path, NodeJson, ReqConfig),
               ?assertEqual("409", Code),
               ?assertEqual(<<"{\"error\":[\"Node already exists\"]}">>, Body)
@@ -113,8 +162,8 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
 
      {"org 'no-such-org' does not exist" ++ Label,
       fun() ->
-              Path = "/organizations/no-such-org/nodes",
-              {ok, Code, _H, Body} = chef_req:request(post, Path, NodeJson, ReqConfig),
+              BadPath = "/organizations/no-such-org/nodes",
+              {ok, Code, _H, Body} = chef_req:request(post, BadPath, NodeJson, ReqConfig),
               ?assertEqual("404", Code),
               ?assertEqual(<<"{\"error\":[\"organization no-such-org does not exist.\"]}">>,
                            Body)
@@ -122,7 +171,6 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
 
      {"POST of invalid JSON is a 400" ++ Label,
       fun() ->
-              Path = "/organizations/clownco/nodes",
               InvalidJson = <<"{not:json}">>,
               {ok, Code, _H, _Body} = chef_req:request(post, Path, InvalidJson, ReqConfig),
               ?assertEqual("400", Code)
