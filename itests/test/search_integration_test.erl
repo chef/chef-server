@@ -10,11 +10,11 @@ search_as_client_test_() ->
              KeyPath = "/tmp/opscode-platform-test/clownco-org-admin.pem",
              ReqConfig = chef_req:make_config("http://localhost",
                                               "clownco-org-admin", KeyPath),
-             {_, ClientConfig} = chef_req:make_client("clownco", "client01", ReqConfig),
+             chef_req:delete_client("clownco", "searchclient01", ReqConfig),
+             ClientConfig = chef_req:make_client("clownco", "searchclient01", ReqConfig),
              ClientConfig
      end,
      fun(#req_config{name = Name}=ReqConfig) ->
-             chef_req:delete_client("clownco", Name, ReqConfig),
              test_utils:test_cleanup(ignore)
      end,
      fun(ReqConfig) ->
@@ -51,7 +51,7 @@ search_as_client_test_() ->
                        Path = search_path("clownco", "node",
                                           "no_field:not_exist"),
                        {ok, "401", _H, Body} = chef_req:request(get, Path, Config),
-                       ?assertEqual(<<"{\"error\":[\"'client01' not associated with "
+                       ?assertEqual(<<"{\"error\":[\"'searchclient01' not associated with "
                                       "organization 'clownco'\"]}">>, Body)
                end}
              ]

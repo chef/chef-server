@@ -2,6 +2,8 @@
 
 -export([test_cleanup/1]).
 
+-include_lib("emysql/include/emysql.hrl").
+
 %% @doc graceful shutdown of apps started by tests
 %% 
 %% This seems to get rid of the following error reports otherwise seen at the end of a test run:
@@ -12,6 +14,7 @@
 %% ** When Server state == {state,inet_gethost_native,undefined,<0.136.0>,
 %%                                {local,inet_gethost_native_sup}}
 test_cleanup(_State) ->
+    application:stop(emysql),
     application:stop(public_key),
     application:stop(ssl),
     case whereis(inet_gethost_native_sup) of
@@ -20,4 +23,3 @@ test_cleanup(_State) ->
         _ ->
             ok
     end.
-

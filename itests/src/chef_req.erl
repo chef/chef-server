@@ -63,12 +63,15 @@ make_client(Org, ClientName, Config) ->
     Client = ejson:decode(Body),
     ClientConfig = clone_config(Config, ClientName,
                                 ej:get({<<"private_key">>}, Client)),
-    {Client, ClientConfig}.
+    ClientConfig.
 
 delete_client(Org, ClientName, Config) ->
     Path = "/organizations/" ++ Org ++ "/clients/" ++ ClientName,
     {ok, Code, _H, _Body} = request(delete, Path, Config),
-    Code.
+    if
+        Code =:= "200" orelse Code =:= "404" -> ok;
+        true -> {error, Code}
+    end.
 
 remove_client_from_group(Org, ClientName, GroupName, Config) ->
     Path = "/organizations/" ++ Org ++ "/groups/" ++ GroupName,
