@@ -20,22 +20,70 @@ node_endpoint_test_() ->
              chef_req:remove_client_from_group("clownco", "client02", "clients", ReqConfig),
              {ReqConfig, ClientConfig, WeakClientConfig}
      end,
-     fun({ReqConfig, _, _}) ->
+     fun({_, _, _}) ->
              test_utils:test_cleanup(ignore)
      end,
      fun({UserConfig, ClientConfig, WeakClientConfig}) ->
-             [basic_named_node_ops(UserConfig),
-              basic_named_node_ops(ClientConfig),
-              basic_node_create_tests_for_config(UserConfig),
+             [
+              named_node_permissions(UserConfig, ClientConfig, WeakClientConfig),
+              %% basic_named_node_ops(UserConfig),
+              %% basic_named_node_ops(ClientConfig),
+              %% basic_node_create_tests_for_config(UserConfig),
               basic_node_create_tests_for_config(ClientConfig),
-              basic_node_list_tests_for_config(UserConfig),
-              basic_node_list_tests_for_config(ClientConfig),
+              %% basic_node_list_tests_for_config(UserConfig),
+              %% basic_node_list_tests_for_config(ClientConfig),
               node_permissions_tests(UserConfig, WeakClientConfig)]
      end}.
 
+named_node_permissions(UserConfig, ClientConfig, WeakClientConfig) ->
+    {UserNode, _UserNodeUrl} = create_node("clownco", UserConfig),
+    {ClientNode, _ClientNodeUrl} = create_node("clownco", ClientConfig),
+    Path = "/organizations/clownco/nodes/",
+    [{"admin user can read client created node",
+      fun() ->
+              NodePath = Path ++ ClientNode,
+              ?assertEqual("200", code_for_request(get, NodePath, UserConfig))
+      end},
+
+     {"client can read user created node",
+      fun() ->
+              NodePath = Path ++ UserNode,
+              ?assertEqual("200", code_for_request(get, NodePath, ClientConfig))
+      end},
+
+     {"weak client cannot read user created node",
+      fun() ->
+              NodePath = Path ++ UserNode,
+              ?assertEqual("403", code_for_request(get, NodePath, WeakClientConfig))
+      end},
+
+     {"weak client cannot read client created node",
+      fun() ->
+              NodePath = Path ++ ClientNode,
+              ?assertEqual("403", code_for_request(get, NodePath, WeakClientConfig))
+      end},
+
+     {"weak client cannot update client created node",
+      fun() ->
+              NodePath = Path ++ ClientNode,
+              {_Name, SampleNode} = sample_node(ClientNode),
+              ?assertEqual("403", code_for_request(put, NodePath, SampleNode, WeakClientConfig))
+      end},
+
+     {"weak client cannot delete client created node",
+      fun() ->
+              NodePath = Path ++ ClientNode,
+              ?assertEqual("403", code_for_request(delete, NodePath, WeakClientConfig))
+      end}
+     %% TODO:
+     %% Moar testing
+     %% verify admin user has all perms on a client created node
+     %% clarify what perms a client should have on an admin created node and test them.
+    ].
+    
 basic_named_node_ops(#req_config{name = Name}=ReqConfig) ->
     Label = " (" ++ Name ++ ")",
-    {AName, AUrl} = create_node("clownco", ReqConfig),
+    {AName, _AUrl} = create_node("clownco", ReqConfig),
     Path = "/organizations/clownco/nodes/",
     [
      {"GET a non-existing node" ++ Label,
@@ -203,4 +251,12 @@ create_node(Org, #req_config{api_root = Root}=ReqConfig) ->
     {ok, "201", _, _} = chef_req:request(post, Path, ANode, ReqConfig),
     Url = list_to_binary(Root ++ Path ++ "/" ++ AName),
     {AName, Url}.
+    
+
+code_for_request(Method, Path, Config) ->
+    code_for_request(Method, Path, [], Config).
+
+code_for_request(Method, Path, ReqBody, Config) ->
+    {ok, Code, _Headers, _Body} = chef_req:request(Method, Path, ReqBody, Config),
+    Code.
     
