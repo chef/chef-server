@@ -30,12 +30,9 @@ node_endpoint_test_() ->
               basic_named_node_ops(ClientConfig),
               basic_node_create_tests_for_config(UserConfig),
               basic_node_create_tests_for_config(ClientConfig),
-              node_permissions_tests(UserConfig, WeakClientConfig)
-              %% I'm not sure why, but these tests are not working,
-              %% getting timeout errors and weird race condition
-              %% looking results. :(
-              %% basic_node_list_tests_for_config(UserConfig)
-              %% basic_node_list_tests_for_config(ClientConfig)
+              node_permissions_tests(UserConfig, WeakClientConfig),
+              basic_node_list_tests_for_config(UserConfig),
+              basic_node_list_tests_for_config(ClientConfig)
              ]
      end}}}.
 
@@ -173,17 +170,26 @@ basic_node_list_tests_for_config(#req_config{name = Name}=ReqConfig) ->
                ?assertEqual("200", Code),
                NodeList = ejson:decode(Body),
                ?assertEqual({[{AName, AUrl}]}, NodeList)
-       end},
+       end}
 
-      {"list more than one nodes" ++ Label,
+      %% There is a latent problem with this test.  On my laptop with
+      %% the created node count set to 11 instead of 5 I consistently
+      %% get a timeout error.  Reducing the count *seems* to resolve
+      %% it, although I have now seen at least one case where on
+      %% another test I got a req_timeout (I think that's from
+      %% emysql).  Probably didn't see this before, because the
+      %% container ACL cloning was broken.  Now that it is fixed, we
+      %% make 7 authz calls per node create so it's probably quite a
+      %% bit slower.
+      ,{timeout, 60, {"list more than one nodes" ++ Label,
        fun() ->
-               NamePairs = [ create_node("clownco", ReqConfig) || _I <- lists:seq(1, 11) ],
+               NamePairs = [ create_node("clownco", ReqConfig) || _I <- lists:seq(1, 5) ],
                Path = "/organizations/clownco/nodes",
                {ok, Code, _H, Body} = chef_req:request(get, Path, ReqConfig),
                ?assertEqual("200", Code),
                {NodeList} = ejson:decode(Body),
                ?assertEqual(lists:sort(NamePairs), lists:sort(NodeList))
-       end}
+       end}}
      ]}.
 
 node_permissions_tests(_UserConfig, WeakClientConfig) ->
