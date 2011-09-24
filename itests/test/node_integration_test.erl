@@ -4,7 +4,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 node_endpoint_test_() ->
-    {setup,
+    {timeout, 60, {inorder, {setup,
      fun() ->
              ok = chef_req:start_apps(),
              db_tool:connect(),
@@ -26,14 +26,18 @@ node_endpoint_test_() ->
      fun({UserConfig, ClientConfig, WeakClientConfig}) ->
              [
               named_node_permissions(UserConfig, ClientConfig, WeakClientConfig),
-              %% basic_named_node_ops(UserConfig),
-              %% basic_named_node_ops(ClientConfig),
-              %% basic_node_create_tests_for_config(UserConfig),
+              basic_named_node_ops(UserConfig),
+              basic_named_node_ops(ClientConfig),
+              basic_node_create_tests_for_config(UserConfig),
               basic_node_create_tests_for_config(ClientConfig),
-              %% basic_node_list_tests_for_config(UserConfig),
-              %% basic_node_list_tests_for_config(ClientConfig),
-              node_permissions_tests(UserConfig, WeakClientConfig)]
-     end}.
+              node_permissions_tests(UserConfig, WeakClientConfig)
+              %% I'm not sure why, but these tests are not working,
+              %% getting timeout errors and weird race condition
+              %% looking results. :(
+              %% basic_node_list_tests_for_config(UserConfig)
+              %% basic_node_list_tests_for_config(ClientConfig)
+             ]
+     end}}}.
 
 named_node_permissions(UserConfig, ClientConfig, WeakClientConfig) ->
     {UserNode, _UserNodeUrl} = create_node("clownco", UserConfig),
@@ -74,6 +78,22 @@ named_node_permissions(UserConfig, ClientConfig, WeakClientConfig) ->
       fun() ->
               NodePath = Path ++ ClientNode,
               ?assertEqual("403", code_for_request(delete, NodePath, WeakClientConfig))
+      end},
+
+     %% FIXME: probably should put these in their own block with
+     %% foreach or setup or something since we depend on creation and
+     %% after the deletion nobody else can use it.
+     {"admin user can update client created node",
+      fun() ->
+              NodePath = Path ++ ClientNode,
+              {_Name, SampleNode} = sample_node(ClientNode),
+              ?assertEqual("200", code_for_request(put, NodePath, SampleNode, UserConfig))
+      end},
+
+     {"admin user can delete client created node",
+      fun() ->
+              NodePath = Path ++ ClientNode,
+              ?assertEqual("200", code_for_request(delete, NodePath, UserConfig))
       end}
      %% TODO:
      %% Moar testing
