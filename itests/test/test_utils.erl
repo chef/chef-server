@@ -18,6 +18,7 @@ test_cleanup(_State) ->
     application:stop(emysql),
     application:stop(public_key),
     application:stop(ssl),
+    application:stop(ibrowse),
     case whereis(inet_gethost_native_sup) of
         P when is_pid(P) ->
             inet_gethost_native:terminate(shutdown, P);
