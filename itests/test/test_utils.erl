@@ -1,6 +1,7 @@
 -module(test_utils).
 
--export([test_cleanup/1]).
+-export([test_cleanup/1,
+         nuke_nodes_from_solr/0]).
 
 -include_lib("emysql/include/emysql.hrl").
 
@@ -23,3 +24,11 @@ test_cleanup(_State) ->
         _ ->
             ok
     end.
+
+nuke_nodes_from_solr() ->
+    error_logger:info_msg("nuking nodes from solr~n"),
+    Body = <<"<delete><query>X_CHEF_type_CHEF_X:node</query></delete>">>,
+    Got = ibrowse:send_req("http://localhost:8983/solr/update",
+                           [{"content-type", "application/xml"}],
+                           post,
+                           Body).

@@ -21,6 +21,7 @@ node_endpoint_test_() ->
              {ReqConfig, ClientConfig, WeakClientConfig}
      end,
      fun({_, _, _}) ->
+             test_utils:nuke_nodes_from_solr(),
              test_utils:test_cleanup(ignore)
      end,
      fun({UserConfig, ClientConfig, WeakClientConfig}) ->
