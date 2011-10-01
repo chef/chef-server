@@ -4,7 +4,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 node_endpoint_test_() ->
-    {timeout, 60, {inorder, {setup,
+    {timeout, 120, {inorder, {setup,
      fun() ->
              ok = chef_req:start_apps(),
              db_tool:connect(),
@@ -26,6 +26,8 @@ node_endpoint_test_() ->
      end,
      fun({UserConfig, ClientConfig, WeakClientConfig}) ->
              [
+              node_search_tests(UserConfig),
+              node_search_tests(ClientConfig),
               basic_env_node_list_tests(UserConfig),
               named_node_permissions(UserConfig, ClientConfig, WeakClientConfig),
               basic_named_node_ops(UserConfig),
@@ -106,7 +108,71 @@ named_node_permissions(UserConfig, ClientConfig, WeakClientConfig) ->
               %% clarify what perms a client should have on an admin created node and test them.
              ]
      end}.
+
+node_search_tests(ReqConfig) ->
+    %% This test verifies that created and updated nodes are
+    %% searchable and that the precendence rules for node attributes
+    %% are respected for indexing/search.
+    {timeout, 60, {"node search coherency",
+     fun() ->
+             %% create a node with a "test_tag" key in the default section.
+             NodeName = make_node_name("search-node-"),
+             Node1 = make_node(NodeName, <<"dev">>,
+                               [<<"recipe[apache2]">>, <<"role[web]">>],
+                               [{default, {[{<<"test_tag">>, <<"default">>}]}}]),
+             create_node("clownco", {NodeName, Node1}, ReqConfig),
+             test_utils:force_solr_commit(),
+             %% now verify that we can search by top-level attributes
+             %% as well as inflated role: and recipe:
+             Queries = ["name:" ++ binary_to_list(NodeName),
+                        "chef_environment:dev",
+                        "role:web",
+                        "recipe:apache2",
+                        "run_list:recipe\\[apache2\\]",
+                        "run_list:role\\[web\\]",
+                        "test_tag:default"],
+             [ assert_node_found_on_search(NodeName, Query, ReqConfig)
+               || Query <- Queries ],
+
+             %% now update the node with a value for test_tag set at
+             %% normal to see it take precedence over default value.
+             Json1 = ejson:decode(Node1),
+             Json2 = ej:set({<<"normal">>}, Json1, {[{<<"test_tag">>, <<"normal">>}]}),
+             Node2 = ejson:encode(Json2),
+             NodePath = "/organizations/clownco/nodes/" ++ binary_to_list(NodeName),
+             {ok, "200", _, _} = chef_req:request(put, NodePath, Node2, ReqConfig),
+
+             test_utils:force_solr_commit(),
+             assert_node_found_on_search(NodeName, "test_tag:normal", ReqConfig),
+             assert_node_not_found_on_search(NodeName, "test_tag:default", ReqConfig),
+
+             %% finally, update and set a value for test_tag in the
+             %% override section.
+             Json3 = ej:set({<<"override">>}, Json2, {[{<<"test_tag">>, <<"override">>}]}),
+             Node3 = ejson:encode(Json3),
+             {ok, "200", _, _} = chef_req:request(put, NodePath, Node3, ReqConfig),
+             test_utils:force_solr_commit(),
+             assert_node_found_on_search(NodeName, "test_tag:override", ReqConfig),
+             assert_node_not_found_on_search(NodeName, "test_tag:default", ReqConfig),
+             assert_node_not_found_on_search(NodeName, "test_tag:normal", ReqConfig)
+     end}}.
+
+assert_node_found_on_search(NodeName, Query, ReqConfig) ->
+    Path = search_path("clownco", "node", Query),
+    {ok, "200", _H, Body} = chef_req:request(get, Path, ReqConfig),
+    Json = ejson:decode(Body),
+    Rows = ej:get({"rows"}, Json),
+    ?assertEqual({Query, true},
+                 {Query, lists:any(fun(Row) -> NodeName =:= ej:get({"name"}, Row) end, Rows)}).
+
+assert_node_not_found_on_search(NodeName, Query, ReqConfig) ->
+    Path = search_path("clownco", "node", Query),
+    {ok, "200", _H, Body} = chef_req:request(get, Path, ReqConfig),
+    Json = ejson:decode(Body),
+    Rows = ej:get({"rows"}, Json),
+    ?assert(lists:all(fun(Row) -> NodeName =/= ej:get({"name"}, Row) end, Rows)).
     
+
 basic_named_node_ops(#req_config{name = Name}=ReqConfig) ->
     Label = " (" ++ Name ++ ")",
     Path = "/organizations/clownco/nodes/",
@@ -324,13 +390,15 @@ bin_to_hex(Bin) ->
     iolist_to_binary([io_lib:format("~2.16.0b", [X])
                       || X <- binary_to_list(Bin)]).
 
-create_node(Org, #req_config{api_root = Root}=ReqConfig) ->
+create_node(Org, ReqConfig) ->
     {AName, ANode} = sample_node(),
+    create_node(Org, {AName, ANode}, ReqConfig).
+
+create_node(Org, {AName, ANode}, #req_config{api_root = Root}=ReqConfig) ->
     Path = "/organizations/" ++ Org ++ "/nodes",
     {ok, "201", _, _} = chef_req:request(post, Path, ANode, ReqConfig),
     Url = list_to_binary(Root ++ Path ++ "/" ++ AName),
     {AName, Url}.
-    
 
 code_for_request(Method, Path, Config) ->
     code_for_request(Method, Path, [], Config).
@@ -338,4 +406,21 @@ code_for_request(Method, Path, Config) ->
 code_for_request(Method, Path, ReqBody, Config) ->
     {ok, Code, _Headers, _Body} = chef_req:request(Method, Path, ReqBody, Config),
     Code.
-    
+
+make_node(Name, EnvName, RunList, Attrs) ->
+    Node = {[
+             %% top-level attributes
+             {<<"name">>, Name},
+             {<<"chef_type">>, <<"node">>},
+             {<<"chef_environment">>, EnvName},
+             {<<"run_list">>, RunList},
+             %% grouped attrs
+             {<<"default">>, proplists:get_value(default, Attrs, {[]})},
+             {<<"normal">>, proplists:get_value(normal, Attrs, {[]})},
+             {<<"override">>, proplists:get_value(override, Attrs, {[]})},
+             {<<"automatic">>, proplists:get_value(automatic, Attrs, {[]})}
+            ]},
+    ejson:encode(Node).
+
+search_path(Org, Type, Query) ->
+    "/organizations/" ++ Org ++ "/search/" ++ Type ++ "?q=" ++ Query.
