@@ -2,6 +2,8 @@
 
 -export([request/3,
          request/4,
+         missing_header_request/5,
+         stale_request/4,
          make_config/3,
          clone_config/3,
 
@@ -9,7 +11,8 @@
          delete_client/3,
          remove_client_from_group/4,
 
-         start_apps/0]).
+         start_apps/0,
+         main/1]).
 
 -include("chef_req.hrl").
 -include_lib("eunit/include/eunit.hrl").
@@ -17,8 +20,8 @@
 -include_lib("chef_common/include/chef_rest_client.hrl").
 
 -define(gv(K, L), proplists:get_value(K, L)).
+-define(ibrowse_opts, [{ssl_options, []}, {response_format, binary}]).
 
--export([main/1]).
 
 main([]) ->
     Msg = "chef_req PATH\n\n"
@@ -46,8 +49,23 @@ request(Method, Path, Body,
         #req_config{api_root = ApiRoot, name = Name, private_key = Private}) ->
     {Url, Headers} = make_headers(method_to_bin(Method), ApiRoot, Path,
                                   Name, Private, Body),
-    ibrowse:send_req(Url, Headers, Method, Body,
-                     [{ssl_options, []}, {response_format, binary}]).
+    ibrowse:send_req(Url, Headers, Method, Body, ?ibrowse_opts).
+
+missing_header_request(Header, Method, Path, Body,
+                       #req_config{api_root = ApiRoot, name = Name, private_key = Private}) ->
+    {Url, Headers} = make_headers(method_to_bin(Method), ApiRoot, Path,
+                                  Name, Private, Body),
+    Headers1 = [ {K, V} || {K, V} <- Headers, K =/= Header ],
+    ibrowse:send_req(Url, Headers1, Method, Body, ?ibrowse_opts).
+
+stale_request(Method, Path, Body,
+              #req_config{api_root = ApiRoot, name = Name, private_key = Private}) ->
+    {Url, Headers} = make_headers(method_to_bin(Method), ApiRoot, Path,
+                                  Name, Private, Body),
+    Headers1 = lists:keyreplace("X-Ops-Timestamp", 1, Headers,
+                                {"X-Ops-Timestamp", "2011-06-21T19:06:35Z"}),
+    ibrowse:send_req(Url, Headers1, Method, Body, ?ibrowse_opts).
+
 
 make_config(ApiRoot, Name, {key, Key}) ->
     Private = chef_authn:extract_private_key(Key),

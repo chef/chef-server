@@ -42,8 +42,44 @@ bad_input_search_tests(#req_config{name = Name}=ReqConfig) ->
               ?assertEqual("400", Code),
               Expect = <<"{\"error\":[\"invalid 'start' value: 'nooo'\"]}">>,
               ?assertEqual(Expect, Body)
-      end}
+      end},
 
+     {"bad rows" ++ Label,
+      fun() ->
+              Path = search_path("clownco", "node", "a:b&rows=-20"),
+              {ok, Code, _H, Body} = chef_req:request(get, Path, ReqConfig),
+              ?assertEqual("400", Code),
+              Expect = <<"{\"error\":[\"invalid 'rows' value: '-20'\"]}">>,
+              ?assertEqual(Expect, Body)
+      end},
+
+     {"missing header" ++ Label,
+      %% FIXME: add tests to validate error code and message for all
+      %% required authn headers
+      fun() ->
+              Path = search_path("clownco", "node", "a:b"),
+              {ok, Code, _H, Body} = chef_req:missing_header_request("X-Ops-Timestamp",
+                                                                     get, Path, [],
+                                                                     ReqConfig),
+              ?assertEqual("400", Code),
+              ErrorMsg = list_to_binary("{\"error\":[\"missing required authentication header(s) "
+                                        "'X-Ops-Timestamp'\"]}"),
+              ?assertEqual(ErrorMsg, Body)
+      end},
+
+     {"stale timestamp request" ++ Label,
+      %% FIXME: add tests to validate error code and message for all
+      %% required authn headers
+      fun() ->
+              Path = search_path("clownco", "node", "a:b"),
+              {ok, Code, _H, Body} = chef_req:stale_request(get, Path, [],
+                                                            ReqConfig),
+              ?assertEqual("400", Code),
+              ErrorMsg = iolist_to_binary(["{\"error\":[\"Failed to authenticate as ",
+                                           Name, ".",
+                                           " Synchronize the clock on your host.\"]}"]),
+              ?assertEqual(ErrorMsg, Body)
+      end}
     ].
 
 
