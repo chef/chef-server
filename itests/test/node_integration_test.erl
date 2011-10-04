@@ -30,8 +30,9 @@ node_endpoint_test_() ->
               node_search_tests(ClientConfig),
               basic_env_node_list_tests(UserConfig),
               named_node_permissions(UserConfig, ClientConfig, WeakClientConfig),
-              basic_named_node_ops(UserConfig),
               basic_named_node_ops(ClientConfig),
+              basic_named_node_ops(UserConfig),
+              updated_at_and_last_updated_by(ClientConfig, UserConfig),
               basic_node_create_tests_for_config(UserConfig),
               basic_node_create_tests_for_config(ClientConfig),
               node_permissions_tests(UserConfig, WeakClientConfig),
@@ -173,6 +174,47 @@ assert_node_not_found_on_search(NodeName, Query, ReqConfig) ->
     ?assert(lists:all(fun(Row) -> NodeName =/= ej:get({"name"}, Row) end, Rows)).
     
 
+updated_at_and_last_updated_by(ClientConfig, UserConfig) ->
+    {setup,
+     fun() ->
+             {AName, _AUrl} = create_node("clownco", ClientConfig),
+             %% Pause here to ensure that any updates we do happen in
+             %% the next second which will allow us to validate that
+             %% updated_at is getting written correctly.
+             Now = calendar:now_to_universal_time(os:timestamp()),
+             timer:sleep(1000),
+             {AName, Now}
+     end,
+     fun(_) -> cleanup end,
+     fun({AName, Now}) ->
+             [
+              {"updated_at and last_updated_by set on node update",
+               fun() ->
+                       %% GET the node
+                       NodePath = "/organizations/clownco/nodes/" ++ AName,
+                       {ok, "200", _H1, Body1} = chef_req:request(get, NodePath, ClientConfig),
+                       TheNode = ejson:decode(Body1),
+                       %% fetch the actor ID that last updated the node
+                       Actor0 = proplists:get_value(last_updated_by,
+                                                    db_tool:metadata_for_node(AName)),
+
+                       %% modify and PUT it back, use UserConfig so that we can verify that
+                       %% last_updated_by works as expected.
+                       NewNode = ej:set({<<"normal">>}, TheNode, {[{<<"volume">>, 11}]}),
+                       NewNodeJson = ejson:encode(NewNode),
+                       {ok, "200", _H2, _Body2} = chef_req:request(put, NodePath,
+                                                                   NewNodeJson, UserConfig),
+
+                       %% check that updated_at was updated
+                       NodeMeta = db_tool:metadata_for_node(AName),
+                       ?assertMatch({{_,_,_},{_,_,_}}, proplists:get_value(updated_at, NodeMeta)),
+                       ?assert(Now < proplists:get_value(updated_at, NodeMeta)),
+                       ?assert(Actor0 =/= proplists:get_value(last_updated_by, NodeMeta))
+               end}
+             ]
+     end}.
+
+    
 basic_named_node_ops(#req_config{name = Name}=ReqConfig) ->
     Label = " (" ++ Name ++ ")",
     Path = "/organizations/clownco/nodes/",
@@ -197,6 +239,7 @@ basic_named_node_ops(#req_config{name = Name}=ReqConfig) ->
 
               {"Fetch, modify, verify, and delete a node" ++ Label,
                fun() ->
+
                        %% GET the node
                        NodePath = Path ++ AName,
                        {ok, GetCode, _H1, Body1} = chef_req:request(get, NodePath, ReqConfig),
@@ -338,11 +381,19 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
     [
      {"create a new node" ++ Label,
       fun() ->
+              Now = calendar:now_to_universal_time(os:timestamp()),
               {ok, Code, _H, Body} = chef_req:request(post, Path, NodeJson, ReqConfig),
               ?assertEqual("201", Code),
               NodeUrl = <<"http://localhost/organizations/clownco/nodes/", NodeName/binary>>,
               Expect = ejson:encode({[{<<"uri">>, NodeUrl}]}),
-              ?assertEqual(Expect, Body)
+              ?assertEqual(Expect, Body),
+
+              NodeMeta = db_tool:metadata_for_node(NodeName),
+              ?assertMatch({{_,_,_},{_,_,_}}, proplists:get_value(created_at, NodeMeta)),
+              ?assertMatch({{_,_,_},{_,_,_}}, proplists:get_value(updated_at, NodeMeta)),
+              ?assert(Now < proplists:get_value(created_at, NodeMeta)),
+              ?assert(Now < proplists:get_value(updated_at, NodeMeta))
+              
       end},
 
      {"conflict when node name already exists" ++ Label,
