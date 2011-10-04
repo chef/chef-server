@@ -3,7 +3,7 @@
 -include("../src/chef_req.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
-search_as_client_test_() ->
+search_endpoint_test_() ->
     {setup,
      fun() ->
              ok = chef_req:start_apps(),
@@ -12,116 +12,76 @@ search_as_client_test_() ->
                                               "clownco-org-admin", KeyPath),
              chef_req:delete_client("clownco", "searchclient01", ReqConfig),
              ClientConfig = chef_req:make_client("clownco", "searchclient01", ReqConfig),
-             ClientConfig
+             {ClientConfig, ReqConfig}
      end,
-     fun(#req_config{name = Name}=ReqConfig) ->
+     fun(_) ->
              test_utils:test_cleanup(ignore)
      end,
-     fun(ReqConfig) ->
-             [
-              {"empty node search as a client",
-               fun() ->
-                       Path = search_path("clownco", "node",
-                                          "no_field:not_exist"),
-                       {ok, "200", _H, Body} = chef_req:request(get, Path,
-                                                                ReqConfig),
-                       Json = ejson:decode(Body),
-                       ?assertEqual(0, ej:get({"total"}, Json)),
-                       ?assertEqual([], ej:get({"rows"}, Json)),
-                       ?assertEqual(0, ej:get({"start"}, Json))
-               end},
-
-              {"data bag does not exist search as a client",
-               fun() ->
-                       Path = search_path("clownco", "no_such_bag", "*:*"),
-                       {ok, "404", _H, Body} = chef_req:request(get, Path,
-                                                                ReqConfig),
-                       Expect = <<"{\"error\":[\"I don't know "
-                                  "how to search for no_such_bag "
-                                  "data objects.\"]}">>,
-                       ?assertEqual(Expect, Body)
-               end},
-
-              {"bad key client",
-               fun() ->
-                       Name = ReqConfig#req_config.name,
-                       KeyPath = "../test/akey.pem",
-                       Config = chef_req:make_config("http://localhost",
-                                                     Name, KeyPath),
-                       Path = search_path("clownco", "node",
-                                          "no_field:not_exist"),
-                       {ok, "401", _H, Body} = chef_req:request(get, Path, Config),
-                       ?assertEqual(<<"{\"error\":[\"'searchclient01' not associated with "
-                                      "organization 'clownco'\"]}">>, Body)
-               end}
-             ]
+     fun({ClientConfig, UserConfig}) ->
+             [search_tests(ClientConfig),
+              search_tests(UserConfig),
+              bad_input_search_tests(ClientConfig)]
      end}.
 
-search_as_user_test_() ->
-    {setup,
-     fun() ->
-             ok = chef_req:start_apps(),
-             KeyPath = "/tmp/opscode-platform-test/clownco-org-admin.pem",
-             chef_req:make_config("http://localhost",
-                                  "clownco-org-admin", KeyPath)
-     end,
-     fun(_X) ->
-             test_utils:test_cleanup(ignore)
-     end,
-     fun(ReqConfig) ->
-             [
-              {"empty node search as clownco-org-admin",
-                fun() ->
-                        Path = search_path("clownco", "node",
-                                           "no_field:not_exist"),
-                        {ok, "200", _H, Body} = chef_req:request(get, Path,
-                                                                 ReqConfig),
-                        Json = ejson:decode(Body),
-                        ?assertEqual(0, ej:get({"total"}, Json)),
-                        ?assertEqual([], ej:get({"rows"}, Json)),
-                        ?assertEqual(0, ej:get({"start"}, Json))
-                end},
+bad_input_search_tests(#req_config{name = Name}=ReqConfig) ->
+    Label = " (" ++ Name ++ ")",
+    [
+     {"bad query" ++ Label,
+      fun() ->
+              Path = search_path("clownco", "node", "a[b"),
+              {ok, Code, _H, Body} = chef_req:request(get, Path, ReqConfig),
+              ?assertEqual("400", Code),
+              Expect = <<"{\"error\":[\"invalid search query: 'a[b'\"]}">>,
+              ?assertEqual(Expect, Body)
+      end},
 
-               {"data bag does not exist search as clownco-org-admin",
-                fun() ->
-                        Path = search_path("clownco", "no_such_bag", "*:*"),
-                        {ok, "404", _H, Body} = chef_req:request(get, Path,
-                                                                 ReqConfig),
-                        Expect = <<"{\"error\":[\"I don't know "
-                                   "how to search for no_such_bag "
-                                   "data objects.\"]}">>,
-                        ?assertEqual(Expect, Body)
-                end},
+     {"bad start" ++ Label,
+      fun() ->
+              Path = search_path("clownco", "node", "a:b&start=nooo"),
+              {ok, Code, _H, Body} = chef_req:request(get, Path, ReqConfig),
+              ?assertEqual("400", Code),
+              Expect = <<"{\"error\":[\"invalid 'start' value: 'nooo'\"]}">>,
+              ?assertEqual(Expect, Body)
+      end}
 
-               {"unknown user or client",
-                fun() ->
-                        KeyPath = "../test/akey.pem",
-                        Config = chef_req:make_config("http://localhost",
-                                                      "no-such-user", KeyPath),
-                        Path = search_path("clownco", "node",
-                                           "no_field:not_exist"),
-                        {ok, "401", _H, Body} = chef_req:request(get, Path, Config),
-                        ?assertEqual(<<"{\"error\":[\"Failed to authenticate as "
-                                       "'no-such-user'. Ensure that your node_name "
-                                       "and client key are correct.\"]}">>,
-                                     Body)
-                end},
+    ].
 
-               {"bad key",
-                fun() ->
-                        KeyPath = "../test/akey.pem",
-                        Config = chef_req:make_config("http://localhost",
-                                                      "clownco-org-admin", KeyPath),
-                        Path = search_path("clownco", "node",
-                                           "no_field:not_exist"),
-                        {ok, "401", _H, Body} = chef_req:request(get, Path, Config),
-                        ?assertEqual(<<"{\"error\":[\"'clownco-org-admin' not "
-                                       "associated with organization 'clownco'\"]}">>,
-                                     Body)
-                end}
-             ]
-     end
-    }.
+
+search_tests(#req_config{name = Name}=ReqConfig) ->
+    Label = " (" ++ Name ++ ")",
+    [
+     {"empty node search" ++ Label,
+      fun() ->
+              Path = search_path("clownco", "node", "no_field:not_exist"),
+              {ok, "200", _H, Body} = chef_req:request(get, Path, ReqConfig),
+              Json = ejson:decode(Body),
+              ?assertEqual(0, ej:get({"total"}, Json)),
+              ?assertEqual([], ej:get({"rows"}, Json)),
+              ?assertEqual(0, ej:get({"start"}, Json))
+      end},
+
+     {"data bag does not exist search" ++ Label,
+      fun() ->
+              Path = search_path("clownco", "no_such_bag", "*:*"),
+              {ok, "404", _H, Body} = chef_req:request(get, Path, ReqConfig),
+              Expect = <<"{\"error\":[\"I don't know "
+                         "how to search for no_such_bag "
+                         "data objects.\"]}">>,
+              ?assertEqual(Expect, Body)
+      end},
+
+     {"bad key" ++ Label,
+      fun() ->
+              KeyPath = "../test/akey.pem",
+              Config = chef_req:make_config("http://localhost", Name, KeyPath),
+              Path = search_path("clownco", "node", "no_field:not_exist"),
+              {ok, "401", _H, Body} = chef_req:request(get, Path, Config),
+              Expect = iolist_to_binary(["{\"error\":[\"'",
+                                         Name, "' not associated with "
+                                         "organization 'clownco'\"]}"]),
+              ?assertEqual(Expect, Body)
+      end}
+    ].
 
 search_path(Org, Type, Query) ->
     "/organizations/" ++ Org ++ "/search/" ++ Type
