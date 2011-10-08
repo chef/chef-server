@@ -11,11 +11,31 @@
          load_all_nodes/1,
          open_table/3,
          init_dets_tables/1,
-         shutdown/0
+         shutdown/0,
+         fetch_node_cache/4,
+         setup/0
         ]).
 
--define(ORG_ESTIMATE, 10000).
--define(NODE_ESTIMATE, 25000).
+-include("node_mover.hrl").
+
+setup() ->
+    ibrowse:start(),
+    S = node_mover:connect("localhost", 8484),
+    init_dets_tables(S),
+    Config = [{org_name, <<"userprimary">>}, {org_id, <<"60d3ed4da757402ea5dd6da9131baeef">>}, {batch_size, 3}, {chef_otto, S}],
+    {S, Config}.
+    
+%% {ok, Pid} = node_mover_worker:start_link(Config).
+%% node_mover_worker:migrate(Pid).
+
+%% setup() ->
+%%     application:set_env(chef_common, mysql_host, "localhost"),
+%%     application:set_env(chef_common, mysql_port, 3306),
+%%     application:set_env(chef_common, mysql_user, "dev"),
+%%     application:set_env(chef_common, mysql_pass, "opensesame"),
+%%     application:set_env(chef_common, mysql_db_name, "opscode_chef"),
+%%     application:set_env(chef_common, mysql_pool_size, 5),
+%%     application:start(
 
 connect(Host, Port) ->
     chef_otto:connect(Host, Port).
@@ -58,8 +78,6 @@ load_all_nodes(S) ->
                        ok = load_nodes_for_org(S, OrgName, OrgId),
                       {ok, Acc + 1}
               end, {ok, 0}, all_orgs).
-
--record(node_cache, {name, id, authz_id, requestor_id}).
 
 load_nodes_for_org(S, OrgName, OrgId) ->
     NodeList = chef_otto:fetch_nodes_with_ids(S, OrgId),
