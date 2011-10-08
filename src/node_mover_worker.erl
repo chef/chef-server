@@ -138,7 +138,8 @@ write_nodes_to_sql(OrgId, [{#node_cache{}=MetaData, NodeData} | Rest]) ->
     %% emysql backed node creation.
     io:format("migrating: ~p ~n", [Node]),
     file:write_file(<<OrgId/binary, "_nodes_complete.txt">>, 
-                    [Name, <<"\t">>, OrigId, <<"\t">>, Node#chef_node.id, "\n"],
+                    iolist_to_binary([Name, <<"\t">>, OrigId, <<"\t">>,
+                                      Node#chef_node.id, "\n"]),
                     [append]),
     write_nodes_to_sql(OrgId, Rest);
 write_nodes_to_sql(OrgId, [{error, _NodeData}|Rest]) ->
