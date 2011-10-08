@@ -42,8 +42,6 @@ start_link(Config) ->
 migrate(Pid) ->
     gen_fsm:send_event(Pid, go).
 
-%% S = node_mover:connect("localhost", 8484).
-%% Config = [{org_name, <<"userprimary">>}, {org_id, <<"60d3ed4da757402ea5dd6da9131baeef">>}, {batch_size, 3}, {chef_otto, S}].
 %% {S, Config} = node_mover:setup().
 %% {ok, Pid} = node_mover_worker:start_link(Config).
 %% node_mover_worker:migrate(Pid).
@@ -98,7 +96,8 @@ migrate_nodes(_Event, #state{node_list = {NodeBatch, NodeList},
     NodeDocs = chef_otto:bulk_get(S, OrgDb, NodeCouchIds),
     NodeMeta = [ fetch_node_meta_data(S, OrgName, OrgId, Name, Id)
                  || {Name, Id} <- NodeBatch ],
-    write_nodes_to_sql(OrgId, lists:zip(NodeMeta, NodeDocs)),
+    Ctx = chef_db:make_context(<<"my-req-id-for-mover">>, S),
+    write_nodes_to_sql(Ctx, OrgId, lists:zip(NodeMeta, NodeDocs)),
     {next_state, migrate_nodes,
      State#state{node_list = safe_split(BatchSize, NodeList)}, 0}.
 
@@ -125,7 +124,7 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
 
-write_nodes_to_sql(OrgId, [{#node_cache{}=MetaData, NodeData} | Rest]) ->
+write_nodes_to_sql(S, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest]) ->
     #node_cache{name = Name, authz_id = AuthzId,
                 id = OrigId,
                 requestor_id = RequestorId} = MetaData,
@@ -136,18 +135,25 @@ write_nodes_to_sql(OrgId, [{#node_cache{}=MetaData, NodeData} | Rest]) ->
     %% this is where we'd call chef_db:create_node(S, Node) shortcut
     %% will be to pass 'ignore' for first arg since not needed for
     %% emysql backed node creation.
-    io:format("migrating: ~p ~n", [Node]),
-    file:write_file(<<OrgId/binary, "_nodes_complete.txt">>, 
-                    iolist_to_binary([Name, <<"\t">>, OrigId, <<"\t">>,
-                                      Node#chef_node.id, "\n"]),
-                    [append]),
-    write_nodes_to_sql(OrgId, Rest);
-write_nodes_to_sql(OrgId, [{error, _NodeData}|Rest]) ->
+    case chef_db:create_node(S, Node, RequestorId) of
+        ok ->
+            io:format("migrated: ~p~n", [Name]),
+            file:write_file(<<OrgId/binary, "_nodes_complete.txt">>, 
+                            iolist_to_binary([Name, <<"\t">>, OrigId, <<"\t">>,
+                                              Node#chef_node.id, "\n"]),
+                            [append]);
+        {conflict, _} ->
+            io:format("skipping: ~p (already exists)~n", [Name]);
+        Error ->
+            error_logger:error_report({node_create_failed, {Node, Error}})
+    end,
+    write_nodes_to_sql(S, OrgId, Rest);
+write_nodes_to_sql(S, OrgId, [{error, _NodeData}|Rest]) ->
     %% FIXME: how should we track errors of this sort if they occur?
     %% This is a case where we found node json, but no matching mixlib
     %% or authz data.
-    write_nodes_to_sql(OrgId, Rest);
-write_nodes_to_sql(_, []) ->
+    write_nodes_to_sql(S, OrgId, Rest);
+write_nodes_to_sql(_, _, []) ->
     ok.
 
 fetch_node_meta_data(S, OrgName, OrgId, Name, Id) ->
