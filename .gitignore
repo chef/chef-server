@@ -3,3 +3,4 @@ deps/*
 .eunit/*
 doc/*
 erl_crash.dump
+rel/mover
