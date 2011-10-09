@@ -5,6 +5,32 @@
 
 -module(node_mover).
 
+%% TODO:
+%% Consider turning this module into gen_fsm behavior with the following states:
+%%
+%% load_orgs
+%%   loads/creates org name/id table
+%% load_nodes_for_orgs
+%%   loads/creates node meta data cache for all orgs
+%% ready_to_migrate_orgs
+%%   waits to be told how many batches of orgs to migrate
+%% start_migration_of_orgs
+%%   mark orgs in org dets table as in-progress
+%%   send POST to darklaunch to mark next batch of orgs read-only
+%%   spawn a node_mover_worker for each org
+%% waiting_for_orgs
+%%   waits for node_mover_worker processes to complete.  Maintains counter.  Transitions to
+%%   next state when all complete.  Needs to also be able to track crashed workers.
+%% orgs_complete
+%%   mark orgs in dets table as complete or failed
+%%   POST to get nginx to enable migrated orgs
+%%   goto ready_to_migrate_orgs
+%%
+%% NOTES:
+%%
+%% - should the org table be moved entirely to the db?  Then we get the persistence and
+%%   would have a single place to track org migration state.
+
 -export([connect/2,
          load_orgs/1,
          load_nodes_for_org/3,
@@ -24,7 +50,7 @@ setup() ->
     init_dets_tables(S),
     Config = [{org_name, <<"userprimary">>}, {org_id, <<"60d3ed4da757402ea5dd6da9131baeef">>}, {batch_size, 3}, {chef_otto, S}],
     {S, Config}.
-    
+
 %% {ok, Pid} = node_mover_worker:start_link(Config).
 %% node_mover_worker:migrate(Pid).
 
@@ -74,9 +100,17 @@ load_orgs(S) ->
 
 load_all_nodes(S) ->
     %% assumes load_orgs has been called
+    GuidCheck = make_guid_checker(),
     dets:foldl(fun({OrgName, OrgId}, {ok, Acc}) ->
-                       ok = load_nodes_for_org(S, OrgName, OrgId),
-                      {ok, Acc + 1}
+                       case GuidCheck(OrgId) of
+                           ok ->
+                               ok = load_nodes_for_org(S, OrgName, OrgId),
+                               {ok, Acc + 1};
+                           error ->
+                               error_logger:error_msg("skipping org '~s' with bad id '~s'~n",
+                                                      [OrgName, OrgId]),
+                               {ok, Acc}
+                       end
               end, {ok, 0}, all_orgs).
 
 load_nodes_for_org(S, OrgName, OrgId) ->
@@ -104,4 +138,13 @@ fetch_node_cache(S, OrgId, NodeName, NodeId) ->
                         requestor_id = RequestorId};
         Error ->
             {error, Error}
+    end.
+
+make_guid_checker() ->
+    {ok, Regex} = re:compile("[a-f0-9]{32}"),
+    fun(Id) ->
+            case re:run(Id, Regex) of
+                nomatch -> error;
+                {match, _} -> ok
+            end
     end.

@@ -94,7 +94,8 @@ migrate_nodes(_Event, #state{node_list = {NodeBatch, NodeList},
     NodeCouchIds = [ Id || {_, Id} <- NodeBatch ],
     OrgDb = chef_otto:dbname(OrgId),
     NodeDocs = chef_otto:bulk_get(S, OrgDb, NodeCouchIds),
-    NodeMeta = [ fetch_node_meta_data(S, OrgName, OrgId, Name, Id)
+    NodeMeta = [ fetch_node_meta_data(S, OrgName, OrgId, Name, Id,
+                                      make_node_cache_validator())
                  || {Name, Id} <- NodeBatch ],
     Ctx = chef_db:make_context(<<"my-req-id-for-mover">>, S),
     write_nodes_to_sql(Ctx, OrgId, lists:zip(NodeMeta, NodeDocs)),
@@ -128,8 +129,10 @@ write_nodes_to_sql(S, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest]) ->
     #node_cache{name = Name, authz_id = AuthzId,
                 id = OrigId,
                 requestor_id = RequestorId} = MetaData,
+    %% NodeData comes from chef_otto:bulk_get which for some reason is unwrapping the
+    %% top-level tuple of the ejson format.  So we restore it here.
     Node = chef_otto:convert_couch_json_to_node_record(OrgId, AuthzId, RequestorId,
-                                                       NodeData),
+                                                       {NodeData}),
     %% validate name match
     Name = ej:get({<<"name">>}, NodeData),
     %% this is where we'd call chef_db:create_node(S, Node) shortcut
@@ -138,6 +141,7 @@ write_nodes_to_sql(S, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest]) ->
     case chef_db:create_node(S, Node, RequestorId) of
         ok ->
             io:format("migrated: ~p~n", [Name]),
+            ok = send_node_to_solr(Node, NodeData),
             file:write_file(<<OrgId/binary, "_nodes_complete.txt">>, 
                             iolist_to_binary([Name, <<"\t">>, OrigId, <<"\t">>,
                                               Node#chef_node.id, "\n"]),
@@ -156,8 +160,8 @@ write_nodes_to_sql(S, OrgId, [{error, _NodeData}|Rest]) ->
 write_nodes_to_sql(_, _, []) ->
     ok.
 
-fetch_node_meta_data(S, OrgName, OrgId, Name, Id) ->
-    case dets:lookup(all_nodes, {OrgName, Name}) of
+fetch_node_meta_data(S, OrgName, OrgId, Name, Id, Validator) ->
+    Ans = case dets:lookup(all_nodes, {OrgName, Name}) of
         [{{OrgName, Name}, MetaData}] ->
             MetaData;
         _ ->
@@ -170,6 +174,23 @@ fetch_node_meta_data(S, OrgName, OrgId, Name, Id) ->
                                                  Why}),
                     error
             end
+    end,
+    Validator(Ans).
+
+send_node_to_solr(#chef_node{id = Id, org_id = OrgId}, NodeJson) ->
+    ok = chef_index_queue:set(node, Id,
+                              chef_otto:dbname(OrgId),
+                              chef_node:ejson_for_indexing(NodeJson)),
+    ok.
+
+make_node_cache_validator() ->
+    {ok, Regex} = re:compile("[a-f0-9]{32}"),
+    fun(error) -> error;
+       (#node_cache{authz_id = AuthzId, requestor_id = RequestorId}=Input) ->
+               case {re:run(AuthzId, Regex), re:run(RequestorId, Regex)} of
+                   {{match, _}, {match, _}} -> Input;
+                   _ -> error
+               end
     end.
 
 safe_split(N, L) ->
