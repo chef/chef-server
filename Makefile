@@ -1,5 +1,8 @@
 REBAR=rebar
-DEPS = deps/ibrowse deps/chef_common
+DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
+       deps/darklaunch deps/emysql deps/meck deps/neotoma deps/webmachine \
+       deps/automeck deps/gen_bunny deps/chef_common
+
 
 all: compile eunit
 
@@ -24,20 +27,18 @@ test: eunit
 
 munge_apps:
 	@mkdir -p rel/apps/mover
-	@ln -sf `pwd`/ebin rel/apps/mover
-	@ln -sf `pwd`/priv rel/apps/mover
-	@cp rebar.config rel
-	@echo '{deps_dir, ["../deps"]}.' >> rel/rebar.config
+	@cp -fR src rel/apps/mover/src
+	@cp -fR ebin rel/apps/mover/ebin
 
 rel: compile munge_apps
-	@cd rel;$(REBAR) generate
-	@rm -rf rel/apps rel/rebar.config
 	@echo '   \ \  / /      / __ \    ) )  ( (   / ___/  (   __ \   '
 	@echo '   () \/ ()     / /  \ \  ( (    ) ) ( (__     ) (__) )  '
 	@echo '   / _  _ \    ( ()  () )  \ \  / /   ) __)   (    __/   '
 	@echo '  / / \/ \ \   ( ()  () )   \ \/ /   ( (       ) \ \  _  '
 	@echo ' /_/      \_\   \ \__/ /     \  /     \ \___  ( ( \ \_)) '
 	@echo '(/          \)   \____/       \/       \____\  )_) \__/  '
+	@cd rel;$(REBAR) generate
+	@rm -rf rel/apps
 
 relclean:
 	@rm -rf rel/mover

@@ -2,5 +2,6 @@ ebin/*
 deps/*
 .eunit/*
 doc/*
-erl_crash.dump
+*/erl_crash.dump
 rel/mover
+rel/apps

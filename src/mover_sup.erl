@@ -20,5 +20,6 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-    Children = [?CHILD(node_mover_sup, [], infinity)],
+    Children = [?CHILD(node_mover_sup, [], infinity),
+                ?CHILD(darklaunch, [], 5000)],
     {ok, {{one_for_one, 10, 10}, Children}}.
