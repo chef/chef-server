@@ -468,6 +468,22 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
               InvalidJson = <<"{not:json}">>,
               {ok, Code, _H, _Body} = chef_req:request(post, Path, InvalidJson, ReqConfig),
               ?assertEqual("400", Code)
+      end},
+     {"POST of a bad name is a 500" ++ Label,
+      fun() ->
+	      Node = ejson:decode(NodeJson),
+              NewNode = ej:set({<<"name">>}, Node, <<" bad%#@Q#*name ">>),
+	      NewNodeJson = ejson:encode(NewNode),
+              {ok, Code, _H, _Body} = chef_req:request(post, Path, NewNodeJson, ReqConfig),
+              ?assertEqual("500", Code)
+      end},
+     {"POST of a bad environment is a 500" ++ Label,
+      fun() ->
+	      Node = ejson:decode(NodeJson),
+	      NewNode = ej:set({<<"chef_environment">>}, Node, <<" bad%#@Q#*name ">>),
+	      NewNodeJson = ejson:encode(NewNode),
+	      {ok, Code, _H, _Body} = chef_req:request(post, Path, NewNodeJson, ReqConfig),
+              ?assertEqual("500", Code)
       end}
     ].
 
