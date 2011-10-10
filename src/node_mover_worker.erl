@@ -141,7 +141,7 @@ write_nodes_to_sql(S, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest]) ->
     case chef_db:create_node(S, Node, RequestorId) of
         ok ->
             io:format("migrated: ~p~n", [Name]),
-            ok = send_node_to_solr(Node, NodeData),
+            ok = send_node_to_solr(Node, {NodeData}),
             file:write_file(<<OrgId/binary, "_nodes_complete.txt">>, 
                             iolist_to_binary([Name, <<"\t">>, OrigId, <<"\t">>,
                                               Node#chef_node.id, "\n"]),
