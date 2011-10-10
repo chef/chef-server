@@ -32,6 +32,7 @@ node_endpoint_test_() ->
               named_node_permissions(UserConfig, ClientConfig, WeakClientConfig),
               basic_named_node_ops(ClientConfig),
               basic_named_node_ops(UserConfig),
+	      invalid_named_node_ops(ClientConfig),
               updated_at_and_last_updated_by(ClientConfig, UserConfig),
               basic_node_create_tests_for_config(UserConfig),
               basic_node_create_tests_for_config(ClientConfig),
@@ -272,6 +273,55 @@ basic_named_node_ops(#req_config{name = Name}=ReqConfig) ->
                end}
              ]
      end}.
+
+   
+invalid_named_node_ops(#req_config{name = Name}=ReqConfig) ->
+    Label = " (" ++ Name ++ ")",
+    Path = "/organizations/clownco/nodes/",
+    {setup,
+     fun() ->
+             {AName, _AUrl} = create_node("clownco", ReqConfig),
+             AName
+     end,
+     fun(_) -> cleanup end,
+     fun(AName) ->
+             [
+              {"Fetch, modify a node with a bad name" ++ Label,
+               fun() ->
+
+                       %% GET the node
+                       NodePath = Path ++ AName,
+                       {ok, GetCode, _H1, Body1} = chef_req:request(get, NodePath, ReqConfig),
+                       ?assertEqual("200", GetCode),
+                       TheNode = ejson:decode(Body1),
+                       ?assertEqual(AName, ej:get({<<"name">>}, TheNode)),
+
+                       %% modify and PUT it back
+                       NewNode = ej:set({<<"name">>}, TheNode, <<" bad%#@Q#*name ">>),
+                       NewNodeJson = ejson:encode(NewNode),
+                       {ok, PutCode, _H2, _Body2} = chef_req:request(put, NodePath,
+                                                                    NewNodeJson, ReqConfig),
+                       ?assertEqual("500", PutCode)
+               end},
+              {"Fetch, modify a node with a bad env" ++ Label,
+               fun() ->
+
+                       %% GET the node
+                       NodePath = Path ++ AName,
+                       {ok, GetCode, _H1, Body1} = chef_req:request(get, NodePath, ReqConfig),
+                       ?assertEqual("200", GetCode),
+                       TheNode = ejson:decode(Body1),
+
+                       %% modify and PUT it back
+                       NewNode = ej:set({<<"chef_environment">>}, TheNode, <<" bad%#@Q#*name ">>),
+                       NewNodeJson = ejson:encode(NewNode),
+                       {ok, PutCode, _H2, _Body2} = chef_req:request(put, NodePath,
+                                                                    NewNodeJson, ReqConfig),
+                       ?assertEqual("500", PutCode)
+               end}
+             ]
+     end}.
+
 
 basic_node_list_tests_for_config(#req_config{name = Name}=ReqConfig) ->
     Label = " (" ++ Name ++ ")",
