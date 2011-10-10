@@ -27,28 +27,3 @@ start(_StartType, _StartArgs) ->
 
 stop(_State) ->
     ok.
-
-%% %% Internal functions
-%% insure_deps() ->
-%%     case application:load(mover) of
-%%         ok ->
-%%             {ok, Deps} = application:get_key(mover, applications),
-%%             insure_deps(Deps);
-%%         Error ->
-%%             Error
-%%     end.
-
-%% %% Don't start chef_common to avoid starting node indexer
-%% insure_deps([]) ->
-%%     ok;
-%% insure_deps([H|T]) when H =:= chef_common->
-%%     insure_deps(T);
-%% insure_deps([H|T]) ->
-%%     case application:start(H) of
-%%         ok ->
-%%             insure_deps(T);
-%%         {error, {already_started, H}} ->
-%%             insure_deps(T);
-%%         Error ->
-%%             Error
-%%     end.
