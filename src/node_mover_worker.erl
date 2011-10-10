@@ -14,16 +14,18 @@
 -export([start_link/1,
          migrate/1,
          init/1,
-         mark_migration_start/2,
-         verify_read_only/2,
-         get_node_list/2,
-         migrate_nodes/2,
-         mark_migration_end/2,
          handle_event/3,
          handle_sync_event/4,
          handle_info/3,
          terminate/3,
          code_change/4]).
+
+%% States
+-export([mark_migration_start/2,
+         verify_read_only/2,
+         get_node_list/2,
+         migrate_nodes/2,
+         mark_migration_end/2]).
 
 -include("node_mover.hrl").
 -include_lib("chef_common/include/chef_sql.hrl").
@@ -56,17 +58,17 @@ init(Config) ->
                                       batch_size = BatchSize,
                                       chef_otto = Otto}}.
 
-mark_migration_start(_Event, #state{org_name = OrgName}=State) ->
+mark_migration_start(go, #state{org_name = OrgName}=State) ->
     error_logger:info_msg("Starting migration of ~s~n", [OrgName]),
     {next_state, verify_read_only, State, 0}.
 
-verify_read_only(_Event, #state{org_name = OrgName}=State) ->
+verify_read_only(timeout, #state{org_name = OrgName}=State) ->
     error_logger:info_msg("Verifying ~s is in READ-ONLY state~n", [OrgName]),
     %% if in read-only, proceed to next state, otherwise sleep and
     %% next state is self.
     {next_state, get_node_list, State, 0}.
 
-get_node_list(_Event, #state{org_name = OrgName, org_id = OrgId,
+get_node_list(timeout, #state{org_name = OrgName, org_id = OrgId,
                              batch_size = BatchSize,
                              chef_otto = S}=State) ->
     error_logger:info_msg("Migrating nodes for ~s~n", [OrgName]),
@@ -82,9 +84,9 @@ get_node_list(_Event, #state{org_name = OrgName, org_id = OrgId,
     {next_state, migrate_nodes,
      State#state{node_list = safe_split(BatchSize, NodeList)}, 0}.
     
-migrate_nodes(_Event, #state{node_list = {[], []}}=State) ->
+migrate_nodes(timeout, #state{node_list = {[], []}}=State) ->
     {next_state, mark_migration_end, State, 0};
-migrate_nodes(_Event, #state{node_list = {NodeBatch, NodeList},
+migrate_nodes(timeout, #state{node_list = {NodeBatch, NodeList},
                              org_name = OrgName,
                              org_id = OrgId,
                              batch_size = BatchSize,
@@ -102,7 +104,7 @@ migrate_nodes(_Event, #state{node_list = {NodeBatch, NodeList},
     {next_state, migrate_nodes,
      State#state{node_list = safe_split(BatchSize, NodeList)}, 0}.
 
-mark_migration_end(_Event, #state{org_name = OrgName}=State) ->
+mark_migration_end(timeout, #state{org_name = OrgName}=State) ->
     error_logger:info_msg("Ending migration of ~s~n", [OrgName]),
     {stop, normal, State}.
     
