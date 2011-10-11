@@ -30,19 +30,23 @@
 -include("node_mover.hrl").
 -include_lib("chef_common/include/chef_sql.hrl").
 
+-define(MAX_INFLIGHT_CHECKS, 20).
+-define(INFLIGHT_WAIT, 1000).
+
 -record(state, {org_name,
                 org_id,
                 batch_size,
                 chef_otto,
                 node_count = 0,
                 node_list = [],
-                node_marker}).
+                node_marker,
+                redis}).
 
 start_link(Config) ->
     gen_fsm:start_link(?MODULE, Config, []).
 
 migrate(Pid) ->
-    gen_fsm:send_event(Pid, go).
+    gen_fsm:send_event(Pid, start).
 
 %% {S, Config} = node_mover:setup().
 %% {ok, Pid} = node_mover_worker:start_link(Config).
@@ -56,17 +60,33 @@ init(Config) ->
     {ok, mark_migration_start, #state{org_name = OrgName,
                                       org_id = OrgId,
                                       batch_size = BatchSize,
-                                      chef_otto = Otto}}.
+                                      chef_otto = Otto,
+                                      redis = mover_redis:connect()}}.
 
-mark_migration_start(go, #state{org_name = OrgName}=State) ->
+mark_migration_start(start, #state{org_name = OrgName}=State) ->
     error_logger:info_msg("Starting migration of ~s~n", [OrgName]),
     {next_state, verify_read_only, State, 0}.
 
-verify_read_only(timeout, #state{org_name = OrgName}=State) ->
-    error_logger:info_msg("Verifying ~s is in READ-ONLY state~n", [OrgName]),
-    %% if in read-only, proceed to next state, otherwise sleep and
-    %% next state is self.
-    {next_state, get_node_list, State, 0}.
+verify_read_only(timeout, State) ->
+    verify_read_only(0, State);
+verify_read_only(N, #state{org_name = OrgName, redis = Redis}=State)
+  when is_integer(N) andalso N =< ?MAX_INFLIGHT_CHECKS ->
+    case mover_redis:inflight_requests_for_org(Redis, OrgName) of
+        [] ->
+            error_logger:info_msg("No in-flight writes for ~s, proceeding~n",
+                                  [OrgName]),
+            {next_state, get_node_list, State, 0};
+        _Pids ->
+            error_logger:info_msg("waiting for in-flight requests to finish (~s)~n",
+                                  [OrgName]),
+            timer:apply_after(?INFLIGHT_WAIT, gen_fsm, send_event, [self(), N + 1]),
+            {next_state, verify_read_only, State}
+    end;
+verify_read_only(N, #state{org_name = OrgName}=State) when N > ?MAX_INFLIGHT_CHECKS ->
+    error_logger:error_msg("~s exceeded timeout waiting for in-flight requests~n",
+                           [OrgName]),
+    {stop, normal, State}.
+
 
 get_node_list(timeout, #state{org_name = OrgName, org_id = OrgId,
                              batch_size = BatchSize,
