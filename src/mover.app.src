@@ -14,5 +14,5 @@
                   couchbeam,
                   emysql,
                   chef_common]},
-  {app, mover_app}
+  {mod, {mover_app, []}}
  ]}.

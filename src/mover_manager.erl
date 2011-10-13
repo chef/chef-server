@@ -7,12 +7,17 @@
 -behaviour(gen_fsm).
 
 %% API
--export([start_link/1]).
+-export([start_link/1,
+         status/0,
+         start_batch/2]).
 
 %% States
 -export([init_storage/2,
+         init_storage/3,
          load_orgs/2,
+         load_orgs/3,
          preload_org_nodes/2,
+         preload_org_nodes/3,
          ready/3,
          running/3]).
 
@@ -43,11 +48,11 @@
 
 -record(org, {guid,
               name,
-              preloaded=false,
-              read_only=false,
-              active=false,
-              complete=false,
-              worker}).
+              preloaded = false,
+              read_only = false,
+              active = false,
+              complete = false,
+              worker = undefined}).
 
 -record(node, {name,
                id,
@@ -60,21 +65,40 @@
 start_link(PreloadAmt) ->
     gen_fsm:start_link({local, ?SERVER}, ?MODULE, [PreloadAmt], []).
 
+status() ->
+    gen_fsm:sync_send_event(?SERVER, status, infinity).
+
+start_batch(NumOrgs, NumNodes) ->
+    gen_fsm:sync_send_event(?SERVER, {start, NumOrgs, NumNodes}).
+
 init([PreloadAmt]) ->
     {ok, init_storage, #state{preload_amt=PreloadAmt}, 0}.
 
+init_storage(_Event, _From, State) ->
+    {reply, {busy, init_storage}, load_orgs, State}.
+
 init_storage(timeout, State) ->
+    error_logger:info_msg("initializing migration storage~n"),
     {ok, _} = dets:open_file(all_orgs, ?DETS_OPTS(?ORG_ESTIMATE)),
     {ok, _} = dets:open_file(all_nodes, ?DETS_OPTS(?NODE_ESTIMATE)),
     {ok, _} = dets:open_file(error_nodes, ?DETS_OPTS(10000)),
     {next_state, load_orgs, State, 0}.
 
+load_orgs(_Event, _From, State) ->
+    {reply, {busy, load_orgs}, load_orgs, State}.
+
 load_orgs(timeout, State) ->
+    error_logger:info_msg("loading unassigned orgs~n"),
     Cn = chef_otto:connect(),
-    [insert_org(NameGuid) || NameGuid <- chef_otto:fetch_orgs(Cn)],
+    [insert_org(NameGuid) || NameGuid <- chef_otto:fetch_assigned_orgs(Cn)],
+    error_logger:info_msg("loaded orgs: ~p~n", [summarize_orgs()]),
     {next_state, preload_org_nodes, State#state{couch_cn=Cn}, 0}.
 
+preload_org_nodes(status, _From, State) ->
+    {reply, {busy, preload_org_nodes}, preload_org_nodes, State}.
+
 preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
+    error_logger:info_msg("preloading nodes for ~B orgs~n", [Amt]),
     case preload_orgs(Amt, State) of
         {ok, State1} ->
             {next_state, ready, State1};
@@ -89,6 +113,9 @@ ready(status, _From, State) ->
     {reply, {ok, 0}, ready, State};
 ready({start, BatchSize, NodeBatchSize}, _From, #state{workers = 0}=State) ->
     case find_migration_candidates(BatchSize) of
+        {ok, none} ->
+            error_logger:info_msg("no migration candidates~n"),
+            {reply, no_candidates, ready, State};
         {ok, Orgs} ->
             %% Tell darklaunch to put these orgs into read-only
             %% mode for nodes.
@@ -99,9 +126,7 @@ ready({start, BatchSize, NodeBatchSize}, _From, #state{workers = 0}=State) ->
                     {reply, {error, none_started}, ready, State};
                 Count ->
                     {reply, {ok, Count}, running, State#state{workers=Count}}
-            end;
-        Error ->
-            {reply, Error, ready, State}
+            end
     end.
 
 running(status, _From, #state{workers=Workers}=State) ->
@@ -112,9 +137,15 @@ running({start, _BatchSize, _NodeBatchSize}, _From, State) ->
 handle_event(_Event, StateName, State) ->
     {next_state, StateName, State}.
 
+handle_sync_event(status, _From, StateName, State) when StateName =:= init_storage;
+                                                        StateName =:= load_orgs;
+                                                        StateName =:= preload_org_nodes ->
+    {reply, {busy, StateName}, StateName, State};
+handle_sync_event(status, _From, running, #state{workers=Workers}=State) ->
+    {reply, {ok, Workers}, running, State};
 handle_sync_event(_Event, _From, StateName, State) ->
-    Reply = ok,
-    {reply, Reply, StateName, State}.
+    {next_state, StateName, State}.
+
 
 handle_info({'DOWN', _MRef, process, Pid, normal}, StateName,
             #state{workers = Workers}=State) when Workers > 0 ->
@@ -171,14 +202,15 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %% Internal functions
 
 insert_org({Name, Guid}) ->
-    case dets:lookup(all_orgs, Name) of
+    case dets:lookup(all_orgs, Guid) of
         [] ->
             Org = #org{guid=Guid, name=Name},
             dets:insert(all_orgs, Org);
-        [#org{complete=true}] ->
-            ok;
-        [Org] ->
-            dets:insert(all_orgs, Org#org{preloaded=false, complete=false, active=false})
+        [#org{}] ->
+            ok
+        %% Hey Kevin, why change state of orgs already loaded?
+        %% [Org] ->
+        %%     dets:insert(all_orgs, Org#org{preloaded=false, complete=false, active=false})
     end.
 
 preload_orgs(BatchSize, State) ->
@@ -202,25 +234,29 @@ load_org_nodes([{OrgId, _Name}|T], #state{couch_cn=Cn}=State) ->
 find_preload_candidates(BatchSize) ->
     {Preloaded, Active, Complete} = {false, false, false},
     case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Complete), BatchSize) of
+        {error, Why} ->
+            {error, Why};
+        '$end_of_table' ->
+            {ok, none};
         {[], _Cont} ->
             {ok, none};
         {Data, _Cont} ->
             Orgs = [{Guid, Name} || [Guid, Name] <- Data],
-            {ok, Orgs};
-        Error ->
-            Error
+            {ok, Orgs}
     end.
 
 find_migration_candidates(BatchSize) ->
     {Preloaded, Active, Complete} = {true, false, false},
     case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Complete), BatchSize) of
+        {error, Why} ->
+            {error, Why};
+        '$end_of_table' ->
+            {ok, none};
         {[], _Cont} ->
             {ok, none};
         {Data, _Cont} ->
             Orgs = [{Guid, Name} || [Guid, Name] <- Data],
-            {ok, Orgs};
-        Error ->
-            Error
+            {ok, Orgs}
     end.
 
 store_node(Cn, OrgId, NodeId, NodeName) ->
@@ -304,10 +340,13 @@ start_workers(Orgs, BatchSize) ->
                         Config = make_worker_config(Guid, Name, BatchSize),
                         case node_mover_sup:new_mover(Config) of
                             {ok, Pid} -> 
+                                node_mover_worker:migrate(Pid),
                                 monitor(process, Pid),
                                 mark_org(active, Guid, Pid),
                                 Count + 1;
-                            _NoPid -> Count
+                            _NoPid ->
+                                error_logger:error_msg("unable to launch worker for ~p ~p~n", [Name, _NoPid]),
+                                Count
                         end
                 end, 0, Orgs).
 
@@ -389,3 +428,20 @@ wildcard_org_spec() ->
          active = '_',
          complete = '_',
          worker = '_'}.
+
+summarize_orgs() ->
+    %% TODO: this needs to filter better, or just make multiple passes.  We don't want to
+    %% count complete in preloaded, e.g.
+    Counts = dets:foldl(fun(Org, {NTotal, NPreloaded, NReadOnly, NActive, NComplete}) ->
+                                {NTotal + 1,
+                                 NPreloaded + as_number(Org#org.preloaded),
+                                 NReadOnly + as_number(Org#org.read_only),
+                                 NActive + as_number(Org#org.active),
+                                 NComplete + as_number(Org#org.complete)}
+                        end, {0, 0, 0, 0, 0}, all_orgs),
+    lists:zip([total, preloaded, read_only, active, complete], tuple_to_list(Counts)).
+
+as_number(true) ->
+    1;
+as_number(_) ->
+    0.

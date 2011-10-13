@@ -16,10 +16,15 @@
 -define(CHILD(Module, Args, Shutdown), {Module, {Module, start_link, Args}, permanent,
                                         Shutdown, worker, [Module]}).
 
+-define(CHILD_SUP(Module, Args, Shutdown),
+        {Module, {Module, start_link, Args}, permanent,
+         Shutdown, supervisor, [Module]}).
+
 start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-    Children = [?CHILD(node_mover_sup, [], infinity),
-                ?CHILD(darklaunch, [], 5000)],
+
+    Children = [?CHILD_SUP(node_mover_sup, [], infinity),
+                ?CHILD(mover_manager, [12], 5000)],
     {ok, {{one_for_one, 10, 10}, Children}}.

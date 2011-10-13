@@ -11,19 +11,7 @@
          stop/1]).
 
 start(_StartType, _StartArgs) ->
-    case mover_sup:start_link() of
-        {ok, Pid} ->
-            case chef_sql:init() of
-                ok ->
-                    {ok, Pid};
-                Error ->
-                    exit(Pid, kill),
-                    Error
-            end;
-        Error ->
-            Error
-    end.
-
+    mover_sup:start_link().
 
 stop(_State) ->
     ok.

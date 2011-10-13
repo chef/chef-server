@@ -94,7 +94,7 @@ open_table(Table, Count, Fun) ->
 
 load_orgs(S) ->
     [ dets:insert(all_orgs, {Name, Guid})
-      || {Name, Guid} <- chef_otto:fetch_orgs(S) ],
+      || {Name, Guid} <- chef_otto:fetch_assigned_orgs(S) ],
     N = proplists:get_value(size, dets:info(all_orgs)),
     {ok, {loaded, N}}.
 
