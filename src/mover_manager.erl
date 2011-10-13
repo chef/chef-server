@@ -301,7 +301,7 @@ mark_org(complete, OrgId) ->
         [] ->
             ok;
         [Org] ->
-            Org1 = Org#org{complete=true, worker=undefined},
+            Org1 = Org#org{complete=true, active=false, worker=undefined},
             dets:insert(all_orgs, Org1)
     end;
 mark_org(nodes_failed, OrgId) ->
@@ -430,16 +430,21 @@ wildcard_org_spec() ->
          worker = '_'}.
 
 summarize_orgs() ->
-    %% TODO: this needs to filter better, or just make multiple passes.  We don't want to
-    %% count complete in preloaded, e.g.
     Counts = dets:foldl(fun(Org, {NTotal, NPreloaded, NReadOnly, NActive, NComplete}) ->
                                 {NTotal + 1,
-                                 NPreloaded + as_number(Org#org.preloaded),
+                                 NPreloaded + preloaded_count(Org),
                                  NReadOnly + as_number(Org#org.read_only),
                                  NActive + as_number(Org#org.active),
                                  NComplete + as_number(Org#org.complete)}
                         end, {0, 0, 0, 0, 0}, all_orgs),
     lists:zip([total, preloaded, read_only, active, complete], tuple_to_list(Counts)).
+
+preloaded_count(#org{preloaded=true, complete = false}) ->
+    1;
+preloaded_count(#org{}) ->
+    0.
+
+
 
 as_number(true) ->
     1;
