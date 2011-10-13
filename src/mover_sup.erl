@@ -24,7 +24,7 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-
+    {ok, PreloadCount} = application:get_env(mover, preload_org_count),
     Children = [?CHILD_SUP(node_mover_sup, [], infinity),
-                ?CHILD(mover_manager, [12], 5000)],
+                ?CHILD(mover_manager, [PreloadCount], 5000)],
     {ok, {{one_for_one, 10, 10}, Children}}.
