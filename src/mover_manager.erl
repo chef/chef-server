@@ -324,14 +324,29 @@ route_orgs_to_erchef_sql() ->
     %% That's any org not complete
     {ok, NginxControlUrls} = application:get_env(mover, nginx_control_urls),
     Body = format_response(list_unmigrated_orgs()),
-    Results = [ post_to_nginx(Url, Body) || Url <- NginxControlUrls ],
+    %% dialyzer doesn't see the use of PostFun and warns that fake_post_to_nginx and
+    %% post_to_nginx are unused.
+    %%
+    %% PostFun = case is_dry_run() of
+    %%               true -> fake_post_to_nginx;
+    %%               false -> post_to_nginx
+    %%           end,
+    Results = [ case is_dry_run() of
+                    true -> fake_post_to_nginx(Url, Body);
+                    false -> post_to_nginx(Url, Body)
+                end
+                || Url <- NginxControlUrls ],
     BadResults = [ X || X <- Results, X =/= ok ], 
     case BadResults of
         [] -> ok;
         _ -> {error, BadResults}
     end.
 
-post_to_nginx(Url, Body) ->    
+fake_post_to_nginx(Url, Body) ->
+    error_logger:info_msg("fake POST of data to nginx at ~s~n~p~n", [Url, Body]),
+    ok.
+
+post_to_nginx(Url, Body) ->
     Headers = [{"content-type", "application/json"}],
     IbrowseOpts = [{ssl_options, []}, {response_format, binary}],
     case ibrowse:send_req(Url, Headers, post, Body, IbrowseOpts) of
@@ -345,10 +360,26 @@ format_response(Orgs) ->
 
 
 darklaunch_enable_node_writes(OrgNames) ->
-    error_logger:info_msg("enabling node writes for ~p via darklaunch~n", [OrgNames]).
+    case is_dry_run() of
+        true ->
+            error_logger:info_msg("enabling node writes for ~p via darklaunch~n", [OrgNames]),
+            ok;
+        false ->
+            error(implement_me)
+    end.
 
 darklaunch_disable_node_writes(OrgNames) ->
-    error_logger:info_msg("disabling node writes for ~p via darklaunch~n", [OrgNames]).
+    case is_dry_run() of
+        true ->
+            error_logger:info_msg("disabling node writes for ~p via darklaunch~n", [OrgNames]),
+            ok;
+        false ->
+            error(implement_me)
+    end.
+
+is_dry_run() ->
+    {ok, DryRun} = application:get_env(mover, dry_run),
+    DryRun.
 
 wildcard_org_spec() ->
     #org{guid = '_',
