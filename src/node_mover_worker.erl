@@ -202,10 +202,14 @@ fetch_node_meta_data(S, OrgName, OrgId, Name, Id, Validator) ->
     Validator(Ans).
 
 send_node_to_solr(#chef_node{id = Id, org_id = OrgId}, NodeJson) ->
-    ok = chef_index_queue:set(node, Id,
-                              chef_otto:dbname(OrgId),
-                              chef_node:ejson_for_indexing(NodeJson)),
-    ok.
+    case is_dry_run() of
+        true -> ok;
+        false ->
+            ok = chef_index_queue:set(node, Id,
+                                      chef_otto:dbname(OrgId),
+                                      chef_node:ejson_for_indexing(NodeJson)),
+            ok
+    end.
 
 make_node_cache_validator() ->
     {ok, Regex} = re:compile("[a-f0-9]{32}"),
@@ -224,3 +228,7 @@ safe_split(N, L) ->
         error:badarg ->
             {L, []}
     end.
+
+is_dry_run() ->
+    {ok, DryRun} = application:get_env(mover, dry_run),
+    DryRun.
