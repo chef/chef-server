@@ -40,7 +40,8 @@
                 node_count = 0,
                 node_list = [],
                 node_marker,
-                redis}).
+                redis,
+                log_dir}).
 
 start_link(Config) ->
     gen_fsm:start_link(?MODULE, Config, []).
@@ -57,12 +58,14 @@ init(Config) ->
     OrgId = proplists:get_value(org_id, Config),
     BatchSize = proplists:get_value(batch_size, Config),
     Otto = proplists:get_value(chef_otto, Config),
+    filelib:ensure_dir(<<"node_migration_log/", OrgName/binary, "/dummy_for_ensure">>),
     error_logger:info_msg("worker starting with config ~p~n", [Config]),
     {ok, mark_migration_start, #state{org_name = OrgName,
                                       org_id = OrgId,
                                       batch_size = BatchSize,
                                       chef_otto = Otto,
-                                      redis = mover_redis:connect()}}.
+                                      redis = mover_redis:connect(),
+                                      log_dir = <<"node_migration_log/", OrgName/binary>>}}.
 
 mark_migration_start(start, #state{org_name = OrgName}=State) ->
     error_logger:info_msg("Starting migration of ~s~n", [OrgName]),
@@ -92,7 +95,8 @@ verify_read_only(N, #state{org_name = OrgName}=State) when N > ?MAX_INFLIGHT_CHE
 
 get_node_list(timeout, #state{org_name = OrgName, org_id = OrgId,
                              batch_size = BatchSize,
-                             chef_otto = S}=State) ->
+                             chef_otto = S,
+                             log_dir = LogDir}=State) ->
     error_logger:info_msg("Migrating nodes for ~s~n", [OrgName]),
     %% here, we'll bulk fetch nodes using batch_size, migrate and then
     %% transition to ourselves. Only when we don't find any nodes do
@@ -101,7 +105,7 @@ get_node_list(timeout, #state{org_name = OrgName, org_id = OrgId,
     %% get full node list.  Write this to a nodes to migrate file
     NodeList = chef_otto:fetch_nodes_with_ids(S, OrgId),
     NodesToMigrate = << <<Name/binary, "\n">> || {Name, _} <- NodeList >>,
-    file:write_file(<<OrgName/binary, "_nodes_to_migrate.txt">>, NodesToMigrate),
+    file:write_file(<<LogDir/binary, "/nodes_to_migrate.txt">>, NodesToMigrate),
     
     {next_state, migrate_nodes,
      State#state{node_list = safe_split(BatchSize, NodeList)}, 0}.
@@ -122,7 +126,7 @@ migrate_nodes(timeout, #state{node_list = {NodeBatch, NodeList},
                                       make_node_cache_validator())
                  || {Name, Id} <- NodeBatch ],
     Ctx = chef_db:make_context(<<"my-req-id-for-mover">>, S),
-    write_nodes_to_sql(Ctx, OrgId, lists:zip(NodeMeta, NodeDocs)),
+    write_nodes_to_sql(Ctx, OrgName, OrgId, lists:zip(NodeMeta, NodeDocs)),
     {next_state, migrate_nodes,
      State#state{node_list = safe_split(BatchSize, NodeList)}, 0}.
 
@@ -149,7 +153,7 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
 
-write_nodes_to_sql(S, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest]) ->
+write_nodes_to_sql(S, OrgName, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest]) ->
     #node_cache{name = Name, authz_id = AuthzId,
                 id = OrigId,
                 requestor_id = RequestorId} = MetaData,
@@ -166,7 +170,10 @@ write_nodes_to_sql(S, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest]) ->
         ok ->
             io:format("migrated: ~p~n", [Name]),
             ok = send_node_to_solr(Node, {NodeData}),
-            file:write_file(<<OrgId/binary, "_nodes_complete.txt">>, 
+
+            %% FIXME: should be using log_dir, but need to refactor.  ETOOMANYARGS alraedy
+            %% :(
+            file:write_file(<<"node_migration_log/", OrgName/binary, "/nodes_complete.txt">>,
                             iolist_to_binary([Name, <<"\t">>, OrigId, <<"\t">>,
                                               Node#chef_node.id, "\n"]),
                             [append]);
@@ -175,13 +182,13 @@ write_nodes_to_sql(S, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest]) ->
         Error ->
             error_logger:error_report({node_create_failed, {Node, Error}})
     end,
-    write_nodes_to_sql(S, OrgId, Rest);
-write_nodes_to_sql(S, OrgId, [{error, _NodeData}|Rest]) ->
+    write_nodes_to_sql(S, OrgName, OrgId, Rest);
+write_nodes_to_sql(S, OrgName, OrgId, [{error, _NodeData}|Rest]) ->
     %% FIXME: how should we track errors of this sort if they occur?
     %% This is a case where we found node json, but no matching mixlib
     %% or authz data.
-    write_nodes_to_sql(S, OrgId, Rest);
-write_nodes_to_sql(_, _, []) ->
+    write_nodes_to_sql(S, OrgName, OrgId, Rest);
+write_nodes_to_sql(_, _, _, []) ->
     ok.
 
 fetch_node_meta_data(S, OrgName, OrgId, Name, Id, Validator) ->
