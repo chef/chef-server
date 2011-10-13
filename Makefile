@@ -7,25 +7,25 @@ DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
 all: compile eunit
 
 clean:
-	@rebar clean
+	@$(REBAR) clean
 
 distclean:
-	@rebar skip_deps=true clean
+	@$(REBAR) skip_deps=true clean
 	@rm -rf deps rel/mover
 
 compile: $(DEPS)
-	@rebar compile
+	@$(REBAR) compile
 	@dialyzer -Wrace_conditions -Wunderspecs -r ebin
 
 $(DEPS):
-	@rebar get-deps
+	@$(REBAR) get-deps
 
 dialyzer:
-	@rebar compile skip_deps=true
+	@$(REBAR) compile skip_deps=true
 	@dialyzer -Wrace_conditions -Wunderspecs -r ebin
 
 eunit: compile
-	@rebar skip_deps=true eunit
+	@$(REBAR) skip_deps=true eunit
 
 test: eunit
 
