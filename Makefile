@@ -1,4 +1,4 @@
-REBAR=rebar
+REBAR=./rebar
 DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
        deps/darklaunch deps/emysql deps/meck deps/neotoma deps/webmachine \
        deps/automeck deps/gen_bunny deps/chef_common deps/erldis
