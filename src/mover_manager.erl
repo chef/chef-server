@@ -87,24 +87,22 @@ preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
 %% 
 ready(status, _From, State) ->
     {reply, {ok, 0}, ready, State};
-ready({start, BatchSize, NodeBatchSize}, _From,
-                 #state{workers=0}=State) ->
-    {Reply, NextState, State1} = case find_migration_candidates(BatchSize) of
-                                     {ok, Orgs} ->
-                                         %% Tell darklaunch to put these orgs into read-only
-                                         %% mode for nodes.
-                                         ok = darklaunch_disable_node_writes([ Name || {_, Name} <- Orgs ]),
-                                         [ mark_org(read_only, OrgId) || {OrgId, _} <- Orgs ],
-                                         case start_workers(Orgs, NodeBatchSize) of
-                                             0 ->
-                                                 {{error, none_started}, ready, State};
-                                             Count ->
-                                                 {{ok, Count}, running, State#state{workers=Count}}
-                                         end;
-                                     Error ->
-                                         {Error, ready, State}
-                                 end,
-    {reply, Reply, NextState, State1}.
+ready({start, BatchSize, NodeBatchSize}, _From, #state{workers = 0}=State) ->
+    case find_migration_candidates(BatchSize) of
+        {ok, Orgs} ->
+            %% Tell darklaunch to put these orgs into read-only
+            %% mode for nodes.
+            ok = darklaunch_disable_node_writes([ Name || {_, Name} <- Orgs ]),
+            [ mark_org(read_only, OrgId) || {OrgId, _} <- Orgs ],
+            case start_workers(Orgs, NodeBatchSize) of
+                0 ->
+                    {reply, {error, none_started}, ready, State};
+                Count ->
+                    {reply, {ok, Count}, running, State#state{workers=Count}}
+            end;
+        Error ->
+            {reply, Error, ready, State}
+    end.
 
 running(status, _From, #state{workers=Workers}=State) ->
     {reply, {ok, Workers}, running, State};
@@ -329,10 +327,8 @@ route_orgs_to_erchef_sql() ->
     Results = [ post_to_nginx(Url, Body) || Url <- NginxControlUrls ],
     BadResults = [ X || X <- Results, X =/= ok ], 
     case BadResults of
-        [] ->
-            ok;
-        _ ->
-            {error, BadResults}
+        [] -> ok;
+        _ -> {error, BadResults}
     end.
 
 post_to_nginx(Url, Body) ->    
