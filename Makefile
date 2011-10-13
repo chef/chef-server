@@ -41,7 +41,7 @@ rel: compile munge_apps
 	@echo '  / / \/ \ \   ( ()  () )   \ \/ /   ( (       ) \ \  _  '
 	@echo ' /_/      \_\   \ \__/ /     \  /     \ \___  ( ( \ \_)) '
 	@echo '(/          \)   \____/       \/       \____\  )_) \__/  '
-	@cd rel;$(REBAR) generate
+	@cd rel;../$(REBAR) generate
 	@rm -rf rel/apps
 
 relclean:
