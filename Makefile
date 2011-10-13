@@ -20,6 +20,10 @@ compile: $(DEPS)
 $(DEPS):
 	@rebar get-deps
 
+dialyzer:
+	@rebar compile skip_deps=true
+	@dialyzer -Wrace_conditions -Wunderspecs -r ebin
+
 eunit: compile
 	@rebar skip_deps=true eunit
 
