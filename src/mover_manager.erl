@@ -29,7 +29,13 @@
                              {keypos, 2},
                              {estimated_no_objects, EstSize}]).
 -define(ORG_SPEC(Preloaded, Active, Complete),
-        {org, '$1', '$2', Preloaded, '_', Active, Complete, '_'}).
+        #org{guid = '$1',
+             name = '$2',
+             preloaded = Preloaded,
+             read_only = '_',
+             active = Active,
+             complete = Complete,
+             worker = '_'}).
 
 -record(state, {couch_cn,
                 preload_amt,
@@ -283,7 +289,7 @@ mark_org(active, OrgId, WorkerPid) ->
     end.
 
 find_org_by_worker(Pid) ->
-    Spec = {org, '$1', '$2', '$3', '$4', '$5', Pid},
+    Spec = (wildcard_org_spec())#org{worker = Pid},
     case dets:match_object(all_orgs, Spec) of
         [] ->
             error_logger:error_msg("No org found for pid ~p~n", [Pid]),
@@ -312,15 +318,7 @@ make_worker_config(Guid, Name, BatchSize) ->
      {chef_otto, chef_otto:connect()}].
 
 list_unmigrated_orgs() ->
-    Spec = {org,
-            '$1',                               % guid
-            '$2',                               % name
-            '$3',                               % preloaded
-            '$4',                               % read_only
-            '$5',                               % active
-            true,                               % complete
-            undefined                           % worker
-           },
+    Spec = (wildcard_org_spec())#org{complete = true, worker = undefined},
     dets:match_object(all_orgs, Spec).
 
 route_orgs_to_erchef_sql() ->
@@ -355,3 +353,12 @@ darklaunch_enable_node_writes(OrgNames) ->
 
 darklaunch_disable_node_writes(OrgNames) ->
     error_logger:info_msg("disabling node writes for ~p via darklaunch~n", [OrgNames]).
+
+wildcard_org_spec() ->
+    #org{guid = '_',
+         name = '_',
+         preloaded = '_',
+         read_only = '_',
+         active = '_',
+         complete = '_',
+         worker = '_'}.
