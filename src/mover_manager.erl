@@ -101,6 +101,7 @@ preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
     error_logger:info_msg("preloading nodes for ~B orgs~n", [Amt]),
     case preload_orgs(Amt, State) of
         {ok, State1} ->
+            error_logger:info_msg("preloading complete~n"),
             {next_state, ready, State1};
         Error ->
             {stop, Error, State}
