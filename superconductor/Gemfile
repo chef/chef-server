@@ -1,0 +1,6 @@
+source :rubygems
+
+gem 'sinatra'
+gem 'erubis'
+gem 'thin'
+gem 'yajl-ruby', :require => 'yajl'

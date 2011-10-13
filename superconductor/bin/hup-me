@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+# hup-me
+# prints a message when it gets HUP'd. So you know you HUP'd.
+
+
+trap(:HUP) do
+  puts "HUP RECVD"
+end
+
+trap(:INT) do
+  exit 0
+end
+
+begin
+  File.open("/var/run/nginx.pid", "w") do |f|
+    f.puts(Process.pid.to_s)
+  end
+rescue
+  puts "Error writing pid to /var/run/nginx.pid maybe you need to get your root on"
+  exit
+end
+
+puts "MY PID IS: #{Process.pid}"
+
+loop do
+  sleep 0.1
+end
