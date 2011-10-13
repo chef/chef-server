@@ -7,6 +7,7 @@
 
 -export([connect/0,
          disconnect/1,
+         delete_tracking/2,
          inflight_requests_for_org/2]).
 
 -define(MIGRATION_DB, 5).
@@ -28,3 +29,6 @@ inflight_requests_for_org(Client, OrgName) ->
           {Host, Port}
       end
       || M <- erldis:smembers(Client, OrgName) ].
+
+delete_tracking(Client, OrgName) ->
+    erldis:del(Client, OrgName).

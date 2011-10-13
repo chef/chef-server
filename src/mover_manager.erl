@@ -28,7 +28,8 @@
 -define(DETS_OPTS(EstSize), [{auto_save, 1000},
                              {keypos, 2},
                              {estimated_no_objects, EstSize}]).
--define(ORG_SPEC(Preloaded, Active, Complete), {org, '$1', '$2', Preloaded, Active, Complete}).
+-define(ORG_SPEC(Preloaded, Active, Complete),
+        {org, '$1', '$2', Preloaded, '_', Active, Complete, '_'}).
 
 -record(state, {couch_cn,
                 preload_amt,
@@ -37,6 +38,7 @@
 -record(org, {guid,
               name,
               preloaded=false,
+              read_only=false,
               active=false,
               complete=false,
               worker}).
@@ -62,7 +64,7 @@ init_storage(timeout, State) ->
     {next_state, load_orgs, State, 0}.
 
 load_orgs(timeout, State) ->
-    Cn = couch_connect(),
+    Cn = chef_otto:connect(),
     [insert_org(NameGuid) || NameGuid <- chef_otto:fetch_orgs(Cn)],
     {next_state, preload_org_nodes, State#state{couch_cn=Cn}, 0}.
 
@@ -74,12 +76,19 @@ preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
             {stop, Error, State}
     end.
 
+%% find_migration_candidates
+%% mark_candidates_as_read_only
+%% 
 ready(status, _From, State) ->
     {reply, {ok, 0}, ready, State};
 ready({start, BatchSize, NodeBatchSize}, _From,
                  #state{workers=0}=State) ->
     {Reply, NextState, State1} = case find_migration_candidates(BatchSize) of
                                      {ok, Orgs} ->
+                                         %% Tell darklaunch to put these orgs into read-only
+                                         %% mode for nodes.
+                                         ok = darklaunch_disable_node_writes([ Name || {_, Name} <- Orgs ]),
+                                         [ mark_org(read_only, OrgId) || {OrgId, _} <- Orgs ],
                                          case start_workers(Orgs, NodeBatchSize) of
                                              0 ->
                                                  {{error, none_started}, ready, State};
@@ -103,10 +112,49 @@ handle_sync_event(_Event, _From, StateName, State) ->
     Reply = ok,
     {reply, Reply, StateName, State}.
 
-handle_info({'EXIT', _Worker, _Reason}, StateName, State) ->
-    %% Update DETS table
-    %% Preload another org to keep pipe full
-    {next_state, StateName, State};
+handle_info({'DOWN', _MRef, process, Pid, normal}, StateName,
+            #state{workers = Workers}=State) when Workers > 0 ->
+    %% TODO: Preload another org to keep pipe full?
+    case find_org_by_worker(Pid) of
+        #org{}=Org ->
+            mark_org(complete, Org#org.guid),
+            WorkerCount = Workers - 1,
+            NextState = case WorkerCount > 0 of
+                            true -> StateName;
+                            false -> ready
+                        end,
+            %% the org is now marked as complete and we regenerate the list of unmigrated
+            %% orgs and send updates to our nginx lbs.  Marking the orgs as not_read_only is
+            %% only for accounting so that we can find orgs that are migrated, but not
+            %% turned on in nginx later.
+            case route_orgs_to_erchef_sql() of
+                ok -> mark_org(not_read_only, Org#org.guid);
+                _Ignore -> ok
+            end,
+            {next_state, NextState, State#state{workers = WorkerCount}};
+        _NotFound ->
+            %% ignore the msg
+            {next_state, StateName, State}
+    end;
+%% FIXME: when worker terminates w/ nodes_failed, is this what we get?
+handle_info({'DOWN', _MRef, process, Pid, nodes_failed}, StateName,
+            #state{workers = Workers}=State) when Workers > 0 ->
+    case find_org_by_worker(Pid) of
+        #org{}=Org ->
+            mark_org(nodes_failed, Org#org.guid),
+            WorkerCount = Workers - 1,
+            NextState = case WorkerCount > 0 of
+                            true -> StateName;
+                            false -> ready
+                        end,
+            %% this org has failed nodes.  To minimize downtime for this org, we will fail
+            %% the migration and turn on writes back in couch-land.
+            darklaunch_enable_node_writes(Org#org.name),
+            {next_state, NextState, State#state{workers = WorkerCount}};
+        _NotFound ->
+            %% ignore the msg
+            {next_state, StateName, State}
+    end;
 handle_info(_Info, StateName, State) ->
     {next_state, StateName, State}.
 
@@ -117,10 +165,6 @@ code_change(_OldVsn, StateName, State, _Extra) ->
     {ok, StateName, State}.
 
 %% Internal functions
-couch_connect() ->
-    {ok, Host} = application:get_env(chef_common, couchdb_host),
-    {ok, Port} = application:get_env(chef_common, couchdb_port),
-    chef_otto:connect(Host, Port).
 
 insert_org({Name, Guid}) ->
     case dets:lookup(all_orgs, Name) of
@@ -152,22 +196,24 @@ load_org_nodes([{OrgId, _Name}|T], #state{couch_cn=Cn}=State) ->
     load_org_nodes(T, State).
 
 find_preload_candidates(BatchSize) ->
-    case dets:match(all_orgs, ?ORG_SPEC(false, false, false), BatchSize) of
+    {Preloaded, Active, Complete} = {false, false, false},
+    case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Complete), BatchSize) of
         {[], _Cont} ->
             {ok, none};
         {Data, _Cont} ->
-            Orgs = [list_to_tuple(Org) || Org <- Data],
+            Orgs = [{Guid, Name} || [Guid, Name] <- Data],
             {ok, Orgs};
         Error ->
             Error
     end.
 
 find_migration_candidates(BatchSize) ->
-    case dets:match(all_orgs, ?ORG_SPEC(true, false, false), BatchSize) of
+    {Preloaded, Active, Complete} = {true, false, false},
+    case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Complete), BatchSize) of
         {[], _Cont} ->
             {ok, none};
         {Data, _Cont} ->
-            Orgs = [list_to_tuple(Org) || Org <- Data],
+            Orgs = [{Guid, Name} || [Guid, Name] <- Data],
             {ok, Orgs};
         Error ->
             Error
@@ -193,20 +239,119 @@ mark_org(preload, OrgId) ->
         [Org] ->
             Org1 = Org#org{preloaded=true},
             dets:insert(all_orgs, Org1)
+    end;
+mark_org(read_only, OrgId) ->
+    case dets:lookup(all_orgs, OrgId) of
+        [] ->
+            ok;
+        [Org] ->
+            Org1 = Org#org{read_only=true},
+            dets:insert(all_orgs, Org1)
+    end;
+mark_org(not_read_only, OrgId) ->
+    case dets:lookup(all_orgs, OrgId) of
+        [] ->
+            ok;
+        [Org] ->
+            Org1 = Org#org{read_only=false},
+            dets:insert(all_orgs, Org1)
+    end;
+mark_org(complete, OrgId) ->
+    case dets:lookup(all_orgs, OrgId) of
+        [] ->
+            ok;
+        [Org] ->
+            Org1 = Org#org{complete=true, worker=undefined},
+            dets:insert(all_orgs, Org1)
+    end;
+mark_org(nodes_failed, OrgId) ->
+    case dets:lookup(all_orgs, OrgId) of
+        [] ->
+            ok;
+        [Org] ->
+            Org1 = Org#org{complete=nodes_failed, worker=undefined},
+            dets:insert(all_orgs, Org1)
     end.
-%% Commented out to make dialyzer happy
-%% mark_org(active, OrgId, WorkerPid) ->
-%%     case dets:lookup(all_orgs, OrgId) of
-%%         [] ->
-%%             ok;
-%%         [Org] ->
-%%             Org1 = Org#org{active=true, worker=WorkerPid},
-%%             dets:insert(all_orgs, Org1)
-%%     end.
 
-start_workers(_Orgs, _BatchSize) ->
-    %% Use node_mover_sup to start up workers
-    %% Monitor each pid as it's returned
-    %% Update corresponding DETS entry for org
-    %% to track PID and set active flag.
-    random:uniform(5) - 1.
+mark_org(active, OrgId, WorkerPid) ->
+    case dets:lookup(all_orgs, OrgId) of
+        [] ->
+            ok;
+        [Org] ->
+            Org1 = Org#org{active=true, worker=WorkerPid},
+            dets:insert(all_orgs, Org1)
+    end.
+
+find_org_by_worker(Pid) ->
+    Spec = {org, '$1', '$2', '$3', '$4', '$5', Pid},
+    case dets:match_object(all_orgs, Spec) of
+        [] ->
+            error_logger:error_msg("No org found for pid ~p~n", [Pid]),
+            not_found;
+        [#org{}=Org] ->
+            Org;
+        {error, Why} ->
+            error_logger:error_report({error, {find_org_by_worker, Pid, Why}}),
+            {error, Why}
+    end.
+                
+start_workers(Orgs, BatchSize) ->
+    lists:foldl(fun({Guid, Name}, Count) ->
+                        Config = make_worker_config(Guid, Name, BatchSize),
+                        case node_mover_sup:new_mover(Config) of
+                            {ok, Pid} -> 
+                                monitor(process, Pid),
+                                mark_org(active, Guid, Pid),
+                                Count + 1;
+                            _NoPid -> Count
+                        end
+                end, 0, Orgs).
+
+make_worker_config(Guid, Name, BatchSize) ->
+    [{org_name, Name}, {org_id, Guid}, {batch_size, BatchSize},
+     {chef_otto, chef_otto:connect()}].
+
+list_unmigrated_orgs() ->
+    Spec = {org,
+            '$1',                               % guid
+            '$2',                               % name
+            '$3',                               % preloaded
+            '$4',                               % read_only
+            '$5',                               % active
+            true,                               % complete
+            undefined                           % worker
+           },
+    dets:match_object(all_orgs, Spec).
+
+route_orgs_to_erchef_sql() ->
+    %% so we actually need to send a list of all non-migrated orgs each time.
+    %% That's any org not complete
+    {ok, NginxControlUrls} = application:get_env(mover, nginx_control_urls),
+    Body = format_response(list_unmigrated_orgs()),
+    Results = [ post_to_nginx(Url, Body) || Url <- NginxControlUrls ],
+    BadResults = [ X || X <- Results, X =/= ok ], 
+    case BadResults of
+        [] ->
+            ok;
+        _ ->
+            {error, BadResults}
+    end.
+
+post_to_nginx(Url, Body) ->    
+    Headers = [{"content-type", "application/json"}],
+    IbrowseOpts = [{ssl_options, []}, {response_format, binary}],
+    case ibrowse:send_req(Url, Headers, post, Body, IbrowseOpts) of
+        {ok, [$2, $0|_], _H, _Body} -> ok;
+        Error -> {error, Error}
+    end.
+
+format_response(Orgs) ->
+    OrgNames = [ Org#org.name || Org <- Orgs ],
+    ejson:encode({[{<<"couch-orgs">>, OrgNames}]}).
+
+
+darklaunch_enable_node_writes(OrgNames) ->
+    error_logger:info_msg("enabling node writes for ~p via darklaunch~n", [OrgNames]).
+
+darklaunch_disable_node_writes(OrgNames) ->
+    error_logger:info_msg("disabling node writes for ~p via darklaunch~n", [OrgNames]).

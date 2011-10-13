@@ -75,6 +75,7 @@ verify_read_only(N, #state{org_name = OrgName, redis = Redis}=State)
         [] ->
             error_logger:info_msg("No in-flight writes for ~s, proceeding~n",
                                   [OrgName]),
+            mover_redis:delete_tracking(Redis, OrgName),
             {next_state, get_node_list, State, 0};
         _Pids ->
             error_logger:info_msg("waiting for in-flight requests to finish (~s)~n",
