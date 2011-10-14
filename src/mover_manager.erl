@@ -10,16 +10,16 @@
 %% API
 -export([start_link/1,
          get_going/3,
-         status/0
+         status/0,
+         mark_node/2,
+         mark_node/3,
+         store_node/4
          ]).
 
 %% States
 -export([init_storage/2,
-         init_storage/3,
          load_orgs/2,
-         load_orgs/3,
          preload_org_nodes/2,
-         preload_org_nodes/3,
          ready/3,
          start_batch/2,
          running/3]).
@@ -31,6 +31,8 @@
          handle_info/3,
          terminate/3,
          code_change/4]).
+
+-include("node_mover.hrl").
 
 -define(SERVER, ?MODULE).
 -define(DETS_OPTS(EstSize), [{auto_save, 1000},
@@ -52,36 +54,17 @@
                 orgs_per_batch = 10,
                 node_batch_size = 20}).
 
--record(org, {guid,
-              name,
-              preloaded = false,
-              read_only = false,
-              active = false,
-              complete = false,
-              worker = undefined}).
-
--record(node, {name,
-               id,
-               authz_id,
-               requestor,
-               error}).
-
--include("node_mover.hrl").
-
 start_link(PreloadAmt) ->
     gen_fsm:start_link({local, ?SERVER}, ?MODULE, [PreloadAmt], []).
 
 status() ->
-    gen_fsm:sync_send_event(?SERVER, status, infinity).
+    gen_fsm:sync_send_all_state_event(?SERVER, status, 10000).
 
 get_going(NumBatches, OrgsPerBatch, NodeBatchSize) ->
     gen_fsm:sync_send_event(?SERVER, {start, NumBatches, OrgsPerBatch, NodeBatchSize}).
 
 init([PreloadAmt]) ->
     {ok, init_storage, #state{preload_amt=PreloadAmt}, 0}.
-
-init_storage(_Event, _From, State) ->
-    {reply, {busy, init_storage}, load_orgs, State}.
 
 init_storage(timeout, State) ->
     error_logger:info_msg("initializing migration storage~n"),
@@ -90,9 +73,6 @@ init_storage(timeout, State) ->
     {ok, _} = dets:open_file(all_nodes, ?DETS_OPTS(?NODE_ESTIMATE)),
     {ok, _} = dets:open_file(error_nodes, ?DETS_OPTS(10000)),
     {next_state, load_orgs, State, 0}.
-
-load_orgs(_Event, _From, State) ->
-    {reply, {busy, load_orgs}, load_orgs, State}.
 
 load_orgs(timeout, State) ->
     error_logger:info_msg("loading unassigned orgs~n"),
@@ -103,9 +83,6 @@ load_orgs(timeout, State) ->
     error_logger:info_msg("loaded orgs: ~p~n", [Summary]),
     log(info, "~256P", [Summary, 10]),
     {next_state, preload_org_nodes, State#state{couch_cn=Cn}, 0}.
-
-preload_org_nodes(status, _From, State) ->
-    {reply, {busy, preload_org_nodes}, preload_org_nodes, State}.
 
 preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
     error_logger:info_msg("preloading nodes for ~B orgs~n", [Amt]),
@@ -122,8 +99,6 @@ preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
 %% find_migration_candidates
 %% mark_candidates_as_read_only
 %% 
-ready(status, _From, State) ->
-    {reply, {ok, 0}, ready, State};
 ready({start, NumBatches, OrgsPerBatch, NodeBatchSize}, _From,
       #state{workers = 0, batches = 0}=State) ->
     State1 = State#state{batches = NumBatches,
@@ -139,7 +114,7 @@ start_batch(timeout, #state{workers = 0,
         {ok, none} ->
             error_logger:info_msg("no migration candidates~n"),
             log(info, "no migration candidates"),
-            {next_state, ready, State};
+            {next_state, ready, State#state{batches = 0}};
         {ok, Orgs} ->
             %% Tell darklaunch to put these orgs into read-only
             %% mode for nodes.
@@ -157,9 +132,6 @@ start_batch(timeout, #state{workers = 0,
             end
     end.
     
-
-running(status, _From, #state{workers=Workers, batches=Batches}=State) ->
-    {reply, {ok, [{org_in_progress, Workers}, {batches_left, Batches}]}, running, State};
 running({start, _BatchSize, _NodeBatchSize}, _From, State) ->
     {reply, {error, running_batch}, running, State}.
 
@@ -170,8 +142,9 @@ handle_sync_event(status, _From, StateName, State) when StateName =:= init_stora
                                                         StateName =:= load_orgs;
                                                         StateName =:= preload_org_nodes ->
     {reply, {busy, StateName}, StateName, State};
-handle_sync_event(status, _From, running, #state{workers=Workers}=State) ->
-    {reply, {ok, Workers}, running, State};
+handle_sync_event(status, _From, StateName, #state{workers=Workers, batches = Batches}=State) ->
+    Summary = [{orgs_in_progress, Workers}, {batches_left, Batches}],
+    {reply, {ok, Summary}, StateName, State};
 handle_sync_event(_Event, _From, StateName, State) ->
     {next_state, StateName, State}.
 
@@ -203,8 +176,7 @@ handle_info({'DOWN', _MRef, process, Pid, normal}, StateName,
             %% ignore the msg
             {next_state, StateName, State}
     end;
-%% FIXME: when worker terminates w/ nodes_failed, is this what we get?
-handle_info({'DOWN', _MRef, process, Pid, nodes_failed}, StateName,
+handle_info({'DOWN', _MRef, process, Pid, _Failed}, StateName,
             #state{workers = Workers}=State) when Workers > 0 ->
     case find_org_by_worker(Pid) of
         #org{}=Org ->
@@ -299,14 +271,32 @@ store_node(Cn, OrgId, NodeId, NodeName) ->
     case chef_otto:fetch_by_name(Cn, OrgId, NodeName, authz_node) of
         {ok, MixlibNode} ->
             MixlibId = ej:get({<<"_id">>}, MixlibNode),
+            %% Note that this can return a {not_found, _} tuple so we use status_for_ids to
+            %% validate that we have binaries and otherwise mark node as an error.
             AuthzId = chef_otto:fetch_auth_join_id(Cn, MixlibId, user_to_auth),
             RequestorId = ej:get({<<"requester_id">>}, MixlibNode),
-            Node = #node{name=NodeName, id=NodeId,
-                         authz_id=AuthzId, requestor=RequestorId},
-            dets:insert(all_nodes, Node);
+            Node = #node{id=NodeId,
+                         name=NodeName,
+                         org_id = OrgId,
+                         authz_id=AuthzId,
+                         requestor=RequestorId,
+                         status = status_for_ids(AuthzId, RequestorId)},
+            dets:insert(all_nodes, Node),
+            Node;
         Error ->
-            dets:insert(error_nodes, #node{name=NodeName, id=NodeId, error=Error})
+            Node = #node{id=NodeId,
+                         name=NodeName,
+                         org_id = OrgId,
+                         status={error, Error}},
+            dets:insert(error_nodes, Node),
+            Node
     end.
+
+status_for_ids(AuthzId, RequestorId) when is_binary(AuthzId),
+                                          is_binary(RequestorId) ->
+    couchdb;
+status_for_ids(AuthzId, RequestorId) ->
+    {error, [{authz_id, AuthzId}, {requestor, RequestorId}]}.
 
 mark_org(preload, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
@@ -356,6 +346,24 @@ mark_org(active, OrgId, WorkerPid) ->
         [Org] ->
             Org1 = Org#org{active=true, worker=WorkerPid},
             dets:insert(all_orgs, Org1)
+    end.
+
+mark_node(complete, Id) ->
+    case dets:lookup(all_nodes, Id) of
+        [] -> ok;
+        [Node] -> dets:insert(all_nodes, Node#node{status = mysql, solr = both})
+    end;
+mark_node(solr_clean, Id) ->
+    case dets:lookup(all_nodes, Id) of
+        [] -> ok;
+        [#node{status = mysql, solr = both} = Node] ->
+            dets:insert(all_nodes, Node#node{solr = mysql})
+    end.
+
+mark_node(error, Id, Why) ->
+    case dets:lookup(all_nodes, Id) of
+        [] -> ok;
+        [Node] -> dets:insert(all_nodes, Node#node{status = {error, Why}})
     end.
 
 find_org_by_worker(Pid) ->
@@ -470,18 +478,26 @@ wildcard_org_spec() ->
          worker = '_'}.
 
 summarize_orgs() ->
-    Counts = dets:foldl(fun(Org, {NTotal, NPreloaded, NReadOnly, NActive, NComplete}) ->
+    Counts = dets:foldl(fun(Org, {NTotal, NPreloaded, NReadOnly,
+                                  NActive, NComplete, NError}) ->
                                 {NTotal + 1,
                                  NPreloaded + preloaded_count(Org),
                                  NReadOnly + as_number(Org#org.read_only),
                                  NActive + as_number(Org#org.active),
-                                 NComplete + as_number(Org#org.complete)}
-                        end, {0, 0, 0, 0, 0}, all_orgs),
-    lists:zip([total, preloaded, read_only, active, complete], tuple_to_list(Counts)).
+                                 NComplete + as_number(Org#org.complete),
+                                 NError + error_count(Org)}
+                        end, {0, 0, 0, 0, 0, 0}, all_orgs),
+    Labels = [total, preloaded, read_only, active, complete, error],
+    lists:zip(Labels, tuple_to_list(Counts)).
 
 preloaded_count(#org{preloaded=true, complete = false}) ->
     1;
 preloaded_count(#org{}) ->
+    0.
+
+error_count(#org{complete = nodes_failed}) ->
+    1;
+error_count(#org{}) ->
     0.
 
 as_number(true) ->

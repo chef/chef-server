@@ -117,14 +117,26 @@ migrate_nodes(timeout, #state{node_list = {NodeBatch, NodeList},
                              chef_otto = S}=State) ->
     log(info, OrgName, "starting batch ~B nodes (~B remaining)",
         [length(NodeBatch), length(NodeList)]),
-    NodeCouchIds = [ Id || {_, Id} <- NodeBatch ],
+    
     OrgDb = chef_otto:dbname(OrgId),
+    %% Get the node meta data first via read-through cache.  This way, we can filter out
+    %% nodes that don't have authz data (yes, it happens) and avoid pulling the node data
+    %% from couch for nodes that were already migrated.
+    NodeMeta = fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch),
+    %% only bulk-get data for nodes we have meta data on and that have not already been
+    %% migrated.
+    NodeCouchIds = [ Id || #node{id = Id} <- NodeMeta ],
     NodeDocs = chef_otto:bulk_get(S, OrgDb, NodeCouchIds),
-    NodeMeta = [ fetch_node_meta_data(S, OrgName, OrgId, Name, Id,
-                                      make_node_cache_validator())
-                 || {Name, Id} <- NodeBatch ],
+    %% FIXME: do we need to worry about the bulk_get returning fewer ids then input?
+    %% let's just assert for now
+    case length(NodeCouchIds) =:= length(NodeDocs) of
+        true -> ok;
+        false ->
+            log(err, OrgName, "bulk_get returned wrong number of nodes"),
+            throw(bulk_get_node_count_mismatch)
+    end,
     Ctx = chef_db:make_context(<<"my-req-id-for-mover">>, S),
-    write_nodes_to_sql(Ctx, OrgName, OrgId, lists:zip(NodeMeta, NodeDocs)),
+    write_nodes_to_sql(Ctx, OrgName, lists:zip(NodeMeta, NodeDocs)),
     {next_state, migrate_nodes,
      State#state{node_list = safe_split(BatchSize, NodeList)}, 0}.
 
@@ -151,10 +163,10 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
 
-write_nodes_to_sql(S, OrgName, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest]) ->
-    #node_cache{name = Name, authz_id = AuthzId,
-                id = OrigId,
-                requestor_id = RequestorId} = MetaData,
+write_nodes_to_sql(S, OrgName, [{#node{status = couchdb}=MetaData, NodeData} | Rest]) ->
+    #node{id = OrigId, name = Name, authz_id = AuthzId,
+          org_id = OrgId,
+          requestor = RequestorId} = MetaData,
     %% NodeData comes from chef_otto:bulk_get which for some reason is unwrapping the
     %% top-level tuple of the ejson format.  So we restore it here.
     Node = chef_otto:convert_couch_json_to_node_record(OrgId, AuthzId, RequestorId,
@@ -166,9 +178,10 @@ write_nodes_to_sql(S, OrgName, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest
     %% emysql backed node creation.
     case chef_db:create_node(S, Node, RequestorId) of
         ok ->
-            log(info, OrgName, "migrated node: ~s", [Name]),
+            log(info, OrgName, "migrated node: ~s ~s (~s => ~s)",
+                [OrgId, Name, OrigId, Node#chef_node.id]),
             ok = send_node_to_solr(Node, {NodeData}),
-
+            mover_manager:mark_node(complete, OrigId),
             %% FIXME: should be using log_dir, but need to refactor.  ETOOMANYARGS alraedy
             %% :(
             file:write_file(<<"node_migration_log/", OrgName/binary, "/nodes_complete.txt">>,
@@ -176,39 +189,61 @@ write_nodes_to_sql(S, OrgName, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest
                                               Node#chef_node.id, "\n"]),
                             [append]);
         {conflict, _} ->
+            %% In theory, we won't ever get here since we match on node meta data status of
+            %% couchdb.
             log(warn, OrgName, "node skipped: ~s (already exists)", [Name]);
         Error ->
             error_logger:error_report({node_create_failed, {Node, Error}}),
             log(err, OrgName, "node create failed"),
-            fast_log:err(node_errors, OrgName, "~p", [{Node, Error}])
+            fast_log:err(node_errors, OrgName, "~p", [{Node, Error}]),
+            mover_manager:mark_node(error, OrigId, Error)
     end,
-    write_nodes_to_sql(S, OrgName, OrgId, Rest);
-write_nodes_to_sql(S, OrgName, OrgId, [{error, _NodeData}|Rest]) ->
+    write_nodes_to_sql(S, OrgName, Rest);
+write_nodes_to_sql(S, OrgName, [{#node{name = Name, status = mysql}, _} | Rest]) ->
+    %% Note that this is here for safetly. Based on how this function is called, only good
+    %% unmigrated nodes will be provided.
+    log(warn, OrgName, "node skipped: ~s (already exists)", [Name]),
+    write_nodes_to_sql(S, OrgName, Rest);
+write_nodes_to_sql(S, OrgName, [{#node{status={error, _}}, _}|Rest]) ->
     %% FIXME: how should we track errors of this sort if they occur?
     %% This is a case where we found node json, but no matching mixlib
     %% or authz data.
-    write_nodes_to_sql(S, OrgName, OrgId, Rest);
-write_nodes_to_sql(_, _, _, []) ->
+    write_nodes_to_sql(S, OrgName, Rest);
+write_nodes_to_sql(_, _, []) ->
     ok.
 
-fetch_node_meta_data(S, OrgName, OrgId, Name, Id, Validator) ->
-    Ans = case dets:lookup(all_nodes, {OrgName, Name}) of
-        [{{OrgName, Name}, MetaData}] ->
-            MetaData;
-        _ ->
-            %% node data not found in cache, attempt to look it up
-            %% here.
-            case node_mover:fetch_node_cache(S, OrgId, Name, Id) of
-                #node_cache{}=MetaData -> MetaData;
-                {error, Why} ->
-                    log(err, OrgName, "unable to get meta data for node ~s ~s", [Name, Id]),
-                    fast_log:err(node_errors, OrgName, "no meta data:~n~p", [{Name, Id, Why}]),
-                    error_logger:error_report({node_not_found, OrgName, Name, Id,
-                                               Why}),
-                    error
-            end
-    end,
-    Validator(Ans).
+fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch) ->
+    fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch, [],
+                              make_node_cache_validator()).
+
+%% @doc Given a list of all org nodes as {Name, Id} pairs, fetch meta data for the node from
+%% the cache or read through chef_otto to fetch the meta data.  The returned list may be
+%% smaller than the input list of nodes as we filter out any nodes for which we cannot find
+%% meta data as well as any nodes that have already been migrated (cache meta data has state
+%% other than 'couchdb').
+fetch_meta_data_for_nodes(S, OrgName, OrgId, [{Name, Id}|Rest], Acc, Validator) ->
+    Acc1 = case dets:lookup(all_nodes, Id) of
+               [#node{status = couchdb}=Node] ->
+                   add_if_valid(Validator(Node), Acc);
+               [] ->
+                   %% node data not found in cache, attempt to look it up
+                   %% here.
+                   case mover_manager:store_node(S, OrgId, Id, Name) of
+                       #node{status = couchdb}=Node ->
+                           add_if_valid(Validator(Node), Acc);
+                       #node{status = {error, Why}} ->
+                           log(err, OrgName, "unable to get meta data for node ~s ~s",
+                               [Name, Id]),
+                           fast_log:err(node_errors, OrgName, "no meta data:~n~p",
+                                        [{Name, Id, Why}]),
+                           error_logger:error_report({node_not_found,
+                                                      OrgName, Name, Id, Why}),
+                           Acc
+                   end
+           end,
+    fetch_meta_data_for_nodes(S, OrgName, OrgId, Rest, Acc1, Validator);
+fetch_meta_data_for_nodes(_S, _OrgName, _OrgId, [], Acc, _Validator) ->
+    Acc.
 
 send_node_to_solr(#chef_node{id = Id, org_id = OrgId}, NodeJson) ->
     case is_dry_run() of
@@ -223,12 +258,23 @@ send_node_to_solr(#chef_node{id = Id, org_id = OrgId}, NodeJson) ->
 make_node_cache_validator() ->
     {ok, Regex} = re:compile("[a-f0-9]{32}"),
     fun(error) -> error;
-       (#node_cache{authz_id = AuthzId, requestor_id = RequestorId}=Input) ->
+       (#node{authz_id = AuthzId, requestor = RequestorId}=Input) 
+          when is_binary(AuthzId) andalso is_binary(RequestorId) ->
                case {re:run(AuthzId, Regex), re:run(RequestorId, Regex)} of
                    {{match, _}, {match, _}} -> Input;
-                   _ -> error
-               end
+                   _ -> 
+                       fast_log:err(node_errors, "invalid: ~256P", [Input, 20]),
+                       error
+               end;
+       (Input) -> 
+            fast_log:err(node_errors, "invalid: ~256P", [Input, 20]),
+            error
     end.
+
+add_if_valid(error, Acc) ->
+    Acc;
+add_if_valid(Item, Acc) ->
+    [Item|Acc].
 
 safe_split(N, L) ->
     try
