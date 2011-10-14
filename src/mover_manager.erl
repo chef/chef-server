@@ -382,7 +382,7 @@ route_orgs_to_erchef_sql() ->
         _ -> {error, BadResults}
     end.
 
-fake_post_to_nginx(Url, Body) ->
+fake_post_to_nginx(_Url, _Body) ->
     %% error_logger:info_msg("fake POST of data to nginx at ~s~n~p~n", [Url, Body]),
     ok.
 
