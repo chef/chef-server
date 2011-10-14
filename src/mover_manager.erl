@@ -445,6 +445,8 @@ format_response(Orgs) ->
     ejson:encode({[{<<"couch-orgs">>, OrgNames}]}).
 
 
+darklaunch_enable_node_writes(OrgName) when is_binary(OrgName) ->
+    darklaunch_enable_node_writes([OrgName]);
 darklaunch_enable_node_writes(OrgNames) ->
     case is_dry_run() of
         true ->
