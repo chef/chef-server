@@ -13,6 +13,7 @@
                   ejson,
                   couchbeam,
                   emysql,
-                  chef_common]},
+                  chef_common,
+                  fast_log]},
   {mod, {mover_app, []}}
  ]}.

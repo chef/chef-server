@@ -59,7 +59,7 @@ init(Config) ->
     BatchSize = proplists:get_value(batch_size, Config),
     Otto = proplists:get_value(chef_otto, Config),
     filelib:ensure_dir(<<"node_migration_log/", OrgName/binary, "/dummy_for_ensure">>),
-    error_logger:info_msg("worker starting with config ~p~n", [Config]),
+    log(info, OrgName, "starting (~B nodes per batch)", [BatchSize]),
     {ok, mark_migration_start, #state{org_name = OrgName,
                                       org_id = OrgId,
                                       batch_size = BatchSize,
@@ -68,7 +68,7 @@ init(Config) ->
                                       log_dir = <<"node_migration_log/", OrgName/binary>>}}.
 
 mark_migration_start(start, #state{org_name = OrgName}=State) ->
-    error_logger:info_msg("Starting migration of ~s~n", [OrgName]),
+    log(info, OrgName, "starting migration"),
     {next_state, verify_read_only, State, 0}.
 
 verify_read_only(timeout, State) ->
@@ -77,19 +77,16 @@ verify_read_only(N, #state{org_name = OrgName, redis = Redis}=State)
   when is_integer(N) andalso N =< ?MAX_INFLIGHT_CHECKS ->
     case mover_redis:inflight_requests_for_org(Redis, OrgName) of
         [] ->
-            error_logger:info_msg("No in-flight writes for ~s, proceeding~n",
-                                  [OrgName]),
+            log(info, OrgName, "no in-flight writes, proceeding"),
             mover_redis:delete_tracking(Redis, OrgName),
             {next_state, get_node_list, State, 0};
         _Pids ->
-            error_logger:info_msg("waiting for in-flight requests to finish (~s)~n",
-                                  [OrgName]),
+            log(info, OrgName, "waiting for in-flight requests to finish"),
             timer:apply_after(?INFLIGHT_WAIT, gen_fsm, send_event, [self(), N + 1]),
             {next_state, verify_read_only, State}
     end;
 verify_read_only(N, #state{org_name = OrgName}=State) when N > ?MAX_INFLIGHT_CHECKS ->
-    error_logger:error_msg("~s exceeded timeout waiting for in-flight requests~n",
-                           [OrgName]),
+    log(err, OrgName, "FAILED: timeout exceeded waiting for in-flight requests"),
     {stop, normal, State}.
 
 
@@ -97,13 +94,14 @@ get_node_list(timeout, #state{org_name = OrgName, org_id = OrgId,
                              batch_size = BatchSize,
                              chef_otto = S,
                              log_dir = LogDir}=State) ->
-    error_logger:info_msg("Migrating nodes for ~s~n", [OrgName]),
+    log(info, OrgName, "fetching list of nodes"),
     %% here, we'll bulk fetch nodes using batch_size, migrate and then
     %% transition to ourselves. Only when we don't find any nodes do
     %% we transition to the wrap up state.
 
     %% get full node list.  Write this to a nodes to migrate file
     NodeList = chef_otto:fetch_nodes_with_ids(S, OrgId),
+    log(info, OrgName, "found ~B nodes", [length(NodeList)]),
     NodesToMigrate = << <<Name/binary, "\n">> || {Name, _} <- NodeList >>,
     file:write_file(<<LogDir/binary, "/nodes_to_migrate.txt">>, NodesToMigrate),
     
@@ -117,8 +115,8 @@ migrate_nodes(timeout, #state{node_list = {NodeBatch, NodeList},
                              org_id = OrgId,
                              batch_size = BatchSize,
                              chef_otto = S}=State) ->
-    error_logger:info_msg("Starting batch ~B nodes (~B remaining) ~s~n",
-                          [length(NodeBatch), length(NodeList), OrgName]),
+    log(info, OrgName, "starting batch ~B nodes (~B remaining)",
+        [length(NodeBatch), length(NodeList)]),
     NodeCouchIds = [ Id || {_, Id} <- NodeBatch ],
     OrgDb = chef_otto:dbname(OrgId),
     NodeDocs = chef_otto:bulk_get(S, OrgDb, NodeCouchIds),
@@ -131,7 +129,7 @@ migrate_nodes(timeout, #state{node_list = {NodeBatch, NodeList},
      State#state{node_list = safe_split(BatchSize, NodeList)}, 0}.
 
 mark_migration_end(timeout, #state{org_name = OrgName}=State) ->
-    error_logger:info_msg("Ending migration of ~s~n", [OrgName]),
+    log(info, OrgName, "migration complete"),
     {stop, normal, State}.
     
 handle_event(_Event, StateName, State) ->
@@ -168,7 +166,7 @@ write_nodes_to_sql(S, OrgName, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest
     %% emysql backed node creation.
     case chef_db:create_node(S, Node, RequestorId) of
         ok ->
-            io:format("migrated: ~p~n", [Name]),
+            log(info, OrgName, "migrated node: ~s", [Name]),
             ok = send_node_to_solr(Node, {NodeData}),
 
             %% FIXME: should be using log_dir, but need to refactor.  ETOOMANYARGS alraedy
@@ -178,9 +176,11 @@ write_nodes_to_sql(S, OrgName, OrgId, [{#node_cache{}=MetaData, NodeData} | Rest
                                               Node#chef_node.id, "\n"]),
                             [append]);
         {conflict, _} ->
-            io:format("skipping: ~p (already exists)~n", [Name]);
+            log(warn, OrgName, "node skipped: ~s (already exists)", [Name]);
         Error ->
-            error_logger:error_report({node_create_failed, {Node, Error}})
+            error_logger:error_report({node_create_failed, {Node, Error}}),
+            log(err, OrgName, "node create failed"),
+            fast_log:err(node_errors, OrgName, "~p", [{Node, Error}])
     end,
     write_nodes_to_sql(S, OrgName, OrgId, Rest);
 write_nodes_to_sql(S, OrgName, OrgId, [{error, _NodeData}|Rest]) ->
@@ -201,8 +201,10 @@ fetch_node_meta_data(S, OrgName, OrgId, Name, Id, Validator) ->
             case node_mover:fetch_node_cache(S, OrgId, Name, Id) of
                 #node_cache{}=MetaData -> MetaData;
                 {error, Why} ->
-                    error_logger:warning_report({node_not_found, OrgName, Name, Id,
-                                                 Why}),
+                    log(err, OrgName, "unable to get meta data for node ~s ~s", [Name, Id]),
+                    fast_log:err(node_errors, OrgName, "no meta data:~n~p", [{Name, Id, Why}]),
+                    error_logger:error_report({node_not_found, OrgName, Name, Id,
+                                               Why}),
                     error
             end
     end,
@@ -239,3 +241,9 @@ safe_split(N, L) ->
 is_dry_run() ->
     {ok, DryRun} = application:get_env(mover, dry_run),
     DryRun.
+
+log(Level, OrgName, Msg) ->
+    fast_log:Level(mover_worker_log, OrgName, Msg).
+
+log(Level, OrgName, Fmt, Args) when is_list(Args) ->
+    fast_log:Level(mover_worker_log, OrgName, Fmt, Args).

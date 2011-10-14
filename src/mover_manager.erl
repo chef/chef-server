@@ -85,6 +85,7 @@ init_storage(_Event, _From, State) ->
 
 init_storage(timeout, State) ->
     error_logger:info_msg("initializing migration storage~n"),
+    log(info, "initializing migration storage"),
     {ok, _} = dets:open_file(all_orgs, ?DETS_OPTS(?ORG_ESTIMATE)),
     {ok, _} = dets:open_file(all_nodes, ?DETS_OPTS(?NODE_ESTIMATE)),
     {ok, _} = dets:open_file(error_nodes, ?DETS_OPTS(10000)),
@@ -95,9 +96,12 @@ load_orgs(_Event, _From, State) ->
 
 load_orgs(timeout, State) ->
     error_logger:info_msg("loading unassigned orgs~n"),
+    log(info, "loading unassigned orgs"),
     Cn = chef_otto:connect(),
     [insert_org(NameGuid) || NameGuid <- chef_otto:fetch_assigned_orgs(Cn)],
-    error_logger:info_msg("loaded orgs: ~p~n", [summarize_orgs()]),
+    Summary = summarize_orgs(),
+    error_logger:info_msg("loaded orgs: ~p~n", [Summary]),
+    log(info, "~256P", [Summary, 10]),
     {next_state, preload_org_nodes, State#state{couch_cn=Cn}, 0}.
 
 preload_org_nodes(status, _From, State) ->
@@ -105,9 +109,11 @@ preload_org_nodes(status, _From, State) ->
 
 preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
     error_logger:info_msg("preloading nodes for ~B orgs~n", [Amt]),
+    log(info, "preloading nodes for ~B orgs", [Amt]),
     case preload_orgs(Amt, State) of
         {ok, State1} ->
             error_logger:info_msg("preloading complete~n"),
+            log(info, "preloading complete"),
             {next_state, ready, State1};
         Error ->
             {stop, Error, State}
@@ -132,6 +138,7 @@ start_batch(timeout, #state{workers = 0,
     case find_migration_candidates(NumOrgs) of
         {ok, none} ->
             error_logger:info_msg("no migration candidates~n"),
+            log(info, "no migration candidates"),
             {next_state, ready, State};
         {ok, Orgs} ->
             %% Tell darklaunch to put these orgs into read-only
@@ -140,12 +147,12 @@ start_batch(timeout, #state{workers = 0,
             [ mark_org(read_only, OrgId) || {OrgId, _} <- Orgs ],
             case start_workers(Orgs, NodeBatchSize) of
                 0 ->
-                    error_logger:error_msg("unable to to start workers~n"),
+                    error_logger:error_msg("unable to start workers~n"),
+                    log(err, "unable to start workers for: ~256P", [[ Name || {_, Name} <- Orgs ], 10]),
                     {next_state, ready, State};
                 Count ->
                     BatchesLeft = Batches - 1,
-                    error_logger:info_msg("~B workers running, ~B batches to go~n",
-                                          [Count, BatchesLeft]),
+                    log(info, "~B workers ok, ~B batches to go", [Count, BatchesLeft]),
                     {next_state, running, State#state{workers=Count, batches = BatchesLeft}}
             end
     end.
@@ -203,6 +210,7 @@ handle_info({'DOWN', _MRef, process, Pid, nodes_failed}, StateName,
         #org{}=Org ->
             mark_org(nodes_failed, Org#org.guid),
             error_logger:error_msg("nodes failed for org ~s~n", [Org#org.name]),
+            log(err, "nodes failed for org ~s", [Org#org.name]),
             %% this org has failed nodes.  To minimize downtime for this org, we will fail
             %% the migration and turn on writes back in couch-land.
             darklaunch_enable_node_writes(Org#org.name),
@@ -355,11 +363,13 @@ find_org_by_worker(Pid) ->
     case dets:match_object(all_orgs, Spec) of
         [] ->
             error_logger:error_msg("No org found for pid ~p~n", [Pid]),
+            log(err, "No org found for pid ~p", [Pid]),
             not_found;
         [#org{}=Org] ->
             Org;
         {error, Why} ->
             error_logger:error_report({error, {find_org_by_worker, Pid, Why}}),
+            log(err, "find_org_by_worker unexpected dets error"),
             {error, Why}
     end.
                 
@@ -374,6 +384,7 @@ start_workers(Orgs, BatchSize) ->
                                 Count + 1;
                             _NoPid ->
                                 error_logger:error_msg("unable to launch worker for ~p ~p~n", [Name, _NoPid]),
+                                log(err, "unable to launch worker for '~s'", [Name]),
                                 Count
                         end
                 end, 0, Orgs).
@@ -429,8 +440,8 @@ format_response(Orgs) ->
 darklaunch_enable_node_writes(OrgNames) ->
     case is_dry_run() of
         true ->
-            error_logger:info_msg("FAKE enable node writes for ~p org via darklaunch~n",
-                                  [length(OrgNames)]),
+            log(info, "FAKE enable node writes for ~B org via darklaunch",
+                [length(OrgNames)]),
             ok;
         false ->
             error(implement_me)
@@ -439,7 +450,7 @@ darklaunch_enable_node_writes(OrgNames) ->
 darklaunch_disable_node_writes(OrgNames) ->
     case is_dry_run() of
         true ->
-            error_logger:info_msg("disabling node writes for ~p via darklaunch~n", [OrgNames]),
+            log(info, "FAKE darklaunch disabling node writes for: ~256P", [OrgNames, 10]),
             ok;
         false ->
             error(implement_me)
@@ -473,9 +484,15 @@ preloaded_count(#org{preloaded=true, complete = false}) ->
 preloaded_count(#org{}) ->
     0.
 
-
-
 as_number(true) ->
     1;
 as_number(_) ->
     0.
+
+log(Level, Msg) ->
+    Id = pid_to_list(self()),
+    fast_log:Level(mover_manager_log, Id, Msg).
+
+log(Level, Fmt, Args) when is_list(Args) ->
+    Id = pid_to_list(self()),
+    fast_log:Level(mover_manager_log, Id, Fmt, Args).
