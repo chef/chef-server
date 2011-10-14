@@ -318,32 +318,6 @@ invalid_named_node_ops(#req_config{name = Name}=ReqConfig) ->
                                                                     NewNodeJson, ReqConfig),
                        ?assertEqual("500", PutCode)
                end},
-              %% {"Fetch, modify a node with missing fields" ++ Label,
-              %%  fun() ->
-
-              %%          %% GET the node
-              %%          NodePath = Path ++ AName,
-              %%          {ok, GetCode, _H1, Body1} = chef_req:request(get, NodePath, ReqConfig),
-              %%          ?assertEqual("200", GetCode),
-              %%          TheNode = ejson:decode(Body1),
-              %%          ?assertEqual(AName, ej:get({<<"name">>}, TheNode)),
-
-	      %% 	       %% modify and PUT it back in various broken ways.
-	      %% 	       [ delete_field_test_helper(NodePath,ReqConfig, TheNode, Field, Code, Expected) ||
-	      %% 		   {Field, Code, Expected} <-
-	      %% 		       [{<<"name">>, "500", AName},
-	      %% 			{<<"automatic">>, "200", {[]}},
-	      %% 			{<<"default">>, "200", {[]}},
-	      %% 			{<<"normal">>, "200", {[]}},
-	      %% 			{<<"override">>, "200", {[]}},
-	      %% 			{<<"chef_environment">>, "200", <<"default">>},
-	      %% 			{<<"run_list">>, "500", ej:get({<<"run_list">>}, TheNode)}, 
-	      %% 			{<<"json_class">>, "400", <<"Chef::Node">>},
-	      %% 			{<<"chef_type">>, "200", <<"node">> }
-	      %% 		       ]
-	      %% 	       ]
-
-              %%  end},
 	      {generator, 
 	       fun() ->
 		       [ {"Fetch, modify a node with missing field " ++ binary_to_list(Field) ++ " : " ++ Label,
