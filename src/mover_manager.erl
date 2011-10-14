@@ -383,7 +383,7 @@ route_orgs_to_erchef_sql() ->
     end.
 
 fake_post_to_nginx(Url, Body) ->
-    error_logger:info_msg("fake POST of data to nginx at ~s~n~p~n", [Url, Body]),
+    %% error_logger:info_msg("fake POST of data to nginx at ~s~n~p~n", [Url, Body]),
     ok.
 
 post_to_nginx(Url, Body) ->
@@ -402,7 +402,8 @@ format_response(Orgs) ->
 darklaunch_enable_node_writes(OrgNames) ->
     case is_dry_run() of
         true ->
-            error_logger:info_msg("enabling node writes for ~p via darklaunch~n", [OrgNames]),
+            error_logger:info_msg("FAKE enable node writes for ~p org via darklaunch~n",
+                                  [length(OrgNames)]),
             ok;
         false ->
             error(implement_me)
