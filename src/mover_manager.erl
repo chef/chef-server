@@ -1,6 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil;fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Kevin Smith <kevin@opscode.com>
+%% @author Seth Falcon <seth@opscode.com>
 %% @copyright 2011 Opscode, Inc.
 -module(mover_manager).
 
@@ -8,8 +9,9 @@
 
 %% API
 -export([start_link/1,
-         status/0,
-         start_batch/2]).
+         get_going/3,
+         status/0
+         ]).
 
 %% States
 -export([init_storage/2,
@@ -19,6 +21,7 @@
          preload_org_nodes/2,
          preload_org_nodes/3,
          ready/3,
+         start_batch/2,
          running/3]).
 
 %% gen_fsm callbacks
@@ -44,7 +47,10 @@
 
 -record(state, {couch_cn,
                 preload_amt,
-                workers=0}).
+                workers = 0,
+                batches = 0,
+                orgs_per_batch = 10,
+                node_batch_size = 20}).
 
 -record(org, {guid,
               name,
@@ -68,8 +74,8 @@ start_link(PreloadAmt) ->
 status() ->
     gen_fsm:sync_send_event(?SERVER, status, infinity).
 
-start_batch(NumOrgs, NumNodes) ->
-    gen_fsm:sync_send_event(?SERVER, {start, NumOrgs, NumNodes}).
+get_going(NumBatches, OrgsPerBatch, NodeBatchSize) ->
+    gen_fsm:sync_send_event(?SERVER, {start, NumBatches, OrgsPerBatch, NodeBatchSize}).
 
 init([PreloadAmt]) ->
     {ok, init_storage, #state{preload_amt=PreloadAmt}, 0}.
@@ -112,11 +118,21 @@ preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
 %% 
 ready(status, _From, State) ->
     {reply, {ok, 0}, ready, State};
-ready({start, BatchSize, NodeBatchSize}, _From, #state{workers = 0}=State) ->
-    case find_migration_candidates(BatchSize) of
+ready({start, NumBatches, OrgsPerBatch, NodeBatchSize}, _From,
+      #state{workers = 0, batches = 0}=State) ->
+    State1 = State#state{batches = NumBatches,
+                         orgs_per_batch = OrgsPerBatch,
+                         node_batch_size = NodeBatchSize},
+    {reply, {ok, moveit}, start_batch, State1, 0}.
+
+start_batch(timeout, #state{workers = 0,
+                            batches = Batches,
+                            orgs_per_batch = NumOrgs,
+                            node_batch_size = NodeBatchSize}=State) ->
+    case find_migration_candidates(NumOrgs) of
         {ok, none} ->
             error_logger:info_msg("no migration candidates~n"),
-            {reply, no_candidates, ready, State};
+            {next_state, ready, State};
         {ok, Orgs} ->
             %% Tell darklaunch to put these orgs into read-only
             %% mode for nodes.
@@ -124,14 +140,19 @@ ready({start, BatchSize, NodeBatchSize}, _From, #state{workers = 0}=State) ->
             [ mark_org(read_only, OrgId) || {OrgId, _} <- Orgs ],
             case start_workers(Orgs, NodeBatchSize) of
                 0 ->
-                    {reply, {error, none_started}, ready, State};
+                    error_logger:error_msg("unable to to start workers~n"),
+                    {next_state, ready, State};
                 Count ->
-                    {reply, {ok, Count}, running, State#state{workers=Count}}
+                    BatchesLeft = Batches - 1,
+                    error_logger:info_msg("~B workers running, ~B batches to go~n",
+                                          [Count, BatchesLeft]),
+                    {next_state, running, State#state{workers=Count, batches = BatchesLeft}}
             end
     end.
+    
 
-running(status, _From, #state{workers=Workers}=State) ->
-    {reply, {ok, Workers}, running, State};
+running(status, _From, #state{workers=Workers, batches=Batches}=State) ->
+    {reply, {ok, [{org_in_progress, Workers}, {batches_left, Batches}]}, running, State};
 running({start, _BatchSize, _NodeBatchSize}, _From, State) ->
     {reply, {error, running_batch}, running, State}.
 
@@ -149,16 +170,10 @@ handle_sync_event(_Event, _From, StateName, State) ->
 
 
 handle_info({'DOWN', _MRef, process, Pid, normal}, StateName,
-            #state{workers = Workers}=State) when Workers > 0 ->
-    %% TODO: Preload another org to keep pipe full?
+            #state{workers = Workers, batches = Batches}=State) when Workers > 0 ->
     case find_org_by_worker(Pid) of
         #org{}=Org ->
             mark_org(complete, Org#org.guid),
-            WorkerCount = Workers - 1,
-            NextState = case WorkerCount > 0 of
-                            true -> StateName;
-                            false -> ready
-                        end,
             %% the org is now marked as complete and we regenerate the list of unmigrated
             %% orgs and send updates to our nginx lbs.  Marking the orgs as not_read_only is
             %% only for accounting so that we can find orgs that are migrated, but not
@@ -167,7 +182,16 @@ handle_info({'DOWN', _MRef, process, Pid, normal}, StateName,
                 ok -> mark_org(not_read_only, Org#org.guid);
                 _Ignore -> ok
             end,
-            {next_state, NextState, State#state{workers = WorkerCount}};
+            WorkerCount = Workers - 1,
+            State1 = State#state{workers = WorkerCount},
+            case {WorkerCount > 0, Batches > 0} of
+                {true, _} ->                    % workers still working on batch
+                    {next_state, StateName, State1};
+                {false, true} ->                % workers done, more batches to do
+                    {next_state, start_batch, State1, 0};
+                {false, false} ->               % workers done, no batches left
+                    {next_state, ready, State1}
+            end;
         _NotFound ->
             %% ignore the msg
             {next_state, StateName, State}
@@ -178,15 +202,18 @@ handle_info({'DOWN', _MRef, process, Pid, nodes_failed}, StateName,
     case find_org_by_worker(Pid) of
         #org{}=Org ->
             mark_org(nodes_failed, Org#org.guid),
+            error_logger:error_msg("nodes failed for org ~s~n", [Org#org.name]),
+            %% this org has failed nodes.  To minimize downtime for this org, we will fail
+            %% the migration and turn on writes back in couch-land.
+            darklaunch_enable_node_writes(Org#org.name),
             WorkerCount = Workers - 1,
             NextState = case WorkerCount > 0 of
                             true -> StateName;
                             false -> ready
                         end,
-            %% this org has failed nodes.  To minimize downtime for this org, we will fail
-            %% the migration and turn on writes back in couch-land.
-            darklaunch_enable_node_writes(Org#org.name),
-            {next_state, NextState, State#state{workers = WorkerCount}};
+            %% since there was a node failure, we'll make this the last batch for this run
+            %% by setting batches to zero.
+            {next_state, NextState, State#state{workers = WorkerCount, batches = 0}};
         _NotFound ->
             %% ignore the msg
             {next_state, StateName, State}
