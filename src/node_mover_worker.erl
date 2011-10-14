@@ -225,6 +225,9 @@ fetch_meta_data_for_nodes(S, OrgName, OrgId, [{Name, Id}|Rest], Acc, Validator) 
     Acc1 = case dets:lookup(all_nodes, Id) of
                [#node{status = couchdb}=Node] ->
                    add_if_valid(Validator(Node), Acc);
+               [#node{}] ->
+                   %% status is not couchdb we want to skip it
+                   Acc;
                [] ->
                    %% node data not found in cache, attempt to look it up
                    %% here.
