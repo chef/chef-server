@@ -215,11 +215,14 @@ insert_org({Name, Guid}) ->
         [] ->
             Org = #org{guid=Guid, name=Name},
             dets:insert(all_orgs, Org);
-        [#org{}] ->
-            ok
-        %% Hey Kevin, why change state of orgs already loaded?
-        %% [Org] ->
-        %%     dets:insert(all_orgs, Org#org{preloaded=false, complete=false, active=false})
+        %% [#org{}] ->
+        %%     ok
+        [Org] ->
+            %% XXX: we assume we are only inserting orgs at startup and not concurrently
+            %% ad-hoc.  Any org that is being inserted is then by-definition not active.  If
+            %% the manager crashes, there may be an org left active with a stale worker, so
+            %% we'll reset that here.
+            dets:insert(all_orgs, Org#org{active=false, worker=undefined})
     end.
 
 preload_orgs(BatchSize, State) ->
