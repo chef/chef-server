@@ -287,6 +287,7 @@ store_node(Cn, OrgId, NodeId, NodeName) ->
                          requestor=RequestorId,
                          status = status_for_ids(AuthzId, RequestorId)},
             dets:insert(all_nodes, Node),
+            log_node_stored(Node),
             Node;
         Error ->
             Node = #node{id=NodeId,
@@ -294,12 +295,19 @@ store_node(Cn, OrgId, NodeId, NodeName) ->
                          org_id = OrgId,
                          status={error, Error}},
             dets:insert(error_nodes, Node),
+            dets:insert(all_nodes, Node),
+            log_node_stored(Node),
             Node
     end.
 
 status_for_ids(AuthzId, RequestorId) when is_binary(AuthzId),
                                           is_binary(RequestorId) ->
-    couchdb;
+    {ok, Regex} = re:compile("[a-f0-9]{32}"),
+    case {re:run(AuthzId, Regex), re:run(RequestorId, Regex)} of
+        {{match, _}, {match, _}} -> couchdb;
+        _NoMatch -> 
+            {error, [{authz_id, AuthzId}, {requestor, RequestorId}]}
+    end;
 status_for_ids(AuthzId, RequestorId) ->
     {error, [{authz_id, AuthzId}, {requestor, RequestorId}]}.
 
@@ -519,6 +527,13 @@ log(Level, Msg) ->
 log(Level, Fmt, Args) when is_list(Args) ->
     Id = pid_to_list(self()),
     fast_log:Level(mover_manager_log, Id, Fmt, Args).
+
+log_node_stored(#node{id=Id, name=Name, org_id=OrgId, status=couchdb}) ->
+    Self = pid_to_list(self()),
+    fast_log:info(node_errors, Self, "authz data loaded: ~s ~s ~s", [Id, Name, OrgId]);
+log_node_stored(#node{id=Id, name=Name, org_id=OrgId, status={error, Why}}) ->
+    Self = pid_to_list(self()),
+    fast_log:err(node_errors, Self, "missing authz data:: ~s ~s ~s ~p", [Id, Name, OrgId, Why]).
 
 safe_split(N, L) ->
     try

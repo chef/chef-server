@@ -127,8 +127,9 @@ migrate_nodes(timeout, #state{node_list = {NodeBatch, NodeList},
     %% migrated.
     NodeCouchIds = [ Id || #node{id = Id} <- NodeMeta ],
     NodeDocs = chef_otto:bulk_get(S, OrgDb, NodeCouchIds),
-    %% FIXME: do we need to worry about the bulk_get returning fewer ids then input?
-    %% let's just assert for now
+    %% bulk_get can return fewer ids then we asked for.  For now, we assert that we have the
+    %% expected count to avoid any data/metadata mixups.  If this fails, the worker will
+    %% crash and halt the migration for this org.
     case length(NodeCouchIds) =:= length(NodeDocs) of
         true -> ok;
         false ->
@@ -213,18 +214,17 @@ write_nodes_to_sql(_, _, []) ->
     ok.
 
 fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch) ->
-    fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch, [],
-                              make_node_cache_validator()).
+    fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch, []).
 
 %% @doc Given a list of all org nodes as {Name, Id} pairs, fetch meta data for the node from
 %% the cache or read through chef_otto to fetch the meta data.  The returned list may be
 %% smaller than the input list of nodes as we filter out any nodes for which we cannot find
 %% meta data as well as any nodes that have already been migrated (cache meta data has state
 %% other than 'couchdb').
-fetch_meta_data_for_nodes(S, OrgName, OrgId, [{Name, Id}|Rest], Acc, Validator) ->
+fetch_meta_data_for_nodes(S, OrgName, OrgId, [{Name, Id}|Rest], Acc) ->
     Acc1 = case dets:lookup(all_nodes, Id) of
                [#node{status = couchdb}=Node] ->
-                   add_if_valid(Validator(Node), Acc);
+                   [Node|Acc];
                [#node{}] ->
                    %% status is not couchdb we want to skip it
                    Acc;
@@ -233,19 +233,19 @@ fetch_meta_data_for_nodes(S, OrgName, OrgId, [{Name, Id}|Rest], Acc, Validator) 
                    %% here.
                    case mover_manager:store_node(S, OrgId, Id, Name) of
                        #node{status = couchdb}=Node ->
-                           add_if_valid(Validator(Node), Acc);
+                           [Node|Acc];
                        #node{status = {error, Why}} ->
-                           log(err, OrgName, "unable to get meta data for node ~s ~s",
+                           log(err, OrgName, "missing authz data for node ~s ~s",
                                [Name, Id]),
-                           fast_log:err(node_errors, OrgName, "no meta data:~n~p",
+                           fast_log:err(node_errors, OrgName, "node authz data not found:~n~p",
                                         [{Name, Id, Why}]),
                            error_logger:error_report({node_not_found,
                                                       OrgName, Name, Id, Why}),
                            Acc
                    end
            end,
-    fetch_meta_data_for_nodes(S, OrgName, OrgId, Rest, Acc1, Validator);
-fetch_meta_data_for_nodes(_S, _OrgName, _OrgId, [], Acc, _Validator) ->
+    fetch_meta_data_for_nodes(S, OrgName, OrgId, Rest, Acc1);
+fetch_meta_data_for_nodes(_S, _OrgName, _OrgId, [], Acc) ->
     Acc.
 
 send_node_to_solr(#chef_node{id = Id, org_id = OrgId}, NodeJson) ->
@@ -258,26 +258,15 @@ send_node_to_solr(#chef_node{id = Id, org_id = OrgId}, NodeJson) ->
             ok
     end.
 
-make_node_cache_validator() ->
-    {ok, Regex} = re:compile("[a-f0-9]{32}"),
-    fun(error) -> error;
-       (#node{authz_id = AuthzId, requestor = RequestorId}=Input) 
-          when is_binary(AuthzId) andalso is_binary(RequestorId) ->
-               case {re:run(AuthzId, Regex), re:run(RequestorId, Regex)} of
-                   {{match, _}, {match, _}} -> Input;
-                   _ -> 
-                       fast_log:err(node_errors, "invalid: ~256P", [Input, 20]),
-                       error
-               end;
-       (Input) -> 
-            fast_log:err(node_errors, "invalid: ~256P", [Input, 20]),
-            error
+delete_node_in_solr(NodeId, OrgId) ->
+    case is_dry_run() of
+        true -> ok;
+        false ->
+            ok = chef_index_queue:delete(node, NodeId,
+                                         chef_otto:dbname(OrgId),
+                                         {[]}),
+            ok
     end.
-
-add_if_valid(error, Acc) ->
-    Acc;
-add_if_valid(Item, Acc) ->
-    [Item|Acc].
 
 safe_split(N, L) ->
     try
