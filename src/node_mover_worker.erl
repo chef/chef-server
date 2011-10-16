@@ -39,6 +39,7 @@
                 chef_otto,
                 node_count = 0,
                 node_list = [],
+                couch_nodes = [],
                 node_marker,
                 redis,
                 log_dir}).
@@ -102,11 +103,10 @@ get_node_list(timeout, #state{org_name = OrgName, org_id = OrgId,
     %% get full node list.  Write this to a nodes to migrate file
     NodeList = chef_otto:fetch_nodes_with_ids(S, OrgId),
     log(info, OrgName, "found ~B nodes", [length(NodeList)]),
-    NodesToMigrate = << <<Name/binary, "\n">> || {Name, _} <- NodeList >>,
-    file:write_file(<<LogDir/binary, "/nodes_to_migrate.txt">>, NodesToMigrate),
-    
-    {next_state, migrate_nodes,
-     State#state{node_list = safe_split(BatchSize, NodeList)}, 0}.
+    log_node_names(LogDir, NodeList),
+    State1 = State#state{node_list = safe_split(BatchSize, NodeList),
+                         couch_nodes = NodeList},
+    {next_state, migrate_nodes, State1, 0}.
     
 migrate_nodes(timeout, #state{node_list = {[], []}}=State) ->
     {next_state, mark_migration_end, State, 0};
@@ -141,9 +141,27 @@ migrate_nodes(timeout, #state{node_list = {NodeBatch, NodeList},
     {next_state, migrate_nodes,
      State#state{node_list = safe_split(BatchSize, NodeList)}, 0}.
 
-mark_migration_end(timeout, #state{org_name = OrgName}=State) ->
-    log(info, OrgName, "migration complete"),
-    {stop, normal, State}.
+%% @doc We verify that the node names we fetched from couch at the start of this migration
+%% match those we can pull back from MySQL.  If so, then the migration was successful and we
+%% issue deletes for all the couch ids to solr.  If the lists are not the same, then one or
+%% more nodes failed to be migrated.  No solr delete is issued and the worker crashes to
+%% indicate that the migration (partially) failed.
+mark_migration_end(timeout, #state{org_name = OrgName,
+                                   org_id = OrgId,
+                                   couch_nodes = CouchNodes}=State) ->
+    {CouchNames0, CouchIds} = lists:unzip(CouchNodes),
+    CouchNames = lists:sort(CouchNames0),
+    SqlNames = lists:sort(chef_sql:fetch_nodes(OrgId)),
+    case CouchNames =:= SqlNames of
+        true ->
+            log(info, OrgName, "deleting couch ids from solr"),
+            [ delete_node_in_solr(Id, OrgId) || Id <- CouchIds ],
+            log(info, OrgName, "migration complete"),
+            {stop, normal, State};
+        false ->
+            log(err, OrgName, "FAILED MIGRATION: couch/mysql node name mismatch"),
+            throw(node_name_mismatch)
+    end.
     
 handle_event(_Event, StateName, State) ->
     {next_state, StateName, State}.
@@ -268,6 +286,7 @@ delete_node_in_solr(NodeId, OrgId) ->
             ok
     end.
 
+
 safe_split(N, L) ->
     try
         lists:split(N, L)
@@ -285,3 +304,7 @@ log(Level, OrgName, Msg) ->
 
 log(Level, OrgName, Fmt, Args) when is_list(Args) ->
     fast_log:Level(mover_worker_log, OrgName, Fmt, Args).
+
+log_node_names(LogDir, NodeList) ->
+    NodesToMigrate = << <<Name/binary, "\n">> || {Name, _} <- NodeList >>,
+    file:write_file(<<LogDir/binary, "/nodes_to_migrate.txt">>, NodesToMigrate).
