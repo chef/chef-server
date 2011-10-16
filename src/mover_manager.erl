@@ -53,7 +53,8 @@
                 workers = 0,
                 batches = 0,
                 orgs_per_batch = 10,
-                node_batch_size = 20}).
+                node_batch_size = 20,
+                orgs_to_migrate}).
 
 start_link(PreloadAmt) ->
     gen_fsm:start_link({local, ?SERVER}, ?MODULE, [PreloadAmt], []).
@@ -90,16 +91,23 @@ preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
     log(info, "preloading nodes for ~B orgs", [Amt]),
     case preload_orgs(Amt, State) of
         {ok, State1} ->
-            error_logger:info_msg("preloading complete~n"),
+            {Preloaded, Active, Complete} = {true, false, false},
+            Candidates = case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Complete)) of
+                             {error, Why} -> throw({error, Why});
+                             Data ->
+                                 [{Guid, Name} || [Guid, Name] <- Data]
+                         end,
+            Summary = summarize_orgs(),
             log(info, "preloading complete"),
-            {next_state, ready, State1};
+            error_logger:info_msg("org summary after preloading: ~p~n", [Summary]),
+            log(info, "~256P", [Summary, 10]),
+            error_logger:info_msg("preloading complete~n"),
+            {next_state, ready, State1#state{orgs_to_migrate = Candidates}};
         Error ->
+            error_logger:error_msg("preloading failed~n"),
             {stop, Error, State}
     end.
 
-%% find_migration_candidates
-%% mark_candidates_as_read_only
-%% 
 ready({start, NumBatches, OrgsPerBatch, NodeBatchSize}, _From,
       #state{workers = 0, batches = 0}=State) ->
     State1 = State#state{batches = NumBatches,
@@ -110,13 +118,14 @@ ready({start, NumBatches, OrgsPerBatch, NodeBatchSize}, _From,
 start_batch(timeout, #state{workers = 0,
                             batches = Batches,
                             orgs_per_batch = NumOrgs,
-                            node_batch_size = NodeBatchSize}=State) ->
-    case find_migration_candidates(NumOrgs) of
-        {ok, none} ->
+                            node_batch_size = NodeBatchSize,
+                            orgs_to_migrate = Candidates}=State) ->
+    case safe_split(NumOrgs, Candidates) of
+        {[], _} ->
             error_logger:info_msg("no migration candidates~n"),
             log(info, "no migration candidates"),
-            {next_state, ready, State#state{batches = 0}};
-        {ok, Orgs} ->
+            {next_state, ready, State#state{batches = 0, orgs_to_migrate = []}};
+        {Orgs, OrgsRest} ->
             %% Tell darklaunch to put these orgs into read-only
             %% mode for nodes.
             ok = darklaunch_disable_node_writes([ Name || {_, Name} <- Orgs ]),
@@ -129,7 +138,9 @@ start_batch(timeout, #state{workers = 0,
                 Count ->
                     BatchesLeft = Batches - 1,
                     log(info, "~B workers ok, ~B batches to go", [Count, BatchesLeft]),
-                    {next_state, running, State#state{workers=Count, batches = BatchesLeft}}
+                    State1 = State#state{workers=Count, batches = BatchesLeft,
+                                         orgs_to_migrate = OrgsRest},
+                    {next_state, running, State1}
             end
     end.
     
@@ -148,7 +159,6 @@ handle_sync_event(status, _From, StateName, #state{workers=Workers, batches = Ba
     {reply, {ok, Summary}, StateName, State};
 handle_sync_event(_Event, _From, StateName, State) ->
     {next_state, StateName, State}.
-
 
 handle_info({'DOWN', _MRef, process, Pid, normal}, StateName,
             #state{workers = Workers, batches = Batches}=State) when Workers > 0 ->
@@ -244,30 +254,21 @@ load_org_nodes([{OrgId, _Name}|T], #state{couch_cn=Cn}=State) ->
     load_org_nodes(T, State).
 
 find_preload_candidates(BatchSize) ->
+    %% dets:match/3 with N does not act like ets:match/3 with Limit. So to keep it simple,
+    %% we waste some memory and just pull back all candidate orgs for preloading and then
+    %% return the desired batch size.  This isn't so bad since for the actual migration we
+    %% want to preload all orgs. An alternative would be to use dets:traverse/2 doing the
+    %% match "manually" and accumulating the desired number before returning {done, Value}.
+    %%
     {Preloaded, Active, Complete} = {false, false, false},
-    case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Complete), BatchSize) of
+    case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Complete)) of
         {error, Why} ->
             {error, Why};
-        '$end_of_table' ->
+        [] ->
             {ok, none};
-        {[], _Cont} ->
-            {ok, none};
-        {Data, _Cont} ->
-            Orgs = [{Guid, Name} || [Guid, Name] <- Data],
-            {ok, Orgs}
-    end.
-
-find_migration_candidates(BatchSize) ->
-    {Preloaded, Active, Complete} = {true, false, false},
-    case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Complete), BatchSize) of
-        {error, Why} ->
-            {error, Why};
-        '$end_of_table' ->
-            {ok, none};
-        {[], _Cont} ->
-            {ok, none};
-        {Data, _Cont} ->
-            Orgs = [{Guid, Name} || [Guid, Name] <- Data],
+        Data ->
+            {Batch, _} = safe_split(BatchSize, Data),
+            Orgs = [{Guid, Name} || [Guid, Name] <- Batch],
             {ok, Orgs}
     end.
 
@@ -518,3 +519,11 @@ log(Level, Msg) ->
 log(Level, Fmt, Args) when is_list(Args) ->
     Id = pid_to_list(self()),
     fast_log:Level(mover_manager_log, Id, Fmt, Args).
+
+safe_split(N, L) ->
+    try
+        lists:split(N, L)
+    catch
+        error:badarg ->
+            {L, []}
+    end.
