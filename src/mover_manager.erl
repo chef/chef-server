@@ -225,13 +225,14 @@ insert_org({Name, Guid}) ->
         [] ->
             Org = #org{guid=Guid, name=Name},
             dets:insert(all_orgs, Org);
-        %% [#org{}] ->
-        %%     ok
         [Org] ->
             %% XXX: we assume we are only inserting orgs at startup and not concurrently
             %% ad-hoc.  Any org that is being inserted is then by-definition not active.  If
             %% the manager crashes, there may be an org left active with a stale worker, so
             %% we'll reset that here.
+            %% 
+            %% Notice that we don't touch the 'complete' field used for candidate selection
+            %% and skipping over completed orgs.
             dets:insert(all_orgs, Org#org{active=false, worker=undefined})
     end.
 
