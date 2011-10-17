@@ -33,16 +33,33 @@
 -define(MAX_INFLIGHT_CHECKS, 20).
 -define(INFLIGHT_WAIT, 1000).
 
--record(state, {org_name,
-                org_id,
-                batch_size,
-                chef_otto,
-                node_count = 0,
-                node_list = [],
-                couch_nodes = [],
-                node_marker,
-                redis,
-                log_dir}).
+-record(state, {
+          %% Name and id of org this worker is migrating
+          org_name,
+          org_id,
+          %% how many nodes to bulk_get at a time
+          batch_size,
+          %% connection context tuple for chef_otto
+          chef_otto,
+
+          %% list of {Name, Id} tuples for all nodes in the org.  fetched at start of
+          %% migration via chef_otto:fetch_nodes_with_ids.  Used at end to verify that all
+          %% nodes made it to MySQL.
+          couch_nodes = [],
+
+          %% Used to batch groups of nodes for migration and track progress.
+          node_list = {[], []},
+          
+          %% These nodes encounted known skippable errors.  Nodes in this list are removed
+          %% from the nodes in couch_nodes for final comparison.
+          skip_nodes = [],
+
+          %% connection tuple for redis
+          redis,
+
+          %% directory where worker logs get written.  These logs are outside of fast_log
+          %% and may not be needed.
+          log_dir}).
 
 start_link(Config) ->
     gen_fsm:start_link(?MODULE, Config, []).
@@ -122,7 +139,7 @@ migrate_nodes(timeout, #state{node_list = {NodeBatch, NodeList},
     %% Get the node meta data first via read-through cache.  This way, we can filter out
     %% nodes that don't have authz data (yes, it happens) and avoid pulling the node data
     %% from couch for nodes that were already migrated.
-    NodeMeta = fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch),
+    {NodeMeta, SkipNodes} = fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch),
     %% only bulk-get data for nodes we have meta data on and that have not already been
     %% migrated.
     NodeCouchIds = [ Id || #node{id = Id} <- NodeMeta ],
@@ -138,8 +155,9 @@ migrate_nodes(timeout, #state{node_list = {NodeBatch, NodeList},
     end,
     Ctx = chef_db:make_context(<<"my-req-id-for-mover">>, S),
     write_nodes_to_sql(Ctx, OrgName, lists:zip(NodeMeta, NodeDocs)),
-    {next_state, migrate_nodes,
-     State#state{node_list = safe_split(BatchSize, NodeList)}, 0}.
+    State1 = State#state{node_list = safe_split(BatchSize, NodeList),
+                         skip_nodes = SkipNodes},
+    {next_state, migrate_nodes, State1, 0}.
 
 %% @doc We verify that the node names we fetched from couch at the start of this migration
 %% match those we can pull back from MySQL.  If so, then the migration was successful and we
@@ -148,9 +166,13 @@ migrate_nodes(timeout, #state{node_list = {NodeBatch, NodeList},
 %% indicate that the migration (partially) failed.
 mark_migration_end(timeout, #state{org_name = OrgName,
                                    org_id = OrgId,
-                                   couch_nodes = CouchNodes}=State) ->
+                                   couch_nodes = CouchNodes,
+                                   skip_nodes = SkipNodes}=State) ->
     {CouchNames0, CouchIds} = lists:unzip(CouchNodes),
-    CouchNames = lists:sort(CouchNames0),
+    %% remove nodes we skipped before comparing to what landed in MySQL
+    SkipDict = dict:from_list(SkipNodes),
+    CouchNames1 = [ Name || Name <- CouchNames0, dict:is_key(Name, SkipDict) =:= false ],
+    CouchNames = lists:sort(CouchNames1),
     SqlNames = lists:sort(chef_sql:fetch_nodes(OrgId)),
     case CouchNames =:= SqlNames of
         true ->
@@ -232,34 +254,42 @@ write_nodes_to_sql(_, _, []) ->
     ok.
 
 fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch) ->
-    fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch, []).
+    fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch, {[], []}).
 
 %% @doc Given a list of all org nodes as {Name, Id} pairs, fetch meta data for the node from
 %% the cache or read through chef_otto to fetch the meta data.  The returned list may be
 %% smaller than the input list of nodes as we filter out any nodes for which we cannot find
 %% meta data as well as any nodes that have already been migrated (cache meta data has state
 %% other than 'couchdb').
-fetch_meta_data_for_nodes(S, OrgName, OrgId, [{Name, Id}|Rest], Acc) ->
+fetch_meta_data_for_nodes(S, OrgName, OrgId, [{Name, Id}|Rest], {Acc, Skip}) ->
     Acc1 = case dets:lookup(all_nodes, Id) of
                [#node{status = couchdb}=Node] ->
-                   [Node|Acc];
+                   {[Node|Acc], Skip};
+               [#node{id = SkipId, name = SkipName,
+                      status = {error, {missing_authz, _}}}] ->
+                   %% known missing authz data, skip this node
+                   {Acc, [{SkipName, SkipId}|Skip]};
                [#node{}] ->
-                   %% status is not couchdb we want to skip it
-                   Acc;
+                   %% other error or already migrated, ignore
+                   {Acc, Skip};
                [] ->
                    %% node data not found in cache, attempt to look it up
                    %% here.
                    case mover_manager:store_node(S, OrgId, Id, Name) of
                        #node{status = couchdb}=Node ->
-                           [Node|Acc];
+                           {[Node|Acc], Skip};
+                       #node{id = SkipId, name = SkipName,
+                             status = {error, {missing_authz, _}}} ->
+                           %% known missing authz data, skip this node
+                           {Acc, [{SkipName, SkipId}|Skip]};
                        #node{status = {error, Why}} ->
-                           log(err, OrgName, "missing authz data for node ~s ~s",
+                           log(err, OrgName, "unexpected error fetching authz data for node ~s ~s",
                                [Name, Id]),
                            fast_log:err(node_errors, OrgName, "node authz data not found:~n~p",
                                         [{Name, Id, Why}]),
                            error_logger:error_report({node_not_found,
                                                       OrgName, Name, Id, Why}),
-                           Acc
+                           {Acc, Skip}
                    end
            end,
     fetch_meta_data_for_nodes(S, OrgName, OrgId, Rest, Acc1);
@@ -285,7 +315,6 @@ delete_node_in_solr(NodeId, OrgId) ->
                                          {[]}),
             ok
     end.
-
 
 safe_split(N, L) ->
     try

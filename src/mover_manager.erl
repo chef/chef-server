@@ -281,25 +281,30 @@ store_node(Cn, OrgId, NodeId, NodeName) ->
             %% validate that we have binaries and otherwise mark node as an error.
             AuthzId = chef_otto:fetch_auth_join_id(Cn, MixlibId, user_to_auth),
             RequestorId = ej:get({<<"requester_id">>}, MixlibNode),
-            Node = #node{id=NodeId,
-                         name=NodeName,
+            Node = #node{id = NodeId,
+                         name = NodeName,
                          org_id = OrgId,
-                         authz_id=AuthzId,
-                         requestor=RequestorId,
+                         authz_id = AuthzId,
+                         requestor = RequestorId,
                          status = status_for_ids(AuthzId, RequestorId)},
             dets:insert(all_nodes, Node),
             log_node_stored(Node),
             Node;
         Error ->
-            Node = #node{id=NodeId,
-                         name=NodeName,
+            Node = #node{id = NodeId,
+                         name = NodeName,
                          org_id = OrgId,
-                         status={error, Error}},
+                         status = status_for_error(Error)},
             dets:insert(error_nodes, Node),
             dets:insert(all_nodes, Node),
             log_node_stored(Node),
             Node
     end.
+
+status_for_error({not_found, authz_node}) ->
+    {error, {missing_authz, no_mixlib_doc}};
+status_for_error(Error) ->
+    {error, Error}.
 
 status_for_ids(AuthzId, RequestorId) when is_binary(AuthzId),
                                           is_binary(RequestorId) ->
@@ -307,10 +312,13 @@ status_for_ids(AuthzId, RequestorId) when is_binary(AuthzId),
     case {re:run(AuthzId, Regex), re:run(RequestorId, Regex)} of
         {{match, _}, {match, _}} -> couchdb;
         _NoMatch -> 
-            {error, [{authz_id, AuthzId}, {requestor, RequestorId}]}
+            {error,
+             {bad_id_format, [{authz_id, AuthzId}, {requestor, RequestorId}]}}
     end;
+status_for_ids({not_found, missing}, _RequestorId) ->
+    {error, {missing_authz, no_auth_join}};
 status_for_ids(AuthzId, RequestorId) ->
-    {error, [{authz_id, AuthzId}, {requestor, RequestorId}]}.
+    {error, {unknown, [{authz_id, AuthzId}, {requestor, RequestorId}]}}.
 
 mark_org(preload, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
