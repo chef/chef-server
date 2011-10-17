@@ -18,6 +18,11 @@ compile: $(DEPS)
 	@$(REBAR) compile
 	@dialyzer -Wrace_conditions -Wunderspecs -r ebin
 
+# rel compile is used for building releases as part of deployment
+# where running dialyzer is not desired.
+rel_compile: $(DEPS)
+	@$(REBAR) compile
+
 $(DEPS):
 	@$(REBAR) get-deps
 
@@ -35,7 +40,7 @@ munge_apps:
 	@cp -fR src rel/apps/mover/src
 	@cp -fR ebin rel/apps/mover/ebin
 
-rel: compile munge_apps
+rel: rel_compile munge_apps
 	@echo '   \ \  / /      / __ \    ) )  ( (   / ___/  (   __ \   '
 	@echo '   () \/ ()     / /  \ \  ( (    ) ) ( (__     ) (__) )  '
 	@echo '   / _  _ \    ( ()  () )  \ \  / /   ) __)   (    __/   '
