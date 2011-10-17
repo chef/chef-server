@@ -100,7 +100,7 @@ verify_read_only(N, #state{org_name = OrgName, redis = Redis}=State)
             {next_state, get_node_list, State, 0};
         _Pids ->
             log(info, OrgName, "waiting for in-flight requests to finish"),
-            timer:apply_after(?INFLIGHT_WAIT, gen_fsm, send_event, [self(), N + 1]),
+            gen_fsm:send_event_after(?INFLIGHT_WAIT, N + 1),
             {next_state, verify_read_only, State}
     end;
 verify_read_only(N, #state{org_name = OrgName}=State) when N > ?MAX_INFLIGHT_CHECKS ->
