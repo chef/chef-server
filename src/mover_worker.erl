@@ -3,7 +3,7 @@
 %% @author Seth Falcon <seth@opscode.com>
 %% @copyright 2011 Opscode, Inc.
 
--module(node_mover_worker).
+-module(mover_worker).
 -behaviour(gen_fsm).
 -define(SERVER, ?MODULE).
 
@@ -27,7 +27,7 @@
          migrate_nodes/2,
          mark_migration_end/2]).
 
--include("node_mover.hrl").
+-include("mover.hrl").
 -include_lib("chef_common/include/chef_sql.hrl").
 
 -define(MAX_INFLIGHT_CHECKS, 20).

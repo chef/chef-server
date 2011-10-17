@@ -25,6 +25,6 @@ start_link() ->
 
 init([]) ->
     {ok, PreloadCount} = application:get_env(mover, preload_org_count),
-    Children = [?CHILD_SUP(node_mover_sup, [], infinity),
+    Children = [?CHILD_SUP(mover_worker_sup, [], infinity),
                 ?CHILD(mover_manager, [PreloadCount], 5000)],
     {ok, {{one_for_one, 10, 10}, Children}}.

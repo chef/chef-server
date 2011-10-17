@@ -34,7 +34,7 @@
          terminate/3,
          code_change/4]).
 
--include("node_mover.hrl").
+-include("mover.hrl").
 
 -define(SERVER, ?MODULE).
 -define(DETS_OPTS(EstSize), [{auto_save, 1000},
@@ -407,9 +407,9 @@ find_org_by_worker(Pid) ->
 start_workers(Orgs, BatchSize) ->
     lists:foldl(fun({Guid, Name}, Count) ->
                         Config = make_worker_config(Guid, Name, BatchSize),
-                        case node_mover_sup:new_mover(Config) of
+                        case mover_worker_sup:new_mover(Config) of
                             {ok, Pid} -> 
-                                node_mover_worker:migrate(Pid),
+                                mover_worker:migrate(Pid),
                                 monitor(process, Pid),
                                 mark_org(active, Guid, Pid),
                                 Count + 1;

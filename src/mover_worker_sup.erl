@@ -3,7 +3,7 @@
 %% @author Kevin Smith <kevin@opscode.com>
 %% @copyright 2011 Opscode, Inc.
 
--module(node_mover_sup).
+-module(mover_worker_sup).
 
 -behaviour(supervisor).
 
@@ -23,6 +23,6 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-    MoverSpec = {undefined, {node_mover_worker, start_link, []},
-                 temporary, 10000, worker, [node_mover_worker]},
+    MoverSpec = {undefined, {mover_worker, start_link, []},
+                 temporary, 10000, worker, [mover_worker]},
     {ok, {{simple_one_for_one, 10, 10}, [MoverSpec]}}.
