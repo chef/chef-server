@@ -14,8 +14,9 @@
          mark_node/2,
          mark_node/3,
          store_node/4,
-         summarize_orgs/0
-         ]).
+         summarize_orgs/0,
+         make_worker_config/3
+        ]).
 
 %% States
 -export([init_storage/2,
