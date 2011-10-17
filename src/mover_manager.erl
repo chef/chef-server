@@ -40,13 +40,13 @@
 -define(DETS_OPTS(EstSize), [{auto_save, 1000},
                              {keypos, 2},
                              {estimated_no_objects, EstSize}]).
--define(ORG_SPEC(Preloaded, Active, Complete),
+-define(ORG_SPEC(Preloaded, Active, Migrated),
         #org{guid = '$1',
              name = '$2',
              preloaded = Preloaded,
              read_only = '_',
              active = Active,
-             complete = Complete,
+             migrated = Migrated,
              worker = '_'}).
 
 -record(state, {couch_cn,
@@ -92,8 +92,8 @@ preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
     log(info, "preloading nodes for ~B orgs", [Amt]),
     case preload_orgs(Amt, State) of
         {ok, State1} ->
-            {Preloaded, Active, Complete} = {true, false, false},
-            Candidates = case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Complete)) of
+            {Preloaded, Active, Migrated} = {true, false, false},
+            Candidates = case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Migrated)) of
                              {error, Why} -> throw({error, Why});
                              Data ->
                                  [{Guid, Name} || [Guid, Name] <- Data]
@@ -165,8 +165,8 @@ handle_info({'DOWN', _MRef, process, Pid, normal}, StateName,
             #state{workers = Workers, batches = Batches}=State) when Workers > 0 ->
     case find_org_by_worker(Pid) of
         #org{}=Org ->
-            mark_org(complete, Org#org.guid),
-            %% the org is now marked as complete and we regenerate the list of unmigrated
+            mark_org(migrated, Org#org.guid),
+            %% the org is now marked as migrated and we regenerate the list of unmigrated
             %% orgs and send updates to our nginx lbs.  Marking the orgs as not_read_only is
             %% only for accounting so that we can find orgs that are migrated, but not
             %% turned on in nginx later.
@@ -232,7 +232,7 @@ insert_org({Name, Guid}) ->
             %% the manager crashes, there may be an org left active with a stale worker, so
             %% we'll reset that here.
             %% 
-            %% Notice that we don't touch the 'complete' field used for candidate selection
+            %% Notice that we don't touch the 'migrated' field used for candidate selection
             %% and skipping over completed orgs.
             dets:insert(all_orgs, Org#org{active=false, worker=undefined})
     end.
@@ -262,8 +262,8 @@ find_preload_candidates(BatchSize) ->
     %% want to preload all orgs. An alternative would be to use dets:traverse/2 doing the
     %% match "manually" and accumulating the desired number before returning {done, Value}.
     %%
-    {Preloaded, Active, Complete} = {false, false, false},
-    case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Complete)) of
+    {Preloaded, Active, Migrated} = {false, false, false},
+    case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Migrated)) of
         {error, Why} ->
             {error, Why};
         [] ->
@@ -345,12 +345,12 @@ mark_org(not_read_only, OrgId) ->
             Org1 = Org#org{read_only=false},
             dets:insert(all_orgs, Org1)
     end;
-mark_org(complete, OrgId) ->
+mark_org(migrated, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
         [] ->
             ok;
         [Org] ->
-            Org1 = Org#org{complete=true, active=false, worker=undefined},
+            Org1 = Org#org{migrated=true, active=false, worker=undefined},
             dets:insert(all_orgs, Org1)
     end;
 mark_org(nodes_failed, OrgId) ->
@@ -358,7 +358,7 @@ mark_org(nodes_failed, OrgId) ->
         [] ->
             ok;
         [Org] ->
-            Org1 = Org#org{complete=nodes_failed, worker=undefined},
+            Org1 = Org#org{migrated=nodes_failed, worker=undefined},
             dets:insert(all_orgs, Org1)
     end.
 
@@ -425,7 +425,7 @@ make_worker_config(Guid, Name, BatchSize) ->
      {chef_otto, chef_otto:connect()}].
 
 list_unmigrated_orgs() ->
-    Spec = (wildcard_org_spec())#org{complete = true, worker = undefined},
+    Spec = (wildcard_org_spec())#org{migrated = true, worker = undefined},
     dets:match_object(all_orgs, Spec).
 
 route_orgs_to_erchef_sql() ->
@@ -499,28 +499,28 @@ wildcard_org_spec() ->
          preloaded = '_',
          read_only = '_',
          active = '_',
-         complete = '_',
+         migrated = '_',
          worker = '_'}.
 
 summarize_orgs() ->
     Counts = dets:foldl(fun(Org, {NTotal, NPreloaded, NReadOnly,
-                                  NActive, NComplete, NError}) ->
+                                  NActive, NMigrated, NError}) ->
                                 {NTotal + 1,
                                  NPreloaded + preloaded_count(Org),
                                  NReadOnly + as_number(Org#org.read_only),
                                  NActive + as_number(Org#org.active),
-                                 NComplete + as_number(Org#org.complete),
+                                 NMigrated + as_number(Org#org.migrated),
                                  NError + error_count(Org)}
                         end, {0, 0, 0, 0, 0, 0}, all_orgs),
-    Labels = [total, preloaded, read_only, active, complete, error],
+    Labels = [total, preloaded, read_only, active, migrated, error],
     lists:zip(Labels, tuple_to_list(Counts)).
 
-preloaded_count(#org{preloaded=true, complete = false}) ->
+preloaded_count(#org{preloaded=true, migrated = false}) ->
     1;
 preloaded_count(#org{}) ->
     0.
 
-error_count(#org{complete = nodes_failed}) ->
+error_count(#org{migrated = nodes_failed}) ->
     1;
 error_count(#org{}) ->
     0.

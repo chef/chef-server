@@ -3,7 +3,7 @@
               preloaded = false,
               read_only = false,
               active = false,
-              complete = false,
+              migrated = false,
               worker = undefined}).
 
 -record(node, {id,                              % guid for node data doc in couchdb
