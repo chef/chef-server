@@ -94,7 +94,8 @@ preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
     case preload_orgs(Amt, State) of
         {ok, State1} ->
             {Preloaded, Active, Migrated} = {true, false, false},
-            Candidates = case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Migrated)) of
+            Spec = ?ORG_SPEC(Preloaded, Active, Migrated),
+            Candidates = case ?fix_table(all_orgs, dets:match(all_orgs, Spec)) of
                              {error, Why} -> throw({error, Why});
                              Data ->
                                  [{Guid, Name} || [Guid, Name] <- Data]
@@ -264,7 +265,8 @@ find_preload_candidates(BatchSize) ->
     %% match "manually" and accumulating the desired number before returning {done, Value}.
     %%
     {Preloaded, Active, Migrated} = {false, false, false},
-    case dets:match(all_orgs, ?ORG_SPEC(Preloaded, Active, Migrated)) of
+    Spec = ?ORG_SPEC(Preloaded, Active, Migrated),
+    case ?fix_table(all_orgs, dets:match(all_orgs, Spec)) of
         {error, Why} ->
             {error, Why};
         [] ->
@@ -405,7 +407,7 @@ mark_node(error, Id, Why) ->
 
 find_org_by_worker(Pid) ->
     Spec = (wildcard_org_spec())#org{worker = Pid},
-    case dets:match_object(all_orgs, Spec) of
+    case ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)) of
         [] ->
             error_logger:error_msg("No org found for pid ~p~n", [Pid]),
             log(err, "No org found for pid ~p", [Pid]),
@@ -440,7 +442,7 @@ make_worker_config(Guid, Name, BatchSize) ->
 
 list_unmigrated_orgs() ->
     Spec = (wildcard_org_spec())#org{migrated = true, worker = undefined},
-    dets:match_object(all_orgs, Spec).
+    ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
 
 route_orgs_to_erchef_sql() ->
     %% so we actually need to send a list of all non-migrated orgs each time.

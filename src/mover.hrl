@@ -17,3 +17,13 @@
 
 -define(ORG_ESTIMATE, 10000).
 -define(NODE_ESTIMATE, 25000).
+
+-define(fix_table(Tab, Expr),
+        begin
+            dets:safe_fixtable(Tab, true),
+            try
+                Expr
+            after
+                dets:safe_fixtable(Tab, false)
+            end
+        end).
