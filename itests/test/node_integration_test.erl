@@ -3,6 +3,11 @@
 -include("../src/chef_req.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
+-define(node_fields, [ <<"automatic">>, <<"default">>, <<"normal">>, <<"override">>, 
+		       <<"chef_environment">>, <<"json_class">>, <<"chef_type">>, 
+		       <<"run_list">> ]
+       ).
+
 node_endpoint_test_() ->
     {timeout, 120, {inorder, {setup,
      fun() ->
@@ -33,10 +38,11 @@ node_endpoint_test_() ->
               basic_named_node_ops(ClientConfig),
               basic_named_node_ops(UserConfig),
 	      invalid_named_node_ops(ClientConfig),
+	      invalid_named_node_creation(ClientConfig),
               updated_at_and_last_updated_by(ClientConfig, UserConfig),
               basic_node_create_tests_for_config(UserConfig),
               basic_node_create_tests_for_config(ClientConfig),
-              node_permissions_tests(UserConfig, WeakClientConfig),
+	      node_permissions_tests(UserConfig, WeakClientConfig),
               basic_node_list_tests_for_config(UserConfig),
               basic_node_list_tests_for_config(ClientConfig)
              ]
@@ -282,11 +288,11 @@ delete_field_test_helper(NodePath, ReqConfig, Node, Field, ResponseCode, Expecte
     NewNode = ej:delete({Field}, Node),
     NewNodeJson = ejson:encode(NewNode),
     {ok, PutCode, _H2, _Body2} = chef_req:request(put, NodePath, NewNodeJson, ReqConfig),
-    ?debugVal({Field, PutCode, ResponseCode}),
+%    ?debugVal({Field, PutCode, ResponseCode}),
     ?assertEqual(ResponseCode, PutCode),
     {ok, _GetCode, _H1, Body2} = chef_req:request(get, NodePath, ReqConfig),
     Node2 =  ejson:decode(Body2),
-    ?debugVal({Field, ej:get({Field}, Node), Expected}),
+%    ?debugVal({Field, ej:get({Field}, Node), Expected}),
     ?assertEqual(Expected, ej:get({Field}, Node2)).
     
     
@@ -301,6 +307,24 @@ invalid_named_node_ops(#req_config{name = Name}=ReqConfig) ->
      fun(_) -> cleanup end,
      fun(AName) ->
              [
+	      {"Fetch, modify a node with a different name" ++ Label,
+               fun() ->
+
+                       %% GET the node
+                       NodePath = Path ++ AName,
+                       {ok, GetCode, _H1, Body1} = chef_req:request(get, NodePath, ReqConfig),
+                       ?assertEqual("200", GetCode),
+                       TheNode = ejson:decode(Body1),
+                       ?assertEqual(AName, ej:get({<<"name">>}, TheNode)),
+
+
+                       %% modify and PUT it back
+                       NewNode = ej:set({<<"name">>}, TheNode, <<"not_the_original_name">>),
+                       NewNodeJson = ejson:encode(NewNode),
+                       {ok, PutCode, _H2, _Body2} = chef_req:request(put, NodePath,
+                                                                    NewNodeJson, ReqConfig),
+                       ?assertEqual("200", PutCode)
+               end},
               {"Fetch, modify a node with a bad name" ++ Label,
                fun() ->
 
@@ -316,34 +340,32 @@ invalid_named_node_ops(#req_config{name = Name}=ReqConfig) ->
                        NewNodeJson = ejson:encode(NewNode),
                        {ok, PutCode, _H2, _Body2} = chef_req:request(put, NodePath,
                                                                     NewNodeJson, ReqConfig),
-                       ?assertEqual("500", PutCode)
+                       ?assertEqual("400", PutCode)
                end},
 	      {generator, 
 	       fun() ->
-		       [ {"Fetch, modify a node with missing field " ++ binary_to_list(Field) ++ " : " ++ Label,
-			  fun() ->
-			  
-				  ?debugVal({Field, Code, Expected}),
-				  %% GET the node
-				  NodePath = Path ++ AName,
-				  {ok, GetCode, _H1, Body1} = chef_req:request(get, NodePath, ReqConfig),
-				  ?assertEqual("200", GetCode),
-				  TheNode = ejson:decode(Body1),
-				  %% modify and PUT it back in various broken ways.
-				  delete_field_test_helper(NodePath,ReqConfig, TheNode, Field, Code, Expected)
-			  end}
-			 || {Field, Code, Expected} <-
-				[{<<"name">>, "500", AName},
-				 {<<"automatic">>, "200", []},
-				 {<<"default">>, "200", []},
-				 {<<"normal">>, "200", []},
-				 {<<"override">>, "200", []},
-				 {<<"chef_environment">>, "200", <<"default">>},
-				 {<<"json_class">>, "400", <<"Chef::Node">>},
-				 {<<"chef_type">>, "200", <<"node">> },
-				 {<<"run_list">>, "500", <<"foo">>}
-				]
-		       ]
+	       	       [ {"Fetch, modify a node with missing field '" ++ binary_to_list(Field) ++ "' : " ++ Label,
+	       		  fun() ->
+	       			  %% GET the node
+	       			  NodePath = Path ++ AName,
+	       			  {ok, GetCode, _H1, Body1} = chef_req:request(get, NodePath, ReqConfig),
+	       			  ?assertEqual("200", GetCode),
+	       			  TheNode = ejson:decode(Body1),
+	       			  %% modify and PUT it back in various broken ways.
+	       			  delete_field_test_helper(NodePath,ReqConfig, TheNode, Field, Code, Expected)
+	       		  end }
+	       		 || {Field, Code, Expected} <-
+	       			[{<<"name">>, "200", AName},
+				 {<<"automatic">>, "200", {[]}},
+	       			 {<<"default">>, "200", {[]}},
+	       			 {<<"normal">>, "200", {[]}},
+	       			 {<<"override">>, "200", {[]}},
+	       			 {<<"chef_environment">>, "200", <<"default">>},
+	       			 {<<"json_class">>, "200", <<"Chef::Node">>},
+	       			 {<<"chef_type">>, "200", <<"node">> },
+	       			 {<<"run_list">>, "400", []}
+	       			]
+	       	       ]
 	       end
 	      },
 	      {"Fetch, modify a node with a bad env" ++ Label,
@@ -360,8 +382,85 @@ invalid_named_node_ops(#req_config{name = Name}=ReqConfig) ->
                        NewNodeJson = ejson:encode(NewNode),
                        {ok, PutCode, _H2, _Body2} = chef_req:request(put, NodePath,
                                                                     NewNodeJson, ReqConfig),
-                       ?assertEqual("500", PutCode)
+                       ?assertEqual("400", PutCode)
                end}
+             ]
+     end}.
+
+invalid_named_node_creation(#req_config{name = Name}=ReqConfig) ->
+    Label = " (" ++ Name ++ ")",
+    Path  = "/organizations/clownco/nodes/",
+    {setup,
+     fun() -> 
+	     {AName, ANodeJson} = sample_node(),
+	     ANode = ejson:decode(ANodeJson),
+	     {AName, ANode}
+     end,
+     fun(_) -> cleanup end,
+     fun({AName, ANode}) ->
+             [
+	      {"Create a node with an empty name" ++ Label,
+               fun() ->
+		       %% CREATE a node with no name
+		       BadNode = ej:delete({<<"name">>}, ANode),
+		       BadNodeJson = ejson:encode(BadNode),
+		       {ok, PostCode, _H1, _B1} =
+			   chef_req:request(post, Path, BadNodeJson, ReqConfig),
+		       ?assertEqual("400", PostCode)
+               end},
+	      {"Create a node with an bad name" ++ Label,
+               fun() ->
+		       %% CREATE a node with no name
+		       BadNode = ej:set({<<"name">>}, ANode, <<" bad%#@Q#*name ">>),
+		       BadNodeJson = ejson:encode(BadNode),
+		       {ok, PostCode, _H1, _B1} =
+			   chef_req:request(post, Path, BadNodeJson, ReqConfig),
+		       ?assertEqual("400", PostCode)
+               end},
+	      {generator, 
+	       fun() ->
+	       	       [ {"Create a node with missing field '" ++ binary_to_list(Field) ++ "' : " ++ Label,
+	       		  fun() ->
+	       			  NodePath = Path ++ AName,
+				  {ok, _, _, _} = chef_req:request(delete, NodePath, ReqConfig),
+
+	      			  BadNode = ej:delete({Field}, ANode),
+	      			  BadNodeJson = ejson:encode(BadNode),
+	      			  {ok, PostCode, _H1, _B1} =
+	      			      chef_req:request(post, Path, BadNodeJson, ReqConfig),
+
+	      			  ?assertEqual(Code, PostCode),
+	       			  %% GET the node
+	       			  {ok, GetCode, _H2, Body2} = chef_req:request(get, NodePath, ReqConfig),
+
+	       			  ?assertEqual(ExpectedGetCode, GetCode),
+
+				  case GetCode of 
+				      "200" -> 
+					  TheNode = ejson:decode(Body2),
+					  ExpectedNode = ej:set({Field}, BadNode, Expected),
+					  [ ?assertEqual(ej:get({Key}, ExpectedNode),
+							 ej:get({Key}, TheNode))
+					    ||  Key <- ?node_fields ];
+				      _ -> ok
+				  end,
+				  
+				  {ok, _, _, _} = chef_req:request(delete, NodePath, ReqConfig)
+	       		  end }
+	       		 || {Field, Code, Expected, ExpectedGetCode} <-
+	      			 [
+				  {<<"automatic">>, "201", {[]}, "200"},
+	      			  {<<"default">>, "201", {[]}, "200"},
+	      			  {<<"normal">>, "201", {[]}, "200"},
+	      			  {<<"override">>, "201", {[]}, "200"},
+	      			  {<<"chef_environment">>, "201", <<"default">>, "200"},
+	      			  {<<"json_class">>, "201", <<"Chef::Node">>, "200"},
+	      			  {<<"chef_type">>, "201", <<"node">>, "200"},
+	      			  {<<"run_list">>, "400", [], "404"}
+				 ]
+	      	       ]
+	       end
+	      }
              ]
      end}.
 
@@ -518,7 +617,7 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
               NewNode = ej:set({<<"name">>}, Node, <<" bad%#@Q#*name ">>),
 	      NewNodeJson = ejson:encode(NewNode),
               {ok, Code, _H, _Body} = chef_req:request(post, Path, NewNodeJson, ReqConfig),
-              ?assertEqual("500", Code)
+              ?assertEqual("400", Code)
       end},
      {"POST of a bad environment is a 500" ++ Label,
       fun() ->
@@ -526,7 +625,7 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
 	      NewNode = ej:set({<<"chef_environment">>}, Node, <<" bad%#@Q#*name ">>),
 	      NewNodeJson = ejson:encode(NewNode),
 	      {ok, Code, _H, _Body} = chef_req:request(post, Path, NewNodeJson, ReqConfig),
-              ?assertEqual("500", Code)
+              ?assertEqual("400", Code)
       end}
     ].
 
