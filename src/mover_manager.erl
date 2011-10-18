@@ -13,8 +13,8 @@
          status/0,
          mark_node/2,
          mark_node/3,
+         mark_org_time/2,
          store_node/4,
-         summarize_orgs/0,
          make_worker_config/3
         ]).
 
@@ -47,7 +47,8 @@
              read_only = '_',
              active = Active,
              migrated = Migrated,
-             worker = '_'}).
+             worker = '_',
+             time = '_'}).
 
 -record(state, {couch_cn,
                 preload_amt,
@@ -82,7 +83,7 @@ load_orgs(timeout, State) ->
     log(info, "loading unassigned orgs"),
     Cn = chef_otto:connect(),
     [insert_org(NameGuid) || NameGuid <- chef_otto:fetch_assigned_orgs(Cn)],
-    Summary = summarize_orgs(),
+    Summary = mover_status:summarize_orgs(),
     error_logger:info_msg("loaded orgs: ~p~n", [Summary]),
     log(info, "~256P", [Summary, 10]),
     {next_state, preload_org_nodes, State#state{couch_cn=Cn}, 0}.
@@ -98,7 +99,7 @@ preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
                              Data ->
                                  [{Guid, Name} || [Guid, Name] <- Data]
                          end,
-            Summary = summarize_orgs(),
+            Summary = mover_status:summarize_orgs(),
             log(info, "preloading complete"),
             error_logger:info_msg("org summary after preloading: ~p~n", [Summary]),
             log(info, "~256P", [Summary, 10]),
@@ -334,7 +335,9 @@ mark_org(read_only, OrgId) ->
         [] ->
             ok;
         [Org] ->
-            Org1 = Org#org{read_only=true},
+            StartTime = {start, os:timestamp()},
+            Time = [StartTime|Org#org.time],
+            Org1 = Org#org{read_only=true, time = Time},
             dets:insert(all_orgs, Org1)
     end;
 mark_org(not_read_only, OrgId) ->
@@ -342,7 +345,9 @@ mark_org(not_read_only, OrgId) ->
         [] ->
             ok;
         [Org] ->
-            Org1 = Org#org{read_only=false},
+            EndTime = {stop, os:timestamp()},
+            Time = [EndTime|Org#org.time],
+            Org1 = Org#org{read_only=false, time = Time},
             dets:insert(all_orgs, Org1)
     end;
 mark_org(migrated, OrgId) ->
@@ -359,6 +364,15 @@ mark_org(nodes_failed, OrgId) ->
             ok;
         [Org] ->
             Org1 = Org#org{migrated=nodes_failed, worker=undefined},
+            dets:insert(all_orgs, Org1)
+    end.
+
+mark_org_time(Tag, OrgId) ->
+    case dets:lookup(all_orgs, OrgId) of
+        [] ->
+            ok;
+        [Org] ->
+            Org1 = Org#org{time = [{Tag, os:timestamp()}|Org#org.time]},
             dets:insert(all_orgs, Org1)
     end.
 
@@ -481,6 +495,7 @@ darklaunch_enable_node_writes(OrgNames) ->
     end.
 
 darklaunch_disable_node_writes(OrgNames) ->
+    
     case is_dry_run() of
         true ->
             log(info, "FAKE darklaunch disabling node writes for: ~256P", [OrgNames, 10]),
@@ -500,35 +515,8 @@ wildcard_org_spec() ->
          read_only = '_',
          active = '_',
          migrated = '_',
-         worker = '_'}.
-
-summarize_orgs() ->
-    Counts = dets:foldl(fun(Org, {NTotal, NPreloaded, NReadOnly,
-                                  NActive, NMigrated, NError}) ->
-                                {NTotal + 1,
-                                 NPreloaded + preloaded_count(Org),
-                                 NReadOnly + as_number(Org#org.read_only),
-                                 NActive + as_number(Org#org.active),
-                                 NMigrated + as_number(Org#org.migrated),
-                                 NError + error_count(Org)}
-                        end, {0, 0, 0, 0, 0, 0}, all_orgs),
-    Labels = [total, preloaded, read_only, active, migrated, error],
-    lists:zip(Labels, tuple_to_list(Counts)).
-
-preloaded_count(#org{preloaded=true, migrated = false}) ->
-    1;
-preloaded_count(#org{}) ->
-    0.
-
-error_count(#org{migrated = nodes_failed}) ->
-    1;
-error_count(#org{}) ->
-    0.
-
-as_number(true) ->
-    1;
-as_number(_) ->
-    0.
+         worker = '_',
+         time = '_'}.
 
 log(Level, Msg) ->
     Id = pid_to_list(self()),

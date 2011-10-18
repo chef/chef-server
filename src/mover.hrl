@@ -4,7 +4,8 @@
               read_only = false,
               active = false,
               migrated = false,
-              worker = undefined}).
+              worker = undefined,
+              time = []}).
 
 -record(node, {id,                              % guid for node data doc in couchdb
                name,                            % node name

@@ -182,6 +182,7 @@ mark_migration_end(timeout, #state{org_name = OrgName,
         true ->
             log(info, OrgName, "deleting couch ids from solr"),
             [ delete_node_in_solr(Id, OrgId) || Id <- CouchIds ],
+            mover_manager:mark_org_time(nodes_done, OrgId),
             log(info, OrgName, "migration complete"),
             {stop, normal, State};
         false ->
