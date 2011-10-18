@@ -16,7 +16,7 @@ org_by_name(Name) ->
                  migrated = '_',
                  worker = '_',
                  time = '_'},
-    dets:match_object(all_orgs, Spec).
+    ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
     
 
 migration_time(Name) ->
@@ -28,7 +28,7 @@ migration_time(Name) ->
                  migrated = '_',
                  worker = '_', 
                  time = '_'},
-    case dets:match_object(all_orgs, Spec) of
+    case ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)) of
         [Org] ->
             [{total, time_diff(Org#org.time, start, stop)},
              {nodes, time_diff(Org#org.time, start, nodes_done)}];
@@ -37,17 +37,20 @@ migration_time(Name) ->
     end.
 
 summarize_time() ->
-    {Sum, Max, N} = dets:foldl(fun(Org, {Sum, Max, N}) ->
-                                       OrgTime = time_diff(Org#org.time, start, stop),
-                                       case OrgTime of
-                                           undefined ->
-                                               {Sum, Max, N};
-                                           _IsMax when OrgTime > Max ->
-                                               {add_time(Sum, OrgTime), OrgTime, N + 1};
-                                           _NotMax ->
-                                               {add_time(Sum, OrgTime), Max, N + 1}
-                                       end
-                               end, {0, 0, 0}, all_orgs),
+    {Sum, Max, N} =
+        ?fix_table(all_orgs,
+                   dets:foldl(
+                     fun(Org, {Sum, Max, N}) ->
+                             OrgTime = time_diff(Org#org.time, start, stop),
+                             case OrgTime of
+                                 undefined ->
+                                     {Sum, Max, N};
+                                 _IsMax when OrgTime > Max ->
+                                     {add_time(Sum, OrgTime), OrgTime, N + 1};
+                                 _NotMax ->
+                                     {add_time(Sum, OrgTime), Max, N + 1}
+                             end
+                     end, {0, 0, 0}, all_orgs)),
     [{avg, avg_time(Sum, N)}, {max, Max}, {count, N}].
 
 add_time(Sum, {_H, _M, _S}=Time) when is_integer(Sum) ->
@@ -70,15 +73,17 @@ time_diff(Times, Tag1, Tag2) ->
     end.
 
 summarize_orgs() ->
-    Counts = dets:foldl(fun(Org, {NTotal, NPreloaded, NReadOnly,
-                                  NActive, NMigrated, NError}) ->
-                                {NTotal + 1,
-                                 NPreloaded + preloaded_count(Org),
-                                 NReadOnly + as_number(Org#org.read_only),
-                                 NActive + as_number(Org#org.active),
-                                 NMigrated + as_number(Org#org.migrated),
-                                 NError + error_count(Org)}
-                        end, {0, 0, 0, 0, 0, 0}, all_orgs),
+    Counts = ?fix_table(all_orgs,
+                        dets:foldl(
+                          fun(Org, {NTotal, NPreloaded, NReadOnly,
+                                    NActive, NMigrated, NError}) ->
+                                  {NTotal + 1,
+                                   NPreloaded + preloaded_count(Org),
+                                   NReadOnly + as_number(Org#org.read_only),
+                                   NActive + as_number(Org#org.active),
+                                   NMigrated + as_number(Org#org.migrated),
+                                   NError + error_count(Org)}
+                          end, {0, 0, 0, 0, 0, 0}, all_orgs)),
     Labels = [total, preloaded, read_only, active, migrated, error],
     lists:zip(Labels, tuple_to_list(Counts)).
 
