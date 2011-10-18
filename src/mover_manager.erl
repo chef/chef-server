@@ -543,7 +543,7 @@ log_node_stored(#node{id=Id, name=Name, org_id=OrgId, status=couchdb}) ->
     fast_log:info(node_errors, Self, "authz data loaded: ~s ~s ~s", [Id, Name, OrgId]);
 log_node_stored(#node{id=Id, name=Name, org_id=OrgId, status={error, Why}}) ->
     Self = pid_to_list(self()),
-    fast_log:err(node_errors, Self, "missing authz data:: ~s ~s ~s ~p", [Id, Name, OrgId, Why]).
+    fast_log:err(node_errors, Self, "missing authz data: ~s ~s ~s ~p", [Id, Name, OrgId, Why]).
 
 safe_split(N, L) ->
     try

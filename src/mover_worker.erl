@@ -131,7 +131,8 @@ migrate_nodes(timeout, #state{node_list = {NodeBatch, NodeList},
                              org_name = OrgName,
                              org_id = OrgId,
                              batch_size = BatchSize,
-                             chef_otto = S}=State) ->
+                             chef_otto = S,
+                             skip_nodes = SkipNodes0}=State) ->
     log(info, OrgName, "starting batch ~B nodes (~B remaining)",
         [length(NodeBatch), length(NodeList)]),
     
@@ -139,7 +140,8 @@ migrate_nodes(timeout, #state{node_list = {NodeBatch, NodeList},
     %% Get the node meta data first via read-through cache.  This way, we can filter out
     %% nodes that don't have authz data (yes, it happens) and avoid pulling the node data
     %% from couch for nodes that were already migrated.
-    {NodeMeta, SkipNodes} = fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch),
+    {NodeMeta, SkipNodes} = fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch,
+                                                      SkipNodes0),
     %% only bulk-get data for nodes we have meta data on and that have not already been
     %% migrated.
     NodeCouchIds = [ Id || #node{id = Id} <- NodeMeta ],
@@ -170,6 +172,8 @@ mark_migration_end(timeout, #state{org_name = OrgName,
                                    skip_nodes = SkipNodes}=State) ->
     {CouchNames0, CouchIds} = lists:unzip(CouchNodes),
     %% remove nodes we skipped before comparing to what landed in MySQL
+    log(info, OrgName, "unmigrated nodes in skip list: ~256P",
+        [[ SN || {SN, _} <- SkipNodes ], 20]),
     SkipDict = dict:from_list(SkipNodes),
     CouchNames1 = [ Name || Name <- CouchNames0, dict:is_key(Name, SkipDict) =:= false ],
     CouchNames = lists:sort(CouchNames1),
@@ -181,7 +185,14 @@ mark_migration_end(timeout, #state{org_name = OrgName,
             log(info, OrgName, "migration complete"),
             {stop, normal, State};
         false ->
-            log(err, OrgName, "FAILED MIGRATION: couch/mysql node name mismatch"),
+            {ok, FH} = file:open(<<OrgName/binary, "-node-mismatch.txt">>, [write]),
+            io:fwrite(FH, "couch node names~n", []),
+            [ io:fwrite(FH, "~s~n", [NN]) || NN <- CouchNames ],
+            io:fwrite(FH, "~nmysql node names~n", []),
+            [ io:fwrite(FH, "~s~n", [NN]) || NN <- SqlNames ],
+            file:close(FH),
+            log(err, OrgName, "FAILED MIGRATION: couch: ~B, mysql: ~B",
+                [length(CouchNames), length(SqlNames)]),
             throw(node_name_mismatch)
     end.
     
@@ -253,20 +264,21 @@ write_nodes_to_sql(S, OrgName, [{#node{status={error, _}}, _}|Rest]) ->
 write_nodes_to_sql(_, _, []) ->
     ok.
 
-fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch) ->
-    fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch, {[], []}).
 
 %% @doc Given a list of all org nodes as {Name, Id} pairs, fetch meta data for the node from
 %% the cache or read through chef_otto to fetch the meta data.  The returned list may be
 %% smaller than the input list of nodes as we filter out any nodes for which we cannot find
 %% meta data as well as any nodes that have already been migrated (cache meta data has state
 %% other than 'couchdb').
+fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch, SkipNodes)
+  when is_list(SkipNodes) ->
+    fetch_meta_data_for_nodes(S, OrgName, OrgId, NodeBatch, {[], SkipNodes});
 fetch_meta_data_for_nodes(S, OrgName, OrgId, [{Name, Id}|Rest], {Acc, Skip}) ->
     Acc1 = case dets:lookup(all_nodes, Id) of
                [#node{status = couchdb}=Node] ->
                    {[Node|Acc], Skip};
-               [#node{id = SkipId, name = SkipName,
-                      status = {error, {missing_authz, _}}}] ->
+               [#node{status = {error, {missing_authz, _}},
+                      id = SkipId, name = SkipName}] ->
                    %% known missing authz data, skip this node
                    {Acc, [{SkipName, SkipId}|Skip]};
                [#node{}] ->
@@ -278,8 +290,8 @@ fetch_meta_data_for_nodes(S, OrgName, OrgId, [{Name, Id}|Rest], {Acc, Skip}) ->
                    case mover_manager:store_node(S, OrgId, Id, Name) of
                        #node{status = couchdb}=Node ->
                            {[Node|Acc], Skip};
-                       #node{id = SkipId, name = SkipName,
-                             status = {error, {missing_authz, _}}} ->
+                       #node{status = {error, {missing_authz, _}},
+                             id = SkipId, name = SkipName} ->
                            %% known missing authz data, skip this node
                            {Acc, [{SkipName, SkipId}|Skip]};
                        #node{status = {error, Why}} ->
