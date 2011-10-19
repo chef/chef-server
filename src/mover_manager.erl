@@ -412,7 +412,10 @@ find_org_by_worker(Pid) ->
             error_logger:error_msg("No org found for pid ~p~n", [Pid]),
             log(err, "No org found for pid ~p", [Pid]),
             not_found;
-        [#org{}=Org] ->
+        [#org{}=Org|_Ignore] ->
+            %% XXX: we should only every match one record, but we think we are encountering
+            %% a race condition in how we are using dets that causes this match_object call
+            %% to return two of the same record ?!.
             Org;
         {error, Why} ->
             error_logger:error_report({error, {find_org_by_worker, Pid, Why}}),
