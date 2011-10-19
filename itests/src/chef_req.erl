@@ -2,6 +2,7 @@
 
 -export([request/3,
          request/4,
+         request/5,
          missing_header_request/5,
          stale_request/4,
          make_config/3,
@@ -45,11 +46,14 @@ main([Path]) ->
 request(Method, Path, ReqConfig) ->
     request(Method, Path, [], ReqConfig).
 
-request(Method, Path, Body,
+request(Method, Path, Body, ReqConfig) ->
+    request(Method, Path, [], Body, ReqConfig).
+
+request(Method, Path, Headers, Body, 
         #req_config{api_root = ApiRoot, name = Name, private_key = Private}) ->
-    {Url, Headers} = make_headers(method_to_bin(Method), ApiRoot, Path,
+    {Url, FullHeaders} = Headers ++ make_headers(method_to_bin(Method), ApiRoot, Path,
                                   Name, Private, Body),
-    ibrowse:send_req(Url, Headers, Method, Body, ?ibrowse_opts).
+    ibrowse:send_req(Url, FullHeaders, Method, Body, ?ibrowse_opts).
 
 missing_header_request(Header, Method, Path, Body,
                        #req_config{api_root = ApiRoot, name = Name, private_key = Private}) ->
