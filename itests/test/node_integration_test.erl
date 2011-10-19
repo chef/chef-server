@@ -360,7 +360,7 @@ invalid_named_node_ops(#req_config{name = Name}=ReqConfig) ->
 	       			 {<<"default">>, "200", {[]}},
 	       			 {<<"normal">>, "200", {[]}},
 	       			 {<<"override">>, "200", {[]}},
-	       			 {<<"chef_environment">>, "200", <<"default">>},
+	       			 {<<"chef_environment">>, "200", <<"_default">>},
 	       			 {<<"json_class">>, "200", <<"Chef::Node">>},
 	       			 {<<"chef_type">>, "200", <<"node">> },
 	       			 {<<"run_list">>, "400", []}
@@ -453,7 +453,7 @@ invalid_named_node_creation(#req_config{name = Name}=ReqConfig) ->
 	      			  {<<"default">>, "201", {[]}, "200"},
 	      			  {<<"normal">>, "201", {[]}, "200"},
 	      			  {<<"override">>, "201", {[]}, "200"},
-	      			  {<<"chef_environment">>, "201", <<"default">>, "200"},
+	      			  {<<"chef_environment">>, "201", <<"_default">>, "200"},
 	      			  {<<"json_class">>, "201", <<"Chef::Node">>, "200"},
 	      			  {<<"chef_type">>, "201", <<"node">>, "200"},
 	      			  {<<"run_list">>, "400", [], "404"}
