@@ -3,7 +3,11 @@
 -export([org_by_name/1,
          migration_time/1,
          summarize_orgs/0,
-         summarize_time/0]).
+         summarize_time/0,
+         read_only_orgs/0,
+         active_orgs/0,
+         error_orgs/0,
+         error_nodes/0]).
 
 -include("mover.hrl").
 
@@ -17,7 +21,6 @@ org_by_name(Name) ->
                  worker = '_',
                  time = '_'},
     ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
-    
 
 migration_time(Name) ->
      Spec = #org{guid = '_',
@@ -35,6 +38,42 @@ migration_time(Name) ->
         [] -> not_found;
         Error -> Error
     end.
+
+read_only_orgs() ->
+     Spec = #org{guid = '_',
+                 name = '_',
+                 preloaded = '_',
+                 read_only = true,
+                 active = '_',
+                 migrated = '_',
+                 worker = '_', 
+                 time = '_'},
+    ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
+
+active_orgs() ->
+     Spec = #org{guid = '_',
+                 name = '_',
+                 preloaded = '_',
+                 read_only = '_',
+                 active = true,
+                 migrated = '_',
+                 worker = '_', 
+                 time = '_'},
+    ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
+
+error_orgs() ->
+     Spec = #org{guid = '_',
+                 name = '_',
+                 preloaded = '_',
+                 read_only = '_',
+                 active = '_',
+                 migrated = nodes_failed,
+                 worker = '_', 
+                 time = '_'},
+    ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
+
+error_nodes() ->
+    ?fix_table(error_nodes, dets:foldl(fun(E,A) -> [E|A] end, [], error_nodes)).
 
 summarize_time() ->
     {Sum, Max, N} =
