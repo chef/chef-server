@@ -253,9 +253,12 @@ preload_orgs(BatchSize, State) ->
 load_org_nodes([], State) ->
     {ok, State};
 load_org_nodes([{OrgId, OrgName}|T], #state{couch_cn=Cn}=State) ->
+    log(info, "~s: preloading node data", [OrgName]),
     NodeList = chef_otto:fetch_nodes_with_ids(Cn, OrgId),
+    log(info, "~s: found ~B nodes for preloading", [OrgName, length(NodeList)]),
     [store_node(Cn, OrgName, OrgId, NodeId, NodeName) || {NodeName, NodeId} <- NodeList],
     mark_org(preload, OrgId),
+    log(info, "~s: preloading complete", [OrgName]),
     load_org_nodes(T, State).
 
 find_preload_candidates(BatchSize) ->
