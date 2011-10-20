@@ -131,7 +131,7 @@ start_batch(timeout, #state{workers = 0,
         {Orgs, OrgsRest} ->
             %% Tell darklaunch to put these orgs into read-only
             %% mode for nodes.
-            ok = darklaunch_disable_node_writes([ Name || {_, Name} <- Orgs ]),
+            darklaunch_read_only_nodes([ Name || {_, Name} <- Orgs ], true),
             [ mark_org(read_only, OrgId) || {OrgId, _} <- Orgs ],
             case start_workers(Orgs, NodeBatchSize) of
                 0 ->
@@ -200,7 +200,7 @@ handle_info({'DOWN', _MRef, process, Pid, _Failed}, StateName,
             log(err, "nodes failed for org ~s", [Org#org.name]),
             %% this org has failed nodes.  To minimize downtime for this org, we will fail
             %% the migration and turn on writes back in couch-land.
-            darklaunch_enable_node_writes(Org#org.name),
+            darklaunch_read_only_nodes(Org#org.name, false),
             WorkerCount = Workers - 1,
             NextState = case WorkerCount > 0 of
                             true -> StateName;
@@ -486,27 +486,46 @@ format_response(Orgs) ->
     OrgNames = [ Org#org.name || Org <- Orgs ],
     ejson:encode({[{<<"couch-orgs">>, OrgNames}]}).
 
-
-darklaunch_enable_node_writes(OrgName) when is_binary(OrgName) ->
-    darklaunch_enable_node_writes([OrgName]);
-darklaunch_enable_node_writes(OrgNames) ->
+darklaunch_read_only_nodes(OrgName, Value) when is_binary(OrgName) ->
+    darklaunch_read_only_nodes([OrgName], Value);
+darklaunch_read_only_nodes(OrgNames, Value) ->
     case is_dry_run() of
         true ->
-            log(info, "FAKE enable node writes for ~B org via darklaunch",
-                [length(OrgNames)]),
+            log(info, "FAKE darklaunch disabling node writes for: ~256P",
+                [OrgNames, 200]),
             ok;
         false ->
-            error(implement_me)
+            Res = [ update_darklaunch("nodes_read_only", Org, Value) || Org <- OrgNames ],
+            case lists:all(fun(X) -> X =:= ok end, Res) of
+                true ->
+                    log(info, "darklaunch (read_only_nodes: ~s) for: ~256P",
+                        [Value, OrgNames, 200]);
+                false ->
+                    log(err, "darklaunch (read_only_nodes: ~s) FAILED for (~256P)",
+                        [Value, OrgNames, 200]),
+                    throw(darklaunch_disable_node_writes_failed)
+            end
     end.
 
-darklaunch_disable_node_writes(OrgNames) ->
-    
-    case is_dry_run() of
-        true ->
-            log(info, "FAKE darklaunch disabling node writes for: ~256P", [OrgNames, 10]),
-            ok;
-        false ->
-            error(implement_me)
+update_darklaunch(Feature, Org, Value) ->
+    {ok, Urls} = application:get_env(mover, darklaunch_urls),
+    Res = [ post_to_darklaunch(Url, Feature, Org, Value) || Url <- Urls ],
+    case lists:all(fun(X) -> X =:= ok end, Res) of
+        true -> ok;
+        false -> error
+    end.
+
+post_to_darklaunch(Url, Feature, Org, Value) when Value =:= true;
+                                                  Value =:= false ->
+    Url1 = binary_to_list(iolist_to_binary([Url, "/", Feature, "/", Org])),
+    Body = iolist_to_binary(["{\"enabled\":", atom_to_list(Value), "}"]),
+    Headers = [{"content-type", "application/json"}],
+    IbrowseOpts = [{ssl_options, []}, {response_format, binary}],
+    case ibrowse:send_req(Url1, Headers, post, Body, IbrowseOpts) of
+        {ok, [$2, $0|_], _H, _Body} -> ok;
+        Error ->
+            error_logger:error_msg("post_to_darklaunch failed ~p", [Error]),
+            {error, Error}
     end.
 
 is_dry_run() ->
