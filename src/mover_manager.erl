@@ -14,7 +14,7 @@
          mark_node/2,
          mark_node/3,
          mark_org_time/2,
-         store_node/4,
+         store_node/5,
          make_worker_config/3
         ]).
 
@@ -251,9 +251,9 @@ preload_orgs(BatchSize, State) ->
 
 load_org_nodes([], State) ->
     {ok, State};
-load_org_nodes([{OrgId, _Name}|T], #state{couch_cn=Cn}=State) ->
+load_org_nodes([{OrgId, OrgName}|T], #state{couch_cn=Cn}=State) ->
     NodeList = chef_otto:fetch_nodes_with_ids(Cn, OrgId),
-    [store_node(Cn, OrgId, NodeId, NodeName) || {NodeName, NodeId} <- NodeList],
+    [store_node(Cn, OrgName, OrgId, NodeId, NodeName) || {NodeName, NodeId} <- NodeList],
     mark_org(preload, OrgId),
     load_org_nodes(T, State).
 
@@ -277,33 +277,29 @@ find_preload_candidates(BatchSize) ->
             {ok, Orgs}
     end.
 
-store_node(Cn, OrgId, NodeId, NodeName) ->
-    case chef_otto:fetch_by_name(Cn, OrgId, NodeName, authz_node) of
-        {ok, MixlibNode} ->
-            MixlibId = ej:get({<<"_id">>}, MixlibNode),
-            %% Note that this can return a {not_found, _} tuple so we use status_for_ids to
-            %% validate that we have binaries and otherwise mark node as an error.
-            AuthzId = chef_otto:fetch_auth_join_id(Cn, MixlibId, user_to_auth),
-            RequestorId = ej:get({<<"requester_id">>}, MixlibNode),
-            Node = #node{id = NodeId,
+store_node(Cn, OrgName, OrgId, NodeId, NodeName) ->
+    Node = case chef_otto:fetch_by_name(Cn, OrgId, NodeName, authz_node) of
+               {ok, MixlibNode} ->
+                   MixlibId = ej:get({<<"_id">>}, MixlibNode),
+                   %% Note that this can return a {not_found, _} tuple so we use
+                   %% status_for_ids to validate that we have binaries and otherwise mark
+                   %% node as an error.
+                   AuthzId = chef_otto:fetch_auth_join_id(Cn, MixlibId, user_to_auth),
+                   RequestorId = ej:get({<<"requester_id">>}, MixlibNode),
+                   #node{id = NodeId,
                          name = NodeName,
                          org_id = OrgId,
                          authz_id = AuthzId,
                          requestor = RequestorId,
-                         status = status_for_ids(AuthzId, RequestorId)},
-            dets:insert(all_nodes, Node),
-            log_node_stored(Node),
-            Node;
-        Error ->
-            Node = #node{id = NodeId,
+                         status = status_for_ids(AuthzId, RequestorId)};
+               Error ->
+                   #node{id = NodeId,
                          name = NodeName,
                          org_id = OrgId,
-                         status = status_for_error(Error)},
-            dets:insert(error_nodes, Node),
-            dets:insert(all_nodes, Node),
-            log_node_stored(Node),
-            Node
-    end.
+                         status = status_for_error(Error)}
+           end,
+    dets:insert(all_nodes, Node),
+    log_node_stored(OrgName, Node).
 
 status_for_error({not_found, authz_node}) ->
     {error, {missing_authz, no_mixlib_doc}};
@@ -531,12 +527,21 @@ log(Level, Fmt, Args) when is_list(Args) ->
     Id = pid_to_list(self()),
     fast_log:Level(mover_manager_log, Id, Fmt, Args).
 
-log_node_stored(#node{id=Id, name=Name, org_id=OrgId, status=couchdb}) ->
+log_node_stored(OrgName, #node{status=couchdb, id=Id, name=Name, org_id=OrgId}) ->
     Self = pid_to_list(self()),
-    fast_log:info(node_errors, Self, "authz data loaded: ~s ~s ~s", [Id, Name, OrgId]);
-log_node_stored(#node{id=Id, name=Name, org_id=OrgId, status={error, Why}}) ->
+    fast_log:info(node_errors, Self, "node authz ok: ~s ~s ~s ~s",
+                  [OrgName, Name, OrgId, Id]);
+log_node_stored(OrgName, #node{status={error, {missing_authz, Type}},
+                               id=Id, name=Name, org_id=OrgId}=Node) ->
+    dets:insert(error_nodes, Node),
     Self = pid_to_list(self()),
-    fast_log:err(node_errors, Self, "missing authz data: ~s ~s ~s ~p", [Id, Name, OrgId, Why]).
+    fast_log:err(node_errors, Self, "missing authz data (~p): ~s ~s ~s ~s",
+                 [Type, OrgName, Name, OrgId, Id]);
+log_node_stored(OrgName, #node{status={error, Why}, id=Id, name=Name, org_id=OrgId}=Node) ->
+    dets:insert(error_nodes, Node),
+    Self = pid_to_list(self()),
+    fast_log:err(node_errors, Self, "node authz fail: ~s ~s ~s ~s ~p",
+                 [OrgName, Name, OrgId, Id, Why]).
 
 safe_split(N, L) ->
     try

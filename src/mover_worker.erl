@@ -288,7 +288,7 @@ fetch_meta_data_for_nodes(S, OrgName, OrgId, [{Name, Id}|Rest], {Acc, Skip}) ->
                [] ->
                    %% node data not found in cache, attempt to look it up
                    %% here.
-                   case mover_manager:store_node(S, OrgId, Id, Name) of
+                   case mover_manager:store_node(S, OrgName, OrgId, Id, Name) of
                        #node{status = couchdb}=Node ->
                            {[Node|Acc], Skip};
                        #node{status = {error, {missing_authz, _}},
