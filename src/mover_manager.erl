@@ -140,7 +140,8 @@ start_batch(timeout, #state{workers = 0,
                     {next_state, ready, State};
                 Count ->
                     BatchesLeft = Batches - 1,
-                    log(info, "~B workers ok, ~B batches to go", [Count, BatchesLeft]),
+                    log(info, "~B workers ok, ~B batches to go, ~B candidate orgs",
+                        [Count, BatchesLeft, length(OrgsRest)]),
                     State1 = State#state{workers=Count, batches = BatchesLeft,
                                          orgs_to_migrate = OrgsRest},
                     {next_state, running, State1}
