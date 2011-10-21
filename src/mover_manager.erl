@@ -493,20 +493,23 @@ route_orgs_to_erchef_sql() ->
     end.
 
 fake_post_to_nginx(_Url, _Body) ->
-    %% error_logger:info_msg("fake POST of data to nginx at ~s~n~p~n", [Url, Body]),
     ok.
 
 post_to_nginx(Url, Body) ->
-    Headers = [{"content-type", "application/json"}],
+    Headers = [{"Content-Type", "application/json"},
+               {"Accept", "application/json"}],
     IbrowseOpts = [{ssl_options, []}, {response_format, binary}],
     case ibrowse:send_req(Url, Headers, post, Body, IbrowseOpts) of
         {ok, [$2, $0|_], _H, _Body} -> ok;
-        Error -> {error, Error}
+        Error ->
+            log(err, "post_to_nginx failed: ~256P", [Error, 100]),
+            error_logger:error_msg("post_to_nginx failed: ~p~n", [Error]),
+            {error, Error}
     end.
 
 format_response(Orgs) ->
     OrgNames = [ Org#org.name || Org <- Orgs ],
-    ejson:encode({[{<<"couch-orgs">>, OrgNames}]}).
+    ejson:encode({[{<<"couchdb_orgs">>, OrgNames}]}).
 
 darklaunch_read_only_nodes(OrgName, Value) when is_binary(OrgName) ->
     darklaunch_read_only_nodes([OrgName], Value);
