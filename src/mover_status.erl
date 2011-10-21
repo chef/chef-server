@@ -22,7 +22,10 @@ org_by_name(Name) ->
                  time = '_'},
     ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
 
-migration_time(Name) ->
+migration_time(#org{}=Org) ->
+    [{total, time_diff(Org#org.time, start, stop)},
+     {nodes, time_diff(Org#org.time, start, nodes_done)}];
+migration_time(Name) when is_binary(Name) ->
      Spec = #org{guid = '_',
                  name = Name,
                  preloaded = '_',
@@ -33,8 +36,7 @@ migration_time(Name) ->
                  time = '_'},
     case ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)) of
         [Org] ->
-            [{total, time_diff(Org#org.time, start, stop)},
-             {nodes, time_diff(Org#org.time, start, nodes_done)}];
+            migration_time(Org);
         [] -> not_found;
         Error -> Error
     end.
