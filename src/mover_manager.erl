@@ -174,8 +174,15 @@ handle_info({'DOWN', _MRef, process, Pid, normal}, StateName,
             %% only for accounting so that we can find orgs that are migrated, but not
             %% turned on in nginx later.
             case route_orgs_to_erchef_sql() of
-                ok -> mark_org(not_read_only, Org#org.guid);
-                _Ignore -> ok
+                ok ->
+                    %% marking not_read_only sets stop time on org
+                    Org1 = mark_org(not_read_only, Org#org.guid),
+                    Total = proplists:get_value(total, mover_status:migration_time(Org1)),
+                    log(info, "~s routed to erchef. Migration time: ~256P",
+                        [Org1#org.name, Total, 50]);
+                _Ignore ->
+                    log(err, "~s FAILED to route to erchef", [Org#org.name]),
+                    ok
             end,
             WorkerCount = Workers - 1,
             State1 = State#state{workers = WorkerCount},
