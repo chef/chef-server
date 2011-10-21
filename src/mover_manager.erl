@@ -544,11 +544,14 @@ post_to_darklaunch(Url, Feature, Org, Value) when Value =:= true;
                                                   Value =:= false ->
     Url1 = binary_to_list(iolist_to_binary([Url, "/", Feature, "/", Org])),
     Body = iolist_to_binary(["{\"enabled\":", atom_to_list(Value), "}"]),
-    Headers = [{"content-type", "application/json"}],
+    Headers = [{"Content-Type", "application/json"},
+               {"Accept", "application/json"}],
     IbrowseOpts = [{ssl_options, []}, {response_format, binary}],
     case ibrowse:send_req(Url1, Headers, post, Body, IbrowseOpts) of
         {ok, [$2, $0|_], _H, _Body} -> ok;
         Error ->
+            log(err, "post_to_darklaunch failed ~s, enable:~s, reason:~256P",
+                [Url1, Value, Error, 100]),
             error_logger:error_msg("post_to_darklaunch failed ~p", [Error]),
             {error, Error}
     end.
