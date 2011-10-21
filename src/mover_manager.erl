@@ -330,7 +330,8 @@ mark_org(preload, OrgId) ->
             ok;
         [Org] ->
             Org1 = Org#org{preloaded=true},
-            dets:insert(all_orgs, Org1)
+            ok = dets:insert(all_orgs, Org1),
+            Org1
     end;
 mark_org(read_only, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
@@ -340,7 +341,8 @@ mark_org(read_only, OrgId) ->
             StartTime = {start, os:timestamp()},
             Time = [StartTime|Org#org.time],
             Org1 = Org#org{read_only=true, time = Time},
-            dets:insert(all_orgs, Org1)
+            ok = dets:insert(all_orgs, Org1),
+            Org1
     end;
 mark_org(not_read_only, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
@@ -350,7 +352,8 @@ mark_org(not_read_only, OrgId) ->
             EndTime = {stop, os:timestamp()},
             Time = [EndTime|Org#org.time],
             Org1 = Org#org{read_only=false, time = Time},
-            dets:insert(all_orgs, Org1)
+            ok = dets:insert(all_orgs, Org1),
+            Org1
     end;
 mark_org(migrated, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
@@ -358,7 +361,8 @@ mark_org(migrated, OrgId) ->
             ok;
         [Org] ->
             Org1 = Org#org{migrated=true, active=false, worker=undefined},
-            dets:insert(all_orgs, Org1)
+            ok = dets:insert(all_orgs, Org1),
+            Org1
     end;
 mark_org(nodes_failed, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
@@ -366,7 +370,8 @@ mark_org(nodes_failed, OrgId) ->
             ok;
         [Org] ->
             Org1 = Org#org{migrated=nodes_failed, worker=undefined},
-            dets:insert(all_orgs, Org1)
+            ok = dets:insert(all_orgs, Org1),
+            Org1
     end.
 
 mark_org_time(Tag, OrgId) ->
@@ -375,7 +380,8 @@ mark_org_time(Tag, OrgId) ->
             ok;
         [Org] ->
             Org1 = Org#org{time = [{Tag, os:timestamp()}|Org#org.time]},
-            dets:insert(all_orgs, Org1)
+            ok = dets:insert(all_orgs, Org1),
+            Org1
     end.
 
 mark_org(active, OrgId, WorkerPid) ->
@@ -384,25 +390,34 @@ mark_org(active, OrgId, WorkerPid) ->
             ok;
         [Org] ->
             Org1 = Org#org{active=true, worker=WorkerPid},
-            dets:insert(all_orgs, Org1)
+            ok = dets:insert(all_orgs, Org1),
+            Org1
     end.
 
 mark_node(complete, Id) ->
     case dets:lookup(all_nodes, Id) of
         [] -> ok;
-        [Node] -> dets:insert(all_nodes, Node#node{status = mysql, solr = both})
+        [Node] ->
+            Node1 = Node#node{status = mysql, solr = both},
+            ok = dets:insert(all_nodes, Node1),
+            Node1
     end;
 mark_node(solr_clean, Id) ->
     case dets:lookup(all_nodes, Id) of
         [] -> ok;
         [#node{status = mysql, solr = both} = Node] ->
-            dets:insert(all_nodes, Node#node{solr = mysql})
+            Node1 = Node#node{solr = mysql},
+            ok = dets:insert(all_nodes, Node1),
+            Node1
     end.
 
 mark_node(error, Id, Why) ->
     case dets:lookup(all_nodes, Id) of
         [] -> ok;
-        [Node] -> dets:insert(all_nodes, Node#node{status = {error, Why}})
+        [Node] ->
+            Node1 = Node#node{status = {error, Why}},
+            ok = dets:insert(all_nodes, Node1),
+            Node1
     end.
 
 find_org_by_worker(Pid) ->
