@@ -7,7 +7,8 @@
          read_only_orgs/0,
          active_orgs/0,
          error_orgs/0,
-         error_nodes/0]).
+         error_nodes/0,
+         reset_orgs/1]).
 
 -include("mover.hrl").
 
@@ -21,6 +22,12 @@ org_by_name(Name) ->
                  worker = '_',
                  time = '_'},
     ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
+
+reset_orgs(Orgs) ->
+    [ dets:insert(all_orgs, Org#org{active = false,
+                                    migrated = false,
+                                    worker = undefined})
+      || Org <- Orgs].
 
 migration_time(#org{}=Org) ->
     [{total, time_diff(Org#org.time, start, stop)},
