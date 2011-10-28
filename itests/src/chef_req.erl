@@ -51,9 +51,10 @@ request(Method, Path, Body, ReqConfig) ->
 
 request(Method, Path, Headers, Body, 
         #req_config{api_root = ApiRoot, name = Name, private_key = Private}) ->
-    {Url, FullHeaders} = Headers ++ make_headers(method_to_bin(Method), ApiRoot, Path,
-                                  Name, Private, Body),
-    ibrowse:send_req(Url, FullHeaders, Method, Body, ?ibrowse_opts).
+    {Url, FullHeaders} = make_headers(method_to_bin(Method), ApiRoot, Path,
+				      Name, Private, Body),
+    FullHeaders1 = Headers ++ FullHeaders,
+    ibrowse:send_req(Url, FullHeaders1, Method, Body, ?ibrowse_opts).
 
 missing_header_request(Header, Method, Path, Body,
                        #req_config{api_root = ApiRoot, name = Name, private_key = Private}) ->
