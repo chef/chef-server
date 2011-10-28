@@ -15,21 +15,26 @@ node_endpoint_test_() ->
              db_tool:connect(),
              ok = db_tool:truncate_nodes_table(),
              KeyPath = "/tmp/opscode-platform-test/clownco-org-admin.pem",
-             ReqConfig = chef_req:make_config("http://localhost",
-                                              "clownco-org-admin", KeyPath),
+             ReqConfig = chef_req:make_config("http://localhost", "clownco-org-admin", 
+					      KeyPath),
+
+	     WebuiKeyPath = "/etc/opscode/webui_priv.pem",
+	     WebuiConfig = chef_req:make_config("http://localhost", "clownco-org-admin",
+						WebuiKeyPath),
+
 
              ok = chef_req:delete_client("clownco", "client01", ReqConfig),
              ok = chef_req:delete_client("clownco", "client02", ReqConfig),
              ClientConfig = chef_req:make_client("clownco", "client01", ReqConfig),
              WeakClientConfig = chef_req:make_client("clownco", "client02", ReqConfig),
              chef_req:remove_client_from_group("clownco", "client02", "clients", ReqConfig),
-             {ReqConfig, ClientConfig, WeakClientConfig}
+             {ReqConfig, ClientConfig, WeakClientConfig, WebuiConfig}
      end,
-     fun({_, _, _}) ->
+     fun({_, _, _, _}) ->
              test_utils:nuke_nodes_from_solr(),
              test_utils:test_cleanup(ignore)
      end,
-     fun({UserConfig, ClientConfig, WeakClientConfig}) ->
+     fun({UserConfig, ClientConfig, WeakClientConfig, WebuiConfig}) ->
              [
               node_search_tests(UserConfig),
               node_search_tests(ClientConfig),
@@ -44,7 +49,8 @@ node_endpoint_test_() ->
               basic_node_create_tests_for_config(ClientConfig),
 	      node_permissions_tests(UserConfig, WeakClientConfig),
               basic_node_list_tests_for_config(UserConfig),
-              basic_node_list_tests_for_config(ClientConfig)
+	      basic_node_list_tests_for_config(ClientConfig),
+	      webui_key_tests(UserConfig, WebuiConfig)
              ]
      end}}}.
 
@@ -628,6 +634,33 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
               ?assertEqual("400", Code)
       end}
     ].
+
+webui_key_tests(#req_config{name = Name}=ReqConfig,
+		#req_config{name = WebUIName}=WebUIConfig) ->
+    Label = " (" ++ WebUIName ++ ")",
+    {NodeName, NodeJson} = sample_node(),
+    Path = "/organizations/clownco/nodes",
+    [
+     {"create a new node" ++ Label,
+      fun() ->
+   	      Now = calendar:now_to_universal_time(os:timestamp()),
+	      Headers = [{"X-OPS-REQUEST-SOURCE", "web"}, 
+		         {"X-OPS-WEBKEY-TAG", "default"}],
+	      {ok, Code, _H, Body} = chef_req:request(post, Path, Headers, NodeJson, WebUIConfig),
+	      ?assertEqual("201", Code),
+	      NodeUrl = <<"http://localhost/organizations/clownco/nodes/", NodeName/binary>>,
+              Expect = ejson:encode({[{<<"uri">>, NodeUrl}]}),
+              ?assertEqual(Expect, Body),
+
+              NodeMeta = db_tool:metadata_for_node(NodeName),
+              ?assertMatch({{_,_,_},{_,_,_}}, proplists:get_value(created_at, NodeMeta)),
+              ?assertMatch({{_,_,_},{_,_,_}}, proplists:get_value(updated_at, NodeMeta)),
+              ?assert(Now < proplists:get_value(created_at, NodeMeta)),
+              ?assert(Now < proplists:get_value(updated_at, NodeMeta))
+              
+      end}
+    ].
+
 
 sample_node() ->
     sample_node(make_node_name(<<"node-">>)).
