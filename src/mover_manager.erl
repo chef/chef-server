@@ -467,7 +467,7 @@ make_worker_config(Guid, Name, BatchSize) ->
      {chef_otto, chef_otto:connect()}].
 
 list_unmigrated_orgs() ->
-    Spec = (wildcard_org_spec())#org{migrated = true, worker = undefined},
+    Spec = (wildcard_org_spec())#org{migrated = false, worker = undefined},
     ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
 
 route_orgs_to_erchef_sql() ->
