@@ -552,9 +552,9 @@ darklaunch_couchdb_nodes(OrgName, Value) when is_binary(OrgName) ->
         false ->
             case update_darklaunch("couchdb_nodes", OrgName, Value) of
                 ok ->
-                    log(info, "darklaunch (couchdb_nodes: ~s) for ~s", [Value, OrgName]);
+                    log(info, "~s darklaunch couchdb_nodes: ~s", [OrgName, Value]);
                 _Err ->
-                    log(err, "darklaunch (couchdb_nodes: ~s) FAILED for ~s", [Value, OrgName]),
+                    log(err, "~s darklaunch couchdb_nodes FAILED", [OrgName, Value]),
                     throw({darklaunch_couchdb_nodes_failed, OrgName, Value})
             end
     end.
