@@ -169,7 +169,7 @@ handle_info({'DOWN', _MRef, process, Pid, normal}, StateName,
     case find_org_by_worker(Pid) of
         #org{}=Org ->
             mark_org(migrated, Org#org.guid),
-            darklaunch_sql_nodes(Org#org.name, true),
+            darklaunch_couchdb_nodes(Org#org.name, false),
             %% the org is now marked as migrated and we regenerate the list of unmigrated
             %% orgs and send updates to our nginx lbs.  Marking the orgs as not_read_only is
             %% only for accounting so that we can find orgs that are migrated, but not
@@ -533,18 +533,18 @@ darklaunch_read_only_nodes(OrgNames, Value) ->
             end
     end.
 
-darklaunch_sql_nodes(OrgName, Value) when is_binary(OrgName) ->
+darklaunch_couchdb_nodes(OrgName, Value) when is_binary(OrgName) ->
     case is_dry_run() of
         true ->
-            log(info, "FAKE darklaunch sql_nodes: ~s for ~s", [Value, OrgName]),
+            log(info, "FAKE darklaunch couchdb_nodes: ~s for ~s", [Value, OrgName]),
             ok;
         false ->
-            case update_darklaunch("sql_nodes", OrgName, Value) of
+            case update_darklaunch("couchdb_nodes", OrgName, Value) of
                 ok ->
-                    log(info, "darklaunch (sql_nodes: ~s) for ~s", [Value, OrgName]);
+                    log(info, "darklaunch (couchdb_nodes: ~s) for ~s", [Value, OrgName]);
                 _Err ->
-                    log(err, "darklaunch (sql_nodes: ~s) FAILED for ~s", [Value, OrgName]),
-                    throw({darklaunch_sql_nodes_failed, OrgName, Value})
+                    log(err, "darklaunch (couchdb_nodes: ~s) FAILED for ~s", [Value, OrgName]),
+                    throw({darklaunch_couchdb_nodes_failed, OrgName, Value})
             end
     end.
 
