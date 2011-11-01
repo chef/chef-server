@@ -322,7 +322,8 @@ store_node(Cn, OrgName, OrgId, NodeId, NodeName) ->
                          status = status_for_error(Error)}
            end,
     dets:insert(all_nodes, Node),
-    log_node_stored(OrgName, Node).
+    log_node_stored(OrgName, Node),
+    Node.
 
 status_for_error({not_found, authz_node}) ->
     {error, {missing_authz, no_mixlib_doc}};
