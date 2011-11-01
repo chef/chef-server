@@ -13,14 +13,7 @@
 -include("mover.hrl").
 
 org_by_name(Name) ->
-     Spec = #org{guid = '_',
-                 name = Name,
-                 preloaded = '_',
-                 read_only = '_',
-                 active = '_',
-                 migrated = '_',
-                 worker = '_',
-                 time = '_'},
+    Spec = ?wildcard_org_spec#org{name = Name},
     ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
 
 reset_orgs(Orgs) ->
@@ -33,14 +26,7 @@ migration_time(#org{}=Org) ->
     [{total, time_diff(Org#org.time, start, stop)},
      {nodes, time_diff(Org#org.time, start, nodes_done)}];
 migration_time(Name) when is_binary(Name) ->
-     Spec = #org{guid = '_',
-                 name = Name,
-                 preloaded = '_',
-                 read_only = '_',
-                 active = '_',
-                 migrated = '_',
-                 worker = '_', 
-                 time = '_'},
+    Spec = ?wildcard_org_spec#org{name = Name},
     case ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)) of
         [Org] ->
             migration_time(Org);
@@ -49,36 +35,15 @@ migration_time(Name) when is_binary(Name) ->
     end.
 
 read_only_orgs() ->
-     Spec = #org{guid = '_',
-                 name = '_',
-                 preloaded = '_',
-                 read_only = true,
-                 active = '_',
-                 migrated = '_',
-                 worker = '_', 
-                 time = '_'},
+     Spec = ?wildcard_org_spec#org{read_only = true},
     ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
 
 active_orgs() ->
-     Spec = #org{guid = '_',
-                 name = '_',
-                 preloaded = '_',
-                 read_only = '_',
-                 active = true,
-                 migrated = '_',
-                 worker = '_', 
-                 time = '_'},
+    Spec = ?wildcard_org_spec#org{active = true},
     ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
 
 error_orgs() ->
-     Spec = #org{guid = '_',
-                 name = '_',
-                 preloaded = '_',
-                 read_only = '_',
-                 active = '_',
-                 migrated = nodes_failed,
-                 worker = '_', 
-                 time = '_'},
+    Spec = ?wildcard_org_spec#org{error = true},
     ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
 
 error_nodes() ->
@@ -130,7 +95,7 @@ summarize_orgs() ->
                                    NReadOnly + as_number(Org#org.read_only),
                                    NActive + as_number(Org#org.active),
                                    NMigrated + as_number(Org#org.migrated),
-                                   NError + error_count(Org)}
+                                   NError + as_number(Org#org.error)}
                           end, {0, 0, 0, 0, 0, 0}, all_orgs)),
     Labels = [total, preloaded, read_only, active, migrated, error],
     lists:zip(Labels, tuple_to_list(Counts)).
@@ -138,11 +103,6 @@ summarize_orgs() ->
 preloaded_count(#org{preloaded=true, migrated = false}) ->
     1;
 preloaded_count(#org{}) ->
-    0.
-
-error_count(#org{migrated = nodes_failed}) ->
-    1;
-error_count(#org{}) ->
     0.
 
 as_number(true) ->

@@ -41,15 +41,14 @@
 -define(DETS_OPTS(EstSize), [{auto_save, 1000},
                              {keypos, 2},
                              {estimated_no_objects, EstSize}]).
--define(ORG_SPEC(Preloaded, Active, Migrated),
-        #org{guid = '$1',
-             name = '$2',
-             preloaded = Preloaded,
-             read_only = '_',
-             active = Active,
-             migrated = Migrated,
-             worker = '_',
-             time = '_'}).
+-define(ORG_SPEC(Preloaded, Active, Migrated, Error),
+        ?wildcard_org_spec#org{
+           guid = '$1',
+           name = '$2',
+           preloaded = Preloaded,
+           active = Active,
+           migrated = Migrated,
+           error = Error}).
 
 -record(state, {couch_cn,
                 preload_amt,
@@ -95,8 +94,8 @@ preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
     log(info, "preloading nodes for ~B orgs", [Amt]),
     case preload_orgs(Amt, State) of
         {ok, State1} ->
-            {Preloaded, Active, Migrated} = {true, false, false},
-            Spec = ?ORG_SPEC(Preloaded, Active, Migrated),
+            {Preloaded, Active, Migrated, Error} = {true, false, false, false},
+            Spec = ?ORG_SPEC(Preloaded, Active, Migrated, Error),
             Candidates = case ?fix_table(all_orgs, dets:match(all_orgs, Spec)) of
                              {error, Why} -> throw({error, Why});
                              Data ->
@@ -287,8 +286,8 @@ find_preload_candidates(BatchSize) ->
     %% want to preload all orgs. An alternative would be to use dets:traverse/2 doing the
     %% match "manually" and accumulating the desired number before returning {done, Value}.
     %%
-    {Preloaded, Active, Migrated} = {false, false, false},
-    Spec = ?ORG_SPEC(Preloaded, Active, Migrated),
+    {Preloaded, Active, Migrated, Error} = {false, false, false, false},
+    Spec = ?ORG_SPEC(Preloaded, Active, Migrated, Error),
     case ?fix_table(all_orgs, dets:match(all_orgs, Spec)) of
         {error, Why} ->
             {error, Why};
@@ -389,7 +388,7 @@ mark_org(nodes_failed, OrgId) ->
         [] ->
             ok;
         [Org] ->
-            Org1 = Org#org{migrated=nodes_failed, worker=undefined},
+            Org1 = Org#org{migrated=false, error=true, worker=undefined},
             ok = dets:insert(all_orgs, Org1),
             Org1
     end.
@@ -441,7 +440,7 @@ mark_node(error, Id, Why) ->
     end.
 
 find_org_by_worker(Pid) ->
-    Spec = (wildcard_org_spec())#org{worker = Pid},
+    Spec = (?wildcard_org_spec)#org{worker = Pid},
     case ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)) of
         [] ->
             error_logger:error_msg("No org found for pid ~p~n", [Pid]),
@@ -479,7 +478,7 @@ make_worker_config(Guid, Name, BatchSize) ->
      {chef_otto, chef_otto:connect()}].
 
 list_unmigrated_orgs() ->
-    Spec = (wildcard_org_spec())#org{migrated = false, worker = undefined},
+    Spec = (?wildcard_org_spec)#org{migrated = false, worker = undefined},
     ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
 
 route_orgs_to_erchef_sql() ->
@@ -633,16 +632,6 @@ post_full_darklaunch(Url, Body) ->
 is_dry_run() ->
     {ok, DryRun} = application:get_env(mover, dry_run),
     DryRun.
-
-wildcard_org_spec() ->
-    #org{guid = '_',
-         name = '_',
-         preloaded = '_',
-         read_only = '_',
-         active = '_',
-         migrated = '_',
-         worker = '_',
-         time = '_'}.
 
 log(Level, Msg) ->
     Id = pid_to_list(self()),
