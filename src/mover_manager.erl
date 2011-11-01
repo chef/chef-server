@@ -22,6 +22,7 @@
 -export([init_storage/2,
          load_orgs/2,
          preload_org_nodes/2,
+         label_orgs_in_darklaunch/2,
          ready/3,
          start_batch/2,
          running/3]).
@@ -105,11 +106,20 @@ preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
             error_logger:info_msg("org summary after preloading: ~p~n", [Summary]),
             log(info, "~256P", [Summary, 10]),
             error_logger:info_msg("preloading complete~n"),
-            {next_state, ready, State1#state{orgs_to_migrate = Candidates}};
+            {next_state, label_orgs_in_darklaunch, State1#state{orgs_to_migrate = Candidates}, 0};
         Error ->
             error_logger:error_msg("preloading failed~n"),
             {stop, Error, State}
     end.
+
+label_orgs_in_darklaunch(timeout, State) ->
+    error_logger:info_msg("marking all unmigrated orgs in nginx~n"),
+    %% this will find all unmigrated orgs and put them in the couchdb list in nginx
+    ok = route_orgs_to_erchef_sql(),
+    error_logger:info_msg("marking all unmigrated orgs in darklaunch 'couchdb_nodes'~n"),
+    ok = darklaunch_couchdb_nodes_for_all(),
+    error_logger:info_msg("ready for action~n"),
+    {next_state, ready, State}.
 
 ready({start, NumBatches, OrgsPerBatch, NodeBatchSize}, _From,
       #state{workers = 0, batches = 0}=State) ->
@@ -569,6 +579,52 @@ post_to_darklaunch(Url, Feature, Org, Value) when Value =:= true;
             log(err, "post_to_darklaunch failed ~s, enable:~s, reason:~256P",
                 [Url1, Value, Error, 100]),
             error_logger:error_msg("post_to_darklaunch failed ~p", [Error]),
+            {error, Error}
+    end.
+
+%% Fetch darklaunch state from first darklaunch server in list. Modify the couchdb_nodes key
+%% to contain all unmigrated orgs. POST this full config to all darklaunch servers.
+darklaunch_couchdb_nodes_for_all() ->
+    case is_dry_run() of
+        true ->
+            log(info, "FAKE darklaunch_couchdb_nodes_for_all"),
+            ok;
+        false ->
+            {ok, Urls} = application:get_env(mover, darklaunch_urls),
+            Darklaunch0 = get_darklaunch_state(hd(Urls)),
+            OrgList = list_unmigrated_orgs(),
+            log(info, "adding ~B orgs to darklaunch couchdb_nodes", [length(OrgList)]),
+            Darklaunch = ej:set({<<"couchdb_nodes">>}, Darklaunch0, OrgList),
+            Body = ejson:encode(Darklaunch),
+            Res = [ post_full_darklaunch(Url, Body) || Url <- Urls ],
+            case lists:all(fun(X) -> X =:= ok end, Res) of
+                true -> ok;
+                false -> error
+            end
+    end.
+
+get_darklaunch_state(Url) ->
+    Headers = [{"Accept", "application/json"}],
+    IbrowseOpts = [{ssl_options, []}, {response_format, binary}],
+    case ibrowse:send_req(Url, Headers, get, [], IbrowseOpts) of
+        {ok, "200", _H, Body} -> ejson:decode(Body);
+        Error ->
+            log(err, "get_darklaunch_state failed ~s, reason:~256P",
+                [Url, Error, 100]),
+            error_logger:error_msg("get_darklaunch_state failed ~p", [Error]),
+            {error, Error}
+    end.
+
+post_full_darklaunch(Url, Body) ->
+    Headers = [{"Content-Type", "application/json"},
+               {"Accept", "application/json"}],
+    IbrowseOpts = [{ssl_options, []}, {response_format, binary}],
+    case ibrowse:send_req(Url, Headers, post, Body, IbrowseOpts) of
+        {ok, [$2, $0|_], _H, _Body} -> ok;
+        Error ->
+            log(err, "post_full_darklaunch failed ~s, reason:~256P",
+                [Url, Error, 100]),
+            error_logger:error_msg("post_full_darklaunch failed ~p", [Error]),
             {error, Error}
     end.
 
