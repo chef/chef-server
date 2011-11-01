@@ -72,6 +72,7 @@ init([PreloadAmt]) ->
     {ok, init_storage, #state{preload_amt=PreloadAmt}, 0}.
 
 init_storage(timeout, State) ->
+    error_logger:info_msg("dry_run is ~p~n", [is_dry_run()]),
     error_logger:info_msg("initializing migration storage~n"),
     log(info, "initializing migration storage"),
     {ok, _} = dets:open_file(all_orgs, ?DETS_OPTS(?ORG_ESTIMATE)),
