@@ -8,7 +8,7 @@ search_endpoint_test_() ->
      fun() ->
              ok = chef_req:start_apps(),
              KeyPath = "/tmp/opscode-platform-test/clownco-org-admin.pem",
-             ReqConfig = chef_req:make_config("http://localhost",
+             ReqConfig = chef_req:make_config("http://localhost:9021",
                                               "clownco-org-admin", KeyPath),
              chef_req:delete_client("clownco", "searchclient01", ReqConfig),
              ClientConfig = chef_req:make_client("clownco", "searchclient01", ReqConfig),
@@ -109,7 +109,7 @@ search_tests(#req_config{name = Name}=ReqConfig) ->
      {"bad key" ++ Label,
       fun() ->
               KeyPath = "../test/akey.pem",
-              Config = chef_req:make_config("http://localhost", Name, KeyPath),
+              Config = chef_req:make_config("http://localhost:9021", Name, KeyPath),
               Path = search_path("clownco", "node", "no_field:not_exist"),
               {ok, "401", _H, Body} = chef_req:request(get, Path, Config),
               Expect = iolist_to_binary(["{\"error\":[\"'",

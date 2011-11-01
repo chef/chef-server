@@ -15,11 +15,11 @@ node_endpoint_test_() ->
              db_tool:connect(),
              ok = db_tool:truncate_nodes_table(),
              KeyPath = "/tmp/opscode-platform-test/clownco-org-admin.pem",
-             ReqConfig = chef_req:make_config("http://localhost", "clownco-org-admin", 
+             ReqConfig = chef_req:make_config("http://localhost:9021", "clownco-org-admin", 
 					      KeyPath),
 
 	     WebuiKeyPath = "/etc/opscode/webui_priv.pem",
-	     WebuiConfig = chef_req:make_config("http://localhost", "clownco-org-admin",
+	     WebuiConfig = chef_req:make_config("http://localhost:9021", "clownco-org-admin",
 						WebuiKeyPath),
 
 
@@ -582,7 +582,7 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
               Now = calendar:now_to_universal_time(os:timestamp()),
               {ok, Code, _H, Body} = chef_req:request(post, Path, NodeJson, ReqConfig),
               ?assertEqual("201", Code),
-              NodeUrl = <<"http://localhost/organizations/clownco/nodes/", NodeName/binary>>,
+              NodeUrl = <<"http://localhost:9021/organizations/clownco/nodes/", NodeName/binary>>,
               Expect = ejson:encode({[{<<"uri">>, NodeUrl}]}),
               ?assertEqual(Expect, Body),
 
@@ -648,7 +648,7 @@ webui_key_tests(#req_config{name = Name}=ReqConfig,
 		         {"X-OPS-WEBKEY-TAG", "default"}],
 	      {ok, Code, _H, Body} = chef_req:request(post, Path, Headers, NodeJson, WebUIConfig),
 	      ?assertEqual("201", Code),
-	      NodeUrl = <<"http://localhost/organizations/clownco/nodes/", NodeName/binary>>,
+	      NodeUrl = <<"http://localhost:9021/organizations/clownco/nodes/", NodeName/binary>>,
               Expect = ejson:encode({[{<<"uri">>, NodeUrl}]}),
               ?assertEqual(Expect, Body),
 
