@@ -477,8 +477,11 @@ make_worker_config(Guid, Name, BatchSize) ->
     [{org_name, Name}, {org_id, Guid}, {batch_size, BatchSize},
      {chef_otto, chef_otto:connect()}].
 
+%% @doc Return a list of #org{} records corresponding to orgs that have not been
+%% migrated. This includes orgs that have had an error or are being actively migrated.
+%%
 list_unmigrated_orgs() ->
-    Spec = (?wildcard_org_spec)#org{migrated = false, worker = undefined},
+    Spec = (?wildcard_org_spec)#org{migrated = false},
     ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
 
 route_orgs_to_erchef_sql() ->
