@@ -593,7 +593,7 @@ darklaunch_couchdb_nodes_for_all() ->
         false ->
             {ok, Urls} = application:get_env(mover, darklaunch_urls),
             Darklaunch0 = get_darklaunch_state(hd(Urls)),
-            OrgList = list_unmigrated_orgs(),
+            OrgList = [ Org#org.name || Org <- list_unmigrated_orgs() ],
             log(info, "adding ~B orgs to darklaunch couchdb_nodes", [length(OrgList)]),
             Darklaunch = ej:set({<<"couchdb_nodes">>}, Darklaunch0, OrgList),
             Body = ejson:encode(Darklaunch),
