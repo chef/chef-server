@@ -19,22 +19,20 @@
         {Module, {Module, start_link, Args}, permanent,
          infinity, supervisor, [Module]}).
 
--define(DRY_RUN(X), case application:get_env(mover, dry_run) =:= {ok, true} of
-                        true ->
-                            [];
-                        false ->
-                            X
-                    end).
-
 start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
     {ok, PreloadCount} = application:get_env(mover, preload_org_count),
-    {ok, RedisHost} = application:get_env(mover, redis_host),
-    {ok, RedisPort} = application:get_env(mover, redis_port),
-    {ok, RedisConns} = application:get_env(mover, redis_conns),
-    Children = lists:flatten([?CHILD_SUP(mover_worker_sup, []),
-                              ?DRY_RUN(?CHILD_SUP(erldis_pool_sup, [{{RedisHost, RedisPort}, RedisConns}])),
-                              ?CHILD(mover_manager, [PreloadCount], 5000)]),
+    Children0 = [?CHILD_SUP(mover_worker_sup, []),
+                 ?CHILD(mover_manager, [PreloadCount], 5000)],
+    Children = case application:get_env(mover, dry_run) of
+                   {ok, true} ->
+                       Children0;
+                   {ok, false} ->
+                       {ok, RedisHost} = application:get_env(mover, redis_host),
+                       {ok, RedisPort} = application:get_env(mover, redis_port),
+                       {ok, RedisConns} = application:get_env(mover, redis_conns),
+                       [?CHILD_SUP(erldis_pool_sup, [{{RedisHost, RedisPort}, RedisConns}])|Children0]
+               end,
     {ok, {{one_for_one, 10, 10}, Children}}.
