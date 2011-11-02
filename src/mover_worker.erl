@@ -54,9 +54,6 @@
           %% from the nodes in couch_nodes for final comparison.
           skip_nodes = [],
 
-          %% connection tuple for redis
-          redis,
-
           %% directory where worker logs get written.  These logs are outside of fast_log
           %% and may not be needed.
           log_dir}).
@@ -82,7 +79,6 @@ init(Config) ->
                                       org_id = OrgId,
                                       batch_size = BatchSize,
                                       chef_otto = Otto,
-                                      redis = mover_redis:connect(),
                                       log_dir = <<"node_migration_log/", OrgName/binary>>}}.
 
 mark_migration_start(start, #state{org_name = OrgName}=State) ->
@@ -91,12 +87,12 @@ mark_migration_start(start, #state{org_name = OrgName}=State) ->
 
 verify_read_only(timeout, State) ->
     verify_read_only(0, State);
-verify_read_only(N, #state{org_name = OrgName, redis = Redis}=State)
+verify_read_only(N, #state{org_name = OrgName}=State)
   when is_integer(N) andalso N =< ?MAX_INFLIGHT_CHECKS ->
-    case mover_redis:inflight_requests_for_org(Redis, OrgName) of
+    case mover_redis:inflight_requests_for_org(OrgName) of
         [] ->
             log(info, OrgName, "no in-flight writes, proceeding"),
-            mover_redis:delete_tracking(Redis, OrgName),
+            mover_redis:delete_tracking(OrgName),
             {next_state, get_node_list, State, 0};
         _Pids ->
             log(info, OrgName, "waiting for in-flight requests to finish"),
