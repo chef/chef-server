@@ -33,6 +33,6 @@ init([]) ->
                        {ok, RedisHost} = application:get_env(mover, redis_host),
                        {ok, RedisPort} = application:get_env(mover, redis_port),
                        {ok, RedisConns} = application:get_env(mover, redis_conns),
-                       [?CHILD_SUP(erldis_pool_sup, [{{RedisHost, RedisPort}, RedisConns}])|Children0]
+                       [?CHILD_SUP(erldis_pool_sup, [[{{RedisHost, RedisPort}, RedisConns}]])|Children0]
                end,
     {ok, {{one_for_one, 10, 10}, Children}}.
