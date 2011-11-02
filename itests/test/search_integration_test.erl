@@ -112,9 +112,10 @@ search_tests(#req_config{name = Name}=ReqConfig) ->
               Config = chef_req:make_config("http://localhost:9021", Name, KeyPath),
               Path = search_path("clownco", "node", "no_field:not_exist"),
               {ok, "401", _H, Body} = chef_req:request(get, Path, Config),
-              Expect = iolist_to_binary(["{\"error\":[\"'",
-                                         Name, "' not associated with "
-                                         "organization 'clownco'\"]}"]),
+
+              Expect = iolist_to_binary(["{\"error\":[\"Invalid signature ",
+                                         "for user or client '",
+                                         Name, "'\"]}"]),
               ?assertEqual(Expect, Body)
       end}
     ].
