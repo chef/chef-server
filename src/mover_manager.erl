@@ -565,11 +565,32 @@ darklaunch_couchdb_nodes(OrgName, Value) when is_binary(OrgName) ->
 
 update_darklaunch(Feature, Org, Value) ->
     {ok, Urls} = application:get_env(mover, darklaunch_urls),
+    scatter_to_all_darklaunch(Urls, Feature, Org, Value),
     Res = [ post_to_darklaunch(Url, Feature, Org, Value) || Url <- Urls ],
     case lists:all(fun(X) -> X =:= ok end, Res) of
         true -> ok;
         false -> error
     end.
+
+scatter_to_all_darklaunch(Urls, Feature, Org, Value) ->
+    Owner = self(),
+    Pids = [spawn_link(make_darklaunch_update_worker(Owner, Url, Feature, Org, Value)) || Url <- Urls],
+    gather_from_all_darklaunch(length(Pids), []).
+
+gather_from_all_darklaunch(0, Results) ->
+    Results;
+gather_from_all_darklaunch(Count, Results) ->
+    receive
+        {darklaunch_result, Result} ->
+            gather_from_all_darklaunch(Count - 1, [Result|Results])
+    end.
+
+make_darklaunch_update_worker(Owner, Url, Feature, Org, Value) ->
+    fun() ->
+            Result = post_to_darklaunch(Url, Feature, Org, Value),
+            Owner ! {darklaunch_result, Result} end.
+
+
 
 post_to_darklaunch(Url, Feature, Org, Value) when Value =:= true;
                                                   Value =:= false ->
