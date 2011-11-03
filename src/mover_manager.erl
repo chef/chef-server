@@ -15,7 +15,8 @@
          mark_node/3,
          mark_org_time/2,
          store_node/5,
-         make_worker_config/3
+         make_worker_config/3,
+         darklaunch_couchdb_nodes/2
         ]).
 
 %% States
