@@ -565,8 +565,7 @@ darklaunch_couchdb_nodes(OrgName, Value) when is_binary(OrgName) ->
 
 update_darklaunch(Feature, Org, Value) ->
     {ok, Urls} = application:get_env(mover, darklaunch_urls),
-    scatter_to_all_darklaunch(Urls, Feature, Org, Value),
-    Res = [ post_to_darklaunch(Url, Feature, Org, Value) || Url <- Urls ],
+    Res = scatter_to_all_darklaunch(Urls, Feature, Org, Value),
     case lists:all(fun(X) -> X =:= ok end, Res) of
         true -> ok;
         false -> error
