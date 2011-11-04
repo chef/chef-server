@@ -8,6 +8,7 @@
          active_orgs/0,
          error_orgs/0,
          error_nodes/0,
+         set_orgs_migrated/1,
          reset_orgs/1]).
 
 -include("mover.hrl").
@@ -15,6 +16,11 @@
 org_by_name(Name) ->
     Spec = ?wildcard_org_spec#org{name = Name},
     ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)).
+
+set_orgs_migrated(Orgs) ->
+    ZeroTime = [{start, os:timestamp()}, {stop, os:timestamp()}],
+    Orgs1 = [ Org#org{migrated = true, time = ZeroTime} || Org <- Orgs ],
+    [ dets:insert(all_orgs, Org) || Org <- Orgs1 ].
 
 reset_orgs(Orgs) ->
     [ dets:insert(all_orgs, Org#org{active = false,
