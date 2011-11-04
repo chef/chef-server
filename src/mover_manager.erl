@@ -15,7 +15,8 @@
          mark_node/3,
          mark_org_time/2,
          store_node/5,
-         make_worker_config/3
+         make_worker_config/3,
+         darklaunch_couchdb_nodes/2
         ]).
 
 %% States
@@ -179,6 +180,7 @@ handle_info({'DOWN', _MRef, process, Pid, normal}, StateName,
     case find_org_by_worker(Pid) of
         #org{}=Org ->
             mark_org(migrated, Org#org.guid),
+            darklaunch_couchdb_nodes(Org#org.name, false),
             %% the org is now marked as migrated and we regenerate the list of unmigrated
             %% orgs and send updates to our nginx lbs.  Marking the orgs as not_read_only is
             %% only for accounting so that we can find orgs that are migrated, but not
@@ -534,7 +536,7 @@ darklaunch_read_only_nodes(OrgNames, Value) ->
                 [OrgNames, 200]),
             ok;
         false ->
-            Res = [mover_darklaunch:update_darklaunch("nodes_read_only", Org, Value) || Org <- OrgNames ],
+            Res = [ update_darklaunch("nodes_read_only", Org, Value) || Org <- OrgNames ],
             case lists:all(fun(X) -> X =:= ok end, Res) of
                 true ->
                     log(info, "darklaunch (read_only_nodes: ~s) for: ~256P",
@@ -544,6 +546,65 @@ darklaunch_read_only_nodes(OrgNames, Value) ->
                         [Value, OrgNames, 200]),
                     throw({darklaunch_disable_node_writes_failed, OrgNames, Value})
             end
+    end.
+
+darklaunch_couchdb_nodes(OrgName, Value) when is_binary(OrgName) ->
+    case is_dry_run() of
+        true ->
+            log(info, "FAKE darklaunch couchdb_nodes: ~s for ~s", [Value, OrgName]),
+            ok;
+        false ->
+            case update_darklaunch("couchdb_nodes", OrgName, Value) of
+                ok ->
+                    log(info, "~s darklaunch couchdb_nodes: ~s", [OrgName, Value]);
+                _Err ->
+                    log(err, "~s darklaunch couchdb_nodes FAILED", [OrgName, Value]),
+                    throw({darklaunch_couchdb_nodes_failed, OrgName, Value})
+            end
+    end.
+
+update_darklaunch(Feature, Org, Value) ->
+    {ok, Urls} = application:get_env(mover, darklaunch_urls),
+    Res = scatter_to_all_darklaunch(Urls, Feature, Org, Value),
+    case lists:all(fun(X) -> X =:= ok end, Res) of
+        true -> ok;
+        false -> error
+    end.
+
+scatter_to_all_darklaunch(Urls, Feature, Org, Value) ->
+    Owner = self(),
+    Pids = [spawn_link(make_darklaunch_update_worker(Owner, Url, Feature, Org, Value)) || Url <- Urls],
+    gather_from_all_darklaunch(length(Pids), []).
+
+gather_from_all_darklaunch(0, Results) ->
+    Results;
+gather_from_all_darklaunch(Count, Results) ->
+    receive
+        {darklaunch_result, Result} ->
+            gather_from_all_darklaunch(Count - 1, [Result|Results])
+    end.
+
+make_darklaunch_update_worker(Owner, Url, Feature, Org, Value) ->
+    fun() ->
+            Result = post_to_darklaunch(Url, Feature, Org, Value),
+            Owner ! {darklaunch_result, Result} end.
+
+
+
+post_to_darklaunch(Url, Feature, Org, Value) when Value =:= true;
+                                                  Value =:= false ->
+    Url1 = binary_to_list(iolist_to_binary([Url, "/", Feature, "/", Org])),
+    Body = iolist_to_binary(["{\"enabled\":", atom_to_list(Value), "}"]),
+    Headers = [{"Content-Type", "application/json"},
+               {"Accept", "application/json"}],
+    IbrowseOpts = [{ssl_options, []}, {response_format, binary}],
+    case ibrowse:send_req(Url1, Headers, post, Body, IbrowseOpts) of
+        {ok, [$2, $0|_], _H, _Body} -> ok;
+        Error ->
+            log(err, "post_to_darklaunch failed ~s, enable:~s, reason:~256P",
+                [Url1, Value, Error, 100]),
+            error_logger:error_msg("post_to_darklaunch failed ~p", [Error]),
+            {error, Error}
     end.
 
 %% Fetch darklaunch state from first darklaunch server in list. Modify the couchdb_nodes key
