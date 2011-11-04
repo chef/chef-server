@@ -25,7 +25,8 @@
          verify_read_only/2,
          get_node_list/2,
          migrate_nodes/2,
-         mark_migration_end/2]).
+         mark_migration_end/2,
+         update_org/2]).
 
 -include("mover.hrl").
 -include_lib("chef_common/include/chef_sql.hrl").
@@ -49,7 +50,7 @@
 
           %% Used to batch groups of nodes for migration and track progress.
           node_list = {[], []},
-          
+
           %% These nodes encounted known skippable errors.  Nodes in this list are removed
           %% from the nodes in couch_nodes for final comparison.
           skip_nodes = [],
@@ -180,7 +181,7 @@ mark_migration_end(timeout, #state{org_name = OrgName,
             [ delete_node_in_solr(Id, OrgId) || Id <- CouchIds ],
             mover_manager:mark_org_time(nodes_done, OrgId),
             log(info, OrgName, "migration complete"),
-            {stop, normal, State};
+            {next_state, update_org, State, 0};
         false ->
             {ok, FH} = file:open(<<OrgName/binary, "-node-mismatch.txt">>, [write]),
             io:fwrite(FH, "couch node names~n", []),
@@ -192,7 +193,11 @@ mark_migration_end(timeout, #state{org_name = OrgName,
                 [length(CouchNames), length(SqlNames)]),
             throw(node_name_mismatch)
     end.
-    
+
+update_org(timeout, #state{org_name=OrgName}=State) ->
+    darklaunch_couchdb_nodes(OrgName, false),
+    {stop, normal, State}.
+
 handle_event(_Event, StateName, State) ->
     {next_state, StateName, State}.
 
@@ -346,3 +351,18 @@ log(Level, OrgName, Fmt, Args) when is_list(Args) ->
 log_node_names(LogDir, NodeList) ->
     NodesToMigrate = << <<Name/binary, "\n">> || {Name, _} <- NodeList >>,
     file:write_file(<<LogDir/binary, "/nodes_to_migrate.txt">>, NodesToMigrate).
+
+darklaunch_couchdb_nodes(OrgName, Value) when is_binary(OrgName) ->
+    case is_dry_run() of
+        true ->
+            log(info, "FAKE darklaunch couchdb_nodes: ~s for ~s", [Value, OrgName]),
+            ok;
+        false ->
+            case mover_darklaunch:update_darklaunch("couchdb_nodes", OrgName, Value) of
+                ok ->
+                    log(info, "~s darklaunch couchdb_nodes: ~s", [OrgName, Value]);
+                _Err ->
+                    log(err, "~s darklaunch couchdb_nodes FAILED", [OrgName, Value]),
+                    throw({darklaunch_couchdb_nodes_failed, OrgName, Value})
+            end
+    end.
