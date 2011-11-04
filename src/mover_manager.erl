@@ -81,10 +81,10 @@ init_storage(timeout, State) ->
     {next_state, load_orgs, State, 0}.
 
 load_orgs(timeout, State) ->
-    error_logger:info_msg("loading unassigned orgs~n"),
-    log(info, "loading unassigned orgs"),
+    %%error_logger:info_msg("loading unassigned orgs~n"),
+    %%log(info, "loading unassigned orgs"),
     Cn = chef_otto:connect(),
-    [insert_org(NameGuid) || NameGuid <- chef_otto:fetch_assigned_orgs(Cn)],
+    %%[insert_org(NameGuid) || NameGuid <- chef_otto:fetch_assigned_orgs(Cn)],
     Summary = mover_status:summarize_orgs(),
     error_logger:info_msg("loaded orgs: ~p~n", [Summary]),
     log(info, "~256P", [Summary, 10]),
@@ -243,21 +243,21 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 
 %% Internal functions
 
-insert_org({Name, Guid}) ->
-    case dets:lookup(all_orgs, Guid) of
-        [] ->
-            Org = #org{guid=Guid, name=Name},
-            dets:insert(all_orgs, Org);
-        [Org] ->
-            %% XXX: we assume we are only inserting orgs at startup and not concurrently
-            %% ad-hoc.  Any org that is being inserted is then by-definition not active.  If
-            %% the manager crashes, there may be an org left active with a stale worker, so
-            %% we'll reset that here.
-            %% 
-            %% Notice that we don't touch the 'migrated' field used for candidate selection
-            %% and skipping over completed orgs.
-            dets:insert(all_orgs, Org#org{active=false, worker=undefined})
-    end.
+%% insert_org({Name, Guid}) ->
+%%     case dets:lookup(all_orgs, Guid) of
+%%         [] ->
+%%             Org = #org{guid=Guid, name=Name},
+%%             dets:insert(all_orgs, Org);
+%%         [Org] ->
+%%             %% XXX: we assume we are only inserting orgs at startup and not concurrently
+%%             %% ad-hoc.  Any org that is being inserted is then by-definition not active.  If
+%%             %% the manager crashes, there may be an org left active with a stale worker, so
+%%             %% we'll reset that here.
+%%             %% 
+%%             %% Notice that we don't touch the 'migrated' field used for candidate selection
+%%             %% and skipping over completed orgs.
+%%             dets:insert(all_orgs, Org#org{active=false, worker=undefined})
+%%     end.
 
 preload_orgs(BatchSize, State) ->
     case find_preload_candidates(BatchSize) of
