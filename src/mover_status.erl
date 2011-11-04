@@ -26,7 +26,8 @@ reset_orgs(Orgs) ->
     [ dets:insert(all_orgs, Org#org{active = false,
                                     migrated = false,
                                     error = false,
-                                    worker = undefined})
+                                    worker = undefined,
+                                    time = []})
       || Org <- Orgs].
 
 migration_time(#org{}=Org) ->
