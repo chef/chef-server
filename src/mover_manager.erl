@@ -514,7 +514,7 @@ fake_post_to_nginx(_Url, _Body) ->
 post_to_nginx(Url, Body) ->
     Headers = [{"Content-Type", "application/json"},
                {"Accept", "application/json"}],
-    IbrowseOpts = [{ssl_options, []}, {response_format, binary}],
+    IbrowseOpts = [{ssl_options, []}, {response_format, binary}, {connect_timeout, 30000}],
     case ibrowse:send_req(Url, Headers, post, Body, IbrowseOpts) of
         {ok, [$2, $0|_], _H, _Body} -> ok;
         Error ->
