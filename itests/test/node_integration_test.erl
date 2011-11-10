@@ -580,6 +580,10 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
      {"create a new node" ++ Label,
       fun() ->
               Now = calendar:now_to_universal_time(os:timestamp()),
+              %% Pause here to ensure that any updates we do happen in
+              %% the next second which will allow us to validate that
+              %% updated_at is getting written correctly.
+              timer:sleep(1000),
               {ok, Code, _H, Body} = chef_req:request(post, Path, NodeJson, ReqConfig),
               ?assertEqual("201", Code),
               NodeUrl = <<"http://localhost:9021/organizations/clownco/nodes/", NodeName/binary>>,
@@ -644,6 +648,10 @@ webui_key_tests(#req_config{name = Name}=ReqConfig,
      {"create a new node" ++ Label,
       fun() ->
    	      Now = calendar:now_to_universal_time(os:timestamp()),
+              %% Pause here to ensure that any updates we do happen in
+              %% the next second which will allow us to validate that
+              %% updated_at is getting written correctly.
+              timer:sleep(1000),
 	      Headers = [{"X-OPS-REQUEST-SOURCE", "web"}, 
 		         {"X-OPS-WEBKEY-TAG", "default"}],
 	      {ok, Code, _H, Body} = chef_req:request(post, Path, Headers, NodeJson, WebUIConfig),
