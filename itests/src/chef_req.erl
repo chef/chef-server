@@ -100,9 +100,9 @@ remove_client_from_group(Org, ClientName, GroupName, Config) ->
     Path = "/organizations/" ++ Org ++ "/groups/" ++ GroupName,
     {ok, "200", _H0, Body1} = request(get, Path, Config),
     Group0 = ejson:decode(Body1),
-    Actors = ej:get({<<"actors">>}, Group0),
-    NewActors = lists:delete(ensure_bin(ClientName), Actors),
-    Group1 = ej:set({<<"actors">>}, Group0, NewActors),
+    Clients = ej:get({<<"clients">>}, Group0),
+    NewClients = lists:delete(ensure_bin(ClientName), Clients),
+    Group1 = ej:set({<<"clients">>}, Group0, NewClients),
     PutGroup = make_group_for_put(Group1),
     {ok, "200", _H1, _Body2} = request(put, Path, ejson:encode(PutGroup), Config),
     ok.
@@ -111,13 +111,8 @@ make_group_for_put(Group) ->
     {[{<<"groupname">>, ej:get({<<"groupname">>}, Group)},
       {<<"orgname">>, ej:get({<<"orgname">>}, Group)},
       {<<"actors">>,
-       %% The asymmetry is impressive here.  We GET a flat structure
-       %% of actors which consists of both users and clients.  When we
-       %% PUT we must specify both users and clients.  I believe that
-       %% items of the wrong type are ignored so the simple
-       %% duplication approach should be sufficient.
-       {[{<<"users">>, ej:get({<<"actors">>}, Group)},
-         {<<"clients">>, ej:get({<<"actors">>}, Group)},
+       {[{<<"users">>, ej:get({<<"users">>}, Group)},
+         {<<"clients">>, ej:get({<<"clients">>}, Group)},
          {<<"groups">>, ej:get({<<"groups">>}, Group)}]}
        }]}.
 
