@@ -2,43 +2,55 @@ DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
        deps/webmachine deps/neotoma deps/meck deps/chef_common deps/chef_rest \
        deps/emysql deps/darklaunch deps/automeck deps/gen_bunny
 
+# The release branch should have a file named USE_REBAR_LOCKED
+use_locked_config = $(wildcard USE_REBAR_LOCKED)
+ifeq ($(use_locked_config),USE_REBAR_LOCKED)
+  rebar_config = rebar.config.locked
+else
+  rebar_config = rebar.config
+endif
+REBAR = ./rebar -C $(rebar_config)
+
 all: compile
 
 compile: $(DEPS)
-	@./rebar compile
+	@$(REBAR) compile
 
 compile_skip:
-	@./rebar compile skip_deps=true
+	@$(REBAR) compile skip_deps=true
 
 clean:
-	@./rebar skip_deps=true clean
+	@$(REBAR) skip_deps=true clean
 
 update: compile
 	@cd rel/erchef;bin/erchef restart
 
 allclean:
-	@./rebar clean
+	@$(REBAR) clean
 
 distclean:
 	@rm -rf deps
-	@./rebar clean
+	@$(REBAR) clean
 
 test: eunit
 
 eunit:
-	@./rebar eunit app=chef_common,chef_rest
+	@$(REBAR) eunit app=chef_common,chef_rest
 
 test-common:
-	@./rebar eunit app=chef_common
+	@$(REBAR) eunit app=chef_common
 
 test-rest:
-	@./rebar eunit app=chef_rest
+	@$(REBAR) eunit app=chef_rest
 
 ## KAS: Temporarily disabling dialyzer target until project structure is sorted
 #dialyze: dialyzer
 
 #dialyzer:
 #	dialyzer -Wrace_conditions -Wspecdiffs apps/*/ebin
+
+update_locked_config:
+	@./lock_deps deps meck
 
 rel: rel/erchef
 
@@ -59,10 +71,10 @@ rel/erchef: compile
 	@/bin/echo '                          |\  '
 	@/bin/echo '                          |/  '
 	@/bin/echo
-	@./rebar generate
+	@$(REBAR) generate
 
 relclean:
 	@rm -rf rel/erchef
 
 $(DEPS):
-	@./rebar get-deps
+	@$(REBAR) get-deps
