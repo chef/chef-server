@@ -74,7 +74,7 @@ bad_input_search_tests(#req_config{name = Name}=ReqConfig) ->
               Path = search_path("clownco", "node", "a:b"),
               {ok, Code, _H, Body} = chef_req:stale_request(get, Path, [],
                                                             ReqConfig),
-              ?assertEqual("400", Code),
+              ?assertEqual("401", Code),
               ErrorMsg = iolist_to_binary(["{\"error\":[\"Failed to authenticate as ",
                                            Name, ".",
                                            " Synchronize the clock on your host.\"]}"]),
