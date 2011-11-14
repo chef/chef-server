@@ -294,11 +294,11 @@ delete_field_test_helper(NodePath, ReqConfig, Node, Field, ResponseCode, Expecte
     NewNode = ej:delete({Field}, Node),
     NewNodeJson = ejson:encode(NewNode),
     {ok, PutCode, _H2, _Body2} = chef_req:request(put, NodePath, NewNodeJson, ReqConfig),
-%    ?debugVal({Field, PutCode, ResponseCode}),
+    %% ?debugVal({Field, PutCode, ResponseCode}),
     ?assertEqual(ResponseCode, PutCode),
     {ok, _GetCode, _H1, Body2} = chef_req:request(get, NodePath, ReqConfig),
     Node2 =  ejson:decode(Body2),
-%    ?debugVal({Field, ej:get({Field}, Node), Expected}),
+    % ?debugVal({Field, ej:get({Field}, Node), Expected}),
     ?assertEqual(Expected, ej:get({Field}, Node2)).
     
     
@@ -344,8 +344,9 @@ invalid_named_node_ops(#req_config{name = Name}=ReqConfig) ->
                        %% modify and PUT it back
                        NewNode = ej:set({<<"name">>}, TheNode, <<" bad%#@Q#*name ">>),
                        NewNodeJson = ejson:encode(NewNode),
-                       {ok, PutCode, _H2, _Body2} = chef_req:request(put, NodePath,
+                       {ok, PutCode, _H2, Body2} = chef_req:request(put, NodePath,
                                                                     NewNodeJson, ReqConfig),
+                       ?assertEqual(<<"{\"error\":[\"Field 'name' invalid\"]}">>, Body2),
                        ?assertEqual("400", PutCode)
                end},
 	      {generator, 
@@ -386,8 +387,9 @@ invalid_named_node_ops(#req_config{name = Name}=ReqConfig) ->
                        %% modify and PUT it back
                        NewNode = ej:set({<<"chef_environment">>}, TheNode, <<" bad%#@Q#*name ">>),
                        NewNodeJson = ejson:encode(NewNode),
-                       {ok, PutCode, _H2, _Body2} = chef_req:request(put, NodePath,
+                       {ok, PutCode, _H2, Body2} = chef_req:request(put, NodePath,
                                                                     NewNodeJson, ReqConfig),
+                       ?assertEqual(<<"{\"error\":[\"Field 'chef_environment' invalid\"]}">>, Body2),
                        ?assertEqual("400", PutCode)
                end}
              ]
@@ -410,17 +412,19 @@ invalid_named_node_creation(#req_config{name = Name}=ReqConfig) ->
 		       %% CREATE a node with no name
 		       BadNode = ej:delete({<<"name">>}, ANode),
 		       BadNodeJson = ejson:encode(BadNode),
-		       {ok, PostCode, _H1, _B1} =
+		       {ok, PostCode, _H1, Body} =
 			   chef_req:request(post, Path, BadNodeJson, ReqConfig),
-		       ?assertEqual("400", PostCode)
+		       ?assertEqual("400", PostCode),
+                       ?assertEqual(<<"{\"error\":[\"Field 'name' missing\"]}">>, Body)
                end},
 	      {"Create a node with an bad name" ++ Label,
                fun() ->
 		       %% CREATE a node with no name
 		       BadNode = ej:set({<<"name">>}, ANode, <<" bad%#@Q#*name ">>),
 		       BadNodeJson = ejson:encode(BadNode),
-		       {ok, PostCode, _H1, _B1} =
+		       {ok, PostCode, _H1, Body} =
 			   chef_req:request(post, Path, BadNodeJson, ReqConfig),
+                       ?assertEqual(<<"{\"error\":[\"Field 'name' invalid\"]}">>, Body),
 		       ?assertEqual("400", PostCode)
                end},
 	      {generator, 
@@ -618,7 +622,8 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
      {"POST of invalid JSON is a 400" ++ Label,
       fun() ->
               InvalidJson = <<"{not:json}">>,
-              {ok, Code, _H, _Body} = chef_req:request(post, Path, InvalidJson, ReqConfig),
+              {ok, Code, _H, Body} = chef_req:request(post, Path, InvalidJson, ReqConfig),
+              ?assertEqual(<<"{\"error\":[\"invalid JSON\"]}">>, Body),
               ?assertEqual("400", Code)
       end},
      {"POST of a bad name is a 500" ++ Label,
@@ -639,7 +644,7 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
       end}
     ].
 
-webui_key_tests(#req_config{name = Name}=ReqConfig,
+webui_key_tests(#req_config{},
 		#req_config{name = WebUIName}=WebUIConfig) ->
     Label = " (" ++ WebUIName ++ ")",
     {NodeName, NodeJson} = sample_node(),
