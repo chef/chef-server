@@ -526,7 +526,7 @@ basic_env_node_list_tests(#req_config{name = Name}=ReqConfig) ->
                NoSuch = "/organizations/clownco/environments/no-such-env/nodes",
                {ok, Code, _H, Body} = chef_req:request(get, NoSuch, ReqConfig),
                ?assertEqual("404", Code),
-               Msg = <<"{\"error\":[\"Cannot load environment no-such-env\"]}">>,
+               Msg = <<"{\"error\":[\"Cannot load environment 'no-such-env'\"]}">>,
                ?assertEqual(Msg, Body)
        end},
 
@@ -611,7 +611,7 @@ basic_node_create_tests_for_config(#req_config{name = Name}=ReqConfig) ->
               BadPath = "/organizations/no-such-org/nodes",
               {ok, Code, _H, Body} = chef_req:request(post, BadPath, NodeJson, ReqConfig),
               ?assertEqual("404", Code),
-              ?assertEqual(<<"{\"error\":[\"organization no-such-org does not exist.\"]}">>,
+              ?assertEqual(<<"{\"error\":[\"organization 'no-such-org' does not exist.\"]}">>,
                            Body)
       end},
 
