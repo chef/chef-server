@@ -177,7 +177,12 @@ assert_node_found_on_search(NodeName, Query, ReqConfig) ->
     Json = ejson:decode(Body),
     Rows = ej:get({"rows"}, Json),
     ?assertEqual({Query, true},
-                 {Query, lists:any(fun(Row) -> NodeName =:= ej:get({"name"}, Row) end, Rows)}).
+                 {Query, lists:any(fun(Row) -> NodeName =:= ej:get({"name"}, Row) end, Rows)}),
+    %% verify that nodes come back with required json_class element:
+    ExpectClass = [ <<"Chef::Node">> || _X <- lists:seq(1, length(Rows)) ],
+    FoundClass = [ ej:get({"json_class"}, Row) || Row <- Rows ],
+    ?assertEqual({Query, "Chef::Node", ExpectClass},
+                 {Query, "Chef::Node", FoundClass}).
 
 assert_node_not_found_on_search(NodeName, Query, ReqConfig) ->
     Path = search_path("clownco", "node", Query),
