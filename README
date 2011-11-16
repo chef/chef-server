@@ -80,43 +80,37 @@ Building erchef for development (longer version)
 Release tagging and branching
 -----------------------------
 
-To tag a new release:
+We manage releases of erchef from the top-level project
+(opscode-chef-api-erlang). To tag a new release:
 
-1) In the top-level project (opscode-chef-api-erlang) edit
-   rel/reltool.config and increment the version.  The version
-   specified in reltool.config is the OTP release version.  We don't
-   yet use the OTP release upgrade process.  When we do, this version
-   will be important.  Check in the change to master.
+1. Merge changes into the release branch. You will want to increment
+   the version in rel/reltool.config and can decide whether it makes
+   sense to do this on master and merge it in, or edit on the release
+   branch post-merge.
 
-2) Merge your changes into the release branch.
+2. Temporarily remove the the USE_REBAR_LOCKED file. Do a clean build
+   and test. If the test is good, update the rebar.config.lock file by
+   running `make update_locked_config`. Commit the new lock file and
+   tag the release. Sequence might look like this:
 
-3) On the release branch, edit rebar.config and set the version and
-   tag of the chef_rest dep appropriately.  Details on tagging chef_rest
-   and other component apps is below.
-
-4) Create a git tag.  E.g.
-
-       git tag 0.2.2
+       rm USE_REBAR_LOCKED
+       make distclean
+       make rel
+       # do testing here
+       make update_locked_config
+       touch USE_REBAR_LOCKED
+       git add rebar.config.lock
+       git commit
+       git tag x.y.z
+       git push opscode release
        git push --tags opscode
 
-5) Edit data bag to set opscode-erchef-revision to "0.2.2".
+3. Edit data bag to set erchef-revision to "x.y.z".
 
-To tag a component app (e.g. chef_common):
-
-1) Merge code to release branch.
-
-2) Edit rebar.config to update all deps to explicit versions and
-   tags/SHAs
-
-3) git tag, git push --tags
-
-In general, you will want to work on chef_common first, then
-chef_rest, then the top-level project because at present the
-dependency tree looks like:
-
-
-   erchef <-- chef_rest <-- chef_common
-
+The current setup pulls components (chef_rest) from master. We might
+want to change that in the future to pull from the release branch of
+chef_rest. You can create a QFE branch for bug fixes retroactively by
+branched from the tag recorded in rebar.config.lock.
 
 Deploying to rs-preprod
 -----------------------
