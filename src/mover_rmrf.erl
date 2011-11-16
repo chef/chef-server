@@ -327,7 +327,7 @@ revision_for_node(CouchUrl, OrgId, NodeId) ->
         false ->
             Headers = [{"Content-Type", "application/json"},
                        {"Accept", "application/json"}],
-            case ibrowse:send_req(Url, Headers, delete, [], ?IBROWSE_OPTS) of
+            case ibrowse:send_req(Url, Headers, get, [], ?IBROWSE_OPTS) of
                 {ok, "404", _H, _Body} ->
                     log(info, "not_found ~s", [Url]),
                     not_found;
