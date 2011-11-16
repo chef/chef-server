@@ -225,21 +225,24 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 
 build_org_dict() ->
     OrgDict = dict:new(),
-    dets:foldl(fun(#node{status = deleted}, Dict) ->
-                       %% skip deleted nodes
+    dets:foldl(fun(#node{status = Skip}, Dict) when Skip =:= deleted; Skip =:= not_found ->
+                       %% skip deleted or not found nodes
                        Dict;
                   (#node{org_id = OrgId}=Node, Dict) ->
                        dict:append(OrgId, Node, Dict)
                end, OrgDict, all_nodes).
 
 make_delete_fun(CouchUrl) ->
-    fun(#node{status = deleted}, _PrevTime) ->
-            %% already deleted, skip
+    fun(#node{status = Skip}, _PrevTime) when Skip =:= deleted; Skip =:= not_found ->
+            %% already deleted or not found, skip
             now();
        (#node{id = NodeId, org_id = OrgId}, PrevTime) ->
             case delete_node_delay(OrgId, NodeId, CouchUrl, PrevTime) of
                 {ok, NewTime} ->
                     mark_node(deleted, NodeId),
+                    NewTime;
+                {not_found, NewTime} ->
+                    mark_node(not_found, NodeId),
                     NewTime;
                 {Error, NewTime} ->
                     mark_node(delete_error, NodeId, Error),
@@ -252,6 +255,14 @@ mark_node(deleted, Id) ->
         [] -> ok;
         [Node] ->
             Node1 = Node#node{status = deleted},
+            ok = dets:insert(all_nodes, Node1),
+            Node1
+    end;
+mark_node(not_found, Id) ->
+    case dets:lookup(all_nodes, Id) of
+        [] -> ok;
+        [Node] ->
+            Node1 = Node#node{status = not_found},
             ok = dets:insert(all_nodes, Node1),
             Node1
     end.
@@ -282,6 +293,7 @@ delete_node_delay(OrgId, NodeId, CouchUrl, PrevTime) ->
     end,
     case revision_for_node(CouchUrl, OrgId, NodeId) of
         {ok, Rev} -> {delete_node(CouchUrl, OrgId, NodeId, Rev), now()};
+        not_found -> {not_found, now()};
         Error -> {Error, now()}
     end.
 
@@ -316,6 +328,8 @@ revision_for_node(CouchUrl, OrgId, NodeId) ->
             Headers = [{"Content-Type", "application/json"},
                        {"Accept", "application/json"}],
             case ibrowse:send_req(Url, Headers, delete, [], ?IBROWSE_OPTS) of
+                {ok, "404", _H, _Body} ->
+                    not_found;
                 {ok, "200", _H, Body} ->
                     Rev = binary_to_list(ej:get({<<"_rev">>}, ejson:decode(Body))),
                     log(info, "Got rev ~s ~s", [Rev, Url]),
@@ -375,13 +389,15 @@ now_ms({MegaSecs,Secs,MicroSecs}) ->
 summarize_nodes() ->
     Counts = ?fix_table(all_nodes,
                         dets:foldl(
-                          fun(Node, {NTotal, NDeleted, NToDelete, NDeleteError}) ->
+                          fun(Node, {NTotal, NDeleted, NToDelete, NDeleteError,
+                                     NNotFound}) ->
                                   {NTotal + 1,
                                    NDeleted + deleted_count(Node),
                                    NToDelete + to_delete_count(Node),
-                                   NDeleteError + delete_error_count(Node)}
-                          end, {0, 0, 0, 0}, all_nodes)),
-    Labels = [total, deleted, to_delete, delete_error],
+                                   NDeleteError + delete_error_count(Node),
+                                   NNotFound + not_found_count(Node)}
+                          end, {0, 0, 0, 0, 0}, all_nodes)),
+    Labels = [total, deleted, to_delete, delete_error, not_found],
     lists:zip(Labels, tuple_to_list(Counts)).
 
 deleted_count(#node{status = deleted}) -> 1;
@@ -392,5 +408,8 @@ to_delete_count(_) -> 1.
 
 delete_error_count(#node{status = {delete_error, _}}) -> 1;
 delete_error_count(_) -> 0.
+
+not_found_count(#node{status = not_found}) -> 1;
+not_found_count(_) -> 0.
 
 
