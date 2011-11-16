@@ -375,7 +375,8 @@ log(Level, Msg) ->
 log(Level, Fmt, Args) when is_list(Args) ->
     Id = pid_to_list(self()),
     FH = get_log_fh(),
-    io:fwrite(FH, "~s ~s " ++ Fmt ++ "\n", [atom_to_list(Level), Id|Args]).
+    io:fwrite(FH, "~s ~s ~s " ++ Fmt ++ "\n", [time_iso8601(),
+                                               atom_to_list(Level), Id|Args]).
 
 get_log_fh() ->
     erlang:get(log_fh).
@@ -414,3 +415,10 @@ not_found_count(#node{status = not_found}) -> 1;
 not_found_count(_) -> 0.
 
 
+time_iso8601() ->
+    time_iso8601(calendar:universal_time()).
+
+time_iso8601({{Year, Month, Day}, {Hour, Min, Sec}}) ->
+    % Is there a way to build a binary straight away?
+    Fmt = "~4B-~2..0B-~2..0BT~2..0B:~2..0B:~2..0BZ",
+    lists:flatten(io_lib:format(Fmt, [Year, Month, Day, Hour, Min, Sec])).
