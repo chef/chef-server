@@ -71,10 +71,12 @@ rel/erchef: compile
 	@/bin/echo '                          |\  '
 	@/bin/echo '                          |/  '
 	@/bin/echo
+	@/bin/echo "using rebar as: $(REBAR)"
 	@$(REBAR) generate
 
 relclean:
 	@rm -rf rel/erchef
 
 $(DEPS):
+	@echo "Fetching deps as: $(REBAR)"
 	@$(REBAR) get-deps
