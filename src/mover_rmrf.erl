@@ -153,6 +153,8 @@ stop() ->
     gen_fsm:send_event(?SERVER, stop).
 
 init([]) ->
+    [ application:start(App) || App <- [crypto, public_key, ssl, ejson] ],
+    ibrowse:start(),
     {ok, LogFile} = file:open("mover_rmrf.log", [append]),
     error_logger:info_msg("writing logs to ~s~n", ["mover_rmrf.log"]),
     %% ugly hack using process dictionary to get some logging
