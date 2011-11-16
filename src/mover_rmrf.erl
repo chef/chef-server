@@ -291,10 +291,11 @@ delete_node_delay(OrgId, NodeId, CouchUrl, PrevTime) ->
             timer:sleep(SleepTime);
         false -> ok
     end,
+    Now = now(),
     case revision_for_node(CouchUrl, OrgId, NodeId) of
-        {ok, Rev} -> {delete_node(CouchUrl, OrgId, NodeId, Rev), now()};
-        not_found -> {not_found, now()};
-        Error -> {Error, now()}
+        {ok, Rev} -> {delete_node(CouchUrl, OrgId, NodeId, Rev), Now};
+        not_found -> {not_found, Now};
+        Error -> {Error, Now}
     end.
 
 delete_node(CouchUrl,OrgId, NodeId, Rev) ->
