@@ -332,9 +332,10 @@ invalid_named_node_ops(#req_config{name = Name}=ReqConfig) ->
                        %% modify and PUT it back
                        NewNode = ej:set({<<"name">>}, TheNode, <<"not_the_original_name">>),
                        NewNodeJson = ejson:encode(NewNode),
-                       {ok, PutCode, _H2, _Body2} = chef_req:request(put, NodePath,
+                       {ok, PutCode, _H2, GotBody} = chef_req:request(put, NodePath,
                                                                     NewNodeJson, ReqConfig),
-                       ?assertEqual("200", PutCode)
+                       ?assertEqual("400", PutCode),
+                       ?assertEqual(<<"{\"error\":[\"Node name mismatch.\"]}">>, GotBody)
                end},
               {"Fetch, modify a node with a bad name" ++ Label,
                fun() ->
@@ -351,7 +352,7 @@ invalid_named_node_ops(#req_config{name = Name}=ReqConfig) ->
                        NewNodeJson = ejson:encode(NewNode),
                        {ok, PutCode, _H2, Body2} = chef_req:request(put, NodePath,
                                                                     NewNodeJson, ReqConfig),
-                       ?assertEqual(<<"{\"error\":[\"Field 'name' invalid\"]}">>, Body2),
+                       ?assertEqual(<<"{\"error\":[\"Node name mismatch.\"]}">>, Body2),
                        ?assertEqual("400", PutCode)
                end},
 	      {generator, 
