@@ -18,7 +18,8 @@ search_endpoint_test_() ->
              test_utils:test_cleanup(ignore)
      end,
      fun({ClientConfig, UserConfig}) ->
-             [search_tests(ClientConfig),
+             [client_search_tests(ClientConfig),
+              search_tests(ClientConfig),
               search_tests(UserConfig),
               bad_input_search_tests(ClientConfig)]
      end}.
@@ -120,6 +121,34 @@ search_tests(#req_config{name = Name}=ReqConfig) ->
       end}
     ].
 
+client_search_tests(#req_config{name = Name}=ReqConfig) ->
+    Label = " (" ++ Name ++ ")",
+    [
+     {"search all clients" ++ Label,
+      fun() ->
+              timer:sleep(2000),
+              test_utils:force_solr_commit(),
+              Query = "*:*",
+              assert_client_found_on_search(Name, Query, ReqConfig)
+      end}].
+
 search_path(Org, Type, Query) ->
     "/organizations/" ++ Org ++ "/search/" ++ Type
         ++ "?q=" ++ Query.
+
+assert_client_found_on_search(Name, Query, ReqConfig) ->
+    Path = search_path("clownco", "client", Query),
+    {ok, "200", _H, Body} = chef_req:request(get, Path, ReqConfig),
+    Json = ejson:decode(Body),
+    Rows = ej:get({"rows"}, Json),
+    NameBin = list_to_binary(Name),
+    %% FIXME: so clients have two forms, one with a "clientname"
+    %% attribute and one with a "name" attribute. Our client creation
+    %% code uses the clientname form and that is what gets
+    %% indexed. Our Ruby code does some compatibility stuff.
+    ?assertEqual({Query, true},
+                 {Query, lists:any(fun(Row) ->
+                                           NameBin =:= ej:get({"clientname"}, Row) end, Rows)}),
+    ExpectClasses = [ <<"Chef::ApiClient">> || _X <- lists:seq(1, length(Rows)) ],
+    GotClasses = [ ej:get({<<"json_class">>}, Row) || Row <- Rows ],
+    ?assertEqual(ExpectClasses, GotClasses).
