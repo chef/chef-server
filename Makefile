@@ -5,7 +5,7 @@ DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
 # The release branch should have a file named USE_REBAR_LOCKED
 use_locked_config = $(wildcard USE_REBAR_LOCKED)
 ifeq ($(use_locked_config),USE_REBAR_LOCKED)
-  rebar_config = rebar.config.locked
+  rebar_config = rebar.config.lock
 else
   rebar_config = rebar.config
 endif
