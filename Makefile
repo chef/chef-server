@@ -1,6 +1,6 @@
 DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
        deps/webmachine deps/neotoma deps/meck deps/chef_common deps/chef_rest \
-       deps/emysql deps/darklaunch deps/automeck deps/gen_bunny
+       deps/emysql deps/darklaunch deps/automeck deps/gen_bunny deps/sqerl
 
 all: compile
 
