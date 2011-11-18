@@ -97,6 +97,8 @@
 
 -define(NODE_ESTIMATE, 25000).
 
+-define(USER_AGENT_HEADER, {"User-Agent", "mover_rmrf (chef-node-mover)"}).
+
 -define(fix_table(Tab, Expr),
         begin
             dets:safe_fixtable(Tab, true),
@@ -306,7 +308,8 @@ delete_node(CouchUrl,OrgId, NodeId, Rev) ->
             log(info, "FAKE DELETE ~s", [Url]),
             ok;
         false ->
-            Headers = [{"Content-Type", "application/json"},
+            Headers = [?USER_AGENT_HEADER,
+                       {"Content-Type", "application/json"},
                        {"Accept", "application/json"}],
             case ibrowse:send_req(Url, Headers, delete, [], ?IBROWSE_OPTS) of
                 {ok, [$2, $0|_], _H, _Body} ->
@@ -326,7 +329,8 @@ revision_for_node(CouchUrl, OrgId, NodeId) ->
             log(info, "FAKE GET REV ~s", [Url]),
             {ok, "1234"};
         false ->
-            Headers = [{"Content-Type", "application/json"},
+            Headers = [?USER_AGENT_HEADER,
+                       {"Content-Type", "application/json"},
                        {"Accept", "application/json"}],
             case ibrowse:send_req(Url, Headers, get, [], ?IBROWSE_OPTS) of
                 {ok, "404", _H, _Body} ->
