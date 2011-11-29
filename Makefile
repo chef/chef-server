@@ -19,7 +19,7 @@ update: compile
 allclean:
 	@./rebar clean
 
-distclean:
+distclean: relclean
 	@rm -rf deps
 	@./rebar clean
 
