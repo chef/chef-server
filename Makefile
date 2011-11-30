@@ -1,6 +1,6 @@
 DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
        deps/webmachine deps/neotoma deps/meck deps/chef_common deps/chef_rest \
-       deps/emysql deps/darklaunch deps/automeck deps/gen_bunny
+       deps/emysql deps/darklaunch deps/automeck deps/gen_bunny deps/sqerl
 
 # The release branch should have a file named USE_REBAR_LOCKED
 use_locked_config = $(wildcard USE_REBAR_LOCKED)
@@ -28,7 +28,7 @@ update: compile
 allclean:
 	@$(REBAR) clean
 
-distclean:
+distclean: relclean
 	@rm -rf deps
 	@$(REBAR) clean
 
