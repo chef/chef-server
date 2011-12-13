@@ -1,6 +1,4 @@
-rel/chef_api/*
-rel/erchef/*
-deps/*
+rel/erchef
+deps
 .DS_Store
-*.beam
-*~
+TAGS

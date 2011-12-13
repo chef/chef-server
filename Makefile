@@ -1,6 +1,7 @@
 DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
        deps/webmachine deps/neotoma deps/meck deps/chef_common deps/chef_rest \
-       deps/emysql deps/darklaunch deps/automeck deps/gen_bunny deps/sqerl
+       deps/emysql deps/darklaunch deps/automeck deps/gen_bunny deps/sqerl \
+       deps/epgsql
 
 # The release branch should have a file named USE_REBAR_LOCKED
 use_locked_config = $(wildcard USE_REBAR_LOCKED)
@@ -42,6 +43,9 @@ test-common:
 
 test-rest:
 	@$(REBAR) eunit app=chef_rest
+
+tags:
+	find deps -name "*.[he]rl" -print | etags -
 
 ## KAS: Temporarily disabling dialyzer target until project structure is sorted
 #dialyze: dialyzer
