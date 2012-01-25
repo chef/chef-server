@@ -1,7 +1,7 @@
 DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
        deps/webmachine deps/neotoma deps/meck deps/chef_common deps/chef_rest \
        deps/emysql deps/darklaunch deps/automeck deps/gen_bunny deps/sqerl \
-       deps/epgsql
+       deps/epgsql deps/stats_hero
 
 # The release branch should have a file named USE_REBAR_LOCKED
 use_locked_config = $(wildcard USE_REBAR_LOCKED)
