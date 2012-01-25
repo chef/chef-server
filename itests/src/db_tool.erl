@@ -16,12 +16,13 @@
 connect() ->
     %% XXX: assume we get run from rebar eunit.
     application:start(emysql),
+    {ok, DbConfig} = file:consult("../../rel/db_vars.config"),
     {ok, Config} = file:consult("../../rel/vars.config"),
-    Host = ?gv(mysql_host, Config),
-    Port = ?gv(mysql_port, Config),
-    DbUser = ?gv(mysql_user, Config),
-    DbPass = ?gv(mysql_pass, Config),
-    DbName = ?gv(mysql_db_name, Config),
+    Host = ?gv(db_host, Config),
+    Port = ?gv(db_port, DbConfig),
+    DbUser = ?gv(db_user, DbConfig),
+    DbPass = ?gv(db_pass, DbConfig),
+    DbName = ?gv(db_name, DbConfig),
     error_logger:info_msg("db_tool connecting to MySQL ~s:~b ~s~n",
                           [Host, Port, DbName]),
     emysql:add_pool(db_tool_pool, 10, DbUser, DbPass,
