@@ -1,10 +1,10 @@
-#+TITLE: Opsode Bookshelf
+#+TITLE: Bookshelf
 #+AUTHOR: Tim Dysinger
 #+EMAIL: timd@opscode.com
 
 * Description
 
-  Opscode Bookshelf is an S3 API compatible object store.
+  Bookshelf is an S3 API compatible object store.
 
 * Setup
 
@@ -14,8 +14,6 @@
 
 * Build
 
-  The project is built with Rebar. You must have rebar in your path in order to build.
-
   #+BEGIN_SRC: sh
 rebar get-deps && rebar compile
   #+END_SRC
@@ -23,5 +21,7 @@ rebar get-deps && rebar compile
 * Start
 
   #+BEGIN_SRC: sh
-erl -pz `pwd`/deps/*/ebin -pz `pwd`/ebin -boot start_sasl -s opscode_store_app
+erl -pz `pwd`/deps/*/ebin -pz `pwd`/ebin -boot start_sasl \
+    -s bookshelf_app \
+    -config `pwd`/etc/bookshelf.config
   #+END_SRC
