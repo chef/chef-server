@@ -1,0 +1,8 @@
+# -*- mode: conf -*-
+
+[default]
+access_key  = lol
+secret_key  = cat
+host_base   = localhost.localdomain:8080
+host_bucket = %(bucket)s.localhost.localdomain:8080
+verbosity   = DEBUG
