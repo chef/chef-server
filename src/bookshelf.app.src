@@ -1,0 +1,9 @@
+%% -*- mode: erlang; -*-
+
+{application, bookshelf,
+ [{applications, [kernel, stdlib, crypto, public_key, ssl, cowboy]},
+  {description, "Opscode Store: Amazon S3 Compatible Object Store."},
+  {env, [{backend, bookshelf_store}]},
+  {mod, {bookshelf_app, []}},
+  {registered, [bookshelf_sup]},
+  {vsn, "0.1.0"}]}.
