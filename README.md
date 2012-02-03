@@ -1,4 +1,4 @@
-# CHEF NODE MOVER #
+# CHEF MOVER #
 
 ![Migration Visualization](http://images.memegenerator.net/instances/400x/10601974.jpg)
 
@@ -6,7 +6,7 @@ Orchestrate and execute the migration of nodes from couch to SQL.
 
 ## Installation ##
 
-Add the `chef-node-mover` default recipe to run_list of the node where
+Add the `chef-mover` default recipe to run_list of the node where
 you want to run the migration and run chef-client. You should now have
 a working install with config based on the node's environment in
 `/srv/mover`.
@@ -86,7 +86,7 @@ following when preloading is complete:
                                    {active,0},
                                    {migrated,0},
                                    {error,0}]
-    
+
     =INFO REPORT==== 28-Oct-2011::21:10:51 ===
     preloading complete
 

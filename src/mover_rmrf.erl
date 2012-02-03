@@ -97,7 +97,7 @@
 
 -define(NODE_ESTIMATE, 25000).
 
--define(USER_AGENT_HEADER, {"User-Agent", "mover_rmrf (chef-node-mover)"}).
+-define(USER_AGENT_HEADER, {"User-Agent", "mover_rmrf (chef-mover)"}).
 
 -define(fix_table(Tab, Expr),
         begin
