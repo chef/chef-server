@@ -15,13 +15,17 @@
 * Build
 
   #+BEGIN_SRC: sh
-rebar get-deps && rebar compile
+rebar get-deps
+rebar compile
+rebar generate
   #+END_SRC
+
+* Configuration
+
+  Standard OTP application configuration
 
 * Start
 
   #+BEGIN_SRC: sh
-erl -pz `pwd`/deps/*/ebin -pz `pwd`/ebin -boot start_sasl \
-    -s bookshelf_app \
-    -config `pwd`/etc/bookshelf.config
+./start.sh
   #+END_SRC
