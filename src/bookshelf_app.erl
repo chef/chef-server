@@ -13,7 +13,8 @@ start() ->
     application:start(bookshelf).
 
 start(_Type, _Args) ->
-    Dispatch = [{'_', [{'_', bookshelf_bucket, []}]}],
+    Dispatch = [{'_', [{[], bookshelf_bucket, []}]},  %% service fqdn
+                {'_', [{[], bookshelf_bucket, []}]}], %% bucket subdomain
     cowboy:start_listener(my_http_listener,
                           100,
                           cowboy_tcp_transport,
@@ -24,3 +25,5 @@ start(_Type, _Args) ->
 
 stop(_State) ->
     ok.
+
+%% TODO We have different behavior based on the request hostname
