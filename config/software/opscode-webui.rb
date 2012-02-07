@@ -10,4 +10,5 @@ bundle_env = { "GEM_PATH" => nil, "GEM_HOME" => nil  }
 
 build do
   command "/opt/opscode/embedded/bin/bundle install --without integration_test test dev hosted_chef", :env => bundle_env
+  # TODO: copy the rm, rsync steps from the clojure build
 end
