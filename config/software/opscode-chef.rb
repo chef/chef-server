@@ -15,6 +15,6 @@ relative_path "opscode-chef"
 bundle_env = {"GEM_PATH" => nil, "GEM_HOME" => nil}
 
 build do
-  command "/opt/opscode/embedded/bin/bundle install --without mysql integration_test dev"
+  command "/opt/opscode/embedded/bin/bundle install --without mysql integration_test dev", :env => bundle_env
   # TODO: copy the rm, rsync steps from the clojure build
 end
