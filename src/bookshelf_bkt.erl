@@ -1,7 +1,7 @@
 %% @author Tim Dysinger <timd@opscode.com>
 %% @copyright 2012 Opscode, Inc. All Rights Reserved
 
--module(bookshelf_bucket).
+-module(bookshelf_bkt).
 -compile(export_all).
 
 init(_Transport, _Rq, _Opts) ->
