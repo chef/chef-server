@@ -16,10 +16,8 @@
 %% permissions and limitations under the License.
 
 -module(bookshelf_app).
-
--export([start/0]).
-
 -behaviour(application).
+-export([start/0]).
 -export([start/2, stop/1]).
 
 %% ===================================================================
