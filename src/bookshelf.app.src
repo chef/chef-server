@@ -1,9 +1,16 @@
 %% -*- mode: erlang; -*-
 
 {application, bookshelf,
- [{applications, [kernel, stdlib, crypto, public_key, ssl, cowboy]},
-  {description, "Opscode Store: Amazon S3 Compatible Object Store."},
-  {env, [{backend, bookshelf_store}]},
-  {mod, {bookshelf_app, []}},
-  {registered, [bookshelf_sup]},
-  {vsn, "0.1.0"}]}.
+ [{description  , "Opscode Store: Amazon S3 Compatible Object Store."},
+  {vsn          , "0.1.0"},
+  {mod          , {bookshelf_app, []}},
+  {registered   , [bookshelf_sup]},
+  {applications , [kernel, stdlib, crypto, public_key, ssl, cowboy]},
+  {env          , [{domains   , ["localhost.localdomain"]},
+                   {interface , "lo"},
+                   {port      , 8080},
+                   {data      , priv_dir},
+                   {keys      , {"e1efc99729beb175",
+                                 "fc683cd9ed1990ca"}}
+                  ]}
+ ]}.
