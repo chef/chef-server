@@ -85,4 +85,4 @@ bdomain(Domain) ->
     lists:map(fun list_to_binary/1, string:tokens(Domain, ".")).
 
 priv_dir(Env) ->
-    lists:keystore(ip, 1, Env, {dir, code:priv_dir(bookshelf)}).
+    lists:keystore(dir, 1, Env, {dir, code:priv_dir(bookshelf)}).

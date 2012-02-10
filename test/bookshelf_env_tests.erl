@@ -42,13 +42,19 @@ with_dispatch_test_() ->
      }].
 
 with_dir_test_() ->
-    [{"should return any env 'dir' if provided",
+    [{"should use any env 'dir' if provided",
       fun() ->
               [{dir, "/tmp"}] =
                   bookshelf_env:with_dir([{dir, "/tmp"}])
       end
      },
-     {"should return the priv_dir dir if 'dir' is priv_dir or absent",
+     {"should use the canonical priv_dir if 'dir' is priv_dir",
+      fun() ->
+              Expect = [{dir, code:priv_dir(bookshelf)}],
+              Expect = bookshelf_env:with_dir([{dir, priv_dir}])
+      end
+     },
+     {"should use the canonical priv_dir if 'dir' is missing",
       fun() ->
               Expect = [{dir, code:priv_dir(bookshelf)}],
               Expect = bookshelf_env:with_dir([])
