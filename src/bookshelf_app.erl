@@ -36,9 +36,9 @@ start() ->
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    Env = bookshelf_conf:with_dispatch(
-            bookshelf_conf:with_ip(
-              bookshelf_conf:with_dir(
+    Env = bookshelf_env:with_dispatch(
+            bookshelf_env:with_ip(
+              bookshelf_env:with_dir(
                 application:get_all_env(bookshelf)))),
     cowboy:start_listener(bookshelf_http_listener, 100,
                           cowboy_tcp_transport, Env,
