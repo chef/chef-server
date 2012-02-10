@@ -16,8 +16,15 @@
 %% permissions and limitations under the License.
 
 -module(bookshelf_app).
+
+-export([start/0]).
+
 -behaviour(application).
--export([start/0, start/2, stop/1]).
+-export([start/2, stop/1]).
+
+%% ===================================================================
+%% API functions
+%% ===================================================================
 
 start() ->
     application:start(crypto),
@@ -26,18 +33,19 @@ start() ->
     application:start(cowboy),
     application:start(bookshelf).
 
-start(_Type, _Args) ->
-    Dispatch = [{'_', [{[], bookshelf_bucket, []}]},  %% service fqdn
-                {'_', [{[], bookshelf_bucket, []}]}], %% bucket subdomain
-    cowboy:start_listener(my_http_listener,
-                          100,
-                          cowboy_tcp_transport,
-                          [{port, 8080}],
-                          cowboy_http_protocol,
-                          [{dispatch, Dispatch}]),
+%% ===================================================================
+%% Application callbacks
+%% ===================================================================
+
+start(_StartType, _StartArgs) ->
+    Env = bookshelf_conf:with_dispatch(
+            bookshelf_conf:with_ip(
+              bookshelf_conf:with_dir(
+                application:get_all_env(bookshelf)))),
+    cowboy:start_listener(bookshelf_http_listener, 100,
+                          cowboy_tcp_transport, Env,
+                          cowboy_http_protocol, Env),
     bookshelf_sup:start_link().
 
 stop(_State) ->
     ok.
-
-%% TODO We have different behavior based on the request hostname
