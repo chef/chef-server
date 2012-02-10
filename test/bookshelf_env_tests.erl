@@ -34,9 +34,9 @@ with_dispatch_test_() ->
               EnvV2 = bookshelf_env:with_dispatch(EnvV1),
               {dispatch,
                [{[bucket, <<"clown">>, <<"com">>],
-                 [{[], bookshelf_bucket, EnvV1}]},
+                 [{[], bookshelf_bkt, EnvV1}]},
                 {[bucket, <<"school">>, <<"com">>],
-                 [{[], bookshelf_bucket, EnvV1}]}]} =
+                 [{[], bookshelf_bkt, EnvV1}]}]} =
                   lists:keyfind(dispatch, 1, EnvV2)
       end
      }].
