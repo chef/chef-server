@@ -1,2 +1,5 @@
+*.dump
+/.eunit
+/*.config
 /deps
 /ebin
