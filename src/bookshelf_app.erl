@@ -16,8 +16,9 @@
 %% permissions and limitations under the License.
 
 -module(bookshelf_app).
--behaviour(application).
+-include("bookshelf.hrl").
 -export([start/0]).
+-behaviour(application).
 -export([start/2, stop/1]).
 
 %% ===================================================================
@@ -36,10 +37,10 @@ start() ->
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    Env = bookshelf_env:with_dispatch(
-            bookshelf_env:with_ip(
-              bookshelf_env:with_dir(
-                application:get_all_env(bookshelf)))),
+    Env = ?env(with_dispatch,
+               ?env(with_model,
+                    ?env(with_dir,
+                         ?env(with_ip, application:get_all_env(bookshelf))))),
     cowboy:start_listener(bookshelf_http_listener, 100,
                           cowboy_tcp_transport, Env,
                           cowboy_http_protocol, Env),
