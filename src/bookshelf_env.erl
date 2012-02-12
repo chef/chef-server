@@ -19,7 +19,7 @@
 -include("bookshelf.hrl").
 -export([
          with_ip/1,
-         with_dipatch/1,
+         with_dispatch/1,
          with_dir/1,
          with_model/1
         ]).
