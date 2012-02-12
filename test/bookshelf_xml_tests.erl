@@ -21,8 +21,8 @@
 list_buckets_test_() ->
     [{"should render ListAllMyBucketsResult",
       fun() ->
-              Buckets = [{"lol", "011-02-10T21:42:17.000Z"},
-                         {"cat", "011-02-10T21:42:17.000Z"}],
+              Buckets = [#bucket{name="lol", date="011-02-10T21:42:17.000Z"},
+                         #bucket{name="cat", date="011-02-10T21:42:17.000Z"}],
               {'ListAllMyBucketsResult',undefined,
                {'CanonicalUser',undefined,"abc123","bobo-t-clown"},
                {'ListAllMyBucketsList',undefined,
