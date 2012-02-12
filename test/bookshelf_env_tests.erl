@@ -32,7 +32,11 @@ with_dispatch_test_() ->
               EnvV1 = [{domains, ["clown.com", "school.com"]}],
               EnvV2 = ?env(with_dispatch, EnvV1),
               {dispatch,
-               [{[bucket, <<"clown">>, <<"com">>],
+               [{[<<"clown">>, <<"com">>],
+                 [{[], bookshelf_bkt, EnvV1}]},
+                {[bucket, <<"clown">>, <<"com">>],
+                 [{[], bookshelf_bkt, EnvV1}]},
+                {[<<"school">>, <<"com">>],
                  [{[], bookshelf_bkt, EnvV1}]},
                 {[bucket, <<"school">>, <<"com">>],
                  [{[], bookshelf_bkt, EnvV1}]}]} =
