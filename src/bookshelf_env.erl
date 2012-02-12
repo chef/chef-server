@@ -16,6 +16,7 @@
 %% permissions and limitations under the License.
 
 -module(bookshelf_env).
+-include("bookshelf.hrl").
 -export([
          with_ip/1,
          with_dipatch/1,
@@ -93,4 +94,4 @@ bdomain(Domain) ->
     lists:map(fun list_to_binary/1, string:tokens(Domain, ".")).
 
 priv_dir(Env) ->
-    lists:keystore(dir, 1, Env, {dir, code:priv_dir(bookshelf)}).
+    lists:keystore(dir, 1, Env, {dir, ?file("data")}).
