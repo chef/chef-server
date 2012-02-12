@@ -16,13 +16,12 @@
 %% permissions and limitations under the License.
 
 -module(bookshelf_env_tests).
--compile(export_all).
--include_lib("eunit/include/eunit.hrl").
+-include("bookshelf.hrl").
 
 with_ip_test_() ->
     [{"should configure the listen ip address if the env has an 'interface'",
       fun() ->
-              Env = bookshelf_env:with_ip([{interface, "lo"}]),
+              Env = ?env(with_ip, [{interface, "lo"}]),
               {ip, {127,0,0,1}} = lists:keyfind(ip, 1, Env)
       end
      }].
@@ -31,7 +30,7 @@ with_dispatch_test_() ->
     [{"should build proper 'cowboy' dispatch rules using env 'domains'",
       fun() ->
               EnvV1 = [{domains, ["clown.com", "school.com"]}],
-              EnvV2 = bookshelf_env:with_dispatch(EnvV1),
+              EnvV2 = ?env(with_dispatch, EnvV1),
               {dispatch,
                [{[bucket, <<"clown">>, <<"com">>],
                  [{[], bookshelf_bkt, EnvV1}]},
@@ -44,20 +43,19 @@ with_dispatch_test_() ->
 with_dir_test_() ->
     [{"should use any env 'dir' if provided",
       fun() ->
-              [{dir, "/tmp"}] =
-                  bookshelf_env:with_dir([{dir, "/tmp"}])
+              [{dir, "/tmp"}] = ?env(with_dir, [{dir, "/tmp"}])
       end
      },
      {"should use the canonical priv_dir if 'dir' is priv_dir",
       fun() ->
-              Expect = [{dir, code:priv_dir(bookshelf)}],
-              Expect = bookshelf_env:with_dir([{dir, priv_dir}])
+              Expect = [{dir, ?file("data")}],
+              Expect = ?env(with_dir, [{dir, priv_dir}])
       end
      },
      {"should use the canonical priv_dir if 'dir' is missing",
       fun() ->
-              Expect = [{dir, code:priv_dir(bookshelf)}],
-              Expect = bookshelf_env:with_dir([])
+              Expect = [{dir, ?file("data")}],
+              Expect = ?env(with_dir, [])
       end
      }
     ].
