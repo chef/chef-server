@@ -18,16 +18,5 @@
 -include_lib("cowboy/include/http.hrl").
 -include_lib("kernel/include/file.hrl").
 
-%% dict
--define(is_dict(Any), (is_tuple(Any) andalso element(1, Any) == dict)).
-
-%% request
--define(is_request(Any), (is_tuple(Any) andalso element(1, Any) == http_req)).
-
-%% state
 -record(state, {dir, model}).
--define(is_state(Any), (is_tuple(Any) andalso element(1, Any) == state)).
-
-%% buckets
 -record(bucket, {name, date}).
--define(is_bucket(Any), (is_tuple(Any) andalso element(1, Any) == bucket)).
