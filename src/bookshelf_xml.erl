@@ -50,7 +50,7 @@ owner() ->
 buckets(Buckets) ->
     #'ListAllMyBucketsList'{ 'Bucket' = lists:map(fun bucket/1, Buckets) }.
 
-bucket({Name, Date}) ->
+bucket(#bucket{name=Name, date=Date}) ->
     #'ListAllMyBucketsEntry'{ 'Name' = Name,
                               'CreationDate' = Date }.
 

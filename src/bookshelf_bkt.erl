@@ -60,14 +60,14 @@ delete_resource(Rq, St) ->
 
 buckets(Dir) ->
     {ok, Files} = file:list_dir(Dir), %% crash if no access to base dir
-    Paths   = lists:map(fun(F) -> filename:join(Dir, F) end, Files),
-    Dirs    = lists:filter(fun filelib:is_dir/1, Paths),
-    Buckets = lists:map(fun filename:basename/1, Dirs),
-    Dates   = lists:map(fun(P) ->
-                                %% crash if no access to bucket dir
-                                {ok, #file_info{ctime=Date}} =
-                                    file:read_file_info(P, [{time, universal}]),
-                                iso8601:format(Date)
-                        end,
-                        Dirs),
-    lists:zip(Buckets, Dates).
+    lists:map(fun(P) -> %% crash if no access to any bucket dir
+                      {ok, #file_info{ctime=Date}} =
+                          file:read_file_info(P, [{time, universal}]),
+                      #bucket{ name=filename:basename(P),
+                               date=iso8601:format(Date) }
+              end,
+              lists:filter(fun filelib:is_dir/1,
+                           lists:map(fun(F) ->
+                                             filename:join(Dir, F)
+                                     end,
+                                     Files))).
