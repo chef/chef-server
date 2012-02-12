@@ -46,13 +46,13 @@ with_dir_test_() ->
               [{dir, "/tmp"}] = ?env(with_dir, [{dir, "/tmp"}])
       end
      },
-     {"should use the canonical priv_dir if 'dir' is priv_dir",
+     {"should use ${priv_dir}/data/ if env 'dir' is the atom 'priv_dir'",
       fun() ->
               Expect = [{dir, ?file("data")}],
               Expect = ?env(with_dir, [{dir, priv_dir}])
       end
      },
-     {"should use the canonical priv_dir if 'dir' is missing",
+     {"should use ${priv_dir}/data/ if env 'dir' is absent",
       fun() ->
               Expect = [{dir, ?file("data")}],
               Expect = ?env(with_dir, [])
