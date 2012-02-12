@@ -22,14 +22,14 @@
 %% API functions
 %% ===================================================================
 
-with_ip(Env) when is_list(Env) ->
+with_ip(Env) ->
     case lists:keyfind(interface, 1, Env) of
         {_, Interface} ->
             lists:keystore(ip, 1, Env, {ip, ip(Interface)});
         _              -> Env
     end.
 
-with_dispatch(Env) when is_list(Env) ->
+with_dispatch(Env) ->
     case lists:keyfind(domains, 1, Env) of
         {_, Domains} ->
             lists:keystore(dispatch, 1, Env,
@@ -37,7 +37,7 @@ with_dispatch(Env) when is_list(Env) ->
         _            -> Env
     end.
 
-with_dir(Env) when is_list(Env) ->
+with_dir(Env) ->
     case lists:keyfind(dir, 1, Env) of
         false         -> priv_dir(Env);
         {_, priv_dir} -> priv_dir(Env);
