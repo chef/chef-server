@@ -1,6 +1,6 @@
 name "opscode-certificate"
 
-dependencies ["erlang", "rsync", "openssl"]
+dependencies ["erlang", "rsync"]
 
 source :git => "git@github.com:opscode/opscode-cert-erlang"
 
