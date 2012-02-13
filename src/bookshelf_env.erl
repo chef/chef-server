@@ -71,8 +71,8 @@ ip(Interface) ->
     Addr.
 
 rules(Env, Domains) ->
-    Ds = lists:map(fun bdomain/1, Domains),
-    lists:flatten(lists:map(fun(D) -> rule(Env, D) end, Ds)).
+    lists:flatten(lists:map(fun(D) -> rule(Env, D) end,
+                            lists:map(fun bdomain/1, Domains))).
 
 rule(Env, Domain) ->
     SubDomain = lists:append([bucket], Domain),
