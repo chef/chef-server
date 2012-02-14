@@ -20,54 +20,49 @@
 -compile(export_all).
 
 %% ===================================================================
-%% Cowboy functions
+%%                              Cowboy
 %% ===================================================================
 
 init(_Transport, _Rq, _Opts) ->
-    %% we need to add model to our opts
     {upgrade, protocol, cowboy_http_rest}.
 
-rest_init(Rq, Opts) ->
-    {dir, Dir}     = lists:keyfind(dir, 1, Opts),
-    {model, Model} = lists:keyfind(model, 1, Opts),
-    {ok, ?req(with_amz_request_id, Rq), #state{dir = Dir, model = Model}}.
+%% ===================================================================
+%%                         Cowboy HTTP REST
+%% ===================================================================
 
-%% ===================================================================
-%% REST callbacks
-%% ===================================================================
+rest_init(Rq, Opts) ->
+    {dir, Dir} = lists:keyfind(dir, 1, Opts),
+    {ok, ?req(with_amz_request_id, Rq), #state{dir = Dir}}.
 
 allowed_methods(Rq, St) ->
-    {['GET', 'PUT', 'DELETE'], Rq, St}.
+    {['PUT', 'DELETE'], Rq, St}.
+
+content_types_accepted(Rq, St) ->
+    {[{undefined, create_resource}], Rq, St}.
 
 content_types_provided(Rq, St) ->
     {[{{<<"text">>, <<"xml">>, []}, to_xml}], Rq, St}.
 
-content_types_accepted(Rq, St) ->
-    {[{{<<"text">>, <<"xml">>, []}, from_xml}], Rq, St}.
+resource_exists(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
+    {bookshelf_fs:bucket_exists(Dir, Bucket), Rq, St}.
 
-resource_exists(Rq, #state{dir=Dir}=St) ->
-    {filelib:is_dir(Dir), Rq, St}.
-
-to_xml(Rq, #state{dir=Dir, model=Model}=St) ->
-    {bookshelf_xml:list_buckets_xml(buckets(Dir), Model), Rq, St}.
-
-delete_resource(Rq, St) ->
-    {true, Rq, St}.
+delete_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
+    case bookshelf_fs:bucket_delete(Dir, Bucket) of
+        ok -> {true, Rq, St};
+        _  -> {false, Rq, St}
+    end.
 
 %% ===================================================================
-%% Internal functions
+%%                         Content Accepted
 %% ===================================================================
 
-buckets(Dir) ->
-    {ok, Files} = file:list_dir(Dir), %% crash if no access to base dir
-    lists:map(fun(P) -> %% crash if no access to any bucket dir
-                      {ok, #file_info{ctime=Date}} =
-                          file:read_file_info(P, [{time, universal}]),
-                      #bucket{ name=filename:basename(P),
-                               date=iso8601:format(Date) }
-              end,
-              lists:filter(fun filelib:is_dir/1,
-                           lists:map(fun(F) ->
-                                             filename:join(Dir, F)
-                                     end,
-                                     Files))).
+create_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
+    case bookshelf_fs:bucket_create(Dir, Bucket) of
+        ok -> {true, Rq, St};
+        E  -> io:fwrite("E~n~p~n", [E]),
+              {false, Rq, St}
+    end.
+
+%% ===================================================================
+%%                         Content Provided
+%% ===================================================================
