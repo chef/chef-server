@@ -18,5 +18,6 @@
 -include_lib("cowboy/include/http.hrl").
 -include_lib("kernel/include/file.hrl").
 
--record(state, {dir, model}).
+-record(state, {dir}).
+
 -record(bucket, {name, date}).

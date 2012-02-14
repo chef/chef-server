@@ -20,8 +20,7 @@
 -export([
          with_ip/1,
          with_dispatch/1,
-         with_dir/1,
-         with_model/1
+         with_dir/1
         ]).
 
 %% ===================================================================
@@ -49,9 +48,6 @@ with_dir(Env) ->
         {_, priv_dir} -> priv_dir(Env);
         _             -> Env
     end.
-
-with_model(Env) ->
-    lists:keystore(model, 1, Env, {model, bookshelf_xml:model()}).
 
 %% ===================================================================
 %% Internal functions
