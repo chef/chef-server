@@ -53,8 +53,9 @@ bucket(#bucket{name=Name, date=Date}) ->
 %% ===================================================================
 
 write(Xml) ->
-    {ok, Xml} = erlsom:write(Xml, model()),
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" ++ erlsom_ucs:to_utf8(Xml).
+    {ok, Text} = erlsom:write(Xml, model()),
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" ++
+        erlsom_ucs:to_utf8(Text).
 
 write_hrl() ->
     case file:read_file(?file("amazon_s3.xsd")) of
