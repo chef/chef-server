@@ -1,4 +1,4 @@
-$:.unshift File.expand_path("../../omnibus/lib", __FILE__)
+$:.unshift File.expand_path("../../omnibus-ruby/lib", __FILE__)
 
 require 'omnibus'
 
