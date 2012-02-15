@@ -22,7 +22,7 @@ build do
 24a25
 > #include <cstdio>
 D
-  command "echo '#{diff}' > patch libfcgi/fcgio.cpp"
+  command "echo '#{diff}' | patch libfcgi/fcgio.cpp"
   command "touch COPYING ChangeLog AUTHORS NEWS"
 
   # autoreconf
