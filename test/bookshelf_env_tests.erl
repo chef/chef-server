@@ -22,7 +22,7 @@ with_ip_test_() ->
     [{"should configure the listen ip address if the env has an 'interface'",
       fun() ->
               Env = ?env(with_ip, [{interface, "lo"}]),
-              {ip, {127,0,0,1}} = lists:keyfind(ip, 1, Env)
+              ?assertMatch({ip, {127,0,0,1}}, lists:keyfind(ip, 1, Env))
       end
      }].
 
@@ -31,35 +31,34 @@ with_dispatch_test_() ->
       fun() ->
               EnvV1 = [{domains, ["clown.com", "school.com"]}],
               EnvV2 = ?env(with_dispatch, EnvV1),
-              {dispatch,
-               [{[<<"clown">>, <<"com">>],
-                 [{[], bookshelf_idx, EnvV1}]},
-                {[bucket, <<"clown">>, <<"com">>],
-                 [{[], bookshelf_bkt, EnvV1}]},
-                {[<<"school">>, <<"com">>],
-                 [{[], bookshelf_idx, EnvV1}]},
-                {[bucket, <<"school">>, <<"com">>],
-                 [{[], bookshelf_bkt, EnvV1}]}]} =
-                  lists:keyfind(dispatch, 1, EnvV2)
+              ?assertMatch({dispatch,
+                            [{[<<"clown">>, <<"com">>],
+                              [{[], bookshelf_idx, EnvV1}]},
+                             {[bucket, <<"clown">>, <<"com">>],
+                              [{[], bookshelf_bkt, EnvV1}]},
+                             {[<<"school">>, <<"com">>],
+                              [{[], bookshelf_idx, EnvV1}]},
+                             {[bucket, <<"school">>, <<"com">>],
+                              [{[], bookshelf_bkt, EnvV1}]}]},
+                           lists:keyfind(dispatch, 1, EnvV2))
       end
      }].
 
 with_dir_test_() ->
     [{"should use any env 'dir' if provided",
       fun() ->
-              [{dir, "/tmp"}] = ?env(with_dir, [{dir, "/tmp"}])
+              ?assertEqual([{dir, "/tmp"}], ?env(with_dir, [{dir, "/tmp"}]))
       end
      },
      {"should use ${priv_dir}/data/ if env 'dir' is the atom 'priv_dir'",
       fun() ->
-              Expect = [{dir, ?file("data")}],
-              Expect = ?env(with_dir, [{dir, priv_dir}])
+              ?assertEqual([{dir, ?file("data")}],
+                           ?env(with_dir, [{dir, priv_dir}]))
       end
      },
      {"should use ${priv_dir}/data/ if env 'dir' is absent",
       fun() ->
-              Expect = [{dir, ?file("data")}],
-              Expect = ?env(with_dir, [])
+              ?_assertEqual([{dir, ?file("data")}], ?env(with_dir, []))
       end
      }
     ].
