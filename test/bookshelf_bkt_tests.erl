@@ -34,9 +34,9 @@ allowed_methods_test_() ->
               Expected = ['PUT', 'DELETE'],
               {Allowed, _, _} =
                   bookshelf_bkt:allowed_methods(#http_req{}, #state{}),
-              ?assertEqual(2, length(Allowed)),
+              ?assertEqual(length(Expected), length(Allowed)),
               Result = sets:from_list(lists:merge(Expected, Allowed)),
-              ?assertEqual(2, sets:size(Result))
+              ?assertEqual(length(Expected), sets:size(Result))
       end
      }].
 
