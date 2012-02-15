@@ -23,13 +23,15 @@ list_buckets_test_() ->
       fun() ->
               Buckets = [#bucket{name="lol", date="011-02-10T21:42:17.000Z"},
                          #bucket{name="cat", date="011-02-10T21:42:17.000Z"}],
-              {'ListAllMyBucketsResult',undefined,
-               {'CanonicalUser',undefined,"abc123","bobo-t-clown"},
-               {'ListAllMyBucketsList',undefined,
-                [{'ListAllMyBucketsEntry',undefined,"lol",
-                  "011-02-10T21:42:17.000Z"},
-                 {'ListAllMyBucketsEntry',undefined,"cat",
-                  "011-02-10T21:42:17.000Z"}]}} =
-                  bookshelf_xml:list_buckets(Buckets)
+              ?assertMatch(
+                 {'ListAllMyBucketsResult',undefined,
+                  {'CanonicalUser',undefined,"abc123","bobo-t-clown"},
+                  {'ListAllMyBucketsList',undefined,
+                   [{'ListAllMyBucketsEntry',undefined,"lol",
+                     "011-02-10T21:42:17.000Z"},
+                    {'ListAllMyBucketsEntry',undefined,"cat",
+                     "011-02-10T21:42:17.000Z"}]}},
+                 bookshelf_xml:list_buckets(Buckets)
+                )
       end
      }].
