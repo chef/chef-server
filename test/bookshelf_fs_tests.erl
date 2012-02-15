@@ -33,7 +33,9 @@ bookshelf_fs_test_() ->
               lists:foreach(
                 fun(B) ->
                         ?assertEqual(ok, bookshelf_fs:bucket_create(Dir, B)),
-                        ?assert(bookshelf_fs:bucket_exists(Dir, B))
+                        ?assert(bookshelf_fs:bucket_exists(Dir, B)),
+                        ?assertMatch({error, _},
+                                     bookshelf_fs:bucket_create(Dir, B))
                 end,
                 Buckets),
               ?assertEqual(ok, bookshelf_fs:bucket_delete(Dir, "cat")),
