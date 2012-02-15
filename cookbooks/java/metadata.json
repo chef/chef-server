@@ -1,0 +1,42 @@
+{
+  "name": "java",
+  "description": "Installs Java runtime.",
+  "long_description": "Description\n===========\n\nInstalls a Java. Uses OpenJDK by default but supports installation of Oracle's JDK.\n\nThis cookbook also provides the `java_ark` LWRP which other java\ncookbooks can use to install java-related applications from binary\npackages.\n\nThe `java_ark` LWPR may move to its own cookbook at some point in the\nfuture as its functionality is useful for other purposes.\n\nRequirements\n============\n\nPlatform\n--------\n\n* Debian, Ubuntu\n* CentOS, Red Hat, Fedora, Scientific, Amazon\n* ArchLinux\n* FreeBSD\n\nAttributes\n==========\n\nSee `attributes/default.rb` for default values.\n\n* `node[\"java\"][\"install_flavor\"]` - Flavor of JVM you would like installed (`oracle` or `openjdk`), default `openjdk`.\n* `node['java']['java_home']` - Default location of the \"`$JAVA_HOME`\".\n* `node['java']['tarball']` - name of the tarball to retrieve from your corporate repository default `jdk1.6.0_29_i386.tar.gz`\n* `node['java']['tarball_checksum']` - checksum for the tarball, if you use a different tarball, you also need to create a new sha256 checksum\n* `node['java']['jdk']` - version and architecture specific attributes\n  for setting the URL on Oracle's site for the JDK, and the checksum\n  of the .tar.gz.\n\nRecipes\n=======\n\ndefault\n-------\n\nInclude the default recipe in a run list, to get `java`.  By default\nthe `openjdk` flavor of Java is installed, but this can be changed by\nusing the `install_flavor` attribute.\n\nOpenJDK is the default because of licensing changes made upstream by\nOracle. See notes on the `oracle` recipe below.\n\nopenjdk\n-------\n\nThis recipe installs the `openjdk` flavor of Java.\n\noracle\n------\n\nThis recipe installs the `oracle` flavor of Java. This recipe does not\nuse distribution packages as Oracle changed the licensing terms with\nJDK 1.6u27 and prohibited the practice for both the debian and EL worlds.\n\nFor both debian and centos/rhel, this recipe pulls the binary\ndistribution from the Oracle website, and installs it in the default\nJAVA_HOME for each distribution. For debian/ubuntu, this is\n/usr/lib/jvm/default-java. For Centos/RHEL, this is /usr/lib/jvm/java\n\nAfter putting the binaries in place, the oracle recipe updates\n/usr/bin/java to point to the installed JDK using the\n`update-alternatives` script\n\noracle_i386\n-----------\n\nThis recipe installs the 32-bit Java virtual machine without setting\nit as the default. This can be useful if you have applications on the\nsame machine that require different versions of the JVM.\n\nResources/Providers\n===================\n\nThis LWRP provides an easy way to manage java applications. It uses\nthe LWRP arkive (deliberately misspelled). It is an arkive and not an\n\"archive\" because the `java_ark` lwrp is not the same as a java\narchive or \"jar\". Essentially, you provide the `java_ark` with the URL\nto a tarball and the commands within the extracted result that you\nwant symlinked to /usr/bin/\n\nThe `java_ark` LWPR may move to its own cookbook at some point in the\nfuture as its functionality is useful for other purposes.\n\nBy default, the extracted directory is extracted to\n`app_root/extracted_dir_name` and symlinked to `app_root/default`\n\n# Actions\n\n- `:install`: extracts the tarball and makes necessary symlinks\n- `:remove`: removes the tarball and run update-alternatives for all\n  symlinked `bin_cmds`\n\n# Attribute Parameters\n\n- `url`: path to tarball, .tar.gz, .bin (oracle-specific), and .zip\n  currently supported\n- `checksum`: sha256 checksum, not used for security but avoid\n  redownloading the archive on each chef-client run\n- `app_home`: the default for installations of this type of\n  application, for example, `/usr/lib/tomcat/default`. If your\n  application is not set to the default, it will be placed at the same\n  level in the directory hierarchy but the directory name will be\n   `app_root/extracted_directory_name + \"_alt\"`\n- `app_home_mode`: file mode for app_home, is an integer\n- `bin_cmds`: array of binary commands that should be symlinked to\n  /usr/bin, examples are mvn, java, javac, etc. These cmds must be in\n  the bin/ subdirectory of the extracted folder. Will be ignored if this\n  java_ark is not the default\n- `owner`: owner of extracted directory, set to \"root\" by default\n- `default`: whether this the default installation of this package,\n  boolean true or false\n\n\n# Examples\n\n    # install jdk6 from Oracle\n    java_ark \"jdk\" do\n        url 'http://download.oracle.com/otn-pub/java/jdk/6u29-b11/jdk-6u29-linux-x64.bin'\n        checksum  'a8603fa62045ce2164b26f7c04859cd548ffe0e33bfc979d9fa73df42e3b3365'\n        app_home '/usr/local/java/default'\n        bin_cmds [\"java\", \"javac\"]\n        action :install\n    end\n\n    # installs maven2\n    java_ark \"maven2\" do\n        url \"http://www.apache.org/dist/maven/binaries/apache-maven-2.2.1-bin.tar.gz\"\n        checksum  \"b9a36559486a862abfc7fb2064fd1429f20333caae95ac51215d06d72c02d376\"\n        app_home \"/usr/local/maven/default\"\n        bin_cmds [\"mvn\"]\n        action :install\n    end\n\nUsage\n=====\n\nSimply include the `java` recipe where ever you would like Java installed.\n\nTo install Oracle flavored Java on Debian or Ubuntu override the `node['java']['install_flavor']` attribute with in role:\n\n    name \"java\"\n    description \"Install Oracle Java on Ubuntu\"\n    override_attributes(\n      \"java\" => {\n        \"install_flavor\" => \"oracle\"\n      }\n    )\n    run_list(\n      \"recipe[java]\"\n    )\n\nChanges\n=======\n\n## v1.4.0:\n\n* [COOK-858] - numerous updates: handle jdk6 and 7, switch from sun to\n  oracle, make openjdk default, add `java_ark` LWRP.\n* [COOK-942] - FreeBSD support\n* [COOK-520] - ArchLinux support\n\nLicense and Author\n==================\n\nAuthor:: Seth Chisamore (<schisamo@opscode.com>)\nAuthor:: Bryan W. Berry (<bryan.berry@gmail.com>)\n\nCopyright:: 2008-2012, Opscode, Inc\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.\n",
+  "maintainer": "Opscode, Inc.",
+  "maintainer_email": "cookbooks@opscode.com",
+  "license": "Apache 2.0",
+  "platforms": {
+    "debian": ">= 0.0.0",
+    "ubuntu": ">= 0.0.0",
+    "centos": ">= 0.0.0",
+    "redhat": ">= 0.0.0",
+    "scientific": ">= 0.0.0",
+    "fedora": ">= 0.0.0",
+    "amazon": ">= 0.0.0",
+    "arch": ">= 0.0.0",
+    "freebsd": ">= 0.0.0"
+  },
+  "dependencies": {
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+  },
+  "replacing": {
+  },
+  "attributes": {
+  },
+  "groupings": {
+  },
+  "recipes": {
+    "java": "Installs Java runtime",
+    "java::openjdk": "Installs the OpenJDK flavor of Java",
+    "java::oracle": "Installs the Oracle flavor of Java",
+    "java::oracle_i386": "Installs the 32-bit jvm without setting it as the default"
+  },
+  "version": "1.4.0"
+}
