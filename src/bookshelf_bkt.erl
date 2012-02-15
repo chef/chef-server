@@ -59,8 +59,7 @@ delete_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
 create_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
     case bookshelf_fs:bucket_create(Dir, Bucket) of
         ok -> {true, Rq, St};
-        E  -> io:fwrite("E~n~p~n", [E]),
-              {false, Rq, St}
+        _  -> {false, Rq, St}
     end.
 
 %% ===================================================================
