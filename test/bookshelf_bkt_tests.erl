@@ -51,7 +51,7 @@ content_types_accepted_test_() ->
      }].
 
 content_types_provided_test_() ->
-    [{"should only support text/xml outputs",
+    [{"should only support text/xml output",
       fun() ->
               {Types, _, _} =
                   bookshelf_bkt:content_types_provided(#http_req{}, #state{}),
