@@ -21,3 +21,5 @@
 -record(state, {dir}).
 
 -record(bucket, {name, date}).
+
+-record(object, {name, date}).
