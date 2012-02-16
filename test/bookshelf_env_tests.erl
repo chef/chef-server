@@ -35,11 +35,13 @@ with_dispatch_test_() ->
                             [{[<<"clown">>, <<"com">>],
                               [{[], bookshelf_idx, EnvV1}]},
                              {[bucket, <<"clown">>, <<"com">>],
-                              [{[], bookshelf_bkt, EnvV1}]},
+                              [{[], bookshelf_bkt, EnvV1},
+                               {['*'], bookshelf_obj, EnvV1}]},
                              {[<<"school">>, <<"com">>],
                               [{[], bookshelf_idx, EnvV1}]},
                              {[bucket, <<"school">>, <<"com">>],
-                              [{[], bookshelf_bkt, EnvV1}]}]},
+                              [{[], bookshelf_bkt, EnvV1},
+                               {['*'], bookshelf_obj, EnvV1}]}]},
                            lists:keyfind(dispatch, 1, EnvV2))
       end
      }].

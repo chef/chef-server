@@ -74,8 +74,9 @@ rule(Env, Domain) ->
     SubDomain = lists:append([bucket], Domain),
     FEnv = filter_env(Env),
     [
-     {Domain,    [{[],  bookshelf_idx, FEnv}]},
-     {SubDomain, [{[],  bookshelf_bkt, FEnv}]}
+     {Domain,    [{[],    bookshelf_idx, FEnv}]},
+     {SubDomain, [{[],    bookshelf_bkt, FEnv},
+                  {['*'], bookshelf_obj, FEnv}]}
     ].
 
 filter_env(Env) ->
