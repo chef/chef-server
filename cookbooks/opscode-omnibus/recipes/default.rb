@@ -46,3 +46,13 @@ file "/home/vagrant/.ssh/known_hosts" do
   owner "vagrant"
   mode "600"
 end
+
+git_config "github.user" do
+  user "vagrant"
+  value node['github_user']
+end
+
+git_config "github.token" do
+  user "vagrant"
+  value node["github_token"]
+end

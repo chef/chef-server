@@ -36,6 +36,10 @@ Vagrant::Config.run do |config|
   config.vm.provision :chef_solo do |chef|
     chef.cookbooks_path = "cookbooks"
     chef.add_recipe "opscode-omnibus"
+    chef.json = {
+      :github_user => `git config github.user`.strip,
+      :github_token => `git config github.token`.strip,
+    }
   end
 
 end
