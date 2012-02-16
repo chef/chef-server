@@ -21,7 +21,8 @@
          bucket_list/1,
          bucket_exists/2,
          bucket_create/2,
-         bucket_delete/2
+         bucket_delete/2,
+         object_list/2
         ]).
 
 %% ===================================================================
@@ -50,3 +51,34 @@ bucket_create(Dir, Bucket) ->
 
 bucket_delete(Dir, Bucket) ->
     file:del_dir(filename:join(Dir, Bucket)).
+
+%% ===================================================================
+%%                         Object functions
+%% ===================================================================
+
+object_list(Dir, Bucket) ->
+    BucketPath = filename:join(Dir, Bucket) ++ "/",
+    filelib:fold_files(
+      BucketPath,
+      ".*",
+      true,
+      fun(FilePath, Acc) ->
+              case filelib:is_regular(FilePath) of
+                  true ->
+                      case file:read_file_info(FilePath,
+                                               [{time, universal}]) of
+                          {ok, #file_info{ctime=Date}} ->
+                              lists:append(
+                                Acc,
+                                [#object{
+                                    name=lists:subtract(FilePath, BucketPath),
+                                    date=iso8601:format(Date)
+                                   }]
+                               );
+                          _                            -> Acc
+                      end;
+                  _    -> Acc
+              end
+      end,
+      []
+     ).

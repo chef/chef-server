@@ -44,3 +44,36 @@ bookshelf_fs_test_() ->
               ?assertNot(bookshelf_fs:bucket_exists(Dir, "cat"))
       end
      }].
+
+bookshelf_fs_object_test_() ->
+    [{"should be able to list objects",
+      fun() ->
+              {Ma, Se, Mi} = erlang:now(),
+              Dir = filename:join("/tmp", io_lib:format("~p~p~p",
+                                                        [Ma,Se,Mi])),
+              Bucket = "bukkit",
+              BucketPath = filename:join(Dir, Bucket),
+              ?assertEqual(ok, filelib:ensure_dir(BucketPath)),
+              ?assertEqual(ok, bookshelf_fs:bucket_create(Dir, Bucket)),
+              ?assertEqual([], bookshelf_fs:object_list(Dir, Bucket)),
+              Objs = ["testing/123/hello", "hello"],
+              lists:foreach(
+                fun(F) ->
+                        ?assertEqual(ok, fixture_file(BucketPath, F, F))
+                end,
+                Objs
+               ),
+              Records = bookshelf_fs:object_list(Dir, Bucket),
+              ?assertEqual(2, length(Records))
+      end
+     }].
+
+fixture_file(BucketPath, ObjectPath, Contents) ->
+    FilePath = filename:join(BucketPath, ObjectPath),
+    ?assertEqual(ok, filelib:ensure_dir(FilePath)),
+    case file:open(FilePath, [write]) of
+        {ok, IODevice} ->
+            ?assertEqual(ok, file:write(IODevice, Contents)),
+            ?assertEqual(ok, file:close(IODevice));
+        E -> E
+    end.
