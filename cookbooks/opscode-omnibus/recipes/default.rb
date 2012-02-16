@@ -7,7 +7,6 @@
 include_recipe "apt"
 include_recipe "build-essential"
 include_recipe "git"
-include_recipe "java"
 
 %w{ruby ruby1.8 ruby1.8-dev rdoc1.8 irb1.8 ri1.8 libopenssl-ruby1.8 rubygems libtool dpkg-dev libxml2 libxml2-dev libxslt1.1 libxslt1-dev help2man gettext texinfo}.each do |name|
   package name
