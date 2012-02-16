@@ -13,14 +13,25 @@ include_recipe "java"
   package name
 end
 
-%w{fpm ohai}.each do |name|
+%w{fpm ohai rake}.each do |name|
   gem_package name do
     gem_binary "/usr/bin/gem"
   end
+end
+
+gem_package "mixlib-shellout" do
+  gem_binary "/usr/bin/gem"
+  options "--pre"
+  version "~>1.0"
 end
 
 Dir['/var/lib/gems/1.8/bin/*'].each do |path|
   link "/usr/local/bin/#{File.basename(path)}" do
     to path
   end
+end
+
+directory "/opt/opscode" do
+  mode "777"
+  recursive true
 end
