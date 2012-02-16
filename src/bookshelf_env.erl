@@ -20,7 +20,8 @@
 -export([
          with_ip/1,
          with_dispatch/1,
-         with_dir/1
+         with_dir/1,
+         with_pool/1
         ]).
 
 %% ===================================================================
@@ -47,6 +48,12 @@ with_dir(Env) ->
         false         -> priv_dir(Env);
         {_, priv_dir} -> priv_dir(Env);
         _             -> Env
+    end.
+
+with_pool(Env) ->
+    case lists:keyfind(pool, 1, Env) of
+        false -> lists:keystore(pool, 1, Env, {pool, 100});
+        _     -> Env
     end.
 
 %% ===================================================================

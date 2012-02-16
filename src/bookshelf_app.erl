@@ -39,8 +39,11 @@ start() ->
 start(_StartType, _StartArgs) ->
     Env = ?env(with_dispatch,
                ?env(with_dir,
-                    ?env(with_ip, application:get_all_env(bookshelf)))),
-    cowboy:start_listener(bookshelf_http_listener, 100,
+                    ?env(with_pool,
+                         ?env(with_ip,
+                              application:get_all_env(bookshelf))))),
+    {pool, Pool} = lists:keyfind(pool, 1, Env),
+    cowboy:start_listener(bookshelf_http_listener, Pool,
                           cowboy_tcp_transport, Env,
                           cowboy_http_protocol, Env),
     bookshelf_sup:start_link().
