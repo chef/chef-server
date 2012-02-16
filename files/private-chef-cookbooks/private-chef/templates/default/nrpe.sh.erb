@@ -1,0 +1,32 @@
+#!/bin/bash
+
+case $1 in
+  check_heartbeat)
+    /usr/sbin/crm_mon -s
+    exit $?
+    ;;
+  check_crm_constraints)
+    /opt/opscode/embedded/nagios/libexec/check_crm_constraints.sh
+    exit $?
+    ;;
+  check_orgs)
+    /opt/opscode/embedded/nagioslibexec/check_org_creator.sh
+    exit $?
+    ;;
+  check_rmq_connections)
+    /opt/opscode/embedded/bin/chpst -u <%= node['private_chef']['user']['username'] %> /usr/bin/env HOME="<%= node['private_chef']['rabbitmq']['dir'] %>" /opt/opscode/embedded/nagios/libexec/check_rmq_connections -w 300 -c 500
+    exit $?
+    ;;
+  check_rmq_messages)
+    /opt/opscode/embedded/bin/chpst -u <%= node['private_chef']['user']['username'] %> /usr/bin/env HOME="<%= node['private_chef']['rabbitmq']['dir'] %>" /opt/opscode/embedded/nagios/libexec/check_rmq_messages -w 100 -c 200
+    exit $?
+    ;;
+  check_opscode_expander)
+    /opt/opscode/embedded/bin/chpst -u <%= node['private_chef']['user']['username'] %> /opt/opscode/embedded/service/opscode-expander/bin/check_queue_size -w 1000 -c 2000
+    exit $?
+    ;;
+  *)
+    echo "Supply a root-level check, please."
+    exit 22
+    ;;
+esac

@@ -1,0 +1,108 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'rubygems'
+require 'redis'
+
+options = {:host => 'localhost',
+          :port => 6379,
+          :db => 0,
+          :password => nil,
+          :timeout => 3}
+
+optparser = OptionParser.new do |opt|
+  opt.banner = "Usage: #{$0} -H <hostname> [options]"
+  opt.on('-H', '--host HOSTNAME', 'Hostname') {|o| options[:host] = o if o }
+  opt.on('-p', '--port', 'Port (Default: "6379")') {|o| options[:port] = o if o }
+  opt.on('-P', '--password PASSWORD', 'Password (Default: blank)') {|o| options[:password] = o if o }
+  opt.on('-T', '--timeout', 'Timeout in seconds (Default: 3)') {|o| options[:timeout] = o if o }
+end
+
+args = []
+begin
+  args = optparser.parse!
+rescue => e
+  $stderr.print e
+  $stderr.print optparser
+  exit 0
+end
+
+class CheckRedis
+
+  def initialize(opts)
+    @keys = %w(last_save_time redis_version total_connections_received connected_clients total_commands_processed connected_slaves uptime_in_seconds used_memory_human uptime_in_days changes_since_last_save)
+    @r = Redis.new(opts)
+    gather_stats
+  rescue Errno::ECONNREFUSED
+    print "CRITICAL - Connection refused.\n"
+    exit 2
+  rescue Errno::ENETUNREACH
+    print "CRITICAL - Network is unreachable.\n"
+    exit 2
+  rescue Errno::EHOSTUNREACH
+    print "CRITICAL - No route to host.\n"
+    exit 2
+  end
+
+  private
+
+  def gather_stats
+    @info = @r.info
+    parse_info
+    output_status
+    print @status
+    exit 0
+  end
+
+  def output_status
+    @status = "OK - version: #{@redis_version} | memory: #{@used_memory_human} uptime (sec): #{@uptime_in_seconds}\n"
+  end
+
+  def parse_info
+    @info.each do |key,value|
+      send("parse_#{key}".to_sym, value) if @keys.include? key.to_s
+    end
+  end
+
+  def parse_last_save_time(value)
+    @last_save_time = value
+  end
+
+  def parse_redis_version(value)
+    @redis_version = value
+  end
+
+  def parse_total_connections_received(value)
+    @total_connections_received = value
+  end
+
+  def parse_connected_clients(value)
+    @connected_clients = value
+  end
+
+  def parse_total_commands_processed(value)
+    @total_commands_processed = value
+  end
+
+  def parse_connected_slaves(value)
+    @connected_slaves = value
+  end
+
+  def parse_uptime_in_seconds(value)
+    @uptime_in_seconds = value
+  end
+
+  def parse_used_memory_human(value)
+    @used_memory_human = value
+  end
+
+  def parse_uptime_in_days(value)
+    @uptime_in_days = value
+  end
+
+  def parse_changes_since_last_save(value)
+    @changes_since_last_save = value
+  end
+end
+
+CheckRedis.new(options)

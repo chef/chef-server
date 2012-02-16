@@ -1,0 +1,7 @@
+#!/bin/sh
+
+cd <%= File.join(node['private_chef']['opscode-solr']['dir'], 'jetty') %>
+
+exec 2>&1
+exec chpst -o 50000 -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> /usr/bin/env PATH=/opt/opscode/embedded/bin:/opt/opscode/bin:/opt/opscode/embedded/jre/bin:$PATH JAVA_HOME=/opt/opscode/embedded/jre <%= node['private_chef']['opscode-solr']['command'] %>
+

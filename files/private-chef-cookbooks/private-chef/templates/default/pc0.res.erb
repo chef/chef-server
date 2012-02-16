@@ -1,0 +1,19 @@
+resource pc0 {
+  syncer {
+    rate <%= @sync_rate %>;
+  }
+ 
+  on <%= @primary['fqdn'] %> {
+    device <%= @device %>;
+    disk <%= @disk %>;
+    flexible-meta-disk  <%= @flexible_meta_disk %>;
+    address <%= @primary['ip'] %>:<%= @primary['port'] %>;
+  }
+
+  on <%= @secondary['fqdn'] %> {
+    device <%= @device %>;
+    disk <%= @disk %>;
+    flexible-meta-disk  <%= @flexible_meta_disk %>;
+    address <%= @secondary['ip'] %>:<%= @secondary['port'] %>;
+  }
+}

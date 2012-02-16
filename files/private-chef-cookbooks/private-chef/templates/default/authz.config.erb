@@ -1,0 +1,14 @@
+% -*- mode: erlang -*-
+% authz app config
+[
+  {authorization, [{couchdb_ip, {"<%= node['private_chef']['couchdb']['vip'] %>", <%= node['private_chef']['couchdb']['port'] %>}},
+                 {authz_db_name, "authorization"},
+                 {authz_port, <%= @port %>},
+		 {redis_ip, "<%= node['private_chef']['redis']['vip'] %>"},
+     {redis_port, <%= node['private_chef']['redis']['port'] %>},
+		 {redis_db, 0},
+		 {redis_prefix, "authz"},
+		 {redis_cache_state, <%= @caching %> }
+		]}
+].
+

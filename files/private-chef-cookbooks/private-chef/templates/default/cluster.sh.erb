@@ -1,0 +1,124 @@
+#!/bin/bash
+#
+# Cluster like it's 1999
+#
+
+LOGNAME=/var/log/opscode/keepalived/cluster.log
+PROGNAME=$(basename $0)
+
+function log_me
+{
+  echo $1
+  echo "$(date -R): ${1}" >> $LOGNAME
+}
+
+function error_exit
+{
+  log_me "$1"
+  echo "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2
+  exit 1
+}
+
+function possibly_ungraceful_runit_shutdown
+{
+  log_me "Stopping service $1"
+  if ! /opt/opscode/bin/private-chef-ctl $1 force-stop; then 
+    # we sent a SIGKILL, service may have stopped even though force-stop exited badly
+    if ! /opt/opscode/bin/private-chef-ctl $1 force-stop; then
+      # we waited another SVWAIT and it still didn't exit cleanly
+      error_exit "Cannot force-stop $1"
+    fi
+  fi
+}
+
+function transition
+{
+  log_me "Transitioning to $1"
+  case "$1" in
+    master)
+      try=300
+      while true; do
+        log_me "Attempting DRBD primary takeover - attempts left ${try}"
+        drbdadm primary pc0 && break
+        let "--try" || error_exit "Cannot become drbd primary!" 
+        sleep 1
+      done
+
+      log_me "DRBD primary takeover successful"
+
+      log_me "Mounting <%= node['private_chef']['drbd']['device'] %> at <%= node['private_chef']['drbd']['data_dir'] %>"
+      mount <%= node['private_chef']['drbd']['device'] %> <%= node['private_chef']['drbd']['data_dir'] %> || true
+
+<%- node['private_chef']['keepalived']['service_order'].each do |item| -%>
+<%- if node['private_chef'][item['key']]['ha'] -%>
+      log_me "Starting service <%= item['service_name'] %>"
+      /opt/opscode/bin/private-chef-ctl <%= item['service_name'] %> start || error_exit "Cannot start <%= item['service_name'] %>"
+<%- end -%>
+<%- end -%>
+
+      ;;
+    backup)
+<%- node['private_chef']['keepalived']['service_order'].reverse.each do |item| -%>
+<%- if node['private_chef'][item['key']]['ha'] -%>
+      possibly_ungraceful_runit_shutdown <%= item['service_name'] %>
+<%- end -%>
+<%- end -%>
+      try=300
+      while true; do
+        log_me "Attempting to become DRBD secondary - attempts left ${try}"
+        umount <%= node['private_chef']['drbd']['data_dir'] %> || true
+        drbdadm secondary pc0 && break
+        let "--try" || error_exit "Cannot become DRBD secondary"
+        sleep 1
+      done
+      ;;
+    fault)
+      # Um... we are on the way elsewhere
+      ;;
+    *)
+  esac
+}
+
+function lock
+{
+  if [ -e $1 ]; then
+    read lockpid < $1
+    if [ ! -z "$lockpid" -a -d /proc/$lockpid ]; then
+      return 1
+    fi
+  fi
+  trap "rm -f $1; exit" INT TERM EXIT
+  echo $$ > $1
+  return 0
+}
+
+function unlock
+{
+  rm $1
+  trap - INT TERM EXIT
+}
+
+export SVWAIT=30
+
+requested_state_file=/var/opt/opscode/keepalived/requested_cluster_status
+echo $1 > $requested_state_file
+
+lockfile=/var/opt/opscode/keepalived/cluster-transition.lock
+if lock $lockfile; then
+   transition "$1"
+   log_me "Transitioned to $1"
+   transitioned_to=$1
+   last_requested_state=`echo -n $(cat $requested_state_file)`
+   while [ "$transitioned_to" != "$last_requested_state" ]; do
+     transition $last_requested_state
+     log_me "Transitioned to $1"
+     transitioned_to=$last_requested_state
+     last_requested_state=`echo -n $(cat $requested_state_file)`
+   done
+   unlock $lockfile 
+else
+   log_me "Requested transition to $1"
+   error_exit "Requested transition to $1, but state transition already running."
+fi
+
+exit 0

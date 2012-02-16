@@ -1,0 +1,40 @@
+global {
+  usage-count no;
+}
+
+common {
+  startup {
+    degr-wfc-timeout 0;
+  }
+<%- if @version =~ /^8\.3/ -%>
+
+  protocol C;
+<%- end -%>
+
+net {
+<%- if @version =~ /^8\.4/ %>
+    protocol C;
+<%- end -%>
+    cram-hmac-alg sha1;
+    shared-secret <%= @shared_secret %>;
+    sndbuf-size 0;
+    rcvbuf-size 0;
+    after-sb-0pri discard-younger-primary;
+    after-sb-1pri discard-secondary;
+    after-sb-2pri call-pri-lost-after-sb;
+  }
+
+  disk {
+    on-io-error detach;
+  }
+ 
+  syncer {
+    rate <%= @sync_rate %>;
+  }
+ 
+  handlers {
+    split-brain "/opt/opscode/embedded/lib/drbd/notify-split-brain.sh <%= node['private_chef']['notification_email'] %>";
+  }
+}
+
+include "<%= File.join(node['private_chef']['drbd']['dir'], "etc", "*.res") %>";

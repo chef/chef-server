@@ -1,0 +1,35 @@
+! Configuration File for keepalived
+
+global_defs {
+  notification_email {
+    <%= node['private_chef']['notification_email'] %>  
+  }
+  smtp_server <%= @smtp_server %>
+  smtp_connect_timeout <%= @smtp_connect_timeout %>
+}
+
+vrrp_sync_group <%= @vrrp_sync_group %> {
+  group {
+    <%= @vrrp_sync_instance %>
+  }
+}
+
+vrrp_instance <%= @vrrp_sync_instance %> {
+    state <%= @vrrp_instance_state %>
+    interface <%= @vrrp_instance_interface %>
+    virtual_router_id <%= @vrrp_instance_virtual_router_id %>
+    priority <%= @vrrp_instance_priority %>
+    advert_int <%= @vrrp_instance_advert_int %>
+		notify_backup "/var/opt/opscode/keepalived/bin/cluster.sh backup"
+		notify_master "/var/opt/opscode/keepalived/bin/cluster.sh master"
+		notify_fault  "/var/opt/opscode/keepalived/bin/cluster.sh fault"
+		notify_stop "/var/opt/opscode/keepalived/bin/cluster.sh backup"
+    authentication {
+        auth_type PASS
+        auth_pass <%= @vrrp_instance_password %>
+    }
+    virtual_ipaddress {
+      <%= @vrrp_instance_ipaddress %> dev <%= @vrrp_instance_ipaddress_dev %>
+    }
+}
+

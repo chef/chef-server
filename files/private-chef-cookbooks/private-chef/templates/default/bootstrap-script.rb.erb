@@ -1,0 +1,16 @@
+delete_couchdb_databases
+
+create_couchdb_databases
+
+su_authz_id = superuser do |u|
+  u.name = 'pivotal'
+  u.first_name = 'Clark'
+  u.last_name = 'Kent'
+  u.display_name = ' Clark Kent'
+  u.email = 'kryptonite@opscode.com'
+  u.password = 'kryptonite'
+  u.certificate = superuser_cert
+end
+
+create_global_containers(su_authz_id)
+                                         

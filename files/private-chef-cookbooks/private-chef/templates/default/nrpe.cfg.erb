@@ -1,0 +1,19 @@
+pid_file=<%= File.join(@dir, "nrpe.pid") %>
+server_port=<%= @port %>
+nrpe_user=opscode-nagios
+nrpe_group=opscode-nagios
+dont_blame_nrpe=0
+debug=0
+command_timeout=60
+allowed_hosts=<%= @allowed_hosts.join(',') %>
+
+command[check_couchdb_drbd]=/opt/opscode/embedded/nagios/libexec/check_disk -c 51% -w 54% -p /drbd/couch-data
+command[check_heartbeat]= <%= File.join(@dir, "bin", "nrpe.sh") %> check_heartbeat
+command[check_crm_constraints]= <%= File.join(@dir, "bin", "nrpe.sh") %> check_crm_constraints
+command[check_drbd]=/opt/opscode/embedded/nagios/libexec/check_drbd.pl -d 0
+command[check_orgs]=<%= File.join(@dir, "bin", "nrpe.sh") %> check_orgs
+command[check_rmq_connections]=/usr/bin/env HOME="<%= node['private_chef']['rabbitmq']['dir'] %>" /opt/opscode/embedded/nagios/libexec/check_rmq_connections -w 300 -c 500
+command[check_rmq_messages]=/usr/bin/env HOME="<%= node['private_chef']['rabbitmq']['dir'] %>" /opt/opscode/embedded/nagios/libexec/check_rmq_messages -w 100 -c 200
+command[check_couchdb_health]=/opt/opscode/embedded/nagios/libexec/check_couchdb_health.rb
+command[check_opscode_expander]=/opt/opscode/embedded/service/opscode-expander/bin/check_queue_size -w 1000 -c 2000
+

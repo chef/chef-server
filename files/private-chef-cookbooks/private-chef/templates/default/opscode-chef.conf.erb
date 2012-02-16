@@ -1,0 +1,45 @@
+supportdir = "<%= node['private_chef']['opscode-chef']['dir'] %>"
+
+log_level          :error
+log_location       STDOUT
+file_cache_path    File.join(supportdir, "cache")
+ssl_verify_mode    :verify_none
+registration_url   "http://127.0.0.1:4000"
+openid_url         "http://127.0.0.1:4000"
+template_url       "http://127.0.0.1:4000"
+remotefile_url     "http://127.0.0.1:4000"
+search_url         "http://127.0.0.1:4000"
+role_url           "http://127.0.0.1:4000"
+chef_server_url    "http://127.0.0.1:4000"
+couchdb_url        "http://<%= node['private_chef']['couchdb']['vip'] %>:<%= node['private_chef']['couchdb']['port'] %>"
+client_url         "http://127.0.0.1:4000"
+solr_url           "http://<%= node['private_chef']['opscode-solr']['vip'] %>:<%= node['private_chef']['opscode-solr']['port'] %>"
+couchdb_version    0.9
+
+cookbook_path      File.join(supportdir, "cookbooks")
+openid_store_path  File.join(supportdir, "openid", "store")
+openid_cstore_path File.join(supportdir, "openid", "cstore")
+search_index_path  File.join(supportdir, "search_index")
+role_path          File.join(supportdir, "roles")
+couchdb_database   'chef'
+
+parkplace          false
+
+amqp_host '<%= node['private_chef']['rabbitmq']['vip'] %>'
+amqp_port '<%= node['private_chef']['rabbitmq']['port'] %>'
+amqp_user '<%= node['private_chef']['rabbitmq']['user'] %>'
+amqp_pass '<%= node['private_chef']['rabbitmq']['password'] %>'
+amqp_vhost '<%= node['private_chef']['rabbitmq']['vhost'] %>'
+amqp_identity ''
+amqp_consumer_id '<%= node['private_chef']['rabbitmq']['consumer_id'] %>'
+
+persistent_queue true
+#Chef::Log::Formatter.show_time = false
+
+#require 'opscode/audit/config'
+
+# Opscode::Audit::Config[:audit_host] = '<%= @int_lb_dns %>'
+# Opscode::Audit::Config[:audit_port] = '3030'
+# Opscode::Audit::Config[:audit_url]  = 'http://<%= @int_lb_dns %>:3030/log'
+
+
