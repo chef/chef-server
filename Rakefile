@@ -22,12 +22,13 @@ end
 if have_vagrant
   vagrant = Vagrant::Environment.new(:ui_class => Vagrant::UI::Colored)
   namespace :vagrant do
-    task :boxes do
-      vagrant.boxes.add("lucid64", "http://files.vagrantup.com/lucid64.box") unless vagrant.boxes.find("lucid64")
-    end
-
-    task :up => :boxes do
-      vagrant.cli("up")
+    task :up do
+      if vagrant.primary_vm.created?
+        vagrant.primary_vm.start
+        vagrant.primary_vm.provision
+      else
+        vagrant.primary_vm.up
+      end
     end
 
     task :build => :up do
