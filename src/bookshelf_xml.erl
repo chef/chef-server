@@ -19,6 +19,7 @@
 -include("bookshelf.hrl").
 -export([
          list_buckets/1,
+         list_objects/1,
          model/0,
          write/1,
          write_hrl/0,
@@ -32,6 +33,15 @@
 list_buckets(Buckets) ->
     #'ListAllMyBucketsResult'{ 'Owner'   = owner(),
                                'Buckets' = buckets(Buckets) }.
+
+list_objects({Bucket, Objects}) ->
+    #'ListBucketResult'{ 'Name'        = Bucket,
+                         'Prefix'      = "",
+                         'Marker'      = "",
+                         'MaxKeys'     = 10000,
+                         'IsTruncated' = false,
+                         'Contents'    = lists:map(fun object/1,
+                                                   Objects) }.
 
 %% ===================================================================
 %%                             Partials
@@ -47,6 +57,13 @@ buckets(Buckets) ->
 bucket(#bucket{name=Name, date=Date}) ->
     #'ListAllMyBucketsEntry'{ 'Name' = Name,
                               'CreationDate' = Date }.
+
+object(#object{name=Name, date=Date, size=Size}) ->
+    #'ListEntry'{ 'Key'          = binary_to_list(Name),
+                  'LastModified' = Date,
+                  'ETag'         = "123",
+                  'Size'         = io_lib:format("~w", [Size]),
+                  'StorageClass' = "STANDARD" }.
 
 %% ===================================================================
 %%                             Utility
