@@ -31,7 +31,7 @@ rest_init_test_() ->
 allowed_methods_test_() ->
     [{"should only support 'PUT' and 'DELETE'",
       fun() ->
-              Expected = ['PUT', 'DELETE'],
+              Expected = ['GET', 'PUT', 'DELETE'],
               {Allowed, _, _} =
                   bookshelf_bkt:allowed_methods(#http_req{}, #state{}),
               ?assertEqual(length(Expected), length(Allowed)),

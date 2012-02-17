@@ -35,7 +35,7 @@ rest_init(Rq, Opts) ->
     {ok, ?req(with_amz_request_id, Rq), #state{dir = Dir}}.
 
 allowed_methods(Rq, St) ->
-    {['PUT', 'DELETE'], Rq, St}.
+    {['GET', 'PUT', 'DELETE'], Rq, St}.
 
 content_types_accepted(Rq, St) ->
     {[{undefined, create_resource}], Rq, St}.
