@@ -49,7 +49,7 @@ list_objects({Bucket, Objects}) ->
 
 owner() ->
     #'CanonicalUser'{ 'ID' = "abc123",
-                      'DisplayName' = "bobo-t-clown" }.
+                      'DisplayName' = "Bobo T. Clown" }.
 
 buckets(Buckets) ->
     #'ListAllMyBucketsList'{ 'Bucket' = lists:map(fun bucket/1, Buckets) }.
