@@ -32,7 +32,7 @@ if have_vagrant
     end
 
     task :build => :up do
-      vagrant.primary_vm.channel.execute("cd opscode-omnibus && rake projects:opscode-webui --trace") do |stream, data|
+      vagrant.primary_vm.channel.execute("cd opscode-omnibus && rake projects:opscode-webui:deb --trace") do |stream, data|
         out = stream == :stdout ? $stdout : $stderr
         out.puts(data)
       end
