@@ -57,7 +57,7 @@ bucket_delete(Dir, Bucket) ->
 %% ===================================================================
 
 object_list(Dir, Bucket) ->
-    BucketPath = filename:join(Dir, Bucket) ++ "/",
+    BucketPath = filename:join(Dir, Bucket),
     filelib:fold_files(
       BucketPath,
       ".*",
@@ -67,15 +67,20 @@ object_list(Dir, Bucket) ->
                   true ->
                       case file:read_file_info(FilePath,
                                                [{time, universal}]) of
-                          {ok, #file_info{ctime=Date}} ->
+                          {ok, #file_info{size=Size, mtime=Date}} ->
+                              Pos = byte_size(FilePath),
+                              Len = byte_size(BucketPath) + 1
+                                  - byte_size(FilePath),
+                              Name = binary:part(FilePath, Pos, Len),
                               lists:append(
                                 Acc,
                                 [#object{
-                                    name=lists:subtract(FilePath, BucketPath),
-                                    date=iso8601:format(Date)
+                                    name=Name,
+                                    date=iso8601:format(Date),
+                                    size=Size
                                    }]
                                );
-                          _                            -> Acc
+                          _                                       -> Acc
                       end;
                   _    -> Acc
               end
