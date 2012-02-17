@@ -23,8 +23,7 @@ if have_vagrant
   vagrant = Vagrant::Environment.new(:ui_class => Vagrant::UI::Colored)
   namespace :vagrant do
     task :boxes do
-      # Mixlib::ShellOut.new("vagrant box add lucid64 http://files.vagrantup.com/lucid64.box", :live_stream => STDOUT).run_cmmand
-      vagrant.cli("box add lucid64 http://files.vagrantup.com/lucid64.box")
+      vagrant.boxes.add("lucid64", "http://files.vagrantup.com/lucid64.box") unless vagrant.boxes.find("lucid64")
     end
 
     task :up => :boxes do
