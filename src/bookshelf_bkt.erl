@@ -67,9 +67,7 @@ create_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
 %% ===================================================================
 
 to_xml(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
-    Objects = bookshelf_fs:object_list(Dir, Bucket),
-    io:fwrite("Objects~n~p~n", [Objects]),
     {?xml(write,
           ?xml(list_objects,
-               {Bucket, Objects})),
+               {Bucket, bookshelf_fs:object_list(Dir, Bucket)})),
      Rq, St}.
