@@ -24,9 +24,14 @@ gem_package "mixlib-shellout" do
   version "~>1.0"
 end
 
-Dir['/var/lib/gems/1.8/bin/*'].each do |path|
-  link "/usr/local/bin/#{File.basename(path)}" do
-    to path
+ruby_block "make gem symlinks" do
+  block do
+    Dir['/var/lib/gems/1.8/bin/*'].each do |path|
+      r = Chef::Resource::Link.new("/usr/local/bin/#{File.basename(path)}", run_context)
+      r.action(:nothing)
+      r.to(path)
+      r.run_action(:create)
+    end
   end
 end
 
