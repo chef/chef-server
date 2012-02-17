@@ -690,6 +690,9 @@
 
   <!-- NEW -->
 
-  <xsd:element name="ListAllMyBucketsResult" type="tns:ListAllMyBucketsResult"/>
+  <xsd:element name="ListAllMyBucketsResult"
+               type="tns:ListAllMyBucketsResult"/>
+  <xsd:element name="ListBucketResult"
+               type="tns:ListBucketResult"/>
 
 </xsd:schema>
