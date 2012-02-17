@@ -20,7 +20,7 @@ rescue LoadError => e
 end
 
 if have_vagrant
-  vagrant = Vagrant::Environment.new
+  vagrant = Vagrant::Environment.new(:ui_class => Vagrant::UI::Colored)
   namespace :vagrant do
     task :boxes do
       # Mixlib::ShellOut.new("vagrant box add lucid64 http://files.vagrantup.com/lucid64.box", :live_stream => STDOUT).run_cmmand
