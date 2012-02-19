@@ -55,24 +55,24 @@ download(#http_req{host=[Bucket|_], raw_path= <<"/",Path/binary>>}=Rq,
         {ok, #file_info{size=Size}} ->
             {ok, Transport, Socket} = cowboy_http_req:transport(Rq),
             Fun                     = fun() ->
-                                              stream(Transport,
-                                                     Socket,
-                                                     Filename)
+                                              stream_out(Transport,
+                                                         Socket,
+                                                         Filename)
                                       end,
             {{stream, Size, Fun}, Rq, St};
         _                           -> {halt, Rq, St}
     end.
 
-stream(Transport, Socket, Filename) ->
+stream_out(Transport, Socket, Filename) ->
     case file:open(Filename, [raw, binary, read_ahead]) of
-        {ok, IODevice} -> chunk(Transport, Socket, IODevice);
+        {ok, IODevice} -> chunk_out(Transport, Socket, IODevice);
         E              -> E
     end.
 
-chunk(Transport, Socket, IODevice) ->
+chunk_out(Transport, Socket, IODevice) ->
     case file:read(IODevice, 4096) of
         eof         -> file:close(IODevice), sent;
         {error, E}  -> {error, E};
         {ok, Chunk} -> Transport:send(Socket, Chunk),
-                       chunk(Transport, Socket, IODevice)
+                       chunk_out(Transport, Socket, IODevice)
     end.
