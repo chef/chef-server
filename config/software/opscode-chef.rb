@@ -6,7 +6,8 @@ dependencies ["ruby",
               "libxml2",
               "libxslt",
               "postgresql", # TODO: how do we install just the client library?
-              "curl"]
+              "curl",
+              "rsync"]
 
 source :git => "git@github.com:opscode/opscode-chef"
 
@@ -16,5 +17,6 @@ bundle_env = {"GEM_PATH" => nil, "GEM_HOME" => nil}
 
 build do
   command "/opt/opscode/embedded/bin/bundle install --without mysql integration_test dev", :env => bundle_env
-  # TODO: copy the rm, rsync steps from the clojure build
+  command "mkdir -p /opt/opscode/embedded/service/opscode-chef"
+  command "/opt/opscode/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./ /opt/opscode/embedded/service/opscode-chef/"
 end

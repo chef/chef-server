@@ -1,6 +1,9 @@
 name "mixlib-authorization"
 
-dependencies ["ruby", "bundler", "postgresql"]
+dependencies ["ruby",
+              "bundler",
+              "postgresql",
+              "rsync"]
 
 source :git => "git@github.com:opscode/mixlib-authorization"
 
@@ -10,5 +13,6 @@ bundle_env = {"GEM_HOME" => nil, "GEM_PATH" => nil}
 
 build do
   command "/opt/opscode/embedded/bin/bundle install --without mysql"
-  # TODO: copy the rm, rsync steps from the clojure build
+  command "mkdir -p /opt/opscode/embedded/service/mixlib-authorization"
+  command "/opt/opscode/embedded/bin/rsync -a --delete --exlude=.git/*** --exclude=.gitignore ./ /opt/opscode/embedded/service/mixlib-authorization/"
 end
