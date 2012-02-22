@@ -3,6 +3,7 @@ name "opscode-expander"
 dependencies ["ruby", "bundler", "rsync"]
 
 source :git => "git@github.com:opscode/opscode-expander"
+version "pc-rel-1.0.0.1"
 
 relative_path "opscode-expander"
 
