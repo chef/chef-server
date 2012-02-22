@@ -15,12 +15,7 @@ build do
   command "mkdir -p /opt/opscode/embedded/service/rabbitmq"
   command "/opt/opscode/embedded/bin/rsync -a ./ /opt/opscode/embedded/service/rabbitmq/"
 
-  # TODO: rabbitmq symlinks
-  # * what do we get from these symlinks?
-  # * why is the version different from the installed one?
-  # * are we able to "test" that rabbitmq works after a build?
-  #
-  # %w{rabbitmqclt rabbitmq-env rabbitmq-multi rabbitmq-server}.each do |cmd|
-  #   command "ln -sf /opt/opsocde/embedded/lib/erlang/lib/rabbitmq_server-2.2.0/sbin/#{cmd} /opt/opscode/embedded/bin/#{cmd}"
-  # end
+  %w{rabbitmqclt rabbitmq-env rabbitmq-multi rabbitmq-server}.each do |cmd|
+    command "ln -sf /opt/opsocde/embedded/service/rabbitmq/sbin/#{cmd} /opt/opscode/embedded/bin/#{cmd}"
+  end
 end
