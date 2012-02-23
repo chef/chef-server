@@ -38,6 +38,7 @@ http {
   gzip_proxied <%= @gzip_proxied %>;
   gzip_types <%= @gzip_types.join(' ') %>;
 
+
   <%- node['private_chef']['lb']['upstream'].each do |uname, servers| -%>
   upstream <%= uname.sub(/-/, '_') %> {
     <%- servers.each do |server| -%>
@@ -228,7 +229,6 @@ http {
 			proxy_redirect <%= node['private_chef']['opscode-chef']['upload_internal_proto'] %>://$my_upstream /;
 			proxy_pass <%= node['private_chef']['opscode-chef']['upload_internal_proto'] %>://$my_upstream;
     }
-
     location / {
       proxy_redirect http://opscode_chef /;
       proxy_pass http://opscode_chef;
@@ -298,7 +298,11 @@ http {
       root   /opt/opscode/embedded/nagios/share/;
       index  index.php;
     }
-
+    location /version { 
+      types { }
+      default_type text/plain;
+      alias /opt/opscode/pc-version.txt;
+    }
     location /nagios {
       index index.php;
       alias /opt/opscode/embedded/nagios/share/;
