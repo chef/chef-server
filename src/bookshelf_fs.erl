@@ -56,7 +56,11 @@ bucket_delete(Dir, Bucket) ->
 %%                         Object functions
 %% ===================================================================
 
-object_list(Dir, Bucket) ->
+object_list(Dir, Bucket) when is_list(Dir) ->
+    object_list(list_to_binary(Dir), Bucket);
+object_list(Dir, Bucket) when is_list(Bucket) ->
+    object_list(Dir, list_to_binary(Bucket));
+object_list(Dir, Bucket) when is_binary(Dir) andalso is_binary(Bucket) ->
     BucketPath = filename:join(Dir, Bucket),
     filelib:fold_files(
       BucketPath,
