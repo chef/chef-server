@@ -1,12 +1,12 @@
 name "libpng"
-version "1.5.8"
+version "1.5.9"
 
 dependencies ["zlib"]
 
-source :url => "ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.8.tar.gz",
-       :md5 => "dc2b84a1c077531ceb5bf9d79ad889a4"
+source :url => "ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-#{version}.tar.gz",
+       :md5 => "c740ba66cd7074ba2471b6a4ff48e1fb"
 
-relative_path "libpng-1.5.8"
+relative_path "libpng-#{version}"
 
 configure_env = {
   "LDFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
