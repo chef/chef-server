@@ -25,7 +25,7 @@ list_buckets_test_() ->
                          #bucket{name="cat", date="011-02-10T21:42:17.000Z"}],
               ?assertMatch(
                  {'ListAllMyBucketsResult',undefined,
-                  {'CanonicalUser',undefined,"abc123","bobo-t-clown"},
+                  {'CanonicalUser',undefined,"abc123","Bobo T. Clown"},
                   {'ListAllMyBucketsList',undefined,
                    [{'ListAllMyBucketsEntry',undefined,"lol",
                      "011-02-10T21:42:17.000Z"},
