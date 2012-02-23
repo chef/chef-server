@@ -5,6 +5,11 @@ require 'omnibus'
 Omnibus.software("../omnibus-ruby/config/software/*.rb", "config/software/*.rb")
 Omnibus.projects("config/projects/*.rb")
 
+desc "Print the name and version of all components"
+task :versions do
+  puts Omnibus::Reports.pretty_version_map
+end
+
 # Build control tasks
 begin
   require 'vagrant'
