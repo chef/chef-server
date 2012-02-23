@@ -1,4 +1,5 @@
 name "fcgi"
+version "2.4.0"
 
 dependencies ["autoconf", "automake", "libtool"]
 

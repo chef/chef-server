@@ -1,4 +1,5 @@
 name "jre"
+version "7u2-b13"
 
 dependencies ["rsync"]
 

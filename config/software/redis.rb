@@ -1,4 +1,5 @@
 name "redis"
+version "2.4.7"
 
 source :url => "http://redis.googlecode.com/files/redis-2.4.7.tar.gz",
        :md5 => "6afffb6120724183e40f1cac324ac71c"

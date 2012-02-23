@@ -1,4 +1,5 @@
 name "rsync"
+version "3.0.9"
 
 source :url => "http://rsync.samba.org/ftp/rsync/src/rsync-3.0.9.tar.gz",
        :md5 => "5ee72266fe2c1822333c407e1761b92b"

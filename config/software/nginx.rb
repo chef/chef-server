@@ -1,4 +1,5 @@
 name "nginx"
+version "1.0.12"
 
 dependencies ["pcre"]
 

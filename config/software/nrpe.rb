@@ -1,4 +1,5 @@
 name "nrpe"
+version "2.13"
 
 dependencies ["zlib", "openssl"]
 

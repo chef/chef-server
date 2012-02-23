@@ -1,4 +1,6 @@
 name "rubygems"
+version "1.8.12"
+
 dependencies ["ruby"]
 
 source :url => "http://production.cf.rubygems.org/rubygems/rubygems-1.8.12.tgz",

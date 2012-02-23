@@ -1,4 +1,5 @@
 name "opscode-chef"
+version "pc-rel-2.4.0.4"
 
 dependencies ["ruby",
               "bundler",

@@ -1,4 +1,5 @@
 name "libjpeg"
+version "8d"
 
 source :url => "http://www.ijg.org/files/jpegsrc.v8d.tar.gz",
        :md5 => "52654eb3b2e60c35731ea8fc87f1bd29"

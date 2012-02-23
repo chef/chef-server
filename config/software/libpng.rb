@@ -1,4 +1,5 @@
 name "libpng"
+version "1.5.8"
 
 dependencies ["zlib"]
 

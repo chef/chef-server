@@ -1,20 +1,13 @@
-name "chef"
+name "chef-pc"
+version "0.10.8"
 
-dependencies ["ruby", "rubygems", "libxml2", "libxslt"]
+dependencies ["ruby", "rubygems"]
 
 build do
   command ["/opt/opscode/embedded/bin/gem install chef",
+           "-v #{version}",
            "-n /opt/opscode/bin",
-           "--no-rdoc --no-ri --",
-           "--with-xml2-include=/opt/opscode/embedded/include/libxml2",
-           "--with-xml2-lib=/opt/opscode/embedded/lib"].join(" ")
-
-  command ["/opt/opscode/embedded/bin/gem install",
-           "highline net-ssh-multi knife-ec2 knife-rackspace",
-           "-n /opt/opscode/bin",
-           "--no-rdoc --no-ri --",
-           "--with-xml2-include=/opt/opscode/embedded/include/libxml2",
-           "--with-xml2-lib=/opt/opscode/embedded/lib"].join(" ")
+           "--no-rdoc --no-ri"].join(" ")
 
   # don't need to do the symlinking setup for private chef
 

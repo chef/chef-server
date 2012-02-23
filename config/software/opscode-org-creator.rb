@@ -1,4 +1,5 @@
 name "opscode-org-creator"
+version "rel-1.0.0"
 
 dependencies ["erlang", "rsync"]
 
