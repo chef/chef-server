@@ -1,4 +1,5 @@
 name "gecode"
+version "3.7.1"
 
 source :url => "http://www.gecode.org/download/gecode-3.7.1.tar.gz",
        :md5 => "b4191d8cfafa18bd9b78594544be2a04"

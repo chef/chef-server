@@ -1,4 +1,5 @@
 name "rabbitmq"
+version "2.7.1"
 
 dependencies ["erlang",
               # TODO: "libxslt", libxslt is required to BUILD rabbitmq, but

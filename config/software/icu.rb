@@ -1,4 +1,5 @@
 name "icu"
+version "4.8.1.1"
 
 source :url => "http://download.icu-project.org/files/icu4c/4.8.1.1/icu4c-4_8_1_1-src.tgz",
 :md5 => "ea93970a0275be6b42f56953cd332c17"

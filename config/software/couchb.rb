@@ -1,4 +1,5 @@
 name "couchdb"
+version "1.1.1"
 
 dependencies ["spidermonkey", "icu", "curl", "erlang"]
 

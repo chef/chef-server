@@ -1,4 +1,5 @@
 name "opscode-test"
+version "rel-0.2.0"
 
 dependencies ["ruby", "libxml2", "rsync"]
 

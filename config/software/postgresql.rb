@@ -1,4 +1,5 @@
 name "postgresql"
+version "9.1.2"
 
 dependencies ["zlib",
               "openssl"]

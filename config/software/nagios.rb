@@ -1,4 +1,5 @@
 name "nagios"
+version "3.3.1"
 
 dependencies ["gd", "php"]
 

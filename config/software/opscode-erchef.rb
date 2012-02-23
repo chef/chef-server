@@ -1,4 +1,5 @@
 name "opscode-erchef"
+version "pc-rc-0.8.0-tag"
 
 dependencies ["erlang", "rsync"]
 

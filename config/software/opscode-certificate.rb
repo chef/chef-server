@@ -1,4 +1,5 @@
 name "opscode-certificate"
+version "rel-0.1.2"
 
 dependencies ["erlang", "rsync"]
 

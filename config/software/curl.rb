@@ -1,4 +1,5 @@
 name "curl"
+version "7.23.1"
 
 dependencies ["zlib", "openssl"]
 

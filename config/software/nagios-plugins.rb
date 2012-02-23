@@ -1,4 +1,5 @@
 name "nagios-plugins"
+version "1.4.15"
 
 dependencies ["zlib", "openssl", "postgresql", "libiconv"]
 
