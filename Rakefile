@@ -21,6 +21,8 @@ end
 if have_vagrant
   vagrant = Vagrant::Environment.new(:ui_class => Vagrant::UI::Colored)
   namespace :vagrant do
+
+    desc "Boot a build VM with Vagrant"
     task :up do
       if vagrant.primary_vm.created?
         vagrant.primary_vm.start
@@ -30,6 +32,7 @@ if have_vagrant
       end
     end
 
+    desc "Boot a build VM with vagrant and run a build"
     task :build => :up do
       vagrant.primary_vm.channel.execute("cd opscode-omnibus && rake projects:opscode-webui:deb --trace") do |stream, data|
         out = stream == :stdout ? $stdout : $stderr
