@@ -1,5 +1,5 @@
 name "opscode-platform-debug"
-version "rel-0.2.5"
+version "master"
 
 dependencies ["ruby", "bundler", "postgresql", "rsync"]
 
