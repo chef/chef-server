@@ -10,5 +10,5 @@ relative_path "opscode-nagios-plugins"
 
 build do
   command "mkdir -p /opt/opscode/embedded/nagios/libexec"
-  command "/opt/opscode/embedded/bin/rsync -a ./plugins/ /opt/opscode/embedded/nagios/libexec/"
+  command "sudo /opt/opscode/embedded/bin/rsync -a ./plugins/ /opt/opscode/embedded/nagios/libexec/"
 end

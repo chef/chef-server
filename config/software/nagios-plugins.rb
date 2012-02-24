@@ -29,5 +29,5 @@ build do
 
   # build it
   command "make", :env => {"LD_RUN_PATH" => "/opt/opscode/embedded/lib"}
-  command "make install"
+  command "sudo make install"
 end
