@@ -22,7 +22,9 @@
          bucket_exists/2,
          bucket_create/2,
          bucket_delete/2,
-         object_list/2
+         object_list/2,
+         object_exists/3,
+         object_delete/3
         ]).
 
 %% ===================================================================
@@ -91,3 +93,24 @@ object_list(Dir, Bucket) when is_binary(Dir) andalso is_binary(Bucket) ->
       end,
       []
      ).
+
+object_exists(Dir, Bucket, Path) when is_list(Dir) ->
+    object_exists(list_to_binary(Dir), Bucket, Path);
+object_exists(Dir, Bucket, Path) when is_list(Bucket) ->
+    object_exists(Dir, list_to_binary(Bucket), Path);
+object_exists(Dir, Bucket, Path) when is_list(Path) ->
+    object_exists(Dir, Bucket, list_to_binary(Path));
+object_exists(Dir, Bucket, Path)
+  when is_binary(Dir) andalso is_binary(Bucket) andalso is_binary(Path) ->
+    filelib:is_regular(filename:join([Dir, Bucket, Path])).
+
+object_delete(Dir, Bucket, Path) when is_list(Dir) ->
+    object_delete(list_to_binary(Dir), Bucket, Path);
+object_delete(Dir, Bucket, Path) when is_list(Bucket) ->
+    object_delete(Dir, list_to_binary(Bucket), Path);
+object_delete(Dir, Bucket, Path) when is_list(Path) ->
+    object_delete(Dir, Bucket, list_to_binary(Path));
+object_delete(Dir, Bucket, Path)
+  when is_binary(Dir) andalso is_binary(Bucket) andalso is_binary(Path) ->
+    ObjectPath = filename:join([Dir, Bucket, Path]),
+    file:delete(ObjectPath).
