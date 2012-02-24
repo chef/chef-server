@@ -35,13 +35,26 @@ rest_init(Rq, Opts) ->
     {ok, ?req(with_amz_request_id, Rq), #state{dir = Dir}}.
 
 allowed_methods(Rq, St) ->
-    {['GET', 'PUT'], Rq, St}.
+    {['GET', 'PUT', 'DELETE'], Rq, St}.
 
 content_types_provided(Rq, St) ->
     {[{{<<"*">>, <<"*">>, []}, download}], Rq, St}.
 
 content_types_accepted(Rq, St) ->
     {[{'*', upload}], Rq, St}.
+
+resource_exists(#http_req{host=[Bucket|_],
+                          raw_path= <<"/",Path/binary>>}=Rq,
+                #state{dir=Dir}=St) ->
+    {bookshelf_fs:object_exists(Dir, Bucket, Path), Rq, St}.
+
+delete_resource(#http_req{host=[Bucket|_],
+                          raw_path= <<"/",Path/binary>>}=Rq,
+                #state{dir=Dir}=St) ->
+    case bookshelf_fs:object_delete(Dir, Bucket, Path) of
+        ok -> {true, Rq, St};
+        _  -> {false, Rq, St}
+    end.
 
 %% ===================================================================
 %%                         Content Accepted
