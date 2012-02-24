@@ -36,3 +36,6 @@ deps << "opscode-nagios-plugins"
 deps << "nrpe"
 
 dependencies deps
+
+exclude "\.git*"
+exclude "bundler\/git"
