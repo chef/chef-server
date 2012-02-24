@@ -15,7 +15,7 @@
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
 
--include("include/amazon_s3.hrl").
--include("include/shorthand.hrl").
--include("include/test.hrl").
--include("include/types.hrl").
+-include("amazon_s3.hrl").
+-include("shorthand.hrl").
+-include("test.hrl").
+-include("types.hrl").
