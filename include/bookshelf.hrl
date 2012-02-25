@@ -19,3 +19,8 @@
 -include("shorthand.hrl").
 -include("test.hrl").
 -include("types.hrl").
+
+-define(TIMEOUT_MS, 4096).
+-define(BLOCK_SIZE, 16384).
+
+-define(BACKEND, bookshelf_fs).
