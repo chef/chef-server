@@ -67,42 +67,39 @@ upload(#http_req{host=[Bucket|_],
                  transport=Trans,
                  buffer=Buf}=Rq,
        #state{dir=Dir}=St) ->
-    FName      = filename:join([Dir, Bucket, Path]),
-    ok         = filelib:ensure_dir(FName),
-    {ok, File} = file:open(FName, [raw, binary, write]),
     {Len, Rq2} = cowboy_http_req:parse_header('Content-Length', Rq),
-    case write(Trans, Sock, File, Len, Buf) of
-        ok ->
-            ok = file:close(File),
-            {ok, Rq3} = cowboy_http_req:reply(202, Rq2),
-            {halt, Rq3, St};
-        {error, Reason} ->
-            io:fwrite("Error~n~p~n", [Reason]),
-            file:close(File),
-            {halt, Rq2, St}
-    end.
-
-write(_Trans, _Sock, File, Len, Buf) when Len =< length(Buf) ->
-    file:write(File, Buf);
-write(Trans, Sock, File, Len, Buf) ->
-    case file:write(File, Buf) of
-        ok -> write(Trans, Sock, File, Len);
-        E  -> E
-    end.
-
-write(Trans, Sock, File, Len) when Len =< 4096 ->
-    case Trans:recv(Sock, Len, 5000) of
-        {ok, Buf} -> file:write(File, Buf);
-        E         -> E
-    end;
-write(Trans, Sock, File, Len) ->
-    case Trans:recv(Sock, 4096, 5000) of
-        {ok, Buf} ->
-            case file:write(File, Buf) of
-                ok -> write(Trans, Sock, File, Len-4096);
-                E  -> E
+    {ok, FsSt} = ?BACKEND:obj_open_w(Dir, Bucket, Path),
+    case ?BACKEND:obj_open_w(Dir, Bucket, Path) of
+        {ok, FsSt} ->
+            case write(FsSt, Trans, Sock, Len, Buf) of
+                {ok, FsSt2} ->
+                    {ok, Digest} = ?BACKEND:close(FsSt2),
+                    Etag = bookshelf_req:md5_hex(Digest),
+                    case cowboy_http_req:parse_header('Content-MD5', Rq2) of
+                        {undefined, undefined, Rq3} ->
+                            halt(202, bookshelf_req:with_etag(Etag, Rq3), St);
+                        {Md5, Rq3} ->
+                            case Md5 =:= Etag of
+                                true ->
+                                    halt(202,
+                                         bookshelf_req:with_etag(Etag, Rq3),
+                                         St);
+                                false ->
+                                    ?BACKEND:obj_close(FsSt2),
+                                    ?BACKEND:object_delete(Dir, Bucket, Path),
+                                    halt(406, Rq3, St)
+                            end
+                    end;
+                {error, timeout} ->
+                    ?BACKEND:obj_close(FsSt),
+                    ?BACKEND:object_delete(Dir, Bucket, Path),
+                    halt(408, Rq, St);
+                {error, _Reason} ->
+                    ?BACKEND:obj_close(FsSt),
+                    ?BACKEND:object_delete(Dir, Bucket, Path),
+                    halt(500, Rq, St)
             end;
-        E -> E
+        _ -> halt(500, Rq, St)
     end.
 
 %% ===================================================================
@@ -111,37 +108,63 @@ write(Trans, Sock, File, Len) ->
 
 download(#http_req{host=[Bucket|_], raw_path= <<"/",Path/binary>>}=Rq,
          #state{dir=Dir} = St) ->
-    Filename = filename:join([Dir, Bucket, Path]),
-    %% TODO move all the file concerns out of the helper functions below
-    case file:read_file_info(Filename) of
-        {ok, #file_info{size=Size}} ->
+    case ?BACKEND:obj_meta(Dir, Bucket, Path) of
+        {ok, #object{name=_Name, date=_Date, size=_Size}} ->
+            %% TODO Add object md5 to the types.hrl
+            %% TODO Set the Size header
+            %% TODO set the Etag header
             {ok, Transport, Socket} = cowboy_http_req:transport(Rq),
-            Fun                     = fun() ->
-                                              stream_out(Transport,
-                                                         Socket,
-                                                         Filename)
-                                      end,
-            {{stream, Size, Fun}, Rq, St};
-        _                           -> {halt, Rq, St}
+            case ?BACKEND:obj_open_w(Dir, Bucket, Path) of
+                {ok, FsSt} ->
+                    case read(FsSt, Transport, Socket) of
+                        {ok, FsSt2} ->
+                            {ok, _Digest} =
+                                ?BACKEND:close(FsSt2),
+                            %% TODO set the Md5 response Etag late?
+                            halt(200, Rq, St);
+                        _ ->
+                            ?BACKEND:close(FsSt),
+                            halt(500, Rq, St)
+                    end;
+                _ -> halt(500, Rq, St)
+            end;
+        _ -> halt(500, Rq, St)
     end.
 
-stream_out(Transport, Socket, Filename) ->
-    case file:open(Filename, [raw, binary, read_ahead]) of
-        {ok, IODevice} -> chunk_out(Transport, Socket, IODevice);
-        E              -> E
+%% ===================================================================
+%%                        Internal Functions
+%% ===================================================================
+
+read(St, Transport, Socket) ->
+    case ?BACKEND:obj_read(St) of
+        {ok, NewSt, Chunk} ->
+            Transport:send(Socket, Chunk),
+            read(NewSt, Transport, Socket);
+        Any -> Any
     end.
 
-chunk_out(Transport, Socket, IODevice) ->
-    case file:read(IODevice, 4096) of
-        eof         -> file:close(IODevice),
-                       sent;
-        {error, E}  -> file:close(IODevice),
-                       {error, E};
-        {ok, Chunk} -> Transport:send(Socket, Chunk),
-                       chunk_out(Transport, Socket, IODevice)
+write(St, Trans, Sock, Len, <<>>) ->
+    write(St, Trans, Sock, Len);
+write(St, Trans, Sock, Len, Buf) ->
+    case ?BACKEND:obj_write(St, Buf) of
+        {ok, NewSt} -> write(NewSt, Trans, Sock, Len-byte_size(Buf));
+        Any         -> Any
+    end.
+write(St, Trans, Sock, Len) when Len =< ?BLOCK_SIZE ->
+    case Trans:recv(Sock, Len, ?TIMEOUT_MS) of
+        {ok, Chunk} -> ?BACKEND:obj_write(St, Chunk);
+        Any         -> Any
+    end;
+write(St, Trans, Sock, Len) ->
+    case Trans:recv(Sock, ?BLOCK_SIZE, ?TIMEOUT_MS) of
+        {ok, Chunk} ->
+            case ?BACKEND:obj_write(St, Chunk) of
+                {ok, NewSt} -> write(NewSt, Trans, Sock, Len-?BLOCK_SIZE);
+                Any         -> Any
+            end;
+        Any -> Any
     end.
 
-md5_hex(Digest) ->
-    string:to_lower(
-      lists:flatten([io_lib:format("~2.16.0b",[N]) || <<N>> <= Digest])
-     ).
+halt(Code, Rq, St) ->
+    {ok, Rq2} = cowboy_http_req:reply(Code, Rq),
+    {halt, Rq2, St}.
