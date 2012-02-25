@@ -2,6 +2,7 @@
 Omnibus.configure do |o|
   o.cache_dir = "/tmp/omnibus/cache"
 
+  # https://wiki.corp.opscode.com/display/CORP/Generate+an+Omnibus+Build
   # o.s3_access_key   = "something"
   # o.s3_secret_key   = "something"
   o.s3_bucket       = "opscode-omnibus-cache"
