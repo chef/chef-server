@@ -1,2 +1,3 @@
 .vagrant
 pkg/*
+omnibus.rb

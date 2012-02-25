@@ -1,0 +1,10 @@
+
+Omnibus.configure do |o|
+  o.cache_dir = "/tmp/omnibus/cache"
+
+  # o.s3_access_key   = "something"
+  # o.s3_secret_key   = "something"
+  o.s3_bucket       = "opscode-omnibus-cache"
+  o.use_s3_caching  = true
+end
+

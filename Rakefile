@@ -2,6 +2,9 @@ $:.unshift File.expand_path("../../omnibus-ruby/lib", __FILE__)
 
 require 'omnibus'
 
+Omnibus.setup
+
+Omnibus::S3Tasks.define!
 Omnibus.software("../omnibus-ruby/config/software/*.rb", "config/software/*.rb")
 Omnibus.projects("config/projects/*.rb")
 
