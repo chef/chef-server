@@ -24,7 +24,13 @@
          bucket_delete/2,
          object_list/2,
          object_exists/3,
-         object_delete/3
+         object_delete/3,
+         obj_meta/3,
+         obj_open_w/3,
+         obj_open_r/3,
+         obj_write/2,
+         obj_read/1,
+         obj_close/1
         ]).
 
 %% ===================================================================
@@ -114,3 +120,41 @@ object_delete(Dir, Bucket, Path)
   when is_binary(Dir) andalso is_binary(Bucket) andalso is_binary(Path) ->
     ObjectPath = filename:join([Dir, Bucket, Path]),
     file:delete(ObjectPath).
+
+obj_meta(Dir, Bucket, Path) ->
+    case file:read_file_info(filename:join([Dir, Bucket, Path])) of
+        {ok, #file_info{mtime=Date, size=Size}} ->
+            {ok, #object{name=Path, date=Date, size=Size}};
+        Any -> Any
+    end.
+
+obj_open(Dir, Bucket, Path, Opts) ->
+    case file:open(filename:join([Dir, Bucket, Path]), Opts) of
+        {ok, File} -> {ok, {File, erlang:md5_init()}};
+        Any        -> Any
+    end.
+
+obj_open_w(Dir, Bucket, Path) ->
+    obj_open(Dir, Bucket, Path, [raw, binary, write]).
+
+obj_open_r(Dir, Bucket, Path) ->
+    obj_open(Dir, Bucket, Path, [raw, binary, read_ahead]).
+
+obj_write({File, Ctx}, Chunk) ->
+    case file:write(File, Chunk) of
+        ok  -> {ok, {File, erlang:md5_update(Ctx, Chunk)}};
+        Any -> Any
+    end.
+
+obj_read({File, Ctx}=St) ->
+    case file:read(File, ?BLOCK_SIZE) of
+        {ok, Chunk} -> {ok, {File, erlang:md5_update(Ctx, Chunk)}, Chunk};
+        eof         -> {ok, St};
+        Any         -> Any
+    end.
+
+obj_close({File, Ctx}) ->
+    case file:close(File) of
+        ok  -> {ok, erlang:md5_final(Ctx)};
+        Any -> Any
+    end.
