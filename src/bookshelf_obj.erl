@@ -140,3 +140,8 @@ chunk_out(Transport, Socket, IODevice) ->
         {ok, Chunk} -> Transport:send(Socket, Chunk),
                        chunk_out(Transport, Socket, IODevice)
     end.
+
+md5_hex(Digest) ->
+    string:to_lower(
+      lists:flatten([io_lib:format("~2.16.0b",[N]) || <<N>> <= Digest])
+     ).
