@@ -48,7 +48,5 @@ resource_exists(Rq, #state{dir=Dir}=St) ->
 %% ===================================================================
 
 to_xml(Rq, #state{dir=Dir}=St) ->
-    {?xml(write,
-          ?xml(list_buckets,
-               bookshelf_fs:bucket_list(Dir))),
+    {?xml(write, ?xml(list_buckets, ?BACKEND:bucket_list(Dir))),
      Rq, St}.

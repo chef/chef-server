@@ -44,10 +44,10 @@ content_types_provided(Rq, St) ->
     {[{{<<"text">>, <<"xml">>, []}, to_xml}], Rq, St}.
 
 resource_exists(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
-    {bookshelf_fs:bucket_exists(Dir, Bucket), Rq, St}.
+    {?BACKEND:bucket_exists(Dir, Bucket), Rq, St}.
 
 delete_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
-    case bookshelf_fs:bucket_delete(Dir, Bucket) of
+    case ?BACKEND:bucket_delete(Dir, Bucket) of
         ok -> {true, Rq, St};
         _  -> {false, Rq, St}
     end.
@@ -57,7 +57,7 @@ delete_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
 %% ===================================================================
 
 create_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
-    case bookshelf_fs:bucket_create(Dir, Bucket) of
+    case ?BACKEND:bucket_create(Dir, Bucket) of
         ok -> {true, Rq, St};
         _  -> {false, Rq, St}
     end.
@@ -69,5 +69,4 @@ create_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
 to_xml(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
     {?xml(write,
           ?xml(list_objects,
-               {Bucket, bookshelf_fs:object_list(Dir, Bucket)})),
-     Rq, St}.
+               {Bucket, ?BACKEND:object_list(Dir, Bucket)})), Rq, St}.

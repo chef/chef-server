@@ -46,12 +46,12 @@ content_types_accepted(Rq, St) ->
 resource_exists(#http_req{host=[Bucket|_],
                           raw_path= <<"/",Path/binary>>}=Rq,
                 #state{dir=Dir}=St) ->
-    {bookshelf_fs:object_exists(Dir, Bucket, Path), Rq, St}.
+    {?BACKEND:object_exists(Dir, Bucket, Path), Rq, St}.
 
 delete_resource(#http_req{host=[Bucket|_],
                           raw_path= <<"/",Path/binary>>}=Rq,
                 #state{dir=Dir}=St) ->
-    case bookshelf_fs:object_delete(Dir, Bucket, Path) of
+    case ?BACKEND:object_delete(Dir, Bucket, Path) of
         ok -> {true, Rq, St};
         _  -> {false, Rq, St}
     end.
