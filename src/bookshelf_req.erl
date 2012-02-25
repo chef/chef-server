@@ -18,18 +18,29 @@
 -module(bookshelf_req).
 -include("bookshelf.hrl").
 -export([
-         with_amz_request_id/1
+         with_amz_request_id/1,
+         to_base64/1,
+         to_hex/1
         ]).
 
 %% ===================================================================
 %%                          API functions
 %% ===================================================================
 
+
 with_amz_request_id(Rq) ->
     {ok, Rq2} =
         cowboy_http_req:set_resp_header(<<"x-amz-request-id">>,
                                         id(), Rq),
     Rq2.
+
+to_base64(Bin) ->
+    base64:encode_to_string(Bin).
+
+to_hex(Bin) ->
+    string:to_lower(
+      lists:flatten([io_lib:format("~2.16.0b",[N]) || <<N>> <= Bin])
+     ).
 
 %% ===================================================================
 %%                        Internal functions
