@@ -32,7 +32,7 @@ init(_Transport, _Rq, _Opts) ->
 
 rest_init(Rq, Opts) ->
     {dir, Dir} = lists:keyfind(dir, 1, Opts),
-    {ok, ?req(with_amz_request_id, Rq), #state{dir = Dir}}.
+    {ok, bookshelf_req:with_amz_request_id(Rq), #state{dir = Dir}}.
 
 allowed_methods(Rq, St) ->
     {['GET', 'PUT', 'DELETE'], Rq, St}.
@@ -67,6 +67,7 @@ create_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
 %% ===================================================================
 
 to_xml(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
-    {?xml(write,
-          ?xml(list_objects,
-               {Bucket, ?BACKEND:object_list(Dir, Bucket)})), Rq, St}.
+    Objects = ?BACKEND:object_list(Dir, Bucket),
+    Term    = bookshelf_xml:list_objects(Objects),
+    Body    = bookshelf_xml:write(Term),
+    {Body, Rq, St}.

@@ -20,5 +20,3 @@
 
 %% shortcut to apply 1 argument to a module function
 -define(env(F, A), apply(bookshelf_env, F, [A])).
--define(req(F, A), apply(bookshelf_req, F, [A])).
--define(xml(F, A), apply(bookshelf_xml, F, [A])).

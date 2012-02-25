@@ -22,8 +22,8 @@ with_amz_rq_id_test_() ->
     [{"should add an amz_request_id response header",
       fun() ->
               ?assertMatch(
-                 #http_req{resp_headers=[{<<"x-amz-request-id">>, _}|_]},
-                 ?req(with_amz_request_id, #http_req{})
+                 #http_req{resp_headers=[{<<"x-amz-request-id">>, _}]},
+                 bookshelf_req:with_amz_request_id(#http_req{})
                 )
       end
      }].

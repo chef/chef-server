@@ -32,7 +32,7 @@ init(_Transport, _Rq, _Opts) ->
 
 rest_init(Rq, Opts) ->
     {dir, Dir} = lists:keyfind(dir, 1, Opts),
-    {ok, ?req(with_amz_request_id, Rq), #state{dir = Dir}}.
+    {ok, bookshelf_req:with_amz_request_id(Rq), #state{dir = Dir}}.
 
 allowed_methods(Rq, St) ->
     {['GET'], Rq, St}.
@@ -48,5 +48,7 @@ resource_exists(Rq, #state{dir=Dir}=St) ->
 %% ===================================================================
 
 to_xml(Rq, #state{dir=Dir}=St) ->
-    {?xml(write, ?xml(list_buckets, ?BACKEND:bucket_list(Dir))),
-     Rq, St}.
+    Buckets = ?BACKEND:bucket_list(Dir),
+    Term    = bookshelf_xml:list_buckets(Buckets),
+    Body    = bookshelf_xml:write(Term),
+    {Body, Rq, St}.

@@ -32,7 +32,7 @@ init(_Transport, _Rq, _Opts) ->
 
 rest_init(Rq, Opts) ->
     {dir, Dir} = lists:keyfind(dir, 1, Opts),
-    {ok, ?req(with_amz_request_id, Rq), #state{dir = Dir}}.
+    {ok, bookshelf_req:with_amz_request_id(Rq), #state{dir = Dir}}.
 
 allowed_methods(Rq, St) ->
     {['GET', 'PUT', 'DELETE'], Rq, St}.

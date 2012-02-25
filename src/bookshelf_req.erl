@@ -18,21 +18,15 @@
 -module(bookshelf_req).
 -include("bookshelf.hrl").
 -export([
-         with_amz_request_id/1,
+         fingerprint/0,
          to_base64/1,
-         to_hex/1
+         to_hex/1,
+         with_amz_request_id/1,
+         with_etag/2
         ]).
 
-%% ===================================================================
-%%                          API functions
-%% ===================================================================
-
-
-with_amz_request_id(Rq) ->
-    {ok, Rq2} =
-        cowboy_http_req:set_resp_header(<<"x-amz-request-id">>,
-                                        id(), Rq),
-    Rq2.
+fingerprint() ->
+    term_to_binary({node(), erlang:now()}).
 
 to_base64(Bin) ->
     base64:encode_to_string(Bin).
@@ -42,9 +36,11 @@ to_hex(Bin) ->
       lists:flatten([io_lib:format("~2.16.0b",[N]) || <<N>> <= Bin])
      ).
 
-%% ===================================================================
-%%                        Internal functions
-%% ===================================================================
+with_amz_request_id(Rq) ->
+    Id        = to_base64(fingerprint()),
+    {ok, Rq2} = cowboy_http_req:set_resp_header(<<"x-amz-request-id">>, Id, Rq),
+    Rq2.
 
-id() ->
-    base64:encode_to_string(term_to_binary({node(), erlang:now()})).
+with_etag(Etag, Rq) ->
+    {ok, Rq2} = cowboy_http_req:set_resp_header('Etag', Etag, Rq),
+    Rq2.
