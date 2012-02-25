@@ -16,7 +16,7 @@ build do
   command "mkdir -p /opt/opscode/embedded/service/rabbitmq"
   command "/opt/opscode/embedded/bin/rsync -a ./ /opt/opscode/embedded/service/rabbitmq/"
 
-  %w{rabbitmqclt rabbitmq-env rabbitmq-multi rabbitmq-server}.each do |cmd|
+  %w{rabbitmqctl rabbitmq-env rabbitmq-multi rabbitmq-server}.each do |cmd|
     command "ln -sf /opt/opsocde/embedded/service/rabbitmq/sbin/#{cmd} /opt/opscode/embedded/bin/#{cmd}"
   end
 end
