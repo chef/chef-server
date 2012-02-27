@@ -36,12 +36,12 @@ ruby_block "make gem symlinks" do
 end
 
 directory "/opt/opscode" do
-  mode "777"
+  mode "755"
   recursive true
 end
 
 directory "/opt/chef" do
-  mode "777"
+  mode "755"
   recursive true
 end
 
