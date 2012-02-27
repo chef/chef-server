@@ -40,6 +40,11 @@ directory "/opt/opscode" do
   recursive true
 end
 
+directory "/opt/chef" do
+  mode "777"
+  recursive true
+end
+
 # gtihub's SSH key
 directory File.expand_path("~#{node["opscode-omnibus"]["build-user"]}/.ssh") do
   owner node["opscode-omnibus"]["build-user"]
