@@ -10,7 +10,7 @@ working_dir = "#{project_dir}/runit-2.1.1"
 
 build do
   # put runit where we want it, not where they tell us to
-  command "sed -i -e s:^char *varservice =\"/service/\";$:char *varservice =\"#{install_dir}/service/\";: src/sv.c", :cwd => working_dir
+  command %q{sed -i -e "s/^char\ \*varservice\ \=\"\/service\/\";$/char\ \*varservice\ \=\"\/opt\/opscode\/service\/\";/" src/sv.c}, :cwd => working_dir
   # TODO: the following is not idempotent
   command "sed -i -e s:/service:#{install_dir}/service: etc/2", :cwd => working_dir
   command "sed -i -e 's!^PATH=/command:/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/X11R6/bin$!PATH=#{install_dir}/bin:#{install_dir}/embedded/bin:/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin!' etc/2", :cwd => working_dir
@@ -36,7 +36,9 @@ build do
   command "cp etc/2 #{install_dir}/embedded/bin/runsvdir-start", :cwd => working_dir
 
   # set up service directories
-  %w{#{install_dir}/service #{install_dir}/sv #{install_dir}/init}.each do |dir|
+  ["#{install_dir}/service",
+   "#{install_dir}/sv",
+   "#{install_dir}/init"].each do |dir|
     command "mkdir -p #{dir}"
   end
 end
