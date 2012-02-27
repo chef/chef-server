@@ -19,7 +19,7 @@
 -include("bookshelf.hrl").
 -export([
          list_buckets/1,
-         list_objects/1,
+         list_objects/2,
          model/0,
          write/1,
          write_hrl/0,
@@ -34,7 +34,7 @@ list_buckets(Buckets) ->
     #'ListAllMyBucketsResult'{ 'Owner'   = owner(),
                                'Buckets' = buckets(Buckets) }.
 
-list_objects({Bucket, Objects}) ->
+list_objects(Bucket, Objects) ->
     #'ListBucketResult'{ 'Name'        = Bucket,
                          'Prefix'      = "",
                          'Marker'      = "",
