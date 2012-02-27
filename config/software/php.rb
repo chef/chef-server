@@ -15,27 +15,27 @@ source :url => "http://us.php.net/distributions/php-5.3.10.tar.gz",
 relative_path "php-5.3.10"
 
 env = {
-  "LDFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
-  "CFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
-  "LD_RUN_PATH" => "/opt/opscode/embedded/lib"
+  "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "LD_RUN_PATH" => "#{install_dir}/embedded/lib"
 }
 
 build do
   command(["./configure",
-           "--prefix=/opt/opscode/embedded",
+           "--prefix=#{install_dir}/embedded",
            "--without-pear",
-           "--with-zlib-dir=/opt/opscode/embedded",
-           "--with-pcre-dir=/opt/opscode/embedded",
-           "--with-xsl=/opt/opscode/embedded",
-           "--with-libxml-dir=/opt/opscode/embedded",
-           "--with-iconv=/opt/opscode/embedded",
-           "--with-openssl-dir=/opt/opscode/embedded",
-           "--with-gd=/opt/opscode/embedded",
+           "--with-zlib-dir=#{install_dir}/embedded",
+           "--with-pcre-dir=#{install_dir}/embedded",
+           "--with-xsl=#{install_dir}/embedded",
+           "--with-libxml-dir=#{install_dir}/embedded",
+           "--with-iconv=#{install_dir}/embedded",
+           "--with-openssl-dir=#{install_dir}/embedded",
+           "--with-gd=#{install_dir}/embedded",
            "--enable-fpm",
            "--with-fpm-user=opscode",
            "--with-fpm-group=opscode"].join(" "),
           :env => env)
 
-  command "make", :env => {"LD_RUN_PATH" => "/opt/opscode/embedded/lib"}
+  command "make", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
   command "make install"
 end

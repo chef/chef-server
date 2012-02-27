@@ -9,9 +9,9 @@ source :url => "http://download.oracle.com/otn-pub/java/jdk/7u2-b13/jdk-7u2-linu
 
 relative_path "jdk1.7.0_02"
 
-jre_dir = "/opt/opscode/embedded/jre"
+jre_dir = "#{install_dir}/embedded/jre"
 
 build do
   command "mkdir -p #{jre_dir}"
-  command "/opt/opscode/embedded/bin/rsync -a jre/ #{jre_dir}/"
+  command "#{install_dir}/embedded/bin/rsync -a jre/ #{jre_dir}/"
 end

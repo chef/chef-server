@@ -10,16 +10,16 @@ source :url => "http://ftp.postgresql.org/pub/source/v9.1.2/postgresql-9.1.2.tar
 relative_path "postgresql-9.1.2"
 
 configure_env = {
-  "LDFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
-  "CFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
-  "LD_RUN_PATH" => "/opt/opscode/embedded/lib"
+  "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "LD_RUN_PATH" => "#{install_dir}/embedded/lib"
 }
 
 build do
   command ["./configure",
-           "--prefix=/opt/opscode/embedded",
-           "--with-openssl --with-includes=/opt/opscode/embedded/include",
-           "--with-libraries=/opt/opscode/embedded/lib"].join(" "), :env => configure_env
-  command "make", :env => {"LD_RUN_PATH" => "/opt/opscode/embedded/lib"}
+           "--prefix=#{install_dir}/embedded",
+           "--with-openssl --with-includes=#{install_dir}/embedded/include",
+           "--with-libraries=#{install_dir}/embedded/lib"].join(" "), :env => configure_env
+  command "make", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
   command "make install"
 end

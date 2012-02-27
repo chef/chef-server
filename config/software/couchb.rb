@@ -9,25 +9,25 @@ source :url => "http://archive.apache.org/dist/couchdb/1.1.1/apache-couchdb-1.1.
 relative_path "apache-couchdb-1.1.1"
 
 build_env = {
-  "RPATH" => "/opt/opscode/embedded/lib",
-  "CURL_CONFIG" => "/opt/opscode/embedded/bin/curl-config",
-  "ICU_CONFIG" => "/opt/opscode/embedded/bin/icu-config",
-  "ERL" => "/opt/opscode/embedded/bin/erl",
-  "ERLC" => "/opt/opscode/embedded/bin/erlc",
-  "LD_RUN_PATH" => "/opt/opscode/embedded/lib",
-  "CFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
-  "PATH" => "/opt/opscode/embedded/bin:#{ENV["PATH"]}"
+  "RPATH" => "#{install_dir}/embedded/lib",
+  "CURL_CONFIG" => "#{install_dir}/embedded/bin/curl-config",
+  "ICU_CONFIG" => "#{install_dir}/embedded/bin/icu-config",
+  "ERL" => "#{install_dir}/embedded/bin/erl",
+  "ERLC" => "#{install_dir}/embedded/bin/erlc",
+  "LD_RUN_PATH" => "#{install_dir}/embedded/lib",
+  "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "PATH" => "#{install_dir}/embedded/bin:#{ENV["PATH"]}"
 }
 
 build do
 #  command "./bootstrap", :env => build_env
   command ["./configure",
-           "--prefix=/opt/opscode/embedded",
+           "--prefix=#{install_dir}/embedded",
            "--disable-init",
            "--disable-launchd",
-           "--with-erlang=/opt/opscode/embedded/lib/erlang/usr/include",
-           "--with-js-include=/opt/opscode/embedded/include",
-           "--with-js-lib=/opt/opscode/embedded/lib"].join(" "), :env => build_env
+           "--with-erlang=#{install_dir}/embedded/lib/erlang/usr/include",
+           "--with-js-include=#{install_dir}/embedded/include",
+           "--with-js-lib=#{install_dir}/embedded/lib"].join(" "), :env => build_env
   command "make", :env => build_env
   command "make install", :env => build_env
 end

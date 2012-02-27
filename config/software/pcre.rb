@@ -7,14 +7,14 @@ source :url => "ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.30.
 relative_path "pcre-8.30"
 
 build do
-  command("./configure --prefix=/opt/opscode/embedded",
+  command("./configure --prefix=#{install_dir}/embedded",
           :env => {
-            "CFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include"
+            "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include"
           })
   # command "touch alocal.m4"
   command("make",
           :env => {
-            "PATH" => "/opt/opscode/embedded/bin:#{ENV["PATH"]}"
+            "PATH" => "#{install_dir}/embedded/bin:#{ENV["PATH"]}"
           })
   command "make install"
 end

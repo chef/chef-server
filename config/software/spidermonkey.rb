@@ -6,7 +6,7 @@ source :url => "http://ftp.mozilla.org/pub/mozilla.org/js/js-1.8.0-rc1.tar.gz",
 
 relative_path "js"
 
-env = {"LD_RUN_PATH" => "/opt/opscode/embedded/lib"}
+env = {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
 working_dir = "#{project_dir}/src"
 
 # == Build Notes ==
@@ -21,14 +21,14 @@ working_dir = "#{project_dir}/src"
 build do
   command(["make",
            "BUILD_OPT=1",
-           "XCFLAGS=-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
+           "XCFLAGS=-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
            "-f",
            "Makefile.ref"].join(" "),
           :env => env,
           :cwd => working_dir)
   command(["make",
            "BUILD_OPT=1",
-           "JS_DIST=/opt/opscode/embedded",
+           "JS_DIST=#{install_dir}/embedded",
            "-f",
            "Makefile.ref",
            "export"].join(" "),
@@ -36,7 +36,7 @@ build do
           :cwd => working_dir)
 
   # TODO: only do the following on 64-bit linux
-  command "mv /opt/opscode/embedded/lib64/libjs.a /opt/opscode/embedded/lib"
-  command "mv /opt/opscode/embedded/lib64/libjs.so /opt/opscode/embedded/lib"
-  command "rm -rf /opt/opscode/embedded/lib64"
+  command "mv #{install_dir}/embedded/lib64/libjs.a #{install_dir}/embedded/lib"
+  command "mv #{install_dir}/embedded/lib64/libjs.so #{install_dir}/embedded/lib"
+  command "rm -rf #{install_dir}/embedded/lib64"
 end

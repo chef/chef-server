@@ -20,7 +20,7 @@ relative_path "gecode-3.7.1"
 
 build do
   command ["./configure",
-           "--prefix=/opt/opscode/embedded",
+           "--prefix=#{install_dir}/embedded",
            "--disable-doc-dot",
            "--disable-doc-search",
            "--disable-doc-tagfile",
@@ -28,6 +28,6 @@ build do
            "--disable-doc-docset",
            "--disable-qt",
            "--disable-examples"].join(" ")
-  command "make", :env => { "LD_RUN_PATH" => "/opt/opscode/embedded/lib" }
+  command "make", :env => { "LD_RUN_PATH" => "#{install_dir}/embedded/lib" }
   command "make install"
 end

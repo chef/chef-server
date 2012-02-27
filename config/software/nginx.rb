@@ -10,11 +10,11 @@ relative_path "nginx-1.0.12"
 
 build do
   command ["./configure",
-           "--prefix=/opt/opscode/embedded",
+           "--prefix=#{install_dir}/embedded",
            "--with-http_ssl_module",
            "--with-debug",
-           "--with-ld-opt=-L/opt/opscode/embedded/lib",
-           "--with-cc-opt=\"-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include\""].join(" ")
-  command "make", :env => {"LD_RUN_PATH" => "/opt/opscode/embedded/lib"}
+           "--with-ld-opt=-L#{install_dir}/embedded/lib",
+           "--with-cc-opt=\"-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include\""].join(" ")
+  command "make", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
   command "make install"
 end

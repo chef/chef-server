@@ -9,6 +9,6 @@ source :git => "git@github.com:opscode/opscode-nagios-plugins"
 relative_path "opscode-nagios-plugins"
 
 build do
-  command "mkdir -p /opt/opscode/embedded/nagios/libexec"
-  command "sudo /opt/opscode/embedded/bin/rsync -a ./plugins/ /opt/opscode/embedded/nagios/libexec/"
+  command "mkdir -p #{install_dir}/embedded/nagios/libexec"
+  command "sudo #{install_dir}/embedded/bin/rsync -a ./plugins/ #{install_dir}/embedded/nagios/libexec/"
 end

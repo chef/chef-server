@@ -4,9 +4,9 @@ version "0.10.8"
 dependencies ["ruby", "rubygems"]
 
 build do
-  command ["/opt/opscode/embedded/bin/gem install chef",
+  command ["#{install_dir}/embedded/bin/gem install chef",
            "-v #{version}",
-           "-n /opt/opscode/bin",
+           "-n #{install_dir}/bin",
            "--no-rdoc --no-ri"].join(" ")
 
   # don't need to do the symlinking setup for private chef
@@ -19,6 +19,6 @@ build do
    "ssl/man",
    "man",
    "info"].each do |dir|
-    command "rm -rf /opt/opscode/embedded/#{dir}"
+    command "rm -rf #{install_dir}/embedded/#{dir}"
   end
 end

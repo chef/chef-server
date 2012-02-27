@@ -12,18 +12,18 @@ relative_path "pierrejoye-gd-libgd-5551f61978e3"
 source_dir = "#{project_dir}/src"
 
 configure_env = {
-  "LDFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
-  "CFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
-  "LD_RUN_PATH" => "/opt/opscode/embedded/lib",
+  "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "LD_RUN_PATH" => "#{install_dir}/embedded/lib",
   "LIBS" => "-liconv"
 }
 
 build do
   command(["./configure",
-           "--prefix=/opt/opscode/embedded",
-           "--with-libiconv-prefix=/opt/opscode/embedded",
-           "--with-jpeg=/opt/opscode/embedded",
-           "--with-png=/opt/opscode/embedded",
+           "--prefix=#{install_dir}/embedded",
+           "--with-libiconv-prefix=#{install_dir}/embedded",
+           "--with-jpeg=#{install_dir}/embedded",
+           "--with-png=#{install_dir}/embedded",
            "--without-x" "--without-freetype",
            "--without-fontconfig",
            "--without-xpm"].join(" "),

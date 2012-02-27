@@ -10,7 +10,7 @@ relative_path 'curl-7.23.1'
 
 build do
   command ["./configure",
-           "--prefix=/opt/opscode/embedded",
+           "--prefix=#{install_dir}/embedded",
            "--disable-debug",
            "--enable-optimize",
            "--disable-ldap",
@@ -20,9 +20,9 @@ build do
            "--disable-dependency-tracking",
            "--enable-ipv6",
            "--without-libidn",
-           "--with-ssl=/opt/opscode/embedded",
-           "--with-zlib=/opt/opscode/embedded"].join(" ")
+           "--with-ssl=#{install_dir}/embedded",
+           "--with-zlib=#{install_dir}/embedded"].join(" ")
 
-  command "make", :env => {"LD_RUN_PATH" => "/opt/opscode/embedded/lib"}
+  command "make", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
   command "make install"
 end

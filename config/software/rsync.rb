@@ -7,13 +7,13 @@ source :url => "http://rsync.samba.org/ftp/rsync/src/rsync-3.0.9.tar.gz",
 relative_path "rsync-3.0.9"
 
 env = {
-  "LDFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
-  "CFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include -static-libgcc",
-  "LD_RUN_PATH" => "/opt/opscode/embedded/lib"
+  "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include -static-libgcc",
+  "LD_RUN_PATH" => "#{install_dir}/embedded/lib"
 }
 
 build do
-  command "./configure --prefix=/opt/opscode/embedded --with-include-popt --disable-iconv", :env => env
+  command "./configure --prefix=#{install_dir}/embedded --with-include-popt --disable-iconv", :env => env
   command "make", :env => env
   command "make install"
 end

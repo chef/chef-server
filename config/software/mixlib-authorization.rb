@@ -13,7 +13,7 @@ relative_path "mixlib-authorization"
 bundle_env = {"GEM_HOME" => nil, "GEM_PATH" => nil}
 
 build do
-  command "/opt/opscode/embedded/bin/bundle install --without mysql"
-  command "mkdir -p /opt/opscode/embedded/service/mixlib-authorization"
-  command "/opt/opscode/embedded/bin/rsync -a --delete --exlude=.git/*** --exclude=.gitignore ./ /opt/opscode/embedded/service/mixlib-authorization/"
+  command "#{install_dir}/embedded/bin/bundle install --without mysql"
+  command "mkdir -p #{install_dir}/embedded/service/mixlib-authorization"
+  command "#{install_dir}/embedded/bin/rsync -a --delete --exlude=.git/*** --exclude=.gitignore ./ #{install_dir}/embedded/service/mixlib-authorization/"
 end

@@ -9,14 +9,14 @@ relative_path "icu"
 working_dir = "#{project_dir}/source"
 
 build do
-  command("./configure --prefix=/opt/opscode/embedded",
+  command("./configure --prefix=#{install_dir}/embedded",
           :env => {
-            "CFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include"
+            "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include"
           },
           :cwd => working_dir)
   command("make",
           :env => {
-            "LD_RUN_PATH" => "/opt/opscode/embedded/lib"
+            "LD_RUN_PATH" => "#{install_dir}/embedded/lib"
           },
           :cwd => working_dir)
   command "make install", :cwd => working_dir

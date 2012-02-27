@@ -10,9 +10,9 @@ source :url => "http://voxel.dl.sourceforge.net/project/nagiosplug/nagiosplug/1.
 relative_path "nagios-plugins-1.4.15"
 
 configure_env = {
-  "LDFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
-  "CFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
-  "LD_RUN_PATH" => "/opt/opscode/embedded/lib"
+  "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "LD_RUN_PATH" => "#{install_dir}/embedded/lib"
 }
 
 gem_env = {"GEM_PATH" => nil, "GEM_HOME" => nil}
@@ -20,14 +20,14 @@ gem_env = {"GEM_PATH" => nil, "GEM_HOME" => nil}
 build do
   # configure it
   command(["./configure",
-           "--prefix=/opt/opscode/embedded/nagios",
-           "--with-trusted-path=/opt/opscode/bin:/opt/opscode/embedded/bin:/bin:/sbin:/usr/bin:/usr/sbin",
-           "--with-openssl=/opt/opscode/embedded",
-           "--with-pgsql=/opt/opscode/embedded",
-           "--with-libiconv-prefix=/opt/opscode/embedded"].join(" "),
+           "--prefix=#{install_dir}/embedded/nagios",
+           "--with-trusted-path=#{install_dir}/bin:#{install_dir}/embedded/bin:/bin:/sbin:/usr/bin:/usr/sbin",
+           "--with-openssl=#{install_dir}/embedded",
+           "--with-pgsql=#{install_dir}/embedded",
+           "--with-libiconv-prefix=#{install_dir}/embedded"].join(" "),
           :env => configure_env)
 
   # build it
-  command "make", :env => {"LD_RUN_PATH" => "/opt/opscode/embedded/lib"}
+  command "make", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
   command "sudo make install"
 end

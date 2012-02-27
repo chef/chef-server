@@ -7,14 +7,14 @@ source :url => "http://www.lighttpd.net/download/spawn-fcgi-1.6.3.tar.gz",
 relative_path "spawn-fcgi-1.6.3"
 
 configure_env = {
-  "LDFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
-  "CFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/include",
-  "LD_RUN_PATH" => "/opt/opscode/embedded/lib",
-  "PATH" => "/opt/opscode/embedded/bin:#{ENV["PATH"]}"
+  "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "LD_RUN_PATH" => "#{install_dir}/embedded/lib",
+  "PATH" => "#{install_dir}/embedded/bin:#{ENV["PATH"]}"
 }
 
 build do
-  command "./configure --prefix=/opt/opscode/embedded", :env => configure_env
-  command "make", :env => {"LD_RUN_PATH" => "/opt/opscode/embedded/lib"}
+  command "./configure --prefix=#{install_dir}/embedded", :env => configure_env
+  command "make", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
   command "make install"
 end

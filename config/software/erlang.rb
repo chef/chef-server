@@ -9,20 +9,20 @@ source :url => "http://www.erlang.org/download/otp_src_R14B03.tar.gz",
 relative_path "otp_src_R14B03"
 
 env = {
-  "CFLAGS" => "-L/opt/opscode/embedded/lib -I/opt/opscode/embedded/erlang/include",
-  "LDFLAGS" => "-Wl,-rpath /opt/opscode/embedded/lib -L/opt/opscode/embedded/lib -I/opt/opscode/embedded/erlang/include"
+  "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/erlang/include",
+  "LDFLAGS" => "-Wl,-rpath #{install_dir}/embedded/lib -L#{install_dir}/embedded/lib -I#{install_dir}/embedded/erlang/include"
 }
 
 build do
   # set up the erlang include dir
-  command "mkdir -p /opt/opscode/embedded/erlang/include"
+  command "mkdir -p #{install_dir}/embedded/erlang/include"
   %w{ncurses openssl zlib.h zconf.h}.each do |link|
-    command "ln -fs /opt/opscode/embedded/include/#{link} /opt/opscode/embedded/erlang/include/#{link}"
+    command "ln -fs #{install_dir}/embedded/include/#{link} #{install_dir}/embedded/erlang/include/#{link}"
   end
 
   # TODO: build cross-platform. this is for linux
   command(["./configure",
-           "--prefix=/opt/opscode/embedded",
+           "--prefix=#{install_dir}/embedded",
            "--enable-threads",
            "--enable-smp-support",
            "--enable-kernel-poll",
@@ -30,7 +30,7 @@ build do
            "--enable-shared-zlib",
            "--enable-hipe",
            "--without-javac",
-           "--with-ssl=/opt/opscode/embedded",
+           "--with-ssl=#{install_dir}/embedded",
            "--disable-debug"].join(" "),
           :env => env)
 
