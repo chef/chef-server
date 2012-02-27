@@ -68,6 +68,6 @@ create_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
 
 to_xml(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
     Objects = ?BACKEND:object_list(Dir, Bucket),
-    Term    = bookshelf_xml:list_objects(Objects),
+    Term    = bookshelf_xml:list_objects(Bucket, Objects),
     Body    = bookshelf_xml:write(Term),
     {Body, Rq, St}.
