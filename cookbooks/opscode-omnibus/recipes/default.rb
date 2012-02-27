@@ -37,11 +37,13 @@ end
 
 directory "/opt/opscode" do
   mode "755"
+  owner node["opscode-omnibus"]["build-user"]
   recursive true
 end
 
 directory "/opt/chef" do
   mode "755"
+  owner node["opscode-omnibus"]["build-user"]
   recursive true
 end
 
