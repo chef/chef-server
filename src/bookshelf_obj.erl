@@ -93,12 +93,13 @@ upload(#http_req{host=[Bucket|_],
                     ?BACKEND:obj_close(FsSt),
                     ?BACKEND:object_delete(Dir, Bucket, Path),
                     halt(408, Rq, St);
-                {error, _Reason} ->
+                _ ->
                     ?BACKEND:obj_close(FsSt),
                     ?BACKEND:object_delete(Dir, Bucket, Path),
                     halt(500, Rq, St)
             end;
-        _ -> halt(500, Rq, St)
+        _ ->
+            halt(500, Rq, St)
     end.
 
 %% ===================================================================
