@@ -21,5 +21,5 @@ build do
 
   # copy solr home
   command "mkdir -p #{service_dir}/home"
-  command "#{install_dir}/embedded/bin/rsync chef-solr/solr/solr-home/ #{service_dir}/home/"
+  command "#{install_dir}/embedded/bin/rsync -a chef-solr/solr/solr-home/ #{service_dir}/home/"
 end
