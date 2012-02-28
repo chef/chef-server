@@ -18,10 +18,15 @@ end
   end
 end
 
-gem_package "mixlib-shellout" do
-  gem_binary "/usr/bin/gem"
-  options "--pre"
-  version "~>1.0"
+# Need pre-release versions of these
+{ "ohai" => "0.6.12.rc.1", 
+  "mixlib-shellout" => "~>1.0" } .each do |name, ver|   
+  gem_package name do
+    gem_binary "/usr/bin/gem"
+    options "--pre"
+    version ver
+  end
+
 end
 
 ruby_block "make gem symlinks" do
