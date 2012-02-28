@@ -1,3 +1,4 @@
 .vagrant
 pkg/*
 omnibus.rb
+.bundle
