@@ -9,7 +9,7 @@ Omnibus::S3Tasks.define!
 ##
 Omnibus.config.install_dir = '/opt/opscode'
 
-Omnibus.software("../omnibus-ruby/config/software/*.rb", "config/software/*.rb")
+Omnibus.software("config/software/*.rb")
 Omnibus.projects("config/projects/*.rb")
 
 desc "Print the name and version of all components"
