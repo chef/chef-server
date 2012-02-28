@@ -16,6 +16,15 @@
                status = couchdb,                % couchdb | mysql | {error, term()}
                solr = couchdb}).                % couchdb | both | mysql
 
+-record(object, {id,                              % guid for node data doc in couchdb
+                 name,                            % object name
+                 org_id,                          % guid for org
+                 authz_id,                        %
+                 requestor,                       % authz id for requesting actor
+                 status = couchdb,                % couchdb | mysql | {error, term()}
+                 solr = couchdb,                  % couchdb | both | mysql
+                 type}).                          % node | role | ...
+
 -define(ORG_ESTIMATE, 10000).
 -define(NODE_ESTIMATE, 25000).
 
