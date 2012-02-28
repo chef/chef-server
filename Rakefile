@@ -41,7 +41,7 @@ if have_vagrant
 
     desc "Boot a build VM with vagrant and run a build"
     task :build => :up do
-      vagrant.primary_vm.channel.execute("cd opscode-omnibus && rake projects:opscode-webui:deb --trace") do |stream, data|
+      vagrant.primary_vm.channel.execute("cd opscode-omnibus && bundle install && bundle exec rake projects:private-chef:deb --trace") do |stream, data|
         out = stream == :stdout ? $stdout : $stderr
         out.puts(data)
       end
