@@ -46,12 +46,12 @@ content_types_accepted(Rq, St) ->
 resource_exists(#http_req{host=[Bucket|_],
                           raw_path= <<"/",Path/binary>>}=Rq,
                 #state{dir=Dir}=St) ->
-    {?BACKEND:object_exists(Dir, Bucket, Path), Rq, St}.
+    {?BACKEND:obj_exists(Dir, Bucket, Path), Rq, St}.
 
 delete_resource(#http_req{host=[Bucket|_],
                           raw_path= <<"/",Path/binary>>}=Rq,
                 #state{dir=Dir}=St) ->
-    case ?BACKEND:object_delete(Dir, Bucket, Path) of
+    case ?BACKEND:obj_delete(Dir, Bucket, Path) of
         ok -> {true, Rq, St};
         _  -> {false, Rq, St}
     end.
@@ -85,17 +85,17 @@ upload(#http_req{host=[Bucket|_],
                                          St);
                                 false ->
                                     ?BACKEND:obj_close(FsSt2),
-                                    ?BACKEND:object_delete(Dir, Bucket, Path),
+                                    ?BACKEND:obj_delete(Dir, Bucket, Path),
                                     halt(406, Rq3, St)
                             end
                     end;
                 {error, timeout} ->
                     ?BACKEND:obj_close(FsSt),
-                    ?BACKEND:object_delete(Dir, Bucket, Path),
+                    ?BACKEND:obj_delete(Dir, Bucket, Path),
                     halt(408, Rq, St);
                 _ ->
                     ?BACKEND:obj_close(FsSt),
-                    ?BACKEND:object_delete(Dir, Bucket, Path),
+                    ?BACKEND:obj_delete(Dir, Bucket, Path),
                     halt(500, Rq, St)
             end;
         _ ->

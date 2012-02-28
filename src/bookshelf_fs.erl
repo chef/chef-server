@@ -22,9 +22,9 @@
          bucket_exists/2,
          bucket_create/2,
          bucket_delete/2,
-         object_list/2,
-         object_exists/3,
-         object_delete/3,
+         obj_list/2,
+         obj_exists/3,
+         obj_delete/3,
          obj_meta/3,
          obj_open_w/3,
          obj_open_r/3,
@@ -64,11 +64,11 @@ bucket_delete(Dir, Bucket) ->
 %%                         Object functions
 %% ===================================================================
 
-object_list(Dir, Bucket) when is_list(Dir) ->
-    object_list(list_to_binary(Dir), Bucket);
-object_list(Dir, Bucket) when is_list(Bucket) ->
-    object_list(Dir, list_to_binary(Bucket));
-object_list(Dir, Bucket) when is_binary(Dir) andalso is_binary(Bucket) ->
+obj_list(Dir, Bucket) when is_list(Dir) ->
+    obj_list(list_to_binary(Dir), Bucket);
+obj_list(Dir, Bucket) when is_list(Bucket) ->
+    obj_list(Dir, list_to_binary(Bucket));
+obj_list(Dir, Bucket) when is_binary(Dir) andalso is_binary(Bucket) ->
     BucketPath = filename:join(Dir, Bucket),
     filelib:fold_files(
       BucketPath,
@@ -100,23 +100,23 @@ object_list(Dir, Bucket) when is_binary(Dir) andalso is_binary(Bucket) ->
       []
      ).
 
-object_exists(Dir, Bucket, Path) when is_list(Dir) ->
-    object_exists(list_to_binary(Dir), Bucket, Path);
-object_exists(Dir, Bucket, Path) when is_list(Bucket) ->
-    object_exists(Dir, list_to_binary(Bucket), Path);
-object_exists(Dir, Bucket, Path) when is_list(Path) ->
-    object_exists(Dir, Bucket, list_to_binary(Path));
-object_exists(Dir, Bucket, Path)
+obj_exists(Dir, Bucket, Path) when is_list(Dir) ->
+    obj_exists(list_to_binary(Dir), Bucket, Path);
+obj_exists(Dir, Bucket, Path) when is_list(Bucket) ->
+    obj_exists(Dir, list_to_binary(Bucket), Path);
+obj_exists(Dir, Bucket, Path) when is_list(Path) ->
+    obj_exists(Dir, Bucket, list_to_binary(Path));
+obj_exists(Dir, Bucket, Path)
   when is_binary(Dir) andalso is_binary(Bucket) andalso is_binary(Path) ->
     filelib:is_regular(filename:join([Dir, Bucket, Path])).
 
-object_delete(Dir, Bucket, Path) when is_list(Dir) ->
-    object_delete(list_to_binary(Dir), Bucket, Path);
-object_delete(Dir, Bucket, Path) when is_list(Bucket) ->
-    object_delete(Dir, list_to_binary(Bucket), Path);
-object_delete(Dir, Bucket, Path) when is_list(Path) ->
-    object_delete(Dir, Bucket, list_to_binary(Path));
-object_delete(Dir, Bucket, Path)
+obj_delete(Dir, Bucket, Path) when is_list(Dir) ->
+    obj_delete(list_to_binary(Dir), Bucket, Path);
+obj_delete(Dir, Bucket, Path) when is_list(Bucket) ->
+    obj_delete(Dir, list_to_binary(Bucket), Path);
+obj_delete(Dir, Bucket, Path) when is_list(Path) ->
+    obj_delete(Dir, Bucket, list_to_binary(Path));
+obj_delete(Dir, Bucket, Path)
   when is_binary(Dir) andalso is_binary(Bucket) andalso is_binary(Path) ->
     ObjectPath = filename:join([Dir, Bucket, Path]),
     file:delete(ObjectPath).

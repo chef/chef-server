@@ -55,7 +55,7 @@ bookshelf_fs_object_test_() ->
               BucketPath = filename:join(Dir, Bucket),
               ?assertEqual(ok, filelib:ensure_dir(BucketPath)),
               ?assertEqual(ok, bookshelf_fs:bucket_create(Dir, Bucket)),
-              ?assertEqual([], bookshelf_fs:object_list(Dir, Bucket)),
+              ?assertEqual([], bookshelf_fs:obj_list(Dir, Bucket)),
               Objs = ["testing/123/hello", "hello"],
               lists:foreach(
                 fun(F) ->
@@ -63,7 +63,7 @@ bookshelf_fs_object_test_() ->
                 end,
                 Objs
                ),
-              Records = bookshelf_fs:object_list(Dir, Bucket),
+              Records = bookshelf_fs:obj_list(Dir, Bucket),
               ?assertEqual(2, length(Records))
       end
      }].
