@@ -17,6 +17,7 @@ deps << "redis"
 deps << "rabbitmq"
 deps << "opscode-solr"
 deps << "opscode-expander"
+deps << "mixlib-authorization" # needed to migrate the DB.
 
 # the front-end services
 deps << "opscode-erchef"
