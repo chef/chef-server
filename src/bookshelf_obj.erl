@@ -72,8 +72,8 @@ upload(#http_req{host=[Bucket|_],
         {ok, FsSt} ->
             case write(FsSt, Trans, Sock, Len, Buf) of
                 {ok, FsSt2} ->
-                    {ok, Digest} = ?BACKEND:close(FsSt2),
                     Etag = bookshelf_req:md5_hex(Digest),
+                    {ok, Digest} = ?BACKEND:obj_close(FsSt2),
                     case cowboy_http_req:parse_header('Content-MD5', Rq2) of
                         {undefined, undefined, Rq3} ->
                             halt(202, bookshelf_req:with_etag(Etag, Rq3), St);
