@@ -55,8 +55,8 @@ if File.directory?("/etc/sysctl.d") && File.exists?("/etc/init.d/procps")
     action :nothing
   end
 
-  template "/etc/sysctl.d/90-postgres" do
-    source "90-postgres.sysctl.erb"
+  template "/etc/sysctl.d/90-postgres.conf" do
+    source "90-postgres.conf.sysctl.erb"
     owner "root"
     mode  "0644"
     variables(node['private_chef']['postgresql'].to_hash)
