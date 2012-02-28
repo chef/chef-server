@@ -19,6 +19,13 @@ vrrp_instance <%= @vrrp_sync_instance %> {
     interface <%= @vrrp_instance_interface %>
     virtual_router_id <%= @vrrp_instance_virtual_router_id %>
     priority <%= @vrrp_instance_priority %>
+<% if @vrrp_instance_vrrp_unicast_peer.nil? %>
+    ! vrrp_unicast_bind <local ip address>
+    ! vrrp_unicast_peer <peer ip address>
+<% else %>
+    vrrp_unicast_bind <%= @vrrp_instance_vrrp_unicast_bind %>
+    vrrp_unicast_peer <%= @vrrp_instance_vrrp_unicast_peer %>
+<% end %>
     advert_int <%= @vrrp_instance_advert_int %>
 		notify_backup "/var/opt/opscode/keepalived/bin/cluster.sh backup"
 		notify_master "/var/opt/opscode/keepalived/bin/cluster.sh master"

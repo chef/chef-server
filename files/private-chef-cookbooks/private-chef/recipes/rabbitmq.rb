@@ -37,11 +37,6 @@ end
 
 rabbitmq_service_dir = "/opt/opscode/embedded/service/rabbitmq"
 
-######################################################################
-# NOTE:
-# we do the symlinking in the build, but we're just making sure that
-# the links are still there in the cookbook
-######################################################################
 %w[rabbitmqctl rabbitmq-env rabbitmq-multi rabbitmq-server].each do |cmd|
   link "/opt/opscode/embedded/bin/#{cmd}" do
     to File.join(rabbitmq_service_dir, "sbin", cmd)

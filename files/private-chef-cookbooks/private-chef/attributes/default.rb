@@ -132,7 +132,7 @@ default['private_chef']['opscode-chef']['port'] = 9460
 default['private_chef']['opscode-chef']['listen'] = '127.0.0.1:9460'
 default['private_chef']['opscode-chef']['backlog'] = 1024
 default['private_chef']['opscode-chef']['tcp_nodelay'] = true 
-default['private_chef']['opscode-chef']['worker_timeout'] = 3600 
+default['private_chef']['opscode-chef']['worker_timeout'] = 3600
 default['private_chef']['opscode-chef']['validation_client_name'] = "chef"
 default['private_chef']['opscode-chef']['umask'] = "0022"
 default['private_chef']['opscode-chef']['worker_processes'] = node["cpu"]["total"].to_i
@@ -171,7 +171,7 @@ default['private_chef']['opscode-webui']['vip'] = '127.0.0.1'
 default['private_chef']['opscode-webui']['port'] = 9462
 default['private_chef']['opscode-webui']['backlog'] = 1024
 default['private_chef']['opscode-webui']['tcp_nodelay'] = true 
-default['private_chef']['opscode-webui']['worker_timeout'] = 3600 
+default['private_chef']['opscode-webui']['worker_timeout'] = 3600
 default['private_chef']['opscode-webui']['validation_client_name'] = "chef"
 default['private_chef']['opscode-webui']['umask'] = "0022"
 default['private_chef']['opscode-webui']['worker_processes'] = node["cpu"]["total"].to_i
@@ -239,6 +239,7 @@ default['private_chef']['nginx']['gzip_proxied'] = "any"
 default['private_chef']['nginx']['gzip_types'] = [ "text/plain", "text/css", "application/x-javascript", "text/xml", "application/xml", "application/xml+rss", "text/javascript" ] 
 default['private_chef']['nginx']['keepalive_timeout'] = 65 
 default['private_chef']['nginx']['client_max_body_size'] = '250m' 
+default['private_chef']['nginx']['cache_max_size'] = '5000m' 
 
 ###
 # MySQL
@@ -359,7 +360,7 @@ default['private_chef']['opscode-account']['url'] = "http://127.0.0.1:9465"
 default['private_chef']['opscode-account']['listen'] = '127.0.0.1:9465'
 default['private_chef']['opscode-account']['backlog'] = 1024
 default['private_chef']['opscode-account']['tcp_nodelay'] = true 
-default['private_chef']['opscode-account']['worker_timeout'] = 3600 
+default['private_chef']['opscode-account']['worker_timeout'] = 3600
 default['private_chef']['opscode-account']['validation_client_name'] = "chef"
 default['private_chef']['opscode-account']['umask'] = "0022"
 default['private_chef']['opscode-account']['worker_processes'] = node['cpu']['total'].to_i
@@ -463,6 +464,9 @@ default['private_chef']['keepalived']['vrrp_instance_advert_int'] = "1"
 default['private_chef']['keepalived']['vrrp_instance_password'] = "sneakybeaky"
 default['private_chef']['keepalived']['vrrp_instance_ipaddress'] = node['ipaddress'] 
 default['private_chef']['keepalived']['vrrp_instance_ipaddress_dev'] = 'eth0' 
+default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_bind'] = node['ipaddress']
+default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_peer'] = nil
+
 default['private_chef']['keepalived']['service_order'] = [
 	{ "key" => "couchdb", "service_name" => "couchdb" },
 	{ "key" => "postgresql", "service_name" => "postgres" },

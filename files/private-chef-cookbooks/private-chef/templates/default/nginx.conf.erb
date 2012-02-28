@@ -38,7 +38,6 @@ http {
   gzip_proxied <%= @gzip_proxied %>;
   gzip_types <%= @gzip_types.join(' ') %>;
 
-
   <%- node['private_chef']['lb']['upstream'].each do |uname, servers| -%>
   upstream <%= uname.sub(/-/, '_') %> {
     <%- servers.each do |server| -%>
@@ -55,7 +54,7 @@ http {
     rewrite ^(.*) https://$server_name$1 permanent;
   }
 
-  proxy_cache_path  <%= File.join(@dir, "cache") %> levels=1:2 keys_zone=webui-cache:50m max_size=1000m inactive=600m;
+  proxy_cache_path  <%= File.join(@dir, "cache") %> levels=1:2 keys_zone=webui-cache:50m max_size=<%= @cache_max_size %> inactive=600m;
   proxy_temp_path <%= File.join(@dir, "cache-tmp") %>;
 
   server { 
@@ -93,7 +92,12 @@ http {
       #access_log   off;
       #allow 127.0.0.1;
       #deny all;
-    #}
+      #}
+
+    location /checksum/ {
+      internal;
+      root <%= node['private_chef']['opscode-chef']['checksum_path'].gsub('checksum', '') %>; 
+    }
 
     location ~ "^/organizations/[a-z0-9\-_]+?/.*?/_acl.*$" {
 <%= select_upstream("opscode_account") %>
@@ -199,6 +203,11 @@ http {
     access_log /var/log/opscode/nginx/internal-chef.access.log opscode;
     error_log  /var/log/opscode/nginx/internal-chef.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
 
+    location /checksum/ {
+      internal;
+      root <%= node['private_chef']['opscode-chef']['checksum_path'].gsub('checksum', '') %>; 
+    }
+
     # search goes to erchef
     location ~ "^/organizations/[a-z0-9\-_]+?/(?:search)/.+$" {
         proxy_redirect http://opscode_erchef /;
@@ -229,6 +238,7 @@ http {
 			proxy_redirect <%= node['private_chef']['opscode-chef']['upload_internal_proto'] %>://$my_upstream /;
 			proxy_pass <%= node['private_chef']['opscode-chef']['upload_internal_proto'] %>://$my_upstream;
     }
+
     location / {
       proxy_redirect http://opscode_chef /;
       proxy_pass http://opscode_chef;
@@ -298,11 +308,7 @@ http {
       root   /opt/opscode/embedded/nagios/share/;
       index  index.php;
     }
-    location /version { 
-      types { }
-      default_type text/plain;
-      alias /opt/opscode/pc-version.txt;
-    }
+
     location /nagios {
       index index.php;
       alias /opt/opscode/embedded/nagios/share/;

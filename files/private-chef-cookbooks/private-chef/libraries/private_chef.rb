@@ -42,7 +42,7 @@ module PrivateChef
   servers Mash.new
   backend_vips Mash.new
   api_fqdn nil 
-	node nil
+  node nil
 
   notification_email nil
   database_type nil
@@ -74,7 +74,7 @@ module PrivateChef
     end
 
     def generate_secrets
-			existing_secrets ||= Hash.new
+      existing_secrets ||= Hash.new
       if File.exists?("/etc/opscode/private-chef-secrets.json")
         existing_secrets = Chef::JSONCompat.from_json(File.read("/etc/opscode/private-chef-secrets.json"))
       end
@@ -95,42 +95,42 @@ module PrivateChef
       PrivateChef['drbd']['shared_secret'] ||= SecureRandom.hex(30)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= SecureRandom.hex(50)
 
-			if File.directory?("/etc/opscode")
-				File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
-					f.puts(
-						Chef::JSONCompat.to_json_pretty({
-							'rabbitmq' => { 
-								'password' => PrivateChef['rabbitmq']['password'],
-								'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
-							},
-							'opscode_webui' => {
-								'cookie_secret' => PrivateChef['opscode_webui']['cookie_secret'],
-							},
-							'mysql' => {
-								'sql_password' => PrivateChef['mysql']['sql_password'],
-							},
-							'postgresql' => {
-								'sql_password' => PrivateChef['postgresql']['sql_password'],
-								'sql_ro_password' => PrivateChef['postgresql']['sql_ro_password']
-							},
-							'opscode_account' => {
-								'session_secret_key' => PrivateChef['opscode_account']['session_secret_key']
-							},
-							'nagios' => {
-								'admin_password' => PrivateChef['nagios']['admin_password']
-							},
-							'drbd' => {
-								'shared_secret' => PrivateChef['drbd']['shared_secret']
-							},
-							'keepalived' => {
-								'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
-							}
-						})
-					)
-					system("chmod 0600 /etc/opscode/private-chef-secrets.json")
-				end
-			end
-		end
+      if File.directory?("/etc/opscode")
+        File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
+          f.puts(
+            Chef::JSONCompat.to_json_pretty({
+              'rabbitmq' => { 
+                'password' => PrivateChef['rabbitmq']['password'],
+                'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
+              },
+              'opscode_webui' => {
+                'cookie_secret' => PrivateChef['opscode_webui']['cookie_secret'],
+              },
+              'mysql' => {
+                'sql_password' => PrivateChef['mysql']['sql_password'],
+              },
+              'postgresql' => {
+                'sql_password' => PrivateChef['postgresql']['sql_password'],
+                'sql_ro_password' => PrivateChef['postgresql']['sql_ro_password']
+              },
+              'opscode_account' => {
+                'session_secret_key' => PrivateChef['opscode_account']['session_secret_key']
+              },
+              'nagios' => {
+                'admin_password' => PrivateChef['nagios']['admin_password']
+              },
+              'drbd' => {
+                'shared_secret' => PrivateChef['drbd']['shared_secret']
+              },
+              'keepalived' => {
+                'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
+              }
+            })
+          )
+          system("chmod 0600 /etc/opscode/private-chef-secrets.json")
+        end
+      end
+    end
 
     def generate_hash
       results = { "private_chef" => {} } 
@@ -175,9 +175,9 @@ module PrivateChef
 
     def gen_nrpe_allowed_hosts
       nrpe_allowed_hosts = [ "127.0.0.1" ]
-			if PrivateChef['backend_vips']['ipaddress']
-				nrpe_allowed_hosts << PrivateChef['backend_vips']['ipaddress'] 
-			end
+      if PrivateChef['backend_vips']['ipaddress']
+        nrpe_allowed_hosts << PrivateChef['backend_vips']['ipaddress'] 
+      end
       PrivateChef['servers'].each do |k,v|
         if v["role"] == "backend" 
           nrpe_allowed_hosts << v["ipaddress"]
@@ -186,102 +186,111 @@ module PrivateChef
       PrivateChef["nrpe"]["allowed_hosts"] ||= nrpe_allowed_hosts 
     end
 
-		def gen_drbd
-			PrivateChef['opscode_chef']['sandbox_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/sandbox"
-			PrivateChef['opscode_chef']['checksum_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/checksum"
-			PrivateChef["couchdb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/couchdb" 
-			PrivateChef["rabbitmq"]["data_dir"] ||= "/var/opt/opscode/drbd/data/rabbitmq" 
-			PrivateChef["opscode_solr"]["data_dir"] ||= "/var/opt/opscode/drbd/data/opscode-solr" 
-			PrivateChef["postgresql"]["data_dir"] ||= "/var/opt/opscode/drbd/data/postgresql" 
-			PrivateChef["drbd"]["enable"] ||= true
-			drbd_role = "primary"
-			PrivateChef['servers'].each do |k, v|
+    def gen_drbd
+      PrivateChef['opscode_chef']['sandbox_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/sandbox"
+      PrivateChef['opscode_chef']['checksum_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/checksum"
+      PrivateChef["couchdb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/couchdb" 
+      PrivateChef["rabbitmq"]["data_dir"] ||= "/var/opt/opscode/drbd/data/rabbitmq" 
+      PrivateChef["opscode_solr"]["data_dir"] ||= "/var/opt/opscode/drbd/data/opscode-solr" 
+      PrivateChef["postgresql"]["data_dir"] ||= "/var/opt/opscode/drbd/data/postgresql" 
+      PrivateChef["drbd"]["enable"] ||= true
+      drbd_role = "primary"
+      PrivateChef['servers'].each do |k, v|
         next unless v['role'] == "backend"
-				PrivateChef["drbd"][drbd_role] ||= {
-					"fqdn" => k,
-					"ip" => v["ipaddress"]
-				}
-				drbd_role = "secondary"
-			end
-		end
+        PrivateChef["drbd"][drbd_role] ||= {
+          "fqdn" => k,
+          "ip" => v["ipaddress"]
+        }
+        drbd_role = "secondary"
+      end
+    end
 
-		def gen_keepalived
-			PrivateChef["keepalived"]["enable"] ||= true
-			PrivateChef["keepalived"]["vrrp_instance_interface"] = backend_vip["heartbeat_device"] 
-			PrivateChef["keepalived"]["vrrp_instance_ipaddress"] = backend_vip["ipaddress"] 
-			PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"] 
-			PrivateChef["couchdb"]["ha"] ||= true
-			PrivateChef["rabbitmq"]["ha"] ||= true
-			PrivateChef["opscode_solr"]["ha"] ||= true
-			PrivateChef["opscode_expander"]["ha"] ||= true
-			PrivateChef["opscode_chef"]["ha"] ||= true
-			PrivateChef["opscode_erchef"]["ha"] ||= true
-			PrivateChef["opscode_webui"]["ha"] ||= true
-			PrivateChef["lb"]["ha"] ||= true
-			PrivateChef["postgresql"]["ha"] ||= true
-			PrivateChef["redis"]["ha"] ||= true
-			PrivateChef["opscode_authz"]["ha"] ||= true
-			PrivateChef["opscode_certificate"]["ha"] ||= true
-			PrivateChef["opscode_org_creator"]["ha"] ||= true
-			PrivateChef["opscode_account"]["ha"] ||= true
-			PrivateChef["nginx"]["ha"] ||= true
-			PrivateChef["nagios"]["ha"] ||= true
-		end
+    def gen_keepalived(node_name)
+      PrivateChef['servers'].each do |k, v|
+        next unless v['role'] == "backend"
+        next if k == node_name
+        PrivateChef['servers'][node_name]['peer_ipaddress'] = v['ipaddress']
+      end
+      PrivateChef["keepalived"]["enable"] ||= true
+      PrivateChef["keepalived"]["vrrp_instance_interface"] = backend_vip["heartbeat_device"] 
+      PrivateChef["keepalived"]["vrrp_instance_ipaddress"] = backend_vip["ipaddress"] 
+      PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"] 
+      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_bind"] = PrivateChef['servers'][node_name]['ipaddress']
+      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef['servers'][node_name]['peer_ipaddress']
+      PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"] 
+      PrivateChef["couchdb"]["ha"] ||= true
+      PrivateChef["rabbitmq"]["ha"] ||= true
+      PrivateChef["opscode_solr"]["ha"] ||= true
+      PrivateChef["opscode_expander"]["ha"] ||= true
+      PrivateChef["opscode_chef"]["ha"] ||= true
+      PrivateChef["opscode_erchef"]["ha"] ||= true
+      PrivateChef["opscode_webui"]["ha"] ||= true
+      PrivateChef["lb"]["ha"] ||= true
+      PrivateChef["postgresql"]["ha"] ||= true
+      PrivateChef["redis"]["ha"] ||= true
+      PrivateChef["opscode_authz"]["ha"] ||= true
+      PrivateChef["opscode_certificate"]["ha"] ||= true
+      PrivateChef["opscode_org_creator"]["ha"] ||= true
+      PrivateChef["opscode_account"]["ha"] ||= true
+      PrivateChef["nginx"]["ha"] ||= true
+      PrivateChef["nagios"]["ha"] ||= true
+    end
 
-		def gen_backend(bootstrap=false)
-			PrivateChef["couchdb"]["bind_address"] ||= "0.0.0.0" 
-			PrivateChef["rabbitmq"]["node_ip_address"] ||= "0.0.0.0" 
-			PrivateChef["opscode_solr"]["ip_address"] ||= "0.0.0.0"
-			PrivateChef["opscode_chef"]["worker_processes"] ||= 6 
-			PrivateChef["opscode_webui"]["worker_processes"] ||= 2 
-			PrivateChef["postgresql"]["listen_address"] ||= "0.0.0.0" 
-			PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"] 
+    def gen_backend(bootstrap=false)
+      PrivateChef["couchdb"]["bind_address"] ||= "0.0.0.0" 
+      PrivateChef["rabbitmq"]["node_ip_address"] ||= "0.0.0.0" 
+      PrivateChef["opscode_solr"]["ip_address"] ||= "0.0.0.0"
+      PrivateChef["opscode_chef"]["worker_processes"] ||= 6 
+      PrivateChef["opscode_webui"]["worker_processes"] ||= 2 
+      PrivateChef["postgresql"]["listen_address"] ||= "0.0.0.0" 
+      PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"] 
 
-			PrivateChef["redis"]["bind"] ||= "0.0.0.0" 
-			PrivateChef["opscode_account"]["worker_processes"] ||= 4 
-			if bootstrap 
-				PrivateChef["bootstrap"]["enable"] = true 
-			else
-				PrivateChef["bootstrap"]["enable"] = false 
-			end
-		end
+      PrivateChef["redis"]["bind"] ||= "0.0.0.0" 
+      PrivateChef["opscode_account"]["worker_processes"] ||= 4 
+      if bootstrap 
+        PrivateChef["bootstrap"]["enable"] = true 
+      else
+        PrivateChef["bootstrap"]["enable"] = false 
+      end
+    end
 
-		def gen_frontend
-			PrivateChef["couchdb"]["enable"] ||= false
-			PrivateChef["couchdb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-			PrivateChef["rabbitmq"]["enable"] ||= false
-			PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-			PrivateChef["opscode_solr"]["enable"] ||= false
-			PrivateChef["opscode_solr"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-			PrivateChef["opscode_expander"]["enable"] ||= false
+    def gen_frontend
+      PrivateChef["couchdb"]["enable"] ||= false
+      PrivateChef["couchdb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["rabbitmq"]["enable"] ||= false
+      PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["opscode_solr"]["enable"] ||= false
+      PrivateChef["opscode_solr"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["opscode_expander"]["enable"] ||= false
       PrivateChef["opscode_org_creator"]["enable"] ||= false
-			PrivateChef["postgresql"]["enable"] ||= false
-			PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-			PrivateChef["redis"]["enable"] ||= false
-			PrivateChef["redis"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-			PrivateChef["opscode_chef"]["upload_vip"] ||= PrivateChef['backend_vips']['ipaddress'] 
-			PrivateChef["opscode_chef"]["upload_port"] ||= 443
-			PrivateChef["opscode_chef"]["upload_proto"] ||= "https"
-			PrivateChef["opscode_chef"]["upload_internal_vip"] ||= PrivateChef['backend_vips']['ipaddress'] 
-			PrivateChef["opscode_chef"]["upload_internal_port"] ||= 9680
-			PrivateChef["lb"]["cache_cookbook_files"] ||= true
-			PrivateChef["nagios"]["enable"] ||= false
-			PrivateChef["bootstrap"]["enable"] = false 
-		end
+      PrivateChef["postgresql"]["enable"] ||= false
+      PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["redis"]["enable"] ||= false
+      PrivateChef["redis"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["opscode_chef"]["upload_vip"] ||= PrivateChef['backend_vips']['ipaddress'] 
+      PrivateChef["opscode_chef"]["upload_port"] ||= 443
+      PrivateChef["opscode_chef"]["upload_proto"] ||= "https"
+      PrivateChef["opscode_chef"]["upload_internal_vip"] ||= PrivateChef['backend_vips']['ipaddress'] 
+      PrivateChef["opscode_chef"]["upload_internal_port"] ||= 9680
+      PrivateChef["lb"]["cache_cookbook_files"] ||= true
+      PrivateChef["nagios"]["enable"] ||= false
+      PrivateChef["bootstrap"]["enable"] = false 
+    end
 
     def gen_redundant(node_name, ha=false)
       raise "Please add a server section for #{node_name} to /etc/opscode/private-chef.rb!" unless PrivateChef['servers'].has_key?(node_name)
       me = PrivateChef["servers"][node_name]
       case me["role"]
       when "backend"
-				gen_backend(me['bootstrap'])
-				gen_drbd if ha
-				gen_keepalived if ha
-      when "frontend"
-				gen_frontend
+        gen_backend(me['bootstrap'])
+        gen_drbd if ha
+        gen_keepalived(node_name) if ha
         gen_api_fqdn
-			else
-				raise "I dont have a role for you! Use 'backend' or 'frontend'."
+      when "frontend"
+        gen_frontend
+        gen_api_fqdn
+      else
+        raise "I dont have a role for you! Use 'backend' or 'frontend'."
       end
     end
 
@@ -290,20 +299,20 @@ module PrivateChef
       gen_nrpe_allowed_hosts
 
       case PrivateChef['topology']
-			when "standalone","manual"
-				PrivateChef[:api_fqdn] ||= node_name 
-				gen_api_fqdn 
+      when "standalone","manual"
+        PrivateChef[:api_fqdn] ||= node_name 
+        gen_api_fqdn 
       when "ha","tier"
-				if PrivateChef['topology'] == "ha"
-					gen_redundant(node_name, true)
-				else
-					gen_redundant(node_name, false)
-				end
+        if PrivateChef['topology'] == "ha"
+          gen_redundant(node_name, true)
+        else
+          gen_redundant(node_name, false)
+        end
       else
         Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha or tier.")
         exit 55
       end
-			generate_hash
+      generate_hash
     end
   end
 end

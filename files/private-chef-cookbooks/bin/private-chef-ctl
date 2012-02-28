@@ -17,6 +17,22 @@
 # limitations under the License.
 #
 
+
+def get_pgrp_from_pid(pid)
+  ps=`which ps`.chomp
+  `#{ps} -p #{pid} -o pgrp=`.chomp
+end
+
+def get_pids_from_pgrp(pgrp)
+  pgrep=`which pgrep`.chomp
+  `#{pgrep} -g #{pgrp}`.split(/\n/).join(" ")
+end
+
+def sigkill_pgrp(pgrp)
+  pkill=`which pkill`.chomp
+  run_command("#{pkill} -9 -g #{pgrp}")
+end
+
 def run_command(command)
 	system(command)
 	$?
@@ -99,6 +115,44 @@ def tail(service=nil)
   end
 end
 
+def is_integer?(string)
+  return true if Integer(string) rescue false
+end
+
+def graceful_kill(service=nil)
+  exit_status = 0
+  get_all_services.each do |service_name|
+    next if !service.nil? && service_name != service
+    if service_enabled?(service_name)
+      pidfile="/opt/opscode/sv/#{service_name}/supervise/pid"
+      pid=File.read(pidfile).chomp if File.exists?(pidfile)
+      if pid.nil? || !is_integer?(pid)
+        puts "could not find #{service_name} runit pidfile (service already stopped?), cannot attempt SIGKILL..."
+        status = run_command("/opt/opscode/init/#{service_name} stop")
+        exit_status = status.exitstatus if exit_status == 0 && !status.success?
+        next
+      end
+      pgrp=get_pgrp_from_pid(pid)
+      if pgrp.nil? || !is_integer?(pgrp)
+        puts "could not find pgrp of pid #{pid} (not running?), cannot attempt SIGKILL..."
+        status = run_command("/opt/opscode/init/#{service_name} stop")
+        exit_status = status.exitstatus if exit_status == 0 && !status.success?
+        next
+      end
+      run_command("/opt/opscode/init/#{service_name} stop")
+      pids=get_pids_from_pgrp(pgrp)
+      if !pids.empty?
+        puts "found stuck pids still running in process group: #{pids}, sending SIGKILL" unless pids.empty?
+        sigkill_pgrp(pgrp)
+      end
+    else
+      puts "#{service_name} disabled, not stopping"
+      exit_status = 1
+    end
+  end 
+  exit exit_status
+end
+
 def sv_command_list
   ["status","up","down","once","pause","cont","hup","alarm","interrupt","quit","1","2","term","kill","start","stop","restart","shutdown","force-stop","force-reload","force-restart","force-shutdown","check"]
 end
@@ -148,6 +202,8 @@ int
     Send the services an INT.
 kill 
     Send the services a KILL.
+graceful-kill
+    Attempt a graceful stop, then SIGKILL the entire process group.
 EOH
   exit 1
 end
@@ -167,14 +223,21 @@ when "reconfigure"
   reconfigure
 when "tail"
   tail
+when "graceful-kill"
+  graceful_kill
 else
   if sv_command_list.include?(ARGV[0])
     run_sv_command(ARGV[0])
   elsif get_all_services.include?(ARGV[0])
     if sv_command_list.include?(ARGV[1])
       run_sv_command(ARGV[1], ARGV[0])
-    elsif ARGV[1] == "tail"
-      tail(ARGV[0])
+    else
+      case ARGV[1]
+      when "tail"
+        tail(ARGV[0])
+      when "graceful-kill"
+        graceful_kill(ARGV[0])
+      end
     end
   else
     help

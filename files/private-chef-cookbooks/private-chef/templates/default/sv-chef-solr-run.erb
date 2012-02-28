@@ -3,7 +3,7 @@
 cd <%= File.join(node['private_chef']['opscode-solr']['dir']['jetty'] %>
 
 exec 2>&1
-exec chpst -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> /usr/bin/env PATH=/opt/opscode/embedded/bin:/opt/opscode/bin:/opt/opscode/embedded/jre/bin:$PATH JAVA_HOME=/opt/opscode/embedded/jre 
+exec chpst -P -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> /usr/bin/env PATH=/opt/opscode/embedded/bin:/opt/opscode/bin:/opt/opscode/embedded/jre/bin:$PATH JAVA_HOME=/opt/opscode/embedded/jre 
 
 /opt/opscode/bin/chef-solr -c <%= File.join(node['private_chef']['chef-solr']['dir'], "etc", "solr.rb") %>
 

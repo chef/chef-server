@@ -2,4 +2,4 @@
 
 cd /opt/opscode/embedded/service/opscode-webui
 exec 2>&1
-exec chpst -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> env HOME="<%= node['private_chef']['opscode-webui']['dir'] %>" PATH=/opt/opscode/embedded/bin:$PATH bundle exec unicorn -E <%= node['private_chef']['opscode-webui']['environment'] %> -c <%= File.join(node['private_chef']['opscode-webui']['dir'], 'etc', 'unicorn.rb') %> /opt/opscode/embedded/service/opscode-webui/config.ru
+exec chpst -P -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> env HOME="<%= node['private_chef']['opscode-webui']['dir'] %>" PATH=/opt/opscode/embedded/bin:$PATH bundle exec unicorn -E <%= node['private_chef']['opscode-webui']['environment'] %> -c <%= File.join(node['private_chef']['opscode-webui']['dir'], 'etc', 'unicorn.rb') %> /opt/opscode/embedded/service/opscode-webui/config.ru
