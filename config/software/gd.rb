@@ -30,6 +30,6 @@ build do
           :env => configure_env,
           :cwd => source_dir)
 
-  command "make", :env => {"LD_RUN_PATH" => "/opt/opsocde/embedded/bin", "LIBS" => "-liconv"}, :cwd => source_dir
+  command "make", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/bin", "LIBS" => "-liconv"}, :cwd => source_dir
   command "make install", :cwd => source_dir
 end
