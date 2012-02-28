@@ -68,7 +68,6 @@ upload(#http_req{host=[Bucket|_],
                  buffer=Buf}=Rq,
        #state{dir=Dir}=St) ->
     {Len, Rq2} = cowboy_http_req:parse_header('Content-Length', Rq),
-    {ok, FsSt} = ?BACKEND:obj_open_w(Dir, Bucket, Path),
     case ?BACKEND:obj_open_w(Dir, Bucket, Path) of
         {ok, FsSt} ->
             case write(FsSt, Trans, Sock, Len, Buf) of
