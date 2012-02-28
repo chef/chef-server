@@ -8,8 +8,19 @@ include_recipe "apt"
 include_recipe "build-essential"
 include_recipe "git"
 
-%w{ruby ruby1.8 ruby1.8-dev rdoc1.8 irb1.8 ri1.8 libopenssl-ruby1.8 rubygems libtool dpkg-dev libxml2 libxml2-dev libxslt1.1 libxslt1-dev help2man gettext texinfo}.each do |name|
+%w{ruby ruby1.8 ruby1.8-dev rdoc1.8 irb1.8 ri1.8 libopenssl-ruby1.8 libtool dpkg-dev libxml2 libxml2-dev libxslt1.1 libxslt1-dev help2man gettext texinfo}.each do |name|
   package name
+end
+
+bash "install rubygems 1.3.7 from source" do
+  cwd "/tmp"
+  code <<-INSTALL_RUBYGEMS
+wget http://production.cf.rubygems.org/rubygems/rubygems-1.3.7.tgz
+tar zxf rubygems-1.3.7.tgz
+cd rubygems-1.3.7
+ruby setup.rb --no-format-executable
+INSTALL_RUBYGEMS
+  not_if { ::File.exists? "/usr/bin/gem" }
 end
 
 %w{bundler rake}.each do |name|
