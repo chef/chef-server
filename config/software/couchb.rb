@@ -3,8 +3,8 @@ version "1.1.1"
 
 dependencies ["spidermonkey", "icu", "curl", "erlang"]
 
-source :url => "http://archive.apache.org/dist/couchdb/1.1.1/apache-couchdb-1.1.1.tar.gz",
-       :md5 => "cd126219b9cb69a4c521abd6960807a6"
+source :url => "http://archive.apache.org/dist/couchdb/1.0.3/apache-couchdb-1.0.3.tar.gz",
+       :md5 => "cfdc2ab751bf18049c5ef7866602d8ed"
 
 relative_path "apache-couchdb-1.1.1"
 
