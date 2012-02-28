@@ -40,5 +40,15 @@ Vagrant::Config.run do |config|
 
   # Enable SSH agent forwarding for git clones
   config.ssh.forward_agent = true
-
+  
+  # Give enough horsepower to build PC without taking all day
+  # or several hours worth of swapping  Disable support we don't need
+  config.vm.customize [ 
+    "modifyvm", :id,
+    "--memory", "1024", 
+    "--cpus", "2", 
+    "--usb", "off", 
+    "--usbehci", "off",
+    "--audio", "none"
+  ]
 end
