@@ -45,7 +45,7 @@ Vagrant::Config.run do |config|
   # or several hours worth of swapping  Disable support we don't need
   config.vm.customize [ 
     "modifyvm", :id,
-    "--memory", "1024", 
+    "--memory", "1536", 
     "--cpus", "2", 
     "--usb", "off", 
     "--usbehci", "off",
