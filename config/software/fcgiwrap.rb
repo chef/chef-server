@@ -18,6 +18,6 @@ env = {
 build do
   command "autoreconf -i", :env => env
   command "./configure --prefix=#{install_dir}/embedded", :env => env
-  command "make", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
+  command "make -j #{max_build_jobs}", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
   command "make install"
 end

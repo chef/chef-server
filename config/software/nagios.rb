@@ -37,7 +37,7 @@ build do
   command "bash -c \"find . -name 'Makefile' | xargs sed -i 's:-o opscode-nagios -g opscode-nagios:-o root -g root:g'\""
 
   # build it
-  command "make all", :env => { "LD_RUN_PATH" => "#{install_dir}/embedded/lib" }
+  command "make -j #{max_build_jobs} all", :env => { "LD_RUN_PATH" => "#{install_dir}/embedded/lib" }
   command "sudo make install"
   command "sudo make install-config"
   command "sudo make install-exfoliation"

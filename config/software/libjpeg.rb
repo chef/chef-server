@@ -16,7 +16,7 @@ configure_env = {
 build do
   command "./configure --prefix=#{install_dir}/embedded --enable-shared --enable-static", :env => configure_env
   command "mkdir -p #{install_dir}/embedded/man/man1"
-  command "make", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
+  command "make -j #{max_build_jobs}", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
   command "make install"
   command "rm -rf #{install_dir}/embedded/man"
 end

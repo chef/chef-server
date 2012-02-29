@@ -12,7 +12,7 @@ build do
             "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include"
           })
   # command "touch alocal.m4"
-  command("make",
+  command("make -j #{max_build_jobs}",
           :env => {
             "PATH" => "#{install_dir}/embedded/bin:#{ENV["PATH"]}"
           })

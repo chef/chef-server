@@ -20,6 +20,6 @@ build do
            "--prefix=#{install_dir}/embedded",
            "--with-openssl --with-includes=#{install_dir}/embedded/include",
            "--with-libraries=#{install_dir}/embedded/lib"].join(" "), :env => configure_env
-  command "make", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
+  command "make -j #{max_build_jobs}", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
   command "make install"
 end

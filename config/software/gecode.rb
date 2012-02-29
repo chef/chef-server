@@ -28,6 +28,6 @@ build do
            "--disable-doc-docset",
            "--disable-qt",
            "--disable-examples"].join(" ")
-  command "make", :env => { "LD_RUN_PATH" => "#{install_dir}/embedded/lib" }
+  command "make -j #{max_build_jobs}", :env => { "LD_RUN_PATH" => "#{install_dir}/embedded/lib" }
   command "make install"
 end

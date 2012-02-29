@@ -36,6 +36,6 @@ build do
            "--with-fpm-group=opscode"].join(" "),
           :env => env)
 
-  command "make", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
+  command "make -j #{max_build_jobs}", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
   command "make install"
 end

@@ -11,6 +11,6 @@ make_args = ["PREFIX=#{install_dir}/embedded",
              "LD_RUN_PATH=#{install_dir}/embedded/lib"].join(" ")
 
 build do
-  command ["make", make_args].join(" ")
+  command ["make -j #{max_build_jobs}", make_args].join(" ")
   command ["make install", make_args].join(" ")
 end

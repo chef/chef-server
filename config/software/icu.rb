@@ -14,7 +14,7 @@ build do
             "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include"
           },
           :cwd => working_dir)
-  command("make",
+  command("make -j #{max_build_jobs}",
           :env => {
             "LD_RUN_PATH" => "#{install_dir}/embedded/lib"
           },
