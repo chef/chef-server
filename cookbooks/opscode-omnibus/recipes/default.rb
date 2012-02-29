@@ -52,6 +52,12 @@ directory "/opt/chef" do
   recursive true
 end
 
+directory "/var/omnibus" do
+  mode "755"
+  owner node["opscode-omnibus"]["build-user"]
+  recursuve true
+end
+
 # gtihub's SSH key
 directory File.expand_path("~#{node["opscode-omnibus"]["build-user"]}/.ssh") do
   owner node["opscode-omnibus"]["build-user"]
