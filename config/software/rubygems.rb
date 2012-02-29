@@ -9,5 +9,5 @@ source :url => "http://production.cf.rubygems.org/rubygems/rubygems-1.8.12.tgz",
 relative_path "rubygems-1.8.12"
 
 build do
-  command "#{install_dir}/embedded/bin/ruby setup.rb"
+  ruby "setup.rb"
 end

@@ -14,10 +14,8 @@ source :git => "git@github.com:opscode/opscode-chef"
 
 relative_path "opscode-chef"
 
-bundle_env = {"GEM_PATH" => nil, "GEM_HOME" => nil}
-
 build do
-  command "#{install_dir}/embedded/bin/bundle install --without mysql integration_test dev", :env => bundle_env
+  bundle "install --without mysql integration_test dev"
   command "mkdir -p #{install_dir}/embedded/service/opscode-chef"
   command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./ #{install_dir}/embedded/service/opscode-chef/"
 end

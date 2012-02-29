@@ -4,10 +4,10 @@ version "0.10.8"
 dependencies ["ruby", "rubygems"]
 
 build do
-  command ["#{install_dir}/embedded/bin/gem install chef",
-           "-v #{version}",
-           "-n #{install_dir}/bin",
-           "--no-rdoc --no-ri"].join(" ")
+  gem ["install chef",
+      "-v #{version}",
+      "-n #{install_dir}/bin",
+      "--no-rdoc --no-ri"].join(" ")
 
   # don't need to do the symlinking setup for private chef
 
