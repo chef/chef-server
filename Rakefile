@@ -1,3 +1,4 @@
+require 'bundler/setup'
 require 'omnibus'
 
 Omnibus.setup do |o|
