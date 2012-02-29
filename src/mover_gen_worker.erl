@@ -3,7 +3,7 @@
 %% @author Seth Falcon <seth@opscode.com>
 %% @copyright 2011-2012 Opscode, Inc.
 
--module(mover_worker).
+-module(mover_gen_worker).
 -behaviour(gen_fsm).
 -define(SERVER, ?MODULE).
 
@@ -401,7 +401,7 @@ fetch_meta_data_for_objects(_Module, _S, _OrgName, _OrgId, [], Acc) ->
     Acc.
 
 store_object(Module, S, OrgName, OrgId, Id, Name) ->
-    Object = mover_object_utils:fetch_object_authz(S, OrgName, OrgId, Id, Name, Module:authz_type()),
+    Object = mover_object_utils:fetch_object_authz(S, OrgId, Id, Name, Module:authz_type()),
     dets:insert(mover_object_utils:table_name(Module:object_name()), Object),
     ObjectTable = mover_object_utils:error_table_name(Module:object_name()),
     log_object_stored(ObjectTable, OrgName, Object),
@@ -417,7 +417,7 @@ log_object_stored(ObjectTable, OrgName, #object{status={error, {missing_authz, T
     Self = pid_to_list(self()),
     fast_log:err(object_errors, Self, "missing authz data (~p): ~s ~s ~s ~s",
                  [Type, OrgName, Name, OrgId, Id]);
-log_object_stored(ObjectTable, OrgName, #node{status={error, Why}, id=Id, name=Name, org_id=OrgId}=Node) ->
+log_object_stored(ObjectTable, OrgName, #object{status={error, Why}, id=Id, name=Name, org_id=OrgId}=Node) ->
     dets:insert(ObjectTable, Node),
     Self = pid_to_list(self()),
     fast_log:err(object_errors, Self, "object authz fail: ~s ~s ~s ~s ~p",

@@ -219,9 +219,9 @@ handle_info({'DOWN', _MRef, process, Pid, _Failed}, StateName,
             #state{workers = Workers}=State) when Workers > 0 ->
     case find_org_by_worker(Pid) of
         #org{}=Org ->
-            mark_org(nodes_failed, Org#org.guid),
-            error_logger:error_msg("nodes failed for org ~s~n", [Org#org.name]),
-            log(err, "nodes failed for org ~s", [Org#org.name]),
+            mark_org(objects_failed, Org#org.guid),
+            error_logger:error_msg("objects failed for org ~s~n", [Org#org.name]),
+            log(err, "objects failed for org ~s", [Org#org.name]),
             %% this org has failed nodes.  To minimize downtime for this org, we will fail
             %% the migration and turn on writes back in couch-land.
             darklaunch_read_only_nodes(Org#org.name, false),
@@ -294,7 +294,8 @@ load_org_objects([{OrgId, OrgName}|T],
     log(info, "~s: preloading complete", [OrgName]),
     load_org_objects(T, State).
 
--spec find_preload_candidates(non_neg_integer()) -> [{binary(), binary()}].
+-spec find_preload_candidates(non_neg_integer()) -> {ok, [{binary(), binary()}] | none }
+                                                        | {error, term()}.
 %% @doc Grovel through org dets file and return a list of `{OrgId, OrgName}` tuples for orgs
 %% that are not yet preloaded, not avtive, not migrated, and have not errored out.
 find_preload_candidates(BatchSize) ->
@@ -362,7 +363,7 @@ mark_org(migrated, OrgId) ->
             ok = dets:insert(all_orgs, Org1),
             Org1
     end;
-mark_org(nodes_failed, OrgId) ->
+mark_org(objects_failed, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
         [] ->
             not_found;

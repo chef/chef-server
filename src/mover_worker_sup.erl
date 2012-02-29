@@ -1,7 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil;fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Kevin Smith <kevin@opscode.com>
-%% @copyright 2011 Opscode, Inc.
+%% @author Seth Falcon <seth@opscode.com>
+%% @copyright 2011-2012 Opscode, Inc.
 
 -module(mover_worker_sup).
 
@@ -23,6 +24,6 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-    MoverSpec = {undefined, {mover_worker, start_link, []},
-                 temporary, 10000, worker, [mover_worker]},
+    MoverSpec = {undefined, {mover_gen_worker, start_link, []},
+                 temporary, 10000, worker, [mover_gen_worker]},
     {ok, {{simple_one_for_one, 10, 10}, [MoverSpec]}}.

@@ -35,10 +35,10 @@ mark_object(Table, error, Id, Why) ->
     end.
 
 table_name(Name) ->
-    list_to_atom("all_" + atom_to_list(Name) ++ "s").
+    list_to_atom("all_" ++ atom_to_list(Name) ++ "s").
 
 error_table_name(Name) ->
-        list_to_atom("error_" + atom_to_list(Name) ++ "s").
+        list_to_atom("error_" ++ atom_to_list(Name) ++ "s").
 
 
 fetch_object_authz(Cn, OrgId, ObjectId, ObjectName, AuthzType) ->

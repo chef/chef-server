@@ -3,7 +3,7 @@
 %% @author Seth Falcon <seth@opscode.com>
 %% @copyright 2012 Opscode, Inc.
 
--module(mover_node_worker).
+-module(mover_role_worker).
 -behaviour(mover_gen_worker).
 
 -include("mover.hrl").
@@ -20,34 +20,32 @@
          send_object_to_solr/2]).
 
 authz_type() ->
-    authz_node.
+    authz_role.
 
-convert_couch_json_to_object_record(OrgId, AuthzId, RequestorId, NodeData) ->
-    chef_otto:convert_couch_json_to_node_record(OrgId, AuthzId, RequestorId, NodeData).
+convert_couch_json_to_object_record(OrgId, AuthzId, RequestorId, RoleData) ->
+    chef_otto:convert_couch_json_to_role_record(OrgId, AuthzId, RequestorId, RoleData).
 
-create_object(Cn, Node, RequestorId) ->
-    chef_db:create_node(Cn, Node, RequestorId).
+create_object(Cn, Role, RequestorId) ->
+    chef_db:create_role(Cn, Role, RequestorId).
 
-delete_object_from_solr(NodeId, OrgId) ->
-    ok = chef_index_queue:delete(node, NodeId, chef_otto:dbname(OrgId), {[]}),
+delete_object_from_solr(RoleId, OrgId) ->
+    ok = chef_index_queue:delete(role, RoleId, chef_otto:dbname(OrgId), {[]}),
     ok.
 
 fetch_objects(S, OrgId) ->
-    chef_otto:fetch_nodes_with_ids(S, OrgId).
+    chef_otto:fetch_roles_with_ids(S, OrgId).
 
 fetch_objects_from_sql(OrgId) ->
-    chef_sql:fetch_nodes(OrgId).
+    chef_sql:fetch_roles(OrgId).
 
-object_id(#chef_node{id = Id}) ->
+object_id(#chef_role{id = Id}) ->
     Id.
 
 object_name() ->
-    node.
+    role.
 
-send_object_to_solr(#chef_node{id = Id, org_id = OrgId}, NodeJson) ->
-    ok = chef_index_queue:set(node, Id,
+send_object_to_solr(#chef_role{id = Id, org_id = OrgId}, RoleJson) ->
+    ok = chef_index_queue:set(role, Id,
                               chef_otto:dbname(OrgId),
-                              chef_node:ejson_for_indexing(NodeJson)),
+                              chef_role:ejson_for_indexing(RoleJson)),
     ok.
-
-
