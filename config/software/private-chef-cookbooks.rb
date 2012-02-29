@@ -1,5 +1,7 @@
 name "private-chef-cookbooks"
 
+dependencies [ "rsync" ]
+
 source :path => File.expand_path("files/private-chef-cookbooks", Omnibus.root)
 
 build do
