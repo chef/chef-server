@@ -1,12 +1,13 @@
 require 'omnibus'
 
 Omnibus.setup do |o|
-  Omnibus::S3Tasks.define!
-
   ##
   # Config Section
   ##
   o.config.install_dir = '/opt/opscode'
+
+  Omnibus::S3Tasks.define!
+  Omnibus::CleanTasks.define!
 end
 
 Omnibus.software("config/software/*.rb")
