@@ -52,7 +52,7 @@ directory "/opt/chef" do
   recursive true
 end
 
-directory "/var/omnibus" do
+directory "/var/cache/omnibus" do
   mode "755"
   owner node["opscode-omnibus"]["build-user"]
   recursuve true
