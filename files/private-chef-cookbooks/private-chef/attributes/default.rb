@@ -443,7 +443,7 @@ if File.exists?("/sbin/drbdadm")
   default['private_chef']['drbd']['version'] = `drbdadm --version | grep DRBDADM_VERSION= | cut -d "=" -f 2`.chomp!
 else
   Chef::Log.debug("No DRBD version available!")
-  default['private_chef']['drbd']['version'] = '8.4'
+  default['private_chef']['drbd']['version'] = nil
 end
 
 ##

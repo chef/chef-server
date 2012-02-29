@@ -11,14 +11,18 @@ directory "/etc/opscode" do
   owner "root"
   group "root"
   mode "0755"
-  action :create
-end
+  action :nothing
+end.run_action(:create)
 
-PrivateChef[:node] = node
-if File.exists?("/etc/opscode/private-chef.rb")
-	PrivateChef.from_file("/etc/opscode/private-chef.rb")
+if File.exists?("/etc/opscode/chef-server.json")
+  Chef::Log.warn("Please move to /etc/opscode/private-chef.rb for configuration - /etc/opscode/chef-server.json is deprecated.")
+else
+  PrivateChef[:node] = node
+  if File.exists?("/etc/opscode/private-chef.rb")
+    PrivateChef.from_file("/etc/opscode/private-chef.rb")
+  end
+  node.consume_attributes(PrivateChef.generate_config(node['fqdn']))
 end
-node.consume_attributes(PrivateChef.generate_config(node['fqdn']))
 
 if File.exists?("/var/opt/opscode/bootstrapped")
 	node['private_chef']['bootstrap']['enable'] = false

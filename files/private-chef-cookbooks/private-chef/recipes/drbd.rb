@@ -5,6 +5,10 @@
 # All Rights Reserved
 #
 
+if node['private_chef']['drbd']['version'].nil?
+  raise "to use drbd you must install drbd first, please follow the install instructions"
+end
+
 drbd_dir = node['private_chef']['drbd']['dir']
 drbd_etc_dir =  File.join(node['private_chef']['drbd']['dir'], "etc")
 drbd_data_dir = node['private_chef']['drbd']['data_dir']
