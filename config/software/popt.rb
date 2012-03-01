@@ -1,12 +1,10 @@
-name "rsync"
-version "3.0.9"
+name "popt"
+version "1.16"
 
-dependencies ["popt"]
+source :url => "http://rpm5.org/files/popt/popt-1.16.tar.gz",
+       :md5 => "3743beefa3dd6247a73f8f7a32c14c33"
 
-source :url => "http://rsync.samba.org/ftp/rsync/src/rsync-3.0.9.tar.gz",
-       :md5 => "5ee72266fe2c1822333c407e1761b92b"
-
-relative_path "rsync-3.0.9"
+relative_path "popt-1.16"
 
 env = {
   "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
@@ -15,7 +13,9 @@ env = {
 }
 
 build do
-  command "./configure --prefix=#{install_dir}/embedded --disable-iconv", :env => env
+  command "./configure --prefix=#{install_dir}/embedded", :env => env
   command "make -j #{max_build_jobs}", :env => env
   command "make install"
 end
+
+
