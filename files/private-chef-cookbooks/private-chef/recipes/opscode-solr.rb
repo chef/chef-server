@@ -13,7 +13,7 @@ solr_data_dir_symlink = File.join(solr_dir, "data")
 solr_home_dir = File.join(solr_dir, "home")
 solr_log_dir = node['private_chef']['opscode-solr']['log_directory']
 
-[ solr_dir, solr_etc_dir, solr_jetty_dir, solr_data_dir, solr_home_dir, solr_log_dir ].each do |dir_name|
+[ solr_dir, solr_etc_dir, solr_data_dir, solr_home_dir, solr_log_dir ].each do |dir_name|
   directory dir_name do
     owner node['private_chef']['user']['username']
     mode '0700'
@@ -40,21 +40,12 @@ should_notify = OmnibusHelper.should_notify?("opscode-solr")
 
 solr_installed_file = File.join(solr_dir, "installed")
 
-execute "unpack-solr-jetty-tarball" do
-  command("tar zxvf /opt/opscode/embedded/service/opscode-solr/solr-jetty.tar.gz")
-  cwd(solr_jetty_dir)
-  not_if { File.exists?(solr_installed_file) }
-  notifies(:restart, "service[opscode-solr]") if should_notify 
-end
-
-execute "unpack-solr-home-tarball" do
-  command("tar zxvf /opt/opscode/embedded/service/opscode-solr/solr-home.tar.gz")
-  cwd(solr_home_dir)
+execute "cp -R /opt/opscode/embedded/service/opscode-solr/home/conf #{File.join(solr_home_dir, 'conf')}" do
   not_if { File.exists?(solr_installed_file) }
   notifies(:restart, "service[opscode-solr]") if should_notify
 end
 
-execute "cp /opt/opscode/embedded/service/opscode-solr/schema.xml #{File.join(solr_home_dir, 'conf', 'schema.xml')}" do
+execute "cp -R /opt/opscode/embedded/service/opscode-solr/jetty #{File.dirname(solr_jetty_dir)}" do
   not_if { File.exists?(solr_installed_file) }
   notifies(:restart, "service[opscode-solr]") if should_notify
 end
