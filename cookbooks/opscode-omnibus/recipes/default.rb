@@ -55,7 +55,7 @@ end
 directory "/var/cache/omnibus" do
   mode "755"
   owner node["opscode-omnibus"]["build-user"]
-  recursuve true
+  recursive true
 end
 
 # gtihub's SSH key
