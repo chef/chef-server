@@ -1,3 +1,5 @@
+require 'time'
+
 def get_role(org_name, role_name)
   db = ORGS.database_from_orgname(org_name)
   the_id = db.view('roles/all_id')["rows"].find { |row| row["key"] =~ /#{role_name}/ }["id"]
@@ -52,12 +54,21 @@ def write_stats_for_org(fh, stats)
   end
 end
 
-def collect_role_stats(file="org_role_size.txt")
+def collect_role_stats(file="/tmp/org_role_size.txt")
+  puts "starting role stats collection"
+  puts Time.now
+  i = 0
   open(file, "w") do |fh|
     fh.write(stats_header + "\n")
-    ORGS.each do |org|
-      org_stats = role_stats(org.name)
+    ORGS.all_names.each do |org_name|
+      i += 1
+      org_stats = role_stats(org_name)
       write_stats_for_org(fh, org_stats)
+      if i % 1000 == 0
+        print "."
+      end
     end
   end
+  puts "\ndone"
+  puts Time.now
 end
