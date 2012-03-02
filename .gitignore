@@ -1,5 +1,6 @@
 *.dump
-/.eunit
 /*.config
+/.eunit
 /deps
 /ebin
+/rel/bookshelf
