@@ -40,6 +40,8 @@
 
 -include("mover.hrl").
 
+-define(ORGS_LOADED_FILE, "ORGS_ALREADY_LOADED").
+
 -define(SERVER, ?MODULE).
 -define(DETS_OPTS(EstSize), [{auto_save, 1000},
                              {keypos, 2},
@@ -86,14 +88,27 @@ init_storage(timeout, State) ->
     {next_state, load_orgs, State, 0}.
 
 load_orgs(timeout, State) ->
-    %% FIXME: make this only load orgs if it hasn't happened before
-    %%error_logger:info_msg("loading unassigned orgs~n"),
-    %%log(info, "loading unassigned orgs"),
     Cn = chef_otto:connect(),
-    %%[insert_org(NameGuid) || NameGuid <- chef_otto:fetch_assigned_orgs(Cn)],
-    Summary = mover_status:summarize_orgs(),
-    error_logger:info_msg("loaded orgs: ~p~n", [Summary]),
-    log(info, "~256P", [Summary, 10]),
+    case filelib:is_file(?ORGS_LOADED_FILE) of
+        true ->
+            %% Orgs have been loaded and a migration is underway. Avoid reloading orgs; if a
+            %% migration is underway, newly created orgs are already migrated and we don't
+            %% want to have them in our list.
+            error_logger:info_msg("skipping load of unassigned orgs~n"),
+            Summary = mover_status:summarize_orgs(),
+            error_logger:info_msg("already loaded orgs: ~p~n", [Summary]),
+            log(info, "~256P", [Summary, 10]);
+        false ->
+            error_logger:info_msg("loading unassigned orgs~n"),
+            log(info, "loading unassigned orgs"),
+            [insert_org(NameGuid) || NameGuid <- chef_otto:fetch_assigned_orgs(Cn)],
+            Summary = mover_status:summarize_orgs(),
+            error_logger:info_msg("loaded orgs: ~p~n", [Summary]),
+            log(info, "~256P", [Summary, 10]),
+            {ok, FH} = file:open(?ORGS_LOADED_FILE, [write]),
+            io:fwrite(FH, "loaded orgs: ~p~n", [Summary]),
+            file:close(FH)
+    end,
     {next_state, preload_org_nodes, State#state{couch_cn=Cn}, 0}.
 
 preload_org_objects(timeout, #state{preload_amt=Amt}=State) ->
@@ -248,22 +263,21 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 
 %% Internal functions
 
-%% insert_org({Name, Guid}) ->
-%%     case dets:lookup(all_orgs, Guid) of
-%%         [] ->
-%%             Org = #org{guid=Guid, name=Name},
-%%             dets:insert(all_orgs, Org);
-%%         [Org] ->
-%%             %% XXX: we assume we are only inserting orgs at startup and not concurrently
-%%             %% ad-hoc.  Any org that is being inserted is then by-definition not active.  If
-%%             %% the manager crashes, there may be an org left active with a stale worker, so
-%%             %% we'll reset that here.
-%%             %% 
-%%             %% Notice that we don't touch the 'migrated' field used for candidate selection
-%%             %% and skipping over completed orgs.
-%%             dets:insert(all_orgs, Org#org{active=false, worker=undefined})
-%%     end.
-
+insert_org({Name, Guid}) ->
+    case dets:lookup(all_orgs, Guid) of
+        [] ->
+            Org = #org{guid=Guid, name=Name},
+            dets:insert(all_orgs, Org);
+        [Org] ->
+            %% NOTE: we assume we are only inserting orgs at startup and not while migration
+            %% is running.  Any org that is being inserted is then by-definition not active.
+            %% If the manager crashes, there may be an org left active with a stale worker,
+            %% so we'll reset that here.
+            %%
+            %% Notice that we don't touch the 'migrated' field used for candidate selection
+            %% and skipping over completed orgs.
+            dets:insert(all_orgs, Org#org{active=false, worker=undefined})
+    end.
 
 preload_orgs(BatchSize, State) ->
     case find_preload_candidates(BatchSize) of
