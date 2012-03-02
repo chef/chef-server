@@ -1,7 +1,7 @@
 %% -*- mode: erlang; -*-
 
 {application, bookshelf,
- [{description  , "Opscode Store: Amazon S3 Compatible Object Store."},
+ [{description  , "Bookshelf: Amazon S3 Compatible Object Store."},
   {vsn          , "0.1.0"},
   {mod          , {bookshelf_app, []}},
   {registered   , [bookshelf_sup]},
