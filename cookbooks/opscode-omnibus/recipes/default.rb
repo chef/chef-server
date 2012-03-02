@@ -8,7 +8,7 @@ include_recipe "apt"
 include_recipe "build-essential"
 include_recipe "git"
 
-%w{ruby ruby1.8 ruby1.8-dev rdoc1.8 irb1.8 ri1.8 libopenssl-ruby1.8 libtool dpkg-dev libxml2 libxml2-dev libxslt1.1 libxslt1-dev help2man gettext texinfo python-setuptool}.each do |name|
+%w{ruby ruby1.8 ruby1.8-dev rdoc1.8 irb1.8 ri1.8 libopenssl-ruby1.8 libtool dpkg-dev libxml2 libxml2-dev libxslt1.1 libxslt1-dev help2man gettext texinfo python-setuptools}.each do |name|
   package name
 end
 
