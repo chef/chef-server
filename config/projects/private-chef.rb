@@ -7,6 +7,7 @@ deps = []
 deps << "chef-pc"
 deps << "private-chef-cookbooks"
 deps << "private-chef-administration"
+deps << "private-chef-scripts"
 deps << "nginx"
 deps << "runit"
 deps << "unicorn"
