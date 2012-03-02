@@ -7,8 +7,9 @@
 include_recipe "apt"
 include_recipe "build-essential"
 include_recipe "git"
+include_recipe "python"
 
-%w{ruby ruby1.8 ruby1.8-dev rdoc1.8 irb1.8 ri1.8 libopenssl-ruby1.8 libtool dpkg-dev libxml2 libxml2-dev libxslt1.1 libxslt1-dev help2man gettext texinfo python-setuptools}.each do |name|
+%w{ruby ruby1.8 ruby1.8-dev rdoc1.8 irb1.8 ri1.8 libopenssl-ruby1.8 libtool dpkg-dev libxml2 libxml2-dev libxslt1.1 libxslt1-dev help2man gettext texinfo}.each do |name|
   package name
 end
 
@@ -23,11 +24,9 @@ INSTALL_RUBYGEMS
   not_if { ::File.exists? "/usr/bin/gem" }
 end
 
-bash "install Pygments and Sphinx" do
-  code <<-EASY_INSTALL
-easy_install Pygments
-easy_install Sphinx
-EASY_INSTALL
+execute "pip install -r /srv/opscode-omnibus/current/requirements.txt" do
+  user "root"
+  cwd "/srv/opscode-omnibus/current"
 end
 
 %w{bundler rake}.each do |name|
