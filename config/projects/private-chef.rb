@@ -6,6 +6,7 @@ deps = []
 # global
 deps << "chef-pc"
 deps << "private-chef-cookbooks"
+deps << "private-chef-administration"
 deps << "nginx"
 deps << "runit"
 deps << "unicorn"
