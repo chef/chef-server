@@ -1,4 +1,8 @@
+*.clj
 *.dump
+*.jar
+*.png
+.lein*
 /*.config
 /.eunit
 /deps
