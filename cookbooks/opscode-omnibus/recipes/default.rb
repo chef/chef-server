@@ -24,9 +24,9 @@ INSTALL_RUBYGEMS
   not_if { ::File.exists? "/usr/bin/gem" }
 end
 
-execute "pip install -r /srv/opscode-omnibus/current/requirements.txt" do
+execute "pip install -r #{node["opscode-omnibus"]["build-folder"]}/requirements.txt" do
   user "root"
-  cwd "/srv/opscode-omnibus/current"
+  cwd node["opscode-omnibus"]["build-folder"]
 end
 
 %w{bundler rake}.each do |name|
