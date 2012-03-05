@@ -31,7 +31,7 @@ Ensure all required gems are installed and ready to use:
     
 omnibus-ruby should also be checked out as a sibling to opscode-omnibus:
     cd ..
-    git clone git@github.com:opscode/opscode-omnibus
+    git clone git@github.com:opscode/omnibus-ruby
 
 # Quick start
 
