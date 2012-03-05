@@ -13,7 +13,9 @@ end
 def fetch_all_roles(org_name)
   db = ORGS.database_from_orgname(org_name)
   db.view('roles/all_id', :include_docs => true)["rows"]
-rescue RestClient::ResourceNotFound
+rescue
+  # The view may be missing for unassigned orgs.
+  # Also, an unassigned org may get assigned/renamed and no longer exist.
   []
 end
 
