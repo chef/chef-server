@@ -1,12 +1,12 @@
 name "keepalived"
-version "1.2.2"
+version "1.1.20"
 
 dependencies ["popt"]
 
-source :url => "http://www.keepalived.org/software/keepalived-1.2.2.tar.gz",
-       :md5 => "f68327ca142616a8463d2d105db122cd"
+source :url => "http://www.keepalived.org/software/keepalived-1.1.20.tar.gz",
+       :md5 => "6c3065c94bb9e2187c4b5a80f6d8be31"
 
-relative_path "keepalived-1.2.2"
+relative_path "keepalived-1.1.20"
 
 env = {
   "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
@@ -15,6 +15,8 @@ env = {
 }
 
 build do
+  command "patch -p1 ../config/patches/keepalived/keepalived-1.1.20_opscode_unicast.patch"
+
   command "./configure --prefix=#{install_dir}/embedded --with-include-popt --disable-iconv", :env => env
   command "make -j #{max_build_jobs}", :env => env
   command "make install"
