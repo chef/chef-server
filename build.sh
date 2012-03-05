@@ -1,6 +1,13 @@
 #!/bin/bash -xe
 if [ ! -e /opt/opscode/.branch ]; then exit 1; fi
-export GIT_BRANCH_CLEAN="$(git describe --all --match "remotes/.*" | sed s/remotes\\/origin\\/// | tr / _)"
+export GIT_BRANCH_CLEAN=""
+for SHA in $(git rev-list HEAD)
+do
+  GIT_BRANCH_POSSIBLE="$(git show-ref | grep -v tags | grep -v HEAD | grep "$SHA")"
+  if [ -n "$GIT_BRANCH_POSSIBLE" ]; then break; fi
+done
+if [ -z "$GIT_BRANCH_POSSIBLE" ]; then exit 1; fi
+export GIT_BRANCH_CLEAN="$(echo "$GIT_BRANCH_POSSIBLE" | awk '{print $2}' | sed s/refs\\/remotes\\/origin\\/// | tr / _)"
 if [ -z "$GIT_BRANCH_CLEAN" ]; then exit 1; fi
 if [ "$GIT_BRANCH_CLEAN" != "$(cat /opt/opscode/.branch)" ]
 then
