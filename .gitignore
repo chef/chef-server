@@ -1,10 +1,12 @@
 *.clj
 *.dump
 *.jar
+*.pdf
 *.png
-.lein*
+*.tex
 /*.config
 /.eunit
+/.lein*
 /deps
 /ebin
 /rel/bookshelf
