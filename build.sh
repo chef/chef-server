@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 if [ ! -e /opt/opscode/.branch ]; then exit 1; fi
-GIT_BRACH_CLEAN="$(git describe --all --match "heads/.*" | sed s/heads\\/// | tr / _)"
+GIT_BRANCH_CLEAN="$(git describe --all --match "heads/.*" | sed s/heads\\/// | tr / _)"
 if [ -z "$GIT_BRANCH_CLEAN" ]; then exit 1; fi
 if [ "$GIT_BRANCH_CLEAN" != "$(cat /opt/opscode/.branch)" ]
 then
