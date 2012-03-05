@@ -20,9 +20,9 @@ build do
   # TODO: OMG THIS IS HORRIBLE
   command "sed -i 's:\\r::g' ./src/nrpe.c"
 
-  # TODO: add real semantics around patching
-  patch_file = File.expand_path("../config/patches/nrpe/fix_for_runit.patch", __FILE__)
-  command "cat #{patch_file} | patch -p1 ./src/nrpe.c"
+  patch :source => "../config/patches/nrpe/fix_for_runit.patch",
+        :plevel => 1,
+        :target => "./src/nrpe.c"
 
   # configure it
   command(["./configure",
@@ -38,5 +38,5 @@ build do
   # move it
   command "mkdir -p #{install_dir}/embedded/nagios/libexec"
   command "cp ./src/check_nrpe #{install_dir}/embedded/nagios/libexec"
-  command "cp ./src/nrpe #{install_dir}/embedded/bin"
+  command "cp ./src/nrpe #{install_dir}/embedded/nagios/bin"
 end

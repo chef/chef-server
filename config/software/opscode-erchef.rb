@@ -19,5 +19,5 @@ build do
   command "mkdir -p #{install_dir}/embedded/service/opscode-erchef"
   command "#{install_dir}/embedded/bin/rsync -a ./rel/erchef/ #{install_dir}/embedded/service/opscode-erchef/"
   # TODO: git cleanup in opscode-erchef service directory
-  command "rm -rf #{install_dir}/embedded/service/opscode-org-creator/rel/org_app/log"
+  command "rm -rf #{install_dir}/embedded/service/opscode-erchef/log"
 end

@@ -7,6 +7,7 @@
 include_recipe "apt"
 include_recipe "build-essential"
 include_recipe "git"
+include_recipe "python"
 
 %w{ruby ruby1.8 ruby1.8-dev rdoc1.8 irb1.8 ri1.8 libopenssl-ruby1.8 libtool dpkg-dev libxml2 libxml2-dev libxslt1.1 libxslt1-dev help2man gettext texinfo}.each do |name|
   package name
@@ -21,6 +22,11 @@ cd rubygems-1.3.7
 ruby setup.rb --no-format-executable
 INSTALL_RUBYGEMS
   not_if { ::File.exists? "/usr/bin/gem" }
+end
+
+execute "pip install -r #{node["opscode-omnibus"]["build-folder"]}/requirements.txt" do
+  user "root"
+  cwd node["opscode-omnibus"]["build-folder"]
 end
 
 %w{bundler rake}.each do |name|
