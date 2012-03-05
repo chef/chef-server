@@ -93,7 +93,7 @@ define command {
 
 define command {
   command_name    check_avail_orgs
-  command_line    $USER1$/opscode_avail_orgs.pl -H $HOSTADDRESS$ -p $ARG1$ --Co $ARG2$ --Wo $ARG3$
+  command_line    $USER1$/opscode_avail_orgs.rb -H $HOSTADDRESS$ -p $ARG1$ --Co $ARG2$ --Wo $ARG3$
 }
 
 define command {
