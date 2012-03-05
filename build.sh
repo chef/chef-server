@@ -1,7 +1,7 @@
 #!/bin/bash -xe
 if [ ! -e /opt/opscode/.branch ]; then exit 1; fi
-GIT_BRACH_CLEAN="${GIT_BRANCH//\//_}"
-if [ "$GIT_BRANCH_CLEAN" != "$(cat /opt/opscode/.branch)"]
+GIT_BRACH_CLEAN="$(git describe --all --match "heads/.*" | sed s/heads\\/// | tr / _)"
+if [ "$GIT_BRANCH_CLEAN" != "$(cat /opt/opscode/.branch)" ]
 then
   mv /opt/opscode "/opt/opscode-$(cat /opt/opscode/.branch)"
   if [ ! -d "/opt/opscode-$GIT_BRANCH_CLEAN" ]; then mkdir "/opt/opscode-$GIT_BRANCH_CLEAN"; fi
