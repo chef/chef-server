@@ -93,6 +93,15 @@ http {
       #allow 127.0.0.1;
       #deny all;
       #}
+    location /docs { 
+      root /opt/opscode/docs;
+    }
+
+    location /version { 
+      types { }
+      default_type text/plain;
+      alias /opt/opscode/pc-version.txt;
+    }
 
     location /checksum/ {
       internal;
@@ -308,11 +317,7 @@ http {
       root   /opt/opscode/embedded/nagios/share/;
       index  index.php;
     }
-    location /version { 
-      types { }
-      default_type text/plain;
-      alias /opt/opscode/pc-version.txt;
-    }
+
     location /nagios {
       index index.php;
       alias /opt/opscode/embedded/nagios/share/;
