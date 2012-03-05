@@ -38,5 +38,5 @@ build do
   # move it
   command "mkdir -p #{install_dir}/embedded/nagios/libexec"
   command "cp ./src/check_nrpe #{install_dir}/embedded/nagios/libexec"
-  command "cp ./src/nrpe #{install_dir}/embedded/bin"
+  command "cp ./src/nrpe #{install_dir}/embedded/nagios/bin"
 end
