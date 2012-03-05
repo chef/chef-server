@@ -32,6 +32,10 @@ template expander_config do
   notifies :restart, 'service[opscode-expander]' if OmnibusHelper.should_notify?("opscode-expander")
 end
 
+link "/opt/opscode/embedded/service/opscode-expander/conf/opscode-expander.rb" do
+  to expander_config
+end
+
 template reindexer_config do
   source "expander.rb.erb"
   owner "root"
