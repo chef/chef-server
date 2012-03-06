@@ -21,3 +21,13 @@ OMNIBUS_CONFIG
 rm pkg/* || true
 bundle install --deployment --without development
 bundle exec rake projects:private-chef:deb
+# Cleanup
+if [ "${GIT_BRANCH}" != "master" ]
+then
+  sudo rm -rf "/var/cache/omnibus/${GIT_BRANCH_CLEAN}"
+  sudo rm -rf /opt/opscode
+  if [ -d /opt/opscode-master ]
+  then
+    sudo mv /opt/opscode-master /opt/opscode
+  fi
+fi
