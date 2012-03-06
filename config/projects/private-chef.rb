@@ -39,6 +39,9 @@ deps << "nagios-plugins"
 deps << "opscode-nagios-plugins"
 deps << "nrpe"
 
+# Version manifest file
+deps << "pc-version"
+
 dependencies deps
 
 exclude "\.git*"
