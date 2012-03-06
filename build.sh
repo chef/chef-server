@@ -16,7 +16,15 @@ then
   sudo mv "/opt/opscode-$GIT_BRANCH_CLEAN" /opt/opscode
 fi
 sudo env CHEF_SOLO_COOKBOOKS="$(pwd)/cookbooks" chef-solo -c /srv/opscode-omnibus/shared/solo.rb -j /srv/opscode-omnibus/shared/solo.json
+if [ ! -d "/var/cache/omnibus/${GIT_BRANCH_CLEAN}" ]; then mkdir "/var/cache/omnibus/${GIT_BRANCH_CLEAN}"; fi
 cp omnibus.rb.example omnibus.rb
+echo <<OMNIBUS_CONFIG >>omnibus.rb
+Omnibus.configure do |o|
+  o.cache_dir = "/var/cache/omnibus/${GIT_BRANCH_CLEAN}/cache"
+  o.source_dir = "/var/cache/omnibus/${GIT_BRANCH_CLEAN}/src"
+  o.build_dir = "/var/cache/omnibus/${GIT_BRANCH_CLEAN}/build"
+end
+OMNIBUS_CONFIG
 rm pkg/* || true
 bundle install --deployment --without development
 bundle exec rake projects:private-chef:deb
