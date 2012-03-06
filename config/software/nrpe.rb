@@ -20,8 +20,7 @@ build do
   # TODO: OMG THIS IS HORRIBLE
   command "sed -i 's:\\r::g' ./src/nrpe.c"
 
-  patch :source => "../config/patches/nrpe/fix_for_runit.patch",
-        :plevel => 1,
+  patch :source => "fix_for_runit.patch",
         :target => "./src/nrpe.c"
 
   # configure it
