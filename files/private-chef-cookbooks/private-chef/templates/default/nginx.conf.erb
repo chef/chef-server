@@ -38,6 +38,8 @@ http {
   gzip_proxied <%= @gzip_proxied %>;
   gzip_types <%= @gzip_types.join(' ') %>;
 
+  include /opt/opscode/embedded/conf/mime.types;
+
   <%- node['private_chef']['lb']['upstream'].each do |uname, servers| -%>
   upstream <%= uname.sub(/-/, '_') %> {
     <%- servers.each do |server| -%>
@@ -93,14 +95,16 @@ http {
       #allow 127.0.0.1;
       #deny all;
       #}
-    location /docs { 
-      root /opt/opscode/docs;
-    }
 
-    location /version { 
+    location /version {
       types { }
       default_type text/plain;
       alias /opt/opscode/pc-version.txt;
+    }
+
+    location /docs {
+      index index.html ;
+      alias /opt/opscode/docs;
     }
 
     location /checksum/ {
