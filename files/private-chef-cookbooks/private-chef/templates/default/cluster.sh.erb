@@ -93,6 +93,7 @@ function unlock
 export SVWAIT=30
 
 requested_state_file=/var/opt/opscode/keepalived/requested_cluster_status
+current_state_file=/var/opt/opscode/keepalived/current_cluster_status
 echo $1 > $requested_state_file
 
 lockfile=/var/opt/opscode/keepalived/cluster-transition.lock
@@ -108,6 +109,7 @@ if lock $lockfile; then
      last_requested_state=`echo -n $(cat $requested_state_file)`
    done
    unlock $lockfile 
+   echo $1 > $current_state_file
 else
    log_me "Requested transition to $1"
    error_exit "Requested transition to $1, but state transition already running."
