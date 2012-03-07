@@ -127,7 +127,7 @@ end
 #  - check drbd is actually enabled in the config
 #  - check that someone created the underlying block device drbd will use
 #  - check that the drbd device itself exists (i.e. kernel module configured+loaded)
-#  - check that the current state matches requested state of master or slave
+#  - check that the current state matches requested state of master or backup
 #  - check that the VRRP IP address state is correct based on our state
 #  - check that the DRBD state is correct based on our state
 #  - check that the DRBD drive is correctly (un)mounted based on our state
@@ -267,10 +267,10 @@ def ha_status
           end
         else
           if status.success?
-            puts "[ERROR] #{service_name} is running, and I am slave."
+            puts "[ERROR] #{service_name} is running, and I am not master."
             error_exit = 7
           else
-            puts "[OK] #{service_name} is not running, and I am slave."
+            puts "[OK] #{service_name} is not running, and I am not master."
           end
         end
       else
