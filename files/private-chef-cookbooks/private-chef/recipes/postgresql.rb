@@ -73,8 +73,8 @@ else
   bash "add shm settings" do
     user "root"
     code <<-EOF
-      cat 'kernel.shmmax = 17179869184' >> /etc/sysctl.conf
-      cat 'kernel.shmall = 4194304' >> /etc/sysctl.conf
+      echo 'kernel.shmmax = 17179869184' >> /etc/sysctl.conf
+      echo 'kernel.shmall = 4194304' >> /etc/sysctl.conf
     EOF
     notifies :run, 'execute[sysctl]', :immediately
     not_if "egrep '^kernel.shmmax = ' /etc/sysctl.conf"
