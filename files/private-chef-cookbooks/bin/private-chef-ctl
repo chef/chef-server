@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+require 'json'
 
 def get_pgrp_from_pid(pid)
   ps=`which ps`.chomp
@@ -115,6 +116,79 @@ def tail(service=nil)
   end
 end
 
+def load_json
+  json = File.read("/etc/opscode/chef-server-running.json")
+  @running_config = JSON.parse(json)
+end
+
+#
+# ha_status
+#  - check keepalived is actually enabled in the config
+#  - check that the current state matches requested state of master or slave
+#  - check that the VRRP IP address state is correct based on our state
+#  - check that the DRBD state is correct based on our state
+#
+
+def ha_status
+  load_json
+
+  unless @running_config['private_chef']['keepalived']['enable']
+    puts "keepalived HA services not enabled, please configure H/A services according to documentation."
+    exit 1 
+  end
+
+  error_exit = 0
+
+  requested_cluster_status = File.read("/var/opt/opscode/keepalived/requested_cluster_status").chomp
+  current_cluster_status = File.read("/var/opt/opscode/keepalived/current_cluster_status").chomp
+
+  if requested_cluster_status != current_cluster_status
+    puts "[WARN] inconsistent cluster status, requested: #{requested_cluster_status}, current: #{current_cluster_status}, failover running?"
+    error_exit = 2
+  else
+    puts "[OK] cluster status = #{current_cluster_status}"
+  end
+ 
+  vrrp_instance_ipaddress = @running_config['private_chef']['keepalived']['vrrp_instance_ipaddress']
+  vrrp_instance_ipaddress_dev = @running_config['private_chef']['keepalived']['vrrp_instance_ipaddress_dev']
+  has_vrrp_addr = `ip a show dev #{vrrp_instance_ipaddress_dev}` =~ /#{vrrp_instance_ipaddress}/
+
+  if has_vrrp_addr 
+    if current_cluster_status == "master"
+      puts "[OK] found VIP IP address and I am master"
+    else
+      puts "[ERROR] found VRRP address and I am not master"
+      error_exit = 3
+    end
+  else
+    if current_cluster_status == "master"
+      puts "[ERROR] did not find VIP IP address and I am master"
+      error_exit = 3
+    else
+      puts "[OK] did not find VIP IP address and I am not master"
+    end
+  end
+
+  drbd_status = `cat /proc/drbd | egrep cs:`.chomp
+  if current_cluster_status == "master"
+    if drbd_status =~ /cs:Connected ro:Primary\/Secondary ds:UpToDate\/UpToDate/
+      puts "[OK] my DRBD status is Connected/Primary/UpToDate"
+    else
+      puts "[ERROR] my DRBD status is: #{drbd_status}"
+      error_exit = 4
+    end
+  else
+    if drbd_status =~ /cs:Connected ro:Secondary\/Primary ds:UpToDate\/UpToDate/
+      puts "[OK] my DRBD status is Connected/Secondary/UpToDate"
+    else
+      puts "[ERROR] my DRBD status is #{drbd_status}"
+      error_exit = 4
+    end
+  end
+
+  exit error_exit
+end
+
 def is_integer?(string)
   return true if Integer(string) rescue false
 end
@@ -184,6 +258,8 @@ service-list
     List all the services (enabled services appear with a *.)
 status
     Show the status of all the services.
+ha-status
+    Show the status of high availability services.
 tail
     Watch the service logs of all enabled services.
 start
@@ -209,6 +285,8 @@ EOH
 end
 
 case ARGV[0]
+when "ha-status"
+  ha_status
 when "master-recover"
 	exec "/var/opt/opscode/keepalived/bin/cluster.sh master"
 when "backup-recover"
