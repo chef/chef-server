@@ -2,7 +2,12 @@
 %% ex: ts=4 sw=4 et
 %% @author Kevin Smith <kevin@opscode.com>
 %% @author Seth Falcon <seth@opscode.com>
-%% @copyright 2011 Opscode, Inc.
+%% @copyright 2011-2012 Opscode, Inc.
+
+%% TODO:
+%% - make org loading a one-time event
+%% - 
+
 -module(mover_manager).
 
 -behaviour(gen_fsm).
@@ -11,18 +16,15 @@
 -export([start_link/1,
          get_going/3,
          status/0,
-         mark_node/2,
-         mark_node/3,
          mark_org_time/2,
-         store_node/5,
-         make_worker_config/3,
+         make_worker_config/5,
          darklaunch_couchdb_nodes/2
         ]).
 
 %% States
 -export([init_storage/2,
          load_orgs/2,
-         preload_org_nodes/2,
+         preload_org_objects/2,
          label_orgs_in_darklaunch/2,
          ready/3,
          start_batch/2,
@@ -37,6 +39,8 @@
          code_change/4]).
 
 -include("mover.hrl").
+
+-define(ORGS_LOADED_FILE, "ORGS_ALREADY_LOADED").
 
 -define(SERVER, ?MODULE).
 -define(DETS_OPTS(EstSize), [{auto_save, 1000},
@@ -56,8 +60,9 @@
                 workers = 0,
                 batches = 0,
                 orgs_per_batch = 10,
-                node_batch_size = 20,
-                orgs_to_migrate}).
+                object_batch_size = 20,
+                orgs_to_migrate,
+                object_mod}).
 
 start_link(PreloadAmt) ->
     gen_fsm:start_link({local, ?SERVER}, ?MODULE, [PreloadAmt], []).
@@ -65,34 +70,48 @@ start_link(PreloadAmt) ->
 status() ->
     gen_fsm:sync_send_all_state_event(?SERVER, status, 10000).
 
-get_going(NumBatches, OrgsPerBatch, NodeBatchSize) ->
-    gen_fsm:sync_send_event(?SERVER, {start, NumBatches, OrgsPerBatch, NodeBatchSize}).
+get_going(NumBatches, OrgsPerBatch, ObjectBatchSize) ->
+    gen_fsm:sync_send_event(?SERVER, {start, NumBatches, OrgsPerBatch, ObjectBatchSize}).
 
 init([PreloadAmt]) ->
-    {ok, init_storage, #state{preload_amt=PreloadAmt}, 0}.
+    {ok, ObjectMod} = application:get_env(mover, object_mod),
+    {ok, init_storage, #state{preload_amt=PreloadAmt, object_mod = ObjectMod}, 0}.
 
 init_storage(timeout, State) ->
     error_logger:info_msg("dry_run is ~p~n", [is_dry_run()]),
     error_logger:info_msg("initializing migration storage~n"),
     log(info, "initializing migration storage"),
-    {ok, _} = dets:open_file(all_orgs, ?DETS_OPTS(?ORG_ESTIMATE)),
-    {ok, _} = dets:open_file(all_nodes, ?DETS_OPTS(?NODE_ESTIMATE)),
-    {ok, _} = dets:open_file(error_nodes, ?DETS_OPTS(10000)),
+    {ok, StorageTables} = application:get_env(mover, storage_tables),
+    [ {ok, _} = dests:open_file(Tab, ?DETS_OPTS(EstSize))
+      || {Tab, EstSize} <- StorageTables ],
+    %% expected storage tables example: all_orgs, all_nodes, error_nodes
     {next_state, load_orgs, State, 0}.
 
 load_orgs(timeout, State) ->
-    %%error_logger:info_msg("loading unassigned orgs~n"),
-    %%log(info, "loading unassigned orgs"),
     Cn = chef_otto:connect(),
-    %%[insert_org(NameGuid) || NameGuid <- chef_otto:fetch_assigned_orgs(Cn)],
-    Summary = mover_status:summarize_orgs(),
-    error_logger:info_msg("loaded orgs: ~p~n", [Summary]),
-    log(info, "~256P", [Summary, 10]),
+    case filelib:is_file(?ORGS_LOADED_FILE) of
+        true ->
+            %% Orgs have been loaded and a migration is underway. Avoid reloading orgs; if a
+            %% migration is underway, newly created orgs are already migrated and we don't
+            %% want to have them in our list.
+            error_logger:info_msg("skipping load of unassigned orgs~n"),
+            Summary = mover_status:summarize_orgs(),
+            error_logger:info_msg("already loaded orgs: ~p~n", [Summary]),
+            log(info, "~256P", [Summary, 10]);
+        false ->
+            error_logger:info_msg("loading unassigned orgs~n"),
+            log(info, "loading unassigned orgs"),
+            [insert_org(NameGuid) || NameGuid <- chef_otto:fetch_assigned_orgs(Cn)],
+            Summary = mover_status:summarize_orgs(),
+            error_logger:info_msg("loaded orgs: ~p~n", [Summary]),
+            log(info, "~256P", [Summary, 10]),
+            {ok, FH} = file:open(?ORGS_LOADED_FILE, [write]),
+            io:fwrite(FH, "loaded orgs: ~p~n", [Summary]),
+            file:close(FH)
+    end,
     {next_state, preload_org_nodes, State#state{couch_cn=Cn}, 0}.
 
-preload_org_nodes(timeout, #state{preload_amt=Amt}=State) ->
-    error_logger:info_msg("preloading nodes for ~B orgs~n", [Amt]),
-    log(info, "preloading nodes for ~B orgs", [Amt]),
+preload_org_objects(timeout, #state{preload_amt=Amt}=State) ->
     case preload_orgs(Amt, State) of
         {ok, State1} ->
             {Preloaded, Active, Migrated, Error} = {true, false, false, false},
@@ -122,17 +141,18 @@ label_orgs_in_darklaunch(timeout, State) ->
     error_logger:info_msg("ready for action~n"),
     {next_state, ready, State}.
 
-ready({start, NumBatches, OrgsPerBatch, NodeBatchSize}, _From,
+ready({start, NumBatches, OrgsPerBatch, ObjectBatchSize}, _From,
       #state{workers = 0, batches = 0}=State) ->
     State1 = State#state{batches = NumBatches,
                          orgs_per_batch = OrgsPerBatch,
-                         node_batch_size = NodeBatchSize},
+                         object_batch_size = ObjectBatchSize},
     {reply, {ok, moveit}, start_batch, State1, 0}.
 
-start_batch(timeout, #state{workers = 0,
+start_batch(timeout, #state{object_mod = ObjectMod,
+                            workers = 0,
                             batches = Batches,
                             orgs_per_batch = NumOrgs,
-                            node_batch_size = NodeBatchSize,
+                            object_batch_size = ObjectBatchSize,
                             orgs_to_migrate = Candidates}=State) ->
     case safe_split(NumOrgs, Candidates) of
         {[], _} ->
@@ -144,7 +164,7 @@ start_batch(timeout, #state{workers = 0,
             %% mode for nodes.
             darklaunch_read_only_nodes([ Name || {_, Name} <- Orgs ], true),
             [ mark_org(read_only, OrgId) || {OrgId, _} <- Orgs ],
-            case start_workers(Orgs, NodeBatchSize) of
+            case start_workers(Orgs, ObjectBatchSize, ObjectMod) of
                 0 ->
                     error_logger:error_msg("unable to start workers~n"),
                     log(err, "unable to start workers for: ~256P", [[ Name || {_, Name} <- Orgs ], 10]),
@@ -159,7 +179,7 @@ start_batch(timeout, #state{workers = 0,
             end
     end.
     
-running({start, _BatchSize, _NodeBatchSize}, _From, State) ->
+running({start, _BatchSize, _ObjectBatchSize}, _From, State) ->
     {reply, {error, running_batch}, running, State}.
 
 handle_event(_Event, StateName, State) ->
@@ -214,9 +234,9 @@ handle_info({'DOWN', _MRef, process, Pid, _Failed}, StateName,
             #state{workers = Workers}=State) when Workers > 0 ->
     case find_org_by_worker(Pid) of
         #org{}=Org ->
-            mark_org(nodes_failed, Org#org.guid),
-            error_logger:error_msg("nodes failed for org ~s~n", [Org#org.name]),
-            log(err, "nodes failed for org ~s", [Org#org.name]),
+            mark_org(objects_failed, Org#org.guid),
+            error_logger:error_msg("objects failed for org ~s~n", [Org#org.name]),
+            log(err, "objects failed for org ~s", [Org#org.name]),
             %% this org has failed nodes.  To minimize downtime for this org, we will fail
             %% the migration and turn on writes back in couch-land.
             darklaunch_read_only_nodes(Org#org.name, false),
@@ -243,43 +263,55 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 
 %% Internal functions
 
-%% insert_org({Name, Guid}) ->
-%%     case dets:lookup(all_orgs, Guid) of
-%%         [] ->
-%%             Org = #org{guid=Guid, name=Name},
-%%             dets:insert(all_orgs, Org);
-%%         [Org] ->
-%%             %% XXX: we assume we are only inserting orgs at startup and not concurrently
-%%             %% ad-hoc.  Any org that is being inserted is then by-definition not active.  If
-%%             %% the manager crashes, there may be an org left active with a stale worker, so
-%%             %% we'll reset that here.
-%%             %% 
-%%             %% Notice that we don't touch the 'migrated' field used for candidate selection
-%%             %% and skipping over completed orgs.
-%%             dets:insert(all_orgs, Org#org{active=false, worker=undefined})
-%%     end.
+insert_org({Name, Guid}) ->
+    case dets:lookup(all_orgs, Guid) of
+        [] ->
+            Org = #org{guid=Guid, name=Name},
+            dets:insert(all_orgs, Org);
+        [Org] ->
+            %% NOTE: we assume we are only inserting orgs at startup and not while migration
+            %% is running.  Any org that is being inserted is then by-definition not active.
+            %% If the manager crashes, there may be an org left active with a stale worker,
+            %% so we'll reset that here.
+            %%
+            %% Notice that we don't touch the 'migrated' field used for candidate selection
+            %% and skipping over completed orgs.
+            dets:insert(all_orgs, Org#org{active=false, worker=undefined})
+    end.
 
 preload_orgs(BatchSize, State) ->
     case find_preload_candidates(BatchSize) of
         {ok, none} ->
             {ok, State};
         {ok, Orgs} ->
-            load_org_nodes(Orgs, State);
+            load_org_objects(Orgs, State);
         Error ->
             Error
     end.
 
-load_org_nodes([], State) ->
+-spec load_org_objects([{binary(), binary()}], #state{}) -> {ok, #state{}}.
+%% @doc Load objects using the module in `State#state.object_mod` for the specified list of
+%% `{OrgId, OrgName}` tuples. For each org, we fetch a list of objects and then load meta
+%% data for all of those objects. Each processed org is marked as state "preload".
+load_org_objects([], State) ->
     {ok, State};
-load_org_nodes([{OrgId, OrgName}|T], #state{couch_cn=Cn}=State) ->
-    log(info, "~s: preloading node data", [OrgName]),
-    NodeList = chef_otto:fetch_nodes_with_ids(Cn, OrgId),
-    log(info, "~s: found ~B nodes for preloading", [OrgName, length(NodeList)]),
-    [store_node(Cn, OrgName, OrgId, NodeId, NodeName) || {NodeName, NodeId} <- NodeList],
+load_org_objects([{OrgId, OrgName}|T],
+                 #state{object_mod = ObjectMod,
+                        object_batch_size = BatchSize}=State) ->
+    Config = make_worker_config(preload, ObjectMod, OrgId, OrgName, BatchSize),
+    case mover_worker_sup:new_mover(Config) of
+        {ok, _Pid} -> ok;
+        _NoPid ->
+            error({"unable to launch preload worker", OrgName})
+    end,
     mark_org(preload, OrgId),
     log(info, "~s: preloading complete", [OrgName]),
-    load_org_nodes(T, State).
+    load_org_objects(T, State).
 
+-spec find_preload_candidates(non_neg_integer()) -> {ok, [{binary(), binary()}] | none }
+                                                        | {error, term()}.
+%% @doc Grovel through org dets file and return a list of `{OrgId, OrgName}` tuples for orgs
+%% that are not yet preloaded, not avtive, not migrated, and have not errored out.
 find_preload_candidates(BatchSize) ->
     %% dets:match/3 with N does not act like ets:match/3 with Limit. So to keep it simple,
     %% we waste some memory and just pull back all candidate orgs for preloading and then
@@ -300,54 +332,15 @@ find_preload_candidates(BatchSize) ->
             {ok, Orgs}
     end.
 
-store_node(Cn, OrgName, OrgId, NodeId, NodeName) ->
-    Node = case chef_otto:fetch_by_name(Cn, OrgId, NodeName, authz_node) of
-               {ok, MixlibNode} ->
-                   MixlibId = ej:get({<<"_id">>}, MixlibNode),
-                   %% Note that this can return a {not_found, _} tuple so we use
-                   %% status_for_ids to validate that we have binaries and otherwise mark
-                   %% node as an error.
-                   AuthzId = chef_otto:fetch_auth_join_id(Cn, MixlibId, user_to_auth),
-                   RequestorId = ej:get({<<"requester_id">>}, MixlibNode),
-                   #node{id = NodeId,
-                         name = NodeName,
-                         org_id = OrgId,
-                         authz_id = AuthzId,
-                         requestor = RequestorId,
-                         status = status_for_ids(AuthzId, RequestorId)};
-               Error ->
-                   #node{id = NodeId,
-                         name = NodeName,
-                         org_id = OrgId,
-                         status = status_for_error(Error)}
-           end,
-    dets:insert(all_nodes, Node),
-    log_node_stored(OrgName, Node),
-    Node.
+-type org_state() :: preload | read_only | not_read_only | migrated | objects_failed.
 
-status_for_error({not_found, authz_node}) ->
-    {error, {missing_authz, no_mixlib_doc}};
-status_for_error(Error) ->
-    {error, Error}.
-
-status_for_ids(AuthzId, RequestorId) when is_binary(AuthzId),
-                                          is_binary(RequestorId) ->
-    {ok, Regex} = re:compile("[a-f0-9]{32}"),
-    case {re:run(AuthzId, Regex), re:run(RequestorId, Regex)} of
-        {{match, _}, {match, _}} -> couchdb;
-        _NoMatch -> 
-            {error,
-             {bad_id_format, [{authz_id, AuthzId}, {requestor, RequestorId}]}}
-    end;
-status_for_ids({not_found, missing}, _RequestorId) ->
-    {error, {missing_authz, no_auth_join}};
-status_for_ids(AuthzId, RequestorId) ->
-    {error, {unknown, [{authz_id, AuthzId}, {requestor, RequestorId}]}}.
-
+-spec mark_org(org_state(), binary()) -> not_found | #org{}.
+%% @doc Update the state of the org record in the `all_orgs` table.
+%% States: `preload`, `read_only`, `not_read_only`, `migrated`, `objects_failed`.
 mark_org(preload, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
         [] ->
-            ok;
+            not_found;
         [Org] ->
             Org1 = Org#org{preloaded=true},
             ok = dets:insert(all_orgs, Org1),
@@ -356,7 +349,7 @@ mark_org(preload, OrgId) ->
 mark_org(read_only, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
         [] ->
-            ok;
+            not_found;
         [Org] ->
             StartTime = {start, os:timestamp()},
             Time = [StartTime|Org#org.time],
@@ -367,7 +360,7 @@ mark_org(read_only, OrgId) ->
 mark_org(not_read_only, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
         [] ->
-            ok;
+            not_found;
         [Org] ->
             EndTime = {stop, os:timestamp()},
             Time = [EndTime|Org#org.time],
@@ -378,68 +371,48 @@ mark_org(not_read_only, OrgId) ->
 mark_org(migrated, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
         [] ->
-            ok;
+            not_found;
         [Org] ->
             Org1 = Org#org{migrated=true, active=false, worker=undefined},
             ok = dets:insert(all_orgs, Org1),
             Org1
     end;
-mark_org(nodes_failed, OrgId) ->
+mark_org(objects_failed, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
         [] ->
-            ok;
+            not_found;
         [Org] ->
             Org1 = Org#org{migrated=false, error=true, worker=undefined},
             ok = dets:insert(all_orgs, Org1),
             Org1
     end.
 
+-spec mark_org_time(atom(), binary()) -> not_found | #org{}.
+%% @doc Add a `{Tag, Timestamp}' tuple to the specified org
 mark_org_time(Tag, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
         [] ->
-            ok;
+            not_found;
         [Org] ->
             Org1 = Org#org{time = [{Tag, os:timestamp()}|Org#org.time]},
             ok = dets:insert(all_orgs, Org1),
             Org1
     end.
 
+-spec mark_org(active, binary(), pid()) -> not_found | #org{}.
+%% @doc Mark an org as active, providing the pid of the worker process handling the org.
 mark_org(active, OrgId, WorkerPid) ->
     case dets:lookup(all_orgs, OrgId) of
         [] ->
-            ok;
+            not_found;
         [Org] ->
             Org1 = Org#org{active=true, worker=WorkerPid},
             ok = dets:insert(all_orgs, Org1),
             Org1
     end.
 
-mark_node(complete, Id) ->
-    case dets:lookup(all_nodes, Id) of
-        [] -> ok;
-        [Node] ->
-            Node1 = Node#node{status = mysql, solr = both},
-            ok = dets:insert(all_nodes, Node1),
-            Node1
-    end;
-mark_node(solr_clean, Id) ->
-    case dets:lookup(all_nodes, Id) of
-        [] -> ok;
-        [#node{status = mysql, solr = both} = Node] ->
-            Node1 = Node#node{solr = mysql},
-            ok = dets:insert(all_nodes, Node1),
-            Node1
-    end.
-
-mark_node(error, Id, Why) ->
-    case dets:lookup(all_nodes, Id) of
-        [] -> ok;
-        [Node] ->
-            Node1 = Node#node{status = {error, Why}},
-            ok = dets:insert(all_nodes, Node1),
-            Node1
-    end.
-
+-spec find_org_by_worker(pid()) -> #org{} | not_found | {error, term()}.
+%% @doc Given the `Pid' of a worker, find the org record it is working on.
 find_org_by_worker(Pid) ->
     Spec = (?wildcard_org_spec)#org{worker = Pid},
     case ?fix_table(all_orgs, dets:match_object(all_orgs, Spec)) of
@@ -458,9 +431,9 @@ find_org_by_worker(Pid) ->
             {error, Why}
     end.
                 
-start_workers(Orgs, BatchSize) ->
+start_workers(Orgs, BatchSize, ObjectMod) ->
     lists:foldl(fun({Guid, Name}, Count) ->
-                        Config = make_worker_config(Guid, Name, BatchSize),
+                        Config = make_worker_config(migrate, ObjectMod, Guid, Name, BatchSize),
                         case mover_worker_sup:new_mover(Config) of
                             {ok, Pid} -> 
                                 mover_worker:migrate(Pid),
@@ -474,8 +447,12 @@ start_workers(Orgs, BatchSize) ->
                         end
                 end, 0, Orgs).
 
-make_worker_config(Guid, Name, BatchSize) ->
-    [{org_name, Name}, {org_id, Guid}, {batch_size, BatchSize},
+make_worker_config(Action, CallbackMod, Guid, Name, BatchSize) when Action =:= preload;
+                                                                    Action =:= migrate ->
+    [{action, Action},
+     {module, CallbackMod},
+     {org_name, Name}, {org_id, Guid},
+     {batch_size, BatchSize},
      {chef_otto, chef_otto:connect()}].
 
 %% @doc Return a list of #org{} records corresponding to orgs that have not been
@@ -664,22 +641,6 @@ log(Level, Msg) ->
 log(Level, Fmt, Args) when is_list(Args) ->
     Id = pid_to_list(self()),
     fast_log:Level(mover_manager_log, Id, Fmt, Args).
-
-log_node_stored(OrgName, #node{status=couchdb, id=Id, name=Name, org_id=OrgId}) ->
-    Self = pid_to_list(self()),
-    fast_log:info(node_errors, Self, "node authz ok: ~s ~s ~s ~s",
-                  [OrgName, Name, OrgId, Id]);
-log_node_stored(OrgName, #node{status={error, {missing_authz, Type}},
-                               id=Id, name=Name, org_id=OrgId}=Node) ->
-    dets:insert(error_nodes, Node),
-    Self = pid_to_list(self()),
-    fast_log:err(node_errors, Self, "missing authz data (~p): ~s ~s ~s ~s",
-                 [Type, OrgName, Name, OrgId, Id]);
-log_node_stored(OrgName, #node{status={error, Why}, id=Id, name=Name, org_id=OrgId}=Node) ->
-    dets:insert(error_nodes, Node),
-    Self = pid_to_list(self()),
-    fast_log:err(node_errors, Self, "node authz fail: ~s ~s ~s ~s ~p",
-                 [OrgName, Name, OrgId, Id, Why]).
 
 safe_split(N, L) ->
     try

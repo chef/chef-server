@@ -90,6 +90,14 @@ following when preloading is complete:
     =INFO REPORT==== 28-Oct-2011::21:10:51 ===
     preloading complete
 
+mover will write the file `ORGS_ALREADY_LOADED` in the current working
+directory once all unassigned orgs have been fetched from
+CouchDB. When mover is restarted, the presence of this file prevents
+the list of unassigned orgs from being re-fetched from CouchDB. This
+is important because once a migration has started, new orgs are
+assumed to be in the migrated state and we don't want to add them to
+the unmigrated list.
+
 ## Starting the migration ##
 
 In the mover console, you can start migration as follows:
