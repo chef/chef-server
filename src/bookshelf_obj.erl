@@ -41,7 +41,7 @@ content_types_provided(Rq, St) ->
     {[{{<<"*">>, <<"*">>, []}, download}], Rq, St}.
 
 content_types_accepted(Rq, St) ->
-    {[{'*', upload}], Rq, St}.
+    {[{'*', upload_or_copy}], Rq, St}.
 
 resource_exists(#http_req{host=[Bucket|_],
                           raw_path= <<"/",Path/binary>>}=Rq,
@@ -59,6 +59,18 @@ delete_resource(#http_req{host=[Bucket|_],
 %% ===================================================================
 %%                         Content Accepted
 %% ===================================================================
+
+upload_or_copy(Rq, St) ->
+    io:fwrite("Upload or Copy?", []),
+    case cowboy_http_req:parse_header(<<"X-Amz-Copy-Source">>, Rq) of
+        {undefined, undefined, Rq2} ->
+            io:fwrite(" Upload!~n", []),
+            io:fwrite("Rq~p~n", [Rq2]),
+            upload(Rq2, St);
+        {undefined, Source, Rq2} ->
+            io:fwrite(" Copy!~n", []),
+            copy(Rq2, St, Source)
+    end.
 
 upload(#http_req{host=[Bucket|_],
                  raw_path= <<"/",Path/binary>>,
@@ -100,6 +112,15 @@ upload(#http_req{host=[Bucket|_],
             end;
         _ ->
             halt(500, Rq, St)
+    end.
+
+copy(#http_req{host=[ToBucket|_], raw_path= <<"/",ToPath/binary>>}=Rq,
+     #state{dir=Dir}=St,
+     <<"/",FromFullPath/binary>>) ->
+    [FromBucket, FromPath] = binary:split(FromFullPath, <<"/">>),
+    case ?BACKEND:obj_copy(Dir, FromBucket, FromPath, ToBucket, ToPath) of
+        {ok, _} -> {true, Rq, St};
+        _       -> {false, Rq, St}
     end.
 
 %% ===================================================================
