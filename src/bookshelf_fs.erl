@@ -30,7 +30,8 @@
          obj_open_r/3,
          obj_write/2,
          obj_read/1,
-         obj_close/1
+         obj_close/1,
+         obj_copy/5
         ]).
 
 %% ===================================================================
@@ -158,3 +159,7 @@ obj_close({File, Ctx}) ->
         ok  -> {ok, erlang:md5_final(Ctx)};
         Any -> Any
     end.
+
+obj_copy(Dir, FromBucket, FromPath, ToBucket, ToPath) ->
+    file:copy(filename:join([Dir, FromBucket, FromPath]),
+              filename:join([Dir, ToBucket, ToPath])).
