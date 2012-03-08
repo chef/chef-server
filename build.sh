@@ -20,7 +20,7 @@ end
 OMNIBUS_CONFIG
 rm pkg/* || true
 bundle install --deployment --without development
-bundle exec rake projects:private-chef:deb
+bundle exec rake projects:private-chef
 # Cleanup
 if [ "${GIT_BRANCH}" != "master" ]
 then
