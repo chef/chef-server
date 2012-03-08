@@ -4,7 +4,7 @@
 # gem install fpm ohai --no-rdoc --no-ri
 # ln -s /var/lib/gems/1.8/bin/* /usr/local/bin
 
-case "platform"
+case node['platform']
 when "ubuntu"
   include_recipe "apt"
 when "centos"
