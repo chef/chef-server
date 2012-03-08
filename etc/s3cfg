@@ -3,6 +3,6 @@
 [default]
 access_key  = lol
 secret_key  = cat
-host_base   = localhost.localdomain:8080
-host_bucket = %(bucket)s.localhost.localdomain:8080
+host_base   = localhost.localdomain:4321
+host_bucket = %(bucket)s.localhost.localdomain:4321
 verbosity   = DEBUG

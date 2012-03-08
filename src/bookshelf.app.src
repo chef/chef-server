@@ -8,7 +8,7 @@
   {applications , [kernel, stdlib, crypto, public_key, ssl, cowboy]},
   {env          , [{domains   , ["localhost.localdomain"]},
                    {interface , "lo"},
-                   {port      , 8080},
+                   {port      , 4321},
                    {pool      , 100},
                    {dir       , priv_dir},
                    {keys      , {"e1efc99729beb175",
