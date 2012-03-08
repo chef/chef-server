@@ -136,6 +136,8 @@ include_recipe "runit"
   end
 end
 
+include_recipe "private-chef::orgmapper"
+
 file "/etc/opscode/chef-server-running.json" do
   owner "opscode"
   group "root"
