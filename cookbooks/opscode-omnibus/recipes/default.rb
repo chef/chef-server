@@ -4,12 +4,64 @@
 # gem install fpm ohai --no-rdoc --no-ri
 # ln -s /var/lib/gems/1.8/bin/* /usr/local/bin
 
-include_recipe "apt"
+case "platform"
+when "ubuntu"
+  include_recipe "apt"
+when "centos"
+  include_recipe "yum"
+end
+
 include_recipe "build-essential"
 include_recipe "git"
 include_recipe "python"
 
-%w{ruby ruby1.8 ruby1.8-dev rdoc1.8 irb1.8 ri1.8 libopenssl-ruby1.8 libtool dpkg-dev libxml2 libxml2-dev libxslt1.1 libxslt1-dev help2man gettext texinfo}.each do |name|
+# install the ruby-related packages
+ruby_pkgs = value_for_platform(
+  ["ubuntu"] => {
+    "default" => ["ruby", "ruby1.8", "ruby1.8-dev", "rdoc1.8", "irb1.8", "ri1.8", "libopenssl-ruby1.8"]
+  },
+  ["centos"] => {
+    # ruby-mode is in the instructions for centos 5
+    "default" => ["ruby", "ruby-libs", "ruby-devel", "ruby-docs", "ruby-ri", "ruby-irb", "ruby-rdoc"]
+  }
+)
+ruby_pkgs.each do |pkg|
+  package pkg do
+    action :install
+  end
+end
+
+# install the packaging related packages
+package_pkgs = value_for_platform(
+  ["ubuntu"] => {
+    "default" => ["dpkg-dev"]
+  },
+  ["centos"] => {
+    "default" => ["rpm-build"]
+  }
+)
+package_pkgs.each do |pkg|
+  package pkg do
+    action :install
+  end
+end
+
+# install the libxml / libxslt packages
+xml_pkgs = value_for_platform(
+  ["ubuntu"] => {
+    "default" => ["libxml2", "libxml2-dev", "libxslt1.1", "libxslt1-dev"]
+  },
+  ["centos"] => {
+    "default" => ["libxml2", "libxml2-devel", "libxslt", "libxslt-devel"]
+  }
+)
+xml_pkgs.each do |pkg|
+  package pkg do
+    action :install
+  end
+end
+
+%w{libtool help2man gettext texinfo}.each do |name|
   package name
 end
 
