@@ -22,8 +22,12 @@ python_pkgs = value_for_platform(
   ["debian","ubuntu"] => {
     "default" => ["python","python-dev"]
   },
-  ["centos","redhat","fedora"] => {
+  ["redhat","fedora"] => {
     "default" => ["python26","python26-devel"]
+  },
+  # WARNING: centos5 needs the python packages in the above block.
+  ["centos"] => {
+    "default" => ["python", "python-devel"]
   },
   ["freebsd"] => {
     "default" => ["python"]
