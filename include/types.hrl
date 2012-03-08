@@ -1,5 +1,5 @@
 %% @copyright 2012 Opscode, Inc. All Rights Reserved
-%% @author Tim Dysinger <timd@opscode.com>
+%% @author Tim Dysinger <dysinger@opscode.com>
 %%
 %% Licensed to the Apache Software Foundation (ASF) under one or more
 %% contributor license agreements.  See the NOTICE file distributed

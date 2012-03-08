@@ -1,6 +1,6 @@
-#+TITLE: Bookshelf
+#+TITLE:  Bookshelf
 #+AUTHOR: Tim Dysinger
-#+EMAIL: timd@opscode.com
+#+EMAIL:  dysinger@opscode.com
 
 * Description
 
