@@ -70,42 +70,27 @@ upload(#http_req{host=[Bucket|_],
                  raw_path= <<"/",Path/binary>>,
                  body_state=waiting,
                  socket=Socket,
-                 transport=Trans,
-                 buffer=Buf}=Rq,
+                 transport=Transport,
+                 buffer=Buffer}=Rq,
        #state{dir=Dir}=St) ->
-    {Len, Rq2} = cowboy_http_req:parse_header('Content-Length', Rq),
-    case ?BACKEND:obj_open_w(Dir, Bucket, Path) of
-        {ok, FsSt} ->
-            case write(FsSt, Trans, Socket, Len, Buf) of
-                {ok, FsSt2} ->
-                    {ok, Digest} = ?BACKEND:obj_close(FsSt2),
-                    Etag = bookshelf_req:to_hex(Digest),
-                    case cowboy_http_req:parse_header('Content-MD5', Rq2) of
-                        {undefined, undefined, Rq3} ->
-                            halt(202, bookshelf_req:with_etag(Etag, Rq3), St);
-                        {Md5, Rq3} ->
-                            case Md5 =:= Etag of
-                                true ->
-                                    halt(202,
-                                         bookshelf_req:with_etag(Etag, Rq3),
-                                         St);
-                                false ->
-                                    ?BACKEND:obj_close(FsSt2),
-                                    ?BACKEND:obj_delete(Dir, Bucket, Path),
-                                    halt(406, Rq3, St)
-                            end
-                    end;
-                {error, timeout} ->
-                    ?BACKEND:obj_close(FsSt),
-                    ?BACKEND:obj_delete(Dir, Bucket, Path),
-                    halt(408, Rq, St);
-                _ ->
-                    ?BACKEND:obj_close(FsSt),
-                    ?BACKEND:obj_delete(Dir, Bucket, Path),
-                    halt(500, Rq, St)
+    {Length, Rq2} = cowboy_http_req:parse_header('Content-Length', Rq),
+    case ?BACKEND:obj_recv(Dir, Bucket, Path,
+                           Transport, Socket, Buffer, Length) of
+        {ok, Digest} ->
+            OurMd5 = bookshelf_req:to_hex(Digest),
+            case cowboy_http_req:parse_header('Content-MD5', Rq2) of
+                {_, undefined, Rq3} ->
+                    Rq4 = bookshelf_req:with_etag(OurMd5, Rq3),
+                    halt(202, Rq4, St);
+                {_, RequestMd5, Rq3} ->
+                    case RequestMd5 =:= OurMd5 of
+                        true -> Rq4 = bookshelf_req:with_etag(RequestMd5, Rq3),
+                                halt(202, Rq4, St);
+                        _    -> halt(406, Rq3, St)
+                    end
             end;
-        _ ->
-            halt(500, Rq, St)
+        {error, timeout} -> halt(408, Rq2, St);
+        _                -> halt(500, Rq2, St)
     end.
 
 copy(#http_req{host=[ToBucket|_], raw_path= <<"/",ToPath/binary>>}=Rq,
@@ -144,28 +129,6 @@ download(#http_req{host=[Bucket|_],
 %% ===================================================================
 %%                        Internal Functions
 %% ===================================================================
-
-write(St, Trans, Sock, Len, <<>>) ->
-    write(St, Trans, Sock, Len);
-write(St, Trans, Sock, Len, Buf) ->
-    case ?BACKEND:obj_write(St, Buf) of
-        {ok, NewSt} -> write(NewSt, Trans, Sock, Len-byte_size(Buf));
-        Any         -> Any
-    end.
-write(St, Trans, Sock, Len) when Len =< ?BLOCK_SIZE ->
-    case Trans:recv(Sock, Len, ?TIMEOUT_MS) of
-        {ok, Chunk} -> ?BACKEND:obj_write(St, Chunk);
-        Any         -> Any
-    end;
-write(St, Trans, Sock, Len) ->
-    case Trans:recv(Sock, ?BLOCK_SIZE, ?TIMEOUT_MS) of
-        {ok, Chunk} ->
-            case ?BACKEND:obj_write(St, Chunk) of
-                {ok, NewSt} -> write(NewSt, Trans, Sock, Len-?BLOCK_SIZE);
-                Any         -> Any
-            end;
-        Any -> Any
-    end.
 
 halt(Code, Rq, St) ->
     {ok, Rq2} = cowboy_http_req:reply(Code, Rq),
