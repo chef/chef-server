@@ -123,12 +123,14 @@ copy(#http_req{host=[ToBucket|_], raw_path= <<"/",ToPath/binary>>}=Rq,
 
 download(#http_req{host=[Bucket|_],
                    raw_path= <<"/",Path/binary>>,
+                   transport=Transport,
                    socket=Socket}=Rq,
          #state{dir=Dir}=St) ->
     case ?BACKEND:obj_meta(Dir, Bucket, Path) of
         {ok, #object{size=Size, digest=Digest}} ->
             SFun = fun() ->
-                           case ?BACKEND:obj_send(Dir, Bucket, Path, Socket) of
+                           case ?BACKEND:obj_send(Dir, Bucket, Path,
+                                                  Transport, Socket) of
                                {ok, Size} -> sent;
                                _          -> {error, "Download unsuccessful"}
                            end
