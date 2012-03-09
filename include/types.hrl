@@ -22,4 +22,4 @@
 
 -record(bucket, {name, date}).
 
--record(object, {name, date, size}).
+-record(object, {name, date, size, digest}).
