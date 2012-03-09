@@ -124,10 +124,32 @@ obj_delete(Dir, Bucket, Path)
     file:delete(ObjectPath).
 
 obj_meta(Dir, Bucket, Path) ->
-    case file:read_file_info(filename:join([Dir, Bucket, Path])) of
-        {ok, #file_info{mtime=Date, size=Size}} ->
-            {ok, #object{name=Path, date=Date, size=Size}};
+    %% FIXME TEMPORARY inefficient (non-cached) MD5 sum
+    Filename = filename:join([Dir, Bucket, Path]),
+    case file:open(Filename, [binary,raw,read_ahead]) of
+        {ok, File} ->
+            case file_md5(File, erlang:md5_init()) of
+                {ok, Md5} ->
+                    case file:read_file_info(Filename) of
+                        {ok, #file_info{mtime=Date, size=Size}} ->
+                            {ok, #object{name=Path,
+                                         date=Date,
+                                         size=Size,
+                                         digest=Md5}};
+                        Any -> Any
+                    end;
+                Any -> Any
+            end;
         Any -> Any
+    end.
+
+file_md5(File, Ctx) ->
+    case file:read(File, ?BLOCK_SIZE) of
+        {ok, Bin} ->
+            file_md5(File, erlang:md5_update(Ctx, Bin));
+        eof ->
+            file:close(File),
+            {ok, erlang:md5_final(Ctx)}
     end.
 
 obj_open(Dir, Bucket, Path, Opts) ->
