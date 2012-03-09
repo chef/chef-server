@@ -30,7 +30,7 @@
          obj_write/2,
          obj_close/1,
          obj_copy/5,
-         obj_send/4
+         obj_send/5,
         ]).
 
 %% ===================================================================
@@ -175,5 +175,5 @@ obj_copy(Dir, FromBucket, FromPath, ToBucket, ToPath) ->
     file:copy(filename:join([Dir, FromBucket, FromPath]),
               filename:join([Dir, ToBucket, ToPath])).
 
-obj_send(Dir, Bucket, Path, Socket) ->
+obj_send(Dir, Bucket, Path, _Transport, Socket) ->
     file:sendfile(filename:join([Dir, Bucket, Path]), Socket).
