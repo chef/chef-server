@@ -121,7 +121,7 @@ download(#http_req{host=[Bucket|_],
                    socket=Socket}=Rq,
          #state{dir=Dir}=St) ->
     case ?BACKEND:obj_meta(Dir, Bucket, Path) of
-        {ok, #object{size=Size, digest=Digest}} ->
+        {ok, #object{size=Size}} ->
             SFun = fun() ->
                            case ?BACKEND:obj_send(Dir, Bucket, Path,
                                                   Transport, Socket) of
@@ -129,9 +129,7 @@ download(#http_req{host=[Bucket|_],
                                _          -> {error, "Download unsuccessful"}
                            end
                    end,
-            {{stream, Size, SFun},
-             bookshelf_req:with_etag(bookshelf_req:to_hex(Digest), Rq),
-             St};
+            {{stream, Size, SFun}, Rq, St};
         _ -> {false, Rq, St}
     end.
 
