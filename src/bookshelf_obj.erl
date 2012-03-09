@@ -62,8 +62,8 @@ delete_resource(#http_req{host=[Bucket|_],
 
 upload_or_copy(Rq, St) ->
     case cowboy_http_req:parse_header(<<"X-Amz-Copy-Source">>, Rq) of
-        {undefined, undefined, Rq2} -> upload(Rq2, St);
-        {undefined, Source, Rq2}    -> copy(Rq2, St, Source)
+        {_, undefined, Rq2} -> upload(Rq2, St);
+        {_, Source,    Rq2} -> copy(Rq2, St, Source)
     end.
 
 upload(#http_req{host=[Bucket|_],
