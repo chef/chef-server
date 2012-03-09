@@ -94,6 +94,7 @@ module PrivateChef
       PrivateChef['nagios']['admin_password'] ||= SecureRandom.hex(50)
       PrivateChef['drbd']['shared_secret'] ||= SecureRandom.hex(30)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= SecureRandom.hex(50)
+      PrivateChef['private_chef']['opscode-authz']['superuser_id'] ||= SecureRandom.hex(32)
 
       if File.directory?("/etc/opscode")
         File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
