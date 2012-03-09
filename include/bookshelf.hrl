@@ -15,12 +15,30 @@
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
 
--include("amazon_s3.hrl").
--include("shorthand.hrl").
--include("test.hrl").
--include("types.hrl").
+-include_lib("kernel/include/file.hrl").
+-include_lib("cowboy/include/http.hrl").
 
+%% amazon s3 model for erlsom
+-include("amazon_s3.hrl").
+
+%% records
+-record(state, {dir}).
+-record(bucket, {name, date}).
+-record(object, {name, date, size, digest}).
+
+%% settings
+-define(BACKEND, bookshelf_fs).
 -define(TIMEOUT_MS, 4096).
 -define(BLOCK_SIZE, 16384).
 
--define(BACKEND, bookshelf_fs).
+%% shortcut macro for a path to a file in our priv/ dir
+-define(file(F), filename:join(code:priv_dir(bookshelf), F)).
+
+%% shortcut macro to apply 1 argument to the env module/function
+-define(env(F, A), apply(bookshelf_env, F, [A])).
+
+%% eunit
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-compile(export_all).
+-endif.
