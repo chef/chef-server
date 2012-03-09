@@ -121,42 +121,27 @@ copy(#http_req{host=[ToBucket|_], raw_path= <<"/",ToPath/binary>>}=Rq,
 %%                         Content Provided
 %% ===================================================================
 
-download(#http_req{host=[Bucket|_], raw_path= <<"/",Path/binary>>}=Rq,
-         #state{dir=Dir} = St) ->
+download(#http_req{host=[Bucket|_],
+                   raw_path= <<"/",Path/binary>>,
+                   socket=Socket}=Rq,
+         #state{dir=Dir}=St) ->
     case ?BACKEND:obj_meta(Dir, Bucket, Path) of
-        {ok, #object{name=_Name, date=_Date, size=_Size}} ->
-            %% TODO Add object md5 to the types.hrl
-            %% TODO Set the Size header
-            %% TODO set the Etag header
-            {ok, Transport, Socket} = cowboy_http_req:transport(Rq),
-            case ?BACKEND:obj_open_w(Dir, Bucket, Path) of
-                {ok, FsSt} ->
-                    case read(FsSt, Transport, Socket) of
-                        {ok, FsSt2} ->
-                            {ok, _Digest} =
-                                ?BACKEND:close(FsSt2),
-                            %% TODO set the Md5 response Etag late?
-                            halt(200, Rq, St);
-                        _ ->
-                            ?BACKEND:close(FsSt),
-                            halt(500, Rq, St)
-                    end;
-                _ -> halt(500, Rq, St)
-            end;
-        _ -> halt(500, Rq, St)
+        {ok, #object{size=Size, digest=Digest}} ->
+            SFun = fun() ->
+                           case ?BACKEND:obj_send(Dir, Bucket, Path, Socket) of
+                               {ok, Size} -> sent;
+                               _          -> {error, "Download unsuccessful"}
+                           end
+                   end,
+            {{stream, Size, SFun},
+             bookshelf_req:with_etag(bookshelf_req:to_hex(Digest), Rq),
+             St};
+        _ -> {false, Rq, St}
     end.
 
 %% ===================================================================
 %%                        Internal Functions
 %% ===================================================================
-
-read(St, Transport, Socket) ->
-    case ?BACKEND:obj_read(St) of
-        {ok, NewSt, Chunk} ->
-            Transport:send(Socket, Chunk),
-            read(NewSt, Transport, Socket);
-        Any -> Any
-    end.
 
 write(St, Trans, Sock, Len, <<>>) ->
     write(St, Trans, Sock, Len);
