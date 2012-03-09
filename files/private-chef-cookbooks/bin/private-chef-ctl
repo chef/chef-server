@@ -384,6 +384,8 @@ kill
     Send the services a KILL.
 graceful-kill
     Attempt a graceful stop, then SIGKILL the entire process group.
+test
+    Run the API test suite against localhost.
 EOH
   exit 1
 end
@@ -407,6 +409,10 @@ when "tail"
   tail
 when "graceful-kill"
   graceful_kill
+when "test"
+  ENV["PATH"] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
+  Dir.chdir("/opt/opscode/embedded/service/opscode-pedant")
+  exec("/opt/opscode/embedded/bin/bundle exec rake private_chef:piab")
 else
   if sv_command_list.include?(ARGV[0])
     run_sv_command(ARGV[0])
