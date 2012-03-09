@@ -69,14 +69,14 @@ upload_or_copy(Rq, St) ->
 upload(#http_req{host=[Bucket|_],
                  raw_path= <<"/",Path/binary>>,
                  body_state=waiting,
-                 socket=Sock,
+                 socket=Socket,
                  transport=Trans,
                  buffer=Buf}=Rq,
        #state{dir=Dir}=St) ->
     {Len, Rq2} = cowboy_http_req:parse_header('Content-Length', Rq),
     case ?BACKEND:obj_open_w(Dir, Bucket, Path) of
         {ok, FsSt} ->
-            case write(FsSt, Trans, Sock, Len, Buf) of
+            case write(FsSt, Trans, Socket, Len, Buf) of
                 {ok, FsSt2} ->
                     {ok, Digest} = ?BACKEND:obj_close(FsSt2),
                     Etag = bookshelf_req:to_hex(Digest),
