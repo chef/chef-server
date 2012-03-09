@@ -56,6 +56,15 @@ delete_resource(#http_req{host=[Bucket|_],
         _  -> {false, Rq, St}
     end.
 
+generate_etag(#http_req{host=[Bucket|_],
+                        raw_path= <<"/",Path/binary>>}=Rq,
+              #state{dir=Dir}=St) ->
+    case ?BACKEND:obj_meta(Dir, Bucket, Path) of
+        {ok, #object{digest=Digest}} ->
+            {{strong, list_to_binary(bookshelf_req:to_hex(Digest))}, Rq, St};
+        _ -> {halt, Rq, St}
+    end.
+
 %% ===================================================================
 %%                         Content Accepted
 %% ===================================================================
