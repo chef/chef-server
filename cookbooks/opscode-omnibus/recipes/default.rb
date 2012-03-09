@@ -76,9 +76,11 @@ INSTALL_RUBYGEMS
   not_if { ::File.exists? "/usr/bin/gem" }
 end
 
-execute "pip install -r #{node["opscode-omnibus"]["build-folder"]}/requirements.txt" do
-  user "root"
-  cwd node["opscode-omnibus"]["build-folder"]
+bash "install python packages" do
+  code <<BASH
+pip install Sphinx==1.1.2
+pip install Pygments==1.4
+BASH
 end
 
 %w{bundler rake}.each do |name|

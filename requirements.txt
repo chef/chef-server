@@ -1,3 +1,0 @@
-# A pip requirements file
-Sphinx==1.1.2
-Pygments==1.4
