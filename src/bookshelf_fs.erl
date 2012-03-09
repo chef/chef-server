@@ -27,9 +27,7 @@
          obj_delete/3,
          obj_meta/3,
          obj_open_w/3,
-         obj_open_r/3,
          obj_write/2,
-         obj_read/1,
          obj_close/1,
          obj_copy/5,
          obj_send/4
@@ -161,20 +159,10 @@ obj_open(Dir, Bucket, Path, Opts) ->
 obj_open_w(Dir, Bucket, Path) ->
     obj_open(Dir, Bucket, Path, [raw, binary, write]).
 
-obj_open_r(Dir, Bucket, Path) ->
-    obj_open(Dir, Bucket, Path, [raw, binary, read_ahead]).
-
 obj_write({File, Ctx}, Chunk) ->
     case file:write(File, Chunk) of
         ok  -> {ok, {File, erlang:md5_update(Ctx, Chunk)}};
         Any -> Any
-    end.
-
-obj_read({File, Ctx}=St) ->
-    case file:read(File, ?BLOCK_SIZE) of
-        {ok, Chunk} -> {ok, {File, erlang:md5_update(Ctx, Chunk)}, Chunk};
-        eof         -> {ok, St};
-        Any         -> Any
     end.
 
 obj_close({File, Ctx}) ->
