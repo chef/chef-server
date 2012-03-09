@@ -31,6 +31,7 @@
          obj_close/1,
          obj_copy/5,
          obj_send/5,
+         obj_recv/7
         ]).
 
 %% ===================================================================
@@ -177,3 +178,44 @@ obj_copy(Dir, FromBucket, FromPath, ToBucket, ToPath) ->
 
 obj_send(Dir, Bucket, Path, _Transport, Socket) ->
     file:sendfile(filename:join([Dir, Bucket, Path]), Socket).
+
+obj_recv(Dir, Bucket, Path, Transport, Socket, Buffer, Length) ->
+    case obj_open_w(Dir, Bucket, Path) of
+        {ok, FsSt} ->
+            case write(FsSt, Transport, Socket, Length, Buffer) of
+                {ok, FsSt2} -> obj_close(FsSt2);
+                {error, timeout} ->
+                    obj_close(FsSt),
+                    obj_delete(Dir, Bucket, Path),
+                    {error, timeout};
+                Any ->
+                    obj_close(FsSt),
+                    obj_delete(Dir, Bucket, Path),
+                    Any
+            end;
+        Any -> Any
+    end.
+
+write(FsSt, Transport, Socket, Length, <<>>) ->
+    write(FsSt, Transport, Socket, Length);
+write(FsSt, Transport, Socket, Length, Buf) ->
+    case obj_write(FsSt, Buf) of
+        {ok, NewFsSt} ->
+            write(NewFsSt, Transport, Socket, Length-byte_size(Buf));
+        Any -> Any
+    end.
+write(FsSt, Transport, Socket, Length) when Length =< ?BLOCK_SIZE ->
+    case Transport:recv(Socket, Length, ?TIMEOUT_MS) of
+        {ok, Chunk} -> obj_write(FsSt, Chunk);
+        Any         -> Any
+    end;
+write(FsSt, Transport, Socket, Length) ->
+    case Transport:recv(Socket, ?BLOCK_SIZE, ?TIMEOUT_MS) of
+        {ok, Chunk} ->
+            case obj_write(FsSt, Chunk) of
+                {ok, NewFsSt} ->
+                    write(NewFsSt, Transport, Socket, Length-?BLOCK_SIZE);
+                Any -> Any
+            end;
+        Any -> Any
+    end.
