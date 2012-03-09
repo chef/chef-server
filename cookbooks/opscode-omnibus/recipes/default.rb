@@ -15,19 +15,11 @@ include_recipe "build-essential"
 include_recipe "git"
 include_recipe "python"
 
-# install the ruby-related packages
-ruby_pkgs = value_for_platform(
-  ["ubuntu"] => {
-    "default" => ["ruby", "ruby1.8", "ruby1.8-dev", "rdoc1.8", "irb1.8", "ri1.8", "libopenssl-ruby1.8"]
-  },
-  ["centos"] => {
-    # ruby-mode is in the instructions for centos 5
-    "default" => ["ruby", "ruby-libs", "ruby-devel", "ruby-docs", "ruby-ri", "ruby-irb", "ruby-rdoc"]
-  }
-)
-ruby_pkgs.each do |pkg|
-  package pkg do
-    action :install
+# install ruby and symlink the binaries to /usr/local
+include_recipe "ruby_1.9"
+%w{ruby gem rake bundle}.each do |bin|
+  link "/usr/local/bin/#{bin}" do
+    to "/opt/ruby1.9/bin/#{bin}"
   end
 end
 
