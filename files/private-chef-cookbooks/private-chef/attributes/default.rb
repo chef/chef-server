@@ -311,6 +311,7 @@ default['private_chef']['opscode-authz']['caching'] = "enabled"
 default['private_chef']['opscode-authz']['port'] = 9463 
 default['private_chef']['opscode-authz']['vip'] = '127.0.0.1'
 default['private_chef']['opscode-authz']['superuser_id'] = '5ca1ab1ef005ba111abe11eddecafbad'
+default['private_chef']['opscode-authz']['couchdb_max_conn'] = '100'
 
 ###
 # Opscode Certificate

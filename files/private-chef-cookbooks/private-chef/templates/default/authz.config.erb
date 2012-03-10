@@ -1,14 +1,32 @@
 % -*- mode: erlang -*-
 % authz app config
 [
-  {authorization, [{couchdb_ip, {"<%= node['private_chef']['couchdb']['vip'] %>", <%= node['private_chef']['couchdb']['port'] %>}},
-                 {authz_db_name, "authorization"},
-                 {authz_port, <%= @port %>},
-		 {redis_ip, "<%= node['private_chef']['redis']['vip'] %>"},
-     {redis_port, <%= node['private_chef']['redis']['port'] %>},
-		 {redis_db, 0},
-		 {redis_prefix, "authz"},
-		 {redis_cache_state, <%= @caching %> }
-		]}
+ {sasl, [
+         {sasl_error_logger, {file, "<%= File.join(@log_directory, 'sasl-error.log') %>"}},
+         {errlog_type, error},
+         {error_logger_mf_dir, "<%= File.join(@log_directory, 'sasl') %>"},      % Log directory
+         {error_logger_mf_maxbytes, 104857600},   % 10 MB max file size
+         {error_logger_mf_maxfiles, 5}           % 5 files max
+        ]},
+ {fast_log, [
+             {loggers, [[{name, authz},
+                         {file, "<%= File.join(@log_directory, 'authz.log') %>"},
+                         {files, 5},
+                         {file_size, 50}]]}
+            ]},
+ {authorization, [{couchdb_ip, {"<%= node['private_chef']['couchdb']['vip'] %>", <%= node['private_chef']['couchdb']['port'] %>}},
+                  {authz_db_name, "authorization"},
+                  {authz_port, <%= @port %>},
+		              {redis_ip, "<%= node['private_chef']['redis']['vip'] %>"},
+                  {redis_port, <%= node['private_chef']['redis']['port'] %>},
+		              {redis_db, 0},
+		              {redis_prefix, "authz"},
+		              {redis_cache_state, <%= @caching %> },
+                  {reqid_header_name, "X-Request-Id"},
+                  {superuser_id, "<%= @superuser_id %>" },
+                  {log_dir, "<%= @log_directory %>"}
+		]},
+ {erldis, [{host, "<%= node['private_chef']['redis']['vip'] %>"}]},
+ {webmachine, [{enable_perf_logger, true}]}
 ].
 

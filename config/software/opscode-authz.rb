@@ -17,6 +17,6 @@ build do
   command "make distclean", :env => env
   command "make rel", :env => env
   command "mkdir -p #{install_dir}/embedded/service/opscode-authz"
-  command "#{install_dir}/embedded/bin/rsync -a ./rel/authz #{install_dir}/embedded/service/opscode-authz/"
-  command "rm -rf #{install_dir}/embedded/service/opscode-authz/log"
+  command "#{install_dir}/embedded/bin/rsync -a ./ #{install_dir}/embedded/service/opscode-authz/"
+  command "rm -rf #{install_dir}/embedded/service/opscode-authz/rel/authz/log"
 end
