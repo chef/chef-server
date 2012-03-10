@@ -417,17 +417,6 @@ if ARGV[1].nil?
   else
     if sv_command_list.include?(ARGV[0])
       run_sv_command(ARGV[0])
-    elsif get_all_services.include?(ARGV[0])
-      if sv_command_list.include?(ARGV[1])
-        run_sv_command(ARGV[1], ARGV[0])
-      else
-        case ARGV[1]
-        when "tail"
-          tail(ARGV[0])
-        when "graceful-kill"
-          graceful_kill(ARGV[0])
-        end
-      end
     else
       help
     end
