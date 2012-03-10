@@ -4,12 +4,18 @@
 Vagrant::Config.run do |config|
 
   config.vm.define 'ubuntu-10.04' do |c|
-    c.vm.box     = "lucid64"
-    c.vm.box_url = "http://files.vagrantup.com/lucid64.box"
+    c.vm.box     = "opscode-ubuntu-10.04"
+    c.vm.box_url = "http://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-ubuntu-10.04.box"
   end
 
   config.vm.define 'centos-6.0' do |c|
     c.vm.box     = "opscode-centos-6.0"
+    c.vm.box_url = "http://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-centos-6.0.box"
+  end
+
+  config.vm.define 'centos-6.2' do |c|
+    c.vm.box     = "opscode-centos-6.2"
+    c.vm.box_url = "http://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-centos-6.2.box"
   end
 
   # Share an additional folder to the guest VM. The first argument is
