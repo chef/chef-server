@@ -19,6 +19,10 @@ Omnibus.configure do |o|
 end
 OMNIBUS_CONFIG
 rm pkg/* || true
+
+which ruby
+which bundle
+
 bundle install --deployment --without development
 bundle exec rake projects:private-chef
 # Cleanup
