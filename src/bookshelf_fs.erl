@@ -196,6 +196,14 @@ obj_recv(Dir, Bucket, Path, Transport, Socket, Buffer, Length) ->
         Any -> Any
     end.
 
+read(FsSt, Transport, Socket) ->
+    case ?BACKEND:obj_read(FsSt) of
+        {ok, NewFsSt, Chunk} ->
+            Transport:send(Socket, Chunk),
+            read(NewFsSt, Transport, Socket);
+        Any -> Any
+    end.
+
 write(FsSt, Transport, Socket, Length, <<>>) ->
     write(FsSt, Transport, Socket, Length);
 write(FsSt, Transport, Socket, Length, Buf) ->
