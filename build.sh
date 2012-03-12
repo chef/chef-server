@@ -22,6 +22,7 @@ rm pkg/* || true
 
 which ruby
 which bundle
+echo $PATH
 
 bundle install --deployment --without development
 bundle exec rake projects:private-chef
