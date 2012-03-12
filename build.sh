@@ -20,10 +20,7 @@ end
 OMNIBUS_CONFIG
 rm pkg/* || true
 
-which ruby
-which bundle
-echo $PATH
-
+export PATH=/usr/local/bin:$PATH
 bundle install --deployment --without development
 bundle exec rake projects:private-chef
 # Cleanup
