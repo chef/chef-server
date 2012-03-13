@@ -18,20 +18,17 @@
 -module(bookshelf_fs).
 -include("bookshelf.hrl").
 -export([
-         bucket_list/1,
-         bucket_exists/2,
          bucket_create/2,
          bucket_delete/2,
-         obj_list/2,
-         obj_exists/3,
-         obj_delete/3,
-         obj_meta/3,
-         obj_open_w/3,
-         obj_write/2,
-         obj_close/1,
+         bucket_exists/2,
+         bucket_list/1,
          obj_copy/5,
-         obj_send/5,
-         obj_recv/7
+         obj_delete/3,
+         obj_exists/3,
+         obj_list/2,
+         obj_meta/3,
+         obj_recv/7,
+         obj_send/5
         ]).
 
 %% ===================================================================
@@ -42,9 +39,11 @@ bucket_list(Dir) ->
     {ok, Files} = file:list_dir(Dir), %% crash if no access to base dir
     lists:map(fun(P) -> %% crash if no access to any bucket dir
                       {ok, #file_info{ctime=Date}} =
-                          file:read_file_info(P, [{time, universal}]),
+                          file:read_file_info(P),
+                      [UTC|_] = %% FIXME This is a hack until R15B
+                          calendar:local_time_to_universal_time_dst(Date),
                       #bucket{ name=filename:basename(P),
-                               date=iso8601:format(Date) }
+                               date=iso8601:format(UTC) }
               end,
               lists:filter(fun filelib:is_dir/1,
                            lists:map(fun(F) ->
@@ -78,9 +77,10 @@ obj_list(Dir, Bucket) when is_binary(Dir) andalso is_binary(Bucket) ->
       fun(FilePath, Acc) ->
               case filelib:is_regular(FilePath) of
                   true ->
-                      case file:read_file_info(FilePath,
-                                               [{time, universal}]) of
+                      case file:read_file_info(FilePath) of
                           {ok, #file_info{size=Size, mtime=Date}} ->
+                              [UTC|_] = %% FIXME This is a hack until R15B
+                                  calendar:local_time_to_universal_time_dst(Date),
                               Pos = byte_size(FilePath),
                               Len = byte_size(BucketPath) + 1
                                   - byte_size(FilePath),
@@ -89,7 +89,7 @@ obj_list(Dir, Bucket) when is_binary(Dir) andalso is_binary(Bucket) ->
                                 Acc,
                                 [#object{
                                     name=Name,
-                                    date=iso8601:format(Date),
+                                    date=iso8601:format(UTC),
                                     size=Size
                                    }]
                                );
@@ -131,8 +131,10 @@ obj_meta(Dir, Bucket, Path) ->
                 {ok, Md5} ->
                     case file:read_file_info(Filename) of
                         {ok, #file_info{mtime=Date, size=Size}} ->
+                            [UTC|_] = %% FIXME This is a hack until R15B
+                                calendar:local_time_to_universal_time_dst(Date),
                             {ok, #object{name=Path,
-                                         date=Date,
+                                         date=UTC,
                                          size=Size,
                                          digest=Md5}};
                         Any -> Any
@@ -160,6 +162,9 @@ obj_open(Dir, Bucket, Path, Opts) ->
 obj_open_w(Dir, Bucket, Path) ->
     obj_open(Dir, Bucket, Path, [raw, binary, write]).
 
+obj_open_r(Dir, Bucket, Path) ->
+    obj_open(Dir, Bucket, Path, [raw, binary, read_ahead]).
+
 obj_write({File, Ctx}, Chunk) ->
     case file:write(File, Chunk) of
         ok  -> {ok, {File, erlang:md5_update(Ctx, Chunk)}};
@@ -176,8 +181,18 @@ obj_copy(Dir, FromBucket, FromPath, ToBucket, ToPath) ->
     file:copy(filename:join([Dir, FromBucket, FromPath]),
               filename:join([Dir, ToBucket, ToPath])).
 
-obj_send(Dir, Bucket, Path, _Transport, Socket) ->
-    file:sendfile(filename:join([Dir, Bucket, Path]), Socket).
+obj_send(Dir, Bucket, Path, Transport, Socket) ->
+    case obj_open_r(Dir, Bucket, Path) of
+        {ok, FsSt} ->
+            case read(FsSt, Transport, Socket) of
+                {ok, FsSt2}      -> obj_close(FsSt2);
+                {error, timeout} -> obj_close(FsSt),
+                                    {error, timeout};
+                Any              -> obj_close(FsSt),
+                                    Any
+            end;
+        Any -> Any
+    end.
 
 obj_recv(Dir, Bucket, Path, Transport, Socket, Buffer, Length) ->
     case obj_open_w(Dir, Bucket, Path) of
@@ -194,6 +209,14 @@ obj_recv(Dir, Bucket, Path, Transport, Socket, Buffer, Length) ->
                     Any
             end;
         Any -> Any
+    end.
+
+read({File, _}=FsSt, Transport, Socket) ->
+    case file:read(File, ?BLOCK_SIZE) of
+        {ok, Chunk} -> Transport:send(Socket, Chunk),
+                       read(FsSt, Transport, Socket);
+        eof         -> ok;
+        Any         -> Any
     end.
 
 write(FsSt, Transport, Socket, Length, <<>>) ->
