@@ -177,7 +177,17 @@ obj_copy(Dir, FromBucket, FromPath, ToBucket, ToPath) ->
               filename:join([Dir, ToBucket, ToPath])).
 
 obj_send(Dir, Bucket, Path, _Transport, Socket) ->
-    file:sendfile(filename:join([Dir, Bucket, Path]), Socket).
+    case obj_open_r(Dir, Bucket, Path) of
+        {ok, FsSt} ->
+            case read(FsSt, Transport, Socket) of
+                {ok, FsSt2}      -> obj_close(FsSt2);
+                {error, timeout} -> obj_close(FsSt),
+                                    {error, timeout};
+                Any              -> obj_close(FsSt),
+                                    Any
+            end;
+        Any -> Any
+    end.
 
 obj_recv(Dir, Bucket, Path, Transport, Socket, Buffer, Length) ->
     case obj_open_w(Dir, Bucket, Path) of
