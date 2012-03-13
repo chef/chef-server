@@ -176,7 +176,7 @@ obj_copy(Dir, FromBucket, FromPath, ToBucket, ToPath) ->
     file:copy(filename:join([Dir, FromBucket, FromPath]),
               filename:join([Dir, ToBucket, ToPath])).
 
-obj_send(Dir, Bucket, Path, _Transport, Socket) ->
+obj_send(Dir, Bucket, Path, Transport, Socket) ->
     case obj_open_r(Dir, Bucket, Path) of
         {ok, FsSt} ->
             case read(FsSt, Transport, Socket) of
@@ -206,7 +206,7 @@ obj_recv(Dir, Bucket, Path, Transport, Socket, Buffer, Length) ->
         Any -> Any
     end.
 
-read(FsSt, Transport, Socket) ->
+read({File, _}=FsSt, Transport, Socket) ->
     case file:read(File, ?BLOCK_SIZE) of
         {ok, Chunk} -> Transport:send(Socket, Chunk),
                        read(FsSt, Transport, Socket);
