@@ -6,18 +6,6 @@ source :url => "http://www.gecode.org/download/gecode-3.7.1.tar.gz",
 
 relative_path "gecode-3.7.1"
 
-# TODO:
-# * set CC and CXX based on presence of gcc version
-# * ask Adam why
-#
-# == ominbus-pc/config/software/gecode.clj:19
-#
-# (let
-#  [env (if (= 0 (get (clojure.java.shell/sh "test" "-f" "/usr/bin/gcc44") :exit))
-#         { "CC" "gcc44" "CXX" "g++44" }
-#         { })]
-#
-
 test = Mixlib::ShellOut.new("test -f /usr/bin/gcc44")
 test.run_command
 
