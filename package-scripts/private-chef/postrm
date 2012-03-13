@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Clean up binary symlinks if they exist
+rm -f /usr/bin/private-chef-ctl
+
