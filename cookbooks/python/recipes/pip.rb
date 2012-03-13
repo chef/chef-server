@@ -40,5 +40,8 @@ bash "install-pip" do
   python#{py_version} distribute_setup.py
   easy_install pip
   EOF
+
+  # the `which pip` command isn't very helpful if you install pip
+  # against the wrong python the first time around
   not_if "which pip"
 end
