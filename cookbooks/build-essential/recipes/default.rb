@@ -24,7 +24,19 @@ when "ubuntu","debian"
       action :install
     end
   end
-when "centos","redhat","fedora"
+when "centos"
+  centos_major_version = node['platform_version'].split('.').first.to_i
+  pkgs = if centos_major_version < 6
+           %w{gcc44 gcc44-c++ kernel-devel make}
+         else
+           %w{gcc gcc-c++ kernel-devel make}
+         end
+  pkgs.each do |pkg|
+    package pkg do
+      action :install
+    end
+  end
+when "redhat","fedora"
   %w{gcc gcc-c++ kernel-devel make}.each do |pkg|
     package pkg do
       action :install
