@@ -18,8 +18,17 @@ relative_path "gecode-3.7.1"
 #         { })]
 #
 
+test = Mixlib::ShellOut.new("test -f /usr/bin/gcc44")
+test.run_command
+
+configure_env = if test.exitstatus == 0
+                  {"CC" => "gcc44", "CXX" => "g++44"}
+                else
+                  {}
+                end
+
 build do
-  command ["./configure",
+  command(["./configure",
            "--prefix=#{install_dir}/embedded",
            "--disable-doc-dot",
            "--disable-doc-search",
@@ -27,7 +36,8 @@ build do
            "--disable-doc-chm",
            "--disable-doc-docset",
            "--disable-qt",
-           "--disable-examples"].join(" ")
+           "--disable-examples"].join(" "),
+          :env => configure_env)
   command "make -j #{max_build_jobs}", :env => { "LD_RUN_PATH" => "#{install_dir}/embedded/lib" }
   command "make install"
 end
