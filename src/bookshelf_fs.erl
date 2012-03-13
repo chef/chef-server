@@ -39,9 +39,11 @@ bucket_list(Dir) ->
     {ok, Files} = file:list_dir(Dir), %% crash if no access to base dir
     lists:map(fun(P) -> %% crash if no access to any bucket dir
                       {ok, #file_info{ctime=Date}} =
-                          file:read_file_info(P, [{time, universal}]),
+                          file:read_file_info(P),
+                      [UTC|_] = %% FIXME This is a hack until R15B
+                          calendar:local_time_to_universal_time_dst(Date),
                       #bucket{ name=filename:basename(P),
-                               date=iso8601:format(Date) }
+                               date=iso8601:format(UTC) }
               end,
               lists:filter(fun filelib:is_dir/1,
                            lists:map(fun(F) ->
@@ -75,9 +77,10 @@ obj_list(Dir, Bucket) when is_binary(Dir) andalso is_binary(Bucket) ->
       fun(FilePath, Acc) ->
               case filelib:is_regular(FilePath) of
                   true ->
-                      case file:read_file_info(FilePath,
-                                               [{time, universal}]) of
+                      case file:read_file_info(FilePath) of
                           {ok, #file_info{size=Size, mtime=Date}} ->
+                              [UTC|_] = %% FIXME This is a hack until R15B
+                                  calendar:local_time_to_universal_time_dst(Date),
                               Pos = byte_size(FilePath),
                               Len = byte_size(BucketPath) + 1
                                   - byte_size(FilePath),
@@ -86,7 +89,7 @@ obj_list(Dir, Bucket) when is_binary(Dir) andalso is_binary(Bucket) ->
                                 Acc,
                                 [#object{
                                     name=Name,
-                                    date=iso8601:format(Date),
+                                    date=iso8601:format(UTC),
                                     size=Size
                                    }]
                                );
@@ -128,8 +131,10 @@ obj_meta(Dir, Bucket, Path) ->
                 {ok, Md5} ->
                     case file:read_file_info(Filename) of
                         {ok, #file_info{mtime=Date, size=Size}} ->
+                            [UTC|_] = %% FIXME This is a hack until R15B
+                                calendar:local_time_to_universal_time_dst(Date),
                             {ok, #object{name=Path,
-                                         date=Date,
+                                         date=UTC,
                                          size=Size,
                                          digest=Md5}};
                         Any -> Any
