@@ -27,7 +27,7 @@ when "ubuntu","debian"
 when "centos"
   centos_major_version = node['platform_version'].split('.').first.to_i
   pkgs = if centos_major_version < 6
-           %w{gcc44 gcc44-c++ kernel-devel make}
+           %w{gcc44 gcc44-c++ gcc gcc-c++ kernel-devel make}
          else
            %w{gcc gcc-c++ kernel-devel make}
          end
