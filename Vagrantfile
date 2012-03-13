@@ -8,6 +8,11 @@ Vagrant::Config.run do |config|
     c.vm.box_url = "http://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-ubuntu-10.04.box"
   end
 
+  config.vm.define 'centos-5.7' do |c|
+    c.vm.box     = "opscode-centos-5.7"
+    c.vm.box_url = "http://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-centos-5.7.box"
+  end
+
   config.vm.define 'centos-6.0' do |c|
     c.vm.box     = "opscode-centos-6.0"
     c.vm.box_url = "http://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-centos-6.0.box"
