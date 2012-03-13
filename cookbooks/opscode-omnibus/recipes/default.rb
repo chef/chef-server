@@ -57,39 +57,11 @@ end
   package name
 end
 
-bash "install rubygems 1.3.7 from source" do
-  cwd "/tmp"
-  code <<-INSTALL_RUBYGEMS
-wget http://production.cf.rubygems.org/rubygems/rubygems-1.3.7.tgz
-tar zxf rubygems-1.3.7.tgz
-cd rubygems-1.3.7
-ruby setup.rb --no-format-executable
-INSTALL_RUBYGEMS
-  not_if { ::File.exists? "/usr/bin/gem" }
-end
-
 bash "install python packages" do
   code <<BASH
 pip install Sphinx==1.1.2
 pip install Pygments==1.4
 BASH
-end
-
-%w{bundler rake}.each do |name|
-  gem_package name do
-    gem_binary "/usr/bin/gem"
-  end
-end
-
-ruby_block "make gem symlinks" do
-  block do
-    Dir['/var/lib/gems/1.8/bin/*'].each do |path|
-      r = Chef::Resource::Link.new("/usr/local/bin/#{File.basename(path)}", run_context)
-      r.action(:nothing)
-      r.to(path)
-      r.run_action(:create)
-    end
-  end
 end
 
 directory "/opt/opscode" do
