@@ -4,6 +4,11 @@
 # gem install fpm ohai --no-rdoc --no-ri
 # ln -s /var/lib/gems/1.8/bin/* /usr/local/bin
 
+# make certain our chef-solo cache dir exists
+directory "#{Chef::Config[:file_cache_path]}" do
+  action :create
+end
+
 case node['platform']
 when "ubuntu"
   include_recipe "apt"
