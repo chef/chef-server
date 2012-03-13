@@ -166,13 +166,6 @@ obj_write({File, Ctx}, Chunk) ->
         Any -> Any
     end.
 
-obj_read({File, Ctx}=St) ->
-    case file:read(File, ?BLOCK_SIZE) of
-        {ok, Chunk} -> {ok, {File, erlang:md5_update(Ctx, Chunk)}, Chunk};
-        eof         -> {ok, St};
-        Any         -> Any
-    end.
-
 obj_close({File, Ctx}) ->
     case file:close(File) of
         ok  -> {ok, erlang:md5_final(Ctx)};
@@ -204,11 +197,11 @@ obj_recv(Dir, Bucket, Path, Transport, Socket, Buffer, Length) ->
     end.
 
 read(FsSt, Transport, Socket) ->
-    case ?BACKEND:obj_read(FsSt) of
-        {ok, NewFsSt, Chunk} ->
-            Transport:send(Socket, Chunk),
-            read(NewFsSt, Transport, Socket);
-        Any -> Any
+    case file:read(File, ?BLOCK_SIZE) of
+        {ok, Chunk} -> Transport:send(Socket, Chunk),
+                       read(FsSt, Transport, Socket);
+        eof         -> ok;
+        Any         -> Any
     end.
 
 write(FsSt, Transport, Socket, Length, <<>>) ->
