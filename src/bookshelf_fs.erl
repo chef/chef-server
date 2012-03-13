@@ -18,22 +18,17 @@
 -module(bookshelf_fs).
 -include("bookshelf.hrl").
 -export([
-         bucket_list/1,
-         bucket_exists/2,
          bucket_create/2,
          bucket_delete/2,
-         obj_list/2,
-         obj_exists/3,
-         obj_delete/3,
-         obj_meta/3,
-         obj_open_w/3,
-         obj_open_r/3,
-         obj_write/2,
-         obj_read/1,
-         obj_close/1,
+         bucket_exists/2,
+         bucket_list/1,
          obj_copy/5,
-         obj_send/5,
-         obj_recv/7
+         obj_delete/3,
+         obj_exists/3,
+         obj_list/2,
+         obj_meta/3,
+         obj_recv/7,
+         obj_send/5
         ]).
 
 %% ===================================================================
