@@ -18,8 +18,13 @@
 /cookbooks
 /deps
 /ebin
+/include/python*
+/include/site
+/lib
+/man
 /node.sh
 /privatechef.rb
 /rel/bookshelf
+/s3-tests
 /setup.sh
 /vendor/bundle
