@@ -1,6 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+require 'bundler/setup'
+require 'omnibus/vagrant/omnibus'
+
 Vagrant::Config.run do |config|
 
   config.vm.define 'ubuntu-10.04' do |c|
@@ -50,4 +53,6 @@ Vagrant::Config.run do |config|
     "--usbehci", "off",
     "--audio", "none"
   ]
+
+  config.omnibus.path = "~/opscode-omnibus"
 end

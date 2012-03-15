@@ -19,11 +19,7 @@ Ensure all required gems are installed and ready to use:
 To initiate an omnibus build on Ubuntu 10.04
 
 ```
-vagrant up ubuntu-10.04
-vagrant ssh ubuntu-10.04
-cd opscode-omnibus
-bundle install
-rake projects:private-chef
+vagrant omnibus build ubuntu-10.04 private-chef
 ```
 
 # Vagrant VM Management
