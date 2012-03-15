@@ -19,6 +19,8 @@ Omnibus.configure do |o|
   o.package_dir = "/var/cache/omnibus/${GIT_BRANCH_CLEAN}/pkg"
 end
 OMNIBUS_CONFIG
+
+rm -r /var/cache/omnibus/${GIT_BRANCH_CLEAN}/pkg/* || true
 rm pkg/* || true
 
 export PATH=/usr/local/bin:$PATH
