@@ -19,26 +19,27 @@ clean :
 
 distclean : clean
 	@git clean -fdx
+	@rm -rf .python
 
 test : eunit nosetests
 
 eunit : compile
 	@rebar skip_deps=true eunit
 
-nosetests : bin/s3tests-generate-objects
-	@S3TEST_CONF=etc/nosetests.conf bin/nosetests --with-xunit
+nosetests : .python/bin/s3tests-generate-objects
+	@S3TEST_CONF=etc/nosetests.conf .python/bin/nosetests --with-xunit
 
-bin/s3tests-generate-objects : bin/nosetests
-	@bin/pip install ./s3-tests
+.python/bin/s3tests-generate-objects : .python/bin/nosetests
+	@.python/bin/pip install .python/s3-tests
 
-bin/nosetests : s3-tests
-	@bin/pip install -r s3-tests/requirements.txt
+.python/bin/nosetests : .python/s3-tests
+	@.python/bin/pip install -r .python/s3-tests/requirements.txt
 
-s3-tests : bin/activate
-	@git clone https://github.com/opscode/s3-tests.git
+.python/s3-tests : .python/bin/activate
+	@git clone https://github.com/opscode/s3-tests.git .python/s3-tests
 
-bin/activate :
-	@virtualenv `pwd`
+.python/bin/activate :
+	@virtualenv `pwd`/.python
 
 start :
 	@rel/bookshelf/bin/bookshelf start
