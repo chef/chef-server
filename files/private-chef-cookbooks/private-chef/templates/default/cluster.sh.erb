@@ -57,7 +57,8 @@ function transition
       try=300
       while true; do
         log_me "Attempting to become DRBD secondary - attempts left ${try}"
-        umount <%= node['private_chef']['drbd']['data_dir'] %> || true
+        mountpoint <%= node['private_chef']['drbd']['data_dir'] %> && fuser -km <%= node['private_chef']['drbd']['data_dir'] %>
+        umount -f <%= node['private_chef']['drbd']['data_dir'] %> || true
         drbdadm secondary pc0 && break
         let "--try" || error_exit "Cannot become DRBD secondary"
         sleep 1
