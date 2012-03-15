@@ -48,4 +48,4 @@ console :
 	@rel/bookshelf/bin/bookshelf console
 
 stop :
-	@rel/bookshelf/bin/bookshelf stop
+	@rel/bookshelf/bin/bookshelf stop ; exit 0
