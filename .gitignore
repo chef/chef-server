@@ -11,6 +11,7 @@
 /.erlang
 /.eunit
 /.lein*
+/.python
 /.ssh
 /.vagrant
 /Gemfile*
