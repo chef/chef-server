@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:opscode/omnibus-ruby.git
-  revision: adcc208726a5302de3e12ea671c792c2c70a0ff6
+  revision: 2e8aa4ca84b86abf2ac7482dd3e30153b678a44e
   specs:
     omnibus (0.1)
       fpm
@@ -31,7 +31,7 @@ GEM
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
     net-ssh (2.2.2)
-    ohai (0.6.12.rc.4)
+    ohai (0.6.12.rc.5)
       ipaddress
       mixlib-cli
       mixlib-config
