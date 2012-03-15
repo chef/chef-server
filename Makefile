@@ -26,7 +26,7 @@ eunit :
 	@rebar skip_deps=true eunit
 
 nosetests : bin/s3tests-generate-objects
-	@S3TEST_CONF=etc/nosetests.conf bin/nosetests
+	@S3TEST_CONF=etc/nosetests.conf bin/nosetests --with-xunit
 
 bin/s3tests-generate-objects : bin/nosetests
 	@cd s3-tests && ../bin/pip install . && cd ..
