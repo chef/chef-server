@@ -29,7 +29,7 @@ nosetests : bin/s3tests-generate-objects
 	@S3TEST_CONF=etc/nosetests.conf bin/nosetests --with-xunit
 
 bin/s3tests-generate-objects : bin/nosetests
-	@cd s3-tests && ../bin/pip install `pwd` && cd ..
+	@bin/pip install ./s3-tests
 
 bin/nosetests : s3-tests
 	@bin/pip install -r s3-tests/requirements.txt
