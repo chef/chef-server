@@ -5,6 +5,7 @@
 *.png
 *.tex
 /*.config
+/*.xml
 /.bundle
 /.chef
 /.erlang
@@ -15,6 +16,8 @@
 /Gemfile*
 /Vagrantfile
 /bin
+/build
+/classes
 /cookbooks
 /deps
 /ebin
@@ -27,4 +30,5 @@
 /rel/bookshelf
 /s3-tests
 /setup.sh
+/target
 /vendor/bundle
