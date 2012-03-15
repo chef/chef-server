@@ -16,6 +16,7 @@ Omnibus.configure do |o|
   o.cache_dir = "/var/cache/omnibus/${GIT_BRANCH_CLEAN}/cache"
   o.source_dir = "/var/cache/omnibus/${GIT_BRANCH_CLEAN}/src"
   o.build_dir = "/var/cache/omnibus/${GIT_BRANCH_CLEAN}/build"
+  o.package_dir = "/var/cache/omnibus/${GIT_BRANCH_CLEAN}/pkg"
 end
 OMNIBUS_CONFIG
 rm pkg/* || true
