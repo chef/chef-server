@@ -29,7 +29,7 @@ nosetests : bin/s3tests-generate-objects
 	@S3TEST_CONF=etc/nosetests.conf bin/nosetests --with-xunit
 
 bin/s3tests-generate-objects : bin/nosetests
-	@cd s3-tests && ../bin/pip install . && cd ..
+	@cd s3-tests && ../bin/pip install `pwd` && cd ..
 
 bin/nosetests : s3-tests
 	@bin/pip install -r s3-tests/requirements.txt
@@ -38,11 +38,11 @@ s3-tests : bin/activate
 	@git clone https://github.com/opscode/s3-tests.git
 	@pushd s3-tests
 	@bin/pip install -r requirements.txt
-	@bin/pip install .
+	@bin/pip install `pwd`
 	@popd
 
 bin/activate :
-	@virtualenv -p ${PYTHON:-python} .
+	@virtualenv -p ${PYTHON:-python} `pwd`
 
 start :
 	@rel/bookshelf/bin/bookshelf start
