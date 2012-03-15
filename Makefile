@@ -38,7 +38,7 @@ s3-tests : bin/activate
 	@git clone https://github.com/opscode/s3-tests.git
 
 bin/activate :
-	@virtualenv -p ${PYTHON:-python} `pwd`
+	@virtualenv `pwd`
 
 start :
 	@rel/bookshelf/bin/bookshelf start
