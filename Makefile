@@ -36,10 +36,6 @@ bin/nosetests : s3-tests
 
 s3-tests : bin/activate
 	@git clone https://github.com/opscode/s3-tests.git
-	@pushd s3-tests
-	@bin/pip install -r requirements.txt
-	@bin/pip install `pwd`
-	@popd
 
 bin/activate :
 	@virtualenv -p ${PYTHON:-python} `pwd`
