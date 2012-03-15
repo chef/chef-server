@@ -22,7 +22,7 @@ distclean : clean
 
 test : eunit nosetests
 
-eunit :
+eunit : deps
 	@rebar skip_deps=true eunit
 
 nosetests : bin/s3tests-generate-objects
