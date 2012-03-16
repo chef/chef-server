@@ -219,7 +219,8 @@ module PrivateChef
       PrivateChef["keepalived"]["vrrp_instance_interface"] = backend_vip["heartbeat_device"] 
       PrivateChef["keepalived"]["vrrp_instance_ipaddress"] = backend_vip["ipaddress"] 
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"] 
-      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_bind"] = PrivateChef['servers'][node_name]['ipaddress']
+      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_bind"] = 
+        PrivateChef['servers'][node_name]['cluster_ipaddress'] || PrivateChef['servers'][node_name]['ipaddress']
       PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef['servers'][node_name]['peer_ipaddress']
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"] 
       PrivateChef["couchdb"]["ha"] ||= true
