@@ -203,7 +203,7 @@ module PrivateChef
         next unless v['role'] == "backend"
         PrivateChef["drbd"][drbd_role] ||= {
           "fqdn" => k,
-          "ip" => v["ipaddress"]
+          "ip" => v['cluster_ipaddress'] || v["ipaddress"]
         }
         drbd_role = "secondary"
       end
@@ -213,7 +213,7 @@ module PrivateChef
       PrivateChef['servers'].each do |k, v|
         next unless v['role'] == "backend"
         next if k == node_name
-        PrivateChef['servers'][node_name]['peer_ipaddress'] = v['ipaddress']
+        PrivateChef['servers'][node_name]['peer_ipaddress'] = v['cluster_ipaddress'] || v['ipaddress']
       end
       PrivateChef["keepalived"]["enable"] ||= true
       PrivateChef["keepalived"]["vrrp_instance_interface"] = backend_vip["heartbeat_device"] 
