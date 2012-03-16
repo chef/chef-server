@@ -22,13 +22,15 @@ compile_skip:
 	@$(REBAR) compile skip_deps=true
 
 clean:
-	@$(REBAR) skip_deps=true clean
+	@$(REBAR) clean
+
+# clean and allclean do the same thing now. Leaving allclean for now
+# in case there are scripts that depend on it.
+allclean:
+	@$(REBAR) clean
 
 update: compile
 	@cd rel/erchef;bin/erchef restart
-
-allclean:
-	@$(REBAR) clean
 
 distclean: relclean
 	@rm -rf deps
