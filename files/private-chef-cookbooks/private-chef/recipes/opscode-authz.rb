@@ -7,10 +7,12 @@
 
 opscode_authz_dir = node['private_chef']['opscode-authz']['dir']
 opscode_authz_etc_dir = File.join(opscode_authz_dir, "etc")
+opscode_authz_etc_ibrowse_dir = File.join(opscode_authz_etc_dir, "ibrowse")
 opscode_authz_log_dir = node['private_chef']['opscode-authz']['log_directory']
 [ 
   opscode_authz_dir,
   opscode_authz_etc_dir,
+  opscode_authz_etc_ibrowse_dir,
   opscode_authz_log_dir,
 ].each do |dir_name|
   directory dir_name do
@@ -20,11 +22,12 @@ opscode_authz_log_dir = node['private_chef']['opscode-authz']['log_directory']
   end
 end
 
-link "/opt/opscode/embedded/service/opscode-authz/priv/log" do
+
+link "/opt/opscode/embedded/service/opscode-authz/rel/authz/log" do
   to opscode_authz_log_dir 
 end
 
-authz_config = File.join(opscode_authz_etc_dir, "authz.config") 
+authz_config = File.join(opscode_authz_etc_dir, "app.config") 
 
 template authz_config do
   source "authz.config.erb"
@@ -33,8 +36,21 @@ template authz_config do
   notifies :restart, 'service[opscode-authz]' if OmnibusHelper.should_notify?("opscode-authz")
 end
 
-link "/opt/opscode/embedded/service/opscode-authz/authz.config" do
+link "/opt/opscode/embedded/service/opscode-authz/rel/authz/etc/app.config" do
   to authz_config 
+end
+
+authz_ibrowse_config = File.join(opscode_authz_etc_dir, "ibrowse.config") 
+
+template authz_ibrowse_config do
+  source "ibrowse.config.erb"
+  mode "0644"
+  variables(node['private_chef']['opscode-authz'].to_hash)
+  notifies :restart, 'service[opscode-authz]' if OmnibusHelper.should_notify?("opscode-authz")
+end
+
+link "/opt/opscode/embedded/service/opscode-authz/rel/authz/etc/ibrowse/ibrowse.config" do
+  to authz_ibrowse_config 
 end
 
 runit_service "opscode-authz" do

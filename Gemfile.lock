@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:opscode/omnibus-ruby.git
-  revision: 4ed1930da98a2fac8c068b61657dd4a5b807581f
+  revision: 2e8aa4ca84b86abf2ac7482dd3e30153b678a44e
   specs:
     omnibus (0.1)
       fpm
@@ -31,7 +31,7 @@ GEM
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
     net-ssh (2.2.2)
-    ohai (0.6.12.rc.3)
+    ohai (0.6.12.rc.5)
       ipaddress
       mixlib-cli
       mixlib-config
@@ -39,10 +39,10 @@ GEM
       systemu
       yajl-ruby
     rake (0.9.2.2)
-    systemu (2.4.2)
+    systemu (2.5.0)
     uber-s3 (0.1.6)
       mime-types (~> 1.17)
-    vagrant (0.9.7)
+    vagrant (1.0.1)
       archive-tar-minitar (= 0.5.2)
       childprocess (~> 0.3.1)
       erubis (~> 2.7.0)
@@ -58,4 +58,4 @@ PLATFORMS
 
 DEPENDENCIES
   omnibus!
-  vagrant (~> 0.9)
+  vagrant (~> 1.0)

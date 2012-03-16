@@ -1,35 +1,37 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+require 'bundler/setup'
+require 'omnibus/vagrant/omnibus'
+
 Vagrant::Config.run do |config|
-  # All Vagrant configuration is done here. The most common configuration
-  # options are documented and commented below. For a complete reference,
-  # please see the online documentation at vagrantup.com.
 
-  # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "lucid64"
+  config.vm.define 'ubuntu-10.04' do |c|
+    c.vm.box     = "opscode-ubuntu-10.04"
+    c.vm.box_url = "http://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-ubuntu-10.04.box"
+  end
 
-  # The url from where the 'config.vm.box' box will be fetched if it
-  # doesn't already exist on the user's system.
-  config.vm.box_url = "http://files.vagrantup.com/lucid64.box"
+  config.vm.define 'centos-5.7' do |c|
+    c.vm.box     = "opscode-centos-5.7"
+    c.vm.box_url = "http://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-centos-5.7.box"
+  end
 
-  # Boot with a GUI so you can see the screen. (Default is headless)
-  # config.vm.boot_mode = :gui
+  config.vm.define 'centos-6.0' do |c|
+    c.vm.box     = "opscode-centos-6.0"
+    c.vm.box_url = "http://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-centos-6.0.box"
+  end
 
-  # Assign this VM to a host only network IP, allowing you to access it
-  # via the IP.
-  # config.vm.network "33.33.33.10"
-
-  # Forward a port from the guest to the host, which allows for outside
-  # computers to access the VM, whereas host only networking does not.
-  # config.vm.forward_port "http", 80, 8080
+  config.vm.define 'centos-6.2' do |c|
+    c.vm.box     = "opscode-centos-6.2"
+    c.vm.box_url = "http://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-centos-6.2.box"
+  end
 
   # Share an additional folder to the guest VM. The first argument is
   # an identifier, the second is the path on the guest to mount the
   # folder, and the third is the path on the host to the actual folder.
   # config.vm.share_folder "v-data", "/vagrant_data", "../data"
-  config.vm.share_folder "omnibus-ruby", "~/omnibus-ruby", File.expand_path("../../omnibus-ruby", __FILE__)
   config.vm.share_folder "opscode-omnibus", "~/opscode-omnibus", File.expand_path("..", __FILE__)
+  config.vm.share_folder "omnibus-ruby", "~/omnibus-ruby", File.expand_path("../../omnibus-ruby", __FILE__)
 
   # Enable provisioning with chef solo, specifying a cookbooks path (relative
   # to this Vagrantfile), and adding some recipes and/or roles.
@@ -51,4 +53,6 @@ Vagrant::Config.run do |config|
     "--usbehci", "off",
     "--audio", "none"
   ]
+
+  config.omnibus.path = "~/opscode-omnibus"
 end

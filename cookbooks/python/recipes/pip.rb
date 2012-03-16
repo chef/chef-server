@@ -28,13 +28,20 @@ remote_file "#{Chef::Config[:file_cache_path]}/distribute_setup.py" do
   not_if "which pip"
 end
 
-use_version = node['python']['distribute_install_py_version']
+py_version = if node['platform'] == 'centos' && node['platform_version'].split('.').first.to_i < 6
+               '26'
+             else
+               nil
+             end
 
 bash "install-pip" do
   cwd Chef::Config[:file_cache_path]
   code <<-EOF
-  python#{use_version} distribute_setup.py
+  python#{py_version} distribute_setup.py
   easy_install pip
   EOF
+
+  # the `which pip` command isn't very helpful if you install pip
+  # against the wrong python the first time around
   not_if "which pip"
 end

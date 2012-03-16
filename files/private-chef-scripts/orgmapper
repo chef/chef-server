@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export PATH=/opt/opscode/embedded/bin:$PATH
+export BUNDLE_GEMFILE=/opt/opscode/embedded/service/opscode-platform-debug/orgmapper/Gemfile
+exec /opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/service/opscode-platform-debug/orgmapper/bin/orgmapper /etc/opscode/orgmapper.conf $*
+

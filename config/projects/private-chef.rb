@@ -39,6 +39,9 @@ deps << "nagios-plugins"
 deps << "opscode-nagios-plugins"
 deps << "nrpe"
 
+# oc-pedant for integration/smoke testing
+deps << "opscode-pedant"
+
 # Version manifest file
 deps << "pc-version"
 

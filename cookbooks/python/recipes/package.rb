@@ -18,18 +18,27 @@
 # limitations under the License.
 #
 
-python_pkgs = value_for_platform(
-  ["debian","ubuntu"] => {
-    "default" => ["python","python-dev"]
-  },
-  ["centos","redhat","fedora"] => {
-    "default" => ["python26","python26-devel"]
-  },
-  ["freebsd"] => {
-    "default" => ["python"]
-  },
-  "default" => ["python","python-dev"]
-)
+python_pkgs = if node['platform'] == 'centos'
+                centos_major_version = node['platform_version'].split('.').first.to_i
+                if centos_major_version == 6
+                  ["python", "python-devel"]
+                else
+                  ["python26", "python26-devel"]
+                end
+              else
+                value_for_platform(
+                                   ["debian","ubuntu"] => {
+                                     "default" => ["python","python-dev"]
+                                   },
+                                   ["redhat","fedora"] => {
+                                     "default" => ["python26","python26-devel"]
+                                   },
+                                   ["freebsd"] => {
+                                     "default" => ["python"]
+                                   },
+                                   "default" => ["python","python-dev"]
+                                   )
+              end
 
 python_pkgs.each do |pkg|
   package pkg do

@@ -4,46 +4,69 @@
 # gem install fpm ohai --no-rdoc --no-ri
 # ln -s /var/lib/gems/1.8/bin/* /usr/local/bin
 
-include_recipe "apt"
+# make certain our chef-solo cache dir exists
+directory "#{Chef::Config[:file_cache_path]}" do
+  action :create
+end
+
+case node['platform']
+when "ubuntu"
+  include_recipe "apt"
+when "centos"
+  include_recipe "yum"
+end
+
 include_recipe "build-essential"
 include_recipe "git"
 include_recipe "python"
 
-%w{ruby ruby1.8 ruby1.8-dev rdoc1.8 irb1.8 ri1.8 libopenssl-ruby1.8 libtool dpkg-dev libxml2 libxml2-dev libxslt1.1 libxslt1-dev help2man gettext texinfo}.each do |name|
+# install ruby and symlink the binaries to /usr/local
+include_recipe "ruby_1.9"
+%w{ruby gem rake bundle fpm}.each do |bin|
+  link "/usr/local/bin/#{bin}" do
+    to "/opt/ruby1.9/bin/#{bin}"
+  end
+end
+
+# install the packaging related packages
+package_pkgs = value_for_platform(
+  ["ubuntu"] => {
+    "default" => ["dpkg-dev"]
+  },
+  ["centos"] => {
+    "default" => ["rpm-build"]
+  }
+)
+package_pkgs.each do |pkg|
+  package pkg do
+    action :install
+  end
+end
+
+# install the libxml / libxslt packages
+xml_pkgs = value_for_platform(
+  ["ubuntu"] => {
+    "default" => ["libxml2", "libxml2-dev", "libxslt1.1", "libxslt1-dev"]
+  },
+  ["centos"] => {
+    "default" => ["libxml2", "libxml2-devel", "libxslt", "libxslt-devel"]
+  }
+)
+xml_pkgs.each do |pkg|
+  package pkg do
+    action :install
+  end
+end
+
+%w{libtool help2man gettext texinfo}.each do |name|
   package name
 end
 
-bash "install rubygems 1.3.7 from source" do
-  cwd "/tmp"
-  code <<-INSTALL_RUBYGEMS
-wget http://production.cf.rubygems.org/rubygems/rubygems-1.3.7.tgz
-tar zxf rubygems-1.3.7.tgz
-cd rubygems-1.3.7
-ruby setup.rb --no-format-executable
-INSTALL_RUBYGEMS
-  not_if { ::File.exists? "/usr/bin/gem" }
-end
-
-execute "pip install -r #{node["opscode-omnibus"]["build-folder"]}/requirements.txt" do
-  user "root"
-  cwd node["opscode-omnibus"]["build-folder"]
-end
-
-%w{bundler rake}.each do |name|
-  gem_package name do
-    gem_binary "/usr/bin/gem"
-  end
-end
-
-ruby_block "make gem symlinks" do
-  block do
-    Dir['/var/lib/gems/1.8/bin/*'].each do |path|
-      r = Chef::Resource::Link.new("/usr/local/bin/#{File.basename(path)}", run_context)
-      r.action(:nothing)
-      r.to(path)
-      r.run_action(:create)
-    end
-  end
+bash "install python packages" do
+  code <<BASH
+pip install Sphinx==1.1.2
+pip install Pygments==1.4
+BASH
 end
 
 directory "/opt/opscode" do

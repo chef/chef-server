@@ -16,11 +16,16 @@ Omnibus.configure do |o|
   o.cache_dir = "/var/cache/omnibus/${GIT_BRANCH_CLEAN}/cache"
   o.source_dir = "/var/cache/omnibus/${GIT_BRANCH_CLEAN}/src"
   o.build_dir = "/var/cache/omnibus/${GIT_BRANCH_CLEAN}/build"
+  o.package_dir = "/var/cache/omnibus/${GIT_BRANCH_CLEAN}/pkg"
 end
 OMNIBUS_CONFIG
+
+rm -r /var/cache/omnibus/${GIT_BRANCH_CLEAN}/pkg/* || true
 rm pkg/* || true
+
+export PATH=/usr/local/bin:$PATH
 bundle install --deployment --without development
-bundle exec rake projects:private-chef:deb
+bundle exec rake projects:private-chef
 # Cleanup
 if [ "${GIT_BRANCH}" != "master" ]
 then

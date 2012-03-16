@@ -94,6 +94,7 @@ module PrivateChef
       PrivateChef['nagios']['admin_password'] ||= SecureRandom.hex(50)
       PrivateChef['drbd']['shared_secret'] ||= SecureRandom.hex(30)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= SecureRandom.hex(50)
+      PrivateChef['opscode_authz']['superuser_id'] ||= SecureRandom.hex(32)
 
       if File.directory?("/etc/opscode")
         File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
@@ -124,6 +125,9 @@ module PrivateChef
               },
               'keepalived' => {
                 'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
+              },
+              'opscode_authz' => {
+                'superuser_id' => PrivateChef['opscode_authz']['superuser_id']
               }
             })
           )
@@ -199,7 +203,7 @@ module PrivateChef
         next unless v['role'] == "backend"
         PrivateChef["drbd"][drbd_role] ||= {
           "fqdn" => k,
-          "ip" => v["ipaddress"]
+          "ip" => v['cluster_ipaddress'] || v["ipaddress"]
         }
         drbd_role = "secondary"
       end
@@ -209,13 +213,14 @@ module PrivateChef
       PrivateChef['servers'].each do |k, v|
         next unless v['role'] == "backend"
         next if k == node_name
-        PrivateChef['servers'][node_name]['peer_ipaddress'] = v['ipaddress']
+        PrivateChef['servers'][node_name]['peer_ipaddress'] = v['cluster_ipaddress'] || v['ipaddress']
       end
       PrivateChef["keepalived"]["enable"] ||= true
       PrivateChef["keepalived"]["vrrp_instance_interface"] = backend_vip["heartbeat_device"] 
       PrivateChef["keepalived"]["vrrp_instance_ipaddress"] = backend_vip["ipaddress"] 
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"] 
-      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_bind"] = PrivateChef['servers'][node_name]['ipaddress']
+      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_bind"] = 
+        PrivateChef['servers'][node_name]['cluster_ipaddress'] || PrivateChef['servers'][node_name]['ipaddress']
       PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef['servers'][node_name]['peer_ipaddress']
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"] 
       PrivateChef["couchdb"]["ha"] ||= true
