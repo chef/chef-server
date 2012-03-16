@@ -1,5 +1,5 @@
 name "opscode-pedant"
-version "master" # TODO FIXME - set this to a tag plz.
+version "rel-0.0.1"
 
 dependencies ["ruby",
               "bundler",
