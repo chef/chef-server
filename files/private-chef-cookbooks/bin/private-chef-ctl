@@ -19,6 +19,10 @@
 
 require 'json'
 
+SV_COMMAND_NAMES = %w[status up down once pause cont hup alarm interrupt quit
+                      1 2 term kill start stop restart shutdown force-stop
+                      force-reload force-restart force-shutdown check]
+
 def get_pgrp_from_pid(pid)
   ps=`which ps`.chomp
   `#{ps} -p #{pid} -o pgrp=`.chomp
@@ -332,10 +336,6 @@ def graceful_kill(service=nil)
   exit exit_status
 end
 
-def sv_command_list
-  ["status","up","down","once","pause","cont","hup","alarm","interrupt","quit","1","2","term","kill","start","stop","restart","shutdown","force-stop","force-reload","force-restart","force-shutdown","check"]
-end
-
 def help
   puts "#{$0}: command (subcommand)"
   puts <<-EOH
@@ -391,7 +391,14 @@ EOH
   exit 1
 end
 
-if ARGV[1].nil?
+case ARGV[1]
+when *SV_COMMAND_NAMES
+  run_sv_command(ARGV[1], ARGV[0])
+when "tail"
+  tail(ARGV[0])
+when "graceful-kill"
+  graceful_kill(ARGV[0])
+else
   case ARGV[0]
   when "ha-status"
     ha_status
@@ -413,27 +420,19 @@ if ARGV[1].nil?
     graceful_kill
   when "test"
     ENV["PATH"] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
+    pedant_args = ARGV[1..-1]
+    pedant_args = %w[-P private_chef] if pedant_args.empty?
     Dir.chdir("/opt/opscode/embedded/service/opscode-pedant")
-    exec("/opt/opscode/embedded/bin/bundle exec rake private_chef:piab")
-  else
-    if sv_command_list.include?(ARGV[0])
-      run_sv_command(ARGV[0])
-    else
-      help
-    end
-  end
-else
-  if sv_command_list.include?(ARGV[1])
-    run_sv_command(ARGV[1], ARGV[0])
-  else
-    case ARGV[1]
-    when "tail"
-      tail(ARGV[0])
-    when "graceful-kill"
-      graceful_kill(ARGV[0])
-    else
+    exec("/opt/opscode/embedded/bin/bundle exec ./bin/opscode-pedant #{pedant_args.join(' ')}")
+  when *SV_COMMAND_NAMES
+    if ARGV[1]
       puts "i don't know that command, did you mean: private-chef-ctl #{ARGV[1]} #{ARGV[0]}?"
+    else
+      run_sv_command(ARGV[0])
     end
+  when nil
+    help
+  else
+    help
   end
 end
-
