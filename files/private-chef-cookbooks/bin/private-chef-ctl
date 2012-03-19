@@ -427,6 +427,7 @@ else
   when *SV_COMMAND_NAMES
     if ARGV[1]
       puts "i don't know that command, did you mean: private-chef-ctl #{ARGV[1]} #{ARGV[0]}?"
+      exit 1
     else
       run_sv_command(ARGV[0])
     end
