@@ -35,7 +35,7 @@ rest_init(Rq, Opts) ->
     {ok, bookshelf_req:with_amz_request_id(Rq), #state{dir = Dir}}.
 
 allowed_methods(Rq, St) ->
-    {['GET', 'PUT', 'DELETE'], Rq, St}.
+    {['HEAD', 'GET', 'PUT', 'DELETE'], Rq, St}.
 
 content_types_provided(Rq, St) ->
     {[{{<<"*">>, <<"*">>, []}, download}], Rq, St}.
