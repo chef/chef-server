@@ -56,6 +56,14 @@ delete_resource(#http_req{host=[Bucket|_],
         _  -> {false, Rq, St}
     end.
 
+last_modified(#http_req{host=[Bucket|_],
+                        raw_path= <<"/",Path/binary>>}=Rq,
+              #state{dir=Dir}=St) ->
+    case ?BACKEND:obj_meta(Dir, Bucket, Path) of
+        {ok, #object{date=Date}} -> {Date, Rq, St};
+        _                        -> {halt, Rq, St}
+    end.
+
 generate_etag(#http_req{host=[Bucket|_],
                         raw_path= <<"/",Path/binary>>}=Rq,
               #state{dir=Dir}=St) ->
