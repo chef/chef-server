@@ -69,7 +69,7 @@ generate_etag(#http_req{host=[Bucket|_],
               #state{dir=Dir}=St) ->
     case ?BACKEND:obj_meta(Dir, Bucket, Path) of
         {ok, #object{digest=Digest}} ->
-            {{strong, list_to_binary(bookshelf_req:to_hex(Digest))}, Rq, St};
+            {{strong, list_to_binary(bookshelf_format:to_hex(Digest))}, Rq, St};
         _ -> {halt, Rq, St}
     end.
 
@@ -94,7 +94,7 @@ upload(#http_req{host=[Bucket|_],
     case ?BACKEND:obj_recv(Dir, Bucket, Path,
                            Transport, Socket, Buffer, Length) of
         {ok, Digest} ->
-            OurMd5 = bookshelf_req:to_hex(Digest),
+            OurMd5 = bookshelf_format:to_hex(Digest),
             case cowboy_http_req:parse_header('Content-MD5', Rq2) of
                 {_, undefined, Rq3} ->
                     Rq4 = bookshelf_req:with_etag(OurMd5, Rq3),

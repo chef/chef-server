@@ -15,21 +15,27 @@
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
 
--module(bookshelf_req).
+-module(bookshelf_format).
 -include("bookshelf.hrl").
 -export([
-         with_amz_request_id/1,
-         with_etag/2
+         to_base64/1,
+         to_date/1,
+         to_etag/1,
+         to_hex/1
         ]).
 
-with_amz_request_id(Rq) ->
-    Id        = term_to_binary({node(), erlang:now()}),
-    Base64    = bookshelf_format:to_base64(Id),
-    {ok, Rq2} = cowboy_http_req:set_resp_header(<<"x-amz-request-id">>,
-                                                Base64,
-                                                Rq),
-    Rq2.
+to_date(Date) ->
+    iso8601:format(Date).
 
-with_etag(Etag, Rq) ->
-    {ok, Rq2} = cowboy_http_req:set_resp_header('Etag', Etag, Rq),
-    Rq2.
+to_base64(Bin) ->
+    base64:encode_to_string(Bin).
+
+to_hex(Bin) ->
+    string:to_lower(
+      lists:flatten([io_lib:format("~2.16.0b",[N]) || <<N>> <= Bin])
+     ).
+
+to_etag(Tag) when is_binary(Tag) ->
+    to_etag(to_hex(Tag));
+to_etag(Tag) ->
+    io_lib:format("\"~s\"", [Tag]).
