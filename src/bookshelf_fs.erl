@@ -43,7 +43,7 @@ bucket_list(Dir) ->
                       [UTC|_] = %% FIXME This is a hack until R15B
                           calendar:local_time_to_universal_time_dst(Date),
                       #bucket{ name=filename:basename(P),
-                               date=iso8601:format(UTC) }
+                               date=UTC }
               end,
               lists:filter(fun filelib:is_dir/1,
                            lists:map(fun(F) ->
