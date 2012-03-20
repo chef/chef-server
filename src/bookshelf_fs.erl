@@ -218,6 +218,9 @@ write(FsSt, Transport, Socket, Length, Buf) ->
             write(NewFsSt, Transport, Socket, Length-byte_size(Buf));
         Any -> Any
     end.
+
+write(FsSt, _Transport, _Socket, 0) ->
+    obj_write(FsSt, <<>>);
 write(FsSt, Transport, Socket, Length) when Length =< ?BLOCK_SIZE ->
     case Transport:recv(Socket, Length, ?TIMEOUT_MS) of
         {ok, Chunk} -> obj_write(FsSt, Chunk);
