@@ -47,5 +47,8 @@ start :
 console :
 	@rel/bookshelf/bin/bookshelf console
 
+ping :
+	@rel/bookshelf/bin/bookshelf ping
+
 stop :
 	@rel/bookshelf/bin/bookshelf stop ; exit 0
