@@ -22,6 +22,16 @@ To initiate an omnibus build on Ubuntu 10.04
 vagrant omnibus build ubuntu-10.04 private-chef
 ```
 
+If you receive an error stating that no config file was found in /home/vagrant/opscode-omnibus/omnibus.rb, this means that a configuration file on the vagrant vm is missing.
+
+SSH into the vagrant vm and copy over the sample configuration file found in the directory given by the error mesasge.
+
+To SSH into the vm
+
+```
+vagrant ssh ubuntu-10.04
+```
+
 # Vagrant VM Management
 
 The build environment utilizes the multi-vm functionality of Vagrant to execute builds across multiple platforms. For a quick primer on how to use Vagrant in a multi-vm setup see [the documentation](http://vagrantup.com/docs/multivm.html).
