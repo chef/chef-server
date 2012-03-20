@@ -58,10 +58,11 @@ bucket(#bucket{name=Name, date=Date}) ->
     #'ListAllMyBucketsEntry'{ 'Name' = Name,
                               'CreationDate' = Date }.
 
-object(#object{name=Name, date=Date, size=Size}) ->
     #'ListEntry'{ 'Key'          = binary_to_list(Name),
                   'LastModified' = Date,
                   'ETag'         = "123",
+object(#object{name=Name, date=Date, size=Size, digest=Digest}) ->
+                  'ETag'         = bookshelf_format:to_etag(Digest),
                   'Size'         = io_lib:format("~w", [Size]),
                   'StorageClass' = "STANDARD" }.
 
