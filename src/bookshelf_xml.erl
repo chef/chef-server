@@ -56,7 +56,7 @@ buckets(Buckets) ->
 
 bucket(#bucket{name=Name, date=Date}) ->
     #'ListAllMyBucketsEntry'{ 'Name' = Name,
-                              'CreationDate' = Date }.
+                              'CreationDate' = bookshelf_format:to_date(Date) }.
 
 object(#object{name=Name, date=Date, size=Size, digest=Digest}) ->
     #'ListEntry'{ 'Key'          = Name,
