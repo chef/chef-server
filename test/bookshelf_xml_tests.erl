@@ -21,16 +21,16 @@
 list_buckets_test_() ->
     [{"should render ListAllMyBucketsResult",
       fun() ->
-              Buckets = [#bucket{name="lol", date="011-02-10T21:42:17.000Z"},
-                         #bucket{name="cat", date="011-02-10T21:42:17.000Z"}],
+              Date = calendar:now_to_datetime(erlang:now()),
+              IsoDate = bookshelf_format:to_date(Date),
+              Buckets = [#bucket{name="lol", date=Date},
+                         #bucket{name="cat", date=Date}],
               ?assertMatch(
                  {'ListAllMyBucketsResult',undefined,
                   {'CanonicalUser',undefined,"abc123","Bobo T. Clown"},
                   {'ListAllMyBucketsList',undefined,
-                   [{'ListAllMyBucketsEntry',undefined,"lol",
-                     "011-02-10T21:42:17.000Z"},
-                    {'ListAllMyBucketsEntry',undefined,"cat",
-                     "011-02-10T21:42:17.000Z"}]}},
+                   [{'ListAllMyBucketsEntry',undefined,"lol", IsoDate},
+                    {'ListAllMyBucketsEntry',undefined,"cat", IsoDate}]}},
                  bookshelf_xml:list_buckets(Buckets)
                 )
       end
