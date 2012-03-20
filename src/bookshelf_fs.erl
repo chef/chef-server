@@ -185,6 +185,7 @@ obj_send(Dir, Bucket, Path, Transport, Socket) ->
     end.
 
 obj_recv(Dir, Bucket, Path, Transport, Socket, Buffer, Length) ->
+    filelib:ensure_dir(filename:join([Dir, Bucket, Path])),
     case obj_open_w(Dir, Bucket, Path) of
         {ok, FsSt} ->
             case write(FsSt, Transport, Socket, Length, Buffer) of
