@@ -77,25 +77,15 @@ obj_list(Dir, Bucket) when is_binary(Dir) andalso is_binary(Bucket) ->
       fun(FilePath, Acc) ->
               case filelib:is_regular(FilePath) of
                   true ->
-                      case file:read_file_info(FilePath) of
-                          {ok, #file_info{size=Size, mtime=Date}} ->
-                              [UTC|_] = %% FIXME This is a hack until R15B
-                                  calendar:local_time_to_universal_time_dst(Date),
-                              Pos = byte_size(FilePath),
-                              Len = byte_size(BucketPath) + 1
-                                  - byte_size(FilePath),
-                              Name = binary:part(FilePath, Pos, Len),
-                              lists:append(
-                                Acc,
-                                [#object{
-                                    name=Name,
-                                    date=iso8601:format(UTC),
-                                    size=Size
-                                   }]
-                               );
-                          _                                       -> Acc
+                      Pos = byte_size(FilePath),
+                      Len = byte_size(BucketPath) + 1
+                          - byte_size(FilePath),
+                      Name = binary:part(FilePath, Pos, Len),
+                      case obj_meta(Dir, Bucket, Name) of
+                          {ok, Object} -> lists:append(Acc, [Object]);
+                          _            -> Acc
                       end;
-                  _    -> Acc
+                  _ -> Acc
               end
       end,
       []
