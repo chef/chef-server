@@ -1,0 +1,5 @@
+{application, doest,
+ [{description, "Package Constraint Solver"},
+  {vsn, "0.0.1a"},
+  {modules, []},
+  {applications, [kernel, stdlib]}]}.
