@@ -192,6 +192,13 @@ http {
     }
     
     location / {
+      # any request from a chef client that reaches this point 
+      # is for a resource/route that doesn't exist.
+      if ($http_x_chef_version ~* "^(\d+\.\d+?)\..+$") {
+         error_page 404 =404 /404.json;
+         return 404;
+      }
+
       proxy_pass http://opscode_webui; 
     }
   }
