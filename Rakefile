@@ -11,8 +11,8 @@ Omnibus.setup do |o|
   Omnibus::CleanTasks.define!
 end
 
-Omnibus.software("config/software/*.rb")
 Omnibus.projects("config/projects/*.rb")
+Omnibus.software("config/software/*.rb")
 
 desc "Print the name and version of all components"
 task :versions do
