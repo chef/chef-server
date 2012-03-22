@@ -55,7 +55,7 @@ http {
   server {
     listen <%= @non_ssl_port %>;
     server_name <%= @server_name %>;
-    <%- if @enablenon_ssl -%>
+    <%- if @enable_non_ssl -%>
     access_log /var/log/opscode/nginx/access-port-<%= @non_ssl_port %>.log;
     root <%= File.join(@dir, "html") %>;
 
