@@ -1,6 +1,7 @@
 name "private-chef"
 
 replaces "private-chef-full"
+install_path "/opt/opscode"
 
 # initialize the dependencies
 deps = []
