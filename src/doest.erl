@@ -58,12 +58,19 @@
 %%%-------------------------------------------------------------------
 -module(doest).
 
+%% Public Api
 -export([new/0,
          add_packages/2,
          add_package/3,
          add_package_version/3,
          add_package_version/4,
          solve/2]).
+
+%% Internal Api
+-export([dep_pkg/1,
+         make_key/1,
+         primitive_solve/2,
+         is_version_within_constraint/2]).
 
 -export_type([t/0,
               pkg/0,
@@ -75,7 +82,8 @@
 %%============================================================================
 %% type
 %%============================================================================
--opaque t() :: {?MODULE, gb_tree()}.
+-type internal_t() :: gb_tree().
+-opaque t() :: {?MODULE, internal_t()}.
 -type pkg() :: {pkg_name(), vsn()}.
 -type pkg_name() :: string() | atom().
 -type vsn() :: string().
@@ -89,7 +97,7 @@
                     | {pkg_name(), vsn(), lt}
                     | {pkg_name(), vsn(), '<'}
                     | {pkg_name(), vsn(), vsn(), between}.
--type dependency_set() :: {pkg(), [{vsn(), [constraint()]}]}.
+-type dependency_set() :: {pkg(), [{vsn(), [constraint()] | []}]}.
 
 %% Internal Types
 -type constraints() :: [constraint()].
@@ -97,7 +105,6 @@
 %%============================================================================
 %% API
 %%============================================================================
-
 -spec new() -> t().
 new() ->
     {?MODULE, gb_trees:empty()}.
@@ -139,14 +146,15 @@ add_package_version(State, Pkg, Vsn) ->
     add_package_version(State, Pkg, Vsn, []).
 
 -spec solve(t(), [constraint()]) -> [pkg()].
-solve({?MODULE, State}, PackageList = [Pkg | _]) ->
-    Constraints = lists:foldl(fun(Info, Acc) ->
-                                      add_constraint(Acc, Info)
-                              end, new_constraints(), PackageList),
-    [_ | OtherPkgs] = lists:map(fun dep_pkg/1, PackageList),
-    case pkgs(State, [], dep_pkg(Pkg), Constraints, OtherPkgs) of
+solve({?MODULE, State}, PackageList)
+  when erlang:length(PackageList) > 0 ->
+    case primitive_solve(State, PackageList) of
+        false ->
+            %% This exists to satisfy dailyzer though it should never happen
+            erlang:throw({this_should_never_happen, fail});
         fail ->
-            erlang:throw({error, no_solution_found});
+            [FirstCons | Rest] = PackageList,
+            doest_culprit:search(State, [FirstCons], Rest);
         Solution ->
             Solution
     end.
@@ -154,6 +162,17 @@ solve({?MODULE, State}, PackageList = [Pkg | _]) ->
 %%====================================================================
 %% Internal Functions
 %%====================================================================
+-spec primitive_solve(internal_t(), [constraint()]) -> [pkg()] | fail | false.
+primitive_solve(State, PackageList)
+  when erlang:length(PackageList) > 0 ->
+    Constraints = lists:foldl(fun(Info, Acc) ->
+                                      add_constraint(Acc, Info)
+                              end, new_constraints(), PackageList),
+
+    [Pkg | OtherPkgs] = lists:map(fun dep_pkg/1, PackageList),
+    pkgs(State, [], dep_pkg(Pkg), Constraints, OtherPkgs).
+
+-spec make_key(pkg_name()) -> term().
 make_key(Pkg) ->
     Pkg.
 
@@ -247,14 +266,17 @@ valid_version(PkgName, Vsn, PkgConstraints) ->
 %% @doc
 %% Given a Package Name and a set of constraints get a list of package
 %% versions that meet all constraints.
--spec constrained_package_versions(t(), pkg_name(), constraints()) -> [vsn()].
+-spec constrained_package_versions(internal_t(),
+                                   pkg_name(),
+                                   constraints()) -> [vsn()].
 constrained_package_versions(State, PkgName, PkgConstraints) ->
     Versions = get_versions(State, PkgName),
     [Vsn || Vsn <- Versions, valid_version(PkgName, Vsn, PkgConstraints)].
 
 %% @doc
 %% Given a package name get the list of all versions available for that package.
--spec get_versions(t(), pkg_name()) -> [vsn()].
+-spec get_versions(internal_t(),
+                   pkg_name()) -> [vsn()].
 get_versions(State, PkgName) ->
     case gb_trees:lookup(make_key(PkgName), State) of
         none ->
@@ -332,7 +354,7 @@ pkgs(State, Visited, Pkg, Constraints, OtherPkgs) ->
         end,
     lists_some(F, constrained_package_versions(State, Pkg, Constraints), fail).
 
--spec get_deps(t(), pkg_name(), vsn()) -> constraints().
+-spec get_deps(internal_t(), pkg_name(), vsn()) -> constraints().
 get_deps(State, Pkg, Vsn) ->
     {Vsn, Constraints} = lists:keyfind(make_key(Vsn), 1,
                                        gb_trees:get(make_key(Pkg), State)),
@@ -362,7 +384,6 @@ lists_some(F, [H | T], False) ->
 -include_lib("eunit/include/eunit.hrl").
 
 first_test() ->
-
     Dom0 = add_packages(new(), [{app1, [{"0.1", [{app2, "0.2"},
                                                 {app3, "0.2", '>='}]},
                                        {"0.2", []},
@@ -453,7 +474,6 @@ third_test() ->
                  solve(Dom0, [app1, app2, app5])).
 
 fail_test() ->
-
     Dom0 = add_packages(new(), [{app1, [{"0.1", [{app2, "0.2"},
                                                 {app3, "0.2", gte}]},
                                        {"0.2", []},
@@ -466,7 +486,8 @@ fail_test() ->
                                        {"0.3", []}]}]),
 
 
-    ?assertThrow({error, no_solution_found},
+    ?assertThrow({unable_to_solve, {app1,"0.1"},
+                  {[], [], [{app1, "0.1"}]}},
                  solve(Dom0, [{app1, "0.1"}])).
 
 conflicting_passing_test() ->
@@ -538,7 +559,7 @@ conflicting_failing_test() ->
                                {app5, [{"2.0.0", []},
                                        {"6.0.0", []}]}]),
 
-    ?assertThrow({error, no_solution_found},
+    ?assertThrow({unable_to_solve,app3,{[],[],[app1,app3]}},
                  solve(Dom0, [app1, app3])).
 
 -endif.
