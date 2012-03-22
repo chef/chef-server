@@ -17,9 +17,13 @@ ERLPATHS=-pa .eunit -pa ebin
 ERLCFLAGS=+debug_info +warnings_as_errors $(ERLPATHS)
 ERLFLAGS=-sname $(NAME) $(ERLPATHS)
 
+PLT_DIR=$(CURDIR)/.plt
+PLT=$(PLT_DIR)/dialyzer_plt
+
 .SUFFIXES:
 .SUFFIXES: .erl .beam
-.PHONY: all compile doc clean build-plt check-plt dialyze eunit shell distclean
+.PHONY: all compile doc clean build-plt check-plt dialyze eunit shell distclean \
+	dialyzer
 
 all: compile
 
@@ -38,8 +42,16 @@ build-plt: compile
 check-plt: compile
 	$(REBAR) check-plt
 
-dialyze:
-	$(REBAR) dialyze
+$(PLT):
+	mkdir -p $(PLT_DIR)
+	dialyzer --build_plt --output_plt $(PLT) \
+		--apps erts kernel stdlib eunit
+
+clean_plt:
+	rm -rf $(PLT_DIR)
+
+dialyzer: $(PLT)
+	dialyzer --src --plt $(PLT) $(TEST_PLT) -c ./src
 
 eunit:
 	$(REBAR) eunit
@@ -53,5 +65,5 @@ $(EUNIT_DIR)/%.beam: test/%.erl
 shell: compile $(TEST_OBJS)
 	@$(ERL) $(ERLFLAGS)
 
-distclean: clean
+distclean: clean clean_plt
 	@rm -rvf deps/*
