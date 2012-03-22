@@ -208,6 +208,8 @@ default['private_chef']['nginx']['ha'] = false
 default['private_chef']['nginx']['dir'] = "/var/opt/opscode/nginx"
 default['private_chef']['nginx']['log_directory'] = "/var/log/opscode/nginx"
 default['private_chef']['nginx']['ssl_port'] = 443
+default['private_chef']['nginx']['enable_non_ssl'] = false
+default['private_chef']['nginx']['non_ssl_port'] = 80
 default['private_chef']['nginx']['server_name'] = node['fqdn']
 default['private_chef']['nginx']['url'] = "https://#{node['fqdn']}"
 # These options provide the current best security with TSLv1

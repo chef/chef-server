@@ -49,15 +49,147 @@ http {
   <%- end -%>
 
   <%- if node['private_chef']['lb']['enable'] -%>
-  server {
-    listen 80;
-    access_log /var/log/opscode/nginx/rewrite-port-80.log;
-    server_name <%= @server_name %>;
-    rewrite ^(.*) https://$server_name$1 permanent;
-  }
-
   proxy_cache_path  <%= File.join(@dir, "cache") %> levels=1:2 keys_zone=webui-cache:50m max_size=<%= @cache_max_size %> inactive=600m;
   proxy_temp_path <%= File.join(@dir, "cache-tmp") %>;
+  <%-   unless @non_ssl_port.nil? -%>
+  server {
+    listen <%= @non_ssl_port %>;
+    server_name <%= @server_name %>;
+    access_log /var/log/opscode/nginx/rewrite-port-80.log;
+    <%- if @enablenon_ssl -%>
+    root <%= File.join(@dir, "html") %>;
+
+		client_max_body_size <%= @client_max_body_size %>;
+
+    proxy_set_header Host $host; 
+    proxy_set_header X-Real-IP $remote_addr; 
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; 
+    proxy_set_header X-Forwarded-Proto https; 
+    proxy_pass_request_headers on;
+    proxy_connect_timeout   1;
+    proxy_send_timeout      300;
+    proxy_read_timeout      300;
+
+    error_page 404 =404 /404.html;
+    error_page 503 =503 /503.json;
+
+    #location /nginx_status {
+      #stub_status on;
+      #access_log   off;
+      #allow 127.0.0.1;
+      #deny all;
+      #}
+
+    location /version {
+      types { }
+      default_type text/plain;
+      alias /opt/opscode/pc-version.txt;
+    }
+
+    location /docs {
+      index index.html ;
+      alias /opt/opscode/docs;
+    }
+
+    location /checksum/ {
+      internal;
+      root <%= node['private_chef']['opscode-chef']['checksum_path'].gsub('checksum', '') %>; 
+    }
+
+    location ~ "^/organizations/[a-z0-9\-_]+?/.*?/_acl.*$" {
+<%= select_upstream("opscode_account") %>
+    }
+
+    location ~ "^/organizations/[a-z0-9\-_]+?/(?:search)/.+$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+
+    # backwards compatible for Chef 0.9.x and below clients
+    # the nodes/:node_name/cookbooks is still handled by Ruby-Chef
+    location ~ "^/organizations/[a-z0-9\-_]+?/nodes/[^/]+/cookbooks$" {
+<%= select_upstream("opscode_chef") %>
+    }
+
+    # nodes goes to erchef
+    location ~ "^/organizations/[a-z0-9\-_]+?/nodes/{0,1}.*$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+
+    location ~ "^/organizations/[a-z0-9\-_]+?/environments/[^/]+/nodes$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+
+<%- if node['private_chef']['lb']['cache_cookbook_files'] -%>    
+    location ~ "^/organizations/[a-z0-9\-_]+?/cookbooks/[\w\.]+/(\d+\.\d+\.\d+|_latest)/files/.+$" {
+<%= select_upstream("#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}", "opscode_webui", node['private_chef']['opscode-chef']['upload_proto']) %>
+      proxy_cache webui-cache;
+      proxy_cache_valid 200 300m;
+    }
+
+<%- end -%>
+    location ~ "^/organizations/[a-z0-9\-_]+?/(?:cookbooks|sandboxes)/{0,1}.*$" {
+<%= select_upstream("#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}", "opscode_webui", node['private_chef']['opscode-chef']['upload_proto']) %>
+    }
+
+    location ~ "^/organizations/[a-z0-9\-_]+?/(?:nodes|status|search|cookbooks|data|roles|sandboxes|environments)/{0,1}.*$" {
+<%= select_upstream("opscode_chef") %>
+    }
+
+    location ~ "^/organizations/[a-z0-9\-_]+?/(?:groups|users|clients|containers|association_requests)/{0,1}.*$" {
+<%= select_upstream("opscode_account") %>
+    }
+
+    location ~ "^/(?:organizations|users)/{0,1}$" {
+<%= select_upstream("opscode_account") %>
+    }
+
+    location ~ "^/organizations/[a-z0-9\-_]+/{0,1}$" {
+<%= select_upstream("opscode_account") %>
+    }
+
+    location ~ "^/users/[a-z0-9\-_]+/{0,1}$" {
+<%= select_upstream("opscode_account") %>
+    }
+
+    location ~ "^/users/[a-z0-9\-_]+/{0,1}/association_requests/{0,1}.*$" {
+<%= select_upstream("opscode_account") %>
+    }
+
+    location ~ "^/users/[a-z0-9\-_]+/organizations/{0,1}$" {
+<%= select_upstream("opscode_account") %>
+    }
+
+    location ~ "^/verify_password$" {
+<%= select_upstream("opscode_account") %>
+    }
+
+    location ~ "^/(?:stylesheets|javascripts|images|facebox|css)/{0,1}.*$" {
+      if ($http_x_chef_version ~* "^(\d+\.\d+?)\..+$") {
+        error_page 400 =400 /400-chef_client_manage.json;
+        return 400;
+      }
+      proxy_pass http://opscode_webui;
+      proxy_pass_request_headers off;
+      proxy_cache webui-cache;
+      proxy_cache_valid 200 302 300m;
+      proxy_cache_valid 404 1m;
+    }
+    
+    location / {
+      # any request from a chef client that reaches this point 
+      # is for a resource/route that doesn't exist.
+      if ($http_x_chef_version ~* "^(\d+\.\d+?)\..+$") {
+         error_page 404 =404 /404.json;
+         return 404;
+      }
+
+      proxy_pass http://opscode_webui; 
+    }
+    <%- else -%>
+    rewrite ^(.*) https://$server_name$1 permanent;
+    <%- end -%>
+  }
+  <%-  end %>
 
   server { 
     listen <%= @ssl_port %>; 
