@@ -266,7 +266,7 @@ def ha_status
     end
   else
     if drbd_status =~ /cs:Connected ro:Secondary\/Primary ds:UpToDate\/UpToDate/
-      puts "[OK] my DRBD status is Connected/Secondary/UpToDate and I am master"
+      puts "[OK] my DRBD status is Connected/Secondary/UpToDate and I am not master"
     else
       puts "[ERROR] my DRBD status is #{drbd_status}"
       error_exit = 4
@@ -288,7 +288,7 @@ def ha_status
       puts "[ERROR] my DRBD partition is mounted and I am not master"
       error_exit = 5
     else
-      puts "[OK] my DRBD partition is not mounted and I am master"
+      puts "[OK] my DRBD partition is not mounted and I am not master"
     end
   end
 
