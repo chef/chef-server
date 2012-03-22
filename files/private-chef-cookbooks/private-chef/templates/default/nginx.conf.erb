@@ -55,8 +55,8 @@ http {
   server {
     listen <%= @non_ssl_port %>;
     server_name <%= @server_name %>;
-    access_log /var/log/opscode/nginx/rewrite-port-80.log;
     <%- if @enablenon_ssl -%>
+    access_log /var/log/opscode/nginx/access-port-<%= @non_ssl_port %>.log;
     root <%= File.join(@dir, "html") %>;
 
 		client_max_body_size <%= @client_max_body_size %>;
@@ -186,6 +186,7 @@ http {
       proxy_pass http://opscode_webui; 
     }
     <%- else -%>
+    access_log /var/log/opscode/nginx/rewrite-port-<%= @non_ssl_port %>.log;
     rewrite ^(.*) https://$server_name$1 permanent;
     <%- end -%>
   }
