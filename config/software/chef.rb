@@ -1,10 +1,4 @@
-# NOTE:
-# Although the contents of this definition are identical to the 'chef'
-# definition, we have created them seperately to prepare for the event
-# that the versions of OSS chef-client and OPC-embedded chef-client
-# are tracked differently.
-
-name "chef-pc"
+name "chef"
 version "0.10.8"
 
 dependencies ["ruby", "rubygems"]
