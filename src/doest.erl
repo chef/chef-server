@@ -256,8 +256,12 @@ constrained_package_versions(State, PkgName, PkgConstraints) ->
 %% Given a package name get the list of all versions available for that package.
 -spec get_versions(t(), pkg_name()) -> [vsn()].
 get_versions(State, PkgName) ->
-    AllVsns = gb_trees:get(make_key(PkgName), State),
-    [Vsn || {Vsn, _} <- AllVsns].
+    case gb_trees:lookup(make_key(PkgName), State) of
+        none ->
+            [];
+        {value, AllVsns} ->
+            [Vsn || {Vsn, _} <- AllVsns]
+    end.
 
 -spec is_version_within_constraint(vsn(), constraint()) -> boolean().
 is_version_within_constraint(_Vsn, Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
