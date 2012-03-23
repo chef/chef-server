@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# TODO: 
+# /opt/chef should be paramaterized for the desired install location
+
+/opt/chef/setup.sh
