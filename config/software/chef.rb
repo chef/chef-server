@@ -9,7 +9,9 @@ build do
       "-n #{install_dir}/bin",
       "--no-rdoc --no-ri"].join(" ")
 
-  # don't need to do the symlinking setup for private chef
+  gem ["install highline net-ssh-multi", # TODO: include knife gems?
+       "-n #{install_dir}/bin",
+       "--no-rdoc --no-ri"].join(" ")
 
   # clean up
   ["docs",
