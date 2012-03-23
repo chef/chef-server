@@ -59,3 +59,12 @@ Mixlib::Authorization::Config.certificate_service_uri = certificate_service_uri
 
 Opscode::Mappers.connection_string = '<%= node['private_chef']['database_type'] == "postgresql" ? "postgres" : "mysql2" %>://<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>:<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>@<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>/opscode_chef'
 
+<% unless  node['private_chef'].nil? || node['private_chef'].empty? -%>
+# LDAP Authentication Enabled
+Mixlib::Authorization::Config.ldap_host = <%= node['private_chef']['ldap']['host'] %>
+Mixlib::Authorization::Config.ldap_port = <%= node['private_chef']['ldap']['port'] %>
+Mixlib::Authorization::Config.ldap_base = <%= node['private_chef']['ldap']['base'] %>
+Mixlib::Authorization::Config.ldap_login_attribute = <%= node['private_chef']['ldap']['login_attribute'] %>
+Mixlib::Authorization::Config.ldap_uid_attribute = <%= node['private_chef']['ldap']['uid_attribute'] %>
+Mixlib::Authorization::Config.ldap_chef_username_attribute = <%= node['private_chef']['ldap']['chef_username_attribute'] %>
+<% end -%>

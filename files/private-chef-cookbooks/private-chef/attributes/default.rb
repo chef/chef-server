@@ -498,3 +498,7 @@ default['private_chef']['keepalived']['service_posthooks'] = {
     "rabbitmq" => "PATH=/opt/opscode/embedded/bin:$PATH /opt/opscode/embedded/bin/rabbitmqctl wait /var/opt/opscode/rabbitmq/db/rabbit@localhost.pid"
 }
 
+##
+# LDAP Authentication Integration
+##
+default['private_chef']['ldap'] = nil

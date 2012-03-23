@@ -48,6 +48,7 @@ module PrivateChef
   from_email nil
   database_type nil
 
+  ldap Mash.new
 
   class << self
 
@@ -312,6 +313,17 @@ module PrivateChef
       end
     end
 
+    def gen_ldap
+      ldap_config_values = %w{ host port base login_attribute uid_attribute chef_username_attribute }
+      # if LDAP Authentication is enabled all config values are required
+      ldap_config_values.each do |val|
+        unless PrivateChef["ldap"].key?(val)
+          # ensure all values have been set
+          raise "Missing required LDAP config value '#{val}'. Required values include [#{ldap_config_values.join(', ')}]"
+        end
+      end
+    end
+
     def generate_config(node_name)
       generate_secrets(node_name)
       gen_nrpe_allowed_hosts
@@ -330,6 +342,11 @@ module PrivateChef
         Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha or tier.")
         exit 55
       end
+
+      unless PrivateChef["ldap"].nil? || PrivateChef["ldap"].empty?
+        gen_ldap
+      end
+
       generate_hash
     end
   end
