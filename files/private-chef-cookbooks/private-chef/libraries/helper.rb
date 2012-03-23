@@ -111,7 +111,12 @@ class Chef::Recipe
   def add_nagios_hostgroup(hostgroup)
     if node['private_chef']['nagios']['enable']
       node.default['private_chef']['nagios']['hosts'][node['hostname']]['hostgroups'] << hostgroup
-    end  
+    end
+  end
+
+  def ldap_authentication_enabled?
+    node['private_chef'].attribute?('ldap') &&
+      !(node['private_chef']['ldap'].nil? || node['private_chef']['ldap'].empty?)
   end
 end
 
