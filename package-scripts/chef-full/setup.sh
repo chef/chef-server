@@ -31,12 +31,12 @@ done
 shift `expr $OPTIND - 1`
 
 
-mkdir -p /opt/opscode || error_exit "Cannot create /opt/opscode!"
+
 if [ -f "/usr/bin/sw_vers" ]; then
     # OS X -- Use DYLD_LIBRARY_PATH
-    DYLD_LIBRARY_PATH=$INSTALLER_DIR/embedded/lib $INSTALLER_DIR/embedded/bin/rsync -a --delete --exclude $INSTALLER_DIR/setup.sh $INSTALLER_DIR/ /opt/opscode || error_exit "Cannot rsync release to /opt/opscode"
+    DYLD_LIBRARY_PATH=$INSTALLER_DIR/embedded/lib $INSTALLER_DIR/embedded/bin/rsync -a --delete --exclude $INSTALLER_DIR/setup.sh $INSTALLER_DIR/ $INSTALLER_DIR || error_exit "Cannot rsync release to $INSTALLER_DIR"
 else
-    LD_LIBRARY_PATH=$INSTALLER_DIR/embedded/lib $INSTALLER_DIR/embedded/bin/rsync -a --delete --exclude $INSTALLER_DIR/setup.sh $INSTALLER_DIR/ /opt/opscode || error_exit "Cannot rsync release to /opt/opscode"
+    LD_LIBRARY_PATH=$INSTALLER_DIR/embedded/lib $INSTALLER_DIR/embedded/bin/rsync -a --delete --exclude $INSTALLER_DIR/setup.sh $INSTALLER_DIR/ $INSTALLER_DIR || error_exit "Cannot rsync release to $INSTALLER_DIR"
 fi
 
 if [ "" != "$chef_url" ]; then
@@ -61,13 +61,13 @@ if [ "" != "$validation_key" ]; then
   chmod 600 /etc/chef/validation.pem
 fi
 
-ln -sf /opt/opscode/bin/chef-client /usr/bin || error_exit "Cannot link chef-client to /usr/bin"
-ln -sf /opt/opscode/bin/chef-solo /usr/bin || error_exit "Cannot link chef-solo to /usr/bin"
-ln -sf /opt/opscode/bin/knife /usr/bin || error_exit "Cannot link knife to /usr/bin"
-ln -sf /opt/opscode/bin/shef /usr/bin || error_exit "Cannot link shef to /usr/bin"
-ln -sf /opt/opscode/bin/ohai /usr/bin || error_exit "Cannot link ohai to /usr/bin"
-if [ -h /opt/opscode/bin/chef-server-ctl ]; then
-  ln -sf /opt/opscode/bin/chef-server-ctl /usr/bin || error_exit "Cannot link chef-server-ctl to /usr/bin"
+ln -sf $INSTALLER_DIR/bin/chef-client /usr/bin || error_exit "Cannot link chef-client to /usr/bin"
+ln -sf $INSTALLER_DIR/bin/chef-solo /usr/bin || error_exit "Cannot link chef-solo to /usr/bin"
+ln -sf $INSTALLER_DIR/bin/knife /usr/bin || error_exit "Cannot link knife to /usr/bin"
+ln -sf $INSTALLER_DIR/bin/shef /usr/bin || error_exit "Cannot link shef to /usr/bin"
+ln -sf $INSTALLER_DIR/bin/ohai /usr/bin || error_exit "Cannot link ohai to /usr/bin"
+if [ -h $INSTALLER_DIR/bin/chef-server-ctl ]; then
+  ln -sf $INSTALLER_DIR/bin/chef-server-ctl /usr/bin || error_exit "Cannot link chef-server-ctl to /usr/bin"
   /usr/bin/chef-server-ctl reconfigure
 fi
 
