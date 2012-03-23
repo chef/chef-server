@@ -6,7 +6,7 @@ diff -ur keepalived-1.1.20/keepalived/vrrp/vrrp.c keepalived-1.1.20.fixed/keepal
  	} else if (hd->priority > vrrp->effective_priority ||
  		   (hd->priority == vrrp->effective_priority &&
 -		    ntohl(iph->saddr) > VRRP_PKT_SADDR(vrrp))) {
-+		    ntohl(iph->saddr) > htonl(VRRP_PKT_SADDR(vrrp)))) {
++		    ntohl(iph->saddr) > ntohl(VRRP_PKT_SADDR(vrrp)))) {
  		log_message(LOG_INFO,
  		       "VRRP_Instance(%s) Received higher prio advert",
  		       vrrp->iname);
