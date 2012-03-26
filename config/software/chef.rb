@@ -1,7 +1,7 @@
 name "chef"
 version "0.10.8"
 
-dependencies ["ruby", "rubygems"]
+dependencies ["ruby", "rubygems", "yajl"]
 
 build do
   gem ["install chef",
