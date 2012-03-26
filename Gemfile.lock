@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:opscode/omnibus-ruby.git
-  revision: 48c385725c0ec0b676eb7a2f79e7f3d5618be8ab
+  revision: e30be7796d30a11a956d57c5c8fbcfa008020622
   branch: chef-full
   specs:
     omnibus (0.1)
@@ -29,7 +29,7 @@ GEM
     mixlib-config (1.1.2)
     mixlib-log (1.3.0)
     mixlib-shellout (1.0.0)
-    net-http-persistent (2.5.2)
+    net-http-persistent (2.6)
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
     net-ssh (2.2.2)
