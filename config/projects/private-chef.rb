@@ -1,5 +1,7 @@
 name "private-chef"
 
+replaces "private-chef-full"
+
 # initialize the dependencies
 deps = []
 
