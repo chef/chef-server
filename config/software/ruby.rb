@@ -1,7 +1,7 @@
 name "ruby"
 version "1.9.2p290"
 
-dependencies ["autoconf", "zlib", "openssl", "ncurses", "readline"]
+dependencies ["zlib", "openssl", "ncurses", "readline"]
 
 source :url => 'http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p290.tar.gz',
        :md5 => '604da71839a6ae02b5b5b5e1b792d5eb'
@@ -28,7 +28,7 @@ env =
   end
 
 build do
-  command "#{install_dir}/embedded/bin/autoconf", :env => env
+  # command "#{install_dir}/embedded/bin/autoconf", :env => env
   command "./configure --prefix=#{install_dir}/embedded --with-opt-dir=#{install_dir}/embedded --enable-shared --disable-install-doc", :env => env
   command "make -j #{max_build_jobs}"
   command "make install"
