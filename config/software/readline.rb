@@ -11,7 +11,7 @@ relative_path "readline-6.2"
 
 configure_env =
   case platform
-  when "darwim"
+  when "darwin"
     {
       "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
       "LDFLAGS" => "-R#{install_dir}/embedded/lib -L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include"
