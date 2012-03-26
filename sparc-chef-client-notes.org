@@ -119,11 +119,11 @@ Studio compiler.
 *** Build the gem
     $ /export/home/builder/BUILD/opt/opscode/embedded/bin/gem build yajl-ruby.gemspec 
 *** Install the gem
-    $ /export/home/builder/BUILD/opt/opscode/embedded/bin/gem install yajl-ruby-1.1.0.gem --no-ri --no-rdoc -i ../BUILD/opt/opscode/embedded/lib/ruby/gems -n ../BUILD/opt/opscode/embedded/bin
+    $ /export/home/builder/BUILD/opt/opscode/embedded/bin/gem install yajl-ruby-1.1.0.gem --no-ri --no-rdoc -i ../BUILD/opt/opscode/embedded/lib/ruby/gems/1.9.1 -n ../BUILD/opt/opscode/embedded/bin
 ** Install chef-client
 Now we have all the dependencies in place to install chef-client
 
-    $ /export/home/builder/BUILD/opt/opscode/embedded/bin/gem install chef --no-ri --no-rdoc -i ../BUILD/opt/opscode/embedded/lib/ruby/1.9.1 -n ../BUILD/opt/opscode/embedded/bin
+    $ /export/home/builder/BUILD/opt/opscode/embedded/bin/gem install chef --no-ri --no-rdoc -i ../BUILD/opt/opscode/embedded/lib/ruby/gems/1.9.1 -n ../BUILD/opt/opscode/embedded/bin
 ** Make package
 We've built Readline and Libyaml, and built and installed a custom
 yajl-ruby, and then installed chef-client.  This has all been
