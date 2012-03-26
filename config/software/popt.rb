@@ -6,11 +6,21 @@ source :url => "http://rpm5.org/files/popt/popt-1.16.tar.gz",
 
 relative_path "popt-1.16"
 
-env = {
-  "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
-  "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include -static-libgcc",
-  "LD_RUN_PATH" => "#{install_dir}/embedded/lib"
-}
+env =
+  case platform
+  when "solaris2"
+    {
+      "LDFLAGS" => "-R#{install_dir}/embedded/lib -L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+      "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+      "LD_RUN_PATH" => "#{install_dir}/embedded/lib"
+    }
+  else
+    {
+      "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+      "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include -static-libgcc",
+      "LD_RUN_PATH" => "#{install_dir}/embedded/lib"
+    }
+  end
 
 build do
   command "./configure --prefix=#{install_dir}/embedded", :env => env
