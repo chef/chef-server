@@ -119,7 +119,7 @@ fi
 
 if [ "x$platform" = "x" ];
 then
-  echo "Unable to determine platform version!"
+  echo "Unable to determine platform!"
   report_bug
   exit 1
 fi
