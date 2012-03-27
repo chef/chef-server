@@ -1,6 +1,11 @@
 #!/bin/bash
 
-release_version="0.10.8-3"
+#
+# This chef-full install script is maintained @
+# https://github.com/opscode/opscode-omnibus/tree/chef-full/package-scripts/chef-full/install.sh
+#
+
+release_version="0.10.8-4"
 use_shell=0
 
 # Check whether a command exists - returns 0 if it does, 1 if it does not
