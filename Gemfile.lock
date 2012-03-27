@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:opscode/omnibus-ruby.git
-  revision: 011abe6bf00a3bcf6aed4bb836d32bd6809c6ca6
+  revision: 8aaf3a8a01e3a8fb8aa458e1c4182be3a37440af
   branch: chef-full
   specs:
     omnibus (0.1)
