@@ -421,7 +421,6 @@ else
   when "test"
     ENV["PATH"] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
     pedant_args = ARGV[1..-1]
-    pedant_args = %w[-P private_chef] if pedant_args.empty?
     Dir.chdir("/opt/opscode/embedded/service/opscode-pedant")
     exec("/opt/opscode/embedded/bin/bundle exec ./bin/opscode-pedant #{pedant_args.join(' ')}")
   when *SV_COMMAND_NAMES
