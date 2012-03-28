@@ -30,6 +30,13 @@ rpm_filename() {
   filename="chef-full-${version}.${machine}.rpm"
 }
 
+# Set the filename for a Solaris SVR4 package, based on version and machine
+svr4_filename() {
+  PATH=/usr/sfw/bin:$PATH
+  filetype="solaris"
+  filename="chef-full_${version}.${platform}.${platform_version}_${machine}.solaris"
+}
+
 # Set the filename for the sh archive
 shell_filename() {
   filetype="sh"
@@ -115,6 +122,11 @@ then
   if [ $x86_64 -eq 1 ]; then
     machine="x86_64"
   fi
+elif [ -f "/etc/release" ];
+then
+  platform="solaris2"
+  machine=$(/usr/bin/uname -p)
+  platform_version=$(/usr/bin/uname -r)
 fi
 
 if [ "x$platform" = "x" ];
@@ -170,6 +182,7 @@ else
     "debian") deb_filename ;;
     "el") rpm_filename ;;
     "fedora") rpm_filename ;;
+    "solaris2") svr4_filename ;;
     *) shell_filename ;;
   esac
 fi
@@ -203,6 +216,9 @@ echo "Installing Chef $version"
 case "$filetype" in
   "rpm") rpm -Uvh /tmp/$filename ;;
   "deb") dpkg -i /tmp/$filename ;;
+  "solaris") echo "conflict=nocheck" > /tmp/nocheck
+             pkgadd -a /tmp/nocheck -G -d /tmp/$filename
+ 	     ;;
   "sh" ) bash /tmp/$filename ;;
 esac
 
