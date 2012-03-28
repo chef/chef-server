@@ -113,7 +113,9 @@ class Chef::Recipe
       node.default['private_chef']['nagios']['hosts'][node['hostname']]['hostgroups'] << hostgroup
     end
   end
+end
 
+class Chef::Resource::Template
   def ldap_authentication_enabled?
     node['private_chef'].attribute?('ldap') &&
       !(node['private_chef']['ldap'].nil? || node['private_chef']['ldap'].empty?)
