@@ -193,9 +193,11 @@ url="http://s3.amazonaws.com/opscode-full-stack/$platform-$platform_version-$mac
 
 if exists wget;
 then
-  wget -O /tmp/$filename $url
+  downloader="wget"
+  wget -O /tmp/$filename $url 2>/tmp/stderr
 elif exists curl;
 then
+  downloader="curl"
   curl $url > /tmp/$filename
 else
   echo "Cannot find wget or curl - cannot install Chef!"
@@ -203,13 +205,30 @@ else
 fi
 
 # Check to see if we got a 404 or an empty file
-grep "does not exist" /tmp/$filename 2>&1 >/dev/null
-if [ $? -eq 0 ] || [ ! -s /tmp/$filename ]
-then
+
+unable_to_retrieve_package() {
   echo "Unable to retrieve a valid package!"
   report_bug
   echo "URL: $url"
   exit 1
+}
+
+if [ $downloader == "curl" ]
+then 
+  #do curl stuff
+  grep "The specified key does not exist." /tmp/$filename 2>&1 >/dev/null
+  if [ $? -eq 0 ] || [ ! -s /tmp/$filename ] 
+  then
+    unable_to_retrieve_package
+  fi
+elif [ $downloader == "wget" ]
+then
+  #do wget stuff
+  grep "404" /tmp/stderr 2>&1 >/dev/null
+  if [ $? -eq 0 ] || [ ! -s /tmp/$filename ] 
+  then
+    unable_to_retrieve_package
+  fi
 fi
 
 echo "Installing Chef $version"
