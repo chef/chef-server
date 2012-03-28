@@ -224,7 +224,7 @@ then
 elif [ $downloader == "wget" ]
 then
   #do wget stuff
-  grep "404" /tmp/stderr 2>&1 >/dev/null
+  grep "ERROR 404" /tmp/stderr 2>&1 >/dev/null
   if [ $? -eq 0 ] || [ ! -s /tmp/$filename ] 
   then
     unable_to_retrieve_package
