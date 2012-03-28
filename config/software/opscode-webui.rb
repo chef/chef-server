@@ -1,5 +1,5 @@
 name "opscode-webui"
-version "pc-rel-3.4.3.3"
+version "active_directory"
 
 dependencies ["ruby", "bundler", "libxml2", "libxslt", "curl", "rsync"]
 

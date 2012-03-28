@@ -1,5 +1,5 @@
 name "mixlib-authorization"
-version "pc-rel-1.2.1"
+version "active_directory"
 
 dependencies ["ruby",
               "bundler",
