@@ -59,7 +59,7 @@ Mixlib::Authorization::Config.certificate_service_uri = certificate_service_uri
 
 Opscode::Mappers.connection_string = '<%= node['private_chef']['database_type'] == "postgresql" ? "postgres" : "mysql2" %>://<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>:<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>@<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>/opscode_chef'
 
-<% unless @ldap_enabled -%>
+<% if @ldap_enabled -%>
 # LDAP Authentication Enabled
 Mixlib::Authorization::Config.ldap_host = <%= node['private_chef']['ldap']['host'] %>
 Mixlib::Authorization::Config.ldap_port = <%= node['private_chef']['ldap']['port'] %>
