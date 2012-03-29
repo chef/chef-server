@@ -64,12 +64,13 @@ def cleanse
   end
 
   FileUtils.rm_f("/etc/init/opscode-runsvdir.conf") if File.exists?("/etc/init/opscode-runsvdir.conf")
-  run_command("egrep -v '/opt/opscode/embedded/bin/runsvdir-start' /etc/inittab > /etc/inittab.new && mv /etc/inittab.new /etc/inittab && kill -1 1") if File.exists?("/etc/inittab")
+  run_command("egrep -v '/opt/opscode/embedded/bin/runsvdir-start' /etc/inittab > /etc/inittab.new && mv /etc/inittab.new /etc/inittab") if File.exists?("/etc/inittab")
+  run_command("kill -1 1")
 
-  backup_dir = "/root/opc-cleanse"
+  backup_dir = Time.now.strftime("/root/opc-cleanse-%FT%R")
   FileUtils.mkdir_p("/root") unless File.exists?("/root")
   FileUtils.rm_rf(backup_dir)
-  FileUtils.cp_r("/etc/opscode", backup_dir)
+  FileUtils.cp_r("/etc/opscode", backup_dir) if File.exists?("/etc/opscode")
   run_command("rm -rfv /opt/opscode/service/* /tmp/opt /var/opt/opscode /etc/opscode /var/log/opscode")
 
   puts "Your config files have been backed up to #{backup_dir}."
