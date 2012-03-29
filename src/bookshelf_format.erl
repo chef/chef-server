@@ -15,7 +15,27 @@
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
 
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--compile(export_all).
--endif.
+-module(bookshelf_format).
+-include("bookshelf.hrl").
+-export([
+         to_base64/1,
+         to_date/1,
+         to_etag/1,
+         to_hex/1
+        ]).
+
+to_date(Date) ->
+    iso8601:format(Date).
+
+to_base64(Bin) ->
+    base64:encode_to_string(Bin).
+
+to_hex(Bin) ->
+    string:to_lower(
+      lists:flatten([io_lib:format("~2.16.0b",[N]) || <<N>> <= Bin])
+     ).
+
+to_etag(Tag) when is_binary(Tag) ->
+    to_etag(to_hex(Tag));
+to_etag(Tag) ->
+    io_lib:format("\"~s\"", [Tag]).

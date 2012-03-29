@@ -18,27 +18,16 @@
 -module(bookshelf_req).
 -include("bookshelf.hrl").
 -export([
-         fingerprint/0,
-         to_base64/1,
-         to_hex/1,
          with_amz_request_id/1,
          with_etag/2
         ]).
 
-fingerprint() ->
-    term_to_binary({node(), erlang:now()}).
-
-to_base64(Bin) ->
-    base64:encode_to_string(Bin).
-
-to_hex(Bin) ->
-    string:to_lower(
-      lists:flatten([io_lib:format("~2.16.0b",[N]) || <<N>> <= Bin])
-     ).
-
 with_amz_request_id(Rq) ->
-    Id        = to_base64(fingerprint()),
-    {ok, Rq2} = cowboy_http_req:set_resp_header(<<"x-amz-request-id">>, Id, Rq),
+    Id        = term_to_binary({node(), erlang:now()}),
+    Base64    = bookshelf_format:to_base64(Id),
+    {ok, Rq2} = cowboy_http_req:set_resp_header(<<"x-amz-request-id">>,
+                                                Base64,
+                                                Rq),
     Rq2.
 
 with_etag(Etag, Rq) ->
