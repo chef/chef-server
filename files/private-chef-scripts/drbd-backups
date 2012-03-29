@@ -153,6 +153,7 @@ end
 
 datestamp=`#{DATE} +%Y-%m-%d-%H-%M-%S`.chomp
 
+system("sync")
 if !system("#{LVCREATE} -L40G -s -n backup-#{datestamp} /dev/#{options[:drbd_vg]}/#{options[:drbd_lv]}")
   system("#{MAIL} -s 'privatechef lvcreate failed on #{sysname}' #{options[:mail_to]} < /dev/null")
   exit -1
