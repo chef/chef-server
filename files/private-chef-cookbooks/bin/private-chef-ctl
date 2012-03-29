@@ -18,6 +18,7 @@
 #
 
 require 'json'
+require 'fileutils'
 
 SV_COMMAND_NAMES = %w[status up down once pause cont hup alarm interrupt quit
                       1 2 term kill start stop restart shutdown force-stop
@@ -61,9 +62,17 @@ def cleanse
     run_sv_command("stop") 
   rescue SystemExit
   end
-  status = run_command("rm -rfv /opt/opscode/service/* /var/opt/opscode /etc/opscode /var/log/opscode")
-  exit_status = status.exitstatus if exit_status == 0 && !status.success?
-  puts "You probably want to run #{$0} reconfigure now."
+
+  FileUtils.rm_f("/etc/init/opscode-runsvdir.conf") if File.exists?("/etc/init/opscode-runsvdir.conf")
+  run_command("egrep -v '/opt/opscode/embedded/bin/runsvdir-start' /etc/inittab > /etc/inittab.new && mv /etc/inittab.new /etc/inittab && kill -1 1") if File.exists?("/etc/inittab")
+
+  backup_dir = "/root/opc-cleanse"
+  FileUtils.mkdir_p("/root") unless File.exists?("/root")
+  FileUtils.rm_rf(backup_dir)
+  FileUtils.cp_r("/etc/opscode", backup_dir)
+  run_command("rm -rfv /opt/opscode/service/* /tmp/opt /var/opt/opscode /etc/opscode /var/log/opscode")
+
+  puts "Your config files have been backed up to #{backup_dir}."
   exit 0
 end
 
