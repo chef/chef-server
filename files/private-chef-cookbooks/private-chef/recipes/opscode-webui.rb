@@ -38,6 +38,7 @@ template env_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-webui'].to_hash)
+  variables(node['private_chef']['opscode-webui'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?))
   notifies :restart, 'service[opscode-webui]' if should_notify
 end
 
