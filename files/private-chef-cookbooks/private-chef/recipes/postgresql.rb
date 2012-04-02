@@ -113,7 +113,7 @@ should_notify = OmnibusHelper.should_notify?("postgres")
 
 runit_service "postgres" do
   down node['private_chef']['postgresql']['ha']
-  init_script_template "postgres-init.erb"
+  control(['t'])
   options({
     :log_directory => postgresql_log_dir
   }.merge(params))
