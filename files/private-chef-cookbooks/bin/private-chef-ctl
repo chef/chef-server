@@ -73,6 +73,17 @@ def cleanse
   FileUtils.cp_r("/etc/opscode", backup_dir) if File.exists?("/etc/opscode")
   run_command("rm -rfv /opt/opscode/service/* /tmp/opt /var/opt/opscode /etc/opscode /var/log/opscode")
 
+  begin
+    run_sv_command("graceful-kill") 
+  rescue SystemExit
+  end
+
+  run_command("pkill -HUP -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
+    sleep 3
+  run_command("pkill -TERM -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
+    sleep 3
+  run_command("pkill -KILL -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
+
   puts "Your config files have been backed up to #{backup_dir}."
   exit 0
 end
