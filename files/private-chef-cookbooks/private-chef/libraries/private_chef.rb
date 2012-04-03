@@ -73,7 +73,16 @@ module PrivateChef
       PrivateChef['backend_vips']
     end
 
-    def generate_secrets
+    # guards against creating secrets on non-bootstrap node
+    def generate_hex_if_bootstrap(chars, ha_guard)
+      if ha_guard
+        Chef::Log.fatal("Attempt to create secrets on non-bootstrap node in an H/A topology, please copy /etc/opscode/* around instead.")
+        exit 44
+      end
+      SecureRandom.hex(chars)
+    end
+
+    def generate_secrets(node_name)
       existing_secrets ||= Hash.new
       if File.exists?("/etc/opscode/private-chef-secrets.json")
         existing_secrets = Chef::JSONCompat.from_json(File.read("/etc/opscode/private-chef-secrets.json"))
@@ -84,17 +93,20 @@ module PrivateChef
         end
       end
 
-      PrivateChef['rabbitmq']['password'] ||= SecureRandom.hex(50)
-      PrivateChef['rabbitmq']['jobs_password'] ||= SecureRandom.hex(50)
-      PrivateChef['opscode_webui']['cookie_secret'] ||= SecureRandom.hex(50)
-      PrivateChef['mysql']['sql_password'] ||= SecureRandom.hex(50)
-      PrivateChef['postgresql']['sql_password'] ||= SecureRandom.hex(50)
-      PrivateChef['postgresql']['sql_ro_password'] ||= SecureRandom.hex(50)
-      PrivateChef['opscode_account']['session_secret_key'] ||= SecureRandom.hex(50)
-      PrivateChef['nagios']['admin_password'] ||= SecureRandom.hex(50)
-      PrivateChef['drbd']['shared_secret'] ||= SecureRandom.hex(30)
-      PrivateChef['keepalived']['vrrp_instance_password'] ||= SecureRandom.hex(50)
-      PrivateChef['opscode_authz']['superuser_id'] ||= SecureRandom.hex(32)
+      me = PrivateChef["servers"][node_name]
+      ha_guard = PrivateChef['topology'] == "ha" && !me['bootstrap']
+
+      PrivateChef['rabbitmq']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['rabbitmq']['jobs_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['opscode_webui']['cookie_secret'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['mysql']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['postgresql']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['postgresql']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['opscode_account']['session_secret_key'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['nagios']['admin_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
+      PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['opscode_authz']['superuser_id'] ||= generate_hex_if_bootstrap(32, ha_guard)
 
       if File.directory?("/etc/opscode")
         File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
@@ -300,7 +312,7 @@ module PrivateChef
     end
 
     def generate_config(node_name)
-      generate_secrets
+      generate_secrets(node_name)
       gen_nrpe_allowed_hosts
 
       case PrivateChef['topology']
