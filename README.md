@@ -14,6 +14,16 @@ Ensure all required gems are installed and ready to use:
 
     bundle install
 
+# omnibus-ruby
+
+Clone the [omnibus-ruby][] repo as a sibling of this repo
+
+[omnibus-ruby]: https://github.com/opscode/omnibus-ruby
+
+# Create a config file
+
+    cp omnibus.rb.example omnibus.rb
+
 # Build It!
 
 To initiate an omnibus build on Ubuntu 10.04
