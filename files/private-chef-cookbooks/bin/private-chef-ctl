@@ -20,6 +20,8 @@
 require 'json'
 require 'fileutils'
 
+File::umask(022)
+
 SV_COMMAND_NAMES = %w[status up down once pause cont hup alarm interrupt quit
                       1 2 term kill start stop restart shutdown force-stop
                       force-reload force-restart force-shutdown check]
