@@ -13,7 +13,7 @@ function error_exit
 
 ln -sf /opt/opscode/bin/private-chef-ctl /usr/bin || error_exit "Cannot link private-chef-ctl in /usr/bin"
   
-#  /opt/opscode/bin/private-chef-ctl reconfigure
+[ -e /etc/opscode/chef-server-running.json ] &&  /opt/opscode/bin/private-chef-ctl reconfigure
 
 
 echo "Thank you for installing Chef!"
