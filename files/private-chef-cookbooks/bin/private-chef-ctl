@@ -69,10 +69,7 @@ def pre_uninstall
   FileUtils.rm_rf(backup_dir)
   FileUtils.cp_r("/etc/opscode", backup_dir) if File.exists?("/etc/opscode")
 
-  begin
-    run_sv_command("graceful-kill") 
-  rescue SystemExit
-  end
+  graceful_kill
 
   run_command("pkill -HUP -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
   run_command("pkill -HUP -f 'runsvdir -P /opt/opscode/service'")
@@ -106,10 +103,7 @@ def cleanse
   FileUtils.cp_r("/etc/opscode", backup_dir) if File.exists?("/etc/opscode")
   run_command("rm -rfv /opt/opscode/service/* /tmp/opt /var/opt/opscode /etc/opscode /var/log/opscode")
 
-  begin
-    run_sv_command("graceful-kill") 
-  rescue SystemExit
-  end
+  graceful_kill
 
   run_command("pkill -HUP -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
   run_command("pkill -HUP -f 'runsvdir -P /opt/opscode/service'")
