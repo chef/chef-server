@@ -55,6 +55,37 @@ def service_list
   exit 0
 end
 
+def pre_uninstall
+  begin
+    run_sv_command("stop") 
+  rescue SystemExit
+  end
+  FileUtils.rm_f("/etc/init/opscode-runsvdir.conf") if File.exists?("/etc/init/opscode-runsvdir.conf")
+  run_command("egrep -v '/opt/opscode/embedded/bin/runsvdir-start' /etc/inittab > /etc/inittab.new && mv /etc/inittab.new /etc/inittab") if File.exists?("/etc/inittab")
+  run_command("kill -1 1")
+
+  backup_dir = Time.now.strftime("/root/opc-cleanse-%FT%R")
+  FileUtils.mkdir_p("/root") unless File.exists?("/root")
+  FileUtils.rm_rf(backup_dir)
+  FileUtils.cp_r("/etc/opscode", backup_dir) if File.exists?("/etc/opscode")
+
+  begin
+    run_sv_command("graceful-kill") 
+  rescue SystemExit
+  end
+
+  run_command("pkill -HUP -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
+  run_command("pkill -HUP -f 'runsvdir -P /opt/opscode/service'")
+    sleep 3
+  run_command("pkill -TERM -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
+  run_command("pkill -TERM -f 'runsvdir -P /opt/opscode/service'")
+    sleep 3
+  run_command("pkill -KILL -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
+  run_command("pkill -KILL -f 'runsvdir -P /opt/opscode/service'")
+
+  puts "Your config files have been backed up to #{backup_dir}."
+end
+
 def cleanse
   puts "This will delete *all* configuration, log, and variable data associated with this Private Chef Instance.\n\n*** You have 60 seconds to hit CTRL-C ***\n\n"
   unless ARGV[1] == "yes"
@@ -381,6 +412,8 @@ reconfigure
     Reconfigure private chef.
 cleanse
     Delete *all* private chef data, and start from scratch.
+pre-uninstall
+    Prep the system for an upgrade.
 master-recover
     Set this server to HA master state, ignoring VRRP
 backup-recover
@@ -436,6 +469,8 @@ else
     service_list
   when "cleanse"
     cleanse
+  when "pre-uninstall"
+    pre_uninstall
   when "show-config"
   	show_config
   when "reconfigure"
