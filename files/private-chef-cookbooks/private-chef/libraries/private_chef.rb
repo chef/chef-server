@@ -315,9 +315,8 @@ module PrivateChef
     end
 
     def gen_ldap
-      ldap_config_values = %w{ host port base login_attribute uid_attribute chef_username_attribute }
-      # if LDAP Authentication is enabled all config values are required
-      ldap_config_values.each do |val|
+      required_ldap_config_values = %w{ host base_dn }
+      required_ldap_config_values.each do |val|
         unless PrivateChef["ldap"].key?(val)
           # ensure all values have been set
           raise "Missing required LDAP config value '#{val}'. Required values include [#{ldap_config_values.join(', ')}]"

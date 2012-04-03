@@ -63,8 +63,6 @@ Opscode::Mappers.connection_string = '<%= node['private_chef']['database_type'] 
 # LDAP Authentication Enabled
 Mixlib::Authorization::Config.ldap_host = "<%= node['private_chef']['ldap']['host'] %>"
 Mixlib::Authorization::Config.ldap_port = "<%= node['private_chef']['ldap']['port'] %>"
-Mixlib::Authorization::Config.ldap_base = "<%= node['private_chef']['ldap']['base'] %>"
+Mixlib::Authorization::Config.ldap_base_dn = "<%= node['private_chef']['ldap']['base_dn'] %>"
 Mixlib::Authorization::Config.ldap_login_attribute = "<%= node['private_chef']['ldap']['login_attribute'] %>"
-Mixlib::Authorization::Config.ldap_uid_attribute = "<%= node['private_chef']['ldap']['uid_attribute'] %>"
-Mixlib::Authorization::Config.ldap_chef_username_attribute = "<%= node['private_chef']['ldap']['chef_username_attribute'] %>"
 <% end -%>
