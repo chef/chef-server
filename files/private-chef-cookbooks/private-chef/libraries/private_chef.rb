@@ -319,7 +319,7 @@ module PrivateChef
       required_ldap_config_values.each do |val|
         unless PrivateChef["ldap"].key?(val)
           # ensure all values have been set
-          raise "Missing required LDAP config value '#{val}'. Required values include [#{ldap_config_values.join(', ')}]"
+          raise "Missing required LDAP config value '#{val}'. Required values include [#{required_ldap_config_values.join(', ')}]"
         end
       end
     end
