@@ -79,10 +79,13 @@ def cleanse
   end
 
   run_command("pkill -HUP -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
+  run_command("pkill -HUP -f 'runsvdir -P /opt/opscode/service'")
     sleep 3
   run_command("pkill -TERM -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
+  run_command("pkill -TERM -f 'runsvdir -P /opt/opscode/service'")
     sleep 3
   run_command("pkill -KILL -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
+  run_command("pkill -KILL -f 'runsvdir -P /opt/opscode/service'")
 
   puts "Your config files have been backed up to #{backup_dir}."
   exit 0
