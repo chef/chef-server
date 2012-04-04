@@ -124,6 +124,11 @@ http {
 <%= select_upstream("opscode_erchef") %>
     }
 
+    # data (data_bags, data_bag_items go to erchef
+    location ~ "^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+
 <%- if node['private_chef']['lb']['cache_cookbook_files'] -%>    
     location ~ "^/organizations/[a-z0-9\-_]+?/cookbooks/[\w\.]+/(\d+\.\d+\.\d+|_latest)/files/.+$" {
 <%= select_upstream("#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}", "opscode_webui", node['private_chef']['opscode-chef']['upload_proto']) %>
@@ -282,6 +287,11 @@ http {
 <%= select_upstream("opscode_erchef") %>
     }
 
+    # data (data_bags, data_bag_items go to erchef
+    location ~ "^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+
 <%- if node['private_chef']['lb']['cache_cookbook_files'] -%>    
     location ~ "^/organizations/[a-z0-9\-_]+?/cookbooks/[\w\.]+/(\d+\.\d+\.\d+|_latest)/files/.+$" {
 <%= select_upstream("#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}", "opscode_webui", node['private_chef']['opscode-chef']['upload_proto']) %>
@@ -401,6 +411,11 @@ http {
 
     # roles go to erchef
     location ~ "^/organizations/[a-z0-9\-_]+?/roles/{0,1}.*$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+
+    # data (data_bags, data_bag_items go to erchef
+    location ~ "^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$" {
 <%= select_upstream("opscode_erchef") %>
     }
 
