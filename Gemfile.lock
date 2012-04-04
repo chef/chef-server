@@ -1,10 +1,9 @@
 GIT
   remote: git@github.com:opscode/omnibus-ruby.git
-  revision: 432bad4d298f62bc1b4547514bc45e978fd42db7
-  branch: chef-full
+  revision: 0b3c753d3d395f2eaec72032c64824e6ceaee91d
   specs:
     omnibus (0.1)
-      fpm (~> 0.3.0)
+      fpm (= 0.3.11)
       mixlib-shellout (~> 1.0)
       ohai (>= 0.6.12)
       rake (>= 0.9)
