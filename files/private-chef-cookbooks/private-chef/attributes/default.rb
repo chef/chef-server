@@ -480,12 +480,12 @@ default['private_chef']['keepalived']['vrrp_instance_preempt_delay'] = 30
 default['private_chef']['keepalived']['vrrp_instance_nopreempt'] = true
 
 default['private_chef']['keepalived']['service_order'] = [
-	{ "key" => "couchdb", "service_name" => "couchdb" },
-	{ "key" => "postgresql", "service_name" => "postgres" },
-	{ "key" => "rabbitmq", "service_name" => "rabbitmq" },
-	{ "key" => "redis", "service_name" => "redis" },
-	{ "key" => "opscode-authz", "service_name" => "opscode-authz" },
-	{ "key" => "opscode-certificate", "service_name" => "opscode-certificate" },
+  { "key" => "couchdb", "service_name" => "couchdb" },
+  { "key" => "postgresql", "service_name" => "postgres" },
+  { "key" => "rabbitmq", "service_name" => "rabbitmq" },
+  { "key" => "redis", "service_name" => "redis" },
+  { "key" => "opscode-authz", "service_name" => "opscode-authz" },
+  { "key" => "opscode-certificate", "service_name" => "opscode-certificate" },
   { "key" => "opscode-account", "service_name" => "opscode-account" },
   { "key" => "opscode-solr", "service_name" => "opscode-solr" },
   { "key" => "opscode-expander", "service_name" => "opscode-expander" },
