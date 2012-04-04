@@ -492,3 +492,7 @@ default['private_chef']['keepalived']['service_order'] = [
   { "key" => "nginx", "service_name" => "nginx" }
 ]
 
+default['private_chef']['keepalived']['service_posthooks'] = {
+    "rabbitmq" => "PATH=/opt/opscode/embedded/bin:$PATH /opt/opscode/embedded/bin/rabbitmqctl wait /var/opt/opscode/rabbitmq/db/rabbit@localhost.pid"
+}
+
