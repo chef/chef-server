@@ -52,6 +52,10 @@ function transition
 <%- if node['private_chef'][item['key']]['ha'] -%>
       log_me "Starting service <%= item['service_name'] %>"
       /opt/opscode/bin/private-chef-ctl <%= item['service_name'] %> start || error_exit "Cannot start <%= item['service_name'] %>"
+      <%- if node['private_chef']['keepalived']['service_posthooks'][item['service_name']] -%>
+        log_me "Doing post-start hook for <%= item['service_name'] %>"
+        <%= node['private_chef']['keepalived']['service_posthooks'][item['service_name']] %>
+      <%- end -%>
 <%- end -%>
 <%- end -%>
 

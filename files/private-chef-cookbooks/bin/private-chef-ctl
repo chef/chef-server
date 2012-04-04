@@ -255,6 +255,16 @@ def ha_status
     end
   end
 
+  vrrp_instance_interface = @running_config['private_chef']['keepalived']['vrrp_instance_interface']
+  has_vrrp_instance_interface = system "ip a show dev #{vrrp_instance_interface} >/dev/null 2>&1"
+
+  if has_vrrp_instance_interface
+    puts "[OK] found VRRP communications interface #{vrrp_instance_interface}"
+  else
+    puts "[ERROR] VRRP communications interface #{vrrp_instance_interface} not found, is heartbeat_device set correctly in private-chef.rb?"
+    error_exit = 8
+  end
+
   drbd_status = `cat /proc/drbd | egrep cs:`.chomp
   if current_cluster_status == "master"
     if drbd_status =~ /cs:Connected ro:Primary\/Secondary ds:UpToDate\/UpToDate/
