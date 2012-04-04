@@ -1,6 +1,9 @@
 name "private-chef"
 
-replaces "private-chef-full"
+replaces        "private-chef-full"
+install_path    "/opt/opscode"
+build_version   Omnibus::BuildVersion.full
+build_iteration "1"
 
 # initialize the dependencies
 deps = []

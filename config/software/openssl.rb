@@ -20,7 +20,7 @@ build do
              "shared"].join(" ")
   elsif platform == "solaris2"
     command ["./Configure",
-             "solaris-x86-gcc",
+             "solaris-sparcv9-cc",
              "--prefix=#{install_dir}/embedded",
              "--with-zlib-lib=#{install_dir}/embedded/lib",
              "--with-zlib-include=#{install_dir}/embedded/include",
