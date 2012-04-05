@@ -1,6 +1,8 @@
 name "pcre"
 version "8.30"
 
+dependencies ["readline", "ncurses"]
+
 source :url => "ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.30.tar.gz",
        :md5 => "d5ee0d9f6d2f0b7489331d04b6c182ef"
 
