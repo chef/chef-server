@@ -24,7 +24,7 @@ build do
            "--with-libiconv-prefix=#{install_dir}/embedded",
            "--with-jpeg=#{install_dir}/embedded",
            "--with-png=#{install_dir}/embedded",
-           "--without-x" "--without-freetype",
+           "--without-x", "--without-freetype",
            "--without-fontconfig",
            "--without-xpm"].join(" "),
           :env => configure_env,
