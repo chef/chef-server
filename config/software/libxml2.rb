@@ -13,7 +13,8 @@ build do
          "--prefix=#{install_dir}/embedded",
          "--with-zlib=#{install_dir}/embedded",
          "--with-readline=#{install_dir}/embedded",
-         "--with-iconv=#{install_dir}/embedded"].join(" ")
+         "--with-iconv=#{install_dir}/embedded",
+         "--without-python"].join(" ")
   env = {
     "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
     "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
