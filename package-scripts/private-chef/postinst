@@ -11,7 +11,10 @@ function error_exit
 	exit 1
 }
 
-ln -sf /opt/opscode/bin/private-chef-ctl /usr/bin || error_exit "Cannot link private-chef-ctl in /usr/bin"
+# see: http://tickets.opscode.com/browse/CHEF-3022
+if [ ! -e /etc/redhat-release -o $1 -eq "1"]; then
+  ln -sf /opt/opscode/bin/private-chef-ctl /usr/bin || error_exit "Cannot link private-chef-ctl in /usr/bin"
+fi
   
 if [ -e /etc/opscode/chef-server-running.json ]; then
   # this is mostly a hack for upgrading pre-1.1.10 clients that do not run pre-uninstall themselves

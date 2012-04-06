@@ -1,9 +1,12 @@
 #!/bin/bash
 
 # Clean up binary symlinks if they exist
-rm -f /usr/bin/chef-client
-rm -f /usr/bin/chef-solo
-rm -f /usr/bin/shef
-rm -f /usr/bin/knife
-rm -f /usr/bin/ohai
+# see: http://tickets.opscode.com/browse/CHEF-3022
+if [ ! -e /etc/redhat-release -o $1 -eq "0"]; then
+  rm -f /usr/bin/chef-client
+  rm -f /usr/bin/chef-solo
+  rm -f /usr/bin/shef
+  rm -f /usr/bin/knife
+  rm -f /usr/bin/ohai
+fi
 
