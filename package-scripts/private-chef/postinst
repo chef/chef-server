@@ -21,6 +21,8 @@ if [ -e /etc/opscode/chef-server-running.json ]; then
   /opt/opscode/bin/private-chef-ctl pre-uninstall
 
   /opt/opscode/bin/private-chef-ctl reconfigure
+
+  /opt/opscode/bin/private-chef-ctl start
 fi
 
 echo "Thank you for installing Chef!"
