@@ -90,6 +90,39 @@ def uninstall
   cleanup_procs_and_nuke("/tmp/opt")
 end
 
+def password
+  unless ARGV.length == 3
+    STDERR.puts "Usage: private-chef-ctl password <username> [<password>|--clear]"
+    exit 1
+  end
+
+  load_json
+  arguments = ""
+  if ARGV[2] == "--clear"
+    if ldap_authentication_enabled?
+      arguments << ' --no-recovery-authentication-enabled'
+    else
+      STDERR.puts "External authentication (such as LDAP) must be enabled to clear a user's password."
+      exit 1
+    end
+  else
+    arguments << " --user-password \"#{ARGV[2]}\""
+    if ldap_authentication_enabled?
+      arguments << " --recovery-authentication-enabled"
+    end
+  end
+
+  account_api_url = @running_config['private_chef']['opscode-account']['url']
+  superuser = @running_config['private_chef']['opscode-account']['proxy_user']
+  ENV["PATH"] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
+  Dir.chdir("/opt/opscode/embedded/service/opscode-account")
+  exec("bundle exec bin/updateobjecttool -a #{account_api_url} -o \"#{superuser}\" -p \"/etc/opscode/#{superuser}.pem\" -w user -n \"#{ARGV[1]}\"#{arguments}")
+end
+
+def ldap_authentication_enabled?
+  @running_config['private_chef']['ldap'] && !@running_config['private_chef']['ldap'].empty?
+end
+
 def cleanse
   puts "This will delete *all* configuration, log, and variable data associated with this Private Chef Instance.\n\n*** You have 60 seconds to hit CTRL-C ***\n\n"
   unless ARGV[1] == "yes"
@@ -452,6 +485,8 @@ graceful-kill
     Attempt a graceful stop, then SIGKILL the entire process group.
 test
     Run the API test suite against localhost.
+password
+    Set or clear a user's password
 EOH
   exit 1
 end
@@ -496,6 +531,8 @@ else
     pedant_args = ARGV[1..-1]
     Dir.chdir("/opt/opscode/embedded/service/opscode-pedant")
     exec("/opt/opscode/embedded/bin/bundle exec ./bin/opscode-pedant #{pedant_args.join(' ')}")
+  when "password"
+    password
   when *SV_COMMAND_NAMES
     if ARGV[1]
       puts "i don't know that command, did you mean: private-chef-ctl #{ARGV[1]} #{ARGV[0]}?"
