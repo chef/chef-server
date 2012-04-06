@@ -12,7 +12,7 @@ function error_exit
 }
 
 # see: http://tickets.opscode.com/browse/CHEF-3022
-if [ ! -e /etc/redhat-release -o $1 -eq "1" ]; then
+if [ ! -e /etc/redhat-release -o "x$1" == "x1" ]; then
   ln -sf /opt/opscode/bin/private-chef-ctl /usr/bin || error_exit "Cannot link private-chef-ctl in /usr/bin"
 fi
   

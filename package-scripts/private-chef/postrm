@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # see: http://tickets.opscode.com/browse/CHEF-3022
-if [ ! -e /etc/redhat-release -o $1 -eq "0" ]; then
+if [ ! -e /etc/redhat-release -o "x$1" == "x0" ]; then
   rm -f /usr/bin/private-chef-ctl
 fi
 
