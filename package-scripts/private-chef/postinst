@@ -14,6 +14,7 @@ function error_exit
 ln -sf /opt/opscode/bin/private-chef-ctl /usr/bin || error_exit "Cannot link private-chef-ctl in /usr/bin"
   
 if [ -e /etc/opscode/chef-server-running.json ]; then
+  # this is mostly a hack for upgrading pre-1.1.10 clients that do not run pre-uninstall themselves
   /opt/opscode/bin/private-chef-ctl pre-uninstall
 
   /opt/opscode/bin/private-chef-ctl reconfigure
