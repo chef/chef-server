@@ -143,6 +143,17 @@ def reconfigure
   end
 end
 
+# start (start all services) is special cased to deal with backend complexity
+def start
+  load_json
+  if @running_config['private_chef']['keepalived']['enable']
+    run_sv_command("start", "keepalived")
+    run_sv_command("start", "nrpe")
+  else
+    run_sv_command("start")
+  end
+end
+
 def tail(service=nil)
   if service
     system("find /var/log/opscode/#{service} -type f | grep -E -v '(lock|@|sasl|idx|siz|nagios|nrpe)' | xargs tail --follow=name --retry")
@@ -461,6 +472,8 @@ else
     reconfigure
   when "tail"
     tail
+  when "start"
+    start
   when "graceful-kill"
     graceful_kill
   when "test"
