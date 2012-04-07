@@ -36,6 +36,7 @@ function transition
     master)
       # 10 * SVWAIT 
       try=300
+      rm -f $terminate_master_file
       while true; do
         log_me "Attempting DRBD primary takeover - attempts left ${try}"
         drbdadm primary pc0 && break
