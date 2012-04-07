@@ -11,7 +11,8 @@ ulimit -f unlimited
 ulimit -i 62793
 ulimit -l 64
 ulimit -m unlimited
-ulimit -n 1000000
+# WARNING: increasing the global file descriptor limit increases RAM consumption on startup dramatically
+ulimit -n 50000
 ulimit -q 819200
 ulimit -r 0
 ulimit -s 10240
