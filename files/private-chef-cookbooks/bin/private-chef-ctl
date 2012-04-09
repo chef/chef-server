@@ -19,6 +19,7 @@
 
 require 'json'
 require 'fileutils'
+require 'highline/import'
 
 File::umask(022)
 
@@ -91,24 +92,31 @@ def uninstall
 end
 
 def password
-  unless ARGV.length == 3
-    STDERR.puts "Usage: private-chef-ctl password <username> [<password>|--clear]"
+
+  unless ARGV.length == 2 || (ARGV.length == 3 && ARGV[2] == "--clear")
+    STDERR.puts "Usage: private-chef-ctl password <username> [--clear]"
     exit 1
   end
 
   load_json
   arguments = ""
-  if ARGV[2] == "--clear"
+  if ARGV.length == 2
+    password = HighLine.ask("Enter the new password:  " ) { |q| q.echo = "*" }
+    password2 = HighLine.ask("Enter the new password again:  " ) { |q| q.echo = "*" }
+    if password != password2
+      STDERR.puts "Passwords did not match"
+      exit 1
+    end
+    arguments << " --user-password \"#{password}\""
+    if ldap_authentication_enabled?
+      arguments << " --recovery-authentication-enabled"
+    end
+  else
     if ldap_authentication_enabled?
       arguments << ' --no-recovery-authentication-enabled'
     else
       STDERR.puts "External authentication (such as LDAP) must be enabled to clear a user's password."
       exit 1
-    end
-  else
-    arguments << " --user-password \"#{ARGV[2]}\""
-    if ldap_authentication_enabled?
-      arguments << " --recovery-authentication-enabled"
     end
   end
 
