@@ -99,7 +99,16 @@ def password
   end
 
   load_json
-  arguments = ""
+  username = ARGV[1]
+  superuser = @running_config['private_chef']['opscode-account']['proxy_user']
+  command = [
+    'bundle', 'exec', 'bin/updateobjecttool',
+    '-a', @running_config['private_chef']['opscode-account']['url'],
+    '-o', superuser,
+    '-p', "/etc/opscode/#{superuser}.pem",
+    '-w', 'user',
+    '-n', username
+  ]
   if ARGV.length == 2
     password = HighLine.ask("Enter the new password:  " ) { |q| q.echo = "*" }
     password2 = HighLine.ask("Enter the new password again:  " ) { |q| q.echo = "*" }
@@ -107,24 +116,28 @@ def password
       STDERR.puts "Passwords did not match"
       exit 1
     end
-    arguments << " --user-password \"#{password}\""
+    command << '--user-password'
+    command << password
     if ldap_authentication_enabled?
-      arguments << " --recovery-authentication-enabled"
+      command << '--recovery-authentication-enabled'
+      verbed = 'enabled'
+    else
+      verbed = 'set'
     end
   else
     if ldap_authentication_enabled?
-      arguments << ' --no-recovery-authentication-enabled'
+      command << '--no-recovery-authentication-enabled'
+      verbed = 'cleared'
     else
       STDERR.puts "External authentication (such as LDAP) must be enabled to clear a user's password."
       exit 1
     end
   end
 
-  account_api_url = @running_config['private_chef']['opscode-account']['url']
-  superuser = @running_config['private_chef']['opscode-account']['proxy_user']
   ENV["PATH"] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
   Dir.chdir("/opt/opscode/embedded/service/opscode-account")
-  exec("bundle exec bin/updateobjecttool -a #{account_api_url} -o \"#{superuser}\" -p \"/etc/opscode/#{superuser}.pem\" -w user -n \"#{ARGV[1]}\"#{arguments}")
+  system(*command)
+  puts "Password for #{username} successfully #{verbed}."
 end
 
 def ldap_authentication_enabled?
