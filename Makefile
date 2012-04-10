@@ -57,7 +57,7 @@ eunit:
 	$(REBAR) eunit
 
 $(EUNIT_DIR)/%.beam: test/%.erl
-	$(ERLC) $(ERLCFLAGS) $< -o $(EUNIT_DIR)
+	$(ERLC) $(ERLCFLAGS) -o $(EUNIT_DIR) $<
 
 # This fixes another brokness in rebar. Rebar does not seem to realize
 # that you may want to 'just rebuild' the tests and not actually run
