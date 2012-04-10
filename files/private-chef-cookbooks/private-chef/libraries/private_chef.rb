@@ -171,13 +171,13 @@ module PrivateChef
         "keepalived",
         "nagios",
         "nrpe",
-        "notification_email",
-        "database_type",
         "nginx"
       ].each do |key|
         rkey = key.gsub('_', '-')
         results['private_chef'][rkey] = PrivateChef[key]
       end
+      results['private_chef']['database_type'] = PrivateChef['database_type']
+      results['private_chef']['notification_email'] = PrivateChef['notification_email']
 
       results
     end
