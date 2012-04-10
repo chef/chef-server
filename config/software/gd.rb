@@ -1,5 +1,5 @@
 name "gd"
-version "2.3.33"
+version "2.0.33"
 
 dependencies ["libiconv", "zlib", "libjpeg", "libpng"]
 
