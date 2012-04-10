@@ -1,7 +1,7 @@
 name "nrpe"
 version "2.13"
 
-dependencies ["zlib", "openssl"]
+dependencies ["zlib", "openssl", "libwrap"]
 
 # tarball location comes from sourceforge download redirect
 source :url => "http://voxel.dl.sourceforge.net/project/nagios/nrpe-2.x/nrpe-2.13/nrpe-2.13.tar.gz",
