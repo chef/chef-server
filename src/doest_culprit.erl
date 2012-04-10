@@ -143,10 +143,10 @@ missing_test() ->
                                                     {"0.3", []}]}]),
 
 
-    ?assertThrow({unable_to_solve,{app4,"0.1"},{[{app4,"0.1"}],[],[]}},
+    ?assertThrow({unreachable_package,app4},
                  doest:solve(Dom0, [{app4, "0.1"}, {app3, "0.1"}])),
 
-    ?assertThrow({unable_to_solve,{app1,"0.1"},{[],[],[{app1,"0.1"}]}},
+    ?assertThrow({unreachable_package,app4},
                  doest:solve(Dom0, [{app1, "0.1"}])).
 
 -endif.

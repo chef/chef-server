@@ -132,7 +132,8 @@ add_package_version({?MODULE, Dom0}, Pkg, Vsn, PkgConstraints) ->
             {value, Info0} ->
                 case lists:keytake(make_key(Vsn), 1, Info0) of
                     {value, {Vsn, Constraints}, Info1} ->
-                        [{Vsn, Constraints ++ PkgConstraints} | Info1];
+                        [{Vsn, join_constraints(Constraints, PkgConstraints)}
+                         | Info1];
                     false ->
                         [{Vsn,  PkgConstraints} | Info0]
                 end;
@@ -146,15 +147,16 @@ add_package_version(State, Pkg, Vsn) ->
     add_package_version(State, Pkg, Vsn, []).
 
 -spec solve(t(), [constraint()]) -> [pkg()].
-solve({?MODULE, State}, PackageList)
+solve({?MODULE, State0}, PackageList)
   when erlang:length(PackageList) > 0 ->
-    case primitive_solve(State, PackageList) of
+    State1 = trim_unreachable_packages(State0, PackageList),
+    case primitive_solve(State1, PackageList) of
         false ->
             %% This exists to satisfy dailyzer though it should never happen
             erlang:throw({this_should_never_happen, fail});
         fail ->
             [FirstCons | Rest] = PackageList,
-            doest_culprit:search(State, [FirstCons], Rest);
+            doest_culprit:search(State1, [FirstCons], Rest);
         Solution ->
             Solution
     end.
@@ -162,6 +164,14 @@ solve({?MODULE, State}, PackageList)
 %%====================================================================
 %% Internal Functions
 %%====================================================================
+-spec join_constraints([constraint()], [constraint()]) ->
+                              [constraint()].
+join_constraints(NewConstraints, ExistingConstraints) ->
+    ECSet = sets:from_list(ExistingConstraints),
+    FilteredNewConstraints = [NC || NC <- NewConstraints,
+                                    not sets:is_element(NC, ECSet)],
+    ExistingConstraints ++ FilteredNewConstraints.
+
 -spec primitive_solve(internal_t(), [constraint()]) -> [pkg()] | fail | false.
 primitive_solve(State, PackageList)
   when erlang:length(PackageList) > 0 ->
@@ -347,7 +357,8 @@ all_pkgs(State, Visited, [Pkg | Pkgs], Constraints) ->
 pkgs(State, Visited, Pkg, Constraints, OtherPkgs) ->
     F = fun (Vsn) ->
                 Deps = get_deps(State, Pkg, Vsn),
-                UConstraints = extend_constraints(Constraints, [{Pkg, Vsn} | Deps]),
+                UConstraints = extend_constraints(Constraints, [{Pkg, Vsn}
+                                                                | Deps]),
                 DepPkgs = lists:map(fun dep_pkg/1, Deps),
                 NewVisited = [Pkg | Visited],
                 all_pkgs(State, NewVisited, DepPkgs ++ OtherPkgs, UConstraints)
@@ -376,6 +387,38 @@ lists_some(F, [H | T], False) ->
         Res ->
             Res
     end.
+
+trim_unreachable_packages(State, Goals) ->
+    {_, NewState0} = new(),
+    lists:foldl(fun(Pkg, NewState1) ->
+                        PkgName = dep_pkg(Pkg),
+                        find_reachable_packages(State, NewState1, PkgName)
+                end, NewState0, Goals).
+
+find_reachable_packages(ExistingState, NewState0, PkgName) ->
+    case contains_package_version(NewState0, PkgName) of
+        true ->
+            NewState0;
+        false ->
+            case gb_trees:lookup(make_key(PkgName), ExistingState) of
+                {value, Info0} ->
+                    NewState1 = gb_trees:insert(make_key(PkgName), Info0, NewState0),
+                    lists:foldl(fun({_Vsn, Constraints}, NewState2) ->
+                                        lists:foldl(fun(DepPkg, NewState3) ->
+                                                            DepPkgName = dep_pkg(DepPkg),
+                                                            find_reachable_packages(ExistingState,
+                                                                                    NewState3,
+                                                                                    DepPkgName)
+                                                    end, NewState2, Constraints)
+                                end, NewState1, Info0);
+                none ->
+                    erlang:throw({unreachable_package, PkgName})
+            end
+    end.
+
+
+contains_package_version(Dom0, Pkg) ->
+    gb_trees:is_defined(make_key(Pkg), Dom0).
 
 %%============================================================================
 %% Tests
