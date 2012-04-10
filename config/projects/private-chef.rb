@@ -37,6 +37,7 @@ deps << "opscode-org-creator"
 deps << "opscode-certificate"
 deps << "opscode-platform-debug"
 deps << "opscode-test"
+deps << "mysql2"
 
 # monitoring
 deps << "nagios"
