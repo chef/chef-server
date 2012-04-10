@@ -109,7 +109,7 @@ load_orgs(timeout, State) ->
             io:fwrite(FH, "loaded orgs: ~p~n", [Summary]),
             file:close(FH)
     end,
-    {next_state, preload_org_nodes, State#state{couch_cn=Cn}, 0}.
+    {next_state, preload_org_objects, State#state{couch_cn=Cn}, 0}.
 
 preload_org_objects(timeout, #state{preload_amt=Amt}=State) ->
     case preload_orgs(Amt, State) of
