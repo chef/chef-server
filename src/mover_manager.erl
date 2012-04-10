@@ -6,7 +6,7 @@
 
 %% TODO:
 %% - make org loading a one-time event
-%% - 
+%% -
 
 -module(mover_manager).
 
@@ -178,7 +178,7 @@ start_batch(timeout, #state{object_mod = ObjectMod,
                     {next_state, running, State1}
             end
     end.
-    
+
 running({start, _BatchSize, _ObjectBatchSize}, _From, State) ->
     {reply, {error, running_batch}, running, State}.
 
@@ -430,12 +430,12 @@ find_org_by_worker(Pid) ->
             log(err, "find_org_by_worker unexpected dets error"),
             {error, Why}
     end.
-                
+
 start_workers(Orgs, BatchSize, ObjectMod) ->
     lists:foldl(fun({Guid, Name}, Count) ->
                         Config = make_worker_config(migrate, ObjectMod, Guid, Name, BatchSize),
                         case mover_worker_sup:new_mover(Config) of
-                            {ok, Pid} -> 
+                            {ok, Pid} ->
                                 mover_worker:migrate(Pid),
                                 monitor(process, Pid),
                                 mark_org(active, Guid, Pid),
@@ -479,7 +479,7 @@ route_orgs_to_erchef_sql() ->
                     false -> post_to_nginx(Url, Body)
                 end
                 || Url <- NginxControlUrls ],
-    BadResults = [ X || X <- Results, X =/= ok ], 
+    BadResults = [ X || X <- Results, X =/= ok ],
     case BadResults of
         [] -> ok;
         _ -> {error, BadResults}
