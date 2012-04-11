@@ -17,15 +17,14 @@ if [ ! -e /etc/redhat-release -o "x$1" == "x1" ]; then
 fi
   
 if [ -e /etc/opscode/chef-server-running.json ]; then
-  # this is mostly a hack for upgrading pre-1.1.10 clients that do not run pre-uninstall themselves
-  /opt/opscode/bin/private-chef-ctl pre-uninstall
-
-  /opt/opscode/bin/private-chef-ctl reconfigure
-
-  /opt/opscode/bin/private-chef-ctl start
+  echo -e "\033[1mYou have upgraded Private Chef!\033[0m"
+  echo
+  echo "The next step in the upgrade process is to run:"
+  echo
+  echo -e "\033[1;31mprivate-chef-ctl upgrade\033[0m"
+else
+  echo -e "\033[1mThank you for installing Private Chef!\033[0m"
 fi
-
-echo "Thank you for installing Chef!"
 
 exit 0
 

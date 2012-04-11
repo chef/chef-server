@@ -22,6 +22,9 @@ execute "/opt/opscode/embedded/bin/gem unpack /opt/opscode/embedded/service/gem/
   not_if { File.directory?("/opt/opscode/embedded/service/gem/ruby/1.9.1/gems/mysql2-#{node['private_chef']['mysql']['mysql2_version']}") }
 end
 
+execute "sed -i -e 's/s.files = `git ls-files`/s.files = `find . -type f`/' /opt/opscode/embedded/service/gem/ruby/1.9.1/gems/mysql2-#{node['private_chef']['mysql']['mysql2_version']}/mysql2.gemspec"
+execute "sed -i -e 's/s.test_files = `git ls-files spec examples`/s.test_files = `find spec examples -type f`/' /opt/opscode/embedded/service/gem/ruby/1.9.1/gems/mysql2-#{node['private_chef']['mysql']['mysql2_version']}/mysql2.gemspec"
+
 execute "compile mysql2" do
   command "/opt/opscode/embedded/bin/rake compile" 
   cwd "/opt/opscode/embedded/service/gem/ruby/1.9.1/gems/mysql2-#{node['private_chef']['mysql']['mysql2_version']}"
