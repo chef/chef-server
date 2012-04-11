@@ -1,7 +1,7 @@
 #!/bin/bash -xe
 
 # Assert that $GIT_TAG is an annotated tag, if it exists.
-if [ -n "$GIT_TAG" ]; then git tag -v $GIT_TAG; fi
+if [ -n "$GIT_TAG" ]; then git describe --exact-match $GIT_TAG; fi
 
 if [ ! -e /opt/opscode/.branch ]; then exit 1; fi
 export GIT_BRANCH_CLEAN="$(echo "$GIT_BRANCH" | tr / _)"
