@@ -1,5 +1,6 @@
 name "pc-version"
 description "generates a version manifest file"
+always_build true
 
 build do
   block do
