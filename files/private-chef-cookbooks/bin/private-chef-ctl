@@ -136,7 +136,10 @@ def password
 
   ENV["PATH"] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
   Dir.chdir("/opt/opscode/embedded/service/opscode-account")
-  system(*command)
+  rc = system(*command)
+  if rc != 0
+    exit rc
+  end
   puts "Password for #{username} successfully #{verbed}."
 end
 
