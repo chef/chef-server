@@ -40,7 +40,6 @@ function transition
         log_me "Attempting DRBD primary takeover - attempts left ${try}"
         drbdadm primary pc0 && break
         let "--try" || error_exit "Cannot become drbd primary!" 
-        [ -e $terminate_master_file ] && error_exit "Aborting master state transition due to request"
         sleep 1
       done
 
@@ -129,7 +128,6 @@ while true; do
      transition_loop "$1"
      break
   else
-     let "--try" || error_exit "Cannot become drbd backup!" 
      log_me "Requested transition to $1"
      if [ "$1" != "backup" ]; then
        error_exit "Requested transition to $1, but state transition already running."
