@@ -29,14 +29,14 @@ rm pkg/* || true
 
 if [ "$1" = "client" ]
 then
-  export TARGET="chef-full"
+  export TARGET_EXEC="chef-full"
 else
-  export TARGET="private-chef"
+  export TARGET_EXEC="private-chef"
 fi
 
 export PATH=/usr/local/bin:$PATH
 bundle install --deployment --without development
-bundle exec rake projects:$TARGET
+bundle exec rake projects:$TARGET_EXEC
 # Cleanup
 if [ "${GIT_BRANCH}" != "master" ]
 then
