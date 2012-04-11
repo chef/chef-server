@@ -1,0 +1,179 @@
+* Building Chef Client
+** Introduction
+The process of building the Chef client requires some bootstrapping.
+Specifically, we need a Ruby interpreter, a compiler, and Git. Both
+Ruby and Git have already been built by Opscode engineering for
+Solaris 10 SPARC, so we can use those versions to build the rest of
+the toolchain.  The compiler is a large piece of software, and can
+only be downloaded by manually accepting a license file.  To make
+bootstrapping easier, we provide the Ruby and Git binaries and
+libraries and the compiler binaries from an NFS server.  All that is
+needed to get started is to ensure the bootstrap share is mounted on
+the building zone.
+** Build server
+Opscode presently has a single Sparc machine, with a Solaris 10
+install on it.  This machine is set up with a number of zones and
+templates and ZFS datasets.  Should the machine need to be rebuilt,
+there is a Jumpstart server available on the same network as the Sparc
+machine.  This will be documented separately.
+** Creating a zone
+To ensure builds are repeatable and not subject to side-effects from
+previous installs, it is recommended that each chef-client build be
+carried out within a Solaris zone.  Creation of these zones is
+documented separately, and for the purposes of this documentation, it
+is assumed that you are beginning with access to a Solaris 10 zone.
+** Mount the bootstrap share
+The first step in the build is to ensure that the zone has access to
+Git, Ruby, and the compiler.  These are made available from an NFS
+share.  As root, carry out the following:
+
+    % mount -F nfs 172.28.5.14:/export/bootstrap /opt/opscode/embdedded
+** Set up required symlinks
+The build process requires access to a few typical tools, secifically
+`ar`, `ld` and `make`.  These tools are shipped with Solaris 10, but
+are placed in directoties containing various other tools, many of
+which we don't need.  In order to satisfy the dependencies of the
+configure script, we must symlink a few tools into a convenient
+location.
+    % mkdir /opt/opscode/bin
+    % ln -s /usr/ccs/bin/ar /opt/opscode/bin/ar
+    % ln -s /usr/ccs/bin/ld /opt/opscode/bin/ld
+    % ln -s /usr/sfw/bin/gmake /opt/opscode/bin/make
+** Set up builder user
+It is recommended to build and package software as a non-privileged, local user.  Create a builder user as follows:
+    % mkdir /export/home/builder
+    % useradd -m -s /usr/bin/bash/ -d /export/home/builder/ builder
+    % passwd builder
+    % su - builder
+    % export PATH=/opt/opscode/embedded/bin:/opt/opscode/embedded/solarisstudio12.3/bin/:/opt/opscode/bin:$PATH
+    % mkdir /export/home/builder/BUILD
+** Building by Hand
+*** Build and install Readline
+The GNU Readline library is needed by `shef`.  The steps to obtain it and compile are as follows:
+**** Get the source code
+    $ /usr/sfw/bin/wget ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
+    $ gzip -dc readline-6.2.tar.gz | tar xvf -
+**** Build Readline
+For each dependency, we specify the prefix, so that when packaged, the
+software will appear under this directory.  We then pass the DESTDIR
+argument to `make install`, so as to place the to-be-packaged software
+into a build directory.
+
+     $ cd readline-6.2 
+     $ ./configure --prefix=/opt/opscode/embedded
+     $ make && make install DESTDIR=/export/home/builder/BUILD
+*** Build and install LibYaml
+LibYaml is needed by the Psych YAML parser and emitter.  We follow exactly the same procedure as for Readline.
+**** Get the source code
+    $ cd
+    $ /usr/sfw/bin/wget http://pyyaml.org/download/libyaml/yaml-0.1.4.tar.gz
+    $ gzip -dc yaml-0.1.4.tar.gz | tar xvf -
+**** Build LibYaml
+    $ cd yaml-0.1.4
+    $ ./configure --prefix=/opt/opscode/embedded
+    $ make && make install DESTDIR=/export/home/builder/BUILD
+*** Build and install Ruby
+Now we have Readline and Libyaml libraries available, we can build Ruby, ensuring we can link to the required libraries.
+**** Get the source code
+    $ cd
+    $ /usr/sfw/bin/wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p125.tar.gz
+    $ gzip -dc ruby-1.9.3-p125.tar.gz | tar xvf -
+**** Build Ruby
+In order to ensure the Readline and Libyaml libaries that we just
+built are available to the compiler when we build Ruby, we must pass
+in the `--with-opt-dir` argument to the configure script.
+
+    $ cd ruby-1.9.3-p125
+    $ ./configure --prefix=/opt/opscode/embedded --with-opt-dir=/export/home/builder/BUILD/opt/opscode/embedded 
+
+Because when installed, Ruby needs to be linked against the correct
+libraries, we must ensure that the correct library path is embedded in
+the ELF binary.  On the Solaris Studio compiler, this is achieved by
+passing the libary path to the compiler with the `-R` flag.  We need
+to edit the Makefile to achieve this.
+
+    $ grep -i ^CC Makefile 
+    CC = cc -R/opt/opscode/embedded/lib 
+
+In order to keep the build time, and the binary size to a minimum, we
+won't build and ship the documentation with our embedded Ruby.  To
+acheive this, we edit the Makefile again:
+
+    $ grep DOCTARGETS Makefile
+    DOCTARGETS = nodoc 
+
+Now we can do the same make and make install routine:
+
+    $ make 
+    $ make install DESTDIR=/export/home/builder/BUILD
+*** Build and install patched yajl-ruby
+Chef has a (nested) dependency upon yajl-ruby.  Unfortunately, this
+gem has native extensions for which the extconf.rb that is shipped
+with upstream's yajl-ruby is only appropriate for use with gcc.
+I've forked and patched yajl-ruby so that it can use the Solaris
+Studio compiler.
+**** Get the patched yajl-ruby
+    $ cd
+    $ git clone git://github.com/Atalanta/yajl-ruby.git
+    $ cd yajl-ruby/
+    $ git checkout sparc
+**** Build the gem
+    $ /export/home/builder/BUILD/opt/opscode/embedded/bin/gem build yajl-ruby.gemspec 
+**** Install the gem
+    $ /export/home/builder/BUILD/opt/opscode/embedded/bin/gem install yajl-ruby-1.1.0.gem --no-ri --no-rdoc -i ../BUILD/opt/opscode/embedded/lib/ruby/gems/1.9.1 -n ../BUILD/opt/opscode/embedded/bin
+*** Install chef-client
+Now we have all the dependencies in place to install chef-client
+
+    $ /export/home/builder/BUILD/opt/opscode/embedded/bin/gem install chef --no-ri --no-rdoc -i ../BUILD/opt/opscode/embedded/lib/ruby/gems/1.9.1 -n ../BUILD/opt/opscode/embedded/bin
+*** Make package
+We've built Readline and Libyaml, and built and installed a custom
+yajl-ruby, and then installed chef-client.  This has all been
+installed into the same build directory, from which we can create a
+single SVR4 package, using FPM.  FPM is provided by the NFS share as part of the base bootstrap system.
+
+    $ /opt/opscode/embedded/bin/fpm -s dir -t solaris -n OPSCchef-full -v 0.10.8 -C /export/home/builder/BUILD opt/
+    $ mv OPSCchef-full_0.10.8_sparc.solaris OPSCchef-full
+
+This package can now be installed on any Solaris 10 SPARC machine using:
+
+   % pkgadd -G -d /path/to/OPSCchef-full
+
+
+
+
+** Building with Omnibus
+*** Intro
+opscode-omnibus is the ruby-based version of the omnibus builder. It
+will build the software and all of its prerequisites in /opt/chef.
+Once the build has completed, opscode-omnibus uses fpm to package the
+contents of /opt/chef for delivery.
+*** Get Set Up
+These instructions assume that you have set up the builder user (from
+above) and have all of the requesite symlinks in place.
+*** Install the Remaining Prerequisites
+The only opscode-omnibus prerequisite missing from the
+/opt/opscode-based build package is bundler.
+
+     $ gem install bundler
+*** Check out opscode-omnibus
+     $ git clone git@github.com:opscode/opscode-omnibus
+     $ # currently all the chef-client work is on it's own branch
+     $ cd opscode-omnibus
+     $ git checkout chef-full
+     $ bundle install
+*** Run the builder
+    $ rake projects:chef-full
+*** What Breaks?
+I have built an entire chef-full package with opscode-omnibus. I
+haven't tested it, however. After I built the package, I added the
+health-check feature to the opscode-omnibus project. health-check will
+run ldd against all files in /opt/chef and determine if they are
+linked in such a way that they will behave correctly on a target
+system (e.g. linked to /opt/chef/* or a commonly available system
+library). Unfortunately, the Solaris libraries differ substantially
+from those on other linux distributions, and without further
+invertigation the health-check fails, preventing the package from
+being created.
+
+The next step is to determine which libraries are safe to link to,
+modify the health-check, and add in dependencies where needed.

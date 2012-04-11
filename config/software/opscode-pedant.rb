@@ -1,5 +1,5 @@
 name "opscode-pedant"
-version "rel-0.2.0"
+version "rel-0.3.0"
 
 dependencies ["ruby",
               "bundler",

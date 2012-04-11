@@ -1,0 +1,76 @@
+# This annotated Pedant configuration file details the various
+# configuration settings available to you.  It is separate from the
+# actual Pedant::Config class because not all settings have sane
+# defaults, and not all settings are appropriate in all settings.
+
+################################################################################
+
+# Testing organization. Use a new one each time because we cache the
+# org_name -> org db id mapping in a few daemons.
+org "pedant-testorg-#{Time.new.utc.strftime("%Y%m%d%H%M%S")}"
+
+# If you've specified a testing organization, you can also indicate
+# whether or not Pedant should create this organization for you, or
+# assume that it already exists.
+create_org true
+
+# If you want Pedant to delete the testing organization when it is
+# done, use this parameter.  Note that this only has an effect if
+# Pedant also created the testing organization.
+delete_org true
+
+# You MUST specify the address of the server the API requests will be
+# sent to.  Only specify protocol, hostname, and port.
+chef_server "<%= @api_url %>"
+
+# If you are doing development testing, you can specify the address of
+# the Solr server.  The presence of this parameter will enable tests
+# to force commits to Solr, greatly decreasing the amout of time
+# needed for testing the search endpoint.  This is only an
+# optimization for development!  If you are testing a "live" Chef
+# Server, or otherwise do not have access to the Solr server from your
+# testing location, you should not specify a value for this parameter.
+# The tests will still run, albeit slower, as they will now need to
+# poll for a period to ensure they are querying committed results.
+search_server "<%= @solr_url %>"
+
+# Related to the 'search_server' parameter, this specifies the maximum
+# amout of time (in seconds) that search endpoint requests should be
+# retried before giving up.  If not explicitly set, it will default to
+# 65 seconds; only set it if you know that your Solr commit interval
+# differs significantly from this.
+maximum_search_time 65
+
+# Test users.  The four users specified below are required; their
+# names (:user, :non_org_user, etc.) are indicative of their role
+# within the tests.  All users must have a ':name' key.  If they have
+# a ':create_me' key, Pedant will create these users for you.  If you
+# are using pre-existing users, you must supply a ':key_file' key,
+# which should be the fully-qualified path /on the machine Pedant is
+# running on/ to a private key for that user.
+users({
+
+    # A "normal" (non-admin) user in the testing organization
+    :user => {
+      :name => "pedant-normal",
+      :create_me => true
+    },
+
+    # A user that is not a member of the testing organization
+    :non_org_user => {
+      :name => "pedant-nobody",
+      :create_me => true
+    },
+
+    # An administrator in the testing organization
+    :admin_user => {
+      :name => "pedant-admin",
+      :create_me => true
+    },
+
+    # The platform superuser
+    :superuser => {
+      :name => "pivotal",
+      :key_file => "/etc/opscode/pivotal.pem"
+    }
+  })

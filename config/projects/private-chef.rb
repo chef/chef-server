@@ -1,5 +1,10 @@
 name "private-chef"
 
+replaces        "private-chef-full"
+install_path    "/opt/opscode"
+build_version   Omnibus::BuildVersion.full
+build_iteration "1"
+
 # initialize the dependencies
 deps = []
 
@@ -32,6 +37,7 @@ deps << "opscode-org-creator"
 deps << "opscode-certificate"
 deps << "opscode-platform-debug"
 deps << "opscode-test"
+deps << "mysql2"
 
 # monitoring
 deps << "nagios"

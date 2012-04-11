@@ -18,7 +18,9 @@ build do
            "--prefix=#{install_dir}/embedded",
            "--with-libxml-prefix=#{install_dir}/embedded",
            "--with-libxml-include-prefix=#{install_dir}/embedded/include",
-           "--with-libxml-libs-prefix=#{install_dir}/embedded/lib"].join(" "),
+           "--with-libxml-libs-prefix=#{install_dir}/embedded/lib",
+           "--without-python",
+           "--without-crypto"].join(" "),
           :env => env)
   command "make -j #{max_build_jobs}", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/bin"}
   command "make install", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/bin"}

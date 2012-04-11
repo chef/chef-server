@@ -252,7 +252,7 @@ default['private_chef']['mysql']['sql_password'] = "snakepliskin"
 default['private_chef']['mysql']['vip'] = "127.0.0.1"
 default['private_chef']['mysql']['destructive_migrate'] = false 
 default['private_chef']['mysql']['install_libs'] = true 
-
+default['private_chef']['mysql']['mysql2_version'] = IO.readlines("/opt/opscode/pc-version.txt").detect { |l| l =~ /^mysql2/ }.gsub(/^mysql2:\s+(\d.+)$/, '\1').chomp
 
 ###
 # PostgreSQL
@@ -491,4 +491,8 @@ default['private_chef']['keepalived']['service_order'] = [
   { "key" => "nagios", "service_name" => "nagios" },
   { "key" => "nginx", "service_name" => "nginx" }
 ]
+
+default['private_chef']['keepalived']['service_posthooks'] = {
+    "rabbitmq" => "PATH=/opt/opscode/embedded/bin:$PATH /opt/opscode/embedded/bin/rabbitmqctl wait /var/opt/opscode/rabbitmq/db/rabbit@localhost.pid"
+}
 

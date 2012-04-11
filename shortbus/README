@@ -1,0 +1,7 @@
+
+shortbus RPMs for installing a less-brain-damaged /usr/bin/ruby on centos-5.5 and
+making certain the O/S packages will never clobber it.
+
+just do a 'vagrant up' and the postinstall will take care of building the 
+shortbus rpms and will spit them back out into this directory when done.
+

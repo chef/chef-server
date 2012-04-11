@@ -1,0 +1,4 @@
+#!/bin/bash
+
+[ -e /usr/bin/private-chef-ctl ] && /usr/bin/private-chef-ctl pre-uninstall
+

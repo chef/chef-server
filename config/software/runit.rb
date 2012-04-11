@@ -12,8 +12,6 @@ build do
   # put runit where we want it, not where they tell us to
   command %q{sed -i -e "s/^char\ \*varservice\ \=\"\/service\/\";$/char\ \*varservice\ \=\"\/opt\/opscode\/service\/\";/" src/sv.c}, :cwd => working_dir
   # TODO: the following is not idempotent
-  command "sed -i -e s:/service:#{install_dir}/service: etc/2", :cwd => working_dir
-  command "sed -i -e 's!^PATH=/command:/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/X11R6/bin$!PATH=#{install_dir}/bin:#{install_dir}/embedded/bin:/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin!' etc/2", :cwd => working_dir
   command "sed -i -e s:-static:: src/Makefile", :cwd => working_dir
 
   # build it
@@ -33,7 +31,9 @@ build do
    "src/utmpset"].each do |bin|
     command "cp #{bin} #{install_dir}/embedded/bin", :cwd => working_dir
   end
-  command "cp etc/2 #{install_dir}/embedded/bin/runsvdir-start", :cwd => working_dir
+
+  files_dir = File.expand_path("files/runit", Omnibus.root)
+  command "#{install_dir}/embedded/bin/rsync -a #{files_dir}/runsvdir-start #{install_dir}/embedded/bin/runsvdir-start"
 
   # set up service directories
   ["#{install_dir}/service",

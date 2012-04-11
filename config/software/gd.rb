@@ -1,5 +1,5 @@
 name "gd"
-version "2.3.33"
+version "2.0.33"
 
 dependencies ["libiconv", "zlib", "libjpeg", "libpng"]
 
@@ -19,12 +19,13 @@ configure_env = {
 }
 
 build do
+  patch :source => 'gd-2.0.33-configure-libpng.patch'
   command(["./configure",
            "--prefix=#{install_dir}/embedded",
            "--with-libiconv-prefix=#{install_dir}/embedded",
            "--with-jpeg=#{install_dir}/embedded",
            "--with-png=#{install_dir}/embedded",
-           "--without-x" "--without-freetype",
+           "--without-x", "--without-freetype",
            "--without-fontconfig",
            "--without-xpm"].join(" "),
           :env => configure_env,

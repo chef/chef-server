@@ -1,3 +1,31 @@
 #!/bin/bash
+#
+# Perform necessary private-chef setup steps after package is installed.
+#
 
-/opt/opscode/setup.sh
+PROGNAME=$(basename $0)
+
+function error_exit
+{
+	echo "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2
+	exit 1
+}
+
+# see: http://tickets.opscode.com/browse/CHEF-3022
+if [ ! -e /etc/redhat-release -o "x$1" == "x1" ]; then
+  ln -sf /opt/opscode/bin/private-chef-ctl /usr/bin || error_exit "Cannot link private-chef-ctl in /usr/bin"
+fi
+  
+if [ -e /etc/opscode/chef-server-running.json ]; then
+  # this is mostly a hack for upgrading pre-1.1.10 clients that do not run pre-uninstall themselves
+  /opt/opscode/bin/private-chef-ctl pre-uninstall
+
+  /opt/opscode/bin/private-chef-ctl reconfigure
+
+  /opt/opscode/bin/private-chef-ctl start
+fi
+
+echo "Thank you for installing Chef!"
+
+exit 0
+

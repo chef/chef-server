@@ -18,6 +18,9 @@
 #
 
 require 'json'
+require 'fileutils'
+
+File::umask(022)
 
 SV_COMMAND_NAMES = %w[status up down once pause cont hup alarm interrupt quit
                       1 2 term kill start stop restart shutdown force-stop
@@ -52,19 +55,47 @@ def service_list
   exit 0
 end
 
+def cleanup_procs_and_nuke(filestr)
+  begin
+    run_sv_command("stop") 
+  rescue SystemExit
+  end
+
+  FileUtils.rm_f("/etc/init/opscode-runsvdir.conf") if File.exists?("/etc/init/opscode-runsvdir.conf")
+  run_command("egrep -v '/opt/opscode/embedded/bin/runsvdir-start' /etc/inittab > /etc/inittab.new && mv /etc/inittab.new /etc/inittab") if File.exists?("/etc/inittab")
+  run_command("kill -1 1")
+
+  backup_dir = Time.now.strftime("/root/opc-cleanse-%FT%R")
+  FileUtils.mkdir_p("/root") unless File.exists?("/root")
+  FileUtils.rm_rf(backup_dir)
+  FileUtils.cp_r("/etc/opscode", backup_dir) if File.exists?("/etc/opscode")
+  run_command("rm -rf #{filestr}")
+
+  graceful_kill
+
+  run_command("pkill -HUP -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
+  run_command("pkill -HUP -f 'runsvdir -P /opt/opscode/service'")
+    sleep 3
+  run_command("pkill -TERM -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
+  run_command("pkill -TERM -f 'runsvdir -P /opt/opscode/service'")
+    sleep 3
+  run_command("pkill -KILL -u opscode,opscode-pgsql,opscode-nagios,opscode-nagios-cmd")
+  run_command("pkill -KILL -f 'runsvdir -P /opt/opscode/service'")
+
+  puts "Your config files have been backed up to #{backup_dir}."
+  exit 0
+end
+
+def pre_uninstall
+  cleanup_procs_and_nuke("/tmp/opt")
+end
+
 def cleanse
   puts "This will delete *all* configuration, log, and variable data associated with this Private Chef Instance.\n\n*** You have 60 seconds to hit CTRL-C ***\n\n"
   unless ARGV[1] == "yes"
     sleep 60
   end
-  begin
-    run_sv_command("stop") 
-  rescue SystemExit
-  end
-  status = run_command("rm -rfv /opt/opscode/service/* /var/opt/opscode /etc/opscode /var/log/opscode")
-  exit_status = status.exitstatus if exit_status == 0 && !status.success?
-  puts "You probably want to run #{$0} reconfigure now."
-  exit 0
+  cleanup_procs_and_nuke("/opt/opscode/service/* /tmp/opt /var/opt/opscode /etc/opscode /var/log/opscode")
 end
 
 def get_all_services_files
@@ -109,6 +140,17 @@ def reconfigure
     exit 0
   else
     exit 1
+  end
+end
+
+# start (start all services) is special cased to deal with backend complexity
+def start
+  load_json
+  if @running_config['private_chef']['keepalived']['enable']
+    run_sv_command("start", "keepalived")
+    run_sv_command("start", "nrpe")
+  else
+    run_sv_command("start")
   end
 end
 
@@ -202,6 +244,16 @@ def ha_status
     else
       puts "[OK] did not find VIP IP address and I am not master"
     end
+  end
+
+  vrrp_instance_interface = @running_config['private_chef']['keepalived']['vrrp_instance_interface']
+  has_vrrp_instance_interface = system "ip a show dev #{vrrp_instance_interface} >/dev/null 2>&1"
+
+  if has_vrrp_instance_interface
+    puts "[OK] found VRRP communications interface #{vrrp_instance_interface}"
+  else
+    puts "[ERROR] VRRP communications interface #{vrrp_instance_interface} not found, is heartbeat_device set correctly in private-chef.rb?"
+    error_exit = 8
   end
 
   drbd_status = `cat /proc/drbd | egrep cs:`.chomp
@@ -355,6 +407,8 @@ reconfigure
     Reconfigure private chef.
 cleanse
     Delete *all* private chef data, and start from scratch.
+pre-uninstall
+    Prep the system for an upgrade.
 master-recover
     Set this server to HA master state, ignoring VRRP
 backup-recover
@@ -410,18 +464,21 @@ else
     service_list
   when "cleanse"
     cleanse
+  when "pre-uninstall"
+    pre_uninstall
   when "show-config"
   	show_config
   when "reconfigure"
     reconfigure
   when "tail"
     tail
+  when "start"
+    start
   when "graceful-kill"
     graceful_kill
   when "test"
     ENV["PATH"] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
     pedant_args = ARGV[1..-1]
-    pedant_args = %w[-P private_chef] if pedant_args.empty?
     Dir.chdir("/opt/opscode/embedded/service/opscode-pedant")
     exec("/opt/opscode/embedded/bin/bundle exec ./bin/opscode-pedant #{pedant_args.join(' ')}")
   when *SV_COMMAND_NAMES
