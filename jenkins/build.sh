@@ -27,9 +27,16 @@ OMNIBUS_CONFIG
 rm -r /var/cache/omnibus/${GIT_BRANCH_CLEAN}/pkg/* || true
 rm pkg/* || true
 
+if [ "$1" = "client" ]
+then
+  export TARGET="chef-full"
+else
+  export TARGET="private-chef"
+fi
+
 export PATH=/usr/local/bin:$PATH
 bundle install --deployment --without development
-bundle exec rake projects:private-chef
+bundle exec rake projects:$TARGET
 # Cleanup
 if [ "${GIT_BRANCH}" != "master" ]
 then
