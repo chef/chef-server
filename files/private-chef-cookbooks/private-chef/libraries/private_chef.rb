@@ -45,6 +45,7 @@ module PrivateChef
   node nil
 
   notification_email nil
+  from_email nil
   database_type nil
 
 
@@ -178,7 +179,7 @@ module PrivateChef
       end
       results['private_chef']['database_type'] = PrivateChef['database_type']
       results['private_chef']['notification_email'] = PrivateChef['notification_email']
-
+      results['private_chef']['from_email'] = PrivateChef['from_email']
       results
     end
 
