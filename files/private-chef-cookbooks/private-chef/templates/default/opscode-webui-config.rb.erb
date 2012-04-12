@@ -48,9 +48,11 @@ OpscodeWebui::Application.configure do
   # Only use best-standards-support built into browsers
   config.action_dispatch.best_standards_support = :builtin
 
+  config.action_mailer.default :from => <%= node['private_chef']['from_email'] %>
+
   config.middleware.use ExceptionNotifier,
     :email_prefix => "[Exception] <%= @environment %>: ",
-    :sender_address => %{"Opscode" <donotreply@opscode.com>},
+    :sender_address => <%= node['private_chef']['from_email'] %>,
     :exception_recipients => %w{ <%= node['private_chef']['notification_email'] %> }
 
   config.action_mailer.default_url_options = {
@@ -58,6 +60,7 @@ OpscodeWebui::Application.configure do
     :protocol => "https://",
     :port => ""
   }
+
 
 end
 
