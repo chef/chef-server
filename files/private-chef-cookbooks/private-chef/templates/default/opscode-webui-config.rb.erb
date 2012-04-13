@@ -19,7 +19,7 @@ Chef::Config[:quickstart_cloud_timeout] = 30
 
 <% if @ldap_enabled -%>
 Chef::Config[:external_authentication_enabled] = true
-Chef::Config[:external_authentication_login_message] = '<%= node['private_chef']['ldap']['login_message'].gsub(/(['\\])/, '\\\\\1') %>'
+Chef::Config[:external_authentication_system_adjective] = '<%= node['private_chef']['ldap']['system_adjective'].gsub(/(['\\])/, '\\\\\1') %>'
 <% end -%>
 
 Chef::Log.level = :info

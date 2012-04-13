@@ -318,6 +318,7 @@ module PrivateChef
       required_ldap_config_values = %w{ host base_dn }
       # ensure a bind password was provided along with the optional bind_dn
       required_ldap_config_values << "bind_password" if PrivateChef["ldap"].key?("bind_dn")
+      PrivateChef["ldap"]["system_adjective"] ||= 'AD/LDAP'
       required_ldap_config_values.each do |val|
         unless PrivateChef["ldap"].key?(val)
           # ensure all values have been set
