@@ -86,7 +86,7 @@ def cleanup_procs_and_nuke(filestr)
   exit 0
 end
 
-def pre_uninstall
+def uninstall
   cleanup_procs_and_nuke("/tmp/opt")
 end
 
@@ -409,8 +409,8 @@ upgrade
     Upgrade your private chef installation.
 cleanse
     Delete *all* private chef data, and start from scratch.
-pre-uninstall
-    Prep the system for an upgrade.
+uninstall
+    Kill all private chef processes and uninstall the process supervisor (data will be preserved).
 master-recover
     Set this server to HA master state, ignoring VRRP
 backup-recover
@@ -470,8 +470,8 @@ else
     service_list
   when "cleanse"
     cleanse
-  when "pre-uninstall"
-    pre_uninstall
+  when "uninstall", "short-stop" # for CW
+    uninstall
   when "show-config"
   	show_config
   when "reconfigure"
