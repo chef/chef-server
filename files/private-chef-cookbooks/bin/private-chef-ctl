@@ -515,7 +515,7 @@ graceful-kill
 test
     Run the API test suite against localhost.
 password
-    Set or clear a user's password
+    Set a user's password or System Recovery Password.
 EOH
   exit 1
 end
