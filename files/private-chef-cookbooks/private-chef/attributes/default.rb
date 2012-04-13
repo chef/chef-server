@@ -9,7 +9,7 @@
 # High level options
 ###
 default['private_chef']['notification_email'] = "pc-default@opscode.com"
-default['private_chef']['from_email'] = '"Opscode" <pc-default@opscode.com>'
+default['private_chef']['from_email'] = '"Opscode" <donotreply@opscode.com>'
 
 default['private_chef']['database_type'] = "postgresql"
 
