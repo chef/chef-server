@@ -146,7 +146,7 @@ end
 # start (start all services) is special cased to deal with backend complexity
 def start
   load_json
-  if @running_config['private_chef']['keepalived']['enable']
+  if !@running_config.nil? && @running_config['private_chef']['keepalived']['enable']
     run_sv_command("start", "keepalived")
     run_sv_command("start", "nrpe")
   else
@@ -163,8 +163,12 @@ def tail(service=nil)
 end
 
 def load_json
-  json = File.read("/etc/opscode/chef-server-running.json")
-  @running_config = JSON.parse(json)
+  if File.exists?("/etc/opscode/chef-server-running.json")
+    json = File.read("/etc/opscode/chef-server-running.json")
+    @running_config = JSON.parse(json)
+  else
+    @running_config = nil
+  end
 end
 
 #
@@ -183,6 +187,11 @@ end
 
 def ha_status
   load_json
+
+  if @running_config.nil?
+    puts "[ERROR] cannot check HA status if you haven't completed a reconfigure" 
+    exit 1
+  end
 
   error_exit = 0
 
