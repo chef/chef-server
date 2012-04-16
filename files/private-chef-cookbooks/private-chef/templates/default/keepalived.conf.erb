@@ -4,7 +4,6 @@ global_defs {
   notification_email {
     <%= node['private_chef']['notification_email'] %>
   }
-  notification_email_from  <%= node['private_chef']['from_email'] %>
 
   smtp_server <%= @smtp_server %>
   smtp_connect_timeout <%= @smtp_connect_timeout %>
