@@ -101,9 +101,11 @@ We manage releases of erchef from the top-level project
        touch USE_REBAR_LOCKED
        git add rebar.config.lock
        git commit
-       git tag x.y.z
+       git tag -a x.y.z
        git push opscode release
        git push --tags opscode
+
+    We now create annotated tags because this gives more useful behaviro for git describe.
 
 3. Edit data bag to set erchef-revision to "x.y.z".
 
