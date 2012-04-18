@@ -31,6 +31,9 @@ $(PLTFILE):
 dialyzer: $(PLTFILE)
 	@dialyzer --plt $(PLTFILE) -c ./src --src
 
+typer: $(PLTFILE)
+	typer --plt $(PLTFILE) -r ./src
+
 clean-plt:
 	rm -f $(PLTFILE)
 
