@@ -108,4 +108,13 @@ How do we load balance between the front ends? VIP => nginx => front-end pools? 
 
 ## Upgrade Definition Structure
 
-TODO: write something here
+Upgrade definitions will be stored on the filesystem in the following fashion: #{major_ver}/#{minor_ver}_#{name}.rb. For example:
+
+```
+└── 001
+    └── 001_first_upgrade.rb
+    └── 002_second_upgrade.rb
+└── 002
+    └── 001_the_next_generation.rb
+    └── 002_a_new_hope.rb
+```
