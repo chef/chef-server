@@ -1,4 +1,4 @@
-class DSLRunner
+class Partybus::DSLRunner
 
   attr_reader :api_version
 
