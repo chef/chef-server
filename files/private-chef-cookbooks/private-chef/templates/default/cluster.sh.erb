@@ -114,12 +114,12 @@ function transition_loop
    last_requested_state=`echo -n $(cat $requested_state_file)`
    while [ "$transitioned_to" != "$last_requested_state" ]; do
      transition $last_requested_state
-     log_me "Transitioned to $1"
+     log_me "Transitioned to $last_requested_state"
      transitioned_to=$last_requested_state
      last_requested_state=`echo -n $(cat $requested_state_file)`
    done
    unlock $lockfile 
-   echo $1 > $current_state_file
+   echo $transitioned_to > $current_state_file
 }
 
 echo $1 > $requested_state_file
