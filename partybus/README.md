@@ -118,3 +118,20 @@ Upgrade definitions will be stored on the filesystem in the following fashion: #
     └── 001_the_next_generation.rb
     └── 002_a_new_hope.rb
 ```
+
+## Upgrade Failures
+
+We need to design the upgrader to gracefully handle failures that may occur during an upgrade. To handle this, the databases will need to be backed up to a location on the backend, and there should be an easy method to restore the databases from the backups.
+
+### SQL
+
+mysqldump / pgdump should be sufficient for most dump / restore scenarios.
+
+### CouchDB
+
+We don't intend to migrate data within CouchDB in such a fashion that we will need to back it up. In other words, we don't intend to make backwards incompatible changes to the CouchDB databases that will leave the data in a non-working state in the case that we need to revert back to the previous version of OPC.
+
+### Solr
+
+TBD
+
