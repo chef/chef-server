@@ -1,0 +1,3 @@
+module Partybus
+
+end
