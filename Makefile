@@ -47,3 +47,5 @@ shell: compile
 	@$(ERL) $(ERLFLAGS)
 
 distclean: clean clean-plt
+	@rm -rvf deps/*
+        @rm -rf $(PLTFILE)
