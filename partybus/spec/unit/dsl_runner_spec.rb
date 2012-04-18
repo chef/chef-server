@@ -4,13 +4,13 @@ require 'partybus/dsl_runner'
 describe DSLRunner do
   subject { DSLRunner.new }
 
-  describe '#define_migration' do
+  describe '#define_upgrade' do
     context "with options:" do
 
       context "default" do
         subject do
           s = DSLRunner.new
-          s.define_migration
+          s.define_upgrade
           s
         end
 
@@ -20,7 +20,7 @@ describe DSLRunner do
       context ":api_version" do
         subject do
           s = DSLRunner.new
-          s.define_migration :api_version => :custom_version
+          s.define_upgrade :api_version => :custom_version
           s
         end
 

@@ -17,7 +17,7 @@ The current OPC upgrade version is stored in a per-host file: `/var/opt/opscode/
 ### Example
 
 ```ruby
-define_migration 'its_a_party' do
+define_upgrade 'its_a_party' do
   maintencance_mode do
 
     upgrade_schema_to 42
@@ -33,7 +33,7 @@ end
 The reason for adding a top-level DSL around upgrades is to future proff the API. If some change is required for one of the DSL methods (e.g. upgrade_schema_to), we need the ability to support both old versions of the upgrade syntax as well as newer versions. For example:
 
 ```ruby
-define_migration 'its_a_futurama_party', :api_version => 2 do
+define_upgrade 'its_a_futurama_party', :api_version => 2 do
 
    # upgrade definition here
 
