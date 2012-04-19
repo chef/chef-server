@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+$:.unshift File.expand_path('../../lib', __FILE__)
+require 'partybus'
+require 'partybus/dsl_runner'
+
+# do the following shit
+
+# TODO: load the config from a file (or template thie binfile :D)
+
+Partybus.config.database_connection_string   = "mysql2://root@127.0.0.1/partybus_test"
+Partybus.config.database_migration_directory = "/Users/stephen/opscode/dev/mixlib-authorization/db/migrate"
+
+# determine current migration level
+# - if !File.exist? ? 0
+
+# build list of migrations that exist from migration tree
+
+# run them through the DSL
+
+runner = Partybus::DSLRunner.new
+
+runner.define_upgrade do
+  upgrade_schema_to 10
+end
