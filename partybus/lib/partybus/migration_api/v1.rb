@@ -1,4 +1,5 @@
 require 'partybus/schema_migrator'
+require 'partybus/service_restarter'
 require 'partybus/migration_api/v1'
 
 module Partybus::UpgradeAPI
@@ -17,8 +18,9 @@ module Partybus::UpgradeAPI
       migrator.migrate_to(version)
     end
 
-    def restart_service
-
+    def restart_service(service_name)
+      restarter = Partybus::ServiceRestarter.new
+      restarter.restart_service(service_name)
     end
 
     def migrate

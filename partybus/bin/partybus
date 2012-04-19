@@ -22,4 +22,8 @@ runner = Partybus::DSLRunner.new
 
 runner.define_upgrade do
   upgrade_schema_to 10
+
+  restart_service "opscode-chef"
+  restart_service "opscode-webui"
+  restart_service "opscode-solr"
 end
