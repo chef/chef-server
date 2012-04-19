@@ -1,5 +1,7 @@
 #!/bin/sh
 
+/opt/opscode/bin/wait-for-rabbit
+
 cd <%= File.join(node['private_chef']['opscode-solr']['dir'], 'jetty') %>
 
 ulimit -n 50000
