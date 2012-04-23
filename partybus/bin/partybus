@@ -2,19 +2,12 @@
 
 $:.unshift File.expand_path('../../lib', __FILE__)
 require 'rubygems'
-require 'json'
 require 'partybus'
 require 'partybus/dsl_runner'
 require 'partybus/migrations'
 
-# do the following shit
-
-# TODO: load the config from a file (or template thie binfile :D)
-
-Partybus.config.database_connection_string   = "mysql2://root@127.0.0.1/partybus_test"
-Partybus.config.database_migration_directory = "/Users/stephen/opscode/dev/mixlib-authorization/db/migrate"
-Partybus.config.partybus_migration_directory = "/Users/stephen/opscode/dev/opscode-omnibus/files/upgrades"
-Partybus.config.migration_state_file         = "/tmp/partybus-state"
+# load the config from a file
+require File.expand_path('../../config.rb', __FILE__)
 
 # obtain the file lock on the migration state file
 File.open(Partybus.config.migration_state_file, File::RDWR | File::CREAT) do |f|
@@ -35,4 +28,3 @@ File.open(Partybus.config.migration_state_file, File::RDWR | File::CREAT) do |f|
     # TODO log and tell them they can't run it at the same time
   end
 end
-

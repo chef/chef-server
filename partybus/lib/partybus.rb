@@ -4,6 +4,10 @@ module Partybus
     @config ||= Config.new
   end
 
+  def self.configure(&block)
+    yield(config)
+  end
+
   class Config
 
     attr_accessor :database_connection_string

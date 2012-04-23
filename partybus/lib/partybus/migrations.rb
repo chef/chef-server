@@ -1,3 +1,4 @@
+require 'json'
 require 'partybus/dsl_runner'
 
 module Partybus
