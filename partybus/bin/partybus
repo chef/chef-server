@@ -9,20 +9,36 @@ require 'partybus/migrations'
 # load the config from a file
 require File.expand_path('../../config.rb', __FILE__)
 
+include Partybus::Logger
+
+# logging
+# print the current state
+# print a list of migrations from current version to desired version
+# for each migration
+# - start / complete / time
+
 # obtain the file lock on the migration state file
 File.open(Partybus.config.migration_state_file, File::RDWR | File::CREAT) do |f|
   if f.flock(File::LOCK_EX | File::LOCK_NB)
     migration_state = Partybus::MigrationState.new(Partybus.config.migration_state_file)
+    log("Current Migration Version: #{migration_state}")
 
     migration_files = Dir.glob("#{Partybus.config.partybus_migration_directory}/**/*.rb")
 
-    migrations = migration_files.map {|path| Partybus::MigrationFile.new(path)}
+    migrations = migration_files.map {|path| Partybus::MigrationFile.new(path)}.sort
 
     pending_migrations = migrations.select{ |m| m > migration_state }.sort
+    log("Latest Migration Available: #{migrations.last}")
+    log("Migrations to Run: #{pending_migrations}")
 
     # run them through the DSL
     pending_migrations.each do |migration|
+      start_time = Time.now
+      log("Starting Migration #{migration}")
       migration.run_migration
+      end_time = Time.now
+      elapsed_time = end_time - start_time
+      log("Finished Migration #{migration} in #{elapsed_time.round(2)} seconds")
     end
   else
     # TODO log and tell them they can't run it at the same time

@@ -19,6 +19,10 @@ module Partybus
       end
     end
 
+    def to_s
+      "#{@major}.#{@minor}"
+    end
+
   end
 
   class MigrationFile

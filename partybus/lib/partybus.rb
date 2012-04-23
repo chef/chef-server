@@ -17,4 +17,11 @@ module Partybus
 
   end
 
+  module Logger
+
+    def log(message)
+      puts "[private-chef-upgrade] - #{message}"
+    end
+
+  end
 end
