@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 $:.unshift File.expand_path('../../lib', __FILE__)
-require 'rubygems'
 require 'partybus'
 require 'partybus/dsl_runner'
 require 'partybus/migrations'
