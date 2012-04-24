@@ -205,6 +205,10 @@ def reconfigure
   end
 end
 
+def upgrade
+  status = run_command("/opt/opscode/embedded/bin/ruby /opt/opscode/embedded/service/partybus/bin/partybus")
+end
+
 # start (start all services) is special cased to deal with backend complexity
 def start
   load_json
@@ -530,9 +534,7 @@ when "graceful-kill"
 else
   case ARGV[0]
   when "upgrade"
-    # Currently just does reconfigure, but here in case we make it more complicated 
-    # during an upgrade cycle.
-    reconfigure
+    upgrade
   when "ha-status"
     ha_status
   when "master-recover"
