@@ -48,6 +48,10 @@ deps << "nrpe"
 # oc-pedant for integration/smoke testing
 deps << "opscode-pedant"
 
+# partybus and upgrade scripts
+deps << "partybus"
+deps << "private-chef-upgrades"
+
 # Version manifest file
 deps << "pc-version"
 
