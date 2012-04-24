@@ -5,7 +5,7 @@ db_password = node['private_chef'][db_type]['sql_password']
 db_vip      = node['private_chef'][db_type]['vip']
 db_name     = "opscode_chef"
 
-db_connection_string = "#{db_protocol}://#{db_user}:#{db_pass}@#{db_vip}/#{db_name}"
+db_connection_string = "#{db_protocol}://#{db_user}:#{db_password}@#{db_vip}/#{db_name}"
 
 directory "/var/opt/opscode/upgrades" do
   mode   "0755"

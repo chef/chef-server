@@ -206,7 +206,7 @@ def reconfigure
 end
 
 def upgrade
-  status = run_command("/opt/opscode/embedded/bin/ruby /opt/opscode/embedded/service/partybus/bin/partybus")
+  status = run_command("cd /opt/opscode/embedded/service/partybus && /opt/opscode/embedded/bin/ruby bin/partybus")
 end
 
 # start (start all services) is special cased to deal with backend complexity
