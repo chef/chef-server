@@ -1,4 +1,4 @@
-db_type     = ndoe['private_chef']['database_type']
+db_type     = node['private_chef']['database_type']
 db_protocol = db_type == "postgresql" ? "postgres" : "mysql2"
 db_user     = node['private_chef'][db_type]['sql_user']
 db_password = node['private_chef'][db_type]['sql_password']
