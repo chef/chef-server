@@ -10,7 +10,22 @@ The upgrade level is independent of the Private Chef version number. Upgrades ar
 
 **minor:** Not major, e.g. single service restarts, document fixes
 
-The current OPC upgrade version is stored in a per-host file: `/var/opt/opscode/partybus.version`
+The current OPC upgrade version is stored in a per-host file: `/var/opt/opscode/upgrades/migration-level`
+
+## Upgrade Definition Structure
+
+Upgrade definitions will be stored on the filesystem in the following fashion: #{major_ver}/#{minor_ver}_#{name}.rb. For example:
+
+```
+└── 001
+    └── 001_first_upgrade.rb
+    └── 002_second_upgrade.rb
+└── 002
+    └── 001_the_next_generation.rb
+    └── 002_a_new_hope.rb
+```
+
+Upgrades are defined and checked into source control in the`files/private-chef-upgrades` folder of the `opscode-omnibus` project
 
 ## Top-Level Upgrade DSL
 
@@ -105,19 +120,6 @@ To stop maintenance mode, said file will be automatically deleted (on and by the
 ### Open Questions
 
 How do we load balance between the front ends? VIP => nginx => front-end pools? The answer affects the order in which we run upgrades / migrations on the front ends.
-
-## Upgrade Definition Structure
-
-Upgrade definitions will be stored on the filesystem in the following fashion: #{major_ver}/#{minor_ver}_#{name}.rb. For example:
-
-```
-└── 001
-    └── 001_first_upgrade.rb
-    └── 002_second_upgrade.rb
-└── 002
-    └── 001_the_next_generation.rb
-    └── 002_a_new_hope.rb
-```
 
 ## Upgrade Failures
 
