@@ -206,7 +206,14 @@ def reconfigure
 end
 
 def upgrade
+  reconfigure
   status = run_command("cd /opt/opscode/embedded/service/partybus && /opt/opscode/embedded/bin/ruby bin/partybus")
+  if status.success?
+    puts "Chef Server Upgraded!"
+    exit 0
+  else
+    exit 1
+  end
 end
 
 # start (start all services) is special cased to deal with backend complexity
