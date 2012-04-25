@@ -17,6 +17,11 @@ Chef::Config[:chargify_site]               = 'opscode-preprod'
 Chef::Config[:dark_launch_config_filename] = '/etc/opscode/dark_launch_features.json'
 Chef::Config[:quickstart_cloud_timeout] = 30
 
+<% if @ldap_enabled -%>
+Chef::Config[:external_authentication_enabled] = true
+Chef::Config[:external_authentication_system_adjective] = '<%= node['private_chef']['ldap']['system_adjective'].gsub(/(['\\])/, '\\\\\1') %>'
+<% end -%>
+
 Chef::Log.level = :info
 
 OpscodeWebui::Application.configure do

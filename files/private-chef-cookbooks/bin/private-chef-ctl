@@ -19,6 +19,7 @@
 
 require 'json'
 require 'fileutils'
+require 'highline/import'
 
 File::umask(022)
 
@@ -88,6 +89,67 @@ end
 
 def uninstall
   cleanup_procs_and_nuke("/tmp/opt")
+end
+
+def password
+
+  unless ARGV.length == 2 || (ARGV.length == 3 && ARGV[2] == "--disable")
+    STDERR.puts "Usage: private-chef-ctl password <username> [--disable]"
+    exit 1
+  end
+
+  load_json
+  username = ARGV[1]
+  superuser = @running_config['private_chef']['opscode-account']['proxy_user']
+  command = [
+    'bundle', 'exec', 'bin/updateobjecttool',
+    '-a', @running_config['private_chef']['opscode-account']['url'],
+    '-o', superuser,
+    '-p', "/etc/opscode/#{superuser}.pem",
+    '-w', 'user',
+    '-n', username
+  ]
+  if ARGV.length == 2
+    password = HighLine.ask("Enter the new password:  " ) { |q| q.echo = "*" }
+    password2 = HighLine.ask("Enter the new password again:  " ) { |q| q.echo = "*" }
+    if password != password2
+      STDERR.puts "Passwords did not match"
+      exit 1
+    end
+    if password == '' && ldap_authentication_enabled?
+      STDERR.puts "Password may not be blank.  Did you mean 'private-chef-ctl password #{username} --disable'?"
+      exit 1
+    end
+
+    command << '--user-password'
+    command << password
+    if ldap_authentication_enabled?
+      command << '--recovery-authentication-enabled'
+      verbed = 'enabled for System Recovery'
+    else
+      verbed = 'set'
+    end
+  else
+    if ldap_authentication_enabled?
+      command << '--no-recovery-authentication-enabled'
+      verbed = 'disabled for System Recovery'
+    else
+      STDERR.puts "External authentication (such as LDAP) must be enabled to clear a user's password."
+      exit 1
+    end
+  end
+
+  ENV["PATH"] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
+  Dir.chdir("/opt/opscode/embedded/service/opscode-account")
+  if !system(*command)
+    STDERR.puts "FAILED"
+    exit $?.exitstatus
+  end
+  puts "Password for #{username} successfully #{verbed}."
+end
+
+def ldap_authentication_enabled?
+  @running_config['private_chef']['ldap'] && !@running_config['private_chef']['ldap'].empty?
 end
 
 def cleanse
@@ -452,6 +514,8 @@ graceful-kill
     Attempt a graceful stop, then SIGKILL the entire process group.
 test
     Run the API test suite against localhost.
+password
+    Set a user's password or System Recovery Password.
 EOH
   exit 1
 end
@@ -496,6 +560,8 @@ else
     pedant_args = ARGV[1..-1]
     Dir.chdir("/opt/opscode/embedded/service/opscode-pedant")
     exec("/opt/opscode/embedded/bin/bundle exec ./bin/opscode-pedant #{pedant_args.join(' ')}")
+  when "password"
+    password
   when *SV_COMMAND_NAMES
     if ARGV[1]
       puts "i don't know that command, did you mean: private-chef-ctl #{ARGV[1]} #{ARGV[0]}?"

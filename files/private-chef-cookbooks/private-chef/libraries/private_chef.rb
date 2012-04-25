@@ -41,13 +41,14 @@ module PrivateChef
 
   servers Mash.new
   backend_vips Mash.new
-  api_fqdn nil 
+  api_fqdn nil
   node nil
 
   notification_email nil
   from_email nil
   database_type nil
 
+  ldap Mash.new
 
   class << self
 
@@ -113,7 +114,7 @@ module PrivateChef
         File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
           f.puts(
             Chef::JSONCompat.to_json_pretty({
-              'rabbitmq' => { 
+              'rabbitmq' => {
                 'password' => PrivateChef['rabbitmq']['password'],
                 'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
               },
@@ -150,7 +151,7 @@ module PrivateChef
     end
 
     def generate_hash
-      results = { "private_chef" => {} } 
+      results = { "private_chef" => {} }
       [
         "couchdb",
         "rabbitmq",
@@ -172,7 +173,8 @@ module PrivateChef
         "keepalived",
         "nagios",
         "nrpe",
-        "nginx"
+        "nginx",
+        "ldap"
       ].each do |key|
         rkey = key.gsub('_', '-')
         results['private_chef'][rkey] = PrivateChef[key]
@@ -186,30 +188,30 @@ module PrivateChef
     def gen_api_fqdn
       PrivateChef["lb"]["api_fqdn"] ||= PrivateChef['api_fqdn']
       PrivateChef["lb"]["web_ui_fqdn"] ||= PrivateChef['api_fqdn']
-      PrivateChef["nginx"]["server_name"] ||= PrivateChef['api_fqdn'] 
+      PrivateChef["nginx"]["server_name"] ||= PrivateChef['api_fqdn']
       PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
     end
 
     def gen_nrpe_allowed_hosts
       nrpe_allowed_hosts = [ "127.0.0.1" ]
       if PrivateChef['backend_vips']['ipaddress']
-        nrpe_allowed_hosts << PrivateChef['backend_vips']['ipaddress'] 
+        nrpe_allowed_hosts << PrivateChef['backend_vips']['ipaddress']
       end
       PrivateChef['servers'].each do |k,v|
-        if v["role"] == "backend" 
+        if v["role"] == "backend"
           nrpe_allowed_hosts << v["ipaddress"]
         end
       end
-      PrivateChef["nrpe"]["allowed_hosts"] ||= nrpe_allowed_hosts 
+      PrivateChef["nrpe"]["allowed_hosts"] ||= nrpe_allowed_hosts
     end
 
     def gen_drbd
       PrivateChef['opscode_chef']['sandbox_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/sandbox"
       PrivateChef['opscode_chef']['checksum_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/checksum"
-      PrivateChef["couchdb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/couchdb" 
-      PrivateChef["rabbitmq"]["data_dir"] ||= "/var/opt/opscode/drbd/data/rabbitmq" 
-      PrivateChef["opscode_solr"]["data_dir"] ||= "/var/opt/opscode/drbd/data/opscode-solr" 
-      PrivateChef["postgresql"]["data_dir"] ||= "/var/opt/opscode/drbd/data/postgresql" 
+      PrivateChef["couchdb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/couchdb"
+      PrivateChef["rabbitmq"]["data_dir"] ||= "/var/opt/opscode/drbd/data/rabbitmq"
+      PrivateChef["opscode_solr"]["data_dir"] ||= "/var/opt/opscode/drbd/data/opscode-solr"
+      PrivateChef["postgresql"]["data_dir"] ||= "/var/opt/opscode/drbd/data/postgresql"
       PrivateChef["drbd"]["enable"] ||= true
       drbd_role = "primary"
       PrivateChef['servers'].each do |k, v|
@@ -229,13 +231,13 @@ module PrivateChef
         PrivateChef['servers'][node_name]['peer_ipaddress'] = v['cluster_ipaddress'] || v['ipaddress']
       end
       PrivateChef["keepalived"]["enable"] ||= true
-      PrivateChef["keepalived"]["vrrp_instance_interface"] = backend_vip["heartbeat_device"] 
-      PrivateChef["keepalived"]["vrrp_instance_ipaddress"] = backend_vip["ipaddress"] 
-      PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"] 
-      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_bind"] = 
+      PrivateChef["keepalived"]["vrrp_instance_interface"] = backend_vip["heartbeat_device"]
+      PrivateChef["keepalived"]["vrrp_instance_ipaddress"] = backend_vip["ipaddress"]
+      PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
+      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_bind"] =
         PrivateChef['servers'][node_name]['cluster_ipaddress'] || PrivateChef['servers'][node_name]['ipaddress']
       PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef['servers'][node_name]['peer_ipaddress']
-      PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"] 
+      PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
       PrivateChef["couchdb"]["ha"] ||= true
       PrivateChef["rabbitmq"]["ha"] ||= true
       PrivateChef["opscode_solr"]["ha"] ||= true
@@ -255,20 +257,20 @@ module PrivateChef
     end
 
     def gen_backend(bootstrap=false)
-      PrivateChef["couchdb"]["bind_address"] ||= "0.0.0.0" 
-      PrivateChef["rabbitmq"]["node_ip_address"] ||= "0.0.0.0" 
+      PrivateChef["couchdb"]["bind_address"] ||= "0.0.0.0"
+      PrivateChef["rabbitmq"]["node_ip_address"] ||= "0.0.0.0"
       PrivateChef["opscode_solr"]["ip_address"] ||= "0.0.0.0"
-      PrivateChef["opscode_chef"]["worker_processes"] ||= 6 
-      PrivateChef["opscode_webui"]["worker_processes"] ||= 2 
-      PrivateChef["postgresql"]["listen_address"] ||= "0.0.0.0" 
-      PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"] 
+      PrivateChef["opscode_chef"]["worker_processes"] ||= 6
+      PrivateChef["opscode_webui"]["worker_processes"] ||= 2
+      PrivateChef["postgresql"]["listen_address"] ||= "0.0.0.0"
+      PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"]
 
-      PrivateChef["redis"]["bind"] ||= "0.0.0.0" 
-      PrivateChef["opscode_account"]["worker_processes"] ||= 4 
-      if bootstrap 
-        PrivateChef["bootstrap"]["enable"] = true 
+      PrivateChef["redis"]["bind"] ||= "0.0.0.0"
+      PrivateChef["opscode_account"]["worker_processes"] ||= 4
+      if bootstrap
+        PrivateChef["bootstrap"]["enable"] = true
       else
-        PrivateChef["bootstrap"]["enable"] = false 
+        PrivateChef["bootstrap"]["enable"] = false
       end
     end
 
@@ -285,14 +287,14 @@ module PrivateChef
       PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["redis"]["enable"] ||= false
       PrivateChef["redis"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["opscode_chef"]["upload_vip"] ||= PrivateChef['backend_vips']['ipaddress'] 
+      PrivateChef["opscode_chef"]["upload_vip"] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef["opscode_chef"]["upload_port"] ||= 443
       PrivateChef["opscode_chef"]["upload_proto"] ||= "https"
-      PrivateChef["opscode_chef"]["upload_internal_vip"] ||= PrivateChef['backend_vips']['ipaddress'] 
+      PrivateChef["opscode_chef"]["upload_internal_vip"] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef["opscode_chef"]["upload_internal_port"] ||= 9680
       PrivateChef["lb"]["cache_cookbook_files"] ||= true
       PrivateChef["nagios"]["enable"] ||= false
-      PrivateChef["bootstrap"]["enable"] = false 
+      PrivateChef["bootstrap"]["enable"] = false
     end
 
     def gen_redundant(node_name, ha=false)
@@ -312,14 +314,27 @@ module PrivateChef
       end
     end
 
+    def gen_ldap
+      required_ldap_config_values = %w{ host base_dn }
+      # ensure a bind password was provided along with the optional bind_dn
+      required_ldap_config_values << "bind_password" if PrivateChef["ldap"].key?("bind_dn")
+      PrivateChef["ldap"]["system_adjective"] ||= 'AD/LDAP'
+      required_ldap_config_values.each do |val|
+        unless PrivateChef["ldap"].key?(val)
+          # ensure all values have been set
+          raise "Missing required LDAP config value '#{val}'. Required values include [#{required_ldap_config_values.join(', ')}]"
+        end
+      end
+    end
+
     def generate_config(node_name)
       generate_secrets(node_name)
       gen_nrpe_allowed_hosts
 
       case PrivateChef['topology']
       when "standalone","manual"
-        PrivateChef[:api_fqdn] ||= node_name 
-        gen_api_fqdn 
+        PrivateChef[:api_fqdn] ||= node_name
+        gen_api_fqdn
       when "ha","tier"
         if PrivateChef['topology'] == "ha"
           gen_redundant(node_name, true)
@@ -330,6 +345,11 @@ module PrivateChef
         Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha or tier.")
         exit 55
       end
+
+      unless PrivateChef["ldap"].nil? || PrivateChef["ldap"].empty?
+        gen_ldap
+      end
+
       generate_hash
     end
   end
