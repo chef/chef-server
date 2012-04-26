@@ -17,9 +17,15 @@ module Partybus
       end
 
       def upgrade_schema_to(version)
-        log("\tUpgrading Schema to Version #{version}")
-        migrator = Partybus::SchemaMigrator.new
-        migrator.migrate_to(version)
+        role = Partybus.config.private_chef_role
+        log("\tPrivate Chef Role: #{role}")
+        if ["backend", "standalone"].include? role
+          log("\tUpgrading Schema to Version #{version}")
+          migrator = Partybus::SchemaMigrator.new
+          migrator.migrate_to(version)
+        else
+          log("\tSkipping Schema Upgrade")
+        end
       end
 
       def restart_service(service_name)
