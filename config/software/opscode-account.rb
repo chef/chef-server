@@ -1,5 +1,5 @@
 name "opscode-account"
-version "active_directory"
+version "pc-rel-1.13.0"
 
 dependencies ["ruby",
               "bundler",

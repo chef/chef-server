@@ -1,5 +1,5 @@
 name "private-chef-administration"
-version "active_directory" # TODO: pin to version number of private chef build
+version "master" # TODO: pin to version number of private chef build
 
 dependencies ["rsync"]
 
