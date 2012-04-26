@@ -25,5 +25,5 @@ template "/opt/opscode/embedded/service/partybus/config.rb" do
   owner  "root"
   mode   "0644"
   variables(:connection_string => db_connection_string,
-            :role => node_role)
+            :node_role => node_role)
 end
