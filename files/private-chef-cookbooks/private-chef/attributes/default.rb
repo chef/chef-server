@@ -10,8 +10,8 @@
 ###
 default['private_chef']['notification_email'] = "pc-default@opscode.com"
 default['private_chef']['from_email'] = '"Opscode" <donotreply@opscode.com>'
-
 default['private_chef']['database_type'] = "postgresql"
+default['private_chef']['role'] = "standalone"
 
 ####
 # The Chef User that services run as

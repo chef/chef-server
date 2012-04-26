@@ -47,6 +47,7 @@ module PrivateChef
   notification_email nil
   from_email nil
   database_type nil
+  role nil
 
   ldap Mash.new
 
