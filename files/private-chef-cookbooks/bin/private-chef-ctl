@@ -191,7 +191,7 @@ def show_config
 	exit 0
 end
 
-def reconfigure
+def reconfigure(exit_on_success=true)
   if File.exists?("/etc/opscode/chef-server.json")
     status = run_command("/opt/opscode/bin/chef-solo -c /opt/opscode/embedded/cookbooks/solo.rb -j /etc/opscode/chef-server.json -l info")
   else
@@ -199,14 +199,14 @@ def reconfigure
   end
   if status.success?
     puts "Chef Server Reconfigured!"
-    exit 0
+    exit 0 if exit_on_success
   else
     exit 1
   end
 end
 
 def upgrade
-  reconfigure
+  reconfigure(false)
   status = run_command("cd /opt/opscode/embedded/service/partybus && /opt/opscode/embedded/bin/ruby bin/partybus")
   if status.success?
     puts "Chef Server Upgraded!"
