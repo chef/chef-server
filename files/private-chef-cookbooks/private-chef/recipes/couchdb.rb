@@ -48,6 +48,13 @@ if node['private_chef']['bootstrap']['enable']
 	end
 end
 
+# Cron may not be installed in a minimal install:
+case node["platform"]
+when "ubuntu"
+when "centos","redhat","scientific"
+  package "cronie"
+end
+
 compact_script_command = File.join(couchdb_etc_dir, "compact_couch.rb")
 
 # Drop off the CouchDB compaction script
