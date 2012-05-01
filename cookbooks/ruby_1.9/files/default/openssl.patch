@@ -1,0 +1,15 @@
+--- ruby-1.9.2-p180/ext/openssl/ossl_ssl.c~	2012-05-01 20:26:24.055244611 +0000
++++ ruby-1.9.2-p180/ext/openssl/ossl_ssl.c	2012-05-01 20:26:40.799026525 +0000
+@@ -107,9 +107,9 @@
+     OSSL_SSL_METHOD_ENTRY(TLSv1),
+     OSSL_SSL_METHOD_ENTRY(TLSv1_server),
+     OSSL_SSL_METHOD_ENTRY(TLSv1_client),
+-    OSSL_SSL_METHOD_ENTRY(SSLv2),
+-    OSSL_SSL_METHOD_ENTRY(SSLv2_server),
+-    OSSL_SSL_METHOD_ENTRY(SSLv2_client),
++//    OSSL_SSL_METHOD_ENTRY(SSLv2),
++//    OSSL_SSL_METHOD_ENTRY(SSLv2_server),
++//    OSSL_SSL_METHOD_ENTRY(SSLv2_client),
+     OSSL_SSL_METHOD_ENTRY(SSLv3),
+     OSSL_SSL_METHOD_ENTRY(SSLv3_server),
+     OSSL_SSL_METHOD_ENTRY(SSLv3_client),
