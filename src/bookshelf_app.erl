@@ -37,11 +37,6 @@ start() ->
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    Env = bookshelf_env:initialize(),
-    {pool, Pool} = lists:keyfind(pool, 1, Env),
-    cowboy:start_listener(bookshelf_http_listener, Pool,
-                          cowboy_tcp_transport, Env,
-                          cowboy_http_protocol, Env),
     bookshelf_sup:start_link().
 
 stop(_State) ->

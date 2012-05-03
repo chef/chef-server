@@ -32,4 +32,16 @@ start_link() ->
 %% ===================================================================
 
 init(_Args) ->
-    {ok, {{one_for_one, 10, 10}, []}}.
+    Env = bookshelf_env:initialize(),
+    {pool, Pool} = lists:keyfind(pool, 1, Env),
+
+    RestartStrategy = one_for_one,
+    MaxRestarts = 1000,
+    MaxSecondsBetweenRestarts = 3600,
+
+    ListenerSup = cowboy:child_spec(bookshelf_http_listener, Pool,
+                                    cowboy_tcp_transport, Env,
+                                    cowboy_http_protocol, Env),
+
+    {ok, {{RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
+          [ListenerSup]}}.
