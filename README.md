@@ -1,31 +1,41 @@
-#+TITLE:  Bookshelf
-#+AUTHOR: Tim Dysinger
-#+EMAIL:  dysinger@opscode.com
+Bookshelf
+=========
 
-* Description
+Description
+-----------
 
   Bookshelf is an S3 API compatible object store.
 
-* Setup
+Setup
+-----
 
-*** [[http://erlang.org][Erlang]] R15
+*[Erlang](http://www.erlang.org) R15
+*[Rebar](https://github.com/basho/rebar) (recent)
+*[Virtualenv](http://pypi.python.org/pypi/virtualenv) (for integration testing)
 
-*** [[https://github.com/basho/rebar][Rebar]] (recent)
+You should also make sure that `localhost.localdomain` resolves to
+your local ip address (usually 127.0.0.1). This is currently *not* the
+case (at least on ubuntu).
 
-* Build
+The integration tests do *not* start the server to be tested. You must
+manually run $>./start.sh to start that instance before runing `make test`
 
-  #+BEGIN_SRC: sh
-rebar get-deps
-rebar compile
-rebar generate
-  #+END_SRC
+Build
+-----
 
-* Configuration
+    $> make
+
+Test
+----
+
+    $> make test
+
+Configuration
+-------------
 
   Standard OTP application configuration
 
-* Start
+Start
+-----
 
-  #+BEGIN_SRC: sh
-./start.sh
-  #+END_SRC
+    $> ./start.sh
