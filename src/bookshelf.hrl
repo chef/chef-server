@@ -33,6 +33,3 @@
 
 %% shortcut macro for a path to a file in our priv/ dir
 -define(file(F), filename:join(code:priv_dir(bookshelf), F)).
-
-%% shortcut macro to apply 1 argument to the env module/function
--define(env(F, A), apply(bookshelf_env, F, [A])).

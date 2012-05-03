@@ -18,6 +18,7 @@
 -module(bookshelf_env).
 -include("bookshelf.hrl").
 -export([
+         initialize/0,
          with_ip/1,
          with_dispatch/1,
          with_dir/1,
@@ -27,6 +28,8 @@
 %% ===================================================================
 %%                          API functions
 %% ===================================================================
+initialize() ->
+    with_dispatch(with_dir(with_pool(with_ip(application:get_all_env(bookshelf))))).
 
 with_ip(Env) ->
     case lists:keyfind(interface, 1, Env) of
@@ -109,7 +112,7 @@ priv_dir(Env) ->
 with_ip_test_() ->
     [{"should configure the listen ip address if the env has an 'interface'",
       fun() ->
-              Env = ?env(with_ip, [{interface, "lo"}]),
+              Env = with_ip([{interface, "lo"}]),
               ?assertMatch({ip, {127,0,0,1}}, lists:keyfind(ip, 1, Env))
       end
      }].
@@ -118,7 +121,7 @@ with_dispatch_test_() ->
     [{"should build proper 'cowboy' dispatch rules using env 'domains'",
       fun() ->
               EnvV1 = [{domains, ["clown.com", "school.com"]}],
-              EnvV2 = ?env(with_dispatch, EnvV1),
+              EnvV2 = with_dispatch(EnvV1),
               ?assertMatch({dispatch,
                             [{[<<"clown">>, <<"com">>],
                               [{[], bookshelf_idx, EnvV1}]},
@@ -137,18 +140,18 @@ with_dispatch_test_() ->
 with_dir_test_() ->
     [{"should use any env 'dir' if provided",
       fun() ->
-              ?assertEqual([{dir, "/tmp"}], ?env(with_dir, [{dir, "/tmp"}]))
+              ?assertEqual([{dir, "/tmp"}], with_dir([{dir, "/tmp"}]))
       end
      },
      {"should use ${priv_dir}/data/ if env 'dir' is the atom 'priv_dir'",
       fun() ->
               ?assertEqual([{dir, ?file("data")}],
-                           ?env(with_dir, [{dir, priv_dir}]))
+                           with_dir([{dir, priv_dir}]))
       end
      },
      {"should use ${priv_dir}/data/ if env 'dir' is absent",
       fun() ->
-              ?_assertEqual([{dir, ?file("data")}], ?env(with_dir, []))
+              ?_assertEqual([{dir, ?file("data")}], with_dir([]))
       end
      }
     ].
