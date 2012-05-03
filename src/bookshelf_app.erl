@@ -26,10 +26,14 @@
 %% ===================================================================
 
 start() ->
+    application:start(kernel),
+    application:start(stdlib),
+    application:start(sasl),
     application:start(crypto),
     application:start(public_key),
     application:start(ssl),
     application:start(cowboy),
+    application:start(erlsom),
     application:start(bookshelf).
 
 %% ===================================================================

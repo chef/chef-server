@@ -5,7 +5,7 @@
   {vsn          , "0.1.0"},
   {mod          , {bookshelf_app, []}},
   {registered   , [bookshelf_sup]},
-  {applications , [kernel, stdlib, crypto, public_key, ssl, cowboy]},
+  {applications , [kernel, stdlib, sasl, crypto, public_key, ssl, cowboy, erlsom]},
   {env          , [{domains   , ["localhost.localdomain"]},
                    {interface , "lo"},
                    {port      , 4321},
