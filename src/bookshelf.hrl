@@ -36,9 +36,3 @@
 
 %% shortcut macro to apply 1 argument to the env module/function
 -define(env(F, A), apply(bookshelf_env, F, [A])).
-
-%% eunit
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--compile(export_all).
--endif.

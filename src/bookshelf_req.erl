@@ -33,3 +33,20 @@ with_amz_request_id(Rq) ->
 with_etag(Etag, Rq) ->
     {ok, Rq2} = cowboy_http_req:set_resp_header('Etag', Etag, Rq),
     Rq2.
+
+%% ===================================================================
+%%                         Eunit Tests
+%% ===================================================================
+-ifndef(NO_TESTS).
+-include_lib("eunit/include/eunit.hrl").
+
+with_amz_rq_id_test_() ->
+    [{"should add an amz_request_id response header",
+      fun() ->
+              ?assertMatch(
+                 #http_req{resp_headers=[{<<"x-amz-request-id">>, _}]},
+                 with_amz_request_id(#http_req{})
+                )
+      end
+     }].
+-endif.

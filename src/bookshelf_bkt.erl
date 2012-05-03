@@ -71,3 +71,108 @@ to_xml(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
     Term    = bookshelf_xml:list_objects(Bucket, Objects),
     Body    = bookshelf_xml:write(Term),
     {Body, Rq, St}.
+
+%% ===================================================================
+%%                         Eunit Tests
+%% ===================================================================
+-ifndef(NO_TESTS).
+-include_lib("eunit/include/eunit.hrl").
+
+rest_init_test_() ->
+    [{"should populate the state with the base dir from handler opts",
+      fun() ->
+              Dir = "/tmp",
+              ?assertMatch({ok, _, #state{dir=Dir}},
+                           rest_init(#http_req{},
+                                                   [{dir, Dir}]))
+      end
+     }].
+
+allowed_methods_test_() ->
+    [{"should only support 'PUT' and 'DELETE'",
+      fun() ->
+              Expected = ['GET', 'PUT', 'DELETE'],
+              {Allowed, _, _} =
+                  allowed_methods(#http_req{}, #state{}),
+              ?assertEqual(length(Expected), length(Allowed)),
+              Result = sets:from_list(lists:merge(Expected, Allowed)),
+              ?assertEqual(length(Expected), sets:size(Result))
+      end
+     }].
+
+content_types_accepted_test_() ->
+    [{"should only support PUT with 'undefined' (absent) Content-Type",
+      fun() ->
+              {Types, _, _} =
+                  content_types_accepted(#http_req{}, #state{}),
+              ?assertEqual(1, length(Types)),
+              ?assert(lists:keymember(undefined, 1, Types))
+      end
+     }].
+
+content_types_provided_test_() ->
+    [{"should only support text/xml output",
+      fun() ->
+              {Types, _, _} =
+                  content_types_provided(#http_req{}, #state{}),
+              ?assertEqual(1, length(Types)),
+              ?assert(lists:keymember({<<"text">>, <<"xml">>, []}, 1, Types))
+      end
+     }].
+
+resource_exists_test_() ->
+    [{"should only return true if the bucket exists",
+      fun() ->
+              {Dir, Bucket} = test_bucket(),
+              ?assertMatch(
+                 {true, _, _},
+                 resource_exists(
+                   #http_req{host=[Bucket]},
+                   #state{dir=Dir}
+                  )
+                ),
+              ?assertMatch(
+                 {false, _, _},
+                 resource_exists(
+                   #http_req{host=[<<"batman!">>]},
+                   #state{dir=Dir}
+                  )
+                )
+      end
+     }].
+
+delete_resource_test_() ->
+    [{"should delete the bucket and if the bucket exists",
+      fun() ->
+              {Dir, Bucket} = test_bucket(),
+              {true, _, _} =
+                  delete_resource(#http_req{host=[Bucket]},
+                                                #state{dir=Dir}),
+              {false, _, _} =
+                  delete_resource(#http_req{host=[<<"derp">>]},
+                                                #state{dir=Dir})
+      end
+     }].
+
+create_resource_test_() ->
+    [{"should create the bucket only if the bucket doesn't exist",
+      fun() ->
+              {Dir, Bucket} = test_bucket(),
+              {false, _, _} =
+                  create_resource(#http_req{host=[Bucket]},
+                                                #state{dir=Dir}),
+              {true, _, _} =
+                  create_resource(#http_req{host=[<<"hurp">>]},
+                                                #state{dir=Dir})
+      end
+     }].
+
+test_bucket() ->
+    {Ma, Se, Mi} = erlang:now(),
+    Dir = filename:join("/tmp", io_lib:format("~p~p~p", [Ma,Se,Mi])),
+    file:make_dir(Dir),
+    Bucket = io_lib:format("~p~p~p", [Ma,Se,Mi]),
+    ?assertEqual(ok, bookshelf_fs:bucket_create(Dir, Bucket)),
+    {Dir, Bucket}.
+
+-endif.

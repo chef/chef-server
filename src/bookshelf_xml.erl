@@ -904,3 +904,29 @@ model() ->
       {'CanonicalUser','User'},
       {'AmazonCustomerByEmail','User'},
       {'User','Grantee'}]}.
+
+%% ===================================================================
+%%                         Eunit Tests
+%% ===================================================================
+-ifndef(NO_TESTS).
+-include_lib("eunit/include/eunit.hrl").
+
+list_buckets_test_() ->
+    [{"should render ListAllMyBucketsResult",
+      fun() ->
+              Date = calendar:now_to_datetime(erlang:now()),
+              IsoDate = bookshelf_format:to_date(Date),
+              Buckets = [#bucket{name="lol", date=Date},
+                         #bucket{name="cat", date=Date}],
+              ?assertMatch(
+                 {'ListAllMyBucketsResult',undefined,
+                  {'CanonicalUser',undefined,"abc123","Bobo T. Clown"},
+                  {'ListAllMyBucketsList',undefined,
+                   [{'ListAllMyBucketsEntry',undefined,"lol", IsoDate},
+                    {'ListAllMyBucketsEntry',undefined,"cat", IsoDate}]}},
+                 list_buckets(Buckets)
+                )
+      end
+     }].
+
+-endif.
