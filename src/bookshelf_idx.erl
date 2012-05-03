@@ -17,6 +17,8 @@
 
 -module(bookshelf_idx).
 -include("bookshelf.hrl").
+-include_lib("cowboy/include/http.hrl").
+
 -compile(export_all).
 
 %% ===================================================================

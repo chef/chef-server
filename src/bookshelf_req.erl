@@ -17,6 +17,8 @@
 
 -module(bookshelf_req).
 -include("bookshelf.hrl").
+-include_lib("cowboy/include/http.hrl").
+
 -export([
          with_amz_request_id/1,
          with_etag/2

@@ -17,6 +17,7 @@
 
 -module(bookshelf_xml).
 -include("bookshelf.hrl").
+-include("amazon_s3.hrl").
 -export([
          list_buckets/1,
          list_objects/2,

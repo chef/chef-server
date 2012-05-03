@@ -15,12 +15,6 @@
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
 
--include_lib("kernel/include/file.hrl").
--include_lib("cowboy/include/http.hrl").
-
-%% amazon s3 model for erlsom
--include("amazon_s3.hrl").
-
 %% records
 -record(state, {dir}).
 -record(bucket, {name, date}).

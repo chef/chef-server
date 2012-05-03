@@ -17,6 +17,7 @@
 
 -module(bookshelf_fs).
 -include("bookshelf.hrl").
+-include_lib("kernel/include/file.hrl").
 -export([
          bucket_create/2,
          bucket_delete/2,

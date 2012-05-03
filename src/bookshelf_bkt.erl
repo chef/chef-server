@@ -17,6 +17,11 @@
 
 -module(bookshelf_bkt).
 -include("bookshelf.hrl").
+-include_lib("cowboy/include/http.hrl").
+
+-include("amazon_s3.hrl").
+
+
 -compile(export_all).
 
 %% ===================================================================
