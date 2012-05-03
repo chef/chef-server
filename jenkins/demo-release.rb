@@ -23,7 +23,7 @@ end
 
 if package_files.has_value?(nil)
   puts '*' * 70
-  puts 'Could not find release artifact for version #{release_version} on all platforms!'
+  puts "Could not find release artifact for version #{release_version} on all platforms!"
   puts '*' * 70
   puts
   package_files.each do |platform, package_file|
