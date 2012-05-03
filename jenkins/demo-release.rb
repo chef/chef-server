@@ -1,6 +1,6 @@
 #! /usr/bin/env ruby
 
-release_version = "1.1.8" # ENV['RELEASE_VERSION']
+release_version = ENV['RELEASE_VERSION']
 
 platforms = {
   "ubuntu-10.04" => lambda {|ver| "private-chef_#{ver}-1.ubuntu.10.04_amd64.deb"},
