@@ -75,17 +75,17 @@ write(Xml) ->
         erlsom_ucs:to_utf8(Text).
 
 write_hrl() ->
-    case file:read_file(?file("amazon_s3.xsd")) of
+    case file:read_file(bookshelf_util:file("amazon_s3.xsd")) of
         {ok, Bin} ->
             Hrl = erlsom_writeHrl:writeXsdHrlFile(
                     erlsom_lib:toUnicode(Bin), []),
-            file:write_file(?file("../include/amazon_s3.hrl"), Hrl);
+            file:write_file(bookshelf_util:file("../include/amazon_s3.hrl"), Hrl);
         Error     -> Error
     end.
 
 write_erl() ->
-    {ok, Model}  = erlsom:compile_xsd_file(?file("amazon_s3.xsd")),
-    {ok, Device} = file:open(?file("../src/bookshelf_xml.erl"),
+    {ok, Model}  = erlsom:compile_xsd_file(bookshelf_util:file("amazon_s3.xsd")),
+    {ok, Device} = file:open(bookshelf_util:file("../src/bookshelf_xml.erl"),
                              [append, write]),
     ok = file:write(Device, io_lib:format("~p", [Model])),
     ok = file:close(Device).

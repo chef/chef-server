@@ -1,5 +1,5 @@
 %% @copyright 2012 Opscode, Inc. All Rights Reserved
-%% @author Tim Dysinger <dysinger@opscode.com>
+%% @author Eric Merritt <emerritt@opscode.com>
 %%
 %% Licensed to the Apache Software Foundation (ASF) under one or more
 %% contributor license agreements.  See the NOTICE file distributed
@@ -15,18 +15,12 @@
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
 
--include_lib("kernel/include/file.hrl").
--include_lib("cowboy/include/http.hrl").
+-module(bookshelf_util).
 
-%% amazon s3 model for erlsom
--include("amazon_s3.hrl").
+-export([file/1]).
 
-%% records
--record(state, {dir}).
--record(bucket, {name, date}).
--record(object, {name, date, size, digest}).
-
-%% settings
--define(BACKEND, bookshelf_fs).
--define(TIMEOUT_MS, 4096).
--define(BLOCK_SIZE, 16384).
+%% ===================================================================
+%%                          API functions
+%% ===================================================================
+file(Path) ->
+    filename:join(code:priv_dir(bookshelf), Path).

@@ -102,7 +102,7 @@ bdomain(Domain) ->
     lists:map(fun list_to_binary/1, string:tokens(Domain, ".")).
 
 priv_dir(Env) ->
-    lists:keystore(dir, 1, Env, {dir, ?file("data")}).
+    lists:keystore(dir, 1, Env, {dir, bookshelf_util:file("data")}).
 
 %% ===================================================================
 %%                          Eunit Tests
@@ -145,13 +145,13 @@ with_dir_test_() ->
      },
      {"should use ${priv_dir}/data/ if env 'dir' is the atom 'priv_dir'",
       fun() ->
-              ?assertEqual([{dir, ?file("data")}],
+              ?assertEqual([{dir, bookshelf_util:file("data")}],
                            with_dir([{dir, priv_dir}]))
       end
      },
      {"should use ${priv_dir}/data/ if env 'dir' is absent",
       fun() ->
-              ?_assertEqual([{dir, ?file("data")}], with_dir([]))
+              ?_assertEqual([{dir, bookshelf_util:file("data")}], with_dir([]))
       end
      }
     ].
