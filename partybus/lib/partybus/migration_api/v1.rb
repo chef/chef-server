@@ -46,8 +46,8 @@ module Partybus
 
       private # private really doesn't do anything when we #instance_eval
 
-      def db_running?
-        db_service = Partybus.config.db_service_name
+      def db_up?
+        db_service = Partybus.config.database_service_name
         system("private-chef-ctl #{db_service} status")
         exit_status = $?.exitstatus
         exit_status == 0

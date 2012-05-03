@@ -16,6 +16,8 @@ db_name     = "opscode_chef"
 
 db_connection_string = "#{db_protocol}://#{db_user}:#{db_password}@#{db_vip}/#{db_name}"
 
+db_service_name = db_type == "postgresql" ? "postgres" : "mysql"
+
 # set the node role
 node_role = node['private_chef']['role']
 
@@ -25,5 +27,6 @@ template "/opt/opscode/embedded/service/partybus/config.rb" do
   owner  "root"
   mode   "0644"
   variables(:connection_string => db_connection_string,
-            :node_role => node_role)
+            :node_role => node_role,
+            :db_service_name => db_service_name)
 end
