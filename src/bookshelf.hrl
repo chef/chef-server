@@ -16,7 +16,7 @@
 %% permissions and limitations under the License.
 
 %% records
--record(state, {dir}).
+-record(req_state, {dir}).
 -record(bucket, {name, date}).
 -record(object, {name, date, size, digest}).
 

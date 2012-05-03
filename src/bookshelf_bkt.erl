@@ -37,7 +37,7 @@ init(_Transport, _Rq, _Opts) ->
 
 rest_init(Rq, Opts) ->
     {dir, Dir} = lists:keyfind(dir, 1, Opts),
-    {ok, bookshelf_req:with_amz_request_id(Rq), #state{dir = Dir}}.
+    {ok, bookshelf_req:with_amz_request_id(Rq), #req_state{dir = Dir}}.
 
 allowed_methods(Rq, St) ->
     {['GET', 'PUT', 'DELETE'], Rq, St}.
@@ -48,10 +48,10 @@ content_types_accepted(Rq, St) ->
 content_types_provided(Rq, St) ->
     {[{{<<"text">>, <<"xml">>, []}, to_xml}], Rq, St}.
 
-resource_exists(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
+resource_exists(#http_req{host=[Bucket|_]}=Rq, #req_state{dir=Dir}=St) ->
     {?BACKEND:bucket_exists(Dir, Bucket), Rq, St}.
 
-delete_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
+delete_resource(#http_req{host=[Bucket|_]}=Rq, #req_state{dir=Dir}=St) ->
     case ?BACKEND:bucket_delete(Dir, Bucket) of
         ok -> {true, Rq, St};
         _  -> {false, Rq, St}
@@ -61,7 +61,7 @@ delete_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
 %%                         Content Accepted
 %% ===================================================================
 
-create_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
+create_resource(#http_req{host=[Bucket|_]}=Rq, #req_state{dir=Dir}=St) ->
     case ?BACKEND:bucket_create(Dir, Bucket) of
         ok -> {true, Rq, St};
         _  -> {false, Rq, St}
@@ -71,7 +71,7 @@ create_resource(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
 %%                         Content Provided
 %% ===================================================================
 
-to_xml(#http_req{host=[Bucket|_]}=Rq, #state{dir=Dir}=St) ->
+to_xml(#http_req{host=[Bucket|_]}=Rq, #req_state{dir=Dir}=St) ->
     Objects = ?BACKEND:obj_list(Dir, Bucket),
     Term    = bookshelf_xml:list_objects(Bucket, Objects),
     Body    = bookshelf_xml:write(Term),
@@ -87,7 +87,7 @@ rest_init_test_() ->
     [{"should populate the state with the base dir from handler opts",
       fun() ->
               Dir = "/tmp",
-              ?assertMatch({ok, _, #state{dir=Dir}},
+              ?assertMatch({ok, _, #req_state{dir=Dir}},
                            rest_init(#http_req{},
                                                    [{dir, Dir}]))
       end
@@ -98,7 +98,7 @@ allowed_methods_test_() ->
       fun() ->
               Expected = ['GET', 'PUT', 'DELETE'],
               {Allowed, _, _} =
-                  allowed_methods(#http_req{}, #state{}),
+                  allowed_methods(#http_req{}, #req_state{}),
               ?assertEqual(length(Expected), length(Allowed)),
               Result = sets:from_list(lists:merge(Expected, Allowed)),
               ?assertEqual(length(Expected), sets:size(Result))
@@ -109,7 +109,7 @@ content_types_accepted_test_() ->
     [{"should only support PUT with 'undefined' (absent) Content-Type",
       fun() ->
               {Types, _, _} =
-                  content_types_accepted(#http_req{}, #state{}),
+                  content_types_accepted(#http_req{}, #req_state{}),
               ?assertEqual(1, length(Types)),
               ?assert(lists:keymember(undefined, 1, Types))
       end
@@ -119,7 +119,7 @@ content_types_provided_test_() ->
     [{"should only support text/xml output",
       fun() ->
               {Types, _, _} =
-                  content_types_provided(#http_req{}, #state{}),
+                  content_types_provided(#http_req{}, #req_state{}),
               ?assertEqual(1, length(Types)),
               ?assert(lists:keymember({<<"text">>, <<"xml">>, []}, 1, Types))
       end
@@ -133,14 +133,14 @@ resource_exists_test_() ->
                  {true, _, _},
                  resource_exists(
                    #http_req{host=[Bucket]},
-                   #state{dir=Dir}
+                   #req_state{dir=Dir}
                   )
                 ),
               ?assertMatch(
                  {false, _, _},
                  resource_exists(
                    #http_req{host=[<<"batman!">>]},
-                   #state{dir=Dir}
+                   #req_state{dir=Dir}
                   )
                 )
       end
@@ -152,10 +152,10 @@ delete_resource_test_() ->
               {Dir, Bucket} = test_bucket(),
               {true, _, _} =
                   delete_resource(#http_req{host=[Bucket]},
-                                                #state{dir=Dir}),
+                                                #req_state{dir=Dir}),
               {false, _, _} =
                   delete_resource(#http_req{host=[<<"derp">>]},
-                                                #state{dir=Dir})
+                                                #req_state{dir=Dir})
       end
      }].
 
@@ -165,10 +165,10 @@ create_resource_test_() ->
               {Dir, Bucket} = test_bucket(),
               {false, _, _} =
                   create_resource(#http_req{host=[Bucket]},
-                                                #state{dir=Dir}),
+                                                #req_state{dir=Dir}),
               {true, _, _} =
                   create_resource(#http_req{host=[<<"hurp">>]},
-                                                #state{dir=Dir})
+                                                #req_state{dir=Dir})
       end
      }].
 

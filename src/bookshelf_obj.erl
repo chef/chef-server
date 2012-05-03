@@ -34,7 +34,7 @@ init(_Transport, _Rq, _Opts) ->
 
 rest_init(Rq, Opts) ->
     {dir, Dir} = lists:keyfind(dir, 1, Opts),
-    {ok, bookshelf_req:with_amz_request_id(Rq), #state{dir = Dir}}.
+    {ok, bookshelf_req:with_amz_request_id(Rq), #req_state{dir = Dir}}.
 
 allowed_methods(Rq, St) ->
     {['HEAD', 'GET', 'PUT', 'DELETE'], Rq, St}.
@@ -47,12 +47,12 @@ content_types_accepted(Rq, St) ->
 
 resource_exists(#http_req{host=[Bucket|_],
                           raw_path= <<"/",Path/binary>>}=Rq,
-                #state{dir=Dir}=St) ->
+                #req_state{dir=Dir}=St) ->
     {?BACKEND:obj_exists(Dir, Bucket, Path), Rq, St}.
 
 delete_resource(#http_req{host=[Bucket|_],
                           raw_path= <<"/",Path/binary>>}=Rq,
-                #state{dir=Dir}=St) ->
+                #req_state{dir=Dir}=St) ->
     case ?BACKEND:obj_delete(Dir, Bucket, Path) of
         ok -> {true, Rq, St};
         _  -> {false, Rq, St}
@@ -60,7 +60,7 @@ delete_resource(#http_req{host=[Bucket|_],
 
 last_modified(#http_req{host=[Bucket|_],
                         raw_path= <<"/",Path/binary>>}=Rq,
-              #state{dir=Dir}=St) ->
+              #req_state{dir=Dir}=St) ->
     case ?BACKEND:obj_meta(Dir, Bucket, Path) of
         {ok, #object{date=Date}} -> {Date, Rq, St};
         _                        -> {halt, Rq, St}
@@ -68,7 +68,7 @@ last_modified(#http_req{host=[Bucket|_],
 
 generate_etag(#http_req{host=[Bucket|_],
                         raw_path= <<"/",Path/binary>>}=Rq,
-              #state{dir=Dir}=St) ->
+              #req_state{dir=Dir}=St) ->
     case ?BACKEND:obj_meta(Dir, Bucket, Path) of
         {ok, #object{digest=Digest}} ->
             {{strong, list_to_binary(bookshelf_format:to_hex(Digest))}, Rq, St};
@@ -91,7 +91,7 @@ upload(#http_req{host=[Bucket|_],
                  socket=Socket,
                  transport=Transport,
                  buffer=Buffer}=Rq,
-       #state{dir=Dir}=St) ->
+       #req_state{dir=Dir}=St) ->
     {Length, Rq2} = cowboy_http_req:parse_header('Content-Length', Rq),
     case ?BACKEND:obj_recv(Dir, Bucket, Path,
                            Transport, Socket, Buffer, Length) of
@@ -113,7 +113,7 @@ upload(#http_req{host=[Bucket|_],
     end.
 
 copy(#http_req{host=[ToBucket|_], raw_path= <<"/",ToPath/binary>>}=Rq,
-     #state{dir=Dir}=St,
+     #req_state{dir=Dir}=St,
      <<"/",FromFullPath/binary>>) ->
     [FromBucket, FromPath] = binary:split(FromFullPath, <<"/">>),
     case ?BACKEND:obj_copy(Dir, FromBucket, FromPath, ToBucket, ToPath) of
@@ -129,7 +129,7 @@ download(#http_req{host=[Bucket|_],
                    raw_path= <<"/",Path/binary>>,
                    transport=Transport,
                    socket=Socket}=Rq,
-         #state{dir=Dir}=St) ->
+         #req_state{dir=Dir}=St) ->
     case ?BACKEND:obj_meta(Dir, Bucket, Path) of
         {ok, #object{size=Size}} ->
             SFun = fun() ->
