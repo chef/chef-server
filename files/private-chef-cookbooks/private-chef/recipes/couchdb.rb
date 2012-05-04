@@ -78,6 +78,7 @@ template "/etc/cron.d/couchdb_compact" do
             :cron_home => couchdb_dir,
             :cron_schedule => "17 1,9,17 * * *",
             :cron_user => node['private_chef']['user']['username'],
+            :cron_path => "/usr/bin:/usr/sbin:/opt/opscode/embedded/bin",
             :cron_command => cron_cmd
             )
 end
@@ -92,6 +93,7 @@ template "/etc/cron.d/couchdb_compact_major_offenders" do
             :cron_home => couchdb_dir,
             :cron_schedule => "17 3,5,7,11,13,15,19,21,23 * * *",
             :cron_user => node['private_chef']['user']['username'],
+            :cron_path => "/usr/bin:/usr/sbin:/opt/opscode/embedded/bin",
             :cron_command => cron_cmd_major_offenders
             )
 end
