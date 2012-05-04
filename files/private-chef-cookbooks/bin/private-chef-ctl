@@ -278,7 +278,7 @@ def ha_status
   if @running_config['private_chef']['drbd']['enable']
     puts "[OK] DRBD disk replication enabled."
   else
-    puts "[ERROR] DRBD disk recplication services not enabled, please configure DRBD according to documentation."
+    puts "[ERROR] DRBD disk replication services not enabled, please configure DRBD according to documentation."
     exit 1 
   end
 
