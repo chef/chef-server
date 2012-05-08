@@ -259,8 +259,7 @@ module PrivateChef
     end
 
     def gen_backend(bootstrap=false)
-
-      PrivateChef["role"] = "backend"
+      PrivateChef[:role] = "backend" #mixlib-config wants a symbol :(
       PrivateChef["couchdb"]["bind_address"] ||= "0.0.0.0"
       PrivateChef["rabbitmq"]["node_ip_address"] ||= "0.0.0.0"
       PrivateChef["opscode_solr"]["ip_address"] ||= "0.0.0.0"
@@ -279,7 +278,7 @@ module PrivateChef
     end
 
     def gen_frontend
-      PrivateChef["role"] = "frontend"
+      PrivateChef[:role] = "frontend"
       PrivateChef["couchdb"]["enable"] ||= false
       PrivateChef["couchdb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["rabbitmq"]["enable"] ||= false
