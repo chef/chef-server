@@ -28,7 +28,16 @@
               {estatsd_server, "<%= node['private_chef']['estatsd']['vip'] %>"},
 	          {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>}
              ]},
+
+ {erlcloud, [
+             {aws_defaults, [{key_id, "<%= node['private_chef']['aws']['aws_key'] %>"},
+                             {secret_access_key, "<%= node['private_chef']['aws']['aws_secret'] %>"}]}
+            ]},
+
  {chef_common, [
+
+                {s3_platform_bucket_name, "<%= node['private_chef']['aws']['s3_bucket'] %>"},
+
                 {solr_url, "http://<%= node['private_chef']['opscode-solr']['vip'] %>:<%= node['private_chef']['opscode-solr']['port'] %>/solr"},
                 {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
                 {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> },
