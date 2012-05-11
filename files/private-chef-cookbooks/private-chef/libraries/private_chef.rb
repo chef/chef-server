@@ -39,6 +39,8 @@ module PrivateChef
   nrpe Mash.new
   nginx Mash.new
 
+  aws Mash.new
+
   servers Mash.new
   backend_vips Mash.new
   api_fqdn nil
@@ -175,7 +177,10 @@ module PrivateChef
         "nagios",
         "nrpe",
         "nginx",
-        "ldap"
+        "ldap",
+
+        ## Temporary until bookshelf is online
+        "aws"
       ].each do |key|
         rkey = key.gsub('_', '-')
         results['private_chef'][rkey] = PrivateChef[key]
@@ -331,6 +336,20 @@ module PrivateChef
       end
     end
 
+    def gen_s3
+      PrivateChef['aws']['s3_bucket'] ||= PrivateChef['s3_bucket']
+      PrivateChef['aws']['aws_key'] ||= PrivateChef['aws_key']
+      PrivateChef['aws']['aws_secret'] ||= PrivateChef['aws_secret']
+
+      unless PrivateChef['aws']['s3_bucket'] &&
+          PrivateChef['aws']['aws_key'] &&
+          PrivateChef['aws']['aws_secret']
+        Chef::Log.fatal("Must supply an 'aws_key', 'aws_secret', and 's3_bucket' for S3 file storage!")
+        exit 67
+      end
+
+    end
+
     def generate_config(node_name)
       generate_secrets(node_name)
       gen_nrpe_allowed_hosts
@@ -352,6 +371,16 @@ module PrivateChef
 
       unless PrivateChef["ldap"].nil? || PrivateChef["ldap"].empty?
         gen_ldap
+      end
+
+      case PrivateChef['file_storage']
+      when nil, 'local' # This can be the default
+        Chef::Log.info("Configuring for local file storage")
+      when 's3'
+        gen_s3
+      else
+        Chef::Log.fatal("I do not understand file_storage #{PrivateChef['file_storage']} - try 's3' or 'local' (the default).")
+        exit 66
       end
 
       generate_hash
