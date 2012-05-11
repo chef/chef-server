@@ -1,0 +1,8 @@
+# -*- mode: conf -*-
+
+[default]
+access_key  = e1efc99729beb175
+secret_key  = fc683cd9ed1990ca
+host_base   = localhost.localdomain:4321
+host_bucket = %(bucket)s.localhost.localdomain:4321
+verbosity   = DEBUG
