@@ -1,44 +1,66 @@
-PYTHON=python
+PLT_DIR=$(CURDIR)/.plt
+PLT=$(PLT_DIR)/dialyzer_plt
+REBAR=$(shell which rebar)
+
+ifeq ($(REBAR),)
+	$(error "Rebar not available on this system")
+endif
+
+.PHONY: all deps compile test eunit ct rel/bookshelf rel doc build-plt \
+	check-plt clean-plt
 
 all : rel
-deps/covertool deps/cowboy deps/erlsom deps/iso8601 :
-	@rebar get-deps
-deps : deps/covertool deps/cowboy deps/erlsom deps/iso8601
+
+deps :
+	$(REBAR) get-deps
+
 compile : deps
-	@rebar compile
+	$(REBAR) compile
+
+test : eunit ct
+
+eunit : compile
+	$(REBAR) skip_deps=true eunit
+
+ct : eunit
+	$(REBAR) skip_deps=true ct
+
 rel/bookshelf :
-	@rebar generate
+	$(REBAR) generate
+
 rel : compile rel/bookshelf
+
+doc:
+	$(REBAR) doc
+
+build-plt: compile
+	$(REBAR) build-plt
+
+check-plt: compile
+	$(REBAR) check-plt
+
+$(PLT): compile
+	mkdir -p $(PLT_DIR)
+	dialyzer --build_plt --output_plt $(PLT) \
+		--apps erts kernel stdlib eunit compiler crypto
+
+clean_plt:
+	rm -rf $(PLT_DIR)
+
+dialyzer: compile $(PLT)
+	dialyzer --src --plt $(PLT) $(TEST_PLT) \
+	-c ./bookshelf_store/src \
+	-c ./bookshelf_wi/src
+
+typer: compile $(PLT)
+	typer --plt $(PLT) -r ./src
+
 clean :
-	@rebar skip_deps=true clean
-	@rm -rf rel/bookshelf
-distclean : clean
+	$(REBAR) skip_deps=true clean
+	rm -rf rel/bookshelf
+
+distclean : clean clean-plt
 	@git clean -fdx
-test : unit integration
-unit : compile
-	@rebar skip_deps=true eunit
-integration : s3-tests
-	@cd s3-tests &&	\
-	export S3TEST_CONF=`pwd`/../etc/nosetests.conf && \
-	./virtualenv/bin/nosetests --with-xunit
-s3-tests : s3-tests/.git s3-tests/virtualenv
-s3-tests/virtualenv : s3-tests/virtualenv/bin/s3tests-generate-objects
-s3-tests/virtualenv/bin/s3tests-generate-objects : s3-tests/virtualenv/bin/nosetests
-	@cd s3-tests && \
-	./virtualenv/bin/python setup.py develop --allow-hosts None
-s3-tests/virtualenv/bin/nosetests : s3-tests/virtualenv/bin/activate
-	@cd s3-tests && \
-	./virtualenv/bin/pip install -r requirements.txt
-s3-tests/virtualenv/bin/activate : s3-tests/.git
-	@cd s3-tests && \
-	virtualenv --python ${PYTHON} virtualenv
-s3-tests/.git :
-	@git clone https://github.com/opscode/s3-tests.git
+
 start :
 	@rel/bookshelf/bin/bookshelf start
-console :
-	@rel/bookshelf/bin/bookshelf console
-ping :
-	@rel/bookshelf/bin/bookshelf ping
-stop :
-	@rel/bookshelf/bin/bookshelf stop ; exit 0
