@@ -30,3 +30,9 @@ template "/opt/opscode/embedded/service/partybus/config.rb" do
             :node_role => node_role,
             :db_service_name => db_service_name)
 end
+
+execute "set initial migration level" do
+  action :nothing
+  command "/opt/opscode/embedded/service/partybus/bin/partybus init"
+  subscribes :run, resources(:directory => "/var/opt/opscode"), :delayed
+end

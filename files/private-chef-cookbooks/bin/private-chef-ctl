@@ -207,7 +207,7 @@ end
 
 def upgrade
   reconfigure(false)
-  status = run_command("cd /opt/opscode/embedded/service/partybus && /opt/opscode/embedded/bin/ruby bin/partybus")
+  status = run_command("cd /opt/opscode/embedded/service/partybus && /opt/opscode/embedded/bin/ruby bin/partybus upgrade")
   if status.success?
     puts "Chef Server Upgraded!"
     exit 0
