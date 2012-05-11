@@ -1,0 +1,11 @@
+source "http://rubygems.org"
+
+gem "sequel", "~> 3.34.1"
+
+group :pg do
+  gem "pg"
+end
+
+group :mysql do
+  gem "mysql2"
+end

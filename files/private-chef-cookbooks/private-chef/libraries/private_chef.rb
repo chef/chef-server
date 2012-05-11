@@ -47,6 +47,7 @@ module PrivateChef
   notification_email nil
   from_email nil
   database_type nil
+  role nil
 
   ldap Mash.new
 
@@ -182,6 +183,7 @@ module PrivateChef
       results['private_chef']['database_type'] = PrivateChef['database_type']
       results['private_chef']['notification_email'] = PrivateChef['notification_email']
       results['private_chef']['from_email'] = PrivateChef['from_email']
+      results['private_chef']['role'] = PrivateChef['role']
       results
     end
 
@@ -257,6 +259,7 @@ module PrivateChef
     end
 
     def gen_backend(bootstrap=false)
+      PrivateChef[:role] = "backend" #mixlib-config wants a symbol :(
       PrivateChef["couchdb"]["bind_address"] ||= "0.0.0.0"
       PrivateChef["rabbitmq"]["node_ip_address"] ||= "0.0.0.0"
       PrivateChef["opscode_solr"]["ip_address"] ||= "0.0.0.0"
@@ -275,6 +278,7 @@ module PrivateChef
     end
 
     def gen_frontend
+      PrivateChef[:role] = "frontend"
       PrivateChef["couchdb"]["enable"] ||= false
       PrivateChef["couchdb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["rabbitmq"]["enable"] ||= false

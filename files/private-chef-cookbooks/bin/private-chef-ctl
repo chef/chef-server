@@ -191,7 +191,7 @@ def show_config
 	exit 0
 end
 
-def reconfigure
+def reconfigure(exit_on_success=true)
   if File.exists?("/etc/opscode/chef-server.json")
     status = run_command("/opt/opscode/bin/chef-solo -c /opt/opscode/embedded/cookbooks/solo.rb -j /etc/opscode/chef-server.json -l info")
   else
@@ -199,6 +199,17 @@ def reconfigure
   end
   if status.success?
     puts "Chef Server Reconfigured!"
+    exit 0 if exit_on_success
+  else
+    exit 1
+  end
+end
+
+def upgrade
+  reconfigure(false)
+  status = run_command("cd /opt/opscode/embedded/service/partybus && /opt/opscode/embedded/bin/ruby bin/partybus upgrade")
+  if status.success?
+    puts "Chef Server Upgraded!"
     exit 0
   else
     exit 1
@@ -530,9 +541,7 @@ when "graceful-kill"
 else
   case ARGV[0]
   when "upgrade"
-    # Currently just does reconfigure, but here in case we make it more complicated 
-    # during an upgrade cycle.
-    reconfigure
+    upgrade
   when "ha-status"
     ha_status
   when "master-recover"
