@@ -2,7 +2,9 @@ Chef::Config[:chargify_api_secret] = ''
 Chef::Config[:chargify_site]       = 'opscode-preprod'
 
 Chef::Config[:dark_launch_config_filename] = '/etc/opscode/dark_launch_features.json'
+Chef::Config[:chef_server_host_uri]  = 'http://<%= node['private_chef']['lb_internal']['vip'] %>:<%= node['private_chef']['lb_internal']['chef_port'] %>'
 Chef::Config[:web_ui_proxy_user] = '<%= @proxy_user %>'
+Chef::Config[:web_ui_private_key]    = '/etc/opscode/webui_priv.pem'
 
 Merb::Config.use do |c|
   # Sets up a custom session id key which is used for the session persistence
