@@ -87,7 +87,7 @@ delete_value(ItemName, Name) ->
 
 %% @doc get a value identified by 'ItemName' from the config. This
 %% will return the value or if the value otherwise 'not_found
--spec get_value(term(), name()) -> term().
+-spec get_value(term(), name()) -> {ok, term()} | not_found.
 get_value(ItemName, Name) ->
    gen_server:call(config_pid(Name), {get, ItemName}).
 
