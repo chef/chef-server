@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
+ENV.delete('RUBYOPT')
 $:.unshift File.expand_path('../../lib', __FILE__)
 require 'partybus'
 require 'partybus/dsl_runner'
