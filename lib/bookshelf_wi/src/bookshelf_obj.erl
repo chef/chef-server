@@ -16,10 +16,22 @@
 %% permissions and limitations under the License.
 
 -module(bookshelf_obj).
+
+-export([init/3,
+         rest_init/2,
+         allowed_methods/2,
+         content_types_provided/2,
+         content_types_accepted/2,
+         resource_exists/2,
+         delete_resource/2,
+         last_modified/2,
+         generate_etag/2,
+         upload_or_copy/2,
+         download/2]).
+
 -include("bookshelf.hrl").
 -include_lib("cowboy/include/http.hrl").
 
--compile(export_all).
 
 %% ===================================================================
 %%                              Cowboy
@@ -32,9 +44,9 @@ init(_Transport, _Rq, _Opts) ->
 %%                         Cowboy HTTP REST
 %% ===================================================================
 
-rest_init(Rq, Opts) ->
-    {dir, Dir} = lists:keyfind(dir, 1, Opts),
-    {ok, bookshelf_req:with_amz_request_id(Rq), #req_state{dir = Dir}}.
+rest_init(Rq, _Opts) ->
+    %% We dont actually make use of state here at all
+    {ok, bookshelf_req:with_amz_request_id(Rq), undefined}.
 
 allowed_methods(Rq, St) ->
     {['HEAD', 'GET', 'PUT', 'DELETE'], Rq, St}.
@@ -47,32 +59,35 @@ content_types_accepted(Rq, St) ->
 
 resource_exists(#http_req{host=[Bucket|_],
                           raw_path= <<"/",Path/binary>>}=Rq,
-                #req_state{dir=Dir}=St) ->
-    {?BACKEND:obj_exists(Dir, Bucket, Path), Rq, St}.
+                St) ->
+    {bookshelf_store:obj_exists(Bucket, Path), Rq, St}.
 
 delete_resource(#http_req{host=[Bucket|_],
                           raw_path= <<"/",Path/binary>>}=Rq,
-                #req_state{dir=Dir}=St) ->
-    case ?BACKEND:obj_delete(Dir, Bucket, Path) of
+                St) ->
+    case bookshelf_store:obj_delete(Bucket, Path) of
         ok -> {true, Rq, St};
         _  -> {false, Rq, St}
     end.
 
 last_modified(#http_req{host=[Bucket|_],
                         raw_path= <<"/",Path/binary>>}=Rq,
-              #req_state{dir=Dir}=St) ->
-    case ?BACKEND:obj_meta(Dir, Bucket, Path) of
-        {ok, #object{date=Date}} -> {Date, Rq, St};
-        _                        -> {halt, Rq, St}
+              St) ->
+    case bookshelf_store:obj_meta(Bucket, Path) of
+        {ok, #object{date=Date}} ->
+            {Date, Rq, St};
+        _  ->
+            {halt, Rq, St}
     end.
 
 generate_etag(#http_req{host=[Bucket|_],
                         raw_path= <<"/",Path/binary>>}=Rq,
-              #req_state{dir=Dir}=St) ->
-    case ?BACKEND:obj_meta(Dir, Bucket, Path) of
+              St) ->
+    case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{digest=Digest}} ->
             {{strong, list_to_binary(bookshelf_format:to_hex(Digest))}, Rq, St};
-        _ -> {halt, Rq, St}
+        _ ->
+            {halt, Rq, St}
     end.
 
 %% ===================================================================
@@ -91,10 +106,11 @@ upload(#http_req{host=[Bucket|_],
                  socket=Socket,
                  transport=Transport,
                  buffer=Buffer}=Rq,
-       #req_state{dir=Dir}=St) ->
+       St) ->
     {Length, Rq2} = cowboy_http_req:parse_header('Content-Length', Rq),
-    case ?BACKEND:obj_recv(Dir, Bucket, Path,
-                           Transport, Socket, Buffer, Length) of
+    Bridge = bkss_transport:new(bksw_socket_transport,
+                                [Transport, Socket, ?TIMEOUT_MS]),
+    case bookshelf_store:obj_recv(Bucket, Path, Bridge, Buffer, Length) of
         {ok, Digest} ->
             OurMd5 = bookshelf_format:to_hex(Digest),
             case cowboy_http_req:parse_header('Content-MD5', Rq2) of
@@ -113,10 +129,10 @@ upload(#http_req{host=[Bucket|_],
     end.
 
 copy(#http_req{host=[ToBucket|_], raw_path= <<"/",ToPath/binary>>}=Rq,
-     #req_state{dir=Dir}=St,
+     St,
      <<"/",FromFullPath/binary>>) ->
     [FromBucket, FromPath] = binary:split(FromFullPath, <<"/">>),
-    case ?BACKEND:obj_copy(Dir, FromBucket, FromPath, ToBucket, ToPath) of
+    case bookshelf_store:obj_copy(FromBucket, FromPath, ToBucket, ToPath) of
         {ok, _} -> {true, Rq, St};
         _       -> {false, Rq, St}
     end.
@@ -129,12 +145,14 @@ download(#http_req{host=[Bucket|_],
                    raw_path= <<"/",Path/binary>>,
                    transport=Transport,
                    socket=Socket}=Rq,
-         #req_state{dir=Dir}=St) ->
-    case ?BACKEND:obj_meta(Dir, Bucket, Path) of
+         St) ->
+    case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{size=Size}} ->
             SFun = fun() ->
-                           case ?BACKEND:obj_send(Dir, Bucket, Path,
-                                                  Transport, Socket) of
+                           Bridge = bkss_transport:new(bksw_socket_transport,
+                                                       [Transport, Socket,
+                                                        ?TIMEOUT_MS]),
+                           case bookshelf_store:obj_send(Bucket, Path, Bridge) of
                                {ok, Size} -> sent;
                                _          -> {error, "Download unsuccessful"}
                            end
