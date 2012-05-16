@@ -18,8 +18,6 @@
 
 -export([with_amz_request_id/1, with_etag/2]).
 
--include("bookshelf.hrl").
-
 -include_lib("cowboy/include/http.hrl").
 
 %%===================================================================
@@ -27,7 +25,7 @@
 %%===================================================================
 with_amz_request_id(Rq) ->
     Id = term_to_binary({node(), erlang:now()}),
-    Base64 = bookshelf_format:to_base64(Id),
+    Base64 = bksw_format:to_base64(Id),
     {ok, Rq2} =
         cowboy_http_req:set_resp_header(<<"x-amz-request-id">>,
                                         Base64, Rq),

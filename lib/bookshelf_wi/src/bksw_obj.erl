@@ -22,9 +22,9 @@
          generate_etag/2, init/3, last_modified/2,
          resource_exists/2, rest_init/2, upload_or_copy/2]).
 
--include("bookshelf.hrl").
-
+-include_lib("bookshelf_store/include/bookshelf_store.hrl").
 -include_lib("cowboy/include/http.hrl").
+-include("internal.hrl").
 
 %%===================================================================
 %% Public API
@@ -35,7 +35,7 @@ init(_Transport, _Rq, _Opts) ->
 
 rest_init(Rq, _Opts) ->
     %% We dont actually make use of state here at all
-    {ok, bookshelf_req:with_amz_request_id(Rq), undefined}.
+    {ok, bksw_req:with_amz_request_id(Rq), undefined}.
 
 allowed_methods(Rq, St) ->
     {['HEAD', 'GET', 'PUT', 'DELETE'], Rq, St}.
@@ -77,7 +77,7 @@ generate_etag(#http_req{host = [Bucket | _],
     case bookshelf_store:obj_meta(Bucket, Path) of
       {ok, #object{digest = Digest}} ->
           {{strong,
-            list_to_binary(bookshelf_format:to_hex(Digest))},
+            list_to_binary(bksw_format:to_hex(Digest))},
            Rq, St};
       _ -> {halt, Rq, St}
     end.
@@ -133,15 +133,15 @@ upload(#http_req{host = [Bucket | _],
                                   Buffer, Length)
         of
       {ok, Digest} ->
-          OurMd5 = bookshelf_format:to_hex(Digest),
+          OurMd5 = bksw_format:to_hex(Digest),
           case cowboy_http_req:parse_header('Content-MD5', Rq2) of
             {_, undefined, Rq3} ->
-                Rq4 = bookshelf_req:with_etag(OurMd5, Rq3),
+                Rq4 = bksw_req:with_etag(OurMd5, Rq3),
                 halt(202, Rq4, St);
             {_, RequestMd5, Rq3} ->
                 case RequestMd5 =:= OurMd5 of
                   true ->
-                      Rq4 = bookshelf_req:with_etag(RequestMd5, Rq3),
+                      Rq4 = bksw_req:with_etag(RequestMd5, Rq3),
                       halt(202, Rq4, St);
                   _ -> halt(406, Rq3, St)
                 end

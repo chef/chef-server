@@ -16,16 +16,16 @@
 %% permissions and limitations under the License.
 -module(bksw_xml).
 
--include("bookshelf.hrl").
-
--include("amazon_s3.hrl").
-
 -export([list_buckets/1, list_objects/2, model/0,
          write/1, write_erl/0, write_hrl/0]).
 
-%% ===================================================================
-%%                            Documents
-%% ===================================================================
+-include_lib("bookshelf_store/include/bookshelf_store.hrl").
+-include("amazon_s3.hrl").
+
+
+%%===================================================================
+%% Public API
+%%===================================================================
 
 list_buckets(Buckets) ->
     #'ListAllMyBucketsResult'{'Owner' = owner(),
@@ -35,10 +35,6 @@ list_objects(Bucket, Objects) ->
     #'ListBucketResult'{'Name' = Bucket, 'Prefix' = "",
                         'Marker' = "", 'MaxKeys' = 10000, 'IsTruncated' = false,
                         'Contents' = [object(O1) || O1 <- Objects]}.
-
-%% ===================================================================
-%%                             Partials
-%% ===================================================================
 
 owner() ->
     #'CanonicalUser'{'ID' = "abc123",
@@ -59,10 +55,6 @@ object(#object{name = Name, date = Date, size = Size,
                  'ETag' = bookshelf_format:to_etag(Digest),
                  'Size' = io_lib:format("~w", [Size]),
                  'StorageClass' = "STANDARD"}.
-
-%% ===================================================================
-%%                             Utility
-%% ===================================================================
 
 write(Xml) ->
     {ok, Text} = erlsom:write(Xml, model()),
@@ -90,10 +82,6 @@ write_erl() ->
                   [append, write]),
     ok = file:write(Device, io_lib:format("~p", [Model])),
     ok = file:close(Device).
-
-%% ===================================================================
-%%                              Model
-%% ===================================================================
 
 model() ->
     {model,
