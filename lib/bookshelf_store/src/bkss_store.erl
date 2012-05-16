@@ -28,8 +28,8 @@
          obj_exists/3,
          obj_list/2,
          obj_meta/3,
-         obj_recv/7,
-         obj_send/5
+         obj_recv/6,
+         obj_send/4
         ]).
 
 -export_type([store/0, bucket/0, path/0]).
@@ -114,14 +114,15 @@ obj_copy(#store_t{callback=Mod,data=Data0}, FromBucket, FromPath, ToBucket, ToPa
     {Data1, R} = Mod:obj_copy(Data0, FromBucket, FromPath, ToBucket, ToPath),
     {#store_t{callback=Mod, data=Data1}, R}.
 
--spec obj_send(store(), bucket_name(), path(), module(), term()) ->
+-spec obj_send(store(), bucket_name(), path(), bkss_transport:trans()) ->
                       {store(), ok | {error, Reason::term()}}.
-obj_send(#store_t{callback=Mod,data=Data0}, Bucket, Path, Transport, Socket) ->
-    Data1 = Mod:obj_send(Data0, Bucket, Path, Transport, Socket),
-    #store_t{callback=Mod, data=Data1}.
+obj_send(#store_t{callback=Mod,data=Data0}, Bucket, Path, Bridge) ->
+    {Data1, R} = Mod:obj_send(Data0, Bucket, Path, Bridge),
+    {#store_t{callback=Mod, data=Data1}, R}.
 
--spec obj_recv(store(), bucket_name(), path(), module(), term(), binary(), non_neg_integer()) ->
+-spec obj_recv(store(), bucket_name(), path(), bkss_transport:trans(),
+               binary(), non_neg_integer()) ->
                       {store(), ok | {error, Reason::term()}}.
-obj_recv(#store_t{callback=Mod,data=Data0}, Bucket, Path, Transport, Socket, Buffer, Length) ->
-    {Data1, Obj} = Mod:obj_recv(Data0, Bucket, Path, Transport, Socket, Buffer, Length),
+obj_recv(#store_t{callback=Mod,data=Data0}, Bucket, Path, Bridge, Buffer, Length) ->
+    {Data1, Obj} = Mod:obj_recv(Data0, Bucket, Path, Bridge, Buffer, Length),
     {#store_t{callback=Mod, data=Data1}, Obj}.

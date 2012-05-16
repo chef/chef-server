@@ -29,8 +29,8 @@
          obj_exists/3,
          obj_list/2,
          obj_meta/3,
-         obj_recv/7,
-         obj_send/5
+         obj_recv/6,
+         obj_send/4
         ]).
 
 -export_type([fs_data/0, dir/0]).
@@ -132,76 +132,81 @@ obj_copy(State={?MODULE, Dir}, FromBucket, FromPath, ToBucket, ToPath) ->
                       filename:join([Dir, ToBucket, ToPath]))}.
 
 -spec obj_send(fs_data(), bkss_store:bucket_name(),
-               bkss_store:path(), module(), term()) ->
+               bkss_store:path(), bkss_transport:trans()) ->
                       {fs_data(), ok | {error, Reason::term()}}.
-obj_send(Dir, Bucket, Path, Transport, Socket) ->
-    case obj_open_r(Dir, Bucket, Path) of
-        {ok, FsSt} ->
-            case read(FsSt, Transport, Socket) of
-                {ok, FsSt2}      -> obj_close(FsSt2);
-                {error, timeout} -> obj_close(FsSt),
-                                    {error, timeout};
-                Any              -> obj_close(FsSt),
-                                    Any
-            end;
-        Any -> Any
-    end.
+obj_send(State={?MODULE, Dir}, Bucket, Path, Bridge) ->
+    Resp =
+        case obj_open_r(Dir, Bucket, Path) of
+            {ok, FsSt} ->
+                case read(FsSt, Bridge) of
+                    {ok, FsSt2}      -> obj_close(FsSt2);
+                    {error, timeout} -> obj_close(FsSt),
+                                        {error, timeout};
+                    Any              -> obj_close(FsSt),
+                                        Any
+                end;
+            Any -> Any
+        end,
+    {State, Resp}.
 
--spec obj_recv(fs_data(), bkss_store:bucket_name(), bkss_store:path(), module(),
-               term(), binary(), non_neg_integer()) ->
+-spec obj_recv(fs_data(), bkss_store:bucket_name(), bkss_store:path(),
+               bkss_transport:trans(), binary(), non_neg_integer()) ->
                       {fs_data(), ok | {error, Reason::term()}}.
-obj_recv(Dir, Bucket, Path, Transport, Socket, Buffer, Length) ->
+obj_recv(State={?MODULE, Dir}, Bucket, Path, Bridge, Buffer, Length) ->
     filelib:ensure_dir(filename:join([Dir, Bucket, Path])),
-    case obj_open_w(Dir, Bucket, Path) of
-        {ok, FsSt} ->
-            case write(FsSt, Transport, Socket, Length, Buffer) of
-                {ok, FsSt2} -> obj_close(FsSt2);
-                {error, timeout} ->
-                    obj_close(FsSt),
-                    obj_delete(Dir, Bucket, Path),
-                    {error, timeout};
-                Any ->
-                    obj_close(FsSt),
-                    obj_delete(Dir, Bucket, Path),
-                    Any
-            end;
-        Any -> Any
-    end.
+    Resp =
+        case obj_open_w(Dir, Bucket, Path) of
+            {ok, FsSt} ->
+                case write(FsSt, Bridge, Length, Buffer) of
+                    {ok, FsSt2} -> obj_close(FsSt2);
+                    {error, timeout} ->
+                        obj_close(FsSt),
+                        obj_delete(Dir, Bucket, Path),
+                        {error, timeout};
+                    Any ->
+                        obj_close(FsSt),
+                        obj_delete(Dir, Bucket, Path),
+                        Any
+                end;
+            Any -> Any
+        end,
+    {State, Resp}.
 
 %%===================================================================
 %% Internal Functions
 %%===================================================================
--spec read({file:file(), term()}, module(), term()) -> ok | {error, Reason::term()}.
-read({File, _}=FsSt, Transport, Socket) ->
+-spec read({file:file(), term()}, bkss_transport:trans()) ->
+                  ok | {error, Reason::term()}.
+read({File, _}=FsSt, Bridge) ->
     case file:read(File, ?BLOCK_SIZE) of
-        {ok, Chunk} -> Transport:send(Socket, Chunk),
-                       read(FsSt, Transport, Socket);
+        {ok, Chunk} -> bkss_transport:send(Bridge, Chunk),
+                       read(FsSt, Bridge);
         eof         -> ok;
         Any         -> Any
     end.
 
-write(FsSt, Transport, Socket, Length, <<>>) ->
-    write(FsSt, Transport, Socket, Length);
-write(FsSt, Transport, Socket, Length, Buf) ->
+write(FsSt, Bridge, Length, <<>>) ->
+    write(FsSt, Bridge, Length);
+write(FsSt, Bridge, Length, Buf) ->
     case obj_write(FsSt, Buf) of
         {ok, NewFsSt} ->
-            write(NewFsSt, Transport, Socket, Length-byte_size(Buf));
+            write(NewFsSt, Bridge, Length-byte_size(Buf));
         Any -> Any
     end.
 
-write(FsSt, _Transport, _Socket, 0) ->
+write(FsSt, _Bridge, 0) ->
     obj_write(FsSt, <<>>);
-write(FsSt, Transport, Socket, Length) when Length =< ?BLOCK_SIZE ->
-    case Transport:recv(Socket, Length, ?TIMEOUT_MS) of
+write(FsSt, Bridge, Length) when Length =< ?BLOCK_SIZE ->
+    case bksw_socket_transport:recv(Bridge, Length) of
         {ok, Chunk} -> obj_write(FsSt, Chunk);
         Any         -> Any
     end;
-write(FsSt, Transport, Socket, Length) ->
-    case Transport:recv(Socket, ?BLOCK_SIZE, ?TIMEOUT_MS) of
+write(FsSt, Bridge, Length) ->
+    case bksw_socket_transport:recv(Bridge, ?BLOCK_SIZE) of
         {ok, Chunk} ->
             case obj_write(FsSt, Chunk) of
                 {ok, NewFsSt} ->
-                    write(NewFsSt, Transport, Socket, Length-?BLOCK_SIZE);
+                    write(NewFsSt, Bridge, Length-?BLOCK_SIZE);
                 Any -> Any
             end;
         Any -> Any
