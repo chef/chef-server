@@ -1,7 +1,0 @@
-%% -*- mode: Erlang; fill-column: 75; comment-column: 50; -*-
-{application, opset,
- [{description, "Reloadable Configuration Server"},
-  {vsn, "0.0.1"},
-  {modules, []},
-  {mod, {ops_app, []}},
-  {applications, [kernel, stdlib, sasl, gproc]}]}.
