@@ -33,6 +33,6 @@ end
 
 execute "set initial migration level" do
   action :nothing
-  command "/opt/opscode/embedded/service/partybus/bin/partybus init"
+  command "cd /opt/opscode/embedded/service/partybus && ./bin/partybus init"
   subscribes :run, resources(:directory => "/var/opt/opscode"), :delayed
 end
