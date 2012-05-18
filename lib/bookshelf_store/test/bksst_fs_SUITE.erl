@@ -9,6 +9,7 @@
 -compile(export_all).
 
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("bookshelf_store/include/bookshelf_store.hrl").
 
 %%====================================================================
 %% TEST SERVER CALLBACK FUNCTIONS
@@ -20,14 +21,14 @@ end_per_suite(_Config) ->
     ok.
 
 init_per_testcase(_TestCase, Config) ->
-    io:format("~p", [Config]),
     Config.
 
 end_per_testcase(_TestCase, _Config) ->
     ok.
 
 all(doc) ->
-    ["This test is runs the fs implementation of the bkss_store signature"].
+    ["This does something very similar to bksst_fs_SUITE but "
+     "does it via the full OTP Stack"].
 
 all() ->
     [bookshelf_fs,bookshelf_fs_object].
@@ -61,6 +62,9 @@ bookshelf_fs(Config) when is_list(Config) ->
     {Store5, R2} = bkss_store:bucket_delete(Store4, <<"cat">>),
     ?assertEqual(ok, R2),
     Pass2 = bkss_store:bucket_list(Store5),
+    ?assert(lists:all(fun(#bucket{name=Name}) ->
+                              lists:member(Name,  [<<"lol">>, <<"walrus">>, <<"bukkit">>])
+                      end, Pass2)),
     ?assertEqual(3, length(Pass2)),
     ?assertNot(bkss_store:bucket_exists(Store5, <<"cat">>)).
 
@@ -68,7 +72,7 @@ bookshelf_fs_object(doc) ->
     ["should be able to list objects"];
 bookshelf_fs_object(suite) ->
     [];
-bookshelf_fs_object(Config) ->
+bookshelf_fs_object(Config) when is_list(Config) ->
     PrivDir = list_to_binary(filename:join(proplists:get_value(priv_dir, Config),
                                            "fs-store-object")),
     file:make_dir(PrivDir),
@@ -80,24 +84,17 @@ bookshelf_fs_object(Config) ->
     Objs = [<<"testing/123/hello">>, <<"hello">>],
     lists:foreach(
       fun(F) ->
-              ?assertEqual(ok, fixture_file(PrivDir, Bucket, F, F))
+              {_, {ok, _}} = bkss_store:obj_create(Store1, Bucket, F, F)
       end,
       Objs
      ),
     Records = bkss_store:obj_list(Store1, Bucket),
-    ?assertEqual(2, length(Records)).
+    ?assertEqual(2, length(Records)),
+    lists:foreach(fun(#object{name=Path}) ->
+                          Data = bkss_store:obj_get(Store1, Bucket, Path),
+                          ?assertEqual({ok, Path}, Data)
+                  end, Records).
 
 %%====================================================================
 %% Utility Functions
 %%====================================================================
-
-fixture_file(PrivDir, Bucket, ObjectPath, Contents) ->
-    FilePath = filename:join([PrivDir, Bucket, ObjectPath]),
-    ?assertEqual(ok, filelib:ensure_dir(FilePath)),
-    case file:open(FilePath, [write]) of
-        {ok, IODevice} ->
-            ?assertEqual(ok, file:write(IODevice, Contents)),
-            ?assertEqual(ok, file:close(IODevice));
-        E ->
-            E
-    end.

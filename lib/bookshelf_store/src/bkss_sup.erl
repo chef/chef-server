@@ -24,10 +24,7 @@ start_link() ->
 %%%===================================================================
 %%% Supervisor callbacks
 %%%===================================================================
--spec init([]) -> {ok, {SupFlags::term(), ChildSpec::term()}} |
-                  ignore |
-                  {error, Reason::term()}.
-
+-spec init([]) -> {ok, {SupFlags::term(), ChildSpec::term()}}.
 init([]) ->
     RestartStrategy = one_for_one,
     MaxRestarts = 1000,
@@ -40,7 +37,7 @@ init([]) ->
 
     Store = {bkss_store_server, {bkss_store_server, start_link, []},
                 Restart, Shutdown, worker, [bkss_store_server]},
-    BucketSup = {bkss_bucket_sub, {bkss_bucket_sub, start_link, []},
+    BucketSup = {bkss_bucket_sup, {bkss_bucket_sup, start_link, []},
                  Restart, Shutdown, supervisor, [bkss_bucket_sup]},
 
-    {ok, {SupFlags, [Store, BucketSup]}}.
+    {ok, {SupFlags, [BucketSup, Store]}}.
