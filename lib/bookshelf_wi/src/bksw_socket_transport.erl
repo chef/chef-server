@@ -38,10 +38,10 @@
 new([Transport, Socket, Timeout]) ->
     #state{transport=Transport, socket=Socket, timeout=Timeout}.
 
--spec recv(bkss_transport:trans(), non_neg_integer()) -> {ok, binary()} | term().
+-spec recv(state(), non_neg_integer()) -> {ok, binary()} | term().
 recv(#state{transport=Transport, socket=Socket, timeout=Timeout}, Length) ->
     Transport:recv(Socket, Length, Timeout).
 
--spec send(bkss_transport:trans(), binary()) -> ok | term().
+-spec send(state(), binary()) -> ok | term().
 send(#state{transport=Transport, socket=Socket, timeout=_Timeout}, Binary) ->
     Transport:send(Socket, Binary).

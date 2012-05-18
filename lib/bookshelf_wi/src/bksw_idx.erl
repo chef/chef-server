@@ -29,7 +29,7 @@ init(_Transport, _Rq, _Opts) ->
     {upgrade, protocol, cowboy_http_rest}.
 
 rest_init(Rq, _Opts) ->
-    {ok, bookshelf_req:with_amz_request_id(Rq), undefined}.
+    {ok, bksw_req:with_amz_request_id(Rq), undefined}.
 
 allowed_methods(Rq, St) -> {['GET'], Rq, St}.
 
@@ -56,7 +56,7 @@ allowed_methods_test_() ->
     [{"should only support 'GET'",
       fun () ->
               Expected = ['GET'],
-              {Allowed, _, _} = allowed_methods(#http_req{},
+              {Allowed, _, _} = allowed_methods(#http_req{pid=self()}, % make dialyzer happy
                                                 undefined),
               ?assertEqual((length(Expected)), (length(Allowed))),
               Result = sets:from_list(lists:merge(Expected, Allowed)),
@@ -66,11 +66,11 @@ allowed_methods_test_() ->
 content_types_provided_test_() ->
     [{"should only support text/xml output",
       fun () ->
-              {Types, _, _} = content_types_provided(#http_req{},
+              {Types, _, _} = content_types_provided(#http_req{pid=self()}, % make dialyzer happy
                                                      undefined),
-              ?assertEqual(1, (length(Types))),
-              ?assert((lists:keymember({<<"text">>, <<"xml">>, []}, 1,
-                                       Types)))
+              1 = length(Types),
+              true = lists:keymember({<<"text">>, <<"xml">>, []}, 1,
+                                     Types)
       end}].
 
 -endif.

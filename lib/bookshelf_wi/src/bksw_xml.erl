@@ -46,13 +46,13 @@ buckets(Buckets) ->
 
 bucket(#bucket{name = Name, date = Date}) ->
     #'ListAllMyBucketsEntry'{'Name' = Name,
-                             'CreationDate' = bookshelf_format:to_date(Date)}.
+                             'CreationDate' = bksw_format:to_date(Date)}.
 
 object(#object{name = Name, date = Date, size = Size,
                digest = Digest}) ->
     #'ListEntry'{'Key' = Name,
-                 'LastModified' = bookshelf_format:to_date(Date),
-                 'ETag' = bookshelf_format:to_etag(Digest),
+                 'LastModified' = bksw_format:to_date(Date),
+                 'ETag' = bksw_format:to_etag(Digest),
                  'Size' = io_lib:format("~w", [Size]),
                  'StorageClass' = "STANDARD"}.
 
@@ -63,22 +63,22 @@ write(Xml) ->
 
 write_hrl() ->
     case
-      file:read_file(bookshelf_util:file("amazon_s3.xsd"))
+      file:read_file(bksw_util:file("amazon_s3.xsd"))
         of
       {ok, Bin} ->
           Hrl =
               erlsom_writeHrl:writeXsdHrlFile(erlsom_lib:toUnicode(Bin),
                                               []),
-          file:write_file(bookshelf_util:file("../include/amazon_s3.hrl"),
+          file:write_file(bksw_util:file("../include/amazon_s3.hrl"),
                           Hrl);
       Error -> Error
     end.
 
 write_erl() ->
     {ok, Model} =
-        erlsom:compile_xsd_file(bookshelf_util:file("amazon_s3.xsd")),
+        erlsom:compile_xsd_file(bksw_util:file("amazon_s3.xsd")),
     {ok, Device} =
-        file:open(bookshelf_util:file("../src/bookshelf_xml.erl"),
+        file:open(bksw_util:file("../src/bksw_xml.erl"),
                   [append, write]),
     ok = file:write(Device, io_lib:format("~p", [Model])),
     ok = file:close(Device).

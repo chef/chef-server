@@ -15,11 +15,13 @@
          obj_exists/2,
          obj_delete/2,
          obj_meta/2,
+         obj_create/3,
+         obj_get/2,
          obj_copy/4,
          obj_send/3,
          obj_recv/5]).
 
--export_type([bucket_name/0]).
+-export_type([bucket_name/0, bucket/0, object/0, path/0]).
 
 %%%===================================================================
 %%% Types
@@ -27,7 +29,8 @@
 
 -type bucket_name() :: bkss_store:bucket_name().
 -type bucket() :: bkss_store:bucket().
-%-type object() :: bkss_store:object().
+-type object() :: bkss_store:object().
+-type path() :: bkss_store:path().
 
 %%===================================================================
 %% External API
@@ -47,7 +50,8 @@ bucket_list() ->
     bkss_store_server:bucket_list().
 
 bucket_exists(BucketName) ->
-    call(BucketName, bucket_exists).
+    bkss_bucket_server:bucket_server_exists(BucketName) andalso
+        call(BucketName, bucket_exists).
 
 bucket_delete(BucketName) ->
     call(BucketName, bucket_delete).
@@ -64,6 +68,12 @@ obj_delete(BucketName, Path) ->
 obj_meta(BucketName, Path) ->
     call(BucketName, {obj_meta, Path}).
 
+obj_create(BucketName, Path, Data) ->
+    call(BucketName, {obj_create, Path, Data}).
+
+obj_get(BucketName, Path) ->
+    call(BucketName, {obj_get, Path}).
+
 obj_copy(FromBucket, FromPath, ToBucket, ToPath) ->
     call(FromBucket, {obj_copy, FromPath, ToBucket, ToPath}).
 
@@ -77,5 +87,5 @@ obj_recv(BucketName, Path, Bridge, Buffer, Length) ->
 %% Internal Functions
 %%===================================================================
 call(BucketName, Msg) ->
-    Pid = bkss_registery:get_bucket_reference(BucketName),
+    Pid = bkss_store_server:get_bucket_reference(BucketName),
     gen_server:call(Pid, Msg).

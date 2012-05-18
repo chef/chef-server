@@ -28,11 +28,13 @@
          obj_exists/3,
          obj_list/2,
          obj_meta/3,
+         obj_create/4,
+         obj_get/3,
          obj_recv/6,
          obj_send/4
         ]).
 
--export_type([store/0, bucket/0, path/0]).
+-export_type([store/0, bucket/0, path/0, bucket_name/0, object/0]).
 -include_lib("bookshelf_store/include/bookshelf_store.hrl").
 
 %%%===================================================================
@@ -61,8 +63,10 @@ behaviour_info(callbacks) ->
      {obj_exists,3},
      {obj_list,2},
      {obj_meta,3},
-     {obj_recv,7},
-     {obj_send,5}
+     {obj_create,4},
+     {obj_get,3},
+     {obj_recv,6},
+     {obj_send,4}
     ];
 behaviour_info(_) ->
     undefined.
@@ -107,6 +111,17 @@ obj_delete(#store_t{callback=Mod,data=Data0}, Bucket, Path) ->
                       {ok, object()} | {error, Reason::term()}.
 obj_meta(#store_t{callback=Mod,data=Data0}, Bucket, Path) ->
     Mod:obj_meta(Data0, Bucket, Path).
+
+-spec obj_create(store(), bucket_name(), path(), iolist()) ->
+                      {store(), ok | {error, Reason::term()}}.
+obj_create(#store_t{callback=Mod,data=Data0}, Bucket, Path, Data) ->
+    {Data1, R} = Mod:obj_create(Data0, Bucket, Path, Data),
+    {#store_t{callback=Mod, data=Data1}, R}.
+
+-spec obj_get(store(), bucket_name(), path()) ->
+                     {store(), ok | {error, Reason::term()}}.
+obj_get(#store_t{callback=Mod,data=Data0}, Bucket, Path) ->
+    Mod:obj_get(Data0, Bucket, Path).
 
 -spec obj_copy(store(), bucket_name(), path(), bucket_name(), path()) ->
                       {store(), ok | {error, Reason::term()}}.

@@ -57,8 +57,8 @@ delete_resource(#http_req{host = [Bucket | _],
                     Rq,
                 St) ->
     case bookshelf_store:obj_delete(Bucket, Path) of
-      ok -> {true, Rq, St};
-      _ -> {false, Rq, St}
+        ok -> {true, Rq, St};
+        _ -> {false, Rq, St}
     end.
 
 last_modified(#http_req{host = [Bucket | _],
@@ -66,8 +66,8 @@ last_modified(#http_req{host = [Bucket | _],
                   Rq,
               St) ->
     case bookshelf_store:obj_meta(Bucket, Path) of
-      {ok, #object{date = Date}} -> {Date, Rq, St};
-      _ -> {halt, Rq, St}
+        {ok, #object{date = Date}} -> {Date, Rq, St};
+        _ -> {halt, Rq, St}
     end.
 
 generate_etag(#http_req{host = [Bucket | _],
@@ -75,20 +75,20 @@ generate_etag(#http_req{host = [Bucket | _],
                   Rq,
               St) ->
     case bookshelf_store:obj_meta(Bucket, Path) of
-      {ok, #object{digest = Digest}} ->
-          {{strong,
-            list_to_binary(bksw_format:to_hex(Digest))},
-           Rq, St};
-      _ -> {halt, Rq, St}
+        {ok, #object{digest = Digest}} ->
+            {{strong,
+              list_to_binary(bksw_format:to_hex(Digest))},
+             Rq, St};
+        _ -> {halt, Rq, St}
     end.
 
 upload_or_copy(Rq, St) ->
     case
-      cowboy_http_req:parse_header(<<"X-Amz-Copy-Source">>,
-                                   Rq)
-        of
-      {_, undefined, Rq2} -> upload(Rq2, St);
-      {_, Source, Rq2} -> copy(Rq2, St, Source)
+        cowboy_http_req:parse_header(<<"X-Amz-Copy-Source">>,
+                                     Rq)
+    of
+        {undefined, Rq2} -> upload(Rq2, St);
+        {Source, Rq2} -> copy(Rq2, St, Source)
     end.
 
 download(#http_req{host = [Bucket | _],
@@ -97,18 +97,18 @@ download(#http_req{host = [Bucket | _],
              Rq,
          St) ->
     case bookshelf_store:obj_meta(Bucket, Path) of
-      {ok, #object{size = Size}} ->
-          SFun = fun () ->
-                         Bridge = bkss_transport:new(bksw_socket_transport,
-                                                     [Transport, Socket,
-                                                      ?TIMEOUT_MS]),
-                         case bookshelf_store:obj_send(Bucket, Path, Bridge) of
-                           {ok, Size} -> sent;
-                           _ -> {error, "Download unsuccessful"}
-                         end
-                 end,
-          {{stream, Size, SFun}, Rq, St};
-      _ -> {false, Rq, St}
+        {ok, #object{size = Size}} ->
+            SFun = fun () ->
+                           Bridge = bkss_transport:new(bksw_socket_transport,
+                                                       [Transport, Socket,
+                                                        ?TIMEOUT_MS]),
+                           case bookshelf_store:obj_send(Bucket, Path, Bridge) of
+                               {ok, Size} -> sent;
+                               _ -> {error, "Download unsuccessful"}
+                           end
+                   end,
+            {{stream, Size, SFun}, Rq, St};
+        _ -> {false, Rq, St}
     end.
 
 %%===================================================================
@@ -131,23 +131,23 @@ upload(#http_req{host = [Bucket | _],
                                 [Transport, Socket, ?TIMEOUT_MS]),
     case bookshelf_store:obj_recv(Bucket, Path, Bridge,
                                   Buffer, Length)
-        of
-      {ok, Digest} ->
-          OurMd5 = bksw_format:to_hex(Digest),
-          case cowboy_http_req:parse_header('Content-MD5', Rq2) of
-            {_, undefined, Rq3} ->
-                Rq4 = bksw_req:with_etag(OurMd5, Rq3),
-                halt(202, Rq4, St);
-            {_, RequestMd5, Rq3} ->
-                case RequestMd5 =:= OurMd5 of
-                  true ->
-                      Rq4 = bksw_req:with_etag(RequestMd5, Rq3),
-                      halt(202, Rq4, St);
-                  _ -> halt(406, Rq3, St)
-                end
-          end;
-      {error, timeout} -> halt(408, Rq2, St);
-      _ -> halt(500, Rq2, St)
+    of
+        {ok, Digest} ->
+            OurMd5 = bksw_format:to_hex(Digest),
+            case cowboy_http_req:parse_header('Content-MD5', Rq2) of
+                {undefined, Rq3} ->
+                    Rq4 = bksw_req:with_etag(OurMd5, Rq3),
+                    halt(202, Rq4, St);
+                {RequestMd5, Rq3} ->
+                    case RequestMd5 =:= OurMd5 of
+                        true ->
+                            Rq4 = bksw_req:with_etag(RequestMd5, Rq3),
+                            halt(202, Rq4, St);
+                        _ -> halt(406, Rq3, St)
+                    end
+            end;
+        {error, timeout} -> halt(408, Rq2, St);
+        _ -> halt(500, Rq2, St)
     end.
 
 copy(#http_req{host = [ToBucket | _],
@@ -158,7 +158,7 @@ copy(#http_req{host = [ToBucket | _],
                                           <<"/">>),
     case bookshelf_store:obj_copy(FromBucket, FromPath,
                                   ToBucket, ToPath)
-        of
-      {ok, _} -> {true, Rq, St};
-      _ -> {false, Rq, St}
+    of
+        {ok, _} -> {true, Rq, St};
+        _ -> {false, Rq, St}
     end.

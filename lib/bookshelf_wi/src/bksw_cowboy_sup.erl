@@ -14,8 +14,7 @@
 %% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
-
--module(bksw_sup).
+-module(bksw_cowboy_sup).
 
 -behaviour(supervisor).
 
@@ -23,6 +22,7 @@
 
 -export([init/1]).
 
+-include("internal.hrl").
 %%===================================================================
 %% API functions
 %%===================================================================
@@ -35,8 +35,9 @@ start_link() ->
 %%===================================================================
 
 init(_Args) ->
-    Env = bksw_env:initialize(),
-    {pool, Pool} = lists:keyfind(pool, 1, Env),
+    %% This will reconfigure the system each time we startup.
+    Env = bksw_conf:get_configuration(),
+    Pool = proplists:get_value(pool, Env),
     RestartStrategy = one_for_one,
     MaxRestarts = 1000,
     MaxSecondsBetweenRestarts = 3600,
@@ -47,3 +48,4 @@ init(_Args) ->
      {{RestartStrategy, MaxRestarts,
        MaxSecondsBetweenRestarts},
       [ListenerSup]}}.
+

@@ -15,7 +15,7 @@
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
 
-%% records
--record(bucket, {name, date}).
--record(object, {name, date, size, digest}).
-
+%% settings
+-define(BOOKSHELF_CONFIG, bookshelf).
+-define(TIMEOUT_MS, 4096).
+-define(BLOCK_SIZE, 16384).

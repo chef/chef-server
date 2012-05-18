@@ -1,4 +1,4 @@
- %% @copyright 2012 Opscode, Inc. All Rights Reserved
+%% @copyright 2012 Opscode, Inc. All Rights Reserved
 %% @author Tim Dysinger <dysinger@opscode.com>
 %%
 %% Licensed to the Apache Software Foundation (ASF) under one or more
@@ -14,14 +14,11 @@
 %% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
-
 -module(bksw_app).
 
--include("bookshelf.hrl").
-
--export([start/0]).
-
 -behaviour(application).
+
+-export([manual_start/0, manual_stop/0]).
 
 -export([start/2, stop/1]).
 
@@ -29,22 +26,39 @@
 %%                          API functions
 %% ===================================================================
 
-start() ->
+manual_start() ->
     application:start(kernel),
     application:start(stdlib),
     application:start(sasl),
     application:start(crypto),
     application:start(public_key),
     application:start(ssl),
-    application:start(cowboy),
+    application:start(inets),
     application:start(erlsom),
-    application:start(bookshelf).
+    application:start(cowboy),
+    application:start(gen_leader),
+    application:start(gproc),
+    application:start(opset),
+    application:start(bookshelf_store),
+    application:start(bookshelf_wi).
+
+manual_stop() ->
+    application:stop(bookshelf_store),
+    application:stop(opset),
+    application:stop(gproc),
+    application:stop(gen_leader),
+    application:stop(bookshelf_wi),
+    application:stop(cowboy),
+    application:stop(erlsom),
+    application:stop(inets).
 
 %% ===================================================================
 %%                      Application callbacks
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    bookshelf_sup:start_link().
+    bksw_conf:setup_default_configuration(),
+    bksw_sup:start_link().
 
-stop(_State) -> ok.
+stop(_State) ->
+    ok.

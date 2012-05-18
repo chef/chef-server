@@ -18,7 +18,7 @@
 
 -behaviour(supervisor).
 
--export([start_link/0]).
+-export([start_link/0, reconfigure_cowboy/0]).
 
 -export([init/1]).
 
@@ -28,6 +28,9 @@
 
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+
+reconfigure_cowboy() ->
+    supervisor:restart_child(?MODULE, bksw_cowboy_sup).
 
 %%===================================================================
 %% Supervisor callbacks

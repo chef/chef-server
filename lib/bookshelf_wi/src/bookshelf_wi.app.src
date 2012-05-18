@@ -6,4 +6,5 @@
   {mod, {bksw_app, []}},
   {registered, [bksw_sup]},
   {applications , [kernel, stdlib, sasl, crypto,
-                   public_key, ssl, cowboy, erlsom, bookshelf_store]}]}.
+                   public_key, ssl, cowboy, erlsom, bookshelf_store,
+                   inets]}]}.
