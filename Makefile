@@ -1,6 +1,14 @@
+LIBDIR=$(CURDIR)/lib
+DEPS=$(CURDIR)/deps
 PLT_DIR=$(CURDIR)/.plt
 PLT=$(PLT_DIR)/dialyzer_plt
 REBAR=$(shell which rebar)
+
+ERLPATH= -pa $(DEPS)/cowboy/ebin -pa $(DEPS)/covertool/ebin \
+	-pa $(DEPS)/edown/ebin -pa $(DEPS)/erlsom/ebin \
+	-pa $(DEPS)/gen_leader/ebin \
+	-pa $(DEPS)/gproc/ebin -pa $(DEPS)/iso8601/ebin \
+	-pa $(DEPS)/opset/ebin -pa $(DEPS)/proper/ebin
 
 ifeq ($(REBAR),)
 	$(error "Rebar not available on this system")
@@ -20,7 +28,8 @@ compile : deps
 test : eunit ct
 
 eunit : compile
-	$(REBAR) skip_deps=true eunit
+# fixing more rebar idiocy
+	ERL_FLAGS="-pa $(CURDIR)/lib/bookshelf_store/ebin" $(REBAR) skip_deps=true eunit
 
 ct : eunit
 	$(REBAR) skip_deps=true ct
@@ -33,27 +42,33 @@ rel : compile rel/bookshelf
 doc:
 	$(REBAR) doc
 
-build-plt: compile
-	$(REBAR) build-plt
-
-check-plt: compile
-	$(REBAR) check-plt
-
-$(PLT): compile
+$(PLT):
 	mkdir -p $(PLT_DIR)
 	dialyzer --build_plt --output_plt $(PLT) \
-		--apps erts kernel stdlib eunit compiler crypto
+		$(ERLPATH) \
+		--apps erts kernel stdlib eunit compiler crypto \
+		cowboy edown inets erlsom gen_leader gproc iso8601 opset proper
 
 clean_plt:
 	rm -rf $(PLT_DIR)
 
-dialyzer: compile $(PLT)
-	dialyzer --src --plt $(PLT) $(TEST_PLT) \
-	-c ./bookshelf_store/src \
-	-c ./bookshelf_wi/src
+dialyzer: $(PLT)
+	@rebar compile
+	dialyzer --no_check_plt --src --plt $(PLT) \
+	$(ERLPATH) \
+	-pa $(LIBDIR)/bookshelf_store/ebin \
+	-pa $(LIBDIR)/bookshelf_wi/ebin \
+	-c $(LIBDIR)/bookshelf_store/src \
+	-c $(LIBDIR)/bookshelf_wi/src
 
 typer: compile $(PLT)
-	typer --plt $(PLT) -r ./src
+	typer --plt $(PLT) -r $(LIBDIR)/bookshelf_store/src \
+		-r $(LIBDIR)/bookshelf_wi/src
+
+shell: compile
+	erl -env ERL_LIBS $(CURDIR)/deps -pa $(CURDIR)/lib/bookshelf_store/ebin\
+	 -pa $(CURDIR)/lib/bookshelf_wi/ebin -boot start_sasl -s bksw_app manual_start
+
 
 clean :
 	$(REBAR) skip_deps=true clean
