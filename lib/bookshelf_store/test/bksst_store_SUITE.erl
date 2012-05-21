@@ -12,6 +12,8 @@
 -include_lib("bookshelf_store/src/internal.hrl").
 -include_lib("bookshelf_store/include/bookshelf_store.hrl").
 
+-define(STR_CHARS, "abcdefghijklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ").
+
 %%====================================================================
 %% TEST SERVER CALLBACK FUNCTIONS
 %%====================================================================
@@ -39,7 +41,7 @@ all(doc) ->
     ["This test is runs the fs implementation of the bkss_store signature"].
 
 all() ->
-    [bookshelf_basic,bookshelf_object, bookshelf_copy].
+    [bookshelf_basic,bookshelf_object, bookshelf_copy, bookshelf_corruption].
 
 %%====================================================================
 %% TEST CASES
@@ -107,6 +109,37 @@ bookshelf_copy(Config) when is_list(Config) ->
                                        bookshelf_store:obj_get(TargetBucket, Path))
                   end, lists:seq(1,100)).
 
+bookshelf_corruption(doc) ->
+    ["Multiple processes writing to the same object"];
+bookshelf_corruption(suite) ->
+    [];
+bookshelf_corruption(Config) when is_list(Config) ->
+    ProcessCount = 1000,
+    BucketName = random_binary(),
+    bookshelf_store:bucket_create(BucketName),
+    Path = filename:join(random_binary(), random_binary()),
+    Action = fun(Sq) ->
+                     seed(Sq),
+                     Data = random_string(100, ?STR_CHARS),
+                     %% Our goal is to check and make sure there is no
+                     %% corruption to that end we create a bunch of data, write
+                     %% it and then read it.  Since there are <ProcessCount>
+                     %% processes doing this at the same time the probability
+                     %% that we read the same data we write is low. However,
+                     %% that doesn't matter as long as things decompress
+                     %% correctly. We are basically relying on zlibs crc-32
+                     %% checks to do the corruption checks for us.
+                     CompressedData = zlib:compress(Data),
+                     bookshelf_store:obj_create(BucketName, Path, CompressedData),
+                     {ok, WrittenData} = bookshelf_store:obj_get(BucketName, Path),
+                     %% Again we dont need to check the data. the fact that it
+                     %% inflates without throwing an error is a good corruption
+                     %% check for us.
+                     zlib:uncompress(WrittenData)
+             end,
+    ec_plists:map(Action, lists:seq(1,ProcessCount)).
+
+
 %%====================================================================
 %% Utility Functions
 %%====================================================================
@@ -136,9 +169,7 @@ copy_t1(Sq) ->
                  bookshelf_store:obj_get(ToBucket, Path1)).
 
 random_binary() ->
-    erlang:list_to_binary(
-      random_string(30,
-                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ")).
+    erlang:list_to_binary(random_string(30, ?STR_CHARS)).
 
 random_string(Length, AllowedChars) ->
     lists:foldl(fun(_, Acc) ->
