@@ -9,9 +9,6 @@ PROGNAME=$(basename $0)
 # must be longer than unicorn 60 second timeout
 export SVWAIT=30
 
-# touching the terminate_master_file will abort a stuck master transition
-# (if you know it will never be able to grab the drbd primary cluster 'lock')
-terminate_master_file=/var/opt/opscode/keepalived/terminate_master
 requested_state_file=/var/opt/opscode/keepalived/requested_cluster_status
 current_state_file=/var/opt/opscode/keepalived/current_cluster_status
 lockfile=/var/opt/opscode/keepalived/cluster-transition.lock
@@ -36,12 +33,15 @@ function transition
     master)
       # 10 * SVWAIT 
       try=300
-      rm -f $terminate_master_file
       while true; do
         log_me "Attempting DRBD primary takeover - attempts left ${try}"
         drbdadm primary pc0 && break
         let "--try" || error_exit "Cannot become drbd primary!" 
-        [ -e $terminate_master_file ] && error_exit "Aborting master state transition due to request"
+        last_requested_state=`echo -n $(cat $requested_state_file)`
+        if [ "$last_requested_state" != "master" ]; then
+          log_me "Requested state transition to backup, aborting trying to aquire DRBD primary"
+          return
+        fi
         sleep 1
       done
 
@@ -124,22 +124,11 @@ function transition_loop
 
 echo $1 > $requested_state_file
 
-try=10
-while true; do
-  if lock $lockfile; then
-     transition_loop "$1"
-     break
-  else
-     let "--try" || error_exit "Cannot become drbd backup!" 
-     log_me "Requested transition to $1"
-     if [ "$1" != "backup" ]; then
-       error_exit "Requested transition to $1, but state transition already running."
-       break
-     fi
-     log_me "Attempting to interrupt previously running state transition."
-     touch $terminate_master_file
-     sleep 1
-  fi
-done
+if lock $lockfile; then
+   transition_loop "$1"
+else
+   log_me "Requested transition to $1"
+   error_exit "Requested transition to $1, but state transition already running."
+fi
 
 exit 0
