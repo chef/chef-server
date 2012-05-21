@@ -20,7 +20,3 @@
 -record(bucket, {name, date}).
 -record(object, {name, date, size, digest}).
 
-%% settings
--define(BACKEND, bookshelf_fs).
--define(TIMEOUT_MS, 4096).
--define(BLOCK_SIZE, 16384).
