@@ -1,4 +1,4 @@
-%% @copyright 2012 Opscode, Inc. All Rights Reserved
+ %% @copyright 2012 Opscode, Inc. All Rights Reserved
 %% @author Tim Dysinger <dysinger@opscode.com>
 %%
 %% Licensed to the Apache Software Foundation (ASF) under one or more
@@ -15,10 +15,14 @@
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
 
--module(bookshelf_app).
+-module(bksw_app).
+
 -include("bookshelf.hrl").
+
 -export([start/0]).
+
 -behaviour(application).
+
 -export([start/2, stop/1]).
 
 %% ===================================================================
@@ -43,5 +47,4 @@ start() ->
 start(_StartType, _StartArgs) ->
     bookshelf_sup:start_link().
 
-stop(_State) ->
-    ok.
+stop(_State) -> ok.

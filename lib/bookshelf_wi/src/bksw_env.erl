@@ -15,48 +15,45 @@
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
 
--module(bookshelf_env).
--include("bookshelf.hrl").
--export([
-         initialize/0,
-         with_ip/1,
-         with_dispatch/1,
-         with_dir/1,
-         with_pool/1
-        ]).
+-module(bksw_env).
 
-%% ===================================================================
-%%                          API functions
-%% ===================================================================
+-include("bookshelf.hrl").
+
+-export([initialize/0, with_dir/1, with_dispatch/1,
+         with_ip/1, with_pool/1]).
+
+%%===================================================================
+%%  API functions
+%%===================================================================
 initialize() ->
     with_dispatch(with_dir(with_pool(with_ip(application:get_all_env(bookshelf))))).
 
 with_ip(Env) ->
     case lists:keyfind(interface, 1, Env) of
-        {_, Interface} ->
-            lists:keystore(ip, 1, Env, {ip, ip(Interface)});
-        _              -> Env
+      {_, Interface} ->
+          lists:keystore(ip, 1, Env, {ip, ip(Interface)});
+      _ -> Env
     end.
 
 with_dispatch(Env) ->
     case lists:keyfind(domains, 1, Env) of
-        {_, Domains} ->
-            lists:keystore(dispatch, 1, Env,
-                           {dispatch, rules(Env, Domains)});
-        _            -> Env
+      {_, Domains} ->
+          lists:keystore(dispatch, 1, Env,
+                         {dispatch, rules(Env, Domains)});
+      _ -> Env
     end.
 
 with_dir(Env) ->
     case lists:keyfind(dir, 1, Env) of
-        false         -> priv_dir(Env);
-        {_, priv_dir} -> priv_dir(Env);
-        _             -> Env
+      false -> priv_dir(Env);
+      {_, priv_dir} -> priv_dir(Env);
+      _ -> Env
     end.
 
 with_pool(Env) ->
     case lists:keyfind(pool, 1, Env) of
-        false -> lists:keystore(pool, 1, Env, {pool, 100});
-        _     -> Env
+      false -> lists:keystore(pool, 1, Env, {pool, 100});
+      _ -> Env
     end.
 
 %% ===================================================================
@@ -64,95 +61,44 @@ with_pool(Env) ->
 %% ===================================================================
 
 ip(Interface) ->
-    {ok, All}    = inet:getifaddrs(),
+    {ok, All} = inet:getifaddrs(),
     {_, Attribs} = lists:keyfind(Interface, 1, All),
-    Addrs        = lists:filter(fun(Attr) ->
-                                        case Attr of
-                                            {addr, {_,_,_,_}} -> true;
-                                            _                 -> false
-                                        end
-                                end,
-                                Attribs),
-    [{addr, Addr}|_] = Addrs,
+    Addrs = [V1 || V1 <- Attribs, ip_1(V1)],
+    [{addr, Addr} | _] = Addrs,
     Addr.
 
+ip_1(Attr) ->
+    case Attr of
+      {addr, {_, _, _, _}} -> true;
+      _ -> false
+    end.
+
 rules(Env, Domains) ->
-    lists:flatten(lists:map(fun(D) -> rule(Env, D) end,
-                            lists:map(fun bdomain/1, Domains))).
+    lists:flatten([rules_1(V2, Env)
+                   || V2 <- [bdomain(V1) || V1 <- Domains]]).
+
+rules_1(D, Env) -> rule(Env, D).
 
 rule(Env, Domain) ->
-    SubDomain = lists:append([bucket], Domain),
+    SubDomain = [bucket] ++ Domain,
     FEnv = filter_env(Env),
-    [
-     {Domain,    [{[],      bookshelf_idx, FEnv}]},
-     {SubDomain, [{[],      bookshelf_bkt, FEnv},
-                  {['...'], bookshelf_obj, FEnv}]}
-    ].
+    [{Domain, [{[], bookshelf_idx, FEnv}]},
+     {SubDomain,
+      [{[], bookshelf_bkt, FEnv},
+       {['...'], bookshelf_obj, FEnv}]}].
 
-filter_env(Env) ->
-    lists:filter(fun(A) ->
-                         case A of
-                             {dispatch, _} -> false;
-                             _             -> true
-                         end
-                 end,
-                 Env).
+filter_env(Env) -> [V1 || V1 <- Env, filter_env_1(V1)].
+
+filter_env_1(A) ->
+    case A of
+      {dispatch, _} -> false;
+      _ -> true
+    end.
 
 bdomain(Domain) ->
-    lists:map(fun list_to_binary/1, string:tokens(Domain, ".")).
+    [fun list_to_binary/1(V1)
+     || V1 <- string:tokens(Domain, ".")].
 
 priv_dir(Env) ->
-    lists:keystore(dir, 1, Env, {dir, bookshelf_util:file("data")}).
-
-%% ===================================================================
-%%                          Eunit Tests
-%% ===================================================================
--ifndef(NO_TESTS).
--include_lib("eunit/include/eunit.hrl").
-with_ip_test_() ->
-    [{"should configure the listen ip address if the env has an 'interface'",
-      fun() ->
-              Env = with_ip([{interface, "lo"}]),
-              ?assertMatch({ip, {127,0,0,1}}, lists:keyfind(ip, 1, Env))
-      end
-     }].
-
-with_dispatch_test_() ->
-    [{"should build proper 'cowboy' dispatch rules using env 'domains'",
-      fun() ->
-              EnvV1 = [{domains, ["clown.com", "school.com"]}],
-              EnvV2 = with_dispatch(EnvV1),
-              ?assertMatch({dispatch,
-                            [{[<<"clown">>, <<"com">>],
-                              [{[], bookshelf_idx, EnvV1}]},
-                             {[bucket, <<"clown">>, <<"com">>],
-                              [{[], bookshelf_bkt, EnvV1},
-                               {['...'], bookshelf_obj, EnvV1}]},
-                             {[<<"school">>, <<"com">>],
-                              [{[], bookshelf_idx, EnvV1}]},
-                             {[bucket, <<"school">>, <<"com">>],
-                              [{[], bookshelf_bkt, EnvV1},
-                               {['...'], bookshelf_obj, EnvV1}]}]},
-                           lists:keyfind(dispatch, 1, EnvV2))
-      end
-     }].
-
-with_dir_test_() ->
-    [{"should use any env 'dir' if provided",
-      fun() ->
-              ?assertEqual([{dir, "/tmp"}], with_dir([{dir, "/tmp"}]))
-      end
-     },
-     {"should use ${priv_dir}/data/ if env 'dir' is the atom 'priv_dir'",
-      fun() ->
-              ?assertEqual([{dir, bookshelf_util:file("data")}],
-                           with_dir([{dir, priv_dir}]))
-      end
-     },
-     {"should use ${priv_dir}/data/ if env 'dir' is absent",
-      fun() ->
-              ?_assertEqual([{dir, bookshelf_util:file("data")}], with_dir([]))
-      end
-     }
-    ].
--endif.
+    lists:keystore(dir, 1, Env,
+                   {dir, bookshelf_util:file("data")}).

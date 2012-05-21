@@ -15,9 +15,12 @@
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
 
--module(bookshelf_sup).
+-module(bksw_sup).
+
 -behaviour(supervisor).
+
 -export([start_link/0]).
+
 -export([init/1]).
 
 %% ===================================================================
@@ -25,7 +28,7 @@
 %% ===================================================================
 
 start_link() ->
-    supervisor:start_link({local,?MODULE}, ?MODULE, []).
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% ===================================================================
 %%                       Supervisor callbacks
@@ -34,14 +37,13 @@ start_link() ->
 init(_Args) ->
     Env = bookshelf_env:initialize(),
     {pool, Pool} = lists:keyfind(pool, 1, Env),
-
     RestartStrategy = one_for_one,
     MaxRestarts = 1000,
     MaxSecondsBetweenRestarts = 3600,
-
-    ListenerSup = cowboy:child_spec(bookshelf_http_listener, Pool,
-                                    cowboy_tcp_transport, Env,
+    ListenerSup = cowboy:child_spec(bookshelf_http_listener,
+                                    Pool, cowboy_tcp_transport, Env,
                                     cowboy_http_protocol, Env),
-
-    {ok, {{RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
-          [ListenerSup]}}.
+    {ok,
+     {{RestartStrategy, MaxRestarts,
+       MaxSecondsBetweenRestarts},
+      [ListenerSup]}}.
