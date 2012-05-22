@@ -22,7 +22,7 @@
 %%===================================================================
 %% External API
 %%===================================================================
--spec behaviour_info(term()) -> term().
+-spec behaviour_info(InfoTypeSpecifier::term()) -> term().
 behaviour_info(callbacks) ->
     [{new,1},
      {recv,2},
@@ -30,14 +30,14 @@ behaviour_info(callbacks) ->
 behaviour_info(_) ->
     undefined.
 
--spec new(atom(), term()) -> trans().
+-spec new(ModuleName::atom(), Data::term()) -> trans().
 new(ModuleName, Data) when is_atom(ModuleName) ->
-    #trans_t{callback=ModuleName, data=ModuleName:new(Data)}.
+    #trans_t{callback = ModuleName, data = ModuleName:new(Data)}.
 
--spec recv(trans(), non_neg_integer()) -> {ok, binary()} | term().
-recv(#trans_t{callback=Mod,data=Data}, Length) ->
+-spec recv(trans(), Length::non_neg_integer()) -> {ok, binary()} | term().
+recv(#trans_t{callback = Mod, data = Data}, Length) ->
     Mod:recv(Data, Length).
 
--spec send(trans(), binary()) -> ok | term().
-send(#trans_t{callback=Mod,data=Data}, Binary) ->
+-spec send(trans(), Binary::binary()) -> ok | term().
+send(#trans_t{callback = Mod, data = Data}, Binary) ->
     Mod:send(Data, Binary).

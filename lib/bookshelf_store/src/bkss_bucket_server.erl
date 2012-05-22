@@ -53,28 +53,27 @@ init([BucketName]) ->
     {ok,{BucketName, State1}}.
 
 -spec handle_call(Request::term(), From::pid(), state()) ->
-                         {reply, Reply::term(), state()} |
-                         {reply, Reply::term(), state(), Timeout::non_neg_integer()}.
-handle_call(bucket_list, _From, State={_, Store}) ->
+                         {reply, Reply::term(), state()}.
+handle_call(bucket_list, _From, State = {_, Store}) ->
     {reply,bkss_store:bucket_list(Store), State};
-handle_call(bucket_exists, _From, State={BucketName, Store}) ->
+handle_call(bucket_exists, _From, State = {BucketName, Store}) ->
     {reply,bkss_store:bucket_exists(Store, BucketName), State};
 handle_call(bucket_delete, _From, {BucketName, Store0}) ->
     {State1, Reply} = bkss_store:bucket_delete(Store0, BucketName),
     {reply, Reply, {die_nicely, State1}, 0};
-handle_call(obj_list, _From, State={BucketName, Store}) ->
+handle_call(obj_list, _From, State = {BucketName, Store}) ->
     {reply, bkss_store:obj_list(Store, BucketName), State};
-handle_call({obj_exists, Path}, _From, State={BucketName, Store}) ->
+handle_call({obj_exists, Path}, _From, State = {BucketName, Store}) ->
     {reply, bkss_store:obj_exists(Store, BucketName, Path), State};
 handle_call({obj_delete, Path}, _From, {BucketName, Store0}) ->
     {Store1, Reply} = bkss_store:obj_delete(Store0, BucketName, Path),
     {reply, Reply, {BucketName, Store1}};
-handle_call({obj_meta, Path}, _From, State={BucketName, Store}) ->
+handle_call({obj_meta, Path}, _From, State = {BucketName, Store}) ->
     {reply, bkss_store:obj_meta(Store, BucketName, Path), State};
 handle_call({obj_create, Path, Data}, _From, {BucketName, Store0}) ->
     {Store1, Reply} = bkss_store:obj_create(Store0, BucketName, Path, Data),
     {reply, Reply, {BucketName, Store1}};
-handle_call({obj_get, Path}, _From, State={BucketName, Store}) ->
+handle_call({obj_get, Path}, _From, State = {BucketName, Store}) ->
     {reply, bkss_store:obj_get(Store, BucketName, Path), State};
 handle_call({obj_copy, FromPath, ToBucket, ToPath}, _From, {BucketName, Store0}) ->
     {Store1, Result} = do_copy(Store0, BucketName, FromPath, ToBucket, ToPath),

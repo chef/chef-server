@@ -34,39 +34,40 @@ content_types_accepted(Rq, St) ->
     {[{'*', upload_or_copy}], Rq, St}.
 
 resource_exists(#http_req{host = [Bucket | _],
-                          raw_path = <<"/", Path/binary>>} =
-                    Rq,
+                          raw_path = <<"/", Path/binary>>} = Rq,
                 St) ->
     {bookshelf_store:obj_exists(Bucket, Path), Rq, St}.
 
 delete_resource(#http_req{host = [Bucket | _],
-                          raw_path = <<"/", Path/binary>>} =
-                    Rq,
+                          raw_path = <<"/", Path/binary>>} = Rq,
                 St) ->
     case bookshelf_store:obj_delete(Bucket, Path) of
-        ok -> {true, Rq, St};
-        _ -> {false, Rq, St}
+        ok ->
+            {true, Rq, St};
+        _ ->
+            {false, Rq, St}
     end.
 
 last_modified(#http_req{host = [Bucket | _],
-                        raw_path = <<"/", Path/binary>>} =
-                  Rq,
+                        raw_path = <<"/", Path/binary>>} = Rq,
               St) ->
     case bookshelf_store:obj_meta(Bucket, Path) of
-        {ok, #object{date = Date}} -> {Date, Rq, St};
-        _ -> {halt, Rq, St}
+        {ok, #object{date = Date}} ->
+            {Date, Rq, St};
+        _ ->
+            {halt, Rq, St}
     end.
 
 generate_etag(#http_req{host = [Bucket | _],
-                        raw_path = <<"/", Path/binary>>} =
-                  Rq,
+                        raw_path = <<"/", Path/binary>>} = Rq,
               St) ->
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{digest = Digest}} ->
             {{strong,
               list_to_binary(bksw_format:to_hex(Digest))},
              Rq, St};
-        _ -> {halt, Rq, St}
+        _ ->
+            {halt, Rq, St}
     end.
 
 upload_or_copy(Rq, St) ->
@@ -74,14 +75,15 @@ upload_or_copy(Rq, St) ->
         cowboy_http_req:parse_header(<<"X-Amz-Copy-Source">>,
                                      Rq)
     of
-        {undefined, Rq2} -> upload(Rq2, St);
-        {Source, Rq2} -> copy(Rq2, St, Source)
+        {undefined, Rq2} ->
+            upload(Rq2, St);
+        {Source, Rq2} ->
+            copy(Rq2, St, Source)
     end.
 
 download(#http_req{host = [Bucket | _],
                    raw_path = <<"/", Path/binary>>, transport = Transport,
-                   socket = Socket} =
-             Rq,
+                   socket = Socket} = Rq,
          St) ->
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{size = Size}} ->
@@ -90,12 +92,15 @@ download(#http_req{host = [Bucket | _],
                                                        [Transport, Socket,
                                                         ?TIMEOUT_MS]),
                            case bookshelf_store:obj_send(Bucket, Path, Bridge) of
-                               {ok, Size} -> sent;
-                               _ -> {error, "Download unsuccessful"}
+                               {ok, Size} ->
+                                   sent;
+                               _ ->
+                                   {error, "Download unsuccessful"}
                            end
                    end,
             {{stream, Size, SFun}, Rq, St};
-        _ -> {false, Rq, St}
+        _ ->
+            {false, Rq, St}
     end.
 
 %%===================================================================
@@ -109,8 +114,7 @@ halt(Code, Rq, St) ->
 upload(#http_req{host = [Bucket | _],
                  raw_path = <<"/", Path/binary>>, body_state = waiting,
                  socket = Socket, transport = Transport,
-                 buffer = Buffer} =
-           Rq,
+                 buffer = Buffer} = Rq,
        St) ->
     {Length, Rq2} =
         cowboy_http_req:parse_header('Content-Length', Rq),
@@ -130,11 +134,14 @@ upload(#http_req{host = [Bucket | _],
                         true ->
                             Rq4 = bksw_req:with_etag(RequestMd5, Rq3),
                             halt(202, Rq4, St);
-                        _ -> halt(406, Rq3, St)
+                        _ ->
+                            halt(406, Rq3, St)
                     end
             end;
-        {error, timeout} -> halt(408, Rq2, St);
-        _ -> halt(500, Rq2, St)
+        {error, timeout} ->
+            halt(408, Rq2, St);
+        _ ->
+            halt(500, Rq2, St)
     end.
 
 copy(#http_req{host = [ToBucket | _],
@@ -146,6 +153,8 @@ copy(#http_req{host = [ToBucket | _],
     case bookshelf_store:obj_copy(FromBucket, FromPath,
                                   ToBucket, ToPath)
     of
-        {ok, _} -> {true, Rq, St};
-        _ -> {false, Rq, St}
+        {ok, _} ->
+            {true, Rq, St};
+        _ ->
+            {false, Rq, St}
     end.

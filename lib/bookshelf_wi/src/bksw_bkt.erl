@@ -72,7 +72,7 @@ to_xml(#http_req{host = [Bucket | _]} = Rq, St) ->
 -include_lib("eunit/include/eunit.hrl").
 
 allowed_methods_test_() ->
-    [{"should only support 'PUT' and 'DELETE'",
+    [{"should only support 'GET', 'PUT' and 'DELETE'",
       fun () ->
               Expected = ['GET', 'PUT', 'DELETE'],
               {Allowed, _, _} = allowed_methods(#http_req{pid=self()}, % make dialyzer happy
@@ -88,8 +88,8 @@ content_types_accepted_test_() ->
       fun () ->
               {Types, _, _} = content_types_accepted(#http_req{pid=self()}, % make dialyzer happy
                                                      undefined),
-              1 = length(Types),
-              true = lists:keymember(undefined, 1, Types)
+              ?assertEqual(1, length(Types)),
+              ?assertEqual(true, lists:keymember(undefined, 1, Types))
       end}].
 
 content_types_provided_test_() ->
@@ -97,9 +97,9 @@ content_types_provided_test_() ->
       fun () ->
               {Types, _, _} = content_types_provided(#http_req{pid=self()}, % make dialyzer happy
                                                      undefined),
-              1 = length(Types),
-              true = lists:keymember({<<"text">>, <<"xml">>, []}, 1,
-                                     Types)
+              ?assertEqual(1, length(Types)),
+              ?assertEqual(true, lists:keymember({<<"text">>, <<"xml">>, []}, 1,
+                                                 Types))
       end}].
 
 -endif.

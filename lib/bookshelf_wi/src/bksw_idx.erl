@@ -46,9 +46,8 @@ allowed_methods_test_() ->
               Expected = ['GET'],
               {Allowed, _, _} = allowed_methods(#http_req{pid=self()}, % make dialyzer happy
                                                 undefined),
-              ?assertEqual((length(Expected)), (length(Allowed))),
-              Result = sets:from_list(lists:merge(Expected, Allowed)),
-              ?assertEqual((length(Expected)), (sets:size(Result)))
+              ?assertEqual(Expected, Allowed)
+
       end}].
 
 content_types_provided_test_() ->
@@ -56,9 +55,9 @@ content_types_provided_test_() ->
       fun () ->
               {Types, _, _} = content_types_provided(#http_req{pid=self()}, % make dialyzer happy
                                                      undefined),
-              1 = length(Types),
-              true = lists:keymember({<<"text">>, <<"xml">>, []}, 1,
-                                     Types)
+              ?assertEqual(1, length(Types)),
+              ?assertEqual(true, lists:keymember({<<"text">>, <<"xml">>, []}, 1,
+                                                 Types))
       end}].
 
 -endif.

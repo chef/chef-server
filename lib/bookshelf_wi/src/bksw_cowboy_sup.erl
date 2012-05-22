@@ -36,4 +36,3 @@ init(_Args) ->
      {{RestartStrategy, MaxRestarts,
        MaxSecondsBetweenRestarts},
       [ListenerSup]}}.
-

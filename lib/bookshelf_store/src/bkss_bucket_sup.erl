@@ -18,15 +18,15 @@
 %%% API functions
 %%%===================================================================
 
-%%--------------------------------------------------------------------
-%% @doc
-%% Starts the supervisor
-%%
-%% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
+-spec start_link() ->
+    {ok, pid()} | ignore | {error, Error::term()}.
 start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+
+-spec start_child(bookshelf_store:bucket_name()) ->
+                         {ok, undefined | pid()} |
+                         {ok, undefined | pid(), any()} |
+                         {error, Reason::any()}.
 
 start_child(BucketName) ->
     supervisor:start_child(?SERVER, [BucketName]).

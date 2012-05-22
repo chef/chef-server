@@ -1,19 +1,7 @@
-%% @copyright 2012 Opscode, Inc. All Rights Reserved
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
 %% @author Tim Dysinger <dysinger@opscode.com>
-%%
-%% Licensed to the Apache Software Foundation (ASF) under one or more
-%% contributor license agreements.  See the NOTICE file distributed
-%% with this work for additional information regarding copyright
-%% ownership.  The ASF licenses this file to you under the Apache
-%% License, Version 2.0 (the "License"); you may not use this file
-%% except in compliance with the License.  You may obtain a copy of
-%% the License at http://www.apache.org/licenses/LICENSE-2.0
-%%
-%% Unless required by applicable law or agreed to in writing, software
-%% distributed under the License is distributed on an "AS IS" BASIS,
-%% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-%% implied.  See the License for the specific language governing
-%% permissions and limitations under the License.
+%% @copyright Copyright 2012 Opscode, Inc.
 -module(bkss_fs).
 
 -behaviour(bkss_store).
@@ -48,6 +36,7 @@
 
 -opaque fs_data() :: {?MODULE, dir()}.
 -type dir() :: binary().
+-type file_desc() :: {file:io_device(), term()}.
 
 %%===================================================================
 %% Signature API
@@ -71,24 +60,25 @@ bucket_exists({?MODULE, Dir}, Bucket) ->
 
 -spec bucket_create(fs_data(), bkss_store:bucket_name()) ->
                            {fs_data(), ok | {error, Reason::term()}}.
-bucket_create(State={?MODULE, Dir}, Bucket) ->
+bucket_create(State = {?MODULE, Dir}, Bucket) ->
     {State, file:make_dir(filename:join(Dir, encode(Bucket)))}.
 
 -spec bucket_delete(fs_data(), bkss_store:bucket_name()) ->
                            {fs_data(), ok | {error, Reason::term()}}.
-bucket_delete(State={?MODULE, Dir}, Bucket) ->
+bucket_delete(State = {?MODULE, Dir}, Bucket) ->
     {State, file:del_dir(filename:join(Dir, encode(Bucket)))}.
 
 -spec obj_list(fs_data(), bkss_store:bucket_name()) -> [bkss_store:object()].
 obj_list({?MODULE, Dir}, BucketName) when is_binary(Dir), is_binary(BucketName) ->
     EncodedName = encode(BucketName),
-    BucketPath = filename:join(Dir, EncodedName),
+    BucketPath = erlang:iolist_to_binary(filename:join(Dir, EncodedName)),
     lists:flatten(filelib:fold_files(
                     BucketPath,
                     ".*",
                     true,
                     fun(FilePath, Acc) ->
-                            [file_2_object(Dir, BucketPath, EncodedName, FilePath) | Acc]
+                            [file_2_object(Dir, BucketPath, EncodedName,
+                                           erlang:iolist_to_binary(FilePath)) | Acc]
                     end,
                     [])).
 
@@ -100,7 +90,7 @@ obj_exists({?MODULE, Dir}, Bucket, Path)
 
 -spec obj_delete(fs_data(), bkss_store:bucket_name(), bkss_store:path()) ->
                         {fs_data(), ok | {error, Reason::term()}}.
-obj_delete(State={?MODULE, Dir}, Bucket, Path)
+obj_delete(State = {?MODULE, Dir}, Bucket, Path)
   when is_binary(Dir), is_binary(Bucket), is_binary(Path) ->
     ObjectPath = filename:join([Dir, encode(Bucket), encode(Path)]),
     {State, file:delete(ObjectPath)}.
@@ -111,9 +101,9 @@ obj_meta({?MODULE, Dir}, Bucket, Path) ->
     obj_meta_internal(Dir, encode(Bucket), encode(Path)).
 
 -spec obj_create(fs_data(), bkss_store:bucket_name(),
-                 bkss_store:path(), iolist()) ->
+                 bkss_store:path(), Data::iolist()) ->
                         {fs_data(), ok | {error, Reason::term()}}.
-obj_create(State={?MODULE, Dir}, Bucket, Path, Data) ->
+obj_create(State = {?MODULE, Dir}, Bucket, Path, Data) ->
     FilePath = filename:join([Dir, encode(Bucket), encode(Path)]),
     filelib:ensure_dir(FilePath),
     Resp =
@@ -132,26 +122,26 @@ obj_create(State={?MODULE, Dir}, Bucket, Path, Data) ->
     {State, Resp}.
 
 -spec obj_get(fs_data(), bkss_store:bucket_name(), bkss_store:path()) ->
-                     {fs_data(), ok | {error, Reason::term()}}.
+                     {ok, binary()} | {error, Reason::term()}.
 obj_get({?MODULE, Dir}, Bucket, Path) ->
     file:read_file(filename:join([Dir, encode(Bucket), encode(Path)])).
 
--spec obj_copy(fs_data(), bkss_store:bucket_name(), bkss_store:path(),
-               bkss_store:bucket_name(), bkss_store:path()) ->
-                      {fs_data(), ok | {error, Reason::term()}}.
+-spec obj_copy(fs_data(), FromBucket::bkss_store:bucket_name(), FromPath::bkss_store:path(),
+               ToBucket::bkss_store:bucket_name(), ToPath::bkss_store:path()) ->
+                      {fs_data(), {ok, BytesCopied::non_neg_integer()} | {error, Reason::term()}}.
 obj_copy(State={?MODULE, Dir}, FromBucket, FromPath, ToBucket, ToPath) ->
     {State, file:copy(filename:join([Dir, encode(FromBucket), encode(FromPath)]),
                       filename:join([Dir, encode(ToBucket), encode(ToPath)]))}.
 
 -spec obj_send(fs_data(), bkss_store:bucket_name(),
-               bkss_store:path(), bkss_transport:trans()) ->
-                      {fs_data(), ok | {error, Reason::term()}}.
-obj_send(State={?MODULE, Dir}, Bucket, Path, Bridge) ->
+               bkss_store:path(), Trans::bkss_transport:trans()) ->
+                      {fs_data(), {ok, MD5::term()} | {error, Reason::term()}}.
+obj_send(State = {?MODULE, Dir}, Bucket, Path, Trans) ->
     FilePath = filename:join([Dir, encode(Bucket), encode(Path)]),
     Resp =
         case obj_open_r(FilePath) of
             {ok, FsSt} ->
-                case read(FsSt, Bridge) of
+                case read(FsSt, Trans) of
                     ok ->
                         obj_close(FsSt);
                     {error, timeout} ->
@@ -166,15 +156,15 @@ obj_send(State={?MODULE, Dir}, Bucket, Path, Bridge) ->
     {State, Resp}.
 
 -spec obj_recv(fs_data(), bkss_store:bucket_name(), bkss_store:path(),
-               bkss_transport:trans(), binary(), non_neg_integer()) ->
-                      {fs_data(), ok | {error, Reason::term()}}.
-obj_recv(State={?MODULE, Dir}, Bucket, Path, Bridge, Buffer, Length) ->
+               Trans::bkss_transport:trans(), Buffer::binary(), Length::non_neg_integer()) ->
+                      {fs_data(), {ok, MD5::term()} | {error, Reason::term()}}.
+obj_recv(State = {?MODULE, Dir}, Bucket, Path, Trans, Buffer, Length) ->
     FilePath = filename:join([Dir, encode(Bucket), encode(Path)]),
     filelib:ensure_dir(FilePath),
     Resp =
         case obj_open_w(FilePath) of
             {ok, FsSt} ->
-                case write(FsSt, Bridge, Length, Buffer) of
+                case write(FsSt, Trans, Length, Buffer) of
                     {ok, FsSt2} -> obj_close(FsSt2);
                     {error, timeout} ->
                         obj_close(FsSt),
@@ -192,53 +182,65 @@ obj_recv(State={?MODULE, Dir}, Bucket, Path, Bridge, Buffer, Length) ->
 %%===================================================================
 %% Internal Functions
 %%===================================================================
--spec read({file:io_device(), term()}, bkss_transport:trans()) ->
+-spec read(file_desc(), bkss_transport:trans()) ->
                   ok | {error, Reason::term()}.
-read({File, _}=FsSt, Bridge) ->
+read({File, _} = FsSt, Trans) ->
     case file:read(File, ?BLOCK_SIZE) of
-        {ok, Chunk} -> bkss_transport:send(Bridge, Chunk),
-                       read(FsSt, Bridge);
-        eof         -> ok;
-        Any         -> Any
+        {ok, Chunk} ->
+            bkss_transport:send(Trans, Chunk),
+            read(FsSt, Trans);
+        eof ->
+            ok;
+        Any ->
+            Any
     end.
 
-write(FsSt, Bridge, Length, <<>>) ->
-    write(FsSt, Bridge, Length);
-write(FsSt, Bridge, Length, Buf) ->
+-spec write(file_desc(), Trans::bkss_transport:trans(),
+            Length::non_neg_integer(), Buf::binary()) ->
+                   {ok, file_desc()} | {error, Reason::term()}.
+write(FsSt, Trans, Length, <<>>) ->
+    write(FsSt, Trans, Length);
+write(FsSt, Trans, Length, Buf) ->
     case obj_write(FsSt, Buf) of
         {ok, NewFsSt} ->
-            write(NewFsSt, Bridge, Length-byte_size(Buf));
+            write(NewFsSt, Trans, Length-byte_size(Buf));
         Any -> Any
     end.
 
-write(FsSt, _Bridge, 0) ->
+-spec write(file_desc(), Trans::bkss_transport:trans(), Length::non_neg_integer()) ->
+                   {ok, file_desc()} | {error, Reason::term()}.
+write(FsSt, _Trans, 0) ->
     obj_write(FsSt, <<>>);
-write(FsSt, Bridge, Length) when Length =< ?BLOCK_SIZE ->
-    case bksw_socket_transport:recv(Bridge, Length) of
-        {ok, Chunk} -> obj_write(FsSt, Chunk);
-        Any         -> Any
+write(FsSt, Trans, Length) when Length =< ?BLOCK_SIZE ->
+    case bkss_transport:recv(Trans, Length) of
+        {ok, Chunk} ->
+            obj_write(FsSt, Chunk);
+        Any ->
+            Any
     end;
-write(FsSt, Bridge, Length) ->
-    case bksw_socket_transport:recv(Bridge, ?BLOCK_SIZE) of
+write(FsSt, Trans, Length) ->
+    case bkss_transport:recv(Trans, ?BLOCK_SIZE) of
         {ok, Chunk} ->
             case obj_write(FsSt, Chunk) of
                 {ok, NewFsSt} ->
-                    write(NewFsSt, Bridge, Length-?BLOCK_SIZE);
-                Any -> Any
+                    write(NewFsSt, Trans, Length-?BLOCK_SIZE);
+                Any ->
+                    Any
             end;
-        Any -> Any
+        Any ->
+            Any
     end.
 
 -spec dir_2_bucket(dir()) -> bkss_store:bucket().
 dir_2_bucket(Dir) ->
     %% crash if no access to any bucket dir
-    {ok, #file_info{ctime=Date}} =
+    {ok, #file_info{ctime = Date}} =
         file:read_file_info(Dir),
-    [UTC|_] =
+    [UTC | _] =
         calendar:local_time_to_universal_time_dst(Date),
-    #bucket{name=erlang:list_to_binary(decode(filename:basename(Dir))), date=UTC}.
+    #bucket{name = decode(filename:basename(Dir)), date = UTC}.
 
--spec file_2_object(dir(), string(), bkss_store:bucket_name(), string()) ->
+-spec file_2_object(dir(), binary(), bkss_store:bucket_name(),binary()) ->
                            bkss_store:object() | [].
 file_2_object(Dir, BucketPath, BucketName, FilePath) ->
     case filelib:is_regular(FilePath) of
@@ -256,6 +258,8 @@ file_2_object(Dir, BucketPath, BucketName, FilePath) ->
         _ ->
             []
     end.
+
+-spec file_md5(file:io_device(), MD5Context::term()) -> {ok, MD5::term()}.
 file_md5(File, Ctx) ->
     case file:read(File, ?BLOCK_SIZE) of
         {ok, Bin} ->
@@ -270,8 +274,10 @@ file_md5(File, Ctx) ->
                       {error, Reason::term()}.
 obj_open(Path, Opts) ->
     case file:open(Path, Opts) of
-        {ok, File} -> {ok, {File, erlang:md5_init()}};
-        Any        -> Any
+        {ok, File} ->
+            {ok, {File, erlang:md5_init()}};
+        Any        ->
+            Any
     end.
 -spec obj_open_w(file:filename()) ->
                         {ok, {file:io_device(), binary()}}  |
@@ -287,26 +293,36 @@ obj_open_r(Path) ->
 
 obj_write({File, Ctx}, Chunk) ->
     case file:write(File, Chunk) of
-        ok  -> {ok, {File, erlang:md5_update(Ctx, Chunk)}};
-        Any -> Any
+        ok  ->
+            {ok, {File, erlang:md5_update(Ctx, Chunk)}};
+        Any ->
+            Any
     end.
 
+-spec obj_close(file_desc()) -> {ok, MD5::term()} | {error, Reason::term()}.
 obj_close({File, Ctx}) ->
     case file:close(File) of
-        ok  -> {ok, erlang:md5_final(Ctx)};
-        Any -> Any
+        ok  ->
+            {ok, erlang:md5_final(Ctx)};
+        Any ->
+            Any
     end.
 
+-spec encode(string() | binary()) -> binary().
 encode(Name) when is_binary(Name) ->
     encode(erlang:binary_to_list(Name));
 encode(Name) when is_list(Name) ->
-    http_uri:encode(Name).
+    erlang:list_to_binary(http_uri:encode(Name)).
 
+-spec decode(string() | binary()) -> binary().
 decode(Name) when is_binary(Name) ->
     decode(erlang:binary_to_list(Name));
 decode(Name) ->
-    http_uri:decode(Name).
+    erlang:list_to_binary(http_uri:decode(Name)).
 
+-spec obj_meta_internal(dir(), bkss_store:bucket_name(), bkss_store:path()) ->
+                               {ok, bkss_store:object()} |
+                               {error, Reason::term()}.
 obj_meta_internal(Dir, Bucket, Path) ->
     %% Bucket and path are already encoded by callers
     Filename = filename:join([Dir, Bucket, Path]),
@@ -314,14 +330,16 @@ obj_meta_internal(Dir, Bucket, Path) ->
         {ok, File} ->
             {ok, Md5} = file_md5(File, erlang:md5_init()),
             case file:read_file_info(Filename) of
-                {ok, #file_info{mtime=Date, size=Size}} ->
-                    [UTC|_] = %% FIXME This is a hack until R15B
+                {ok, #file_info{mtime = Date, size = Size}} ->
+                    [UTC | _] = %% FIXME This is a hack until R15B
                         calendar:local_time_to_universal_time_dst(Date),
-                    {ok, #object{name=erlang:list_to_binary(decode(Path)),
-                                 date=UTC,
-                                 size=Size,
-                                 digest=Md5}};
-                Any -> Any
+                    {ok, #object{name = decode(Path),
+                                 date = UTC,
+                                 size = Size,
+                                 digest = Md5}};
+                Any ->
+                    Any
             end;
-        Any -> Any
+        Any ->
+            Any
     end.

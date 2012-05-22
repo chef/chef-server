@@ -106,4 +106,4 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 -spec make_key(bookshelf_store:bucket_name()) -> term().
 make_key(BucketName) ->
-    {n,l,BucketName}.
+    {n, l, BucketName}.

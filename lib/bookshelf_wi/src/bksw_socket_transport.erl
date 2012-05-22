@@ -24,12 +24,12 @@
 %%===================================================================
 -spec new(list()) -> state().
 new([Transport, Socket, Timeout]) ->
-    #state{transport=Transport, socket=Socket, timeout=Timeout}.
+    #state{transport = Transport, socket = Socket, timeout = Timeout}.
 
 -spec recv(state(), non_neg_integer()) -> {ok, binary()} | term().
-recv(#state{transport=Transport, socket=Socket, timeout=Timeout}, Length) ->
+recv(#state{transport = Transport, socket = Socket, timeout = Timeout}, Length) ->
     Transport:recv(Socket, Length, Timeout).
 
 -spec send(state(), binary()) -> ok | term().
-send(#state{transport=Transport, socket=Socket, timeout=_Timeout}, Binary) ->
+send(#state{transport = Transport, socket = Socket, timeout = _Timeout}, Binary) ->
     Transport:send(Socket, Binary).
