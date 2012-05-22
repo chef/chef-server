@@ -73,6 +73,8 @@ shell: compile
 clean :
 	$(REBAR) skip_deps=true clean
 	rm -rf rel/bookshelf
+	rm -rf lib/bookshelf_store/logs
+	rm -rf lib/bookshelf_wi/logs
 
 distclean : clean clean-plt
 	@git clean -fdx

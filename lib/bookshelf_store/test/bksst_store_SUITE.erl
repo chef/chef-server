@@ -62,7 +62,6 @@ bookshelf_basic(Config) when is_list(Config) ->
     ?assert(lists:all(fun(Val) -> ok == Val end, Res)),
     ?assertEqual(ok, bookshelf_store:bucket_delete(<<"cat">>)),
     ?assertEqual(3, length(bookshelf_store:bucket_list())),
-    io:format("5"),
     ?assertNot(bookshelf_store:bucket_exists(<<"cat">>)).
 
 bookshelf_object(doc) ->
@@ -73,7 +72,8 @@ bookshelf_object(Config) when is_list(Config) ->
     Bucket = <<"bukkit">>,
     ?assertEqual(ok, bookshelf_store:bucket_create(Bucket)),
     ?assertEqual([], bookshelf_store:obj_list(Bucket)),
-    Objs = [filename:join(random_binary(), random_binary()) || _ <- lists:seq(1,100)],
+    Objs = [filename:join(random_binary(), random_binary()) ||
+               _ <- lists:seq(1,100)],
     ec_plists:map(fun(F) ->
                          {ok, _} = bookshelf_store:obj_create(Bucket, F, F)
                   end, Objs),
@@ -81,7 +81,9 @@ bookshelf_object(Config) when is_list(Config) ->
     Records = bookshelf_store:obj_list(Bucket),
     ?assertEqual(100, length(Records)),
     ec_plists:map(fun(#object{name=Path}) ->
-                          ?assertEqual({ok, Path}, bookshelf_store:obj_get(Bucket, Path))
+                          ?assertEqual({ok, Path},
+                                       bookshelf_store:obj_get(Bucket,
+                                                               Path))
                   end, Records).
 
 bookshelf_copy(doc) ->
