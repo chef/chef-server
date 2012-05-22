@@ -1,10 +1,12 @@
-%%%-------------------------------------------------------------------
-%%% @author Eric B Merritt <ericbmerritt@gmail.com>
-%%% @copyright (C) 2012, Opscode, Inc.
-%%% @doc
-%%%
-%%% @end
-%%%-------------------------------------------------------------------
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
+%% @author Eric B Merritt <ericbmerritt@gmail.com>
+%% @copyright Copyright 2012 Opscode, Inc.
+%% @doc
+%%  This provides the interface to the 'bookshelf_store' otp app and
+%%  serves as the single point of interface for code outside of the
+%%  bookshelf_store app.
+%% @end
 -module(bookshelf_store).
 
 -export([bucket_create/1,
