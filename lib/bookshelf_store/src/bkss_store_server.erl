@@ -85,12 +85,14 @@ handle_call(bucket_list, _From, State) ->
 -spec handle_cast(Msg::term(), state()) ->
                          {noreply, state()}.
 
-handle_cast(make_sure_we_crash, State) ->
+handle_cast(handle_cast_not_implemented, State) ->
+    erlang:error(handle_cast_not_implemented),
     {noreply, State}.
 
 -spec handle_info(Info::term(), state()) ->
                          {noreply, state()}.
-handle_info(make_sure_we_crash, State) ->
+handle_info(handle_info_not_implemented, State) ->
+    erlang:error(handle_info_not_implemented),
     {noreply, State}.
 
 -spec terminate(Reason::term(), state()) -> ok.
