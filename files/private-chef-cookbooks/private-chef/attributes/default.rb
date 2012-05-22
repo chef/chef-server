@@ -465,7 +465,7 @@ default['private_chef']['keepalived']['smtp_server'] = "127.0.0.1"
 default['private_chef']['keepalived']['smtp_connect_timeout'] = "30"
 default['private_chef']['keepalived']['vrrp_sync_group'] = "PC_GROUP"
 default['private_chef']['keepalived']['vrrp_sync_instance'] = "PC_VI"
-default['private_chef']['keepalived']['vrrp_instance_state'] = "MASTER"
+default['private_chef']['keepalived']['vrrp_instance_state'] = "BACKUP"
 default['private_chef']['keepalived']['vrrp_instance_interface'] = "eth0"
 default['private_chef']['keepalived']['vrrp_instance_virtual_router_id'] = "1"
 default['private_chef']['keepalived']['vrrp_instance_priority'] = "100"
@@ -475,6 +475,8 @@ default['private_chef']['keepalived']['vrrp_instance_ipaddress'] = node['ipaddre
 default['private_chef']['keepalived']['vrrp_instance_ipaddress_dev'] = 'eth0'
 default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_bind'] = node['ipaddress']
 default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_peer'] = nil
+default['private_chef']['keepalived']['vrrp_instance_preempt_delay'] = 30
+default['private_chef']['keepalived']['vrrp_instance_nopreempt'] = true
 
 default['private_chef']['keepalived']['service_order'] = [
 	{ "key" => "couchdb", "service_name" => "couchdb" },
