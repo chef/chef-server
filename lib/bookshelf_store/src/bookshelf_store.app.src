@@ -5,5 +5,5 @@
   {vsn          , "0.0.1"},
   {mod          , {bks_app, []}},
   {registered   , [bks_sup]},
-  {applications , [kernel, stdlib, sasl]}
+  {applications , [kernel, stdlib, sasl, gproc, opset]}
  ]}.
