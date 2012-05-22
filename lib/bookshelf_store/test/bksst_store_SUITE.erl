@@ -41,7 +41,8 @@ all(doc) ->
     ["This test is runs the fs implementation of the bkss_store signature"].
 
 all() ->
-    [bookshelf_basic,bookshelf_object, bookshelf_copy, bookshelf_corruption].
+    [bookshelf_basic,bookshelf_object, bookshelf_copy, bookshelf_corruption,
+    bookshelf_concurrent_access].
 
 %%====================================================================
 %% TEST CASES
@@ -72,13 +73,13 @@ bookshelf_object(Config) when is_list(Config) ->
     Bucket = <<"bukkit">>,
     ?assertEqual(ok, bookshelf_store:bucket_create(Bucket)),
     ?assertEqual([], bookshelf_store:obj_list(Bucket)),
-    Objs = [<<"testing/123/hello">>, <<"hello">>],
+    Objs = [filename:join(random_binary(), random_binary()) || _ <- lists:seq(1,100)],
     ec_plists:map(fun(F) ->
                          {ok, _} = bookshelf_store:obj_create(Bucket, F, F)
                   end, Objs),
-    ?assertEqual(2, length(bookshelf_store:obj_list(Bucket))),
+    ?assertEqual(100, length(bookshelf_store:obj_list(Bucket))),
     Records = bookshelf_store:obj_list(Bucket),
-    ?assertEqual(2, length(Records)),
+    ?assertEqual(100, length(Records)),
     ec_plists:map(fun(#object{name=Path}) ->
                           ?assertEqual({ok, Path}, bookshelf_store:obj_get(Bucket, Path))
                   end, Records).
@@ -135,6 +136,25 @@ bookshelf_corruption(Config) when is_list(Config) ->
                      %% Again we dont need to check the data. the fact that it
                      %% inflates without throwing an error is a good corruption
                      %% check for us.
+                     zlib:uncompress(WrittenData)
+             end,
+    ec_plists:map(Action, lists:seq(1,ProcessCount)).
+
+bookshelf_concurrent_access(doc) ->
+    ["Multiple processes reading and writing to different files in the same bucket"];
+bookshelf_concurrent_access(suite) ->
+    [];
+bookshelf_concurrent_access(Config) when is_list(Config) ->
+    ProcessCount = 1000,
+    BucketName = random_binary(),
+    bookshelf_store:bucket_create(BucketName),
+    Action = fun(Sq) ->
+                     seed(Sq),
+                     Path = filename:join(random_binary(), random_binary()),
+                     Data = random_string(100, ?STR_CHARS),
+                     CompressedData = zlib:compress(Data),
+                     bookshelf_store:obj_create(BucketName, Path, CompressedData),
+                     {ok, WrittenData} = bookshelf_store:obj_get(BucketName, Path),
                      zlib:uncompress(WrittenData)
              end,
     ec_plists:map(Action, lists:seq(1,ProcessCount)).
