@@ -39,7 +39,7 @@ start_link() ->
 
 -spec get_bucket_reference(bookshelf_store:bucket_name()) -> pid().
 get_bucket_reference(BucketName) ->
-    gen_server:call(?SERVER, {get_bucket_reference, BucketName}).
+    gproc:where(make_key(BucketName)).
 
 -spec create_bucket(bookshelf_store:bucket_name()) -> pid().
 create_bucket(BucketName) ->
@@ -64,9 +64,6 @@ init([]) ->
 
 -spec handle_call(Request::term(), From::pid(), state()) ->
                          {reply, Reply::term(), state}.
-handle_call({get_bucket_reference, BucketName}, _From, State) ->
-    {Pid, _} = gproc:await(make_key(BucketName), ?AWAIT_TIMEOUT),
-    {reply, Pid, State};
 handle_call({create_bucket, BucketName}, _From, State) ->
     case bkss_bucket_server:bucket_server_exists(BucketName) of
         true ->
