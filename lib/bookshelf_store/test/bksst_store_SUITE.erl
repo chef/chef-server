@@ -42,7 +42,7 @@ all(doc) ->
 
 all() ->
     [bookshelf_basic,bookshelf_object, bookshelf_copy, bookshelf_corruption,
-    bookshelf_concurrent_access].
+     bookshelf_concurrent_access, bookshelf_stream].
 
 %%====================================================================
 %% TEST CASES
@@ -161,6 +161,28 @@ bookshelf_concurrent_access(Config) when is_list(Config) ->
              end,
     ec_plists:map(Action, lists:seq(1,ProcessCount)).
 
+bookshelf_stream(doc) ->
+    ["Test the bookshelf_store streaming protocols"];
+bookshelf_stream(suite) ->
+    [];
+bookshelf_stream(Config) when is_list(Config) ->
+    random:seed(erlang:now()),
+    ProcessCount = 1000,
+    Bucket = random_binary(),
+    ?assertEqual(ok,  bookshelf_store:bucket_create(Bucket)),
+    ?assertEqual([], bookshelf_store:obj_list(Bucket)),
+    Action = fun(Sq) ->
+                     seed(Sq),
+                     Path = filename:join(random_binary(), random_binary()),
+                     Data = random_string(1000, ?STR_CHARS),
+                     Trans = bkss_transport:new(bksst_test_transport, [Data]),
+                     ?assertMatch({ok, _},
+                                  bookshelf_store:obj_recv(Bucket, Path,
+                                                           Trans, <<>>, 100)),
+                     ?assertMatch({ok, _}, bookshelf_store:obj_send(Bucket,
+                                                                    Path, Trans))
+             end,
+    ec_plists:map(Action, lists:seq(1,ProcessCount)).
 
 %%====================================================================
 %% Utility Functions
