@@ -17,7 +17,7 @@ vrrp_sync_group <%= @vrrp_sync_group %> {
 
 vrrp_instance <%= @vrrp_sync_instance %> {
     state <%= @vrrp_instance_state %>
-    preempt_delay <= @vrrp_instance_preempt_delay %>
+    preempt_delay <%= @vrrp_instance_preempt_delay %>
 <% if @vrrp_instance_nopreempt %>
     nopreempt
 <% end %>
