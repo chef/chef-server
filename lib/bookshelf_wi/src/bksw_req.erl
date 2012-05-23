@@ -12,6 +12,11 @@
 %% API functions
 %%===================================================================
 with_amz_request_id(Rq) ->
+    %% According to the docs erlang/new will always return a unique value on on the same
+    %% node. There is still some small opportunity here for there to be unconnected nodes
+    %% with the same node name that call erlang:now/0 in the same microsecond. However, that
+    %% is both unlikely enough and low impact enough that I dont think its worth adding
+    %% extra to this.
     Id = term_to_binary({node(), erlang:now()}),
     Base64 = bksw_format:to_base64(Id),
     {ok, Rq2} =
