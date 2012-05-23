@@ -507,3 +507,8 @@ default['private_chef']['keepalived']['service_posthooks'] = {
 # LDAP Authentication Integration
 ##
 default['private_chef']['ldap'] = nil
+
+##
+# Upgrades/Partybus
+##
+default['private_chef']['upgrades']['dir'] = "/var/opt/opscode/upgrades"

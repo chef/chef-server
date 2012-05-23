@@ -1,10 +1,25 @@
-directory "/var/opt/opscode/upgrades" do
-  mode   "0755"
-  owner  "root"
-  group  "root"
-  recursive true
-  action :create
+#
+# Author:: Stephen Delano (<stephen@opscode.com>)
+# Copyright:: Copyright (c) 2012 Opscode, Inc.
+#
+# All Rights Reserved
+
+upgrades_dir = node['private_chef']['upgrades']['dir']
+upgrades_etc_dir = File.join(upgrades_dir, "etc")
+upgrades_service_dir = "/opt/opscode/embedded/service/partybus"
+[
+  upgrades_dir,
+  upgrades_etc_dir,
+  upgrades_service_dir
+].each do |dir_name|
+  directory dir_name do
+    owner node['private_chef']['user']['username']
+    mode '0700'
+    recursive true
+  end
 end
+
+partybus_config = File.join(upgrades_etc_dir, "config.rb")
 
 # set the db connection string
 db_type     = node['private_chef']['database_type']
@@ -21,14 +36,17 @@ db_service_name = db_type == "postgresql" ? "postgres" : "mysql"
 # set the node role
 node_role = node['private_chef']['role']
 
-template "/opt/opscode/embedded/service/partybus/config.rb" do
+template partybus_config do
   source "partybus_config.rb.erb"
-  owner  "root"
-  owner  "root"
+  owner node['private_chef']['user']['username']
   mode   "0644"
   variables(:connection_string => db_connection_string,
             :node_role => node_role,
             :db_service_name => db_service_name)
+end
+
+link "/opt/opscode/embedded/service/partybus/config.rb" do
+  to partybus_config
 end
 
 execute "set initial migration level" do
