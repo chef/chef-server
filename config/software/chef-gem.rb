@@ -1,5 +1,5 @@
 name "chef-gem"
-version "0.10.8"
+version "0.10.10"
 
 dependencies ["ruby", "rubygems", "yajl"]
 
