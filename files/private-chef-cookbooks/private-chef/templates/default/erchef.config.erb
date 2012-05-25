@@ -49,27 +49,26 @@
                {estatsd_port, 5665 }
               ]},
   {sqerl, [
-            %% The database system you are using (e.g., mysql, pgsql)
-            {db_type, <%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %> },
-  
-            %% This is for pooler, but not sure where it gets used
-            {metrics_module, folsom_metrics},
-  
-            %% Pool characteristics
-            {max_count, <%= @db_pool_size %> },
-            {init_count, <%= @db_pool_size %> },
-  
-            %% Database connection parameters
-            {host, "<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>"},
-            {port, <%= node['private_chef']['database_type'] == "postgresql" ? 5432 : 3306 %>},
-            {user, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>"},
-    	    {pass, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>"},
-            {db,   "opscode_chef" },
-  
-            {prepared_statement_source, "etc/<%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %>_statements.config"},
-            %% what's this?
-            {column_transforms, undefined}
-           ]}
+           %% The database system you are using (e.g., mysql, pgsql)
+           {db_type, <%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %> },
+
+           %% Database connection parameters
+           {db_host, "<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>"},
+           {db_port, <%= node['private_chef']['database_type'] == "postgresql" ? 5432 : 3306 %>},
+           {db_user, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>"},
+           {db_pass, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>"},
+           {db_name, "opscode_chef" },
+
+           {prepared_statements, {chef_sql, statements, [<%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %>]}},
+           {column_transforms, undefined}
+           ]},
+
+  {pooler, [
+           {pools, [[{name, "sqerl"},
+                     {max_count, <%= @db_pool_size %>},
+                     {init_count, <%= @db_pool_size %>},
+                     {start_mfa, {sqerl_client, start_link, []}}]]},
+           {metrics_module, folsom_metrics}
+          ]}
+
 ].
-
-

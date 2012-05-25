@@ -110,12 +110,31 @@ http {
 <%= select_upstream("opscode_chef") %>
     }
 
-    # nodes goes to erchef
+    # nodes go to erchef
     location ~ "^/organizations/[a-z0-9\-_]+?/nodes/{0,1}.*$" {
 <%= select_upstream("opscode_erchef") %>
     }
 
     location ~ "^/organizations/[a-z0-9\-_]+?/environments/[^/]+/nodes$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+
+<% if !node['private_chef']['dark_launch']['couchdb_roles'] %>
+    # roles go to erchef
+    location ~ "^/organizations/[a-z0-9\-_]+?/roles/{0,1}.*$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+<% end %>
+
+<% if !node['private_chef']['dark_launch']['couchdb_data'] %>
+    # data (data_bags, data_bag_items go to erchef
+    location ~ "^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+<% end %>
+
+    # search index request
+    location ~ "^/organizations/[a-z0-9\-_]+?/(?:search)/?$" {
 <%= select_upstream("opscode_erchef") %>
     }
 
@@ -272,6 +291,25 @@ http {
 <%= select_upstream("opscode_erchef") %>
     }
 
+<% if !node['private_chef']['dark_launch']['couchdb_roles'] %>
+    # roles go to erchef
+    location ~ "^/organizations/[a-z0-9\-_]+?/roles/{0,1}.*$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+<% end %>
+
+<% if !node['private_chef']['dark_launch']['couchdb_data'] %>
+    # data (data_bags, data_bag_items go to erchef
+    location ~ "^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+<% end %>
+
+    # search index request
+    location ~ "^/organizations/[a-z0-9\-_]+?/(?:search)/?$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+
 <%- if node['private_chef']['lb']['cache_cookbook_files'] -%>    
     location ~ "^/organizations/[a-z0-9\-_]+?/cookbooks/[\w\.]+/(\d+\.\d+\.\d+|_latest)/files/.+$" {
 <%= select_upstream("#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}", "opscode_webui", node['private_chef']['opscode-chef']['upload_proto']) %>
@@ -387,6 +425,25 @@ http {
     location ~ "^/organizations/[a-z0-9\-_]+?/environments/[^/]+/nodes$" {
       proxy_redirect http://opscode_erchef /;
       proxy_pass http://opscode_erchef;
+    }
+
+<% if !node['private_chef']['dark_launch']['couchdb_roles'] %>
+    # roles go to erchef
+    location ~ "^/organizations/[a-z0-9\-_]+?/roles/{0,1}.*$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+<% end %>
+
+<% if !node['private_chef']['dark_launch']['couchdb_data'] %>
+    # data (data_bags, data_bag_items go to erchef
+    location ~ "^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$" {
+<%= select_upstream("opscode_erchef") %>
+    }
+<% end %>
+
+    # search index request
+    location ~ "^/organizations/[a-z0-9\-_]+?/(?:search)/?$" {
+<%= select_upstream("opscode_erchef") %>
     }
 
     # cookbooks must go to the vip running opscode-chef directly (webui hits this)
