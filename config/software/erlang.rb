@@ -1,12 +1,12 @@
 name "erlang"
-version "R14B03"
+version "R15B01"
 
 dependencies ["zlib", "openssl", "ncurses"]
 
-source :url => "http://www.erlang.org/download/otp_src_R14B03.tar.gz",
-       :md5 => "7979e662d11476b97c462feb7c132fb7"
+source :url => "http://www.erlang.org/download/otp_src_R15B01.tar.gz",
+       :md5 => "f12d00f6e62b36ad027d6c0c08905fad"
 
-relative_path "otp_src_R14B03"
+relative_path "otp_src_R15B01"
 
 env = {
   "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/erlang/include",
