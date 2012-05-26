@@ -1,7 +1,7 @@
 name "opscode-org-creator"
 version "r15b"
 
-dependencies ["erlang", "rsync"]
+dependencies ["erlang", "rebar", "rsync"]
 
 source :git => "git@github.com:opscode/opscode-org-creator"
 
