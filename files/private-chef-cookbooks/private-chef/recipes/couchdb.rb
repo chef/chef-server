@@ -51,7 +51,13 @@ end
 # Cron may not be installed in a minimal install:
 case node["platform"]
 when "ubuntu"
-when "centos","redhat","scientific"
+when "centos"
+  if node["platform_version"] =~ /^5/
+    package "vixie-cron"
+  else
+    package "cronie"
+  end
+when "redhat","scientific"
   package "cronie"
 end
 
