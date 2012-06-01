@@ -1,0 +1,124 @@
+  server {
+    listen <%= @helper.listen_port(@server_proto) %>;
+    server_name <%= @server_name %>;
+
+    access_log <%= @helper.access_log(@server_proto) %> opscode;
+    <% if @server_proto == "https" %>
+      ssl on;
+      ssl_certificate <%= @ssl_certificate %>;
+      ssl_certificate_key <%= @ssl_certificate_key %>;
+
+      ssl_session_timeout 5m;
+
+      ssl_protocols <%= node['private_chef']['nginx']['ssl_protocols'] %>;
+      ssl_ciphers <%= node['private_chef']['nginx']['ssl_ciphers'] %>;
+      ssl_prefer_server_ciphers on;
+    <% end %>
+    root <%= File.join(@dir, "html") %>;
+    client_max_body_size <%= @client_max_body_size %>;
+
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto <%= @server_proto %>;
+    proxy_pass_request_headers on;
+    proxy_connect_timeout   1;
+    proxy_send_timeout      300;
+    proxy_read_timeout      300;
+
+    error_page 404 =404 /404.html;
+    error_page 503 =503 /503.json;
+
+    location /version {
+      types { }
+      default_type text/plain;
+      alias /opt/opscode/pc-version.txt;
+    }
+
+    location /docs {
+      index index.html ;
+      alias /opt/opscode/docs;
+    }
+
+    # This internal location is used to serve checksum file content
+    # via the X-Accel-Redirect header. See http://wiki.nginx.org/XSendfile
+    location /checksum/ {
+      internal;
+      root <%= node['private_chef']['opscode-chef']['checksum_path'].gsub('checksum', '') %>;
+    }
+
+    # object ACL requests go to opscode-account service
+    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/.*?/_acl.*$") %>
+
+    # search requests
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/?$") %>
+
+    <% if node['private_chef']['dark_launch']['couchdb_cookbooks'] %>
+    # backwards compatible for Chef 0.9.x and below clients
+    # the nodes/:node_name/cookbooks is still handled by Ruby-Chef
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/nodes/[^/]+/cookbooks$", :ruby) %>
+    <% end %>
+
+    # nodes and environments/*/nodes go to erchef
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/nodes/{0,1}.*$") %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/[^/]+/nodes$") %>
+
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/roles/{0,1}.*$", 'couchdb_roles') %>
+
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$", 'couchdb_data') %>
+
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/{0,1}.*$", 'couchdb_environments') %>
+
+    # optional caching of cookbook files by nginx
+    <%- if node['private_chef']['lb']['cache_cookbook_files'] -%>
+    location ~ "^/organizations/[a-z0-9\-_]+?/cookbooks/[\w\.]+/(\d+\.\d+\.\d+|_latest)/files/.+$" {
+    <%= @helper.select_upstream("#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}",
+                                "opscode_webui",
+                                node['private_chef']['opscode-chef']['upload_proto']) %>
+      proxy_cache webui-cache;
+      proxy_cache_valid 200 300m;
+    }
+    <%- end -%>
+
+    # cookbook uploads and sandboxes
+    <%= @helper.make_location("^/organizations/[a-z0-9\-_]+?/(?:cookbooks|sandboxes)/{0,1}.*$",
+                              "#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}",
+                              "opscode_webui",
+                              node['private_chef']['opscode-chef']['upload_proto']) %>
+
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/status/{0,1}.*$", :ruby) %>
+
+    # opscode-account service endpoints
+    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/(?:groups|users|clients|containers|association_requests)/{0,1}.*$") %>
+    <%= @helper.account_api("^/(?:organizations|users)/{0,1}$") %>
+    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+/{0,1}$") %>
+    <%= @helper.account_api("^/users/[a-z0-9\-_]+/{0,1}$") %>
+    <%= @helper.account_api("^/users/[a-z0-9\-_]+/{0,1}/association_requests/{0,1}.*$") %>
+    <%= @helper.account_api("^/users/[a-z0-9\-_]+/organizations/{0,1}$") %>
+    <%= @helper.account_api("^/verify_password$") %>
+    <%= @helper.account_api("^/authenticate_user$") %>
+
+    location ~ "^/(?:stylesheets|javascripts|images|facebox|css)/{0,1}.*$" {
+      if ($http_x_chef_version ~* "^(\d+\.\d+?)\..+$") {
+        error_page 400 =400 /400-chef_client_manage.json;
+        return 400;
+      }
+      proxy_pass http://opscode_webui;
+      proxy_pass_request_headers off;
+      proxy_cache webui-cache;
+      proxy_cache_valid 200 302 300m;
+      proxy_cache_valid 404 1m;
+    }
+
+    location / {
+      # any request from a chef client that reaches this point
+      # is for a resource/route that doesn't exist.
+      if ($http_x_chef_version ~* "^(\d+\.\d+?)\..+$") {
+         error_page 404 =404 /404.json;
+         return 404;
+      }
+
+      proxy_pass http://opscode_webui;
+    }
+  }
