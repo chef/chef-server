@@ -32,7 +32,7 @@ If you want to add S3 access, find the AWS credentials for the
 To initiate an omnibus build on Ubuntu 10.04
 
 ```
-vagrant omnibus build ubuntu-10.04 private-chef
+bundle exec vagrant omnibus build ubuntu-10.04 private-chef
 ```
 
 If you receive an error stating that no config file was found in /home/vagrant/opscode-omnibus/omnibus.rb, this means that a configuration file on the vagrant vm is missing.
