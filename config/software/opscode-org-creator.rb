@@ -1,5 +1,5 @@
 name "opscode-org-creator"
-version "r15b"
+version "rel-1.1.0"
 
 dependencies ["erlang", "rebar", "rsync"]
 
