@@ -1,5 +1,5 @@
 name "rebar"
-version "master"
+version "2.0.0"
 
 dependencies ["erlang"]
 
