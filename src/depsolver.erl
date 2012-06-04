@@ -24,8 +24,8 @@
 %%%
 %%% we can add this world to the system all at once ass follows
 %%%
-%%%      Graph0 = doest:new(),
-%%%      Graph1 = doest:add_packages(
+%%%      Graph0 = depsolver:new(),
+%%%      Graph1 = depsolver:add_packages(
 %%%             [{app1, [{"0.1", [{app2, "0.2"},
 %%%                               {app3, "0.2", '>='}]},
 %%%                               {"0.2", []},
@@ -40,23 +40,23 @@
 %%% We can also build it up incrementally using the other add_package and
 %%% add_package_version functions.
 %%%
-%%% Finally, once we have built up the graph we can ask doest to solve the
+%%% Finally, once we have built up the graph we can ask depsolver to solve the
 %%% dependency constraints. That is to give us a list of valid dependencies by
 %%% using the solve function. Lets say we want the app3 version "0.3" and all of
 %%% its resolved dependencies. We could call solve as follows.
 %%%
-%%%    doest:solve(Graph1, [{app3, "0.3"}]).
+%%%    depsolver:solve(Graph1, [{app3, "0.3"}]).
 %%%
 %%% That will give us the completely resolved dependencies including app3
 %%% itself. Lets be a little more flexible. Lets ask for a graph that is rooted
 %%% in anything greater then app3 "0.1". We could do that by
 %%%
-%%%    doest:solve(Graph1, [{app3, "0.3", '>='}]).
+%%%    depsolver:solve(Graph1, [{app3, "0.3", '>='}]).
 %%%
 %%% Of course, you can specify any number of goals at the top level.
 %%% @end
 %%%-------------------------------------------------------------------
--module(doest).
+-module(depsolver).
 
 %% Public Api
 -export([new/0,
@@ -156,7 +156,7 @@ solve({?MODULE, State0}, PackageList)
             erlang:throw({this_should_never_happen, fail});
         fail ->
             [FirstCons | Rest] = PackageList,
-            doest_culprit:search(State1, [FirstCons], Rest);
+            depsolver_culprit:search(State1, [FirstCons], Rest);
         Solution ->
             Solution
     end.

@@ -10,7 +10,7 @@
 %%%  goal, and the good apps (those not immediately constrained from
 %%%  the goals).
 %%% @end
--module(doest_culprit).
+-module(depsolver_culprit).
 
 -export([search/3]).
 
@@ -20,17 +20,17 @@
 %% Types
 %%============================================================================
 -type void() :: ok.
--type detail() :: {UnknownApps::[doest:constraint()],
-                   VersionConstrained::[doest:constraint()],
-                   GoodApps::[doest:constraint()]}.
+-type detail() :: {UnknownApps::[depsolver:constraint()],
+                   VersionConstrained::[depsolver:constraint()],
+                   GoodApps::[depsolver:constraint()]}.
 
 %%============================================================================
 %% Internal API
 %%============================================================================
--spec search(doest:internal_t(), [doest:constraint()], [doest:constraint()])
+-spec search(depsolver:internal_t(), [depsolver:constraint()], [depsolver:constraint()])
             -> void().
 search(State, ActiveCons=[Culprit | _], []) ->
-    case doest:primitive_solve(State, ActiveCons) of
+    case depsolver:primitive_solve(State, ActiveCons) of
         fail ->
             erlang:throw(format_culprit_error(State, Culprit, ActiveCons));
         _Success ->
@@ -40,7 +40,7 @@ search(State, ActiveCons=[Culprit | _], []) ->
             erlang:throw(inconsistant_graph_state)
     end;
 search(State, ActiveCons=[PossibleCulprit | _], [NewCon | Constraints]) ->
-    case doest:primitive_solve(State, ActiveCons) of
+    case depsolver:primitive_solve(State, ActiveCons) of
         fail ->
             erlang:throw(format_culprit_error(State,
                                               PossibleCulprit,
@@ -55,15 +55,15 @@ search(State, ActiveCons=[PossibleCulprit | _], [NewCon | Constraints]) ->
 %% Internal Functions
 %%============================================================================
 
--spec format_culprit_error(doest:internal_t(), doest:constraint(),
-                           [doest:constraint()]) ->
-                                   {unable_to_solve, doest:constraint(),
+-spec format_culprit_error(depsolver:internal_t(), depsolver:constraint(),
+                           [depsolver:constraint()]) ->
+                                   {unable_to_solve, depsolver:constraint(),
                                     detail()}.
 format_culprit_error(State, Culprit, ActiveCons) ->
     Result = sort_constraints(State, ActiveCons),
     {unable_to_solve, Culprit, Result}.
 
--spec sort_constraints(doest:internal_t(), [doest:constraint()]) ->
+-spec sort_constraints(depsolver:internal_t(), [depsolver:constraint()]) ->
                               detail().
 sort_constraints(State, Cons) ->
     lists:foldl(fun(Con, {AccUnknown, AccBad, AccGood}) ->
@@ -80,11 +80,11 @@ sort_constraints(State, Cons) ->
                         end
                 end, {[], [], []}, Cons).
 
--spec is_known(doest:internal_t(), doest:constraint()) ->
+-spec is_known(depsolver:internal_t(), depsolver:constraint()) ->
                       boolean().
 is_known(State,  Con) ->
     {PkgName, Vsn} = dep_pkg_vsn(Con),
-    case gb_trees:lookup(doest:make_key(PkgName), State) of
+    case gb_trees:lookup(depsolver:make_key(PkgName), State) of
         none ->
             false;
         {value, Vsns} ->
@@ -101,18 +101,18 @@ is_known(State,  Con) ->
             end
     end.
 
--spec is_bad(doest:constraint(), [doest:constraint()]) -> boolean().
+-spec is_bad(depsolver:constraint(), [depsolver:constraint()]) -> boolean().
 is_bad(Con, Constraints) ->
     {PkgName, Vsn} = dep_pkg_vsn(Con),
     PkgCons = [Con1 || Con1 <- Constraints,
-                       doest:dep_pkg(Con) == PkgName],
+                       depsolver:dep_pkg(Con) == PkgName],
     not lists:all(fun (L) ->
-                      doest:is_version_within_constraint(Vsn, L)
+                      depsolver:is_version_within_constraint(Vsn, L)
                   end,
                   PkgCons).
 
 
--spec dep_pkg_vsn(doest:constraint()) -> {doest:pkg_name(), doest:vsn()}.
+-spec dep_pkg_vsn(depsolver:constraint()) -> {depsolver:pkg_name(), depsolver:vsn()}.
 dep_pkg_vsn(Pkg={_Pkg, _Vsn}) ->
     Pkg;
 dep_pkg_vsn({Pkg, Vsn, _}) ->
@@ -130,7 +130,7 @@ dep_pkg_vsn(Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
 
 missing_test() ->
 
-    Dom0 = doest:add_packages(doest:new(), [{app1, [{"0.1", [{app2, "0.2"},
+    Dom0 = depsolver:add_packages(depsolver:new(), [{app1, [{"0.1", [{app2, "0.2"},
                                                              {app3, "0.2", '>='},
                                                              {app4, "0.2"}]},
                                                     {"0.2", [{app4, "0.2"}]},
@@ -144,9 +144,9 @@ missing_test() ->
 
 
     ?assertThrow({unreachable_package,app4},
-                 doest:solve(Dom0, [{app4, "0.1"}, {app3, "0.1"}])),
+                 depsolver:solve(Dom0, [{app4, "0.1"}, {app3, "0.1"}])),
 
     ?assertThrow({unreachable_package,app4},
-                 doest:solve(Dom0, [{app1, "0.1"}])).
+                 depsolver:solve(Dom0, [{app1, "0.1"}])).
 
 -endif.

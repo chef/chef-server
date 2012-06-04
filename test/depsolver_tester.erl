@@ -3,10 +3,10 @@
 %%%-------------------------------------------------------------------
 %%% @author Eric Merritt <ericbmerritt@gmail.com>
 %%% @doc
-%%% Additional testing for doest
+%%% Additional testing for depsolver
 %%% @end
 %%%-------------------------------------------------------------------
--module(doest_tester).
+-module(depsolver_tester).
 
 -export([run_data/1, run_log/1]).
 -include_lib("eunit/include/eunit.hrl").
@@ -342,7 +342,7 @@ fix_rebar_brokenness(Filename) ->
 
 run_data_file(Device) ->
     Constraints = get_constraints(io:get_line(Device, "")),
-    doest:solve(process_packages(read_packages(Device)), Constraints).
+    depsolver:solve(process_packages(read_packages(Device)), Constraints).
 
 goble_lines(_Device, eof, Acc) ->
     lists:reverse(Acc);
@@ -355,14 +355,14 @@ goble_lines(Device) ->
     goble_lines(Device, io:get_line(Device, ""), []).
 
 run_log_file(Device) ->
-    State0 = doest:new(),
+    State0 = depsolver:new(),
     {Goals, State2} =
         lists:foldl(fun(Line, Data) ->
                             process_add_goal(Line,
                                              process_add_constraint(Line,
                                                                     process_add_package(Line, Data)))
                     end, {[], State0}, goble_lines(Device)),
-    doest:solve(State2, Goals).
+    depsolver:solve(State2, Goals).
 
 read_packages(Device) ->
     process_line(Device, io:get_line(Device, ""), []).
@@ -394,8 +394,8 @@ process_line(Device, Pkg, Acc) ->
 
 process_packages(Pkgs) ->
     lists:foldl(fun({Pkg, Vsn, Constraints}, Dom0) ->
-                        doest:add_package_version(Dom0, Pkg, Vsn, Constraints)
-                end, doest:new(), Pkgs).
+                        depsolver:add_package_version(Dom0, Pkg, Vsn, Constraints)
+                end, depsolver:new(), Pkgs).
 
 get_constraints(ConLine) ->
     AppVsns = string:tokens(ConLine, " \n"),
@@ -416,7 +416,7 @@ process_add_package(Line, {Goals, State0}) ->
         {match, [_All, _InstNumber, PkgName, _PkgCount, VersionCount]} ->
             {Goals,
              lists:foldl(fun(PkgVsn, State1) ->
-                                 doest:add_package_version(State1,
+                                 depsolver:add_package_version(State1,
                                                            PkgName,
                                                            erlang:integer_to_list(PkgVsn),
                                                            [])
@@ -430,7 +430,7 @@ process_add_constraint(Line, {Goals, State0}) ->
     case re:run(Line, ?ADD_VC, [{capture, all, list}]) of
         {match, [_All, _InstNumber, Pkg, Vsn, Dep, _Ignore, DepVsn]} ->
             {Goals,
-             doest:add_package_version(State0, Pkg, Vsn, [{Dep, DepVsn}])};
+             depsolver:add_package_version(State0, Pkg, Vsn, [{Dep, DepVsn}])};
         _ ->
             {Goals, State0}
     end.

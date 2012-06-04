@@ -1,5 +1,4 @@
-_build
 .eunit
 *.beam
 *.app
-.plt
+*.plt

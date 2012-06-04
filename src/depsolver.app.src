@@ -1,4 +1,4 @@
-{application, doest,
+{application, depsolver,
  [{description, "Package Constraint Solver"},
   {vsn, "0.0.1a"},
   {modules, []},
