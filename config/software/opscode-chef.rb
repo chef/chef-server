@@ -1,5 +1,5 @@
 name "opscode-chef"
-version "master"
+version "pc-rel-2.5.0"
 
 dependencies ["ruby",
               "bundler",
