@@ -121,4 +121,3 @@ class Chef::Resource::Template
       !(node['private_chef']['ldap'].nil? || node['private_chef']['ldap'].empty?)
   end
 end
-
