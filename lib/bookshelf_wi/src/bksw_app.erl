@@ -36,18 +36,12 @@ manual_start() ->
     application:start(inets),
     application:start(erlsom),
     application:start(cowboy),
-    application:start(gen_leader),
-    application:start(gproc),
-    application:start(opset),
-    application:start(bookshelf_store),
+    bkss_app:manual_start(),
     application:start(bookshelf_wi).
 
 manual_stop() ->
-    application:stop(bookshelf_store),
-    application:stop(opset),
-    application:stop(gproc),
-    application:stop(gen_leader),
     application:stop(bookshelf_wi),
+    bkss_app:manual_stop(),
     application:stop(cowboy),
     application:stop(erlsom),
     application:stop(inets).
