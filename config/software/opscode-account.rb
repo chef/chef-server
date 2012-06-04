@@ -1,5 +1,5 @@
 name "opscode-account"
-version "master"
+version "pc-rel-1.14.0"
 
 dependencies ["ruby",
               "bundler",
