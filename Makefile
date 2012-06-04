@@ -32,7 +32,7 @@ eunit : compile
 	ERL_FLAGS="-pa $(CURDIR)/lib/bookshelf_store/ebin" $(REBAR) skip_deps=true eunit
 
 ct : eunit
-	$(REBAR) skip_deps=true ct
+	ERL_FLAGS="-pa $(CURDIR)/lib/bookshelf_store/ebin" $(REBAR) skip_deps=true ct
 
 rel/bookshelf :
 	$(REBAR) generate
