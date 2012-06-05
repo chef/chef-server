@@ -70,9 +70,20 @@
            {db_name, "opscode_chef" },
 
            {prepared_statements, {chef_sql, statements, [<%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %>]}},
-           {column_transforms, undefined}
-           ]},
-
+           {column_transforms,
+           <%-if node['private_chef']['database_type'] == "mysql" %>
+                              [{<<"frozen">>,
+                                {sqerl_transformers, convert_integer_to_boolean}]
+           <%- elsif node['private_chef']['database_type'] == "postgresql" %>
+                              [{<<"created_at">>,
+                                {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
+                               {<<"updated_at">>,
+                                {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}]
+           <% else %>
+                              undefined
+           <%- end %>
+           }
+          ]},
   {pooler, [
            {pools, [[{name, "sqerl"},
                      {max_count, <%= @db_pool_size %>},
