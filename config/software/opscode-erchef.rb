@@ -1,5 +1,5 @@
 name "opscode-erchef"
-version "pc-rel-0.10.1"
+version "pc-rel-0.11.0"
 
 dependencies ["erlang", "rsync"]
 
