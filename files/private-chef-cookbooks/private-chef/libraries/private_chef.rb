@@ -111,7 +111,7 @@ module PrivateChef
       PrivateChef['nagios']['admin_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['opscode_authz']['superuser_id'] ||= generate_hex_if_bootstrap(32, ha_guard)
+      PrivateChef['opscode_authz']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
 
       if File.directory?("/etc/opscode")
         File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
