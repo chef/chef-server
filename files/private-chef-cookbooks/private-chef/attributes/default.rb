@@ -143,10 +143,10 @@ default['private_chef']['opscode-chef']['proxy_user'] = "pivotal"
 default['private_chef']['opscode-chef']['environment'] = 'privatechef'
 default['private_chef']['opscode-chef']['url'] = "http://127.0.0.1:9460"
 default['private_chef']['opscode-chef']['upload_vip'] = "127.0.0.1"
-default['private_chef']['opscode-chef']['upload_port'] = 9460
+default['private_chef']['opscode-chef']['upload_port'] = 8000
 default['private_chef']['opscode-chef']['upload_proto'] = "http"
 default['private_chef']['opscode-chef']['upload_internal_vip'] = "127.0.0.1"
-default['private_chef']['opscode-chef']['upload_internal_port'] = 9460
+default['private_chef']['opscode-chef']['upload_internal_port'] = 8000
 default['private_chef']['opscode-chef']['upload_internal_proto'] = "http"
 default['private_chef']['opscode-chef']['vip'] = "127.0.0.1"
 default['private_chef']['opscode-chef']['port'] = 9460
@@ -431,7 +431,7 @@ default['private_chef']['opscode-org-creator']['port'] = 4369
 ###
 # Dark Launch
 ###
-default['private_chef']['dark_launch']['sql_migration_phase_1'] = false
+default['private_chef']['dark_launch']['sql_migration_phase_1'] = true
 default['private_chef']['dark_launch']["quick_start"] = false
 default['private_chef']['dark_launch']["new_theme"] = true
 default['private_chef']['dark_launch']["private-chef"] = true
