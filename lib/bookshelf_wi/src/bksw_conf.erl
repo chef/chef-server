@@ -22,9 +22,6 @@ get_configuration() ->
     lists:flatten([ip(),
                    dispatch(),
                    pool(),
-                   certfile(),
-                   keyfile(),
-                   password(),
                    port(),
                    keys()]).
 
@@ -54,30 +51,6 @@ pool() ->
             [{pool, 100}];
         {ok, Pool} ->
             [{pool, Pool}]
-    end.
-
-certfile() ->
-    case application:get_env(certfile) of
-        undefined ->
-            [{certfile, []}];
-        {ok, CertFile} ->
-            [{certfile, CertFile}]
-    end.
-
-keyfile() ->
-    case application:get_env(keyfile) of
-        undefined ->
-            [{keyfile, ""}];
-        {ok, KeyFile} ->
-            [{keyfile, KeyFile}]
-    end.
-
-password() ->
-    case application:get_env(password) of
-        undefined ->
-            [];
-        {ok, Password} ->
-            [{password, Password}]
     end.
 
 port() ->

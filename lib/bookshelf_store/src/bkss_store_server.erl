@@ -20,7 +20,7 @@
 
 -define(SERVER, ?MODULE).
 -define(AWAIT_TIMEOUT, 1000).
-
+-define(GEN_SERVER_TIMEOUT, 1000).
 -record(state, {}).
 
 %%%===================================================================
@@ -42,7 +42,7 @@ get_bucket_reference(BucketName) ->
 
 -spec create_bucket(bookshelf_store:bucket_name()) -> pid().
 create_bucket(BucketName) ->
-    gen_server:call(?SERVER, {create_bucket, BucketName}).
+    gen_server:call(?SERVER, {create_bucket, BucketName}, ?GEN_SERVER_TIMEOUT).
 
 -spec bucket_list() -> [bookshelf_store:bucket()].
 bucket_list() ->
