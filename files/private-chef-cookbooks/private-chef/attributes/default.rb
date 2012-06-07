@@ -214,15 +214,20 @@ default['private_chef']['nginx']['enable_non_ssl'] = false
 default['private_chef']['nginx']['non_ssl_port'] = 80
 default['private_chef']['nginx']['server_name'] = node['fqdn']
 default['private_chef']['nginx']['url'] = "https://#{node['fqdn']}"
-# These options provide the current best security with TSLv1
+# HIGHEST SECURITY AT ALL COSTS: TLSv1 only to prevent BEAST, can also turn off RC4/MEDIUM/MD5 to really favor security over speed/comptability
 #default['private_chef']['nginx']['ssl_protocols'] = "-ALL +TLSv1"
-#default['private_chef']['nginx']['ssl_ciphers'] = "RC4:!MD5"
-# This might be necessary for auditors that want no MEDIUM security ciphers and don't understand BEAST attacks
+#default['private_chef']['nginx']['ssl_ciphers'] = "RC4-SHA:RC4-MD5:RC4:RSA:HIGH:MEDIUM:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK"
+# HIGHEST SECURITY THAT IS COMPTATIBLE AND FAST: SSLv3 for compatibility, but RC4 only to definitively block BEAST
+#default['private_chef']['nginx']['ssl_protocols'] = "-ALL +SSLv3 +TLSv1"
+#default['private_chef']['nginx']['ssl_ciphers'] = "RC4-SHA:RC4-MD5:RC4:RSA:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK"
+# HIGHEST SECURITY ON PAPER: Favors only HIGH security ciphers, still compatible with non-TLSv1 browsers, slow, vulnerable to BEAST on all ciphers over SSLv3
 #default['private_chef']['nginx']['ssl_protocols'] = "-ALL +SSLv3 +TLSv1"
 #default['private_chef']['nginx']['ssl_ciphers'] = "HIGH:!MEDIUM:!LOW:!ADH:!kEDH:!aNULL:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK"
-# The following favors performance and compatibility, addresses BEAST, and should pass a PCI audit
+# FAST/COMPTATIBLE/AUDITABLE: Favors performance and compatibility, default is not vulnerable to BEAST attacks, uses RC4/MEDIUM, allows MD5
 default['private_chef']['nginx']['ssl_protocols'] = "SSLv3 TLSv1"
 default['private_chef']['nginx']['ssl_ciphers'] = "RC4-SHA:RC4-MD5:RC4:RSA:HIGH:MEDIUM:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK"
+# For any of the above:  drop the "RC4-SHA:RC4-MD5:RC4:RSA" prefix and you should wind up favoring AES256 with ECDHE forward security if you want that and don't
+# care about speed.
 default['private_chef']['nginx']['ssl_certificate'] = nil
 default['private_chef']['nginx']['ssl_certificate_key'] = nil
 default['private_chef']['nginx']['ssl_country_name'] = "US"
