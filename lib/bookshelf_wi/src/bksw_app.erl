@@ -57,7 +57,6 @@ manual_stop() ->
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    bksw_conf:setup_default_configuration(),
     bksw_sup:start_link().
 
 stop(_State) ->

@@ -7,8 +7,6 @@
 %% API
 -export([start_link/1]).
 
--include("internal.hrl").
-
 -define(WAIT_MARKER, '$$__wait_for_me__$$').
 -define(WAIT_TIMEOUT, 100000).
 

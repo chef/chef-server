@@ -16,7 +16,6 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
          terminate/2, code_change/3]).
 
--include("internal.hrl").
 -include_lib("bookshelf_store/include/bookshelf_store.hrl").
 
 -define(SERVER, ?MODULE).
@@ -55,7 +54,7 @@ bucket_list() ->
 
 -spec init([]) -> {ok, state()}.
 init([]) ->
-    {ok,DiskStore} = opset:get_value(disk_store, ?BOOKSHELF_CONFIG),
+    {ok,DiskStore} = application:get_env(bookshelf_store, disk_store),
     Store = bkss_store:new(bkss_fs, DiskStore),
     lists:foreach(fun(#bucket{name=BucketName}) ->
                           bkss_bucket_sup:start_child(BucketName)
@@ -74,7 +73,7 @@ handle_call({create_bucket, BucketName}, _From, State) ->
     {Pid, _} = gproc:await(make_key(BucketName)),
     {reply, Pid, State};
 handle_call(bucket_list, _From, State) ->
-    {ok,DiskStore} = opset:get_value(disk_store, ?BOOKSHELF_CONFIG),
+    {ok,DiskStore} = application:get_env(disk_store),
     Store = bkss_store:new(bkss_fs, DiskStore),
     {reply, bkss_store:bucket_list(Store), State}.
 

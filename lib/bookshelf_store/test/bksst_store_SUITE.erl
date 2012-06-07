@@ -9,7 +9,6 @@
 -compile(export_all).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("bookshelf_store/src/internal.hrl").
 -include_lib("bookshelf_store/include/bookshelf_store.hrl").
 
 -define(STR_CHARS, "abcdefghijklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ").
@@ -24,13 +23,13 @@ end_per_suite(_Config) ->
     ok.
 
 init_per_testcase(_TestCase, Config) ->
-    ok = bkss_app:manual_start(),
     %% This fixes another rebar brokenness. We cant specify any options to
     %% common test in rebar
     DiskStore = filename:join(proplists:get_value(priv_dir, Config),
                               random_string(10, "abcdefghijklmnopqrstuvwxyz")),
     filelib:ensure_dir(filename:join(DiskStore, "tmp")),
-    ok = opset:set_value(disk_store, DiskStore, ?BOOKSHELF_CONFIG),
+    ok = application:set_env(bookshelf_store, disk_store, DiskStore),
+    ok = bkss_app:manual_start(),
     Config.
 
 end_per_testcase(_TestCase, _Config) ->

@@ -9,8 +9,6 @@
 -export([manual_start/0, manual_stop/0]).
 -export([start/2, stop/1]).
 
--include("internal.hrl").
-
 %%===================================================================
 %% API functions
 %%===================================================================
@@ -21,20 +19,17 @@ manual_start() ->
     application:start(sasl),
     application:start(gen_leader),
     application:start(gproc),
-    application:start(opset),
     application:start(inets),
     application:start(bookshelf_store).
 
 manual_stop() ->
-    application:stop(opset),
     application:stop(gproc),
     application:stop(gen_leader),
     application:stop(inets),
     application:stop(bookshelf_store).
 
 start(_StartType, _StartArgs) ->
-    opset:create(?BOOKSHELF_CONFIG,
-                 [{disk_store, get_initial_config()}]),
+    ensure_disk_store(),
     bkss_sup:start_link().
 
 stop(_State) ->
@@ -43,13 +38,12 @@ stop(_State) ->
 %%===================================================================
 %% External
 %%===================================================================
-get_initial_config() ->
-   Store1 =
-        case application:get_env(bookshelf_store, disk_store) of
-            undefined ->
-                filename:join(code:priv_dir(bookshelf_store), "data");
-            {ok, Store0} ->
-                Store0
-        end,
-    filelib:ensure_dir(filename:join(Store1, "tmp")),
-    Store1.
+ensure_disk_store() ->
+    case application:get_env(bookshelf_store, disk_store) of
+        undefined ->
+            Store = filename:join(code:priv_dir(bookshelf_store), "data"),
+            filelib:ensure_dir(filename:join(Store, "tmp")),
+            application:set_env(bookshelf_store, disk_store, Store);
+        _ ->
+            ok
+    end.
