@@ -17,7 +17,7 @@ init(_Transport, _Rq, _Opts) ->
     {upgrade, protocol, cowboy_http_rest}.
 
 rest_init(Rq, _Opts) ->
-    {ok, bksw_req:with_amz_request_id(Rq), undefined}.
+    {ok, Rq, undefined}.
 
 allowed_methods(Rq, St) -> {['GET'], Rq, St}.
 
