@@ -36,6 +36,8 @@ manual_start() ->
     application:start(inets),
     application:start(erlsom),
     application:start(cowboy),
+    application:start(xmerl),
+    application:start(mini_s3),
     bkss_app:manual_start(),
     application:start(bookshelf_wi).
 
@@ -43,6 +45,7 @@ manual_stop() ->
     application:stop(bookshelf_wi),
     bkss_app:manual_stop(),
     application:stop(cowboy),
+    application:stop(mini_s3),
     application:stop(erlsom),
     application:stop(inets).
 
