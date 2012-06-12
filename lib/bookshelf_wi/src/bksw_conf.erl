@@ -5,7 +5,8 @@
 -module(bksw_conf).
 
 %% API
--export([start_link/0, get_configuration/0]).
+-export([start_link/0, get_configuration/0,
+        keys/0]).
 
 -include("internal.hrl").
 -define(SERVER, ?MODULE).
@@ -19,7 +20,8 @@ start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 get_configuration() ->
-    lists:flatten([ip(),
+    lists:flatten([sec_handler(),
+                   ip(),
                    dispatch(),
                    pool(),
                    port(),
@@ -28,6 +30,9 @@ get_configuration() ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+
+sec_handler() ->
+    {onrequest, fun bksw_sec:handle_request/1}.
 
 ip() ->
     case application:get_env(interface) of
@@ -64,9 +69,10 @@ port() ->
 keys() ->
     case application:get_env(keys) of
         undefined ->
-            {keys, {"", ""}};
-        {ok, Keys} ->
-            {keys, Keys}
+            {keys, {<<"">>, <<"">>}};
+        {ok, {AWSAccessKey, SecretKey}} ->
+            {keys, {bksw_util:to_binary(AWSAccessKey),
+                    bksw_util:to_binary(SecretKey)}}
     end.
 
 ip(Interface) ->
