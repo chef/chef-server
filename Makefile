@@ -17,7 +17,7 @@ endif
 .PHONY: all deps compile test eunit ct rel/bookshelf rel doc build-plt \
 	check-plt clean-plt
 
-all : rel
+all : rel dialyzer
 
 deps :
 	$(REBAR) get-deps
@@ -44,12 +44,12 @@ doc:
 
 $(PLT):
 	mkdir -p $(PLT_DIR)
-	dialyzer --build_plt --output_plt $(PLT) \
+	- dialyzer --build_plt --output_plt $(PLT) \
 		$(ERLPATH) \
 		--apps erts kernel stdlib eunit compiler crypto \
 		cowboy edown inets erlsom gen_leader gproc iso8601 \
 		xmerl mini_s3
-
+	@if test ! -f $(PLT); then exit 2; fi
 clean_plt:
 	rm -rf $(PLT_DIR)
 
