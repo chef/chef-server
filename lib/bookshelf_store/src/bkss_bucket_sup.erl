@@ -35,7 +35,9 @@ start_child(BucketName) ->
 %%% Supervisor callbacks
 %%%===================================================================
 
--spec init([]) -> {ok, {SupFlags::term(), ChildSpec::term()}}.
+-spec init([]) ->
+                  {ok, {{supervisor:strategy(), non_neg_integer(), non_neg_integer()},
+                        [supervisor:child_spec()]}}.
 init([]) ->
     RestartStrategy = simple_one_for_one,
     MaxRestarts = 1000,

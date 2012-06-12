@@ -70,7 +70,7 @@ wi_basic(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
     %% Get much more then about 800 here and you start running out of file
     %% descriptors on a normal box
-    Count = 500,
+    Count = 100,
     Buckets = [random_binary() || _ <- lists:seq(1, Count)],
     Res = ec_plists:map(fun(B) ->
                                 mini_s3:create_bucket(B, public_read_write, none, S3Conf)

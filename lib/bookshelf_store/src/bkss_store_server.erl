@@ -61,7 +61,7 @@ init([]) ->
                   end, bkss_store:bucket_list(Store)),
     {ok, #state{}}.
 
--spec handle_call(Request::term(), From::pid(), state()) ->
+-spec handle_call(Request::term(), From::term(), state()) ->
                          {reply, Reply::term(), state}.
 handle_call({create_bucket, BucketName}, _From, State) ->
     case bkss_bucket_server:bucket_server_exists(BucketName) of
@@ -78,24 +78,21 @@ handle_call(bucket_list, _From, State) ->
     {reply, bkss_store:bucket_list(Store), State}.
 
 
--spec handle_cast(Msg::term(), state()) ->
-                         {noreply, state()}.
+-spec handle_cast(handle_cast_not_implemented, state()) ->
+                         no_return().
+handle_cast(handle_cast_not_implemented, _State) ->
+    erlang:error(handle_cast_not_implemented).
 
-handle_cast(handle_cast_not_implemented, State) ->
-    erlang:error(handle_cast_not_implemented),
-    {noreply, State}.
-
--spec handle_info(Info::term(), state()) ->
-                         {noreply, state()}.
-handle_info(handle_info_not_implemented, State) ->
-    erlang:error(handle_info_not_implemented),
-    {noreply, State}.
+-spec handle_info(handle_info_not_implemented, state()) ->
+                         no_return().
+handle_info(handle_info_not_implemented, _State) ->
+    erlang:error(handle_info_not_implemented).
 
 -spec terminate(Reason::term(), state()) -> ok.
 terminate(_Reason, _State) ->
     ok.
 
--spec code_change(OldVsn::term(), state(), Extra::term) -> {ok, state()}.
+-spec code_change(OldVsn::term(), state(), Extra::term()) -> {ok, state()}.
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 

@@ -20,7 +20,7 @@
 %%%===================================================================
 %%% Types
 %%%===================================================================
--type state() ::{bookshelf_store:bucket_name(), bkss_store:store()}.
+-type state() :: record(state).
 
 %%%===================================================================
 %%% API
@@ -57,7 +57,7 @@ init([BucketName]) ->
     gproc:reg({n,l,BucketName}),
     {ok,#state{bucket_name=BucketName, store=State1, locks=[], work_queue=[]}}.
 
--spec handle_call(Request::term(), From::pid(), state()) ->
+-spec handle_call(Request::term(), From::term(), state()) ->
                          {reply, Reply::term(), state()}.
 handle_call(bucket_exists, _From, State = #state{bucket_name = BucketName,
                                                  store = Store}) ->
@@ -119,7 +119,7 @@ handle_cast({unlock, Path}, State = #state{locks = Locks0, work_queue = WQ}) ->
     {noreply, State1}.
 
 
--spec handle_info(Info::term(), state()) -> {noreply, state()}.
+-spec handle_info(Info::term(), {die_nicely, state()}) -> {stop, normal, state()}.
 handle_info(timeout, {die_nicely, State}) ->
     %% This is just so we can die nicely in the call
     {stop, normal, State}.
@@ -134,7 +134,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%====================================================================
 %% Internal Functions
 %%====================================================================
--spec is_locked(bookshelf_store:path(), state()) -> state().
+-spec is_locked(bookshelf_store:path(), state()) -> boolean().
 is_locked(Path, #state{locks=Locks}) ->
     lists:member(Path, Locks).
 

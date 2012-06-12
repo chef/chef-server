@@ -8,7 +8,7 @@ ERLPATH= -pa $(DEPS)/cowboy/ebin -pa $(DEPS)/covertool/ebin \
 	-pa $(DEPS)/edown/ebin -pa $(DEPS)/erlsom/ebin \
 	-pa $(DEPS)/gen_leader/ebin \
 	-pa $(DEPS)/gproc/ebin -pa $(DEPS)/iso8601/ebin \
-	-pa $(DEPS)/opset/ebin -pa $(DEPS)/proper/ebin
+	-pa $(DEPS)/mini_s3/ebin
 
 ifeq ($(REBAR),)
 	$(error "Rebar not available on this system")
@@ -47,14 +47,15 @@ $(PLT):
 	dialyzer --build_plt --output_plt $(PLT) \
 		$(ERLPATH) \
 		--apps erts kernel stdlib eunit compiler crypto \
-		cowboy edown inets erlsom gen_leader gproc iso8601 opset proper
+		cowboy edown inets erlsom gen_leader gproc iso8601 \
+		xmerl mini_s3
 
 clean_plt:
 	rm -rf $(PLT_DIR)
 
 dialyzer: $(PLT)
 	@rebar compile
-	dialyzer --no_check_plt --src --plt $(PLT) \
+	dialyzer --no_check_plt -Wno_undefined_callbacks --src --plt $(PLT) \
 	$(ERLPATH) \
 	-pa $(LIBDIR)/bookshelf_store/ebin \
 	-pa $(LIBDIR)/bookshelf_wi/ebin \

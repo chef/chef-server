@@ -33,7 +33,7 @@ do_signed_url_authorization(RequestId, Req0) ->
                                               Path,
                                               Expires,
                                               Headers),
-    case ((AWSAccessKeyId == erlang:list_to_binary(AccessKey)) andalso
+    case ((AWSAccessKeyId == AccessKey) andalso
           Signature == IncomingSignature) of
         true ->
             Req6;

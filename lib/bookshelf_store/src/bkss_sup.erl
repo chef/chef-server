@@ -17,14 +17,15 @@
 %%%===================================================================
 %%% API functions
 %%%===================================================================
--spec start_link() -> {ok, pid()} | ignore | {error, Error::term()}.
+-spec start_link() -> {ok, pid()}.
 start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 %%%===================================================================
 %%% Supervisor callbacks
 %%%===================================================================
--spec init([]) -> {ok, {SupFlags::term(), ChildSpec::term()}}.
+-spec init([]) -> {ok, {{supervisor:strategy(), non_neg_integer(), non_neg_integer()},
+                        [supervisor:child_spec()]}}.
 init([]) ->
     RestartStrategy = one_for_one,
     MaxRestarts = 1000,
