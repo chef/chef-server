@@ -203,7 +203,7 @@ write(FsSt, Trans, Length, <<>>) ->
 write(FsSt, Trans, Length, Buf) ->
     case obj_write(FsSt, Buf) of
         {ok, NewFsSt} ->
-            write(NewFsSt, Trans, Length-byte_size(Buf));
+            write(NewFsSt, Trans, Length - byte_size(Buf));
         Any -> Any
     end.
 

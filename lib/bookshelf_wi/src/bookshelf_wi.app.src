@@ -7,4 +7,4 @@
   {registered, [bksw_sup]},
   {applications , [kernel, stdlib, sasl, crypto,
                    public_key, ssl, cowboy, erlsom, bookshelf_store,
-                   inets]}]}.
+                   mini_s3, inets]}]}.

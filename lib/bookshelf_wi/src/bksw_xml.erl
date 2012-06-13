@@ -4,8 +4,9 @@
 %% @copyright Copyright 2012 Opscode, Inc.
 -module(bksw_xml).
 
--export([list_buckets/1, list_objects/2, model/0,
-         write/1, write_erl/0, write_hrl/0]).
+-export([list_buckets/1, list_objects/2,
+         signature_does_not_match_error/4,
+         model/0, write/1, write_erl/0, write_hrl/0]).
 
 -include_lib("bookshelf_store/include/bookshelf_store.hrl").
 -include("amazon_s3.hrl").
@@ -43,6 +44,23 @@ object(#object{name = Name, date = Date, size = Size,
                  'ETag' = bksw_format:to_etag(Digest),
                  'Size' = io_lib:format("~w", [Size]),
                  'StorageClass' = "STANDARD"}.
+
+signature_does_not_match_error(RequestId, SignatureProvided, StringToSign,
+                               AWSAccessKeyId) ->
+    Data =
+        {'Error',
+         [{'Code', ["SignatureDoesNotMatch"]},
+          {'Message', ["The request signature we calculated does not match the "
+                       "signature you provided. Check your key and signing method."]},
+          {'StringToSignBytes', [""]},
+          {'RequestId', [RequestId]},
+      {'HostId', [""]},
+      {'SignatureProvided', [SignatureProvided]},
+      {'StringToSign', [StringToSign]},
+      {'AWSAccessKeyId', [AWSAccessKeyId]}]},
+    erlsom_ucs:to_utf8(xmerl:export_simple([Data], xmerl_xml,
+                                           [{prolog,
+                                             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"}])).
 
 write(Xml) ->
     {ok, Text} = erlsom:write(Xml, model()),
@@ -1265,4 +1283,3 @@ model() ->
       {'CanonicalUser', 'User'},
       {'AmazonCustomerByEmail', 'User'},
       {'User', 'Grantee'}]}.
-

@@ -4,15 +4,9 @@
 %% @copyright Copyright 2012 Opscode, Inc.
 -module(bksw_conf).
 
--behaviour(gen_server).
-
 %% API
 -export([start_link/0, get_configuration/0,
-        setup_default_configuration/0]).
-
-%% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-         terminate/2, code_change/3]).
+        keys/0]).
 
 -include("internal.hrl").
 -define(SERVER, ?MODULE).
@@ -26,94 +20,60 @@ start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 get_configuration() ->
-    lists:flatten([ip(),
+    lists:flatten([sec_handler(),
+                   ip(),
                    dispatch(),
                    pool(),
-                   {port, opset:get_value(port, [], ?BOOKSHELF_CONFIG)},
-                   {keys, opset:get_value(keys, [], ?BOOKSHELF_CONFIG)}]).
-
-setup_default_configuration() ->
-    opset:create(?BOOKSHELF_CONFIG, []),
-    opset:set_if_not_already_set([{domains, ["localhost.localdomain"]},
-                                  {interface, "lo"},
-                                  {port, 4321},
-                                  {pool, 100},
-                                  {keys, {"e1efc99729beb175",
-                                          "fc683cd9ed1990ca"}}],
-                                 ?BOOKSHELF_CONFIG).
-
-%%%===================================================================
-%%% gen_server callbacks
-%%%===================================================================
--spec init([]) -> {ok, ok}.
-init([]) ->
-    {ok, ok}.
-
-%% @doc this should not be called in this case.
--spec handle_call(Request::term(), From::pid(), ok) ->
-                         {reply, Reply::term(), ok}.
-handle_call(die_a_horrible_death, _From, State) ->
-    Reply = ok,
-    {reply, Reply, State}.
-
-%% @doc this should not be called in this case.
-handle_cast(die_a_horrible_death, State) ->
-    {noreply, State}.
-
-%% @doc this will be called by the config server.
--spec handle_info(Info::term(), ok) -> {noreply, ok}.
-handle_info({_, ?BOOKSHELF_CONFIG, ChangedValues}, _) ->
-    case if_values_changed(ChangedValues, [interface, domains,
-                                           dispatch, pool, port, keys]) of
-        true ->
-            bksw_sup:reconfigure_cowboy();
-        _ ->
-            ok
-    end,
-    {noreply, ok}.
-
--spec terminate(Reason::term(), ok) -> ok.
-terminate(_Reason, _State) ->
-    ok.
-
--spec code_change(OldVsn::term(), ok, Extra::term()) -> {ok, ok}.
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
+                   port(),
+                   keys()]).
 
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
-if_values_changed(ChangedValues, ListOfChangedKeys) ->
-    lists:any(fun({_, KVPairs}) ->
-                      lists:any(fun({Key, _}) ->
-                                         lists:member(Key, ListOfChangedKeys)
-                                end, KVPairs)
-              end, ChangedValues).
+
+sec_handler() ->
+    {onrequest, fun bksw_sec:handle_request/1}.
 
 ip() ->
-    case opset:get_value(interface, ?BOOKSHELF_CONFIG) of
-        not_found ->
-            [];
+    case application:get_env(interface) of
+        undefined ->
+            [{ip, ip("lo")}];
         {ok, Interface} ->
             [{ip, ip(Interface)}]
     end.
 
 dispatch() ->
-    case opset:get_value(domains, ?BOOKSHELF_CONFIG) of
-        not_found ->
-            [];
+    case application:get_env(domains) of
+        undefined ->
+            [{dispatch, rules(["localhost.localdomain"])}];
         {_, Domains} ->
             [{dispatch, rules(Domains)}]
     end.
 
 pool() ->
-    case opset:get_value(pool, ?BOOKSHELF_CONFIG) of
-        not_found ->
+    case application:get_env(pool) of
+        undefined ->
             [{pool, 100}];
         {ok, Pool} ->
             [{pool, Pool}]
     end.
 
+port() ->
+    case application:get_env(port) of
+        undefined ->
+            {port, 4321};
+        {ok, Port} ->
+            {port, Port}
+    end.
+
+keys() ->
+    case application:get_env(keys) of
+        undefined ->
+            {keys, {<<"">>, <<"">>}};
+        {ok, {AWSAccessKey, SecretKey}} ->
+            {keys, {bksw_util:to_binary(AWSAccessKey),
+                    bksw_util:to_binary(SecretKey)}}
+    end.
 
 ip(Interface) ->
     {ok, All} = inet:getifaddrs(),
@@ -135,7 +95,6 @@ rules(Domains) ->
 format_domains(Domains) ->
     [create_domain(Domain) || Domain <- Domains].
 
-
 rule(Domain) ->
     SubDomain = [bucket] ++ Domain,
     FEnv = dispatch_rules(),
@@ -145,7 +104,12 @@ rule(Domain) ->
        {['...'], bksw_obj, FEnv}]}].
 
 dispatch_rules() ->
-    opset:get_value(dispatch, [], ?BOOKSHELF_CONFIG).
+    case application:get_env(dispatch) of
+        undefined ->
+            [];
+        Defined ->
+            Defined
+    end.
 
 create_domain(Domain) ->
     [fun list_to_binary/1(Token)

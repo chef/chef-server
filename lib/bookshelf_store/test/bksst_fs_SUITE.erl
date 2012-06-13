@@ -31,7 +31,7 @@ all(doc) ->
      "does it via the full OTP Stack"].
 
 all() ->
-    [bookshelf_fs,bookshelf_fs_object].
+    [bookshelf_fs, bookshelf_fs_object, bookshelf_fs_stream].
 
 %%====================================================================
 %% TEST CASES
@@ -94,6 +94,40 @@ bookshelf_fs_object(Config) when is_list(Config) ->
                           Data = bkss_store:obj_get(Store1, Bucket, Path),
                           ?assertEqual({ok, Path}, Data)
                   end, Records).
+
+
+bookshelf_fs_stream(doc) ->
+    ["Test the bkss_store streaming protocols"];
+bookshelf_fs_stream(suite) ->
+    [];
+bookshelf_fs_stream(Config) when is_list(Config) ->
+    PrivDir = list_to_binary(filename:join(proplists:get_value(priv_dir, Config),
+                                           "fs-store-object")),
+    file:make_dir(PrivDir),
+    Store0 = bkss_store:new(bkss_fs, PrivDir),
+    Bucket = <<"bukkit_fs">>,
+    {Store1, R0} = bkss_store:bucket_create(Store0, Bucket),
+    ?assertEqual(ok, R0),
+    ?assertEqual([], bkss_store:obj_list(Store1, Bucket)),
+    Objs = [<<"test-foo">>, <<"hello-kitti">>],
+    Trans = bkss_transport:new(bksst_test_transport, [<<"eeeeeeeeeeeeeeeeeeeeeeee"
+                                                        "eeeeeeeeeeeeeeeeeeeeeeee"
+                                                        "eeeeeeeeeeeeeeeeeeeeeeee"
+                                                        "eeeeeeeeeeeeeeeeeeeeeeee">>]),
+    lists:foreach(
+      fun(F) ->
+              {_, {ok, _}} = bkss_store:obj_recv(Store1, Bucket, F, Trans, <<>>, 100)
+      end,
+      Objs),
+
+    lists:foreach(
+      fun(F) ->
+              {_, {ok, _}} = bkss_store:obj_send(Store1, Bucket, F, Trans)
+      end,
+      Objs),
+
+    Records = bkss_store:obj_list(Store1, Bucket),
+    ?assertEqual(2, length(Records)).
 
 %%====================================================================
 %% Utility Functions

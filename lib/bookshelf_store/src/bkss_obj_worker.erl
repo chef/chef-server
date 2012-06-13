@@ -1,4 +1,4 @@
- %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Eric B Merritt <ericbmerritt@gmail.com>
 %% @copyright Copyright 2012 Opscode, Inc.
@@ -6,8 +6,7 @@
 
 %% API
 -export([start_link/1]).
-
--include("internal.hrl").
+-export_type([work/0]).
 
 -define(WAIT_MARKER, '$$__wait_for_me__$$').
 -define(WAIT_TIMEOUT, 100000).
@@ -21,8 +20,7 @@
 %%% API
 %%%===================================================================
 
--spec start_link(work()) ->
-                        {ok, pid()} | ignore | {error, Error::term()}.
+-spec start_link(work()) -> pid().
 start_link(Work) ->
     proc_lib:spawn_link(fun() -> do_work(Work) end).
 

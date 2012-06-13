@@ -12,7 +12,6 @@
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
          terminate/2, code_change/3]).
--include("internal.hrl").
 
 -define(WAIT_MARKER, '$$__wait_for_me__$$').
 -define(WAIT_TIMEOUT, 100000).
@@ -21,7 +20,7 @@
 %%%===================================================================
 %%% Types
 %%%===================================================================
--type state() ::{bookshelf_store:bucket_name(), bkss_store:store()}.
+-type state() :: record(state).
 
 %%%===================================================================
 %%% API
@@ -47,7 +46,7 @@ unlock_path(BucketName, Path) ->
 
 -spec init([bookshelf_store:bucket_name()]) -> {ok, state()}.
 init([BucketName]) ->
-    {ok,DiskStore} = opset:get_value(disk_store, ?BOOKSHELF_CONFIG),
+    {ok,DiskStore} = application:get_env(disk_store),
     State1 =
         case bkss_store:bucket_create(bkss_store:new(bkss_fs, DiskStore), BucketName) of
             {State0, ok} ->
@@ -56,10 +55,9 @@ init([BucketName]) ->
                 State0
     end,
     gproc:reg({n,l,BucketName}),
-    opset:link_config(?BOOKSHELF_CONFIG),
     {ok,#state{bucket_name=BucketName, store=State1, locks=[], work_queue=[]}}.
 
--spec handle_call(Request::term(), From::pid(), state()) ->
+-spec handle_call(Request::term(), From::term(), state()) ->
                          {reply, Reply::term(), state()}.
 handle_call(bucket_exists, _From, State = #state{bucket_name = BucketName,
                                                  store = Store}) ->
@@ -121,26 +119,10 @@ handle_cast({unlock, Path}, State = #state{locks = Locks0, work_queue = WQ}) ->
     {noreply, State1}.
 
 
--spec handle_info(Info::term(), state()) -> {noreply, state()}.
+-spec handle_info(Info::term(), {die_nicely, state()}) -> {stop, normal, state()}.
 handle_info(timeout, {die_nicely, State}) ->
     %% This is just so we can die nicely in the call
-    {stop, normal, State};
-handle_info({_, ?BOOKSHELF_CONFIG, Values}, State0={BucketName, _Store}) ->
-    %% This is where we get notifications about config changes. The
-    %% one we are interested in is "{set, [{disk_store, NewValue}]}"
-    %% When we get that we create a new bkss_store and go back to
-    %% handling things. It does *not* copy the bucket contents from
-    %% the old location to the new or *anything* like that. So there
-    %% may be unintended consequences.
-    State1 =
-        case proplists:get_value(disk_store, proplists:get_value(set, Values, []),
-                                 undefined) of
-            undefined ->
-                State0;
-            DiskStore ->
-                {BucketName, bkss_store:new(bkss_fs, DiskStore)}
-        end,
-    {noreply, State1}.
+    {stop, normal, State}.
 
 -spec terminate(Reason::term(), state()) -> ok.
 terminate(_Reason, _State) ->
@@ -152,7 +134,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%====================================================================
 %% Internal Functions
 %%====================================================================
--spec is_locked(bookshelf_store:path(), state()) -> state().
+-spec is_locked(bookshelf_store:path(), state()) -> boolean().
 is_locked(Path, #state{locks=Locks}) ->
     lists:member(Path, Locks).
 
@@ -167,4 +149,3 @@ queue_work(Path, Work, State = #state{locks = Locked,
             %% Add the work onto the back, so the we get a FIFO queue
             State#state{work_queue =  WorkQueue ++ [{Path, Work}]}
     end.
-

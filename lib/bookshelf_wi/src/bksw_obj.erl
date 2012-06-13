@@ -22,7 +22,7 @@ init(_Transport, _Rq, _Opts) ->
 
 rest_init(Rq, _Opts) ->
     %% We dont actually make use of state here at all
-    {ok, bksw_req:with_amz_request_id(Rq), undefined}.
+    {ok, Rq, undefined}.
 
 allowed_methods(Rq, St) ->
     {['HEAD', 'GET', 'PUT', 'DELETE'], Rq, St}.

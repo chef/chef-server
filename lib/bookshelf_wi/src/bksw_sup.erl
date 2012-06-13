@@ -37,7 +37,4 @@ init(_Args) ->
     CowboySup = {bksw_cowboy_sup, {bksw_cowboy_sup, start_link, []},
                  Restart, Shutdown, supervisor, [bksw_cowboy_sup]},
 
-    Conf = {bksw_conf, {bksw_conf, start_link, []},
-            Restart, Shutdown, worker, [bksw_conf]},
-
-    {ok, {SupFlags, [CowboySup, Conf]}}.
+    {ok, {SupFlags, [CowboySup]}}.

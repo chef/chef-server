@@ -30,13 +30,13 @@ init(_Transport, _Rq, _Opts) ->
     {upgrade, protocol, cowboy_http_rest}.
 
 rest_init(Rq, _Opts) ->
-    {ok, bksw_req:with_amz_request_id(Rq), undefined}.
+    {ok, Rq, []}.
 
 allowed_methods(Rq, St) ->
     {['GET', 'PUT', 'DELETE'], Rq, St}.
 
 content_types_accepted(Rq, St) ->
-    {[{undefined, create_resource}], Rq, St}.
+    {[{'*', create_resource}], Rq, St}.
 
 content_types_provided(Rq, St) ->
     {[{{<<"text">>, <<"xml">>, []}, to_xml}], Rq, St}.
@@ -89,7 +89,7 @@ content_types_accepted_test_() ->
               {Types, _, _} = content_types_accepted(#http_req{pid=self()}, % make dialyzer happy
                                                      undefined),
               ?assertEqual(1, length(Types)),
-              ?assertEqual(true, lists:keymember(undefined, 1, Types))
+              ?assertEqual(true, lists:keymember('*', 1, Types))
       end}].
 
 content_types_provided_test_() ->

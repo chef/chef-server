@@ -9,7 +9,6 @@
 -compile(export_all).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("bookshelf_store/src/internal.hrl").
 -include_lib("bookshelf_store/include/bookshelf_store.hrl").
 
 -define(STR_CHARS, "abcdefghijklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ").
@@ -24,13 +23,13 @@ end_per_suite(_Config) ->
     ok.
 
 init_per_testcase(_TestCase, Config) ->
-    ok = bkss_app:manual_start(),
     %% This fixes another rebar brokenness. We cant specify any options to
     %% common test in rebar
     DiskStore = filename:join(proplists:get_value(priv_dir, Config),
                               random_string(10, "abcdefghijklmnopqrstuvwxyz")),
     filelib:ensure_dir(filename:join(DiskStore, "tmp")),
-    ok = opset:set_value(disk_store, DiskStore, ?BOOKSHELF_CONFIG),
+    ok = application:set_env(bookshelf_store, disk_store, DiskStore),
+    ok = bkss_app:manual_start(),
     Config.
 
 end_per_testcase(_TestCase, _Config) ->
@@ -42,7 +41,7 @@ all(doc) ->
 
 all() ->
     [bookshelf_basic,bookshelf_object, bookshelf_copy, bookshelf_corruption,
-    bookshelf_concurrent_access].
+     bookshelf_concurrent_access, bookshelf_stream].
 
 %%====================================================================
 %% TEST CASES
@@ -161,6 +160,28 @@ bookshelf_concurrent_access(Config) when is_list(Config) ->
              end,
     ec_plists:map(Action, lists:seq(1,ProcessCount)).
 
+bookshelf_stream(doc) ->
+    ["Test the bookshelf_store streaming protocols"];
+bookshelf_stream(suite) ->
+    [];
+bookshelf_stream(Config) when is_list(Config) ->
+    random:seed(erlang:now()),
+    ProcessCount = 1000,
+    Bucket = random_binary(),
+    ?assertEqual(ok,  bookshelf_store:bucket_create(Bucket)),
+    ?assertEqual([], bookshelf_store:obj_list(Bucket)),
+    Action = fun(Sq) ->
+                     seed(Sq),
+                     Path = filename:join(random_binary(), random_binary()),
+                     Data = random_string(1000, ?STR_CHARS),
+                     Trans = bkss_transport:new(bksst_test_transport, [Data]),
+                     ?assertMatch({ok, _},
+                                  bookshelf_store:obj_recv(Bucket, Path,
+                                                           Trans, <<>>, 100)),
+                     ?assertMatch({ok, _}, bookshelf_store:obj_send(Bucket,
+                                                                    Path, Trans))
+             end,
+    ec_plists:map(Action, lists:seq(1,ProcessCount)).
 
 %%====================================================================
 %% Utility Functions

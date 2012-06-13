@@ -8,7 +8,7 @@ ERLPATH= -pa $(DEPS)/cowboy/ebin -pa $(DEPS)/covertool/ebin \
 	-pa $(DEPS)/edown/ebin -pa $(DEPS)/erlsom/ebin \
 	-pa $(DEPS)/gen_leader/ebin \
 	-pa $(DEPS)/gproc/ebin -pa $(DEPS)/iso8601/ebin \
-	-pa $(DEPS)/opset/ebin -pa $(DEPS)/proper/ebin
+	-pa $(DEPS)/mini_s3/ebin
 
 ifeq ($(REBAR),)
 	$(error "Rebar not available on this system")
@@ -17,7 +17,7 @@ endif
 .PHONY: all deps compile test eunit ct rel/bookshelf rel doc build-plt \
 	check-plt clean-plt
 
-all : rel
+all : rel dialyzer
 
 deps :
 	$(REBAR) get-deps
@@ -32,7 +32,7 @@ eunit : compile
 	ERL_FLAGS="-pa $(CURDIR)/lib/bookshelf_store/ebin" $(REBAR) skip_deps=true eunit
 
 ct : eunit
-	$(REBAR) skip_deps=true ct
+	ERL_FLAGS="-pa $(CURDIR)/lib/bookshelf_store/ebin" $(REBAR) skip_deps=true ct
 
 rel/bookshelf :
 	$(REBAR) generate
@@ -44,17 +44,18 @@ doc:
 
 $(PLT):
 	mkdir -p $(PLT_DIR)
-	dialyzer --build_plt --output_plt $(PLT) \
+	- dialyzer --build_plt --output_plt $(PLT) \
 		$(ERLPATH) \
 		--apps erts kernel stdlib eunit compiler crypto \
-		cowboy edown inets erlsom gen_leader gproc iso8601 opset proper
-
+		cowboy edown inets erlsom gen_leader gproc iso8601 \
+		xmerl mini_s3
+	@if test ! -f $(PLT); then exit 2; fi
 clean_plt:
 	rm -rf $(PLT_DIR)
 
 dialyzer: $(PLT)
 	@rebar compile
-	dialyzer --no_check_plt --src --plt $(PLT) \
+	dialyzer --no_check_plt -Wno_undefined_callbacks --src --plt $(PLT) \
 	$(ERLPATH) \
 	-pa $(LIBDIR)/bookshelf_store/ebin \
 	-pa $(LIBDIR)/bookshelf_wi/ebin \
