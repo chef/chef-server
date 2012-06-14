@@ -72,7 +72,7 @@ Mixlib::Authorization::Config.ldap_bind_password = "<%= node['private_chef']['ld
 <% end -%>
 Mixlib::Authorization::Config.ldap_base_dn = "<%= node['private_chef']['ldap']['base_dn'] %>"
 Mixlib::Authorization::Config.ldap_login_attribute = "<%= node['private_chef']['ldap']['login_attribute'] || "samaccountname" %>"
-<% if node['private_chef']['ldap']['encryption'] -%>
-Mixlib::Authorization::Config.ldap_encryption = "<%= node['private_chef']['ldap']['encryption'] %>"
+<% if node['private_chef']['ldap']['ssl_enabled'] == true -%>
+Mixlib::Authorization::Config.ldap_encryption = :simple_tls
 <% end -%>
 <% end -%>
