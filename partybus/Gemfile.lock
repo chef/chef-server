@@ -1,0 +1,14 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    mysql2 (0.3.10)
+    pg (0.11.0)
+    sequel (3.34.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  mysql2
+  pg
+  sequel (~> 3.34.1)

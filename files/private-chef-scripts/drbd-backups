@@ -161,7 +161,7 @@ end
 
 system("#{MKDIR} -p #{options[:backup_mp]}")
 
-if !system("#{MOUNT} -t ext4 /dev/#{options[:drbd_vg]}/backup-#{datestamp} #{options[:backup_mp]}")
+if !system("#{MOUNT} /dev/#{options[:drbd_vg]}/backup-#{datestamp} #{options[:backup_mp]}")
   system("#{MAIL} -s 'privatechef mounting #{options[:backup_mp]} failed on #{sysname}' #{options[:mail_to]} < /dev/null")
 end
 

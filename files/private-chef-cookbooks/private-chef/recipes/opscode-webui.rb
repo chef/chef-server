@@ -11,7 +11,7 @@ private_chef_webui_working_dir = File.join(private_chef_webui_dir, "working")
 private_chef_webui_tmp_dir = File.join(private_chef_webui_dir, "tmp")
 private_chef_webui_log_dir = node['private_chef']['opscode-webui']['log_directory']
 
-[ 
+[
   private_chef_webui_dir,
   private_chef_webui_etc_dir,
   private_chef_webui_working_dir,
@@ -37,7 +37,7 @@ template env_config do
   owner "root"
   group "root"
   mode "0644"
-  variables(node['private_chef']['opscode-webui'].to_hash)
+  variables(node['private_chef']['opscode-webui'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?))
   notifies :restart, 'service[opscode-webui]' if should_notify
 end
 
@@ -72,13 +72,13 @@ link "/opt/opscode/embedded/service/opscode-webui/config/initializers/secret_tok
 end
 
 unicorn_config File.join(private_chef_webui_etc_dir, "unicorn.rb") do
-  listen node['private_chef']['opscode-webui']['listen'] => { 
+  listen node['private_chef']['opscode-webui']['listen'] => {
     :backlog => node['private_chef']['opscode-webui']['backlog'],
     :tcp_nodelay => node['private_chef']['opscode-webui']['tcp_nodelay']
   }
   worker_timeout node['private_chef']['opscode-webui']['worker_timeout']
-  working_directory private_chef_webui_working_dir 
-  worker_processes node['private_chef']['opscode-webui']['worker_processes']  
+  working_directory private_chef_webui_working_dir
+  worker_processes node['private_chef']['opscode-webui']['worker_processes']
   owner "root"
   group "root"
   mode "0644"
@@ -86,10 +86,10 @@ unicorn_config File.join(private_chef_webui_etc_dir, "unicorn.rb") do
 end
 
 link "/opt/opscode/embedded/service/opscode-webui/tmp" do
-  to private_chef_webui_tmp_dir 
+  to private_chef_webui_tmp_dir
 end
 
-execute "chown -R #{node['private_chef']['user']['username']} /opt/opscode/embedded/service/opscode-webui/public" 
+execute "chown -R #{node['private_chef']['user']['username']} /opt/opscode/embedded/service/opscode-webui/public"
 
 runit_service "opscode-webui" do
   down node['private_chef']['opscode-webui']['ha']
@@ -100,7 +100,7 @@ end
 
 if node['private_chef']['bootstrap']['enable']
 	execute "/opt/opscode/bin/private-chef-ctl opscode-webui start" do
-		retries 20 
+		retries 20
 	end
 end
 

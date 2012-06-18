@@ -11,10 +11,7 @@ function error_exit
 	exit 1
 }
 
-# see: http://tickets.opscode.com/browse/CHEF-3022
-if [ ! -e /etc/redhat-release -o "x$1" == "x1" ]; then
-  ln -sf /opt/opscode/bin/private-chef-ctl /usr/bin || error_exit "Cannot link private-chef-ctl in /usr/bin"
-fi
+ln -sf /opt/opscode/bin/private-chef-ctl /usr/bin || error_exit "Cannot link private-chef-ctl in /usr/bin"
   
 if [ -e /etc/opscode/chef-server-running.json ]; then
   echo -e "\033[1mYou have upgraded Private Chef!\033[0m"

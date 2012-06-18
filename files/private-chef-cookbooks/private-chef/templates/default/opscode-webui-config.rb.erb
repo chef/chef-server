@@ -17,6 +17,11 @@ Chef::Config[:chargify_site]               = 'opscode-preprod'
 Chef::Config[:dark_launch_config_filename] = '/etc/opscode/dark_launch_features.json'
 Chef::Config[:quickstart_cloud_timeout] = 30
 
+<% if @ldap_enabled -%>
+Chef::Config[:external_authentication_enabled] = true
+Chef::Config[:external_authentication_system_adjective] = '<%= node['private_chef']['ldap']['system_adjective'].gsub(/(['\\])/, '\\\\\1') %>'
+<% end -%>
+
 Chef::Log.level = :info
 
 OpscodeWebui::Application.configure do
@@ -48,9 +53,11 @@ OpscodeWebui::Application.configure do
   # Only use best-standards-support built into browsers
   config.action_dispatch.best_standards_support = :builtin
 
+  ActionMailer::Base.default :from => %{ <%= node['private_chef']['from_email'] %> }
+
   config.middleware.use ExceptionNotifier,
     :email_prefix => "[Exception] <%= @environment %>: ",
-    :sender_address => %{"Opscode" <donotreply@opscode.com>},
+    :sender_address => %{ <%= node['private_chef']['from_email'] %> },
     :exception_recipients => %w{ <%= node['private_chef']['notification_email'] %> }
 
   config.action_mailer.default_url_options = {
@@ -58,6 +65,7 @@ OpscodeWebui::Application.configure do
     :protocol => "https://",
     :port => ""
   }
+
 
 end
 

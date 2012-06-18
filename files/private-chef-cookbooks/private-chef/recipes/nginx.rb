@@ -13,7 +13,7 @@ nginx_html_dir = File.join(nginx_dir, "html")
 nginx_ca_dir = File.join(nginx_dir, "ca")
 nginx_log_dir = node['private_chef']['nginx']['log_directory']
 
-[ 
+[
   nginx_dir,
   nginx_etc_dir,
   nginx_cache_dir,
@@ -90,13 +90,34 @@ remote_directory nginx_html_dir do
 end
 
 nginx_config = File.join(nginx_etc_dir, "nginx.conf")
+chef_lb_configs = {
+  :chef_https_config => File.join(nginx_etc_dir, "chef_https_lb.conf"),
+  :chef_http_config => File.join(nginx_etc_dir, "chef_http_lb.conf")
+}
+
+nginx_vars = node['private_chef']['nginx'].to_hash
+nginx_vars = nginx_vars.merge({:helper => NginxErb.new(node)})
+
+# Chef API lb config for HTTPS and HTTP
+["https", "http"].each do |server_proto|
+  config_key = "chef_#{server_proto}_config".to_sym
+  lb_config = chef_lb_configs[config_key]
+  template lb_config do
+    source "nginx_chef_api_lb.conf.erb"
+    owner "root"
+    group "root"
+    mode "0644"
+    variables(nginx_vars.merge({:server_proto => server_proto}))
+    notifies :restart, 'service[nginx]' if OmnibusHelper.should_notify?("nginx")
+  end
+end
 
 template nginx_config do
   source "nginx.conf.erb"
   owner "root"
   group "root"
   mode "0644"
-  variables(node['private_chef']['nginx'].to_hash)
+  variables(nginx_vars.merge(chef_lb_configs))
   notifies :restart, 'service[nginx]' if OmnibusHelper.should_notify?("nginx")
 end
 
@@ -117,14 +138,13 @@ runit_service "nginx" do
 end
 
 if node['private_chef']['nginx']['bootstrap']
-	execute "/opt/opscode/bin/private-chef-ctl nginx start" do
-		retries 20 
-	end
+        execute "/opt/opscode/bin/private-chef-ctl nginx start" do
+                retries 20
+        end
 end
 
 add_nagios_hostgroup("nginx")
 
 add_nagios_hostgroup("lb") if node['private_chef']['lb']['enable']
 
-add_nagios_hostgroup("lb_internal") if node['private_chef']['lb_internal']['enable']  
-
+add_nagios_hostgroup("lb_internal") if node['private_chef']['lb_internal']['enable']

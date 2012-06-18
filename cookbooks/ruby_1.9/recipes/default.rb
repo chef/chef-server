@@ -42,6 +42,10 @@ remote_file "/tmp/ruby-1.9.2-p180.tar.gz" do
   end
 end
 
+cookbook_file "/tmp/openssl.patch" do
+  source "openssl.patch"
+end
+
 # Install ruby from source unless it already exists at the correct
 # version
 #
@@ -50,6 +54,7 @@ bash "install ruby-1.9.2" do
   code <<-EOH
 tar zxf ruby-1.9.2-p180.tar.gz
 cd ruby-1.9.2-p180
+patch -p1 < /tmp/openssl.patch
 ./configure --prefix=/opt/ruby1.9
 make
 make install

@@ -62,9 +62,16 @@ end
   package name
 end
 
+# centos6 installs matahari which pulls in an AMQP broker called qpid which fights with rabbitmq over its port
+%w{qpid-cpp-client qpid-cpp-server qpid-cpp-client-ssl qpid-cpp-server-ssl qpid-qmf}.each do |pkg|
+  package pkg do
+    action :remove
+  end
+end
+
 bash "install python packages" do
   code <<BASH
-pip install Sphinx==1.1.2
+pip install Sphinx==1.1.3
 pip install Pygments==1.4
 BASH
 end

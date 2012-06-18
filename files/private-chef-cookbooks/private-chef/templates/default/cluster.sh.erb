@@ -6,6 +6,13 @@
 LOGNAME=/var/log/opscode/keepalived/cluster.log
 PROGNAME=$(basename $0)
 
+# must be longer than unicorn 60 second timeout
+export SVWAIT=30
+
+requested_state_file=/var/opt/opscode/keepalived/requested_cluster_status
+current_state_file=/var/opt/opscode/keepalived/current_cluster_status
+lockfile=/var/opt/opscode/keepalived/cluster-transition.lock
+
 function log_me
 {
   echo $1
@@ -30,6 +37,11 @@ function transition
         log_me "Attempting DRBD primary takeover - attempts left ${try}"
         drbdadm primary pc0 && break
         let "--try" || error_exit "Cannot become drbd primary!" 
+        last_requested_state=`echo -n $(cat $requested_state_file)`
+        if [ "$last_requested_state" != "master" ]; then
+          log_me "Requested state transition to backup, aborting trying to aquire DRBD primary"
+          return
+        fi
         sleep 1
       done
 
@@ -109,12 +121,18 @@ if lock $lockfile; then
    last_requested_state=`echo -n $(cat $requested_state_file)`
    while [ "$transitioned_to" != "$last_requested_state" ]; do
      transition $last_requested_state
-     log_me "Transitioned to $1"
+     log_me "Transitioned to $last_requested_state"
      transitioned_to=$last_requested_state
      last_requested_state=`echo -n $(cat $requested_state_file)`
    done
    unlock $lockfile 
-   echo $1 > $current_state_file
+   echo $transitioned_to > $current_state_file
+}
+
+echo $1 > $requested_state_file
+
+if lock $lockfile; then
+   transition_loop "$1"
 else
    log_me "Requested transition to $1"
    error_exit "Requested transition to $1, but state transition already running."

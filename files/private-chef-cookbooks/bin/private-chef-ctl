@@ -19,6 +19,7 @@
 
 require 'json'
 require 'fileutils'
+require 'highline/import'
 
 File::umask(022)
 
@@ -90,6 +91,67 @@ def uninstall
   cleanup_procs_and_nuke("/tmp/opt")
 end
 
+def password
+
+  unless ARGV.length == 2 || (ARGV.length == 3 && ARGV[2] == "--disable")
+    STDERR.puts "Usage: private-chef-ctl password <username> [--disable]"
+    exit 1
+  end
+
+  load_json
+  username = ARGV[1]
+  superuser = @running_config['private_chef']['opscode-account']['proxy_user']
+  command = [
+    'bundle', 'exec', 'bin/updateobjecttool',
+    '-a', @running_config['private_chef']['opscode-account']['url'],
+    '-o', superuser,
+    '-p', "/etc/opscode/#{superuser}.pem",
+    '-w', 'user',
+    '-n', username
+  ]
+  if ARGV.length == 2
+    password = HighLine.ask("Enter the new password:  " ) { |q| q.echo = "*" }
+    password2 = HighLine.ask("Enter the new password again:  " ) { |q| q.echo = "*" }
+    if password != password2
+      STDERR.puts "Passwords did not match"
+      exit 1
+    end
+    if password == '' && ldap_authentication_enabled?
+      STDERR.puts "Password may not be blank.  Did you mean 'private-chef-ctl password #{username} --disable'?"
+      exit 1
+    end
+
+    command << '--user-password'
+    command << password
+    if ldap_authentication_enabled?
+      command << '--recovery-authentication-enabled'
+      verbed = 'enabled for System Recovery'
+    else
+      verbed = 'set'
+    end
+  else
+    if ldap_authentication_enabled?
+      command << '--no-recovery-authentication-enabled'
+      verbed = 'disabled for System Recovery'
+    else
+      STDERR.puts "External authentication (such as LDAP) must be enabled to clear a user's password."
+      exit 1
+    end
+  end
+
+  ENV["PATH"] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
+  Dir.chdir("/opt/opscode/embedded/service/opscode-account")
+  if !system(*command)
+    STDERR.puts "FAILED"
+    exit $?.exitstatus
+  end
+  puts "Password for #{username} successfully #{verbed}."
+end
+
+def ldap_authentication_enabled?
+  @running_config['private_chef']['ldap'] && !@running_config['private_chef']['ldap'].empty?
+end
+
 def cleanse
   puts "This will delete *all* configuration, log, and variable data associated with this Private Chef Instance.\n\n*** You have 60 seconds to hit CTRL-C ***\n\n"
   unless ARGV[1] == "yes"
@@ -129,7 +191,7 @@ def show_config
 	exit 0
 end
 
-def reconfigure
+def reconfigure(exit_on_success=true)
   if File.exists?("/etc/opscode/chef-server.json")
     status = run_command("/opt/opscode/bin/chef-solo -c /opt/opscode/embedded/cookbooks/solo.rb -j /etc/opscode/chef-server.json -l info")
   else
@@ -137,6 +199,17 @@ def reconfigure
   end
   if status.success?
     puts "Chef Server Reconfigured!"
+    exit 0 if exit_on_success
+  else
+    exit 1
+  end
+end
+
+def upgrade
+  reconfigure(false)
+  status = run_command("cd /opt/opscode/embedded/service/partybus && /opt/opscode/embedded/bin/ruby bin/partybus upgrade")
+  if status.success?
+    puts "Chef Server Upgraded!"
     exit 0
   else
     exit 1
@@ -205,7 +278,7 @@ def ha_status
   if @running_config['private_chef']['drbd']['enable']
     puts "[OK] DRBD disk replication enabled."
   else
-    puts "[ERROR] DRBD disk recplication services not enabled, please configure DRBD according to documentation."
+    puts "[ERROR] DRBD disk replication services not enabled, please configure DRBD according to documentation."
     exit 1 
   end
 
@@ -452,6 +525,8 @@ graceful-kill
     Attempt a graceful stop, then SIGKILL the entire process group.
 test
     Run the API test suite against localhost.
+password
+    Set a user's password or System Recovery Password.
 EOH
   exit 1
 end
@@ -466,9 +541,7 @@ when "graceful-kill"
 else
   case ARGV[0]
   when "upgrade"
-    # Currently just does reconfigure, but here in case we make it more complicated 
-    # during an upgrade cycle.
-    reconfigure
+    upgrade
   when "ha-status"
     ha_status
   when "master-recover"
@@ -496,6 +569,8 @@ else
     pedant_args = ARGV[1..-1]
     Dir.chdir("/opt/opscode/embedded/service/opscode-pedant")
     exec("/opt/opscode/embedded/bin/bundle exec ./bin/opscode-pedant #{pedant_args.join(' ')}")
+  when "password"
+    password
   when *SV_COMMAND_NAMES
     if ARGV[1]
       puts "i don't know that command, did you mean: private-chef-ctl #{ARGV[1]} #{ARGV[0]}?"

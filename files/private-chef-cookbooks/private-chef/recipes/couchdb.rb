@@ -48,6 +48,19 @@ if node['private_chef']['bootstrap']['enable']
 	end
 end
 
+# Cron may not be installed in a minimal install:
+case node["platform"]
+when "ubuntu"
+when "centos"
+  if node["platform_version"] =~ /^5/
+    package "vixie-cron"
+  else
+    package "cronie"
+  end
+when "redhat","scientific"
+  package "cronie"
+end
+
 compact_script_command = File.join(couchdb_etc_dir, "compact_couch.rb")
 
 # Drop off the CouchDB compaction script
@@ -71,6 +84,7 @@ template "/etc/cron.d/couchdb_compact" do
             :cron_home => couchdb_dir,
             :cron_schedule => "17 1,9,17 * * *",
             :cron_user => node['private_chef']['user']['username'],
+            :cron_path => "/usr/bin:/usr/sbin:/opt/opscode/embedded/bin",
             :cron_command => cron_cmd
             )
 end
@@ -85,6 +99,7 @@ template "/etc/cron.d/couchdb_compact_major_offenders" do
             :cron_home => couchdb_dir,
             :cron_schedule => "17 3,5,7,11,13,15,19,21,23 * * *",
             :cron_user => node['private_chef']['user']['username'],
+            :cron_path => "/usr/bin:/usr/sbin:/opt/opscode/embedded/bin",
             :cron_command => cron_cmd_major_offenders
             )
 end

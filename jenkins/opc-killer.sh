@@ -11,10 +11,10 @@ if [ -e "/etc/init/opscode-runsvdir.conf" ]; then
   sudo rm /etc/init/opscode-runsvdir.conf
 fi
 
-ps ax | egrep 'runsvdir -P /opt/opscode/service' | grep -v egrep | awk '{ print $1 }' | xargs sudo kill -HUP
+ps ax | egrep 'runsvdir -P /opt/opscode/service' | grep -v grep | awk '{ print $1 }' | xargs sudo kill -HUP
 sleep 5
-ps ax | egrep 'runsvdir -P /opt/opscode/service' | grep -v egrep | awk '{ print $1 }' | xargs sudo kill -TERM
-ps ax | egrep 'svlogd -tt /var/log/opscode.*' | grep -v egrep | awk '{ print $1 }' | xargs sudo kill -TERM
+ps ax | egrep 'runsvdir -P /opt/opscode/service' | grep -v grep | awk '{ print $1 }' | xargs sudo kill -TERM
+ps ax | egrep 'svlogd -tt /var/log/opscode.*' | grep -v grep | awk '{ print $1 }' | xargs sudo kill -TERM
 sudo rm -rf /opt/opscode
 sudo rm -rf /var/opt/opscode
 sudo rm -rf /var/log/opscode

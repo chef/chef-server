@@ -10,7 +10,7 @@ private_chef_account_etc_dir = File.join(private_chef_account_dir, "etc")
 private_chef_account_working_dir = File.join(private_chef_account_dir, "working")
 private_chef_account_log_dir = node['private_chef']['opscode-account']['log_directory']
 
-[ 
+[
   private_chef_account_dir,
   private_chef_account_etc_dir,
   private_chef_account_working_dir,
@@ -42,7 +42,7 @@ template env_config do
   owner "root"
   group "root"
   mode "0644"
-  variables(node['private_chef']['opscode-account'].to_hash)
+  variables(node['private_chef']['opscode-account'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?))
   notifies :restart, 'service[opscode-account]' if should_notify
 end
 
@@ -64,13 +64,13 @@ link "/opt/opscode/embedded/service/opscode-account/statsd_config.rb" do
 end
 
 unicorn_config File.join(private_chef_account_etc_dir, "unicorn.rb") do
-  listen node['private_chef']['opscode-account']['listen'] => { 
+  listen node['private_chef']['opscode-account']['listen'] => {
     :backlog => node['private_chef']['opscode-account']['backlog'],
     :tcp_nodelay => node['private_chef']['opscode-account']['tcp_nodelay']
   }
   worker_timeout node['private_chef']['opscode-account']['worker_timeout']
-  working_directory private_chef_account_working_dir 
-  worker_processes node['private_chef']['opscode-account']['worker_processes']  
+  working_directory private_chef_account_working_dir
+  worker_processes node['private_chef']['opscode-account']['worker_processes']
   owner "root"
   group "root"
   mode "0644"
@@ -85,9 +85,9 @@ runit_service "opscode-account" do
   }.merge(params))
 end
 
-if node['private_chef']['bootstrap']['enable'] 
+if node['private_chef']['bootstrap']['enable']
 	execute "/opt/opscode/bin/private-chef-ctl opscode-account start" do
-		retries 20 
+		retries 20
 	end
 end
 
