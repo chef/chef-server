@@ -6,6 +6,8 @@
 
 -export([handle_request/1]).
 
+-define(SECONDS_AT_EPOCH, 62167219200).
+
 %%===================================================================
 %% API functions
 %%===================================================================
@@ -33,14 +35,20 @@ do_signed_url_authorization(RequestId, Req0) ->
                                               Path,
                                               Expires,
                                               Headers),
-    case ((AWSAccessKeyId == AccessKey) andalso
-          Signature == IncomingSignature) of
+    case is_expired(Expires) of
         true ->
-            Req6;
+            encode_access_denied_error_response(RequestId, Req6);
         false ->
-            encode_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
-                                  StringToSign, Req6)
+            case ((AWSAccessKeyId == AccessKey) andalso
+                  Signature == IncomingSignature) of
+                true ->
+                    Req6;
+                false ->
+                    encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
+                                               StringToSign, Req6)
+            end
     end.
+
 
 do_standard_authorization(RequestId, IncomingAuth, Req0) ->
     {Headers, Req1} = cowboy_http_req:headers(Req0),
@@ -69,8 +77,13 @@ do_standard_authorization(RequestId, IncomingAuth, Req0) ->
         true ->
             Req8;
         false ->
-            encode_error_response(AccessKeyId, Signature, RequestId, StringToSign, Req8)
+            encode_sign_error_response(AccessKeyId, Signature, RequestId, StringToSign, Req8)
     end.
+
+-spec is_expired(binary()) -> boolean().
+is_expired(Expires) ->
+    Now = calendar:datetime_to_gregorian_seconds(erlang:universaltime()),
+    bksw_util:to_integer(Expires) < (Now - ?SECONDS_AT_EPOCH).
 
 get_bucket({[_, _], Req6}) ->
     {"", Req6};
@@ -78,13 +91,19 @@ get_bucket({[Bucket, _, _], Req6}) ->
     {Bucket, Req6}.
 
 
-encode_error_response(AccessKeyId, Signature,
+encode_sign_error_response(AccessKeyId, Signature,
                       RequestId, StringToSign, Req0) ->
     Req1 = bksw_req:with_amz_id_2(Req0),
     Body = bksw_xml:signature_does_not_match_error(
              RequestId, bksw_util:to_string(Signature),
              bksw_util:to_string(StringToSign),
              bksw_util:to_string(AccessKeyId)),
+    {ok, Req2} = cowboy_http_req:reply(403, [], Body, Req1),
+    Req2.
+
+encode_access_denied_error_response(RequestId, Req0) ->
+    Req1 = bksw_req:with_amz_id_2(Req0),
+    Body = bksw_xml:access_denied_error(RequestId),
     {ok, Req2} = cowboy_http_req:reply(403, [], Body, Req1),
     Req2.
 

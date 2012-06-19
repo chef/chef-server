@@ -71,8 +71,6 @@ generate_etag(Rq0, St) ->
 upload_or_copy(Rq, St) ->
     case cowboy_http_req:parse_header(<<"X-Amz-Copy-Source">>,
                                      Rq) of
-        {undefined, undefined, Rq2} ->
-            upload(Rq2, St);
         {undefined, Rq2} ->
             upload(Rq2, St);
         {Source, Rq2} ->
@@ -138,9 +136,6 @@ upload(#http_req{body_state = waiting,
         {ok, Digest} ->
             OurMd5 = bksw_format:to_hex(Digest),
             case cowboy_http_req:parse_header('Content-MD5', Rq3) of
-                {undefined, undefined, Rq4} ->
-                    Rq5 = bksw_req:with_etag(OurMd5, Rq4),
-                    halt(202, Rq5, St);
                 {undefined, Rq4} ->
                     Rq5 = bksw_req:with_etag(OurMd5, Rq4),
                     halt(202, Rq5, St);

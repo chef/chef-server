@@ -58,7 +58,7 @@ all(doc) ->
     ["This test is runs the fs implementation of the bkss_store signature"].
 
 all() ->
-    [put_object, wi_basic, sec_fail, signed_url].
+    [put_object, wi_basic, sec_fail, signed_url, signed_url_fail].
 
 %%====================================================================
 %% TEST CASES
@@ -149,6 +149,27 @@ signed_url(Config) when is_list(Config) ->
                                     "text/xml", Content}, [], []),
   ?assertMatch({ok,{{"HTTP/1.1",403,"Forbidden"}, _, _}},
                Response2).
+
+signed_url_fail(doc) ->
+    ["Test that signed url expiration actually works"];
+signed_url_fail(suite) ->
+    [];
+signed_url_fail(Config) when is_list(Config) ->
+    S3Conf = proplists:get_value(s3_conf, Config),
+    Bucket = random_binary(),
+    mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf),
+    Content = "<x>Super Foo</x>",
+    Headers = [{"content-type", "text/xml"},
+               {"content-md5",
+                erlang:binary_to_list(base64:encode(crypto:md5(Content)))}],
+    SignedUrl = mini_s3:s3_url('put', Bucket, "foo", -1,
+                               Headers,
+                               S3Conf),
+    Response = httpc:request(put, {erlang:binary_to_list(SignedUrl),
+                                   Headers,
+                                   "text/xml", Content}, [], []),
+    ?assertMatch({ok,{{"HTTP/1.1",403,"Forbidden"}, _, _}},
+                 Response).
 
 
 %%====================================================================
