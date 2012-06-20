@@ -10,8 +10,8 @@
 
       ssl_session_timeout 5m;
 
-      ssl_protocols <%= node['private_chef']['nginx']['ssl_protocols'] %>;
-      ssl_ciphers <%= node['private_chef']['nginx']['ssl_ciphers'] %>;
+      ssl_protocols <%= @ssl_protocols %>;
+      ssl_ciphers <%= @ssl_ciphers %>;
       ssl_prefer_server_ciphers on;
     <% end %>
     root <%= File.join(@dir, "html") %>;
