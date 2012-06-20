@@ -1,0 +1,5 @@
+#!/bin/bash
+
+<% @commands.each do |command| %>
+<%= command %>
+<% end %>

@@ -49,7 +49,9 @@ end
 runit_service "opscode-org-creator" do
   down node['private_chef']['opscode-org-creator']['ha']
   options({
-    :log_directory => opscode_org_creator_log_dir
+    :log_directory => opscode_org_creator_log_dir,
+    :svlogd_size => node['private_chef']['opscode-org-creator']['svlogd_size'],
+    :svlogd_num  => node['private_chef']['opscode-org-creator']['svlogd_num']
   }.merge(params))
 end
 

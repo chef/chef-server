@@ -69,7 +69,9 @@ end
 runit_service "rabbitmq" do
   down node['private_chef']['rabbitmq']['ha']
   options({
-    :log_directory => rabbitmq_log_dir
+    :log_directory => rabbitmq_log_dir,
+    :svlogd_size => node['private_chef']['rabbitmq']['svlogd_size'],
+    :svlogd_num  => node['private_chef']['rabbitmq']['svlogd_num']
   }.merge(params))
 end
 

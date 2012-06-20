@@ -40,7 +40,9 @@ end
 runit_service "opscode-certificate" do
   down node['private_chef']['opscode-certificate']['ha']
   options({
-    :log_directory => opscode_certificate_log_dir
+    :log_directory => opscode_certificate_log_dir,
+    :svlogd_size => node['private_chef']['opscode-certificate']['svlogd_size'],
+    :svlogd_num  => node['private_chef']['opscode-certificate']['svlogd_num']
   }.merge(params))
 end
 

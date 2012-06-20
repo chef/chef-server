@@ -1,0 +1,3 @@
+# svlogd configuration
+S<%= @options[:svlogd_size] %>
+n<%= @options[:svlogd_num] %>

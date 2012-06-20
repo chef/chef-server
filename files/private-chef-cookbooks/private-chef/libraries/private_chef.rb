@@ -38,6 +38,7 @@ module PrivateChef
   nagios Mash.new
   nrpe Mash.new
   nginx Mash.new
+  logs Mash.new
 
   aws Mash.new
 
@@ -178,6 +179,7 @@ module PrivateChef
         "nrpe",
         "nginx",
         "ldap",
+        "logs",
 
         ## Temporary until bookshelf is online
         "aws"

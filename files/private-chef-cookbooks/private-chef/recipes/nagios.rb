@@ -141,21 +141,27 @@ end
 runit_service "nagios" do
   down node['private_chef']['nagios']['ha']
   options({
-    :log_directory => log_directory
+    :log_directory => log_directory,
+    :svlogd_size => node['private_chef']['nagios']['svlogd_size'],
+    :svlogd_num  => node['private_chef']['nagios']['svlogd_num']
   }.merge(params))
 end
 
 runit_service "fcgiwrap" do
   down node['private_chef']['nagios']['ha']
   options({
-    :log_directory => fcgiwrap_log_directory
+    :log_directory => fcgiwrap_log_directory,
+    :svlogd_size => node['private_chef']['nagios']['fcgiwrap_svlogd_size'],
+    :svlogd_num  => node['private_chef']['nagios']['fcgiwrap_svlogd_num']
   }.merge(params))
 end
 
 runit_service "php-fpm" do
   down node['private_chef']['nagios']['ha']
   options({
-    :log_directory => php_fpm_log_directory
+    :log_directory => php_fpm_log_directory,
+    :svlogd_size => node['private_chef']['nagios']['php_fpm_svlogd_size'],
+    :svlogd_num  => node['private_chef']['nagios']['php_fpm_svlogd_num']
   }.merge(params))
 end
 

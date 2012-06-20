@@ -38,7 +38,9 @@ end
 runit_service "couchdb" do
   down node['private_chef']['couchdb']['ha']
   options({
-    :log_directory => couchdb_log_dir
+    :log_directory => couchdb_log_dir,
+    :svlogd_size => node['private_chef']['couchdb']['svlogd_size'],
+    :svlogd_num  => node['private_chef']['couchdb']['svlogd_num']
   }.merge(params))
 end
 

@@ -50,14 +50,18 @@ end
 runit_service "opscode-expander" do
   down node['private_chef']['opscode-expander']['ha'] 
   options({
-    :log_directory => expander_log_dir
+    :log_directory => expander_log_dir,
+    :svlogd_size => node['private_chef']['opscode-expander']['svlogd_size'],
+    :svlogd_num  => node['private_chef']['opscode-expander']['svlogd_num']
   }.merge(params))
 end
 
 runit_service "opscode-expander-reindexer" do
   down node['private_chef']['opscode-expander']['ha'] 
   options({
-    :log_directory => expander_reindexer_log_dir
+    :log_directory => expander_reindexer_log_dir,
+    :svlogd_size => node['private_chef']['opscode-expander']['reindexer_svlogd_size'],
+    :svlogd_num  => node['private_chef']['opscode-expander']['reindexer_svlogd_num']
   }.merge(params))
 end
 

@@ -32,6 +32,8 @@ end
 
 runit_service "keepalived" do
   options({
-    :log_directory => keepalived_log_dir
+    :log_directory => keepalived_log_dir,
+    :svlogd_size => node['private_chef']['keepalived']['svlogd_size'],
+    :svlogd_num  => node['private_chef']['keepalived']['svlogd_num']
   }.merge(params))
 end

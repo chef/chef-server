@@ -115,7 +115,9 @@ runit_service "postgres" do
   down node['private_chef']['postgresql']['ha']
   control(['t'])
   options({
-    :log_directory => postgresql_log_dir
+    :log_directory => postgresql_log_dir,
+    :svlogd_size => node['private_chef']['postgresql']['svlogd_size'],
+    :svlogd_num  => node['private_chef']['postgresql']['svlogd_num']
   }.merge(params))
 end
 
