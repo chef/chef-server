@@ -44,6 +44,7 @@ object(#object{name = Name, date = Date, size = Size,
                  'LastModified' = bksw_format:to_date(Date),
                  'ETag' = bksw_format:to_etag(Digest),
                  'Size' = io_lib:format("~w", [Size]),
+                 'Owner' = owner(),
                  'StorageClass' = "STANDARD"}.
 
 signature_does_not_match_error(RequestId, SignatureProvided, StringToSign,
