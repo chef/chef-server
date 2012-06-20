@@ -158,22 +158,23 @@ obj_copy(State={?MODULE, Dir}, FromBucket, FromPath, ToBucket, ToPath) ->
 -spec obj_send(fs_data(), bkss_store:bucket_name(),
                bkss_store:path(), Trans::bkss_transport:trans()) ->
                       {fs_data(), {ok, MD5::term()} | {error, Reason::term()}}.
-obj_send(State = {?MODULE, Dir}, Bucket, Path, Trans) ->
+obj_send(State = {?MODULE, Dir}, Bucket, Path, Trans0) ->
     FilePath = filename:join([Dir, encode(Bucket), encode(Path)]),
     Resp =
         case obj_open_r(FilePath) of
             {ok, FsSt} ->
-                case read(FsSt, Trans) of
-                    ok ->
-                        obj_close(FsSt);
-                    {error, timeout} ->
+                case read(FsSt, Trans0) of
+                    {Trans1, ok} ->
+                        {Trans1, obj_close(FsSt)};
+                    {Trans1, {error, timeout}} ->
                         obj_close(FsSt),
-                        {error, timeout};
+                        {Trans1, {error, timeout}};
                     Any ->
                         obj_close(FsSt),
                         Any
                 end;
-            Any -> Any
+            Any ->
+                Any
         end,
     {State, Resp}.
 
@@ -187,11 +188,12 @@ obj_recv(State = {?MODULE, Dir}, Bucket, Path, Trans, Buffer, Length) ->
         case obj_open_w(FilePath) of
             {ok, FsSt} ->
                 case write(FsSt, Trans, Length, Buffer) of
-                    {ok, FsSt2} -> obj_close(FsSt2);
-                    {error, timeout} ->
+                    {Trans1, {ok, FsSt2}} ->
+                        {Trans1, obj_close(FsSt2)};
+                    {Trans1, {error, timeout}} ->
                         obj_close(FsSt),
                         obj_delete(State, Bucket, Path),
-                        {error, timeout};
+                        {Trans1, {error, timeout}};
                     Any ->
                         obj_close(FsSt),
                         obj_delete(State, Bucket, Path),
@@ -206,15 +208,15 @@ obj_recv(State = {?MODULE, Dir}, Bucket, Path, Trans, Buffer, Length) ->
 %%===================================================================
 -spec read(file_desc(), bkss_transport:trans()) ->
                   ok | {error, Reason::term()}.
-read({File, _} = FsSt, Trans) ->
+read({File, _} = FsSt, Trans0) ->
     case file:read(File, ?BLOCK_SIZE) of
         {ok, Chunk} ->
-            bkss_transport:send(Trans, Chunk),
-            read(FsSt, Trans);
+            {Trans1, _} = bkss_transport:send(Trans0, Chunk),
+            read(FsSt, Trans1);
         eof ->
-            ok;
+            {Trans0, ok};
         Any ->
-            Any
+            {Trans0, Any}
     end.
 
 -spec write(file_desc(), Trans::bkss_transport:trans(),
@@ -226,31 +228,32 @@ write(FsSt, Trans, Length, Buf) ->
     case obj_write(FsSt, Buf) of
         {ok, NewFsSt} ->
             write(NewFsSt, Trans, Length - byte_size(Buf));
-        Any -> Any
+        Any ->
+            {Trans, Any}
     end.
 
 -spec write(file_desc(), Trans::bkss_transport:trans(), Length::non_neg_integer()) ->
                    {ok, file_desc()} | {error, Reason::term()}.
-write(FsSt, _Trans, 0) ->
-    obj_write(FsSt, <<>>);
-write(FsSt, Trans, Length) when Length =< ?BLOCK_SIZE ->
-    case bkss_transport:recv(Trans, Length) of
-        {ok, Chunk} ->
-            obj_write(FsSt, Chunk);
+write(FsSt, Trans, 0) ->
+    {Trans, obj_write(FsSt, <<>>)};
+write(FsSt, Trans0, Length) when Length =< ?BLOCK_SIZE ->
+    case bkss_transport:recv(Trans0, Length) of
+        {Trans1, {ok, Chunk}} ->
+            {Trans1, obj_write(FsSt, Chunk)};
         Any ->
-            Any
+            {Trans0, Any}
     end;
-write(FsSt, Trans, Length) ->
-    case bkss_transport:recv(Trans, ?BLOCK_SIZE) of
-        {ok, Chunk} ->
+write(FsSt, Trans0, Length) ->
+    case bkss_transport:recv(Trans0, ?BLOCK_SIZE) of
+        {Trans1, {ok, Chunk}} ->
             case obj_write(FsSt, Chunk) of
                 {ok, NewFsSt} ->
-                    write(NewFsSt, Trans, Length-?BLOCK_SIZE);
+                    write(NewFsSt, Trans1, Length-?BLOCK_SIZE);
                 Any ->
-                    Any
+                    {Trans1, Any}
             end;
         Any ->
-            Any
+            {Trans0, Any}
     end.
 
 -spec dir_2_bucket(dir()) -> bkss_store:bucket().

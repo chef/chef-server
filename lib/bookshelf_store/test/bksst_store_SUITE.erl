@@ -74,7 +74,7 @@ bookshelf_object(Config) when is_list(Config) ->
     Objs = [filename:join(random_binary(), random_binary()) ||
                _ <- lists:seq(1,100)],
     ec_plists:map(fun(F) ->
-                         {ok, _} = bookshelf_store:obj_create(Bucket, F, F)
+                          {ok, _} = bookshelf_store:obj_create(Bucket, F, F)
                   end, Objs),
     ?assertEqual(100, length(bookshelf_store:obj_list(Bucket))),
     Records = bookshelf_store:obj_list(Bucket),
@@ -175,11 +175,11 @@ bookshelf_stream(Config) when is_list(Config) ->
                      Path = filename:join(random_binary(), random_binary()),
                      Data = random_string(1000, ?STR_CHARS),
                      Trans = bkss_transport:new(bksst_test_transport, [Data]),
-                     ?assertMatch({ok, _},
+                     ?assertMatch({_, {ok, _}},
                                   bookshelf_store:obj_recv(Bucket, Path,
                                                            Trans, <<>>, 100)),
-                     ?assertMatch({ok, _}, bookshelf_store:obj_send(Bucket,
-                                                                    Path, Trans))
+                     ?assertMatch({_, {ok, _}}, bookshelf_store:obj_send(Bucket,
+                                                                         Path, Trans))
              end,
     ec_plists:map(Action, lists:seq(1,ProcessCount)).
 

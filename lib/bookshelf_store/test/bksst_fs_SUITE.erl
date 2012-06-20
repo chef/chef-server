@@ -116,13 +116,13 @@ bookshelf_fs_stream(Config) when is_list(Config) ->
                                                         "eeeeeeeeeeeeeeeeeeeeeeee">>]),
     lists:foreach(
       fun(F) ->
-              {_, {ok, _}} = bkss_store:obj_recv(Store1, Bucket, F, Trans, <<>>, 100)
+              {_, {_, {ok, _}}} = bkss_store:obj_recv(Store1, Bucket, F, Trans, <<>>, 100)
       end,
       Objs),
 
     lists:foreach(
       fun(F) ->
-              {_, {ok, _}} = bkss_store:obj_send(Store1, Bucket, F, Trans)
+              {_, {_, {ok, _}}} = bkss_store:obj_send(Store1, Bucket, F, Trans)
       end,
       Objs),
 

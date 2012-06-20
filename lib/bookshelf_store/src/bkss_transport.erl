@@ -34,10 +34,12 @@ behaviour_info(_) ->
 new(ModuleName, Data) when is_atom(ModuleName) ->
     #trans_t{callback = ModuleName, data = ModuleName:new(Data)}.
 
--spec recv(trans(), Length::non_neg_integer()) -> {ok, binary()} | term().
+-spec recv(trans(), Length::non_neg_integer()) -> {trans(), {ok, binary()}} |
+                                                  {trans(), term()}.
 recv(#trans_t{callback = Mod, data = Data}, Length) ->
     Mod:recv(Data, Length).
 
--spec send(trans(), Binary::binary()) -> ok | term().
+-spec send(trans(), Binary::binary()) -> {trans(), ok} |
+                                         {trans(), term()}.
 send(#trans_t{callback = Mod, data = Data}, Binary) ->
     Mod:send(Data, Binary).

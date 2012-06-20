@@ -68,9 +68,12 @@ generate_etag(Rq0, St) ->
             {halt, Rq2, St}
     end.
 
-upload_or_copy(Rq, St) ->
+upload_or_copy(Rq0, St) ->
+    {ok, Rq1} = cowboy_http_req:set_resp_header(<<"Obj">>, <<"Obj">>, Rq0),
     case cowboy_http_req:parse_header(<<"X-Amz-Copy-Source">>,
-                                     Rq) of
+                                      Rq1) of
+        {undefined, undefined, Rq2} ->
+            upload(Rq2, St);
         {undefined, Rq2} ->
             upload(Rq2, St);
         {Source, Rq2} ->
@@ -78,20 +81,17 @@ upload_or_copy(Rq, St) ->
     end.
 
 download(Rq0, St) ->
-    {ok, Transport, Socket} = cowboy_http_req:transport(Rq0),
     {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
     {Path, Rq2} = get_object_name(Rq1),
 
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{size = Size}} ->
             SFun = fun () ->
-                           Bridge = bkss_transport:new(bksw_socket_transport,
-                                                       [Transport, Socket,
-                                                        ?TIMEOUT_MS]),
+                           Bridge = bkss_transport:new(bksw_socket_transport, Rq2),
                            case bookshelf_store:obj_send(Bucket, Path, Bridge) of
-                               {ok, Size} ->
+                               {_Rq2, {ok, Size}} ->
                                    sent;
-                               _ ->
+                               {_Rq2, _} ->
                                    {error, "Download unsuccessful"}
                            end
                    end,
@@ -113,45 +113,43 @@ get_object_name(Rq0) ->
             {filename:join(Path), Rq1}
     end.
 
-
 halt(Code, Rq, St) ->
     {ok, Rq2} = cowboy_http_req:reply(Code, Rq),
     {halt, Rq2, St}.
 
-%% This direct access to the body really needs to go away. This is an cowboy internal
-%% streaming protocol that is undocumented and subject to change. There is a set of
-%% cowboy_http_req:stream_body apis that should probably be used instead.
-upload(#http_req{body_state = waiting,
-                 buffer = Buffer} = Rq0, St) ->
-    {ok, Transport, Socket} = cowboy_http_req:transport(Rq0),
+upload(Rq0, St) ->
     {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
     {Path, Rq2} = get_object_name(Rq1),
     {Length, Rq3} =
         cowboy_http_req:parse_header('Content-Length', Rq2),
-    Bridge = bkss_transport:new(bksw_socket_transport,
-                                [Transport, Socket, ?TIMEOUT_MS]),
-    case bookshelf_store:obj_recv(Bucket, Path, Bridge,
-                                  Buffer, Length)
-    of
-        {ok, Digest} ->
+    Bridge = bkss_transport:new(bksw_socket_transport, Rq3),
+    case bookshelf_store:obj_recv(Bucket, Path, Bridge, <<>>, Length) of
+        {Rq4, {ok, Digest}} ->
             OurMd5 = bksw_format:to_hex(Digest),
-            case cowboy_http_req:parse_header('Content-MD5', Rq3) of
-                {undefined, Rq4} ->
-                    Rq5 = bksw_req:with_etag(OurMd5, Rq4),
-                    halt(202, Rq5, St);
-                {RequestMd5, Rq4} ->
+            case cowboy_http_req:parse_header('Content-MD5', Rq4) of
+                {undefined, undefined, Rq5} ->
+                    Rq6 = bksw_req:with_etag(OurMd5, Rq5),
+                    halt(202, Rq6, St);
+                {undefined, Rq5} ->
+            error_logger:error_msg("A3:~s", [Path]),
+                    Rq6 = bksw_req:with_etag(OurMd5, Rq5),
+                    halt(202, Rq6, St);
+                {RequestMd5, Rq5} ->
+            error_logger:error_msg("A4:~s", [Path]),
                     case RequestMd5 =:= OurMd5 of
                         true ->
-                            Rq5 = bksw_req:with_etag(RequestMd5, Rq4),
-                            halt(202, Rq5, St);
+                            Rq6 = bksw_req:with_etag(RequestMd5, Rq5),
+                            halt(202, Rq6, St);
                         _ ->
-                            halt(406, Rq4, St)
+                            halt(406, Rq5, St)
                     end
             end;
-        {error, timeout} ->
-            halt(408, Rq3, St);
-        _ ->
-            halt(500, Rq3, St)
+        {Rq4, {error, timeout}} ->
+            error_logger:error_msg("A5"),
+            halt(408, Rq4, St);
+        {Rq4, _} ->
+            error_logger:error_msg("A6"),
+            halt(500, Rq4, St)
     end.
 
 copy(Rq0, St, <<"/", FromFullPath/binary>>) ->

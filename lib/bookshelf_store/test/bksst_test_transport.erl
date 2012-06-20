@@ -26,10 +26,10 @@
 new([Data]) ->
     #state{data=Data}.
 
--spec recv(state(), non_neg_integer()) -> {ok, binary()} | term().
-recv(#state{data=Data}, _Length) ->
-    {ok, Data}.
+-spec recv(state(), non_neg_integer()) -> {state(), {ok, binary()}} | {state(), term()}.
+recv(S = #state{data=Data}, _Length) ->
+    {S, {ok, Data}}.
 
--spec send(state(), binary()) -> ok | term().
-send(#state{}, _Binary) ->
-    ok.
+-spec send(state(), binary()) -> {state(), ok} | {state(), term()}.
+send(S = #state{}, _Binary) ->
+    {S, ok}.

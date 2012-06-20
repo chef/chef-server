@@ -12,24 +12,31 @@
 
 -export_type([state/0]).
 
--record(state, {transport, socket, timeout}).
-
 %%%===================================================================
 %%% Types
 %%%===================================================================
--opaque state() :: record(state).
+-opaque state() :: CowboyHttpReq::term().
 
 %%===================================================================
 %% External API
 %%===================================================================
 -spec new(list()) -> state().
-new([Transport, Socket, Timeout]) ->
-    #state{transport = Transport, socket = Socket, timeout = Timeout}.
+new(Req) ->
+    Req.
 
--spec recv(state(), non_neg_integer()) -> {ok, binary()} | term().
-recv(#state{transport = Transport, socket = Socket, timeout = Timeout}, Length) ->
-    Transport:recv(Socket, Length, Timeout).
+-spec recv(state(), non_neg_integer()) -> {ok, binary()} | eof | term().
+recv(Req0, _Length) ->
+    case cowboy_http_req:stream_body(Req0) of
+        {ok, Bin, Req1} ->
+            {Req1, {ok, Bin}};
+        {done, Req1} ->
+            {Req1, eof};
+        Error = {error, _}  ->
+            error_logger:error_msg("FOOOOOOOOOOOOOO"),
+            {Req0, Error}
+    end.
 
 -spec send(state(), binary()) -> ok | term().
-send(#state{transport = Transport, socket = Socket, timeout = _Timeout}, Binary) ->
-    Transport:send(Socket, Binary).
+send(Req0, Binary) ->
+    {ok, Transport, Socket} = cowboy_http_req:transport(Req0),
+    {Req0, Transport:send(Socket, Binary)}.
