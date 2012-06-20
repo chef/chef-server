@@ -212,6 +212,7 @@ default['private_chef']['nginx']['log_directory'] = "/var/log/opscode/nginx"
 default['private_chef']['nginx']['ssl_port'] = 443
 default['private_chef']['nginx']['enable_non_ssl'] = false
 default['private_chef']['nginx']['non_ssl_port'] = 80
+default['private_chef']['nginx']['x_forwarded_proto'] = 'https'
 default['private_chef']['nginx']['server_name'] = node['fqdn']
 default['private_chef']['nginx']['url'] = "https://#{node['fqdn']}"
 # HIGHEST SECURITY AT ALL COSTS: TLSv1 only to prevent BEAST, can also turn off RC4/MEDIUM/MD5 to really favor security over speed/comptability
