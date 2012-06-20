@@ -138,6 +138,7 @@ end
 
 include_recipe "private-chef::orgmapper"
 include_recipe "private-chef::opscode-pedant"
+include_recipe "private-chef::log_cleanup"
 include_recipe "private-chef::partybus"
 
 file "/etc/opscode/chef-server-running.json" do

@@ -512,6 +512,29 @@ default['private_chef']['keepalived']['service_posthooks'] = {
 }
 
 ##
+# Log cleanup in days
+##
+
+default['private_chef']['log_retention'] = {
+  "couchdb" => 14,
+  "postgresql" => 14,
+  "rabbitmq" => 14,
+  "redis" => 14,
+  "opscode-authz" => 14,
+  "opscode-certificate" => 14,
+  "opscode-account" => 14,
+  "opscode-solr" => 14,
+  "opscode-expander" => 14,
+  "opscode-expander" => 14,
+  "opscode-org-creator" => 14,
+  "opscode-chef" => 14,
+  "opscode-erchef" => 14,
+  "opscode-webui" => 14,
+  "nagios" => 14,
+  "nginx" => 14
+}
+
+##
 # LDAP Authentication Integration
 ##
 default['private_chef']['ldap'] = nil
