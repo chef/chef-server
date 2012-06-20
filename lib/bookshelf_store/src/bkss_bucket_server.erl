@@ -35,10 +35,12 @@ bucket_server_exists(BucketName) ->
     gproc:where({n,l,BucketName}) =/= undefined.
 
 lock_path(BucketName, Path) ->
-    gen_server:cast(gproc:where({n,l,BucketName}), {lock, Path}).
+    {Pid, _} = gproc:await({n,l,BucketName}, ?WAIT_TIMEOUT),
+    gen_server:cast(Pid, {lock, Path}).
 
 unlock_path(BucketName, Path) ->
-    gen_server:cast(gproc:where({n,l,BucketName}), {unlock, Path}).
+    {Pid, _} = gproc:await({n,l,BucketName}, ?WAIT_TIMEOUT),
+    gen_server:cast(Pid, {unlock, Path}).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -46,6 +48,7 @@ unlock_path(BucketName, Path) ->
 
 -spec init([bookshelf_store:bucket_name()]) -> {ok, state()}.
 init([BucketName]) ->
+    gproc:reg({n,l,BucketName}),
     {ok,DiskStore} = application:get_env(disk_store),
     State1 =
         case bkss_store:bucket_create(bkss_store:new(bkss_fs, DiskStore), BucketName) of
@@ -54,7 +57,6 @@ init([BucketName]) ->
             {State0, {error,eexist}} ->
                 State0
     end,
-    gproc:reg({n,l,BucketName}),
     {ok,#state{bucket_name=BucketName, store=State1, locks=[], work_queue=[]}}.
 
 -spec handle_call(Request::term(), From::term(), state()) ->

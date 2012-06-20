@@ -45,9 +45,9 @@ do_work({obj_get, From, [BucketName, Store, Path]}) ->
 do_work({obj_copy, From, [BucketName, Store, FromPath, ToBucket, ToPath]}) ->
     bkss_bucket_server:lock_path(ToBucket, ToPath),
     {_, Result} = bkss_store:obj_copy(Store, BucketName, FromPath, ToBucket, ToPath),
-    gen_server:reply(From, Result),
     bkss_bucket_server:unlock_path(BucketName, FromPath),
-    bkss_bucket_server:unlock_path(ToBucket, ToPath);
+    bkss_bucket_server:unlock_path(ToBucket, ToPath),
+    gen_server:reply(From, Result);
 do_work({obj_send, From, [BucketName, Store, Path, Bridge]}) ->
     {_, Reply} = bkss_store:obj_send(Store, BucketName, Path, Bridge),
     gen_server:reply(From, Reply),

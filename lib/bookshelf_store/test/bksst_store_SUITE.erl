@@ -200,12 +200,14 @@ copy_t1(Sq) ->
     ?assertEqual([], bookshelf_store:obj_list(FromBucket)),
     ?assertEqual([], bookshelf_store:obj_list(ToBucket)),
     {ok, _} = bookshelf_store:obj_create(FromBucket, Path1, Contents),
-    {ok, ConSize} =
+    {ok, ReturnedConSize0} =
         bookshelf_store:obj_copy(FromBucket, Path1, FromBucket, Path2),
+    ?assertMatch(ConSize, ReturnedConSize0),
     ?assertEqual(bookshelf_store:obj_get(FromBucket, Path1),
                  bookshelf_store:obj_get(FromBucket, Path2)),
-    {ok, ConSize} =
+    {ok, ReturnedConSize1} =
         bookshelf_store:obj_copy(FromBucket, Path1, ToBucket, Path1),
+    ?assertMatch(ConSize, ReturnedConSize1),
     ?assertEqual(bookshelf_store:obj_get(FromBucket, Path1),
                  bookshelf_store:obj_get(ToBucket, Path1)),
     ?assertEqual(bookshelf_store:obj_get(FromBucket, Path2),

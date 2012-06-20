@@ -100,16 +100,13 @@ put_object(Config) when is_list(Config) ->
     ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
     ?assertEqual([], proplists:get_value(contents, BucketContents)),
     Objs = [filename:join(random_binary(), random_binary()) ||
-               _ <- lists:seq(1,2)],
+               _ <- lists:seq(1,100)],
     ec_plists:map(fun(F) ->
                           mini_s3:put_object(Bucket, F, F, [], [], S3Conf),
                           error_logger:error_msg("000")
                   end, Objs),
-    error_logger:error_msg("1111"),
     Result = mini_s3:list_objects(Bucket, [], S3Conf),
-    error_logger:error_msg("222"),
     ObjList = proplists:get_value(contents, Result),
-    error_logger:error_msg("333"),
     ?assertEqual(100, length(ObjList)),
     ec_plists:map(fun(Obj) ->
                           error_logger:error_msg("---<<-->>~p", [Obj])

@@ -63,9 +63,7 @@ generate_etag(Rq0, St) ->
     {Path, Rq2} = get_object_name(Rq1),
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{digest = Digest}} ->
-            {{strong,
-              list_to_binary(bksw_format:to_hex(Digest))},
-             Rq2, St};
+            {{strong, Digest}, Rq2, St};
         _ ->
             {halt, Rq2, St}
     end.
