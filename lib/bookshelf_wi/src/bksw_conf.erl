@@ -53,7 +53,7 @@ dispatch() ->
 pool() ->
     case application:get_env(pool) of
         undefined ->
-            [{pool, 100}];
+            [{pool, 1000}];
         {ok, Pool} ->
             [{pool, Pool}]
     end.
@@ -98,7 +98,9 @@ format_domains(Domains) ->
 rule(Domain) ->
     SubDomain = [bucket] ++ Domain,
     FEnv = dispatch_rules(),
-    [{Domain, [{[], bksw_idx, FEnv}]},
+    [{Domain, [{[], bksw_idx, FEnv},
+               {[bucket], bksw_bkt, FEnv},
+               {[bucket, '_', '...'], bksw_obj, FEnv}]},
      {SubDomain,
       [{[], bksw_bkt, FEnv},
        {['...'], bksw_obj, FEnv}]}].

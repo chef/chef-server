@@ -41,28 +41,36 @@ content_types_accepted(Rq, St) ->
 content_types_provided(Rq, St) ->
     {[{{<<"text">>, <<"xml">>, []}, to_xml}], Rq, St}.
 
-resource_exists(#http_req{host = [Bucket | _]} = Rq, St) ->
-    {bookshelf_store:bucket_exists(Bucket), Rq, St}.
+resource_exists(Rq0, St) ->
+    {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
+    {bookshelf_store:bucket_exists(Bucket), Rq1, St}.
 
-delete_resource(#http_req{host = [Bucket | _]} = Rq, St) ->
+delete_resource(Rq0, St) ->
+    {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
     case bookshelf_store:bucket_delete(Bucket) of
         ok ->
-            {true, Rq, St};
+            {true, Rq1, St};
         _ ->
-            {false, Rq, St}
+            {false, Rq1, St}
     end.
 
-create_resource(#http_req{host = [Bucket | _]} = Rq, St) ->
+create_resource(Rq0, St) ->
+    {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
     case bookshelf_store:bucket_create(Bucket) of
-      ok -> {true, Rq, St};
-      _ -> {false, Rq, St}
+      ok -> {true, Rq1, St};
+      _ -> {false, Rq1, St}
     end.
 
-to_xml(#http_req{host = [Bucket | _]} = Rq, St) ->
+to_xml(Rq0, St) ->
+    {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
     Objects = bookshelf_store:obj_list(Bucket),
     Term = bksw_xml:list_objects(Bucket, Objects),
     Body = bksw_xml:write(Term),
-    {Body, Rq, St}.
+    {Body, Rq1, St}.
+
+%%===================================================================
+%% Internal API
+%%===================================================================
 
 %%===================================================================
 %% Eunit Tests

@@ -29,7 +29,8 @@ init_per_testcase(sec_fail, Config0) ->
     Port = 4321,
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
                           lists:flatten(io_lib:format("http://localhost.localdomain:~p",
-                                                      [Port]))),
+                                                      [Port])),
+                         path),
     lists:keyreplace(s3_conf, 1, Config1, {s3_conf, S3State});
 init_per_testcase(_TestCase, Config) ->
     %% This fixes another rebar brokenness. We cant specify any options to
@@ -45,7 +46,8 @@ init_per_testcase(_TestCase, Config) ->
     Port = 4321,
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
                           lists:flatten(io_lib:format("http://localhost.localdomain:~p",
-                                                      [Port]))),
+                                                      [Port])),
+                          path),
     [{s3_conf, S3State} | Config].
 
 end_per_testcase(_TestCase, _Config) ->
@@ -56,7 +58,7 @@ all(doc) ->
     ["This test is runs the fs implementation of the bkss_store signature"].
 
 all() ->
-    [wi_basic, sec_fail, signed_url].
+    [put_object, wi_basic, sec_fail, signed_url].
 
 %%====================================================================
 %% TEST CASES
@@ -86,6 +88,32 @@ wi_basic(Config) when is_list(Config) ->
     [{buckets, NewBuckets}] = mini_s3:list_buckets(S3Conf),
     ?assertEqual(Count - 1, length(NewBuckets)).
 
+put_object(doc) ->
+    ["should be able to put and list objects"];
+put_object(suite) ->
+    [];
+put_object(Config) when is_list(Config) ->
+    S3Conf = proplists:get_value(s3_conf, Config),
+    Bucket = "bukkit",
+    ?assertEqual(ok, mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)),
+    BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
+    ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
+    ?assertEqual([], proplists:get_value(contents, BucketContents)),
+    Objs = [filename:join(random_binary(), random_binary()) ||
+               _ <- lists:seq(1,2)],
+    ec_plists:map(fun(F) ->
+                          mini_s3:put_object(Bucket, F, F, [], [], S3Conf),
+                          error_logger:error_msg("000")
+                  end, Objs),
+    error_logger:error_msg("1111"),
+    Result = mini_s3:list_objects(Bucket, [], S3Conf),
+    error_logger:error_msg("222"),
+    ObjList = proplists:get_value(contents, Result),
+    error_logger:error_msg("333"),
+    ?assertEqual(100, length(ObjList)),
+    ec_plists:map(fun(Obj) ->
+                          error_logger:error_msg("---<<-->>~p", [Obj])
+                  end, ObjList).
 
 sec_fail(doc) ->
     ["Check authentication failure on the part of the caller"];

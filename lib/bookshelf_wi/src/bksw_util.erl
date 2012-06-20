@@ -4,7 +4,8 @@
 %% @copyright Copyright 2012 Opscode, Inc.
 -module(bksw_util).
 
--export([file/1,
+-export([get_bucket/1,
+         file/1,
          to_string/1,
          to_binary/1]).
 
@@ -25,3 +26,14 @@ to_binary(Val) when is_list(Val) ->
     erlang:list_to_binary(Val);
 to_binary(Val) when is_binary(Val) ->
     Val.
+
+-spec get_bucket(term()) -> {binary(), term()}.
+get_bucket(Req0) ->
+    case cowboy_http_req:binding(bucket, Req0) of
+        {undefined, _Req1} ->
+            %% We would through a bad match here but you cant have
+            %% guards in a match which is really unfortunate
+            erlang:error(bad_bucket_dep);
+        GoodValue = {_, _} ->
+            GoodValue
+    end.
