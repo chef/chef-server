@@ -25,6 +25,8 @@
 
 -export_type([bucket_name/0, bucket/0, object/0, path/0]).
 
+-define(GEN_SERVER_TIMEOUT, 10000).
+
 %%%===================================================================
 %%% Types
 %%%===================================================================
@@ -115,4 +117,4 @@ obj_recv(BucketName, Path, Trans, Buffer, Length) ->
 -spec call(bucket_name(), Msg::term()) -> term().
 call(BucketName, Msg) ->
     Pid = bkss_store_server:get_bucket_reference(BucketName),
-    gen_server:call(Pid, Msg).
+    gen_server:call(Pid, Msg, ?GEN_SERVER_TIMEOUT).
