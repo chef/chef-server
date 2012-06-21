@@ -8,7 +8,7 @@
 user "opscode-nagios" do
   system true
   shell "/bin/sh"
-  home node['private_chef']['nagios']['dir'] 
+  home node['private_chef']['nagios']['dir']
 end
 
 group "opscode-nagios" do
@@ -18,7 +18,7 @@ end
 user "opscode-nagios-cmd" do
   system true
   shell "/bin/sh"
-  home node['private_chef']['nagios']['dir'] 
+  home node['private_chef']['nagios']['dir']
 end
 
 group "opscode-nagios-cmd" do
@@ -27,7 +27,7 @@ end
 
 nagios_dir = node['private_chef']['nagios']['dir']
 nagios_etc_dir = File.join(nagios_dir, "etc")
-[ 
+[
   nagios_dir,
   nagios_etc_dir,
 ].each do |dir_name|
@@ -51,12 +51,12 @@ directory File.join(nagios_dir, "tmp") do
 end
 
 directory File.join(nagios_dir, "fastcgi") do
-  owner "opscode"
+  owner node['private_chef']['user']['username']
   mode '0755'
 end
 
 directory File.join(nagios_dir, "php-fpm") do
-  owner "opscode"
+  owner node['private_chef']['user']['username']
   mode '0755'
 end
 
@@ -85,7 +85,7 @@ end
 
 php_fpm_log_directory = node['private_chef']['nagios']['php_fpm_log_directory']
 directory php_fpm_log_directory do
-  owner "opscode"
+  owner node['private_chef']['user']['username']
   group "opscode-nagios"
   mode "0775"
   recursive true
@@ -167,12 +167,12 @@ end
 
 if node['private_chef']['bootstrap']['enable']
 	execute "/opt/opscode/bin/private-chef-ctl nagios start" do
-		retries 20 
+		retries 20
 	end
 	execute "/opt/opscode/bin/private-chef-ctl php-fpm start" do
-		retries 20 
+		retries 20
 	end
 	execute "/opt/opscode/bin/private-chef-ctl fcgiwrap start" do
-		retries 20 
+		retries 20
 	end
 end
