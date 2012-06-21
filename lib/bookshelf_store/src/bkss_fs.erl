@@ -33,11 +33,17 @@
 %% magic number that indicates a bookshelf file.
 -define(BKSF_IND, 16#0DDBA11).
 
-%% The total header size
--define(BKSF_HEADER_SIZE, (4 + 14 + 32)).
+%% Header Information
+-define(BKSF_HEADER_SIZE, (4 + 2)).
+
+-define(BKSF_VERSION, 1).
+-define(BKSF_HEADER_DETAIL_SIZE_1, (14 + 32)).
+
+-define(CURRENT_HEADER_SIZE,
+        (?BKSF_HEADER_SIZE + ?BKSF_HEADER_DETAIL_SIZE_1)).
 
 %% This FILE_PAD is appended to the front of files.
--define(FILE_PAD, <<?BKSF_IND:32,
+-define(FILE_PAD, <<?BKSF_IND:32, 0:16,
                     0,0,0,0,0,0,0,0,0,0,
                     0,0,0,0,0,0,0,0,0,0,
                     0,0,0,0,0,0,0,0,0,0,
@@ -153,7 +159,7 @@ obj_copy(State={?MODULE, Dir}, FromBucket, FromPath, ToBucket, ToPath) ->
     {ok, CpySize} =
         file:copy(filename:join([Dir, encode(FromBucket), encode(FromPath)]),
                   filename:join([Dir, encode(ToBucket), encode(ToPath)])),
-    {State, {ok, CpySize - ?BKSF_HEADER_SIZE}}.
+    {State, {ok, CpySize - ?CURRENT_HEADER_SIZE}}.
 
 -spec obj_send(fs_data(), bkss_store:bucket_name(),
                bkss_store:path(), Trans::bkss_transport:trans()) ->
@@ -287,8 +293,15 @@ file_2_object(Dir, BucketPath, BucketName, FilePath) ->
 -spec file_md5(file:io_device()) -> {ok, MD5::binary()}.
 file_md5(File) ->
     case file:read(File, ?BKSF_HEADER_SIZE) of
-        {ok, <<?BKSF_IND:32,
-               _TimeStamp:14/binary, MD5:32/binary>>} ->
+        {ok, <<?BKSF_IND:32/integer, Version:16/integer>>} ->
+            parse_header(File, Version);
+        _ ->
+            {error, invalid_file}
+    end.
+
+parse_header(File, 1) ->
+    case file:read(File, ?BKSF_HEADER_DETAIL_SIZE_1) of
+        {ok, <<_DateStamp:14/binary, MD5:32/binary>>} ->
             {ok, MD5};
         _ ->
             {error, invalid_file}
@@ -310,8 +323,8 @@ obj_open(Path, Opts) ->
 -spec handle_file_pad(file:io_device(), boolean(), list()) -> ok.
 handle_file_pad(File, true, _Opts) ->
     %% Reading or writing we want to make sure we are
-    %% avoding the header
-    {ok, ?BKSF_HEADER_SIZE} = file:position(File, ?BKSF_HEADER_SIZE);
+    %% avoiding the header
+    {ok, ?CURRENT_HEADER_SIZE} = file:position(File, ?CURRENT_HEADER_SIZE);
 handle_file_pad(File, false, Opts) ->
     case lists:member(write, Opts) of
         true ->
@@ -344,9 +357,13 @@ obj_write({File, Ctx}, Chunk) ->
 obj_close({File, Ctx}) ->
     FinalMD5 = erlang:md5_final(Ctx),
     %% The first four bytes are the BKSF indicator
-    {ok, 4} = file:position(File, 4),
-    file:write(File, create_timestamp()),
-    file:write(File, to_hex(FinalMD5)),
+    {ok, 0} = file:position(File, 0),
+    Timestamp = create_timestamp(),
+    MD5 = to_hex(FinalMD5),
+    file:write(File, <<?BKSF_IND:32/integer,
+                       ?BKSF_VERSION:16/integer,
+                       Timestamp:14/binary,
+                       MD5:32/binary>>),
     case file:close(File) of
         ok  ->
             {ok, FinalMD5};
