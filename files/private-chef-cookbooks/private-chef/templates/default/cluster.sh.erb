@@ -106,15 +106,8 @@ function unlock
   trap - INT TERM EXIT
 }
 
-# must be longer than unicorn 60 second timeout
-export SVWAIT=30
-
-requested_state_file=/var/opt/opscode/keepalived/requested_cluster_status
-current_state_file=/var/opt/opscode/keepalived/current_cluster_status
-echo $1 > $requested_state_file
-
-lockfile=/var/opt/opscode/keepalived/cluster-transition.lock
-if lock $lockfile; then
+function transition_loop
+{
    transition "$1"
    log_me "Transitioned to $1"
    transitioned_to=$1
