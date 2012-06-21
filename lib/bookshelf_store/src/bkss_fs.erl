@@ -411,9 +411,9 @@ obj_meta_internal(Dir, Bucket, Path) ->
 -spec to_hex(binary()) -> binary().
 to_hex(Bin) ->
     erlang:iolist_to_binary(
-      string:to_lower(lists:flatten([io_lib:format("~2.16.0b",
-                                                   [N])
-                                     || <<N>> <= Bin]))).
+      [io_lib:format("~2.16.0b",
+                     [N])
+       || <<N>> <= Bin]).
 
 -spec create_timestamp() -> binary().
 create_timestamp() ->
