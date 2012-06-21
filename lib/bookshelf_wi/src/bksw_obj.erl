@@ -34,38 +34,34 @@ content_types_accepted(Rq, St) ->
     {[{'*', upload_or_copy}], Rq, St}.
 
 resource_exists(Rq0, St) ->
-    {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
-    {Path, Rq2} = get_object_name(Rq1),
-    {bookshelf_store:obj_exists(Bucket, Path), Rq2, St}.
+    {Bucket, Path, Rq1} = get_object_name(Rq0),
+    {bookshelf_store:obj_exists(Bucket, Path), Rq1, St}.
 
 delete_resource(Rq0, St) ->
-    {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
-    {Path, Rq2} = get_object_name(Rq1),
+    {Bucket, Path, Rq1} = get_object_name(Rq0),
     case bookshelf_store:obj_delete(Bucket, Path) of
         ok ->
-            {true, Rq2, St};
+            {true, Rq1, St};
         _ ->
-            {false, Rq2, St}
+            {false, Rq1, St}
     end.
 
 last_modified(Rq0, St) ->
-    {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
-    {Path, Rq2} = get_object_name(Rq1),
+    {Bucket, Path, Rq1} = get_object_name(Rq0),
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{date = Date}} ->
-            {Date, Rq2, St};
+            {Date, Rq1, St};
         _ ->
-            {halt, Rq2, St}
+            {halt, Rq1, St}
     end.
 
 generate_etag(Rq0, St) ->
-    {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
-    {Path, Rq2} = get_object_name(Rq1),
+    {Bucket, Path, Rq1} = get_object_name(Rq0),
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{digest = Digest}} ->
-            {{strong, Digest}, Rq2, St};
+            {{strong, Digest}, Rq1, St};
         _ ->
-            {halt, Rq2, St}
+            {halt, Rq1, St}
     end.
 
 upload_or_copy(Rq0, St) ->
@@ -81,13 +77,11 @@ upload_or_copy(Rq0, St) ->
     end.
 
 download(Rq0, St) ->
-    {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
-    {Path, Rq2} = get_object_name(Rq1),
-
+    {Bucket, Path, Rq1} = get_object_name(Rq0),
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{size = Size}} ->
             SFun = fun () ->
-                           Bridge = bkss_transport:new(bksw_socket_transport, Rq2),
+                           Bridge = bkss_transport:new(bksw_socket_transport, Rq1),
                            case bookshelf_store:obj_send(Bucket, Path, Bridge) of
                                {_Rq2, {ok, Size}} ->
                                    sent;
@@ -95,22 +89,30 @@ download(Rq0, St) ->
                                    {error, "Download unsuccessful"}
                            end
                    end,
-            {{stream, Size, SFun}, Rq2, St};
+            {{stream, Size, SFun}, Rq1, St};
         _ ->
-            {false, Rq2, St}
+            {false, Rq1, St}
     end.
 
 %%===================================================================
 %% Internal Functions
 %%===================================================================
 get_object_name(Rq0) ->
-    case cowboy_http_req:path_info(Rq0) of
+    {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
+    case cowboy_http_req:path(Rq1) of
         {undefined, _} ->
             erlang:error(missing_path_info);
-        {Path, Rq1} ->
-            %% Paths are always one name joined by a path seperator. Cowboy splits them up
-            %% but we don t actually want that.
-            {filename:join(Path), Rq1}
+        {[PossibleBucket | Path], Rq2} ->
+            case Bucket of
+                PossibleBucket ->
+                    %% Paths are always one name joined by a path seperator. Cowboy splits them up
+                    %% but we don t actually want that.
+                    {Bucket, filename:join(Path), Rq2};
+                _ ->
+                    %% Paths are always one name joined by a path seperator. Cowboy splits them up
+                    %% but we don t actually want that.
+                    {Bucket, filename:join([PossibleBucket | Path]), Rq2}
+            end
     end.
 
 halt(Code, Rq, St) ->
@@ -118,37 +120,32 @@ halt(Code, Rq, St) ->
     {halt, Rq2, St}.
 
 upload(Rq0, St) ->
-    {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
-    {Path, Rq2} = get_object_name(Rq1),
-    {Length, Rq3} =
-        cowboy_http_req:parse_header('Content-Length', Rq2),
-    Bridge = bkss_transport:new(bksw_socket_transport, Rq3),
+    {Bucket, Path, Rq1} = get_object_name(Rq0),
+    {Length, Rq2} =
+        cowboy_http_req:parse_header('Content-Length', Rq1),
+    Bridge = bkss_transport:new(bksw_socket_transport, Rq2),
     case bookshelf_store:obj_recv(Bucket, Path, Bridge, <<>>, Length) of
-        {Rq4, {ok, Digest}} ->
+        {Rq3, {ok, Digest}} ->
             OurMd5 = bksw_format:to_hex(Digest),
-            case cowboy_http_req:parse_header('Content-MD5', Rq4) of
-                {undefined, undefined, Rq5} ->
-                    Rq6 = bksw_req:with_etag(OurMd5, Rq5),
-                    halt(202, Rq6, St);
-                {undefined, Rq5} ->
-            error_logger:error_msg("A3:~s", [Path]),
-                    Rq6 = bksw_req:with_etag(OurMd5, Rq5),
-                    halt(202, Rq6, St);
-                {RequestMd5, Rq5} ->
-            error_logger:error_msg("A4:~s", [Path]),
+            case cowboy_http_req:parse_header('Content-MD5', Rq3) of
+                {undefined, undefined, Rq4} ->
+                    Rq5 = bksw_req:with_etag(OurMd5, Rq4),
+                    halt(202, Rq5, St);
+                {undefined, Rq4} ->
+                    Rq5 = bksw_req:with_etag(OurMd5, Rq4),
+                    halt(202, Rq5, St);
+                {RequestMd5, Rq4} ->
                     case RequestMd5 =:= OurMd5 of
                         true ->
-                            Rq6 = bksw_req:with_etag(RequestMd5, Rq5),
-                            halt(202, Rq6, St);
+                            Rq5 = bksw_req:with_etag(RequestMd5, Rq4),
+                            halt(202, Rq5, St);
                         _ ->
-                            halt(406, Rq5, St)
+                            halt(406, Rq4, St)
                     end
             end;
         {Rq4, {error, timeout}} ->
-            error_logger:error_msg("A5"),
             halt(408, Rq4, St);
         {Rq4, _} ->
-            error_logger:error_msg("A6"),
             halt(500, Rq4, St)
     end.
 

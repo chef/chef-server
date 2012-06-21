@@ -35,6 +35,7 @@ init_per_testcase(sec_fail, Config0) ->
 init_per_testcase(_TestCase, Config) ->
     %% This fixes another rebar brokenness. We cant specify any options to
     %% common test in rebar
+    seed(erlang:phash2(now)),
     DiskStore = filename:join(proplists:get_value(priv_dir, Config),
                               random_string(10, "abcdefghijklmnopqrstuvwxyz")),
     filelib:ensure_dir(filename:join(DiskStore, "tmp")),
@@ -48,7 +49,7 @@ init_per_testcase(_TestCase, Config) ->
                           lists:flatten(io_lib:format("http://localhost.localdomain:~p",
                                                       [Port])),
                           path),
-    [{s3_conf, S3State} | Config].
+    [{s3_conf, S3State}, {disk_store, DiskStore} | Config].
 
 end_per_testcase(_TestCase, _Config) ->
     bksw_app:manual_stop(),
@@ -72,7 +73,7 @@ wi_basic(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
     %% Get much more then about 800 here and you start running out of file
     %% descriptors on a normal box
-    Count = 100,
+    Count = 2,
     Buckets = [random_binary() || _ <- lists:seq(1, Count)],
     Res = ec_plists:map(fun(B) ->
                                 mini_s3:create_bucket(B, public_read_write, none, S3Conf)
@@ -99,17 +100,19 @@ put_object(Config) when is_list(Config) ->
     BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
     ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
     ?assertEqual([], proplists:get_value(contents, BucketContents)),
+    Count = 2,
     Objs = [filename:join(random_binary(), random_binary()) ||
-               _ <- lists:seq(1,100)],
+               _ <- lists:seq(1,Count)],
     ec_plists:map(fun(F) ->
-                          mini_s3:put_object(Bucket, F, F, [], [], S3Conf),
-                          error_logger:error_msg("000")
+                          mini_s3:put_object(Bucket, F, F, [], [], S3Conf)
                   end, Objs),
     Result = mini_s3:list_objects(Bucket, [], S3Conf),
     ObjList = proplists:get_value(contents, Result),
-    ?assertEqual(100, length(ObjList)),
+    ?assertEqual(Count, length(ObjList)),
     ec_plists:map(fun(Obj) ->
-                          error_logger:error_msg("---<<-->>~p", [Obj])
+                          Key = proplists:get_value(key, Obj),
+                          ObjDetail = mini_s3:get_object(Bucket, Key, [], S3Conf),
+                          ?assertMatch(Key, proplists:get_value(contents, ObjDetail))
                   end, ObjList).
 
 sec_fail(doc) ->
