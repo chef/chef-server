@@ -563,7 +563,6 @@ default['private_chef']['logs']['log_retention'] = {
   "opscode-account" => 14,
   "opscode-solr" => 14,
   "opscode-expander" => 14,
-  "opscode-expander" => 14,
   "opscode-org-creator" => 14,
   "opscode-chef" => 14,
   "opscode-erchef" => 14,
