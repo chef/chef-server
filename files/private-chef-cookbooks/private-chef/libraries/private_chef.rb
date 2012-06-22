@@ -181,6 +181,7 @@ module PrivateChef
         "nrpe",
         "nginx",
         "ldap",
+        "user",
 
         ## Temporary until bookshelf is online
         "aws"
