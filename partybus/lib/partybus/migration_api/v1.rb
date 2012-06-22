@@ -19,7 +19,7 @@ module Partybus
       def upgrade_schema_to(version)
         role = Partybus.config.private_chef_role
         log("\tPrivate Chef Role: #{role}")
-        if role == "backend" && config.bootstrap_server
+        if role == "backend" && Partybus.config.bootstrap_server
           if db_up?
             log("\tDatabase Up")
             perform_schema_upgrade(version)
