@@ -1,6 +1,8 @@
 ERL = $(shell which erl)
 PLTFILE = .depsolver.plt
 
+ERLFLAGS= -pa ebin -pa $(CURDIR)/*/ebin
+
 REBAR=$(shell which rebar)
 
 ifeq ($(REBAR),)
@@ -26,7 +28,7 @@ eunit:
 $(PLTFILE):
 	@dialyzer --build_plt --apps stdlib crypto erts kernel public_key eunit --output_plt $(PLTFILE)
 
-check-plt: $(PLTFILE)
+dialyzer: $(PLTFILE)
 	@dialyzer --plt $(PLTFILE) -c ./src --src
 
 clean-plt:
@@ -39,6 +41,6 @@ shell: compile
 # fails (thats probably why You want them in the shell). This
 # runs eunit but tells make to ignore the result.
 	- @$(REBAR) eunit
-	@$(ERL) -pa ebin
+	@$(ERL) $(ERLFLAGS)
 
 distclean: clean clean-plt
