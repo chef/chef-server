@@ -356,7 +356,7 @@ goble_lines(Device) ->
     goble_lines(Device, io:get_line(Device, ""), []).
 
 run_log_file(Device) ->
-    State0 = depsolver:new(),
+    State0 = depsolver:new_graph(),
     {Goals, State2} =
         lists:foldl(fun(Line, Data) ->
                             process_add_goal(Line,
@@ -396,7 +396,7 @@ process_line(Device, Pkg, Acc) ->
 process_packages(Pkgs) ->
     lists:foldl(fun({Pkg, Vsn, Constraints}, Dom0) ->
                         depsolver:add_package_version(Dom0, Pkg, Vsn, Constraints)
-                end, depsolver:new(), Pkgs).
+                end, depsolver:new_graph(), Pkgs).
 
 get_constraints(ConLine) ->
     AppVsns = string:tokens(ConLine, " \n"),

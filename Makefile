@@ -20,8 +20,6 @@ doc:
 clean:
 	@$(REBAR) clean
 
-test: eunit
-
 eunit:
 	@$(REBAR) eunit
 
@@ -47,5 +45,5 @@ shell: compile
 	@$(ERL) $(ERLFLAGS)
 
 distclean: clean clean-plt
-	@rm -rvf deps/*
-        @rm -rf $(PLTFILE)
+	@rm -rvf $(CURDIR)/deps/*
+	@rm -rf $(PLTFILE)
