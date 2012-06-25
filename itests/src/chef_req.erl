@@ -17,7 +17,7 @@
 
 -include("chef_req.hrl").
 -include_lib("eunit/include/eunit.hrl").
--include_lib("chef_common/include/ej.hrl").
+-include_lib("ej/include/ej.hrl").
 -include_lib("chef_common/include/chef_rest_client.hrl").
 
 -define(gv(K, L), proplists:get_value(K, L)).
