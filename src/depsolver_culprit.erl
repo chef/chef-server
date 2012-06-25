@@ -4,7 +4,7 @@
 %%% @author Eric Merritt <ericbmerritt@gmail.com>
 %%% @doc
 %%%  This app does the culprit search for a failed solve. It searches
-%%%  throw the goals provided by the user trying to find the first one
+%%%  through the goals provided by the user trying to find the first one
 %%%  that fails. It then returns that as the culprit along with the
 %%%  unknown apps from the goal, the version constrained apps from the
 %%%  goal, and the good apps (those not immediately constrained from
