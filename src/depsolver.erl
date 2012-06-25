@@ -4,8 +4,8 @@
 %%% @author Eric Merritt <ericbmerritt@gmail.com>
 %%% @doc
 
-%%% This is a dependency constraint solver. You add your 'world' the
-%%% solver. That is the packages that exist, thier versions and their
+%%% This is a dependency constraint solver. You add your 'world' to the
+%%% solver. That is the packages that exist, their versions and their
 %%% dependencies. Then give the system a set of targets and ask it to solve.
 %%%
 %%%  Lets say our world looks as follows
