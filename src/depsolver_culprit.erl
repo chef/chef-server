@@ -32,19 +32,19 @@
 search(State, ActiveCons=[Culprit | _], []) ->
     case depsolver:primitive_solve(State, ActiveCons) of
         fail ->
-            erlang:throw(format_culprit_error(State, Culprit, ActiveCons));
+            format_culprit_error(State, Culprit, ActiveCons);
         _Success ->
             %% This should *never* happen. 'Culprit' above represents the last
             %% possible constraint that could cause things to fail. There for
             %% this should have failed as well.
-            erlang:throw(inconsistant_graph_state)
+            inconsistant_graph_state
     end;
 search(State, ActiveCons=[PossibleCulprit | _], [NewCon | Constraints]) ->
     case depsolver:primitive_solve(State, ActiveCons) of
         fail ->
-            erlang:throw(format_culprit_error(State,
-                                              PossibleCulprit,
-                                              ActiveCons));
+            format_culprit_error(State,
+                                 PossibleCulprit,
+                                 ActiveCons);
         _Success ->
             %% Move one constraint from the inactive to the active
             %% constraints and run again
@@ -143,10 +143,10 @@ missing_test() ->
                                                     {"0.3", []}]}]),
 
 
-    ?assertThrow({unreachable_package,app4},
+    ?assertMatch({error, {unreachable_package,app4}},
                  depsolver:solve(Dom0, [{app4, "0.1"}, {app3, "0.1"}])),
 
-    ?assertThrow({unreachable_package,app4},
+    ?assertMatch({error, {unreachable_package,app4}},
                  depsolver:solve(Dom0, [{app1, "0.1"}])).
 
 -endif.

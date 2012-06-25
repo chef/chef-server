@@ -87,7 +87,8 @@
 -type pkg() :: {pkg_name(), vsn()}.
 -type pkg_name() :: string() | atom().
 -type vsn() :: string().
--type constraint() :: {pkg_name(), vsn()}
+-type constraint() :: pkg_name()
+                    | {pkg_name(), vsn()}
                     | {pkg_name(), vsn(), gte}
                     | {pkg_name(), vsn(),'>='}
                     | {pkg_name(), vsn(), lte}
@@ -97,7 +98,7 @@
                     | {pkg_name(), vsn(), lt}
                     | {pkg_name(), vsn(), '<'}
                     | {pkg_name(), vsn(), vsn(), between}.
--type dependency_set() :: {pkg(), [{vsn(), [constraint()] | []}]}.
+-type dependency_set() :: {pkg_name(), [{vsn(), [constraint()] | []}]}.
 
 %% Internal Types
 -type constraints() :: [constraint()].
@@ -149,16 +150,17 @@ add_package_version(State, Pkg, Vsn) ->
 -spec solve(t(), [constraint()]) -> [pkg()].
 solve({?MODULE, State0}, PackageList)
   when erlang:length(PackageList) > 0 ->
-    State1 = trim_unreachable_packages(State0, PackageList),
-    case primitive_solve(State1, PackageList) of
-        false ->
-            %% This exists to satisfy dailyzer though it should never happen
-            erlang:throw({this_should_never_happen, fail});
-        fail ->
-            [FirstCons | Rest] = PackageList,
-            depsolver_culprit:search(State1, [FirstCons], Rest);
-        Solution ->
-            Solution
+    case trim_unreachable_packages(State0, PackageList) of
+        Error = {error, _} ->
+            Error;
+        State1 ->
+            case primitive_solve(State1, PackageList) of
+                fail ->
+                    [FirstCons | Rest] = PackageList,
+                    {error, depsolver_culprit:search(State1, [FirstCons], Rest)};
+                Solution ->
+                    {ok, Solution}
+            end
     end.
 
 %%====================================================================
@@ -390,11 +392,14 @@ lists_some(F, [H | T], False) ->
 
 trim_unreachable_packages(State, Goals) ->
     {_, NewState0} = new(),
-    lists:foldl(fun(Pkg, NewState1) ->
+    lists:foldl(fun(_, Error = {error, _}) ->
+                        Error;
+                   (Pkg, NewState1) ->
                         PkgName = dep_pkg(Pkg),
                         find_reachable_packages(State, NewState1, PkgName)
                 end, NewState0, Goals).
-
+find_reachable_packages(_, Error = {error, {unreachable_package, _PkgName}}, _)->
+    Error;
 find_reachable_packages(ExistingState, NewState0, PkgName) ->
     case contains_package_version(NewState0, PkgName) of
         true ->
@@ -403,8 +408,12 @@ find_reachable_packages(ExistingState, NewState0, PkgName) ->
             case gb_trees:lookup(make_key(PkgName), ExistingState) of
                 {value, Info0} ->
                     NewState1 = gb_trees:insert(make_key(PkgName), Info0, NewState0),
-                    lists:foldl(fun({_Vsn, Constraints}, NewState2) ->
-                                        lists:foldl(fun(DepPkg, NewState3) ->
+                    lists:foldl(fun({_Vsn, _Constraints}, Error={error, _}) ->
+                                        Error;
+                                   ({_Vsn, Constraints}, NewState2) ->
+                                        lists:foldl(fun(_DepPkg, Error={error, _}) ->
+                                                            Error;
+                                                       (DepPkg, NewState3) ->
                                                             DepPkgName = dep_pkg(DepPkg),
                                                             find_reachable_packages(ExistingState,
                                                                                     NewState3,
@@ -412,7 +421,7 @@ find_reachable_packages(ExistingState, NewState0, PkgName) ->
                                                     end, NewState2, Constraints)
                                 end, NewState1, Info0);
                 none ->
-                    erlang:throw({unreachable_package, PkgName})
+                    {error, {unreachable_package, PkgName}}
             end
     end.
 
@@ -440,10 +449,10 @@ first_test() ->
 
 
     X = solve(Dom0, [{app1, "0.1"}]),
-    ?assertMatch([{app3,"0.3"},
-                  {app2,"0.2"},
-                  {app1,"0.1"}],
-                 X).
+    ?assertMatch({ok, [{app3,"0.3"},
+                       {app2,"0.2"},
+                       {app1,"0.1"}]},
+                  X).
 
 second_test() ->
 
@@ -465,10 +474,10 @@ second_test() ->
 
     X = solve(Dom0, [{app1, "0.1"},
                      {app2, "0.3"}]),
-    ?assertMatch([{app3,"0.3"},
-                  {app2,"0.3"},
-                  {app4,"0.2"},
-                  {app1,"0.1"}],
+    ?assertMatch({ok, [{app3,"0.3"},
+                       {app2,"0.3"},
+                       {app4,"0.2"},
+                       {app1,"0.1"}]},
                  X).
 
 third_test() ->
@@ -501,19 +510,19 @@ third_test() ->
                                        {"0.3.0", []},
                                        {"2.0.0", []},
                                        {"6.0.0", []}]}]),
-    ?assertMatch([{app5,"6.0.0"},
-                  {app3,"0.1.3"},
-                  {app4,"6.0.0"},
-                  {app2,"3.0"},
-                  {app1,"3.0"}],
+    ?assertMatch({ok, [{app5,"6.0.0"},
+                       {app3,"0.1.3"},
+                       {app4,"6.0.0"},
+                       {app2,"3.0"},
+                       {app1,"3.0"}]},
                  solve(Dom0, [{app1, "3.0"}])),
 
 
-    ?assertMatch([{app5,"6.0.0"},
-                  {app3,"0.1.3"},
-                  {app4,"6.0.0"},
-                  {app2,"3.0"},
-                  {app1,"3.0"}],
+    ?assertMatch({ok, [{app5,"6.0.0"},
+                       {app3,"0.1.3"},
+                       {app4,"6.0.0"},
+                       {app2,"3.0"},
+                       {app1,"3.0"}]},
                  solve(Dom0, [app1, app2, app5])).
 
 fail_test() ->
@@ -529,8 +538,8 @@ fail_test() ->
                                        {"0.3", []}]}]),
 
 
-    ?assertThrow({unable_to_solve, {app1,"0.1"},
-                  {[], [], [{app1, "0.1"}]}},
+    ?assertMatch({error, {unable_to_solve, {app1,"0.1"},
+                          {[], [], [{app1, "0.1"}]}}},
                  solve(Dom0, [{app1, "0.1"}])).
 
 conflicting_passing_test() ->
@@ -564,18 +573,18 @@ conflicting_passing_test() ->
                                        {"2.0.0", []},
                                        {"6.0.0", []}]}]),
 
-    ?assertMatch([{app5,"2.0.0"},
-                  {app3,"0.1.3"},
-                  {app4,"5.0.0"},
-                  {app2,"3.0"},
-                  {app1,"3.0"}],
+    ?assertMatch({ok, [{app5,"2.0.0"},
+                       {app3,"0.1.3"},
+                       {app4,"5.0.0"},
+                       {app2,"3.0"},
+                       {app1,"3.0"}]},
                  solve(Dom0, [{app1, "3.0"}])),
 
-    ?assertMatch([{app5,"2.0.0"},
-                  {app3,"0.1.3"},
-                  {app4,"5.0.0"},
-                  {app2,"3.0"},
-                  {app1,"3.0"}],
+    ?assertMatch({ok, [{app5,"2.0.0"},
+                       {app3,"0.1.3"},
+                       {app4,"5.0.0"},
+                       {app2,"3.0"},
+                       {app1,"3.0"}]},
                  solve(Dom0, [app1, app2, app5])).
 
 
@@ -584,7 +593,7 @@ circular_dependencies_test() ->
     Dom0 = add_packages(new(), [{app1, [{"0.1.0", [app2]}]},
                                {app2, [{"0.0.1", [app1]}]}]),
 
-    ?assertMatch([{app1,"0.1.0"},{app2,"0.0.1"}],
+    ?assertMatch({ok, [{app1,"0.1.0"},{app2,"0.0.1"}]},
                  solve(Dom0, [{app1, "0.1.0"}])).
 
 conflicting_failing_test() ->
@@ -602,7 +611,7 @@ conflicting_failing_test() ->
                                {app5, [{"2.0.0", []},
                                        {"6.0.0", []}]}]),
 
-    ?assertThrow({unable_to_solve,app3,{[],[],[app1,app3]}},
+    ?assertMatch({error, {unable_to_solve,app3,{[],[],[app1,app3]}}},
                  solve(Dom0, [app1, app3])).
 
 -endif.
