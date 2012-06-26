@@ -187,7 +187,7 @@ add_package_version({?MODULE, Dom0}, Pkg, RawVsn, RawPkgConstraints) ->
     %% and need to be fixed
     PkgConstraints = [fix_con(PkgConstraint) ||
                          PkgConstraint <- RawPkgConstraints],
-   Info2 =
+    Info2 =
         case gb_trees:lookup(Pkg, Dom0) of
             {value, Info0} ->
                 case lists:keytake(Vsn, 1, Info0) of
@@ -457,7 +457,7 @@ is_version_within_constraint(Vsn, {_Pkg, LVsn, '~>'}) ->
 is_version_within_constraint(Vsn, {_Pkg, LVsn1, LVsn2, between}) ->
     NVsn = normalize_version(Vsn),
     NVsn >= normalize_version(LVsn1) andalso
-       NVsn =< normalize_version(LVsn2);
+        NVsn =< normalize_version(LVsn2);
 is_version_within_constraint(_Vsn, _Pkg) ->
     false.
 
@@ -582,7 +582,7 @@ lists_some(F, Args) ->
     lists_some(F, Args, false).
 
 -spec lists_some(evaluator(A, Return, FailIndicator), [A], FailIndicator) ->
-                       Return | FailIndicator.
+                        Return | FailIndicator.
 lists_some(_, [], False) ->
     False;
 lists_some(F, [H | T], False) ->
@@ -659,40 +659,40 @@ contains_package_version(Dom0, PkgName) ->
 
 first_test() ->
     Dom0 = add_packages(new_graph(), [{app1, [{"0.1", [{app2, "0.2"},
-                                                {app3, "0.2", '>='}]},
-                                       {"0.2", []},
-                                       {"0.3", []}]},
-                               {app2, [{"0.1", []},
-                                       {"0.2",[{app3, "0.3"}]},
-                                       {"0.3", []}]},
-                               {app3, [{"0.1", []},
-                                       {"0.2", []},
-                                       {"0.3", []}]}]),
+                                                       {app3, "0.2", '>='}]},
+                                              {"0.2", []},
+                                              {"0.3", []}]},
+                                      {app2, [{"0.1", []},
+                                              {"0.2",[{app3, "0.3"}]},
+                                              {"0.3", []}]},
+                                      {app3, [{"0.1", []},
+                                              {"0.2", []},
+                                              {"0.3", []}]}]),
 
 
     X = solve(Dom0, [{app1, "0.1"}]),
     ?assertMatch({ok, [{app3,{0,3}},
                        {app2,{0,2}},
                        {app1,{0,1}}]},
-                  X).
+                 X).
 
 second_test() ->
 
     Dom0 = add_packages(new_graph(), [{app1, [{"0.1", [{app2, "0.1", '>='},
-                                                {app4, "0.2"},
-                                                {app3, "0.2", '>='}]},
-                                       {"0.2", []},
-                                       {"0.3", []}]},
-                               {app2, [{"0.1", [{app3, "0.2", gte}]},
-                                       {"0.2", [{app3, "0.2", gte}]},
-                                       {"0.3", [{app3, "0.2", '>='}]}]},
-                               {app3, [{"0.1", [{app4, "0.2", '>='}]},
-                                       {"0.2", [{app4, "0.2"}]},
-                                       {"0.3", []}]},
-                               {app4, [{"0.1", []},
-                                       {"0.2", [{app2, "0.2", gte},
-                                                {app3, "0.3"}]},
-                                       {"0.3", []}]}]),
+                                                       {app4, "0.2"},
+                                                       {app3, "0.2", '>='}]},
+                                              {"0.2", []},
+                                              {"0.3", []}]},
+                                      {app2, [{"0.1", [{app3, "0.2", gte}]},
+                                              {"0.2", [{app3, "0.2", gte}]},
+                                              {"0.3", [{app3, "0.2", '>='}]}]},
+                                      {app3, [{"0.1", [{app4, "0.2", '>='}]},
+                                              {"0.2", [{app4, "0.2"}]},
+                                              {"0.3", []}]},
+                                      {app4, [{"0.1", []},
+                                              {"0.2", [{app2, "0.2", gte},
+                                                       {app3, "0.3"}]},
+                                              {"0.3", []}]}]),
 
     X = solve(Dom0, [{app1, "0.1"},
                      {app2, "0.3"}]),
@@ -750,15 +750,15 @@ third_test() ->
 
 fail_test() ->
     Dom0 = add_packages(new_graph(), [{app1, [{"0.1", [{app2, "0.2"},
-                                                {app3, "0.2", gte}]},
-                                       {"0.2", []},
-                                       {"0.3", []}]},
-                               {app2, [{"0.1", []},
-                                       {"0.2",[{app3, "0.1"}]},
-                                       {"0.3", []}]},
-                               {app3, [{"0.1", []},
-                                       {"0.2", []},
-                                       {"0.3", []}]}]),
+                                                       {app3, "0.2", gte}]},
+                                              {"0.2", []},
+                                              {"0.3", []}]},
+                                      {app2, [{"0.1", []},
+                                              {"0.2",[{app3, "0.1"}]},
+                                              {"0.3", []}]},
+                                      {app3, [{"0.1", []},
+                                              {"0.2", []},
+                                              {"0.3", []}]}]),
 
 
     ?assertMatch({error, {unable_to_solve, {app1,{0,1}},
@@ -775,26 +775,26 @@ conflicting_passing_test() ->
     Pkg3Deps = [{app5, "2.0.0", '>='}],
 
     Dom0 = add_packages(new_graph(), [{app1, [{"0.1.0", Pkg1Deps},
-                                       {"0.1.0", Pkg1Deps},
-                                       {"0.2", Pkg1Deps},
-                                       {"3.0", Pkg1Deps}]},
-                               {app2, [{"0.0.1", Pkg2Deps},
-                                       {"0.1", Pkg2Deps},
-                                       {"1.0", Pkg2Deps},
-                                       {"3.0", Pkg2Deps}]},
-                               {app3, [{"0.1.0", Pkg3Deps},
-                                       {"0.1.3", Pkg3Deps},
-                                       {"2.0.0", Pkg3Deps},
-                                       {"3.0.0", Pkg3Deps},
-                                       {"4.0.0", Pkg3Deps}]},
-                               {app4, [{"0.1.0", [{app5, "0.1.0"}]},
-                                       {"0.3.0", [{app5, "0.3.0"}]},
-                                       {"5.0.0", [{app5, "2.0.0"}]},
-                                       {"6.0.0", [{app5, "6.0.0"}]}]},
-                               {app5, [{"0.1.0", []},
-                                       {"0.3.0", []},
-                                       {"2.0.0", []},
-                                       {"6.0.0", []}]}]),
+                                              {"0.1.0", Pkg1Deps},
+                                              {"0.2", Pkg1Deps},
+                                              {"3.0", Pkg1Deps}]},
+                                      {app2, [{"0.0.1", Pkg2Deps},
+                                              {"0.1", Pkg2Deps},
+                                              {"1.0", Pkg2Deps},
+                                              {"3.0", Pkg2Deps}]},
+                                      {app3, [{"0.1.0", Pkg3Deps},
+                                              {"0.1.3", Pkg3Deps},
+                                              {"2.0.0", Pkg3Deps},
+                                              {"3.0.0", Pkg3Deps},
+                                              {"4.0.0", Pkg3Deps}]},
+                                      {app4, [{"0.1.0", [{app5, "0.1.0"}]},
+                                              {"0.3.0", [{app5, "0.3.0"}]},
+                                              {"5.0.0", [{app5, "2.0.0"}]},
+                                              {"6.0.0", [{app5, "6.0.0"}]}]},
+                                      {app5, [{"0.1.0", []},
+                                              {"0.3.0", []},
+                                              {"2.0.0", []},
+                                              {"6.0.0", []}]}]),
 
     ?assertMatch({ok, [{app5,{2,0,0}},
                        {app3,{0,1,3}},
@@ -814,7 +814,7 @@ conflicting_passing_test() ->
 
 circular_dependencies_test() ->
     Dom0 = add_packages(new_graph(), [{app1, [{"0.1.0", [app2]}]},
-                               {app2, [{"0.0.1", [app1]}]}]),
+                                      {app2, [{"0.0.1", [app1]}]}]),
 
     ?assertMatch({ok, [{app1,{0,1,0}},{app2,{0,0,1}}]},
                  solve(Dom0, [{app1, "0.1.0"}])).
@@ -829,11 +829,11 @@ conflicting_failing_test() ->
 
 
     Dom0 = add_packages(new_graph(), [{app1, [{"3.0", Pkg1Deps}]},
-                               {app2, [{"0.0.1", Pkg2Deps}]},
-                               {app3, [{"0.1.0", Pkg3Deps}]},
-                               {app4, [{"5.0.0", [{app5, "2.0.0"}]}]},
-                               {app5, [{"2.0.0", []},
-                                       {"6.0.0", []}]}]),
+                                      {app2, [{"0.0.1", Pkg2Deps}]},
+                                      {app3, [{"0.1.0", Pkg3Deps}]},
+                                      {app4, [{"5.0.0", [{app5, "2.0.0"}]}]},
+                                      {app5, [{"2.0.0", []},
+                                              {"6.0.0", []}]}]),
 
     ?assertMatch({error, {unable_to_solve,app3,{[],[],[app1,app3]}}},
                  solve(Dom0, [app1, app3])).
