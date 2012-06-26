@@ -64,7 +64,8 @@
          add_package/3,
          add_package_version/3,
          add_package_version/4,
-         parse_version/1]).
+         parse_version/1,
+         filter_packages/2]).
 
 %% Internally Exported API. This should *not* be used outside of the depsolver
 %% application. You have been warned.
@@ -265,10 +266,34 @@ parse_version(Vsn = {Major})
        Major >= 0 ->
     Vsn.
 
+%% @doc given a list of package name version pairs, and a list of constraints
+%% return every member of that list that matches all constraints.
+-spec filter_packages([{pkg_name(), raw_vsn()}], [raw_constraint()]) ->
+                             [{pkg_name(), raw_vsn()}].
+filter_packages(PVPairs, RawConstraints) ->
+    Constraints = [fix_con(Constraint) || Constraint <- RawConstraints],
+    [PVPair || PVPair <- PVPairs,
+               filter_pvpair_by_constraint(fix_con(PVPair), Constraints)].
+
 
 %%====================================================================
 %% Internal Functions
 %%====================================================================
+filter_pvpair_by_constraint(PVPair, Constraints) ->
+    lists:all(fun(Constraint) ->
+                      filter_package(PVPair, Constraint)
+              end, Constraints).
+
+filter_package({PkgName, Vsn}, C = {PkgName, _}) ->
+    is_version_within_constraint(Vsn, C);
+filter_package({PkgName, Vsn}, C = {PkgName, _, _}) ->
+    is_version_within_constraint(Vsn, C);
+filter_package({PkgName, Vsn}, C = {PkgName, _, _, _}) ->
+    is_version_within_constraint(Vsn, C);
+filter_package(_, _) ->
+    %% If its not explicitly excluded its included
+    true.
+
 %% @doc
 %% fix package. Take a package with a possible invalid version and fix it.
 -spec fix_con(raw_constraint()) -> constraint().
@@ -889,5 +914,50 @@ pessimistic_major_minor_test() ->
                        {app2,{2,2}},
                        {app1,{3,0}}]},
                  solve(Dom0, [{app1, "3.0"}])).
+
+filter_versions_test() ->
+
+    Cons = [{app2, "2.1", '~>'},
+            {app3, "0.1.1", "0.1.5", between},
+            {app4, "5.0.0", gte},
+            {app5, "2.0.0", '>='},
+            app5],
+
+    Packages = [{app1, "0.1.0"},
+                {app1, "0.2"},
+                {app1, "0.2"},
+                {app1, "3.0"},
+                {app2, "0.0.1"},
+                {app2, "0.1"},
+                {app2, "1.0"},
+                {app2, "2.1.5"},
+                {app2, "2.2"},
+                {app2, "3.0"},
+                {app3, "0.1.0"},
+                {app3, "0.1.3"},
+                {app3, "2.0.0"},
+                {app3, "3.0.0"},
+                {app3, "4.0.0"},
+                {app4, "0.1.0"},
+                {app4, "0.3.0"},
+                {app4, "5.0.0"},
+                {app4, "6.0.0"},
+                {app5, "0.1.0"},
+                {app5, "0.3.0"},
+                {app5, "2.0.0"},
+                {app5, "6.0.0"}],
+
+    ?assertMatch([{app1,"0.1.0"},
+                  {app1,"0.2"},
+                  {app1,"0.2"},
+                  {app1,"3.0"},
+                  {app2,"2.1.5"},
+                  {app2,"2.2"},
+                  {app3,"0.1.3"},
+                  {app4,"5.0.0"},
+                  {app4,"6.0.0"},
+                  {app5,"2.0.0"},
+                  {app5,"6.0.0"}],
+                 filter_packages(Packages, Cons)).
 
 -endif.
