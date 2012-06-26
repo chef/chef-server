@@ -101,6 +101,8 @@
                         | {pkg_name(), raw_vsn(), '>'}
                         | {pkg_name(), raw_vsn(), lt}
                         | {pkg_name(), raw_vsn(), '<'}
+                        | {pkg_name(), raw_vsn(), pes}
+                        | {pkg_name(), raw_vsn(), '~>'}
                         | {pkg_name(), raw_vsn(), vsn(), between}.
 
 -type constraint() :: pkg_name()
@@ -113,7 +115,8 @@
                     | {pkg_name(), vsn(), '>'}
                     | {pkg_name(), vsn(), lt}
                     | {pkg_name(), vsn(), '<'}
-                    | {pkg_name(), vsn(), '~>'}
+                    | {pkg_name(), raw_vsn(), pes}
+                    | {pkg_name(), raw_vsn(), '~>'}
                     | {pkg_name(), vsn(), vsn(), between}.
 
 
@@ -348,6 +351,10 @@ is_valid_constraint({_Pkg, _LVsn, lt}) ->
     true;
 is_valid_constraint({_Pkg, _LVsn, '<'}) ->
     true;
+is_valid_constraint({_Pkg, _LVsn, pes}) ->
+    true;
+is_valid_constraint({_Pkg, _LVsn, '~>'}) ->
+    true;
 is_valid_constraint({_Pkg, _LVsn1, _LVsn2, between}) ->
     true;
 is_valid_constraint(_InvalidConstraint) ->
@@ -387,6 +394,16 @@ normalize_version({M, MI}) ->
 normalize_version({M, MI, P}) ->
     {M, MI, P}.
 
+-spec is_within_pessimistic_version(vsn(),vsn()) -> boolean().
+is_within_pessimistic_version(Vsn, {LM, LMI}) ->
+    NVsn = normalize_version(Vsn),
+    NVsn >= {LM, LMI, 0} andalso NVsn < {LM + 1, 0, 0};
+is_within_pessimistic_version(Vsn, LVsn = {LM, LMI, _}) ->
+    NVsn= normalize_version(Vsn),
+    NVsn >= LVsn andalso NVsn < {LM, LMI + 1, 0};
+is_within_pessimistic_version(Vsn = {_}, LVsn) ->
+    normalize_version(Vsn) >= normalize_version(LVsn).
+
 -spec is_version_within_constraint(vsn(),constraint()) -> boolean().
 is_version_within_constraint(_Vsn, Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
     true;
@@ -408,6 +425,10 @@ is_version_within_constraint(Vsn, {_Pkg, LVsn, lt}) ->
     normalize_version(Vsn) < normalize_version(LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn, '<'}) ->
     normalize_version(Vsn) < normalize_version(LVsn);
+is_version_within_constraint(Vsn, {_Pkg, LVsn, 'pes'}) ->
+    is_within_pessimistic_version(Vsn, LVsn);
+is_version_within_constraint(Vsn, {_Pkg, LVsn, '~>'}) ->
+    is_within_pessimistic_version(Vsn, LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn1, LVsn2, between}) ->
     NVsn = normalize_version(Vsn),
     NVsn >= normalize_version(LVsn1) andalso
@@ -791,5 +812,82 @@ conflicting_failing_test() ->
 
     ?assertMatch({error, {unable_to_solve,app3,{[],[],[app1,app3]}}},
                  solve(Dom0, [app1, app3])).
+
+
+pessimistic_major_minor_patch_test() ->
+
+    Pkg1Deps = [{app2, "2.1.1", '~>'},
+                {app3, "0.1.1", "0.1.5", between}],
+
+    Pkg2Deps = [{app4, "5.0.0", gte}],
+    Pkg3Deps = [{app5, "2.0.0", '>='}],
+    Pkg4Deps = [app5],
+
+    Dom0 = add_packages(new_graph(), [{app1, [{"0.1.0", Pkg1Deps},
+                                              {"0.2", Pkg1Deps},
+                                              {"3.0", Pkg1Deps}]},
+                                      {app2, [{"0.0.1", Pkg2Deps},
+                                              {"0.1", Pkg2Deps},
+                                              {"1.0", Pkg2Deps},
+                                              {"2.1.5", Pkg2Deps},
+                                              {"2.2", Pkg2Deps},
+                                              {"3.0", Pkg2Deps}]},
+                                      {app3, [{"0.1.0", Pkg3Deps},
+                                              {"0.1.3", Pkg3Deps},
+                                              {"2.0.0", Pkg3Deps},
+                                              {"3.0.0", Pkg3Deps},
+                                              {"4.0.0", Pkg3Deps}]},
+                                      {app4, [{"0.1.0", Pkg4Deps},
+                                              {"0.3.0", Pkg4Deps},
+                                              {"5.0.0", Pkg4Deps},
+                                              {"6.0.0", Pkg4Deps}]},
+                                      {app5, [{"0.1.0", []},
+                                              {"0.3.0", []},
+                                              {"2.0.0", []},
+                                              {"6.0.0", []}]}]),
+    ?assertMatch({ok, [{app5,{6,0,0}},
+                       {app3,{0,1,3}},
+                       {app4,{6,0,0}},
+                       {app2,{2,1,5}},
+                       {app1,{3,0}}]},
+                 solve(Dom0, [{app1, "3.0"}])).
+
+pessimistic_major_minor_test() ->
+
+    Pkg1Deps = [{app2, "2.1", '~>'},
+                {app3, "0.1.1", "0.1.5", between}],
+
+    Pkg2Deps = [{app4, "5.0.0", gte}],
+    Pkg3Deps = [{app5, "2.0.0", '>='}],
+    Pkg4Deps = [app5],
+
+    Dom0 = add_packages(new_graph(), [{app1, [{"0.1.0", Pkg1Deps},
+                                              {"0.2", Pkg1Deps},
+                                              {"3.0", Pkg1Deps}]},
+                                      {app2, [{"0.0.1", Pkg2Deps},
+                                              {"0.1", Pkg2Deps},
+                                              {"1.0", Pkg2Deps},
+                                              {"2.1.5", Pkg2Deps},
+                                              {"2.2", Pkg2Deps},
+                                              {"3.0", Pkg2Deps}]},
+                                      {app3, [{"0.1.0", Pkg3Deps},
+                                              {"0.1.3", Pkg3Deps},
+                                              {"2.0.0", Pkg3Deps},
+                                              {"3.0.0", Pkg3Deps},
+                                              {"4.0.0", Pkg3Deps}]},
+                                      {app4, [{"0.1.0", Pkg4Deps},
+                                              {"0.3.0", Pkg4Deps},
+                                              {"5.0.0", Pkg4Deps},
+                                              {"6.0.0", Pkg4Deps}]},
+                                      {app5, [{"0.1.0", []},
+                                              {"0.3.0", []},
+                                              {"2.0.0", []},
+                                              {"6.0.0", []}]}]),
+    ?assertMatch({ok, [{app5,{6,0,0}},
+                       {app3,{0,1,3}},
+                       {app4,{6,0,0}},
+                       {app2,{2,2}},
+                       {app1,{3,0}}]},
+                 solve(Dom0, [{app1, "3.0"}])).
 
 -endif.
