@@ -63,7 +63,8 @@
          add_packages/2,
          add_package/3,
          add_package_version/3,
-         add_package_version/4]).
+         add_package_version/4,
+         parse_version/1]).
 
 %% Internally Exported API. This should *not* be used outside of the depsolver
 %% application. You have been warned.
@@ -86,7 +87,22 @@
 -opaque t() :: {?MODULE, dep_graph()}.
 -type pkg() :: {pkg_name(), vsn()}.
 -type pkg_name() :: string() | atom().
--type vsn() :: string().
+-type raw_vsn() :: string() | binary() | vsn().
+-type vsn() :: {non_neg_integer()}
+             | {non_neg_integer(), non_neg_integer()}
+             | {non_neg_integer(), non_neg_integer(), non_neg_integer()}.
+-type raw_constraint() :: pkg_name()
+                        | {pkg_name(), raw_vsn()}
+                        | {pkg_name(), raw_vsn(), gte}
+                        | {pkg_name(), raw_vsn(),'>='}
+                        | {pkg_name(), raw_vsn(), lte}
+                        | {pkg_name(), raw_vsn(), '<='}
+                        | {pkg_name(), raw_vsn(), gt}
+                        | {pkg_name(), raw_vsn(), '>'}
+                        | {pkg_name(), raw_vsn(), lt}
+                        | {pkg_name(), raw_vsn(), '<'}
+                        | {pkg_name(), raw_vsn(), vsn(), between}.
+
 -type constraint() :: pkg_name()
                     | {pkg_name(), vsn()}
                     | {pkg_name(), vsn(), gte}
@@ -100,7 +116,8 @@
                     | {pkg_name(), vsn(), '~>'}
                     | {pkg_name(), vsn(), vsn(), between}.
 
--type vsn_constraint() :: {vsn(), [constraint()]}.
+
+-type vsn_constraint() :: {raw_vsn(), [raw_constraint()]}.
 -type dependency_set() :: {pkg_name(), [vsn_constraint()]}.
 
 %% Internal Types
@@ -159,17 +176,23 @@ add_package(State, Pkg, Versions)
 %%                                              {"0.2", []},
 %%                                              {"0.3", []}]).
 %% '''
--spec add_package_version(t(),pkg_name(),vsn(),[constraint()]) -> t().
-add_package_version({?MODULE, Dom0}, Pkg, Vsn, PkgConstraints) ->
+-spec add_package_version(t(), pkg_name(), raw_vsn(), [raw_constraint()]) -> t().
+add_package_version({?MODULE, Dom0}, Pkg, RawVsn, RawPkgConstraints) ->
+    Vsn = parse_version(RawVsn),
+    %% Incoming constraints are raw
+    %% and need to be fixed
+    PkgConstraints = [fix_con(PkgConstraint) ||
+                         PkgConstraint <- RawPkgConstraints],
    Info2 =
         case gb_trees:lookup(Pkg, Dom0) of
             {value, Info0} ->
                 case lists:keytake(Vsn, 1, Info0) of
                     {value, {Vsn, Constraints}, Info1} ->
-                        [{Vsn, join_constraints(Constraints, PkgConstraints)}
+                        [{Vsn, join_constraints(Constraints,
+                                                PkgConstraints)}
                          | Info1];
                     false ->
-                        [{Vsn,  PkgConstraints} | Info0]
+                        [{Vsn,  PkgConstraints}  | Info0]
                 end;
             none ->
                 [{Vsn, PkgConstraints}]
@@ -180,7 +203,7 @@ add_package_version({?MODULE, Dom0}, Pkg, Vsn, PkgConstraints) ->
 %% constraints, dependency constraints can always be added after the fact.
 %%
 %% ```depsolver:add_package_version(Graph, app1, "0.1").'''
--spec add_package_version(t(),pkg_name(),vsn()) -> t().
+-spec add_package_version(t(),pkg_name(),raw_vsn()) -> t().
 add_package_version(State, Pkg, Vsn) ->
     add_package_version(State, Pkg, Vsn, []).
 
@@ -189,8 +212,9 @@ add_package_version(State, Pkg, Vsn) ->
 %% an exception is thrown.
 %% ``` depsolver:solve(State, [{app1, "0.1", '>='}]).'''
 -spec solve(t(),[constraint()]) -> {ok, [pkg()] | []} | {error, term()}.
-solve({?MODULE, DepGraph0}, Goals)
-  when erlang:length(Goals) > 0 ->
+solve({?MODULE, DepGraph0}, RawGoals)
+  when erlang:length(RawGoals) > 0 ->
+    Goals = [fix_con(Goal) || Goal <- RawGoals],
     case trim_unreachable_packages(DepGraph0, Goals) of
         Error = {error, _} ->
             Error;
@@ -203,16 +227,66 @@ solve({?MODULE, DepGraph0}, Goals)
                     {ok, Solution}
             end
     end.
+%% Parse a string version into a tuple based version
+-spec parse_version(raw_vsn() | vsn()) -> vsn().
+parse_version(RawVsn) when erlang:is_list(RawVsn) ->
+    case string:tokens(RawVsn, ".") of
+        [MajorVsn, MinorVsn, RawPatch]  ->
+            {erlang:list_to_integer(MajorVsn),
+             erlang:list_to_integer(MinorVsn),
+             erlang:list_to_integer(RawPatch)};
+        [MajorVsn, MinorVsn] ->
+            {erlang:list_to_integer(MajorVsn),
+             erlang:list_to_integer(MinorVsn)};
+        [MajorVsn] ->
+            {erlang:list_to_integer(MajorVsn)}
+    end;
+parse_version(RawVsn) when erlang:is_binary(RawVsn) ->
+    parse_version(erlang:binary_to_list(RawVsn));
+parse_version(Vsn = {Major, Minor, Patch})
+  when erlang:is_integer(Major),
+       erlang:is_integer(Minor),
+       erlang:is_integer(Patch),
+       Major >= 0,
+       Minor >= 0,
+       Patch >= 0 ->
+    Vsn;
+parse_version(Vsn = {Major, Minor})
+  when erlang:is_integer(Major),
+       erlang:is_integer(Minor),
+       Major >= 0,
+       Minor >= 0 ->
+    Vsn;
+parse_version(Vsn = {Major})
+  when erlang:is_integer(Major),
+       Major >= 0 ->
+    Vsn.
+
 
 %%====================================================================
 %% Internal Functions
 %%====================================================================
+%% @doc
+%% fix package. Take a package with a possible invalid version and fix it.
+-spec fix_con(raw_constraint()) -> constraint().
+fix_con({Pkg, Vsn}) ->
+    {Pkg, parse_version(Vsn)};
+fix_con({Pkg, Vsn, CI}) ->
+    {Pkg, parse_version(Vsn), CI};
+fix_con({Pkg, Vsn1, Vsn2, CI}) ->
+    {Pkg, parse_version(Vsn1),
+     parse_version(Vsn2), CI};
+fix_con(Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
+    Pkg.
+
+
+-spec join_constraints([constraint()], [constraint()]) ->
+                              [constraint()].
 
 %% @doc given two lists of constraints join them in such a way that no
 %% constraint is duplicated but the over all order of the constraints is
 %% preserved. Order drives priority in this solver and is important for that
 %% reason.
--spec join_constraints([constraint()],[constraint()]) -> [constraint()].
 join_constraints(NewConstraints, ExistingConstraints) ->
     ECSet = sets:from_list(ExistingConstraints),
     FilteredNewConstraints = [NC || NC <- NewConstraints,
@@ -241,7 +315,8 @@ primitive_solve(State, PackageList)
     [Pkg | OtherPkgs] = lists:map(fun dep_pkg/1, PackageList),
     pkgs(State, [], dep_pkg(Pkg), Constraints, OtherPkgs).
 
-%% @doc given a package spec return the 'name' portion of said spec
+%% @doc
+%% given a Pkg | {Pkg, Vsn} | {Pkg, Vsn, Constraint} return Pkg
 -spec dep_pkg(constraint()) -> pkg_name().
 dep_pkg({Pkg, _Vsn}) ->
     Pkg;
@@ -255,7 +330,7 @@ dep_pkg(Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
 -spec is_valid_constraint(constraint()) -> boolean().
 is_valid_constraint(Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
     true;
-is_valid_constraint({_Pkg, Vsn}) when is_list(Vsn) ->
+is_valid_constraint({_Pkg, Vsn}) when is_tuple(Vsn) ->
     true;
 is_valid_constraint({_Pkg, _LVsn, gte}) ->
     true;
@@ -304,32 +379,42 @@ extend_constraints(ExistingConstraints0, NewConstraints) ->
                 end,
                 ExistingConstraints0, NewConstraints).
 
+-spec normalize_version(vsn()) -> vsn().
+normalize_version({M}) ->
+    {M, 0, 0};
+normalize_version({M, MI}) ->
+    {M, MI, 0};
+normalize_version({M, MI, P}) ->
+    {M, MI, P}.
+
 -spec is_version_within_constraint(vsn(),constraint()) -> boolean().
 is_version_within_constraint(_Vsn, Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
     true;
-is_version_within_constraint(Vsn, {_Pkg, Vsn}) when is_list(Vsn) ->
-    true;
-is_version_within_constraint(Vsn, {_Pkg, LVsn, gte}) when Vsn >= LVsn ->
-    true;
-is_version_within_constraint(Vsn, {_Pkg, LVsn, '>='}) when Vsn >= LVsn ->
-    true;
-is_version_within_constraint(Vsn, {_Pkg, LVsn, lte}) when Vsn =< LVsn ->
-    true;
-is_version_within_constraint(Vsn, {_Pkg, LVsn, '<='}) when Vsn =< LVsn ->
-    true;
-is_version_within_constraint(Vsn, {_Pkg, LVsn, gt}) when Vsn > LVsn ->
-    true;
-is_version_within_constraint(Vsn, {_Pkg, LVsn, '>'}) when Vsn > LVsn ->
-    true;
-is_version_within_constraint(Vsn, {_Pkg, LVsn, lt}) when Vsn < LVsn ->
-    true;
-is_version_within_constraint(Vsn, {_Pkg, LVsn, '<'}) when Vsn < LVsn ->
-    true;
-is_version_within_constraint(Vsn, {_Pkg, LVsn1, LVsn2, between})
-  when Vsn >= LVsn1 andalso Vsn =< LVsn2 ->
-    true;
+is_version_within_constraint(Vsn, {_Pkg, NVsn}) ->
+    normalize_version(Vsn) == normalize_version(NVsn);
+is_version_within_constraint(Vsn, {_Pkg, LVsn, gte})  ->
+    normalize_version(Vsn) >= normalize_version(LVsn);
+is_version_within_constraint(Vsn, {_Pkg, LVsn, '>='}) ->
+    normalize_version(Vsn) >= normalize_version(LVsn);
+is_version_within_constraint(Vsn, {_Pkg, LVsn, lte}) ->
+    normalize_version(Vsn) =< normalize_version(LVsn);
+is_version_within_constraint(Vsn, {_Pkg, LVsn, '<='}) ->
+    normalize_version(Vsn) =< normalize_version(LVsn);
+is_version_within_constraint(Vsn, {_Pkg, LVsn, gt}) ->
+    normalize_version(Vsn) > normalize_version(LVsn);
+is_version_within_constraint(Vsn, {_Pkg, LVsn, '>'}) ->
+    normalize_version(Vsn) > normalize_version(LVsn);
+is_version_within_constraint(Vsn, {_Pkg, LVsn, lt}) ->
+    normalize_version(Vsn) < normalize_version(LVsn);
+is_version_within_constraint(Vsn, {_Pkg, LVsn, '<'}) ->
+    normalize_version(Vsn) < normalize_version(LVsn);
+is_version_within_constraint(Vsn, {_Pkg, LVsn1, LVsn2, between}) ->
+    NVsn = normalize_version(Vsn),
+    NVsn >= normalize_version(LVsn1) andalso
+       NVsn =< normalize_version(LVsn2);
 is_version_within_constraint(_Vsn, _Pkg) ->
     false.
+
 
 %% @doc
 %% Get the currently active constraints that relate to the specified package
@@ -374,7 +459,7 @@ constrained_package_versions(State, PkgName, PkgConstraints) ->
 %% Given a list of constraints filter said list such that only false (for things
 %% that do not match a package and pkg are returned. Since at the end only pkg()
 %% we should have a pure list of packages.
--spec filter_package_constraints([constraint()]) -> [false | pkg()].
+-spec filter_package_constraints([constraint()]) -> false | pkg().
 filter_package_constraints(PkgConstraints) ->
     lists_some(fun (Pkg)
                      when is_atom(Pkg) ->
@@ -389,7 +474,7 @@ filter_package_constraints(PkgConstraints) ->
 
 %% @doc all_pkgs is one of the set of mutually recursive functions (all_pkgs and
 %% pkgs) that serve to walk the solution space of dependency.
--spec all_pkgs(dep_graph(),[pkg_name()],[pkg_name()],[constraint()]) ->
+-spec all_pkgs(dep_graph(),[pkg_name()],[pkg_name()],[{pkg(), [constraint()]}]) ->
                       fail | [pkg()].
 all_pkgs(_State, _, [], Constraints) ->
     PkgVsns =
@@ -540,9 +625,9 @@ first_test() ->
 
 
     X = solve(Dom0, [{app1, "0.1"}]),
-    ?assertMatch({ok, [{app3,"0.3"},
-                       {app2,"0.2"},
-                       {app1,"0.1"}]},
+    ?assertMatch({ok, [{app3,{0,3}},
+                       {app2,{0,2}},
+                       {app1,{0,1}}]},
                   X).
 
 second_test() ->
@@ -565,10 +650,11 @@ second_test() ->
 
     X = solve(Dom0, [{app1, "0.1"},
                      {app2, "0.3"}]),
-    ?assertMatch({ok, [{app3,"0.3"},
-                       {app2,"0.3"},
-                       {app4,"0.2"},
-                       {app1,"0.1"}]},
+
+    ?assertMatch({ok, [{app3,{0,3}},
+                       {app2,{0,3}},
+                       {app4,{0,2}},
+                       {app1,{0,1}}]},
                  X).
 
 third_test() ->
@@ -581,40 +667,40 @@ third_test() ->
     Pkg4Deps = [app5],
 
     Dom0 = add_packages(new_graph(), [{app1, [{"0.1.0", Pkg1Deps},
-                                       {"0.2", Pkg1Deps},
-                                       {"3.0", Pkg1Deps}]},
+                                              {"0.2", Pkg1Deps},
+                                              {"3.0", Pkg1Deps}]},
+                                      {app2, [{"0.0.1", Pkg2Deps},
+                                              {"0.1", Pkg2Deps},
+                                              {"1.0", Pkg2Deps},
+                                              {"3.0", Pkg2Deps}]},
+                                      {app3, [{"0.1.0", Pkg3Deps},
+                                              {"0.1.3", Pkg3Deps},
+                                              {"2.0.0", Pkg3Deps},
+                                              {"3.0.0", Pkg3Deps},
+                                              {"4.0.0", Pkg3Deps}]},
+                                      {app4, [{"0.1.0", Pkg4Deps},
+                                              {"0.3.0", Pkg4Deps},
+                                              {"5.0.0", Pkg4Deps},
+                                              {"6.0.0", Pkg4Deps}]},
+                                      {app5, [{"0.1.0", []},
+                                              {"0.3.0", []},
+                                              {"2.0.0", []},
+                                              {"6.0.0", []}]}]),
 
-                               {app2, [{"0.0.0.1", Pkg2Deps},
-                                       {"0.1", Pkg2Deps},
-                                       {"1.0", Pkg2Deps},
-                                       {"3.0", Pkg2Deps}]},
-                               {app3, [{"0.1.0", Pkg3Deps},
-                                       {"0.1.3", Pkg3Deps},
-                                       {"2.0.0", Pkg3Deps},
-                                       {"3.0.0", Pkg3Deps},
-                                       {"4.0.0", Pkg3Deps}]},
-                               {app4, [{"0.1.0", Pkg4Deps},
-                                       {"0.3.0", Pkg4Deps},
-                                       {"5.0.0", Pkg4Deps},
-                                       {"6.0.0", Pkg4Deps}]},
-                               {app5, [{"0.1.0", []},
-                                       {"0.3.0", []},
-                                       {"2.0.0", []},
-                                       {"6.0.0", []}]}]),
-    ?assertMatch({ok, [{app5,"6.0.0"},
-                       {app3,"0.1.3"},
-                       {app4,"6.0.0"},
-                       {app2,"3.0"},
-                       {app1,"3.0"}]},
+    ?assertMatch({ok, [{app5,{6,0,0}},
+                       {app3,{0,1,3}},
+                       {app4,{6,0,0}},
+                       {app2,{3,0}},
+                       {app1,{3,0}}]},
                  solve(Dom0, [{app1, "3.0"}])),
 
 
-    ?assertMatch({ok, [{app5,"6.0.0"},
-                       {app3,"0.1.3"},
-                       {app4,"6.0.0"},
-                       {app2,"3.0"},
-                       {app1,"3.0"}]},
-                 solve(Dom0, [app1, app2, app5])).
+    ?assertMatch({ok, [{app5,{6,0,0}},
+                       {app3,{0,1,3}},
+                       {app4,{6,0,0}},
+                       {app2,{3,0}},
+                       {app1,{3,0}}]},
+                 solve(Dom0, [app1])).
 
 fail_test() ->
     Dom0 = add_packages(new_graph(), [{app1, [{"0.1", [{app2, "0.2"},
@@ -629,9 +715,9 @@ fail_test() ->
                                        {"0.3", []}]}]),
 
 
-    ?assertMatch({error, {unable_to_solve, {app1,"0.1"},
-                          {[], [], [{app1, "0.1"}]}}},
-                 solve(Dom0, [{app1, "0.1"}])).
+    ?assertMatch({error, {unable_to_solve, {app1,{0,1}},
+                          {[], [], [{app1, {0,1}}]}}},
+                 solve(Dom0, [{app1, {0,1}}])).
 
 conflicting_passing_test() ->
     Pkg1Deps = [{app2, "0.1.0", '>='},
@@ -646,7 +732,7 @@ conflicting_passing_test() ->
                                        {"0.1.0", Pkg1Deps},
                                        {"0.2", Pkg1Deps},
                                        {"3.0", Pkg1Deps}]},
-                               {app2, [{"0.0.0.1", Pkg2Deps},
+                               {app2, [{"0.0.1", Pkg2Deps},
                                        {"0.1", Pkg2Deps},
                                        {"1.0", Pkg2Deps},
                                        {"3.0", Pkg2Deps}]},
@@ -664,18 +750,18 @@ conflicting_passing_test() ->
                                        {"2.0.0", []},
                                        {"6.0.0", []}]}]),
 
-    ?assertMatch({ok, [{app5,"2.0.0"},
-                       {app3,"0.1.3"},
-                       {app4,"5.0.0"},
-                       {app2,"3.0"},
-                       {app1,"3.0"}]},
+    ?assertMatch({ok, [{app5,{2,0,0}},
+                       {app3,{0,1,3}},
+                       {app4,{5,0,0}},
+                       {app2,{3,0}},
+                       {app1,{3,0}}]},
                  solve(Dom0, [{app1, "3.0"}])),
 
-    ?assertMatch({ok, [{app5,"2.0.0"},
-                       {app3,"0.1.3"},
-                       {app4,"5.0.0"},
-                       {app2,"3.0"},
-                       {app1,"3.0"}]},
+    ?assertMatch({ok, [{app5,{2,0,0}},
+                       {app3,{0,1,3}},
+                       {app4,{5,0,0}},
+                       {app2,{3,0}},
+                       {app1,{3,0}}]},
                  solve(Dom0, [app1, app2, app5])).
 
 
@@ -684,7 +770,7 @@ circular_dependencies_test() ->
     Dom0 = add_packages(new_graph(), [{app1, [{"0.1.0", [app2]}]},
                                {app2, [{"0.0.1", [app1]}]}]),
 
-    ?assertMatch({ok, [{app1,"0.1.0"},{app2,"0.0.1"}]},
+    ?assertMatch({ok, [{app1,{0,1,0}},{app2,{0,0,1}}]},
                  solve(Dom0, [{app1, "0.1.0"}])).
 
 conflicting_failing_test() ->
@@ -694,6 +780,7 @@ conflicting_failing_test() ->
 
     Pkg2Deps = [{app4, "5.0.0", gte}],
     Pkg3Deps = [{app5, "6.0.0"}],
+
 
     Dom0 = add_packages(new_graph(), [{app1, [{"3.0", Pkg1Deps}]},
                                {app2, [{"0.0.1", Pkg2Deps}]},
