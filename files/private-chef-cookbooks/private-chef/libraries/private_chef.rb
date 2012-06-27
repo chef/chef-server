@@ -56,6 +56,8 @@ module PrivateChef
 
   ldap Mash.new
 
+  allowed_webui_subnets []
+
   class << self
 
     def server(name=nil, opts={})
