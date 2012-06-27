@@ -98,12 +98,14 @@ chef_lb_configs = {
 }
 
 nginx_vars = node['private_chef']['nginx'].to_hash
-nginx_vars = nginx_vars.merge({:helper => NginxErb.new(node)})
+nginx_vars = nginx_vars.merge({ :helper => NginxErb.new(node),
+                                :allowed_webui_subnets => PrivateChef.allowed_webui_subnets})
 
 # Chef API lb config for HTTPS and HTTP
 ["https", "http"].each do |server_proto|
   config_key = "chef_#{server_proto}_config".to_sym
   lb_config = chef_lb_configs[config_key]
+
   template lb_config do
     source "nginx_chef_api_lb.conf.erb"
     owner "root"
@@ -112,6 +114,7 @@ nginx_vars = nginx_vars.merge({:helper => NginxErb.new(node)})
     variables(nginx_vars.merge({:server_proto => server_proto}))
     notifies :restart, 'service[nginx]' if OmnibusHelper.should_notify?("nginx")
   end
+
 end
 
 template nginx_config do

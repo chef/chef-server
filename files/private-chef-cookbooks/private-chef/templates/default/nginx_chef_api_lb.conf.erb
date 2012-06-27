@@ -104,6 +104,18 @@
         error_page 400 =400 /400-chef_client_manage.json;
         return 400;
       }
+
+      # When configured to allow webui access to only certain subnets,
+      # create "allow" rules for them, followed by deny all.
+      # NOTE: This snippet is duplicated for the "/" location below.
+      # Copy changes you make here down there as well.
+      <% if @allowed_webui_subnets && !@allowed_webui_subnets.empty? %>
+        <% @allowed_webui_subnets.each do |subnet| %>
+      allow <%= subnet %>;
+        <% end %>
+      deny all;
+      <% end %>
+
       proxy_pass http://opscode_webui;
       proxy_pass_request_headers off;
       proxy_cache webui-cache;
@@ -118,6 +130,18 @@
          error_page 404 =404 /404.json;
          return 404;
       }
+
+      # When configured to allow webui access to only certain subnets,
+      # create "allow" rules for them, followed by deny all.
+      # NOTE: This snippet is duplicated for the static assets locations above.
+      # Copy changes you make here up there as well.
+      <% if @allowed_webui_subnets && !@allowed_webui_subnets.empty? %>
+        <% @allowed_webui_subnets.each do |subnet| %>
+      allow <%= subnet %>;
+        <% end %>
+      deny all;
+      <% end %>
+
 
       proxy_pass http://opscode_webui;
     }
