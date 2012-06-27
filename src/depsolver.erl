@@ -279,11 +279,15 @@ filter_packages(PVPairs, RawConstraints) ->
 %%====================================================================
 %% Internal Functions
 %%====================================================================
+-spec filter_pvpair_by_constraint([{pkg_name(), vsn()}], [constraint()]) ->
+                                         boolean().
 filter_pvpair_by_constraint(PVPair, Constraints) ->
     lists:all(fun(Constraint) ->
                       filter_package(PVPair, Constraint)
               end, Constraints).
 
+-spec filter_package({pkg_name(), vsn()}, constraint()) ->
+                            boolean().
 filter_package({PkgName, Vsn}, C = {PkgName, _}) ->
     is_version_within_constraint(Vsn, C);
 filter_package({PkgName, Vsn}, C = {PkgName, _, _}) ->
@@ -502,20 +506,20 @@ constrained_package_versions(State, PkgName, PkgConstraints) ->
     Versions = get_versions(State, PkgName),
     [Vsn || Vsn <- Versions, valid_version(PkgName, Vsn, PkgConstraints)].
 
-%% Given a list of constraints filter said list such that only false (for things
+%% Given a list of constraints filter said list such that only fail (for things
 %% that do not match a package and pkg are returned. Since at the end only pkg()
 %% we should have a pure list of packages.
--spec filter_package_constraints([constraint()]) -> false | pkg().
+-spec filter_package_constraints([constraint()]) -> fail | pkg().
 filter_package_constraints(PkgConstraints) ->
     lists_some(fun (Pkg)
                      when is_atom(Pkg) ->
-                       false;
+                       fail;
                    ({_Pkg1, _Vsn} = PV) ->
                        PV;
                    ({_Pkg2, _Vsn, _R}) ->
-                       false;
+                       fail;
                    ({_Pkg2, _Vsn1, _Vsn2, _R}) ->
-                       false
+                       fail
                end, PkgConstraints).
 
 %% @doc all_pkgs is one of the set of mutually recursive functions (all_pkgs and
@@ -572,14 +576,14 @@ get_dep_constraints(DepGraph, PkgName, Vsn) ->
 
 -type evaluator(A, Return, FailIndicator) ::
         fun((A) -> Return | FailIndicator).
--spec lists_some(evaluator(A, Return, false), [A]) -> Return | false.
+-spec lists_some(evaluator(A, Return, fail), [A]) -> Return | fail.
 %% @doc lists_some is the root of the system the actual backtracing search that
 %% makes the dep solver posible. It a takes a function that checks whether the
 %% 'problem' has been solved and an fail indicator. As long as the evaluator
 %% returns the fail indicator processing continues. If the evaluator returns
 %% anything but the fail indicator that indicates success.
 lists_some(F, Args) ->
-    lists_some(F, Args, false).
+    lists_some(F, Args, fail).
 
 -spec lists_some(evaluator(A, Return, FailIndicator), [A], FailIndicator) ->
                         Return | FailIndicator.
