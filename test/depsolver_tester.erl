@@ -183,7 +183,7 @@ log_07be9e47_test() ->
                  Data).
 
 log_183998c1_test() ->
-    ?assertMatch({error, {unreachable_package,"9"}},
+    ?assertMatch({error, {unreachable_package,<<"9">>}},
                  run_log(fix_rebar_brokenness("log-183998c1-2ada-4214-b308-e480345c42f2.txt"))).
 
 
@@ -335,7 +335,7 @@ log_ea2d264b_test() ->
 versionify(X) when erlang:is_list(X) ->
     lists:map(fun versionify/1, X);
 versionify({K, V}) ->
-    {K, depsolver:parse_version(V)}.
+    {erlang:list_to_binary(K), depsolver:parse_version(V)}.
 
 fix_rebar_brokenness(Filename) ->
     Alt1 = filename:join(["./test", "data", Filename]),

@@ -182,7 +182,8 @@ add_package(State, Pkg, Versions)
 %%                                              {"0.3", []}]).
 %% '''
 -spec add_package_version(t(), pkg_name(), raw_vsn(), [raw_constraint()]) -> t().
-add_package_version({?MODULE, Dom0}, Pkg, RawVsn, RawPkgConstraints) ->
+add_package_version({?MODULE, Dom0}, RawPkg, RawVsn, RawPkgConstraints) ->
+    Pkg = fix_pkg(RawPkg),
     Vsn = parse_version(RawVsn),
     %% Incoming constraints are raw
     %% and need to be fixed
@@ -300,26 +301,32 @@ filter_package(_, _) ->
     true.
 
 %% @doc
+%% fix the package name. If its a list turn it into a binary otherwise leave it as an atom
+fix_pkg(Pkg) when is_list(Pkg) ->
+    erlang:list_to_binary(Pkg);
+fix_pkg(Pkg) when is_binary(Pkg); is_atom(Pkg) ->
+    Pkg.
+
+%% @doc
 %% fix package. Take a package with a possible invalid version and fix it.
 -spec fix_con(raw_constraint()) -> constraint().
 fix_con({Pkg, Vsn}) ->
-    {Pkg, parse_version(Vsn)};
+    {fix_pkg(Pkg), parse_version(Vsn)};
 fix_con({Pkg, Vsn, CI}) ->
-    {Pkg, parse_version(Vsn), CI};
+    {fix_pkg(Pkg), parse_version(Vsn), CI};
 fix_con({Pkg, Vsn1, Vsn2, CI}) ->
-    {Pkg, parse_version(Vsn1),
+    {fix_pkg(Pkg), parse_version(Vsn1),
      parse_version(Vsn2), CI};
-fix_con(Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
-    Pkg.
+fix_con(Pkg) ->
+    fix_pkg(Pkg).
 
-
--spec join_constraints([constraint()], [constraint()]) ->
-                              [constraint()].
 
 %% @doc given two lists of constraints join them in such a way that no
 %% constraint is duplicated but the over all order of the constraints is
 %% preserved. Order drives priority in this solver and is important for that
 %% reason.
+-spec join_constraints([constraint()], [constraint()]) ->
+                              [constraint()].
 join_constraints(NewConstraints, ExistingConstraints) ->
     ECSet = sets:from_list(ExistingConstraints),
     FilteredNewConstraints = [NC || NC <- NewConstraints,
@@ -357,11 +364,11 @@ dep_pkg({Pkg, _Vsn, _}) ->
     Pkg;
 dep_pkg({Pkg, _Vsn1, _Vsn2, _}) ->
     Pkg;
-dep_pkg(Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
+dep_pkg(Pkg) when is_atom(Pkg) orelse is_binary(Pkg) ->
     Pkg.
 
 -spec is_valid_constraint(constraint()) -> boolean().
-is_valid_constraint(Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
+is_valid_constraint(Pkg) when is_atom(Pkg) orelse is_binary(Pkg) ->
     true;
 is_valid_constraint({_Pkg, Vsn}) when is_tuple(Vsn) ->
     true;
