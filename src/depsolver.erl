@@ -80,14 +80,14 @@
               constraint/0,
               dependency_set/0]).
 
--export_type([constraints/0]).
+-export_type([dep_graph/0, constraints/0]).
 %%============================================================================
 %% type
 %%============================================================================
 -type dep_graph() :: gb_tree().
 -opaque t() :: {?MODULE, dep_graph()}.
 -type pkg() :: {pkg_name(), vsn()}.
--type pkg_name() :: string() | atom().
+-type pkg_name() :: binary() | atom().
 -type raw_vsn() :: string() | binary() | vsn().
 -type vsn() :: {non_neg_integer()}
              | {non_neg_integer(), non_neg_integer()}
@@ -116,8 +116,8 @@
                     | {pkg_name(), vsn(), '>'}
                     | {pkg_name(), vsn(), lt}
                     | {pkg_name(), vsn(), '<'}
-                    | {pkg_name(), raw_vsn(), pes}
-                    | {pkg_name(), raw_vsn(), '~>'}
+                    | {pkg_name(), vsn(), pes}
+                    | {pkg_name(), vsn(), '~>'}
                     | {pkg_name(), vsn(), vsn(), between}.
 
 
@@ -126,6 +126,7 @@
 
 %% Internal Types
 -type constraints() :: [constraint()].
+-type version_checker() :: fun((vsn()) -> fail | vsn()).
 
 %%============================================================================
 %% API
@@ -215,7 +216,7 @@ add_package_version(State, Pkg, Vsn) ->
 %% and versions that satisfy all constraints. If no solution can be found then
 %% an exception is thrown.
 %% ``` depsolver:solve(State, [{app1, "0.1", '>='}]).'''
--spec solve(t(),[constraint()]) -> {ok, [pkg()] | []} | {error, term()}.
+-spec solve(t(),[constraint()]) -> {ok, [pkg()]} | {error, term()}.
 solve({?MODULE, DepGraph0}, RawGoals)
   when erlang:length(RawGoals) > 0 ->
     Goals = [fix_con(Goal) || Goal <- RawGoals],
@@ -279,7 +280,7 @@ filter_packages(PVPairs, RawConstraints) ->
 %%====================================================================
 %% Internal Functions
 %%====================================================================
--spec filter_pvpair_by_constraint([{pkg_name(), vsn()}], [constraint()]) ->
+-spec filter_pvpair_by_constraint({pkg_name(), vsn()}, [constraint()]) ->
                                          boolean().
 filter_pvpair_by_constraint(PVPair, Constraints) ->
     lists:all(fun(Constraint) ->
@@ -344,8 +345,8 @@ primitive_solve(State, PackageList)
                                       add_constraint(Acc, Info)
                               end, new_constraints(), PackageList),
 
-    [Pkg | OtherPkgs] = lists:map(fun dep_pkg/1, PackageList),
-    pkgs(State, [], dep_pkg(Pkg), Constraints, OtherPkgs).
+    Pkgs = lists:map(fun dep_pkg/1, PackageList),
+    all_pkgs(State, [], Pkgs, Constraints).
 
 %% @doc
 %% given a Pkg | {Pkg, Vsn} | {Pkg, Vsn, Constraint} return Pkg
@@ -389,7 +390,7 @@ is_valid_constraint({_Pkg, _LVsn1, _LVsn2, between}) ->
 is_valid_constraint(_InvalidConstraint) ->
     false.
 
--spec add_constraint([constraint()],constraint()) -> [constraint()].
+-spec add_constraint([constraint()],constraint()) -> [{pkg_name(), constraints()}].
 add_constraint(PkgsConstraints, PkgConstraint) ->
     case is_valid_constraint(PkgConstraint) of
         true -> ok;
@@ -408,7 +409,7 @@ add_constraint(PkgsConstraints, PkgConstraint) ->
 
 %% @doc
 %% Extend the currently active constraints correctly for the given constraints.
--spec extend_constraints(constraints(),constraints()) -> constraints().
+-spec extend_constraints(constraints(),constraints()) -> [{pkg_name(), constraints()}].
 extend_constraints(ExistingConstraints0, NewConstraints) ->
     lists:foldl(fun (Constraint, ExistingConstraints1) ->
                         add_constraint(ExistingConstraints1, Constraint)
@@ -434,7 +435,7 @@ is_within_pessimistic_version(Vsn = {_}, LVsn) ->
     normalize_version(Vsn) >= normalize_version(LVsn).
 
 -spec is_version_within_constraint(vsn(),constraint()) -> boolean().
-is_version_within_constraint(_Vsn, Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
+is_version_within_constraint(_Vsn, Pkg) when is_atom(Pkg) orelse is_binary(Pkg) ->
     true;
 is_version_within_constraint(Vsn, {_Pkg, NVsn}) ->
     normalize_version(Vsn) == normalize_version(NVsn);
@@ -468,7 +469,7 @@ is_version_within_constraint(_Vsn, _Pkg) ->
 
 %% @doc
 %% Get the currently active constraints that relate to the specified package
--spec get_constraints(constraints(),pkg_name()) -> constraints().
+-spec get_constraints([{pkg_name(), constraints()}],pkg_name()) -> constraints().
 get_constraints(PkgsConstraints, PkgName) ->
     case lists:keysearch(PkgName, 1, PkgsConstraints) of
         false ->
@@ -510,25 +511,28 @@ constrained_package_versions(State, PkgName, PkgConstraints) ->
 %% that do not match a package and pkg are returned. Since at the end only pkg()
 %% we should have a pure list of packages.
 -spec filter_package_constraints([constraint()]) -> fail | pkg().
-filter_package_constraints(PkgConstraints) ->
-    lists_some(fun (Pkg)
-                     when is_atom(Pkg) ->
-                       fail;
-                   ({_Pkg1, _Vsn} = PV) ->
-                       PV;
-                   ({_Pkg2, _Vsn, _R}) ->
-                       fail;
-                   ({_Pkg2, _Vsn1, _Vsn2, _R}) ->
-                       fail
-               end, PkgConstraints).
+filter_package_constraints([]) ->
+    fail;
+filter_package_constraints([Pkg | PkgConstraints]) ->
+    case Pkg of
+        _ when is_atom(Pkg); is_binary(Pkg) ->
+            filter_package_constraints(PkgConstraints);
+        {_Pkg1, _Vsn} = PV ->
+            PV;
+        {_Pkg2, _Vsn, _R} ->
+            filter_package_constraints(PkgConstraints);
+        {_Pkg2, _Vsn1, _Vsn2, _R} ->
+            filter_package_constraints(PkgConstraints)
+    end.
 
 %% @doc all_pkgs is one of the set of mutually recursive functions (all_pkgs and
 %% pkgs) that serve to walk the solution space of dependency.
--spec all_pkgs(dep_graph(),[pkg_name()],[pkg_name()],[{pkg(), [constraint()]}]) ->
+-spec all_pkgs(dep_graph(),[pkg_name()],[pkg_name()],[{pkg_name(), constraints()}]) ->
                       fail | [pkg()].
 all_pkgs(_State, _, [], Constraints) ->
     PkgVsns =
-        [filter_package_constraints(PkgConstraints) || {_Pkg, PkgConstraints} <- Constraints],
+        [filter_package_constraints(PkgConstraints)
+         || {_, PkgConstraints} <- Constraints],
 
     %% PkgVsns should be a list of pkg() where all the constraints are correctly
     %% met. If not we fail the solution. If so we return those pkg()s
@@ -542,28 +546,28 @@ all_pkgs(_State, _, [], Constraints) ->
         false ->
             fail
     end;
-all_pkgs(State, Visited, [Pkg | Pkgs], Constraints) ->
-    case lists:member(Pkg, Visited) of
+all_pkgs(State, Visited, [PkgName | PkgNames], Constraints)
+  when is_atom(PkgName); is_binary(PkgName) ->
+    case lists:member(PkgName, Visited) of
         true ->
-            all_pkgs(State, Visited, Pkgs, Constraints);
+            all_pkgs(State, Visited, PkgNames, Constraints);
         false ->
-            pkgs(State, Visited, Pkg, Constraints, Pkgs)
+            pkgs(State, Visited, PkgName, Constraints, PkgNames)
     end.
 
 %% @doc this is the key graph walker. Set of constraints it walks forward into
 %% the solution space searching for a path that solves all dependencies.
--spec pkgs(dep_graph(),[pkg_name()], pkg_name(), [constraint()],
-           [constraint()]) -> fail | [pkg()].
+-spec pkgs(dep_graph(),[pkg_name()], pkg_name(), [{pkg_name(), constraints()}],
+           [pkg_name()]) -> fail | [pkg()].
 pkgs(DepGraph, Visited, Pkg, Constraints, OtherPkgs) ->
     F = fun (Vsn) ->
                 Deps = get_dep_constraints(DepGraph, Pkg, Vsn),
-                UConstraints = extend_constraints(Constraints, [{Pkg, Vsn}
-                                                                | Deps]),
+                UConstraints = extend_constraints(Constraints, [{Pkg, Vsn} | Deps]),
                 DepPkgs =[dep_pkg(Dep) || Dep <- Deps],
                 NewVisited = [Pkg | Visited],
                 all_pkgs(DepGraph, NewVisited, DepPkgs ++ OtherPkgs, UConstraints)
         end,
-    lists_some(F, constrained_package_versions(DepGraph, Pkg, Constraints), fail).
+    lists_some(F, constrained_package_versions(DepGraph, Pkg, Constraints)).
 
 
 %% @doc This gathers the dependency constraints for a given package vsn from the
@@ -574,25 +578,19 @@ get_dep_constraints(DepGraph, PkgName, Vsn) ->
                                        gb_trees:get(PkgName, DepGraph)),
     Constraints.
 
--type evaluator(A, Return, FailIndicator) ::
-        fun((A) -> Return | FailIndicator).
--spec lists_some(evaluator(A, Return, fail), [A]) -> Return | fail.
+
+-spec lists_some(version_checker(), [vsn()]) -> vsn() | fail.
 %% @doc lists_some is the root of the system the actual backtracing search that
 %% makes the dep solver posible. It a takes a function that checks whether the
 %% 'problem' has been solved and an fail indicator. As long as the evaluator
 %% returns the fail indicator processing continues. If the evaluator returns
 %% anything but the fail indicator that indicates success.
-lists_some(F, Args) ->
-    lists_some(F, Args, fail).
-
--spec lists_some(evaluator(A, Return, FailIndicator), [A], FailIndicator) ->
-                        Return | FailIndicator.
-lists_some(_, [], False) ->
-    False;
-lists_some(F, [H | T], False) ->
+lists_some(_, []) ->
+    fail;
+lists_some(F, [H | T]) ->
     case F(H) of
-        False ->
-            lists_some(F, T, False);
+        fail ->
+            lists_some(F, T);
         Res ->
             Res
     end.
@@ -654,314 +652,3 @@ find_reachable_packages(ExistingGraph, NewGraph0, PkgName) ->
 -spec contains_package_version(dep_graph(), pkg_name()) -> boolean().
 contains_package_version(Dom0, PkgName) ->
     gb_trees:is_defined(PkgName, Dom0).
-
-%%============================================================================
-%% Tests
-%%============================================================================
--ifndef(NO_TESTS).
--include_lib("eunit/include/eunit.hrl").
-
-first_test() ->
-    Dom0 = add_packages(new_graph(), [{app1, [{"0.1", [{app2, "0.2"},
-                                                       {app3, "0.2", '>='}]},
-                                              {"0.2", []},
-                                              {"0.3", []}]},
-                                      {app2, [{"0.1", []},
-                                              {"0.2",[{app3, "0.3"}]},
-                                              {"0.3", []}]},
-                                      {app3, [{"0.1", []},
-                                              {"0.2", []},
-                                              {"0.3", []}]}]),
-
-
-    X = solve(Dom0, [{app1, "0.1"}]),
-    ?assertMatch({ok, [{app3,{0,3}},
-                       {app2,{0,2}},
-                       {app1,{0,1}}]},
-                 X).
-
-second_test() ->
-
-    Dom0 = add_packages(new_graph(), [{app1, [{"0.1", [{app2, "0.1", '>='},
-                                                       {app4, "0.2"},
-                                                       {app3, "0.2", '>='}]},
-                                              {"0.2", []},
-                                              {"0.3", []}]},
-                                      {app2, [{"0.1", [{app3, "0.2", gte}]},
-                                              {"0.2", [{app3, "0.2", gte}]},
-                                              {"0.3", [{app3, "0.2", '>='}]}]},
-                                      {app3, [{"0.1", [{app4, "0.2", '>='}]},
-                                              {"0.2", [{app4, "0.2"}]},
-                                              {"0.3", []}]},
-                                      {app4, [{"0.1", []},
-                                              {"0.2", [{app2, "0.2", gte},
-                                                       {app3, "0.3"}]},
-                                              {"0.3", []}]}]),
-
-    X = solve(Dom0, [{app1, "0.1"},
-                     {app2, "0.3"}]),
-
-    ?assertMatch({ok, [{app3,{0,3}},
-                       {app2,{0,3}},
-                       {app4,{0,2}},
-                       {app1,{0,1}}]},
-                 X).
-
-third_test() ->
-
-    Pkg1Deps = [{app2, "0.1.0", '>='},
-                {app3, "0.1.1", "0.1.5", between}],
-
-    Pkg2Deps = [{app4, "5.0.0", gte}],
-    Pkg3Deps = [{app5, "2.0.0", '>='}],
-    Pkg4Deps = [app5],
-
-    Dom0 = add_packages(new_graph(), [{app1, [{"0.1.0", Pkg1Deps},
-                                              {"0.2", Pkg1Deps},
-                                              {"3.0", Pkg1Deps}]},
-                                      {app2, [{"0.0.1", Pkg2Deps},
-                                              {"0.1", Pkg2Deps},
-                                              {"1.0", Pkg2Deps},
-                                              {"3.0", Pkg2Deps}]},
-                                      {app3, [{"0.1.0", Pkg3Deps},
-                                              {"0.1.3", Pkg3Deps},
-                                              {"2.0.0", Pkg3Deps},
-                                              {"3.0.0", Pkg3Deps},
-                                              {"4.0.0", Pkg3Deps}]},
-                                      {app4, [{"0.1.0", Pkg4Deps},
-                                              {"0.3.0", Pkg4Deps},
-                                              {"5.0.0", Pkg4Deps},
-                                              {"6.0.0", Pkg4Deps}]},
-                                      {app5, [{"0.1.0", []},
-                                              {"0.3.0", []},
-                                              {"2.0.0", []},
-                                              {"6.0.0", []}]}]),
-
-    ?assertMatch({ok, [{app5,{6,0,0}},
-                       {app3,{0,1,3}},
-                       {app4,{6,0,0}},
-                       {app2,{3,0}},
-                       {app1,{3,0}}]},
-                 solve(Dom0, [{app1, "3.0"}])),
-
-
-    ?assertMatch({ok, [{app5,{6,0,0}},
-                       {app3,{0,1,3}},
-                       {app4,{6,0,0}},
-                       {app2,{3,0}},
-                       {app1,{3,0}}]},
-                 solve(Dom0, [app1])).
-
-fail_test() ->
-    Dom0 = add_packages(new_graph(), [{app1, [{"0.1", [{app2, "0.2"},
-                                                       {app3, "0.2", gte}]},
-                                              {"0.2", []},
-                                              {"0.3", []}]},
-                                      {app2, [{"0.1", []},
-                                              {"0.2",[{app3, "0.1"}]},
-                                              {"0.3", []}]},
-                                      {app3, [{"0.1", []},
-                                              {"0.2", []},
-                                              {"0.3", []}]}]),
-
-
-    ?assertMatch({error, {unable_to_solve, {app1,{0,1}},
-                          {[], [], [{app1, {0,1}}]}}},
-                 solve(Dom0, [{app1, {0,1}}])).
-
-conflicting_passing_test() ->
-    Pkg1Deps = [{app2, "0.1.0", '>='},
-                {app5, "2.0.0"},
-                {app4, "0.3.0", "5.0.0", between},
-                {app3, "0.1.1", "0.1.5", between}],
-
-    Pkg2Deps = [{app4, "3.0.0", gte}],
-    Pkg3Deps = [{app5, "2.0.0", '>='}],
-
-    Dom0 = add_packages(new_graph(), [{app1, [{"0.1.0", Pkg1Deps},
-                                              {"0.1.0", Pkg1Deps},
-                                              {"0.2", Pkg1Deps},
-                                              {"3.0", Pkg1Deps}]},
-                                      {app2, [{"0.0.1", Pkg2Deps},
-                                              {"0.1", Pkg2Deps},
-                                              {"1.0", Pkg2Deps},
-                                              {"3.0", Pkg2Deps}]},
-                                      {app3, [{"0.1.0", Pkg3Deps},
-                                              {"0.1.3", Pkg3Deps},
-                                              {"2.0.0", Pkg3Deps},
-                                              {"3.0.0", Pkg3Deps},
-                                              {"4.0.0", Pkg3Deps}]},
-                                      {app4, [{"0.1.0", [{app5, "0.1.0"}]},
-                                              {"0.3.0", [{app5, "0.3.0"}]},
-                                              {"5.0.0", [{app5, "2.0.0"}]},
-                                              {"6.0.0", [{app5, "6.0.0"}]}]},
-                                      {app5, [{"0.1.0", []},
-                                              {"0.3.0", []},
-                                              {"2.0.0", []},
-                                              {"6.0.0", []}]}]),
-
-    ?assertMatch({ok, [{app5,{2,0,0}},
-                       {app3,{0,1,3}},
-                       {app4,{5,0,0}},
-                       {app2,{3,0}},
-                       {app1,{3,0}}]},
-                 solve(Dom0, [{app1, "3.0"}])),
-
-    ?assertMatch({ok, [{app5,{2,0,0}},
-                       {app3,{0,1,3}},
-                       {app4,{5,0,0}},
-                       {app2,{3,0}},
-                       {app1,{3,0}}]},
-                 solve(Dom0, [app1, app2, app5])).
-
-
-
-circular_dependencies_test() ->
-    Dom0 = add_packages(new_graph(), [{app1, [{"0.1.0", [app2]}]},
-                                      {app2, [{"0.0.1", [app1]}]}]),
-
-    ?assertMatch({ok, [{app1,{0,1,0}},{app2,{0,0,1}}]},
-                 solve(Dom0, [{app1, "0.1.0"}])).
-
-conflicting_failing_test() ->
-    Pkg1Deps = [app2,
-                {app5, "2.0.0"},
-                {app4, "0.3.0", "5.0.0", between}],
-
-    Pkg2Deps = [{app4, "5.0.0", gte}],
-    Pkg3Deps = [{app5, "6.0.0"}],
-
-
-    Dom0 = add_packages(new_graph(), [{app1, [{"3.0", Pkg1Deps}]},
-                                      {app2, [{"0.0.1", Pkg2Deps}]},
-                                      {app3, [{"0.1.0", Pkg3Deps}]},
-                                      {app4, [{"5.0.0", [{app5, "2.0.0"}]}]},
-                                      {app5, [{"2.0.0", []},
-                                              {"6.0.0", []}]}]),
-
-    ?assertMatch({error, {unable_to_solve,app3,{[],[],[app1,app3]}}},
-                 solve(Dom0, [app1, app3])).
-
-
-pessimistic_major_minor_patch_test() ->
-
-    Pkg1Deps = [{app2, "2.1.1", '~>'},
-                {app3, "0.1.1", "0.1.5", between}],
-
-    Pkg2Deps = [{app4, "5.0.0", gte}],
-    Pkg3Deps = [{app5, "2.0.0", '>='}],
-    Pkg4Deps = [app5],
-
-    Dom0 = add_packages(new_graph(), [{app1, [{"0.1.0", Pkg1Deps},
-                                              {"0.2", Pkg1Deps},
-                                              {"3.0", Pkg1Deps}]},
-                                      {app2, [{"0.0.1", Pkg2Deps},
-                                              {"0.1", Pkg2Deps},
-                                              {"1.0", Pkg2Deps},
-                                              {"2.1.5", Pkg2Deps},
-                                              {"2.2", Pkg2Deps},
-                                              {"3.0", Pkg2Deps}]},
-                                      {app3, [{"0.1.0", Pkg3Deps},
-                                              {"0.1.3", Pkg3Deps},
-                                              {"2.0.0", Pkg3Deps},
-                                              {"3.0.0", Pkg3Deps},
-                                              {"4.0.0", Pkg3Deps}]},
-                                      {app4, [{"0.1.0", Pkg4Deps},
-                                              {"0.3.0", Pkg4Deps},
-                                              {"5.0.0", Pkg4Deps},
-                                              {"6.0.0", Pkg4Deps}]},
-                                      {app5, [{"0.1.0", []},
-                                              {"0.3.0", []},
-                                              {"2.0.0", []},
-                                              {"6.0.0", []}]}]),
-    ?assertMatch({ok, [{app5,{6,0,0}},
-                       {app3,{0,1,3}},
-                       {app4,{6,0,0}},
-                       {app2,{2,1,5}},
-                       {app1,{3,0}}]},
-                 solve(Dom0, [{app1, "3.0"}])).
-
-pessimistic_major_minor_test() ->
-
-    Pkg1Deps = [{app2, "2.1", '~>'},
-                {app3, "0.1.1", "0.1.5", between}],
-
-    Pkg2Deps = [{app4, "5.0.0", gte}],
-    Pkg3Deps = [{app5, "2.0.0", '>='}],
-    Pkg4Deps = [app5],
-
-    Dom0 = add_packages(new_graph(), [{app1, [{"0.1.0", Pkg1Deps},
-                                              {"0.2", Pkg1Deps},
-                                              {"3.0", Pkg1Deps}]},
-                                      {app2, [{"0.0.1", Pkg2Deps},
-                                              {"0.1", Pkg2Deps},
-                                              {"1.0", Pkg2Deps},
-                                              {"2.1.5", Pkg2Deps},
-                                              {"2.2", Pkg2Deps},
-                                              {"3.0", Pkg2Deps}]},
-                                      {app3, [{"0.1.0", Pkg3Deps},
-                                              {"0.1.3", Pkg3Deps},
-                                              {"2.0.0", Pkg3Deps},
-                                              {"3.0.0", Pkg3Deps},
-                                              {"4.0.0", Pkg3Deps}]},
-                                      {app4, [{"0.1.0", Pkg4Deps},
-                                              {"0.3.0", Pkg4Deps},
-                                              {"5.0.0", Pkg4Deps},
-                                              {"6.0.0", Pkg4Deps}]},
-                                      {app5, [{"0.1.0", []},
-                                              {"0.3.0", []},
-                                              {"2.0.0", []},
-                                              {"6.0.0", []}]}]),
-    ?assertMatch({ok, [{app5,{6,0,0}},
-                       {app3,{0,1,3}},
-                       {app4,{6,0,0}},
-                       {app2,{2,2}},
-                       {app1,{3,0}}]},
-                 solve(Dom0, [{app1, "3.0"}])).
-
-filter_versions_test() ->
-
-    Cons = [{app2, "2.1", '~>'},
-            {app3, "0.1.1", "0.1.5", between},
-            {app4, "5.0.0", gte},
-            {app5, "2.0.0", '>='},
-            app5],
-
-    Packages = [{app1, "0.1.0"},
-                {app1, "0.2"},
-                {app1, "0.2"},
-                {app1, "3.0"},
-                {app2, "0.0.1"},
-                {app2, "0.1"},
-                {app2, "1.0"},
-                {app2, "2.1.5"},
-                {app2, "2.2"},
-                {app2, "3.0"},
-                {app3, "0.1.0"},
-                {app3, "0.1.3"},
-                {app3, "2.0.0"},
-                {app3, "3.0.0"},
-                {app3, "4.0.0"},
-                {app4, "0.1.0"},
-                {app4, "0.3.0"},
-                {app4, "5.0.0"},
-                {app4, "6.0.0"},
-                {app5, "0.1.0"},
-                {app5, "0.3.0"},
-                {app5, "2.0.0"},
-                {app5, "6.0.0"}],
-
-    ?assertMatch([{app1,"0.1.0"},
-                  {app1,"0.2"},
-                  {app1,"0.2"},
-                  {app1,"3.0"},
-                  {app2,"2.1.5"},
-                  {app2,"2.2"},
-                  {app3,"0.1.3"},
-                  {app4,"5.0.0"},
-                  {app4,"6.0.0"},
-                  {app5,"2.0.0"},
-                  {app5,"6.0.0"}],
-                 filter_packages(Packages, Cons)).
-
--endif.

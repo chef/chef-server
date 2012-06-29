@@ -56,7 +56,7 @@ search(State, ActiveCons=[PossibleCulprit | _], [NewCon | Constraints]) ->
 %% Internal Functions
 %%============================================================================
 
--spec format_culprit_error(depsolver:internal_t(), depsolver:constraint(),
+-spec format_culprit_error(depsolver:dep_graph(), depsolver:constraint(),
                            [depsolver:constraint()]) ->
                                    {unable_to_solve, depsolver:constraint(),
                                     detail()}.
@@ -67,7 +67,7 @@ format_culprit_error(State, Culprit, ActiveCons) ->
 %% @doc sort the constraints into the individual baskets that are contained
 %% within the error through. That is unknown apps, known bad (version
 %% constrained) and known good apps.
--spec sort_constraints(depsolver:internal_t(), [depsolver:constraint()]) ->
+-spec sort_constraints(depsolver:dep_graph(), [depsolver:constraint()]) ->
                               detail().
 sort_constraints(State, Cons) ->
     lists:foldl(fun(Con, {AccUnknown, AccBad, AccGood}) ->
@@ -85,7 +85,7 @@ sort_constraints(State, Cons) ->
                 end, {[], [], []}, Cons).
 
 %% @doc check taht the specified constraint is in the dependency graph.
--spec is_known(depsolver:internal_t(), depsolver:constraint()) ->
+-spec is_known(depsolver:dep_graph(), depsolver:constraint()) ->
                       boolean().
 is_known(State,  Con) ->
     {PkgName, Vsn} = dep_pkg_vsn(Con),
@@ -130,33 +130,3 @@ dep_pkg_vsn({Pkg, Vsn1, _Vsn2, _}) ->
     {Pkg, Vsn1};
 dep_pkg_vsn(Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
     {Pkg, unspecified}.
-
-%%============================================================================
-%% Tests
-%%============================================================================
--ifndef(NO_TESTS).
--include_lib("eunit/include/eunit.hrl").
-
--spec missing_test() -> ok.
-missing_test() ->
-
-    Dom0 = depsolver:add_packages(depsolver:new_graph(), [{app1, [{"0.1", [{app2, "0.2"},
-                                                             {app3, "0.2", '>='},
-                                                             {app4, "0.2"}]},
-                                                    {"0.2", [{app4, "0.2"}]},
-                                                    {"0.3", [{app4, "0.2"}]}]},
-                                            {app2, [{"0.1", []},
-                                                    {"0.2",[{app3, "0.3"}]},
-                                                    {"0.3", []}]},
-                                            {app3, [{"0.1", []},
-                                                    {"0.2", []},
-                                                    {"0.3", []}]}]),
-
-
-    ?assertMatch({error, {unreachable_package,app4}},
-                 depsolver:solve(Dom0, [{app4, "0.1"}, {app3, "0.1"}])),
-
-    ?assertMatch({error, {unreachable_package,app4}},
-                 depsolver:solve(Dom0, [{app1, "0.1"}])).
-
--endif.
