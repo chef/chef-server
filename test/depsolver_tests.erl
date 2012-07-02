@@ -304,18 +304,21 @@ filter_versions_test() ->
                 {app5, "2.0.0"},
                 {app5, "6.0.0"}],
 
-    ?assertMatch([{app1,"0.1.0"},
-                  {app1,"0.2"},
-                  {app1,"0.2"},
-                  {app1,"3.0"},
-                  {app2,"2.1.5"},
-                  {app2,"2.2"},
-                  {app3,"0.1.3"},
-                  {app4,"5.0.0"},
-                  {app4,"6.0.0"},
-                  {app5,"2.0.0"},
-                  {app5,"6.0.0"}],
-                 depsolver:filter_packages(Packages, Cons)).
+    ?assertMatch({ok, [{app1,"0.1.0"},
+                       {app1,"0.2"},
+                       {app1,"0.2"},
+                       {app1,"3.0"},
+                       {app2,"2.1.5"},
+                       {app2,"2.2"},
+                       {app3,"0.1.3"},
+                       {app4,"5.0.0"},
+                       {app4,"6.0.0"},
+                       {app5,"2.0.0"},
+                       {app5,"6.0.0"}]},
+                 depsolver:filter_packages(Packages, Cons)),
+    ?assertMatch({error, {invalid_constraints, [{<<"foo">>,{1,0,0},'~~~~'}]}},
+                 depsolver:filter_packages(Packages,
+                                           [{"foo", "1.0.0", '~~~~'} | Cons])).
 
 -spec missing_test() -> ok.
 missing_test() ->

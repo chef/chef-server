@@ -271,16 +271,42 @@ parse_version(Vsn = {Major})
 %% @doc given a list of package name version pairs, and a list of constraints
 %% return every member of that list that matches all constraints.
 -spec filter_packages([{pkg_name(), raw_vsn()}], [raw_constraint()]) ->
-                             [{pkg_name(), raw_vsn()}].
+                             {ok, [{pkg_name(), raw_vsn()}]}
+                                 | {error, Reason::term()}.
 filter_packages(PVPairs, RawConstraints) ->
     Constraints = [fix_con(Constraint) || Constraint <- RawConstraints],
-    [PVPair || PVPair <- PVPairs,
-               filter_pvpair_by_constraint(fix_con(PVPair), Constraints)].
+    case check_constraints(Constraints) of
+        ok ->
+            {ok, [PVPair || PVPair <- PVPairs,
+                            filter_pvpair_by_constraint(fix_con(PVPair), Constraints)]};
+        Error ->
+            Error
+    end.
 
 
 %%====================================================================
 %% Internal Functions
 %%====================================================================
+-spec check_constraints(constraints()) ->
+                               ok | {error, {invalid_constraints, [term()]}}.
+check_constraints(Constraints) ->
+    PossibleInvalids =
+        lists:foldl(fun(Constraint, InvalidConstraints) ->
+                            case is_valid_constraint(Constraint) of
+                                true ->
+                                    InvalidConstraints;
+                                false ->
+                                [Constraint | InvalidConstraints]
+                            end
+                    end, [], Constraints),
+    case PossibleInvalids of
+        [] ->
+            ok;
+        _ ->
+        {error, {invalid_constraints, PossibleInvalids}}
+    end.
+
+
 -spec filter_pvpair_by_constraint({pkg_name(), vsn()}, [constraint()]) ->
                                          boolean().
 filter_pvpair_by_constraint(PVPair, Constraints) ->
