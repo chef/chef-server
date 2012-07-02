@@ -178,7 +178,7 @@ circular_dependencies_test() ->
 
 conflicting_failing_test() ->
     Pkg1Deps = [app2,
-                {app5, "2.0.0"},
+                {app5, "2.0.0", '='},
                 {app4, "0.3.0", "5.0.0", between}],
 
     Pkg2Deps = [{app4, "5.0.0", gte}],
@@ -325,9 +325,9 @@ missing_test() ->
 
     Dom0 = depsolver:add_packages(depsolver:new_graph(), [{app1, [{"0.1", [{app2, "0.2"},
                                                              {app3, "0.2", '>='},
-                                                             {app4, "0.2"}]},
+                                                             {app4, "0.2", '='}]},
                                                     {"0.2", [{app4, "0.2"}]},
-                                                    {"0.3", [{app4, "0.2"}]}]},
+                                                    {"0.3", [{app4, "0.2", '='}]}]},
                                             {app2, [{"0.1", []},
                                                     {"0.2",[{app3, "0.3"}]},
                                                     {"0.3", []}]},

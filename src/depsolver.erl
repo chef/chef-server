@@ -94,6 +94,7 @@
              | {non_neg_integer(), non_neg_integer(), non_neg_integer()}.
 -type raw_constraint() :: pkg_name()
                         | {pkg_name(), raw_vsn()}
+                        | {pkg_name(), raw_vsn(), '='}
                         | {pkg_name(), raw_vsn(), gte}
                         | {pkg_name(), raw_vsn(),'>='}
                         | {pkg_name(), raw_vsn(), lte}
@@ -108,6 +109,7 @@
 
 -type constraint() :: pkg_name()
                     | {pkg_name(), vsn()}
+                    | {pkg_name(), vsn(), '='}
                     | {pkg_name(), vsn(), gte}
                     | {pkg_name(), vsn(),'>='}
                     | {pkg_name(), vsn(), lte}
@@ -398,6 +400,8 @@ is_valid_constraint(Pkg) when is_atom(Pkg) orelse is_binary(Pkg) ->
     true;
 is_valid_constraint({_Pkg, Vsn}) when is_tuple(Vsn) ->
     true;
+is_valid_constraint({_Pkg, Vsn, '='}) when is_tuple(Vsn) ->
+    true;
 is_valid_constraint({_Pkg, _LVsn, gte}) ->
     true;
 is_valid_constraint({_Pkg, _LVsn, '>='}) ->
@@ -471,6 +475,8 @@ is_within_pessimistic_version(Vsn = {_}, LVsn) ->
 is_version_within_constraint(_Vsn, Pkg) when is_atom(Pkg) orelse is_binary(Pkg) ->
     true;
 is_version_within_constraint(Vsn, {_Pkg, NVsn}) ->
+    normalize_version(Vsn) == normalize_version(NVsn);
+is_version_within_constraint(Vsn, {_Pkg, NVsn, '='}) ->
     normalize_version(Vsn) == normalize_version(NVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn, gte})  ->
     normalize_version(Vsn) >= normalize_version(LVsn);
