@@ -19,7 +19,6 @@
 %%============================================================================
 %% Types
 %%============================================================================
--type void() :: ok.
 -type detail() :: {UnknownApps::[depsolver:constraint()],
                    VersionConstrained::[depsolver:constraint()],
                    GoodApps::[depsolver:constraint()]}.
@@ -27,24 +26,26 @@
 %%============================================================================
 %% Internal API
 %%============================================================================
--spec search(depsolver:internal_t(), [depsolver:constraint()], [depsolver:constraint()])
-            -> void().
+%% @doc start running the solver, with each run reduce the number of constraints
+%% set as goals. At some point the solver should succeed.
+-spec search(depsolver:dep_graph(), [depsolver:constraint()], [depsolver:constraint()])
+            -> detail() | term().
 search(State, ActiveCons=[Culprit | _], []) ->
     case depsolver:primitive_solve(State, ActiveCons) of
         fail ->
-            erlang:throw(format_culprit_error(State, Culprit, ActiveCons));
+            format_culprit_error(State, Culprit, ActiveCons);
         _Success ->
             %% This should *never* happen. 'Culprit' above represents the last
             %% possible constraint that could cause things to fail. There for
             %% this should have failed as well.
-            erlang:throw(inconsistant_graph_state)
+            inconsistant_graph_state
     end;
 search(State, ActiveCons=[PossibleCulprit | _], [NewCon | Constraints]) ->
     case depsolver:primitive_solve(State, ActiveCons) of
         fail ->
-            erlang:throw(format_culprit_error(State,
-                                              PossibleCulprit,
-                                              ActiveCons));
+            format_culprit_error(State,
+                                 PossibleCulprit,
+                                 ActiveCons);
         _Success ->
             %% Move one constraint from the inactive to the active
             %% constraints and run again
@@ -55,7 +56,7 @@ search(State, ActiveCons=[PossibleCulprit | _], [NewCon | Constraints]) ->
 %% Internal Functions
 %%============================================================================
 
--spec format_culprit_error(depsolver:internal_t(), depsolver:constraint(),
+-spec format_culprit_error(depsolver:dep_graph(), depsolver:constraint(),
                            [depsolver:constraint()]) ->
                                    {unable_to_solve, depsolver:constraint(),
                                     detail()}.
@@ -63,7 +64,10 @@ format_culprit_error(State, Culprit, ActiveCons) ->
     Result = sort_constraints(State, ActiveCons),
     {unable_to_solve, Culprit, Result}.
 
--spec sort_constraints(depsolver:internal_t(), [depsolver:constraint()]) ->
+%% @doc sort the constraints into the individual baskets that are contained
+%% within the error through. That is unknown apps, known bad (version
+%% constrained) and known good apps.
+-spec sort_constraints(depsolver:dep_graph(), [depsolver:constraint()]) ->
                               detail().
 sort_constraints(State, Cons) ->
     lists:foldl(fun(Con, {AccUnknown, AccBad, AccGood}) ->
@@ -80,11 +84,12 @@ sort_constraints(State, Cons) ->
                         end
                 end, {[], [], []}, Cons).
 
--spec is_known(depsolver:internal_t(), depsolver:constraint()) ->
+%% @doc check taht the specified constraint is in the dependency graph.
+-spec is_known(depsolver:dep_graph(), depsolver:constraint()) ->
                       boolean().
 is_known(State,  Con) ->
     {PkgName, Vsn} = dep_pkg_vsn(Con),
-    case gb_trees:lookup(depsolver:make_key(PkgName), State) of
+    case gb_trees:lookup(PkgName, State) of
         none ->
             false;
         {value, Vsns} ->
@@ -93,7 +98,7 @@ is_known(State,  Con) ->
                     true;
                 _ ->
                     case lists:keyfind(Vsn, 1, Vsns) of
-                        none ->
+                        false ->
                             false;
                         _ ->
                             true
@@ -101,6 +106,8 @@ is_known(State,  Con) ->
             end
     end.
 
+%% @doc check to see if the version constrained to not fit in the solution
+%% space.
 -spec is_bad(depsolver:constraint(), [depsolver:constraint()]) -> boolean().
 is_bad(Con, Constraints) ->
     {PkgName, Vsn} = dep_pkg_vsn(Con),
@@ -111,8 +118,10 @@ is_bad(Con, Constraints) ->
                   end,
                   PkgCons).
 
-
--spec dep_pkg_vsn(depsolver:constraint()) -> {depsolver:pkg_name(), depsolver:vsn()}.
+%% @doc this is basically the equivilent of dep_pkg. Except it returns the pkg
+%% nad version if available or {pkg, unspecified} if not available.
+-spec dep_pkg_vsn(depsolver:constraint()) -> {depsolver:pkg_name(), depsolver:vsn()} |
+                                         {depsolver:pkg_name(), unspecified}.
 dep_pkg_vsn(Pkg={_Pkg, _Vsn}) ->
     Pkg;
 dep_pkg_vsn({Pkg, Vsn, _}) ->
@@ -121,32 +130,3 @@ dep_pkg_vsn({Pkg, Vsn1, _Vsn2, _}) ->
     {Pkg, Vsn1};
 dep_pkg_vsn(Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
     {Pkg, unspecified}.
-
-%%============================================================================
-%% Tests
-%%============================================================================
--ifndef(NO_TESTS).
--include_lib("eunit/include/eunit.hrl").
-
-missing_test() ->
-
-    Dom0 = depsolver:add_packages(depsolver:new(), [{app1, [{"0.1", [{app2, "0.2"},
-                                                             {app3, "0.2", '>='},
-                                                             {app4, "0.2"}]},
-                                                    {"0.2", [{app4, "0.2"}]},
-                                                    {"0.3", [{app4, "0.2"}]}]},
-                                            {app2, [{"0.1", []},
-                                                    {"0.2",[{app3, "0.3"}]},
-                                                    {"0.3", []}]},
-                                            {app3, [{"0.1", []},
-                                                    {"0.2", []},
-                                                    {"0.3", []}]}]),
-
-
-    ?assertThrow({unreachable_package,app4},
-                 depsolver:solve(Dom0, [{app4, "0.1"}, {app3, "0.1"}])),
-
-    ?assertThrow({unreachable_package,app4},
-                 depsolver:solve(Dom0, [{app1, "0.1"}])).
-
--endif.
