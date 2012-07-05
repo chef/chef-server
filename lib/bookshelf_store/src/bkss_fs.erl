@@ -18,9 +18,11 @@
          obj_meta/3,
          obj_create/4,
          obj_get/3,
-         obj_recv/6,
-         obj_send/4
-        ]).
+         obj_in_start/3,
+         obj_in/3,
+         obj_in_end/2,
+         obj_out_start/4,
+         obj_out/2]).
 
 -export_type([fs_data/0, dir/0]).
 
@@ -161,107 +163,52 @@ obj_copy(State={?MODULE, Dir}, FromBucket, FromPath, ToBucket, ToPath) ->
                   filename:join([Dir, encode(ToBucket), encode(ToPath)])),
     {State, {ok, CpySize - ?CURRENT_HEADER_SIZE}}.
 
--spec obj_send(fs_data(), bkss_store:bucket_name(),
-               bkss_store:path(), Trans::bkss_transport:trans()) ->
-                      {fs_data(), {ok, MD5::term()} | {error, Reason::term()}}.
-obj_send(State = {?MODULE, Dir}, Bucket, Path, Trans0) ->
-    FilePath = filename:join([Dir, encode(Bucket), encode(Path)]),
-    Resp =
-        case obj_open_r(FilePath) of
-            {ok, FsSt} ->
-                case read(FsSt, Trans0) of
-                    {Trans1, ok} ->
-                        {Trans1, obj_close(FsSt)};
-                    {Trans1, {error, timeout}} ->
-                        obj_close(FsSt),
-                        {Trans1, {error, timeout}};
-                    Any ->
-                        obj_close(FsSt),
-                        Any
-                end;
-            Any ->
-                Any
-        end,
-    {State, Resp}.
-
--spec obj_recv(fs_data(), bkss_store:bucket_name(), bkss_store:path(),
-               Trans::bkss_transport:trans(), Buffer::binary(), Length::non_neg_integer()) ->
-                      {fs_data(), {ok, MD5::term()} | {error, Reason::term()}}.
-obj_recv(State = {?MODULE, Dir}, Bucket, Path, Trans, Buffer, Length) ->
+-spec obj_in_start(fs_data(), bkss_store:bucket_name(), bkss_store:path()) ->
+                          {fs_data(), {ok, Ref::term()} | {error, Reason::term()}}.
+obj_in_start(State = {?MODULE, Dir}, Bucket, Path) ->
     FilePath = filename:join([Dir, encode(Bucket), encode(Path)]),
     filelib:ensure_dir(FilePath),
-    Resp =
-        case obj_open_w(FilePath) of
-            {ok, FsSt} ->
-                case write(FsSt, Trans, Length, Buffer) of
-                    {Trans1, {ok, FsSt2}} ->
-                        {Trans1, obj_close(FsSt2)};
-                    {Trans1, {error, timeout}} ->
-                        obj_close(FsSt),
-                        obj_delete(State, Bucket, Path),
-                        {Trans1, {error, timeout}};
-                    Any ->
-                        obj_close(FsSt),
-                        obj_delete(State, Bucket, Path),
-                        Any
-                end;
-            Any -> Any
-        end,
+    Resp = obj_open_w(FilePath),
     {State, Resp}.
+
+-spec obj_in(fs_data(), Ref::term() , Data::binary()) ->
+                    {fs_data(), {ok, Ref1::term()} | {error, Reason::term()}}.
+obj_in(State = {?MODULE, _Dir}, Ref, Data) ->
+    {State, obj_write(Ref, Data)}.
+
+-spec obj_in_end(fs_data(), Ref::term()) ->
+                    {fs_data(), {ok, MD5::term()} | {error, Reason::term()}}.
+obj_in_end(State = {?MODULE, _Dir}, Ref) ->
+    {State, obj_close(Ref)}.
+
+-spec obj_out_start(fs_data(), bkss_store:bucket_name(), bkss_store:path(),
+                    Hunk::non_neg_integer()) ->
+                      {fs_data(), {ok, Ref::term()} | {error, Reason::term()}}.
+obj_out_start(State = {?MODULE, Dir}, Bucket, Path, Length) ->
+    FilePath = filename:join([Dir, encode(Bucket), encode(Path)]),
+    Resp = case obj_open_r(FilePath) of
+               {ok, Fst} ->
+                   {ok, {Fst, Length}};
+               Any ->
+                   Any
+           end,
+    {State, Resp}.
+
+-spec obj_out(fs_data(), Ref::term()) ->
+                     {fs_data(), {ok, Data::binary()} | done | {error, Reason::term()}}.
+obj_out(State = {?MODULE, _Dir}, {{File, _}, Length}) ->
+    case file:read(File, Length) of
+        {ok, Chunk} ->
+            {State, {ok, Chunk}};
+        eof ->
+            {State, done};
+        Any ->
+            {State, Any}
+    end.
 
 %%===================================================================
 %% Internal Functions
 %%===================================================================
--spec read(file_desc(), bkss_transport:trans()) ->
-                  ok | {error, Reason::term()}.
-read({File, _} = FsSt, Trans0) ->
-    case file:read(File, ?BLOCK_SIZE) of
-        {ok, Chunk} ->
-            {Trans1, _} = bkss_transport:send(Trans0, Chunk),
-            read(FsSt, Trans1);
-        eof ->
-            {Trans0, ok};
-        Any ->
-            {Trans0, Any}
-    end.
-
--spec write(file_desc(), Trans::bkss_transport:trans(),
-            Length::non_neg_integer(), Buf::binary()) ->
-                   {ok, file_desc()} | {error, Reason::term()}.
-write(FsSt, Trans, Length, <<>>) ->
-    write(FsSt, Trans, Length);
-write(FsSt, Trans, Length, Buf) ->
-    case obj_write(FsSt, Buf) of
-        {ok, NewFsSt} ->
-            write(NewFsSt, Trans, Length - byte_size(Buf));
-        Any ->
-            {Trans, Any}
-    end.
-
--spec write(file_desc(), Trans::bkss_transport:trans(), Length::non_neg_integer()) ->
-                   {ok, file_desc()} | {error, Reason::term()}.
-write(FsSt, Trans, 0) ->
-    {Trans, obj_write(FsSt, <<>>)};
-write(FsSt, Trans0, Length) when Length =< ?BLOCK_SIZE ->
-    case bkss_transport:recv(Trans0, Length) of
-        {Trans1, {ok, Chunk}} ->
-            {Trans1, obj_write(FsSt, Chunk)};
-        Any ->
-            {Trans0, Any}
-    end;
-write(FsSt, Trans0, Length) ->
-    case bkss_transport:recv(Trans0, ?BLOCK_SIZE) of
-        {Trans1, {ok, Chunk}} ->
-            case obj_write(FsSt, Chunk) of
-                {ok, NewFsSt} ->
-                    write(NewFsSt, Trans1, Length-?BLOCK_SIZE);
-                Any ->
-                    {Trans1, Any}
-            end;
-        Any ->
-            {Trans0, Any}
-    end.
-
 -spec dir_2_bucket(dir()) -> bkss_store:bucket().
 dir_2_bucket(Dir) ->
     %% crash if no access to any bucket dir

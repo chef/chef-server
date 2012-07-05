@@ -173,13 +173,19 @@ bookshelf_stream(Config) when is_list(Config) ->
     Action = fun(Sq) ->
                      seed(Sq),
                      Path = filename:join(random_binary(), random_binary()),
-                     Data = random_string(1000, ?STR_CHARS),
-                     Trans = bkss_transport:new(bksst_test_transport, [Data]),
-                     ?assertMatch({_, {ok, _}},
-                                  bookshelf_store:obj_recv(Bucket, Path,
-                                                           Trans, <<>>, 100)),
-                     ?assertMatch({_, {ok, _}}, bookshelf_store:obj_send(Bucket,
-                                                                         Path, Trans))
+                     ListData = [erlang:list_to_binary(random_string(100, ?STR_CHARS)) || _ <- lists:seq(1,100)],
+                     MD5 = erlang:md5(erlang:iolist_to_binary(ListData)),
+                     {ok, Ref} = bookshelf_store:obj_in_start(Bucket, Path),
+                     lists:foreach(fun(Data) ->
+                                           ok = bookshelf_store:obj_in(Ref, Data)
+                                   end, ListData),
+                     {ok, MD5} = bookshelf_store:obj_in_end(Ref),
+                     {ok, Ref2} = bookshelf_store:obj_out_start(Bucket, Path, 100),
+                     lists:foreach(fun(Data) ->
+                                           R = bookshelf_store:obj_out(Ref2),
+                                           ?assertMatch({ok, Data}, R)
+                                   end, ListData),
+                     done = bookshelf_store:obj_out(Ref2)
              end,
     ec_plists:map(Action, lists:seq(1,ProcessCount)).
 

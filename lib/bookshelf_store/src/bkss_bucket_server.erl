@@ -42,9 +42,9 @@ unlock_path(BucketName, Path) ->
     {Pid, _} = gproc:await({n,l,BucketName}, ?WAIT_TIMEOUT),
     gen_server:cast(Pid, {unlock, Path}).
 
-%%%===================================================================
-%%% gen_server callbacks
-%%%===================================================================
+%% %%%===================================================================
+%% %%% gen_server callbacks
+%% %%%===================================================================
 
 -spec init([bookshelf_store:bucket_name()]) -> {ok, state()}.
 init([BucketName]) ->
@@ -56,7 +56,7 @@ init([BucketName]) ->
                 State0;
             {State0, {error,eexist}} ->
                 State0
-    end,
+        end,
     {ok,#state{bucket_name=BucketName, store=State1, locks=[], work_queue=[]}}.
 
 -spec handle_call(Request::term(), From::term(), state()) ->
@@ -69,19 +69,33 @@ handle_call(bucket_delete, _From, #state{bucket_name = BucketName,
     {State1, Reply} = bkss_store:bucket_delete(Store0, BucketName),
     {reply, Reply, {die_nicely, State1}, 0};
 handle_call(obj_list, From, State = #state{bucket_name = BucketName,
-                                          store = Store0}) ->
+                                           store = Store0}) ->
     bkss_obj_sup:start_child({obj_list, From, [BucketName, Store0]}),
     {noreply, State};
+handle_call({obj_in_start, Path}, From, State = #state{bucket_name = BucketName,
+                                                       store = Store0}) ->
+    Work = fun() ->
+                   bkss_stream_sup:start_child({in, From, BucketName, Path,
+                                                Store0, 0})
+           end,
+    {noreply, queue_work(Path, Work, State)};
+handle_call({obj_out_start, Path, Length}, From, State = #state{bucket_name = BucketName,
+                                                                store = Store0}) ->
+    Work = fun() ->
+                   bkss_stream_sup:start_child({out, From, BucketName, Path,
+                                                Store0, Length})
+           end,
+    {noreply, queue_work(Path, Work, State)};
 handle_call({obj_exists, Path}, From, State = #state{bucket_name = BucketName,
                                                      store = Store0}) ->
     bkss_obj_sup:start_child({obj_exists, From, [BucketName, Store0, Path]}),
     {noreply, State};
 handle_call({obj_delete, Path}, From, State = #state{bucket_name = BucketName,
-                                                      store = Store0}) ->
+                                                     store = Store0}) ->
     Work = {obj_delete, From, [BucketName, Store0, Path]},
     {noreply, queue_work(Path, Work, State)};
 handle_call({obj_meta, Path}, From, State = #state{bucket_name = BucketName,
-                                                      store = Store}) ->
+                                                   store = Store}) ->
     Work = {obj_meta, From, [BucketName, Store, Path]},
     {noreply, queue_work(Path, Work, State)};
 handle_call({obj_create, Path, Data}, From, State = #state{bucket_name = BucketName,
@@ -89,7 +103,7 @@ handle_call({obj_create, Path, Data}, From, State = #state{bucket_name = BucketN
     Work = {obj_create, From, [BucketName, Store, Path, Data]},
     {noreply, queue_work(Path, Work, State)};
 handle_call({obj_get, Path}, From, State = #state{bucket_name = BucketName,
-                                                   store = Store}) ->
+                                                  store = Store}) ->
     Work = {obj_get, From, [BucketName, Store, Path]},
     {noreply, queue_work(Path, Work, State)};
 handle_call({obj_copy, FromPath, ToBucket, ToPath}, From, State = #state{bucket_name = BucketName,
@@ -101,7 +115,7 @@ handle_call({obj_send, Path, Trans}, From, State = #state{bucket_name = BucketNa
     Work = {obj_send, From, [BucketName, Store, Path, Trans]},
     {noreply, queue_work(Path, Work, State)};
 handle_call({obj_recv, Path, Trans, Buffer, Length}, From, State = #state{bucket_name = BucketName,
-                                                                           store = Store}) ->
+                                                                          store = Store}) ->
     Work = {obj_recv, From, [BucketName, Store, Path, Trans, Buffer, Length]},
     {noreply, queue_work(Path, Work, State)}.
 
@@ -112,12 +126,12 @@ handle_cast({lock, Path}, State = #state{locks = Locks}) ->
 handle_cast({unlock, Path}, State = #state{locks = Locks0, work_queue = WQ}) ->
     Locks1 = lists:delete(Path, Locks0),
     State1 = case lists:keytake(Path, 1, WQ) of
-                {value, {Path, Work}, NewQueue} ->
-                    queue_work(Path, Work, State#state{locks = Locks1,
-                                                       work_queue=NewQueue});
-                false ->
-                    State#state{locks = Locks1}
-            end,
+                 {value, {Path, Work}, NewQueue} ->
+                     queue_work(Path, Work, State#state{locks = Locks1,
+                                                        work_queue=NewQueue});
+                 false ->
+                     State#state{locks = Locks1}
+             end,
     {noreply, State1}.
 
 
@@ -140,12 +154,18 @@ code_change(_OldVsn, State, _Extra) ->
 is_locked(Path, #state{locks=Locks}) ->
     lists:member(Path, Locks).
 
--spec queue_work(bookshelf_store:path(), bkss_obj_worker:work(), state()) -> state().
+-spec queue_work(bookshelf_store:path(), (fun(() -> ok)) |
+                 bkss_obj_worker:work(), state()) -> state().
 queue_work(Path, Work, State = #state{locks = Locked,
                                       work_queue = WorkQueue}) ->
     case is_locked(Path, State) of
         false ->
-            bkss_obj_sup:start_child(Work),
+            case erlang:is_function(Work) of
+                true ->
+                    Work();
+                false ->
+                    bkss_obj_sup:start_child(Work)
+            end,
             State#state{locks = [Path | Locked]};
         true ->
             %% Add the work onto the back, so the we get a FIFO queue
