@@ -22,19 +22,20 @@ node['private_chef']['mysql']['mysql2_versions'].each do |mysql2_version|
     cwd "/opt/opscode/embedded/service/gem/ruby/1.9.1/gems"
     not_if { File.directory?("/opt/opscode/embedded/service/gem/ruby/1.9.1/gems/mysql2-#{mysql2_version}") }
   end
-
-  execute "sed -i -e 's/s.files = `git ls-files`/s.files = `find . -type f`/' /opt/opscode/embedded/service/gem/ruby/1.9.1/gems/mysql2-#{mysql2_version}/mysql2.gemspec"
-  execute "sed -i -e 's/s.test_files = `git ls-files spec examples`/s.test_files = `find spec examples -type f`/' /opt/opscode/embedded/service/gem/ruby/1.9.1/gems/mysql2-#{mysql2_version}/mysql2.gemspec"
+  mysql2_base = "/opt/opscode/embedded/service/gem/ruby/1.9.1/gems/mysql2-#{mysql2_version}"
+  mysql2_base_safe = mysql2_base.gsub('/', '\/')
+  execute "sed -i -e 's/s.files = `git ls-files`/s.files = `find #{mysql2_base_safe} -type f`/' #{mysql2_base}/mysql2.gemspec"
+  execute "sed -i -e 's/s.test_files = `git ls-files spec examples`/s.test_files = `find #{mysql2_base_safe}\\/spec examples -type f`/' #{mysql2_base}/mysql2.gemspec"
 
   execute "compile mysql2 #{mysql2_version}" do
     command "/opt/opscode/embedded/bin/rake compile" 
-    cwd "/opt/opscode/embedded/service/gem/ruby/1.9.1/gems/mysql2-#{mysql2_version}"
-    not_if { File.directory?("/opt/opscode/embedded/service/gem/ruby/1.9.1/gems/mysql2-#{mysql2_version}/lib/mysql2/mysql2.so") }
+    cwd mysql2_base
+    not_if { File.directory?("#{mysql2_base}/lib/mysql2/mysql2.so") }
   end
 
   ruby_block "create mysql2 gemspec #{mysql2_version}" do
     block do
-      gemspec = Gem::Specification.load("/opt/opscode/embedded/service/gem/ruby/1.9.1/gems/mysql2-#{mysql2_version}/mysql2.gemspec").to_ruby_for_cache
+      gemspec = Gem::Specification.load("#{mysql2_base}/mysql2.gemspec").to_ruby_for_cache
       File.open("/opt/opscode/embedded/service/gem/ruby/1.9.1/specifications/mysql2-#{mysql2_version}.gemspec", "w") do |spec_file|
         spec_file.print gemspec
       end
