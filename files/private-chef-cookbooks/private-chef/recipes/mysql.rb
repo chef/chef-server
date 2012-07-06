@@ -52,12 +52,12 @@ end
 if !File.exists?("/var/opt/opscode/mysql-bootstrap")
   if node["private_chef"]["mysql"]["destructive_migrate"] && node['private_chef']['bootstrap']['enable']
     execute "migrate_database_1" do
-      command "/opt/opscode/embedded/bin/bundle exec sequel -m db/migrate mysql2://#{node['private_chef']['mysql']['sql_user']}:#{node['private_chef']['mysql']['sql_password']}@localhost/opscode_chef -M 0"
+      command "/opt/opscode/embedded/bin/bundle exec sequel -m db/migrate mysql2://#{node['private_chef']['mysql']['sql_user']}:#{node['private_chef']['mysql']['sql_password']}@#{node['private_chef']['mysql']['vip']}/opscode_chef -M 0"
       cwd "/opt/opscode/embedded/service/mixlib-authorization"
     end
 
     execute "migrate_database_2" do
-      command "/opt/opscode/embedded/bin/bundle exec sequel -m db/migrate mysql2://#{node['private_chef']['mysql']['sql_user']}:#{node['private_chef']['mysql']['sql_password']}@localhost/opscode_chef"
+      command "/opt/opscode/embedded/bin/bundle exec sequel -m db/migrate mysql2://#{node['private_chef']['mysql']['sql_user']}:#{node['private_chef']['mysql']['sql_password']}@#{node['private_chef']['mysql']['vip']}/opscode_chef"
       cwd "/opt/opscode/embedded/service/mixlib-authorization"
     end
   end
