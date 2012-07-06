@@ -243,7 +243,7 @@ pessimistic_major_minor_test() ->
     Pkg3Deps = [{app5, "2.0.0", '>='}],
     Pkg4Deps = [app5],
 
-    Dom0 = depsolver:add_packages(depsolver:new_graph(), [{app1, [{"0.1.0", Pkg1Deps},
+     Dom0 = depsolver:add_packages(depsolver:new_graph(), [{app1, [{"0.1.0", Pkg1Deps},
                                               {"0.2", Pkg1Deps},
                                               {"3.0", Pkg1Deps}]},
                                       {app2, [{"0.0.1", Pkg2Deps},
@@ -341,3 +341,13 @@ missing_test() ->
 
     ?assertMatch({error, {unreachable_package,app4}},
                  depsolver:solve(Dom0, [{app1, "0.1"}])).
+
+binary_test() ->
+
+    World = [{<<"foo">>, [{<<"1.2.3">>, [{<<"bar">>, <<"2.0.0">>, gt}]}]},
+             {<<"bar">>, [{<<"2.0.0">>, [{<<"foo">>, <<"3.0.0">>, gt}]}]}],
+    X = depsolver:solve(depsolver:add_packages(depsolver:new_graph(),
+                                               World),
+                        [<<"foo">>]),
+
+    ?assertMatch({error,{unable_to_solve,<<"foo">>,{[],[],[<<"foo">>]}}}, X).

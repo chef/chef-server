@@ -128,5 +128,5 @@ dep_pkg_vsn({Pkg, Vsn, _}) ->
     {Pkg, Vsn};
 dep_pkg_vsn({Pkg, Vsn1, _Vsn2, _}) ->
     {Pkg, Vsn1};
-dep_pkg_vsn(Pkg) when is_atom(Pkg) orelse is_list(Pkg) ->
+dep_pkg_vsn(Pkg) when is_atom(Pkg) orelse is_binary(Pkg) ->
     {Pkg, unspecified}.
