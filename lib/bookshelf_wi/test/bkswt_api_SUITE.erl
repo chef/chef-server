@@ -43,7 +43,6 @@ init_per_testcase(_TestCase, Config) ->
     filelib:ensure_dir(filename:join(DiskStore, "tmp")),
     AccessKeyID = random_string(10, "abcdefghijklmnopqrstuvwxyz"),
     SecretAccessKey = random_string(30, "abcdefghijklmnopqrstuvwxyz"),
-    error_logger:error_msg("SAK", [SecretAccessKey]),
     application:set_env(bookshelf_store, disk_store, DiskStore),
     application:set_env(bookshelf_wi, keys, {AccessKeyID, SecretAccessKey}),
     application:set_env(bookshelf_wi, log_dir, LogDir),
@@ -74,25 +73,30 @@ wi_basic(doc) ->
 wi_basic(suite) ->
     [];
 wi_basic(Config) when is_list(Config) ->
-    S3Conf = proplists:get_value(s3_conf, Config),
-    %% Get much more then about 800 here and you start running out of file
-    %% descriptors on a normal box
-    Count = 100,
-    Buckets = [random_binary() || _ <- lists:seq(1, Count)],
-    error_logger:error_msg("~p~n", [Buckets]),
-    Res = ec_plists:map(fun(B) ->
-                                mini_s3:create_bucket(B, public_read_write, none, S3Conf)
-                        end,
-                        Buckets),
-    ?assert(lists:all(fun(Val) -> ok == Val end, Res)),
-    [{buckets, Details}] = mini_s3:list_buckets(S3Conf),
-    BucketNames = lists:map(fun(Opts) -> proplists:get_value(name, Opts) end,
-                            Details),
-    ?assert(lists:all(fun(Name) -> lists:member(Name, BucketNames) end, Buckets)),
-    [DelBuck | _] = Buckets,
-    ?assertEqual(ok, mini_s3:delete_bucket(DelBuck, S3Conf)),
-    [{buckets, NewBuckets}] = mini_s3:list_buckets(S3Conf),
-    ?assertEqual(Count - 1, length(NewBuckets)).
+    {Timings, _} =
+        timer:tc(fun() ->
+                         S3Conf = proplists:get_value(s3_conf, Config),
+                         %% Get much more then about 800 here and you start running out of file
+                         %% descriptors on a normal box
+                         Count = 10,
+                         Buckets = [random_binary() || _ <- lists:seq(1, Count)],
+                         error_logger:error_msg("~p~n", [Buckets]),
+                         Res = ec_plists:map(fun(B) ->
+                                                     mini_s3:create_bucket(B, public_read_write, none, S3Conf)
+                                             end,
+                                             Buckets),
+                         ?assert(lists:all(fun(Val) -> ok == Val end, Res)),
+                         [{buckets, Details}] = mini_s3:list_buckets(S3Conf),
+                         BucketNames = lists:map(fun(Opts) -> proplists:get_value(name, Opts) end,
+                                                 Details),
+                         ?assert(lists:all(fun(Name) -> lists:member(Name, BucketNames) end, Buckets)),
+                         [DelBuck | _] = Buckets,
+                         ?assertEqual(ok, mini_s3:delete_bucket(DelBuck, S3Conf)),
+                         [{buckets, NewBuckets}] = mini_s3:list_buckets(S3Conf),
+                         ?assertEqual(Count - 1, length(NewBuckets))
+                 end),
+    error_logger:info_msg("WI_BASIC TIMING ~p", [Timings]).
+
 
 put_object(doc) ->
     ["should be able to put and list objects"];
@@ -105,7 +109,7 @@ put_object(Config) when is_list(Config) ->
     BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
     ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
     ?assertEqual([], proplists:get_value(contents, BucketContents)),
-    Count = 100,
+    Count = 2,
     Objs = [filename:join(random_binary(), random_binary()) ||
                _ <- lists:seq(1,Count)],
     ec_plists:map(fun(F) ->

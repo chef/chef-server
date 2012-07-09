@@ -57,7 +57,7 @@ init([BucketName]) ->
             {State0, {error,eexist}} ->
                 State0
         end,
-    {ok,#state{bucket_name=BucketName, store=State1, locks=[], work_queue=[]}}.
+    {ok,#state{bucket_name=BucketName, store=State1, locks=sets:new(), work_queue=dict:new()}}.
 
 -spec handle_call(Request::term(), From::term(), state()) ->
                          {reply, Reply::term(), state()}.
@@ -122,14 +122,17 @@ handle_call({obj_recv, Path, Trans, Buffer, Length}, From, State = #state{bucket
 -spec handle_cast(Msg::term(), state()) ->
                          {noreply, state()}.
 handle_cast({lock, Path}, State = #state{locks = Locks}) ->
-    {noreply, State#state{locks = [Path | Locks]}};
+    {noreply, State#state{locks = sets:add_element(Path, Locks)}};
 handle_cast({unlock, Path}, State = #state{locks = Locks0, work_queue = WQ}) ->
-    Locks1 = lists:delete(Path, Locks0),
-    State1 = case lists:keytake(Path, 1, WQ) of
-                 {value, {Path, Work}, NewQueue} ->
+    Locks1 = sets:del_element(Path, Locks0),
+    State1 = case dict:find(Path, WQ) of
+                 {ok, []} ->
+                     State#state{locks = Locks1,
+                                work_queue=dict:erase(Path, WQ)};
+                 {ok, [Work | Rest]} ->
                      queue_work(Path, Work, State#state{locks = Locks1,
-                                                        work_queue=NewQueue});
-                 false ->
+                                                        work_queue=dict:store(Path, Rest, WQ)});
+                 error ->
                      State#state{locks = Locks1}
              end,
     {noreply, State1}.
@@ -152,7 +155,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%====================================================================
 -spec is_locked(bookshelf_store:path(), state()) -> boolean().
 is_locked(Path, #state{locks=Locks}) ->
-    lists:member(Path, Locks).
+    sets:is_element(Path, Locks).
 
 -spec queue_work(bookshelf_store:path(), (fun(() -> ok)) |
                  bkss_obj_worker:work(), state()) -> state().
@@ -166,8 +169,8 @@ queue_work(Path, Work, State = #state{locks = Locked,
                 false ->
                     bkss_obj_sup:start_child(Work)
             end,
-            State#state{locks = [Path | Locked]};
+            State#state{locks = sets:add_element(Path, Locked)};
         true ->
             %% Add the work onto the back, so the we get a FIFO queue
-            State#state{work_queue =  WorkQueue ++ [{Path, Work}]}
+            State#state{work_queue =  dict:append(Path, Work, WorkQueue)}
     end.

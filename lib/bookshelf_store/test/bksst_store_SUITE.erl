@@ -116,30 +116,33 @@ bookshelf_corruption(doc) ->
 bookshelf_corruption(suite) ->
     [];
 bookshelf_corruption(Config) when is_list(Config) ->
-    ProcessCount = 1000,
-    BucketName = random_binary(),
-    bookshelf_store:bucket_create(BucketName),
-    Path = filename:join(random_binary(), random_binary()),
-    Action = fun(Sq) ->
-                     seed(Sq),
-                     Data = random_string(100, ?STR_CHARS),
-                     %% Our goal is to check and make sure there is no
-                     %% corruption to that end we create a bunch of data, write
-                     %% it and then read it.  Since there are <ProcessCount>
-                     %% processes doing this at the same time the probability
-                     %% that we read the same data we write is low. However,
-                     %% that doesn't matter as long as things decompress
-                     %% correctly. We are basically relying on zlibs crc-32
-                     %% checks to do the corruption checks for us.
-                     CompressedData = zlib:compress(Data),
-                     bookshelf_store:obj_create(BucketName, Path, CompressedData),
-                     {ok, WrittenData} = bookshelf_store:obj_get(BucketName, Path),
-                     %% Again we dont need to check the data. the fact that it
-                     %% inflates without throwing an error is a good corruption
-                     %% check for us.
-                     zlib:uncompress(WrittenData)
-             end,
-    ec_plists:map(Action, lists:seq(1,ProcessCount)).
+    {Timings, _} = timer:tc(fun() ->
+                                    ProcessCount = 1000,
+                                    BucketName = random_binary(),
+                                    bookshelf_store:bucket_create(BucketName),
+                                    Path = filename:join(random_binary(), random_binary()),
+                                    Action = fun(Sq) ->
+                                                     seed(Sq),
+                                                     Data = random_string(100, ?STR_CHARS),
+                                                     %% Our goal is to check and make sure there is no
+                                                     %% corruption to that end we create a bunch of data, write
+                                                     %% it and then read it.  Since there are <ProcessCount>
+                                                     %% processes doing this at the same time the probability
+                                                     %% that we read the same data we write is low. However,
+                                                     %% that doesn't matter as long as things decompress
+                                                     %% correctly. We are basically relying on zlibs crc-32
+                                                     %% checks to do the corruption checks for us.
+                                                     CompressedData = zlib:compress(Data),
+                                                     bookshelf_store:obj_create(BucketName, Path, CompressedData),
+                                                     {ok, WrittenData} = bookshelf_store:obj_get(BucketName, Path),
+                                                     %% Again we dont need to check the data. the fact that it
+                                                     %% inflates without throwing an error is a good corruption
+                                                     %% check for us.
+                                                     zlib:uncompress(WrittenData)
+                                             end,
+                                    ec_plists:map(Action, lists:seq(1,ProcessCount))
+                            end),
+    error_logger:info_msg("BOOKSHELF CORRUPTION~p", [Timings]).
 
 bookshelf_concurrent_access(doc) ->
     ["Multiple processes reading and writing to different files in the same bucket"];

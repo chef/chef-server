@@ -29,7 +29,7 @@
 
 -export_type([bucket_name/0, bucket/0, object/0, path/0]).
 
--define(GEN_SERVER_TIMEOUT, 10000).
+-define(GEN_SERVER_TIMEOUT, 20000).
 
 %%%===================================================================
 %%% Types
@@ -113,13 +113,13 @@ obj_in_start(BucketName, Path) ->
                            ok | {error, Reason::term()}.
 obj_in(StreamToken, Data) ->
     {Pid, _} = gproc:await({n, l, StreamToken}, ?GEN_SERVER_TIMEOUT),
-    gen_server:call(Pid, {obj_in, Data}).
+    gen_server:call(Pid, {obj_in, Data}, ?GEN_SERVER_TIMEOUT).
 
 -spec obj_in_end(stream_token()) ->
                         {ok, MD5::term()} | {error, Reason::term()}.
 obj_in_end(StreamToken) ->
     {Pid, _} = gproc:await({n, l, StreamToken}, ?GEN_SERVER_TIMEOUT),
-    gen_server:call(Pid, obj_in_end).
+    gen_server:call(Pid, obj_in_end, ?GEN_SERVER_TIMEOUT).
 
 -spec obj_out_start(bucket_name(), path(), HunkSize::non_neg_integer()) ->
                            {ok, StreamToken::term()} | {error, Reason::term()}.
@@ -130,7 +130,7 @@ obj_out_start(BucketName, Path, HunkSize) ->
                      {ok, Data::binary()} | done | {error, Reason::term()}.
 obj_out(StreamToken) ->
     {Pid, _} = gproc:await({n, l, StreamToken}, ?GEN_SERVER_TIMEOUT),
-    gen_server:call(Pid, obj_out).
+    gen_server:call(Pid, obj_out, ?GEN_SERVER_TIMEOUT).
 
 %%===================================================================
 %% Internal Functions
