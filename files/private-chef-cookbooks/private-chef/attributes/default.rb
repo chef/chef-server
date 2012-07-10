@@ -189,7 +189,7 @@ default['private_chef']['opscode-erchef']['max_cache_size'] = '10000'
 default['private_chef']['opscode-erchef']['cache_ttl'] = '3600'
 default['private_chef']['opscode-erchef']['db_pool_size'] = '20'
 default['private_chef']['opscode-erchef']['couchdb_max_conn'] = '100'
-default['private_chef']['opscode-erchef']['s3_bucket'] = 'chef_common_opc'
+default['private_chef']['opscode-erchef']['s3_bucket'] = 'bookshelf'
 
 ####
 # Chef Server WebUI
