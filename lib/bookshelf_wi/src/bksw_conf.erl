@@ -47,11 +47,11 @@ secret_access_key(#context{secret_access_key=SecretAccessKey}) ->
 %%%===================================================================
 
 ip() ->
-    case application:get_env(interface) of
+    case application:get_env(ip) of
         undefined ->
-            [{ip, ip("lo")}];
-        {ok, Interface} ->
-            [{ip, ip(Interface)}]
+            [{ip, "127.0.01"}];
+        {ok, Ip} ->
+            [{ip, Ip}]
     end.
 
 dispatch() ->
@@ -77,21 +77,6 @@ keys() ->
         {ok, {AWSAccessKey, SecretKey}} ->
             {keys, {bksw_util:to_binary(AWSAccessKey),
                     bksw_util:to_binary(SecretKey)}}
-    end.
-
-ip(Interface) ->
-    {ok, All} = inet:getifaddrs(),
-    Attribs = proplists:get_value(Interface, All),
-    Addrs = [Attr || Attr <- Attribs, ip_filter(Attr)],
-    [{addr, {N1, N2, N3, N4}} | _] = Addrs,
-    lists:flatten(io_lib:format("~p.~p.~p.~p", [N1, N2, N3, N4])).
-
-ip_filter(Attr) ->
-    case Attr of
-      {addr, _} ->
-            true;
-      _ ->
-            false
     end.
 
 rules(Domains) ->
