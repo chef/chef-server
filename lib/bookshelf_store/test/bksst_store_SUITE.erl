@@ -42,8 +42,14 @@ all(doc) ->
     ["This test is runs the fs implementation of the bkss_store signature"].
 
 all() ->
-    [bookshelf_basic,bookshelf_object, bookshelf_copy, bookshelf_corruption,
-     bookshelf_concurrent_access, bookshelf_stream].
+    [bookshelf_concurrent,
+     bookshelf_concurrent_bucket,
+     bookshelf_basic,
+     bookshelf_object,
+     bookshelf_copy,
+     bookshelf_corruption,
+     bookshelf_concurrent_access,
+     bookshelf_stream].
 
 %%====================================================================
 %% TEST CASES
