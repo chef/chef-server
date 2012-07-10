@@ -109,7 +109,7 @@ put_object(Config) when is_list(Config) ->
     BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
     ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
     ?assertEqual([], proplists:get_value(contents, BucketContents)),
-    Count = 2,
+    Count = 4,
     Objs = [filename:join(random_binary(), random_binary()) ||
                _ <- lists:seq(1,Count)],
     ec_plists:map(fun(F) ->
