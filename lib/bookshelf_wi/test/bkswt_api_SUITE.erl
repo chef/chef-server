@@ -28,7 +28,7 @@ init_per_testcase(sec_fail, Config0) ->
     SecretAccessKey = random_string(30, "abcdefghijklmnopqrstuvwxyz"),
     Port = 4321,
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
-                          lists:flatten(io_lib:format("http://localhost.localdomain:~p",
+                          lists:flatten(io_lib:format("http://127.0.0.1:~p",
                                                       [Port])),
                          path),
     lists:keyreplace(s3_conf, 1, Config1, {s3_conf, S3State});
@@ -49,7 +49,7 @@ init_per_testcase(_TestCase, Config) ->
     ok = bksw_app:manual_start(),
     Port = 4321,
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
-                          lists:flatten(io_lib:format("http://localhost.localdomain:~p",
+                          lists:flatten(io_lib:format("http://127.0.0.1:~p",
                                                       [Port])),
                           path),
     [{s3_conf, S3State}, {disk_store, DiskStore} | Config].
@@ -109,7 +109,7 @@ put_object(Config) when is_list(Config) ->
     BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
     ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
     ?assertEqual([], proplists:get_value(contents, BucketContents)),
-    Count = 4,
+    Count = 6,
     Objs = [filename:join(random_binary(), random_binary()) ||
                _ <- lists:seq(1,Count)],
     ec_plists:map(fun(F) ->
