@@ -141,15 +141,15 @@ get_streamed_body({Data, done}, Ref, Rq0, Ctx) ->
             case get_header('Content-MD5', Rq0) of
                 undefined ->
                     Rq1 = bksw_req:with_etag(base64:encode(Digest), Rq0),
-                    halt(202, Rq1, Ctx);
+                    {true, wrq:set_response_code(202, Rq1), Ctx};
                 RawRequestMd5 ->
                     RequestMd5 = base64:decode(RawRequestMd5),
                     case RequestMd5 of
                         Digest ->
                             Rq1 = bksw_req:with_etag(RawRequestMd5, Rq0),
-                            halt(202, Rq1, Ctx);
+                            {true, wrq:set_response_code(202, Rq1), Ctx};
                         _ ->
-                            halt(406, Rq0, Ctx)
+                            {true, wrq:set_response_code(406, Rq0), Ctx}
                     end
             end;
         {error, Data} ->
