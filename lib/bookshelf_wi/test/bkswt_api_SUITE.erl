@@ -38,11 +38,15 @@ init_per_testcase(_TestCase, Config) ->
     seed(erlang:phash2(now)),
     DiskStore = filename:join(proplists:get_value(priv_dir, Config),
                               random_string(10, "abcdefghijklmnopqrstuvwxyz")),
+    LogDir = filename:join(proplists:get_value(priv_dir, Config),
+                           "logs"),
     filelib:ensure_dir(filename:join(DiskStore, "tmp")),
     AccessKeyID = random_string(10, "abcdefghijklmnopqrstuvwxyz"),
     SecretAccessKey = random_string(30, "abcdefghijklmnopqrstuvwxyz"),
+    error_logger:error_msg("SAK", [SecretAccessKey]),
     application:set_env(bookshelf_store, disk_store, DiskStore),
     application:set_env(bookshelf_wi, keys, {AccessKeyID, SecretAccessKey}),
+    application:set_env(bookshelf_wi, log_dir, LogDir),
     ok = bksw_app:manual_start(),
     Port = 4321,
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
@@ -73,8 +77,9 @@ wi_basic(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
     %% Get much more then about 800 here and you start running out of file
     %% descriptors on a normal box
-    Count = 2,
+    Count = 100,
     Buckets = [random_binary() || _ <- lists:seq(1, Count)],
+    error_logger:error_msg("~p~n", [Buckets]),
     Res = ec_plists:map(fun(B) ->
                                 mini_s3:create_bucket(B, public_read_write, none, S3Conf)
                         end,
@@ -100,7 +105,7 @@ put_object(Config) when is_list(Config) ->
     BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
     ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
     ?assertEqual([], proplists:get_value(contents, BucketContents)),
-    Count = 2,
+    Count = 100,
     Objs = [filename:join(random_binary(), random_binary()) ||
                _ <- lists:seq(1,Count)],
     ec_plists:map(fun(F) ->
@@ -112,7 +117,8 @@ put_object(Config) when is_list(Config) ->
     ec_plists:map(fun(Obj) ->
                           Key = proplists:get_value(key, Obj),
                           ObjDetail = mini_s3:get_object(Bucket, Key, [], S3Conf),
-                          ?assertMatch(Key, proplists:get_value(contents, ObjDetail))
+                          ?assertMatch(Key,
+                                       erlang:binary_to_list(proplists:get_value(content, ObjDetail)))
                   end, ObjList).
 
 sec_fail(doc) ->

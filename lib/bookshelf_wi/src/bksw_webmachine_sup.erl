@@ -34,6 +34,5 @@ init(_Args) ->
                   permanent, 5000, worker, dynamic},
 
     {ok,
-     {{RestartStrategy, MaxRestarts,
-       MaxSecondsBetweenRestarts},
+     {{RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
       [WebMachine]}}.

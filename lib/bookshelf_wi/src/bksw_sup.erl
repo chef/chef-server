@@ -6,7 +6,7 @@
 
 -behaviour(supervisor).
 
--export([start_link/0, reconfigure_cowboy/0]).
+-export([start_link/0, reconfigure_server/0]).
 
 -export([init/1]).
 
@@ -17,8 +17,8 @@
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-reconfigure_cowboy() ->
-    supervisor:restart_child(?MODULE, bksw_cowboy_sup).
+reconfigure_server() ->
+    supervisor:restart_child(?MODULE, bksw_webmachine_sup).
 
 %%===================================================================
 %% Supervisor callbacks
@@ -34,7 +34,7 @@ init(_Args) ->
     Restart = permanent,
     Shutdown = 2000,
 
-    CowboySup = {bksw_cowboy_sup, {bksw_cowboy_sup, start_link, []},
-                 Restart, Shutdown, supervisor, [bksw_cowboy_sup]},
+    WebmachineSup = {bks_webmachine_sup, {bksw_webmachine_sup, start_link, []},
+                     Restart, Shutdown, supervisor, [bksw_webmachine_sup]},
 
-    {ok, {SupFlags, [CowboySup]}}.
+    {ok, {SupFlags, [WebmachineSup]}}.

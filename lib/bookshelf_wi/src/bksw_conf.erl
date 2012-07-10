@@ -5,34 +5,46 @@
 -module(bksw_conf).
 
 %% API
--export([start_link/0, get_configuration/0,
-        keys/0]).
+-export([get_configuration/0, get_context/0,
+        access_key_id/1, secret_access_key/1]).
 
 -include("internal.hrl").
--define(SERVER, ?MODULE).
+
+-record(context, {access_key_id,
+                  secret_access_key}).
+
+%%%===================================================================
+%%% types
+%%%===================================================================
+-opaque context() :: record(context).
 
 %%%===================================================================
 %%% API
 %%%===================================================================
 
--spec start_link() -> {ok, pid()} | ignore | {error, Error::term()}.
-start_link() ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+-spec get_context() -> context().
+get_context() ->
+    {keys, {AccessKeyId, SecretAccessKey}} = keys(),
+    #context{access_key_id=AccessKeyId, secret_access_key=SecretAccessKey}.
 
+-spec get_configuration() -> list().
 get_configuration() ->
-    lists:flatten([sec_handler(),
-                   ip(),
+    lists:flatten([ip(),
                    dispatch(),
-                   pool(),
                    port(),
-                   keys()]).
+                   log_dir()]).
+
+-spec access_key_id(context()) -> binary().
+access_key_id(#context{access_key_id=AccessKeyId}) ->
+    AccessKeyId.
+
+-spec secret_access_key(context()) -> binary().
+secret_access_key(#context{secret_access_key=SecretAccessKey}) ->
+    SecretAccessKey.
 
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
-
-sec_handler() ->
-    {onrequest, fun bksw_sec:handle_request/1}.
 
 ip() ->
     case application:get_env(interface) of
@@ -48,14 +60,6 @@ dispatch() ->
             [{dispatch, rules(["localhost.localdomain"])}];
         {_, Domains} ->
             [{dispatch, rules(Domains)}]
-    end.
-
-pool() ->
-    case application:get_env(pool) of
-        undefined ->
-            [{pool, 1000}];
-        {ok, Pool} ->
-            [{pool, Pool}]
     end.
 
 port() ->
@@ -79,13 +83,15 @@ ip(Interface) ->
     {ok, All} = inet:getifaddrs(),
     Attribs = proplists:get_value(Interface, All),
     Addrs = [Attr || Attr <- Attribs, ip_filter(Attr)],
-    [{addr, Addr} | _] = Addrs,
-    Addr.
+    [{addr, {N1, N2, N3, N4}} | _] = Addrs,
+    lists:flatten(io_lib:format("~p.~p.~p.~p", [N1, N2, N3, N4])).
 
 ip_filter(Attr) ->
     case Attr of
-      {addr, {_, _, _, _}} -> true;
-      _ -> false
+      {addr, _} ->
+            true;
+      _ ->
+            false
     end.
 
 rules(Domains) ->
@@ -97,22 +103,23 @@ format_domains(Domains) ->
 
 rule(Domain) ->
     SubDomain = [bucket] ++ Domain,
-    FEnv = dispatch_rules(),
-    [{Domain, [{[], bksw_idx, FEnv},
-               {[bucket], bksw_bkt, FEnv},
-               {[bucket, '_', '...'], bksw_obj, FEnv}]},
-     {SubDomain,
+    FEnv = undefined,
+    [{SubDomain,
       [{[], bksw_bkt, FEnv},
-       {['...'], bksw_obj, FEnv}]}].
-
-dispatch_rules() ->
-    case application:get_env(dispatch) of
-        undefined ->
-            [];
-        Defined ->
-            Defined
-    end.
+       {[obj_part, '*'], bksw_obj, FEnv}]},
+     {[bucket, obj_part, '*'], bksw_obj, FEnv},
+     {[bucket], bksw_bkt, FEnv},
+     {[], bksw_idx, FEnv}].
 
 create_domain(Domain) ->
     [fun list_to_binary/1(Token)
      || Token <- string:tokens(Domain, ".")].
+
+log_dir() ->
+    case application:get_env(log_dir) of
+        undefined ->
+            Dir = code:priv_dir(bookshelf_wi),
+            {log_dir, Dir};
+        {ok, Dir} ->
+            {log_dir, Dir}
+    end.

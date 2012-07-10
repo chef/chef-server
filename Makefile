@@ -48,7 +48,7 @@ $(PLT):
 		$(ERLPATH) \
 		--apps erts kernel stdlib eunit compiler crypto \
 		webmachine edown inets erlsom gen_leader gproc iso8601 \
-		xmerl mini_s3
+		xmerl mini_s3 mochiweb
 	@if test ! -f $(PLT); then exit 2; fi
 clean_plt:
 	rm -rf $(PLT_DIR)

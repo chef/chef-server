@@ -32,13 +32,13 @@ to_binary(Val) when is_list(Val) ->
 to_binary(Val) when is_binary(Val) ->
     Val.
 
--spec get_bucket(term()) -> {binary(), term()}.
+-spec get_bucket(term()) -> term().
 get_bucket(Req0) ->
-    case cowboy_http_req:binding(bucket, Req0) of
-        {undefined, _Req1} ->
+    case wrq:path_info(bucket, Req0) of
+        undefined ->
             %% We would through a bad match here but you cant have
             %% guards in a match which is really unfortunate
             erlang:error(bad_bucket_dep);
-        GoodValue = {_, _} ->
-            GoodValue
+        GoodValue ->
+            to_binary(GoodValue)
     end.

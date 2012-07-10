@@ -6,159 +6,174 @@
 
 -export([allowed_methods/2, content_types_accepted/2,
          content_types_provided/2, delete_resource/2, download/2,
-         generate_etag/2, init/3, last_modified/2,
-         resource_exists/2, rest_init/2, upload_or_copy/2]).
+         generate_etag/2, init/1, is_authorized/2, last_modified/2,
+         resource_exists/2, upload_or_copy/2]).
 
 -include_lib("bookshelf_store/include/bookshelf_store.hrl").
--include_lib("cowboy/include/http.hrl").
+-include_lib("webmachine/include/webmachine.hrl").
 -include("internal.hrl").
 
 %%===================================================================
 %% Public API
 %%===================================================================
 
-init(_Transport, _Rq, _Opts) ->
-    {upgrade, protocol, cowboy_http_rest}.
+init(_Context) ->
+    {ok, bksw_conf:get_context()}.
 
-rest_init(Rq, _Opts) ->
-    %% We dont actually make use of state here at all
-    {ok, Rq, undefined}.
+is_authorized(Rq, Ctx) ->
+    bksw_sec:is_authorized(Rq, Ctx).
 
-allowed_methods(Rq, St) ->
-    {['HEAD', 'GET', 'PUT', 'DELETE'], Rq, St}.
+allowed_methods(Rq, Ctx) ->
+    {['HEAD', 'GET', 'PUT', 'DELETE'], Rq, Ctx}.
 
-content_types_provided(Rq, St) ->
-    {[{{<<"*">>, <<"*">>, []}, download}], Rq, St}.
+content_types_provided(Rq, Ctx) ->
+    CType =
+    case wrq:get_req_header("accept", Rq) of
+        undefined ->
+            "application/octet-stream";
+        C ->
+            C
+    end,
+    {[{CType, download}], Rq, Ctx}.
 
-content_types_accepted(Rq, St) ->
-    {[{'*', upload_or_copy}], Rq, St}.
+content_types_accepted(Rq, Ctx) ->
+    CT = case wrq:get_req_header("content-type", Rq) of
+             undefined ->
+                 "application/octet-stream";
+             X ->
+                 X
+         end,
+    {MT, _Params} = webmachine_util:media_type_to_detail(CT),
+    {[{MT, upload_or_copy}], Rq, Ctx}.
 
-resource_exists(Rq0, St) ->
-    {Bucket, Path, Rq1} = get_object_name(Rq0),
-    {bookshelf_store:obj_exists(Bucket, Path), Rq1, St}.
+resource_exists(Rq0, Ctx) ->
+    {Bucket, Path} = get_object_name(Rq0),
+    {bookshelf_store:obj_exists(Bucket, Path), Rq0, Ctx}.
 
-delete_resource(Rq0, St) ->
-    {Bucket, Path, Rq1} = get_object_name(Rq0),
+delete_resource(Rq0, Ctx) ->
+    {Bucket, Path} = get_object_name(Rq0),
     case bookshelf_store:obj_delete(Bucket, Path) of
         ok ->
-            {true, Rq1, St};
+            {true, Rq0, Ctx};
         _ ->
-            {false, Rq1, St}
+            {false, Rq0, Ctx}
     end.
 
-last_modified(Rq0, St) ->
-    {Bucket, Path, Rq1} = get_object_name(Rq0),
+last_modified(Rq0, Ctx) ->
+    {Bucket, Path} = get_object_name(Rq0),
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{date = Date}} ->
-            {Date, Rq1, St};
+            {Date, Rq0, Ctx};
         _ ->
-            {halt, Rq1, St}
+            {halt, Rq0, Ctx}
     end.
 
-generate_etag(Rq0, St) ->
-    {Bucket, Path, Rq1} = get_object_name(Rq0),
+generate_etag(Rq0, Ctx) ->
+    {Bucket, Path} = get_object_name(Rq0),
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{digest = Digest}} ->
-            {{strong, Digest}, Rq1, St};
+            {bksw_format:to_base64(Digest), Rq0, Ctx};
         _ ->
-            {halt, Rq1, St}
+            {halt, Rq0, Ctx}
     end.
 
-upload_or_copy(Rq0, St) ->
-    {ok, Rq1} = cowboy_http_req:set_resp_header(<<"Obj">>, <<"Obj">>, Rq0),
-    case cowboy_http_req:parse_header(<<"X-Amz-Copy-Source">>,
-                                      Rq1) of
-        {undefined, undefined, Rq2} ->
-            upload(Rq2, St);
-        {undefined, Rq2} ->
-            upload(Rq2, St);
-        {Source, Rq2} ->
-            copy(Rq2, St, Source)
+upload_or_copy(Rq0, Ctx) ->
+    Rq1 = wrq:set_resp_header("Obj", "Obj", Rq0),
+    case get_header("X-Amz-Copy-Source", Rq1) of
+        undefined ->
+            upload(Rq1, Ctx);
+        Source ->
+            copy(Rq1, Ctx, Source)
     end.
 
-download(Rq0, St) ->
-    {Bucket, Path, Rq1} = get_object_name(Rq0),
+download(Rq0, Ctx) ->
+    {Bucket, Path} = get_object_name(Rq0),
     case bookshelf_store:obj_meta(Bucket, Path) of
-        {ok, #object{size = Size}} ->
-            SFun = fun () ->
-                           Bridge = bkss_transport:new(bksw_socket_transport, Rq1),
-                           case bookshelf_store:obj_send(Bucket, Path, Bridge) of
-                               {_Rq2, {ok, Size}} ->
-                                   sent;
-                               {_Rq2, _} ->
-                                   {error, "Download unsuccessful"}
-                           end
-                   end,
-            {{stream, Size, SFun}, Rq1, St};
+        {ok, _} ->
+            {ok, Ref} = bookshelf_store:obj_out_start(Bucket, Path, ?BLOCK_SIZE),
+            {{stream, send_streamed_body(Ref)},
+             Rq0,
+             Ctx};
         _ ->
-            {false, Rq1, St}
+            {false, Rq0, Ctx}
     end.
 
 %%===================================================================
 %% Internal Functions
 %%===================================================================
+send_streamed_body(Ref) ->
+    case bookshelf_store:obj_out(Ref) of
+        {ok, Data1} ->
+            {Data1, fun() -> send_streamed_body(Ref) end};
+        done ->
+            {<<>>, done};
+        Error = {error, _} ->
+            Error
+    end.
+
 get_object_name(Rq0) ->
-    {Bucket, Rq1} = bksw_util:get_bucket(Rq0),
-    case cowboy_http_req:path(Rq1) of
-        {undefined, _} ->
-            erlang:error(missing_path_info);
-        {[PossibleBucket | Path], Rq2} ->
+    Bucket = bksw_util:to_string(bksw_util:get_bucket(Rq0)),
+    case string:tokens(wrq:path(Rq0), "/") of
+        [PossibleBucket | Path] ->
             case Bucket of
                 PossibleBucket ->
-                    %% Paths are always one name joined by a path seperator. Cowboy splits them up
-                    %% but we don t actually want that.
-                    {Bucket, filename:join(Path), Rq2};
+                    {bksw_util:to_binary(Bucket),
+                     bksw_util:to_binary(filename:join(Path))};
                 _ ->
-                    %% Paths are always one name joined by a path seperator. Cowboy splits them up
-                    %% but we don t actually want that.
-                    {Bucket, filename:join([PossibleBucket | Path]), Rq2}
+                    {bksw_util:to_binary(Bucket),
+                     bksw_util:to_binary(filename:join([PossibleBucket | Path]))}
             end
     end.
 
-halt(Code, Rq, St) ->
-    {ok, Rq2} = cowboy_http_req:reply(Code, Rq),
-    {halt, Rq2, St}.
+halt(Code, Rq, Ctx) ->
+    {{halt, Code}, Rq, Ctx}.
 
-upload(Rq0, St) ->
-    {Bucket, Path, Rq1} = get_object_name(Rq0),
-    {Length, Rq2} =
-        cowboy_http_req:parse_header('Content-Length', Rq1),
-    Bridge = bkss_transport:new(bksw_socket_transport, Rq2),
-    case bookshelf_store:obj_recv(Bucket, Path, Bridge, <<>>, Length) of
-        {Rq3, {ok, Digest}} ->
-            OurMd5 = bksw_format:to_hex(Digest),
-            case cowboy_http_req:parse_header('Content-MD5', Rq3) of
-                {undefined, undefined, Rq4} ->
-                    Rq5 = bksw_req:with_etag(OurMd5, Rq4),
-                    halt(202, Rq5, St);
-                {undefined, Rq4} ->
-                    Rq5 = bksw_req:with_etag(OurMd5, Rq4),
-                    halt(202, Rq5, St);
-                {RequestMd5, Rq4} ->
-                    case RequestMd5 =:= OurMd5 of
-                        true ->
-                            Rq5 = bksw_req:with_etag(RequestMd5, Rq4),
-                            halt(202, Rq5, St);
+upload(Rq0, Ctx) ->
+    {Bucket, Path} = get_object_name(Rq0),
+    {ok, Ref} = bookshelf_store:obj_in_start(Bucket, Path),
+    get_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE),
+                      Ref, Rq0, Ctx).
+
+get_streamed_body({Data, done}, Ref, Rq0, Ctx) ->
+    ok = bookshelf_store:obj_in(Ref, Data),
+    case bookshelf_store:obj_in_end(Ref) of
+        {ok, Digest} ->
+            case get_header('Content-MD5', Rq0) of
+                undefined ->
+                    Rq1 = bksw_req:with_etag(base64:encode(Digest), Rq0),
+                    halt(202, Rq1, Ctx);
+                RawRequestMd5 ->
+                    RequestMd5 = base64:decode(RawRequestMd5),
+                    case RequestMd5 of
+                        Digest ->
+                            Rq1 = bksw_req:with_etag(RawRequestMd5, Rq0),
+                            halt(202, Rq1, Ctx);
                         _ ->
-                            halt(406, Rq4, St)
+                            halt(406, Rq0, Ctx)
                     end
             end;
-        {Rq4, {error, timeout}} ->
-            halt(408, Rq4, St);
-        {Rq4, _} ->
-            halt(500, Rq4, St)
-    end.
+        {error, Data} ->
+            halt(500, Rq0, Ctx)
+    end;
+get_streamed_body({Data, Next}, Ref, Rq0, Ctx) ->
+    ok = bookshelf_store:obj_in(Ref, Data),
+    get_streamed_body(Next(), Ref, Rq0, Ctx).
 
-copy(Rq0, St, <<"/", FromFullPath/binary>>) ->
-    {ToBucket, Rq1} = bksw_util:get_bucket(Rq0),
-    {ToPath, Rq2} = get_object_name(Rq1),
+
+
+copy(Rq0, Ctx, <<"/", FromFullPath/binary>>) ->
+    {ToBucket, ToPath} = get_object_name(Rq0),
     [FromBucket, FromPath] = binary:split(FromFullPath,
                                           <<"/">>),
-    case bookshelf_store:obj_copy(FromBucket, FromPath,
+    case bookshelf_store:obj_copy(bksw_util:to_binary(FromBucket),
+                                  bksw_util:to_binary(FromPath),
                                   ToBucket, ToPath)
     of
         {ok, _} ->
-            {true, Rq2, St};
+            {true, Rq0, Ctx};
         _ ->
-            {false, Rq2, St}
+            {false, Rq0, Ctx}
     end.
+
+get_header(Header, Rq) ->
+    wrq:get_req_header(Header, Rq).
