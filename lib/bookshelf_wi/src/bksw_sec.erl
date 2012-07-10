@@ -62,8 +62,7 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context) ->
     ContentMD5 = proplists:get_value('Content-Md5', Headers, ""),
     ContentType = proplists:get_value('Content-Type', Headers, ""),
     Date = proplists:get_value('Date', Headers, ""),
-    Host = get_bucket(wrq:host_tokens(Req0)),
-    Resource = wrq:path(Req0),
+    {ok, Bucket, Resource} = bksw_util:get_object_and_bucket(Req0),
     AccessKey = bksw_conf:access_key_id(Context),
     SecretKey = bksw_conf:secret_access_key(Context),
 
@@ -73,8 +72,8 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context) ->
                                    bksw_util:to_string(ContentMD5),
                                    bksw_util:to_string(ContentType),
                                    bksw_util:to_string(Date),
-                                   AmzHeaders, bksw_util:to_string(Host),
-                                   bksw_util:to_string(Resource),
+                                   AmzHeaders, bksw_util:to_string(Bucket),
+                                   "/" ++ bksw_util:to_string(Resource),
                                    ""),
     CheckedAuth = erlang:iolist_to_binary(RawCheckedAuth),
     [AccessKeyId, Signature] = split_authorization(IncomingAuth),
@@ -91,10 +90,8 @@ is_expired(Expires) ->
     Now = calendar:datetime_to_gregorian_seconds(erlang:universaltime()),
     bksw_util:to_integer(Expires) < (Now - ?SECONDS_AT_EPOCH).
 
-get_bucket([_, _]) ->
-    "";
-get_bucket([Bucket, _, _]) ->
-    Bucket.
+%% get_bucket([Bucket, _, _]) ->
+%%     Bucket.
 
 encode_sign_error_response(AccessKeyId, Signature,
                            RequestId, StringToSign, Req0,

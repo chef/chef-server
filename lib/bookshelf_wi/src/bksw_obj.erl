@@ -4,7 +4,7 @@
 %% @copyright Copyright 2012 Opscode, Inc.
 -module(bksw_obj).
 
--export([allowed_methods/2, content_types_accepted/2,
+-export([allowed_methods/2, content_types_accepted/2, finish_request/2,
          content_types_provided/2, delete_resource/2, download/2,
          generate_etag/2, init/1, is_authorized/2, last_modified/2,
          resource_exists/2, upload_or_copy/2]).
@@ -47,11 +47,11 @@ content_types_accepted(Rq, Ctx) ->
     {[{MT, upload_or_copy}], Rq, Ctx}.
 
 resource_exists(Rq0, Ctx) ->
-    {Bucket, Path} = get_object_name(Rq0),
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     {bookshelf_store:obj_exists(Bucket, Path), Rq0, Ctx}.
 
 delete_resource(Rq0, Ctx) ->
-    {Bucket, Path} = get_object_name(Rq0),
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bookshelf_store:obj_delete(Bucket, Path) of
         ok ->
             {true, Rq0, Ctx};
@@ -60,7 +60,7 @@ delete_resource(Rq0, Ctx) ->
     end.
 
 last_modified(Rq0, Ctx) ->
-    {Bucket, Path} = get_object_name(Rq0),
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{date = Date}} ->
             {Date, Rq0, Ctx};
@@ -69,7 +69,7 @@ last_modified(Rq0, Ctx) ->
     end.
 
 generate_etag(Rq0, Ctx) ->
-    {Bucket, Path} = get_object_name(Rq0),
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{digest = Digest}} ->
             {bksw_format:to_base64(Digest), Rq0, Ctx};
@@ -87,7 +87,7 @@ upload_or_copy(Rq0, Ctx) ->
     end.
 
 download(Rq0, Ctx) ->
-    {Bucket, Path} = get_object_name(Rq0),
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, _} ->
             {ok, Ref} = bookshelf_store:obj_out_start(Bucket, Path, ?BLOCK_SIZE),
@@ -98,6 +98,9 @@ download(Rq0, Ctx) ->
             {false, Rq0, Ctx}
     end.
 
+finish_request(Rq0, Ctx) ->
+    error_logger:error_msg("Finished ~p~n", [wrq:path(Rq0)]),
+    {true, Rq0, Ctx}.
 %%===================================================================
 %% Internal Functions
 %%===================================================================
@@ -111,28 +114,16 @@ send_streamed_body(Ref) ->
             Error
     end.
 
-get_object_name(Rq0) ->
-    Bucket = bksw_util:to_string(bksw_util:get_bucket(Rq0)),
-    case string:tokens(wrq:path(Rq0), "/") of
-        [PossibleBucket | Path] ->
-            case Bucket of
-                PossibleBucket ->
-                    {bksw_util:to_binary(Bucket),
-                     bksw_util:to_binary(filename:join(Path))};
-                _ ->
-                    {bksw_util:to_binary(Bucket),
-                     bksw_util:to_binary(filename:join([PossibleBucket | Path]))}
-            end
-    end.
-
 halt(Code, Rq, Ctx) ->
     {{halt, Code}, Rq, Ctx}.
 
 upload(Rq0, Ctx) ->
-    {Bucket, Path} = get_object_name(Rq0),
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     {ok, Ref} = bookshelf_store:obj_in_start(Bucket, Path),
-    get_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE),
-                      Ref, Rq0, Ctx).
+    Result = {T, _, C} = get_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE),
+                               Ref, Rq0, Ctx),
+    error_logger:error_msg("RESULT ~p~n", [{T, C}]),
+    Result.
 
 get_streamed_body({Data, done}, Ref, Rq0, Ctx) ->
     ok = bookshelf_store:obj_in(Ref, Data),
@@ -162,7 +153,7 @@ get_streamed_body({Data, Next}, Ref, Rq0, Ctx) ->
 
 
 copy(Rq0, Ctx, <<"/", FromFullPath/binary>>) ->
-    {ToBucket, ToPath} = get_object_name(Rq0),
+    {ok, ToBucket, ToPath} = bksw_util:get_object_and_bucket(Rq0),
     [FromBucket, FromPath] = binary:split(FromFullPath,
                                           <<"/">>),
     case bookshelf_store:obj_copy(bksw_util:to_binary(FromBucket),

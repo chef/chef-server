@@ -5,6 +5,7 @@
 -module(bksw_util).
 
 -export([get_bucket/1,
+         get_object_and_bucket/1,
          file/1,
          to_integer/1,
          to_string/1,
@@ -41,4 +42,18 @@ get_bucket(Req0) ->
             erlang:error(bad_bucket_dep);
         GoodValue ->
             to_binary(GoodValue)
+    end.
+
+get_object_and_bucket(Rq0) ->
+    case string:tokens(wrq:path(Rq0), "/") of
+        [] ->
+            {ok, <<"">>, <<"">>};
+        [Bucket] ->
+            {ok, bksw_util:to_binary(Bucket),
+             <<"">>};
+        [Bucket | Path] ->
+            {ok, bksw_util:to_binary(Bucket),
+             bksw_util:to_binary(filename:join(Path))};
+        _ ->
+            {error, invalid_path}
     end.

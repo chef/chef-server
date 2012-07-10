@@ -55,12 +55,10 @@ ip() ->
     end.
 
 dispatch() ->
-    case application:get_env(domains) of
-        undefined ->
-            [{dispatch, rules(["localhost.localdomain"])}];
-        {_, Domains} ->
-            [{dispatch, rules(Domains)}]
-    end.
+    FEnv = undefined,
+    [{dispatch, [{[bucket, obj_part, '*'], bksw_obj, FEnv},
+                 {[bucket], bksw_bkt, FEnv},
+                 {[], bksw_idx, FEnv}]}].
 
 port() ->
     case application:get_env(port) of
@@ -78,27 +76,6 @@ keys() ->
             {keys, {bksw_util:to_binary(AWSAccessKey),
                     bksw_util:to_binary(SecretKey)}}
     end.
-
-rules(Domains) ->
-    lists:flatten([rule(Domain)
-                   || Domain <- format_domains(Domains)]).
-
-format_domains(Domains) ->
-    [create_domain(Domain) || Domain <- Domains].
-
-rule(Domain) ->
-    SubDomain = [bucket] ++ Domain,
-    FEnv = undefined,
-    [{SubDomain,
-      [{[], bksw_bkt, FEnv},
-       {[obj_part, '*'], bksw_obj, FEnv}]},
-     {[bucket, obj_part, '*'], bksw_obj, FEnv},
-     {[bucket], bksw_bkt, FEnv},
-     {[], bksw_idx, FEnv}].
-
-create_domain(Domain) ->
-    [fun list_to_binary/1(Token)
-     || Token <- string:tokens(Domain, ".")].
 
 log_dir() ->
     case application:get_env(log_dir) of
