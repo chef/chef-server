@@ -200,7 +200,7 @@ bookshelf_concurrent_access(doc) ->
 bookshelf_concurrent_access(suite) ->
     [];
 bookshelf_concurrent_access(Config) when is_list(Config) ->
-    ProcessCount = 1000,
+    ProcessCount = 200,
     BucketName = random_binary(),
     bookshelf_store:bucket_create(BucketName),
     Action = fun(Sq) ->
@@ -220,7 +220,7 @@ bookshelf_stream(suite) ->
     [];
 bookshelf_stream(Config) when is_list(Config) ->
     random:seed(erlang:now()),
-    ProcessCount = 1000,
+    ProcessCount = 100,
     Bucket = random_binary(),
     ?assertEqual(ok,  bookshelf_store:bucket_create(Bucket)),
     ?assertEqual([], bookshelf_store:obj_list(Bucket)),
