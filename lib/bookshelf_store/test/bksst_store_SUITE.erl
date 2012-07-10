@@ -25,8 +25,10 @@ end_per_suite(_Config) ->
 init_per_testcase(_TestCase, Config) ->
     %% This fixes another rebar brokenness. We cant specify any options to
     %% common test in rebar
+    seed(erlang:phash2({erlang:now(), erlang:node()})),
     DiskStore = filename:join(proplists:get_value(priv_dir, Config),
                               random_string(10, "abcdefghijklmnopqrstuvwxyz")),
+
     filelib:ensure_dir(filename:join(DiskStore, "tmp")),
     ok = application:set_env(bookshelf_store, disk_store, DiskStore),
     ok = bkss_app:manual_start(),
