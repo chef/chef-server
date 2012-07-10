@@ -37,6 +37,8 @@
 
  {chef_common, [
 
+                %% We need this parameter in chef_common now, too
+                {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
                 {s3_platform_bucket_name, "<%= node['private_chef']['aws']['s3_bucket'] %>"},
 
                 {solr_url, "http://<%= node['private_chef']['opscode-solr']['vip'] %>:<%= node['private_chef']['opscode-solr']['port'] %>/solr"},
