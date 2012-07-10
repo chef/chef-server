@@ -122,6 +122,23 @@ default['private_chef']['opscode-expander']['consumer_id'] = "default"
 default['private_chef']['opscode-expander']['nodes'] = 2
 
 ####
+# Bookshelf
+####
+default['private_chef']['bookshelf']['enable'] = true
+default['private_chef']['bookshelf']['ha'] = false
+default['private_chef']['bookshelf']['dir'] = "/var/opt/opscode/bookshelf"
+default['private_chef']['bookshelf']['data_dir'] = "/var/opt/opscode/bookshelf/data"
+default['private_chef']['bookshelf']['log_directory'] = "/var/log/opscode/bookshelf"
+default['private_chef']['bookshelf']['svlogd_size'] = 1000000
+default['private_chef']['bookshelf']['svlogd_num'] = 10
+default['private_chef']['bookshelf']['vip'] = '127.0.0.1'
+default['private_chef']['bookshelf']['listen'] = '127.0.0.1'
+default['private_chef']['bookshelf']['port'] = 4321
+default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
+default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
+default['private_chef']['bookshelf']['pool_size'] = '100'
+
+####
 # Chef Server API
 ####
 default['private_chef']['opscode-chef']['enable'] = true
@@ -172,6 +189,7 @@ default['private_chef']['opscode-erchef']['max_cache_size'] = '10000'
 default['private_chef']['opscode-erchef']['cache_ttl'] = '3600'
 default['private_chef']['opscode-erchef']['db_pool_size'] = '20'
 default['private_chef']['opscode-erchef']['couchdb_max_conn'] = '100'
+default['private_chef']['opscode-erchef']['s3_bucket'] = 'chef_common_opc'
 
 ####
 # Chef Server WebUI
