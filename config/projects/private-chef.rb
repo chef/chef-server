@@ -27,6 +27,7 @@ deps << "opscode-expander"
 deps << "chef-sql-schema" # needed to migrate the DB.
 deps << "mixlib-authorization" # Is this still necessary?
 deps << "keepalived"
+deps << "bookshelf"
 
 # the front-end services
 deps << "opscode-erchef"
