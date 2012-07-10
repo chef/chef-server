@@ -119,13 +119,56 @@ bookshelf_copy(Config) when is_list(Config) ->
                                        bookshelf_store:obj_get(TargetBucket, Path))
                   end, lists:seq(1,100)).
 
+bookshelf_concurrent_bucket(doc) ->
+    ["Test pure writing of multiple objects same bucket"];
+bookshelf_concurrent_bucket(suite) ->
+    [];
+bookshelf_concurrent_bucket(Config) when is_list(Config) ->
+    ProcessCount = 200,
+    BucketName = random_binary(),
+    bookshelf_store:bucket_create(BucketName),
+    Action = fun(Sq) ->
+                     seed(Sq),
+                     Path = filename:join(random_binary(), random_binary()),
+                     Data = erlang:iolist_to_binary(random_string(100, ?STR_CHARS)),
+                     bookshelf_store:obj_create(BucketName, Path, Data),
+                     {ok, WrittenData} = bookshelf_store:obj_get(BucketName, Path),
+                     %% Again we dont need to check the data. the fact that it
+                     %% inflates without throwing an error is a good corruption
+                     %% check for us.
+                     ?assertMatch(Data, WrittenData)
+             end,
+    ec_plists:map(Action, lists:seq(1,ProcessCount)).
+
+bookshelf_concurrent(doc) ->
+    ["Test pure writing of multiple objects in different buckets"];
+bookshelf_concurrent(suite) ->
+    [];
+bookshelf_concurrent(Config) when is_list(Config) ->
+    ProcessCount = 200,
+    Action = fun(Sq) ->
+                     seed(Sq),
+                     BucketName = random_binary(),
+                     bookshelf_store:bucket_create(BucketName),
+                     Path = filename:join(random_binary(), random_binary()),
+                     Data = erlang:iolist_to_binary(random_string(100, ?STR_CHARS)),
+                     bookshelf_store:obj_create(BucketName, Path, Data),
+                     {ok, WrittenData} = bookshelf_store:obj_get(BucketName, Path),
+                     %% Again we dont need to check the data. the fact that it
+                     %% inflates without throwing an error is a good corruption
+                     %% check for us.
+                     ?assertMatch(Data, WrittenData)
+             end,
+    ec_plists:map(Action, lists:seq(1,ProcessCount)).
+
+
 bookshelf_corruption(doc) ->
     ["Multiple processes writing to the same object"];
 bookshelf_corruption(suite) ->
     [];
 bookshelf_corruption(Config) when is_list(Config) ->
     {Timings, _} = timer:tc(fun() ->
-                                    ProcessCount = 1000,
+                                    ProcessCount = 200,
                                     BucketName = random_binary(),
                                     bookshelf_store:bucket_create(BucketName),
                                     Path = filename:join(random_binary(), random_binary()),
