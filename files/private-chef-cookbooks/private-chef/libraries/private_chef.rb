@@ -32,6 +32,7 @@ module PrivateChef
   opscode_certificate Mash.new
   opscode_org_creator Mash.new
   opscode_account Mash.new
+  bookshelf Mash.new
   bootstrap Mash.new
   drbd Mash.new
   keepalived Mash.new
@@ -150,6 +151,10 @@ module PrivateChef
               },
               'opscode_authz' => {
                 'superuser_id' => PrivateChef['opscode_authz']['superuser_id']
+              },
+              'bookshelf' => {
+                'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
+                'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
               }
             })
           )
@@ -176,6 +181,7 @@ module PrivateChef
         "opscode_certificate",
         "opscode_org_creator",
         "opscode_account",
+        "bookshelf",
         "bootstrap",
         "drbd",
         "keepalived",
