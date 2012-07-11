@@ -78,7 +78,7 @@ wi_basic(Config) when is_list(Config) ->
                          S3Conf = proplists:get_value(s3_conf, Config),
                          %% Get much more then about 800 here and you start running out of file
                          %% descriptors on a normal box
-                         Count = 10,
+                         Count = 50,
                          Buckets = [random_binary() || _ <- lists:seq(1, Count)],
                          error_logger:error_msg("~p~n", [Buckets]),
                          Res = ec_plists:map(fun(B) ->
@@ -109,7 +109,7 @@ put_object(Config) when is_list(Config) ->
     BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
     ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
     ?assertEqual([], proplists:get_value(contents, BucketContents)),
-    Count = 6,
+    Count = 50,
     Objs = [filename:join(random_binary(), random_binary()) ||
                _ <- lists:seq(1,Count)],
     ec_plists:map(fun(F) ->
@@ -132,7 +132,7 @@ sec_fail(suite) ->
 sec_fail(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
     Bucket = random_binary(),
-    ?assertError({aws_error, {http_error, 403, _, _}},
+    ?assertError({aws_error, {http_error, "403", _}},
                  mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)).
 
 signed_url(doc) ->

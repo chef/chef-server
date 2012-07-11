@@ -4,7 +4,7 @@
 %% @copyright Copyright 2012 Opscode, Inc.
 -module(bksw_obj).
 
--export([allowed_methods/2, content_types_accepted/2, finish_request/2,
+-export([allowed_methods/2, content_types_accepted/2,
          content_types_provided/2, delete_resource/2, download/2,
          generate_etag/2, init/1, is_authorized/2, last_modified/2,
          resource_exists/2, upload_or_copy/2]).
@@ -97,10 +97,6 @@ download(Rq0, Ctx) ->
         _ ->
             {false, Rq0, Ctx}
     end.
-
-finish_request(Rq0, Ctx) ->
-    error_logger:error_msg("Finished ~p~n", [wrq:path(Rq0)]),
-    {true, Rq0, Ctx}.
 %%===================================================================
 %% Internal Functions
 %%===================================================================
@@ -120,10 +116,8 @@ halt(Code, Rq, Ctx) ->
 upload(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     {ok, Ref} = bookshelf_store:obj_in_start(Bucket, Path),
-    Result = {T, _, C} = get_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE),
-                               Ref, Rq0, Ctx),
-    error_logger:error_msg("RESULT ~p~n", [{T, C}]),
-    Result.
+    get_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE),
+                      Ref, Rq0, Ctx).
 
 get_streamed_body({Data, done}, Ref, Rq0, Ctx) ->
     ok = bookshelf_store:obj_in(Ref, Data),
