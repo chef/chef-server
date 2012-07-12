@@ -12,7 +12,8 @@ bookshelf_sasl_log_dir = File.join(bookshelf_log_dir, "sasl")
   bookshelf_dir,
   bookshelf_etc_dir,
   bookshelf_log_dir,
-  bookshelf_sasl_log_dir
+  bookshelf_sasl_log_dir,
+  node['private_chef']['bookshelf']['data_dir']
 ].each do |dir_name|
   directory dir_name do
     owner node['private_chef']['user']['username']
@@ -34,7 +35,7 @@ template "/opt/opscode/embedded/service/bookshelf/bin/bookshelf" do
   notifies :restart, 'service[bookshelf]' if OmnibusHelper.should_notify?("bookshelf")
 end
 
-bookshelf_config = File.join(bookshelf_etc_dir, "sys.config")
+bookshelf_config = File.join(bookshelf_etc_dir, "app.config")
 
 template bookshelf_config do
   source "bookshelf.config.erb"
@@ -43,7 +44,7 @@ template bookshelf_config do
   notifies :restart, 'service[bookshelf]' if OmnibusHelper.should_notify?("bookshelf")
 end
 
-link "/opt/opscode/embedded/service/bookshelf/etc/sys.config" do
+link "/opt/opscode/embedded/service/bookshelf/etc/app.config" do
   to bookshelf_config
 end
 
