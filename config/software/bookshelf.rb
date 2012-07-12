@@ -1,5 +1,5 @@
 name "bookshelf"
-version "ebm-oc-1794"
+version "master"
 
 dependencies ["erlang", "rebar", "rsync"]
 
