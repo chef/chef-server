@@ -377,7 +377,7 @@ new_constraints() ->
 primitive_solve(State, PackageList)
   when erlang:length(PackageList) > 0 ->
     Constraints = lists:foldl(fun(Info, Acc) ->
-                                      add_constraint(Acc, Info)
+                                      add_constraint('_GOAL_', 'NO_VSN', Acc, Info)
                               end, new_constraints(), PackageList),
 
     Pkgs = lists:map(fun dep_pkg/1, PackageList),
@@ -427,8 +427,8 @@ is_valid_constraint({_Pkg, _LVsn1, _LVsn2, between}) ->
 is_valid_constraint(_InvalidConstraint) ->
     false.
 
--spec add_constraint([constraint()],constraint()) -> [{pkg_name(), constraints()}].
-add_constraint(PkgsConstraints, PkgConstraint) ->
+-spec add_constraint(pkg_name(), vsn(), [constraint()],constraint()) -> [{pkg_name(), constraints()}].
+add_constraint(SrcPkg, SrcVsn, PkgsConstraints, PkgConstraint) ->
     case is_valid_constraint(PkgConstraint) of
         true -> ok;
         false -> erlang:throw({invalid_constraint, PkgConstraint})
@@ -441,17 +441,17 @@ add_constraint(PkgsConstraints, PkgConstraint) ->
             {value, {PkgName, Constraints0}} ->
                 Constraints0
         end,
-    [{PkgName, [PkgConstraint | Constraints1]} |
+    [{PkgName, [{PkgConstraint, {SrcPkg, SrcVsn}} | Constraints1]} |
      lists:keydelete(PkgName, 1, PkgsConstraints)].
 
 %% @doc
 %% Extend the currently active constraints correctly for the given constraints.
--spec extend_constraints(constraints(),constraints()) -> [{pkg_name(), constraints()}].
-extend_constraints(ExistingConstraints0, NewConstraints) ->
+-spec extend_constraints(pkg_name(), vsn(), constraints(),constraints()) -> [{pkg_name(), constraints()}].
+extend_constraints(SrcPkg, SrcVsn, ExistingConstraints0, NewConstraints) ->
     lists:foldl(fun (Constraint, ExistingConstraints1) ->
-                        add_constraint(ExistingConstraints1, Constraint)
+                        add_constraint(SrcPkg, SrcVsn, ExistingConstraints1, Constraint)
                 end,
-                ExistingConstraints0, NewConstraints).
+                ExistingConstraints0, [{SrcPkg, SrcVsn} | NewConstraints]).
 
 -spec normalize_version(vsn()) -> vsn().
 normalize_version({M}) ->
@@ -532,7 +532,7 @@ get_versions(DepGraph, PkgName) ->
 %% make sure a given name/vsn meets all current constraints
 -spec valid_version(pkg_name(),vsn(),constraints()) -> boolean().
 valid_version(PkgName, Vsn, PkgConstraints) ->
-    lists:all(fun (L) ->
+    lists:all(fun ({L, _ConstraintSrc}) ->
                       is_version_within_constraint(Vsn, L)
               end,
               get_constraints(PkgConstraints, PkgName)).
@@ -552,15 +552,15 @@ constrained_package_versions(State, PkgName, PkgConstraints) ->
 -spec filter_package_constraints([constraint()]) -> fail | pkg().
 filter_package_constraints([]) ->
     fail;
-filter_package_constraints([Pkg | PkgConstraints]) ->
-    case Pkg of
-        _ when is_atom(Pkg); is_binary(Pkg) ->
+filter_package_constraints([PkgCon | PkgConstraints]) ->
+    case PkgCon of
+        {Pkg, _} when is_atom(Pkg); is_binary(Pkg) ->
             filter_package_constraints(PkgConstraints);
-        {_Pkg1, _Vsn} = PV ->
+        {{_Pkg1, _Vsn} = PV, _} ->
             PV;
-        {_Pkg2, _Vsn, _R} ->
+        {{_Pkg2, _Vsn, _R}, _} ->
             filter_package_constraints(PkgConstraints);
-        {_Pkg2, _Vsn1, _Vsn2, _R} ->
+        {{_Pkg2, _Vsn1, _Vsn2, _R}, _} ->
             filter_package_constraints(PkgConstraints)
     end.
 
@@ -568,7 +568,7 @@ filter_package_constraints([Pkg | PkgConstraints]) ->
 %% pkgs) that serve to walk the solution space of dependency.
 -spec all_pkgs(dep_graph(),[pkg_name()],[pkg_name()],[{pkg_name(), constraints()}]) ->
                       fail | [pkg()].
-all_pkgs(_State, _, [], Constraints) ->
+all_pkgs(_State, _Visited, [], Constraints) ->
     PkgVsns =
         [filter_package_constraints(PkgConstraints)
          || {_, PkgConstraints} <- Constraints],
@@ -576,7 +576,7 @@ all_pkgs(_State, _, [], Constraints) ->
     %% PkgVsns should be a list of pkg() where all the constraints are correctly
     %% met. If not we fail the solution. If so we return those pkg()s
     case lists:all(fun({Pkg, Vsn}) ->
-                           lists:all(fun(Constraint) ->
+                           lists:all(fun({Constraint, _}) ->
                                              is_version_within_constraint(Vsn, Constraint)
                                      end,  get_constraints(Constraints, Pkg))
                    end, PkgVsns) of
@@ -601,12 +601,19 @@ all_pkgs(State, Visited, [PkgName | PkgNames], Constraints)
 pkgs(DepGraph, Visited, Pkg, Constraints, OtherPkgs) ->
     F = fun (Vsn) ->
                 Deps = get_dep_constraints(DepGraph, Pkg, Vsn),
-                UConstraints = extend_constraints(Constraints, [{Pkg, Vsn} | Deps]),
+                UConstraints = extend_constraints(Pkg, Vsn, Constraints, Deps),
                 DepPkgs =[dep_pkg(Dep) || Dep <- Deps],
                 NewVisited = [Pkg | Visited],
-                all_pkgs(DepGraph, NewVisited, DepPkgs ++ OtherPkgs, UConstraints)
+                Res = all_pkgs(DepGraph, NewVisited, DepPkgs ++ OtherPkgs, UConstraints),
+                Res
+
         end,
-    lists_some(F, constrained_package_versions(DepGraph, Pkg, Constraints)).
+    case constrained_package_versions(DepGraph, Pkg, Constraints) of
+        [] ->
+            fail;
+        Res ->
+            lists_some(F, Res)
+    end.
 
 
 %% @doc This gathers the dependency constraints for a given package vsn from the
