@@ -18,8 +18,11 @@
          obj_meta/3,
          obj_create/4,
          obj_get/3,
-         obj_recv/6,
-         obj_send/4
+         obj_in_start/3,
+         obj_in/3,
+         obj_in_end/2,
+         obj_out_start/4,
+         obj_out/2
         ]).
 
 -export_type([store/0, bucket/0, path/0, bucket_name/0, object/0]).
@@ -53,9 +56,11 @@ behaviour_info(callbacks) ->
      {obj_meta, 3},
      {obj_create, 4},
      {obj_get, 3},
-     {obj_recv, 6},
-     {obj_send, 4}
-    ];
+     {obj_in_start, 3},
+     {obj_in, 3},
+     {obj_in_end, 2},
+     {obj_out_start, 4},
+     {obj_out, 2}];
 behaviour_info(_) ->
     undefined.
 
@@ -118,15 +123,32 @@ obj_copy(#store_t{callback = Mod, data = Data0}, FromBucket, FromPath, ToBucket,
     {Data1, R} = Mod:obj_copy(Data0, FromBucket, FromPath, ToBucket, ToPath),
     {#store_t{callback = Mod, data = Data1}, R}.
 
--spec obj_send(store(), bucket_name(), path(), Trans::bkss_transport:trans()) ->
-                      {store(), {ok, MD5::term()} | {error, Reason::term()}}.
-obj_send(#store_t{callback = Mod, data = Data0}, Bucket, Path, Trans) ->
-    {Data1, R} = Mod:obj_send(Data0, Bucket, Path, Trans),
+-spec obj_in_start(store(), bucket_name(), path()) ->
+                         {store(), {ok, Ref::term()} | {error, Reason::term()}}.
+obj_in_start(#store_t{callback = Mod, data = Data0}, Bucket, Path) ->
+    {Data1, R} = Mod:obj_in_start(Data0, Bucket, Path),
     {#store_t{callback = Mod, data = Data1}, R}.
 
--spec obj_recv(store(), bucket_name(), path(), Trans::bkss_transport:trans(),
-               Buffer::binary(), Length::non_neg_integer()) ->
-                      {store(), {ok, MD5::term()} | {error, Reason::term()}}.
-obj_recv(#store_t{callback = Mod, data =Data0}, Bucket, Path, Trans, Buffer, Length) ->
-    {Data1, Obj} = Mod:obj_recv(Data0, Bucket, Path, Trans, Buffer, Length),
+-spec obj_in(store(), Ref0::term(), Data::binary()) ->
+                         {store(), {ok, Ref1::term()} | {error, Reason::term()}}.
+obj_in(#store_t{callback = Mod, data = Data0}, Ref, Data) ->
+    {Data1, R} = Mod:obj_in(Data0, Ref, Data),
+    {#store_t{callback = Mod, data = Data1}, R}.
+
+-spec obj_in_end(store(), Ref::term()) ->
+                        {store(), {ok, MD5::term()} | {error, Reason::term()}}.
+obj_in_end(#store_t{callback = Mod, data = Data0}, Ref) ->
+    {Data1, R} = Mod:obj_in_end(Data0, Ref),
+    {#store_t{callback = Mod, data = Data1}, R}.
+
+-spec obj_out_start(store(), bucket_name(), path(), Length::non_neg_integer()) ->
+                      {store(), {ok, Ref::term()} | {error, Reason::term()}}.
+obj_out_start(#store_t{callback = Mod, data = Data0}, Bucket, Path, Length) ->
+    {Data1, Obj} = Mod:obj_out_start(Data0, Bucket, Path, Length),
+    {#store_t{callback = Mod, data = Data1}, Obj}.
+
+-spec obj_out(store(), Ref::term()) ->
+                      {store(), {ok, Data::binary()} | done | {error, Reason::term()}}.
+obj_out(#store_t{callback = Mod, data = Data0}, Ref) ->
+    {Data1, Obj} = Mod:obj_out(Data0, Ref),
     {#store_t{callback = Mod, data = Data1}, Obj}.

@@ -20,10 +20,16 @@
          obj_create/3,
          obj_get/2,
          obj_copy/4,
-         obj_send/3,
-         obj_recv/5]).
+         obj_in_start/2,
+         obj_in/2,
+         obj_in_end/1,
+         obj_out_start/3,
+         obj_out/1
+        ]).
 
 -export_type([bucket_name/0, bucket/0, object/0, path/0]).
+
+-define(GEN_SERVER_TIMEOUT, 20000).
 
 %%%===================================================================
 %%% Types
@@ -33,6 +39,7 @@
 -type bucket() :: bkss_store:bucket().
 -type object() :: bkss_store:object().
 -type path() :: bkss_store:path().
+-opaque stream_token() :: term().
 
 %%===================================================================
 %% External API
@@ -56,8 +63,7 @@ bucket_list() ->
 bucket_exists(BucketName) ->
     %% This works differently then most of the other functions because in this case, it is
     %% expected that the bucket may or may not exist. So we check to see of the bucket
-    %% exists. If it does not exist then we simply return false (rather then blow up). If it
-    %% does exist then we forward the call to the bucket server to check to see if the
+    %% exists. If it does not exist then we simply return false (rather then blow up). If it    %% does exist then we forward the call to the bucket server to check to see if the
     %% directory exists.
     bkss_bucket_server:bucket_server_exists(BucketName) andalso
         call(BucketName, bucket_exists).
@@ -98,16 +104,33 @@ obj_get(BucketName, Path) ->
 obj_copy(FromBucket, FromPath, ToBucket, ToPath) ->
     call(FromBucket, {obj_copy, FromPath, ToBucket, ToPath}).
 
--spec obj_send(bucket_name(), path(), Trans::bkss_transport:trans()) ->
-                      {ok, MD5::term()} | {error, Reason::term()}.
-obj_send(BucketName, Path, Trans) ->
-    call(BucketName, {obj_send, Path, Trans}).
+-spec obj_in_start(bucket_name(), path()) ->
+                          {ok, StreamToken::term()} | {error, Reason::term()}.
+obj_in_start(BucketName, Path) ->
+    call(BucketName, {obj_in_start, Path}).
 
--spec obj_recv(bucket_name(), path(), Trans::bkss_transport:trans(),
-               Buffer::binary(), Length::non_neg_integer()) ->
-                      {ok, MD5::term()} | {error, Reason::term()}.
-obj_recv(BucketName, Path, Trans, Buffer, Length) ->
-    call(BucketName, {obj_recv, Path, Trans, Buffer, Length}).
+-spec obj_in(stream_token(), Data::iolist()) ->
+                           ok | {error, Reason::term()}.
+obj_in(StreamToken, Data) ->
+    {Pid, _} = gproc:await({n, l, StreamToken}, ?GEN_SERVER_TIMEOUT),
+    gen_server:call(Pid, {obj_in, Data}, ?GEN_SERVER_TIMEOUT).
+
+-spec obj_in_end(stream_token()) ->
+                        {ok, MD5::term()} | {error, Reason::term()}.
+obj_in_end(StreamToken) ->
+    {Pid, _} = gproc:await({n, l, StreamToken}, ?GEN_SERVER_TIMEOUT),
+    gen_server:call(Pid, obj_in_end, ?GEN_SERVER_TIMEOUT).
+
+-spec obj_out_start(bucket_name(), path(), HunkSize::non_neg_integer()) ->
+                           {ok, StreamToken::term()} | {error, Reason::term()}.
+obj_out_start(BucketName, Path, HunkSize) ->
+    call(BucketName, {obj_out_start, Path, HunkSize}).
+
+-spec obj_out(stream_token()) ->
+                     {ok, Data::binary()} | done | {error, Reason::term()}.
+obj_out(StreamToken) ->
+    {Pid, _} = gproc:await({n, l, StreamToken}, ?GEN_SERVER_TIMEOUT),
+    gen_server:call(Pid, obj_out, ?GEN_SERVER_TIMEOUT).
 
 %%===================================================================
 %% Internal Functions
@@ -115,4 +138,4 @@ obj_recv(BucketName, Path, Trans, Buffer, Length) ->
 -spec call(bucket_name(), Msg::term()) -> term().
 call(BucketName, Msg) ->
     Pid = bkss_store_server:get_bucket_reference(BucketName),
-    gen_server:call(Pid, Msg).
+    gen_server:call(Pid, Msg, ?GEN_SERVER_TIMEOUT).

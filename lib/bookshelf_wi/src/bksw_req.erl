@@ -8,29 +8,20 @@
          with_amz_id_2/1,
          with_etag/2]).
 
--include_lib("cowboy/include/http.hrl").
-
 %%===================================================================
 %% API functions
 %%===================================================================
 with_amz_request_id(Rq) ->
     Base64 = generate_id(),
-    {ok, Rq2} =
-        cowboy_http_req:set_resp_header(<<"x-amz-request-id">>,
-                                        Base64, Rq),
-    {Base64, Rq2}.
+    {Base64, wrq:set_resp_header("x-amz-request-id", Base64, Rq)}.
 
 with_amz_id_2(Rq) ->
     Base64 = generate_id(),
-    {ok, Rq2} =
-        cowboy_http_req:set_resp_header(<<"x-amz-id-2">>,
-                                        Base64, Rq),
-    Rq2.
+    wrq:set_resp_header("x-amz-id-2", Base64, Rq).
 
 with_etag(Etag, Rq) ->
-    {ok, Rq2} = cowboy_http_req:set_resp_header('Etag',
-                                                Etag, Rq),
-    Rq2.
+    wrq:set_resp_header("Etag", bksw_util:to_string(Etag), Rq).
+
 
 %%===================================================================
 %% Internal Functions

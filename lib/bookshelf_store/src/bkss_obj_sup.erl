@@ -49,7 +49,7 @@ init([]) ->
     Shutdown = 2000,
     Type = worker,
 
-    BucketServer = {bkss_obj_worker, {bkss_obj_worker, start_link, []},
+    ObjWorker = {bkss_obj_worker, {bkss_obj_worker, start_link, []},
               Restart, Shutdown, Type, [bkss_obj_worker]},
 
-    {ok, {SupFlags, [BucketServer]}}.
+    {ok, {SupFlags, [ObjWorker]}}.

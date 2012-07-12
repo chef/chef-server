@@ -4,7 +4,7 @@ PLT_DIR=$(CURDIR)/.plt
 PLT=$(PLT_DIR)/dialyzer_plt
 REBAR=$(shell which rebar)
 
-ERLPATH= -pa $(DEPS)/cowboy/ebin -pa $(DEPS)/covertool/ebin \
+ERLPATH= -pa $(DEPS)/webmachine/ebin -pa $(DEPS)/covertool/ebin \
 	-pa $(DEPS)/edown/ebin -pa $(DEPS)/erlsom/ebin \
 	-pa $(DEPS)/gen_leader/ebin \
 	-pa $(DEPS)/gproc/ebin -pa $(DEPS)/iso8601/ebin \
@@ -47,8 +47,8 @@ $(PLT):
 	- dialyzer --build_plt --output_plt $(PLT) \
 		$(ERLPATH) \
 		--apps erts kernel stdlib eunit compiler crypto \
-		cowboy edown inets erlsom gen_leader gproc iso8601 \
-		xmerl mini_s3
+		webmachine edown inets erlsom gen_leader gproc iso8601 \
+		xmerl mini_s3 mochiweb
 	@if test ! -f $(PLT); then exit 2; fi
 clean_plt:
 	rm -rf $(PLT_DIR)
@@ -78,7 +78,7 @@ clean :
 	rm -rf lib/bookshelf_wi/logs
 
 distclean : clean clean-plt
-	@git clean -fdx
+	rm -rf deps
 
 start :
 	@rel/bookshelf/bin/bookshelf start

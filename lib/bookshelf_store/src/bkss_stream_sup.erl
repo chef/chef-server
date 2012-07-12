@@ -2,12 +2,12 @@
 %% ex: ts=4 sw=4 et
 %% @author Eric B Merritt <ericbmerritt@gmail.com>
 %% @copyright Copyright 2012 Opscode, Inc.
--module(bkss_sup).
+-module(bkss_stream_sup).
 
 -behaviour(supervisor).
 
 %% API
--export([start_link/0]).
+-export([start_link/0, start_child/1]).
 
 %% Supervisor callbacks
 -export([init/1]).
@@ -17,32 +17,39 @@
 %%%===================================================================
 %%% API functions
 %%%===================================================================
--spec start_link() -> {ok, pid()}.
+
+-spec start_link() ->
+    {ok, pid()} | ignore | {error, Error::term()}.
 start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+
+-spec start_child(bkss_stream_worker:work()) ->
+                         {ok, undefined | pid()} |
+                         {ok, undefined | pid(), any()} |
+                         {error, Reason::any()}.
+
+start_child(Work) ->
+    supervisor:start_child(?SERVER, [Work]).
 
 %%%===================================================================
 %%% Supervisor callbacks
 %%%===================================================================
--spec init([]) -> {ok, {{supervisor:strategy(), non_neg_integer(), non_neg_integer()},
+
+-spec init([]) ->
+                  {ok, {{supervisor:strategy(), non_neg_integer(), non_neg_integer()},
                         [supervisor:child_spec()]}}.
 init([]) ->
-    RestartStrategy = one_for_one,
+    RestartStrategy = simple_one_for_one,
     MaxRestarts = 1000,
     MaxSecondsBetweenRestarts = 3600,
 
     SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
 
-    Restart = permanent,
+    Restart = temporary,
     Shutdown = 2000,
+    Type = worker,
 
-    Store = {bkss_store_server, {bkss_store_server, start_link, []},
-                Restart, Shutdown, worker, [bkss_store_server]},
-    WorkerSup = {bkss_obj_sup, {bkss_obj_sup, start_link, []},
-                 Restart, Shutdown, supervisor, [bkss_obj_sup]},
-    StreamSup = {bkss_stream_sup, {bkss_stream_sup, start_link, []},
-                 Restart, Shutdown, supervisor, [bkss_stream_sup]},
-    BucketSup = {bkss_bucket_sup, {bkss_bucket_sup, start_link, []},
-                 Restart, Shutdown, supervisor, [bkss_bucket_sup]},
+    StreamWorker = {bkss_stream_worker, {bkss_stream_worker, start_link, []},
+              Restart, Shutdown, Type, [bkss_stream_worker]},
 
-    {ok, {SupFlags, [StreamSup, WorkerSup, BucketSup, Store]}}.
+    {ok, {SupFlags, [StreamWorker]}}.

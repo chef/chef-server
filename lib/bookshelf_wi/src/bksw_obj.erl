@@ -6,155 +6,159 @@
 
 -export([allowed_methods/2, content_types_accepted/2,
          content_types_provided/2, delete_resource/2, download/2,
-         generate_etag/2, init/3, last_modified/2,
-         resource_exists/2, rest_init/2, upload_or_copy/2]).
+         generate_etag/2, init/1, is_authorized/2, last_modified/2,
+         resource_exists/2, upload_or_copy/2]).
 
 -include_lib("bookshelf_store/include/bookshelf_store.hrl").
--include_lib("cowboy/include/http.hrl").
+-include_lib("webmachine/include/webmachine.hrl").
 -include("internal.hrl").
 
 %%===================================================================
 %% Public API
 %%===================================================================
 
-init(_Transport, _Rq, _Opts) ->
-    {upgrade, protocol, cowboy_http_rest}.
+init(_Context) ->
+    {ok, bksw_conf:get_context()}.
 
-rest_init(Rq, _Opts) ->
-    %% We dont actually make use of state here at all
-    {ok, Rq, undefined}.
+is_authorized(Rq, Ctx) ->
+    bksw_sec:is_authorized(Rq, Ctx).
 
-allowed_methods(Rq, St) ->
-    {['HEAD', 'GET', 'PUT', 'DELETE'], Rq, St}.
+allowed_methods(Rq, Ctx) ->
+    {['HEAD', 'GET', 'PUT', 'DELETE'], Rq, Ctx}.
 
-content_types_provided(Rq, St) ->
-    {[{{<<"*">>, <<"*">>, []}, download}], Rq, St}.
+content_types_provided(Rq, Ctx) ->
+    CType =
+    case wrq:get_req_header("accept", Rq) of
+        undefined ->
+            "application/octet-stream";
+        C ->
+            C
+    end,
+    {[{CType, download}], Rq, Ctx}.
 
-content_types_accepted(Rq, St) ->
-    {[{'*', upload_or_copy}], Rq, St}.
+content_types_accepted(Rq, Ctx) ->
+    CT = case wrq:get_req_header("content-type", Rq) of
+             undefined ->
+                 "application/octet-stream";
+             X ->
+                 X
+         end,
+    {MT, _Params} = webmachine_util:media_type_to_detail(CT),
+    {[{MT, upload_or_copy}], Rq, Ctx}.
 
-resource_exists(#http_req{host = [Bucket | _],
-                          raw_path = <<"/", Path/binary>>} = Rq,
-                St) ->
-    {bookshelf_store:obj_exists(Bucket, Path), Rq, St}.
+resource_exists(Rq0, Ctx) ->
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
+    {bookshelf_store:obj_exists(Bucket, Path), Rq0, Ctx}.
 
-delete_resource(#http_req{host = [Bucket | _],
-                          raw_path = <<"/", Path/binary>>} = Rq,
-                St) ->
+delete_resource(Rq0, Ctx) ->
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bookshelf_store:obj_delete(Bucket, Path) of
         ok ->
-            {true, Rq, St};
+            {true, Rq0, Ctx};
         _ ->
-            {false, Rq, St}
+            {false, Rq0, Ctx}
     end.
 
-last_modified(#http_req{host = [Bucket | _],
-                        raw_path = <<"/", Path/binary>>} = Rq,
-              St) ->
+last_modified(Rq0, Ctx) ->
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{date = Date}} ->
-            {Date, Rq, St};
+            {Date, Rq0, Ctx};
         _ ->
-            {halt, Rq, St}
+            {halt, Rq0, Ctx}
     end.
 
-generate_etag(#http_req{host = [Bucket | _],
-                        raw_path = <<"/", Path/binary>>} = Rq,
-              St) ->
+generate_etag(Rq0, Ctx) ->
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bookshelf_store:obj_meta(Bucket, Path) of
         {ok, #object{digest = Digest}} ->
-            {{strong,
-              list_to_binary(bksw_format:to_hex(Digest))},
-             Rq, St};
+            {bksw_format:to_base64(Digest), Rq0, Ctx};
         _ ->
-            {halt, Rq, St}
+            {halt, Rq0, Ctx}
     end.
 
-upload_or_copy(Rq, St) ->
-    case
-        cowboy_http_req:parse_header(<<"X-Amz-Copy-Source">>,
-                                     Rq)
-    of
-        {undefined, Rq2} ->
-            upload(Rq2, St);
-        {Source, Rq2} ->
-            copy(Rq2, St, Source)
+upload_or_copy(Rq0, Ctx) ->
+    Rq1 = wrq:set_resp_header("Obj", "Obj", Rq0),
+    case get_header("X-Amz-Copy-Source", Rq1) of
+        undefined ->
+            upload(Rq1, Ctx);
+        Source ->
+            copy(Rq1, Ctx, Source)
     end.
 
-download(#http_req{host = [Bucket | _],
-                   raw_path = <<"/", Path/binary>>, transport = Transport,
-                   socket = Socket} = Rq,
-         St) ->
+download(Rq0, Ctx) ->
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bookshelf_store:obj_meta(Bucket, Path) of
-        {ok, #object{size = Size}} ->
-            SFun = fun () ->
-                           Bridge = bkss_transport:new(bksw_socket_transport,
-                                                       [Transport, Socket,
-                                                        ?TIMEOUT_MS]),
-                           case bookshelf_store:obj_send(Bucket, Path, Bridge) of
-                               {ok, Size} ->
-                                   sent;
-                               _ ->
-                                   {error, "Download unsuccessful"}
-                           end
-                   end,
-            {{stream, Size, SFun}, Rq, St};
+        {ok, _} ->
+            {ok, Ref} = bookshelf_store:obj_out_start(Bucket, Path, ?BLOCK_SIZE),
+            {{stream, send_streamed_body(Ref)},
+             Rq0,
+             Ctx};
         _ ->
-            {false, Rq, St}
+            {false, Rq0, Ctx}
     end.
-
 %%===================================================================
 %% Internal Functions
 %%===================================================================
-
-halt(Code, Rq, St) ->
-    {ok, Rq2} = cowboy_http_req:reply(Code, Rq),
-    {halt, Rq2, St}.
-
-upload(#http_req{host = [Bucket | _],
-                 raw_path = <<"/", Path/binary>>, body_state = waiting,
-                 socket = Socket, transport = Transport,
-                 buffer = Buffer} = Rq,
-       St) ->
-    {Length, Rq2} =
-        cowboy_http_req:parse_header('Content-Length', Rq),
-    Bridge = bkss_transport:new(bksw_socket_transport,
-                                [Transport, Socket, ?TIMEOUT_MS]),
-    case bookshelf_store:obj_recv(Bucket, Path, Bridge,
-                                  Buffer, Length)
-    of
-        {ok, Digest} ->
-            OurMd5 = bksw_format:to_hex(Digest),
-            case cowboy_http_req:parse_header('Content-MD5', Rq2) of
-                {undefined, Rq3} ->
-                    Rq4 = bksw_req:with_etag(OurMd5, Rq3),
-                    halt(202, Rq4, St);
-                {RequestMd5, Rq3} ->
-                    case RequestMd5 =:= OurMd5 of
-                        true ->
-                            Rq4 = bksw_req:with_etag(RequestMd5, Rq3),
-                            halt(202, Rq4, St);
-                        _ ->
-                            halt(406, Rq3, St)
-                    end
-            end;
-        {error, timeout} ->
-            halt(408, Rq2, St);
-        _ ->
-            halt(500, Rq2, St)
+send_streamed_body(Ref) ->
+    case bookshelf_store:obj_out(Ref) of
+        {ok, Data1} ->
+            {Data1, fun() -> send_streamed_body(Ref) end};
+        done ->
+            {<<>>, done};
+        Error = {error, _} ->
+            Error
     end.
 
-copy(#http_req{host = [ToBucket | _],
-               raw_path = <<"/", ToPath/binary>>} =
-         Rq,
-     St, <<"/", FromFullPath/binary>>) ->
+halt(Code, Rq, Ctx) ->
+    {{halt, Code}, Rq, Ctx}.
+
+upload(Rq0, Ctx) ->
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
+    {ok, Ref} = bookshelf_store:obj_in_start(Bucket, Path),
+    get_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE),
+                      Ref, Rq0, Ctx).
+
+get_streamed_body({Data, done}, Ref, Rq0, Ctx) ->
+    ok = bookshelf_store:obj_in(Ref, Data),
+    case bookshelf_store:obj_in_end(Ref) of
+        {ok, Digest} ->
+            case get_header('Content-MD5', Rq0) of
+                undefined ->
+                    Rq1 = bksw_req:with_etag(base64:encode(Digest), Rq0),
+                    {true, wrq:set_response_code(202, Rq1), Ctx};
+                RawRequestMd5 ->
+                    RequestMd5 = base64:decode(RawRequestMd5),
+                    case RequestMd5 of
+                        Digest ->
+                            Rq1 = bksw_req:with_etag(RawRequestMd5, Rq0),
+                            {true, wrq:set_response_code(202, Rq1), Ctx};
+                        _ ->
+                            {true, wrq:set_response_code(406, Rq0), Ctx}
+                    end
+            end;
+        {error, Data} ->
+            halt(500, Rq0, Ctx)
+    end;
+get_streamed_body({Data, Next}, Ref, Rq0, Ctx) ->
+    ok = bookshelf_store:obj_in(Ref, Data),
+    get_streamed_body(Next(), Ref, Rq0, Ctx).
+
+
+
+copy(Rq0, Ctx, <<"/", FromFullPath/binary>>) ->
+    {ok, ToBucket, ToPath} = bksw_util:get_object_and_bucket(Rq0),
     [FromBucket, FromPath] = binary:split(FromFullPath,
                                           <<"/">>),
-    case bookshelf_store:obj_copy(FromBucket, FromPath,
+    case bookshelf_store:obj_copy(bksw_util:to_binary(FromBucket),
+                                  bksw_util:to_binary(FromPath),
                                   ToBucket, ToPath)
     of
         {ok, _} ->
-            {true, Rq, St};
+            {true, Rq0, Ctx};
         _ ->
-            {false, Rq, St}
+            {false, Rq0, Ctx}
     end.
+
+get_header(Header, Rq) ->
+    wrq:get_req_header(Header, Rq).

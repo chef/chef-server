@@ -23,10 +23,10 @@ manual_start() ->
     application:start(bookshelf_store).
 
 manual_stop() ->
-    application:stop(gproc),
-    application:stop(gen_leader),
+    application:stop(bookshelf_store),
     application:stop(inets),
-    application:stop(bookshelf_store).
+    application:stop(gen_leader),
+    application:stop(gproc).
 
 start(_StartType, _StartArgs) ->
     ensure_disk_store(),
@@ -44,6 +44,11 @@ ensure_disk_store() ->
             Store = filename:join(code:priv_dir(bookshelf_store), "data"),
             filelib:ensure_dir(filename:join(Store, "tmp")),
             application:set_env(bookshelf_store, disk_store, Store);
-        _ ->
-            ok
+        {ok, DiskStore} ->
+            case filelib:is_dir(DiskStore) of
+                true ->
+                    ok;
+                false ->
+                    throw({error, disk_store_does_not_exist})
+            end
     end.

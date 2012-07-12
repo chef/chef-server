@@ -16,90 +16,72 @@
 %% permissions and limitations under the License.
 -module(bksw_bkt).
 
--export([init/3, rest_init/2, allowed_methods/2, content_types_provided/2,
+-export([init/1, is_authorized/2, allowed_methods/2, content_types_provided/2,
          content_types_accepted/2,
          resource_exists/2, delete_resource/2, create_resource/2, to_xml/2]).
 
 -include("amazon_s3.hrl").
--include_lib("cowboy/include/http.hrl").
+-include_lib("webmachine/include/webmachine.hrl").
 
 %%===================================================================
 %% Public API
 %%===================================================================
-init(_Transport, _Rq, _Opts) ->
-    {upgrade, protocol, cowboy_http_rest}.
+init(_Context) ->
+    {ok, bksw_conf:get_context()}.
 
-rest_init(Rq, _Opts) ->
-    {ok, Rq, []}.
+is_authorized(Rq, Ctx) ->
+    bksw_sec:is_authorized(Rq, Ctx).
 
-allowed_methods(Rq, St) ->
-    {['GET', 'PUT', 'DELETE'], Rq, St}.
+allowed_methods(Rq, Ctx) ->
+    {['GET', 'PUT', 'DELETE'], Rq, Ctx}.
 
-content_types_accepted(Rq, St) ->
-    {[{'*', create_resource}], Rq, St}.
+content_types_accepted(Rq, Ctx) ->
+    CType =
+        case wrq:get_req_header("Content-Type", Rq) of
+            undefined ->
+                "text/xml";
+            C ->
+                C
+        end,
+    {[{CType, create_resource}], Rq, Ctx}.
 
-content_types_provided(Rq, St) ->
-    {[{{<<"text">>, <<"xml">>, []}, to_xml}], Rq, St}.
+content_types_provided(Rq, Ctx) ->
+    CType =
+        case wrq:get_req_header("accept", Rq) of
+            undefined ->
+                "text/xml";
+            C ->
+                C
+        end,
+    {[{CType, to_xml}], Rq, Ctx}.
 
-resource_exists(#http_req{host = [Bucket | _]} = Rq, St) ->
-    {bookshelf_store:bucket_exists(Bucket), Rq, St}.
+resource_exists(Rq0, Ctx) ->
+    Bucket = bksw_util:get_bucket(Rq0),
+    {bookshelf_store:bucket_exists(Bucket), Rq0, Ctx}.
 
-delete_resource(#http_req{host = [Bucket | _]} = Rq, St) ->
+delete_resource(Rq0, Ctx) ->
+    Bucket = bksw_util:get_bucket(Rq0),
     case bookshelf_store:bucket_delete(Bucket) of
         ok ->
-            {true, Rq, St};
+            {true, Rq0, Ctx};
         _ ->
-            {false, Rq, St}
+            {false, Rq0, Ctx}
     end.
 
-create_resource(#http_req{host = [Bucket | _]} = Rq, St) ->
+create_resource(Rq0, Ctx) ->
+    Bucket = bksw_util:get_bucket(Rq0),
     case bookshelf_store:bucket_create(Bucket) of
-      ok -> {true, Rq, St};
-      _ -> {false, Rq, St}
+      ok -> {true, Rq0, Ctx};
+      _ -> {false, Rq0, Ctx}
     end.
 
-to_xml(#http_req{host = [Bucket | _]} = Rq, St) ->
+to_xml(Rq0, Ctx) ->
+    Bucket = bksw_util:get_bucket(Rq0),
     Objects = bookshelf_store:obj_list(Bucket),
     Term = bksw_xml:list_objects(Bucket, Objects),
     Body = bksw_xml:write(Term),
-    {Body, Rq, St}.
+    {Body, Rq0, Ctx}.
 
 %%===================================================================
-%% Eunit Tests
+%% Internal API
 %%===================================================================
--ifndef(NO_TESTS).
-
--include_lib("eunit/include/eunit.hrl").
-
-allowed_methods_test_() ->
-    [{"should only support 'GET', 'PUT' and 'DELETE'",
-      fun () ->
-              Expected = ['GET', 'PUT', 'DELETE'],
-              {Allowed, _, _} = allowed_methods(#http_req{pid=self()}, % make dialyzer happy
-                                                undefined),
-              ?assertEqual((length(Expected)), (length(Allowed))),
-              Result = sets:from_list(lists:merge(Expected, Allowed)),
-              ?assertEqual((length(Expected)), (sets:size(Result)))
-      end}].
-
-content_types_accepted_test_() ->
-    [{"should only support PUT with 'undefined' "
-      "(absent) Content-Type",
-      fun () ->
-              {Types, _, _} = content_types_accepted(#http_req{pid=self()}, % make dialyzer happy
-                                                     undefined),
-              ?assertEqual(1, length(Types)),
-              ?assertEqual(true, lists:keymember('*', 1, Types))
-      end}].
-
-content_types_provided_test_() ->
-    [{"should only support text/xml output",
-      fun () ->
-              {Types, _, _} = content_types_provided(#http_req{pid=self()}, % make dialyzer happy
-                                                     undefined),
-              ?assertEqual(1, length(Types)),
-              ?assertEqual(true, lists:keymember({<<"text">>, <<"xml">>, []}, 1,
-                                                 Types))
-      end}].
-
--endif.

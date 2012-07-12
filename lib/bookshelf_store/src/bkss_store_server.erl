@@ -19,8 +19,8 @@
 -include_lib("bookshelf_store/include/bookshelf_store.hrl").
 
 -define(SERVER, ?MODULE).
--define(AWAIT_TIMEOUT, 1000).
--define(GEN_SERVER_TIMEOUT, 1000).
+-define(AWAIT_TIMEOUT, 10000).
+-define(GEN_SERVER_TIMEOUT, 10000).
 -record(state, {}).
 
 %%%===================================================================
@@ -38,7 +38,8 @@ start_link() ->
 
 -spec get_bucket_reference(bookshelf_store:bucket_name()) -> pid().
 get_bucket_reference(BucketName) ->
-    gproc:where(make_key(BucketName)).
+    {Pid, _} = gproc:await(make_key(BucketName), ?AWAIT_TIMEOUT),
+    Pid.
 
 -spec create_bucket(bookshelf_store:bucket_name()) -> pid().
 create_bucket(BucketName) ->
@@ -70,7 +71,7 @@ handle_call({create_bucket, BucketName}, _From, State) ->
         false ->
             bkss_bucket_sup:start_child(BucketName)
     end,
-    {Pid, _} = gproc:await(make_key(BucketName)),
+    {Pid, _} = gproc:await(make_key(BucketName), ?AWAIT_TIMEOUT),
     {reply, Pid, State};
 handle_call(bucket_list, _From, State) ->
     {ok,DiskStore} = application:get_env(disk_store),

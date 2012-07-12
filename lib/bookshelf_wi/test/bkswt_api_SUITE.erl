@@ -28,25 +28,31 @@ init_per_testcase(sec_fail, Config0) ->
     SecretAccessKey = random_string(30, "abcdefghijklmnopqrstuvwxyz"),
     Port = 4321,
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
-                          lists:flatten(io_lib:format("http://localhost.localdomain:~p",
-                                                      [Port]))),
+                          lists:flatten(io_lib:format("http://127.0.0.1:~p",
+                                                      [Port])),
+                         path),
     lists:keyreplace(s3_conf, 1, Config1, {s3_conf, S3State});
 init_per_testcase(_TestCase, Config) ->
     %% This fixes another rebar brokenness. We cant specify any options to
     %% common test in rebar
+    seed(erlang:phash2(now)),
     DiskStore = filename:join(proplists:get_value(priv_dir, Config),
                               random_string(10, "abcdefghijklmnopqrstuvwxyz")),
+    LogDir = filename:join(proplists:get_value(priv_dir, Config),
+                           "logs"),
     filelib:ensure_dir(filename:join(DiskStore, "tmp")),
     AccessKeyID = random_string(10, "abcdefghijklmnopqrstuvwxyz"),
     SecretAccessKey = random_string(30, "abcdefghijklmnopqrstuvwxyz"),
     application:set_env(bookshelf_store, disk_store, DiskStore),
     application:set_env(bookshelf_wi, keys, {AccessKeyID, SecretAccessKey}),
+    application:set_env(bookshelf_wi, log_dir, LogDir),
     ok = bksw_app:manual_start(),
     Port = 4321,
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
-                          lists:flatten(io_lib:format("http://localhost.localdomain:~p",
-                                                      [Port]))),
-    [{s3_conf, S3State} | Config].
+                          lists:flatten(io_lib:format("http://127.0.0.1:~p",
+                                                      [Port])),
+                          path),
+    [{s3_conf, S3State}, {disk_store, DiskStore} | Config].
 
 end_per_testcase(_TestCase, _Config) ->
     bksw_app:manual_stop(),
@@ -56,7 +62,7 @@ all(doc) ->
     ["This test is runs the fs implementation of the bkss_store signature"].
 
 all() ->
-    [wi_basic, sec_fail, signed_url].
+    [put_object, wi_basic, sec_fail, signed_url, signed_url_fail].
 
 %%====================================================================
 %% TEST CASES
@@ -67,25 +73,57 @@ wi_basic(doc) ->
 wi_basic(suite) ->
     [];
 wi_basic(Config) when is_list(Config) ->
-    S3Conf = proplists:get_value(s3_conf, Config),
-    %% Get much more then about 800 here and you start running out of file
-    %% descriptors on a normal box
-    Count = 100,
-    Buckets = [random_binary() || _ <- lists:seq(1, Count)],
-    Res = ec_plists:map(fun(B) ->
-                                mini_s3:create_bucket(B, public_read_write, none, S3Conf)
-                        end,
-                        Buckets),
-    ?assert(lists:all(fun(Val) -> ok == Val end, Res)),
-    [{buckets, Details}] = mini_s3:list_buckets(S3Conf),
-    BucketNames = lists:map(fun(Opts) -> proplists:get_value(name, Opts) end,
-                            Details),
-    ?assert(lists:all(fun(Name) -> lists:member(Name, BucketNames) end, Buckets)),
-    [DelBuck | _] = Buckets,
-    ?assertEqual(ok, mini_s3:delete_bucket(DelBuck, S3Conf)),
-    [{buckets, NewBuckets}] = mini_s3:list_buckets(S3Conf),
-    ?assertEqual(Count - 1, length(NewBuckets)).
+    {Timings, _} =
+        timer:tc(fun() ->
+                         S3Conf = proplists:get_value(s3_conf, Config),
+                         %% Get much more then about 800 here and you start running out of file
+                         %% descriptors on a normal box
+                         Count = 50,
+                         Buckets = [random_binary() || _ <- lists:seq(1, Count)],
+                         error_logger:error_msg("~p~n", [Buckets]),
+                         Res = ec_plists:map(fun(B) ->
+                                                     mini_s3:create_bucket(B, public_read_write, none, S3Conf)
+                                             end,
+                                             Buckets),
+                         ?assert(lists:all(fun(Val) -> ok == Val end, Res)),
+                         [{buckets, Details}] = mini_s3:list_buckets(S3Conf),
+                         BucketNames = lists:map(fun(Opts) -> proplists:get_value(name, Opts) end,
+                                                 Details),
+                         ?assert(lists:all(fun(Name) -> lists:member(Name, BucketNames) end, Buckets)),
+                         [DelBuck | _] = Buckets,
+                         ?assertEqual(ok, mini_s3:delete_bucket(DelBuck, S3Conf)),
+                         [{buckets, NewBuckets}] = mini_s3:list_buckets(S3Conf),
+                         ?assertEqual(Count - 1, length(NewBuckets))
+                 end),
+    error_logger:info_msg("WI_BASIC TIMING ~p", [Timings]).
 
+
+put_object(doc) ->
+    ["should be able to put and list objects"];
+put_object(suite) ->
+    [];
+put_object(Config) when is_list(Config) ->
+    S3Conf = proplists:get_value(s3_conf, Config),
+    Bucket = "bukkit",
+    ?assertEqual(ok, mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)),
+    BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
+    ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
+    ?assertEqual([], proplists:get_value(contents, BucketContents)),
+    Count = 50,
+    Objs = [filename:join(random_binary(), random_binary()) ||
+               _ <- lists:seq(1,Count)],
+    ec_plists:map(fun(F) ->
+                          mini_s3:put_object(Bucket, F, F, [], [], S3Conf)
+                  end, Objs),
+    Result = mini_s3:list_objects(Bucket, [], S3Conf),
+    ObjList = proplists:get_value(contents, Result),
+    ?assertEqual(Count, length(ObjList)),
+    ec_plists:map(fun(Obj) ->
+                          Key = proplists:get_value(key, Obj),
+                          ObjDetail = mini_s3:get_object(Bucket, Key, [], S3Conf),
+                          ?assertMatch(Key,
+                                       erlang:binary_to_list(proplists:get_value(content, ObjDetail)))
+                  end, ObjList).
 
 sec_fail(doc) ->
     ["Check authentication failure on the part of the caller"];
@@ -94,7 +132,7 @@ sec_fail(suite) ->
 sec_fail(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
     Bucket = random_binary(),
-    ?assertError({aws_error, {http_error, 403, _, _}},
+    ?assertError({aws_error, {http_error, "403", _}},
                  mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)).
 
 signed_url(doc) ->
@@ -124,6 +162,27 @@ signed_url(Config) when is_list(Config) ->
                                     "text/xml", Content}, [], []),
   ?assertMatch({ok,{{"HTTP/1.1",403,"Forbidden"}, _, _}},
                Response2).
+
+signed_url_fail(doc) ->
+    ["Test that signed url expiration actually works"];
+signed_url_fail(suite) ->
+    [];
+signed_url_fail(Config) when is_list(Config) ->
+    S3Conf = proplists:get_value(s3_conf, Config),
+    Bucket = random_binary(),
+    mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf),
+    Content = "<x>Super Foo</x>",
+    Headers = [{"content-type", "text/xml"},
+               {"content-md5",
+                erlang:binary_to_list(base64:encode(crypto:md5(Content)))}],
+    SignedUrl = mini_s3:s3_url('put', Bucket, "foo", -1,
+                               Headers,
+                               S3Conf),
+    Response = httpc:request(put, {erlang:binary_to_list(SignedUrl),
+                                   Headers,
+                                   "text/xml", Content}, [], []),
+    ?assertMatch({ok,{{"HTTP/1.1",403,"Forbidden"}, _, _}},
+                 Response).
 
 
 %%====================================================================

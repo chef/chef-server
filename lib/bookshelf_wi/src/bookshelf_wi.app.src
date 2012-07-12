@@ -5,6 +5,7 @@
   {vsn, "0.0.1"},
   {mod, {bksw_app, []}},
   {registered, [bksw_sup]},
+  {included_applications, [mochiweb]},
   {applications , [kernel, stdlib, sasl, crypto,
-                   public_key, ssl, cowboy, erlsom, bookshelf_store,
+                   public_key, ssl, webmachine, erlsom, bookshelf_store,
                    mini_s3, inets]}]}.

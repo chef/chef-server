@@ -35,7 +35,7 @@ manual_start() ->
     application:start(ssl),
     application:start(inets),
     application:start(erlsom),
-    application:start(cowboy),
+    application:start(webmachine),
     application:start(xmerl),
     application:start(mini_s3),
     bkss_app:manual_start(),
@@ -44,7 +44,8 @@ manual_start() ->
 manual_stop() ->
     application:stop(bookshelf_wi),
     bkss_app:manual_stop(),
-    application:stop(cowboy),
+    application:stop(webmachine),
+    application:stop(mochiweb),
     application:stop(mini_s3),
     application:stop(erlsom),
     application:stop(inets).

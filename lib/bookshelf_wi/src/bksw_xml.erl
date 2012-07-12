@@ -6,6 +6,7 @@
 
 -export([list_buckets/1, list_objects/2,
          signature_does_not_match_error/4,
+         access_denied_error/1,
          model/0, write/1, write_erl/0, write_hrl/0]).
 
 -include_lib("bookshelf_store/include/bookshelf_store.hrl").
@@ -43,6 +44,7 @@ object(#object{name = Name, date = Date, size = Size,
                  'LastModified' = bksw_format:to_date(Date),
                  'ETag' = bksw_format:to_etag(Digest),
                  'Size' = io_lib:format("~w", [Size]),
+                 'Owner' = owner(),
                  'StorageClass' = "STANDARD"}.
 
 signature_does_not_match_error(RequestId, SignatureProvided, StringToSign,
@@ -62,6 +64,16 @@ signature_does_not_match_error(RequestId, SignatureProvided, StringToSign,
                                            [{prolog,
                                              "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"}])).
 
+access_denied_error(RequestId) ->
+        Data =
+        {'Error',
+         [{'Code', ["AccessDenied"]},
+          {'Message', ["Access Denied"]},
+          {'RequestId', [RequestId]},
+          {'HostId', [""]}]},
+    erlsom_ucs:to_utf8(xmerl:export_simple([Data], xmerl_xml,
+                                           [{prolog,
+                                             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"}])).
 write(Xml) ->
     {ok, Text} = erlsom:write(Xml, model()),
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" ++

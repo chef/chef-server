@@ -110,19 +110,29 @@ bookshelf_fs_stream(Config) when is_list(Config) ->
     ?assertEqual(ok, R0),
     ?assertEqual([], bkss_store:obj_list(Store1, Bucket)),
     Objs = [<<"test-foo">>, <<"hello-kitti">>],
-    Trans = bkss_transport:new(bksst_test_transport, [<<"eeeeeeeeeeeeeeeeeeeeeeee"
-                                                        "eeeeeeeeeeeeeeeeeeeeeeee"
-                                                        "eeeeeeeeeeeeeeeeeeeeeeee"
-                                                        "eeeeeeeeeeeeeeeeeeeeeeee">>]),
+    Content = <<"1234567890">>,
+    MD5 = erlang:md5(<<Content/binary, Content/binary, Content/binary, Content/binary>>),
     lists:foreach(
       fun(F) ->
-              {_, {ok, _}} = bkss_store:obj_recv(Store1, Bucket, F, Trans, <<>>, 100)
+
+              {_, {ok, Ref0}} = bkss_store:obj_in_start(Store1, Bucket, F),
+              {_, {ok, Ref1}} = bkss_store:obj_in(Store1, Ref0, Content),
+              {_, {ok, Ref2}} = bkss_store:obj_in(Store1, Ref1, Content),
+              {_, {ok, Ref3}} = bkss_store:obj_in(Store1, Ref2, Content),
+              {_, {ok, Ref4}} = bkss_store:obj_in(Store1, Ref3, Content),
+              {_, {ok, MD5}} = bkss_store:obj_in_end(Store1, Ref4)
       end,
       Objs),
 
     lists:foreach(
       fun(F) ->
-              {_, {ok, _}} = bkss_store:obj_send(Store1, Bucket, F, Trans)
+              {_, {ok, Ref}} = bkss_store:obj_out_start(Store1, Bucket, F, 10),
+              {_, {ok, Content}} = bkss_store:obj_out(Store1, Ref),
+              {_, {ok, Content}} = bkss_store:obj_out(Store1, Ref),
+              {_, {ok, Content}} = bkss_store:obj_out(Store1, Ref),
+              {_, {ok, Content}} = bkss_store:obj_out(Store1, Ref),
+              {_, done} = bkss_store:obj_out(Store1, Ref)
+
       end,
       Objs),
 

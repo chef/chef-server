@@ -31,9 +31,9 @@ to_base64(Bin) ->
     base64:encode_to_string(Bin).
 
 to_hex(Bin) ->
-    string:to_lower(lists:flatten([io_lib:format("~2.16.0b",
-                                                 [N])
-                                   || <<N>> <= Bin])).
+      string:to_lower(lists:flatten([io_lib:format("~2.16.0b",
+                                                   [N])
+                                     || <<N>> <= Bin])).
 
 to_etag(Tag) when is_binary(Tag) ->
     to_etag(to_hex(Tag));

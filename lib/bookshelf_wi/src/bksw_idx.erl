@@ -4,60 +4,31 @@
 %% @copyright Copyright 2012 Opscode, Inc.
 -module(bksw_idx).
 
--export([init/3, rest_init/2, allowed_methods/2, content_types_provided/2,
+-export([init/1, is_authorized/2, allowed_methods/2, content_types_provided/2,
          resource_exists/2, to_xml/2]).
 
--include_lib("cowboy/include/http.hrl").
-
+-include_lib("webmachine/include/webmachine.hrl").
 %%===================================================================
 %% Public API
 %%===================================================================
 
-init(_Transport, _Rq, _Opts) ->
-    {upgrade, protocol, cowboy_http_rest}.
+init(_Context) ->
+    {ok, bksw_conf:get_context()}.
 
-rest_init(Rq, _Opts) ->
-    {ok, Rq, undefined}.
+is_authorized(Rq, Ctx) ->
+    bksw_sec:is_authorized(Rq, Ctx).
 
-allowed_methods(Rq, St) -> {['GET'], Rq, St}.
+allowed_methods(Rq, Ctx) ->
+    {['GET'], Rq, Ctx}.
 
-content_types_provided(Rq, St) ->
-    {[{{<<"text">>, <<"xml">>, []}, to_xml}], Rq, St}.
+content_types_provided(Rq, Ctx) ->
+    {[{"text/xml", to_xml}], Rq, Ctx}.
 
-resource_exists(Rq, St) ->
-    {erlang:is_list(bookshelf_store:bucket_list()), Rq, St}.
+resource_exists(Rq, Ctx) ->
+    {erlang:is_list(bookshelf_store:bucket_list()), Rq, Ctx}.
 
-to_xml(Rq, St) ->
+to_xml(Rq, Ctx) ->
     Buckets = bookshelf_store:bucket_list(),
     Term = bksw_xml:list_buckets(Buckets),
     Body = bksw_xml:write(Term),
-    {Body, Rq, St}.
-
-%%===================================================================
-%% Eunit Tests
-%%===================================================================
--ifndef(NO_TESTS).
-
--include_lib("eunit/include/eunit.hrl").
-
-allowed_methods_test_() ->
-    [{"should only support 'GET'",
-      fun () ->
-              Expected = ['GET'],
-              {Allowed, _, _} = allowed_methods(#http_req{pid=self()}, % make dialyzer happy
-                                                undefined),
-              ?assertEqual(Expected, Allowed)
-
-      end}].
-
-content_types_provided_test_() ->
-    [{"should only support text/xml output",
-      fun () ->
-              {Types, _, _} = content_types_provided(#http_req{pid=self()}, % make dialyzer happy
-                                                     undefined),
-              ?assertEqual(1, length(Types)),
-              ?assertEqual(true, lists:keymember({<<"text">>, <<"xml">>, []}, 1,
-                                                 Types))
-      end}].
-
--endif.
+    {Body, Rq, Ctx}.

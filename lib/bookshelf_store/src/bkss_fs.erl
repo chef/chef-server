@@ -18,9 +18,11 @@
          obj_meta/3,
          obj_create/4,
          obj_get/3,
-         obj_recv/6,
-         obj_send/4
-        ]).
+         obj_in_start/3,
+         obj_in/3,
+         obj_in_end/2,
+         obj_out_start/4,
+         obj_out/2]).
 
 -export_type([fs_data/0, dir/0]).
 
@@ -29,6 +31,26 @@
 
 -define(BLOCK_SIZE, 16384).
 -define(TIMEOUT_MS, 4096).
+
+%% magic number that indicates a bookshelf file.
+-define(BKSF_IND, 16#0DDBA11).
+
+%% Header Information
+-define(BKSF_HEADER_SIZE, (4 + 2)).
+
+-define(BKSF_VERSION, 1).
+-define(BKSF_HEADER_DETAIL_SIZE_1, (14 + 32)).
+
+-define(CURRENT_HEADER_SIZE,
+        (?BKSF_HEADER_SIZE + ?BKSF_HEADER_DETAIL_SIZE_1)).
+
+%% This FILE_PAD is appended to the front of files.
+-define(FILE_PAD, <<?BKSF_IND:32, 0:16,
+                    0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0>>).
 
 %%===================================================================
 %% Types
@@ -124,113 +146,69 @@ obj_create(State = {?MODULE, Dir}, Bucket, Path, Data) ->
 -spec obj_get(fs_data(), bkss_store:bucket_name(), bkss_store:path()) ->
                      {ok, binary()} | {error, Reason::term()}.
 obj_get({?MODULE, Dir}, Bucket, Path) ->
-    file:read_file(filename:join([Dir, encode(Bucket), encode(Path)])).
+    AbsPath = filename:join([Dir, encode(Bucket), encode(Path)]),
+    case obj_open_r(AbsPath) of
+        {ok, {Fs, _}} ->
+            slurp_file(Fs, []);
+        Any ->
+            Any
+    end.
 
 -spec obj_copy(fs_data(), FromBucket::bkss_store:bucket_name(), FromPath::bkss_store:path(),
                ToBucket::bkss_store:bucket_name(), ToPath::bkss_store:path()) ->
                       {fs_data(), {ok, BytesCopied::non_neg_integer()} | {error, Reason::term()}}.
 obj_copy(State={?MODULE, Dir}, FromBucket, FromPath, ToBucket, ToPath) ->
-    {State, file:copy(filename:join([Dir, encode(FromBucket), encode(FromPath)]),
-                      filename:join([Dir, encode(ToBucket), encode(ToPath)]))}.
+    {ok, CpySize} =
+        file:copy(filename:join([Dir, encode(FromBucket), encode(FromPath)]),
+                  filename:join([Dir, encode(ToBucket), encode(ToPath)])),
+    {State, {ok, CpySize - ?CURRENT_HEADER_SIZE}}.
 
--spec obj_send(fs_data(), bkss_store:bucket_name(),
-               bkss_store:path(), Trans::bkss_transport:trans()) ->
-                      {fs_data(), {ok, MD5::term()} | {error, Reason::term()}}.
-obj_send(State = {?MODULE, Dir}, Bucket, Path, Trans) ->
-    FilePath = filename:join([Dir, encode(Bucket), encode(Path)]),
-    Resp =
-        case obj_open_r(FilePath) of
-            {ok, FsSt} ->
-                case read(FsSt, Trans) of
-                    ok ->
-                        obj_close(FsSt);
-                    {error, timeout} ->
-                        obj_close(FsSt),
-                        {error, timeout};
-                    Any ->
-                        obj_close(FsSt),
-                        Any
-                end;
-            Any -> Any
-        end,
-    {State, Resp}.
-
--spec obj_recv(fs_data(), bkss_store:bucket_name(), bkss_store:path(),
-               Trans::bkss_transport:trans(), Buffer::binary(), Length::non_neg_integer()) ->
-                      {fs_data(), {ok, MD5::term()} | {error, Reason::term()}}.
-obj_recv(State = {?MODULE, Dir}, Bucket, Path, Trans, Buffer, Length) ->
+-spec obj_in_start(fs_data(), bkss_store:bucket_name(), bkss_store:path()) ->
+                          {fs_data(), {ok, Ref::term()} | {error, Reason::term()}}.
+obj_in_start(State = {?MODULE, Dir}, Bucket, Path) ->
     FilePath = filename:join([Dir, encode(Bucket), encode(Path)]),
     filelib:ensure_dir(FilePath),
-    Resp =
-        case obj_open_w(FilePath) of
-            {ok, FsSt} ->
-                case write(FsSt, Trans, Length, Buffer) of
-                    {ok, FsSt2} -> obj_close(FsSt2);
-                    {error, timeout} ->
-                        obj_close(FsSt),
-                        obj_delete(State, Bucket, Path),
-                        {error, timeout};
-                    Any ->
-                        obj_close(FsSt),
-                        obj_delete(State, Bucket, Path),
-                        Any
-                end;
-            Any -> Any
-        end,
+    Resp = obj_open_w(FilePath),
     {State, Resp}.
+
+-spec obj_in(fs_data(), Ref::term() , Data::binary()) ->
+                    {fs_data(), {ok, Ref1::term()} | {error, Reason::term()}}.
+obj_in(State = {?MODULE, _Dir}, Ref, Data) ->
+    {State, obj_write(Ref, Data)}.
+
+-spec obj_in_end(fs_data(), Ref::term()) ->
+                    {fs_data(), {ok, MD5::term()} | {error, Reason::term()}}.
+obj_in_end(State = {?MODULE, _Dir}, Ref) ->
+    {State, obj_close(Ref)}.
+
+-spec obj_out_start(fs_data(), bkss_store:bucket_name(), bkss_store:path(),
+                    Hunk::non_neg_integer()) ->
+                      {fs_data(), {ok, Ref::term()} | {error, Reason::term()}}.
+obj_out_start(State = {?MODULE, Dir}, Bucket, Path, Length) ->
+    FilePath = filename:join([Dir, encode(Bucket), encode(Path)]),
+    Resp = case obj_open_r(FilePath) of
+               {ok, Fst} ->
+                   {ok, {Fst, Length}};
+               Any ->
+                   Any
+           end,
+    {State, Resp}.
+
+-spec obj_out(fs_data(), Ref::term()) ->
+                     {fs_data(), {ok, Data::binary()} | done | {error, Reason::term()}}.
+obj_out(State = {?MODULE, _Dir}, {{File, _}, Length}) ->
+    case file:read(File, Length) of
+        {ok, Chunk} ->
+            {State, {ok, Chunk}};
+        eof ->
+            {State, done};
+        Any ->
+            {State, Any}
+    end.
 
 %%===================================================================
 %% Internal Functions
 %%===================================================================
--spec read(file_desc(), bkss_transport:trans()) ->
-                  ok | {error, Reason::term()}.
-read({File, _} = FsSt, Trans) ->
-    case file:read(File, ?BLOCK_SIZE) of
-        {ok, Chunk} ->
-            bkss_transport:send(Trans, Chunk),
-            read(FsSt, Trans);
-        eof ->
-            ok;
-        Any ->
-            Any
-    end.
-
--spec write(file_desc(), Trans::bkss_transport:trans(),
-            Length::non_neg_integer(), Buf::binary()) ->
-                   {ok, file_desc()} | {error, Reason::term()}.
-write(FsSt, Trans, Length, <<>>) ->
-    write(FsSt, Trans, Length);
-write(FsSt, Trans, Length, Buf) ->
-    case obj_write(FsSt, Buf) of
-        {ok, NewFsSt} ->
-            write(NewFsSt, Trans, Length - byte_size(Buf));
-        Any -> Any
-    end.
-
--spec write(file_desc(), Trans::bkss_transport:trans(), Length::non_neg_integer()) ->
-                   {ok, file_desc()} | {error, Reason::term()}.
-write(FsSt, _Trans, 0) ->
-    obj_write(FsSt, <<>>);
-write(FsSt, Trans, Length) when Length =< ?BLOCK_SIZE ->
-    case bkss_transport:recv(Trans, Length) of
-        {ok, Chunk} ->
-            obj_write(FsSt, Chunk);
-        Any ->
-            Any
-    end;
-write(FsSt, Trans, Length) ->
-    case bkss_transport:recv(Trans, ?BLOCK_SIZE) of
-        {ok, Chunk} ->
-            case obj_write(FsSt, Chunk) of
-                {ok, NewFsSt} ->
-                    write(NewFsSt, Trans, Length-?BLOCK_SIZE);
-                Any ->
-                    Any
-            end;
-        Any ->
-            Any
-    end.
-
 -spec dir_2_bucket(dir()) -> bkss_store:bucket().
 dir_2_bucket(Dir) ->
     %% crash if no access to any bucket dir
@@ -259,26 +237,49 @@ file_2_object(Dir, BucketPath, BucketName, FilePath) ->
             []
     end.
 
--spec file_md5(file:io_device(), MD5Context::term()) -> {ok, MD5::term()}.
-file_md5(File, Ctx) ->
-    case file:read(File, ?BLOCK_SIZE) of
-        {ok, Bin} ->
-            file_md5(File, erlang:md5_update(Ctx, Bin));
-        eof ->
-            file:close(File),
-            {ok, erlang:md5_final(Ctx)}
+-spec file_md5(file:io_device()) -> {ok, MD5::binary()}.
+file_md5(File) ->
+    case file:read(File, ?BKSF_HEADER_SIZE) of
+        {ok, <<?BKSF_IND:32/integer, Version:16/integer>>} ->
+            parse_header(File, Version);
+        _ ->
+            {error, invalid_file}
+    end.
+
+parse_header(File, 1) ->
+    case file:read(File, ?BKSF_HEADER_DETAIL_SIZE_1) of
+        {ok, <<_DateStamp:14/binary, MD5:32/binary>>} ->
+            {ok, MD5};
+        _ ->
+            {error, invalid_file}
     end.
 
 -spec obj_open(file:filename(), list()) ->
                       {ok, {file:io_device(), binary()}}  |
                       {error, Reason::term()}.
 obj_open(Path, Opts) ->
+    Exists = filelib:is_regular(Path),
     case file:open(Path, Opts) of
         {ok, File} ->
+            handle_file_pad(File, Exists, Opts),
             {ok, {File, erlang:md5_init()}};
         Any        ->
             Any
     end.
+
+-spec handle_file_pad(file:io_device(), boolean(), list()) -> ok.
+handle_file_pad(File, true, _Opts) ->
+    %% Reading or writing we want to make sure we are
+    %% avoiding the header
+    {ok, ?CURRENT_HEADER_SIZE} = file:position(File, ?CURRENT_HEADER_SIZE);
+handle_file_pad(File, false, Opts) ->
+    case lists:member(write, Opts) of
+        true ->
+            ok = file:write(File, ?FILE_PAD);
+        false ->
+            ok
+    end.
+
 -spec obj_open_w(file:filename()) ->
                         {ok, {file:io_device(), binary()}}  |
                         {error, Reason::term()}.
@@ -301,9 +302,18 @@ obj_write({File, Ctx}, Chunk) ->
 
 -spec obj_close(file_desc()) -> {ok, MD5::term()} | {error, Reason::term()}.
 obj_close({File, Ctx}) ->
+    FinalMD5 = erlang:md5_final(Ctx),
+    %% The first four bytes are the BKSF indicator
+    {ok, 0} = file:position(File, 0),
+    Timestamp = create_timestamp(),
+    MD5 = to_hex(FinalMD5),
+    file:write(File, <<?BKSF_IND:32/integer,
+                       ?BKSF_VERSION:16/integer,
+                       Timestamp:14/binary,
+                       MD5:32/binary>>),
     case file:close(File) of
         ok  ->
-            {ok, erlang:md5_final(Ctx)};
+            {ok, FinalMD5};
         Any ->
             Any
     end.
@@ -328,7 +338,7 @@ obj_meta_internal(Dir, Bucket, Path) ->
     Filename = filename:join([Dir, Bucket, Path]),
     case file:open(Filename, [binary,raw,read_ahead]) of
         {ok, File} ->
-            {ok, Md5} = file_md5(File, erlang:md5_init()),
+            {ok, Md5} = file_md5(File),
             case file:read_file_info(Filename) of
                 {ok, #file_info{mtime = Date, size = Size}} ->
                     [UTC | _] = %% FIXME This is a hack until R15B
@@ -342,4 +352,30 @@ obj_meta_internal(Dir, Bucket, Path) ->
             end;
         Any ->
             Any
+    end.
+
+
+-spec to_hex(binary()) -> binary().
+to_hex(Bin) ->
+    erlang:iolist_to_binary(
+      [io_lib:format("~2.16.0b",
+                     [N])
+       || <<N>> <= Bin]).
+
+-spec create_timestamp() -> binary().
+create_timestamp() ->
+    DateTime = calendar:now_to_datetime(now()),
+    {{Year, Month, Day}, {Hour, Min, Sec}} = DateTime,
+    erlang:iolist_to_binary(io_lib:format("~4..0B~2..0B~2..0B~2..0B~2..0B~2..0B",
+                                          [Year, Month, Day, Hour, Min, Sec])).
+
+
+-spec slurp_file(file:io_device(), [binary()]) -> {ok, binary()}.
+slurp_file(File, Acc) ->
+    case file:read(File, ?BLOCK_SIZE) of
+        {ok, Chunk} ->
+            slurp_file(File, [Chunk, Acc]);
+        eof ->
+            file:close(File),
+            {ok, erlang:iolist_to_binary(lists:reverse(Acc))}
     end.

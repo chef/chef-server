@@ -4,104 +4,126 @@
 %% @copyright Copyright 2012 Opscode, Inc.
 -module(bksw_sec).
 
--export([handle_request/1]).
+-export([is_authorized/2]).
+
+-define(SECONDS_AT_EPOCH, 62167219200).
 
 %%===================================================================
 %% API functions
 %%===================================================================
-handle_request(Req0) ->
+is_authorized(Req0, Context) ->
+    Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
-    case cowboy_http_req:header('Authorization', Req1) of
-        {undefined, Req1} ->
-            do_signed_url_authorization(RequestId, Req1);
-        {IncomingAuth, Req1}  ->
-            do_standard_authorization(RequestId, IncomingAuth, Req1)
+    case proplists:get_value('Authorization', Headers, undefined) of
+        undefined ->
+            do_signed_url_authorization(RequestId, Req1, Context);
+        IncomingAuth ->
+            do_standard_authorization(RequestId, IncomingAuth, Req1, Context)
     end.
 
-do_signed_url_authorization(RequestId, Req0) ->
-    {AWSAccessKeyId, Req1} = cowboy_http_req:qs_val(<<"AWSAccessKeyId">>, Req0),
-    {Expires, Req2} = cowboy_http_req:qs_val(<<"Expires">>, Req1),
-    {IncomingSignature, Req3} =cowboy_http_req:qs_val(<<"Signature">>, Req2),
-    {RawMethod, Req4} = cowboy_http_req:method(Req3),
+do_signed_url_authorization(RequestId, Req0, Context) ->
+    AWSAccessKeyId = wrq:get_qs_value("AWSAccessKeyId", Req0),
+    Expires = wrq:get_qs_value("Expires", Req0),
+    IncomingSignature = wrq:get_qs_value("Signature", Req0),
+    RawMethod = wrq:method(Req0),
     Method = string:to_lower(erlang:atom_to_list(RawMethod)),
-    {Headers, Req5} = cowboy_http_req:headers(Req4),
-    {Path, Req6} = cowboy_http_req:raw_path(Req5),
-    {keys, {AccessKey, SecretKey}} = bksw_conf:keys(),
+    Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
+    Path  = wrq:raw_path(Req0),
+    AccessKey = bksw_conf:access_key_id(Context),
+    SecretKey = bksw_conf:secret_access_key(Context),
     {StringToSign, Signature} =
         mini_s3:make_signed_url_authorization(SecretKey,
                                               erlang:list_to_existing_atom(Method),
                                               Path,
                                               Expires,
                                               Headers),
-    case ((AWSAccessKeyId == AccessKey) andalso
-          Signature == IncomingSignature) of
+    case is_expired(Expires) of
         true ->
-            Req6;
+            encode_access_denied_error_response(RequestId, Req0, Context);
         false ->
-            encode_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
-                                  StringToSign, Req6)
+            case ((erlang:iolist_to_binary(AWSAccessKeyId) ==
+                       erlang:iolist_to_binary(AccessKey)) andalso
+                  erlang:iolist_to_binary(Signature) ==
+                      erlang:iolist_to_binary(IncomingSignature)) of
+                true ->
+                    {true, Req0, Context};
+                false ->
+                    encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
+                                               StringToSign, Req0, Context)
+            end
     end.
 
-do_standard_authorization(RequestId, IncomingAuth, Req0) ->
-    {Headers, Req1} = cowboy_http_req:headers(Req0),
+
+do_standard_authorization(RequestId, IncomingAuth, Req0, Context) ->
+    Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
     AmzHeaders = amz_headers(Headers),
-    {RawMethod, Req2} = cowboy_http_req:method(Req1),
+    RawMethod = wrq:method(Req0),
     Method = string:to_lower(erlang:atom_to_list(RawMethod)),
-    {ContentMD5, Req3} = cowboy_http_req:header('Content-Md5', Req2, ""),
-    {ContentType, Req4} = cowboy_http_req:header('Content-Type', Req3, ""),
-    {Date, Req5} = cowboy_http_req:header('Date', Req4, ""),
-    {Host, Req6} = get_bucket(cowboy_http_req:host(Req5)),
-    {Resource, Req7} = cowboy_http_req:raw_path(Req6),
-    {Qs, Req8} = cowboy_http_req:raw_qs(Req7),
-    {keys, {AccessKey, SecretKey}} = bksw_conf:keys(),
+    ContentMD5 = proplists:get_value('Content-Md5', Headers, ""),
+    ContentType = proplists:get_value('Content-Type', Headers, ""),
+    Date = proplists:get_value('Date', Headers, ""),
+    {ok, Bucket, Resource} = bksw_util:get_object_and_bucket(Req0),
+    AccessKey = bksw_conf:access_key_id(Context),
+    SecretKey = bksw_conf:secret_access_key(Context),
+
     {StringToSign, RawCheckedAuth} =
         mini_s3:make_authorization(AccessKey, SecretKey,
                                    erlang:list_to_existing_atom(Method),
                                    bksw_util:to_string(ContentMD5),
                                    bksw_util:to_string(ContentType),
                                    bksw_util:to_string(Date),
-                                   AmzHeaders, bksw_util:to_string(Host),
-                                   bksw_util:to_string(Resource),
-                                   bksw_util:to_string(Qs)),
+                                   AmzHeaders, bksw_util:to_string(Bucket),
+                                   "/" ++ bksw_util:to_string(Resource),
+                                   ""),
     CheckedAuth = erlang:iolist_to_binary(RawCheckedAuth),
     [AccessKeyId, Signature] = split_authorization(IncomingAuth),
-    case CheckedAuth == IncomingAuth of
-        true ->
-            Req8;
-        false ->
-            encode_error_response(AccessKeyId, Signature, RequestId, StringToSign, Req8)
+    case erlang:iolist_to_binary(IncomingAuth) of
+        CheckedAuth ->
+            {true, Req0, Context};
+        _ ->
+            encode_sign_error_response(AccessKeyId, Signature,
+                                       RequestId, StringToSign, Req0, Context)
     end.
 
-get_bucket({[_, _], Req6}) ->
-    {"", Req6};
-get_bucket({[Bucket, _, _], Req6}) ->
-    {Bucket, Req6}.
+-spec is_expired(binary()) -> boolean().
+is_expired(Expires) ->
+    Now = calendar:datetime_to_gregorian_seconds(erlang:universaltime()),
+    bksw_util:to_integer(Expires) < (Now - ?SECONDS_AT_EPOCH).
 
+%% get_bucket([Bucket, _, _]) ->
+%%     Bucket.
 
-encode_error_response(AccessKeyId, Signature,
-                      RequestId, StringToSign, Req0) ->
+encode_sign_error_response(AccessKeyId, Signature,
+                           RequestId, StringToSign, Req0,
+                          Context) ->
     Req1 = bksw_req:with_amz_id_2(Req0),
     Body = bksw_xml:signature_does_not_match_error(
              RequestId, bksw_util:to_string(Signature),
              bksw_util:to_string(StringToSign),
              bksw_util:to_string(AccessKeyId)),
-    {ok, Req2} = cowboy_http_req:reply(403, [], Body, Req1),
-    Req2.
+    Req2 = wrq:set_resp_body(Body, Req1),
+    {{halt, 403}, Req2, Context}.
 
-split_authorization(<<"AWS :", Rest/binary>>) ->
+encode_access_denied_error_response(RequestId, Req0, Context) ->
+    Req1 = bksw_req:with_amz_id_2(Req0),
+    Body = bksw_xml:access_denied_error(RequestId),
+    Req2 = wrq:set_resp_body(Body, Req1),
+    {{halt, 403}, Req2, Context}.
+
+split_authorization([$A, $W, $S, $\s, $: | Rest]) ->
     [<<>>, Rest];
-split_authorization(<<"AWS ", Rest/binary>>) ->
-    binary:split(Rest, <<":">>).
+split_authorization([$A, $W, $S, $\s  | Rest]) ->
+    string:tokens(Rest, ":").
 
-is_amz(<<"X-Amz-Acl", _Rest/binary>>) ->
+is_amz([$X, $-, $A, $m, $z, $-, $A, $c, $l | _]) ->
     true;
-is_amz(<<"x-amz-acl", _Rest/binary>>) ->
+is_amz([$x, $-, $a, $m, $z, $-, $a, $c, $l | _]) ->
     true;
 is_amz(_) ->
     false.
 
-to_processable(K) ->
-    string:to_lower(erlang:binary_to_list(K)).
-
 amz_headers(Headers) ->
-    [{to_processable(K), V} || {K,V} <- Headers, is_amz(K)].
+    [{process_header(K), V} || {K,V} <- Headers, is_amz(K)].
+
+process_header(Key) ->
+    string:to_lower(bksw_util:to_string(Key)).
