@@ -28,7 +28,7 @@ do_signed_url_authorization(RequestId, Req0, Context) ->
     RawMethod = wrq:method(Req0),
     Method = string:to_lower(erlang:atom_to_list(RawMethod)),
     Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
-    Path  = wrq:raw_path(Req0),
+    Path  = wrq:path(Req0),
     AccessKey = bksw_conf:access_key_id(Context),
     SecretKey = bksw_conf:secret_access_key(Context),
     {StringToSign, Signature} =
