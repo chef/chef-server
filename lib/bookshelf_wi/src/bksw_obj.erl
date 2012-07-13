@@ -48,7 +48,13 @@ content_types_accepted(Rq, Ctx) ->
 
 resource_exists(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
-    {bookshelf_store:obj_exists(Bucket, Path), Rq0, Ctx}.
+    %% Buckets always exist for writes since we create them on the fly
+    case wrq:method(Rq0) of
+        'PUT' ->
+            {true, Rq0, Ctx};
+        _ ->
+            {bookshelf_store:obj_exists(Bucket, Path), Rq0, Ctx}
+    end.
 
 delete_resource(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
