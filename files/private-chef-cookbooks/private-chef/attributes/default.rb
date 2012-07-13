@@ -136,7 +136,6 @@ default['private_chef']['bookshelf']['listen'] = '127.0.0.1'
 default['private_chef']['bookshelf']['port'] = 4321
 default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
 default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
-default['private_chef']['bookshelf']['pool_size'] = '100'
 
 ####
 # Chef Server API

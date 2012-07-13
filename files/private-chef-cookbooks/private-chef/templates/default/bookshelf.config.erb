@@ -18,9 +18,6 @@
  %% bookshelf_wi Config
  {bookshelf_wi, [{ip, "<%= @listen %>"},
                  {port, <%= @port %>},
-                 {domains, ["<%= @vip %>"]},
-                 {certfile, ""},
-                 {pool, <%= @pool_size %>},
                  {keys, {"<%= @access_key_id %>",
                          "<%= @secret_access_key %>"}}
                 ]}
