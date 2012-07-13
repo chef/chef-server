@@ -142,7 +142,7 @@ obj_out(StreamToken) ->
 %%===================================================================
 -spec call(bucket_name(), Msg::term()) -> term().
 call(BucketName, Msg) ->
-    case bkss_store_server:get_bucket_reference(BucketName) of
+    case bkss_store_server:get_bucket_reference(BucketName, true) of
         Pid when is_pid(Pid) ->
             gen_server:call(Pid, Msg, ?GEN_SERVER_TIMEOUT);
         {error, _} = Error ->

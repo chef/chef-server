@@ -8,7 +8,7 @@
 
 %% API
 -export([start_link/0,
-         get_bucket_reference/1,
+         get_bucket_reference/2,
          create_bucket/1,
          bucket_list/0]).
 
@@ -36,14 +36,43 @@
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
--spec get_bucket_reference(bookshelf_store:bucket_name()) -> pid().
-get_bucket_reference(BucketName) ->
-    case catch gproc:await(make_key(BucketName), ?AWAIT_TIMEOUT) of
-        {'EXIT', {timeout, _}} ->
-            {error, timeout};
-        {Pid, _} ->
+-spec get_bucket_reference(bookshelf_store:bucket_name(), boolean()) -> term().
+ %% get_bucket_reference(BucketName) ->
+%%     case catch gproc:await(make_key(BucketName), ?AWAIT_TIMEOUT) of
+%%         {'EXIT', {timeout, _}} ->
+%%             {error, timeout};
+%%         {Pid, _} ->
+%%             Pid
+%%     end.
+
+get_bucket_reference(BucketName, true) ->
+    create_or_get_bucket_ref(make_key(BucketName), 3);
+get_bucket_reference(BucketName, false) ->
+    BucketKey = make_key(BucketName),
+    case gproc:where(BucketKey) of
+        undefined ->
+            {error, not_found};
+        Pid ->
             Pid
     end.
+
+create_or_get_bucket_ref(_BucketKey, 0) ->
+    {error, failed_lookup};
+create_or_get_bucket_ref({_, _, BucketName}=BucketKey, Count) ->
+    case gproc:where(BucketKey) of
+        undefined ->
+            case bkss_bucket_sup:start_child(BucketName) of
+                {ok, Pid} ->
+                    Pid;
+                _Error ->
+                    create_or_get_bucket_ref(BucketKey, Count - 1)
+            end;
+        Pid when is_pid(Pid)  ->
+            Pid;
+        _Error ->
+            create_or_get_bucket_ref(BucketKey, Count - 1)
+    end.
+
 
 -spec create_bucket(bookshelf_store:bucket_name()) -> pid().
 create_bucket(BucketName) ->
