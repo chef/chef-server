@@ -78,7 +78,12 @@ obj_list(BucketName) ->
 
 -spec obj_exists(bucket_name(), path()) -> boolean().
 obj_exists(BucketName, Path) ->
-    call(BucketName, {obj_exists, Path}).
+    case call(BucketName, {obj_exists, Path}) of
+        {error, timeout} ->
+            false;
+        V ->
+            V
+    end.
 
 -spec obj_delete(bucket_name(), path()) -> ok | {error, Reason::term()}.
 obj_delete(BucketName, Path) ->
@@ -137,5 +142,10 @@ obj_out(StreamToken) ->
 %%===================================================================
 -spec call(bucket_name(), Msg::term()) -> term().
 call(BucketName, Msg) ->
-    Pid = bkss_store_server:get_bucket_reference(BucketName),
-    gen_server:call(Pid, Msg, ?GEN_SERVER_TIMEOUT).
+    case bkss_store_server:get_bucket_reference(BucketName) of
+        Pid when is_pid(Pid) ->
+            gen_server:call(Pid, Msg, ?GEN_SERVER_TIMEOUT);
+        {error, _} = Error ->
+            Error
+    end.
+

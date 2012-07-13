@@ -38,8 +38,12 @@ start_link() ->
 
 -spec get_bucket_reference(bookshelf_store:bucket_name()) -> pid().
 get_bucket_reference(BucketName) ->
-    {Pid, _} = gproc:await(make_key(BucketName), ?AWAIT_TIMEOUT),
-    Pid.
+    case catch gproc:await(make_key(BucketName), ?AWAIT_TIMEOUT) of
+        {'EXIT', {timeout, _}} ->
+            {error, timeout};
+        {Pid, _} ->
+            Pid
+    end.
 
 -spec create_bucket(bookshelf_store:bucket_name()) -> pid().
 create_bucket(BucketName) ->
