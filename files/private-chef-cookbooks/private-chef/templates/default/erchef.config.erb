@@ -54,6 +54,7 @@
                 {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['vhost'] %>">>},
                 {rabbitmq_exchange, <<"">>},
                 {authz_root_url, "http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>" },
+                {certificate_root_url, "http://<%= node['private_chef']['opscode-certificate']['vip'] %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificates"},
 		        {keyring, [{default, "/etc/opscode/webui_pub.pem"}]}]},
   {stats_hero, [
                {udp_socket_pool_size, 1 },
@@ -75,7 +76,10 @@
            {column_transforms,
            <%-if node['private_chef']['database_type'] == "mysql" %>
                               [{<<"frozen">>,
-                               {sqerl_transformers, convert_integer_to_boolean}}]
+                                {sqerl_transformers, convert_integer_to_boolean}},
+                               {<<"validator">>,
+                                {sqerl_transformers, convert_integer_to_boolean}}
+                              ]
            <%- elsif node['private_chef']['database_type'] == "postgresql" %>
                               [{<<"created_at">>,
                                 {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
