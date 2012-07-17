@@ -48,7 +48,7 @@
     }
 
     # object ACL requests go to opscode-account service
-    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/.*?/_acl.*$") %>
+    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/.*?/_acl.*$", :account) %>
 
     # pushy
     <%= @helper.pushy_api("^/organizations/[a-z0-9\-_]+?/pushy/{0,1}") %>
@@ -93,14 +93,15 @@
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/status/{0,1}.*$", :ruby) %>
 
     # opscode-account service endpoints
-    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/(?:groups|users|clients|containers|association_requests)/{0,1}.*$") %>
-    <%= @helper.account_api("^/(?:organizations|users)/{0,1}$") %>
-    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+/{0,1}$") %>
-    <%= @helper.account_api("^/users/[a-z0-9\-_]+/{0,1}$") %>
-    <%= @helper.account_api("^/users/[a-z0-9\-_]+/{0,1}/association_requests/{0,1}.*$") %>
-    <%= @helper.account_api("^/users/[a-z0-9\-_]+/organizations/{0,1}$") %>
-    <%= @helper.account_api("^/verify_password$") %>
-    <%= @helper.account_api("^/authenticate_user$") %>
+    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", 'couchdb_clients') %>
+    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/(?:groups|users|containers|association_requests)/{0,1}.*$", :account) %>
+    <%= @helper.account_api("^/(?:organizations|users)/{0,1}$", :account) %>
+    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+/{0,1}$", :account) %>
+    <%= @helper.account_api("^/users/[a-z0-9\-_]+/{0,1}$", :account) %>
+    <%= @helper.account_api("^/users/[a-z0-9\-_]+/{0,1}/association_requests/{0,1}.*$", :account) %>
+    <%= @helper.account_api("^/users/[a-z0-9\-_]+/organizations/{0,1}$", :account) %>
+    <%= @helper.account_api("^/verify_password$", :account) %>
+    <%= @helper.account_api("^/authenticate_user$", :account) %>
 
     location ~ "^/(?:stylesheets|javascripts|images|facebox|css)/{0,1}.*$" {
       if ($http_x_chef_version ~* "^(\d+\.\d+?)\..+$") {

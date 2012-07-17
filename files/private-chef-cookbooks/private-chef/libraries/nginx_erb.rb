@@ -42,8 +42,18 @@ class NginxErb
     make_location(path, choose_upstream(key), alternative, proto)
   end
 
-  def account_api(path)
-    make_location(path, "opscode_account", "opscode_webui", "http")
+  def choose_account_upstream(key=:erchef)
+    if (key == :account) || node['private_chef']['dark_launch'][key]
+      "opscode_account"
+    else
+      "opscode_erchef"
+    end
+  end
+
+  # Generate an nginx location directive, selecting opscode_account or
+  # opscode_erchef based on the node's dark_launch config
+  def account_api(path, key=:erchef, alternative="opscode_webui", proto="http")
+    make_location(path, choose_account_upstream(key), alternative, proto)
   end
 
   def pushy_api(path)
