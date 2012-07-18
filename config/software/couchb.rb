@@ -21,6 +21,9 @@ build_env = {
 
 build do
 #  command "./bootstrap", :env => build_env
+
+  patch :source => "patch_for_couchjs_stack.patch"
+
   command ["./configure",
            "--prefix=#{install_dir}/embedded",
            "--disable-init",
