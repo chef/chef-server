@@ -143,13 +143,13 @@ if node['private_chef']['bootstrap']['enable']
 
   execute "migrate_database" do
     command "/opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/bin/rake pg:remigrate" 
-    cwd "/opt/opscode/embedded/service/mixlib-authorization"
+    cwd "/opt/opscode/embedded/service/chef-sql-schema"
     user node['private_chef']['postgresql']['username']
     action :nothing
   end
 
   execute "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"CREATE USER #{node['private_chef']['postgresql']['sql_user']} WITH SUPERUSER ENCRYPTED PASSWORD '#{node['private_chef']['postgresql']['sql_password']}'\"" do
-    cwd "/opt/opscode/embedded/service/mixlib-authorization"
+    cwd "/opt/opscode/embedded/service/chef-sql-schema"
     user node['private_chef']['postgresql']['username']
     notifies :run, "execute[grant opscode_chef privileges]", :immediately
     not_if user_exists
@@ -162,7 +162,7 @@ if node['private_chef']['bootstrap']['enable']
   end
 
   execute "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"CREATE USER #{node['private_chef']['postgresql']['sql_ro_user']} WITH SUPERUSER ENCRYPTED PASSWORD '#{node['private_chef']['postgresql']['sql_ro_password']}'\"" do
-    cwd "/opt/opscode/embedded/service/mixlib-authorization"
+    cwd "/opt/opscode/embedded/service/chef-sql-schema"
     user node['private_chef']['postgresql']['username']
     notifies :run, "execute[grant opscode_chef_ro privileges]", :immediately
     not_if ro_user_exists
