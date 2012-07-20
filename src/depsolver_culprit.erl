@@ -15,14 +15,9 @@
 -export([search/3,
         format_error/1]).
 
--export_type([detail/0]).
-
 %%============================================================================
 %% Types
 %%============================================================================
--type detail() :: {UnknownApps::[depsolver:constraint()],
-                   VersionConstrained::[depsolver:constraint()],
-                   GoodApps::[depsolver:constraint()]}.
 
 %%============================================================================
 %% Internal API
@@ -30,11 +25,11 @@
 %% @doc start running the solver, with each run reduce the number of constraints
 %% set as goals. At some point the solver should succeed.
 -spec search(depsolver:dep_graph(), [depsolver:constraint()], [depsolver:constraint()])
-            -> detail() | term().
+            -> term().
 search(State, ActiveCons, []) ->
     case depsolver:primitive_solve(State, ActiveCons, keep_paths) of
         {fail, FailPaths} ->
-            format_culprit_error(ActiveCons, lists:flatten(FailPaths), []);
+            extract_culprit_information0(ActiveCons, lists:flatten(FailPaths));
         _Success ->
             %% This should *never* happen. 'Culprit' above represents the last
             %% possible constraint that could cause things to fail. There for
@@ -44,13 +39,23 @@ search(State, ActiveCons, []) ->
 search(State, ActiveCons, [NewCon | Constraints]) ->
     case depsolver:primitive_solve(State, ActiveCons, keep_paths) of
         {fail, FailPaths} ->
-            format_culprit_error(ActiveCons, lists:flatten(FailPaths), []);
+            extract_culprit_information0(ActiveCons, lists:flatten(FailPaths));
         _Success ->
             %% Move one constraint from the inactive to the active
             %% constraints and run again
             search(State, [NewCon | ActiveCons], Constraints)
     end.
 
+format_error({error, {unreachable_package, AppName}}) ->
+    ["Dependency ", format_constraint(AppName), " is specified as a dependency ",
+     "but is not reachable by the system.\n"];
+format_error({error, {invalid_constraints, Constraints}}) ->
+    ["Invalid constraint ", add_s(Constraints), " specified ",
+     lists:foldl(fun(Con, "") ->
+                         [io_lib:format("~p", [Con])];
+                    (Con, Acc) ->
+                         [io_lib:format("~p", [Con]), ", " | Acc]
+                 end, "", Constraints)];
 format_error({error, Detail}) ->
     format_error(Detail);
 format_error(Details) when erlang:is_list(Details) ->
@@ -60,6 +65,7 @@ format_error(Details) when erlang:is_list(Details) ->
 %%============================================================================
 %% Internal Functions
 %%============================================================================
+-spec append_value(term(), term(), proplists:proplist()) -> proplists:proplist().
 append_value(Key, Value, PropList) ->
     case proplists:get_value(Key, PropList, undefined) of
         undefined ->
@@ -69,6 +75,8 @@ append_value(Key, Value, PropList) ->
              proplists:delete(Key, PropList)]
     end.
 
+-spec strip_goal([[depsolver:pkg()] | depsolver:pkg()]) ->
+                        [[depsolver:pkg()] | depsolver:pkg()].
 strip_goal([{'_GOAL_', 'NO_VSN'}, Children]) ->
     Children;
 strip_goal(All = [Val | _])
@@ -77,21 +85,38 @@ strip_goal(All = [Val | _])
 strip_goal(Else) ->
     Else.
 
-format_culprit_error(_ActiveCons, [], Acc) ->
-    Acc;
-format_culprit_error(ActiveCons, [{[], RawConstraints} | Rest], Acc) ->
+-spec extract_culprit_information0(depsolver:constraints(),
+                             [depsolver:fail_info()]) ->
+                                           [term()].
+extract_culprit_information0(ActiveCons, FailInfo)
+  when is_list(FailInfo) ->
+    [extract_culprit_information1(ActiveCons, FI) || FI <- FailInfo].
+
+
+-spec extract_root(depsolver:constraints(), [depsolver:pkg()]) ->
+                          {[depsolver:constraint()], [depsolver:pkg()]}.
+extract_root(ActiveCons, TPath = [PRoot | _]) ->
+    RootName = depsolver:dep_pkg(PRoot),
+    Roots = lists:filter(fun(El) ->
+                                 RootName =:= depsolver:dep_pkg(El)
+                         end, ActiveCons),
+    {Roots, TPath}.
+
+-spec extract_culprit_information1(depsolver:constraints(),
+                                  depsolver:fail_info()) ->
+                                         term().
+extract_culprit_information1(_ActiveCons, {[], RawConstraints}) ->
     %% In this case where there was no realized versions, the GOAL
     %% constraints actually where unsatisfiable
-    Constraints = lists:flatten(lists:map(fun({_, Constraints}) ->
-                                                  Constraints
-                                          end, RawConstraints)),
+    Constraints = lists:flatten([Constraints ||
+                                    {_, Constraints} <- RawConstraints]),
+
     Cons = [Pkg || {Pkg, Src} <- Constraints,
                    Src =:= {'_GOAL_', 'NO_VSN'}],
-    format_culprit_error(ActiveCons, Rest, [{[{Cons, Cons}], []} | Acc]);
-format_culprit_error(ActiveCons, [{Path, RawConstraints} | Rest], Acc) ->
-    Constraints = lists:flatten(lists:map(fun({_, Constraints}) ->
-                                                  Constraints
-                                          end, RawConstraints)),
+    {[{Cons, Cons}], []};
+extract_culprit_information1(ActiveCons, {Path, RawConstraints}) ->
+    Constraints = lists:flatten([Constraints ||
+                                    {_, Constraints} <- RawConstraints]),
     FailCons =
         lists:foldl(fun(El = {FailedPkg, FailedVsn}, Acc1) ->
                             case get_constraints(FailedPkg, FailedVsn, Path,
@@ -103,18 +128,12 @@ format_culprit_error(ActiveCons, [{Path, RawConstraints} | Rest], Acc) ->
                             end
                     end, [], lists:reverse(Path)),
     TreedPath = strip_goal(treeize_path({'_GOAL_', 'NO_VSN'}, Constraints, [])),
-    RunListItems = lists:map(fun(TPath = [PRoot | _]) ->
-                                     RootName = depsolver:dep_pkg(PRoot),
-                                     Roots = lists:filter(fun(El) ->
-                                                                  RootName =:= depsolver:dep_pkg(El)
-                                                          end, ActiveCons),
-                                     {Roots, TPath}
-                             end, TreedPath),
-    Resolution = {RunListItems, FailCons},
-    format_culprit_error(ActiveCons, Rest, [Resolution | Acc]);
-format_culprit_error(ActiveCons, BareFailPath, Acc) when is_tuple(BareFailPath) ->
-    format_culprit_error(ActiveCons, [BareFailPath], Acc).
+    RunListItems = [extract_root(ActiveCons, TPath) || TPath <- TreedPath],
+    {RunListItems, FailCons}.
 
+-spec follow_chain(depsolver:pkg_name(), depsolver:vsn(),
+                   {depsolver:constraint(), depsolver:pkg()}) ->
+                           false | {ok, depsolver:constraint()}.
 follow_chain(Pkg, Vsn, {{Pkg, Vsn}, {Pkg, Vsn}}) ->
     %% When the package version is the same as the source we dont want to try to follow it at all
     false;
@@ -123,6 +142,9 @@ follow_chain(Pkg, Vsn, {Con, {Pkg, Vsn}}) ->
 follow_chain(_Pkg, _Vsn, _) ->
     false.
 
+-spec find_chain(depsolver:pkg_name(), depsolver:vsn(),
+                   [{depsolver:constraint(), depsolver:pkg()}]) ->
+                          depsolver:constraints().
 find_chain(Pkg, Vsn, Constraints) ->
     lists:foldl(fun(NCon, Acc) ->
                         case follow_chain(Pkg, Vsn, NCon) of
@@ -133,6 +155,9 @@ find_chain(Pkg, Vsn, Constraints) ->
                         end
                 end, [], Constraints).
 
+-spec get_constraints(depsolver:pkg_name(), depsolver:vsn(), [depsolver:pkg()],
+                      [{depsolver:constraint(), depsolver:pkg()}]) ->
+                             depsolver:constraints().
 get_constraints(FailedPkg, FailedVsn, Path, Constraints) ->
     Chain = find_chain(FailedPkg, FailedVsn, Constraints),
     lists:filter(fun(Con) ->
@@ -143,6 +168,9 @@ get_constraints(FailedPkg, FailedVsn, Path, Constraints) ->
                           not lists:keymember(PkgName, 1, Path))
                  end, Chain).
 
+-spec pkg_vsn(depsolver:constraint(),  [{depsolver:constraint(),
+                                     depsolver:pkg()}]) ->
+                      [depsolver:pkg()].
 pkg_vsn(PkgCon, Constraints) ->
     PkgName = depsolver:dep_pkg(PkgCon),
     [DepPkg || Con = {DepPkg, _} <- Constraints,
@@ -153,12 +181,20 @@ pkg_vsn(PkgCon, Constraints) ->
                        false
                end].
 
+-spec depends(depsolver:pkg(), [{depsolver:constraint(),
+                                     depsolver:pkg()}],
+                   [depsolver:pkg()]) ->
+                           [depsolver:pkg()].
 depends(SrcPkg, Constraints, Seen) ->
     lists:flatten([pkg_vsn(Pkg, Constraints) || {Pkg, Source} <- Constraints,
                                                 Source =:= SrcPkg andalso
                                                     Pkg =/= SrcPkg andalso
                                                     not lists:member(Pkg, Seen)]).
 
+-spec treeize_path(depsolver:pkg(), [{depsolver:constraint(),
+                                     depsolver:pkg()}],
+                   [depsolver:pkg()]) ->
+                           [depsolver:pkg() | [depsolver:pkg()]].
 treeize_path(Pkg, Constraints, Seen0) ->
     Seen1 = [Pkg | Seen0],
     case depends(Pkg, Constraints, Seen1) of
@@ -170,6 +206,7 @@ treeize_path(Pkg, Constraints, Seen0) ->
 
     end.
 
+-spec format_version(depsolver:vsn()) -> iolist().
 format_version({Maj}) ->
     erlang:integer_to_list(Maj);
 format_version({Maj, Min}) ->
@@ -179,7 +216,6 @@ format_version({Maj, Min, Patch}) ->
     [erlang:integer_to_list(Maj), ".",
      erlang:integer_to_list(Min), ".",
      erlang:integer_to_list(Patch)].
-
 
 -spec format_constraint(depsolver:constraint()) -> list().
 format_constraint(Pkg) when is_atom(Pkg) ->
@@ -227,6 +263,7 @@ format_constraint({Pkg, Vsn1, Vsn2, between}) ->
      format_version(Vsn1), " and ",
      format_version(Vsn2), ")"].
 
+-spec add_s(list()) -> iolist().
 add_s(Roots) ->
      case erlang:length(Roots) of
          Len when Len > 1 ->
@@ -235,6 +272,7 @@ add_s(Roots) ->
              ""
      end.
 
+-spec format_roots([depsolver:constraint()]) -> iolist().
 format_roots(Roots) ->
     lists:foldl(fun(Root, Acc0) ->
                         lists:foldl(
@@ -245,6 +283,7 @@ format_roots(Roots) ->
                           end, Acc0, Root)
                 end, "", Roots).
 
+-spec format_culprits([{[depsolver:constraint()], [depsolver:constrait()]}]) -> iolist().
 format_culprits(FailingDeps) ->
     Deps = sets:to_list(sets:from_list(lists:flatten([[depsolver:dep_pkg(Con) || Con <- Cons]
                                                       || {_, Cons} <- FailingDeps]))),
@@ -255,7 +294,7 @@ format_culprits(FailingDeps) ->
                         ", " | Acc1]
                 end, "", Deps).
 
-
+-spec format_path(string(), [depsolver:pkg()]) -> iolist().
 format_path(CurrentIdent, Path) ->
     [CurrentIdent, "    ",
      lists:foldl(fun(Con, "") ->
@@ -265,6 +304,8 @@ format_path(CurrentIdent, Path) ->
                  end, "", Path),
      "\n"].
 
+-spec format_dependency_paths(string(), [[depsolver:pkg()] | depsolver:pkg()],
+                                   [{depsolver:pkg(), [depsolver:constraint()]}], [depsolver:pkg()]) -> iolist().
 format_dependency_paths(CurrentIndent, [SubPath | Rest], FailingDeps, Acc)
   when erlang:is_list(SubPath) ->
     [format_dependency_paths(CurrentIndent, lists:sort(SubPath), FailingDeps, Acc),
@@ -291,6 +332,8 @@ format_dependency_paths(CurrentIndent, [Con | Rest], FailingDeps, Acc) ->
 format_dependency_paths(_CurrentIndent, [], _FailingDeps, _Acc) ->
     [].
 
+-spec format_error_path(string(), {[{[depsolver:constraint()], [depsolver:pkg()]}],
+                                   [depsolver:constraint()]}) -> iolist().
 format_error_path(CurrentIndent, {RawPaths, FailingDeps}) ->
     Roots = [RootSet || {RootSet, _} <- RawPaths],
     Paths = [Path || {_, Path} <- RawPaths],

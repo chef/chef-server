@@ -118,13 +118,15 @@ fail_test() ->
                                               {"0.2", []},
                                               {"0.3", []}]}]),
 
-
+    Ret = depsolver:solve(Dom0, [{app1, {0,1}}]),
+    %% We do this to make sure all errors can be formated.
+    _ = depsolver:format_error(Ret),
     ?assertMatch({error,
                   [{[{[{app1,{0,1}}],
                       [{app1,{0,1}},[[{app2,{0,2}}]]]}],
                     [{{app2,{0,2}},[{app3,{0,1}}]},
                      {{app1,{0,1}},[{app3,{0,2},gte}]}]}]},
-                 depsolver:solve(Dom0, [{app1, {0,1}}])).
+                 Ret).
 
 conflicting_passing_test() ->
     Pkg1Deps = [{app2, "0.1.0", '>='},
@@ -195,7 +197,8 @@ conflicting_failing_test() ->
                                       {app4, [{"5.0.0", [{app5, "2.0.0"}]}]},
                                       {app5, [{"2.0.0", []},
                                               {"6.0.0", []}]}]),
-
+    Ret = depsolver:solve(Dom0, [app1, app3]),
+    _ = depsolver:format_error(Ret),
     ?assertMatch({error,
                    [{[{[app1],
                        [{app1,{3,0}},
@@ -205,7 +208,7 @@ conflicting_failing_test() ->
                        [{app3,{0,1,0}},[[{app5,{6,0,0}}]]]}],
                      [{{app4,{5,0,0}},[{app5,{2,0,0}}]},
                       {{app1,{3,0}},[{app5,{2,0,0},'='}]}]}]},
-                 depsolver:solve(Dom0, [app1, app3])).
+                 Ret).
 
 
 pessimistic_major_minor_patch_test() ->
@@ -328,9 +331,12 @@ filter_versions_test() ->
                        {app5,"2.0.0"},
                        {app5,"6.0.0"}]},
                  depsolver:filter_packages(Packages, Cons)),
-    ?assertMatch({error, {invalid_constraints, [{<<"foo">>,{1,0,0},'~~~~'}]}},
-                 depsolver:filter_packages(Packages,
-                                           [{"foo", "1.0.0", '~~~~'} | Cons])).
+
+    Ret = depsolver:filter_packages(Packages,
+                                    [{"foo", "1.0.0", '~~~~'} | Cons]),
+    _ = depsolver:format_error(Ret),
+    ?assertMatch({error, {invalid_constraints, [{<<"foo">>,{1,0,0},'~~~~'}]}}, Ret).
+
 
 -spec missing_test() -> ok.
 missing_test() ->
@@ -346,12 +352,15 @@ missing_test() ->
                                                           {app3, [{"0.1", []},
                                                                   {"0.2", []},
                                                                   {"0.3", []}]}]),
+    Ret1 = depsolver:solve(Dom0, [{app4, "0.1"}, {app3, "0.1"}]),
+    _ = depsolver:format_error(Ret1),
+    ?assertMatch({error,{unreachable_package,app4}}, Ret1),
 
+    Ret2 = depsolver:solve(Dom0, [{app1, "0.1"}]),
+    _ = depsolver:format_error(Ret2),
     ?assertMatch({error,{unreachable_package,app4}},
-                 depsolver:solve(Dom0, [{app4, "0.1"}, {app3, "0.1"}])),
+                 Ret2).
 
-    ?assertMatch({error,{unreachable_package,app4}},
-                 depsolver:solve(Dom0, [{app1, "0.1"}])).
 
 binary_test() ->
 
@@ -361,6 +370,7 @@ binary_test() ->
                                                World),
                         [<<"foo">>]),
 
+    _ = depsolver:format_error(Ret),
     ?assertMatch({error,
                   [{[{[<<"foo">>],[{<<"foo">>,{1,2,3}}]}],
                     [{{<<"foo">>,{1,2,3}},
@@ -380,7 +390,7 @@ doesnt_exist_test() ->
     Constraints = [{<<"foo">>,[{<<"1.2.3">>, [{<<"bar">>, <<"2.0.0">>, gt}]}]}],
     World = depsolver:add_packages(depsolver:new_graph(), Constraints),
     Ret = depsolver:solve(World, [<<"foo">>]),
-
+    _ = depsolver:format_error(Ret),
     ?assertMatch({error,{unreachable_package,<<"bar">>}}, Ret).
 
 %%
@@ -399,7 +409,7 @@ not_new_enough_test() ->
                    {<<"bar">>, [{<<"2.0.0">>, []}]}],
     World = depsolver:add_packages(depsolver:new_graph(), Constraints),
     Ret = depsolver:solve(World, [<<"foo">>]),
-
+    _ = depsolver:format_error(Ret),
     ?assertMatch({error,
                   [{[{[<<"foo">>],[{<<"foo">>,{1,2,3}}]}],
                     [{{<<"foo">>,{1,2,3}},
@@ -420,7 +430,7 @@ impossible_dependency_test() ->
                                    [{<<"foo">>, [{<<"1.2.3">>,[{ <<"bar">>, <<"2.0.0">>, gt}]}]},
                                     {<<"bar">>, [{<<"2.0.0">>, [{ <<"foo">>, <<"3.0.0">>, gt}]}]}]),
     Ret = depsolver:solve(World, [<<"foo">>]),
-
+    _ = depsolver:format_error(Ret),
     ?assertMatch({error,
                   [{[{[<<"foo">>],[{<<"foo">>,{1,2,3}}]}],
                     [{{<<"foo">>,{1,2,3}},

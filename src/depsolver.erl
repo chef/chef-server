@@ -81,7 +81,9 @@
               constraint/0,
               dependency_set/0]).
 
--export_type([dep_graph/0, constraints/0]).
+-export_type([dep_graph/0, constraints/0,
+              ordered_constraints/0, fail_info/0,
+              fail_detail/0]).
 %%============================================================================
 %% type
 %%============================================================================
@@ -90,7 +92,8 @@
 -type pkg() :: {pkg_name(), vsn()}.
 -type pkg_name() :: binary() | atom().
 -type raw_vsn() :: string() | binary() | vsn().
--type vsn() :: {non_neg_integer()}
+-type vsn() :: 'NO_VSN'
+             | {non_neg_integer()}
              | {non_neg_integer(), non_neg_integer()}
              | {non_neg_integer(), non_neg_integer(), non_neg_integer()}.
 -type raw_constraint() :: pkg_name()
@@ -129,7 +132,10 @@
 
 %% Internal Types
 -type constraints() :: [constraint()].
--type version_checker() :: fun((vsn()) -> fail | vsn()).
+-type ordered_constraints() :: [{pkg_name(), constraints()}].
+-type fail_info() :: {[pkg()], ordered_constraints()}.
+-type fail_detail() :: {fail, [fail_info()]}.
+-type version_checker() :: fun((vsn()) -> fail_detail() | vsn()).
 
 %%============================================================================
 %% API
@@ -378,7 +384,7 @@ new_constraints() ->
 %% from the exported solve/2 function is the fact that this does not do the
 %% culprit search.
 -spec primitive_solve(dep_graph(),[constraint()], term()) ->
-                             [pkg()] | 'fail'.
+                             [pkg()] | fail_detail().
 primitive_solve(State, PackageList, PathInd)
   when erlang:length(PackageList) > 0 ->
     Constraints = lists:foldl(fun(Info, Acc) ->
@@ -432,7 +438,7 @@ is_valid_constraint({_Pkg, _LVsn1, _LVsn2, between}) ->
 is_valid_constraint(_InvalidConstraint) ->
     false.
 
--spec add_constraint(pkg_name(), vsn(), [constraint()],constraint()) -> [{pkg_name(), constraints()}].
+-spec add_constraint(pkg_name(), vsn(), [constraint()],constraint()) -> ordered_constraints().
 add_constraint(SrcPkg, SrcVsn, PkgsConstraints, PkgConstraint) ->
     case is_valid_constraint(PkgConstraint) of
         true -> ok;
@@ -571,8 +577,8 @@ filter_package_constraints([PkgCon | PkgConstraints]) ->
 
 %% @doc all_pkgs is one of the set of mutually recursive functions (all_pkgs and
 %% pkgs) that serve to walk the solution space of dependency.
--spec all_pkgs(dep_graph(),[pkg_name()],[pkg_name()],[{pkg_name(), constraints()}], term()) ->
-                      fail | [pkg()].
+-spec all_pkgs(dep_graph(),[pkg()],[pkg_name()],[{pkg_name(), constraints()}], term()) ->
+                      fail_detail() | [pkg()].
 all_pkgs(_State, Visited, [], Constraints, _PathInd) ->
     PkgVsns =
         [filter_package_constraints(PkgConstraints)
@@ -601,8 +607,8 @@ all_pkgs(State, Visited, [PkgName | PkgNames], Constraints, PathInd)
 
 %% @doc this is the key graph walker. Set of constraints it walks forward into
 %% the solution space searching for a path that solves all dependencies.
--spec pkgs(dep_graph(),[pkg_name()], pkg_name(), [{pkg_name(), constraints()}],
-           [pkg_name()], term()) -> fail | [pkg()].
+-spec pkgs(dep_graph(),[pkg()], pkg_name(), [{pkg_name(), constraints()}],
+           [pkg_name()], term()) -> fail_detail() | [pkg()].
 pkgs(DepGraph, Visited, Pkg, Constraints, OtherPkgs, PathInd) ->
     F = fun (Vsn) ->
                 Deps = get_dep_constraints(DepGraph, Pkg, Vsn),
@@ -633,7 +639,7 @@ get_dep_constraints(DepGraph, PkgName, Vsn) ->
 lists_some(F, Res, PathInd) ->
     lists_some(F, Res, [], PathInd).
 
--spec lists_some(version_checker(), [vsn()], term(), term()) -> vsn() | fail.
+-spec lists_some(version_checker(), [vsn()], term(), term()) -> vsn() | fail_detail().
 %% @doc lists_some is the root of the system the actual backtracing search that
 %% makes the dep solver posible. It a takes a function that checks whether the
 %% 'problem' has been solved and an fail indicator. As long as the evaluator
