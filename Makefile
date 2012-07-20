@@ -1,7 +1,7 @@
 ERL = $(shell which erl)
 PLTFILE = .depsolver.plt
 
-ERLFLAGS= -pa ebin -pa $(CURDIR)/*/ebin
+ERLFLAGS= -pa $(CURDIR)/.eunit -pa $(CURDIR)/ebin -pa $(CURDIR)/*/ebin
 
 REBAR=$(shell which rebar)
 
