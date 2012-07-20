@@ -32,7 +32,7 @@
 -spec search(depsolver:dep_graph(), [depsolver:constraint()], [depsolver:constraint()])
             -> detail() | term().
 search(State, ActiveCons, []) ->
-    case depsolver:primitive_solve(State, ActiveCons) of
+    case depsolver:primitive_solve(State, ActiveCons, keep_paths) of
         {fail, FailPaths} ->
             format_culprit_error(ActiveCons, lists:flatten(FailPaths), []);
         _Success ->
@@ -42,7 +42,7 @@ search(State, ActiveCons, []) ->
             inconsistant_graph_state
     end;
 search(State, ActiveCons, [NewCon | Constraints]) ->
-    case depsolver:primitive_solve(State, ActiveCons) of
+    case depsolver:primitive_solve(State, ActiveCons, keep_paths) of
         {fail, FailPaths} ->
             format_culprit_error(ActiveCons, lists:flatten(FailPaths), []);
         _Success ->

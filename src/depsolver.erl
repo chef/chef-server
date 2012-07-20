@@ -72,7 +72,7 @@
 %% application. You have been warned.
 -export([dep_pkg/1,
          filter_package/2,
-         primitive_solve/2]).
+         primitive_solve/3]).
 
 -export_type([t/0,
               pkg/0,
@@ -228,7 +228,7 @@ solve({?MODULE, DepGraph0}, RawGoals)
         Error = {error, _} ->
             Error;
         DepGraph1 ->
-            case primitive_solve(DepGraph1, Goals) of
+            case primitive_solve(DepGraph1, Goals, no_path) of
                 {fail, _} ->
                     [FirstCons | Rest] = Goals,
                     {error, depsolver_culprit:search(DepGraph1, [FirstCons], Rest)};
@@ -377,16 +377,16 @@ new_constraints() ->
 %% fails. This is basically the root solver of the system, the main difference
 %% from the exported solve/2 function is the fact that this does not do the
 %% culprit search.
--spec primitive_solve(dep_graph(),[constraint()]) ->
+-spec primitive_solve(dep_graph(),[constraint()], term()) ->
                              [pkg()] | 'fail'.
-primitive_solve(State, PackageList)
+primitive_solve(State, PackageList, PathInd)
   when erlang:length(PackageList) > 0 ->
     Constraints = lists:foldl(fun(Info, Acc) ->
                                       add_constraint('_GOAL_', 'NO_VSN', Acc, Info)
                               end, new_constraints(), PackageList),
 
     Pkgs = lists:map(fun dep_pkg/1, PackageList),
-    all_pkgs(State, [], Pkgs, Constraints).
+    all_pkgs(State, [], Pkgs, Constraints, PathInd).
 
 %% @doc
 %% given a Pkg | {Pkg, Vsn} | {Pkg, Vsn, Constraint} return Pkg
@@ -571,9 +571,9 @@ filter_package_constraints([PkgCon | PkgConstraints]) ->
 
 %% @doc all_pkgs is one of the set of mutually recursive functions (all_pkgs and
 %% pkgs) that serve to walk the solution space of dependency.
--spec all_pkgs(dep_graph(),[pkg_name()],[pkg_name()],[{pkg_name(), constraints()}]) ->
+-spec all_pkgs(dep_graph(),[pkg_name()],[pkg_name()],[{pkg_name(), constraints()}], term()) ->
                       fail | [pkg()].
-all_pkgs(_State, Visited, [], Constraints) ->
+all_pkgs(_State, Visited, [], Constraints, _PathInd) ->
     PkgVsns =
         [filter_package_constraints(PkgConstraints)
          || {_, PkgConstraints} <- Constraints],
@@ -590,26 +590,26 @@ all_pkgs(_State, Visited, [], Constraints) ->
         false ->
             {fail, [{Visited, Constraints}]}
     end;
-all_pkgs(State, Visited, [PkgName | PkgNames], Constraints)
+all_pkgs(State, Visited, [PkgName | PkgNames], Constraints, PathInd)
   when is_atom(PkgName); is_binary(PkgName) ->
     case lists:keymember(PkgName, 1, Visited) of
         true ->
-            all_pkgs(State, Visited, PkgNames, Constraints);
+            all_pkgs(State, Visited, PkgNames, Constraints, PathInd);
         false ->
-            pkgs(State, Visited, PkgName, Constraints, PkgNames)
+            pkgs(State, Visited, PkgName, Constraints, PkgNames, PathInd)
     end.
 
 %% @doc this is the key graph walker. Set of constraints it walks forward into
 %% the solution space searching for a path that solves all dependencies.
 -spec pkgs(dep_graph(),[pkg_name()], pkg_name(), [{pkg_name(), constraints()}],
-           [pkg_name()]) -> fail | [pkg()].
-pkgs(DepGraph, Visited, Pkg, Constraints, OtherPkgs) ->
+           [pkg_name()], term()) -> fail | [pkg()].
+pkgs(DepGraph, Visited, Pkg, Constraints, OtherPkgs, PathInd) ->
     F = fun (Vsn) ->
                 Deps = get_dep_constraints(DepGraph, Pkg, Vsn),
                 UConstraints = extend_constraints(Pkg, Vsn, Constraints, Deps),
                 DepPkgs =[dep_pkg(Dep) || Dep <- Deps],
                 NewVisited = [{Pkg, Vsn} | Visited],
-                Res = all_pkgs(DepGraph, NewVisited, DepPkgs ++ OtherPkgs, UConstraints),
+                Res = all_pkgs(DepGraph, NewVisited, DepPkgs ++ OtherPkgs, UConstraints, PathInd),
                 Res
 
         end,
@@ -617,7 +617,7 @@ pkgs(DepGraph, Visited, Pkg, Constraints, OtherPkgs) ->
         [] ->
             {fail, [{Visited, Constraints}]};
         Res ->
-            lists_some(F, Res)
+            lists_some(F, Res, PathInd)
     end.
 
 
@@ -630,21 +630,26 @@ get_dep_constraints(DepGraph, PkgName, Vsn) ->
     Constraints.
 
 
-lists_some(F, Res) ->
-    lists_some(F, Res, []).
+lists_some(F, Res, PathInd) ->
+    lists_some(F, Res, [], PathInd).
 
--spec lists_some(version_checker(), [vsn()], term()) -> vsn() | fail.
+-spec lists_some(version_checker(), [vsn()], term(), term()) -> vsn() | fail.
 %% @doc lists_some is the root of the system the actual backtracing search that
 %% makes the dep solver posible. It a takes a function that checks whether the
 %% 'problem' has been solved and an fail indicator. As long as the evaluator
 %% returns the fail indicator processing continues. If the evaluator returns
 %% anything but the fail indicator that indicates success.
-lists_some(_, [], FailPaths) ->
+lists_some(_, [], FailPaths, _PathInd) ->
     {fail, FailPaths};
-lists_some(F, [H | T], FailPaths) ->
+lists_some(F, [H | T], FailPaths, PathInd) ->
     case F(H) of
         {fail, FailPath} ->
-            lists_some(F, T, [FailPath | FailPaths]);
+            case PathInd of
+                keep_paths ->
+                    lists_some(F, T, [FailPath | FailPaths], PathInd);
+                _ ->
+                    lists_some(F, T, [], PathInd)
+            end;
         Res ->
             Res
     end.
