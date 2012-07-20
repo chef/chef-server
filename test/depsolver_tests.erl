@@ -106,8 +106,9 @@ third_test() ->
                  depsolver:solve(Dom0, [app1])).
 
 fail_test() ->
-    Dom0 = depsolver:add_packages(depsolver:new_graph(), [{app1, [{"0.1", [{app2, "0.2"},
-                                                       {app3, "0.2", gte}]},
+    Dom0 = depsolver:add_packages(depsolver:new_graph(),
+                                  [{app1, [{"0.1", [{app2, "0.2"},
+                                                    {app3, "0.2", gte}]},
                                               {"0.2", []},
                                               {"0.3", []}]},
                                       {app2, [{"0.1", []},
@@ -118,8 +119,11 @@ fail_test() ->
                                               {"0.3", []}]}]),
 
 
-    ?assertMatch({error, {unable_to_solve, {app1,{0,1}},
-                          {[], [], [{app1, {0,1}}]}}},
+    ?assertMatch({error,
+                  [{[{[{app1,{0,1}}],
+                      [{app1,{0,1}},[[{app2,{0,2}}]]]}],
+                    [{{app2,{0,2}},[{app3,{0,1}}]},
+                     {{app1,{0,1}},[{app3,{0,2},gte}]}]}]},
                  depsolver:solve(Dom0, [{app1, {0,1}}])).
 
 conflicting_passing_test() ->
@@ -192,7 +196,15 @@ conflicting_failing_test() ->
                                       {app5, [{"2.0.0", []},
                                               {"6.0.0", []}]}]),
 
-    ?assertMatch({error, {unable_to_solve,app3,{[],[],[app1,app3]}}},
+    ?assertMatch({error,
+                   [{[{[app1],
+                       [{app1,{3,0}},
+                        [[{app4,{5,0,0}}],
+                         [{app2,{0,0,1}},[[{app4,{5,0,0}}]]]]]},
+                      {[app3],
+                       [{app3,{0,1,0}},[[{app5,{6,0,0}}]]]}],
+                     [{{app4,{5,0,0}},[{app5,{2,0,0}}]},
+                      {{app1,{3,0}},[{app5,{2,0,0},'='}]}]}]},
                  depsolver:solve(Dom0, [app1, app3])).
 
 
@@ -326,28 +338,90 @@ missing_test() ->
     Dom0 = depsolver:add_packages(depsolver:new_graph(), [{app1, [{"0.1", [{app2, "0.2"},
                                                              {app3, "0.2", '>='},
                                                              {app4, "0.2", '='}]},
-                                                    {"0.2", [{app4, "0.2"}]},
-                                                    {"0.3", [{app4, "0.2", '='}]}]},
-                                            {app2, [{"0.1", []},
-                                                    {"0.2",[{app3, "0.3"}]},
-                                                    {"0.3", []}]},
-                                            {app3, [{"0.1", []},
-                                                    {"0.2", []},
-                                                    {"0.3", []}]}]),
+                                                                  {"0.2", [{app4, "0.2"}]},
+                                                                  {"0.3", [{app4, "0.2", '='}]}]},
+                                                          {app2, [{"0.1", []},
+                                                                  {"0.2",[{app3, "0.3"}]},
+                                                                  {"0.3", []}]},
+                                                          {app3, [{"0.1", []},
+                                                                  {"0.2", []},
+                                                                  {"0.3", []}]}]),
 
-
-    ?assertMatch({error, {unreachable_package,app4}},
+    ?assertMatch({error,{unreachable_package,app4}},
                  depsolver:solve(Dom0, [{app4, "0.1"}, {app3, "0.1"}])),
 
-    ?assertMatch({error, {unreachable_package,app4}},
+    ?assertMatch({error,{unreachable_package,app4}},
                  depsolver:solve(Dom0, [{app1, "0.1"}])).
 
 binary_test() ->
 
     World = [{<<"foo">>, [{<<"1.2.3">>, [{<<"bar">>, <<"2.0.0">>, gt}]}]},
              {<<"bar">>, [{<<"2.0.0">>, [{<<"foo">>, <<"3.0.0">>, gt}]}]}],
-    X = depsolver:solve(depsolver:add_packages(depsolver:new_graph(),
+    Ret = depsolver:solve(depsolver:add_packages(depsolver:new_graph(),
                                                World),
                         [<<"foo">>]),
 
-    ?assertMatch({error,{unable_to_solve,<<"foo">>,{[],[],[<<"foo">>]}}}, X).
+    ?assertMatch({error,
+                  [{[{[<<"foo">>],[{<<"foo">>,{1,2,3}}]}],
+                    [{{<<"foo">>,{1,2,3}},
+                      [{<<"bar">>,{2,0,0},gt}]}]}]}, Ret).
+
+%%
+%% We don't have bar cookbook
+%%
+%% Ruby gives
+%% "message":"Unable to satisfy constraints on cookbook bar, which does not exist, due to run list item (foo >= 0.0.0).
+%%            Run list items that may result in a constraint on bar: [(foo = 1.2.3) -> (bar > 2.0.0)]",
+%% "unsatisfiable_run_list_item":"(foo >= 0.0.0)",
+%% "non_existent_cookbooks":["bar"],"
+%% "most_constrained_cookbooks":[]}"
+%%
+doesnt_exist_test() ->
+    Constraints = [{<<"foo">>,[{<<"1.2.3">>, [{<<"bar">>, <<"2.0.0">>, gt}]}]}],
+    World = depsolver:add_packages(depsolver:new_graph(), Constraints),
+    Ret = depsolver:solve(World, [<<"foo">>]),
+
+    ?assertMatch({error,{unreachable_package,<<"bar">>}}, Ret).
+
+%%
+%% We have v 2.0.0 of bar but want > 2.0.0
+%%
+%% Ruby gives
+%% "message":"Unable to satisfy constraints on cookbook bar due to run list item (foo >= 0.0.0).
+%%            Run list items that may result in a constraint on bar: [(foo = 1.2.3) -> (bar > 2.0.0)]",
+%% "unsatisfiable_run_list_item":"(foo >= 0.0.0)",
+%% "non_existent_cookbooks":[],
+%% "most_constrained_cookbooks":["bar 2.0.0 -> []"]
+%%
+not_new_enough_test() ->
+
+    Constraints = [{<<"foo">>, [{<<"1.2.3">>, [{<<"bar">>, <<"2.0.0">>, gt}]}]},
+                   {<<"bar">>, [{<<"2.0.0">>, []}]}],
+    World = depsolver:add_packages(depsolver:new_graph(), Constraints),
+    Ret = depsolver:solve(World, [<<"foo">>]),
+
+    ?assertMatch({error,
+                  [{[{[<<"foo">>],[{<<"foo">>,{1,2,3}}]}],
+                    [{{<<"foo">>,{1,2,3}},
+                      [{<<"bar">>,{2,0,0},gt}]}]}]}, Ret).
+
+%%
+%% circular deps are bad
+%%
+%% Ruby gives
+%% "message":"Unable to satisfy constraints on cookbook bar due to run list item (foo >= 0.0.0).
+%%            Run list items that may result in a constraint on bar: [(foo = 1.2.3) -> (bar > 2.0.0)]",
+%% "unsatisfiable_run_list_item":"(foo >= 0.0.0)",
+%% "non_existent_cookbooks":[],
+%% "most_constrained_cookbooks:["bar = 2.0.0 -> [(foo > 3.0.0)]"]
+%%
+impossible_dependency_test() ->
+    World = depsolver:add_packages(depsolver:new_graph(),
+                                   [{<<"foo">>, [{<<"1.2.3">>,[{ <<"bar">>, <<"2.0.0">>, gt}]}]},
+                                    {<<"bar">>, [{<<"2.0.0">>, [{ <<"foo">>, <<"3.0.0">>, gt}]}]}]),
+    Ret = depsolver:solve(World, [<<"foo">>]),
+
+    ?assertMatch({error,
+                  [{[{[<<"foo">>],[{<<"foo">>,{1,2,3}}]}],
+                    [{{<<"foo">>,{1,2,3}},
+                      [{<<"bar">>,{2,0,0},gt}]}]}]}, Ret).
