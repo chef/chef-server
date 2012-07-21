@@ -1,0 +1,9 @@
+{application, chef_authz,
+ [
+  {description, "Opscode authz client"},
+  {vsn, "1.0"},
+  {registered, []},
+  {applications, [kernel,
+                  stdlib,
+		  sasl]}
+ ]}.
