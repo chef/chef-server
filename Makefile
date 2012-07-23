@@ -22,6 +22,9 @@ all: compile eunit dialyzer
 clean:
 	@$(REBAR) skip_deps=true clean
 	@rm -rf ebin_dialyzer
+#	rebar does not clean up common test logs
+	@rm -rf $(CURDIR)/lib/bookshelf_store/logs
+	@rm -rf $(CURDIR)/lib/bookshelf_wi/logs
 
 clean_plt:
 	rm -rf $(PLT_DIR)
@@ -38,6 +41,16 @@ update: compile
 compile: $(DEPS)
 	@$(REBAR) compile
 
+$(PLT):
+	mkdir -p $(PLT_DIR)
+	- dialyzer --build_plt --output_plt $(PLT) \
+		$(ERLPATH) \
+		--apps erts kernel stdlib eunit compiler crypto \
+		webmachine edown inets erlsom gen_leader gproc iso8601 \
+		xmerl mini_s3 mochiweb
+	@if test ! -f $(PLT); then exit 2; fi
+
+
 dialyzer: $(PLT)
 	@$(REBAR) compile
 	dialyzer --no_check_plt -Wno_undefined_callbacks --src --plt $(PLT) \
@@ -51,9 +64,12 @@ $(DEPS):
 	@$(REBAR) get-deps
 
 eunit: compile
-	@$(REBAR) skip_deps=true eunit
+	ERL_FLAGS="-pa $(CURDIR)/lib/bookshelf_store/ebin" $(REBAR) skip_deps=true eunit
 
-test: eunit
+ct : eunit
+	 ERL_FLAGS="-pa $(CURDIR)/lib/bookshelf_store/ebin" $(REBAR) skip_deps=true ct
+
+test: ct eunit
 
 rel/bookshelf:
 	$(REBAR) generate
@@ -71,35 +87,3 @@ devrel: rel
 
 relclean:
 	@rm -rf rel/bookshelf
-
-# test : eunit ct
-
-# eunit: compile
-# 	# fixing more rebar idiocy
-# 	ERL_FLAGS="-pa $(CURDIR)/lib/bookshelf_store/ebin" $(REBAR) skip_deps=true eunit
-
-# ct : eunit
-# 	ERL_FLAGS="-pa $(CURDIR)/lib/bookshelf_store/ebin" $(REBAR) skip_deps=true ct
-
-# doc:
-# 	$(REBAR) doc
-
-# $(PLT):
-# 	mkdir -p $(PLT_DIR)
-# 	- dialyzer --build_plt --output_plt $(PLT) \
-# 		$(ERLPATH) \
-# 		--apps erts kernel stdlib eunit compiler crypto \
-# 		webmachine edown inets erlsom gen_leader gproc iso8601 \
-# 		xmerl mini_s3 mochiweb
-# 	@if test ! -f $(PLT); then exit 2; fi
-
-# typer: compile $(PLT)
-# 	typer --plt $(PLT) -r $(LIBDIR)/bookshelf_store/src \
-# 		-r $(LIBDIR)/bookshelf_wi/src
-
-# shell: compile
-# 	erl -env ERL_LIBS $(CURDIR)/deps -pa $(CURDIR)/lib/bookshelf_store/ebin\
-# 	 -pa $(CURDIR)/lib/bookshelf_wi/ebin -boot start_sasl -s bksw_app manual_start
-
-# start :
-# 	@rel/bookshelf/bin/bookshelf start
