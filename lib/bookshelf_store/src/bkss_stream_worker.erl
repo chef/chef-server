@@ -43,6 +43,7 @@ start_link(Work) ->
 
 -spec init([work()]) -> {ok, state(), non_neg_integer()}.
 init([{Type, From, BucketName, Path, Store0, Size}]) ->
+    erlang:link(From),
     ServerRef = {node(), erlang:make_ref()},
     gproc:reg({n,l,ServerRef}),
     {Store2, Ref1} =

@@ -22,7 +22,10 @@
 
 -spec start_link(work()) -> pid().
 start_link(Work) ->
-    proc_lib:spawn_link(fun() -> do_work(Work) end).
+    proc_lib:spawn_link(fun() ->
+                                From = element(2, Work),
+                                erlang:link(From),
+                                do_work(Work) end).
 
 do_work({obj_list, From, [BucketName, Store]}) ->
     gen_server:reply(From, bkss_store:obj_list(Store, BucketName));
