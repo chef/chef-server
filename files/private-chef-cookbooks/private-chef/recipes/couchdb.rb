@@ -72,7 +72,7 @@ end
 # Add it to cron
 cron_email = node['private_chef']['notification_email']
 cron_cmd = "if `test -d #{couchdb_data_dir}` ; then #{compact_script_command} 2>&1 > #{couchdb_log_dir}/compact-`date \"+%Y%m%d%H%M%S\"`.log ; fi"
-cron_cmd_major_offenders = "if `test -d #{couchdb_data_dir}` ; then #{compact_script_command} --max-dbs=50 2>&1 > #{couchdb_log_dir}/compact-`date \"+%Y%m%d%H%M%S\"`.log ; fi"
+cron_cmd_major_offenders = "if `test -d #{couchdb_data_dir}` ; then #{compact_script_command} --max-dbs=50 2>&1 > #{couchdb_log_dir}/compact-`date \"+\\%Y\\%m\\%d\\%H\\%M\\%S\"`.log ; fi"
 
 template "/etc/cron.d/couchdb_compact" do
   source "compact-cron-entry.erb"
