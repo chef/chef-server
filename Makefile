@@ -8,7 +8,7 @@ ERLPATH= -pa $(DEPS)/webmachine/ebin -pa $(DEPS)/covertool/ebin \
 	-pa $(DEPS)/edown/ebin -pa $(DEPS)/erlsom/ebin \
 	-pa $(DEPS)/gen_leader/ebin \
 	-pa $(DEPS)/gproc/ebin -pa $(DEPS)/iso8601/ebin \
-	-pa $(DEPS)/mini_s3/ebin
+	-pa $(DEPS)/mini_s3/ebin -pa $(DEPS)/mochiweb/ebin
 
 ifeq ($(REBAR),)
 	$(error "Rebar not available on this system")
@@ -53,7 +53,7 @@ $(PLT):
 
 dialyzer: $(PLT)
 	@$(REBAR) compile
-	dialyzer --no_check_plt -Wno_undefined_callbacks --src --plt $(PLT) \
+	dialyzer -nn --no_check_plt -Wno_undefined_callbacks --src --plt $(PLT) \
 	$(ERLPATH) \
 	-pa $(LIBDIR)/bookshelf_store/ebin \
 	-pa $(LIBDIR)/bookshelf_wi/ebin \
