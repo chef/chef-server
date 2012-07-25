@@ -10,5 +10,6 @@ gem "mixlib-config", "1.1.2", :git => "git@github.com:opscode/mixlib-config.git"
 
 gem 'opscode-pedant-core', :path => '../opscode-pedant-core'
 gem 'opscode-pedant-opc-core', :path => '../opscode-pedant-opc-core'
+gem 'opscode-pedant-oss-core', :path => '../opscode-pedant-oss-core'
 gem 'opscode-pedant-oss-tests', :path => '../opscode-pedant-oss-tests'
 gem 'opscode-pedant-opc-tests', :path => '../opscode-pedant-opc-tests'
