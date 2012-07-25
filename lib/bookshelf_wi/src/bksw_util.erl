@@ -53,7 +53,5 @@ get_object_and_bucket(Rq0) ->
              <<"">>};
         [Bucket | Path] ->
             {ok, bksw_util:to_binary(Bucket),
-             bksw_util:to_binary(filename:join(Path))};
-        _ ->
-            {error, invalid_path}
+             bksw_util:to_binary(filename:join(Path))}
     end.

@@ -14,7 +14,7 @@
 %%%===================================================================
 %%% Types
 %%%===================================================================
--type work() :: {WorkType::atom(), From::pid(), [WorkDetails::term()]}.
+-type work() :: {WorkType::atom(), From::{pid(), term()}, [WorkDetails::term()]}.
 
 %%%===================================================================
 %%% API
@@ -23,9 +23,12 @@
 -spec start_link(work()) -> pid().
 start_link(Work) ->
     proc_lib:spawn_link(fun() ->
-                                From = element(2, Work),
-                                erlang:link(From),
-                                do_work(Work) end).
+                                {_, From, _} = Work,
+                                {FromPid, _} = From,
+                                erlang:link(FromPid),
+                                do_work(Work),
+                                ok
+                        end).
 
 do_work({obj_list, From, [BucketName, Store]}) ->
     gen_server:reply(From, bkss_store:obj_list(Store, BucketName));
