@@ -4,6 +4,7 @@ require 'bundler/setup' # so we don't need to type 'bundle exec' to run it
 
 require 'rspec/core'
 require 'pedant'
+require 'pedant/opensource/platform'
 require 'pedant/multitenant'
 require 'pedant/organization'
 
