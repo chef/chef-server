@@ -1,13 +1,16 @@
 DEPS = deps/automeck \
        deps/couchbeam \
        deps/ej \
-       deps/ejson
+       deps/ejson \
+       deps/ibrowse \
+       deps/meck \
+       deps/mochiweb \
+       deps/oauth
 
 all: compile eunit dialyzer
 
 clean:
 	@rebar clean
-	@rm -rf ebin_dialyzer
 
 distclean: clean
 	@rm -rf deps
@@ -16,11 +19,7 @@ compile: $(DEPS)
 	@rebar compile
 
 dialyzer:
-	@rm -rf ebin_dialyzer
-	@mkdir -p ebin_dialyzer
-	@cp ebin/* ebin_dialyzer
-        ## added -nn which seems to speed up the analysis
-	@dialyzer -Wrace_conditions -Wunderspecs -nn -r ebin_dialyzer
+	@dialyzer -Wrace_conditions -Wunderspecs -r ebin
 
 $(DEPS):
 	@rebar get-deps
