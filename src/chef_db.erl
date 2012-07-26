@@ -1,0 +1,1305 @@
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
+%% @author Seth Falcon <seth@opscode.com>
+%% @author Daniel Deleo <dan@opscode.com>
+%% @author Mark Anderson <mark@opscode.com>
+%% @author Christopher Maier <cm@opscode.com>
+%% @author Mark Mzyk <mmzyk@opscode.com>
+%% @copyright 2011-2012 Opscode, Inc.
+%% @end
+
+-module(chef_db).
+
+-export([fetch_user/2,
+         user_record_to_authz_id/2,
+         %% fetch_all_users/1,
+         %% fetch_org/2,
+         fetch_org_id/2,
+         client_record_to_authz_id/2,
+
+         fetch_requestor/3,
+
+         fetch_container/3,
+         container_record_to_authz_id/2,
+
+         %% Checksum ops
+         mark_checksums_as_uploaded/3,
+
+         %% node ops
+         fetch_node/3,
+         fetch_nodes/2,
+         fetch_nodes/3,
+         create_node/3,
+         delete_node/2,
+         update_node/3,
+         node_record_to_authz_id/2,
+
+         %% role ops
+         fetch_role/3,
+         fetch_roles/2,
+         create_role/3,
+         delete_role/2,
+         update_role/3,
+         %% role_record_to_authz_id/2,
+
+         %% environment ops
+         fetch_environment/3,
+         fetch_environments/2,
+         create_environment/3,
+         delete_environment/2,
+         update_environment/3,
+
+         %% client ops
+         fetch_client/3,
+         fetch_clients/2,
+         create_client/3,
+         delete_client/2,
+         update_client/3,
+
+         %% data_bag ops
+         fetch_data_bag/3,
+         fetch_data_bags/2,
+         create_data_bag/3,
+         delete_data_bag/2,
+
+         %% data_bag_item ops
+         fetch_data_bag_item/4,
+         fetch_data_bag_items/3,
+         fetch_data_bag_item_ids/3,
+         create_data_bag_item/3,
+         delete_data_bag_item/2,
+         update_data_bag_item/3,
+
+         %% cookbook_version ops
+         cookbook_exists/3,
+
+         fetch_cookbook_version/3,
+         fetch_cookbook_versions/2,
+         fetch_latest_cookbook_version/3,
+         create_cookbook_version/3,
+         update_cookbook_version/3,
+         delete_cookbook_version/2,
+         fetch_latest_cookbook_versions/2,
+         fetch_latest_cookbook_versions/3,
+         fetch_latest_cookbook_recipes/2,
+         fetch_all_cookbook_version_dependencies/2,
+         fetch_environment_filtered_cookbook_versions/5,
+         fetch_environment_filtered_recipes/3,
+
+         %% Sandbox ops
+         make_sandbox/4,
+         fetch_sandbox/3,
+         commit_sandbox/2,
+
+         %% fetch_orgs_for_user/2,
+
+         is_user_in_org/3,
+         connect/0,
+         create_fun/1,
+         bulk_get/4,
+         data_bag_exists/3,
+         data_bag_names/2,
+         environment_exists/3,
+         make_context/1,
+         make_context/2,
+         update_fun/1,
+
+         new_node_record/4,
+         new_role_record/4,
+         new_data_bag_record/4,
+         new_data_bag_item_record/5]).
+
+-include_lib("chef_objects/include/chef_types.hrl").
+-include_lib("stats_hero/include/stats_hero.hrl").
+
+-record(context, {reqid :: binary(),
+                  otto_connection}).
+
+-define(gv(Key, PList), proplists:get_value(Key, PList)).
+
+-type db_context() :: #context{}.
+
+%% All the names of functions to create various Chef items, found in this module
+-type create_fun() :: 'create_data_bag' |
+                      'create_data_bag_item' |
+                      'create_environment' |
+                      'create_client' |
+                      'create_node' |
+                      'create_role' |
+                      'create_sandbox' |
+                      'create_cookbook_version'.
+
+-type update_fun() :: 'update_cookbook_version' |
+                      'update_data_bag_item' |
+                      'update_environment' |
+                      'update_client' |
+                      'update_node' |
+                      'update_role'.
+
+-type delete_fun() :: 'delete_cookbook_version' |
+                      'delete_data_bag' |
+                      'delete_data_bag_item' |
+                      'delete_environment' |
+                      'delete_client' |
+                      'delete_node' |
+                      'delete_role' |
+                      'delete_sandbox'.
+
+-export_type([
+              create_fun/0,
+              db_context/0,
+              %% delete_fun/0 %% currently not needed anywhere else
+              update_fun/0
+             ]).
+
+%% -type chef_object_name() :: 'chef_node' |
+%%                             'chef_role'.
+
+%% -ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+%% -endif.
+
+make_context(ReqId) ->
+    #context{reqid = ReqId, otto_connection = chef_otto:connect()}.
+
+make_context(ReqId, OttoServer) ->
+    #context{reqid = ReqId, otto_connection = OttoServer}.
+
+%%%
+%%% User access
+%%%
+-spec fetch_user(#context{}, binary() | string()) -> #chef_user{} |
+                                                     not_found |
+                                                     {error, term()}.
+fetch_user(#context{reqid = ReqId, otto_connection = _Server} = _Context, UserName) ->
+    case ?SH_TIME(ReqId, chef_sql, fetch_user, (UserName)) of
+        {ok, not_found} ->
+            not_found;
+        {ok, #chef_user{}=User} ->
+            User;
+        {error, Error} ->
+            {error, Error}
+    end.
+
+%%%
+-spec user_record_to_authz_id(any(), any()) -> id().
+user_record_to_authz_id(#context{}, #chef_user{} = UserRecord) ->
+    UserRecord#chef_user.authz_id;
+user_record_to_authz_id(#context{}, not_found) ->
+    %% FIXME: is this what we want here?
+    erlang:error({error, not_found}).
+
+%% fetch_all_users(S) ->
+%%     chef_otto:fetch_all_users(S).
+
+%% fetch_org(S, OrgName) ->
+%%     chef_otto:fetch_org(S, OrgName).
+
+-spec fetch_org_id(#context{}, binary()) -> not_found | binary().
+fetch_org_id(#context{reqid = ReqId,
+                      otto_connection = Server}, OrgName) when is_binary(OrgName) ->
+    case chef_cache:get(org_guid, OrgName) of
+        Error when Error =:= not_found orelse Error =:= no_cache ->
+            case ?SH_TIME(ReqId, chef_otto, fetch_org_id, (Server, OrgName)) of
+                not_found ->
+                    not_found;
+                Guid ->
+                    chef_cache:put(org_guid, OrgName, Guid),
+                    Guid
+            end;
+        {ok, Guid} ->
+            Guid
+    end.
+
+%%% Client access
+%%%
+fetch_couchdb_client(#context{otto_connection = Server} = _Context, OrgId, ClientName) ->
+    chef_otto:fetch_client(Server, OrgId, ClientName).
+
+client_record_to_authz_id(_Context, ClientRecord) ->
+    ClientRecord#chef_client.authz_id.
+
+-spec fetch_requestor(Ctx::#context{},
+                      OrgName::binary(),
+                      ClientName::binary()) -> #chef_requestor{} |
+                                               {'not_found', 'client' | 'org'}.
+%% @doc Given a name and an org, find either a user or a client and return a
+%% #chef_requestor{} record.
+%%
+%% Looks for a user first, then a client.  The fact that users and
+%% clients are in the same name space is a known limitation of the
+%% system.  We examine the user/client record and return the
+%% certificate containing the actor's public key.
+fetch_requestor(Ctx, OrgName, ClientName) ->
+    case darklaunch:is_enabled(<<"couchdb_clients">>) of
+        true ->
+            fetch_couchdb_requestor(Ctx, OrgName, ClientName);
+        false ->
+            fetch_sql_requestor(Ctx, OrgName, ClientName)
+    end.
+
+-spec fetch_couchdb_requestor(Context::#context{},
+                              OrgName::binary(),
+                              ClientName::binary()) -> #chef_requestor{} |
+                                                       {'not_found', 'client' | 'org'}.
+%% @doc Given a name and an org, find either a user or a client in
+%% couchdb and return a #chef_requestor{} record.
+%%
+%% Looks for a user first, then a client.  The fact that users and
+%% clients are in the same name space is a known limitation of the
+%% system.  We examine the user/client record and return the
+%% certificate containing the actor's public key.  Some legacy records
+%% are present in the database that do not have certificates and have
+%% only a public key.  For these cases, we return the key tagged with
+%% 'key' instead of 'cert'.
+fetch_couchdb_requestor(#context{reqid = ReqId, otto_connection = Server}=Context,
+                        OrgName, ClientName) when is_binary(OrgName), is_binary(ClientName) ->
+    case fetch_user(Context, ClientName) of
+        not_found ->
+            OrgId = fetch_org_id(Context, OrgName),
+            case ?SH_TIME(ReqId, chef_otto, fetch_client,
+                          (Server, OrgId, ClientName)) of
+                {not_found, What} -> {not_found, What};
+                #chef_client{}=Client ->
+                    #chef_requestor{type = client,
+                                    authz_id = Client#chef_client.authz_id,
+                                    name = Client#chef_client.name,
+                                    key_data = find_key_data(Client)}
+            end;
+        #chef_user{}=User ->
+            #chef_requestor{type = user,
+                            authz_id = User#chef_user.authz_id,
+                            name = User#chef_user.username,
+                            key_data = find_key_data(User)}
+    end;
+fetch_couchdb_requestor(Context, OrgName, ClientName) ->
+    fetch_couchdb_requestor(Context, as_bin(OrgName), as_bin(ClientName)).
+
+-spec fetch_sql_requestor(Context::#context{},
+                              OrgName::binary(),
+                              ClientName::binary()) -> #chef_requestor{} |
+                                                       {'not_found', 'client'}.
+fetch_sql_requestor(Context, OrgName, ClientName) ->
+    case fetch_user(Context, ClientName) of
+        not_found ->
+            case fetch_client(Context, OrgName, ClientName) of
+                not_found ->
+                    {not_found, client};
+                #chef_client{authz_id = AuthzId,
+                             name = Name} = Client ->
+                    #chef_requestor{type = client,
+                                    authz_id = AuthzId,
+                                    name = Name,
+                                    key_data = find_key_data(Client)}
+            end;
+        #chef_user{authz_id = AuthzId,
+                   username = Name} = User ->
+            #chef_requestor{type = user,
+                            authz_id = AuthzId,
+                            name = Name,
+                            key_data = find_key_data(User)}
+    end.
+
+%
+% Container
+%
+fetch_container(#context{reqid = ReqId, otto_connection = Server}, OrgId, ContainerName) ->
+    ?SH_TIME(ReqId, chef_otto, fetch_container, (Server, OrgId, ContainerName)).
+
+-spec container_record_to_authz_id(any(), any()) -> id().
+container_record_to_authz_id(#context{}, ContainerRecord) ->
+    ContainerRecord#chef_container.authz_id.
+
+-spec create_node(#context{}, #chef_node{}, object_id()) -> ok | {conflict, term()} | term().
+%% @doc Store a new node in the datastore.
+create_node(#context{}=Ctx, Node, ActorId) ->
+    create_object(Ctx, create_node, Node, ActorId).
+
+-spec create_role(#context{}, #chef_role{}, object_id()) -> ok | {conflict, term()} | term().
+%% @doc Store a new role in the datastore.
+create_role(#context{}=Ctx, Role, ActorId) ->
+    create_object(Ctx, create_role, Role, ActorId).
+
+-spec create_environment(#context{}, #chef_environment{}, object_id()) -> ok | {conflict, term()} | term().
+%% @doc Store a new environment in the datastore.
+create_environment(#context{}=Ctx, Environment, ActorId) ->
+    create_object(Ctx, create_environment, Environment, ActorId).
+
+-spec create_client(#context{}, #chef_client{}, object_id()) -> ok | {conflict, term()} | term().
+%% @doc Store a new client in the datastore.
+create_client(#context{}=Ctx, Client, ActorId) ->
+    create_object(Ctx, create_client, Client, ActorId).
+
+-spec create_data_bag(#context{}, #chef_data_bag{}, object_id()) -> 'ok' |
+                                                                    {'conflict', _} |
+                                                                    {'error', _}.
+%% @doc Store a new data_bag in the datastore.
+create_data_bag(#context{}=Ctx, #chef_data_bag{}=DataBag, ActorId) ->
+    create_object(Ctx, create_data_bag, DataBag, ActorId).
+
+-spec create_data_bag_item(#context{}, #chef_data_bag_item{}, object_id()) -> ok | {conflict, term()} | term().
+%% @doc Store a new data_bag_item in the datastore.
+create_data_bag_item(#context{}=Ctx, DataBagItem, ActorId) ->
+    create_object(Ctx, create_data_bag_item, DataBagItem, ActorId).
+
+-spec create_cookbook_version(DbContext :: #context{},
+                              CBVersion :: #chef_cookbook_version{},
+                              ActorId :: object_id()) -> ok | {conflict, _} | {error, _}.
+%% @doc Store a new cookbook_version in the datastore.
+create_cookbook_version(#context{}=Ctx, CookbookVersion, ActorId) ->
+    create_object(Ctx, create_cookbook_version, CookbookVersion, ActorId).
+
+%% Currently, this is only used internally, but will be useful for future enhancements to
+%% the sandboxes protocol that allow for partial progress monitoring (e.g., upload a few
+%% files, retrieve the current state of the sandbox, upload a few more, etc.)
+-spec fetch_sandbox(DbContext::#context{},
+                    OrgName::binary(),
+                    SandboxId::object_id()) -> #chef_sandbox{} |
+                                               not_found |
+                                               {error, any()}.
+fetch_sandbox(#context{} = Ctx, OrgName, SandboxId) ->
+    fetch_object(Ctx, chef_sandbox, OrgName, SandboxId).
+
+%% @doc Saves sandbox information for a new sandbox in the database, and returns a
+%% chef_sandbox record representing the new sandbox.  This is a different pattern from other
+%% Chef objects, because the creation of a record for the object requires data that the
+%% caller does not have access to (the 'upload' state of the checksums must be retrieved
+%% from the database).
+
+-spec make_sandbox(DbContext :: #context{},
+                   OrgName :: binary(),
+                   ActorId :: object_id(),
+                   Checksums :: [binary()]) -> #chef_sandbox{} |
+                                               not_found |
+                                               {conflict, term()} |
+                                               {error, term()}.
+make_sandbox(#context{}=Ctx, OrgName, ActorId, Checksums) ->
+    case fetch_org_id(Ctx, OrgName) of
+        not_found ->
+            not_found;
+        OrgId ->
+            Id = chef_object:make_org_prefix_id(OrgId),
+            %% TempSandbox doesn't know if the checksums have been uploaded yet or not
+            TempSandbox = #chef_sandbox{id=Id,
+                                        org_id=OrgId,
+                                        checksums = [{C, false} || C <- Checksums]},
+            %% TODO: ActorId isn't actually needed in the code, but it is if we want to use common code paths
+            case create_object(Ctx, create_sandbox, TempSandbox, ActorId) of
+                ok ->
+                    %% this sandbox will know if the checksums have been uploaded
+                    fetch_sandbox(Ctx, OrgName, Id);
+                {conflict, Msg} ->
+                    {conflict, Msg};
+                {error, Why} ->
+                    {error, Why}
+            end
+    end.
+
+-spec fetch_environment(#context{},
+                        OrgName :: binary() | {id, object_id()},
+                        EnvironmentName :: binary()) -> #chef_environment{} |
+                                                        not_found |
+                                                        {error, _}.
+%% @doc Return the environment in `OrgName' with name `EnvironmentName'. Returns a
+%% `#chef_environment{}' record.
+fetch_environment(#context{} = Ctx, OrgName, EnvironmentName) ->
+    fetch_object(Ctx, chef_environment, OrgName, EnvironmentName).
+
+-spec fetch_client(#context{}, binary(), binary()) -> #chef_client{} |
+                                                      not_found | {error, _}.
+%% @doc Return the client in `OrgName' with name `ClientName'. Returns a
+%% `#chef_client{}' record.
+fetch_client(#context{} = Ctx, OrgName, ClientName) ->
+    case darklaunch:is_enabled(<<"couchdb_clients">>) of
+        true ->
+            fetch_couchdb_client(Ctx, OrgName, ClientName);
+        false ->
+            fetch_object(Ctx, chef_client, OrgName, ClientName)
+    end.
+
+-spec fetch_node(#context{}, binary(), binary()) -> #chef_node{} |
+                                                    not_found |
+                                                    {error, _}.
+%% @doc Return the node in `OrgName' with name `NodeName'. Returns a `#chef_node{}' record.
+fetch_node(#context{} = Ctx, OrgName, NodeName) ->
+    fetch_object(Ctx, chef_node, OrgName, NodeName).
+
+-spec fetch_role(#context{}, binary(), binary()) -> #chef_role{} |
+                                                    not_found |
+                                                    {error, _}.
+%% @doc Return the role in `OrgName' with name `RoleName'. Returns a `#chef_role{}' record.
+fetch_role(#context{} = Ctx, OrgName, RoleName) ->
+    fetch_object(Ctx, chef_role, OrgName, RoleName).
+
+-spec fetch_data_bag(#context{}, binary(), binary()) -> #chef_data_bag{} |
+                                                        not_found |
+                                                        {error, _}.
+%% @doc Return the data_bag in `OrgName' with name `DataBagName'. Returns a
+%% `#chef_data_bag{}' record.
+fetch_data_bag(#context{} = Ctx, OrgName, DataBagName) ->
+    fetch_object(Ctx, chef_data_bag, OrgName, DataBagName).
+
+-spec fetch_data_bag_item(#context{}, binary(), binary(), binary()) ->
+                                 #chef_data_bag_item{} |
+                                 not_found |
+                                 {error, _}.
+%% @doc Return the data_bag_item in the `DataBagName' data_bag in the `OrgName'
+%% org.. Returns a `#chef_data_bag_item{}' record.
+fetch_data_bag_item(#context{reqid = ReqId} = Ctx, OrgName, DataBagName, ItemName) ->
+    case fetch_org_id(Ctx, OrgName) of
+        not_found ->
+            %% FIXME: do we want to indicate that the issue is the org not found?
+            %%    {not_found, org};
+            not_found;
+        OrgId ->
+            case ?SH_TIME(ReqId, chef_sql, fetch_data_bag_item, (OrgId, DataBagName,
+                                                                 ItemName)) of
+                {ok, not_found} ->
+                    not_found;
+                {ok, #chef_data_bag_item{}=DataBagItem} ->
+                    DataBagItem;
+                {error, _Why} = Error ->
+                    Error
+            end
+    end.
+
+-spec cookbook_exists(DbContext :: #context{},
+                      OrgName :: binary(),
+                      CookbookName :: binary()) ->
+                             boolean() | {error, term()}.
+cookbook_exists(#context{reqid=ReqId} = DbContext, OrgName, CookbookName) ->
+    case fetch_org_id(DbContext, OrgName) of
+        not_found ->
+            not_found;
+        OrgId ->
+            ?SH_TIME(ReqId, chef_sql, cookbook_exists, (OrgId, CookbookName))
+    end.
+
+-spec fetch_cookbook_versions(#context{}, binary()) -> {not_found, org} |
+                                                       [versioned_cookbook()] |
+                                                       {error, any()}.
+%% @doc Return a list of all cookbook names and versions in an org
+fetch_cookbook_versions(#context{} = Ctx, OrgName) ->
+    fetch_objects(Ctx, fetch_cookbook_versions, OrgName).
+
+-spec fetch_cookbook_version(DbContext :: #context{},
+                             OrgName :: binary(),
+                             VersionedCookbook :: versioned_cookbook()) -> #chef_cookbook_version{} |
+                                                                           {cookbook_exists, object_id()} |
+                                                                           not_found |
+                                                                           {error, term()}.
+fetch_cookbook_version(#context{reqid = ReqId} = Ctx, OrgName, VersionedCookbook) ->
+    case fetch_org_id(Ctx, OrgName) of
+        not_found ->
+            not_found;
+        OrgId ->
+            stats_hero:ctime(ReqId, stats_hero:label(chef_sql, fetch_cookbook_version),
+                             fun() -> chef_sql:fetch_cookbook_version(OrgId,
+                                                                      VersionedCookbook)
+                             end)
+    end.
+
+-spec fetch_latest_cookbook_version(Ctx::#context{},
+                                    OrgName::binary(),
+                                    CookbookName::binary()) ->
+                                    #chef_cookbook_version{} |
+                                    not_found |
+                                    {error, term()}.
+%% @doc Return the latest version of the requested cookbook
+fetch_latest_cookbook_version(#context{reqid=ReqId} = Ctx, OrgName, CookbookName) ->
+    case fetch_org_id(Ctx, OrgName) of
+      not_found ->
+        not_found;
+      OrgId ->
+         stats_hero:ctime(ReqId, stats_hero:label(chef_sql, fetch_latest_cookbook_version),
+                          fun() -> chef_sql:fetch_latest_cookbook_version(OrgId, CookbookName)
+                          end)
+    end.
+
+%% @doc Retrieve a list of {Name, Verison} tuples for the latest version of each cookbook in
+%% an organization.  Version information is returned as a binary string (e.g., <<"1.0.0">>)
+%% instead of the tuple form (e.g. {1,0,0}) that is used elsewhere.
+-spec fetch_latest_cookbook_versions(DbContext :: #context{},
+                                     OrgName :: binary()) ->
+                                            [{CookbookName :: binary(),
+                                              VersionString :: binary()}] |
+                                            {not_found, org} |
+                                            {error, Reason :: term()}.
+fetch_latest_cookbook_versions(#context{}=DbContext, OrgName) ->
+    fetch_latest_cookbook_versions(DbContext, OrgName, 1).
+
+%% @doc Same as fetch_latest_cookbook_versions/2, but allows you to specify how many
+%% versions for which to fetch information.  For instance, setting `NumberOfVersions' to `3'
+%% will retrieve the {Name, Version} pairs for the three most recent versions of each
+%% cookbook.
+%%
+%% If fewer than `NumberOfVersions' versions exist for a given cookbook, all
+%% versions are represented in the output.
+-spec fetch_latest_cookbook_versions(DbContext :: #context{},
+                                     OrgName :: binary(),
+                                     NumberOfVersions :: non_neg_integer()) ->
+                                            [{CookbookName :: binary(),
+                                              VersionString :: binary()}] |
+                                            {not_found, org} |
+                                            {error, Reason :: term()}.
+fetch_latest_cookbook_versions(#context{reqid=ReqId}=DbContext, OrgName, NumberOfVersions) ->
+    case fetch_org_id(DbContext, OrgName) of
+        not_found ->
+            {not_found, org};
+        OrgId ->
+            case ?SH_TIME(ReqId, chef_sql, fetch_latest_cookbook_versions, (OrgId, all, NumberOfVersions)) of
+                {ok, VersionInfo} ->
+                    VersionInfo;
+                {error, Error} ->
+                    {error, Error}
+            end
+    end.
+
+%% @doc Retrieves the list of all recipes from the latest version of all an organization's
+%% cookbooks and returns their cookbook-qualified names.
+-spec fetch_latest_cookbook_recipes(DbContext :: #context{},
+                                    OrgName :: binary()) ->
+                                           [CookbookQualifiedRecipeName :: binary()] |
+                                           {not_found, org} |
+                                           {error, Reason :: term()}.
+fetch_latest_cookbook_recipes(#context{reqid=ReqId}=DbContext, OrgName) ->
+    case fetch_org_id(DbContext, OrgName) of
+        not_found ->
+            {not_found, org};
+        OrgId ->
+            case ?SH_TIME(ReqId, chef_sql, fetch_latest_cookbook_recipes, (OrgId)) of
+                {ok, Results} ->
+                    Results;
+                {error, Error} ->
+                    {error, Error}
+            end
+    end.
+
+%% @doc Retrieve all cookbook dependency information for an organization as a list of
+%% Depsolver dependency sets.
+%%
+%% See the corresponding function in the chef_sql module for more information.
+-spec fetch_all_cookbook_version_dependencies(DbContext :: #context{},
+                                              OrgName :: binary()) -> [depsolver:dependency_set()] |
+                                                                      {error, term()}.
+fetch_all_cookbook_version_dependencies(#context{reqid=ReqId}=DbContext, OrgName) ->
+    case fetch_org_id(DbContext, OrgName) of
+        not_found ->
+            not_found;
+        OrgId ->
+            case ?SH_TIME(ReqId, chef_sql, fetch_all_cookbook_version_dependencies, (OrgId)) of
+                {ok, Results} ->
+                    Results;
+                {error, Error} ->
+                    {error, Error}
+            end
+    end.
+
+%% @doc Retrieve cookbook versions, subject to any constraints imposed by the specified
+%% environment.  `NumVersions' is either an integer or the atom `all', and indicates the
+%% maximum number of versions that should be returned that satisfy the constraints for each
+%% cookbook
+%%
+%% If the given CookbookName is the atom 'all', information for all cookbooks is retrieved;
+%% if it is a cookbook name (i.e., a binary), then information on just that cookbook will be
+%% returned.
+-spec fetch_environment_filtered_cookbook_versions(DbContext :: #context{},
+                                                   OrgName :: binary(),
+                                                   EnvName :: binary(),
+                                                   CookbookName :: binary() | all,
+                                                   NumVersions :: all | non_neg_integer()) ->
+                                                          [{CookbookName :: binary(), [Version :: binary()]}] |
+                                                          {error, term()}.
+fetch_environment_filtered_cookbook_versions(#context{reqid=ReqId}=DbContext, OrgName, EnvName, CookbookName, NumVersions) ->
+    case fetch_org_id(DbContext, OrgName) of
+        not_found ->
+            not_found;
+        OrgId ->
+            case ?SH_TIME(ReqId, chef_sql, fetch_environment_filtered_cookbook_versions, (OrgId, EnvName, CookbookName, NumVersions)) of
+                {ok, Results} ->
+                    Results;
+                {error, Error} ->
+                    {error, Error}
+            end
+    end.
+
+%% @doc Given an environment in an organization, return a sorted list
+%% of qualified recipe names for the cookbook versions that best match
+%% the environment's version constraints, if any.
+-spec fetch_environment_filtered_recipes(DbContext :: #context{},
+                                         OrgName :: binary(),
+                                         EnvName :: binary()) ->
+                                                [QualifiedRecipeName :: binary()].
+fetch_environment_filtered_recipes(#context{reqid=ReqId}=DbContext, OrgName, EnvName) ->
+    case fetch_org_id(DbContext, OrgName) of
+        not_found ->
+            not_found;
+        OrgId ->
+            case ?SH_TIME(ReqId, chef_sql, fetch_environment_filtered_recipes, (OrgId, EnvName)) of
+                {ok, Results} ->
+                    Results;
+                {error, Error} ->
+                    {error, Error}
+            end
+    end.
+
+-spec fetch_environments(#context{}, binary()) -> {not_found, org} |
+                                                  [binary()] |
+                                                  {error, any()}.
+%% @doc Return a list of all environment names in an org
+fetch_environments(#context{} = Ctx, OrgName) ->
+    fetch_objects(Ctx, fetch_environments, OrgName).
+
+-spec fetch_clients(#context{}, binary()) -> {not_found, org} |
+                                             [binary()] | {error, any()}.
+%% @doc Return a list of all client names in an org
+%%
+fetch_clients(#context{} = Ctx, OrgName) ->
+    fetch_objects(Ctx, fetch_clients, OrgName).
+
+-spec fetch_data_bags(#context{}, binary() | {id, object_id()}) -> [binary()] |
+                                                                   {not_found, org} |
+                                                                   {error, any()}.
+%% @doc Return a list of all data_bag names in an org
+fetch_data_bags(#context{} = Ctx, OrgName) ->
+    case darklaunch:is_enabled(<<"couchdb_data">>) of
+        true ->
+            fetch_couchdb_data_bags(Ctx, OrgName);
+        false ->
+            fetch_objects(Ctx, fetch_data_bags, OrgName)
+    end.
+
+-spec fetch_nodes(#context{}, binary()) -> {not_found, org} |
+                                           [binary()] |
+                                           {error, any()}.
+%% @doc Return a list of all node names in an org
+fetch_nodes(#context{} = Ctx, OrgName) ->
+    fetch_objects(Ctx, fetch_nodes, OrgName).
+
+-spec fetch_roles(#context{}, binary()) -> {not_found, org} |
+                                           [binary()] |
+                                           {error, any()}.
+%% @doc Return a list of all role names in an org
+fetch_roles(#context{} = Ctx, OrgName) ->
+    fetch_objects(Ctx, fetch_roles, OrgName).
+
+-spec fetch_nodes(#context{}, binary(), binary()) -> [binary()] |
+                                                     {not_found, org} |
+                                                     {error, _}.
+%% @doc Returns list of node names for `OrgName' that are in the `EnvName' environment.
+fetch_nodes(#context{} = Ctx, OrgName, EnvName) ->
+    fetch_objects(Ctx, fetch_nodes, OrgName, EnvName).
+
+-spec fetch_data_bag_items(#context{}, binary(), binary()) -> [binary()] |
+                                                              {not_found, org} |
+                                                              {error, _}.
+%% @doc Returns list of data_bag_item names in `DataBagName' for `OrgName'.
+fetch_data_bag_items(#context{} = Ctx, OrgName, DataBagName) ->
+    fetch_objects(Ctx, fetch_data_bag_items, OrgName, DataBagName).
+
+-spec fetch_data_bag_item_ids(#context{}, binary() | {id, object_id()},
+                              binary()) -> [binary()] |
+                                           {not_found, org} |
+                                           {error, _}.
+%% @doc Returns list of data_bag_item names in `DataBagName' for `OrgName'.
+fetch_data_bag_item_ids(#context{} = Ctx, OrgName, DataBagName) ->
+    fetch_objects(Ctx, fetch_data_bag_item_ids, OrgName, DataBagName).
+
+-spec update_node(#context{}, #chef_node{}, binary()) -> ok |
+                                                         not_found |
+                                                         {error, _}.
+%% Update data for a node.
+update_node(#context{}=Ctx, Node, ActorId) ->
+    update_object(Ctx, ActorId, update_node, Node).
+
+-spec update_role(#context{}, #chef_role{}, binary()) -> ok |
+                                                         not_found |
+                                                         {error, _}.
+%% Update data for a role.
+update_role(#context{}=Ctx, Role, ActorId) ->
+    update_object(Ctx, ActorId, update_role, Role).
+
+%% Update data for a environment.
+update_environment(#context{}=Ctx, Environment, ActorId) ->
+    update_object(Ctx, ActorId, update_environment, Environment).
+
+%% Update data for a client.
+update_client(#context{}=Ctx, Client, ActorId) ->
+    update_object(Ctx, ActorId, update_client, Client).
+
+%% Update data for a data_bag_item.
+update_data_bag_item(#context{}=Ctx, DataBagItem, ActorId) ->
+    update_object(Ctx, ActorId, update_data_bag_item, DataBagItem).
+
+-spec update_cookbook_version(DbContext :: #context{},
+                              CBVersion :: #chef_cookbook_version{},
+                              ActorId :: object_id()) -> ok | {conflict, _} | {error, _}.
+%% @doc Update a cookbook version
+update_cookbook_version(#context{}=Ctx, UpdatedCookbookVersion, ActorId) ->
+    update_object(Ctx, ActorId, update_cookbook_version, UpdatedCookbookVersion).
+
+%% @doc Delete a cookbook version
+-spec delete_cookbook_version(Ctx::#context{},
+                              CookbookVersion::#chef_cookbook_version{})
+   -> {ok, 1 | 2} | not_found | {error, _}.
+delete_cookbook_version(#context{}=Ctx, #chef_cookbook_version{}=CookbookVersion) ->
+    delete_object(Ctx, delete_cookbook_version, CookbookVersion).
+
+-spec delete_node(#context{}, #chef_node{}) -> {ok, 1 | 2} | not_found | {error, _}.
+%% @doc Delete a node. You can provide either a `#chef_node{}' record or just the ID of the
+%% node.
+delete_node(#context{}=Ctx, #chef_node{}=Node) -> delete_object(Ctx, delete_node, Node).
+
+-spec delete_role(#context{}, #chef_role{}) -> {ok, 1 | 2} | not_found | {error, _}.
+%% @doc Delete a role. You can provide either a `#chef_role{}' record or just the ID of the
+%% role.
+delete_role(#context{}=Ctx, #chef_role{}=Role) -> delete_object(Ctx, delete_role, Role).
+
+-spec delete_environment(#context{}, #chef_environment{}) -> {ok, 1 | 2} |
+                                                             not_found |
+                                                             {error, _}.
+%% @doc Delete a environment. You can provide either a `#chef_environment{}' record or just
+%% the ID of the environment.
+delete_environment(#context{}=Ctx, #chef_environment{}=Environment) ->
+    delete_object(Ctx, delete_environment, Environment).
+
+-spec delete_client(#context{}, #chef_client{}) -> {ok, 1 | 2} |
+                                                   not_found |
+                                                   {error, _}.
+%% @doc Delete a client. You can provide either a `#chef_client{}' record or just
+%% the ID of the client.
+delete_client(#context{}=Ctx, #chef_client{}=Client) ->
+    delete_object(Ctx, delete_client, Client).
+
+-spec delete_data_bag(#context{}, #chef_data_bag{}) -> {ok, 1 | 2} |
+                                                       not_found |
+                                                       {error, _}.
+%% @doc Delete a data_bag. You can provide either a `#chef_data_bag{}' record or just
+%% the ID of the data_bag.
+delete_data_bag(#context{}=Ctx, #chef_data_bag{}=DataBag) ->
+    delete_object(Ctx, delete_data_bag, DataBag).
+
+-spec delete_data_bag_item(#context{}, #chef_data_bag_item{}) -> {ok, 1 | 2} |
+                                                                 not_found |
+                                                                 {error, _}.
+%% @doc Delete a data_bag_item. You can provide either a `#chef_data_bag_item{}' record or just
+%% the ID of the data_bag_item.
+delete_data_bag_item(#context{}=Ctx, #chef_data_bag_item{}=DataBagItem) ->
+    delete_object(Ctx, delete_data_bag_item, DataBagItem).
+
+
+%% @doc Verifies that all checksums in the given sandbox are marked as uploaded, and if so,
+%% deletes the sandbox from the database.
+%%
+%% This most closely corresponds to the "delete_X" functions for other Chef objects.
+-spec commit_sandbox(#context{}, #chef_sandbox{}) -> {ok, 1 | 2} |
+                                                     not_found |
+                                                     {error, {need_upload, [binary()]}} |
+                                                     {error, term()}.
+commit_sandbox(#context{}=Ctx, #chef_sandbox{}=Sandbox) ->
+    case non_uploaded_checksums(Ctx, Sandbox) of
+        [] ->
+            %% Good to go!
+            remove_sandbox(Ctx, Sandbox);
+        Checksums when is_list(Checksums) ->
+            %% Oops, you've still got some work to do
+            {error, {need_upload, Checksums}};
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+%% @doc Deletes a sandbox from the database.
+%%
+%% This is not an exported function, because it is a considered a "private" step in other
+%% processes.  Currently, this is only used for committing a sandbox, but in the future, it
+%% will be used for purging stale sandboxes as well.
+-spec remove_sandbox(#context{}, #chef_sandbox{}) -> {ok, 1 | 2} |
+                                                     not_found |
+                                                     {error, any()}.
+remove_sandbox(#context{}=Ctx, #chef_sandbox{}=Sandbox) ->
+    delete_object(Ctx, delete_sandbox, Sandbox).
+
+%% @doc Returns a list of all the checksums in the given sandbox that have not yet been
+%% marked as uploaded.
+-spec non_uploaded_checksums(#context{}, #chef_sandbox{}) -> [binary()] | {error, term()}.
+non_uploaded_checksums(#context{reqid=ReqId}, #chef_sandbox{id=SandboxId,
+                                                            org_id=OrgId}) ->
+    ?SH_TIME(ReqId, chef_sql, non_uploaded_checksums, (SandboxId, OrgId)).
+
+%% @doc Given an OrgId and a list of checksums, marks them all as having been uploaded to the system
+-spec mark_checksums_as_uploaded(#context{}, binary(), [binary()]) -> ok | {error, term()}.
+mark_checksums_as_uploaded(#context{reqid=ReqId}, OrgId, Checksums) ->
+    ?SH_TIME(ReqId, chef_sql, mark_checksums_as_uploaded, (OrgId, Checksums)).
+
+-spec node_record_to_authz_id(any(), any()) -> id().
+node_record_to_authz_id(_Context, NodeRecord) ->
+    NodeRecord#chef_node.authz_id.
+
+-spec is_user_in_org(#context{}, binary(), binary()) -> boolean() | {error, _}.
+is_user_in_org(#context{reqid = ReqId, otto_connection = S}=Ctx, User, OrgName) ->
+    case fetch_user(Ctx, User) of
+        #chef_user{id = UserId} ->
+            ?SH_TIME(ReqId, chef_otto, is_user_in_org, (S, UserId, OrgName));
+        not_found ->
+            false;
+        {error, Why} ->
+            {error, Why}
+    end.
+
+connect() ->
+    chef_otto:connect().
+
+-spec bulk_get(#context{}, binary(), chef_object(), [binary()]) ->
+                      [binary()] | {error, _}.
+%% @doc Return a list of JSON/gzip'd JSON as binary corresponding to the specified list of
+%% IDs.
+bulk_get(#context{reqid = ReqId}, _OrgName, node, Ids) ->
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_nodes, (Ids)));
+bulk_get(#context{reqid = ReqId}=Ctx, OrgName, role, Ids) ->
+    %% TODO: remove after roles migration to Erchef/SQL
+    case darklaunch:is_enabled(<<"couchdb_roles">>, OrgName) of
+        true ->
+            bulk_get_couchdb(Ctx, OrgName, role, Ids);
+        false ->
+            bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_roles, (Ids)))
+    end;
+bulk_get(#context{reqid = ReqId}=Ctx, OrgName, data_bag_item, Ids) ->
+    %% TODO: remove after data_bag data_bag_item migration to Erchef/SQL
+    case darklaunch:is_enabled(<<"couchdb_data">>, OrgName) of
+        true ->
+            bulk_get_couchdb(Ctx, OrgName, data_bag_item, Ids);
+        false ->
+            bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_data_bag_items, (Ids)))
+    end;
+bulk_get(#context{reqid = ReqId}=Ctx, OrgName, environment, Ids) ->
+    %% TODO: remove after environments migration to Erchef/SQL
+    case darklaunch:is_enabled(<<"couchdb_environments">>, OrgName) of
+        true ->
+            bulk_get_couchdb(Ctx, OrgName, environment, Ids);
+        false ->
+            bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_environments, (Ids)))
+    end;
+bulk_get(#context{reqid = ReqId}=Ctx, OrgName, client, Ids) ->
+    %% TODO: remove after environments migration to Erchef/SQL
+    case darklaunch:is_enabled(<<"couchdb_clients">>, OrgName) of
+        true ->
+            bulk_get_couchdb(Ctx, OrgName, client, Ids);
+        false ->
+            bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_clients, (Ids)))
+    end;
+bulk_get(Ctx, OrgName, Type, Ids) ->
+    bulk_get_couchdb(Ctx, OrgName, Type, Ids).
+
+bulk_get_result({ok, not_found}) ->
+    [];
+bulk_get_result({ok, L}) when is_list(L) ->
+    L;
+bulk_get_result({error, _Why}=Error) ->
+    Error.
+
+bulk_get_couchdb(#context{reqid = ReqId, otto_connection = S}=Ctx, OrgName, _Type, Ids) ->
+    %% presently searching for non-nodes goes to couchdb
+    case fetch_org_id(Ctx, OrgName) of
+        not_found ->
+            {error, {not_found, org}};
+        OrgId ->
+            DbName = chef_otto:dbname(OrgId),
+            ?SH_TIME(ReqId, chef_otto, bulk_get, (S, DbName, Ids))
+    end.
+
+-spec data_bag_exists(#context{}, binary(), binary() | string()) -> boolean().
+%% @doc Return true if data bag `DataBag' exists in org `OrgName' and false otherwise.
+data_bag_exists(#context{reqid = ReqId, otto_connection = S}=Ctx, OrgName, DataBag) ->
+    case darklaunch:is_enabled(<<"couchdb_data">>, OrgName) of
+        true ->
+            case fetch_org_id(Ctx, OrgName) of
+                not_found ->
+                    false;
+                OrgId ->
+                    ?SH_TIME(ReqId, chef_otto, data_bag_exists, (S, OrgId, DataBag))
+            end;
+        false ->
+            case fetch_data_bag(Ctx, OrgName, DataBag) of
+                #chef_data_bag{} -> true;
+                not_found -> false
+            end
+    end.
+
+%% @doc Return a lit of the names of all an organization's data bags.
+-spec data_bag_names(#context{}, OrgId::object_id()) ->  [binary()] |
+                                                         {not_found, org} |
+                                                         {error, any()}.
+data_bag_names(#context{}=Ctx, OrgId) ->
+    fetch_data_bags(Ctx, {id, OrgId}).
+
+-spec environment_exists(#context{}, binary(), binary() | string()) -> boolean().
+%% @doc Return true if environment `EnvName' exists in org `OrgId' and false otherwise.
+environment_exists(#context{reqid = ReqId, otto_connection = S}=Ctx, OrgId, EnvName) ->
+    case darklaunch:is_enabled(<<"couchdb_environments">>) of
+        true ->
+            ?SH_TIME(ReqId, chef_otto, environment_exists, (S, OrgId, EnvName));
+        false ->
+            %% FIXME: we should implement a specialized environment exists function
+            case fetch_environment(Ctx, {id, OrgId}, EnvName) of
+                #chef_environment{} -> true;
+                _ -> false
+            end
+    end.
+
+-spec update_fun(chef_updatable_object()) -> chef_db:update_fun().
+%% @doc Return the atom corresponding to the appropriate update function in the `chef_db'
+%% module for the given `chef_object()' record.
+update_fun(#chef_data_bag_item{}) ->
+    update_data_bag_item;
+update_fun(#chef_environment{}) ->
+    update_environment;
+update_fun(#chef_client{}) ->
+    update_client;
+update_fun(#chef_node{}) ->
+    update_node;
+update_fun(#chef_role{}) ->
+    update_role;
+update_fun(#chef_cookbook_version{}) ->
+    update_cookbook_version.
+
+-spec create_fun(chef_object() | #chef_sandbox{}) -> chef_db:create_fun().
+%% @doc Return the atom corresponding to the appropriate create function in the `chef_db'
+%% module for the given `chef_object()' record.
+create_fun(#chef_data_bag{}) ->
+    create_data_bag;
+create_fun(#chef_data_bag_item{}) ->
+    create_data_bag_item;
+create_fun(#chef_environment{}) ->
+    create_environment;
+create_fun(#chef_client{}) ->
+    create_client;
+create_fun(#chef_node{}) ->
+    create_node;
+create_fun(#chef_role{}) ->
+    create_role;
+create_fun(#chef_sandbox{}) ->
+    create_sandbox;
+create_fun(#chef_cookbook_version{}) ->
+    create_cookbook_version.
+
+%% -------------------------------------
+%% private functions
+%% -------------------------------------
+
+-spec create_object(DbContext :: #context{},
+                    Fun :: create_fun(),
+                    Object :: chef_object() |
+                              #chef_sandbox{} |
+                              #chef_cookbook_version{},
+                    ActorId :: object_id()) -> ok |
+                                               {conflict, _} |
+                                               {error, any()}.
+%% @doc Generic object creation with metrics.  `Fun' is the function in the `chef_sql'
+%% module to use for the creation and determines the return type (will return the
+%% appropriate chef object record type).
+create_object(#context{reqid = ReqId}, Fun, Object, ActorId) ->
+    Object1 = chef_object:set_created(Object, ActorId),
+    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+                          fun() -> chef_sql:Fun(Object1) end) of
+        {ok, 1} -> ok;
+        {conflict, Msg}-> {conflict, Msg};
+        {error, Why} -> {error, Why}
+    end.
+
+%% @doc Generic fetching of a single Chef object. `Fun' is the name of a function in the
+%% `chef_sql' module to use to fetch for the specified `OrgIdentifier' is either the binary
+%% name of the org, or it is an `{id, OrgId}' tuple.  In most cases, `ObjectIdentifier',
+%% will just be the name of the object.  In the case of a Cookbook Version, however, it is a
+%% `{Name, Version}' tuple.
+%%
+%% TODO: Fold data_bag_item back into this
+-spec fetch_object(DbContext :: #context{},
+                   ObjectType :: atom(),
+                   OrgIdentifier :: binary() | {id, object_id()},
+                   ObjectIdentifier :: binary() |
+                                       versioned_cookbook()) -> not_found |
+                                                                #chef_client{} |
+                                                                #chef_environment{} |
+                                                                #chef_data_bag{} |
+                                                                %% #chef_data_bag_item{} handled separately
+                                                                #chef_node{} |
+                                                                #chef_role{} |
+                                                                #chef_sandbox{} |
+                                                                {error, any()}.
+fetch_object(#context{reqid = ReqId}, ObjectType, {id, OrgId}, ObjectIdentifier) ->
+    Fun = fetch_query_for_type(ObjectType),
+    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+                          fun() -> chef_sql:Fun(OrgId, ObjectIdentifier) end) of
+        {ok, not_found} -> not_found;
+        {ok, Object} -> assert_chef_object(Object, ObjectType);
+        {error, _Why} = Error -> Error
+    end;
+fetch_object(#context{}=Ctx, ObjectType, OrgName, ObjectIdentifier) ->
+    case fetch_org_id(Ctx, OrgName) of
+        not_found ->
+            not_found;
+        OrgId ->
+            fetch_object(Ctx, ObjectType, {id, OrgId}, ObjectIdentifier)
+    end.
+
+%% note that chef_data_bag_item is handled separately because it requires an extra argument
+%% to fetch.
+fetch_query_for_type(chef_client) ->
+    fetch_client;
+fetch_query_for_type(chef_data_bag) ->
+    fetch_data_bag;
+fetch_query_for_type(chef_environment) ->
+    fetch_environment;
+fetch_query_for_type(chef_node) ->
+    fetch_node;
+fetch_query_for_type(chef_role) ->
+    fetch_role;
+fetch_query_for_type(chef_sandbox) ->
+    fetch_sandbox.
+
+-define(ASSERT_RECORD(Object, RecName),
+        case Object of
+            #RecName{} -> Object;
+            _ -> error({unexpected_type, {expected, #RecName{}}, {found, Object}})
+        end).
+
+assert_chef_object(Object, chef_client) ->
+    ?ASSERT_RECORD(Object, chef_client);
+
+assert_chef_object(Object, chef_data_bag) ->
+    ?ASSERT_RECORD(Object, chef_data_bag);
+
+%% not used, so left out for now to avoid dialyzer warning
+%% assert_chef_object(Object, chef_data_bag_item) ->
+%%     ?ASSERT_RECORD(Object, chef_data_bag_item);
+
+assert_chef_object(Object, chef_environment) ->
+    ?ASSERT_RECORD(Object, chef_environment);
+
+assert_chef_object(Object, chef_node) ->
+    ?ASSERT_RECORD(Object, chef_node);
+
+assert_chef_object(Object, chef_role) ->
+    ?ASSERT_RECORD(Object, chef_role);
+
+assert_chef_object(Object, chef_sandbox) ->
+    ?ASSERT_RECORD(Object, chef_sandbox).
+
+
+%% assert_chef_object(Object, chef_data_bag) ->
+%%     case Object of
+%%         #chef_data_bag{} -> true;
+%%         _ -> error({unexpected_type, {expected, #chef_data_bag{}}, {found, Object}})
+%%     end;
+%% assert_chef_object(Object, chef_data_bag_item) ->
+%%     case Object of
+%%         #chef_data_bag_item{} -> true;
+%%         _ -> error({unexpected_type, {expected, #chef_data_bag_item{}}, {found, Object}})
+%%     end;
+%% assert_chef_object(Object, chef_environment) ->
+%%     case Object of
+%%         #chef_environment{} -> true;
+%%         _ -> error({unexpected_type, {expected, #chef_environment{}}, {found, Object}})
+%%     end;
+%% assert_chef_object(Object, chef_node) ->
+%%     case Object of
+%%         #chef_node{} -> true;
+%%         _ -> error({unexpected_type, {expected, #chef_node{}}, {found, Object}})
+%%     end;
+%% assert_chef_object(Object, chef_role) ->
+%%     case Object of
+%%         #chef_role{} -> true;
+%%         _ -> error({unexpected_type, {expected, #chef_role{}}, {found, Object}})
+%%     end.
+
+
+-spec fetch_objects(#context{}, atom(),
+                    binary() | {id, object_id()}) -> {not_found, org} |
+                                                     [binary() | versioned_cookbook() ] |
+                                                     {error, any()}.
+%% @doc Generic listing of a Chef object type. `Fun' is a function in the `chef_sql'
+%% module. Returns a list of object names.
+fetch_objects(#context{reqid = ReqId}, Fun, {id, OrgId}) ->
+    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+                          fun() -> chef_sql:Fun(OrgId) end) of
+        {ok, L} when is_list(L) ->
+            L;
+        {error, Error} ->
+            {error, Error}
+    end;
+fetch_objects(#context{} = Ctx, Fun, OrgName) ->
+    case fetch_org_id(Ctx, OrgName) of
+        not_found -> {not_found, org};
+        OrgId -> fetch_objects(Ctx, Fun, {id, OrgId})
+    end.
+
+-spec fetch_objects(#context{}, atom(), binary() | {id, object_id()},
+                    binary()) -> {not_found, org} |
+                                 [binary() | versioned_cookbook()] |
+                                 {error, any()}.
+%% @doc Generic listing of a Chef object type with filtering. `Fun' is the appropriate
+%% function in the `chef_sql' module. This version is used to fetch nodes within a specified
+%% `environment' as well as `data_bag_items' within a specified `data_bag'.
+fetch_objects(#context{reqid = ReqId}, Fun, {id, OrgId}, Arg) ->
+    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+                          fun() -> chef_sql:Fun(OrgId, Arg) end) of
+        {ok, L} when is_list(L) ->
+            L;
+        {error, Error} ->
+            {error, Error}
+    end;
+fetch_objects(#context{}=Ctx, Fun, OrgName, Arg) ->
+    case fetch_org_id(Ctx, OrgName) of
+        not_found -> {not_found, org};
+        OrgId -> fetch_objects(Ctx, Fun, {id, OrgId}, Arg)
+    end.
+
+%% For back-compat with data bags in couchdb, this is used to fetch the data bag names which
+%% are valid as part of search queries.
+fetch_couchdb_data_bags(#context{} = Ctx, OrgName) when is_binary(OrgName) ->
+    case fetch_org_id(Ctx, OrgName) of
+        not_found ->
+            {not_found, org};
+        OrgId ->
+            fetch_couchdb_data_bags(Ctx, {id, OrgId})
+    end;
+fetch_couchdb_data_bags(#context{reqid = ReqId, otto_connection = S}, {id, OrgId}) ->
+    ?SH_TIME(ReqId, chef_otto, data_bag_names, (S, OrgId)).
+
+%% FIXME: seems like delete_object should take either object ID or orgid+object_name only.
+%% Also might want to take ActorId here and at least log who deleted the object.
+-spec delete_object(DbContext :: #context{},
+                    Fun :: delete_fun(),
+                    Object :: chef_object() | object_id() | #chef_client{} | #chef_sandbox{} |
+                              #chef_cookbook_version{} ) -> {ok, 1 | 2} |
+                                                            not_found |
+                                                            {error, _}.
+%% @doc Delete a object. You can provide either a `#chef_object{}' record or just the ID of
+%% the object.
+delete_object(#context{reqid = ReqId}, Fun, #chef_cookbook_version{} = CookbookVersion) ->
+    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+                          fun() -> chef_sql:Fun(CookbookVersion) end) of
+        {ok, not_found} -> not_found;
+        {ok, N} -> {ok, N};
+        {error, Error} -> {error, Error}
+    end;
+delete_object(#context{}=Ctx, Fun, Object) when is_tuple(Object) ->
+    delete_object(Ctx, Fun, get_id(Object));
+delete_object(#context{reqid = ReqId}, Fun, Id) ->
+    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+                          fun() -> chef_sql:Fun(Id) end) of
+        {ok, not_found} -> not_found;
+        {ok, N} -> {ok, N};
+        {error, Error} -> {error, Error}
+    end.
+
+-spec update_object(#context{}, object_id(), update_fun(), chef_object() | #chef_cookbook_version{}) -> ok |
+                                                                             not_found |
+                                                                             {conflict, any()} |
+                                                                             {error, any()}.
+%% @doc Generic update for Chef object types. `Fun' is the appropriate function in the
+%% `chef_sql' module. `Object' is a Chef object (record) with updated data.
+update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
+    Object1 = chef_object:set_updated(Object, ActorId),
+    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+                          fun() -> chef_sql:Fun(Object1) end) of
+        {ok, 1} -> ok;
+        {ok, not_found} -> not_found;
+        {conflict, Message} -> {conflict, Message};
+        {error, Error} -> {error, Error}
+    end.
+
+-spec find_key_data(#chef_user{} | #chef_client{}) ->
+                           {cert, binary()} | {key, binary()}.
+%% Some of Our user data lacks a certificate and has a public key
+%% instead.  We look first for certificate, then for public_key.  If
+%% both are not found, we'll crash with some detail of the badly
+%% formed user record.
+%%
+find_key_data(#chef_user{public_key = KeyData, pubkey_version = ?CERT_VERSION}) ->
+    {cert, KeyData};
+find_key_data(#chef_user{public_key = KeyData, pubkey_version = ?KEY_VERSION}) ->
+    {key, KeyData};
+find_key_data(#chef_client{public_key = Cert}) ->
+    {cert, Cert}.
+
+-spec new_node_record(<<_:256>>, <<_:256>>, {[_]}, db_type()) -> #chef_node{}.
+%% @doc Create a `#chef_node{}' record assigning a generated id and setting timestamps to
+%% now.
+%%
+new_node_record(OrgId, AuthzId, NodeTerms, DbType) ->
+    Name = ej:get({<<"name">>}, NodeTerms),
+    Environment = ej:get({<<"chef_environment">>}, NodeTerms),
+    Id = chef_object:make_org_prefix_id(OrgId, Name),
+    Data = chef_db_compression:compress(DbType, chef_node, ejson:encode(NodeTerms)),
+    #chef_node{id = Id,
+               authz_id = AuthzId,
+               org_id = OrgId,
+               name = Name,
+               environment = Environment,
+               serialized_object = Data}.
+
+-spec new_role_record(<<_:256>>, <<_:256>>, {[_]}, db_type()) -> #chef_role{}.
+%% @doc Create a `#chef_role{}' record assigning a generated id and setting timestamps to
+%% now.
+%%
+new_role_record(OrgId, AuthzId, RoleTerms, DbType) ->
+    Name = ej:get({<<"name">>}, RoleTerms),
+    Id = chef_object:make_org_prefix_id(OrgId, Name),
+    Data = chef_db_compression:compress(DbType, chef_role, ejson:encode(RoleTerms)),
+    #chef_role{id = Id,
+               authz_id = AuthzId,
+               org_id = OrgId,
+               name = Name,
+               %% FIXME: compression needs to be fixed either for all or be type specific
+               %% now.
+               serialized_object = Data}.
+
+-spec new_data_bag_record(<<_:256>>, <<_:256>>, binary(), db_type()) -> #chef_data_bag{}.
+%% @doc Create a `#chef_data_bag{}' record. Timestamps are not set here since chef_sql will
+%% set on create or update.
+%%
+new_data_bag_record(OrgId, AuthzId, Name, _DbType) ->
+    Id = chef_object:make_org_prefix_id(OrgId, Name),
+    #chef_data_bag{id = Id,
+                   authz_id = AuthzId,
+                   org_id = OrgId,
+                   name = Name}.
+
+-spec new_data_bag_item_record(<<_:256>>, <<_:256>>, <<_:256>>, {[_]}, db_type()) ->
+                                      #chef_data_bag_item{}.
+%% @doc Create a `#chef_data_bag_item{}' record. Timestamps are not set here since chef_sql will
+%% set on create or update.
+%%
+new_data_bag_item_record(OrgId, DataBagName, ItemName, ItemTerms, DbType) ->
+    Id = chef_object:make_org_prefix_id(OrgId, DataBagName),
+    Data = chef_db_compression:compress(DbType, chef_data_bag_item,
+                                        ejson:encode(ItemTerms)),
+    #chef_data_bag_item{id = Id,
+                        org_id = OrgId,
+                        data_bag_name = DataBagName,
+                        item_name = ItemName,
+                        serialized_object = Data
+                       }.
+
+as_bin(S) when is_list(S) ->
+    list_to_binary(S);
+as_bin(B) when is_binary(B) ->
+    B.
+
+-spec get_id(chef_object() | #chef_client{} | #chef_sandbox{} | #chef_cookbook_version{}) -> object_id().
+%% @doc Return the `id' field from a `chef_object()' record type.
+get_id(#chef_client{id = Id}) ->
+    Id;
+get_id(#chef_node{id = Id}) ->
+    Id;
+get_id(#chef_role{id = Id}) ->
+    Id;
+get_id(#chef_environment{id = Id}) ->
+    Id;
+get_id(#chef_data_bag{id = Id}) ->
+    Id;
+get_id(#chef_data_bag_item{id = Id}) ->
+    Id;
+get_id(#chef_sandbox{id = Id}) ->
+    Id.
