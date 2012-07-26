@@ -1,0 +1,13 @@
+{application, chef_objects,
+ [
+  {description, "Chef object types and support modules"},
+  {vsn, git},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  ejson,
+                  ibrowse
+                 ]},
+  {env, []}
+ ]}.
