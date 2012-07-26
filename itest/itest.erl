@@ -8,7 +8,7 @@
 -define(GET_ARG(Name, Args), proplists:get_value(Name, Args)).
 
 -include_lib("eunit/include/eunit.hrl").
--include("chef_types.hrl").
+-include_lib("chef_objects/include/chef_types.hrl").
 
 make_id(Prefix) when is_binary(Prefix) ->
     case size(Prefix) of
@@ -218,7 +218,7 @@ setup_env() ->
     %% In production we use 5, but I'm using 2 here for the time being
     %% to exercise the joining together of multiple database calls.  See the TODO
     %% in the "Environment-filtered Recipes Tests" section for more.
-    ok = application:set_env(chef_common, bulk_fetch_batch_size, 2),
+    ok = application:set_env(chef_db, bulk_fetch_batch_size, 2),
 
     ColumnTransforms = case Type of
                            pgsql ->
@@ -301,11 +301,6 @@ basic_test_() ->
       {<<"Client Operations">>,
        [
         {<<"Insert operations">>, fun insert_client_data/0},
-        {<<"Name/clientname agreement">>, fun check_name_clientname_agreement/0},
-	{<<"Creation with name only">>, fun check_creation_with_name_only/0},
-	{<<"Creation with clientname only">>, fun check_creation_with_clientname_only/0},
-	{<<"Creation with bad name">>, fun check_creation_with_bad_name/0},
-	{<<"Creation with no name at all">>, fun check_creation_with_no_name/0},
         {<<"Fetch operations">>,  fun fetch_client_data/0},
         {<<"Bulk Fetch operations">>,  fun bulk_fetch_client_data/0},
         {<<"Delete operations">>, fun delete_client_data/0}
@@ -1080,35 +1075,6 @@ insert_client_data() ->
     Expected = lists:duplicate(length(Clients), {ok, 1}),
     Results = [chef_sql:create_client(Client) || Client <- Clients ],
     ?assertEqual(Expected, Results).
-
-check_name_clientname_agreement() ->
-    Body = <<"{\"name\":\"name\",\"clientname\":\"notname\"}">>,
-    ?assertThrow({client_name_mismatch}, chef_client:parse_binary_json(Body)).
-
-check_creation_with_name_only() ->
-    Body = <<"{\"name\":\"name\"}">>,
-    {ok, Client} = chef_client:parse_binary_json(Body),
-    Name = ej:get({<<"name">>}, Client),
-    ClientName = ej:get({<<"clientname">>}, Client),
-    ?assertEqual(Name, ClientName).
-
-check_creation_with_clientname_only() ->
-    Body = <<"{\"clientname\":\"name\"}">>,
-    {ok, Client} = chef_client:parse_binary_json(Body),
-    Name = ej:get({<<"name">>}, Client),
-    ClientName = ej:get({<<"clientname">>}, Client),
-    ?assertEqual(Name, ClientName).
-
-check_creation_with_no_name() ->
-    Body = <<"{\"validator\":false}">>,
-    ?assertThrow({both_missing, <<"name">>, <<"clientname">>},
-		 chef_client:parse_binary_json(Body)).
-
-check_creation_with_bad_name() ->
-    Body = <<"{\"name\":\"bad~name\"}">>,
-    ?assertThrow({bad_client_name, <<"bad~name">>,
-		  <<"Malformed client name.  Must be A-Z, a-z, 0-9, _, -, or .">>},
-		 chef_client:parse_binary_json(Body)).
 
 fetch_client_data() ->
     Expected = make_client(<<"client03">>),

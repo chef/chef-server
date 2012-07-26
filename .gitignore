@@ -12,3 +12,5 @@ doc/*.html
 
 
 
+itest/.bundle
+itest/mysql-migration.log

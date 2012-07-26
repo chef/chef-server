@@ -11,7 +11,6 @@
 -behaviour(application).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("xmerl/include/xmerl.hrl").
 
 %% Application callbacks
 -export([start/2, stop/1]).
@@ -19,19 +18,21 @@
 start(_StartType, _StartArgs) ->
     ok = load_ibrowse_config(),
     ok = enable_org_cache(),
-    chef_common_sup:start_link().
+    %% FIXME: this isn't right. chef_cache should be supervised.
+    {ok, self()}.
 
 stop(_State) ->
     ok.
 
 load_ibrowse_config() ->
+    %% FIXME: location of this file should be in config!
     ConfigFile = filename:absname(filename:join(["etc", "ibrowse", "ibrowse.config"])),
     error_logger:info_msg("Loading ibrowse configuration from ~s~n", [ConfigFile]),
     ok = ibrowse:rescan_config(ConfigFile),
     ok.
 
 enable_org_cache() ->
-    case application:get_env(chef_common, cache_defaults) of
+    case application:get_env(chef_db, cache_defaults) of
         undefined ->
             error_logger:info_msg("Org guid cache disabled~n");
         {ok, _Defaults} ->
