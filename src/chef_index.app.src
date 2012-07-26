@@ -1,12 +1,12 @@
 {application, chef_index,
  [
-  {description, ""},
-  {vsn, "1"},
+  {description, "Chef search index tools"},
+  {vsn, git},
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  ejson
                  ]},
-  {mod, { chef_index_app, []}},
   {env, []}
  ]}.
