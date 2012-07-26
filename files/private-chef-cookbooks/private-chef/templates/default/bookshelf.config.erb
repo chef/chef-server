@@ -13,7 +13,9 @@
         ]},
 
  %% bookshelf_store Config
- {bookshelf_store, [{disk_store, "<%= @data_dir %>"}]},
+ {bookshelf_store, [{disk_store, "<%= @bucket_directory %>"},
+                    {md_disk_store, "<%= @metadata_directory %>"}
+                   ]},
 
  %% bookshelf_wi Config
  {bookshelf_wi, [{ip, "<%= @listen %>"},
