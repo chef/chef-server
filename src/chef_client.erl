@@ -85,7 +85,7 @@ set_name_values(Client, ReqName) ->
     % TODO: Can this be simplified?  Several of these cases are duplicates; doesn't
     % seem to be a case where reordering really solves the issue
     case {Name, ClientName, ReqName} of
-        {undefined, undefined, undefined} ->
+        {undefined, undefined, _} ->
             throw({both_missing, <<"name">>, <<"clientname">>});
         {Name, Name, undefined} ->
             {Name, Client};
