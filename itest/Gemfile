@@ -1,0 +1,8 @@
+source 'http://www.rubygems.org'
+
+gem "mysql2"
+gem "pg"
+
+gem 'mixlib-authorization',
+    :git => 'git@github.com:opscode/mixlib-authorization.git',
+    :require => 'mixlib/authorization'

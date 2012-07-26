@@ -1,0 +1,19 @@
+{application, chef_db,
+ [
+  {description, "Database abstraction layer for Chef server"},
+  {vsn, git},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  couchbeam,
+                  ejson,
+                  ibrowse,
+                  mochiweb,
+                  darklaunch,
+                  stats_hero,
+                  sqerl
+                 ]},
+  {mod, {chef_db_app, []}},
+  {env, []}
+ ]}.
