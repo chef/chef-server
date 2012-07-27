@@ -9,9 +9,7 @@ doc/*.html
 /doc/edoc-info
 /doc/erlang.png
 /doc/stylesheet.css
-
-
-
 itest/.bundle
+/itest/Gemfile.lock
 itest/mysql-migration.log
 itest/pgsql-migration.log
