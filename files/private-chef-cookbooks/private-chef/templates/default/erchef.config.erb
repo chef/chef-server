@@ -29,33 +29,36 @@
 	            {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>},
               {superusers, [<<"pivotal">>]}
              ]},
-
- {chef_common, [
-
-                %% We need this parameter in chef_common now, too
-                {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
-
-                {s3_access_key_id, "<%= node['private_chef']['aws']['aws_key'] %>"},
-                {s3_secret_key_id, "<%= node['private_chef']['aws']['aws_secret'] %>"},
-                %% this is hard-coded until bookshelf gets integrated.
-                {s3_url, "https://s3.amazonaws.com"},
-                {s3_platform_bucket_name, "<%= node['private_chef']['aws']['s3_bucket'] %>"},
-
-                {solr_url, "http://<%= node['private_chef']['opscode-solr']['vip'] %>:<%= node['private_chef']['opscode-solr']['port'] %>/solr"},
-                {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
-                {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> },
-
-                {cache_defaults, [{max_size, <%= @max_cache_size %> },
+  {chef_authn, [
+                {keyring, [{default, "/etc/opscode/webui_pub.pem"}]}
+               ]},
+  {chef_authz, [
+                {authz_root_url, "http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>" }
+               ]},
+  {chef_db, [
+             {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
+             {cache_defaults, [{max_size, <%= @max_cache_size %> },
                                   {ttl, <%= @cache_ttl %> }]},
+             {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
+             {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> },
+            ]},
+  {chef_index, [
                 {rabbitmq_host, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
                 {rabbitmq_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
                 {rabbitmq_user, <<"<%= node['private_chef']['rabbitmq']['user'] %>">>},
                 {rabbitmq_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
                 {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['vhost'] %>">>},
                 {rabbitmq_exchange, <<"">>},
-                {authz_root_url, "http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>" },
-                {certificate_root_url, "http://<%= node['private_chef']['opscode-certificate']['vip'] %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificates"},
-		        {keyring, [{default, "/etc/opscode/webui_pub.pem"}]}]},
+                {solr_url, "http://<%= node['private_chef']['opscode-solr']['vip'] %>:<%= node['private_chef']['opscode-solr']['port'] %>/solr"}
+               ]},
+  {chef_objects, [
+                  {certificate_root_url, "http://<%= node['private_chef']['opscode-certificate']['vip'] %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificates"},
+                  {s3_access_key_id, "<%= node['private_chef']['aws']['aws_key'] %>"},
+                  {s3_secret_key_id, "<%= node['private_chef']['aws']['aws_secret'] %>"},
+                  %% this is hard-coded until bookshelf gets integrated.
+                  {s3_url, "https://s3.amazonaws.com"},
+                  {s3_platform_bucket_name, "<%= node['private_chef']['aws']['s3_bucket'] %>"}
+                 ]},
   {stats_hero, [
                {udp_socket_pool_size, 1 },
                {estatsd_host, "127.0.0.1" },
