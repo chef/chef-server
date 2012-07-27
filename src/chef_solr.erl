@@ -88,7 +88,7 @@ add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery},
                               binary_to_list(OrgGuid) ++ " " ++ FilterQuery}.
 
 search(#chef_solr_query{}=Query) ->
-    {ok, SolrUrl} = application:get_env(chef_common, solr_url),
+    {ok, SolrUrl} = application:get_env(chef_index, solr_url),
     Url = SolrUrl ++ make_solr_query_url(Query),
     % FIXME: error handling
     {ok, Code, _Head, Body} = ibrowse:send_req(Url, [], get),
@@ -114,7 +114,7 @@ search(#chef_solr_query{}=Query) ->
 
 ping() ->
     try
-        {ok, SolrUrl} = application:get_env(chef_common, solr_url),
+        {ok, SolrUrl} = application:get_env(chef_index, solr_url),
         %% FIXME: solr will barf on doubled '/'s so SolrUrl must not end with a trailing slash
         Url = SolrUrl ++ "/admin/ping?wt=json",
         case ibrowse:send_req(Url, [], get) of

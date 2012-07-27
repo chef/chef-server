@@ -153,7 +153,7 @@ search_test_() ->
      fun() ->
              meck:new(wrq),
              meck:new(ibrowse),
-             application:set_env(chef_common, solr_url, "mock_solr_url")
+             application:set_env(chef_index, solr_url, "mock_solr_url")
      end,
      fun(_) ->
              meck:unload([wrq, ibrowse])
