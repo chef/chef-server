@@ -102,7 +102,7 @@ base64_checksum(Checksum) ->
 %% @doc Utility function for fetching the S3 bucket name from config.
 -spec bucket() -> string().
 bucket() ->
-    {ok, Bucket} = application:get_env(chef_common, s3_platform_bucket_name),
+    {ok, Bucket} = application:get_env(chef_objects, s3_platform_bucket_name),
     Bucket.
 
 -spec headers_for_type(http_verb(), Checksum::binary()) -> [ {string(), string()} ].
@@ -119,10 +119,10 @@ headers_for_type(get, _Checksum) ->
     [].
 
 get_config() ->
-    {ok, S3AccessKeyId } =  application:get_env(chef_common, s3_access_key_id),
-    {ok, S3SecretKeyId } =  application:get_env(chef_common, s3_secret_key_id),
+    {ok, S3AccessKeyId } =  application:get_env(chef_objects, s3_access_key_id),
+    {ok, S3SecretKeyId } =  application:get_env(chef_objects, s3_secret_key_id),
 
-    S3Url = case application:get_env(chef_common, s3_url) of
+    S3Url = case application:get_env(chef_objects, s3_url) of
         undefined ->
             throw({error, missing_s3_url});
         {ok, Url} ->

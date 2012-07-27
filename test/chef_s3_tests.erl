@@ -49,10 +49,10 @@ url_test_() ->
       foreach,
       fun() ->
               test_utils:mock(MockedModules, [passthrough]),
-              application:set_env(chef_common, s3_platform_bucket_name, "testbucket"),
-              application:set_env(chef_common, s3_access_key_id, "super_id"),
-              application:set_env(chef_common, s3_secret_key_id, "super_secret"),
-              application:set_env(chef_common, s3_url, "https://FAKE_S3.com"),
+              application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
+              application:set_env(chef_objects, s3_access_key_id, "super_id"),
+              application:set_env(chef_objects, s3_secret_key_id, "super_secret"),
+              application:set_env(chef_objects, s3_url, "https://FAKE_S3.com"),
 
               meck:expect(mini_s3, new, 3, blah),
               meck:expect(mini_s3, get_object_metadata, 4, something),
@@ -113,7 +113,7 @@ check_test_() ->
      fun() ->
              test_utils:mock(MockedModules, [passthrough]),
              meck:expect(chef_s3, get_config, fun() -> mock_config end),
-             application:set_env(chef_common, s3_platform_bucket_name, "testbucket"),
+             application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
 
              %% Actual value doesn't matter; we're not going to use it anyway
              meck:expect(mini_s3, new, 3, ignored),

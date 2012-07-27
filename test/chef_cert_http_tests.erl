@@ -11,7 +11,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 setup_env() ->
-    ok = application:set_env(chef_common, certificate_root_url, ?cert_url).
+    ok = application:set_env(chef_objects, certificate_root_url, ?cert_url).
 
 make_response_body(Cert, KeyPair) ->
     ejson:encode({[{<<"cert">>, Cert}, {<<"keypair">>, KeyPair}]}).

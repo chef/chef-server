@@ -24,7 +24,7 @@ gen_cert(Guid, RequestId) ->
     FullHeaders = [{?X_OPS_REQUEST_ID, binary_to_list(RequestId)},
                    {"Accept", "application/json"}
                   ],
-    {ok, Url} = application:get_env(chef_common, certificate_root_url),
+    {ok, Url} = application:get_env(chef_objects, certificate_root_url),
     Body = body_for_post(Guid),
     case ibrowse:send_req(Url, FullHeaders, post, Body) of
         {ok, Code, ResponseHeaders, ResponseBody} ->
