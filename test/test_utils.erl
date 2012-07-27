@@ -88,7 +88,6 @@ ensure_couch() ->
     application:set_env(chef_authz, authz_root_url, ?authz_host),
     application:set_env(chef_db, couchdb_host, ?chef_host_name),
     application:set_env(chef_db, couchdb_port, ?chef_host_port),
-    application:set_env(chef_db, dark_launch_sql_users, false),
     ensure_ibrowse().
 
 %% helper functions for configuring mocking.
