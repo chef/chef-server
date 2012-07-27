@@ -14,3 +14,4 @@ doc/*.html
 
 itest/.bundle
 itest/mysql-migration.log
+itest/pgsql-migration.log
