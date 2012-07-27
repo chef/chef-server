@@ -1,11 +1,4 @@
-DEPS = deps/amqp_client \
-       deps/ejson \
-       deps/gen_bunny \
-       deps/gen_server2 \
-       deps/meck \
-       deps/mochiweb \
-       deps/neotoma \
-       deps/rabbit_common
+DEPS=$(CURDIR)/deps
 
 all: compile eunit dialyzer
 
