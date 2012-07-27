@@ -30,15 +30,6 @@
                       'authz_node' |
                       'authz_role'.
 
--type chef_object_name() :: chef_client |
-                            chef_data_bag |
-                            chef_data_bag_item |
-                            chef_environment |
-                            chef_node |
-                            chef_role.
-
--type authz_type_or_object() :: authz_type() | chef_object_name().
-
 -type db_key() :: binary() | string().
 
 
