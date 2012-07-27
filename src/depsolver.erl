@@ -1,7 +1,25 @@
 %% -*- erlang-indent-level: 4; indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sx=4 et
+%%
+%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
+%% @author Eric Merritt <ericbmerritt@gmail.com>
+%%
 %%%-------------------------------------------------------------------
-%%% @author Eric Merritt <ericbmerritt@gmail.com>
 %%% @doc
 %%% This is a dependency constraint solver. You add your 'world' to the
 %%% solver. That is the packages that exist, their versions and their
@@ -21,7 +39,7 @@
 %%%      app3 that has versions
 %%%       "0.1", "0.2" and "0.3" all with no dependencies
 %%%
-%%% we can add this world to the system all at once ass follows
+%%% we can add this world to the system all at once as follows
 %%%
 %%%      Graph0 = depsolver:new_graph(),
 %%%      Graph1 = depsolver:add_packages(
