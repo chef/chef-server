@@ -13,7 +13,11 @@
 -module(depsolver_culprit).
 
 -export([search/3,
-        format_error/1]).
+        format_error/1,
+        format_version/1,
+        format_constraint/1,
+        format_roots/1,
+        format_culprits/1]).
 
 %%============================================================================
 %% Types
@@ -61,6 +65,87 @@ format_error({error, Detail}) ->
 format_error(Details) when erlang:is_list(Details) ->
     ["Unable to solve constraints, the following solutions were attempted \n\n",
      [[format_error_path("    ", Detail)] || Detail <- Details]].
+
+-spec format_roots([depsolver:constraints()]) -> iolist().
+format_roots(Roots) ->
+    lists:foldl(fun(Root, Acc0) ->
+                        lists:foldl(
+                          fun(Con, "") ->
+                                  [format_constraint(Con)];
+                             (Con, Acc1) ->
+                                  [format_constraint(Con), ", "  | Acc1]
+                          end, Acc0, Root)
+                end, [], Roots).
+
+-spec format_culprits([{[depsolver:constraint()], [depsolver:constraint()]}]) -> iolist().
+format_culprits(FailingDeps) ->
+    Deps = sets:to_list(sets:from_list(lists:flatten([[depsolver:dep_pkg(Con) || Con <- Cons]
+                                                      || {_, Cons} <- FailingDeps]))),
+    lists:foldl(fun(Con, "") ->
+                        [format_constraint(Con)];
+                   (Con, Acc1) ->
+                        [format_constraint(Con),
+                        ", " | Acc1]
+                end, [], Deps).
+
+
+-spec format_version(depsolver:vsn()) -> iolist().
+format_version({Maj}) ->
+    erlang:integer_to_list(Maj);
+format_version({Maj, Min}) ->
+    [erlang:integer_to_list(Maj), ".",
+     erlang:integer_to_list(Min)];
+format_version({Maj, Min, Patch}) ->
+    [erlang:integer_to_list(Maj), ".",
+     erlang:integer_to_list(Min), ".",
+     erlang:integer_to_list(Patch)].
+
+-spec format_constraint(depsolver:constraint()) -> list().
+format_constraint(Pkg) when is_atom(Pkg) ->
+    erlang:atom_to_list(Pkg);
+format_constraint(Pkg) when is_binary(Pkg) ->
+    erlang:binary_to_list(Pkg);
+format_constraint({Pkg, Vsn}) when is_tuple(Vsn) ->
+    ["(", format_constraint(Pkg), " = ",
+     format_version(Vsn), ")"];
+format_constraint({Pkg, Vsn, '='}) when is_tuple(Vsn) ->
+    ["(", format_constraint(Pkg), " = ",
+     format_version(Vsn), ")"];
+format_constraint({Pkg, Vsn, gte}) ->
+    ["(", format_constraint(Pkg), " >= ",
+     format_version(Vsn), ")"];
+format_constraint({Pkg, Vsn, '>='}) ->
+    ["(", format_constraint(Pkg), " >= ",
+     format_version(Vsn), ")"];
+format_constraint({Pkg, Vsn, lte}) ->
+    ["(", format_constraint(Pkg), " <= ",
+     format_version(Vsn), ")"];
+format_constraint({Pkg, Vsn, '<='}) ->
+    ["(", format_constraint(Pkg), " <= ",
+     format_version(Vsn), ")"];
+format_constraint({Pkg, Vsn, gt}) ->
+    ["(", format_constraint(Pkg), " > ",
+     format_version(Vsn), ")"];
+format_constraint({Pkg, Vsn, '>'}) ->
+    ["(", format_constraint(Pkg), " > ",
+     format_version(Vsn), ")"];
+format_constraint({Pkg, Vsn, lt}) ->
+    ["(", format_constraint(Pkg), " < ",
+     format_version(Vsn), ")"];
+format_constraint({Pkg, Vsn, '<'}) ->
+    ["(", format_constraint(Pkg), " < ",
+     format_version(Vsn), ")"];
+format_constraint({Pkg, Vsn, pes}) ->
+    ["(", format_constraint(Pkg), " ~> ",
+     format_version(Vsn), ")"];
+format_constraint({Pkg, Vsn, '~>'}) ->
+    ["(", format_constraint(Pkg), " ~> ",
+     format_version(Vsn), ")"];
+format_constraint({Pkg, Vsn1, Vsn2, between}) ->
+    ["(", format_constraint(Pkg), " between ",
+     format_version(Vsn1), " and ",
+     format_version(Vsn2), ")"].
+
 
 %%============================================================================
 %% Internal Functions
@@ -206,63 +291,6 @@ treeize_path(Pkg, Constraints, Seen0) ->
 
     end.
 
--spec format_version(depsolver:vsn()) -> iolist().
-format_version({Maj}) ->
-    erlang:integer_to_list(Maj);
-format_version({Maj, Min}) ->
-    [erlang:integer_to_list(Maj), ".",
-     erlang:integer_to_list(Min)];
-format_version({Maj, Min, Patch}) ->
-    [erlang:integer_to_list(Maj), ".",
-     erlang:integer_to_list(Min), ".",
-     erlang:integer_to_list(Patch)].
-
--spec format_constraint(depsolver:constraint()) -> list().
-format_constraint(Pkg) when is_atom(Pkg) ->
-    erlang:atom_to_list(Pkg);
-format_constraint(Pkg) when is_binary(Pkg) ->
-    Pkg;
-format_constraint({Pkg, Vsn}) when is_tuple(Vsn) ->
-    ["(", format_constraint(Pkg), " = ",
-     format_version(Vsn), ")"];
-format_constraint({Pkg, Vsn, '='}) when is_tuple(Vsn) ->
-    ["(", format_constraint(Pkg), " = ",
-     format_version(Vsn), ")"];
-format_constraint({Pkg, Vsn, gte}) ->
-    ["(", format_constraint(Pkg), " >= ",
-     format_version(Vsn), ")"];
-format_constraint({Pkg, Vsn, '>='}) ->
-    ["(", format_constraint(Pkg), " >= ",
-     format_version(Vsn), ")"];
-format_constraint({Pkg, Vsn, lte}) ->
-    ["(", format_constraint(Pkg), " <= ",
-     format_version(Vsn), ")"];
-format_constraint({Pkg, Vsn, '<='}) ->
-    ["(", format_constraint(Pkg), " <= ",
-     format_version(Vsn), ")"];
-format_constraint({Pkg, Vsn, gt}) ->
-    ["(", format_constraint(Pkg), " > ",
-     format_version(Vsn), ")"];
-format_constraint({Pkg, Vsn, '>'}) ->
-    ["(", format_constraint(Pkg), " > ",
-     format_version(Vsn), ")"];
-format_constraint({Pkg, Vsn, lt}) ->
-    ["(", format_constraint(Pkg), " < ",
-     format_version(Vsn), ")"];
-format_constraint({Pkg, Vsn, '<'}) ->
-    ["(", format_constraint(Pkg), " < ",
-     format_version(Vsn), ")"];
-format_constraint({Pkg, Vsn, pes}) ->
-    ["(", format_constraint(Pkg), " ~> ",
-     format_version(Vsn), ")"];
-format_constraint({Pkg, Vsn, '~>'}) ->
-    ["(", format_constraint(Pkg), " ~> ",
-     format_version(Vsn), ")"];
-format_constraint({Pkg, Vsn1, Vsn2, between}) ->
-    ["(", format_constraint(Pkg), " between ",
-     format_version(Vsn1), " and ",
-     format_version(Vsn2), ")"].
-
 -spec add_s(list()) -> iolist().
 add_s(Roots) ->
      case erlang:length(Roots) of
@@ -271,28 +299,6 @@ add_s(Roots) ->
          _ ->
              ""
      end.
-
--spec format_roots([depsolver:constraint()]) -> iolist().
-format_roots(Roots) ->
-    lists:foldl(fun(Root, Acc0) ->
-                        lists:foldl(
-                          fun(Con, "") ->
-                                  [format_constraint(Con)];
-                             (Con, Acc1) ->
-                                  [format_constraint(Con), ", "  | Acc1]
-                          end, Acc0, Root)
-                end, "", Roots).
-
--spec format_culprits([{[depsolver:constraint()], [depsolver:constrait()]}]) -> iolist().
-format_culprits(FailingDeps) ->
-    Deps = sets:to_list(sets:from_list(lists:flatten([[depsolver:dep_pkg(Con) || Con <- Cons]
-                                                      || {_, Cons} <- FailingDeps]))),
-    lists:foldl(fun(Con, "") ->
-                        [format_constraint(Con)];
-                   (Con, Acc1) ->
-                        [format_constraint(Con),
-                        ", " | Acc1]
-                end, "", Deps).
 
 -spec format_path(string(), [depsolver:pkg()]) -> iolist().
 format_path(CurrentIdent, Path) ->

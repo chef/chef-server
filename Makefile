@@ -1,5 +1,4 @@
 ERL = $(shell which erl)
-PLTFILE = .depsolver.plt
 
 ERLFLAGS= -pa $(CURDIR)/.eunit -pa $(CURDIR)/ebin -pa $(CURDIR)/*/ebin
 
@@ -9,7 +8,7 @@ ifeq ($(REBAR),)
 	$(error "Rebar not available on this system")
 endif
 
-all: compile test
+all: compile eunit dialyzer
 
 compile:
 	@$(REBAR) compile
@@ -20,20 +19,14 @@ doc:
 clean:
 	@$(REBAR) clean
 
-eunit:
-	@$(REBAR) eunit
+eunit: compile
+	@$(REBAR) skip_deps=true eunit
 
-$(PLTFILE):
-	@dialyzer --build_plt --apps stdlib crypto erts kernel public_key eunit --output_plt $(PLTFILE)
+dialyzer:
+	@dialyzer -Wrace_conditions -r ebin
 
-dialyzer: $(PLTFILE)
-	@dialyzer --plt $(PLTFILE) -c ./src --src
-
-typer: $(PLTFILE)
-	typer --plt $(PLTFILE) -r ./src
-
-clean-plt:
-	rm -f $(PLTFILE)
+typer:
+	typer -r ./src
 
 shell: compile
 # You often want *rebuilt* rebar tests to be available to the
@@ -44,6 +37,5 @@ shell: compile
 	- @$(REBAR) eunit
 	@$(ERL) $(ERLFLAGS)
 
-distclean: clean clean-plt
+distclean: clean
 	@rm -rvf $(CURDIR)/deps/*
-	@rm -rf $(PLTFILE)
