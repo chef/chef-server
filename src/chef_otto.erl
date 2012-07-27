@@ -14,7 +14,6 @@
          fetch_assigned_orgs/1,
          %% chef object fetching
          fetch_client/3,
-         fetch_container/3,
          %% fetch_cookbook/3,
          fetch_data_bag/3,
          %% fetch_data_bag_item/3,
@@ -244,32 +243,6 @@ fetch_client(Server, OrgId, ClientName) ->
                          public_key =  Cert,
                          last_updated_by = Updated
                         };
-        Error -> Error
-    end.
-
-%%%
-%%% Containers only have a mixlib-auth record
-%%%
--spec fetch_container(couchbeam:server(), binary() | not_found,
-                      binary() | string()) ->
-                         #chef_container{}
-                                 | {not_found, client}
-                                 | {not_found, org}.
-fetch_container(Server, OrgId, ContainerName) ->
-    case fetch_by_name(Server, OrgId, ContainerName, authz_container) of
-        {ok, Container} ->
-            Id = ej:get({<<"_id">>}, Container),
-            AuthzId = fetch_auth_join_id(Server, Id, user_to_auth),
-            Name = ej:get({<<"containername">>}, Container),
-            Path = ej:get({<<"containerpath">>}, Container),
-            Updated =  ej:get({<<"requester_id">>}, Container),
-            #chef_container{id = Id,
-                            authz_id = AuthzId,
-                            org_id = OrgId,
-                            name = Name,
-                            path = Path,
-                            last_updated_by = Updated
-                           };
         Error -> Error
     end.
 

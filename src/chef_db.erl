@@ -19,9 +19,6 @@
 
          fetch_requestor/3,
 
-         fetch_container/3,
-         container_record_to_authz_id/2,
-
          %% Checksum ops
          mark_checksums_as_uploaded/3,
 
@@ -299,16 +296,6 @@ fetch_sql_requestor(Context, OrgName, ClientName) ->
                             name = Name,
                             key_data = find_key_data(User)}
     end.
-
-%
-% Container
-%
-fetch_container(#context{reqid = ReqId, otto_connection = Server}, OrgId, ContainerName) ->
-    ?SH_TIME(ReqId, chef_otto, fetch_container, (Server, OrgId, ContainerName)).
-
--spec container_record_to_authz_id(any(), any()) -> id().
-container_record_to_authz_id(#context{}, ContainerRecord) ->
-    ContainerRecord#chef_container.authz_id.
 
 -spec create_node(#context{}, #chef_node{}, object_id()) -> ok | {conflict, term()} | term().
 %% @doc Store a new node in the datastore.
