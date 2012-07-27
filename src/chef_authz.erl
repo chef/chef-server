@@ -45,6 +45,9 @@
          ping/0]).
 
 -include("chef_authz.hrl").
+-include("chef_authz_db.hrl").
+
+-export_type([chef_authz_context/0]).
 
 -define(x_ops_requester_id, "X-Ops-Requesting-Actor-Id").
 -define(x_ops_user_id, "X-Ops-User-Id").
@@ -59,9 +62,16 @@
 -include_lib("eunit/include/eunit.hrl").
 %-endif.
 
--type requestor_id() :: binary().
--type actor_id() :: binary().
--type object_id() :: <<_:256>>.
+-type contained_object_name() :: 'client' |
+                                 'container' |
+                                 'cookbook' |
+                                 'data' |
+                                 'environment'|
+                                 'group' |
+                                 'node' |
+                                 'role' |
+                                 'sandboxes' |
+                                 'search'.
 
 -spec ping() -> pong | pang.
 ping() ->
@@ -72,6 +82,12 @@ ping() ->
 %%% creates the authz permissions for the object if the creator is permitted
 %%% otherwise returns {error, forbidden}
 %%%
+-spec create_object_if_authorized(chef_authz_context(),
+                                  object_id(),
+                                  object_id(),
+                                  contained_object_name()) ->
+                                         {error, forbidden} |
+                                         {ok, object_id()}.
 create_object_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
     ContainerAId = get_container_aid_for_object(Context, OrgId, ObjectType),
     case is_authorized_on_resource(CreatorAId, container, ContainerAId, actor, CreatorAId, create) of
@@ -83,6 +99,10 @@ create_object_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
 %%%
 %%% get_container_aid_for_object
 %%% TODO: consider error cases in more detail
+-spec get_container_aid_for_object(chef_authz_context(),
+                                   object_id(),
+                                   contained_object_name()) ->
+                                          object_id().
 get_container_aid_for_object(Context, OrgId, ObjectType) ->
     ContainerName = object_type_to_container_name(ObjectType),
     Container = chef_authz_db:fetch_container(Context, OrgId, ContainerName),
@@ -272,22 +292,13 @@ set_ace_for_resource(RequestorId, ResourceType, Id, AccessMethod, #authz_ace{act
         {error, Error} -> {error, Error}
     end.
 
--spec pluralize_resource(resource_type()) -> <<_:48,_:_*8>>. % <<"actors">> | <<"containers">> | <<"groups">> | <<"objects">>.
+-spec pluralize_resource(resource_type()) -> <<_:48,_:_*8>>.
 pluralize_resource(actor) -> <<"actors">>;
 pluralize_resource(container) -> <<"containers">>;
 pluralize_resource(group) -> <<"groups">>;
 pluralize_resource(object) -> <<"objects">>.
 
--spec object_type_to_container_name('client' |
-                                    'container' |
-                                    'cookbook' |
-                                    'data' |
-                                    'environment'|
-                                    'group' |
-                                    'node' |
-                                    'role' |
-                                    'sandboxes' |
-                                    'search') -> <<_:32,_:_*8>>.
+-spec object_type_to_container_name(contained_object_name()) -> <<_:32,_:_*8>>.
 object_type_to_container_name(client) -> <<"clients">>;
 object_type_to_container_name(container) -> <<"containers">>;
 object_type_to_container_name(cookbook) -> <<"cookbooks">>;
@@ -304,7 +315,7 @@ object_type_to_container_name(search) -> <<"search">>.
 % TODO:
 % write: auth_id_to_object(Server, OrgId, AuthId) ->
 %
-
+-spec to_text(atom() | binary() | string()) -> string().
 to_text(E) when is_binary(E) ->
     binary_to_list(E);
 to_text(E) when is_atom(E) ->
@@ -312,7 +323,7 @@ to_text(E) when is_atom(E) ->
 to_text(E) when is_list(E) ->
     E.
 
--spec make_url([string()|binary()|atom()]) -> string().
+-spec make_url([string()|binary()|atom(),...]) -> string().
 make_url(Components) ->
     string:join([to_text(E) || E <- Components],"/").
 

@@ -17,22 +17,12 @@
 
 -module(chef_authz_db).
 
--include("chef_authz.hrl").
-
 -export([container_record_to_authz_id/2,
-         fetch_container/3]).
+         fetch_container/3,
+         make_context/1]).
 
--type authz_type() :: 'authz_client' |
-                      'authz_container' |
-                      'authz_cookbook' |
-                      'authz_data_bag' |
-                      'authz_environment' |
-                      'authz_group' |
-                      'authz_node' |
-                      'authz_role'.
-
--type db_key() :: binary() | string().
--type object_id() :: <<_:256>>.
+-include("chef_authz.hrl").
+-include("chef_authz_db.hrl").
 
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
 -define(user_db, "opscode_account").
@@ -68,8 +58,6 @@
 -define(mixlib_auth_join_design,
         "Mixlib::Authorization::AuthJoin-25834c5a8d6a9586adb05320f3f725e8").
 
-
-
 -define(client_design, "clients").
 -define(cookbook_design, "cookbooks").
 -define(data_bag_design, "data_bags").
@@ -78,7 +66,19 @@
 -define(node_design, "nodes").
 -define(role_design, "roles").
 
-fetch_container(#context{otto_connection=Server}, OrgId, ContainerName) ->
+-spec make_context(binary()) -> #chef_authz_context{}.
+make_context(ReqId) when is_binary(ReqId) ->
+    Host = get_env(couchdb_host),
+    Port = get_env(couchdb_port),
+    S = couchbeam:server_connection(Host, Port, "", []),
+    #chef_authz_context{reqid = ReqId, otto_connection = S}.
+    
+-spec fetch_container(chef_authz_context(),
+                      object_id(),
+                      container_name()) ->
+                             #chef_container{} |
+                             {not_found, authz_container | org}.
+fetch_container(#chef_authz_context{otto_connection=Server}, OrgId, ContainerName) ->
     case fetch_by_name(Server, OrgId, ContainerName, authz_container) of
         {ok, Container} ->
             Id = ej:get({<<"_id">>}, Container),
@@ -97,8 +97,8 @@ fetch_container(#context{otto_connection=Server}, OrgId, ContainerName) ->
     end.
 
 -spec container_record_to_authz_id(any(), any()) -> object_id().
-container_record_to_authz_id(#context{}, ContainerRecord) ->
-    ContainerRecord#chef_container.authz_id.
+container_record_to_authz_id(#chef_authz_context{}, #chef_container{authz_id = Id}) ->
+    Id.
 
 -spec fetch_by_name(couchbeam:server(),
                     binary() | 'not_found',
@@ -183,3 +183,11 @@ design_and_view_for_type(authz_container) ->
 -spec dbname(binary()) -> <<_:40,_:_*8>>.
 dbname(OrgId) ->
     <<"chef_", OrgId/binary>>.
+
+get_env(Key) ->
+    case application:get_env(chef_authz, Key) of
+        undefined ->
+            throw({missing_application_config, chef_authz, Key});
+        {ok, Value} ->
+            Value
+    end.
