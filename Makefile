@@ -40,3 +40,7 @@ eunit: compile
 	@rebar skip_deps=true eunit
 
 test: eunit
+
+lucene: compile
+	@rm src/lucene_*.erl
+	@priv/build_grammars
