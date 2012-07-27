@@ -41,6 +41,7 @@
          get_group/2,
          get_acl_for_resource/3,
          get_ace_for_resource/4,
+         make_context/1,
          set_ace_for_resource/5,
          ping/0]).
 
@@ -76,6 +77,10 @@
 -spec ping() -> pong | pang.
 ping() ->
     chef_authz_http:ping().
+
+-spec make_context(binary()) -> #chef_authz_context{}.
+make_context(ReqId)  ->
+    chef_authz_db:make_context(ReqId).
 
 %%%
 %%% Takes a Creator authz id,  an object type atom and an OrgId and
