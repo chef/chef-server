@@ -33,7 +33,9 @@
                 {keyring, [{default, "/etc/opscode/webui_pub.pem"}]}
                ]},
   {chef_authz, [
-                {authz_root_url, "http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>" }
+                {authz_root_url, "http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>" },
+                {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
+                {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
                ]},
   {chef_db, [
              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
