@@ -39,7 +39,7 @@
 %%%      app3 that has versions
 %%%       "0.1", "0.2" and "0.3" all with no dependencies
 %%%
-%%% we can add this world to the system all at once ass follows
+%%% we can add this world to the system all at once as follows
 %%%
 %%%      Graph0 = depsolver:new_graph(),
 %%%      Graph1 = depsolver:add_packages(
