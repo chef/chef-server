@@ -11,6 +11,17 @@ If no solution can be found, detailed back tracking information is
 returned that can be used to detect what exact dependencies are causing
 the problem.
 
+Building
+--------
+1) In order to build you need rebar (https://github.com/basho/rebar)
+
+2) (Optional) Build dialyzer PLT which includes erts, kernel, stdlib, crypto,
+   and public_key. If you've never done this before, use the command below:
+
+    dialyzer --build_plt --apps erts kernel stdlib crypto public_key
+
+3) run `make`
+
 API
 -----
 Lets say our world looks as follows
