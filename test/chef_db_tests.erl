@@ -184,5 +184,5 @@ update_fun_test_() ->
 
 set_app_env() ->
     test_utils:start_stats_hero(),
-    application:set_env(chef_common, couchdb_host, "localhost"),
-    application:set_env(chef_common, couchdb_port, 5984).
+    application:set_env(chef_db, couchdb_host, "localhost"),
+    application:set_env(chef_db, couchdb_port, 5984).

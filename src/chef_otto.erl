@@ -90,8 +90,8 @@
 
 -spec connect() -> couchbeam:server().
 connect() ->
-    {ok, Host} = application:get_env(chef_common, couchdb_host),
-    {ok, Port} = application:get_env(chef_common, couchdb_port),
+    {ok, Host} = application:get_env(chef_db, couchdb_host),
+    {ok, Port} = application:get_env(chef_db, couchdb_port),
     connect(Host, Port).
 
 -spec connect(string(), http_port()) -> couchbeam:server().

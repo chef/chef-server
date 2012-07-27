@@ -7,7 +7,7 @@ require 'logger'
 PGSQL_CMD = "psql -q -d postgres -h localhost -p 5432 -f -"
 
 module SchemaHelper
-  DB_NAME = "chef_common_itest"
+  DB_NAME = "chef_db_itest"
   DB_USER = "itest"
   DB_PASS = "itest"
 
