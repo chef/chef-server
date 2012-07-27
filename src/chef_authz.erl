@@ -62,8 +62,7 @@
 
 -type requestor_id() :: binary().
 -type actor_id() :: binary().
-
-
+-type object_id() :: <<_:256>>.
 
 -spec ping() -> pong | pang.
 ping() ->
