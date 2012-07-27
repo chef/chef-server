@@ -1,11 +1,4 @@
-DEPS = deps/automeck \
-       deps/depsolver \
-       deps/ej \
-       deps/ejson \
-       deps/ibrowse \
-       deps/meck \
-       deps/mini_s3 \
-       deps/mochiweb
+DEPS=$(CURDIR)/deps
 
 all: compile eunit dialyzer
 
@@ -37,8 +30,8 @@ dialyzer:
        # TODO: uncomment and deal with warnings
        # @dialyzer -Wrace_conditions -Wunderspecs -r ebin deps/ej/ebin \
        #                                             deps/mini_s3/ebin \
-       #                                             deps/depsolver/ebin 
-	@dialyzer -Wrace_conditions -Wunderspecs -r ebin deps/ej/ebin 
+       #                                             deps/depsolver/ebin
+	@dialyzer -Wrace_conditions -Wunderspecs -r ebin deps/ej/ebin
 
 $(DEPS):
 	@rebar get-deps
