@@ -59,6 +59,10 @@
 
 %% Public Api
 -export([format_error/1,
+         format_roots/1,
+         format_culprits/1,
+         format_constraint/1,
+         format_version/1,
          new_graph/0,
          solve/2,
          add_packages/2,
@@ -296,6 +300,18 @@ filter_packages(PVPairs, RawConstraints) ->
 
 format_error(Error) ->
     depsolver_culprit:format_error(Error).
+
+format_roots(Roots) ->
+    depsolver_culprit:format_roots(Roots).
+
+format_culprits(Culprits) ->
+    depsolver_culprit:format_culprits(Culprits).
+
+format_version(Version) ->
+    depsolver_culprit:format_version(Version).
+
+format_constraint(Constraint) ->
+    depsolver_culprit:format_constraint(Constraint).
 
 %%====================================================================
 %% Internal Functions
