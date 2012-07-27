@@ -1,11 +1,4 @@
-DEPS = deps/automeck \
-       deps/couchbeam \
-       deps/ej \
-       deps/ejson \
-       deps/ibrowse \
-       deps/meck \
-       deps/mochiweb \
-       deps/oauth
+DEPS=$(CURDIR)/deps
 
 all: compile eunit dialyzer
 
