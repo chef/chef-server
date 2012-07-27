@@ -84,16 +84,6 @@
           'updated_at' :: binary()  % time created at
          }).
 
-%% Currently only used by chef_authz
--record(chef_container, {
-          'id',             % guid for object (unique)
-          'authz_id',       % authorization guid (unique)
-          'org_id',         % organization guid
-          'name',           % name of container
-          'path',           % 'path' of container (not used? Orig part of inheritance mech?; safe to delete? Yea!)
-          'last_updated_by' % authz guid of last actor to update object
-         }).
-
 -record(chef_cookbook_version, {
           'id',                % guid for object (unique)
           'major',             % major version
