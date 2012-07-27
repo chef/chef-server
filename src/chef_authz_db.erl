@@ -19,7 +19,8 @@
 
 -include("chef_authz.hrl").
 
--export([fetch_container/3]).
+-export([container_record_to_authz_id/2,
+         fetch_container/3]).
 
 -type authz_type() :: 'authz_client' |
                       'authz_container' |
@@ -31,7 +32,7 @@
                       'authz_role'.
 
 -type db_key() :: binary() | string().
-
+-type object_id() :: <<_:256>>.
 
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
 -define(user_db, "opscode_account").
@@ -94,6 +95,10 @@ fetch_container(#context{otto_connection=Server}, OrgId, ContainerName) ->
                            };
         Error -> Error
     end.
+
+-spec container_record_to_authz_id(any(), any()) -> object_id().
+container_record_to_authz_id(#context{}, ContainerRecord) ->
+    ContainerRecord#chef_container.authz_id.
 
 -spec fetch_by_name(couchbeam:server(),
                     binary() | 'not_found',
