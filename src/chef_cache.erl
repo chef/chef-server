@@ -51,7 +51,7 @@
          prune_worker/1]).
 
 init(Name) when is_atom(Name) ->
-    case application:get_env(chef_common, cache_defaults) of
+    case application:get_env(chef_db, cache_defaults) of
         undefined ->
             error(missing_defaults);
         {ok, Defaults} ->
