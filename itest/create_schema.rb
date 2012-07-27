@@ -13,7 +13,7 @@ module SchemaHelper
 
   MYSQL_ROOT_PASS = ""
   PGSQL_ROOT_PASS = ""
-  MIGRATE_DIR = `bundle show mixlib-authorization`.chomp + "/db/migrate"
+  MIGRATE_DIR = `bundle show chef-sql-schema`.chomp + "/db/migrate"
   SEQUEL_CMD_FMT = "bin/sequel -m #{MIGRATE_DIR} -l %s %s"
 
   class Pgsql

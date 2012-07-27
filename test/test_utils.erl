@@ -23,23 +23,12 @@
 
 -export([test_setup/0,
          test_cleanup/1,
-         ensure_ibrowse/0,
-         ensure_couch/0,
          start_stats_hero/0,
          mock/1,
          mock/2,
          unmock/1,
          validate_modules/1
         ]).
-
--define(superuser_name,  <<"platform-superuser">>).
--define(test_org_name, <<"clownco">>).
--define(test_org_admin, <<"clownco-org-admin">>).
--define(test_org_user1, <<"cooky">>).
--define(no_such_id, <<"deadbeefdeadbeefdeadbeefdeadbeef">>).
--define(authz_host, "http://localhost:5959").
--define(chef_host_name, "localhost").
--define(chef_host_port, 5984).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -63,8 +52,6 @@ dumb_random_port() ->
     Port.
 
 test_cleanup(_State) ->
-    cleanup_ibrowse(),
-    application:stop(ibrowse),
     case whereis(inet_gethost_native_sup) of
         P when is_pid(P) ->
             inet_gethost_native:terminate(shutdown, P);
@@ -73,24 +60,6 @@ test_cleanup(_State) ->
     end,
     meck:unload(),
     ok.
-
-ensure_ibrowse() ->
-    case ibrowse:start() of
-        {ok, _} -> ok;
-        {error, {already_started, _}} -> ok;
-        Error -> Error
-    end.
-
-cleanup_ibrowse() ->
-    ibrowse:stop().
-
-ensure_couch() ->
-    application:set_env(chef_authz, authz_root_url, ?authz_host),
-    application:set_env(chef_db, couchdb_host, ?chef_host_name),
-    application:set_env(chef_db, couchdb_port, ?chef_host_port),
-    ensure_ibrowse().
-
-%% helper functions for configuring mocking.
 
 %%@doc setup mocking for a list of modules.  This would normally be
 %% called in the setup/0 method. You can optionally pass in a list of
@@ -110,4 +79,3 @@ unmock(Modules) ->
 %% expectations
 validate_modules(Modules) ->
     [?assert(meck:validate(M)) || M <- Modules].
-
