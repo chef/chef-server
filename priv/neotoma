@@ -49,11 +49,11 @@ add_neotoma_to_path() ->
     code:add_path(Path).
 
 find_rebar() ->
-    Dirs = [".", "..", "../opscode-chef-api-erlang", "/usr/local/bin"],
+    Dirs = [".", "..", "/usr/local/bin"],
     find_item(Dirs, "rebar", is_file).
 
 find_neotoma() ->
-    Dirs = ["deps", "..", "../opscode-chef-api-erlang/deps"],
+    Dirs = ["deps"],
     find_item(Dirs, "neotoma", is_dir).
 
 find_item([], Name, _) ->
