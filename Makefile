@@ -1,20 +1,4 @@
-DEPS = deps/chef_objects \
-       deps/couchbeam \
-       deps/darklaunch \
-       deps/depsolver \
-       deps/ej \
-       deps/ejson \
-       deps/emysql \
-       deps/epgsql \
-       deps/ibrowse \
-       deps/meck \
-       deps/mini_s3 \
-       deps/mochiweb \
-       deps/oauth \
-       deps/pooler \
-       deps/sqerl \
-       deps/stats_hero \
-       deps/webmachine
+DEPS=$(CURDIR)/deps
 
 ## Set the environment variable $DB_TYPE to either mysql or pgsql
 ## to run the correct integration tests.
@@ -37,7 +21,6 @@ compile: $(DEPS)
 
 # Not yet since there are a *ton* of warnings that we need to weed through.
 # @dialyzer -Wrace_conditions -Wunderspecs -r ebin
-
 
 dialyzer:
 	@dialyzer -Wrace_conditions -Wunderspecs -nn -r ebin
