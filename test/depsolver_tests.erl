@@ -435,3 +435,43 @@ impossible_dependency_test() ->
                   [{[{[<<"foo">>],[{<<"foo">>,{1,2,3}}]}],
                     [{{<<"foo">>,{1,2,3}},
                       [{<<"bar">>,{2,0,0},gt}]}]}]}, Ret).
+
+%%
+%% Formatting tests
+%%
+format_test_() ->
+      [{"format_version returns iolist",
+        [?_assertEqual("1", depsolver:format_version({1})),
+         ?_assertEqual(["1", ".", "2", ".", "34"], depsolver:format_version({1,2,34}))
+        ]
+       },
+       {"format_version",
+        [equal_bin_string(<<"1">>, depsolver:format_version({1})),
+         equal_bin_string(<<"1.2">>, depsolver:format_version({1,2})),
+         equal_bin_string(<<"1.2.2">>, depsolver:format_version({1,2,2})),
+         equal_bin_string(<<"1.99.2">>, depsolver:format_version({1,99,2})),
+         equal_bin_string(<<"1">>, depsolver:format_version({1}))]
+       },
+       {"format constraint",
+        [equal_bin_string(<<"foo">>, depsolver:format_constraint(<<"foo">>)),
+         equal_bin_string(<<"foo">>, depsolver:format_constraint(foo)),
+         equal_bin_string(<<"(foo = 1.2.0)">>, depsolver:format_constraint({<<"foo">>, {1,2,0}})),
+         equal_bin_string(<<"(foo = 1.2.0)">>, depsolver:format_constraint({<<"foo">>,{1,2,0}, '='})),
+         equal_bin_string(<<"(foo > 1.2.0)">>, depsolver:format_constraint({<<"foo">>,{1,2,0}, '>'})),
+         equal_bin_string(<<"(foo > 1.2.0)">>, depsolver:format_constraint({<<"foo">>,{1,2,0}, gt})),
+         equal_bin_string(<<"(foo between 1.2.0 and 1.3.0)">>, depsolver:format_constraint({<<"foo">>,{1,2,0}, {1,3,0}, between}))
+        ]
+       },
+       {"format roots",
+        [equal_bin_string(<<"(bar = 1.2.0)">>, depsolver:format_roots([ [{<<"bar">>, {1,2,0}}] ])),
+         equal_bin_string(<<"(bar = 1.2.0), foo">>, depsolver:format_roots([[<<"foo">>, {<<"bar">>, {1,2,0}}]])),
+         equal_bin_string(<<"(bar = 1.2.0), foo">>, depsolver:format_roots([[<<"foo">>], [{<<"bar">>, {1,2,0}}]]))
+        ]
+       }
+      ].
+
+%%
+%% Internal functions
+%%
+equal_bin_string(Expected, Got) ->
+  ?_assertEqual(Expected, iolist_to_binary(Got)).

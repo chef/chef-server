@@ -66,7 +66,7 @@ format_error(Details) when erlang:is_list(Details) ->
     ["Unable to solve constraints, the following solutions were attempted \n\n",
      [[format_error_path("    ", Detail)] || Detail <- Details]].
 
--spec format_roots([depsolver:constraint()]) -> iolist().
+-spec format_roots([depsolver:constraints()]) -> iolist().
 format_roots(Roots) ->
     lists:foldl(fun(Root, Acc0) ->
                         lists:foldl(
@@ -77,7 +77,7 @@ format_roots(Roots) ->
                           end, Acc0, Root)
                 end, "", Roots).
 
--spec format_culprits([{[depsolver:constraint()], [depsolver:constrait()]}]) -> iolist().
+-spec format_culprits([{[depsolver:constraint()], [depsolver:constraint()]}]) -> iolist().
 format_culprits(FailingDeps) ->
     Deps = sets:to_list(sets:from_list(lists:flatten([[depsolver:dep_pkg(Con) || Con <- Cons]
                                                       || {_, Cons} <- FailingDeps]))),
