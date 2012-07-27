@@ -72,10 +72,10 @@ cleanup_ibrowse() ->
     ibrowse:stop().
 
 ensure_couch() ->
-    application:set_env(chef_common, authz_root_url, ?authz_host),
-    application:set_env(chef_common, couchdb_host, ?chef_host_name),
-    application:set_env(chef_common, couchdb_port, ?chef_host_port),
-    application:set_env(chef_common, dark_launch_sql_users, false),
+    application:set_env(chef_authz, authz_root_url, ?authz_host),
+    application:set_env(chef_authz, couchdb_host, ?chef_host_name),
+    application:set_env(chef_authz, couchdb_port, ?chef_host_port),
+    application:set_env(chef_authz, dark_launch_sql_users, false),
     ensure_ibrowse().
 
 %% helper functions for configuring mocking.
