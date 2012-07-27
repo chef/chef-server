@@ -75,7 +75,7 @@ format_roots(Roots) ->
                              (Con, Acc1) ->
                                   [format_constraint(Con), ", "  | Acc1]
                           end, Acc0, Root)
-                end, "", Roots).
+                end, [], Roots).
 
 -spec format_culprits([{[depsolver:constraint()], [depsolver:constraint()]}]) -> iolist().
 format_culprits(FailingDeps) ->
@@ -86,7 +86,7 @@ format_culprits(FailingDeps) ->
                    (Con, Acc1) ->
                         [format_constraint(Con),
                         ", " | Acc1]
-                end, "", Deps).
+                end, [], Deps).
 
 
 -spec format_version(depsolver:vsn()) -> iolist().
@@ -104,7 +104,7 @@ format_version({Maj, Min, Patch}) ->
 format_constraint(Pkg) when is_atom(Pkg) ->
     erlang:atom_to_list(Pkg);
 format_constraint(Pkg) when is_binary(Pkg) ->
-    Pkg;
+    erlang:binary_to_list(Pkg);
 format_constraint({Pkg, Vsn}) when is_tuple(Vsn) ->
     ["(", format_constraint(Pkg), " = ",
      format_version(Vsn), ")"];

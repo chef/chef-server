@@ -297,19 +297,41 @@ filter_packages(PVPairs, RawConstraints) ->
             Error
     end.
 
-
+%% @doc Produce a full error message for a given error condition.  This includes
+%% details of the paths taken to resolve the dependencies and shows which dependencies
+%% could not be satisfied
+-spec format_error({error, {unreachable_package, list()} |
+                           {invalid_constraints, [constraint()]} |
+                           list()}) -> iolist().
 format_error(Error) ->
     depsolver_culprit:format_error(Error).
 
+%% @doc Return a formatted list of roots of the dependency trees which
+%% could not be satisified. These may also have versions attached.
+%% Example:
+%%
+%%    ```(foo = 1.2.0), bar```
+%%
+-spec format_roots([constraints()]) -> iolist().
 format_roots(Roots) ->
     depsolver_culprit:format_roots(Roots).
 
+
+%% @doc Return a formatted list of the culprit depenedencies which led to
+%% the dependencies not being satisfied. Example:
+%%
+%%     ```(foo = 1.2.0) -> (bar > 2.0.0)```
+-spec format_culprits([{[constraint()], [constraint()]}]) -> iolist().
 format_culprits(Culprits) ->
     depsolver_culprit:format_culprits(Culprits).
 
+%% @doc A formatted version tuple
+-spec format_version(vsn()) -> iolist().
 format_version(Version) ->
     depsolver_culprit:format_version(Version).
 
+%% @doc A formatted constraint tuple
+-spec format_constraint(constraint()) -> iolist().
 format_constraint(Constraint) ->
     depsolver_culprit:format_constraint(Constraint).
 
