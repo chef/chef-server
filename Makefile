@@ -1,5 +1,5 @@
 DEPS = deps/couchbeam deps/ejson deps/ibrowse deps/mochiweb deps/oauth \
-       deps/webmachine deps/neotoma deps/meck deps/chef_common deps/chef_rest \
+       deps/webmachine deps/neotoma deps/meck deps/chef_rest \
        deps/emysql deps/darklaunch deps/automeck deps/gen_bunny deps/sqerl \
        deps/epgsql deps/stats_hero deps/pooler deps/folsom deps/ej \
        deps/fast_log deps/depsolver deps/erlware_comons
