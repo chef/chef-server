@@ -1,0 +1,4 @@
+#!/bin/sh
+
+rm -f src/lucene.erl
+rm -f src/chef_lucene.erl

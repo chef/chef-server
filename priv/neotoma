@@ -1,0 +1,53 @@
+#!/usr/bin/env escript
+
+%% -*- mode: erlang;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ft=erlang ts=4 sw=4 et
+
+main(Args) ->
+    add_neotoma_to_path(),
+    [PegFile, Mod, TransformMod] = Args,
+    Output = filename:absname(filename:join([filename:dirname(PegFile),  "..", "src"])),
+    io:format("generating parser ~s (~s) for ~s ~n", [Mod, TransformMod, PegFile]),
+    Txfm = list_to_atom(TransformMod),
+    ModAtom = list_to_atom(Mod),
+    neotoma:file(PegFile, [{output, Output}, {transform_module, Txfm}, {module, ModAtom}]),
+    io:format("wrote parser to ~s~n", [Output]).
+
+build_neotoma() ->
+    Neotoma = find_neotoma(),
+    case filelib:is_file(filename:join([Neotoma, "ebin", "neotoma.beam"])) of
+        false ->
+            io:format("Compiling neotoma~n"),
+            {ok, Cwd} = file:get_cwd(),
+            file:set_cwd(Neotoma),
+            Rebar = find_rebar(),
+            io:format("Compiling neotoma: ~s~n", [os:cmd(Rebar ++ " compile")]),
+            file:set_cwd(Cwd);
+        true ->
+            ok
+    end.
+
+add_neotoma_to_path() ->
+    Neotoma = find_neotoma(),
+    Path = filename:join([Neotoma, "ebin"]),
+    code:add_path(Path).
+
+find_rebar() ->
+    Dirs = [".", "..", "../opscode-chef-api-erlang", "/usr/local/bin"],
+    find_item(Dirs, "rebar", is_file).
+
+find_neotoma() ->
+    Dirs = ["deps", "..", "../opscode-chef-api-erlang/deps"],
+    find_item(Dirs, "neotoma", is_dir).
+
+find_item([], Name, _) ->
+    io:format("ERROR! Unable to locate ~s~n", [Name]),
+    erlang:halt(1);
+find_item([H|T], Name, Type) ->
+    Path = filename:absname(filename:join([H, Name])),
+    case filelib:Type(Path) of
+        false ->
+            find_item(T, Name, Type);
+        true ->
+            Path
+    end.
