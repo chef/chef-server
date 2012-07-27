@@ -22,19 +22,7 @@
 %% under the License.
 %%
 
-
 -module(chef_authz).
-
--include("chef_authz.hrl").
-
--define(x_ops_requester_id, "X-Ops-Requesting-Actor-Id").
--define(x_ops_user_id, "X-Ops-User-Id").
--define(x_ops_user_id_value, "front-end-service").
--define(atom_bin_perms, [{create, <<"create">>},
-                         {read, <<"read">>},
-                         {update, <<"update">>},
-                         {delete, <<"delete">>},
-                         {grant, <<"grant">>}]).
 
 %
 % TODO:
@@ -55,6 +43,17 @@
          get_ace_for_resource/4,
          set_ace_for_resource/5,
          ping/0]).
+
+-include("chef_authz.hrl").
+
+-define(x_ops_requester_id, "X-Ops-Requesting-Actor-Id").
+-define(x_ops_user_id, "X-Ops-User-Id").
+-define(x_ops_user_id_value, "front-end-service").
+-define(atom_bin_perms, [{create, <<"create">>},
+                         {read, <<"read">>},
+                         {update, <<"update">>},
+                         {delete, <<"delete">>},
+                         {grant, <<"grant">>}]).
 
 %-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
