@@ -24,32 +24,16 @@
 -module(chef_solr).
 
 -export([add_org_guid_to_query/2,
-         make_query_from_params/1,
+         make_query_from_params/4,
          ping/0,
          search/1]).
 
 %% TODO: refactor so that we don't use webmachine's wrq module at all
-%%-include_lib("webmachine/include/webmachine.hrl").
 -include("chef_solr.hrl").
 
-make_query_from_params(Req) ->
+make_query_from_params(ObjType, QueryString, Start, Rows) ->
     % TODO: super awesome error messages
-    % TODO: verify that FilterQuery, Start, Rows and Sort have correct values
-    ObjType = wrq:path_info(object_type, Req),
-    QueryString = case wrq:get_qs_value("q", Req) of
-                      undefined ->
-                          %% Default query string if no 'q' param is present. We might
-                          %% change this to be a 400 in the future.
-                          "*:*";
-                      "" ->
-                          %% thou shalt not query with the empty string
-                          throw({bad_query, ""});
-                      Query ->
-                          transform_query(http_uri:decode(Query))
-                  end,
     FilterQuery = make_fq_type(ObjType),
-    Start = decode(nonneg_int, "start", Req, 0),
-    Rows = decode(nonneg_int, "rows", Req, 1000),
     %% 'sort' param is ignored and hardcoded because indexing
     %% scheme doesn't support sorting since there is only one field.
     Sort = "X_CHEF_id_CHEF_X asc",
@@ -59,26 +43,6 @@ make_query_from_params(Req) ->
                      rows = Rows,
                      sort = Sort,
                      index = index_type(ObjType)}.
-
-decode(nonneg_int, Key, Req, Default) ->
-    {Int, Orig} =
-        case wrq:get_qs_value(Key, Req) of
-            undefined ->
-                {Default, default};
-            Value ->
-                try
-                    {list_to_integer(http_uri:decode(Value)), Value}
-                catch
-                    error:badarg ->
-                        throw({bad_param, {Key, Value}})
-                end
-        end,
-    validate_non_neg(Key, Int, Orig).
-
-validate_non_neg(Key, Int, OrigValue) when Int < 0 ->
-    throw({bad_param, {Key, OrigValue}});
-validate_non_neg(_Key, Int, _OrigValue) ->
-    Int.
 
 -spec add_org_guid_to_query(#chef_solr_query{}, binary()) ->
                                    #chef_solr_query{}.
@@ -127,17 +91,6 @@ ping() ->
             error_logger:error_report({chef_solr, ping, How, Why}),
             pang
     end.
-
-transform_query(RawQuery) when is_list(RawQuery) ->
-    transform_query(list_to_binary(RawQuery));
-transform_query(RawQuery) ->
-    case chef_lucene:parse(RawQuery) of
-        Query when is_binary(Query) ->
-            binary_to_list(Query);
-        _ ->
-            throw({bad_query, RawQuery})
-    end.
-
 
 %% Internal functions
 
