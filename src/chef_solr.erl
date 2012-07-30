@@ -28,7 +28,6 @@
          ping/0,
          search/1]).
 
-%% TODO: refactor so that we don't use webmachine's wrq module at all
 -include("chef_solr.hrl").
 
 make_query_from_params(ObjType, QueryString, Start, Rows) ->
