@@ -47,64 +47,6 @@ make_query_from_params_test_() ->
           ?assertEqual(Expect, Query)
       end}
 
-     %{"Present, but empty 'q' is a 400",
-      %fun() ->
-              %meck:expect(wrq, path_info, fun(object_type, req_mock) -> "role" end),
-              %expect_params([{"q", ""}]),
-              %?assertThrow({bad_query, ""}, chef_solr:make_query_from_params(req_mock)),
-              %?assert(meck:validate(wrq))
-      %end},
-
-     %{"bad query",
-      %fun() ->
-              %meck:expect(wrq, path_info,
-                          %fun(object_type, req_mock) -> "node" end),
-              %expect_params([{"q", "a[b"}]),
-              %?assertThrow({bad_query, <<"a[b">>},
-                           %chef_solr:make_query_from_params(req_mock)),
-              %?assert(meck:validate(wrq))
-      %end},
-
-     %{"bad start not integer",
-      %fun() ->
-              %meck:expect(wrq, path_info,
-                          %fun(object_type, req_mock) -> "node" end),
-              %expect_params([{"start", "abc"}]),
-              %?assertThrow({bad_param, {"start", "abc"}},
-                           %chef_solr:make_query_from_params(req_mock)),
-              %?assert(meck:validate(wrq))
-      %end},
-     
-     %{"bad start negative",
-      %fun() ->
-              %meck:expect(wrq, path_info,
-                          %fun(object_type, req_mock) -> "node" end),
-              %expect_params([{"start", "-5"}]),
-              %?assertThrow({bad_param, {"start", "-5"}},
-                           %chef_solr:make_query_from_params(req_mock)),
-              %?assert(meck:validate(wrq))
-      %end},
-     
-     %{"bad rows not integer",
-      %fun() ->
-              %meck:expect(wrq, path_info,
-                          %fun(object_type, req_mock) -> "node" end),
-              %expect_params([{"rows", "abc"}]),
-              %?assertThrow({bad_param, {"rows", "abc"}},
-                           %chef_solr:make_query_from_params(req_mock)),
-              %?assert(meck:validate(wrq))
-      %end},
-     
-     %{"bad rows negative",
-      %fun() ->
-              %meck:expect(wrq, path_info,
-                          %fun(object_type, req_mock) -> "node" end),
-              %expect_params([{"rows", "-5"}]),
-              %?assertThrow({bad_param, {"rows", "-5"}},
-                           %chef_solr:make_query_from_params(req_mock)),
-              %?assert(meck:validate(wrq))
-      %end},
-
      %{"index type",
       %fun() ->
               %Tests = [{"node", node}, {"role", role}, {"client", client},
