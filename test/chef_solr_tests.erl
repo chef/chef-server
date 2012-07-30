@@ -45,23 +45,19 @@ make_query_from_params_test_() ->
             rows = 5,
             index = node},
           ?assertEqual(Expect, Query)
-      end}
+      end},
 
-     %{"index type",
-      %fun() ->
-              %Tests = [{"node", node}, {"role", role}, {"client", client},
-                       %{"environment", environment},
-                       %{"adbag", {data_bag, <<"adbag">>}}],
-              %Types = [ T || {T, _} <- Tests],
-              %meck:sequence(wrq, path_info, 2, Types),
-              %expect_params([]),                % defaults
-              %lists:foreach(
-                %fun({_, Want}) ->
-                        %Query = chef_solr:make_query_from_params(req_mock),
-                        %?assertEqual(Want, Query#chef_solr_query.index)
-                %end, Tests),
-              %?assert(meck:validate(wrq))
-      %end}
+     {"index type",
+      fun() ->
+              Tests = [{"node", node}, {"role", role}, {"client", client},
+                       {"environment", environment},
+                       {"adbag", {data_bag, <<"adbag">>}}],
+              lists:foreach(
+                fun({Sent, Want}) ->
+                        Query = chef_solr:make_query_from_params(Sent, "query", 2, 5),
+                        ?assertEqual(Want, Query#chef_solr_query.index)
+                end, Tests)
+      end}
 
     ]}.
 
