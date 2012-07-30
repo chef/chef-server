@@ -1,11 +1,4 @@
-DEPS = deps/amqp_client \
-       deps/ejson \
-       deps/gen_bunny \
-       deps/gen_server2 \
-       deps/meck \
-       deps/mochiweb \
-       deps/neotoma \
-       deps/rabbit_common
+DEPS=$(CURDIR)/deps
 
 all: compile eunit dialyzer
 
@@ -40,3 +33,7 @@ eunit: compile
 	@rebar skip_deps=true eunit
 
 test: eunit
+
+lucene: compile
+	@rm src/lucene_*.erl
+	@priv/build_grammars
