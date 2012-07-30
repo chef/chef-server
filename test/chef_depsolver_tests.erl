@@ -103,6 +103,12 @@ cookbook(Name, Version) ->
 cookbook(Name, Version, Dep = {_Name, _Version, _Reln}) ->
     {Name, [{Version, [ Dep ] }] }.
 
+depsolver_dep_empty_deps_test() ->
+    World = [ ],
+    Constraints = [ ],
+    Ret = chef_depsolver:solve_dependencies(World, Constraints, []),
+    ?assertEqual({ok, []}, Ret).
+
 depsolver_dep_empty_world_test() ->
     World = [ ],
     Constraints = [ ],
@@ -113,8 +119,11 @@ depsolver_dep_no_version_test() ->
     World = [ cookbook(<<"foo">>, <<"1.2.3">>)],
     Constraints = [ ],
     Ret = chef_depsolver:solve_dependencies(World, Constraints, [{<<"foo">>, <<"2.0.0">>}]),
-    Detail = {[{<<"foo">>, {2,0,0}}], [], []},
-    ?assertEqual({error, {unable_to_solve, {<<"foo">>, {2,0,0}}, Detail}}, Ret).
+    Detail = [{[{[{<<"foo">>, {2,0,0}}],
+                 [{<<"foo">>, {2,0,0}}]}],
+               []
+              }],
+    ?assertEqual({error, Detail}, Ret).
 
 %% Some tests which mimic the pedant tests for the depsolver endpoint
 
@@ -150,8 +159,11 @@ depsolver_dep_not_new_enough_test() ->
     Constraints = [cookbook(<<"foo">>, <<"1.2.3">>, {<<"bar">>, <<"2.0.0">>, gt}) ],
     Ret = chef_depsolver:solve_dependencies(World, Constraints, [<<"foo">>]),
     %% TODO: Should this have bar in bad ??
-    Detail = {[], [], [<<"foo">>]},
-    ?assertEqual({error, {unable_to_solve, <<"foo">>, Detail}}, Ret).
+    Detail = [{[{[<<"foo">>],
+                 [{<<"foo">>, {1,2,3}}]}],
+               [{{<<"foo">>, {1,2,3}}, [{<<"bar">>, {2,0,0}, gt}]}]
+              }],
+    ?assertEqual({error, Detail}, Ret).
 
 %%
 %% circular deps are bad
@@ -167,7 +179,9 @@ depsolver_impossible_dependency_test() ->
     World = [ cookbook(<<"foo">>, <<"1.2.3">>, { <<"bar">>, <<"2.0.0">>, gt}),
              cookbook(<<"bar">>, <<"2.0.0">>, { <<"foo">>, <<"3.0.0">>, gt})],
     Ret = chef_depsolver:solve_dependencies(World, [], [<<"foo">>]),
-    %% TODO: Should this have bar in bad ??
-    Detail = {[], [], [<<"foo">>]},
-    ?assertEqual({error, {unable_to_solve, <<"foo">>, Detail}}, Ret).
+    Detail = [{[{[<<"foo">>],
+                 [{<<"foo">>, {1,2,3}}]}],
+               [{{<<"foo">>, {1,2,3}}, [{<<"bar">>, {2,0,0}, gt}]}]
+              }],
+    ?assertEqual({error, Detail}, Ret).
 
