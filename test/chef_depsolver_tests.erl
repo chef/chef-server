@@ -99,7 +99,10 @@ parse_binary_json_test_() ->
 
 cookbook(Name, Version) ->
     {Name, [{Version, []}]}.
-
+cookbook(Name, Version, Dep) when is_list(Dep) ->
+    {Name, [{Version, Dep }] };
+cookbook(Name, Version, Dep = {_Name, _Version}) ->
+    {Name, [{Version, [ Dep ] }] };
 cookbook(Name, Version, Dep = {_Name, _Version, _Reln}) ->
     {Name, [{Version, [ Dep ] }] }.
 
@@ -184,4 +187,32 @@ depsolver_impossible_dependency_test() ->
                [{{<<"foo">>, {1,2,3}}, [{<<"bar">>, {2,0,0}, gt}]}]
               }],
     ?assertEqual({error, Detail}, Ret).
+
+%% A more complex test.
+%% World:
+%% foo@1.2.3 -> bar@1.0.0 -> baz@1.0.0
+%%     |
+%%     -------> buzz@1.0.0 -> baz > 1.2.0
+%% buzz@2.0.0 -> baz@1.0.0
+%% ack@1.0.0 -> foobar @1.0.0
+%% baz@1.0.0
+%% baz@2.0.0
+%%
+%% solve(foo@1.2.3, buzz)
+%% Fail since buzz@2.0.0 and foo@1.2.3 collide over baz
+depsolver_complex_dependency_test() ->
+    World = [cookbook(<<"foo">>, <<"1.2.3">>, [{ <<"bar">>, <<"1.0.0">>},
+                                               { <<"buzz">>, <<"1.0.0">>}]),
+             cookbook(<<"bar">>, <<"1.0.0">>, { <<"baz">>, <<"1.0.0">>}),
+             cookbook(<<"buzz">>, <<"1.0.0">>, {<<"baz">>, <<"1.2.0">>, gt}),
+             cookbook(<<"buzz">>, <<"2.0.0">>, {<<"baz">>, <<"1.0.0">>}),
+             cookbook(<<"ack">>, <<"1.0.0">>, {<<"foobar">>, <<"1.0.0">>}),
+             cookbook(<<"baz">>, <<"1.0.0">>),
+             cookbook(<<"baz">>, <<"2.0.0">>)
+            ],
+    Ret = chef_depsolver:solve_dependencies(World, [], [<<"foo">>, <<"buzz">>]),
+    Expected = [{{<<"buzz">>,{1,0,0}},[{<<"baz">>,{1,2,0},gt}]}],
+    %% Check the culprits
+    {error, [{_Paths, Culprits}] } = Ret,
+    ?assertEqual(Expected, Culprits).
 
