@@ -99,9 +99,18 @@ parse_binary_json_test_() ->
 
 cookbook(Name, Version) ->
     {Name, [{Version, []}]}.
-
+cookbook(Name, Version, Dep) when is_list(Dep) ->
+    {Name, [{Version, Dep }] };
+cookbook(Name, Version, Dep = {_Name, _Version}) ->
+    {Name, [{Version, [ Dep ] }] };
 cookbook(Name, Version, Dep = {_Name, _Version, _Reln}) ->
     {Name, [{Version, [ Dep ] }] }.
+
+depsolver_dep_empty_deps_test() ->
+    World = [ ],
+    Constraints = [ ],
+    Ret = chef_depsolver:solve_dependencies(World, Constraints, []),
+    ?assertEqual({ok, []}, Ret).
 
 depsolver_dep_empty_world_test() ->
     World = [ ],
@@ -113,8 +122,11 @@ depsolver_dep_no_version_test() ->
     World = [ cookbook(<<"foo">>, <<"1.2.3">>)],
     Constraints = [ ],
     Ret = chef_depsolver:solve_dependencies(World, Constraints, [{<<"foo">>, <<"2.0.0">>}]),
-    Detail = {[{<<"foo">>, {2,0,0}}], [], []},
-    ?assertEqual({error, {unable_to_solve, {<<"foo">>, {2,0,0}}, Detail}}, Ret).
+    Detail = [{[{[{<<"foo">>, {2,0,0}}],
+                 [{<<"foo">>, {2,0,0}}]}],
+               []
+              }],
+    ?assertEqual({error, Detail}, Ret).
 
 %% Some tests which mimic the pedant tests for the depsolver endpoint
 
@@ -150,8 +162,11 @@ depsolver_dep_not_new_enough_test() ->
     Constraints = [cookbook(<<"foo">>, <<"1.2.3">>, {<<"bar">>, <<"2.0.0">>, gt}) ],
     Ret = chef_depsolver:solve_dependencies(World, Constraints, [<<"foo">>]),
     %% TODO: Should this have bar in bad ??
-    Detail = {[], [], [<<"foo">>]},
-    ?assertEqual({error, {unable_to_solve, <<"foo">>, Detail}}, Ret).
+    Detail = [{[{[<<"foo">>],
+                 [{<<"foo">>, {1,2,3}}]}],
+               [{{<<"foo">>, {1,2,3}}, [{<<"bar">>, {2,0,0}, gt}]}]
+              }],
+    ?assertEqual({error, Detail}, Ret).
 
 %%
 %% circular deps are bad
@@ -167,7 +182,37 @@ depsolver_impossible_dependency_test() ->
     World = [ cookbook(<<"foo">>, <<"1.2.3">>, { <<"bar">>, <<"2.0.0">>, gt}),
              cookbook(<<"bar">>, <<"2.0.0">>, { <<"foo">>, <<"3.0.0">>, gt})],
     Ret = chef_depsolver:solve_dependencies(World, [], [<<"foo">>]),
-    %% TODO: Should this have bar in bad ??
-    Detail = {[], [], [<<"foo">>]},
-    ?assertEqual({error, {unable_to_solve, <<"foo">>, Detail}}, Ret).
+    Detail = [{[{[<<"foo">>],
+                 [{<<"foo">>, {1,2,3}}]}],
+               [{{<<"foo">>, {1,2,3}}, [{<<"bar">>, {2,0,0}, gt}]}]
+              }],
+    ?assertEqual({error, Detail}, Ret).
+
+%% A more complex test.
+%% World:
+%% foo@1.2.3 -> bar@1.0.0 -> baz@1.0.0
+%%     |
+%%     -------> buzz@1.0.0 -> baz > 1.2.0
+%% buzz@2.0.0 -> baz@1.0.0
+%% ack@1.0.0 -> foobar @1.0.0
+%% baz@1.0.0
+%% baz@2.0.0
+%%
+%% solve(foo@1.2.3, buzz)
+%% Fail since buzz@2.0.0 and foo@1.2.3 collide over baz
+depsolver_complex_dependency_test() ->
+    World = [cookbook(<<"foo">>, <<"1.2.3">>, [{ <<"bar">>, <<"1.0.0">>},
+                                               { <<"buzz">>, <<"1.0.0">>}]),
+             cookbook(<<"bar">>, <<"1.0.0">>, { <<"baz">>, <<"1.0.0">>}),
+             cookbook(<<"buzz">>, <<"1.0.0">>, {<<"baz">>, <<"1.2.0">>, gt}),
+             cookbook(<<"buzz">>, <<"2.0.0">>, {<<"baz">>, <<"1.0.0">>}),
+             cookbook(<<"ack">>, <<"1.0.0">>, {<<"foobar">>, <<"1.0.0">>}),
+             cookbook(<<"baz">>, <<"1.0.0">>),
+             cookbook(<<"baz">>, <<"2.0.0">>)
+            ],
+    Ret = chef_depsolver:solve_dependencies(World, [], [<<"foo">>, <<"buzz">>]),
+    Expected = [{{<<"buzz">>,{1,0,0}},[{<<"baz">>,{1,2,0},gt}]}],
+    %% Check the culprits
+    {error, [{_Paths, Culprits}] } = Ret,
+    ?assertEqual(Expected, Culprits).
 
