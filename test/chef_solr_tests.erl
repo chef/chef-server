@@ -47,26 +47,6 @@ make_query_from_params_test_() ->
           ?assertEqual(Expect, Query)
       end}
 
-     %{"default values",
-      %%% TODO: currently, a missing 'q' param is mapped to "*:*". We'd
-      %%% like to change that to be a 400 in the future.
-      %fun() ->
-              %meck:expect(wrq, path_info,
-                          %fun(object_type, req_mock) -> "role" end),
-              %expect_params([]),
-
-              %Query = chef_solr:make_query_from_params(req_mock),
-              %Expect = #chef_solr_query{
-                              %query_string = "*:*",
-                              %filter_query = "+X_CHEF_type_CHEF_X:role",
-                              %sort = "X_CHEF_id_CHEF_X asc",
-                              %start = 0,
-                              %rows = 1000,
-                              %index = role},
-              %?assertEqual(Expect, Query),
-              %?assert(meck:validate(wrq))
-      %end}
-
      %{"Present, but empty 'q' is a 400",
       %fun() ->
               %meck:expect(wrq, path_info, fun(object_type, req_mock) -> "role" end),
