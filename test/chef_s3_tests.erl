@@ -138,7 +138,7 @@ check_test_() ->
                                      [$e|_] ->
                                          %% In real code, it'd be:
                                          %% erlang:error({aws_error, ...})
-                                         meck:exception(error, {aws_error, {http_error, 404, blah, blah}});
+                                         meck:exception(error, {aws_error, {http_error, 404, blah}});
                                      [$f|_] ->
                                          timer:sleep(10 * 1000);
                                      _ ->
