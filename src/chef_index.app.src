@@ -23,7 +23,9 @@
   {applications, [
                   kernel,
                   stdlib,
-                  ejson
+                  ejson,
+                  gen_bunny,
+                  ibrowse
                  ]},
   {env, []}
  ]}.
