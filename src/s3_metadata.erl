@@ -133,7 +133,7 @@ check_file(OrgId, Bucket, Checksum) ->
                  _V ->
                      {ok, Checksum}
              catch
-                 error:{aws_error, {http_error,404,_,_}} ->
+                 error:{aws_error, {http_error,404,_}} ->
                      {missing, Checksum};
                  _X:_Y->
                      {error, Checksum}
