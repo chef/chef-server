@@ -33,7 +33,11 @@
 -endif.
 
 
--export([fetch_user/1,
+-export([
+        %%user ops
+        fetch_user/1,
+        create_user/1,
+
          %% checksum ops
          mark_checksums_as_uploaded/2,
          non_uploaded_checksums/2,
@@ -136,18 +140,25 @@ ping() ->
             pang
     end.
 
+%% chef user ops
+
 -spec fetch_user(bin_or_string()) -> {ok, #chef_user{} | not_found } | {error, term()}.
 %% @doc Return user data for the given username
 %%
 %%
 fetch_user(UserName) ->
-    case sqerl:select(find_by_username_for_authn, [UserName], ?FIRST(chef_user)) of
+    case sqerl:select(find_by_username, [UserName], ?FIRST(chef_user)) of
         {ok, none} ->
             {ok, not_found};
         {ok, #chef_user{}=User} ->
             {ok, User};
         {error, Error} -> {error, Error}
     end.
+
+-spec create_user(#chef_user{}) -> {ok, 1} | {error, term()}.
+%% doc Insert user data into database
+create_user(#chef_user{}=User) ->
+    create_object(User).
 
 %% node ops
 
@@ -1023,9 +1034,12 @@ bulk_get_objects(Type, Ids) ->
 
 -spec create_object(Object :: chef_object() |
                               #chef_sandbox{} |
+                              #chef_user{} |
                               #chef_cookbook_version{}) -> {ok, non_neg_integer()} |
                                                            sqerl_error().
 %% @doc create an object given a chef object record
+create_object(#chef_user{}=User) ->
+  create_object(insert_user, User);
 create_object(#chef_node{}=Node) ->
     create_object(insert_node, Node);
 create_object(#chef_role{}=Role) ->
