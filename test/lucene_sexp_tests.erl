@@ -15,7 +15,7 @@
 %% under the License.
 %%
 
--module(lucene_sexp_test).
+-module(lucene_sexp_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 -define(i2b(X), iolist_to_binary(X)).

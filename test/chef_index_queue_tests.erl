@@ -15,7 +15,7 @@
 %% under the License.
 %%
 
--module(chef_index_queue_test).
+-module(chef_index_queue_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 -define(ObjectID, <<"ffffffffffffffffffffffffffffffff">>).
