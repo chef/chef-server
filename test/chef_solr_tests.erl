@@ -47,6 +47,57 @@ make_query_from_params_test_() ->
           ?assertEqual(Expect, Query)
       end},
 
+    {"default values",
+      %% TODO: currently, a missing 'q' param is mapped to "*:*". We'd
+      %% like to change that to be a 400 in the future.
+      fun() ->
+          Query = chef_solr:make_query_from_params("role", undefined, undefined, undefined),
+          Expect = #chef_solr_query{
+            query_string = "*:*",
+            filter_query = "+X_CHEF_type_CHEF_X:role",
+            sort = "X_CHEF_id_CHEF_X asc",
+            start = 0,
+            rows = 1000,
+            index = role},
+          ?assertEqual(Expect, Query)
+      end},
+
+    {"Present, but empty 'q' is a 400",
+      fun() ->
+          ?assertThrow({bad_query, ""},
+            chef_solr:make_query_from_params("role", "", undefined, undefined))
+      end},
+
+    {"bad query",
+      fun() ->
+          ?assertThrow({bad_query, <<"a[b">>},
+            chef_solr:make_query_from_params("node", "a[b", undefined, undefined))
+      end},
+
+    {"bad start not integer",
+      fun() ->
+          ?assertThrow({bad_param, {"start", "abc"}},
+            chef_solr:make_query_from_params("node", undefined, "abc", undefined))
+      end},
+
+    {"bad start negative",
+      fun() ->
+          ?assertThrow({bad_param, {"start", "-5"}},
+            chef_solr:make_query_from_params("node", undefined, "-5", undefined))
+      end},
+
+    {"bad rows not integer",
+      fun() ->
+          ?assertThrow({bad_param, {"rows", "abc"}},
+            chef_solr:make_query_from_params("node", undefined, undefined, "abc"))
+      end},
+
+    {"bad rows negative",
+      fun() ->
+          ?assertThrow({bad_param, {"rows", "-5"}},
+            chef_solr:make_query_from_params("node", undefined, undefined, "-5"))
+      end},
+
      {"index type",
       fun() ->
               Tests = [{"node", node}, {"role", role}, {"client", client},
