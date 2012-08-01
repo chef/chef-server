@@ -17,5 +17,6 @@
                   mochiweb,
                   webmachine
                  ]},
+  {mod, {oc_chef_wm_app, []}},
   {env, []}
  ]}.
