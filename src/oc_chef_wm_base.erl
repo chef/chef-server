@@ -10,9 +10,7 @@
 
 %% Complete webmachine callbacks which must be
 %% mixed in and aliased to the proper name.
--export([forbidden_on_object_type/2,
-         forbidden_on_object/2,
-         selectable_forbidden/2]).
+-export([forbidden/2]).
 
 %% Default functions available to mixin
 -export([validate_request/3,
@@ -150,25 +148,7 @@ malformed_request_message({bad_run_lists, {Field, _Value}}, _Req, _State) ->
 malformed_request_message(Reason, Req, #base_state{resource_mod=Mod}=State) ->
     Mod:malformed_request_message(Reason, Req, State).
 
-forbidden_on_object_type(Req, #base_state{resource_mod=Mod}=State) ->
-    {ContainerId, Req1, State1} = Mod:auth_info(Req, State),
-    case ContainerId of
-        not_found ->
-            {{halt, 404}, Req1, State1};
-        _ ->
-            invert_perm(check_permission(container, ContainerId, Req1, State1))
-    end.
-
-forbidden_on_object(Req, #base_state{resource_mod=Mod}=State) ->
-    {ObjectId, Req1, State1} = Mod:auth_info(Req, State),
-    case ObjectId of
-        not_found ->
-            {{halt, 404}, Req1, State1};
-        _ ->
-            invert_perm(check_permission(object, ObjectId, Req1, State1))
-    end.
-
-selectable_forbidden(Req, #base_state{resource_mod=Mod}=State) ->
+forbidden(Req, #base_state{resource_mod=Mod}=State) ->
     case Mod:auth_info(Req, State) of
         {{halt, Code}, Req1, State1} ->
             {{halt, Code}, Req1, State1};
