@@ -7,9 +7,10 @@ source "http://rubygems.org"
 
 
 gem "mixlib-config", "1.1.2", :git => "git@github.com:opscode/mixlib-config.git"
+gem "rspec-shared", :git => "git://github.com/justinko/rspec-shared.git"
 
-gem 'opscode-pedant-core', :path => '../opscode-pedant-core'
-gem 'opscode-pedant-opc-core', :path => '../opscode-pedant-opc-core'
-gem 'opscode-pedant-oss-core', :path => '../opscode-pedant-oss-core'
-gem 'opscode-pedant-oss-tests', :path => '../opscode-pedant-oss-tests'
-gem 'opscode-pedant-opc-tests', :path => '../opscode-pedant-opc-tests'
+gem 'opscode-pedant-core', :path => '/srv/piab/mounts/opscode-pedant-core'
+gem 'opscode-pedant-opc-core', :path => '/srv/piab/mounts/opscode-pedant-opc-core'
+gem 'opscode-pedant-oss-core', :path => '/srv/piab/mounts/opscode-pedant-oss-core'
+gem 'opscode-pedant-oss-tests', :path => '/srv/piab/mounts/opscode-pedant-oss-tests'
+gem 'opscode-pedant-opc-tests', :path => '/srv/piab/mounts/opscode-pedant-opc-tests'
