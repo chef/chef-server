@@ -84,7 +84,7 @@
 
           %% Turn this on if superuser is allowed to bypass security checks for
           %% this endpoint.
-          superuser_bypasses_checks :: true | false
+          superuser_bypasses_checks = false :: true | false
          }).
 
 -record(search_state, {
