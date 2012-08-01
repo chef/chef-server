@@ -460,6 +460,8 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
             end
     end.
 
+conflict_message(cookbook_version, _Name) ->
+    {[{<<"error">>, [<<"Cookbook already exists">>]}]};
 conflict_message(role, _Name) ->
     {[{<<"error">>, [<<"Role already exists">>]}]};
 conflict_message(node, _Name) ->
@@ -472,7 +474,11 @@ conflict_message(data_bag_item, {BagName, ItemName}) ->
     {[{<<"error">>, [Msg]}]};
 conflict_message(data_bag, _Name) ->
     %% {[{<<"error">>, [<<"Data Bag '", Name/binary, "' already exists">>]}]}.
-    {[{<<"error">>, [<<"Data bag already exists">>]}]}.
+    {[{<<"error">>, [<<"Data bag already exists">>]}]};
+conflict_message(environment, _Name) ->
+    {[{<<"error">>, [<<"Environment already exists">>]}]};
+conflict_message(client, _Name) ->
+    {[{<<"error">>, [<<"Client already exists">>]}]}.
 
 error_message(checksum_missing, Checksum) ->
     {[{<<"error">>, [iolist_to_binary([<<"Manifest has checksum ">>, Checksum,
