@@ -339,10 +339,10 @@ verify_request_signature(Req,
                     {false, Req1, State1#base_state{log_msg = Reason}}
             end
     end.
-
 -spec create_from_json(Req :: #wm_reqdata{}, State :: #base_state{},
-                       RecType :: chef_object_name(),
-                       ContainerId ::object_id(), ObjectEjson :: ejson_term()) ->
+                       RecType :: chef_object_name()| chef_cookbook_version,
+                       ContainerId ::object_id() | {authz_id, AuthzId::object_id()},
+                       ObjectEjson :: ejson_term()) ->
                               {true | {halt, 409 | 500}, #wm_reqdata{}, #base_state{}}.
 %% @doc Implements the from_json callback for POST requests to create Chef
 %% objects. `RecType' is the name of the object record being created
@@ -355,11 +355,9 @@ create_from_json(#wm_reqdata{} = Req,
                              organization_guid = OrgId,
                              requestor = #chef_requestor{authz_id = ActorId},
                              db_type = DbType} = State,
-                 RecType, ContainerId, ObjectEjson) ->
-    %% Note: potential race condition.  If we don't have perms, the create will fail.
-    %% Although we checked rights above, they could have changed.
-    {ok, AuthzId} = ?SH_TIME(ReqId, chef_authz,
-                             create_object_with_container_acl, (ActorId, ContainerId)),
+                 RecType, AuthzInfo, ObjectEjson) ->
+    {ok, AuthzId} = maybe_create_authz(ReqId, ActorId, AuthzInfo),
+
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
     ObjectRec = chef_object:new_record(RecType, OrgId, AuthzId, ObjectEjson,
@@ -371,13 +369,13 @@ create_from_json(#wm_reqdata{} = Req,
     %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
     %% the world.
-    ok = chef_object:add_to_solr(TypeName, Id, OrgId,
+    ok = chef_object_db:add_to_solr(TypeName, Id, OrgId,
                                  chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
-    CreateFun = chef_object:create_fun(ObjectRec),
+    CreateFun = chef_db:create_fun(ObjectRec),
     case chef_db:CreateFun(DbContext, ObjectRec, ActorId) of
         {conflict, _} ->
             %% ignore return value of solr delete, this is best effort.
-            chef_object:delete_from_solr(ObjectRec),
+            chef_object_db:delete_from_solr(ObjectRec),
 
             LogMsg = {RecType, name_conflict, Name},
             ConflictMsg = conflict_message(TypeName, Name),
@@ -391,7 +389,7 @@ create_from_json(#wm_reqdata{} = Req,
              State#base_state{log_msg = LogMsg}};
         What ->
             %% ignore return value of solr delete, this is best effort.
-            chef_object:delete_from_solr(ObjectRec),
+            chef_object_db:delete_from_solr(ObjectRec),
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
@@ -664,3 +662,15 @@ get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) 
     UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
     BypassesChecks = SuperuserBypassesChecks andalso is_superuser(UserName),
     {UserName, BypassesChecks}.
+
+-spec maybe_create_authz(ReqId::binary(), ActorId::object_id(),
+                         ContainerId::object_id() | {authz_id, AuthzId::object_id()})
+    -> {ok, object_id()} | {error, _}.
+%% @doc Helper function to deal with creating an AuthzId where needed.  If an AuthzId is
+%% passed in the just use that other wise create a new one based on the container AuthzId
+maybe_create_authz(_ReqId, _ActorId, {authz_id, AuthzId}) ->
+    {ok, AuthzId};
+maybe_create_authz(ReqId, ActorId, ContainerId) when is_binary(ContainerId) ->
+    %% Note: potential race condition.  If we don't have perms, the create will fail.
+    %% Although we checked rights above, they could have changed.
+    ?SH_TIME(ReqId, chef_authz, create_object_with_container_acl, (ActorId, ContainerId)).
