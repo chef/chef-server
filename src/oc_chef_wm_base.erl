@@ -33,6 +33,10 @@
 %% -callback auth_info(#wm_reqdata{}, any()) -> {not_found | binary(), #wm_reqdata{}, any()}.
 
 -define(NO_PING, no_ping).
+
+%% This is the max size allowed for incoming request bodies.
+-define(MAX_SIZE, 1000000).
+
 -include("chef_wm.hrl").
 
 init(ResourceMod, Config) ->
@@ -74,18 +78,19 @@ malformed_request(Req, #base_state{resource_mod=Mod,
     try
         chef_authn:validate_headers(GetHeader, AuthSkew),
         OrgId = fetch_org_guid(Req, State1),
-        {Req1, State2} = Mod:validate_request(wrq:method(Req), Req,
+        Req1 = body_not_too_big(Req),
+        {Req2, State2} = Mod:validate_request(wrq:method(Req1), Req1,
                                               State1#base_state{organization_guid = OrgId}),
-        {false, Req1, State2}
+        {false, Req2, State2}
     catch
         throw:{org_not_found, Org} ->
             Msg = iolist_to_binary([<<"organization '">>, Org, <<"' does not exist.">>]),
-            Req2 = wrq:set_resp_body(ejson:encode({[{<<"error">>, [Msg]}]}), Req),
-            {{halt, 404}, Req2, State1#base_state{log_msg = org_not_found}};
+            Req3 = wrq:set_resp_body(ejson:encode({[{<<"error">>, [Msg]}]}), Req),
+            {{halt, 404}, Req3, State1#base_state{log_msg = org_not_found}};
         throw:bad_clock ->
             Msg1 = malformed_request_message(bad_clock, Req, State),
-            Req2 = wrq:set_resp_body(ejson:encode(Msg1), Req),
-            {{halt, 401}, Req2, State1#base_state{log_msg = bad_clock}};
+            Req3 = wrq:set_resp_body(ejson:encode(Msg1), Req),
+            {{halt, 401}, Req3, State1#base_state{log_msg = bad_clock}};
                 throw:bad_headers ->
             Msg1 = malformed_request_message(bad_headers, Req, State),
             Req3 = wrq:set_resp_body(ejson:encode(Msg1), Req),
@@ -690,6 +695,31 @@ get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) 
     UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
     BypassesChecks = SuperuserBypassesChecks andalso is_superuser(UserName),
     {UserName, BypassesChecks}.
+
+-spec body_not_too_big(#wm_reqdata{}) -> #wm_reqdata{}.
+%% Verify that the request body is not larger than ?MAX_SIZE bytes. Throws `{too_big, Msg}`
+%% if the request body is too large.
+body_not_too_big(Req) ->
+    body_not_too_big(wrq:method(Req), wrq:set_max_recv_body(?MAX_SIZE, Req)).
+
+body_not_too_big(Method, Req) when Method =:= 'POST';
+                                   Method =:= 'PUT' ->
+    try
+        %% Force a read of request body. Webmachine memoizes this in the process
+        %% dictionary. Webmachine will read in chunks and call exit/1 if the body exceeds
+        %% the max set above. It would be nice if there was something other than a string to
+        %% match against. TODO: patch webmachine.
+        wrq:req_body(Req),
+        Req
+    catch
+        exit:"request body too large" ->
+            Msg = iolist_to_binary([<<"JSON must be no more than ">>,
+                                    integer_to_list(?MAX_SIZE),
+                                    <<" bytes.">>]),
+            throw({too_big, Msg})
+    end;
+body_not_too_big(_Method, Req) ->
+    Req.
 
 -spec maybe_create_authz(ReqId::binary(), ActorId::object_id(),
                          ContainerId::object_id() | {authz_id, AuthzId::object_id()})
