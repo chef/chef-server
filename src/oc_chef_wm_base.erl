@@ -22,6 +22,7 @@
          authorized_by_org_membership_check/2,
          log_request/2,
          base_uri/1,
+         full_uri/1,
          update_from_json/4]).
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
@@ -659,6 +660,9 @@ base_uri(Req) ->
     Host = string:join(lists:reverse(wrq:host_tokens(Req)), "."),
     PortString = port_string(wrq:port(Req)),
     Scheme ++ "://" ++ Host ++ PortString.
+
+full_uri(Req) ->
+    base_uri(Req) ++ wrq:disp_path(Req).
 
 scheme(Req) ->
     case wrq:get_req_header("x-forwarded-proto", Req) of
