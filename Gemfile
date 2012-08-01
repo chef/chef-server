@@ -11,6 +11,5 @@ gem "rspec-shared", :git => "git://github.com/justinko/rspec-shared.git"
 
 gem 'chef-pedant-core', :path => '/srv/piab/mounts/chef-pedant-core'
 gem 'oc-chef-pedant-core', :path => '/srv/piab/mounts/oc-chef-pedant-core'
-gem 'chef-pedant-core', :path => '/srv/piab/mounts/chef-pedant-core'
 gem 'chef-pedant-tests', :path => '/srv/piab/mounts/chef-pedant-tests'
 gem 'oc-chef-pedant-tests', :path => '/srv/piab/mounts/oc-chef-pedant-tests'
