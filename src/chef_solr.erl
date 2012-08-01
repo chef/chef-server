@@ -36,10 +36,10 @@ make_query_from_params(ObjType, QueryString, Start, Rows) ->
     %% 'sort' param is ignored and hardcoded because indexing
     %% scheme doesn't support sorting since there is only one field.
     Sort = "X_CHEF_id_CHEF_X asc",
-    #chef_solr_query{query_string = QueryString,
+    #chef_solr_query{query_string = check_query(QueryString),
                      filter_query = FilterQuery,
-                     start = Start,
-                     rows = Rows,
+                     start = decode(nonneg_int, Start, 0),
+                     rows = decode(nonneg_int, Rows, 1000),
                      sort = Sort,
                      index = index_type(ObjType)}.
 
@@ -136,3 +136,48 @@ index_type("environment") ->
     'environment';
 index_type(DataBag) ->
     {'data_bag', list_to_binary(DataBag)}.
+
+
+check_query(RawQuery) ->
+    case RawQuery of
+        undefined ->
+            %% Default query string if no 'q' param is present. We might
+            %% change this to be a 400 in the future.
+            "*:*";
+        "" ->
+            %% thou shalt not query with the empty string
+            throw({bad_query, ""});
+        Query ->
+            transform_query(http_uri:decode(Query))
+    end.
+
+transform_query(RawQuery) when is_list(RawQuery) ->
+    transform_query(list_to_binary(RawQuery));
+transform_query(RawQuery) ->
+    case chef_lucene:parse(RawQuery) of
+        Query when is_binary(Query) ->
+            binary_to_list(Query);
+        _ ->
+            throw({bad_query, RawQuery})
+    end.
+
+decode(nonneg_int, Key, Default) ->
+    {Int, Orig} =
+        case Key of
+            undefined ->
+                {Default, default};
+            Value ->
+                try
+                    {list_to_integer(http_uri:decode(Value)), Value}
+                catch
+                    error:badarg ->
+                        throw({bad_param, {Key, Value}})
+                end
+        end,
+    validate_non_neg(Key, Int, Orig).
+
+validate_non_neg(Key, Int, OrigValue) when Int < 0 ->
+    throw({bad_param, {Key, OrigValue}});
+validate_non_neg(_Key, Int, _OrigValue) ->
+    Int.
+
