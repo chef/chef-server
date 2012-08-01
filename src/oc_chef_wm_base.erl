@@ -48,12 +48,6 @@ init_base_state(ResourceMod, InitParams) ->
                 db_type = ?gv(db_type, InitParams),
                 resource_mod = ResourceMod}.
 
-validate_request(_Verb, Req, State) ->
-    {Req, State}.
-
-auth_info(Req, State) ->
-    {not_found, Req, State}.
-
 %% @doc Determines if service is available.
 %%
 %% Also initializes chef_db_context and reqid fields of base_state.
@@ -62,11 +56,17 @@ service_available(Req, State) ->
     %% TODO: query overload here and send 503 also can consult
     %% config/darklaunch to determine if we are in maint mode.
     OrgName = list_to_binary(wrq:path_info(organization_id, Req)),
-    State0 = set_chef_db_context(Req, State),
+    State0 = set_req_contexts(Req, State),
     State1 = State0#base_state{organization_name = OrgName},
     spawn_stats_hero_worker(Req, State1),
     {_GetHeader, State2} = get_header_fun(Req, State1),
     {true, Req, State2}.
+
+validate_request(_Verb, Req, State) ->
+    {Req, State}.
+
+auth_info(Req, State) ->
+    {not_found, Req, State}.
 
 malformed_request(Req, #base_state{resource_mod=Mod,
                                    auth_skew=AuthSkew}=State) ->
@@ -82,13 +82,22 @@ malformed_request(Req, #base_state{resource_mod=Mod,
             Msg = iolist_to_binary([<<"organization '">>, Org, <<"' does not exist.">>]),
             Req2 = wrq:set_resp_body(ejson:encode({[{<<"error">>, [Msg]}]}), Req),
             {{halt, 404}, Req2, State1#base_state{log_msg = org_not_found}};
-        throw:{json_too_large, Msg} ->
-            Req2 = wrq:set_resp_body(ejson:encode({[{<<"error">>, Msg}]}), Req),
-            {{halt, 413}, Req2, State1#base_state{log_msg = json_too_large}};
         throw:bad_clock ->
             Msg1 = malformed_request_message(bad_clock, Req, State),
             Req2 = wrq:set_resp_body(ejson:encode(Msg1), Req),
             {{halt, 401}, Req2, State1#base_state{log_msg = bad_clock}};
+                throw:bad_headers ->
+            Msg1 = malformed_request_message(bad_headers, Req, State),
+            Req3 = wrq:set_resp_body(ejson:encode(Msg1), Req),
+            {{halt, 401}, Req3, State1#base_state{log_msg = bad_headers}};
+        throw:bad_sign_desc ->
+            Msg1 = malformed_request_message(bad_sign_desc, Req, State),
+            Req3 = wrq:set_resp_body(ejson:encode(Msg1), Req),
+            {{halt, 400}, Req3, State1#base_state{log_msg = bad_sign_desc}};
+        throw:{too_big, Msg} ->
+            error_logger:info_msg("json too large (~p)", [Msg]),
+            Req3 = wrq:set_resp_body(ejson:encode({[{<<"error">>, Msg}]}), Req),
+            {{halt, 413}, Req3, State1#base_state{log_msg = too_big}};
         throw:Why ->
             Msg = malformed_request_message(Why, Req, State),
             NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),
@@ -110,7 +119,7 @@ malformed_request(Req, #base_state{resource_mod=Mod,
 %%
 
 malformed_request_message(bad_clock, Req, State) ->
-    {GetHeader, _State1} = get_header_fun(Req, State),
+    {GetHeader, _State1} = chef_rest_wm:get_header_fun(Req, State),
     User = case GetHeader(<<"X-Ops-UserId">>) of
                undefined -> <<"">>;
                UID -> UID
@@ -118,10 +127,18 @@ malformed_request_message(bad_clock, Req, State) ->
     Msg = iolist_to_binary([<<"Failed to authenticate as ">>, User,
                             <<". Synchronize the clock on your host.">>]),
     {[{<<"error">>, [Msg]}]};
+malformed_request_message(bad_sign_desc, _Req, _State) ->
+    Msg = <<"Unsupported authentication protocol version">>,
+    {[{<<"error">>, [Msg]}]};
 malformed_request_message({missing_headers, Missing}, _Req, _State) ->
     Msg = iolist_to_binary([
                             <<"missing required authentication header(s) ">>,
                             bin_str_join(Missing, <<", ">>)]),
+    {[{<<"error">>, [Msg]}]};
+malformed_request_message({bad_headers, Bad}, _Req, _State) ->
+    Msg = iolist_to_binary([
+                            <<"bad header(s) ">>,
+                            bin_str_join(Bad, <<", ">>)]),
     {[{<<"error">>, [Msg]}]};
 malformed_request_message({invalid_json, _}, _Req, _State) ->
     %% in theory, there might be some sort of slightly useful error detail from ejson, but
@@ -132,6 +149,14 @@ malformed_request_message({mismatch, {FieldName, _Pat, _Val}}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Field '", FieldName, "' invalid"])]}]};
 malformed_request_message({missing, FieldName}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Field '", FieldName, "' missing"])]}]};
+malformed_request_message({both_missing, Field1, Field2}, _Req, _State) ->
+    {[{<<"error">>, [iolist_to_binary(["Both fields '", Field1, "' and '", Field2,
+				       "' are missing, at least one must be passed"])]}]};
+malformed_request_message({client_name_mismatch}, _Req, _State) ->
+    {[{<<"error">>, [<<"name and clientname must match">>]}]};
+malformed_request_message({bad_client_name, Name, Pattern}, _Req, _State) ->
+    {[{<<"error">>, [iolist_to_binary(["Invalid cookbook name '", Name,
+				       "' using regex: '", Pattern, "'."])]}]};
 
 %% Not sure if we want to be this specific, or just want to fold this into an 'invalid JSON'
 %% case.  At any rate, here it is.
@@ -145,6 +170,8 @@ malformed_request_message({bad_run_list, {Field, _Value}}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Field '", Field, "' is not a valid run list"])]}]};
 malformed_request_message({bad_run_lists, {Field, _Value}}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Field '", Field, "' contains invalid run lists"])]}]};
+malformed_request_message(invalid_num_versions, _Req, _State) ->
+    {[{<<"error">>, [<<"You have requested an invalid number of versions (x >= 0 || 'all')">>]}]};
 malformed_request_message(Reason, Req, #base_state{resource_mod=Mod}=State) ->
     Mod:malformed_request_message(Reason, Req, State).
 
@@ -456,10 +483,13 @@ body_or_default(Req, Default) ->
         Body -> Body
     end.
 
-set_chef_db_context(Req, #base_state{reqid_header_name = HeaderName} = State) ->
+set_req_contexts(Req, #base_state{reqid_header_name = HeaderName} = State) ->
     ReqId = read_req_id(HeaderName, Req),
-    Context = chef_db:make_context(ReqId),
-    State#base_state{chef_db_context = Context, reqid = ReqId}.
+    AuthzContext = chef_authz:make_context(ReqId),
+    DbContext = chef_db:make_context(ReqId),
+    State#base_state{chef_authz_context = AuthzContext,
+                     chef_db_context = DbContext,
+                     reqid = ReqId}.
 
 read_req_id(ReqHeaderName, Req) ->
     case wrq:get_req_header(ReqHeaderName, Req) of
