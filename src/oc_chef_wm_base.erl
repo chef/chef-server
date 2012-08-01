@@ -393,9 +393,9 @@ create_from_json(#wm_reqdata{} = Req,
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
--spec update_from_json(#wm_reqdata{}, #base_state{}, chef_object(), ejson_term()) ->
+-spec update_from_json(#wm_reqdata{}, #base_state{}, chef_object() | #chef_cookbook_version{}, ejson_term()) ->
                               {true, #wm_reqdata{}, #base_state{}} |
-                              {{halt, 404 | 500}, #wm_reqdata{}, #base_state{}}.
+                              {{halt, 400 | 404 | 500}, #wm_reqdata{}, #base_state{}}.
 %% @doc Implements the from_json callback for PUT requests to update Chef
 %% objects. `OrigObjectRec' should be the existing and unmodified `chef_object()'
 %% record. `ObjectEjson' is the parsed EJSON from the request body.
@@ -407,7 +407,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
     %% Send object to solr for indexing *first*. If the update fails, we will have sent
     %% incorrect data, but that should get corrected when the client retries. This is a
     %% compromise.
-    ok = chef_object:add_to_solr(chef_object:type_name(ObjectRec),
+    ok = chef_object_db:add_to_solr(chef_object:type_name(ObjectRec),
                                  chef_object:id(ObjectRec),
                                  OrgId,
                                  chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
@@ -422,7 +422,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
             {true, chef_rest_util:set_json_body(Req, ObjectEjson), State1};
         false ->
-            UpdateFun = chef_object:update_fun(ObjectRec),
+            UpdateFun = chef_db:update_fun(ObjectRec),
             case chef_db:UpdateFun(DbContext, ObjectRec, ActorId) of
                 ok ->
                     {true, chef_rest_util:set_json_body(Req, ObjectEjson), State};
@@ -436,6 +436,24 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                                                            chef_object:name(ObjectRec)),
                     Req1 = chef_rest_util:set_json_body(Req, Msg),
                     {{halt, 404}, Req1, State1};
+                {conflict, _} ->
+                    Name = chef_object:name(ObjectRec),
+                    TypeName = chef_object:type_name(ObjectRec),
+                    RecType = erlang:element(1,ObjectRec),
+                    LogMsg = {RecType, name_conflict, Name},
+                    ConflictMsg = conflict_message(TypeName, Name),
+                    {{halt, 409}, chef_rest_util:set_json_body(Req, ConflictMsg),
+                     State#base_state{log_msg = LogMsg}};
+                {error, {checksum_missing, Checksum}} ->
+                    % Catches the condition where the user attempts to reference a checksum that
+                    % as not been uploaded.
+                    % This leaves it open to be generified
+                    % Not sure if we want to explicitly assume what is getting passed
+                    % is chef_cookbook_version
+                    LogMsg = {checksum_missing, Checksum},
+                    ErrorMsg = error_message(checksum_missing, Checksum),
+                    {{halt, 400}, chef_rest_util:set_json_body(Req, ErrorMsg),
+                     State#base_state{log_msg = LogMsg}};
                 Why ->
                     State1 = State#base_state{log_msg = Why},
                     {{halt, 500}, Req, State1}
@@ -455,6 +473,10 @@ conflict_message(data_bag_item, {BagName, ItemName}) ->
 conflict_message(data_bag, _Name) ->
     %% {[{<<"error">>, [<<"Data Bag '", Name/binary, "' already exists">>]}]}.
     {[{<<"error">>, [<<"Data bag already exists">>]}]}.
+
+error_message(checksum_missing, Checksum) ->
+    {[{<<"error">>, [iolist_to_binary([<<"Manifest has checksum ">>, Checksum,
+                                       <<" but it hasn't yet been uploaded">>])]}]}.
 
 verify_request_message({not_found, org}, _User, Org) ->
     Msg = iolist_to_binary([<<"organization '">>, Org, <<"' does not exist.">>]),
