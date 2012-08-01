@@ -36,7 +36,7 @@ make_query_from_params_test_() ->
     [
      {"properly formed",
       fun() ->
-          Query = chef_solr:make_query_from_params("node", "myquery", 2, 5),
+          Query = chef_solr:make_query_from_params("node", "myquery", "2", "5"),
           Expect = #chef_solr_query{
             query_string = "myquery",
             filter_query = "+X_CHEF_type_CHEF_X:node",
@@ -54,7 +54,7 @@ make_query_from_params_test_() ->
                        {"adbag", {data_bag, <<"adbag">>}}],
               lists:foreach(
                 fun({Sent, Want}) ->
-                        Query = chef_solr:make_query_from_params(Sent, "query", 2, 5),
+                        Query = chef_solr:make_query_from_params(Sent, "query", "2", "5"),
                         ?assertEqual(Want, Query#chef_solr_query.index)
                 end, Tests)
       end}
