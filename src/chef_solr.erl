@@ -38,8 +38,10 @@ make_query_from_params(ObjType, QueryString, Start, Rows) ->
     Sort = "X_CHEF_id_CHEF_X asc",
     #chef_solr_query{query_string = check_query(QueryString),
                      filter_query = FilterQuery,
-                     start = decode(nonneg_int, Start, 0),
-                     rows = decode(nonneg_int, Rows, 1000),
+                     %% I don't like passing the "Key" string in here.
+                     %% Not sure how to generate the proper error tuples otherwise though.
+                     start = decode(nonneg_int, "start", Start, 0),
+                     rows = decode(nonneg_int, "rows", Rows, 1000),
                      sort = Sort,
                      index = index_type(ObjType)}.
 
@@ -161,9 +163,9 @@ transform_query(RawQuery) ->
             throw({bad_query, RawQuery})
     end.
 
-decode(nonneg_int, Key, Default) ->
+decode(nonneg_int, Key, Val, Default) ->
     {Int, Orig} =
-        case Key of
+        case Val of
             undefined ->
                 {Default, default};
             Value ->
