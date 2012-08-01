@@ -192,7 +192,6 @@ invert_perm({false, Req, State}) ->
 invert_perm(Other) ->
     Other.
 
-
 check_permission(AuthzObjectType, AuthzId, Req, #base_state{reqid=ReqId,
                                                             requestor=RequestorId}=State) ->
     Perm = http_method_to_authz_perm(wrq:method(Req)),
@@ -229,10 +228,10 @@ is_authorized(Req, State) ->
                     {true, Req2, State2}
             end;
         {false, ReqOther, StateOther} ->
+            %% FIXME: the supported version is determined by the chef_authn application
+            %% also, see: https://wiki.corp.opscode.com/display/CORP/RFC+Authentication+Version+Negotiation
             {"X-Ops-Sign version=\"1.0\"", ReqOther, StateOther}
     end.
-
-
 
 %%%
 %%% Clients are inherently a member of the org, but users are not.
@@ -243,19 +242,23 @@ is_authorized(Req, State) ->
 authorized_by_org_membership_check(Req, #base_state{requester_type=client}=State) ->
     {true, Req, State};
 authorized_by_org_membership_check(Req, State = #base_state{organization_name = OrgName,
-                                                           chef_db_context = DbContext}) ->
-    UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
-    case chef_db:is_user_in_org(DbContext, UserName, OrgName) of
-        true ->
-            {true, Req, State};
-        false ->
-            Msg = forbidden_message(not_member_of_org, UserName, OrgName),
-            {false, wrq:set_resp_body(ejson:encode(Msg), Req),
-             State#base_state{log_msg = user_not_in_org}};
-        Error ->
-            Msg = forbidden_message(unverified_org_membership, UserName, OrgName),
-            {false, wrq:set_resp_body(ejson:encode(Msg), Req),
-             State#base_state{log_msg = {user_not_in_org_error, Error}}}
+                                                            chef_db_context = DbContext}) ->
+    {UserName, BypassesChecks} = get_user(Req, State),
+    case BypassesChecks of
+        true -> {true, Req, State};
+        _ ->
+            case chef_db:is_user_in_org(DbContext, UserName, OrgName) of
+                true ->
+                    {true, Req, State};
+                false ->
+                    Msg = forbidden_message(not_member_of_org, UserName, OrgName),
+                    {false, wrq:set_resp_body(ejson:encode(Msg), Req),
+                     State#base_state{log_msg = user_not_in_org}};
+                Error ->
+                    Msg = forbidden_message(unverified_org_membership, UserName, OrgName),
+                    {false, wrq:set_resp_body(ejson:encode(Msg), Req),
+                     State#base_state{log_msg = {user_not_in_org_error, Error}}}
+            end
     end.
 
 forbidden_message(not_member_of_org, User, Org) ->
@@ -267,8 +270,6 @@ forbidden_message(unverified_org_membership, User, Org) ->
                             <<"' as a member of organization '">>,
                             Org, <<"'">>]),
     {[{<<"error">>, [Msg]}]}.
-
-
 
 content_types_provided(Req, State) ->
     {[{"application/json", to_json}], Req, State}.
@@ -651,3 +652,15 @@ port_string(Default) when Default =:= 80; Default =:= 443 ->
 port_string(Port) ->
     [$:|erlang:integer_to_list(Port)].
 
+%% Tells whether this user is the superuser.
+is_superuser(UserName) ->
+    case application:get_env(chef_rest, superusers) of
+        {ok,Superusers} -> lists:member(UserName, Superusers);
+        undefined -> false
+    end.
+
+%% Get the username from the request (and tell whether it is a superuser)
+get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) ->
+    UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
+    BypassesChecks = SuperuserBypassesChecks andalso is_superuser(UserName),
+    {UserName, BypassesChecks}.
