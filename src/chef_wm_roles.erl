@@ -1,6 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
 %% @author Christopher Maier <cm@opscode.com>
+%% @author Seth Falcon <seth@opscode.com>
 %% @copyright 2012 Opscode, Inc.
 
 -module(chef_wm_roles).
@@ -13,7 +14,12 @@
                           is_authorized/2,
                           malformed_request/2,
                           ping/2,
+                          post_is_create/2,
                           service_available/2]}]).
+
+%% I think we will end up moving the generic complete wm callbacks like post_is_create,
+%% content_types_* into chef_wm_base and mixing those in here separately so that we only
+%% have to have those defined in one place.
 
 %% chef_wm behavior callbacks
 -export([auth_info/2,
@@ -57,9 +63,6 @@ auth_info(Req, #base_state{chef_authz_context = AuthzContext,
     {container, ContainerId, Req, State#base_state{resource_state=RoleState1}}.
 
 resource_exists(Req, State) ->
-    {true, Req, State}.
-
-post_is_create(Req, State) ->
     {true, Req, State}.
 
 create_path(Req, #base_state{resource_state = #role_state{role_data = RoleData}}=State) ->

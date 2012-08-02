@@ -1,13 +1,16 @@
 -module(oc_chef_wm_base).
 
 %% Complete webmachine callbacks
--export([ping/2,
-         is_authorized/2,
+-export([
          content_types_accepted/2,
          content_types_provided/2,
-         service_available/2,
          finish_request/2,
-         malformed_request/2]).
+         is_authorized/2,
+         malformed_request/2,
+         ping/2,
+         post_is_create/2,
+         service_available/2
+        ]).
 
 %% Complete webmachine callbacks which must be
 %% mixed in and aliased to the proper name.
@@ -71,6 +74,9 @@ validate_request(_Verb, Req, State) ->
 
 auth_info(Req, State) ->
     {not_found, Req, State}.
+
+post_is_create(Req, State) ->
+    {true, Req, State}.
 
 malformed_request(Req, #base_state{resource_mod=Mod,
                                    auth_skew=AuthSkew}=State) ->
