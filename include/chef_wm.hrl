@@ -92,5 +92,14 @@
           partial_paths = []
          }).
 
+-record(role_state, {
+          %% EJson-encoded representation of a Role
+          role_data,
+
+          role_container_id,
+
+          chef_role :: #chef_role{}
+         }).
+
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
