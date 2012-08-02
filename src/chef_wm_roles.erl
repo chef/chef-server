@@ -32,7 +32,6 @@
          create_path/2,
          from_json/2,
          init/1,
-         post_is_create/2,
          resource_exists/2,
          to_json/2]).
 
