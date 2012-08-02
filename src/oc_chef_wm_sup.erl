@@ -88,7 +88,7 @@ load_ibrowse_config() ->
     ok.
 
 enable_org_cache() ->
-    %% FIXME: should this config live at the chef_rest level?
+    %% FIXME: should this config live at the oc_chef_wm level?
     case application:get_env(chef_db, cache_defaults) of
         undefined ->
             error_logger:info_msg("Org guid cache disabled~n");
