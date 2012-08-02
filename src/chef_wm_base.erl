@@ -242,13 +242,13 @@ create_from_json(#wm_reqdata{} = Req,
 
             LogMsg = {RecType, name_conflict, Name},
             ConflictMsg = conflict_message(TypeName, Name),
-            {{halt, 409}, chef_rest_util:set_json_body(Req, ConflictMsg),
+            {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
              State#base_state{log_msg = LogMsg}};
         ok ->
             LogMsg = {created, Name},
-            Uri = chef_rest_routes:route(TypeName, Req, [{name, Name}]),
+            Uri = chef_wm_routes:route(TypeName, Req, [{name, Name}]),
             {true,
-             chef_rest_util:set_uri_of_created_resource(Uri, Req),
+             chef_wm_util:set_uri_of_created_resource(Uri, Req),
              State#base_state{log_msg = LogMsg}};
         What ->
             %% ignore return value of solr delete, this is best effort.
@@ -283,21 +283,21 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
     case OrigObjectRec =:= ObjectRec of
         true ->
             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
-            {true, chef_rest_util:set_json_body(Req, ObjectEjson), State1};
+            {true, chef_wm_util:set_json_body(Req, ObjectEjson), State1};
         false ->
             UpdateFun = chef_object:update_fun(ObjectRec),
             case chef_db:UpdateFun(DbContext, ObjectRec, ActorId) of
                 ok ->
-                    {true, chef_rest_util:set_json_body(Req, ObjectEjson), State};
+                    {true, chef_wm_util:set_json_body(Req, ObjectEjson), State};
                 not_found ->
                     %% We will get this if no rows were affected by the query. This could
                     %% happen if the object is deleted in the middle of handling this
                     %% request. In this case, we return 404 just as we would if the client
                     %% retried.
                     State1 = State#base_state{log_msg = not_found},
-                    Msg = chef_rest_util:not_found_message(chef_object:type_name(ObjectRec),
+                    Msg = chef_wm_util:not_found_message(chef_object:type_name(ObjectRec),
                                                            chef_object:name(ObjectRec)),
-                    Req1 = chef_rest_util:set_json_body(Req, Msg),
+                    Req1 = chef_wm_util:set_json_body(Req, Msg),
                     {{halt, 404}, Req1, State1};
                 Why ->
                     State1 = State#base_state{log_msg = Why},

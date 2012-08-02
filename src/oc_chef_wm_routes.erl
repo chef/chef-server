@@ -3,7 +3,7 @@
 %% @author Christopher Maier <cm@opscode.com>
 %% @author Seth Falcon <seth@opscode.com>
 %% @copyright 2011-2012 Opscode, Inc.
--module(chef_wm_routes).
+-module(oc_chef_wm_routes).
 
 -export([
          bulk_route_fun/2,
