@@ -199,7 +199,8 @@ invert_perm(Other) ->
     Other.
 
 check_permission(AuthzObjectType, AuthzId, Req, #base_state{reqid=ReqId,
-                                                            requestor=RequestorId}=State) ->
+                                                            requestor=Requestor}=State) ->
+    #chef_requestor{authz_id = RequestorId} = Requestor,
     Perm = http_method_to_authz_perm(wrq:method(Req)),
     case ?SH_TIME(ReqId, chef_authz, is_authorized_on_resource,
                   (RequestorId, AuthzObjectType, AuthzId, actor, RequestorId, Perm)) of
