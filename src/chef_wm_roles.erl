@@ -7,30 +7,28 @@
 
 -include("chef_wm.hrl").
 
--mixin([{?BASE_RESOURCE, [malformed_request/2,
-                          service_available/2,
-                          is_authorized/2,
-                          content_types_provided/2,
-                          ping/2,
+-mixin([{?BASE_RESOURCE, [content_types_provided/2,
                           finish_request/2,
-                          forbidden/2]}]).
+                          forbidden/2,
+                          is_authorized/2,
+                          malformed_request/2,
+                          ping/2,
+                          service_available/2]}]).
 
 %% chef_wm behavior callbacks
--export([request_type/0,
-         validate_request/3,
+-export([auth_info/2,
          malformed_request_message/3,
-         auth_info/2]).
+         request_type/0,
+         validate_request/3]).
 
--export([
-         init/1,
-         allowed_methods/2,
+-export([allowed_methods/2,
          content_types_accepted/2,
          create_path/2,
          from_json/2,
+         init/1,
          post_is_create/2,
          resource_exists/2,
-         to_json/2
-        ]).
+         to_json/2]).
 
 -behaviour(chef_wm).
 
@@ -39,14 +37,6 @@ init(Config) ->
 
 request_type() ->
     "roles".
-
-%% Memoize the container id so we don't hammer the database
-auth_info(Req, #base_state{chef_authz_context = AuthzContext,
-                            resource_state = RoleState,
-                            organization_guid=OrgId}=State) ->
-    ContainerId = chef_authz:get_container_aid_for_object(AuthzContext, OrgId, role),
-    RoleState1 = RoleState#role_state{role_container_id=ContainerId},
-    {container, ContainerId, Req, State#base_state{resource_state=RoleState1}}.
 
 allowed_methods(Req, State) ->
     {['GET','POST'], Req, State}.
@@ -57,6 +47,14 @@ validate_request('POST', Req, State) ->
     Body = wrq:req_body(Req),
     {ok, Role} = chef_role:parse_binary_json(Body, create),
     {Req, State#base_state{resource_state = #role_state{role_data = Role}}}.
+
+%% Memoize the container id so we don't hammer the database
+auth_info(Req, #base_state{chef_authz_context = AuthzContext,
+                           resource_state = RoleState,
+                           organization_guid=OrgId}=State) ->
+    ContainerId = chef_authz:get_container_aid_for_object(AuthzContext, OrgId, role),
+    RoleState1 = RoleState#role_state{role_container_id=ContainerId},
+    {container, ContainerId, Req, State#base_state{resource_state=RoleState1}}.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
