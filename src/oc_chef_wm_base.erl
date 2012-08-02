@@ -21,8 +21,6 @@
          create_from_json/5,
          authorized_by_org_membership_check/2,
          log_request/2,
-         base_uri/1,
-         full_uri/1,
          update_from_json/4]).
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
@@ -64,7 +62,7 @@ service_available(Req, State) ->
     State0 = set_req_contexts(Req, State),
     State1 = State0#base_state{organization_name = OrgName},
     spawn_stats_hero_worker(Req, State1),
-    {_GetHeader, State2} = get_header_fun(Req, State1),
+    {_GetHeader, State2} = chef_wm_util:get_header_fun(Req, State1),
     {true, Req, State2}.
 
 validate_request(_Verb, Req, State) ->
@@ -75,7 +73,7 @@ auth_info(Req, State) ->
 
 malformed_request(Req, #base_state{resource_mod=Mod,
                                    auth_skew=AuthSkew}=State) ->
-    {GetHeader, State1} = get_header_fun(Req, State),
+    {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
     try
         chef_authn:validate_headers(GetHeader, AuthSkew),
         OrgId = fetch_org_guid(Req, State1),
@@ -125,7 +123,7 @@ malformed_request(Req, #base_state{resource_mod=Mod,
 %%
 
 malformed_request_message(bad_clock, Req, State) ->
-    {GetHeader, _State1} = chef_rest_wm:get_header_fun(Req, State),
+    {GetHeader, _State1} = chef_wm_util:get_header_fun(Req, State),
     User = case GetHeader(<<"X-Ops-UserId">>) of
                undefined -> <<"">>;
                UID -> UID
@@ -329,7 +327,7 @@ verify_request_signature(Req,
             Body = body_or_default(Req, <<>>),
             HTTPMethod = iolist_to_binary(atom_to_list(wrq:method(Req))),
             Path = iolist_to_binary(wrq:path(Req)),
-            {GetHeader, State1} = get_header_fun(Req, State),
+            {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
             case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
                                                       Path, Body, KeyData,
                                                       AuthSkew) of
@@ -386,13 +384,13 @@ create_from_json(#wm_reqdata{} = Req,
 
             LogMsg = {RecType, name_conflict, Name},
             ConflictMsg = conflict_message(TypeName, Name),
-            {{halt, 409}, chef_rest_util:set_json_body(Req, ConflictMsg),
+            {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
              State#base_state{log_msg = LogMsg}};
         ok ->
             LogMsg = {created, Name},
-            Uri = chef_rest_routes:route(TypeName, Req, [{name, Name}]),
+            Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, Name}]),
             {true,
-             chef_rest_util:set_uri_of_created_resource(Uri, Req),
+             chef_wm_util:set_uri_of_created_resource(Uri, Req),
              State#base_state{log_msg = LogMsg}};
         What ->
             %% ignore return value of solr delete, this is best effort.
@@ -427,21 +425,21 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
     case OrigObjectRec =:= ObjectRec of
         true ->
             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
-            {true, chef_rest_util:set_json_body(Req, ObjectEjson), State1};
+            {true, chef_wm_util:set_json_body(Req, ObjectEjson), State1};
         false ->
             UpdateFun = chef_db:update_fun(ObjectRec),
             case chef_db:UpdateFun(DbContext, ObjectRec, ActorId) of
                 ok ->
-                    {true, chef_rest_util:set_json_body(Req, ObjectEjson), State};
+                    {true, chef_wm_util:set_json_body(Req, ObjectEjson), State};
                 not_found ->
                     %% We will get this if no rows were affected by the query. This could
                     %% happen if the object is deleted in the middle of handling this
                     %% request. In this case, we return 404 just as we would if the client
                     %% retried.
                     State1 = State#base_state{log_msg = not_found},
-                    Msg = chef_rest_util:not_found_message(chef_object:type_name(ObjectRec),
+                    Msg = chef_wm_util:not_found_message(chef_object:type_name(ObjectRec),
                                                            chef_object:name(ObjectRec)),
-                    Req1 = chef_rest_util:set_json_body(Req, Msg),
+                    Req1 = chef_wm_util:set_json_body(Req, Msg),
                     {{halt, 404}, Req1, State1};
                 {conflict, _} ->
                     Name = chef_object:name(ObjectRec),
@@ -449,7 +447,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     RecType = erlang:element(1,ObjectRec),
                     LogMsg = {RecType, name_conflict, Name},
                     ConflictMsg = conflict_message(TypeName, Name),
-                    {{halt, 409}, chef_rest_util:set_json_body(Req, ConflictMsg),
+                    {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
                      State#base_state{log_msg = LogMsg}};
                 {error, {checksum_missing, Checksum}} ->
                     % Catches the condition where the user attempts to reference a checksum that
@@ -459,7 +457,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     % is chef_cookbook_version
                     LogMsg = {checksum_missing, Checksum},
                     ErrorMsg = error_message(checksum_missing, Checksum),
-                    {{halt, 400}, chef_rest_util:set_json_body(Req, ErrorMsg),
+                    {{halt, 400}, chef_wm_util:set_json_body(Req, ErrorMsg),
                      State#base_state{log_msg = LogMsg}};
                 Why ->
                     State1 = State#base_state{log_msg = Why},
@@ -532,23 +530,6 @@ read_req_id(ReqHeaderName, Req) ->
         HV ->
             iolist_to_binary(HV)
     end.
-
-get_header_fun(Req, State = #base_state{header_fun = HFun})
-  when HFun =:= undefined ->
-    GetHeader = fun(H) ->
-                        Name = case is_binary(H) of
-                                   true -> binary_to_list(H);
-                                   false -> H
-                               end,
-                        case wrq:get_req_header(string:to_lower(Name), Req) of
-                            B when is_binary(B) -> B;
-                            S when is_list(S) -> iolist_to_binary(S);
-                            undefined -> undefined
-                        end
-                end,
-    {GetHeader, State#base_state{header_fun = GetHeader}};
-get_header_fun(_Req, State) ->
-    {State#base_state.header_fun, State}.
 
 spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
                                          organization_name = OrgName,
@@ -654,39 +635,6 @@ select_user_or_webui_key(Req, KeyData, RequestorType) ->
         _Else ->
             {RequestorType, KeyData}
     end.
-
-%% @doc Returns the base URI for the server as called by the client as a string.
-base_uri(Req) ->
-    Scheme = scheme(Req),
-    Host = string:join(lists:reverse(wrq:host_tokens(Req)), "."),
-    PortString = port_string(wrq:port(Req)),
-    Scheme ++ "://" ++ Host ++ PortString.
-
-full_uri(Req) ->
-    base_uri(Req) ++ wrq:disp_path(Req).
-
-scheme(Req) ->
-    case wrq:get_req_header("x-forwarded-proto", Req) of
-        undefined ->
-            case wrq:scheme(Req) of
-                https -> "https";
-                http -> "http";
-                P -> erlang:atom_to_list(P)
-            end;
-        Proto -> Proto
-    end.
-
-%% So this is kind of gross and will prevent correct port info if you run https on port 80
-%% or http on port 443; otherwise it should work. The problem is two-fold, first webmachine
-%% ignores scheme information when parsing the host header and so always sets the port to 80
-%% if no port is present in the host header. But in a load-balanced situation, the scheme
-%% from webmachine may not reflect what is in use at the load balancer. A simple compromise
-%% is to treat both 80 and 443 as default and only include a port string if the port differs
-%% from those.
-port_string(Default) when Default =:= 80; Default =:= 443 ->
-    "";
-port_string(Port) ->
-    [$:|erlang:integer_to_list(Port)].
 
 %% Tells whether this user is the superuser.
 is_superuser(UserName) ->
