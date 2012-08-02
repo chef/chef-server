@@ -15,7 +15,7 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    chef_rest_sup:start_link().
+    oc_chef_wm_sup:start_link().
 
 stop(_State) ->
     ok.
