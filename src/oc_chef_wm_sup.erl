@@ -48,9 +48,8 @@ init([]) ->
     validate_bulk_fetch_batch_size(),
     ok = load_ibrowse_config(),
     ok = enable_org_cache(),
-    %% FIXME: move config to oc_chef_wm and/or chef_wm
-    {ok, Ip} = application:get_env(chef_rest, ip),
-    {ok, Port} = application:get_env(chef_rest, port),
+    {ok, Ip} = application:get_env(oc_chef_wm, ip),
+    {ok, Port} = application:get_env(oc_chef_wm, port),
     {ok, Dispatch} = file:consult(filename:join(
                          [filename:dirname(code:which(?MODULE)),
                           "..", "priv", "dispatch.conf"])),
@@ -103,7 +102,7 @@ validate_bulk_fetch_batch_size() ->
     %% Batch size for bulk_fetch is currently tightly coupled to hard-coded prepared SQL
     %% queries. We verify the value does not exceed the the predefined queries here while we
     %% are investigating a more elegant solution.
-    {ok, BatchSize} = application:get_env(chef_rest, bulk_fetch_batch_size),
+    {ok, BatchSize} = application:get_env(oc_chef_wm, bulk_fetch_batch_size),
     case BatchSize > ?MAX_BULK_GET_SIZE of
         true ->
             error_logger:error_msg("bulk_fetch_batch_size of ~p is larger than "
@@ -155,10 +154,10 @@ fetch_custom_init_params(Module, Defaults) ->
 
 %% @doc Return a proplist of init parameters that should be passed to all resource modules.
 default_resource_init() ->
-    [{batch_size, get_env(chef_rest, bulk_fetch_batch_size)},
-     {auth_skew, get_env(chef_rest, auth_skew)},
+    [{batch_size, get_env(oc_chef_wm, bulk_fetch_batch_size)},
+     {auth_skew, get_env(oc_chef_wm, auth_skew)},
      {db_type, get_env(sqerl, db_type)},
-     {reqid_header_name, get_env(chef_rest, reqid_header_name)}].
+     {reqid_header_name, get_env(oc_chef_wm, reqid_header_name)}].
 
 get_env(App, Key) ->
     {ok, Value} = application:get_env(App, Key),

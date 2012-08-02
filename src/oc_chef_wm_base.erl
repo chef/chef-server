@@ -689,7 +689,7 @@ port_string(Port) ->
 
 %% Tells whether this user is the superuser.
 is_superuser(UserName) ->
-    case application:get_env(chef_rest, superusers) of
+    case application:get_env(oc_chef_wm, superusers) of
         {ok,Superusers} -> lists:member(UserName, Superusers);
         undefined -> false
     end.
