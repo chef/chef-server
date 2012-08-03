@@ -87,7 +87,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  requestor = #chef_requestor{
                                      authz_id = RequestorId}} = State) ->
 
-    ok = chef_object_db:delete(DbContext, Role, RequestorId),
+    ok = ?BASE_RESOURCE:delete_object(DbContext, Role, RequestorId),
 
     Json = chef_db_compression:decompress(Role#chef_role.serialized_object),
     {true, wrq:set_resp_body(Json, Req), State}.

@@ -21,11 +21,14 @@
          auth_info/2]).
 
 %% Helpers for webmachine callbacks
--export([init/2,
-         create_from_json/5,
+-export([
          authorized_by_org_membership_check/2,
+         create_from_json/5,
+         delete_object/3,
+         init/2,
          log_request/2,
-         update_from_json/4]).
+         update_from_json/4
+        ]).
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
 %% contains a function definition.
@@ -423,9 +426,9 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
     %% incorrect data, but that should get corrected when the client retries. This is a
     %% compromise.
     ok = chef_object_db:add_to_solr(chef_object:type_name(ObjectRec),
-                                 chef_object:id(ObjectRec),
-                                 OrgId,
-                                 chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
+                                    chef_object:id(ObjectRec),
+                                    OrgId,
+                                    chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
 
     %% Ignore updates that don't change anything. If the user PUTs identical data, we skip
     %% going to the database and skip updating updated_at. This allows us to avoid RDBMS
@@ -474,6 +477,12 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     {{halt, 500}, Req, State1}
             end
     end.
+
+-spec delete_object(chef_db:db_context(),
+                    chef_object() | #chef_cookbook_version{},
+                    object_id()) -> ok.
+delete_object(DbContext, Object, RequestId) ->
+    oc_chef_object_db:delete(DbContext, Object, RequestId).
 
 conflict_message(cookbook_version, _Name) ->
     {[{<<"error">>, [<<"Cookbook already exists">>]}]};
