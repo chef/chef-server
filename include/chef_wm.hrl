@@ -22,7 +22,7 @@
           %% Concrete resource impl
           resource_mod :: atom(),
           %% unique request ID from nginx header (or generated if not
-          %% found) set by chef_rest_wm:read_req_id.
+          %% found) set by chef_wm_util:read_req_id.
           reqid :: binary(),
 
           %% The name of the HTTP request header containing the unique ID set by the load
@@ -90,6 +90,15 @@
 -record(search_state, {
           solr_query = undefined,
           partial_paths = []
+         }).
+
+-record(role_state, {
+          %% EJson-encoded representation of a Role
+          role_data,
+
+          role_container_id,
+
+          chef_role :: #chef_role{}
          }).
 
 -define(gv(X,L), proplists:get_value(X, L)).
