@@ -5,9 +5,8 @@ PLT=$(PLT_DIR)/dialyzer_plt
 REBAR=$(shell which rebar)
 
 ERLPATH= -pa $(DEPS)/webmachine/ebin -pa $(DEPS)/covertool/ebin \
-	-pa $(DEPS)/edown/ebin -pa $(DEPS)/erlsom/ebin \
-	-pa $(DEPS)/gen_leader/ebin \
-	-pa $(DEPS)/gproc/ebin -pa $(DEPS)/iso8601/ebin \
+	-pa $(DEPS)/erlsom/ebin \
+	-pa $(DEPS)/iso8601/ebin \
 	-pa $(DEPS)/mini_s3/ebin -pa $(DEPS)/mochiweb/ebin
 
 ifeq ($(REBAR),)
@@ -55,9 +54,7 @@ dialyzer: $(PLT)
 	@$(REBAR) compile
 	dialyzer -nn --no_check_plt -Wno_undefined_callbacks --src --plt $(PLT) \
 	$(ERLPATH) \
-	-pa $(LIBDIR)/bookshelf_store/ebin \
 	-pa $(LIBDIR)/bookshelf_wi/ebin \
-	-c $(LIBDIR)/bookshelf_store/src \
 	-c $(LIBDIR)/bookshelf_wi/src
 
 $(DEPS):

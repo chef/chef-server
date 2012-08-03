@@ -5,8 +5,11 @@
 -module(bksw_conf).
 
 %% API
--export([get_configuration/0, get_context/0,
-        access_key_id/1, secret_access_key/1]).
+-export([get_configuration/0,
+         get_context/0,
+         access_key_id/1,
+         disk_store/0,
+         secret_access_key/1]).
 
 -include("internal.hrl").
 
@@ -42,6 +45,14 @@ access_key_id(#context{access_key_id=AccessKeyId}) ->
 secret_access_key(#context{secret_access_key=SecretAccessKey}) ->
     SecretAccessKey.
 
+-spec disk_store() -> string().
+disk_store() ->
+    case application:get_env(disk_store) of
+        undefined ->
+            throw({error, {missing_config, {bookshelf_wi, disk_store}}});
+        {ok, Path} ->
+            Path
+    end.
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================

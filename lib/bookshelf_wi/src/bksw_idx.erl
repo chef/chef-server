@@ -25,10 +25,10 @@ content_types_provided(Rq, Ctx) ->
     {[{"text/xml", to_xml}], Rq, Ctx}.
 
 resource_exists(Rq, Ctx) ->
-    {erlang:is_list(bookshelf_store:bucket_list()), Rq, Ctx}.
+    {erlang:is_list(bksw_file:bucket_list()), Rq, Ctx}.
 
 to_xml(Rq, Ctx) ->
-    Buckets = bookshelf_store:bucket_list(),
+    Buckets = bksw_file:bucket_list(),
     Term = bksw_xml:list_buckets(Buckets),
     Body = bksw_xml:write(Term),
     {Body, Rq, Ctx}.

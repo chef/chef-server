@@ -9,7 +9,7 @@
          generate_etag/2, init/1, is_authorized/2, last_modified/2,
          resource_exists/2, upload_or_copy/2]).
 
--include_lib("bookshelf_store/include/bookshelf_store.hrl").
+-include_lib("bookshelf_wi/include/bookshelf_store.hrl").
 -include_lib("webmachine/include/webmachine.hrl").
 -include("internal.hrl").
 
