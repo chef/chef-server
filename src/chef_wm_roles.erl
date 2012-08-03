@@ -8,13 +8,14 @@
 
 -include("chef_wm.hrl").
 
--mixin([{?BASE_RESOURCE, [content_types_provided/2,
-                          finish_request/2,
-                          forbidden/2,
+-mixin([{chef_wm_base, [content_types_provided/2,
+                        finish_request/2,
+                        malformed_request/2,
+                        ping/2,
+                        post_is_create/2]}]).
+
+-mixin([{?BASE_RESOURCE, [forbidden/2,
                           is_authorized/2,
-                          malformed_request/2,
-                          ping/2,
-                          post_is_create/2,
                           service_available/2]}]).
 
 %% I think we will end up moving the generic complete wm callbacks like post_is_create,
@@ -37,7 +38,7 @@
          to_json/2]).
 
 init(Config) ->
-    ?BASE_RESOURCE:init(?MODULE, Config).
+    chef_wm_base:init(?MODULE, Config).
 
 request_type() ->
     "roles".
@@ -83,7 +84,7 @@ from_json(Req, #base_state{resource_state =
                                            %% or {container, Id}.
                                            %% role_container_id = ContainerId,
                                            new_authz_id = AuthzId}} = State) ->
-    ?BASE_RESOURCE:create_from_json(Req, State, chef_role, {authz_id, AuthzId}, RoleData).
+    chef_wm_base:create_from_json(Req, State, chef_role, {authz_id, AuthzId}, RoleData).
 
 to_json(Req, State) ->
     {all_roles_json(Req, State), Req, State}.

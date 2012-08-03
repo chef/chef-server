@@ -22,11 +22,11 @@
          validate_request/3]).
 
 %% Helpers for webmachine callbacks
--export([authorized_by_org_membership_check/2,
-         create_from_json/5,
+-export([create_from_json/5,
          delete_object/3,
          init/2,
          log_request/2,
+         verify_request_signature/2,
          update_from_json/4]).
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
@@ -194,62 +194,15 @@ forbidden(Req, #base_state{resource_mod=Mod}=State) ->
             {false, Req1, State1}
     end.
 
-
-%%%
-%%% part of being authorized is being a member of the org; otherwise we fail out early.
-%%%
 is_authorized(Req, State) ->
     case verify_request_signature(Req, State) of
         {true, Req1, State1} ->
-            case authorized_by_org_membership_check(Req1,State1) of
-                {false, Req2, State2} ->
-                    {{halt, 403}, Req2, State2};
-                {true, Req2, State2} ->
-                    {true, Req2, State2}
-            end;
+            {true, Req1, State1};
         {false, ReqOther, StateOther} ->
             %% FIXME: the supported version is determined by the chef_authn application
             %% also, see: https://wiki.corp.opscode.com/display/CORP/RFC+Authentication+Version+Negotiation
             {"X-Ops-Sign version=\"1.0\"", ReqOther, StateOther}
     end.
-
-%%%
-%%% Clients are inherently a member of the org, but users are not.
-%%% If we add a user to the org, and then disassociate them, there will be acls left behind
-%%% granting permissions on the org objects, so we must check user association and
-%%% permissions
-%%%
-authorized_by_org_membership_check(Req, #base_state{requester_type=client}=State) ->
-    {true, Req, State};
-authorized_by_org_membership_check(Req, State = #base_state{organization_name = OrgName,
-                                                            chef_db_context = DbContext}) ->
-    {UserName, BypassesChecks} = get_user(Req, State),
-    case BypassesChecks of
-        true -> {true, Req, State};
-        _ ->
-            case chef_db:is_user_in_org(DbContext, UserName, OrgName) of
-                true ->
-                    {true, Req, State};
-                false ->
-                    Msg = forbidden_message(not_member_of_org, UserName, OrgName),
-                    {false, wrq:set_resp_body(ejson:encode(Msg), Req),
-                     State#base_state{log_msg = user_not_in_org}};
-                Error ->
-                    Msg = forbidden_message(unverified_org_membership, UserName, OrgName),
-                    {false, wrq:set_resp_body(ejson:encode(Msg), Req),
-                     State#base_state{log_msg = {user_not_in_org_error, Error}}}
-            end
-    end.
-
-forbidden_message(not_member_of_org, User, Org) ->
-    Msg = iolist_to_binary([<<"'">>, User, <<"' not associated with organization '">>,
-                            Org, <<"'">>]),
-    {[{<<"error">>, [Msg]}]};
-forbidden_message(unverified_org_membership, User, Org) ->
-    Msg = iolist_to_binary([<<"Failed to verify user '">>, User,
-                            <<"' as a member of organization '">>,
-                            Org, <<"'">>]),
-    {[{<<"error">>, [Msg]}]}.
 
 content_types_accepted(Req, State) ->
     {[{"application/json", from_json}], Req, State}.
@@ -529,14 +482,13 @@ log_request(Req, #base_state{reqid = ReqId, log_msg = Msg, organization_name = O
     Status = wrq:response_code(Req),
     Tuples = [{req_id, ReqId},
               {status, Status},
-              {org_name, Org},
               {method, wrq:method(Req)},
               {path, wrq:raw_path(Req)},
               {user, wrq:get_req_header("x-ops-userid", Req)},
               {msg, {raw, Msg}}],
     PerfTuples = stats_hero:snapshot(ReqId, agg),
     Level = log_level(Status),
-    fast_log:Level(erchef, Tuples ++ PerfTuples).
+    fast_log:Level(erchef, maybe_add_org_name(Org, Tuples) ++ PerfTuples).
 
 log_level(Code) when Code >= 500 ->
     err;
@@ -560,6 +512,11 @@ fetch_org_guid(#base_state{organization_guid = undefined,
         not_found -> throw({org_not_found, OrgName});
         Guid -> Guid
     end.
+
+maybe_add_org_name(?OSC_ORG_NAME, Items) ->
+    Items;
+maybe_add_org_name(OrgName, Items) ->
+    [{org_name, OrgName} | Items].
 
 %%% @doc Return appropriate public key based on request source
 %%%
@@ -606,19 +563,6 @@ select_user_or_webui_key(Req, KeyData, RequestorType) ->
         _Else ->
             {RequestorType, KeyData}
     end.
-
-%% Tells whether this user is the superuser.
-is_superuser(UserName) ->
-    case application:get_env(oc_chef_wm, superusers) of
-        {ok,Superusers} -> lists:member(UserName, Superusers);
-        undefined -> false
-    end.
-
-%% Get the username from the request (and tell whether it is a superuser)
-get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) ->
-    UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
-    BypassesChecks = SuperuserBypassesChecks andalso is_superuser(UserName),
-    {UserName, BypassesChecks}.
 
 -spec body_not_too_big(#wm_reqdata{}) -> #wm_reqdata{}.
 %% Verify that the request body is not larger than ?MAX_SIZE bytes. Throws `{too_big, Msg}`
