@@ -1,3 +1,9 @@
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
+%% ex: ts=4 sw=4 et
+%% @author Kevin Smith <kevin@opscode.com>
+%% @author Seth Falcon <seth@opscode.com>
+%% @copyright 2012 Opscode, Inc.
+
 -module(oc_chef_wm_base).
 
 %% Complete webmachine callbacks
@@ -17,7 +23,6 @@
 
 %% Helpers for webmachine callbacks
 -export([authorized_by_org_membership_check/2,
-         create_from_json/5,
          delete_object/3,
          init/2,
          log_request/2,
@@ -182,12 +187,21 @@ malformed_request_message(Reason, Req, #base_state{resource_mod=Mod}=State) ->
 
 forbidden(Req, #base_state{resource_mod=Mod}=State) ->
     case Mod:auth_info(Req, State) of
+        {{halt, 403}, Req1, State1} ->
+            Perm = http_method_to_authz_perm(wrq:method(Req)),
+            Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8),
+                                    " permission"]),
+            JsonMsg = ejson:encode({[{<<"error">>, [Msg]}]}),
+            Req1 = wrq:set_resp_body(JsonMsg, Req),
+            {true, Req1, State1#base_state{log_msg = {Perm, forbidden}}};
         {{halt, Code}, Req1, State1} ->
             {{halt, Code}, Req1, State1};
         {container, ContainerId, Req1, State1} ->
             invert_perm(check_permission(container, ContainerId, Req1, State1));
         {object, ObjectId, Req1, State1} ->
-            invert_perm(check_permission(object, ObjectId, Req1, State1))
+            invert_perm(check_permission(object, ObjectId, Req1, State1));
+        {authorized, Req1, State1} ->
+            {false, Req1, State1}
     end.
 
 invert_perm({true, Req, State}) ->
@@ -347,59 +361,6 @@ verify_request_signature(Req,
                     Req1 = wrq:set_resp_body(Json, Req),
                     {false, Req1, State1#base_state{log_msg = Reason}}
             end
-    end.
--spec create_from_json(Req :: #wm_reqdata{}, State :: #base_state{},
-                       RecType :: chef_object_name()| chef_cookbook_version,
-                       ContainerId ::object_id() | {authz_id, AuthzId::object_id()},
-                       ObjectEjson :: ejson_term()) ->
-                              {true | {halt, 409 | 500}, #wm_reqdata{}, #base_state{}}.
-%% @doc Implements the from_json callback for POST requests to create Chef
-%% objects. `RecType' is the name of the object record being created
-%% (e.g. `chef_node'). `ContainerId' is the AuthzID of the container for the object being
-%% created (e.g. node container authz ID for creating a node). The `ObjectEjson' is the
-%% validated and normalized EJSON that was parsed from the request body.
-create_from_json(#wm_reqdata{} = Req,
-                 #base_state{chef_db_context = DbContext,
-                             reqid = ReqId,
-                             organization_guid = OrgId,
-                             requestor = #chef_requestor{authz_id = ActorId},
-                             db_type = DbType} = State,
-                 RecType, AuthzInfo, ObjectEjson) ->
-    {ok, AuthzId} = maybe_create_authz(ReqId, ActorId, AuthzInfo),
-
-    %% ObjectEjson should already be normalized. Record creation does minimal work and does
-    %% not add or update any fields.
-    ObjectRec = chef_object:new_record(RecType, OrgId, AuthzId, ObjectEjson,
-                                       DbType),
-    Id = chef_object:id(ObjectRec),
-    Name = chef_object:name(ObjectRec),
-    TypeName = chef_object:type_name(ObjectRec),
-    %% We send the object data to solr for indexing *first*. If it fails, we'll error out on
-    %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
-    %% safely send a delete to solr since this is a new object with a unique ID unknown to
-    %% the world.
-    ok = chef_object_db:add_to_solr(TypeName, Id, OrgId,
-                                 chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
-    CreateFun = chef_db:create_fun(ObjectRec),
-    case chef_db:CreateFun(DbContext, ObjectRec, ActorId) of
-        {conflict, _} ->
-            %% ignore return value of solr delete, this is best effort.
-            chef_object_db:delete_from_solr(ObjectRec),
-
-            LogMsg = {RecType, name_conflict, Name},
-            ConflictMsg = conflict_message(TypeName, Name),
-            {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
-             State#base_state{log_msg = LogMsg}};
-        ok ->
-            LogMsg = {created, Name},
-            Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, Name}]),
-            {true,
-             chef_wm_util:set_uri_of_created_resource(Uri, Req),
-             State#base_state{log_msg = LogMsg}};
-        What ->
-            %% ignore return value of solr delete, this is best effort.
-            chef_object_db:delete_from_solr(ObjectRec),
-            {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
 -spec update_from_json(#wm_reqdata{}, #base_state{}, chef_object() | #chef_cookbook_version{}, ejson_term()) ->
@@ -683,15 +644,3 @@ body_not_too_big(Method, Req) when Method =:= 'POST';
     end;
 body_not_too_big(_Method, Req) ->
     Req.
-
--spec maybe_create_authz(ReqId::binary(), ActorId::object_id(),
-                         ContainerId::object_id() | {authz_id, AuthzId::object_id()})
-    -> {ok, object_id()} | {error, _}.
-%% @doc Helper function to deal with creating an AuthzId where needed.  If an AuthzId is
-%% passed in the just use that other wise create a new one based on the container AuthzId
-maybe_create_authz(_ReqId, _ActorId, {authz_id, AuthzId}) ->
-    {ok, AuthzId};
-maybe_create_authz(ReqId, ActorId, ContainerId) when is_binary(ContainerId) ->
-    %% Note: potential race condition.  If we don't have perms, the create will fail.
-    %% Although we checked rights above, they could have changed.
-    ?SH_TIME(ReqId, chef_authz, create_object_with_container_acl, (ActorId, ContainerId)).

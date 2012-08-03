@@ -22,6 +22,7 @@
 %% have to have those defined in one place.
 
 %% chef_wm behavior callbacks
+-behaviour(chef_wm).
 -export([auth_info/2,
          malformed_request_message/3,
          request_type/0,
@@ -34,8 +35,6 @@
          init/1,
          resource_exists/2,
          to_json/2]).
-
--behaviour(chef_wm).
 
 init(Config) ->
     ?BASE_RESOURCE:init(?MODULE, Config).
@@ -56,10 +55,16 @@ validate_request('POST', Req, State) ->
 %% Memoize the container id so we don't hammer the database
 auth_info(Req, #base_state{chef_authz_context = AuthzContext,
                            resource_state = RoleState,
-                           organization_guid=OrgId}=State) ->
-    ContainerId = chef_authz:get_container_aid_for_object(AuthzContext, OrgId, role),
-    RoleState1 = RoleState#role_state{role_container_id=ContainerId},
-    {container, ContainerId, Req, State#base_state{resource_state=RoleState1}}.
+                           organization_guid = OrgId,
+                           requestor = Requestor}=State) ->
+    #chef_requestor{authz_id = RequestorId} = Requestor,
+    case chef_authz:create_object_if_authorized(AuthzContext, OrgId, RequestorId, role) of
+        {ok, NewAuthzId} ->
+            RoleState1 = RoleState#role_state{new_authz_id = NewAuthzId},
+            {authorized, Req, State#base_state{resource_state = RoleState1}};
+        {error, forbidden} ->
+            {{halt, 403}, Req, State}
+    end.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
@@ -73,8 +78,12 @@ content_types_accepted(Req, State) ->
 
 from_json(Req, #base_state{resource_state =
                                #role_state{role_data = RoleData,
-                                           role_container_id = ContainerId}} = State) ->
-    ?BASE_RESOURCE:create_from_json(Req, State, chef_role, ContainerId, RoleData).
+                                           %% could change this field to be role_authz_id
+                                           %% and it could either be set to: {authz_id, Id}
+                                           %% or {container, Id}.
+                                           %% role_container_id = ContainerId,
+                                           new_authz_id = AuthzId}} = State) ->
+    ?BASE_RESOURCE:create_from_json(Req, State, chef_role, {authz_id, AuthzId}, RoleData).
 
 to_json(Req, State) ->
     {all_roles_json(Req, State), Req, State}.

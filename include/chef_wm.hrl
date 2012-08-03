@@ -17,6 +17,9 @@
 -compile([export_all]).
 -endif.
 
+-define(OSC_ORG_NAME, <<"open-source-chef">>).
+-define(OSC_ORG_ID, <<"00000000000000000000000000000000">>).
+
 %% Shared resource state shared by all chef_wm resource modules.
 -record(base_state, {
           %% Concrete resource impl
@@ -95,9 +98,8 @@
 -record(role_state, {
           %% EJson-encoded representation of a Role
           role_data,
-
+          new_authz_id,
           role_container_id,
-
           chef_role :: #chef_role{}
          }).
 
