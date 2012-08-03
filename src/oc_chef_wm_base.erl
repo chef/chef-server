@@ -1,34 +1,27 @@
 -module(oc_chef_wm_base).
 
 %% Complete webmachine callbacks
--export([
-         content_types_accepted/2,
+-export([content_types_accepted/2,
          content_types_provided/2,
          finish_request/2,
+         forbidden/2,
          is_authorized/2,
          malformed_request/2,
          ping/2,
          post_is_create/2,
-         service_available/2
-        ]).
-
-%% Complete webmachine callbacks which must be
-%% mixed in and aliased to the proper name.
--export([forbidden/2]).
+         service_available/2]).
 
 %% Default functions available to mixin
--export([validate_request/3,
-         auth_info/2]).
+-export([auth_info/2,
+         validate_request/3]).
 
 %% Helpers for webmachine callbacks
--export([
-         authorized_by_org_membership_check/2,
+-export([authorized_by_org_membership_check/2,
          create_from_json/5,
          delete_object/3,
          init/2,
          log_request/2,
-         update_from_json/4
-        ]).
+         update_from_json/4]).
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
 %% contains a function definition.
@@ -37,8 +30,6 @@
 %% -callback malformed_request_message(any(), #wm_reqdata{}, any()) -> {[{binary(), [binary()]}]}.
 %% -callback request_type() -> string().
 %% -callback auth_info(#wm_reqdata{}, any()) -> {not_found | binary(), #wm_reqdata{}, any()}.
-
--define(NO_PING, no_ping).
 
 %% This is the max size allowed for incoming request bodies.
 -define(MAX_SIZE, 1000000).
