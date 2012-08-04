@@ -42,18 +42,36 @@ service_available(Req, State) ->
     {_GetHeader, State2} = chef_wm_util:get_header_fun(Req, State1),
     {true, Req, State2}.
 
-forbidden(Req, #base_state{resource_mod=Mod}=State) ->
+forbidden(Req, #base_state{resource_mod = Mod} = State) ->
     case Mod:auth_info(Req, State) of
         {{halt, 403}, Req1, State1} ->
-            forbidden_perm(Req1, State1);
+            {Req2, State2} = set_forbidden_msg(Req1, State1),
+            {true, Req2, State2};
         {{halt, Code}, Req1, State1} ->
             {{halt, Code}, Req1, State1};
+        {{create_in_container, Container}, Req1, State1} ->
+            create_in_container(Container, Req1, State1);
         {container, ContainerId, Req1, State1} ->
             invert_perm(check_permission(container, ContainerId, Req1, State1));
         {object, ObjectId, Req1, State1} ->
             invert_perm(check_permission(object, ObjectId, Req1, State1));
         {authorized, Req1, State1} ->
             {false, Req1, State1}
+    end.
+
+create_in_container(Container, Req, #base_state{chef_authz_context = AuthzContext,
+                                                organization_guid = OrgId,
+                                                requestor = Requestor,
+                                                resource_state = RS} = State) ->
+    #chef_requestor{authz_id = RequestorId} = Requestor,
+    case chef_authz:create_object_if_authorized(AuthzContext, OrgId, RequestorId,
+                                                Container) of
+        {ok, AuthzId} ->
+            State1 = State#base_state{resource_state = set_authz_id(AuthzId, RS)},
+            {false, Req, State1};
+        {error, forbidden} ->
+            {Req1, State1} = set_forbidden_msg(Req, State),
+            {true, Req1, State1}
     end.
 
 invert_perm({true, Req, State}) ->
@@ -72,7 +90,8 @@ check_permission(AuthzObjectType, AuthzId, Req, #base_state{reqid=ReqId,
         true ->
             {true, Req, State};
         false ->
-            forbidden_perm(Req, State);
+            {Req1, State1} = set_forbidden_msg(Req, State),
+            {false, Req1, State1};
         Error ->
             error_logger:error_msg("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
                                    [Perm, {AuthzObjectType, AuthzId}, RequestorId, Error]),
@@ -126,12 +145,12 @@ authorized_by_org_membership_check(Req, State = #base_state{organization_name = 
             end
     end.
 
-forbidden_perm(Req, State) ->
+set_forbidden_msg(Req, State) ->
     Perm = http_method_to_authz_perm(Req),
     Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8), " permission"]),
     JsonMsg = ejson:encode({[{<<"error">>, [Msg]}]}),
     Req1 = wrq:set_resp_body(JsonMsg, Req),
-    {true, Req1, State#base_state{log_msg = {Perm, forbidden}}}.
+    {Req1, State#base_state{log_msg = {Perm, forbidden}}}.
 
 forbidden_message(not_member_of_org, User, Org) ->
     Msg = iolist_to_binary([<<"'">>, User, <<"' not associated with organization '">>,
@@ -202,3 +221,6 @@ get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) 
     UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
     BypassesChecks = SuperuserBypassesChecks andalso is_superuser(UserName),
     {UserName, BypassesChecks}.
+
+set_authz_id(Id, #role_state{}=R) ->
+    R#role_state{role_authz_id = Id}.

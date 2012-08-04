@@ -53,18 +53,8 @@ validate_request('POST', Req, State) ->
     {ok, Role} = chef_role:parse_binary_json(Body, create),
     {Req, State#base_state{resource_state = #role_state{role_data = Role}}}.
 
-auth_info(Req, #base_state{chef_authz_context = AuthzContext,
-                           resource_state = RoleState,
-                           organization_guid = OrgId,
-                           requestor = Requestor}=State) ->
-    #chef_requestor{authz_id = RequestorId} = Requestor,
-    case chef_authz:create_object_if_authorized(AuthzContext, OrgId, RequestorId, role) of
-        {ok, NewAuthzId} ->
-            RoleState1 = RoleState#role_state{role_authz_id = NewAuthzId},
-            {authorized, Req, State#base_state{resource_state = RoleState1}};
-        {error, forbidden} ->
-            {{halt, 403}, Req, State}
-    end.
+auth_info(Req, State) ->
+    {{create_in_container, role}, Req, State}.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
