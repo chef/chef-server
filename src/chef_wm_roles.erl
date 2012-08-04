@@ -53,7 +53,6 @@ validate_request('POST', Req, State) ->
     {ok, Role} = chef_role:parse_binary_json(Body, create),
     {Req, State#base_state{resource_state = #role_state{role_data = Role}}}.
 
-%% Memoize the container id so we don't hammer the database
 auth_info(Req, #base_state{chef_authz_context = AuthzContext,
                            resource_state = RoleState,
                            organization_guid = OrgId,

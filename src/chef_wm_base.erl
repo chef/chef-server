@@ -399,7 +399,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     chef_object() | #chef_cookbook_version{},
                     object_id()) -> ok.
 delete_object(DbContext, Object, RequestId) ->
-    oc_chef_object_db:delete(DbContext, Object, RequestId).
+    chef_object_db:delete(DbContext, Object, RequestId).
 
 conflict_message(cookbook_version, _Name) ->
     {[{<<"error">>, [<<"Cookbook already exists">>]}]};
