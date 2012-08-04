@@ -60,7 +60,7 @@ auth_info(Req, #base_state{chef_authz_context = AuthzContext,
     #chef_requestor{authz_id = RequestorId} = Requestor,
     case chef_authz:create_object_if_authorized(AuthzContext, OrgId, RequestorId, role) of
         {ok, NewAuthzId} ->
-            RoleState1 = RoleState#role_state{new_authz_id = NewAuthzId},
+            RoleState1 = RoleState#role_state{role_authz_id = NewAuthzId},
             {authorized, Req, State#base_state{resource_state = RoleState1}};
         {error, forbidden} ->
             {{halt, 403}, Req, State}
@@ -78,11 +78,7 @@ content_types_accepted(Req, State) ->
 
 from_json(Req, #base_state{resource_state =
                                #role_state{role_data = RoleData,
-                                           %% could change this field to be role_authz_id
-                                           %% and it could either be set to: {authz_id, Id}
-                                           %% or {container, Id}.
-                                           %% role_container_id = ContainerId,
-                                           new_authz_id = AuthzId}} = State) ->
+                                           role_authz_id = AuthzId}} = State) ->
     chef_wm_base:create_from_json(Req, State, chef_role, {authz_id, AuthzId}, RoleData).
 
 to_json(Req, State) ->

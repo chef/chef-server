@@ -98,8 +98,7 @@
 -record(role_state, {
           %% EJson-encoded representation of a Role
           role_data,
-          new_authz_id,
-          role_container_id,
+          role_authz_id,
           chef_role :: #chef_role{}
          }).
 
