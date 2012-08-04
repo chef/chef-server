@@ -459,7 +459,7 @@ set_req_contexts(Req, #base_state{reqid_header_name = HeaderName} = State) ->
 read_req_id(ReqHeaderName, Req) ->
     case wrq:get_req_header(ReqHeaderName, Req) of
         undefined ->
-            base64:encode(term_to_binary(make_ref()));
+            base64:encode(crypto:md5(term_to_binary(make_ref())));
         HV ->
             iolist_to_binary(HV)
     end.
