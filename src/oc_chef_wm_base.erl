@@ -45,12 +45,7 @@ service_available(Req, State) ->
 forbidden(Req, #base_state{resource_mod=Mod}=State) ->
     case Mod:auth_info(Req, State) of
         {{halt, 403}, Req1, State1} ->
-            Perm = http_method_to_authz_perm(wrq:method(Req)),
-            Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8),
-                                    " permission"]),
-            JsonMsg = ejson:encode({[{<<"error">>, [Msg]}]}),
-            Req1 = wrq:set_resp_body(JsonMsg, Req),
-            {true, Req1, State1#base_state{log_msg = {Perm, forbidden}}};
+            forbidden_perm(Req1, State1);
         {{halt, Code}, Req1, State1} ->
             {{halt, Code}, Req1, State1};
         {container, ContainerId, Req1, State1} ->
@@ -71,20 +66,13 @@ invert_perm(Other) ->
 check_permission(AuthzObjectType, AuthzId, Req, #base_state{reqid=ReqId,
                                                             requestor=Requestor}=State) ->
     #chef_requestor{authz_id = RequestorId} = Requestor,
-    Perm = http_method_to_authz_perm(wrq:method(Req)),
+    Perm = http_method_to_authz_perm(Req),
     case ?SH_TIME(ReqId, chef_authz, is_authorized_on_resource,
                   (RequestorId, AuthzObjectType, AuthzId, actor, RequestorId, Perm)) of
         true ->
             {true, Req, State};
         false ->
-            Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8),
-                                    " permission"]),
-            JsonMsg = ejson:encode({[{<<"error">>, [Msg]}]}),
-            %% eventually we might want to customize the error message, for now, we'll go
-            %% with the generic message.
-            %% {Req1, State1} = ErrorMsgFun(Req, State),
-            Req1 = wrq:set_resp_body(JsonMsg, Req),
-            {false, Req1, State#base_state{log_msg = {Perm, forbidden}}};
+            forbidden_perm(Req, State);
         Error ->
             error_logger:error_msg("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
                                    [Perm, {AuthzObjectType, AuthzId}, RequestorId, Error]),
@@ -138,6 +126,13 @@ authorized_by_org_membership_check(Req, State = #base_state{organization_name = 
             end
     end.
 
+forbidden_perm(Req, State) ->
+    Perm = http_method_to_authz_perm(Req),
+    Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8), " permission"]),
+    JsonMsg = ejson:encode({[{<<"error">>, [Msg]}]}),
+    Req1 = wrq:set_resp_body(JsonMsg, Req),
+    {true, Req1, State#base_state{log_msg = {Perm, forbidden}}}.
+
 forbidden_message(not_member_of_org, User, Org) ->
     Msg = iolist_to_binary([<<"'">>, User, <<"' not associated with organization '">>,
                             Org, <<"'">>]),
@@ -184,6 +179,8 @@ spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
               {upstream_prefixes, [<<"rdbms">>, <<"couch">>, <<"authz">>, <<"solr">>]}],
     stats_hero_worker_sup:new_worker(Config).
 
+http_method_to_authz_perm(#wm_reqdata{}=Req) ->
+    http_method_to_authz_perm(wrq:method(Req));
 http_method_to_authz_perm('DELETE') ->
     delete;
 http_method_to_authz_perm('GET') ->
