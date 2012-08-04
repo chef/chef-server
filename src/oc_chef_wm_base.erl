@@ -95,7 +95,7 @@ is_authorized(Req, State) ->
         {false, ReqOther, StateOther} ->
             %% FIXME: the supported version is determined by the chef_authn application
             %% also, see: https://wiki.corp.opscode.com/display/CORP/RFC+Authentication+Version+Negotiation
-            {"X-Ops-Sign version=\"1.0\"", ReqOther, StateOther}
+            {"X-Ops-Sign version=\"1.0\" version=\"1.1\"", ReqOther, StateOther}
     end.
 
 %%%
