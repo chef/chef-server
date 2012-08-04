@@ -40,9 +40,13 @@
          update_from_ejson/3
         ]).
 
+%% @doc Create a new Chef object record of type specified by `RecType'. This function will
+%% generate a unique id for the object using `make_org_prefix_id/2'. If `AuthzId' is the
+%% atom 'unset', then the object's generated id will be used as a placeholder authorization
+%% identifier.
 -spec new_record(RecType :: chef_object_name() | chef_cookbook_version,
                  OrgId :: object_id(),
-                 AuthzId :: object_id(),
+                 AuthzId :: object_id() | unset,
                  ObjectEjson :: ejson_term() |
                                 binary() |
                                 {binary(), ejson_term()},
@@ -52,7 +56,7 @@ new_record(chef_environment, OrgId, AuthzId, EnvData, DbType) ->
     Id = make_org_prefix_id(OrgId, Name),
     Data = chef_db_compression:compress(DbType, chef_environment, ejson:encode(EnvData)),
     #chef_environment{id = Id,
-                      authz_id = AuthzId,
+                      authz_id = maybe_stub_authz_id(AuthzId, Id),
                       org_id = OrgId,
                       name = Name,
                       serialized_object = Data};
@@ -63,7 +67,7 @@ new_record(chef_client, OrgId, AuthzId, ClientData, _DbType) ->
     PublicKey =  ej:get({<<"public_key">>}, ClientData),
     PubkeyVersion = ej:get({<<"pubkey_version">>}, ClientData),
     #chef_client{id = Id,
-                 authz_id = AuthzId,
+                 authz_id = maybe_stub_authz_id(AuthzId, Id),
                  org_id = OrgId,
                  name = Name,
                  validator = Validator,
@@ -72,7 +76,7 @@ new_record(chef_client, OrgId, AuthzId, ClientData, _DbType) ->
 new_record(chef_data_bag, OrgId, AuthzId, Name, _DbType) ->
     Id = make_org_prefix_id(OrgId, Name),
     #chef_data_bag{id = Id,
-                   authz_id = AuthzId,
+                   authz_id = maybe_stub_authz_id(AuthzId, Id),
                    org_id = OrgId,
                    name = Name};
 new_record(chef_data_bag_item, OrgId, _AuthzId, {BagName, ItemData}, DbType) ->
@@ -91,7 +95,7 @@ new_record(chef_node, OrgId, AuthzId, NodeData, DbType) ->
     Id = make_org_prefix_id(OrgId, Name),
     Data = chef_db_compression:compress(DbType, chef_node, ejson:encode(NodeData)),
     #chef_node{id = Id,
-               authz_id = AuthzId,
+               authz_id = maybe_stub_authz_id(AuthzId, Id),
                org_id = OrgId,
                name = Name,
                environment = Environment,
@@ -101,7 +105,7 @@ new_record(chef_role, OrgId, AuthzId, RoleData, DbType) ->
     Id = make_org_prefix_id(OrgId, Name),
     Data = chef_db_compression:compress(DbType, chef_role, ejson:encode(RoleData)),
     #chef_role{id = Id,
-               authz_id = AuthzId,
+               authz_id = maybe_stub_authz_id(AuthzId, Id),
                org_id = OrgId,
                name = Name,
                serialized_object = Data};
@@ -134,7 +138,7 @@ new_record(chef_cookbook_version, OrgId, AuthzId, CBVData, DbType) ->
     Data = compress_maybe(ej:delete({<<"metadata">>}, CBVData),
                               chef_cookbook_version, DbType),
     #chef_cookbook_version{id = Id,
-                           authz_id = AuthzId,
+                           authz_id = maybe_stub_authz_id(AuthzId, Id),
                            org_id = OrgId,
                            name = ej:get({<<"cookbook_name">>}, CBVData),
                            major = Major,
@@ -499,3 +503,9 @@ make_org_prefix_id(OrgId, Name) ->
     Bin = iolist_to_binary([OrgId, Name, crypto:rand_bytes(6)]),
     <<ObjectPart:80, _/binary>> = crypto:md5(Bin),
     iolist_to_binary(io_lib:format("~s~20.16.0b", [OrgSuffix, ObjectPart])).
+
+%% If the incoming authz id is the atom 'unset', use the object's id as ersatz authz id.
+maybe_stub_authz_id(unset, ObjectId) ->
+    ObjectId;
+maybe_stub_authz_id(AuthzId, _ObjectId) ->
+    AuthzId.
