@@ -381,7 +381,7 @@ name(#chef_data_bag_item{data_bag_name = BagName, item_name = ItemName}) ->
 name(#chef_cookbook_version{name = Name}) ->
     Name.
 
--spec type_name(chef_object()) -> chef_type().
+-spec type_name(chef_object()) -> chef_type() | cookbook_version.
 %% @doc Return the common type name of a `chef_object()' record. For example, the common
 %% type name of a `chef_node{}' record is `node'.
 type_name(#chef_data_bag{}) ->
