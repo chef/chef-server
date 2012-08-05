@@ -317,7 +317,7 @@ create_from_json(#wm_reqdata{} = Req,
              State#base_state{log_msg = LogMsg}};
         ok ->
             LogMsg = {created, Name},
-            Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, Name}]),
+            Uri = ?BASE_ROUTES:route(TypeName, Req, [{name, Name}]),
             {true,
              chef_wm_util:set_uri_of_created_resource(Uri, Req),
              State#base_state{log_msg = LogMsg}};

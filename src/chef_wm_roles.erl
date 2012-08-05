@@ -83,7 +83,7 @@ to_json(Req, State) ->
 all_roles_json(Req, #base_state{chef_db_context = DbContext,
                                 organization_name = OrgName}) ->
     RoleNames = chef_db:fetch_roles(DbContext, OrgName),
-    RouteFun = oc_chef_wm_routes:bulk_route_fun(role, Req),
+    RouteFun = ?BASE_ROUTES:bulk_route_fun(role, Req),
     UriMap= [{Name, RouteFun(Name)} || Name <- RoleNames],
     ejson:encode({UriMap}).
 

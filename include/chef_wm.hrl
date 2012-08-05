@@ -20,6 +20,14 @@
 -define(OSC_ORG_NAME, <<"open-source-chef">>).
 -define(OSC_ORG_ID, <<"00000000000000000000000000000000">>).
 
+-ifndef(BASE_RESOURCE).
+-define(BASE_RESOURCE, chef_wm_base).
+-endif.
+
+-ifndef(BASE_ROUTES).
+-define(BASE_ROUTES, chef_wm_routes).
+-endif.
+
 %% Shared resource state shared by all chef_wm resource modules.
 -record(base_state, {
           %% Concrete resource impl
