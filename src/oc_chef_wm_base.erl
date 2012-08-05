@@ -59,6 +59,13 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
             {false, Req1, State1}
     end.
 
+%% Called by forbidden/2 when the resource module wants to create a
+%% new Chef Object within the container specified by the return value
+%% of the resource module's auth_info function. We attempt to create
+%% the authz object and return 403 if this fails due to lack of CREATE
+%% permission. Otherwise, the created AuthzId is stored in the
+%% resource_state record using set_authz_id/2 (which knows how to deal
+%% with the different resource_state records).
 create_in_container(Container, Req, #base_state{chef_authz_context = AuthzContext,
                                                 organization_guid = OrgId,
                                                 requestor = Requestor,
@@ -68,9 +75,11 @@ create_in_container(Container, Req, #base_state{chef_authz_context = AuthzContex
                                                 Container) of
         {ok, AuthzId} ->
             State1 = State#base_state{resource_state = set_authz_id(AuthzId, RS)},
+            %% return forbidden: false
             {false, Req, State1};
         {error, forbidden} ->
             {Req1, State1} = set_forbidden_msg(Req, State),
+            %% return forbidden: true
             {true, Req1, State1}
     end.
 
@@ -99,9 +108,8 @@ check_permission(AuthzObjectType, AuthzId, Req, #base_state{reqid=ReqId,
     end.
 
 
-%%%
-%%% part of being authorized is being a member of the org; otherwise we fail out early.
-%%%
+%% part of being authorized is being a member of the org; otherwise we
+%% fail out early.
 is_authorized(Req, State) ->
     case chef_wm_base:verify_request_signature(Req, State) of
         {true, Req1, State1} ->
@@ -117,12 +125,10 @@ is_authorized(Req, State) ->
             {"X-Ops-Sign version=\"1.0\" version=\"1.1\"", ReqOther, StateOther}
     end.
 
-%%%
-%%% Clients are inherently a member of the org, but users are not.
-%%% If we add a user to the org, and then disassociate them, there will be acls left behind
-%%% granting permissions on the org objects, so we must check user association and
-%%% permissions
-%%%
+%% Clients are inherently a member of the org, but users are not.  If
+%% we add a user to the org, and then disassociate them, there will be
+%% acls left behind granting permissions on the org objects, so we
+%% must check user association and permissions
 authorized_by_org_membership_check(Req, #base_state{requester_type=client}=State) ->
     {true, Req, State};
 authorized_by_org_membership_check(Req, State = #base_state{organization_name = OrgName,
