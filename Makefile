@@ -5,7 +5,7 @@ all: compile eunit
 clean:
 	@rebar clean
 
-compile: $(DEPS)
+compile: $(DEPS) check_calls
 	@rebar compile
 
 $(DEPS):
@@ -22,3 +22,8 @@ test: eunit
 
 dialyzer:
 	@dialyzer -Wrace_conditions -Wunderspecs -r ebin
+
+check_calls:
+	@./check_calls
+
+.PHONY: check_calls
