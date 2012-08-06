@@ -15,3 +15,12 @@ if `grep -q oc_chef src/chef*`; then
     grep oc_chef src/chef*
     exit 1
 fi
+
+
+if `grep -q chef_rest src/*`; then
+    echo "ERROR: calls to chef_rest found"
+    grep chef_rest src/*
+    exit 1
+fi
+
+
