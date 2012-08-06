@@ -8,7 +8,8 @@
 
 -include("chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_provided/2,
+-mixin([{chef_wm_base, [content_types_accepted/2,
+                        content_types_provided/2,
                         finish_request/2,
                         malformed_request/2,
                         ping/2,
@@ -31,7 +32,6 @@
          validate_request/3]).
 
 -export([allowed_methods/2,
-         content_types_accepted/2,
          create_path/2,
          from_json/2,
          resource_exists/2,
@@ -62,9 +62,6 @@ resource_exists(Req, State) ->
 create_path(Req, #base_state{resource_state = #role_state{role_data = RoleData}}=State) ->
     Name = ej:get({<<"name">>}, RoleData),
     {binary_to_list(Name), Req, State}.
-
-content_types_accepted(Req, State) ->
-    {[{"application/json", from_json}], Req, State}.
 
 from_json(Req, #base_state{resource_state =
                                #role_state{role_data = RoleData,
