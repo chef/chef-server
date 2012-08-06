@@ -98,6 +98,22 @@
           superuser_bypasses_checks = false :: true | false
          }).
 
+-record(cookbook_state, {
+          %% authz id of the cookbook
+          authz_id,
+          %% authz id for the cookbooks container
+          cookbook_container_id,
+          %% EJson representation of a cookbook version
+          cookbook_data,
+          %% cookbook name from the URL
+          cookbook_name,
+          %% cookbook version from the URL
+          cookbook_version,
+          chef_cookbook_version :: #chef_cookbook_version{} | undefined,
+          %% number of versions to display when doing cookbook list
+          num_versions :: non_neg_integer() | all | undefined
+         }).
+
 -record(node_state, {
           environment_name,
           node_data,

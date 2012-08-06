@@ -54,7 +54,7 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
         {{container, Container}, Req1, State1} ->
             ContainerId = fetch_container_id(Container, Req1, State1),
             invert_perm(check_permission(container, ContainerId, Req1, State1));
-        {object, ObjectId, Req1, State1} ->
+        {{object, ObjectId}, Req1, State1} ->
             invert_perm(check_permission(object, ObjectId, Req1, State1));
         {authorized, Req1, State1} ->
             {false, Req1, State1}
@@ -235,6 +235,8 @@ get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) 
     BypassesChecks = SuperuserBypassesChecks andalso is_superuser(UserName),
     {UserName, BypassesChecks}.
 
+set_authz_id(Id, #cookbook_state{}=C) ->
+    C#cookbook_state{authz_id = Id};
 set_authz_id(Id, #node_state{}=N) ->
     N#node_state{node_authz_id = Id};
 set_authz_id(Id, #role_state{}=R) ->
