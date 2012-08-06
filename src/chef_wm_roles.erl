@@ -8,13 +8,14 @@
 
 -include("chef_wm.hrl").
 
--mixin([{?BASE_RESOURCE, [content_types_provided/2,
-                          finish_request/2,
-                          forbidden/2,
+-mixin([{chef_wm_base, [content_types_provided/2,
+                        finish_request/2,
+                        malformed_request/2,
+                        ping/2,
+                        post_is_create/2]}]).
+
+-mixin([{?BASE_RESOURCE, [forbidden/2,
                           is_authorized/2,
-                          malformed_request/2,
-                          ping/2,
-                          post_is_create/2,
                           service_available/2]}]).
 
 %% I think we will end up moving the generic complete wm callbacks like post_is_create,
@@ -22,6 +23,7 @@
 %% have to have those defined in one place.
 
 %% chef_wm behavior callbacks
+-behaviour(chef_wm).
 -export([auth_info/2,
          malformed_request_message/3,
          request_type/0,
@@ -35,10 +37,8 @@
          resource_exists/2,
          to_json/2]).
 
--behaviour(chef_wm).
-
 init(Config) ->
-    ?BASE_RESOURCE:init(?MODULE, Config).
+    chef_wm_base:init(?MODULE, Config).
 
 request_type() ->
     "roles".
@@ -53,13 +53,8 @@ validate_request('POST', Req, State) ->
     {ok, Role} = chef_role:parse_binary_json(Body, create),
     {Req, State#base_state{resource_state = #role_state{role_data = Role}}}.
 
-%% Memoize the container id so we don't hammer the database
-auth_info(Req, #base_state{chef_authz_context = AuthzContext,
-                           resource_state = RoleState,
-                           organization_guid=OrgId}=State) ->
-    ContainerId = chef_authz:get_container_aid_for_object(AuthzContext, OrgId, role),
-    RoleState1 = RoleState#role_state{role_container_id=ContainerId},
-    {container, ContainerId, Req, State#base_state{resource_state=RoleState1}}.
+auth_info(Req, State) ->
+    {{create_in_container, role}, Req, State}.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
@@ -73,8 +68,8 @@ content_types_accepted(Req, State) ->
 
 from_json(Req, #base_state{resource_state =
                                #role_state{role_data = RoleData,
-                                           role_container_id = ContainerId}} = State) ->
-    ?BASE_RESOURCE:create_from_json(Req, State, chef_role, ContainerId, RoleData).
+                                           role_authz_id = AuthzId}} = State) ->
+    chef_wm_base:create_from_json(Req, State, chef_role, {authz_id, AuthzId}, RoleData).
 
 to_json(Req, State) ->
     {all_roles_json(Req, State), Req, State}.
@@ -88,7 +83,7 @@ to_json(Req, State) ->
 all_roles_json(Req, #base_state{chef_db_context = DbContext,
                                 organization_name = OrgName}) ->
     RoleNames = chef_db:fetch_roles(DbContext, OrgName),
-    RouteFun = oc_chef_wm_routes:bulk_route_fun(role, Req),
+    RouteFun = ?BASE_ROUTES:bulk_route_fun(role, Req),
     UriMap= [{Name, RouteFun(Name)} || Name <- RoleNames],
     ejson:encode({UriMap}).
 

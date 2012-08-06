@@ -14,6 +14,7 @@
          full_uri/1,
          get_header_fun/2,
          malformed_request_message/3,
+         base_mods/0,
          not_found_message/2,
          num_versions/1,
          num_versions/2,
@@ -26,6 +27,11 @@
 
 %% TODO: These types are just placeholders until we get all the types cleaned up
 -type ejson() :: {[tuple()]}.
+
+%% @doc Report the names of the "pluggable" modules determined at compile time. Useful for
+%% debugging builds.
+base_mods() ->
+    [{base_resource, ?BASE_RESOURCE}, {base_routes, ?BASE_ROUTES}].
 
 %% @doc Returns the base URI for the server as called by the client as a string.
 base_uri(Req) ->
