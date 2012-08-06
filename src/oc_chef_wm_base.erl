@@ -51,7 +51,8 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
             {{halt, Code}, Req1, State1};
         {{create_in_container, Container}, Req1, State1} ->
             create_in_container(Container, Req1, State1);
-        {container, ContainerId, Req1, State1} ->
+        {{container, Container}, Req1, State1} ->
+            ContainerId = fetch_container_id(Container, Req1, State1),
             invert_perm(check_permission(container, ContainerId, Req1, State1));
         {object, ObjectId, Req1, State1} ->
             invert_perm(check_permission(object, ObjectId, Req1, State1));
@@ -82,6 +83,12 @@ create_in_container(Container, Req, #base_state{chef_authz_context = AuthzContex
             %% return forbidden: true
             {true, Req1, State1}
     end.
+
+%% Called by forbidden/2 when the resource module wants to do authz based on the ACL of the
+%% specified `Container'.
+fetch_container_id(Container, _Req, #base_state{chef_authz_context = AuthzContext,
+                                               organization_guid = OrgId}) ->
+    chef_authz:get_container_aid_for_object(AuthzContext, OrgId, Container).
 
 invert_perm({true, Req, State}) ->
     {false, Req, State};
@@ -229,4 +236,6 @@ get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) 
     {UserName, BypassesChecks}.
 
 set_authz_id(Id, #role_state{}=R) ->
-    R#role_state{role_authz_id = Id}.
+    R#role_state{role_authz_id = Id};
+set_authz_id(Id, #sandbox_state{}=S) ->
+    S#sandbox_state{sandbox_authz_id = Id}.
