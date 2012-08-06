@@ -7,5 +7,5 @@
   {registered, [bksw_sup]},
   {included_applications, [mochiweb]},
   {applications , [kernel, stdlib, sasl, crypto,
-                   public_key, ssl, webmachine, erlsom, bookshelf_store,
+                   public_key, ssl, webmachine, erlsom,
                    mini_s3, inets]}]}.

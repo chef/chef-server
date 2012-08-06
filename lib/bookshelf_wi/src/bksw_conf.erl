@@ -46,13 +46,23 @@ secret_access_key(#context{secret_access_key=SecretAccessKey}) ->
     SecretAccessKey.
 
 -spec disk_store() -> string().
+-ifdef(TEST).
 disk_store() ->
-    case application:get_env(disk_store) of
+    "/tmp/".
+-else.
+disk_store() ->
+    case application:get_env(bookshelf_wi, disk_store) of
         undefined ->
             throw({error, {missing_config, {bookshelf_wi, disk_store}}});
-        {ok, Path} ->
-            Path
+        {ok, Path} when is_list(Path) ->
+            case string:rchr(Path, $/) /= length(Path) of
+                true ->
+                    Path ++ "/";
+                false ->
+                    Path
+            end
     end.
+-endif.
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================

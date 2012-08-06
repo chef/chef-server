@@ -57,19 +57,19 @@ content_types_provided(Rq, Ctx) ->
 
 resource_exists(Rq0, Ctx) ->
     Bucket = bksw_util:get_bucket(Rq0),
-    {bksw_file:bucket_exists(Bucket), Rq0, Ctx}.
+    {bksw_io:bucket_exists(Bucket), Rq0, Ctx}.
 
 delete_resource(Rq0, Ctx) ->
     Bucket = bksw_util:get_bucket(Rq0),
-    {bksw_file:bucket_delete(Bucket), Rq0, Ctx}.
+    {bksw_io:bucket_delete(Bucket), Rq0, Ctx}.
 
 create_resource(Rq0, Ctx) ->
     Bucket = bksw_util:get_bucket(Rq0),
-    {bksw_file:bucket_create(Bucket), Rq0, Ctx}.
+    {bksw_io:bucket_create(Bucket), Rq0, Ctx}.
 
 to_xml(Rq0, Ctx) ->
     Bucket = bksw_util:get_bucket(Rq0),
-    Objects = bksw_file:entry_list(Bucket),
+    Objects = bksw_io:entry_list(Bucket),
     Term = bksw_xml:list_objects(Bucket, Objects),
     Body = bksw_xml:write(Term),
     {Body, Rq0, Ctx}.

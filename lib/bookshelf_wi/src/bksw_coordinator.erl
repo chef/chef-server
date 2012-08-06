@@ -4,8 +4,13 @@
 
 %% API
 -export([start_link/0,
-         reader/1,
-         commit/1]).
+         start_read/1,
+         end_read/0,
+         end_read/1,
+         commit/1,
+         end_commit/0,
+         end_commit/1,
+         path_stats/1]).
 
 -record(reader, {path,
                  pid,
@@ -38,7 +43,7 @@
 -define(MS_ALL_COMMITTERS(Path), {committer, Path, '$1', '_', '_'}).
 -define(MS_ALL_READERS(Path), {reader, Path, '$1', '$2', '$3'}).
 -define(MS_THIS_READER(Path, Who), {reader, Path, Who, '$1', '_'}).
--define(MS_WHICH_READER(Who), {reader, '$1', Who, '$2'}).
+-define(MS_WHICH_READER(Who), {reader, '$1', Who, '$2', '$3'}).
 -define(MS_WHICH_COMMITTER(Who), {committer, '$1', Who, '$2', '$3'}).
 -define(MS_THIS_COMMITTER(Path, Who), {committer, Path, Who, '$1', '$2'}).
 -define(ACTIVE_COMMITTER(Committer), Committer#committer.tag == undefined).
@@ -46,11 +51,26 @@
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-reader(Path) ->
-    ?GSCALL({reader, Path}).
+start_read(Path) ->
+    ?GSCALL({start_read, Path}).
+
+end_read() ->
+    end_read(self()).
+
+end_read(ReaderPid) ->
+    ?GSCALL({end_read, ReaderPid}).
 
 commit(Path) ->
-    ?GSCALL({committer, Path}).
+    ?GSCALL({start_commit, Path}).
+
+end_commit() ->
+    end_commit(self()).
+
+end_commit(Committer) ->
+    ?GSCALL({end_commit, Committer}).
+
+path_stats(Path) ->
+    ?GSCALL({stats, Path}).
 
 init([]) ->
     Readers = ets:new(bksw_coord_readers, [duplicate_bag, protected,
@@ -61,38 +81,77 @@ init([]) ->
                                                  {read_concurrency, true}]),
     {ok, #state{readers=Readers, committers=Committers}}.
 
-handle_call({reader, Path}, {Who, Tag}, #state{readers=Readers}=State) ->
-    MRef = erlang:monitor(process, Who),
-    case can_read(Path, State) of
-        true ->
-            case is_duplicate_reader(Path, Who, State) of
+handle_call({stats, Path}, _From, #state{readers=Readers, committers=Writers}=State) ->
+    RCount = length(fetch_all(Readers, ?MS_ALL_READERS(Path))),
+    WCount = length(fetch_all(Writers, ?MS_ALL_COMMITTERS(Path))),
+    {reply, [{readers, RCount}, {writers, WCount}], State};
+
+handle_call({start_read, Path}, {Who, Tag}, #state{readers=Readers}=State) ->
+    Reply = case is_duplicate_reader(Path, Who, State) of
+                true ->
+                    io:format("~p is a dupe reader for ~p~n", [Who, Path]),
+                    ok;
                 false ->
-                    ets:insert(Readers, #reader{path=Path, pid=Who, mref=MRef}),
-                    {reply, ok, State};
-                true ->
-                    {reply, ok, State}
-            end;
-        false ->
-            ets:insert(Readers, #reader{path=Path, pid=Who, tag=Tag, mref=MRef}),
-            {noreply, State}
-    end;
-handle_call({committer, Path}, {Who, Tag}, #state{committers=Committers}=State) ->
-    MRef = erlang:monitor(process, Who),
-    Reply = case can_write(Path, State) of
-                true ->
-                    case is_duplicate_committer(Path, Who, State) of
-                        false ->
-                            ets:insert(Committers, #committer{path=Path, pid=Who, mref=MRef}),
-                            ok;
+                    MRef = erlang:monitor(process, Who),
+                    case can_read(Path, State) of
                         true ->
-                            ok
-                    end;
-                false ->
-                    ets:insert(Committers, #committer{path=Path, pid=Who, mref=MRef, tag=Tag}),
-                    noreply
+                            ets:insert(Readers, #reader{path=Path, pid=Who, mref=MRef}),
+                            ok;
+                        false ->
+                            ets:insert(Readers, #reader{path=Path, pid=Who, tag=Tag, mref=MRef}),
+                            noreply
+                    end
             end,
     {reply, Reply, State};
-
+handle_call({end_read, Who}, _From, #state{readers=Readers}=State) ->
+    Reply = case find_process(Who, State) of
+                unknown ->
+                    ok;
+                #reader{tag=undefined, mref=MRef}=Reader ->
+                    erlang:demonitor(MRef, [flush]),
+                    ets:delete_object(Readers, Reader),
+                    ok;
+                #reader{tag=Tag, mref=MRef}=Reader ->
+                    erlang:demonitor(MRef, [flush]),
+                    ets:delete_object(Readers, Reader),
+                    gen_server:reply({Who, Tag}, aborted),
+                    ok;
+                #committer{} ->
+                    {error, not_reading}
+            end,
+    {reply, Reply, State};
+handle_call({start_commit, Path}, {Who, Tag}, #state{committers=Committers}=State) ->
+    case is_duplicate_committer(Path, Who, State) of
+        true ->
+            {reply, ok, State};
+        false ->
+            MRef = erlang:monitor(process, Who),
+            case can_write(Path, State) of
+                true ->
+                    ets:insert(Committers, #committer{path=Path, pid=Who, mref=MRef}),
+                    {reply, ok, State};
+                false ->
+                    ets:insert(Committers, #committer{path=Path, pid=Who, mref=MRef, tag=Tag}),
+                    {noreply, State}
+            end
+    end;
+handle_call({end_commit, Who}, _From, #state{committers=Committers}=State) ->
+    Reply = case find_process(Who, State) of
+                unknown ->
+                    ok;
+                #committer{tag=undefined, mref=MRef}=Committer ->
+                    erlang:demonitor(MRef, [flush]),
+                    ets:delete_object(Committers, Committer),
+                    ok;
+                #committer{tag=Tag, mref=MRef}=Committer ->
+                    erlang:demonitor(MRef, [flush]),
+                    ets:delete_object(Committers, Committer),
+                    gen_server:reply({Who, Tag}, aborted),
+                    ok;
+                #reader{} ->
+                    {error, not_writing}
+            end,
+    {reply, Reply, State};
 handle_call(_Request, _From, State) ->
     {reply, ignored, State}.
 

@@ -38,12 +38,10 @@ manual_start() ->
     application:start(webmachine),
     application:start(xmerl),
     application:start(mini_s3),
-    bkss_app:manual_start(),
     application:start(bookshelf_wi).
 
 manual_stop() ->
     application:stop(bookshelf_wi),
-    bkss_app:manual_stop(),
     application:stop(webmachine),
     application:stop(mochiweb),
     application:stop(mini_s3),
