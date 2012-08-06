@@ -98,9 +98,11 @@
           superuser_bypasses_checks = false :: true | false
          }).
 
--record(search_state, {
-          solr_query = undefined,
-          partial_paths = []
+-record(node_state, {
+          environment_name,
+          node_data,
+          node_authz_id,
+          chef_node :: #chef_node{}
          }).
 
 -record(role_state, {
@@ -116,6 +118,11 @@
           sandbox_data,
           chef_sandbox
           }).
+
+-record(search_state, {
+          solr_query = undefined,
+          partial_paths = []
+         }).
 
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).

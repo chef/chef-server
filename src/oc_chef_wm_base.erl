@@ -235,6 +235,8 @@ get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) 
     BypassesChecks = SuperuserBypassesChecks andalso is_superuser(UserName),
     {UserName, BypassesChecks}.
 
+set_authz_id(Id, #node_state{}=N) ->
+    N#node_state{node_authz_id = Id};
 set_authz_id(Id, #role_state{}=R) ->
     R#role_state{role_authz_id = Id};
 set_authz_id(Id, #sandbox_state{}=S) ->
