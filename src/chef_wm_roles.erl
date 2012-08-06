@@ -25,6 +25,7 @@
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
 -export([auth_info/2,
+         init/1,
          malformed_request_message/3,
          request_type/0,
          validate_request/3]).
@@ -33,7 +34,6 @@
          content_types_accepted/2,
          create_path/2,
          from_json/2,
-         init/1,
          resource_exists/2,
          to_json/2]).
 

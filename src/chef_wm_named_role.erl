@@ -19,7 +19,9 @@
                           service_available/2]}]).
 
 %% chef_wm behavior callbacks
+-behaviour(chef_wm).
 -export([auth_info/2,
+         init/1,
          malformed_request_message/3,
          request_type/0,
          validate_request/3]).
@@ -27,11 +29,10 @@
 -export([allowed_methods/2,
          delete_resource/2,
          from_json/2,
-         init/1,
          resource_exists/2,
          to_json/2]).
 
--behaviour(chef_wm).
+
 
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
