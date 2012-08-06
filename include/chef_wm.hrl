@@ -110,5 +110,12 @@
           chef_role :: #chef_role{}
          }).
 
+-record(sandbox_state, {
+          id,
+          sandbox_authz_id,
+          sandbox_data,
+          chef_sandbox
+          }).
+
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
