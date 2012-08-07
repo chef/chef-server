@@ -25,6 +25,7 @@
 -include_lib("kernel/include/file.hrl").
 -include("bksw_obj.hrl").
 
+-define(MAGIC_NUMBER, <<16#b00c:16/integer>>).
 -define(MAGIC_NUMBER_SIZE_BYTES, 2).
 -define(CHECKSUM_SIZE_BYTES, 16).
 -define(TOTAL_HEADER_SIZE_BYTES, ?MAGIC_NUMBER_SIZE_BYTES + ?CHECKSUM_SIZE_BYTES).
@@ -142,7 +143,7 @@ open_for_write(Bucket, Entry) ->
     case file:open(FileName, [exclusive, write, binary]) of
         {ok, Fd} ->
             %% Magic number to guard against file corruption
-            case file:write(Fd, <<16#b00c:16/integer>>) of
+            case file:write(Fd, ?MAGIC_NUMBER) of
                 ok ->
                     {ok, ?TOTAL_HEADER_SIZE_BYTES} = file:position(Fd, {bof, ?TOTAL_HEADER_SIZE_BYTES}),
                     {ok, #entryref{fd=Fd, path=FileName, ctx=erlang:md5_init()}};
@@ -162,7 +163,7 @@ open_for_read(Bucket, Entry) ->
         {ok, Fd} ->
             case file:read(Fd, 2) of
                 %% Verify magic number is intact
-                {ok, <<16#b00c:16/integer>>} ->
+                {ok, ?MAGIC_NUMBER} ->
                     %% Skip past checksum data for now
                     {ok, ?TOTAL_HEADER_SIZE_BYTES} = file:position(Fd, {bof, ?TOTAL_HEADER_SIZE_BYTES}),
                     {ok, #entryref{fd=Fd, path=FileName}};
