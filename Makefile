@@ -37,3 +37,8 @@ test: eunit
 lucene: compile
 	@rm src/lucene_*.erl
 	@priv/build_grammars
+
+doc:
+	@rebar doc skip_deps=true
+
+.PHONY: doc
