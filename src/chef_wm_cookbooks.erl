@@ -70,7 +70,7 @@ to_json("_recipes", Req, State) ->
 %% @doc Generate a JSON string for a the version listing
 %% @end
 %%
--spec all_cookbooks_json(Request :: webmachine:rd(),
+-spec all_cookbooks_json(Request :: wm_req(),
                          State :: #base_state{}) -> JSON :: binary().
 all_cookbooks_json(Req, #base_state{chef_db_context = DbContext,
                                     organization_name = OrgName,
@@ -83,7 +83,7 @@ all_cookbooks_json(Req, #base_state{chef_db_context = DbContext,
 
 %% @doc Generate a JSON hash mapping a cookbook's name to the URL for the most recent
 %% version of that cookbook
--spec latest_cookbooks_json(Request :: webmachine:rd(),
+-spec latest_cookbooks_json(Request :: wm_req(),
                             State :: #base_state{}) -> JSON :: binary().
 latest_cookbooks_json(Req, #base_state{chef_db_context = DbContext,
                                        organization_name = OrgName}) ->
@@ -106,7 +106,7 @@ cookbook_recipes_json(#base_state{chef_db_context = DbContext,
 %% version of that cookbook.
 -spec process_latest_cookbooks([{CookbookName :: binary(),
                                  VersionString :: binary()}],
-                               Req :: webmachine:rd()) -> [{CookbookName :: binary(),
+                               Req :: wm_req()) -> [{CookbookName :: binary(),
                                                             LatestURL :: binary()}].
 process_latest_cookbooks(Latest, Req) ->
     UrlGenerator = ?BASE_ROUTES:bulk_route_fun(cookbook_version, Req),

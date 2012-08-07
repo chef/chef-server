@@ -28,6 +28,8 @@
 -define(BASE_ROUTES, chef_wm_routes).
 -endif.
 
+-type wm_req() :: #wm_reqdata{}.
+
 %% Shared resource state shared by all chef_wm resource modules.
 -record(base_state, {
           %% Concrete resource impl

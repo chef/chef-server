@@ -227,7 +227,7 @@ num_versions(Req) ->
 %% @doc Depending on which resource the current request is processing, the default value for
 %% an unspecified 'num_versions' parameter can be either 1 or `all'.
 -spec num_versions(Default :: 1 | all,
-                   Req :: webmachine:rd()) ->  all | non_neg_integer().
+                   Req :: wm_req()) ->  all | non_neg_integer().
 num_versions(Default, Req) ->
     case wrq:get_qs_value("num_versions", Req) of
         undefined ->
