@@ -55,13 +55,16 @@ disk_store() ->
         undefined ->
             throw({error, {missing_config, {bookshelf_wi, disk_store}}});
         {ok, Path} when is_list(Path) ->
-            case string:rchr(Path, $/) /= length(Path) of
+            case ends_with($/, Path) of
                 true ->
-                    Path ++ "/";
+                    Path;
                 false ->
-                    Path
+                    Path ++ "/"
             end
     end.
+
+ends_with(Char, String) ->
+    lists:last(String) =:= Char.
 -endif.
 %%%===================================================================
 %%% Internal functions
