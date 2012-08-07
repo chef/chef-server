@@ -8,15 +8,13 @@ bookshelf_dir = node['private_chef']['bookshelf']['dir']
 bookshelf_etc_dir = File.join(bookshelf_dir, "etc")
 bookshelf_log_dir = node['private_chef']['bookshelf']['log_directory']
 bookshelf_sasl_log_dir = File.join(bookshelf_log_dir, "sasl")
-bookshelf_bucket_dir = File.join(node['private_chef']['bookshelf']['data_dir'], 'buckets')
-bookshelf_metadata_dir = File.join(node['private_chef']['bookshelf']['data_dir'], 'metadata')
+bookshelf_data_dir = node['private_chef']['bookshelf']['data_dir']
 [
   bookshelf_dir,
   bookshelf_etc_dir,
   bookshelf_log_dir,
   bookshelf_sasl_log_dir,
-  bookshelf_bucket_dir,
-  bookshelf_metadata_dir
+  bookshelf_data_dir,
 ].each do |dir_name|
   directory dir_name do
     owner node['private_chef']['user']['username']
@@ -43,10 +41,7 @@ bookshelf_config = File.join(bookshelf_etc_dir, "app.config")
 template bookshelf_config do
   source "bookshelf.config.erb"
   mode "644"
-  variables(node['private_chef']['bookshelf'].to_hash.merge(
-    :bucket_directory => bookshelf_bucket_dir,
-    :metadata_directory => bookshelf_metadata_dir
-  ))
+  variables(node['private_chef']['bookshelf'].to_hash)
   notifies :restart, 'service[bookshelf]' if OmnibusHelper.should_notify?("bookshelf")
 end
 
