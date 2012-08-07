@@ -1,9 +1,0 @@
-%% -*- mode: erlang; -*-
-
-{application, bookshelf_store,
- [{description  , "On Disk Store for Bookshelf"},
-  {vsn          , "0.0.1"},
-  {mod          , {bkss_app, []}},
-  {registered   , [bkss_sup]},
-  {applications , [kernel, stdlib, sasl, gproc, inets]}
- ]}.
