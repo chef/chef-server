@@ -61,10 +61,10 @@ $(DEPS):
 	@$(REBAR) get-deps
 
 eunit: compile
-	ERL_FLAGS="-pa $(CURDIR)/lib/bookshelf_store/ebin" $(REBAR) skip_deps=true eunit
+	$(REBAR) skip_deps=true eunit
 
 ct : eunit
-	 ERL_FLAGS="-pa $(CURDIR)/lib/bookshelf_store/ebin" $(REBAR) skip_deps=true ct
+	 ERL_LIBS=`pwd`/deps:`pwd`/lib:$(ERL_LIBS) $(REBAR) skip_deps=true ct
 
 test: ct eunit
 
