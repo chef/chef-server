@@ -444,7 +444,7 @@ process_constraint_for_depsolver({Name, ConstraintString}) ->
     {Comparator, Version} = parse_constraint(ConstraintString),
     {Name, Version, Comparator}.
 
-%% @doc Given a version constraint string (e.g., <<">= 1.5.0">>), extract the comparison
+%% @doc Given a version constraint string (e.g., `<<">= 1.5.0">>'), extract the comparison
 %% operator and version and present them as a paired tuple.
 -spec parse_constraint(Constraint :: binary()) -> {Operator :: comparison_operator(), Version :: binary()} | error.
 parse_constraint(<<"< ", Version/binary>>) ->

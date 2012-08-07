@@ -1,4 +1,5 @@
 DEPS=$(CURDIR)/deps
+.PHONY: doc
 
 all: compile eunit dialyzer
 
@@ -15,6 +16,9 @@ distclean:
 
 compile: $(DEPS)
 	@rebar compile
+
+doc:
+	@rebar doc skip_deps=true
 
 # Not yet since there are a *ton* of warnings that we need to weed through.
 # @dialyzer -Wrace_conditions -Wunderspecs -r ebin

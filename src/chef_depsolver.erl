@@ -3,7 +3,7 @@
 %% @author James Casey <james@opscode.com>
 %%
 %% Regex from chef_json_validator.erl
-%%  - @author Marc Paradise <marc@opscode.com>
+%% @author Marc Paradise <marc@opscode.com>
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
