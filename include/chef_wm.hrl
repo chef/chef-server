@@ -123,6 +123,18 @@
           data_bag_authz_id,
           chef_data_bag :: #chef_data_bag{} | undefined,
           chef_data_bag_item :: #chef_data_bag_item{} | undefined
+
+-record(environment_state, {
+          environment_data,
+          environment_authz_id,
+          chef_environment :: #chef_environment{},
+
+          %% Used for when we're returning environment-filtered cookbook version info
+          num_versions :: num_versions(),
+
+          %% Used when we're grabbing specific cookbooks filtered through an environment
+          %% `all' indicates that all cookbooks should be returned (duh)
+          cookbook :: binary() | all
          }).
 
 -record(node_state, {
