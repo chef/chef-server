@@ -53,13 +53,13 @@ init(Config) ->
 request_type() ->
     "nodes".
 
-allowed_methods(Req, #base_state{resource_state = NodeState} = State) ->
+allowed_methods(Req, #base_state{} = State) ->
     {Methods, EnvName} = case wrq:path_info(environment_name, Req) of
                              undefined -> {['GET', 'POST'], undefined};
                              Name -> {['GET'], list_to_binary(Name)}
                          end,
-    NodeState1 = NodeState#node_state{environment_name = EnvName},
-    {Methods, Req, State#base_state{resource_state = NodeState1}}.
+    NodeState = #node_state{environment_name = EnvName},
+    {Methods, Req, State#base_state{resource_state = NodeState}}.
 
 validate_request('GET', Req, State) ->
     {Req, State#base_state{resource_state = #node_state{}}};
