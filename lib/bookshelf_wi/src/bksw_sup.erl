@@ -34,7 +34,10 @@ init(_Args) ->
     Restart = permanent,
     Shutdown = 2000,
 
-    WebmachineSup = {bks_webmachine_sup, {bksw_webmachine_sup, start_link, []},
-                     Restart, Shutdown, supervisor, [bksw_webmachine_sup]},
+    Coordinator = {bksw_coordinator, {bksw_coordinator, start_link, []},
+                     Restart, Shutdown, worker, [bksw_coordinator]},
 
-    {ok, {SupFlags, [WebmachineSup]}}.
+    WebmachineSup = {bks_webmachine_sup, {bksw_webmachine_sup, start_link, []},
+                     Restart, infinity, supervisor, [bksw_webmachine_sup]},
+
+    {ok, {SupFlags, [Coordinator, WebmachineSup]}}.
