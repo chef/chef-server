@@ -55,11 +55,8 @@ validate_request('POST', Req, State) ->
     <<Name/binary>> = ej:get({<<"name">>}, DataBagEjson),
     {Req, State#base_state{resource_state = #data_state{data_bag_name = Name}}}.
 
-
 auth_info(Req, State) ->
   {{create_in_container, data}, Req, State}.
-
-
 
 resource_exists(Req, State) ->
     {true, Req, State}.
@@ -69,9 +66,9 @@ create_path(Req, #base_state{resource_state = #data_state{
   {binary_to_list(DataBagName), Req, State}.
 
 from_json(Req, #base_state{resource_state =
-    #data_state{data_bag_name = DataBagName,
-      data_bag_container_id = ContainerId}} = State) ->
-  chef_rest_wm:create_from_json(Req, State, chef_data_bag, ContainerId, DataBagName).
+                               #data_state{data_bag_name = DataBagName,
+                                           data_bag_authz_id = AuthId}} = State) ->
+    chef_rest_wm:create_from_json(Req, State, chef_data_bag, {authz_id, AuthzId}, DataBagName).
 
 to_json(Req, State) ->
     {all_data_bags_json(Req, State), Req, State}.

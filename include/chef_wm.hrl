@@ -120,7 +120,7 @@
           data_bag_name,
           data_bag_item_name,
           data_bag_item_ejson,
-          data_bag_container_id,
+          data_bag_authz_id,
           chef_data_bag :: #chef_data_bag{} | undefined,
           chef_data_bag_item :: #chef_data_bag_item{} | undefined
          }).
