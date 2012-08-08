@@ -5,9 +5,9 @@ PLT=$(PLT_DIR)/dialyzer_plt
 REBAR=$(shell which rebar)
 
 ERLPATH= -pa $(DEPS)/webmachine/ebin -pa $(DEPS)/covertool/ebin \
-	-pa $(DEPS)/erlsom/ebin \
-	-pa $(DEPS)/iso8601/ebin \
-	-pa $(DEPS)/mini_s3/ebin -pa $(DEPS)/mochiweb/ebin
+	-pa $(DEPS)/erlsom/ebin -pa $(DEPS)/iso8601/ebin \
+	-pa $(DEPS)/mini_s3/ebin -pa $(DEPS)/mochiweb/ebin \
+	-pa $(DEPS)/ibrowse/ebin
 
 ifeq ($(REBAR),)
 	$(error "Rebar not available on this system")
@@ -22,7 +22,6 @@ clean:
 	@$(REBAR) skip_deps=true clean
 	@rm -rf ebin_dialyzer
 #	rebar does not clean up common test logs
-	@rm -rf $(CURDIR)/lib/bookshelf_store/logs
 	@rm -rf $(CURDIR)/lib/bookshelf_wi/logs
 
 clean_plt:
@@ -45,8 +44,8 @@ $(PLT):
 	- dialyzer --build_plt --output_plt $(PLT) \
 		$(ERLPATH) \
 		--apps erts kernel stdlib eunit compiler crypto \
-		webmachine edown inets erlsom gen_leader gproc iso8601 \
-		xmerl mini_s3 mochiweb
+		webmachine inets ibrowse iso8601 mini_s3 mochiweb \
+		xmerl erlsom
 	@if test ! -f $(PLT); then exit 2; fi
 
 
