@@ -100,23 +100,12 @@ delete_entries([Entry|T]) ->
 
 -spec entry_delete(binary(), binary()) -> boolean().
 entry_delete(Bucket, Entry) ->
-    FullPath = bksw_io_names:entry_path(Bucket, Entry),
-    ok = bksw_coordinator:commit(FullPath),
-    try
-        case file:delete(FullPath) of
-            ok ->
-                true;
-            Error ->
-                error_logger:error_msg("Error deleting bucket entry ~p: ~p~n", [FullPath, Error]),
-                false
-        end
-    after
-        bksw_coordinator:end_commit(FullPath)
-    end.
+    entry_delete(bksw_io_names:entry_path(Bucket, Entry)).
 
--spec entry_delete(#object{}) -> boolean().
+-spec entry_delete(#object{} | binary()) -> boolean().
 entry_delete(#object{path=Path}) ->
-    FullPath = bksw_io_names:entry_path(Path),
+    entry_delete(bksw_io_names:entry_path(Path));
+entry_delete(FullPath) ->
     ok = bksw_coordinator:commit(FullPath),
     try
 
