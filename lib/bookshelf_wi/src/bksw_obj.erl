@@ -82,7 +82,7 @@ download(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bksw_io:open_for_read(Bucket, Path) of
         {ok, Ref} ->
-            send_streamed_body(Ref);
+            {{stream, send_streamed_body(Ref)}, Rq0, Ctx};
         _Error ->
             {false, Rq0, Ctx}
     end.
