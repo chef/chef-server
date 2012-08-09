@@ -65,7 +65,7 @@ request_type() ->
 allowed_methods(Req, State) ->
     %% DELETE - delete the data_bag and all items if it has any
     %% You cannot update a data_bag, only data_bag_items, hence no PUT
-    %% GET is handled by chef_rest_data_item_resource.
+    %% GET is handled by chef_wm_data_item.
     {['GET', 'POST', 'DELETE'], Req, State}.
 
 %% DELETE is an operation on the data_bag

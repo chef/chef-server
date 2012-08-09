@@ -55,7 +55,7 @@ validate_request('PUT', Req, State) ->
     %% FIXME: should we also fetch the data_bag here to make sure that it exists and ensure
     %% we have authz? With the current setup, we will deny malformed requests with 400 even
     %% for a missing or no-perms data_bag.
-    Name = chef_rest_util:object_name(data_bag_item, Req),
+    Name = chef_wm_util:object_name(data_bag_item, Req),
     Body = wrq:req_body(Req),
     {ok, Item} = chef_data_bag_item:parse_binary_json(Body, {update, Name}),
     DataState = #data_state{data_bag_item_ejson = Item},
@@ -71,11 +71,11 @@ resource_exists(Req, #base_state{chef_db_context = DbContext,
                                  organization_name = OrgName,
                                  resource_state = DataBagState} = State) ->
     DataBagName = DataBagState#data_state.data_bag_name,
-    ItemName = chef_rest_util:object_name(data_bag_item, Req),
+    ItemName = chef_wm_util:object_name(data_bag_item, Req),
     case chef_db:fetch_data_bag_item(DbContext, OrgName, DataBagName, ItemName) of
         not_found ->
             Message = custom_404_msg(Req, DataBagName, ItemName),
-            Req1 = chef_rest_util:set_json_body(Req, Message),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
             %% WARNING: Webmachine will not halt here if this is a PUT request and we return
             %% {false, Req1, State}; So we force the halt since we do not want PUT only for
             %% update. We don't have this problem for simple objects, such as nodes, because
@@ -93,13 +93,13 @@ from_json(Req, #base_state{resource_state = #data_state{
                              data_bag_item_ejson = ItemData}} = State) ->
     %% We have to hack the shared update function so we can post-process and add the cruft
     %% fields for back-compatibility.
-    case chef_rest_wm:update_from_json(Req, State, Item, ItemData) of
+    case chef_wm_wm:update_from_json(Req, State, Item, ItemData) of
         {true, Req1, State1} ->
             case darklaunch:is_enabled(<<"add_type_and_bag_to_items">>) of
                 true ->
                     CruftItemData = chef_data_bag_item:add_type_and_bag(BagName,
                                                                         ItemData),
-                    {true, chef_rest_util:set_json_body(Req1, CruftItemData), State1};
+                    {true, chef_wm_util:set_json_body(Req1, CruftItemData), State1};
                 false ->
                     {true, Req1, State1}
             end;
@@ -124,7 +124,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
     Json = chef_db_compression:decompress(Item#chef_data_bag_item.serialized_object),
     EjsonItem = ejson:decode(Json),
     WrappedItem = chef_data_bag_item:wrap_item(BagName, ItemName, EjsonItem),
-    {true, chef_rest_util:set_json_body(Req, WrappedItem), State}.
+    {true, chef_wm_util:set_json_body(Req, WrappedItem), State}.
 
 %% Private utility functions
 malformed_request_message(Any, _Req, _State) ->
@@ -134,11 +134,11 @@ malformed_request_message(Any, _Req, _State) ->
 custom_404_msg(Req, BagName, ItemName) ->
     case wrq:method(Req) of
         Update when Update =:= 'POST' ->
-            chef_rest_util:not_found_message(data_bag_missing_for_item_post, BagName);
+            chef_wm_util:not_found_message(data_bag_missing_for_item_post, BagName);
         'PUT' ->
-            chef_rest_util:not_found_message(data_bag_item2, {BagName, ItemName});
+            chef_wm_util:not_found_message(data_bag_item2, {BagName, ItemName});
         'GET' ->
-            chef_rest_util:not_found_message(data_bag_item2, {BagName, ItemName});
+            chef_wm_util:not_found_message(data_bag_item2, {BagName, ItemName});
         'DELETE' ->
-            chef_rest_util:not_found_message(data_bag_item1, {BagName, ItemName})
+            chef_wm_util:not_found_message(data_bag_item1, {BagName, ItemName})
     end.
