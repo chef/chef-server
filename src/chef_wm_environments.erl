@@ -62,7 +62,12 @@ validate_request('POST', Req, State) ->
                                #environment_state{environment_data = Environment}}}.
 
 auth_info(Req, State) ->
-    {{create_in_container, environment}, Req, State}.
+    auth_info(wrq:method(Req), Req, State).
+
+auth_info('POST', Req, State) ->
+    {{create_in_container, environment}, Req, State};
+auth_info('GET', Req, State) ->
+    {{container, environment}, Req, State}.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
