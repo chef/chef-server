@@ -88,8 +88,7 @@ validate_request('POST', Req, State) ->
                              data_bag_item_ejson = DataBagItemEjson}}}.
 
 auth_info(Req, State) ->
-    %% Implement This
-    .
+    {{create_in_container, data}, Req, State}.
 
 %% Org is checked for in malformed_request/2, data_bag is checked for in forbidden/2;
 %% if we get this far, it exists.
