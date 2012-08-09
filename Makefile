@@ -16,7 +16,7 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
 
 DEPS_PLT = chef_wm.plt
 
-all: compile eunit
+all: compile eunit dialyzer
 
 clean:
 	@rebar clean
