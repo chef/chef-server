@@ -68,7 +68,7 @@ create_path(Req, #base_state{resource_state = #data_state{
 from_json(Req, #base_state{resource_state =
                                #data_state{data_bag_name = DataBagName,
                                            data_bag_authz_id = AuthzId}} = State) ->
-    chef_rest_wm:create_from_json(Req, State, chef_data_bag, {authz_id, AuthzId}, DataBagName).
+    chef_wm_base:create_from_json(Req, State, chef_data_bag, {authz_id, AuthzId}, DataBagName).
 
 to_json(Req, State) ->
     {all_data_bags_json(Req, State), Req, State}.
