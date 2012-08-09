@@ -144,7 +144,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
              State#base_state{log_msg = LogMsg}};
         ok ->
             LogMsg = {created, DataBagName},
-            Uri = chef_wm_routes:route(data_bag, Req, [{name, DataBagName}]),
+            Uri = ?BASE_RESOURCE:route(data_bag, Req, [{name, DataBagName}]),
             %% set the Location header to return a 201 Created response. Don't use
             %% set_uri_of_created_resource since we want the body to be the data_bag_item
             %% data.
@@ -197,7 +197,7 @@ items_for_data_bag(Req, #base_state{chef_db_context = DbContext,
     %% FIXME: error handling for {error, _}. Can also return {not_found, org}, but I think
     %% we will have encountered that earlier on in the request processing.
     ItemNames = chef_db:fetch_data_bag_items(DbContext, OrgName, DataBagName),
-    RouteFun = chef_wm_routes:bulk_route_fun(data_bag_item, DataBagName, Req),
+    RouteFun = ?BASE_RESOURCE:bulk_route_fun(data_bag_item, DataBagName, Req),
     UriMap = [ {Name, RouteFun(Name)}  || Name <- ItemNames ],
     ejson:encode({UriMap}).
 
