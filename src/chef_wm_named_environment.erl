@@ -65,7 +65,7 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
     case chef_db:fetch_environment(DbContext, OrgName, Name) of
         not_found ->
             Message = chef_wm_util:not_found_message(environment, Name),
-            Req1 = chef_rest_util:set_json_body(Req, Message),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
             {{halt, 404}, Req1, State#base_state{log_msg = environment_not_found}};
         #chef_environment{authz_id = AuthzId} = Environment ->
             %% check authz here
