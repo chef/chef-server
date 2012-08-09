@@ -197,7 +197,7 @@ items_for_data_bag(Req, #base_state{chef_db_context = DbContext,
     %% FIXME: error handling for {error, _}. Can also return {not_found, org}, but I think
     %% we will have encountered that earlier on in the request processing.
     ItemNames = chef_db:fetch_data_bag_items(DbContext, OrgName, DataBagName),
-    RouteFun = ?BASE_RESOURCE:bulk_route_fun(data_bag_item, DataBagName, Req),
+    RouteFun = ?BASE_ROUTES:bulk_route_fun(data_bag_item, DataBagName, Req),
     UriMap = [ {Name, RouteFun(Name)}  || Name <- ItemNames ],
     ejson:encode({UriMap}).
 
