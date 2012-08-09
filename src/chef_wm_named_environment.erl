@@ -72,7 +72,7 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
             EnvironmentState1 = EnvironmentState#environment_state{chef_environment =
                                                                        Environment},
             State1 = State#base_state{resource_state = EnvironmentState1},
-            {object, AuthzId, Req, State1}
+            {{object, AuthzId}, Req, State1}
     end.
 
 resource_exists(Req, State) ->
