@@ -108,7 +108,7 @@ from_json(Req, #base_state{resource_state = #data_state{
                              data_bag_item_ejson = ItemData}} = State) ->
     %% We have to hack the shared update function so we can post-process and add the cruft
     %% fields for back-compatibility.
-    case chef_wm_wm:update_from_json(Req, State, Item, ItemData) of
+    case chef_wm_base:update_from_json(Req, State, Item, ItemData) of
         {true, Req1, State1} ->
             case darklaunch:is_enabled(<<"add_type_and_bag_to_items">>) of
                 true ->
