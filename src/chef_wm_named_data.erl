@@ -193,16 +193,5 @@ conflict_message(data_bag_item, ItemName, BagName) ->
             BagName/binary, "'.">>,
     {[{<<"error">>, [Msg]}]}.
 
-%% The Ruby API returns a different 404 message just for POSTs
-custom_404_msg(Req, BagName) ->
-    case wrq:method(Req) of
-        'DELETE' ->
-            chef_rest_util:not_found_message(data_bag, BagName);
-        'POST' ->
-            chef_rest_util:not_found_message(data_bag_missing_for_item_post, BagName);
-        'GET' ->
-            chef_rest_util:not_found_message(data_bag, BagName)
-    end.
-
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
