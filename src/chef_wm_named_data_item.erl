@@ -61,8 +61,23 @@ validate_request('PUT', Req, State) ->
     DataState = #data_state{data_bag_item_ejson = Item},
     {Req, State#base_state{resource_state = DataState}}.
 
-auth_info(Req, State) ->
-  {{create_in_container, data}, Req, State}.
+auth_info(Req, #base_state{chef_db_context = DbContext,
+                           organization_name = OrgName,
+                           resource_state = DataBagState} = State) ->
+    DataBagName = chef_wm_util:object_name(data_bag, Req),
+    ItemName = chef_wm_util:object_name(data_bag_item, Req),
+    case chef_db:fetch_data_bag(DbContext, OrgName, DataBagName) of
+        not_found ->
+            Message = custom_404_msg(Req, DataBagName, ItemName),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 404}, Req1, State#base_state{log_msg = node_not_found}};
+        #chef_data_bag{authz_id = AuthzId} = DataBag ->
+            DataBagState1 = DataBagState#data_state{chef_data_bag = DataBag,
+                                                    data_bag_name = DataBagName,
+                                                    data_bag_item_name = ItemName},
+            State1 = State#base_state{resource_state = DataBagState1},
+            {{object, AuthzId}, Req, State1}
+    end.
 
 %% If we get here, we know that the data_bag exists and we have authz, here we'll check that
 %% the item exists. If items grow their own authz, this logic will move into an enhanced
