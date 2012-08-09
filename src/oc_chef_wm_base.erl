@@ -237,6 +237,8 @@ get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) 
 
 set_authz_id(Id, #cookbook_state{}=C) ->
     C#cookbook_state{authz_id = Id};
+set_authz_id(Id, #environment_state{}=E) ->
+    E#environment_state{environment_authz_id = Id};
 set_authz_id(Id, #node_state{}=N) ->
     N#node_state{node_authz_id = Id};
 set_authz_id(Id, #role_state{}=R) ->
