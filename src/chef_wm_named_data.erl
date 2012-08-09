@@ -73,12 +73,12 @@ validate_request('DELETE', Req, State) ->
     {Req, State#base_state{resource_state = #data_state{}}};
 %% GET is an operation on the collection of items in the data_bag
 validate_request('GET', Req, State) ->
-    DataBagName = chef_rest_util:object_name(data_bag, Req),
+    DataBagName = chef_wm_util:object_name(data_bag, Req),
     {Req, State#base_state{resource_state = #data_state{
                              data_bag_name = DataBagName }}};
 %% POST creates a new item in the data_bag
 validate_request('POST', Req, State) ->
-    DataBagName = chef_rest_util:object_name(data_bag, Req),
+    DataBagName = chef_wm_util:object_name(data_bag, Req),
     Body = wrq:req_body(Req),
     {ok, DataBagItemEjson} = chef_data_bag_item:parse_binary_json(Body, create),
     <<Name/binary>> = ej:get({<<"id">>}, DataBagItemEjson),
@@ -126,7 +126,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
     case chef_db:create_data_bag_item(DbContext, DataBagItem, ActorId) of
         {conflict, _} ->
             LogMsg = {data_bag_name_conflict, DataBagName},
-            {{halt, 409}, chef_rest_util:set_json_body(Req,
+            {{halt, 409}, chef_wm_util:set_json_body(Req,
                                                        conflict_message(data_bag_item, ItemName, DataBagName)),
              State#base_state{log_msg = LogMsg}};
         ok ->
@@ -151,7 +151,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
                                     false ->
                                         ItemData
                                 end,
-            Req2 = chef_rest_util:set_json_body(Req1, ItemDataWithCruft),
+            Req2 = chef_wm_util:set_json_body(Req1, ItemDataWithCruft),
             {true, Req2, State#base_state{log_msg = LogMsg}};
         What ->
             %% ignore return value of solr delete, this is best effort.
