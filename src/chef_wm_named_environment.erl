@@ -61,7 +61,7 @@ validate_request(_Other, Req, State) ->
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            organization_name = OrgName,
                            resource_state = EnvironmentState} = State) ->
-    Name = chef_rest_util:object_name(environment, Req),
+    Name = chef_wm_util:object_name(environment, Req),
     case chef_db:fetch_environment(DbContext, OrgName, Name) of
         not_found ->
             Message = chef_wm_util:not_found_message(environment, Name),
@@ -95,7 +95,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  requestor = #chef_requestor{
                                      authz_id = RequestorId}} = State) ->
 
-    ok = chef_object_db:delete(DbContext, Environment, RequestorId),
+    ok = ?BASE_RESOURCE:delete_object(DbContext, Environment, RequestorId),
     Json = chef_db_compression:decompress(Environment#chef_environment.serialized_object),
     {true, wrq:set_resp_body(Json, Req), State}.
 
