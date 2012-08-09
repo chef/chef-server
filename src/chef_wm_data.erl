@@ -84,7 +84,7 @@ to_json(Req, State) ->
 all_data_bags_json(Req, #base_state{chef_db_context = DbContext,
                                     organization_name = OrgName}) ->
     DataBagNames = chef_db:fetch_data_bags(DbContext, OrgName),
-    RouteFun = chef_rest_routes:bulk_route_fun(data_bag, Req),
+    RouteFun = chef_wm_routes:bulk_route_fun(data_bag, Req),
     UriMap= [{Name, RouteFun(Name)} || Name <- DataBagNames],
     ejson:encode({UriMap}).
 
