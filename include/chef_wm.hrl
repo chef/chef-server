@@ -116,6 +116,15 @@
           num_versions :: non_neg_integer() | all | undefined
          }).
 
+-record(data_state, {
+          data_bag_name,
+          data_bag_item_name,
+          data_bag_item_ejson,
+          data_bag_authz_id,
+          chef_data_bag :: #chef_data_bag{} | undefined,
+          chef_data_bag_item :: #chef_data_bag_item{} | undefined
+         }).
+
 -record(node_state, {
           environment_name,
           node_data,

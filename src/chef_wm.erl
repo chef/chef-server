@@ -5,6 +5,7 @@
 -type http_verb() :: 'GET' | 'PUT' | 'POST' | 'DELETE' | 'HEAD' | 'OPTIONS'.
 -type base_state() :: #base_state{}.
 -type container_name() :: cookbook |
+                          data |
                           node |
                           role |
                           sandbox.

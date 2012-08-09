@@ -242,4 +242,7 @@ set_authz_id(Id, #node_state{}=N) ->
 set_authz_id(Id, #role_state{}=R) ->
     R#role_state{role_authz_id = Id};
 set_authz_id(Id, #sandbox_state{}=S) ->
-    S#sandbox_state{sandbox_authz_id = Id}.
+    S#sandbox_state{sandbox_authz_id = Id};
+set_authz_id(Id, #data_state{}=D) ->
+    D#data_state{data_bag_authz_id = Id}.
+
