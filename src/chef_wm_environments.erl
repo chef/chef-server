@@ -19,10 +19,6 @@
                           is_authorized/2,
                           service_available/2]}]).
 
-%% I think we will end up moving the generic complete wm callbacks like post_is_create,
-%% content_types_* into chef_wm_base and mixing those in here separately so that we only
-%% have to have those defined in one place.
-
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
 -export([auth_info/2,
