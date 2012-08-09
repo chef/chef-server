@@ -87,10 +87,23 @@ validate_request('POST', Req, State) ->
                              data_bag_item_name = Name,
                              data_bag_item_ejson = DataBagItemEjson}}}.
 
-auth_info(Req, State) ->
-    {{create_in_container, data}, Req, State}.
+auth_info(Req, #base_state{chef_db_context = DbContext,
+                           organization_name = OrgName,
+                           resource_state = DataBagState} = State) ->
+    DataBagName = chef_wm_util:object_name(data_bag, Req),
+    case chef_db:fetch_data_bag(DbContext, OrgName, DataBagName) of
+        not_found ->
+            Message = custom_404_msg(Req, DataBagName),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 404}, Req1, State#base_state{log_msg = node_not_found}};
+        #chef_data_bag{authz_id = AuthzId} = DataBag ->
+            DataBagState1 = DataBagState#data_state{chef_data_bag = DataBag,
+                                                    data_bag_name = DataBagName},
+            State1 = State#base_state{resource_state = DataBagState1},
+            {{object, AuthzId}, Req, State1}
+    end.
 
-%% Org is checked for in malformed_request/2, data_bag is checked for in forbidden/2;
+%% Org is checked for in malformed_request/2, data_bag is checked for in auth_info/2;
 %% if we get this far, it exists.
 resource_exists(Req, State) ->
     {true, Req, State}.
@@ -195,3 +208,14 @@ conflict_message(data_bag_item, ItemName, BagName) ->
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
+
+%% The Ruby API returns a different 404 message just for POSTs
+custom_404_msg(Req, BagName) ->
+    case wrq:method(Req) of
+        'DELETE' ->
+            chef_wm_util:not_found_message(data_bag, BagName);
+        'POST' ->
+            chef_wm_util:not_found_message(data_bag_missing_for_item_post, BagName);
+        'GET' ->
+            chef_wm_util:not_found_message(data_bag, BagName)
+    end.
