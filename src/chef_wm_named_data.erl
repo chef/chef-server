@@ -144,7 +144,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
              State#base_state{log_msg = LogMsg}};
         ok ->
             LogMsg = {created, DataBagName},
-            Uri = ?BASE_RESOURCE:route(data_bag, Req, [{name, DataBagName}]),
+            Uri = ?BASE_ROUTES:route(data_bag, Req, [{name, DataBagName}]),
             %% set the Location header to return a 201 Created response. Don't use
             %% set_uri_of_created_resource since we want the body to be the data_bag_item
             %% data.
