@@ -43,7 +43,13 @@
 -include("chef_wm.hrl").
 
 init(ResourceMod, Config) ->
-    {ok, init_base_state(ResourceMod, Config)}.
+    BaseState = init_base_state(ResourceMod, Config),
+    case ResourceMod:init_resource_state(Config) of
+        {ok, ResourceState} ->
+            maybe_trace(BaseState#base_state{resource_state=ResourceState}, Config);
+        Error ->
+            Error
+    end.
 
 ping(Req, State) ->
     {pong, Req, State}.
@@ -591,3 +597,11 @@ body_not_too_big(_Method, Req) ->
 
 method_as_binary(Req) ->
     iolist_to_binary(atom_to_list(wrq:method(Req))).
+
+maybe_trace(State, Config) ->
+    case lists:keyfind(trace, 1, Config) of
+        {trace, true} ->
+            {{trace, "/tmp"}, State};
+        _ ->
+            {ok, State}
+    end.

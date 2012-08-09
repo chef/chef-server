@@ -22,6 +22,7 @@
 -behaviour(chef_wm).
 -export([auth_info/2,
          init/1,
+         init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
          validate_request/3]).
@@ -37,21 +38,23 @@
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
+init_resource_state(_Config) ->
+    {ok, #role_state{}}.
+
 request_type() ->
     "roles".
 
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
-validate_request('GET', Req, State) ->
-    {Req, State#base_state{resource_state = #role_state{}}};
-validate_request('DELETE', Req, State) ->
-    {Req, State#base_state{resource_state = #role_state{}}};
-validate_request('PUT', Req, State) ->
+validate_request(Method, Req, State) when Method == 'GET';
+                                          Method == 'DELETE' ->
+    {Req, State};
+validate_request('PUT', Req, #base_state{resource_state = RoleState} = State) ->
     Name = chef_wm_util:object_name(role, Req),
     Body = wrq:req_body(Req),
     {ok, Role} = chef_role:parse_binary_json(Body, {update, Name}),
-    {Req, State#base_state{resource_state = #role_state{role_data = Role}}}.
+    {Req, State#base_state{resource_state = RoleState#role_state{role_data = Role}}}.
 
 %% Memoize the container id so we don't hammer the database
 auth_info(Req, #base_state{chef_db_context = DbContext,

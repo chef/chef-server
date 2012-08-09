@@ -25,6 +25,7 @@
 -export([
          auth_info/2,
          init/1,
+         init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
          validate_request/3
@@ -41,6 +42,9 @@
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
+init_resource_state(_Config) ->
+    {ok, #data_state{}}.
+
 request_type() ->
   "data".
 
@@ -48,17 +52,17 @@ allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
 validate_request('GET', Req, State) ->
-    {Req, State#base_state{resource_state = #data_state{}}};
+    {Req, State};
 validate_request('DELETE', Req, State) ->
-    {Req, State#base_state{resource_state = #data_state{}}};
-validate_request('PUT', Req, State) ->
+    {Req, State};
+validate_request('PUT', Req, #base_state{resource_state = DataState0} = State) ->
     %% FIXME: should we also fetch the data_bag here to make sure that it exists and ensure
     %% we have authz? With the current setup, we will deny malformed requests with 400 even
     %% for a missing or no-perms data_bag.
     Name = chef_wm_util:object_name(data_bag_item, Req),
     Body = wrq:req_body(Req),
     {ok, Item} = chef_data_bag_item:parse_binary_json(Body, {update, Name}),
-    DataState = #data_state{data_bag_item_ejson = Item},
+    DataState = DataState0#data_state{data_bag_item_ejson = Item},
     {Req, State#base_state{resource_state = DataState}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,

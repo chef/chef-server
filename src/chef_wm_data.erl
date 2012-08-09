@@ -24,6 +24,7 @@
 -export([
          auth_info/2,
          init/1,
+         init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
          validate_request/3
@@ -41,6 +42,9 @@
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
+init_resource_state(_Config) ->
+    {ok, #data_state{}}.
+
 request_type() ->
   "data".
 
@@ -48,12 +52,12 @@ allowed_methods(Req, State) ->
     {['GET','POST'], Req, State}.
 
 validate_request('GET', Req, State) ->
-    {Req, State#base_state{resource_state = #data_state{}}};
-validate_request('POST', Req, State) ->
+    {Req, State};
+validate_request('POST', Req, #base_state{resource_state = DataState} = State) ->
     Body = wrq:req_body(Req),
     {ok, DataBagEjson} = chef_data_bag:parse_binary_json(Body, create),
     <<Name/binary>> = ej:get({<<"name">>}, DataBagEjson),
-    {Req, State#base_state{resource_state = #data_state{data_bag_name = Name}}}.
+    {Req, State#base_state{resource_state = DataState#data_state{data_bag_name = Name}}}.
 
 auth_info(Req, State) ->
   {{create_in_container, data}, Req, State}.

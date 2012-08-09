@@ -23,6 +23,7 @@
 -behaviour(chef_wm).
 -export([auth_info/2,
          init/1,
+         init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
          validate_request/3]).
@@ -36,24 +37,28 @@
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
+init_resource_state(_Config) ->
+    {ok, #cookbook_state{}}.
+
 request_type() ->
     "cookbooks".
 
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
-validate_request(Method, Req, State) ->
+validate_request(Method, Req, #base_state{resource_state = CBState0} = State) ->
     UrlName = chef_wm_util:extract_from_path(cookbook_name, Req),
     UrlVersion = chef_wm_util:extract_from_path(cookbook_version, Req),
     Version = parse_cookbook_version(Method, UrlVersion),
-    CBState0 = #cookbook_state{cookbook_name = UrlName, cookbook_version = Version},
+    CBState1 = CBState0#cookbook_state{cookbook_name = UrlName,
+                                       cookbook_version = Version},
     CBState = case Method of
                 'PUT' ->
                   Body = wrq:req_body(Req),
                   {ok, Cookbook} = chef_cookbook:parse_binary_json(Body, {UrlName, UrlVersion}),
-                  CBState0#cookbook_state{cookbook_data = Cookbook};
+                  CBState1#cookbook_state{cookbook_data = Cookbook};
                 _ ->
-                  CBState0
+                  CBState1
                 end,
     {Req, State#base_state{resource_state = CBState}}.
 

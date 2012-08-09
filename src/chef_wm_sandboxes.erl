@@ -21,6 +21,7 @@
 -behaviour(chef_wm).
 -export([auth_info/2,
          init/1,
+         init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
          validate_request/3]).
@@ -35,6 +36,9 @@
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
+init_resource_state(_Config) ->
+    {ok, #sandbox_state{}}.
+
 request_type() ->
     "sandboxes".
 
@@ -42,10 +46,10 @@ allowed_methods(Req, State) ->
     {['GET','POST'], Req, State}.
 
 validate_request('GET', Req, State) ->
-    {Req, State#base_state{resource_state = #sandbox_state{}}};
-validate_request('POST', Req, State) ->
+    {Req, State};
+validate_request('POST', Req, #base_state{resource_state = BoxState} = State) ->
     {ok, Sandbox} = chef_sandbox:parse_binary_json(wrq:req_body(Req), create),
-    {Req, State#base_state{resource_state = #sandbox_state{sandbox_data = Sandbox}}}.
+    {Req, State#base_state{resource_state = BoxState#sandbox_state{sandbox_data = Sandbox}}}.
 
 
 auth_info(Req, State) ->

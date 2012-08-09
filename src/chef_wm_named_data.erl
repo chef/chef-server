@@ -42,6 +42,7 @@
 -export([
          auth_info/2,
          init/1,
+         init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
          validate_request/3
@@ -59,6 +60,9 @@
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
+init_resource_state(_Config) ->
+    {ok, #data_state{}}.
+
 request_type() ->
     "data".
 
@@ -70,22 +74,22 @@ allowed_methods(Req, State) ->
 
 %% DELETE is an operation on the data_bag
 validate_request('DELETE', Req, State) ->
-    {Req, State#base_state{resource_state = #data_state{}}};
+    {Req, State};
 %% GET is an operation on the collection of items in the data_bag
-validate_request('GET', Req, State) ->
+validate_request('GET', Req, #base_state{resource_state = DataState} = State) ->
     DataBagName = chef_wm_util:object_name(data_bag, Req),
-    {Req, State#base_state{resource_state = #data_state{
-                             data_bag_name = DataBagName }}};
+    {Req, State#base_state{resource_state = DataState#data_state{
+                                              data_bag_name = DataBagName }}};
 %% POST creates a new item in the data_bag
-validate_request('POST', Req, State) ->
+validate_request('POST', Req, #base_state{resource_state = DataState} = State) ->
     DataBagName = chef_wm_util:object_name(data_bag, Req),
     Body = wrq:req_body(Req),
     {ok, DataBagItemEjson} = chef_data_bag_item:parse_binary_json(Body, create),
     <<Name/binary>> = ej:get({<<"id">>}, DataBagItemEjson),
-    {Req, State#base_state{resource_state = #data_state{
-                             data_bag_name = DataBagName,
-                             data_bag_item_name = Name,
-                             data_bag_item_ejson = DataBagItemEjson}}}.
+    {Req, State#base_state{resource_state = DataState#data_state{
+                                              data_bag_name = DataBagName,
+                                              data_bag_item_name = Name,
+                                              data_bag_item_ejson = DataBagItemEjson}}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            organization_name = OrgName,

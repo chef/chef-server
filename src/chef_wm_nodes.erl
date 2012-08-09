@@ -37,6 +37,7 @@
 -behaviour(chef_wm).
 -export([auth_info/2,
          init/1,
+         init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
          validate_request/3]).
@@ -50,23 +51,26 @@
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
+init_resource_state(_Config) ->
+    {ok, #node_state{}}.
+
 request_type() ->
     "nodes".
 
-allowed_methods(Req, #base_state{} = State) ->
+allowed_methods(Req, #base_state{resource_state = NodeState0} = State) ->
     {Methods, EnvName} = case wrq:path_info(environment_name, Req) of
                              undefined -> {['GET', 'POST'], undefined};
                              Name -> {['GET'], list_to_binary(Name)}
                          end,
-    NodeState = #node_state{environment_name = EnvName},
+    NodeState = NodeState0#node_state{environment_name = EnvName},
     {Methods, Req, State#base_state{resource_state = NodeState}}.
 
 validate_request('GET', Req, State) ->
-    {Req, State#base_state{resource_state = #node_state{}}};
-validate_request('POST', Req, State) ->
+    {Req, State};
+validate_request('POST', Req, #base_state{resource_state = NodeState} = State) ->
     Body = wrq:req_body(Req),
     {ok, Json} = chef_node:parse_check_binary_as_json_node(Body, create),
-    {Req, State#base_state{resource_state = #node_state{node_data = Json}}}.
+    {Req, State#base_state{resource_state = NodeState#node_state{node_data = Json}}}.
 
 auth_info(Req, State) ->
     {{create_in_container, node}, Req, State}.

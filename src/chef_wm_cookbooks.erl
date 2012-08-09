@@ -23,6 +23,7 @@
 -behaviour(chef_wm).
 -export([auth_info/2,
          init/1,
+         init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
          validate_request/3]).
@@ -35,15 +36,19 @@
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
+init_resource_state(_Config) ->
+    {ok, #cookbook_state{}}.
+
 request_type() ->
     "cookbooks".
 
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
-validate_request('GET', Req, State) ->
+validate_request('GET', Req, #base_state{resource_state = CBState0} = State) ->
     NumVersions = chef_wm_util:num_versions(Req),
-    State1 = State#base_state{resource_state = #cookbook_state{num_versions=NumVersions}},
+    CBState = CBState0#cookbook_state{num_versions=NumVersions},
+    State1 = State#base_state{resource_state = CBState},
     {Req, State1}.
 
 auth_info(Req, State) ->

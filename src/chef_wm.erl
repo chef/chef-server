@@ -2,15 +2,20 @@
 
 -include("chef_wm.hrl").
 
+-type error() :: {error, term()}.
 -type http_verb() :: 'GET' | 'PUT' | 'POST' | 'DELETE' | 'HEAD' | 'OPTIONS'.
 -type base_state() :: #base_state{}.
+-type resource_state() :: term().
 -type container_name() :: cookbook |
                           data |
                           node |
                           role |
                           sandbox.
 -callback init(list()) ->
-    {ok, base_state()}.
+    {ok, base_state()} | error().
+
+-callback init_resource_state(list()) ->
+    {ok, resource_state()} | error().
 
 -callback validate_request(http_verb(), wm_req(), base_state()) ->
     {wm_req(), base_state()}.

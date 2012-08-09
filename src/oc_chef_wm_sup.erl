@@ -57,7 +57,7 @@ init([]) ->
                  {ip, Ip},
                  {port, Port},
                  {log_dir, "priv/log"},
-                 {dispatch, add_resource_init(Dispatch)}],
+                 {dispatch, add_custom_settings(Dispatch)}],
 
     Web = {webmachine_mochiweb,
            {webmachine_mochiweb, start, [WebConfig]},
@@ -114,6 +114,15 @@ validate_bulk_fetch_batch_size() ->
             ok
     end.
 
+add_custom_settings(Dispatch) ->
+    Dispatch1 = add_resource_init(Dispatch),
+    case application:get_env(oc_chef_wm, request_tracing) of
+        {ok, true} ->
+            [{["_debug", "trace", '*'], wmtrace_resource, [{trace_dir, "/tmp"}]} | Dispatch1];
+        _ ->
+            Dispatch1
+    end.
+
 %% @doc Add default and module-specific init params to the `Dispatch' list. This is useful
 %% for initializing resource modules with config that needs to be computed and isn't
 %% ammenable to `file:consult'. For example, we use it to insert parameters derrived from
@@ -154,10 +163,16 @@ fetch_custom_init_params(Module, Defaults) ->
 
 %% @doc Return a proplist of init parameters that should be passed to all resource modules.
 default_resource_init() ->
-    [{batch_size, get_env(oc_chef_wm, bulk_fetch_batch_size)},
-     {auth_skew, get_env(oc_chef_wm, auth_skew)},
-     {db_type, get_env(sqerl, db_type)},
-     {reqid_header_name, get_env(oc_chef_wm, reqid_header_name)}].
+    Defaults = [{batch_size, get_env(oc_chef_wm, bulk_fetch_batch_size)},
+                {auth_skew, get_env(oc_chef_wm, auth_skew)},
+                {db_type, get_env(sqerl, db_type)},
+                {reqid_header_name, get_env(oc_chef_wm, reqid_header_name)}],
+    case application:get_env(oc_chef_wm, request_tracing) of
+        {ok, true} ->
+            [{trace, true}|Defaults];
+        _ ->
+            Defaults
+    end.
 
 get_env(App, Key) ->
     {ok, Value} = application:get_env(App, Key),
