@@ -124,8 +124,9 @@ from_json(Req, #base_state{chef_db_context = DbContext,
     %% Note: potential race condition.  If we don't have perms, the create will fail.
     %% Although we checked rights above, they could have changed.
 
-    %% the 'ignored' atom is where an AuthzId would typically go
-    DataBagItem = chef_object:new_record(chef_data_bag_item, OrgId, ignored,
+    %% the 'unset' atom is where an AuthzId would typically go. Since chef_data_bag_item
+    %% objects do not have their own AuthzId, we hard-code the placeholder.
+    DataBagItem = chef_object:new_record(chef_data_bag_item, OrgId, unset,
                                          {DataBagName, ItemData}, DbType),
     %% We send the data_bag_item data to solr for indexing *first*. If it fails, we'll error out on a
     %% 500 and client can retry. If we succeed and the db call fails or conflicts, we can
