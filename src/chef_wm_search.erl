@@ -82,9 +82,9 @@ resource_exists(Req, #base_state{organization_guid = OrgGuid,
         throw:org_not_found ->
             %% Not sure we can ever get here; user in org check will
             %% have failed with 403 if no such org.
-            OrgName = wrq:path_info(organization_id, Req),
+            OrgName = chef_wm_util:extract_from_path(organization_id, Req),
             NoOrg = resource_exists_message(org_not_found, OrgName),
-            Req1 = wrq:set_resp_body(ejson:encode(NoOrg), Req),
+            Req1 = chef_wm_util:set_json_body(NoOrg, Req),
             {false, Req1, State#base_state{log_msg = org_not_found}}
     end.
 
@@ -116,19 +116,23 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                         false ->
                             Msg = iolist_to_binary([<<"I don't know how to search for ">>,
                                                     BagName, <<" data objects.">>]),
-                            Json = ejson:encode({[{<<"error">>, [Msg]}]}),
-                            {{halt, 404}, wrq:set_resp_body(Json, Req),
-                             State1#base_state{log_msg=lists:flatten(["no data bag: ", BagName])}}
+                            {{halt, 404},
+                                chef_wm_util:set_json_body(Req, {[{<<"error">>, [Msg]}]}),
+                                State1#base_state{log_msg=lists:flatten(["no data bag: ", BagName])}}
                     end;
                 _Else ->
                     {Ans, Req, State1}
             end;
         {error, {solr_400, _}=Why} ->
-            Msg = ejson:encode(malformed_request_message(Why, Req, State)),
-            {{halt, 400}, wrq:set_resp_body(Msg, Req), State#base_state{log_msg=Why}};
+            {{halt, 400},
+                chef_wm_util:set_json_body(Req,
+                    malformed_request_message(Why, Req, State)),
+                State#base_state{log_msg=Why}};
         {error, {solr_500, _}=Why} ->
-            Msg = ejson:encode(malformed_request_message(Why, Req, State)),
-            {{halt, 500}, wrq:set_resp_body(Msg, Req), State#base_state{log_msg=Why}}
+            {{halt, 500},
+                chef_wm_util:set_json_body(Req,
+                    malformed_request_message(Why, Req, State)),
+                State#base_state{log_msg=Why}}
     end.
 
 %% POST to /search represents a partial search request
@@ -277,13 +281,12 @@ url_for_item(BaseURI, Item, OrgName, Type) ->
                       <<"s/">>,
                       ej:get({<<"name">>}, Item)]).
 
-
 %% This helper function extracts the necessary params from the request and passes it to
 %% chef_solr:make_query_from_params to return the query.
 make_query_from_params(Req) ->
     % TODO - sort this out
     % ObjType = chef_wm_util:extract_from_path(object_type, Req),
-    ObjType = wrq:path_info(object_type, Req),
+    ObjType = chef_wm_util:extract_from_path(object_type, Req),
     QueryString = wrq:get_qs_value("q", Req),
     Start = wrq:get_qs_value("start", Req),
     Rows = wrq:get_qs_value("rows", Req),
