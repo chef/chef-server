@@ -22,6 +22,7 @@
 -behavior(chef_wm).
 -export([auth_info/2,
          init/1,
+         init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
          validate_request/3]).
@@ -29,11 +30,13 @@
 -export([allowed_methods/2,
          delete_resource/2,
          from_json/2,
-         resource_exists/2,
          to_json/2]).
 
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
+
+init_resource_state(_Config) ->
+    {ok, #node_state{}}.
 
 request_type() ->
   "nodes".
@@ -41,15 +44,14 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
-validate_request('GET', Req, State) ->
-    {Req, State#base_state{resource_state = #node_state{}}};
-validate_request('DELETE', Req, State) ->
-    {Req, State#base_state{resource_state = #node_state{}}};
-validate_request('PUT', Req, State) ->
+validate_request(Method, Req, State) when Method == 'GET';
+                                          Method == 'DELETE' ->
+    {Req, State};
+validate_request('PUT', Req, #base_state{resource_state = NodeState} = State) ->
     Name = chef_wm_util:object_name(node, Req),
     Body = wrq:req_body(Req),
-    {ok, Json} = chef_node:parse_check_binary_as_json_node(Body, {update, Name}),
-    {Req, State#base_state{resource_state = #node_state{node_data = Json}}}.
+    {ok, Node} = chef_node:parse_check_binary_as_json_node(Body, {update, Name}),
+    {Req, State#base_state{resource_state = NodeState#node_state{node_data = Node}}}.
 
 %% Memoize the container id so we don't hammer the database
 auth_info(Req, #base_state{chef_db_context = DbContext,
@@ -66,11 +68,6 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
             State1 = State#base_state{resource_state = NodeState1},
             {{object, AuthzId}, Req, State1}
     end.
-
-%% Org is checked for in malformed_request/2, node is checked for in forbidden/2;
-%% if we get this far, it exists.
-resource_exists(Req, State) ->
-    {true, Req, State}.
 
 to_json(Req, #base_state{resource_state = NodeState} = State) ->
     #node_state{chef_node = Node} = NodeState,
