@@ -30,4 +30,5 @@
     {{halt, non_neg_integer()}, wm_req(), base_state()} |
     {{create_in_container, container_name()}, wm_req(), base_state()} |
     {{container, container_name()}, wm_req(), base_state()} |
-    {{object, object_id()}, wm_req(), base_state()}.
+    {{object, object_id()}, wm_req(), base_state()} |
+    {authorized, wm_req(), base_state()}.
