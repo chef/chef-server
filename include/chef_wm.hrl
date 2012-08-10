@@ -116,6 +116,12 @@
           num_versions :: non_neg_integer() | all | undefined
          }).
 
+-record(client_state, {
+          client_data,
+          client_container_id,
+          chef_client :: #chef_client{}
+         }).
+
 -record(data_state, {
           data_bag_name,
           data_bag_item_name,
