@@ -162,7 +162,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
             %% to disable this and will make the API more sane. It is very confusing that
             %% you can specify bogus values, that look like they are ignored, but actually
             %% end up in the item data.
-            ItemDataWithCruft = case darklaunch:is_enabled(<<"add_type_and_bag_to_items">>) of
+            ItemDataWithCruft = case chef_wm_darklaunch:is_enabled(<<"add_type_and_bag_to_items">>) of
                                     true ->
                                         chef_data_bag_item:add_type_and_bag(DataBagName,
                                                                             ItemData);
