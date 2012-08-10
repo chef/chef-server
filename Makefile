@@ -4,6 +4,7 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
                 deps/chef_db/ebin \
                 deps/chef_index/ebin \
                 deps/chef_objects/ebin \
+                deps/depsolver/ebin \
                 deps/ej/ebin \
                 deps/fast_log/ebin \
                 deps/mini_s3/ebin \
@@ -13,7 +14,12 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
                 deps/ibrowse/ebin \
                 deps/webmachine/ebin \
                 deps/ejson/ebin
-
+# note that we ommit erlware_commons from the analysis because it
+# currently gives the following error:
+#
+# dialyzer: Analysis failed with error:
+# ec_gb_trees.erl:72: Polymorphic opaque types not supported yet
+# :'(
 DEPS_PLT = chef_wm.plt
 
 all: compile eunit dialyzer
