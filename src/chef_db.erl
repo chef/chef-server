@@ -851,7 +851,7 @@ is_user_in_org(#context{reqid = ReqId, otto_connection = S}=Ctx, User, OrgName) 
 connect() ->
     chef_otto:connect().
 
--spec bulk_get(#context{}, binary(), chef_object(), [binary()]) ->
+-spec bulk_get(#context{}, binary(), chef_type(), [binary()]) ->
                       [binary()] | {error, _}.
 %% @doc Return a list of JSON/gzip'd JSON as binary corresponding to the specified list of
 %% IDs.
