@@ -30,6 +30,10 @@
 
 -include("chef_solr.hrl").
 
+-spec make_query_from_params(binary()|string(),
+                             string(),
+                             non_neg_integer(),
+                             non_neg_integer()) -> #chef_solr_query{}.
 make_query_from_params(ObjType, QueryString, Start, Rows) ->
     % TODO: super awesome error messages
     FilterQuery = make_fq_type(ObjType),
@@ -50,6 +54,10 @@ add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery},
     Query#chef_solr_query{filter_query = "+X_CHEF_database_CHEF_X:chef_" ++
                               binary_to_list(OrgGuid) ++ " " ++ FilterQuery}.
 
+-spec search(#chef_solr_query{}) ->
+                    {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
+                    {error, {solr_400, string()}} |
+                    {error, {solr_500, string()}}.
 search(#chef_solr_query{}=Query) ->
     {ok, SolrUrl} = application:get_env(chef_index, solr_url),
     Url = SolrUrl ++ make_solr_query_url(Query),
@@ -75,6 +83,7 @@ search(#chef_solr_query{}=Query) ->
             {error, {solr_500, Url}}
     end.
 
+-spec ping() -> pong | pang.
 ping() ->
     try
         {ok, SolrUrl} = application:get_env(chef_index, solr_url),
@@ -118,6 +127,8 @@ make_solr_query_url(#chef_solr_query{
                                       Start, Rows,
                                       ibrowse_lib:url_encode(Sort)])).
 
+make_fq_type(ObjType) when is_binary(ObjType) ->
+    make_fq_type(binary_to_list(ObjType));
 make_fq_type(ObjType) when ObjType =:= "node";
                            ObjType =:= "role";
                            ObjType =:= "client";
@@ -126,6 +137,8 @@ make_fq_type(ObjType) when ObjType =:= "node";
 make_fq_type(ObjType) ->
     "+X_CHEF_type_CHEF_X:data_bag_item +data_bag:" ++ ObjType.
 
+index_type(Type) when is_binary(Type) ->
+    index_type(binary_to_list(Type));
 index_type("node") ->
     'node';
 index_type("role") ->
@@ -136,7 +149,6 @@ index_type("environment") ->
     'environment';
 index_type(DataBag) ->
     {'data_bag', list_to_binary(DataBag)}.
-
 
 check_query(RawQuery) ->
     case RawQuery of
