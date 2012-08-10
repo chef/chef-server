@@ -15,19 +15,30 @@
 %% specific language governing permissions and limitations
 %% under the License.
 %%
+-module(chef_db_darklaunch).
 
-{application, chef_db,
- [
-  {description, "Database abstraction layer for Chef server"},
-  {vsn, git},
-  {registered, []},
-  {applications, [
-                  kernel,
-                  stdlib,
-                  couchbeam,
-                  ejson,
-                  stats_hero,
-                  sqerl
-                 ]},
-  {env, []}
- ]}.
+-export([is_enabled/1,
+         is_enabled/2]).
+
+%% The darklaunch module used by chef_db can be set using this
+%% define. The default included here ignores `OrgName' and answers
+%% false to all couchdb_* features and true otherwise.
+-ifndef(CHEF_DB_DARKLAUNCH).
+is_enabled(Feature, _OrgName) ->
+    is_enabled(Feature).
+
+is_enabled(<<"couchdb_", _Rest/binary>>) ->
+    false;
+is_enabled(_) ->
+    true.
+-else.
+is_enabled(Feature, OrgName) ->
+    ?CHEF_DB_DARKLAUNCH:is_enabled(Feature, OrgName).
+
+is_enabled(Feature) ->
+    ?CHEF_DB_DARKLAUNCH:is_enabled(Feature).
+-endif.
+
+
+
+

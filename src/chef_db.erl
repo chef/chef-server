@@ -243,7 +243,7 @@ client_record_to_authz_id(_Context, ClientRecord) ->
 %% system.  We examine the user/client record and return the
 %% certificate containing the actor's public key.
 fetch_requestor(Ctx, OrgName, ClientName) ->
-    case darklaunch:is_enabled(<<"couchdb_clients">>) of
+    case chef_db_darklaunch:is_enabled(<<"couchdb_clients">>) of
         true ->
             fetch_couchdb_requestor(Ctx, OrgName, ClientName);
         false ->
@@ -412,7 +412,7 @@ fetch_environment(#context{} = Ctx, OrgName, EnvironmentName) ->
 %% @doc Return the client in `OrgName' with name `ClientName'. Returns a
 %% `#chef_client{}' record.
 fetch_client(#context{} = Ctx, OrgName, ClientName) ->
-    case darklaunch:is_enabled(<<"couchdb_clients">>) of
+    case chef_db_darklaunch:is_enabled(<<"couchdb_clients">>) of
         true ->
             fetch_couchdb_client(Ctx, OrgName, ClientName);
         false ->
@@ -664,7 +664,7 @@ fetch_clients(#context{} = Ctx, OrgName) ->
                                                                    {error, any()}.
 %% @doc Return a list of all data_bag names in an org
 fetch_data_bags(#context{} = Ctx, OrgName) ->
-    case darklaunch:is_enabled(<<"couchdb_data">>) of
+    case chef_db_darklaunch:is_enabled(<<"couchdb_data">>) of
         true ->
             fetch_couchdb_data_bags(Ctx, OrgName);
         false ->
@@ -859,7 +859,7 @@ bulk_get(#context{reqid = ReqId}, _OrgName, node, Ids) ->
     bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_nodes, (Ids)));
 bulk_get(#context{reqid = ReqId}=Ctx, OrgName, role, Ids) ->
     %% TODO: remove after roles migration to Erchef/SQL
-    case darklaunch:is_enabled(<<"couchdb_roles">>, OrgName) of
+    case chef_db_darklaunch:is_enabled(<<"couchdb_roles">>, OrgName) of
         true ->
             bulk_get_couchdb(Ctx, OrgName, role, Ids);
         false ->
@@ -867,7 +867,7 @@ bulk_get(#context{reqid = ReqId}=Ctx, OrgName, role, Ids) ->
     end;
 bulk_get(#context{reqid = ReqId}=Ctx, OrgName, data_bag_item, Ids) ->
     %% TODO: remove after data_bag data_bag_item migration to Erchef/SQL
-    case darklaunch:is_enabled(<<"couchdb_data">>, OrgName) of
+    case chef_db_darklaunch:is_enabled(<<"couchdb_data">>, OrgName) of
         true ->
             bulk_get_couchdb(Ctx, OrgName, data_bag_item, Ids);
         false ->
@@ -875,7 +875,7 @@ bulk_get(#context{reqid = ReqId}=Ctx, OrgName, data_bag_item, Ids) ->
     end;
 bulk_get(#context{reqid = ReqId}=Ctx, OrgName, environment, Ids) ->
     %% TODO: remove after environments migration to Erchef/SQL
-    case darklaunch:is_enabled(<<"couchdb_environments">>, OrgName) of
+    case chef_db_darklaunch:is_enabled(<<"couchdb_environments">>, OrgName) of
         true ->
             bulk_get_couchdb(Ctx, OrgName, environment, Ids);
         false ->
@@ -883,7 +883,7 @@ bulk_get(#context{reqid = ReqId}=Ctx, OrgName, environment, Ids) ->
     end;
 bulk_get(#context{reqid = ReqId}=Ctx, OrgName, client, Ids) ->
     %% TODO: remove after environments migration to Erchef/SQL
-    case darklaunch:is_enabled(<<"couchdb_clients">>, OrgName) of
+    case chef_db_darklaunch:is_enabled(<<"couchdb_clients">>, OrgName) of
         true ->
             bulk_get_couchdb(Ctx, OrgName, client, Ids);
         false ->
@@ -912,7 +912,7 @@ bulk_get_couchdb(#context{reqid = ReqId, otto_connection = S}=Ctx, OrgName, _Typ
 -spec data_bag_exists(#context{}, binary(), binary() | string()) -> boolean().
 %% @doc Return true if data bag `DataBag' exists in org `OrgName' and false otherwise.
 data_bag_exists(#context{reqid = ReqId, otto_connection = S}=Ctx, OrgName, DataBag) ->
-    case darklaunch:is_enabled(<<"couchdb_data">>, OrgName) of
+    case chef_db_darklaunch:is_enabled(<<"couchdb_data">>, OrgName) of
         true ->
             case fetch_org_id(Ctx, OrgName) of
                 not_found ->
@@ -937,7 +937,7 @@ data_bag_names(#context{}=Ctx, OrgId) ->
 -spec environment_exists(#context{}, binary(), binary() | string()) -> boolean().
 %% @doc Return true if environment `EnvName' exists in org `OrgId' and false otherwise.
 environment_exists(#context{reqid = ReqId, otto_connection = S}=Ctx, OrgId, EnvName) ->
-    case darklaunch:is_enabled(<<"couchdb_environments">>) of
+    case chef_db_darklaunch:is_enabled(<<"couchdb_environments">>) of
         true ->
             ?SH_TIME(ReqId, chef_otto, environment_exists, (S, OrgId, EnvName));
         false ->

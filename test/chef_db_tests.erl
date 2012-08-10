@@ -25,7 +25,7 @@ fetch_requestor_test_() ->
     {foreach,
      fun() ->
              meck:new(chef_sql),
-             meck:new(darklaunch),
+             meck:new(chef_db_darklaunch),
              meck:new(chef_otto),
              set_app_env()
      end,
@@ -36,8 +36,8 @@ fetch_requestor_test_() ->
       {"a user is found SQL",
        fun() ->
                meck:expect(chef_otto, connect, fun() -> otto_connect end),
-               meck:expect(darklaunch, is_enabled, fun(<<"sql_users">>) -> true end),
-               meck:expect(darklaunch, is_enabled, fun(<<"couchdb_clients">>) -> false end),
+               meck:expect(chef_db_darklaunch, is_enabled, fun(<<"sql_users">>) -> true end),
+               meck:expect(chef_db_darklaunch, is_enabled, fun(<<"couchdb_clients">>) -> false end),
                meck:expect(chef_sql, fetch_user,
                            fun(<<"alice">>) ->
                                    {ok, #chef_user{id = <<"a1">>,
@@ -59,9 +59,9 @@ fetch_requestor_test_() ->
                            fun(_, <<"mock-org">>) ->
                                    <<"mock-org-id-123">>
                            end),
-               meck:expect(darklaunch, is_enabled,
+               meck:expect(chef_db_darklaunch, is_enabled,
                            fun(<<"sql_users">>) -> true end),
-               meck:expect(darklaunch, is_enabled,
+               meck:expect(chef_db_darklaunch, is_enabled,
                            fun(<<"couchdb_clients">>) -> false end),
                meck:expect(chef_sql, fetch_user,
                            fun(<<"alice">>) -> {ok, not_found} end),
@@ -98,9 +98,9 @@ fetch_requestor_test_() ->
                                                 pubkey_version = 0,
                                                 public_key = <<"key data">>}
                            end),
-               meck:expect(darklaunch, is_enabled,
+               meck:expect(chef_db_darklaunch, is_enabled,
                            fun(<<"sql_users">>) -> true end),
-               meck:expect(darklaunch, is_enabled,
+               meck:expect(chef_db_darklaunch, is_enabled,
                            fun(<<"couchdb_clients">>) -> true end),
                Context = chef_db:make_context(<<"req-id-123">>),
                Client = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
