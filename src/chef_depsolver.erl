@@ -102,10 +102,10 @@ regex_for_run_list_item(<<"role[", _Rest/binary>>) ->
 regex_for_run_list_item(UnqualifiedRecipe) when is_binary(UnqualifiedRecipe) ->
     chef_regex:regex_for(unqualified_recipe).
 
--spec solve_dependencies(AllVersions::depsolver:dependency_set(),
-                         Env::#chef_environment{},
-                         Cookbooks::[Name::binary() |
-                                     {Name::binary(), Version::binary()}]) ->
+-spec solve_dependencies(AllVersions :: [depsolver:dependency_set()],
+                         EnvConstraints :: [depsolver:dependency_set()],
+                         Cookbooks :: [Name::binary() |
+                                             {Name::binary(), Version::binary()}]) ->
     {ok, [ versioned_cookbook()]} | {error, term()}.
 %% @doc Main entry point into the depsolver.  It is supplied with a dependency_set()
 %% containing all the cookbook versions and their dependencies that are in the database

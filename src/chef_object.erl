@@ -442,8 +442,7 @@ depsolver_constraints({Constraints}) when is_list(Constraints) ->
 %% @doc Convert a cookbook name / version constraint string pair into a valid depsolver
 %% constraint.  Mainly ensures the types of the various components are correct, as depsolver
 %% works mainly with strings and atoms, instead of binaries.
--spec process_constraint_for_depsolver({Name :: binary(),
-                                        ConstraintString :: binary()}) -> depsolver:constraint().
+-spec process_constraint_for_depsolver({_, binary()}) -> {_, binary(), '<' | '<=' | '=' | '>' | '>=' | '~>'}.
 process_constraint_for_depsolver({Name, ConstraintString}) ->
     {Comparator, Version} = parse_constraint(ConstraintString),
     {Name, Version, Comparator}.
