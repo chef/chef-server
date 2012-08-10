@@ -61,9 +61,10 @@ validate_request('GET', Req, State) ->
     {Req, State#base_state{resource_state = SearchState}};
 validate_request('POST', Req, State) ->
     Query = make_query_from_params(Req),
-    SearchState = #search_state{solr_query = Query},
     Body = ejson:decode(wrq:req_body(Req)),
     validate_body(Body),
+    {NamePaths} = Body,
+    SearchState = #search_state{solr_query = Query, partial_paths = NamePaths},
     {Req, State#base_state{resource_state = SearchState}}.
 
 auth_info(Req, State) ->
@@ -74,7 +75,7 @@ resource_exists(Req, #base_state{organization_guid = OrgGuid,
     QueryWithoutGuid = SearchState#search_state.solr_query,
     try
         Query = chef_solr:add_org_guid_to_query(QueryWithoutGuid, OrgGuid),
-        SearchState1 = #search_state{solr_query = Query},
+        SearchState1 = SearchState#search_state{solr_query = Query},
         {true, Req, State#base_state{organization_guid = OrgGuid,
                                      resource_state = SearchState1}}
     catch
@@ -135,14 +136,11 @@ to_json(Req, #base_state{chef_db_context = DbContext,
 %% { "mk1" : [ "K1", "K2" ],
 %%   "mk2" : [ "K3", "K4", "K5" ] }
 %%
-process_post(Req, #base_state{resource_state = SearchState}=State) ->
-    %% FIXME TODO: validation and error handling for POST body
-    {NamePaths} = ejson:decode(wrq:req_body(Req)),
-    SearchState1 = SearchState#search_state{partial_paths = NamePaths},
-    {Ans, Req1, State1} = to_json(Req, State#base_state{resource_state = SearchState1}),
+process_post(Req, State) ->
+    {Ans, Req1, State1} = to_json(Req, State),
     case Ans of
         {halt, _} -> {Ans, Req1, State1};
-           Result -> {true, wrq:set_resp_body(Result, Req), State1}
+        Result -> {true, wrq:set_resp_body(Result, Req), State1}
     end.
 
 -spec make_bulk_get_fun(chef_db:db_context(),
