@@ -12,7 +12,10 @@
          service_available/2]).
 
 %% Helpers for webmachine callbacks
--export([authorized_by_org_membership_check/2,
+-export([authorized_by_org_membership_check/2]).
+
+%% "Grab Bag" functions that will also need to be implemented by other base resources
+-export([check_cookbook_authz/3,
          delete_object/3]).
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
@@ -27,6 +30,15 @@
 -define(MAX_SIZE, 1000000).
 
 -include("chef_wm.hrl").
+
+-type permission() :: create | delete | read | update.
+
+%% This somewhat duplicates the chef_authz:resource_type() type, but I don't know that it's
+%% worth pulling all the authz types and records here.
+-type authz_object() :: container | object.
+
+%% @doc Used for the multi_auth_check/3 function
+-type auth_tuple() :: {authz_object(), object_id(), permission()}.
 
 %% @doc Determines if service is available.
 %%
@@ -56,9 +68,70 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
             invert_perm(check_permission(container, ContainerId, Req1, State1));
         {{object, ObjectId}, Req1, State1} ->
             invert_perm(check_permission(object, ObjectId, Req1, State1));
+        {AuthTuples, Req1, State1} when is_list(AuthTuples)->
+            %% NOTE: multi_auth_check does not handle create_in_container yet, and expects
+            %% each auth tuple to have a permission.  This code path is currently only used
+            %% by the depsolver endpoint.
+            case multi_auth_check(AuthTuples, Req1, State1) of
+                true ->
+                    %% All auth checks out, so we're not forbidden
+                    {false, Req1, State1};
+                {false, {_AuthzObjectType, _AuthzId, Permission}} ->
+                    %% NOTE: No specific message for the auth check that failed (but this is
+                    %% the same behavior we had before)
+                    {Req2, State2} = set_forbidden_msg(Permission, Req1, State1),
+                    {true, Req2, State2};
+                {Error, {AuthzObjectType, AuthzId, Permission}} ->
+                    #base_state{requestor=#chef_requestor{authz_id=RequestorId}} = State1,
+                    %% TODO: Extract this logging message, as it is used elsewhere, too
+                    error_logger:error_msg("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
+                                           [Permission, {AuthzObjectType, AuthzId}, RequestorId, Error]),
+                    {{halt, 500}, Req, State1#base_state{log_msg={error, is_authorized_on_resource}}}
+            end;
         {authorized, Req1, State1} ->
             {false, Req1, State1}
     end.
+
+%% @doc Performs multiple authorization checks in sequence.  If all pass, returns true.  The
+%% first check that is false or returns an error, however, halts short-circuits any further
+%% checks and returns the result along with the auth_tuple() of the failing authorization
+%% check (useful for error message generation).
+-spec multi_auth_check(AuthChecks :: [auth_tuple()],
+                       Req :: wm_req(),
+                       State :: #base_state{}) -> true |
+                                                  {false,
+                                                   FailingTuple :: auth_tuple()} |
+                                                  {Error :: term(),
+                                                   FailingTuple :: auth_tuple()}.
+multi_auth_check([], Req, State) ->
+    %% Nothing left to check, must be OK
+    true;
+multi_auth_check([CurrentTuple|Rest], Req, State) ->
+    case auth_check(CurrentTuple, Req, State) of
+        true ->
+            %% That one checked out; check the rest
+            multi_auth_check(Rest, Req, State);
+        false ->
+            %% That one failed; no need to continue
+            {false, CurrentTuple};
+        Error ->
+            %% That one REALLY failed; send it out for use in error messages
+            {Error, CurrentTuple}
+    end.
+
+%% @doc Perform a simple authorization check.  Only indicates whether the requested
+%% permission is allowed or not; does no manipulation of either Req or State.
+%%
+%% No function head for the `create_in_container` check, because that's not needed at this
+%% time.  Further refactorings may change this.
+%% -spec auth_check(AuthCheck :: auth_tuple(),
+%%                  Req :: wm_req(),
+%%                  State :: #base_state{}) -> true | false | Error :: term().
+auth_check({container, Container, Permission}, Req, State) ->
+    ContainerId = fetch_container_id(Container, Req, State),
+    has_permission(container, ContainerId, Permission, Req, State);
+auth_check({object, ObjectId, Permission}, Req, State) ->
+    has_permission(object, ObjectId, Permission, Req, State).
 
 %% Called by forbidden/2 when the resource module wants to create a
 %% new Chef Object within the container specified by the return value
@@ -86,8 +159,9 @@ create_in_container(Container, Req, #base_state{chef_authz_context = AuthzContex
 
 %% Called by forbidden/2 when the resource module wants to do authz based on the ACL of the
 %% specified `Container'.
+%% TODO - Can we just dispense with the Req parameter since it isn't used??
 fetch_container_id(Container, _Req, #base_state{chef_authz_context = AuthzContext,
-                                               organization_guid = OrgId}) ->
+                                                organization_guid = OrgId}) ->
     chef_authz:get_container_aid_for_object(AuthzContext, OrgId, Container).
 
 invert_perm({true, Req, State}) ->
@@ -97,12 +171,25 @@ invert_perm({false, Req, State}) ->
 invert_perm(Other) ->
     Other.
 
-check_permission(AuthzObjectType, AuthzId, Req, #base_state{reqid=ReqId,
-                                                            requestor=Requestor}=State) ->
+%% @doc Performs simple permission check
+%% -spec has_permission(AuthzObjectType :: authz_object(),
+%%                      AuthzId :: object_id(),
+%%                      Permission :: permission(),
+%%                      Req :: wm_req(),
+%%                      State :: #base_state{}) -> true | false | Error :: term().
+has_permission(AuthzObjectType, AuthzId, Permission, Req, #base_state{reqid=ReqId,
+                                                                      requestor=Requestor}=State) ->
     #chef_requestor{authz_id = RequestorId} = Requestor,
+    ?SH_TIME(ReqId, chef_authz, is_authorized_on_resource,
+                  (RequestorId, AuthzObjectType, AuthzId, actor, RequestorId, Permission)).
+
+%% NOTE: derives the permission check from the HTTP verb of the Request
+check_permission(AuthzObjectType, AuthzId, Req, #base_state{reqid=ReqId,
+                                                            requestor=#chef_requestor{
+                                                              authz_id = RequestorId}
+                                                           }=State) ->
     Perm = http_method_to_authz_perm(Req),
-    case ?SH_TIME(ReqId, chef_authz, is_authorized_on_resource,
-                  (RequestorId, AuthzObjectType, AuthzId, actor, RequestorId, Perm)) of
+    case has_permission(AuthzObjectType, AuthzId, Perm, Req, State) of
         true ->
             {true, Req, State};
         false ->
@@ -113,7 +200,6 @@ check_permission(AuthzObjectType, AuthzId, Req, #base_state{reqid=ReqId,
                                    [Perm, {AuthzObjectType, AuthzId}, RequestorId, Error]),
             {{halt, 500}, Req, State#base_state{log_msg={error, is_authorized_on_resource}}}
     end.
-
 
 %% part of being authorized is being a member of the org; otherwise we
 %% fail out early.
@@ -158,12 +244,19 @@ authorized_by_org_membership_check(Req, State = #base_state{organization_name = 
             end
     end.
 
-set_forbidden_msg(Req, State) ->
-    Perm = http_method_to_authz_perm(Req),
+set_forbidden_msg(Perm, Req, State) when is_atom(Perm)->
     Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8), " permission"]),
     JsonMsg = ejson:encode({[{<<"error">>, [Msg]}]}),
     Req1 = wrq:set_resp_body(JsonMsg, Req),
     {Req1, State#base_state{log_msg = {Perm, forbidden}}}.
+
+%% Assumes the permission can be derived from the HTTP verb of the request; this is the
+%% original behavior of this function, prior to the addition of set_forbidden_msg/3.
+%%
+%% TODO: Reconcile these in a future refactoring.
+set_forbidden_msg(Req, State) ->
+    Perm = http_method_to_authz_perm(Req),
+    set_forbidden_msg(Perm, Req, State).
 
 forbidden_message(not_member_of_org, User, Org) ->
     Msg = iolist_to_binary([<<"'">>, User, <<"' not associated with organization '">>,
@@ -248,3 +341,46 @@ set_authz_id(Id, #sandbox_state{}=S) ->
 set_authz_id(Id, #data_state{}=D) ->
     D#data_state{data_bag_authz_id = Id}.
 
+%%------------------------------------------------------------------------------
+%% GRAB BAG FUNCTIONS AHEAD!!
+%%------------------------------------------------------------------------------
+%%
+%% The following functions require the use of Authz, but in ways that are not currently
+%% amenable to our behaviour / mixin based approach.  The most expedient thing at present is
+%% to export these functions and call them directly via ?BASE_RESOURCE in the endpoints
+%% where they are required.
+%%
+%% As such, the Open Source implementation of the base resource will need corresponding
+%% "no-op" versions.
+
+-define(AUTHZ_TIMEOUT, 5 * 1000).
+
+%% @doc Check the authz permissions on a list of cookbooks in parallel.
+%% If an checks fails we return early with the failed cookbook
+-spec check_cookbook_authz(Cookbooks :: [#chef_cookbook_version{}],
+                           Req :: wm_req(),
+                           State :: #base_state{}) ->
+                                  ok | {error, Msg :: binary()}.
+check_cookbook_authz(Cookbooks, Req, State) ->
+    AllOk = lists:duplicate(length(Cookbooks), ok),
+    try
+        AllOk = ec_plists:map(fun(#chef_cookbook_version{name = Name,
+                                                         authz_id = AuthzId}) ->
+                                      case has_permission(object, AuthzId, read, Req, State) of
+                                          true ->
+                                              ok;
+                                          false ->
+                                              Msg = iolist_to_binary(["missing read permission on ", Name, " cookbook"]),
+                                              throw({authz_error, Msg})
+                                      end
+                              end,
+                              Cookbooks,
+                              ?AUTHZ_TIMEOUT),
+        ok
+    catch
+        throw:{authz_error, Msg} ->
+            {error, Msg}
+    end.
+
+%% This version should work for Open Source:
+%% check_cookbook_authz(_Cookbooks, _Req, _State) -> ok.
