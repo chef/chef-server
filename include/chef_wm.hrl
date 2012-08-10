@@ -164,5 +164,15 @@
           partial_paths = []
          }).
 
+-record(depsolver_state, {
+          chef_environment :: #chef_environment{},
+          %% environment within which to depsolve from the URL
+          environment_name :: binary(),
+          %% list of required cookbooks from POST.  These have been processed
+          %% and if there was a version in the recipe the we store it as a
+          %% cookbook name, version tuple
+          run_list_cookbooks :: [binary() | {binary(), binary()}]
+        }).
+
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
