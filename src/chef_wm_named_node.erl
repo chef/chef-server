@@ -64,7 +64,7 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
         #chef_node{authz_id = AuthzId} = Node ->
             NodeState1 = NodeState#node_state{chef_node = Node},
             State1 = State#base_state{resource_state = NodeState1},
-            {object, AuthzId, Req, State1}
+            {{object, AuthzId}, Req, State1}
     end.
 
 %% Org is checked for in malformed_request/2, node is checked for in forbidden/2;
