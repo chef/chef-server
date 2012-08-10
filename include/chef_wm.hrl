@@ -123,6 +123,7 @@
           data_bag_authz_id,
           chef_data_bag :: #chef_data_bag{} | undefined,
           chef_data_bag_item :: #chef_data_bag_item{} | undefined
+         }).
 
 -record(environment_state, {
           environment_data,

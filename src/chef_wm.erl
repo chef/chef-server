@@ -7,8 +7,8 @@
 -type base_state() :: #base_state{}.
 -type resource_state() :: term().
 -type container_name() :: cookbook |
-                          environment |
                           data |
+                          environment |
                           node |
                           role |
                           sandbox.
