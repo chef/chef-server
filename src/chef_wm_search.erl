@@ -84,7 +84,7 @@ resource_exists(Req, #base_state{organization_guid = OrgGuid,
             %% have failed with 403 if no such org.
             OrgName = chef_wm_util:extract_from_path(organization_id, Req),
             NoOrg = resource_exists_message(org_not_found, OrgName),
-            Req1 = chef_wm_util:set_json_body(NoOrg, Req),
+            Req1 = chef_wm_util:set_json_body(Req, NoOrg),
             {false, Req1, State#base_state{log_msg = org_not_found}}
     end.
 
