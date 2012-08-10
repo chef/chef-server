@@ -21,7 +21,8 @@
          object_name/2,
          set_json_body/2,
          set_uri_of_created_resource/1,
-         set_uri_of_created_resource/2]).
+         set_uri_of_created_resource/2,
+         with_error_body/2]).
 
 -include("chef_wm.hrl").
 
@@ -105,7 +106,10 @@ not_found_message(client, Name) ->
 %% "Cannot load data bag item not_really_there for data bag sack"
 
 
-error_message_envelope(Message) when is_binary(Message) ->
+error_message_envelope(Message) when is_binary(Message) orelse
+                                     is_tuple(Message) ->
+    %% Tuple guard added to accommodate depsolver messages.  This is part of an ongoing
+    %% refactor, and may not ultimately be necessary.
     {[{<<"error">>, [Message]}]}.
 
 %% @doc Converts the given Ejson-encoded data to a JSON string and
@@ -114,6 +118,16 @@ error_message_envelope(Message) when is_binary(Message) ->
 set_json_body(Req, EjsonData) ->
     Json = ejson:encode(EjsonData),
     wrq:set_resp_body(Json, Req).
+
+%% @doc Convenience method for manipulating error data.  Data that is passed in is wrapped
+%% in an error message envelope, which is then encoded to JSON and set as the body of the
+%% request.  This updated request is returned.
+-spec with_error_body(Req :: wm_req(),
+                      ErrorData :: ej:json_object() | ej:json_string()) ->
+                             ReqWithErrorJSON :: wm_req().
+with_error_body(Req, ErrorData) ->
+    ErrorPayload = error_message_envelope(ErrorData),
+    set_json_body(Req, ErrorPayload).
 
 %% @doc Append a JSON map item to the request body and
 %% set it as the new request body, returning the updated request.
