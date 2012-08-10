@@ -13,6 +13,8 @@
 -include("chef_wm.hrl").
 -include_lib("chef_index/include/chef_solr.hrl").
 
+%% We chose to *not* mixin chef_wm_base:post_is_create/2 as a POST in
+%% this resource is purely for processing...not resource creation.
 -mixin([{chef_wm_base, [content_types_accepted/2,
                         content_types_provided/2,
                         finish_request/2,
@@ -37,15 +39,9 @@
          validate_request/3]).
 
 -export([allowed_methods/2,
-         post_is_create/2,
          process_post/2,
          resource_exists/2,
          to_json/2]).
-
-%% We chose to *not* mixin the post_is_create/2 from chef_wm_base as a POST in
-%% this resource is purely for processing...not resource creation.
-post_is_create(Req, State) ->
-    {false, Req, State}.
 
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
