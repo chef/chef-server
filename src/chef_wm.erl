@@ -8,6 +8,7 @@
 -type resource_state() :: term().
 -type container_name() :: cookbook |
                           data |
+                          environment |
                           node |
                           role |
                           sandbox.

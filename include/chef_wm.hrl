@@ -125,6 +125,19 @@
           chef_data_bag_item :: #chef_data_bag_item{} | undefined
          }).
 
+-record(environment_state, {
+          environment_data,
+          environment_authz_id,
+          chef_environment :: #chef_environment{},
+
+          %% Used for when we're returning environment-filtered cookbook version info
+          num_versions :: num_versions(),
+
+          %% Used when we're grabbing specific cookbooks filtered through an environment
+          %% `all' indicates that all cookbooks should be returned (duh)
+          cookbook :: binary() | all
+         }).
+
 -record(node_state, {
           environment_name,
           node_data,
@@ -150,6 +163,16 @@
           solr_query = undefined,
           partial_paths = []
          }).
+
+-record(depsolver_state, {
+          chef_environment :: #chef_environment{},
+          %% environment within which to depsolve from the URL
+          environment_name :: binary(),
+          %% list of required cookbooks from POST.  These have been processed
+          %% and if there was a version in the recipe the we store it as a
+          %% cookbook name, version tuple
+          run_list_cookbooks :: [binary() | {binary(), binary()}]
+        }).
 
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
