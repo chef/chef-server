@@ -158,7 +158,7 @@ process_post(Req, State) ->
                                 role,
                         NamePaths :: any(), %% really: [{binary(), [binary()]}],
                         BaseURI :: binary() | string()) ->
-                               fun(([binary()]) -> [ej:json_object()]).
+                               fun(([binary()]) -> [ej:json_object() | binary()]).
 
 %% @doc Returns a fun/1 that can be given a list of object IDs and returns a list of the
 %% corresponding EJSON object. The fun wraps `chef_db:bulk_get' and in some cases does some
