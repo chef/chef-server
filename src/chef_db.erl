@@ -852,7 +852,7 @@ connect() ->
     chef_otto:connect().
 
 -spec bulk_get(#context{}, binary(), chef_type(), [binary()]) ->
-                      [binary()] | {error, _}.
+                      [binary()|ej:json_object()] | {error, _}.
 %% @doc Return a list of JSON/gzip'd JSON as binary corresponding to the specified list of
 %% IDs.
 bulk_get(#context{reqid = ReqId}, _OrgName, node, Ids) ->
