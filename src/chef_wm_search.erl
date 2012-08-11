@@ -175,8 +175,8 @@ make_bulk_get_fun(DbContext, OrgName, client, [], _BaseURI) ->
     %% BUGBUG in waiting: special casing for one class is UBER CODE SMELL
     fun(Ids) ->
             Clients = chef_db:bulk_get(DbContext, OrgName, client, Ids),
-            [ [{<<"json_class">>, <<"Chef::ApiClient">>}|Client]
-             || Client <- Clients ]
+            [ ej:set({<<"json_class">>}, Client, <<"Chef::ApiClient">>)
+              || Client <- Clients ]
     end;
 make_bulk_get_fun(DbContext, OrgName, {data_bag, BagName}, [], _BaseURI) ->
     %% For data bag items, we return the raw object if the data bag item is coming from
