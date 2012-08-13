@@ -23,11 +23,14 @@
 
 %% Helpers for webmachine callbacks
 -export([create_from_json/5,
-         delete_object/3,
          init/2,
          log_request/2,
          verify_request_signature/2,
          update_from_json/4]).
+
+%% "Grab Bag" functions that will also need to be implemented by other base resources
+-export([check_cookbook_authz/3,
+         delete_object/3]).
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
 %% contains a function definition.
@@ -406,6 +409,13 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     object_id()) -> ok.
 delete_object(DbContext, Object, RequestId) ->
     chef_object_db:delete(DbContext, Object, RequestId).
+
+-spec check_cookbook_authz(Cookbooks :: [#chef_cookbook_version{}],
+                           Req :: wm_req(),
+                           State :: #base_state{}) ->
+                                  ok | {error, Msg :: binary()}.
+check_cookbook_authz(_, _, #base_state{}) ->
+    ok.
 
 conflict_message(cookbook_version, _Name) ->
     {[{<<"error">>, [<<"Cookbook already exists">>]}]};
