@@ -897,7 +897,11 @@ delete_sandbox(SandboxId) when is_binary(SandboxId) ->
 %% not altered @end
 %%
 %% TODO: This wants to be in a transaction!
--spec mark_checksums_as_uploaded(binary(), [binary()]) -> ok | sqerl_error().
+-spec mark_checksums_as_uploaded(binary(), [binary()]) ->
+                                        'ok' |
+                                        {'error', _} |
+                                        {'foreign_key', _} |
+                                        {'ok', 'none' | number()}.
 mark_checksums_as_uploaded(_OrgId, []) ->
     ok;
 mark_checksums_as_uploaded(OrgId, [Checksum|Rest]) ->
