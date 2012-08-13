@@ -1,4 +1,21 @@
 DEPS=$(CURDIR)/deps
+DIALYZER_DEPS = deps/chef_objects/ebin \
+                deps/couchbeam/ebin \
+                deps/darklaunch/ebin \
+                deps/depsolver/ebin \
+                deps/ej/ebin \
+                deps/ejson/ebin \
+                deps/emysql/ebin \
+                deps/epgsql/ebin \
+                deps/ibrowse/ebin \
+                deps/mini_s3/ebin \
+                deps/mochiweb/ebin \
+                deps/oauth/ebin \
+                deps/pooler/ebin \
+                deps/sqerl/ebin \
+                deps/stats_hero/ebin \
+                deps/webmachine/ebin
+DEPS_PLT = chef_db.plt
 
 ## Set the environment variable $DB_TYPE to either mysql or pgsql
 ## to run the correct integration tests.
@@ -19,11 +36,11 @@ distclean:
 compile: $(DEPS)
 	@rebar compile
 
-# Not yet since there are a *ton* of warnings that we need to weed through.
-# @dialyzer -Wrace_conditions -Wunderspecs -r ebin
+dialyzer: $(DEPS_PLT)
+	@dialyzer -Wrace_conditions -Wunderspecs --plts ~/.dialyzer_plt $(DEPS_PLT) -r ebin
 
-dialyzer:
-	@dialyzer -Wrace_conditions -Wunderspecs -nn -r ebin
+$(DEPS_PLT):
+	@dialyzer --build_plt $(DIALYZER_DEPS) --output_plt $(DEPS_PLT)
 
 $(DEPS):
 	@rebar get-deps
