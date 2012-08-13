@@ -74,6 +74,8 @@
 -include_lib("chef_objects/include/chef_types.hrl").
 -include("chef_otto.hrl").
 
+-type couch_server() :: server().               % from couchbeam.hrl
+
 -type authz_type() :: 'authz_client' |
                       'authz_container' |
                       'authz_cookbook' |
@@ -88,13 +90,13 @@
 
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
 
--spec connect() -> couchbeam:server().
+-spec connect() -> couch_server().
 connect() ->
     {ok, Host} = application:get_env(chef_db, couchdb_host),
     {ok, Port} = application:get_env(chef_db, couchdb_port),
     connect(Host, Port).
 
--spec connect(string(), http_port()) -> couchbeam:server().
+-spec connect(string(), http_port()) -> couch_server().
 connect(Host, Port) ->
     couchbeam:server_connection(Host, Port, "", []).
 
@@ -111,12 +113,12 @@ ping() ->
             pang
     end.
 
--spec is_user_in_org(couchbeam:server(), object_id(), binary()) -> boolean().
+-spec is_user_in_org(couch_server(), object_id(), binary()) -> boolean().
 %% @doc Return true if `User' is in `OrgName' and false otherwise.
 is_user_in_org(Server, UserId, OrgName) when is_binary(OrgName) ->
     lists:member(OrgName, fetch_orgs_for_user_id(Server, UserId)).
 
--spec fetch_orgs_for_user_id(couchbeam:server(), object_id()) -> [binary()].
+-spec fetch_orgs_for_user_id(couch_server(), object_id()) -> [binary()].
 %% @doc Return the list of organization names that username `User' is associated with
 %%
 fetch_orgs_for_user_id(Server, UserId) ->
@@ -138,7 +140,7 @@ fetch_orgs_for_user_id(Server, UserId) ->
     Orgs = bulk_get(Server, ?user_db, OrgAccountIds),
     [ ej:get({<<"name">>}, Org) || Org <- Orgs ].
 
--spec fetch_orgs(couchbeam:server()) -> [{binary(), binary()}].
+-spec fetch_orgs(couch_server()) -> [{binary(), binary()}].
 %% @doc Return a list of {OrgName, OrgId} tuples for all orgs in the opscode-account
 %% database.
 %%
@@ -153,7 +155,7 @@ fetch_orgs(Server) ->
                                 [{OrgName, OrgId}|Acc]
                         end).
 
--spec fetch_assigned_orgs(couchbeam:server()) -> [{binary(), binary()}].
+-spec fetch_assigned_orgs(couch_server()) -> [{binary(), binary()}].
 
 %% @doc Return a list of {OrgName, OrgId} tuples for all assigned orgs in the
 %% opscode-account database.
@@ -181,7 +183,7 @@ is_unassigned(Row) ->
     Name = ej:get({<<"doc">>, <<"name">>}, Row),
     FullName =:= <<"Pre-created">> andalso byte_size(Name) =:= 20.
 
--spec fetch_org_id(couchbeam:server(), binary()) -> binary() | not_found.
+-spec fetch_org_id(couch_server(), binary()) -> binary() | not_found.
 %% @doc Return the org GUID for a given organization name.
 fetch_org_id(Server, OrgName) when is_binary(OrgName) ->
     case fetch_org(Server, OrgName) of
@@ -189,7 +191,7 @@ fetch_org_id(Server, OrgName) when is_binary(OrgName) ->
         Org when is_list(Org) -> ?gv(<<"guid">>, Org)
     end.
 
--spec fetch_org(couchbeam:server(), binary()) ->
+-spec fetch_org(couch_server(), binary()) ->
     [tuple()]
         | {org_not_found, not_in_view}
         | {org_not_found, {no_doc, binary()}}.
@@ -211,7 +213,7 @@ fetch_org(Server, OrgName) when is_binary(OrgName) ->
 fetch_org(Server, OrgName) when is_list(OrgName) ->
     fetch_org(Server, list_to_binary(OrgName)).
 
--spec fetch_by_name(couchbeam:server(),
+-spec fetch_by_name(couch_server(),
                     binary() | 'not_found',
                     binary() | string(),
                     authz_type() | chef_object_name()) ->
@@ -242,7 +244,7 @@ fetch_by_name(Server, OrgId, Name, Type) when is_binary(Name), is_binary(OrgId) 
 %%%
 %%% Clients are only mixlib-side entities?
 %%%
--spec fetch_client(couchbeam:server(), binary() | not_found, binary() | string()) ->
+-spec fetch_client(couch_server(), binary() | not_found, binary() | string()) ->
                           #chef_client{}
                               | {not_found, client}
                               | {not_found, org}.
@@ -346,7 +348,7 @@ convert_couch_json_to_node_record(OrgId, AuthzId, RequestorId, NodeBlob) ->
 %%%
 %%% Nodes have a mixlib-auth record and a regular record
 %%%
--spec fetch_node(couchbeam:server(), OrgId :: binary(),
+-spec fetch_node(couch_server(), OrgId :: binary(),
                  NodeName :: binary() | string()) ->
                         #chef_node{} |
                         {'error', {{'not_found', atom()} |
@@ -382,22 +384,22 @@ fetch_environment(Server, OrgId, Name) ->
 
 %% FIXME: not quite right. This returns a list of cookbook_versions, but not the right data
 %% for the API yet.
-%% -spec fetch_cookbooks(couchbeam:server(), binary()) -> [binary()].
+%% -spec fetch_cookbooks(couch_server(), binary()) -> [binary()].
 %% fetch_cookbooks(Server, OrgId) -> fetch_objects(Server, OrgId, cookbook).
 
--spec fetch_data_bags(couchbeam:server(), binary()) -> [binary()].
+-spec fetch_data_bags(couch_server(), binary()) -> [binary()].
 fetch_data_bags(Server, OrgId) ->
     fetch_objects(Server, OrgId, chef_data_bag).
 
-%% -spec fetch_data_bag_items(couchbeam:server(), binary()) -> [binary()].
+%% -spec fetch_data_bag_items(couch_server(), binary()) -> [binary()].
 %% fetch_data_bag_items(Server, OrgId) ->
 %%     fetch_objects(Server, OrgId, data_bag_items).
 
--spec fetch_nodes(couchbeam:server(), binary()) -> [binary()].
+-spec fetch_nodes(couch_server(), binary()) -> [binary()].
 fetch_nodes(Server, OrgId) ->
     fetch_objects(Server, OrgId, chef_node).
 
--spec fetch_roles(couchbeam:server(), binary()) -> [binary()].
+-spec fetch_roles(couch_server(), binary()) -> [binary()].
 fetch_roles(Server, OrgId) ->
     fetch_objects(Server, OrgId, chef_role).
 
@@ -441,7 +443,7 @@ fetch_nodes(Server, OrgId, EnvName) ->
 fetch_roles_with_ids(Server, OrgId) ->
     fetch_objects_with_ids(Server, OrgId, chef_role).
 
--spec bulk_get(couchbeam:server(), string() | binary(), [binary()]) ->
+-spec bulk_get(couch_server(), string() | binary(), [binary()]) ->
     [[tuple()]] | [].
 bulk_get(Server, DbName, Ids) ->
     {ok, Db} = couchbeam:open_db(Server, DbName, []),
@@ -451,7 +453,7 @@ bulk_get(Server, DbName, Ids) ->
                    end,
     lists:reverse(couchbeam_view:fold(View, DocCollector)).
 
--spec fetch_auth_join_id(couchbeam:server(), db_key(), auth_to_user|user_to_auth) -> id() | {not_found, term()}.
+-spec fetch_auth_join_id(couch_server(), db_key(), auth_to_user|user_to_auth) -> id() | {not_found, term()}.
 fetch_auth_join_id(Server, Id, Direction) when is_list(Id) ->
     fetch_auth_join_id(Server, list_to_binary(Id), Direction);
 fetch_auth_join_id(Server, Id, Direction) when is_binary(Id) ->
@@ -469,7 +471,7 @@ fetch_auth_join_id(Server, Id, Direction) when is_binary(Id) ->
         Why -> {not_found, Why}
     end.
 
--spec data_bag_exists(couchbeam:server(), binary(), binary() | string()) -> boolean().
+-spec data_bag_exists(couch_server(), binary(), binary() | string()) -> boolean().
 %% @doc Return true if there is a data bag named `DataBag' in the
 %% specified org.
 %%
@@ -480,7 +482,7 @@ data_bag_exists(Server, OrgId, DataBag)
 data_bag_exists(Server, OrgId, DataBag) when is_list(DataBag), is_binary(OrgId) ->
     data_bag_exists(Server, OrgId, list_to_binary(DataBag)).
 
--spec environment_exists(couchbeam:server(), binary(), binary() | string()) -> boolean().
+-spec environment_exists(couch_server(), binary(), binary() | string()) -> boolean().
 %% @doc Return true if there is an environment named `EnvName' in the
 %% specified org.
 %%
@@ -491,7 +493,7 @@ environment_exists(Server, OrgId, EnvName) when is_list(EnvName), is_binary(OrgI
 
 
 %% @doc Return the names of all an organization's data bags
--spec data_bag_names(couchbeam:server(), OrgId::binary()) -> list(binary()).
+-spec data_bag_names(couch_server(), OrgId::binary()) -> list(binary()).
 data_bag_names(Server, OrgId) when is_binary(OrgId) ->
     {ok, Db} = couchbeam:open_db(Server, dbname(OrgId), []),
     {ok, View} = couchbeam:view(Db, {"data_bags", "all_id"}, []),
@@ -511,7 +513,7 @@ serialize_node(Node) when is_binary(Node) ->
 serialize_node({_}=Node) ->
     serialize_node(ejson:encode(Node)).
 
--spec fetch_object(couchbeam:server(), OrgId :: binary(),
+-spec fetch_object(couch_server(), OrgId :: binary(),
                    Name :: binary() | string(),
                    Type :: chef_object_name()) ->
                           chef_object() | #chef_client{} |
@@ -534,7 +536,7 @@ fetch_object(Server, OrgId, Name, Type) ->
 %% success typing is (_,binary(),'cookbook' | 'data_bag' | 'data_bag_items' | 'node' |
 %% 'role') -> [any()]
 
--spec fetch_objects(couchbeam:server(), binary(), 'chef_data_bag' | 'chef_node' | 'chef_role') -> [binary()].
+-spec fetch_objects(couch_server(), binary(), 'chef_data_bag' | 'chef_node' | 'chef_role') -> [binary()].
 %% @doc fetch list of object names
 fetch_objects(Server, OrgId, Type) ->
     ChefDb = dbname(OrgId),
@@ -547,7 +549,7 @@ fetch_objects(Server, OrgId, Type) ->
                                            [Key | Acc]
                                    end)).
 
--spec fetch_objects_with_ids(couchbeam:server(), binary(),
+-spec fetch_objects_with_ids(couch_server(), binary(),
                              chef_object_name()) -> [{binary(), binary()}].
 %% @doc fetch list of object `{name, ID}' tuples.
 fetch_objects_with_ids(Server, OrgId, Type) ->
@@ -562,7 +564,7 @@ fetch_objects_with_ids(Server, OrgId, Type) ->
                                         [ {Name, Id} | Acc]
                                    end)).
 
--spec object_exists(couchbeam:server(), binary(), binary(), chef_environment | chef_data_bag) -> boolean().
+-spec object_exists(couch_server(), binary(), binary(), chef_environment | chef_data_bag) -> boolean().
 %% @doc Return true if we find an object named `Named' of the specified `Type'.
 %%
 object_exists(Server, OrgId, Name, Type) when is_binary(Name), is_binary(OrgId) ->
