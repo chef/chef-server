@@ -10,3 +10,4 @@ doc/*.html
 /doc/erlang.png
 /doc/stylesheet.css
 .test
+/chef_wm.plt

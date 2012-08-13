@@ -43,7 +43,7 @@ eunit:
 test: eunit
 
 dialyzer: $(DEPS_PLT)
-	@dialyzer -Wrace_conditions -Wunderspecs --plts ~/.dialyzer_plt chef_wm.plt -r ebin
+	@dialyzer -Wrace_conditions -Wunderspecs --plts ~/.dialyzer_plt $(DEPS_PLT) -r ebin
 
 check_calls:
 	@./check_calls
