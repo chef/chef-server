@@ -230,7 +230,7 @@ precondition_failed(Req, State, ErrorData, LogMsg) when is_atom(LogMsg) ->
 %% @doc Utility function to remove some of the verbosity.  Note that
 %% this is specific to Chef, and has absolutely nothing to do with the
 %% Webmachine callback.
-forbidden(Req, State, ErrorData, LogMsg) ->
+forbid(Req, State, ErrorData, LogMsg) ->
     halt(403, Req, State, ErrorData, LogMsg).
 
 server_error(Req, State, ErrorData, LogMsg) ->
@@ -262,7 +262,7 @@ assemble_response(Req, State, CookbookVersions) ->
             CBMapJson = ejson:encode(JsonList),
             {true, wrq:append_to_response_body(CBMapJson, Req), State};
         {error, Msg} ->
-            forbidden(Req, State, Msg, {read, forbidden})
+            forbid(Req, State, Msg, {read, forbidden})
     end.
 
 %%------------------------------------------------------------------------------
