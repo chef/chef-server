@@ -1,0 +1,23 @@
+{application, chef_wm,
+ [
+  {description, "Erlang Chef Server Webmachine Resources"},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  crypto,
+                  stats_hero,
+                  fast_log,
+                  sqerl,
+                  gen_bunny,
+                  ibrowse,
+                  couchbeam,
+                  darklaunch,
+                  chef_index,
+                  mochiweb,
+                  webmachine
+                 ]},
+  {mod, {chef_wm_app, []}},
+  {env, []}
+ ]}.
