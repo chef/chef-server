@@ -1,7 +1,6 @@
 DEPS=$(CURDIR)/deps
 DIALYZER_DEPS = deps/chef_objects/ebin \
                 deps/couchbeam/ebin \
-                deps/darklaunch/ebin \
                 deps/depsolver/ebin \
                 deps/ej/ebin \
                 deps/ejson/ebin \
@@ -13,8 +12,7 @@ DIALYZER_DEPS = deps/chef_objects/ebin \
                 deps/oauth/ebin \
                 deps/pooler/ebin \
                 deps/sqerl/ebin \
-                deps/stats_hero/ebin \
-                deps/webmachine/ebin
+                deps/stats_hero/ebin
 DEPS_PLT = chef_db.plt
 
 ## Set the environment variable $DB_TYPE to either mysql or pgsql
