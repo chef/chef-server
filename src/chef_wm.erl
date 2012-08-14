@@ -10,6 +10,7 @@
                           data |
                           node |
                           role |
+                          client |
                           sandbox.
 -callback init(list()) ->
     {ok, base_state()} | error().
