@@ -48,14 +48,14 @@ assemble_client_ejson(#chef_client{name = Name, validator = Validator,
       {<<"certificate">>, PublicKey},
       {<<"orgname">>, OrgName}]}.
 
--spec parse_binary_json(binary(), binary()) -> {'ok', {[{_, _}]}}. % or throw
+-spec parse_binary_json(binary(), binary() | undefined) -> {'ok', {[{_, _}]}}. % or throw
 %% @doc Convert a binary JSON string representing a Chef Client into an
 %% EJson-encoded Erlang data structure, with no passed defaults
 %% @end
 parse_binary_json(Bin, ReqName) ->
     parse_binary_json(Bin, ReqName, not_found).
 
--spec parse_binary_json(binary(), binary(), term()) -> {'ok', {[{_, _}]}}. % or throw
+-spec parse_binary_json(binary(), binary() | undefined, not_found | [_]) -> {'ok', {[{_, _}]}}. % or throw
 %% @doc Convert a binary JSON string representing a Chef Client into an
 %% EJson-encoded Erlang data structure, using passed defaults
 %% @end
@@ -93,6 +93,7 @@ set_default_values(Client, Defaults) ->
                 Client,
                 Defaults).
 
+-spec set_name_values(ej:json_object(), binary() | undefined) -> {binary(), ej:json_object()} | no_return().
 set_name_values(Client, ReqName) ->
     % Since either name or clientname is required (but not both), if only one is
     % passed, we will use it to set the other one

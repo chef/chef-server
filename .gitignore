@@ -1,7 +1,6 @@
 .eunit
 deps/
 ebin/
-ebin_dialyzer/
 TAGS
 .DS_Store
 doc/*.html
@@ -9,6 +8,4 @@ doc/*.html
 /doc/edoc-info
 /doc/erlang.png
 /doc/stylesheet.css
-
-
-
+/chef_objects.plt
