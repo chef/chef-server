@@ -61,12 +61,12 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'POST', 'DELETE'], Req, State}.
 
-validate_request('GET', Req, State) ->
-    {Req, State#base_state{resource_state = #client_state{}}};
 %% @doc Currently we need to allow the pivotal user to create clients for pedant.
 %% We set up the state such that the superuser avoids the ACL checks.
 %% FIXME: This is a temporary fix until pedant uses the validator which has
 %% permissions to create a new client
+validate_request('GET', Req, State) ->
+    {Req, State#base_state{resource_state = #client_state{}}};
 validate_request('POST', Req, State) ->
     case wrq:req_body(Req) of
         undefined ->
@@ -88,11 +88,11 @@ create_path(Req, #base_state{resource_state = #client_state{client_data = Client
 %% and return the private key as part of the response
 from_json(Req, #base_state{reqid = RequestId,
                            resource_state = #client_state{client_data = ClientData,
-                                                          client_container_id = ContainerId}} = State) ->
+                                                          client_authz_id = AuthzId}} = State) ->
     Name = ej:get({<<"name">>}, ClientData),
     {Cert, PrivateKey} = chef_cert_http:gen_cert(Name, RequestId),
     ClientData1 = chef_client:add_authn_fields(ClientData, Cert),
-    case chef_wm_base:create_from_json(Req, State, chef_client, ContainerId, ClientData1) of
+    case chef_wm_base:create_from_json(Req, State, chef_client, AuthzId, ClientData1) of
         {true, Req1, State1} ->
             Req2 = chef_wm_util:append_field_to_json_body(Req1, <<"private_key">>, PrivateKey),
             {true,Req2, State1};

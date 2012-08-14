@@ -100,6 +100,12 @@
           superuser_bypasses_checks = false :: true | false
          }).
 
+-record(client_state, {
+          client_data,
+          client_authz_id,
+          chef_client :: #chef_client{}
+         }).
+
 -record(cookbook_state, {
           %% authz id of the cookbook
           authz_id,
@@ -114,12 +120,6 @@
           chef_cookbook_version :: #chef_cookbook_version{} | undefined,
           %% number of versions to display when doing cookbook list
           num_versions :: non_neg_integer() | all | undefined
-         }).
-
--record(client_state, {
-          client_data,
-          client_container_id,
-          chef_client :: #chef_client{}
          }).
 
 -record(data_state, {
