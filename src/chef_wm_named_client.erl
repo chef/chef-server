@@ -51,7 +51,7 @@ allowed_methods(Req, State) ->
 validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
                                          organization_name = OrgName} = State) ->
     Body = wrq:req_body(Req),
-    Name = chef_rest_util:object_name(client, Req),
+    Name = chef_wm_util:object_name(client, Req),
     OldClient = chef_db:fetch_client(DbContext, OrgName, Name),
     case OldClient of
         not_found ->
@@ -82,19 +82,19 @@ from_json(Req, #base_state{reqid = RequestId,
                           PrivateKey = undefined,
                           ClientData
     end,
-    {Result, Req1, State1} = chef_rest_wm:update_from_json(Req, State,
+    {Result, Req1, State1} = chef_wm_base:update_from_json(Req, State,
                                                            Client, ClientData1),
     % This is for returning the private key, but needs to happen after update
     Req2 = case PrivateKey of
                undefined ->
                    Req1;
                _ ->
-                   chef_rest_util:append_field_to_json_body(Req1, <<"private_key">>,
+                   chef_wm_util:append_field_to_json_body(Req1, <<"private_key">>,
                                                             PrivateKey)
            end,
     % Need to return uri (for no good reason except ruby endpoint does)
-    Uri = chef_rest_routes:route(client, Req1, [{name, Name}]),
-    FinalReq = chef_rest_util:append_field_to_json_body(Req2, <<"uri">>, Uri),
+    Uri = ?BASE_ROUTES:route(client, Req1, [{name, Name}]),
+    FinalReq = chef_wm_util:append_field_to_json_body(Req2, <<"uri">>, Uri),
     {Result, FinalReq, State1}.
 
 to_json(Req, #base_state{resource_state =
@@ -111,7 +111,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  organization_name = OrgName} = State) ->
     ok = chef_object_db:delete(DbContext, Client, RequestorId),
     EJson = chef_client:assemble_client_ejson(Client, OrgName),
-    Req1 = chef_rest_util:set_json_body(Req, EJson),
+    Req1 = chef_wm_util:set_json_body(Req, EJson),
     {true, Req1, State}.
 
 %% Internal Functions

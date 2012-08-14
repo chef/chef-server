@@ -92,9 +92,9 @@ from_json(Req, #base_state{reqid = RequestId,
     Name = ej:get({<<"name">>}, ClientData),
     {Cert, PrivateKey} = chef_cert_http:gen_cert(Name, RequestId),
     ClientData1 = chef_client:add_authn_fields(ClientData, Cert),
-    case chef_rest_wm:create_from_json(Req, State, chef_client, ContainerId, ClientData1) of
+    case chef_wm_base:create_from_json(Req, State, chef_client, ContainerId, ClientData1) of
         {true, Req1, State1} ->
-            Req2 = chef_rest_util:append_field_to_json_body(Req1, <<"private_key">>, PrivateKey),
+            Req2 = chef_wm_util:append_field_to_json_body(Req1, <<"private_key">>, PrivateKey),
             {true,Req2, State1};
         Else ->
             Else
@@ -107,13 +107,13 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  resource_state = #client_state{chef_client = Client},
                                  requestor = #chef_requestor{authz_id = RequestorId}} = State) ->
     ok = chef_object_db:delete(DbContext, Client, RequestorId),
-    {true, chef_rest_util:set_json_body(Req, [<<"Deleted">>]), State}.
+    {true, chef_wm_util:set_json_body(Req, [<<"Deleted">>]), State}.
 
 %% Internal Functions
 all_clients_json(Req, #base_state{chef_db_context = DbContext,
                                   organization_name = OrgName}) ->
     ClientNames = chef_db:fetch_clients(DbContext, OrgName),
-    RouteFun = chef_rest_routes:bulk_route_fun(client, Req),
+    RouteFun = ?BASE_ROUTES:bulk_route_fun(client, Req),
     UriMap = [ {Name, RouteFun(Name)} || Name <- ClientNames ],
     ejson:encode({UriMap}).
 
