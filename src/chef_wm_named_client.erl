@@ -67,8 +67,20 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
 validate_request(_Other, Req, State) ->
     {Req, State}.
 
-auth_info(Req, State) ->
-    {{create_in_container, client}, Req, State}.
+auth_info(Req, #base_state{chef_db_context = DbContext,
+                           resource_state = ClientState,
+                           organization_name=OrgName}=State) ->
+    ClientName = chef_wm_util:object_name(client, Req),
+    case chef_db:fetch_client(DbContext, OrgName, ClientName) of
+        not_found ->
+            Message = chef_wm_util:not_found_message(client, ClientName),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 404}, Req1, State#base_state{log_msg = client_not_found}};
+        #chef_client{authz_id = AuthzId} = Client ->
+            ClientState1 = ClientState#client_state{chef_client = Client},
+            State1 = State#base_state{resource_state = ClientState1},
+            {{object, AuthzId}, Req, State1}
+    end.
 
 from_json(Req, #base_state{reqid = RequestId,
                            resource_state =
