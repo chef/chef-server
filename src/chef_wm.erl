@@ -11,6 +11,7 @@
                           environment |
                           node |
                           role |
+                          client |
                           sandbox.
 -callback init(list()) ->
     {ok, base_state()} | error().
@@ -19,7 +20,7 @@
     {ok, resource_state()} | error().
 
 -callback validate_request(http_verb(), wm_req(), base_state()) ->
-    {wm_req(), base_state()}.
+    {wm_req(), base_state()} | no_return().
 
 -callback malformed_request_message(term(), wm_req(), base_state()) ->
     term().                                     % return is really EJSON
