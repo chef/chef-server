@@ -19,7 +19,7 @@ DEPS_PLT = chef_db.plt
 ## to run the correct integration tests.
 -include itest/$(DB_TYPE)_conf.mk
 
-all: compile eunit dialyzer
+all: compile eunit
 
 clean:
 	@rebar skip_deps=true clean
