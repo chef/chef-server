@@ -40,7 +40,7 @@ init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
-    {ok, #data_state{}}.
+    {ok, #client_state{}}.
 
 request_type() ->
   "data".
