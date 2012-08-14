@@ -100,6 +100,12 @@
           superuser_bypasses_checks = false :: true | false
          }).
 
+-record(client_state, {
+          client_data,
+          client_authz_id,
+          chef_client :: #chef_client{}
+         }).
+
 -record(cookbook_state, {
           %% authz id of the cookbook
           authz_id,

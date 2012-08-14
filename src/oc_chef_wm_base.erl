@@ -328,6 +328,8 @@ get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) 
     BypassesChecks = SuperuserBypassesChecks andalso is_superuser(UserName),
     {UserName, BypassesChecks}.
 
+set_authz_id(Id, #client_state{}=Cl) ->
+    Cl#client_state{client_authz_id = Id};
 set_authz_id(Id, #cookbook_state{}=C) ->
     C#cookbook_state{authz_id = Id};
 set_authz_id(Id, #environment_state{}=E) ->
