@@ -115,6 +115,10 @@ malformed_request(Req, #base_state{resource_mod=Mod,
             error_logger:info_msg("json too large (~p)", [Msg]),
             Req3 = wrq:set_resp_body(ejson:encode({[{<<"error">>, Msg}]}), Req),
             {{halt, 413}, Req3, State1#base_state{log_msg = too_big}};
+        throw:{error, missing_body} ->
+            error_logger:info_msg("Missing Body"),
+            NewReq = wrq:set_resp_body(ejson:encode("Missing Body"), Req),
+            {true, NewReq, State1#base_state{log_msg = missing_body}};
         throw:Why ->
             Msg = malformed_request_message(Why, Req, State),
             NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),

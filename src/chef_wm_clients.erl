@@ -68,10 +68,14 @@ validate_request('GET', Req, State) ->
 %% FIXME: This is a temporary fix until pedant uses the validator which has
 %% permissions to create a new client
 validate_request('POST', Req, State) ->
-    Body = wrq:req_body(Req),
-    {ok, Client} = chef_client:parse_binary_json(Body, undefined),
-    {Req, State#base_state{superuser_bypasses_checks = true,
-                           resource_state = #client_state{client_data = Client}}}.
+    case wrq:req_body(Req) of
+        undefined ->
+            throw({error, missing_body});
+        Body ->
+            {ok, Client} = chef_client:parse_binary_json(Body, undefined),
+            {Req, State#base_state{superuser_bypasses_checks = true,
+                    resource_state = #client_state{client_data = Client}}}
+    end.
 
 auth_info(Req, State) ->
     {{create_in_container, client}, Req, State}.
