@@ -184,7 +184,7 @@ make_bulk_get_fun(DbContext, OrgName, {data_bag, BagName}, [], _BaseURI) ->
     %% match the expected shape.
     %%
     %% BUGBUG BUGBUG: special casing for two classes is MEGA UBER CODE STENCH
-    case darklaunch:is_enabled(<<"couchdb_data">>, OrgName) of
+    case chef_wm_darklaunch:is_enabled(<<"couchdb_data">>, OrgName) of
         true ->
             fun(Ids) ->
                     chef_db:bulk_get(DbContext, OrgName, data_bag_item, Ids)
