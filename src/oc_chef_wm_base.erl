@@ -29,7 +29,7 @@
 %% This is the max size allowed for incoming request bodies.
 -define(MAX_SIZE, 1000000).
 
--include("chef_wm.hrl").
+-include_lib("chef_wm/include/chef_wm.hrl").
 
 -type permission() :: create | delete | read | update.
 
