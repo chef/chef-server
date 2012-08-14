@@ -31,43 +31,46 @@ content_types_provided(Req, State) ->
 
 to_json(Req, State) ->
     case check_health() of
-        {<<"fail">>, Body} ->
+        {fail, Body} ->
             {{halt, 500}, wrq:set_resp_body(Body, Req), State};
-        {<<"pong">>, Body} ->
+        {pong, Body} ->
             {Body, Req, State}
     end.
 
 %% private functions
 
+-spec check_health() -> {pong | fail, binary()}.
 check_health() ->
     Pings = spawn_health_checks(),
     Status = overall_status(Pings),
-    {Status, ejson:encode({[{<<"status">>, Status}, {<<"upstreams">>, {Pings}}]})}.
+    {Status, ejson:encode({[{<<"status">>, ?A2B(Status)}, {<<"upstreams">>, {Pings}}]})}.
 
 overall_status(Pings) ->
     case [ Pang || {_, <<"fail">>}=Pang <- Pings ] of
         [] ->
             %% no fails, we're good
-            <<"pong">>;
+            pong;
         _Failure ->
-            <<"fail">>
+            fail
     end.
 
 %% Execute health checks in parallel such that no check will exceed `ping_timeout()'
 %% milliseconds. This call does not return until all health checks have been executed (or
 %% timed out). Each checker process is monitored so crashed checking processes will be
 %% reported as fails.
+-spec spawn_health_checks() -> [{binary(), <<_:32>>}].
 spawn_health_checks() ->
     Parent = self(),
-    Pids = [ {erlang:spawn_monitor(fun() ->
-                                          check_health_worker(Mod, Parent, ping_timeout())
-                                  end), Mod} || Mod <- ping_modules() ],
-    %% NOTE: Pids are in the form {Pid, MonRef}
-    gather_health_workers(Pids, []).
+    Workers = [ {erlang:spawn_monitor(fun() ->
+                                              check_health_worker(Mod, Parent, ping_timeout())
+                                      end), Mod} || Mod <- ping_modules() ],
+    %% Elements of Workers are {{Pid, MonRef}, Mod} tuples
+    gather_health_workers(Workers, []).
 
 %% Calls Mod:ping() and sends `{Pid, Mod, Result}' to the specified `Parent'. The worker
 %% should be spawned into its own process where it will launch yet another process to
 %% actually execute the ping so that it can do so with a timeout.
+-spec check_health_worker(atom(), pid(), non_neg_integer()) -> {pid(), atom(), term()}.
 check_health_worker(Mod, Parent, Timeout) ->
     Self = self(),
     proc_lib:spawn_link(fun() ->
@@ -84,11 +87,21 @@ check_health_worker(Mod, Parent, Timeout) ->
 
 %% Receive ping results from spawned workers. Also translates results into EJSON friendly
 %% format and converts 'pang' to 'fail' for easier reading.
+-spec gather_health_workers([{{pid(), reference()}, atom()}],
+                            [{binary(), binary()}]) -> [{binary(), binary()}].
 gather_health_workers([{{Pid, _}, Mod} | Rest] = List, Acc) ->
+    %% Each worker is allotted `ping_timeout()' time to complete its check and report back
+    %% to this process. We should always get a reply within this window since either the
+    %% worker will send a result, trigger a timeout and send that, or crash in which case
+    %% we'll recieve the 'DOWN' message. To protect against blocking in receive in the event
+    %% of a bug in which none of the above happen, we set a timeout with some padding -- we
+    %% need more than ping_timeout() time to avoid a race condition when a worker has a
+    %% legitimate "normal" timeout. The 500 milliseconds here is very conservative.
     Timeout = ping_timeout() + 500,
     receive
         {Pid, Mod, Result} ->
-            %% we translate pang => fail to make it easier to distinguish from pong.
+            %% we translate pang => fail to make it easier to distinguish from pong by tired
+            %% eyes at 3:00 AM.
             ResultBin = case Result of
                             pong -> <<"pong">>;
                             pang -> <<"fail">>;

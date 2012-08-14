@@ -33,7 +33,7 @@ check_health_all_ok_test_() ->
      [
       fun() ->
               {Status, Json} = chef_wm_status:check_health(),
-              ?assertEqual(<<"pong">>, Status),
+              ?assertEqual(pong, Status),
               Ejson = ejson:decode(Json),
               ?assertEqual(<<"pong">>, ej:get({<<"status">>}, Ejson)),
               [ ?assertEqual(<<"pong">>, ej:get({"upstreams", a2b(Mod)}, Ejson))
@@ -52,7 +52,7 @@ check_health_one_crash_no_module_test_() ->
      [
       fun() ->
               {Status, _Json} = chef_wm_status:check_health(),
-              ?assertEqual(<<"fail">>, Status)
+              ?assertEqual(fail, Status)
       end]}.
 
 check_health_one_pang_test_() ->
@@ -85,7 +85,7 @@ check_health_mod_fails(BadMod, How) ->
      [{"handles failure of " ++ a2s(BadMod),
       fun() ->
               {Status, _Json} = chef_wm_status:check_health(),
-              ?assertEqual(<<"fail">>, Status)
+              ?assertEqual(fail, Status)
       end}]}.
 
 a2b(A) ->
