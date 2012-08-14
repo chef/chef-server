@@ -117,5 +117,5 @@ all_clients_json(Req, #base_state{chef_db_context = DbContext,
     UriMap = [ {Name, RouteFun(Name)} || Name <- ClientNames ],
     ejson:encode({UriMap}).
 
-malformed_request_message(Any, _Req, _State) ->
-    error({unexpected_malformed_request_message, Any}).
+malformed_request_message(Any, Req, State) ->
+    chef_wm_util:malformed_request_message(Any, Req, State).
