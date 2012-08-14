@@ -92,7 +92,7 @@ from_json(Req, #base_state{reqid = RequestId,
     Name = ej:get({<<"name">>}, ClientData),
     {Cert, PrivateKey} = chef_cert_http:gen_cert(Name, RequestId),
     ClientData1 = chef_client:add_authn_fields(ClientData, Cert),
-    case chef_wm_base:create_from_json(Req, State, chef_client, AuthzId, ClientData1) of
+    case chef_wm_base:create_from_json(Req, State, chef_client, {authz_id, AuthzId}, ClientData1) of
         {true, Req1, State1} ->
             Req2 = chef_wm_util:append_field_to_json_body(Req1, <<"private_key">>, PrivateKey),
             {true,Req2, State1};
