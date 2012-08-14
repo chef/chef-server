@@ -49,20 +49,23 @@ allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
 validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
-                                         organization_name = OrgName} = State) ->
+                                         organization_name = OrgName,
+                                         resource_state = ClientState} = State) ->
     Body = wrq:req_body(Req),
     Name = chef_wm_util:object_name(client, Req),
     OldClient = chef_db:fetch_client(DbContext, OrgName, Name),
-    case OldClient of
-        not_found ->
-            {ok, Client} = chef_client:parse_binary_json(Body, Name);
-        _ ->
-            {Previous} = chef_client:assemble_client_ejson(OldClient, OrgName),
-            {ok, Client} = chef_client:parse_binary_json(Body, Name, Previous)
-    end,
-    {Req, State#base_state{resource_state = #client_state{client_data = Client}}};
+    NewClient = case OldClient of
+                    not_found ->
+                        {ok, Client} = chef_client:parse_binary_json(Body, Name),
+                        Client;
+                    _ ->
+                        {Previous} = chef_client:assemble_client_ejson(OldClient, OrgName),
+                        {ok, Client} = chef_client:parse_binary_json(Body, Name, Previous),
+                        Client
+                end,
+    {Req, State#base_state{resource_state = ClientState#client_state{client_data = NewClient}}};
 validate_request(_Other, Req, State) ->
-    {Req, State#base_state{resource_state = #client_state{}}}.
+    {Req, State}.
 
 auth_info(Req, State) ->
     {{create_in_container, client}, Req, State}.
