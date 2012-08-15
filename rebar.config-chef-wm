@@ -33,6 +33,11 @@
 
  ]}.
 
-{erl_opts, [debug_info]}.
+%% We want projects that depend on chef_wm to be able to set the
+%% BASE_RESOURCE and BASE_ROUTES macros. Currently, rebar only allows
+%% overriding these if the subordinate project does not itself set an
+%% erl_opts option in its config.
+%%
+%% {erl_opts, [debug_info]}.
 
 {cover_enabled, true}.
