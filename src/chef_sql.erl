@@ -834,7 +834,7 @@ update_cookbook_version_checksums(#chef_cookbook_version{ id        = Id,
 delete_cookbook_version(#chef_cookbook_version{id=CookbookVersionId,
                                                org_id=OrgId,
                                                name=Name}) ->
-    case delete_checksums(OrgId, CookbookVersionId) of
+    case delete_cookbook_version_checksums(OrgId, CookbookVersionId) of
         {ok, DeletedChecksums} ->
             case delete_object(delete_cookbook_version_by_id, CookbookVersionId) of
                 {ok, 1} ->
@@ -1336,9 +1336,9 @@ fetch_cookbook_authz(OrgId, CookbookName) ->
     end.
 
 %% @doc Delete all checksums for a given cookbook version
--spec delete_checksums(OrgId::binary(),
+-spec delete_cookbook_version_checksums(OrgId::binary(),
                        CookbookVersionId::binary()) -> {ok, 1 } | {error, _}.
-delete_checksums(OrgId, CookbookVersionId) ->
+delete_cookbook_version_checksums(OrgId, CookbookVersionId) ->
     % retrieve a list of checksums before we delete the
     % cookbook_version_checksums record
     Checksums = fetch_cookbook_version_checksums(OrgId, CookbookVersionId),
