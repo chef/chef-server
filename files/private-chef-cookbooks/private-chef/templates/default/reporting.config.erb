@@ -1,0 +1,81 @@
+%% -*- mode: erlang -*-
+[
+ {kernel, [{start_pg2, true}]},
+ %% SASL config
+ {sasl, [
+         {sasl_error_logger, {file, "<%= File.join(@log_directory, 'sasl-error.log') %>"}},
+         {errlog_type, error},
+         {error_logger_mf_dir, "<%= File.join(@log_directory, 'sasl') %>"},      % Log directory
+         {error_logger_mf_maxbytes, 104857600},   % 10 MB max file size
+         {error_logger_mf_maxfiles, 5}           % 5 files max
+        ]},
+ %% Lager Config
+ {lager, [
+            %% What handlers to install with what arguments
+            %% The defaults for the logfiles are to rotate the files when
+            %% they reach 10Mb or at midnight, whichever comes first, and keep
+            %% the last 5 rotations. See the lager README for a description of
+            %% the time rotation format:
+            %% https://github.com/basho/lager/blob/master/README.org
+            %%
+            %% If you wish to disable rotation, you can either set the size to 0
+            %% and the rotation time to "", or instead specify a 2-tuple that only
+            %% consists of {Logfile, Level}.
+            {handlers, [
+                {lager_console_backend, info},
+                {lager_file_backend, [
+                    {"<%= File.join(@log_directory, 'error.log') %>", error, 10485760, "$D0", 5},
+                    {"<%= File.join(@log_directory, 'console.log') %>", info, 10485760, "$D0", 5}
+                ]}
+            ]},
+
+            %% Whether to write a crash log, and where.
+            %% Commented/omitted/undefined means no crash logger.
+            {crash_log, "<%= File.join(@log_directory, 'crash.log') %>"},
+
+            %% Maximum size in bytes of events in the crash log - defaults to 65536
+            {crash_log_msg_size, 65536},
+
+            %% Maximum size of the crash log in bytes, before its rotated, set
+            %% to 0 to disable rotation - default is 0
+            {crash_log_size, 10485760},
+
+            %% What time to rotate the crash log - default is no time
+            %% rotation. See the lager README for a description of this format:
+            %% https://github.com/basho/lager/blob/master/README.org
+            {crash_log_date, "$D0"},
+
+            %% Number of rotated crash logs to keep, 0 means keep only the
+            %% current one - default is 0
+            {crash_log_count, 5},
+
+            %% Whether to redirect error_logger messages into lager - defaults to true
+            {error_logger_redirect, true}
+        ]},
+ {reporting, [{server_name, "<%= @server_name %>" },
+          {port, <%= @port %> },
+          {log_dir, "<%= @log_directory %>"},
+          {metrics_module, folsom_metrics}
+          ]},
+ {sqerl, [
+           %% The database system you are using (e.g., mysql, pgsql)
+           {db_type, <%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %> },
+
+           %% Database connection parameters
+           {db_host, "<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>"},
+           {db_port, <%= node['private_chef']['database_type'] == "postgresql" ? 5432 : 3306 %>},
+           {db_user, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>"},
+           {db_pass, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>"},
+           {db_name, "opscode_chef" },
+
+           {prepared_statements, {reporting_sql, statements, [<%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %>]}},
+           {column_transforms, undefined}
+           ]},
+  {pooler, [
+           {pools, [[{name, "sqerl"},
+                     {max_count, <%= node['private_chef']['opscode-reporting']['db_pool_max_count'] %> },
+                     {init_count, <%= node['private_chef']['opscode-reporting']['db_pool_init_count'] %> },
+                     {start_mfa, {sqerl_client, start_link, []}}]]}
+          ]}
+].
+

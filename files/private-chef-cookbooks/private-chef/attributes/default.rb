@@ -235,6 +235,7 @@ default['private_chef']['lb']['upstream']['opscode-authz'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-solr'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-pushy'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['bookshelf'] = [ "127.0.0.1" ]
+default['private_chef']['lb']['upstream']['opscode-reporting'] = [ "127.0.0.1" ]
 default['private_chef']['lb_internal']['enable'] = true
 default['private_chef']['lb_internal']['vip'] = "127.0.0.1"
 default['private_chef']['lb_internal']['chef_port'] = 9680
@@ -245,6 +246,11 @@ default['private_chef']['lb_internal']['authz_port'] = 9683
 # Pushy
 ####
 default['private_chef']['opscode-pushy']['port'] = 10003
+
+####
+# Reporting
+####
+default['private_chef']['opscode-reporting']['port'] = 10010
 
 ####
 # Nginx
@@ -603,6 +609,7 @@ default['private_chef']['logs']['log_retention'] = {
   "opscode-org-creator" => 14,
   "opscode-chef" => 14,
   "opscode-erchef" => 14,
+  "opscode-reporting" => 14,
   "opscode-webui" => 14,
   "nagios" => 14,
   "nginx" => 14
@@ -632,3 +639,14 @@ default['private_chef']['ldap'] = nil
 # Upgrades/Partybus
 ##
 default['private_chef']['upgrades']['dir'] = "/var/opt/opscode/upgrades"
+
+####
+# Opscode Reporting 
+####
+default['private_chef']['opscode-reporting']['enable'] = true
+default['private_chef']['opscode-reporting']['dir'] = "/var/opt/opscode/opscode-reporting"
+default['private_chef']['opscode-reporting']['log_directory'] = "/var/log/opscode/opscode-reporting" 
+default['private_chef']['opscode-reporting']['port'] = 10010
+default['private_chef']['opscode-reporting']['db_pool_max_count'] = 20
+default['private_chef']['opscode-reporting']['db_pool_init_count'] = 5
+
