@@ -1374,7 +1374,7 @@ delete_checksums(OrgId, Checksums) ->
                       end,
                       [],
                       Checksums),
-    {ok, lists:reverse(DeletedChecksums)}.
+    {ok, DeletedChecksums}.
 
 %% @doc try and delete the row from cookbooks table.  It is protected by a
 %% ON DELETE RESTRICT from cookbook_versions so we get a FK violation if there
