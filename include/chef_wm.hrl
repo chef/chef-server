@@ -203,5 +203,11 @@
           run_list_cookbooks :: [binary() | {binary(), binary()}]
         }).
 
+-record(user_state, {
+          user_data,
+          user_authz_id,
+          chef_user :: #chef_user{}
+      }).
+
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
