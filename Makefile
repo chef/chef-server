@@ -26,7 +26,7 @@ allclean:
 	@$(REBAR) clean
 
 update: compile
-	@cd rel/erchef;bin/erchef restart
+	@cd rel/oc_erchef;bin/oc_erchef restart
 
 distclean: relclean
 	@rm -rf deps
@@ -55,16 +55,16 @@ tags:
 update_locked_config:
 	@./lock_deps deps meck
 
-rel: rel/erchef
+rel: rel/oc_erchef
 
 devrel: rel
 	@/bin/echo -n Symlinking deps and apps into release
-	@$(foreach dep,$(wildcard deps/*), /bin/echo -n .;rm -rf rel/erchef/lib/$(shell basename $(dep))-* \
-	   && ln -sf $(abspath $(dep)) rel/erchef/lib;)
+	@$(foreach dep,$(wildcard deps/*), /bin/echo -n .;rm -rf rel/oc_erchef/lib/$(shell basename $(dep))-* \
+	   && ln -sf $(abspath $(dep)) rel/oc_erchef/lib;)
 	@/bin/echo done.
 	@/bin/echo  Run \'make update\' to pick up changes in a running VM.
 
-rel/erchef: compile
+rel/oc_erchef: compile
 	@/bin/echo 'building OTP release package for'
 	@/bin/echo '                _          _  '
 	@/bin/echo '               | |        | | '
@@ -78,7 +78,7 @@ rel/erchef: compile
 	@$(REBAR) generate overlay_vars=db_vars.config
 
 relclean:
-	@rm -rf rel/erchef
+	@rm -rf rel/oc_erchef
 
 $(DEPS):
 	@echo "Fetching deps as: $(REBAR)"
