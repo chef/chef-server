@@ -1344,15 +1344,11 @@ delete_cookbook_version_checksums(OrgId, CookbookVersionId) ->
     Checksums = fetch_cookbook_version_checksums(OrgId, CookbookVersionId),
     case sqerl:statement(delete_cookbook_checksums_by_orgid_cookbook_versionid,
                             [OrgId, CookbookVersionId]) of
-        {ok, N} when is_integer(N) -> %% pretend there is 1
-            delete_checksums(OrgId, Checksums);
-        {ok, none} ->
-            %% this is ok, there might be no checksums to delete
+        {ok, _} ->
             delete_checksums(OrgId, Checksums);
         {error, Error} ->
             {error, Error}
     end.
-
 %% @doc Deletes a list of checksums from the checksums table.  Happily swallows
 %% foreign_key constraint errors assuming the checksum is still associated with
 %% another cookbook_version_checksum record.  Returns a list of deleted checksum
