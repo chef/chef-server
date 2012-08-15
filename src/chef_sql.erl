@@ -4,6 +4,7 @@
 %% @author Christopher Maier <cm@opscode.com>
 %% @author James Casey <james@opscode.com>
 %% @author Mark Mzyk <mmzyk@opscode.com>
+%% @author Seth Chisamore <schisamo@opscode.com>
 %% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -890,6 +891,19 @@ delete_sandbox(SandboxId) when is_binary(SandboxId) ->
 
 
 %% Checksum Operations
+
+%% @doc Helper function for testing checksum existence.
+-spec checksum_exists(Checksum :: binary()) ->
+                             boolean() | {error, term()}.
+checksum_exists(ChecksumId) ->
+    case sqerl:select(find_checksum_by_id, [ChecksumId], first_as_scalar, [checksum]) of
+        {ok, Checksum} when is_binary(Checksum) ->
+            true;
+        {ok, none} ->
+            false;
+        {error, Reason} ->
+            {error, Reason}
+    end.
 
 %% @doc Given an Org and list of checksums, mark all of them as having been uploaded.  In
 %% practice, this means adding a new row to the checksums table. Returns 'ok' if all are
