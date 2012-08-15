@@ -53,6 +53,7 @@
             {error_logger_redirect, true}
         ]},
  {reporting, [{server_name, "<%= @server_name %>" },
+          {ip, <%= @listen %> },
           {port, <%= @port %> },
           {log_dir, "<%= @log_directory %>"},
           {metrics_module, folsom_metrics}
