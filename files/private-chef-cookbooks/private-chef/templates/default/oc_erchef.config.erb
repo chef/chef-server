@@ -29,6 +29,10 @@
 	            {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>},
               {superusers, [<<"pivotal">>]}
              ]},
+  {chef_wm, [
+             {health_ping_timeout, 50},
+             {health_ping_modules, [chef_otto, chef_sql, chef_solr]}
+            ]},
   {chef_authn, [
                 {keyring, [{default, "/etc/opscode/webui_pub.pem"}]}
                ]},
