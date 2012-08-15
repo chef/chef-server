@@ -1601,8 +1601,8 @@ delete_cookbook_version_checksums() ->
 
     % Verify all checksums exist
     [Checksum1, Checksum2] = Got#chef_cookbook_version.checksums,
-    ?assertEqual(true, chef_sql:checksum_exists(Checksum1)),
-    ?assertEqual(true, chef_sql:checksum_exists(Checksum2)),
+    ?assertEqual(true, chef_sql:checksum_exists(Got#chef_cookbook_version.org_id, Checksum1)),
+    ?assertEqual(true, chef_sql:checksum_exists(Got#chef_cookbook_version.org_id, Checksum2)),
 
     %% We should have gotten back a list of deleted checksums
     {ok, N, DeletedChecksums} = chef_sql:delete_cookbook_version(Got),
@@ -1618,8 +1618,8 @@ delete_cookbook_version_checksums() ->
                                                               Got#chef_cookbook_version.patch}})),
 
     %% Ensure the checksums don't exist in the checksum table
-    ?assertEqual(false, chef_sql:checksum_exists(Checksum1)),
-    ?assertEqual(false, chef_sql:checksum_exists(Checksum2)).
+    ?assertEqual(false, chef_sql:checksum_exists(Got#chef_cookbook_version.org_id, Checksum1)),
+    ?assertEqual(false, chef_sql:checksum_exists(Got#chef_cookbook_version.org_id, Checksum2)).
 
 %% @doc check that the cookbook row is still in the database until all
 %% versions of the cookbook have been deleted

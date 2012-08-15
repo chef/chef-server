@@ -34,7 +34,7 @@
 
 -export([fetch_user/1,
          %% checksum ops
-         checksum_exists/1,
+         checksum_exists/2,
          mark_checksums_as_uploaded/2,
          non_uploaded_checksums/2,
 
@@ -893,10 +893,10 @@ delete_sandbox(SandboxId) when is_binary(SandboxId) ->
 %% Checksum Operations
 
 %% @doc Helper function for testing checksum existence.
--spec checksum_exists(Checksum :: binary()) ->
+-spec checksum_exists(OrgId :: binary(), ChecksumId :: binary()) ->
                              boolean() | {error, term()}.
-checksum_exists(ChecksumId) ->
-    case sqerl:select(find_checksum_by_id, [ChecksumId], first_as_scalar, [checksum]) of
+checksum_exists(OrgId, ChecksumId) ->
+    case sqerl:select(find_checksum_by_id, [OrgId, ChecksumId], first_as_scalar, [checksum]) of
         {ok, Checksum} when is_binary(Checksum) ->
             true;
         {ok, none} ->
@@ -1343,12 +1343,12 @@ delete_checksums(OrgId, CookbookVersionId) ->
     % cookbook_version_checksums record
     Checksums = fetch_cookbook_version_checksums(OrgId, CookbookVersionId),
     case sqerl:statement(delete_cookbook_checksums_by_orgid_cookbook_versionid,
-                         [OrgId, CookbookVersionId]) of
+                            [OrgId, CookbookVersionId]) of
         {ok, N} when is_integer(N) -> %% pretend there is 1
-            delete_checksums(Checksums);
+            delete_checksums(OrgId, Checksums);
         {ok, none} ->
             %% this is ok, there might be no checksums to delete
-            delete_checksums(Checksums);
+            delete_checksums(OrgId, Checksums);
         {error, Error} ->
             {error, Error}
     end.
@@ -1357,9 +1357,11 @@ delete_checksums(OrgId, CookbookVersionId) ->
 %% foreign_key constraint errors assuming the checksum is still associated with
 %% another cookbook_version_checksum record.  Returns a list of deleted checksum
 %% ids for further upstream processing(ie delete the checksums from S3).
-delete_checksums(Checksums) ->
+-spec delete_checksums(OrgId::binary(),
+                       Checksums::[binary()]) -> {ok, [binary()] } | {error, _}.
+delete_checksums(OrgId, Checksums) ->
     DeletedChecksums = lists:foldl(fun(Checksum, Acc) ->
-                            case sqerl:statement(delete_checksum_by_id, [Checksum]) of
+                            case sqerl:statement(delete_checksum_by_id, [OrgId, Checksum]) of
                                 {ok, N} when is_integer(N) -> %% pretend there is 1
                                     [Checksum|Acc];
                                 {foreign_key, _} ->
