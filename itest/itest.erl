@@ -293,10 +293,13 @@ cleanup_statements() ->
 
 statements(mysql) ->
     {ok, Statements} = file:consult("priv/mysql_statements.config"),
-    Statements ++ cleanup_statements();
+    {ok, HelperStatements} = file:consult("itest/helper_mysql_statements.config"),
+    Statements ++ HelperStatements ++ cleanup_statements();
+
 statements(pgsql) ->
     {ok, Statements} = file:consult("priv/pgsql_statements.config"),
-    Statements ++ cleanup_statements().
+    {ok, HelperStatements} = file:consult("itest/helper_pgsql_statements.config"),
+    Statements ++ HelperStatements ++ cleanup_statements().
 
 basic_test_() ->
     {foreach,
@@ -1601,8 +1604,8 @@ delete_cookbook_version_checksums() ->
 
     % Verify all checksums exist
     [Checksum1, Checksum2] = Got#chef_cookbook_version.checksums,
-    ?assertEqual(true, chef_sql:checksum_exists(Got#chef_cookbook_version.org_id, Checksum1)),
-    ?assertEqual(true, chef_sql:checksum_exists(Got#chef_cookbook_version.org_id, Checksum2)),
+    ?assertEqual(true, checksum_exists(Got#chef_cookbook_version.org_id, Checksum1)),
+    ?assertEqual(true, checksum_exists(Got#chef_cookbook_version.org_id, Checksum2)),
 
     %% We should have gotten back a list of deleted checksums
     {ok, N, DeletedChecksums} = chef_sql:delete_cookbook_version(Got),
@@ -1618,8 +1621,8 @@ delete_cookbook_version_checksums() ->
                                                               Got#chef_cookbook_version.patch}})),
 
     %% Ensure the checksums don't exist in the checksum table
-    ?assertEqual(false, chef_sql:checksum_exists(Got#chef_cookbook_version.org_id, Checksum1)),
-    ?assertEqual(false, chef_sql:checksum_exists(Got#chef_cookbook_version.org_id, Checksum2)).
+    ?assertEqual(false, checksum_exists(Got#chef_cookbook_version.org_id, Checksum1)),
+    ?assertEqual(false, checksum_exists(Got#chef_cookbook_version.org_id, Checksum2)).
 
 %% @doc check that the cookbook row is still in the database until all
 %% versions of the cookbook have been deleted
@@ -1719,10 +1722,11 @@ cookbook_create_new_version() ->
 
 
 
+%% FIXME: move this out into a testing helper module
 
-
-%% Utility Functions for Cookbook Setup
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%------------------------------------------------------------------------------
+%% Cookbook-related Helper Functions
+%%------------------------------------------------------------------------------
 
 %% @doc Just providing a label for the cookbook structure for this test module
 -type cookbook() :: {CookbookAuthzId :: binary(),
@@ -1942,6 +1946,19 @@ insert_recipe_manifest_for_names(EJsonBody, RecipeNames) ->
 encode_and_compress(EJson) ->
     JSON = ejson:encode(EJson),
     zlib:gzip(JSON).
+
+%%------------------------------------------------------------------------------
+%% Checksum-related Helper Functions
+%%------------------------------------------------------------------------------
+
+%% @doc Helper function for testing checksum existence.
+-spec checksum_exists(OrgId :: binary(), ChecksumId :: binary()) ->
+                             boolean() | {error, term()}.
+checksum_exists(OrgId, ChecksumId) ->
+    case sqerl:select(find_checksum_by_id, [OrgId, ChecksumId], first_as_scalar, [checksum]) of
+        {ok, Checksum} -> Checksum =/= none;
+        {error, Reason} -> {error, Reason}
+    end.
 
 %%------------------------------------------------------------------------------
 %% Environment-related Helper Functions

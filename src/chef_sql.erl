@@ -34,7 +34,6 @@
 
 -export([fetch_user/1,
          %% checksum ops
-         checksum_exists/2,
          mark_checksums_as_uploaded/2,
          non_uploaded_checksums/2,
 
@@ -891,19 +890,6 @@ delete_sandbox(SandboxId) when is_binary(SandboxId) ->
     delete_object(delete_sandbox_by_id, SandboxId).
 
 %% Checksum Operations
-
-%% @doc Helper function for testing checksum existence.
--spec checksum_exists(OrgId :: binary(), ChecksumId :: binary()) ->
-                             boolean() | {error, term()}.
-checksum_exists(OrgId, ChecksumId) ->
-    case sqerl:select(find_checksum_by_id, [OrgId, ChecksumId], first_as_scalar, [checksum]) of
-        {ok, Checksum} when is_binary(Checksum) ->
-            true;
-        {ok, none} ->
-            false;
-        {error, Reason} ->
-            {error, Reason}
-    end.
 
 %% @doc Given an Org and list of checksums, mark all of them as having been uploaded.  In
 %% practice, this means adding a new row to the checksums table. Returns 'ok' if all are
