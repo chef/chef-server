@@ -5,6 +5,7 @@
 %% @author Mark Anderson <mark@opscode.com>
 %% @author Christopher Maier <cm@opscode.com>
 %% @author Mark Mzyk <mmzyk@opscode.com>
+%% @author Seth Chisamore <schisamo@opscode.com>
 %% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -749,7 +750,13 @@ update_cookbook_version(#context{}=Ctx, UpdatedCookbookVersion, ActorId) ->
                               CookbookVersion::#chef_cookbook_version{})
    -> {ok, 1 | 2} | not_found | {error, _}.
 delete_cookbook_version(#context{}=Ctx, #chef_cookbook_version{}=CookbookVersion) ->
-    delete_object(Ctx, delete_cookbook_version, CookbookVersion).
+    case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
+        {ok, N, _DeletedChecksums} ->
+            %% TODO - some awesome parallel s3 deletion action
+            {ok, N};
+        {error, Reason} ->
+            {error, Reason}
+    end.
 
 -spec delete_node(#context{}, #chef_node{}) -> {ok, 1 | 2} | not_found | {error, _}.
 %% @doc Delete a node. You can provide either a `#chef_node{}' record or just the ID of the
