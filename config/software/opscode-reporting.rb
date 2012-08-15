@@ -1,6 +1,5 @@
 name "opscode-reporting"
-#version "pc-rel-0.13.0"
-version "master" 
+version "rel-1.0.10"
 
 dependencies ["erlang", "rsync", "rebar"]
 
@@ -19,6 +18,5 @@ build do
   command "make rel", :env => env
   command "mkdir -p #{install_dir}/embedded/service/opscode-reporting"
   command "#{install_dir}/embedded/bin/rsync -a --delete ./rel/reporting/ #{install_dir}/embedded/service/opscode-reporting/"
-  # TODO: git cleanup in opscode-reporting service directory?
   command "rm -rf #{install_dir}/embedded/service/opscode-reporting/log"
 end
