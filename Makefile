@@ -7,7 +7,7 @@ ifeq ($(use_locked_config),USE_REBAR_LOCKED)
 else
   rebar_config = rebar.config
 endif
-REBAR = ./rebar -C $(rebar_config)
+REBAR = rebar -C $(rebar_config)
 
 all: compile
 
