@@ -1598,32 +1598,62 @@ delete_cookbook_version_checksums() ->
                                            {CookbookVersion#chef_cookbook_version.major,
                                             CookbookVersion#chef_cookbook_version.minor,
                                             CookbookVersion#chef_cookbook_version.patch}}),
-    ?assertEqual({ok, 2}, %% Last version of this cookbook, so deleting the cookbook as well
-                 chef_sql:delete_cookbook_version(Got)),
-    %% TODO - how to check if the checksums have been deleted ?
+
+    % Verify all checksums exist
+    [Checksum1, Checksum2] = Got#chef_cookbook_version.checksums,
+    ?assertEqual(true, chef_sql:checksum_exists(Checksum1)),
+    ?assertEqual(true, chef_sql:checksum_exists(Checksum2)),
+
+    %% We should have gotten back a list of deleted checksums
+    {ok, N, DeletedChecksums} = chef_sql:delete_cookbook_version(Got),
+
+    ?assertEqual(2, N), %% Last version of this cookbook, so deleting the cookbook as well
+    ?assertEqual(lists:sort(Got#chef_cookbook_version.checksums),
+                 lists:sort(DeletedChecksums)),
+
     ?assertEqual(not_found, chef_sql:fetch_cookbook_version(Got#chef_cookbook_version.org_id,
                                                             {Got#chef_cookbook_version.name,
                                                              {Got#chef_cookbook_version.major,
                                                               Got#chef_cookbook_version.minor,
-                                                              Got#chef_cookbook_version.patch}})).
+                                                              Got#chef_cookbook_version.patch}})),
+
+    %% Ensure the checksums don't exist in the checksum table
+    ?assertEqual(false, chef_sql:checksum_exists(Checksum1)),
+    ?assertEqual(false, chef_sql:checksum_exists(Checksum2)).
 
 %% @doc check that the cookbook row is still in the database until all
 %% versions of the cookbook have been deleted
 delete_cookbook_multiple_versions() ->
     {AuthzId, OrgId, Name} = make_cookbook(<<"delete_multiple">>),
     ?assertEqual(not_found, chef_sql:fetch_cookbook_authz(OrgId, Name)),
+
     CookbookVersion0 = make_cookbook_version(<<"000delete_multiple">>, 0, {AuthzId, OrgId, Name}),
     CookbookVersion1 = make_cookbook_version(<<"001delete_multiple">>, 1, {AuthzId, OrgId, Name}),
-    ?assertEqual({ok, 1}, chef_sql:create_cookbook_version(CookbookVersion0)),
-    ?assertEqual({ok, 1}, chef_sql:create_cookbook_version(CookbookVersion1)),
+    Checksums = [ make_id(<<"checksum1">>),
+                  make_id(<<"checksum2">>)],
+    CookbookVersion20 = CookbookVersion0#chef_cookbook_version{checksums=Checksums},
+    CookbookVersion21 = CookbookVersion1#chef_cookbook_version{checksums=Checksums},
+    ok = chef_sql:mark_checksums_as_uploaded(CookbookVersion20#chef_cookbook_version.org_id,
+                                             Checksums),
+
+    ?assertEqual({ok, 1}, chef_sql:create_cookbook_version(CookbookVersion20)),
+    ?assertEqual({ok, 1}, chef_sql:create_cookbook_version(CookbookVersion21)),
     Got = chef_sql:fetch_cookbook_authz(OrgId, Name),
 
-    ?assertEqual({ok, 1}, chef_sql:delete_cookbook_version(CookbookVersion1)),
+    %% No checksums should be deleted from the checksum table so we should get
+    %% back an empty list.
+    ?assertEqual({ok, 1, []}, chef_sql:delete_cookbook_version(CookbookVersion20)),
     Got = chef_sql:fetch_cookbook_authz(OrgId, Name),
 
-    ?assertEqual({ok, 2}, %% Last version of this cookbook, so deleting the cookbook as well
-                 chef_sql:delete_cookbook_version(CookbookVersion0)),
-    not_found = chef_sql:fetch_cookbook_authz(OrgId, Name).
+    %% All checksums should be deleted when the second (and final) cookbook
+    %% version is deleted.
+    {ok, N, DeletedChecksums} = chef_sql:delete_cookbook_version(CookbookVersion21),
+    ?assertEqual(2, N), %% Last version of this cookbook, so deleting the cookbook as well
+    ?assertEqual(lists:sort(Checksums),
+                 lists:sort(DeletedChecksums)),
+
+    %not_found = chef_sql:fetch_cookbook_authz(OrgId, Name).
+    ?assertEqual(not_found, chef_sql:fetch_cookbook_authz(OrgId, Name)).
 
 %% Combined integration test for entire cookbook create workflow.
 %% Starts with (org_id, cookbook_name, cookbook_version)
