@@ -34,6 +34,7 @@
 
 -export([fetch_user/1,
          %% checksum ops
+         checksum_exists/1,
          mark_checksums_as_uploaded/2,
          non_uploaded_checksums/2,
 
@@ -834,12 +835,12 @@ delete_cookbook_version(#chef_cookbook_version{id=CookbookVersionId,
                                                org_id=OrgId,
                                                name=Name}) ->
     case delete_checksums(OrgId, CookbookVersionId) of
-        {ok, 1 } ->
+        {ok, DeletedChecksums} ->
             case delete_object(delete_cookbook_version_by_id, CookbookVersionId) of
                 {ok, 1} ->
                     case delete_cookbook_if_last(OrgId, Name) of
                         {ok, N} ->
-                            {ok, N + 1};
+                            {ok, N+1, DeletedChecksums};
                         Error = {error, _} ->
                             Error
                     end;
@@ -888,7 +889,6 @@ create_sandbox(#chef_sandbox{} = Sandbox) ->
                                   {error, term()}.
 delete_sandbox(SandboxId) when is_binary(SandboxId) ->
     delete_object(delete_sandbox_by_id, SandboxId).
-
 
 %% Checksum Operations
 
@@ -1339,15 +1339,40 @@ fetch_cookbook_authz(OrgId, CookbookName) ->
 -spec delete_checksums(OrgId::binary(),
                        CookbookVersionId::binary()) -> {ok, 1 } | {error, _}.
 delete_checksums(OrgId, CookbookVersionId) ->
+    % retrieve a list of checksums before we delete the
+    % cookbook_version_checksums record
+    Checksums = fetch_cookbook_version_checksums(OrgId, CookbookVersionId),
     case sqerl:statement(delete_cookbook_checksums_by_orgid_cookbook_versionid,
                          [OrgId, CookbookVersionId]) of
         {ok, N} when is_integer(N) -> %% pretend there is 1
-            {ok, 1};
+            delete_checksums(Checksums);
         {ok, none} ->
-            {ok, 1}; %% this is ok, there might be no checksums to delete
+            %% this is ok, there might be no checksums to delete
+            delete_checksums(Checksums);
         {error, Error} ->
             {error, Error}
     end.
+
+%% @doc Deletes a list of checksums from the checksums table.  Happily swallows
+%% foreign_key constraint errors assuming the checksum is still associated with
+%% another cookbook_version_checksum record.  Returns a list of deleted checksum
+%% ids for further upstream processing(ie delete the checksums from S3).
+delete_checksums(Checksums) ->
+    DeletedChecksums = lists:foldl(fun(Checksum, Acc) ->
+                            case sqerl:statement(delete_checksum_by_id, [Checksum]) of
+                                {ok, N} when is_integer(N) -> %% pretend there is 1
+                                    [Checksum|Acc];
+                                {foreign_key, _} ->
+                                    %% The checksum may still be associated with
+                                    %% another cookbook version record which is OK!
+                                    Acc;
+                                {error, _Error} ->
+                                    Acc
+                            end
+                      end,
+                      [],
+                      Checksums),
+    {ok, lists:reverse(DeletedChecksums)}.
 
 %% @doc try and delete the row from cookbooks table.  It is protected by a
 %% ON DELETE RESTRICT from cookbook_versions so we get a FK violation if there
