@@ -1226,8 +1226,10 @@ find_key_data(#chef_user{public_key = KeyData, pubkey_version = ?CERT_VERSION}) 
     {cert, KeyData};
 find_key_data(#chef_user{public_key = KeyData, pubkey_version = ?KEY_VERSION}) ->
     {key, KeyData};
-find_key_data(#chef_client{public_key = Cert}) ->
-    {cert, Cert}.
+find_key_data(#chef_client{public_key = Cert, pubkey_version = ?CERT_VERSION}) ->
+    {cert, Cert};
+find_key_data(#chef_client{public_key = KeyData, pubkey_version = ?KEY_VERSION}) ->
+    {key, KeyData}.
 
 -spec new_node_record(<<_:256>>, <<_:256>>, {[_]}, db_type()) -> #chef_node{}.
 %% @doc Create a `#chef_node{}' record assigning a generated id and setting timestamps to
