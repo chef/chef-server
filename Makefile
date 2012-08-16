@@ -65,6 +65,6 @@ itest_clean:
 itest: compile itest_bundler itest_create itest_run itest_clean
 
 itest_run:
-	cd itest;erlc -pz ../deps/chef_objects/ebin *.erl
-	@erl -pa deps/*/ebin -pa ebin -pa itest -noshell -eval "eunit:test(itest, [verbose])" \
+	cd itest;erlc -I ../include -pz ../deps/chef_objects/ebin *.erl
+	@erl -I include -pa deps/*/ebin -pa ebin -pa itest -noshell -eval "eunit:test(itest, [verbose])" \
 	-s erlang halt -db_type $(DB_TYPE)

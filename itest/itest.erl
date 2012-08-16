@@ -25,6 +25,7 @@
 -define(GET_ARG(Name, Args), proplists:get_value(Name, Args)).
 
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("chef_db.hrl").
 -include_lib("chef_objects/include/chef_types.hrl").
 
 make_id(Prefix) when is_binary(Prefix) ->
@@ -1608,9 +1609,11 @@ delete_cookbook_version_checksums() ->
     ?assertEqual(true, checksum_exists(Got#chef_cookbook_version.org_id, Checksum2)),
 
     %% We should have gotten back a list of deleted checksums
-    {ok, N, DeletedChecksums} = chef_sql:delete_cookbook_version(Got),
+    #chef_db_cb_version_delete{
+        cookbook_delete=CookbookDeleted,
+        deleted_checksums=DeletedChecksums} = chef_sql:delete_cookbook_version(Got),
 
-    ?assertEqual(2, N), %% Last version of this cookbook, so deleting the cookbook as well
+    ?assertEqual(true, CookbookDeleted), %% Last version of this cookbook, so deleting the cookbook as well
     ?assertEqual(lists:sort(Got#chef_cookbook_version.checksums),
                  lists:sort(DeletedChecksums)),
 
@@ -1645,13 +1648,18 @@ delete_cookbook_multiple_versions() ->
 
     %% No checksums should be deleted from the checksum table so we should get
     %% back an empty list.
-    ?assertEqual({ok, 1, []}, chef_sql:delete_cookbook_version(CookbookVersion20)),
+    ?assertEqual(#chef_db_cb_version_delete{
+                    cookbook_delete=false,
+                    deleted_checksums=[]}, chef_sql:delete_cookbook_version(CookbookVersion20)),
     Got = chef_sql:fetch_cookbook_authz(OrgId, Name),
 
     %% All checksums should be deleted when the second (and final) cookbook
     %% version is deleted.
-    {ok, N, DeletedChecksums} = chef_sql:delete_cookbook_version(CookbookVersion21),
-    ?assertEqual(2, N), %% Last version of this cookbook, so deleting the cookbook as well
+    #chef_db_cb_version_delete{
+        cookbook_delete=CookbookDeleted,
+        deleted_checksums=DeletedChecksums} = chef_sql:delete_cookbook_version(CookbookVersion21),
+
+    ?assertEqual(true, CookbookDeleted), %% Last version of this cookbook, so deleting the cookbook as well
     ?assertEqual(lists:sort(Checksums),
                  lists:sort(DeletedChecksums)),
 
