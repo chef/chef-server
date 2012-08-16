@@ -122,6 +122,7 @@
          new_data_bag_record/4,
          new_data_bag_item_record/5]).
 
+-include_lib("chef_db/include/chef_db.hrl").
 -include_lib("chef_objects/include/chef_types.hrl").
 -include_lib("chef_objects/include/chef_osc_defaults.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
@@ -749,13 +750,17 @@ update_cookbook_version(#context{}=Ctx, UpdatedCookbookVersion, ActorId) ->
 -spec delete_cookbook_version(Ctx::#context{},
                               CookbookVersion::#chef_cookbook_version{})
    -> {ok, 1 | 2} | not_found | {error, _}.
-delete_cookbook_version(#context{}=Ctx, #chef_cookbook_version{}=CookbookVersion) ->
+delete_cookbook_version(#context{}=Ctx, #chef_cookbook_version{org_id=_OrgId}=CookbookVersion) ->
     case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
-        {ok, N, _DeletedChecksums} ->
+        #chef_db_cb_version_delete{cookbook_delete=CookbookDeleted, deleted_checksums=_DeletedChecksums} ->
             %% TODO - some awesome parallel s3 deletion action
-            {ok, N};
-        {error, Reason} ->
-            {error, Reason}
+            % chef_s3:delete_checksums(OrgId, DeletedChecksums),
+            %% FIXME: return the actual chef_db_cb_version_delete record to the caller
+            case CookbookDeleted of
+                false -> {ok, 1};
+                true -> {ok, 2}
+            end;
+        Result -> Result %% not_found or {error, _}
     end.
 
 -spec delete_node(#context{}, #chef_node{}) -> {ok, 1 | 2} | not_found | {error, _}.
