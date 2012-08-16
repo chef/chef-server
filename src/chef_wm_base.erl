@@ -415,7 +415,12 @@ delete_object(DbContext, Object, RequestId) ->
                            State :: #base_state{}) ->
                                   ok | {error, Msg :: binary()}.
 check_cookbook_authz(_, _, #base_state{}) ->
-    ok.
+    case random:uniform(1) of
+        1 ->
+            ok;
+        _ ->
+            {error, <<"makes dialyzer happy">>}
+    end.
 
 conflict_message(cookbook_version, _Name) ->
     {[{<<"error">>, [<<"Cookbook already exists">>]}]};
