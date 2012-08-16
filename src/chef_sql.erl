@@ -25,6 +25,7 @@
 
 -module(chef_sql).
 
+-include_lib("chef_db/include/chef_db.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -ifdef(TEST).
@@ -821,7 +822,7 @@ update_cookbook_version_checksums(#chef_cookbook_version{ id        = Id,
     end.
 
 
--spec delete_cookbook_version(#chef_cookbook_version{}) -> {ok, 1 | 2} |
+-spec delete_cookbook_version(#chef_cookbook_version{}) -> #chef_db_cb_version_delete{} |
                                                            {error, term()}.
 %% @doc Delete a cookbok version. This will delete from several
 %% different tables in the DB. This function will return `{ok, 2}' if
@@ -835,11 +836,14 @@ delete_cookbook_version(#chef_cookbook_version{id=CookbookVersionId,
                                                name=Name}) ->
     case delete_cookbook_version_checksums(OrgId, CookbookVersionId) of
         {ok, DeletedChecksums} ->
+            DeleteResponse = #chef_db_cb_version_delete{deleted_checksums = DeletedChecksums},
             case delete_object(delete_cookbook_version_by_id, CookbookVersionId) of
                 {ok, 1} ->
                     case delete_cookbook_if_last(OrgId, Name) of
-                        {ok, N} ->
-                            {ok, N+1, DeletedChecksums};
+                        {ok, 0} ->
+                            DeleteResponse#chef_db_cb_version_delete{cookbook_delete = false};
+                        {ok, 1} ->
+                            DeleteResponse#chef_db_cb_version_delete{cookbook_delete = true};
                         Error = {error, _} ->
                             Error
                     end;
@@ -1331,7 +1335,7 @@ delete_cookbook_version_checksums(OrgId, CookbookVersionId) ->
     case sqerl:statement(delete_cookbook_checksums_by_orgid_cookbook_versionid,
                             [OrgId, CookbookVersionId]) of
         {ok, _} ->
-            delete_checksums(OrgId, Checksums);
+            {ok, delete_checksums(OrgId, Checksums)};
         {error, Error} ->
             {error, Error}
     end.
@@ -1342,25 +1346,24 @@ delete_cookbook_version_checksums(OrgId, CookbookVersionId) ->
 -spec delete_checksums(OrgId::binary(),
                        Checksums::[binary()]) -> {ok, [binary()] } | {error, _}.
 delete_checksums(OrgId, Checksums) ->
-    DeletedChecksums = lists:foldl(fun(Checksum, Acc) ->
-                            case sqerl:statement(delete_checksum_by_id, [OrgId, Checksum]) of
-                                {ok, N} when is_integer(N) -> %% pretend there is 1
-                                    [Checksum|Acc];
-                                {foreign_key, _} ->
-                                    %% The checksum may still be associated with
-                                    %% another cookbook version record which is OK!
-                                    Acc;
-                                {error, Error} ->
-                                    error_logger:error_msg("The following error occured
-                                                          when trying to delete checksum
-                                                          record ~p for organization ~p: ~p~n",
-                                                          [Checksum, OrgId, Error]),
-                                    Acc
-                            end
-                      end,
-                      [],
-                      Checksums),
-    {ok, DeletedChecksums}.
+    lists:foldl(fun(Checksum, Acc) ->
+            case sqerl:statement(delete_checksum_by_id, [OrgId, Checksum]) of
+                {ok, N} when is_integer(N) -> %% pretend there is 1
+                    [Checksum|Acc];
+                {foreign_key, _} ->
+                    %% The checksum may still be associated with
+                    %% another cookbook version record which is OK!
+                    Acc;
+                {error, Error} ->
+                    error_logger:error_msg("The following error occured
+                                          when trying to delete checksum
+                                          record ~p for organization ~p: ~p~n",
+                                          [Checksum, OrgId, Error]),
+                    Acc
+            end
+      end,
+      [],
+      Checksums).
 
 %% @doc try and delete the row from cookbooks table.  It is protected by a
 %% ON DELETE RESTRICT from cookbook_versions so we get a FK violation if there
