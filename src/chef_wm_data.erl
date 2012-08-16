@@ -60,7 +60,12 @@ validate_request('POST', Req, #base_state{resource_state = DataState} = State) -
     {Req, State#base_state{resource_state = DataState#data_state{data_bag_name = Name}}}.
 
 auth_info(Req, State) ->
-  {{create_in_container, data}, Req, State}.
+    auth_info(wrq:method(Req), Req, State).
+
+auth_info('POST', Req, State) ->
+    {{create_in_container, data}, Req, State};
+auth_info('GET', Req, State) ->
+    {{container, data}, Req, State}.
 
 resource_exists(Req, State) ->
     {true, Req, State}.

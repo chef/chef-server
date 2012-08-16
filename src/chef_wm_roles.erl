@@ -58,7 +58,12 @@ validate_request('POST', Req, #base_state{resource_state = RoleState} = State) -
     {Req, State#base_state{resource_state = RoleState#role_state{role_data = Role}}}.
 
 auth_info(Req, State) ->
-    {{create_in_container, role}, Req, State}.
+    auth_info(wrq:method(Req), Req, State).
+
+auth_info('POST', Req, State) ->
+    {{create_in_container, role}, Req, State};
+auth_info('GET', Req, State) ->
+    {{container, role}, Req, State}.
 
 resource_exists(Req, State) ->
     {true, Req, State}.

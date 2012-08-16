@@ -73,7 +73,12 @@ validate_request('POST', Req, #base_state{resource_state = NodeState} = State) -
     {Req, State#base_state{resource_state = NodeState#node_state{node_data = Json}}}.
 
 auth_info(Req, State) ->
-    {{create_in_container, node}, Req, State}.
+    auth_info(wrq:method(Req), Req, State).
+
+auth_info('POST', Req, State) ->
+    {{create_in_container, node}, Req, State};
+auth_info('GET', Req, State) ->
+    {{container, node}, Req, State}.
 
 %% @doc If the org exists, then resource exists for POST, GET
 %%

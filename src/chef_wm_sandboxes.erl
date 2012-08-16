@@ -51,9 +51,13 @@ validate_request('POST', Req, #base_state{resource_state = BoxState} = State) ->
     {ok, Sandbox} = chef_sandbox:parse_binary_json(wrq:req_body(Req), create),
     {Req, State#base_state{resource_state = BoxState#sandbox_state{sandbox_data = Sandbox}}}.
 
-
 auth_info(Req, State) ->
-    {{create_in_container, sandbox}, Req, State}.
+    auth_info(wrq:method(Req), Req, State).
+
+auth_info('POST', Req, State) ->
+    {{create_in_container, sandbox}, Req, State};
+auth_info('GET', Req, State) ->
+    {{container, sandbox}, Req, State}.
 
 resource_exists(Req, #base_state{organization_name = OrgName} = State) ->
     case wrq:method(Req) of

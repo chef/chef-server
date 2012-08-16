@@ -78,7 +78,12 @@ validate_request('POST', Req, State) ->
     end.
 
 auth_info(Req, State) ->
-    {{create_in_container, client}, Req, State}.
+    auth_info(wrq:method(Req), Req, State).
+
+auth_info('POST', Req, State) ->
+    {{create_in_container, client}, Req, State};
+auth_info('GET', Req, State) ->
+    {{container, client}, Req, State}.
 
 create_path(Req, #base_state{resource_state = #client_state{client_data = ClientData}} = State) ->
     Name = ej:get({<<"name">>}, ClientData),
