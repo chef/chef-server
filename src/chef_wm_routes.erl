@@ -80,6 +80,7 @@ route(organization_search, Req, Args) ->
 %% Create a url for an individual role.  Requires a 'role_name' argument
 route(node, Req, Args) -> route_rest_object("nodes", Req, Args);
 route(role, Req, Args) -> route_rest_object("roles", Req, Args);
+route(user, Req, Args) -> route_rest_object("users", Req, Args);
 route(data_bag, Req, Args) -> route_rest_object("data", Req, Args);
 route(environment, Req, Args) -> route_rest_object("environments", Req, Args);
 route(client, Req, Args) -> route_rest_object("clients", Req, Args);
