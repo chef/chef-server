@@ -31,21 +31,22 @@
 
 -spec add_to_solr(chef_type(), object_id(), object_id(), ejson_term()) -> ok.
 %% Add a Chef object to solr
-add_to_solr(data_bag, _Id, _OrgId, _Ejson) ->
-    %% we don't index data_bags
-    ok;
-add_to_solr(cookbook_version, _Id, _OrgId, _Ejson) ->
-    %% we don't index cookbook_version objects
-    ok;
+add_to_solr(TypeName, _Id, _OrgId, _Ejson) when TypeName =:= data_bag;
+                                              TypeName =:= user;
+                                              TypeName =:= coookbook_version ->
+            ok; %%These types are not indexed
 add_to_solr(TypeName, Id, OrgId, Ejson) ->
     chef_index_queue:set(TypeName, Id, chef_otto:dbname(OrgId), Ejson).
 
 %% @doc Helper function to easily delete an object from Solr, instead
 %% of calling chef_index_queue directly.
--spec delete_from_solr(chef_indexable_object() | #chef_cookbook_version{}) -> ok.
-delete_from_solr(#chef_cookbook_version{}) ->
-    %% FIXME: not sure this is the right thing
-    ok;
+-spec delete_from_solr(chef_indexable_object()
+                        | #chef_cookbook_version{}
+                        | #chef_user{}) -> ok.
+delete_from_solr(Object) when is_record(Object, chef_cookbook_version);
+                              is_record(Object, chef_data_bag_item);
+                              is_record(Object, chef_user) ->
+                 ok; %%These types are not indexed, so don't need to issue delete
 delete_from_solr(Object) ->
     {Id, OrgId} = get_id_and_org_id(Object),
     chef_index_queue:delete(chef_object:type_name(Object), Id, chef_otto:dbname(OrgId)).
