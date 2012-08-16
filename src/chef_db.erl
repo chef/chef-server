@@ -1194,21 +1194,13 @@ fetch_couchdb_data_bags(#context{reqid = ReqId, otto_connection = S}, {id, OrgId
                                                             {error, _}.
 %% @doc Delete a object. You can provide either a `#chef_object{}' record or just the ID of
 %% the object.
-delete_object(#context{reqid = ReqId}, Fun, #chef_cookbook_version{} = CookbookVersion) ->
-    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
-                          fun() -> chef_sql:Fun(CookbookVersion) end) of
-        {ok, not_found} -> not_found;
-        {ok, N} -> {ok, N};
-        {error, Error} -> {error, Error}
-    end;
 delete_object(#context{}=Ctx, Fun, Object) when is_tuple(Object) ->
     delete_object(Ctx, Fun, get_id(Object));
 delete_object(#context{reqid = ReqId}, Fun, Id) ->
     case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
                           fun() -> chef_sql:Fun(Id) end) of
         {ok, not_found} -> not_found;
-        {ok, N} -> {ok, N};
-        {error, Error} -> {error, Error}
+        Result -> Result
     end.
 
 -spec update_object(#context{}, object_id(), update_fun(), chef_object() | #chef_cookbook_version{}) -> ok |
