@@ -1,6 +1,5 @@
 DEPS=$(CURDIR)/deps
 DIALYZER_DEPS = deps/chef_objects/ebin \
-                deps/couchbeam/ebin \
                 deps/depsolver/ebin \
                 deps/ej/ebin \
                 deps/ejson/ebin \
@@ -19,7 +18,7 @@ DEPS_PLT = chef_db.plt
 ## to run the correct integration tests.
 -include itest/$(DB_TYPE)_conf.mk
 
-all: compile eunit
+all: compile eunit dialyzer
 
 clean:
 	@rebar skip_deps=true clean
