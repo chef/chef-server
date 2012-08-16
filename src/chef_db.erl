@@ -747,9 +747,9 @@ update_cookbook_version(#context{}=Ctx, UpdatedCookbookVersion, ActorId) ->
     update_object(Ctx, ActorId, update_cookbook_version, UpdatedCookbookVersion).
 
 %% @doc Delete a cookbook version
--spec delete_cookbook_version(Ctx::#context{},
-                              CookbookVersion::#chef_cookbook_version{})
-   -> {ok, 1 | 2} | not_found | {error, _}.
+-spec delete_cookbook_version(Ctx :: #context{},
+                              CookbookVersion :: #chef_cookbook_version{}) ->
+                                {ok, 1 | 2} | not_found | {error, term()}.
 delete_cookbook_version(#context{}=Ctx, #chef_cookbook_version{org_id=_OrgId}=CookbookVersion) ->
     case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
         #chef_db_cb_version_delete{cookbook_delete=CookbookDeleted, deleted_checksums=_DeletedChecksums} ->
@@ -1191,6 +1191,7 @@ fetch_couchdb_data_bags(#context{reqid = ReqId, otto_connection = S}, {id, OrgId
                     Object :: chef_object() | object_id() | #chef_client{} | #chef_sandbox{} |
                               #chef_cookbook_version{} ) -> {ok, 1 | 2} |
                                                             not_found |
+                                                            #chef_db_cb_version_delete{} |
                                                             {error, _}.
 %% @doc Delete a object. You can provide either a `#chef_object{}' record or just the ID of
 %% the object.
@@ -1322,4 +1323,6 @@ get_id(#chef_data_bag{id = Id}) ->
 get_id(#chef_data_bag_item{id = Id}) ->
     Id;
 get_id(#chef_sandbox{id = Id}) ->
+    Id;
+get_id(#chef_cookbook_version{id = Id}) ->
     Id.

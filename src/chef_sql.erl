@@ -1326,8 +1326,9 @@ fetch_cookbook_authz(OrgId, CookbookName) ->
     end.
 
 %% @doc Delete all checksums for a given cookbook version
--spec delete_cookbook_version_checksums(OrgId::binary(),
-                       CookbookVersionId::binary()) -> {ok, 1 } | {error, _}.
+-spec delete_cookbook_version_checksums(OrgId::object_id(),
+                                       CookbookVersionId::object_id()) ->
+                                        {ok, [binary()]} | {error, term()}.
 delete_cookbook_version_checksums(OrgId, CookbookVersionId) ->
     % retrieve a list of checksums before we delete the
     % cookbook_version_checksums record
@@ -1344,7 +1345,7 @@ delete_cookbook_version_checksums(OrgId, CookbookVersionId) ->
 %% another cookbook_version_checksum record.  Returns a list of deleted checksum
 %% ids for further upstream processing(ie delete the checksums from S3).
 -spec delete_checksums(OrgId::binary(),
-                       Checksums::[binary()]) -> {ok, [binary()] } | {error, _}.
+                       Checksums::[binary()]) -> [binary()].
 delete_checksums(OrgId, Checksums) ->
     lists:foldl(fun(Checksum, Acc) ->
             case sqerl:statement(delete_checksum_by_id, [OrgId, Checksum]) of
