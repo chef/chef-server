@@ -44,7 +44,6 @@
 -export([
          allowed_methods/2,
          create_path/2,
-         delete_resource/2,
          from_json/2,
          to_json/2
        ]).
@@ -59,7 +58,7 @@ request_type() ->
     "clients".
 
 allowed_methods(Req, State) ->
-    {['GET', 'POST', 'DELETE'], Req, State}.
+    {['GET', 'POST'], Req, State}.
 
 %% @doc Currently we need to allow the pivotal user to create clients for pedant.
 %% We set up the state such that the superuser avoids the ACL checks.
@@ -102,12 +101,6 @@ from_json(Req, #base_state{reqid = RequestId,
 
 to_json(Req, State) ->
     {all_clients_json(Req, State), Req, State}.
-
-delete_resource(Req, #base_state{chef_db_context = DbContext,
-                                 resource_state = #client_state{chef_client = Client},
-                                 requestor = #chef_requestor{authz_id = RequestorId}} = State) ->
-    ok = chef_object_db:delete(DbContext, Client, RequestorId),
-    {true, chef_wm_util:set_json_body(Req, [<<"Deleted">>]), State}.
 
 %% Internal Functions
 all_clients_json(Req, #base_state{chef_db_context = DbContext,
