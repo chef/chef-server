@@ -122,7 +122,9 @@
          new_data_bag_item_record/5]).
 
 -include_lib("chef_objects/include/chef_types.hrl").
+-include_lib("chef_objects/include/chef_osc_defaults.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
+
 
 -record(context, {reqid :: binary(),
                   otto_connection}).
@@ -207,7 +209,9 @@ user_record_to_authz_id(#context{}, not_found) ->
 %% fetch_org(S, OrgName) ->
 %%     chef_otto:fetch_org(S, OrgName).
 
--spec fetch_org_id(#context{}, binary()) -> not_found | binary().
+-spec fetch_org_id(#context{}, binary() | ?OSC_ORG_NAME) -> not_found | binary().
+fetch_org_id(_, ?OSC_ORG_NAME) ->
+    ?OSC_ORG_ID;
 fetch_org_id(#context{reqid = ReqId,
                       otto_connection = Server}, OrgName) when is_binary(OrgName) ->
     case chef_cache:get(org_guid, OrgName) of
