@@ -116,7 +116,7 @@ template_for_type(data_bag) ->
     "/data/~s";
 template_for_type(data_bag_item) ->
     "/data/~s/~s";
-template_for_type({data, _}) ->
+template_for_type({data_bag, _}) ->
     %% another way of asking for data_bag_item
     "/data/~s/~s".
 
