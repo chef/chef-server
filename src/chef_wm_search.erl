@@ -156,7 +156,7 @@ process_post(Req, State) ->
                                 node |
                                 role,
                         NamePaths :: any(), %% really: [{binary(), [binary()]}],
-                        BaseURI :: binary() | string()) ->
+                        Req :: wm_req()) ->
                                fun(([binary()]) -> [ej:json_object() | binary()]).
 
 %% @doc Returns a fun/1 that can be given a list of object IDs and returns a list of the
