@@ -67,20 +67,24 @@ bucket_create(Bucket) ->
 bucket_delete(Bucket) ->
     case entry_list(Bucket) of
         [] ->
-            true;
+            delete_bucket_dir(Bucket);
         Entries ->
             case delete_entries(Entries) of
                 true ->
-                    case os:cmd("rm -rf " ++ bksw_io_names:bucket_path(binary_to_list(Bucket))) of
-                        [] ->
-                            true;
-                        _ ->
-                            false
-                    end;
+                    delete_bucket_dir(Bucket);
                  false ->
                     false
             end
     end.
+
+delete_bucket_dir(Bucket) ->
+    case os:cmd("rm -rf " ++ bksw_io_names:bucket_path(binary_to_list(Bucket))) of
+        [] ->
+            true;
+        _ ->
+            false
+    end.
+
 
 delete_entries([]) ->
     true;
@@ -164,7 +168,7 @@ open_for_read(Bucket, Entry) ->
                     {ok, #entryref{fd=Fd, path=FileName}};
                 _ ->
                     file:close(Fd),
-                    bksw_coordinator:end_read(),
+                    bksw_coordinator:end_read(FileName),
                     {error, corrupt_file}
             end;
         Error ->
@@ -173,9 +177,10 @@ open_for_read(Bucket, Entry) ->
 
 -spec entry_md(binary(), binary()) -> {ok, #object{}} | {error, term()}.
 entry_md(Bucket, Entry) ->
-    {ok, Ref} = open_for_read(Bucket, Entry),
+    FileName = bksw_io_names:entry_path(Bucket, Entry),
+    {ok, Ref} = open_for_read(Bucket, bksw_io_names:decode(Entry)),
     Result = entry_md(Ref),
-    bksw_coordinator:end_read(),
+    bksw_coordinator:end_read(FileName),
     Result.
 
 -spec entry_md(#entryref{}) -> {ok, #object{}} | {error, term()}.
@@ -191,6 +196,7 @@ entry_md(#entryref{fd=Fd, path=Path}) ->
                     {entry, Bucket, Entry} = bksw_io_names:parse_path(Path),
                     EntryPath = filename:join([Bucket, Entry]),
                     {ok, #object{path=EntryPath,
+                                 name=Entry,
                                  date=UTC,
                                  size=Size - ?TOTAL_HEADER_SIZE_BYTES,
                                  digest=MD5}}

@@ -63,7 +63,9 @@ eunit: compile
 	$(REBAR) skip_deps=true eunit
 
 ct : eunit
-	 ERL_LIBS=`pwd`/deps:`pwd`/lib:$(ERL_LIBS) $(REBAR) skip_deps=true ct
+	rm -rf /tmp/bukkits
+	mkdir -p /tmp/bukkits
+	ERL_LIBS=`pwd`/deps:`pwd`/lib:$(ERL_LIBS) $(REBAR) skip_deps=true ct
 
 test: ct eunit
 

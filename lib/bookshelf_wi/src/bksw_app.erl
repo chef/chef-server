@@ -37,6 +37,7 @@ manual_start() ->
     application:start(erlsom),
     application:start(webmachine),
     application:start(xmerl),
+    application:start(ibrowse),
     application:start(mini_s3),
     application:start(bookshelf_wi).
 
@@ -46,7 +47,8 @@ manual_stop() ->
     application:stop(mochiweb),
     application:stop(mini_s3),
     application:stop(erlsom),
-    application:stop(inets).
+    application:stop(inets),
+    application:stop(ibrowse).
 
 %% ===================================================================
 %%                      Application callbacks

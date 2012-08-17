@@ -47,6 +47,7 @@ init_per_testcase(_TestCase, Config) ->
     application:set_env(bookshelf_wi, keys, {AccessKeyID, SecretAccessKey}),
     application:set_env(bookshelf_wi, log_dir, LogDir),
     ok = bksw_app:manual_start(),
+    application:set_env(bookshelf_wi, disk_store, "/tmp/bukkits"),
     Port = 4321,
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
                           lists:flatten(io_lib:format("http://127.0.0.1:~p",
@@ -93,6 +94,7 @@ wi_basic(Config) when is_list(Config) ->
                          [DelBuck | _] = Buckets,
                          ?assertEqual(ok, mini_s3:delete_bucket(DelBuck, S3Conf)),
                          [{buckets, NewBuckets}] = mini_s3:list_buckets(S3Conf),
+                         error_logger:info_msg("NewBuckets: ~p~n", [NewBuckets]),
                          ?assertEqual(Count - 1, length(NewBuckets))
                  end),
     error_logger:info_msg("WI_BASIC TIMING ~p", [Timings]).
@@ -132,7 +134,7 @@ sec_fail(suite) ->
 sec_fail(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
     Bucket = random_binary(),
-    ?assertError({aws_error, {http_error, "403", _}},
+    ?assertError({aws_error, {http_error, 403, _}},
                  mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)).
 
 signed_url(doc) ->

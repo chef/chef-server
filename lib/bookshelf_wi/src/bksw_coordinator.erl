@@ -5,11 +5,11 @@
 %% API
 -export([start_link/0,
          start_read/1,
-         end_read/0,
          end_read/1,
+         end_read/2,
          commit/1,
-         end_commit/0,
          end_commit/1,
+         end_commit/2,
          path_stats/1]).
 
 -record(reader, {path,
@@ -54,20 +54,20 @@ start_link() ->
 start_read(Path) ->
     ?GSCALL({start_read, Path}).
 
-end_read() ->
-    end_read(self()).
+end_read(Path) ->
+    end_read(self(), Path).
 
-end_read(ReaderPid) ->
-    ?GSCALL({end_read, ReaderPid}).
+end_read(ReaderPid, Path) ->
+    ?GSCALL({end_read, ReaderPid, Path}).
 
 commit(Path) ->
     ?GSCALL({start_commit, Path}).
 
-end_commit() ->
-    end_commit(self()).
+end_commit(Path) ->
+    end_commit(self(), Path).
 
-end_commit(Committer) ->
-    ?GSCALL({end_commit, Committer}).
+end_commit(Committer, Path) ->
+    ?GSCALL({end_commit, Committer, Path}).
 
 path_stats(Path) ->
     ?GSCALL({stats, Path}).
@@ -87,37 +87,34 @@ handle_call({stats, Path}, _From, #state{readers=Readers, committers=Writers}=St
     {reply, [{readers, RCount}, {writers, WCount}], State};
 
 handle_call({start_read, Path}, {Who, Tag}, #state{readers=Readers}=State) ->
-    Reply = case is_duplicate_reader(Path, Who, State) of
+    case is_duplicate_reader(Path, Who, State) of
+        true ->
+            error_logger:info_msg("~p is a dupe reader for ~p~n", [Who, Path]),
+            {reply, ok, State};
+        false ->
+            MRef = erlang:monitor(process, Who),
+            case can_read(Path, State) of
                 true ->
-                    io:format("~p is a dupe reader for ~p~n", [Who, Path]),
-                    ok;
+                    ets:insert(Readers, #reader{path=Path, pid=Who, mref=MRef}),
+                    {reply, ok, State};
                 false ->
-                    MRef = erlang:monitor(process, Who),
-                    case can_read(Path, State) of
-                        true ->
-                            ets:insert(Readers, #reader{path=Path, pid=Who, mref=MRef}),
-                            ok;
-                        false ->
-                            ets:insert(Readers, #reader{path=Path, pid=Who, tag=Tag, mref=MRef}),
-                            noreply
-                    end
-            end,
-    {reply, Reply, State};
-handle_call({end_read, Who}, _From, #state{readers=Readers}=State) ->
-    Reply = case find_process(Who, State) of
-                unknown ->
+                    ets:insert(Readers, #reader{path=Path, pid=Who, tag=Tag, mref=MRef}),
+                    {noreply, State}
+            end
+    end;
+handle_call({end_read, Who, Path}, _From, #state{readers=Readers}=State) ->
+    Reply = case ets:match_object(Readers, ?MS_THIS_READER(Path, Who)) of
+                [] ->
                     ok;
-                #reader{tag=undefined, mref=MRef}=Reader ->
+                [#reader{tag=undefined, mref=MRef}=Reader] ->
                     erlang:demonitor(MRef, [flush]),
                     ets:delete_object(Readers, Reader),
                     ok;
-                #reader{tag=Tag, mref=MRef}=Reader ->
+                [#reader{tag=Tag, mref=MRef}=Reader] ->
                     erlang:demonitor(MRef, [flush]),
                     ets:delete_object(Readers, Reader),
                     gen_server:reply({Who, Tag}, aborted),
-                    ok;
-                #committer{} ->
-                    {error, not_reading}
+                    ok
             end,
     {reply, Reply, State};
 handle_call({start_commit, Path}, {Who, Tag}, #state{committers=Committers}=State) ->
@@ -135,21 +132,19 @@ handle_call({start_commit, Path}, {Who, Tag}, #state{committers=Committers}=Stat
                     {noreply, State}
             end
     end;
-handle_call({end_commit, Who}, _From, #state{committers=Committers}=State) ->
-    Reply = case find_process(Who, State) of
-                unknown ->
+handle_call({end_commit, Who, Path}, _From, #state{committers=Committers}=State) ->
+    Reply = case ets:match_object(Committers, ?MS_THIS_COMMITTER(Path, Who)) of
+                [] ->
                     ok;
-                #committer{tag=undefined, mref=MRef}=Committer ->
+                [#committer{tag=undefined, mref=MRef}=Committer] ->
                     erlang:demonitor(MRef, [flush]),
                     ets:delete_object(Committers, Committer),
                     ok;
-                #committer{tag=Tag, mref=MRef}=Committer ->
+                [#committer{tag=Tag, mref=MRef}=Committer] ->
                     erlang:demonitor(MRef, [flush]),
                     ets:delete_object(Committers, Committer),
                     gen_server:reply({Who, Tag}, aborted),
-                    ok;
-                #reader{} ->
-                    {error, not_writing}
+                    ok
             end,
     {reply, Reply, State};
 handle_call(_Request, _From, State) ->
@@ -158,27 +153,12 @@ handle_call(_Request, _From, State) ->
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
-handle_info(#'DOWN'{obj=Pid}, #state{readers=Readers, committers=Committers}=State) ->
+handle_info(#'DOWN'{obj=Pid}, State) ->
     case find_process(Pid, State) of
         unknown ->
             ok;
-        #reader{}=Reader ->
-            ets:delete_object(Readers, Reader),
-            maybe_write(Reader#reader.path, State);
-        #committer{}=Committer ->
-            ets:delete_object(Committers, Committer),
-            case ?ACTIVE_COMMITTER(Committer) of
-                true ->
-                    %% Prefer readers over writers
-                    case maybe_read(Committer#committer.path, State) of
-                        false ->
-                            maybe_write(Committer#committer.path, State);
-                        true ->
-                            ok
-                    end;
-                false ->
-                    ok
-            end
+        Records ->
+            dispatch_pending(Records, State)
     end,
     {noreply, State};
 handle_info(_Info, State) ->
@@ -191,6 +171,28 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% Internal functions
+dispatch_pending([], _State) ->
+    ok;
+dispatch_pending([#reader{}=H|T], #state{readers=Readers}=State) ->
+    ets:delete_object(Readers, H),
+    maybe_write(H#reader.path, State),
+    dispatch_pending(T, State);
+dispatch_pending([#committer{}=H|T], #state{committers=Committers}=State) ->
+    ets:delete_object(Committers, H),
+    case ?ACTIVE_COMMITTER(H) of
+        true ->
+            %% Prefer readers over writers
+            case maybe_read(H#committer.path, State) of
+                false ->
+                    maybe_write(H#committer.path, State);
+                true ->
+                    ok
+            end;
+        false ->
+                    ok
+    end,
+    dispatch_pending(T, State).
+
 maybe_write(Path, #state{readers=Readers, committers=Committers}) ->
     maybe_write(Path, has_none(Readers, ?MS_ALL_READERS(Path)), Committers).
 
@@ -238,11 +240,11 @@ find_process(Pid, #state{readers=Readers, committers=Committers}) ->
             case ets:match_object(Committers, ?MS_WHICH_COMMITTER(Pid)) of
                 [] ->
                     unknown;
-                [Committer] ->
-                    Committer
+                C ->
+                    C
             end;
-        [Reader] ->
-            Reader
+        R ->
+            R
     end.
 
 can_write(Path, #state{readers=Readers, committers=Committers}) ->
