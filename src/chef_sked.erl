@@ -14,7 +14,9 @@
 -include_lib("chef_certgen/include/chef_certgen.hrl").
 
 -export([create_client/3,
-         create_client/4]).
+         create_client/4,
+         create_default_environment/0,
+         create_default_environment/1]).
 
 %% An authz id used as the requestor id for operations performed by
 %% this helper module.
@@ -36,7 +38,7 @@ create_client(Name, IsValidator, IsAdmin) ->
     end.
 
 %% @doc Create a client with the specified `PublicKey'.
-create_client(Name, IsValidator, IsAdmin, PublicKey) ->
+create_client(Name, IsValidator, _IsAdmin, PublicKey) ->
     Id = chef_object:make_org_prefix_id(?OSC_ORG_ID, Name),
     Client = #chef_client{id = Id,
                           %% stub authz ID
@@ -49,6 +51,29 @@ create_client(Name, IsValidator, IsAdmin, PublicKey) ->
     Ctx = chef_db:make_context(make_req_id()),
     chef_db:create_client(Ctx, Client, ?CHEF_SKED_AUTHZ_ID).
 
+%% @doc Create the _default environment assuming the default RDBMS of PostgreSQL.
+create_default_environment() ->
+    create_default_environment(pgsql).
+
+%% @doc Create the _default environment with compression determined by
+%% `DbType'.
+create_default_environment(DbType) ->
+    Name = <<"_default">>,
+    Json = <<"{\"name\":\"_default\",\"description\":\"The default Chef environment\","
+             "\"cookbook_versions\":{},\"json_class\":\"Chef::Environment\","
+             "\"chef_type\":\"environment\","
+             "\"default_attributes\":{},"
+             "\"override_attributes\":{}}">>,
+    Data = chef_db_compression:compress(DbType, chef_environment, Json),
+    Id = chef_object:make_org_prefix_id(?OSC_ORG_ID, Name),
+    Env = #chef_environment{id = Id,
+                            authz_id = Id,
+                            org_id = ?OSC_ORG_ID,
+                            name = Name,
+                            serialized_object = Data},
+    Ctx = chef_db:make_context(make_req_id()),
+    chef_db:create_environment(Ctx, Env, ?CHEF_SKED_AUTHZ_ID).
+        
 %% Determine the "pubkey_version" of a key or certificate in PEM
 %% format. Certificates are version 1. Public keys in either PKCS1 or
 %% SPKI format are version 0. The PKCS1 format is deprecated, but
