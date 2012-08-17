@@ -5,6 +5,7 @@
 
 -include_lib("webmachine/include/wm_reqdata.hrl").
 -include_lib("chef_objects/include/chef_types.hrl").
+-include_lib("chef_objects/include/chef_osc_defaults.hrl").
 -include_lib("mixer/include/mixer.hrl").
 -include_lib("ej/include/ej.hrl").
 
@@ -15,9 +16,6 @@
 -include_lib("eunit/include/eunit.hrl").
 -compile([export_all]).
 -endif.
-
--define(OSC_ORG_NAME, <<"open-source-chef">>).
--define(OSC_ORG_ID, <<"00000000000000000000000000000000">>).
 
 -ifndef(BASE_RESOURCE).
 -define(BASE_RESOURCE, chef_wm_base).
@@ -70,7 +68,7 @@
 
           %% The name of the organization parsed from the request URL.
           %% Set by chef_rest_wm:service_available.
-          organization_name :: binary(),
+          organization_name :: binary() | ?OSC_ORG_NAME,
 
           %% Batch size used to pull back large objects from couchdb.
           %% Currently used by the search resource to limit the number
