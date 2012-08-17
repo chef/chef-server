@@ -154,7 +154,22 @@ add_authn_fields(ClientData, PublicKey) ->
                 end,
                 ClientData,
                 [
-                    {<<"pubkey_version">>, ?CERT_VERSION},
+                    {<<"pubkey_version">>, key_version(PublicKey)},
                     {<<"public_key">>, PublicKey}
                 ]).
+
+%% Determine the "pubkey_version" of a key or certificate in PEM
+%% format. Certificates are version 1. Public keys in either PKCS1 or
+%% SPKI format are version 0. The PKCS1 format is deprecated, but
+%% supported for read. We will only generate certs or SPKI packaged
+%% keys.
+key_version(<<"-----BEGIN CERTIFICATE", _Bin/binary>>) ->
+    %% cert
+    1;
+key_version(<<"-----BEGIN PUBLIC KEY", _Bin/binary>>) ->
+    %% SPKI
+    0;
+key_version(<<"-----BEGIN RSA PUBLIC KEY", _Bin/binary>>) ->
+    %% PKCS1
+    0.
 
