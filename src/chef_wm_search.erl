@@ -103,8 +103,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
         {ok, Start, SolrNumFound, Ids} ->
             IndexType = Query#chef_solr_query.index,
             Paths = SearchState#search_state.partial_paths,
-            BaseURI = chef_wm_util:base_uri(Req),
-            BulkGetFun = make_bulk_get_fun(DbContext, OrgName, IndexType, Paths, BaseURI),
+            BulkGetFun = make_bulk_get_fun(DbContext, OrgName, IndexType, Paths, Req),
             {DbNumFound, Ans} = make_search_results(BulkGetFun, Ids, BatchSize,
                                                     Start, SolrNumFound),
             State1 = State#base_state{log_msg = {search, SolrNumFound, length(Ids), DbNumFound}},
@@ -168,7 +167,7 @@ process_post(Req, State) ->
 %% If `NamePaths' is non-empty, then the returned fun will create partial search results by
 %% extracting the values specified by the paths and mapping them to the specified names in
 %% the returned EJSON object.
-make_bulk_get_fun(DbContext, OrgName, client, [], _BaseURI) ->
+make_bulk_get_fun(DbContext, OrgName, client, [], _Req) ->
     %% clients get special handling to add json_class which is not stored in the db (not
     %% even in couch).
     %%
@@ -178,7 +177,7 @@ make_bulk_get_fun(DbContext, OrgName, client, [], _BaseURI) ->
             [ ej:set({<<"json_class">>}, Client, <<"Chef::ApiClient">>)
               || Client <- Clients ]
     end;
-make_bulk_get_fun(DbContext, OrgName, {data_bag, BagName}, [], _BaseURI) ->
+make_bulk_get_fun(DbContext, OrgName, {data_bag, BagName}, [], _Req) ->
     %% For data bag items, we return the raw object if the data bag item is coming from
     %% couchdb. Otherwise, we need to wrap the item in some additional JSON cruft to make it
     %% match the expected shape.
@@ -203,19 +202,20 @@ make_bulk_get_fun(DbContext, OrgName, {data_bag, BagName}, [], _BaseURI) ->
                       end || Item <- Items ]
             end
     end;
-make_bulk_get_fun(DbContext, OrgName, Type, [], _BaseURI) ->
+make_bulk_get_fun(DbContext, OrgName, Type, [], _Req) ->
     %% all other types just call into chef_db
     fun(Ids) ->
             chef_db:bulk_get(DbContext, OrgName, Type, Ids)
     end;
-make_bulk_get_fun(DbContext, OrgName, Type, NamePaths, BaseURI) ->
+make_bulk_get_fun(DbContext, OrgName, Type, NamePaths, Req) ->
     %% Here NamePaths is a non-empty list of {Name, Path} tuples. This is the bulk_get fun
     %% that will be created if the user has requested partial search.
     fun(Ids) ->
             Items = chef_db:bulk_get(DbContext, OrgName, index_type_to_db_type(Type), Ids),
+            RouteFun = ?BASE_ROUTES:url_for_search_item_fun(Req, Type, OrgName),
             [ begin
                   EJsonItem = parse_item(Type, Item),
-                  Url = url_for_item(BaseURI, EJsonItem, OrgName, Type),
+                  Url = RouteFun(EJsonItem),
                   {[{<<"url">>, Url},
                     {<<"data">>,
                      {[ {Name, extract_path(EJsonItem, Path)}
@@ -268,19 +268,6 @@ parse_item0({L}=Item) when is_list(L) ->
     %% should be valid EJSON format
     Item.
 
-%% FIXME: I think we can make use of the new route module instead of this.
-url_for_item(BaseURI, Item, OrgName, {data_bag, Bag}) ->
-    iolist_to_binary([BaseURI, <<"/organizations/">>, OrgName, <<"/data/">>, Bag, <<"/">>,
-                      data_bag_item_id(Item)]);
-url_for_item(BaseURI, Item, OrgName, client) ->
-    iolist_to_binary([BaseURI, <<"/organizations/">>, OrgName, <<"/clients/">>,
-                      ej:get({<<"clientname">>}, Item)]);
-url_for_item(BaseURI, Item, OrgName, Type) ->
-    iolist_to_binary([BaseURI, <<"/organizations/">>, OrgName, <<"/">>,
-                      atom_to_binary(Type, utf8),
-                      <<"s/">>,
-                      ej:get({<<"name">>}, Item)]).
-
 %% This helper function extracts the necessary params from the request and passes it to
 %% chef_solr:make_query_from_params to return the query.
 make_query_from_params(Req) ->
@@ -291,22 +278,6 @@ make_query_from_params(Req) ->
     Start = wrq:get_qs_value("start", Req),
     Rows = wrq:get_qs_value("rows", Req),
     chef_solr:make_query_from_params(ObjType, QueryString, Start, Rows).
-
-%% When data_bag_items are stored in couchdb, they are wrapped in cruft such that the actual
-%% item is under the 'raw_data' key of the wrapper. When data_bag_items are stored in SQL,
-%% just the item is stored. This helper function extracts the id of the data_bag_item for
-%% either type. We could have used darklaunch here, but since there are two cases and it is
-%% easy to test for, we just inspect the data at hand. This can go away once data_bag_items
-%% are only in SQL.
-%% TODO: when data bags are no longer in couchdb, clean this
-data_bag_item_id(Item) ->
-    case ej:get({<<"id">>}, Item) of
-        undefined ->
-            %% we must have a structure coming out of couchdb wrapped in data_bag_item cruft
-            ej:get({<<"raw_data">>, <<"id">>}, Item);
-        Id when is_binary(Id) ->
-            Id
-    end.
 
 extract_path(_Item, []) ->
     null;

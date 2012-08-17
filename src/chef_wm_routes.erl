@@ -8,7 +8,8 @@
 -export([
          bulk_route_fun/2,
          bulk_route_fun/3,
-         route/3
+         route/3,
+         url_for_search_item_fun/3
         ]).
 
 -include_lib("webmachine/include/webmachine.hrl").
@@ -114,4 +115,42 @@ template_for_type(client) ->
 template_for_type(data_bag) ->
     "/data/~s";
 template_for_type(data_bag_item) ->
+    "/data/~s/~s";
+template_for_type({data, _}) ->
+    %% another way of asking for data_bag_item
     "/data/~s/~s".
+
+%% This is extracted from search, needs more cleanup
+url_for_search_item_fun(Req, Type, _OrgName) ->
+    BaseURI = chef_wm_util:base_uri(Req),
+    Template = template_for_type(Type),
+    fun(ItemEjson) ->
+            Args = make_args(ItemEjson, Type),
+            render_template(Template, BaseURI, Args)
+    end.
+
+make_args(Item, {data_bag, Bag}) ->
+    [Bag, data_bag_item_id(Item)];
+make_args(Item, client) ->
+    [ej:get({<<"clientname">>}, Item)];
+make_args(Item, _) ->
+    [ej:get({<<"name">>}, Item)].
+
+%% extract name
+
+%% When data_bag_items are stored in couchdb, they are wrapped in cruft such that the actual
+%% item is under the 'raw_data' key of the wrapper. When data_bag_items are stored in SQL,
+%% just the item is stored. This helper function extracts the id of the data_bag_item for
+%% either type. We could have used darklaunch here, but since there are two cases and it is
+%% easy to test for, we just inspect the data at hand. This can go away once data_bag_items
+%% are only in SQL.
+%% TODO: when data bags are no longer in couchdb, clean this
+data_bag_item_id(Item) ->
+    case ej:get({<<"id">>}, Item) of
+        undefined ->
+            %% we must have a structure coming out of couchdb wrapped in data_bag_item cruft
+            ej:get({<<"raw_data">>, <<"id">>}, Item);
+        Id when is_binary(Id) ->
+            Id
+    end.
+        
