@@ -20,7 +20,7 @@
 %%
 
 
--module(s3_metadata).
+-module(s3_ops).
 
 -define(MAX, 5).
 -define(TIMEOUT, 5 * 1000).
@@ -28,7 +28,7 @@
 -include("chef_types.hrl").
 
 -export([
-         fetch/2
+         fetch_md/2
         ]).
 
 -record(state, {
@@ -45,7 +45,7 @@
          }).
 
 %% @doc Verify that each checksummed file is stored in S3 by checking its metadata
-fetch(OrgId, Checksums) when is_list(Checksums),
+fetch_md(OrgId, Checksums) when is_list(Checksums),
                              is_binary(OrgId) ->
     parallel_fetch(OrgId, Checksums).
 
