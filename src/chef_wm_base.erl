@@ -195,13 +195,9 @@ malformed_request_message(invalid_num_versions, _Req, _State) ->
 malformed_request_message(Reason, Req, #base_state{resource_mod=Mod}=State) ->
     Mod:malformed_request_message(Reason, Req, State).
 
-forbidden(Req, #base_state{resource_mod=Mod}=State) ->
-    case Mod:auth_info(Req, State) of
-        {{halt, Code}, Req1, State1} ->
-            {{halt, Code}, Req1, State1};
-        {authorized, Req1, State1} ->
-            {false, Req1, State1}
-    end.
+forbidden(Req, #base_state{}=State) ->
+    %% FIXME: add authorization logic for OSC
+    {false, Req, State}.
 
 is_authorized(Req, State) ->
     case verify_request_signature(Req, State) of
