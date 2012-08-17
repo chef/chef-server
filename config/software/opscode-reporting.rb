@@ -2,7 +2,7 @@ name "opscode-reporting"
 #version "pc-rel-0.13.0"
 version "master" 
 
-dependencies ["erlang", "rsync"]
+dependencies ["erlang", "rsync", "rebar"]
 
 source :git => "git@github.com:opscode/oc_reporting"
 
