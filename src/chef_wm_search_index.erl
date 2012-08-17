@@ -73,8 +73,8 @@ generate_index_list(DBContext, OrgId) ->
 %% Example:
 %%
 %%  index_map(["nodes", "clients"], Req) =>
-%%     [{"nodes", "http://server.com/organizations/clownco/search/nodes"},
-%%      {"clients", "http://server.com/organizations/clownco/search/clients"}]
+%%     [{"nodes", "http://server.com/search/nodes"},
+%%      {"clients", "http://server.com/search/clients"}]
 %%
 -spec index_map(SearchIndexes::list(binary()), Req::tuple()) ->
                        list({IndexName::binary(), URL::binary()}).

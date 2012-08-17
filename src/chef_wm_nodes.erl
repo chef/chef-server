@@ -8,10 +8,10 @@
 %% The REST API provided by this module is as follows:
 %%
 %% Create a new node with body of POST being node JSON
-%% POST /organizations/:org_name/nodes/
+%% POST /nodes/
 %%
 %% Fetch all node names
-%% GET /organizations/:org_name/nodes/
+%% GET /nodes/
 %%
 %%
 -module(chef_wm_nodes).
@@ -123,14 +123,10 @@ list_nodes(EnvName, Req, #base_state{chef_db_context = DbContext,
     package_node_list(NodeNames, Req, State).
 
 package_node_list(NodeNames, Req, #base_state{organization_name = OrgName}=State) ->
-    UrlPrefix = node_url_prefix(Req, OrgName),
-    NameMap = [ {Name, iolist_to_binary([UrlPrefix, Name])} || Name <- NodeNames ],
+    RouteFun = ?BASE_ROUTES:bulk_route_fun(node, Req),
+    NameMap = [ {Name, RouteFun(Name)} || Name <- NodeNames ],
     Json = ejson:encode({NameMap}),
     {Json, Req, State#base_state{log_msg = {list, length(NodeNames)}}}.
-
-node_url_prefix(Req, OrgName) ->
-    iolist_to_binary([chef_wm_util:base_uri(Req),
-                      "/organizations/", OrgName, "/nodes/"]).
 
 %% error message functions
 

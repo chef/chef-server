@@ -52,10 +52,8 @@ validate_request('GET', Req, State) ->
 validate_request('POST', Req, State) ->
     Body = wrq:req_body(Req),
     {ok, Environment} = chef_environment:parse_binary_json(Body),
-    % POST /environments/_default can come from the org creator, in which case
-    % superuser is allowed.  When POST /organizations is implemented in Erchef,
-    % we should remove this.  No other endpoint gives special treatment to
-    % superuser.
+    % POST /environments/_default can come from the org creator, in which case superuser is
+    % allowed. No other endpoint gives special treatment to superuser.
     Name = ej:get({<<"name">>}, Environment),
     SuperuserBypassesChecks = case Name of
         <<"_default">> -> true;

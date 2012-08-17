@@ -8,10 +8,10 @@
 %% The REST API provided by this module is as follows:
 %%
 %% Create a new client with body of POST being client JSON
-%% POST /organizations/:org_name/clients/
+%% POST /clients/
 %%
 %% Fetch all client names
-%% GET /organizations/:org_name/clients/
+%% GET /clients/
 %%
 %%
 -module(chef_wm_clients).

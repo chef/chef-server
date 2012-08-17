@@ -88,9 +88,8 @@ not_found_message(data_bag_missing_for_item_post, BagName) ->
                                              BagName,
                                              "' could be found. Please create this ",
                                              "data bag before adding items to it."]));
-not_found_message(sandboxes, OrgName) ->
-    error_message_envelope(iolist_to_binary([<<"No routes match the request: /organizations/">>,
-                                             OrgName, <<"/sandboxes">>]));
+not_found_message(sandboxes, _OrgName) ->
+    error_message_envelope(<<"No routes match the request: /sandboxes">>);
 not_found_message(sandbox, SandboxId) ->
     error_message_envelope(iolist_to_binary([<<"No such sandbox '">>, SandboxId,
                                              <<"'.">>]));
@@ -157,7 +156,7 @@ set_uri_of_created_resource(Uri, Req0) when is_binary(Uri) ->
 %% @doc Extracts the name of a given object from the request path.  This is for use in
 %% resources that manipulate individual Chef objects, like nodes or roles.
 %%
-%% For example, given a request to the path "/organizations/clownco/nodes/foo", this
+%% For example, given a request to the path "/nodes/foo", this
 %% function would return <<"foo">>
 %% @end
 %%

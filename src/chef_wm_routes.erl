@@ -86,7 +86,7 @@ route(cookbook_version, Req, Args) ->
 %% the path of the desired URL (including the leading "/" character!).  Thus, a "good"
 %% template might be
 %%
-%%  "/organizations/~s/search/~s"
+%%  "/search/~s"
 %%
 render_template(Template, BaseURI, Args) when is_list(BaseURI) ->
     iolist_to_binary(BaseURI ++ io_lib:format(Template, Args));
