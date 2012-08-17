@@ -195,9 +195,17 @@ malformed_request_message(invalid_num_versions, _Req, _State) ->
 malformed_request_message(Reason, Req, #base_state{resource_mod=Mod}=State) ->
     Mod:malformed_request_message(Reason, Req, State).
 
-forbidden(Req, #base_state{}=State) ->
+forbidden(Req, #base_state{resource_mod=Mod}=State) ->
     %% FIXME: add authorization logic for OSC
-    {false, Req, State}.
+
+    %% For now we call auth_info because currently need the side-effect of looking up the
+    %% record and returning 404.
+    case Mod:auth_info(Req, State) of
+        {{halt, _}, _, _} = Halt ->
+            Halt;
+        {_, Req1, State1} ->
+            {false, Req1, State1}
+    end.
 
 is_authorized(Req, State) ->
     case verify_request_signature(Req, State) of
@@ -299,7 +307,7 @@ create_from_json(#wm_reqdata{} = Req,
                  RecType, {authz_id, AuthzId}, ObjectEjson) ->
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
-    ObjectRec = chef_object:new_record(RecType, OrgId, AuthzId, ObjectEjson,
+    ObjectRec = chef_object:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson,
                                        DbType),
     Id = chef_object:id(ObjectRec),
     Name = chef_object:name(ObjectRec),
@@ -340,9 +348,9 @@ create_from_json(#wm_reqdata{} = Req,
 %% objects. `OrigObjectRec' should be the existing and unmodified `chef_object()'
 %% record. `ObjectEjson' is the parsed EJSON from the request body.
 update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
-                                  organization_guid = OrgId,
-                                  requestor = #chef_requestor{authz_id = ActorId},
-                             db_type = DbType}=State, OrigObjectRec, ObjectEjson) ->
+                                                  organization_guid = OrgId,
+                                                  requestor = #chef_requestor{authz_id = ActorId},
+                                                  db_type = DbType}=State, OrigObjectRec, ObjectEjson) ->
     ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectEjson, DbType),
     %% Send object to solr for indexing *first*. If the update fails, we will have sent
     %% incorrect data, but that should get corrected when the client retries. This is a
@@ -616,3 +624,8 @@ maybe_trace(State, Config) ->
         _ ->
             {ok, State}
     end.
+
+maybe_authz_id(undefined) ->
+    unset;
+maybe_authz_id(B) ->
+    B.
