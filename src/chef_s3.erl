@@ -2,6 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Mark Anderson <mark@opscode.com>
 %% @author Christopher Maier <cm@opscode.com>
+%% @author Seth Chisamore <schisamo@opscode.com>
 %% @doc chef_s3 - Manage S3 activities for erchef
 %%
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
@@ -21,13 +22,13 @@
 %% under the License.
 %%
 
-
 -module(chef_s3).
 
 -include("chef_types.hrl").
 
 -export([
          check_checksums/2,
+         delete_checksums/2,
          generate_presigned_url/4,
          generate_presigned_urls/4,
          make_key/2,
@@ -50,6 +51,17 @@
                               {error, non_neg_integer()}}.
 check_checksums(OrgId, Checksums) ->
     s3_ops:fetch_md(OrgId, Checksums).
+
+%% @doc Given a OrgGuid and a list of checksums, delete the checksums, returns a list of
+%% the ones deleted, missing, timeout and errors
+-spec delete_checksums(OrgId :: object_id(),
+                      Checksums :: [binary()]) ->
+                             {{ok, [binary()]},
+                              {missing, [binary()]},
+                              {timeout, non_neg_integer()},
+                              {error, non_neg_integer()}}.
+delete_checksums(OrgId, Checksums) ->
+    s3_ops:delete(OrgId, Checksums).
 
 %% @doc Given an OrgGuid, an expire time, and a list of checksums, returns a list of
 %% {Checksum, Url} tuples
