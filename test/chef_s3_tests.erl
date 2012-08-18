@@ -1,6 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
 %% @author Christopher Maier <cm@opscode.com>
+%% @author Seth Chisamore <schisamo@opscode.com>
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -107,13 +108,16 @@ url_test_() ->
                 test_utils:validate_modules(MockedModules)
         end}]}.
 
-check_test_() ->
-    MockedModules = [mini_s3, chef_s3],
+checksum_test_() ->
+    MockedModules = [mini_s3, chef_s3, s3_ops],
     {foreach,
      fun() ->
              test_utils:mock(MockedModules, [passthrough]),
              meck:expect(chef_s3, get_config, fun() -> mock_config end),
              application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
+
+             %% Make the chunk size smaller
+             meck:expect(s3_ops, chunk_size, fun() -> 3 end),
 
              %% Actual value doesn't matter; we're not going to use it anyway
              meck:expect(mini_s3, new, 3, ignored),
@@ -147,6 +151,36 @@ check_test_() ->
                                          meck:exception(throw, oops)
                                  end
                          end),
+             %% FIXME - copy pasta
+             meck:expect(mini_s3, delete_object,
+                         fun(_Bucket, Key, mock_config) ->
+                                 %% Since we're mocking, we need an easy way to control what
+                                 %% happens in this function.  We're going to take the last
+                                 %% character in the Key (which happens to be the last
+                                 %% character in the checksum).  If that character is an
+                                 %% "a", we'll consider the checksum to have been uploaded;
+                                 %% if it's an "e", it's missing; if it's an "f", timeout;
+                                 %% any other character means some error occurred
+
+                                 Reversed = lists:reverse(Key),
+                                 case Reversed of
+                                     [$a|_] ->
+                                         %% The real value is unimportant, since it's
+                                         %% ignored; the important thing is that it wasn't
+                                         %% an abnormal return
+                                         [{delete_marker, foo}, {version_id, <<"1.0">>}];
+                                     [$e|_] ->
+                                         %% In real code, it'd be:
+                                         %% erlang:error({aws_error, ...})
+                                         meck:exception(error, {aws_error, {http_error, 404, blah}});
+                                     [$f|_] ->
+                                         timer:sleep(10 * 1000);
+                                     _ ->
+                                         %% Here, it'd just be:
+                                         %% throw(oops)
+                                         meck:exception(throw, oops)
+                                 end
+                         end),
              OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
 
              OrgId
@@ -156,7 +190,7 @@ check_test_() ->
      end,
      [
       fun(OrgId) ->
-              [{"Finds all the checksums",
+              [{"Fetch: Finds all the checksums",
                 fun() ->
 
                         %% They all end in "a", so they should all be found
@@ -173,7 +207,7 @@ check_test_() ->
                         test_utils:validate_modules(MockedModules)
                 end},
 
-               {"Finds all the checksums (greater than parallel limit)",
+               {"Fetch: Finds all the checksums (greater than parallel limit)",
                 fun() ->
 
                         %% They all end in "a", so they should all be found
@@ -196,7 +230,7 @@ check_test_() ->
                         test_utils:validate_modules(MockedModules)
                 end},
 
-              {"Missing one of the checksums",
+              {"Fetch: Missing one of the checksums",
                 fun() ->
                         Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                      <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>,
@@ -209,7 +243,7 @@ check_test_() ->
                                      chef_s3:check_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                 end},
-               {"Error for one of the checksums",
+               {"Fetch: Error for one of the checksums",
                 fun() ->
                         Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                      <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>,
@@ -222,7 +256,7 @@ check_test_() ->
                                      chef_s3:check_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                 end},
-               {"Timeout!",
+               {"Fetch: Timeout!",
                 %% 20 seconds is waaaaaaay liberal here
                 {timeout, 20, fun() ->
                                       Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
@@ -236,7 +270,7 @@ check_test_() ->
                                       test_utils:validate_modules(MockedModules)
                               end}
                },
-               {"One of each",
+               {"Fetch: One of each",
                 fun() ->
                         Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                      <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>,
@@ -248,7 +282,7 @@ check_test_() ->
                                      chef_s3:check_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                 end},
-               {"All files are already in the system!",
+               {"Fetch: All files are already in the system!",
                 fun() ->
                         Checksums = [],
                         ?assertEqual({{ok, []},
@@ -257,6 +291,104 @@ check_test_() ->
                                      chef_s3:check_checksums(OrgId, Checksums))
                         %% Don't actually need to validate the mocks, since this shouldn't call them
 
-                end}
+                end},
+                {"Delete: Finds all the checksums",
+                 fun() ->
+
+                        %% They all end in "a", so they should all be found
+                        Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                     <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbba">>,
+                                     <<"ccccccccccccccccccccccccccccccca">>],
+
+                        ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                            <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbba">>,
+                                            <<"ccccccccccccccccccccccccccccccca">>]},
+                                      {missing, []},
+                                      {timeout, 0},
+                                      {error, 0}},
+                                     chef_s3:delete_checksums(OrgId, Checksums)),
+                        test_utils:validate_modules(MockedModules)
+                 end},
+                {"Delete: Multiple chunk groups",
+                 fun() ->
+                        %% This should produce 3 chunk groups (3,3,1)
+                        %% They all end in "a", so they should all be found
+                        Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                     <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbba">>,
+                                     <<"ccccccccccccccccccccccccccccccca">>,
+                                     <<"ddddddddddddddddddddddddddddddda">>,
+                                     <<"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeea">>,
+                                     <<"fffffffffffffffffffffffffffffffa">>,
+                                     <<"ggggggggggggggggggggggggggggggga">>],
+
+                        ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                            <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbba">>,
+                                            <<"ccccccccccccccccccccccccccccccca">>,
+                                            <<"ddddddddddddddddddddddddddddddda">>,
+                                            <<"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeea">>,
+                                            <<"fffffffffffffffffffffffffffffffa">>,
+                                            <<"ggggggggggggggggggggggggggggggga">>]},
+                                      {missing, []},
+                                      {timeout, 0},
+                                      {error, 0}},
+                                     chef_s3:delete_checksums(OrgId, Checksums)),
+                        test_utils:validate_modules(MockedModules)
+                 end},
+                {"Delete: Missing one of the checksums",
+                 fun() ->
+                        Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                     <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>,
+                                     <<"ccccccccccccccccccccccccccccccca">>],
+
+                        ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                            <<"ccccccccccccccccccccccccccccccca">>]},
+                                      {missing, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>]},
+                                      {timeout, 0},
+                                      {error, 0}},
+                                     chef_s3:delete_checksums(OrgId, Checksums)),
+                        test_utils:validate_modules(MockedModules)
+                 end},
+                {"Delete: Error for one of the checksums",
+                 fun() ->
+                        Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                     <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>,
+                                     <<"ccccccccccccccccccccccccccccccca">>],
+
+                        ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                            <<"ccccccccccccccccccccccccccccccca">>]},
+                                      {missing, []},
+                                      {timeout, 0},
+                                      {error, 1}},
+                                     chef_s3:delete_checksums(OrgId, Checksums)),
+                        test_utils:validate_modules(MockedModules)
+                 end},
+                {"Delete: Timeout!",
+                 %% 20 seconds is waaaaaaay liberal here
+                 {timeout, 20, fun() ->
+                                      Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                                   <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>,
+                                                   <<"cccccccccccccccccccccccccccccccf">>],
+
+                                      ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>]},
+                                                    {missing, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>]},
+                                                    {timeout, 1},
+                                                    {error, 0}},
+                                                   chef_s3:delete_checksums(OrgId, Checksums)),
+                                      test_utils:validate_modules(MockedModules)
+                              end}
+                },
+                {"Delete: One of each",
+                 fun() ->
+                        Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                     <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>,
+                                     <<"cccccccccccccccccccccccccccccccd">>],
+
+                        ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>]},
+                                      {missing, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>]},
+                                      {timeout, 0},
+                                      {error, 1}},
+                                     chef_s3:delete_checksums(OrgId, Checksums)),
+                        test_utils:validate_modules(MockedModules)
+                 end}
               ]
       end]}.
