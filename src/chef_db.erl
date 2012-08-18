@@ -750,12 +750,11 @@ update_cookbook_version(#context{}=Ctx, UpdatedCookbookVersion, ActorId) ->
 -spec delete_cookbook_version(Ctx :: #context{},
                               CookbookVersion :: #chef_cookbook_version{}) ->
                                 {ok, 1 | 2} | not_found | {error, term()}.
-delete_cookbook_version(#context{}=Ctx, #chef_cookbook_version{org_id=_OrgId}=CookbookVersion) ->
+delete_cookbook_version(#context{}=Ctx, #chef_cookbook_version{org_id=OrgId}=CookbookVersion) ->
     case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
-        #chef_db_cb_version_delete{cookbook_delete=CookbookDeleted, deleted_checksums=_DeletedChecksums} ->
-            %% TODO - some awesome parallel s3 deletion action
-            % chef_s3:delete_checksums(OrgId, DeletedChecksums),
-            %% FIXME: return the actual chef_db_cb_version_delete record to the caller
+        #chef_db_cb_version_delete{cookbook_delete=CookbookDeleted, deleted_checksums=DeletedChecksums} ->
+            chef_s3:delete_checksums(OrgId, DeletedChecksums),
+            %% TODO: return the actual chef_db_cb_version_delete record to the caller
             case CookbookDeleted of
                 false -> {ok, 1};
                 true -> {ok, 2}
