@@ -153,14 +153,6 @@
           'serialized_object' % json blob of object data
          }).
 
-%% This doesn't quite belong here, but rather in a chef_db hrl file.
-%% Used as a common data format for actor data (users or clients).
--record(chef_requestor, {
-          'type' = user :: 'user' | 'client',
-          'authz_id',
-          'name',
-          'key_data'}).
-
 -record(chef_role, {
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
