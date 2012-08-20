@@ -53,12 +53,8 @@ delete(OrgId, Checksums) when is_list(Checksums),
     %% we'll split our checksum list into chunks
     %% so we don't pound the S3 store by
     %% parallelizing ALL THE THINGS!!
-    Chunks = chunk_list(Checksums, chunk_size()),
-    %% Delete the checksums in each chunk in parrallel
-    Results = lists:map(fun(Chunk) ->
-                    parallel_delete(OrgId, Chunk)
-                end,
-                Chunks),
+    Results = chunk_map(fun(Chunk) -> parallel_delete(OrgId, Chunk) end,
+                        Checksums, chunk_size()),
     %% The results will be a list of lists so flatten it
     FlattenedResults = lists:flatten(Results),
     %% Process the flattened results, splitting them into success checksums,
@@ -232,15 +228,27 @@ delete_file(OrgId, Bucket, Checksum) ->
 chunk_size() ->
     ?CHUNKSIZE.
 
-%% TODO: opscode_commons
-chunk_list([], _, Result) ->
-    lists:reverse(Result);
-chunk_list(List, ChunkSize, Result) ->
-    {Chunk, Rest} = safe_split(ChunkSize, List),
-    chunk_list(Rest, ChunkSize, [Chunk | Result]).
+%% ----------------------------------------------------------------------------
+%% opscode_commons candidate code
+%% ----------------------------------------------------------------------------
 
-chunk_list(List, ChunkSize) ->
-    chunk_list(List, ChunkSize, []).
+%% chunk_list(List, ChunkSize) ->
+%%     chunk_list(List, ChunkSize, []).
+%
+%% chunk_list([], _, Result) ->
+%%     lists:reverse(Result);
+%% chunk_list(List, ChunkSize, Result) ->
+%%     {Chunk, Rest} = safe_split(ChunkSize, List),
+%%     chunk_list(Rest, ChunkSize, [Chunk | Result]).
+
+chunk_map(Fun, List, ChunkSize) ->
+    chunk_map(Fun, List, ChunkSize, []).
+
+chunk_map(_Fun, [], _ChunkSize, Acc) ->
+    lists:reverse(Acc);
+chunk_map(Fun, List, ChunkSize, Acc) ->
+    {Chunk, Rest} = safe_split(ChunkSize, List),
+    chunk_map(Fun, Rest, ChunkSize, [Fun(Chunk) | Acc]).
 
 safe_split(N, L) ->
     try
