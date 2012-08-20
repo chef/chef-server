@@ -24,7 +24,7 @@
 -include("chef_types.hrl").
 
 %% fields:
- %% name - in webui, name has _ inserted for , (periods) so should check that there are no periods in the name here
+ %% username/name - in webui, name has _ inserted for , (periods) so should check that there are no periods in the name here
  %% salt - no default - generated in webui
  %% password - no default -
  %%   cannot be blank, must be 6 chars - encorced in webui
@@ -35,14 +35,14 @@
         [
           {<<"json_class">>, <<"Chef::WebUIUser">>},
           {<<"chef_type">>, <<"webui_user">>},
-          {<<"admin">>, <<"false">>},
+          {<<"admin">>, <<"false">>}
         ]).
 
 -define(VALIDATION_CONSTRAINTS,
         [
           {<<"json_class">>,  {match, "Chef::WebUIUser"}},
           {<<"chef_type">>, {match, "webui_user"}},
-          {<<"admin">>, {match, "^true$|^false$"}},
+          {<<"admin">>, {match, "^true$|^false$"}}
         ]).
 
 -type user_action() :: create.
