@@ -50,7 +50,7 @@
                               {missing, [binary()]},
                               {error, non_neg_integer()}}.
 check_checksums(OrgId, Checksums) ->
-    s3_ops:fetch_md(OrgId, Checksums).
+    chef_s3_ops:fetch_md(OrgId, Checksums).
 
 %% @doc Given a OrgGuid and a list of checksums, delete the checksums, returns a list of
 %% the ones deleted, missing, timeout and errors
@@ -61,7 +61,7 @@ check_checksums(OrgId, Checksums) ->
                                {timeout, non_neg_integer()},
                                {error, non_neg_integer()}}.
 delete_checksums(OrgId, Checksums) ->
-    s3_ops:delete(OrgId, Checksums).
+    chef_s3_ops:delete(OrgId, Checksums).
 
 %% @doc Given an OrgGuid, an expire time, and a list of checksums, returns a list of
 %% {Checksum, Url} tuples

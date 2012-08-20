@@ -20,7 +20,7 @@
 %% under the License.
 %%
 
--module(s3_ops).
+-module(chef_s3_ops).
 
 -define(MAX, 5).
 -define(TIMEOUT, 5 * 1000).

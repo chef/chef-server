@@ -109,7 +109,7 @@ url_test_() ->
         end}]}.
 
 checksum_test_() ->
-    MockedModules = [mini_s3, chef_s3, s3_ops],
+    MockedModules = [mini_s3, chef_s3, chef_s3_ops],
     {foreach,
      fun() ->
              %% Temporarily disable logging chef_s3:delete_checksums/2
@@ -119,7 +119,7 @@ checksum_test_() ->
              application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
 
              %% Make the chunk size smaller
-             meck:expect(s3_ops, chunk_size, fun() -> 3 end),
+             meck:expect(chef_s3_ops, chunk_size, fun() -> 3 end),
 
              %% Actual value doesn't matter; we're not going to use it anyway
              meck:expect(mini_s3, new, 3, ignored),
