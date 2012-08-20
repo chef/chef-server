@@ -88,17 +88,17 @@ parallel_delete(OrgId, Checksums) ->
     %%  [{value, 1}, {value, 2}, timeout, {badmatch, ...}]
     %%
     ec_plists:ftmap(fun(Checksum) ->
-                    case delete_file(OrgId, Bucket, Checksum) of
-                        {ok, Checksum} -> Checksum;
-                        {Error, Checksum} -> throw({Error, Checksum})
-                    end
-                end,
-                Checksums,
-                ?TIMEOUT).
+                            case delete_file(OrgId, Bucket, Checksum) of
+                                {ok, Checksum} -> Checksum;
+                                {Error, Checksum} -> throw({Error, Checksum})
+                            end
+                    end,
+                    Checksums,
+                    ?TIMEOUT).
 
 %% @doc Verify that each checksummed file is stored in S3 by checking its metadata
 fetch_md(OrgId, Checksums) when is_list(Checksums),
-                             is_binary(OrgId) ->
+                                is_binary(OrgId) ->
     parallel_fetch(OrgId, Checksums).
 
 parallel_fetch(OrgId, Checksums) ->

@@ -55,11 +55,11 @@ check_checksums(OrgId, Checksums) ->
 %% @doc Given a OrgGuid and a list of checksums, delete the checksums, returns a list of
 %% the ones deleted, missing, timeout and errors
 -spec delete_checksums(OrgId :: object_id(),
-                      Checksums :: [binary()]) ->
-                             {{ok, [binary()]},
-                              {missing, [binary()]},
-                              {timeout, non_neg_integer()},
-                              {error, non_neg_integer()}}.
+                       Checksums :: [binary()]) ->
+                              {{ok, [binary()]},
+                               {missing, [binary()]},
+                               {timeout, non_neg_integer()},
+                               {error, non_neg_integer()}}.
 delete_checksums(OrgId, Checksums) ->
     s3_ops:delete(OrgId, Checksums).
 
