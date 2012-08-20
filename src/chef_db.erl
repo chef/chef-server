@@ -1229,7 +1229,15 @@ find_key_data(#chef_user{public_key = KeyData, pubkey_version = ?KEY_VERSION}) -
 find_key_data(#chef_client{public_key = Cert, pubkey_version = ?CERT_VERSION}) ->
     {cert, Cert};
 find_key_data(#chef_client{public_key = KeyData, pubkey_version = ?KEY_VERSION}) ->
-    {key, KeyData}.
+    {key, KeyData};
+find_key_data(#chef_client{public_key = KeyData}) ->
+    %% FIXME: we should re-evaluate whether we need to track pubkey_version at all. For the
+    %% types of key data in our current systems, we can easily detect the type by inspection
+    %% of the key data. This could be done in the chef_authn layer.
+    %%
+    %% If not otherwise set, assume the key data is a certificate
+    {cert, KeyData}.
+
 
 -spec new_node_record(<<_:256>>, <<_:256>>, {[_]}, db_type()) -> #chef_node{}.
 %% @doc Create a `#chef_node{}' record assigning a generated id and setting timestamps to
