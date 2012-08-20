@@ -836,23 +836,24 @@ delete_cookbook_version(#chef_cookbook_version{id=CookbookVersionId,
                                                name=Name}) ->
     case delete_cookbook_version_checksums(OrgId, CookbookVersionId) of
         {ok, DeletedChecksums} ->
-            DeleteResponse = #chef_db_cb_version_delete{deleted_checksums = DeletedChecksums},
-            case delete_object(delete_cookbook_version_by_id, CookbookVersionId) of
-                {ok, 1} ->
-                    case delete_cookbook_if_last(OrgId, Name) of
-                        {ok, 0} ->
-                            DeleteResponse#chef_db_cb_version_delete{cookbook_delete = false};
-                        {ok, 1} ->
-                            DeleteResponse#chef_db_cb_version_delete{cookbook_delete = true};
-                        Error = {error, _} ->
-                            Error
-                    end;
-                {error, Reason} ->
-                    {error, Reason}
-             end;
-        {error, Reason} ->
-            {error, Reason}
+            CookbookDelete = case delete_object(delete_cookbook_version_by_id, CookbookVersionId) of
+                                 {ok, 1} ->
+                                     case delete_cookbook_if_last(OrgId, Name) of
+                                         {ok, 0} -> false;
+                                         {ok, 1} -> true;
+                                         Error = {error, _} -> Error
+                                     end;
+                                 {error, Reason} -> {error, Reason}
+                             end,
+            dcv_result_or_error(CookbookDelete, DeletedChecksums);
+        {error, Reason} -> {error, Reason}
     end.
+
+dcv_result_or_error({error, Reason}, _) ->
+    {error, Reason};
+dcv_result_or_error(CookbookDelete, DeletedChecksums) ->
+    #chef_db_cb_version_delete{deleted_checksums = DeletedChecksums,
+                               cookbook_delete = CookbookDelete}.
 
 %% The API does not update data_bag objects at present. The only reason to have an upadte at
 %% this time would be for audit/debug purposes where we could keep track of who and when a
