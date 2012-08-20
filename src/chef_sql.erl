@@ -1356,11 +1356,10 @@ delete_checksums(OrgId, Checksums) ->
                     %% The checksum may still be associated with
                     %% another cookbook version record which is OK!
                     Acc;
-                {error, Error} ->
-                    error_logger:error_msg("The following error occured
-                                          when trying to delete checksum
-                                          record ~p for organization ~p: ~p~n",
-                                          [Checksum, OrgId, Error]),
+                {error, Reason} ->
+                    error_logger:error_msg("Checksum deletion error: ~p~n"
+                                           "{~p,delete_checksums,2,[{file,~p},{line,~p}]}~n",
+                                           [Reason, ?MODULE, ?FILE, ?LINE]),
                     Acc
             end
       end,
