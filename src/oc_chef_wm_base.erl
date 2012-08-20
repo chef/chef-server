@@ -82,7 +82,7 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
                     {Req2, State2} = set_forbidden_msg(Permission, Req1, State1),
                     {true, Req2, State2};
                 {Error, {AuthzObjectType, AuthzId, Permission}} ->
-                    #base_state{requestor=#chef_requestor{authz_id=RequestorId}} = State1,
+                    #base_state{requestor_id=RequestorId} = State1,
                     %% TODO: Extract this logging message, as it is used elsewhere, too
                     error_logger:error_msg("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
                                            [Permission, {AuthzObjectType, AuthzId}, RequestorId, Error]),
@@ -142,9 +142,8 @@ auth_check({object, ObjectId, Permission}, Req, State) ->
 %% with the different resource_state records).
 create_in_container(Container, Req, #base_state{chef_authz_context = AuthzContext,
                                                 organization_guid = OrgId,
-                                                requestor = Requestor,
+                                                requestor_id = RequestorId,
                                                 resource_state = RS} = State) ->
-    #chef_requestor{authz_id = RequestorId} = Requestor,
     case chef_authz:create_object_if_authorized(AuthzContext, OrgId, RequestorId,
                                                 Container) of
         {ok, AuthzId} ->
@@ -178,15 +177,13 @@ invert_perm(Other) ->
 %%                      Req :: wm_req(),
 %%                      State :: #base_state{}) -> true | false | Error :: term().
 has_permission(AuthzObjectType, AuthzId, Permission, Req, #base_state{reqid=ReqId,
-                                                                      requestor=Requestor}=State) ->
-    #chef_requestor{authz_id = RequestorId} = Requestor,
+                                                                      requestor_id=RequestorId}=State) ->
     ?SH_TIME(ReqId, chef_authz, is_authorized_on_resource,
                   (RequestorId, AuthzObjectType, AuthzId, actor, RequestorId, Permission)).
 
 %% NOTE: derives the permission check from the HTTP verb of the Request
 check_permission(AuthzObjectType, AuthzId, Req, #base_state{reqid=ReqId,
-                                                            requestor=#chef_requestor{
-                                                              authz_id = RequestorId}
+                                                            requestor_id=RequestorId
                                                            }=State) ->
     Perm = http_method_to_authz_perm(Req),
     case has_permission(AuthzObjectType, AuthzId, Perm, Req, State) of
@@ -222,7 +219,7 @@ is_authorized(Req, State) ->
 %% we add a user to the org, and then disassociate them, there will be
 %% acls left behind granting permissions on the org objects, so we
 %% must check user association and permissions
-authorized_by_org_membership_check(Req, #base_state{requester_type=client}=State) ->
+authorized_by_org_membership_check(Req, #base_state{requestor=#chef_client{}}=State) ->
     {true, Req, State};
 authorized_by_org_membership_check(Req, State = #base_state{organization_name = OrgName,
                                                             chef_db_context = DbContext}) ->
