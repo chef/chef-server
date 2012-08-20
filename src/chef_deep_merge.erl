@@ -19,7 +19,7 @@
 %%
 
 
--module(deep_merge).
+-module(chef_deep_merge).
 
 -export([merge/2]).
 
