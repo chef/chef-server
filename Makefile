@@ -61,6 +61,7 @@ itest_clean:
 	@rm -f itest/*.beam
 	@echo Dropping integration test database
 	@cd itest;bundle exec ./create_schema.rb ${DB_TYPE} destroy
+	@rm -rf itest/Gemfile.lock
 
 itest: compile itest_bundler itest_create itest_run itest_clean
 
