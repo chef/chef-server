@@ -43,7 +43,6 @@
 
           ok = [] :: [binary()],
           missing = [] :: [binary()],
-          timeouts = 0,
           errors = 0 :: non_neg_integer()
          }).
 
@@ -56,26 +55,24 @@ delete(OrgId, Checksums) when is_list(Checksums),
     Results = chunk_map(fun(Chunk) -> parallel_delete(OrgId, Chunk) end,
                         Checksums, chunk_size()),
     %% The results will be a list of lists so flatten it
-    FlattenedResults = lists:flatten(Results),
     %% Process the flattened results, splitting them into success checksums,
     %% missing checksums, timeout count and error count
-    #state{ok=Ok, missing=Missing, timeouts=Timeouts, errors=Errors} =
-        lists:foldl(fun(A, #state{ok=Ok,missing=Missing,timeouts=Timeouts,errors=Errors}=State) ->
-            case A of
-                {value, Checksum} -> State#state{ok=[Checksum|Ok]};
-                {missing, Checksum} -> State#state{missing=[Checksum|Missing]};
-                timeout -> State#state{timeouts=Timeouts + 1};
-                _Error -> State#state{errors=Errors + 1}
-            end
-        end,
-        #state{},
-        FlattenedResults
-        ),
+    AddResult = fun(Result, {Ok, Missing, Timeouts, Errors}) ->
+                    case Result of
+                        {value, Checksum} -> {[Checksum | Ok], Missing, Timeouts, Errors};
+                        {missing, Checksum} -> {Ok, [Checksum | Missing], Timeouts, Errors};
+                        timeout -> {Ok, Missing, Timeouts + 1, Errors};
+                        {_Error, _Checksum} -> {Ok, Missing, Timeouts, Errors + 1}
+                    end
+                end,
 
-    error_logger:info_msg(
-        "Deleted ~p/~p checksums with ~p missing, ~p timeouts and ~p errors~n",
-        [length(Ok), length(Checksums), length(Missing), Timeouts, Errors]
-    ),
+    {Ok, Missing, Timeouts, Errors} =
+        lists:foldl(AddResult,
+                    {[], [], 0, 0}, lists:flatten(Results)),
+    error_logger:info_msg("Deleted ~p/~p checksums with ~p missing,"
+                          "~p timeouts and ~p errors~n",
+                          [length(Ok), length(Checksums), length(Missing),
+                           Timeouts, Errors]),
     Result = {{ok, lists:sort(Ok)},
               {missing, lists:sort(Missing)},
               {timeout, Timeouts},
