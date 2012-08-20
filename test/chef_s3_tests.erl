@@ -112,6 +112,8 @@ checksum_test_() ->
     MockedModules = [mini_s3, chef_s3, s3_ops],
     {foreach,
      fun() ->
+             %% Temporarily disable logging chef_s3:delete_checksums/2
+             error_logger:tty(false),
              test_utils:mock(MockedModules, [passthrough]),
              meck:expect(chef_s3, get_config, fun() -> mock_config end),
              application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
@@ -186,6 +188,8 @@ checksum_test_() ->
              OrgId
      end,
      fun(_OrgId) ->
+             %% Re-enable logging
+             error_logger:tty(true),
              test_utils:unmock(MockedModules)
      end,
      [
