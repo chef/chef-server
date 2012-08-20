@@ -1603,7 +1603,7 @@ delete_cookbook_version_checksums() ->
                                             CookbookVersion#chef_cookbook_version.minor,
                                             CookbookVersion#chef_cookbook_version.patch}}),
 
-    % Verify all checksums exist
+    %% Verify all checksums exist
     [Checksum1, Checksum2] = Got#chef_cookbook_version.checksums,
     ?assertEqual(true, checksum_exists(Got#chef_cookbook_version.org_id, Checksum1)),
     ?assertEqual(true, checksum_exists(Got#chef_cookbook_version.org_id, Checksum2)),
