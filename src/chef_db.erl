@@ -239,10 +239,10 @@ client_record_to_authz_id(_Context, ClientRecord) ->
 
 -spec fetch_requestor(Ctx::#context{},
                       OrgName::binary(),
-                      ClientName::binary()) -> #chef_requestor{} |
+                      ClientName::binary()) -> #chef_client{} | #chef_user{} |
                                                {'not_found', 'client' | 'org'}.
 %% @doc Given a name and an org, find either a user or a client and return a
-%% #chef_requestor{} record.
+%% #chef_user{} or #chef_client{} record.
 %%
 %% Looks for a user first, then a client.  The fact that users and
 %% clients are in the same name space is a known limitation of the
@@ -258,10 +258,10 @@ fetch_requestor(Ctx, OrgName, ClientName) ->
 
 -spec fetch_couchdb_requestor(Context::#context{},
                               OrgName::binary(),
-                              ClientName::binary()) -> #chef_requestor{} |
+                              ClientName::binary()) -> #chef_client{} | #chef_user{} |
                                                        {'not_found', 'client' | 'org'}.
 %% @doc Given a name and an org, find either a user or a client in
-%% couchdb and return a #chef_requestor{} record.
+%% couchdb and return a #chef_client{} or #chef_user{} record.
 %%
 %% Looks for a user first, then a client.  The fact that users and
 %% clients are in the same name space is a known limitation of the
@@ -279,23 +279,17 @@ fetch_couchdb_requestor(#context{reqid = ReqId, otto_connection = Server}=Contex
                           (Server, OrgId, ClientName)) of
                 {not_found, What} -> {not_found, What};
                 #chef_client{}=Client ->
-                    #chef_requestor{type = client,
-                                    authz_id = Client#chef_client.authz_id,
-                                    name = Client#chef_client.name,
-                                    key_data = find_key_data(Client)}
+                    Client
             end;
         #chef_user{}=User ->
-            #chef_requestor{type = user,
-                            authz_id = User#chef_user.authz_id,
-                            name = User#chef_user.username,
-                            key_data = find_key_data(User)}
+            User
     end;
 fetch_couchdb_requestor(Context, OrgName, ClientName) ->
     fetch_couchdb_requestor(Context, as_bin(OrgName), as_bin(ClientName)).
 
 -spec fetch_sql_requestor(Context::#context{},
-                              OrgName::binary(),
-                              ClientName::binary()) -> #chef_requestor{} |
+                          OrgName::binary(),
+                          ClientName::binary()) -> #chef_client{} | #chef_user{} |
                                                        {'not_found', 'client'}.
 fetch_sql_requestor(Context, OrgName, ClientName) ->
     case fetch_user(Context, ClientName) of
@@ -303,19 +297,11 @@ fetch_sql_requestor(Context, OrgName, ClientName) ->
             case fetch_client(Context, OrgName, ClientName) of
                 not_found ->
                     {not_found, client};
-                #chef_client{authz_id = AuthzId,
-                             name = Name} = Client ->
-                    #chef_requestor{type = client,
-                                    authz_id = AuthzId,
-                                    name = Name,
-                                    key_data = find_key_data(Client)}
+                #chef_client{} = Client ->
+                    Client
             end;
-        #chef_user{authz_id = AuthzId,
-                   username = Name} = User ->
-            #chef_requestor{type = user,
-                            authz_id = AuthzId,
-                            name = Name,
-                            key_data = find_key_data(User)}
+        #chef_user{} = User ->
+            User
     end.
 
 -spec create_node(#context{}, #chef_node{}, object_id()) -> ok | {conflict, term()} | term().
@@ -1227,30 +1213,6 @@ update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
         {conflict, Message} -> {conflict, Message};
         {error, Error} -> {error, Error}
     end.
-
--spec find_key_data(#chef_user{} | #chef_client{}) ->
-                           {cert, binary()} | {key, binary()}.
-%% Some of Our user data lacks a certificate and has a public key
-%% instead.  We look first for certificate, then for public_key.  If
-%% both are not found, we'll crash with some detail of the badly
-%% formed user record.
-%%
-find_key_data(#chef_user{public_key = KeyData, pubkey_version = ?CERT_VERSION}) ->
-    {cert, KeyData};
-find_key_data(#chef_user{public_key = KeyData, pubkey_version = ?KEY_VERSION}) ->
-    {key, KeyData};
-find_key_data(#chef_client{public_key = Cert, pubkey_version = ?CERT_VERSION}) ->
-    {cert, Cert};
-find_key_data(#chef_client{public_key = KeyData, pubkey_version = ?KEY_VERSION}) ->
-    {key, KeyData};
-find_key_data(#chef_client{public_key = KeyData}) ->
-    %% FIXME: we should re-evaluate whether we need to track pubkey_version at all. For the
-    %% types of key data in our current systems, we can easily detect the type by inspection
-    %% of the key data. This could be done in the chef_authn layer.
-    %%
-    %% If not otherwise set, assume the key data is a certificate
-    {cert, KeyData}.
-
 
 -spec new_node_record(<<_:256>>, <<_:256>>, {[_]}, db_type()) -> #chef_node{}.
 %% @doc Create a `#chef_node{}' record assigning a generated id and setting timestamps to

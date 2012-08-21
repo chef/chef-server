@@ -38,18 +38,16 @@ fetch_requestor_test_() ->
                meck:expect(chef_otto, connect, fun() -> otto_connect end),
                meck:expect(chef_db_darklaunch, is_enabled, fun(<<"sql_users">>) -> true end),
                meck:expect(chef_db_darklaunch, is_enabled, fun(<<"couchdb_clients">>) -> false end),
+               User = #chef_user{id = <<"a1">>,
+                                 authz_id = <<"b2">>,
+                                 username = <<"alice">>,
+                                 pubkey_version = 1,
+                                 public_key = <<"key data">>},
                meck:expect(chef_sql, fetch_user,
-                           fun(<<"alice">>) ->
-                                   {ok, #chef_user{id = <<"a1">>,
-                                                   authz_id = <<"b2">>,
-                                                   username = <<"alice">>,
-                                                   pubkey_version = 1,
-                                                   public_key = <<"key data">>}}
-                           end),
+                           fun(<<"alice">>) -> {ok, User } end),
                Context = chef_db:make_context(<<"req-id-123">>),
-               User = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
-               ?assertEqual({cert, <<"key data">>}, User#chef_requestor.key_data),
-               ?assertEqual(user, User#chef_requestor.type)
+               Got = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
+               ?assertEqual(Got, User)
        end
       },
       {"a client is found SQL cert",
@@ -65,19 +63,17 @@ fetch_requestor_test_() ->
                            fun(<<"couchdb_clients">>) -> false end),
                meck:expect(chef_sql, fetch_user,
                            fun(<<"alice">>) -> {ok, not_found} end),
+               Client = #chef_client{id = <<"mock-client-id">>,
+                                     authz_id = <<"mock-client-authz-id">>,
+                                     org_id = <<"org-id-123">>,
+                                     name = <<"alice">>,
+                                     pubkey_version = 1,
+                                     public_key = <<"key data">>},
                meck:expect(chef_sql, fetch_client,
-                           fun(<<"mock-org-id-123">>, <<"alice">>) ->
-                                   {ok, #chef_client{id = <<"mock-client-id">>,
-                                                     authz_id = <<"mock-client-authz-id">>,
-                                                     org_id = <<"org-id-123">>,
-                                                     name = <<"alice">>,
-                                                     pubkey_version = 1,
-                                                     public_key = <<"key data">>}}
-                           end),
+                           fun(<<"mock-org-id-123">>, <<"alice">>) -> {ok, Client} end),
                Context = chef_db:make_context(<<"req-id-123">>),
-               Client = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
-               ?assertEqual({cert, <<"key data">>}, Client#chef_requestor.key_data),
-               ?assertEqual(client, Client#chef_requestor.type)
+               Got = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
+               ?assertEqual(Got, Client)
        end
       },
       {"a client is found SQL key",
@@ -93,19 +89,17 @@ fetch_requestor_test_() ->
                            fun(<<"couchdb_clients">>) -> false end),
                meck:expect(chef_sql, fetch_user,
                            fun(<<"alice">>) -> {ok, not_found} end),
+            Client = #chef_client{id = <<"mock-client-id">>,
+                                  authz_id = <<"mock-client-authz-id">>,
+                                  org_id = <<"org-id-123">>,
+                                  name = <<"alice">>,
+                                  pubkey_version = 0,
+                                  public_key = <<"key data">>},
                meck:expect(chef_sql, fetch_client,
-                           fun(<<"mock-org-id-123">>, <<"alice">>) ->
-                                   {ok, #chef_client{id = <<"mock-client-id">>,
-                                                     authz_id = <<"mock-client-authz-id">>,
-                                                     org_id = <<"org-id-123">>,
-                                                     name = <<"alice">>,
-                                                     pubkey_version = 0,
-                                                     public_key = <<"key data">>}}
-                           end),
+                           fun(<<"mock-org-id-123">>, <<"alice">>) -> {ok, Client} end),
                Context = chef_db:make_context(<<"req-id-123">>),
-               Client = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
-               ?assertEqual({key, <<"key data">>}, Client#chef_requestor.key_data),
-               ?assertEqual(client, Client#chef_requestor.type)
+               Got = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
+               ?assertEqual(Got, Client)
        end
       },
       {"a client is found Couchdb",
@@ -117,23 +111,21 @@ fetch_requestor_test_() ->
                            end),
                meck:expect(chef_sql, fetch_user,
                            fun(<<"alice">>) -> {ok, not_found} end),
+               Client = #chef_client{id = <<"mock-client-id">>,
+                                     authz_id = <<"mock-client-authz-id">>,
+                                     org_id = <<"org-id-123">>,
+                                     name = <<"alice">>,
+                                     pubkey_version = 1,
+                                     public_key = <<"key data">>},
                meck:expect(chef_otto, fetch_client,
-                           fun(_, <<"mock-org-id-123">>, <<"alice">>) ->
-                                   #chef_client{id = <<"mock-client-id">>,
-                                                authz_id = <<"mock-client-authz-id">>,
-                                                org_id = <<"org-id-123">>,
-                                                name = <<"alice">>,
-                                                pubkey_version = 1,
-                                                public_key = <<"key data">>}
-                           end),
+                           fun(_, <<"mock-org-id-123">>, <<"alice">>) -> Client end),
                meck:expect(chef_db_darklaunch, is_enabled,
                            fun(<<"sql_users">>) -> true end),
                meck:expect(chef_db_darklaunch, is_enabled,
                            fun(<<"couchdb_clients">>) -> true end),
                Context = chef_db:make_context(<<"req-id-123">>),
-               Client = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
-               ?assertEqual({cert, <<"key data">>}, Client#chef_requestor.key_data),
-               ?assertEqual(client, Client#chef_requestor.type)
+               Got = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
+               ?assertEqual(Got, Client)
        end
       }
      ]}.
