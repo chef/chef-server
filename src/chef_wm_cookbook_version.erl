@@ -122,11 +122,9 @@ from_json(Req, #base_state{resource_state = CookbookState} = State) ->
             chef_wm_base:update_from_json(Req, State, CBVersion, CBData1);
         false ->
             #cookbook_state{authz_id = AuthzId,
-                            cookbook_container_id = ContainerId,
                             cookbook_data = CBData} = CookbookState,
-            AuthzInfo = authz_for_cookbook_version(ContainerId, AuthzId),
             case chef_wm_base:create_from_json(Req, State, chef_cookbook_version,
-                                               AuthzInfo, CBData) of
+                                               {authz_id, AuthzId}, CBData) of
                 {true, Req1, State1} ->
                     %% munge response since we are using PUT as create here
                     {true, chef_wm_util:set_json_body(Req1, CBData), State1};
@@ -154,14 +152,6 @@ cookbook_version_exists(#cookbook_state{chef_cookbook_version = undefined}) ->
     false;
 cookbook_version_exists(#cookbook_state{chef_cookbook_version = #chef_cookbook_version{} }) ->
     true.
-
-%% @doc select appropriate Authz Id to be used when creating the object from json.
-%% If a previous version of the cookbook exists use its AuthzId otherwise use
-%% the cookbook container AuthzId
-authz_for_cookbook_version(ContainerId, undefined) ->
-    ContainerId;
-authz_for_cookbook_version(_ContainerId, AuthzId) ->
-    {authz_id, AuthzId}.
 
 construct_not_found_response(Req, #base_state{resource_state = #cookbook_state{cookbook_name = Name}} = State) ->
     Message = chef_wm_util:not_found_message(cookbook_version, {Name, chef_wm_util:extract_from_path(cookbook_version, Req)}),
