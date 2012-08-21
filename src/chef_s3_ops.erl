@@ -69,10 +69,6 @@ delete(OrgId, Checksums) when is_list(Checksums),
     {Ok, Missing, Timeouts, Errors} =
         lists:foldl(AddResult,
                     {[], [], 0, 0}, lists:flatten(Results)),
-    error_logger:info_msg("Deleted ~p/~p checksums with ~p missing,"
-                          "~p timeouts and ~p errors~n",
-                          [length(Ok), length(Checksums), length(Missing),
-                           Timeouts, Errors]),
     Result = {{ok, lists:sort(Ok)},
               {missing, lists:sort(Missing)},
               {timeout, Timeouts},
