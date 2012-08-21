@@ -31,7 +31,8 @@
 -define(TOTAL_HEADER_SIZE_BYTES, ?MAGIC_NUMBER_SIZE_BYTES + ?CHECKSUM_SIZE_BYTES).
 
 %% Matches file names without "._bkwbuf_" in the name
--define(DISCARD_WRITE_BUFS, "^(?:.(?<!\\._bkwbuf_))*$").
+%%-define(DISCARD_WRITE_BUFS, "^(?:.(?<!\\._bkwbuf_))*$").
+-define(WRITE_BUFS, ". [0-9][0-9][0-9]_bkwbuf$").
 
 -spec bucket_list() -> [#bucket{}] | [].
 bucket_list() ->
@@ -260,21 +261,21 @@ finish_write(#entryref{fd=Fd, path=Path, ctx=Ctx}) ->
 filter_entries(_Bucket, []) ->
     [];
 filter_entries(Bucket, Entries) ->
-    {ok, Ex} = re:compile(?DISCARD_WRITE_BUFS, [unicode]),
+    {ok, Ex} = re:compile(?WRITE_BUFS, [unicode]),
     filter_entries(Bucket, Entries, Ex, []).
 
 filter_entries(_Bucket, [], _Ex, Accum) ->
     lists:reverse(Accum);
 filter_entries(Bucket, [Entry|T], Ex, Accum) ->
-    case re:run(Entry, Ex, [{capture, first, binary}]) of
-        {match, [MatchingEntry]} ->
-            case entry_md(Bucket, MatchingEntry) of
+    case re:run(Entry, Ex, [{capture, none}]) of
+        nomatch ->
+            case entry_md(Bucket, filename:basename(Entry)) of
                 {ok, Obj} ->
                     filter_entries(Bucket, T, Ex, [Obj|Accum]);
                 _Error ->
                     filter_entries(Bucket, T, Ex, Accum)
             end;
-        nomatch ->
+        match ->
             filter_entries(Bucket, T, Ex, Accum)
     end.
 
