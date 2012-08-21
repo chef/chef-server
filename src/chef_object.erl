@@ -191,9 +191,9 @@ ejson_for_indexing(#chef_node{name = Name, environment = Environment}, Node) ->
     Override = get_node_part(<<"override">>, Node),
     %% automatic may not always be present
     Automatic = get_node_part(<<"automatic">>, Node),
-    DefaultNormal = deep_merge:merge(Defaults, Normal),
-    DefaultNormalOverride = deep_merge:merge(DefaultNormal, Override),
-    {Merged} = deep_merge:merge(DefaultNormalOverride, Automatic),
+    DefaultNormal = chef_deep_merge:merge(Defaults, Normal),
+    DefaultNormalOverride = chef_deep_merge:merge(DefaultNormal, Override),
+    {Merged} = chef_deep_merge:merge(DefaultNormalOverride, Automatic),
     RunList = value_or_empty_list(<<"run_list">>, Node),
     %% We transform to a dict to ensure we override the top-level keys
     %% with the appropriate values and don't introduce any duplicate

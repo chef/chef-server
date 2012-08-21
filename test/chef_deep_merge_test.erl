@@ -15,7 +15,7 @@
 %% under the License.
 %%
 
--module(deep_merge_test).
+-module(chef_deep_merge_test).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -45,7 +45,7 @@ deep_merge_comparison({MergeeFile, OtherFile, ExpectedFile}) ->
   OtherTerm    = json_read(OtherFile),
   ExpectedTerm = json_read(ExpectedFile),
   {"Deep Merge Test: " ++ TestIndex, fun() ->
-        Result = deep_merge:merge(MergeeTerm, OtherTerm),
+        Result = chef_deep_merge:merge(MergeeTerm, OtherTerm),
         NormalizedExpected = normalize(ExpectedTerm),
         NormalizedResult = normalize(Result),
         ?assertEqual(NormalizedExpected,NormalizedResult)
