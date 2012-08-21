@@ -120,9 +120,9 @@ to_json(Req, #base_state{resource_state =
     {Json, Req, State}.
 
 delete_resource(Req, #base_state{chef_db_context = DbContext,
+                                 requestor_id = RequestorId,
                                  resource_state = #client_state{
                                    chef_client = Client},
-                                 requestor = #chef_requestor{authz_id = RequestorId},
                                  organization_name = OrgName} = State) ->
     ok = chef_object_db:delete(DbContext, Client, RequestorId),
     EJson = chef_client:assemble_client_ejson(Client, OrgName),

@@ -132,12 +132,12 @@ to_json(Req, #base_state{resource_state = DataBagState} = State) ->
     {chef_db_compression:decompress(JSON), Req, State}.
 
 delete_resource(Req, #base_state{chef_db_context = DbContext,
+                                 requestor_id = RequestorId,
                                  resource_state = #data_state{
                                      data_bag_name = BagName,
                                      data_bag_item_name = ItemName,
-                                     chef_data_bag_item = Item},
-                                 requestor = #chef_requestor{
-                                     authz_id = RequestorId}}=State) ->
+                                     chef_data_bag_item = Item}
+                                }=State) ->
 
     ok = chef_object_db:delete(DbContext, Item, RequestorId),
     Json = chef_db_compression:decompress(Item#chef_data_bag_item.serialized_object),

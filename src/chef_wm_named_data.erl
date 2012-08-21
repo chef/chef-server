@@ -117,12 +117,11 @@ create_path(Req, #base_state{resource_state = #data_state{
     {binary_to_list(ItemName), Req, State}.
 
 from_json(Req, #base_state{chef_db_context = DbContext,
+                           requestor_id = ActorId,
                            resource_state = #data_state{data_bag_name = DataBagName,
                                                         data_bag_item_name = ItemName,
                                                         data_bag_item_ejson = ItemData},
                            organization_guid = OrgId,
-                           requestor = #chef_requestor{authz_id = ActorId},
-                           %reqid = _ReqId,
                            db_type = DbType} = State) ->
 
     %% Note: potential race condition.  If we don't have perms, the create will fail.
@@ -181,11 +180,11 @@ to_json(Req, State) ->
     {items_for_data_bag(Req, State), Req, State}.
 
 delete_resource(Req, #base_state{chef_db_context = DbContext,
+                                 requestor_id = RequestorId,
                                  resource_state = #data_state{
                                      chef_data_bag = DataBag,
-                                     data_bag_name = DataBagName},
-                                 requestor = #chef_requestor{
-                                     authz_id = RequestorId}} = State) ->
+                                     data_bag_name = DataBagName}
+                                } = State) ->
 
     ok = chef_object_db:delete(DbContext, DataBag, RequestorId),
     NakedBag = {[{<<"name">>, DataBagName},
