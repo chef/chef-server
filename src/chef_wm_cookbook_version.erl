@@ -140,10 +140,10 @@ from_json(Req, #base_state{resource_state = CookbookState} = State) ->
     end.
 
 delete_resource(Req, #base_state{chef_db_context = DbContext,
+                                 requestor_id = RequestorId,
                                  resource_state = #cookbook_state{
-                                     chef_cookbook_version = CookbookVersion},
-                                 requestor = #chef_requestor{
-                                     authz_id = RequestorId}} = State) ->
+                                     chef_cookbook_version = CookbookVersion}
+                                } = State) ->
     ok = ?BASE_RESOURCE:delete_object(DbContext, CookbookVersion, RequestorId),
     Json = chef_cookbook:assemble_cookbook_ejson(CookbookVersion),
     {true, chef_wm_util:set_json_body(Req, Json), State}.

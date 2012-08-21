@@ -87,10 +87,10 @@ from_json(Req, #base_state{resource_state = #role_state{chef_role = Role,
     chef_wm_base:update_from_json(Req, State, Role, RoleData).
 
 delete_resource(Req, #base_state{chef_db_context = DbContext,
+                                 requestor_id = RequestorId,
                                  resource_state = #role_state{
-                                     chef_role = Role},
-                                 requestor = #chef_requestor{
-                                     authz_id = RequestorId}} = State) ->
+                                     chef_role = Role}
+                                } = State) ->
 
     ok = ?BASE_RESOURCE:delete_object(DbContext, Role, RequestorId),
 

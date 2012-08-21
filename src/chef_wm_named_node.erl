@@ -78,10 +78,10 @@ from_json(Req, #base_state{resource_state = #node_state{chef_node = Node,
     chef_wm_base:update_from_json(Req, State, Node, NodeData).
 
 delete_resource(Req, #base_state{chef_db_context = DbContext,
+                                 requestor_id = RequestorId,
                                  resource_state = #node_state{
-                                     chef_node = Node},
-                                 requestor = #chef_requestor{
-                                     authz_id = RequestorId}} = State) ->
+                                     chef_node = Node}
+                                } = State) ->
 
     ok = ?BASE_RESOURCE:delete_object(DbContext, Node, RequestorId),
     Json = chef_db_compression:decompress(Node#chef_node.serialized_object),

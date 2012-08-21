@@ -52,10 +52,6 @@
           %% Formatted using ~p, but expected to be reasonably small.
           log_msg = "" :: term(),
 
-          %% Set by chef_rest_wm:is_authorized to record whether
-          %% request is originating from a user or a client.
-          requester_type :: 'user' | 'client',
-
           %% Time drift in seconds allowed between the timestamp in a
           %% singed request and the clock on the server.  Set in
           %% app.config {chef_rest, auth_skey}.
@@ -83,8 +79,11 @@
           %% Opaque db connection context record as returned by chef_authz:make_context.
           chef_authz_context :: chef_authz:chef_authz_context(),
 
+          %% AuthzId for the actor making the request.
+          requestor_id :: object_id(),
+
           %% Details for The actor making the request.
-          requestor :: #chef_requestor{} | undefined,
+          requestor :: #chef_client{} | #chef_user{},
 
           %% A record containing resource-specific state.
           resource_state :: tuple(),

@@ -78,8 +78,8 @@ create_path(Req, #base_state{organization_guid = OrgId,
     {binary_to_list(Id), Req, State#base_state{resource_state = SandboxState1}}.
 
 from_json(Req, #base_state{chef_db_context = DbContext,
+                           requestor_id = ActorId,
                            organization_name = OrgName,
-                           requestor = #chef_requestor{authz_id = ActorId},
                            resource_state =
                                #sandbox_state{sandbox_data = SandboxData}} = State) ->
     Checksums = checksums_from_sandbox_ejson(SandboxData),
