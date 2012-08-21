@@ -265,16 +265,15 @@ verify_request_signature(Req,
             {false, wrq:set_resp_body(ejson:encode(NotFoundMsg), Req),
              State#base_state{log_msg = {not_found, What}}};
         Requestor -> %% This is either #chef_client{} or #chef_user{}
-            KeyData0 = find_key_data(Requestor),
             %% If the request originated from the webui, we do authn using the webui public
             %% key, not the user's key.
-            KeyData = select_user_or_webui_key(Req, KeyData0),
+            PublicKey = select_user_or_webui_key(Req, Requestor),
             Body = body_or_default(Req, <<>>),
             HTTPMethod = method_as_binary(Req),
             Path = iolist_to_binary(wrq:path(Req)),
             {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
             case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
-                                                      Path, Body, KeyData,
+                                                      Path, Body, PublicKey,
                                                       AuthSkew) of
                 {name, _} ->
                     {true, Req, State1#base_state{requestor_id = authz_id(Requestor),
@@ -550,7 +549,7 @@ maybe_add_org_name(OrgName, Items) ->
 %%% The webui public key is fetched from the chef_keyring service. The 'X-Ops-WebKey-Tag'
 %%% header specifies which key id to use, or we use the 'default' key if it is missing.
 %%%
-select_user_or_webui_key(Req, KeyData) ->
+select_user_or_webui_key(Req, Requestor) ->
     %% Request origin is determined by the X-Ops-Request-Source header.  This is still secure
     %% because the request needs to have been signed with the webui private key.
     case wrq:get_req_header("x-ops-request-source", Req) of
@@ -584,7 +583,7 @@ select_user_or_webui_key(Req, KeyData) ->
                     throw({no_such_key, WebKeyTag})
             end;
         _Else ->
-            KeyData
+            public_key(Requestor)
     end.
 
 -spec body_not_too_big(#wm_reqdata{}) -> #wm_reqdata{}.
@@ -634,23 +633,8 @@ authz_id(#chef_client{authz_id = AuthzId}) ->
 authz_id(#chef_user{authz_id = AuthzId}) ->
     AuthzId.
 
--spec find_key_data(#chef_user{} | #chef_client{}) ->
-    {cert, binary()} | {key, binary()}.
-%% Some of Our user data lacks a certificate and has a public key
-%% instead.  We look first for certificate, then for public_key.  If
-%% both are not found, we'll crash with some detail of the badly
-%% formed user record.
-%%
-find_key_data(#chef_user{public_key = KeyData, pubkey_version = ?CERT_VERSION}) ->
-    {cert, KeyData};
-find_key_data(#chef_user{public_key = KeyData, pubkey_version = ?KEY_VERSION}) ->
-    {key, KeyData};
-find_key_data(#chef_client{public_key = KeyData, pubkey_version = ?KEY_VERSION}) ->
-    {key, KeyData};
-find_key_data(#chef_client{public_key = KeyData}) ->
-    %% FIXME: we should re-evaluate whether we need to track pubkey_version at all. For the
-    %% types of key data in our current systems, we can easily detect the type by inspection
-    %% of the key data. This could be done in the chef_authn layer.
-    %%
-    %% If not otherwise set, assume the key data is a certificate
-    {cert, KeyData}.
+-spec public_key(#chef_user{} | #chef_client{}) -> binary().
+public_key(#chef_user{public_key = PublicKey}) ->
+    PublicKey;
+public_key(#chef_client{public_key = PublicKey}) ->
+    PublicKey.
