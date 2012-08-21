@@ -4,6 +4,7 @@
 %% @author Christopher Maier <cm@opscode.com>
 %% @author James Casey <james@opscode.com>
 %% @author Mark Mzyk <mmzyk@opscode.com>
+%% @author Seth Chisamore <schisamo@opscode.com>
 %% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -24,6 +25,7 @@
 
 -module(chef_sql).
 
+-include_lib("chef_db/include/chef_db.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -ifdef(TEST).
@@ -820,7 +822,7 @@ update_cookbook_version_checksums(#chef_cookbook_version{ id        = Id,
     end.
 
 
--spec delete_cookbook_version(#chef_cookbook_version{}) -> {ok, 1 | 2} |
+-spec delete_cookbook_version(#chef_cookbook_version{}) -> #chef_db_cb_version_delete{} |
                                                            {error, term()}.
 %% @doc Delete a cookbok version. This will delete from several
 %% different tables in the DB. This function will return `{ok, 2}' if
@@ -832,22 +834,26 @@ update_cookbook_version_checksums(#chef_cookbook_version{ id        = Id,
 delete_cookbook_version(#chef_cookbook_version{id=CookbookVersionId,
                                                org_id=OrgId,
                                                name=Name}) ->
-    case delete_checksums(OrgId, CookbookVersionId) of
-        {ok, 1 } ->
-            case delete_object(delete_cookbook_version_by_id, CookbookVersionId) of
-                {ok, 1} ->
-                    case delete_cookbook_if_last(OrgId, Name) of
-                        {ok, N} ->
-                            {ok, N + 1};
-                        Error = {error, _} ->
-                            Error
-                    end;
-                {error, Reason} ->
-                    {error, Reason}
-             end;
-        {error, Reason} ->
-            {error, Reason}
+    case delete_cookbook_version_checksums(OrgId, CookbookVersionId) of
+        {ok, DeletedChecksums} ->
+            CookbookDelete = case delete_object(delete_cookbook_version_by_id, CookbookVersionId) of
+                                 {ok, 1} ->
+                                     case delete_cookbook_if_last(OrgId, Name) of
+                                         {ok, 0} -> false;
+                                         {ok, 1} -> true;
+                                         Error = {error, _} -> Error
+                                     end;
+                                 {error, Reason} -> {error, Reason}
+                             end,
+            dcv_result_or_error(CookbookDelete, DeletedChecksums);
+        {error, Reason} -> {error, Reason}
     end.
+
+dcv_result_or_error({error, Reason}, _) ->
+    {error, Reason};
+dcv_result_or_error(CookbookDelete, DeletedChecksums) ->
+    #chef_db_cb_version_delete{deleted_checksums = DeletedChecksums,
+                               cookbook_delete = CookbookDelete}.
 
 %% The API does not update data_bag objects at present. The only reason to have an upadte at
 %% this time would be for audit/debug purposes where we could keep track of who and when a
@@ -887,7 +893,6 @@ create_sandbox(#chef_sandbox{} = Sandbox) ->
                                   {error, term()}.
 delete_sandbox(SandboxId) when is_binary(SandboxId) ->
     delete_object(delete_sandbox_by_id, SandboxId).
-
 
 %% Checksum Operations
 
@@ -1322,18 +1327,44 @@ fetch_cookbook_authz(OrgId, CookbookName) ->
     end.
 
 %% @doc Delete all checksums for a given cookbook version
--spec delete_checksums(OrgId::binary(),
-                       CookbookVersionId::binary()) -> {ok, 1 } | {error, _}.
-delete_checksums(OrgId, CookbookVersionId) ->
+-spec delete_cookbook_version_checksums(OrgId::object_id(),
+                                       CookbookVersionId::object_id()) ->
+                                        {ok, [binary()]} | {error, term()}.
+delete_cookbook_version_checksums(OrgId, CookbookVersionId) ->
+    % retrieve a list of checksums before we delete the
+    % cookbook_version_checksums record
+    Checksums = fetch_cookbook_version_checksums(OrgId, CookbookVersionId),
     case sqerl:statement(delete_cookbook_checksums_by_orgid_cookbook_versionid,
-                         [OrgId, CookbookVersionId]) of
-        {ok, N} when is_integer(N) -> %% pretend there is 1
-            {ok, 1};
-        {ok, none} ->
-            {ok, 1}; %% this is ok, there might be no checksums to delete
+                            [OrgId, CookbookVersionId]) of
+        {ok, _} ->
+            {ok, delete_checksums(OrgId, Checksums)};
         {error, Error} ->
             {error, Error}
     end.
+%% @doc Deletes a list of checksums from the checksums table.  Happily swallows
+%% foreign_key constraint errors assuming the checksum is still associated with
+%% another cookbook_version_checksum record.  Returns a list of deleted checksum
+%% ids for further upstream processing(ie delete the checksums from S3).
+-spec delete_checksums(OrgId::binary(),
+                       Checksums::[binary()]) -> [binary()].
+delete_checksums(OrgId, Checksums) ->
+    lists:foldl(fun(Checksum, Acc) ->
+            case sqerl:statement(delete_checksum_by_id, [OrgId, Checksum]) of
+                {ok, N} when is_integer(N) -> %% pretend there is 1
+                    [Checksum|Acc];
+                {foreign_key, _} ->
+                    %% The checksum may still be associated with
+                    %% another cookbook version record which is OK!
+                    Acc;
+                {error, Reason} ->
+                    error_logger:error_msg("Checksum deletion error: ~p~n"
+                                           "{~p,delete_checksums,2,[{file,~p},{line,~p}]}~n",
+                                           [Reason, ?MODULE, ?FILE, ?LINE]),
+                    Acc
+            end
+      end,
+      [],
+      Checksums).
 
 %% @doc try and delete the row from cookbooks table.  It is protected by a
 %% ON DELETE RESTRICT from cookbook_versions so we get a FK violation if there

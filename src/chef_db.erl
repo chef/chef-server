@@ -5,6 +5,7 @@
 %% @author Mark Anderson <mark@opscode.com>
 %% @author Christopher Maier <cm@opscode.com>
 %% @author Mark Mzyk <mmzyk@opscode.com>
+%% @author Seth Chisamore <schisamo@opscode.com>
 %% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -121,6 +122,7 @@
          new_data_bag_record/4,
          new_data_bag_item_record/5]).
 
+-include_lib("chef_db/include/chef_db.hrl").
 -include_lib("chef_objects/include/chef_types.hrl").
 -include_lib("chef_objects/include/chef_osc_defaults.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
@@ -745,11 +747,20 @@ update_cookbook_version(#context{}=Ctx, UpdatedCookbookVersion, ActorId) ->
     update_object(Ctx, ActorId, update_cookbook_version, UpdatedCookbookVersion).
 
 %% @doc Delete a cookbook version
--spec delete_cookbook_version(Ctx::#context{},
-                              CookbookVersion::#chef_cookbook_version{})
-   -> {ok, 1 | 2} | not_found | {error, _}.
-delete_cookbook_version(#context{}=Ctx, #chef_cookbook_version{}=CookbookVersion) ->
-    delete_object(Ctx, delete_cookbook_version, CookbookVersion).
+-spec delete_cookbook_version(Ctx :: #context{},
+                              CookbookVersion :: #chef_cookbook_version{}) ->
+                                {ok, 1 | 2} | not_found | {error, term()}.
+delete_cookbook_version(#context{}=Ctx, #chef_cookbook_version{org_id=OrgId}=CookbookVersion) ->
+    case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
+        #chef_db_cb_version_delete{cookbook_delete=CookbookDeleted, deleted_checksums=DeletedChecksums} ->
+            chef_s3:delete_checksums(OrgId, DeletedChecksums),
+            %% TODO: return the actual chef_db_cb_version_delete record to the caller
+            case CookbookDeleted of
+                false -> {ok, 1};
+                true -> {ok, 2}
+            end;
+        Result -> Result %% not_found or {error, _}
+    end.
 
 -spec delete_node(#context{}, #chef_node{}) -> {ok, 1 | 2} | not_found | {error, _}.
 %% @doc Delete a node. You can provide either a `#chef_node{}' record or just the ID of the
@@ -1179,15 +1190,18 @@ fetch_couchdb_data_bags(#context{reqid = ReqId, otto_connection = S}, {id, OrgId
                     Object :: chef_object() | object_id() | #chef_client{} | #chef_sandbox{} |
                               #chef_cookbook_version{} ) -> {ok, 1 | 2} |
                                                             not_found |
+                                                            #chef_db_cb_version_delete{} |
                                                             {error, _}.
 %% @doc Delete a object. You can provide either a `#chef_object{}' record or just the ID of
 %% the object.
+
+%% SPECIAL CASE - We need an OrgId and Name in addition to the Id when deleting
+%% cookbook versions.
 delete_object(#context{reqid = ReqId}, Fun, #chef_cookbook_version{} = CookbookVersion) ->
     case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
                           fun() -> chef_sql:Fun(CookbookVersion) end) of
         {ok, not_found} -> not_found;
-        {ok, N} -> {ok, N};
-        {error, Error} -> {error, Error}
+        Result -> Result
     end;
 delete_object(#context{}=Ctx, Fun, Object) when is_tuple(Object) ->
     delete_object(Ctx, Fun, get_id(Object));
@@ -1195,8 +1209,7 @@ delete_object(#context{reqid = ReqId}, Fun, Id) ->
     case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
                           fun() -> chef_sql:Fun(Id) end) of
         {ok, not_found} -> not_found;
-        {ok, N} -> {ok, N};
-        {error, Error} -> {error, Error}
+        Result -> Result
     end.
 
 -spec update_object(#context{}, object_id(), update_fun(), chef_object() | #chef_cookbook_version{}) -> ok |
