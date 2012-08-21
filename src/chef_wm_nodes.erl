@@ -122,7 +122,7 @@ list_nodes(EnvName, Req, #base_state{chef_db_context = DbContext,
     NodeNames = chef_db:fetch_nodes(DbContext, OrgName, EnvName),
     package_node_list(NodeNames, Req, State).
 
-package_node_list(NodeNames, Req, #base_state{organization_name = OrgName}=State) ->
+package_node_list(NodeNames, Req, #base_state{}=State) ->
     RouteFun = ?BASE_ROUTES:bulk_route_fun(node, Req),
     NameMap = [ {Name, RouteFun(Name)} || Name <- NodeNames ],
     Json = ejson:encode({NameMap}),
