@@ -68,7 +68,7 @@ parse_binary_json(Bin, ReqName, Defaults) ->
                     Values ->
                         set_default_values(Client1, Values)
                 end,
-    {Name, FinalClient} = validate_name_or_rename(Client2, ReqName),
+    {Name, FinalClient} = check_name_values(Client2, ReqName),
     valid_name_format(Name),
     validate_client(FinalClient, Name).
 
@@ -110,7 +110,7 @@ set_name_values(Client) ->
             throw({client_name_mismatch})
     end.
 
-validate_name_or_rename(Client, ReqName) ->
+check_name_values(Client, ReqName) ->
     Name = ej:get({<<"name">>}, Client),
     case {Name, ReqName} of
         {undefined, undefined} ->
@@ -118,16 +118,8 @@ validate_name_or_rename(Client, ReqName) ->
         {undefined, _} ->
             {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>},
                                                   Client, ReqName), ReqName)};
-        {Name, undefined} ->
-            % This is a POST, nothing to do here
-            {Name, Client};
-        {Name, Name} ->
-            % This is a regular PUT, nothing to do here
-            {Name, Client};
-        {Name, _} ->
-            % This is a rename; we need to check for existing records
-            {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>},
-                                                  Client, ReqName), ReqName)}
+        {_, _} ->
+            {Name, Client}
     end.
 
 validate_client(Client, Name) ->
