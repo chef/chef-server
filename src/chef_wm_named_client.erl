@@ -85,9 +85,10 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
 from_json(Req, #base_state{reqid = RequestId,
                            resource_state =
                                #client_state{chef_client =
-                                                 #chef_client{name = Name} = Client,
+                                                 #chef_client{name = ReqName} = Client,
                                              client_data = ClientData}} =
               State) ->
+    Name = ej:get({<<"name">>}, ClientData),
     % Check to see if we need to generate a new key
     ClientData1 = case ej:get({<<"private_key">>}, ClientData) of
                       true ->
@@ -96,21 +97,34 @@ from_json(Req, #base_state{reqid = RequestId,
                       _ ->
                           PrivateKey = undefined,
                           ClientData
-    end,
+                  end,
     {Result, Req1, State1} = chef_wm_base:update_from_json(Req, State,
                                                            Client, ClientData1),
-    % This is for returning the private key, but needs to happen after update
-    Req2 = case PrivateKey of
-               undefined ->
-                   Req1;
-               _ ->
-                   chef_wm_util:append_field_to_json_body(Req1, <<"private_key">>,
-                                                            PrivateKey)
-           end,
-    % Need to return uri (for no good reason except ruby endpoint does)
-    Uri = ?BASE_ROUTES:route(client, Req1, [{name, Name}]),
-    FinalReq = chef_wm_util:append_field_to_json_body(Req2, <<"uri">>, Uri),
-    {Result, FinalReq, State1}.
+    case Result of
+        {halt, _} ->
+            {Result, Req1, State1};
+        _ ->
+            % This is for returning the private key, but needs to happen after update
+            Req2 = case PrivateKey of
+                       undefined ->
+                           Req1;
+                       _ ->
+                           chef_wm_util:append_field_to_json_body(Req1,
+                                                                  <<"private_key">>,
+                                                                  PrivateKey)
+                   end,
+            % Need to return uri (in case request is a rename?)
+            Uri = ?BASE_ROUTES:route(client, Req1, [{name, Name}]),
+            FinalReq = chef_wm_util:append_field_to_json_body(Req2, <<"uri">>, Uri),
+            case ReqName of
+                Name ->
+                    {Result, FinalReq, State1};
+                _ ->
+                    RenameReq = wrq:set_resp_header("Location", binary_to_list(Uri),
+                                                    FinalReq),
+                    {Result, RenameReq, State1}
+            end
+    end.
 
 to_json(Req, #base_state{resource_state =
                              #client_state{chef_client = Client},
