@@ -13,8 +13,7 @@
 -include_lib("chef_objects/include/chef_osc_defaults.hrl").
 -include_lib("chef_certgen/include/chef_certgen.hrl").
 
--export([create_client/3,
-         create_client/4,
+-export([create_client/4,
          create_default_environment/0,
          create_default_environment/1]).
 
@@ -27,7 +26,7 @@
 
 %% @doc Create a client generating a new RSA key pair and return the
 %% private key.
-create_client(Name, IsValidator, IsAdmin) ->
+create_client(Name, IsValidator, IsAdmin, create_key) ->
     KeyPair = chef_certgen:rsa_generate_keypair(?KEY_BITS),
     case create_client(Name, IsValidator, IsAdmin,
                        KeyPair#rsa_key_pair.public_key) of
@@ -35,8 +34,7 @@ create_client(Name, IsValidator, IsAdmin) ->
             {ok, KeyPair#rsa_key_pair.private_key};
         Error ->
             Error
-    end.
-
+    end;
 %% @doc Create a client with the specified `PublicKey'.
 create_client(Name, IsValidator, _IsAdmin, PublicKey) ->
     Id = chef_object:make_org_prefix_id(?OSC_ORG_ID, Name),
@@ -73,7 +71,7 @@ create_default_environment(DbType) ->
                             serialized_object = Data},
     Ctx = chef_db:make_context(make_req_id()),
     chef_db:create_environment(Ctx, Env, ?CHEF_SKED_AUTHZ_ID).
-        
+
 %% Determine the "pubkey_version" of a key or certificate in PEM
 %% format. Certificates are version 1. Public keys in either PKCS1 or
 %% SPKI format are version 0. The PKCS1 format is deprecated, but
