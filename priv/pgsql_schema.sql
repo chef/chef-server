@@ -9,14 +9,14 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
 --
 
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
@@ -29,7 +29,7 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: checksums; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: checksums; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE checksums (
@@ -38,10 +38,8 @@ CREATE TABLE checksums (
 );
 
 
-ALTER TABLE public.checksums OWNER TO "opscode-pgsql";
-
 --
--- Name: clients; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: clients; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE clients (
@@ -59,10 +57,8 @@ CREATE TABLE clients (
 );
 
 
-ALTER TABLE public.clients OWNER TO "opscode-pgsql";
-
 --
--- Name: cookbook_version_checksums; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: cookbook_version_checksums; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE cookbook_version_checksums (
@@ -72,10 +68,8 @@ CREATE TABLE cookbook_version_checksums (
 );
 
 
-ALTER TABLE public.cookbook_version_checksums OWNER TO "opscode-pgsql";
-
 --
--- Name: cookbook_versions; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: cookbook_versions; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE cookbook_versions (
@@ -100,10 +94,8 @@ ALTER TABLE ONLY cookbook_versions ALTER COLUMN metadata SET STORAGE EXTERNAL;
 ALTER TABLE ONLY cookbook_versions ALTER COLUMN serialized_object SET STORAGE EXTERNAL;
 
 
-ALTER TABLE public.cookbook_versions OWNER TO "opscode-pgsql";
-
 --
--- Name: cookbooks; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: cookbooks; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE cookbooks (
@@ -114,30 +106,24 @@ CREATE TABLE cookbooks (
 );
 
 
-ALTER TABLE public.cookbooks OWNER TO "opscode-pgsql";
-
 --
--- Name: cookbook_version_dependencies; Type: VIEW; Schema: public; Owner: opscode-pgsql
+-- Name: cookbook_version_dependencies; Type: VIEW; Schema: public; Owner: -
 --
 
 CREATE VIEW cookbook_version_dependencies AS
     SELECT c.org_id, c.name, v.major, v.minor, v.patch, v.meta_deps AS dependencies FROM (cookbooks c JOIN cookbook_versions v ON ((c.id = v.cookbook_id)));
 
 
-ALTER TABLE public.cookbook_version_dependencies OWNER TO "opscode-pgsql";
-
 --
--- Name: cookbook_versions_by_rank; Type: VIEW; Schema: public; Owner: opscode-pgsql
+-- Name: cookbook_versions_by_rank; Type: VIEW; Schema: public; Owner: -
 --
 
 CREATE VIEW cookbook_versions_by_rank AS
     SELECT v.major, v.minor, v.patch, ((((v.major || '.'::text) || v.minor) || '.'::text) || v.patch) AS version, v.serialized_object, c.org_id, c.name, rank() OVER (PARTITION BY v.cookbook_id ORDER BY v.major DESC, v.minor DESC, v.patch DESC) AS rank FROM (cookbooks c JOIN cookbook_versions v ON ((c.id = v.cookbook_id)));
 
 
-ALTER TABLE public.cookbook_versions_by_rank OWNER TO "opscode-pgsql";
-
 --
--- Name: cookbooks_id_seq; Type: SEQUENCE; Schema: public; Owner: opscode-pgsql
+-- Name: cookbooks_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE cookbooks_id_seq
@@ -148,17 +134,15 @@ CREATE SEQUENCE cookbooks_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.cookbooks_id_seq OWNER TO "opscode-pgsql";
-
 --
--- Name: cookbooks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: opscode-pgsql
+-- Name: cookbooks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE cookbooks_id_seq OWNED BY cookbooks.id;
 
 
 --
--- Name: data_bag_items; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: data_bag_items; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE data_bag_items (
@@ -174,10 +158,8 @@ CREATE TABLE data_bag_items (
 ALTER TABLE ONLY data_bag_items ALTER COLUMN serialized_object SET STORAGE EXTERNAL;
 
 
-ALTER TABLE public.data_bag_items OWNER TO "opscode-pgsql";
-
 --
--- Name: data_bags; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: data_bags; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE data_bags (
@@ -191,10 +173,8 @@ CREATE TABLE data_bags (
 );
 
 
-ALTER TABLE public.data_bags OWNER TO "opscode-pgsql";
-
 --
--- Name: environments; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: environments; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE environments (
@@ -210,20 +190,16 @@ CREATE TABLE environments (
 ALTER TABLE ONLY environments ALTER COLUMN serialized_object SET STORAGE EXTERNAL;
 
 
-ALTER TABLE public.environments OWNER TO "opscode-pgsql";
-
 --
--- Name: joined_cookbook_version; Type: VIEW; Schema: public; Owner: opscode-pgsql
+-- Name: joined_cookbook_version; Type: VIEW; Schema: public; Owner: -
 --
 
 CREATE VIEW joined_cookbook_version AS
     SELECT v.major, v.minor, v.patch, ((((v.major || '.'::text) || v.minor) || '.'::text) || v.patch) AS version, v.serialized_object, v.id, c.org_id, c.name FROM (cookbooks c JOIN cookbook_versions v ON ((c.id = v.cookbook_id)));
 
 
-ALTER TABLE public.joined_cookbook_version OWNER TO "opscode-pgsql";
-
 --
--- Name: nodes; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: nodes; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE nodes (
@@ -239,10 +215,8 @@ CREATE TABLE nodes (
 );
 
 
-ALTER TABLE public.nodes OWNER TO "opscode-pgsql";
-
 --
--- Name: roles; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: roles; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE roles (
@@ -258,10 +232,8 @@ CREATE TABLE roles (
 ALTER TABLE ONLY roles ALTER COLUMN serialized_object SET STORAGE EXTERNAL;
 
 
-ALTER TABLE public.roles OWNER TO "opscode-pgsql";
-
 --
--- Name: sandboxed_checksums; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: sandboxed_checksums; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE sandboxed_checksums (
@@ -272,10 +244,8 @@ CREATE TABLE sandboxed_checksums (
 );
 
 
-ALTER TABLE public.sandboxed_checksums OWNER TO "opscode-pgsql";
-
 --
--- Name: schema_info; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: schema_info; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE schema_info (
@@ -283,10 +253,8 @@ CREATE TABLE schema_info (
 );
 
 
-ALTER TABLE public.schema_info OWNER TO "opscode-pgsql";
-
 --
--- Name: users; Type: TABLE; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: users; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE users (
@@ -306,17 +274,15 @@ CREATE TABLE users (
 );
 
 
-ALTER TABLE public.users OWNER TO "opscode-pgsql";
-
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: opscode-pgsql
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE cookbooks ALTER COLUMN id SET DEFAULT nextval('cookbooks_id_seq'::regclass);
 
 
 --
--- Name: checksums_pkey; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: checksums_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY checksums
@@ -324,7 +290,7 @@ ALTER TABLE ONLY checksums
 
 
 --
--- Name: clients_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: clients_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY clients
@@ -332,7 +298,7 @@ ALTER TABLE ONLY clients
 
 
 --
--- Name: clients_pkey; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: clients_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY clients
@@ -340,7 +306,7 @@ ALTER TABLE ONLY clients
 
 
 --
--- Name: cookbook_versions_cookbook_id_major_minor_patch_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: cookbook_versions_cookbook_id_major_minor_patch_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY cookbook_versions
@@ -348,7 +314,7 @@ ALTER TABLE ONLY cookbook_versions
 
 
 --
--- Name: cookbook_versions_pkey; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: cookbook_versions_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY cookbook_versions
@@ -356,7 +322,7 @@ ALTER TABLE ONLY cookbook_versions
 
 
 --
--- Name: cookbooks_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: cookbooks_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY cookbooks
@@ -364,7 +330,7 @@ ALTER TABLE ONLY cookbooks
 
 
 --
--- Name: cookbooks_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: cookbooks_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY cookbooks
@@ -372,7 +338,7 @@ ALTER TABLE ONLY cookbooks
 
 
 --
--- Name: cookbooks_pkey; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: cookbooks_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY cookbooks
@@ -380,7 +346,7 @@ ALTER TABLE ONLY cookbooks
 
 
 --
--- Name: data_bag_items_org_id_data_bag_name_item_name_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: data_bag_items_org_id_data_bag_name_item_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY data_bag_items
@@ -388,7 +354,7 @@ ALTER TABLE ONLY data_bag_items
 
 
 --
--- Name: data_bag_items_pkey; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: data_bag_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY data_bag_items
@@ -396,7 +362,7 @@ ALTER TABLE ONLY data_bag_items
 
 
 --
--- Name: data_bags_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: data_bags_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY data_bags
@@ -404,7 +370,7 @@ ALTER TABLE ONLY data_bags
 
 
 --
--- Name: data_bags_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: data_bags_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY data_bags
@@ -412,7 +378,7 @@ ALTER TABLE ONLY data_bags
 
 
 --
--- Name: data_bags_pkey; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: data_bags_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY data_bags
@@ -420,7 +386,7 @@ ALTER TABLE ONLY data_bags
 
 
 --
--- Name: environments_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: environments_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY environments
@@ -428,7 +394,7 @@ ALTER TABLE ONLY environments
 
 
 --
--- Name: environments_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: environments_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY environments
@@ -436,7 +402,7 @@ ALTER TABLE ONLY environments
 
 
 --
--- Name: environments_pkey; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: environments_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY environments
@@ -444,7 +410,7 @@ ALTER TABLE ONLY environments
 
 
 --
--- Name: nodes_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: nodes_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY nodes
@@ -452,7 +418,7 @@ ALTER TABLE ONLY nodes
 
 
 --
--- Name: nodes_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: nodes_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY nodes
@@ -460,7 +426,7 @@ ALTER TABLE ONLY nodes
 
 
 --
--- Name: nodes_pkey; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: nodes_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY nodes
@@ -468,7 +434,7 @@ ALTER TABLE ONLY nodes
 
 
 --
--- Name: org_id_name_unique; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: org_id_name_unique; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY clients
@@ -476,7 +442,7 @@ ALTER TABLE ONLY clients
 
 
 --
--- Name: roles_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: roles_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY roles
@@ -484,7 +450,7 @@ ALTER TABLE ONLY roles
 
 
 --
--- Name: roles_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: roles_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY roles
@@ -492,7 +458,7 @@ ALTER TABLE ONLY roles
 
 
 --
--- Name: roles_pkey; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: roles_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY roles
@@ -500,7 +466,7 @@ ALTER TABLE ONLY roles
 
 
 --
--- Name: sandboxed_checksums_pkey; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: sandboxed_checksums_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY sandboxed_checksums
@@ -508,7 +474,7 @@ ALTER TABLE ONLY sandboxed_checksums
 
 
 --
--- Name: users_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: users_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY users
@@ -516,7 +482,7 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: users_email_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: users_email_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY users
@@ -524,7 +490,7 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY users
@@ -532,7 +498,7 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: users_username_key; Type: CONSTRAINT; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: users_username_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY users
@@ -540,21 +506,21 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: cookbooks_org_id_index; Type: INDEX; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: cookbooks_org_id_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX cookbooks_org_id_index ON cookbooks USING btree (org_id);
 
 
 --
--- Name: nodes_org_id_environment_index; Type: INDEX; Schema: public; Owner: opscode-pgsql; Tablespace: 
+-- Name: nodes_org_id_environment_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX nodes_org_id_environment_index ON nodes USING btree (org_id, environment);
 
 
 --
--- Name: cookbook_version_checksums_cookbook_version_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: opscode-pgsql
+-- Name: cookbook_version_checksums_cookbook_version_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY cookbook_version_checksums
@@ -562,7 +528,7 @@ ALTER TABLE ONLY cookbook_version_checksums
 
 
 --
--- Name: cookbook_version_checksums_org_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: opscode-pgsql
+-- Name: cookbook_version_checksums_org_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY cookbook_version_checksums
@@ -570,7 +536,7 @@ ALTER TABLE ONLY cookbook_version_checksums
 
 
 --
--- Name: cookbook_versions_cookbook_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: opscode-pgsql
+-- Name: cookbook_versions_cookbook_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY cookbook_versions
@@ -578,21 +544,11 @@ ALTER TABLE ONLY cookbook_versions
 
 
 --
--- Name: data_bag_items_org_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: opscode-pgsql
+-- Name: data_bag_items_org_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY data_bag_items
     ADD CONSTRAINT data_bag_items_org_id_fkey FOREIGN KEY (org_id, data_bag_name) REFERENCES data_bags(org_id, name) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: public; Type: ACL; Schema: -; Owner: opscode-pgsql
---
-
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM "opscode-pgsql";
-GRANT ALL ON SCHEMA public TO "opscode-pgsql";
-GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --
