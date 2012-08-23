@@ -17,7 +17,6 @@
 -module(chef_wm_clients).
 
 -include("chef_wm.hrl").
--include_lib("chef_certgen/include/chef_certgen.hrl").
 
 -mixin([{chef_wm_base, [content_types_accepted/2,
                         content_types_provided/2,
@@ -95,7 +94,7 @@ from_json(Req, #base_state{reqid = RequestId,
                            resource_state = #client_state{client_data = ClientData,
                                                           client_authz_id = AuthzId}} = State) ->
     Name = ej:get({<<"name">>}, ClientData),
-    {PublicKey, PrivateKey} = generate_keypair(Name, RequestId),
+    {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
     ClientData1 = chef_client:add_authn_fields(ClientData, PublicKey),
     case chef_wm_base:create_from_json(Req, State, chef_client, {authz_id, AuthzId}, ClientData1) of
         {true, Req1, State1} ->
@@ -118,15 +117,3 @@ all_clients_json(Req, #base_state{chef_db_context = DbContext,
 
 malformed_request_message(Any, Req, State) ->
     chef_wm_util:malformed_request_message(Any, Req, State).
-
-%% Return either a public key or a public key wrapped in a certificate along
-%% with the corresponding private key.
-generate_keypair(Name, RequestId) ->
-    case application:get_env(chef_wm, local_key_gen) of
-        {ok, {true, Bits}} ->
-            KeyPair = chef_certgen:rsa_generate_keypair(Bits),
-            #rsa_key_pair{public_key = PublicKey, private_key = PrivateKey} = KeyPair,
-            {PublicKey, PrivateKey};
-        _ ->
-            chef_cert_http:gen_cert(Name, RequestId)
-    end.

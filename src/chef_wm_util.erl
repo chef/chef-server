@@ -22,9 +22,11 @@
          set_json_body/2,
          set_uri_of_created_resource/1,
          set_uri_of_created_resource/2,
-         with_error_body/2]).
+         with_error_body/2,
+         generate_keypair/2]).
 
 -include("chef_wm.hrl").
+-include_lib("chef_certgen/include/chef_certgen.hrl").
 
 %% TODO: These types are just placeholders until we get all the types cleaned up
 -type ejson() :: {[tuple()]}.
@@ -288,3 +290,18 @@ port_string(Default) when Default =:= 80; Default =:= 443 ->
     "";
 port_string(Port) ->
     [$:|erlang:integer_to_list(Port)].
+
+%% Helper function to abstract out our two ways of creating keys - either locally or
+%% through an external helper service for OPC
+%%
+%% Return either a public key or a public key wrapped in a certificate along
+%% with the corresponding private key.
+generate_keypair(Name, RequestId) ->
+    case application:get_env(chef_wm, local_key_gen) of
+        {ok, {true, Bits}} ->
+            KeyPair = chef_certgen:rsa_generate_keypair(Bits),
+            #rsa_key_pair{public_key = PublicKey, private_key = PrivateKey} = KeyPair,
+            {PublicKey, PrivateKey};
+        _ ->
+            chef_cert_http:gen_cert(Name, RequestId)
+    end.

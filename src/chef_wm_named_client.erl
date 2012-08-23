@@ -91,8 +91,8 @@ from_json(Req, #base_state{reqid = RequestId,
     % Check to see if we need to generate a new key
     ClientData1 = case ej:get({<<"private_key">>}, ClientData) of
                       true ->
-                          {Cert, PrivateKey} = chef_cert_http:gen_cert(Name, RequestId),
-                          ej:set({<<"certificate">>}, ClientData, Cert);
+                          {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
+                          ej:set({<<"certificate">>}, ClientData, PublicKey);
                       _ ->
                           PrivateKey = undefined,
                           ClientData
@@ -132,3 +132,4 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
 %% Internal Functions
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
+
