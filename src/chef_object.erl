@@ -64,6 +64,7 @@ new_record(chef_client, OrgId, AuthzId, ClientData, _DbType) ->
     Name = ej:get({<<"name">>}, ClientData),
     Id = make_org_prefix_id(OrgId, Name),
     Validator = ej:get({<<"validator">>}, ClientData),
+    Admin = ej:get({<<"admin">>}, ClientData),
     PublicKey =  ej:get({<<"public_key">>}, ClientData),
     PubkeyVersion = ej:get({<<"pubkey_version">>}, ClientData),
     #chef_client{id = Id,
@@ -71,6 +72,7 @@ new_record(chef_client, OrgId, AuthzId, ClientData, _DbType) ->
                  org_id = OrgId,
                  name = Name,
                  validator = Validator,
+                 admin = Admin,
                  public_key = PublicKey,
                  pubkey_version = PubkeyVersion};
 new_record(chef_data_bag, OrgId, AuthzId, Name, _DbType) ->
