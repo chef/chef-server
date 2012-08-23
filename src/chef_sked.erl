@@ -36,7 +36,7 @@ create_client(Name, IsValidator, IsAdmin, create_key) ->
             Error
     end;
 %% @doc Create a client with the specified `PublicKey'.
-create_client(Name, IsValidator, _IsAdmin, PublicKey) ->
+create_client(Name, IsValidator, IsAdmin, PublicKey) ->
     Id = chef_object:make_org_prefix_id(?OSC_ORG_ID, Name),
     Client = #chef_client{id = Id,
                           %% stub authz ID
@@ -44,6 +44,7 @@ create_client(Name, IsValidator, _IsAdmin, PublicKey) ->
                           org_id = ?OSC_ORG_ID,
                           name = Name,
                           validator = IsValidator =:= true,
+                          admin = IsAdmin =:= true,
                           public_key = PublicKey,
                           pubkey_version = key_version(PublicKey)},
     Ctx = chef_db:make_context(make_req_id()),
