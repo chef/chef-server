@@ -34,6 +34,7 @@
 -define(DEFAULT_FIELD_VALUES,
         [
          {<<"validator">>, false},
+         {<<"admin">>, false},
          {<<"private_key">>, false},
          {<<"certificate">>, <<"">>}
         ]).

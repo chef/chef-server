@@ -75,7 +75,8 @@
           'authz_id' :: object_id(),        % authorization guid (unique)
           'org_id' :: object_id(),          % organization guid
           'name' :: binary(),               % name of client
-          'validator' :: boolean(),         % boolean; true if this is a validator
+          'validator' = false :: boolean(),         % boolean; true if this is a validator
+          'admin' = false :: boolean(),             % true if this is an admin user
           'public_key' :: binary(),         % public key cert
           'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION,
                                             % version/type of public key (certificate)
