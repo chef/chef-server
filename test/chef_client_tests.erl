@@ -52,7 +52,7 @@ parse_binary_json_test_() ->
       fun() ->
           Body = <<"{\"validator\":false}">>,
           ?assertThrow({both_missing, <<"name">>, <<"clientname">>},
-                       chef_client:parse_binary_json(Body, <<"foo">>))
+                       chef_client:parse_binary_json(Body, undefined))
       end
      },
      {"Error thrown with bad name",

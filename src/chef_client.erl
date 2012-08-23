@@ -62,14 +62,15 @@ parse_binary_json(Bin, ReqName) ->
 %% @end
 parse_binary_json(Bin, ReqName, Defaults) ->
     Client = chef_json:decode_body(Bin),
-    NewClient = case Defaults of
+    Client1 = set_name_values(Client),
+    Client2 = case Defaults of
                     not_found ->
-                        set_default_values(Client);
+                        set_default_values(Client1);
                     Values ->
-                        set_default_values(Client, Values)
+                        set_default_values(Client1, Values)
                 end,
-    {Name, FinalClient} = set_name_values(NewClient, ReqName),
-    valid_name(Name),
+    {Name, FinalClient} = check_name_values(Client2, ReqName),
+    valid_name_format(Name),
     validate_client(FinalClient, Name).
 
 client_spec(Name) ->
@@ -94,40 +95,32 @@ set_default_values(Client, Defaults) ->
                 Client,
                 Defaults).
 
--spec set_name_values(ej:json_object(), binary() | undefined) -> {binary(), ej:json_object()} | no_return().
-set_name_values(Client, ReqName) ->
+set_name_values(Client) ->
     % Since either name or clientname is required (but not both), if only one is
     % passed, we will use it to set the other one
     Name = ej:get({<<"name">>}, Client),
     ClientName = ej:get({<<"clientname">>}, Client),
-    % TODO: Can this be simplified?  Several of these cases are duplicates; doesn't
-    % seem to be a case where reordering really solves the issue
-    case {Name, ClientName, ReqName} of
-        {undefined, undefined, _} ->
-            throw({both_missing, <<"name">>, <<"clientname">>});
-        {Name, Name, undefined} ->
-            {Name, Client};
-        {Name, Name, Name} ->
-            {Name, Client};
-        {Name, Name, _} ->
-            {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>},
-                                                  Client, ReqName), ReqName)};
-        {Name, undefined, undefined} ->
-            {Name, ej:set({<<"clientname">>}, Client, Name)};
-        {Name, undefined, Name} ->
-            {Name, ej:set({<<"clientname">>}, Client, Name)};
-        {Name, undefined, _} ->
-            {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>},
-                                                  Client, ReqName), ReqName)};
-        {undefined, ClientName, undefined} ->
-            {ClientName, ej:set({<<"name">>}, Client, ClientName)};
-        {undefined, ClientName, ClientName} ->
-            {ClientName, ej:set({<<"name">>}, Client, ClientName)};
-        {undefined, ClientName, _} ->
-            {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>},
-                                                  Client, ReqName), ReqName)};
-        {_, _, _} ->
+    case {Name, ClientName} of
+        {Name, Name} ->
+            Client;
+        {Name, undefined} ->
+            ej:set({<<"clientname">>}, Client, Name);
+        {undefined, ClientName} ->
+            ej:set({<<"name">>}, Client, ClientName);
+        {_, _} ->
             throw({client_name_mismatch})
+    end.
+
+check_name_values(Client, ReqName) ->
+    Name = ej:get({<<"name">>}, Client),
+    case {Name, ReqName} of
+        {undefined, undefined} ->
+            throw({both_missing, <<"name">>, <<"clientname">>});
+        {undefined, _} ->
+            {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>},
+                                                  Client, ReqName), ReqName)};
+        {_, _} ->
+            {Name, Client}
     end.
 
 validate_client(Client, Name) ->
@@ -136,7 +129,7 @@ validate_client(Client, Name) ->
         Bad -> throw(Bad)
     end.
 
-valid_name(Name) ->
+valid_name_format(Name) ->
     {Regex, Msg} = chef_regex:regex_for(client_name),
     case re:run(Name, Regex) of
         nomatch ->
