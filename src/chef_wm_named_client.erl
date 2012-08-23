@@ -102,6 +102,7 @@ from_json(Req, #base_state{reqid = RequestId,
                                                            Client, ClientData1),
     case Result of
         {halt, _} ->
+            % There was a problem with the update; abort! abort!
             {Result, Req1, State1};
         _ ->
             % This is for returning the private key, but needs to happen after update
@@ -115,15 +116,18 @@ from_json(Req, #base_state{reqid = RequestId,
                    end,
             % Need to return uri (in case request is a rename?)
             Uri = ?BASE_ROUTES:route(client, Req1, [{name, Name}]),
-            FinalReq = chef_wm_util:append_field_to_json_body(Req2, <<"uri">>, Uri),
-            case ReqName of
-                Name ->
-                    {Result, FinalReq, State1};
-                _ ->
-                    RenameReq = wrq:set_resp_header("Location", binary_to_list(Uri),
-                                                    FinalReq),
-                    {Result, RenameReq, State1}
-            end
+            Req3 = chef_wm_util:append_field_to_json_body(Req2, <<"uri">>, Uri),
+            FinalReq = set_http_response_code(Name, ReqName, Uri, Req3),
+            {Result, FinalReq, State1}
+    end.
+
+set_http_response_code(Name, ReqName, Uri, Request) ->
+    % If this is a rename, we need to add the Location header so it returns 201
+    case ReqName of
+        Name ->
+            Request;
+        _ ->
+            wrq:set_resp_header("Location", binary_to_list(Uri), Request)
     end.
 
 to_json(Req, #base_state{resource_state =
