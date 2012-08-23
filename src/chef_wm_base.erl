@@ -44,6 +44,7 @@
 -define(MAX_SIZE, 1000000).
 
 -include("chef_wm.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
 init(ResourceMod, Config) ->
     BaseState = init_base_state(ResourceMod, Config),
@@ -196,15 +197,19 @@ malformed_request_message(Reason, Req, #base_state{resource_mod=Mod}=State) ->
     Mod:malformed_request_message(Reason, Req, State).
 
 forbidden(Req, #base_state{resource_mod=Mod}=State) ->
-    %% FIXME: add authorization logic for OSC
-
     %% For now we call auth_info because currently need the side-effect of looking up the
     %% record and returning 404.
     case Mod:auth_info(Req, State) of
         {{halt, _}, _, _} = Halt ->
             Halt;
         {_, Req1, State1} ->
-            {false, Req1, State1}
+            case handle_authz_check(Mod, Req1, State1) of
+                false ->
+                    {Req2, State2} = set_forbidden_msg(Req1, State1),
+                    {true, Req2, State2};
+                true ->
+                    {false, Req1, State1}
+            end
     end.
 
 is_authorized(Req, State) ->
@@ -627,6 +632,7 @@ maybe_authz_id(undefined) ->
 maybe_authz_id(B) ->
     B.
 
+
 -spec authz_id(#chef_user{} | #chef_client{}) -> object_id().
 authz_id(#chef_client{authz_id = AuthzId}) ->
     AuthzId;
@@ -638,3 +644,93 @@ public_key(#chef_user{public_key = PublicKey}) ->
     PublicKey;
 public_key(#chef_client{public_key = PublicKey}) ->
     PublicKey.
+
+%%
+%% forbidden helpers
+%%
+handle_authz_check(chef_wm_cookbook_version, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'PUT' -> %% create && update
+            is_admin(Requestor);
+        'DELETE' ->
+            is_admin(Requestor);
+        _Else ->
+            true
+    end;
+handle_authz_check(chef_wm_data, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'POST' -> %% create data
+            is_admin(Requestor);
+        _Else ->
+            true
+    end;
+handle_authz_check(chef_wm_named_data, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'POST' -> %% create data_item
+            is_admin(Requestor);
+        'DELETE' -> %% delete data
+            is_admin(Requestor);
+        _Else ->
+            true
+    end;
+handle_authz_check(chef_wm_named_data_item, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'PUT' -> %% update data_item
+            is_admin(Requestor);
+        'DELETE' -> %% delete data_item
+            is_admin(Requestor);
+        _Else ->
+            true
+    end;
+handle_authz_check(chef_wm_roles, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'POST' ->
+            is_admin(Requestor);
+        _Else ->
+            true
+    end;
+handle_authz_check(chef_wm_named_role, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'PUT' ->
+            is_admin(Requestor);
+        'DELETE' ->
+            is_admin(Requestor);
+        _Else ->
+            true
+    end;
+%% Default case is to allow all requests
+handle_authz_check(_Mod, _Req, _State) ->
+    true.
+
+%%
+%% TODO implement is_FOO functions for #chef_user{} when the record
+%% has an 'admin' field
+%%
+
+-spec is_admin(#chef_client{}) -> boolean().
+is_admin(#chef_client{admin = true}) ->
+    true;
+is_admin(#chef_client{}) ->
+    false.
+
+
+-spec is_admin_or_validator(#chef_client{}) -> boolean().
+is_admin_or_validator(#chef_client{validator = true} = Client) ->
+    is_admin(Client);
+is_admin_or_validator(#chef_client{}) ->
+    false.
+
+is_admin_or_requesting_node(#chef_client{name = Name} = Client, NodeName) ->
+    case NodeName of
+        _N = Name ->
+            is_admin(Client);
+        _Else ->
+            false
+    end.
+
+set_forbidden_msg(Req, State) ->
+    Msg = <<"You are not allowed to take this action.">>,
+    JsonMsg = ejson:encode({[{<<"error">>, [Msg]}]}),
+    Req1 = wrq:set_resp_body(JsonMsg, Req),
+    {Req1, State#base_state{log_msg = {forbidden}}}.
+
