@@ -203,7 +203,7 @@ forbidden(Req, #base_state{resource_mod=Mod}=State) ->
         {{halt, _}, _, _} = Halt ->
             Halt;
         {_, Req1, State1} ->
-            case handle_authz_check(Mod, Req1, State1) of
+            case handle_auth_info(Mod, Req1, State1) of
                 false ->
                     {Req2, State2} = set_forbidden_msg(Req1, State1),
                     {true, Req2, State2};
@@ -395,11 +395,11 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
                      State#base_state{log_msg = LogMsg}};
                 {error, {checksum_missing, Checksum}} ->
-                    % Catches the condition where the user attempts to reference a checksum that
-                    % as not been uploaded.
-                    % This leaves it open to be generified
-                    % Not sure if we want to explicitly assume what is getting passed
-                    % is chef_cookbook_version
+                    %% Catches the condition where the user attempts to reference a checksum that
+                    %% as not been uploaded.
+                    %% This leaves it open to be generified
+                    %% Not sure if we want to explicitly assume what is getting passed
+                    %% is chef_cookbook_version
                     LogMsg = {checksum_missing, Checksum},
                     ErrorMsg = error_message(checksum_missing, Checksum),
                     {{halt, 400}, chef_wm_util:set_json_body(Req, ErrorMsg),
@@ -648,7 +648,29 @@ public_key(#chef_client{public_key = PublicKey}) ->
 %%
 %% forbidden helpers
 %%
-handle_authz_check(chef_wm_cookbook_version, Req, #base_state{requestor = Requestor}) ->
+handle_auth_info(chef_wm_clients, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'POST' -> %% create
+            is_admin_or_validator(Requestor);
+        'GET' -> %% index
+            is_admin(Requestor);
+        _Else ->
+            true
+    end;
+handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'PUT' -> %% update
+            is_admin(Requestor);
+        'GET' -> %% show
+            %%is_admin_or_requesting_node(Requestor);
+            is_admin(Requestor);
+        'DELETE' -> %% delete
+            %%is_admin_or_requesting_node(Requestor);
+            is_admin(Requestor);
+        _Else ->
+            true
+    end;
+handle_auth_info(chef_wm_cookbook_version, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'PUT' -> %% create && update
             is_admin(Requestor);
@@ -657,14 +679,14 @@ handle_authz_check(chef_wm_cookbook_version, Req, #base_state{requestor = Reques
         _Else ->
             true
     end;
-handle_authz_check(chef_wm_data, Req, #base_state{requestor = Requestor}) ->
+handle_auth_info(chef_wm_data, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'POST' -> %% create data
             is_admin(Requestor);
         _Else ->
             true
     end;
-handle_authz_check(chef_wm_named_data, Req, #base_state{requestor = Requestor}) ->
+handle_auth_info(chef_wm_named_data, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'POST' -> %% create data_item
             is_admin(Requestor);
@@ -673,7 +695,7 @@ handle_authz_check(chef_wm_named_data, Req, #base_state{requestor = Requestor}) 
         _Else ->
             true
     end;
-handle_authz_check(chef_wm_named_data_item, Req, #base_state{requestor = Requestor}) ->
+handle_auth_info(chef_wm_named_data_item, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'PUT' -> %% update data_item
             is_admin(Requestor);
@@ -682,14 +704,14 @@ handle_authz_check(chef_wm_named_data_item, Req, #base_state{requestor = Request
         _Else ->
             true
     end;
-handle_authz_check(chef_wm_roles, Req, #base_state{requestor = Requestor}) ->
+handle_auth_info(chef_wm_roles, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'POST' ->
             is_admin(Requestor);
         _Else ->
             true
     end;
-handle_authz_check(chef_wm_named_role, Req, #base_state{requestor = Requestor}) ->
+handle_auth_info(chef_wm_named_role, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'PUT' ->
             is_admin(Requestor);
@@ -699,7 +721,7 @@ handle_authz_check(chef_wm_named_role, Req, #base_state{requestor = Requestor}) 
             true
     end;
 %% Default case is to allow all requests
-handle_authz_check(_Mod, _Req, _State) ->
+handle_auth_info(_Mod, _Req, _State) ->
     true.
 
 %%
@@ -715,10 +737,10 @@ is_admin(#chef_client{}) ->
 
 
 -spec is_admin_or_validator(#chef_client{}) -> boolean().
-is_admin_or_validator(#chef_client{validator = true} = Client) ->
-    is_admin(Client);
-is_admin_or_validator(#chef_client{}) ->
-    false.
+is_admin_or_validator(#chef_client{validator = true}) ->
+    true;
+is_admin_or_validator(#chef_client{} = Client) ->
+    is_admin(Client).
 
 is_admin_or_requesting_node(#chef_client{name = Name} = Client, NodeName) ->
     case NodeName of
