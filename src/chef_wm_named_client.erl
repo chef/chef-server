@@ -85,9 +85,10 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
 from_json(Req, #base_state{reqid = RequestId,
                            resource_state =
                                #client_state{chef_client =
-                                                 #chef_client{name = Name} = Client,
+                                                 #chef_client{name = ReqName} = Client,
                                              client_data = ClientData}} =
               State) ->
+    Name = ej:get({<<"name">>}, ClientData),
     % Check to see if we need to generate a new key
     ClientData1 = case ej:get({<<"private_key">>}, ClientData) of
                       true ->
@@ -96,21 +97,38 @@ from_json(Req, #base_state{reqid = RequestId,
                       _ ->
                           PrivateKey = undefined,
                           ClientData
-    end,
+                  end,
     {Result, Req1, State1} = chef_wm_base:update_from_json(Req, State,
                                                            Client, ClientData1),
-    % This is for returning the private key, but needs to happen after update
-    Req2 = case PrivateKey of
-               undefined ->
-                   Req1;
-               _ ->
-                   chef_wm_util:append_field_to_json_body(Req1, <<"private_key">>,
-                                                            PrivateKey)
-           end,
-    % Need to return uri (for no good reason except ruby endpoint does)
-    Uri = ?BASE_ROUTES:route(client, Req1, [{name, Name}]),
-    FinalReq = chef_wm_util:append_field_to_json_body(Req2, <<"uri">>, Uri),
-    {Result, FinalReq, State1}.
+    case Result of
+        {halt, _} ->
+            % There was a problem with the update; abort! abort!
+            {Result, Req1, State1};
+        _ ->
+            % This is for returning the private key, but needs to happen after update
+            Req2 = case PrivateKey of
+                       undefined ->
+                           Req1;
+                       _ ->
+                           chef_wm_util:append_field_to_json_body(Req1,
+                                                                  <<"private_key">>,
+                                                                  PrivateKey)
+                   end,
+            % Need to return uri (in case request is a rename?)
+            Uri = ?BASE_ROUTES:route(client, Req1, [{name, Name}]),
+            Req3 = chef_wm_util:append_field_to_json_body(Req2, <<"uri">>, Uri),
+            FinalReq = set_http_response_code(Name, ReqName, Uri, Req3),
+            {Result, FinalReq, State1}
+    end.
+
+set_http_response_code(Name, ReqName, Uri, Request) ->
+    % If this is a rename, we need to add the Location header so it returns 201
+    case ReqName of
+        Name ->
+            Request;
+        _ ->
+            wrq:set_resp_header("Location", binary_to_list(Uri), Request)
+    end.
 
 to_json(Req, #base_state{resource_state =
                              #client_state{chef_client = Client},
@@ -129,7 +147,42 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
     Req1 = chef_wm_util:set_json_body(Req, EJson),
     {true, Req1, State}.
 
-%% Internal Functions
+% TODO: this could stand refactoring: I'm sure there is stuff re-used by other
+% endpoints and possibly unused code here
+error_message(Msg) when is_list(Msg) ->
+    error_message(iolist_to_binary(Msg));
+error_message(Msg) when is_binary(Msg) ->
+    {[{<<"error">>, [Msg]}]}.
+
+malformed_request_message(#ej_invalid{type = json_type, key = Key}, _Req, _State) ->
+    case Key of
+        undefined -> error_message([<<"Incorrect JSON type for request body">>]);
+        _ ->error_message([<<"Incorrect JSON type for ">>, Key])
+    end;
+malformed_request_message(#ej_invalid{type = missing, key = Key}, _Req, _State) ->
+    error_message([<<"Required value for ">>, Key, <<" is missing">>]);
+malformed_request_message({invalid_key, Key}, _Req, _State) ->
+    error_message([<<"Invalid key ">>, Key, <<" in request body">>]);
+malformed_request_message(invalid_json_body, _Req, _State) ->
+    error_message([<<"Incorrect JSON type for request body">>]);
+malformed_request_message(#ej_invalid{type = exact, key = Key, msg = Expected},
+                          _Req, _State) ->
+    error_message([Key, <<" must equal ">>, Expected]);
+malformed_request_message(#ej_invalid{type = string_match, msg = Error},
+                          _Req, _State) ->
+    error_message([Error]);
+malformed_request_message(#ej_invalid{type = object_key, key = Object, found = Key},
+                          _Req, _State) ->
+    error_message([<<"Invalid key '">>, Key, <<"' for ">>, Object]);
+% TODO: next two tests can get merged (hopefully) when object_map is extended not
+% to swallow keys
+malformed_request_message(#ej_invalid{type = object_value, key = Object, found = Val},
+                          _Req, _State) when is_binary(Val) ->
+    error_message([<<"Invalid value '">>, Val, <<"' for ">>, Object]);
+malformed_request_message(#ej_invalid{type = object_value, key = Object, found = Val},
+                          _Req, _State) ->
+    error_message([<<"Invalid value '">>, io_lib:format("~p", [Val]),
+                   <<"' for ">>, Object]);
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
