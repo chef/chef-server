@@ -651,72 +651,104 @@ public_key(#chef_client{public_key = PublicKey}) ->
 handle_auth_info(chef_wm_clients, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'POST' -> %% create
-            is_admin_or_validator(Requestor);
+            chef_wm_authz:is_admin_or_validator(Requestor);
         'GET' -> %% index
-            is_admin(Requestor);
+            chef_wm_authz:is_admin(Requestor);
         _Else ->
             true
     end;
-handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor}) ->
+handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
+                                                        resource_state =
+                                                            #client_state{chef_client = Client}}) ->
+    ClientName = chef_wm_util:object_name(client, Req),
     case wrq:method(Req) of
         'PUT' -> %% update
-            is_admin(Requestor);
+            chef_wm_authz:is_admin(Requestor);
         'GET' -> %% show
-            %%is_admin_or_requesting_node(Requestor);
-            is_admin(Requestor);
+            chef_wm_authz:is_admin_or_requesting_node(Requestor, ClientName);
         'DELETE' -> %% delete
-            %%is_admin_or_requesting_node(Requestor);
-            is_admin(Requestor);
+            case chef_wm_authz:is_validator(Client) of %% We can't delete the validator
+                true ->
+                    false;
+                _Else ->
+                    chef_wm_authz:is_admin_or_requesting_node(Requestor, ClientName)
+            end;
         _Else ->
             true
     end;
 handle_auth_info(chef_wm_cookbook_version, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'PUT' -> %% create && update
-            is_admin(Requestor);
+            chef_wm_authz:is_admin(Requestor);
         'DELETE' ->
-            is_admin(Requestor);
+            chef_wm_authz:is_admin(Requestor);
         _Else ->
             true
     end;
 handle_auth_info(chef_wm_data, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'POST' -> %% create data
-            is_admin(Requestor);
+            chef_wm_authz:is_admin(Requestor);
         _Else ->
             true
     end;
 handle_auth_info(chef_wm_named_data, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'POST' -> %% create data_item
-            is_admin(Requestor);
+            chef_wm_authz:is_admin(Requestor);
         'DELETE' -> %% delete data
-            is_admin(Requestor);
+            chef_wm_authz:is_admin(Requestor);
         _Else ->
             true
     end;
 handle_auth_info(chef_wm_named_data_item, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'PUT' -> %% update data_item
-            is_admin(Requestor);
+            chef_wm_authz:is_admin(Requestor);
         'DELETE' -> %% delete data_item
-            is_admin(Requestor);
+            chef_wm_authz:is_admin(Requestor);
+        _Else ->
+            true
+    end;
+handle_auth_info(chef_wm_environments, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'POST' ->
+            chef_wm_authz:is_admin(Requestor);
+        _Else ->
+            true
+    end;
+handle_auth_info(chef_wm_named_environment, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'PUT' ->
+            chef_wm_authz:is_admin(Requestor);
+        'DELETE' ->
+            chef_wm_authz:is_admin(Requestor);
         _Else ->
             true
     end;
 handle_auth_info(chef_wm_roles, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'POST' ->
-            is_admin(Requestor);
+            chef_wm_authz:is_admin(Requestor);
         _Else ->
             true
     end;
 handle_auth_info(chef_wm_named_role, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'PUT' ->
-            is_admin(Requestor);
+            chef_wm_authz:is_admin(Requestor);
         'DELETE' ->
-            is_admin(Requestor);
+            chef_wm_authz:is_admin(Requestor);
+        _Else ->
+            true
+    end;
+handle_auth_info(chef_wm_named_node, Req, #base_state{requestor = Requestor}) ->
+    NodeName = chef_wm_util:object_name(node, Req),
+    case wrq:method(Req) of
+        'PUT' -> %% update
+            chef_wm_authz:is_admin_or_requesting_node(Requestor, NodeName);
+        'DELETE' -> %% delete
+            chef_wm_authz:is_admin_or_requesting_node(Requestor, NodeName);
         _Else ->
             true
     end;
@@ -724,35 +756,8 @@ handle_auth_info(chef_wm_named_role, Req, #base_state{requestor = Requestor}) ->
 handle_auth_info(_Mod, _Req, _State) ->
     true.
 
-%%
-%% TODO implement is_FOO functions for #chef_user{} when the record
-%% has an 'admin' field
-%%
-
--spec is_admin(#chef_client{}) -> boolean().
-is_admin(#chef_client{admin = true}) ->
-    true;
-is_admin(#chef_client{}) ->
-    false.
-
-
--spec is_admin_or_validator(#chef_client{}) -> boolean().
-is_admin_or_validator(#chef_client{validator = true}) ->
-    true;
-is_admin_or_validator(#chef_client{} = Client) ->
-    is_admin(Client).
-
-is_admin_or_requesting_node(#chef_client{name = Name} = Client, NodeName) ->
-    case NodeName of
-        _N = Name ->
-            is_admin(Client);
-        _Else ->
-            false
-    end.
-
 set_forbidden_msg(Req, State) ->
     Msg = <<"You are not allowed to take this action.">>,
     JsonMsg = ejson:encode({[{<<"error">>, [Msg]}]}),
     Req1 = wrq:set_resp_body(JsonMsg, Req),
     {Req1, State#base_state{log_msg = {forbidden}}}.
-
