@@ -63,10 +63,9 @@ new_record(chef_environment, OrgId, AuthzId, EnvData, DbType) ->
 new_record(chef_client, OrgId, AuthzId, ClientData, _DbType) ->
     Name = ej:get({<<"name">>}, ClientData),
     Id = make_org_prefix_id(OrgId, Name),
-    Validator = ej:get({<<"validator">>}, ClientData),
-    Admin = ej:get({<<"admin">>}, ClientData),
-    PublicKey =  ej:get({<<"public_key">>}, ClientData),
-    PubkeyVersion = ej:get({<<"pubkey_version">>}, ClientData),
+    Validator = ej:get({<<"validator">>}, ClientData) =:= true,
+    Admin = ej:get({<<"admin">>}, ClientData) =:= true,
+    {PublicKey, PubkeyVersion} = cert_or_key(ClientData),
     #chef_client{id = Id,
                  authz_id = maybe_stub_authz_id(AuthzId, Id),
                  org_id = OrgId,
@@ -255,8 +254,15 @@ update_from_ejson(#chef_environment{} = Env, EnvData, DbType) ->
     Env#chef_environment{name = Name, serialized_object = Data};
 update_from_ejson(#chef_client{} = Client, ClientData, _DbType) ->
     Name = ej:get({<<"name">>}, ClientData),
-    PublicKey = ej:get({<<"certificate">>}, ClientData),
-    Client#chef_client{name = Name, public_key = PublicKey, pubkey_version = 1};
+    IsAdmin = ej:get({<<"admin">>}, ClientData) =:= true,
+    IsValidator = ej:get({<<"validator">>}, ClientData) =:= true,
+    %% Take certificate first, then public_key
+    {Key, Version} = cert_or_key(ClientData),
+    Client#chef_client{name = Name,
+                       admin = IsAdmin,
+                       validator = IsValidator,
+                       public_key = Key,
+                       pubkey_version = Version};
 update_from_ejson(#chef_data_bag{} = DataBag, DataBagData, _DbType) ->
     %% here for completeness
     Name = ej:get({<<"name">>}, DataBagData),
@@ -510,3 +516,14 @@ maybe_stub_authz_id(unset, ObjectId) ->
     ObjectId;
 maybe_stub_authz_id(AuthzId, _ObjectId) ->
     AuthzId.
+
+cert_or_key(ClientData) ->
+    Cert = ej:get({<<"certificate">>}, ClientData),
+    PublicKey = ej:get({<<"public_key">>}, ClientData),
+    %% Take certificate first, then public_key
+    case Cert of
+        undefined ->
+            {PublicKey, ?KEY_VERSION};
+        _ ->
+            {Cert, ?CERT_VERSION}
+    end.
