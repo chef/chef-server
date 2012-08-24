@@ -169,9 +169,8 @@ malformed_request_message({mismatch, {FieldName, _Pat, _Val}}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Field '", FieldName, "' invalid"])]}]};
 malformed_request_message({missing, FieldName}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Field '", FieldName, "' missing"])]}]};
-malformed_request_message({both_missing, Field1, Field2}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["Both fields '", Field1, "' and '", Field2,
-				       "' are missing, at least one must be passed"])]}]};
+malformed_request_message({both_missing, Field1, _Field2}, _Req, _State) ->
+    {[{<<"error">>, [iolist_to_binary(["Field '", Field1, "' missing"])]}]};
 malformed_request_message({client_name_mismatch}, _Req, _State) ->
     {[{<<"error">>, [<<"name and clientname must match">>]}]};
 malformed_request_message({bad_client_name, Name, Pattern}, _Req, _State) ->
