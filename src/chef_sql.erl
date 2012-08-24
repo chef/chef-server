@@ -395,8 +395,13 @@ update_client(#chef_client{last_updated_by = LastUpdatedBy,
                            name = Name,
                            public_key = PublicKey,
                            pubkey_version = PubkeyVersion,
+                           admin = IsAdmin,
+                           validator = IsValidator,
                            id = Id}) ->
-    UpdateFields = [LastUpdatedBy, UpdatedAt, Name, PublicKey, PubkeyVersion, Id],
+    UpdateFields = [LastUpdatedBy, UpdatedAt, Name,
+                    PublicKey, PubkeyVersion,
+                    IsValidator =:= true,
+                    IsAdmin =:= true, Id],
     do_update(update_client_by_id, UpdateFields).
 
 %% data_bag ops
