@@ -56,6 +56,7 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
     OldClient = chef_db:fetch_client(DbContext, OrgName, Name),
     NewClient = case OldClient of
                     not_found ->
+                        %% FIXME: we should just 404 here
                         {ok, Client} = chef_client:parse_binary_json(Body, Name),
                         Client;
                     _ ->
@@ -92,7 +93,7 @@ from_json(Req, #base_state{reqid = RequestId,
     ClientData1 = case ej:get({<<"private_key">>}, ClientData) of
                       true ->
                           {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
-                          ej:set({<<"certificate">>}, ClientData, PublicKey);
+                          chef_client:set_public_key(ClientData, PublicKey);
                       _ ->
                           PrivateKey = undefined,
                           ClientData

@@ -95,7 +95,7 @@ from_json(Req, #base_state{reqid = RequestId,
                                                           client_authz_id = AuthzId}} = State) ->
     Name = ej:get({<<"name">>}, ClientData),
     {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
-    ClientData1 = chef_client:add_authn_fields(ClientData, PublicKey),
+    ClientData1 = chef_client:set_public_key(ClientData, PublicKey),
     case chef_wm_base:create_from_json(Req, State, chef_client, {authz_id, AuthzId}, ClientData1) of
         {true, Req1, State1} ->
             Req2 = chef_wm_util:append_field_to_json_body(Req1, <<"private_key">>, PrivateKey),
