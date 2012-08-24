@@ -16,10 +16,6 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `opscode_chef` /*!40100 DEFAULT CHARACTER SET utf8 */;
-
-USE `opscode_chef`;
 DROP TABLE IF EXISTS `checksums`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -254,8 +250,6 @@ CREATE TABLE `users` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
-USE `opscode_chef`;
 /*!50001 DROP TABLE IF EXISTS `cookbook_version_dependencies`*/;
 /*!50001 DROP VIEW IF EXISTS `cookbook_version_dependencies`*/;
 /*!50001 SET @saved_cs_client          = @@character_set_client */;
