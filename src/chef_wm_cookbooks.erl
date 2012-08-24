@@ -82,7 +82,10 @@ to_json(undefined, Req, State) ->
 to_json("_latest", Req, State) ->
     {latest_cookbooks_json(Req, State), Req, State};
 to_json("_recipes", Req, State) ->
-    {cookbook_recipes_json(State), Req, State}.
+    {cookbook_recipes_json(State), Req, State};
+to_json(CookbookName0, Req, State) ->
+    CookbookName = list_to_binary(CookbookName0),
+    {single_cookbook_json(CookbookName, Req, State), Req, State}.
 
 %%
 %% Helper functions
@@ -97,6 +100,23 @@ all_cookbooks_json(Req, #base_state{chef_db_context = DbContext,
                                     organization_name = OrgName,
                                     resource_state = CookbookState}) ->
     CookbookVersions = chef_db:fetch_cookbook_versions(DbContext, OrgName),
+    #cookbook_state{num_versions = NumVersions} = CookbookState,
+    AggregateCookbooks = aggregate_versions(CookbookVersions),
+    CBList = make_cookbook_list(Req, AggregateCookbooks, NumVersions),
+    ejson:encode({CBList}).
+
+%% @doc Generate the same format as all_cookbook_json but for a single version
+%% @end
+%%
+-spec single_cookbook_json(CookbookName :: binary(),
+                           Recipes :: wm_req(),
+                           State :: #base_state{}) -> JSON :: binary().
+single_cookbook_json(CookbookName,
+                     Req,
+                     #base_state{chef_db_context = DbContext,
+                                 organization_name = OrgName,
+                                 resource_state = CookbookState}) ->
+    CookbookVersions = chef_db:fetch_cookbook_versions(DbContext, OrgName, CookbookName),
     #cookbook_state{num_versions = NumVersions} = CookbookState,
     AggregateCookbooks = aggregate_versions(CookbookVersions),
     CBList = make_cookbook_list(Req, AggregateCookbooks, NumVersions),
