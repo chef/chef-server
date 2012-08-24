@@ -59,8 +59,7 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
                         {ok, Client} = chef_client:parse_binary_json(Body, Name),
                         Client;
                     _ ->
-                        {Previous} = chef_client:assemble_client_ejson(OldClient, OrgName),
-                        {ok, Client} = chef_client:parse_binary_json(Body, Name, Previous),
+                        {ok, Client} = chef_client:parse_binary_json(Body, Name, OldClient),
                         Client
                 end,
     {Req, State#base_state{resource_state = ClientState#client_state{client_data = NewClient}}};
