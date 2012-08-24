@@ -260,13 +260,13 @@ oc_destination_name(Client, ReqName) ->
 %% keys.
 key_version(<<"-----BEGIN CERTIFICATE", _Bin/binary>>) ->
     %% cert
-    1;
+    ?CERT_VERSION;
 key_version(<<"-----BEGIN PUBLIC KEY", _Bin/binary>>) ->
     %% SPKI
-    0;
+    ?KEY_VERSION;
 key_version(<<"-----BEGIN RSA PUBLIC KEY", _Bin/binary>>) ->
     %% PKCS1
-    0.
+    ?KEY_VERSION.
 
 valid_name(Name) ->
     {Regex, Msg} = chef_regex:regex_for(client_name),
