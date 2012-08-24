@@ -34,7 +34,9 @@
          osc_parse_binary_json/3,
 
          parse_binary_json/2,
-         parse_binary_json/3
+         parse_binary_json/3,
+
+         set_public_key/2
         ]).
 
 -include_lib("ej/include/ej.hrl").
@@ -158,6 +160,17 @@ oc_parse_binary_json(Bin, ReqName, CurrentClient) ->
     {Name, FinalClient} = oc_destination_name(Client1, ReqName),
     valid_name(Name),
     validate_client(FinalClient, Name, oc).
+
+%% @doc Sets either the `certificate' or `public_key' field of
+%% `ClientEjson' depending on the value of `PublicKey'.
+-spec set_public_key(ej:json_object(), binary()) -> ej:json_object().
+set_public_key(ClientEjson, PublicKey) ->
+    case key_version(PublicKey) of
+        ?KEY_VERSION ->
+            ej:set({<<"public_key">>}, ClientEjson, PublicKey);
+        ?CERT_VERSION ->
+            ej:set({<<"certificate">>}, ClientEjson, PublicKey)
+    end.
 
 validate_client(Client, Name, osc) ->
     validate_client(Client, osc_client_spec(Name));
