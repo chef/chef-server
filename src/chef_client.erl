@@ -233,29 +233,22 @@ oc_destination_name(Client, ReqName) ->
     % TODO: Can this be simplified?  Several of these cases are duplicates; doesn't
     % seem to be a case where reordering really solves the issue
     case {Name, ClientName, ReqName} of
-        {undefined, undefined, _} ->
+        {undefined, undefined, undefined} ->
+            %% this is a POST with no name and no clientname is body
             throw({both_missing, <<"name">>, <<"clientname">>});
-        {Name, Name, undefined} ->
-            {Name, Client};
-        {Name, Name, Name} ->
-            {Name, Client};
+        {undefined, undefined, ReqName} ->
+            %% a PUT with only name found in URL, set both in body
+            {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>},
+                                                  Client, ReqName), ReqName)};
         {Name, Name, _} ->
-            {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>},
-                                                  Client, ReqName), ReqName)};
-        {Name, undefined, undefined} ->
-            {Name, ej:set({<<"clientname">>}, Client, Name)};
-        {Name, undefined, Name} ->
-            {Name, ej:set({<<"clientname">>}, Client, Name)};
+            %% POST or PUT with with name == clientname
+            {Name, Client};
         {Name, undefined, _} ->
-            {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>},
-                                                  Client, ReqName), ReqName)};
-        {undefined, ClientName, undefined} ->
-            {ClientName, ej:set({<<"name">>}, Client, ClientName)};
-        {undefined, ClientName, ClientName} ->
-            {ClientName, ej:set({<<"name">>}, Client, ClientName)};
+            %% POST or PUT with only name, set clientname
+            {Name, ej:set({<<"clientname">>}, Client, Name)};
         {undefined, ClientName, _} ->
-            {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>},
-                                                  Client, ReqName), ReqName)};
+            %% POST or PUT with only clientname, set name
+            {ClientName, ej:set({<<"name">>}, Client, ClientName)};
         {_, _, _} ->
             throw({client_name_mismatch})
     end.
