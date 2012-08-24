@@ -676,7 +676,10 @@ handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
         _Else ->
             true
     end;
-handle_auth_info(chef_wm_cookbook_version, Req, #base_state{requestor = Requestor}) ->
+handle_auth_info(Module, Req, #base_state{requestor = Requestor})
+        when Module =:= chef_wm_cookbook_version;
+             Module =:= chef_wm_named_environment;
+             Module =:= chef_wm_named_data_item ->
     case wrq:method(Req) of
         'PUT' -> %% create && update
             chef_wm_authz:is_admin(Requestor);
@@ -685,7 +688,9 @@ handle_auth_info(chef_wm_cookbook_version, Req, #base_state{requestor = Requesto
         _Else ->
             true
     end;
-handle_auth_info(chef_wm_data, Req, #base_state{requestor = Requestor}) ->
+handle_auth_info(Module, Req, #base_state{requestor = Requestor}) when Module =:= chef_wm_data;
+                                                                       Module =:= chef_wm_environments;
+                                                                       Module =:= chef_wm_roles ->
     case wrq:method(Req) of
         'POST' -> %% create data
             chef_wm_authz:is_admin(Requestor);
@@ -701,34 +706,11 @@ handle_auth_info(chef_wm_named_data, Req, #base_state{requestor = Requestor}) ->
         _Else ->
             true
     end;
-handle_auth_info(chef_wm_named_data_item, Req, #base_state{requestor = Requestor}) ->
-    case wrq:method(Req) of
-        'PUT' -> %% update data_item
-            chef_wm_authz:is_admin(Requestor);
-        'DELETE' -> %% delete data_item
-            chef_wm_authz:is_admin(Requestor);
-        _Else ->
-            true
-    end;
-handle_auth_info(chef_wm_environments, Req, #base_state{requestor = Requestor}) ->
-    case wrq:method(Req) of
-        'POST' ->
-            chef_wm_authz:is_admin(Requestor);
-        _Else ->
-            true
-    end;
 handle_auth_info(chef_wm_named_environment, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'PUT' ->
             chef_wm_authz:is_admin(Requestor);
         'DELETE' ->
-            chef_wm_authz:is_admin(Requestor);
-        _Else ->
-            true
-    end;
-handle_auth_info(chef_wm_roles, Req, #base_state{requestor = Requestor}) ->
-    case wrq:method(Req) of
-        'POST' ->
             chef_wm_authz:is_admin(Requestor);
         _Else ->
             true
