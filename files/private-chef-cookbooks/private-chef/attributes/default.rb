@@ -247,7 +247,6 @@ default['private_chef']['lb_internal']['authz_port'] = 9683
 ####
 default['private_chef']['opscode-pushy']['port'] = 10003
 
-
 ####
 # Nginx
 ####
