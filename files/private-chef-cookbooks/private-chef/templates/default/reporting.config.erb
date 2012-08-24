@@ -73,6 +73,13 @@
           {log_dir, "<%= @log_directory %>"},
           {metrics_module, folsom_metrics}
           ]},
+
+{stats_hero, [
+               {udp_socket_pool_size, 1 },
+               {estatsd_host, "127.0.0.1" },
+               {estatsd_port, 5665 }
+              ]},
+
  {sqerl, [
            %% The database system you are using (e.g., mysql, pgsql)
            {db_type, <%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %> },
