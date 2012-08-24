@@ -175,7 +175,7 @@ malformed_request_message({both_missing, Field1, Field2}, _Req, _State) ->
 malformed_request_message({client_name_mismatch}, _Req, _State) ->
     {[{<<"error">>, [<<"name and clientname must match">>]}]};
 malformed_request_message({bad_client_name, Name, Pattern}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["Invalid cookbook name '", Name,
+    {[{<<"error">>, [iolist_to_binary(["Invalid client name '", Name,
 				       "' using regex: '", Pattern, "'."])]}]};
 
 %% Not sure if we want to be this specific, or just want to fold this into an 'invalid JSON'
