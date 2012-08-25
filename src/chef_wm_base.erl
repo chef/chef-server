@@ -204,10 +204,10 @@ forbidden(Req, #base_state{resource_mod=Mod}=State) ->
             Halt;
         {_, Req1, State1} ->
             case handle_auth_info(Mod, Req1, State1) of
-                false ->
+                forbidden ->
                     {Req2, State2} = set_forbidden_msg(Req1, State1),
                     {true, Req2, State2};
-                true ->
+                authorized ->
                     {false, Req1, State1}
             end
     end.
@@ -648,14 +648,15 @@ public_key(#chef_client{public_key = PublicKey}) ->
 %%
 %% forbidden helpers
 %%
+-spec handle_auth_info(atom(), wm_req(), #base_state{}) -> authorized | forbidden.
 handle_auth_info(chef_wm_clients, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'POST' -> %% create
-            chef_wm_authz:is_admin_or_validator(Requestor);
+            chef_wm_authz:allow_admin_or_validator(Requestor);
         'GET' -> %% index
-            chef_wm_authz:is_admin(Requestor);
+            chef_wm_authz:allow_admin(Requestor);
         _Else ->
-            true
+            authorized
     end;
 handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
                                                         resource_state =
@@ -663,80 +664,64 @@ handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
     ClientName = chef_wm_util:object_name(client, Req),
     case wrq:method(Req) of
         'PUT' -> %% update
-            chef_wm_authz:is_admin(Requestor);
+            chef_wm_authz:allow_admin(Requestor);
         'GET' -> %% show
-            chef_wm_authz:is_admin_or_requesting_node(Requestor, ClientName);
+            chef_wm_authz:allow_admin_or_requesting_node(Requestor, ClientName);
         'DELETE' -> %% delete
-            case chef_wm_authz:is_validator(Client) of %% We can't delete the validator
-                true ->
-                    false;
+            #chef_client{validator = IsValidator} = Client,
+            case IsValidator of
+                true -> %% We can't delete the validator
+                    forbidden;
                 _Else ->
-                    chef_wm_authz:is_admin_or_requesting_node(Requestor, ClientName)
+                    chef_wm_authz:allow_admin_or_requesting_node(Requestor, ClientName)
             end;
         _Else ->
-            true
+            authorized
     end;
 handle_auth_info(Module, Req, #base_state{requestor = Requestor})
         when Module =:= chef_wm_cookbook_version;
              Module =:= chef_wm_named_environment;
+             Module =:= chef_wm_named_role;
              Module =:= chef_wm_named_data_item ->
     case wrq:method(Req) of
-        'PUT' -> %% create && update
-            chef_wm_authz:is_admin(Requestor);
+        'PUT' -> %% update
+            chef_wm_authz:allow_admin(Requestor);
         'DELETE' ->
-            chef_wm_authz:is_admin(Requestor);
+            chef_wm_authz:allow_admin(Requestor);
         _Else ->
-            true
+            authorized
     end;
 handle_auth_info(Module, Req, #base_state{requestor = Requestor}) when Module =:= chef_wm_data;
                                                                        Module =:= chef_wm_environments;
                                                                        Module =:= chef_wm_roles ->
     case wrq:method(Req) of
-        'POST' -> %% create data
-            chef_wm_authz:is_admin(Requestor);
+        'POST' -> %% create
+            chef_wm_authz:allow_admin(Requestor);
         _Else ->
-            true
+            authorized
     end;
 handle_auth_info(chef_wm_named_data, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'POST' -> %% create data_item
-            chef_wm_authz:is_admin(Requestor);
+            chef_wm_authz:allow_admin(Requestor);
         'DELETE' -> %% delete data
-            chef_wm_authz:is_admin(Requestor);
+            chef_wm_authz:allow_admin(Requestor);
         _Else ->
-            true
-    end;
-handle_auth_info(chef_wm_named_environment, Req, #base_state{requestor = Requestor}) ->
-    case wrq:method(Req) of
-        'PUT' ->
-            chef_wm_authz:is_admin(Requestor);
-        'DELETE' ->
-            chef_wm_authz:is_admin(Requestor);
-        _Else ->
-            true
-    end;
-handle_auth_info(chef_wm_named_role, Req, #base_state{requestor = Requestor}) ->
-    case wrq:method(Req) of
-        'PUT' ->
-            chef_wm_authz:is_admin(Requestor);
-        'DELETE' ->
-            chef_wm_authz:is_admin(Requestor);
-        _Else ->
-            true
+            authorized
     end;
 handle_auth_info(chef_wm_named_node, Req, #base_state{requestor = Requestor}) ->
     NodeName = chef_wm_util:object_name(node, Req),
     case wrq:method(Req) of
         'PUT' -> %% update
-            chef_wm_authz:is_admin_or_requesting_node(Requestor, NodeName);
+            chef_wm_authz:allow_admin_or_requesting_node(Requestor, NodeName);
         'DELETE' -> %% delete
-            chef_wm_authz:is_admin_or_requesting_node(Requestor, NodeName);
+            chef_wm_authz:allow_admin_or_requesting_node(Requestor, NodeName);
         _Else ->
-            true
+            authorized
     end;
 %% Default case is to allow all requests
 handle_auth_info(_Mod, _Req, _State) ->
-    true.
+    authorized.
 
 set_forbidden_msg(Req, State) ->
     Msg = <<"You are not allowed to take this action.">>,
