@@ -44,6 +44,7 @@
 -define(MAX_SIZE, 1000000).
 
 -include("chef_wm.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
 init(ResourceMod, Config) ->
     BaseState = init_base_state(ResourceMod, Config),
@@ -195,15 +196,19 @@ malformed_request_message(Reason, Req, #base_state{resource_mod=Mod}=State) ->
     Mod:malformed_request_message(Reason, Req, State).
 
 forbidden(Req, #base_state{resource_mod=Mod}=State) ->
-    %% FIXME: add authorization logic for OSC
-
     %% For now we call auth_info because currently need the side-effect of looking up the
     %% record and returning 404.
     case Mod:auth_info(Req, State) of
         {{halt, _}, _, _} = Halt ->
             Halt;
         {_, Req1, State1} ->
-            {false, Req1, State1}
+            case handle_auth_info(Mod, Req1, State1) of
+                forbidden ->
+                    {Req2, State2} = set_forbidden_msg(Req1, State1),
+                    {true, Req2, State2};
+                authorized ->
+                    {false, Req1, State1}
+            end
     end.
 
 is_authorized(Req, State) ->
@@ -389,11 +394,11 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
                      State#base_state{log_msg = LogMsg}};
                 {error, {checksum_missing, Checksum}} ->
-                    % Catches the condition where the user attempts to reference a checksum that
-                    % as not been uploaded.
-                    % This leaves it open to be generified
-                    % Not sure if we want to explicitly assume what is getting passed
-                    % is chef_cookbook_version
+                    %% Catches the condition where the user attempts to reference a checksum that
+                    %% as not been uploaded.
+                    %% This leaves it open to be generified
+                    %% Not sure if we want to explicitly assume what is getting passed
+                    %% is chef_cookbook_version
                     LogMsg = {checksum_missing, Checksum},
                     ErrorMsg = error_message(checksum_missing, Checksum),
                     {{halt, 400}, chef_wm_util:set_json_body(Req, ErrorMsg),
@@ -626,6 +631,7 @@ maybe_authz_id(undefined) ->
 maybe_authz_id(B) ->
     B.
 
+
 -spec authz_id(#chef_user{} | #chef_client{}) -> object_id().
 authz_id(#chef_client{authz_id = AuthzId}) ->
     AuthzId;
@@ -637,3 +643,87 @@ public_key(#chef_user{public_key = PublicKey}) ->
     PublicKey;
 public_key(#chef_client{public_key = PublicKey}) ->
     PublicKey.
+
+%%
+%% forbidden helpers
+%%
+-spec handle_auth_info(atom(), wm_req(), #base_state{}) -> authorized | forbidden.
+handle_auth_info(chef_wm_clients, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'POST' -> %% create
+            chef_wm_authz:allow_admin_or_validator(Requestor);
+        'GET' -> %% index
+            chef_wm_authz:allow_admin(Requestor);
+        _Else ->
+            authorized
+    end;
+handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
+                                                        resource_state =
+                                                            #client_state{chef_client = Client}}) ->
+    ClientName = chef_wm_util:object_name(client, Req),
+    case wrq:method(Req) of
+        'PUT' -> %% update
+            chef_wm_authz:allow_admin(Requestor);
+        'GET' -> %% show
+            chef_wm_authz:allow_admin_or_requesting_node(Requestor, ClientName);
+        'DELETE' -> %% delete
+            #chef_client{validator = IsValidator} = Client,
+            case IsValidator of
+                true -> %% We can't delete the validator
+                    forbidden;
+                _Else ->
+                    chef_wm_authz:allow_admin_or_requesting_node(Requestor, ClientName)
+            end;
+        _Else ->
+            authorized
+    end;
+handle_auth_info(Module, Req, #base_state{requestor = Requestor})
+        when Module =:= chef_wm_cookbook_version;
+             Module =:= chef_wm_named_environment;
+             Module =:= chef_wm_named_role;
+             Module =:= chef_wm_named_data_item ->
+    case wrq:method(Req) of
+        'PUT' -> %% update
+            chef_wm_authz:allow_admin(Requestor);
+        'DELETE' ->
+            chef_wm_authz:allow_admin(Requestor);
+        _Else ->
+            authorized
+    end;
+handle_auth_info(Module, Req, #base_state{requestor = Requestor}) when Module =:= chef_wm_data;
+                                                                       Module =:= chef_wm_environments;
+                                                                       Module =:= chef_wm_roles ->
+    case wrq:method(Req) of
+        'POST' -> %% create
+            chef_wm_authz:allow_admin(Requestor);
+        _Else ->
+            authorized
+    end;
+handle_auth_info(chef_wm_named_data, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'POST' -> %% create data_item
+            chef_wm_authz:allow_admin(Requestor);
+        'DELETE' -> %% delete data
+            chef_wm_authz:allow_admin(Requestor);
+        _Else ->
+            authorized
+    end;
+handle_auth_info(chef_wm_named_node, Req, #base_state{requestor = Requestor}) ->
+    NodeName = chef_wm_util:object_name(node, Req),
+    case wrq:method(Req) of
+        'PUT' -> %% update
+            chef_wm_authz:allow_admin_or_requesting_node(Requestor, NodeName);
+        'DELETE' -> %% delete
+            chef_wm_authz:allow_admin_or_requesting_node(Requestor, NodeName);
+        _Else ->
+            authorized
+    end;
+%% Default case is to allow all requests
+handle_auth_info(_Mod, _Req, _State) ->
+    authorized.
+
+set_forbidden_msg(Req, State) ->
+    Msg = <<"You are not allowed to take this action.">>,
+    JsonMsg = ejson:encode({[{<<"error">>, [Msg]}]}),
+    Req1 = wrq:set_resp_body(JsonMsg, Req),
+    {Req1, State#base_state{log_msg = {forbidden}}}.
