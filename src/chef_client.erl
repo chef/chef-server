@@ -186,14 +186,18 @@ validate_client(Client, Spec) ->
 osc_set_values_from_current_client(Client, not_found) ->
     Client;
 osc_set_values_from_current_client(Client, #chef_client{admin = IsAdmin,
-                                                        validator = IsValidator}) ->
-    set_default_values(Client, [{<<"admin">>, IsAdmin},
-                                {<<"validator">>, IsValidator}]).
+                                                        validator = IsValidator,
+                                                        public_key = PublicKey}) ->
+    C = set_default_values(Client, [{<<"admin">>, IsAdmin},
+                                    {<<"validator">>, IsValidator}]),
+    set_public_key(C, PublicKey).
 
 oc_set_values_from_current_client(Client, not_found) ->
     Client;
-oc_set_values_from_current_client(Client, #chef_client{validator = IsValidator}) ->
-    set_default_values(Client, [{<<"validator">>, IsValidator}]).
+oc_set_values_from_current_client(Client, #chef_client{validator = IsValidator,
+                                                       public_key = Cert}) ->
+    C = set_default_values(Client, [{<<"validator">>, IsValidator}]),
+    set_public_key(C, Cert).
 
 set_default_values(Client, Defaults) ->
     lists:foldl(fun({Key, Default}, Current) ->
