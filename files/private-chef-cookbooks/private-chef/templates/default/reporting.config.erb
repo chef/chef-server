@@ -52,7 +52,8 @@
             %% Whether to redirect error_logger messages into lager - defaults to true
             {error_logger_redirect, true}
         ]},
- {chef_db, [
+ {chef_common, [
+ %{chef_db, [
   %         {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
   %         {cache_defaults, [{max_size, <%= @max_cache_size %> },
   %                              {ttl, <%= @cache_ttl %> }]},
