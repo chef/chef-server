@@ -728,8 +728,7 @@ handle_auth_info(chef_wm_named_node, Req, #base_state{requestor = Requestor}) ->
         _Else ->
             forbidden
     end;
-handle_auth_info(Module, Req, #base_state{requestor = Requestor})
-        when Module =:= chef_wm_nodes ->
+handle_auth_info(chef_wm_nodes, Req, _State) ->
     case wrq:method(Req) of
         'GET' ->
             authorized;
@@ -770,7 +769,7 @@ handle_auth_info(Module, Req, _State)
             forbidden
     end;
 %% Default case is to allow disallow all requests
-handle_auth_info(Mod, Req, _State) ->
+handle_auth_info(_Mod, _Req, _State) ->
     forbidden.
 
 set_forbidden_msg(Req, State) ->
