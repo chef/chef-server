@@ -648,10 +648,18 @@ public_key(#chef_client{public_key = PublicKey}) ->
 %% forbidden helpers
 %%
 -spec handle_auth_info(atom(), wm_req(), #base_state{}) -> authorized | forbidden.
-handle_auth_info(chef_wm_clients, Req, #base_state{requestor = Requestor}) ->
+handle_auth_info(chef_wm_clients, Req,
+                 #base_state{requestor = Requestor,
+                             resource_state = #client_state{client_data = Client}}) ->
     case wrq:method(Req) of
         'POST' -> %% create
-            chef_wm_authz:allow_admin_or_validator(Requestor);
+            NotCreatingAdmin = ej:get({<<"admin">>}, Client) =/= true,
+            IsAdmin = chef_wm_authz:is_admin(Requestor),
+            IsValidator = chef_wm_authz:is_validator(Requestor),
+            case IsAdmin orelse (IsValidator andalso NotCreatingAdmin) of
+                true -> authorized;
+                false -> forbidden
+            end;
         'GET' -> %% index
             chef_wm_authz:allow_admin(Requestor);
         _Else ->
