@@ -62,7 +62,6 @@ init_base_state(ResourceMod, InitParams) ->
     #base_state{reqid_header_name = ?gv(reqid_header_name, InitParams),
                 batch_size = ?gv(batch_size, InitParams),
                 auth_skew = ?gv(auth_skew, InitParams),
-                db_type = ?gv(db_type, InitParams),
                 resource_mod = ResourceMod}.
 
 %% @doc Determines if service is available.
@@ -303,13 +302,11 @@ verify_request_signature(Req,
 create_from_json(#wm_reqdata{} = Req,
                  #base_state{chef_db_context = DbContext,
                              organization_guid = OrgId,
-                             requestor_id = ActorId,
-                             db_type = DbType} = State,
+                             requestor_id = ActorId} = State,
                  RecType, {authz_id, AuthzId}, ObjectEjson) ->
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
-    ObjectRec = chef_object:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson,
-                                       DbType),
+    ObjectRec = chef_object:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
     Id = chef_object:id(ObjectRec),
     Name = chef_object:name(ObjectRec),
     TypeName = chef_object:type_name(ObjectRec),
@@ -350,9 +347,9 @@ create_from_json(#wm_reqdata{} = Req,
 %% record. `ObjectEjson' is the parsed EJSON from the request body.
 update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                                                   organization_guid = OrgId,
-                                                  requestor_id = ActorId,
-                                                  db_type = DbType}=State, OrigObjectRec, ObjectEjson) ->
-    ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectEjson, DbType),
+                                                  requestor_id = ActorId}=State,
+                 OrigObjectRec, ObjectEjson) ->
+    ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectEjson),
     %% Send object to solr for indexing *first*. If the update fails, we will have sent
     %% incorrect data, but that should get corrected when the client retries. This is a
     %% compromise.

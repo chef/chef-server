@@ -14,8 +14,7 @@
 -include_lib("chef_certgen/include/chef_certgen.hrl").
 
 -export([create_client/4,
-         create_default_environment/0,
-         create_default_environment/1]).
+         create_default_environment/0]).
 
 %% An authz id used as the requestor id for operations performed by
 %% this helper module.
@@ -50,20 +49,15 @@ create_client(Name, IsValidator, IsAdmin, PublicKey) ->
     Ctx = chef_db:make_context(make_req_id()),
     chef_db:create_client(Ctx, Client, ?CHEF_SKED_AUTHZ_ID).
 
-%% @doc Create the _default environment assuming the default RDBMS of PostgreSQL.
+%% @doc Create the _default environment
 create_default_environment() ->
-    create_default_environment(pgsql).
-
-%% @doc Create the _default environment with compression determined by
-%% `DbType'.
-create_default_environment(DbType) ->
     Name = <<"_default">>,
     Json = <<"{\"name\":\"_default\",\"description\":\"The default Chef environment\","
              "\"cookbook_versions\":{},\"json_class\":\"Chef::Environment\","
              "\"chef_type\":\"environment\","
              "\"default_attributes\":{},"
              "\"override_attributes\":{}}">>,
-    Data = chef_db_compression:compress(DbType, chef_environment, Json),
+    Data = chef_db_compression:compress(chef_environment, Json),
     Id = chef_object:make_org_prefix_id(?OSC_ORG_ID, Name),
     Env = #chef_environment{id = Id,
                             authz_id = Id,

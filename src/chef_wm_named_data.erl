@@ -121,8 +121,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
                            resource_state = #data_state{data_bag_name = DataBagName,
                                                         data_bag_item_name = ItemName,
                                                         data_bag_item_ejson = ItemData},
-                           organization_guid = OrgId,
-                           db_type = DbType} = State) ->
+                           organization_guid = OrgId} = State) ->
 
     %% Note: potential race condition.  If we don't have perms, the create will fail.
     %% Although we checked rights above, they could have changed.
@@ -130,7 +129,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
     %% the 'unset' atom is where an AuthzId would typically go. Since chef_data_bag_item
     %% objects do not have their own AuthzId, we hard-code the placeholder.
     DataBagItem = chef_object:new_record(chef_data_bag_item, OrgId, unset,
-                                         {DataBagName, ItemData}, DbType),
+                                         {DataBagName, ItemData}),
     %% We send the data_bag_item data to solr for indexing *first*. If it fails, we'll error out on a
     %% 500 and client can retry. If we succeed and the db call fails or conflicts, we can
     %% safely send a delete to solr since this is a new data_bag_item with a unique ID unknown to the
