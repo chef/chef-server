@@ -104,9 +104,6 @@
           %% A record containing resource-specific state.
           resource_state :: tuple(),
 
-          %% Type of database backend we are talking to
-          db_type :: 'mysql' | 'pgsql',
-
           %% Turn this on if superuser is allowed to bypass security checks for
           %% this endpoint.
           superuser_bypasses_checks = false :: true | false
