@@ -29,8 +29,7 @@
 -export([
          allowed_methods/2,
          create_path/2,
-         from_json/2,
-         resource_exists/2
+         from_json/2
         ]).
 
 init(Config) ->
@@ -54,9 +53,6 @@ auth_info(Req, State) ->
 
 auth_info('POST', Req, State) ->
     {{create_in_container, sandbox}, Req, State}.
-
-resource_exists(Req, State) ->
-    {true, Req, State}.
 
 create_path(Req, #base_state{organization_guid = OrgId,
                              resource_state = SandboxState}=State) ->
