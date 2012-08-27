@@ -219,8 +219,9 @@ CREATE TABLE nodes (
     last_updated_by character(32) NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    serialized_object text
+    serialized_object bytea
 );
+ALTER TABLE ONLY nodes ALTER COLUMN serialized_object SET STORAGE EXTERNAL;
 
 
 --
