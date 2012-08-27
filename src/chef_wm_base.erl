@@ -103,6 +103,10 @@ malformed_request(Req, #base_state{resource_mod=Mod,
             Msg = iolist_to_binary([<<"organization '">>, Org, <<"' does not exist.">>]),
             Req3 = wrq:set_resp_body(ejson:encode({[{<<"error">>, [Msg]}]}), Req),
             {{halt, 404}, Req3, State1#base_state{log_msg = org_not_found}};
+        throw:{client_not_found, Name} ->
+            Msg = chef_wm_util:not_found_message(client, Name),
+            Req3 = wrq:set_resp_body(ejson:encode({[{<<"error">>, [Msg]}]}), Req),
+            {{halt, 404}, Req3, State1#base_state{log_msg = client_not_found}};
         throw:bad_clock ->
             Msg1 = malformed_request_message(bad_clock, Req, State),
             Req3 = wrq:set_resp_body(ejson:encode(Msg1), Req),

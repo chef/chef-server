@@ -48,39 +48,38 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
-validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
+validate_request(Method, Req, #base_state{chef_db_context = DbContext,
                                          organization_name = OrgName,
                                          resource_state = ClientState} = State) ->
-    Body = wrq:req_body(Req),
     Name = chef_wm_util:object_name(client, Req),
     OldClient = chef_db:fetch_client(DbContext, OrgName, Name),
-    NewClient = case OldClient of
-                    not_found ->
-                        %% FIXME: we should just 404 here
-                        {ok, Client} = chef_client:parse_binary_json(Body, Name),
-                        Client;
-                    _ ->
-                        {ok, Client} = chef_client:parse_binary_json(Body, Name, OldClient),
-                        Client
-                end,
-    {Req, State#base_state{resource_state = ClientState#client_state{client_data = NewClient}}};
-validate_request(_Other, Req, State) ->
-    {Req, State}.
-
-auth_info(Req, #base_state{chef_db_context = DbContext,
-                           resource_state = ClientState,
-                           organization_name=OrgName}=State) ->
-    ClientName = chef_wm_util:object_name(client, Req),
-    case chef_db:fetch_client(DbContext, OrgName, ClientName) of
+    case OldClient of
         not_found ->
-            Message = chef_wm_util:not_found_message(client, ClientName),
-            Req1 = chef_wm_util:set_json_body(Req, Message),
-            {{halt, 404}, Req1, State#base_state{log_msg = client_not_found}};
-        #chef_client{authz_id = AuthzId} = Client ->
-            ClientState1 = ClientState#client_state{chef_client = Client},
-            State1 = State#base_state{resource_state = ClientState1},
-            {{object, AuthzId}, Req, State1}
+            throw({client_not_found, Name});
+        _ ->
+            case Method of
+                'PUT' ->
+                    Body = wrq:req_body(Req),
+                    {ok, Client} = chef_client:parse_binary_json(Body, Name, OldClient),
+                    {Req,
+                     State#base_state{resource_state =
+                                          ClientState#client_state{client_data = Client,
+                                                                   chef_client =
+                                                                       OldClient}}};
+                _ ->
+                    {Req, State#base_state{resource_state =
+                                               ClientState#client_state{chef_client =
+                                                                            OldClient}}}
+            end
     end.
+
+auth_info(Req, #base_state{resource_state =
+                               #client_state{chef_client =
+                                                 #chef_client{authz_id = AuthzId} =
+                                                 Client} = ClientState} = State) ->
+    ClientState1 = ClientState#client_state{chef_client = Client},
+    State1 = State#base_state{resource_state = ClientState1},
+    {{object, AuthzId}, Req, State1}.
 
 from_json(Req, #base_state{reqid = RequestId,
                            resource_state =
