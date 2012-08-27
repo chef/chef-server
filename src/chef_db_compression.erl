@@ -22,7 +22,7 @@
 
 -module(chef_db_compression).
 
--export([compress/3,
+-export([compress/2,
          decompress/1,
          decompress_and_decode/1]).
 
@@ -38,14 +38,21 @@
                           | 'cookbook_metadata'
                           | 'cookbook_long_desc'.
 
--spec compress(db_type(), chef_compressable(), binary()) -> binary().
-%% @doc Compresses data for database storage based on `DbType' and `Type'.
-compress(mysql, _Type, Data) ->
-    zlib:gzip(Data);
-compress(pgsql, chef_node, Data) ->
+%% Define CHEF_UNCOMPRESSED_NODE_DATA at compile time if your schema requires uncompressed
+%% node data.
+-ifdef(CHEF_UNCOMPRESSED_NODE_DATA).
+%% skip compression of node data for quirk in node table schema.
+-spec compress(chef_compressable(), binary()) -> binary().
+compress(chef_node, Data) ->
     Data;
-compress(pgsql, _Type, Data) ->
+compress(_Type, Data) ->
     zlib:gzip(Data).
+-else.
+%% All types are compressed
+-spec compress(chef_compressable(), binary()) -> binary().
+compress(_Type, Data) ->
+    zlib:gzip(Data).
+-endif.
 
 -spec decompress(binary()) -> binary().
 %% @doc Decompresses gzip data and lets non-gzip data pass through

@@ -32,12 +32,12 @@
          make_org_prefix_id/1,
          make_org_prefix_id/2,
          name/1,
-         new_record/5,
+         new_record/4,
          parse_constraint/1,
          set_created/2,
          set_updated/2,
          type_name/1,
-         update_from_ejson/3
+         update_from_ejson/2
         ]).
 
 %% @doc Create a new Chef object record of type specified by `RecType'. This function will
@@ -49,18 +49,18 @@
                  AuthzId :: object_id() | unset,
                  ObjectEjson :: ejson_term() |
                                 binary() |
-                                {binary(), ejson_term()},
-                 DbType :: db_type()) -> chef_object() | #chef_cookbook_version{}.
-new_record(chef_environment, OrgId, AuthzId, EnvData, DbType) ->
+                                {binary(), ejson_term()}) ->
+                        chef_object() | #chef_cookbook_version{}.
+new_record(chef_environment, OrgId, AuthzId, EnvData) ->
     Name = ej:get({<<"name">>}, EnvData),
     Id = make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(DbType, chef_environment, ejson:encode(EnvData)),
+    Data = chef_db_compression:compress(chef_environment, ejson:encode(EnvData)),
     #chef_environment{id = Id,
                       authz_id = maybe_stub_authz_id(AuthzId, Id),
                       org_id = OrgId,
                       name = Name,
                       serialized_object = Data};
-new_record(chef_client, OrgId, AuthzId, ClientData, _DbType) ->
+new_record(chef_client, OrgId, AuthzId, ClientData) ->
     Name = ej:get({<<"name">>}, ClientData),
     Id = make_org_prefix_id(OrgId, Name),
     Validator = ej:get({<<"validator">>}, ClientData) =:= true,
@@ -74,43 +74,43 @@ new_record(chef_client, OrgId, AuthzId, ClientData, _DbType) ->
                  admin = Admin,
                  public_key = PublicKey,
                  pubkey_version = PubkeyVersion};
-new_record(chef_data_bag, OrgId, AuthzId, Name, _DbType) ->
+new_record(chef_data_bag, OrgId, AuthzId, Name) ->
     Id = make_org_prefix_id(OrgId, Name),
     #chef_data_bag{id = Id,
                    authz_id = maybe_stub_authz_id(AuthzId, Id),
                    org_id = OrgId,
                    name = Name};
-new_record(chef_data_bag_item, OrgId, _AuthzId, {BagName, ItemData}, DbType) ->
+new_record(chef_data_bag_item, OrgId, _AuthzId, {BagName, ItemData}) ->
     ItemName = ej:get({<<"id">>}, ItemData),
     Id = make_org_prefix_id(OrgId, <<BagName/binary, ItemName/binary>>),
-    Data = chef_db_compression:compress(DbType, chef_data_bag_item, ejson:encode(ItemData)),
+    Data = chef_db_compression:compress(chef_data_bag_item, ejson:encode(ItemData)),
     #chef_data_bag_item{id = Id,
                         org_id = OrgId,
                         data_bag_name = BagName,
                         item_name = ItemName,
                         serialized_object = Data
                        };
-new_record(chef_node, OrgId, AuthzId, NodeData, DbType) ->
+new_record(chef_node, OrgId, AuthzId, NodeData) ->
     Name = ej:get({<<"name">>}, NodeData),
     Environment = ej:get({<<"chef_environment">>}, NodeData),
     Id = make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(DbType, chef_node, ejson:encode(NodeData)),
+    Data = chef_db_compression:compress(chef_node, ejson:encode(NodeData)),
     #chef_node{id = Id,
                authz_id = maybe_stub_authz_id(AuthzId, Id),
                org_id = OrgId,
                name = Name,
                environment = Environment,
                serialized_object = Data};
-new_record(chef_role, OrgId, AuthzId, RoleData, DbType) ->
+new_record(chef_role, OrgId, AuthzId, RoleData) ->
     Name = ej:get({<<"name">>}, RoleData),
     Id = make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(DbType, chef_role, ejson:encode(RoleData)),
+    Data = chef_db_compression:compress(chef_role, ejson:encode(RoleData)),
     #chef_role{id = Id,
                authz_id = maybe_stub_authz_id(AuthzId, Id),
                org_id = OrgId,
                name = Name,
                serialized_object = Data};
-new_record(chef_cookbook_version, OrgId, AuthzId, CBVData, DbType) ->
+new_record(chef_cookbook_version, OrgId, AuthzId, CBVData) ->
     %% name for a cookbook_version is actually cb_name-cb_version which is good for ID
     %% creation
     Name = ej:get({<<"name">>}, CBVData),
@@ -121,23 +121,23 @@ new_record(chef_cookbook_version, OrgId, AuthzId, CBVData, DbType) ->
     Metadata0 = ej:get({<<"metadata">>}, CBVData),
 
     MAttributes = compress_maybe(ej:get({<<"attributes">>}, Metadata0, {[]}),
-                                 cookbook_meta_attributes, DbType),
+                                 cookbook_meta_attributes),
 
     %% Do not compress the deps!
     Deps = ejson:encode(ej:get({<<"dependencies">>}, Metadata0, {[]})),
 
     LongDesc = compress_maybe(ej:get({<<"long_description">>}, Metadata0, <<"">>),
-                              cookbook_long_desc, DbType),
+                              cookbook_long_desc),
 
     Metadata = compress_maybe(lists:foldl(fun(Key, MD) ->
                                                   ej:delete({Key}, MD)
                                           end, Metadata0, [<<"attributes">>,
                                                            <<"dependencies">>,
                                                            <<"long_description">>]),
-                              cookbook_metadata, DbType),
+                              cookbook_metadata),
 
     Data = compress_maybe(ej:delete({<<"metadata">>}, CBVData),
-                              chef_cookbook_version, DbType),
+                          chef_cookbook_version),
     #chef_cookbook_version{id = Id,
                            authz_id = maybe_stub_authz_id(AuthzId, Id),
                            org_id = OrgId,
@@ -153,10 +153,10 @@ new_record(chef_cookbook_version, OrgId, AuthzId, CBVData, DbType) ->
                            checksums = chef_cookbook:extract_checksums(CBVData),
                            serialized_object = Data}.
 
-compress_maybe(Data, cookbook_long_desc, DbType) ->
-    chef_db_compression:compress(DbType, cookbook_long_desc, Data);
-compress_maybe(Data, Type, DbType) ->
-    chef_db_compression:compress(DbType, Type, ejson:encode(Data)).
+compress_maybe(Data, cookbook_long_desc) ->
+    chef_db_compression:compress(cookbook_long_desc, Data);
+compress_maybe(Data, Type) ->
+    chef_db_compression:compress(Type, ejson:encode(Data)).
 
 -spec ejson_for_indexing(ChefRecord :: chef_indexable_object(),
                          ChefEJSON :: ejson_term()) -> ejson_term().
@@ -242,17 +242,17 @@ extract_roles(RunList) ->
     [ binary:part(Item, {0, byte_size(Item) - 1})
       || <<"role[", Item/binary>> <- RunList ].
 
--spec update_from_ejson(chef_object() | #chef_cookbook_version{}, ejson_term(), db_type()) -> chef_object().
+-spec update_from_ejson(chef_object() | #chef_cookbook_version{}, ejson_term()) -> chef_object().
 %% @doc Return a new `chef_object()' record updated according to the specified EJSON
 %% terms. Data normalization on the EJSON should occur before making this call. Fields in
 %% the EJSON that exist in the record are updated. The serialized_object record field is
 %% updated with appropriately compressed data. No sanity checks are made; you can "rename"
 %% an object record with this function.
-update_from_ejson(#chef_environment{} = Env, EnvData, DbType) ->
+update_from_ejson(#chef_environment{} = Env, EnvData) ->
     Name = ej:get({<<"name">>}, EnvData),
-    Data = chef_db_compression:compress(DbType, chef_environment, ejson:encode(EnvData)),
+    Data = chef_db_compression:compress(chef_environment, ejson:encode(EnvData)),
     Env#chef_environment{name = Name, serialized_object = Data};
-update_from_ejson(#chef_client{} = Client, ClientData, _DbType) ->
+update_from_ejson(#chef_client{} = Client, ClientData) ->
     Name = ej:get({<<"name">>}, ClientData),
     IsAdmin = ej:get({<<"admin">>}, ClientData) =:= true,
     IsValidator = ej:get({<<"validator">>}, ClientData) =:= true,
@@ -263,30 +263,30 @@ update_from_ejson(#chef_client{} = Client, ClientData, _DbType) ->
                        validator = IsValidator,
                        public_key = Key,
                        pubkey_version = Version};
-update_from_ejson(#chef_data_bag{} = DataBag, DataBagData, _DbType) ->
+update_from_ejson(#chef_data_bag{} = DataBag, DataBagData) ->
     %% here for completeness
     Name = ej:get({<<"name">>}, DataBagData),
     DataBag#chef_data_bag{name = Name};
-update_from_ejson(#chef_data_bag_item{} = DataBagItem, DataBagItemData, DbType) ->
+update_from_ejson(#chef_data_bag_item{} = DataBagItem, DataBagItemData) ->
     Name = ej:get({<<"id">>}, DataBagItemData),
     DataBagItemJson = ejson:encode(DataBagItemData),
-    Data = chef_db_compression:compress(DbType, chef_data_bag_item, DataBagItemJson),
+    Data = chef_db_compression:compress(chef_data_bag_item, DataBagItemJson),
     DataBagItem#chef_data_bag_item{item_name = Name, serialized_object = Data};
-update_from_ejson(#chef_node{} = Node, NodeJson, DbType) ->
+update_from_ejson(#chef_node{} = Node, NodeJson) ->
     Name = ej:get({<<"name">>}, NodeJson),
     %% We expect that the insert_autofill_fields call will insert default when necessary
     Environment = ej:get({<<"chef_environment">>}, NodeJson),
-    Data = chef_db_compression:compress(DbType, chef_node, ejson:encode(NodeJson)),
+    Data = chef_db_compression:compress(chef_node, ejson:encode(NodeJson)),
     Node#chef_node{name = Name, environment = Environment, serialized_object = Data};
-update_from_ejson(#chef_role{} = Role, RoleData, DbType) ->
+update_from_ejson(#chef_role{} = Role, RoleData) ->
     Name = ej:get({<<"name">>}, RoleData),
-    Data = chef_db_compression:compress(DbType, chef_role, ejson:encode(RoleData)),
+    Data = chef_db_compression:compress(chef_role, ejson:encode(RoleData)),
     Role#chef_role{name = Name, serialized_object = Data};
 update_from_ejson(#chef_cookbook_version{org_id = OrgId,
                                          authz_id = AuthzId,
                                          frozen = FrozenOrig} = CookbookVersion,
-                  CookbookVersionData, DbType) ->
-    UpdatedVersion = new_record(chef_cookbook_version, OrgId, AuthzId, CookbookVersionData, DbType),
+                  CookbookVersionData) ->
+    UpdatedVersion = new_record(chef_cookbook_version, OrgId, AuthzId, CookbookVersionData),
     %% frozen is immutable once it is set to true
     Frozen = FrozenOrig =:= true orelse UpdatedVersion#chef_cookbook_version.frozen,
     CookbookVersion#chef_cookbook_version{frozen            = Frozen,
