@@ -9,9 +9,10 @@
 -module(chef_wm_authz).
 
 -export([allow_admin/1,
+         allow_admin_or_requesting_node/2,
          allow_validator/1,
-         allow_admin_or_validator/1,
-         allow_admin_or_requesting_node/2]).
+         is_admin/1,
+         is_validator/1]).
 
 -include("chef_wm.hrl").
 
@@ -26,12 +27,6 @@ allow_admin(#chef_client{admin = true}) ->
 allow_admin(#chef_client{}) ->
     forbidden.
 
--spec allow_admin_or_validator(#chef_client{}) -> authorized | forbidden.
-allow_admin_or_validator(#chef_client{validator = true}) ->
-    authorized;
-allow_admin_or_validator(#chef_client{} = Client) ->
-    allow_admin(Client).
-
 -spec allow_admin_or_requesting_node(#chef_client{}, binary()) -> authorized | forbidden.
 allow_admin_or_requesting_node(#chef_client{name = Name}, Name) ->
     authorized;
@@ -43,4 +38,17 @@ allow_validator(#chef_client{validator = true}) ->
     authorized;
 allow_validator(#chef_client{}) ->
     forbidden.
+
+-spec is_admin(#chef_client{}) -> true | false.
+is_admin(#chef_client{admin = true}) ->
+    true;
+is_admin(#chef_client{}) ->
+    false.
+
+-spec is_validator(#chef_client{}) -> true | false.
+is_validator(#chef_client{validator = true}) ->
+    true;
+is_validator(#chef_client{}) ->
+    false.
+
 

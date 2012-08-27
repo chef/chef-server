@@ -45,16 +45,28 @@ allow_validator_test_() ->
      fun() -> ?assertError(function_clause, chef_wm_authz:allow_validator(#chef_node{name= <<"foo">>})) end}
     ].
 
-allow_admin_or_validator_test_() ->
+is_admin_test_() ->
   [
-    {"allow_admin_or_validator Admin is true",
-     fun() -> ?assertEqual(authorized, chef_wm_authz:allow_admin_or_validator(?ADMIN)) end},
-    {"allow_admin_or_validator Validator is true",
-     fun() -> ?assertEqual(authorized, chef_wm_authz:allow_admin_or_validator(?VALIDATOR)) end},
-    {"allow_admin_or_validator non-admin is false",
-     fun() -> ?assertEqual(forbidden, chef_wm_authz:allow_admin_or_validator(?NONADMIN)) end},
-    {"no match for allow_admin_or_validator with non-client",
-     fun() -> ?assertError(function_clause, chef_wm_authz:allow_admin_or_validator(#chef_node{name= <<"foo">>})) end}
+    {"is_admin Admin is true",
+    fun() -> ?assertEqual(true, chef_wm_authz:is_admin(?ADMIN)) end},
+    {"is_admin Validator is false",
+     fun() -> ?assertEqual(false, chef_wm_authz:is_admin(?VALIDATOR)) end},
+    {"is_admin non-admin is false",
+     fun() -> ?assertEqual(false, chef_wm_authz:is_admin(?NONADMIN)) end},
+    {"no match for is_admin with non-client",
+     fun() -> ?assertError(function_clause, chef_wm_authz:is_admin(#chef_node{name= <<"foo">>})) end}
+    ].
+
+is_validator_test_() ->
+  [
+    {"is_validator Admin is false",
+     fun() -> ?assertEqual(false, chef_wm_authz:is_validator(?ADMIN)) end},
+    {"is_validator Validator is true",
+     fun() -> ?assertEqual(true, chef_wm_authz:is_validator(?VALIDATOR)) end},
+    {"is_validator non-admin is false",
+     fun() -> ?assertEqual(false, chef_wm_authz:is_validator(?NONADMIN)) end},
+    {"no match for is_validator with non-client",
+     fun() -> ?assertError(function_clause, chef_wm_authz:is_validator(#chef_node{name= <<"foo">>})) end}
     ].
 
 allow_admin_or_requesting_node_test_() ->
