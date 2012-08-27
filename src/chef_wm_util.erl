@@ -90,8 +90,6 @@ not_found_message(data_bag_missing_for_item_post, BagName) ->
                                              BagName,
                                              "' could be found. Please create this ",
                                              "data bag before adding items to it."]));
-not_found_message(sandboxes, _OrgName) ->
-    error_message_envelope(<<"Listing sandboxes not supported.">>);
 not_found_message(sandbox, SandboxId) ->
     error_message_envelope(iolist_to_binary([<<"No such sandbox '">>, SandboxId,
                                              <<"'.">>]));
