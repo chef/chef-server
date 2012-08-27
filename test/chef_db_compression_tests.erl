@@ -24,25 +24,27 @@
 
 -define(TYPES, [chef_node, chef_role, chef_data_bag_item]).
 
-mysql_always_compressed_test_() ->
-    [ {"mysql compressed for: " ++ atom_to_list(Type),
+always_compressed_test_() ->
+    [ {"compressed for: " ++ atom_to_list(Type),
        fun() ->
-               assert_compressed(chef_db_compression:compress(mysql, Type, ?DATA))
-       end} || Type <- ?TYPES ].
-
-pgsql_sometimes_compressed_test_() ->
-    Tests = [{chef_node, fun assert_not_compressed/1},
-             {chef_role, fun assert_compressed/1},
-             {chef_data_bag_item, fun assert_compressed/1}],
-    [ fun() ->
-              Assert(chef_db_compression:compress(pgsql, Type, ?DATA))
-      end || {Type, Assert} <- Tests ].
+               assert_compressed(chef_db_compression:compress(Type, ?DATA))
+       end} || Type <- [chef_role, chef_data_bag_item] ].
 
 assert_compressed(CData) ->
     ?assert(size(CData) =/= size(?DATA)),
     ?assertNot(?DATA =:= CData),
     ?assertEqual(?DATA, chef_db_compression:decompress(CData)).
 
+-ifdef(CHEF_UNCOMPRESSED_NODE_DATA).
+sometimes_compressed_test_() ->
+    Tests = [{chef_node, fun assert_not_compressed/1},
+             {chef_role, fun assert_compressed/1},
+             {chef_data_bag_item, fun assert_compressed/1}],
+    [ fun() ->
+              Assert(chef_db_compression:compress(Type, ?DATA))
+      end || {Type, Assert} <- Tests ].
+
 assert_not_compressed(CData) ->
     ?assertEqual(?DATA, CData),
     ?assertEqual(?DATA, chef_db_compression:decompress(CData)).
+-endif.

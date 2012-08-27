@@ -212,12 +212,10 @@ assemble_cookbook_ejson_test_() ->
       fun() ->
               OrgId = <<"12341234123412341234123412341234">>,
               AuthzId = <<"auth">>,
-              DbType = pgsql,
               Record = chef_object:new_record(chef_cookbook_version,
                                               OrgId,
                                               AuthzId,
-                                              CBEJson,
-                                              DbType),
+                                              CBEJson),
 
               chef_test_utility:ejson_match(CBEJson,
                                             chef_cookbook:assemble_cookbook_ejson(Record)),

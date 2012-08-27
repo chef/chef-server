@@ -72,7 +72,6 @@ new_record_test_() ->
     AuthzId = <<"authz-123">>,
     NameJson = {[{<<"name">>, <<"the-name">>}, {<<"alpha">>, <<"bravo">>}]},
     IdJson = {[{<<"id">>, <<"the-name">>}, {<<"alpha">>, <<"bravo">>}]},
-    DbTypes = [pgsql, mysql],
     NameForInput = fun(Name) when is_binary(Name) ->
                            Name;
                       ({BagName, {ItemData}}) when is_binary(BagName) ->
@@ -92,10 +91,10 @@ new_record_test_() ->
             ],
     [ {atom_to_list(RecName),
        fun() ->
-              Got = chef_object:new_record(RecName, O, A, Data, DbType),
+              Got = chef_object:new_record(RecName, O, A, Data),
               ?assertEqual(NameForInput(Data), chef_object:name(Got)),
               ?assertEqual(32, size(chef_object:id(Got)))
-      end} || {RecName, O, A, Data} <- Tests, DbType <- DbTypes ].
+      end} || {RecName, O, A, Data} <- Tests ].
 
 %% ejson_for_indexing tests
 
@@ -220,7 +219,7 @@ data_Bag_item_update_from_ejson_test_() ->
       [
        {atom_to_list(DbType),
         fun() ->
-                Item1 = chef_object:update_from_ejson(Item, RawItem, DbType),
+                Item1 = chef_object:update_from_ejson(Item, RawItem),
                 GotData = Item1#chef_data_bag_item.serialized_object,
                 GotEjson = ejson:decode(chef_db_compression:decompress(GotData)),
                 ?assertEqual(<<"the_item_name">>, Item1#chef_data_bag_item.item_name),
@@ -239,7 +238,7 @@ environment_update_from_ejson_test_() ->
       [
        {atom_to_list(DbType),
         fun() ->
-                Env1 = chef_object:update_from_ejson(Env, RawEnv, DbType),
+                Env1 = chef_object:update_from_ejson(Env, RawEnv),
                 GotData = Env1#chef_environment.serialized_object,
                 GotEjson = ejson:decode(chef_db_compression:decompress(GotData)),
                 ?assertEqual(<<"new_name">>, Env1#chef_environment.name),
@@ -254,7 +253,7 @@ node_update_from_ejson_test_() ->
       [
        {atom_to_list(DbType),
         fun() ->
-                Node1 = chef_object:update_from_ejson(Node, RawNode, DbType),
+                Node1 = chef_object:update_from_ejson(Node, RawNode),
                 GotData = Node1#chef_node.serialized_object,
                 GotEjson = ejson:decode(chef_db_compression:decompress(GotData)),
                 ?assertEqual(<<"a_node">>, Node1#chef_node.name),
@@ -280,7 +279,7 @@ role_update_from_ejson_test_() ->
       [
        {atom_to_list(DbType),
         fun() ->
-                Role1 = chef_object:update_from_ejson(Role, RawRole, DbType),
+                Role1 = chef_object:update_from_ejson(Role, RawRole),
                 GotData = Role1#chef_role.serialized_object,
                 GotEjson = ejson:decode(chef_db_compression:decompress(GotData)),
                 ?assertEqual(<<"new_name">>, Role1#chef_role.name),
