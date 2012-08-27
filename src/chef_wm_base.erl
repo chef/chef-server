@@ -655,7 +655,7 @@ handle_auth_info(chef_wm_clients, Req, #base_state{requestor = Requestor}) ->
         'GET' -> %% index
             chef_wm_authz:allow_admin(Requestor);
         _Else ->
-            authorized
+            forbidden
     end;
 handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
                                                         resource_state =
@@ -675,7 +675,7 @@ handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
                     chef_wm_authz:allow_admin_or_requesting_node(Requestor, ClientName)
             end;
         _Else ->
-            authorized
+            forbidden
     end;
 handle_auth_info(Module, Req, #base_state{requestor = Requestor})
         when Module =:= chef_wm_cookbook_version;
@@ -683,44 +683,95 @@ handle_auth_info(Module, Req, #base_state{requestor = Requestor})
              Module =:= chef_wm_named_role;
              Module =:= chef_wm_named_data_item ->
     case wrq:method(Req) of
+        'GET' ->
+            authorized;
         'PUT' -> %% update
             chef_wm_authz:allow_admin(Requestor);
         'DELETE' ->
             chef_wm_authz:allow_admin(Requestor);
         _Else ->
-            authorized
+            forbidden
     end;
-handle_auth_info(Module, Req, #base_state{requestor = Requestor}) when Module =:= chef_wm_data;
-                                                                       Module =:= chef_wm_environments;
-                                                                       Module =:= chef_wm_roles ->
+handle_auth_info(Module, Req, #base_state{requestor = Requestor})
+        when Module =:= chef_wm_data;
+             Module =:= chef_wm_environments;
+             Module =:= chef_wm_roles;
+             Module =:= chef_wm_sandboxes ->
     case wrq:method(Req) of
+        'GET' ->
+            authorized;
         'POST' -> %% create
             chef_wm_authz:allow_admin(Requestor);
         _Else ->
-            authorized
+            forbidden
     end;
 handle_auth_info(chef_wm_named_data, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
+        'GET' ->
+            authorized;
         'POST' -> %% create data_item
             chef_wm_authz:allow_admin(Requestor);
         'DELETE' -> %% delete data
             chef_wm_authz:allow_admin(Requestor);
         _Else ->
-            authorized
+            forbidden
     end;
 handle_auth_info(chef_wm_named_node, Req, #base_state{requestor = Requestor}) ->
     NodeName = chef_wm_util:object_name(node, Req),
     case wrq:method(Req) of
+        'GET' ->
+            authorized;
         'PUT' -> %% update
             chef_wm_authz:allow_admin_or_requesting_node(Requestor, NodeName);
         'DELETE' -> %% delete
             chef_wm_authz:allow_admin_or_requesting_node(Requestor, NodeName);
         _Else ->
-            authorized
+            forbidden
     end;
-%% Default case is to allow all requests
-handle_auth_info(_Mod, _Req, _State) ->
-    authorized.
+handle_auth_info(Module, Req, #base_state{requestor = Requestor})
+        when Module =:= chef_wm_nodes ->
+    case wrq:method(Req) of
+        'GET' ->
+            authorized;
+        'POST' ->
+            authorized;
+        _Else ->
+            forbidden
+    end;
+handle_auth_info(Module, Req, _State)
+        when
+             Module =:= chef_wm_cookbooks;
+             Module =:= chef_wm_environment_cookbooks;
+             Module =:= chef_wm_environment_recipes;
+             Module =:= chef_wm_environment_roles;
+             Module =:= chef_wm_search_index;
+             Module =:= chef_wm_status ->
+    case wrq:method(Req) of
+        'GET' ->
+            authorized;
+        _Else ->
+            forbidden
+    end;
+handle_auth_info(Module, Req, _State)
+        when Module =:= chef_wm_depsolver ->
+    case wrq:method(Req) of
+        'POST' ->
+            authorized;
+        _Else ->
+            forbidden
+    end;
+handle_auth_info(Module, Req, _State)
+        when Module =:= chef_wm_named_sandbox;
+             Module =:= chef_wm_search ->
+    case wrq:method(Req) of
+        'PUT' ->
+            authorized;
+        _Else ->
+            forbidden
+    end;
+%% Default case is to allow disallow all requests
+handle_auth_info(Mod, Req, _State) ->
+    forbidden.
 
 set_forbidden_msg(Req, State) ->
     Msg = <<"You are not allowed to take this action.">>,
