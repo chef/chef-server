@@ -115,12 +115,7 @@
          environment_exists/3,
          make_context/1,
          make_context/2,
-         update_fun/1,
-
-         new_node_record/4,
-         new_role_record/4,
-         new_data_bag_record/4,
-         new_data_bag_item_record/5]).
+         update_fun/1]).
 
 -include_lib("chef_db/include/chef_db.hrl").
 -include_lib("chef_objects/include/chef_types.hrl").
@@ -1213,65 +1208,6 @@ update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
         {conflict, Message} -> {conflict, Message};
         {error, Error} -> {error, Error}
     end.
-
--spec new_node_record(<<_:256>>, <<_:256>>, {[_]}, db_type()) -> #chef_node{}.
-%% @doc Create a `#chef_node{}' record assigning a generated id and setting timestamps to
-%% now.
-%%
-new_node_record(OrgId, AuthzId, NodeTerms, DbType) ->
-    Name = ej:get({<<"name">>}, NodeTerms),
-    Environment = ej:get({<<"chef_environment">>}, NodeTerms),
-    Id = chef_object:make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(DbType, chef_node, ejson:encode(NodeTerms)),
-    #chef_node{id = Id,
-               authz_id = AuthzId,
-               org_id = OrgId,
-               name = Name,
-               environment = Environment,
-               serialized_object = Data}.
-
--spec new_role_record(<<_:256>>, <<_:256>>, {[_]}, db_type()) -> #chef_role{}.
-%% @doc Create a `#chef_role{}' record assigning a generated id and setting timestamps to
-%% now.
-%%
-new_role_record(OrgId, AuthzId, RoleTerms, DbType) ->
-    Name = ej:get({<<"name">>}, RoleTerms),
-    Id = chef_object:make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(DbType, chef_role, ejson:encode(RoleTerms)),
-    #chef_role{id = Id,
-               authz_id = AuthzId,
-               org_id = OrgId,
-               name = Name,
-               %% FIXME: compression needs to be fixed either for all or be type specific
-               %% now.
-               serialized_object = Data}.
-
--spec new_data_bag_record(<<_:256>>, <<_:256>>, binary(), db_type()) -> #chef_data_bag{}.
-%% @doc Create a `#chef_data_bag{}' record. Timestamps are not set here since chef_sql will
-%% set on create or update.
-%%
-new_data_bag_record(OrgId, AuthzId, Name, _DbType) ->
-    Id = chef_object:make_org_prefix_id(OrgId, Name),
-    #chef_data_bag{id = Id,
-                   authz_id = AuthzId,
-                   org_id = OrgId,
-                   name = Name}.
-
--spec new_data_bag_item_record(<<_:256>>, <<_:256>>, <<_:256>>, {[_]}, db_type()) ->
-                                      #chef_data_bag_item{}.
-%% @doc Create a `#chef_data_bag_item{}' record. Timestamps are not set here since chef_sql will
-%% set on create or update.
-%%
-new_data_bag_item_record(OrgId, DataBagName, ItemName, ItemTerms, DbType) ->
-    Id = chef_object:make_org_prefix_id(OrgId, DataBagName),
-    Data = chef_db_compression:compress(DbType, chef_data_bag_item,
-                                        ejson:encode(ItemTerms)),
-    #chef_data_bag_item{id = Id,
-                        org_id = OrgId,
-                        data_bag_name = DataBagName,
-                        item_name = ItemName,
-                        serialized_object = Data
-                       }.
 
 as_bin(S) when is_list(S) ->
     list_to_binary(S);
