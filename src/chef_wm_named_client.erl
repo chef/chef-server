@@ -49,8 +49,8 @@ allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
 validate_request(Method, Req, #base_state{chef_db_context = DbContext,
-                                         organization_name = OrgName,
-                                         resource_state = ClientState} = State) ->
+                                          organization_name = OrgName,
+                                          resource_state = ClientState} = State) ->
     Name = chef_wm_util:object_name(client, Req),
     OldClient = chef_db:fetch_client(DbContext, OrgName, Name),
     case OldClient of
@@ -61,11 +61,9 @@ validate_request(Method, Req, #base_state{chef_db_context = DbContext,
                 'PUT' ->
                     Body = wrq:req_body(Req),
                     {ok, Client} = chef_client:parse_binary_json(Body, Name, OldClient),
-                    {Req,
-                     State#base_state{resource_state =
-                                          ClientState#client_state{client_data = Client,
-                                                                   chef_client =
-                                                                       OldClient}}};
+                    {Req, State#base_state{resource_state =
+                                               ClientState#client_state{client_data = Client,
+                                                                   chef_client = OldClient}}};
                 _ ->
                     {Req, State#base_state{resource_state =
                                                ClientState#client_state{chef_client =
