@@ -780,12 +780,17 @@ handle_auth_info(Module, Req, _State)
         _Else ->
             forbidden
     end;
-handle_auth_info(Module, Req, _State)
-        when Module =:= chef_wm_named_sandbox;
-             Module =:= chef_wm_search ->
+handle_auth_info(chef_wm_search, Req, _State) ->
     case wrq:method(Req) of
         'PUT' ->
             authorized;
+        _Else ->
+            forbidden
+    end;
+handle_auth_info(chef_wm_named_sandbox, Req, #base_state{requestor = Requestor}) ->
+    case wrq:method(Req) of
+        'PUT' ->
+            chef_wm_authz:allow_admin(Requestor);
         _Else ->
             forbidden
     end;
