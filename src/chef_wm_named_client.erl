@@ -48,29 +48,38 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
-validate_request(Method, Req, #base_state{chef_db_context = DbContext,
-                                          organization_name = OrgName,
-                                          resource_state = ClientState} = State) ->
+validate_any_request(Req, #base_state{chef_db_context = DbContext,
+                                      organization_name = OrgName,
+                                      resource_state = ClientState} = State) ->
     Name = chef_wm_util:object_name(client, Req),
-    OldClient = chef_db:fetch_client(DbContext, OrgName, Name),
-    case OldClient of
-        not_found ->
-            throw({client_not_found, Name});
-        _ ->
-            case Method of
-                'PUT' ->
-                    Body = wrq:req_body(Req),
-                    {ok, Client} = chef_client:parse_binary_json(Body, Name, OldClient),
-                    {Req, State#base_state{resource_state =
-                                               ClientState#client_state{client_data = Client,
-                                                                   chef_client = OldClient}}};
-                _ ->
-                    {Req, State#base_state{resource_state =
-                                               ClientState#client_state{chef_client =
-                                                                            OldClient}}}
-            end
-    end.
+    Client = case chef_db:fetch_client(DbContext, OrgName, Name) of
+                 not_found ->
+                     not_found;
+                 #chef_client{} = Found ->
+                     Found
+             end,
+    ClientState1 = ClientState#client_state{chef_client = Client},
+    {Req, State#base_state{resource_state = ClientState1}}.
 
+validate_request('PUT', Req, State) ->
+    {Req1, State1} = validate_any_request(Req, State),
+    #base_state{resource_state =
+                    #client_state{chef_client =
+                                      #chef_client{name = Name} = OldClient} =
+                    ClientState} = State1,
+    Body = wrq:req_body(Req),
+    {ok, ClientData} = chef_client:parse_binary_json(Body, Name, OldClient),
+    {Req1, State1#base_state{resource_state =
+                                ClientState#client_state{client_data = ClientData}}};
+validate_request(_Other, Req, State) ->
+    validate_any_request(Req, State).
+
+auth_info(Req, #base_state{resource_state =
+                               #client_state{chef_client = not_found}} = State) ->
+    Name = chef_wm_util:object_name(client, Req),
+    Message = chef_wm_util:not_found_message(client, Name),
+    Req1 = chef_wm_util:set_json_body(Req, Message),
+    {{halt, 404}, Req1, State#base_state{log_msg = client_not_found}};
 auth_info(Req, #base_state{resource_state =
                                #client_state{chef_client =
                                                  #chef_client{authz_id = AuthzId} =
