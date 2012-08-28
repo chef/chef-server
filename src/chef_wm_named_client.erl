@@ -64,13 +64,18 @@ validate_any_request(Req, #base_state{chef_db_context = DbContext,
 validate_request('PUT', Req, State) ->
     {Req1, State1} = validate_any_request(Req, State),
     #base_state{resource_state =
-                    #client_state{chef_client =
-                                      #chef_client{name = Name} = OldClient} =
-                    ClientState} = State1,
-    Body = wrq:req_body(Req),
-    {ok, ClientData} = chef_client:parse_binary_json(Body, Name, OldClient),
-    {Req1, State1#base_state{resource_state =
-                                ClientState#client_state{client_data = ClientData}}};
+                    #client_state{chef_client = OldClient} = ClientState} = State1,
+    case OldClient of
+        not_found ->
+            {Req1, State1};
+        _ ->
+            #chef_client{name = Name} = OldClient,
+            Body = wrq:req_body(Req),
+            {ok, ClientData} = chef_client:parse_binary_json(Body, Name, OldClient),
+            {Req1, State1#base_state{resource_state =
+                                         ClientState#client_state{client_data =
+                                                                      ClientData}}}
+    end;
 validate_request(_Other, Req, State) ->
     validate_any_request(Req, State).
 
