@@ -52,11 +52,10 @@
             %% Whether to redirect error_logger messages into lager - defaults to true
             {error_logger_redirect, true}
         ]},
- {chef_common, [
- %{chef_db, [
-  %         {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
-  %         {cache_defaults, [{max_size, <%= @max_cache_size %> },
-  %                              {ttl, <%= @cache_ttl %> }]},
+ {chef_db, [
+          {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
+          {cache_defaults, [{max_size, <%= @max_cache_size %> },
+                               {ttl, <%= @cache_ttl %> }]},
            {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
            {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
           ]},
