@@ -112,7 +112,7 @@
 -record(client_state, {
           client_data,
           client_authz_id,
-          chef_client :: #chef_client{}
+          chef_client :: #chef_client{} | not_found
          }).
 
 -record(cookbook_state, {

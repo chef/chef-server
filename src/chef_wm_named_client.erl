@@ -64,39 +64,54 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
-validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
-                                         organization_name = OrgName,
-                                         resource_state = ClientState} = State) ->
-    Body = wrq:req_body(Req),
+validate_any_request(Req, #base_state{chef_db_context = DbContext,
+                                      organization_name = OrgName,
+                                      resource_state = ClientState} = State) ->
     Name = chef_wm_util:object_name(client, Req),
-    OldClient = chef_db:fetch_client(DbContext, OrgName, Name),
-    NewClient = case OldClient of
-                    not_found ->
-                        %% FIXME: we should just 404 here
-                        {ok, Client} = chef_client:parse_binary_json(Body, Name),
-                        Client;
-                    _ ->
-                        {ok, Client} = chef_client:parse_binary_json(Body, Name, OldClient),
-                        Client
-                end,
-    {Req, State#base_state{resource_state = ClientState#client_state{client_data = NewClient}}};
-validate_request(_Other, Req, State) ->
-    {Req, State}.
+    Client = case chef_db:fetch_client(DbContext, OrgName, Name) of
+                 not_found ->
+                     not_found;
+                 #chef_client{} = Found ->
+                     Found
+             end,
+    ClientState1 = ClientState#client_state{chef_client = Client},
+    {Req, State#base_state{resource_state = ClientState1}}.
 
-auth_info(Req, #base_state{chef_db_context = DbContext,
-                           resource_state = ClientState,
-                           organization_name=OrgName}=State) ->
-    ClientName = chef_wm_util:object_name(client, Req),
-    case chef_db:fetch_client(DbContext, OrgName, ClientName) of
+validate_request('PUT', Req, State) ->
+    {Req1, State1} = validate_any_request(Req, State),
+    #base_state{resource_state =
+                    #client_state{chef_client = OldClient} = ClientState} = State1,
+    case OldClient of
         not_found ->
-            Message = chef_wm_util:not_found_message(client, ClientName),
-            Req1 = chef_wm_util:set_json_body(Req, Message),
-            {{halt, 404}, Req1, State#base_state{log_msg = client_not_found}};
-        #chef_client{authz_id = AuthzId} = Client ->
-            ClientState1 = ClientState#client_state{chef_client = Client},
-            State1 = State#base_state{resource_state = ClientState1},
-            {{object, AuthzId}, Req, State1}
-    end.
+            {Req1, State1};
+        _ ->
+            % FIXME: parse_binary_json can probably be simplified to NOT need a
+            % name passed to it; the name extracted from the old client here is
+            % the same as the request name, since the request name is used to pull
+            % the old client from the database in the first place.
+            #chef_client{name = Name} = OldClient,
+            Body = wrq:req_body(Req),
+            {ok, ClientData} = chef_client:parse_binary_json(Body, Name, OldClient),
+            {Req1, State1#base_state{resource_state =
+                                         ClientState#client_state{client_data =
+                                                                      ClientData}}}
+    end;
+validate_request(_Other, Req, State) ->
+    validate_any_request(Req, State).
+
+auth_info(Req, #base_state{resource_state =
+                               #client_state{chef_client = not_found}} = State) ->
+    Name = chef_wm_util:object_name(client, Req),
+    Message = chef_wm_util:not_found_message(client, Name),
+    Req1 = chef_wm_util:set_json_body(Req, Message),
+    {{halt, 404}, Req1, State#base_state{log_msg = client_not_found}};
+auth_info(Req, #base_state{resource_state =
+                               #client_state{chef_client =
+                                                 #chef_client{authz_id = AuthzId} =
+                                                 Client} = ClientState} = State) ->
+    ClientState1 = ClientState#client_state{chef_client = Client},
+    State1 = State#base_state{resource_state = ClientState1},
+    {{object, AuthzId}, Req, State1}.
 
 from_json(Req, #base_state{reqid = RequestId,
                            resource_state =
