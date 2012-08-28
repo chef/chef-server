@@ -45,8 +45,7 @@
 -export([
          allowed_methods/2,
          create_path/2,
-         from_json/2,
-         resource_exists/2
+         from_json/2
         ]).
 
 init(Config) ->
@@ -59,10 +58,8 @@ request_type() ->
     "sandboxes".
 
 allowed_methods(Req, State) ->
-    {['GET','POST'], Req, State}.
+    {['POST'], Req, State}.
 
-validate_request('GET', Req, State) ->
-    {Req, State};
 validate_request('POST', Req, #base_state{resource_state = BoxState} = State) ->
     {ok, Sandbox} = chef_sandbox:parse_binary_json(wrq:req_body(Req), create),
     {Req, State#base_state{resource_state = BoxState#sandbox_state{sandbox_data = Sandbox}}}.
@@ -71,19 +68,7 @@ auth_info(Req, State) ->
     auth_info(wrq:method(Req), Req, State).
 
 auth_info('POST', Req, State) ->
-    {{create_in_container, sandbox}, Req, State};
-auth_info('GET', Req, State) ->
-    {{container, sandbox}, Req, State}.
-
-resource_exists(Req, #base_state{organization_name = OrgName} = State) ->
-    case wrq:method(Req) of
-        'GET' ->
-            Msg = chef_wm_util:not_found_message(sandboxes, OrgName),
-            Req1 = chef_wm_util:set_json_body(Req, Msg),
-            {false, Req1, State};
-        _ ->
-            {true, Req, State}
-    end.
+    {{create_in_container, sandbox}, Req, State}.
 
 create_path(Req, #base_state{organization_guid = OrgId,
                              resource_state = SandboxState}=State) ->
