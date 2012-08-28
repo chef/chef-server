@@ -69,6 +69,10 @@ validate_request('PUT', Req, State) ->
         not_found ->
             {Req1, State1};
         _ ->
+            % FIXME: parse_binary_json can probably be simplified to NOT need a
+            % name passed to it; the name extracted from the old client here is
+            % the same as the request name, since the request name is used to pull
+            % the old client from the database in the first place.
             #chef_client{name = Name} = OldClient,
             Body = wrq:req_body(Req),
             {ok, ClientData} = chef_client:parse_binary_json(Body, Name, OldClient),
