@@ -749,7 +749,9 @@ handle_auth_info(chef_wm_named_node, Req, #base_state{requestor = Requestor}) ->
         _Else ->
             forbidden
     end;
-handle_auth_info(chef_wm_nodes, Req, _State) ->
+handle_auth_info(Module, Req, _State)
+        when Module =:= chef_wm_nodes;
+             Module =:= chef_wm_search ->
     case wrq:method(Req) of
         'GET' ->
             authorized;
@@ -759,8 +761,7 @@ handle_auth_info(chef_wm_nodes, Req, _State) ->
             forbidden
     end;
 handle_auth_info(Module, Req, _State)
-        when
-             Module =:= chef_wm_cookbooks;
+        when Module =:= chef_wm_cookbooks;
              Module =:= chef_wm_environment_cookbooks;
              Module =:= chef_wm_environment_recipes;
              Module =:= chef_wm_environment_roles;
@@ -772,17 +773,9 @@ handle_auth_info(Module, Req, _State)
         _Else ->
             forbidden
     end;
-handle_auth_info(Module, Req, _State)
-        when Module =:= chef_wm_depsolver ->
+handle_auth_info(chef_wm_depsolver, Req, _State) ->
     case wrq:method(Req) of
         'POST' ->
-            authorized;
-        _Else ->
-            forbidden
-    end;
-handle_auth_info(chef_wm_search, Req, _State) ->
-    case wrq:method(Req) of
-        'PUT' ->
             authorized;
         _Else ->
             forbidden
