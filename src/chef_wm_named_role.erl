@@ -54,14 +54,25 @@
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
-init_resource_state(_Config) ->
-    {ok, #role_state{}}.
+init_resource_state(Config) ->
+    %% this resource serves named roles as well as the /roles/:role/environments endpoint
+    %% that returns just the names of the environments that a given role has
+    %% environment-specific run lists for. The behavior is determined by the value of init
+    %% parameter 'env_run_list_only'.
+    EnvRunListOnly = (true =:= proplists:get_value(env_run_list_only, Config)),
+    {ok, #role_state{env_run_list_only = EnvRunListOnly}}.
 
 request_type() ->
     "roles".
 
-allowed_methods(Req, State) ->
-    {['GET', 'PUT', 'DELETE'], Req, State}.
+allowed_methods(Req, #base_state{resource_state = RoleState} = State) ->
+    Methods = case RoleState#role_state.env_run_list_only of
+                  true ->
+                      ['GET'];
+                  false ->
+                      ['GET', 'PUT', 'DELETE']
+              end,
+    {Methods, Req, State}.
 
 validate_request(Method, Req, State) when Method == 'GET';
                                           Method == 'DELETE' ->
@@ -94,9 +105,17 @@ resource_exists(Req, State) ->
     {true, Req, State}.
 
 to_json(Req, #base_state{resource_state = #role_state{
+                           env_run_list_only = EnvRunListOnly,
                            chef_role = #chef_role{
-                             serialized_object = JSON}}} = State) ->
-    {chef_db_compression:decompress(JSON), Req, State}.
+                             serialized_object = Gzip}}} = State) ->
+    JSON = chef_db_compression:decompress(Gzip),
+    case EnvRunListOnly of
+        true ->
+            Environments = chef_role:environments(ejson:decode(JSON)),
+            {ejson:encode(Environments), Req, State};
+        false ->
+            {JSON, Req, State}
+    end.
 
 from_json(Req, #base_state{resource_state = #role_state{chef_role = Role,
                                                         role_data = RoleData}} = State) ->

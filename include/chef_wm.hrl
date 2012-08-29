@@ -161,6 +161,7 @@
          }).
 
 -record(role_state, {
+          env_run_list_only = false :: boolean(),
           %% EJson-encoded representation of a Role
           role_data,
           role_authz_id,
