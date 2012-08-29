@@ -9,7 +9,7 @@ source "http://rubygems.org"
 gem "mixlib-config", "1.1.2", :git => "git@github.com:opscode/mixlib-config.git"
 gem "rspec-shared", :git => "git://github.com/justinko/rspec-shared.git"
 
-gem 'chef-pedant-core', :path => '/srv/piab/mounts/chef-pedant-core'
-gem 'oc-chef-pedant-core', :path => '/srv/piab/mounts/oc-chef-pedant-core'
-gem 'chef-pedant-tests', :path => '/srv/piab/mounts/chef-pedant-tests'
-gem 'oc-chef-pedant-tests', :path => '/srv/piab/mounts/oc-chef-pedant-tests'
+gem 'chef-pedant-core', :git => "git@github.com:opscode/chef-pedant-core.git"
+gem 'oc-chef-pedant-core', :git => "git@github.com:opscode/oc-chef-pedant-core.git"
+gem 'chef-pedant-tests', :git => "git@github.com:opscode/chef-pedant-tests.git"
+gem 'oc-chef-pedant-tests', :git => "git@github.com:opscode/oc-chef-pedant-tests.git"
