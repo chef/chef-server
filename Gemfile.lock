@@ -1,49 +1,49 @@
 GIT
-  remote: git@github.com:opscode/mixlib-config.git
-  revision: f09a2f09e30b6588567da564ea89abcd8fdb98d4
+  remote: git://github.com/justinko/rspec-shared.git
+  revision: 7034924ee61aea3b3440aa9bd27bfbb316ee5831
+  ref: 7034924ee61aea3b3440aa9bd27bfbb316ee5831
   specs:
-    mixlib-config (1.1.2)
-
-PATH
-  remote: ../opscode-pedant-core
-  specs:
-    opscode-pedant-core (0.0.1)
-      activesupport
-      chef
-      erubis
-      mixlib-authentication
-      mixlib-config
-      mixlib-shellout
-      net-http-spy
-      rest-client
+    rspec-shared (0.0.1)
       rspec
-      rspec_junit_formatter
 
-PATH
-  remote: ../opscode-pedant-opc-core
+GIT
+  remote: git@github.com:opscode/chef-pedant-core.git
+  revision: 72bf6f9c585400ec9496ffe5ba3d35aa84eac5c3
   specs:
-    opscode-pedant-opc-core (0.0.1)
+    chef-pedant-core (0.0.1)
+      activesupport (~> 3.2.8)
+      chef (~> 10.12.0)
+      erubis (~> 2.7.0)
+      mixlib-authentication (~> 1.3.0)
+      mixlib-config (~> 1.1.2)
+      mixlib-shellout (~> 1.1.0)
+      net-http-spy (~> 0.2.1)
+      rest-client (~> 1.6.7)
+      rspec (~> 2.11.0)
+      rspec_junit_formatter (~> 0.1.1)
 
-PATH
-  remote: ../opscode-pedant-opc-tests
+GIT
+  remote: git@github.com:opscode/chef-pedant-tests.git
+  revision: e1dafdfe3e3fa033cbe6f6cfa4a3a97dcc3b3c4d
   specs:
-    opscode-pedant-opc-tests (0.0.1)
+    chef-pedant-tests (0.0.1)
 
-PATH
-  remote: ../opscode-pedant-oss-core
+GIT
+  remote: git@github.com:opscode/oc-chef-pedant-core.git
+  revision: 19d237115d69d3fc34f9456862ebb607f31da9e7
   specs:
-    opscode-pedant-oss-core (0.0.1)
-      opscode-pedant-core
+    oc-chef-pedant-core (0.0.1)
 
-PATH
-  remote: ../opscode-pedant-oss-tests
+GIT
+  remote: git@github.com:opscode/oc-chef-pedant-tests.git
+  revision: 213bd6ee4adcfdfee3bf0e35882f70bbd6fcd34c
   specs:
-    opscode-pedant-oss-tests (0.0.1)
+    oc-chef-pedant-tests (0.0.1)
 
 GEM
   remote: http://rubygems.org/
   specs:
-    activesupport (3.2.6)
+    activesupport (3.2.8)
       i18n (~> 0.6)
       multi_json (~> 1.0)
     builder (3.0.0)
@@ -68,16 +68,17 @@ GEM
       yajl-ruby (~> 1.1)
     diff-lcs (1.1.3)
     erubis (2.7.0)
-    highline (1.6.13)
+    highline (1.6.14)
     i18n (0.6.0)
     ipaddress (0.8.0)
     json (1.6.1)
     mime-types (1.19)
-    mixlib-authentication (1.1.4)
+    mixlib-authentication (1.3.0)
       mixlib-log
     mixlib-cli (1.2.2)
+    mixlib-config (1.1.2)
     mixlib-log (1.4.1)
-    mixlib-shellout (1.0.0)
+    mixlib-shellout (1.1.0)
     moneta (0.6.0)
     multi_json (1.3.6)
     net-http-spy (0.2.1)
@@ -102,9 +103,9 @@ GEM
       rspec-expectations (~> 2.11.0)
       rspec-mocks (~> 2.11.0)
     rspec-core (2.11.1)
-    rspec-expectations (2.11.1)
+    rspec-expectations (2.11.2)
       diff-lcs (~> 1.1.3)
-    rspec-mocks (2.11.1)
+    rspec-mocks (2.11.2)
     rspec_junit_formatter (0.1.1)
       builder
       rspec (~> 2.0)
@@ -119,9 +120,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  mixlib-config (= 1.1.2)!
-  opscode-pedant-core!
-  opscode-pedant-opc-core!
-  opscode-pedant-opc-tests!
-  opscode-pedant-oss-core!
-  opscode-pedant-oss-tests!
+  chef-pedant-core!
+  chef-pedant-tests!
+  oc-chef-pedant-core!
+  oc-chef-pedant-tests!
+  rspec-shared!
