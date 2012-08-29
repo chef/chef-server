@@ -31,8 +31,22 @@ basic_role() ->
       {<<"chef_type">>, <<"role">>},
       {<<"default_attributes">>, {[]}},
       {<<"override_attributes">>, {[]}},
-      {<<"run_list">>, []}
+      {<<"run_list">>, []},
+      {<<"env_run_lists">>, {[]}}
      ]}.
+
+
+role_environments_test_() ->
+    [{"empty env_run_lists",
+      ?_assertEqual([], chef_role:environments(basic_role()))},
+
+     {"non-empty env_run_lists",
+      fun() ->
+              Role = ej:set({<<"env_run_lists">>}, basic_role(),
+                            {[{<<"e2">>, {[]}}, {<<"e1">>, {[]}}]}),
+              ?assertEqual([<<"e1">>, <<"e2">>], chef_role:environments(Role))
+      end}
+    ].
 
 validate_role_test_() ->
     [
