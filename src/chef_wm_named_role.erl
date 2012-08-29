@@ -55,6 +55,10 @@ init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(Config) ->
+    %% this resource serves named roles as well as the /roles/:role/environments endpoint
+    %% that returns just the names of the environments that a given role has
+    %% environment-specific run lists for. The behavior is determined by the value of init
+    %% parameter 'env_run_list_only'.
     EnvRunListOnly = (true =:= proplists:get_value(env_run_list_only, Config)),
     {ok, #role_state{env_run_list_only = EnvRunListOnly}}.
 
