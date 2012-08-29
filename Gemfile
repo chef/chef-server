@@ -1,13 +1,7 @@
-source "http://rubygems.org"
+source :rubygems
 
-# IF we use the stuff from git it fails?
-
-#gem "mixlib-authentication", :git => "git@github.com:opscode/mixlib-authentication.git"
-#, "1.1.5"
-
-
-gem "mixlib-config", "1.1.2", :git => "git@github.com:opscode/mixlib-config.git"
-gem "rspec-shared", :git => "git://github.com/justinko/rspec-shared.git"
+# FIXME: this is really a transitive dependency but it was never released to rubygems.org
+gem "rspec-shared", :git => "git://github.com/justinko/rspec-shared.git", :ref => "7034924ee61aea3b3440aa9bd27bfbb316ee5831"
 
 gem 'chef-pedant-core', :git => "git@github.com:opscode/chef-pedant-core.git"
 gem 'oc-chef-pedant-core', :git => "git@github.com:opscode/oc-chef-pedant-core.git"
