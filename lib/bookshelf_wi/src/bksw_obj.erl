@@ -31,6 +31,8 @@ content_types_provided(Rq, Ctx) ->
     case wrq:get_req_header("accept", Rq) of
         undefined ->
             "application/octet-stream";
+        "*/*" ->
+            "application/octet-stream";
         C ->
             C
     end,
@@ -82,23 +84,25 @@ download(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bksw_io:open_for_read(Bucket, Path) of
         {ok, Ref} ->
-            {{stream, send_streamed_body(Ref)}, Rq0, Ctx};
+            %% TODO Make this work with streaming response bodies
+            {fully_read(Ref, []), Rq0, Ctx};
         _Error ->
             {false, Rq0, Ctx}
     end.
 
+
 %%===================================================================
 %% Internal Functions
 %%===================================================================
-send_streamed_body(Ref) ->
+fully_read(Ref, Accum) ->
     case bksw_io:read(Ref, ?BLOCK_SIZE) of
         {ok, eof} ->
-            bksw_io:finish_read(Ref),
-            {<<>>, done};
+            lists:reverse(Accum);
         {ok, Data} ->
-            {Data, fun() -> send_streamed_body(Ref) end};
-        Error = {error, _} ->
-            Error
+            fully_read(Ref, [Data|Accum]);
+        Error ->
+            error_logger:error_msg("Error occurred during content download: ~p~n", [Error]),
+            lists:reverse(Accum)
     end.
 
 upload(Rq0, Ctx) ->
