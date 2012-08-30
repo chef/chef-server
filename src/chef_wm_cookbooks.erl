@@ -83,9 +83,21 @@ to_json("_latest", Req, State) ->
     {latest_cookbooks_json(Req, State), Req, State};
 to_json("_recipes", Req, State) ->
     {cookbook_recipes_json(State), Req, State};
-to_json(CookbookName0, Req, State) ->
+to_json(CookbookName0, Req, #base_state{chef_db_context = DbContext,
+                                        organization_name = OrgName} = State) ->
     CookbookName = list_to_binary(CookbookName0),
-    {single_cookbook_json(CookbookName, Req, State), Req, State}.
+    CookbookVersions = chef_db:fetch_cookbook_versions(DbContext, OrgName, CookbookName),
+    case CookbookVersions of
+        [] ->
+            Message = chef_wm_util:not_found_message(cookbook, CookbookName),
+            {{halt, 404},
+             chef_wm_util:set_json_body(Req, Message),
+             State#base_state{log_msg = cookbook_not_found}};
+        _Else ->
+            AggregateCookbooks = aggregate_versions(CookbookVersions),
+            CBList = make_cookbook_list(Req, AggregateCookbooks, all),
+            {ejson:encode({CBList}), Req, State}
+    end.
 
 %%
 %% Helper functions
@@ -100,23 +112,6 @@ all_cookbooks_json(Req, #base_state{chef_db_context = DbContext,
                                     organization_name = OrgName,
                                     resource_state = CookbookState}) ->
     CookbookVersions = chef_db:fetch_cookbook_versions(DbContext, OrgName),
-    #cookbook_state{num_versions = NumVersions} = CookbookState,
-    AggregateCookbooks = aggregate_versions(CookbookVersions),
-    CBList = make_cookbook_list(Req, AggregateCookbooks, NumVersions),
-    ejson:encode({CBList}).
-
-%% @doc Generate the same format as all_cookbook_json but for a single version
-%% @end
-%%
--spec single_cookbook_json(CookbookName :: binary(),
-                           Recipes :: wm_req(),
-                           State :: #base_state{}) -> JSON :: binary().
-single_cookbook_json(CookbookName,
-                     Req,
-                     #base_state{chef_db_context = DbContext,
-                                 organization_name = OrgName,
-                                 resource_state = CookbookState}) ->
-    CookbookVersions = chef_db:fetch_cookbook_versions(DbContext, OrgName, CookbookName),
     #cookbook_state{num_versions = NumVersions} = CookbookState,
     AggregateCookbooks = aggregate_versions(CookbookVersions),
     CBList = make_cookbook_list(Req, AggregateCookbooks, NumVersions),
