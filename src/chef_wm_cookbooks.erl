@@ -86,14 +86,13 @@ to_json("_recipes", Req, State) ->
 to_json(CookbookName0, Req, #base_state{chef_db_context = DbContext,
                                         organization_name = OrgName} = State) ->
     CookbookName = list_to_binary(CookbookName0),
-    CookbookVersions = chef_db:fetch_cookbook_versions(DbContext, OrgName, CookbookName),
-    case CookbookVersions of
+    case chef_db:fetch_cookbook_versions(DbContext, OrgName, CookbookName) of
         [] ->
             Message = chef_wm_util:not_found_message(cookbook, CookbookName),
             {{halt, 404},
              chef_wm_util:set_json_body(Req, Message),
              State#base_state{log_msg = cookbook_not_found}};
-        _Else ->
+        CookbookVersions ->
             AggregateCookbooks = aggregate_versions(CookbookVersions),
             CBList = make_cookbook_list(Req, AggregateCookbooks, all),
             {ejson:encode({CBList}), Req, State}
