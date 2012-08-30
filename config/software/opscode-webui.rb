@@ -1,5 +1,5 @@
 name "opscode-webui"
-version "pc-rel-3.6.2"
+version "ESPRINT-1232"
 
 dependencies ["ruby", "bundler", "libxml2", "libxslt", "curl", "rsync"]
 
