@@ -1,6 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
 %% @author Seth Falcon <seth@opscode.com>
+%% @author Seth Chisamore <schisamo@opscode.com>
 %% @doc A utility module for manipulating OSC Chef objects from the
 %% console.  Sked is Swedish for spoon. Does not work for OPC/OHC.
 %%
@@ -24,9 +25,8 @@
 
 -module(chef_sked).
 
--include_lib("chef_objects/include/chef_types.hrl").
--include_lib("chef_objects/include/chef_osc_defaults.hrl").
 -include_lib("chef_certgen/include/chef_certgen.hrl").
+-include("chef_wm.hrl").
 
 -export([create_client/4,
          create_default_environment/0]).
@@ -51,51 +51,52 @@ create_client(Name, IsValidator, IsAdmin, create_key) ->
     end;
 %% @doc Create a client with the specified `PublicKey'.
 create_client(Name, IsValidator, IsAdmin, PublicKey) ->
-    Id = chef_object:make_org_prefix_id(?OSC_ORG_ID, Name),
-    Client = #chef_client{id = Id,
-                          %% stub authz ID
-                          authz_id = Id,
-                          org_id = ?OSC_ORG_ID,
-                          name = Name,
-                          validator = IsValidator =:= true,
-                          admin = IsAdmin =:= true,
-                          public_key = PublicKey,
-                          pubkey_version = key_version(PublicKey)},
-    Ctx = chef_db:make_context(make_req_id()),
-    chef_db:create_client(Ctx, Client, ?CHEF_SKED_AUTHZ_ID).
+    Ejson = {[{<<"name">>, Name},
+              {<<"validator">>, IsValidator =:= true},
+              {<<"admin">>, IsAdmin =:= true},
+              {<<"public_key">>, PublicKey}]},
+    create_from_json(chef_client, Ejson).
 
 %% @doc Create the _default environment
 create_default_environment() ->
-    Name = <<"_default">>,
-    Json = <<"{\"name\":\"_default\",\"description\":\"The default Chef environment\","
-             "\"cookbook_versions\":{},\"json_class\":\"Chef::Environment\","
-             "\"chef_type\":\"environment\","
-             "\"default_attributes\":{},"
-             "\"override_attributes\":{}}">>,
-    Data = chef_db_compression:compress(chef_environment, Json),
-    Id = chef_object:make_org_prefix_id(?OSC_ORG_ID, Name),
-    Env = #chef_environment{id = Id,
-                            authz_id = Id,
-                            org_id = ?OSC_ORG_ID,
-                            name = Name,
-                            serialized_object = Data},
-    Ctx = chef_db:make_context(make_req_id()),
-    chef_db:create_environment(Ctx, Env, ?CHEF_SKED_AUTHZ_ID).
+    Ejson = {[{<<"name">>, <<"_default">>},
+              {<<"description">>, <<"The default Chef environment">>},
+              {<<"cookbook_versions">>, {[]}},
+              {<<"json_class">>, <<"Chef::Environment">>},
+              {<<"chef_type">>, <<"environment">>},
+              {<<"default_attributes">>, {[]}},
+              {<<"override_attributes">>, {[]}}]},
+    create_from_json(chef_environment, Ejson).
 
-%% Determine the "pubkey_version" of a key or certificate in PEM
-%% format. Certificates are version 1. Public keys in either PKCS1 or
-%% SPKI format are version 0. The PKCS1 format is deprecated, but
-%% supported for read. We will only generate certs or SPKI packaged
-%% keys.
-key_version(<<"-----BEGIN CERTIFICATE", _Bin/binary>>) ->
-    %% cert
-    1;
-key_version(<<"-----BEGIN PUBLIC KEY", _Bin/binary>>) ->
-    %% SPKI
-    0;
-key_version(<<"-----BEGIN RSA PUBLIC KEY", _Bin/binary>>) ->
-    %% PKCS1
-    0.
+%% @doc Thin wrapper used to create objects from ejson tuples.
+%% FIXME: It would be nice to deal stricly with records!
+create_from_json(RecType, ObjectEjson) ->
+    DbContext = chef_db:make_context(make_req_id()),
+    %% ObjectEjson should already be normalized. Record creation does minimal work and does
+    %% not add or update any fields.
+    ObjectRec = chef_object:new_record(RecType, ?OSC_ORG_ID, unset, ObjectEjson),
+    Id = chef_object:id(ObjectRec),
+    TypeName = chef_object:type_name(ObjectRec),
+    %% We send the object data to solr for indexing *first*. If it fails, we'll error out on
+    %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
+    %% safely send a delete to solr since this is a new object with a unique ID unknown to
+    %% the world.
+    ok = chef_object_db:add_to_solr(TypeName, Id, ?OSC_ORG_ID,
+                                 chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
+    CreateFun = chef_db:create_fun(ObjectRec),
+
+    case chef_db:CreateFun(DbContext, ObjectRec, ?CHEF_SKED_AUTHZ_ID) of
+        {conflict, Msg} ->
+            %% ignore return value of solr delete, this is best effort.
+            chef_object_db:delete_from_solr(ObjectRec),
+            {conflict, Msg};
+        ok ->
+            ok;
+        What ->
+            %% ignore return value of solr delete, this is best effort.
+            chef_object_db:delete_from_solr(ObjectRec),
+            What
+    end.
 
 %% Create a binary string used as the request identifier.
 make_req_id() ->
