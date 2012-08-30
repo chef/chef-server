@@ -88,6 +88,7 @@
 
          fetch_cookbook_version/3,
          fetch_cookbook_versions/2,
+         fetch_cookbook_versions/3,
          fetch_latest_cookbook_version/3,
          create_cookbook_version/3,
          update_cookbook_version/3,
@@ -470,6 +471,13 @@ cookbook_exists(#context{reqid=ReqId} = DbContext, OrgName, CookbookName) ->
 %% @doc Return a list of all cookbook names and versions in an org
 fetch_cookbook_versions(#context{} = Ctx, OrgName) ->
     fetch_objects(Ctx, fetch_cookbook_versions, OrgName).
+
+-spec fetch_cookbook_versions(#context{}, binary(), binary()) -> {not_found, org} |
+                                                                 [versioned_cookbook()] |
+                                                                 {error, any()}.
+%% @doc Return a list of all cookbook names and versions in an org
+fetch_cookbook_versions(#context{} = Ctx, OrgName, CookbookName) ->
+    fetch_objects(Ctx, fetch_cookbook_versions, OrgName, CookbookName).
 
 -spec fetch_cookbook_version(DbContext :: #context{},
                              OrgName :: binary(),
