@@ -1387,14 +1387,14 @@ delete_cookbook_if_last(OrgId, Name) ->
             Error
     end.
 
--spec cookbook_versions_from_db(QueryName :: binary(), Args :: [ binary() ]) ->
+-spec cookbook_versions_from_db(QueryName :: atom(), Args :: [binary() | object_id()]) ->
     {ok, [versioned_cookbook()]} | {error, term()}.
 %% @doc helper function to do the actual logic for returning cookbook
 %% versions, either for all of them in an org or for all specific to
 %% a given cookbook name.
 %%
 %% extracted here for clarity and DRYness
-cookbook_versions_from_db(QueryName, Args) when is_list(Args) ->
+cookbook_versions_from_db(QueryName, Args) ->
     case sqerl:select(QueryName, Args, rows, []) of
         {ok, L} when is_list(L) ->
             {ok,
