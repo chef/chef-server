@@ -440,7 +440,7 @@ fetch_cookbook_versions(OrgId) ->
 -spec fetch_cookbook_versions(OrgId::object_id(), CookbookName::binary()) ->
     {ok, [versioned_cookbook()]} | {error, term()}.
 %% @doc Return list of [cookbook name, version()] for a given organization and cookbook.
-%% The list is returned sort by name, major, minor, patch fields.
+%% The list is returned sorted by name, major, minor, patch fields.
 fetch_cookbook_versions(OrgId, CookbookName) when is_binary(CookbookName) ->
     QueryName = list_cookbook_versions_by_orgid_cookbook_name,
     cookbook_versions_from_db(QueryName, [OrgId, CookbookName]).

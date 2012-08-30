@@ -1430,7 +1430,7 @@ fetch_cookbook_versions() ->
 fetch_cookbook_versions_single_cookbook_no_versions() ->
     OrgId = the_org_id(),
     {ok, Versions} = chef_sql:fetch_cookbook_versions(OrgId, <<"does_not_exist">>),
-    ?assertMatch([], Versions).
+    ?assertEqual([], Versions).
 
 fetch_cookbook_versions_single_cookbook_with_versions() ->
     Cookbook = make_cookbook(<<"fetch_versions_of_me">>),
@@ -1442,7 +1442,7 @@ fetch_cookbook_versions_single_cookbook_with_versions() ->
                                                  CookbookVersion0#chef_cookbook_version.name),
     Expected = [[CookbookVersion1#chef_cookbook_version.name, version_tuple(1)],
                 [CookbookVersion0#chef_cookbook_version.name, version_tuple(0)]],
-    ?assertMatch(Expected, Got).
+    ?assertEqual(Expected, Got).
 
 
 %% @doc This tests pulling the latest version of a cookbook using the _latest endpoint
