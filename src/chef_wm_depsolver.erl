@@ -272,7 +272,7 @@ assemble_response(Req, State, CookbookVersions) ->
             %% cookbook which has just enough information for chef-client to run
             JsonList = {
                     [ { CBV#chef_cookbook_version.name,
-                       chef_cookbook:minimal_cookbook_ejson_with_s3urls(CBV) }
+                       chef_cookbook:minimal_cookbook_ejson(CBV) }
                       || CBV <- CookbookVersions ]
                     },
             CBMapJson = ejson:encode(JsonList),
