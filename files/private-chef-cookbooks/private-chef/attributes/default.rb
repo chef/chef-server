@@ -426,7 +426,7 @@ default['private_chef']['dark_launch']["couchdb_checksums"] = true
 default['private_chef']['dark_launch']["couchdb_environments"] = true
 default['private_chef']['dark_launch']["couchdb_clients"] = true
 default['private_chef']['dark_launch']["add_type_and_bag_to_items"] = true
-
+default['private_chef']['dark_launch']["node_run_history"] = true
 ###
 # Opscode Account
 ###
