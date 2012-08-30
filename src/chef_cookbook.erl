@@ -24,9 +24,7 @@
 
 -export([
          assemble_cookbook_ejson/1,
-         assemble_cookbook_ejson_with_s3urls/1,
          minimal_cookbook_ejson/1,
-         minimal_cookbook_ejson_with_s3urls/1,
          parse_binary_json/2,
          extract_checksums/1,
          version_to_binary/1,
@@ -257,6 +255,7 @@ version_to_binary({Major, Minor, Patch}) ->
 %% not contain any extra information, e.g. S3 URLs.
 -spec assemble_cookbook_ejson(#chef_cookbook_version{}) -> ejson_term().
 assemble_cookbook_ejson(#chef_cookbook_version{
+                           org_id = OrgId,
                            frozen=Frozen,
                            serialized_object=XCookbookJSON,
                            metadata=XMetadataJSON,
@@ -278,17 +277,19 @@ assemble_cookbook_ejson(#chef_cookbook_version{
                            [{<<"attributes">>, XMetaAttributesJSON},
                             {<<"dependencies">>, DependenciesJSON},
                             {<<"long_description">>, XLongDescription}]),
+    CookbookJSON = annotate_with_s3_urls(inflate(<<"cookbook">>, XCookbookJSON), OrgId),
 
     %% Now that the metadata is assembled, piece the final cookbook together
     lists:foldl(fun({Key, Data}, CB) ->
                         ej:set({Key}, CB, Data)
                 end,
-                inflate(<<"cookbook">>, XCookbookJSON),
+                CookbookJSON,
                 [{<<"frozen?">>, Frozen},
                  {<<"metadata">>, Metadata}]).
 
 -spec minimal_cookbook_ejson(#chef_cookbook_version{}) -> ejson_term().
-minimal_cookbook_ejson(#chef_cookbook_version{frozen=Frozen,
+minimal_cookbook_ejson(#chef_cookbook_version{org_id = OrgId,
+                                              frozen=Frozen,
                                               serialized_object=XCookbookJSON,
                                               metadata=XMetadataJSON}) ->
     %% The serialized_object is everything but the metadata, and metadata in turn is all the
@@ -296,31 +297,14 @@ minimal_cookbook_ejson(#chef_cookbook_version{frozen=Frozen,
     %% add in the sub pieces of the metadata when merging
 
     Metadata = inflate(<<"metadata">>, XMetadataJSON),
+    CookbookJSON = annotate_with_s3_urls(inflate(<<"cookbook">>, XCookbookJSON), OrgId),
 
     lists:foldl(fun({Key, Data}, CB) ->
                         ej:set({Key}, CB, Data)
                 end,
-                inflate(<<"cookbook">>, XCookbookJSON),
+                CookbookJSON,
                 [{<<"frozen?">>, Frozen},
                  {<<"metadata">>, Metadata}]).
-
-%% @doc "Rehydrates" a versioned cookbook as a decompressed EJson data
-%% structure.
-%%
-%% It also includes s3 urls for each file in segements.  This can be used by clients which then
-%% need to subsequently download the files of the cookbook
--spec assemble_cookbook_ejson_with_s3urls(CookbookVersion::#chef_cookbook_version{}) -> ejson_term().
-assemble_cookbook_ejson_with_s3urls(#chef_cookbook_version{org_id = OrgId} = CookbookVersion) ->
-    annotate_with_s3_urls(assemble_cookbook_ejson(CookbookVersion), OrgId).
-
-%% @doc "Rehydrates" a minimal versioned cookbook as a decompressed EJson data structure which
-%% can be used by chef-client when loading cookbooks to apply
-%%
-%% It also includes s3 urls for each file in segements.  This can be used by clients which then
-%% need to subsequently download the files of the cookbook
--spec minimal_cookbook_ejson_with_s3urls(CookbookVersion::#chef_cookbook_version{}) -> ejson_term().
-minimal_cookbook_ejson_with_s3urls(#chef_cookbook_version{org_id = OrgId} = CookbookVersion) ->
-    annotate_with_s3_urls(minimal_cookbook_ejson(CookbookVersion), OrgId).
 
 %% @doc Add S3 download URLs for all files in the cookbook
 annotate_with_s3_urls(Ejson, OrgId) ->
