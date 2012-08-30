@@ -83,6 +83,8 @@
                               [{<<"frozen">>,
                                 {sqerl_transformers, convert_integer_to_boolean}},
                                {<<"validator">>,
+                                {sqerl_transformers, convert_integer_to_boolean}},
+                               {<<"admin">>,
                                 {sqerl_transformers, convert_integer_to_boolean}}
                               ]
            <%- elsif node['private_chef']['database_type'] == "postgresql" %>
