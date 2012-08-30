@@ -115,6 +115,7 @@ make_client(Prefix) ->
 	    org_id = the_org_id(),
 	    name = AzId,
 	    authz_id = AzId,
+            admin = true,
 	    validator = false,
 	    public_key =
 	    <<"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwxOFcrbsV7bEbqzOvW5u"
@@ -248,6 +249,8 @@ setup_env() ->
                                [{<<"frozen">>,
                                  fun sqerl_transformers:convert_integer_to_boolean/1},
                                 {<<"validator">>,
+                                 fun sqerl_transformers:convert_integer_to_boolean/1},
+                                {<<"admin">>,
                                  fun sqerl_transformers:convert_integer_to_boolean/1}]
                        end,
     ok = application:set_env(sqerl, column_transforms, ColumnTransforms),
