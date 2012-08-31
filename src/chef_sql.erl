@@ -367,11 +367,11 @@ fetch_clients(OrgId) ->
 %% so we need to construct a binary JSON representation of the table
 %% for serving up in search results.
 %%
-%% Note this return a list of proplists, different from the other bulk_get_X
+%% Note this return a list of chef_client records, different from the other bulk_get_X
 %% calls
 bulk_get_clients(Ids) ->
     Query = bulk_get_query_for_count(client, length(Ids)),
-    case sqerl:select(Query, Ids) of
+    case sqerl:select(Query, Ids, ?ALL(chef_client)) of
         {ok, none} ->
             {ok, not_found};
         {ok, L} when is_list(L) ->

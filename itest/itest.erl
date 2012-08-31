@@ -1116,9 +1116,7 @@ bulk_fetch_client_data() ->
   Clients =  [ make_client(<<"client_bulk", Num/binary>>) || Num <- [ <<"0">>, <<"1">>, <<"2">> ] ],
   [ ?assertEqual({ok, 1}, chef_sql:create_client(C)) || C <- Clients ],
   Ids = [ C#chef_client.id || C <- Clients ],
-  Expected = [ [{<<"name">>, C#chef_client.name},
-                {<<"clientname">>, C#chef_client.name},
-                {<<"public_key">>, C#chef_client.public_key}] || C <- Clients],
+  Expected = Clients,
 
   {ok, Got} = chef_sql:bulk_get_clients(Ids),
   ?assertEqual(length(Got), 3),
