@@ -891,7 +891,8 @@ bulk_get(#context{reqid = ReqId}=Ctx, OrgName, client, Ids) ->
         true ->
             bulk_get_couchdb(Ctx, OrgName, client, Ids);
         false ->
-            bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_clients, (Ids)))
+            ClientRecords = bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_clients, (Ids))),
+            [chef_client:assemble_client_ejson(C, OrgName) || #chef_client{}=C <- ClientRecords]
     end;
 bulk_get(Ctx, OrgName, Type, Ids) ->
     bulk_get_couchdb(Ctx, OrgName, Type, Ids).
