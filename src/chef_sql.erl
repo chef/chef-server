@@ -90,6 +90,7 @@
 
          fetch_cookbook_version/2,
          fetch_cookbook_versions/1,
+         fetch_cookbook_versions/2,
          fetch_latest_cookbook_version/2,
          fetch_latest_cookbook_recipes/1,
          create_cookbook_version/1,
@@ -366,11 +367,11 @@ fetch_clients(OrgId) ->
 %% so we need to construct a binary JSON representation of the table
 %% for serving up in search results.
 %%
-%% Note this return a list of proplists, different from the other bulk_get_X
+%% Note this return a list of chef_client records, different from the other bulk_get_X
 %% calls
 bulk_get_clients(Ids) ->
     Query = bulk_get_query_for_count(client, length(Ids)),
-    case sqerl:select(Query, Ids) of
+    case sqerl:select(Query, Ids, ?ALL(chef_client)) of
         {ok, none} ->
             {ok, not_found};
         {ok, L} when is_list(L) ->
@@ -395,8 +396,13 @@ update_client(#chef_client{last_updated_by = LastUpdatedBy,
                            name = Name,
                            public_key = PublicKey,
                            pubkey_version = PubkeyVersion,
+                           admin = IsAdmin,
+                           validator = IsValidator,
                            id = Id}) ->
-    UpdateFields = [LastUpdatedBy, UpdatedAt, Name, PublicKey, PubkeyVersion, Id],
+    UpdateFields = [LastUpdatedBy, UpdatedAt, Name,
+                    PublicKey, PubkeyVersion,
+                    IsValidator =:= true,
+                    IsAdmin =:= true, Id],
     do_update(update_client_by_id, UpdateFields).
 
 %% data_bag ops
@@ -429,16 +435,15 @@ delete_data_bag(DataBagId) when is_binary(DataBagId) ->
 %% by name, major, minor, patch fields.
 fetch_cookbook_versions(OrgId) ->
     QueryName = list_cookbook_versions_by_orgid,
-    case sqerl:select(QueryName, [OrgId], rows, []) of
-        {ok, L} when is_list(L) ->
-            {ok,
-             [ [Name, triple_to_version_tuple(Major, Minor, Patch) ] || [Name, Major, Minor, Patch]  <- L]
-            };
-        {ok, none} ->
-            {ok, []};
-        {error, Error} ->
-            {error, Error}
-    end.
+    cookbook_versions_from_db(QueryName, [OrgId]).
+
+-spec fetch_cookbook_versions(OrgId::object_id(), CookbookName::binary()) ->
+    {ok, [versioned_cookbook()]} | {error, term()}.
+%% @doc Return list of [cookbook name, version()] for a given organization and cookbook.
+%% The list is returned sorted by name, major, minor, patch fields.
+fetch_cookbook_versions(OrgId, CookbookName) when is_binary(CookbookName) ->
+    QueryName = list_cookbook_versions_by_orgid_cookbook_name,
+    cookbook_versions_from_db(QueryName, [OrgId, CookbookName]).
 
 %% @doc Fetch up to `NumberOfVersions' most recent versions of each
 %% cookbook within an organization.  Just returns a proplist mapping
@@ -1381,6 +1386,26 @@ delete_cookbook_if_last(OrgId, Name) ->
         Error ->
             Error
     end.
+
+-spec cookbook_versions_from_db(QueryName :: atom(), Args :: [binary() | object_id()]) ->
+    {ok, [versioned_cookbook()]} | {error, term()}.
+%% @doc helper function to do the actual logic for returning cookbook
+%% versions, either for all of them in an org or for all specific to
+%% a given cookbook name.
+%%
+%% extracted here for clarity and DRYness
+cookbook_versions_from_db(QueryName, Args) ->
+    case sqerl:select(QueryName, Args, rows, []) of
+        {ok, L} when is_list(L) ->
+            {ok,
+             [ [Name, triple_to_version_tuple(Major, Minor, Patch) ] || [Name, Major, Minor, Patch]  <- L]
+            };
+        {ok, none} ->
+            {ok, []};
+        {error, Error} ->
+            {error, Error}
+    end.
+
 
 %% @doc helper function to convert from the three fields stored in the DB
 %% and convert it into a version() type as returned by the API

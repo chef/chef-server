@@ -33,8 +33,8 @@ make_id(Prefix) when is_binary(Prefix) ->
         Size when Size > 32 ->
             error(prefix_too_long_for_id);
         Size when Size =:= 32 ->
-            Prefix;
-        Size ->
+              Prefix;
+          Size ->
             iolist_to_binary([Prefix, lists:duplicate(32 - Size, $0)])
     end.
 
@@ -115,6 +115,7 @@ make_client(Prefix) ->
 	    org_id = the_org_id(),
 	    name = AzId,
 	    authz_id = AzId,
+            admin = true,
 	    validator = false,
 	    public_key =
 	    <<"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwxOFcrbsV7bEbqzOvW5u"
@@ -248,6 +249,8 @@ setup_env() ->
                                [{<<"frozen">>,
                                  fun sqerl_transformers:convert_integer_to_boolean/1},
                                 {<<"validator">>,
+                                 fun sqerl_transformers:convert_integer_to_boolean/1},
+                                {<<"admin">>,
                                  fun sqerl_transformers:convert_integer_to_boolean/1}]
                        end,
     ok = application:set_env(sqerl, column_transforms, ColumnTransforms),
@@ -368,6 +371,9 @@ basic_test_() ->
          {<<"Fetch different version of cookbook returns authzid">>,
           fun fetch_cookbook_version_different_version/0},
          {<<"Fetch versions">>, fun fetch_cookbook_versions/0},
+         {<<"Fetch version for single cookbook, no versions">>, fun fetch_cookbook_versions_single_cookbook_no_versions/0},
+         {<<"Fetch version for single cookbook, with versions">>, fun fetch_cookbook_versions_single_cookbook_with_versions/0},
+
          {<<"Fetch latest version of cookbook">>, fun fetch_latest_cookbook_version/0},
          {<<"Fetch latest version of cookbook, different version on server">>, fun fetch_latest_cookbook_version_different_versions/0},
 	 {<<"Update existing cookbook">>, fun update_cookbook_version_checksums/0},
@@ -1110,9 +1116,7 @@ bulk_fetch_client_data() ->
   Clients =  [ make_client(<<"client_bulk", Num/binary>>) || Num <- [ <<"0">>, <<"1">>, <<"2">> ] ],
   [ ?assertEqual({ok, 1}, chef_sql:create_client(C)) || C <- Clients ],
   Ids = [ C#chef_client.id || C <- Clients ],
-  Expected = [ [{<<"name">>, C#chef_client.name},
-                {<<"clientname">>, C#chef_client.name},
-                {<<"public_key">>, C#chef_client.public_key}] || C <- Clients],
+  Expected = Clients,
 
   {ok, Got} = chef_sql:bulk_get_clients(Ids),
   ?assertEqual(length(Got), 3),
@@ -1423,6 +1427,24 @@ fetch_cookbook_versions() ->
           ?assertMatch( X when is_integer(X) andalso X >= 0, Minor),
           ?assertMatch( X when is_integer(X) andalso X >= 0, Patch)
       end || Row <- Versions].
+
+fetch_cookbook_versions_single_cookbook_no_versions() ->
+    OrgId = the_org_id(),
+    {ok, Versions} = chef_sql:fetch_cookbook_versions(OrgId, <<"does_not_exist">>),
+    ?assertEqual([], Versions).
+
+fetch_cookbook_versions_single_cookbook_with_versions() ->
+    Cookbook = make_cookbook(<<"fetch_versions_of_me">>),
+    CookbookVersion0 = make_cookbook_version(<<"000fetch_versions_of_me">>, 0, Cookbook),
+    CookbookVersion1 = make_cookbook_version(<<"001fetch_versions_of_me">>, 1, Cookbook),
+    ?assertEqual({ok, 1}, chef_sql:create_cookbook_version(CookbookVersion0)),
+    ?assertEqual({ok, 1}, chef_sql:create_cookbook_version(CookbookVersion1)),
+    {ok, Got} = chef_sql:fetch_cookbook_versions(CookbookVersion0#chef_cookbook_version.org_id,
+                                                 CookbookVersion0#chef_cookbook_version.name),
+    Expected = [[CookbookVersion1#chef_cookbook_version.name, version_tuple(1)],
+                [CookbookVersion0#chef_cookbook_version.name, version_tuple(0)]],
+    ?assertEqual(Expected, Got).
+
 
 %% @doc This tests pulling the latest version of a cookbook using the _latest endpoint
 fetch_latest_cookbook_version() ->
