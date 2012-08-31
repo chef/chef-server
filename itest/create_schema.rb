@@ -11,10 +11,11 @@ module SchemaHelper
   DB_USER = "itest"
   DB_PASS = "itest"
 
+  PGSQL_SCHEMA ="../priv/pgsql_schema.sql"
+  MYSQL_SCHEMA ="../priv/mysql_schema.sql"
+
   MYSQL_ROOT_PASS = ""
   PGSQL_ROOT_PASS = ""
-  MIGRATE_DIR = `bundle show chef-sql-schema`.chomp + "/db/migrate"
-  SEQUEL_CMD_FMT = "bin/sequel -m #{MIGRATE_DIR} -l %s %s"
 
   class Pgsql
     attr_reader :root_db, :url, :root_url
@@ -47,7 +48,7 @@ module SchemaHelper
     end
 
     def migrate
-      cmd = SEQUEL_CMD_FMT % ["pgsql-migration.log", url]
+      cmd = "psql -U #{DB_USER} #{DB_NAME} < #{PGSQL_SCHEMA}"
       puts "running migration: #{cmd}"
       system(cmd)
     end
@@ -81,7 +82,7 @@ module SchemaHelper
     end
 
     def migrate
-      cmd = SEQUEL_CMD_FMT % ["mysql-migration.log", url]
+      cmd = "mysql -u root #{DB_NAME} < #{MYSQL_SCHEMA}"
       puts "running migration: #{cmd}"
       system(cmd)
     end

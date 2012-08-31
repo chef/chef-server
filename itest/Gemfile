@@ -2,6 +2,4 @@ source 'http://www.rubygems.org'
 
 gem "mysql2"
 gem "pg"
-
-gem 'chef-sql-schema',
-    :git => 'git@github.com:opscode/chef-sql-schema.git', :branch => 'master'
+gem "sequel"
