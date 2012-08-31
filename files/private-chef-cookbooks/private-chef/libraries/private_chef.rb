@@ -38,6 +38,8 @@ module PrivateChef
   nagios Mash.new
   nrpe Mash.new
   nginx Mash.new
+  log_retention Mash.new
+  log_rotation Mash.new
 
   aws Mash.new
 
@@ -50,8 +52,11 @@ module PrivateChef
   from_email nil
   database_type nil
   role nil
+  user Mash.new
 
   ldap Mash.new
+
+  allowed_webui_subnets []
 
   class << self
 
@@ -178,6 +183,7 @@ module PrivateChef
         "nrpe",
         "nginx",
         "ldap",
+        "user",
 
         ## Temporary until bookshelf is online
         "aws"
@@ -189,6 +195,9 @@ module PrivateChef
       results['private_chef']['notification_email'] = PrivateChef['notification_email']
       results['private_chef']['from_email'] = PrivateChef['from_email']
       results['private_chef']['role'] = PrivateChef['role']
+      results['private_chef']['logs'] = {}
+      results['private_chef']['logs']['log_retention'] = PrivateChef['log_retention']
+      results['private_chef']['logs']['log_rotation'] = PrivateChef['log_rotation']
       results
     end
 

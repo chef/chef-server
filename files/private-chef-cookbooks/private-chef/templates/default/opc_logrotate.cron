@@ -1,0 +1,2 @@
+MAILTO=<%= node['private_chef']['notification_email'] %>
+53 4 * * * root /usr/sbin/logrotate /etc/opscode/logrotate.conf

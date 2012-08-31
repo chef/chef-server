@@ -18,9 +18,20 @@
 # limitations under the License.
 #
 
-python_pkgs = if node['platform'] == 'centos'
-                centos_major_version = node['platform_version'].split('.').first.to_i
-                if centos_major_version == 6
+# COOK-1016 Handle RHEL/CentOS namings of python packages, by installing EPEL repo & package
+# This implementation was determined a stopgap measure until CHEF-2410 is implemented and widespread.
+if node['platform'] == 'centos' || node['platform'] == 'redhat'
+  major_version = node['platform_version'].split('.').first.to_i
+  if major_version == 5
+    include_recipe 'yum::epel'
+  else
+    # Do nothing.
+  end
+end
+
+python_pkgs = if node['platform'] == 'centos' || node['platform'] == 'redhat'
+                major_version = node['platform_version'].split('.').first.to_i
+                if major_version == 6
                   ["python", "python-devel"]
                 else
                   ["python26", "python26-devel"]
@@ -30,8 +41,8 @@ python_pkgs = if node['platform'] == 'centos'
                                    ["debian","ubuntu"] => {
                                      "default" => ["python","python-dev"]
                                    },
-                                   ["redhat","fedora"] => {
-                                     "default" => ["python26","python26-devel"]
+                                   ["fedora","amazon"] => {
+                                     "default" => ["python","python-devel"]
                                    },
                                    ["freebsd"] => {
                                      "default" => ["python"]
@@ -45,4 +56,3 @@ python_pkgs.each do |pkg|
     action :install
   end
 end
-

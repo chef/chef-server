@@ -39,7 +39,7 @@ http {
   <%- if node['private_chef']['lb']['enable'] -%>
     proxy_cache_path  <%= File.join(@dir, "cache") %> levels=1:2 keys_zone=webui-cache:50m max_size=<%= @cache_max_size %> inactive=600m;
     proxy_temp_path <%= File.join(@dir, "cache-tmp") %>;
-  
+
     # We support three options: serve nothing on non_ssl_port (80),
     # redirect to https, or actually serve the API.
     <%- if @non_ssl_port -%>
@@ -60,7 +60,7 @@ http {
   <%- end -%>
 
   # internal lb config for Chef API Services
-  <%- if node['private_chef']['lb_internal']['enable'] -%> 
+  <%- if node['private_chef']['lb_internal']['enable'] -%>
   server {
     listen <%= node['private_chef']['lb_internal']['chef_port'] %>;
     # The name doesn't matter; this is the only listener on this port
@@ -82,8 +82,11 @@ http {
 
     location /checksum/ {
       internal;
-      root <%= node['private_chef']['opscode-chef']['checksum_path'].gsub('checksum', '') %>; 
+      root <%= node['private_chef']['opscode-chef']['checksum_path'].gsub('checksum', '') %>;
     }
+
+    # pushy
+    <%= @helper.pushy_api("^/organizations/[a-z0-9\-_]+?/pushy") %>
 
     # search requests
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
@@ -210,13 +213,15 @@ http {
       fastcgi_param DOCUMENT_ROOT  /opt/opscode/embedded/nagios/sbin;
       fastcgi_param SCRIPT_FILENAME    $fastcgi_script_name;
       fastcgi_pass 127.0.0.1:<%= node['private_chef']['nagios']['fcgiwrap_port'] %>;
-    }  
+    }
 
     location ~ \.php$ {
       include <%= File.join(@dir, "etc", "fastcgi.conf") %>;
       fastcgi_pass 127.0.0.1:<%= node['private_chef']['nagios']['php_fpm_port'] %>;
-    }  
+    }
 
   }
   <%- end -%>
+
+  include <%= node['private_chef']['nginx']['dir'] %>/etc/nginx.d/*.conf;
 }

@@ -88,7 +88,9 @@ node.default['private_chef']['opscode-solr']['command'] << " -jar '#{solr_jetty_
 runit_service "opscode-solr" do
   down node['private_chef']['opscode-solr']['ha']
   options({
-    :log_directory => solr_log_dir
+    :log_directory => solr_log_dir,
+    :svlogd_size => node['private_chef']['opscode-solr']['svlogd_size'],
+    :svlogd_num  => node['private_chef']['opscode-solr']['svlogd_num']
   }.merge(params))
 end
 

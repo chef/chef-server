@@ -1,5 +1,5 @@
 name "opscode-authz"
-version "pc-rel-0.3.3"
+version "pc-rel-0.3.4"
 
 dependencies ["erlang", "rsync"]
 

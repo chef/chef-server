@@ -38,7 +38,9 @@ end
 runit_service "couchdb" do
   down node['private_chef']['couchdb']['ha']
   options({
-    :log_directory => couchdb_log_dir
+    :log_directory => couchdb_log_dir,
+    :svlogd_size => node['private_chef']['couchdb']['svlogd_size'],
+    :svlogd_num  => node['private_chef']['couchdb']['svlogd_num']
   }.merge(params))
 end
 
@@ -69,8 +71,8 @@ end
 
 # Add it to cron
 cron_email = node['private_chef']['notification_email']
-cron_cmd = "if `test -d #{couchdb_data_dir}` ; then #{compact_script_command}; fi"
-cron_cmd_major_offenders = "if `test -d #{couchdb_data_dir}` ; then #{compact_script_command} --max-dbs=50; fi"
+cron_cmd = "if `test -d #{couchdb_data_dir}` ; then #{compact_script_command} 2>&1 > #{couchdb_log_dir}/compact-`date \"+%Y%m%d%H%M%S\"`.log ; fi"
+cron_cmd_major_offenders = "if `test -d #{couchdb_data_dir}` ; then #{compact_script_command} --max-dbs=50 2>&1 > #{couchdb_log_dir}/compact-`date \"+\\%Y\\%m\\%d\\%H\\%M\\%S\"`.log ; fi"
 
 template "/etc/cron.d/couchdb_compact" do
   source "compact-cron-entry.erb"
@@ -82,7 +84,7 @@ template "/etc/cron.d/couchdb_compact" do
             :cron_home => couchdb_dir,
             :cron_schedule => "17 1,9,17 * * *",
             :cron_user => node['private_chef']['user']['username'],
-            :cron_path => "/usr/bin:/usr/sbin:/opt/opscode/embedded/bin",
+            :cron_path => "/usr/bin:/usr/sbin:/bin:/opt/opscode/embedded/bin",
             :cron_command => cron_cmd
             )
 end
@@ -97,7 +99,7 @@ template "/etc/cron.d/couchdb_compact_major_offenders" do
             :cron_home => couchdb_dir,
             :cron_schedule => "17 3,5,7,11,13,15,19,21,23 * * *",
             :cron_user => node['private_chef']['user']['username'],
-            :cron_path => "/usr/bin:/usr/sbin:/opt/opscode/embedded/bin",
+            :cron_path => "/usr/bin:/usr/sbin:/bin:/opt/opscode/embedded/bin",
             :cron_command => cron_cmd_major_offenders
             )
 end

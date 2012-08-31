@@ -158,6 +158,17 @@ define :runit_service, :directory => nil, :only_if => false, :finish_script => f
       end
     end
 
+    if params[:options].respond_to?(:has_key?) && params[:options][:log_directory]
+      template "#{params[:options][:log_directory]}/config" do
+        cookbook "runit"
+        source "config.svlogd"
+        mode "0644"
+        owner "root"
+        group "root"
+        variables :options => params[:options]
+      end
+    end
+
     ruby_block "supervise_#{params[:name]}_sleep" do
       block do
         Chef::Log.debug("Waiting until named pipe #{sv_dir_name}/supervise/ok exists.")

@@ -37,7 +37,7 @@ end
 include_recipe "private-chef::users"
 
 file "/etc/opscode/dark_launch_features.json" do
-  owner "opscode"
+  owner node["private_chef"]["user"]["username"]
   group "root"
   mode "0644"
   content Chef::JSONCompat.to_json_pretty(node['private_chef']['dark_launch'].to_hash)
@@ -53,7 +53,7 @@ file "/etc/opscode/webui_pub.pem" do
 end
 
 file "/etc/opscode/webui_priv.pem" do
-  owner "opscode"
+  owner node["private_chef"]["user"]["username"]
   group "root"
   mode "0600"
   content webui_key.to_pem.to_s unless File.exists?('/etc/opscode/webui_pub.pem')
@@ -69,14 +69,14 @@ file "/etc/opscode/worker-public.pem" do
 end
 
 file "/etc/opscode/worker-private.pem" do
-  owner "opscode"
+  owner node["private_chef"]["user"]["username"]
   group "root"
   mode "0600"
   content worker_key.to_pem.to_s unless File.exists?('/etc/opscode/worker-public.pem')
 end
 
 unless File.exists?('/etc/opscode/pivotal.pem')
-  cert, key = OmnibusHelper.gen_certificate  
+  cert, key = OmnibusHelper.gen_certificate
 end
 
 file "/etc/opscode/pivotal.cert" do
@@ -87,7 +87,7 @@ file "/etc/opscode/pivotal.cert" do
 end
 
 file "/etc/opscode/pivotal.pem" do
-  owner "opscode"
+  owner node["private_chef"]["user"]["username"]
   group "root"
   mode "0600"
   content key.to_pem.to_s unless File.exists?('/etc/opscode/pivotal.pem')
@@ -95,7 +95,7 @@ end
 
 directory "/etc/chef" do
   owner "root"
-  group node['private_chef']['user']['username'] 
+  group node['private_chef']['user']['username']
   mode "0775"
   action :create
 end
@@ -112,10 +112,10 @@ end
 include_recipe "runit"
 
 # Configure Services
-[ 
+[
 	"drbd",
-  "couchdb", 
-  "rabbitmq", 
+  "couchdb",
+  "rabbitmq",
   "postgresql",
   "mysql",
   "redis",
@@ -143,10 +143,11 @@ end
 
 include_recipe "private-chef::orgmapper"
 include_recipe "private-chef::opscode-pedant"
+include_recipe "private-chef::log_cleanup"
 include_recipe "private-chef::partybus"
 
 file "/etc/opscode/chef-server-running.json" do
-  owner "opscode"
+  owner node["private_chef"]["user"]["username"]
   group "root"
   mode "0644"
   content Chef::JSONCompat.to_json_pretty({ "private_chef" => node['private_chef'].to_hash, "run_list" => node.run_list })

@@ -48,7 +48,10 @@
     }
 
     # object ACL requests go to opscode-account service
-    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/.*?/_acl.*$") %>
+    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/.*?/_acl.*$", :account) %>
+
+    # pushy
+    <%= @helper.pushy_api("^/organizations/[a-z0-9\-_]+?/pushy/{0,1}") %>
 
     # search requests
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
@@ -90,20 +93,33 @@
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/status/{0,1}.*$", :ruby) %>
 
     # opscode-account service endpoints
-    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/(?:groups|users|clients|containers|association_requests)/{0,1}.*$") %>
-    <%= @helper.account_api("^/(?:organizations|users)/{0,1}$") %>
-    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+/{0,1}$") %>
-    <%= @helper.account_api("^/users/[a-z0-9\-_]+/{0,1}$") %>
-    <%= @helper.account_api("^/users/[a-z0-9\-_]+/{0,1}/association_requests/{0,1}.*$") %>
-    <%= @helper.account_api("^/users/[a-z0-9\-_]+/organizations/{0,1}$") %>
-    <%= @helper.account_api("^/verify_password$") %>
-    <%= @helper.account_api("^/authenticate_user$") %>
+    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", 'couchdb_clients') %>
+    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/(?:groups|users|containers|association_requests)/{0,1}.*$", :account) %>
+    <%= @helper.account_api("^/(?:organizations|users)/{0,1}$", :account) %>
+    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+/{0,1}$", :account) %>
+    <%= @helper.account_api("^/users/[a-z0-9\-_]+/{0,1}$", :account) %>
+    <%= @helper.account_api("^/users/[a-z0-9\-_]+/{0,1}/association_requests/{0,1}.*$", :account) %>
+    <%= @helper.account_api("^/users/[a-z0-9\-_]+/organizations/{0,1}$", :account) %>
+    <%= @helper.account_api("^/verify_password$", :account) %>
+    <%= @helper.account_api("^/authenticate_user$", :account) %>
 
     location ~ "^/(?:stylesheets|javascripts|images|facebox|css)/{0,1}.*$" {
       if ($http_x_chef_version ~* "^(\d+\.\d+?)\..+$") {
         error_page 400 =400 /400-chef_client_manage.json;
         return 400;
       }
+
+      # When configured to allow webui access to only certain subnets,
+      # create "allow" rules for them, followed by deny all.
+      # NOTE: This snippet is duplicated for the "/" location below.
+      # Copy changes you make here down there as well.
+      <% if @allowed_webui_subnets && !@allowed_webui_subnets.empty? %>
+        <% @allowed_webui_subnets.each do |subnet| %>
+      allow <%= subnet %>;
+        <% end %>
+      deny all;
+      <% end %>
+
       proxy_pass http://opscode_webui;
       proxy_pass_request_headers off;
       proxy_cache webui-cache;
@@ -118,6 +134,18 @@
          error_page 404 =404 /404.json;
          return 404;
       }
+
+      # When configured to allow webui access to only certain subnets,
+      # create "allow" rules for them, followed by deny all.
+      # NOTE: This snippet is duplicated for the static assets locations above.
+      # Copy changes you make here up there as well.
+      <% if @allowed_webui_subnets && !@allowed_webui_subnets.empty? %>
+        <% @allowed_webui_subnets.each do |subnet| %>
+      allow <%= subnet %>;
+        <% end %>
+      deny all;
+      <% end %>
+
 
       proxy_pass http://opscode_webui;
     }

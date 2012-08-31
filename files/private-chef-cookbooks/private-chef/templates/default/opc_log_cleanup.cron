@@ -1,0 +1,3 @@
+# rendered by private-chef-ctl reconfigure, do not modify
+MAILTO=<%= node['private_chef']['notification_email'] %>
+53 3 * * * root <%= @cron_command %>

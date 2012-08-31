@@ -12,6 +12,7 @@ nginx_cache_tmp_dir = File.join(nginx_dir, "cache-tmp")
 nginx_html_dir = File.join(nginx_dir, "html")
 nginx_ca_dir = File.join(nginx_dir, "ca")
 nginx_log_dir = node['private_chef']['nginx']['log_directory']
+nginx_d_dir = File.join(nginx_etc_dir, "nginx.d")
 
 [
   nginx_dir,
@@ -21,6 +22,7 @@ nginx_log_dir = node['private_chef']['nginx']['log_directory']
   nginx_html_dir,
   nginx_ca_dir,
   nginx_log_dir,
+  nginx_d_dir,
 ].each do |dir_name|
   directory dir_name do
     owner node['private_chef']['user']['username']
@@ -96,12 +98,14 @@ chef_lb_configs = {
 }
 
 nginx_vars = node['private_chef']['nginx'].to_hash
-nginx_vars = nginx_vars.merge({:helper => NginxErb.new(node)})
+nginx_vars = nginx_vars.merge({ :helper => NginxErb.new(node),
+                                :allowed_webui_subnets => PrivateChef.allowed_webui_subnets})
 
 # Chef API lb config for HTTPS and HTTP
 ["https", "http"].each do |server_proto|
   config_key = "chef_#{server_proto}_config".to_sym
   lb_config = chef_lb_configs[config_key]
+
   template lb_config do
     source "nginx_chef_api_lb.conf.erb"
     owner "root"
@@ -110,6 +114,7 @@ nginx_vars = nginx_vars.merge({:helper => NginxErb.new(node)})
     variables(nginx_vars.merge({:server_proto => server_proto}))
     notifies :restart, 'service[nginx]' if OmnibusHelper.should_notify?("nginx")
   end
+
 end
 
 template nginx_config do
@@ -133,7 +138,9 @@ end
 runit_service "nginx" do
   down node['private_chef']['nginx']['ha']
   options({
-    :log_directory => nginx_log_dir
+    :log_directory => nginx_log_dir,
+    :svlogd_size => node['private_chef']['nginx']['svlogd_size'],
+    :svlogd_num  => node['private_chef']['nginx']['svlogd_num']
   }.merge(params))
 end
 
