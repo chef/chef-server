@@ -8,7 +8,7 @@
    {git, "git://github.com/opscode/chef_authn.git", {branch, "master"}}},
 
   {chef_certgen, ".*",
-   {git, "git@github.com:opscode/chef_certgen.git", {branch, "master"}}},
+   {git, "git://github.com/opscode/chef_certgen.git", {branch, "master"}}},
 
   {chef_db, ".*",
    {git, "git://github.com/opscode/chef_db.git", {branch, "master"}}},
@@ -23,7 +23,7 @@
    {git, "git://github.com/basho/webmachine", {tag, "1.9.0-mochifix"}}},
 
   {fast_log, ".*",
-   {git, "git@github.com:opscode/fast-log-erlang.git", {branch, "master"}}},
+   {git, "git://github.com/opscode/fast-log-erlang.git", {branch, "master"}}},
 
   {mixer, ".*",
    {git, "git://github.com/opscode/mixer.git", {branch, "master"}}},
