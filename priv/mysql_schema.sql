@@ -253,7 +253,7 @@ CREATE TABLE `users` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50020 DEFINER=`opscode_chef`@`localhost`*/ /*!50003 PROCEDURE `cookbook_recipes`(IN organization CHAR(32))
+/*!50003 CREATE*/ /*!50020 DEFINER=CURRENT_USER*/ /*!50003 PROCEDURE `cookbook_recipes`(IN organization CHAR(32))
 BEGIN
     -- Set up the information in the temporary table...
     CALL prepare_latest_cookbook_data(organization, 1);
@@ -281,7 +281,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50020 DEFINER=`opscode_chef`@`localhost`*/ /*!50003 PROCEDURE `latest_cookbook_versions`(IN organization CHAR(32), IN num_latest INTEGER)
+/*!50003 CREATE*/ /*!50020 DEFINER=CURRENT_USER*/ /*!50003 PROCEDURE `latest_cookbook_versions`(IN organization CHAR(32), IN num_latest INTEGER)
 BEGIN
     -- Set up the information in the temporary table...
     CALL prepare_latest_cookbook_data(organization, num_latest);
@@ -309,7 +309,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50020 DEFINER=`opscode_chef`@`localhost`*/ /*!50003 PROCEDURE `prepare_latest_cookbook_data`(IN organization CHAR(32), IN num_latest INTEGER)
+/*!50003 CREATE*/ /*!50020 DEFINER=CURRENT_USER*/ /*!50003 PROCEDURE `prepare_latest_cookbook_data`(IN organization CHAR(32), IN num_latest INTEGER)
 BEGIN
     -- This stored procedure ultimately generates a temporary table filled
     -- with the cookbook name, version information, and serialized object for
@@ -418,7 +418,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8 */;
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`opscode_chef`@`localhost` SQL SECURITY DEFINER */
+/*!50013 DEFINER=CURRENT_USER SQL SECURITY DEFINER */
 /*!50001 VIEW `cookbook_version_dependencies` AS select `c`.`org_id` AS `org_id`,`c`.`name` AS `name`,`v`.`major` AS `major`,`v`.`minor` AS `minor`,`v`.`patch` AS `patch`,`v`.`meta_deps` AS `dependencies` from (`cookbooks` `c` join `cookbook_versions` `v` on((`c`.`id` = `v`.`cookbook_id`))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -432,7 +432,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8 */;
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`opscode_chef`@`localhost` SQL SECURITY DEFINER */
+/*!50013 DEFINER=CURRENT_USER SQL SECURITY DEFINER */
 /*!50001 VIEW `joined_cookbook_version` AS select `v`.`major` AS `major`,`v`.`minor` AS `minor`,`v`.`patch` AS `patch`,concat_ws('.',`v`.`major`,`v`.`minor`,`v`.`patch`) AS `version`,`v`.`serialized_object` AS `serialized_object`,`v`.`id` AS `id`,`c`.`org_id` AS `org_id`,`c`.`name` AS `name` from (`cookbooks` `c` join `cookbook_versions` `v` on((`c`.`id` = `v`.`cookbook_id`))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
