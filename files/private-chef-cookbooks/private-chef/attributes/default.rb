@@ -645,4 +645,5 @@ default['private_chef']['opscode-reporting']['listen'] = '127.0.0.1'
 default['private_chef']['opscode-reporting']['port'] = 10010
 default['private_chef']['opscode-reporting']['db_pool_max_count'] = 20
 default['private_chef']['opscode-reporting']['db_pool_init_count'] = 5
-
+default['private_chef']['opscode-reporting']['max_cache_size'] = '10000'
+default['private_chef']['opscode-reporting']['cache_ttl'] = '3600'

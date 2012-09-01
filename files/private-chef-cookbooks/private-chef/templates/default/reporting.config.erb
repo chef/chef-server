@@ -52,10 +52,9 @@
             %% Whether to redirect error_logger messages into lager - defaults to true
             {error_logger_redirect, true}
         ]},
- {chef_db, [
-  %        {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
-  %        {cache_defaults, [{max_size, <%= @max_cache_size %> },
-  %                             {ttl, <%= @cache_ttl %> }]},
+  {chef_db, [
+           {cache_defaults, [{max_size, <%= @max_cache_size %> },
+                               {ttl, <%= @cache_ttl %> }]},
            {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
            {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
           ]},
@@ -66,6 +65,9 @@
                 {authz_root_url, "http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>" },
                 {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
                 {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
+               ]},
+  {chef_index, [
+                {solr_url, "http://<%= node['private_chef']['opscode-solr']['vip'] %>:<%= node['private_chef']['opscode-solr']['port'] %>/solr"}
                ]},
  {reporting, [{server_name, "<%= @server_name %>" },
           {ip, "<%= @listen %>" },
