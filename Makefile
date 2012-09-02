@@ -36,6 +36,7 @@ else
 DEPSOLVER_PLT=$(GLOBAL_PLT)
 endif
 
+.PHONY: all compile doc clean eunit dialyzer typer shell distclean
 
 all: compile eunit dialyzer
 
