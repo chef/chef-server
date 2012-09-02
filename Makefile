@@ -22,7 +22,7 @@ ERLFLAGS= -pa $(CURDIR)/.eunit -pa $(CURDIR)/ebin -pa $(CURDIR)/*/ebin
 REBAR=$(shell which rebar)
 
 ifeq ($(REBAR),)
-	$(error "Rebar not available on this system")
+$(error "Rebar not available on this system")
 endif
 
 # If there is a user global plt use that. However, if there is not a user global plt
