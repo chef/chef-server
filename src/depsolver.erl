@@ -99,6 +99,7 @@
 
 -export_type([t/0,
               pkg/0,
+              constraint_op/0,
               pkg_name/0,
               vsn/0,
               constraint/0,
@@ -119,34 +120,19 @@
              | {non_neg_integer()}
              | {non_neg_integer(), non_neg_integer()}
              | {non_neg_integer(), non_neg_integer(), non_neg_integer()}.
+
+-type constraint_op() ::
+        '=' | gte | '>=' | lte | '<='
+      | gt | '>' | lt | '<' | pes | '~>' | between.
+
 -type raw_constraint() :: pkg_name()
                         | {pkg_name(), raw_vsn()}
-                        | {pkg_name(), raw_vsn(), '='}
-                        | {pkg_name(), raw_vsn(), gte}
-                        | {pkg_name(), raw_vsn(),'>='}
-                        | {pkg_name(), raw_vsn(), lte}
-                        | {pkg_name(), raw_vsn(), '<='}
-                        | {pkg_name(), raw_vsn(), gt}
-                        | {pkg_name(), raw_vsn(), '>'}
-                        | {pkg_name(), raw_vsn(), lt}
-                        | {pkg_name(), raw_vsn(), '<'}
-                        | {pkg_name(), raw_vsn(), pes}
-                        | {pkg_name(), raw_vsn(), '~>'}
+                        | {pkg_name(), raw_vsn(), constraint_op()}
                         | {pkg_name(), raw_vsn(), vsn(), between}.
 
 -type constraint() :: pkg_name()
                     | {pkg_name(), vsn()}
-                    | {pkg_name(), vsn(), '='}
-                    | {pkg_name(), vsn(), gte}
-                    | {pkg_name(), vsn(),'>='}
-                    | {pkg_name(), vsn(), lte}
-                    | {pkg_name(), vsn(), '<='}
-                    | {pkg_name(), vsn(), gt}
-                    | {pkg_name(), vsn(), '>'}
-                    | {pkg_name(), vsn(), lt}
-                    | {pkg_name(), vsn(), '<'}
-                    | {pkg_name(), vsn(), pes}
-                    | {pkg_name(), vsn(), '~>'}
+                    | {pkg_name(), vsn(), constraint_op()}
                     | {pkg_name(), vsn(), vsn(), between}.
 
 
