@@ -50,6 +50,10 @@ init_per_testcase(_TestCase, Config) ->
     application:set_env(bookshelf_wi, keys, {AccessKeyID, SecretAccessKey}),
     application:set_env(bookshelf_wi, log_dir, LogDir),
     ok = bksw_app:manual_start(),
+    %% increase max sessions per server for ibrowse
+    application:set_env(ibrowse, default_max_sessions, 300),
+    %% disable request pipelining for ibrowse.
+    application:set_env(ibrowse, default_max_pipeline_size, 1),
     Port = 4321,
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
                           lists:flatten(io_lib:format("http://127.0.0.1:~p",
