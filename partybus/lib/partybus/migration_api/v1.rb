@@ -1,5 +1,6 @@
 require 'partybus/schema_migrator'
 require 'partybus/service_restarter'
+require 'partybus/command_runner'
 require 'partybus/migration_api/v1'
 
 module Partybus
@@ -61,7 +62,13 @@ EOF
         restarter = Partybus::ServiceRestarter.new
         restarter.restart_service(service_name)
       end
-
+      
+      def run_command(command)
+        log("\tRunning Command: #{command}")
+        runner = Partybus::CommandRunner.new
+        runner.run_command(command)
+      end
+      
       def migrate
 
       end

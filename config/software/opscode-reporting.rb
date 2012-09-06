@@ -19,4 +19,9 @@ build do
   command "mkdir -p #{install_dir}/embedded/service/opscode-reporting"
   command "#{install_dir}/embedded/bin/rsync -a --delete ./rel/reporting/ #{install_dir}/embedded/service/opscode-reporting/"
   command "rm -rf #{install_dir}/embedded/service/opscode-reporting/log"
+
+  # DB
+  command "mkdir -p #{install_dir}/embedded/service/opscode-reporting/db"
+  bundle "install --without mysql --gemfile=./db/Gemfile --path=/opt/opscode/embedded/service/gem"
+  command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./db/ #{install_dir}/embedded/service/opscode-reporting/db/"
 end

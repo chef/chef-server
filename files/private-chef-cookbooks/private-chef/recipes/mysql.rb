@@ -61,6 +61,22 @@ if !File.exists?("/var/opt/opscode/mysql-bootstrap")
       command "/opt/opscode/embedded/bin/bundle exec sequel -m db/migrate mysql2://#{node['private_chef']['mysql']['sql_user']}:#{node['private_chef']['mysql']['sql_password']}@#{node['private_chef']['mysql']['vip']}/opscode_chef"
       cwd "/opt/opscode/embedded/service/chef-sql-schema"
     end
+
+    # Until reporting is migrated to its own database, we're executing
+    # reporting schema migrations on chef database
+    # TODO: Remove reporting schema migrations when it gets its own db
+    
+    execute "migrate_database_reporting" do
+      command "/opt/opscode/embedded/bin/bundle exec rake db:remigrate"
+      cwd "/opt/opscode/embedded/service/opscode-reporting/db"
+      environment ({'DB_CONNECTION_STRING' => "mysql2://#{node['private_chef']['mysql']['sql_user']}:#{node['private_chef']['mysql']['sql_password']}@#{node['private_chef']['mysql']['vip']}/opscode_chef"})
+    end
+
+    execute "migrate_reporting_database_2" do
+      command "/opt/opscode/embedded/bin/bundle exec sequel -m migrate mysql2://#{node['private_chef']['mysql']['sql_user']}:#{node['private_chef']['mysql']['sql_password']}@#{node['private_chef']['mysql']['vip']}/opscode_chef"
+      cwd "/opt/opscode/embedded/service/opscode-reporting/db"
+    end
+
   end
 
   file "/var/opt/opscode/mysql-bootstrap" 

@@ -148,6 +148,18 @@ if node['private_chef']['bootstrap']['enable']
     action :nothing
   end
 
+  #
+  # Ultimately reporting service will have its own database. Until
+  # then we need to manage its migrations seperately.
+  # TODO: Remove this migration when reporting is moved to its own db.
+  #
+  execute "migrate_reporting_database" do
+    command "/opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/bin/rake pg:remigrate" 
+    cwd "/opt/opscode/embedded/service/opscode-reporting/db"
+    user node['private_chef']['postgresql']['username']
+    action :nothing
+  end
+
   execute "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"CREATE USER #{node['private_chef']['postgresql']['sql_user']} WITH SUPERUSER ENCRYPTED PASSWORD '#{node['private_chef']['postgresql']['sql_password']}'\"" do
     cwd "/opt/opscode/embedded/service/chef-sql-schema"
     user node['private_chef']['postgresql']['username']
