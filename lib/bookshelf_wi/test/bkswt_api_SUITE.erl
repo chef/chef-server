@@ -35,19 +35,25 @@ init_per_testcase(sec_fail, Config0) ->
 init_per_testcase(_TestCase, Config) ->
     %% This fixes another rebar brokenness. We cant specify any options to
     %% common test in rebar
-    seed(erlang:phash2(now)),
+    Seed = now(),
+    random:seed(Seed),
+    error_logger:info_msg("Using random seed: ~p~n", [Seed]),
     DiskStore = filename:join(proplists:get_value(priv_dir, Config),
                               random_string(10, "abcdefghijklmnopqrstuvwxyz")),
     LogDir = filename:join(proplists:get_value(priv_dir, Config),
                            "logs"),
     filelib:ensure_dir(filename:join(DiskStore, "tmp")),
+    error_logger:info_msg("Using disk_store: ~p~n", [DiskStore]),
     AccessKeyID = random_string(10, "abcdefghijklmnopqrstuvwxyz"),
     SecretAccessKey = random_string(30, "abcdefghijklmnopqrstuvwxyz"),
-    application:set_env(bookshelf_store, disk_store, DiskStore),
+    application:set_env(bookshelf_wi, disk_store, DiskStore),
     application:set_env(bookshelf_wi, keys, {AccessKeyID, SecretAccessKey}),
     application:set_env(bookshelf_wi, log_dir, LogDir),
     ok = bksw_app:manual_start(),
-    application:set_env(bookshelf_wi, disk_store, "/tmp/bukkits"),
+    %% increase max sessions per server for ibrowse
+    application:set_env(ibrowse, default_max_sessions, 300),
+    %% disable request pipelining for ibrowse.
+    application:set_env(ibrowse, default_max_pipeline_size, 1),
     Port = 4321,
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
                           lists:flatten(io_lib:format("http://127.0.0.1:~p",
@@ -63,7 +69,7 @@ all(doc) ->
     ["This test is runs the fs implementation of the bkss_store signature"].
 
 all() ->
-    [put_object, wi_basic, sec_fail, signed_url, signed_url_fail].
+    [head_object, put_object, wi_basic, sec_fail, signed_url, signed_url_fail].
 
 %%====================================================================
 %% TEST CASES
@@ -126,6 +132,31 @@ put_object(Config) when is_list(Config) ->
                           ?assertMatch(Key,
                                        erlang:binary_to_list(proplists:get_value(content, ObjDetail)))
                   end, ObjList).
+
+head_object(doc) ->
+    ["supports HEAD operations with PUT"];
+head_object(suite) ->
+    [];
+head_object(Config) when is_list(Config) ->
+    S3Conf = proplists:get_value(s3_conf, Config),
+    Bucket = "head-put-tests",
+    ?assertEqual(ok, mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)),
+    BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
+    ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
+    ?assertEqual([], proplists:get_value(contents, BucketContents)),
+    Count = 50,
+    Objs = [filename:join(random_binary(), random_binary()) ||
+               _ <- lists:seq(1,Count)],
+    ec_plists:map(fun(F) ->
+                          mini_s3:put_object(Bucket, F, F, [], [], S3Conf)
+                  end, Objs),
+    Got = ec_plists:ftmap(fun(Obj) ->
+                                  mini_s3:get_object_metadata(Bucket, Obj, [], S3Conf)
+                          end, Objs, 10000),
+    error_logger:info_msg("Got: ~p~n", [Got]),
+    [ ?assertMatch({value, _}, Item) || Item <- Got ].
+
+
 
 sec_fail(doc) ->
     ["Check authentication failure on the part of the caller"];
@@ -198,6 +229,3 @@ random_string(Length, AllowedChars) ->
                         [lists:nth(random:uniform(length(AllowedChars)),
                                    AllowedChars) | Acc]
                 end, [], lists:seq(1, Length)).
-
-seed(Num) ->
-        random:seed(Num, erlang:phash2(erlang:now()), erlang:phash2(erlang:now())).
