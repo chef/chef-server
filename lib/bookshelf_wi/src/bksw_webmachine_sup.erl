@@ -26,9 +26,10 @@ init(_Args) ->
     MaxRestarts = 1000,
     MaxSecondsBetweenRestarts = 3600,
 
+    error_logger:info_msg("bookshelf using config: ~p~n",
+                          [bksw_conf:summarize_config()]),
     %% This will reconfigure the system each time we startup.
     WebConfig = bksw_conf:get_configuration(),
-
     WebMachine = {webmachine_mochiweb,
                   {webmachine_mochiweb, start, [WebConfig]},
                   permanent, 5000, worker, dynamic},
