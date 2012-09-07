@@ -168,10 +168,9 @@ open_for_read(Bucket, Entry) ->
 
 -spec entry_md(binary(), binary()) -> {ok, #object{}} | {error, term()}.
 entry_md(Bucket, Entry) ->
-    FileName = bksw_io_names:entry_path(Bucket, Entry),
     {ok, Ref} = open_for_read(Bucket, bksw_io_names:decode(Entry)),
     Result = entry_md(Ref),
-    bksw_coordinator:end_read(FileName),
+    finish_read(Ref),
     Result.
 
 -spec entry_md(#entryref{}) -> {ok, #object{}} | {error, term()}.
