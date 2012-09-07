@@ -331,6 +331,7 @@ id(#chef_cookbook_version{id = Id}) ->
     Id.
 
 -spec set_created(Object :: chef_object() |
+                            #chef_user{} |
                             #chef_sandbox{} |
                             #chef_cookbook_version{},
                   ActorId :: object_id()) -> chef_object() |
