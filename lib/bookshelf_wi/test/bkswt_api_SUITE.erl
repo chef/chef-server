@@ -49,9 +49,13 @@ init_per_testcase(_TestCase, Config) ->
     application:set_env(bookshelf_wi, disk_store, DiskStore),
     application:set_env(bookshelf_wi, keys, {AccessKeyID, SecretAccessKey}),
     application:set_env(bookshelf_wi, log_dir, LogDir),
+    application:set_env(bookshelf_wi, stream_download, true),
     ok = bksw_app:manual_start(),
+    %% force webmachine to pickup new dispatch_list. I don't understand why it
+    %% isn't enough to do application:stop/start for webmachine, but it isn't.
+    bksw_conf:reset_dispatch(),
     %% increase max sessions per server for ibrowse
-    application:set_env(ibrowse, default_max_sessions, 300),
+    application:set_env(ibrowse, default_max_sessions, 256),
     %% disable request pipelining for ibrowse.
     application:set_env(ibrowse, default_max_pipeline_size, 1),
     Port = 4321,

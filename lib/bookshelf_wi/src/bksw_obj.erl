@@ -17,8 +17,8 @@
 %% Public API
 %%===================================================================
 
-init(_Context) ->
-    {ok, bksw_conf:get_context()}.
+init(Config) ->
+    {ok, bksw_conf:get_context(Config)}.
 
 is_authorized(Rq, Ctx) ->
     bksw_sec:is_authorized(Rq, Ctx).
@@ -84,16 +84,40 @@ download(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bksw_io:open_for_read(Bucket, Path) of
         {ok, Ref} ->
-            %% TODO Make this work with streaming response bodies
-            {fully_read(Ref, []), Rq0, Ctx};
+            case bksw_conf:is_stream_download(Ctx) of
+                true ->
+                    {{stream, send_streamed_body(Ref)}, Rq0, Ctx};
+                false ->
+                    {fully_read(Ref, []), Rq0, Ctx}
+            end;
         _Error ->
             {false, Rq0, Ctx}
     end.
 
 
+
 %%===================================================================
 %% Internal Functions
 %%===================================================================
+send_streamed_body(Ref) ->
+     case bksw_io:read(Ref, ?BLOCK_SIZE) of
+         {ok, eof} ->
+            bksw_io:finish_read(Ref),
+            {<<>>, done};
+         {ok, Data} ->
+             case byte_size(Data) < ?BLOCK_SIZE of
+                 true ->
+                     bksw_io:finish_read(Ref),
+                     {Data, done};
+                 false ->
+                     {Data, fun() -> send_streamed_body(Ref) end}
+             end;
+        Error = {error, _} ->
+             bksw_io:finish_read(Ref),
+             error_logger:error_msg("Error occurred during content download: ~p~n", [Error]),
+             Error
+     end.
+
 fully_read(Ref, Accum) ->
     case bksw_io:read(Ref, ?BLOCK_SIZE) of
         {ok, eof} ->
