@@ -204,9 +204,10 @@ read(#entryref{fd=Fd}, Size) ->
             Result
     end.
 
--spec finish_read(#entryref{}) -> ok | {error, file:posix() | badarg}.
-finish_read(#entryref{fd=Fd}) ->
-    file:close(Fd).
+-spec finish_read(#entryref{}) -> ok.
+finish_read(#entryref{fd=Fd, path=Path}) ->
+    file:close(Fd),
+    bksw_coordinator:end_read(Path).
 
 -spec write(#entryref{}, binary()) -> {ok, #entryref{}} | {error, file:posix() | badarg | terminated}.
 write(#entryref{fd=Fd, ctx=Ctx}=ERef, Data) when is_binary(Data) ->
