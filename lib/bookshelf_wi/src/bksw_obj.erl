@@ -107,11 +107,13 @@ send_streamed_body(Ref) ->
          {ok, Data} ->
              case byte_size(Data) < ?BLOCK_SIZE of
                  true ->
+                     bksw_io:finish_read(Ref),
                      {Data, done};
                  false ->
                      {Data, fun() -> send_streamed_body(Ref) end}
              end;
         Error = {error, _} ->
+             bksw_io:finish_read(Ref),
              error_logger:error_msg("Error occurred during content download: ~p~n", [Error]),
              Error
      end.
