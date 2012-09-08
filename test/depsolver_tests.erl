@@ -29,12 +29,12 @@
 %%============================================================================
 
 first_test() ->
-    Dom0 = depsolver:add_packages(depsolver:new_graph(), [{app1, [{"0.1", [{app2, "0.2"},
+    Dom0 = depsolver:add_packages(depsolver:new_graph(), [{app1, [{"0.1", [{app2, "0.2+build.33"},
                                                                            {app3, "0.2", '>='}]},
                                                                   {"0.2", []},
                                                                   {"0.3", []}]},
                                                           {app2, [{"0.1", []},
-                                                                  {"0.2",[{app3, "0.3"}]},
+                                                                  {"0.2+build.33",[{app3, "0.3"}]},
                                                                   {"0.3", []}]},
                                                           {app3, [{"0.1", []},
                                                                   {"0.2", []},
@@ -42,9 +42,9 @@ first_test() ->
 
 
     case depsolver:solve(Dom0, [{app1, "0.1"}]) of
-        {ok, [{app3,{0,3}},
-              {app2,{0,2}},
-              {app1,{0,1}}]} ->
+        {ok,[{app3,{{0,3},{[],[]}}},
+             {app2,{{0,2},{[],[<<"build">>,33]}}},
+             {app1,{{0,1},{[],[]}}}]} ->
             ok;
         E ->
             erlang:throw({invalid_result, E})
@@ -71,10 +71,10 @@ second_test() ->
     X = depsolver:solve(Dom0, [{app1, "0.1"},
                      {app2, "0.3"}]),
 
-    ?assertMatch({ok, [{app3,{0,3}},
-                       {app2,{0,3}},
-                       {app4,{0,2}},
-                       {app1,{0,1}}]},
+    ?assertMatch({ok, [{app3,{{0,3},{[],[]}}},
+                       {app2,{{0,3},{[],[]}}},
+                       {app4,{{0,2},{[],[]}}},
+                       {app1,{{0,1},{[],[]}}}]},
                  X).
 
 third_test() ->
@@ -107,42 +107,42 @@ third_test() ->
                                               {"2.0.0", []},
                                               {"6.0.0", []}]}]),
 
-    ?assertMatch({ok, [{app5,{6,0,0}},
-                       {app3,{0,1,3}},
-                       {app4,{6,0,0}},
-                       {app2,{3,0}},
-                       {app1,{3,0}}]},
+    ?assertMatch({ok, [{app5,{{6,0,0},{[],[]}}},
+                       {app3,{{0,1,3},{[],[]}}},
+                       {app4,{{6,0,0},{[],[]}}},
+                       {app2,{{3,0},{[],[]}}},
+                       {app1,{{3,0},{[],[]}}}]},
                  depsolver:solve(Dom0, [{app1, "3.0"}])),
 
 
-    ?assertMatch({ok, [{app5,{6,0,0}},
-                       {app3,{0,1,3}},
-                       {app4,{6,0,0}},
-                       {app2,{3,0}},
-                       {app1,{3,0}}]},
+    ?assertMatch({ok, [{app5,{{6,0,0},{[],[]}}},
+                       {app3,{{0,1,3},{[],[]}}},
+                       {app4,{{6,0,0},{[],[]}}},
+                       {app2,{{3,0},{[],[]}}},
+                       {app1,{{3,0},{[],[]}}}]},
                  depsolver:solve(Dom0, [app1])).
 
 fail_test() ->
     Dom0 = depsolver:add_packages(depsolver:new_graph(),
                                   [{app1, [{"0.1", [{app2, "0.2"},
                                                     {app3, "0.2", gte}]},
-                                              {"0.2", []},
-                                              {"0.3", []}]},
-                                      {app2, [{"0.1", []},
-                                              {"0.2",[{app3, "0.1"}]},
-                                              {"0.3", []}]},
-                                      {app3, [{"0.1", []},
-                                              {"0.2", []},
-                                              {"0.3", []}]}]),
+                                           {"0.2", []},
+                                           {"0.3", []}]},
+                                   {app2, [{"0.1", []},
+                                           {"0.2",[{app3, "0.1"}]},
+                                           {"0.3", []}]},
+                                   {app3, [{"0.1", []},
+                                           {"0.2", []},
+                                           {"0.3", []}]}]),
 
-    Ret = depsolver:solve(Dom0, [{app1, {0,1}}]),
+    Ret = depsolver:solve(Dom0, [{app1, "0.1"}]),
     %% We do this to make sure all errors can be formated.
     _ = depsolver:format_error(Ret),
     ?assertMatch({error,
-                  [{[{[{app1,{0,1}}],
-                      [{app1,{0,1}},[[{app2,{0,2}}]]]}],
-                    [{{app2,{0,2}},[{app3,{0,1}}]},
-                     {{app1,{0,1}},[{app3,{0,2},gte}]}]}]},
+                  [{[{[{app1,{{0,1},{[],[]}}}],
+                      [{app1,{{0,1},{[],[]}}},[[{app2,{{0,2},{[],[]}}}]]]}],
+                    [{{app2,{{0,2},{[],[]}}},[{app3,{{0,1},{[],[]}}}]},
+                     {{app1,{{0,1},{[],[]}}},[{app3,{{0,2},{[],[]}},gte}]}]}]},
                  Ret).
 
 conflicting_passing_test() ->
@@ -176,18 +176,18 @@ conflicting_passing_test() ->
                                               {"2.0.0", []},
                                               {"6.0.0", []}]}]),
 
-    ?assertMatch({ok, [{app5,{2,0,0}},
-                       {app3,{0,1,3}},
-                       {app4,{5,0,0}},
-                       {app2,{3,0}},
-                       {app1,{3,0}}]},
+    ?assertMatch({ok, [{app5,{{2,0,0},{[],[]}}},
+                       {app3,{{0,1,3},{[],[]}}},
+                       {app4,{{5,0,0},{[],[]}}},
+                       {app2,{{3,0},{[],[]}}},
+                       {app1,{{3,0},{[],[]}}}]},
                  depsolver:solve(Dom0, [{app1, "3.0"}])),
 
-    ?assertMatch({ok, [{app5,{2,0,0}},
-                       {app3,{0,1,3}},
-                       {app4,{5,0,0}},
-                       {app2,{3,0}},
-                       {app1,{3,0}}]},
+    ?assertMatch({ok, [{app5,{{2,0,0},{[],[]}}},
+                       {app3,{{0,1,3},{[],[]}}},
+                       {app4,{{5,0,0},{[],[]}}},
+                       {app2,{{3,0},{[],[]}}},
+                       {app1,{{3,0},{[],[]}}}]},
                  depsolver:solve(Dom0, [app1, app2, app5])).
 
 
@@ -196,7 +196,7 @@ circular_dependencies_test() ->
     Dom0 = depsolver:add_packages(depsolver:new_graph(), [{app1, [{"0.1.0", [app2]}]},
                                       {app2, [{"0.0.1", [app1]}]}]),
 
-    ?assertMatch({ok, [{app1,{0,1,0}},{app2,{0,0,1}}]},
+    ?assertMatch({ok, [{app1,{{0,1,0},{[],[]}}},{app2,{{0,0,1},{[],[]}}}]},
                  depsolver:solve(Dom0, [{app1, "0.1.0"}])).
 
 conflicting_failing_test() ->
@@ -218,13 +218,13 @@ conflicting_failing_test() ->
     _ = depsolver:format_error(Ret),
     ?assertMatch({error,
                    [{[{[app1],
-                       [{app1,{3,0}},
-                        [[{app4,{5,0,0}}],
-                         [{app2,{0,0,1}},[[{app4,{5,0,0}}]]]]]},
+                       [{app1,{{3,0},{[],[]}}},
+                        [[{app4,{{5,0,0},{[],[]}}}],
+                         [{app2,{{0,0,1},{[],[]}}},[[{app4,{{5,0,0},{[],[]}}}]]]]]},
                       {[app3],
-                       [{app3,{0,1,0}},[[{app5,{6,0,0}}]]]}],
-                     [{{app4,{5,0,0}},[{app5,{2,0,0}}]},
-                      {{app1,{3,0}},[{app5,{2,0,0},'='}]}]}]},
+                       [{app3,{{0,1,0},{[],[]}}},[[{app5,{{6,0,0},{[],[]}}}]]]}],
+                     [{{app4,{{5,0,0},{[],[]}}},[{app5,{{2,0,0},{[],[]}}}]},
+                      {{app1,{{3,0},{[],[]}}},[{app5,{{2,0,0},{[],[]}},'='}]}]}]},
                  Ret).
 
 
@@ -259,11 +259,11 @@ pessimistic_major_minor_patch_test() ->
                                               {"0.3.0", []},
                                               {"2.0.0", []},
                                               {"6.0.0", []}]}]),
-    ?assertMatch({ok, [{app5,{6,0,0}},
-                       {app3,{0,1,3}},
-                       {app4,{6,0,0}},
-                       {app2,{2,1,5}},
-                       {app1,{3,0}}]},
+    ?assertMatch({ok, [{app5,{{6,0,0},{[],[]}}},
+                       {app3,{{0,1,3},{[],[]}}},
+                       {app4,{{6,0,0},{[],[]}}},
+                       {app2,{{2,1,5},{[],[]}}},
+                       {app1,{{3,0},{[],[]}}}]},
                  depsolver:solve(Dom0, [{app1, "3.0"}])).
 
 pessimistic_major_minor_test() ->
@@ -297,11 +297,11 @@ pessimistic_major_minor_test() ->
                                               {"0.3.0", []},
                                               {"2.0.0", []},
                                               {"6.0.0", []}]}]),
-    ?assertMatch({ok, [{app5,{6,0,0}},
-                       {app3,{0,1,3}},
-                       {app4,{6,0,0}},
-                       {app2,{2,2}},
-                       {app1,{3,0}}]},
+    ?assertMatch({ok, [{app5,{{6,0,0},{[],[]}}},
+                       {app3,{{0,1,3},{[],[]}}},
+                       {app4,{{6,0,0},{[],[]}}},
+                       {app2,{{2,2},{[],[]}}},
+                       {app1,{{3,0},{[],[]}}}]},
                  depsolver:solve(Dom0, [{app1, "3.0"}])).
 
 filter_packages_with_deps_test() ->
@@ -394,7 +394,7 @@ filter_versions_test() ->
     Ret = depsolver:filter_packages(Packages,
                                     [{"foo", "1.0.0", '~~~~'} | Cons]),
     _ = depsolver:format_error(Ret),
-    ?assertMatch({error, {invalid_constraints, [{<<"foo">>,{1,0,0},'~~~~'}]}}, Ret).
+    ?assertMatch({error, {invalid_constraints, [{<<"foo">>,{{1,0,0},{[],[]}},'~~~~'}]}}, Ret).
 
 
 -spec missing_test() -> ok.
@@ -431,17 +431,18 @@ binary_test() ->
 
     _ = depsolver:format_error(Ret),
     ?assertMatch({error,
-                  [{[{[<<"foo">>],[{<<"foo">>,{1,2,3}}]}],
-                    [{{<<"foo">>,{1,2,3}},
-                      [{<<"bar">>,{2,0,0},gt}]}]}]}, Ret).
+                  [{[{[<<"foo">>],[{<<"foo">>,{{1,2,3},{[],[]}}}]}],
+                    [{{<<"foo">>,{{1,2,3},{[],[]}}},
+                      [{<<"bar">>,{{2,0,0},{[],[]}},gt}]}]}]}, Ret).
 
 %%
 %% We don't have bar cookbook
 %%
 %% Ruby gives
-%% "message":"Unable to satisfy constraints on cookbook bar, which does not exist, due to run list item (foo >= 0.0.0).
-%%            Run list items that may result in a constraint on bar: [(foo = 1.2.3) -> (bar > 2.0.0)]",
-%% "unsatisfiable_run_list_item":"(foo >= 0.0.0)",
+%% "message":"Unable to satisfy constraints on cookbook bar, which does not
+%%   exist, due to run list item (foo >= 0.0.0).  Run list items that may result
+%%   in a constraint on bar: [(foo = 1.2.3) -> (bar > 2.0.0)]",
+%%   "unsatisfiable_run_list_item":"(foo >= 0.0.0)",
 %% "non_existent_cookbooks":["bar"],"
 %% "most_constrained_cookbooks":[]}"
 %%
@@ -456,8 +457,9 @@ doesnt_exist_test() ->
 %% We have v 2.0.0 of bar but want > 2.0.0
 %%
 %% Ruby gives
-%% "message":"Unable to satisfy constraints on cookbook bar due to run list item (foo >= 0.0.0).
-%%            Run list items that may result in a constraint on bar: [(foo = 1.2.3) -> (bar > 2.0.0)]",
+%% "message":"Unable to satisfy constraints on cookbook bar due to run list item
+%% (foo >= 0.0.0).  Run list items that may result in a constraint on bar: [(foo
+%% = 1.2.3) -> (bar > 2.0.0)]",
 %% "unsatisfiable_run_list_item":"(foo >= 0.0.0)",
 %% "non_existent_cookbooks":[],
 %% "most_constrained_cookbooks":["bar 2.0.0 -> []"]
@@ -470,9 +472,9 @@ not_new_enough_test() ->
     Ret = depsolver:solve(World, [<<"foo">>]),
     _ = depsolver:format_error(Ret),
     ?assertMatch({error,
-                  [{[{[<<"foo">>],[{<<"foo">>,{1,2,3}}]}],
-                    [{{<<"foo">>,{1,2,3}},
-                      [{<<"bar">>,{2,0,0},gt}]}]}]}, Ret).
+                  [{[{[<<"foo">>],[{<<"foo">>,{{1,2,3},{[],[]}}}]}],
+                    [{{<<"foo">>,{{1,2,3},{[],[]}}},
+                      [{<<"bar">>,{{2,0,0},{[],[]}},gt}]}]}]}, Ret).
 
 %%
 %% circular deps are bad
@@ -491,40 +493,57 @@ impossible_dependency_test() ->
     Ret = depsolver:solve(World, [<<"foo">>]),
     _ = depsolver:format_error(Ret),
     ?assertMatch({error,
-                  [{[{[<<"foo">>],[{<<"foo">>,{1,2,3}}]}],
-                    [{{<<"foo">>,{1,2,3}},
-                      [{<<"bar">>,{2,0,0},gt}]}]}]}, Ret).
+                  [{[{[<<"foo">>],[{<<"foo">>,{{1,2,3},{[],[]}}}]}],
+                    [{{<<"foo">>,{{1,2,3},{[],[]}}},
+                      [{<<"bar">>,{{2,0,0},{[],[]}},gt}]}]}]}, Ret).
 
 %%
 %% Formatting tests
 %%
 format_test_() ->
       [{"format_version returns iolist",
-        [?_assertEqual("1", depsolver:format_version({1})),
-         ?_assertEqual(["1", ".", "2", ".", "34"], depsolver:format_version({1,2,34}))
+        [?_assertEqual(["1", [], []], depsolver:format_version({1, {[],[]}})),
+         ?_assertEqual(["1", ".", "2", ".", "34", [], []], depsolver:format_version({{1,2,34},{[],[]}}))
         ]
        },
        {"format_version",
-        [equal_bin_string(<<"1">>, depsolver:format_version({1})),
-         equal_bin_string(<<"1.2">>, depsolver:format_version({1,2})),
-         equal_bin_string(<<"1.2.2">>, depsolver:format_version({1,2,2})),
-         equal_bin_string(<<"1.99.2">>, depsolver:format_version({1,99,2})),
-         equal_bin_string(<<"1">>, depsolver:format_version({1}))]
+        [equal_bin_string(<<"1">>, depsolver:format_version({1, {[],[]}})),
+         equal_bin_string(<<"1.2">>, depsolver:format_version({{1,2}, {[],[]}})),
+         equal_bin_string(<<"1.2.2">>, depsolver:format_version({{1,2,2}, {[],[]}})),
+         equal_bin_string(<<"1.99.2">>, depsolver:format_version({{1,99,2}, {[],[]}})),
+         equal_bin_string(<<"1.99.2-alpha">>, depsolver:format_version({{1,99,2}, {["alpha"],[]}})),
+         equal_bin_string(<<"1.99.2-alpha.1">>, depsolver:format_version({{1,99,2}, {["alpha",1], []}})),
+         equal_bin_string(<<"1.99.2+build.1.a36">>,
+                          depsolver:format_version({{1,99,2}, {[], ["build", 1, "a36"]}})),
+         equal_bin_string(<<"1.99.2-alpha.1+build.1.a36">>,
+                          depsolver:format_version({{1,99,2}, {["alpha", 1], ["build", 1, "a36"]}})),
+         equal_bin_string(<<"1">>, depsolver:format_version({1, {[],[]}}))]
        },
        {"format constraint",
         [equal_bin_string(<<"foo">>, depsolver:format_constraint(<<"foo">>)),
          equal_bin_string(<<"foo">>, depsolver:format_constraint(foo)),
-         equal_bin_string(<<"(foo = 1.2.0)">>, depsolver:format_constraint({<<"foo">>, {1,2,0}})),
-         equal_bin_string(<<"(foo = 1.2.0)">>, depsolver:format_constraint({<<"foo">>,{1,2,0}, '='})),
-         equal_bin_string(<<"(foo > 1.2.0)">>, depsolver:format_constraint({<<"foo">>,{1,2,0}, '>'})),
-         equal_bin_string(<<"(foo > 1.2.0)">>, depsolver:format_constraint({<<"foo">>,{1,2,0}, gt})),
-         equal_bin_string(<<"(foo between 1.2.0 and 1.3.0)">>, depsolver:format_constraint({<<"foo">>,{1,2,0}, {1,3,0}, between}))
+         equal_bin_string(<<"(foo = 1.2.0)">>, depsolver:format_constraint({<<"foo">>, {{1,2,0}, {[], []}}})),
+         equal_bin_string(<<"(foo = 1.2.0)">>, depsolver:format_constraint({<<"foo">>, {{1,2,0}, {[], []}}, '='})),
+         equal_bin_string(<<"(foo > 1.2.0)">>,
+                          depsolver:format_constraint({<<"foo">>, {{1,2,0}, {[], []}}, '>'})),
+         equal_bin_string(<<"(foo > 1.2.0)">>,
+                          depsolver:format_constraint({<<"foo">>, {{1,2,0}, {[], []}}, gt})),
+         equal_bin_string(<<"(foo between 1.2.0 and 1.3.0)">>,
+                          depsolver:format_constraint({<<"foo">>,{{1,2,0}, {[], []}},
+                                                       {{1,3,0}, {[], []}}, between})),
+         equal_bin_string(<<"(foo > 1.2.0-alpha.1+build.36)">>,
+                          depsolver:format_constraint({<<"foo">>,
+                                                       {{1,2,0}, {["alpha", 1], ["build", 36]}}, gt}))
         ]
        },
        {"format roots",
-        [equal_bin_string(<<"(bar = 1.2.0)">>, depsolver:format_roots([ [{<<"bar">>, {1,2,0}}] ])),
-         equal_bin_string(<<"(bar = 1.2.0), foo">>, depsolver:format_roots([[<<"foo">>, {<<"bar">>, {1,2,0}}]])),
-         equal_bin_string(<<"(bar = 1.2.0), foo">>, depsolver:format_roots([[<<"foo">>], [{<<"bar">>, {1,2,0}}]]))
+        [equal_bin_string(<<"(bar = 1.2.0)">>,
+                          depsolver:format_roots([ [{<<"bar">>, {{1,2,0},{[],[]}}}] ])),
+         equal_bin_string(<<"(bar = 1.2.0), foo">>,
+                          depsolver:format_roots([[<<"foo">>,
+                                                   {<<"bar">>, {{1,2,0},{[],[]}}}]])),
+         equal_bin_string(<<"(bar = 1.2.0), foo">>,
+                          depsolver:format_roots([[<<"foo">>], [{<<"bar">>, {{1,2,0},{[],[]}}}]]))
         ]
        }
       ].
@@ -533,4 +552,4 @@ format_test_() ->
 %% Internal functions
 %%
 equal_bin_string(Expected, Got) ->
-  ?_assertEqual(Expected, iolist_to_binary(Got)).
+  ?_assertEqual(Expected, erlang:iolist_to_binary(Got)).
