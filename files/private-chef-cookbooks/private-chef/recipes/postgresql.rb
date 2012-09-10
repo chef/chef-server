@@ -139,6 +139,7 @@ if node['private_chef']['bootstrap']['enable']
     not_if database_exists
     retries 30
     notifies :run, "execute[migrate_database]", :immediately
+    notifies :run, "execute[migrate_reporting_database]", :immediately
   end
 
   execute "migrate_database" do
