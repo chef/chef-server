@@ -147,7 +147,7 @@ ping() ->
 %%
 %%
 fetch_user(UserName) ->
-    case sqerl:select(find_by_username, [UserName], ?FIRST(chef_user)) of
+    case sqerl:select(find_user_by_username, [UserName], ?FIRST(chef_user)) of
         {ok, none} ->
             {ok, not_found};
         {ok, #chef_user{}=User} ->
