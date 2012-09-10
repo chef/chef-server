@@ -72,11 +72,6 @@ if !File.exists?("/var/opt/opscode/mysql-bootstrap")
       environment ({'DB_CONNECTION_STRING' => "mysql2://#{node['private_chef']['mysql']['sql_user']}:#{node['private_chef']['mysql']['sql_password']}@#{node['private_chef']['mysql']['vip']}/opscode_chef"})
     end
 
-    execute "migrate_reporting_database_2" do
-      command "/opt/opscode/embedded/bin/bundle exec sequel -m migrate mysql2://#{node['private_chef']['mysql']['sql_user']}:#{node['private_chef']['mysql']['sql_password']}@#{node['private_chef']['mysql']['vip']}/opscode_chef"
-      cwd "/opt/opscode/embedded/service/opscode-reporting/db"
-    end
-
   end
 
   file "/var/opt/opscode/mysql-bootstrap" 
