@@ -168,10 +168,9 @@ open_for_read(Bucket, Entry) ->
 
 -spec entry_md(binary(), binary()) -> {ok, #object{}} | {error, term()}.
 entry_md(Bucket, Entry) ->
-    FileName = bksw_io_names:entry_path(Bucket, Entry),
     {ok, Ref} = open_for_read(Bucket, bksw_io_names:decode(Entry)),
     Result = entry_md(Ref),
-    bksw_coordinator:end_read(FileName),
+    finish_read(Ref),
     Result.
 
 -spec entry_md(#entryref{}) -> {ok, #object{}} | {error, term()}.
@@ -204,9 +203,10 @@ read(#entryref{fd=Fd}, Size) ->
             Result
     end.
 
--spec finish_read(#entryref{}) -> ok | {error, file:posix() | badarg}.
-finish_read(#entryref{fd=Fd}) ->
-    file:close(Fd).
+-spec finish_read(#entryref{}) -> ok.
+finish_read(#entryref{fd=Fd, path=Path}) ->
+    file:close(Fd),
+    bksw_coordinator:end_read(Path).
 
 -spec write(#entryref{}, binary()) -> {ok, #entryref{}} | {error, file:posix() | badarg | terminated}.
 write(#entryref{fd=Fd, ctx=Ctx}=ERef, Data) when is_binary(Data) ->
