@@ -179,10 +179,10 @@
         'authz_id',                         %% authorization guid (placeholder - not used)
         'username',                         %% username
         'email',                            %% email - left null
-        'pubkey_version',                   %% public key version - set to 1 for CERT
-                                            %% osc users will also be using a CERT
         'public_key',                       %% public key - might be null
-        'serialized_object',                %% salt + password
+        'hashed_password',                  %% password
+        'salt',                             %% password salt
+        'hash_type',                        %% hash used to scramble password
         'last_updated_by',                  %% authz guid of last actor to update object -
                                             %% it is  a place holder in this case
         'created_at',                       %% time created at

@@ -115,14 +115,15 @@ new_record(chef_user, OrgId, AuthzId, UserData) ->
     Admin = ej:get({<<"admin">>}, UserData) =:= true,
     Password = ej:get({<<"password">>}, UserData),
     Salt = ej:get({<<"salt">>}, UserData),
-    AuthInfo = {Salt, Password},
+    HashType = ej:get({<<"hash_type">>}, UserData),
     #chef_user{id = Id,
                authz_id = maybe_stub_authz_id(AuthzId, Id),
                username = Name,
                email = null, %% Not used in open source user
-               pubkey_version = null, %% Not used in open source user
                public_key = null, %% Not used in open source user
-               serialized_object = AuthInfo,
+               hashed_password = Password,
+               salt = Salt,
+               hash_type = HashType,
                external_authentication_uid = OpenId,
                recovery_authentication_enabled = false, %% Not used in open source user
                admin = Admin
