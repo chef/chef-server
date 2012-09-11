@@ -14,7 +14,8 @@ bundles = {
   "opscode-chef" => "integration_test dev",
   "opscode-expander" => false,
   "opscode-test" => "dev",
-  "opscode-webui" => "integration_test dev"
+  "opscode-webui" => "integration_test dev",
+  "opscode-reporting/db" => false
 }
 
 node['private_chef']['mysql']['mysql2_versions'].each do |mysql2_version|
