@@ -387,7 +387,8 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
             UpdateFun = chef_db:update_fun(ObjectRec),
             case chef_db:UpdateFun(DbContext, ObjectRec, ActorId) of
                 ok ->
-                    {true, chef_wm_util:set_json_body(Req, ObjectEjson), State};
+                    Req1 = handle_rename(ObjectRec, Req),
+                    {true, chef_wm_util:set_json_body(Req1, ObjectEjson), State};
                 not_found ->
                     %% We will get this if no rows were affected by the query. This could
                     %% happen if the object is deleted in the middle of handling this
@@ -556,6 +557,20 @@ maybe_add_org_name(?OSC_ORG_NAME, Items) ->
     Items;
 maybe_add_org_name(OrgName, Items) ->
     [{org_name, OrgName} | Items].
+
+%% If request results in a rename, then set Location header and wm will return with a 201.
+%% Currently, only the clients endpoint supports rename
+handle_rename(#chef_client{name = ObjectName}=ObjectRec, Req) ->
+    ReqName = chef_wm_util:object_name(client, Req),
+    case ObjectName of
+        ReqName ->
+            Req;
+        _ ->
+            Uri = ?BASE_ROUTES:route(client, Req, [{name, ObjectName}]),
+            wrq:set_resp_header("Location", binary_to_list(Uri), Req)
+    end;
+handle_rename(_, Req) ->
+    Req.
 
 %%% @doc Return appropriate public key based on request source
 %%%

@@ -115,51 +115,10 @@ auth_info(Req, #base_state{resource_state =
 
 from_json(Req, #base_state{reqid = RequestId,
                            resource_state =
-                               #client_state{chef_client =
-                                                 #chef_client{name = ReqName} = Client,
-                                             client_data = ClientData}} =
-              State) ->
-    Name = ej:get({<<"name">>}, ClientData),
-    % Check to see if we need to generate a new key
-    ClientData1 = case ej:get({<<"private_key">>}, ClientData) of
-                      true ->
-                          {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
-                          chef_client:set_public_key(ClientData, PublicKey);
-                      _ ->
-                          PrivateKey = undefined,
-                          ClientData
-                  end,
-    {Result, Req1, State1} = chef_wm_base:update_from_json(Req, State,
-                                                           Client, ClientData1),
-    case Result of
-        {halt, _} ->
-            % There was a problem with the update; abort! abort!
-            {Result, Req1, State1};
-        _ ->
-            % This is for returning the private key, but needs to happen after update
-            Req2 = case PrivateKey of
-                       undefined ->
-                           Req1;
-                       _ ->
-                           chef_wm_util:append_field_to_json_body(Req1,
-                                                                  <<"private_key">>,
-                                                                  PrivateKey)
-                   end,
-            % Need to return uri (in case request is a rename?)
-            Uri = ?BASE_ROUTES:route(client, Req1, [{name, Name}]),
-            Req3 = chef_wm_util:append_field_to_json_body(Req2, <<"uri">>, Uri),
-            FinalReq = set_http_response_code(Name, ReqName, Uri, Req3),
-            {Result, FinalReq, State1}
-    end.
-
-set_http_response_code(Name, ReqName, Uri, Request) ->
-    % If this is a rename, we need to add the Location header so it returns 201
-    case ReqName of
-        Name ->
-            Request;
-        _ ->
-            wrq:set_resp_header("Location", binary_to_list(Uri), Request)
-    end.
+                               #client_state{chef_client = Client,
+                                             client_data = ClientData}} = State) ->
+    ClientData1 = maybe_generate_key_pair(ClientData, RequestId),
+    chef_wm_base:update_from_json(Req, State, Client, ClientData1).
 
 to_json(Req, #base_state{resource_state =
                              #client_state{chef_client = Client},
@@ -177,6 +136,21 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
     EJson = chef_client:assemble_client_ejson(Client, OrgName),
     Req1 = chef_wm_util:set_json_body(Req, EJson),
     {true, Req1, State}.
+
+%% If the request contains "private_key":true, then we will generate a new key pair. In
+%% this case, we'll add the new public and private keys into the EJSON since
+%% update_from_json will use it to set the response.
+maybe_generate_key_pair(ClientData, RequestId) ->
+    Name = ej:get({<<"name">>}, ClientData),
+    case ej:get({<<"private_key">>}, ClientData) of
+        true ->
+            {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
+            chef_client:set_key_pair(ClientData,
+                                     {public_key, PublicKey},
+                                     {private_key, PrivateKey});
+        _ ->
+            ClientData
+    end.
 
 % TODO: this could stand refactoring: I'm sure there is stuff re-used by other
 % endpoints and possibly unused code here
