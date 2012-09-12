@@ -22,6 +22,6 @@ build do
 
   # DB
   command "mkdir -p #{install_dir}/embedded/service/opscode-reporting/db"
-  bundle "install --without mysql --gemfile=./db/Gemfile --path=/opt/opscode/embedded/service/gem"
+  bundle "install --without mysql --gemfile=./db/Gemfile --path=#{install_dir}embedded/service/gem"
   command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./db/ #{install_dir}/embedded/service/opscode-reporting/db/"
 end

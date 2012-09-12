@@ -1,10 +1,11 @@
 class Partybus::CommandRunner
 
   def run_command(command)
-    system(command)
-    
-    # Returns true, false or nil. In order to return exit status for a
-    # command use $?.exitstatus
+    return_val = system(command)
+
+    unless return_val
+      raise "Partybus failed to execute command '#{command}' exitstatus: #{$?.exitstatus}"
+    end
   end
 
 end
