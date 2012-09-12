@@ -26,17 +26,55 @@
 -include_lib("chef_objects/include/chef_osc_defaults.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
+public_key_data() ->
+    {ok, Bin} = file:read_file("../test/spki_public.pem"),
+    Bin.
+
+cert_data() ->
+    {ok, Bin} = file:read_file("../test/cert.pem"),
+    Bin.
+
+set_key_pair_test_() ->
+    Ejson = {[]},
+    PrivateKey = <<"private">>,
+    DataForType = fun(key) ->
+                          public_key_data();
+                     (cert) ->
+                          cert_data()
+                  end,
+    KeyForType = fun(key) ->
+                         <<"public_key">>;
+                    (cert) ->
+                         <<"certificate">>
+                 end,
+    NotKeyForType = fun(key) ->
+                            <<"certificate">>;
+                       (cert) ->
+                            <<"public_key">>
+                    end,
+    Tests = [
+             begin
+                 Got = chef_client:set_key_pair(Ejson,
+                                                {public_key, DataForType(Type)},
+                                                {private_key, PrivateKey}),
+                 [?_assertEqual(PrivateKey, ej:get({<<"private_key">>}, Got)),
+                  ?_assertEqual(DataForType(Type), ej:get({KeyForType(Type)}, Got)),
+                  ?_assertEqual(undefined, ej:get({NotKeyForType(Type)}, Got))]
+             end
+             || Type <- [key, cert] ],
+    lists:flatten(Tests).
+
 osc_assemble_client_ejson_test_() ->
     [{"obtain expected EJSON",
       fun() ->
               Client = #chef_client{name = <<"alice">>,
                                     admin = true,
                                     validator = false,
-                                    public_key = <<"PUBKEY">>},
+                                    public_key = public_key_data()},
               {GotList} = chef_client:osc_assemble_client_ejson(Client, ?OSC_ORG_NAME),
               ExpectedData = [{<<"json_class">>, <<"Chef::ApiClient">>},
                               {<<"chef_type">>, <<"client">>},
-                              {<<"public_key">>, <<"PUBKEY">>},
+                              {<<"public_key">>, public_key_data()},
                               {<<"validator">>, false},
                               {<<"admin">>, true},
                               {<<"name">>, <<"alice">>}],
@@ -91,13 +129,13 @@ osc_parse_binary_json_test_() ->
      {"Inherits values from current client",
       fun() ->
               CurClient = #chef_client{admin = true, validator = true,
-                                       public_key = <<"-----BEGIN PUBLIC KEY">>},
+                                       public_key = public_key_data()},
               {ok, Client} = chef_client:osc_parse_binary_json(<<"{}">>, <<"alice">>, CurClient),
               ExpectedData = [{<<"json_class">>, <<"Chef::ApiClient">>},
                               {<<"chef_type">>, <<"client">>},
                               {<<"validator">>, true},
                               {<<"admin">>, true},
-                              {<<"public_key">>, <<"-----BEGIN PUBLIC KEY">>},
+                              {<<"public_key">>, public_key_data()},
                               {<<"name">>, <<"alice">>}],
               {GotData} = Client,
               ?assertEqual(lists:sort(ExpectedData), lists:sort(GotData))
@@ -109,7 +147,7 @@ osc_parse_binary_json_test_() ->
       fun() ->
               %% override true with false
               CurClient = #chef_client{admin = true, validator = true,
-                                       public_key = <<"-----BEGIN PUBLIC KEY">>},
+                                       public_key = public_key_data()},
               {ok, Client} = chef_client:osc_parse_binary_json(<<"{\"validator\":false, \"admin\":false}">>,
                                                            <<"alice">>, CurClient),
               ?assertEqual(false, ej:get({"admin"}, Client)),
@@ -121,7 +159,7 @@ osc_parse_binary_json_test_() ->
        fun() ->
                %% override false with true
                CurClient = #chef_client{admin = false, validator = false,
-                                        public_key = <<"-----BEGIN PUBLIC KEY">>},
+                                        public_key = public_key_data()},
                {ok, Client} = chef_client:osc_parse_binary_json(<<"{\"validator\":true, \"admin\":true}">>,
                                                             <<"alice">>, CurClient),
                ?assertEqual(true, ej:get({"admin"}, Client)),
@@ -133,10 +171,10 @@ osc_parse_binary_json_test_() ->
       fun() ->
               %% override true with false
               CurClient = #chef_client{admin = true, validator = true,
-                                       public_key = <<"-----BEGIN CERTIFICATE">>},
+                                       public_key = cert_data()},
               {ok, Client} = chef_client:osc_parse_binary_json(<<"{\"validator\":false, \"admin\":false}">>,
                                                            <<"alice">>, CurClient),
-              ?assertEqual(<<"-----BEGIN CERTIFICATE">>, ej:get({"certificate"}, Client))
+              ?assertEqual(cert_data(), ej:get({"certificate"}, Client))
       end
      }
 

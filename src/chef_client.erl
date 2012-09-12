@@ -36,6 +36,7 @@
          parse_binary_json/2,
          parse_binary_json/3,
 
+         set_key_pair/3,
          set_public_key/2
         ]).
 
@@ -160,6 +161,15 @@ oc_parse_binary_json(Bin, ReqName, CurrentClient) ->
     {Name, FinalClient} = oc_destination_name(Client1, ReqName),
     valid_name(Name),
     validate_client(FinalClient, Name, oc).
+
+%% @doc Add public and private key data to `ClientEjson'. This function infers
+%% the key type and puts the public key data in iether a `certificate' or
+%% `public_key' field. The private key will be placed in the `private_key'
+%% field.
+-spec set_key_pair(ej:json_object(), {public_key, binary()}, {private_key, binary()}) -> ej:json_object().
+set_key_pair(ClientEjson, {public_key, PublicKey}, {private_key, PrivateKey}) ->
+    ClientEjson1 = set_public_key(ClientEjson, PublicKey),
+    ej:set({<<"private_key">>}, ClientEjson1, PrivateKey).
 
 %% @doc Sets either the `certificate' or `public_key' field of
 %% `ClientEjson' depending on the value of `PublicKey'.
