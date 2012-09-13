@@ -263,8 +263,7 @@ create_from_json(#wm_reqdata{} = Req,
     %% the world.
     ok = chef_object_db:add_to_solr(TypeName, Id, OrgId,
                                  chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
-    CreateFun = chef_db:create_fun(ObjectRec),
-    case chef_db:CreateFun(DbContext, ObjectRec, ActorId) of
+    case chef_db:create(ObjectRec, DbContext, ActorId) of
         {conflict, _} ->
             %% ignore return value of solr delete, this is best effort.
             chef_object_db:delete_from_solr(ObjectRec),
