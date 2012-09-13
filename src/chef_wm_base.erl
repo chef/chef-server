@@ -635,6 +635,9 @@ handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
         _Else ->
             forbidden
     end;
+handle_auth_info(chef_wm_users, _, _) ->
+  %% temp pass
+  authorized;
 handle_auth_info(Module, Req, #base_state{requestor = Requestor})
         when Module =:= chef_wm_cookbook_version;
              Module =:= chef_wm_named_environment;
