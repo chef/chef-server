@@ -22,8 +22,7 @@
 
 -module(chef_wm_util).
 
--export([append_field_to_json_body/3,
-         base_uri/1,
+-export([base_uri/1,
          environment_not_found_message/1,
          error_message_envelope/1,
          extract_from_path/2,
@@ -143,14 +142,6 @@ set_json_body(Req, EjsonData) ->
 with_error_body(Req, ErrorData) ->
     ErrorPayload = error_message_envelope(ErrorData),
     set_json_body(Req, ErrorPayload).
-
-%% @doc Append a JSON map item to the request body and
-%% set it as the new request body, returning the updated request.
-%% @end
-append_field_to_json_body(Req, Key, Value) ->
-    Json = ejson:decode(wrq:resp_body(Req)),
-    Json1 = ej:set({Key}, Json, Value),
-    set_json_body(Req, Json1).
 
 %% @doc Sets the JSON body of a response and it's Location header to
 %% point to the URI of a newly-created resource.
