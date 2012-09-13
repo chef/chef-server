@@ -114,8 +114,14 @@ from_json(Req, #base_state{reqid = RequestId,
     ClientData1 = chef_client:set_public_key(ClientData, PublicKey),
     case chef_wm_base:create_from_json(Req, State, chef_client, {authz_id, AuthzId}, ClientData1) of
         {true, Req1, State1} ->
-            Req2 = chef_wm_util:append_field_to_json_body(Req1, <<"private_key">>, PrivateKey),
-            {true,Req2, State1};
+            %% create_from_json by default sets the response to a json body
+            %% containing only a uri key. Here we want to add the generated key
+            %% pair so we replace the response.
+            URI = list_to_binary(chef_wm_util:full_uri(Req1)),
+            EJSON = {[{<<"uri">>, URI},
+                      {<<"private_key">>, PrivateKey},
+                      {<<"public_key">>, PublicKey}]},
+            {true, chef_wm_util:set_json_body(Req1, EJSON), State1};
         Else ->
             Else
     end.
