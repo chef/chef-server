@@ -47,10 +47,15 @@ request_type() ->
 allowed_methods(Req, State) ->
   {['POST'], Req, State}.
 
-validate_request('POST', Req, #base_state{resource_state = UserState} = State) ->
-  Body = wrq:req_body(Req),
-  {ok, UserData} = chef_user:parse_binary_json(Body, create),
-  {Req, State#base_state{resource_state = UserState#user_state{user_data = UserData}}}.
+validate_request('POST', Req, State) ->
+  case wrq:req_body(Req) of
+    undefined ->
+      throw({error, missing_body});
+   Body ->
+      {ok, UserData} = chef_user:parse_binary_json(Body, create),
+      {Req, State#base_state{resource_state =
+          #user_state{user_data = UserData}}}
+  end.
 
 %% Create, destroy, and update are admin only actions
 %% Need to update this to reflect that, as right now it
