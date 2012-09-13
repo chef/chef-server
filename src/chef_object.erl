@@ -213,6 +213,9 @@ ejson_for_indexing(#chef_cookbook_version{}, _CBVersion) ->
     %% FIXME: cleanup how we handle non-indexed objects
     %% cookbook_versions don't get indexed.
     {[]};
+ejson_for_indexing(#chef_user{}, _) ->
+    %% FIXME: we don't index users, so this is a dummy value
+    {[]};
 ejson_for_indexing(#chef_node{name = Name, environment = Environment}, Node) ->
     Defaults = ej:get({<<"default">>}, Node, ?EMPTY_EJSON_HASH),
     Normal = ej:get({<<"normal">>}, Node, ?EMPTY_EJSON_HASH),
