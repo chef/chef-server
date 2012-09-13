@@ -1,5 +1,5 @@
 name "opscode-reporting"
-version "rel-1.0.10"
+version "JPL-OC-3404"
 
 dependencies ["erlang", "rsync", "rebar"]
 
@@ -22,6 +22,6 @@ build do
 
   # DB
   command "mkdir -p #{install_dir}/embedded/service/opscode-reporting/db"
-  bundle "install --without mysql --gemfile=./db/Gemfile --path=#{install_dir}embedded/service/gem"
+  bundle "install --without mysql --gemfile=./db/Gemfile --path=#{install_dir}/embedded/service/gem"
   command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./db/ #{install_dir}/embedded/service/opscode-reporting/db/"
 end
