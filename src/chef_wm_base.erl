@@ -560,7 +560,7 @@ maybe_add_org_name(OrgName, Items) ->
 
 %% If request results in a rename, then set Location header and wm will return with a 201.
 %% Currently, only the clients endpoint supports rename
-handle_rename(#chef_client{name = ObjectName}=ObjectRec, Req) ->
+handle_rename(#chef_client{name = ObjectName}, Req) ->
     ReqName = chef_wm_util:object_name(client, Req),
     case ObjectName of
         ReqName ->
