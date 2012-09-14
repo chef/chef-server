@@ -116,11 +116,12 @@ new_record(chef_user, OrgId, AuthzId, UserData) ->
     Password = ej:get({<<"password">>}, UserData),
     Salt = ej:get({<<"salt">>}, UserData),
     HashType = ej:get({<<"hash_type">>}, UserData),
+    {PublicKey, _PubkeyVersion} = cert_or_key(UserData),
     #chef_user{id = Id,
                authz_id = maybe_stub_authz_id(AuthzId, Id),
                username = Name,
                email = null, %% Not used in open source user
-               public_key = null, %% Not used in open source user
+               public_key = PublicKey,
                hashed_password = Password,
                salt = Salt,
                hash_type = HashType,
