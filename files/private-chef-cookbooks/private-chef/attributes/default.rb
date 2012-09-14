@@ -78,6 +78,13 @@ default['private_chef']['rabbitmq']['vip'] = '127.0.0.1'
 default['private_chef']['rabbitmq']['consumer_id'] = 'hotsauce'
 
 ####
+# Jetty dummy for logs
+####
+# Should always be enable = false, we control Jetty+Solr through opscode-solr
+default['private_chef']['jetty']['enable'] = false
+default['private_chef']['jetty']['ha'] = false
+
+####
 # Chef Solr
 ####
 default['private_chef']['opscode-solr']['enable'] = true
@@ -614,6 +621,7 @@ default['private_chef']['logs']['log_retention'] = {
   "opscode-certificate" => 14,
   "opscode-account" => 14,
   "opscode-solr" => 14,
+  "jetty" => 14,
   "opscode-expander" => 14,
   "opscode-org-creator" => 14,
   "opscode-chef" => 14,

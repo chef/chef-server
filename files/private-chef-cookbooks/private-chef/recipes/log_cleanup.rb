@@ -8,7 +8,7 @@
 commands = []
 
 node['private_chef']['logs']['log_retention'].each do |service, days|
-  next unless node['private_chef'][service]['enable']
+  next unless node['private_chef'][service]['enable'] || service == "jetty"
   log_directory = node['private_chef'][service]['log_directory']
   commands << "find #{log_directory} -type f \\( -mtime +#{days} \\! -name config \\! -name lock \\! -name state \\! -name newstate \\) -print0 2>/dev/null | xargs -0 rm -f"
 end
