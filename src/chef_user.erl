@@ -52,8 +52,8 @@
 -spec parse_binary_json( binary(), user_action() ) -> {ok, ejson_term() }. % or throw
 parse_binary_json(Bin, Action) ->
   User0 = ejson:decode(Bin),
-  User = set_default_values(User0, ?DEFAULT_FIELD_VALUES),
-  validate_user(User, Action).
+  User1 = set_default_values(User0, ?DEFAULT_FIELD_VALUES),
+  validate_user(User1, Action).
 
 set_default_values(User, Defaults) ->
   lists:foldl(fun({Key, Default}, Current) ->

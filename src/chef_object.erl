@@ -107,22 +107,20 @@ new_record(chef_node, OrgId, AuthzId, NodeData) ->
                name = Name,
                environment = Environment,
                serialized_object = Data};
-new_record(chef_user, OrgId, AuthzId, UserData) ->
+new_record(chef_user, OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
     %% This only works for Open Source Users currently
     Name = ej:get({<<"name">>}, UserData),
     Id = make_org_prefix_id(OrgId, Name),
-    OpenId= value_or_null({<<"openid">>}, UserData),
+    OpenId = value_or_null({<<"openid">>}, UserData),
+    Email = value_or_null({<<"email">>}, UserData),
     Admin = ej:get({<<"admin">>}, UserData) =:= true,
-    Password = ej:get({<<"password">>}, UserData),
-    Salt = ej:get({<<"salt">>}, UserData),
-    HashType = ej:get({<<"hash_type">>}, UserData),
     {PublicKey, _PubkeyVersion} = cert_or_key(UserData),
     #chef_user{id = Id,
                authz_id = maybe_stub_authz_id(AuthzId, Id),
                username = Name,
-               email = null, %% Not used in open source user
+               email = Email,
                public_key = PublicKey,
-               hashed_password = Password,
+               hashed_password = HashPass,
                salt = Salt,
                hash_type = HashType,
                external_authentication_uid = OpenId,
