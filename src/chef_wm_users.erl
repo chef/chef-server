@@ -72,8 +72,24 @@ create_path(Req, #base_state{resource_state = #user_state{user_data = UserData}}
   Name = ej:get({<<"name">>}, UserData),
   {binary_to_list(Name), Req, State}.
 
-from_json(Req, #base_state{resource_state = #user_state{user_data = UserData, user_authz_id = AuthzId}} = State) ->
-  chef_wm_base:create_from_json(Req, State, chef_user, {authz_id, AuthzId}, UserData).
+from_json(Req, #base_state{reqid = RequestId,
+                           resource_state = #user_state{user_data = UserData,
+                           user_authz_id = AuthzId}} = State) ->
+  %% FIXME: This code closely mirrors that of client and can likely be extracted out
+  Name = ej:get({<<"name">>}, UserData),
+  {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
+  UserData1 = chef_user:set_public_key(UserData, PublicKey),
+  case chef_wm_base:create_from_json(Req, State, chef_user, {authz_id, AuthzId}, UserData1) of
+    {true, Req1, State1} ->
+      Uri = list_to_binary(chef_wm_util:full_uri(Req1)),
+      Ejson = {[{<<"uri">>, Uri},
+                {<<"private_key">>, PrivateKey},
+                {<<"public_key">>, PublicKey}
+               ]},
+      {true, chef_wm_util:set_json_body(Req1, Ejson), State1};
+    Else ->
+      Else
+  end.
 
 %% Need to write function to be called here
 to_json(Req, State) ->
