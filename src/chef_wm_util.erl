@@ -114,7 +114,10 @@ not_found_message(cookbook, Name) when is_binary(Name) ->
 not_found_message(cookbook_version, {Name, Version}) when is_binary(Version) -> %% NOT a parsed {Major, Minor, Patch} tuple!!
     error_message_envelope(iolist_to_binary(["Cannot find a cookbook named ", Name, " with version ", Version]));
 not_found_message(client, Name) ->
-    error_message_envelope(iolist_to_binary(["Cannot load client ", Name])).
+    error_message_envelope(iolist_to_binary(["Cannot load client ", Name]));
+not_found_message(user, Name) ->
+    error_message_envelope(iolist_to_binary(["user '", Name, "' not found"])).
+
 
 %% "Cannot load data bag item not_really_there for data bag sack"
 
@@ -186,7 +189,9 @@ object_name(environment, Req) ->
 object_name(cookbook, Req) ->
     extract_from_path(cookbook_name, Req);
 object_name(client, Req) ->
-    extract_from_path(client_name, Req).
+    extract_from_path(client_name, Req);
+object_name(user, Req) ->
+    extract_from_path(user_name, Req).
 
 %% @doc Private utility function to extract a path element as a binary.  Returns the atom
 %% `undefined' if no such value exists.
