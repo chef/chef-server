@@ -27,6 +27,7 @@
 -module(chef_db).
 
 -export([fetch_user/2,
+         fetch_users/1,
          user_record_to_authz_id/2,
          %% fetch_all_users/1,
          %% fetch_org/2,
@@ -195,6 +196,14 @@ fetch_user(#context{reqid = ReqId, otto_connection = _Server} = _Context, UserNa
             User;
         {error, Error} ->
             {error, Error}
+    end.
+
+-spec fetch_users(#context{}) -> [binary()] | {error, _}.
+fetch_users(#context{reqid = ReqId}) ->
+    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, fetch_users),
+                          fun() -> chef_sql:fetch_users() end) of
+        {ok, L} -> L;
+        Other -> Other
     end.
 
 %%%

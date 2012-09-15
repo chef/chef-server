@@ -35,7 +35,8 @@
 
 -export([
         %%user ops
-        fetch_user/1,
+         fetch_user/1,
+         fetch_users/0,
         create_user/1,
 
          %% checksum ops
@@ -159,6 +160,16 @@ fetch_user(UserName) ->
 %% doc Insert user data into database
 create_user(#chef_user{}=User) ->
     create_object(User).
+
+-spec fetch_users() -> {ok, none | [binary()]} | {error, _}.
+%% Return a list of all usernames.
+fetch_users() ->
+    case sqerl:select(list_users, [], rows_as_scalars, [username]) of
+        {ok, none} ->
+            {ok, []};
+        Other ->
+            Other
+    end.
 
 %% node ops
 
