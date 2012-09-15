@@ -42,7 +42,8 @@ bulk_route_fun(Type, Req) when Type =:= role;
                                Type =:= environment;
                                Type =:= client;
                                Type =:= data_bag;
-                               Type =:= data_bag_item ->
+                               Type =:= data_bag_item;
+                               Type =:= user ->
     BaseURI = chef_wm_util:base_uri(Req),
     Template = template_for_type(Type),
     fun(Name) ->
@@ -135,7 +136,9 @@ template_for_type(data_bag_item) ->
     "/data/~s/~s";
 template_for_type({data_bag, _}) ->
     %% another way of asking for data_bag_item
-    "/data/~s/~s".
+    "/data/~s/~s";
+template_for_type(user) ->
+    "/users/~s".
 
 %% This is extracted from search, needs more cleanup
 url_for_search_item_fun(Req, Type, _OrgName) ->
