@@ -24,6 +24,7 @@
                   kernel,
                   stdlib,
                   crypto,
+                  bcrypt,
                   stats_hero,
                   fast_log,
                   sqerl,
