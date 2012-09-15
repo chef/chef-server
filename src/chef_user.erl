@@ -19,7 +19,8 @@
 %
 -module(chef_user).
 
--export([parse_binary_json/2,
+-export([assemble_user_ejson/2,
+         parse_binary_json/2,
          set_public_key/2]).
 
 -include("chef_types.hrl").
@@ -46,6 +47,16 @@
         ]).
 
 -type user_action() :: create.
+
+assemble_user_ejson(#chef_user{username = Name,
+                               public_key = PubKey,
+                               external_authentication_uid = OpenId,
+                               admin = Admin},
+                    _OrgId) ->
+    {[{<<"username">>, Name},
+      {<<"public_key">>, PubKey},
+      {<<"openid">>, OpenId},
+      {<<"admin">>, Admin}]}.
 
 %% @doc Convert a binary JSON string representing a Chef User into an
 %% EJson-encoded Erlang data structure.
