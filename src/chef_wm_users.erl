@@ -45,7 +45,7 @@ request_type() ->
   "users".
 
 allowed_methods(Req, State) ->
-  {['POST'], Req, State}.
+  {['GET', 'POST'], Req, State}.
 
 validate_request('POST', Req, State) ->
   case wrq:req_body(Req) of
@@ -55,7 +55,9 @@ validate_request('POST', Req, State) ->
       {ok, UserData} = chef_user:parse_binary_json(Body, create),
       {Req, State#base_state{resource_state =
           #user_state{user_data = UserData}}}
-  end.
+  end;
+validate_request('GET', Req, State) ->
+    {Req, State}.
 
 %% Create, destroy, and update are admin only actions
 %% Need to update this to reflect that, as right now it
@@ -105,7 +107,15 @@ secure_password(User) ->
 
 %% Need to write function to be called here
 to_json(Req, State) ->
-  filler.
+    {all_users_json(Req, State), Req, State}.
+
+%% Internal Functions
+all_users_json(Req, #base_state{chef_db_context = DbContext}) ->
+    UserNames = chef_db:fetch_users(DbContext),
+    RouteFun = ?BASE_ROUTES:bulk_route_fun(user, Req),
+    UriMap = [ {Name, RouteFun(Name)} || Name <- UserNames ],
+    ejson:encode({UriMap}).
+
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
