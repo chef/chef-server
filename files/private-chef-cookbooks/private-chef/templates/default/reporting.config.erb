@@ -43,7 +43,10 @@
 {stats_hero, [
                {udp_socket_pool_size, 1 },
                {estatsd_host, "127.0.0.1" },
-               {estatsd_port, 5665 }
+               {estatsd_port, 5665 },
+               {my_app, "reportingAPI"},
+               {upstream_prefixes, [<<"rdbms">>, <<"couch">>, <<"authz">>, <<"solr">>, <<"reporting_db">>]},
+               {label_fun, {reporting_app, label_mfa}}
               ]},
               
 {sqerl, [
