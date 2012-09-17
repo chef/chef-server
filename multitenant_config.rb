@@ -84,14 +84,20 @@ requestors({
                # The the admin user, for the purposes of getting things rolling
                :admin => {
                  :name => "pedant_admin_client",
-                 :create_me => true
+                 :create_me => true,
+                 :create_knife => true,
+                 :admin => true
                },
                :non_admin => {
                  :name => 'pedant_client',
-                 :create_me => true
+                 :create_me => true,
+                 :create_knife => true,
                },
                :bad => {
-                 :name => 'bad_client'
+                 :name => 'bad_client',
+                 :create_me => true,
+                 :create_knife => true,
+                 :associate => false
                }
              },
 
@@ -99,26 +105,23 @@ requestors({
                # An administrator in the testing organization
                :admin => {
                  :name => "pedant_admin_user",
-                 :create_me => true
+                 :create_me => true,
+                 :create_knife => true
                },
 
                :non_admin => {
                  :name => "pedant_user",
-                 :create_me => true
+                 :create_me => true,
+                 :create_knife => true
                },
 
                # A user that is not a member of the testing organization
                :bad => {
                  :name => "pedant-nobody",
-                 :create_me => true
+                 :create_me => true,
+                 :create_knife => true,
+                 :associate => false
                },
-
-               # A user for Knife tests.  A knife.rb and key files will be set up
-               # for this user
-               :knife_user => {
-                 :name => "knifey",
-                 :create_me => true
-               }
              }
            })
 
