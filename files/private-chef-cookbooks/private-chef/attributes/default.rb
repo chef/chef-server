@@ -647,3 +647,5 @@ default['private_chef']['opscode-reporting']['db_pool_max_count'] = 20
 default['private_chef']['opscode-reporting']['db_pool_init_count'] = 5
 default['private_chef']['opscode-reporting']['max_cache_size'] = '10000'
 default['private_chef']['opscode-reporting']['cache_ttl'] = '3600'
+default['private_chef']['opscode-reporting']['node_search_limit'] = 50
+
