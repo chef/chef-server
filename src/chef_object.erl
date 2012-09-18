@@ -187,15 +187,15 @@ ejson_for_indexing(#chef_cookbook_version{}, _CBVersion) ->
     %% cookbook_versions don't get indexed.
     {[]};
 ejson_for_indexing(#chef_node{name = Name, environment = Environment}, Node) ->
-    Defaults = get_node_part(<<"default">>, Node),
-    Normal = get_node_part(<<"normal">>, Node),
-    Override = get_node_part(<<"override">>, Node),
+    Defaults = ej:get({<<"default">>}, Node, ?EMPTY_EJSON_HASH),
+    Normal = ej:get({<<"normal">>}, Node, ?EMPTY_EJSON_HASH),
+    Override = ej:get({<<"override">>}, Node, ?EMPTY_EJSON_HASH),
     %% automatic may not always be present
-    Automatic = get_node_part(<<"automatic">>, Node),
+    Automatic = ej:get({<<"automatic">>}, Node, ?EMPTY_EJSON_HASH),
     DefaultNormal = chef_deep_merge:merge(Defaults, Normal),
     DefaultNormalOverride = chef_deep_merge:merge(DefaultNormal, Override),
     {Merged} = chef_deep_merge:merge(DefaultNormalOverride, Automatic),
-    RunList = value_or_empty_list(<<"run_list">>, Node),
+    RunList = ej:get({<<"run_list">>}, Node, []),
     %% We transform to a dict to ensure we override the top-level keys
     %% with the appropriate values and don't introduce any duplicate
     %% keys
@@ -220,19 +220,6 @@ ejson_for_indexing(#chef_environment{}, Environment) ->
     Environment;
 ejson_for_indexing(#chef_client{}, Client) ->
     Client.
-
-get_node_part(Key, Node) ->
-    case ej:get({Key}, Node) of
-        undefined -> ?EMPTY_EJSON_HASH;
-        Value -> Value
-    end.
-
-value_or_empty_list(Key, Node) ->
-    case ej:get({Key}, Node) of
-        undefined -> [];
-        Value -> Value
-    end.
-
 
 extract_recipes(RunList) ->
     [ binary:part(Item, {0, byte_size(Item) - 1})
