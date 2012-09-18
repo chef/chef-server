@@ -33,6 +33,7 @@
          make_org_prefix_id/2,
          name/1,
          new_record/4,
+         normalize_run_list/1,
          parse_constraint/1,
          set_created/2,
          set_updated/2,
@@ -514,3 +515,49 @@ cert_or_key(ClientData) ->
         _ ->
             {Cert, ?CERT_VERSION}
     end.
+
+%% @doc Returns a normalized version of `RunList`.  All implicitly-declared recipes (e.g.,
+%% "foo::bar") are made explicit (e.g., "recipe[foo::bar]").  Already explicit recipes and
+%% roles (which are always explicit) are unchanged.
+%%
+%% Exact duplicates are removed following the normalization process.  Semantic duplicates
+%% (such as "recipe[foo]" and "recipe[foo::default]") are preserved.
+-spec normalize_run_list(RunList :: [binary()]) -> [binary()].
+normalize_run_list(RunList) ->
+    deduplicate_run_list([normalize_item(Item) || Item <- RunList]).
+
+%% @doc Explicitly qualify a run list item.  Items already marked as "recipe[...]" or
+%% "role[...]" remain unchanged, while all other input is taken to be a recipe, and is
+%% wrapped as "recipe[ITEM]".
+%%
+%% It is assumed that only legal run list items will be input to this function (i.e., the
+%% run lists they are part of have already been validated).
+%%
+%% NOTE: About the spec here, `<<_:40,_:_*8>>` is the notation for a binary string that is
+%% at least 5 bytes long (8 bits * 5 = 40).  This comes from Dialyzer inferring that the
+%% smallest possible return value for this function would be <<"role[">>, which (while true)
+%% is rather unhelpful.  We can't specify a return value of `binary()`, however, because
+%% that is an underspecification, which conflicts with our Dialyzer setting of -Wunderspecs;
+%% we want to keep that because it's a generally useful setting... just not when dealing
+%% with Erlang's lack of a true string data type :(
+-spec normalize_item(binary()) -> <<_:40,_:_*8>>.
+normalize_item(<<"role[",_Item/binary>>=Role) ->
+    Role;
+normalize_item(<<"recipe[",_Item/binary>>=Recipe) ->
+    Recipe;
+normalize_item(Recipe) when is_binary(Recipe) ->
+    <<"recipe[", Recipe/binary, "]">>.
+
+%% @doc Removes duplicates from a run list, preserving order.  Intended for use with
+%% already-normalized run lists.
+%% @end
+%%
+%% NOTE: The spec for this function is the way it is for the same reasons as
+%% `normalize_item/1`.  See the documentation for that function for the gory details.
+%%
+%% TODO: This would be a good candidate for a 'chef_common' module function; it's copied
+%% from chef_wm_depsolver:remove_dups/1.
+-spec deduplicate_run_list([<<_:40,_:_*8>>]) -> list().
+deduplicate_run_list(L) ->
+    WithIdx = lists:zip(L, lists:seq(1, length(L))),
+    [ Elt || {Elt, _} <- lists:ukeysort(2, lists:ukeysort(1, WithIdx)) ].

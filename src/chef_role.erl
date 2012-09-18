@@ -80,8 +80,11 @@ parse_binary_json(Bin, Action) ->
     %% parse error from ejson if we can extract it?
     Role0 = chef_json:decode(Bin),
     Role = set_default_values(Role0),
-    validate_role(Role, Action).
-
+    {ok, ValidRole} = validate_role(Role, Action),
+    %% We validate then normalize, because the normalization code assumes there are valid
+    %% entries to normalize in the first place.
+    Normalized = normalize(ValidRole),
+    {ok, Normalized}.
 
 %% TODO: merge set_default_values and validate_role?
 
@@ -127,3 +130,25 @@ validate_role(Role, {update, UrlName}) ->
         Mismatch ->
             throw({url_json_name_mismatch, {UrlName, Mismatch, "Role"}})
     end.
+
+%% @doc Normalizes the run lists of an EJson Role.  All run lists are put into canonical
+%% form (all bare recipes are qualified with "recipe[...]"), and exact duplicates are
+%% removed.
+-spec normalize(ej:json_object()) -> ej:json_object().
+normalize(RoleEjson) ->
+    RunListKey = <<"run_list">>,
+    EnvRunListsKey = <<"env_run_lists">>,
+
+    RunList = ej:get({RunListKey}, RoleEjson, []),
+    NormalizedRunList = chef_object:normalize_run_list(RunList),
+
+    %% Roles have a hash of {environment -> run list} that need to be normalized as well.
+    {EnvRunLists} = ej:get({EnvRunListsKey}, RoleEjson, ?EMPTY_EJSON_HASH),
+    NormalizedEnvRunLists = {[{Env, chef_object:normalize_run_list(List)} || {Env, List} <- EnvRunLists]},
+
+    lists:foldl(fun({Key, Value}, Role) ->
+                        ej:set({Key}, Role, Value)
+                end,
+                RoleEjson,
+                [{RunListKey, NormalizedRunList},
+                 {EnvRunListsKey, NormalizedEnvRunLists}]).
