@@ -131,6 +131,32 @@ make_client(Prefix) ->
 	    updated_at = {datetime, {{2011,10,1},{16,47,46}}}
     }.
 
+make_user(Prefix) ->
+  AzId = make_az_id(Prefix),
+  #chef_user{
+    id = AzId,
+    authz_id = AzId,
+    username = AzId,
+    email = AzId,
+    public_key =
+    <<"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwxOFcrbsV7bEbqzOvW5u"
+	      "W5lyB23qsenlUdIGyRttqzGEaki01s7X+PpYy4BLfmVVmA6A6FCbL38CzzTUFX1a"
+	      "p6LYQR2Pb1tYjBjZZMUiVnjEgl12Zd1JF8dsPMj2BgPggx5GaGLvCOsajZ0YCDgW"
+	      "WkoO/HAEbztFIx2jdSCyD0ZH0ep4fSGDjmkN+5XurS0dBH8J5qPeJjriA/s/RzUb"
+	      "ULjr3gvfg49onHxr/kTKbhc78GBOfKSH1ftECCoWnidadW7/lfKbAZ3xiSjLsIxS"
+	      "KxavHMeCuSgyReDZpsFOn2Saie26jvLxWrGyn870yIh36wMvCvWKwUQPnluSnstJ"
+	      "xwIDAQAB">>,
+    hashed_password = <<"secretHaxorz">>,
+    salt = <<"kosher">>,
+    hash_type = <<"bcrypt">>,
+    last_updated_by = actor_id(),
+    created_at = {datetime, {{2011,10,1},{16,47,46}}},
+    updated_at = {datetime, {{2011,10,1},{16,47,46}}},
+    external_authentication_uid = <<"an open id of some kind">>,
+    recovery_authentication_enabled = false,
+    admin = false
+  }.
+
 make_cookbook(Prefix) ->
     AzId = make_az_id(Prefix),
     OrgId = the_org_id(),
@@ -251,6 +277,8 @@ setup_env() ->
                                 {<<"validator">>,
                                  fun sqerl_transformers:convert_integer_to_boolean/1},
                                 {<<"admin">>,
+                                 fun sqerl_transformers:convert_integer_to_boolean/1},
+                                {<<"recovery_authentication_enabled">>,
                                  fun sqerl_transformers:convert_integer_to_boolean/1}]
                        end,
     ok = application:set_env(sqerl, column_transforms, ColumnTransforms),
@@ -320,6 +348,16 @@ basic_test_() ->
       {<<"Node Operations">>,
        [
         {<<"Insert operations">>, fun insert_node_data/0}
+       ]
+      },
+      {<<"User Operations">>,
+       [
+         %% Always run fetch user list first, so no users
+         %% yet exist in DB, so results are predictable,
+         %% since we don't clean up after every test
+         {<<"Fetch user list">>, fun fetch_user_list/0},
+         {<<"Insert operations">>, fun insert_user_data/0},
+         {<<"Fetch single user">>, fun fetch_user_data/0}
        ]
       },
       {<<"Client Operations">>,
@@ -1092,6 +1130,35 @@ insert_node_data() ->
     Expected = lists:duplicate(length(Nodes), {ok, 1}),
     Results = [chef_sql:create_node(Node) || Node <- Nodes ],
     ?assertEqual(Expected, Results).
+
+%%%======================================================================
+%%% USERS
+%%%======================================================================
+
+insert_user_data() ->
+  Users = [make_user(<<"user01">>), make_user(<<"user02">>)],
+  Expected = lists:duplicate(length(Users), {ok, 1}),
+  Results = [chef_sql:create_user(User) || User <- Users ],
+  ?assertEqual(Expected, Results).
+
+fetch_user_data() ->
+  Expected = make_user(<<"user03">>),
+  Username = Expected#chef_user.username,
+  %% Make sure client create succeeds
+  ?assertEqual({ok, 1}, chef_sql:create_user(Expected)),
+  {ok, Result} = chef_sql:fetch_user(Username),
+  ?debugVal(Expected),
+  ?debugVal(Result),
+  ?assertEqual(Expected, Result).
+
+fetch_user_list() ->
+  Users = [make_user(<<"user04">>), make_user(<<"user05">>)],
+  CreatedResults = lists:duplicate(length(Users), {ok, 1}),
+  Created = [chef_sql:create_user(User) || User <- Users ],
+  ?assertEqual(CreatedResults, Created),
+  Results = chef_sql:fetch_users(),
+  Expected = {ok, [ User#chef_user.username || User <- Users ]},
+  ?assertEqual(Expected, Results).
 
 %%%======================================================================
 %%% CLIENTS
