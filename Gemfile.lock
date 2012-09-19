@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:opscode/chef-pedant-core.git
-  revision: 3fa051967d0d20b584a348f395b4dc04fff9277d
+  revision: 33ed50e08b0ec42bf5cc5f709c9bf45093e50438
   specs:
     chef-pedant-core (0.0.1)
       activesupport (~> 3.2.8)
@@ -28,7 +28,7 @@ GIT
 
 GIT
   remote: git@github.com:opscode/oc-chef-pedant-tests.git
-  revision: 2b46a31415468b5d9b2ac014baac4257648eddc8
+  revision: 72007c8618469ba931435ef8893555203920940e
   specs:
     oc-chef-pedant-tests (0.0.1)
 
@@ -38,7 +38,7 @@ GEM
     activesupport (3.2.8)
       i18n (~> 0.6)
       multi_json (~> 1.0)
-    builder (3.1.0)
+    builder (3.1.3)
     bunny (0.8.0)
     chef (10.12.0)
       bunny (>= 0.6.0)
@@ -60,7 +60,7 @@ GEM
       yajl-ruby (~> 1.1)
     diff-lcs (1.1.3)
     erubis (2.7.0)
-    highline (1.6.14)
+    highline (1.6.15)
     i18n (0.6.1)
     ipaddress (0.8.0)
     json (1.6.1)
