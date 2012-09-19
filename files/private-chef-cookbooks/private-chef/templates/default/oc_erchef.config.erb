@@ -16,7 +16,7 @@
                          {files, 5},
                          {file_size, 50}]]}
             ]},
- {chef_rest, [
+ {oc_chef_wm, [
               {ip, "<%= @listen %>"},
               {port, <%= @port %>},
               {reqid_header_name, "X-Request-Id"},
@@ -26,9 +26,13 @@
               %% preparing a response.
               {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
               {estatsd_server, "<%= node['private_chef']['estatsd']['vip'] %>"},
-	            {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>},
+              {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>},
               {superusers, [<<"pivotal">>]}
              ]},
+  {chef_wm, [
+             {health_ping_timeout, 400},
+             {health_ping_modules, [chef_authz, chef_otto, chef_sql, chef_solr]}
+            ]},
   {chef_authn, [
                 {keyring, [{default, "/etc/opscode/webui_pub.pem"}]}
                ]},

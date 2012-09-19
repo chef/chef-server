@@ -25,8 +25,8 @@ link "/opt/opscode/embedded/service/opscode-erchef/log" do
   to opscode_erchef_log_dir 
 end
 
-template "/opt/opscode/embedded/service/opscode-erchef/bin/erchef" do
-  source "erchef.erb"
+template "/opt/opscode/embedded/service/opscode-erchef/bin/oc_erchef" do
+  source "oc_erchef.erb"
   owner "root"
   group "root"
   mode "0755" 
@@ -37,7 +37,7 @@ end
 erchef_config = File.join(opscode_erchef_etc_dir, "app.config") 
 
 template erchef_config do
-  source "erchef.config.erb"
+  source "oc_erchef.config.erb"
   mode "644"
   variables(node['private_chef']['opscode-erchef'].to_hash)
   notifies :restart, 'service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
