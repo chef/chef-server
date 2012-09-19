@@ -124,6 +124,7 @@ include_recipe "runit"
   "opscode-account",
   "opscode-solr",
   "opscode-expander",
+  "bookshelf",
   "bootstrap",
   "opscode-org-creator",
   "opscode-chef",

@@ -55,11 +55,10 @@
                ]},
   {chef_objects, [
                   {certificate_root_url, "http://<%= node['private_chef']['opscode-certificate']['vip'] %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificates"},
-                  {s3_access_key_id, "<%= node['private_chef']['aws']['aws_key'] %>"},
-                  {s3_secret_key_id, "<%= node['private_chef']['aws']['aws_secret'] %>"},
-                  %% this is hard-coded until bookshelf gets integrated.
-                  {s3_url, "https://s3.amazonaws.com"},
-                  {s3_platform_bucket_name, "<%= node['private_chef']['aws']['s3_bucket'] %>"}
+                  {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
+                  {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
+                  {s3_url, "http://<%= node['private_chef']['bookshelf']['vip'] %>:<%= node['private_chef']['bookshelf']['port'] %>"},
+                  {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"}
                  ]},
   {stats_hero, [
                {udp_socket_pool_size, 1 },

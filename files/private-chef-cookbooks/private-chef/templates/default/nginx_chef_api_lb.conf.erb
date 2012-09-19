@@ -40,6 +40,11 @@
       alias /opt/opscode/docs;
     }
 
+    # bookshelf
+    location ~ "/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/{0,1}.*$" {
+      proxy_pass http://bookshelf;
+    }
+
     # This internal location is used to serve checksum file content
     # via the X-Accel-Redirect header. See http://wiki.nginx.org/XSendfile
     location /checksum/ {

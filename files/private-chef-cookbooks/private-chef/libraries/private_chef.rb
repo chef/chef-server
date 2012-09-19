@@ -32,6 +32,7 @@ module PrivateChef
   opscode_certificate Mash.new
   opscode_org_creator Mash.new
   opscode_account Mash.new
+  bookshelf Mash.new
   bootstrap Mash.new
   drbd Mash.new
   keepalived Mash.new
@@ -40,8 +41,6 @@ module PrivateChef
   nginx Mash.new
   log_retention Mash.new
   log_rotation Mash.new
-
-  aws Mash.new
 
   servers Mash.new
   backend_vips Mash.new
@@ -117,6 +116,8 @@ module PrivateChef
       PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['opscode_authz']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
+      PrivateChef['bookshelf']['access_key_id'] ||= generate_hex_if_bootstrap(20, ha_guard)
+      PrivateChef['bookshelf']['secret_access_key'] ||= generate_hex_if_bootstrap(40, ha_guard)
 
       if File.directory?("/etc/opscode")
         File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
@@ -150,6 +151,10 @@ module PrivateChef
               },
               'opscode_authz' => {
                 'superuser_id' => PrivateChef['opscode_authz']['superuser_id']
+              },
+              'bookshelf' => {
+                'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
+                'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
               }
             })
           )
@@ -176,6 +181,7 @@ module PrivateChef
         "opscode_certificate",
         "opscode_org_creator",
         "opscode_account",
+        "bookshelf",
         "bootstrap",
         "drbd",
         "keepalived",
@@ -183,10 +189,7 @@ module PrivateChef
         "nrpe",
         "nginx",
         "ldap",
-        "user",
-
-        ## Temporary until bookshelf is online
-        "aws"
+        "user"
       ].each do |key|
         rkey = key.gsub('_', '-')
         results['private_chef'][rkey] = PrivateChef[key]
@@ -345,20 +348,6 @@ module PrivateChef
       end
     end
 
-    def gen_s3
-      PrivateChef['aws']['s3_bucket'] ||= PrivateChef['s3_bucket']
-      PrivateChef['aws']['aws_key'] ||= PrivateChef['aws_key']
-      PrivateChef['aws']['aws_secret'] ||= PrivateChef['aws_secret']
-
-      unless PrivateChef['aws']['s3_bucket'] &&
-          PrivateChef['aws']['aws_key'] &&
-          PrivateChef['aws']['aws_secret']
-        Chef::Log.fatal("Must supply an 'aws_key', 'aws_secret', and 's3_bucket' for S3 file storage!")
-        exit 67
-      end
-
-    end
-
     def generate_config(node_name)
       generate_secrets(node_name)
       gen_nrpe_allowed_hosts
@@ -380,16 +369,6 @@ module PrivateChef
 
       unless PrivateChef["ldap"].nil? || PrivateChef["ldap"].empty?
         gen_ldap
-      end
-
-      case PrivateChef['file_storage']
-      when nil, 'local' # This can be the default
-        Chef::Log.info("Configuring for local file storage")
-      when 's3'
-        gen_s3
-      else
-        Chef::Log.fatal("I do not understand file_storage #{PrivateChef['file_storage']} - try 's3' or 'local' (the default).")
-        exit 66
       end
 
       generate_hash
