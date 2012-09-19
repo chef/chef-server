@@ -81,9 +81,8 @@ from_json(Req, #base_state{reqid = RequestId,
     {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
     UserWithKey = chef_user:set_public_key(UserData, PublicKey),
     PasswordData = chef_wm_password:encrypt(ej:get({<<"password">>}, UserWithKey)),
-    case chef_wm_base:create_from_json(Req, State, chef_user,
-                                       {authz_id, AuthzId},
-                                       {UserWithKey, PasswordData}) of
+    case create_from_json(Req, State, chef_user, {authz_id, AuthzId},
+                          {UserWithKey, PasswordData}) of
         {true, Req1, State1} ->
             Uri = list_to_binary(chef_wm_util:full_uri(Req1)),
             Ejson = {[{<<"uri">>, Uri},
@@ -109,3 +108,41 @@ all_users_json(Req, #base_state{chef_db_context = DbContext}) ->
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
+
+%% FIXME: we will likely be able to re-use something from chef_wm_base once a bit of
+%% refaactoring happens. This is largely copy pasta from chef_wm_base, but with solr bits
+%% removed.
+create_from_json(#wm_reqdata{} = Req,
+                 #base_state{chef_db_context = DbContext,
+                             organization_guid = OrgId,
+                             requestor_id = ActorId} = State,
+                 RecType, {authz_id, AuthzId}, ObjectEjson) ->
+    %% ObjectEjson should already be normalized. Record creation does minimal work and does
+    %% not add or update any fields.
+    ObjectRec = chef_object:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
+    Name = chef_object:name(ObjectRec),
+    case chef_db:create(ObjectRec, DbContext, ActorId) of
+        {conflict, _} ->
+            %% FIXME: created authz_id is leaked for this case, cleanup?
+            LogMsg = {RecType, name_conflict, Name},
+            ConflictMsg = conflict_message(Name),
+            {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
+             State#base_state{log_msg = LogMsg}};
+        ok ->
+            LogMsg = {created, Name},
+            Uri = ?BASE_ROUTES:route(user, Req, [{name, Name}]),
+            {true,
+             chef_wm_util:set_uri_of_created_resource(Uri, Req),
+             State#base_state{log_msg = LogMsg}};
+        What ->
+            {{halt, 500}, Req, State#base_state{log_msg = What}}
+    end.
+
+maybe_authz_id(undefined) ->
+    unset;
+maybe_authz_id(B) ->
+    B.
+
+conflict_message(Name) ->
+    Msg = iolist_to_binary([<<"User '">>, Name, <<"' already exists">>]),
+    {[{<<"error">>, [Msg]}]}.
