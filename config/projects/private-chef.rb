@@ -30,7 +30,7 @@ deps << "keepalived"
 deps << "bookshelf"
 
 # the front-end services
-deps << "opscode-erchef"
+deps << "oc_erchef"
 deps << "opscode-chef"
 deps << "opscode-account"
 deps << "opscode-webui"

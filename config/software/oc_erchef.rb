@@ -1,7 +1,7 @@
-name "opscode-erchef"
+name "oc_erchef"
 version "master"
 
-dependencies ["erlang", "rsync"]
+dependencies ["erlang", "rebar", "rsync"]
 
 source :git => "git@github.com:opscode/oc_erchef"
 
@@ -9,8 +9,8 @@ relative_path "oc_erchef"
 
 env = {
   "PATH" => "#{install_dir}/embedded/bin:#{ENV["PATH"]}",
-  "LD_FLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
-  "CFLAGS" => "-I#{install_dir}/embedded/include",
+  "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
+  "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
   "LD_RUN_PATH" => "#{install_dir}/embedded/lib"
 }
 
