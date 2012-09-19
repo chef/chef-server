@@ -1,3 +1,10 @@
+#
+# Author:: Seth Chisamore (<schisamo@opscode.com>)
+# Copyright:: Copyright (c) 2012 Opscode, Inc.
+#
+# All Rights Reserved
+#
+
 template "/etc/opscode/pedant_config.rb" do
   owner "root"
   group "root"
