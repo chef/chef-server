@@ -21,6 +21,7 @@
 
 -export([assemble_user_ejson/2,
          parse_binary_json/2,
+         set_key_pair/3,
          set_public_key/2]).
 
 -include("chef_types.hrl").
@@ -83,6 +84,15 @@ validate_user(User, create) ->
     ok -> {ok, User};
     Bad -> throw(Bad)
   end.
+
+%% @doc Add public and private key data to `UserEjson'. This function infers
+%% the key type and puts the public key data in iether a `certificate' or
+%% `public_key' field. The private key will be placed in the `private_key'
+%% field.
+-spec set_key_pair(ej:json_object(), {public_key, binary()}, {private_key, binary()}) -> ej:json_object().
+set_key_pair(UserEjson, {public_key, PublicKey}, {private_key, PrivateKey}) ->
+    UserEjson1 = set_public_key(UserEjson, PublicKey),
+    ej:set({<<"private_key">>}, UserEjson1, PrivateKey).
 
 %% @doc Sets either the `certificate' or `public_key' field of
 %% `UserEjson' depending on the value of `PublicKey'.
