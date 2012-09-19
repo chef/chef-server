@@ -227,77 +227,45 @@ fetch_org_id(#context{reqid = ReqId,
 
 %%% Client access
 %%%
+fetch_couchdb_client(#context{} = _Context, not_found, _ClientName) ->
+    not_found;
 fetch_couchdb_client(#context{otto_connection = Server} = _Context, OrgId, ClientName) ->
-    chef_otto:fetch_client(Server, OrgId, ClientName).
+    case chef_otto:fetch_client(Server, OrgId, ClientName) of
+        {not_found, _} -> not_found;
+        Other -> Other
+    end.
 
 client_record_to_authz_id(_Context, ClientRecord) ->
     ClientRecord#chef_client.authz_id.
 
--spec fetch_requestor(Ctx::#context{},
-                      OrgName::binary(),
-                      ClientName::binary()) -> #chef_client{} | #chef_user{} |
-                                               {'not_found', 'client' | 'org'}.
 %% @doc Given a name and an org, find either a user or a client and return a
 %% #chef_user{} or #chef_client{} record.
 %%
-%% Looks for a user first, then a client.  The fact that users and
-%% clients are in the same name space is a known limitation of the
-%% system.  We examine the user/client record and return the
-%% certificate containing the actor's public key.
-fetch_requestor(Ctx, OrgName, ClientName) ->
-    case chef_db_darklaunch:is_enabled(<<"couchdb_clients">>) of
-        true ->
-            fetch_couchdb_requestor(Ctx, OrgName, ClientName);
-        false ->
-            fetch_sql_requestor(Ctx, OrgName, ClientName)
-    end.
-
--spec fetch_couchdb_requestor(Context::#context{},
-                              OrgName::binary(),
-                              ClientName::binary()) -> #chef_client{} | #chef_user{} |
-                                                       {'not_found', 'client' | 'org'}.
-%% @doc Given a name and an org, find either a user or a client in
-%% couchdb and return a #chef_client{} or #chef_user{} record.
+%% Looks for a client first, then a user. We search for the client first for two reasons: 1)
+%% more API requests come from clients; 2) prevents a DoS attack cleverly chosen user names
+%% in OHC breaking clients with matching names.
 %%
-%% Looks for a user first, then a client.  The fact that users and
-%% clients are in the same name space is a known limitation of the
-%% system.  We examine the user/client record and return the
-%% certificate containing the actor's public key.  Some legacy records
-%% are present in the database that do not have certificates and have
-%% only a public key.  For these cases, we return the key tagged with
+%% We examine the user/client record and return the certificate containing the actor's
+%% public key.  Some legacy records are present in the database that do not have
+%% certificates and have only a public key.  For these cases, we return the key tagged with
 %% 'key' instead of 'cert'.
-fetch_couchdb_requestor(#context{reqid = ReqId, otto_connection = Server}=Context,
-                        OrgName, ClientName) when is_binary(OrgName), is_binary(ClientName) ->
-    case fetch_user(Context, ClientName) of
+-spec fetch_requestor(#context{},
+                      binary(),
+                      binary()) -> #chef_client{} | #chef_user{} |
+                                   %% TODO: fix chef_wm so we can just return 'not_found'
+                                   {'not_found', 'client'}.
+fetch_requestor(Context, OrgName, ClientName) ->
+    case fetch_client(Context, OrgName, ClientName) of
         not_found ->
-            OrgId = fetch_org_id(Context, OrgName),
-            case ?SH_TIME(ReqId, chef_otto, fetch_client,
-                          (Server, OrgId, ClientName)) of
-                {not_found, What} -> {not_found, What};
-                #chef_client{}=Client ->
-                    Client
-            end;
-        #chef_user{}=User ->
-            User
-    end;
-fetch_couchdb_requestor(Context, OrgName, ClientName) ->
-    fetch_couchdb_requestor(Context, as_bin(OrgName), as_bin(ClientName)).
-
--spec fetch_sql_requestor(Context::#context{},
-                          OrgName::binary(),
-                          ClientName::binary()) -> #chef_client{} | #chef_user{} |
-                                                       {'not_found', 'client'}.
-fetch_sql_requestor(Context, OrgName, ClientName) ->
-    case fetch_user(Context, ClientName) of
-        not_found ->
-            case fetch_client(Context, OrgName, ClientName) of
+            case fetch_user(Context, ClientName) of
                 not_found ->
+                    %% back compat for now until we update chef_wm
                     {not_found, client};
-                #chef_client{} = Client ->
-                    Client
+                #chef_user{} = User ->
+                    User
             end;
-        #chef_user{} = User ->
-            User
+        #chef_client{} = Client ->
+            Client
     end.
 
 -spec create_node(#context{}, #chef_node{}, object_id()) -> ok | {conflict, term()} | term().
@@ -1217,11 +1185,6 @@ update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
         {conflict, Message} -> {conflict, Message};
         {error, Error} -> {error, Error}
     end.
-
-as_bin(S) when is_list(S) ->
-    list_to_binary(S);
-as_bin(B) when is_binary(B) ->
-    B.
 
 -spec get_id(chef_object() | #chef_client{} | #chef_sandbox{} | #chef_cookbook_version{}) -> object_id().
 %% @doc Return the `id' field from a `chef_object()' record type.
