@@ -84,8 +84,10 @@ environment_not_found_message(EnvName) ->
 %% TODO: Why are these messages phrased differently?  This is what the Ruby endpoints were
 %% doing, FYI.  Is this something we're stuck with, or can we update the API and normalize
 %% these messages?
--spec not_found_message( node | role | data_bag | data_bag_item1 | data_bag_item2 | client
-                         | data_bag_missing_for_item_post | environment | sandbox | sandboxes | cookbook | cookbook_version,
+-spec not_found_message( node | role | data_bag | data_bag_item1 |
+                         data_bag_item2 | client | data_bag_missing_for_item_post |
+                         environment | sandbox | sandboxes | cookbook |
+                         cookbook_version | user,
                          bin_or_string() | {bin_or_string(), bin_or_string()} ) -> ejson().
 not_found_message(node, Name) ->
     error_message_envelope(iolist_to_binary(["node '", Name, "' not found"]));

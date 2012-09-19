@@ -68,7 +68,7 @@ validate_request(Method, Req, State) when Method == 'GET';
                                           Method == 'DELETE' ->
     {Req, State};
 validate_request('PUT', Req, #base_state{resource_state = UserState} = State) ->
-    Name = chef_wm_util:object_name(user, Req),
+    %% Name = chef_wm_util:object_name(user, Req),
     Body = wrq:req_body(Req),
     %% FIXME: need to validate no name change since we aren't going to support rename for
     %% users.
@@ -76,8 +76,7 @@ validate_request('PUT', Req, #base_state{resource_state = UserState} = State) ->
     {Req, State#base_state{resource_state = UserState#user_state{user_data = User}}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
-                           resource_state = UserState,
-                           organization_name=OrgName}=State) ->
+                           resource_state = UserState}=State) ->
     UserName = chef_wm_util:object_name(user, Req),
     case chef_db:fetch_user(DbContext, UserName) of
         not_found ->
@@ -90,12 +89,14 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
             {{object, AuthzId}, Req, State1}
     end.
 
-from_json(Req, #base_state{reqid = RequestId,
+from_json(_Req, #base_state{reqid = RequestId,
                            resource_state =
-                               #user_state{chef_user = User,
-                                             user_data = UserData}} = State) ->
-    UserData1 = maybe_generate_key_pair(UserData, RequestId),
-    chef_wm_base:update_from_json(Req, State, User, UserData1).
+                               #user_state{chef_user = _User,
+                                             user_data = UserData}} = _State) ->
+    _UserData1 = maybe_generate_key_pair(UserData, RequestId),
+    %% FIXME:
+    error({implement_me}).
+    %% update_from_json(Req, State, User, UserData1).
 
 to_json(Req, #base_state{resource_state =
                              #user_state{chef_user = User},
@@ -104,12 +105,13 @@ to_json(Req, #base_state{resource_state =
     Json = ejson:encode(EJson),
     {Json, Req, State}.
 
-delete_resource(Req, #base_state{chef_db_context = DbContext,
-                                 requestor_id = RequestorId,
+delete_resource(Req, #base_state{%% chef_db_context = DbContext,
+                                 %% requestor_id = RequestorId,
                                  resource_state = #user_state{
                                    chef_user = User},
                                  organization_name = OrgName} = State) ->
-    ok = chef_object_db:delete(DbContext, User, RequestorId),
+    %% FIXME: need to implement delete in chef_db
+    %% ok = chef_object_db:delete(DbContext, User, RequestorId),
     EJson = chef_user:assemble_user_ejson(User, OrgName),
     Req1 = chef_wm_util:set_json_body(Req, EJson),
     {true, Req1, State}.
@@ -168,3 +170,43 @@ malformed_request_message(#ej_invalid{type = object_value, key = Object, found =
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
+
+%% update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
+%%                                                   requestor_id = ActorId}=State,
+%%                  OrigObjectRec, ObjectEjson) ->
+%%     ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectEjson),
+%%     case OrigObjectRec =:= ObjectRec of
+%%         true ->
+%%             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
+%%             {true, chef_wm_util:set_json_body(Req, ObjectEjson), State1};
+%%         false ->
+%%             UpdateFun = chef_db:update_fun(ObjectRec),
+%%             case chef_db:UpdateFun(DbContext, ObjectRec, ActorId) of
+%%                 ok ->
+%%                     {true, chef_wm_util:set_json_body(Req, ObjectEjson), State};
+%%                 not_found ->
+%%                     %% We will get this if no rows were affected by the query. This could
+%%                     %% happen if the object is deleted in the middle of handling this
+%%                     %% request. In this case, we return 404 just as we would if the client
+%%                     %% retried.
+%%                     State1 = State#base_state{log_msg = not_found},
+%%                     Msg = chef_wm_util:not_found_message(chef_object:type_name(ObjectRec),
+%%                                                            chef_object:name(ObjectRec)),
+%%                     Req1 = chef_wm_util:set_json_body(Req, Msg),
+%%                     {{halt, 404}, Req1, State1};
+%%                 {conflict, _} ->
+%%                     Name = chef_object:name(ObjectRec),
+%%                     RecType = erlang:element(1,ObjectRec),
+%%                     LogMsg = {RecType, name_conflict, Name},
+%%                     ConflictMsg = conflict_message(Name),
+%%                     {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
+%%                      State#base_state{log_msg = LogMsg}};
+%%                 Why ->
+%%                     State1 = State#base_state{log_msg = Why},
+%%                     {{halt, 500}, Req, State1}
+%%             end
+%%     end.
+
+%% conflict_message(Name) ->
+%%     Msg = iolist_to_binary([<<"User '">>, Name, <<"' already exists">>]),
+%%     {[{<<"error">>, [Msg]}]}.

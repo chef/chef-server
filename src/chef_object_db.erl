@@ -60,10 +60,12 @@ delete_from_solr(Object) ->
 %% pulled out of the db so it will be as if the data was correctly deleted. If we deleted
 %% the solr data when a db error was encountered, we could have data in the db that could
 %% not be findable via search.
--spec delete( chef_db:db_context(),
-    chef_object() | #chef_cookbook_version{checksums::'undefined' | [binary()]},
-    object_id() ) -> ok.
-
+-spec delete(chef_db:db_context(),
+             chef_object() |
+             #chef_cookbook_version{checksums::'undefined' |
+                                               [binary()]} |
+             #chef_user{},
+             object_id() ) -> ok.
 delete(DbContext,#chef_data_bag{org_id = OrgId,
                                 name = DataBagName}=DataBag,
                                 _RequestorId) ->
@@ -138,3 +140,4 @@ get_id_and_org_id(#chef_data_bag_item{id = Id, org_id = OrgId}) ->
     {Id, OrgId};
 get_id_and_org_id(#chef_cookbook_version{id = Id, org_id = OrgId}) ->
     {Id, OrgId}.
+

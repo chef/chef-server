@@ -285,7 +285,10 @@ create_from_json(#wm_reqdata{} = Req,
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
--spec update_from_json(#wm_reqdata{}, #base_state{}, chef_object() | #chef_cookbook_version{}, ejson_term()) ->
+-spec update_from_json(#wm_reqdata{},
+                       #base_state{},
+                       chef_object() | #chef_cookbook_version{} | #chef_user{},
+                       ejson_term()) ->
                               {true, #wm_reqdata{}, #base_state{}} |
                               {{halt, 400 | 404 | 500}, #wm_reqdata{}, #base_state{}}.
 %% @doc Implements the from_json callback for PUT requests to update Chef
