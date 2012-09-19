@@ -130,3 +130,76 @@ set_default_values_test_() ->
                            {[{<<"awesomeness">>, <<"considerable">>}]})
       end}
     ].
+
+parse_binary_json_test_() ->
+    [{"Ensure that all variants of recipes in a run list are properly normalized",
+      fun() ->
+              R = basic_role(),
+              RunList = [<<"foo">>,
+                         <<"bar::default">>,
+                         <<"baz::quux@1.0.0">>,
+                         <<"recipe[web]">>,
+                         <<"role[prod]">>],
+              WithRunList = ej:set({<<"run_list">>}, R, RunList),
+              JSON = jiffy:encode(WithRunList),
+
+              {ok, Processed} = chef_role:parse_binary_json(JSON, create),
+              ?assertEqual([<<"recipe[foo]">>, <<"recipe[bar::default]">>, <<"recipe[baz::quux@1.0.0]">>, <<"recipe[web]">>, <<"role[prod]">>],
+                           ej:get({<<"run_list">>}, Processed)),
+
+              {ok, ProcessedForUpdate} = chef_role:parse_binary_json(JSON, {update, ej:get({<<"name">>}, R)}),
+              ?assertEqual([<<"recipe[foo]">>, <<"recipe[bar::default]">>, <<"recipe[baz::quux@1.0.0]">>, <<"recipe[web]">>, <<"role[prod]">>],
+                           ej:get({<<"run_list">>}, ProcessedForUpdate))
+
+      end
+     },
+     {"Ensure that all variants of recipes in environment run lists are properly normalized",
+      fun() ->
+              R = basic_role(),
+              RunLists ={[{<<"prod">>, [<<"foo">>,
+                                        <<"bar::default">>,
+                                        <<"baz::quux@1.0.0">>,
+                                        <<"recipe[web]">>,
+                                        <<"role[prod]">>]},
+                          {<<"dev">>, [<<"foo">>, <<"bar">>]}]},
+              WithRunLists = ej:set({<<"env_run_lists">>}, R, RunLists),
+              JSON = jiffy:encode(WithRunLists),
+
+              %% Test for create
+              {ok, Processed} = chef_role:parse_binary_json(JSON, create),
+              ?assertEqual([<<"recipe[foo]">>, <<"recipe[bar::default]">>, <<"recipe[baz::quux@1.0.0]">>, <<"recipe[web]">>, <<"role[prod]">>],
+                           ej:get({<<"env_run_lists">>, <<"prod">>}, Processed)),
+              ?assertEqual([<<"recipe[foo]">>, <<"recipe[bar]">>],
+                           ej:get({<<"env_run_lists">>, <<"dev">>}, Processed)),
+
+              %% Test for update
+              {ok, ProcessedForUpdate} = chef_role:parse_binary_json(JSON, {update, ej:get({<<"name">>}, R)}),
+              ?assertEqual([<<"recipe[foo]">>, <<"recipe[bar::default]">>, <<"recipe[baz::quux@1.0.0]">>, <<"recipe[web]">>, <<"role[prod]">>],
+                           ej:get({<<"env_run_lists">>, <<"prod">>}, ProcessedForUpdate)),
+              ?assertEqual([<<"recipe[foo]">>, <<"recipe[bar]">>],
+                           ej:get({<<"env_run_lists">>, <<"dev">>}, ProcessedForUpdate))
+      end
+     }
+    ].
+
+normalize_test_() ->
+    [{Message,
+      fun() ->
+              ?assertEqual(Normalized,
+                           chef_role:normalize(Input))
+      end}
+    || {Message, Input, Normalized} <- [
+                                        {"Normalizes a role's run list",
+                                         ej:set({<<"run_list">>}, basic_role(), [<<"foo">>, <<"bar">>, <<"baz">>]),
+                                         ej:set({<<"run_list">>}, basic_role(), [<<"recipe[foo]">>, <<"recipe[bar]">>, <<"recipe[baz]">>])},
+                                        {"Normalizes a role's environment run lists",
+                                         ej:set({<<"env_run_lists">>},
+                                                basic_role(),
+                                                {[{<<"prod">>, [<<"foo">>, <<"bar">>, <<"baz">>]},
+                                                  {<<"dev">>, [<<"oof">>, <<"rab">>, <<"zab">>]}]}),
+                                         ej:set({<<"env_run_lists">>},
+                                                basic_role(),
+                                                {[{<<"prod">>, [<<"recipe[foo]">>, <<"recipe[bar]">>, <<"recipe[baz]">>]},
+                                                  {<<"dev">>, [<<"recipe[oof]">>, <<"recipe[rab]">>, <<"recipe[zab]">>]}]})}
+                                       ]
+    ].

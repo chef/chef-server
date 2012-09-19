@@ -41,6 +41,11 @@
          update_from_ejson/2
         ]).
 
+%% In order to fully test things
+-ifdef(TEST).
+-compile([export_all]).
+-endif.
+
 %% @doc Create a new Chef object record of type specified by `RecType'. This function will
 %% generate a unique id for the object using `make_org_prefix_id/2'. If `AuthzId' is the
 %% atom 'unset', then the object's generated id will be used as a placeholder authorization

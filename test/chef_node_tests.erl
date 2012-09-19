@@ -175,12 +175,46 @@ parse_check_binary_as_json_node_test_() ->
       end},
      {"check that a node with an invalid name is rejected (1)",
       fun() ->
+          N = extended_node(),
+          BadN = ej:set({<<"name">>}, N, <<"~dog">>),
+          NB = jiffy:encode(BadN),
+          ?assertThrow(#ej_invalid{},
+                       chef_node:parse_check_binary_as_json_node(NB, create)),
+          ?assertThrow({url_json_name_mismatch, _},
+                       chef_node:parse_check_binary_as_json_node(NB, {update, <<"a_node">>}))
+      end},
+     {"Ensure that all variants of recipes in a run list are properly normalized",
+      fun() ->
               N = extended_node(),
-              BadN = ej:set({<<"name">>}, N, <<"~dog">>),
-              NB = jiffy:encode(BadN),
-              ?assertThrow(#ej_invalid{},
-                           chef_node:parse_check_binary_as_json_node(NB, create)),
-              ?assertThrow({url_json_name_mismatch, _},
-                           chef_node:parse_check_binary_as_json_node(NB, {update, <<"a_node">>}))
-      end}
+              RunList = [<<"foo">>,
+                         <<"bar::default">>,
+                         <<"baz::quux@1.0.0">>,
+                         <<"recipe[web]">>,
+                         <<"role[prod]">>],
+              WithRunList = ej:set({<<"run_list">>}, N, RunList),
+              JSON = jiffy:encode(WithRunList),
+
+              %% Test for create
+              {ok, Processed} = chef_node:parse_check_binary_as_json_node(JSON, create),
+              ?assertEqual([<<"recipe[foo]">>, <<"recipe[bar::default]">>, <<"recipe[baz::quux@1.0.0]">>, <<"recipe[web]">>, <<"role[prod]">>],
+                           ej:get({<<"run_list">>}, Processed)),
+
+              %% Test for update
+              {ok, ProcessedForUpdate} = chef_node:parse_check_binary_as_json_node(JSON, {update, ej:get({<<"name">>}, N)}),
+              ?assertEqual([<<"recipe[foo]">>, <<"recipe[bar::default]">>, <<"recipe[baz::quux@1.0.0]">>, <<"recipe[web]">>, <<"role[prod]">>],
+                           ej:get({<<"run_list">>}, ProcessedForUpdate))
+
+      end
+     }
     ].
+
+normalize_test_() ->
+    [{"Normalizes a node's run list",
+      fun() ->
+              Input = ej:set({<<"run_list">>}, extended_node(),
+                             [<<"foo">>, <<"bar">>, <<"baz">>]),
+              Normalized = ej:set({<<"run_list">>}, extended_node(),
+                                  [<<"recipe[foo]">>, <<"recipe[bar]">>, <<"recipe[baz]">>]),
+              ?assertEqual(Normalized,
+                           chef_node:normalize(Input))
+      end}].
