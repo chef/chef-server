@@ -307,8 +307,13 @@ basic_node_index() ->
       {<<"run_list">>, [<<"recipe[web]">>, <<"role[prod]">>]}
      ]}.
 
+%% @doc Merge two proplists together, returning a proplist.  Treats them as dictionaries to
+%% prevent repeated keys.  Values in L2 take precedence of values in L1.
 merge({L1}, {L2}) ->
-    {L1 ++ L2}.
+    D1 = dict:from_list(L1),
+    D2 = dict:from_list(L2),
+    Merged = dict:merge(fun(_K,_V1,V2) -> V2 end, D1,D2),
+    {dict:to_list(Merged)}.
 
 to_sorted_list({L}) ->
     lists:sort(L).
