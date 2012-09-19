@@ -55,7 +55,8 @@
                  AuthzId :: object_id() | unset,
                  ObjectEjson :: ejson_term() |
                                 binary() |
-                                {binary(), ejson_term()}) ->
+                                {binary(), ejson_term()} |
+                                {ejson_term(), _}) ->
                         chef_object() | #chef_cookbook_version{}.
 new_record(chef_environment, OrgId, AuthzId, EnvData) ->
     Name = ej:get({<<"name">>}, EnvData),
@@ -185,7 +186,7 @@ compress_maybe(Data, Type) ->
     chef_db_compression:compress(Type, chef_json:encode(Data)).
 
 -spec ejson_for_indexing(chef_indexable_object() | #chef_data_bag_item{},
-                         ejson_term()) -> ejson_term().
+                         ejson_term() | {ejson_term(), _}) -> ejson_term().
 %% @doc Return EJSON terms appropriate for sending to opscode-expander for
 %% indexing. Although the EJSON data is embedded in the ChefRecord, it is stored in a
 %% possibly compressed form. To avoid double work, we pass both the Chef object record
@@ -258,7 +259,8 @@ extract_roles(RunList) ->
     [ binary:part(Item, {0, byte_size(Item) - 1})
       || <<"role[", Item/binary>> <- RunList ].
 
--spec update_from_ejson(chef_object() | #chef_cookbook_version{}, ejson_term()) -> chef_object().
+-spec update_from_ejson(chef_object() | #chef_cookbook_version{} | #chef_user{},
+                        ejson_term()) -> chef_object().
 %% @doc Return a new `chef_object()' record updated according to the specified EJSON
 %% terms. Data normalization on the EJSON should occur before making this call. Fields in
 %% the EJSON that exist in the record are updated. The serialized_object record field is
@@ -311,7 +313,10 @@ update_from_ejson(#chef_cookbook_version{org_id = OrgId,
                                           meta_long_desc    = UpdatedVersion#chef_cookbook_version.meta_long_desc,
                                           metadata          = UpdatedVersion#chef_cookbook_version.metadata,
                                           checksums         = UpdatedVersion#chef_cookbook_version.checksums,
-                                          serialized_object = UpdatedVersion#chef_cookbook_version.serialized_object}.
+                                          serialized_object = UpdatedVersion#chef_cookbook_version.serialized_object};
+update_from_ejson(#chef_user{} = User, UserData) ->
+    error({implement_me, User, UserData}).
+
 
 
 -spec id(chef_object()) -> object_id().
