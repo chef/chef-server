@@ -105,10 +105,6 @@ all_users_json(Req, #base_state{chef_db_context = DbContext}) ->
     UriMap = [ {Name, RouteFun(Name)} || Name <- UserNames ],
     ejson:encode({UriMap}).
 
-
-malformed_request_message(Any, _Req, _State) ->
-    error({unexpected_malformed_request_message, Any}).
-
 %% FIXME: we will likely be able to re-use something from chef_wm_base once a bit of
 %% refaactoring happens. This is largely copy pasta from chef_wm_base, but with solr bits
 %% removed.
@@ -146,3 +142,40 @@ maybe_authz_id(B) ->
 conflict_message(Name) ->
     Msg = iolist_to_binary([<<"User '">>, Name, <<"' already exists">>]),
     {[{<<"error">>, [Msg]}]}.
+
+error_message(Msg) when is_list(Msg) ->
+    error_message(iolist_to_binary(Msg));
+error_message(Msg) when is_binary(Msg) ->
+    {[{<<"error">>, [Msg]}]}.
+
+malformed_request_message(#ej_invalid{type = json_type, key = Key}, _Req, _State) ->
+    case Key of
+        undefined -> error_message([<<"Incorrect JSON type for request body">>]);
+        _ ->error_message([<<"Incorrect JSON type for ">>, Key])
+    end;
+malformed_request_message(#ej_invalid{type = missing, key = Key}, _Req, _State) ->
+    error_message([<<"Required value for ">>, Key, <<" is missing">>]);
+malformed_request_message({invalid_key, Key}, _Req, _State) ->
+    error_message([<<"Invalid key ">>, Key, <<" in request body">>]);
+malformed_request_message(invalid_json_body, _Req, _State) ->
+    error_message([<<"Incorrect JSON type for request body">>]);
+malformed_request_message(#ej_invalid{type = exact, key = Key, msg = Expected},
+                          _Req, _State) ->
+    error_message([Key, <<" must equal ">>, Expected]);
+malformed_request_message(#ej_invalid{type = string_match, msg = Error},
+                          _Req, _State) ->
+    error_message([Error]);
+malformed_request_message(#ej_invalid{type = object_key, key = Object, found = Key},
+                          _Req, _State) ->
+    error_message([<<"Invalid key '">>, Key, <<"' for ">>, Object]);
+% TODO: next two tests can get merged (hopefully) when object_map is extended not
+% to swallow keys
+malformed_request_message(#ej_invalid{type = object_value, key = Object, found = Val},
+                          _Req, _State) when is_binary(Val) ->
+    error_message([<<"Invalid value '">>, Val, <<"' for ">>, Object]);
+malformed_request_message(#ej_invalid{type = object_value, key = Object, found = Val},
+                          _Req, _State) ->
+    error_message([<<"Invalid value '">>, io_lib:format("~p", [Val]),
+                   <<"' for ">>, Object]);
+malformed_request_message(Any, Req, State) ->
+    chef_wm_util:malformed_request_message(Any, Req, State).
