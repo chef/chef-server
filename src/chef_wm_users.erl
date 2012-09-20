@@ -52,7 +52,7 @@ validate_request('POST', Req, State) ->
     undefined ->
       throw({error, missing_body});
    Body ->
-      {ok, UserData} = chef_user:parse_binary_json(Body, create),
+      {ok, UserData} = chef_user:parse_binary_json(Body),
       {Req, State#base_state{resource_state =
           #user_state{user_data = UserData}}}
   end;

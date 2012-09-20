@@ -72,7 +72,7 @@ validate_request('PUT', Req, #base_state{resource_state = UserState} = State) ->
     Body = wrq:req_body(Req),
     %% FIXME: need to validate no name change since we aren't going to support rename for
     %% users.
-    {ok, User} = chef_user:parse_binary_json(Body, create),
+    {ok, User} = chef_user:parse_binary_json(Body),
     {Req, State#base_state{resource_state = UserState#user_state{user_data = User}}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
