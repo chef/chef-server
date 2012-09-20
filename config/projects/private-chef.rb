@@ -25,7 +25,6 @@ deps << "rabbitmq"
 deps << "opscode-solr"
 deps << "opscode-expander"
 deps << "chef-sql-schema" # needed to migrate the DB.
-deps << "mixlib-authorization" # Is this still necessary?
 deps << "keepalived"
 deps << "bookshelf"
 
