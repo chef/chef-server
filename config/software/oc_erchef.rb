@@ -1,5 +1,5 @@
 name "oc_erchef"
-version "pc-rel-0.14.0"
+version "pc-rel-0.15.1"
 
 dependencies ["erlang", "rebar", "rsync"]
 
