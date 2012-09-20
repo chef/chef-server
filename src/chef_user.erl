@@ -20,7 +20,7 @@
 -module(chef_user).
 
 -export([assemble_user_ejson/2,
-         parse_binary_json/2,
+         parse_binary_json/1,
          set_key_pair/3,
          set_public_key/2]).
 
@@ -28,26 +28,33 @@
 
 %% fields:
  %% username/name - in webui, name has _ inserted for , (periods) so should check that there are no periods in the name here
- %% salt - no default - generated in webui
  %% password - no default -
- %%   cannot be blank, must be 6 chars - encorced in webui
- %%   it is also encrypted in webui, so might not feasible to verify restrictions here
+ %%   cannot be blank, must be 6 chars
  %% openid - default is none - no restrictions on what it can be set to
 
 -define(DEFAULT_FIELD_VALUES,
         [
           {<<"openid">>, null},
-          {<<"admin">>, <<"false">>}
+          {<<"admin">>, false}
         ]).
 
--define(VALIDATION_CONSTRAINTS,
-        [
-          %%{<<"name">>, {match, "" }},   At the least should be non-null
-          %%{<<"password">>, {match, "" }}, At the least should be non-null
-          {<<"admin">>, {match, "^true$|^false$"}}
-        ]).
+user_spec() ->
+  {[
+    {<<"name">>, {string_match, username_validation_regex()}},
+    {<<"password">>, {string_match, password_validation_regex()}},
+    {{opt,<<"admin">>}, boolean},
+    {{opt, <<"openid">>}, string}
+   ]}.
 
--type user_action() :: create.
+username_validation_regex() ->
+    UsernamePattern = <<"^[a-z0-9\-_]+$">>,
+    {ok, UsernameRegex} = re:compile(UsernamePattern),
+    {UsernameRegex, UsernamePattern}.
+
+password_validation_regex() ->
+  PasswordPattern = <<".{6,}">>,
+  {ok, PasswordRegex} = re:compile(PasswordPattern),
+  {PasswordRegex, PasswordPattern}.
 
 assemble_user_ejson(#chef_user{username = Name,
                                public_key = PubKey,
@@ -61,11 +68,15 @@ assemble_user_ejson(#chef_user{username = Name,
 
 %% @doc Convert a binary JSON string representing a Chef User into an
 %% EJson-encoded Erlang data structure.
--spec parse_binary_json( binary(), user_action() ) -> {ok, ejson_term() }. % or throw
-parse_binary_json(Bin, Action) ->
-  User0 = ejson:decode(Bin),
-  User1 = set_default_values(User0, ?DEFAULT_FIELD_VALUES),
-  validate_user(User1, Action).
+-spec parse_binary_json( binary()) -> {ok, ejson_term() }. % or throw
+parse_binary_json(Bin) ->
+  User = ejson:decode(Bin),
+  %% If user is invalid, an error is thown
+  validate_user(User, user_spec()),
+  %% Set default values after validating input, so openid can be validated as string
+  %% but set to null if it is not present (null fails string validation)
+  User1 = set_default_values(User, ?DEFAULT_FIELD_VALUES),
+  {ok, User1}.
 
 set_default_values(User, Defaults) ->
   lists:foldl(fun({Key, Default}, Current) ->
@@ -78,11 +89,13 @@ set_default_values(User, Defaults) ->
               User,
               Defaults).
 
--spec validate_user(ejson_term(), user_action()) -> {ok, ejson_term()}. % or throw
-validate_user(User, create) ->
-  case chef_json_validator:validate_json_by_regex_constraints(User, ?VALIDATION_CONSTRAINTS) of
-    ok -> {ok, User};
-    Bad -> throw(Bad)
+%%-spec validate_user(ejson_term(), ejson_term()) -> {ok, ejson_term()}. % or throw
+validate_user(User, Spec) ->
+  case ej:valid(Spec, User) of
+    ok ->
+      {ok, User};
+    BadSpec ->
+      throw(BadSpec)
   end.
 
 %% @doc Add public and private key data to `UserEjson'. This function infers
