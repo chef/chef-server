@@ -100,6 +100,10 @@
            <%- end %>
            }
           ]},
+  {ibrowse, [
+             {default_max_sessions, <%= @ibrowse_max_sessions %>},
+             {default_max_pipeline_size, <%= @ibrowse_max_pipeline_size %>}
+            ]},
   {pooler, [
            {pools, [[{name, "sqerl"},
                      {max_count, <%= @db_pool_size %>},
