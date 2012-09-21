@@ -229,10 +229,15 @@ fetch_org_id(#context{reqid = ReqId,
 %%%
 fetch_couchdb_client(#context{} = _Context, not_found, _ClientName) ->
     not_found;
-fetch_couchdb_client(#context{otto_connection = Server} = _Context, OrgId, ClientName) ->
-    case chef_otto:fetch_client(Server, OrgId, ClientName) of
-        {not_found, _} -> not_found;
-        Other -> Other
+fetch_couchdb_client(#context{otto_connection = Server} = Context, OrgName, ClientName) ->
+    case fetch_org_id(Context, OrgName) of
+        not_found ->
+            not_found;
+        OrgId ->
+            case chef_otto:fetch_client(Server, OrgId, ClientName) of
+                {not_found, _} -> not_found;
+                Other -> Other
+            end
     end.
 
 client_record_to_authz_id(_Context, ClientRecord) ->
