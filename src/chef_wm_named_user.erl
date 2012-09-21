@@ -105,13 +105,12 @@ to_json(Req, #base_state{resource_state =
     Json = ejson:encode(EJson),
     {Json, Req, State}.
 
-delete_resource(Req, #base_state{%% chef_db_context = DbContext,
-                                 %% requestor_id = RequestorId,
+delete_resource(Req, #base_state{chef_db_context = DbContext,
+                                 requestor_id = RequestorId,
                                  resource_state = #user_state{
                                    chef_user = User},
                                  organization_name = OrgName} = State) ->
-    %% FIXME: need to implement delete in chef_db
-    %% ok = chef_object_db:delete(DbContext, User, RequestorId),
+    ok = chef_object_db:delete(DbContext, User, RequestorId),
     EJson = chef_user:assemble_user_ejson(User, OrgName),
     Req1 = chef_wm_util:set_json_body(Req, EJson),
     {true, Req1, State}.

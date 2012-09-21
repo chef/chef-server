@@ -98,7 +98,7 @@ delete(DbContext, Object, _RequestorId) ->
     ok.
 
 -spec delete_from_db(chef_db:db_context(),
-                     chef_object() | #chef_cookbook_version{}) -> ok.
+                     chef_object() | #chef_user{} | #chef_cookbook_version{}) -> ok.
 %% @doc Delete an object from the database.  Provides pattern-matching sugar over chef_db
 %% delete functions, making the `delete` function in this module very simple. Throws if the
 %% database call returns an error, otherwise returns `ok' ignoring specific return value
@@ -107,6 +107,8 @@ delete_from_db(DbContext, #chef_client{}=Client) ->
     handle_delete_from_db(chef_db:delete_client(DbContext, Client));
 delete_from_db(DbContext, #chef_node{}=Node) ->
     handle_delete_from_db(chef_db:delete_node(DbContext, Node));
+delete_from_db(DbContext, #chef_user{}=User) ->
+    handle_delete_from_db(chef_db:delete_user(DbContext, User));
 delete_from_db(DbContext, #chef_role{}=Role) ->
     handle_delete_from_db(chef_db:delete_role(DbContext, Role));
 delete_from_db(DbContext, #chef_environment{}=Environment) ->

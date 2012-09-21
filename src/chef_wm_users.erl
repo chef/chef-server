@@ -94,7 +94,6 @@ from_json(Req, #base_state{reqid = RequestId,
             Else
     end.
 
-%% Need to write function to be called here
 to_json(Req, State) ->
     {all_users_json(Req, State), Req, State}.
 
