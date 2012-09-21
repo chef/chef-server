@@ -23,7 +23,7 @@
                           {tag,"05cd996e89220287e6a7b71f9ba296819a529678"}}},
        {chef_db,".*",
                 {git,"git@github.com:opscode/chef_db.git",
-                     {tag,"f4be74a2a94bb07d40a05ba5ca5339d9977c31a3"}}},
+                     {tag,"190e21bcdf77ef689eec8b2dd07f559ce57677e1"}}},
        {chef_index,".*",
                    {git,"git@github.com:opscode/chef_index.git",
                         {tag,"cd50749cd105b87ffe4e482c876445d4330c7793"}}},
