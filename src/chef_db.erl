@@ -26,10 +26,8 @@
 
 -module(chef_db).
 
--export([fetch_user/2,
-         fetch_users/1,
+-export([
          user_record_to_authz_id/2,
-         %% fetch_all_users/1,
          %% fetch_org/2,
          fetch_org_id/2,
          client_record_to_authz_id/2,
@@ -40,7 +38,10 @@
          mark_checksums_as_uploaded/3,
 
          %% user ops
+         fetch_user/2,
+         fetch_users/1,
          create_user/3,
+         delete_user/2,
 
          %% node ops
          fetch_node/3,
@@ -159,6 +160,7 @@
                       'delete_environment' |
                       'delete_client' |
                       'delete_node' |
+                      'delete_user' |
                       'delete_role' |
                       'delete_sandbox'.
 
@@ -213,9 +215,6 @@ user_record_to_authz_id(#context{}, #chef_user{} = UserRecord) ->
 user_record_to_authz_id(#context{}, not_found) ->
     %% FIXME: is this what we want here?
     erlang:error({error, not_found}).
-
-%% fetch_all_users(S) ->
-%%     chef_otto:fetch_all_users(S).
 
 %% fetch_org(S, OrgName) ->
 %%     chef_otto:fetch_org(S, OrgName).
@@ -747,6 +746,10 @@ delete_cookbook_version(#context{}=Ctx, #chef_cookbook_version{org_id=OrgId}=Coo
 %% node.
 delete_node(#context{}=Ctx, #chef_node{}=Node) -> delete_object(Ctx, delete_node, Node).
 
+-spec delete_user(#context{}, #chef_user{}) -> {ok, 1 | 2 } | not_found | {error, _}.
+delete_user(#context{}=Ctx, #chef_user{}=User) ->
+  delete_object(Ctx, delete_user, User).
+
 -spec delete_role(#context{}, #chef_role{}) -> {ok, 1 | 2} | not_found | {error, _}.
 %% @doc Delete a role. You can provide either a `#chef_role{}' record or just the ID of the
 %% role.
@@ -1169,7 +1172,7 @@ fetch_couchdb_data_bags(#context{reqid = ReqId, otto_connection = S}, {id, OrgId
 %% Also might want to take ActorId here and at least log who deleted the object.
 -spec delete_object(DbContext :: #context{},
                     Fun :: delete_fun(),
-                    Object :: chef_object() | object_id() | #chef_client{} | #chef_sandbox{} |
+                    Object :: chef_object() | object_id() | #chef_user{} | #chef_client{} | #chef_sandbox{} |
                               #chef_cookbook_version{} ) -> {ok, 1 | 2} |
                                                             not_found |
                                                             #chef_db_cb_version_delete{} |
@@ -1210,7 +1213,12 @@ update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
         {error, Error} -> {error, Error}
     end.
 
--spec get_id(chef_object() | #chef_client{} | #chef_sandbox{} | #chef_cookbook_version{}) -> object_id().
+as_bin(S) when is_list(S) ->
+    list_to_binary(S);
+as_bin(B) when is_binary(B) ->
+    B.
+
+  -spec get_id(chef_object() | #chef_user{} | #chef_client{} | #chef_sandbox{} | #chef_cookbook_version{}) -> object_id().
 %% @doc Return the `id' field from a `chef_object()' record type.
 get_id(#chef_client{id = Id}) ->
     Id;
@@ -1225,4 +1233,6 @@ get_id(#chef_data_bag{id = Id}) ->
 get_id(#chef_data_bag_item{id = Id}) ->
     Id;
 get_id(#chef_sandbox{id = Id}) ->
-    Id.
+    Id;
+get_id(#chef_user{username = Username}) ->
+    Username.

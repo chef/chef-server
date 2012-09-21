@@ -356,8 +356,9 @@ basic_test_() ->
          %% yet exist in DB, so results are predictable,
          %% since we don't clean up after every test
          {<<"Fetch user list">>, fun fetch_user_list/0},
-         {<<"Insert operations">>, fun insert_user_data/0},
-         {<<"Fetch single user">>, fun fetch_user_data/0}
+         {<<"Insert user">>, fun insert_user_data/0},
+         {<<"Fetch single user">>, fun fetch_user_data/0},
+         {<<"Delete user">>, fun delete_user_data/0}
        ]
       },
       {<<"Client Operations">>,
@@ -1147,8 +1148,6 @@ fetch_user_data() ->
   %% Make sure client create succeeds
   ?assertEqual({ok, 1}, chef_sql:create_user(Expected)),
   {ok, Result} = chef_sql:fetch_user(Username),
-  ?debugVal(Expected),
-  ?debugVal(Result),
   ?assertEqual(Expected, Result).
 
 fetch_user_list() ->
@@ -1159,6 +1158,15 @@ fetch_user_list() ->
   Results = chef_sql:fetch_users(),
   Expected = {ok, [ User#chef_user.username || User <- Users ]},
   ?assertEqual(Expected, Results).
+
+delete_user_data() ->
+  User = make_user(<<"user06">>),
+  Username = User#chef_user.username,
+  ?assertEqual({ok, 1}, chef_sql:create_user(User)),
+  Result = chef_sql:delete_user(Username),
+  ?assertEqual({ok, 1}, Result),
+  Result1 = chef_sql:fetch_user(Username),
+  ?assertEqual({ok, not_found}, Result1).
 
 %%%======================================================================
 %%% CLIENTS

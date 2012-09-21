@@ -34,10 +34,11 @@
 
 
 -export([
-        %%user ops
+         %%user ops
          fetch_user/1,
          fetch_users/0,
-        create_user/1,
+         create_user/1,
+         delete_user/1,
 
          %% checksum ops
          mark_checksums_as_uploaded/2,
@@ -118,6 +119,7 @@
 -include_lib("chef_objects/include/chef_types.hrl").
 
 -type delete_query() :: delete_cookbook_version_by_id |
+                        delete_user_by_username |
                         delete_data_bag_by_id |
                         delete_data_bag_item_by_id |
                         delete_environment_by_id |
@@ -160,6 +162,14 @@ fetch_user(UserName) ->
 %% doc Insert user data into database
 create_user(#chef_user{}=User) ->
     create_object(User).
+
+-spec delete_user(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
+delete_user(Username) when is_list(Username) ->
+    delete_user(list_to_binary(Username));
+delete_user(#chef_user{username=Username}) ->
+    delete_user(Username);
+delete_user(Username) when is_binary(Username)->
+  delete_object(delete_user_by_username, Username).
 
 -spec fetch_users() -> {ok, none | [binary()]} | {error, _}.
 %% Return a list of all usernames.
