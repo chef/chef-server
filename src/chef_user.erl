@@ -61,7 +61,7 @@ assemble_user_ejson(#chef_user{username = Name,
                                external_authentication_uid = OpenId,
                                admin = Admin},
                     _OrgId) ->
-    {[{<<"username">>, Name},
+    {[{<<"name">>, Name},
       {<<"public_key">>, PubKey},
       {<<"openid">>, OpenId},
       {<<"admin">>, Admin}]}.
