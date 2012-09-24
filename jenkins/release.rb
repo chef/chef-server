@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
-require 'rubbygems'
+require 'rubygems'
 require 'optparse'
-require 'mixlib-shellout'
+require 'mixlib/shellout'
 
 STDOUT.sync = true
 shellout_opts = {:timeout => 1200, :live_stream => STDOUT}
@@ -18,11 +18,15 @@ optparse = OptionParser.new do |opts|
   opts.on("-b", "--bucket BUCKET", "the name of the S3 bucket to release to") do |bucket|
     options[:bucket] = bucket
   end
+
+  opts.on("-v", "--version VERSION", "the version of the installer to release") do |version|
+    options[:version] = version
+  end
 end
 
 begin
   optparse.parse!
-  required = [::bucket]
+  required = [:bucket, :version]
   missing = required.select {|param| options[param].nil?}
   if !missing.empty?
     puts "Missing required options: #{missing.join(', ')}"
@@ -54,7 +58,8 @@ jenkins_build_support = {
 # fetch the list of local builds
 local_packages = Dir["**/pkg/*"]
 
-# upload the packages
+# upload the packages and the json metadata
+build_support_json = {}
 jenkins_build_support.each do |(build, supported_platforms)|
   build_platform = supported_platforms.first
 
@@ -75,5 +80,24 @@ jenkins_build_support.each do |(build, supported_platforms)|
   shell = Mixlib::ShellOut.new(s3_cmd, shellout_opts)
   shell.run_command
   shell.error!
+
+  # update json with build information
+  supported_platforms.each do |(platform, platform_version, machine_architecture)|
+    build_support_json[platform] ||= {}
+    build_support_json[platform][platform_version] ||= {}
+    build_support_json[platform][platform_version][machine_architecture] = {}
+    build_support_json[platform][platform_version][machine_architecture][options[:version]] = build_location
+  end
 end
 
+File.open("platform-support.json", "w") {|f| f.puts JSON.pretty_generate(build_support_json)}
+
+s3_location = "s3://#{options[:bucket]}/opc-platform-support/#{options[:version]}.json"
+puts "UPLOAD: platform-support.json -> #{s3_location}"
+s3_cmd = ["s3cmd",
+          "put",
+          "platform-support.json",
+          s3_location].join(" ")
+shell = Mixlib::ShellOut.new(s3_cmd, shellout_opts)
+shell.run_command
+shell.error!
