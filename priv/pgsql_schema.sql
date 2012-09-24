@@ -263,10 +263,10 @@ CREATE TABLE schema_info (
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: osc_users; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE TABLE users (
+CREATE TABLE osc_users (
     id character(32) NOT NULL,
     authz_id character(32) NOT NULL,
     username text NOT NULL,
@@ -484,35 +484,35 @@ ALTER TABLE ONLY sandboxed_checksums
 
 
 --
--- Name: users_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: osc_users_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
-ALTER TABLE ONLY users
-    ADD CONSTRAINT users_authz_id_key UNIQUE (authz_id);
-
-
---
--- Name: users_email_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY users
-    ADD CONSTRAINT users_email_key UNIQUE (email);
+ALTER TABLE ONLY osc_users
+    ADD CONSTRAINT osc_users_authz_id_key UNIQUE (authz_id);
 
 
 --
--- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: osc_users_email_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
-ALTER TABLE ONLY users
-    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY osc_users
+    ADD CONSTRAINT osc_users_email_key UNIQUE (email);
 
 
 --
--- Name: users_username_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: osc_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
-ALTER TABLE ONLY users
-    ADD CONSTRAINT users_username_key UNIQUE (username);
+ALTER TABLE ONLY osc_users
+    ADD CONSTRAINT osc_users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: osc_users_username_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY osc_users
+    ADD CONSTRAINT osc_users_username_key UNIQUE (username);
 
 
 --

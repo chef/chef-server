@@ -231,10 +231,10 @@ CREATE TABLE `schema_info` (
   `version` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `osc_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `users` (
+CREATE TABLE `osc_users` (
   `id` char(32) COLLATE utf8_bin NOT NULL,
   `authz_id` char(32) COLLATE utf8_bin NOT NULL,
   `username` varchar(255) COLLATE utf8_bin NOT NULL,
