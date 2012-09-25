@@ -50,20 +50,17 @@ test: eunit
 tags:
 	find src deps -name "*.[he]rl" -print | etags -
 
-itest_bundler:
-	cd itest; bundle install --binstubs
-
 itest_create:
 	@echo Creating integration test database
-	@cd itest;bundle exec ./create_schema.rb ${DB_TYPE} create
+	@cd itest;./create_schema.rb ${DB_TYPE} create
 
 itest_clean:
 	@rm -f itest/*.beam
 	@echo Dropping integration test database
-	@cd itest;bundle exec ./create_schema.rb ${DB_TYPE} destroy
+	@cd itest;./create_schema.rb ${DB_TYPE} destroy
 	@rm -rf itest/Gemfile.lock
 
-itest: compile itest_bundler itest_create itest_run itest_clean
+itest: compile itest_create itest_run itest_clean
 
 itest_run:
 	cd itest;erlc -I ../include -pz ../deps/chef_objects/ebin *.erl
