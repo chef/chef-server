@@ -74,7 +74,6 @@ jenkins_build_support.each do |(build, supported_platforms)|
   s3_cmd = ["s3cmd",
             "put",
             "--progress",
-            "--acl-public",
             build_package,
             "s3://#{options[:bucket]}#{build_location}"].join(" ")
   shell = Mixlib::ShellOut.new(s3_cmd, shellout_opts)
