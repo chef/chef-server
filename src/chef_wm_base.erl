@@ -638,12 +638,29 @@ handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
         _Else ->
             forbidden
     end;
-handle_auth_info(chef_wm_users, _, _) ->
-    %% temp pass
-    authorized;
-handle_auth_info(chef_wm_named_user, _, _) ->
-    %% temp pass
-    authorized;
+handle_auth_info(chef_wm_users, Req, #base_state{requestor = Requestor}) ->
+  case wrq:method(Req) of
+    'POST' -> %% Create new user
+        chef_wm_authz:allow_admin(Requestor);
+    'GET' -> %% List all users
+        chef_wm_authz:allow_admin(Requestor);
+    _Else ->
+        forbidden
+  end;
+handle_auth_info(chef_wm_named_user, Req, #base_state{requestor = Requestor}) ->
+  UserName = chef_wm_util:object_name(user, Req),
+  case wrq:method(Req) of
+    'PUT' ->
+      %% Also need to ensure last admin can't make themselves a non-admin
+      chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName);
+    'GET' ->
+      chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName);
+    'DELETE' ->
+      %% Also need to ensure last admin can't be deleted
+      chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName);
+    _Else ->
+      forbidden
+  end;
 handle_auth_info(Module, Req, #base_state{requestor = Requestor})
         when Module =:= chef_wm_cookbook_version;
              Module =:= chef_wm_named_environment;
