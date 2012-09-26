@@ -19,7 +19,7 @@
 %%
 
 
--module(chef_wm_named_pubkey).
+-module(chef_wm_named_principal).
 
 -include("chef_wm.hrl").
 
@@ -56,7 +56,7 @@ init_resource_state(_Config) ->
     {ok, #client_state{}}.
 
 request_type() ->
-  "pubkey".
+  "principal".
 
 forbidden(Req, State) ->
     {false, Req, State}.
