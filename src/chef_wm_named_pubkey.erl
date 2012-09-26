@@ -19,7 +19,7 @@
 %%
 
 
--module(chef_wm_pubkey).
+-module(chef_wm_named_pubkey).
 
 -include("chef_wm.hrl").
 
@@ -46,8 +46,6 @@
          forbidden/2,
          is_authorized/2,
          allowed_methods/2,
-         delete_resource/2,
-         from_json/2,
          to_json/2
        ]).
 
@@ -69,7 +67,7 @@ is_authorized(Req, State) ->
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
-validate_any_request(Req, #base_state{chef_db_context = DbContext,
+validate_request(_Method, Req, #base_state{chef_db_context = DbContext,
                                       organization_name = OrgName,
                                       resource_state = ClientState} = State) ->
     Name = chef_wm_util:object_name(client, Req),
@@ -82,40 +80,9 @@ validate_any_request(Req, #base_state{chef_db_context = DbContext,
     ClientState1 = ClientState#client_state{chef_client = Client},
     {Req, State#base_state{resource_state = ClientState1}}.
 
-validate_request('PUT', Req, State) ->
-    {Req1, State1} = validate_any_request(Req, State),
-    #base_state{resource_state =
-                    #client_state{chef_client = OldClient} = ClientState} = State1,
-    case OldClient of
-        not_found ->
-            {Req1, State1};
-        _ ->
-            % FIXME: parse_binary_json can probably be simplified to NOT need a
-            % name passed to it; the name extracted from the old client here is
-            % the same as the request name, since the request name is used to pull
-            % the old client from the database in the first place.
-            #chef_client{name = Name} = OldClient,
-            Body = wrq:req_body(Req),
-            {ok, ClientData} = chef_client:parse_binary_json(Body, Name, OldClient),
-            {Req1, State1#base_state{resource_state =
-                                         ClientState#client_state{client_data =
-                                                                      ClientData}}}
-    end;
-validate_request(_Other, Req, State) ->
-    validate_any_request(Req, State).
-
 %% This should never get called.
 auth_info(Req, State) ->
     {{halt, 404}, Req, State}.
-
-set_http_response_code(Name, ReqName, Uri, Request) ->
-    % If this is a rename, we need to add the Location header so it returns 201
-    case ReqName of
-        Name ->
-            Request;
-        _ ->
-            wrq:set_resp_header("Location", binary_to_list(Uri), Request)
-    end.
 
 to_json(Req, #base_state{resource_state =
                              #client_state{chef_client = Client},
@@ -124,52 +91,6 @@ to_json(Req, #base_state{resource_state =
     Json = ejson:encode(EJson),
     {Json, Req, State}.
 
-delete_resource(Req, #base_state{chef_db_context = DbContext,
-                                 requestor_id = RequestorId,
-                                 resource_state = #client_state{
-                                   chef_client = Client},
-                                 organization_name = OrgName} = State) ->
-    ok = chef_object_db:delete(DbContext, Client, RequestorId),
-    EJson = chef_client:assemble_client_ejson(Client, OrgName),
-    Req1 = chef_wm_util:set_json_body(Req, EJson),
-    {true, Req1, State}.
-
-% TODO: this could stand refactoring: I'm sure there is stuff re-used by other
-% endpoints and possibly unused code here
-error_message(Msg) when is_list(Msg) ->
-    error_message(iolist_to_binary(Msg));
-error_message(Msg) when is_binary(Msg) ->
-    {[{<<"error">>, [Msg]}]}.
-
-malformed_request_message(#ej_invalid{type = json_type, key = Key}, _Req, _State) ->
-    case Key of
-        undefined -> error_message([<<"Incorrect JSON type for request body">>]);
-        _ ->error_message([<<"Incorrect JSON type for ">>, Key])
-    end;
-malformed_request_message(#ej_invalid{type = missing, key = Key}, _Req, _State) ->
-    error_message([<<"Required value for ">>, Key, <<" is missing">>]);
-malformed_request_message({invalid_key, Key}, _Req, _State) ->
-    error_message([<<"Invalid key ">>, Key, <<" in request body">>]);
-malformed_request_message(invalid_json_body, _Req, _State) ->
-    error_message([<<"Incorrect JSON type for request body">>]);
-malformed_request_message(#ej_invalid{type = exact, key = Key, msg = Expected},
-                          _Req, _State) ->
-    error_message([Key, <<" must equal ">>, Expected]);
-malformed_request_message(#ej_invalid{type = string_match, msg = Error},
-                          _Req, _State) ->
-    error_message([Error]);
-malformed_request_message(#ej_invalid{type = object_key, key = Object, found = Key},
-                          _Req, _State) ->
-    error_message([<<"Invalid key '">>, Key, <<"' for ">>, Object]);
-% TODO: next two tests can get merged (hopefully) when object_map is extended not
-% to swallow keys
-malformed_request_message(#ej_invalid{type = object_value, key = Object, found = Val},
-                          _Req, _State) when is_binary(Val) ->
-    error_message([<<"Invalid value '">>, Val, <<"' for ">>, Object]);
-malformed_request_message(#ej_invalid{type = object_value, key = Object, found = Val},
-                          _Req, _State) ->
-    error_message([<<"Invalid value '">>, io_lib:format("~p", [Val]),
-                   <<"' for ">>, Object]);
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
