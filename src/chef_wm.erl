@@ -26,6 +26,7 @@
 -type container_name() :: cookbook |
                           data |
                           environment |
+                          principal |
                           node |
                           role |
                           client |

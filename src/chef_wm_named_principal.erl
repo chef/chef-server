@@ -29,7 +29,9 @@
                         malformed_request/2,
                         ping/2]}]).
 
--mixin([{?BASE_RESOURCE, [service_available/2]}]).
+-mixin([{?BASE_RESOURCE, [forbidden/2,
+                          is_authorized/2,
+                          service_available/2]}]).
 
 %% chef_wm behaviour callbacks
 -behaviour(chef_wm).
@@ -43,9 +45,9 @@
         ]).
 
 -export([
+         allowed_methods/2,
          forbidden/2,
          is_authorized/2,
-         allowed_methods/2,
          to_json/2
        ]).
 
@@ -56,20 +58,14 @@ init_resource_state(_Config) ->
     {ok, #client_state{}}.
 
 request_type() ->
-  "principal".
-
-forbidden(Req, State) ->
-    {false, Req, State}.
-
-is_authorized(Req, State) ->
-    {true, Req, State}.
+    "principal".
 
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
 validate_request(_Method, Req, #base_state{chef_db_context = DbContext,
-                                      organization_name = OrgName,
-                                      resource_state = ClientState} = State) ->
+                                           organization_name = OrgName,
+                                           resource_state = ClientState} = State) ->
     Name = chef_wm_util:object_name(client, Req),
     Client = case chef_db:fetch_client(DbContext, OrgName, Name) of
                  not_found ->
@@ -82,7 +78,7 @@ validate_request(_Method, Req, #base_state{chef_db_context = DbContext,
 
 %% This should never get called.
 auth_info(Req, State) ->
-    {{halt, 404}, Req, State}.
+    {{halt, 500}, Req, State}.
 
 to_json(Req, #base_state{resource_state =
                              #client_state{chef_client = Client},
