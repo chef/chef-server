@@ -44,19 +44,19 @@
         ]).
 
 -define(VALIDATION_CONSTRAINTS,
-        [
-         {<<"name">>,                        {match, "^[[:alnum:]_\:\.\-]+$"}},
+        {[
+          {<<"name">>, {string_match, chef_regex:regex_for(role_name)}},
 
-         {<<"json_class">>,                  {match, "Chef::Role"}},
-         {<<"chef_type">>,                   {match, "role"}},
+          {<<"json_class">>, <<"Chef::Role">>},
+          {<<"chef_type">>, <<"role">>},
 
-         {<<"default_attributes">>,          is_ejson_proplist},
-         {<<"override_attributes">>,         is_ejson_proplist},
+          {<<"default_attributes">>, chef_json_validator:attribute_spec()},
+          {<<"override_attributes">>, chef_json_validator:attribute_spec()},
 
-         {<<"run_list">>,                    is_run_list},
+          {<<"run_list">>, chef_json_validator:run_list_spec()},
 
-         {<<"env_run_lists">>,               is_run_list_map}
-        ]).
+          {<<"env_run_lists">>, chef_json_validator:env_run_lists_spec()}
+         ]}).
 
 -type role_action() :: create | { update, Name::binary() }.
 
@@ -101,12 +101,19 @@ set_default_values(Role, Defaults) ->
                 Role,
                 Defaults).
 
+-spec validate(ej:ejson_object()) -> {ok, ej:ejson_object()}.
+validate(Role) ->
+    case ej:valid(?VALIDATION_CONSTRAINTS, Role) of
+        ok ->
+            {ok, Role};
+        Bad ->
+            throw(Bad)
+    end.
+
+
 -spec validate_role(ejson_term(), role_action()) -> {ok, ejson_term()}.
 validate_role(Role, create) ->
-    case chef_json_validator:validate_json_by_regex_constraints(Role, ?VALIDATION_CONSTRAINTS) of
-        ok -> {ok, Role};
-        Bad -> throw(Bad)
-    end;
+    validate(Role);
 validate_role(Role, {update, UrlName}) ->
     %% For update, name in URL must match name, if provided, in JSON.  Missing name is ok
     %% (you know the name by the URL you're hitting), but name mismatch is not.
@@ -116,11 +123,7 @@ validate_role(Role, {update, UrlName}) ->
             %% Go ahead and set the name, since it can only be one thing, and 'name' is a
             %% required validation
             RoleWithName = ej:set({<<"name">>}, Role, UrlName),
-            case chef_json_validator:validate_json_by_regex_constraints(RoleWithName,
-                                                                        ?VALIDATION_CONSTRAINTS) of
-                ok -> {ok, RoleWithName};
-                Bad -> throw(Bad)
-            end;
+            validate(RoleWithName);
         Mismatch ->
             throw({url_json_name_mismatch, {UrlName, Mismatch, "Role"}})
     end.

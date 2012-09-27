@@ -22,6 +22,7 @@
 -module(chef_role_tests).
 
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("ej/include/ej.hrl").
 
 basic_role() ->
     {[
@@ -62,26 +63,33 @@ validate_role_test_() ->
      {"Validate that a role with a missing name is rejected",
       fun() ->
               R = ej:delete({<<"name">>}, basic_role()),
-              ?assertThrow({missing, <<"name">>},
+              ?assertThrow(#ej_invalid{},
                            chef_role:validate_role(R, create))
       end},
      {"Validate that a chef_type not equal to 'role' is rejected",
       fun() ->
               R = ej:set({<<"chef_type">>}, basic_role(), <<"BLAHBLAH">>),
-              ?assertThrow({mismatch, {<<"chef_type">>, "role", <<"BLAHBLAH">>}},
+              ?assertThrow(#ej_invalid{},
                            chef_role:validate_role(R, create))
       end},
      {"Validate that a json_class not equal to 'Chef::Role' is rejected",
       fun() ->
               R = ej:set({<<"json_class">>}, basic_role(), <<"BLAHBLAH">>),
-              ?assertThrow({mismatch, {<<"json_class">>, "Chef::Role", <<"BLAHBLAH">>}},
+              ?assertThrow(#ej_invalid{},
                            chef_role:validate_role(R, create))
       end},
+     {"Validate that a default_attributes that is not a proplist is rejected",
+      fun() ->
+              R = ej:set({<<"default_attributes">>}, basic_role(), <<"BLAHBLAH">>),
+              ?assertThrow(#ej_invalid{},
+                           chef_role:validate_role(R, create))
+      end},
+
      {"Validate that a bogus run list is rejected",
       fun() ->
               R = ej:set({<<"run_list">>}, basic_role(),
                          [<<"recipe[foo]">>, <<"fake[not_good]">>]),
-              ?assertThrow({bad_run_list, _},
+              ?assertThrow(#ej_invalid{},
                            chef_role:validate_role(R, create))
       end},
      {"Validate that a bogus env_run_lists entry is rejected",
@@ -89,7 +97,7 @@ validate_role_test_() ->
               R = ej:set({<<"env_run_lists">>}, basic_role(),
                          {[{<<"preprod">>, [<<"recipe[foo]">>]},
                            {<<"prod">>, [<<"fake[not_good]">>]}]}),
-              ?assertThrow({bad_run_lists, _},
+              ?assertThrow(#ej_invalid{},
                            chef_role:validate_role(R, create))
       end}
     ].
