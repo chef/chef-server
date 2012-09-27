@@ -66,7 +66,7 @@ allowed_methods(Req, State) ->
 validate_request(_Method, Req, #base_state{chef_db_context = DbContext,
                                            organization_name = OrgName,
                                            resource_state = ClientState} = State) ->
-    Name = chef_wm_util:object_name(client, Req),
+    Name = chef_wm_util:object_name(principal, Req),
     Client = case chef_db:fetch_client(DbContext, OrgName, Name) of
                  not_found ->
                      not_found;
