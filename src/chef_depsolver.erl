@@ -21,7 +21,6 @@
 %% under the License.
 %%
 
-
 -module(chef_depsolver).
 
 -include_lib("eunit/include/eunit.hrl").
@@ -38,16 +37,11 @@
 -include("chef_types.hrl").
 -include("chef_regex.hrl").
 
--define(DEFAULT_FIELD_VALUES,
-        [
-         {<<"run_list">>, []}
-        ]).
-
+ %% @doc the input into the depsolver is a single run_list
 -define(VALIDATION_CONSTRAINTS,
-        [
-         {<<"run_list">>, is_run_list}
-        ]).
-
+        {[
+          {<<"run_list">>, chef_json_validator:run_list_spec()}
+         ]}).
 
 %% @doc Convert a binary JSON string representing a Chef runlist into an
 %% EJson-encoded Erlang data structure.
@@ -71,42 +65,18 @@ set_default_values(Bin) ->
 
 -spec validate_body(ej:json_object()) -> {ok, ej:json_object()}.
 validate_body(Body) ->
-    case ej:valid(depsolver_spec(), Body) of
+    case ej:valid(?VALIDATION_CONSTRAINTS, Body) of
         ok -> {ok, Body};
         Bad -> throw(Bad)
     end.
-
-%% @doc the input into the depsolver is a single run_list
-%%
-depsolver_spec() ->
-  {[
-    {<<"run_list">>, {array_map, {fun_match, {fun valid_run_list_item/1, string,
-                                              <<"Invalid Run list item">>}}}}
-   ]}.
-
-valid_run_list_item(Str) ->
-    {RegEx, _Msg} = regex_for_run_list_item(Str),
-    case re:run(Str, RegEx) of
-        nomatch -> error;
-        _ -> ok
-    end.
-
-%% @doc Given an item from a Chef run list, determines if it is
-%% syntactically correct, taking into account the various types of
-%% items that are allowed in a run list.
--spec regex_for_run_list_item(binary()) -> {re_regex(), re_msg()}.
-regex_for_run_list_item(<<"recipe[", _Rest/binary>>) ->
-    chef_regex:regex_for(qualified_recipe);
-regex_for_run_list_item(<<"role[", _Rest/binary>>) ->
-    chef_regex:regex_for(qualified_role);
-regex_for_run_list_item(UnqualifiedRecipe) when is_binary(UnqualifiedRecipe) ->
-    chef_regex:regex_for(unqualified_recipe).
 
 -spec solve_dependencies(AllVersions :: [depsolver:dependency_set()],
                          EnvConstraints :: [depsolver:dependency_set()],
                          Cookbooks :: [Name::binary() |
                                              {Name::binary(), Version::binary()}]) ->
     {ok, [ versioned_cookbook()]} | {error, term()}.
+
+
 %% @doc Main entry point into the depsolver.  It is supplied with a dependency_set()
 %% containing all the cookbook versions and their dependencies that are in the database
 %% along with the constraints from the environment
