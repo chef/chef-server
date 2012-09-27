@@ -57,6 +57,10 @@
 %% repository, this regular expression applies to them as well.
 -define(NAME_REGEX, "[.[:alnum:]_-]+").
 
+%% This is very similar to NAME_REGEX (differs only with the addition of ':').  This is used
+%% for data bags, data bag items, roles, and nodes.
+-define(ALTERNATIVE_NAME_REGEX, "[.[:alnum:]_\:-]+").
+
 %% Recipes can be cookbook-qualified; if not, the name is taken to be
 %% the cookbook, and the recipe is implicitly assumed to be "default".
 -define(COOKBOOK_PREFIX_REGEX, "(?:" ++ ?NAME_REGEX ++ "::)?").
@@ -85,10 +89,26 @@ regex_for(environment_name) ->
     {ok, Regex} = re:compile(Pattern),
     {Regex, <<"Malformed environment name. Must only contain A-Z, a-z, 0-9, _ or -">>};
 regex_for(client_name) ->
-    % This might be the same as nodename -- nodename seems to allow ':' as well
     Pattern = ?ANCHOR_REGEX(?NAME_REGEX),
     {ok, Regex} = re:compile(Pattern),
     {Regex, <<"Malformed client name.  Must be A-Z, a-z, 0-9, _, -, or .">>};
+
+regex_for(data_bag_name) ->
+    Pattern = ?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
+    {ok, Regex} = re:compile(Pattern),
+    {Regex, <<"Malformed data bag name.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>};
+regex_for(data_bag_item_id) ->
+    Pattern = ?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
+    {ok, Regex} = re:compile(Pattern),
+    {Regex, <<"Malformed data bag item ID.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>};
+regex_for(role_name) ->
+    Pattern = ?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
+    {ok, Regex} = re:compile(Pattern),
+    {Regex, <<"Malformed role name.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>};
+regex_for(node_name) ->
+    Pattern = ?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
+    {ok, Regex} = re:compile(Pattern),
+    {Regex, <<"Malformed node name.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>};
 
 %% used in environments
 regex_for(cookbook_version_constraint) ->
