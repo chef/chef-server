@@ -48,6 +48,7 @@
 -export([check_cookbook_authz/3,
          delete_object/3]).
 
+
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
 %% contains a function definition.
 
@@ -191,7 +192,7 @@ malformed_request_message({client_name_mismatch}, _Req, _State) ->
     {[{<<"error">>, [<<"name and clientname must match">>]}]};
 malformed_request_message({bad_client_name, Name, Pattern}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Invalid client name '", Name,
-				       "' using regex: '", Pattern, "'."])]}]};
+                                       "' using regex: '", Pattern, "'."])]}]};
 
 %% Not sure if we want to be this specific, or just want to fold this into an 'invalid JSON'
 %% case.  At any rate, here it is.
@@ -207,8 +208,108 @@ malformed_request_message({bad_run_lists, {Field, _Value}}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Field '", Field, "' contains invalid run lists"])]}]};
 malformed_request_message(invalid_num_versions, _Req, _State) ->
     {[{<<"error">>, [<<"You have requested an invalid number of versions (x >= 0 || 'all')">>]}]};
+
+%% This is used by some custom validation in environments that may (or may not!) be pulled up into ej:valid validations
+malformed_request_message({invalid_key, Key}, _Req, _State) ->
+    error_envelope([<<"Invalid key ">>, Key, <<" in request body">>]);
+
+malformed_request_message(invalid_json_body, _Req, _State) ->
+    error_envelope([<<"Incorrect JSON type for request body">>]);
+
+%% General ej_invalid messages
+
+%% Missing fields
+malformed_request_message(#ej_invalid{type=missing,
+                                      key=Key
+                                     }, _Req, _State) ->
+    error_envelope([<<"Field '", Key/binary, "' missing">>]);
+
+%% Exact and string_match failures
+malformed_request_message(#ej_invalid{type=Type,
+                                      key=Key,
+                                      msg=Expected
+                                     }, _Req, _State) when Type =:= exact orelse
+                                                           Type =:= string_match ->
+    error_envelope([<<"Field '", Key/binary, "' invalid">>]);
+
+%% Things that should be hashes, but aren't.
+malformed_request_message(#ej_invalid{type=json_type,
+                                      key=Key
+                                     }, _Req, _State) when Key =:= <<"override_attributes">> orelse
+                                                           Key =:= <<"default_attributes">> orelse
+                                                           Key =:= <<"normal">> orelse
+                                                           Key =:= <<"default">> orelse
+                                                           Key =:= <<"override">> orelse
+                                                           Key =:= <<"automatic">> orelse
+                                                           Key =:= <<"cookbook_versions">> ->
+    error_envelope([<<"Field '", Key/binary, "' is not a hash">>]);
+
+%% Entire run list is the wrong type
+malformed_request_message(#ej_invalid{type=json_type,
+                                     key=Key}, _Req, _State) when Key =:= <<"run_list">> ->
+    error_envelope([<<"Field '", Key/binary,"' is not a valid run list">>]);
+
+%% entire env_run_lists is the wrong type
+malformed_request_message(#ej_invalid{type=json_type,
+                                      key=Key
+                                     }, _Req, _State) when Key =:= <<"env_run_lists">> ->
+    error_envelope([<<"Field '", Key/binary, "' contains invalid run lists">>]);
+
+%% All other json_type failures
+malformed_request_message(#ej_invalid{type=json_type,
+                                      key=Key
+                                     }, _Req, _State) ->
+    error_envelope([<<"Field '", Key/binary, "' invalid">>]);
+
+%% Bogus run list items
+%%
+%% In the future, we may wish to add more detailed error messages reflecting whether a run
+%% list item is simply the wrong type (e.g., a number) or an invalid run list item (e.g.,
+%% the string "recipe[").  To do so, we would need to compare the `found_type` and
+%% `expected_type` record fields
+malformed_request_message(#ej_invalid{type=array_elt,
+                                      key=Key}, _Req, _State) when Key =:= <<"run_list">> ->
+    error_envelope([<<"Field '", Key/binary, "' is not a valid run list">>]);
+
+malformed_request_message(#ej_invalid{type = object_key,
+                                      key = Object,
+                                      found = Key}, _Req, _State) ->
+    error_envelope([<<"Invalid key '">>, Key, <<"' for ">>, Object]);
+
+malformed_request_message(#ej_invalid{type = object_value,
+                                      key = Key,
+                                      found = Val}, _Req, _State) when Key =:= <<"env_run_lists">> ->
+    error_envelope([<<"Field '", Key/binary, "' contains invalid run lists">>]);
+
+malformed_request_message(#ej_invalid{type = object_value,
+                                      key = Object,
+                                      found = Val}, _Req, _State) ->
+    error_envelope([<<"Invalid value '">>, Val, <<"' for ">>, Object]);
+
+
 malformed_request_message(Reason, Req, #base_state{resource_mod=Mod}=State) ->
     Mod:malformed_request_message(Reason, Req, State).
+
+-spec to_binary( any() ) -> binary().
+to_binary(A) when is_atom(A) ->
+    atom_to_binary(A, utf8);
+to_binary(I) when is_integer(I)->
+    list_to_binary(integer_to_list(I));
+to_binary(B) when is_binary(B)->
+    B;
+to_binary(O) ->
+    %% Catch-all case
+    list_to_binary(io_lib:format("~p", [O])).
+
+-spec binary_message([atom() | string() | binary()]) -> binary().
+binary_message(Parts)  ->
+    iolist_to_binary([to_binary(P) || P <- Parts]).
+
+-spec error_envelope(binary() | [binary()]) -> ej:json_object().
+error_envelope(Parts) when is_list(Parts) ->
+    error_envelope(binary_message(Parts));
+error_envelope(Message) when is_binary(Message) ->
+    chef_wm_util:error_message_envelope(Message).
 
 forbidden(Req, #base_state{resource_mod=Mod}=State) ->
     %% For now we call auth_info because currently need the side-effect of looking up the
