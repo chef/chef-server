@@ -18,7 +18,6 @@
 %% under the License.
 %%
 
-
 -module(chef_sandbox).
 
 -export([
@@ -35,11 +34,12 @@
 -define(MAX_SIZE, 1000000).
 
 -define(VALIDATION_CONSTRAINTS,
-        [
-         {<<"checksums">>, is_ejson_proplist}
-         ]).
-
--define(BAD_CHECKSUM_MSG, <<"Invalid checksum in sandbox.">>).
+        {[
+          {<<"checksums">>, {fun_match, {fun valid_checksum_hash/1,
+                                         object,
+                                         <<"Bad checksums!">>}
+                            }}
+         ]}).
 
 %% @doc Convert a binary JSON string representing a Chef Role into an
 %% EJson-encoded Erlang data structure.
@@ -58,38 +58,34 @@ parse_binary_json(Bin, create) ->
         false -> ok
     end,
     Sandbox = chef_json:decode(Bin),
-    validate_sandbox(Sandbox, create).
+    validate(Sandbox).
 
-
--spec validate_sandbox(ejson_term(), create) -> {ok, ejson_term()}.
-validate_sandbox(Sandbox, create) ->
-    case chef_json_validator:validate_json_by_regex_constraints(Sandbox, ?VALIDATION_CONSTRAINTS) of
+-spec validate(ej:json_object()) -> {ok, ej:json_object()}.
+validate(Sandbox) ->
+    case ej:valid(?VALIDATION_CONSTRAINTS, Sandbox) of
         ok ->
-            case ej:get({<<"checksums">>}, Sandbox) of
-                {[]} ->
-                    throw({empty_checksums, <<"A sandbox must contain at least one checksum">>});
-                {Checksums} ->
-                    case valid_checksums(Checksums) of
-                        ok -> {ok, Sandbox};
-                        Why -> throw(Why)
-                    end
-            end;
+            {ok, Sandbox};
         Bad ->
             throw(Bad)
     end.
 
-valid_checksums([{Checksum, null}| Rest]) ->
-    case is_md5_hex(Checksum) of
-        true ->
-            valid_checksums(Rest);
-        false ->
-            {bad_checksum, ?BAD_CHECKSUM_MSG}
+%% @doc Validation function for a sandbox's checksum hash.  Ensures that at least one entry
+%% is present.  The value must be null.
+-spec valid_checksum_hash(Input :: any()) -> ok | error.
+valid_checksum_hash({[]}) ->
+    error;
+valid_checksum_hash({[{Checksum, Value}|Rest]}) ->
+    case {is_md5_hex(Checksum), Value} of
+        {true, null} ->
+            case Rest of
+                [] -> ok;  % Easy termination condition that ensures at least one entry is present
+                _ -> valid_checksum_hash({Rest})
+            end;
+        _ ->
+            error
     end;
-valid_checksums([_|_Rest]) ->
-    {bad_checksum, ?BAD_CHECKSUM_MSG};
-valid_checksums([]) ->
-    ok.
-
+valid_checksum_hash(_) ->
+    error.
 
 is_md5_hex(<<Bin:32/binary>>) ->
     is_hex(Bin);
