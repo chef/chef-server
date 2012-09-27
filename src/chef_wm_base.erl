@@ -781,6 +781,7 @@ handle_auth_info(Module, Req, _State)
              Module =:= chef_wm_environment_recipes;
              Module =:= chef_wm_environment_roles;
              Module =:= chef_wm_search_index;
+             Module =:= chef_wm_named_principal;
              Module =:= chef_wm_status ->
     case wrq:method(Req) of
         'GET' ->

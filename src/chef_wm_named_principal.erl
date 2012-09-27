@@ -46,8 +46,6 @@
 
 -export([
          allowed_methods/2,
-         forbidden/2,
-         is_authorized/2,
          to_json/2
        ]).
 
@@ -76,14 +74,24 @@ validate_request(_Method, Req, #base_state{chef_db_context = DbContext,
     ClientState1 = ClientState#client_state{chef_client = Client},
     {Req, State#base_state{resource_state = ClientState1}}.
 
-%% This should never get called.
-auth_info(Req, State) ->
-    {{halt, 500}, Req, State}.
+auth_info(Req, #base_state{resource_state =
+                               #client_state{chef_client = not_found}} = State) ->
+    Name = chef_wm_util:object_name(principal, Req),
+    Message = chef_wm_util:not_found_message(client, Name),
+    Req1 = chef_wm_util:set_json_body(Req, Message),
+    {{halt, 404}, Req1, State#base_state{log_msg = client_not_found}};
+auth_info(Req, #base_state{resource_state =
+                               #client_state{chef_client =
+                                                 #chef_client{authz_id = AuthzId} =
+                                                 Client} = ClientState} = State) ->
+    ClientState1 = ClientState#client_state{chef_client = Client},
+    State1 = State#base_state{resource_state = ClientState1},
+    {{object, AuthzId}, Req, State1}.
 
 to_json(Req, #base_state{resource_state =
                              #client_state{chef_client = Client},
                          organization_name = OrgName} = State) ->
-    EJson = chef_client:assemble_client_ejson(Client, OrgName),
+    EJson = chef_client:assemble_client_pubkey_ejson(Client, OrgName),
     Json = ejson:encode(EJson),
     {Json, Req, State}.
 
