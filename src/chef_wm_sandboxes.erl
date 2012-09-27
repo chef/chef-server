@@ -94,17 +94,17 @@ from_json(Req, #base_state{chef_db_context = DbContext,
             {{halt, 500}, Req, State}
     end.
 
-malformed_request_message({empty_checksums, Msg}, _Req, _State) ->
-    chef_wm_util:error_message_envelope(Msg);
-malformed_request_message({bad_checksum, Msg}, _Req, _State) ->
-    chef_wm_util:error_message_envelope(Msg);
+malformed_request_message(#ej_invalid{type=fun_match,
+                                      key=Key,
+                                      msg=Message
+                                     }, _Req, _State) when Key =:= <<"checksums">> ->
+    {[{<<"error">>, [<<"Field '", Key/binary, "' invalid">>]}]};
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
 checksums_from_sandbox_ejson(SandboxData) ->
     {ChecksumList} = ej:get({<<"checksums">>}, SandboxData),
     [ CSum || {CSum, null} <- ChecksumList ].
-
 
 sandbox_to_response(Req, #chef_sandbox{id = Id, org_id = OrgId, checksums = ChecksumList}) ->
     Ans = {[{<<"sandbox_id">>, Id},
