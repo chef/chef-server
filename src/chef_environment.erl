@@ -62,22 +62,20 @@ environment_spec() ->
       {{opt, <<"description">>}, string},
       {{opt, <<"json_class">>}, <<"Chef::Environment">>},
       {{opt, <<"chef_type">>}, <<"environment">>},
-      {{opt, <<"default_attributes">>}, object},
-      {{opt, <<"override_attributes">>}, object},
-      {{opt, <<"cookbook_versions">>},
-       {object_map, {
-          {keys, {string_match,
-                  chef_regex:regex_for(cookbook_name)}},
-          {values, {any_of, {[{string_match,
-                               chef_regex:regex_for(cookbook_version_constraint)},
-                              %% This is required because a simple array_map will
-                              %% succeed with multiple entries -- only arrays of
-                              %% length one (or zero) can be valid
-                              {fun_match, {fun cookbook_version_array_test/1, array,
-                                           <<"Invalid cookbook version">>}},
-                              null], <<"Invalid cookbook version">>}}}}}}
+      {{opt, <<"default_attributes">>}, chef_json_validator:attribute_spec()},
+      {{opt, <<"override_attributes">>}, chef_json_validator:attribute_spec()},
+      {{opt, <<"cookbook_versions">>}, {object_map, {{keys, {string_match, chef_regex:regex_for(cookbook_name)}},
+                                                     {values, {any_of, {[{string_match,
+                                                                          chef_regex:regex_for(cookbook_version_constraint)},
+                                                                         %% This is required because a simple array_map will
+                                                                         %% succeed with multiple entries -- only arrays of
+                                                                         %% length one (or zero) can be valid
+                                                                         {fun_match, {fun cookbook_version_array_test/1,
+                                                                                      array,
+                                                                                      <<"Invalid cookbook version">>}},
+                                                                         null],
+                                                                        <<"Invalid cookbook version">>}}}}}}
      ]}.
-
 
 %% @doc If certain fields are missing from a Environment, fill them in with
 %% sane default values.
@@ -123,4 +121,3 @@ validate_keys([{Item, _}|Rest]) ->
         _ ->
             throw({invalid_key, Item})
     end.
-
