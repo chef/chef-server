@@ -89,9 +89,8 @@ auth_info(Req, #base_state{resource_state =
     {authorized, Req, State1}.
 
 to_json(Req, #base_state{resource_state =
-                             #client_state{chef_client = Client},
-                         organization_name = OrgName} = State) ->
-    EJson = chef_client:assemble_client_pubkey_ejson(Client, OrgName),
+                             #client_state{chef_client = Client}} = State) ->
+    EJson = chef_client:assemble_client_pubkey_ejson(Client),
     Json = ejson:encode(EJson),
     {Json, Req, State}.
 
