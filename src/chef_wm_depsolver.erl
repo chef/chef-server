@@ -66,14 +66,6 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['POST'], Req, State}.
 
-%% TODO: More specific error messages for bad run_list element and content
-malformed_request_message(#ej_invalid{type = json_type}, _Req, _State) ->
-    {[{<<"error">>, [<<"Field 'run_list' is not a valid run list">>]}]};
-malformed_request_message(#ej_invalid{type = array_elt}, _Req, _State) ->
-    {[{<<"error">>, [<<"Field 'run_list' is not a valid run list">>]}]};
-malformed_request_message({environment_not_found, Name}, _Req, _State) ->
-    Msg = iolist_to_binary(["environment '", Name, "' not found"]),
-    {[{<<"error">>, [Msg]}]};
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 

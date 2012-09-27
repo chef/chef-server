@@ -198,41 +198,8 @@ malformed_request_message(#ej_invalid{type = array_elt,
                                       key = Key},
                           _Req, _State) ->
     error_message([<<"Invalid element in array value of '">>, Key, <<"'.">>]);
-malformed_request_message(#ej_invalid{type = Type,
-                                      key = <<"metadata.", _/binary>>= Key,
-                                      msg = undefined},
-                          _Req, _State) when Type =:= object_value;
-                                             Type =:= object_key ->
-    error_message([<<"Unexpected value for '">>, Key, <<"'.">>]);
-malformed_request_message(#ej_invalid{type = Type,
-                                      key = <<"metadata.", _/binary>>= Key,
-                                      msg = Msg},
-                          _Req, _State) when Type =:= object_value;
-                                             Type =:= object_key ->
-    error_message([Msg, <<" for '">>, Key, <<"'.">>]);
-malformed_request_message(#ej_invalid{type = missing, key = Key }, _Req, _State) ->
-    error_message([<<"Required key '">>, Key, <<"' not found in JSON.">>]);
-malformed_request_message(#ej_invalid{type = exact, key = Key, msg = Expected,
-                                      found = Found, found_type = FType}, _Req, _State) ->
-    Msg0 = [<<"Value for '">>, Key, <<"' must be '">>, Expected],
-    Msg = case FType of
-              string ->
-                  Msg0 ++ [<<"', found: '">>, Found, <<"'.">>];
-              _ ->
-                  Msg0 ++ [<<"'.">>]
-          end,
-    error_message(Msg);
-malformed_request_message(#ej_invalid{type = json_type, key = Key,
-                                      expected_type = EType,
-                                      found_type = FType}, _Req, _State) ->
-    Msg = [<<"Value for key '">>, Key, <<"' must have type '">>,
-           atom_to_binary(EType, utf8), <<"', found '">>,
-           atom_to_binary(FType, utf8), <<"'.">>],
-    error_message(Msg);
 
-malformed_request_message(#ej_invalid{type = string_match, found = Found, key = Key, msg = Error}, _Req, _State) ->
-    Msg = [<<"Invalid value ">>, Found, <<" for key ">>, Key, " must match ", Error],
-    error_message(Msg);
+
 malformed_request_message({bad_cookbook_name, Name, Pattern}, _Req, _State) ->
     Msg = [<<"Invalid cookbook name '">>, Name, <<"' using regex: '">>, Pattern, <<"'.">>],
     error_message(Msg);
