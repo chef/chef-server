@@ -86,7 +86,7 @@ auth_info(Req, #base_state{resource_state =
                                                  Client} = ClientState} = State) ->
     ClientState1 = ClientState#client_state{chef_client = Client},
     State1 = State#base_state{resource_state = ClientState1},
-    {{object, AuthzId}, Req, State1}.
+    {authorized, Req, State1}.
 
 to_json(Req, #base_state{resource_state =
                              #client_state{chef_client = Client},
