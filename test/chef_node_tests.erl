@@ -18,10 +18,13 @@
 -module(chef_node_tests).
 
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("ej/include/ej.hrl").
 
 extended_node() ->
     {[{<<"name">>, <<"a_node">>},
       {<<"chef_environment">>, <<"prod">>},
+      {<<"json_class">>, <<"Chef::Node">>},
+      {<<"chef_type">>, <<"node">>},
       {<<"run_list">>, [<<"recipe[web]">>, <<"role[prod]">>]},
       {<<"normal">>, {[]}},
       {<<"override">>, {[]}},
@@ -58,7 +61,8 @@ validate_json_node_test_() ->
       fun() ->
           N = extended_node(),
           BadN = ej:delete({<<"name">>}, N),
-          ?assertThrow({missing,<<"name">>}, chef_node:validate_json_node(BadN, create))
+          ?assertThrow(#ej_invalid{},
+                       chef_node:validate_json_node(BadN, create))
       end},
      {"check that a node with a name mismatch is rejected for update",
       fun() ->
@@ -75,37 +79,38 @@ validate_json_node_test_() ->
      {"check that run_list is required for create and update",
       fun() ->
           N = ej:delete({"run_list"}, extended_node()),
-          ?assertThrow({missing, <<"run_list">>}, chef_node:validate_json_node(N, create)),
-          ?assertThrow({missing, <<"run_list">>},
+          ?assertThrow(#ej_invalid{},
+                       chef_node:validate_json_node(N, create)),
+          ?assertThrow(#ej_invalid{},
                        chef_node:validate_json_node(N, {update, <<"a_node">>}))
       end},
      {"check that a node with an invalid name is rejected (1)",
       fun() ->
           N = extended_node(),
           BadN = ej:set({<<"name">>}, N, <<"~dog">>),
-          ?assertThrow({mismatch,{<<"name">>,"^[[:alnum:]_:.-]+$",<<"~dog">>}},
+              ?assertThrow(#ej_invalid{},
                       chef_node:validate_json_node(BadN, create))
       end},
      {"check that a node with an invalid name is rejected (2)",
       fun() ->
           N = extended_node(),
           BadN = ej:set({<<"name">>}, N, <<"~dog">>),
-          ?assertThrow({mismatch,{<<"name">>,"^[[:alnum:]_:.-]+$",<<"~dog">>}},
+              ?assertThrow(#ej_invalid{},
                        chef_node:validate_json_node(BadN, create))
       end},
      {"check that a node with an invalid name is rejected (3)",
       fun() ->
           N = extended_node(),
           BadN = ej:set({<<"name">>}, N, <<"~dog">>),
-          ?assertThrow({mismatch,{<<"name">>,"^[[:alnum:]_:.-]+$",<<"~dog">>}},
+          ?assertThrow(#ej_invalid{},
                        chef_node:validate_json_node(BadN, create))
       end},
      {"check that a node with an invalid name is rejected (4)",
       fun() ->
           N = extended_node(),
           BadN = ej:set({<<"name">>}, N, <<"~dog">>),
-          ?assertThrow({mismatch,{<<"name">>,"^[[:alnum:]_:.-]+$",<<"~dog">>}},
-                      chef_node:validate_json_node(BadN, create))
+              ?assertThrow(#ej_invalid{},
+                           chef_node:validate_json_node(BadN, create))
       end},
      {"check that a node with an correct json class is accepted)",
       fun() ->
@@ -117,14 +122,14 @@ validate_json_node_test_() ->
       fun() ->
           N = extended_node(),
           BadN = ej:set({<<"json_class">>}, N, <<"Chef::Role">>),
-          ?assertThrow({mismatch,{<<"json_class">>,"Chef::Node",<<"Chef::Role">>}},
+          ?assertThrow(#ej_invalid{},
                        chef_node:validate_json_node(BadN, create))
       end},
      {"check that a node with an bad json proplist in the normal field is rejected)",
       fun() ->
           N = extended_node(),
           BadN = ej:set({<<"json_class">>}, N, []),
-          ?assertThrow({mismatch,{<<"json_class">>,"Chef::Node",[]}},
+          ?assertThrow(#ej_invalid{},
                        chef_node:validate_json_node(BadN, create))
       end},
      {"check that a bogus run list is rejected",
@@ -133,7 +138,7 @@ validate_json_node_test_() ->
               BadN = ej:set({<<"run_list">>},
                             N,
                             [<<"recipe[foo]">>, <<"fake[not_good]">>]),
-              ?assertThrow({bad_run_list, _},
+              ?assertThrow(#ej_invalid{},
                            chef_node:validate_json_node(BadN, create))
       end}].
 
@@ -170,12 +175,12 @@ parse_check_binary_as_json_node_test_() ->
       end},
      {"check that a node with an invalid name is rejected (1)",
       fun() ->
-          N = extended_node(),
-          BadN = ej:set({<<"name">>}, N, <<"~dog">>),
-          NB = jiffy:encode(BadN),
-          ?assertThrow({mismatch,  {<<"name">>, _, _}},
-                       chef_node:parse_check_binary_as_json_node(NB, create)),
-          ?assertThrow({url_json_name_mismatch, _},
-                       chef_node:parse_check_binary_as_json_node(NB, {update, <<"a_node">>}))
+              N = extended_node(),
+              BadN = ej:set({<<"name">>}, N, <<"~dog">>),
+              NB = jiffy:encode(BadN),
+              ?assertThrow(#ej_invalid{},
+                           chef_node:parse_check_binary_as_json_node(NB, create)),
+              ?assertThrow({url_json_name_mismatch, _},
+                           chef_node:parse_check_binary_as_json_node(NB, {update, <<"a_node">>}))
       end}
     ].
