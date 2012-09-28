@@ -28,6 +28,7 @@ deps << "opscode-expander"
 deps << "chef-sql-schema" # needed to migrate the DB.
 deps << "keepalived"
 deps << "bookshelf"
+deps << "varnish"
 
 # the front-end services
 deps << "oc_erchef"
