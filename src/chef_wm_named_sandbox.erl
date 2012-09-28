@@ -62,7 +62,7 @@ allowed_methods(Req, State) ->
     {['PUT'], Req, State}.
 
 auth_info(Req, State) ->
-    {{container, sandbox}, Req, State}.
+    {[{container, sandbox, create}], Req, State}.
 
 %% Org is checked for in malformed_request/2, sandbox is checked for in forbidden/2;
 %% if we get this far, it exists.
