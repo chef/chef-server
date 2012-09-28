@@ -64,39 +64,64 @@ allowed_methods(Req, State) ->
 fetch_client_or_user(DbContext, OrgName, Name) ->
     case chef_db:fetch_client(DbContext, OrgName, Name) of
         not_found ->
-            not_found;
-        #chef_client{} = Found ->
-            Found
+            case chef_db:fetch_user(DbContext, Name) of
+                not_found ->
+                    not_found;
+                #chef_user{} = User ->
+                    User
+            end;
+        #chef_client{} = Client ->
+            Client
     end.
 
 validate_request(_Method, Req, #base_state{chef_db_context = DbContext,
                                            organization_name = OrgName,
                                            resource_state = ResourceState} = State) ->
     Name = chef_wm_util:object_name(principal, Req),
-    ResourceState1 = case fetch_client_or_user(DbContext, OrgName, Name) of
-                         not_found ->
-                             not_found;
-                         #chef_client{} = Client ->
-                             ResourceState#client_state{chef_client = Client}
-                     end,
-    {Req, State#base_state{resource_state = ResourceState1}}.
+    State1 = case fetch_client_or_user(DbContext, OrgName, Name) of
+                 not_found ->
+                     State#base_state{resource_state = {not_found}};
+                 #chef_client{} = Client ->
+                     State#base_state{resource_state =
+                                          ResourceState#client_state{chef_client =
+                                                                         Client}};
+                 #chef_user{} = User ->
+                     State#base_state{resource_state = #user_state{chef_user = User}}
+             end,
+    {Req, State1}.
 
-auth_info(Req, #base_state{resource_state = not_found} = State) ->
+auth_info(Req, #base_state{resource_state = {not_found}} = State) ->
     Name = chef_wm_util:object_name(principal, Req),
     Message = chef_wm_util:not_found_message(client, Name),
     Req1 = chef_wm_util:set_json_body(Req, Message),
     {{halt, 404}, Req1, State#base_state{log_msg = client_not_found}};
 auth_info(Req, #base_state{resource_state =
-                               #client_state{chef_client =
-                                                 #chef_client{authz_id = AuthzId} =
-                                                 Client} = ClientState} = State) ->
+                               #client_state{chef_client = Client} =
+                               ClientState} = State) ->
     ClientState1 = ClientState#client_state{chef_client = Client},
     State1 = State#base_state{resource_state = ClientState1},
+    {authorized, Req, State1};
+auth_info(Req, #base_state{resource_state =
+                               #user_state{chef_user = User} =
+                               UserState} = State) ->
+    UserState1 = UserState#user_state{chef_user = User},
+    State1 = State#base_state{resource_state = UserState1},
     {authorized, Req, State1}.
+
+assemble_user_pubkey_ejson(#chef_user{username=Name, public_key=PubKey,
+                                      pubkey_version=Version}) ->
+    {[{<<"username">>, Name},
+      {<<"pubkey">>, PubKey},
+      {<<"pubkey_version">>, Version}]}.
 
 to_json(Req, #base_state{resource_state =
                              #client_state{chef_client = Client}} = State) ->
     EJson = chef_client:assemble_client_pubkey_ejson(Client),
+    Json = ejson:encode(EJson),
+    {Json, Req, State};
+to_json(Req, #base_state{resource_state =
+                             #user_state{chef_user = User}} = State) ->
+    EJson = assemble_user_pubkey_ejson(User),
     Json = ejson:encode(EJson),
     {Json, Req, State}.
 

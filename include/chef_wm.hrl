@@ -180,6 +180,12 @@
           partial_paths = []
          }).
 
+-record(user_state, {
+          user_data,
+          user_authz_id,
+          chef_user :: #chef_user{} | not_found
+         }).
+
 -record(depsolver_state, {
           chef_environment :: #chef_environment{},
           %% environment within which to depsolve from the URL
