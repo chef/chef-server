@@ -41,6 +41,19 @@
 -define(BASE_ROUTES, chef_wm_routes).
 -endif.
 
+-type permission() :: create | delete | read | update.
+
+-type container_name() :: cookbook |
+                          data |
+                          environment |
+                          node |
+                          role |
+                          client |
+                          sandbox.
+
+-type auth_tuple() :: {object, object_id(), permission()} |
+                      {container, container_name(), permission()}.
+
 -type wm_req() :: #wm_reqdata{}.
 
 %% Shared resource state shared by all chef_wm resource modules.

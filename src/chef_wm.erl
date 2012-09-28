@@ -23,13 +23,7 @@
 -type http_verb() :: 'GET' | 'PUT' | 'POST' | 'DELETE' | 'HEAD' | 'OPTIONS'.
 -type base_state() :: #base_state{}.
 -type resource_state() :: term().
--type container_name() :: cookbook |
-                          data |
-                          environment |
-                          node |
-                          role |
-                          client |
-                          sandbox.
+
 -callback init(list()) ->
     {ok, base_state()} | error().
 
@@ -50,4 +44,5 @@
     {{create_in_container, container_name()}, wm_req(), base_state()} |
     {{container, container_name()}, wm_req(), base_state()} |
     {{object, object_id()}, wm_req(), base_state()} |
+    {[auth_tuple()], wm_req(), base_state()} |
     {authorized, wm_req(), base_state()}.
