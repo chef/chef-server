@@ -30,9 +30,6 @@
 
 -include("chef_types.hrl").
 
-%% Maximum size of raw JSON sandbox data, in bytes
--define(MAX_SIZE, 1000000).
-
 -define(VALIDATION_CONSTRAINTS,
         {[
           {<<"checksums">>, {fun_match, {fun valid_checksum_hash/1,
@@ -41,22 +38,10 @@
                             }}
          ]}).
 
-%% @doc Convert a binary JSON string representing a Chef Role into an
+%% @doc Convert a binary JSON string representing a Chef Sandbox into an
 %% EJson-encoded Erlang data structure.
-%% @end
 -spec parse_binary_json( binary(), create ) -> { ok, ejson_term() }. % or throw
 parse_binary_json(Bin, create) ->
-    Size = iolist_size(Bin),
-    case Size > ?MAX_SIZE of
-        true ->
-            Msg = iolist_to_binary([<<"Sandbox JSON must be less than ">>,
-                                    integer_to_list(?MAX_SIZE),
-                                    <<" bytes. You sent ">>,
-                                    integer_to_list(Size),
-                                    <<" bytes.">>]),
-            throw({json_too_large, Msg});
-        false -> ok
-    end,
     Sandbox = chef_json:decode(Bin),
     validate(Sandbox).
 
