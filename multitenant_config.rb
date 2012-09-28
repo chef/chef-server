@@ -79,6 +79,8 @@ include_internal false
 superuser_name 'pivotal'
 superuser_key  '/etc/opscode/pivotal.pem'
 
+webui_key '/etc/opscode/webui_priv.pem'
+
 requestors({
              :clients => {
                # The the admin user, for the purposes of getting things rolling
