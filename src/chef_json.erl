@@ -30,7 +30,7 @@
 -spec decode_body( binary() ) -> ejson_term(). % or throw
 %% @doc Decodes JSON body and verifies valid payload type
 decode_body(Bin) ->
-    Body = ejson:decode(Bin),
+    Body = jiffy:decode(Bin),
     verify_json_type(Body).
 
 verify_json_type({JSON}) when is_list(JSON) ->

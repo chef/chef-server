@@ -112,9 +112,9 @@ insert_autofill_fields(JsonNode, Fields) ->
                                              {ok, ejson_term()}.
 %% @doc Parses, validates, and normalizes node JSON binary.
 parse_check_binary_as_json_node(NodeBin, Action) ->
-    %% NOTE: ejson:decode/1 will throw({invalid_json, _}) and we rely
+    %% NOTE: jiffy:decode/1 will throw({invalid_json, _}) and we rely
     %% on that behavior as the calling code is only catching based on
     %% a `throw:Why' pattern.
-    Json = ejson:decode(NodeBin),
+    Json = jiffy:decode(NodeBin),
     JsonFilled = insert_autofill_fields(Json),
     validate_json_node(JsonFilled, Action).

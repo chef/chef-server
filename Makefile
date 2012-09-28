@@ -1,10 +1,10 @@
 DEPS=$(CURDIR)/deps
 DIALYZER_DEPS = deps/depsolver/ebin \
                 deps/ej/ebin \
-                deps/ejson/ebin \
+                deps/jiffy/ebin \
                 deps/ibrowse/ebin \
-                deps/mini_s3/ebin \
-                deps/mochiweb/ebin
+                deps/mini_s3/ebin
+
 DEPS_PLT = chef_objects.plt
 
 .PHONY: doc

@@ -35,7 +35,7 @@ normalize_json_object(JSONObject) ->
 
 json_read(Filename) ->
   {ok, Daters} = file:read_file(Filename),
-  DecodedDaters = ejson:decode(Daters),
+  DecodedDaters = jiffy:decode(Daters),
   DecodedDaters.
 
 

@@ -241,7 +241,7 @@ parse_version_badversion_test() ->
 dependencies_to_depsolver_constraints_test_() ->
     {foreachx,
      fun({Terms, _Expected}) ->
-             ejson:encode({Terms})
+             jiffy:encode({Terms})
      end,
      fun(_, _) ->
              ok
