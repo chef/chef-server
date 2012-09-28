@@ -40,6 +40,7 @@ module PrivateChef
   nrpe Mash.new
   estatsd Mash.new
   nginx Mash.new
+  varnish Mash.new
   log_retention Mash.new
   log_rotation Mash.new
   dark_launch Mash.new
@@ -191,6 +192,7 @@ module PrivateChef
         "nrpe",
         "estatsd",
         "nginx",
+        "varnish",
         "ldap",
         "user"
       ].each do |key|
@@ -264,6 +266,7 @@ module PrivateChef
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
       PrivateChef["bookshelf"]["ha"] ||= true
       PrivateChef["couchdb"]["ha"] ||= true
+      PrivateChef["varnish"]["ha"] ||= true
       PrivateChef["rabbitmq"]["ha"] ||= true
       PrivateChef["opscode_solr"]["ha"] ||= true
       PrivateChef["opscode_expander"]["ha"] ||= true
@@ -285,6 +288,7 @@ module PrivateChef
       PrivateChef[:role] = "backend" #mixlib-config wants a symbol :(
       PrivateChef["bookshelf"]["listen"] ||= "0.0.0.0"
       PrivateChef["couchdb"]["bind_address"] ||= "0.0.0.0"
+      PrivateChef["varnish"]["bind_address"] ||= "0.0.0.0"
       PrivateChef["rabbitmq"]["node_ip_address"] ||= "0.0.0.0"
       PrivateChef["opscode_solr"]["ip_address"] ||= "0.0.0.0"
       PrivateChef["opscode_chef"]["worker_processes"] ||= 6
@@ -306,6 +310,8 @@ module PrivateChef
       PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["couchdb"]["enable"] ||= false
       PrivateChef["couchdb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["varnish"]["enable"] ||= false
+      PrivateChef["varnish"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["rabbitmq"]["enable"] ||= false
       PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["opscode_solr"]["enable"] ||= false

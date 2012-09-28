@@ -30,6 +30,7 @@ dependency "opscode-expander"
 dependency "chef-sql-schema" # needed to migrate the DB.
 dependency "keepalived"
 dependency "bookshelf"
+dependency "varnish"
 
 # the front-end services
 dependency "oc_erchef"
