@@ -31,15 +31,6 @@
 
 -include_lib("chef_wm/include/chef_wm.hrl").
 
--type permission() :: create | delete | read | update.
-
-%% This somewhat duplicates the chef_authz:resource_type() type, but I don't know that it's
-%% worth pulling all the authz types and records here.
--type authz_object() :: container | object.
-
-%% @doc Used for the multi_auth_check/3 function
--type auth_tuple() :: {authz_object(), object_id(), permission()}.
-
 %% @doc Determines if service is available.
 %%
 %% Also initializes chef_db_context and reqid fields of base_state.
