@@ -1,0 +1,4 @@
+#!/bin/sh
+exec 2>&1
+exec chpst -P /opt/opscode/embedded/sbin/varnishd -F -P /opt/opscode/embedded/var/run/varnishd.pid -a :6984 -T 6082 -f /var/opt/opscode/varnish/etc/default.vcl -s file,/var/opt/opscode/varnish/varnish_storage.bin,1G
+
