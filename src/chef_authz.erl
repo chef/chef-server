@@ -290,7 +290,7 @@ delete_ace_for_resource(RequestorId, ResourceType, Id, AccessMethod) ->
 -spec set_ace_for_resource(requestor_id(), resource_type(), binary(), access_method(), authz_ace()) -> ok|{error, any()}.
 set_ace_for_resource(RequestorId, ResourceType, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
     Url = make_url([pluralize_resource(ResourceType), Id, acl, AccessMethod]),
-    Body = ejson:encode({[{<<"actors">>, Actors}, {<<"groups">>, Groups}]}),
+    Body = jiffy:encode({[{<<"actors">>, Actors}, {<<"groups">>, Groups}]}),
     case chef_authz_http:request(Url, put, [], Body, RequestorId) of
         ok -> ok;
         %% Expected errors are forbidden, not_found, server_error
@@ -373,7 +373,7 @@ merge_acl(Acl1, Acl2) ->
 -ifdef(TEST).
 extract_acl_test() ->
     {ok, AclJson} = file:read_file("../test/example_container_acl.json"),
-    RawAcl = ejson:decode(AclJson),
+    RawAcl = jiffy:decode(AclJson),
     Acl = extract_acl(RawAcl),
     [ ?assertEqual(true, lists:keymember(Perm, 1, Acl)) || Perm <- ?access_methods ],
     ReadAce = proplists:get_value(read, Acl),
@@ -385,11 +385,11 @@ extract_acl_test() ->
 
 merge_acl_test_() ->
     {ok, ContainerAclJson} = file:read_file("../test/example_container_acl.json"),
-    RawContainerAcl = ejson:decode(ContainerAclJson),
+    RawContainerAcl = jiffy:decode(ContainerAclJson),
     ContainerAcl = extract_acl(RawContainerAcl),
 
     {ok, NodeAclJson} = file:read_file("../test/example_node_acl.json"),
-    RawNodeAcl = ejson:decode(NodeAclJson),
+    RawNodeAcl = jiffy:decode(NodeAclJson),
     NodeAcl = extract_acl(RawNodeAcl),
 
     MergedAcl = merge_acl(ContainerAcl, NodeAcl),

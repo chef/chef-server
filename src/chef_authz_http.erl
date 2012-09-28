@@ -51,13 +51,13 @@ request(Path, Method, Headers, Body, RequestorId) ->
         {ok, "200", _ResponseHeaders, ResponseBody} = _Response ->
             case ResponseBody of
                 "{}" -> ok;
-                Raw -> Json = ejson:decode(Raw),
+                Raw -> Json = jiffy:decode(Raw),
                        {ok, Json}
             end;
         {ok, "201", _ResponseHeaders, ResponseBody} = _Response ->
             case ResponseBody of
                 "{}" -> ok;
-                Raw -> Json = ejson:decode(Raw),
+                Raw -> Json = jiffy:decode(Raw),
                        {ok, Json}
             end;
         {ok, "403", _H, _B} -> {error, forbidden};
