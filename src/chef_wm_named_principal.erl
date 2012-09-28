@@ -61,21 +61,27 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
+fetch_client_or_user(DbContext, OrgName, Name) ->
+    case chef_db:fetch_client(DbContext, OrgName, Name) of
+        not_found ->
+            not_found;
+        #chef_client{} = Found ->
+            Found
+    end.
+
 validate_request(_Method, Req, #base_state{chef_db_context = DbContext,
                                            organization_name = OrgName,
-                                           resource_state = ClientState} = State) ->
+                                           resource_state = ResourceState} = State) ->
     Name = chef_wm_util:object_name(principal, Req),
-    Client = case chef_db:fetch_client(DbContext, OrgName, Name) of
-                 not_found ->
-                     not_found;
-                 #chef_client{} = Found ->
-                     Found
-             end,
-    ClientState1 = ClientState#client_state{chef_client = Client},
-    {Req, State#base_state{resource_state = ClientState1}}.
+    ResourceState1 = case fetch_client_or_user(DbContext, OrgName, Name) of
+                         not_found ->
+                             not_found;
+                         #chef_client{} = Client ->
+                             ResourceState#client_state{chef_client = Client}
+                     end,
+    {Req, State#base_state{resource_state = ResourceState1}}.
 
-auth_info(Req, #base_state{resource_state =
-                               #client_state{chef_client = not_found}} = State) ->
+auth_info(Req, #base_state{resource_state = not_found} = State) ->
     Name = chef_wm_util:object_name(principal, Req),
     Message = chef_wm_util:not_found_message(client, Name),
     Req1 = chef_wm_util:set_json_body(Req, Message),
