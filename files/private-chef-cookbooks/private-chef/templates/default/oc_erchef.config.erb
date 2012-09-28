@@ -61,7 +61,7 @@
                   {certificate_root_url, "http://<%= node['private_chef']['opscode-certificate']['vip'] %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificates"},
                   {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
                   {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
-                  {s3_url, "http://<%= node['private_chef']['bookshelf']['vip'] %>:<%= node['private_chef']['bookshelf']['port'] %>"},
+                  {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= node['private_chef']['lb']['api_fqdn'] %>"},
                   {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"}
                  ]},
   {stats_hero, [
