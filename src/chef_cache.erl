@@ -225,7 +225,7 @@ verify_and_delete(Name, Key, TTL) ->
     end.
 
 now_ts() ->
-    Now = erlang:now(),
+    Now = os:timestamp(),
     NowSecs = calendar:datetime_to_gregorian_seconds( calendar:now_to_universal_time(Now)),
     EpochStartSecs = calendar:datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}}),
     NowSecs - EpochStartSecs.
