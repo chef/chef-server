@@ -22,6 +22,5 @@
   {registered, []},
   {applications, [kernel,
                   stdlib,
-		  sasl,
-                  ejson]}
+		  sasl]}
  ]}.
