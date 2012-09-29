@@ -16,7 +16,7 @@ GIT
 
 GIT
   remote: git@github.com:opscode/chef-pedant-tests.git
-  revision: 7d32cf3e637673df8d20191a619d8df5b89e1b84
+  revision: 129dde566ba2ea993fae602cbb75b682c5117c73
   specs:
     chef-pedant-tests (0.0.1)
 
