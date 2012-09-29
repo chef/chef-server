@@ -142,7 +142,7 @@ search_test_() ->
                         {[{<<"start">>, 2},
                           {<<"numFound">>, 10},
                           {<<"docs">>, Docs}]}}]},
-              SolrJson = ejson:encode(Solr),
+              SolrJson = jiffy:encode(Solr),
               meck:expect(ibrowse, send_req,
                           fun(_Url, [], get) -> {ok, "200", [], SolrJson} end),
               Query0 = #chef_solr_query{

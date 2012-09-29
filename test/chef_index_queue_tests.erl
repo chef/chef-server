@@ -61,7 +61,7 @@ send_data_to_amqp_test_() ->
             %% us use pattern matching to check small pieces at a time
             AssertPublishDataCorrect = fun(_ServerName, RoutingKey, Data) ->
                 ?assertEqual(<<"vnode-257">>, RoutingKey),
-                DecodedData = ejson:decode(Data),
+                DecodedData = jiffy:decode(Data),
                 {[{<<"action">>, <<"add">>}, {<<"payload">>, InnerEnvelope}]} = DecodedData,
                 {[{<<"type">>, <<"node">>},
                   {<<"id">>, ?ObjectID},

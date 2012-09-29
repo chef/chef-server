@@ -65,7 +65,7 @@ search(#chef_solr_query{}=Query) ->
     {ok, Code, _Head, Body} = ibrowse:send_req(Url, [], get),
     case Code of
         "200" ->
-            SolrData = ejson:decode(Body),
+            SolrData = jiffy:decode(Body),
             Response = ej:get({<<"response">>}, SolrData),
             Start = ej:get({<<"start">>}, Response),
             NumFound = ej:get({<<"numFound">>}, Response),
