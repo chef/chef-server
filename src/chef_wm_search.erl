@@ -77,7 +77,7 @@ validate_request('GET', Req, State) ->
     {Req, State#base_state{resource_state = SearchState}};
 validate_request('POST', Req, State) ->
     Query = make_query_from_params(Req),
-    Body = ejson:decode(wrq:req_body(Req)),
+    Body = chef_json:decode(wrq:req_body(Req)),
     validate_body(Body),
     {NamePaths} = Body,
     SearchState = #search_state{solr_query = Query, partial_paths = NamePaths},
@@ -212,7 +212,7 @@ make_bulk_get_fun(DbContext, OrgName, {data_bag, BagName}, [], _Req) ->
                     %% add a special bulk get query that also returns bag_name and item_name
                     %% and hand-craft the json to avoid parsing.
                     [ begin
-                          RawItem = ejson:decode(chef_db_compression:decompress(Item)),
+                          RawItem = chef_json:decode(chef_db_compression:decompress(Item)),
                           ItemName = ej:get({<<"id">>}, RawItem),
                           chef_data_bag_item:wrap_item(BagName, ItemName, RawItem)
                       end || Item <- Items ]
@@ -279,7 +279,7 @@ parse_item(_, Item) ->
     parse_item0(Item).
 
 parse_item0(Item) when is_binary(Item) ->
-    ejson:decode(chef_db_compression:decompress(Item));
+    chef_json:decode(chef_db_compression:decompress(Item));
 parse_item0({L}=Item) when is_list(L) ->
     %% should be valid EJSON format
     Item.
@@ -370,7 +370,7 @@ encode_result_rows([Item|_Rest]=Items) when is_binary(Item) ->
 encode_result_rows(Items) ->
     %% ensure no couchdb cruft leaks out
     CleanItems = [ {remove_couchdb_keys(Doc)} || {Doc} <- Items ],
-    Bin = ejson:encode(CleanItems),
+    Bin = chef_json:encode(CleanItems),
     %% remove leading '[' and trailing ']' so that we can add to this result.
     binary:part(Bin, {1, size(Bin) - 2}).
 

@@ -135,7 +135,7 @@ all_clients_json(Req, #base_state{chef_db_context = DbContext,
     ClientNames = chef_db:fetch_clients(DbContext, OrgName),
     RouteFun = ?BASE_ROUTES:bulk_route_fun(client, Req),
     UriMap = [ {Name, RouteFun(Name)} || Name <- ClientNames ],
-    ejson:encode({UriMap}).
+    chef_json:encode({UriMap}).
 
 % TODO: this could stand refactoring: I'm sure there is stuff re-used by other
 % endpoints and possibly unused code here
@@ -153,7 +153,7 @@ malformed_request_message(#ej_invalid{type = missing, key = Key}, _Req, _State) 
     error_message([<<"Required value for ">>, Key, <<" is missing">>]);
 malformed_request_message({invalid_key, Key}, _Req, _State) ->
     error_message([<<"Invalid key ">>, Key, <<" in request body">>]);
-malformed_request_message(invalid_json_body, _Req, _State) ->
+malformed_request_message(invalid_json_object, _Req, _State) ->
     error_message([<<"Incorrect JSON type for request body">>]);
 malformed_request_message(#ej_invalid{type = exact, key = Key, msg = Expected},
                           _Req, _State) ->

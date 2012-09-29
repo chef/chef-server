@@ -109,7 +109,7 @@ malformed_request_message(Any, _Req, _State) ->
 
 validate_request('PUT', Req, State) ->
     %% it's OK if this throws, will be handled by caller of validate_request/2.
-    Body = ejson:decode(wrq:req_body(Req)),
+    Body = chef_json:decode(wrq:req_body(Req)),
     case ej:get({<<"is_completed">>}, Body) of
         true ->
             {Req, State#base_state{resource_state = #sandbox_state{}}};

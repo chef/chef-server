@@ -111,7 +111,7 @@ all_data_bags_json(Req, #base_state{chef_db_context = DbContext,
     DataBagNames = chef_db:fetch_data_bags(DbContext, OrgName),
     RouteFun = ?BASE_ROUTES:bulk_route_fun(data_bag, Req),
     UriMap= [{Name, RouteFun(Name)} || Name <- DataBagNames],
-    ejson:encode({UriMap}).
+    chef_json:encode({UriMap}).
 
 
 %% error message functions

@@ -111,8 +111,8 @@ to_json(Req, #base_state{resource_state = #role_state{
     JSON = chef_db_compression:decompress(Gzip),
     case EnvRunListOnly of
         true ->
-            Environments = chef_role:environments(ejson:decode(JSON)),
-            {ejson:encode(Environments), Req, State};
+            Environments = chef_role:environments(chef_json:decode(JSON)),
+            {chef_json:encode(Environments), Req, State};
         false ->
             {JSON, Req, State}
     end.

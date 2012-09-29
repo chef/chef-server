@@ -104,7 +104,7 @@ to_json(Req, #base_state{chef_db_context = DBContext,
     SearchIndexes = generate_index_list(DBContext, OrgId),
     IndexMap = index_map(SearchIndexes, Req),
     %% IndexMap is a proplist, need to wrap in a tuple for ejson
-    Json = ejson:encode({IndexMap}),
+    Json = chef_json:encode({IndexMap}),
     {Json, Req, State}.
 
 %% This should never get called; if it does, something is very wrong.

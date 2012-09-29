@@ -95,7 +95,7 @@ to_json(CookbookName0, Req, #base_state{chef_db_context = DbContext,
         CookbookVersions ->
             AggregateCookbooks = aggregate_versions(CookbookVersions),
             CBList = make_cookbook_list(Req, AggregateCookbooks, all),
-            {ejson:encode({CBList}), Req, State}
+            {chef_json:encode({CBList}), Req, State}
     end.
 
 %%
@@ -114,7 +114,7 @@ all_cookbooks_json(Req, #base_state{chef_db_context = DbContext,
     #cookbook_state{num_versions = NumVersions} = CookbookState,
     AggregateCookbooks = aggregate_versions(CookbookVersions),
     CBList = make_cookbook_list(Req, AggregateCookbooks, NumVersions),
-    ejson:encode({CBList}).
+    chef_json:encode({CBList}).
 
 %% @doc Generate a JSON hash mapping a cookbook's name to the URL for the most recent
 %% version of that cookbook
@@ -124,7 +124,7 @@ latest_cookbooks_json(Req, #base_state{chef_db_context = DbContext,
                                        organization_name = OrgName}) ->
     Latest = chef_db:fetch_latest_cookbook_versions(DbContext, OrgName),
     Processed = process_latest_cookbooks(Latest, Req),
-    ejson:encode({Processed}).
+    chef_json:encode({Processed}).
 
 %% @doc Generate a JSON array of cookbook-qualified names (i.e. "cookbook::recipe") for all
 %% the recipes in the latest version of each cookbook in an organization.  Items are sorted
@@ -135,7 +135,7 @@ cookbook_recipes_json(#base_state{chef_db_context = DbContext,
     Recipes = chef_db:fetch_latest_cookbook_recipes(DbContext, OrgName),
     %% Recipes is just a list of cookbook-qualified recipe names, so we don't need to do any
     %% further processing; just encode to JSON and we're done.
-    ejson:encode(Recipes).
+    chef_json:encode(Recipes).
 
 %% @doc Generate a proplist mapping cookbook name to the URL for the latest
 %% version of that cookbook.

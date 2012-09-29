@@ -275,7 +275,7 @@ assemble_response(Req, State, CookbookVersions) ->
                        chef_cookbook:minimal_cookbook_ejson(CBV) }
                       || CBV <- CookbookVersions ]
                     },
-            CBMapJson = ejson:encode(JsonList),
+            CBMapJson = chef_json:encode(JsonList),
             {true, wrq:append_to_response_body(CBMapJson, Req), State};
         {error, Msg} ->
             forbid(Req, State, Msg, {read, forbidden})

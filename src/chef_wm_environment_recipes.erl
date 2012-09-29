@@ -101,4 +101,4 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                              name = EnvName
                             }}} = State) ->
     Results = chef_db:fetch_environment_filtered_recipes(DbContext, OrgName, EnvName),
-    {ejson:encode(Results), Req, State}.
+    {chef_json:encode(Results), Req, State}.

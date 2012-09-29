@@ -110,7 +110,7 @@ resource_exists(Req, #base_state{chef_db_context = DbContext,
             case chef_db:environment_exists(DbContext, OrgId, EnvName) of
                 true -> {true, Req, State};
                 false ->
-                    Msg = ejson:encode(chef_wm_util:environment_not_found_message(EnvName)),
+                    Msg = chef_json:encode(chef_wm_util:environment_not_found_message(EnvName)),
                     {false, wrq:set_resp_body(Msg, Req),
                      State#base_state{log_msg={env_not_found, EnvName}}}
             end
@@ -141,7 +141,7 @@ list_nodes(EnvName, Req, #base_state{chef_db_context = DbContext,
 package_node_list(NodeNames, Req, #base_state{}=State) ->
     RouteFun = ?BASE_ROUTES:bulk_route_fun(node, Req),
     NameMap = [ {Name, RouteFun(Name)} || Name <- NodeNames ],
-    Json = ejson:encode({NameMap}),
+    Json = chef_json:encode({NameMap}),
     {Json, Req, State#base_state{log_msg = {list, length(NodeNames)}}}.
 
 %% error message functions

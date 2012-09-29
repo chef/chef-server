@@ -59,7 +59,7 @@ to_json(Req, State) ->
 check_health() ->
     Pings = spawn_health_checks(),
     Status = overall_status(Pings),
-    {Status, ejson:encode({[{<<"status">>, ?A2B(Status)}, {<<"upstreams">>, {Pings}}]})}.
+    {Status, chef_json:encode({[{<<"status">>, ?A2B(Status)}, {<<"upstreams">>, {Pings}}]})}.
 
 overall_status(Pings) ->
     case [ Pang || {_, <<"fail">>}=Pang <- Pings ] of

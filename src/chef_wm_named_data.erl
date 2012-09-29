@@ -205,7 +205,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
     NakedBag = {[{<<"name">>, DataBagName},
                  {<<"json_class">>, <<"Chef::DataBag">>},
                  {<<"chef_type">>, <<"data_bag">>}]},
-    Json = ejson:encode(NakedBag),
+    Json = chef_json:encode(NakedBag),
     {true, wrq:set_resp_body(Json, Req), State}.
 
 %% Private utility functions
@@ -218,7 +218,7 @@ items_for_data_bag(Req, #base_state{chef_db_context = DbContext,
     ItemNames = chef_db:fetch_data_bag_items(DbContext, OrgName, DataBagName),
     RouteFun = ?BASE_ROUTES:bulk_route_fun(data_bag_item, DataBagName, Req),
     UriMap = [ {Name, RouteFun(Name)}  || Name <- ItemNames ],
-    ejson:encode({UriMap}).
+    chef_json:encode({UriMap}).
 
 conflict_message(data_bag_item, ItemName, BagName) ->
     Msg = <<"Data Bag Item '", ItemName/binary, "' already exists in Data Bag '",

@@ -120,7 +120,7 @@ fetch_cookbook_version(DbContext, OrgName, Name, Version) ->
 
 to_json(Req, #base_state{resource_state=#cookbook_state{chef_cookbook_version=CBV}}=State) ->
     CompleteEJson = chef_cookbook:assemble_cookbook_ejson(CBV),
-    {ejson:encode(CompleteEJson), Req, State}.
+    {chef_json:encode(CompleteEJson), Req, State}.
 
 from_json(Req, #base_state{resource_state = CookbookState} = State) ->
     case cookbook_version_exists(CookbookState) of
