@@ -61,7 +61,7 @@ body_for_post(Guid) ->
 %%
 %% We apply here a version for the Pubkey
 parse_json_response(Body) ->
-    EJson = ejson:decode(Body),
+    EJson = chef_json:decode(Body),
     Cert = ej:get({<<"cert">>}, EJson),
     Keypair = ej:get({<<"keypair">>}, EJson),
     {Cert, Keypair}.

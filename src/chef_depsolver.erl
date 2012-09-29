@@ -54,7 +54,7 @@
 %% @end
 -spec parse_binary_json( binary() ) -> { ok, ejson_term() }. % or throw
 parse_binary_json(Bin) ->
-    Bin0 = ejson:decode(Bin),
+    Bin0 = chef_json:decode(Bin),
     Runlist = set_default_values(Bin0),
     validate_body(Runlist).
 

@@ -54,7 +54,7 @@
 new_record(chef_environment, OrgId, AuthzId, EnvData) ->
     Name = ej:get({<<"name">>}, EnvData),
     Id = make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(chef_environment, ejson:encode(EnvData)),
+    Data = chef_db_compression:compress(chef_environment, chef_json:encode(EnvData)),
     #chef_environment{id = Id,
                       authz_id = maybe_stub_authz_id(AuthzId, Id),
                       org_id = OrgId,
@@ -83,7 +83,7 @@ new_record(chef_data_bag, OrgId, AuthzId, Name) ->
 new_record(chef_data_bag_item, OrgId, _AuthzId, {BagName, ItemData}) ->
     ItemName = ej:get({<<"id">>}, ItemData),
     Id = make_org_prefix_id(OrgId, <<BagName/binary, ItemName/binary>>),
-    Data = chef_db_compression:compress(chef_data_bag_item, ejson:encode(ItemData)),
+    Data = chef_db_compression:compress(chef_data_bag_item, chef_json:encode(ItemData)),
     #chef_data_bag_item{id = Id,
                         org_id = OrgId,
                         data_bag_name = BagName,
@@ -94,7 +94,7 @@ new_record(chef_node, OrgId, AuthzId, NodeData) ->
     Name = ej:get({<<"name">>}, NodeData),
     Environment = ej:get({<<"chef_environment">>}, NodeData),
     Id = make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(chef_node, ejson:encode(NodeData)),
+    Data = chef_db_compression:compress(chef_node, chef_json:encode(NodeData)),
     #chef_node{id = Id,
                authz_id = maybe_stub_authz_id(AuthzId, Id),
                org_id = OrgId,
@@ -104,7 +104,7 @@ new_record(chef_node, OrgId, AuthzId, NodeData) ->
 new_record(chef_role, OrgId, AuthzId, RoleData) ->
     Name = ej:get({<<"name">>}, RoleData),
     Id = make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(chef_role, ejson:encode(RoleData)),
+    Data = chef_db_compression:compress(chef_role, chef_json:encode(RoleData)),
     #chef_role{id = Id,
                authz_id = maybe_stub_authz_id(AuthzId, Id),
                org_id = OrgId,
@@ -124,7 +124,7 @@ new_record(chef_cookbook_version, OrgId, AuthzId, CBVData) ->
                                  cookbook_meta_attributes),
 
     %% Do not compress the deps!
-    Deps = ejson:encode(ej:get({<<"dependencies">>}, Metadata0, {[]})),
+    Deps = chef_json:encode(ej:get({<<"dependencies">>}, Metadata0, {[]})),
 
     LongDesc = compress_maybe(ej:get({<<"long_description">>}, Metadata0, <<"">>),
                               cookbook_long_desc),
@@ -156,7 +156,7 @@ new_record(chef_cookbook_version, OrgId, AuthzId, CBVData) ->
 compress_maybe(Data, cookbook_long_desc) ->
     chef_db_compression:compress(cookbook_long_desc, Data);
 compress_maybe(Data, Type) ->
-    chef_db_compression:compress(Type, ejson:encode(Data)).
+    chef_db_compression:compress(Type, chef_json:encode(Data)).
 
 -spec ejson_for_indexing(ChefRecord :: chef_indexable_object(),
                          ChefEJSON :: ejson_term()) -> ejson_term().
@@ -250,7 +250,7 @@ extract_roles(RunList) ->
 %% an object record with this function.
 update_from_ejson(#chef_environment{} = Env, EnvData) ->
     Name = ej:get({<<"name">>}, EnvData),
-    Data = chef_db_compression:compress(chef_environment, ejson:encode(EnvData)),
+    Data = chef_db_compression:compress(chef_environment, chef_json:encode(EnvData)),
     Env#chef_environment{name = Name, serialized_object = Data};
 update_from_ejson(#chef_client{} = Client, ClientData) ->
     Name = ej:get({<<"name">>}, ClientData),
@@ -269,18 +269,18 @@ update_from_ejson(#chef_data_bag{} = DataBag, DataBagData) ->
     DataBag#chef_data_bag{name = Name};
 update_from_ejson(#chef_data_bag_item{} = DataBagItem, DataBagItemData) ->
     Name = ej:get({<<"id">>}, DataBagItemData),
-    DataBagItemJson = ejson:encode(DataBagItemData),
+    DataBagItemJson = chef_json:encode(DataBagItemData),
     Data = chef_db_compression:compress(chef_data_bag_item, DataBagItemJson),
     DataBagItem#chef_data_bag_item{item_name = Name, serialized_object = Data};
 update_from_ejson(#chef_node{} = Node, NodeJson) ->
     Name = ej:get({<<"name">>}, NodeJson),
     %% We expect that the insert_autofill_fields call will insert default when necessary
     Environment = ej:get({<<"chef_environment">>}, NodeJson),
-    Data = chef_db_compression:compress(chef_node, ejson:encode(NodeJson)),
+    Data = chef_db_compression:compress(chef_node, chef_json:encode(NodeJson)),
     Node#chef_node{name = Name, environment = Environment, serialized_object = Data};
 update_from_ejson(#chef_role{} = Role, RoleData) ->
     Name = ej:get({<<"name">>}, RoleData),
-    Data = chef_db_compression:compress(chef_role, ejson:encode(RoleData)),
+    Data = chef_db_compression:compress(chef_role, chef_json:encode(RoleData)),
     Role#chef_role{name = Name, serialized_object = Data};
 update_from_ejson(#chef_cookbook_version{org_id = OrgId,
                                          authz_id = AuthzId,
@@ -441,7 +441,7 @@ depsolver_constraints(#chef_environment{serialized_object=SerializedObject}) ->
     Constraints = ej:get({<<"cookbook_versions">>}, EJson),
     depsolver_constraints(Constraints);
 depsolver_constraints(JSON) when is_binary(JSON) ->
-    Constraints = ejson:decode(JSON),
+    Constraints = chef_json:decode(JSON),
     depsolver_constraints(Constraints);
 depsolver_constraints({Constraints}) when is_list(Constraints) ->
     [ process_constraint_for_depsolver(Constraint)

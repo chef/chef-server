@@ -108,7 +108,8 @@ make_key(OrgId, Checksum) ->
 %% @doc Base64-encode an MD5 hex string.
 -spec base64_checksum(Checksum::binary()) -> binary().
 base64_checksum(Checksum) ->
-    Bin = mochihex:to_bin(as_string(Checksum)),
+    {ok, [BigNum], []} = io_lib:fread("~16u", as_string(Checksum)),
+    Bin = <<BigNum:128>>,
     base64:encode(Bin).
 
 %% @doc Utility function for fetching the S3 bucket name from config.

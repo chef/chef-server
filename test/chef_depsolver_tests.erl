@@ -86,13 +86,13 @@ parse_binary_json_test_() ->
         {"Non json throws error",
          fun() ->
                  Bin = "this_is_not_json",
-                 ?assertThrow({invalid_json, _},
+                 ?assertThrow({error, _},
                               chef_depsolver:parse_binary_json(Bin))
          end},
         {"Bad json throws error",
          fun() ->
                  Bin = "{\"run_list\":",
-                 ?assertThrow({invalid_json, _},
+                 ?assertThrow({error, _},
                               chef_depsolver:parse_binary_json(Bin))
          end}
     ].

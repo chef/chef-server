@@ -157,22 +157,22 @@ parse_check_binary_as_json_node_test_() ->
     [{"check that a valid node is accepted",
       fun() ->
           N = extended_node(),
-          NB = ejson:encode(N),
+          NB = jiffy:encode(N),
           chef_node:parse_check_binary_as_json_node(NB, create),
           chef_node:parse_check_binary_as_json_node(NB, {update, <<"a_node">>})
       end},
      {"check that invalid json is rejected",
       fun() ->
           NB = mk_dummy_node([], 200),
-          ?assertThrow({invalid_json, _}, chef_node:parse_check_binary_as_json_node(NB, create)),
-          ?assertThrow({invalid_json, _},
+          ?assertThrow({error, _}, chef_node:parse_check_binary_as_json_node(NB, create)),
+          ?assertThrow({error, _},
                        chef_node:parse_check_binary_as_json_node(NB, {update, <<"a_node">>}))
       end},
      {"check that a node with an invalid name is rejected (1)",
       fun() ->
           N = extended_node(),
           BadN = ej:set({<<"name">>}, N, <<"~dog">>),
-          NB = ejson:encode(BadN),
+          NB = jiffy:encode(BadN),
           ?assertThrow({mismatch,  {<<"name">>, _, _}},
                        chef_node:parse_check_binary_as_json_node(NB, create)),
           ?assertThrow({url_json_name_mismatch, _},

@@ -65,4 +65,4 @@ decompress(Data) ->
 %% no-op.
 -spec decompress_and_decode(Data :: binary()) -> ejson_term().
 decompress_and_decode(Data) ->
-    ejson:decode(chef_db_compression:decompress(Data)).
+    chef_json:decode(chef_db_compression:decompress(Data)).

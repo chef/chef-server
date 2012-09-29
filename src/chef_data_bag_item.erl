@@ -67,7 +67,7 @@ parse_binary_json(Bin, Action) ->
     %% currently without any additional information.  Do we want to
     %% emit the JSON we recieved (size limited) or some details of the
     %% parse error from ejson if we can extract it?
-    DataBagItem = unwrap_item(ejson:decode(Bin)),
+    DataBagItem = unwrap_item(chef_json:decode(Bin)),
     validate_data_bag_item(DataBagItem, Action).
 
 validate_data_bag_item(DataBagItem, create) ->

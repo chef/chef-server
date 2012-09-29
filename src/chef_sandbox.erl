@@ -57,7 +57,7 @@ parse_binary_json(Bin, create) ->
             throw({json_too_large, Msg});
         false -> ok
     end,
-    Sandbox = ejson:decode(Bin),
+    Sandbox = chef_json:decode(Bin),
     validate_sandbox(Sandbox, create).
 
 

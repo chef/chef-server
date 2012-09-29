@@ -30,7 +30,7 @@ setup_env() ->
     ok = application:set_env(chef_objects, certificate_root_url, ?cert_url).
 
 make_response_body(Cert, KeyPair) ->
-    ejson:encode({[{<<"cert">>, Cert}, {<<"keypair">>, KeyPair}]}).
+    jiffy:encode({[{<<"cert">>, Cert}, {<<"keypair">>, KeyPair}]}).
 
 simple_test_() ->
     MockedModules = [ibrowse],

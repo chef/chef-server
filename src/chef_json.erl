@@ -22,18 +22,31 @@
 -module(chef_json).
 
 -export([
-         decode_body/1
+         decode_body/1,
+         decode/1,
+         encode/1
         ]).
 
 -include("chef_types.hrl").
 
+decode(Bin) ->
+    try
+        jiffy:decode(Bin)
+    catch
+        throw:{error, _} ->
+            throw({error, invalid_json})
+    end.
+
+encode(EJSON) ->
+    jiffy:encode(EJSON).
+
 -spec decode_body( binary() ) -> ejson_term(). % or throw
 %% @doc Decodes JSON body and verifies valid payload type
 decode_body(Bin) ->
-    Body = ejson:decode(Bin),
+    Body = decode(Bin),
     verify_json_type(Body).
 
 verify_json_type({JSON}) when is_list(JSON) ->
     {JSON};
 verify_json_type(_) ->
-    throw(invalid_json_body).
+    throw(invalid_json_object).

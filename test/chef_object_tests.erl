@@ -221,7 +221,7 @@ data_Bag_item_update_from_ejson_test_() ->
         fun() ->
                 Item1 = chef_object:update_from_ejson(Item, RawItem),
                 GotData = Item1#chef_data_bag_item.serialized_object,
-                GotEjson = ejson:decode(chef_db_compression:decompress(GotData)),
+                GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
                 ?assertEqual(<<"the_item_name">>, Item1#chef_data_bag_item.item_name),
                 ?assertEqual(RawItem, GotEjson)
         end} || DbType <- [mysql, pgsql] ]}
@@ -240,7 +240,7 @@ environment_update_from_ejson_test_() ->
         fun() ->
                 Env1 = chef_object:update_from_ejson(Env, RawEnv),
                 GotData = Env1#chef_environment.serialized_object,
-                GotEjson = ejson:decode(chef_db_compression:decompress(GotData)),
+                GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
                 ?assertEqual(<<"new_name">>, Env1#chef_environment.name),
                 ?assertEqual(RawEnv, GotEjson)
         end} || DbType <- [mysql, pgsql] ]}
@@ -255,7 +255,7 @@ node_update_from_ejson_test_() ->
         fun() ->
                 Node1 = chef_object:update_from_ejson(Node, RawNode),
                 GotData = Node1#chef_node.serialized_object,
-                GotEjson = ejson:decode(chef_db_compression:decompress(GotData)),
+                GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
                 ?assertEqual(<<"a_node">>, Node1#chef_node.name),
                 ?assertEqual(<<"prod">>, Node1#chef_node.environment),
                 ?assertEqual(RawNode, GotEjson)
@@ -281,7 +281,7 @@ role_update_from_ejson_test_() ->
         fun() ->
                 Role1 = chef_object:update_from_ejson(Role, RawRole),
                 GotData = Role1#chef_role.serialized_object,
-                GotEjson = ejson:decode(chef_db_compression:decompress(GotData)),
+                GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
                 ?assertEqual(<<"new_name">>, Role1#chef_role.name),
                 ?assertEqual(RawRole, GotEjson)
         end} || DbType <- [mysql, pgsql] ]}

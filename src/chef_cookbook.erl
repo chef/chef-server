@@ -70,7 +70,7 @@ parse_binary_json(Bin, {UrlName, UrlVersion}) ->
     %% avoid parsing the cookbook JSON if name or version from URL is invalid
     valid_name(UrlName),
     valid_version(UrlVersion),
-    Cookbook0 = ejson:decode(Bin),
+    Cookbook0 = chef_json:decode(Bin),
     Cookbook = set_default_values(Cookbook0),
     validate_cookbook(Cookbook, {UrlName, UrlVersion}).
 
@@ -345,7 +345,7 @@ qualified_recipe_names(CookbookName, SerializedObject) ->
 inflate(<<"long_description">>, Data) ->
     chef_db_compression:decompress(Data);
 inflate(<<"dependencies">>, Data) ->
-    ejson:decode(Data);
+    chef_json:decode(Data);
 inflate(_Type, Data) ->
     chef_db_compression:decompress_and_decode(Data).
 

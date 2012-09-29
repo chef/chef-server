@@ -48,7 +48,7 @@ parse_binary_json(Bin, create) ->
     %% currently without any additional information.  Do we want to
     %% emit the JSON we recieved (size limited) or some details of the
     %% parse error from ejson if we can extract it?
-    DataBag = ejson:decode(Bin),
+    DataBag = chef_json:decode(Bin),
     case validate_data_bag(DataBag, create) of
         %% Note: we fill some fields with default values if they are missing
         ok -> {ok, DataBag};
