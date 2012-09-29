@@ -124,7 +124,7 @@ to_json(Req, #base_state{resource_state =
                              #client_state{chef_client = Client},
                          organization_name = OrgName} = State) ->
     EJson = chef_client:assemble_client_ejson(Client, OrgName),
-    Json = ejson:encode(EJson),
+    Json = chef_json:encode(EJson),
     {Json, Req, State}.
 
 delete_resource(Req, #base_state{chef_db_context = DbContext,
@@ -168,7 +168,7 @@ malformed_request_message(#ej_invalid{type = missing, key = Key}, _Req, _State) 
     error_message([<<"Required value for ">>, Key, <<" is missing">>]);
 malformed_request_message({invalid_key, Key}, _Req, _State) ->
     error_message([<<"Invalid key ">>, Key, <<" in request body">>]);
-malformed_request_message(invalid_json_body, _Req, _State) ->
+malformed_request_message(invalid_json_object, _Req, _State) ->
     error_message([<<"Incorrect JSON type for request body">>]);
 malformed_request_message(#ej_invalid{type = exact, key = Key, msg = Expected},
                           _Req, _State) ->

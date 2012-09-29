@@ -130,7 +130,7 @@ error_message_envelope(Message) when is_binary(Message) orelse
 %% sets it as the request body, returning the updated request.
 %% @end
 set_json_body(Req, EjsonData) ->
-    Json = ejson:encode(EjsonData),
+    Json = chef_json:encode(EjsonData),
     wrq:set_resp_body(Json, Req).
 
 %% @doc Convenience method for manipulating error data.  Data that is passed in is wrapped
@@ -213,7 +213,7 @@ malformed_request_message(#ej_invalid{type = missing, key = Key}, _Req, _State) 
     error_message([<<"Required value for ">>, Key, <<" is missing">>]);
 malformed_request_message({invalid_key, Key}, _Req, _State) ->
     error_message([<<"Invalid key ">>, Key, <<" in request body">>]);
-malformed_request_message(invalid_json_body, _Req, _State) ->
+malformed_request_message(invalid_json_object, _Req, _State) ->
     error_message([<<"Incorrect JSON type for request body">>]);
 malformed_request_message(#ej_invalid{type = exact, key = Key, msg = Expected},
                           _Req, _State) ->

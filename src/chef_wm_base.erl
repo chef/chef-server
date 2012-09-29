@@ -116,27 +116,27 @@ malformed_request(Req, #base_state{resource_mod=Mod,
     catch
         throw:{org_not_found, Org} ->
             Msg = iolist_to_binary([<<"organization '">>, Org, <<"' does not exist.">>]),
-            Req3 = wrq:set_resp_body(ejson:encode({[{<<"error">>, [Msg]}]}), Req),
+            Req3 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Msg]}]}), Req),
             {{halt, 404}, Req3, State1#base_state{log_msg = org_not_found}};
         throw:bad_clock ->
             Msg1 = malformed_request_message(bad_clock, Req, State),
-            Req3 = wrq:set_resp_body(ejson:encode(Msg1), Req),
+            Req3 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
             {{halt, 401}, Req3, State1#base_state{log_msg = bad_clock}};
                 throw:bad_headers ->
             Msg1 = malformed_request_message(bad_headers, Req, State),
-            Req3 = wrq:set_resp_body(ejson:encode(Msg1), Req),
+            Req3 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
             {{halt, 401}, Req3, State1#base_state{log_msg = bad_headers}};
         throw:bad_sign_desc ->
             Msg1 = malformed_request_message(bad_sign_desc, Req, State),
-            Req3 = wrq:set_resp_body(ejson:encode(Msg1), Req),
+            Req3 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
             {{halt, 400}, Req3, State1#base_state{log_msg = bad_sign_desc}};
         throw:{too_big, Msg} ->
             error_logger:info_msg("json too large (~p)", [Msg]),
-            Req3 = wrq:set_resp_body(ejson:encode({[{<<"error">>, Msg}]}), Req),
+            Req3 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, Msg}]}), Req),
             {{halt, 413}, Req3, State1#base_state{log_msg = too_big}};
         throw:Why ->
             Msg = malformed_request_message(Why, Req, State),
-            NewReq = wrq:set_resp_body(ejson:encode(Msg), Req),
+            NewReq = wrq:set_resp_body(chef_json:encode(Msg), Req),
             {true, NewReq, State1#base_state{log_msg = Why}}
     end.
 
@@ -176,10 +176,10 @@ malformed_request_message({bad_headers, Bad}, _Req, _State) ->
                             <<"bad header(s) ">>,
                             bin_str_join(Bad, <<", ">>)]),
     {[{<<"error">>, [Msg]}]};
-malformed_request_message({invalid_json, _}, _Req, _State) ->
-    %% in theory, there might be some sort of slightly useful error detail from ejson, but
-    %% thus far nothing specific enough to beat out this. Also, would not passing internal
-    %% library error messages out to the user when possible.
+malformed_request_message({error, invalid_json}, _Req, _State) ->
+    %% in theory, there might be some sort of slightly useful error detail from
+    %% chef_json/jiffy, but thus far nothing specific enough to beat out this. Also, would
+    %% not passing internal library error messages out to the user when possible.
     {[{<<"error">>, [<<"invalid JSON">>]}]};
 malformed_request_message({mismatch, {FieldName, _Pat, _Val}}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Field '", FieldName, "' invalid"])]}]};
@@ -252,7 +252,7 @@ finish_request(Req, #base_state{reqid = ReqId}=State) ->
             500 ->
                 %% sanitize response body
                 Msg = <<"internal service error">>,
-                Json = ejson:encode({[{<<"error">>, [Msg]}]}),
+                Json = chef_json:encode({[{<<"error">>, [Msg]}]}),
                 Req1 = wrq:set_resp_header("Content-Type",
                                            "application/json", Req),
                 {true, wrq:set_resp_body(Json, Req1), State};
@@ -281,7 +281,7 @@ verify_request_signature(Req,
         {not_found, What} ->
             NotFoundMsg = verify_request_message({not_found, What},
                                                  UserName, OrgName),
-            {false, wrq:set_resp_body(ejson:encode(NotFoundMsg), Req),
+            {false, wrq:set_resp_body(chef_json:encode(NotFoundMsg), Req),
              State#base_state{log_msg = {not_found, What}}};
         Requestor -> %% This is either #chef_client{} or #chef_user{}
             %% If the request originated from the webui, we do authn using the webui public
@@ -299,7 +299,7 @@ verify_request_signature(Req,
                                                   requestor = Requestor}};
                 {no_authn, Reason} ->
                     Msg = verify_request_message(Reason, UserName, OrgName),
-                    Json = ejson:encode(Msg),
+                    Json = chef_json:encode(Msg),
                     Req1 = wrq:set_resp_body(Json, Req),
                     {false, Req1, State1#base_state{log_msg = Reason}}
             end
@@ -808,6 +808,6 @@ handle_auth_info(_Mod, _Req, _State) ->
 
 set_forbidden_msg(Req, State) ->
     Msg = <<"You are not allowed to take this action.">>,
-    JsonMsg = ejson:encode({[{<<"error">>, [Msg]}]}),
+    JsonMsg = chef_json:encode({[{<<"error">>, [Msg]}]}),
     Req1 = wrq:set_resp_body(JsonMsg, Req),
     {Req1, State#base_state{log_msg = {forbidden}}}.

@@ -275,7 +275,7 @@ assemble_response(Req, State, CookbookVersions) ->
                        chef_cookbook:minimal_cookbook_ejson(CBV) }
                       || CBV <- CookbookVersions ]
                     },
-            CBMapJson = ejson:encode(JsonList),
+            CBMapJson = chef_json:encode(JsonList),
             {true, wrq:append_to_response_body(CBMapJson, Req), State};
         {error, Msg} ->
             forbid(Req, State, Msg, {read, forbidden})
@@ -287,29 +287,29 @@ assemble_response(Req, State, CookbookVersions) ->
 
 -spec not_found_message(environment | cookbook_version,
                         EnvironmentName :: binary() | [CookbookName :: binary()]) ->
-                               Message :: binary() | {[{Key :: string(), Message :: binary() |
+                               Message :: binary() | {[{Key :: binary(), Message :: binary() |
                                                                          [CookbookName :: binary()]}]}.
 not_found_message(environment, Name) ->
     iolist_to_binary(["environment '", Name, "' not found"]);
 not_found_message(cookbook_version, [CookbookName]) when is_binary(CookbookName) ->
-    {[{"message", list_to_binary(["Run list contains invalid items: no such cookbook ",
+    {[{<<"message">>, list_to_binary(["Run list contains invalid items: no such cookbook ",
                                   CookbookName, "."])},
-      {"non_existent_cookbooks", [CookbookName]},
-      {"cookbooks_with_no_versions", []}]};
+      {<<"non_existent_cookbooks">>, [CookbookName]},
+      {<<"cookbooks_with_no_versions">>, []}]};
 not_found_message(cookbook_version, CookbookNames) ->
     Reason = iolist_to_binary(["Run list contains invalid items: no such cookbooks ",
                                bin_str_join(CookbookNames, <<", ">>), "."]),
-    {[{"message", Reason},
-      {"non_existent_cookbooks", CookbookNames},
-      {"cookbooks_with_no_versions", []}]}.
+    {[{<<"message">>, Reason},
+      {<<"non_existent_cookbooks">>, CookbookNames},
+      {<<"cookbooks_with_no_versions">>, []}]}.
 
 not_reachable_message(CookbookName) ->
     Reason = iolist_to_binary(["Unable to satisfy constraints on cookbook ",
                                CookbookName,
                                ", which does not exist."]),
-    {[{"message", Reason},
-      {"non_existent_cookbooks", [ CookbookName ]},
-      {"most_constrained_cookbooks",[]}]}.
+    {[{<<"message">>, Reason},
+      {<<"non_existent_cookbooks">>, [ CookbookName ]},
+      {<<"most_constrained_cookbooks">>,[]}]}.
 
 %% Main entry point for parsing the depsolver error structure
 %% It consists of a list of solutions that were tried where each solution has the form:
@@ -334,19 +334,19 @@ unable_to_solve_message(_Reason, RawPaths, []) ->
                                            bin_str_join(RunlistItems, <<",">>),
                                            "."
                                           ]),
-    {[{"message", InvalidItemsReason},
-      {"non_existent_cookbooks", []},
-      {"cookbooks_with_no_versions", RunlistItems}]};
+    {[{<<"message">>, InvalidItemsReason},
+      {<<"non_existent_cookbooks">>, []},
+      {<<"cookbooks_with_no_versions">>, RunlistItems}]};
 %% If constraint paths are non-empty, find the reason that the constraint is not satisfied
 %% and return the run list item ()root of the failure tree) along with the most constrained
 %% cookbook in the tree
 unable_to_solve_message(Reason, RawPaths, FailingDeps) ->
     RunlistItems = formatted_roots(RawPaths),
     Constraints = formatted_constraints(FailingDeps),
-    {[{"message", Reason},
-      {"unsatisfiable_run_list_item", RunlistItems},
-      {"non_existent_cookbooks", []},
-      {"most_constrained_cookbooks", Constraints}]}.
+    {[{<<"message">>, Reason},
+      {<<"unsatisfiable_run_list_item">>, RunlistItems},
+      {<<"non_existent_cookbooks">>, []},
+      {<<"most_constrained_cookbooks">>, Constraints}]}.
 
 %% @doc Give a set of run list items that are roots in the dependency
 %% tree, format them as binaries.  They could be either simple names

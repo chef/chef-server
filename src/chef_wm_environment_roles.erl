@@ -93,10 +93,10 @@ to_json(Req, #base_state{resource_state = #role_state{
                            chef_role = #chef_role{
                              serialized_object = JSON}}} = State) ->
     EnvName = chef_wm_util:object_name(environment, Req),
-    RoleJson = ejson:decode(chef_db_compression:decompress(JSON)),
+    RoleJson = chef_json:decode(chef_db_compression:decompress(JSON)),
     RunList = retrieve_run_list(EnvName, RoleJson),
     Body = {[{<<"run_list">>, RunList}]},
-    {ejson:encode(Body), Req, State}.
+    {chef_json:encode(Body), Req, State}.
 
 retrieve_run_list(<<"_default">>, RoleJson) ->
   ej:get({<<"run_list">>}, RoleJson, null);

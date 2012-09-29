@@ -162,7 +162,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                             }}} = State) ->
     Results = chef_db:fetch_environment_filtered_cookbook_versions(
                 DbContext, OrgName, EnvName, Cookbook, NumVersions),
-    {ejson:encode(process_filtered_results(Results, Req)),
+    {chef_json:encode(process_filtered_results(Results, Req)),
      Req, State}.
 
 %% @doc Process the results of filtering cookbook versions through an environment.

@@ -51,7 +51,7 @@ check_health_all_ok_test_() ->
       fun() ->
               {Status, Json} = chef_wm_status:check_health(),
               ?assertEqual(pong, Status),
-              Ejson = ejson:decode(Json),
+              Ejson = chef_json:decode(Json),
               ?assertEqual(<<"pong">>, ej:get({<<"status">>}, Ejson)),
               [ ?assertEqual(<<"pong">>, ej:get({"upstreams", a2b(Mod)}, Ejson))
                 || Mod <- ?CHECK_MODS ]

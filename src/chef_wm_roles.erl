@@ -107,7 +107,7 @@ all_roles_json(Req, #base_state{chef_db_context = DbContext,
     RoleNames = chef_db:fetch_roles(DbContext, OrgName),
     RouteFun = ?BASE_ROUTES:bulk_route_fun(role, Req),
     UriMap= [{Name, RouteFun(Name)} || Name <- RoleNames],
-    ejson:encode({UriMap}).
+    chef_json:encode({UriMap}).
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
