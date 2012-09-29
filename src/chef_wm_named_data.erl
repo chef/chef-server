@@ -120,7 +120,7 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
             DataBagState1 = DataBagState#data_state{chef_data_bag = DataBag,
                                                     data_bag_name = DataBagName},
             State1 = State#base_state{resource_state = DataBagState1},
-            {{object, AuthzId}, Req, State1}
+            {chef_wm_authz:maybe_check_authz(authz_skip_data, {object, AuthzId}), Req, State1}
     end.
 
 %% Org is checked for in malformed_request/2, data_bag is checked for in auth_info/2;
