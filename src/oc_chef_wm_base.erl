@@ -223,18 +223,18 @@ authorized_by_org_membership_check(Req, State = #base_state{organization_name = 
                     {true, Req, State};
                 false ->
                     Msg = forbidden_message(not_member_of_org, UserName, OrgName),
-                    {false, wrq:set_resp_body(ejson:encode(Msg), Req),
+                    {false, wrq:set_resp_body(chef_json:encode(Msg), Req),
                      State#base_state{log_msg = user_not_in_org}};
                 Error ->
                     Msg = forbidden_message(unverified_org_membership, UserName, OrgName),
-                    {false, wrq:set_resp_body(ejson:encode(Msg), Req),
+                    {false, wrq:set_resp_body(chef_json:encode(Msg), Req),
                      State#base_state{log_msg = {user_not_in_org_error, Error}}}
             end
     end.
 
 set_forbidden_msg(Perm, Req, State) when is_atom(Perm)->
     Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8), " permission"]),
-    JsonMsg = ejson:encode({[{<<"error">>, [Msg]}]}),
+    JsonMsg = chef_json:encode({[{<<"error">>, [Msg]}]}),
     Req1 = wrq:set_resp_body(JsonMsg, Req),
     {Req1, State#base_state{log_msg = {Perm, forbidden}}}.
 

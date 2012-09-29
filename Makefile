@@ -14,7 +14,7 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
                 deps/stats_hero/ebin \
                 deps/ibrowse/ebin \
                 deps/webmachine/ebin \
-                deps/ejson/ebin
+                deps/jiffy/ebin
 # note that we ommit erlware_commons from the analysis because it
 # currently gives the following error:
 #
