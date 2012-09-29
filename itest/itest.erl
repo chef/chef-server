@@ -200,9 +200,9 @@ process_property(dependencies=Property, Properties) ->
             %% Already JSON
             Binary ;
         {Property, PropertyList} when is_list(PropertyList)->
-            ejson:encode({PropertyList});
+            chef_json:encode({PropertyList});
         none ->
-            ejson:encode({[]})
+            chef_json:encode({[]})
     end.
 
 cookbook_version_list(Cookbook) ->
@@ -1974,7 +1974,7 @@ insert_recipe_manifest_for_names(EJsonBody, RecipeNames) ->
 
 %% @doc Encode `EJson' to a JSON string, and then GZip it
 encode_and_compress(EJson) ->
-    JSON = ejson:encode(EJson),
+    JSON = chef_json:encode(EJson),
     zlib:gzip(JSON).
 
 %%------------------------------------------------------------------------------

@@ -511,7 +511,7 @@ dbname(OrgId) ->
 serialize_node(Node) when is_binary(Node) ->
     zlib:gzip(Node);
 serialize_node({_}=Node) ->
-    serialize_node(ejson:encode(Node)).
+    serialize_node(chef_json:encode(Node)).
 
 -spec fetch_object(couch_server(), OrgId :: binary(),
                    Name :: binary() | string(),
@@ -632,7 +632,7 @@ couch_json_to_record(chef_node, OrgId, AuthzId, RequesterId, Object) ->
     <<Name/binary>> = ej:get({<<"name">>}, Object),
     <<Environment/binary>> = ej:get({<<"chef_environment">>}, Object),
     Date = sql_date(now),
-    <<NodeJs/binary>> = ejson:encode(cleanup_couch_node_record(Object)),
+    <<NodeJs/binary>> = chef_json:encode(cleanup_couch_node_record(Object)),
     #chef_node{id = ej:get({<<"_id">>}, Object),
                authz_id = AuthzId,
                org_id = OrgId,
@@ -646,7 +646,7 @@ couch_json_to_record(chef_node, OrgId, AuthzId, RequesterId, Object) ->
 couch_json_to_record(chef_role, OrgId, AuthzId, RequesterId, Object) ->
     Name = ej:get({<<"name">>}, Object),
     Date = sql_date(now),
-    RoleJs = ejson:encode(cleanup_couch_role_record(Object)),
+    RoleJs = chef_json:encode(cleanup_couch_role_record(Object)),
     #chef_role{id = ej:get({<<"_id">>}, Object),
                authz_id = AuthzId,
                org_id = OrgId,
@@ -681,7 +681,7 @@ couch_json_to_record(chef_client, OrgId, AuthzId, RequesterId, Object) ->
 couch_json_to_record(chef_environment, OrgId, AuthzId, RequesterId, Object) ->
     Name = ej:get({<<"name">>}, Object),
     Date = sql_date(now),
-    EnvironmentJs = ejson:encode(cleanup_couch_environment_record(Object)),
+    EnvironmentJs = chef_json:encode(cleanup_couch_environment_record(Object)),
     #chef_environment{id = ej:get({<<"_id">>}, Object),
                authz_id = AuthzId,
                org_id = OrgId,
@@ -694,7 +694,7 @@ couch_json_to_record(chef_environment, OrgId, AuthzId, RequesterId, Object) ->
 couch_json_to_record(chef_data_bag_item, OrgId, _AuthzId, RequesterId, Object) ->
     Name = ej:get({<<"name">>}, Object),
     Date = sql_date(now),
-    Data_Bag_ItemJs = ejson:encode(cleanup_couch_data_bag_item_record(Object)),
+    Data_Bag_ItemJs = chef_json:encode(cleanup_couch_data_bag_item_record(Object)),
     #chef_data_bag_item{id = ej:get({<<"_id">>}, Object),
                         org_id = OrgId,
                         item_name = Name,

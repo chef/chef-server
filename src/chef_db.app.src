@@ -25,7 +25,6 @@
                   kernel,
                   stdlib,
                   couchbeam,
-                  ejson,
                   stats_hero,
                   sqerl
                  ]},
