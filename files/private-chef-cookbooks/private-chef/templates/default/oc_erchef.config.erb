@@ -28,7 +28,13 @@
               %% how many nodes are deserialized at a time in
               %% preparing a response.
               {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
-              {superusers, [<<"pivotal">>]},
+              {custom_acls_always_for_modification, <%= node['private_chef']['opscode-authz']['custom_acls_always_for_modification'] %>},
+
+              {custom_acls_depsolver, <%= node['private_chef']['opscode-authz']['custom_acls_depsolver'] %>},
+              {custom_acls_data, <%= node['private_chef']['opscode-authz']['custom_acls_data'] %>},
+              {custom_acls_cookbooks, <%= node['private_chef']['opscode-authz']['custom_acls_cookbooks'] %>},
+              {custom_acls_roles, <%= node['private_chef']['opscode-authz']['custom_acls_roles'] %>},
+	      {superusers, [<<"pivotal">>]},
               %% metrics config
               {root_metric_key, "<%= @root_metric_key %>"},
 
