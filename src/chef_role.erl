@@ -78,7 +78,7 @@ parse_binary_json(Bin, Action) ->
     %% currently without any additional information.  Do we want to
     %% emit the JSON we recieved (size limited) or some details of the
     %% parse error from ejson if we can extract it?
-    Role0 = jiffy:decode(Bin),
+    Role0 = chef_json:decode(Bin),
     Role = set_default_values(Role0),
     validate_role(Role, Action).
 
