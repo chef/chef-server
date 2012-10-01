@@ -112,9 +112,25 @@ use_custom_acls(_Endpoint, Auth, Req, #base_state{requestor = #chef_user{} } = S
 use_custom_acls(Endpoint, Auth, Req, #base_state{requestor = #chef_client{} } = State) ->
     case application:get_env(oc_chef_wm, config_for(Endpoint)) of
         {ok, false} ->
-            {authorized, Req, State};
+            handle_always_for_modification(Auth, Req, State);
         _Else -> %% use standard behaviour
             {Auth, Req, State}
+    end.
+
+%% Allow the option to use_custom_acls always for create,update,delete methods
+%% all requests. If set to true the 'custom_acls_FOO' flags only apply to the GET
+%% method.
+%%
+%% Controlled by the config variable {oc_chef_wm, custom_acls_not_on_get}
+handle_always_for_modification(Auth, Req, State) ->
+    {ok, AlwaysForModification} = application:get_env(oc_chef_wm, custom_acls_always_for_modification),
+    case {wm:method(Req), AlwaysForModification} of
+        {'GET', true} ->
+            {authorized, Req, State};
+        {_Method, true} ->
+            {Auth, Req, State};
+        {_Method, false} ->
+            {authorized, Req, State}
     end.
 
 config_for(cookbooks) ->
