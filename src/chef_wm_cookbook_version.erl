@@ -93,8 +93,7 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
             CookbookState1 = CookbookState#cookbook_state{authz_id = AuthzId,
                                                           chef_cookbook_version = CookbookVersion},
             State1 = State#base_state{resource_state = CookbookState1},
-            {chef_wm_authz:use_custom_acls(cookbooks, {object, AuthzId}),
-             Req, State1}
+            chef_wm_authz:use_custom_acls(cookbooks, {object, AuthzId}, Req, State1)
     end.
 
 is_conflict(Req, #base_state{}=State) ->
@@ -190,8 +189,7 @@ handle_not_found(Req, #base_state{} = State) ->
 handle_cookbook_exists(Req, #base_state{resource_state = #cookbook_state{authz_id = AuthzId}} = State) ->
     case wrq:method(Req) of
         'PUT' ->
-            {chef_wm_authz:use_custom_acls(cookbooks, {object, AuthzId}),
-             Req, State};
+            chef_wm_authz:use_custom_acls(cookbooks, {object, AuthzId}, Req, State);
         _ ->
             construct_not_found_response(Req, State)
     end.

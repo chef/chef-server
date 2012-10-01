@@ -97,9 +97,11 @@ forbidden_for_environment(#chef_environment{authz_id = EnvAuthzId} = Env, Req,
                          #base_state{resource_state = ResourceState} = State) ->
     %% Set this here before passing it out; downstream functions will need it
     State1 = State#base_state{resource_state = ResourceState#depsolver_state{chef_environment = Env}},
-    {chef_wm_authz:use_custom_acls(depsolver, [{container, cookbook, read},
-                                               {object, EnvAuthzId, read}]),
-     Req, State1}.
+    chef_wm_authz:use_custom_acls(depsolver,
+                                  [{container, cookbook, read},
+                                   {object, EnvAuthzId, read}],
+                                  Req,
+                                  State1).
 
 post_is_create(Req, State) ->
     {false, Req, State}.

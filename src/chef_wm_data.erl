@@ -81,7 +81,7 @@ auth_info(Req, State) ->
 auth_info('POST', Req, State) ->
     {{create_in_container, data}, Req, State};
 auth_info('GET', Req, State) ->
-    {chef_wm_authz:use_custom_acls(data, {container, data}), Req, State}.
+    chef_wm_authz:use_custom_acls(data, {container, data}, Req, State).
 
 resource_exists(Req, State) ->
     {true, Req, State}.
