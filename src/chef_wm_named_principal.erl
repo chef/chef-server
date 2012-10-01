@@ -61,25 +61,12 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
-fetch_client_or_user(DbContext, OrgName, Name) ->
-    case chef_db:fetch_client(DbContext, OrgName, Name) of
-        not_found ->
-            case chef_db:fetch_user(DbContext, Name) of
-                not_found ->
-                    not_found;
-                #chef_user{} = User ->
-                    User
-            end;
-        #chef_client{} = Client ->
-            Client
-    end.
-
 validate_request(_Method, Req, #base_state{chef_db_context = DbContext,
                                            organization_name = OrgName,
                                            resource_state = ResourceState} = State) ->
     Name = chef_wm_util:object_name(principal, Req),
-    State1 = case fetch_client_or_user(DbContext, OrgName, Name) of
-                 not_found ->
+    State1 = case chef_db:fetch_requestor(DbContext, OrgName, Name) of
+                 {not_found, client} ->
                      State#base_state{resource_state = {not_found}};
                  #chef_client{} = Client ->
                      State#base_state{resource_state =
