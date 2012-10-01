@@ -33,7 +33,7 @@
          is_requesting_client/2,
          is_requesting_node/2,
          is_validator/1,
-         maybe_check_authz/2]).
+         use_custom_acls/2]).
 
 -include("chef_wm.hrl").
 
@@ -98,17 +98,27 @@ is_validator(#chef_client{validator = true}) -> true;
 is_validator(#chef_client{})                 -> false;
 is_validator(#chef_user{})                   -> false.
 
--spec maybe_check_authz(atom(),
-                        {object, object_id()} |
-                        {container, container_name()} | [auth_tuple()])
+-spec use_custom_acls(Endpoint :: atom(),
+                      Auth :: {object, object_id()} |
+                              {container, container_name()} | [auth_tuple()])
     -> authorized | {object, object_id()} | {container, container_name()} | [auth_tuple()].
-
-maybe_check_authz(ConfigName, Auth) ->
-    case application:get_env(oc_chef_wm, ConfigName) of
-        {ok, true} ->
+%% Check if we should use custom acls for an endpoint. If the config variable is false,
+%% the we don't check the object/container ACLs and instead use the fact that a client has
+%% passed authn is enough
+use_custom_acls(Endpoint, Auth) ->
+    case application:get_env(oc_chef_wm, config_for(Endpoint)) of
+        {ok, false} ->
             authorized;
         _Else -> %% use standard behaviour
             Auth
     end.
 
+config_for(cookbooks) ->
+    custom_acls_cookbooks;
+config_for(roles) ->
+    custom_acls_roles;
+config_for(data) ->
+    custom_acls_data;
+config_for(depsolver) ->
+    custom_acls_depsolver.
 

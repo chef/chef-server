@@ -79,7 +79,7 @@ auth_info(Req, State) ->
 auth_info('POST', Req, State) ->
     {{create_in_container, role}, Req, State};
 auth_info('GET', Req, State) ->
-    {chef_wm_authz:maybe_check_authz(authz_skip_roles, {container, role}), Req, State}.
+    {chef_wm_authz:use_custom_acls(roles, {container, role}), Req, State}.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
