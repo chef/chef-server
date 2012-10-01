@@ -39,6 +39,7 @@
          fetch_users/0,
          create_user/1,
          delete_user/1,
+         count_user_admins/0,
 
          %% checksum ops
          mark_checksums_as_uploaded/2,
@@ -180,6 +181,10 @@ fetch_users() ->
         Other ->
             Other
     end.
+-spec count_user_admins() -> {ok, none} | {ok, integer()} | {error, _}.
+%% Return a count of the user admins
+count_user_admins() ->
+  sqerl:select(count_user_admins, [], first_as_scalar, [count]).
 
 %% node ops
 

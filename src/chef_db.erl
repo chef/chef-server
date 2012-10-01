@@ -42,6 +42,7 @@
          fetch_users/1,
          create_user/3,
          delete_user/2,
+         count_user_admins/1,
 
          %% node ops
          fetch_node/3,
@@ -207,6 +208,14 @@ fetch_users(#context{reqid = ReqId}) ->
         {ok, L} -> L;
         Other -> Other
     end.
+
+-spec count_user_admins(#context{}) -> integer() | {error, term()}.
+count_user_admins(#context{reqid = ReqId}) ->
+  case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, count_user_admins),
+                        fun() -> chef_sql:count_user_admins() end) of
+       {ok, Count} -> Count;
+       Other -> Other
+  end.
 
 %%%
 -spec user_record_to_authz_id(any(), any()) -> id().
