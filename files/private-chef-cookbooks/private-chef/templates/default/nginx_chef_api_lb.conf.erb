@@ -45,11 +45,8 @@
       proxy_pass http://bookshelf;
     }
 
-    # This internal location is used to serve checksum file content
-    # via the X-Accel-Redirect header. See http://wiki.nginx.org/XSendfile
-    location /checksum/ {
-      internal;
-      root <%= node['private_chef']['opscode-chef']['checksum_path'].gsub('checksum', '') %>;
+    location ~ "/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/{0,1}.*$" {
+      proxy_pass http://bookshelf;
     }
 
     # object ACL requests go to opscode-account service
@@ -69,12 +66,6 @@
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/?$") %>
 
-    <% if node['private_chef']['dark_launch']['couchdb_cookbooks'] %>
-    # backwards compatible for Chef 0.9.x and below clients
-    # the nodes/:node_name/cookbooks is still handled by Ruby-Chef
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/nodes/[^/]+/cookbooks$", :ruby) %>
-    <% end %>
-
     # nodes and environments/*/nodes go to erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/nodes/{0,1}.*$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/[^/]+/nodes$") %>
@@ -88,22 +79,9 @@
     # principals go to erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
 
-    # optional caching of cookbook files by nginx
-    <%- if node['private_chef']['lb']['cache_cookbook_files'] -%>
-    location ~ "^/organizations/[a-z0-9\-_]+?/cookbooks/[\w\.]+/(\d+\.\d+\.\d+|_latest)/files/.+$" {
-    <%= @helper.select_upstream("#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}",
-                                "opscode_webui",
-                                node['private_chef']['opscode-chef']['upload_proto']) %>
-      proxy_cache webui-cache;
-      proxy_cache_valid 200 300m;
-    }
-    <%- end -%>
-
     # cookbook uploads and sandboxes
-    <%= @helper.make_location("^/organizations/[a-z0-9\-_]+?/(?:cookbooks|sandboxes)/{0,1}.*$",
-                              "#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}",
-                              "opscode_webui",
-                              node['private_chef']['opscode-chef']['upload_proto']) %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/cookbooks/{0,1}.*$", 'couchdb_cookbooks') %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/sandboxes/{0,1}.*$", 'couchdb_checksums') %>
 
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/status/{0,1}.*$", :ruby) %>
     <%= @helper.chef_api("^/_status") %>
