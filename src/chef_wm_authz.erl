@@ -104,33 +104,34 @@ is_validator(#chef_user{})                   -> false.
                       Req :: wm:req(),
                       State :: #base_state{})
     -> authorized | {object, object_id()} | {container, container_name()} | [auth_tuple()].
-%% Check if we should use custom acls for an endpoint. If the config variable is false,
-%% the we don't check the object/container ACLs and instead use the fact that a client has
-%% passed authn is enough
+%% Check if we should use contact opscode-authz and chef requestor-specific acls for an endpoint.
+%% If the config variable is false, then we don't check the object/container ACLs and instead
+%% use the fact that a client has passed authn as allowing them to access a resource
 use_custom_acls(_Endpoint, Auth, Req, #base_state{requestor = #chef_user{} } = State) ->
     {Auth, Req, State};
 use_custom_acls(Endpoint, Auth, Req, #base_state{requestor = #chef_client{} } = State) ->
     case application:get_env(oc_chef_wm, config_for(Endpoint)) of
         {ok, false} ->
-            handle_always_for_modification(Auth, Req, State);
+            customize_for_modification_maybe(wm:method(Req), Auth, Req, State);
         _Else -> %% use standard behaviour
             {Auth, Req, State}
     end.
 
-%% Allow the option to use_custom_acls always for create,update,delete methods
-%% all requests. If set to true the 'custom_acls_FOO' flags only apply to the GET
-%% method.
+%% Allow the option to contact opscode-authz with custom acls for all create,update,delete
+%% requests. When 'custom_acls_always_for_modification' is set to true the
+%% 'custom_acls_FOO' flags only apply to the GET method.
 %%
-%% Controlled by the config variable {oc_chef_wm, custom_acls_not_on_get}
-handle_always_for_modification(Auth, Req, State) ->
-    {ok, AlwaysForModification} = application:get_env(oc_chef_wm, custom_acls_always_for_modification),
-    case {wm:method(Req), AlwaysForModification} of
-        {'GET', true} ->
-            {authorized, Req, State};
-        {_Method, true} ->
+%% Controlled by the config variable {oc_chef_wm, custom_acls_always_for_modification}
+customize_for_modification_maybe('GET', Auth, Req, State) ->
+    {authorized, Req, State};
+customize_for_modification_maybe(_Method, Auth, Req, State) ->
+    case application:get_env(oc_chef_wm, custom_acls_always_for_modification) of
+        {ok, true} ->
             {Auth, Req, State};
-        {_Method, false} ->
-            {authorized, Req, State}
+        {ok, false} ->
+            {authorized, Req, State};
+        _Else ->
+            {Auth, Req, State}
     end.
 
 config_for(cookbooks) ->
