@@ -70,9 +70,10 @@
                   {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>}
                  ]},
   {stats_hero, [
-               {udp_socket_pool_size, <%= node['private_chef']['opscode-erchef']['udp_socket_pool_size'] %> },
-               {estatsd_host, "<%= node['private_chef']['estatsd']['vip'] %>" },
-               {estatsd_port, <%= node['private_chef']['estatsd']['port'] %> }
+               %% Set sender pool size to DB max_connections to avoid contention
+               {udp_socket_pool_size, <%= node['private_chef']['postgresql']['max_connections'] %> },
+               {estatsd_host, "<%= node['private_chef']['estatsd']['vip'] %>"},
+               {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>}
               ]},
   {sqerl, [
            %% The database system you are using (e.g., mysql, pgsql)
