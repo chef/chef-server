@@ -101,7 +101,7 @@ is_validator(#chef_user{})                   -> false.
 -spec use_custom_acls(Endpoint :: atom(),
                       Auth :: {object, object_id()} |
                               {container, container_name()} | [auth_tuple()],
-                      Req :: wm:req(),
+                      Req :: wrq:req(),
                       State :: #base_state{})
     -> authorized | {object, object_id()} | {container, container_name()} | [auth_tuple()].
 %% Check if we should use contact opscode-authz and chef requestor-specific acls for an endpoint.
@@ -112,7 +112,7 @@ use_custom_acls(_Endpoint, Auth, Req, #base_state{requestor = #chef_user{} } = S
 use_custom_acls(Endpoint, Auth, Req, #base_state{requestor = #chef_client{} } = State) ->
     case application:get_env(oc_chef_wm, config_for(Endpoint)) of
         {ok, false} ->
-            customize_for_modification_maybe(wm:method(Req), Auth, Req, State);
+            customize_for_modification_maybe(wrq:method(Req), Auth, Req, State);
         _Else -> %% use standard behaviour
             {Auth, Req, State}
     end.
