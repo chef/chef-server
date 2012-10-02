@@ -88,8 +88,10 @@ validate(DataBagItem) ->
 -spec normalized_data_bag_for_update(ej:json_object(), binary()) ->ej:json_object().
 normalized_data_bag_for_update(DataBagItem, IdFromUrl) ->
     case ej:get({<<"id">>}, DataBagItem)of
-        Id when Id =:= IdFromUrl orelse Id =:= undefined ->
+        undefined ->
             ej:set({<<"id">>}, DataBagItem, IdFromUrl);
+        IdFromUrl ->
+            DataBagItem;
         Mismatch ->
             throw({url_json_name_mismatch, {IdFromUrl, Mismatch, "DataBagItem"}})
     end.
