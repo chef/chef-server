@@ -64,14 +64,6 @@ extract_roles(RunList) ->
     [ binary:part(Item, {0, byte_size(Item) - 1})
       || <<"role[", Item/binary>> <- RunList ].
 
-%%%
-%%% Some of this begs to be factored out into a separate file.
-%%%
-
-%%%
-%%%
-%%%
-
 validate(Node) ->
     case ej:valid(?VALIDATION_CONSTRAINTS, Node) of
         ok ->
