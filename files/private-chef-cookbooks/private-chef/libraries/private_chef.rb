@@ -286,7 +286,7 @@ module PrivateChef
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
       PrivateChef["postgresql"]["listen_address"] ||= "0.0.0.0"
       PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"]
-      PrivateChef["opscode_chef"]["enable"] ||= false
+
       PrivateChef["redis"]["bind"] ||= "0.0.0.0"
       PrivateChef["opscode_account"]["worker_processes"] ||= 4
       if bootstrap

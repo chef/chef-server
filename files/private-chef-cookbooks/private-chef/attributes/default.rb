@@ -138,9 +138,9 @@ default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
 default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
 
 ####
-# Chef Server API
+# Legacy Chef Server API -- Disabled by default
 ####
-default['private_chef']['opscode-chef']['enable'] = true
+default['private_chef']['opscode-chef']['enable'] = false
 default['private_chef']['opscode-chef']['ha'] = false
 default['private_chef']['opscode-chef']['dir'] = "/var/opt/opscode/opscode-chef"
 default['private_chef']['opscode-chef']['log_directory'] = "/var/log/opscode/opscode-chef"
