@@ -228,6 +228,7 @@ module PrivateChef
       PrivateChef['opscode_chef']['sandbox_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/sandbox"
       PrivateChef['opscode_chef']['checksum_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/checksum"
       PrivateChef["couchdb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/couchdb"
+      PrivateChef['bookshelf']['data_dir'] = "/var/opt/opscode/drbd/data/bookshelf"
       PrivateChef["rabbitmq"]["data_dir"] ||= "/var/opt/opscode/drbd/data/rabbitmq"
       PrivateChef["opscode_solr"]["data_dir"] ||= "/var/opt/opscode/drbd/data/opscode-solr"
       PrivateChef["postgresql"]["data_dir"] ||= "/var/opt/opscode/drbd/data/postgresql"
@@ -257,6 +258,7 @@ module PrivateChef
         PrivateChef['servers'][node_name]['cluster_ipaddress'] || PrivateChef['servers'][node_name]['ipaddress']
       PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef['servers'][node_name]['peer_ipaddress']
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
+      PrivateChef["bookshelf"]["ha"] ||= true
       PrivateChef["couchdb"]["ha"] ||= true
       PrivateChef["rabbitmq"]["ha"] ||= true
       PrivateChef["opscode_solr"]["ha"] ||= true
@@ -284,7 +286,9 @@ module PrivateChef
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
       PrivateChef["postgresql"]["listen_address"] ||= "0.0.0.0"
       PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"]
-
+      PrivateChef["opscode_chef"]["enable"] ||= false
+      PrivateChef["opscode_erchef"]["enable"] ||= false
+      PrivateChef["opscode_account"]["enable"] ||= false
       PrivateChef["redis"]["bind"] ||= "0.0.0.0"
       PrivateChef["opscode_account"]["worker_processes"] ||= 4
       if bootstrap
@@ -296,6 +300,8 @@ module PrivateChef
 
     def gen_frontend
       PrivateChef[:role] = "frontend"
+      PrivateChef["bookshelf"]["enable"] ||= false
+      PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["couchdb"]["enable"] ||= false
       PrivateChef["couchdb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["rabbitmq"]["enable"] ||= false
