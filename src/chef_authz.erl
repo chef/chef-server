@@ -171,7 +171,7 @@ merge_acl_from_container(RequestorId, ContainerId, ObjectId) ->
 set_acl(_RequestorId, _ObjectId, []) ->
     ok;
 set_acl(RequestorId, ObjectId, [{Method, ACE}|Rest]) ->
-    case set_ace_for_resource(RequestorId, object, ObjectId, Method, ACE) of
+    case set_ace_for_object(RequestorId, ObjectId, Method, ACE) of
         ok ->
             set_acl(RequestorId, ObjectId, Rest);
         {error, Reason} ->
@@ -250,14 +250,13 @@ get_acl_for_resource(RequestorId, ResourceType, Id) ->
 % Replace the actors and groups of an ace
 % PUT {objects|groups|actors|containers}/:id/acl/:action
 %
--spec set_ace_for_resource(requestor_id(),
-                           object,
-                           object_id(),
-                           access_method(),
-                           authz_ace()) -> ok |
-                                           {error, any()}.
-set_ace_for_resource(RequestorId, ResourceType, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
-    Url = make_url([pluralize_resource(ResourceType), Id, acl, AccessMethod]),
+-spec set_ace_for_object(requestor_id(),
+                         object_id(),
+                         access_method(),
+                         authz_ace()) -> ok |
+                                         {error, any()}.
+set_ace_for_object(RequestorId, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
+    Url = make_url([pluralize_resource(object), Id, acl, AccessMethod]),
     Body = jiffy:encode({[{<<"actors">>, Actors}, {<<"groups">>, Groups}]}),
     case chef_authz_http:request(Url, put, [], Body, RequestorId) of
         ok -> ok;
