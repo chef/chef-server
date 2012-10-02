@@ -228,19 +228,19 @@ malformed_request_message(#ej_invalid{type=missing,
 malformed_request_message(#ej_invalid{type=Type,
                                       key=Key,
                                       msg=Expected
-                                     }, _Req, _State) when Type =:= exact orelse
+                                     }, _Req, _State) when Type =:= exact ;
                                                            Type =:= string_match ->
     error_envelope([<<"Field '", Key/binary, "' invalid">>]);
 
 %% Things that should be hashes, but aren't.
 malformed_request_message(#ej_invalid{type=json_type,
                                       key=Key
-                                     }, _Req, _State) when Key =:= <<"override_attributes">> orelse
-                                                           Key =:= <<"default_attributes">> orelse
-                                                           Key =:= <<"normal">> orelse
-                                                           Key =:= <<"default">> orelse
-                                                           Key =:= <<"override">> orelse
-                                                           Key =:= <<"automatic">> orelse
+                                     }, _Req, _State) when Key =:= <<"override_attributes">> ;
+                                                           Key =:= <<"default_attributes">> ;
+                                                           Key =:= <<"normal">> ;
+                                                           Key =:= <<"default">> ;
+                                                           Key =:= <<"override">> ;
+                                                           Key =:= <<"automatic">> ;
                                                            Key =:= <<"cookbook_versions">> ->
     error_envelope([<<"Field '", Key/binary, "' is not a hash">>]);
 
