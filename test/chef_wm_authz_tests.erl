@@ -153,19 +153,20 @@ customize_for_modification_maybe_with_no_custom_acls_test_() ->
      end,
      [
          {"GET case always returns authorized",
-          fun() -> Got = chef_wm_authz:customize_for_modification_maybe('GET', a, r, s),
-                   ?assertEqual({authorized, r, s}, Got)
+          fun() -> Got = chef_wm_authz:customize_for_modification_maybe(depsolver,'GET', a),
+                   ?assertEqual(authorized, Got)
          end
          },
          {"PUT case returns authorized when always_for_modification == false",
           fun() -> application:set_env(oc_chef_wm, custom_acls_always_for_modification, false),
-                   Got = chef_wm_authz:customize_for_modification_maybe('PUT', a, r, s),
-                   ?assertEqual({authorized, r, s}, Got)
+                   Got = chef_wm_authz:customize_for_modification_maybe(roles, 'PUT', a),
+                   ?assertEqual(authorized, Got)
           end
          },
          {"PUT case returns auth rules when always_for_modification == true",
-          fun() -> application:set_env(oc_chef_wm, custom_acls_always_for_modification, true), Got = chef_wm_authz:customize_for_modification_maybe('PUT', a, r, s),
-                   ?assertEqual({a, r, s}, Got)
+          fun() -> application:set_env(oc_chef_wm, custom_acls_always_for_modification, true), 
+                   Got = chef_wm_authz:customize_for_modification_maybe(roles, 'PUT', a),
+                   ?assertEqual(a, Got)
           end
          }
      ]}.
@@ -176,17 +177,40 @@ customize_for_modification_maybe_with_no_custom_acls_test_() ->
 %%
 custom_acls_test_descriptions() ->
     Descriptions = [
-        {roles, true, false, 'PUT', authz_rules},
-        {roles, false, false, 'PUT', authorized},
 
+        %% GET is authorized regardless of AlwaysForModValue
+        {roles, true, false, 'GET', authorized},
+        {roles, false, false, 'GET', authorized},
         {depsolver, true, false, 'GET', authorized},
         {depsolver, false, false, 'GET', authorized},
+        {cookbooks, true, false, 'GET', authorized},
+        {cookbooks, false, false, 'GET', authorized},
+        {data, true, false, 'GET', authorized},
+        {data, false, false, 'GET', authorized},
 
+        %% PUT depends on AlwaysForModValue
+        {roles, true, false, 'PUT', authz_rules},
+        {roles, false, false, 'PUT', authorized},
+        {cookbooks, true, false, 'PUT', authz_rules},
+        {cookbooks, false, false, 'PUT', authorized},
+        {data, true, false, 'PUT', authz_rules},
+        {data, false, false, 'PUT', authorized},
+
+        %% DELETE depends on AlwaysForModValue
+        {roles, true, false, 'DELETE', authz_rules},
+        {roles, false, false, 'DELETE', authorized},
+        {cookbooks, true, false, 'DELETE', authz_rules},
+        {cookbooks, false, false, 'DELETE', authorized},
+        {data, true, false, 'DELETE', authz_rules},
+        {data, false, false, 'DELETE', authorized},
+
+        %% POST for depsolver is a special case
         {roles, true, false, 'POST', authz_rules},
         {roles, false, false, 'POST', authorized},
-
-        {depsolver, true, false, 'POST', authorized}, %% Here we have a problem
-        {depsolver, false, false, 'POST', authorized}
+        {depsolver, true, false, 'POST', authorized}, 
+        {depsolver, false, false, 'POST', authorized},
+        {data, true, false, 'POST', authz_rules},
+        {data, false, false, 'POST', authorized}
     ],
     [ {lists:flatten(io_lib:format("~p", [Args])),
        fun() -> test_use_custom_acls(Endpoint, AlwaysForMod, EndpointValue, Method, Expected)

@@ -112,7 +112,7 @@ use_custom_acls(_Endpoint, Auth, Req, #base_state{requestor = #chef_user{} } = S
 use_custom_acls(Endpoint, Auth, Req, #base_state{requestor = #chef_client{} } = State) ->
     case application:get_env(oc_chef_wm, config_for(Endpoint)) of
         {ok, false} ->
-            customize_for_modification_maybe(wrq:method(Req), Auth, Req, State);
+            {customize_for_modification_maybe(Endpoint, wrq:method(Req), Auth), Req, State};
         _Else -> %% use standard behaviour
             {Auth, Req, State}
     end.
@@ -122,16 +122,17 @@ use_custom_acls(Endpoint, Auth, Req, #base_state{requestor = #chef_client{} } = 
 %% 'custom_acls_FOO' flags only apply to the GET method.
 %%
 %% Controlled by the config variable {oc_chef_wm, custom_acls_always_for_modification}
-customize_for_modification_maybe('GET', Auth, Req, State) ->
-    {authorized, Req, State};
-customize_for_modification_maybe(_Method, Auth, Req, State) ->
-    case application:get_env(oc_chef_wm, custom_acls_always_for_modification) of
-        {ok, true} ->
-            {Auth, Req, State};
-        {ok, false} ->
-            {authorized, Req, State};
-        _Else ->
-            {Auth, Req, State}
+customize_for_modification_maybe(Endpoint, Method, Auth) ->
+    case is_modification(Endpoint, Method) of
+        true ->
+            case auth_for_modification() of
+                true ->
+                    Auth;
+                false ->
+                    authorized
+            end;
+        false ->
+            authorized
     end.
 
 config_for(cookbooks) ->
@@ -142,4 +143,20 @@ config_for(data) ->
     custom_acls_data;
 config_for(depsolver) ->
     custom_acls_depsolver.
+
+is_modification(depsolver, 'POST') ->
+    false;
+is_modification(_Endpoint, Method) when Method =:= 'GET';
+                                        Method =:= 'HEAD' ->
+    false;
+is_modification(_Endpoint, _Method) ->
+    true.
+
+auth_for_modification() ->
+    case application:get_env(oc_chef_wm, custom_acls_always_for_modification) of
+        {ok, Value} ->
+            Value =:= true;
+        _Else -> 
+           true 
+    end.
 
