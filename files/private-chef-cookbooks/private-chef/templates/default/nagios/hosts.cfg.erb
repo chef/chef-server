@@ -28,14 +28,7 @@ define host {
   use server
   address <%= node['private_chef']['opscode-erchef']['vip'] %>
   host_name opscode-erchef-vip
-  hostgroups opscode-erchef-vip,ha-vips 
-}
-
-define host {
-  use server
-  address <%= node['private_chef']['opscode-chef']['vip'] %>
-  host_name opscode-chef-vip
-  hostgroups opscode-chef-vip,ha-vips 
+  hostgroups opscode-erchef-vip,ha-vips
 }
 
 define host {
