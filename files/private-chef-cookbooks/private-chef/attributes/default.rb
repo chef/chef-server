@@ -129,39 +129,6 @@ default['private_chef']['opscode-expander']['consumer_id'] = "default"
 default['private_chef']['opscode-expander']['nodes'] = 2
 
 ####
-# Chef Server API
-####
-default['private_chef']['opscode-chef']['enable'] = true
-default['private_chef']['opscode-chef']['ha'] = false
-default['private_chef']['opscode-chef']['dir'] = "/var/opt/opscode/opscode-chef"
-default['private_chef']['opscode-chef']['log_directory'] = "/var/log/opscode/opscode-chef"
-default['private_chef']['opscode-chef']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['opscode-chef']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-chef']['sandbox_path'] = "/var/opt/opscode/opscode-chef/sandbox"
-default['private_chef']['opscode-chef']['checksum_path'] = "/var/opt/opscode/opscode-chef/checksum"
-default['private_chef']['opscode-chef']['proxy_user'] = "pivotal"
-default['private_chef']['opscode-chef']['environment'] = 'privatechef'
-default['private_chef']['opscode-chef']['url'] = "http://127.0.0.1:9460"
-default['private_chef']['opscode-chef']['upload_vip'] = "127.0.0.1"
-default['private_chef']['opscode-chef']['upload_port'] = 8000
-default['private_chef']['opscode-chef']['upload_proto'] = "http"
-default['private_chef']['opscode-chef']['upload_internal_vip'] = "127.0.0.1"
-default['private_chef']['opscode-chef']['upload_internal_port'] = 8000
-default['private_chef']['opscode-chef']['upload_internal_proto'] = "http"
-default['private_chef']['opscode-chef']['vip'] = "127.0.0.1"
-default['private_chef']['opscode-chef']['port'] = 9460
-default['private_chef']['opscode-chef']['listen'] = '127.0.0.1:9460'
-default['private_chef']['opscode-chef']['backlog'] = 1024
-default['private_chef']['opscode-chef']['tcp_nodelay'] = true
-default['private_chef']['opscode-chef']['worker_timeout'] = 3600
-default['private_chef']['opscode-chef']['validation_client_name'] = "chef"
-default['private_chef']['opscode-chef']['umask'] = "0022"
-default['private_chef']['opscode-chef']['worker_processes'] = node["cpu"]["total"].to_i
-default['private_chef']['opscode-chef']['web_ui_client_name'] = "chef-webui"
-default['private_chef']['opscode-chef']['web_ui_admin_user_name'] = "admin"
-default['private_chef']['opscode-chef']['web_ui_admin_default_password'] = "p@ssw0rd1"
-
-####
 # Erlang Chef Server API
 ####
 default['private_chef']['opscode-erchef']['enable'] = true
@@ -236,7 +203,6 @@ default['private_chef']['lb']['api_fqdn'] = node['fqdn']
 default['private_chef']['lb']['web_ui_fqdn'] = node['fqdn']
 default['private_chef']['lb']['cache_cookbook_files'] = false
 default['private_chef']['lb']['debug'] = false
-default['private_chef']['lb']['upstream']['opscode-chef'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-erchef'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-account'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-webui'] = [ "127.0.0.1" ]
@@ -538,7 +504,6 @@ default['private_chef']['keepalived']['service_order'] = [
   { "key" => "opscode-expander", "service_name" => "opscode-expander" },
   { "key" => "opscode-expander", "service_name" => "opscode-expander-reindexer" },
   { "key" => "opscode-org-creator", "service_name" => "opscode-org-creator" },
-  { "key" => "opscode-chef", "service_name" => "opscode-chef" },
   { "key" => "opscode-erchef", "service_name" => "opscode-erchef" },
   { "key" => "opscode-webui", "service_name" => "opscode-webui" },
   { "key" => "nginx", "service_name" => "nginx" }
