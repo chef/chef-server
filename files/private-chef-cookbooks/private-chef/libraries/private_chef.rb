@@ -319,6 +319,7 @@ module PrivateChef
       PrivateChef["opscode_chef"]["upload_internal_vip"] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef["opscode_chef"]["upload_internal_port"] ||= 9680
       PrivateChef["lb"]["cache_cookbook_files"] ||= true
+      PrivateChef["lb"]["upstream"] = Mash.new
       PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ PrivateChef["backend_vips"]["ipaddress"] ]
       PrivateChef["nagios"]["enable"] ||= false
       PrivateChef["bootstrap"]["enable"] = false
