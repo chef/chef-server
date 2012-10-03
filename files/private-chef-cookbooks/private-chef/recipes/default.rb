@@ -138,7 +138,6 @@ include_recipe "private-chef::runit"
   "bookshelf",
   "bootstrap",
   "opscode-org-creator",
-  "opscode-chef",
   "opscode-erchef",
   "opscode-webui",
   "nginx",
