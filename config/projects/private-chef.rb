@@ -33,7 +33,6 @@ dependency "bookshelf"
 
 # the front-end services
 dependency "oc_erchef"
-dependency "opscode-chef"
 dependency "opscode-account"
 dependency "opscode-webui"
 dependency "opscode-authz"
