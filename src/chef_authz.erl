@@ -30,20 +30,16 @@
 % Helper function to ADD/DELETE actors and groups from record
 % (expecting we won't want to make everyone do this common task
 
--export([create_object_if_authorized/4,
-         create_object_with_container_acl/2,
+-ifndef(TEST).
+-export([delete_resource/3,
+         create_object_if_authorized/4,
          get_container_aid_for_object/3,
-         is_authorized_on_resource/6,
-         create_resource/2,
-         delete_resource/3,
-         add_to_group/4,
-         delete_from_group/4,
-         get_group/2,
-         get_acl_for_resource/3,
-         get_ace_for_resource/4,
          make_context/1,
-         set_ace_for_resource/5,
+         is_authorized_on_resource/6,
          ping/0]).
+-else.
+-compile([export_all]).
+-endif.
 
 -include("chef_authz.hrl").
 -include("chef_authz_db.hrl").
@@ -91,8 +87,8 @@ make_context(ReqId)  ->
                                   object_id(),
                                   object_id(),
                                   contained_object_name()) ->
-                                         {error, forbidden} |
-                                         {ok, object_id()}.
+                                         {ok, object_id()} |
+                                         {error, forbidden}.
 create_object_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
     ContainerAId = get_container_aid_for_object(Context, OrgId, ObjectType),
     case is_authorized_on_resource(CreatorAId, container, ContainerAId, actor, CreatorAId, create) of
@@ -113,7 +109,6 @@ get_container_aid_for_object(Context, OrgId, ObjectType) ->
     Container = chef_authz_db:fetch_container(Context, OrgId, ContainerName),
     Container#chef_container.authz_id.
 
--spec create_object_with_container_acl(requestor_id(), object_id()) -> {ok, object_id()}.
 %% @doc Create a new authz object using the ACL of a container as a template for the new
 %% object's ACL.
 %%
@@ -121,30 +116,77 @@ get_container_aid_for_object(Context, OrgId, ObjectType) ->
 %% with the ACL for `ContainerAId' will be merged into the ACL for the new object.
 %%
 %% TODO: consider error cases in more detail
+-spec create_object_with_container_acl(requestor_id(), object_id()) -> {ok, object_id()} |
+                                                                       {error, forbidden}.
 create_object_with_container_acl(RequestorId, ContainerAId) ->
     {ok, ObjectId} = create_resource(RequestorId, object),
-    ok = merge_acl_from_container(RequestorId, ContainerAId, ObjectId),
-    {ok, ObjectId}.
+    case merge_acl_from_container(RequestorId, ContainerAId, ObjectId) of
+        ok ->
+            {ok, ObjectId};
+        {error, object_acl} ->
+            error_logger:error_msg("Unable to read ACL for newly created resource: ~p~n", [ObjectId]),
+            {error, forbidden};
+        _Error ->
+            {error, forbidden}
+    end.
 
 %%%
 %%% merge_acl_from_container
 %%% TODO: consider error cases in more detail
--spec merge_acl_from_container(requestor_id(), binary(), object_id()) -> ok.
+-spec merge_acl_from_container(requestor_id(), object_id(), object_id()) -> ok |
+                                                                            {error, object_acl | container_acl}.
 merge_acl_from_container(RequestorId, ContainerId, ObjectId) ->
-    {ok, CAcl} = get_acl_for_resource(RequestorId, container, ContainerId),
-    {ok, OAcl} = get_acl_for_resource(RequestorId, object, ObjectId),
-    NAcl = merge_acl(CAcl, OAcl),
-    [ ok = set_ace_for_resource(RequestorId, object, ObjectId,  Method, Ace) ||
-        {Method, Ace} <- NAcl],
-    ok.
+    case get_acl_for_resource(RequestorId, container, ContainerId) of
+        {ok, CAcl} ->
+            case get_acl_for_resource(RequestorId, object, ObjectId) of
+                {ok, OAcl} ->
+                    NAcl = merge_acl(CAcl, OAcl),
+                    case set_acl(RequestorId, ObjectId, NAcl) of
+                        ok ->
+                            ok;
+                        {error, _} ->
+                            %% The details of the error will have already been logged
+                            {error, object_acl}
+                    end;
+                Error ->
+                    error_logger:error_msg("Error fetching ACL on object ~p for requestor ~p: ~p~n",
+                                           [ObjectId, RequestorId, Error]),
+                    {error, object_acl}
+            end;
+        Error ->
+            error_logger:error_msg("Error fetching ACL on container ~p for requestor ~p: ~p~n",
+                                   [ContainerId, RequestorId, Error]),
+            {error, container_acl}
+    end.
+
+%% @doc Set the ACL of the object to the given ACL, one ACE at a time.
+%%
+%% Returns 'ok' if all ACEs are successfully set, and {error, Reason} at the first failure.
+%%
+%% No, this is not transactional in any sense, but then again, neither is CouchDB.  In any
+%% case, this will change dramatically once we move to SQL.
+-spec set_acl(requestor_id(),
+              object_id(),
+              authz_acl()) -> ok | {error, any()}.
+set_acl(_RequestorId, _ObjectId, []) ->
+    ok;
+set_acl(RequestorId, ObjectId, [{Method, ACE}|Rest]) ->
+    case set_ace_for_object(RequestorId, ObjectId, Method, ACE) of
+        ok ->
+            set_acl(RequestorId, ObjectId, Rest);
+        {error, Reason} ->
+            error_logger:error_msg("Error setting ACE ~p for method ~p on object ~p for requestor ~p: ~p~n",
+                                   [ACE, Method, ObjectId, RequestorId, Reason]),
+            {error, Reason}
+    end.
 
 %
 % Test if an actor is authorized
 % Corresponds to GET /{actors|containers|groups|objects}/:id/acl/{actors|groups}/:member_id
 %
 -spec is_authorized_on_resource(requestor_id(), resource_type(), object_id(),
-                              'actor'|'group', actor_id(), access_method())
-                             -> true|false|{error,server_error}.
+                                'actor'|'group', actor_id(), access_method())
+                               -> true|false|{error,server_error}.
 is_authorized_on_resource(RequestorId, ResourceType, ResourceId, ActorType, ActorId, AccessMethod)
   when is_atom(ResourceType) and is_atom(ActorType) and is_atom(AccessMethod) ->
     Url = make_url([pluralize_resource(ResourceType), ResourceId, <<"acl">>,
@@ -190,51 +232,6 @@ delete_resource(RequestorId, ResourceType, Id) ->
     end.
 
 %
-% Get contents of a group
-% Corresponds to GET groups/:group_id
-%
--spec get_group(requestor_id(), binary())
-               -> {ok, #authz_group{}} | {error, forbidden|not_found|server_error}.
-get_group(RequestorId, GroupId) ->
-    Url = make_url([groups, GroupId]),
-    case chef_authz_http:request(Url, get, [], [], RequestorId) of
-        {ok, Data} ->
-            {Actors, Groups} = extract_actors_and_groups(Data),
-            Group = #authz_group{actors=Actors, groups=Groups},
-            {ok, Group};
-        %% Expected errors are forbidden, not_found, server_error
-        {error, Error} -> {error, Error}
-    end.
-
-%
-% Add a member to a group
-% Corresponds to PUT /groups/:group_id/{actor|group}/:actor_or_group_id
-%
--spec add_to_group(requestor_id(), binary(), 'actor'|'group', binary()) -> ok|{error, any()}.
-add_to_group(RequestorId, GroupId, ResourceType, ActorOrGroupId) ->
-    Url = make_url([groups, GroupId, pluralize_resource(ResourceType), ActorOrGroupId]),
-    %% Expected errors are forbidden, not_found, server_error
-    case chef_authz_http:request(Url, put, [], [], RequestorId) of
-        ok -> ok;
-        %% Expected errors are forbidden, not_found, server_error
-        {error, Error} -> {error, Error}
-    end.
-
-%
-% Remove a member from a group
-% Corresponds to PUT /groups/:group_id/{actor|group}/:actor_or_group_id
-%
--spec delete_from_group(requestor_id(), binary(), 'actor'|'group', binary()) -> ok|{error, any()}.
-delete_from_group(RequestorId, GroupId, Type, ActorOrGroupId) ->
-    Url = make_url([groups, GroupId, pluralize_resource(Type), ActorOrGroupId]),
-    case chef_authz_http:request(Url, delete, [], [], RequestorId) of
-        ok -> ok;
-        %% Expected errors are forbidden, not_found, server_error
-        {error, Error} -> {error, Error}
-    end.
-
-
-%
 % Get acl from an entity
 % GET {objects|groups|actors|containers}/:id/acl
 %
@@ -250,46 +247,16 @@ get_acl_for_resource(RequestorId, ResourceType, Id) ->
     end.
 
 %
-% Get the ace for a resource
-%
-% GET {objects|groups|actors|containers}/:id/acl/:action
-
--spec get_ace_for_resource(requestor_id(), resource_type(), binary(), access_method()) -> {ok, authz_ace()}|{error, any()}.
-get_ace_for_resource(RequestorId, ResourceType, Id, AccessMethod) ->
-    Url = make_url([pluralize_resource(ResourceType), Id, acl, AccessMethod]),
-    case chef_authz_http:request(Url, get, [], [], RequestorId) of
-        {ok, Data} ->
-            {Actors, Groups} = extract_actors_and_groups(Data),
-            Ace = #authz_ace{actors=Actors, groups=Groups},
-            {ok, Ace};
-        %% Expected errors are forbidden, not_found, server_error
-        {error, Error} -> {error, Error}
-    end.
-
-%
-% Remove all actors and groups from an ace
-% DELETE {objects|groups|actors|containers}/:id/acl/:action
-%
-% THIS ISN'T ACTUALLY IMPLEMENTED IN AUTHZ!!!
-%
--ifdef(HASDELETE).
--spec delete_ace_for_resource(requestor_id(), resource_type(), binary(), access_method()) -> ok|{error, any()}.
-delete_ace_for_resource(RequestorId, ResourceType, Id, AccessMethod) ->
-    Url = make_url([pluralize_resource(ResourceType), Id, acl, AccessMethod]),
-    case chef_authz_http:request(Url, delete, [], [], RequestorId) of
-        ok -> ok;
-        %% Expected errors are forbidden, not_found, server_error
-        {error, Error} -> {error, Error}
-    end.
--endif.
-
-%
 % Replace the actors and groups of an ace
 % PUT {objects|groups|actors|containers}/:id/acl/:action
 %
--spec set_ace_for_resource(requestor_id(), resource_type(), binary(), access_method(), authz_ace()) -> ok|{error, any()}.
-set_ace_for_resource(RequestorId, ResourceType, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
-    Url = make_url([pluralize_resource(ResourceType), Id, acl, AccessMethod]),
+-spec set_ace_for_object(requestor_id(),
+                         object_id(),
+                         access_method(),
+                         authz_ace()) -> ok |
+                                         {error, any()}.
+set_ace_for_object(RequestorId, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
+    Url = make_url([pluralize_resource(object), Id, acl, AccessMethod]),
     Body = jiffy:encode({[{<<"actors">>, Actors}, {<<"groups">>, Groups}]}),
     case chef_authz_http:request(Url, put, [], Body, RequestorId) of
         ok -> ok;
