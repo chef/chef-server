@@ -17,7 +17,7 @@
                         {tag,"44c3288649ecece19bd772e67731b080a0e33815"}}},
        {chef_authz,".*",
                    {git,"git@github.com:opscode/chef_authz.git",
-                        {tag,"712c65c5f3a016066841faa1074833d17757d804"}}},
+                        {tag,"0d4e0864c572af8137d2794bb1e20013493f250e"}}},
        {chef_certgen,".*",
                      {git,"git://github.com/opscode/chef_certgen.git",
                           {tag,"05cd996e89220287e6a7b71f9ba296819a529678"}}},
