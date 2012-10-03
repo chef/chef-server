@@ -21,7 +21,6 @@ module PrivateChef
   rabbitmq Mash.new
   opscode_solr Mash.new
   opscode_expander Mash.new
-  opscode_chef Mash.new
   opscode_erchef Mash.new
   opscode_webui Mash.new
   lb Mash.new
@@ -171,7 +170,6 @@ module PrivateChef
         "rabbitmq",
         "opscode_solr",
         "opscode_expander",
-        "opscode_chef",
         "opscode_erchef",
         "opscode_webui",
         "lb",
@@ -227,8 +225,6 @@ module PrivateChef
     end
 
     def gen_drbd
-      PrivateChef['opscode_chef']['sandbox_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/sandbox"
-      PrivateChef['opscode_chef']['checksum_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/checksum"
       PrivateChef["couchdb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/couchdb"
       PrivateChef['bookshelf']['data_dir'] = "/var/opt/opscode/drbd/data/bookshelf"
       PrivateChef["rabbitmq"]["data_dir"] ||= "/var/opt/opscode/drbd/data/rabbitmq"
@@ -265,7 +261,6 @@ module PrivateChef
       PrivateChef["rabbitmq"]["ha"] ||= true
       PrivateChef["opscode_solr"]["ha"] ||= true
       PrivateChef["opscode_expander"]["ha"] ||= true
-      PrivateChef["opscode_chef"]["ha"] ||= true
       PrivateChef["opscode_erchef"]["ha"] ||= true
       PrivateChef["opscode_webui"]["ha"] ||= true
       PrivateChef["lb"]["ha"] ||= true
@@ -285,7 +280,6 @@ module PrivateChef
       PrivateChef["couchdb"]["bind_address"] ||= "0.0.0.0"
       PrivateChef["rabbitmq"]["node_ip_address"] ||= "0.0.0.0"
       PrivateChef["opscode_solr"]["ip_address"] ||= "0.0.0.0"
-      PrivateChef["opscode_chef"]["worker_processes"] ||= 6
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
       PrivateChef["postgresql"]["listen_address"] ||= "0.0.0.0"
       PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"]
@@ -314,11 +308,6 @@ module PrivateChef
       PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["redis"]["enable"] ||= false
       PrivateChef["redis"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["opscode_chef"]["upload_vip"] ||= PrivateChef['backend_vips']['ipaddress']
-      PrivateChef["opscode_chef"]["upload_port"] ||= 443
-      PrivateChef["opscode_chef"]["upload_proto"] ||= "https"
-      PrivateChef["opscode_chef"]["upload_internal_vip"] ||= PrivateChef['backend_vips']['ipaddress']
-      PrivateChef["opscode_chef"]["upload_internal_port"] ||= 9680
       PrivateChef["lb"]["cache_cookbook_files"] ||= true
       PrivateChef["lb"]["upstream"] = Mash.new
       PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ PrivateChef["backend_vips"]["ipaddress"] ]
