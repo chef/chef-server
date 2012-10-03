@@ -1,0 +1,97 @@
+#!/usr/bin/env escript -noshell
+
+main(Apps) ->
+    xref:start(s),
+    xref:set_default(s, [{verbose, false}, {warnings, false}]),
+    xref:add_release(s, code:lib_dir(), {name, otp}),
+    LibDir = code:lib_dir(),
+    xref:add_release(s, LibDir, {name, otp}),
+    AppMods = load_app_modules(Apps),
+    xref:add_directory(s, "deps", [{recurse, true}]),
+    {ok, Undefined0} = xref:analyze(s, undefined_function_calls),
+    Undefined = [{undefined, Undef} || Undef <- Undefined0,
+                                       keep_result(Undef, AppMods) == true],
+    {ok, Locals0} = xref:analyze(s, locals_not_used),
+    Locals = [{dead, Local} || Local <- Locals0,
+                        keep_result(Local, AppMods) == true],
+    case Locals ++ Undefined of
+        [] ->
+            erlang:halt(0);
+        Results ->
+            print_results(Results),
+            erlang:halt(1)
+    end.
+
+print_results([]) ->
+    ok;
+print_results([{undefined, {{CallerMod, CallerFun, CallerArity},
+                            {CalledMod, CalledFun, CalledArity}}}|T]) ->
+    io:format(standard_error, "\e[1;31m~p:~p/~p called undefined function ~p:~p/~p.\e[0m~n",
+              [CallerMod, CallerFun, CallerArity, CalledMod, CalledFun, CalledArity]),
+    print_results(T);
+print_results([{dead, {Mod, Fun, Arity}}|T]) ->
+    io:format(standard_error, "\e[1;33m~p:~p/~p is unused.\e[0m~n", [Mod, Fun, Arity]),
+    print_results(T).
+
+keep_result({{CallerMod, _, _}, {CalledMod, _, _}}, AppMods) ->
+    sets:is_element(CallerMod, AppMods) == true andalso
+        (code:is_module_native(CalledMod) == false orelse
+         code:which(CalledMod) /= preloaded);
+keep_result({Mod, Fun, Arity}, AppMods) ->
+    case sets:is_element(Mod, AppMods) of
+        true ->
+            case find_on_load(Mod) of
+                {Mod, Fun, Arity} ->
+                    false;
+                _ ->
+                    true
+            end;
+        false ->
+            false
+    end.
+
+load_app_modules(Apps) ->
+    load_app_modules(Apps, sets:new()).
+
+load_app_modules([], Accum) ->
+    Accum;
+load_app_modules([App|T], Accum) ->
+    AppFileWC = filename:join([".", "deps", App, "ebin"]) ++ "/*.app",
+    [AppFile] = filelib:wildcard(AppFileWC),
+    {ok, [{application, _, AppDesc}]} = file:consult(AppFile),
+    Accum1 = case proplists:get_value(modules, AppDesc) of
+                 undefined ->
+                     io:format("No modules list found for ~p. Skipping...~n", [App]),
+                     io:format("AppDesc: ~p~n", [AppDesc]),
+                     Accum;
+                 Mods ->
+                     sets:union(Accum, sets:from_list(Mods))
+             end,
+    load_app_modules(T, Accum1).
+
+find_on_load(ModName) ->
+    case erlang:get(ModName) of
+        undefined ->
+            SourceWC = filename:join([".", "deps", "*", "src", atom_to_list(ModName)]) ++ ".erl",
+            [Source|_] = filelib:wildcard(SourceWC),
+            {ok, AST} = epp_dodger:parse_file(Source),
+            Result = walk_tree(AST),
+            erlang:put(ModName, Result),
+            find_on_load(ModName);
+        false ->
+            undefined;
+        {FunName, Arity} ->
+            {ModName, FunName, Arity}
+    end.
+
+walk_tree([]) ->
+    false;
+walk_tree([{tree,attribute, _,
+            {attribute,
+             {tree, atom, _, on_load},
+             [{tree, tuple, _,
+               [{tree, atom, _, Name},
+                {tree,integer, _, Arity}]}]}}|_]) ->
+    {Name, Arity};
+walk_tree([_Attr|T]) ->
+    walk_tree(T).
