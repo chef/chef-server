@@ -365,6 +365,7 @@ basic_test_() ->
          {<<"Fetch user list">>, fun fetch_user_list/0},
          {<<"Insert user">>, fun insert_user_data/0},
          {<<"Fetch single user">>, fun fetch_user_data/0},
+         {<<"Update user">>, fun update_user_data/0},
          {<<"Delete user">>, fun delete_user_data/0},
          {<<"Count admin users">>, fun count_admin_users/0}
        ]
@@ -1150,6 +1151,7 @@ insert_user_data() ->
   Results = [chef_sql:create_user(User) || User <- Users ],
   ?assertEqual(Expected, Results).
 
+
 fetch_user_data() ->
   Expected = make_user(<<"user03">>),
   Username = Expected#chef_user.username,
@@ -1176,11 +1178,27 @@ delete_user_data() ->
   Result1 = chef_sql:fetch_user(Username),
   ?assertEqual({ok, not_found}, Result1).
 
+update_user_data() ->
+  User = make_user(<<"user07">>),
+  Username = User#chef_user.username,
+  ?assertEqual({ok, 1}, chef_sql:create_user(User)),
+
+  UpdatedUserData = User#chef_user{ admin = true },
+
+  Result = chef_sql:update_user(UpdatedUserData),
+  ?assertEqual({ok, 1}, Result),
+
+  {ok, PersistedUser} = chef_sql:fetch_user(Username),
+  ?assertEqual(true, PersistedUser#chef_user.admin),
+
+  %% Cleanup admin user so count_admin_users() tests will work
+  chef_sql:delete_user(Username).
+
 count_admin_users() ->
-  User = make_admin_user(<<"user07">>),
+  User = make_admin_user(<<"user08">>),
   ?assertEqual({ok, 1}, chef_sql:create_user(User)),
   ?assertEqual({ok, 1}, chef_sql:count_user_admins()),
-  User2 = make_admin_user(<<"user08">>),
+  User2 = make_admin_user(<<"user09">>),
   ?assertEqual({ok, 1}, chef_sql:create_user(User2)),
   ?assertEqual({ok, 2}, chef_sql:count_user_admins()).
 

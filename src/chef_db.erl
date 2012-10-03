@@ -727,6 +727,10 @@ update_client(#context{}=Ctx, Client, ActorId) ->
 update_data_bag_item(#context{}=Ctx, DataBagItem, ActorId) ->
     update_object(Ctx, ActorId, update_data_bag_item, DataBagItem).
 
+%% Update data for a User.
+update_user(#context{}=Ctx, User, ActorId) ->
+    update_object(Ctx, ActorId, update_user, User).
+
 -spec update_cookbook_version(DbContext :: #context{},
                               CBVersion :: #chef_cookbook_version{},
                               ActorId :: object_id()) -> ok | {conflict, _} | {error, _}.
