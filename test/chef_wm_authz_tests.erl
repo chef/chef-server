@@ -126,3 +126,150 @@ all_but_validators_test_() ->
                                            {"Non-admin user is allowed", ?NON_ADMIN_USER, authorized}
                                           ]
     ].
+
+setup_no_custom_acls_env() ->
+    %%application:set_env(oc_chef_wm, custom_acls_always_for_modification, false),
+    application:set_env(oc_chef_wm, custom_acls_depsolver, false),
+    application:set_env(oc_chef_wm, custom_acls_roles, false),
+    application:set_env(oc_chef_wm, custom_acls_cookbooks, true),
+    application:set_env(oc_chef_wm, custom_acls_data, true),
+    ok.
+
+set_default_custom_acls_env() ->
+    application:set_env(oc_chef_wm, custom_acls_always_for_modification, true),
+    application:set_env(oc_chef_wm, custom_acls_depsolver, true),
+    application:set_env(oc_chef_wm, custom_acls_roles, true),
+    application:set_env(oc_chef_wm, custom_acls_cookbooks, true),
+    application:set_env(oc_chef_wm, custom_acls_data, true),
+    ok.
+
+customize_for_modification_maybe_with_no_custom_acls_test_() ->
+    {setup,
+     fun() -> 
+             setup_no_custom_acls_env()
+     end,
+     fun(_) -> 
+             set_default_custom_acls_env()
+     end,
+     [
+         {"GET case always returns authorized",
+          fun() -> Got = chef_wm_authz:customize_for_modification_maybe('GET', a, r, s),
+                   ?assertEqual({authorized, r, s}, Got)
+         end
+         },
+         {"PUT case returns authorized when always_for_modification == false",
+          fun() -> application:set_env(oc_chef_wm, custom_acls_always_for_modification, false),
+                   Got = chef_wm_authz:customize_for_modification_maybe('PUT', a, r, s),
+                   ?assertEqual({authorized, r, s}, Got)
+          end
+         },
+         {"PUT case returns auth rules when always_for_modification == true",
+          fun() -> application:set_env(oc_chef_wm, custom_acls_always_for_modification, true), Got = chef_wm_authz:customize_for_modification_maybe('PUT', a, r, s),
+                   ?assertEqual({a, r, s}, Got)
+          end
+         }
+     ]}.
+
+use_custom_acls_test_() ->
+    {setup,
+     fun() -> 
+             set_default_custom_acls_env()
+     end,
+     fun(_) -> ok end,
+     [
+        {"Clients always return original auth with default env",
+         fun() -> Client = #chef_client{name = <<"alice">>,
+                                        admin = true,
+                                        validator = false,
+                                        public_key = <<"key is here">>},
+                  State = #base_state{requestor = Client},
+                  Got = chef_wm_authz:use_custom_acls(depsolver, a, r, State),
+                  ?assertEqual({a, r, State}, Got)
+         end}
+     ]}.
+
+use_custom_acls_with_no_custom_acls_test_() ->
+    {setup,
+     fun() -> meck:new(wrq) end,
+     fun(_) -> meck:unload(wrq) end,
+     [
+        {"Clients depsolver returns original auth with no_custom_acls and PUT",
+         fun() -> application:set_env(oc_chef_wm, custom_acls_always_for_modification, true),
+                  application:set_env(oc_chef_wm, custom_acls_depsolver, false),
+                  meck:expect(wrq, method, fun(_Req) -> 'PUT' end),
+                  Client = #chef_client{name = <<"alice">>,
+                                        admin = true,
+                                        validator = false,
+                                        public_key = <<"key is here">>},
+                  State = #base_state{requestor = Client},
+                  Got = chef_wm_authz:use_custom_acls(depsolver, a, r, State),
+                  ?assertEqual({a, r, State}, Got)
+         end
+        },
+        {"Clients depsolver returns authorized with no always_for_modification and PUT",
+         fun() -> application:set_env(oc_chef_wm, custom_acls_always_for_modification, false),
+                  application:set_env(oc_chef_wm, custom_acls_depsolver, false),
+                  meck:expect(wrq, method, fun(_Req) -> 'PUT' end),
+                  Client = #chef_client{name = <<"alice">>,
+                                        admin = true,
+                                        validator = false,
+                                        public_key = <<"key is here">>},
+                  State = #base_state{requestor = Client},
+                  Got = chef_wm_authz:use_custom_acls(depsolver, a, r, State),
+                  ?assertEqual({authorized, r, State}, Got)
+         end
+        },
+        {"Clients depsolver returns authorized with no_custom_acls env and GET",
+         fun() -> application:set_env(oc_chef_wm, custom_acls_always_for_modification, true),
+                  application:set_env(oc_chef_wm, custom_acls_depsolver, false),
+                  meck:expect(wrq, method, fun(_Req) -> 'GET' end),
+                  Client = #chef_client{name = <<"alice">>,
+                                        admin = true,
+                                        validator = false,
+                                        public_key = <<"key is here">>},
+                  State = #base_state{requestor = Client},
+                  Got = chef_wm_authz:use_custom_acls(depsolver, a, r, State),
+                  ?assertEqual({authorized, r, State}, Got)
+         end
+        },
+        {"Clients depsolver returns authorized with no_custom_acls env and GET",
+         fun() -> application:set_env(oc_chef_wm, custom_acls_always_for_modification, false),
+                  application:set_env(oc_chef_wm, custom_acls_depsolver, false),
+                  meck:expect(wrq, method, fun(_Req) -> 'GET' end),
+                  Client = #chef_client{name = <<"alice">>,
+                                        admin = true,
+                                        validator = false,
+                                        public_key = <<"key is here">>},
+                  State = #base_state{requestor = Client},
+                  Got = chef_wm_authz:use_custom_acls(depsolver, a, r, State),
+                  ?assertEqual({authorized, r, State}, Got)
+         end
+        },
+        {"Clients depsolver returns authorized with no_custom_acls env and POST",
+         fun() -> application:set_env(oc_chef_wm, custom_acls_always_for_modification, true),
+                  application:set_env(oc_chef_wm, custom_acls_depsolver, false),
+                  meck:expect(wrq, method, fun(_Req) -> 'POST' end),
+                  Client = #chef_client{name = <<"alice">>,
+                                        admin = true,
+                                        validator = false,
+                                        public_key = <<"key is here">>},
+                  State = #base_state{requestor = Client},
+                  Got = chef_wm_authz:use_custom_acls(depsolver, a, r, State),
+                  ?assertEqual({authorized, r, State}, Got)
+         end
+        },
+        {"Clients depsolver returns authorized with no_custom_acls env and POST",
+         fun() -> application:set_env(oc_chef_wm, custom_acls_always_for_modification, false),
+                  application:set_env(oc_chef_wm, custom_acls_depsolver, false),
+                  meck:expect(wrq, method, fun(_Req) -> 'POST' end),
+                  Client = #chef_client{name = <<"alice">>,
+                                        admin = true,
+                                        validator = false,
+                                        public_key = <<"key is here">>},
+                  State = #base_state{requestor = Client},
+                  Got = chef_wm_authz:use_custom_acls(depsolver, a, r, State),
+                  ?assertEqual({authorized, r, State}, Got)
+         end
+        }
+     ]}.
+
