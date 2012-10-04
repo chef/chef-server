@@ -19,7 +19,6 @@
 %% under the License.
 %%
 
-
 -module(chef_data_bag).
 
 -export([
@@ -32,29 +31,36 @@
 
 -include("chef_types.hrl").
 
+%% @doc Describes the valid structure of a data bag for use with `ej:valid/2`.
 -define(VALIDATION_CONSTRAINTS,
-        [
-         {<<"name">>,             {match, "^[[:alnum:]_\:\.\-]+$"}}
-        ]).
+        {[
+          {<<"name">>, {string_match, chef_regex:regex_for(data_bag_name)}}
+          %% In other objects we would have validation like this:
+          %%
+          %%     {{opt, <<"chef_type">>}, <<"data_bag">>},
+          %%     {{opt, <<"json_class">>}, <<"Chef::DataBag">>}
+          %%
+          %% We don't need that for data bags, because all we save from them is a name.  They
+          %% have no 'serialized object' that is saved and also returned to clients upon
+          %% retrieval.
+         ]}).
 
 %% @doc Convert a binary JSON string representing a Chef data_bag into an EJson-encoded
 %% Erlang data structure.
 %%
-%% @end
--spec parse_binary_json( binary(), create ) ->
-                               { ok, ejson_term() }. % or throw
-parse_binary_json(Bin, create) ->
-    %% TODO: invalid_json will get logged by do_malformed_request, but
-    %% currently without any additional information.  Do we want to
-    %% emit the JSON we recieved (size limited) or some details of the
-    %% parse error from ejson if we can extract it?
+%% The `create` atom is required to keep the contract of this function in line with those of
+%% other "Chef object" modules.  They allow for updates as well as creation, but updates
+%% aren't valid for data bags.
+-spec parse_binary_json(Bin :: binary(), Action :: create ) ->
+                               {ok, Parsed :: ejson_term()}. % or throw
+parse_binary_json(Bin, _Action=create) ->
     DataBag = chef_json:decode(Bin),
-    case validate_data_bag(DataBag, create) of
-        %% Note: we fill some fields with default values if they are missing
-        ok -> {ok, DataBag};
-        X -> throw(X)
-  end.
+    validate_data_bag(DataBag).
 
-validate_data_bag(DataBag, create) ->
-    chef_json_validator:validate_json_by_regex_constraints(DataBag,
-                                                           ?VALIDATION_CONSTRAINTS).
+validate_data_bag(DataBag) ->
+    case ej:valid(?VALIDATION_CONSTRAINTS, DataBag) of
+        ok ->
+            {ok, DataBag};
+        Bad ->
+            throw(Bad)
+    end.

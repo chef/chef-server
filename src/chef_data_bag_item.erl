@@ -20,7 +20,6 @@
 %% under the License.
 %%
 
-
 -module(chef_data_bag_item).
 
 -export([
@@ -35,11 +34,11 @@
 
 -include("chef_types.hrl").
 
+%% Describes the valid structure of a data bag item for use with `ej:valid/2`.
 -define(VALIDATION_CONSTRAINTS,
-        [
-         {<<"id">>,             {match, "^[[:alnum:]_\:\.\-]+$"}}
-        ]).
-
+        {[
+          {<<"id">>, {string_match, chef_regex:regex_for(data_bag_item_id)}}
+         ]}).
 
 -spec add_type_and_bag(BagName :: binary(), Item :: ejson_term()) -> ejson_term().
 %% @doc Returns data bag item EJSON `Item' with keys `chef_type' and `data_bag' added.
@@ -58,39 +57,43 @@ wrap_item(BagName, ItemName, Item) ->
 
 %% @doc Convert a binary JSON string representing a Chef data_bag into an EJson-encoded
 %% Erlang data structure.
-%%
-%% @end
 -spec parse_binary_json( binary(), create | {update, binary()} ) ->
                                { ok, ejson_term() }. % or throw
 parse_binary_json(Bin, Action) ->
-    %% TODO: invalid_json will get logged by do_malformed_request, but
-    %% currently without any additional information.  Do we want to
-    %% emit the JSON we recieved (size limited) or some details of the
-    %% parse error from ejson if we can extract it?
     DataBagItem = unwrap_item(chef_json:decode(Bin)),
     validate_data_bag_item(DataBagItem, Action).
 
+-spec validate_data_bag_item(ej:json_object(), create | {update, binary()})
+                            -> {ok, ej:json_object()}.
 validate_data_bag_item(DataBagItem, create) ->
-    case chef_json_validator:validate_json_by_regex_constraints(DataBagItem,
-                                                                ?VALIDATION_CONSTRAINTS)of
-        ok -> {ok, DataBagItem};
-        Bad -> throw(Bad)
-    end;
-validate_data_bag_item(DataBagItem, {update, UrlName}) ->
-    %% For update, name in URL must match name, if provided, in JSON.  Missing name is ok
-    %% (you know the name by the URL you're hitting), but name mismatch is not.
-    case ej:get({<<"id">>}, DataBagItem) of
-        %% item JSON *must* contain id
-        Name when Name =:= UrlName;
-                  Name =:= undefined ->
-            WithName = ej:set({<<"id">>}, DataBagItem, UrlName),
-            case chef_json_validator:validate_json_by_regex_constraints(WithName,
-                                                                        ?VALIDATION_CONSTRAINTS) of
-                ok -> {ok, WithName};
-                Bad -> throw(Bad)
-            end;
+    validate(DataBagItem);
+validate_data_bag_item(DataBagItem, {update, IdFromUrl}) ->
+    validate(normalized_data_bag_for_update(DataBagItem, IdFromUrl)).
+
+%% @doc Common logic for validating a data bag item, whether it's for creation or update
+-spec validate(ej:json_object()) -> {ok, ej:json_object()}.
+validate(DataBagItem) ->
+    case ej:valid(?VALIDATION_CONSTRAINTS, DataBagItem) of
+        ok ->
+            {ok, DataBagItem};
+        Bad ->
+            throw(Bad)
+    end.
+
+%% @doc For data bag update, the id in URL must match the id (if provided) in the JSON.
+%% Missing the id is ok (you know from the URL you're hitting), but an id mismatch is not.
+%%
+%% Returns `DataBagItem` with `IdFromUrl` unambiguously set as its id, or throws if it was
+%% mismatched.
+-spec normalized_data_bag_for_update(ej:json_object(), binary()) ->ej:json_object().
+normalized_data_bag_for_update(DataBagItem, IdFromUrl) ->
+    case ej:get({<<"id">>}, DataBagItem)of
+        undefined ->
+            ej:set({<<"id">>}, DataBagItem, IdFromUrl);
+        IdFromUrl ->
+            DataBagItem;
         Mismatch ->
-            throw({url_json_name_mismatch, {UrlName, Mismatch, "DataBagItem"}})
+            throw({url_json_name_mismatch, {IdFromUrl, Mismatch, "DataBagItem"}})
     end.
 
 unwrap_item(Ejson) ->

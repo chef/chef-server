@@ -23,17 +23,18 @@
 -type regex_name() :: cookbook_name |
                       cookbook_version |
                       cookbook_version_constraint |
+                      data_bag_item_id |
+                      data_bag_name |
                       environment_name |
                       client_name |
+                      node_name |
                       qualified_recipe |
                       qualified_role |
                       recipe_name |
+                      role_name |
                       unqualified_recipe.
 
 -type re_regex() :: {re_pattern, integer(), integer(), binary()}.
 %% FIXME: This type is not yet correct
 %% I'd like to use binary() but dialyzer wants this more specific type
 -type re_msg() :: <<_:64,_:_*8>>.
-
-
-

@@ -22,20 +22,23 @@
 -module(chef_sandbox_tests).
 
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("ej/include/ej.hrl").
 
 validate_sandbox_test_() ->
     [
      {"Sandboxes must not be empty",
       fun() ->
               Box = {[{<<"checksums">>, {[]}}]},
-              ?assertThrow({empty_checksums, <<"A sandbox must contain at least one checksum">>},
-                           chef_sandbox:validate_sandbox(Box, create))
+              ?assertThrow(#ej_invalid{type=fun_match,
+                                       key = <<"checksums">>,
+                                       msg = <<"Bad checksums!">>},
+                           chef_sandbox:validate(Box))
       end},
 
      {"Valid sandbox is ok",
       fun() ->
               Box = {[{<<"checksums">>, {make_checksums(5)}}]},
-              ?assertEqual({ok, Box}, chef_sandbox:validate_sandbox(Box, create))
+              ?assertEqual({ok, Box}, chef_sandbox:validate(Box))
       end},
 
      {"Bad checksums are not Valid", generator,
@@ -55,8 +58,10 @@ validate_sandbox_test_() ->
                          end,
               Examples = [ {[{<<"checksums">>, MakeSums(Pos, Bad)}]} ||
                              Pos <- Locs, Bad <- BadSums ],
-              [ ?_assertThrow({bad_checksum, <<"Invalid checksum in sandbox.">>},
-                              chef_sandbox:validate_sandbox(Box, create))
+              [ ?_assertThrow(#ej_invalid{type=fun_match,
+                                          key = <<"checksums">>,
+                                          msg = <<"Bad checksums!">>},
+                              chef_sandbox:validate(Box))
                 || Box <- Examples ]
       end},
 
@@ -69,8 +74,10 @@ validate_sandbox_test_() ->
                       {[{C2, null}, {C3, null}, {C1, true}]}
                      ],
               Examples = [ {[{<<"checksums">>, E}]} || E <- Sums ],
-              [ ?_assertThrow({bad_checksum, <<"Invalid checksum in sandbox.">>},
-                              chef_sandbox:validate_sandbox(Box, create))
+              [ ?_assertThrow(#ej_invalid{type=fun_match,
+                                          key = <<"checksums">>,
+                                          msg = <<"Bad checksums!">>},
+                              chef_sandbox:validate(Box))
                 || Box <-  Examples ]
       end}
     ].

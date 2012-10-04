@@ -42,21 +42,19 @@ validate_body_test_() ->
       fun() ->
               R = ej:set({<<"run_list">>}, empty_runlist(),
                          [<<"recipe[foo]">>, <<"fake[not_good]">>]),
-              ?assertThrow(#ej_invalid{type=array_elt, key= <<"run_list">>},
+              ?assertThrow(#ej_invalid{},
                            chef_depsolver:validate_body(R))
       end},
      {"Validate that a run list that is not a list is rejected",
       fun() ->
               R = ej:set({<<"run_list">>}, empty_runlist(), 12),
-              ?assertThrow(#ej_invalid{type=json_type, key= <<"run_list">>,
-                                      found_type=number, expected_type=array},
+              ?assertThrow(#ej_invalid{},
                            chef_depsolver:validate_body(R))
       end},
      {"Validate that a run list with wrong type is rejected",
       fun() ->
               R = ej:set({<<"run_list">>}, empty_runlist(), [12]),
-              ?assertThrow(#ej_invalid{type=array_elt, key= <<"run_list">>,
-                                       found_type=number, expected_type=string},
+              ?assertThrow(#ej_invalid{},
                            chef_depsolver:validate_body(R))
       end}
     ].
@@ -215,4 +213,3 @@ depsolver_complex_dependency_test() ->
     %% Check the culprits
     {error, [{_Paths, Culprits}] } = Ret,
     ?assertEqual(Expected, Culprits).
-

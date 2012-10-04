@@ -31,16 +31,19 @@
 -include("chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--define(node_validation_constraints,
-        [{<<"name">>,             {match_if_exists, "^[[:alnum:]_\:\.\-]+$"}},
-         {<<"chef_environment">>, {match_if_exists, "^[[:alnum:]_\-]+$"}},
-         {<<"json_class">>,       {match_if_exists, "Chef::Node"}},
-         {<<"normal">>,           is_ejson_proplist},
-         {<<"default">>,          is_ejson_proplist},
-         {<<"override">>,         is_ejson_proplist},
-         {<<"automatic">>,        is_ejson_proplist},
-         {<<"run_list">>,         is_run_list}
-        ]).
+-define(VALIDATION_CONSTRAINTS,
+        {[{<<"name">>, {string_match, chef_regex:regex_for(node_name)}},
+          {<<"chef_environment">>, {string_match, chef_regex:regex_for(environment_name)}},
+          {<<"json_class">>, <<"Chef::Node">>},
+          {<<"chef_type">>, <<"node">>},
+
+          {<<"normal">>, chef_json_validator:attribute_spec()},
+          {<<"default">>, chef_json_validator:attribute_spec()},
+          {<<"override">>, chef_json_validator:attribute_spec()},
+          {<<"automatic">>, chef_json_validator:attribute_spec()},
+
+          {<<"run_list">>, chef_json_validator:run_list_spec()}
+         ]}).
 
 -define(create_if_missing_fields,
         [{<<"chef_environment">>, <<"_default">>},
@@ -61,14 +64,17 @@ extract_roles(RunList) ->
     [ binary:part(Item, {0, byte_size(Item) - 1})
       || <<"role[", Item/binary>> <- RunList ].
 
-%%%
-%%% Some of this begs to be factored out into a separate file.
-%%%
+validate(Node) ->
+    case ej:valid(?VALIDATION_CONSTRAINTS, Node) of
+        ok ->
+            {ok, Node};
+        Bad ->
+            throw(Bad)
+    end.
 
-%%%
-%%%
-%%%
 -spec validate_json_node(ejson_term(), {update, binary()} | create) -> {ok, ejson_term()}.
+validate_json_node(Node, create) ->
+    validate(Node);
 validate_json_node(Node, {update, UrlName}) ->
     %% For update, name in URL must match name, if provided, in JSON.
     %% Missing name is ok, but name mismatch is not.
@@ -76,19 +82,9 @@ validate_json_node(Node, {update, UrlName}) ->
         Name when Name =:= UrlName orelse
                   Name =:= undefined ->
             WithName = ej:set({<<"name">>}, Node, UrlName),
-            case chef_json_validator:validate_json_by_regex_constraints(WithName,
-                                                                        ?node_validation_constraints) of
-                ok -> {ok, WithName};
-                Bad -> throw(Bad)
-            end;
+            validate(WithName);
         Mismatch ->
             throw({url_json_name_mismatch, {UrlName, Mismatch, "Node"}})
-    end;
-validate_json_node(Node, create) ->
-    case chef_json_validator:validate_json_by_regex_constraints(Node,
-                                                                [<<"name">> | ?node_validation_constraints ]) of
-        ok -> {ok, Node};
-        Bad -> throw(Bad)
     end.
 
 insert_autofill_fields(JsonNode) ->
