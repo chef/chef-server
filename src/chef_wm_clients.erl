@@ -138,4 +138,4 @@ all_clients_json(Req, #base_state{chef_db_context = DbContext,
     chef_json:encode({UriMap}).
 
 malformed_request_message(Any, Req, State) ->
-    chef_wm_util:malformed_request_message(Any, Req, State).
+    chef_wm_malformed:malformed_request_message(Any, Req, State).
