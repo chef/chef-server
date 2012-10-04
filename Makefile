@@ -1,4 +1,6 @@
 DEPS=$(CURDIR)/deps
+XCHECK_APPS=chef_authn chef_authz chef_certgen chef_db chef_index chef_objects chef_wm \
+	    oc_chef_wm sqerl
 
 # The release branch should have a file named USE_REBAR_LOCKED
 use_locked_config = $(wildcard USE_REBAR_LOCKED)
@@ -11,12 +13,17 @@ REBAR = rebar -C $(rebar_config)
 
 all: compile
 
+# Jenkins build target
+ci: compile xcheck
+
 compile: $(DEPS)
 	@$(REBAR) compile
 
 compile_skip:
 	@$(REBAR) compile skip_deps=true
 
+xcheck:
+	@scripts/xcheck $(XCHECK_APPS)
 clean:
 	@$(REBAR) clean
 
