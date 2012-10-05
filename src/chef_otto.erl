@@ -443,15 +443,18 @@ fetch_nodes(Server, OrgId, EnvName) ->
 fetch_roles_with_ids(Server, OrgId) ->
     fetch_objects_with_ids(Server, OrgId, chef_role).
 
--spec bulk_get(couch_server(), string() | binary(), [binary()]) ->
-    [[tuple()]] | [].
+-spec bulk_get(couch_server(), string() | binary(), [binary()]) -> [tuple()].
 bulk_get(Server, DbName, Ids) ->
     {ok, Db} = couchbeam:open_db(Server, DbName, []),
     {ok, View} = couchbeam:all_docs(Db, [{keys, Ids}, {include_docs, true}]),
     DocCollector = fun(Row, Acc) ->
                       [ ej:get({<<"doc">>}, Row) | Acc ]
                    end,
-    lists:reverse(couchbeam_view:fold(View, DocCollector)).
+    %% There is a apparent bug in CouchDB where documents that have been deleted can still
+    %% be returned as 'null'.  The rest of the code should not have to deal with this, so
+    %% we'll filter out any non-tuple items in our results here.
+    Results = couchbeam_view:fold(View, DocCollector),
+    lists:reverse([Doc || Doc <- Results, is_tuple(Doc)]).
 
 -spec fetch_auth_join_id(couch_server(), db_key(), auth_to_user|user_to_auth) -> id() | {not_found, term()}.
 fetch_auth_join_id(Server, Id, Direction) when is_list(Id) ->
