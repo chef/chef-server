@@ -61,6 +61,11 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
+principal_type(#chef_client{}) ->
+    <<"client">>;
+principal_type(#chef_user{}) ->
+    <<"user">>.
+
 resource_exists(Req, #base_state{chef_db_context = DbContext,
                                  organization_name = OrgName,
                                  resource_state = ResourceState} = State) ->
@@ -70,14 +75,16 @@ resource_exists(Req, #base_state{chef_db_context = DbContext,
             Message = chef_wm_util:not_found_message(client, Name),
             Req1 = chef_wm_util:set_json_body(Req, Message),
             {false, Req1, State#base_state{log_msg = client_not_found}};
-        #chef_client{} = Client ->
-            {true, Req,
-             State#base_state{resource_state =
-                                  ResourceState#principal_state{principal = Client}}};
-        #chef_user{} = User ->
-            {true, Req,
-             State#base_state{resource_state =
-                                  ResourceState#principal_state{principal = User}}}
+        #chef_client{name = Name, public_key = PublicKey} = Client ->
+            State1 = ResourceState#principal_state{name = Name,
+                                                   public_key = PublicKey,
+                                                   type = principal_type(Client)},
+            {true, Req, State#base_state{resource_state = State1}};
+        #chef_user{username = Name, public_key = PublicKey} = User ->
+            State1 = ResourceState#principal_state{name = Name,
+                                                   public_key = PublicKey,
+                                                   type = principal_type(User)},
+            {true, Req, State#base_state{resource_state = State1}}
     end.
 
 validate_request(_Method, Req, State) ->
@@ -86,18 +93,15 @@ validate_request(_Method, Req, State) ->
 auth_info(Req, State) ->
     {authorized, Req, State}.
 
-assemble_pubkey_ejson(#chef_user{username=Name, public_key=PubKey}) ->
+assemble_principal_ejson(#principal_state{name = Name,
+                                          public_key = PublicKey,
+                                          type = Type} = _Principal) ->
     {[{<<"name">>, Name},
-      {<<"pubkey">>, PubKey},
-      {<<"type">>, <<"user">>}]};
-assemble_pubkey_ejson(#chef_client{name=Name, public_key=PubKey}) ->
-    {[{<<"name">>, Name},
-      {<<"pubkey">>, PubKey},
-      {<<"type">>, <<"client">>}]}.
+      {<<"public_key">>, PublicKey},
+      {<<"type">>, Type}]}.
 
-to_json(Req, #base_state{resource_state =
-                             #principal_state{principal = Principal}} = State) ->
-    EJson = assemble_pubkey_ejson(Principal),
+to_json(Req, #base_state{resource_state = Principal} = State) ->
+    EJson = assemble_principal_ejson(Principal),
     Json = ejson:encode(EJson),
     {Json, Req, State}.
 

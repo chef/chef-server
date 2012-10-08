@@ -182,7 +182,9 @@
 
 -record(principal_state, {
           principal_data,
-          principal :: #chef_user{} | #chef_client{}
+          name,
+          public_key,
+          type
          }).
 
 -record(depsolver_state, {
