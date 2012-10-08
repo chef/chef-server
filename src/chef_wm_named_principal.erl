@@ -30,7 +30,6 @@
                         ping/2]}]).
 
 -mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
                           service_available/2]}]).
 
 %% chef_wm behaviour callbacks
@@ -41,6 +40,7 @@
          init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
+         resource_exists/2,
          validate_request/3
         ]).
 
@@ -53,7 +53,7 @@ init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
-    {ok, #client_state{}}.
+    {ok, #principal_state{}}.
 
 request_type() ->
     "principal".
@@ -61,39 +61,30 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
-validate_request(_Method, Req, #base_state{chef_db_context = DbContext,
-                                           organization_name = OrgName,
-                                           resource_state = ResourceState} = State) ->
+resource_exists(Req, #base_state{chef_db_context = DbContext,
+                                 organization_name = OrgName,
+                                 resource_state = ResourceState} = State) ->
     Name = chef_wm_util:object_name(principal, Req),
-    State1 = case chef_db:fetch_requestor(DbContext, OrgName, Name) of
-                 {not_found, client} ->
-                     State#base_state{resource_state = {not_found}};
-                 #chef_client{} = Client ->
-                     State#base_state{resource_state =
-                                          ResourceState#client_state{chef_client =
-                                                                         Client}};
-                 #chef_user{} = User ->
-                     State#base_state{resource_state = #user_state{chef_user = User}}
-             end,
-    {Req, State1}.
+    case chef_db:fetch_requestor(DbContext, OrgName, Name) of
+        {not_found, client} ->
+            Message = chef_wm_util:not_found_message(client, Name),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {false, Req1, State#base_state{log_msg = client_not_found}};
+        #chef_client{} = Client ->
+            {true, Req,
+             State#base_state{resource_state =
+                                  ResourceState#principal_state{principal = Client}}};
+        #chef_user{} = User ->
+            {true, Req,
+             State#base_state{resource_state =
+                                  ResourceState#principal_state{principal = User}}}
+    end.
 
-auth_info(Req, #base_state{resource_state = {not_found}} = State) ->
-    Name = chef_wm_util:object_name(principal, Req),
-    Message = chef_wm_util:not_found_message(client, Name),
-    Req1 = chef_wm_util:set_json_body(Req, Message),
-    {{halt, 404}, Req1, State#base_state{log_msg = client_not_found}};
-auth_info(Req, #base_state{resource_state =
-                               #client_state{chef_client = Client} =
-                               ClientState} = State) ->
-    ClientState1 = ClientState#client_state{chef_client = Client},
-    State1 = State#base_state{resource_state = ClientState1},
-    {authorized, Req, State1};
-auth_info(Req, #base_state{resource_state =
-                               #user_state{chef_user = User} =
-                               UserState} = State) ->
-    UserState1 = UserState#user_state{chef_user = User},
-    State1 = State#base_state{resource_state = UserState1},
-    {authorized, Req, State1}.
+validate_request(_Method, Req, State) ->
+    {Req, State}.
+
+auth_info(Req, State) ->
+    {authorized, Req, State}.
 
 assemble_pubkey_ejson(#chef_user{username=Name, public_key=PubKey}) ->
     {[{<<"name">>, Name},
@@ -105,12 +96,14 @@ assemble_pubkey_ejson(#chef_client{name=Name, public_key=PubKey}) ->
       {<<"type">>, <<"client">>}]}.
 
 to_json(Req, #base_state{resource_state =
-                             #client_state{chef_client = Client}} = State) ->
+                             #principal_state{principal =
+                                                  #chef_client{} = Client}} = State) ->
     EJson = assemble_pubkey_ejson(Client),
     Json = ejson:encode(EJson),
     {Json, Req, State};
 to_json(Req, #base_state{resource_state =
-                             #user_state{chef_user = User}} = State) ->
+                             #principal_state{principal =
+                                                  #chef_user{} = User}} = State) ->
     EJson = assemble_pubkey_ejson(User),
     Json = ejson:encode(EJson),
     {Json, Req, State}.
