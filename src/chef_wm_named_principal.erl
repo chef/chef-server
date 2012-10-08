@@ -96,15 +96,8 @@ assemble_pubkey_ejson(#chef_client{name=Name, public_key=PubKey}) ->
       {<<"type">>, <<"client">>}]}.
 
 to_json(Req, #base_state{resource_state =
-                             #principal_state{principal =
-                                                  #chef_client{} = Client}} = State) ->
-    EJson = assemble_pubkey_ejson(Client),
-    Json = ejson:encode(EJson),
-    {Json, Req, State};
-to_json(Req, #base_state{resource_state =
-                             #principal_state{principal =
-                                                  #chef_user{} = User}} = State) ->
-    EJson = assemble_pubkey_ejson(User),
+                             #principal_state{principal = Principal}} = State) ->
+    EJson = assemble_pubkey_ejson(Principal),
     Json = ejson:encode(EJson),
     {Json, Req, State}.
 
