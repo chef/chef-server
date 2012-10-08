@@ -95,20 +95,23 @@ auth_info(Req, #base_state{resource_state =
     State1 = State#base_state{resource_state = UserState1},
     {authorized, Req, State1}.
 
-assemble_user_pubkey_ejson(#chef_user{username=Name, public_key=PubKey,
-                                      pubkey_version=Version}) ->
-    {[{<<"username">>, Name},
+assemble_pubkey_ejson(#chef_user{username=Name, public_key=PubKey}) ->
+    {[{<<"name">>, Name},
       {<<"pubkey">>, PubKey},
-      {<<"pubkey_version">>, Version}]}.
+      {<<"type">>, <<"user">>}]};
+assemble_pubkey_ejson(#chef_client{name=Name, public_key=PubKey}) ->
+    {[{<<"name">>, Name},
+      {<<"pubkey">>, PubKey},
+      {<<"type">>, <<"client">>}]}.
 
 to_json(Req, #base_state{resource_state =
                              #client_state{chef_client = Client}} = State) ->
-    EJson = chef_client:assemble_client_pubkey_ejson(Client),
+    EJson = assemble_pubkey_ejson(Client),
     Json = ejson:encode(EJson),
     {Json, Req, State};
 to_json(Req, #base_state{resource_state =
                              #user_state{chef_user = User}} = State) ->
-    EJson = assemble_user_pubkey_ejson(User),
+    EJson = assemble_pubkey_ejson(User),
     Json = ejson:encode(EJson),
     {Json, Req, State}.
 
