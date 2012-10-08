@@ -315,8 +315,18 @@ update_from_ejson(#chef_cookbook_version{org_id = OrgId,
                                           checksums         = UpdatedVersion#chef_cookbook_version.checksums,
                                           serialized_object = UpdatedVersion#chef_cookbook_version.serialized_object};
 update_from_ejson(#chef_user{} = User, UserData) ->
-    error({implement_me, User, UserData}).
-
+    Name = ej:get({<<"name">>}, UserData),
+    IsAdmin = ej:get({<<"admin">>}, UserData) =:= true,
+    Email = ej:get({<<"email">>}, UserData),
+    %% IsValidator = ej:get({<<"validator">>}, UserData) =:= true,
+    %% Take certificate first, then public_key
+    %{Key, Version} = cert_or_key(UserData),
+    User#chef_user{ username = Name,
+                    admin = IsAdmin,
+                    email = Email }.
+                    %%validator = IsValidator,
+                    %%public_key = Key,
+                    %%pubkey_version = Version}.
 
 
 -spec id(chef_object()) -> object_id().
@@ -403,7 +413,10 @@ set_updated(#chef_user{} = Object, ActorId) ->
     Object#chef_user{updated_at = Now, last_updated_by = ActorId};
 set_updated(#chef_cookbook_version{} = Object, ActorId) ->
     Now = sql_date(now),
-    Object#chef_cookbook_version{updated_at = Now, last_updated_by = ActorId}.
+    Object#chef_cookbook_version{updated_at = Now, last_updated_by = ActorId};
+set_updated(#chef_user{} = Object, ActorId) ->
+    Now = sql_date(now),
+    Object#chef_user{updated_at = Now, last_updated_by = ActorId}.
 
 -spec name(chef_object()) -> binary() | {binary(), binary()}.
 %% @doc Return the `name' field from a `chef_object()' record type. For `data_bag_items' the
