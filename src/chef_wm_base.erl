@@ -299,6 +299,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                                                   requestor_id = ActorId}=State,
                  OrigObjectRec, ObjectEjson) ->
     ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectEjson),
+
     %% Send object to solr for indexing *first*. If the update fails, we will have sent
     %% incorrect data, but that should get corrected when the client retries. This is a
     %% compromise.

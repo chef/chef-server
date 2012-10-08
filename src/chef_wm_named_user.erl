@@ -89,14 +89,14 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
             {{object, AuthzId}, Req, State1}
     end.
 
-from_json(_Req, #base_state{reqid = RequestId,
+from_json(Req, #base_state{reqid = RequestId,
                            resource_state =
-                               #user_state{chef_user = _User,
-                                             user_data = UserData}} = _State) ->
-    _UserData1 = maybe_generate_key_pair(UserData, RequestId),
+                               #user_state{chef_user = User,
+                                           user_data = UserData}} = State) ->
+    UserData1 = maybe_generate_key_pair(UserData, RequestId),
     %% FIXME:
-    error({implement_me}).
-    %% update_from_json(Req, State, User, UserData1).
+    %% error({implement_me}).
+    chef_wm_base:update_from_json(Req, State, User, UserData1).
 
 to_json(Req, #base_state{resource_state =
                              #user_state{chef_user = User},
