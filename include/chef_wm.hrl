@@ -180,10 +180,9 @@
           partial_paths = []
          }).
 
--record(user_state, {
-          user_data,
-          user_authz_id,
-          chef_user :: #chef_user{} | not_found
+-record(principal_state, {
+          principal_data,
+          principal :: #chef_user{} | #chef_client{}
          }).
 
 -record(depsolver_state, {
