@@ -298,6 +298,13 @@ basic_node() ->
       {<<"run_list">>, [<<"recipe[web]">>, <<"role[prod]">>]}
      ]}.
 
+basic_role() ->
+    {[{<<"name">>, <<"a_role">>},
+      {<<"description">>, <<"my awesome role">>},
+      {<<"run_list">>, [<<"recipe[web]">>, <<"role[prod]">>]},
+      {<<"env_run_lists">>, {[]}}
+     ]}.
+
 basic_node_index() ->
     {[{<<"name">>, <<"a_node">>},
       {<<"chef_type">>, <<"node">>},
@@ -307,8 +314,13 @@ basic_node_index() ->
       {<<"run_list">>, [<<"recipe[web]">>, <<"role[prod]">>]}
      ]}.
 
+%% @doc Merge two proplists together, returning a proplist.  Treats them as dictionaries to
+%% prevent repeated keys.  Values in L2 take precedence of values in L1.
 merge({L1}, {L2}) ->
-    {L1 ++ L2}.
+    D1 = dict:from_list(L1),
+    D2 = dict:from_list(L2),
+    Merged = dict:merge(fun(_K,_V1,V2) -> V2 end, D1,D2),
+    {dict:to_list(Merged)}.
 
 to_sorted_list({L}) ->
     lists:sort(L).
@@ -403,3 +415,85 @@ make_org_id() ->
     <<TL:32, TM:16, THV:16, CSR:8, CSL:8, N:48>> = crypto:rand_bytes(16),
     Fmt = "~8.16.0b~4.16.0b~4.16.0b~2.16.0b~2.16.0b~12.16.0b",
     iolist_to_binary((io_lib:format(Fmt, [TL, TM, THV, CSR, CSL, N]))).
+
+deduplicate_run_list_test_() ->
+    [{Message,
+      fun() ->
+              ?assertEqual(Expected,
+                           chef_object:deduplicate_run_list(Input))
+      end}
+     || {Message, Input, Expected} <- [
+                                       {"'deduplicates' an empty list", [], []},
+                                       {"Leaves a list with no duplicates alone",
+                                        ["foo", "bar", "baz"],
+                                        ["foo", "bar", "baz"]},
+                                       {"Deduplicates a list that happens to be sorted already",
+                                        ["a", "a", "b", "a", "c", "c", "d"],
+                                        ["a","b","c","d"]},
+                                       {"Deduplicates an unsorted list, and retains its ordering",
+                                        ["d", "c", "c", "a", "b", "b", "a"],
+                                        ["d", "c", "a", "b"]}
+                                      ]
+    ].
+
+normalize_item_test_() ->
+    [{Message,
+     fun() ->
+             ?assertEqual(Normalized,
+                         chef_object:normalize_item(Input))
+     end}
+     || {Message, Input, Normalized} <- [
+                                         {"Explicit recipes are unchanged",
+                                          <<"recipe[foo]">>,
+                                          <<"recipe[foo]">>},
+                                         {"Roles are unchanged",
+                                          <<"role[foo]">>,
+                                          <<"role[foo]">>},
+                                         {"Bare cookbooks are tagged as recipes",
+                                          <<"foo">>,
+                                          <<"recipe[foo]">>},
+                                         {"Cookbook-qualified recipes are tagged as recipes",
+                                         <<"foo::bar">>,
+                                          <<"recipe[foo::bar]">>},
+                                         {"Versioned recipes are tagged as recipes",
+                                          <<"foo::bar@1.0.0">>,
+                                          <<"recipe[foo::bar@1.0.0]">>},
+                                         {"Actually, any binary, whether it is a valid cookbook/recipe or not, is tagged as a recipe; we currently assume valid run list items as input",
+                                         <<"23?8^3$$$%-not-valid-input">>,
+                                          <<"recipe[23?8^3$$$%-not-valid-input]">>}
+                                        ]
+    ].
+
+normalize_run_list_test_() ->
+    [{Message,
+      fun() ->
+              ?assertEqual(Normalized,
+                           chef_object:normalize_run_list(Input))
+      end}
+     || {Message, Input, Normalized} <- [
+                                         {"Normalizes an empty run list", [], []},
+                                         {"Does nothing to an already normalized list",
+                                          [<<"recipe[foo]">>, <<"role[web]">>, <<"recipe[bar::baz]">>],
+                                          [<<"recipe[foo]">>, <<"role[web]">>, <<"recipe[bar::baz]">>]},
+                                         {"Normalizes bare cookbooks to recipes",
+                                          [<<"foo">>, <<"bar">>, <<"baz">>],
+                                          [<<"recipe[foo]">>, <<"recipe[bar]">>, <<"recipe[baz]">>]},
+                                         {"Normalizes a mix of run list items",
+                                          [<<"foo">>, <<"recipe[bar]">>, <<"baz::quux">>, <<"role[server]">>],
+                                          [<<"recipe[foo]">>, <<"recipe[bar]">>, <<"recipe[baz::quux]">>, <<"role[server]">>]},
+                                         {"Removes duplicates after normalization",
+                                          [<<"foo">>, <<"recipe[foo]">>],
+                                          [<<"recipe[foo]">>]}
+                                        ]
+    ].
+
+%% Calling out this behavior on its own in case we decide to change it in the future
+semantic_duplication_test_() ->
+    [{"Semantic duplicates in a node run list are preserved",
+      fun() ->
+              Input = [<<"foo">>, <<"foo::default">>],
+              Normalized = [<<"recipe[foo]">>, <<"recipe[foo::default]">>],
+              ?assertEqual(Normalized,
+                           chef_object:normalize_run_list(Input))
+      end}
+    ].

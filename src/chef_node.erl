@@ -27,6 +27,9 @@
          insert_autofill_fields/1,
          parse_check_binary_as_json_node/2]).
 
+-ifdef(TEST).
+-compile(export_all).
+-endif.
 
 -include("chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
@@ -113,4 +116,16 @@ parse_check_binary_as_json_node(NodeBin, Action) ->
     %% a `throw:Why' pattern.
     Json = chef_json:decode(NodeBin),
     JsonFilled = insert_autofill_fields(Json),
-    validate_json_node(JsonFilled, Action).
+    {ok, ValidNode} = validate_json_node(JsonFilled, Action),
+    %% We validate then normalize, because the normalization code assumes there are valid
+    %% entries to normalize in the first place.
+    Normalized = normalize(ValidNode),
+    {ok, Normalized}.
+
+%% @doc Normalizes the run list of an EJson Node, putting it into canonical form (all bare
+%% recipes are qualified with "recipe[...]"), and exact duplicates are removed.
+-spec normalize(ej:json_object()) -> ej:json_object().
+normalize(NodeEjson) ->
+    RunList = ej:get({<<"run_list">>}, NodeEjson, []),
+    Normalized = chef_object:normalize_run_list(RunList),
+    ej:set({<<"run_list">>}, NodeEjson, Normalized).
