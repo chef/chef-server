@@ -42,6 +42,7 @@
          fetch_users/1,
          create_user/3,
          delete_user/2,
+         update_user/3,
          count_user_admins/1,
 
          %% node ops
@@ -128,7 +129,6 @@
 -include_lib("chef_objects/include/chef_types.hrl").
 -include_lib("chef_objects/include/chef_osc_defaults.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
-
 
 -record(context, {reqid :: binary(),
                   otto_connection}).
@@ -974,7 +974,9 @@ update_fun(#chef_node{}) ->
 update_fun(#chef_role{}) ->
     update_role;
 update_fun(#chef_cookbook_version{}) ->
-    update_cookbook_version.
+    update_cookbook_version;
+update_fun(#chef_user{}) ->
+    update_user.
 
 -spec create(chef_object() | #chef_user{} | #chef_sandbox{}, #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
 %% @doc Call the appropriate create function based on the given chef_object record
