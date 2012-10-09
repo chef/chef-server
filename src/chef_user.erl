@@ -40,21 +40,16 @@
 
 user_spec() ->
   {[
-    {<<"name">>, {string_match, username_validation_regex()}},
-    {<<"password">>, {string_match, password_validation_regex()}},
+    {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
+    {<<"password">>, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
     {{opt,<<"admin">>}, boolean},
     {{opt, <<"openid">>}, string}
    ]}.
 
-username_validation_regex() ->
-    UsernamePattern = <<"^[a-z0-9\-_]+$">>,
-    {ok, UsernameRegex} = re:compile(UsernamePattern),
-    {UsernameRegex, UsernamePattern}.
-
-password_validation_regex() ->
-  PasswordPattern = <<".{6,}">>,
-  {ok, PasswordRegex} = re:compile(PasswordPattern),
-  {PasswordRegex, PasswordPattern}.
+valid_password(Password) when is_binary(Password) andalso byte_size(Password) >= 6 ->
+  ok;
+valid_password(_Password) ->
+  error.
 
 assemble_user_ejson(#chef_user{username = Name,
                                public_key = PubKey,
