@@ -51,6 +51,8 @@ rm -f $WORKSPACE/src/*
 
 mkdir -p chef-solo/cache
 
+export PATH=/usr/local/bin:/opt/ruby1.9/bin:$PATH
+
 # ensure bundler is installed
 if ! exists bundle;
 then
