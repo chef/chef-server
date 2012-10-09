@@ -72,10 +72,12 @@
 %% Sometimes, recipe names can have version qualifiers as well.
 -define(VERSIONED_RECIPE_REGEX, ?COOKBOOK_QUALIFIED_RECIPE_REGEX ++ ?RECIPE_VERSION_REGEX).
 
+-spec generate_regex(regex_pattern()) -> re_regex().
 generate_regex(Pattern) ->
   {ok, Regex} = re:compile(Pattern),
   Regex.
 
+-spec generate_regex_msg_tuple(regex_pattern(), re_msg()) -> {re_regex(), re_msg()}.
 generate_regex_msg_tuple(Pattern, Message) ->
   Regex = generate_regex(Pattern),
   {Regex, Message}.
@@ -84,65 +86,54 @@ generate_regex_msg_tuple(Pattern, Message) ->
 %% @doc provide compiled regex for use externally
 regex_for(recipe_name) ->
     %% Note that this does NOT include a version suffix!
-    Pattern = ?ANCHOR_REGEX(?COOKBOOK_QUALIFIED_RECIPE_REGEX),
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Invalid recipe name. Must only contain A-Z, a-z, 0-9, _ or -">>};
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?COOKBOOK_QUALIFIED_RECIPE_REGEX),
+                             <<"Invalid recipe name. Must only contain A-Z, a-z, 0-9, _ or -">>);
 regex_for(cookbook_version) ->
-    Pattern = ?ANCHOR_REGEX(?VERSION_REGEX),
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Invalid cookbook version">>};
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?VERSION_REGEX),
+                             <<"Invalid cookbook version">>);
 regex_for(cookbook_name) ->
-    Pattern = ?ANCHOR_REGEX(?NAME_REGEX),
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Malformed cookbook name. Must only contain A-Z, a-z, 0-9, _ or -">>};
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
+                             <<"Malformed cookbook name. Must only contain A-Z, a-z, 0-9, _ or -">>);
 regex_for(environment_name) ->
-    Pattern = ?ANCHOR_REGEX(?NAME_REGEX),
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Malformed environment name. Must only contain A-Z, a-z, 0-9, _ or -">>};
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
+                             <<"Malformed environment name. Must only contain A-Z, a-z, 0-9, _ or -">>);
 regex_for(client_name) ->
-    Pattern = ?ANCHOR_REGEX(?NAME_REGEX),
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Malformed client name.  Must be A-Z, a-z, 0-9, _, -, or .">>};
+    % This might be the same as nodename -- nodename seems to allow ':' as well
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
+                             <<"Malformed client name.  Must be A-Z, a-z, 0-9, _, -, or .">>);
 
 regex_for(data_bag_name) ->
-    Pattern = ?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Malformed data bag name.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>};
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
+                             <<"Malformed data bag name.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>);
 regex_for(data_bag_item_id) ->
-    Pattern = ?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Malformed data bag item ID.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>};
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
+                             <<"Malformed data bag item ID.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>);
 regex_for(role_name) ->
-    Pattern = ?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Malformed role name.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>};
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
+                             <<"Malformed role name.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>);
 regex_for(node_name) ->
-    Pattern = ?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Malformed node name.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>};
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
+                             <<"Malformed node name.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>);
 
 %% used in environments
 regex_for(cookbook_version_constraint) ->
-    Pattern = "^(~>|=|>=?|<=?) " ++ ?VERSION_REGEX ++ "$",
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Invalid cookbook version constraint">>};
+    generate_regex_msg_tuple("^(~>|=|>=?|<=?) " ++ ?VERSION_REGEX ++ "$",
+                             <<"Invalid cookbook version constraint">>);
 
 regex_for(qualified_role) ->
-    %% Roles MUST be wrapped in "role[...]" to be recognized as such.
-    %% Also, they have no cookbook prefix or version suffix.
-    Pattern = "^role\\[" ++ ?NAME_REGEX ++ "\\]$",
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Malformed role">>};
+   %% Roles MUST be wrapped in "role[...]" to be recognized as such.
+   %% Also, they have no cookbook prefix or version suffix.
+  generate_regex_msg_tuple("^role\\[" ++ ?NAME_REGEX ++ "\\]$",
+                             <<"Malformed role">>);
 %% Recipes can be wrapped in "recipe[...]", or can be bare
 regex_for(qualified_recipe) ->
-    Pattern = "^recipe\\[" ++ ?VERSIONED_RECIPE_REGEX ++ "\\]$",
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Malformed recipe">>};
+  generate_regex_msg_tuple("^recipe\\[" ++ ?VERSIONED_RECIPE_REGEX ++ "\\]$",
+                           <<"Malformed recipe">>);
 regex_for(unqualified_recipe) ->
-    Pattern = ?ANCHOR_REGEX(?VERSIONED_RECIPE_REGEX),
-    {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Malformed recipe">>};
+  generate_regex_msg_tuple(?ANCHOR_REGEX(?VERSIONED_RECIPE_REGEX),
+                           <<"Malformed recipe">>);
 
 regex_for(user_name) ->
-   generate_regex_msg_tuple(?ANCHOR_REGEX(?USERNAME_REGEX), <<"Malformed user name. Must only contain a-z, 0-9, _, or -">>).
+   generate_regex_msg_tuple(?ANCHOR_REGEX(?USERNAME_REGEX),
+                            <<"Malformed user name. Must only contain a-z, 0-9, _, or -">>).
 
