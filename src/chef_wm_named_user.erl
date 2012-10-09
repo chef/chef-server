@@ -94,8 +94,6 @@ from_json(Req, #base_state{reqid = RequestId,
                                #user_state{chef_user = User,
                                            user_data = UserData}} = State) ->
     UserData1 = maybe_generate_key_pair(UserData, RequestId),
-    %% FIXME:
-    %% error({implement_me}).
     chef_wm_base:update_from_json(Req, State, User, UserData1).
 
 to_json(Req, #base_state{resource_state =
