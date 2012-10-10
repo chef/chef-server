@@ -168,10 +168,11 @@ create_user(#chef_user{}=User) ->
 %% Add spec
 update_user(#chef_user{ last_updated_by = LastUpdatedBy,
                         updated_at      = UpdatedAt,
-                        email           = Email,
                         admin           = IsAdmin,
-                        id              =  Id } = UserData) ->
-                UpdateFields = [ IsAdmin =:= true, LastUpdatedBy, UpdatedAt, Id ],
+                        public_key      = PublicKey,
+                        id              = Id } = User) ->
+                    io:format("~nchef_sql:update_user, User: ~p~n", [User]),
+                UpdateFields = [ IsAdmin =:= true, PublicKey, LastUpdatedBy, UpdatedAt, Id ],
                 do_update(update_user_by_id, UpdateFields).
 
 -spec delete_user(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
