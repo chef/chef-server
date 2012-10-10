@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'optparse'
 require 'mixlib/shellout'
+require 'json'
 
 STDOUT.sync = true
 shellout_opts = {:timeout => 1200, :live_stream => STDOUT}
