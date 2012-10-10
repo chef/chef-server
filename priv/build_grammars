@@ -1,4 +1,0 @@
-#!/bin/sh
-
-./priv/neotoma priv/lucene.peg lucene lucene_sexp
-./priv/neotoma priv/lucene.peg chef_lucene lucene_txfm

@@ -1,4 +1,5 @@
 DEPS=$(CURDIR)/deps
+NEOTOMA=deps/neotoma/neotoma
 
 all: compile eunit dialyzer
 
@@ -34,9 +35,12 @@ eunit: compile
 
 test: eunit
 
-lucene: compile
-	@rm src/lucene_*.erl
-	@priv/build_grammars
+lucene: compile $(NEOTOMA)
+	@$(NEOTOMA) priv/lucene.peg -module chef_lucene -output src -transform_module lucene_txfm
+	@$(NEOTOMA) priv/lucene.peg -module lucene -output src -transform_module lucene_sexp
+
+$(NEOTOMA):
+	@(cd deps/neotoma; rebar escriptize)
 
 doc:
 	@rebar doc skip_deps=true
