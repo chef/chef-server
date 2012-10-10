@@ -59,7 +59,7 @@ init_resource_state(_Config) ->
     {ok, #client_state{}}.
 
 request_type() ->
-  "data".
+  "clients".
 
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
