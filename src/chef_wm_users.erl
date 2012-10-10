@@ -161,12 +161,12 @@ malformed_request_message(invalid_json_body, _Req, _State) ->
 malformed_request_message(#ej_invalid{type = exact, key = Key, msg = Expected},
                           _Req, _State) ->
     error_message([Key, <<" must equal ">>, Expected]);
+malformed_request_message(#ej_invalid{type = fun_match, key = Key, msg = Error},
+                          _Req, _State) when Key =:= <<"password">> ->
+    error_message([Error]);
 malformed_request_message(#ej_invalid{type = string_match, key = Key, msg = Error},
                           _Req, _State) ->
-    case Key of
-        <<"password">> -> error_message([<<"Password must have at least 6 characters">>]);
-        _ -> error_message([Error])
-    end;
+    error_message([Error]);
 malformed_request_message(#ej_invalid{type = object_key, key = Object, found = Key},
                           _Req, _State) ->
     error_message([<<"Invalid key '">>, Key, <<"' for ">>, Object]);
