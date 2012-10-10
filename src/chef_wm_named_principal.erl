@@ -26,7 +26,6 @@
 -mixin([{chef_wm_base, [content_types_accepted/2,
                         content_types_provided/2,
                         finish_request/2,
-                        malformed_request/2,
                         ping/2]}]).
 
 -mixin([{?BASE_RESOURCE, [forbidden/2,
@@ -38,6 +37,7 @@
          auth_info/2,
          init/1,
          init_resource_state/1,
+         malformed_request/2,
          malformed_request_message/3,
          request_type/0,
          resource_exists/2,
@@ -65,6 +65,11 @@ principal_type(#chef_client{}) ->
     <<"client">>;
 principal_type(#chef_user{}) ->
     <<"user">>.
+
+% We need to override this instead of using the mixin; otherwise we reject unsigned
+% requests, which is silly when we're not doing any authentication in the first place
+malformed_request(Req, State) ->
+    {false, Req, State}.
 
 resource_exists(Req, #base_state{chef_db_context = DbContext,
                                  organization_name = OrgName,
