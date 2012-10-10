@@ -93,8 +93,12 @@ from_json(Req, #base_state{reqid = RequestId,
                            resource_state =
                                #user_state{chef_user = User,
                                            user_data = UserData}} = State) ->
-    UserData1 = maybe_generate_key_pair(UserData, RequestId),
-    chef_wm_base:update_from_json(Req, State, User, UserData1).
+    case maybe_generate_key_pair(UserData, RequestId) of
+        {UserData1, PublicKey} ->
+            chef_wm_base:update_from_json(Req, State, User#chef_user{ public_key = PublicKey }, UserData1);
+        UserData1 ->
+            chef_wm_base:update_from_json(Req, State, User, UserData1)
+    end.
 
 to_json(Req, #base_state{resource_state =
                              #user_state{chef_user = User},
@@ -121,9 +125,9 @@ maybe_generate_key_pair(UserData, RequestId) ->
     case ej:get({<<"private_key">>}, UserData) of
         true ->
             {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
-            chef_user:set_key_pair(UserData,
+            {chef_user:set_key_pair(UserData,
                                    {public_key, PublicKey},
-                                   {private_key, PrivateKey});
+                                   {private_key, PrivateKey}), PublicKey};
         _ ->
             UserData
     end.
