@@ -1222,11 +1222,6 @@ update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
         {error, Error} -> {error, Error}
     end.
 
-as_bin(S) when is_list(S) ->
-    list_to_binary(S);
-as_bin(B) when is_binary(B) ->
-    B.
-
   -spec get_id(chef_object() | #chef_user{} | #chef_client{} | #chef_sandbox{} | #chef_cookbook_version{}) -> object_id().
 %% @doc Return the `id' field from a `chef_object()' record type.
 get_id(#chef_client{id = Id}) ->
