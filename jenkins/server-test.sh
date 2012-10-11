@@ -54,7 +54,7 @@ export PATH=/opt/opscode/bin:/opt/opscode/embedded/bin:$PATH
 
 sudo "${project_name}-ctl" reconfigure
 sleep 120
-sudo "${project_name}-ctl" test -J $WORKSPACE/pedant.xml
+sudo "${project_name}-ctl" test --all -J $WORKSPACE/pedant.xml
 
 # when build succeeds, nuke the packages
 find . -type d -maxdepth 1 -mindepth 1 | xargs rm -rf
