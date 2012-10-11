@@ -47,19 +47,6 @@ link "/opt/opscode/embedded/service/opscode-erchef/etc/app.config" do
   to erchef_config 
 end
 
-erchef_ibrowse_config = File.join(opscode_erchef_etc_dir, "ibrowse.config") 
-
-template erchef_ibrowse_config do
-  source "ibrowse.config.erb"
-  mode "0644"
-  variables(node['private_chef']['opscode-erchef'].to_hash)
-  notifies :restart, 'service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
-end
-
-link "/opt/opscode/embedded/service/opscode-erchef/etc/ibrowse/ibrowse.config" do
-  to erchef_ibrowse_config 
-end
-
 runit_service "opscode-erchef" do
   down node['private_chef']['opscode-erchef']['ha']
   options({
