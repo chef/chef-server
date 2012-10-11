@@ -1,7 +1,7 @@
 name "ruby"
 version "1.9.2p290"
 
-dependencies ["zlib", "ncurses", "readline", "openssl"]
+dependencies ["zlib", "ncurses", "readline", "openssl", "libyaml"]
 
 source :url => 'http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p290.tar.gz',
        :md5 => '604da71839a6ae02b5b5b5e1b792d5eb'
