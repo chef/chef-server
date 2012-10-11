@@ -332,6 +332,13 @@ default['private_chef']['postgresql']['md5_auth_cidr_addresses'] = [ ]
 default['private_chef']['postgresql']['trust_auth_cidr_addresses'] = [ '127.0.0.1/32', '::1/128' ]
 default['private_chef']['postgresql']['shmmax'] = 17179869184
 default['private_chef']['postgresql']['shmall'] = 4194304
+default['private_chef']['postgresql']['shared_buffers'] = "#{(node['memory']['total'].to_i / 4) / (1024)}MB"
+default['private_chef']['postgresql']['work_mem'] = "8MB"
+default['private_chef']['postgresql']['effective_cache_size'] = "128MB"
+default['private_chef']['postgresql']['checkpoint_segments'] = 3
+default['private_chef']['postgresql']['checkpoint_timeout'] = "5min"
+default['private_chef']['postgresql']['checkpoint_completion_target'] = 0.5
+default['private_chef']['postgresql']['checkpoint_warning'] = "30s"
 
 ###
 # Redis
