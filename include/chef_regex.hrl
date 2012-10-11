@@ -32,7 +32,8 @@
                       qualified_role |
                       recipe_name |
                       role_name |
-                      unqualified_recipe.
+                      unqualified_recipe |
+                      user_name.
 
 -type re_regex() :: {re_pattern, integer(), integer(), binary()}.
 %% FIXME: This type is not yet correct

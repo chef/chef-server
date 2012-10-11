@@ -48,14 +48,16 @@
                             'chef_environment' |
                             'chef_client' |
                             'chef_role' |
-                            'chef_node'.
+                            'chef_node'|
+                            'chef_user'.
 
 -type chef_type() :: 'data_bag' |
                      'data_bag_item' |
                      'environment' |
                      'client' |
                      'node' |
-                     'role'.
+                     'role' |
+                     'user'.
 
 -type ejson_term() :: {maybe_improper_list()}.
 
@@ -173,12 +175,22 @@
          }).
 
 -record(chef_user, {
-          'id',
-          'authz_id',
-          'username',
-          'pubkey_version',
-          'public_key'
-         }).
+        'id',                               %% guid for object (unique)
+        'authz_id',                         %% authorization guid (placeholder - not used)
+        'username',                         %% username
+        'email',                            %% email - left null
+        'public_key',                       %% public key - might be null
+        'hashed_password',                  %% password
+        'salt',                             %% password salt
+        'hash_type',                        %% hash used to scramble password
+        'last_updated_by',                  %% authz guid of last actor to update object -
+                                            %% it is  a place holder in this case
+        'created_at',                       %% time created at
+        'updated_at',                       %% time updated at
+        'external_authentication_uid',      %% open id if it is present - might be null
+        'recovery_authentication_enabled',  %% not used, will be null
+        'admin'                             %% if the user is an admin
+       }).
 
 %% These types are just convenient shorthands for subsets of our
 %% records that are used in the SQL layers.
@@ -188,10 +200,10 @@
                        #chef_environment{} |
                        #chef_client{} |
                        #chef_role{} |
-                       #chef_node{}.
+                       #chef_node{} .
 
--type chef_indexable_object() :: #chef_data_bag_item{} |
-                                 #chef_environment{} |
+-type chef_indexable_object() :: #chef_environment{} |
+                                 #chef_data_bag_item{} |
                                  #chef_client{} |
                                  #chef_role{} |
                                  #chef_node{}.

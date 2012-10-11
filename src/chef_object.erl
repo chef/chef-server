@@ -55,7 +55,8 @@
                  AuthzId :: object_id() | unset,
                  ObjectEjson :: ejson_term() |
                                 binary() |
-                                {binary(), ejson_term()}) ->
+                                {binary(), ejson_term()} |
+                                {ejson_term(), _}) ->
                         chef_object() | #chef_cookbook_version{}.
 new_record(chef_environment, OrgId, AuthzId, EnvData) ->
     Name = ej:get({<<"name">>}, EnvData),
@@ -107,6 +108,26 @@ new_record(chef_node, OrgId, AuthzId, NodeData) ->
                name = Name,
                environment = Environment,
                serialized_object = Data};
+new_record(chef_user, OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
+    %% This only works for Open Source Users currently
+    Name = ej:get({<<"name">>}, UserData),
+    Id = make_org_prefix_id(OrgId, Name),
+    OpenId = value_or_null({<<"openid">>}, UserData),
+    Email = value_or_null({<<"email">>}, UserData),
+    Admin = ej:get({<<"admin">>}, UserData) =:= true,
+    {PublicKey, _PubkeyVersion} = cert_or_key(UserData),
+    #chef_user{id = Id,
+               authz_id = maybe_stub_authz_id(AuthzId, Id),
+               username = Name,
+               email = Email,
+               public_key = PublicKey,
+               hashed_password = HashPass,
+               salt = Salt,
+               hash_type = HashType,
+               external_authentication_uid = OpenId,
+               recovery_authentication_enabled = false, %% Not used in open source user
+               admin = Admin
+    };
 new_record(chef_role, OrgId, AuthzId, RoleData) ->
     Name = ej:get({<<"name">>}, RoleData),
     Id = make_org_prefix_id(OrgId, Name),
@@ -164,8 +185,8 @@ compress_maybe(Data, cookbook_long_desc) ->
 compress_maybe(Data, Type) ->
     chef_db_compression:compress(Type, chef_json:encode(Data)).
 
--spec ejson_for_indexing(ChefRecord :: chef_indexable_object(),
-                         ChefEJSON :: ejson_term()) -> ejson_term().
+-spec ejson_for_indexing(chef_indexable_object() | #chef_data_bag_item{},
+                         ejson_term() | {ejson_term(), _}) -> ejson_term().
 %% @doc Return EJSON terms appropriate for sending to opscode-expander for
 %% indexing. Although the EJSON data is embedded in the ChefRecord, it is stored in a
 %% possibly compressed form. To avoid double work, we pass both the Chef object record
@@ -191,6 +212,9 @@ ejson_for_indexing(#chef_data_bag{}, <<Name/binary>>) ->
 ejson_for_indexing(#chef_cookbook_version{}, _CBVersion) ->
     %% FIXME: cleanup how we handle non-indexed objects
     %% cookbook_versions don't get indexed.
+    {[]};
+ejson_for_indexing(#chef_user{}, _) ->
+    %% FIXME: we don't index users, so this is a dummy value
     {[]};
 ejson_for_indexing(#chef_node{name = Name, environment = Environment}, Node) ->
     Defaults = ej:get({<<"default">>}, Node, ?EMPTY_EJSON_HASH),
@@ -235,7 +259,8 @@ extract_roles(RunList) ->
     [ binary:part(Item, {0, byte_size(Item) - 1})
       || <<"role[", Item/binary>> <- RunList ].
 
--spec update_from_ejson(chef_object() | #chef_cookbook_version{}, ejson_term()) -> chef_object().
+-spec update_from_ejson(chef_object() | #chef_cookbook_version{} | #chef_user{},
+                        ejson_term()) -> chef_object().
 %% @doc Return a new `chef_object()' record updated according to the specified EJSON
 %% terms. Data normalization on the EJSON should occur before making this call. Fields in
 %% the EJSON that exist in the record are updated. The serialized_object record field is
@@ -288,7 +313,10 @@ update_from_ejson(#chef_cookbook_version{org_id = OrgId,
                                           meta_long_desc    = UpdatedVersion#chef_cookbook_version.meta_long_desc,
                                           metadata          = UpdatedVersion#chef_cookbook_version.metadata,
                                           checksums         = UpdatedVersion#chef_cookbook_version.checksums,
-                                          serialized_object = UpdatedVersion#chef_cookbook_version.serialized_object}.
+                                          serialized_object = UpdatedVersion#chef_cookbook_version.serialized_object};
+update_from_ejson(#chef_user{} = User, UserData) ->
+    error({implement_me, User, UserData}).
+
 
 
 -spec id(chef_object()) -> object_id().
@@ -296,6 +324,8 @@ update_from_ejson(#chef_cookbook_version{org_id = OrgId,
 id(#chef_node{id = Id}) ->
     Id;
 id(#chef_role{id = Id}) ->
+    Id;
+id(#chef_user{id = Id}) ->
     Id;
 id(#chef_environment{id = Id}) ->
     Id;
@@ -309,6 +339,7 @@ id(#chef_cookbook_version{id = Id}) ->
     Id.
 
 -spec set_created(Object :: chef_object() |
+                            #chef_user{} |
                             #chef_sandbox{} |
                             #chef_cookbook_version{},
                   ActorId :: object_id()) -> chef_object() |
@@ -334,6 +365,9 @@ set_created(#chef_node{} = Object, ActorId) ->
 set_created(#chef_role{} = Object, ActorId) ->
     Now = sql_date(now),
     Object#chef_role{created_at = Now, updated_at = Now, last_updated_by = ActorId};
+set_created(#chef_user{} = Object, ActorId) ->
+    Now = sql_date(now),
+    Object#chef_user{created_at = Now, updated_at = Now, last_updated_by = ActorId};
 set_created(#chef_sandbox{}=Object, _ActorId) ->
     Now = sql_date(now),
     Object#chef_sandbox{created_at = Now};
@@ -364,16 +398,22 @@ set_updated(#chef_node{} = Object, ActorId) ->
 set_updated(#chef_role{} = Object, ActorId) ->
     Now = sql_date(now),
     Object#chef_role{updated_at = Now, last_updated_by = ActorId};
+set_updated(#chef_user{} = Object, ActorId) ->
+    Now = sql_date(now),
+    Object#chef_user{updated_at = Now, last_updated_by = ActorId};
 set_updated(#chef_cookbook_version{} = Object, ActorId) ->
     Now = sql_date(now),
     Object#chef_cookbook_version{updated_at = Now, last_updated_by = ActorId}.
 
 -spec name(chef_object()) -> binary() | {binary(), binary()}.
 %% @doc Return the `name' field from a `chef_object()' record type. For `data_bag_items' the
-%% return value is a tuple of `{BagName, ItemName}'.
+%% return value is a tuple of `{BagName, ItemName}',
+%% for a chef_user, the username is returned.
 name(#chef_node{name = Name}) ->
     Name;
 name(#chef_role{name = Name}) ->
+    Name;
+name(#chef_user{username = Name}) ->
     Name;
 name(#chef_environment{name = Name}) ->
     Name;
@@ -401,6 +441,8 @@ type_name(#chef_node{}) ->
     node;
 type_name(#chef_role{}) ->
     role;
+type_name(#chef_user{}) ->
+    user;
 type_name(#chef_cookbook_version{}) ->
     cookbook_version.
 
@@ -566,3 +608,12 @@ normalize_item(Recipe) when is_binary(Recipe) ->
 deduplicate_run_list(L) ->
     WithIdx = lists:zip(L, lists:seq(1, length(L))),
     [ Elt || {Elt, _} <- lists:ukeysort(2, lists:ukeysort(1, WithIdx)) ].
+
+value_or_null(Key, Data) ->
+  Value = ej:get(Key, Data),
+  case Value of
+    undefined ->
+      null;
+    _ ->
+      Value
+  end.

@@ -61,6 +61,9 @@
 %% for data bags, data bag items, roles, and nodes.
 -define(ALTERNATIVE_NAME_REGEX, "[.[:alnum:]_\:-]+").
 
+%% Username validation regex
+-define(USERNAME_REGEX, "[a-z0-9\-_]+").
+
 %% Recipes can be cookbook-qualified; if not, the name is taken to be
 %% the cookbook, and the recipe is implicitly assumed to be "default".
 -define(COOKBOOK_PREFIX_REGEX, "(?:" ++ ?NAME_REGEX ++ "::)?").
@@ -68,6 +71,14 @@
 
 %% Sometimes, recipe names can have version qualifiers as well.
 -define(VERSIONED_RECIPE_REGEX, ?COOKBOOK_QUALIFIED_RECIPE_REGEX ++ ?RECIPE_VERSION_REGEX).
+
+generate_regex(Pattern) ->
+  {ok, Regex} = re:compile(Pattern),
+  Regex.
+
+generate_regex_msg_tuple(Pattern, Message) ->
+  Regex = generate_regex(Pattern),
+  {Regex, Message}.
 
 -spec regex_for(regex_name()) -> {re_regex(),  re_msg()}.
 %% @doc provide compiled regex for use externally
@@ -130,4 +141,8 @@ regex_for(qualified_recipe) ->
 regex_for(unqualified_recipe) ->
     Pattern = ?ANCHOR_REGEX(?VERSIONED_RECIPE_REGEX),
     {ok, Regex} = re:compile(Pattern),
-    {Regex, <<"Malformed recipe">>}.
+    {Regex, <<"Malformed recipe">>};
+
+regex_for(user_name) ->
+   generate_regex_msg_tuple(?ANCHOR_REGEX(?USERNAME_REGEX), <<"Malformed user name. Must only contain a-z, 0-9, _, or -">>).
+
