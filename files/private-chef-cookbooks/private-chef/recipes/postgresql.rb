@@ -82,31 +82,31 @@ else
 end
 
 
-if node['private_chef']['bootstrap']['enable'] 
+if node['private_chef']['bootstrap']['enable']
   execute "/opt/opscode/embedded/bin/initdb -D #{postgresql_data_dir}" do
     user node['private_chef']['postgresql']['username']
     not_if { File.exists?(File.join(postgresql_data_dir, "PG_VERSION")) }
   end
+end
 
-  postgresql_config = File.join(postgresql_data_dir, "postgresql.conf")
+postgresql_config = File.join(postgresql_data_dir, "postgresql.conf")
 
-  template postgresql_config do
-    source "postgresql.conf.erb"
-    owner node['private_chef']['postgresql']['username']
-    mode "0644"
-    variables(node['private_chef']['postgresql'].to_hash)
-    notifies :restart, 'service[postgres]' if OmnibusHelper.should_notify?("postgres")
-  end
+template postgresql_config do
+  source "postgresql.conf.erb"
+  owner node['private_chef']['postgresql']['username']
+  mode "0644"
+  variables(node['private_chef']['postgresql'].to_hash)
+  notifies :restart, 'service[postgres]' if OmnibusHelper.should_notify?("postgres")
+end
 
-  pg_hba_config = File.join(postgresql_data_dir, "pg_hba.conf")
+pg_hba_config = File.join(postgresql_data_dir, "pg_hba.conf")
 
-  template pg_hba_config do
-    source "pg_hba.conf.erb"
-    owner node['private_chef']['postgresql']['username']
-    mode "0644"
-    variables(node['private_chef']['postgresql'].to_hash)
-    notifies :restart, 'service[postgres]' if OmnibusHelper.should_notify?("postgres")
-  end
+template pg_hba_config do
+  source "pg_hba.conf.erb"
+  owner node['private_chef']['postgresql']['username']
+  mode "0644"
+  variables(node['private_chef']['postgresql'].to_hash)
+  notifies :restart, 'service[postgres]' if OmnibusHelper.should_notify?("postgres")
 end
 
 should_notify = OmnibusHelper.should_notify?("postgres")

@@ -134,6 +134,7 @@ default['private_chef']['bookshelf']['svlogd_num'] = 10
 default['private_chef']['bookshelf']['vip'] = '127.0.0.1'
 default['private_chef']['bookshelf']['listen'] = '127.0.0.1'
 default['private_chef']['bookshelf']['port'] = 4321
+default['private_chef']['bookshelf']['stream_download'] = true
 default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
 default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
 
@@ -188,6 +189,8 @@ default['private_chef']['opscode-erchef']['max_cache_size'] = '10000'
 default['private_chef']['opscode-erchef']['cache_ttl'] = '3600'
 default['private_chef']['opscode-erchef']['db_pool_size'] = '20'
 default['private_chef']['opscode-erchef']['couchdb_max_conn'] = '100'
+default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
+default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
 default['private_chef']['opscode-erchef']['s3_bucket'] = 'bookshelf'
 
 ####
@@ -329,6 +332,13 @@ default['private_chef']['postgresql']['md5_auth_cidr_addresses'] = [ ]
 default['private_chef']['postgresql']['trust_auth_cidr_addresses'] = [ '127.0.0.1/32', '::1/128' ]
 default['private_chef']['postgresql']['shmmax'] = 17179869184
 default['private_chef']['postgresql']['shmall'] = 4194304
+default['private_chef']['postgresql']['shared_buffers'] = "#{(node['memory']['total'].to_i / 4) / (1024)}MB"
+default['private_chef']['postgresql']['work_mem'] = "8MB"
+default['private_chef']['postgresql']['effective_cache_size'] = "128MB"
+default['private_chef']['postgresql']['checkpoint_segments'] = 3
+default['private_chef']['postgresql']['checkpoint_timeout'] = "5min"
+default['private_chef']['postgresql']['checkpoint_completion_target'] = 0.5
+default['private_chef']['postgresql']['checkpoint_warning'] = "30s"
 
 ###
 # Redis
