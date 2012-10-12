@@ -91,13 +91,28 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
 
 from_json(Req, #base_state{reqid = RequestId,
                            resource_state =
-                               #user_state{chef_user = User,
-                                           user_data = UserData}} = State) ->
-    case maybe_generate_key_pair(UserData, RequestId) of
+                               #user_state{
+                                   chef_user = #chef_user{
+                                              hashed_password = OriginalHashedPassword,
+                                              salt = OriginalSalt,
+                                              hash_type = OriginalHashType
+                                            } = User,
+                                   user_data = UserData}} = State) ->
+    PasswordPayload = ej:get({<<"password">>}, UserData),
+    { HashedPassword, Salt, HashType } = case PasswordPayload of
+        NewPassword when is_binary(NewPassword) -> chef_wm_password:encrypt(PasswordPayload);
+        _ -> { OriginalHashedPassword, OriginalSalt, OriginalHashType }
+    end,
+    UserWithPassword = User#chef_user{
+        hashed_password = HashedPassword,
+        salt = Salt,
+        hash_type = HashType },
+    UserDataWithoutPassword = ej:delete({<<"password">>}, UserData),
+    case maybe_generate_key_pair(UserDataWithoutPassword, RequestId) of
         {UserData1, PublicKey} ->
-            chef_wm_base:update_from_json(Req, State, User#chef_user{ public_key = PublicKey }, UserData1);
+            chef_wm_base:update_from_json(Req, State, UserWithPassword#chef_user{ public_key = PublicKey }, UserData1);
         UserData1 ->
-            chef_wm_base:update_from_json(Req, State, User, UserData1)
+            chef_wm_base:update_from_json(Req, State, UserWithPassword, UserData1)
     end.
 
 to_json(Req, #base_state{resource_state =
