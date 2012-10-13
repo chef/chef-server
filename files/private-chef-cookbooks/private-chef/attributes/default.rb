@@ -649,4 +649,4 @@ default['private_chef']['opscode-reporting']['max_cache_size'] = '10000'
 default['private_chef']['opscode-reporting']['cache_ttl'] = '3600'
 default['private_chef']['opscode-reporting']['node_search_limit'] = 50
 default['private_chef']['opscode-reporting']['summary_only_percentage'] = 0.9
-default['private_chef']['opscode-reporting']['summary_client_min_version'] = "10.14.4"
+default['private_chef']['opscode-reporting']['summary_client_min_version'] = "10.16.0"
