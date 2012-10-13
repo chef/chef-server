@@ -26,9 +26,8 @@
 
 -module(chef_db).
 
--export([fetch_user/2,
+-export([
          user_record_to_authz_id/2,
-         %% fetch_all_users/1,
          %% fetch_org/2,
          fetch_org_id/2,
          client_record_to_authz_id/2,
@@ -37,6 +36,13 @@
 
          %% Checksum ops
          mark_checksums_as_uploaded/3,
+
+         %% user ops
+         fetch_user/2,
+         fetch_users/1,
+         create_user/3,
+         delete_user/2,
+         count_user_admins/1,
 
          %% node ops
          fetch_node/3,
@@ -109,7 +115,7 @@
 
          is_user_in_org/3,
          connect/0,
-         create_fun/1,
+         create/3,
          bulk_get/4,
          data_bag_exists/3,
          data_bag_names/2,
@@ -137,6 +143,7 @@
                       'create_environment' |
                       'create_client' |
                       'create_node' |
+                      'create_user' |
                       'create_role' |
                       'create_sandbox' |
                       'create_cookbook_version'.
@@ -154,6 +161,7 @@
                       'delete_environment' |
                       'delete_client' |
                       'delete_node' |
+                      'delete_user' |
                       'delete_role' |
                       'delete_sandbox'.
 
@@ -193,6 +201,22 @@ fetch_user(#context{reqid = ReqId, otto_connection = _Server} = _Context, UserNa
             {error, Error}
     end.
 
+-spec fetch_users(#context{}) -> [binary()] | {error, _}.
+fetch_users(#context{reqid = ReqId}) ->
+    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, fetch_users),
+                          fun() -> chef_sql:fetch_users() end) of
+        {ok, L} -> L;
+        Other -> Other
+    end.
+
+-spec count_user_admins(#context{}) -> integer() | {error, term()}.
+count_user_admins(#context{reqid = ReqId}) ->
+  case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, count_user_admins),
+                        fun() -> chef_sql:count_user_admins() end) of
+       {ok, Count} -> Count;
+       Other -> Other
+  end.
+
 %%%
 -spec user_record_to_authz_id(any(), any()) -> id().
 user_record_to_authz_id(#context{}, #chef_user{} = UserRecord) ->
@@ -200,9 +224,6 @@ user_record_to_authz_id(#context{}, #chef_user{} = UserRecord) ->
 user_record_to_authz_id(#context{}, not_found) ->
     %% FIXME: is this what we want here?
     erlang:error({error, not_found}).
-
-%% fetch_all_users(S) ->
-%%     chef_otto:fetch_all_users(S).
 
 %% fetch_org(S, OrgName) ->
 %%     chef_otto:fetch_org(S, OrgName).
@@ -282,6 +303,11 @@ create_node(#context{}=Ctx, Node, ActorId) ->
 %% @doc Store a new role in the datastore.
 create_role(#context{}=Ctx, Role, ActorId) ->
     create_object(Ctx, create_role, Role, ActorId).
+
+-spec create_user(#context{}, #chef_user{}, object_id()) -> ok | {conflict, term()} | term().
+%% @doc Store a new user in the datastore.
+create_user(#context{}=Ctx, User, ActorId) ->
+    create_object(Ctx, create_user, User, ActorId).
 
 -spec create_environment(#context{}, #chef_environment{}, object_id()) -> ok | {conflict, term()} | term().
 %% @doc Store a new environment in the datastore.
@@ -729,6 +755,10 @@ delete_cookbook_version(#context{}=Ctx, #chef_cookbook_version{org_id=OrgId}=Coo
 %% node.
 delete_node(#context{}=Ctx, #chef_node{}=Node) -> delete_object(Ctx, delete_node, Node).
 
+-spec delete_user(#context{}, #chef_user{}) -> {ok, 1 | 2 } | not_found | {error, _}.
+delete_user(#context{}=Ctx, #chef_user{}=User) ->
+  delete_object(Ctx, delete_user, User).
+
 -spec delete_role(#context{}, #chef_role{}) -> {ok, 1 | 2} | not_found | {error, _}.
 %% @doc Delete a role. You can provide either a `#chef_role{}' record or just the ID of the
 %% role.
@@ -942,25 +972,25 @@ update_fun(#chef_role{}) ->
 update_fun(#chef_cookbook_version{}) ->
     update_cookbook_version.
 
--spec create_fun(chef_object() | #chef_sandbox{}) -> chef_db:create_fun().
-%% @doc Return the atom corresponding to the appropriate create function in the `chef_db'
-%% module for the given `chef_object()' record.
-create_fun(#chef_data_bag{}) ->
-    create_data_bag;
-create_fun(#chef_data_bag_item{}) ->
-    create_data_bag_item;
-create_fun(#chef_environment{}) ->
-    create_environment;
-create_fun(#chef_client{}) ->
-    create_client;
-create_fun(#chef_node{}) ->
-    create_node;
-create_fun(#chef_role{}) ->
-    create_role;
-create_fun(#chef_sandbox{}) ->
-    create_sandbox;
-create_fun(#chef_cookbook_version{}) ->
-    create_cookbook_version.
+-spec create(chef_object() | #chef_user{} | #chef_sandbox{}, #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
+%% @doc Call the appropriate create function based on the given chef_object record
+create(#chef_data_bag{} = Record, DbContext, ActorId) ->
+    create_data_bag(DbContext, Record, ActorId);
+create(#chef_data_bag_item{} = Record, DbContext, ActorId) ->
+    create_data_bag_item(DbContext, Record, ActorId);
+create(#chef_environment{} = Record, DbContext, ActorId) ->
+    create_environment(DbContext, Record, ActorId);
+create(#chef_client{} = Record, DbContext, ActorId) ->
+  create_client(DbContext, Record, ActorId);
+create(#chef_node{} = Record, DbContext, ActorId) ->
+    create_node(DbContext, Record, ActorId);
+create(#chef_user{} = Record, DbContext, ActorId) ->
+    create_user(DbContext, Record, ActorId);
+create(#chef_role{} = Record, DbContext, ActorId) ->
+    create_role(DbContext, Record, ActorId);
+create(#chef_cookbook_version{} = Record, DbContext, ActorId) ->
+    create_cookbook_version(DbContext, Record, ActorId).
+
 
 %% -------------------------------------
 %% private functions
@@ -969,6 +999,7 @@ create_fun(#chef_cookbook_version{}) ->
 -spec create_object(DbContext :: #context{},
                     Fun :: create_fun(),
                     Object :: chef_object() |
+                              #chef_user{} |
                               #chef_sandbox{} |
                               #chef_cookbook_version{},
                     ActorId :: object_id()) -> ok |
@@ -1150,7 +1181,7 @@ fetch_couchdb_data_bags(#context{reqid = ReqId, otto_connection = S}, {id, OrgId
 %% Also might want to take ActorId here and at least log who deleted the object.
 -spec delete_object(DbContext :: #context{},
                     Fun :: delete_fun(),
-                    Object :: chef_object() | object_id() | #chef_client{} | #chef_sandbox{} |
+                    Object :: chef_object() | object_id() | #chef_user{} | #chef_client{} | #chef_sandbox{} |
                               #chef_cookbook_version{} ) -> {ok, 1 | 2} |
                                                             not_found |
                                                             #chef_db_cb_version_delete{} |
@@ -1191,7 +1222,7 @@ update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
         {error, Error} -> {error, Error}
     end.
 
--spec get_id(chef_object() | #chef_client{} | #chef_sandbox{} | #chef_cookbook_version{}) -> object_id().
+  -spec get_id(chef_object() | #chef_user{} | #chef_client{} | #chef_sandbox{} | #chef_cookbook_version{}) -> object_id().
 %% @doc Return the `id' field from a `chef_object()' record type.
 get_id(#chef_client{id = Id}) ->
     Id;
@@ -1206,4 +1237,6 @@ get_id(#chef_data_bag{id = Id}) ->
 get_id(#chef_data_bag_item{id = Id}) ->
     Id;
 get_id(#chef_sandbox{id = Id}) ->
-    Id.
+    Id;
+get_id(#chef_user{username = Username}) ->
+    Username.

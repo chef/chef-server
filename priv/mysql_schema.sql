@@ -1,3 +1,14 @@
+-- Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at
+--
+--   http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the License for the specific language governing permissions and limitations under the License.
+
+--
+-- MYSQL database dump
+--
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -220,17 +231,18 @@ CREATE TABLE `schema_info` (
   `version` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `osc_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `users` (
+CREATE TABLE `osc_users` (
   `id` char(32) COLLATE utf8_bin NOT NULL,
   `authz_id` char(32) COLLATE utf8_bin NOT NULL,
   `username` varchar(255) COLLATE utf8_bin NOT NULL,
   `email` varchar(255) COLLATE utf8_bin DEFAULT NULL,
-  `pubkey_version` int(11) NOT NULL,
   `public_key` text COLLATE utf8_bin,
-  `serialized_object` text COLLATE utf8_bin,
+  `hashed_password` text COLLATE utf8_bin NOT NULL,
+  `salt` text COLLATE utf8_bin NOT NULL,
+  `hash_type` text COLLATE utf8_bin NOT NULL,
   `last_updated_by` char(32) COLLATE utf8_bin NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,

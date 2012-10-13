@@ -1,5 +1,0 @@
-source 'http://www.rubygems.org'
-
-gem "mysql2"
-gem "pg"
-gem "sequel"

@@ -33,7 +33,14 @@
 -endif.
 
 
--export([fetch_user/1,
+-export([
+         %%user ops
+         fetch_user/1,
+         fetch_users/0,
+         create_user/1,
+         delete_user/1,
+         count_user_admins/0,
+
          %% checksum ops
          mark_checksums_as_uploaded/2,
          non_uploaded_checksums/2,
@@ -113,6 +120,7 @@
 -include_lib("chef_objects/include/chef_types.hrl").
 
 -type delete_query() :: delete_cookbook_version_by_id |
+                        delete_user_by_username |
                         delete_data_bag_by_id |
                         delete_data_bag_item_by_id |
                         delete_environment_by_id |
@@ -136,18 +144,47 @@ ping() ->
             pang
     end.
 
+%% chef user ops
+
 -spec fetch_user(bin_or_string()) -> {ok, #chef_user{} | not_found } | {error, term()}.
 %% @doc Return user data for the given username
 %%
 %%
 fetch_user(UserName) ->
-    case sqerl:select(find_by_username_for_authn, [UserName], ?FIRST(chef_user)) of
+    case sqerl:select(find_user_by_username, [UserName], ?FIRST(chef_user)) of
         {ok, none} ->
             {ok, not_found};
         {ok, #chef_user{}=User} ->
             {ok, User};
         {error, Error} -> {error, Error}
     end.
+
+-spec create_user(#chef_user{}) -> {ok, 1} | {error, term()}.
+%% doc Insert user data into database
+create_user(#chef_user{}=User) ->
+    create_object(User).
+
+-spec delete_user(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
+delete_user(Username) when is_list(Username) ->
+    delete_user(list_to_binary(Username));
+delete_user(#chef_user{username=Username}) ->
+    delete_user(Username);
+delete_user(Username) when is_binary(Username)->
+  delete_object(delete_user_by_username, Username).
+
+-spec fetch_users() -> {ok, none | [binary()]} | {error, _}.
+%% Return a list of all usernames.
+fetch_users() ->
+    case sqerl:select(list_users, [], rows_as_scalars, [username]) of
+        {ok, none} ->
+            {ok, []};
+        Other ->
+            Other
+    end.
+-spec count_user_admins() -> {ok, none} | {ok, integer()} | {error, _}.
+%% Return a count of the user admins
+count_user_admins() ->
+  sqerl:select(count_user_admins, [], first_as_scalar, [count]).
 
 %% node ops
 
@@ -1023,9 +1060,12 @@ bulk_get_objects(Type, Ids) ->
 
 -spec create_object(Object :: chef_object() |
                               #chef_sandbox{} |
+                              #chef_user{} |
                               #chef_cookbook_version{}) -> {ok, non_neg_integer()} |
                                                            sqerl_error().
 %% @doc create an object given a chef object record
+create_object(#chef_user{}=User) ->
+  create_object(insert_user, User);
 create_object(#chef_node{}=Node) ->
     create_object(insert_node, Node);
 create_object(#chef_role{}=Role) ->

@@ -48,11 +48,15 @@ fetch_requestor_test_() ->
                User = #chef_user{id = <<"a1">>,
                                  authz_id = <<"b2">>,
                                  username = <<"alice">>,
-                                 pubkey_version = 1,
-                                 public_key = <<"key data">>},
-               meck:expect(chef_sql, fetch_user,
-                           fun(<<"alice">>) -> {ok, User } end),
-
+                                 public_key = <<"key data">>,
+                                 hashed_password = <<"abc123xyz">>,
+                                 salt = <<"pepper">>,
+                                 hash_type = <<"bcrypt">>,
+                                 external_authentication_uid = <<"">>,
+                                 recovery_authentication_enabled = <<"0">>,
+                                 admin = <<"false">>
+                               },
+               meck:expect(chef_sql, fetch_user, fun(<<"alice">>) -> {ok, User } end),
                Context = chef_db:make_context(<<"req-id-123">>),
                Got = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
                ?assertEqual(Got, User)
@@ -185,17 +189,6 @@ fetch_cookbook_versions_test_() ->
          end}
      ]
     }.
-
-create_fun_test_() ->
-    [
-     ?_assertEqual(create_data_bag_item, chef_db:create_fun(#chef_data_bag_item{})),
-     ?_assertEqual(create_data_bag, chef_db:create_fun(#chef_data_bag{})),
-     ?_assertEqual(create_environment, chef_db:create_fun(#chef_environment{})),
-     ?_assertEqual(create_node, chef_db:create_fun(#chef_node{})),
-     ?_assertEqual(create_role, chef_db:create_fun(#chef_role{})),
-     ?_assertEqual(create_cookbook_version,
-                   chef_db:create_fun(#chef_cookbook_version{}))
-    ].
 
 update_fun_test_() ->
     [
