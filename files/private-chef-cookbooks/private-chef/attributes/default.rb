@@ -648,5 +648,5 @@ default['private_chef']['opscode-reporting']['db_pool_init_count'] = 5
 default['private_chef']['opscode-reporting']['max_cache_size'] = '10000'
 default['private_chef']['opscode-reporting']['cache_ttl'] = '3600'
 default['private_chef']['opscode-reporting']['node_search_limit'] = 50
-default['private_chef']['opscode-reporting']['summary_post_threshold'] = 90
-default['private_chef']['opscode-reporting']['summary_client_min_version'] = "10.14.6"
+default['private_chef']['opscode-reporting']['summary_only_percentage'] = 0.9
+default['private_chef']['opscode-reporting']['summary_client_min_version'] = "10.14.4"
