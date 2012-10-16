@@ -21,6 +21,11 @@
 -define(i2b(X), iolist_to_binary(X)).
 -define(gv(X, PL), proplists:get_value(X, PL)).
 
+%% @ should be a legal character
+at_sign_test() ->
+    ?assertEqual([<<"foo@bar.com">>],
+                 lucene:parse("foo@bar.com")).
+
 lucene_query_test_() ->
     Tests = [{"aterm", [<<"aterm">>]},
              {"a1 b2 c3", [<<"a1">>, <<"b2">>, <<"c3">>]},
