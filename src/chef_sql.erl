@@ -173,7 +173,7 @@ update_user(#chef_user{ last_updated_by = LastUpdatedBy,
                         hashed_password = HashedPassword,
                         salt            = Salt,
                         hash_type       = HashType,
-                        id              = Id } = User) ->
+                        id              = Id } ) ->
                 UpdateFields = [ IsAdmin =:= true, PublicKey, HashedPassword, Salt, HashType, LastUpdatedBy, UpdatedAt, Id ],
                 do_update(update_user_by_id, UpdateFields).
 
