@@ -153,7 +153,8 @@
                       'update_environment' |
                       'update_client' |
                       'update_node' |
-                      'update_role'.
+                      'update_role' |
+                      'update_user'.
 
 -type delete_fun() :: 'delete_cookbook_version' |
                       'delete_data_bag' |
@@ -218,7 +219,7 @@ count_user_admins(#context{reqid = ReqId}) ->
   end.
 
 %%%
--spec user_record_to_authz_id(any(), any()) -> id().
+-spec user_record_to_authz_id(#context{}, #chef_user{} | not_found) -> id().
 user_record_to_authz_id(#context{}, #chef_user{} = UserRecord) ->
     UserRecord#chef_user.authz_id;
 user_record_to_authz_id(#context{}, not_found) ->
@@ -728,7 +729,7 @@ update_data_bag_item(#context{}=Ctx, DataBagItem, ActorId) ->
     update_object(Ctx, ActorId, update_data_bag_item, DataBagItem).
 
 %% Update data for a User.
-update_user(#context{}=Ctx, User, ActorId) ->
+update_user(#context{}=Ctx, #chef_user{}=User, ActorId) ->
     update_object(Ctx, ActorId, update_user, User).
 
 -spec update_cookbook_version(DbContext :: #context{},
@@ -1212,10 +1213,13 @@ delete_object(#context{reqid = ReqId}, Fun, Id) ->
         Result -> Result
     end.
 
--spec update_object(#context{}, object_id(), update_fun(), chef_object() | #chef_cookbook_version{}) -> ok |
-                                                                             not_found |
-                                                                             {conflict, any()} |
-                                                                             {error, any()}.
+-spec update_object(#context{}, object_id(), update_fun(),
+                    chef_object() |
+                    #chef_user{} |
+                    #chef_cookbook_version{}) -> ok |
+                                                 not_found |
+                                                 {conflict, any()} |
+                                                 {error, any()}.
 %% @doc Generic update for Chef object types. `Fun' is the appropriate function in the
 %% `chef_sql' module. `Object' is a Chef object (record) with updated data.
 update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->

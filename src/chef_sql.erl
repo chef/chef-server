@@ -165,7 +165,7 @@ fetch_user(UserName) ->
 create_user(#chef_user{}=User) ->
     create_object(User).
 
-%% Add spec
+-spec update_user(#chef_user{}) -> {ok, 1 | not_found} | {error, term()}.
 update_user(#chef_user{ last_updated_by = LastUpdatedBy,
                         updated_at      = UpdatedAt,
                         admin           = IsAdmin,
