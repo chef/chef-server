@@ -21,12 +21,14 @@
 -module(chef_lucene).
 -export([parse/1,file/1]).
 -compile(nowarn_unused_vars).
--compile({nowarn_unused_function,[p/4, p/5, p_eof/0, p_optional/1, p_not/1, p_assert/1, p_seq/1, p_and/1, p_choose/1, p_zero_or_more/1, p_one_or_more/1, p_label/2, p_string/1, p_anything/0, p_charclass/1, line/1, column/1]}).
+-compile({nowarn_unused_function,[p/4, p/5, p_eof/0, p_optional/1, p_not/1, p_assert/1, p_seq/1, p_and/1, p_choose/1, p_zero_or_more/1, p_one_or_more/1, p_label/2, p_string/1, p_anything/0, p_charclass/1, p_attempt/4, line/1, column/1]}).
 
 
 
+-spec file(file:name()) -> any().
 file(Filename) -> {ok, Bin} = file:read_file(Filename), parse(Bin).
 
+-spec parse(binary() | list()) -> any().
 parse(List) when is_list(List) -> parse(list_to_binary(List));
 parse(Input) when is_binary(Input) ->
   setup_memo(),
@@ -103,7 +105,7 @@ parse(Input) when is_binary(Input) ->
   p(Input, Index, 'keyword', fun(I,D) -> (p_choose([p_string(<<"AND">>), p_string(<<"OR">>), p_string(<<"NOT">>)]))(I,D) end, fun(Node, Idx) -> transform('keyword', Node, Idx) end).
 
 'valid_letter'(Input, Index) ->
-  p(Input, Index, 'valid_letter', fun(I,D) -> (p_seq([p_one_or_more(fun 'start_letter'/2), p_zero_or_more(p_choose([p_charclass(<<"[a-zA-Z0-9*?_+.-]">>), p_seq([p_string(<<"\\">>), fun 'special_char'/2])]))]))(I,D) end, fun(Node, Idx) -> transform('valid_letter', Node, Idx) end).
+  p(Input, Index, 'valid_letter', fun(I,D) -> (p_seq([p_one_or_more(fun 'start_letter'/2), p_zero_or_more(p_choose([p_charclass(<<"[a-zA-Z0-9*?@_+.-]">>), p_seq([p_string(<<"\\">>), fun 'special_char'/2])]))]))(I,D) end, fun(Node, Idx) -> transform('valid_letter', Node, Idx) end).
 
 'start_letter'(Input, Index) ->
   p(Input, Index, 'start_letter', fun(I,D) -> (p_choose([p_charclass(<<"[a-zA-Z0-9_.*]">>), p_seq([p_string(<<"\\">>), fun 'special_char'/2])]))(I,D) end, fun(Node, Idx) -> transform('start_letter', Node, Idx) end).
@@ -125,19 +127,19 @@ p(Inp, StartIndex, Name, ParseFun, TransformFun) ->
     {ok, Memo} -> %Memo;                     % If it is, return the stored result
       Memo;
     _ ->                                        % If not, attempt to parse
-      case ParseFun(Inp, StartIndex) of
+      Result = case ParseFun(Inp, StartIndex) of
         {fail,_} = Failure ->                       % If it fails, memoize the failure
-          Result = Failure;
+          Failure;
         {Match, InpRem, NewIndex} ->               % If it passes, transform and memoize the result.
           Transformed = TransformFun(Match, StartIndex),
-          Result = {Transformed, InpRem, NewIndex}
+          {Transformed, InpRem, NewIndex}
       end,
       memoize(StartIndex, Name, Result),
       Result
   end.
 
 setup_memo() ->
-  put(parse_memo_table, ets:new(?MODULE, [set])).
+  put({parse_memo_table, ?MODULE}, ets:new(?MODULE, [set])).
 
 release_memo() ->
   ets:delete(memo_table_name()).
@@ -160,7 +162,7 @@ get_memo(Index, Name) ->
     end.
 
 memo_table_name() ->
-    get(parse_memo_table).
+    get({parse_memo_table, ?MODULE}).
 
 p_eof() ->
   fun(<<>>, Index) -> {eof, [], Index};
