@@ -188,6 +188,7 @@ default['private_chef']['opscode-erchef']['bulk_fetch_batch_size'] = '5'
 default['private_chef']['opscode-erchef']['max_cache_size'] = '10000'
 default['private_chef']['opscode-erchef']['cache_ttl'] = '3600'
 default['private_chef']['opscode-erchef']['db_pool_size'] = '20'
+default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = '20'
 default['private_chef']['opscode-erchef']['couchdb_max_conn'] = '100'
 default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
