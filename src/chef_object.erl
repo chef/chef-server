@@ -317,16 +317,8 @@ update_from_ejson(#chef_cookbook_version{org_id = OrgId,
 update_from_ejson(#chef_user{} = User, UserData) ->
     Name = ej:get({<<"name">>}, UserData),
     IsAdmin = ej:get({<<"admin">>}, UserData) =:= true,
-    Email = ej:get({<<"email">>}, UserData),
-    %% IsValidator = ej:get({<<"validator">>}, UserData) =:= true,
-    %% Take certificate first, then public_key
-    %{Key, Version} = cert_or_key(UserData),
     User#chef_user{ username = Name,
-                    admin = IsAdmin,
-                    email = Email }.
-                    %%validator = IsValidator,
-                    %%public_key = Key,
-                    %%pubkey_version = Version}.
+                    admin = IsAdmin }.
 
 
 -spec id(chef_object()) -> object_id().
