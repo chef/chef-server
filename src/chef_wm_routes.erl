@@ -42,7 +42,8 @@ bulk_route_fun(Type, Req) when Type =:= role;
                                Type =:= environment;
                                Type =:= client;
                                Type =:= data_bag;
-                               Type =:= data_bag_item ->
+                               Type =:= data_bag_item;
+                               Type =:= user ->
     BaseURI = chef_wm_util:base_uri(Req),
     Template = template_for_type(Type),
     fun(Name) ->
@@ -80,6 +81,7 @@ route(organization_search, Req, Args) ->
 %% Create a url for an individual role.  Requires a 'role_name' argument
 route(node, Req, Args) -> route_rest_object("nodes", Req, Args);
 route(role, Req, Args) -> route_rest_object("roles", Req, Args);
+route(user, Req, Args) -> route_rest_object("users", Req, Args);
 route(data_bag, Req, Args) -> route_rest_object("data", Req, Args);
 route(environment, Req, Args) -> route_rest_object("environments", Req, Args);
 route(client, Req, Args) -> route_rest_object("clients", Req, Args);
@@ -134,7 +136,9 @@ template_for_type(data_bag_item) ->
     "/data/~s/~s";
 template_for_type({data_bag, _}) ->
     %% another way of asking for data_bag_item
-    "/data/~s/~s".
+    "/data/~s/~s";
+template_for_type(user) ->
+    "/users/~s".
 
 %% This is extracted from search, needs more cleanup
 url_for_search_item_fun(Req, Type, _OrgName) ->

@@ -285,7 +285,10 @@ create_from_json(#wm_reqdata{} = Req,
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
--spec update_from_json(#wm_reqdata{}, #base_state{}, chef_object() | #chef_cookbook_version{}, ejson_term()) ->
+-spec update_from_json(#wm_reqdata{},
+                       #base_state{},
+                       chef_object() | #chef_cookbook_version{} | #chef_user{},
+                       ejson_term()) ->
                               {true, #wm_reqdata{}, #base_state{}} |
                               {{halt, 400 | 404 | 500}, #wm_reqdata{}, #base_state{}}.
 %% @doc Implements the from_json callback for PUT requests to update Chef
@@ -635,6 +638,69 @@ handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
         _Else ->
             forbidden
     end;
+handle_auth_info(chef_wm_users, Req, #base_state{requestor = Requestor}) ->
+  case wrq:method(Req) of
+    'POST' -> %% Create new user
+        chef_wm_authz:allow_admin(Requestor);
+    'GET' -> %% List all users
+        chef_wm_authz:allow_admin(Requestor);
+    _Else ->
+        forbidden
+  end;
+handle_auth_info(chef_wm_named_user, Req, #base_state{requestor = Requestor,
+                                           chef_db_context = DbContext,
+                                           resource_state = #user_state{chef_user = User}}) ->
+  UserName = chef_wm_util:object_name(user, Req),
+  case wrq:method(Req) of
+    'PUT' ->
+      %% Ensure user can't reset themselves to not be non-admin if none are left
+      case chef_wm_authz:is_admin(Requestor) andalso chef_wm_authz:is_requesting_node(Requestor, UserName) of
+        true ->
+          %%They are an admin and updating themselves
+          case chef_db:count_user_admins(DbContext) >1 of
+            %% They are an admin, are they attempting to change the admin status?
+            true ->
+              case chef_wm_util:admin_field_is_false(User) of
+                 %% They are attempting to change their admin field, deny
+                 true ->
+                   forbidden;
+                 %% They are not attempting to change their admin field, allow
+                 false ->
+                   authorized
+               end;
+            %% More than one admin left, let the operation continue
+            false ->
+              authorized
+          end;
+        false ->
+          %% User is not in danger of setting last to non-admin status
+          chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName)
+      end;
+    'GET' ->
+      chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName);
+    'DELETE' ->
+      %% Ensure last admin can't be deleted
+      case chef_wm_authz:is_admin(Requestor) andalso chef_wm_authz:is_requesting_node(Requestor, UserName) of
+        %% User is an admin and trying to operate on itself
+        true ->
+          case chef_db:count_user_admins(DbContext) > 1 of
+            %% More than one admin left, let operation continue
+            true ->
+                authorized;
+            %% Last admin, don't let them delete themselves
+            false ->
+                forbidden
+            end;
+        %% User is not in danger of deleting the last admin, check normal permissions
+        false ->
+          chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName)
+      end;
+    _Else ->
+      forbidden
+  end;
+
+
+
 handle_auth_info(Module, Req, #base_state{requestor = Requestor})
         when Module =:= chef_wm_cookbook_version;
              Module =:= chef_wm_named_environment;

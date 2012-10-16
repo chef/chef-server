@@ -28,6 +28,8 @@
          extract_from_path/2,
          full_uri/1,
          get_header_fun/2,
+         malformed_request_message/3,
+         admin_field_is_false/1,
          base_mods/0,
          not_found_message/2,
          num_versions/1,
@@ -84,8 +86,10 @@ environment_not_found_message(EnvName) ->
 %% TODO: Why are these messages phrased differently?  This is what the Ruby endpoints were
 %% doing, FYI.  Is this something we're stuck with, or can we update the API and normalize
 %% these messages?
--spec not_found_message( node | role | data_bag | data_bag_item1 | data_bag_item2 | client
-                         | data_bag_missing_for_item_post | environment | sandbox | sandboxes | cookbook | cookbook_version,
+-spec not_found_message( node | role | data_bag | data_bag_item1 |
+                         data_bag_item2 | client | data_bag_missing_for_item_post |
+                         environment | sandbox | sandboxes | cookbook |
+                         cookbook_version | user,
                          bin_or_string() | {bin_or_string(), bin_or_string()} ) -> ejson().
 not_found_message(node, Name) ->
     error_message_envelope(iolist_to_binary(["node '", Name, "' not found"]));
@@ -114,7 +118,10 @@ not_found_message(cookbook, Name) when is_binary(Name) ->
 not_found_message(cookbook_version, {Name, Version}) when is_binary(Version) -> %% NOT a parsed {Major, Minor, Patch} tuple!!
     error_message_envelope(iolist_to_binary(["Cannot find a cookbook named ", Name, " with version ", Version]));
 not_found_message(client, Name) ->
-    error_message_envelope(iolist_to_binary(["Cannot load client ", Name])).
+    error_message_envelope(iolist_to_binary(["Cannot load client ", Name]));
+not_found_message(user, Name) ->
+    error_message_envelope(iolist_to_binary(["user '", Name, "' not found"])).
+
 
 %% "Cannot load data bag item not_really_there for data bag sack"
 
@@ -169,7 +176,7 @@ set_uri_of_created_resource(Uri, Req0) when is_binary(Uri) ->
 %% TODO: Currently we only use this for nodes and roles; when we clean up our custom types,
 %% the spec will be updated
 -spec object_name(cookbook | node | role | data_bag | data_bag_item |
-                  environment | sandbox | client,
+                  environment | sandbox | client | user,
                   Request :: #wm_reqdata{}) -> binary() | undefined.
 object_name(node, Req) ->
     extract_from_path(node_name, Req);
@@ -186,7 +193,9 @@ object_name(environment, Req) ->
 object_name(cookbook, Req) ->
     extract_from_path(cookbook_name, Req);
 object_name(client, Req) ->
-    extract_from_path(client_name, Req).
+    extract_from_path(client_name, Req);
+object_name(user, Req) ->
+    extract_from_path(user_name, Req).
 
 %% @doc Private utility function to extract a path element as a binary.  Returns the atom
 %% `undefined' if no such value exists.
@@ -197,6 +206,48 @@ extract_from_path(PathKey, Req) ->
         Value ->
             list_to_binary(Value)
     end.
+
+error_message(Msg) when is_list(Msg) ->
+    error_message(iolist_to_binary(Msg));
+error_message(Msg) when is_binary(Msg) ->
+    {[{<<"error">>, [Msg]}]}.
+
+malformed_request_message(#ej_invalid{type = json_type, key = Key}, _Req, _State) ->
+    case Key of
+        undefined -> error_message([<<"Incorrect JSON type for request body">>]);
+        _ ->error_message([<<"Incorrect JSON type for ">>, Key])
+    end;
+malformed_request_message(#ej_invalid{type = missing, key = Key}, _Req, _State) ->
+    error_message([<<"Required value for ">>, Key, <<" is missing">>]);
+malformed_request_message({invalid_key, Key}, _Req, _State) ->
+    error_message([<<"Invalid key ">>, Key, <<" in request body">>]);
+malformed_request_message(invalid_json_body, _Req, _State) ->
+    error_message([<<"Incorrect JSON type for request body">>]);
+malformed_request_message(#ej_invalid{type = exact, key = Key, msg = Expected},
+                          _Req, _State) ->
+    error_message([Key, <<" must equal ">>, Expected]);
+malformed_request_message(#ej_invalid{type = string_match, msg = Error},
+                          _Req, _State) ->
+    error_message([Error]);
+malformed_request_message(#ej_invalid{type = object_key, key = Object, found = Key},
+                          _Req, _State) ->
+    error_message([<<"Invalid key '">>, Key, <<"' for ">>, Object]);
+% TODO: next two tests can get merged (hopefully) when object_map is extended not
+% to swallow keys
+malformed_request_message(#ej_invalid{type = object_value, key = Object, found = Val},
+                          _Req, _State) when is_binary(Val) ->
+    error_message([<<"Invalid value '">>, Val, <<"' for ">>, Object]);
+malformed_request_message(#ej_invalid{type = object_value, key = Object, found = Val},
+                          _Req, _State) ->
+    error_message([<<"Invalid value '">>, io_lib:format("~p", [Val]),
+                   <<"' for ">>, Object]);
+malformed_request_message(Any, _Req, _State) ->
+    error({unexpected_malformed_request_message, Any}).
+
+admin_field_is_false(#chef_user{admin = Admin}) when Admin =:= false ->
+  true;
+admin_field_is_false(#chef_user{}) ->
+  false.
 
 %% @doc Utility function to process the `num_versions' parameter that is common to several
 %% cookbook-related resources

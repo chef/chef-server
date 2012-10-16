@@ -31,21 +31,22 @@
 
 -spec add_to_solr(chef_type(), object_id(), object_id(), ejson_term()) -> ok.
 %% Add a Chef object to solr
-add_to_solr(data_bag, _Id, _OrgId, _Ejson) ->
-    %% we don't index data_bags
-    ok;
-add_to_solr(cookbook_version, _Id, _OrgId, _Ejson) ->
-    %% we don't index cookbook_version objects
-    ok;
+add_to_solr(TypeName, _Id, _OrgId, _Ejson) when TypeName =:= data_bag;
+                                              TypeName =:= user;
+                                              TypeName =:= coookbook_version ->
+            ok; %%These types are not indexed
 add_to_solr(TypeName, Id, OrgId, Ejson) ->
     chef_index_queue:set(TypeName, Id, chef_otto:dbname(OrgId), Ejson).
 
 %% @doc Helper function to easily delete an object from Solr, instead
 %% of calling chef_index_queue directly.
--spec delete_from_solr(chef_indexable_object() | #chef_cookbook_version{}) -> ok.
-delete_from_solr(#chef_cookbook_version{}) ->
-    %% FIXME: not sure this is the right thing
-    ok;
+-spec delete_from_solr(chef_indexable_object()
+                        | #chef_cookbook_version{}
+                        | #chef_user{}) -> ok.
+delete_from_solr(Object) when is_record(Object, chef_cookbook_version);
+                              is_record(Object, chef_data_bag);
+                              is_record(Object, chef_user) ->
+                 ok; %%These types are not indexed, so don't need to issue delete
 delete_from_solr(Object) ->
     {Id, OrgId} = get_id_and_org_id(Object),
     chef_index_queue:delete(chef_object:type_name(Object), Id, chef_otto:dbname(OrgId)).
@@ -59,10 +60,12 @@ delete_from_solr(Object) ->
 %% pulled out of the db so it will be as if the data was correctly deleted. If we deleted
 %% the solr data when a db error was encountered, we could have data in the db that could
 %% not be findable via search.
--spec delete( chef_db:db_context(),
-    chef_object() | #chef_cookbook_version{checksums::'undefined' | [binary()]},
-    object_id() ) -> ok.
-
+-spec delete(chef_db:db_context(),
+             chef_object() |
+             #chef_cookbook_version{checksums::'undefined' |
+                                               [binary()]} |
+             #chef_user{},
+             object_id() ) -> ok.
 delete(DbContext,#chef_data_bag{org_id = OrgId,
                                 name = DataBagName}=DataBag,
                                 _RequestorId) ->
@@ -95,7 +98,7 @@ delete(DbContext, Object, _RequestorId) ->
     ok.
 
 -spec delete_from_db(chef_db:db_context(),
-                     chef_object() | #chef_cookbook_version{}) -> ok.
+                     chef_object() | #chef_user{} | #chef_cookbook_version{}) -> ok.
 %% @doc Delete an object from the database.  Provides pattern-matching sugar over chef_db
 %% delete functions, making the `delete` function in this module very simple. Throws if the
 %% database call returns an error, otherwise returns `ok' ignoring specific return value
@@ -104,6 +107,8 @@ delete_from_db(DbContext, #chef_client{}=Client) ->
     handle_delete_from_db(chef_db:delete_client(DbContext, Client));
 delete_from_db(DbContext, #chef_node{}=Node) ->
     handle_delete_from_db(chef_db:delete_node(DbContext, Node));
+delete_from_db(DbContext, #chef_user{}=User) ->
+    handle_delete_from_db(chef_db:delete_user(DbContext, User));
 delete_from_db(DbContext, #chef_role{}=Role) ->
     handle_delete_from_db(chef_db:delete_role(DbContext, Role));
 delete_from_db(DbContext, #chef_environment{}=Environment) ->
@@ -137,3 +142,4 @@ get_id_and_org_id(#chef_data_bag_item{id = Id, org_id = OrgId}) ->
     {Id, OrgId};
 get_id_and_org_id(#chef_cookbook_version{id = Id, org_id = OrgId}) ->
     {Id, OrgId}.
+

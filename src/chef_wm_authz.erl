@@ -28,26 +28,30 @@
          allow_admin_or_requesting_node/2,
          allow_validator/1,
          is_admin/1,
+         is_requesting_node/2,
          is_validator/1]).
 
 -include("chef_wm.hrl").
 
-%%
-%% TODO implement is_FOO functions for #chef_user{} when the record
-%% has an 'admin' field
-%%
-
--spec allow_admin(#chef_client{}) -> authorized | forbidden.
+-spec allow_admin(#chef_client{} | #chef_user{}) -> authorized | forbidden.
 allow_admin(#chef_client{admin = true}) ->
     authorized;
 allow_admin(#chef_client{}) ->
+    forbidden;
+allow_admin(#chef_user{admin = true}) ->
+    authorized;
+allow_admin(#chef_user{}) ->
     forbidden.
 
--spec allow_admin_or_requesting_node(#chef_client{}, binary()) -> authorized | forbidden.
+-spec allow_admin_or_requesting_node(#chef_client{} | #chef_user{}, binary()) -> authorized | forbidden.
 allow_admin_or_requesting_node(#chef_client{name = Name}, Name) ->
     authorized;
 allow_admin_or_requesting_node(#chef_client{} = Client, _Name) ->
-    allow_admin(Client).
+    allow_admin(Client);
+allow_admin_or_requesting_node(#chef_user{username = Name}, Name) ->
+    authorized;
+allow_admin_or_requesting_node(#chef_user{} = User, _Name) ->
+    allow_admin(User).
 
 -spec allow_validator(#chef_client{}) -> authorized | forbidden.
 allow_validator(#chef_client{validator = true}) ->
@@ -55,10 +59,24 @@ allow_validator(#chef_client{validator = true}) ->
 allow_validator(#chef_client{}) ->
     forbidden.
 
--spec is_admin(#chef_client{}) -> true | false.
+-spec is_admin(#chef_client{} | #chef_user{}) -> true | false.
 is_admin(#chef_client{admin = true}) ->
     true;
 is_admin(#chef_client{}) ->
+    false;
+is_admin(#chef_user{admin = true}) ->
+    true;
+is_admin(#chef_user{}) ->
+    false.
+
+-spec is_requesting_node(#chef_client{} | #chef_user{}, binary()) -> true | false.
+is_requesting_node(#chef_client{name = Name}, Name) ->
+    true;
+is_requesting_node(#chef_client{}, _Name) ->
+    false;
+is_requesting_node(#chef_user{username = Name}, Name) ->
+    true;
+is_requesting_node(#chef_user{}, _Name) ->
     false.
 
 -spec is_validator(#chef_client{}) -> true | false.
