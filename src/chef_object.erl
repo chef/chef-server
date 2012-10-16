@@ -387,7 +387,10 @@ set_created(#chef_cookbook_version{} = Object, ActorId) ->
                                  last_updated_by = ActorId}.
 
 
--spec set_updated(chef_object() | #chef_cookbook_version{}, object_id()) -> chef_object().
+-spec set_updated(chef_object() |
+                  #chef_user{} |
+                  #chef_cookbook_version{},
+                  object_id()) -> chef_object().
 %% @doc Set the `updated_at' and `last_updated_by' fields of a `chef_object()' record type
 %% (if appropriate, otherwise no-op that returns the same record provided as argument).
 set_updated(#chef_data_bag{} = Object, ActorId) ->
@@ -413,10 +416,7 @@ set_updated(#chef_user{} = Object, ActorId) ->
     Object#chef_user{updated_at = Now, last_updated_by = ActorId};
 set_updated(#chef_cookbook_version{} = Object, ActorId) ->
     Now = sql_date(now),
-    Object#chef_cookbook_version{updated_at = Now, last_updated_by = ActorId};
-set_updated(#chef_user{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_user{updated_at = Now, last_updated_by = ActorId}.
+    Object#chef_cookbook_version{updated_at = Now, last_updated_by = ActorId}.
 
 -spec name(chef_object()) -> binary() | {binary(), binary()}.
 %% @doc Return the `name' field from a `chef_object()' record type. For `data_bag_items' the
