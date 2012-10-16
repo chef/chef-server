@@ -44,7 +44,7 @@ add_to_solr(TypeName, Id, OrgId, Ejson) ->
                         | #chef_cookbook_version{}
                         | #chef_user{}) -> ok.
 delete_from_solr(Object) when is_record(Object, chef_cookbook_version);
-                              is_record(Object, chef_data_bag_item);
+                              is_record(Object, chef_data_bag);
                               is_record(Object, chef_user) ->
                  ok; %%These types are not indexed, so don't need to issue delete
 delete_from_solr(Object) ->
