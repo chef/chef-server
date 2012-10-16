@@ -31,9 +31,9 @@
 -include("chef_solr.hrl").
 
 -spec make_query_from_params(binary()|string(),
+                             string() | binary() | undefined,
                              string(),
-                             non_neg_integer(),
-                             non_neg_integer()) -> #chef_solr_query{}.
+                             string()) -> #chef_solr_query{}.
 make_query_from_params(ObjType, QueryString, Start, Rows) ->
     % TODO: super awesome error messages
     FilterQuery = make_fq_type(ObjType),
