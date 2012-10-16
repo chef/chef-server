@@ -1183,11 +1183,16 @@ update_user_data() ->
   Username = User#chef_user.username,
   ?assertEqual({ok, 1}, chef_sql:create_user(User)),
 
-  UpdatedUserData = User#chef_user{ admin = true },
+  % Is the user really a non-admin?
+  {ok, CreatedUser} = chef_sql:fetch_user(Username),
+  ?assertEqual(false, CreatedUser#chef_user.admin),
 
+  % Make user an admin
+  UpdatedUserData = User#chef_user{ admin = true },
   Result = chef_sql:update_user(UpdatedUserData),
   ?assertEqual({ok, 1}, Result),
 
+  % Is the user really an admin?
   {ok, PersistedUser} = chef_sql:fetch_user(Username),
   ?assertEqual(true, PersistedUser#chef_user.admin),
 
