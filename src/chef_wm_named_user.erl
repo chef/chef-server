@@ -90,30 +90,18 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
     end.
 
 from_json(Req, #base_state{reqid = RequestId,
-                           resource_state =
-                               #user_state{
-                                   chef_user = #chef_user{
-                                              hashed_password = OriginalHashedPassword,
-                                              salt = OriginalSalt,
-                                              hash_type = OriginalHashType
-                                            } = User,
-                                   user_data = UserData}} = State) ->
-    PasswordPayload = ej:get({<<"password">>}, UserData),
-    { HashedPassword, Salt, HashType } = case PasswordPayload of
-        NewPassword when is_binary(NewPassword) -> chef_wm_password:encrypt(PasswordPayload);
-        _ -> { OriginalHashedPassword, OriginalSalt, OriginalHashType }
+        resource_state = #user_state{
+            chef_user = User,
+            user_data = UserData}} = State) ->
+    PasswordData = case ej:get({<<"password">>}, UserData) of
+        NewPassword when is_binary(NewPassword) ->
+            chef_wm_password:encrypt(NewPassword);
+        _ ->
+            chef_user:password_data(User)
     end,
-    UserWithPassword = User#chef_user{
-        hashed_password = HashedPassword,
-        salt = Salt,
-        hash_type = HashType },
     UserDataWithoutPassword = ej:delete({<<"password">>}, UserData),
-    case maybe_generate_key_pair(UserDataWithoutPassword, RequestId) of
-        {UserData1, PublicKey} ->
-            chef_wm_base:update_from_json(Req, State, UserWithPassword#chef_user{ public_key = PublicKey }, UserData1);
-        UserData1 ->
-            chef_wm_base:update_from_json(Req, State, UserWithPassword, UserData1)
-    end.
+    UserDataWithKeys = maybe_generate_key_pair(UserDataWithoutPassword, RequestId),
+    update_from_json(Req, State, User, {UserDataWithKeys, PasswordData}).
 
 to_json(Req, #base_state{resource_state =
                              #user_state{chef_user = User},
@@ -140,9 +128,9 @@ maybe_generate_key_pair(UserData, RequestId) ->
     case ej:get({<<"private_key">>}, UserData) of
         true ->
             {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
-            {chef_user:set_key_pair(UserData,
+            chef_user:set_key_pair(UserData,
                                    {public_key, PublicKey},
-                                   {private_key, PrivateKey}), PublicKey};
+                                   {private_key, PrivateKey});
         _ ->
             UserData
     end.
@@ -187,42 +175,51 @@ malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
 
-%% update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
-%%                                                   requestor_id = ActorId}=State,
-%%                  OrigObjectRec, ObjectEjson) ->
-%%     ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectEjson),
-%%     case OrigObjectRec =:= ObjectRec of
-%%         true ->
-%%             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
-%%             {true, chef_wm_util:set_json_body(Req, ObjectEjson), State1};
-%%         false ->
-%%             UpdateFun = chef_db:update_fun(ObjectRec),
-%%             case chef_db:UpdateFun(DbContext, ObjectRec, ActorId) of
-%%                 ok ->
-%%                     {true, chef_wm_util:set_json_body(Req, ObjectEjson), State};
-%%                 not_found ->
-%%                     %% We will get this if no rows were affected by the query. This could
-%%                     %% happen if the object is deleted in the middle of handling this
-%%                     %% request. In this case, we return 404 just as we would if the client
-%%                     %% retried.
-%%                     State1 = State#base_state{log_msg = not_found},
-%%                     Msg = chef_wm_util:not_found_message(chef_object:type_name(ObjectRec),
-%%                                                            chef_object:name(ObjectRec)),
-%%                     Req1 = chef_wm_util:set_json_body(Req, Msg),
-%%                     {{halt, 404}, Req1, State1};
-%%                 {conflict, _} ->
-%%                     Name = chef_object:name(ObjectRec),
-%%                     RecType = erlang:element(1,ObjectRec),
-%%                     LogMsg = {RecType, name_conflict, Name},
-%%                     ConflictMsg = conflict_message(Name),
-%%                     {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
-%%                      State#base_state{log_msg = LogMsg}};
-%%                 Why ->
-%%                     State1 = State#base_state{log_msg = Why},
-%%                     {{halt, 500}, Req, State1}
-%%             end
-%%     end.
+%% TODO: consolidate this with named_client update
+%% How to handle extra arguments passwed to update_from_json() ?
+update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
+                                                  organization_guid = OrgId,
+                                                  requestor_id = ActorId}=State,
+                 OrigObjectRec, {ObjectEjson, _PasswordData} = ObjectData) ->
+    ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectData),
 
-%% conflict_message(Name) ->
-%%     Msg = iolist_to_binary([<<"User '">>, Name, <<"' already exists">>]),
-%%     {[{<<"error">>, [Msg]}]}.
+    ok = chef_object_db:add_to_solr(chef_object:type_name(ObjectRec),
+                                    chef_object:id(ObjectRec),
+                                    OrgId,
+                                    chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
+
+    case OrigObjectRec =:= ObjectRec of
+        true ->
+            State1 = State#base_state{log_msg = ignore_update_for_duplicate},
+            {true, chef_wm_util:set_json_body(Req, ObjectEjson), State1};
+        false ->
+            UpdateFun = chef_db:update_fun(ObjectRec),
+            case chef_db:UpdateFun(DbContext, ObjectRec, ActorId) of
+                ok ->
+                    {true, chef_wm_util:set_json_body(Req, ObjectEjson), State};
+                not_found ->
+                    %% We will get this if no rows were affected by the query. This could
+                    %% happen if the object is deleted in the middle of handling this
+                    %% request. In this case, we return 404 just as we would if the client
+                    %% retried.
+                    State1 = State#base_state{log_msg = not_found},
+                    Msg = chef_wm_util:not_found_message(chef_object:type_name(ObjectRec),
+                                                           chef_object:name(ObjectRec)),
+                    Req1 = chef_wm_util:set_json_body(Req, Msg),
+                    {{halt, 404}, Req1, State1};
+                {conflict, _} ->
+                    Name = chef_object:name(ObjectRec),
+                    RecType = erlang:element(1,ObjectRec),
+                    LogMsg = {RecType, name_conflict, Name},
+                    ConflictMsg = conflict_message(Name),
+                    {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
+                     State#base_state{log_msg = LogMsg}};
+                Why ->
+                    State1 = State#base_state{log_msg = Why},
+                    {{halt, 500}, Req, State1}
+            end
+    end.
+
+conflict_message(Name) ->
+    Msg = iolist_to_binary([<<"User '">>, Name, <<"' already exists">>]),
+    {[{<<"error">>, [Msg]}]}.
