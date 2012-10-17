@@ -166,15 +166,15 @@ create_user(#chef_user{}=User) ->
     create_object(User).
 
 -spec update_user(#chef_user{}) -> {ok, 1 | not_found} | {error, term()}.
-update_user(#chef_user{ last_updated_by = LastUpdatedBy,
-                        updated_at      = UpdatedAt,
-                        admin           = IsAdmin,
-                        public_key      = PublicKey,
-                        hashed_password = HashedPassword,
-                        salt            = Salt,
-                        hash_type       = HashType,
-                        id              = Id } ) ->
-                UpdateFields = [ IsAdmin =:= true, PublicKey, HashedPassword, Salt, HashType, LastUpdatedBy, UpdatedAt, Id ],
+update_user(#chef_user{last_updated_by = LastUpdatedBy,
+                       updated_at      = UpdatedAt,
+                       admin           = IsAdmin,
+                       public_key      = PublicKey,
+                       hashed_password = HashedPassword,
+                       salt            = Salt,
+                       hash_type       = HashType,
+                       id              = Id }) ->
+                UpdateFields = [IsAdmin =:= true, PublicKey, HashedPassword, Salt, HashType, LastUpdatedBy, UpdatedAt, Id],
                 do_update(update_user_by_id, UpdateFields).
 
 -spec delete_user(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
