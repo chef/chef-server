@@ -314,11 +314,16 @@ update_from_ejson(#chef_cookbook_version{org_id = OrgId,
                                           metadata          = UpdatedVersion#chef_cookbook_version.metadata,
                                           checksums         = UpdatedVersion#chef_cookbook_version.checksums,
                                           serialized_object = UpdatedVersion#chef_cookbook_version.serialized_object};
-update_from_ejson(#chef_user{} = User, UserData) ->
+update_from_ejson(#chef_user{} = User, {UserData, PasswordData}) ->
     Name = ej:get({<<"name">>}, UserData),
     IsAdmin = ej:get({<<"admin">>}, UserData) =:= true,
-    User#chef_user{ username = Name,
-                    admin = IsAdmin }.
+
+    {Key, _Version} = cert_or_key(UserData),
+    UserWithPassword = chef_user:set_password_data(User, PasswordData),
+    UserWithPassword#chef_user{username = Name,
+                               admin = IsAdmin,
+                               public_key = Key
+                              }.
 
 
 -spec id(chef_object()) -> object_id().
@@ -557,9 +562,9 @@ maybe_stub_authz_id(unset, ObjectId) ->
 maybe_stub_authz_id(AuthzId, _ObjectId) ->
     AuthzId.
 
-cert_or_key(ClientData) ->
-    Cert = ej:get({<<"certificate">>}, ClientData),
-    PublicKey = ej:get({<<"public_key">>}, ClientData),
+cert_or_key(Payload) ->
+    Cert = ej:get({<<"certificate">>}, Payload),
+    PublicKey = ej:get({<<"public_key">>}, Payload),
     %% Take certificate first, then public_key
     case Cert of
         undefined ->
