@@ -178,15 +178,9 @@ malformed_request_message(Any, _Req, _State) ->
 %% TODO: consolidate this with named_client update
 %% How to handle extra arguments passwed to update_from_json() ?
 update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
-                                                  organization_guid = OrgId,
                                                   requestor_id = ActorId}=State,
                  OrigObjectRec, {ObjectEjson, _PasswordData} = ObjectData) ->
-    ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectData),
-
-    ok = chef_object_db:add_to_solr(chef_object:type_name(ObjectRec),
-                                    chef_object:id(ObjectRec),
-                                    OrgId,
-                                    chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
+    ObjectRec = chef_user:update_from_ejson(OrigObjectRec, ObjectData),
 
     case OrigObjectRec =:= ObjectRec of
         true ->
