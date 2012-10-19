@@ -146,7 +146,7 @@ set_password_data(#chef_user{}=User, {HashedPassword, Salt, HashType}) ->
                        hash_type = HashType}.
 
 %% TODO: This is transient code and will be deprecated/removed in the future
--spec update_from_ejson(#chef_user{}, {ejson_term(), {string(), string(), string()}}) -> #chef_user{}.
+-spec update_from_ejson(#chef_user{}, {ejson_term(), {binary(), binary(), binary()}}) -> #chef_user{}.
 %% @doc Return a new `chef_user()' record updated according to the specified EJSON
 %% terms. This provides behavior similar to chef_objects:update_from_ejson()
 update_from_ejson(#chef_user{} = User, {UserData, PasswordData}) ->
