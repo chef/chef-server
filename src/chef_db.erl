@@ -961,7 +961,7 @@ environment_exists(#context{reqid = ReqId, otto_connection = S}=Ctx, OrgId, EnvN
             end
     end.
 
--spec update_fun(chef_updatable_object()) -> chef_db:update_fun().
+-spec update_fun(chef_updatable_object() | #chef_user{}) -> chef_db:update_fun().
 %% @doc Return the atom corresponding to the appropriate update function in the `chef_db'
 %% module for the given `chef_object()' record.
 update_fun(#chef_data_bag_item{}) ->
