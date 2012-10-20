@@ -114,7 +114,8 @@
 
          sql_now/0,
          ping/0,
-         statements/1
+         osc_statements/1,
+         opc_statements/1
         ]).
 
 -include_lib("sqerl/include/sqerl.hrl").
@@ -922,12 +923,50 @@ dcv_result_or_error(CookbookDelete, DeletedChecksums) ->
 %%     UpdateFields = [LastUpdatedBy, UpdatedAt, Id],
 %%     do_update(update_data_bag_by_id, UpdateFields).
 
-%% @doc Return a proplist of the parameterized SQL queries needed for chef_sql
-statements(DbType) ->
-    File = atom_to_list(DbType) ++ "_statements.config",
+%% @doc Return a proplist of the parameterized SQL queries needed for
+%% chef_sql.  `Class` is used to distinguish between OPC and OSC
+%% queries; see `osc_statements/2` and `opc_statements/2` for more.
+statements(DbType, Class) when Class =:= default;
+                               Class =:= opc ->
+    Suffix = case Class of
+                 default ->
+                     "_statements.config";
+                 opc ->
+                     "_statements_opc.config"
+             end,
+    File = atom_to_list(DbType) ++ Suffix,
     Path = filename:join([filename:dirname(code:which(?MODULE)), "..", "priv", File]),
     {ok, Statements} = file:consult(Path),
     Statements.
+
+%% @doc Open Source Chef Server queries
+osc_statements(DbType) ->
+    statements(DbType, default).
+
+%% @doc Private Chef Server queries.  Don't get excited, we're not
+%% revealing deep dark secrets here; this is just a temporary
+%% work-around on the road to fully harmonizing the user-related
+%% tables and queries between the two platforms.
+opc_statements(DbType) ->
+    BaseStatements = statements(DbType, default),
+    OPCStatements = statements(DbType, opc),
+
+    %% Queries from the OPC statements file will override any
+    %% identically-named queries used on the Open Source server
+    Merged = dict:merge(fun(_K, _V1, V2) -> V2 end,
+                        dict:from_list(BaseStatements),
+                        dict:from_list(OPCStatements)),
+
+    %% A few queries are currently only used on Open Source and should
+    %% not even be prepared on Private Chef
+    StatementsToRemove = [insert_user,
+                          delete_user_by_username,
+                          list_users,
+                          count_user_admins],
+
+    dict:to_list(lists:foldl(fun dict:erase/2,
+                             Merged,
+                             StatementsToRemove)).
 
 %% Sandbox Operations
 
