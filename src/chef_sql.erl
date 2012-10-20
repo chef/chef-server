@@ -962,7 +962,8 @@ opc_statements(DbType) ->
     StatementsToRemove = [insert_user,
                           delete_user_by_username,
                           list_users,
-                          count_user_admins],
+                          count_user_admins,
+                          update_user_by_id],
 
     dict:to_list(lists:foldl(fun dict:erase/2,
                              Merged,
