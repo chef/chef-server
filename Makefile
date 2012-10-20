@@ -39,28 +39,21 @@ distclean: relclean
 	@rm -rf deps
 	@$(REBAR) clean
 
-test: eunit
+tags: TAGS
 
-eunit:
-	@$(REBAR) eunit app=chef_common,chef_rest
-
-test-common:
-	@$(REBAR) eunit app=chef_common
-
-test-rest:
-	@$(REBAR) eunit app=chef_rest
-
-tags:
+TAGS:
 	find deps -name "*.[he]rl" -print | etags -
 
-## KAS: Temporarily disabling dialyzer target until project structure is sorted
-#dialyze: dialyzer
+prepare_release: distclean unlocked_deps rel update_locked_config
+	@echo 'release prepared, bumping version'
+	@$(REBAR) bump-rel-version
 
-#dialyzer:
-#	dialyzer -Wrace_conditions -Wspecdiffs apps/*/ebin
+unlocked_deps:
+	@echo 'Fetching deps as: rebar -C rebar.config'
+	@rebar -C rebar.config get-deps
 
 update_locked_config:
-	@./lock_deps deps meck
+	@rebar lock-deps ignore=meck skip_deps=true
 
 rel: rel/oc_erchef
 
@@ -72,17 +65,16 @@ devrel: rel
 	@/bin/echo  Run \'make update\' to pick up changes in a running VM.
 
 rel/oc_erchef: compile
-	@/bin/echo 'building OTP release package for'
-	@/bin/echo '                _          _  '
-	@/bin/echo '               | |        | | '
-	@/bin/echo ' _   ,_    __  | |     _  | | '
-	@/bin/echo '|/  /  |  /    |/ \   |/  |/  '
-	@/bin/echo '|__/   |_/\___/|   |_/|__/|__/'
-	@/bin/echo '                          |\  '
-	@/bin/echo '                          |/  '
-	@/bin/echo
+	@/bin/echo 'building OTP release package for oc_erchef'
 	@/bin/echo "using rebar as: $(REBAR)"
-	@$(REBAR) generate overlay_vars=db_vars.config
+	@$(REBAR) generate
+	@/bin/echo '                             _          _  '
+	@/bin/echo '                            | |        | | '
+	@/bin/echo '  __   __     _   ,_    __  | |     _  | | '
+	@/bin/echo ' /  \_/      |/  /  |  /    |/ \   |/  |/  '
+	@/bin/echo ' \__/ \___/  |__/   |_/\___/|   |_/|__/|__/'
+	@/bin/echo '                                       |\  '
+	@/bin/echo '                                       |/  '
 
 relclean:
 	@rm -rf rel/oc_erchef
@@ -90,3 +82,5 @@ relclean:
 $(DEPS):
 	@echo "Fetching deps as: $(REBAR)"
 	@$(REBAR) get-deps
+
+.PHONY: distclean remove_lock set_lock prepare_release update_locked_config update clean compile compile_skip allclean tags relclean unlocked_deps
