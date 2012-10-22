@@ -63,7 +63,7 @@ maximum_search_time 65
 # explicitly `false` only the customer-friendly tests will be run.
 #
 # This is mainly here for documentation purposes, since the
-# command-line `opscode-pedant` utility ultimately determines this
+# command-line `oc-chef-pedant` utility ultimately determines this
 # value.
 include_internal false
 
@@ -74,39 +74,54 @@ include_internal false
 # are using pre-existing users, you must supply a ':key_file' key,
 # which should be the fully-qualified path /on the machine Pedant is
 # running on/ to a private key for that user.
-users({
 
-    # A "normal" (non-admin) user in the testing organization
-    :user => {
-      :name => "pedant-normal",
-      :create_me => true
-    },
+superuser_name 'pivotal'
+superuser_key  '/etc/opscode/pivotal.pem'
+webui_key '/etc/opscode/webui_priv.pem'
 
-    # A user that is not a member of the testing organization
-    :non_org_user => {
-      :name => "pedant-nobody",
-      :create_me => true
-    },
+requestors({
+             :clients => {
+               :admin => {
+                 :name => "pedant_admin_client",
+                 :create_me => true,
+                 :create_knife => true,
+                 :admin => true
+               },
+               :non_admin => {
+                 :name => 'pedant_client',
+                 :create_me => true,
+                 :create_knife => true,
+               },
+               :bad => {
+                 :name => 'bad_client',
+                 :create_me => true,
+                 :bogus => true
+               }
+             },
 
-    # An administrator in the testing organization
-    :admin_user => {
-      :name => "pedant-admin",
-      :create_me => true
-    },
+             :users => {
+               # An administrator in the testing organization
+               :admin => {
+                 :name => "pedant_admin_user",
+                 :create_me => true,
+                 :create_knife => true
+               },
 
-    # The platform superuser
-    :superuser => {
-      :name => "pivotal",
-      :key_file => "/etc/opscode/pivotal.pem"
-    },
+               :non_admin => {
+                 :name => "pedant_user",
+                 :create_me => true,
+                 :create_knife => true
+               },
 
-    # A user for Knife tests.  A knife.rb and key files will be set up
-    # for this user
-    :knife_user => {
-      :name => "knifey",
-      :create_me => true
-    }
-  })
+               # A user that is not a member of the testing organization
+               :bad => {
+                 :name => "pedant-nobody",
+                 :create_me => true,
+                 :create_knife => true,
+                 :associate => false
+               },
+             }
+           })
 
 # To facilitate testing as we transition from Ruby to Erlang endpoint
 # implementations, you can specify in your configuration which

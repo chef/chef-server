@@ -46,8 +46,8 @@ deps << "nagios-plugins"
 deps << "opscode-nagios-plugins"
 deps << "nrpe"
 
-# oc-pedant for integration/smoke testing
-deps << "opscode-pedant"
+# oc-chef-pedant for integration/smoke testing
+deps << "oc-chef-pedant"
 
 # partybus and upgrade scripts
 deps << "partybus"
