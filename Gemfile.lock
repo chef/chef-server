@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:opscode/chef-pedant-core.git
-  revision: eb3865c5294e9ea53db24f2864729f351f2f4ac2
+  revision: 17a7be1ece015d47c5726c3deed5baac64e53cd2
   specs:
     chef-pedant-core (0.0.1)
       activesupport (~> 3.2.8)
@@ -16,7 +16,7 @@ GIT
 
 GIT
   remote: git@github.com:opscode/chef-pedant-tests.git
-  revision: 9c653da70f9441713b00dae904c108f2a6bfe0f4
+  revision: 8ce99ea6dafc4c7a21d42d2bd5114e24f354ccaa
   specs:
     chef-pedant-tests (0.0.1)
 
@@ -28,7 +28,7 @@ GIT
 
 GIT
   remote: git@github.com:opscode/oc-chef-pedant-tests.git
-  revision: 72007c8618469ba931435ef8893555203920940e
+  revision: 15f93072cb567779582bbd3550bfca6d3364096f
   specs:
     oc-chef-pedant-tests (0.0.1)
 
@@ -38,7 +38,7 @@ GEM
     activesupport (3.2.8)
       i18n (~> 0.6)
       multi_json (~> 1.0)
-    builder (3.1.3)
+    builder (3.1.4)
     bunny (0.8.0)
     chef (10.12.0)
       bunny (>= 0.6.0)
