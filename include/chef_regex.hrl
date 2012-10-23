@@ -39,3 +39,6 @@
 %% FIXME: This type is not yet correct
 %% I'd like to use binary() but dialyzer wants this more specific type
 -type re_msg() :: <<_:64,_:_*8>>.
+
+-type regex_pattern() :: [1..255,...].
+
