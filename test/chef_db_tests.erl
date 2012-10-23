@@ -190,16 +190,6 @@ fetch_cookbook_versions_test_() ->
      ]
     }.
 
-update_fun_test_() ->
-    [
-     ?_assertEqual(update_data_bag_item, chef_db:update_fun(#chef_data_bag_item{})),
-     ?_assertEqual(update_environment, chef_db:update_fun(#chef_environment{})),
-     ?_assertEqual(update_node, chef_db:update_fun(#chef_node{})),
-     ?_assertEqual(update_role, chef_db:update_fun(#chef_role{})),
-     ?_assertEqual(update_cookbook_version,
-                   chef_db:update_fun(#chef_cookbook_version{}))
-    ].
-
 set_app_env() ->
     test_utils:start_stats_hero(),
     application:set_env(chef_db, couchdb_host, "localhost"),

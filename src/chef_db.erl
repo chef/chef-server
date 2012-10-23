@@ -42,7 +42,6 @@
          fetch_users/1,
          create_user/3,
          delete_user/2,
-         update_user/3,
          count_user_admins/1,
 
          %% node ops
@@ -51,7 +50,6 @@
          fetch_nodes/3,
          create_node/3,
          delete_node/2,
-         update_node/3,
          node_record_to_authz_id/2,
 
          %% role ops
@@ -59,7 +57,6 @@
          fetch_roles/2,
          create_role/3,
          delete_role/2,
-         update_role/3,
          %% role_record_to_authz_id/2,
 
          %% environment ops
@@ -67,14 +64,12 @@
          fetch_environments/2,
          create_environment/3,
          delete_environment/2,
-         update_environment/3,
 
          %% client ops
          fetch_client/3,
          fetch_clients/2,
          create_client/3,
          delete_client/2,
-         update_client/3,
 
          %% data_bag ops
          fetch_data_bag/3,
@@ -88,7 +83,6 @@
          fetch_data_bag_item_ids/3,
          create_data_bag_item/3,
          delete_data_bag_item/2,
-         update_data_bag_item/3,
 
          %% cookbook_version ops
          cookbook_exists/3,
@@ -98,7 +92,6 @@
          fetch_cookbook_versions/3,
          fetch_latest_cookbook_version/3,
          create_cookbook_version/3,
-         update_cookbook_version/3,
          delete_cookbook_version/2,
          fetch_latest_cookbook_versions/2,
          fetch_latest_cookbook_versions/3,
@@ -117,13 +110,13 @@
          is_user_in_org/3,
          connect/0,
          create/3,
+         update/3,
          bulk_get/4,
          data_bag_exists/3,
          data_bag_names/2,
          environment_exists/3,
          make_context/1,
-         make_context/2,
-         update_fun/1]).
+         make_context/2]).
 
 -include_lib("chef_db/include/chef_db.hrl").
 -include_lib("chef_objects/include/chef_types.hrl").
@@ -702,43 +695,6 @@ fetch_data_bag_items(#context{} = Ctx, OrgName, DataBagName) ->
 fetch_data_bag_item_ids(#context{} = Ctx, OrgName, DataBagName) ->
     fetch_objects(Ctx, fetch_data_bag_item_ids, OrgName, DataBagName).
 
--spec update_node(#context{}, #chef_node{}, binary()) -> ok |
-                                                         not_found |
-                                                         {error, _}.
-%% Update data for a node.
-update_node(#context{}=Ctx, Node, ActorId) ->
-    update_object(Ctx, ActorId, update_node, Node).
-
--spec update_role(#context{}, #chef_role{}, binary()) -> ok |
-                                                         not_found |
-                                                         {error, _}.
-%% Update data for a role.
-update_role(#context{}=Ctx, Role, ActorId) ->
-    update_object(Ctx, ActorId, update_role, Role).
-
-%% Update data for a environment.
-update_environment(#context{}=Ctx, Environment, ActorId) ->
-    update_object(Ctx, ActorId, update_environment, Environment).
-
-%% Update data for a client.
-update_client(#context{}=Ctx, Client, ActorId) ->
-    update_object(Ctx, ActorId, update_client, Client).
-
-%% Update data for a data_bag_item.
-update_data_bag_item(#context{}=Ctx, DataBagItem, ActorId) ->
-    update_object(Ctx, ActorId, update_data_bag_item, DataBagItem).
-
-%% Update data for a User.
-update_user(#context{}=Ctx, #chef_user{}=User, ActorId) ->
-    update_object(Ctx, ActorId, update_user, User).
-
--spec update_cookbook_version(DbContext :: #context{},
-                              CBVersion :: #chef_cookbook_version{},
-                              ActorId :: object_id()) -> ok | {conflict, _} | {error, _}.
-%% @doc Update a cookbook version
-update_cookbook_version(#context{}=Ctx, UpdatedCookbookVersion, ActorId) ->
-    update_object(Ctx, ActorId, update_cookbook_version, UpdatedCookbookVersion).
-
 %% @doc Delete a cookbook version
 -spec delete_cookbook_version(Ctx :: #context{},
                               CookbookVersion :: #chef_cookbook_version{}) ->
@@ -961,24 +917,6 @@ environment_exists(#context{reqid = ReqId, otto_connection = S}=Ctx, OrgId, EnvN
             end
     end.
 
--spec update_fun(chef_updatable_object() | #chef_user{}) -> chef_db:update_fun().
-%% @doc Return the atom corresponding to the appropriate update function in the `chef_db'
-%% module for the given `chef_object()' record.
-update_fun(#chef_data_bag_item{}) ->
-    update_data_bag_item;
-update_fun(#chef_environment{}) ->
-    update_environment;
-update_fun(#chef_client{}) ->
-    update_client;
-update_fun(#chef_node{}) ->
-    update_node;
-update_fun(#chef_role{}) ->
-    update_role;
-update_fun(#chef_cookbook_version{}) ->
-    update_cookbook_version;
-update_fun(#chef_user{}) ->
-    update_user.
-
 -spec create(chef_object() | #chef_user{} | #chef_sandbox{}, #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
 %% @doc Call the appropriate create function based on the given chef_object record
 create(#chef_data_bag{} = Record, DbContext, ActorId) ->
@@ -998,6 +936,22 @@ create(#chef_role{} = Record, DbContext, ActorId) ->
 create(#chef_cookbook_version{} = Record, DbContext, ActorId) ->
     create_cookbook_version(DbContext, Record, ActorId).
 
+-spec update(#context{}, chef_updatable_object() | #chef_user{}, object_id()) ->
+             ok | not_found | {conflict, term()} | {error, term()}.
+update(DbContext, #chef_data_bag_item{} = Record, ActorId) ->
+    update_object(DbContext, ActorId, update_data_bag_item, Record);
+update(DbContext, #chef_environment{} = Record, ActorId) ->
+    update_object(DbContext, ActorId, update_environment, Record);
+update(DbContext, #chef_client{} = Record, ActorId) ->
+    update_object(DbContext, ActorId, update_client, Record);
+update(DbContext, #chef_node{} = Record, ActorId) ->
+    update_object(DbContext, ActorId, update_node, Record);
+update(DbContext, #chef_role{} = Record, ActorId) ->
+    update_object(DbContext, ActorId, update_role, Record);
+update(DbContext, #chef_cookbook_version{} = Record, ActorId) ->
+    update_object(DbContext, ActorId, update_cookbook_version, Record);
+update(DbContext, #chef_user{} = Record, ActorId) ->
+    update_object(DbContext, ActorId, update_user, Record).
 
 %% -------------------------------------
 %% private functions
@@ -1214,12 +1168,11 @@ delete_object(#context{reqid = ReqId}, Fun, Id) ->
     end.
 
 -spec update_object(#context{}, object_id(), update_fun(),
-                    chef_object() |
-                    #chef_user{} |
-                    #chef_cookbook_version{}) -> ok |
-                                                 not_found |
-                                                 {conflict, any()} |
-                                                 {error, any()}.
+                    chef_updatable_object() |
+                    #chef_user{}) ->  ok |
+                                      not_found |
+                                      {conflict, any()} |
+                                      {error, any()}.
 %% @doc Generic update for Chef object types. `Fun' is the appropriate function in the
 %% `chef_sql' module. `Object' is a Chef object (record) with updated data.
 update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
