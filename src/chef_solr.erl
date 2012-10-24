@@ -51,8 +51,9 @@ make_query_from_params(ObjType, QueryString, Start, Rows) ->
                                    #chef_solr_query{}.
 add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery},
                       OrgGuid) ->
-    Query#chef_solr_query{filter_query = "+X_CHEF_database_CHEF_X:chef_" ++
-                              binary_to_list(OrgGuid) ++ " " ++ FilterQuery}.
+    Query#chef_solr_query{filter_query = "+" ++
+                              search_db_from_orgid(OrgGuid) ++
+                              " " ++ FilterQuery}.
 
 -spec search(#chef_solr_query{}) ->
                     {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
@@ -101,6 +102,11 @@ ping() ->
     end.
 
 %% Internal functions
+
+%% @doc Generates the name of the organization's search database from its ID
+-spec search_db_from_orgid(OrgId :: binary()) -> DBName :: string().
+search_db_from_orgid(OrgId) ->
+    "X_CHEF_database_CHEF_X:chef_" ++ binary_to_list(OrgId).
 
 % /solr/select?
     % fq=%2BX_CHEF_type_CHEF_X%3Anode+%2BX_CHEF_database_CHEF_X%3Achef_288da1c090ff45c987346d2829257256
