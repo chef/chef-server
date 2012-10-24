@@ -199,3 +199,33 @@ validate_non_neg(Key, Int, OrigValue) when Int < 0 ->
 validate_non_neg(_Key, Int, _OrigValue) ->
     Int.
 
+%%------------------------------------------------------------------------------
+%% Direct Solr Server Interaction
+%%
+%% To drop all entries for a given org's search "database", we need to bypass the indexer
+%% queue and interact directly with the Solr server.  These functions facilitate that.
+%%------------------------------------------------------------------------------
+
+%% @doc Sends `Body` to the Solr server's "/update" endpoint.
+-spec solr_update(Body :: string()) -> ok | {error, term()}.
+solr_update(Body) ->
+    try
+        {ok, SolrUrl} = application:get_env(chef_index, solr_url),
+        %% FIXME: solr will barf on doubled '/'s so SolrUrl must not end with a trailing slash
+        Url = SolrUrl ++ "/update",
+        Headers = [],
+        case ibrowse:send_req(Url, Headers, post, Body) of
+            %% FIXME: verify that solr returns non-200 if something is wrong and not "status":"ERROR".
+            {ok, "200", _Head, _Body} -> ok;
+            Error -> {error, Error}
+        end
+    catch
+        How:Why ->
+            error_logger:error_report({chef_solr, update, How, Why}),
+            {error, Why}
+    end.
+
+%% @doc Sends a "commit" message directly to Solr
+-spec solr_commit() -> ok | {error, term()}.
+solr_commit() ->
+    solr_update("<?xml version='1.0' encoding='UTF-8'?><commit/>").
