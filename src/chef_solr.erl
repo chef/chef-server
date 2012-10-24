@@ -23,10 +23,13 @@
 
 -module(chef_solr).
 
--export([add_org_guid_to_query/2,
+-export([
+         add_org_guid_to_query/2,
+         delete_search_db/1,
          make_query_from_params/4,
          ping/0,
-         search/1]).
+         search/1
+        ]).
 
 -include("chef_solr.hrl").
 
@@ -100,6 +103,17 @@ ping() ->
             error_logger:error_report({chef_solr, ping, How, Why}),
             pang
     end.
+
+%% TODO: Deal properly with errors
+%% @doc Delete all search index entries for a given organization.
+-spec delete_search_db(OrgId :: binary()) -> ok.
+delete_search_db(OrgId) ->
+    DeleteQuery = "<?xml version='1.0' encoding='UTF-8'?><delete><query>" ++
+        search_db_from_orgid(OrgId) ++
+        "</query></delete>",
+    ok = solr_update(DeleteQuery),
+    ok = solr_commit(),
+    ok.
 
 %% Internal functions
 
