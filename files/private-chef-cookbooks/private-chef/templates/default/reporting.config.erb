@@ -43,6 +43,14 @@
           {summary_client_min_version, "<%= @summary_client_min_version %>" }
           ]},
 
+  {node_run_worker, [
+                {worker_count, <%= node['private_chef']['opscode-reporting']['node_run_worker_count'] %> },
+                {rabbitmq_host, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
+                {rabbitmq_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
+                {rabbitmq_user, <<"<%= node['private_chef']['rabbitmq']['reports_user'] %>">>},
+                {rabbitmq_password, <<"<%= node['private_chef']['rabbitmq']['reports_password'] %>">>},
+                {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['reports_vhost'] %>">>}
+               ]},
 {stats_hero, [
                {udp_socket_pool_size, 1 },
                {estatsd_host, "127.0.0.1" },
