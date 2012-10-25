@@ -587,7 +587,9 @@ default['private_chef']['logs']['log_rotation'] = {
     "rotate" => 14
   },
   "/var/log/opscode/couchdb/couchdb.log" => {
-    "rotate" => 14
+    "rotate" => 14,
+    "owner"  => "opscode",
+    "group"  => "opscode"
   },
   "/var/log/opscode/nagios/nagios.log" => {
     "rotate" => 14
