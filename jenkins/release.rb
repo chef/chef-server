@@ -50,10 +50,10 @@ end
 #
 
 jenkins_build_support = {
-  "os=centos6,role=opc-builder" => [["el", "5", "x86_64"]],
-  "os=centos5,role=opc-builder" => [["el", "6", "x86_64"]],
-  "os=ubuntu-10-04,role=opc-builder" => [["ubuntu", "10.04", "x86_64"]],
-  "os=ubuntu-11-04,role=opc-builder" => [["ubuntu", "11.04", "x86_64"]]
+  "build_os=centos-5,machine_architecture=x64,role=opc-builder" => [["el", "5", "x86_64"]],
+  "build_os=centos-6,machine_architecture=x64,role=opc-builder" => [["el", "6", "x86_64"]],
+  "build_os=ubuntu-10-04,machine_architecture=x64,role=opc-builder" => [["ubuntu", "10.04", "x86_64"]],
+  "build_os=ubuntu-11-04,machine_architecture=x64,role=opc-builder" => [["ubuntu", "11.04", "x86_64"]]
 }
 
 # fetch the list of local builds
@@ -66,7 +66,7 @@ jenkins_build_support.each do |(build, supported_platforms)|
 
   # find the build in the local packages
   build_package = local_packages.find {|b| b.include?(build)}
-  raise unless build_package
+  raise "Could not find build for #{build}" unless build_package
 
   # upload build to build platform directory
   build_location = "/#{build_platform.join('/')}/#{build_package.split('/').last}"
