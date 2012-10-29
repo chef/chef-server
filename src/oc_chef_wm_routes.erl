@@ -52,6 +52,7 @@ route(node, Req, Args) -> route_organization_rest_object("nodes", Req, Args);
 route(role, Req, Args) -> route_organization_rest_object("roles", Req, Args);
 route(data_bag, Req, Args) -> route_organization_rest_object("data", Req, Args);
 route(environment, Req, Args) -> route_organization_rest_object("environments", Req, Args);
+route(principal, Req, Args) -> route_organization_rest_object("principals", Req, Args);
 route(client, Req, Args) -> route_organization_rest_object("clients", Req, Args);
 route(sandbox, Req, Args) ->
     Org = org_name(Req),
@@ -95,6 +96,7 @@ bulk_route_fun(Type, Req) when Type =:= role;
                                Type =:= node;
                                Type =:= cookbook;
                                Type =:= environment;
+                               Type =:= principal;
                                Type =:= client;
                                Type =:= data_bag;
                                Type =:= data_bag_item ->
@@ -131,6 +133,8 @@ template_for_type(cookbook_version) ->
     "/organizations/~s/cookbooks/~s/~s";
 template_for_type(environment) ->
     "/organizations/~s/environments/~s";
+template_for_type(principal) ->
+    "/organizations/~s/principals/~s";
 template_for_type(client) ->
     "/organizations/~s/clients/~s";
 template_for_type(data_bag) ->
