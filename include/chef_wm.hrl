@@ -193,6 +193,13 @@
           partial_paths = []
          }).
 
+-record(principal_state, {
+          principal_data,
+          name,
+          public_key,
+          type
+         }).
+
 -record(depsolver_state, {
           chef_environment :: #chef_environment{},
           %% environment within which to depsolve from the URL
