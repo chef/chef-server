@@ -287,7 +287,7 @@ create_from_json(#wm_reqdata{} = Req,
 
 -spec update_from_json(#wm_reqdata{},
                        #base_state{},
-                       chef_object() | #chef_cookbook_version{} | #chef_user{},
+                       chef_updatable_object() | #chef_user{},
                        ejson_term()) ->
                               {true, #wm_reqdata{}, #base_state{}} |
                               {{halt, 400 | 404 | 500}, #wm_reqdata{}, #base_state{}}.
@@ -318,8 +318,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
             {true, chef_wm_util:set_json_body(Req, ObjectEjson), State1};
         false ->
-            UpdateFun = chef_db:update_fun(ObjectRec),
-            case chef_db:UpdateFun(DbContext, ObjectRec, ActorId) of
+            case chef_db:update(DbContext, ObjectRec, ActorId) of
                 ok ->
                     Req1 = handle_rename(ObjectRec, Req),
                     {true, chef_wm_util:set_json_body(Req1, ObjectEjson), State};
