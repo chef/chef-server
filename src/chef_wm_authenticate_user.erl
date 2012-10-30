@@ -5,7 +5,7 @@
 
 %% @doc Resource module for Chef users endpoint
 
--module(chef_wm_verify_password).
+-module(chef_wm_authenticate_user).
 
 -include("chef_wm.hrl").
 
@@ -75,7 +75,7 @@ process_post(Req, #base_state{chef_db_context = DbContext,
                        false;
                    #chef_user{hashed_password = HashedPass,
                               salt = Salt,
-                              hash_type = HashType} = XUser ->
+                              hash_type = HashType} ->
                        Password = ej:get({<<"password">>}, UserData),
                        chef_wm_password:verify(Password, {HashedPass, Salt, HashType})
                end,
