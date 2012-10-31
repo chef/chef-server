@@ -164,8 +164,7 @@ malformed_request_message(#ej_invalid{type = exact, key = Key, msg = Expected},
 malformed_request_message(#ej_invalid{type = fun_match, key = Key, msg = Error},
                           _Req, _State) when Key =:= <<"password">> ->
     error_message([Error]);
-malformed_request_message(#ej_invalid{type = string_match, key = Key, msg = Error},
-                          _Req, _State) ->
+malformed_request_message(#ej_invalid{type = string_match, msg = Error}, _Req, _State) ->
     error_message([Error]);
 malformed_request_message(#ej_invalid{type = object_key, key = Object, found = Key},
                           _Req, _State) ->

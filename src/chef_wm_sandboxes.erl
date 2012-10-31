@@ -94,10 +94,8 @@ from_json(Req, #base_state{chef_db_context = DbContext,
             {{halt, 500}, Req, State}
     end.
 
-malformed_request_message(#ej_invalid{type=fun_match,
-                                      key=Key,
-                                      msg=Message
-                                     }, _Req, _State) when Key =:= <<"checksums">> ->
+malformed_request_message(#ej_invalid{type=fun_match, key=Key}, _Req, _State)
+  when Key =:= <<"checksums">> ->
     {[{<<"error">>, [<<"Field '", Key/binary, "' invalid">>]}]};
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
