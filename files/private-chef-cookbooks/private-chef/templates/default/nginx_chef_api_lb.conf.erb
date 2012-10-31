@@ -78,6 +78,9 @@
 
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/{0,1}.*$", 'couchdb_environments') %>
 
+    # principals go to erchef
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
+
     # optional caching of cookbook files by nginx
     <%- if node['private_chef']['lb']['cache_cookbook_files'] -%>
     location ~ "^/organizations/[a-z0-9\-_]+?/cookbooks/[\w\.]+/(\d+\.\d+\.\d+|_latest)/files/.+$" {
