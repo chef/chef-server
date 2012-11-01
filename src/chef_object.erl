@@ -113,7 +113,6 @@ new_record(chef_user, OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
     %% This only works for Open Source Users currently
     Name = ej:get({<<"name">>}, UserData),
     Id = make_org_prefix_id(OrgId, Name),
-    OpenId = value_or_null({<<"openid">>}, UserData),
     Email = value_or_null({<<"email">>}, UserData),
     Admin = ej:get({<<"admin">>}, UserData) =:= true,
     {PublicKey, _PubkeyVersion} = cert_or_key(UserData),
@@ -125,7 +124,7 @@ new_record(chef_user, OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
                hashed_password = HashPass,
                salt = Salt,
                hash_type = HashType,
-               external_authentication_uid = OpenId,
+               external_authentication_uid = null, %% Not used in open source user
                recovery_authentication_enabled = false, %% Not used in open source user
                admin = Admin
     };

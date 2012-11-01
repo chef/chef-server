@@ -187,7 +187,7 @@
                                             %% it is  a place holder in this case
         'created_at',                       %% time created at
         'updated_at',                       %% time updated at
-        'external_authentication_uid',      %% open id if it is present - might be null
+        'external_authentication_uid',      %% External UID, such as LDAP - nullable
         'recovery_authentication_enabled',  %% not used, will be null
         'admin'                             %% if the user is an admin
        }).

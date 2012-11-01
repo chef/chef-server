@@ -33,11 +33,10 @@
  %% username/name - in webui, name has _ inserted for , (periods) so should check that there are no periods in the name here
  %% password - no default -
  %%   cannot be blank, must be 6 chars
- %% openid - default is none - no restrictions on what it can be set to
+ %% admin - default is false
 
 -define(DEFAULT_FIELD_VALUES,
         [
-          {<<"openid">>, null},
           {<<"admin">>, false}
         ]).
 
@@ -45,8 +44,7 @@ user_spec() ->
   {[
     {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
     {<<"password">>, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
-    {{opt,<<"admin">>}, boolean},
-    {{opt, <<"openid">>}, string}
+    {{opt,<<"admin">>}, boolean}
    ]}.
 
 valid_password(Password) when is_binary(Password) andalso byte_size(Password) >= 6 ->
@@ -56,12 +54,10 @@ valid_password(_Password) ->
 
 assemble_user_ejson(#chef_user{username = Name,
                                public_key = PubKey,
-                               external_authentication_uid = OpenId,
                                admin = Admin},
                     _OrgId) ->
     {[{<<"name">>, Name},
       {<<"public_key">>, PubKey},
-      {<<"openid">>, OpenId},
       {<<"admin">>, Admin}]}.
 
 %% @doc Convert a binary JSON string representing a Chef User into an
@@ -71,8 +67,8 @@ parse_binary_json(Bin) ->
   User = ejson:decode(Bin),
   %% If user is invalid, an error is thown
   validate_user(User, user_spec()),
-  %% Set default values after validating input, so openid can be validated as string
-  %% but set to null if it is not present (null fails string validation)
+  %% Set default values after validating input, so admin can be set to false
+  %% if it is not present
   User1 = set_default_values(User, ?DEFAULT_FIELD_VALUES),
   {ok, User1}.
 
