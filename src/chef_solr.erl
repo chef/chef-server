@@ -118,7 +118,12 @@ delete_search_db(OrgId) ->
 %% Internal functions
 
 %% @doc Generates the name of the organization's search database from its ID
--spec search_db_from_orgid(OrgId :: binary()) -> DBName :: string().
+%% @end
+%%
+%% Note: this really returns a string(), but Dialyzer is convinced it's a byte list (which
+%% it is, technically).  In order for it to be recognized as a printable string, though,
+%% we'd have to use io_lib:format
+-spec search_db_from_orgid(OrgId :: binary()) -> DBName :: [byte(),...].
 search_db_from_orgid(OrgId) ->
     "X_CHEF_database_CHEF_X:chef_" ++ binary_to_list(OrgId).
 
@@ -221,7 +226,11 @@ validate_non_neg(_Key, Int, _OrigValue) ->
 %%------------------------------------------------------------------------------
 
 %% @doc Sends `Body` to the Solr server's "/update" endpoint.
--spec solr_update(Body :: string()) -> ok | {error, term()}.
+%% @end
+%%
+%% Body is really a string(), but Dialyzer can only determine it is a list of bytes due to
+%% the implementation of search_db_from_orgid/1
+-spec solr_update(Body :: [byte(),...]) -> ok | {error, term()}.
 solr_update(Body) ->
     try
         {ok, SolrUrl} = application:get_env(chef_index, solr_url),
