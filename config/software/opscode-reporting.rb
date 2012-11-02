@@ -1,5 +1,5 @@
 name "opscode-reporting"
-version "master" 
+version "rel-1.0.10" 
 
 dependencies ["erlang", "rsync", "rebar"]
 
