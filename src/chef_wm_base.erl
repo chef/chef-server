@@ -649,7 +649,7 @@ handle_auth_info(chef_wm_users, Req, #base_state{requestor = Requestor}) ->
   end;
 handle_auth_info(chef_wm_named_user, Req, #base_state{requestor = Requestor,
                                            chef_db_context = DbContext,
-                                           resource_state = #user_state{chef_user = User}}) ->
+                                           resource_state = #user_state{user_data = UserData}}) ->
   UserName = chef_wm_util:object_name(user, Req),
   case wrq:method(Req) of
     'PUT' ->
@@ -657,19 +657,19 @@ handle_auth_info(chef_wm_named_user, Req, #base_state{requestor = Requestor,
       case chef_wm_authz:is_admin(Requestor) andalso chef_wm_authz:is_requesting_node(Requestor, UserName) of
         true ->
           %%They are an admin and updating themselves
-          case chef_db:count_user_admins(DbContext) >1 of
+          case chef_db:count_user_admins(DbContext) > 1 of
             %% They are an admin, are they attempting to change the admin status?
-            true ->
-              case chef_wm_util:admin_field_is_false(User) of
-                 %% They are attempting to change their admin field, deny
-                 true ->
-                   forbidden;
-                 %% They are not attempting to change their admin field, allow
+            false ->
+                case ej:get({<<"admin">>}, UserData) of
+                 %% They are attempting to de-admin as the last admin, deny
                  false ->
+                   forbidden;
+                 %% They are not attempting to de-admin as the last admin, allow
+                 true ->
                    authorized
                end;
             %% More than one admin left, let the operation continue
-            false ->
+            true ->
               authorized
           end;
         false ->
