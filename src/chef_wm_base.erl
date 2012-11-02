@@ -653,6 +653,7 @@ handle_auth_info(chef_wm_named_user, Req, #base_state{requestor = Requestor,
   UserName = chef_wm_util:object_name(user, Req),
   case wrq:method(Req) of
     'PUT' ->
+      RequestedAdminFlag = ej:get({<<"admin">>}, UserData),
       %% Ensure user can't reset themselves to not be non-admin if none are left
       case chef_wm_authz:is_admin(Requestor) andalso chef_wm_authz:is_requesting_node(Requestor, UserName) of
         true ->
@@ -660,7 +661,7 @@ handle_auth_info(chef_wm_named_user, Req, #base_state{requestor = Requestor,
           case chef_db:count_user_admins(DbContext) > 1 of
             %% They are an admin, are they attempting to change the admin status?
             false ->
-                case ej:get({<<"admin">>}, UserData) of
+                case RequestedAdminFlag of
                  %% They are attempting to de-admin as the last admin, deny
                  false ->
                    forbidden;
@@ -674,7 +675,18 @@ handle_auth_info(chef_wm_named_user, Req, #base_state{requestor = Requestor,
           end;
         false ->
           %% User is not in danger of setting last to non-admin status
-          chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName)
+          %% However, now we need to check that normal users cannot admin themselves
+          case RequestedAdminFlag of
+            true ->
+              %% Only admins can admin others
+              case chef_wm_authz:is_admin(Requestor) of
+                  true  -> authorized;
+                  false -> forbidden
+              end;
+            _ ->
+              %% We are not trying to escalate privs, pass on as normal
+              chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName)
+          end
       end;
     'GET' ->
       chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName);
