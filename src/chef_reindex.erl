@@ -28,7 +28,7 @@
 %% longer needs to interact with CouchDB, bulk_get/4 will become
 %% bulk_get/3, and we can dispense with this dummy placeholder
 %% entirely.
--define(ORG_NAME, does_not_matter).
+-define(ORG_NAME, <<"does_not_matter">>).
 
 %% A binary() index is taken to be a data bag name.
 -type index() :: client | environment | node | role | binary().
@@ -193,7 +193,7 @@ chef_object_type(Index)                       -> Index.
 %% item on the index queue.
 -spec send_to_index_queue(OrgId :: object_id(),
                           Index :: index(),
-                          SerializedObjects :: [binary()],
+                          SerializedObjects :: [binary()] | [ej:json_object()],
                           NameIdDict :: dict()) -> list().
 send_to_index_queue(OrgId, Index, SerializedObjects, NameIdDict) ->
     [begin
