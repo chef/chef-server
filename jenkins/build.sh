@@ -9,7 +9,7 @@ PROJ_NAME=oc_erchef
 export PATH=$PATH:/usr/local/bin
 jenkins/builder_info.rb
 source machine_info
-ARTIFACT_BASE=opscode-ci/artifacts/$os/$machine_architecture/$PROJ_NAME
+ARTIFACT_BASE=opscode-ci/artifacts/$os/$machine/$PROJ_NAME
 
 make distclean rel || exit 1
 
