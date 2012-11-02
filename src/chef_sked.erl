@@ -29,6 +29,7 @@
 -include("chef_wm.hrl").
 
 -export([create_client/4,
+         create_user/4,
          create_default_environment/0]).
 
 %% An authz id used as the requestor id for operations performed by
@@ -56,6 +57,22 @@ create_client(Name, IsValidator, IsAdmin, PublicKey) ->
               {<<"admin">>, IsAdmin =:= true},
               {<<"public_key">>, PublicKey}]},
     create_from_json(chef_client, Ejson).
+
+create_user(Name, Password, IsAdmin, create_key) ->
+  KeyPair = chef_certgen:rsa_generate_keypair(?KEY_BITS),
+  case create_user(Name, Password, IsAdmin, KeyPair#rsa_key_pair.public_key) of
+      ok ->
+        {ok, KeyPair#rsa_key_pair.private_key};
+      Error ->
+        Error
+  end;
+create_user(Name, Password, IsAdmin, PublicKey) ->
+  PasswordData = chef_wm_password:encrypt(Password),
+  Ejson = {[{<<"name">>, Name},
+            {<<"admin">>, IsAdmin =:= true},
+            {<<"public_key">>, PublicKey}]},
+  create_from_json(chef_user, {Ejson, PasswordData}).
+
 
 %% @doc Create the _default environment
 create_default_environment() ->
