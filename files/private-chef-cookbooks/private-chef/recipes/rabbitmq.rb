@@ -95,7 +95,7 @@ if node['private_chef']['bootstrap']['enable']
 
   [ rabbitmq['vhost'], rabbitmq['reindexer_vhost'], rabbitmq['jobs_vhost'], rabbitmq['reports_vhost'] ].each do |vhost|
     execute "#{rmq_ctl} add_vhost #{vhost}" do
-      user node['private_chef']['user']['username']
+      user opc_username 
       not_if "#{rmq_ctl_chpost} list_vhosts| grep #{vhost}"
       retries 20
     end
@@ -103,18 +103,18 @@ if node['private_chef']['bootstrap']['enable']
   # create chef user for the queue
   execute "#{rmq_ctl} add_user #{rabbitmq['user']} #{rabbitmq['password']}" do
     not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['user']}"
-    user node['private_chef']['user']['username']
+    user opc_username
     retries 10
   end
 
   execute "#{rmq_ctl} add_user #{rabbitmq['jobs_user']} #{rabbitmq['jobs_password']}" do
-    user node['private_chef']['user']['username']
+    user opc_username
     not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['jobs_user']}"
     retries 10
   end
   
   execute "#{rmq_ctl} add_user #{rabbitmq['reports_user']} #{rabbitmq['reports_password']}" do
-    user node['private_chef']['user']['username']
+    user opc_username
     not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['reports_user']}"
     retries 10
   end
@@ -124,25 +124,25 @@ if node['private_chef']['bootstrap']['enable']
   # the three regex's map to config, write, read permissions respectively
   #
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['vhost']} #{rabbitmq['user']} \".*\" \".*\" \".*\"" do
-    user node['private_chef']['user']['username']
+    user opc_username
     not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['vhost']}"
     retries 10
   end
 
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['reindexer_vhost']} #{rabbitmq['user']} \".*\" \".*\" \".*\"" do
-    user node['private_chef']['user']['username']
+    user opc_username
     not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['reindexer_vhost']}"
     retries 10
   end
 
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['jobs_vhost']} #{rabbitmq['jobs_user']} \".*\" \".*\" \".*\"" do
-    user node['private_chef']['user']['username']
+    user opc_username
     not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['jobs_user']}|grep #{rabbitmq['jobs_vhost']}"
     retries 10
   end
 
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['reports_vhost']} #{rabbitmq['reports_user']} \".*\" \".*\" \".*\"" do
-    user node['private_chef']['user']['username']
+    user opc_username
     not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['reports_user']}|grep #{rabbitmq['reports_vhost']}"
     retries 10
   end
