@@ -20,5 +20,11 @@ then
     tar zcvf $PACKAGE $PROJ_NAME/
     s3cmd put --progress $PACKAGE s3://$ARTIFACT_BASE/$PACKAGE
 else
-    echo "There was no exact match for release tags found, so artifacts are not being uploaded."
+    REL_VERSION=`cat rel/reltool.config|grep '{rel,.*"oc_erchef"'|cut -d ',' -f 3|sed 's/"//g'`
+    GIT_SHA=`git rev-parse --short HEAD`
+    VERSION=${REL_VERSION}-${GIT_SHA}
+    PACKAGE=${PROJ_NAME_}${VERSION}.tar.gz
+    cd rel
+    tar zcvf $PACKAGE $PROJ_NAME/
+    s3cmd put --progress $PACKAGE s3://$ARTIFACT_BASE/$PACKAGE
 fi
