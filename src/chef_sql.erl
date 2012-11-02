@@ -53,6 +53,7 @@
          delete_data_bag/1,
 
          %% data_bag_item ops
+         create_data_bag_item_name_id_dict/2,
          fetch_data_bag_item/3,
          fetch_data_bag_items/2,
          fetch_data_bag_item_ids/2,
@@ -62,6 +63,7 @@
          update_data_bag_item/1,
 
          %% environment ops
+         create_environment_name_id_dict/1,
          fetch_environment/2,
          fetch_environments/1,
          bulk_get_environments/1,
@@ -70,6 +72,7 @@
          update_environment/1,
 
          %% client ops
+         create_client_name_id_dict/1,
          fetch_client/2,
          fetch_clients/1,
          bulk_get_clients/1,
@@ -78,6 +81,7 @@
          update_client/1,
 
          %% node ops
+         create_node_name_id_dict/1,
          fetch_node/2,
          fetch_nodes/1,
          fetch_nodes/2,
@@ -86,6 +90,7 @@
          delete_node/1,
          update_node/1,
          %% role ops
+         create_role_name_id_dict/1,
          fetch_role/2,
          fetch_roles/1,
          bulk_get_roles/1,
@@ -1799,3 +1804,79 @@ safe_split(N, L) ->
         error:badarg ->
             {L, []}
     end.
+
+%% @doc Make a dict mapping node name to database ID
+create_node_name_id_dict(OrgId) ->
+    create_dict(list_node_ids_names_for_org,
+                [OrgId],
+                {<<"name">>, <<"id">>}).
+
+%% @doc Make a dict mapping role name to database ID
+create_role_name_id_dict(OrgId) ->
+    create_dict(list_role_ids_names_for_org,
+                [OrgId],
+                {<<"name">>, <<"id">>}).
+
+%% @doc Make a dict mapping environment name to database ID
+create_environment_name_id_dict(OrgId) ->
+    create_dict(list_environment_ids_names_for_org,
+                [OrgId],
+                {<<"name">>, <<"id">>}).
+
+%% @doc Make a dict mapping client name to database ID
+create_client_name_id_dict(OrgId) ->
+    create_dict(list_client_ids_names_for_org,
+                [OrgId],
+                {<<"name">>, <<"id">>}).
+
+%% @doc Make a dict mapping data bag item ID to database ID within a given data bag
+create_data_bag_item_name_id_dict(OrgId, DataBagName) ->
+    create_dict(list_data_bag_item_ids_names_for_org,
+                [OrgId, DataBagName],
+                {<<"item_name">>, <<"id">>}).
+
+%% @doc Create a dict mapping `Key` to `Value` across the resultset of
+%% executing a database query.
+-spec create_dict(Query :: atom(),
+                  Args :: list(),
+                  {Key :: binary(),
+                   Value :: binary()}) -> dict().
+create_dict(Query, Args, {Key, Value}) ->
+    case proplist_results(Query, Args) of
+        Results when is_list(Results) ->
+            {ok, proplists_to_dict(Results, Key, Value)};
+        {error, Error} ->
+            {error, Error}
+    end.
+
+%% @doc Execute a query with the given arguments and return the "raw"
+%% resultset as a list of proplists.
+-spec proplist_results(Query :: atom(), Args :: list()) -> [[tuple()]] | {error, term()}.
+proplist_results(Query, Args) ->
+    case sqerl:select(Query, Args) of
+        {ok, L} when is_list(L) ->
+            L;
+        {ok, none} ->
+            [];
+        {error, Error} ->
+            {error, Error}
+    end.
+
+%% @doc Given a list of proplists (e.g., a "raw" query resultset from
+%% sqerl), create a dict that maps `Key` to `Value`, where those are
+%% both keys present in each proplist.
+%%
+%% Thus, using `Key` = <<"foo">> and `Value` = <<"bar">>, a proplist
+%% of [{<<"foo">>, 123}, {<<"bar">>, 456}] would become a dict entry
+%% mapping 123 to 456.
+-spec proplists_to_dict(ResultSetProplist :: [[tuple()]],
+                        Key :: binary(),
+                        Value :: binary()) -> dict().
+proplists_to_dict(ResultSetProplist, Key, Value) ->
+    lists:foldl(fun(Row, Dict) ->
+                        K = proplists:get_value(Key, Row),
+                        V = proplists:get_value(Value, Row),
+                        dict:store(K, V, Dict)
+                end,
+                dict:new(),
+                ResultSetProplist).
