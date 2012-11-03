@@ -122,26 +122,13 @@ reindex(Ctx, OrgId) ->
               OrgId :: object_id(),
               Index :: index()) -> ok.
 reindex(Ctx, OrgId, Index) ->
-    NameIdDict = create_name_id_dict(Ctx, OrgId, Index),
+    NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
     %% Grab all the database IDs to do batch retrieval on
     AllIds = dict:fold(fun(_K, V, Acc) -> [V|Acc] end,
                        [],
                        NameIdDict), %% All dict values will be unique anyway
     {ok, BatchSize} = application:get_env(chef_wm, bulk_fetch_batch_size),
     batch_reindex(Ctx, AllIds, BatchSize, OrgId, Index, NameIdDict).
-
-%% @doc Generate a dict mapping the unique name of a Chef object to
-%% that object's unique database ID.  Binary index values are data bag
-%% names, and must be handled separately from other kinds of objects.
--spec create_name_id_dict(chef_db:db_context(),
-                          OrgId :: object_id(),
-                          Index :: index()) -> dict().
-create_name_id_dict(Ctx, OrgId, DataBagName) when is_binary(DataBagName) ->
-    chef_db:data_bag_item_name_id_dict(Ctx, OrgId, DataBagName);
-create_name_id_dict(Ctx, OrgId, Index) when is_atom(Index) ->
-    %% Find the correct 2-arg function in the chef_db module
-    Fun = list_to_existing_atom(atom_to_list(Index) ++ "_name_id_dict"),
-    chef_db:Fun(Ctx, OrgId).
 
 %% @doc Recursively batch-process a list of database IDs by retrieving
 %% the serialized_object data from the database, processing them as
@@ -159,25 +146,23 @@ batch_reindex(_, [], _, _, _, _) ->
 batch_reindex(Ctx, Ids, BatchSize, OrgId, Index, NameIdDict) when is_list(Ids) ->
     batch_reindex(Ctx, safe_split(BatchSize, Ids), BatchSize, OrgId, Index, NameIdDict);
 batch_reindex(Ctx, {LastBatch, []}, _BatchSize, OrgId, Index, NameIdDict) ->
-    index_a_batch(Ctx, LastBatch, OrgId, Index, NameIdDict),
+    ok = index_a_batch(Ctx, LastBatch, OrgId, Index, NameIdDict),
     ok;
 batch_reindex(Ctx, {CurrentBatch, Rest}, BatchSize, OrgId, Index, NameIdDict) ->
-    index_a_batch(Ctx, CurrentBatch, OrgId, Index, NameIdDict),
+    ok = index_a_batch(Ctx, CurrentBatch, OrgId, Index, NameIdDict),
     batch_reindex(Ctx, safe_split(BatchSize, Rest), BatchSize, OrgId, Index, NameIdDict).
 
 %% @doc Helper function to retrieve and index objects for a single
 %% batch of database IDs.
-%%
-%% Just returns a list of 'ok' atoms... could just as easily return a
-%% single 'ok'.
 -spec index_a_batch(chef_db:db_context(),
                     BatchOfIds :: [object_id()],
                     OrgId :: object_id(),
                     Index :: index(),
-                    NameIdDict :: dict()) -> list().
+                    NameIdDict :: dict()) -> ok.
 index_a_batch(Ctx, BatchOfIds, OrgId, Index, NameIdDict) ->
     SerializedObjects = chef_db:bulk_get(Ctx, ?ORG_NAME, chef_object_type(Index), BatchOfIds),
-    send_to_index_queue(OrgId, Index, SerializedObjects, NameIdDict).
+    ok = send_to_index_queue(OrgId, Index, SerializedObjects, NameIdDict),
+    ok.
 
 %% @doc Resolve an index to the name of the corresponding Chef object type.
 chef_object_type(Index) when is_binary(Index) -> data_bag_item;
@@ -189,26 +174,27 @@ chef_object_type(Index)                       -> Index.
 -spec send_to_index_queue(OrgId :: object_id(),
                           Index :: index(),
                           SerializedObjects :: [binary()] | [ej:json_object()],
-                          NameIdDict :: dict()) -> list().
-send_to_index_queue(OrgId, Index, SerializedObjects, NameIdDict) ->
-    [begin
-         %% All object types are returned from chef_db:bulk_get/4 as
-         %% binaries (compressed or not) EXCEPT for clients, which are
-         %% returned as EJson directly, because none of their
-         %% information is actually stored as a JSON "blob" in the
-         %% database.
-         PreliminaryEJson = case is_binary(SO) of
-                                true ->
-                                    chef_db_compression:decompress_and_decode(SO);
-                                false ->
+                          NameIdDict :: dict()) -> ok.
+send_to_index_queue(_, _, [], _) ->
+    ok;
+send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict) ->
+    %% All object types are returned from chef_db:bulk_get/4 as
+    %% binaries (compressed or not) EXCEPT for clients, which are
+    %% returned as EJson directly, because none of their
+    %% information is actually stored as a JSON "blob" in the
+    %% database.
+    PreliminaryEJson = case is_binary(SO) of
+                           true ->
+                               chef_db_compression:decompress_and_decode(SO);
+                           false ->
                                     SO
-                            end,
-         NameKey = name_key(chef_object_type(Index)),
-         ItemName = ej:get({NameKey}, PreliminaryEJson),
-         {ok, ObjectId} = dict:find(ItemName, NameIdDict),
-         EJson = ejson_for_indexing(Index, PreliminaryEJson),
-         chef_object_db:add_to_solr(chef_object_type(Index), ObjectId, OrgId, EJson)
-     end || SO <- SerializedObjects ].
+                       end,
+    NameKey = name_key(chef_object_type(Index)),
+    ItemName = ej:get({NameKey}, PreliminaryEJson),
+    {ok, ObjectId} = dict:find(ItemName, NameIdDict),
+    EJson = ejson_for_indexing(Index, PreliminaryEJson),
+    ok = chef_object_db:add_to_solr(chef_object_type(Index), ObjectId, OrgId, EJson),
+    send_to_index_queue(OrgId, Index, Rest, NameIdDict).
 
 %% @doc Determine the proper key to use to retrieve the unique name of
 %% an object from its EJson representation.
