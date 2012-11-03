@@ -127,13 +127,8 @@ reindex(Ctx, OrgId, Index) ->
     AllIds = dict:fold(fun(_K, V, Acc) -> [V|Acc] end,
                        [],
                        NameIdDict), %% All dict values will be unique anyway
-    BatchSize = get_batch_size(),
+    {ok, BatchSize} = application:get_env(chef_wm, bulk_fetch_batch_size),
     batch_reindex(Ctx, AllIds, BatchSize, OrgId, Index, NameIdDict).
-
-%% TODO: This is hard-coded into the chef_wm base_state
-%% record right now; this needs to go into the app's configuration.
-%% This function should ultimately retrieve the value from there.
-get_batch_size() -> 5.
 
 %% @doc Generate a dict mapping the unique name of a Chef object to
 %% that object's unique database ID.  Binary index values are data bag
