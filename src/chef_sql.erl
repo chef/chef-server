@@ -1840,7 +1840,7 @@ create_data_bag_item_name_id_dict(OrgId, DataBagName) ->
 -spec create_dict(Query :: atom(),
                   Args :: list(),
                   {Key :: binary(),
-                   Value :: binary()}) -> dict().
+                   Value :: binary()}) -> {ok, dict()}.
 create_dict(Query, Args, {Key, Value}) ->
     case proplist_results(Query, Args) of
         Results when is_list(Results) ->
