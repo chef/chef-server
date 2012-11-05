@@ -34,6 +34,8 @@
 
 
 -export([
+         create_name_id_dict/2,
+
          %%user ops
          fetch_user/1,
          fetch_users/0,
@@ -1799,3 +1801,114 @@ safe_split(N, L) ->
         error:badarg ->
             {L, []}
     end.
+
+%% @doc Make a dict mapping an object's unique name to its database ID for all objects
+%% within a given "index". (This is currently only used for reindexing, so it only works on
+%% items that are indexed.)  An index that is a binary is taken to be a data bag name, in
+%% which case, the dict will map data bag item ID to database ID for all items within that
+%% data bag.
+-spec create_name_id_dict(OrgId :: object_id(),
+                          Index :: node | role | client | environment | binary()) ->
+                                 {ok, dict()} | {error, term()}.
+create_name_id_dict(OrgId, Index) ->
+    Query = dict_query_for_index(Index),
+    Args = dict_query_args_for_index(OrgId, Index),
+    KV = dict_key_value_for_index(Index),
+    create_dict(Query, Args, KV).
+
+%% @doc Determine the appropriate prepared statement to call to
+%% generate a name->id dict for the given kind of object.
+dict_query_for_index(DataBagName) when is_binary(DataBagName) -> list_data_bag_item_ids_names_for_org;
+dict_query_for_index(node)                                    -> list_node_ids_names_for_org;
+dict_query_for_index(role)                                    -> list_role_ids_names_for_org;
+dict_query_for_index(client)                                  -> list_client_ids_names_for_org;
+dict_query_for_index(environment)                             -> list_environment_ids_names_for_org.
+
+%% @doc Queries for generating name->id dicts only require an OrgId
+%% for most things, but require a data bag name if we're querying
+%% data bag items.
+%%
+%% See also dict_query_for_index/1.
+dict_query_args_for_index(OrgId, DataBagName) when is_binary(DataBagName) ->
+    [OrgId, DataBagName];
+dict_query_args_for_index(OrgId, Index) when Index =:= node;
+                                             Index =:= role;
+                                             Index =:= client;
+                                             Index =:= environment ->
+    [OrgId].
+
+%% @doc Most objects' "unique name" is stored under a "name" key,
+%% except for data bag items, which use "item_name".
+%%
+%% NOTE: These binaries refer to the names of database table columns.
+%%
+%% See also create_dict/3, create_name_id_dict/2 and
+%% proplists_to_dict/3.
+dict_key_value_for_index(DataBagName) when is_binary(DataBagName) ->
+    {<<"item_name">>, <<"id">>};
+dict_key_value_for_index(Index) when Index =:= node;
+                                     Index =:= role;
+                                     Index =:= client;
+                                     Index =:= environment ->
+    {<<"name">>, <<"id">>}.
+
+%% This type is only needed to spec create_dict/3, and then only
+%% because we run Dialyzer with -Wunderspecs.
+-type dict_queries() :: list_client_ids_names_for_org |
+                        list_data_bag_items_ids_names_for_org |
+                        list_environment_ids_names_for_org |
+                        list_node_ids_names_for_org |
+                        list_role_ids_names_for_org.
+
+%% @doc Create a dict mapping `Key` to `Value` across the resultset of
+%% executing a database query.
+%% @end
+%%
+%% This spec brought to you by -Wunderspecs
+-spec create_dict(Query :: dict_queries(),
+                  Args :: list(),
+                  {Key :: <<_:32,_:_*40>>, %% <<"name">> | <<"item_name">>
+                   Value :: <<_:16>>}) %% <<"id">>
+                 -> {ok, dict()} | {error, term()}.
+create_dict(Query, Args, {Key, Value}) ->
+    case proplist_results(Query, Args) of
+        Results when is_list(Results) ->
+            {ok, proplists_to_dict(Results, Key, Value)};
+        {error, Error} ->
+            {error, Error}
+    end.
+
+%% @doc Execute a query with the given arguments and return the "raw"
+%% resultset as a list of proplists.
+-spec proplist_results(Query :: atom(), Args :: list()) -> [[tuple()]] | {error, term()}.
+proplist_results(Query, Args) ->
+    case sqerl:select(Query, Args) of
+        {ok, L} when is_list(L) ->
+            L;
+        {ok, none} ->
+            [];
+        {error, Error} ->
+            {error, Error}
+    end.
+
+%% @doc Given a list of proplists (e.g., a "raw" query resultset from
+%% sqerl), create a dict that maps `Key` to `Value`, where those are
+%% both keys present in each proplist.
+%%
+%% Thus, using `Key` = <<"foo">> and `Value` = <<"bar">>, a proplist
+%% of [{<<"foo">>, 123}, {<<"bar">>, 456}] would become a dict entry
+%% mapping 123 to 456.
+%% @end
+%%
+%% This spec brought to you by -Wunderspecs
+-spec proplists_to_dict(ResultSetProplist :: [[tuple()]],
+                        Key :: <<_:32,_:_*40>>, %% <<"name">> | <<"item_name">>
+                        Value :: <<_:16>>) -> dict(). %% <<"id">>
+proplists_to_dict(ResultSetProplist, Key, Value) ->
+    lists:foldl(fun(Row, Dict) ->
+                        K = proplists:get_value(Key, Row),
+                        V = proplists:get_value(Value, Row),
+                        dict:store(K, V, Dict)
+                end,
+                dict:new(),
+                ResultSetProplist).

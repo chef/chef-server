@@ -27,6 +27,8 @@
 -module(chef_db).
 
 -export([
+         create_name_id_dict/3,
+
          user_record_to_authz_id/2,
          %% fetch_org/2,
          fetch_org_id/2,
@@ -858,6 +860,8 @@ bulk_get(#context{reqid = ReqId}=Ctx, OrgName, client, Ids) ->
             ClientRecords = bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_clients, (Ids))),
             [chef_client:assemble_client_ejson(C, OrgName) || #chef_client{}=C <- ClientRecords]
     end;
+
+% TODO: Can this come out now?
 bulk_get(Ctx, OrgName, Type, Ids) ->
     bulk_get_couchdb(Ctx, OrgName, Type, Ids).
 
@@ -1203,3 +1207,20 @@ get_id(#chef_sandbox{id = Id}) ->
     Id;
 get_id(#chef_user{username = Username}) ->
     Username.
+
+%% @doc Make a dict mapping an object's unique name to its database ID for all objects
+%% within a given "index". (This is currently only used for reindexing, so it only works on
+%% items that are indexed.)  An index that is a binary is taken to be a data bag name, in
+%% which case, the dict will map data bag item ID to database ID for all items within that
+%% data bag.
+-spec create_name_id_dict(#context{},
+                          Index :: node | role | client | environment | binary(),
+                          OrgId :: object_id()) ->
+                                 dict() | {error, term()}.
+create_name_id_dict(#context{reqid=ReqId}, Index, OrgId) ->
+    case ?SH_TIME(ReqId, chef_sql, create_name_id_dict, (OrgId, Index)) of
+        {ok, D} ->
+            D;
+        {error, Error} ->
+            {error, Error}
+    end.
