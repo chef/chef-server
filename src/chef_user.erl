@@ -77,7 +77,7 @@ parse_binary_json(Bin) ->
 
 -spec parse_binary_json( binary(), create | update ) -> {ok, ejson_term() }. % or throw
 parse_binary_json(Bin, Operation) ->
-  User = ejson:decode(Bin),
+  User = chef_json:decode(Bin),
   %% If user is invalid, an error is thown
   validate_user(User, user_spec(Operation)),
   %% Set default values after validating input, so admin can be set to false
