@@ -23,10 +23,13 @@
 
 -module(chef_solr).
 
--export([add_org_guid_to_query/2,
+-export([
+         add_org_guid_to_query/2,
+         delete_search_db/1,
          make_query_from_params/4,
          ping/0,
-         search/1]).
+         search/1
+        ]).
 
 -include("chef_solr.hrl").
 
@@ -51,8 +54,9 @@ make_query_from_params(ObjType, QueryString, Start, Rows) ->
                                    #chef_solr_query{}.
 add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery},
                       OrgGuid) ->
-    Query#chef_solr_query{filter_query = "+X_CHEF_database_CHEF_X:chef_" ++
-                              binary_to_list(OrgGuid) ++ " " ++ FilterQuery}.
+    Query#chef_solr_query{filter_query = "+" ++
+                              search_db_from_orgid(OrgGuid) ++
+                              " " ++ FilterQuery}.
 
 -spec search(#chef_solr_query{}) ->
                     {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
@@ -100,7 +104,28 @@ ping() ->
             pang
     end.
 
+%% TODO: Deal properly with errors
+%% @doc Delete all search index entries for a given organization.
+-spec delete_search_db(OrgId :: binary()) -> ok.
+delete_search_db(OrgId) ->
+    DeleteQuery = "<?xml version='1.0' encoding='UTF-8'?><delete><query>" ++
+        search_db_from_orgid(OrgId) ++
+        "</query></delete>",
+    ok = solr_update(DeleteQuery),
+    ok = solr_commit(),
+    ok.
+
 %% Internal functions
+
+%% @doc Generates the name of the organization's search database from its ID
+%% @end
+%%
+%% Note: this really returns a string(), but Dialyzer is convinced it's a byte list (which
+%% it is, technically).  In order for it to be recognized as a printable string, though,
+%% we'd have to use io_lib:format
+-spec search_db_from_orgid(OrgId :: binary()) -> DBName :: [byte(),...].
+search_db_from_orgid(OrgId) ->
+    "X_CHEF_database_CHEF_X:chef_" ++ binary_to_list(OrgId).
 
 % /solr/select?
     % fq=%2BX_CHEF_type_CHEF_X%3Anode+%2BX_CHEF_database_CHEF_X%3Achef_288da1c090ff45c987346d2829257256
@@ -193,3 +218,37 @@ validate_non_neg(Key, Int, OrigValue) when Int < 0 ->
 validate_non_neg(_Key, Int, _OrigValue) ->
     Int.
 
+%%------------------------------------------------------------------------------
+%% Direct Solr Server Interaction
+%%
+%% To drop all entries for a given org's search "database", we need to bypass the indexer
+%% queue and interact directly with the Solr server.  These functions facilitate that.
+%%------------------------------------------------------------------------------
+
+%% @doc Sends `Body` to the Solr server's "/update" endpoint.
+%% @end
+%%
+%% Body is really a string(), but Dialyzer can only determine it is a list of bytes due to
+%% the implementation of search_db_from_orgid/1
+-spec solr_update(Body :: [byte(),...]) -> ok | {error, term()}.
+solr_update(Body) ->
+    try
+        {ok, SolrUrl} = application:get_env(chef_index, solr_url),
+        %% FIXME: solr will barf on doubled '/'s so SolrUrl must not end with a trailing slash
+        Url = SolrUrl ++ "/update",
+        Headers = [],
+        case ibrowse:send_req(Url, Headers, post, Body) of
+            %% FIXME: verify that solr returns non-200 if something is wrong and not "status":"ERROR".
+            {ok, "200", _Head, _Body} -> ok;
+            Error -> {error, Error}
+        end
+    catch
+        How:Why ->
+            error_logger:error_report({chef_solr, update, How, Why}),
+            {error, Why}
+    end.
+
+%% @doc Sends a "commit" message directly to Solr
+-spec solr_commit() -> ok | {error, term()}.
+solr_commit() ->
+    solr_update("<?xml version='1.0' encoding='UTF-8'?><commit/>").
