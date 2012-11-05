@@ -26,7 +26,6 @@
 -module(chef_sql).
 
 -include_lib("chef_db/include/chef_db.hrl").
--include_lib("eunit/include/eunit.hrl").
 
 -ifdef(TEST).
 -compile(export_all).
@@ -108,6 +107,9 @@
          delete_cookbook_version/1,
          fetch_all_cookbook_version_dependencies/1,
          fetch_environment_filtered_cookbook_versions/4,
+
+         fetch_environment_filtered_recipes/2,
+         fetch_latest_cookbook_versions/3,
 
          %% Sandbox Ops
          create_sandbox/1,
@@ -1574,6 +1576,8 @@ row_to_dependency_set(Row) ->
 %% NumVersions = 0, empty lists are returned, and if NumVersions =
 %% 'all', then all versions are returned.
 %%
+%% Note that this helper function is never called with an empty list.
+%%
 %% It is assumed that all inputs are already properly grouped by
 %% cookbook and sorted by version, most recent first.
 %%
@@ -1606,8 +1610,6 @@ row_to_dependency_set(Row) ->
 -spec condense_depsolver_results([{CookbookName :: binary(), Version :: binary()}],
                                  NumVersions :: num_versions()) ->
                                         [{CookbookBin :: binary(), [ VersionBin :: binary()]}].
-condense_depsolver_results([], _NumVersions) ->
-    [];
 condense_depsolver_results([First|Rest], NumVersions) ->
     NumTaken = case NumVersions of
                    0 -> 0;

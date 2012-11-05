@@ -60,9 +60,9 @@ itest_clean:
 	@cd itest;./create_schema.rb ${DB_TYPE} destroy
 	@rm -rf itest/Gemfile.lock
 
-itest: compile itest_create itest_run itest_clean
+itest: test itest_create itest_run itest_clean
 
 itest_run:
 	cd itest;erlc -I ../include -pz ../deps/chef_objects/ebin *.erl
-	@erl -I include -pa deps/*/ebin -pa ebin -pa itest -noshell -eval "eunit:test(itest, [verbose])" \
+	@erl -I include -pa deps/*/ebin -pa .eunit -pa itest -noshell -eval "eunit:test(itest, [verbose])" \
 	-s erlang halt -db_type $(DB_TYPE)
