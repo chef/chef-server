@@ -27,6 +27,8 @@
 -module(chef_db).
 
 -export([
+         create_name_id_dict/3,
+
          user_record_to_authz_id/2,
          %% fetch_org/2,
          fetch_org_id/2,
@@ -47,7 +49,6 @@
 
          %% node ops
          fetch_node/3,
-         node_name_id_dict/2,
          fetch_nodes/2,
          fetch_nodes/3,
          create_node/3,
@@ -57,7 +58,6 @@
 
          %% role ops
          fetch_role/3,
-         role_name_id_dict/2,
          fetch_roles/2,
          create_role/3,
          delete_role/2,
@@ -66,7 +66,6 @@
 
          %% environment ops
          fetch_environment/3,
-         environment_name_id_dict/2,
          fetch_environments/2,
          create_environment/3,
          delete_environment/2,
@@ -74,7 +73,6 @@
 
          %% client ops
          fetch_client/3,
-         client_name_id_dict/2,
          fetch_clients/2,
          create_client/3,
          delete_client/2,
@@ -90,7 +88,6 @@
          fetch_data_bag_item/4,
          fetch_data_bag_items/3,
          fetch_data_bag_item_ids/3,
-         data_bag_item_name_id_dict/3,
          create_data_bag_item/3,
          delete_data_bag_item/2,
          update_data_bag_item/3,
@@ -134,8 +131,6 @@
 -include_lib("chef_objects/include/chef_types.hrl").
 -include_lib("chef_objects/include/chef_osc_defaults.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
-
--include_lib("eunit/include/eunit.hrl").
 
 -record(context, {reqid :: binary(),
                   otto_connection}).
@@ -1260,37 +1255,19 @@ get_id(#chef_sandbox{id = Id}) ->
 get_id(#chef_user{username = Username}) ->
     Username.
 
-%% @doc Make a dict mapping node name to database ID
-node_name_id_dict(#context{}=Ctx, OrgId) ->
-    name_id_dict(Ctx, create_node_name_id_dict, OrgId).
-
-%% @doc Make a dict mapping role name to database ID
-role_name_id_dict(#context{}=Ctx, OrgId) ->
-    name_id_dict(Ctx, create_role_name_id_dict, OrgId).
-
-%% @doc Make a dict mapping environment name to database ID
-environment_name_id_dict(#context{}=Ctx, OrgId) ->
-    name_id_dict(Ctx, create_environment_name_id_dict, OrgId).
-
-%% @doc Make a dict mapping client name to database ID
-client_name_id_dict(#context{}=Ctx, OrgId) ->
-    name_id_dict(Ctx, create_client_name_id_dict, OrgId).
-
-%% @doc Make a dict mapping data bag item ID to database ID within a given data bag
-data_bag_item_name_id_dict(#context{reqid=ReqId}, OrgId, DataBagName) ->
-    case ?SH_TIME(ReqId, chef_sql, create_data_bag_item_name_id_dict, (OrgId, DataBagName)) of
-        {ok, D}        -> D;
-        {error, Error} -> {error, Error}
-    end.
-
-%% @doc Creates a dict mapping a "unique item name" to the database ID for all the objects
-%% of a particular type in a given org.  Used in server reindexing.
--spec name_id_dict(#context{},
-                   Fun :: atom(),
-                   OrgId :: object_id()) ->
-                          dict() | {error, term()}.
-name_id_dict(#context{reqid=ReqId}, Fun, OrgId) ->
-    case ?SH_TIME(ReqId, chef_sql, Fun, (OrgId)) of
-        {ok, D}        -> D;
-        {error, Error} -> {error, Error}
+%% @doc Make a dict mapping an object's unique name to its database ID for all objects
+%% within a given "index". (This is currently only used for reindexing, so it only works on
+%% items that are indexed.)  An index that is a binary is taken to be a data bag name, in
+%% which case, the dict will map data bag item ID to database ID for all items within that
+%% data bag.
+-spec create_name_id_dict(#context{},
+                          Index :: node | role | client | environment | binary(),
+                          OrgId :: object_id()) ->
+                                 dict() | {error, term()}.
+create_name_id_dict(#context{reqid=ReqId}, Index, OrgId) ->
+    case ?SH_TIME(ReqId, chef_sql, create_name_id_dict, (OrgId, Index)) of
+        {ok, D} ->
+            D;
+        {error, Error} ->
+            {error, Error}
     end.

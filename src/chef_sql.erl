@@ -34,6 +34,8 @@
 
 
 -export([
+         create_name_id_dict/2,
+
          %%user ops
          fetch_user/1,
          fetch_users/0,
@@ -53,7 +55,6 @@
          delete_data_bag/1,
 
          %% data_bag_item ops
-         create_data_bag_item_name_id_dict/2,
          fetch_data_bag_item/3,
          fetch_data_bag_items/2,
          fetch_data_bag_item_ids/2,
@@ -63,7 +64,6 @@
          update_data_bag_item/1,
 
          %% environment ops
-         create_environment_name_id_dict/1,
          fetch_environment/2,
          fetch_environments/1,
          bulk_get_environments/1,
@@ -72,7 +72,6 @@
          update_environment/1,
 
          %% client ops
-         create_client_name_id_dict/1,
          fetch_client/2,
          fetch_clients/1,
          bulk_get_clients/1,
@@ -81,7 +80,6 @@
          update_client/1,
 
          %% node ops
-         create_node_name_id_dict/1,
          fetch_node/2,
          fetch_nodes/1,
          fetch_nodes/2,
@@ -90,7 +88,6 @@
          delete_node/1,
          update_node/1,
          %% role ops
-         create_role_name_id_dict/1,
          fetch_role/2,
          fetch_roles/1,
          bulk_get_roles/1,
@@ -1805,42 +1802,74 @@ safe_split(N, L) ->
             {L, []}
     end.
 
-%% @doc Make a dict mapping node name to database ID
-create_node_name_id_dict(OrgId) ->
-    create_dict(list_node_ids_names_for_org,
-                [OrgId],
-                {<<"name">>, <<"id">>}).
+%% @doc Make a dict mapping an object's unique name to its database ID for all objects
+%% within a given "index". (This is currently only used for reindexing, so it only works on
+%% items that are indexed.)  An index that is a binary is taken to be a data bag name, in
+%% which case, the dict will map data bag item ID to database ID for all items within that
+%% data bag.
+-spec create_name_id_dict(OrgId :: object_id(),
+                          Index :: node | role | client | environment | binary()) ->
+                                 {ok, dict()} | {error, term()}.
+create_name_id_dict(OrgId, Index) ->
+    Query = dict_query_for_index(Index),
+    Args = dict_query_args_for_index(OrgId, Index),
+    KV = dict_key_value_for_index(Index),
+    create_dict(Query, Args, KV).
 
-%% @doc Make a dict mapping role name to database ID
-create_role_name_id_dict(OrgId) ->
-    create_dict(list_role_ids_names_for_org,
-                [OrgId],
-                {<<"name">>, <<"id">>}).
+%% @doc Determine the appropriate prepared statement to call to
+%% generate a name->id dict for the given kind of object.
+dict_query_for_index(DataBagName) when is_binary(DataBagName) -> list_data_bag_item_ids_names_for_org;
+dict_query_for_index(node)                                    -> list_node_ids_names_for_org;
+dict_query_for_index(role)                                    -> list_role_ids_names_for_org;
+dict_query_for_index(client)                                  -> list_client_ids_names_for_org;
+dict_query_for_index(environment)                             -> list_environment_ids_names_for_org.
 
-%% @doc Make a dict mapping environment name to database ID
-create_environment_name_id_dict(OrgId) ->
-    create_dict(list_environment_ids_names_for_org,
-                [OrgId],
-                {<<"name">>, <<"id">>}).
+%% @doc Queries for generating name->id dicts only require an OrgId
+%% for most things, but require a data bag name if we're querying
+%% data bag items.
+%%
+%% See also dict_query_for_index/1.
+dict_query_args_for_index(OrgId, DataBagName) when is_binary(DataBagName) ->
+    [OrgId, DataBagName];
+dict_query_args_for_index(OrgId, Index) when Index =:= node;
+                                             Index =:= role;
+                                             Index =:= client;
+                                             Index =:= environment ->
+    [OrgId].
 
-%% @doc Make a dict mapping client name to database ID
-create_client_name_id_dict(OrgId) ->
-    create_dict(list_client_ids_names_for_org,
-                [OrgId],
-                {<<"name">>, <<"id">>}).
+%% @doc Most objects' "unique name" is stored under a "name" key,
+%% except for data bag items, which use "item_name".
+%%
+%% NOTE: These binaries refer to the names of database table columns.
+%%
+%% See also create_dict/3, create_name_id_dict/2 and
+%% proplists_to_dict/3.
+dict_key_value_for_index(DataBagName) when is_binary(DataBagName) ->
+    {<<"item_name">>, <<"id">>};
+dict_key_value_for_index(Index) when Index =:= node;
+                                     Index =:= role;
+                                     Index =:= client;
+                                     Index =:= environment ->
+    {<<"name">>, <<"id">>}.
 
-%% @doc Make a dict mapping data bag item ID to database ID within a given data bag
-create_data_bag_item_name_id_dict(OrgId, DataBagName) ->
-    create_dict(list_data_bag_item_ids_names_for_org,
-                [OrgId, DataBagName],
-                {<<"item_name">>, <<"id">>}).
+%% This type is only needed to spec create_dict/3, and then only
+%% because we run Dialyzer with -Wunderspecs.
+-type dict_queries() :: list_client_ids_names_for_org |
+                        list_data_bag_items_ids_names_for_org |
+                        list_environment_ids_names_for_org |
+                        list_node_ids_names_for_org |
+                        list_role_ids_names_for_org.
 
 %% @doc Create a dict mapping `Key` to `Value` across the resultset of
 %% executing a database query.
--spec create_dict(Query :: atom(),
+%% @end
+%%
+%% This spec brought to you by -Wunderspecs
+-spec create_dict(Query :: dict_queries(),
                   Args :: list(),
-                  {Key :: binary(),
-                   Value :: binary()}) -> {ok, dict()}.
+                  {Key :: <<_:32,_:_*40>>, %% <<"name">> | <<"item_name">>
+                   Value :: <<_:16>>}) %% <<"id">>
+                 -> {ok, dict()} | {error, term()}.
 create_dict(Query, Args, {Key, Value}) ->
     case proplist_results(Query, Args) of
         Results when is_list(Results) ->
@@ -1869,9 +1898,12 @@ proplist_results(Query, Args) ->
 %% Thus, using `Key` = <<"foo">> and `Value` = <<"bar">>, a proplist
 %% of [{<<"foo">>, 123}, {<<"bar">>, 456}] would become a dict entry
 %% mapping 123 to 456.
+%% @end
+%%
+%% This spec brought to you by -Wunderspecs
 -spec proplists_to_dict(ResultSetProplist :: [[tuple()]],
-                        Key :: binary(),
-                        Value :: binary()) -> dict().
+                        Key :: <<_:32,_:_*40>>, %% <<"name">> | <<"item_name">>
+                        Value :: <<_:16>>) -> dict(). %% <<"id">>
 proplists_to_dict(ResultSetProplist, Key, Value) ->
     lists:foldl(fun(Row, Dict) ->
                         K = proplists:get_value(Key, Row),
