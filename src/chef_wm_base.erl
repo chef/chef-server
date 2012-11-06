@@ -658,8 +658,8 @@ handle_auth_info(chef_wm_named_user, Req, #base_state{requestor = Requestor,
     %% this logic is reused in more than one place in this function.  Hooray for lambdas!
     ForbidIfLastAdmin = fun() ->
                                 case chef_db:count_user_admins(DbContext) of
-                                    1 -> forbidden;
-                                    _ -> authorized
+                                    Num when is_number(Num) andalso Num > 1 -> authorized;
+                                    _ -> forbidden
                                 end
                         end,
 
