@@ -41,8 +41,6 @@
           {<<"admin">>, false}
         ]).
 
-user_spec()->
-    user_spec(create).
 user_spec(create) ->
   {[
     {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
@@ -72,11 +70,11 @@ assemble_user_ejson(#chef_user{username = Name,
 
 %% @doc Convert a binary JSON string representing a Chef User into an
 %% EJson-encoded Erlang data structure.
--spec parse_binary_json( binary()) -> {ok, ejson_term() }. % or throw
+-spec parse_binary_json(binary()) -> {ok, ej:json_object()}. % or throw
 parse_binary_json(Bin) ->
     parse_binary_json(Bin, create).
 
--spec parse_binary_json( binary(), create | update ) -> {ok, ejson_term() }. % or throw
+-spec parse_binary_json(binary(), create | update) -> {ok, ej:json_object()}. % or throw
 parse_binary_json(Bin, Operation) ->
   User = chef_json:decode(Bin),
   %% If user is invalid, an error is thown
