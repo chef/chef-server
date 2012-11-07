@@ -171,6 +171,8 @@ malformed_request_message(#ej_invalid{type = object_value, key = Object, found =
                           _Req, _State) ->
     error_message([<<"Invalid value '">>, io_lib:format("~p", [Val]),
                    <<"' for ">>, Object]);
+malformed_request_message(#ej_invalid{type = fun_match, msg = Message}, _Req, _State) ->
+    error_message([Message]);
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
