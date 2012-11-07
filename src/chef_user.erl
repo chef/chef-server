@@ -53,6 +53,7 @@ user_spec(update) ->
   {[
     {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
     {{opt,<<"password">>}, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
+    {{opt,<<"private_key">>}, boolean},
     {{opt,<<"admin">>}, boolean}
    ]}.
 
