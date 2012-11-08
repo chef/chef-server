@@ -645,7 +645,7 @@ handle_auth_info(chef_wm_clients, Req,
             IsAdmin = chef_wm_authz:is_admin(Requestor),
 
             IsValidator = chef_wm_authz:is_validator(Requestor),
-            CreatingUnprivileged = (ej:get({<<"admin">>}, Client) =:= false) and
+            CreatingUnprivileged = (ej:get({<<"admin">>}, Client) =:= false) andalso
                 (ej:get({<<"validator">>}, Client) =:= false),
 
             %% Admins can create whatever they want, but validators can only create
