@@ -24,7 +24,9 @@
 
 -module(chef_wm_authz).
 
--export([allow_admin/1,
+-export([
+         all_but_validators/1,
+         allow_admin/1,
          allow_admin_or_requesting_node/2,
          allow_validator/1,
          is_admin/1,
@@ -33,7 +35,16 @@
 
 -include("chef_wm.hrl").
 
+%% @doc Rejects validator clients, but allows all other requestors.
+all_but_validators(#chef_client{validator=true}) -> forbidden;
+all_but_validators(#chef_client{})               -> authorized;
+all_but_validators(#chef_user{})                 -> authorized.
+
 -spec allow_admin(#chef_client{} | #chef_user{}) -> authorized | forbidden.
+%% Technically, it is possible for a client to be both validator and admin... this should
+%% probably be disallowed
+allow_admin(#chef_client{validator = true}) ->
+    forbidden;
 allow_admin(#chef_client{admin = true}) ->
     authorized;
 allow_admin(#chef_client{}) ->
@@ -44,6 +55,10 @@ allow_admin(#chef_user{}) ->
     forbidden.
 
 -spec allow_admin_or_requesting_node(#chef_client{} | #chef_user{}, binary()) -> authorized | forbidden.
+allow_admin_or_requesting_node(#chef_client{validator = true}, _Name) ->
+    %% Validators can only create new clients, and cannot even operate on themselves; If you
+    %% need to modify a validator for some reason, do it as a proper admin.
+    forbidden;
 allow_admin_or_requesting_node(#chef_client{name = Name}, Name) ->
     authorized;
 allow_admin_or_requesting_node(#chef_client{} = Client, _Name) ->
