@@ -21,6 +21,7 @@
 
 -export([assemble_user_ejson/2,
          parse_binary_json/1,
+         parse_binary_json/2,
          password_data/1,
          set_key_pair/3,
          set_password_data/2,
@@ -40,10 +41,17 @@
           {<<"admin">>, false}
         ]).
 
-user_spec() ->
+user_spec(create) ->
   {[
     {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
     {<<"password">>, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
+    {{opt,<<"admin">>}, boolean}
+   ]};
+user_spec(update) ->
+  {[
+    {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
+    {{opt,<<"password">>}, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
+    {{opt,<<"private_key">>}, boolean},
     {{opt,<<"admin">>}, boolean}
    ]}.
 
@@ -62,11 +70,15 @@ assemble_user_ejson(#chef_user{username = Name,
 
 %% @doc Convert a binary JSON string representing a Chef User into an
 %% EJson-encoded Erlang data structure.
--spec parse_binary_json( binary()) -> {ok, ejson_term() }. % or throw
+-spec parse_binary_json(binary()) -> {ok, ej:json_object()}. % or throw
 parse_binary_json(Bin) ->
-  User = ejson:decode(Bin),
+    parse_binary_json(Bin, create).
+
+-spec parse_binary_json(binary(), create | update) -> {ok, ej:json_object()}. % or throw
+parse_binary_json(Bin, Operation) ->
+  User = chef_json:decode(Bin),
   %% If user is invalid, an error is thown
-  validate_user(User, user_spec()),
+  validate_user(User, user_spec(Operation)),
   %% Set default values after validating input, so admin can be set to false
   %% if it is not present
   User1 = set_default_values(User, ?DEFAULT_FIELD_VALUES),
