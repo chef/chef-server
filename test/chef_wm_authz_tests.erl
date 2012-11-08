@@ -61,18 +61,6 @@ allow_admin_test_() ->
       fun() -> ?assertError(function_clause, chef_wm_authz:allow_admin(#chef_node{name= <<"foo">>})) end}
     ].
 
-allow_validator_test_() ->
-  [
-    {"allow_validator Admin is false",
-     fun() -> ?assertEqual(forbidden, chef_wm_authz:allow_validator(?ADMIN)) end},
-    {"allow_validator Validator is true",
-     fun() -> ?assertEqual(authorized, chef_wm_authz:allow_validator(?VALIDATOR)) end},
-    {"allow_validator non-admin is false",
-     fun() -> ?assertEqual(forbidden, chef_wm_authz:allow_validator(?NONADMIN)) end},
-    {"no match for allow_validator with non-client",
-     fun() -> ?assertError(function_clause, chef_wm_authz:allow_validator(#chef_node{name= <<"foo">>})) end}
-    ].
-
 is_admin_test_() ->
   [
     {"is_admin Admin is true",
@@ -138,4 +126,3 @@ all_but_validators_test_() ->
                                            {"Non-admin user is allowed", ?NON_ADMIN_USER, authorized}
                                           ]
     ].
-
