@@ -155,8 +155,6 @@ url_for_search_item_fun(Req, Type, _OrgName) ->
 
 make_args(Item, {data_bag, Bag}) ->
     [Bag, data_bag_item_id(Item)];
-make_args(Item, client) ->
-    [ej:get({<<"clientname">>}, Item)];
 make_args(Item, _) ->
     [ej:get({<<"name">>}, Item)].
 
