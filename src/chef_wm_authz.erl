@@ -79,10 +79,10 @@ is_requesting_node(#chef_user{username = Name}, Name) ->
 is_requesting_node(#chef_user{}, _Name) ->
     false.
 
--spec is_validator(#chef_client{}) -> true | false.
+-spec is_validator(#chef_client{} | #chef_user{}) -> true | false.
 is_validator(#chef_client{validator = true}) ->
     true;
 is_validator(#chef_client{}) ->
+    false;
+is_validator(#chef_user{}) ->
     false.
-
-
