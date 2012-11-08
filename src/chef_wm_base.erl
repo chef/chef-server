@@ -648,58 +648,50 @@ handle_auth_info(chef_wm_users, Req, #base_state{requestor = Requestor}) ->
         forbidden
   end;
 handle_auth_info(chef_wm_named_user, Req, #base_state{requestor = Requestor,
-                                           chef_db_context = DbContext,
-                                           resource_state = #user_state{chef_user = User}}) ->
-  UserName = chef_wm_util:object_name(user, Req),
-  case wrq:method(Req) of
-    'PUT' ->
-      %% Ensure user can't reset themselves to not be non-admin if none are left
-      case chef_wm_authz:is_admin(Requestor) andalso chef_wm_authz:is_requesting_node(Requestor, UserName) of
-        true ->
-          %%They are an admin and updating themselves
-          case chef_db:count_user_admins(DbContext) >1 of
-            %% They are an admin, are they attempting to change the admin status?
-            true ->
-              case chef_wm_util:admin_field_is_false(User) of
-                 %% They are attempting to change their admin field, deny
-                 true ->
-                   forbidden;
-                 %% They are not attempting to change their admin field, allow
-                 false ->
-                   authorized
-               end;
-            %% More than one admin left, let the operation continue
-            false ->
-              authorized
-          end;
-        false ->
-          %% User is not in danger of setting last to non-admin status
-          chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName)
-      end;
-    'GET' ->
-      chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName);
-    'DELETE' ->
-      %% Ensure last admin can't be deleted
-      case chef_wm_authz:is_admin(Requestor) andalso chef_wm_authz:is_requesting_node(Requestor, UserName) of
-        %% User is an admin and trying to operate on itself
-        true ->
-          case chef_db:count_user_admins(DbContext) > 1 of
-            %% More than one admin left, let operation continue
-            true ->
-                authorized;
-            %% Last admin, don't let them delete themselves
-            false ->
-                forbidden
+                                                      chef_db_context = DbContext,
+                                                      resource_state = #user_state{user_data = UserData}}) ->
+    UserName = chef_wm_util:object_name(user, Req),
+    RequestorIsAdmin = chef_wm_authz:is_admin(Requestor),
+    RequestorIsModifyingSelf = chef_wm_authz:is_requesting_node(Requestor, UserName),
+
+    %% Database interaction is expensive, so we only want to do it if necessary; however,
+    %% this logic is reused in more than one place in this function.  Hooray for lambdas!
+    ForbidIfLastAdmin = fun() ->
+                                case chef_db:count_user_admins(DbContext) of
+                                    Num when is_number(Num) andalso Num > 1 -> authorized;
+                                    _ -> forbidden
+                                end
+                        end,
+
+    case wrq:method(Req) of
+        'PUT' ->
+            RequestedAdminFlag = ej:get({<<"admin">>}, UserData),
+            case {RequestorIsAdmin, RequestorIsModifyingSelf, RequestedAdminFlag} of
+                {true, true, false} ->
+                    %% Admin requestor wants to remove own admin privs; only allow if other admins exist
+                    ForbidIfLastAdmin();
+                {false, true, true} ->
+                    %% Non-admin requestors cannot give admin privs to themselves
+                    forbidden;
+                {_, _, _} ->
+                    %% Admins can change whatever else they like for other users or
+                    %% themselves, and non-admins can change whatever non-admin privileges
+                    %% for themselves they want.
+                    chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName)
             end;
-        %% User is not in danger of deleting the last admin, check normal permissions
-        false ->
-          chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName)
-      end;
-    _Else ->
-      forbidden
-  end;
-
-
+        'GET' ->
+            chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName);
+        'DELETE' ->
+            case {RequestorIsAdmin, RequestorIsModifyingSelf} of
+                {true, true} ->
+                    %% Admins can only delete themselves if they are not the last admin
+                    ForbidIfLastAdmin();
+                {_, _} ->
+                    chef_wm_authz:allow_admin_or_requesting_node(Requestor, UserName)
+            end;
+        _OtherMethod ->
+            forbidden
+    end;
 
 handle_auth_info(Module, Req, #base_state{requestor = Requestor})
         when Module =:= chef_wm_cookbook_version;

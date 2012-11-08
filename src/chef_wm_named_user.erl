@@ -72,7 +72,7 @@ validate_request('PUT', Req, #base_state{resource_state = UserState} = State) ->
     Body = wrq:req_body(Req),
     %% FIXME: need to validate no name change since we aren't going to support rename for
     %% users.
-    {ok, User} = chef_user:parse_binary_json(Body),
+    {ok, User} = chef_user:parse_binary_json(Body, update),
     {Req, State#base_state{resource_state = UserState#user_state{user_data = User}}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
@@ -171,6 +171,8 @@ malformed_request_message(#ej_invalid{type = object_value, key = Object, found =
                           _Req, _State) ->
     error_message([<<"Invalid value '">>, io_lib:format("~p", [Val]),
                    <<"' for ">>, Object]);
+malformed_request_message(#ej_invalid{type = fun_match, msg = Message}, _Req, _State) ->
+    error_message([Message]);
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
