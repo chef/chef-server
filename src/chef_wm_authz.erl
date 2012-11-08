@@ -34,63 +34,45 @@
 
 -include("chef_wm.hrl").
 
-%% @doc Rejects validator clients, but allows all other requestors.
+%% @doc Reject validator clients, but allow all other requestors.
 all_but_validators(#chef_client{validator=true}) -> forbidden;
 all_but_validators(#chef_client{})               -> authorized;
 all_but_validators(#chef_user{})                 -> authorized.
 
--spec allow_admin(#chef_client{} | #chef_user{}) -> authorized | forbidden.
+%% @doc Only authorize admin requestors.
+%%
 %% Technically, it is possible for a client to be both validator and admin... this should
-%% probably be disallowed
-allow_admin(#chef_client{validator = true}) ->
-    forbidden;
-allow_admin(#chef_client{admin = true}) ->
-    authorized;
-allow_admin(#chef_client{}) ->
-    forbidden;
-allow_admin(#chef_user{admin = true}) ->
-    authorized;
-allow_admin(#chef_user{}) ->
-    forbidden.
+%% probably be disallowed.
+allow_admin(#chef_client{validator = true}) -> forbidden;
+allow_admin(#chef_client{admin = true})     -> authorized;
+allow_admin(#chef_client{})                 -> forbidden;
+allow_admin(#chef_user{admin = true})       -> authorized;
+allow_admin(#chef_user{})                   -> forbidden.
 
+%% @doc Admins can do what they wish, but other requestors can only proceed if they are
+%% operating on themselves.
+%%
+%% Validators can only create new clients, and cannot even operate on themselves; if you
+%% need to modify a validator for some reason, do it as a proper admin
 -spec allow_admin_or_requesting_node(#chef_client{} | #chef_user{}, binary()) -> authorized | forbidden.
-allow_admin_or_requesting_node(#chef_client{validator = true}, _Name) ->
-    %% Validators can only create new clients, and cannot even operate on themselves; If you
-    %% need to modify a validator for some reason, do it as a proper admin.
-    forbidden;
-allow_admin_or_requesting_node(#chef_client{name = Name}, Name) ->
-    authorized;
-allow_admin_or_requesting_node(#chef_client{} = Client, _Name) ->
-    allow_admin(Client);
-allow_admin_or_requesting_node(#chef_user{username = Name}, Name) ->
-    authorized;
-allow_admin_or_requesting_node(#chef_user{} = User, _Name) ->
-    allow_admin(User).
+allow_admin_or_requesting_node(#chef_client{validator = true}, _Name) -> forbidden;
+allow_admin_or_requesting_node(#chef_client{name = Name}, Name)       -> authorized;
+allow_admin_or_requesting_node(#chef_client{} = Client, _Name)        -> allow_admin(Client);
+allow_admin_or_requesting_node(#chef_user{username = Name}, Name)     -> authorized;
+allow_admin_or_requesting_node(#chef_user{} = User, _Name)            -> allow_admin(User).
 
--spec is_admin(#chef_client{} | #chef_user{}) -> true | false.
-is_admin(#chef_client{admin = true}) ->
-    true;
-is_admin(#chef_client{}) ->
-    false;
-is_admin(#chef_user{admin = true}) ->
-    true;
-is_admin(#chef_user{}) ->
-    false.
+is_admin(#chef_client{admin = true}) -> true;
+is_admin(#chef_client{})             -> false;
+is_admin(#chef_user{admin = true})   -> true;
+is_admin(#chef_user{})               -> false.
 
+%% @doc Is the requestor operating on itself?
 -spec is_requesting_node(#chef_client{} | #chef_user{}, binary()) -> true | false.
-is_requesting_node(#chef_client{name = Name}, Name) ->
-    true;
-is_requesting_node(#chef_client{}, _Name) ->
-    false;
-is_requesting_node(#chef_user{username = Name}, Name) ->
-    true;
-is_requesting_node(#chef_user{}, _Name) ->
-    false.
+is_requesting_node(#chef_client{name = Name}, Name)   -> true;
+is_requesting_node(#chef_client{}, _Name)             -> false;
+is_requesting_node(#chef_user{username = Name}, Name) -> true;
+is_requesting_node(#chef_user{}, _Name)               -> false.
 
--spec is_validator(#chef_client{} | #chef_user{}) -> true | false.
-is_validator(#chef_client{validator = true}) ->
-    true;
-is_validator(#chef_client{}) ->
-    false;
-is_validator(#chef_user{}) ->
-    false.
+is_validator(#chef_client{validator = true}) -> true;
+is_validator(#chef_client{})                 -> false;
+is_validator(#chef_user{})                   -> false.
