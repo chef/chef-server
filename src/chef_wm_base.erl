@@ -665,19 +665,11 @@ handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
                                                             #client_state{chef_client = Client}}) ->
     ClientName = chef_wm_util:object_name(client, Req),
     case wrq:method(Req) of
-        'PUT' -> %% update
+        'PUT' ->
             chef_wm_authz:allow_admin(Requestor);
-        'GET' -> %% show
+        Method when Method =:= 'GET';
+                    Method =:= 'DELETE' ->
             chef_wm_authz:allow_admin_or_requesting_node(Requestor, ClientName);
-        'DELETE' -> %% delete
-            case chef_wm_authz:is_validator(Client) of
-                true ->
-                    %% We can't delete the validator
-                    %% Note: this assumes there is only a single validator
-                    forbidden;
-                _Else ->
-                    chef_wm_authz:allow_admin_or_requesting_node(Requestor, ClientName)
-            end;
         _Else ->
             forbidden
     end;
