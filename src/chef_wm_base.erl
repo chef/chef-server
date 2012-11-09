@@ -62,6 +62,7 @@
 
 -include("chef_wm.hrl").
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("public_key/include/public_key.hrl").
 
 init(ResourceMod, Config) ->
     BaseState = init_base_state(ResourceMod, Config),
@@ -532,8 +533,11 @@ select_user_or_webui_key(Req, Requestor) ->
                         end
                 end,
             case chef_keyring:get_key(WebKeyTag) of
-                {ok, Key} ->
-                    Key;
+                %% extract the public key from the private key
+                {ok, #'RSAPrivateKey'{modulus=Mod, publicExponent=Exp}} ->
+                    #'RSAPublicKey'{modulus = Mod, publicExponent = Exp};
+                {ok, #'RSAPublicKey'{}=PublicKey} ->
+                    PublicKey;
                 {error, unknown_key} ->
                     Msg = io_lib:format("Failed finding key ~w", [WebKeyTag]),
                     error_logger:error_report({no_such_key, Msg, erlang:get_stacktrace()}),
