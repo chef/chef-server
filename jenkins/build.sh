@@ -49,7 +49,7 @@ fi
 rm -f $WORKSPACE/pkg/*
 rm -rf $WORKSPACE/src/*
 
-mkdir -p chef-solo/cache
+mkdir -p jenkins/chef-solo/cache
 
 export PATH=/usr/local/bin:/opt/ruby1.9/bin:$PATH
 
