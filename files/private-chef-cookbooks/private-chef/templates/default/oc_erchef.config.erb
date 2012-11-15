@@ -17,6 +17,9 @@
                          {file_size, 50}]]}
             ]},
  {oc_chef_wm, [
+              {api_version, "<%= node['private_chef']['api_version'] %>"},
+              {server_flavor, "<%= node['private_chef']['flavor'] %>"},
+
               {ip, "<%= @listen %>"},
               {port, <%= @port %>},
               {reqid_header_name, "X-Request-Id"},
@@ -30,6 +33,7 @@
               {superusers, [<<"pivotal">>]}
              ]},
   {chef_wm, [
+             {server_version, "<%= node['private_chef']['version'] %>"},
              {health_ping_timeout, 400},
              {health_ping_modules, [chef_authz, chef_otto, chef_sql, chef_solr]}
             ]},
