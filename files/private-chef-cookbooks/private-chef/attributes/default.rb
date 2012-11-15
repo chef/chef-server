@@ -68,6 +68,9 @@ default['private_chef']['rabbitmq']['reindexer_vhost'] = '/reindexer'
 default['private_chef']['rabbitmq']['jobs_vhost'] = '/jobs'
 default['private_chef']['rabbitmq']['jobs_user'] = 'jobs'
 default['private_chef']['rabbitmq']['jobs_password'] = 'workcomplete'
+default['private_chef']['rabbitmq']['reports_vhost'] = '/reports'
+default['private_chef']['rabbitmq']['reports_user'] = 'reports'
+default['private_chef']['rabbitmq']['reports_password'] = 'reportallthethings'
 default['private_chef']['rabbitmq']['node_ip_address'] = '127.0.0.1'
 default['private_chef']['rabbitmq']['node_port'] = '5672'
 default['private_chef']['rabbitmq']['nodename'] = 'rabbit@localhost'
@@ -235,6 +238,7 @@ default['private_chef']['lb']['upstream']['opscode-authz'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-solr'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-pushy'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['bookshelf'] = [ "127.0.0.1" ]
+default['private_chef']['lb']['upstream']['opscode-reporting'] = [ "127.0.0.1" ]
 default['private_chef']['lb_internal']['enable'] = true
 default['private_chef']['lb_internal']['vip'] = "127.0.0.1"
 default['private_chef']['lb_internal']['chef_port'] = 9680
@@ -425,7 +429,7 @@ default['private_chef']['dark_launch']["couchdb_checksums"] = true
 default['private_chef']['dark_launch']["couchdb_environments"] = true
 default['private_chef']['dark_launch']["couchdb_clients"] = true
 default['private_chef']['dark_launch']["add_type_and_bag_to_items"] = true
-
+default['private_chef']['dark_launch']["node_run_history"] = true
 ###
 # Opscode Account
 ###
@@ -603,6 +607,7 @@ default['private_chef']['logs']['log_retention'] = {
   "opscode-org-creator" => 14,
   "opscode-chef" => 14,
   "opscode-erchef" => 14,
+  "opscode-reporting" => 14,
   "opscode-webui" => 14,
   "nagios" => 14,
   "nginx" => 14
@@ -632,3 +637,22 @@ default['private_chef']['ldap'] = nil
 # Upgrades/Partybus
 ##
 default['private_chef']['upgrades']['dir'] = "/var/opt/opscode/upgrades"
+
+####
+# Opscode Reporting 
+####
+default['private_chef']['opscode-reporting']['enable'] = true
+default['private_chef']['opscode-reporting']['dir'] = "/var/opt/opscode/opscode-reporting"
+default['private_chef']['opscode-reporting']['log_directory'] = "/var/log/opscode/opscode-reporting" 
+default['private_chef']['opscode-reporting']['listen'] = '127.0.0.1'
+default['private_chef']['opscode-reporting']['port'] = 10010
+default['private_chef']['opscode-reporting']['db_pool_max_count'] = 20
+default['private_chef']['opscode-reporting']['db_pool_init_count'] = 5 
+default['private_chef']['opscode-reporting']['node_run_worker_count'] = 5
+default['private_chef']['opscode-reporting']['node_run_init_sender_count'] = 5
+default['private_chef']['opscode-reporting']['node_run_max_sender_count'] = 20
+default['private_chef']['opscode-reporting']['max_cache_size'] = '10000'
+default['private_chef']['opscode-reporting']['cache_ttl'] = '3600'
+default['private_chef']['opscode-reporting']['node_search_limit'] = 50
+default['private_chef']['opscode-reporting']['summary_only_percentage'] = 0.9
+default['private_chef']['opscode-reporting']['summary_client_min_version'] = "10.16.0"

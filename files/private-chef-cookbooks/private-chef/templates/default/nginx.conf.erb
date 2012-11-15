@@ -111,6 +111,10 @@ http {
     # principals go to erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
 
+    <%= @helper.reporting_api("^/organizations/[a-z0-9\-_]+?/reports/.*$") %>
+
+    <%= @helper.reporting_api("^/reports/.*$") %>
+
     # no caching of cookbook files for internal-lb
 
     # cookbook uploads and sandboxes, specialized for internal-lb

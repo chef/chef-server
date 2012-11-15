@@ -39,6 +39,7 @@ module PrivateChef
   nagios Mash.new
   nrpe Mash.new
   nginx Mash.new
+  opscode_reporting Mash.new
   log_retention Mash.new
   log_rotation Mash.new
 
@@ -189,7 +190,8 @@ module PrivateChef
         "nrpe",
         "nginx",
         "ldap",
-        "user"
+        "user",
+        "opscode_reporting"
       ].each do |key|
         rkey = key.gsub('_', '-')
         results['private_chef'][rkey] = PrivateChef[key]
