@@ -952,8 +952,13 @@ update(DbContext, #chef_node{} = Record, ActorId) ->
     update_object(DbContext, ActorId, update_node, Record);
 update(DbContext, #chef_role{} = Record, ActorId) ->
     update_object(DbContext, ActorId, update_role, Record);
-update(DbContext, #chef_cookbook_version{} = Record, ActorId) ->
-    update_object(DbContext, ActorId, update_cookbook_version, Record);
+update(DbContext, #chef_cookbook_version{org_id=OrgId} = Record, ActorId) ->
+    case update_object(DbContext, ActorId, update_cookbook_version, Record) of
+        #chef_db_cb_version_update{deleted_checksums=DeletedChecksums} ->
+            chef_s3:delete_checksums(OrgId, DeletedChecksums),
+            ok;
+        Result -> Result %% {conflict, _} or {error, _}
+    end;
 update(DbContext, #chef_user{} = Record, ActorId) ->
     update_object(DbContext, ActorId, update_user, Record).
 
@@ -1176,13 +1181,15 @@ delete_object(#context{reqid = ReqId}, Fun, Id) ->
                     #chef_user{}) ->  ok |
                                       not_found |
                                       {conflict, any()} |
-                                      {error, any()}.
+                                      {error, any()} |
+                                      #chef_db_cb_version_update{}.
 %% @doc Generic update for Chef object types. `Fun' is the appropriate function in the
 %% `chef_sql' module. `Object' is a Chef object (record) with updated data.
 update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
     Object1 = chef_object:set_updated(Object, ActorId),
     case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
                           fun() -> chef_sql:Fun(Object1) end) of
+        #chef_db_cb_version_update{}=CookbookVersionUpdate -> CookbookVersionUpdate;
         {ok, 1} -> ok;
         {ok, not_found} -> not_found;
         {conflict, Message} -> {conflict, Message};

@@ -19,3 +19,8 @@
           'cookbook_delete' :: boolean(),
           'deleted_checksums' :: [ Checksum::binary()]
          }).
+
+-record(chef_db_cb_version_update, {
+          'deleted_checksums' :: [ Checksum::binary()],
+          'added_checksums' :: [ Checksum::binary()]
+         }).

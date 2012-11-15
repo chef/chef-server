@@ -1637,8 +1637,19 @@ update_cookbook_version_checksums(#chef_cookbook_version{} = ExistingVersion, Ex
     ?assertEqual(ExistingVersion#chef_cookbook_version{checksums = []}, Existing#chef_cookbook_version{checksums = []}),
     ?assertEqual(NormalizedExistingChecksums, lists:sort(Existing#chef_cookbook_version.checksums)),
 
+    %% compute some checksums addition/deletion sets for comparison
+    ExistingChecksumsSet = sets:from_list(ExistingChecksums),
+    UpdatedChecksumsSet  = sets:from_list(UpdatedChecksums),
+    Deletions = sets:to_list(sets:subtract(ExistingChecksumsSet, UpdatedChecksumsSet)),
+    Additions = sets:to_list(sets:subtract(UpdatedChecksumsSet, ExistingChecksumsSet)),
 
-    ?assertEqual({ok, 1}, chef_sql:update_cookbook_version(UpdatedVersion)),
+    #chef_db_cb_version_update{
+        added_checksums=AddedChecksums,
+        deleted_checksums=DeletedChecksums} = chef_sql:update_cookbook_version(UpdatedVersion),
+
+    ?assertEqual(Additions, AddedChecksums),
+    ?assertEqual(Deletions, DeletedChecksums),
+
     Updated = chef_sql:fetch_cookbook_version(UpdatedVersion#chef_cookbook_version.org_id,
                                                {UpdatedVersion#chef_cookbook_version.name,
                                                  {UpdatedVersion#chef_cookbook_version.major,
@@ -1707,7 +1718,12 @@ update_cookbook_version_checksums_with_shared_checksums() ->
     ?assertEqual(lists:sort(ExistingChecksums), lists:sort(Existing#chef_cookbook_version.checksums)),
 
     % Update a version which causes the shared checksum to be deleted
-    ?assertEqual({ok, 1}, chef_sql:update_cookbook_version(UpdatedVersion)),
+    #chef_db_cb_version_update{
+        added_checksums=AddedChecksums,
+        deleted_checksums=DeletedChecksums} = chef_sql:update_cookbook_version(UpdatedVersion),
+    ?assertEqual(lists:sort(UpdatedChecksums) , lists:sort(AddedChecksums)),
+    ?assertEqual(lists:sort(ExistingChecksums), lists:sort(DeletedChecksums)),
+
     Updated = chef_sql:fetch_cookbook_version(UpdatedVersion#chef_cookbook_version.org_id,
                                                {UpdatedVersion#chef_cookbook_version.name,
                                                  {UpdatedVersion#chef_cookbook_version.major,
