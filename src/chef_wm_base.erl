@@ -204,7 +204,7 @@ create_500_response(Req, State) ->
     wrq:set_resp_body(Json, Req2).
 
 add_version_header(Req, #base_state{version_info = Version}) ->
-    wrq:set_response_header("X-Ops-API-Version", Version, Req).
+    wrq:set_resp_header("X-Ops-API-Version", Version, Req).
 
 -spec verify_request_signature(#wm_reqdata{}, #base_state{}) ->
                                       {boolean(), #wm_reqdata{}, #base_state{}}.
