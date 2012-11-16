@@ -68,6 +68,9 @@
           %% balancer
           reqid_header_name :: string(),
 
+          %% String containing version info for the chef server
+          version_info :: string(),
+
           %% A fun/1 that closes over the request headers and returns
           %% header values as binaries or 'undefined'.
           %% chef_rest_wm:init sets this.

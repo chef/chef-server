@@ -80,6 +80,7 @@ init_base_state(ResourceMod, InitParams) ->
     #base_state{reqid_header_name = ?gv(reqid_header_name, InitParams),
                 batch_size = ?gv(batch_size, InitParams),
                 auth_skew = ?gv(auth_skew, InitParams),
+                server_version = ?gv(server_version, InitParams),
                 resource_mod = ResourceMod}.
 
 %% @doc Determines if service is available.
@@ -182,19 +183,28 @@ finish_request(Req, #base_state{reqid = ReqId}=State) ->
         stats_hero:stop_worker(ReqId),
         case Code of
             500 ->
-                %% sanitize response body
-                Msg = <<"internal service error">>,
-                Json = chef_json:encode({[{<<"error">>, [Msg]}]}),
-                Req1 = wrq:set_resp_header("Content-Type",
-                                           "application/json", Req),
-                {true, wrq:set_resp_body(Json, Req1), State};
+                Req1 = create_500_response(Req, State),
+                {true, Req1, State};
             _ ->
-                {true, Req, State}
+                Req1 = add_version_header(Req, State),
+                {true, Req1, State}
         end
     catch
         X:Y ->
             error_logger:error_report({X, Y, erlang:get_stacktrace()})
     end.
+
+create_500_response(Req, State) ->
+    %% sanitize response body
+    Msg = <<"internal service error">>,
+    Json = chef_json:encode({[{<<"error">>, [Msg]}]}),
+    Req1 = wrq:set_resp_header("Content-Type",
+                               "application/json", Req),
+    Req2 = add_version_header(Req1, State),
+    wrq:set_resp_body(Json, Req2).
+
+add_version_header(Req, #base_state{version_info = Version}) ->
+    wrq:set_response_header("X-Ops-API-Version", Version, Req).
 
 -spec verify_request_signature(#wm_reqdata{}, #base_state{}) ->
                                       {boolean(), #wm_reqdata{}, #base_state{}}.

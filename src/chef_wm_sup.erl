@@ -159,7 +159,8 @@ fetch_custom_init_params(Module, Defaults) ->
 default_resource_init() ->
     Defaults = [{batch_size, get_env(chef_wm, bulk_fetch_batch_size)},
                 {auth_skew, get_env(chef_wm, auth_skew)},
-                {reqid_header_name, get_env(chef_wm, reqid_header_name)}],
+                {reqid_header_name, get_env(chef_wm, reqid_header_name)},
+                {server_version, get_env(chef_wm, server_version)}],
     case application:get_env(chef_wm, request_tracing) of
         {ok, true} ->
             [{trace, true}|Defaults];
