@@ -841,7 +841,7 @@ create_cookbook_version(CookbookVersion) ->
     end.
 
 -spec update_cookbook_version(#chef_cookbook_version{}) ->
-    {ok, non_neg_integer()} | {error, _}.
+    #chef_db_cb_version_update{} | {error, _}.
 update_cookbook_version(#chef_cookbook_version{ id                = Id,
                                                 frozen            = Frozen,
                                                 meta_attributes   = MetaAttributes,
@@ -852,9 +852,12 @@ update_cookbook_version(#chef_cookbook_version{ id                = Id,
                                                 last_updated_by   = LastUpdatedBy,
                                                 updated_at        = UpdatedAt }=UpdatedVersion) ->
     case update_cookbook_version_checksums(UpdatedVersion) of
-        ok ->
+        {ok, Additions, Deletions} ->
             UpdatedFields = [Frozen, MetaAttributes, MetaDeps, MetaLongDesc, Metadata, SerializeObject, LastUpdatedBy, UpdatedAt, Id],
-            do_update(update_cookbook_version, UpdatedFields);
+            case do_update(update_cookbook_version, UpdatedFields) of
+                {ok, _} -> #chef_db_cb_version_update{added_checksums=Additions,deleted_checksums=Deletions};
+                Error -> Error
+            end;
         {error, Reason} ->
             {error, Reason}
     end.
@@ -876,7 +879,10 @@ update_cookbook_version_checksums(#chef_cookbook_version{ id        = Id,
 
     case delete_cookbook_checksums(sets:to_list(Deletions), OrgId, Id) of
         ok ->
-            insert_cookbook_checksums(sets:to_list(Additions), OrgId, Name, Major, Minor, Patch);
+            case insert_cookbook_checksums(sets:to_list(Additions), OrgId, Name, Major, Minor, Patch) of
+                ok -> {ok, sets:to_list(Additions) , sets:to_list(Deletions) };
+                Result -> Result
+            end;
         {error, Reason} ->
             {error, Reason}
     end.
