@@ -80,7 +80,7 @@ init_base_state(ResourceMod, InitParams) ->
     #base_state{reqid_header_name = ?gv(reqid_header_name, InitParams),
                 batch_size = ?gv(batch_size, InitParams),
                 auth_skew = ?gv(auth_skew, InitParams),
-                server_version = ?gv(server_version, InitParams),
+                version_info = ?gv(version, InitParams),
                 resource_mod = ResourceMod}.
 
 %% @doc Determines if service is available.
