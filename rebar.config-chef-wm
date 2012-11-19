@@ -35,7 +35,7 @@
    {git, "git://github.com/opscode/stats_hero.git", {branch, "master"}}},
 
   {folsom, ".*",
-   {git, "git://github.com/boundary/folsom.git", {branch, "master"}}}
+   {git, "git://github.com/boundary/folsom.git", {tag, "0.7.2"}}}
 
  ]}.
 
