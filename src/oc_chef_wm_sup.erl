@@ -166,7 +166,8 @@ default_resource_init() ->
     Defaults = [{batch_size, get_env(oc_chef_wm, bulk_fetch_batch_size)},
                 {auth_skew, get_env(oc_chef_wm, auth_skew)},
                 {db_type, get_env(sqerl, db_type)},
-                {reqid_header_name, get_env(oc_chef_wm, reqid_header_name)}],
+                {reqid_header_name, get_env(oc_chef_wm, reqid_header_name)},
+                {version, get_env(chef_wm, server_version)}],
     case application:get_env(oc_chef_wm, request_tracing) of
         {ok, true} ->
             [{trace, true}|Defaults];
