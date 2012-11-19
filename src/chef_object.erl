@@ -25,6 +25,7 @@
 -module(chef_object).
 
 -include("chef_types.hrl").
+-include_lib("ej/include/ej.hrl").
 
 -export([cert_or_key/1,
          depsolver_constraints/1,
@@ -38,6 +39,7 @@
          parse_constraint/1,
          set_created/2,
          set_updated/2,
+         strictly_valid/3,
          type_name/1,
          update_from_ejson/2
         ]).
@@ -617,3 +619,47 @@ value_or_null(Key, Data) ->
     _ ->
       Value
   end.
+
+%% These type specs are taken from ej. They are not in an exportable form
+%% They are reproduced here to make dialyzer work for strictly_valid()
+%% Perhaps, that means strictly_valid() should be moved into ej
+-type ej_string_match() :: {'string_match', {re:mp(), _}}.
+-type ej_fun_match() :: {fun_match, {fun((json_term()) -> ok | error),
+                                        ej_json_type_name(), _}}.
+-type ej_array_map() :: {array_map, ej_json_val_spec()}.
+
+-type ej_object_map() :: {object_map, {{keys, ej_json_val_spec()},
+                                       {values, ej_json_val_spec()}}}.
+
+-type ej_json_spec() :: {[ej_json_spec_rule()]} | ej_object_map().
+-type ej_json_spec_rule() :: {ej_json_key_spec(), ej_json_val_spec()}.
+-type ej_json_key_spec() :: binary() | {opt, binary()}.
+-type ej_json_val_spec() :: binary()             |
+                            ej_json_type_name()  |
+                            ej_string_match()    |
+                            ej_fun_match()       |
+                            ej_array_map()       |
+                            ej_object_map()      |
+                            {[ej_json_val_spec()]}.
+
+%% Call this instead of ej:valid() if you want to validate specs
+%% and check for invalid top-level keys. This will not check for
+%% invalid keys beyond the top-level.
+-spec strictly_valid(Constraints :: ej_json_spec(), ValidKeys :: [binary()],  Ejson :: json_object()) -> ok | #ej_invalid{}.
+strictly_valid(Constraints, ValidKeys, Ejson) ->
+    case allowed_keys(ValidKeys, Ejson) of
+        ok ->
+            ej:valid(Constraints, Ejson)
+        % allowed_keys will throw, not return
+    end.
+
+allowed_keys(_ValidKeys, []) ->
+    ok;
+allowed_keys(ValidKeys, {List}) when is_list(List) ->
+    allowed_keys(ValidKeys, List);
+allowed_keys(ValidKeys, [{Item, _}|Rest]) ->
+    case lists:member(Item, ValidKeys) of
+        true -> allowed_keys(ValidKeys, Rest);
+        _ ->
+            throw({invalid_key, Item})
+    end.
