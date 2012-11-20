@@ -1,11 +1,11 @@
 name "oc-chef-pedant"
-version "master"
+version "cm/OC-4908"
 
 dependencies ["ruby",
               "bundler",
               "rsync"]
 
-source :git => "git@github.com:opscode/oc-chef-pedant"
+source :git => "git@github.com:opscode/oc-chef-pedant.git"
 
 relative_path "oc-chef-pedant"
 
