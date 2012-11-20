@@ -157,10 +157,19 @@ fetch_custom_init_params(Module, Defaults) ->
 
 %% @doc Return a proplist of init parameters that should be passed to all resource modules.
 default_resource_init() ->
+    %% We will only have one release, until such time as we start doing live upgrades.  When
+    %% and if that time comes, this will probably fail.
+    [{ServerName, ServerVersion, _, _}] = release_handler:which_releases(permanent),
+
     Defaults = [{batch_size, get_env(chef_wm, bulk_fetch_batch_size)},
                 {auth_skew, get_env(chef_wm, auth_skew)},
                 {reqid_header_name, get_env(chef_wm, reqid_header_name)},
-                {version, get_env(chef_wm, server_version)}],
+
+                %% These will be used to generate the X-Ops-API-Info header
+                {otp_info, {ServerName, ServerVersion}},
+                {server_flavor, get_env(chef_wm, server_flavor)},
+                {api_version, get_env(chef_wm, api_version)}
+               ],
     case application:get_env(chef_wm, request_tracing) of
         {ok, true} ->
             [{trace, true}|Defaults];
