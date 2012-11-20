@@ -48,6 +48,10 @@
           {<<"run_list">>, chef_json_validator:run_list_spec()}
          ]}).
 
+-define(VALID_KEYS,
+        [<<"name">>, <<"chef_environment">>, <<"json_class">>, <<"chef_type">>,
+         <<"normal">>, <<"default">>, <<"override">>, <<"automatic">>, <<"run_list">>]).
+
 -define(create_if_missing_fields,
         [{<<"chef_environment">>, <<"_default">>},
          {<<"json_class">>,       <<"Chef::Node">>},
@@ -68,7 +72,7 @@ extract_roles(RunList) ->
       || <<"role[", Item/binary>> <- RunList ].
 
 validate(Node) ->
-    case ej:valid(?VALIDATION_CONSTRAINTS, Node) of
+    case chef_object:strictly_valid(?VALIDATION_CONSTRAINTS, ?VALID_KEYS, Node) of
         ok ->
             {ok, Node};
         Bad ->
@@ -129,3 +133,4 @@ normalize(NodeEjson) ->
     RunList = ej:get({<<"run_list">>}, NodeEjson, []),
     Normalized = chef_object:normalize_run_list(RunList),
     ej:set({<<"run_list">>}, NodeEjson, Normalized).
+
