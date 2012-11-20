@@ -1,4 +1,4 @@
-name "oc-chef-pedant"
+name "oc-reporting-pedant"
 version "master"
 
 dependencies ["ruby",
@@ -7,7 +7,7 @@ dependencies ["ruby",
 
 source :git => "git@github.com:opscode/oc-reporting-pedant"
 
-relative_path "oc-chef-pedant"
+relative_path "oc-reporting-pedant"
 
 build do
   bundle "install --path=/opt/opscode/embedded/service/gem"
