@@ -9,6 +9,7 @@ require 'pedant/multitenant'
 require 'pedant/organization'
 
 Pedant.config.platform_class = Pedant::MultiTenantPlatform
+Pedant.config.suite = "api"
 Pedant.setup(ARGV)
 puts Pedant::UI.new.info_banner
 
