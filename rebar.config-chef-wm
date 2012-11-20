@@ -29,7 +29,7 @@
    {git, "git://github.com/opscode/fast-log-erlang.git", {branch, "master"}}},
 
   {mixer, ".*",
-   {git, "git://github.com/opscode/mixer.git", {branch, "master"}}},
+   {git, "git://github.com/opscode/mixer.git", {tag, "0.1.1"}}},
 
   {stats_hero, ".*",
    {git, "git://github.com/opscode/stats_hero.git", {branch, "master"}}},
