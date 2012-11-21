@@ -497,3 +497,41 @@ semantic_duplication_test_() ->
                            chef_object:normalize_run_list(Input))
       end}
     ].
+
+public_key_data() ->
+    {ok, Bin} = file:read_file("../test/spki_public.pem"),
+    Bin.
+
+cert_data() ->
+    {ok, Bin} = file:read_file("../test/cert.pem"),
+    Bin.
+
+set_key_pair_test_() ->
+    Ejson = {[]},
+    PrivateKey = <<"private">>,
+    DataForType = fun(key) ->
+                          public_key_data();
+                     (cert) ->
+                          cert_data()
+                  end,
+    KeyForType = fun(key) ->
+                         <<"public_key">>;
+                    (cert) ->
+                         <<"certificate">>
+                 end,
+    NotKeyForType = fun(key) ->
+                            <<"certificate">>;
+                       (cert) ->
+                            <<"public_key">>
+                    end,
+    Tests = [
+             begin
+                 Got = chef_object:set_key_pair(Ejson,
+                                                {public_key, DataForType(Type)},
+                                                {private_key, PrivateKey}),
+                 [?_assertEqual(PrivateKey, ej:get({<<"private_key">>}, Got)),
+                  ?_assertEqual(DataForType(Type), ej:get({KeyForType(Type)}, Got)),
+                  ?_assertEqual(undefined, ej:get({NotKeyForType(Type)}, Got))]
+             end
+             || Type <- [key, cert] ],
+    lists:flatten(Tests).

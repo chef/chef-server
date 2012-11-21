@@ -31,6 +31,7 @@
          depsolver_constraints/1,
          ejson_for_indexing/2,
          id/1,
+         key_version/1,
          make_org_prefix_id/1,
          make_org_prefix_id/2,
          name/1,
@@ -38,6 +39,8 @@
          normalize_run_list/1,
          parse_constraint/1,
          set_created/2,
+         set_key_pair/3,
+         set_public_key/2,
          set_updated/2,
          strictly_valid/3,
          type_name/1,
@@ -663,3 +666,49 @@ allowed_keys(ValidKeys, [{Item, _}|Rest]) ->
         _ ->
             throw({invalid_key, Item})
     end.
+
+%% @doc Add public and private key data to `UserEjson'. This function infers
+%% the key type and puts the public key data in iether a `certificate' or
+%% `public_key' field.
+%% If a private key is defined, then the private key will be placed in the `private_key'
+%% field.
+-spec set_key_pair(ej:json_object(), {public_key, binary()}, {private_key, binary()}) -> ej:json_object().
+set_key_pair(UserEjson, {public_key, PublicKey}, {private_key, PrivateKey}) ->
+    UserEjson1 = set_public_key(UserEjson, PublicKey),
+    case PrivateKey of
+        undefined ->
+            UserEjson1;
+        _ ->
+            ej:set({<<"private_key">>}, UserEjson1, PrivateKey)
+    end.
+
+%% @doc Sets either the `certificate' or `public_key' field of
+%% `UserEjson' depending on the value of `PublicKey'.
+-spec set_public_key(ej:json_object(), binary()) -> ej:json_object().
+set_public_key(UserEjson, PublicKey) ->
+  case key_version(PublicKey) of
+        ?KEY_VERSION ->
+            ej:set({<<"public_key">>}, UserEjson, PublicKey);
+        ?CERT_VERSION ->
+            ej:set({<<"certificate">>}, UserEjson, PublicKey)
+    end.
+
+%% Shameless ripped key_version code from chef_client -
+%% needs to be put in a common place if it is going to end up in
+%% both user and client - putting here to more further along for now
+
+%% Determine the "pubkey_version" of a key or certificate in PEM
+%% format. Certificates are version 1. Public keys in either PKCS1 or
+%% SPKI format are version 0. The PKCS1 format is deprecated, but
+%% supported for read. We will only generate certs or SPKI packaged
+%% keys.
+-spec key_version(<<_:64,_:_*8>>) -> 0 | 1.
+key_version(<<"-----BEGIN CERTIFICATE", _Bin/binary>>) ->
+    %% cert
+    ?CERT_VERSION;
+key_version(<<"-----BEGIN PUBLIC KEY", _Bin/binary>>) ->
+    %% SPKI
+    ?KEY_VERSION;
+key_version(<<"-----BEGIN RSA PUBLIC KEY", _Bin/binary>>) ->
+    %% PKCS1
+    ?KEY_VERSION.
