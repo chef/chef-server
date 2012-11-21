@@ -110,7 +110,12 @@ from_json(Req, #base_state{reqid = RequestId,
                            resource_state = #client_state{client_data = ClientData,
                                                           client_authz_id = AuthzId}} = State) ->
     Name = ej:get({<<"name">>}, ClientData),
-    {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
+    {PublicKey, PrivateKey} = case chef_object:cert_or_key(ClientData) of
+        {undefined, _} ->
+            chef_wm_util:generate_keypair(Name, RequestId);
+        {PubKey, _PubKeyVersion} ->
+            {PubKey, null}
+    end,
     ClientData1 = chef_client:set_public_key(ClientData, PublicKey),
     case chef_wm_base:create_from_json(Req, State, chef_client, {authz_id, AuthzId}, ClientData1) of
         {true, Req1, State1} ->
