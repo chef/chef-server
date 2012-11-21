@@ -80,7 +80,7 @@
            {db_pass, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>"},
            {db_name, "opscode_chef" },
 
-           {prepared_statements, {chef_sql, statements, [<%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %>]}},
+           {prepared_statements, {chef_sql, opc_statements, [<%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %>]}},
            {column_transforms,
            <%-if node['private_chef']['database_type'] == "mysql" %>
                               [{<<"frozen">>,
