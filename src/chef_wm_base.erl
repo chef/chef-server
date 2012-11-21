@@ -80,6 +80,11 @@ init_base_state(ResourceMod, InitParams) ->
     #base_state{reqid_header_name = ?gv(reqid_header_name, InitParams),
                 batch_size = ?gv(batch_size, InitParams),
                 auth_skew = ?gv(auth_skew, InitParams),
+
+                otp_info = ?gv(otp_info, InitParams),
+                server_flavor = ?gv(server_flavor, InitParams),
+                api_version = ?gv(api_version, InitParams),
+
                 resource_mod = ResourceMod}.
 
 %% @doc Determines if service is available.
@@ -182,19 +187,46 @@ finish_request(Req, #base_state{reqid = ReqId}=State) ->
         stats_hero:stop_worker(ReqId),
         case Code of
             500 ->
-                %% sanitize response body
-                Msg = <<"internal service error">>,
-                Json = chef_json:encode({[{<<"error">>, [Msg]}]}),
-                Req1 = wrq:set_resp_header("Content-Type",
-                                           "application/json", Req),
-                {true, wrq:set_resp_body(Json, Req1), State};
+                Req1 = create_500_response(Req, State),
+                {true, Req1, State};
             _ ->
-                {true, Req, State}
+                Req1 = add_api_info_header(Req, State),
+                {true, Req1, State}
         end
     catch
         X:Y ->
             error_logger:error_report({X, Y, erlang:get_stacktrace()})
     end.
+
+create_500_response(Req, State) ->
+    %% sanitize response body
+    Msg = <<"internal service error">>,
+    Json = chef_json:encode({[{<<"error">>, [Msg]}]}),
+    Req1 = wrq:set_resp_header("Content-Type",
+                               "application/json", Req),
+    Req2 = add_api_info_header(Req1, State),
+    wrq:set_resp_body(Json, Req2).
+
+%% @doc Extract information from `State` needed to generate the X-Ops-API-Info header value.
+api_info(#base_state{api_version = ApiVersion,
+                     otp_info = {ReleaseName, OtpVersion},
+                     server_flavor = ServerFlavor}) ->
+    [{"flavor", ServerFlavor},
+     {"version", ApiVersion},
+     {ReleaseName, OtpVersion}].
+
+%% @doc Generate the value of the X-Ops-API-Info header, which is a semicolon-delimited list
+%% of key=value pairs.
+api_info_header_value(#base_state{}=State) ->
+    string:join([ Key ++ "=" ++ Value ||
+                    {Key, Value} <- api_info(State)],
+                ";").
+
+%% @doc Add the X-Ops-API-Info header to the outgoing response.  This contains server API
+%% version information (useful for maintaining back-compatibility) as well as OTP version
+%% information (more useful for debugging purposes).
+add_api_info_header(Req, State) ->
+    wrq:set_resp_header("X-Ops-API-Info", api_info_header_value(State), Req).
 
 -spec verify_request_signature(#wm_reqdata{}, #base_state{}) ->
                                       {boolean(), #wm_reqdata{}, #base_state{}}.

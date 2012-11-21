@@ -68,6 +68,16 @@
           %% balancer
           reqid_header_name :: string(),
 
+          %% String containing API version info for the chef server
+          api_version :: string(),
+
+          %% OTP information for the Erchef server in {ReleaseName, OtpVersion} form.
+          otp_info :: {string(), string()},
+
+          %% Indicates what variant of Chef Server this is (e.g. "osc" => Open Source Chef,
+          %% "opc" = Opscode Private Chef, etc).
+          server_flavor :: string(),
+
           %% A fun/1 that closes over the request headers and returns
           %% header values as binaries or 'undefined'.
           %% chef_rest_wm:init sets this.
