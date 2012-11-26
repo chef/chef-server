@@ -78,17 +78,20 @@ from_json(Req, #base_state{reqid = RequestId,
                            resource_state = #user_state{user_data = UserData,
                            user_authz_id = AuthzId}} = State) ->
     Name = ej:get({<<"name">>}, UserData),
-    {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
-    UserWithKey = chef_user:set_public_key(UserData, PublicKey),
+    {PublicKey, PrivateKey} = case chef_object:cert_or_key(UserData) of
+        {undefined, _} ->
+            chef_wm_util:generate_keypair(Name, RequestId);
+        {PubKey, _PubKeyVersion} ->
+            {PubKey, undefined}
+    end,
+    UserWithKey = chef_object:set_public_key(UserData, PublicKey),
     PasswordData = chef_wm_password:encrypt(ej:get({<<"password">>}, UserWithKey)),
     case create_from_json(Req, State, chef_user, {authz_id, AuthzId},
                           {UserWithKey, PasswordData}) of
         {true, Req1, State1} ->
             Uri = list_to_binary(chef_wm_util:full_uri(Req1)),
-            Ejson = {[{<<"uri">>, Uri},
-                      {<<"private_key">>, PrivateKey},
-                      {<<"public_key">>, PublicKey}
-                     ]},
+            Ejson = chef_object:set_key_pair({[{<<"uri">>, Uri}]},
+                        {public_key, PublicKey}, {private_key, PrivateKey}),
             {true, chef_wm_util:set_json_body(Req1, Ejson), State1};
         Else ->
             Else

@@ -145,7 +145,7 @@ maybe_generate_key_pair(ClientData, RequestId) ->
     case ej:get({<<"private_key">>}, ClientData) of
         true ->
             {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
-            chef_client:set_key_pair(ClientData,
+            chef_object:set_key_pair(ClientData,
                                      {public_key, PublicKey},
                                      {private_key, PrivateKey});
         _ ->
