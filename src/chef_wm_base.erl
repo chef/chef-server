@@ -642,10 +642,16 @@ handle_auth_info(chef_wm_clients, Req,
                              resource_state = #client_state{client_data = Client}}) ->
     case wrq:method(Req) of
         'POST' -> %% create
-            NotCreatingAdmin = ej:get({<<"admin">>}, Client) =/= true,
             IsAdmin = chef_wm_authz:is_admin(Requestor),
+
             IsValidator = chef_wm_authz:is_validator(Requestor),
-            case IsAdmin orelse (IsValidator andalso NotCreatingAdmin) of
+            CreatingUnprivileged = (ej:get({<<"admin">>}, Client) =:= false) andalso
+                (ej:get({<<"validator">>}, Client) =:= false),
+
+            %% Admins can create whatever they want, but validators can only create
+            %% non-admin, non-validator clients
+            case IsAdmin orelse
+                (IsValidator andalso CreatingUnprivileged) of
                 true -> authorized;
                 false -> forbidden
             end;
@@ -659,18 +665,11 @@ handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
                                                             #client_state{chef_client = Client}}) ->
     ClientName = chef_wm_util:object_name(client, Req),
     case wrq:method(Req) of
-        'PUT' -> %% update
+        'PUT' ->
             chef_wm_authz:allow_admin(Requestor);
-        'GET' -> %% show
+        Method when Method =:= 'GET';
+                    Method =:= 'DELETE' ->
             chef_wm_authz:allow_admin_or_requesting_node(Requestor, ClientName);
-        'DELETE' -> %% delete
-            #chef_client{validator = IsValidator} = Client,
-            case IsValidator of
-                true -> %% We can't delete the validator
-                    forbidden;
-                _Else ->
-                    chef_wm_authz:allow_admin_or_requesting_node(Requestor, ClientName)
-            end;
         _Else ->
             forbidden
     end;
@@ -736,7 +735,7 @@ handle_auth_info(Module, Req, #base_state{requestor = Requestor})
              Module =:= chef_wm_named_data_item ->
     case wrq:method(Req) of
         'GET' ->
-            authorized;
+            chef_wm_authz:all_but_validators(Requestor);
         'PUT' -> %% update
             chef_wm_authz:allow_admin(Requestor);
         'DELETE' ->
@@ -751,7 +750,7 @@ handle_auth_info(Module, Req, #base_state{requestor = Requestor})
              Module =:= chef_wm_sandboxes ->
     case wrq:method(Req) of
         'GET' ->
-            authorized;
+            chef_wm_authz:all_but_validators(Requestor);
         'POST' -> %% create
             chef_wm_authz:allow_admin(Requestor);
         _Else ->
@@ -760,7 +759,7 @@ handle_auth_info(Module, Req, #base_state{requestor = Requestor})
 handle_auth_info(chef_wm_named_data, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'GET' ->
-            authorized;
+            chef_wm_authz:all_but_validators(Requestor);
         'POST' -> %% create data_item
             chef_wm_authz:allow_admin(Requestor);
         'DELETE' -> %% delete data
@@ -772,7 +771,7 @@ handle_auth_info(chef_wm_named_node, Req, #base_state{requestor = Requestor}) ->
     NodeName = chef_wm_util:object_name(node, Req),
     case wrq:method(Req) of
         'GET' ->
-            authorized;
+            chef_wm_authz:all_but_validators(Requestor);
         'PUT' -> %% update
             chef_wm_authz:allow_admin_or_requesting_node(Requestor, NodeName);
         'DELETE' -> %% delete
@@ -780,35 +779,46 @@ handle_auth_info(chef_wm_named_node, Req, #base_state{requestor = Requestor}) ->
         _Else ->
             forbidden
     end;
-handle_auth_info(Module, Req, _State)
+handle_auth_info(Module, Req, #base_state{requestor = Requestor})
         when Module =:= chef_wm_nodes;
              Module =:= chef_wm_search ->
     case wrq:method(Req) of
         'GET' ->
-            authorized;
+            chef_wm_authz:all_but_validators(Requestor);
         'POST' ->
-            authorized;
+            chef_wm_authz:all_but_validators(Requestor);
         _Else ->
             forbidden
     end;
-handle_auth_info(Module, Req, _State)
+handle_auth_info(Module, Req, #base_state{requestor = Requestor})
         when Module =:= chef_wm_cookbooks;
              Module =:= chef_wm_environment_cookbooks;
              Module =:= chef_wm_environment_recipes;
              Module =:= chef_wm_environment_roles;
              Module =:= chef_wm_search_index;
-             Module =:= chef_wm_named_principal;
              Module =:= chef_wm_status ->
+    case wrq:method(Req) of
+        'GET' ->
+            chef_wm_authz:all_but_validators(Requestor);
+        _Else ->
+            forbidden
+    end;
+
+%% The named principal endpoint currently performs no auth checking, and thus doesn't set a
+%% requestor in the base state.  This will allow validators to call this endpoint.  When
+%% request signing is in place for this endpoint, this should be changed as appropriate.
+handle_auth_info(chef_wm_named_principal, Req, _State) ->
     case wrq:method(Req) of
         'GET' ->
             authorized;
         _Else ->
             forbidden
     end;
-handle_auth_info(chef_wm_depsolver, Req, _State) ->
+
+handle_auth_info(chef_wm_depsolver, Req, #base_state{requestor = Requestor}) ->
     case wrq:method(Req) of
         'POST' ->
-            authorized;
+            chef_wm_authz:all_but_validators(Requestor);
         _Else ->
             forbidden
     end;
