@@ -34,10 +34,7 @@
          osc_parse_binary_json/3,
 
          parse_binary_json/2,
-         parse_binary_json/3,
-
-         set_key_pair/3,
-         set_public_key/2
+         parse_binary_json/3
         ]).
 
 -include_lib("ej/include/ej.hrl").
@@ -79,7 +76,7 @@ add_authn_fields(ClientData, PublicKey) ->
                 end,
                 ClientData,
                 [
-                    {<<"pubkey_version">>, key_version(PublicKey)},
+                    {<<"pubkey_version">>, chef_object:key_version(PublicKey)},
                     {<<"public_key">>, PublicKey}
                 ]).
 
@@ -100,7 +97,7 @@ oc_assemble_client_ejson(#chef_client{name = Name, validator = Validator,
         undefined ->
             {Values};
         _ ->
-            case key_version(PublicKey) of
+            case chef_object:key_version(PublicKey) of
                 0 ->
                     {[{<<"public_key">>, PublicKey} | Values]};
                 1 ->
@@ -162,26 +159,6 @@ oc_parse_binary_json(Bin, ReqName, CurrentClient) ->
     valid_name(Name),
     validate_client(FinalClient, Name, oc).
 
-%% @doc Add public and private key data to `ClientEjson'. This function infers
-%% the key type and puts the public key data in iether a `certificate' or
-%% `public_key' field. The private key will be placed in the `private_key'
-%% field.
--spec set_key_pair(ej:json_object(), {public_key, binary()}, {private_key, binary()}) -> ej:json_object().
-set_key_pair(ClientEjson, {public_key, PublicKey}, {private_key, PrivateKey}) ->
-    ClientEjson1 = set_public_key(ClientEjson, PublicKey),
-    ej:set({<<"private_key">>}, ClientEjson1, PrivateKey).
-
-%% @doc Sets either the `certificate' or `public_key' field of
-%% `ClientEjson' depending on the value of `PublicKey'.
--spec set_public_key(ej:json_object(), binary()) -> ej:json_object().
-set_public_key(ClientEjson, PublicKey) ->
-    case key_version(PublicKey) of
-        ?KEY_VERSION ->
-            ej:set({<<"public_key">>}, ClientEjson, PublicKey);
-        ?CERT_VERSION ->
-            ej:set({<<"certificate">>}, ClientEjson, PublicKey)
-    end.
-
 validate_client(Client, Name, osc) ->
     validate_client(Client, osc_client_spec(Name));
 validate_client(Client, Name, oc) ->
@@ -200,14 +177,24 @@ osc_set_values_from_current_client(Client, #chef_client{admin = IsAdmin,
                                                         public_key = PublicKey}) ->
     C = set_default_values(Client, [{<<"admin">>, IsAdmin},
                                     {<<"validator">>, IsValidator}]),
-    set_public_key(C, PublicKey).
+    case chef_object:cert_or_key(C) of
+        {undefined, _} ->
+            chef_object:set_public_key(C, PublicKey);
+        {_NewPublicKey, _} ->
+            C
+    end.
 
 oc_set_values_from_current_client(Client, not_found) ->
     Client;
 oc_set_values_from_current_client(Client, #chef_client{validator = IsValidator,
                                                        public_key = Cert}) ->
     C = set_default_values(Client, [{<<"validator">>, IsValidator}]),
-    set_public_key(C, Cert).
+    case chef_object:cert_or_key(C) of
+        {undefined, _} ->
+            chef_object:set_public_key(C, Cert);
+        {_NewPublicKey, _} ->
+            C
+    end.
 
 set_default_values(Client, Defaults) ->
     lists:foldl(fun({Key, Default}, Current) ->
@@ -279,21 +266,6 @@ oc_destination_name(Client, ReqName) ->
         {_, _, _} ->
             throw({client_name_mismatch})
     end.
-
-%% Determine the "pubkey_version" of a key or certificate in PEM
-%% format. Certificates are version 1. Public keys in either PKCS1 or
-%% SPKI format are version 0. The PKCS1 format is deprecated, but
-%% supported for read. We will only generate certs or SPKI packaged
-%% keys.
-key_version(<<"-----BEGIN CERTIFICATE", _Bin/binary>>) ->
-    %% cert
-    ?CERT_VERSION;
-key_version(<<"-----BEGIN PUBLIC KEY", _Bin/binary>>) ->
-    %% SPKI
-    ?KEY_VERSION;
-key_version(<<"-----BEGIN RSA PUBLIC KEY", _Bin/binary>>) ->
-    %% PKCS1
-    ?KEY_VERSION.
 
 valid_name(Name) ->
     {Regex, Msg} = chef_regex:regex_for(client_name),
