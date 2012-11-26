@@ -55,7 +55,12 @@
                  {estatsd_host, "127.0.0.1" },
                  {estatsd_port, 5665 },
                  {my_app, "reportingAPI"},
-                 {upstream_prefixes, [<<"rdbms">>, <<"couch">>, <<"authz">>, <<"solr">>, <<"reporting_db">>, <<"rest_org_run">>, <<"rest_node_run">>, <<"node_run_common">>, <<"rest_wm">>, <<"node_run_detail">>, <<"node_run_rest">>, <<"ejson">>]},
+                 {upstream_prefixes, [<<"rdbms">>, <<"couch">>, <<"authz">>,
+                   <<"solr">>, <<"reporting_db">>, <<"rest_org_run">>,
+                   <<"rest_node_run">>, <<"node_run_common">>, <<"rest_wm">>,
+                   <<"node_run_detail">>, <<"node_run_rest">>, <<"ejson">>,
+                   <<"rest_run_counts">>, <<"rest_run_durations">>,
+                   <<"auth">>, "<<chef">>]},
                  {label_fun, {reporting_app, label_mfa}}
                 ]},
   {sqerl, [
