@@ -693,9 +693,6 @@ set_public_key(UserEjson, PublicKey) ->
             ej:set({<<"certificate">>}, UserEjson, PublicKey)
     end.
 
-%% Shameless ripped key_version code from chef_client -
-%% needs to be put in a common place if it is going to end up in
-%% both user and client - putting here to more further along for now
 
 %% Determine the "pubkey_version" of a key or certificate in PEM
 %% format. Certificates are version 1. Public keys in either PKCS1 or
