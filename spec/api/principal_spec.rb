@@ -27,7 +27,7 @@ describe "Principals API Endpoint", :principals do
   # At any rate, when that glorious day arrives, this code can be
   # nuked with mild prejudice.
 
-  let(:principal_client_name) { client.name }
+  let(:principal_client_name) { platform.non_admin_client.name }
   let(:principal_user_name) { normal_user.name }
   let(:non_existent_principal_name) { 'not_a_number' }
 
