@@ -85,6 +85,12 @@ resource_exists(Req, #base_state{chef_db_context = DbContext,
             {{halt, 500}, Req, State#base_state{log_msg = Why}}
     end.
 
+%% For back-compatibility, we return a "sandbox" response when a client commits a sandbox. A
+%% simple 204 would be more appropriate. The client already has all of the data we will send
+%% and the sandbox is deleted as part of the commit action, so there is nothing the client
+%% can do with a sandbox after committing it. Chef 0.10.z clients crash on 204 responses
+%% (code in chef/rest.rb assumes a non-nil body). For a small cleanup, we've removed the
+%% json_class field since even Chef 0.10.z clients do not operate on the returned data.
 from_json(Req, #base_state{chef_db_context = DbContext,
                            resource_state = #sandbox_state{chef_sandbox = Sandbox}} = State) ->
     try
@@ -152,9 +158,7 @@ sandbox_to_ejson(#chef_sandbox{id = Id, checksums = Checksums}) ->
       {<<"name">>, Id},
       {<<"checksums">>, [ C || {C, _} <- Checksums ]},
       {<<"create_time">>, When},
-      {<<"is_completed">>, true},
-      {<<"json_class">>, <<"Chef::Sandbox">>},
-      {<<"chef_type">>, <<"sandbox">>}
+      {<<"is_completed">>, true}
      ]}.
 
 as_binary(S) when is_list(S) ->
