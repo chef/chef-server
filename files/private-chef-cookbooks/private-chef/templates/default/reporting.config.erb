@@ -25,7 +25,8 @@
              {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
             ]},
   {chef_authn, [
-                  {keyring, [{default, "/etc/opscode/webui_pub.pem"}]}
+                  {keyring, [{default, "/etc/opscode/webui_pub.pem"},
+                             {pivotal, "/etc/opscode/pivotal.pem"}]}
                  ]},
   {chef_authz, [
                   {authz_root_url, "http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>" },
@@ -48,7 +49,8 @@
             {rabbitmq_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
             {rabbitmq_user, <<"<%= node['private_chef']['rabbitmq']['reports_user'] %>">>},
             {rabbitmq_password, <<"<%= node['private_chef']['rabbitmq']['reports_password'] %>">>},
-            {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['reports_vhost'] %>">>}
+            {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['reports_vhost'] %>">>},
+            {chef_base_url, "https://localhost"}
                ]},
   {stats_hero, [
                  {udp_socket_pool_size, 1 },
