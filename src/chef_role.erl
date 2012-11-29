@@ -58,6 +58,11 @@
           {<<"env_run_lists">>, chef_json_validator:env_run_lists_spec()}
          ]}).
 
+-define(VALID_KEYS, 
+        [<<"chef_type">>, <<"default_attributes">>, <<"description">>,
+         <<"env_run_lists">>, <<"json_class">>, <<"name">>, <<"override_attributes">>,
+         <<"run_list">> ]).
+
 -type role_action() :: create | { update, Name::binary() }.
 
 %% @doc Given the EJSON representation of a role, return a sorted list of the environment names
@@ -106,13 +111,12 @@ set_default_values(Role, Defaults) ->
 
 -spec validate(ej:ejson_object()) -> {ok, ej:ejson_object()}.
 validate(Role) ->
-    case ej:valid(?VALIDATION_CONSTRAINTS, Role) of
+    case chef_object:strictly_valid(?VALIDATION_CONSTRAINTS, ?VALID_KEYS, Role) of
         ok ->
             {ok, Role};
         Bad ->
             throw(Bad)
     end.
-
 
 -spec validate_role(ejson_term(), role_action()) -> {ok, ejson_term()}.
 validate_role(Role, create) ->

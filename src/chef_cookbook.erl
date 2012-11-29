@@ -48,10 +48,11 @@
          {<<"frozen?">>, false}
         ]).
 
-
-%% ["definitions", "name", "attributes", "files", "json_class", "providers", "metadata",
-%%  "libraries", "templates", "resources", "cookbook_name", "version", "recipes", "root_files",
-%%  "frozen?", "chef_type"]
+-define(VALID_KEYS,
+        [<<"attributes">>, <<"chef_type">>, <<"cookbook_name">>,
+         <<"definitions">>, <<"files">>, <<"frozen?">>, <<"json_class">>, <<"libraries">>,
+         <<"metadata">>, <<"name">>, <<"providers">>, <<"recipes">>, <<"resources">>,
+         <<"root_files">>, <<"templates">>, <<"version">>]).
 
 -define(VALIDATION_CONSTRAINTS,
         [
@@ -98,7 +99,7 @@ set_default_values(Cookbook, Defaults) ->
                          UrlVersion :: binary()}) -> {ok, ej:json_object()}.
 validate_cookbook(Cookbook, {UrlName, UrlVersion}) ->
     %% WARNING: UrlName and UrlVersion are assumed to be valid
-    case ej:valid(cookbook_spec(UrlName, UrlVersion), Cookbook) of
+    case chef_object:strictly_valid(cookbook_spec(UrlName, UrlVersion), ?VALID_KEYS, Cookbook) of
         ok -> {ok, Cookbook};
         Bad -> throw(Bad)
     end.

@@ -99,7 +99,20 @@ validate_role_test_() ->
                            {<<"prod">>, [<<"fake[not_good]">>]}]}),
               ?assertThrow(#ej_invalid{},
                            chef_role:validate_role(R, create))
+      end},
+     {"Role with extra top-level key is invalid for create",
+      fun() ->
+              R = ej:set({<<"not_valid_key">>}, basic_role(), <<"some junk">>),
+              ?assertThrow({invalid_key, <<"not_valid_key">>},
+                          chef_role:validate_role(R, create))
+      end},
+     {"Role with extra top-level key is invalid for update",
+      fun() ->
+              R = ej:set({<<"not_valid_key">>}, basic_role(), <<"some junk">>),
+              ?assertThrow({invalid_key, <<"not_valid_key">>},
+                           chef_role:validate_role(R,{update, ej:get({<<"name">>}, R)}))
       end}
+     
     ].
 
 set_default_values_test_() ->
