@@ -168,7 +168,8 @@ malformed_request_message(#ej_invalid{type = object_value,
                                       found = Val}, _Req, _State) ->
     error_envelope([<<"Invalid value '">>, Val, <<"' for ">>, Object]);
 
-
+malformed_request_message(#ej_invalid{type = fun_match, msg = Message}, _Req, _State) ->
+    error_envelope([Message]);
 malformed_request_message(Reason, Req, #base_state{resource_mod=Mod}=State) ->
     Mod:malformed_request_message(Reason, Req, State).
 
