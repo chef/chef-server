@@ -44,7 +44,7 @@ user_spec(create) ->
     {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
     {<<"password">>, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
     {{opt,<<"admin">>}, boolean},
-    {{opt,<<"public_key">>}, {fun_match, {fun valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
+    {{opt,<<"public_key">>}, {fun_match, {fun chef_object:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
    ]};
 user_spec(update) ->
   {[
@@ -52,7 +52,7 @@ user_spec(update) ->
     {{opt,<<"password">>}, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
     {{opt,<<"private_key">>}, boolean},
     {{opt,<<"admin">>}, boolean},
-    {{opt,<<"public_key">>}, {fun_match, {fun valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
+    {{opt,<<"public_key">>}, {fun_match, {fun chef_object:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
    ]}.
 
 valid_password(Password) when is_binary(Password) andalso byte_size(Password) >= 6 ->
@@ -60,18 +60,6 @@ valid_password(Password) when is_binary(Password) andalso byte_size(Password) >=
 valid_password(_Password) ->
   error.
 
-valid_public_key(PublicKey) ->
-    case chef_object:has_public_key_header(PublicKey) of
-        true ->
-            case chef_authn:extract_public_or_private_key(PublicKey) of
-                {error, bad_key} ->
-                    error;
-                _ ->
-                    ok
-            end;
-        false ->
-            error
-    end.
 
 
 assemble_user_ejson(#chef_user{username = Name,

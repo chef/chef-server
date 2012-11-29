@@ -212,7 +212,8 @@ osc_client_spec(Name) ->
       {{opt, <<"validator">>}, boolean},
       {{opt, <<"private_key">>}, boolean},
       {{opt, <<"json_class">>}, <<"Chef::ApiClient">>},
-      {{opt, <<"chef_type">>}, <<"client">>}
+      {{opt, <<"chef_type">>}, <<"client">>},
+      {{opt, <<"public_key">>}, {fun_match, {fun chef_object:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
      ]}.
 
 oc_client_spec(Name) ->

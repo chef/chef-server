@@ -44,7 +44,8 @@
          set_updated/2,
          strictly_valid/3,
          type_name/1,
-         update_from_ejson/2
+         update_from_ejson/2,
+         valid_public_key/1
         ]).
 
 %% In order to fully test things
@@ -281,11 +282,18 @@ update_from_ejson(#chef_client{} = Client, ClientData) ->
     IsValidator = ej:get({<<"validator">>}, ClientData) =:= true,
     %% Take certificate first, then public_key
     {Key, Version} = cert_or_key(ClientData),
-    Client#chef_client{name = Name,
-                       admin = IsAdmin,
-                       validator = IsValidator,
-                       public_key = Key,
-                       pubkey_version = Version};
+    case Key of
+        undefined ->
+            Client#chef_client{name = Name,
+                admin = IsAdmin,
+                validator = IsValidator};
+        _ ->
+            Client#chef_client{name = Name,
+                admin = IsAdmin,
+                validator = IsValidator,
+                public_key = Key,
+                pubkey_version = Version}
+    end;
 update_from_ejson(#chef_data_bag{} = DataBag, DataBagData) ->
     %% here for completeness
     Name = ej:get({<<"name">>}, DataBagData),
@@ -718,3 +726,17 @@ has_public_key_header(<<"-----BEGIN RSA PUBLIC KEY", _/binary>>) ->
     true;
 has_public_key_header(_) ->
     false.
+
+-spec valid_public_key(<<_:64, _:_*8>>) -> ok | error.
+valid_public_key(PublicKey) ->
+    case has_public_key_header(PublicKey) of
+        true ->
+            case chef_authn:extract_public_or_private_key(PublicKey) of
+                {error, bad_key} ->
+                    error;
+                _ ->
+                    ok
+            end;
+        false ->
+            error
+    end.
