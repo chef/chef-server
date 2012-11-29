@@ -43,7 +43,8 @@ user_spec(create) ->
   {[
     {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
     {<<"password">>, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
-    {{opt,<<"admin">>}, boolean}
+    {{opt,<<"admin">>}, boolean},
+    {{opt,<<"public_key">>}, {fun_match, {fun valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
    ]};
 user_spec(update) ->
   {[
