@@ -66,6 +66,19 @@ valid_resources_test() ->
                   ]}]),
     ?assertEqual({ok, CB}, chef_cookbook:validate_cookbook(CB, NameVer)).
 
+top_level_key_validation_test() ->
+    Name = <<"test_name">>,
+    Version = <<"1.2.3">>,
+    Cookbook = basic_cookbook(Name, Version),
+    [
+     {"Cookbook with extra top-level key is invalid for create",
+      fun() ->
+              C = ej:set({<<"not_valid_key">>}, Cookbook, <<"some junk">>),
+              ?assertThrow({invalid_key, <<"not_valid_key">>},
+                           chef_cookbook:validate_role(C, {Name, Version}))
+      end}
+    ].
+
 bad_resources_test_() ->
     CB0 = basic_cookbook(<<"php">>, <<"1.2.3">>),
     NameVer = {<<"php">>, <<"1.2.3">>},
