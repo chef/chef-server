@@ -78,7 +78,7 @@ parse_binary_json(Bin) ->
 
 -spec parse_binary_json(binary(), create | update) -> {ok, ej:json_object()}. % or throw
 parse_binary_json(Bin, Operation) ->
-  User = chef_json:decode(Bin),
+  User = chef_object:delete_null_public_key(chef_json:decode(Bin)),
   %% If user is invalid, an error is thown
   validate_user(User, user_spec(Operation)),
   %% Set default values after validating input, so admin can be set to false

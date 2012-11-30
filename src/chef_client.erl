@@ -138,7 +138,7 @@ osc_parse_binary_json(Bin, ReqName) ->
 %% EJson-encoded Erlang data structure, using passed defaults
 %% @end
 osc_parse_binary_json(Bin, ReqName, CurrentClient) ->
-    Client = osc_set_values_from_current_client(chef_json:decode_body(Bin), CurrentClient),
+    Client = osc_set_values_from_current_client(chef_object:delete_null_public_key(chef_json:decode_body(Bin)), CurrentClient),
     Client1 = set_default_values(Client, ?DEFAULT_FIELD_VALUES),
     {Name, FinalClient} = osc_destination_name(Client1, ReqName),
     valid_name(Name),
