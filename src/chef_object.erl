@@ -756,7 +756,7 @@ has_public_key_header(_) ->
 valid_public_key(PublicKey) ->
     case has_public_key_header(PublicKey) of
         true ->
-            case chef_authn:extract_public_or_private_key(PublicKey) of
+            case chef_authn:extract_public_key(PublicKey) of
                 {error, bad_key} ->
                     error;
                 _ ->
