@@ -50,13 +50,28 @@ user_spec(update) ->
     {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
     {{opt,<<"password">>}, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
     {{opt,<<"private_key">>}, boolean},
-    {{opt,<<"admin">>}, boolean}
+    {{opt,<<"admin">>}, boolean},
+    {{opt,<<"public_key">>}, {fun_match, {fun valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
    ]}.
 
 valid_password(Password) when is_binary(Password) andalso byte_size(Password) >= 6 ->
   ok;
 valid_password(_Password) ->
   error.
+
+valid_public_key(PublicKey) ->
+    case chef_object:has_public_key_header(PublicKey) of
+        true ->
+            case chef_authn:extract_public_or_private_key(PublicKey) of
+                {error, bad_key} ->
+                    error;
+                _ ->
+                    ok
+            end;
+        false ->
+            error
+    end.
+
 
 assemble_user_ejson(#chef_user{username = Name,
                                public_key = PubKey,
@@ -123,8 +138,15 @@ update_from_ejson(#chef_user{} = User, {UserData, PasswordData}) ->
 
     {Key, _Version} = chef_object:cert_or_key(UserData),
     UserWithPassword = chef_user:set_password_data(User, PasswordData),
-    UserWithPassword#chef_user{username = Name,
-                               admin = IsAdmin,
-                               public_key = Key
-                              }.
+    case Key of
+        undefined ->
+            UserWithPassword#chef_user{username = Name,
+                admin = IsAdmin
+            };
+        _ ->
+            UserWithPassword#chef_user{username = Name,
+                admin = IsAdmin,
+                public_key = Key
+            }
+    end.
 

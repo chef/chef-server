@@ -709,3 +709,12 @@ key_version(<<"-----BEGIN PUBLIC KEY", _Bin/binary>>) ->
 key_version(<<"-----BEGIN RSA PUBLIC KEY", _Bin/binary>>) ->
     %% PKCS1
     ?KEY_VERSION.
+
+%% OSC will only accept public keys. It will not accept certificates
+-spec has_public_key_header(<<_:64,_:_*8>>) -> true | false.
+has_public_key_header(<<"-----BEGIN PUBLIC KEY", _/binary>>) ->
+    true;
+has_public_key_header(<<"-----BEGIN RSA PUBLIC KEY", _/binary>>) ->
+    true;
+has_public_key_header(_) ->
+    false.
