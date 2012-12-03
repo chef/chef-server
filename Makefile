@@ -1,5 +1,6 @@
 DEPS=$(CURDIR)/deps
-DIALYZER_DEPS = deps/depsolver/ebin \
+DIALYZER_DEPS = deps/chef_authn/ebin \
+                deps/depsolver/ebin \
                 deps/ej/ebin \
                 deps/jiffy/ebin \
                 deps/ibrowse/ebin \

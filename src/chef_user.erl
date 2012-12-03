@@ -43,20 +43,24 @@ user_spec(create) ->
   {[
     {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
     {<<"password">>, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
-    {{opt,<<"admin">>}, boolean}
+    {{opt,<<"admin">>}, boolean},
+    {{opt,<<"public_key">>}, {fun_match, {fun chef_object:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
    ]};
 user_spec(update) ->
   {[
     {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
     {{opt,<<"password">>}, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
     {{opt,<<"private_key">>}, boolean},
-    {{opt,<<"admin">>}, boolean}
+    {{opt,<<"admin">>}, boolean},
+    {{opt,<<"public_key">>}, {fun_match, {fun chef_object:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
    ]}.
 
 valid_password(Password) when is_binary(Password) andalso byte_size(Password) >= 6 ->
   ok;
 valid_password(_Password) ->
   error.
+
+
 
 assemble_user_ejson(#chef_user{username = Name,
                                public_key = PubKey,
@@ -74,7 +78,7 @@ parse_binary_json(Bin) ->
 
 -spec parse_binary_json(binary(), create | update) -> {ok, ej:json_object()}. % or throw
 parse_binary_json(Bin, Operation) ->
-  User = chef_json:decode(Bin),
+  User = chef_object:delete_null_public_key(chef_json:decode(Bin)),
   %% If user is invalid, an error is thown
   validate_user(User, user_spec(Operation)),
   %% Set default values after validating input, so admin can be set to false
@@ -123,8 +127,15 @@ update_from_ejson(#chef_user{} = User, {UserData, PasswordData}) ->
 
     {Key, _Version} = chef_object:cert_or_key(UserData),
     UserWithPassword = chef_user:set_password_data(User, PasswordData),
-    UserWithPassword#chef_user{username = Name,
-                               admin = IsAdmin,
-                               public_key = Key
-                              }.
+    case Key of
+        undefined ->
+            UserWithPassword#chef_user{username = Name,
+                admin = IsAdmin
+            };
+        _ ->
+            UserWithPassword#chef_user{username = Name,
+                admin = IsAdmin,
+                public_key = Key
+            }
+    end.
 

@@ -138,7 +138,7 @@ osc_parse_binary_json(Bin, ReqName) ->
 %% EJson-encoded Erlang data structure, using passed defaults
 %% @end
 osc_parse_binary_json(Bin, ReqName, CurrentClient) ->
-    Client = osc_set_values_from_current_client(chef_json:decode_body(Bin), CurrentClient),
+    Client = osc_set_values_from_current_client(chef_object:delete_null_public_key(chef_json:decode_body(Bin)), CurrentClient),
     Client1 = set_default_values(Client, ?DEFAULT_FIELD_VALUES),
     {Name, FinalClient} = osc_destination_name(Client1, ReqName),
     valid_name(Name),
@@ -212,7 +212,8 @@ osc_client_spec(Name) ->
       {{opt, <<"validator">>}, boolean},
       {{opt, <<"private_key">>}, boolean},
       {{opt, <<"json_class">>}, <<"Chef::ApiClient">>},
-      {{opt, <<"chef_type">>}, <<"client">>}
+      {{opt, <<"chef_type">>}, <<"client">>},
+      {{opt, <<"public_key">>}, {fun_match, {fun chef_object:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
      ]}.
 
 oc_client_spec(Name) ->

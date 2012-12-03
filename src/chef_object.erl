@@ -28,6 +28,7 @@
 -include_lib("ej/include/ej.hrl").
 
 -export([cert_or_key/1,
+         delete_null_public_key/1,
          depsolver_constraints/1,
          ejson_for_indexing/2,
          id/1,
@@ -44,7 +45,8 @@
          set_updated/2,
          strictly_valid/3,
          type_name/1,
-         update_from_ejson/2
+         update_from_ejson/2,
+         valid_public_key/1
         ]).
 
 %% In order to fully test things
@@ -281,11 +283,18 @@ update_from_ejson(#chef_client{} = Client, ClientData) ->
     IsValidator = ej:get({<<"validator">>}, ClientData) =:= true,
     %% Take certificate first, then public_key
     {Key, Version} = cert_or_key(ClientData),
-    Client#chef_client{name = Name,
-                       admin = IsAdmin,
-                       validator = IsValidator,
-                       public_key = Key,
-                       pubkey_version = Version};
+    case Key of
+        undefined ->
+            Client#chef_client{name = Name,
+                admin = IsAdmin,
+                validator = IsValidator};
+        _ ->
+            Client#chef_client{name = Name,
+                admin = IsAdmin,
+                validator = IsValidator,
+                public_key = Key,
+                pubkey_version = Version}
+    end;
 update_from_ejson(#chef_data_bag{} = DataBag, DataBagData) ->
     %% here for completeness
     Name = ej:get({<<"name">>}, DataBagData),
@@ -558,8 +567,13 @@ maybe_stub_authz_id(AuthzId, _ObjectId) ->
     AuthzId.
 
 cert_or_key(Payload) ->
-    Cert = ej:get({<<"certificate">>}, Payload),
-    PublicKey = ej:get({<<"public_key">>}, Payload),
+    %% Some consumers of the API, such as webui, will generate a
+    %% JSON { public_key: null } to mean, "do not change it". By
+    %% default, null is treated as a defined, and will erase the
+    %% public_key in the database. We use value_or_undefined() to
+    %% convert all null into undefined.
+    Cert = value_or_undefined({<<"certificate">>}, Payload),
+    PublicKey = value_or_undefined({<<"public_key">>}, Payload),
     %% Take certificate first, then public_key
     case Cert of
         undefined ->
@@ -567,6 +581,17 @@ cert_or_key(Payload) ->
         _ ->
             {Cert, ?CERT_VERSION}
     end.
+
+%% Hack to get null public_key accepted as undefined
+-spec delete_null_public_key(json_object()) -> json_object().
+delete_null_public_key(Ejson) ->
+    case ej:get({<<"public_key">>}, Ejson) of
+        null ->
+            ej:delete({<<"public_key">>}, Ejson);
+        _ ->
+            Ejson
+    end.
+
 
 %% @doc Returns a normalized version of `RunList`.  All implicitly-declared recipes (e.g.,
 %% "foo::bar") are made explicit (e.g., "recipe[foo::bar]").  Already explicit recipes and
@@ -615,11 +640,19 @@ deduplicate_run_list(L) ->
     [ Elt || {Elt, _} <- lists:ukeysort(2, lists:ukeysort(1, WithIdx)) ].
 
 value_or_null(Key, Data) ->
-  Value = ej:get(Key, Data),
+ Value = ej:get(Key, Data),
   case Value of
     undefined ->
       null;
     _ ->
+      Value
+  end.
+
+value_or_undefined(Key, Data) ->
+  case ej:get(Key, Data) of
+    null ->
+      undefined;
+    Value ->
       Value
   end.
 
@@ -709,3 +742,26 @@ key_version(<<"-----BEGIN PUBLIC KEY", _Bin/binary>>) ->
 key_version(<<"-----BEGIN RSA PUBLIC KEY", _Bin/binary>>) ->
     %% PKCS1
     ?KEY_VERSION.
+
+%% OSC will only accept public keys. It will not accept certificates
+-spec has_public_key_header(<<_:64,_:_*8>>) -> true | false.
+has_public_key_header(<<"-----BEGIN PUBLIC KEY", _/binary>>) ->
+    true;
+has_public_key_header(<<"-----BEGIN RSA PUBLIC KEY", _/binary>>) ->
+    true;
+has_public_key_header(_) ->
+    false.
+
+-spec valid_public_key(<<_:64, _:_*8>>) -> ok | error.
+valid_public_key(PublicKey) ->
+    case has_public_key_header(PublicKey) of
+        true ->
+            case chef_authn:extract_public_key(PublicKey) of
+                {error, bad_key} ->
+                    error;
+                _ ->
+                    ok
+            end;
+        false ->
+            error
+    end.
