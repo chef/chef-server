@@ -24,7 +24,9 @@
 
 -include_lib("chef_objects/include/chef_types.hrl").
 -include_lib("chef_objects/include/chef_osc_defaults.hrl").
+-include_lib("ej/include/ej.hrl").
 -include_lib("eunit/include/eunit.hrl").
+
 
 public_key_data() ->
     {ok, Bin} = file:read_file("../test/spki_public.pem"),
@@ -95,6 +97,45 @@ osc_parse_binary_json_test_() ->
                            chef_client:osc_parse_binary_json(Body, <<"bad~name">>))
       end
      },
+
+     {"a null public_key is removed",
+      fun() ->
+              Body = chef_json:encode({[
+                                        {<<"name">>, <<"client1">>},
+                                        {<<"public_key">>, null}
+                                       ]}),
+              {ok, Got} = chef_client:osc_parse_binary_json(Body, <<"client1">>),
+              ?assertEqual(undefined, ej:get({"public_key"}, Got))
+      end},
+
+     {"a valid public_key is preserved",
+      fun() ->
+              Body = chef_json:encode({[
+                                        {<<"name">>, <<"client1">>},
+                                        {<<"public_key">>, public_key_data()}
+                                       ]}),
+              {ok, Got} = chef_client:osc_parse_binary_json(Body, <<"client1">>),
+              ?assertEqual(public_key_data(), ej:get({"public_key"}, Got))
+      end},
+
+     {"Errors thrown for invalid public_key data ", generator,
+      fun() ->
+              MungedKey = re:replace(public_key_data(), "A", "2",
+                                     [{return, binary}, global]),
+              BadKeys = [MungedKey,
+                         <<"a very bad key">>,
+                         true,
+                         113,
+                         [public_key_data()],
+                         {[]}],
+              Bodies = [ chef_json:encode({[
+                                        {<<"name">>, <<"client1">>},
+                                        {<<"public_key">>, Key}]})
+                         || Key <- BadKeys ],
+              [ ?_assertThrow(#ej_invalid{},
+                              chef_client:osc_parse_binary_json(Body, <<"client1">>))
+                || Body <- Bodies ]
+      end},
 
      {"Inherits values from current client",
       fun() ->
