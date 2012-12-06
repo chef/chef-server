@@ -204,10 +204,10 @@
          }).
 
 -record(principal_state, {
-          principal_data,
           name,
           public_key,
-          type
+          type,
+          authz_id
          }).
 
 -record(depsolver_state, {

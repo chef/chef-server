@@ -80,15 +80,17 @@ resource_exists(Req, #base_state{chef_db_context = DbContext,
             Message = chef_wm_util:not_found_message(client, Name),
             Req1 = chef_wm_util:set_json_body(Req, Message),
             {false, Req1, State#base_state{log_msg = client_not_found}};
-        #chef_client{name = Name, public_key = PublicKey} = Client ->
+        #chef_client{name = Name, public_key = PublicKey, authz_id = AuthzId} = Client ->
             State1 = ResourceState#principal_state{name = Name,
                                                    public_key = PublicKey,
-                                                   type = principal_type(Client)},
+                                                   type = principal_type(Client),
+                                                   authz_id = AuthzId},
             {true, Req, State#base_state{resource_state = State1}};
-        #chef_user{username = Name, public_key = PublicKey} = User ->
+        #chef_user{username = Name, public_key = PublicKey, authz_id = AuthzId} = User ->
             State1 = ResourceState#principal_state{name = Name,
                                                    public_key = PublicKey,
-                                                   type = principal_type(User)},
+                                                   type = principal_type(User),
+                                                   authz_id = AuthzId},
             {true, Req, State#base_state{resource_state = State1}}
     end.
 
@@ -100,10 +102,12 @@ auth_info(Req, State) ->
 
 assemble_principal_ejson(#principal_state{name = Name,
                                           public_key = PublicKey,
-                                          type = Type} = _Principal) ->
+                                          type = Type,
+                                          authz_id = AuthzId} = _Principal) ->
     {[{<<"name">>, Name},
       {<<"public_key">>, PublicKey},
-      {<<"type">>, Type}]}.
+      {<<"type">>, Type},
+      {<<"authz_id">>, AuthzId}]}.
 
 to_json(Req, #base_state{resource_state = Principal} = State) ->
     EJson = assemble_principal_ejson(Principal),
