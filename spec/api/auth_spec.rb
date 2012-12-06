@@ -498,7 +498,6 @@ describe "private chef authorization checks" do
     def new_node(name)
       {
       "name" => name,
-      "description" => "blah",
       "json_class" => "Chef::Node",
       "chef_type" => "node",
       "chef_environment" => "_default",
@@ -511,7 +510,7 @@ describe "private chef authorization checks" do
     end
 
     let(:new_resource) { new_node(new_name) }
-    let(:modified_resource) { new_resource.merge({ "description" => "foobar" }) }
+    let(:modified_resource) { new_resource.merge({ "run_list" => ["role[foobar]"] }) }
     let(:modified_resource2) { new_resource.merge({ "name" => other_name }) }
 
     let(:default_list) { {
