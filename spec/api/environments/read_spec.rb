@@ -156,7 +156,7 @@ describe "Environments API Endpoint", :environments do
             end
           end
           context 'with a client' do
-            let(:user) { client }
+            let(:user) { platform.non_admin_client }
             include_context 'successfully GETs'
           end
           context 'with an outside user (admin of another org)' do
@@ -214,7 +214,7 @@ describe "Environments API Endpoint", :environments do
 
           end
           context 'with a client' do
-            let(:requestor) { client }
+            let(:requestor) { platform.non_admin_client }
             include_context 'successfully GETs environment'
           end
 

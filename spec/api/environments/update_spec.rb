@@ -119,7 +119,7 @@ describe "Environments API Endpoint", :environments do
         context 'with a client' do
           it 'returns 403' do
             response = put(api_url("/environments/#{new_environment_name}"),
-                           client,
+                           platform.non_admin_client,
                            :payload => modified_env)
             response.should look_like({:status => 403})
           end
