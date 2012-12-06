@@ -115,7 +115,7 @@ describe "Environments API Endpoint", :environments do
           end
 
           context 'with a client' do
-            let(:requestor)         { client }
+            let(:requestor)         { platform.non_admin_client }
             let(:request_payload)   { new_environment(new_environment_name) }
             let(:expected_response) { forbidden_response }
 

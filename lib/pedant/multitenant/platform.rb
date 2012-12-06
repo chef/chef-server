@@ -26,7 +26,6 @@ module Pedant
 
     def setup(requestors=Pedant::Config.requestors)
       requestors[:clients].each do |kind, client_hash|
-        client_hash[:admin] = !!client_hash[:admin] # Convert to true or false
 
         key = cache_key(kind, :client)
 
@@ -54,9 +53,6 @@ module Pedant
         end
       end
 
-      # Create a client and stash in the config object
-      client = create_client("pedant_client", self.test_org)
-      Pedant::Config.real_clients = {:pedant_client => client}
     end
 
     def cleanup
@@ -137,7 +133,7 @@ module Pedant
     # end
 
 
-    def create_client(name, org)
+    def create_client(name)
       clientname = name.to_s
       puts "Creating client #{clientname}..."
       payload = { "name" => clientname }
@@ -158,16 +154,15 @@ module Pedant
       name = requestor_spec[:name]
       create_me = requestor_spec[:create_me]
       type = requestor_spec[:type]
-      admin = requestor_spec[:admin] || false
       key_file = requestor_spec[:key_file]
 
       # Extract to after hooks
       if create_me
-        create_client(name, admin).tap do |client|
+        create_client(name).tap do |client|
           client.populate_dot_chef! if requestor_spec[:create_knife]
         end
       else
-        Pedant::Client.new(name, key_file, platform: self, preexisting: true, admin: admin)
+        Pedant::Client.new(name, key_file, platform: self, preexisting: true, admin: false)
       end
     end
 

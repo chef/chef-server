@@ -89,7 +89,7 @@ describe "Environments API Endpoint", :environments do
 
         context 'with a client' do
           let(:expected_response) { forbidden_response }
-          let(:requestor) { client }
+          let(:requestor) { platform.non_admin_client }
           should_respond_with 403
         end
 
