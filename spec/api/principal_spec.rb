@@ -41,13 +41,15 @@ describe "Principals API Endpoint", :principals do
     {
       "name" => principal_client_name,
       "type" => "client",
-      "public_key" => /^-----BEGIN CERTIFICATE-----/
+      "public_key" => /^-----BEGIN CERTIFICATE-----/,
+      "authz_id" => /.+/
     } }
   let(:user_body) {
     {
       "name" => principal_user_name,
       "type" => "user",
-      "public_key" => /^-----BEGIN CERTIFICATE-----/
+      "public_key" => /^-----BEGIN CERTIFICATE-----/,
+      "authz_id" => /.+/
     } }
 
   describe 'access control' do
