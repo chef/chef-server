@@ -87,6 +87,7 @@ http {
 
     # pushy
     <%= @helper.pushy_api("^/organizations/[a-z0-9\-_]+?/pushy") %>
+    <%= @helper.pushy_api("^/_status") %>
 
     # search requests
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
