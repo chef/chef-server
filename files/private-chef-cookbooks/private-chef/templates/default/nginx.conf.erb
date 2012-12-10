@@ -87,7 +87,13 @@ http {
 
     # pushy
     <%= @helper.pushy_api("^/organizations/[a-z0-9\-_]+?/pushy") %>
-    <%= @helper.pushy_api("^/_status") %>
+
+    # pushy status endpoint
+    location ~ "^/pushy/_status$" {
+        set $my_upstream opscode_pushy;
+        proxy_redirect http://$my_upstream /;
+        proxy_pass http://$my_upstream;
+    }
 
     # search requests
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
