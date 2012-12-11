@@ -101,6 +101,7 @@ ALTER TABLE ONLY cookbook_versions ALTER COLUMN meta_long_desc SET STORAGE EXTER
 ALTER TABLE ONLY cookbook_versions ALTER COLUMN metadata SET STORAGE EXTERNAL;
 ALTER TABLE ONLY cookbook_versions ALTER COLUMN serialized_object SET STORAGE EXTERNAL;
 
+CREATE INDEX cookbook_version_checksums_by_id ON cookbook_version_checksums(cookbook_version_id);
 
 --
 -- Name: cookbooks; Type: TABLE; Schema: public; Owner: -; Tablespace: 
