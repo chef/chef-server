@@ -50,7 +50,8 @@
             {rabbitmq_user, <<"<%= node['private_chef']['rabbitmq']['reports_user'] %>">>},
             {rabbitmq_password, <<"<%= node['private_chef']['rabbitmq']['reports_password'] %>">>},
             {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['reports_vhost'] %>">>},
-            {chef_base_url, "https://localhost"}
+            {chef_base_url, "https://localhost"},
+            {erchef_base_url, "https://localhost"}
                ]},
   {stats_hero, [
                  {udp_socket_pool_size, 1 },
@@ -62,7 +63,7 @@
                    <<"rest_node_run">>, <<"node_run_common">>, <<"rest_wm">>,
                    <<"node_run_detail">>, <<"node_run_rest">>, <<"ejson">>,
                    <<"rest_run_counts">>, <<"rest_run_durations">>,
-                   <<"auth">>, "<<chef">>]},
+                   <<"auth">>, <<"chef">>]},
                  {label_fun, {reporting_app, label_mfa}}
                 ]},
   {sqerl, [
