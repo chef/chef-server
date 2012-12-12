@@ -10,6 +10,13 @@ GIT
       rake (>= 0.9)
       uber-s3
 
+GIT
+  remote: git://github.com/opscode/omnibus-software.git
+  revision: 6b50a975e800b27feb032e1af0f6cad92fd9688f
+  branch: master
+  specs:
+    omnibus-software (0.0.1)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -59,4 +66,5 @@ PLATFORMS
 
 DEPENDENCIES
   omnibus!
+  omnibus-software!
   vagrant (~> 1.0)
