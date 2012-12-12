@@ -229,6 +229,7 @@ default['private_chef']['opscode-webui']['cookie_secret'] = "47b3b8d95dea455baf3
 ####
 default['private_chef']['oc-chef-pedant']['dir'] = "/var/opt/opscode/oc-chef-pedant"
 default['private_chef']['oc-chef-pedant']['log_directory'] = "/var/log/opscode/oc-chef-pedant"
+default['private_chef']['oc-chef-pedant']['log_http_requests'] = true
 
 ###
 # Load Balancer
