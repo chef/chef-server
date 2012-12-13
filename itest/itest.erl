@@ -1511,7 +1511,10 @@ fetch_cookbook_version_checksums() ->
                                            {CookbookVersion#chef_cookbook_version.major,
                                             CookbookVersion#chef_cookbook_version.minor,
                                             CookbookVersion#chef_cookbook_version.patch}}),
-    ?assertEqual(CookbookVersion, Got).
+    % We don't know the order the checksums will come back as
+    NormalizedGotChecksums = lists:sort(Got#chef_cookbook_version.checksums),
+    NormalizedGot = Got#chef_cookbook_version{checksums = NormalizedGotChecksums},
+    ?assertEqual(CookbookVersion, NormalizedGot).
 
 fetch_cookbook_version_different_version() ->
     Cookbook = make_cookbook(<<"fetch_different">>),

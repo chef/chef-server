@@ -61,6 +61,7 @@ CREATE TABLE `cookbook_version_checksums` (
   CONSTRAINT `cookbook_version_checksums_org_id_fkey` FOREIGN KEY (`org_id`, `checksum`) REFERENCES `checksums` (`org_id`, `checksum`) ON UPDATE CASCADE,
   CONSTRAINT `cookbook_version_checksums_ibfk_1` FOREIGN KEY (`cookbook_version_id`) REFERENCES `cookbook_versions` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+CREATE INDEX cookbook_version_checksums_by_id ON cookbook_version_checksums(cookbook_version_id);
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `cookbook_version_dependencies`;
 /*!50001 DROP VIEW IF EXISTS `cookbook_version_dependencies`*/;
