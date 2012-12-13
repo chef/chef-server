@@ -6,7 +6,7 @@
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 
-describe "Principals API Endpoint", :principals do
+describe "Principals API Endpoint", :focus, :principals do
 
   # This code does not use any of the new hotness, and is in fact
   # somewhat temporary, so it has been decided not to waste the effort
@@ -41,13 +41,17 @@ describe "Principals API Endpoint", :principals do
     {
       "name" => principal_client_name,
       "type" => "client",
-      "public_key" => /^-----BEGIN CERTIFICATE-----/
+      "public_key" => /^-----BEGIN CERTIFICATE-----/,
+      "authz_id" => /^[0-9a-f]{32}$/,
+      "org_member" => true
     } }
   let(:user_body) {
     {
       "name" => principal_user_name,
       "type" => "user",
-      "public_key" => /^-----BEGIN CERTIFICATE-----/
+      "public_key" => /^-----BEGIN CERTIFICATE-----/,
+      "authz_id" => /^[0-9a-f]{32}$/,
+      "org_member" => true
     } }
 
   describe 'access control' do
@@ -125,6 +129,58 @@ describe "Principals API Endpoint", :principals do
       end
 
       context 'when requesting a user' do
+        it 'returns a 200 ("OK") for admin' do
+          get(api_url("/principals/#{principal_user_name}"),
+              admin_user) do |response|
+            response.should look_like({
+                                        :status => 200,
+                                        :body_exact => user_body
+                                      })
+          end
+        end
+
+        it 'returns a 200 ("OK") for normal user' do
+          get(api_url("/principals/#{principal_user_name}"),
+              normal_user) do |response|
+            response.should look_like({
+                                        :status => 200,
+                                        :body_exact => user_body
+                                      })
+          end
+        end
+
+        it 'returns a 200 ("OK") for invalid user' do
+          get(api_url("/principals/#{principal_user_name}"),
+              invalid_user) do |response|
+            response.should look_like({
+                                        :status => 200,
+                                        :body_exact => user_body
+                                      })
+          end
+        end
+
+        it 'returns a 200 ("OK") for outside user' do
+          get(api_url("/principals/#{principal_user_name}"),
+              outside_user) do |response|
+            response.should look_like({
+                                        :status => 200,
+                                        :body_exact => user_body
+                                      })
+          end
+        end
+      end
+
+      context 'when requesting an outside user' do
+        let(:principal_user_name) { outside_user.name }
+        let(:user_body) {
+          {
+            "name" => principal_user_name,
+            "type" => "user",
+            "public_key" => /^-----BEGIN CERTIFICATE-----/,
+            "authz_id" => /^[0-9a-f]{32}$/,
+            "org_member" => false
+          } }
+
         it 'returns a 200 ("OK") for admin' do
           get(api_url("/principals/#{principal_user_name}"),
               admin_user) do |response|
