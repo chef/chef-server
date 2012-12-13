@@ -568,7 +568,7 @@ else
     ENV["PATH"] = "/opt/opscode/bin:/opt/opscode/embedded/bin:#{ENV['PATH']}"
     pedant_args = ARGV[1..-1]
     pedant_args = ["--smoke"] unless pedant_args.any?
-    pedant_config = "/etc/opscode/pedant_config.rb"
+    pedant_config = "/var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb"
     Dir.chdir("/opt/opscode/embedded/service/oc-chef-pedant")
     exec("/opt/opscode/embedded/bin/bundle exec ./bin/oc-chef-pedant -c #{pedant_config} #{pedant_args.join(' ')}")
   when "password"

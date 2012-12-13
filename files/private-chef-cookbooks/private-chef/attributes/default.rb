@@ -224,6 +224,13 @@ default['private_chef']['opscode-webui']['session_key'] = "_sandbox_session"
 default['private_chef']['opscode-webui']['cookie_domain'] = "all"
 default['private_chef']['opscode-webui']['cookie_secret'] = "47b3b8d95dea455baf32155e95d1e64e"
 
+####
+# Chef Pedant
+####
+default['private_chef']['oc-chef-pedant']['dir'] = "/var/opt/opscode/oc-chef-pedant"
+default['private_chef']['oc-chef-pedant']['log_directory'] = "/var/log/opscode/oc-chef-pedant"
+default['private_chef']['oc-chef-pedant']['log_http_requests'] = true
+
 ###
 # Load Balancer
 ###
