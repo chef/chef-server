@@ -54,8 +54,8 @@ deps << "oc-chef-pedant"
 deps << "partybus"
 deps << "private-chef-upgrades"
 
-# Version manifest file
-deps << "pc-version"
+# version manifest file
+deps << "version-manifest"
 
 dependencies deps
 

@@ -125,7 +125,7 @@ Omnibus as a valid version (e.g., branch name, tag name, SHA1, etc.)
 If present, the versions of the software packages in this file will
 supercede versions in the corresponding software descriptor file.
 Additionally, the information in the generated
-`/opt/opscode/pc-versions.txt` file (installed by the generated
+`/opt/opscode/version-manifest.txt` file (installed by the generated
 installer) will indicate which (if any) packages had their versions
 overridden, and what the version would have been if it hadn't been
 overridden.

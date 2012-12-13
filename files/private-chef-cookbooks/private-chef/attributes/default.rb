@@ -320,7 +320,7 @@ default['private_chef']['mysql']['sql_password'] = "snakepliskin"
 default['private_chef']['mysql']['vip'] = "127.0.0.1"
 default['private_chef']['mysql']['destructive_migrate'] = false
 default['private_chef']['mysql']['install_libs'] = true
-default['private_chef']['mysql']['mysql2_versions'] = IO.readlines("/opt/opscode/pc-version.txt").detect { |l| l =~ /^mysql2/ }.gsub(/^mysql2:\s+(\d.+)$/, '\1').chomp.split("-")
+default['private_chef']['mysql']['mysql2_versions'] = IO.readlines("/opt/opscode/version-manifest.txt").detect { |l| l =~ /^mysql2/ }.gsub(/^mysql2\s+(\d.+)$/, '\1').chomp.strip.split("-")
 
 ###
 # PostgreSQL
