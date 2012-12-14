@@ -103,6 +103,14 @@ auth_info(Req, State) ->
 assemble_principal_ejson(#principal_state{name = Name,
                                           public_key = PublicKey,
                                           type = Type,
+                                          authz_id = AuthzId} = _Principal) ->
+    {[{<<"name">>, Name},
+      {<<"public_key">>, PublicKey},
+      {<<"type">>, Type},
+      {<<"authz_id">>, AuthzId}]}.
+assemble_principal_ejson(#principal_state{name = Name,
+                                          public_key = PublicKey,
+                                          type = Type,
                                           authz_id = AuthzId} = _Principal,
                          OrgName, DbContext) ->
     Member = case Type of
@@ -118,8 +126,14 @@ assemble_principal_ejson(#principal_state{name = Name,
       {<<"org_member">>, Member}]}.
 
 to_json(Req, #base_state{resource_state = Principal, chef_db_context = DbContext,
-                         organization_name = OrgName} = State) ->
-    EJson = assemble_principal_ejson(Principal, OrgName, DbContext),
+                         organization_name = OrgName,
+                         server_flavor = Flavor} = State) ->
+    EJson = case Flavor of
+                "osc" ->
+                    assemble_principal_ejson(Principal);
+                _other ->
+                    assemble_principal_ejson(Principal, OrgName, DbContext)
+            end,
     Json = ejson:encode(EJson),
     {Json, Req, State}.
 
