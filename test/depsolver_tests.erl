@@ -304,6 +304,48 @@ pessimistic_major_minor_test() ->
                        {app1,{3,0}}]},
                  depsolver:solve(Dom0, [{app1, "3.0"}])).
 
+filter_packages_with_deps_test() ->
+    Packages = [{app1, [{"0.1", [{app2, "0.2"},
+                                 {app3, "0.2", '>='},
+                                 {app4, "0.2", '='}]},
+                        {"0.2", [{app4, "0.2"}]},
+                        {"0.3", [{app4, "0.2", '='}]}]},
+                {app2, [{"0.1", []},
+                        {"0.2",[{app3, "0.3"}]},
+                        {"0.3", []}]},
+                {app3, [{"0.1", []},
+                        {"0.2", []},
+                        {"0.3", []}]}],
+
+    %% constrain app1 and app3
+    Cons = [{app1, "0.1", '='},
+            {app3, "0.1", '>'}],
+    ?assertEqual({ok, [{app1, [{"0.1", [{app2, "0.2"},
+                                        {app3, "0.2", '>='},
+                                        {app4, "0.2", '='}]}]},
+                       {app2, [{"0.1", []},
+                               {"0.2",[{app3, "0.3"}]},
+                               {"0.3", []}]},
+                       {app3, [{"0.2", []},
+                               {"0.3", []}]}]},
+                 depsolver:filter_packages_with_deps(Packages, Cons)),
+    %% a constraint that doesn't matter
+    ?assertEqual({ok, Packages},
+                 depsolver:filter_packages_with_deps(Packages, [{appX, "4.0"}])),
+    %% no constraints
+    ?assertEqual({ok, Packages},
+                 depsolver:filter_packages_with_deps(Packages, [])),
+
+    %% remove everything constraints
+    ?assertEqual({ok, []},
+                 depsolver:filter_packages_with_deps(Packages,
+                                                     [{app1, "40.0"},
+                                                      {app2, "40.0"},
+                                                      {app3, "40.0"}])),
+
+    Ret = depsolver:filter_packages_with_deps(Packages, [{<<"ick">>, "1.0.0", '~~~~'}]),
+    ?assertEqual({error, {invalid_constraints, [{<<"ick">>, {1,0,0}, '~~~~'}]}}, Ret).
+
 filter_versions_test() ->
 
     Cons = [{app2, "2.1", '~>'},

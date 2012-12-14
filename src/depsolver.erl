@@ -88,7 +88,8 @@
          add_package_version/3,
          add_package_version/4,
          parse_version/1,
-         filter_packages/2]).
+         filter_packages/2,
+         filter_packages_with_deps/2]).
 
 %% Internally Exported API. This should *not* be used outside of the depsolver
 %% application. You have been warned.
@@ -314,6 +315,38 @@ filter_packages(PVPairs, RawConstraints) ->
         Error ->
             Error
     end.
+
+%% @doc given a list of packages as can be passed to `add_packages' where each
+%% package consists of the name and a list of versions with dependencies, remove
+%% package/version pairs that don't satisfy one of the constraints in
+%% `RawConstraints'. The return value is a list of dependency sets (same shape
+%% as `packagesWithDeps'.
+-spec filter_packages_with_deps([dependency_set()], [raw_constraint()]) ->
+                                       {ok, [dependency_set()]} |
+                                       {error, Reason::term()}.
+filter_packages_with_deps(PackagesWithDeps, RawConstraints) ->
+    Constraints = [fix_con(Constraint) || Constraint <- RawConstraints],
+    case check_constraints(Constraints) of
+        ok ->
+            MaybeWithEmpties =
+                [ select_versions_by_constraint(PkgVersions, Constraints)
+                  || PkgVersions <- PackagesWithDeps ],
+            %% remove package if it doesn't have any versions
+            {ok, [ {Pkg, Versions} || {Pkg, Versions} <- MaybeWithEmpties,
+                                      Versions =/= [] ]};
+        Error ->
+            Error
+    end.
+
+%% Given a dependency_set() and constraints, return a new dependency set
+%% containing only those versions that meet the constraints. May return an empty
+%% list of versions.
+select_versions_by_constraint({Pkg, Versions}, Constraints) ->
+    KeepVersions = [ {Ver, Deps}
+                     || {Ver, Deps} <- Versions,
+                        filter_pvpair_by_constraint(fix_con({Pkg, Ver}),
+                                                    Constraints) ],
+    {Pkg, KeepVersions}.
 
 %% @doc Produce a full error message for a given error condition.  This includes
 %% details of the paths taken to resolve the dependencies and shows which dependencies
