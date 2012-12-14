@@ -24,6 +24,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
+-include_lib("chef_objects/include/chef_osc_defaults.hrl").
 
 %% Contains all allowed variants of run list items
 good_runlist() ->
@@ -139,8 +140,8 @@ depsolver_dep_no_version_test() ->
 %% "most_constrained_cookbooks":[]}"
 %%
 depsolver_dep_doesnt_exist_test() ->
-    World = [ cookbook(<<"foo">>, <<"1.2.3">>)],
-    Constraints = [ cookbook(<<"foo">>, <<"1.2.3">>, {<<"bar">>, <<"2.0.0">>, gt}) ],
+    World = [ cookbook(<<"foo">>, <<"1.2.3">>, {<<"bar">>, <<"2.0.0">>, gt})],
+    Constraints = [],
     Ret = chef_depsolver:solve_dependencies(World, Constraints, [<<"foo">>]),
     ?assertEqual({error, {unreachable_package, <<"bar">>}}, Ret).
 
@@ -155,15 +156,16 @@ depsolver_dep_doesnt_exist_test() ->
 %% "most_constrained_cookbooks":["bar 2.0.0 -> []"]
 %%
 depsolver_dep_not_new_enough_test() ->
-    World = [ cookbook(<<"foo">>, <<"1.2.3">>),
+    World = [ cookbook(<<"foo">>, <<"1.2.3">>, {<<"bar">>, <<"2.0.0">>, '>'}),
               cookbook(<<"bar">>, <<"2.0.0">>)],
-    Constraints = [cookbook(<<"foo">>, <<"1.2.3">>, {<<"bar">>, <<"2.0.0">>, gt}) ],
+    Constraints = [{<<"foo">>, <<"1.2.3">>, '='}],
     Ret = chef_depsolver:solve_dependencies(World, Constraints, [<<"foo">>]),
     %% TODO: Should this have bar in bad ??
-    Detail = [{[{[<<"foo">>],
-                 [{<<"foo">>, {1,2,3}}]}],
-               [{{<<"foo">>, {1,2,3}}, [{<<"bar">>, {2,0,0}, gt}]}]
-              }],
+    Detail = [
+              {[{[<<"foo">>], [{<<"foo">>, {1, 2, 3}}]}],
+                  [{{<<"foo">>, {1, 2, 3}},
+                    [{<<"bar">>, {2, 0, 0}, '>'}]}]}
+             ],
     ?assertEqual({error, Detail}, Ret).
 
 %%
@@ -185,6 +187,42 @@ depsolver_impossible_dependency_test() ->
                [{{<<"foo">>, {1,2,3}}, [{<<"bar">>, {2,0,0}, gt}]}]
               }],
     ?assertEqual({error, Detail}, Ret).
+
+depsolver_environment_respected_test_() ->
+    World = [ cookbook(<<"foo">>, <<"1.2.3">>, {<<"bar">>, <<"2.0.0">>, gt}),
+              cookbook(<<"foo">>, <<"1.0.0">>, {<<"bar">>, <<"1.0.0">>, '='}),
+              cookbook(<<"bar">>, <<"1.0.0">>),
+              cookbook(<<"bar">>, <<"3.0.0">>) ],
+
+    Env100 = make_env(<<"myenv">>, {[{<<"bar">>, <<"= 1.0.0">>}]}),
+    Constraints100 = chef_object:depsolver_constraints(Env100),
+
+    Env123 = make_env(<<"myenv">>, {[{<<"bar">>, <<"> 1.1.0">>}]}),
+    Constraints123 = chef_object:depsolver_constraints(Env123),
+
+    Expect100 = {ok, [{<<"bar">>, {1, 0, 0}}, {<<"foo">>, {1, 0, 0}}]},
+    Expect123 = {ok, [{<<"bar">>, {3, 0, 0}}, {<<"foo">>, {1, 2, 3}}]},
+
+    Tests = [ {Constraints100, Expect100},
+              {Constraints123, Expect123} ],
+    [ ?_assertEqual(Expect, chef_depsolver:solve_dependencies(World, Cons,
+                                                              [<<"foo">>]))
+      || {Cons, Expect} <- Tests ].
+
+depsolver_impossible_dependency_via_environment_test() ->
+    World = [ cookbook(<<"foo">>, <<"1.2.3">>, { <<"bar">>, <<"2.0.0">>, gt}),
+              cookbook(<<"bar">>, <<"1.0.0">>),
+              cookbook(<<"bar">>, <<"3.0.0">>) ],
+    CookbookCons = {[{<<"bar">>, <<"= 1.0.0">>}]},
+    Env = make_env(<<"myenv">>, CookbookCons),
+    Constraints = chef_object:depsolver_constraints(Env),
+    %% without constraints in env, ok
+    ?assertMatch({ok, _}, chef_depsolver:solve_dependencies(World, [], [<<"foo">>])),
+    %% with the constraints, foo can't be satisfied
+    Ret = chef_depsolver:solve_dependencies(World, Constraints, [<<"foo">>]),
+    Expect = {error, [{[{[<<"foo">>], [{<<"foo">>, {1, 2, 3}}]}],
+                      [{{<<"foo">>, {1, 2, 3}}, [{<<"bar">>, {2, 0, 0}, gt}]}]}]},
+    ?assertEqual(Expect, Ret).
 
 %% A more complex test.
 %% World:
@@ -212,4 +250,17 @@ depsolver_complex_dependency_test() ->
     Expected = [{{<<"buzz">>,{1,0,0}},[{<<"baz">>,{1,2,0},gt}]}],
     %% Check the culprits
     {error, [{_Paths, Culprits}] } = Ret,
-    ?assertEqual(Expected, Culprits).
+    ?assertEqual(Expected, Culprits),
+    %% verify that an unrelated set of constraints doesn't change anything
+    Cons = [{<<"someting">>, <<"1.0.0">>, '='}],
+    ?assertEqual(Ret, chef_depsolver:solve_dependencies(World, Cons, [<<"foo">>, <<"buzz">>])).
+
+make_env(Name, Deps) ->
+    Ejson0 = {[
+              {<<"name">>, Name},
+              {<<"description">>, <<"test env">>},
+              {<<"cookbook_versions">>, Deps}
+             ]},
+    Json = chef_json:encode(Ejson0),
+    {ok, Ejson} = chef_environment:parse_binary_json(Json),
+    chef_object:new_record(chef_environment, ?OSC_ORG_ID, unset, Ejson).

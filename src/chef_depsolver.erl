@@ -71,7 +71,7 @@ validate_body(Body) ->
     end.
 
 -spec solve_dependencies(AllVersions :: [depsolver:dependency_set()],
-                         EnvConstraints :: [depsolver:dependency_set()],
+                         EnvConstraints :: [depsolver:constraint()],
                          Cookbooks :: [Name::binary() |
                                              {Name::binary(), Version::binary()}]) ->
     {ok, [ versioned_cookbook()]} | {error, term()}.
@@ -86,8 +86,12 @@ validate_body(Body) ->
 solve_dependencies(_AllVersions, _EnvConstraints, []) ->
     {ok, []};
 solve_dependencies(AllVersions, EnvConstraints, Cookbooks) ->
-    Graph0 = depsolver:new_graph(),
-    Graph1 = depsolver:add_packages(Graph0, AllVersions),
-    Graph2 = depsolver:add_packages(Graph1, EnvConstraints),
-
-    depsolver:solve(Graph2, Cookbooks).
+    %% We apply the environment cookbook version constraints as a pre-filter, removing
+    %% cookbook versions that don't satisfy early. This makes for a smaller graph and an
+    %% easier problem to solve. However, when cookbooks are filtered out due to the
+    %% environment, the solver is unable to backtrack and provide extra error detail. With
+    %% this approach, the "world" of cookbooks conforms to what the user will see from
+    %% listing cookbooks within an environment.
+    {ok, FilteredVersions} = depsolver:filter_packages_with_deps(AllVersions, EnvConstraints),
+    Graph = depsolver:add_packages(depsolver:new_graph(), FilteredVersions),
+    depsolver:solve(Graph, Cookbooks).
