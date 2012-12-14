@@ -439,7 +439,7 @@ default['private_chef']['dark_launch']["couchdb_checksums"] = true
 default['private_chef']['dark_launch']["couchdb_environments"] = true
 default['private_chef']['dark_launch']["couchdb_clients"] = true
 default['private_chef']['dark_launch']["add_type_and_bag_to_items"] = true
-default['private_chef']['dark_launch']["node_run_history"] = true
+default['private_chef']['dark_launch']["node_run_history"] = false
 ###
 # Opscode Account
 ###
@@ -651,7 +651,7 @@ default['private_chef']['upgrades']['dir'] = "/var/opt/opscode/upgrades"
 ####
 # Opscode Reporting 
 ####
-default['private_chef']['opscode-reporting']['enable'] = true
+default['private_chef']['opscode-reporting']['enable'] = false
 default['private_chef']['opscode-reporting']['dir'] = "/var/opt/opscode/opscode-reporting"
 default['private_chef']['opscode-reporting']['log_directory'] = "/var/log/opscode/opscode-reporting" 
 default['private_chef']['opscode-reporting']['listen'] = '127.0.0.1'
