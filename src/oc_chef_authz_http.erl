@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Kevin Smith <kevin@opscode.com>
-%% @doc chef_authz's interface to the authz server
+%% @doc oc_chef_authz's interface to the authz server
 %%
 %% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
 %%
@@ -21,7 +21,7 @@
 %%
 
 
--module(chef_authz_http).
+-module(oc_chef_authz_http).
 
 -define(x_ops_requester_id, "X-Ops-Requesting-Actor-Id").
 -define(x_ops_user, {"X-Ops-User-Id", "front-end-service"}).
@@ -45,7 +45,7 @@ request(Path, Method, Headers, Body, RequestorId) ->
                    {"Accept", "application/json"},
                    {"Content-Type", "application/json"} | Headers
                   ],
-    {ok, AuthzHost} = application:get_env(chef_authz, authz_root_url),
+    {ok, AuthzHost} = application:get_env(oc_chef_authz, authz_root_url),
     Url = AuthzHost ++ "/" ++ Path,
     case ibrowse:send_req(Url, FullHeaders, Method, Body) of
         {ok, "200", _ResponseHeaders, ResponseBody} = _Response ->
@@ -72,7 +72,7 @@ request(Path, Method, Headers, Body, RequestorId) ->
 -spec ping() -> pong | pang.
 ping() ->
     try
-        {ok, AuthzUrl} = application:get_env(chef_authz, authz_root_url),
+        {ok, AuthzUrl} = application:get_env(oc_chef_authz, authz_root_url),
         Url = AuthzUrl ++ "/_ping",
         Headers = [{"Accept", "application/json"}],
         case ibrowse:send_req(Url, Headers, get) of
@@ -81,6 +81,6 @@ ping() ->
         end
     catch
         How:Why ->
-            error_logger:error_report({chef_authz_http, ping, How, Why}),
+            error_logger:error_report({oc_chef_authz_http, ping, How, Why}),
             pang
     end.

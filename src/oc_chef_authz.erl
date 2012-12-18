@@ -22,7 +22,7 @@
 %% under the License.
 %%
 
--module(chef_authz).
+-module(oc_chef_authz).
 
 %
 % TODO:
@@ -41,10 +41,10 @@
 -compile([export_all]).
 -endif.
 
--include("chef_authz.hrl").
--include("chef_authz_db.hrl").
+-include("oc_chef_authz.hrl").
+-include("oc_chef_authz_db.hrl").
 
--export_type([chef_authz_context/0]).
+-export_type([oc_chef_authz_context/0]).
 
 -define(x_ops_requester_id, "X-Ops-Requesting-Actor-Id").
 -define(x_ops_user_id, "X-Ops-User-Id").
@@ -72,18 +72,18 @@
 
 -spec ping() -> pong | pang.
 ping() ->
-    chef_authz_http:ping().
+    oc_chef_authz_http:ping().
 
--spec make_context(binary()) -> #chef_authz_context{}.
+-spec make_context(binary()) -> #oc_chef_authz_context{}.
 make_context(ReqId)  ->
-    chef_authz_db:make_context(ReqId).
+    oc_chef_authz_db:make_context(ReqId).
 
 %%%
 %%% Takes a Creator authz id,  an object type atom and an OrgId and
 %%% creates the authz permissions for the object if the creator is permitted
 %%% otherwise returns {error, forbidden}
 %%%
--spec create_object_if_authorized(chef_authz_context(),
+-spec create_object_if_authorized(oc_chef_authz_context(),
                                   object_id(),
                                   object_id(),
                                   contained_object_name()) ->
@@ -100,13 +100,13 @@ create_object_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
 %%%
 %%% get_container_aid_for_object
 %%% TODO: consider error cases in more detail
--spec get_container_aid_for_object(chef_authz_context(),
+-spec get_container_aid_for_object(oc_chef_authz_context(),
                                    object_id(),
                                    contained_object_name()) ->
                                           object_id().
 get_container_aid_for_object(Context, OrgId, ObjectType) ->
     ContainerName = object_type_to_container_name(ObjectType),
-    Container = chef_authz_db:fetch_container(Context, OrgId, ContainerName),
+    Container = oc_chef_authz_db:fetch_container(Context, OrgId, ContainerName),
     Container#chef_container.authz_id.
 
 %% @doc Create a new authz object using the ACL of a container as a template for the new
@@ -191,7 +191,7 @@ is_authorized_on_resource(RequestorId, ResourceType, ResourceId, ActorType, Acto
   when is_atom(ResourceType) and is_atom(ActorType) and is_atom(AccessMethod) ->
     Url = make_url([pluralize_resource(ResourceType), ResourceId, <<"acl">>,
                     AccessMethod, pluralize_resource(ActorType), ActorId ] ),
-    case chef_authz_http:request(Url, get, [], [], RequestorId) of
+    case oc_chef_authz_http:request(Url, get, [], [], RequestorId) of
         ok -> true;
         %% This api returns not found for any missing permission
         {error, not_found} -> false;
@@ -211,7 +211,7 @@ is_authorized_on_resource(RequestorId, ResourceType, ResourceId, ActorType, Acto
 create_resource(RequestorId, ResourceType) ->
     %% authz can return 500, and we'll throw. I think that is correct
     %% What are the failure modes? Can we succeed and not get a doc?
-    case chef_authz_http:request(pluralize_resource(ResourceType), post, [], [], RequestorId) of
+    case oc_chef_authz_http:request(pluralize_resource(ResourceType), post, [], [], RequestorId) of
         %% What are the failure modes? Can we succeed and not get a doc?
         {ok, IdDoc} -> {ok, ej:get({<<"id">>}, IdDoc)};
         {error, server_error} -> {error, server_error}
@@ -225,7 +225,7 @@ create_resource(RequestorId, ResourceType) ->
                      ->  ok | {error, forbidden|not_found|server_error}.
 delete_resource(RequestorId, ResourceType, Id) ->
     Url = make_url([pluralize_resource(ResourceType), Id]),
-    case chef_authz_http:request(Url, delete, [], [], RequestorId) of
+    case oc_chef_authz_http:request(Url, delete, [], [], RequestorId) of
         ok -> ok;
         %% Expected errors are forbidden, not_found, server_error
         {error, Error} -> {error, Error}
@@ -238,7 +238,7 @@ delete_resource(RequestorId, ResourceType, Id) ->
 -spec get_acl_for_resource(requestor_id(), resource_type(), binary()) -> {ok, authz_acl()}|{error, any()}.
 get_acl_for_resource(RequestorId, ResourceType, Id) ->
     Url = make_url([pluralize_resource(ResourceType), Id, acl]),
-    case chef_authz_http:request(Url, get, [], [], RequestorId) of
+    case oc_chef_authz_http:request(Url, get, [], [], RequestorId) of
         {ok, Data} ->
             Acl=extract_acl(Data),
             {ok, Acl};
@@ -258,7 +258,7 @@ get_acl_for_resource(RequestorId, ResourceType, Id) ->
 set_ace_for_object(RequestorId, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
     Url = make_url([pluralize_resource(object), Id, acl, AccessMethod]),
     Body = jiffy:encode({[{<<"actors">>, Actors}, {<<"groups">>, Groups}]}),
-    case chef_authz_http:request(Url, put, [], Body, RequestorId) of
+    case oc_chef_authz_http:request(Url, put, [], Body, RequestorId) of
         ok -> ok;
         %% Expected errors are forbidden, not_found, server_error
         {error, Error} -> {error, Error}

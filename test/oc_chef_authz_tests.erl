@@ -21,7 +21,7 @@
 %% under the License.
 %%
 
--module(chef_authz_tests).
+-module(oc_chef_authz_tests).
 
 -compile([export_all]).
 
@@ -29,9 +29,9 @@
 %%          test_setup/0,
 %%          test_cleanup/1]).
 
--include("chef_authz.hrl").
+-include("oc_chef_authz.hrl").
 
-%-define(setup, chef_authz_tests).
+%-define(setup, oc_chef_authz_tests).
 -define(setup, test_utils).
 
 -define(SUPERUSER,  <<"platform-superuser">>).
@@ -54,7 +54,7 @@
 %%     test_utils:test_setup(),                    % starts stats_hero
 %%     automeck:mocks(?AUTOMECK_FILE(user_lookup)),
 %%     Context = chef_db:make_context(<<"testing">>), % req_id must be a binary
-%%     ?assert(is_authz_id(chef_authz:username_to_auth_id(Context, ?SUPERUSER))),
+%%     ?assert(is_authz_id(oc_chef_authz:username_to_auth_id(Context, ?SUPERUSER))),
 %%     meck:unload().
 
 resource_test_() ->
@@ -67,47 +67,47 @@ resource_test_() ->
           %% Resource creation
           {"Simple group create",
            fun() ->
-               {ok, NewId} = chef_authz:create_resource(Superuser, group),
+               {ok, NewId} = oc_chef_authz:create_resource(Superuser, group),
                true = is_authz_id(NewId)
            end}
       end,
       fun({_Server, Superuser}) ->
               {"Simple group create by non superuser",
                fun() ->
-                       {ok, Actor} = chef_authz:create_resource(Superuser, actor),
-                       {ok, Group} = chef_authz:create_resource(Actor, group),
+                       {ok, Actor} = oc_chef_authz:create_resource(Superuser, actor),
+                       {ok, Group} = oc_chef_authz:create_resource(Actor, group),
                        true = is_authz_id(Group)
                end}
       end,
       fun({_Server, _Superuser}) ->
               {"Simple group create by non-existient user",
                fun() ->
-                       {ok, Group} = chef_authz:create_resource(?no_such_id, group),
+                       {ok, Group} = oc_chef_authz:create_resource(?no_such_id, group),
                        true = is_authz_id(Group)
                end}
       end,
       fun({_Server, Superuser}) ->
               {"group delete",
                fun() ->
-                       {ok, NewId} = chef_authz:create_resource(Superuser, group),
+                       {ok, NewId} = oc_chef_authz:create_resource(Superuser, group),
                        true = is_authz_id(NewId),
-                       ok = chef_authz:delete_resource(Superuser, group, NewId)
+                       ok = oc_chef_authz:delete_resource(Superuser, group, NewId)
                end}
       end,
       fun({_Server, Superuser}) ->
               {"group delete without permission",
                fun() ->
-                       {ok, NewId} = chef_authz:create_resource(Superuser, group),
+                       {ok, NewId} = oc_chef_authz:create_resource(Superuser, group),
                        true = is_authz_id(NewId),
-                       {error, forbidden} = chef_authz:delete_resource(?no_such_id, group, NewId)
+                       {error, forbidden} = oc_chef_authz:delete_resource(?no_such_id, group, NewId)
                end}
       end,
       fun({_Server, Superuser}) ->
               {"group delete for non-group",
                fun() ->
-                       {ok, NewId} = chef_authz:create_resource(Superuser, actor),
+                       {ok, NewId} = oc_chef_authz:create_resource(Superuser, actor),
                        true = is_authz_id(NewId),
-                       {error, server_error} = chef_authz:delete_resource(?no_such_id, group, NewId)
+                       {error, server_error} = oc_chef_authz:delete_resource(?no_such_id, group, NewId)
                end}
       end]}.
 
@@ -120,8 +120,8 @@ get_acl_from_resource_test_() ->
      [fun({_Server, Superuser}) ->
               {"get the acl for a newly created resource",
                fun() ->
-                       {ok, GroupId} = chef_authz:create_resource(Superuser, group),
-                       {ok, Acl} = chef_authz:get_acl_for_resource(Superuser, group, GroupId),
+                       {ok, GroupId} = oc_chef_authz:create_resource(Superuser, group),
+                       {ok, Acl} = oc_chef_authz:get_acl_for_resource(Superuser, group, GroupId),
                        %%ACE should only contain the superuser
                        lists:foreach(fun(Ace) -> {_Method, #authz_ace{actors=[Superuser],groups=[]}} = Ace end, Acl)
                end}
@@ -130,15 +130,15 @@ get_acl_from_resource_test_() ->
               {"get the acl for a non existient resource",
                fun() ->
                        %% Should this be remapped?
-                       {error, server_error} = chef_authz:get_acl_for_resource(Superuser, group, ?no_such_id)
+                       {error, server_error} = oc_chef_authz:get_acl_for_resource(Superuser, group, ?no_such_id)
                end}
       end,
       fun({_Server, Superuser}) ->
               {"get the acl for a resource you don't have rights to",
                fun() ->
-                       {ok, GroupId} = chef_authz:create_resource(Superuser, group),
-                       {ok, ActorId} = chef_authz:create_resource(Superuser, actor),
-                       ?assertEqual({error, forbidden}, chef_authz:get_acl_for_resource(ActorId, group, GroupId))
+                       {ok, GroupId} = oc_chef_authz:create_resource(Superuser, group),
+                       {ok, ActorId} = oc_chef_authz:create_resource(Superuser, actor),
+                       ?assertEqual({error, forbidden}, oc_chef_authz:get_acl_for_resource(ActorId, group, GroupId))
                end}
       end]}.
 
@@ -150,28 +150,28 @@ is_authorized_on_resource_test_() ->
               automeck:mocks(?AUTOMECK_FILE(is_authorized1)),
               {"check if the owner is authorized for grant on a newly created resource",
                fun() ->
-                       {ok, ObjectId} = chef_authz:create_resource(Superuser, object),
-                       ?assert(chef_authz:is_authorized_on_resource(Superuser, object, ObjectId, actor, Superuser, grant))
+                       {ok, ObjectId} = oc_chef_authz:create_resource(Superuser, object),
+                       ?assert(oc_chef_authz:is_authorized_on_resource(Superuser, object, ObjectId, actor, Superuser, grant))
                end}
       end,
       fun({_Server, Superuser}) ->
               automeck:mocks(?AUTOMECK_FILE(is_authorized1)),
               {"check that someone else is not authorized for grant on an newly created resource",
                fun() ->
-                       {ok, ObjectId} = chef_authz:create_resource(Superuser, object),
-                       {ok, ActorId} = chef_authz:create_resource(Superuser, actor),
-                       ?assertNot(chef_authz:is_authorized_on_resource(Superuser, object, ObjectId, actor, ActorId, grant))
+                       {ok, ObjectId} = oc_chef_authz:create_resource(Superuser, object),
+                       {ok, ActorId} = oc_chef_authz:create_resource(Superuser, actor),
+                       ?assertNot(oc_chef_authz:is_authorized_on_resource(Superuser, object, ObjectId, actor, ActorId, grant))
                end}
       end,
       fun({_Server, Superuser}) ->
               automeck:mocks(?AUTOMECK_FILE(is_authorized2)),
               {"check that someone else can query permissions on an newly created resource",
                fun() ->
-                       {ok, ObjectId} = chef_authz:create_resource(Superuser, object),
-                       {ok, ActorId} = chef_authz:create_resource(Superuser, actor),
-                       {ok, GroupId} = chef_authz:create_resource(Superuser, group),
-                       ?assert(chef_authz:is_authorized_on_resource(ActorId, object, ObjectId, actor, Superuser, grant)),
-                       ?assert(chef_authz:is_authorized_on_resource(ActorId, group, GroupId, actor, Superuser, grant))
+                       {ok, ObjectId} = oc_chef_authz:create_resource(Superuser, object),
+                       {ok, ActorId} = oc_chef_authz:create_resource(Superuser, actor),
+                       {ok, GroupId} = oc_chef_authz:create_resource(Superuser, group),
+                       ?assert(oc_chef_authz:is_authorized_on_resource(ActorId, object, ObjectId, actor, Superuser, grant)),
+                       ?assert(oc_chef_authz:is_authorized_on_resource(ActorId, group, GroupId, actor, Superuser, grant))
                end}
       end,
       fun({_Server, Superuser}) ->
@@ -179,18 +179,18 @@ is_authorized_on_resource_test_() ->
               {"queries on a nonexistient object fail",
                fun() ->
                        %% would expect not_found
-                       ?assertNot(chef_authz:is_authorized_on_resource(Superuser, object, ?no_such_id, actor, Superuser, grant))
+                       ?assertNot(oc_chef_authz:is_authorized_on_resource(Superuser, object, ?no_such_id, actor, Superuser, grant))
                end}
       end,
       fun({_Server, Superuser}) ->
               automeck:mocks(?AUTOMECK_FILE(is_authorized3)),
               {"queries on a object of the wrong type fail",
                fun() ->
-                       {ok, ObjectId} = chef_authz:create_resource(Superuser, object),
-                       {ok, ActorId} = chef_authz:create_resource(Superuser, actor),
+                       {ok, ObjectId} = oc_chef_authz:create_resource(Superuser, object),
+                       {ok, ActorId} = oc_chef_authz:create_resource(Superuser, actor),
                        %% would expect server_error
-                       ?assertNot(chef_authz:is_authorized_on_resource(Superuser, group, ObjectId, actor, ActorId, grant)),
-                       ?assertNot(chef_authz:is_authorized_on_resource(Superuser, object, ObjectId, group, ActorId, grant))
+                       ?assertNot(oc_chef_authz:is_authorized_on_resource(Superuser, group, ObjectId, actor, ActorId, grant)),
+                       ?assertNot(oc_chef_authz:is_authorized_on_resource(Superuser, object, ObjectId, group, ActorId, grant))
                end}
       end]}.
 
@@ -202,7 +202,7 @@ get_container_aid_for_object_test_() ->
      [fun({Context, _Superuser}) ->
               {"Can we get a real container",
                fun() ->
-                       ObjectId = chef_authz:get_container_aid_for_object(Context, ?test_org_id, node),
+                       ObjectId = oc_chef_authz:get_container_aid_for_object(Context, ?test_org_id, node),
                        ?assert(is_authz_id(ObjectId))
                end}
       end]}.
@@ -220,13 +220,13 @@ create_object_if_authorized_test_() ->
                       %% so bobo doesn't get created by setup test, probably only by running
                       %% features.
                       %% TODO: also need to decide on behavor for user_record_to_authz_id(not_found)
-                      {ok, ObjectId} = chef_authz:create_object_if_authorized(Server, ?test_org_id, AdminAID, node),
+                      {ok, ObjectId} = oc_chef_authz:create_object_if_authorized(Server, ?test_org_id, AdminAID, node),
                       ?assert(is_authz_id(ObjectId)),
                       %% the creator should have access
-                      [ ?assert(chef_authz:is_authorized_on_resource(AdminAID, object, ObjectId, actor,
+                      [ ?assert(oc_chef_authz:is_authorized_on_resource(AdminAID, object, ObjectId, actor,
                                                                      AdminAID, Method)) || Method <- ?access_methods],
                       %% a regular user should not
-                      [ ?assertNot(chef_authz:is_authorized_on_resource(UserAID, object, ObjectId, actor,
+                      [ ?assertNot(oc_chef_authz:is_authorized_on_resource(UserAID, object, ObjectId, actor,
                                                                          UserAID, Method)) || Method <- ?access_methods]
               end}
      end,
@@ -236,7 +236,7 @@ create_object_if_authorized_test_() ->
               fun() ->
                       UserAID = <<"cf5d90545fbbac541225fbd9e73e4e42">>,
                       ?assertEqual({error, forbidden},
-                                   chef_authz:create_object_if_authorized(Server, ?test_org_id, UserAID, node))
+                                   oc_chef_authz:create_object_if_authorized(Server, ?test_org_id, UserAID, node))
               end}
      end]}.
 

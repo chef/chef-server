@@ -15,14 +15,14 @@
 %% under the License.
 %%
 
--module(chef_authz_db).
+-module(oc_chef_authz_db).
 
 -export([container_record_to_authz_id/2,
          fetch_container/3,
          make_context/1]).
 
--include("chef_authz.hrl").
--include("chef_authz_db.hrl").
+-include("oc_chef_authz.hrl").
+-include("oc_chef_authz_db.hrl").
 
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
 -define(user_db, "opscode_account").
@@ -66,19 +66,19 @@
 -define(node_design, "nodes").
 -define(role_design, "roles").
 
--spec make_context(binary()) -> #chef_authz_context{}.
+-spec make_context(binary()) -> #oc_chef_authz_context{}.
 make_context(ReqId) when is_binary(ReqId) ->
     Host = get_env(couchdb_host),
     Port = get_env(couchdb_port),
     S = couchbeam:server_connection(Host, Port, "", []),
-    #chef_authz_context{reqid = ReqId, otto_connection = S}.
+    #oc_chef_authz_context{reqid = ReqId, otto_connection = S}.
     
--spec fetch_container(chef_authz_context(),
+-spec fetch_container(oc_chef_authz_context(),
                       object_id(),
                       container_name()) ->
                              #chef_container{} |
                              {not_found, authz_container | org}.
-fetch_container(#chef_authz_context{otto_connection=Server}, OrgId, ContainerName) ->
+fetch_container(#oc_chef_authz_context{otto_connection=Server}, OrgId, ContainerName) ->
     case fetch_by_name(Server, OrgId, ContainerName, authz_container) of
         {ok, Container} ->
             Id = ej:get({<<"_id">>}, Container),
@@ -97,7 +97,7 @@ fetch_container(#chef_authz_context{otto_connection=Server}, OrgId, ContainerNam
     end.
 
 -spec container_record_to_authz_id(any(), any()) -> object_id().
-container_record_to_authz_id(#chef_authz_context{}, #chef_container{authz_id = Id}) ->
+container_record_to_authz_id(#oc_chef_authz_context{}, #chef_container{authz_id = Id}) ->
     Id.
 
 -spec fetch_by_name(couchbeam:server(),
@@ -185,9 +185,9 @@ dbname(OrgId) ->
     <<"chef_", OrgId/binary>>.
 
 get_env(Key) ->
-    case application:get_env(chef_authz, Key) of
+    case application:get_env(oc_chef_authz, Key) of
         undefined ->
-            throw({missing_application_config, chef_authz, Key});
+            throw({missing_application_config, oc_chef_authz, Key});
         {ok, Value} ->
             Value
     end.

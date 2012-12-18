@@ -15,7 +15,7 @@
 %% under the License.
 %%
 
-{application, chef_authz,
+{application, oc_chef_authz,
  [
   {description, "Opscode authz client"},
   {vsn, "1.0"},

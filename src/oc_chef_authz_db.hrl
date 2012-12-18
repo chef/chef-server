@@ -20,10 +20,10 @@
 %% under the License.
 %%
 
--record(chef_authz_context, {reqid :: binary(),
+-record(oc_chef_authz_context, {reqid :: binary(),
                              otto_connection :: couchbeam:server()}).
 
--type chef_authz_context() :: #chef_authz_context{}.
+-type oc_chef_authz_context() :: #oc_chef_authz_context{}.
 
 -type requestor_id() :: binary().
 -type actor_id() :: binary().
