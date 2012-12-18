@@ -302,7 +302,10 @@ make_url(Components) ->
 % Extract actors and groups from the
 % TODO refine spec
 % todo add error handling
--spec extract_actors_and_groups({}) -> {[binary()], [binary()]} | error.
+%% The return type should always be `{[binary()], [binary()]}' but since we are extracting
+%% from a JSON blob using ej, dialyzer has no way to verify that so we have to use a broader
+%% spec.
+-spec extract_actors_and_groups(ej:json_object()) -> {ej:json_term(), ej:json_term()} | error.
 extract_actors_and_groups(JsonBlob) ->
     Actors = ej:get({<<"actors">>}, JsonBlob),
     Groups = ej:get({<<"groups">>}, JsonBlob),
@@ -311,7 +314,7 @@ extract_actors_and_groups(JsonBlob) ->
         false -> {Actors, Groups}
     end.
 
--spec extract_ace({}) -> authz_ace().
+-spec extract_ace(ej:json_object()) -> authz_ace().
 extract_ace(JsonBlob) ->
     {Actors, Groups} = extract_actors_and_groups(JsonBlob),
     #authz_ace{actors=Actors, groups=Groups}.

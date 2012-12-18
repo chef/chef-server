@@ -2,3 +2,4 @@
 deps/
 ebin/
 ebin_dialyzer/
+/oc_chef_authz.plt
