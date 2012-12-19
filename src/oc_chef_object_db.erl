@@ -110,11 +110,11 @@ maybe_delete_authz_id_or_error({ok, 1}, #chef_cookbook_version{}, _RequestorId) 
     ok;
 maybe_delete_authz_id_or_error({ok, 2}, #chef_cookbook_version{} = CBV, RequestorId) ->
     %% With status {ok, 2} we've deleted the cbv _and_ the cb so we delete the authz_id
-    chef_authz:delete_resource(RequestorId, object, authz_id(CBV)),
+    oc_chef_authz:delete_resource(RequestorId, object, authz_id(CBV)),
     ok;
 maybe_delete_authz_id_or_error({ok, 1}, Object, RequestorId) ->
     %% for all other object types, successful delete of 1 record means we should delete authz id
-    chef_authz:delete_resource(RequestorId, object, authz_id(Object)),
+    oc_chef_authz:delete_resource(RequestorId, object, authz_id(Object)),
     ok.
 
 -spec authz_id(chef_object() | #chef_cookbook_version{} | #chef_client{}  ) -> object_id().

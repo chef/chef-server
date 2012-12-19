@@ -135,7 +135,7 @@ create_in_container(Container, Req, #base_state{chef_authz_context = AuthzContex
                                                 organization_guid = OrgId,
                                                 requestor_id = RequestorId,
                                                 resource_state = RS} = State) ->
-    case chef_authz:create_object_if_authorized(AuthzContext, OrgId, RequestorId,
+    case oc_chef_authz:create_object_if_authorized(AuthzContext, OrgId, RequestorId,
                                                 Container) of
         {ok, AuthzId} ->
             State1 = State#base_state{resource_state = set_authz_id(AuthzId, RS)},
@@ -152,7 +152,7 @@ create_in_container(Container, Req, #base_state{chef_authz_context = AuthzContex
 %% TODO - Can we just dispense with the Req parameter since it isn't used??
 fetch_container_id(Container, _Req, #base_state{chef_authz_context = AuthzContext,
                                                 organization_guid = OrgId}) ->
-    chef_authz:get_container_aid_for_object(AuthzContext, OrgId, Container).
+    oc_chef_authz:get_container_aid_for_object(AuthzContext, OrgId, Container).
 
 invert_perm({true, Req, State}) ->
     {false, Req, State};
@@ -169,7 +169,7 @@ invert_perm(Other) ->
 %%                      State :: #base_state{}) -> true | false | Error :: term().
 has_permission(AuthzObjectType, AuthzId, Permission, Req, #base_state{reqid=ReqId,
                                                                       requestor_id=RequestorId}=State) ->
-    ?SH_TIME(ReqId, chef_authz, is_authorized_on_resource,
+    ?SH_TIME(ReqId, oc_chef_authz, is_authorized_on_resource,
                   (RequestorId, AuthzObjectType, AuthzId, actor, RequestorId, Permission)).
 
 %% NOTE: derives the permission check from the HTTP verb of the Request
@@ -264,7 +264,7 @@ delete_object(DbContext, Object, RequestId) ->
 
 set_req_contexts(Req, #base_state{reqid_header_name = HeaderName} = State) ->
     ReqId = read_req_id(HeaderName, Req),
-    AuthzContext = chef_authz:make_context(ReqId),
+    AuthzContext = oc_chef_authz:make_context(ReqId),
     DbContext = chef_db:make_context(ReqId),
     State#base_state{chef_authz_context = AuthzContext,
                      chef_db_context = DbContext,

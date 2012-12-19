@@ -1,6 +1,6 @@
 DEPS = $(CURDIR)/deps
 DIALYZER_DEPS = deps/chef_authn/ebin \
-                deps/chef_authz/ebin \
+                deps/oc_chef_authz/ebin \
                 deps/chef_db/ebin \
                 deps/chef_index/ebin \
                 deps/chef_objects/ebin \
