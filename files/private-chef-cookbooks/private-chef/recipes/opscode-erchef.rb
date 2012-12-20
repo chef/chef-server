@@ -57,8 +57,8 @@ runit_service "opscode-erchef" do
 end
 
 if node['private_chef']['bootstrap']['enable'] 
-	execute "/opt/opscode/bin/private-chef-ctl opscode-erchef start" do
 		retries 20 
+	execute "/opt/opscode/bin/private-chef-ctl start opscode-erchef" do
 	end
 end
 

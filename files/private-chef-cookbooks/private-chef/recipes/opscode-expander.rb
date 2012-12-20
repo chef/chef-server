@@ -66,11 +66,11 @@ runit_service "opscode-expander-reindexer" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl opscode-expander start" do
 		retries 20 
+	execute "/opt/opscode/bin/private-chef-ctl start opscode-expander" do
 	end
-	execute "/opt/opscode/bin/private-chef-ctl opscode-expander-reindexer start" do
 		retries 20 
+	execute "/opt/opscode/bin/private-chef-ctl start opscode-expander-reindexer" do
 	end
 end
 

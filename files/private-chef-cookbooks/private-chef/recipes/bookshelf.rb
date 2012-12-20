@@ -59,7 +59,7 @@ runit_service "bookshelf" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-  execute "/opt/opscode/bin/private-chef-ctl bookshelf start" do
+  execute "/opt/opscode/bin/private-chef-ctl start bookshelf" do
     retries 20
   end
 end

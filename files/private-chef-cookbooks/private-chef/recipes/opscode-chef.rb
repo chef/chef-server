@@ -101,8 +101,8 @@ runit_service "opscode-chef" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl opscode-chef start" do
 		retries 20 
+	execute "/opt/opscode/bin/private-chef-ctl start opscode-chef" do
 	end
 end
 

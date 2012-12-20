@@ -85,8 +85,8 @@ if node['private_chef']['bootstrap']['enable']
   opc_username = node["private_chef"]["user"]["username"]
   rmq_ctl_chpost = "/opt/opscode/embedded/bin/chpst -u #{opc_username} -U #{opc_username} #{rmq_ctl}"
 
-  execute "/opt/opscode/bin/private-chef-ctl rabbitmq start" do
     retries 20 
+  execute "/opt/opscode/bin/private-chef-ctl start rabbitmq" do
   end
   
   execute "#{rmq_ctl_chpost} wait #{rabbitmq_data_dir}/rabbit@localhost.pid" do

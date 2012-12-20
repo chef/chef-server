@@ -95,8 +95,8 @@ runit_service "opscode-solr" do
 end
 
 if node['private_chef']['bootstrap']['enable'] 
-	execute "/opt/opscode/bin/private-chef-ctl opscode-account start" do
 		retries 20 
+	execute "/opt/opscode/bin/private-chef-ctl start opscode-account" do
 	end
 end
 

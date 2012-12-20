@@ -47,8 +47,8 @@ runit_service "opscode-certificate" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl opscode-certificate start" do
 		retries 20 
+	execute "/opt/opscode/bin/private-chef-ctl start opscode-certificate" do
 	end
 end
 

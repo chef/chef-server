@@ -54,7 +54,7 @@ runit_service "redis" do
 end
 
 if node['private_chef']['bootstrap']['enable'] 
-	execute "/opt/opscode/bin/private-chef-ctl redis start" do
 		retries 20 
+	execute "/opt/opscode/bin/private-chef-ctl start redis" do
 	end
 end

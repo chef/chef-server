@@ -2,5 +2,5 @@
 # weekly bounce couchdb monday AM at 4:44AM
 #
 MAILTO=<%= node['private_chef']['notification_email'] %>
-44 17 * * 1,4 root [ -s /opt/opscode/sv/couchdb/supervise/pid ] && [ -e /proc/$(cat /opt/opscode/sv/couchdb/supervise/pid)/cmdline ] && /opt/opscode/bin/private-chef-ctl couchdb restart
+44 17 * * 1,4 root [ -s /opt/opscode/sv/couchdb/supervise/pid ] && [ -e /proc/$(cat /opt/opscode/sv/couchdb/supervise/pid)/cmdline ] && /opt/opscode/bin/private-chef-ctl restart couchdb
 

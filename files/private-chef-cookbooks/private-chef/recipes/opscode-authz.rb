@@ -78,8 +78,8 @@ runit_service "opscode-authz" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl opscode-authz start" do
 		retries 20 
+	execute "/opt/opscode/bin/private-chef-ctl start opscode-authz" do
 	end
 
   execute "/opt/opscode/embedded/bin/rake design:load" do

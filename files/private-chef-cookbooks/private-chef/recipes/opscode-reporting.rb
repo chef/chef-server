@@ -56,8 +56,8 @@ runit_service "opscode-reporting" do
 end
 
 if node['private_chef']['bootstrap']['enable'] 
-	execute "/opt/opscode/bin/private-chef-ctl opscode-reporting start" do
 		retries 20 
+	execute "/opt/opscode/bin/private-chef-ctl start opscode-reporting" do
 	end
 end
 

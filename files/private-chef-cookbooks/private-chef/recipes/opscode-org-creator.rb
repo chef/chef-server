@@ -56,8 +56,8 @@ runit_service "opscode-org-creator" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl opscode-org-creator start" do
 		retries 20 
+	execute "/opt/opscode/bin/private-chef-ctl start opscode-org-creator" do
 	end
 end
 

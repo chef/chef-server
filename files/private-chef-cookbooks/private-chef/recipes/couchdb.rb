@@ -45,8 +45,8 @@ runit_service "couchdb" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl couchdb start" do
 		retries 20 
+	execute "/opt/opscode/bin/private-chef-ctl start couchdb" do
 	end
 end
 
