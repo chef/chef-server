@@ -97,6 +97,13 @@ osc_parse_binary_json_test_() ->
                            chef_client:osc_parse_binary_json(Body, <<"bad~name">>))
       end
      },
+     {"Error thrown with both admin and validator set to true",
+      fun() ->
+              Body = <<"{\"name\":\"client\",\"admin\":true,\"validator\":true}">>,
+              ?assertThrow(#ej_invalid{type = fun_match, msg = <<"Client can be either an admin or a validator, but not both.">>},
+                           chef_client:osc_parse_binary_json(Body, <<"client">>))
+      end
+     },
 
      {"a null public_key is removed",
       fun() ->
@@ -137,27 +144,42 @@ osc_parse_binary_json_test_() ->
                 || Body <- Bodies ]
       end},
 
-     {"Inherits values from current client",
+     {"Inherits values from current admin client",
       fun() ->
-              CurClient = #chef_client{admin = true, validator = true,
+              CurClient = #chef_client{admin = true, validator = false,
                                        public_key = public_key_data()},
               {ok, Client} = chef_client:osc_parse_binary_json(<<"{}">>, <<"alice">>, CurClient),
               ExpectedData = [{<<"json_class">>, <<"Chef::ApiClient">>},
                               {<<"chef_type">>, <<"client">>},
-                              {<<"validator">>, true},
+                              {<<"validator">>, false},
                               {<<"admin">>, true},
                               {<<"public_key">>, public_key_data()},
                               {<<"name">>, <<"alice">>}],
               {GotData} = Client,
               ?assertEqual(lists:sort(ExpectedData), lists:sort(GotData))
-              
       end
      },
 
-     {"Inherits values from current client but can override true to false",
+     {"Inherits values from current validator client",
+      fun() ->
+              CurClient = #chef_client{admin = false, validator = true,
+                                       public_key = public_key_data()},
+              {ok, Client} = chef_client:osc_parse_binary_json(<<"{}">>, <<"alice">>, CurClient),
+              ExpectedData = [{<<"json_class">>, <<"Chef::ApiClient">>},
+                              {<<"chef_type">>, <<"client">>},
+                              {<<"validator">>, true},
+                              {<<"admin">>, false},
+                              {<<"public_key">>, public_key_data()},
+                              {<<"name">>, <<"alice">>}],
+              {GotData} = Client,
+              ?assertEqual(lists:sort(ExpectedData), lists:sort(GotData))
+      end
+     },
+
+     {"Inherits values from current admin client but can override true to false",
       fun() ->
               %% override true with false
-              CurClient = #chef_client{admin = true, validator = true,
+              CurClient = #chef_client{admin = true, validator = false,
                                        public_key = public_key_data()},
               {ok, Client} = chef_client:osc_parse_binary_json(<<"{\"validator\":false, \"admin\":false}">>,
                                                            <<"alice">>, CurClient),
@@ -166,15 +188,36 @@ osc_parse_binary_json_test_() ->
       end
      },
 
-     {"Inherits values from current client but can override false to true",
+     {"Inherits values from current validator client but can override true to false",
+      fun() ->
+              %% override true with false
+              CurClient = #chef_client{admin = false, validator = true,
+                                       public_key = public_key_data()},
+              {ok, Client} = chef_client:osc_parse_binary_json(<<"{\"validator\":false, \"admin\":false}">>,
+                                                           <<"alice">>, CurClient),
+              ?assertEqual(false, ej:get({"validator"}, Client))
+      end
+     },
+
+     {"Inherits values from current admin client but can override false to true",
        fun() ->
                %% override false with true
-               CurClient = #chef_client{admin = false, validator = false,
+               CurClient = #chef_client{admin = true, validator = false,
                                         public_key = public_key_data()},
-               {ok, Client} = chef_client:osc_parse_binary_json(<<"{\"validator\":true, \"admin\":true}">>,
+               {ok, Client} = chef_client:osc_parse_binary_json(<<"{\"validator\":true, \"admin\":false}">>,
                                                             <<"alice">>, CurClient),
-               ?assertEqual(true, ej:get({"admin"}, Client)),
                ?assertEqual(true, ej:get({"validator"}, Client))
+       end
+     },
+
+     {"Inherits values from current validator client but can override false to true",
+       fun() ->
+               %% override false with true
+               CurClient = #chef_client{admin = false, validator = true,
+                                        public_key = public_key_data()},
+               {ok, Client} = chef_client:osc_parse_binary_json(<<"{\"validator\":false, \"admin\":true}">>,
+                                                            <<"alice">>, CurClient),
+               ?assertEqual(true, ej:get({"admin"}, Client))
        end
      },
 
