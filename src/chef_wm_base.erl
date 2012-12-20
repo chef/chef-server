@@ -669,7 +669,7 @@ handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
             chef_wm_authz:allow_admin(Requestor);
         Method when Method =:= 'GET';
                     Method =:= 'DELETE' ->
-            chef_wm_authz:allow_admin_or_requesting_node(Requestor, ClientName);
+            chef_wm_authz:allow_admin_or_requesting_client(Requestor, ClientName);
         _Else ->
             forbidden
     end;
