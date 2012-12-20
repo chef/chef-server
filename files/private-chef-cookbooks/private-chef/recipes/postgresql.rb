@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -121,13 +121,13 @@ runit_service "postgres" do
   }.merge(params))
 end
 
-if node['private_chef']['bootstrap']['enable'] 
-		retries 20 
+if node['private_chef']['bootstrap']['enable']
 	execute "/opt/opscode/bin/private-chef-ctl start postgres" do
+		retries 20
 	end
 
   ###
-  # Create the database, migrate it, and create the users we need, and grant them 
+  # Create the database, migrate it, and create the users we need, and grant them
   # privileges.
   ###
   database_exists = "/opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} /opt/opscode/embedded/bin/psql -d 'template1' -c 'select datname from pg_database' -x|grep opscode_chef"
@@ -143,7 +143,7 @@ if node['private_chef']['bootstrap']['enable']
   end
 
   execute "migrate_database" do
-    command "/opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/bin/rake pg:remigrate" 
+    command "/opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/bin/rake pg:remigrate"
     cwd "/opt/opscode/embedded/service/chef-sql-schema"
     user node['private_chef']['postgresql']['username']
     action :nothing
@@ -155,7 +155,7 @@ if node['private_chef']['bootstrap']['enable']
   # TODO: Remove this migration when reporting is moved to its own db.
   #
   execute "migrate_reporting_database" do
-    command "/opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/bin/rake pg:remigrate" 
+    command "/opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/bin/rake pg:remigrate"
     cwd "/opt/opscode/embedded/service/opscode-reporting/db"
     user node['private_chef']['postgresql']['username']
     action :nothing
@@ -169,7 +169,7 @@ if node['private_chef']['bootstrap']['enable']
   end
 
   execute "grant opscode_chef privileges" do
-    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_user']}\"" 
+    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_user']}\""
     user node['private_chef']['postgresql']['username']
     action :nothing
   end
@@ -182,7 +182,7 @@ if node['private_chef']['bootstrap']['enable']
   end
 
   execute "grant opscode_chef_ro privileges" do
-    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_ro_user']}\"" 
+    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_ro_user']}\""
     user node['private_chef']['postgresql']['username']
     action :nothing
   end

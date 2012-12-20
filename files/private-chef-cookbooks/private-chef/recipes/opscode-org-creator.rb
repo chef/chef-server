@@ -8,7 +8,7 @@ opscode_org_creator_dir = node['private_chef']['opscode-org-creator']['dir']
 opscode_org_creator_etc_dir = File.join(opscode_org_creator_dir, "etc")
 opscode_org_creator_log_dir = node['private_chef']['opscode-org-creator']['log_directory']
 opscode_org_creator_log_sasl_dir = File.join(node['private_chef']['opscode-org-creator']['log_directory'], "sasl")
-[ 
+[
   opscode_org_creator_dir,
   opscode_org_creator_etc_dir,
   opscode_org_creator_log_dir,
@@ -21,7 +21,7 @@ opscode_org_creator_log_sasl_dir = File.join(node['private_chef']['opscode-org-c
   end
 end
 
-org_creator_config = File.join(opscode_org_creator_etc_dir, "app.config") 
+org_creator_config = File.join(opscode_org_creator_etc_dir, "app.config")
 
 template org_creator_config do
   source "opscode-org-creator.config.erb"
@@ -31,7 +31,7 @@ template org_creator_config do
 end
 
 link "/opt/opscode/embedded/service/opscode-org-creator/rel/org_app/etc/app.config" do
-  to org_creator_config 
+  to org_creator_config
 end
 
 link "/opt/opscode/embedded/service/opscode-org-creator/rel/org_app/log" do
@@ -56,8 +56,8 @@ runit_service "opscode-org-creator" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-		retries 20 
 	execute "/opt/opscode/bin/private-chef-ctl start opscode-org-creator" do
+		retries 20
 	end
 end
 

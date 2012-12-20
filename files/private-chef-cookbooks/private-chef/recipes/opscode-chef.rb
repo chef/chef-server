@@ -14,7 +14,7 @@ private_chef_api_checksum_dir = node['private_chef']['opscode-chef']['checksum_p
 private_chef_api_cookbook_cache_dir = File.join(private_chef_api_dir, "cookbooks_cache")
 private_chef_api_log_dir = node['private_chef']['opscode-chef']['log_directory']
 
-[ 
+[
   private_chef_api_dir,
   private_chef_api_etc_dir,
   private_chef_api_working_dir,
@@ -77,13 +77,13 @@ link "/opt/opscode/embedded/service/opscode-chef/chef-server-api/statsd_config.r
 end
 
 unicorn_config File.join(private_chef_api_etc_dir, "unicorn.rb") do
-  listen node['private_chef']['opscode-chef']['listen'] => { 
+  listen node['private_chef']['opscode-chef']['listen'] => {
     :backlog => node['private_chef']['opscode-chef']['backlog'],
     :tcp_nodelay => node['private_chef']['opscode-chef']['tcp_nodelay']
   }
   worker_timeout node['private_chef']['opscode-chef']['worker_timeout']
-  working_directory private_chef_api_working_dir 
-  worker_processes node['private_chef']['opscode-chef']['worker_processes']  
+  working_directory private_chef_api_working_dir
+  worker_processes node['private_chef']['opscode-chef']['worker_processes']
   owner "root"
   group "root"
   mode "0644"
@@ -101,8 +101,8 @@ runit_service "opscode-chef" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-		retries 20 
 	execute "/opt/opscode/bin/private-chef-ctl start opscode-chef" do
+		retries 20
 	end
 end
 

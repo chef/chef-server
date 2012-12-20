@@ -48,7 +48,7 @@ template reindexer_config do
 end
 
 runit_service "opscode-expander" do
-  down node['private_chef']['opscode-expander']['ha'] 
+  down node['private_chef']['opscode-expander']['ha']
   options({
     :log_directory => expander_log_dir,
     :svlogd_size => node['private_chef']['opscode-expander']['svlogd_size'],
@@ -57,7 +57,7 @@ runit_service "opscode-expander" do
 end
 
 runit_service "opscode-expander-reindexer" do
-  down node['private_chef']['opscode-expander']['ha'] 
+  down node['private_chef']['opscode-expander']['ha']
   options({
     :log_directory => expander_reindexer_log_dir,
     :svlogd_size => node['private_chef']['opscode-expander']['reindexer_svlogd_size'],
@@ -66,11 +66,11 @@ runit_service "opscode-expander-reindexer" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-		retries 20 
 	execute "/opt/opscode/bin/private-chef-ctl start opscode-expander" do
+		retries 20
 	end
-		retries 20 
 	execute "/opt/opscode/bin/private-chef-ctl start opscode-expander-reindexer" do
+		retries 20
 	end
 end
 

@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,7 +50,7 @@ rabbitmq_service_dir = "/opt/opscode/embedded/service/rabbitmq"
   end
 end
 
-config_file = File.join(rabbitmq['dir'], "etc", "rabbitmq.conf") 
+config_file = File.join(rabbitmq['dir'], "etc", "rabbitmq.conf")
 
 template "#{rabbitmq_service_dir}/sbin/rabbitmq-env" do
   owner "root"
@@ -85,17 +85,17 @@ if node['private_chef']['bootstrap']['enable']
   opc_username = node["private_chef"]["user"]["username"]
   rmq_ctl_chpost = "/opt/opscode/embedded/bin/chpst -u #{opc_username} -U #{opc_username} #{rmq_ctl}"
 
-    retries 20 
   execute "/opt/opscode/bin/private-chef-ctl start rabbitmq" do
+    retries 20
   end
-  
+
   execute "#{rmq_ctl_chpost} wait #{rabbitmq_data_dir}/rabbit@localhost.pid" do
-    retries 10 
+    retries 10
   end
 
   [ rabbitmq['vhost'], rabbitmq['reindexer_vhost'], rabbitmq['jobs_vhost'], rabbitmq['reports_vhost'] ].each do |vhost|
     execute "#{rmq_ctl} add_vhost #{vhost}" do
-      user opc_username 
+      user opc_username
       not_if "#{rmq_ctl_chpost} list_vhosts| grep #{vhost}"
       retries 20
     end
@@ -112,7 +112,7 @@ if node['private_chef']['bootstrap']['enable']
     not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['jobs_user']}"
     retries 10
   end
-  
+
   execute "#{rmq_ctl} add_user #{rabbitmq['reports_user']} #{rabbitmq['reports_password']}" do
     user opc_username
     not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['reports_user']}"

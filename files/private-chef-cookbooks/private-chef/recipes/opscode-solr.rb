@@ -94,9 +94,9 @@ runit_service "opscode-solr" do
   }.merge(params))
 end
 
-if node['private_chef']['bootstrap']['enable'] 
-		retries 20 
+if node['private_chef']['bootstrap']['enable']
 	execute "/opt/opscode/bin/private-chef-ctl start opscode-account" do
+		retries 20
 	end
 end
 

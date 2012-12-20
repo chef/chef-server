@@ -28,7 +28,7 @@ end
 # Drop off the CouchDB configuration file
 template File.join(couchdb_etc_dir, "local.ini") do
   source "local.ini.erb"
-  owner node['private_chef']['user']['username'] 
+  owner node['private_chef']['user']['username']
   mode "0600"
   variables(node['private_chef']['couchdb'].to_hash)
   notifies :restart, "service[couchdb]" if OmnibusHelper.should_notify?("couchdb")
@@ -45,8 +45,8 @@ runit_service "couchdb" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-		retries 20 
 	execute "/opt/opscode/bin/private-chef-ctl start couchdb" do
+		retries 20
 	end
 end
 

@@ -8,7 +8,7 @@
 opscode_certificate_dir = node['private_chef']['opscode-certificate']['dir']
 opscode_certificate_etc_dir = File.join(opscode_certificate_dir, "etc")
 opscode_certificate_log_dir = node['private_chef']['opscode-certificate']['log_directory']
-[ 
+[
   opscode_certificate_dir,
   opscode_certificate_etc_dir,
   opscode_certificate_log_dir,
@@ -21,10 +21,10 @@ opscode_certificate_log_dir = node['private_chef']['opscode-certificate']['log_d
 end
 
 link "/opt/opscode/embedded/service/opscode-certificate/priv/log" do
-  to opscode_certificate_log_dir 
+  to opscode_certificate_log_dir
 end
 
-certificate_config = File.join(opscode_certificate_etc_dir, "certificate.config") 
+certificate_config = File.join(opscode_certificate_etc_dir, "certificate.config")
 
 template certificate_config do
   source "certgen_web.config.erb"
@@ -34,7 +34,7 @@ template certificate_config do
 end
 
 link "/opt/opscode/embedded/service/opscode-certificate/priv/certgen_web.config" do
-  to certificate_config 
+  to certificate_config
 end
 
 runit_service "opscode-certificate" do
@@ -47,8 +47,8 @@ runit_service "opscode-certificate" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-		retries 20 
 	execute "/opt/opscode/bin/private-chef-ctl start opscode-certificate" do
+		retries 20
 	end
 end
 
