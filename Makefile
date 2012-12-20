@@ -28,7 +28,7 @@ all: compile eunit dialyzer
 clean:
 	@rebar clean
 
-compile: $(DEPS) check_calls
+compile: $(DEPS)
 	@rebar compile
 
 $(DEPS):
@@ -45,9 +45,6 @@ test: eunit
 
 dialyzer: $(DEPS_PLT)
 	@dialyzer -Wrace_conditions -Wunderspecs --plts ~/.dialyzer_plt $(DEPS_PLT) -r ebin
-
-check_calls:
-	@./check_calls
 
 $(DEPS_PLT):
 	@dialyzer --build_plt $(DIALYZER_DEPS) --output_plt $(DEPS_PLT)

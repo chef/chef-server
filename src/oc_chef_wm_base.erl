@@ -94,7 +94,7 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
                                                    FailingTuple :: auth_tuple()} |
                                                   {Error :: term(),
                                                    FailingTuple :: auth_tuple()}.
-multi_auth_check([], Req, State) ->
+multi_auth_check([], _Req, _State) ->
     %% Nothing left to check, must be OK
     true;
 multi_auth_check([CurrentTuple|Rest], Req, State) ->
@@ -167,15 +167,14 @@ invert_perm(Other) ->
 %%                      Permission :: permission(),
 %%                      Req :: wm_req(),
 %%                      State :: #base_state{}) -> true | false | Error :: term().
-has_permission(AuthzObjectType, AuthzId, Permission, Req, #base_state{reqid=ReqId,
-                                                                      requestor_id=RequestorId}=State) ->
+has_permission(AuthzObjectType, AuthzId, Permission, _Req,
+               #base_state{reqid=ReqId, requestor_id=RequestorId}) ->
     ?SH_TIME(ReqId, oc_chef_authz, is_authorized_on_resource,
                   (RequestorId, AuthzObjectType, AuthzId, actor, RequestorId, Permission)).
 
 %% NOTE: derives the permission check from the HTTP verb of the Request
-check_permission(AuthzObjectType, AuthzId, Req, #base_state{reqid=ReqId,
-                                                            requestor_id=RequestorId
-                                                           }=State) ->
+check_permission(AuthzObjectType, AuthzId, Req,
+                 #base_state{requestor_id=RequestorId}=State) ->
     Perm = http_method_to_authz_perm(Req),
     case has_permission(AuthzObjectType, AuthzId, Perm, Req, State) of
         true ->
