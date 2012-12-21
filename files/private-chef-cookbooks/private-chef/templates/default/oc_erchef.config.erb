@@ -35,12 +35,12 @@
   {chef_wm, [
              {server_version, "<%= node['private_chef']['version'] %>"},
              {health_ping_timeout, 400},
-             {health_ping_modules, [chef_authz, chef_otto, chef_sql, chef_solr]}
+             {health_ping_modules, [oc_chef_authz, chef_otto, chef_sql, chef_solr]}
             ]},
   {chef_authn, [
                 {keyring, [{default, "/etc/opscode/webui_pub.pem"}]}
                ]},
-  {chef_authz, [
+  {oc_chef_authz, [
                 {authz_root_url, "http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>" },
                 {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
                 {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
