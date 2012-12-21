@@ -44,13 +44,20 @@ tags: TAGS
 TAGS:
 	find deps -name "*.[he]rl" -print | etags -
 
-prepare_release: distclean unlocked_deps rel update_locked_config
+prepare_release: distclean unlocked_deps unlocked_compile update_locked_config rel
 	@echo 'release prepared, bumping version'
 	@$(REBAR) bump-rel-version
 
 unlocked_deps:
 	@echo 'Fetching deps as: rebar -C rebar.config'
 	@rebar -C rebar.config get-deps
+
+# When running the prepare_release target, we have to ensure that a
+# compile occurs using the unlocked rebar.config. If a dependency has
+# been removed, then using the locked version that contains the stale
+# dep will cause a compile error.
+unlocked_compile:
+	@rebar -C rebar.config compile
 
 update_locked_config:
 	@rebar lock-deps ignore=meck skip_deps=true
