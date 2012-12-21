@@ -1,5 +1,5 @@
 DEPS=$(CURDIR)/deps
-XCHECK_APPS=chef_authn chef_authz chef_certgen chef_db chef_index chef_objects chef_wm \
+XCHECK_APPS=chef_authn oc_chef_authz chef_certgen chef_db chef_index chef_objects chef_wm \
 	    oc_chef_wm sqerl
 
 # The release branch should have a file named USE_REBAR_LOCKED
