@@ -100,40 +100,9 @@ validate_request(_Method, Req, State) ->
 auth_info(Req, State) ->
     {authorized, Req, State}.
 
-assemble_principal_ejson(#principal_state{name = Name,
-                                          public_key = PublicKey,
-                                          type = Type,
-                                          authz_id = AuthzId} = _Principal) ->
-    {[{<<"name">>, Name},
-      {<<"public_key">>, PublicKey},
-      {<<"type">>, Type},
-      {<<"authz_id">>, AuthzId}]}.
-assemble_principal_ejson(#principal_state{name = Name,
-                                          public_key = PublicKey,
-                                          type = Type,
-                                          authz_id = AuthzId} = _Principal,
-                         OrgName, DbContext) ->
-    Member = case Type of
-                 <<"client">>  ->
-                     true;
-                 <<"user">> ->
-                     chef_db:is_user_in_org(DbContext, Name, OrgName)
-             end,                 
-    {[{<<"name">>, Name},
-      {<<"public_key">>, PublicKey},
-      {<<"type">>, Type},
-      {<<"authz_id">>, AuthzId},
-      {<<"org_member">>, Member}]}.
-
 to_json(Req, #base_state{resource_state = Principal, chef_db_context = DbContext,
-                         organization_name = OrgName,
-                         server_flavor = Flavor} = State) ->
-    EJson = case Flavor of
-                "osc" ->
-                    assemble_principal_ejson(Principal);
-                _other ->
-                    assemble_principal_ejson(Principal, OrgName, DbContext)
-            end,
+                         organization_name = OrgName} = State) ->
+    EJson = ?BASE_RESOURCE:assemble_principal_ejson(Principal, OrgName, DbContext),
     Json = ejson:encode(EJson),
     {Json, Req, State}.
 
