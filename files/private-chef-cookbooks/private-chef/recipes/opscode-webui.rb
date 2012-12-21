@@ -101,7 +101,7 @@ runit_service "opscode-webui" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl opscode-webui start" do
+	execute "/opt/opscode/bin/private-chef-ctl start opscode-webui" do
 		retries 20
 	end
 end
