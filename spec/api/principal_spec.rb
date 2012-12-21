@@ -6,7 +6,7 @@
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 
-describe "Principals API Endpoint", :principals do
+describe "Principals API Endpoint", :focus, :principals do
 
   # This code does not use any of the new hotness, and is in fact
   # somewhat temporary, so it has been decided not to waste the effort
@@ -41,7 +41,10 @@ describe "Principals API Endpoint", :principals do
     {
       "name" => principal_client_name,
       "type" => "client",
-      "public_key" => /^-----BEGIN CERTIFICATE-----/,
+      # We're not actually validating the key, all we're testing here is that it
+      # exists in the response body; if it's returning invalid keys, that would be
+      # obvious from pushy test failures (possibly reporting as well).
+      "public_key" => /^-----/,
       "authz_id" => /^[0-9a-f]{32}$/,
       "org_member" => true
     } }
@@ -49,7 +52,8 @@ describe "Principals API Endpoint", :principals do
     {
       "name" => principal_user_name,
       "type" => "user",
-      "public_key" => /^-----BEGIN CERTIFICATE-----/,
+      # See above
+      "public_key" => /^-----/,
       "authz_id" => /^[0-9a-f]{32}$/,
       "org_member" => true
     } }
