@@ -6,7 +6,7 @@
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 
-describe "Principals API Endpoint", :focus, :principals do
+describe "Principals API Endpoint", :principals do
 
   # This code does not use any of the new hotness, and is in fact
   # somewhat temporary, so it has been decided not to waste the effort
