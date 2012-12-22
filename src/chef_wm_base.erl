@@ -484,7 +484,16 @@ spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
               {request_action, atom_to_list(wrq:method(Req))},
               %% FIXME: make this list a define/app config
               {upstream_prefixes, [<<"rdbms">>, <<"couch">>, <<"authz">>, <<"solr">>]}],
-    stats_hero_worker_sup:new_worker(Config).
+    %% we don't want to fail if stats_hero is broken, but will log an error message if we
+    %% can't even spawn a worker here.
+    case stats_hero_worker_sup:new_worker(Config) of
+        {ok, _} ->
+            ok;
+        {error, Reason} ->
+            error_logger:error_msg("FAILED stats_hero_worker_sup:new_worker: ~p~n",
+                                   [Reason]),
+            ok
+    end.
 
 log_request(Req, #base_state{reqid = ReqId, log_msg = Msg, organization_name = Org}) ->
     Status = wrq:response_code(Req),
