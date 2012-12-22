@@ -46,7 +46,9 @@
 
 %% "Grab Bag" functions that will also need to be implemented by other base resources
 -export([check_cookbook_authz/3,
-         delete_object/3]).
+         delete_object/3,
+         stats_hero_label/1,
+         stats_hero_upstreams/0]).
 
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
@@ -866,3 +868,30 @@ set_forbidden_msg(Req, State) ->
     JsonMsg = chef_json:encode({[{<<"error">>, [Msg]}]}),
     Req1 = wrq:set_resp_body(JsonMsg, Req),
     {Req1, State#base_state{log_msg = {forbidden}}}.
+
+
+%% These are modules that we instrument with stats_hero and aggregate into common prefix via
+%% stats_hero_label.
+-type metric_module() :: chef_sql | chef_solr.
+
+%% @doc Given a `{Mod, Fun}' tuple, generate a stats hero metric with a prefix appropriate
+%% for stats_hero aggregation. An error is thrown if `Mod' is unknown. This is where we
+%% encode the mapping of module to upstream label.
+-spec stats_hero_label({Mod::metric_module(), Fun::atom()}) -> <<_:16,_:_*8>>.
+stats_hero_label({chef_sql, Fun}) ->
+    stats_hero_label0(rdbms, {chef_sql, Fun});
+stats_hero_label({chef_solr, Fun}) ->
+    stats_hero_label0(solr, {chef_solr, Fun});
+stats_hero_label({BadPrefix, Fun}) ->
+    erlang:error({bad_prefix, {BadPrefix, Fun}}).
+
+stats_hero_label0(Prefix, {Mod, Fun}) ->
+    PrefixBin = erlang:atom_to_binary(Prefix, utf8),
+    ModBin = erlang:atom_to_binary(Mod, utf8),
+    FunBin = erlang:atom_to_binary(Fun, utf8),
+    <<PrefixBin/binary, ".", ModBin/binary, ".", FunBin/binary>>.
+
+%% @doc The prefixes that stats_hero should use for aggregating timing data over each
+%% request.
+stats_hero_upstreams() ->
+    [<<"rdbms">>, <<"solr">>].
