@@ -129,7 +129,10 @@
 
           %% Turn this on if superuser is allowed to bypass security checks for
           %% this endpoint.
-          superuser_bypasses_checks = false :: true | false
+          superuser_bypasses_checks = false :: true | false,
+
+          %% A proplist of config for metric reporting and stats_hero integration.
+          metrics_config :: [{atom(), term()}]
          }).
 
 -record(client_state, {

@@ -87,6 +87,7 @@ init_base_state(ResourceMod, InitParams) ->
                 server_flavor = ?gv(server_flavor, InitParams),
                 api_version = ?gv(api_version, InitParams),
 
+                metrics_config = ?gv(metrics_config, InitParams),
                 resource_mod = ResourceMod}.
 
 %% @doc Determines if service is available.
