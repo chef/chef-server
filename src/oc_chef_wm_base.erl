@@ -376,17 +376,27 @@ check_cookbook_authz(Cookbooks, Req, State) ->
 %% This version should work for Open Source:
 %% check_cookbook_authz(_Cookbooks, _Req, _State) -> ok.
 
+is_user_in_org(Type, DbContext, Name, OrgName) ->
+    case Type of
+        <<"client">> ->
+            true;
+        <<"user">> ->
+            case chef_db:is_user_in_org(DbContext, Name, OrgName) of
+                true ->
+                    true;
+                false ->
+                    false;
+                Error ->
+                    throw(Error)
+            end
+    end.
+
 assemble_principal_ejson(#principal_state{name = Name,
                                           public_key = PublicKey,
                                           type = Type,
                                           authz_id = AuthzId} = _Principal,
                          OrgName, DbContext) ->
-    Member = case Type of
-                 <<"client">>  ->
-                     true;
-                 <<"user">> ->
-                     chef_db:is_user_in_org(DbContext, Name, OrgName)
-             end,                 
+    Member = is_user_in_org(Type, DbContext, Name, OrgName),                 
     {[{<<"name">>, Name},
       {<<"public_key">>, PublicKey},
       {<<"type">>, Type},
