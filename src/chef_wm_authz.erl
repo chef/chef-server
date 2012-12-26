@@ -30,6 +30,7 @@
          allow_admin_or_requesting_client/2,
          allow_admin_or_requesting_node/2,
          is_admin/1,
+         is_requesting_client/2,
          is_requesting_node/2,
          is_validator/1]).
 
@@ -67,11 +68,12 @@ allow_admin_or_requesting_node(#chef_user{} = User, _Name)            -> allow_a
 %%
 %% Validators can only create clients, get info on itself, and update itself. It cannot do
 %% anything else, including operating on node resources.
+%%
+%% Forbids non-admin users with the same name as the client
 -spec allow_admin_or_requesting_client(#chef_client{} | #chef_user{}, binary()) -> authorized | forbidden.
 allow_admin_or_requesting_client(#chef_client{name = Name}, Name)       -> authorized;
 allow_admin_or_requesting_client(#chef_client{validator = true}, _Name) -> forbidden;
 allow_admin_or_requesting_client(#chef_client{} = Client, _Name)        -> allow_admin(Client);
-allow_admin_or_requesting_client(#chef_user{username = Name}, Name)     -> authorized;
 allow_admin_or_requesting_client(#chef_user{} = User, _Name)            -> allow_admin(User).
 
 is_admin(#chef_client{admin = true}) -> true;
@@ -86,6 +88,13 @@ is_requesting_node(#chef_client{}, _Name)             -> false;
 is_requesting_node(#chef_user{username = Name}, Name) -> true;
 is_requesting_node(#chef_user{}, _Name)               -> false.
 
+%% Specifically does not allow users with the same name as the client
+-spec is_requesting_client(#chef_client{} | #chef_user{}, binary()) -> true | false.
+is_requesting_client(#chef_client{name = Name}, Name)   -> true;
+is_requesting_client(_, _)                              -> false.
+
 is_validator(#chef_client{validator = true}) -> true;
 is_validator(#chef_client{})                 -> false;
 is_validator(#chef_user{})                   -> false.
+
+
