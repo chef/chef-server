@@ -129,8 +129,8 @@ malformed_request(Req, #base_state{resource_mod=Mod,
             Msg1 = chef_wm_malformed:malformed_request_message(bad_clock, Req, State),
             Req3 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
             {{halt, 401}, Req3, State1#base_state{log_msg = bad_clock}};
-                throw:bad_headers ->
-            Msg1 =  chef_wm_malformed:malformed_request_message(bad_headers, Req, State),
+        throw:{bad_headers, Headers} ->
+            Msg1 =  chef_wm_malformed:malformed_request_message({bad_headers, Headers}, Req, State),
             Req3 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
             {{halt, 401}, Req3, State1#base_state{log_msg = bad_headers}};
         throw:bad_sign_desc ->
