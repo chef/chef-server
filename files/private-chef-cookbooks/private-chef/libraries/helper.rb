@@ -1,4 +1,4 @@
-require 'chef/shell_out'
+require 'mixlib/shellout'
 
 class OmnibusHelper
   def self.should_notify?(service_name)
@@ -6,7 +6,7 @@ class OmnibusHelper
   end
 
   def self.check_status(service_name)
-    o = Chef::ShellOut.new("/opt/opscode/bin/private-chef-ctl status #{service_name}")
+    o = Mixlib::ShellOut.new("/opt/opscode/bin/private-chef-ctl status #{service_name}")
     o.run_command
     o.exitstatus == 0 ? true : false
   end
