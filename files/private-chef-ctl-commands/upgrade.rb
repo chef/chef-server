@@ -6,7 +6,9 @@
 
 add_command "upgrade", "Upgrade your private chef installation.", 1 do
   reconfigure(false)
-  status = run_command("cd /opt/opscode/embedded/service/partybus && /opt/opscode/embedded/bin/ruby bin/partybus upgrade")
+  Dir.chdir(File.join(base_path, "embedded", "service", "partybus"))
+  bundle = File.join(base_path, "embedded", "bin", "bundle")
+  status = run_command("#{bundle} exec ./bin/partybus upgrade")
   if status.success?
     puts "Chef Server Upgraded!"
     exit 0
