@@ -153,9 +153,9 @@ with_error_body(Req, ErrorData) ->
 %% point to the URI of a newly-created resource.
 %%
 %% The body will be of the form
-%%
+%% ```
 %%     {"uri":"http://foo.com/newresource"}
-%%
+%% '''
 %% Returns the updated request.
 set_uri_of_created_resource(Req) ->
     set_uri_of_created_resource(chef_wm_util:full_uri(Req), Req).
@@ -169,8 +169,8 @@ set_uri_of_created_resource(Uri, Req0) when is_binary(Uri) ->
 %% @doc Extracts the name of a given object from the request path.  This is for use in
 %% resources that manipulate individual Chef objects, like nodes or roles.
 %%
-%% For example, given a request to the path "/nodes/foo", this
-%% function would return <<"foo">>
+%% For example, given a request to the path `"/nodes/foo"', this
+%% function would return `<<"foo">>'
 %% @end
 %%
 %% TODO: Currently we only use this for nodes and roles; when we clean up our custom types,

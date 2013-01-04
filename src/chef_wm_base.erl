@@ -207,7 +207,7 @@ create_500_response(Req, State) ->
     Req2 = add_api_info_header(Req1, State),
     wrq:set_resp_body(Json, Req2).
 
-%% @doc Extract information from `State` needed to generate the X-Ops-API-Info header value.
+%% @doc Extract information from `State' needed to generate the X-Ops-API-Info header value.
 api_info(#base_state{api_version = ApiVersion,
                      otp_info = {ReleaseName, OtpVersion},
                      server_flavor = ServerFlavor}) ->

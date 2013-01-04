@@ -87,12 +87,12 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
 %% recipes are presented as only the cookbook name.
 %%
 %% Example:
-%%
+%% ```
 %% [
 %%   "bar::recipe",
 %%   "baz::recipe",
 %%   "foo"             <-- the recipe "foo::default"
-%% ]
+%% ]'''
 %%
 to_json(Req, #base_state{chef_db_context = DbContext,
                          organization_name = OrgName,
