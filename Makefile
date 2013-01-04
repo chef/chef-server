@@ -47,6 +47,9 @@ eunit: compile
 
 test: eunit
 
+doc:
+	@rebar doc skip_deps=true
+
 tags:
 	find src deps -name "*.[he]rl" -print | etags -
 
@@ -66,3 +69,5 @@ itest_run:
 	cd itest;erlc -I ../include -pz ../deps/chef_objects/ebin *.erl
 	@erl -I include -pa deps/*/ebin -pa .eunit -pa itest -noshell -eval "eunit:test(itest, [verbose])" \
 	-s erlang halt -db_type $(DB_TYPE)
+
+.PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest

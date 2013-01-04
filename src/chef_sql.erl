@@ -502,8 +502,8 @@ fetch_cookbook_versions(OrgId, CookbookName) when is_binary(CookbookName) ->
 
 %% @doc Fetch up to `NumberOfVersions' most recent versions of each
 %% cookbook within an organization.  Just returns a proplist mapping
-%% cookbook name -> concatenated version (i.e., <<"1.0.0">> instead of
-%% {1,0,0}).
+%% cookbook name to concatenated version (i.e., `<<"1.0.0">>' instead of
+%% `{1,0,0}').
 %%
 %% If `NumberOfVersions' is the atom `all', then information for all
 %% versions of all cookbooks is returned.
@@ -934,8 +934,8 @@ dcv_result_or_error(CookbookDelete, DeletedChecksums) ->
 %%     do_update(update_data_bag_by_id, UpdateFields).
 
 %% @doc Return a proplist of the parameterized SQL queries needed for
-%% chef_sql.  `Class` is used to distinguish between OPC and OSC
-%% queries; see `osc_statements/2` and `opc_statements/2` for more.
+%% chef_sql.  `Class' is used to distinguish between OPC and OSC
+%% queries; see {@link osc_statements/2} and {@link opc_statements/2} for more.
 statements(DbType, Class) when Class =:= default;
                                Class =:= opc ->
     Suffix = case Class of
@@ -1575,11 +1575,11 @@ row_to_dependency_set(Row) ->
 %% Environment Cookbook Filtering Helper Functions
 %%------------------------------------------------------------------------------
 
-%% @doc Given a list of {Cookbook, Version} pairs that satisfy a given
+%% @doc Given a list of `{Cookbook, Version}' pairs that satisfy a given
 %% set of environmental constraints, condense into a list of
-%% {Cookbook, Versions} pairs, where Versions is a list of at most
+%% `{Cookbook, Versions}' pairs, where Versions is a list of at most
 %% NumVersions version identifiers (sorted most recent first).  If
-%% NumVersions = 0, empty lists are returned, and if NumVersions =
+%% `NumVersions = 0', empty lists are returned, and if NumVersions =
 %% 'all', then all versions are returned.
 %%
 %% Note that this helper function is never called with an empty list.
@@ -1588,6 +1588,7 @@ row_to_dependency_set(Row) ->
 %% cookbook and sorted by version, most recent first.
 %%
 %% Examples:
+%% ```
 %% condense_depsolver_results([{<<"cb_1">>, <<"1.0.0">>},
 %%                             {<<"cb_1">>, <<"0.5.0">>},
 %%                             {<<"cb_2">>, <<"1.2.3">>},
@@ -1613,6 +1614,8 @@ row_to_dependency_set(Row) ->
 %% [{<<"cb_1">>, []},
 %%  {<<"cb_2">>, []},
 %%  {<<"cb_3">>, []}]
+%% '''
+%%
 -spec condense_depsolver_results([{CookbookName :: binary(), Version :: binary()}],
                                  NumVersions :: num_versions()) ->
                                         [{CookbookBin :: binary(), [ VersionBin :: binary()]}].
@@ -1682,7 +1685,7 @@ finalize_versions({Cookbook, Versions}) ->
 %% versions in the organization, mapping them to the database ID of
 %% the cookbook version using an Erlang dict.
 %%
-%% The key of the dict is a {CookbookName, Version} tuple, which
+%% The key of the dict is a `{CookbookName, Version}' tuple, which
 %% corresponds to the data that Depsolver gives.
 -spec create_cookbook_version_dict(OrgId :: object_id()) -> {ok, dict()} |
                                                             {error, term()}.
@@ -1724,7 +1727,7 @@ extract_ids_using_filtered_results(MappingDict, FilteredCookbookVersions) ->
       || {CookbookName, [Version]} <- FilteredCookbookVersions ].
 
 %% @doc Given a list of cookbook version database IDs, return a list
-%% of {CookbookName, SerializedObject} to facilitate the extraction of
+%% of `{CookbookName, SerializedObject}' to facilitate the extraction of
 %% recipe names from the group.
 -spec fetch_cookbook_version_serialized_objects([Ids :: integer()]) ->
                                                        {ok, [{CookbookName :: binary(),
@@ -1734,7 +1737,7 @@ fetch_cookbook_version_serialized_objects(Ids) ->
     {ok, BatchSize} = application:get_env(chef_db, bulk_fetch_batch_size),
     fetch_cookbook_version_serialized_objects(Ids, BatchSize, []).
 
-%% @doc Recursive implementation of fetch_cookbook_version_serialized_objects/1.
+%% @doc Recursive implementation of {@link fetch_cookbook_version_serialized_objects/1}.
 fetch_cookbook_version_serialized_objects([], _BatchSize, AllResults) ->
     %% Not reversing the list since order doesn't matter here; we
     %% ultimately want all the recipe names, and *that* list will be
@@ -1750,7 +1753,7 @@ fetch_cookbook_version_serialized_objects(UnprocessedIds, BatchSize, AllResults)
     end.
 
 %% @doc Actual database interaction logic for
-%% fetch_cookbook_version_serialized_objects/3, extracted here for
+%% {@link fetch_cookbook_version_serialized_objects/3}, extracted here for
 %% clarity.
 %%
 %% Note: There is no recursion in this function at all; each
@@ -1785,7 +1788,7 @@ fetch_cookbook_version_serialized_objects_batch(Ids) when is_list(Ids)->
     end.
 
 %% @doc Extracts qualified recipe names for a collection of cookbook
-%% versions, presented as {CookbookName, SerializedObject} pairs.
+%% versions, presented as `{CookbookName, SerializedObject}' pairs.
 %%
 %% Recipe names are returned sorted alphabetically.
 -spec extract_recipe_names_from_serialized_objects([{CookbookName :: binary(),
@@ -1868,7 +1871,7 @@ dict_key_value_for_index(Index) when Index =:= node;
                         list_node_ids_names_for_org |
                         list_role_ids_names_for_org.
 
-%% @doc Create a dict mapping `Key` to `Value` across the resultset of
+%% @doc Create a dict mapping `Key' to `Value' across the resultset of
 %% executing a database query.
 %% @end
 %%
@@ -1900,11 +1903,11 @@ proplist_results(Query, Args) ->
     end.
 
 %% @doc Given a list of proplists (e.g., a "raw" query resultset from
-%% sqerl), create a dict that maps `Key` to `Value`, where those are
+%% sqerl), create a dict that maps `Key' to `Value', where those are
 %% both keys present in each proplist.
 %%
-%% Thus, using `Key` = <<"foo">> and `Value` = <<"bar">>, a proplist
-%% of [{<<"foo">>, 123}, {<<"bar">>, 456}] would become a dict entry
+%% Thus, using `Key = <<"foo">>' and `Value = <<"bar">>', a proplist
+%% of `[{<<"foo">>, 123}, {<<"bar">>, 456}]' would become a dict entry
 %% mapping 123 to 456.
 %% @end
 %%

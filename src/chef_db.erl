@@ -508,9 +508,9 @@ fetch_latest_cookbook_version(#context{reqid=ReqId} = Ctx, OrgName, CookbookName
                           end)
     end.
 
-%% @doc Retrieve a list of {Name, Verison} tuples for the latest version of each cookbook in
-%% an organization.  Version information is returned as a binary string (e.g., <<"1.0.0">>)
-%% instead of the tuple form (e.g. {1,0,0}) that is used elsewhere.
+%% @doc Retrieve a list of `{Name, Verison}' tuples for the latest version of each cookbook in
+%% an organization.  Version information is returned as a binary string (e.g., `<<"1.0.0">>')
+%% instead of the tuple form (e.g. `{1,0,0}') that is used elsewhere.
 -spec fetch_latest_cookbook_versions(DbContext :: #context{},
                                      OrgName :: binary()) ->
                                             [{CookbookName :: binary(),
@@ -520,9 +520,9 @@ fetch_latest_cookbook_version(#context{reqid=ReqId} = Ctx, OrgName, CookbookName
 fetch_latest_cookbook_versions(#context{}=DbContext, OrgName) ->
     fetch_latest_cookbook_versions(DbContext, OrgName, 1).
 
-%% @doc Same as fetch_latest_cookbook_versions/2, but allows you to specify how many
+%% @doc Same as {@link fetch_latest_cookbook_versions/2}, but allows you to specify how many
 %% versions for which to fetch information.  For instance, setting `NumberOfVersions' to `3'
-%% will retrieve the {Name, Version} pairs for the three most recent versions of each
+%% will retrieve the `{Name, Version}' pairs for the three most recent versions of each
 %% cookbook.
 %%
 %% If fewer than `NumberOfVersions' versions exist for a given cookbook, all
