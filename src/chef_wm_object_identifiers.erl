@@ -18,16 +18,34 @@
 %% under the License.
 %%
 
+%% @doc The internal object identifier resource.
+%% This resource maps a Chef object type and name to the internal identifiers for the
+%% object. It is not routed at present in OSC, but is used in OPC so that federated services
+%% can track Chef objects using the internal ids.
+%%
+%% A request to obtain the identifiers for node web1 looks like `GET
+%% /nodes/web1/_identifiers'. If the object is found, the JSON response will have the
+%% following format:
+%% ```
+%% {
+%%   "id": ID,
+%%   "authz_id": AUTHZID,
+%%   "org_id": ORGID
+%% }
+%% '''
+%%
+%% NOTE: only implemented for node objects
+%%
 -module(chef_wm_object_identifiers).
 
--include("include/chef_wm.hrl").
+-include("chef_wm.hrl").
 
--mixin([{chef_wm_base, [ content_types_provided/2,
-                         finish_request/2,
-                         ping/2,
-                         validate_request/3 ]}]).
+-mixin([{chef_wm_base, [content_types_provided/2,
+                        finish_request/2,
+                        ping/2,
+                        validate_request/3]}]).
 
--mixin([{?BASE_RESOURCE, [ service_available/2 ]}]).
+-mixin([{?BASE_RESOURCE, [service_available/2]}]).
 
 -export([
          allowed_methods/2,
@@ -38,48 +56,44 @@
          to_json/2
          ]).
 
--record(object_identifier_state, { id :: object_id(), 
-                                   authz_id :: object_id(), 
-                                   org_id :: object_id() } ).
+-record(object_identifier_state, {id :: object_id(),
+                                  authz_id :: object_id(),
+                                  org_id :: object_id()}).
 
-%%
-%% Webmachine and chef_wm callbacks
-%% 
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
-init_resource_state(_Config) -> 
+init_resource_state(_Config) ->
     {ok, #object_identifier_state{}}.
 
-request_type() -> 
+request_type() ->
     "object_identifiers".
 
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
-resource_exists(Req, State) -> 
+resource_exists(Req, State) ->
     ObjType = chef_wm_util:extract_from_path(object_type, Req),
     ObjName = chef_wm_util:extract_from_path(object_name, Req),
-    case object_identifiers(ObjType, ObjName, State) of 
+    case object_identifiers(ObjType, ObjName, State) of
         #object_identifier_state{} = IdState ->
             State1 = State#base_state{resource_state = IdState},
             {true, Req, State1};
         Error ->
             Message = error_message(Error, ObjType, ObjName),
             Req1 = chef_wm_util:set_json_body(Req, Message),
-            {false, Req1, State#base_state{log_msg = {Error, ObjType, ObjName}} }
+            {false, Req1, State#base_state{log_msg = {Error, ObjType, ObjName}}}
     end.
 
 to_json(Req, #base_state{resource_state = #object_identifier_state{
-                                            id = Id,
-                                            authz_id = AuthzId,
-                                            org_id = OrgId} } = State) ->
+                                             id = Id,
+                                             authz_id = AuthzId,
+                                             org_id = OrgId} } = State) ->
     Response = {[{<<"id">>, Id}, {<<"authz_id">>, AuthzId}, {<<"org_id">>, OrgId}]},
     {chef_json:encode(Response), Req, State}.
 
-%% 
 %% Internal Functions
-%%
+
 -spec object_identifiers(binary(), binary(), #base_state{}) -> #object_identifier_state{} |
                                                                not_found |
                                                                unknown_object_type.
@@ -90,18 +104,16 @@ object_identifiers(<<"nodes">>,  NodeName, #base_state{chef_db_context = DbConte
         not_found ->
             not_found;
         #chef_node{} = Node ->
-            ObjectIdState#object_identifier_state{ id = Node#chef_node.id,
-                                                   authz_id = Node#chef_node.authz_id,
-                                                   org_id = Node#chef_node.org_id}
+            ObjectIdState#object_identifier_state{id = Node#chef_node.id,
+                                                  authz_id = Node#chef_node.authz_id,
+                                                  org_id = Node#chef_node.org_id}
     end;
 object_identifiers(_Type, _Name, _State) ->
     unknown_object_type.
 
-%% Error Response Formatting
-%%
 error_message(not_found, ObjType, ObjName) ->
-    chef_wm_util:error_message_envelope(iolist_to_binary( [<<"No such '">>, ObjType,
-                                                           <<"': '">>, ObjName, <<"'.">>]));
+    chef_wm_util:error_message_envelope(iolist_to_binary([<<"No such '">>, ObjType,
+                                                          <<"': '">>, ObjName, <<"'.">>]));
 error_message(unknown_object_type, ObjType, _ObjName) ->
-    chef_wm_util:error_message_envelope(iolist_to_binary( [<<"Unsupported object type: '">>,
-                                                           ObjType, <<"'.">>])).
+    chef_wm_util:error_message_envelope(iolist_to_binary([<<"Unsupported object type: '">>,
+                                                          ObjType, <<"'.">>])).
