@@ -662,14 +662,42 @@ handle_auth_info(chef_wm_clients, Req,
     end;
 handle_auth_info(chef_wm_named_client, Req, #base_state{requestor = Requestor,
                                                         resource_state =
-                                                            #client_state{chef_client = Client}}) ->
+                                                            #client_state{client_data = ClientData}}) ->
     ClientName = chef_wm_util:object_name(client, Req),
     case wrq:method(Req) of
         'PUT' ->
-            chef_wm_authz:allow_admin(Requestor);
+            RequestorIsModifyingSelf = chef_wm_authz:is_requesting_client(Requestor, ClientName),
+            RequestorIsNotAdmin = chef_wm_authz:is_admin(Requestor) =:= false,
+            RequestorIsNotValidator = chef_wm_authz:is_validator(Requestor) =:= false,
+
+            UpdateToAdmin = ej:get({<<"admin">>}, ClientData),
+            UpdateToValidator = ej:get({<<"validator">>}, ClientData),
+
+            %% Is a non-admin trying to upgrade to an admin?
+            EscalateAdminAttempt = RequestorIsNotAdmin andalso UpdateToAdmin,
+
+            %% Is a non-admin, non-validator trying to upgrade to validator?
+            EscalateValidatorAttempt = RequestorIsNotAdmin andalso RequestorIsNotValidator andalso UpdateToValidator,
+
+            EscalateAttempt = EscalateAdminAttempt orelse EscalateValidatorAttempt,
+
+            case {RequestorIsModifyingSelf, EscalateAttempt} of
+                {true, true} ->
+                    %% Non-admin clients cannot give admin privs to themselves.
+                    %% Non-admin clients cannot give validator privs to themselves
+                    forbidden;
+                {_, _} ->
+                    %% Admins can change whatever else they like for other users or
+                    %% themselves, and non-admins can change whatever for themselves
+                    %% as long as it is not escalating privs.
+
+                    %% Unlike users, we do not check for last client admin. As long as there is one admin user left,
+                    %% it can create another admin client
+                    chef_wm_authz:allow_admin_or_requesting_client(Requestor, ClientName)
+            end;
         Method when Method =:= 'GET';
                     Method =:= 'DELETE' ->
-            chef_wm_authz:allow_admin_or_requesting_node(Requestor, ClientName);
+            chef_wm_authz:allow_admin_or_requesting_client(Requestor, ClientName);
         _Else ->
             forbidden
     end;
