@@ -199,7 +199,7 @@ fetch_user(#context{reqid = ReqId, otto_connection = _Server} = _Context, UserNa
 
 -spec fetch_users(#context{}) -> [binary()] | {error, _}.
 fetch_users(#context{reqid = ReqId}) ->
-    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, fetch_users),
+    case stats_hero:ctime(ReqId, {chef_sql, fetch_users},
                           fun() -> chef_sql:fetch_users() end) of
         {ok, L} -> L;
         Other -> Other
@@ -207,7 +207,7 @@ fetch_users(#context{reqid = ReqId}) ->
 
 -spec count_user_admins(#context{}) -> integer() | {error, term()}.
 count_user_admins(#context{reqid = ReqId}) ->
-  case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, count_user_admins),
+  case stats_hero:ctime(ReqId, {chef_sql, count_user_admins},
                         fun() -> chef_sql:count_user_admins() end) of
        {ok, Count} -> Count;
        Other -> Other
@@ -485,7 +485,7 @@ fetch_cookbook_version(#context{reqid = ReqId} = Ctx, OrgName, VersionedCookbook
         not_found ->
             not_found;
         OrgId ->
-            stats_hero:ctime(ReqId, stats_hero:label(chef_sql, fetch_cookbook_version),
+            stats_hero:ctime(ReqId, {chef_sql, fetch_cookbook_version},
                              fun() -> chef_sql:fetch_cookbook_version(OrgId,
                                                                       VersionedCookbook)
                              end)
@@ -503,7 +503,7 @@ fetch_latest_cookbook_version(#context{reqid=ReqId} = Ctx, OrgName, CookbookName
       not_found ->
         not_found;
       OrgId ->
-         stats_hero:ctime(ReqId, stats_hero:label(chef_sql, fetch_latest_cookbook_version),
+         stats_hero:ctime(ReqId, {chef_sql, fetch_latest_cookbook_version},
                           fun() -> chef_sql:fetch_latest_cookbook_version(OrgId, CookbookName)
                           end)
     end.
@@ -980,7 +980,7 @@ update(DbContext, #chef_user{} = Record, ActorId) ->
 %% appropriate chef object record type).
 create_object(#context{reqid = ReqId}, Fun, Object, ActorId) ->
     Object1 = chef_object:set_created(Object, ActorId),
-    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+    case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(Object1) end) of
         {ok, 1} -> ok;
         {conflict, Msg}-> {conflict, Msg};
@@ -1009,7 +1009,7 @@ create_object(#context{reqid = ReqId}, Fun, Object, ActorId) ->
                                                                 {error, any()}.
 fetch_object(#context{reqid = ReqId}, ObjectType, {id, OrgId}, ObjectIdentifier) ->
     Fun = fetch_query_for_type(ObjectType),
-    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+    case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(OrgId, ObjectIdentifier) end) of
         {ok, not_found} -> not_found;
         {ok, Object} -> assert_chef_object(Object, ObjectType);
@@ -1101,7 +1101,7 @@ assert_chef_object(Object, chef_sandbox) ->
 %% @doc Generic listing of a Chef object type. `Fun' is a function in the `chef_sql'
 %% module. Returns a list of object names.
 fetch_objects(#context{reqid = ReqId}, Fun, {id, OrgId}) ->
-    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+    case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(OrgId) end) of
         {ok, L} when is_list(L) ->
             L;
@@ -1122,7 +1122,7 @@ fetch_objects(#context{} = Ctx, Fun, OrgName) ->
 %% function in the `chef_sql' module. This version is used to fetch nodes within a specified
 %% `environment' as well as `data_bag_items' within a specified `data_bag'.
 fetch_objects(#context{reqid = ReqId}, Fun, {id, OrgId}, Arg) ->
-    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+    case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(OrgId, Arg) end) of
         {ok, L} when is_list(L) ->
             L;
@@ -1162,7 +1162,7 @@ fetch_couchdb_data_bags(#context{reqid = ReqId, otto_connection = S}, {id, OrgId
 %% SPECIAL CASE - We need an OrgId and Name in addition to the Id when deleting
 %% cookbook versions.
 delete_object(#context{reqid = ReqId}, Fun, #chef_cookbook_version{} = CookbookVersion) ->
-    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+    case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(CookbookVersion) end) of
         {ok, not_found} -> not_found;
         Result -> Result
@@ -1170,7 +1170,7 @@ delete_object(#context{reqid = ReqId}, Fun, #chef_cookbook_version{} = CookbookV
 delete_object(#context{}=Ctx, Fun, Object) when is_tuple(Object) ->
     delete_object(Ctx, Fun, get_id(Object));
 delete_object(#context{reqid = ReqId}, Fun, Id) ->
-    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+    case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(Id) end) of
         {ok, not_found} -> not_found;
         Result -> Result
@@ -1187,7 +1187,7 @@ delete_object(#context{reqid = ReqId}, Fun, Id) ->
 %% `chef_sql' module. `Object' is a Chef object (record) with updated data.
 update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
     Object1 = chef_object:set_updated(Object, ActorId),
-    case stats_hero:ctime(ReqId, stats_hero:label(chef_sql, Fun),
+    case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(Object1) end) of
         #chef_db_cb_version_update{}=CookbookVersionUpdate -> CookbookVersionUpdate;
         {ok, 1} -> ok;

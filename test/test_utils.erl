@@ -26,6 +26,7 @@
          start_stats_hero/0,
          mock/1,
          mock/2,
+         stats_hero_label/1,
          unmock/1,
          validate_modules/1
         ]).
@@ -43,7 +44,12 @@ start_stats_hero() ->
     application:set_env(stats_hero, estatsd_host, "localhost"),
     application:set_env(stats_hero, estatsd_port, dumb_random_port()),
     application:set_env(stats_hero, udp_socket_pool_size, 5),
-    application:start(stats_hero).
+    case application:start(stats_hero) of
+        ok ->
+            ok;
+        {error, {already_started, stats_hero}} ->
+            ok
+    end.
 
 dumb_random_port() ->
     {ok, Socket} = gen_udp:open(0),
@@ -79,3 +85,19 @@ unmock(Modules) ->
 %% expectations
 validate_modules(Modules) ->
     [?assert(meck:validate(M)) || M <- Modules].
+
+%% copied from chef_wm_base to use for testing
+stats_hero_label({chef_sql, Fun}) ->
+    stats_hero_label0(rdbms, {chef_sql, Fun});
+stats_hero_label({chef_otto, Fun}) ->
+    stats_hero_label0(rdbms, {chef_otto, Fun});
+stats_hero_label({chef_solr, Fun}) ->
+    stats_hero_label0(solr, {chef_solr, Fun});
+stats_hero_label({BadPrefix, Fun}) ->
+    erlang:error({bad_prefix, {BadPrefix, Fun}}).
+
+stats_hero_label0(Prefix, {Mod, Fun}) ->
+    PrefixBin = erlang:atom_to_binary(Prefix, utf8),
+    ModBin = erlang:atom_to_binary(Mod, utf8),
+    FunBin = erlang:atom_to_binary(Fun, utf8),
+    <<PrefixBin/binary, ".", ModBin/binary, ".", FunBin/binary>>.

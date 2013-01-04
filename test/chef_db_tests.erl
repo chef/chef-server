@@ -21,6 +21,8 @@
 -include_lib("emysql/include/emysql.hrl").
 -include_lib("chef_objects/include/chef_types.hrl").
 
+-define(REQ_ID, <<"req-id-123">>).
+
 fetch_requestor_test_() ->
     {foreach,
      fun() ->
@@ -59,7 +61,19 @@ fetch_requestor_test_() ->
                meck:expect(chef_sql, fetch_user, fun(<<"alice">>) -> {ok, User } end),
                Context = chef_db:make_context(<<"req-id-123">>),
                Got = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
-               ?assertEqual(Got, User)
+               ?assertEqual(Got, User),
+               Stats = stats_hero:snapshot(<<"req-id-123">>, all),
+               ExpectKeys = [<<"req_time">>,
+                             <<"rdbms.chef_sql.fetch_client_time">>,
+                             <<"rdbms.chef_sql.fetch_client_count">>,
+                             <<"rdbms.chef_otto.fetch_org_id_time">>,
+                             <<"rdbms.chef_otto.fetch_org_id_count">>,
+                             <<"rdbms.chef_sql.fetch_user_time">>,
+                             <<"rdbms.chef_sql.fetch_user_count">>,
+                             <<"rdbms_time">>,
+                             <<"rdbms_count">>],
+               GotKeys = [ Key || {Key, _} <- Stats ],
+               ?assertEqual(ExpectKeys, GotKeys)
        end
       },
       {"a client is found SQL cert",
@@ -111,7 +125,17 @@ fetch_requestor_test_() ->
                            fun(<<"mock-org-id-123">>, <<"alice">>) -> {ok, Client} end),
                Context = chef_db:make_context(<<"req-id-123">>),
                Got = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
-               ?assertEqual(Got, Client)
+               ?assertEqual(Got, Client),
+               Stats = stats_hero:snapshot(<<"req-id-123">>, all),
+               ExpectKeys = [<<"req_time">>,
+                             <<"rdbms.chef_sql.fetch_client_time">>,
+                             <<"rdbms.chef_sql.fetch_client_count">>,
+                             <<"rdbms.chef_otto.fetch_org_id_time">>,
+                             <<"rdbms.chef_otto.fetch_org_id_count">>,
+                             <<"rdbms_time">>,
+                             <<"rdbms_count">>],
+               GotKeys = [ Key || {Key, _} <- Stats ],
+               ?assertEqual(ExpectKeys, GotKeys)
        end
       },
       {"a client is found Couchdb",
@@ -134,7 +158,15 @@ fetch_requestor_test_() ->
                            fun(_, O, <<"alice">>) when O =:= OrgId -> Client end),
                Context = chef_db:make_context(<<"req-id-123">>),
                Got = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
-               ?assertEqual(Got, Client)
+               ?assertEqual(Got, Client),
+               Stats = stats_hero:snapshot(<<"req-id-123">>, all),
+               ExpectKeys = [<<"req_time">>,
+                             <<"rdbms.chef_otto.fetch_org_id_time">>,
+                             <<"rdbms.chef_otto.fetch_org_id_count">>,
+                             <<"rdbms_time">>,
+                             <<"rdbms_count">>],
+               GotKeys = [ Key || {Key, _} <- Stats ],
+               ?assertEqual(ExpectKeys, GotKeys)
        end
       }
      ]}.
@@ -165,6 +197,24 @@ fetch_cookbook_versions_test_() ->
              Ctx = chef_db:make_context(<<"req-id-123">>),
              ?assertEqual(SqlOutput, chef_db:fetch_cookbook_versions(Ctx, <<"mock-org">>))
          end},
+      {"fetch_cookbook_versions collects stats_hero metrics",
+         fun() ->
+             SqlOutput = [[ ]],
+             meck:expect(chef_sql, fetch_cookbook_versions,
+                         fun(_) -> {ok, SqlOutput} end),
+             Ctx = chef_db:make_context(<<"req-id-123">>),
+             SqlOutput = chef_db:fetch_cookbook_versions(Ctx, <<"mock-org">>),
+             Stats = stats_hero:snapshot(<<"req-id-123">>, all),
+             ExpectKeys = [<<"req_time">>,
+                           <<"rdbms.chef_sql.fetch_cookbook_versions_time">>,
+                           <<"rdbms.chef_sql.fetch_cookbook_versions_count">>,
+                           <<"rdbms.chef_otto.fetch_org_id_time">>,
+                           <<"rdbms.chef_otto.fetch_org_id_count">>,
+                           <<"rdbms_time">>,
+                           <<"rdbms_count">>],
+             GotKeys = [ Key || {Key, _} <- Stats ],
+             ?assertEqual(ExpectKeys, GotKeys)
+         end},
        {"fetch_cookbook_versions passes structured list",
          fun() ->
              SqlOutput = [[ <<"foo">>, {1, 2, 3} ]],
@@ -193,4 +243,19 @@ fetch_cookbook_versions_test_() ->
 set_app_env() ->
     test_utils:start_stats_hero(),
     application:set_env(chef_db, couchdb_host, "localhost"),
-    application:set_env(chef_db, couchdb_port, 5984).
+    application:set_env(chef_db, couchdb_port, 5984),
+    spawn_stats_hero_worker().
+
+spawn_stats_hero_worker() ->
+    Config = stats_hero_config(),
+    {ok, _} = stats_hero_worker_sup:new_worker(Config),
+    ok.
+
+stats_hero_config() ->
+    [{my_app, "chef_db_test"},
+     {request_label, "test-req"},
+     {request_action, "ACTION"},
+     {org_name, "myorg"},
+     {request_id, ?REQ_ID},
+     {label_fun, {test_utils, stats_hero_label}},
+     {upstream_prefixes, [<<"rdbms">>, <<"solr">>]}].
