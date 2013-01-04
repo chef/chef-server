@@ -23,6 +23,8 @@
 
 -behaviour(supervisor).
 
+-include("chef_wm.hrl").
+
 %% External exports
 -export([start_link/0, upgrade/0]).
 
@@ -168,7 +170,19 @@ default_resource_init() ->
                 %% These will be used to generate the X-Ops-API-Info header
                 {otp_info, {ServerName, ServerVersion}},
                 {server_flavor, get_env(chef_wm, server_flavor)},
-                {api_version, get_env(chef_wm, api_version)}
+                {api_version, get_env(chef_wm, api_version)},
+
+                %% metrics and stats_hero config. We organize these into a proplist which
+                %% will end up in the base_state record rather than having a key for each of
+                %% these in base state.
+                {metrics_config,
+                 [{root_metric_key, get_env(chef_wm, root_metric_key)},
+                  %% the following two are hard-coded calls to ?BASE_RESOURCE. These could
+                  %% be factored out into app config if we wanted ultimate flexibility. At
+                  %% that point, we might want a label and upstream function to form a
+                  %% behavior defined in stats_hero.
+                  {stats_hero_upstreams, ?BASE_RESOURCE:stats_hero_upstreams()},
+                  {stats_hero_label_fun, {?BASE_RESOURCE, stats_hero_label}}]}
                ],
     case application:get_env(chef_wm, request_tracing) of
         {ok, true} ->
