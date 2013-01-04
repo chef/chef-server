@@ -160,7 +160,8 @@ oc_parse_binary_json(Bin, ReqName, CurrentClient) ->
     validate_client(FinalClient, Name, oc).
 
 validate_client(Client, Name, osc) ->
-    validate_client(Client, osc_client_spec(Name));
+    validate_client(Client, osc_client_spec(Name)),
+    validate_admin_xor_validator(Client);
 validate_client(Client, Name, oc) ->
     validate_client(Client, oc_client_spec(Name)).
 
@@ -168,6 +169,17 @@ validate_client(Client, Spec) ->
     case ej:valid(Spec, Client) of
         ok -> {ok, Client};
         Bad -> throw(Bad)
+    end.
+
+% On OSC, clients can either be an admin or a validator, but not both
+validate_admin_xor_validator(Client) ->
+    IsAdmin = ej:get({<<"admin">>}, Client),
+    IsValidator = ej:get({<<"validator">>}, Client),
+    case {IsAdmin, IsValidator} of
+        {true, true} ->
+            chef_object:throw_invalid_fun_match(<<"Client can be either an admin or a validator, but not both.">>);
+        {_, _} ->
+            {ok, Client}
     end.
 
 osc_set_values_from_current_client(Client, not_found) ->

@@ -44,6 +44,7 @@
          set_public_key/2,
          set_updated/2,
          strictly_valid/3,
+         throw_invalid_fun_match/1,
          type_name/1,
          update_from_ejson/2,
          valid_public_key/1
@@ -765,3 +766,10 @@ valid_public_key(PublicKey) ->
         false ->
             error
     end.
+
+%% @doc throws an ej_invalid for fun_match. Useful for bespoke validation functions
+%% that needs to return an error message back to the API client.
+-spec throw_invalid_fun_match(binary()) -> none().
+throw_invalid_fun_match(Message) ->
+    throw(#ej_invalid{type = fun_match, msg = Message}).
+
