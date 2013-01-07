@@ -15,7 +15,8 @@
 -export([authorized_by_org_membership_check/2]).
 
 %% "Grab Bag" functions that will also need to be implemented by other base resources
--export([check_cookbook_authz/3,
+-export([assemble_principal_ejson/3,
+         check_cookbook_authz/3,
          delete_object/3]).
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
@@ -373,3 +374,30 @@ check_cookbook_authz(Cookbooks, Req, State) ->
 
 %% This version should work for Open Source:
 %% check_cookbook_authz(_Cookbooks, _Req, _State) -> ok.
+
+is_user_in_org(Type, DbContext, Name, OrgName) ->
+    case Type of
+        <<"client">> ->
+            true;
+        <<"user">> ->
+            case chef_db:is_user_in_org(DbContext, Name, OrgName) of
+                true ->
+                    true;
+                false ->
+                    false;
+                Error ->
+                    throw(Error)
+            end
+    end.
+
+assemble_principal_ejson(#principal_state{name = Name,
+                                          public_key = PublicKey,
+                                          type = Type,
+                                          authz_id = AuthzId} = _Principal,
+                         OrgName, DbContext) ->
+    Member = is_user_in_org(Type, DbContext, Name, OrgName),                 
+    {[{<<"name">>, Name},
+      {<<"public_key">>, PublicKey},
+      {<<"type">>, Type},
+      {<<"authz_id">>, AuthzId},
+      {<<"org_member">>, Member}]}.
