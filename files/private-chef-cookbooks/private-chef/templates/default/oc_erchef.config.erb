@@ -30,7 +30,9 @@
               {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
               {estatsd_server, "<%= node['private_chef']['estatsd']['vip'] %>"},
               {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>},
-              {superusers, [<<"pivotal">>]}
+              {superusers, [<<"pivotal">>]},
+              %% metrics config
+              {root_metric_key, "<%= @root_metric_key %>"}
              ]},
   {chef_wm, [
              {server_version, "<%= node['private_chef']['version'] %>"},
