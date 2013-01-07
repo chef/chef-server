@@ -100,17 +100,9 @@ validate_request(_Method, Req, State) ->
 auth_info(Req, State) ->
     {authorized, Req, State}.
 
-assemble_principal_ejson(#principal_state{name = Name,
-                                          public_key = PublicKey,
-                                          type = Type,
-                                          authz_id = AuthzId} = _Principal) ->
-    {[{<<"name">>, Name},
-      {<<"public_key">>, PublicKey},
-      {<<"type">>, Type},
-      {<<"authz_id">>, AuthzId}]}.
-
-to_json(Req, #base_state{resource_state = Principal} = State) ->
-    EJson = assemble_principal_ejson(Principal),
+to_json(Req, #base_state{resource_state = Principal, chef_db_context = DbContext,
+                         organization_name = OrgName} = State) ->
+    EJson = ?BASE_RESOURCE:assemble_principal_ejson(Principal, OrgName, DbContext),
     Json = ejson:encode(EJson),
     {Json, Req, State}.
 

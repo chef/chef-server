@@ -45,7 +45,8 @@
          update_from_json/4]).
 
 %% "Grab Bag" functions that will also need to be implemented by other base resources
--export([check_cookbook_authz/3,
+-export([assemble_principal_ejson/3,
+         check_cookbook_authz/3,
          delete_object/3,
          stats_hero_label/1,
          stats_hero_upstreams/0]).
@@ -409,6 +410,16 @@ check_cookbook_authz(_, _, #base_state{}) ->
         _ ->
             {error, <<"makes dialyzer happy">>}
     end.
+
+assemble_principal_ejson(#principal_state{name = Name,
+                                          public_key = PublicKey,
+                                          type = Type,
+                                          authz_id = AuthzId} = _Principal,
+                        _OrgName, _DbContext) ->
+    {[{<<"name">>, Name},
+      {<<"public_key">>, PublicKey},
+      {<<"type">>, Type},
+      {<<"authz_id">>, AuthzId}]}.
 
 conflict_message(cookbook_version, _Name) ->
     {[{<<"error">>, [<<"Cookbook already exists">>]}]};
