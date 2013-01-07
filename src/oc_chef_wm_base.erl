@@ -282,16 +282,16 @@ read_req_id(ReqHeaderName, Req) ->
 
 spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
                                          organization_name = OrgName,
-                                         reqid = ReqId}) ->
+                                         reqid = ReqId,
+                                         metrics_config = MetricsConfig}) ->
     RequestLabel = Mod:request_type(),
     Config = [{request_id, ReqId},
               {org_name, OrgName},
-              %% FIXME: pull this out into app config
-              {my_app, <<"chefAPI">>},
+              {my_app, ?gv(root_metric_key, MetricsConfig)},
               {request_label, RequestLabel},
               {request_action, atom_to_list(wrq:method(Req))},
-              %% FIXME: make this list a define/app config
-              {upstream_prefixes, [<<"rdbms">>, <<"couch">>, <<"authz">>, <<"solr">>]}],
+              {label_fun, ?gv(stats_hero_label_fun, MetricsConfig)},
+              {upstream_prefixes, ?gv(stats_hero_upstreams, MetricsConfig)}],
     stats_hero_worker_sup:new_worker(Config).
 
 http_method_to_authz_perm(#wm_reqdata{}=Req) ->
