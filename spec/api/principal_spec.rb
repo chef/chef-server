@@ -44,7 +44,7 @@ describe "Principals API Endpoint", :principals do
       # We're not actually validating the key, all we're testing here is that it
       # exists in the response body; if it's returning invalid keys, that would be
       # obvious from pushy test failures (possibly reporting as well).
-      "public_key" => /^-----/,
+      "public_key" => /^-----BEGIN (PUBLIC KEY|CERTIFICATE)-----/,
       "authz_id" => /^[0-9a-f]{32}$/,
       "org_member" => true
     } }
@@ -53,7 +53,7 @@ describe "Principals API Endpoint", :principals do
       "name" => principal_user_name,
       "type" => "user",
       # See above
-      "public_key" => /^-----/,
+      "public_key" => /^-----BEGIN (PUBLIC KEY|CERTIFICATE)-----/,
       "authz_id" => /^[0-9a-f]{32}$/,
       "org_member" => true
     } }
@@ -180,7 +180,7 @@ describe "Principals API Endpoint", :principals do
           {
             "name" => principal_user_name,
             "type" => "user",
-            "public_key" => /^-----BEGIN CERTIFICATE-----/,
+            "public_key" => /^-----BEGIN (PUBLIC KEY|CERTIFICATE)-----/,
             "authz_id" => /^[0-9a-f]{32}$/,
             "org_member" => false
           } }
