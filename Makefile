@@ -44,9 +44,10 @@ tags: TAGS
 TAGS:
 	find deps -name "*.[he]rl" -print | etags -
 
+BUMP ?= patch
 prepare_release: distclean unlocked_deps unlocked_compile update_locked_config rel
 	@echo 'release prepared, bumping version'
-	@$(REBAR) bump-rel-version
+	@$(REBAR) bump-rel-version version=$(BUMP)
 
 unlocked_deps:
 	@echo 'Fetching deps as: rebar -C rebar.config'
