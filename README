@@ -1,197 +1,41 @@
-===============
-erchef - README
-===============
-
-This is the Erlang implementation of Chef's REST API.
-
-Currently implemented endpoints are:
-
-* Search: /organizations/<org_id>/search/<obj_type>
-
-Note: Parameters are enclosed in angle brackets
-
-Building erchef (tl;dr version)
----------------------------------
-1) Install Erlang R14B03 or later
-
-2) Run 'make rel'
-
-3) 'cd rel/erchef;bin/erchef start'
-
-4) Profit!
+oc_erchef - Opscode PRIVATE Chef API
+====================================
 
 
-Building erchef for development (longer version)
-------------------------------------------------
-1) Install Erlang R14B03 or later
+This is the top-level project for the Erlang implementation of OPC's
+REST API. It corresponds to the `erchef` project in OSC but includes
+additional support for multitenancy and role based access controls
+(authz).
 
-2) (Optional) Build dialyzer PLT which includes erts, kernel, stdlib, crypto,
-   and public_key. If you've never done this before, use the command below:
-
-   dialyzer --build_plt --apps erts kernel stdlib crypto public_key
-
-3) The erchef application is itself composed of a few separate OTP
-   applications.  For development work you will want to clone the
-   following git repos:
-
-         git clone git@github.com:opscode/fast-log-erlang.git fast_log
-         git clone git@github.com:opscode/chef-api-common-erlang.git chef_common
-         git clone git@github.com:opscode/chef-api-rest-erlang.git chef_rest
-         # and the top level project (where this file lives)
-         git clone git@github.com:opscode/opscode-chef-api-erlang.git erchef
-
-   Once cloned, you will want to create symlinks as follows so that
-   the dependencies get resolved to your local dev setup:
-
-        cd erchef
-        mkdir -p deps
-        cd deps
-        ln -s ../../fast_log
-        ln -s ../../chef_common
-        ln -s ../../chef_rest
-
-4) Run 'make'. This will download all dependencies (the ones that you
-   didn't symlink) and compile all code.
-
-5) Run 'make test'. This will execute the test suites for chef_rest and
-   chef_common. All tests should pass.
-
-6) (Optional) If you've got an up to date PLT file (see #2) you can use
-   dialyzer to perform static analysis on erchef. Running 'make dialyzer'
-   will perform analysis against chef_rest and chef_common.
-
-7) erchef is designed to be deployed as a standalone OTP release. You can
-   build a release via either 'make rel' or 'make devrel'. The devrel target
-   is highly recommended for developers working on erchef directly. This
-   target symlinks all dependencies and application so the release doesn't
-   have to be rebuilt each time code is changed.
-
-   If a release has been built via 'make devrel' you can rebuild and load
-   changed code into the running erchef instance via 'make update'.
-   NOTE: This performs a warm reboot of the Erlang VM so any application
-   state will be totally lost.
-
-7) You can start the erchef release with an interactive shell via the
-   command below:
-
-   cd rel/erchef;bin/erchef console
-
+This project exists to build the `oc_erchef` OTP release system and
+manage the complete list of dependencies that constitute an
+`oc_erchef` release.
 
 Release tagging and branching
 -----------------------------
 
-We manage releases of erchef from the top-level project
-(opscode-chef-api-erlang). To tag a new release:
+All dependencies are locked via `rebar.config.lock`. We update the
+lock file on master and tag releases off of master.
 
-1. Merge changes into the release branch. You will want to increment
-   the version in rel/reltool.config and can decide whether it makes
-   sense to do this on master and merge it in, or edit on the release
-   branch post-merge.
+You can update the lock file (pull in latest versions of dependencies)
+as follows:
 
-2. Temporarily remove the the USE_REBAR_LOCKED file. Do a clean build
-   and test. If the test is good, update the rebar.config.lock file by
-   running `make update_locked_config`. Commit the new lock file and
-   tag the release. Sequence might look like this:
+1. Decide if this should be a _patch_, _minor_, or _major_ version
+   bump for oc_erchef.
 
-       rm USE_REBAR_LOCKED
-       make distclean
-       make rel
-       # do testing here
-       make update_locked_config
-       touch USE_REBAR_LOCKED
-       git add rebar.config.lock
-       git commit
-       git tag -a x.y.z
-       git push opscode release
-       git push --tags opscode
+2. Prepare a new release. This removes all local deps, pulls new deps
+   **not using the lock file**, updates the lock file, compiles, and
+   builds the OTP release, and increments the release version in
+   `rel/reltool.config` based on the value of the `BUMP` environment
+   variable. For example, to prepare a minor release:
+   ```
+   BUMP=minor make prepare_release && rebar commit-release
+   ```
+3. Review the commit log produced via `rebar commit-release`. It will
+   show you which dependencies were added, removed, or changed. For
+   changed deps, it will summarize the changes.
 
-    We now create annotated tags because this gives more useful behaviro for git describe.
-
-3. Edit data bag to set erchef-revision to "x.y.z".
-
-The current setup pulls components (chef_rest) from master. We might
-want to change that in the future to pull from the release branch of
-chef_rest. You can create a QFE branch for bug fixes retroactively by
-branched from the tag recorded in rebar.config.lock.
-
-Deploying to rs-preprod
------------------------
-
-Here's an EC2 provisioning command for rs-preprod:
-
-    knife ec2 server create -G rs-preprod,platform-server \
-        --flavor m1.small -I ami-9a9c6bf3 \
-        -x ubuntu -r 'role[opscode-erchef],role[rs-preprod]' \
-        -i ~/.ssh/opscode-preprod-20101208
-
-For other deployment details, see the opscode-erchef cookbook.
-
-
-Other Notes
------------
-
-Request signing ignores query parameters.  This is by design.
-
-
-Data Bag Queries
-~~~~~~~~~~~~~~~~
-
-Ruby code goes to couchdb prior to each request to verify the list of
-known data bags.  If data bag is not found, returns 404, otherwise
-continues with search.  We need to either repro that call or do the
-following which should save on calls to couch for the common case.
-
-1. Execute data bag search.  If we get results, go to #2, otherwise #3
-
-2. (solr returned IDs) Fetch objects from couch using IDs from solr.
-   If no results, go to #3, otherwise #4.
-
-3. (no objects found for IDs, or no IDs from solr) Fetch list of data
-   bags from couch.  If searched for data bag exists, return empty
-   result set 200, otherwise return 404.
-
-4. Return result set 200.
-
-
-Search Error Cases
-~~~~~~~~~~~~~~~~~~
-
-- [X] missing signature
-- [X] q param defaults to "*:*"
-- [X] request time out of bounds
-- [X] bad signature
-- [X] not in org
-- [X] no such org
-- [X} no such user/client.  these are the same from the search resource level.
-- [X] bad query (can't parse)
-- [X] invalid extra params (rows=foo, rows=-10)
-- [X] params: start, rows, sort, q.  Do we actually support sort?
-  - default values for start, rows, sort
-- [X] verify that user can't manipulate filter to escape org guid filter
-- bad type (not a node, role, client, or environment). Do we need to
-  validate data bag?
-
-
-brew install mysql (maybe you will need to follow brew info mysql
-instructions for first setup).
-
-mysql.server start
-
-mysql -uroot
-  create database opscode_chef;
-  create database opscode_chef_test;
-  create user 'dev'@'localhost' identified by 'opensesame';
-  grant all privileges on opscode_chef.* to 'dev'@'localhost';
-
-Edit /etc/opscode/dark_launch_features.json
-{
-"quick_start":true,
-"new_theme":true,
-"sql_users":true
-}
-
-Get latest mixlib-authorization.  In that project run:
-bundle exec rake db:remigrate
-bundle exec rake db:remigrate_test
-
-Now run setup:test 
+Note that you can perform the above steps on a feature branch of this
+repo and push that through CI for testing or pull it into an
+opscode-omnibus build locally (you will need to push your feature
+branch).
