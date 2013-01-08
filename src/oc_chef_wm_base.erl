@@ -17,7 +17,9 @@
 %% "Grab Bag" functions that will also need to be implemented by other base resources
 -export([assemble_principal_ejson/3,
          check_cookbook_authz/3,
-         delete_object/3]).
+         delete_object/3,
+         stats_hero_label/1,
+         stats_hero_upstreams/0]).
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
 %% contains a function definition.
@@ -280,16 +282,16 @@ read_req_id(ReqHeaderName, Req) ->
 
 spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
                                          organization_name = OrgName,
-                                         reqid = ReqId}) ->
+                                         reqid = ReqId,
+                                         metrics_config = MetricsConfig}) ->
     RequestLabel = Mod:request_type(),
     Config = [{request_id, ReqId},
               {org_name, OrgName},
-              %% FIXME: pull this out into app config
-              {my_app, <<"chefAPI">>},
+              {my_app, ?gv(root_metric_key, MetricsConfig)},
               {request_label, RequestLabel},
               {request_action, atom_to_list(wrq:method(Req))},
-              %% FIXME: make this list a define/app config
-              {upstream_prefixes, [<<"rdbms">>, <<"couch">>, <<"authz">>, <<"solr">>]}],
+              {label_fun, ?gv(stats_hero_label_fun, MetricsConfig)},
+              {upstream_prefixes, ?gv(stats_hero_upstreams, MetricsConfig)}],
     stats_hero_worker_sup:new_worker(Config).
 
 http_method_to_authz_perm(#wm_reqdata{}=Req) ->
@@ -401,3 +403,34 @@ assemble_principal_ejson(#principal_state{name = Name,
       {<<"type">>, Type},
       {<<"authz_id">>, AuthzId},
       {<<"org_member">>, Member}]}.
+
+%% These are modules that we instrument with stats_hero and aggregate into common prefix via
+%% stats_hero_label.
+-type metric_module() :: oc_chef_authz | chef_sql | chef_solr | chef_otto.
+
+%% @doc Given a `{Mod, Fun}' tuple, generate a stats hero metric with a prefix appropriate
+%% for stats_hero aggregation. An error is thrown if `Mod' is unknown. This is where we
+%% encode the mapping of module to upstream label.
+-spec stats_hero_label({Mod::metric_module(), Fun::atom()}) -> <<_:16,_:_*8>>.
+stats_hero_label({chef_sql, Fun}) ->
+    stats_hero_label0(rdbms, {chef_sql, Fun});
+stats_hero_label({oc_chef_authz, Fun}) ->
+    stats_hero_label0(authz, {oc_chef_authz, Fun});
+stats_hero_label({chef_solr, Fun}) ->
+    stats_hero_label0(solr, {chef_solr, Fun});
+stats_hero_label({chef_otto, Fun}) ->
+    stats_hero_label0(couchdb, {chef_otto, Fun});
+stats_hero_label({BadPrefix, Fun}) ->
+    erlang:error({bad_prefix, {BadPrefix, Fun}}).
+
+stats_hero_label0(Prefix, {Mod, Fun}) ->
+    PrefixBin = erlang:atom_to_binary(Prefix, utf8),
+    ModBin = erlang:atom_to_binary(Mod, utf8),
+    FunBin = erlang:atom_to_binary(Fun, utf8),
+    <<PrefixBin/binary, ".", ModBin/binary, ".", FunBin/binary>>.
+
+%% @doc The prefixes that stats_hero should use for aggregating timing data over each
+%% request.
+stats_hero_upstreams() ->
+    [<<"authz">>, <<"couchdb">>, <<"rdbms">>, <<"solr">>].
+
