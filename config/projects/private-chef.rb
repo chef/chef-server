@@ -2,7 +2,7 @@ name "private-chef"
 
 replaces        "private-chef-full"
 install_path    "/opt/opscode"
-build_version   Omnibus::BuildVersion.full
+build_version   Omnibus::BuildVersion.new.semver
 build_iteration "1"
 
 # initialize the dependencies
