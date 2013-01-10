@@ -38,8 +38,7 @@
 
 -include("chef_types.hrl").
 
-%% FIXME:  This should be pulled out into app.config
--define(GET_URL_TTL, 900).
+-define(DEFAULT_BOOKSHELF_URL_TTL, 900).
 
 -define(DEFAULT_FIELD_VALUES,
         [
@@ -367,13 +366,21 @@ extract_recipe_names(<<31, 139, _Rest/binary>>=XCookbookJSON) ->
     %% end.
     [ ej:get({<<"name">>}, Recipe) || Recipe <- Manifest].
 
-%% @doc given a list of files for a particular segment add in a S3 URL per file
+%% @doc Return the bookshelf_url_ttl from the application environment, if it is
+%% undefined return the default value set in ?DEFAULT_BOOKSHELF_URL_TTL
+url_ttl() ->
+    case application:get_env(chef_objects, bookshelf_url_ttl) of
+        {ok, BookshelfTTL} -> BookshelfTTL;
+        undefined          -> ?DEFAULT_BOOKSHELF_URL_TTL
+    end.
+
+%% @doc Given a list of files for a particular segment add in a S3 URL per file
 %% based on the checksum
 add_urls_for_segment(OrgId, FileList) ->
     [ ej:set({<<"url">>},
              File,
              chef_s3:generate_presigned_url(OrgId,
-                                            ?GET_URL_TTL,
+                                            url_ttl(),
                                             get,
                                             ej:get({<<"checksum">>}, File)))
      || File <- FileList].
