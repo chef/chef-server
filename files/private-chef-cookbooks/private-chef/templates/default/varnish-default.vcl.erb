@@ -1,0 +1,35 @@
+# -e This is a basic VCL configuration file for varnish.  See the vcl(7)
+# man page for details on VCL syntax and semantics.
+#
+# Default backend definition.  Set this to point to your content
+# server.
+#
+backend default	{
+    .host = "127.0.0.1";
+    .port = "5984";
+}
+
+sub vcl_recv {
+    if (req.request == "GET" && req.url ~ "^/opscode_account/_design/Mixlib::Authorization::AuthJoin") {
+        return(lookup);
+    }
+    return (pass);
+}
+
+sub vcl_fetch {
+    if (req.request == "GET" && req.url ~ "^/opscode_account/_design/Mixlib::Authorization::AuthJoin" && beresp.http.Transfer-Encoding ~ "chunked") {
+      set beresp.ttl = 7200 s;
+    } else {
+      set beresp.ttl = 0 s;
+    }
+    if (beresp.ttl <= 0s ||
+        beresp.http.Set-Cookie ||
+        beresp.http.Vary == "*") {
+                /*
+                 * Mark as "Hit-For-Pass" for the next 2 minutes
+                 */
+                set beresp.ttl = 120 s;
+                return (hit_for_pass);
+    }
+    return (deliver);
+}
