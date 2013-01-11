@@ -103,7 +103,7 @@ is_validator(#chef_user{})                   -> false.
                               {container, container_name()} | [auth_tuple()],
                       Req :: wrq:req(),
                       State :: #base_state{})
-    -> authorized | {object, object_id()} | {container, container_name()} | [auth_tuple()].
+    -> {_, _, #base_state{}}.
 %% Check if we should use contact opscode-authz and chef requestor-specific acls for an endpoint.
 %% If the config variable is false, then we don't check the object/container ACLs and instead
 %% use the fact that a client has passed authn as allowing them to access a resource
