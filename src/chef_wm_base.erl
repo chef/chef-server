@@ -900,17 +900,11 @@ set_forbidden_msg(Req, State) ->
 %% encode the mapping of module to upstream label.
 -spec stats_hero_label({Mod::metric_module(), Fun::atom()}) -> <<_:16,_:_*8>>.
 stats_hero_label({chef_sql, Fun}) ->
-    stats_hero_label0(rdbms, {chef_sql, Fun});
+    chef_metrics:label(rdbms, {chef_sql, Fun});
 stats_hero_label({chef_solr, Fun}) ->
-    stats_hero_label0(solr, {chef_solr, Fun});
+    chef_metrics:label(solr, {chef_solr, Fun});
 stats_hero_label({BadPrefix, Fun}) ->
     erlang:error({bad_prefix, {BadPrefix, Fun}}).
-
-stats_hero_label0(Prefix, {Mod, Fun}) ->
-    PrefixBin = erlang:atom_to_binary(Prefix, utf8),
-    ModBin = erlang:atom_to_binary(Mod, utf8),
-    FunBin = erlang:atom_to_binary(Fun, utf8),
-    <<PrefixBin/binary, ".", ModBin/binary, ".", FunBin/binary>>.
 
 %% @doc The prefixes that stats_hero should use for aggregating timing data over each
 %% request.
