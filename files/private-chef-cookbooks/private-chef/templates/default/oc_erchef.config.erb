@@ -28,8 +28,6 @@
               %% how many nodes are deserialized at a time in
               %% preparing a response.
               {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
-              {estatsd_server, "<%= node['private_chef']['estatsd']['vip'] %>"},
-              {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>},
               {superusers, [<<"pivotal">>]},
               %% metrics config
               {root_metric_key, "<%= @root_metric_key %>"}
@@ -73,8 +71,8 @@
                  ]},
   {stats_hero, [
                {udp_socket_pool_size, <%= node['private_chef']['opscode-erchef']['udp_socket_pool_size'] %> },
-               {estatsd_host, "127.0.0.1" },
-               {estatsd_port, 5665 }
+               {estatsd_host, "<%= node['private_chef']['estatsd']['vip'] %>" },
+               {estatsd_port, <%= node['private_chef']['estatsd']['port'] %> }
               ]},
   {sqerl, [
            %% The database system you are using (e.g., mysql, pgsql)
