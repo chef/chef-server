@@ -68,7 +68,8 @@
                   {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
                   {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
                   {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= node['private_chef']['lb']['api_fqdn'] %>"},
-                  {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"}
+                  {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
+                  {bookshelf_url_ttl, <%= node['chef_server']['erchef']['bookshelf_url_ttl'] %>}
                  ]},
   {stats_hero, [
                {udp_socket_pool_size, <%= node['private_chef']['opscode-erchef']['udp_socket_pool_size'] %> },

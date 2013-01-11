@@ -200,6 +200,7 @@ default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
 default['private_chef']['opscode-erchef']['s3_bucket'] = 'bookshelf'
 default['private_chef']['opscode-erchef']['root_metric_key'] = "chefAPI"
+default['private_chef']['opscode-erchef']['bookshelf_url_ttl'] = 900
 
 ####
 # Chef Server WebUI
