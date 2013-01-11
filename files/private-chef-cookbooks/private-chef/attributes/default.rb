@@ -651,15 +651,15 @@ default['private_chef']['ldap'] = nil
 default['private_chef']['upgrades']['dir'] = "/var/opt/opscode/upgrades"
 
 ####
-# Opscode Reporting 
+# Opscode Reporting
 ####
 default['private_chef']['opscode-reporting']['enable'] = false
 default['private_chef']['opscode-reporting']['dir'] = "/var/opt/opscode/opscode-reporting"
-default['private_chef']['opscode-reporting']['log_directory'] = "/var/log/opscode/opscode-reporting" 
+default['private_chef']['opscode-reporting']['log_directory'] = "/var/log/opscode/opscode-reporting"
 default['private_chef']['opscode-reporting']['listen'] = '127.0.0.1'
 default['private_chef']['opscode-reporting']['port'] = 10010
 default['private_chef']['opscode-reporting']['db_pool_max_count'] = 20
-default['private_chef']['opscode-reporting']['db_pool_init_count'] = 5 
+default['private_chef']['opscode-reporting']['db_pool_init_count'] = 5
 default['private_chef']['opscode-reporting']['node_run_worker_count'] = 5
 default['private_chef']['opscode-reporting']['node_run_init_sender_count'] = 5
 default['private_chef']['opscode-reporting']['node_run_max_sender_count'] = 20
