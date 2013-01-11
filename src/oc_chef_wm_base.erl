@@ -406,7 +406,7 @@ assemble_principal_ejson(#principal_state{name = Name,
 
 %% These are modules that we instrument with stats_hero and aggregate into common prefix via
 %% stats_hero_label.
--type metric_module() :: oc_chef_authz | chef_sql | chef_solr | chef_otto.
+-type metric_module() :: oc_chef_authz | chef_s3 | chef_sql | chef_solr | chef_otto.
 
 %% @doc Given a `{Mod, Fun}' tuple, generate a stats hero metric with a prefix appropriate
 %% for stats_hero aggregation. An error is thrown if `Mod' is unknown. This is where we
@@ -420,11 +420,13 @@ stats_hero_label({chef_solr, Fun}) ->
     chef_metrics:label(solr, {chef_solr, Fun});
 stats_hero_label({chef_otto, Fun}) ->
     chef_metrics:label(couchdb, {chef_otto, Fun});
+stats_hero_label({chef_s3, Fun}) ->
+    chef_metrics:label(s3, {chef_s3, Fun});
 stats_hero_label({BadPrefix, Fun}) ->
     erlang:error({bad_prefix, {BadPrefix, Fun}}).
 
 %% @doc The prefixes that stats_hero should use for aggregating timing data over each
 %% request.
 stats_hero_upstreams() ->
-    [<<"authz">>, <<"couchdb">>, <<"rdbms">>, <<"solr">>].
+    [<<"authz">>, <<"couchdb">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
 
