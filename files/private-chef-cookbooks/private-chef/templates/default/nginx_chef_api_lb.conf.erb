@@ -106,8 +106,9 @@
                               node['private_chef']['opscode-chef']['upload_proto']) %>
 
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/status/{0,1}.*$", :ruby) %>
+    <%= @helper.chef_api("^/_status") %>
 
-    # opscode reporting endpoints 
+    # opscode reporting endpoints
     <%= @helper.reporting_api("^/organizations/[a-z0-9\-_]+?/reports/.*$") %>
     <%= @helper.reporting_api("^/reports/.*$") %>
 
