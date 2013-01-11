@@ -94,29 +94,23 @@ http {
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/?$") %>
 
-    # nodes and environments/*/nodes go to erchef
+    # erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/nodes/{0,1}.*$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/[^/]+/nodes$") %>
-
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/roles/{0,1}.*$", 'couchdb_roles') %>
-
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$", 'couchdb_data') %>
-
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/{0,1}.*$", 'couchdb_environments') %>
-
-    # principals go to erchef
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/roles/{0,1}.*$") %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$") %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/{0,1}.*$") %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/cookbooks/{0,1}.*$") %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/sandboxes/{0,1}.*$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
 
+    # opscode reporting endpoints
     <%= @helper.reporting_api("^/organizations/[a-z0-9\-_]+?/reports/.*$") %>
-
     <%= @helper.reporting_api("^/reports/.*$") %>
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/cookbooks/{0,1}.*$", 'couchdb_cookbooks') %>
-
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/sandboxes/{0,1}.*$", 'couchdb_checksums') %>
 
     location / {
-      proxy_redirect http://opscode_chef /;
-      proxy_pass http://opscode_chef;
+      proxy_redirect http://opscode_erchef /;
+      proxy_pass http://opscode_erchef;
     }
   }
 

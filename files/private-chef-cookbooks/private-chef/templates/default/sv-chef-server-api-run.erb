@@ -1,4 +1,0 @@
-#!/bin/sh
-
-exec 2>&1
-exec chpst -P -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> /usr/bin/env HOME="<%= node['private_chef']['chef-server-api']['dir'] %>" unicorn -E production -c <%= File.join(node['private_chef']['chef-server-api']['dir'], "etc", "unicorn.rb") %> /opt/opscode/embedded/lib/ruby/gems/1.9.1/gems/chef-server-api-<%= Chef::VERSION %>/config.ru
