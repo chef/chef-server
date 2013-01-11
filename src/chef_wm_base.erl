@@ -893,7 +893,7 @@ set_forbidden_msg(Req, State) ->
 
 %% These are modules that we instrument with stats_hero and aggregate into common prefix via
 %% stats_hero_label.
--type metric_module() :: chef_sql | chef_solr.
+-type metric_module() :: chef_s3 | chef_sql | chef_solr.
 
 %% @doc Given a `{Mod, Fun}' tuple, generate a stats hero metric with a prefix appropriate
 %% for stats_hero aggregation. An error is thrown if `Mod' is unknown. This is where we
@@ -903,10 +903,12 @@ stats_hero_label({chef_sql, Fun}) ->
     chef_metrics:label(rdbms, {chef_sql, Fun});
 stats_hero_label({chef_solr, Fun}) ->
     chef_metrics:label(solr, {chef_solr, Fun});
+stats_hero_label({chef_s3, Fun}) ->
+    chef_metrics:label(s3, {chef_s3, Fun});
 stats_hero_label({BadPrefix, Fun}) ->
     erlang:error({bad_prefix, {BadPrefix, Fun}}).
 
 %% @doc The prefixes that stats_hero should use for aggregating timing data over each
 %% request.
 stats_hero_upstreams() ->
-    [<<"rdbms">>, <<"solr">>].
+    [<<"rdbms">>, <<"s3">>, <<"solr">>].
