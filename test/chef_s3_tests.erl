@@ -118,8 +118,8 @@ checksum_test_() ->
              meck:expect(chef_s3, get_config, fun() -> mock_config end),
              application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
 
-             %% Make the chunk size smaller
-             meck:expect(chef_s3_ops, chunk_size, fun() -> 3 end),
+             application:set_env(chef_objects, s3_parallel_ops_fanout, 3),
+             application:set_env(chef_objects, s3_parallel_ops_timeout, 5000),
 
              %% Actual value doesn't matter; we're not going to use it anyway
              meck:expect(mini_s3, new, 3, ignored),

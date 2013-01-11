@@ -24,7 +24,6 @@
 
 -define(MAX, 5).
 -define(TIMEOUT, 5 * 1000).
--define(CHUNKSIZE, 20). %% TODO - make this configurable
 
 -include("chef_types.hrl").
 
@@ -32,6 +31,184 @@
          fetch_md/2,
          delete/2
         ]).
+
+%% @doc Specifies how many requests to S3 / Bookshelf are in-flight at a given time.
+-spec fanout() -> Size :: pos_integer().
+fanout() ->
+    fetch_and_validate_config_option(chef_objects, s3_parallel_ops_fanout).
+
+%% @doc Specifies the maximum amount of time (in milliseconds) to wait for a SINGLE request
+%% to S3 / Bookshelf to complete.
+-spec timeout() -> MS :: pos_integer().
+timeout() ->
+    fetch_and_validate_config_option(chef_objects, s3_parallel_ops_timeout).
+
+%% @doc Fetch a configuration value via `application:get_env/2` and verify it is a
+%% non-negative integer.  Valid values are returned; invalid values trigger an error
+%% @end
+%%
+%% The spec is specifically tailored for use in this module (to make Dialyzer happy), but it
+%% is conceivable that the function could be used elsewhere as well.
+-spec fetch_and_validate_config_option(Application :: chef_objects,
+                                       OptionName :: s3_parallel_ops_fanout |
+                                                     s3_parallel_ops_timeout) ->
+                                              Value :: pos_integer().
+fetch_and_validate_config_option(Application, OptionName) ->
+    {ok, Value} = application:get_env(Application, OptionName),
+    case {is_integer(Value), Value > 0} of
+        {true, true} ->
+            Value;
+        _ ->
+            error_logger:error_msg("Improper Configuration: ~p / ~p was ~p; should be a non-negative integer~n", [Application, OptionName, Value]),
+            erlang:error({configuration, Application, OptionName, Value})
+    end.
+
+%% @doc Delete each checksummed file in S3
+delete(OrgId, Checksums) when is_list(Checksums),
+                              is_binary(OrgId) ->
+
+    Bucket = chef_s3:bucket(),
+    AwsConfig = chef_s3:get_config(),
+    Timeout = timeout(),
+
+    %% Using erlware_commons' ftmap ("fault-tolerant map") to handle the gory details of
+    %% chunking and parallelizing the work of deleting files from S3 / Bookshelf.
+    %%
+    %% A 'malt' is erlware_commons jargon for the configuration 'blob' that specifies how an
+    %% operation is to be parallelized using the ec_plist module (my favorite option for its
+    %% meaning is "Malt is A List Tearing Specification"; see the module docs for more
+    %% details on the various options available)
+    %%
+    %% Since making an HTTP request is a high-latency, IO-bound operation, we use a
+    %% configuration where each list chunk has a single item, but we have multiple processes
+    %% processing chunks.  This prevents pathological situations (like, for example, a large
+    %% chunk of requests that all timeout taking LENGTH * TIMEOUT ms to complete), while
+    %% maximizing the overall throughput.
+    %%
+    %% This configuration will also allow there to be fanout() HTTP requests in flight at
+    %% any given time, which makes for more even throughput.
+    %%
+    %% While we can specify a {timeout, Millis} tuple in the malt, this only applies to how
+    %% long it takes to process the entire list; there does not currently appear to be a
+    %% built-in way to manage individual process timeouts.  To circumvent this, we'll spawn
+    %% helper processes to manage timeouts ourselves (see comments for spawn_deleter/5
+    %% for more details).
+    Malt = [1,                      %% Number of items to process in a given batch
+            {processes, fanout()}], %% Have fanout() processes working on the entire list
+
+    Results = ec_plists:ftmap(fun(Checksum) ->
+                                      spawn_deleter(OrgId, AwsConfig, Timeout, Bucket, Checksum)
+                              end,
+                              Checksums,
+                              Malt),
+
+    %% The results will be a list of lists, so we must flatten it.  We then process the
+    %% flattened results, splitting them into successfully-deleted checksums, missing
+    %% checksums (i.e., we got a 404 when trying to delete them), timeout count and error
+    %% count.
+    %%
+    %% Note that ec_plists:ftmap/3 wraps each resulting list item in a {value, X} tuple.  I
+    %% think this is a hold-over from a previous implementation that doesn't really make
+    %% much sense anymore, but whatever...
+    {Ok, Missing, NumTimeouts, NumErrors} =
+        lists:foldl(fun({value, Result}, {Ok, Missing, Timeouts, Errors}) ->
+                            case Result of
+                                {ok, Checksum} -> {[Checksum | Ok], Missing, Timeouts, Errors};
+                                {missing, Checksum} -> {Ok, [Checksum | Missing], Timeouts, Errors};
+                                {error, _Checksum} -> {Ok, Missing, Timeouts, Errors + 1};
+                                {timeout, _Checksum} -> {Ok, Missing, Timeouts + 1, Errors}
+                            end
+                    end,
+                    {[], [], 0, 0},
+                    lists:flatten(Results)),
+
+    %% A final bit of processing to sort the lists of checksums before we return
+    {{ok, lists:sort(Ok)},
+     {missing, lists:sort(Missing)},
+     {timeout, NumTimeouts},
+     {error, NumErrors}}.
+
+%% @doc Delete an existing checksum file in S3
+-spec delete_file(OrgId :: object_id(),
+                  AwsConfig :: mini_s3:config(),
+                  Bucket :: string(),
+                  Checksum :: binary()) -> {'error', binary()} |
+                                           {'missing', binary()} |
+                                           {'ok', binary()}.
+delete_file(OrgId, AwsConfig, Bucket, Checksum) ->
+    Key = chef_s3:make_key(OrgId, Checksum),
+
+    try mini_s3:delete_object(Bucket, Key, AwsConfig) of
+        %% Return value doesn't much matter here but it looks like, but
+        %% for documentation's sake it looks like:
+        %%
+        %%  [{delete_marker, list_to_existing_atom(Marker)}, {version_id, Id}]
+        %%
+        %% The main take-away here is that the call to delete_object/3 was successful and
+        %% didn't throw an error
+        _Response ->
+            {ok, Checksum}
+    catch
+        error:{aws_error, {http_error,404,_}} ->
+            %% We got a 404.  No biggie; mark it as 'missing' and move on
+            {missing, Checksum};
+        ExceptionClass:Reason->
+            %% Something unanticipated happened.  We should log the specific reason for
+            %% later analysis, but as far as the overall deletion operation is concerned,
+            %% this is "just an error", and we can continue along.
+            error_logger:error_msg("Deletion of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) raised exception ~p:~p~n",
+                                   [Checksum, OrgId, Bucket, Key, ExceptionClass, Reason]),
+            {error, Checksum}
+    end.
+
+%% @doc Spawns a worker process to perform the actual deletion of an object from S3 /
+%% Bookshelf so that we can impose a timeout on the operation.
+%%
+%% This is necessary because we'd like to keep track of individual operation information
+%% like this, but erlware_commons now obscures timeout information.  Additionally,
+%% erlware_commons appears to only allow clients to specify a timeout on an entire list
+%% operation as a whole, instead of a timeout on each individual list item operation.
+%%
+%% By spawning a separate process and managing the timeout ourselves, we can once again
+%% capture this information.  Additionally, we no longer need to specify a timeout via the
+%% ec_plist "malt" configuration, since that now basically takes care of itself.
+-spec spawn_deleter(OrgId :: object_id(),
+                    AwsConfig :: mini_s3:config(),
+                    Timeout :: integer(),
+                    Bucket::string(),
+                    Checksum :: binary()) -> {'error', binary()} |
+                                             {'missing', binary()} |
+                                             {'ok', binary()} |
+                                             {'timeout', binary()}.
+spawn_deleter(OrgId, AwsConfig, Timeout, Bucket, Checksum) ->
+    Me = self(),
+
+    %% This token is used below in the receive block (just look!) to make absolutely certain
+    %% that we are only processing the exact message we are expecting, as opposed to any
+    %% other messages the receiving process may be getting from elsewhere in the system.
+    %%
+    %% It's admittedly a bit of paranoia, but should help insulate from potential future
+    %% changes in erlware_commons (that involve message passing).
+    %%
+    %% Also, paranoia.
+    Token = erlang:make_ref(),
+
+    Worker = erlang:spawn(fun() ->
+                                  Result = delete_file(OrgId, AwsConfig, Bucket, Checksum),
+                                  Me ! {Token, Result, self()}
+                          end),
+    receive
+        {Token, Response, Worker} ->
+            Response
+    after Timeout ->
+            error_logger:error_msg("Deletion of file (checksum: ~p) for org ~p from bucket ~p has taken longer than ~p ms; killing spawned worker process ~p~n",
+                                   [Checksum, OrgId, Bucket, Timeout, Worker]),
+            erlang:exit(Worker, kill),
+            {timeout, Checksum}
+    end.
+
+%% File Checking Code Below
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 -record(state, {
           token :: reference(),
@@ -46,51 +223,7 @@
           errors = 0 :: non_neg_integer()
          }).
 
-%% @doc Delete each checksummed file in S3
-delete(OrgId, Checksums) when is_list(Checksums),
-                             is_binary(OrgId) ->
-    %% we'll split our checksum list into chunks
-    %% so we don't pound the S3 store by
-    %% parallelizing ALL THE THINGS!!
-    Results = chunk_map(fun(Chunk) -> parallel_delete(OrgId, Chunk) end,
-                        Checksums, chunk_size()),
-    %% The results will be a list of lists so flatten it
-    %% Process the flattened results, splitting them into success checksums,
-    %% missing checksums, timeout count and error count
-    AddResult = fun(Result, {Ok, Missing, Timeouts, Errors}) ->
-                    case Result of
-                        {value, Checksum} -> {[Checksum | Ok], Missing, Timeouts, Errors};
-                        {missing, Checksum} -> {Ok, [Checksum | Missing], Timeouts, Errors};
-                        timeout -> {Ok, Missing, Timeouts + 1, Errors};
-                        {_Error, _Checksum} -> {Ok, Missing, Timeouts, Errors + 1}
-                    end
-                end,
 
-    {Ok, Missing, Timeouts, Errors} =
-        lists:foldl(AddResult,
-                    {[], [], 0, 0}, lists:flatten(Results)),
-    Result = {{ok, lists:sort(Ok)},
-              {missing, lists:sort(Missing)},
-              {timeout, Timeouts},
-              {error, Errors}},
-    Result.
-
-parallel_delete(OrgId, Checksums) ->
-    Bucket = chef_s3:bucket(),
-    %% We'll take advantage of Erlware's excellent ec_plists:ftmap/3 which
-    %% applies a function to a list, in parrellel, in a fault tolerant way.
-    %% The return result looks something like:
-    %%
-    %%  [{value, 1}, {value, 2}, timeout, {badmatch, ...}]
-    %%
-    ec_plists:ftmap(fun(Checksum) ->
-                            case delete_file(OrgId, Bucket, Checksum) of
-                                {ok, Checksum} -> Checksum;
-                                {Error, Checksum} -> throw({Error, Checksum})
-                            end
-                    end,
-                    Checksums,
-                    ?TIMEOUT).
 
 %% @doc Verify that each checksummed file is stored in S3 by checking its metadata
 fetch_md(OrgId, Checksums) when is_list(Checksums),
@@ -187,66 +320,3 @@ check_file(OrgId, Bucket, Checksum) ->
                      {error, Checksum}
              end,
     Result.
-
-%% @doc Delete an existing checksum file in S3
--spec delete_file(OrgId :: object_id(),
-                 Bucket :: string(),
-                 Checksum :: binary()) -> {'error', binary()} |
-                                          {'missing', binary()} |
-                                          {'ok', binary()}.
-delete_file(OrgId, Bucket, Checksum) ->
-    Key = chef_s3:make_key(OrgId, Checksum),
-    AwsConfig = chef_s3:get_config(),
-    Result = try mini_s3:delete_object(Bucket, Key, AwsConfig) of
-                %% Return value doesn't much matter here but it looks like, but
-                %% for documentation sake it looks like:
-                %%
-                %%  [{delete_marker, list_to_existing_atom(Marker)}, {version_id, Id}]
-                %%
-                 _Response ->
-                     {ok, Checksum}
-             catch
-                error:{aws_error, {http_error,404,_}} ->
-                     {missing, Checksum};
-                X:Y->
-                    error_logger:error_msg(
-                        "Could not delete checksum ~p from bucket ~p: Reason -> ~p:~p~n",
-                        [Checksum, Bucket, X, Y]
-                    ),
-                    {error, Checksum}
-             end,
-    Result.
-
-%% TODO - pull this from config
-chunk_size() ->
-    ?CHUNKSIZE.
-
-%% ----------------------------------------------------------------------------
-%% opscode_commons candidate code
-%% ----------------------------------------------------------------------------
-
-%% chunk_list(List, ChunkSize) ->
-%%     chunk_list(List, ChunkSize, []).
-%
-%% chunk_list([], _, Result) ->
-%%     lists:reverse(Result);
-%% chunk_list(List, ChunkSize, Result) ->
-%%     {Chunk, Rest} = safe_split(ChunkSize, List),
-%%     chunk_list(Rest, ChunkSize, [Chunk | Result]).
-
-chunk_map(Fun, List, ChunkSize) ->
-    chunk_map(Fun, List, ChunkSize, []).
-
-chunk_map(_Fun, [], _ChunkSize, Acc) ->
-    lists:reverse(Acc);
-chunk_map(Fun, List, ChunkSize, Acc) ->
-    {Chunk, Rest} = safe_split(ChunkSize, List),
-    chunk_map(Fun, Rest, ChunkSize, [Fun(Chunk) | Acc]).
-
-safe_split(N, L) ->
-    try
-        lists:split(N, L)
-    catch
-        error:badarg ->
-            {L, []}
-    end.
