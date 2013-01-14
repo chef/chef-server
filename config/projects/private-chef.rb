@@ -15,10 +15,11 @@ ENV['CHEF_GIT_REV'] ||= "10.16.6"
 
 # global
 deps << "chef" # for embedded chef-solo
-deps << "private-chef-cookbooks"
+deps << "preparation" # creates required build directories
+deps << "private-chef-cookbooks" # used by private-chef-ctl reconfigure
+deps << "private-chef-scripts" # assorted scripts used by installed instance
+deps << "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 deps << "private-chef-administration"
-deps << "private-chef-scripts"
-deps << "private-chef-ctl"
 deps << "nginx"
 deps << "runit"
 deps << "unicorn"
