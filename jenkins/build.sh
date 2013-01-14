@@ -66,9 +66,10 @@ fi
 if [ "$CLEAN" = "true" ]; then
   sudo rm -rf "/opt/opscode" || true
   sudo mkdir -p "/opt/opscode" && sudo chown jenkins-node "/opt/opscode"
-  sudo rm -r /var/cache/omnibus/pkg/* || true
-  sudo rm /var/cache/omnibus/build/*/*.manifest || true
-  sudo rm pkg/* || true
+  sudo rm -rf /var/cache/omnibus/pkg/* || true
+  sudo rm -rf /var/cache/omnibus/src/* || true
+  sudo rm -f /var/cache/omnibus/build/*/*.manifest || true
+  sudo rm -f pkg/* || true
 fi
 bundle install
 
