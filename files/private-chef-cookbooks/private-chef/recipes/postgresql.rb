@@ -43,7 +43,7 @@ postgresql_log_dir = node['private_chef']['postgresql']['log_directory']
 user node['private_chef']['postgresql']['username'] do
   system true
   shell node['private_chef']['postgresql']['shell']
-  home node['private_chef']['postgresql']['dir']
+  home node['private_chef']['postgresql']['home']
 end
 
 directory postgresql_log_dir do
@@ -65,6 +65,14 @@ end
 link postgresql_data_dir_symlink do
   to postgresql_data_dir
   not_if { postgresql_data_dir == postgresql_data_dir_symlink }
+end
+
+file File.join(node['private_chef']['postgresql']['home'], ".profile") do
+  owner node['private_chef']['postgresql']['username']
+  mode "0644"
+  content <<-EOH
+PATH=#{node['private_chef']['postgresql']['user_path']}
+EOH
 end
 
 if File.directory?("/etc/sysctl.d") && File.exists?("/etc/init.d/procps")
