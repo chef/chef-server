@@ -1,5 +1,5 @@
 name "bookshelf"
-version "rel-0.1.0"
+version "rel-0.1.1"
 
 dependencies ["erlang", "rebar", "rsync"]
 
