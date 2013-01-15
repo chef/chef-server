@@ -150,7 +150,7 @@ include_recipe "private-chef::partybus"
 file "/etc/opscode/chef-server-running.json" do
   owner node["private_chef"]["user"]["username"]
   group "root"
-  mode "0644"
+  mode "0600"
   content Chef::JSONCompat.to_json_pretty({ "private_chef" => node['private_chef'].to_hash, "run_list" => node.run_list })
 end
 
