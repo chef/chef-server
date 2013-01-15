@@ -576,7 +576,7 @@ default['private_chef']['keepalived']['vrrp_instance_nopreempt'] = true
 
 default['private_chef']['keepalived']['service_order'] = [
   { "key" => "couchdb", "service_name" => "couchdb" },
-  { "key" => "postgresql", "service_name" => "postgres" },
+  { "key" => "postgresql", "service_name" => "postgresql" },
   { "key" => "rabbitmq", "service_name" => "rabbitmq" },
   { "key" => "redis", "service_name" => "redis" },
   { "key" => "opscode-authz", "service_name" => "opscode-authz" },

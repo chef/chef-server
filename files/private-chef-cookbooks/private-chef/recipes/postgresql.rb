@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 
-
 postgresql_dir = node['private_chef']['postgresql']['dir']
 postgresql_data_dir = node['private_chef']['postgresql']['data_dir']
 postgresql_data_dir_symlink = File.join(postgresql_dir, "data")
@@ -55,8 +54,8 @@ if File.directory?("/etc/sysctl.d") && File.exists?("/etc/init.d/procps")
     action :nothing
   end
 
-  template "/etc/sysctl.d/90-postgres.conf" do
-    source "90-postgres.conf.sysctl.erb"
+  template "/etc/sysctl.d/90-postgresql.conf" do
+    source "90-postgresql.conf.sysctl.erb"
     owner "root"
     mode  "0644"
     variables(node['private_chef']['postgresql'].to_hash)
@@ -96,7 +95,7 @@ template postgresql_config do
   owner node['private_chef']['postgresql']['username']
   mode "0644"
   variables(node['private_chef']['postgresql'].to_hash)
-  notifies :restart, 'service[postgres]' if OmnibusHelper.should_notify?("postgres")
+  notifies :restart, 'service[postgresql]' if OmnibusHelper.should_notify?("postgresql")
 end
 
 pg_hba_config = File.join(postgresql_data_dir, "pg_hba.conf")
@@ -106,12 +105,12 @@ template pg_hba_config do
   owner node['private_chef']['postgresql']['username']
   mode "0644"
   variables(node['private_chef']['postgresql'].to_hash)
-  notifies :restart, 'service[postgres]' if OmnibusHelper.should_notify?("postgres")
+  notifies :restart, 'service[postgresql]' if OmnibusHelper.should_notify?("postgresql")
 end
 
-should_notify = OmnibusHelper.should_notify?("postgres")
+should_notify = OmnibusHelper.should_notify?("postgresql")
 
-runit_service "postgres" do
+runit_service "postgresql" do
   down node['private_chef']['postgresql']['ha']
   control(['t'])
   options({
@@ -122,7 +121,7 @@ runit_service "postgres" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl start postgres" do
+	execute "/opt/opscode/bin/private-chef-ctl start postgresql" do
 		retries 20
 	end
 
@@ -176,4 +175,3 @@ if node['private_chef']['bootstrap']['enable']
 end
 
 add_nagios_hostgroup("postgresql")
-
