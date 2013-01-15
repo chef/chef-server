@@ -128,23 +128,6 @@ default['private_chef']['opscode-expander']['consumer_id'] = "default"
 default['private_chef']['opscode-expander']['nodes'] = 2
 
 ####
-# Bookshelf
-####
-default['private_chef']['bookshelf']['enable'] = false
-default['private_chef']['bookshelf']['ha'] = false
-default['private_chef']['bookshelf']['dir'] = "/var/opt/opscode/bookshelf"
-default['private_chef']['bookshelf']['data_dir'] = "/var/opt/opscode/bookshelf/data"
-default['private_chef']['bookshelf']['log_directory'] = "/var/log/opscode/bookshelf"
-default['private_chef']['bookshelf']['svlogd_size'] = 1000000
-default['private_chef']['bookshelf']['svlogd_num'] = 10
-default['private_chef']['bookshelf']['vip'] = '127.0.0.1'
-default['private_chef']['bookshelf']['listen'] = '127.0.0.1'
-default['private_chef']['bookshelf']['port'] = 4321
-default['private_chef']['bookshelf']['stream_download'] = true
-default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
-default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
-
-####
 # Chef Server API
 ####
 default['private_chef']['opscode-chef']['enable'] = true
@@ -395,6 +378,23 @@ default['private_chef']['opscode-authz']['port'] = 9463
 default['private_chef']['opscode-authz']['vip'] = '127.0.0.1'
 default['private_chef']['opscode-authz']['superuser_id'] = '5ca1ab1ef005ba111abe11eddecafbad'
 default['private_chef']['opscode-authz']['couchdb_max_conn'] = '100'
+
+####
+# Bookshelf
+####
+default['private_chef']['bookshelf']['enable'] = false
+default['private_chef']['bookshelf']['ha'] = false
+default['private_chef']['bookshelf']['dir'] = "/var/opt/opscode/bookshelf"
+default['private_chef']['bookshelf']['data_dir'] = "/var/opt/opscode/bookshelf/data"
+default['private_chef']['bookshelf']['log_directory'] = "/var/log/opscode/bookshelf"
+default['private_chef']['bookshelf']['svlogd_size'] = 1000000
+default['private_chef']['bookshelf']['svlogd_num'] = 10
+default['private_chef']['bookshelf']['vip'] = node['private_chef']['lb']['api_fqdn']
+default['private_chef']['bookshelf']['listen'] = '127.0.0.1'
+default['private_chef']['bookshelf']['port'] = 4321
+default['private_chef']['bookshelf']['stream_download'] = true
+default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
+default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
 
 ###
 # Opscode Certificate
