@@ -22,13 +22,20 @@
 -include_lib("eunit/include/eunit.hrl").
 
 stats_hero_label_test_() ->
+
+    application:set_env(chef_objects, s3_url, "http://s3.amazonaws.com"),
+    application:set_env(chef_objects, s3_platform_bucket_name, "test.bucket"),
+
     GoodTests = [
                  ?_assertEqual(Expect, chef_wm_base:stats_hero_label(In))
                  || {In, Expect} <- [
                                      %% {Input, Expected}
                                      {{chef_sql, fetch_client}, <<"rdbms.chef_sql.fetch_client">>},
-                                     {{chef_solr, some_fun}, <<"solr.chef_solr.some_fun">>}
+                                     {{chef_solr, some_fun}, <<"solr.chef_solr.some_fun">>},
+                                     {{chef_s3, delete_checksums}, <<"s3.s3_amazonaws_com.test_bucket.chef_s3.delete_checksums">>}
                                     ] ],
+
+
     BadTests = [
                 ?_assertError({bad_prefix, {bad, juju}},
                               chef_wm_base:stats_hero_label({bad, juju})) ],

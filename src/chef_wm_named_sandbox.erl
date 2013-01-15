@@ -91,10 +91,12 @@ resource_exists(Req, #base_state{chef_db_context = DbContext,
 %% can do with a sandbox after committing it. Chef 0.10.z clients crash on 204 responses
 %% (code in chef/rest.rb assumes a non-nil body). For a small cleanup, we've removed the
 %% json_class field since even Chef 0.10.z clients do not operate on the returned data.
-from_json(Req, #base_state{chef_db_context = DbContext,
+from_json(Req, #base_state{reqid = ReqId,
+                           chef_db_context = DbContext,
                            resource_state = #sandbox_state{chef_sandbox = Sandbox}} = State) ->
     try
-        validate_checksums_uploaded(Sandbox),
+        %% ReqId needed here for chef_s3 instrumentation
+        validate_checksums_uploaded(ReqId, Sandbox),
         commit_sandbox(DbContext, Sandbox),
         Req1 = chef_wm_util:set_json_body(Req, sandbox_to_ejson(Sandbox)),
         {true, Req1, State}
@@ -124,10 +126,10 @@ validate_request('PUT', Req, State) ->
             throw({invalid, Msg})
     end.
 
-validate_checksums_uploaded(#chef_sandbox{id = _BoxId, checksums = Checksums, org_id = OrgId}) ->
+validate_checksums_uploaded(ReqId, #chef_sandbox{id = _BoxId, checksums = Checksums, org_id = OrgId}) ->
     %% The flag is for "uploaded"
     NeedsUpload = [ CSum || {CSum, false} <- Checksums ],
-    {{ok, _}, {missing, NotFound}, {error, ErrorCount}} = chef_s3:check_checksums(OrgId, NeedsUpload),
+    {{ok, _}, {missing, NotFound}, {error, ErrorCount}} = ?SH_TIME(ReqId, chef_s3, check_checksums, (OrgId, NeedsUpload)),
     %% FIXME: Do we want to distinguish not_found vs other S3 errors at this point?
     case ErrorCount > 0 of
         true ->
