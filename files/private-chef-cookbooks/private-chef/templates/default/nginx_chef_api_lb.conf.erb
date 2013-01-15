@@ -45,6 +45,20 @@
       proxy_pass http://bookshelf;
     }
 
+    # erchef status endpoint
+    location ~ "/_status/?$" {
+      types { }
+      default_type application/json;
+      proxy_pass http://opscode_erchef;
+    }
+
+    # pushy status endpoint
+    location ~ "^/pushy/_status/?$" {
+      types { }
+      default_type application/json;
+      proxy_pass http://opscode_pushy;
+    }
+
     # This internal location is used to serve checksum file content
     # via the X-Accel-Redirect header. See http://wiki.nginx.org/XSendfile
     location /checksum/ {
@@ -57,13 +71,6 @@
 
     # pushy
     <%= @helper.pushy_api("^/organizations/[a-z0-9\-_]+?/pushy/{0,1}") %>
-
-    # pushy status endpoint
-    location ~ "^/pushy/_status$" {
-        set $my_upstream opscode_pushy;
-        proxy_redirect http://$my_upstream /;
-        proxy_pass http://$my_upstream;
-    }
 
     # search requests
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
@@ -106,7 +113,6 @@
                               node['private_chef']['opscode-chef']['upload_proto']) %>
 
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/status/{0,1}.*$", :ruby) %>
-    <%= @helper.chef_api("^/_status") %>
 
     # opscode reporting endpoints
     <%= @helper.reporting_api("^/organizations/[a-z0-9\-_]+?/reports/.*$") %>
