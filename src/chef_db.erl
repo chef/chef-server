@@ -701,10 +701,10 @@ fetch_data_bag_item_ids(#context{} = Ctx, OrgName, DataBagName) ->
 -spec delete_cookbook_version(Ctx :: #context{},
                               CookbookVersion :: #chef_cookbook_version{}) ->
                                 {ok, 1 | 2} | not_found | {error, term()}.
-delete_cookbook_version(#context{}=Ctx, #chef_cookbook_version{org_id=OrgId}=CookbookVersion) ->
+delete_cookbook_version(#context{reqid=ReqId}=Ctx, #chef_cookbook_version{org_id=OrgId}=CookbookVersion) ->
     case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
         #chef_db_cb_version_delete{cookbook_delete=CookbookDeleted, deleted_checksums=DeletedChecksums} ->
-            chef_s3:delete_checksums(OrgId, DeletedChecksums),
+            ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, DeletedChecksums)),
             %% TODO: return the actual chef_db_cb_version_delete record to the caller
             case CookbookDeleted of
                 false -> {ok, 1};
@@ -952,10 +952,10 @@ update(DbContext, #chef_node{} = Record, ActorId) ->
     update_object(DbContext, ActorId, update_node, Record);
 update(DbContext, #chef_role{} = Record, ActorId) ->
     update_object(DbContext, ActorId, update_role, Record);
-update(DbContext, #chef_cookbook_version{org_id=OrgId} = Record, ActorId) ->
+update(#context{reqid=ReqId}=DbContext, #chef_cookbook_version{org_id=OrgId} = Record, ActorId) ->
     case update_object(DbContext, ActorId, update_cookbook_version, Record) of
         #chef_db_cb_version_update{deleted_checksums=DeletedChecksums} ->
-            chef_s3:delete_checksums(OrgId, DeletedChecksums),
+            ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, DeletedChecksums)),
             ok;
         Result -> Result %% {conflict, _} or {error, _}
     end;
