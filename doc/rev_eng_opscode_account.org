@@ -1,0 +1,103 @@
+* Notes opscode_account schema reverse engineering
+** views:
+*** AssociationRequest
+**** Name:  _design/AssociationRequest-bf34293bc3d23b3db03146881171493d
+**** Size: about 166 docs in preprod
+**** Doc Schema
+     couchrest-type: AssociationRequest
+     organization: org GUID
+     user: user GUID of some sort
+     organization_admin_actor_id:
+**** Users: TODO
+*** Mixlib::Authorization::AuthJoin
+**** Name: _design/Mixlib::Authorization::AuthJoin (Inactive view)
+**** Name: _design/Mixlib::Authorization::AuthJoin-25834c5a8d6a9586adb05320f3f725e8
+**** Size: about 1.16 M docs in preprod
+**** Doc Schema
+     couchrest-type: Mixlib::Authorization::AuthJoin
+     auth_object_id: auth side object GUID
+     user_object_id: user side object GUID
+**** Users: TODO
+
+*** Mixlib::Authorization::Models::Client
+**** Name: _design/Mixlib::Authorization::Models::Client-fec21b157b76e08b86e92ef7cbc2be81
+**** NOTE: may be unused! Has all this gone to SQL?
+**** Size: NO DOCS in preprod
+     
+*** Mixlib::Authorization::Models::Container
+**** Name: _design/Mixlib::Authorization::Models::Container (Inactive view)
+**** Name:  _design/Mixlib::Authorization::Models::Container-f6aead5acfa18f649f9f951ad5570324
+**** Size: 2 docs (see below)
+**** Doc Schema
+     couchrest-type: Mixlib::Authorization::Models::Client
+     containername: name
+     containerpath: name
+     requester_id: (GUID)
+**** Note
+     only two docs exist:
+     organizations (name/path same)
+     users (name/path same)
+*** Mixlib::Authorization::Models::Group
+**** Name: _design/Mixlib::Authorization::Models::Group-59a505c964199e318b67910cc642a062
+**** Size: 18K docs in preprod (not as many as there are orgs; possibly not there for precreated orgs?) 
+**** Doc Schema
+     couchrest-type: Mixlib::Authorization::Models::Group
+     actor_and_group_names: groups: [list of members]
+     groupname: ORGNAME_global_admins (where ORGNAME is the actual name, e.g. 001_global_admins
+     orgname: actual name of org (e.g. 001)
+     requester_id: GUID of requestor (generally pivotal 4920224947d7ed92e872e53b620e94b7)
+     
+     It looks like these are created for unassigned orgs (aadfpwkihcdefoyodgbn_global_admins)
+
+*** Mixlib::Authorization::Models::Organization
+**** _design/Mixlib::Authorization::Models::Organization (inactive)
+**** _design/Mixlib::Authorization::Models::Organization-2d2195f97596850adcab2fe4a47e4ab9 (inactive)
+**** _design/Mixlib::Authorization::Models::Organization-eed4ffc4a127815b935ff840706c19de 
+**** Size: 25K docs
+**** Doc Schema 
+     couchrest-type: Mixlib::Authorization::Models::Organization
+     assigned_at: date
+     billing_plan: platform-free
+     chargify_customer_id: 1300443
+     chargify_subscription_id: 1308808
+     clientname: az-validator
+     full_name: human readable name
+     guid: 30db482adc8f48399387a0417d52a5bf
+     name: short name ("Pre-created" for pre-created orgs)
+     org_type: Only type I've found so far is 'Business'
+     requester_id: A guid (948465a564a458797b26c3442d6a18e9)
+
+*** Mixlib::Authorization::Models::User
+**** _design/Mixlib::Authorization::Models::User (seems to be active)
+**** _design/Mixlib::Authorization::Models::User-1362073e995844cc72a5d40fba783cb9 (inactive)
+**** _design/Mixlib::Authorization::Models::User-29b9399f9c8ef75095bf05bcab454f2c (inactive)
+**** _design/Mixlib::Authorization::Models::User-d91081011f53ef032d42ce42f76fc9ed (inactive)
+**** _design/Mixlib::Authorization::Models::User-e8e718b2cc7860fc5d5beb40adc8511a (inactive)
+**** Size: 8.6K docs
+**** Question: is this just residual from before the sql migration of users...
+**** Doc Schema:
+     _id: is guid of user...
+     couchrest-type: Mixlib::Authorization::Models::User
+     certificate: RSA CERT
+     city: 
+     country:
+     display_name: 
+     email: 
+     first_name: 
+     image_file_name:
+     last_name:
+     middle_name:
+     password:
+     salt:
+     twitter_account
+     username
+
+*** OrganizationUser
+**** _design/OrganizationUser (inactive)
+**** _design/OrganizationUser-59f856e73fb179067256ec5ac7ebdff6 (inactive)
+**** _design/OrganizationUser-5c1085b0dd852acf9c74bbfe97f66406 (active)
+**** Size: 20K docs
+**** Doc Schema:    
+     couchrest-type: OrganizationUser
+     organization: GUID of org
+     user: GUID of user
