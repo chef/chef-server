@@ -1,5 +1,5 @@
 name "oc_erchef"
-version "master"
+version "rel-0.18.0"
 
 dependencies ["erlang", "rebar", "rsync"]
 
