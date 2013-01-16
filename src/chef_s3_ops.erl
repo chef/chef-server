@@ -35,13 +35,13 @@
 %% @doc Specifies how many requests to S3 / Bookshelf are in-flight at a given time.
 -spec fanout() -> Size :: pos_integer().
 fanout() ->
-    fetch_and_validate_config_option(chef_objects, s3_parallel_ops_fanout).
+    fetch_and_validate_config_option(s3_parallel_ops_fanout).
 
 %% @doc Specifies the maximum amount of time (in milliseconds) to wait for a SINGLE request
 %% to S3 / Bookshelf to complete.
 -spec timeout() -> MS :: pos_integer().
 timeout() ->
-    fetch_and_validate_config_option(chef_objects, s3_parallel_ops_timeout).
+    fetch_and_validate_config_option(s3_parallel_ops_timeout).
 
 %% @doc Fetch a configuration value via `application:get_env/2` and verify it is a
 %% non-negative integer.  Valid values are returned; invalid values trigger an error
@@ -49,18 +49,25 @@ timeout() ->
 %%
 %% The spec is specifically tailored for use in this module (to make Dialyzer happy), but it
 %% is conceivable that the function could be used elsewhere as well.
--spec fetch_and_validate_config_option(Application :: chef_objects,
-                                       OptionName :: s3_parallel_ops_fanout |
+-spec fetch_and_validate_config_option(OptionName :: s3_parallel_ops_fanout |
                                                      s3_parallel_ops_timeout) ->
                                               Value :: pos_integer().
-fetch_and_validate_config_option(Application, OptionName) ->
-    {ok, Value} = application:get_env(Application, OptionName),
-    case {is_integer(Value), Value > 0} of
-        {true, true} ->
-            Value;
-        _ ->
-            error_logger:error_msg("Improper Configuration: ~p / ~p was ~p; should be a non-negative integer~n", [Application, OptionName, Value]),
-            erlang:error({configuration, Application, OptionName, Value})
+fetch_and_validate_config_option(OptionName) ->
+    Application = chef_objects,
+    OptionValue = application:get_env(Application, OptionName),
+    case OptionValue of
+        {ok, Value} ->
+            case {is_integer(Value), Value > 0} of
+                {true, true} ->
+                    Value;
+                _ ->
+                    error_logger:error_msg("Improper Configuration: ~p / ~p was ~p; should be a positive integer~n",
+                                           [Application, OptionName, Value]),
+                    erlang:error({configuration, Application, OptionName, Value})
+            end;
+        undefined ->
+            error_logger:error_msg("Improper Configuration: ~p / ~p was undefined!~n", [Application, OptionName]),
+            erlang:error({configuration, Application, OptionName, undefined})
     end.
 
 %% @doc Delete each checksummed file in S3
@@ -139,8 +146,7 @@ delete_file(OrgId, AwsConfig, Bucket, Checksum) ->
     Key = chef_s3:make_key(OrgId, Checksum),
 
     try mini_s3:delete_object(Bucket, Key, AwsConfig) of
-        %% Return value doesn't much matter here but it looks like, but
-        %% for documentation's sake it looks like:
+        %% Return value doesn't much matter here but for documentation's sake it looks like:
         %%
         %%  [{delete_marker, list_to_existing_atom(Marker)}, {version_id, Id}]
         %%
@@ -151,6 +157,8 @@ delete_file(OrgId, AwsConfig, Bucket, Checksum) ->
     catch
         error:{aws_error, {http_error,404,_}} ->
             %% We got a 404.  No biggie; mark it as 'missing' and move on
+            error_logger:warning_msg("Deletion of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) failed because the file was not found~n",
+                                     [Checksum, OrgId, Bucket, Key]),
             {missing, Checksum};
         ExceptionClass:Reason->
             %% Something unanticipated happened.  We should log the specific reason for
@@ -193,10 +201,10 @@ spawn_deleter(OrgId, AwsConfig, Timeout, Bucket, Checksum) ->
     %% Also, paranoia.
     Token = erlang:make_ref(),
 
-    Worker = erlang:spawn(fun() ->
-                                  Result = delete_file(OrgId, AwsConfig, Bucket, Checksum),
-                                  Me ! {Token, Result, self()}
-                          end),
+    Worker = proc_lib:spawn_link(fun() ->
+                                         Result = delete_file(OrgId, AwsConfig, Bucket, Checksum),
+                                         Me ! {Token, Result, self()}
+                                 end),
     receive
         {Token, Response, Worker} ->
             Response
