@@ -56,15 +56,6 @@ class NginxErb
     make_location(path, choose_account_upstream(key), alternative, proto)
   end
 
-  def pushy_api(path)
-    make_location(path, "opscode_pushy", "opscode_webui", "http")
-  end
-
-  def reporting_api(path) 
-    make_location(path, "opscode_reporting", "opscode_webui", "http")
-  end
-
-
   def make_location(path, upstream, alternative, proto)
     <<EOS
 location ~ "#{path}" {

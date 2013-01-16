@@ -52,13 +52,6 @@
       proxy_pass http://opscode_erchef;
     }
 
-    # pushy status endpoint
-    location ~ "^/pushy/_status/?$" {
-      types { }
-      default_type application/json;
-      proxy_pass http://opscode_pushy;
-    }
-
     # This internal location is used to serve checksum file content
     # via the X-Accel-Redirect header. See http://wiki.nginx.org/XSendfile
     location /checksum/ {
@@ -68,9 +61,6 @@
 
     # object ACL requests go to opscode-account service
     <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/.*?/_acl.*$", :account) %>
-
-    # pushy
-    <%= @helper.pushy_api("^/organizations/[a-z0-9\-_]+?/pushy/{0,1}") %>
 
     # search requests
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
@@ -113,10 +103,6 @@
                               node['private_chef']['opscode-chef']['upload_proto']) %>
 
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/status/{0,1}.*$", :ruby) %>
-
-    # opscode reporting endpoints
-    <%= @helper.reporting_api("^/organizations/[a-z0-9\-_]+?/reports/.*$") %>
-    <%= @helper.reporting_api("^/reports/.*$") %>
 
     # opscode-account service endpoints
     <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", 'couchdb_clients') %>
