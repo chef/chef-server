@@ -248,18 +248,12 @@ default['private_chef']['lb']['upstream']['opscode-account'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-webui'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-authz'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-solr'] = [ "127.0.0.1" ]
-default['private_chef']['lb']['upstream']['opscode-pushy'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['bookshelf'] = [ "127.0.0.1" ]
 default['private_chef']['lb_internal']['enable'] = true
 default['private_chef']['lb_internal']['vip'] = "127.0.0.1"
 default['private_chef']['lb_internal']['chef_port'] = 9680
 default['private_chef']['lb_internal']['account_port'] = 9685
 default['private_chef']['lb_internal']['authz_port'] = 9683
-
-####
-# Pushy
-####
-default['private_chef']['opscode-pushy']['port'] = 10003
 
 ####
 # Nginx
