@@ -1,5 +1,5 @@
 
-if node['private_chef']['mysql']['install_libs'] 
+if node['private_chef']['mysql']['install_libs']
   case node["platform"]
   when "ubuntu"
     package "libmysqlclient-dev"
@@ -28,7 +28,7 @@ node['private_chef']['mysql']['mysql2_versions'].each do |mysql2_version|
   execute "sed -i -e 's/s.test_files = `git ls-files spec examples`/s.test_files = `find #{mysql2_base_safe}\\/spec examples -type f`/' #{mysql2_base}/mysql2.gemspec"
 
   execute "compile mysql2 #{mysql2_version}" do
-    command "/opt/opscode/embedded/bin/rake compile" 
+    command "/opt/opscode/embedded/bin/rake compile"
     cwd mysql2_base
     not_if { File.directory?("#{mysql2_base}/lib/mysql2/mysql2.so") }
   end
@@ -44,7 +44,7 @@ node['private_chef']['mysql']['mysql2_versions'].each do |mysql2_version|
   end
 end
 
-bundles.each do |name, without_list| 
+bundles.each do |name, without_list|
   execute "sed -i -e 's/mysql://g' /opt/opscode/embedded/service/#{name}/.bundle/config"
   execute "sed -i -e 's/:mysql//g' /opt/opscode/embedded/service/#{name}/.bundle/config"
   execute "sed -i -e 's/mysql//g' /opt/opscode/embedded/service/#{name}/.bundle/config"
@@ -64,5 +64,5 @@ if !File.exists?("/var/opt/opscode/mysql-bootstrap")
 
   end
 
-  file "/var/opt/opscode/mysql-bootstrap" 
+  file "/var/opt/opscode/mysql-bootstrap"
 end
