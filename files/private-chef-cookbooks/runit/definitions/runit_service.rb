@@ -182,7 +182,7 @@ define :runit_service, :directory => nil, :only_if => false, :finish_script => f
       if params[:owner]
         control_cmd = "#{node[:runit][:chpst_bin]} -u #{params[:owner]} #{control_cmd}"
       end
-      provider Chef::Provider::Service::Init
+      provider Chef::Provider::Service::Simple
       supports :restart => true, :status => true
       start_command "#{control_cmd} #{params[:start_command]} #{service_dir_name}"
       stop_command "#{control_cmd} #{params[:stop_command]} #{service_dir_name}"

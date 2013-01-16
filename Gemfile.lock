@@ -1,6 +1,7 @@
 GIT
-  remote: git@github.com:opscode/omnibus-ruby.git
-  revision: ba2cc39ad4f96be8ad60de863bd318663edbd378
+  remote: git://github.com/opscode/omnibus-ruby.git
+  revision: e875bb73fbbce832f89ff59a58e5bc3ede05b6ea
+  branch: master
   specs:
     omnibus (0.1)
       fpm (= 0.3.11)
@@ -8,6 +9,13 @@ GIT
       ohai (>= 0.6.12)
       rake (>= 0.9)
       uber-s3
+
+GIT
+  remote: git://github.com/opscode/omnibus-software.git
+  revision: 786b64b7e390a8241192203ad5c5d2aa08abb955
+  branch: master
+  specs:
+    omnibus-software (0.0.1)
 
 GEM
   remote: http://rubygems.org/
@@ -27,7 +35,7 @@ GEM
     mixlib-cli (1.2.2)
     mixlib-config (1.1.2)
     mixlib-log (1.4.1)
-    mixlib-shellout (1.0.0)
+    mixlib-shellout (1.1.0)
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
     net-ssh (2.2.2)
@@ -38,7 +46,7 @@ GEM
       mixlib-log
       systemu
       yajl-ruby
-    rake (0.9.2.2)
+    rake (10.0.3)
     systemu (2.5.2)
     uber-s3 (0.2.4)
       mime-types (~> 1.17)
@@ -58,4 +66,5 @@ PLATFORMS
 
 DEPENDENCIES
   omnibus!
+  omnibus-software!
   vagrant (~> 1.0)

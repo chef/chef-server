@@ -8,7 +8,7 @@ opscode_erchef_dir = node['private_chef']['opscode-erchef']['dir']
 opscode_erchef_etc_dir = File.join(opscode_erchef_dir, "etc")
 opscode_erchef_log_dir = node['private_chef']['opscode-erchef']['log_directory']
 opscode_erchef_sasl_log_dir = File.join(opscode_erchef_log_dir, "sasl")
-[ 
+[
   opscode_erchef_dir,
   opscode_erchef_etc_dir,
   opscode_erchef_log_dir,
@@ -22,42 +22,29 @@ opscode_erchef_sasl_log_dir = File.join(opscode_erchef_log_dir, "sasl")
 end
 
 link "/opt/opscode/embedded/service/opscode-erchef/log" do
-  to opscode_erchef_log_dir 
+  to opscode_erchef_log_dir
 end
 
-template "/opt/opscode/embedded/service/opscode-erchef/bin/erchef" do
-  source "erchef.erb"
+template "/opt/opscode/embedded/service/opscode-erchef/bin/oc_erchef" do
+  source "oc_erchef.erb"
   owner "root"
   group "root"
-  mode "0755" 
+  mode "0755"
   variables(node['private_chef']['opscode-erchef'].to_hash)
   notifies :restart, 'service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
 end
 
-erchef_config = File.join(opscode_erchef_etc_dir, "app.config") 
+erchef_config = File.join(opscode_erchef_etc_dir, "app.config")
 
 template erchef_config do
-  source "erchef.config.erb"
+  source "oc_erchef.config.erb"
   mode "644"
   variables(node['private_chef']['opscode-erchef'].to_hash)
   notifies :restart, 'service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
 end
 
 link "/opt/opscode/embedded/service/opscode-erchef/etc/app.config" do
-  to erchef_config 
-end
-
-erchef_ibrowse_config = File.join(opscode_erchef_etc_dir, "ibrowse.config") 
-
-template erchef_ibrowse_config do
-  source "ibrowse.config.erb"
-  mode "0644"
-  variables(node['private_chef']['opscode-erchef'].to_hash)
-  notifies :restart, 'service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
-end
-
-link "/opt/opscode/embedded/service/opscode-erchef/etc/ibrowse/ibrowse.config" do
-  to erchef_ibrowse_config 
+  to erchef_config
 end
 
 runit_service "opscode-erchef" do
@@ -69,9 +56,9 @@ runit_service "opscode-erchef" do
   }.merge(params))
 end
 
-if node['private_chef']['bootstrap']['enable'] 
-	execute "/opt/opscode/bin/private-chef-ctl opscode-erchef start" do
-		retries 20 
+if node['private_chef']['bootstrap']['enable']
+	execute "/opt/opscode/bin/private-chef-ctl start opscode-erchef" do
+		retries 20
 	end
 end
 

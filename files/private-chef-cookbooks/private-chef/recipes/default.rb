@@ -27,10 +27,10 @@ end
 # the bootstrap_server attribute is set to signify that this node is
 # cofigured to be the bootstrap server. If bootstrap#enable is set in
 # the OPC config, then we know we should be the bootstrap server.
-node['private_chef']['bootstrap']['bootstrap_server'] = node['private_chef']['bootstrap']['enable']
+node.set['private_chef']['bootstrap']['bootstrap_server'] = node['private_chef']['bootstrap']['enable']
 
 if File.exists?("/var/opt/opscode/bootstrapped")
-	node['private_chef']['bootstrap']['enable'] = false
+	node.set['private_chef']['bootstrap']['enable'] = false
 end
 
 # Create the Chef User
@@ -124,6 +124,7 @@ include_recipe "runit"
   "opscode-account",
   "opscode-solr",
   "opscode-expander",
+  "bookshelf",
   "bootstrap",
   "opscode-org-creator",
   "opscode-chef",
@@ -142,7 +143,7 @@ include_recipe "runit"
 end
 
 include_recipe "private-chef::orgmapper"
-include_recipe "private-chef::opscode-pedant"
+include_recipe "private-chef::oc-chef-pedant"
 include_recipe "private-chef::log_cleanup"
 include_recipe "private-chef::partybus"
 

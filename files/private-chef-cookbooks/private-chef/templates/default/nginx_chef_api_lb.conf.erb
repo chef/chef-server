@@ -32,12 +32,24 @@
     location /version {
       types { }
       default_type text/plain;
-      alias /opt/opscode/pc-version.txt;
+      alias /opt/opscode/version-manifest.txt;
     }
 
     location /docs {
       index index.html ;
       alias /opt/opscode/docs;
+    }
+
+    # bookshelf
+    location ~ "/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/{0,1}.*$" {
+      proxy_pass http://bookshelf;
+    }
+
+    # erchef status endpoint
+    location ~ "/_status/?$" {
+      types { }
+      default_type application/json;
+      proxy_pass http://opscode_erchef;
     }
 
     # This internal location is used to serve checksum file content
@@ -49,9 +61,6 @@
 
     # object ACL requests go to opscode-account service
     <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/.*?/_acl.*$", :account) %>
-
-    # pushy
-    <%= @helper.pushy_api("^/organizations/[a-z0-9\-_]+?/pushy/{0,1}") %>
 
     # search requests
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
@@ -72,6 +81,9 @@
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$", 'couchdb_data') %>
 
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/{0,1}.*$", 'couchdb_environments') %>
+
+    # principals go to erchef
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
 
     # optional caching of cookbook files by nginx
     <%- if node['private_chef']['lb']['cache_cookbook_files'] -%>

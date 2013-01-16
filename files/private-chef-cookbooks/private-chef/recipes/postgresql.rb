@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -82,31 +82,31 @@ else
 end
 
 
-if node['private_chef']['bootstrap']['enable'] 
+if node['private_chef']['bootstrap']['enable']
   execute "/opt/opscode/embedded/bin/initdb -D #{postgresql_data_dir}" do
     user node['private_chef']['postgresql']['username']
     not_if { File.exists?(File.join(postgresql_data_dir, "PG_VERSION")) }
   end
+end
 
-  postgresql_config = File.join(postgresql_data_dir, "postgresql.conf")
+postgresql_config = File.join(postgresql_data_dir, "postgresql.conf")
 
-  template postgresql_config do
-    source "postgresql.conf.erb"
-    owner node['private_chef']['postgresql']['username']
-    mode "0644"
-    variables(node['private_chef']['postgresql'].to_hash)
-    notifies :restart, 'service[postgres]' if OmnibusHelper.should_notify?("postgres")
-  end
+template postgresql_config do
+  source "postgresql.conf.erb"
+  owner node['private_chef']['postgresql']['username']
+  mode "0644"
+  variables(node['private_chef']['postgresql'].to_hash)
+  notifies :restart, 'service[postgres]' if OmnibusHelper.should_notify?("postgres")
+end
 
-  pg_hba_config = File.join(postgresql_data_dir, "pg_hba.conf")
+pg_hba_config = File.join(postgresql_data_dir, "pg_hba.conf")
 
-  template pg_hba_config do
-    source "pg_hba.conf.erb"
-    owner node['private_chef']['postgresql']['username']
-    mode "0644"
-    variables(node['private_chef']['postgresql'].to_hash)
-    notifies :restart, 'service[postgres]' if OmnibusHelper.should_notify?("postgres")
-  end
+template pg_hba_config do
+  source "pg_hba.conf.erb"
+  owner node['private_chef']['postgresql']['username']
+  mode "0644"
+  variables(node['private_chef']['postgresql'].to_hash)
+  notifies :restart, 'service[postgres]' if OmnibusHelper.should_notify?("postgres")
 end
 
 should_notify = OmnibusHelper.should_notify?("postgres")
@@ -121,13 +121,13 @@ runit_service "postgres" do
   }.merge(params))
 end
 
-if node['private_chef']['bootstrap']['enable'] 
-	execute "/opt/opscode/bin/private-chef-ctl postgres start" do
-		retries 20 
+if node['private_chef']['bootstrap']['enable']
+	execute "/opt/opscode/bin/private-chef-ctl start postgres" do
+		retries 20
 	end
 
   ###
-  # Create the database, migrate it, and create the users we need, and grant them 
+  # Create the database, migrate it, and create the users we need, and grant them
   # privileges.
   ###
   database_exists = "/opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} /opt/opscode/embedded/bin/psql -d 'template1' -c 'select datname from pg_database' -x|grep opscode_chef"
@@ -142,7 +142,7 @@ if node['private_chef']['bootstrap']['enable']
   end
 
   execute "migrate_database" do
-    command "/opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/bin/rake pg:remigrate" 
+    command "/opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/bin/rake pg:remigrate"
     cwd "/opt/opscode/embedded/service/chef-sql-schema"
     user node['private_chef']['postgresql']['username']
     action :nothing
@@ -156,7 +156,7 @@ if node['private_chef']['bootstrap']['enable']
   end
 
   execute "grant opscode_chef privileges" do
-    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_user']}\"" 
+    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_user']}\""
     user node['private_chef']['postgresql']['username']
     action :nothing
   end
@@ -169,7 +169,7 @@ if node['private_chef']['bootstrap']['enable']
   end
 
   execute "grant opscode_chef_ro privileges" do
-    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_ro_user']}\"" 
+    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_ro_user']}\""
     user node['private_chef']['postgresql']['username']
     action :nothing
   end

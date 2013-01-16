@@ -5,7 +5,7 @@
 # are tracked differently.
 
 name "chef-pc"
-version "0.10.8"
+version "10.16.4"
 
 dependencies ["ruby", "rubygems"]
 

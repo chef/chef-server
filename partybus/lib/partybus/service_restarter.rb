@@ -6,11 +6,11 @@ class Partybus::ServiceRestarter
       raise "Sorry yo, can't to that yet"
     end
 
-    system("private-chef-ctl #{service_name} status")
+    system("private-chef-ctl status #{service_name}")
     exit_status = $?.exitstatus
 
     unless exit_status == 3 # service is already down
-      system("private-chef-ctl #{service_name} restart")
+      system("private-chef-ctl restart #{service_name}")
     end
   end
 

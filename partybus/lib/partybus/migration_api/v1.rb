@@ -1,5 +1,6 @@
 require 'partybus/schema_migrator'
 require 'partybus/service_restarter'
+require 'partybus/command_runner'
 require 'partybus/migration_api/v1'
 
 module Partybus
@@ -61,7 +62,13 @@ EOF
         restarter = Partybus::ServiceRestarter.new
         restarter.restart_service(service_name)
       end
-
+      
+      def run_command(command)
+        log("\tRunning Command: #{command}")
+        runner = Partybus::CommandRunner.new
+        runner.run_command(command)
+      end
+      
       def migrate
 
       end
@@ -70,7 +77,7 @@ EOF
 
       def db_up?
         db_service = Partybus.config.database_service_name
-        system("private-chef-ctl #{db_service} status")
+        system("private-chef-ctl status #{db_service}")
         exit_status = $?.exitstatus
         exit_status == 0
       end

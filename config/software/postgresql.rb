@@ -3,7 +3,7 @@ version "9.1.2"
 
 dependencies ["zlib",
               "openssl",
-              "readline",
+              "libedit",
               "ncurses"]
 
 source :url => "http://ftp.postgresql.org/pub/source/v9.1.2/postgresql-9.1.2.tar.gz",
@@ -21,6 +21,7 @@ build do
   patch :source => 'postgresql-9.1.2-configure-ncurses-fix.patch'
   command ["./configure",
            "--prefix=#{install_dir}/embedded",
+           "--with-libedit-preferred",
            "--with-openssl --with-includes=#{install_dir}/embedded/include",
            "--with-libraries=#{install_dir}/embedded/lib"].join(" "), :env => configure_env
   command "make -j #{max_build_jobs}", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}

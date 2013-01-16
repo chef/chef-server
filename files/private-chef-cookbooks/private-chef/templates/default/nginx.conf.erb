@@ -85,9 +85,6 @@ http {
       root <%= node['private_chef']['opscode-chef']['checksum_path'].gsub('checksum', '') %>;
     }
 
-    # pushy
-    <%= @helper.pushy_api("^/organizations/[a-z0-9\-_]+?/pushy") %>
-
     # search requests
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/?$") %>
@@ -107,6 +104,9 @@ http {
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$", 'couchdb_data') %>
 
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/{0,1}.*$", 'couchdb_environments') %>
+
+    # principals go to erchef
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
 
     # no caching of cookbook files for internal-lb
 

@@ -166,13 +166,13 @@ runit_service "php-fpm" do
 end
 
 if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl nagios start" do
+	execute "/opt/opscode/bin/private-chef-ctl start nagios" do
 		retries 20
 	end
-	execute "/opt/opscode/bin/private-chef-ctl php-fpm start" do
+	execute "/opt/opscode/bin/private-chef-ctl start php-fpm" do
 		retries 20
 	end
-	execute "/opt/opscode/bin/private-chef-ctl fcgiwrap start" do
+	execute "/opt/opscode/bin/private-chef-ctl start fcgiwrap" do
 		retries 20
 	end
 end

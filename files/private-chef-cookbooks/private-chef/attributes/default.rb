@@ -8,6 +8,9 @@
 ###
 # High level options
 ###
+default['private_chef']['api_version'] = "11.0.0"
+default['private_chef']['flavor'] = "opc"
+
 default['private_chef']['notification_email'] = "pc-default@opscode.com"
 default['private_chef']['from_email'] = '"Opscode" <donotreply@opscode.com>'
 default['private_chef']['database_type'] = "postgresql"
@@ -68,6 +71,9 @@ default['private_chef']['rabbitmq']['reindexer_vhost'] = '/reindexer'
 default['private_chef']['rabbitmq']['jobs_vhost'] = '/jobs'
 default['private_chef']['rabbitmq']['jobs_user'] = 'jobs'
 default['private_chef']['rabbitmq']['jobs_password'] = 'workcomplete'
+default['private_chef']['rabbitmq']['reports_vhost'] = '/reports'
+default['private_chef']['rabbitmq']['reports_user'] = 'reports'
+default['private_chef']['rabbitmq']['reports_password'] = 'reportallthethings'
 default['private_chef']['rabbitmq']['node_ip_address'] = '127.0.0.1'
 default['private_chef']['rabbitmq']['node_port'] = '5672'
 default['private_chef']['rabbitmq']['nodename'] = 'rabbit@localhost'
@@ -122,6 +128,23 @@ default['private_chef']['opscode-expander']['consumer_id'] = "default"
 default['private_chef']['opscode-expander']['nodes'] = 2
 
 ####
+# Bookshelf
+####
+default['private_chef']['bookshelf']['enable'] = true
+default['private_chef']['bookshelf']['ha'] = false
+default['private_chef']['bookshelf']['dir'] = "/var/opt/opscode/bookshelf"
+default['private_chef']['bookshelf']['data_dir'] = "/var/opt/opscode/bookshelf/data"
+default['private_chef']['bookshelf']['log_directory'] = "/var/log/opscode/bookshelf"
+default['private_chef']['bookshelf']['svlogd_size'] = 1000000
+default['private_chef']['bookshelf']['svlogd_num'] = 10
+default['private_chef']['bookshelf']['vip'] = '127.0.0.1'
+default['private_chef']['bookshelf']['listen'] = '127.0.0.1'
+default['private_chef']['bookshelf']['port'] = 4321
+default['private_chef']['bookshelf']['stream_download'] = true
+default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
+default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
+
+####
 # Chef Server API
 ####
 default['private_chef']['opscode-chef']['enable'] = true
@@ -171,7 +194,13 @@ default['private_chef']['opscode-erchef']['bulk_fetch_batch_size'] = '5'
 default['private_chef']['opscode-erchef']['max_cache_size'] = '10000'
 default['private_chef']['opscode-erchef']['cache_ttl'] = '3600'
 default['private_chef']['opscode-erchef']['db_pool_size'] = '20'
+default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = '20'
 default['private_chef']['opscode-erchef']['couchdb_max_conn'] = '100'
+default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
+default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
+default['private_chef']['opscode-erchef']['s3_bucket'] = 'bookshelf'
+default['private_chef']['opscode-erchef']['s3_url_ttl'] = 900
+default['private_chef']['opscode-erchef']['root_metric_key'] = "chefAPI"
 
 ####
 # Chef Server WebUI
@@ -197,6 +226,13 @@ default['private_chef']['opscode-webui']['session_key'] = "_sandbox_session"
 default['private_chef']['opscode-webui']['cookie_domain'] = "all"
 default['private_chef']['opscode-webui']['cookie_secret'] = "47b3b8d95dea455baf32155e95d1e64e"
 
+####
+# Chef Pedant
+####
+default['private_chef']['oc-chef-pedant']['dir'] = "/var/opt/opscode/oc-chef-pedant"
+default['private_chef']['oc-chef-pedant']['log_directory'] = "/var/log/opscode/oc-chef-pedant"
+default['private_chef']['oc-chef-pedant']['log_http_requests'] = true
+
 ###
 # Load Balancer
 ###
@@ -212,17 +248,12 @@ default['private_chef']['lb']['upstream']['opscode-account'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-webui'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-authz'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-solr'] = [ "127.0.0.1" ]
-default['private_chef']['lb']['upstream']['opscode-pushy'] = [ "127.0.0.1" ]
+default['private_chef']['lb']['upstream']['bookshelf'] = [ "127.0.0.1" ]
 default['private_chef']['lb_internal']['enable'] = true
 default['private_chef']['lb_internal']['vip'] = "127.0.0.1"
 default['private_chef']['lb_internal']['chef_port'] = 9680
 default['private_chef']['lb_internal']['account_port'] = 9685
 default['private_chef']['lb_internal']['authz_port'] = 9683
-
-####
-# Pushy
-####
-default['private_chef']['opscode-pushy']['port'] = 10003
 
 ####
 # Nginx
@@ -284,7 +315,7 @@ default['private_chef']['mysql']['sql_password'] = "snakepliskin"
 default['private_chef']['mysql']['vip'] = "127.0.0.1"
 default['private_chef']['mysql']['destructive_migrate'] = false
 default['private_chef']['mysql']['install_libs'] = true
-default['private_chef']['mysql']['mysql2_versions'] = IO.readlines("/opt/opscode/pc-version.txt").detect { |l| l =~ /^mysql2/ }.gsub(/^mysql2:\s+(\d.+)$/, '\1').chomp.split("-")
+default['private_chef']['mysql']['mysql2_versions'] = IO.readlines("/opt/opscode/version-manifest.txt").detect { |l| l =~ /^mysql2/ }.gsub(/^mysql2\s+(\d.+)$/, '\1').chomp.strip.split("-")
 
 ###
 # PostgreSQL
@@ -311,6 +342,13 @@ default['private_chef']['postgresql']['md5_auth_cidr_addresses'] = [ ]
 default['private_chef']['postgresql']['trust_auth_cidr_addresses'] = [ '127.0.0.1/32', '::1/128' ]
 default['private_chef']['postgresql']['shmmax'] = 17179869184
 default['private_chef']['postgresql']['shmall'] = 4194304
+default['private_chef']['postgresql']['shared_buffers'] = "#{(node['memory']['total'].to_i / 4) / (1024)}MB"
+default['private_chef']['postgresql']['work_mem'] = "8MB"
+default['private_chef']['postgresql']['effective_cache_size'] = "128MB"
+default['private_chef']['postgresql']['checkpoint_segments'] = 3
+default['private_chef']['postgresql']['checkpoint_timeout'] = "5min"
+default['private_chef']['postgresql']['checkpoint_completion_target'] = 0.5
+default['private_chef']['postgresql']['checkpoint_warning'] = "30s"
 
 ###
 # Redis
@@ -396,7 +434,7 @@ default['private_chef']['dark_launch']["couchdb_checksums"] = true
 default['private_chef']['dark_launch']["couchdb_environments"] = true
 default['private_chef']['dark_launch']["couchdb_clients"] = true
 default['private_chef']['dark_launch']["add_type_and_bag_to_items"] = true
-
+default['private_chef']['dark_launch']["node_run_history"] = false
 ###
 # Opscode Account
 ###

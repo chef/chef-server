@@ -1,0 +1,121 @@
+%% -*- mode: erlang -*-
+%% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ts=4 sw=4 ft=erlang et
+[
+ %% SASL config
+ {sasl, [
+         {sasl_error_logger, {file, "<%= File.join(@log_directory, 'sasl-error.log') %>"}},
+         {errlog_type, error},
+         {error_logger_mf_dir, "<%= File.join(@log_directory, 'sasl') %>"},      % Log directory
+         {error_logger_mf_maxbytes, 104857600},   % 10 MB max file size
+         {error_logger_mf_maxfiles, 5}           % 5 files max
+        ]},
+ {fast_log, [
+             {loggers, [[{name, erchef},
+                         {file, "<%= File.join(@log_directory, 'erchef.log') %>"},
+                         {files, 5},
+                         {file_size, 50}]]}
+            ]},
+ {oc_chef_wm, [
+              {api_version, "<%= node['private_chef']['api_version'] %>"},
+              {server_flavor, "<%= node['private_chef']['flavor'] %>"},
+
+              {ip, "<%= @listen %>"},
+              {port, <%= @port %>},
+              {reqid_header_name, "X-Request-Id"},
+              {auth_skew, <%= @auth_skew %>},
+              %% currently only used by the search endpoint to bound
+              %% how many nodes are deserialized at a time in
+              %% preparing a response.
+              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
+              {superusers, [<<"pivotal">>]},
+              %% metrics config
+              {root_metric_key, "<%= @root_metric_key %>"}
+             ]},
+  {chef_wm, [
+             {server_version, "<%= node['private_chef']['version'] %>"},
+             {health_ping_timeout, 400},
+             {health_ping_modules, [oc_chef_authz, chef_otto, chef_sql, chef_solr]}
+            ]},
+  {chef_authn, [
+                {keyring, [{default, "/etc/opscode/webui_pub.pem"}]}
+               ]},
+  {oc_chef_authz, [
+                {authz_root_url, "http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>" },
+                {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
+                {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
+               ]},
+  {chef_db, [
+             {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
+             {cache_defaults, [{max_size, <%= @max_cache_size %> },
+                                  {ttl, <%= @cache_ttl %> }]},
+             {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
+             {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
+            ]},
+  {chef_index, [
+                {rabbitmq_host, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
+                {rabbitmq_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
+                {rabbitmq_user, <<"<%= node['private_chef']['rabbitmq']['user'] %>">>},
+                {rabbitmq_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
+                {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['vhost'] %>">>},
+                {rabbitmq_exchange, <<"">>},
+                {solr_url, "http://<%= node['private_chef']['opscode-solr']['vip'] %>:<%= node['private_chef']['opscode-solr']['port'] %>/solr"}
+               ]},
+  {chef_objects, [
+                  {certificate_root_url, "http://<%= node['private_chef']['opscode-certificate']['vip'] %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificates"},
+                  {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
+                  {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
+                  {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= node['private_chef']['lb']['api_fqdn'] %>"},
+                  {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
+                  {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>}
+                 ]},
+  {stats_hero, [
+               %% Set sender pool size to DB max_connections to avoid contention
+               {udp_socket_pool_size, <%= node['private_chef']['postgresql']['max_connections'] %> },
+               {estatsd_host, "<%= node['private_chef']['estatsd']['vip'] %>"},
+               {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>}
+              ]},
+  {sqerl, [
+           %% The database system you are using (e.g., mysql, pgsql)
+           {db_type, <%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %> },
+
+           %% Database connection parameters
+           {db_host, "<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>"},
+           {db_port, <%= node['private_chef']['database_type'] == "postgresql" ? 5432 : 3306 %>},
+           {db_user, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>"},
+           {db_pass, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>"},
+           {db_name, "opscode_chef" },
+
+           {prepared_statements, {chef_sql, opc_statements, [<%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %>]}},
+           {column_transforms,
+           <%-if node['private_chef']['database_type'] == "mysql" %>
+                              [{<<"frozen">>,
+                                {sqerl_transformers, convert_integer_to_boolean}},
+                               {<<"validator">>,
+                                {sqerl_transformers, convert_integer_to_boolean}},
+                               {<<"admin">>,
+                                {sqerl_transformers, convert_integer_to_boolean}}
+                              ]
+           <%- elsif node['private_chef']['database_type'] == "postgresql" %>
+                              [{<<"created_at">>,
+                                {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
+                               {<<"updated_at">>,
+                                {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}]
+           <% else %>
+                              undefined
+           <%- end %>
+           }
+          ]},
+  {ibrowse, [
+             {default_max_sessions, <%= @ibrowse_max_sessions %>},
+             {default_max_pipeline_size, <%= @ibrowse_max_pipeline_size %>}
+            ]},
+  {pooler, [
+           {pools, [[{name, "sqerl"},
+                     {max_count, <%= @db_pool_size %>},
+                     {init_count, <%= @db_pool_size %>},
+                     {start_mfa, {sqerl_client, start_link, []}}]]},
+           {metrics_module, folsom_metrics}
+          ]}
+
+].

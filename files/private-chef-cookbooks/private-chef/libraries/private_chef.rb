@@ -32,6 +32,7 @@ module PrivateChef
   opscode_certificate Mash.new
   opscode_org_creator Mash.new
   opscode_account Mash.new
+  bookshelf Mash.new
   bootstrap Mash.new
   drbd Mash.new
   keepalived Mash.new
@@ -40,8 +41,6 @@ module PrivateChef
   nginx Mash.new
   log_retention Mash.new
   log_rotation Mash.new
-
-  aws Mash.new
 
   servers Mash.new
   backend_vips Mash.new
@@ -117,6 +116,8 @@ module PrivateChef
       PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['opscode_authz']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
+      PrivateChef['bookshelf']['access_key_id'] ||= generate_hex_if_bootstrap(20, ha_guard)
+      PrivateChef['bookshelf']['secret_access_key'] ||= generate_hex_if_bootstrap(40, ha_guard)
 
       if File.directory?("/etc/opscode")
         File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
@@ -150,6 +151,10 @@ module PrivateChef
               },
               'opscode_authz' => {
                 'superuser_id' => PrivateChef['opscode_authz']['superuser_id']
+              },
+              'bookshelf' => {
+                'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
+                'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
               }
             })
           )
@@ -176,6 +181,7 @@ module PrivateChef
         "opscode_certificate",
         "opscode_org_creator",
         "opscode_account",
+        "bookshelf",
         "bootstrap",
         "drbd",
         "keepalived",
@@ -183,10 +189,7 @@ module PrivateChef
         "nrpe",
         "nginx",
         "ldap",
-        "user",
-
-        ## Temporary until bookshelf is online
-        "aws"
+        "user"
       ].each do |key|
         rkey = key.gsub('_', '-')
         results['private_chef'][rkey] = PrivateChef[key]
@@ -225,6 +228,7 @@ module PrivateChef
       PrivateChef['opscode_chef']['sandbox_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/sandbox"
       PrivateChef['opscode_chef']['checksum_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/checksum"
       PrivateChef["couchdb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/couchdb"
+      PrivateChef['bookshelf']['data_dir'] = "/var/opt/opscode/drbd/data/bookshelf"
       PrivateChef["rabbitmq"]["data_dir"] ||= "/var/opt/opscode/drbd/data/rabbitmq"
       PrivateChef["opscode_solr"]["data_dir"] ||= "/var/opt/opscode/drbd/data/opscode-solr"
       PrivateChef["postgresql"]["data_dir"] ||= "/var/opt/opscode/drbd/data/postgresql"
@@ -254,6 +258,7 @@ module PrivateChef
         PrivateChef['servers'][node_name]['cluster_ipaddress'] || PrivateChef['servers'][node_name]['ipaddress']
       PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef['servers'][node_name]['peer_ipaddress']
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
+      PrivateChef["bookshelf"]["ha"] ||= true
       PrivateChef["couchdb"]["ha"] ||= true
       PrivateChef["rabbitmq"]["ha"] ||= true
       PrivateChef["opscode_solr"]["ha"] ||= true
@@ -274,6 +279,7 @@ module PrivateChef
 
     def gen_backend(bootstrap=false)
       PrivateChef[:role] = "backend" #mixlib-config wants a symbol :(
+      PrivateChef["bookshelf"]["listen"] ||= "0.0.0.0"
       PrivateChef["couchdb"]["bind_address"] ||= "0.0.0.0"
       PrivateChef["rabbitmq"]["node_ip_address"] ||= "0.0.0.0"
       PrivateChef["opscode_solr"]["ip_address"] ||= "0.0.0.0"
@@ -281,7 +287,7 @@ module PrivateChef
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
       PrivateChef["postgresql"]["listen_address"] ||= "0.0.0.0"
       PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"]
-
+      PrivateChef["opscode_chef"]["enable"] ||= false
       PrivateChef["redis"]["bind"] ||= "0.0.0.0"
       PrivateChef["opscode_account"]["worker_processes"] ||= 4
       if bootstrap
@@ -293,6 +299,8 @@ module PrivateChef
 
     def gen_frontend
       PrivateChef[:role] = "frontend"
+      PrivateChef["bookshelf"]["enable"] ||= false
+      PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["couchdb"]["enable"] ||= false
       PrivateChef["couchdb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["rabbitmq"]["enable"] ||= false
@@ -311,6 +319,8 @@ module PrivateChef
       PrivateChef["opscode_chef"]["upload_internal_vip"] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef["opscode_chef"]["upload_internal_port"] ||= 9680
       PrivateChef["lb"]["cache_cookbook_files"] ||= true
+      PrivateChef["lb"]["upstream"] = Mash.new
+      PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ PrivateChef["backend_vips"]["ipaddress"] ]
       PrivateChef["nagios"]["enable"] ||= false
       PrivateChef["bootstrap"]["enable"] = false
     end
@@ -345,20 +355,6 @@ module PrivateChef
       end
     end
 
-    def gen_s3
-      PrivateChef['aws']['s3_bucket'] ||= PrivateChef['s3_bucket']
-      PrivateChef['aws']['aws_key'] ||= PrivateChef['aws_key']
-      PrivateChef['aws']['aws_secret'] ||= PrivateChef['aws_secret']
-
-      unless PrivateChef['aws']['s3_bucket'] &&
-          PrivateChef['aws']['aws_key'] &&
-          PrivateChef['aws']['aws_secret']
-        Chef::Log.fatal("Must supply an 'aws_key', 'aws_secret', and 's3_bucket' for S3 file storage!")
-        exit 67
-      end
-
-    end
-
     def generate_config(node_name)
       generate_secrets(node_name)
       gen_nrpe_allowed_hosts
@@ -380,16 +376,6 @@ module PrivateChef
 
       unless PrivateChef["ldap"].nil? || PrivateChef["ldap"].empty?
         gen_ldap
-      end
-
-      case PrivateChef['file_storage']
-      when nil, 'local' # This can be the default
-        Chef::Log.info("Configuring for local file storage")
-      when 's3'
-        gen_s3
-      else
-        Chef::Log.fatal("I do not understand file_storage #{PrivateChef['file_storage']} - try 's3' or 'local' (the default).")
-        exit 66
       end
 
       generate_hash

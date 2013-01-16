@@ -31,12 +31,12 @@ function transition
   log_me "Transitioning to $1"
   case "$1" in
     master)
-      # 10 * SVWAIT 
+      # 10 * SVWAIT
       try=300
       while true; do
         log_me "Attempting DRBD primary takeover - attempts left ${try}"
         drbdadm primary pc0 && break
-        let "--try" || error_exit "Cannot become drbd primary!" 
+        let "--try" || error_exit "Cannot become drbd primary!"
         last_requested_state=`echo -n $(cat $requested_state_file)`
         if [ "$last_requested_state" != "master" ]; then
           log_me "Requested state transition to backup, aborting trying to aquire DRBD primary"
@@ -53,7 +53,7 @@ function transition
 <%- node['private_chef']['keepalived']['service_order'].each do |item| -%>
 <%- if node['private_chef'][item['key']]['ha'] -%>
       log_me "Starting service <%= item['service_name'] %>"
-      /opt/opscode/bin/private-chef-ctl <%= item['service_name'] %> start || error_exit "Cannot start <%= item['service_name'] %>"
+      /opt/opscode/bin/private-chef-ctl start <%= item['service_name'] %> || error_exit "Cannot start <%= item['service_name'] %>"
       <%- if node['private_chef']['keepalived']['service_posthooks'][item['service_name']] -%>
         log_me "Doing post-start hook for <%= item['service_name'] %>"
         <%= node['private_chef']['keepalived']['service_posthooks'][item['service_name']] %>
@@ -66,10 +66,10 @@ function transition
 <%- node['private_chef']['keepalived']['service_order'].reverse.each do |item| -%>
 <%- if node['private_chef'][item['key']]['ha'] -%>
       log_me "Stopping service <%= item['service_name'] %>"
-      /opt/opscode/bin/private-chef-ctl <%= item['service_name'] %> graceful-kill || error_exit "Cannot kill <%= item['service_name'] %>"
+      /opt/opscode/bin/private-chef-ctl graceful-kill <%= item['service_name'] %> || error_exit "Cannot kill <%= item['service_name'] %>"
 <%- end -%>
 <%- end -%>
-      # 10 * SVWAIT 
+      # 10 * SVWAIT
       try=300
       while true; do
         log_me "Attempting to become DRBD secondary - attempts left ${try}"
@@ -118,7 +118,7 @@ function transition_loop
      transitioned_to=$last_requested_state
      last_requested_state=`echo -n $(cat $requested_state_file)`
    done
-   unlock $lockfile 
+   unlock $lockfile
    echo $transitioned_to > $current_state_file
 }
 
