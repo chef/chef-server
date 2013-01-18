@@ -128,8 +128,9 @@ not_found_message(user, Name) ->
 
 error_message_envelope(Message) when is_binary(Message) orelse
                                      is_tuple(Message) ->
-    %% Tuple guard added to accommodate depsolver messages.  This is part of an ongoing
-    %% refactor, and may not ultimately be necessary.
+    %% Tuple guard is really intended for grabbing EJson-encoded json objects, but we don't
+    %% have guards for that.  It was added to accommodate depsolver messages.  This is part
+    %% of an ongoing refactor, and may not ultimately be necessary.
     {[{<<"error">>, [Message]}]}.
 
 %% @doc Converts the given Ejson-encoded data to a JSON string and

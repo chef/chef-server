@@ -129,19 +129,22 @@ validate_request('PUT', Req, State) ->
 validate_checksums_uploaded(ReqId, #chef_sandbox{id = _BoxId, checksums = Checksums, org_id = OrgId}) ->
     %% The flag is for "uploaded"
     NeedsUpload = [ CSum || {CSum, false} <- Checksums ],
-    {{ok, _}, {missing, NotFound}, {error, ErrorCount}} = ?SH_TIME(ReqId, chef_s3, check_checksums, (OrgId, NeedsUpload)),
-    %% FIXME: Do we want to distinguish not_found vs other S3 errors at this point?
-    case ErrorCount > 0 of
-        true ->
-            throw({checksum_check_error, ErrorCount});
-        false ->
-            ok
-    end,
-    case NotFound of
-        [] ->
+
+    {{ok, _}, {missing, NotFound}, {timeout, Timeouts}, {error, Errors}}  =
+        ?SH_TIME(ReqId, chef_s3, check_checksums, (OrgId, NeedsUpload)),
+    %% For the time being, we are lumping timeouts in with other errors
+    OverallErrorCount = length(Errors) + length(Timeouts),
+
+    case {NotFound, OverallErrorCount} of
+        {[], 0} ->
+            %% Everything was there!
             ok;
-        BadSums ->
-            throw({missing_checksums, lists:sort(BadSums)})
+        {_, OverallErrorCount} when OverallErrorCount =/= 0 ->
+            %% We had some errors :(
+            throw({checksum_check_error, OverallErrorCount});
+        {Missing, _} ->
+            %% Some checksums were missing :(
+            throw({missing_checksums, Missing})
     end.
 
 %% @doc Commits a sandbox.  This marks all checksums as having been uploaded, and removes
