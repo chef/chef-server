@@ -130,7 +130,7 @@ default['private_chef']['opscode-expander']['nodes'] = 2
 ####
 # Bookshelf
 ####
-default['private_chef']['bookshelf']['enable'] = true
+default['private_chef']['bookshelf']['enable'] = false
 default['private_chef']['bookshelf']['ha'] = false
 default['private_chef']['bookshelf']['dir'] = "/var/opt/opscode/bookshelf"
 default['private_chef']['bookshelf']['data_dir'] = "/var/opt/opscode/bookshelf/data"
