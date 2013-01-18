@@ -153,42 +153,13 @@ check_file(OrgId, AwsConfig, Bucket, Checksum) ->
 %% @doc Specifies how many requests to S3 / Bookshelf are in-flight at a given time.
 -spec fanout() -> Size :: pos_integer().
 fanout() ->
-    fetch_and_validate_config_option(s3_parallel_ops_fanout).
+    chef_config:config_option(chef_objects, s3_parallel_ops_fanout, pos_integer).
 
 %% @doc Specifies the maximum amount of time (in milliseconds) to wait for a SINGLE request
 %% to S3 / Bookshelf to complete.
 -spec timeout() -> MS :: pos_integer().
 timeout() ->
-    fetch_and_validate_config_option(s3_parallel_ops_timeout).
-
-%% @doc Fetch a configuration value via `application:get_env/2` and verify it is a
-%% non-negative integer.  Valid values are returned; invalid values trigger an error
-%% @end
-%%
-%% The spec is specifically tailored for use in this module (to make Dialyzer happy), but it
-%% is conceivable that the function could be used elsewhere as well.
--spec fetch_and_validate_config_option(OptionName :: s3_parallel_ops_fanout |
-                                                     s3_parallel_ops_timeout) ->
-                                              Value :: pos_integer().
-fetch_and_validate_config_option(OptionName) ->
-    Application = chef_objects,
-    OptionValue = application:get_env(Application, OptionName),
-    case OptionValue of
-        {ok, Value} ->
-            case {is_integer(Value), Value > 0} of
-                {true, true} ->
-                    Value;
-                _ ->
-                    error_logger:error_msg("Improper Configuration: ~p / ~p was ~p; should be a positive integer~n",
-                                           [Application, OptionName, Value]),
-                    erlang:error({configuration, Application, OptionName, Value})
-            end;
-        undefined ->
-            error_logger:error_msg("Improper Configuration: ~p / ~p was undefined!~n",
-                                   [Application, OptionName]),
-            erlang:error({configuration, Application, OptionName, undefined})
-    end.
-
+    chef_config:config_option(chef_objects, s3_parallel_ops_timeout, pos_integer).
 
 -type request_fun() :: check_file | delete_file.
 
