@@ -38,6 +38,7 @@ module PrivateChef
   keepalived Mash.new
   nagios Mash.new
   nrpe Mash.new
+  estatsd Mash.new
   nginx Mash.new
   log_retention Mash.new
   log_rotation Mash.new
@@ -187,6 +188,7 @@ module PrivateChef
         "keepalived",
         "nagios",
         "nrpe",
+        "estatsd",
         "nginx",
         "ldap",
         "user"
