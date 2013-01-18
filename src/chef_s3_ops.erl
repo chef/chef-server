@@ -29,6 +29,11 @@
          fetch_md/2
         ]).
 
+-type checksum_op_return_type() :: {{ok, [binary()]},
+                                    {missing, [binary()]},
+                                    {timeout, [binary()]},
+                                    {error, [binary()]}}.
+
 %% @doc Delete each checksummed file in S3.  
 %%
 %% Returns a tuple of tagged tuples indicating which checksums were successfully deleted and
@@ -39,19 +44,10 @@
 %% missing checksums, plus the number of errors and timeouts, will be equal to the length of
 %% `Checksums'.
 -spec delete(OrgId :: object_id(),
-             Checksums :: [binary()]) -> {{ok, [binary()]},
-                                          {missing, [binary()]},
-                                          {timeout, non_neg_integer()},
-                                          {error, non_neg_integer()}}.
+             Checksums :: [binary()]) -> checksum_op_return_type().
 delete(OrgId, Checksums) when is_list(Checksums),
                               is_binary(OrgId) ->
-
-    {Ok, Missing, NumTimeouts, NumErrors} = parallelize(OrgId, Checksums, delete_file),
-
-    {{ok, Ok},
-     {missing, Missing},
-     {timeout, NumTimeouts},
-     {error, NumErrors}}.
+    parallelize_checksum_op(OrgId, Checksums, delete_file).
 
 %% @doc Verify that each checksummed file is stored in S3 by checking its metadata.
 %%
@@ -62,18 +58,10 @@ delete(OrgId, Checksums) when is_list(Checksums),
 %% Note that the return value information is all disjoint; that is, the number of found and
 %% missing checksums, plus the number of errors, will be equal to the length of `Checksums'.
 -spec fetch_md(OrgId :: object_id(),
-              Checksums :: [binary()]) -> {{ok, [binary()]},
-                                           {missing, [binary()]},
-                                           {error, non_neg_integer()}}.
+              Checksums :: [binary()]) -> checksum_op_return_type().
 fetch_md(OrgId, Checksums) when is_list(Checksums),
                                 is_binary(OrgId) ->
-    
-    {Ok, Missing, NumTimeouts, NumErrors} = parallelize(OrgId, Checksums, check_file),
-    
-    {{ok, Ok},
-     {missing, Missing},
-     %% Currently, for file checking purposes, a timeout is considered an error
-     {error, NumErrors + NumTimeouts}}.
+    parallelize_checksum_op(OrgId, Checksums, check_file).
 
 %% HTTP Operation Functions
 %%
@@ -167,18 +155,10 @@ timeout() ->
 %%
 %% `Operation' is an atom naming a function in this module that will be used to actually
 %% make the HTTP requests. The literal atom is also used for informative error logging.
-%%
-%% Returns a tuple containing a list of checksums for which the operation was successful, a
-%% list of checksums that were not found, the number of timeouts that occurred (see
-%% `timeout/0'), and the number of other unspecified errors that occurred.
--spec parallelize(OrgId :: object_id(),
-                  Checksums :: [binary()],
-                  Operation :: request_fun()) ->
-                         {OkChecksums :: [binary()],
-                          MissingChecksums :: [binary()],
-                          NumTimeouts :: non_neg_integer(),
-                          NumErrors :: non_neg_integer()}.
-parallelize(OrgId, Checksums, Operation) -> %%, RequestFun) ->
+-spec parallelize_checksum_op(OrgId :: object_id(),
+                              Checksums :: [binary()],
+                              Operation :: request_fun()) -> checksum_op_return_type().
+parallelize_checksum_op(OrgId, Checksums, Operation) -> %%, RequestFun) ->
  
     Bucket = chef_s3:bucket(),
     AwsConfig = chef_s3:get_config(),
@@ -249,29 +229,34 @@ parallelize(OrgId, Checksums, Operation) -> %%, RequestFun) ->
     %% Now we actually get to perform the requests!
     Results = ec_plists:ftmap(MapFun, Checksums, ParallelConfig),
     
-    %% Now we need to consolidate our results.
+    %% Now we need to consolidate our results based on:
     %%
-    %% Items in `Results' are each wrapped in a `{value, Term}' tuple (this is an
+    %%   Did the operation succeed?
+    %%   Was the checksum even found?
+    %%   Did the operation timeout?
+    %%   Did some other error occur during the operation?.
+    %%
+    %% Note that items in `Results' are each wrapped in a `{value, Term}' tuple (this is an
     %% erlware_commons thing).  I think this wrapping is a hold-over from a previous
     %% implementation of erlware_commons that doesn't really make much sense anymore, but
     %% whatever...
-    {OkChecksums, MissingChecksums, NumTimeouts, NumErrors} =
+    {OkChecksums, MissingChecksums, Timeouts, Errors} =
         lists:foldl(fun({value, Result}, {Ok, Missing, Timeouts, Errors}) ->
                             case Result of
                                 {ok, Checksum} -> {[Checksum | Ok], Missing, Timeouts, Errors};
                                 {missing, Checksum} -> {Ok, [Checksum | Missing], Timeouts, Errors};
-                                {error, _Checksum} -> {Ok, Missing, Timeouts, Errors + 1};
-                                {timeout, _Checksum} -> {Ok, Missing, Timeouts + 1, Errors}
+                                {timeout, Checksum} -> {Ok, Missing, [Checksum |Timeouts], Errors};
+                                {error, Checksum} -> {Ok, Missing, Timeouts, [Checksum | Errors]}
                             end
                     end,
-                    {[], [], 0, 0},
+                    {[], [], [], []},
                     Results),
 
-    %% We'll sort the checksums for consistency here, and then return
-    {lists:sort(OkChecksums),
-     lists:sort(MissingChecksums),
-     NumTimeouts,
-     NumErrors}.
+    %% Sort the checksums and package everything up properly
+    {{ok, lists:sort(OkChecksums)},
+     {missing, lists:sort(MissingChecksums)},
+     {timeout, lists:sort(Timeouts)},
+     {error, lists:sort(Errors)}}.
 
 %% @doc This bit of gymnastics is required to both simplify the implementations of
 %% `delete/2' and `fetch_md/2', and to make these private functions available for use by
@@ -283,4 +268,3 @@ parallelize(OrgId, Checksums, Operation) -> %%, RequestFun) ->
                                 {'error' | 'missing' | 'ok', binary()} ).
 get_fun(check_file)  -> fun check_file/4;
 get_fun(delete_file) -> fun delete_file/4.
-    

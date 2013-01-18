@@ -48,7 +48,8 @@
                       Checksums :: [binary()]) ->
                              {{ok, [binary()]},
                               {missing, [binary()]},
-                              {error, non_neg_integer()}}.
+                              {timeout, [binary()]},
+                              {error, [binary()]}}.
 check_checksums(OrgId, Checksums) ->
     chef_s3_ops:fetch_md(OrgId, Checksums).
 
@@ -58,8 +59,8 @@ check_checksums(OrgId, Checksums) ->
                        Checksums :: [binary()]) ->
                               {{ok, [binary()]},
                                {missing, [binary()]},
-                               {timeout, non_neg_integer()},
-                               {error, non_neg_integer()}}.
+                               {timeout, [binary()]},
+                               {error, [binary()]}}.
 delete_checksums(OrgId, Checksums) ->
     chef_s3_ops:delete(OrgId, Checksums).
 
