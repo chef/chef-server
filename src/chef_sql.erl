@@ -863,30 +863,64 @@ update_cookbook_version(#chef_cookbook_version{ id                = Id,
     end.
 
 
-update_cookbook_version_checksums(#chef_cookbook_version{ id        = Id,
-                                                          org_id    = OrgId,
-                                                          name      = Name,
-                                                          major     = Major,
-                                                          minor     = Minor,
-                                                          patch     = Patch,
-                                                          checksums = Checksums}) ->
-    % Set up sets
-    ExistingChecksums = sets:from_list(fetch_cookbook_version_checksums(OrgId, Id)),
-    UpdatedChecksums  = sets:from_list(Checksums),
 
-    Deletions = sets:subtract(ExistingChecksums, UpdatedChecksums),
-    Additions = sets:subtract(UpdatedChecksums, ExistingChecksums),
+%% @doc Updates the checksums associated with the given cookbook version.
+%%
+%% Since some checksums that were previously associated with this
+%% cookbook version may no longer be associated (given this update),
+%% we need to do a little housekeeping.  Specifically, the database
+%% records linking those checksums to the CBV need to be deleted.
+%% Then, if no other CBVs are referencing those checksums, they need
+%% to be deleted from the database as a whole (this prevents "garbage"
+%% checksums from building up).  The files that correspond to those
+%% checksums which are completely removed from the database must then
+%% also be removed from S3 to prevent "garbage" build-up there, as
+%% well.  The S3 removal is not handled here, but the list of
+%% checksummed files to remove from S3 is passed out.
+-spec update_cookbook_version_checksums(#chef_cookbook_version{}) -> {'ok',
+                                                                      NewChecksums :: [binary()],
+                                                                      DeleteFromS3 :: [binary()]} |
+                                                                     {'error', term()}.
+update_cookbook_version_checksums(#chef_cookbook_version{id        = Id,
+                                                         org_id    = OrgId,
+                                                         name      = Name,
+                                                         major     = Major,
+                                                         minor     = Minor,
+                                                         patch     = Patch,
+                                                         checksums = Checksums}) ->
+    % Set up sets for difference operations
+    OldChecksums = sets:from_list(fetch_cookbook_version_checksums(OrgId, Id)),
+    NewChecksums  = sets:from_list(Checksums),
 
-    case delete_cookbook_checksums(sets:to_list(Deletions), OrgId, Id) of
+    %% Checksums that are in the database (the "old" cookbook version)
+    %% that aren't in the new version's list are targeted for deletion
+    UnlinkFromCBV = sets:to_list(sets:subtract(OldChecksums,
+                                               NewChecksums)),
+    
+    %% Conversely, checksums that are in the new list but not the old
+    %% need to be added to the system
+    AddToCBV = sets:to_list(sets:subtract(NewChecksums, 
+                                          OldChecksums)),
+
+    %% We must first dissociate the checksums-to-be-deleted from the
+    %% cookbook version.  Then, we need to remove from the database
+    %% entirely only those checksums that are no longer referenced by
+    %% other cookbooks.  This will be a subset of our `UnlinkFromCBV'
+    %% list.  This subset must then be removed from S3.
+    %%
+    %% The additions are new, so we need to link them to the CBV (the
+    %% checksums will already be present in the database, and the
+    %% corresponding files will have already been uploaded to S3).
+    case delete_cookbook_checksums(UnlinkFromCBV, OrgId, Id) of
         ok ->
-            case insert_cookbook_checksums(sets:to_list(Additions), OrgId, Name, Major, Minor, Patch) of
-                ok -> {ok, sets:to_list(Additions) , sets:to_list(Deletions) };
-                Result -> Result
+            DeleteFromS3 = delete_checksums(OrgId, UnlinkFromCBV),
+            case insert_cookbook_checksums(AddToCBV, OrgId, Name, Major, Minor, Patch) of
+                ok -> {ok, AddToCBV, DeleteFromS3};
+                Error -> Error
             end;
         {error, Reason} ->
             {error, Reason}
     end.
-
 
 -spec delete_cookbook_version(#chef_cookbook_version{}) -> #chef_db_cb_version_delete{} |
                                                            {error, term()}.
@@ -1230,6 +1264,9 @@ insert_cookbook_checksums([Checksum|Rest], OrgId, Name, Major, Minor, Patch) ->
             Error
     end.
 
+%% @doc Delete only selected checksums from a given cookbook version,
+%% as opposed to all checksums associated with a given cookbook
+%% version (for that, see `delete_cookbook_version_checksums/2').
 delete_cookbook_checksums([], _OrgId, _CookbookVersionId) ->
     ok;
 delete_cookbook_checksums([Checksum|Rest], OrgId, CookbookVersionId) ->
