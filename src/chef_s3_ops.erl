@@ -29,10 +29,12 @@
          fetch_md/2
         ]).
 
--type checksum_op_return_type() :: {{ok, [binary()]},
-                                    {missing, [binary()]},
-                                    {timeout, [binary()]},
-                                    {error, [binary()]}}.
+-type individual_op_return() ::  {'error' | 'missing' | 'ok', binary()}.
+
+-type bulk_op_return() :: {{ok, [binary()]},
+                           {missing, [binary()]},
+                           {timeout, [binary()]},
+                           {error, [binary()]}}.
 
 %% @doc Delete each checksummed file in S3.  
 %%
@@ -44,10 +46,13 @@
 %% missing checksums, plus the number of errors and timeouts, will be equal to the length of
 %% `Checksums'.
 -spec delete(OrgId :: object_id(),
-             Checksums :: [binary()]) -> checksum_op_return_type().
+             Checksums :: [binary()]) -> bulk_op_return().
 delete(OrgId, Checksums) when is_list(Checksums),
                               is_binary(OrgId) ->
-    parallelize_checksum_op(OrgId, Checksums, delete_file).
+    s3_checksum_op(OrgId,
+                   Checksums, 
+                   fun delete_file/4,
+                   "Deletion of checksum: ~p for org ~p from bucket ~p has taken longer than ~p ms~n").
 
 %% @doc Verify that each checksummed file is stored in S3 by checking its metadata.
 %%
@@ -58,10 +63,13 @@ delete(OrgId, Checksums) when is_list(Checksums),
 %% Note that the return value information is all disjoint; that is, the number of found and
 %% missing checksums, plus the number of errors, will be equal to the length of `Checksums'.
 -spec fetch_md(OrgId :: object_id(),
-              Checksums :: [binary()]) -> checksum_op_return_type().
+              Checksums :: [binary()]) -> bulk_op_return().
 fetch_md(OrgId, Checksums) when is_list(Checksums),
                                 is_binary(OrgId) ->
-    parallelize_checksum_op(OrgId, Checksums, check_file).
+    s3_checksum_op(OrgId,
+                   Checksums, 
+                   fun check_file/4,
+                   "Checking presence of checksum: ~p for org ~p from bucket ~p has taken longer than ~p ms~n").
 
 %% HTTP Operation Functions
 %%
@@ -74,9 +82,7 @@ fetch_md(OrgId, Checksums) when is_list(Checksums),
 -spec delete_file(OrgId :: object_id(),
                   AwsConfig :: mini_s3:config(),
                   Bucket :: string(),
-                  Checksum :: binary()) -> {'error', binary()} |
-                                           {'missing', binary()} |
-                                           {'ok', binary()}.
+                  Checksum :: binary()) -> individual_op_return().
 delete_file(OrgId, AwsConfig, Bucket, Checksum) ->
     Key = chef_s3:make_key(OrgId, Checksum),
 
@@ -109,9 +115,7 @@ delete_file(OrgId, AwsConfig, Bucket, Checksum) ->
 -spec check_file(OrgId :: object_id(),
                  AwsConfig :: mini_s3:config(),
                  Bucket :: string(),
-                 Checksum :: binary()) -> {'error', binary()} |
-                                          {'missing', binary()} |
-                                          {'ok', binary()}.
+                 Checksum :: binary()) -> individual_op_return().
 check_file(OrgId, AwsConfig, Bucket, Checksum) ->
     Key = chef_s3:make_key(OrgId, Checksum),
 
@@ -136,100 +140,35 @@ check_file(OrgId, AwsConfig, Bucket, Checksum) ->
              end,
     Result.
 
-%% Private Utility Functions
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% @doc Specifies how many requests to S3 / Bookshelf are in-flight at a given time.
--spec fanout() -> Size :: pos_integer().
-fanout() ->
-    chef_config:config_option(chef_objects, s3_parallel_ops_fanout, pos_integer).
-
-%% @doc Specifies the maximum amount of time (in milliseconds) to wait for a SINGLE request
-%% to S3 / Bookshelf to complete.
--spec timeout() -> MS :: pos_integer().
-timeout() ->
-    chef_config:config_option(chef_objects, s3_parallel_ops_timeout, pos_integer).
-
--type request_fun() :: check_file | delete_file.
-
-%% @doc Parallelizes HTTP requests to S3.
+%% @doc Utility function to handle the commonalities of deleting or verifying the presence
+%% of files in S3.
 %%
-%% `Operation' is an atom naming a function in this module that will be used to actually
-%% make the HTTP requests. The literal atom is also used for informative error logging.
--spec parallelize_checksum_op(OrgId :: object_id(),
-                              Checksums :: [binary()],
-                              Operation :: request_fun()) -> checksum_op_return_type().
-parallelize_checksum_op(OrgId, Checksums, Operation) ->
- 
+%% Basically, `Fun' is going to be either `delete_file/4' or `check_file/4'.
+%% `TimeoutMsgTemplate' should be a template string for an `error_logger' message that takes
+%% a Checksum, an OrgId, a Bucket name, and a Timeout value (in that order).
+-spec s3_checksum_op(OrgId :: object_id(),
+                     Checksums :: [binary()],
+                     Fun :: fun((object_id(), mini_s3:config(), string(), binary()) -> individual_op_return()),
+                     TimeoutMsgTemplate :: string()) ->
+                            bulk_op_return().
+s3_checksum_op(OrgId, Checksums, Fun, TimeoutMsgTemplate) ->
+        
     Bucket = chef_s3:bucket(),
     AwsConfig = chef_s3:get_config(),
-    Timeout = timeout(),
+    Timeout = chef_config:config_option(chef_objects, s3_parallel_ops_timeout, pos_integer),
+    Fanout = chef_config:config_option(chef_objects, s3_parallel_ops_fanout, pos_integer),
 
-    %% Create a function to map across the list of checksums.  It spawns an additional
-    %% process to perform the request in order to control timeout situations.
-    %% 
-    %% This is necessary because we'd like to keep track of individual operation information
-    %% like this, but erlware_commons now obscures timeout information.  Additionally,
-    %% erlware_commons appears to only allow clients to specify a timeout on an entire list
-    %% operation as a whole, instead of a timeout on each individual list item operation.
-    %%
-    %% By spawning a separate process and managing the timeout ourselves, we can once again
-    %% capture this information.  Additionally, we no longer need to specify a timeout via the
-    %% ec_plist "malt" configuration, since that now basically takes care of itself.
-    MapFun = fun(Checksum) ->
-                     Me = self(),
+    RequestFun = fun(Checksum) ->
+                         Fun(OrgId, AwsConfig, Bucket, Checksum)
+                 end,
     
-                     %% This token is used below in the receive block (just look!) to make
-                     %% absolutely certain that we are only processing the exact message we
-                     %% are expecting, as opposed to any other messages the receiving
-                     %% process may be getting from elsewhere in the system.
-                     %%
-                     %% It's admittedly a bit of paranoia, but should help insulate from
-                     %% potential future changes in erlware_commons (that involve message
-                     %% passing).
-                     %%
-                     %% Also, paranoia.
-                     Token = erlang:make_ref(),
-                     Worker = proc_lib:spawn_link(fun() ->
-                                                          %% Figure out what private function we should use
-                                                          OpFun = get_fun(Operation),
-                                                          Result = OpFun(OrgId,
-                                                                         AwsConfig,
-                                                                         Bucket,
-                                                                         Checksum),
-                                                          Me ! {Token, Result, self()}
-                                                  end),
-                     receive
-                         {Token, Response, Worker} ->
-                             Response
-                     after Timeout ->
-                             error_logger:error_msg("Operation '~p' on checksum: ~p for org ~p from bucket ~p has taken longer than ~p ms; killing spawned worker process ~p~n",
-                                                    [Operation, Checksum, OrgId, Bucket, Timeout, Worker]),
-                             erlang:unlink(Worker),
-                             erlang:exit(Worker, kill),
+    TimeoutHandler = fun(Checksum) ->
+                             error_logger:error_msg(TimeoutMsgTemplate,
+                                                    [Checksum, OrgId, Bucket, Timeout]),
                              {timeout, Checksum}
-                     end
-             end,
-    
-    %% Since making an HTTP request is a high-latency, IO-bound operation, we use a
-    %% configuration where each list chunk has a single item, but we have multiple processes
-    %% processing chunks.  This prevents pathological situations (like, for example, a large
-    %% chunk of requests that all timeout taking LENGTH * TIMEOUT ms to complete), while
-    %% maximizing the overall throughput.
-    %%
-    %% This configuration will also allow there to be `fanout()' HTTP requests in flight at
-    %% any given time, which makes for more even throughput.
-    %%
-    %% While we can also specify a `{timeout, Millis}' tuple, this only applies to how long
-    %% it takes to process the entire list; there does not currently appear to be a built-in
-    %% way to manage individual process timeouts. This is why we manage our own timeouts, as
-    %% implemented above in `MapFun'.
-    %%
-    %% See the documentation for erlware_commons' ec_plists module for more details.
-    ParallelConfig = [1, {processes, fanout()}],
+                     end,
 
-    %% Now we actually get to perform the requests!
-    Results = ec_plists:ftmap(MapFun, Checksums, ParallelConfig),
+    Results = chef_parallel:parallelize_all_with_timeout(Checksums, RequestFun, Fanout, Timeout, TimeoutHandler),
     
     %% Now we need to consolidate our results based on:
     %%
@@ -238,12 +177,8 @@ parallelize_checksum_op(OrgId, Checksums, Operation) ->
     %%   Did the operation timeout?
     %%   Did some other error occur during the operation?.
     %%
-    %% Note that items in `Results' are each wrapped in a `{value, Term}' tuple (this is an
-    %% erlware_commons thing).  I think this wrapping is a hold-over from a previous
-    %% implementation of erlware_commons that doesn't really make much sense anymore, but
-    %% whatever...
     {OkChecksums, MissingChecksums, Timeouts, Errors} =
-        lists:foldl(fun({value, Result}, {Ok, Missing, Timeouts, Errors}) ->
+        lists:foldl(fun(Result, {Ok, Missing, Timeouts, Errors}) ->
                             case Result of
                                 {ok, Checksum} -> {[Checksum | Ok], Missing, Timeouts, Errors};
                                 {missing, Checksum} -> {Ok, [Checksum | Missing], Timeouts, Errors};
@@ -259,14 +194,3 @@ parallelize_checksum_op(OrgId, Checksums, Operation) ->
      {missing, lists:sort(MissingChecksums)},
      {timeout, lists:sort(Timeouts)},
      {error, lists:sort(Errors)}}.
-
-%% @doc This bit of gymnastics is required to both simplify the implementations of
-%% `delete/2' and `fetch_md/2', and to make these private functions available for use by
-%% erlware_commons.
-%%
-%% It just maps the name of the function to the actual function itself.
--spec get_fun(request_fun()) -> 
-                     fun((object_id(), mini_s3:config(), string(), binary()) -> 
-                                {'error' | 'missing' | 'ok', binary()} ).
-get_fun(check_file)  -> fun check_file/4;
-get_fun(delete_file) -> fun delete_file/4.
