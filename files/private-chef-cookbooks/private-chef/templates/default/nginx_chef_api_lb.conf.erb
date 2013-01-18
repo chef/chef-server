@@ -46,7 +46,7 @@
     }
 
     # erchef status endpoint
-    location ~ "/_status/?$" {
+    location ~ "^/_status/?$" {
       types { }
       default_type application/json;
       proxy_pass http://opscode_erchef;
