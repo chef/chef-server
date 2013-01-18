@@ -24,9 +24,13 @@ shape the migrations to best meet business needs.
 
 * Migration 1: Nodes to MySQL (DONE)
 * Migration 2: MySQL to PostgreSQL
+** DONE Order hardware for a dedicated pgsql HA pair for oc_erchef data
+** Assumptions
+1. The community site runs on MySQL. It will not migrate to pgsql at
+   this time. Community site will be part of a major reworking of the
+   web properties and migration to pgsql will be part of the larger
+   refactor.
 ** Questions
-1. Do we need new hardware by way of an additional high-power HA pair?
-2. Do we want to consider moving the community site so that
 3. Can we do a full dump and load within an acceptable full outage
    window? Do we have other options? Batches of orgs? Users separate
    from nodes? Would a pre-load and UPDATE if modified time not
@@ -39,8 +43,11 @@ shape the migrations to best meet business needs.
 6. If reporting data needs to migrate, is there read-only data that
    could be moved ahead of time?
 7. Should we upgrade to a sane user table schema before, after, or as
-   a part of this migration?
+   a part of this migration? Where "sane" means looking much more like
+   what is in OSC and where we upgrade hashed passwords to use bcrypt.
 ** Deploy postgres to preprod
+*** cookbook development for pg
+*** monitoring
 ** Deploy HA postgres to prod
 *** test HA failover
 ** Establish postgres data backup
@@ -51,6 +58,7 @@ are already using it for mysql.
 *** test recovery
 ** Write dump and load mysql to pg tool
 *** Time dump/load time, is it reasonable for a full downtime outage?
+** Test data dump/load in preprod
 ** Integrate pg client in oc-account
 ** Integrate pg client into oc-chef
 ** Integrate pg client into oc_erchef
