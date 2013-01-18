@@ -385,9 +385,7 @@ default['private_chef']['opscode-authz']['custom_acls_roles'] = true
 ####
 # Bookshelf
 ####
-# We are not using this for now, and instead, enable bookshelf based upon whether
-# sql_migration_phase_1 is enabled
-#default['private_chef']['bookshelf']['enable'] = false
+default['private_chef']['bookshelf']['enable'] = true
 default['private_chef']['bookshelf']['ha'] = false
 default['private_chef']['bookshelf']['dir'] = "/var/opt/opscode/bookshelf"
 default['private_chef']['bookshelf']['data_dir'] = "/var/opt/opscode/bookshelf/data"
