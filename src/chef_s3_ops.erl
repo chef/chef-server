@@ -122,8 +122,9 @@ check_file(OrgId, AwsConfig, Bucket, Checksum) ->
                      {ok, Checksum}
              catch
                  error:{aws_error, {http_error,404,_}} ->
-                     %% The file wasn't found.  Not logging it because this is not
-                     %% necessarily indicative of badness
+                     %% The file wasn't found. Log it and move on.
+                     error_logger:error_msg("Checking presence of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) failed because the file was not found~n",
+                                            [Checksum, OrgId, Bucket, Key]),
                      {missing, Checksum};
                  ExceptionClass:Reason->
                      %% Something unanticipated happened.  We should log the specific reason
@@ -158,7 +159,7 @@ timeout() ->
 -spec parallelize_checksum_op(OrgId :: object_id(),
                               Checksums :: [binary()],
                               Operation :: request_fun()) -> checksum_op_return_type().
-parallelize_checksum_op(OrgId, Checksums, Operation) -> %%, RequestFun) ->
+parallelize_checksum_op(OrgId, Checksums, Operation) ->
  
     Bucket = chef_s3:bucket(),
     AwsConfig = chef_s3:get_config(),
@@ -204,6 +205,7 @@ parallelize_checksum_op(OrgId, Checksums, Operation) -> %%, RequestFun) ->
                      after Timeout ->
                              error_logger:error_msg("Operation '~p' on checksum: ~p for org ~p from bucket ~p has taken longer than ~p ms; killing spawned worker process ~p~n",
                                                     [Operation, Checksum, OrgId, Bucket, Timeout, Worker]),
+                             erlang:unlink(Worker),
                              erlang:exit(Worker, kill),
                              {timeout, Checksum}
                      end
