@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:opscode/chef-pedant.git
-  revision: d913644282579e43a3d9555957ebfdec281dd819
+  revision: 815f0cb6e8fd2d52f96896dfa83e3d8168fda65b
   specs:
     chef-pedant (0.0.11)
       activesupport (~> 3.2.8)
@@ -56,11 +56,11 @@ GEM
     mime-types (1.19)
     mixlib-authentication (1.3.0)
       mixlib-log
-    mixlib-cli (1.2.2)
+    mixlib-cli (1.3.0)
     mixlib-config (1.1.2)
     mixlib-log (1.4.1)
     mixlib-shellout (1.1.0)
-    moneta (0.7.5)
+    moneta (0.7.6)
     multi_json (1.5.0)
     net-http-spy (0.2.1)
     net-ssh (2.2.2)
@@ -69,11 +69,12 @@ GEM
     net-ssh-multi (1.1)
       net-ssh (>= 2.1.4)
       net-ssh-gateway (>= 0.99.0)
-    ohai (6.14.0)
+    ohai (6.16.0)
       ipaddress
       mixlib-cli
       mixlib-config
       mixlib-log
+      mixlib-shellout
       systemu
       yajl-ruby
     polyglot (0.3.3)
