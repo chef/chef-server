@@ -1,0 +1,105 @@
+#+TITLE: RFC: Early Data Bag Migration for OHC
+* Impact
+Current OHC averages 100-200 req/sec. A splunk query for a complete
+one hour period showed 50 req/sec for data bag items (179,284 requests
+in the measured hour). There were 77,977 Search requests for data bags
+in the same hour corresponding to a request rate of 22
+req/sec. Migrating data bags and data bag items to Erchef/SQL would
+reduce Ruby Chef load by approximately 70 req/sec. The impact on
+couchdb request will be greater since search requests require multiple
+bulk_get calls due to batching.
+
+** Splunk Queries
+#+BEGIN_EXAMPLE
+index=opscode-platform source="/srv/nginx/log/access.log"
+sourcetype="nginx-access"
+eventtype="api_organizations_ORGNAME_data_DATABAG_ITEM"
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE
+index=opscode-platform source="/srv/nginx/log/access.log"
+sourcetype="nginx-access"
+eventtype="api_organizations_ORGNAME_search_INDEX"
+NOT http_path=/organizations/*/search/node*
+NOT http_path=/organizations/*/search/role*
+NOT http_path=/organizations/*/search/client*
+#+END_EXAMPLE
+* Migration Plan
+
+** Overview
+
+Teach oc_erchef to be a simple reverse proxy for opscode-chef and
+opscode-account requests. The idea is to have nginx send all API
+requests to oc_erchef. For the endpoints that still need to be
+handled by oc-chef or oc-account, oc_erchef will use ibrowse to
+the replay HTTP call, receive the result, and return it. This will
+allow us to control dynamic routing from a single service.
+
+Introduce darklaunch_db. Unlike the existing darklaunch setup,
+darklaunch_db will store all feature data in the database. A request
+to darklaunch_db will be made at the start of processing for every
+request in oc_erchef. The darklaunch data for that org (a merge of
+global defaults, org overrides, and global overrides) will be put into
+an ETS table. Components of the oc_erchef stack will access the
+darklaunch data via request id. The opscode-account service will read
+a new HTTP header providing darklaunch data sent from oc_erchef to
+control look up for serving ACLs.
+
+Routing all API requests through oc_erchef and using the db will allow
+a fast and synchronized means of disabling all requests for a set of
+orgs, controlling routing to oc_erchef proper vs opscode-chef or
+opscode-account, and controlling oc_erchef internal switching as used
+by search to determine where data lives on a per-org basis. Fetching
+the global default, org-specific, and global override data will
+involve three db queries at the start of each request. Since
+darklaunch data is only queried once per request, the darklaunch
+state will always be consistent throughout processing of a given
+request.
+
+To perform the actual data migration we'll need either moser,
+chef-mover, or a combination of the two. Migration tooling will be
+able to take a list of orgs and perform batched migration according
+to the specified order. This will allow us to migrate first some test
+orgs and then the busiest orgs for data bag item use.
+
+** Timeline
+*** new org creation outage
+Migration will begin with a brief outage for new org creation during
+which all assigned orgs will be marked as ={ORG_NAME, data_bags_couchdb, true}=
+and the default setting (which will be used for any newly created
+orgs) will be ={default, data_bags_couchdb, false}=.
+*** migrate test orgs
+Verify desired behavior and routing for migrated test orgs
+*** re-enable new org creation
+*** launch migration of busy orgs
+1. disable all requests to migrating orgs (ignore in-flight)
+2. read and insert data bags for migrating orgs
+3. read and insert data bag items for migrating orgs
+4. update darklaunch_db for migrating orgs, re-enable
+*** continue migration of batches of orgs as above
+** oc_erchef becomes a simple reverse proxy for oc-chef and oc-account
+*** oc_erchef changes
+Add routes to oc_chef_wm to match on opscode-account and
+opscode-chef. Add a reverse_proxy resource module that does service
+available for darklaunch_db, calls upstream service including all
+received headers and passes along the result.
+*** external lb routes all to oc_erchef
+*** int lb goes to oc_erchef, but allows oc_erchef -> oc-chef/oc-account
+** introduce darklaunch_db, a db-backed darklaunch
+*** oc-chef, oc-account darklaunch data via headers
+*** Add darklaunch_db implementation to oc_chef_wm
+- new supervisor holds ref to ETS table
+- db queries to get/set values
+- module logic to merge default, org-specific, global override
+- eunit tests
+*** define schema and add migration to chef-sql-schema
+Three tables: darklaunch_default, darklaunch_orgs, darklaunch_override
+Basic structure is:
+** moser enhancements
+*** able to read and align authz ids for data bags
+*** able to write data bag items (or use logic in chef-mover)
+*** Will reading entire db be faster than just data bag and data bag item views via HTTP?
+** chef-mover enhancements
+*** fix bit-rot for latest oc_erchef code base
+*** add user-specific org list ability
+*** integrate darklaunch_db, possibly as Erlang RPC
