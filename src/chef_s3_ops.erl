@@ -29,6 +29,13 @@
          fetch_md/2
         ]).
 
+%% These don't need to be exported, strictly speaking, but could be helpful in live system
+%% debugging scenarios.
+-export([
+         check_file/4,
+         delete_file/4
+        ]).
+
 -type individual_op_return() ::  {'error' | 'missing' | 'ok', binary()}.
 
 -type bulk_op_return() :: {{ok, [binary()]},
