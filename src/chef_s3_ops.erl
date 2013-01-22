@@ -36,7 +36,7 @@
                            {timeout, [binary()]},
                            {error, [binary()]}}.
 
-%% @doc Delete each checksummed file in S3.  
+%% @doc Delete each checksummed file in S3.
 %%
 %% Returns a tuple of tagged tuples indicating which checksums were successfully deleted and
 %% which were not found, along with both the number of timeouts that occured, as well as the
@@ -50,7 +50,7 @@
 delete(OrgId, Checksums) when is_list(Checksums),
                               is_binary(OrgId) ->
     s3_checksum_op(OrgId,
-                   Checksums, 
+                   Checksums,
                    fun delete_file/4,
                    "Deletion of checksum: ~p for org ~p from bucket ~p has taken longer than ~p ms~n").
 
@@ -67,7 +67,7 @@ delete(OrgId, Checksums) when is_list(Checksums),
 fetch_md(OrgId, Checksums) when is_list(Checksums),
                                 is_binary(OrgId) ->
     s3_checksum_op(OrgId,
-                   Checksums, 
+                   Checksums,
                    fun check_file/4,
                    "Checking presence of checksum: ~p for org ~p from bucket ~p has taken longer than ~p ms~n").
 
@@ -152,7 +152,7 @@ check_file(OrgId, AwsConfig, Bucket, Checksum) ->
                      TimeoutMsgTemplate :: string()) ->
                             bulk_op_return().
 s3_checksum_op(OrgId, Checksums, Fun, TimeoutMsgTemplate) ->
-        
+
     Bucket = chef_s3:bucket(),
     AwsConfig = chef_s3:get_config(),
     Timeout = chef_config:config_option(chef_objects, s3_parallel_ops_timeout, pos_integer),
@@ -161,7 +161,7 @@ s3_checksum_op(OrgId, Checksums, Fun, TimeoutMsgTemplate) ->
     RequestFun = fun(Checksum) ->
                          Fun(OrgId, AwsConfig, Bucket, Checksum)
                  end,
-    
+
     TimeoutHandler = fun(Checksum) ->
                              error_logger:error_msg(TimeoutMsgTemplate,
                                                     [Checksum, OrgId, Bucket, Timeout]),
@@ -169,7 +169,7 @@ s3_checksum_op(OrgId, Checksums, Fun, TimeoutMsgTemplate) ->
                      end,
 
     Results = chef_parallel:parallelize_all_with_timeout(Checksums, RequestFun, Fanout, Timeout, TimeoutHandler),
-    
+
     %% Now we need to consolidate our results based on:
     %%
     %%   Did the operation succeed?

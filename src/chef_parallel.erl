@@ -20,8 +20,8 @@
 -module(chef_parallel).
 
 -export([
-	 parallelize_all_with_timeout/5
-	]).
+         parallelize_all_with_timeout/5
+        ]).
 
 %% @doc Parallelizes the map of `Fun' across `Items', with each
 %% invocation subject to a `Timeout' (specified in ms).
@@ -40,15 +40,15 @@
 %% processed; there is no short-circuiting if one invocation of `Fun'
 %% fails or times out.
 -spec parallelize_all_with_timeout(Items :: list(),
-				   Fun :: fun((any()) -> any()),
-				   Fanout :: pos_integer(),
-				   Timeout :: pos_integer(),
-				   TimeoutHandler :: fun((any()) -> any())) -> list().
+                                   Fun :: fun((any()) -> any()),
+                                   Fanout :: pos_integer(),
+                                   Timeout :: pos_integer(),
+                                   TimeoutHandler :: fun((any()) -> any())) -> list().
 parallelize_all_with_timeout(Items, Fun, Fanout, Timeout, TimeoutHandler) ->
     %% Create a wrapper function to map across `Items'.  It spawns an
     %% additional process to invoke `Fun' in order to control timeout
     %% situations.
-    %% 
+    %%
     %% This is necessary because often we'd like to keep track of
     %% individual operation information like this, but erlware_commons
     %% now obscures timeout information.  Additionally,
@@ -63,12 +63,12 @@ parallelize_all_with_timeout(Items, Fun, Fanout, Timeout, TimeoutHandler) ->
     %% care of itself.
     MapFun = fun(Item) ->
                      Me = self(),
-		     %% This token is used below in the receive block
-		     %% (just look!) to make absolutely certain that
-		     %% we are only processing the exact message we
-		     %% are expecting, as opposed to any other
-		     %% messages the receiving process may be getting
-		     %% from elsewhere in the system.
+                     %% This token is used below in the receive block
+                     %% (just look!) to make absolutely certain that
+                     %% we are only processing the exact message we
+                     %% are expecting, as opposed to any other
+                     %% messages the receiving process may be getting
+                     %% from elsewhere in the system.
                      %%
                      %% It's admittedly a bit of paranoia, but should
                      %% help insulate from potential future changes in
@@ -78,7 +78,7 @@ parallelize_all_with_timeout(Items, Fun, Fanout, Timeout, TimeoutHandler) ->
                      %% Also, paranoia.
                      Token = erlang:make_ref(),
                      Worker = proc_lib:spawn_link(fun() ->
-							  Result = Fun(Item),
+                                                          Result = Fun(Item),
                                                           Me ! {Token, Result, self()}
                                                   end),
                      receive
@@ -87,7 +87,7 @@ parallelize_all_with_timeout(Items, Fun, Fanout, Timeout, TimeoutHandler) ->
                      after Timeout ->
                              erlang:unlink(Worker),
                              erlang:exit(Worker, kill),
-			     TimeoutHandler(Item)
+                             TimeoutHandler(Item)
                      end
              end,
 
@@ -100,8 +100,7 @@ parallelize_all_with_timeout(Items, Fun, Fanout, Timeout, TimeoutHandler) ->
 
     %% Now we actually get to do the work!
     Results = ec_plists:ftmap(MapFun, Items, ParallelConfig),
-    
+
     %% Get rid of the `{value, Term}' wrapping that ec_plists:ftmap/3
     %% introduces.
     [Value || {value, Value} <- Results].
-   
