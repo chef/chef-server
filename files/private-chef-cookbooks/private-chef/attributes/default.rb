@@ -188,6 +188,10 @@ default['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] = 20
 default['private_chef']['opscode-erchef']['authz_timeout'] = 1000
 default['private_chef']['opscode-erchef']['authz_fanout'] = 20
 default['private_chef']['opscode-erchef']['root_metric_key'] = "chefAPI"
+# redis client pool size of 0 disables search caching
+default['private_chef']['opscode-erchef']['eredis_client_pool_size'] = 0
+default['private_chef']['opscode-erchef']['redis_db'] = 6
+default['private_chef']['opscode-erchef']['search_cache_entry_ttl'] = 60
 
 ####
 # Chef Server WebUI
