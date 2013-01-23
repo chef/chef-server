@@ -35,6 +35,9 @@ http {
   }
   <%- end -%>
 
+  # Include upstream definitions for addons
+  include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_upstreams.conf;
+
   # external lb config for Chef API
   <%- if node['private_chef']['lb']['enable'] -%>
     proxy_cache_path  <%= File.join(@dir, "cache") %> levels=1:2 keys_zone=webui-cache:50m max_size=<%= @cache_max_size %> inactive=600m;
