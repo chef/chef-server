@@ -12,6 +12,7 @@
 %% @doc Fetch an entry from the search cache.
 -spec get(_, binary()) -> not_found | {integer(), binary()}.
 get(ReqId, Key) ->
+    folsom_metrics:notify({search_cache_get, 1}),
     get(ReqId, redis_client(), Key).
 
 get(_ReqId, no_redis, _Key) ->
@@ -19,8 +20,10 @@ get(_ReqId, no_redis, _Key) ->
 get(_ReqId, Redis, Key) ->
     case eredis:q(Redis, ["GET", Key]) of
         {ok, undefined} ->
+            folsom_metrics:notify({search_cache_miss, 1}),
             not_found;
         {ok, Value} ->
+            folsom_metrics:notify({search_cache_hit, 1}),
             {Count, Gzip} = binary_to_term(Value),
             {Count, zlib:gunzip(Gzip)}
     end.
@@ -28,6 +31,7 @@ get(_ReqId, Redis, Key) ->
 %% @doc Add entry to the search cache
 -spec put(_, binary(), {integer(), binary()}) -> ok | error.
 put(ReqId, Key, {Count, Raw}) ->
+    folsom_metrics:notify({search_cache_put, 1}),
     put(ReqId, redis_client(), Key, {Count, Raw}).
 
 put(_ReqId, no_redis, _Key, _Value) ->

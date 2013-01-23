@@ -21,6 +21,7 @@ init([]) ->
     {ok, ClientCount} = application:get_env(oc_chef_wm, eredis_client_pool_size),
     error_logger:info_msg("starting oc_chef_wm_eredis_sup with ~B senders~n", [ClientCount]),
     ok = pg2:create(redis_search_cache),
+    init_metrics(),
     {ok, Host} = application:get_env(oc_chef_wm, redis_host),
     {ok, Port} = application:get_env(oc_chef_wm, redis_port),
     {ok, RedisDb} = application:get_env(oc_chef_wm, redis_db),
@@ -42,3 +43,10 @@ eredis_start_wrapper(Host, Port, RedisDb) ->
         Error ->
             Error
     end.
+
+init_metrics() ->
+    folsom_metrics:new_meter(search_cache_hit),
+    folsom_metrics:new_meter(search_cache_miss),
+    folsom_metrics:new_meter(search_cache_get),
+    folsom_metrics:new_meter(search_cache_put),
+    ok.
