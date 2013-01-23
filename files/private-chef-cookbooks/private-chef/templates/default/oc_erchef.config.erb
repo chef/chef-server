@@ -30,7 +30,9 @@
               {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
               {superusers, [<<"pivotal">>]},
               %% metrics config
-              {root_metric_key, "<%= @root_metric_key %>"}
+              {root_metric_key, "<%= @root_metric_key %>"},
+              {authz_timeout, <%= node['private_chef']['opscode-erchef']['authz_timeout'] %>},
+              {authz_fanout, <%= node['private_chef']['opscode-erchef']['authz_fanout'] %>}
              ]},
   {chef_wm, [
              {server_version, "<%= node['private_chef']['version'] %>"},
@@ -67,7 +69,9 @@
                   {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
                   {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= node['private_chef']['lb']['api_fqdn'] %>"},
                   {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
-                  {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>}
+                  {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>},
+                  {s3_parallel_ops_timeout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] %>},
+                  {s3_parallel_ops_fanout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] %>}
                  ]},
   {stats_hero, [
                %% Set sender pool size to DB max_connections to avoid contention
