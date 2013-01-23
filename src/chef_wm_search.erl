@@ -119,9 +119,21 @@ to_json(Req, #base_state{chef_db_context = DbContext,
         {ok, Start, SolrNumFound, Ids} ->
             IndexType = Query#chef_solr_query.index,
             Paths = SearchState#search_state.partial_paths,
-            BulkGetFun = make_bulk_get_fun(DbContext, OrgName, IndexType, Paths, Req),
-            {DbNumFound, Ans} = make_search_results(BulkGetFun, Ids, BatchSize,
-                                                    Start, SolrNumFound),
+            CacheKey = ?SEARCH_CACHE:make_key(OrgName, BatchSize, Start,
+                                              Ids, wrq:raw_path(Req), Paths),
+            {DbNumFound, Ans} = case ?SEARCH_CACHE:get(ReqId, CacheKey) of
+                                    not_found ->
+                                        BulkGetFun = make_bulk_get_fun(DbContext, OrgName,
+                                                                       IndexType, Paths,
+                                                                       Req),
+                                        DbResult = make_search_results(BulkGetFun, Ids,
+                                                                       BatchSize, Start,
+                                                                       SolrNumFound),
+                                        ?SEARCH_CACHE:put(ReqId, CacheKey, DbResult),
+                                        DbResult;
+                                    CacheValue ->
+                                        CacheValue
+                                end,
             State1 = State#base_state{log_msg = {search, SolrNumFound, length(Ids), DbNumFound}},
             case IndexType of
                 {data_bag, BagName} when DbNumFound =:= 0 ->
