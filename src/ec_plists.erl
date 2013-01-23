@@ -300,7 +300,7 @@ filter(Fun, List, Malt) ->
 
 %% @doc Like below, but assumes 1 as the Malt. This function is almost useless,
 %% and is intended only to aid converting code from using lists to plists.
--spec fold/3 :: (fun(), InitAcc::term(), list()) -> term().
+-spec fold/3 :: (fun((any(),any()) -> any()), InitAcc::term(), list()) -> term().
 fold(Fun, InitAcc, List) ->
     fold(Fun, Fun, InitAcc, List, 1).
 
@@ -575,7 +575,7 @@ add_key(Dict, Key, Value) ->
 
 %% @doc Like below, but assumes a Malt of 1,
 %% meaning each element of the list is processed by a seperate process.
--spec runmany/3 :: (fun(), fuse(), list()) -> term().
+-spec runmany/3 :: (fun(([any()]) -> any()), fuse(), list()) -> term().
 runmany(Fun, Fuse, List) ->
     runmany(Fun, Fuse, List, 1).
 
