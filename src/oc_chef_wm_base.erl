@@ -345,33 +345,53 @@ set_authz_id(Id, #data_state{}=D) ->
 %% As such, the Open Source implementation of the base resource will need corresponding
 %% "no-op" versions.
 
--define(AUTHZ_TIMEOUT, 5 * 1000).
-
-%% @doc Check the authz permissions on a list of cookbooks in parallel.
-%% If an checks fails we return early with the failed cookbook
+%% @doc Check the READ authz permissions on a list of cookbooks in parallel.  Checks ALL
+%% cookbooks to return a complete error message, since if the user had read permission on
+%% all cookbooks, we'd be making all the HTTP requests anyway.
 -spec check_cookbook_authz(Cookbooks :: [#chef_cookbook_version{}],
                            Req :: wm_req(),
                            State :: #base_state{}) ->
                                   ok | {error, Msg :: binary()}.
 check_cookbook_authz(Cookbooks, Req, State) ->
+    %% How long should we allow for each individual Authz request?
+    Timeout = chef_config:config_option(oc_chef_wm, authz_timeout, pos_integer),
+
+    %% How many Authz requests should be in flight at any given time?
+    Fanout = chef_config:config_option(oc_chef_wm, authz_fanout, pos_integer),
+
+    %% Return 'ok' if the user has read permission on the cookbook, the `Name' of the
+    %% cookbook if not
+    CheckFun = fun(#chef_cookbook_version{name = Name, authz_id = AuthzId}) ->
+                       case has_permission(object, AuthzId, read, Req, State) of
+                           true  -> ok;
+                           false -> Name
+                       end
+               end,
+
+    TimeoutHandler = fun(#chef_cookbook_version{name = Name}) ->
+                             {timeout, Name}
+                     end,
+
+    %% If the user is authorized for all cookbooks, this is what the result would look like.
     AllOk = lists:duplicate(length(Cookbooks), ok),
-    try
-        AllOk = ec_plists:map(fun(#chef_cookbook_version{name = Name,
-                                                         authz_id = AuthzId}) ->
-                                      case has_permission(object, AuthzId, read, Req, State) of
-                                          true ->
-                                              ok;
-                                          false ->
-                                              Msg = iolist_to_binary(["missing read permission on ", Name, " cookbook"]),
-                                              throw({authz_error, Msg})
-                                      end
-                              end,
-                              Cookbooks,
-                              ?AUTHZ_TIMEOUT),
-        ok
-    catch
-        throw:{authz_error, Msg} ->
-            {error, Msg}
+
+    case chef_parallel:parallelize_all_with_timeout(Cookbooks, CheckFun, Fanout, Timeout, TimeoutHandler) of
+        AllOk ->
+            ok;
+        SomeFailed ->
+            %% Filter to get just the names, and sort
+            Names = lists:sort([N || N <- SomeFailed, is_binary(N)]),
+            Timeouts = [N || {timeout, N} <- SomeFailed],
+
+            case Timeouts of
+                [] ->
+                    %% Just failed due to missing permissions; this is the "normal" error
+                    {error, {[{<<"message">>, <<"Read permission is not granted for one or more cookbooks">>},
+                              {<<"unauthorized_cookbooks">>, Names}]}};
+                _ ->
+                    %% We had some timeouts!
+                    {timeout, <<"Timeout when checking cookbook permissions">>}
+            end
     end.
 
 %% This version should work for Open Source:
