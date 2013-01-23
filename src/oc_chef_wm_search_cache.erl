@@ -69,19 +69,16 @@ cache_entry_ttl() ->
 %% including query parameters. `Path' is the list of partial search
 %% paths or empty list.
 -spec make_key(binary(), integer(), integer(),
-               [binary()], string(), [binary()]) -> binary().
+               [binary()], string(), [{binary(), [binary()]}]) -> binary().
 make_key(OrgName, BatchSize, Start, Ids, ReqPath, Paths) ->
-    iolist_to_binary([OrgName,
-                      integer_to_list(BatchSize),
-                      integer_to_list(Start),
-                      digest_ids(Ids),
-                      ReqPath, Paths]).
+    ToDigest = [lists:sort(Ids), BatchSize, Start, ReqPath, Paths],
+    iolist_to_binary([OrgName, "-", digest(ToDigest)]).
 
-digest_ids(Ids) ->
-    md5_to_hex(crypto:md5(lists:sort(Ids))).
+digest(List) ->
+    sha_to_hex(crypto:sha(term_to_binary(List))).
 
-md5_to_hex(<<X:128/big-unsigned-integer>>) ->
-    iolist_to_binary(io_lib:format("~32.16.0b", [X])).
+sha_to_hex(<<X:160/big-unsigned-integer>>) ->
+    iolist_to_binary(io_lib:format("~40.16.0b", [X])).
 
 %% Obtain a non-exclusive client from the redis client "pool". If
 %% there are no clients or some other error occurs, returns
