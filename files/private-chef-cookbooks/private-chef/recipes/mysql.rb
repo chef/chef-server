@@ -11,7 +11,6 @@ end
 bundles = {
   "chef-sql-schema" => false,
   "opscode-account" => "test",
-  "opscode-chef" => "integration_test dev",
   "opscode-expander" => false,
   "opscode-test" => "dev",
   "opscode-webui" => "integration_test dev"

@@ -128,7 +128,6 @@ include_recipe "runit"
   "bookshelf",
   "bootstrap",
   "opscode-org-creator",
-  "opscode-chef",
   "opscode-erchef",
   "opscode-webui",
   "nagios",
