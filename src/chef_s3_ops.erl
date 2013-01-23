@@ -22,231 +22,182 @@
 
 -module(chef_s3_ops).
 
--define(MAX, 5).
--define(TIMEOUT, 5 * 1000).
--define(CHUNKSIZE, 20). %% TODO - make this configurable
-
 -include("chef_types.hrl").
 
 -export([
-         fetch_md/2,
-         delete/2
+         delete/2,
+         fetch_md/2
         ]).
 
--record(state, {
-          token :: reference(),
-          checksums = [] :: [binary()],
-          org_id :: object_id(),
-          bucket :: string(),
-          count = 0 :: non_neg_integer(),
-          workers = [] :: [pid()],
+%% These don't need to be exported, strictly speaking, but could be helpful in live system
+%% debugging scenarios.
+-export([
+         check_file/4,
+         delete_file/4
+        ]).
 
-          ok = [] :: [binary()],
-          missing = [] :: [binary()],
-          errors = 0 :: non_neg_integer()
-         }).
+-type individual_op_return() ::  {'error' | 'missing' | 'ok', binary()}.
 
-%% @doc Delete each checksummed file in S3
+-type bulk_op_return() :: {{ok, [binary()]},
+                           {missing, [binary()]},
+                           {timeout, [binary()]},
+                           {error, [binary()]}}.
+
+%% @doc Delete each checksummed file in S3.
+%%
+%% Returns a tuple of tagged tuples indicating which checksums were successfully deleted and
+%% which were not found, along with both the number of timeouts that occured, as well as the
+%% number of other errors occurred.
+%%
+%% Note that the return value information is all disjoint; that is, the number of found and
+%% missing checksums, plus the number of errors and timeouts, will be equal to the length of
+%% `Checksums'.
+-spec delete(OrgId :: object_id(),
+             Checksums :: [binary()]) -> bulk_op_return().
 delete(OrgId, Checksums) when is_list(Checksums),
-                             is_binary(OrgId) ->
-    %% we'll split our checksum list into chunks
-    %% so we don't pound the S3 store by
-    %% parallelizing ALL THE THINGS!!
-    Results = chunk_map(fun(Chunk) -> parallel_delete(OrgId, Chunk) end,
-                        Checksums, chunk_size()),
-    %% The results will be a list of lists so flatten it
-    %% Process the flattened results, splitting them into success checksums,
-    %% missing checksums, timeout count and error count
-    AddResult = fun(Result, {Ok, Missing, Timeouts, Errors}) ->
-                    case Result of
-                        {value, Checksum} -> {[Checksum | Ok], Missing, Timeouts, Errors};
-                        {missing, Checksum} -> {Ok, [Checksum | Missing], Timeouts, Errors};
-                        timeout -> {Ok, Missing, Timeouts + 1, Errors};
-                        {_Error, _Checksum} -> {Ok, Missing, Timeouts, Errors + 1}
-                    end
-                end,
+                              is_binary(OrgId) ->
+    s3_checksum_op(OrgId,
+                   Checksums,
+                   fun delete_file/4,
+                   "Deletion of checksum: ~p for org ~p from bucket ~p has taken longer than ~p ms~n").
 
-    {Ok, Missing, Timeouts, Errors} =
-        lists:foldl(AddResult,
-                    {[], [], 0, 0}, lists:flatten(Results)),
-    Result = {{ok, lists:sort(Ok)},
-              {missing, lists:sort(Missing)},
-              {timeout, Timeouts},
-              {error, Errors}},
-    Result.
-
-parallel_delete(OrgId, Checksums) ->
-    Bucket = chef_s3:bucket(),
-    %% We'll take advantage of Erlware's excellent ec_plists:ftmap/3 which
-    %% applies a function to a list, in parrellel, in a fault tolerant way.
-    %% The return result looks something like:
-    %%
-    %%  [{value, 1}, {value, 2}, timeout, {badmatch, ...}]
-    %%
-    ec_plists:ftmap(fun(Checksum) ->
-                            case delete_file(OrgId, Bucket, Checksum) of
-                                {ok, Checksum} -> Checksum;
-                                {Error, Checksum} -> throw({Error, Checksum})
-                            end
-                    end,
-                    Checksums,
-                    ?TIMEOUT).
-
-%% @doc Verify that each checksummed file is stored in S3 by checking its metadata
+%% @doc Verify that each checksummed file is stored in S3 by checking its metadata.
+%%
+%% Returns a tuple of tagged tuples indicating which checksums were found and which were
+%% not, along with both the number of errors (including timeouts, as distinct from
+%% `delete/2') that occurred.
+%%
+%% Note that the return value information is all disjoint; that is, the number of found and
+%% missing checksums, plus the number of errors, will be equal to the length of `Checksums'.
+-spec fetch_md(OrgId :: object_id(),
+              Checksums :: [binary()]) -> bulk_op_return().
 fetch_md(OrgId, Checksums) when is_list(Checksums),
                                 is_binary(OrgId) ->
-    parallel_fetch(OrgId, Checksums).
+    s3_checksum_op(OrgId,
+                   Checksums,
+                   fun check_file/4,
+                   "Checking presence of checksum: ~p for org ~p from bucket ~p has taken longer than ~p ms~n").
 
-parallel_fetch(OrgId, Checksums) ->
+%% HTTP Operation Functions
+%%
+%% These functions are responsible for actually issuing an HTTP request to S3 to either
+%% delete a file or to verify its existence.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    Bucket = chef_s3:bucket(),
+%% @doc Delete an existing file (identified by `Checksum') in S3
+-spec delete_file(OrgId :: object_id(),
+                  AwsConfig :: mini_s3:config(),
+                  Bucket :: string(),
+                  Checksum :: binary()) -> individual_op_return().
+delete_file(OrgId, AwsConfig, Bucket, Checksum) ->
+    Key = chef_s3:make_key(OrgId, Checksum),
 
-    Remainder = length(Checksums) rem ?MAX,
-    Token = erlang:make_ref(),
-
-    % Using a record since there's quite a bit to keep track of;
-    % otherwise the function signatures would get cumbersome
-    State = #state{checksums=Checksums,
-                   org_id=OrgId,
-                   bucket=Bucket,
-                   token=Token},
-
-    StateBeforeRemainder = lists:foldl(fun fetcher/2, State, Checksums),
-    fetch_remainder(StateBeforeRemainder#state{count=Remainder}).
-
-fetcher(Checksum, #state{count=?MAX}=State) ->
-    State1 = gather(State),
-    fetcher(Checksum, State1#state{count=0, workers=[]});
-
-fetcher(Checksum, #state{count=Count,
-                         token=Token,
-                         org_id=OrgId,
-                         bucket=Bucket,
-                         workers=Workers}=State) ->
-    Worker = spawn_worker(OrgId, Bucket, Checksum, Token),
-    State#state{count=Count+1,
-                workers=[Worker|Workers]}.
-
-fetch_remainder(#state{}=State) ->
-    #state{ok=Ok, errors=Errors, missing=Missing} = gather(State),
-    Result = {{ok, lists:sort(Ok)},
-              {missing, lists:sort(Missing)},
-              {error, Errors}},
-    Result.
-
-gather(#state{count=0}=State) ->
-    State;
-gather(#state{token=Token, ok=Ok, missing=Missing, errors=Errors, count=Count, workers=Workers}=State) ->
-    receive
-        {Token, {Status, Checksum}, WorkerPid} ->
-            ResultState0 = case Status of
-                               ok ->
-                                   State#state{ok=[Checksum|Ok]};
-                               missing ->
-                                   State#state{missing=[Checksum|Missing]};
-                               error ->
-                                   State#state{errors=Errors + 1}
-                           end,
-            ResultState = ResultState0#state{count=Count-1,
-                                             workers=lists:delete(WorkerPid, Workers)},
-            gather(ResultState)
-    after ?TIMEOUT ->
-            %% Kill remaining workers; they're taking too long
-            [ erlang:exit(W, kill) || W <- Workers ],
-            State#state{workers=[], errors=Errors + length(Workers)}
+    try mini_s3:delete_object(Bucket, Key, AwsConfig) of
+        %% Return value doesn't much matter here but for documentation's sake it looks like:
+        %%
+        %%  [{delete_marker, list_to_existing_atom(Marker)}, {version_id, Id}]
+        %%
+        %% The main take-away here is that the call to delete_object/3 was successful and
+        %% didn't throw an error
+        _Response ->
+            {ok, Checksum}
+    catch
+        error:{aws_error, {http_error,404,_}} ->
+            %% We got a 404.  Since this *may* be indicative of weirdness, we'll log it, but
+            %% we don't need to crash or raise an exception.
+            error_logger:warning_msg("Deletion of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) failed because the file was not found~n",
+                                     [Checksum, OrgId, Bucket, Key]),
+            {missing, Checksum};
+        ExceptionClass:Reason->
+            %% Something unanticipated happened.  We should log the specific reason for
+            %% later analysis, but as far as the overall deletion operation is concerned,
+            %% this is "just an error", and we can continue along.
+            error_logger:error_msg("Deletion of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) raised exception ~p:~p~n",
+                                   [Checksum, OrgId, Bucket, Key, ExceptionClass, Reason]),
+            {error, Checksum}
     end.
 
--spec spawn_worker(OrgId :: object_id(),
-                   Bucket :: string(),
-                   Checksum :: binary(),
-                   Token :: reference()) -> Worker :: pid().
-spawn_worker(OrgId, Bucket, Checksum, Token) ->
-    Master = self(), %% This is the same as the process that is doing the scatter / gather
-    erlang:spawn(fun() ->
-                         Result = check_file(OrgId, Bucket, Checksum),
-                         Master ! {Token, Result, self()}
-                 end).
-
-%% @doc Check to see if a checksum file is stored in S3 already by checking for file
-%% metadata.
+%% @doc See if the file represented by the given `Checksum' exists in S3.
 -spec check_file(OrgId :: object_id(),
+                 AwsConfig :: mini_s3:config(),
                  Bucket :: string(),
-                 Checksum :: binary()) -> {'error', binary()} |
-                                          {'missing', binary()} |
-                                          {'ok',binary()}.
-check_file(OrgId, Bucket, Checksum) ->
+                 Checksum :: binary()) -> individual_op_return().
+check_file(OrgId, AwsConfig, Bucket, Checksum) ->
     Key = chef_s3:make_key(OrgId, Checksum),
-    AwsConfig = chef_s3:get_config(),
+
     Result = try mini_s3:get_object_metadata(Bucket, Key, [], AwsConfig) of
-                 _V ->
+                 _Response ->
+                     %% Actual return value doesn't matter, just that the call didn't throw
+                     %% an error.
                      {ok, Checksum}
              catch
                  error:{aws_error, {http_error,404,_}} ->
+                     %% The file wasn't found. Log it and move on.
+                     error_logger:error_msg("Checking presence of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) failed because the file was not found~n",
+                                            [Checksum, OrgId, Bucket, Key]),
                      {missing, Checksum};
-                 _X:_Y->
+                 ExceptionClass:Reason->
+                     %% Something unanticipated happened.  We should log the specific reason
+                     %% for later analysis, but as far as the overall checking operation is
+                     %% concerned, this is "just an error", and we can continue along.
+                     error_logger:error_msg("Checking presence of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) raised exception ~p:~p~n",
+                                            [Checksum, OrgId, Bucket, Key, ExceptionClass, Reason]),
                      {error, Checksum}
              end,
     Result.
 
-%% @doc Delete an existing checksum file in S3
--spec delete_file(OrgId :: object_id(),
-                 Bucket :: string(),
-                 Checksum :: binary()) -> {'error', binary()} |
-                                          {'missing', binary()} |
-                                          {'ok', binary()}.
-delete_file(OrgId, Bucket, Checksum) ->
-    Key = chef_s3:make_key(OrgId, Checksum),
+%% @doc Utility function to handle the commonalities of deleting or verifying the presence
+%% of files in S3.
+%%
+%% Basically, `Fun' is going to be either `delete_file/4' or `check_file/4'.
+%% `TimeoutMsgTemplate' should be a template string for an `error_logger' message that takes
+%% a Checksum, an OrgId, a Bucket name, and a Timeout value (in that order).
+-spec s3_checksum_op(OrgId :: object_id(),
+                     Checksums :: [binary()],
+                     Fun :: fun((object_id(), mini_s3:config(), string(), binary()) -> individual_op_return()),
+                     TimeoutMsgTemplate :: string()) ->
+                            bulk_op_return().
+s3_checksum_op(OrgId, Checksums, Fun, TimeoutMsgTemplate) ->
+
+    Bucket = chef_s3:bucket(),
     AwsConfig = chef_s3:get_config(),
-    Result = try mini_s3:delete_object(Bucket, Key, AwsConfig) of
-                %% Return value doesn't much matter here but it looks like, but
-                %% for documentation sake it looks like:
-                %%
-                %%  [{delete_marker, list_to_existing_atom(Marker)}, {version_id, Id}]
-                %%
-                 _Response ->
-                     {ok, Checksum}
-             catch
-                error:{aws_error, {http_error,404,_}} ->
-                     {missing, Checksum};
-                X:Y->
-                    error_logger:error_msg(
-                        "Could not delete checksum ~p from bucket ~p: Reason -> ~p:~p~n",
-                        [Checksum, Bucket, X, Y]
-                    ),
-                    {error, Checksum}
-             end,
-    Result.
+    Timeout = chef_config:config_option(chef_objects, s3_parallel_ops_timeout, pos_integer),
+    Fanout = chef_config:config_option(chef_objects, s3_parallel_ops_fanout, pos_integer),
 
-%% TODO - pull this from config
-chunk_size() ->
-    ?CHUNKSIZE.
+    RequestFun = fun(Checksum) ->
+                         Fun(OrgId, AwsConfig, Bucket, Checksum)
+                 end,
 
-%% ----------------------------------------------------------------------------
-%% opscode_commons candidate code
-%% ----------------------------------------------------------------------------
+    TimeoutHandler = fun(Checksum) ->
+                             error_logger:error_msg(TimeoutMsgTemplate,
+                                                    [Checksum, OrgId, Bucket, Timeout]),
+                             {timeout, Checksum}
+                     end,
 
-%% chunk_list(List, ChunkSize) ->
-%%     chunk_list(List, ChunkSize, []).
-%
-%% chunk_list([], _, Result) ->
-%%     lists:reverse(Result);
-%% chunk_list(List, ChunkSize, Result) ->
-%%     {Chunk, Rest} = safe_split(ChunkSize, List),
-%%     chunk_list(Rest, ChunkSize, [Chunk | Result]).
+    Results = chef_parallel:parallelize_all_with_timeout(Checksums, RequestFun, Fanout, Timeout, TimeoutHandler),
 
-chunk_map(Fun, List, ChunkSize) ->
-    chunk_map(Fun, List, ChunkSize, []).
+    %% Now we need to consolidate our results based on:
+    %%
+    %%   Did the operation succeed?
+    %%   Was the checksum even found?
+    %%   Did the operation timeout?
+    %%   Did some other error occur during the operation?.
+    %%
+    {OkChecksums, MissingChecksums, Timeouts, Errors} =
+        lists:foldl(fun(Result, {Ok, Missing, Timeouts, Errors}) ->
+                            case Result of
+                                {ok, Checksum} -> {[Checksum | Ok], Missing, Timeouts, Errors};
+                                {missing, Checksum} -> {Ok, [Checksum | Missing], Timeouts, Errors};
+                                {timeout, Checksum} -> {Ok, Missing, [Checksum |Timeouts], Errors};
+                                {error, Checksum} -> {Ok, Missing, Timeouts, [Checksum | Errors]}
+                            end
+                    end,
+                    {[], [], [], []},
+                    Results),
 
-chunk_map(_Fun, [], _ChunkSize, Acc) ->
-    lists:reverse(Acc);
-chunk_map(Fun, List, ChunkSize, Acc) ->
-    {Chunk, Rest} = safe_split(ChunkSize, List),
-    chunk_map(Fun, Rest, ChunkSize, [Fun(Chunk) | Acc]).
-
-safe_split(N, L) ->
-    try
-        lists:split(N, L)
-    catch
-        error:badarg ->
-            {L, []}
-    end.
+    %% Sort the checksums and package everything up properly
+    {{ok, lists:sort(OkChecksums)},
+     {missing, lists:sort(MissingChecksums)},
+     {timeout, lists:sort(Timeouts)},
+     {error, lists:sort(Errors)}}.

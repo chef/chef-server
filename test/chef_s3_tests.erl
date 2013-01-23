@@ -118,8 +118,8 @@ checksum_test_() ->
              meck:expect(chef_s3, get_config, fun() -> mock_config end),
              application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
 
-             %% Make the chunk size smaller
-             meck:expect(chef_s3_ops, chunk_size, fun() -> 3 end),
+             application:set_env(chef_objects, s3_parallel_ops_fanout, 3),
+             application:set_env(chef_objects, s3_parallel_ops_timeout, 5000),
 
              %% Actual value doesn't matter; we're not going to use it anyway
              meck:expect(mini_s3, new, 3, ignored),
@@ -206,7 +206,8 @@ checksum_test_() ->
                                             <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbba">>,
                                             <<"ccccccccccccccccccccccccccccccca">>]},
                                       {missing, []},
-                                      {error, 0}},
+                                      {timeout, []},
+                                      {error, []}},
                                      chef_s3:check_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                 end},
@@ -229,7 +230,8 @@ checksum_test_() ->
                                             <<"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeea">>,
                                             <<"fffffffffffffffffffffffffffffffa">>]},
                                       {missing, []},
-                                      {error, 0}},
+                                      {timeout, []},
+                                      {error, []}},
                                      chef_s3:check_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                 end},
@@ -243,7 +245,8 @@ checksum_test_() ->
                         ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                             <<"ccccccccccccccccccccccccccccccca">>]},
                                       {missing, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>]},
-                                      {error, 0}},
+                                      {timeout, []},
+                                      {error, []}},
                                      chef_s3:check_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                 end},
@@ -256,7 +259,8 @@ checksum_test_() ->
                         ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                             <<"ccccccccccccccccccccccccccccccca">>]},
                                       {missing, []},
-                                      {error, 1}},
+                                      {timeout, []},
+                                      {error, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>]}},
                                      chef_s3:check_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                 end},
@@ -269,7 +273,8 @@ checksum_test_() ->
 
                                       ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>]},
                                                     {missing, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>]},
-                                                    {error, 1}},
+                                                    {timeout, [<<"cccccccccccccccccccccccccccccccf">>]},
+                                                    {error, []}},
                                                    chef_s3:check_checksums(OrgId, Checksums)),
                                       test_utils:validate_modules(MockedModules)
                               end}
@@ -282,7 +287,8 @@ checksum_test_() ->
 
                         ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>]},
                                       {missing, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>]},
-                                      {error, 1}},
+                                      {timeout, []},
+                                      {error, [<<"cccccccccccccccccccccccccccccccd">>]}},
                                      chef_s3:check_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                 end},
@@ -291,7 +297,8 @@ checksum_test_() ->
                         Checksums = [],
                         ?assertEqual({{ok, []},
                                       {missing, []},
-                                      {error, 0}},
+                                      {timeout, []},
+                                      {error, []}},
                                      chef_s3:check_checksums(OrgId, Checksums))
                         %% Don't actually need to validate the mocks, since this shouldn't call them
 
@@ -308,8 +315,8 @@ checksum_test_() ->
                                             <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbba">>,
                                             <<"ccccccccccccccccccccccccccccccca">>]},
                                       {missing, []},
-                                      {timeout, 0},
-                                      {error, 0}},
+                                      {timeout, []},
+                                      {error, []}},
                                      chef_s3:delete_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                  end},
@@ -333,8 +340,8 @@ checksum_test_() ->
                                             <<"fffffffffffffffffffffffffffffffa">>,
                                             <<"ggggggggggggggggggggggggggggggga">>]},
                                       {missing, []},
-                                      {timeout, 0},
-                                      {error, 0}},
+                                      {timeout, []},
+                                      {error, []}},
                                      chef_s3:delete_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                  end},
@@ -347,8 +354,8 @@ checksum_test_() ->
                         ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                             <<"ccccccccccccccccccccccccccccccca">>]},
                                       {missing, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>]},
-                                      {timeout, 0},
-                                      {error, 0}},
+                                      {timeout, []},
+                                      {error, []}},
                                      chef_s3:delete_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                  end},
@@ -361,8 +368,8 @@ checksum_test_() ->
                         ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                             <<"ccccccccccccccccccccccccccccccca">>]},
                                       {missing, []},
-                                      {timeout, 0},
-                                      {error, 1}},
+                                      {timeout, []},
+                                      {error, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>]}},
                                      chef_s3:delete_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                  end},
@@ -375,8 +382,8 @@ checksum_test_() ->
 
                                       ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>]},
                                                     {missing, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>]},
-                                                    {timeout, 1},
-                                                    {error, 0}},
+                                                    {timeout, [<<"cccccccccccccccccccccccccccccccf">>]},
+                                                    {error, []}},
                                                    chef_s3:delete_checksums(OrgId, Checksums)),
                                       test_utils:validate_modules(MockedModules)
                               end}
@@ -389,8 +396,8 @@ checksum_test_() ->
 
                         ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>]},
                                       {missing, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>]},
-                                      {timeout, 0},
-                                      {error, 1}},
+                                      {timeout, []},
+                                      {error, [<<"cccccccccccccccccccccccccccccccd">>]}},
                                      chef_s3:delete_checksums(OrgId, Checksums)),
                         test_utils:validate_modules(MockedModules)
                  end}
