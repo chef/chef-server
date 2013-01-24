@@ -104,8 +104,8 @@
 
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/status/{0,1}.*$", :ruby) %>
 
-    # Include endpoints for addons
-    include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_endpoints.conf;
+    # Include external routes for addons
+    include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_external.conf;
 
     # opscode-account service endpoints
     <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", 'couchdb_clients') %>

@@ -137,6 +137,14 @@ template File.join(nginx_etc_dir, "fastcgi.conf") do
   notifies :restart, 'service[nginx]' if OmnibusHelper.should_notify?("nginx")
 end
 
+template File.join(nginx_addon_dir, "README.md") do
+  source "nginx-addons.README.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+end
+
+
 runit_service "nginx" do
   down node['private_chef']['nginx']['ha']
   options({

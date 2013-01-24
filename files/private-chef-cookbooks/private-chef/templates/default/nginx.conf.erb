@@ -119,6 +119,10 @@ http {
                               "opscode_webui",
                               node['private_chef']['opscode-chef']['upload_internal_proto']) %>
 
+    # Include internal routes for addons
+    include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_internal.conf;
+
+
     location / {
       proxy_redirect http://opscode_chef /;
       proxy_pass http://opscode_chef;
