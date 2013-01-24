@@ -13,5 +13,3 @@ config = PrivateChef.generate_config(node['fqdn'])
 
 puts "Topology: #{PrivateChef['topology']}"
 puts Chef::JSONCompat.to_json_pretty(config)
-exit 0
-

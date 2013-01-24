@@ -52,6 +52,10 @@ rm -rf $WORKSPACE/src/*
 mkdir -p jenkins/chef-solo/cache
 
 export PATH=/usr/local/bin:/opt/ruby1.9/bin:$PATH
+if ! exists chef-solo;
+then
+  sudo gem install chef --no-ri --no-rdoc
+fi
 
 # ensure bundler is installed
 if ! exists bundle;
@@ -62,14 +66,15 @@ fi
 if [ "$CLEAN" = "true" ]; then
   sudo rm -rf "/opt/opscode" || true
   sudo mkdir -p "/opt/opscode" && sudo chown jenkins-node "/opt/opscode"
-  sudo rm -r /var/cache/omnibus/pkg/* || true
-  sudo rm /var/cache/omnibus/build/*/*.manifest || true
-  sudo rm pkg/* || true
+  sudo rm -rf /var/cache/omnibus/pkg/* || true
+  sudo rm -rf /var/cache/omnibus/src/* || true
+  sudo rm -f /var/cache/omnibus/build/*/*.manifest || true
+  sudo rm -f pkg/* || true
 fi
 bundle install
 
 # Omnibus build server prep tasks, including build ruby
-sudo -i env OMNIBUS_GEM_PATH=$(bundle show omnibus) chef-solo -c $(pwd)/jenkins/solo.rb -j $(pwd)/jenkins/dna.json -l debug
+sudo -i env PATH=$PATH OMNIBUS_GEM_PATH=$(bundle show omnibus) chef-solo -c $(pwd)/jenkins/solo.rb -j $(pwd)/jenkins/dna.json -l debug
 
 # copy config into place
 cp omnibus.rb.example omnibus.rb

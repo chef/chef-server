@@ -28,6 +28,7 @@ execute "boostrap-platform" do
   command "bash -c 'echo y | /opt/opscode/embedded/bin/bundle exec ./bin/bootstrap-platform -c ./bootstrapper-config/config.rb -s ./bootstrapper-config/script.rb'"
   cwd opscode_test_dir
   not_if { File.exists?(bootstrap_status_file) }
+  notifies :restart, 'service[opscode-erchef]'
 end
 
 file bootstrap_status_file do 

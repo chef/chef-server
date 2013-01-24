@@ -17,7 +17,7 @@ define service {
 }
 
 <% if node['private_chef']['database_type'] == "postgresql" -%>
-# postgres and drbd on private chef
+# postgresql and drbd on private chef
 define service {
     service_description postgresql service
     hostgroup_name      postgresql-vip
