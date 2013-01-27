@@ -402,13 +402,16 @@ delete_object(DbContext, Object, RequestId) ->
 -spec check_cookbook_authz(Cookbooks :: [#chef_cookbook_version{}],
                            Req :: wm_req(),
                            State :: #base_state{}) ->
-                                  ok | {error, Msg :: binary()}.
+                                  ok | {error, Msg :: binary()} |
+                                  {timeout, binary()}.
 check_cookbook_authz(_, _, #base_state{}) ->
     case random:uniform(1) of
         1 ->
             ok;
-        _ ->
-            {error, <<"makes dialyzer happy">>}
+        2 ->
+            {error, <<"makes dialyzer happy">>};
+        3 ->
+            {timeout, <<"makes dialyzer happy">>}
     end.
 
 assemble_principal_ejson(#principal_state{name = Name,
