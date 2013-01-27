@@ -72,7 +72,7 @@ cache_entry_ttl() ->
                [binary()], string(), [{binary(), [binary()]}]) -> binary().
 make_key(OrgName, BatchSize, Start, Ids, ReqPath, Paths) ->
     ToDigest = [lists:sort(Ids), BatchSize, Start, ReqPath, Paths],
-    iolist_to_binary([OrgName, "-", digest(ToDigest)]).
+    iolist_to_binary([OrgName, "|", digest(ToDigest)]).
 
 digest(List) ->
     sha_to_hex(crypto:sha(term_to_binary(List))).
