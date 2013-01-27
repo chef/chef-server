@@ -351,7 +351,8 @@ set_authz_id(Id, #data_state{}=D) ->
 -spec check_cookbook_authz(Cookbooks :: [#chef_cookbook_version{}],
                            Req :: wm_req(),
                            State :: #base_state{}) ->
-                                  ok | {error, Msg :: binary()}.
+                                  ok | {error, {[any()]}} |
+                                  {timeout, Msg :: binary()}.
 check_cookbook_authz(Cookbooks, Req, State) ->
     %% How long should we allow for each individual Authz request?
     Timeout = chef_config:config_option(oc_chef_wm, authz_timeout, pos_integer),
