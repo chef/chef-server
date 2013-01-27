@@ -39,10 +39,9 @@ put(_ReqId, no_redis, _Key, _Value) ->
 put(_ReqId, Redis, Key, {Count, Raw}) ->
     Gzip = zlib:gzip(Raw),
     Value = term_to_binary({Count, Gzip}),
-    Cmds = [["SET", Key, Value],
-            ["EXPIRE", Key, cache_entry_ttl()]],
-    case eredis:qp(Redis, Cmds) of
-        [{ok, <<"OK">>}, {ok, <<"1">>}] ->
+    Cmd = ["SETEX", Key, integer_to_list(cache_entry_ttl()), Value],
+    case eredis:q(Redis, Cmd) of
+        {ok, <<"OK">>} ->
             ok;
         _ ->
             error
