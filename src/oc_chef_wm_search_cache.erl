@@ -27,7 +27,8 @@ get(no_cache, _ReqId, _Redis, _Key) ->
 get(_, _ReqId, no_redis, _Key) ->
     not_found;
 get(cache, _ReqId, Redis, Key) ->
-    case eredis:q(Redis, ["GET", key_to_bin(Key)]) of
+    Fun = fun() -> eredis:q(Redis, ["GET", key_to_bin(Key)]) end,
+    case folsom_time(search_cache_redis_get, Fun) of
         {ok, undefined} ->
             folsom_metrics:notify({search_cache_miss, 1}),
             not_found;
@@ -52,12 +53,16 @@ put(cache, _ReqId, Redis, Key, {Count, Raw}) ->
     Gzip = zlib:gzip(Raw),
     Value = term_to_binary({Count, Gzip}),
     Cmd = ["SETEX", key_to_bin(Key), integer_to_list(cache_entry_ttl()), Value],
-    case eredis:q(Redis, Cmd) of
+    Fun = fun() -> eredis:q(Redis, Cmd) end,
+    case folsom_time(search_cache_redis_set, Fun) of
         {ok, <<"OK">>} ->
             ok;
         _ ->
             error
     end.
+
+folsom_time(Label, Fun) ->
+    folsom_metrics:histogram_timed_update(Label, Fun).
 
 %% @doc Return a list of org names that are not allowed to be cached
 no_cache_orgs() ->
@@ -147,7 +152,8 @@ caching_allowed(no_redis, _OrgName) ->
     no_cache;
 caching_allowed(Redis, OrgName) ->
     Cmd = ["SISMEMBER", ?NO_CACHE_ORGS_KEY, OrgName],
-    case eredis:q(Redis, Cmd) of
+    Fun = fun() -> eredis:q(Redis, Cmd) end,
+    case folsom_time(search_cache_redis_member, Fun) of
         {ok, <<"1">>} ->
             folsom_metrics:notify({search_cache_no_cache_allowed, 1}),
             no_cache;
