@@ -41,6 +41,10 @@
 -define(BASE_ROUTES, chef_wm_routes).
 -endif.
 
+-ifndef(SEARCH_CACHE).
+-define(SEARCH_CACHE, chef_wm_search_cache).
+-endif.
+
 -type permission() :: create | delete | read | update.
 
 -type container_name() :: cookbook |
