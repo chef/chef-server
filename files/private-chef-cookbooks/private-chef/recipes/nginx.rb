@@ -13,6 +13,7 @@ nginx_html_dir = File.join(nginx_dir, "html")
 nginx_ca_dir = File.join(nginx_dir, "ca")
 nginx_log_dir = node['private_chef']['nginx']['log_directory']
 nginx_d_dir = File.join(nginx_etc_dir, "nginx.d")
+nginx_addon_dir = File.join(nginx_etc_dir, "addon.d")
 
 [
   nginx_dir,
@@ -23,6 +24,7 @@ nginx_d_dir = File.join(nginx_etc_dir, "nginx.d")
   nginx_ca_dir,
   nginx_log_dir,
   nginx_d_dir,
+  nginx_addon_dir,
 ].each do |dir_name|
   directory dir_name do
     owner node['private_chef']['user']['username']
@@ -134,6 +136,14 @@ template File.join(nginx_etc_dir, "fastcgi.conf") do
   variables(node['private_chef']['nginx'].to_hash)
   notifies :restart, 'service[nginx]' if OmnibusHelper.should_notify?("nginx")
 end
+
+template File.join(nginx_addon_dir, "README.md") do
+  source "nginx-addons.README.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+end
+
 
 runit_service "nginx" do
   down node['private_chef']['nginx']['ha']
