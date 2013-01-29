@@ -40,7 +40,7 @@ query modifiers.
 The cache will store binary data resulting from a call to
 `erlang:term_to_binary` of the following structure:
 
-    {SolrNumFound, NumIds, DbNumFound, Ans}
+    {DbNumFound, Ans}
 
 where the values of the tuple have the following meaning:
 
@@ -61,10 +61,19 @@ as starting point).
 
 The cache entries will use the following key format:
 
-    :http_path|:digest_of_ids
+    :org_name-:request_digest
 
-where `http_path` is the full path of the request including query
-parameters and `digest_of_ids` is `md5(sort(Ids))`.
+where `:org_name` is the name of the org and `:request_digest` is the
+SHA1 digest in hex of the `term_to_binary` result of the following
+list:
+
+    [lists:sort(Ids), BatchSize, Start, ReqPath, Paths]
+
+Where `Ids` are the ids returned from Solr, `BatchSize` is the
+configured `bulk_get` batch size, `Start` is the pagination start
+index, `ReqPath` is the full HTTP request path including query
+parameters, and `Paths` is the parsed partial search path
+specification.
 
 Always asking solr for results means that we invalidate for the most
 common search use cases where the main point is whether or not an item
@@ -74,6 +83,16 @@ A 60 second TTL for cache entries will mean that cached search results
 will return a possibly out-of-date copy of objects. Note that we will
 never return stale objects that fail to match the query (or at least
 the caching will not change the behavior of the uncached system).
+
+Without caching, deletes are immediate for search results. Even though
+the solr index returns the deleted id, the object will not be found in
+the db and will therefore not be included in search results. With
+search result caching, deleted objects will appear in search results
+until the next solr commit or search result expiration. Similarly,
+without caching, search results always return the latest version of an
+object (even if it is inconsistent with the search query). With
+caching enabled, search results will return stale objects until the
+search result cache entry expires.
 
 Expected Size of Cache in RAM
 -----------------------------
