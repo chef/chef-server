@@ -31,7 +31,7 @@
                           "434d85bc789b366ee5e8c9321d3d384c3a1a1d4d"}},
        {chef_wm,".*",
                 {git,"git@github.com:opscode/chef_wm.git",
-                     "4a8057c34a282ef969c85059f5c3f9b4074aedf6"}},
+                     "e14a17f51e4784806405cdff2bac7eb6dbb26e30"}},
        {couchbeam,".*",
                   {git,"git://github.com/opscode/couchbeam.git",
                        "c7881f6247a92cd62a818fe9f637ff973a5f8923"}},
@@ -59,6 +59,9 @@
        {epgsql,".*",
                {git,"git://github.com/opscode/epgsql.git",
                     "f24cee4170395ba69e96e5e56c876d947394e471"}},
+       {eredis,".*",
+               {git,"git://github.com/wooga/eredis.git",
+                    "aecf39a1a50bbaba706159d6c889a84d7a7c3063"}},
        {fast_log,".*",
                  {git,"git@github.com:opscode/fast-log-erlang.git",
                       "0db6ec3238e012aad64956fbbb9d48bb457113a3"}},
@@ -97,7 +100,7 @@
                            "3a3bf45228514e88afa36380881817df44dbc44a"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
-                        "fa9477891d7628ed657c2d990c0bc460562f977d"}},
+                        "39445ccd9f18b03d19f53db0498726c511844879"}},
        {pooler,".*",
                {git,"git://github.com/seth/pooler.git",
                     "f7829d7b894d739e840896fbf8f31f5a53b2eebb"}},
@@ -126,4 +129,5 @@
            {d,'BASE_ROUTES',oc_chef_wm_routes},
            {d,'CHEF_DB_DARKLAUNCH',darklaunch},
            {d,'CHEF_WM_DARKLAUNCH',darklaunch},
-           {d, 'SEARCH_CACHE', oc_chef_wm_search_cache}]}.
+           {d,'SEARCH_CACHE',oc_chef_wm_search_cache}]}.
+
