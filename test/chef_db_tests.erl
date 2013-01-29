@@ -161,6 +161,8 @@ fetch_requestor_test_() ->
                ?assertEqual(Got, Client),
                Stats = stats_hero:snapshot(<<"req-id-123">>, all),
                ExpectKeys = [<<"req_time">>,
+                             <<"rdbms.chef_otto.fetch_client_time">>,
+                             <<"rdbms.chef_otto.fetch_client_count">>,
                              <<"rdbms.chef_otto.fetch_org_id_time">>,
                              <<"rdbms.chef_otto.fetch_org_id_count">>,
                              <<"rdbms_time">>,
