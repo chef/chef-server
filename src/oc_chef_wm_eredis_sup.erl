@@ -18,17 +18,23 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-    {ok, ClientCount} = application:get_env(oc_chef_wm, eredis_client_pool_size),
-    error_logger:info_msg("starting oc_chef_wm_eredis_sup with ~B senders~n", [ClientCount]),
+    ClientCount = get_env(eredis_client_pool_size, 0),
     ok = pg2:create(redis_search_cache),
     init_metrics(),
-    {ok, Host} = application:get_env(oc_chef_wm, redis_host),
-    {ok, Port} = application:get_env(oc_chef_wm, redis_port),
-    {ok, RedisDb} = application:get_env(oc_chef_wm, redis_db),
-    StartUp = {?MODULE, eredis_start_wrapper, [Host, Port, RedisDb]},
-    Children = [ {make_id(I), StartUp, permanent, brutal_kill, worker, [eredis]}
-                 || I <- lists:seq(1, ClientCount) ],
-    {ok, {{one_for_one, 60, 10}, Children}}.
+    case ClientCount of
+        0 ->
+            error_logger:info_msg("search cache DISABLED~n"),
+            {ok, {{one_for_one, 60, 10}, []}};
+        _ ->
+            error_logger:info_msg("search cache ENABLED with ~B senders~n", [ClientCount]),
+            Host = get_env(redis_host),
+            Port = get_env(redis_port),
+            RedisDb = get_env(redis_db, 0),
+            StartUp = {?MODULE, eredis_start_wrapper, [Host, Port, RedisDb]},
+            Children = [ {make_id(I), StartUp, permanent, brutal_kill, worker, [eredis]}
+                         || I <- lists:seq(1, ClientCount) ],
+            {ok, {{one_for_one, 60, 10}, Children}}
+    end.
 
 make_id(I) ->
     "eredis_" ++ integer_to_list(I).
@@ -55,3 +61,19 @@ init_metrics() ->
     folsom_metrics:new_histogram(search_cache_redis_set),
     folsom_metrics:new_histogram(search_cache_redis_member),
     ok.
+
+get_env(Key, Default) ->
+    case application:get_env(oc_chef_wm, Key) of
+        {ok, Value} ->
+            Value;
+        undefined ->
+            Default
+    end.
+
+get_env(Key) ->
+    case application:get_env(oc_chef_wm, Key) of
+        {ok, Value} ->
+            Value;
+        undefined ->
+            error({required_config_missing, {oc_chef_wm, Key}})
+    end.
