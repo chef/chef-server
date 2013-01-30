@@ -100,7 +100,7 @@
                            "3a3bf45228514e88afa36380881817df44dbc44a"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
-                        "39445ccd9f18b03d19f53db0498726c511844879"}},
+                        "3de29dee7debe61ff25df5a1e4874ffb82e33dc2"}},
        {pooler,".*",
                {git,"git://github.com/seth/pooler.git",
                     "f7829d7b894d739e840896fbf8f31f5a53b2eebb"}},
