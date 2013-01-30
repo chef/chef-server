@@ -90,7 +90,7 @@ validate_modules(Modules) ->
 stats_hero_label({chef_sql, Fun}) ->
     stats_hero_label0(rdbms, {chef_sql, Fun});
 stats_hero_label({chef_otto, Fun}) ->
-    stats_hero_label0(rdbms, {chef_otto, Fun});
+    stats_hero_label0(couchdb, {chef_otto, Fun});
 stats_hero_label({chef_solr, Fun}) ->
     stats_hero_label0(solr, {chef_solr, Fun});
 stats_hero_label({BadPrefix, Fun}) ->
