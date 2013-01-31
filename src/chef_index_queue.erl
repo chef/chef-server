@@ -105,7 +105,9 @@ publish(Data, RoutingKey) ->
   %%        amqp_channel:call(name, {...}) -> ok|blocked|closing
   %% blocked or closing count as errors to us, and letting errors bubble up
   %% seems fine.
-  ok = bunnyc:publish(?SERVER, RoutingKey, jiffy:encode(Data)).
+
+  %% Jiffy may return an iolist, but publish only takes binaries.
+  ok = bunnyc:publish(?SERVER, RoutingKey, erlang:iolist_to_binary(jiffy:encode(Data))).
 
 -spec routing_key(uuid_binary()) -> binary().
 routing_key(ObjectID) ->
