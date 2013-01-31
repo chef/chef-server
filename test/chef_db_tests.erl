@@ -66,14 +66,16 @@ fetch_requestor_test_() ->
                ExpectKeys = [<<"req_time">>,
                              <<"rdbms.chef_sql.fetch_client_time">>,
                              <<"rdbms.chef_sql.fetch_client_count">>,
-                             <<"rdbms.chef_otto.fetch_org_id_time">>,
-                             <<"rdbms.chef_otto.fetch_org_id_count">>,
+                             <<"couchdb.chef_otto.fetch_org_id_time">>,
+                             <<"couchdb.chef_otto.fetch_org_id_count">>,
                              <<"rdbms.chef_sql.fetch_user_time">>,
                              <<"rdbms.chef_sql.fetch_user_count">>,
+                             <<"couchdb_count">>,
+                             <<"couchdb_time">>,
                              <<"rdbms_time">>,
                              <<"rdbms_count">>],
                GotKeys = [ Key || {Key, _} <- Stats ],
-               ?assertEqual(ExpectKeys, GotKeys)
+               ?assertEqual(lists:sort(ExpectKeys), lists:sort(GotKeys))
        end
       },
       {"a client is found SQL cert",
@@ -130,12 +132,14 @@ fetch_requestor_test_() ->
                ExpectKeys = [<<"req_time">>,
                              <<"rdbms.chef_sql.fetch_client_time">>,
                              <<"rdbms.chef_sql.fetch_client_count">>,
-                             <<"rdbms.chef_otto.fetch_org_id_time">>,
-                             <<"rdbms.chef_otto.fetch_org_id_count">>,
+                             <<"couchdb.chef_otto.fetch_org_id_time">>,
+                             <<"couchdb.chef_otto.fetch_org_id_count">>,
+                             <<"couchdb_count">>,
+                             <<"couchdb_time">>,
                              <<"rdbms_time">>,
                              <<"rdbms_count">>],
                GotKeys = [ Key || {Key, _} <- Stats ],
-               ?assertEqual(ExpectKeys, GotKeys)
+               ?assertEqual(lists:sort(ExpectKeys), lists:sort(GotKeys))
        end
       },
       {"a client is found Couchdb",
@@ -161,12 +165,14 @@ fetch_requestor_test_() ->
                ?assertEqual(Got, Client),
                Stats = stats_hero:snapshot(<<"req-id-123">>, all),
                ExpectKeys = [<<"req_time">>,
-                             <<"rdbms.chef_otto.fetch_org_id_time">>,
-                             <<"rdbms.chef_otto.fetch_org_id_count">>,
-                             <<"rdbms_time">>,
-                             <<"rdbms_count">>],
+                             <<"couchdb.chef_otto.fetch_client_time">>,
+                             <<"couchdb.chef_otto.fetch_client_count">>,
+                             <<"couchdb.chef_otto.fetch_org_id_time">>,
+                             <<"couchdb.chef_otto.fetch_org_id_count">>,
+                             <<"couchdb_count">>,
+                             <<"couchdb_time">>],
                GotKeys = [ Key || {Key, _} <- Stats ],
-               ?assertEqual(ExpectKeys, GotKeys)
+               ?assertEqual(lists:sort(ExpectKeys), lists:sort(GotKeys))
        end
       }
      ]}.
@@ -208,12 +214,14 @@ fetch_cookbook_versions_test_() ->
              ExpectKeys = [<<"req_time">>,
                            <<"rdbms.chef_sql.fetch_cookbook_versions_time">>,
                            <<"rdbms.chef_sql.fetch_cookbook_versions_count">>,
-                           <<"rdbms.chef_otto.fetch_org_id_time">>,
-                           <<"rdbms.chef_otto.fetch_org_id_count">>,
+                           <<"couchdb.chef_otto.fetch_org_id_time">>,
+                           <<"couchdb.chef_otto.fetch_org_id_count">>,
+                           <<"couchdb_count">>,
+                           <<"couchdb_time">>,
                            <<"rdbms_time">>,
                            <<"rdbms_count">>],
              GotKeys = [ Key || {Key, _} <- Stats ],
-             ?assertEqual(ExpectKeys, GotKeys)
+             ?assertEqual(lists:sort(ExpectKeys), lists:sort(GotKeys))
          end},
        {"fetch_cookbook_versions passes structured list",
          fun() ->
@@ -258,4 +266,4 @@ stats_hero_config() ->
      {org_name, "myorg"},
      {request_id, ?REQ_ID},
      {label_fun, {test_utils, stats_hero_label}},
-     {upstream_prefixes, [<<"rdbms">>, <<"solr">>]}].
+     {upstream_prefixes, [<<"rdbms">>, <<"couchdb">>, <<"solr">>]}].

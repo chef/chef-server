@@ -246,12 +246,13 @@ fetch_org_id(#context{reqid = ReqId,
 %%%
 fetch_couchdb_client(#context{} = _Context, not_found, _ClientName) ->
     not_found;
-fetch_couchdb_client(#context{otto_connection = Server} = Context, OrgName, ClientName) ->
+fetch_couchdb_client(#context{reqid = ReqId, otto_connection = Server} = Context,
+                     OrgName, ClientName) ->
     case fetch_org_id(Context, OrgName) of
         not_found ->
             not_found;
         OrgId ->
-            case chef_otto:fetch_client(Server, OrgId, ClientName) of
+            case ?SH_TIME(ReqId, chef_otto, fetch_client, (Server, OrgId, ClientName)) of
                 {not_found, _} -> not_found;
                 Other -> Other
             end
