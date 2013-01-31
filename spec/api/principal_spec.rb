@@ -226,6 +226,60 @@ describe "Principals API Endpoint", :principals do
         end
       end
 
+      context 'when requesting an bad client' do
+        let(:principal_client_name) { platform.bad_client.name }
+        let(:cannot_load_nonexistent_msg) { 
+          ["Cannot load client #{principal_client_name}"] }
+
+        it 'returns a 200 ("OK") for admin' do
+          get(api_url("/principals/#{principal_client_name}"),
+              admin_user) do |response|
+            response.should look_like({
+                                        :status => 404,
+                                        :body_exact => {
+                                          "error" => cannot_load_nonexistent_msg
+                                        }
+                                      })
+          end
+        end
+
+        it 'returns a 200 ("OK") for normal user' do
+          get(api_url("/principals/#{principal_client_name}"),
+              normal_user) do |response|
+            response.should look_like({
+                                        :status => 404,
+                                        :body_exact => {
+                                          "error" => cannot_load_nonexistent_msg
+                                        }
+                                      })
+          end
+        end
+
+        it 'returns a 200 ("OK") for invalid user' do
+          get(api_url("/principals/#{principal_client_name}"),
+              invalid_user) do |response|
+            response.should look_like({
+                                        :status => 404,
+                                        :body_exact => {
+                                          "error" => cannot_load_nonexistent_msg
+                                        }
+                                      })
+          end
+        end
+
+        it 'returns a 200 ("OK") for outside user' do
+          get(api_url("/principals/#{principal_client_name}"),
+              outside_user) do |response|
+            response.should look_like({
+                                        :status => 404,
+                                        :body_exact => {
+                                          "error" => cannot_load_nonexistent_msg
+                                        }
+                                      })
+          end
+        end
+      end
+
       it 'returns a 404 ("Not Found") for missing principal for admin' do
         get(api_url("/principals/#{non_existent_principal_name}"),
             admin_user) do |response|
