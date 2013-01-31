@@ -16,10 +16,10 @@
 %% under the License.
 %%
 
-{application, bookshelf_wi,
+{application, bookshelf,
  [{description  , "Bookshelf Rest Interface: Amazon S3 Compatible"
    "Object Store Rest API"},
-  {vsn, "0.0.1"},
+  {vsn, "0.0.2"},
   {mod, {bksw_app, []}},
   {registered, [bksw_sup]},
   {included_applications, [mochiweb]},

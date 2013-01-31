@@ -31,7 +31,7 @@
 %% API functions
 %%===================================================================
 file(Path) ->
-    filename:join(code:priv_dir(bookshelf_wi), Path).
+    filename:join(code:priv_dir(bookshelf), Path).
 
 -spec to_integer(string() | binary()) -> integer().
 to_integer(Val) ->

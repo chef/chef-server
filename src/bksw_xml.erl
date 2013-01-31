@@ -25,7 +25,7 @@
          access_denied_error/1,
          model/0, write/1, write_erl/0, write_hrl/0]).
 
--include_lib("bookshelf_wi/include/bksw_obj.hrl").
+-include("bksw_obj.hrl").
 -include("amazon_s3.hrl").
 
 

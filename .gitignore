@@ -6,4 +6,4 @@ logs
 coverage.xml
 *.app
 rel/bookshelf
-.plt
+bookshelf.plt

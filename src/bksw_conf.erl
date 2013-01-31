@@ -87,9 +87,9 @@ disk_store() ->
     "/tmp/".
 -else.
 disk_store() ->
-    case application:get_env(bookshelf_wi, disk_store) of
+    case application:get_env(bookshelf, disk_store) of
         undefined ->
-            error({missing_config, {bookshelf_wi, disk_store}});
+            error({missing_config, {bookshelf, disk_store}});
         {ok, Path} when is_list(Path) ->
             case ends_with($/, Path) of
                 true ->
@@ -107,7 +107,7 @@ ends_with(Char, String) ->
 %%%===================================================================
 
 ip() ->
-    case application:get_env(bookshelf_wi, ip) of
+    case application:get_env(bookshelf, ip) of
         undefined ->
             [{ip, "127.0.0.1"}];
         {ok, Ip} ->
@@ -130,7 +130,7 @@ dispatch() ->
                  {[], bksw_idx, Config}]}].
 
 port() ->
-    case application:get_env(bookshelf_wi, port) of
+    case application:get_env(bookshelf, port) of
         undefined ->
             {port, 4321};
         {ok, Port} ->
@@ -138,25 +138,25 @@ port() ->
     end.
 
 keys() ->
-    case application:get_env(bookshelf_wi, keys) of
+    case application:get_env(bookshelf, keys) of
         undefined ->
-            error({missing_config, {bookshelf_wi, keys}});
+            error({missing_config, {bookshelf, keys}});
         {ok, {AWSAccessKey, SecretKey}} ->
             {keys, {bksw_util:to_binary(AWSAccessKey),
                     bksw_util:to_binary(SecretKey)}}
     end.
 
 log_dir() ->
-    case application:get_env(bookshelf_wi, log_dir) of
+    case application:get_env(bookshelf, log_dir) of
         undefined ->
-            Dir = code:priv_dir(bookshelf_wi),
+            Dir = code:priv_dir(bookshelf),
             {log_dir, Dir};
         {ok, Dir} ->
             {log_dir, Dir}
     end.
 
 stream_download() ->
-    case application:get_env(bookshelf_wi, stream_download) of
+    case application:get_env(bookshelf, stream_download) of
         {ok, true} ->
             true;
         _ ->

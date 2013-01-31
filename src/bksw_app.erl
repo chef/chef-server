@@ -39,10 +39,10 @@ manual_start() ->
     application:start(xmerl),
     application:start(ibrowse),
     application:start(mini_s3),
-    application:start(bookshelf_wi).
+    application:start(bookshelf).
 
 manual_stop() ->
-    application:stop(bookshelf_wi),
+    application:stop(bookshelf),
     application:stop(webmachine),
     application:stop(mochiweb),
     application:stop(mini_s3),

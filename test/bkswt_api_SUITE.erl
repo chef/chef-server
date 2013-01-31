@@ -24,7 +24,7 @@
 -compile(export_all).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("bookshelf_wi/src/internal.hrl").
+-include("../src/internal.hrl").
 
 -define(STR_CHARS, "abcdefghijklmnopqrstuvwxyz").
 
@@ -61,10 +61,10 @@ init_per_testcase(_TestCase, Config) ->
     error_logger:info_msg("Using disk_store: ~p~n", [DiskStore]),
     AccessKeyID = random_string(10, "abcdefghijklmnopqrstuvwxyz"),
     SecretAccessKey = random_string(30, "abcdefghijklmnopqrstuvwxyz"),
-    application:set_env(bookshelf_wi, disk_store, DiskStore),
-    application:set_env(bookshelf_wi, keys, {AccessKeyID, SecretAccessKey}),
-    application:set_env(bookshelf_wi, log_dir, LogDir),
-    application:set_env(bookshelf_wi, stream_download, true),
+    application:set_env(bookshelf, disk_store, DiskStore),
+    application:set_env(bookshelf, keys, {AccessKeyID, SecretAccessKey}),
+    application:set_env(bookshelf, log_dir, LogDir),
+    application:set_env(bookshelf, stream_download, true),
     ok = bksw_app:manual_start(),
     %% force webmachine to pickup new dispatch_list. I don't understand why it
     %% isn't enough to do application:stop/start for webmachine, but it isn't.
