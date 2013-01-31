@@ -28,7 +28,7 @@ allclean:
 
 distclean:
 	@rebar skip_deps=true clean
-	@rm -rf deps
+	@rm -rf deps $(DEPS_PLT)
 
 compile: $(DEPS)
 	@rebar compile
