@@ -99,7 +99,7 @@ requestors({
                  :name => 'bad_client',
                  :create_me => true,
                  :create_knife => true,
-                 :associate => false
+                 :bogus => true
                }
              },
 
