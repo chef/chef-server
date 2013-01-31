@@ -231,7 +231,7 @@ describe "Principals API Endpoint", :principals do
         let(:cannot_load_nonexistent_msg) { 
           ["Cannot load client #{principal_client_name}"] }
 
-        it 'returns a 200 ("OK") for admin' do
+        it 'returns a 404 ("Not Found") for admin' do
           get(api_url("/principals/#{principal_client_name}"),
               admin_user) do |response|
             response.should look_like({
@@ -243,7 +243,7 @@ describe "Principals API Endpoint", :principals do
           end
         end
 
-        it 'returns a 200 ("OK") for normal user' do
+        it 'returns a 404 ("Not Found") for normal user' do
           get(api_url("/principals/#{principal_client_name}"),
               normal_user) do |response|
             response.should look_like({
@@ -255,7 +255,7 @@ describe "Principals API Endpoint", :principals do
           end
         end
 
-        it 'returns a 200 ("OK") for invalid user' do
+        it 'returns a 404 ("Not Found") for invalid user' do
           get(api_url("/principals/#{principal_client_name}"),
               invalid_user) do |response|
             response.should look_like({
@@ -267,7 +267,7 @@ describe "Principals API Endpoint", :principals do
           end
         end
 
-        it 'returns a 200 ("OK") for outside user' do
+        it 'returns a 404 ("Not Found") for outside user' do
           get(api_url("/principals/#{principal_client_name}"),
               outside_user) do |response|
             response.should look_like({
