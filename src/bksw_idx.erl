@@ -21,6 +21,7 @@
 -module(bksw_idx).
 
 -export([init/1, is_authorized/2, allowed_methods/2, content_types_provided/2,
+         finish_request/2,
          resource_exists/2, to_xml/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
@@ -48,3 +49,24 @@ to_xml(Rq, Ctx) ->
     Term = bksw_xml:list_buckets(Buckets),
     Body = bksw_xml:write(Term),
     {Body, Rq, Ctx}.
+
+finish_request(Rq0, Ctx) ->
+    try
+        case wrq:response_code(Rq0) of
+            500 ->
+                Rq1 = create_500_response(Rq0, Ctx),
+                {true, Rq1, Ctx};
+            _ ->
+                {true, Rq0, Ctx}
+        end
+    catch
+        X:Y ->
+            error_logger:error_report({X, Y, erlang:get_stacktrace()})
+    end.
+
+create_500_response(Rq0, _Ctx) ->
+    %% sanitize response body
+    Msg = <<"internal service error">>,
+    Rq1 = wrq:set_resp_header("Content-Type",
+                               "text/plain", Rq0),
+    wrq:set_resp_body(Msg, Rq1).
