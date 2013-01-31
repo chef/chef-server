@@ -185,7 +185,12 @@ sec_fail(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
     Bucket = random_binary(),
     ?assertError({aws_error, {http_error, 403, _}},
-                 mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)).
+                 mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)),
+    %% also verify that unsigned URL requests don't crash
+    {ok, Status, _H, Body} = ibrowse:send_req("http://127.0.0.1:4321/foobar", [],
+                                              get),
+    ?assertEqual("403", Status),
+    ?assert(string:str(Body, "<Message>Access Denied</Message>") > 0).
 
 signed_url(doc) ->
     ["Test that signed urls actually work"];

@@ -47,28 +47,45 @@ do_signed_url_authorization(RequestId, Req0, Context) ->
     Path  = wrq:path(Req0),
     AccessKey = bksw_conf:access_key_id(Context),
     SecretKey = bksw_conf:secret_access_key(Context),
-    {StringToSign, Signature} =
+    case make_signed_url_authorization(SecretKey,
+                                       Method,
+                                       Path,
+                                       Expires,
+                                       Headers) of
+        {StringToSign, Signature} ->
+            case is_expired(Expires) of
+                true ->
+                    encode_access_denied_error_response(RequestId, Req0, Context);
+                false ->
+                    case ((erlang:iolist_to_binary(AWSAccessKeyId) ==
+                               erlang:iolist_to_binary(AccessKey)) andalso
+                          erlang:iolist_to_binary(Signature) ==
+                              erlang:iolist_to_binary(IncomingSignature)) of
+                        true ->
+                            {true, Req0, Context};
+                        false ->
+                            encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
+                                                       StringToSign, Req0, Context)
+                    end
+                end;
+        error ->
+            encode_access_denied_error_response(RequestId, Req0, Context)
+    end.
+
+make_signed_url_authorization(SecretKey, Method, Path, Expires, Headers) ->
+    try
         mini_s3:make_signed_url_authorization(SecretKey,
                                               erlang:list_to_existing_atom(Method),
                                               Path,
                                               Expires,
-                                              Headers),
-    case is_expired(Expires) of
-        true ->
-            encode_access_denied_error_response(RequestId, Req0, Context);
-        false ->
-            case ((erlang:iolist_to_binary(AWSAccessKeyId) ==
-                       erlang:iolist_to_binary(AccessKey)) andalso
-                  erlang:iolist_to_binary(Signature) ==
-                      erlang:iolist_to_binary(IncomingSignature)) of
-                true ->
-                    {true, Req0, Context};
-                false ->
-                    encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
-                                               StringToSign, Req0, Context)
-            end
+                                              Headers)
+    catch
+        _:Why ->
+            error_logger:error_report({error, {{mini_s3, make_signed_url_authorization},
+                                               [<<"SECRETKEY">>, Method, Path, Expires, Headers],
+                                               Why}}),
+            error
     end.
-
 
 do_standard_authorization(RequestId, IncomingAuth, Req0, Context) ->
     Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
