@@ -291,12 +291,16 @@ assemble_cookbook_ejson(#chef_cookbook_version{
 minimal_cookbook_ejson(#chef_cookbook_version{org_id = OrgId,
                                               frozen=Frozen,
                                               serialized_object=XCookbookJSON,
-                                              metadata=XMetadataJSON}) ->
+                                              metadata=XMetadataJSON,
+                                              meta_deps=DependenciesJSON}) ->
     %% The serialized_object is everything but the metadata, and metadata in turn is all the
-    %% metadata except the attributes, long description, and dependencies.  We do not
-    %% add in the sub pieces of the metadata when merging
+    %% metadata except the attributes and long description.  We do not add in the sub pieces
+    %% of the metadata when merging
 
-    Metadata = inflate(<<"metadata">>, XMetadataJSON),
+    Metadata0 = inflate(<<"metadata">>, XMetadataJSON),
+    Metadata = ej:set({<<"dependencies">>}, Metadata0,
+                      inflate(<<"dependencies">>, DependenciesJSON)),
+
     CookbookJSON = annotate_with_s3_urls(inflate(<<"cookbook">>, XCookbookJSON), OrgId),
 
     lists:foldl(fun({Key, Data}, CB) ->

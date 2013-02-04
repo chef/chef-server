@@ -234,6 +234,22 @@ assemble_cookbook_ejson_test_() ->
                                             chef_cookbook:assemble_cookbook_ejson(Record)),
 
               test_utils:validate_modules(MockedModules)
+      end},
+
+     {"minimal rehydration test",
+      fun() ->
+              OrgId = <<"12341234123412341234123412341234">>,
+              AuthzId = <<"auth">>,
+              Record = chef_object:new_record(chef_cookbook_version,
+                                              OrgId,
+                                              AuthzId,
+                                              CBEJson),
+
+              MinCb = chef_cookbook:minimal_cookbook_ejson(Record),
+              ?assertEqual(undefined, ej:get({"metadata", "attributes"}, MinCb)),
+              ?assertEqual(undefined, ej:get({"metadata", "long_description"}, MinCb)),
+              ?assertEqual({[{<<"ruby">>, []}]}, ej:get({"metadata", "dependencies"}, MinCb)),
+              test_utils:validate_modules(MockedModules)
       end}
     ]}.
 
