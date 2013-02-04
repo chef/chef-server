@@ -1,0 +1,118 @@
+#+TITLE: RFC: Migration of Chef_* couch database objects
+* Objective
+We want to cleanly migrate our customer's organization data from the couchdb chef_* databases to
+postgresql, and switch them to use erchef for the bulk of their requests.
+
+* Requirements
+** We want to be able to migrate orgs independently
+We must allow some orgs to be in couch and some in sql
+This implies dark launch capability to route requests properly
+** Organizations can be down for 30 minutes or so during migration (DISCUSS)
+This simplifies migration; we can simply wait for requests to complete
+rather than the complex tracking we did for nodes
+** We want to keep the system up for orgs not in active migration (DISCUSS)
+** We will not migrate pre-created orgs
+** We will not attempt to migrate knife-test (the largest couchdb file)
+
+* High level migration sequence
+** A week or so before M-day
+*** Install dark-launch routing system 
+This is to allow us to select on an org-by-org basis who is using ruby-couch
+and who is using erchef-sql, and have a 'maintainance mode' flag to
+completely disable access on a per org basis.
+*** Set darklaunch default to be ruby-couch
+*** Test migrate orgs
+Migrate a small number of test orgs, and do sanity checking on them
+*** Migrate first testing wave
+A small group of friendly customers are migrated to get broader
+experience using erchef.
+** Shortly before M-day
+*** Last minute test migration sweep over over all orgs
+Clone data to preprod, run migration tooling to v
+*** Identify customers who will not be migrated in the main body
+** M-day
+*** Populate all unset dark launch databags to point to ruby-couch
+*** set dark launch default to use erchef-sql
+*** Fix org-creation (See below)
+*** Migrate main body
+** After M-day
+*** Migrate trailing edge
+We may have certain customers who are not able to be migrated with the
+main body. We'd like to drive this set to zero, but must plan for this
+possibility.
+*** Migration cleanup; remove migrated data from couchdb
+
+* Dark launch 
+Our current plan is to have Nginx route requests based on per org configuration information, either
+using ruby chef or sql chef. Nginx would parse out the org name from the URI, look it up in a
+databse, and route accordingly. Dark launch will overlay default global configurations with whatever
+org specific information is stored to produce the final configuration information used to control
+the system.
+
+For the purposes of this migration, we will want two separate flags in dark launch: a flag
+indicating whether to route requests to erchef or ruby chef, and a flag to completely disable
+routing an organization's requests ('maintainance mode'). 
+
+We will deploy dark launch well in advance of the migration with settings that preserve our current
+behavior. This deployment should be doable without downtime. This will allow us to do small scale
+testing prior to the main event.
+
+* Org migration flow
+Most orgs will be migrated in batches, and will be advanced through the following steps
+together. Org migration is intended to be relatively granular; the chunk size will be chosen to
+allow reasonable amortization of cool down wait time without having excessive downtime for any
+individual org. We will target about 10 minutes of downtime as the desired goal, and probably
+message 30 minutes to external customers.
+
+The actual grouping of the batches will be done semi-statically; we will assemble a list of orgs to
+migrate, and give them to the migrator 
+
+** Populate dark launch record for org with settings to use ruby-couch, and maintainance mode false
+** Set maintainance mode to true, disabling the org.
+** Wait a bit for pending requests to complete. 
+*** Can we verify this cheaply?
+*** What is the max TTL for a request? Should we set that lower for the duration of the migration activity?
+** Start migrating orgs from couch to sql. This may be done in parallel.
+** Validate org migration successful
+** If successful, set dark launch to route to erchef-pgsql
+** Set maintainance mode to false, re-enabling the org.
+
+A small optimization is to restore service to orgs as they complete,
+rather than limit them to batch granularity.
+
+* Org creation fixup
+Precreated orgs should not be migrated. Instead we will create fresh orgs using erchef-sql, and
+destroy the old couchdb orgs. The easiest way to do this is to turn off new org signups for a
+while. This is probably best done before the main migration.
+
+Transitioning over is a multi-step process:
+1. Disable new org creation at webui
+2. Disable org-creator
+3. Remove all pre-created orgs from organizations list
+   + Is there a clean delete org primitive?
+4. Insure dark-launch default uses sql
+   We change the name of the pre-created orgs when we 'create' an org. So we will start out without
+   any org specific dark launch configuration. We will either need to insure any needed dark-launch
+   configuration is created then, or insure that the default works for newly created orgs.
+
+   It may be worth creating a template dark-launch config for newly created orgs, and replicating
+   this as part of org creation.
+
+5. Enable new org creation, should now use native sql orgs
+6. Wait for a new few orgs to accumulate
+7. Enable org-creation at the webui
+
+* Research and Open questions
+** Org creator
+*** Org creator: does it need to be dark-launch capabl?e
+*** What is typical org-creation rate? How long do we need to wait to get them available?
+** Dark launch
+*** Dark launch prototyping for NGINX (OC-5949)
+*** Current users of dark launch API should be able to either parse headers or use redis.
+*** We will want tooling to allow easy interogation and modification of dark launch entries.
+** User communication
+*** We should have a maintainance mode darklaunch flag
+This disables the org at the LB, and indicates so in the webui.
+*** What's the cleanest messaging for the migration process? 
+Do we want the users to know they're being migrated? 
+Do we want to indicate some level of state in the webui?
