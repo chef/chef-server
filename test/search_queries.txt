@@ -97,3 +97,8 @@ content:words__=__\"*
 ec2:*
 content:ec2__=__*
 
+mount:/foo
+content:mount__=__/foo
+
+mount:foo/bar
+content:mount__=__foo/bar

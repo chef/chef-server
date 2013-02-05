@@ -44,9 +44,9 @@ string <- '"' str:(term (space term)*) '"';
 keyword <- "AND" / "OR" / "NOT";
 
 
-valid_letter <- start_letter+ ([a-zA-Z0-9*?@_+.-] / '\\' special_char)*;
+valid_letter <- start_letter+ ([a-zA-Z0-9*?@_+./-] / '\\' special_char)*;
 
-start_letter <- [a-zA-Z0-9_.*] / '\\' special_char;
+start_letter <- [a-zA-Z0-9_.*/] / '\\' special_char;
 
 space <- [ \t]+;
 
