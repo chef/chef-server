@@ -105,10 +105,10 @@ parse(Input) when is_binary(Input) ->
   p(Input, Index, 'keyword', fun(I,D) -> (p_choose([p_string(<<"AND">>), p_string(<<"OR">>), p_string(<<"NOT">>)]))(I,D) end, fun(Node, Idx) -> transform('keyword', Node, Idx) end).
 
 'valid_letter'(Input, Index) ->
-  p(Input, Index, 'valid_letter', fun(I,D) -> (p_seq([p_one_or_more(fun 'start_letter'/2), p_zero_or_more(p_choose([p_charclass(<<"[a-zA-Z0-9*?@_+.-]">>), p_seq([p_string(<<"\\">>), fun 'special_char'/2])]))]))(I,D) end, fun(Node, Idx) -> transform('valid_letter', Node, Idx) end).
+  p(Input, Index, 'valid_letter', fun(I,D) -> (p_seq([p_one_or_more(fun 'start_letter'/2), p_zero_or_more(p_choose([p_charclass(<<"[a-zA-Z0-9*?@_+.\/-]">>), p_seq([p_string(<<"\\">>), fun 'special_char'/2])]))]))(I,D) end, fun(Node, Idx) -> transform('valid_letter', Node, Idx) end).
 
 'start_letter'(Input, Index) ->
-  p(Input, Index, 'start_letter', fun(I,D) -> (p_choose([p_charclass(<<"[a-zA-Z0-9_.*]">>), p_seq([p_string(<<"\\">>), fun 'special_char'/2])]))(I,D) end, fun(Node, Idx) -> transform('start_letter', Node, Idx) end).
+  p(Input, Index, 'start_letter', fun(I,D) -> (p_choose([p_charclass(<<"[a-zA-Z0-9_.*\/]">>), p_seq([p_string(<<"\\">>), fun 'special_char'/2])]))(I,D) end, fun(Node, Idx) -> transform('start_letter', Node, Idx) end).
 
 'space'(Input, Index) ->
   p(Input, Index, 'space', fun(I,D) -> (p_one_or_more(p_charclass(<<"[\s\t]">>)))(I,D) end, fun(Node, Idx) -> transform('space', Node, Idx) end).
