@@ -38,7 +38,7 @@ decode(Bin) ->
     end.
 
 encode(EJSON) ->
-    jiffy:encode(EJSON).
+    erlang:iolist_to_binary(jiffy:encode(EJSON)).
 
 -spec decode_body( binary() ) -> ejson_term(). % or throw
 %% @doc Decodes JSON body and verifies valid payload type
