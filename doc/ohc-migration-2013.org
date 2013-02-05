@@ -62,8 +62,6 @@ are already using it for mysql.
 ** Integrate pg client in oc-account
 ** Integrate pg client into oc-chef
 ** Integrate pg client into oc_erchef
-** Integrate pg client into oc_reporting
-** Community site?
 ** Convert cron scripts that pull data from mysql for internal reports
 ** Update support tool
 ** Update org-mapper
