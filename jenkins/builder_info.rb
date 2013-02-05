@@ -6,7 +6,7 @@ require 'yajl'
 class OhNo
   def ohai
     if !@ohai
-      raw = `ohai`
+      raw = `ohai -lerror`
       @ohai = Yajl::Parser.new.parse(raw)
     end
     @ohai
