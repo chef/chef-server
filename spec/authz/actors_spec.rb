@@ -106,14 +106,61 @@ describe "Actors Endpoint" do
     # empty JSON object!  It can basically only answer the question
     # "Is there an actor with this ID?"
     context "GET" do
-      with_actor :alice
-      with_actor :bob
+      context "an actor directly in the READ ACE" do
+        with_actors :alice, :testy
 
-      it "should retrieve an empty body and a 200" do
-        get("/actors/#{bob}", :superuser).should have_status_code(200).with_body({})
+        with_ace_on_actor :testy, :read, :actors => [:alice]
+
+        it "can read the actor" do
+          :alice.should directly_have_permission(:read).on_actor(:testy)
+          get("/actors/#{testy}", :alice).should have_status_code(200).with_body({})
+        end
       end
 
-      it "must be in the READ ACE"
+      context "an actor NOT in the READ ACE" do
+        with_actors :bob, :testy
+
+        # Give bob everything EXCEPT delete
+        with_acl_on_actor :testy, {
+          :create => {:actors => [:bob], :groups => []},
+          :read   => {:actors => [],     :groups => []}, # <--- That's the one!
+          :update => {:actors => [:bob], :groups => []},
+          :delete => {:actors => [:bob], :groups => []},
+          :grant  => {:actors => [:bob], :groups => []}
+        }
+
+        it "cannot read the actor" do
+          :bob.should_not directly_have_permission(:read).on_actor(:testy)
+          get("/actors/#{testy}", :bob).should have_status_code(403).with_body({"error" => "must be in the read access control entry to perform this action"})
+        end
+      end
+
+      context "an actor inderectly in the READ ACE" do
+        with_actors :alice, :testy, :bob
+        with_group :hackers
+
+        with_ace_on_actor :testy, :read, :groups => [:hackers]
+        with_members :hackers, :actors => [:alice]
+
+        it "can read the actor" do
+
+          :alice.should_not directly_have_permission(:read).on_actor(:testy)
+          :alice.should be_a_direct_member_of(:hackers)
+          :hackers.should directly_have_permission(:read).on_actor(:testy)
+
+          get("/actors/#{testy}", :alice).should have_status_code(200).with_body({})
+        end
+      end
+
+      context "with a non-existent target" do
+        with_actor :alice
+
+        it "can't be read, because it doesn't exist" do
+          fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+
+          get("/actors/#{fake_actor}", :alice).should have_status_code(404)
+        end
+      end
     end
 
     should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff"
@@ -228,7 +275,9 @@ describe "Actors Endpoint" do
     context "DELETE"
   end # /actors/<actor_id>/acl/<action>
 
-  # TODO: is there a GET /actors/<actor_id>/acl/<action>/<member_type> endpoint?
+  context "/actors/<actor_id>/acl/<action>/<member_type>" do
+    # TODO: make sure there are no permissions here
+  end # /actors/<actor_id>/acl/<action>/<member_type>
 
   context "/actors/<actor_id>/acl/<action>/<member_type>/<member_id>" do
 
