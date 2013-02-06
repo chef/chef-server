@@ -67,22 +67,29 @@ describe "Actors Endpoint" do
           :testy.should directly_have_permission(:delete).on_actor(:testy)
           :testy.should directly_have_permission(:grant).on_actor(:testy)
         end
+      end
+
+      context "created actor part deux" do
+        with_actor :testy
+
+        before :each do
+          response = post("/actors", testy)
+          @actor = parse(response)["id"]
+        end
+
+        after :each do
+          delete("/actors/#{@actor}", testy)
+        end
 
         it "contains creator in ACLs" do
-          response = post("/actors", testy)
-          actor = parse(response)["id"]
-
-          body = {"create" => {"actors" => [actor, testy], "groups" => []},
-            "read" => {"actors" => [actor, testy], "groups" => []},
-            "update" => {"actors" => [actor, testy], "groups" => []},
-            "delete" => {"actors" => [actor, testy], "groups" => []},
-            "grant" => {"actors" => [actor, testy], "groups" => []}}
+          body = {"create" => {"actors" => [@actor, testy], "groups" => []},
+            "read" => {"actors" => [@actor, testy], "groups" => []},
+            "update" => {"actors" => [@actor, testy], "groups" => []},
+            "delete" => {"actors" => [@actor, testy], "groups" => []},
+            "grant" => {"actors" => [@actor, testy], "groups" => []}}
           
-          get("/actors/#{actor}/acl",
+          get("/actors/#{@actor}/acl",
               :superuser).should have_status_code(200).with_body(body)
-
-          # TODO: move creation to before clause and this to an after clause
-          delete("/actors/#{actor}", testy)
         end
       end
     end # POST
@@ -424,8 +431,6 @@ describe "Actors Endpoint" do
     should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create"
 
     # PUT replaces an ACE atomically
-
-    # TODO: add tests for bad input; should be returning 400 instead of 500
 
     context "PUT" do
       ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
