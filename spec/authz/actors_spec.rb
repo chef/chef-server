@@ -82,7 +82,7 @@ describe "Actors Endpoint" do
       context "an actor NOT in the READ ACE" do
         with_actors :bob, :testy
 
-        # Give bob everything EXCEPT delete
+        # Give bob everything EXCEPT read
         with_acl_on_actor :testy, {
           :create => {:actors => [:bob], :groups => []},
           :read   => {:actors => [],     :groups => []}, # <--- That's the one!
@@ -209,7 +209,263 @@ describe "Actors Endpoint" do
     # Cucumber: Additionally, a newly-created actor should contain
     # *the actor that created it* in each of its ACEs (same caveats
     # re: ACL vs. ACEs apply)
-    context "GET"
+
+    context "GET" do
+      context "an actor directly in the CREATE ACE" do
+        with_actors :alice, :testy
+
+        with_ace_on_actor :testy, :create, :actors => [:alice]
+
+        # TODO: abstract body creation, since these are all very close to each other
+        # with only one actor/group change each
+
+        let(:body) {
+          {"create" => {"actors" => [alice], "groups" => []},
+            "read" => {"actors" => [testy], "groups" => []},
+            "update" => {"actors" => [testy], "groups" => []},
+            "delete" => {"actors" => [testy], "groups" => []},
+            "grant" => {"actors" => [testy], "groups" => []}}
+        }
+
+        it "can read the acl" do
+          :alice.should directly_have_permission(:create).on_actor(:testy)
+          get("/actors/#{testy}/acl", :alice).should have_status_code(200).with_body(body)
+        end
+      end
+
+      context "an actor directly in the READ ACE" do
+        with_actors :alice, :testy
+
+        with_ace_on_actor :testy, :read, :actors => [:alice]
+
+        let(:body) {
+          {"create" => {"actors" => [testy], "groups" => []},
+            "read" => {"actors" => [alice], "groups" => []},
+            "update" => {"actors" => [testy], "groups" => []},
+            "delete" => {"actors" => [testy], "groups" => []},
+            "grant" => {"actors" => [testy], "groups" => []}}
+        }
+
+        it "can read the acl" do
+          :alice.should directly_have_permission(:read).on_actor(:testy)
+          get("/actors/#{testy}/acl", :alice).should have_status_code(200).with_body(body)
+        end
+      end
+
+      context "an actor directly in the UPDATE ACE" do
+        with_actors :alice, :testy
+
+        with_ace_on_actor :testy, :update, :actors => [:alice]
+
+        let(:body) {
+          {"create" => {"actors" => [testy], "groups" => []},
+            "read" => {"actors" => [testy], "groups" => []},
+            "update" => {"actors" => [alice], "groups" => []},
+            "delete" => {"actors" => [testy], "groups" => []},
+            "grant" => {"actors" => [testy], "groups" => []}}
+        }
+
+        it "can read the acl" do
+          :alice.should directly_have_permission(:update).on_actor(:testy)
+          get("/actors/#{testy}/acl", :alice).should have_status_code(200).with_body(body)
+        end
+      end
+
+      context "an actor directly in the DELETE ACE" do
+        with_actors :alice, :testy
+
+        with_ace_on_actor :testy, :delete, :actors => [:alice]
+
+        let(:body) {
+          {"create" => {"actors" => [testy], "groups" => []},
+            "read" => {"actors" => [testy], "groups" => []},
+            "update" => {"actors" => [testy], "groups" => []},
+            "delete" => {"actors" => [alice], "groups" => []},
+            "grant" => {"actors" => [testy], "groups" => []}}
+        }
+
+        it "can read the acl" do
+          :alice.should directly_have_permission(:delete).on_actor(:testy)
+          get("/actors/#{testy}/acl", :alice).should have_status_code(200).with_body(body)
+        end
+      end
+
+      context "an actor directly in the GRANT ACE" do
+        with_actors :alice, :testy
+
+        with_ace_on_actor :testy, :grant, :actors => [:alice]
+
+        let(:body) {
+          {"create" => {"actors" => [testy], "groups" => []},
+            "read" => {"actors" => [testy], "groups" => []},
+            "update" => {"actors" => [testy], "groups" => []},
+            "delete" => {"actors" => [testy], "groups" => []},
+            "grant" => {"actors" => [alice], "groups" => []}}
+        }
+
+        it "can read the acl" do
+          :alice.should directly_have_permission(:grant).on_actor(:testy)
+          get("/actors/#{testy}/acl", :alice).should have_status_code(200).with_body(body)
+        end
+      end
+
+      context "an actor with NO ACE" do
+        with_actors :bob, :testy
+
+        # Give bob no access at all
+        with_acl_on_actor :testy, {
+          :create => {:actors => [], :groups => []},
+          :read   => {:actors => [], :groups => []},
+          :update => {:actors => [], :groups => []},
+          :delete => {:actors => [], :groups => []},
+          :grant  => {:actors => [], :groups => []}
+        }
+
+        it "cannot read the acl" do
+          :bob.should_not directly_have_permission(:create).on_actor(:testy) 
+          :bob.should_not directly_have_permission(:read).on_actor(:testy)
+          :bob.should_not directly_have_permission(:update).on_actor(:testy)
+          :bob.should_not directly_have_permission(:delete).on_actor(:testy)
+          :bob.should_not directly_have_permission(:grant).on_actor(:testy)
+         get("/actors/#{testy}/acl", :bob).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
+        end
+      end
+
+      context "an actor inderectly in the CREATE ACE" do
+        with_actors :alice, :testy, :bob
+        with_group :hackers
+
+        with_ace_on_actor :testy, :create, :groups => [:hackers]
+        with_members :hackers, :actors => [:alice]
+
+        let(:body) {
+          {"create" => {"actors" => [], "groups" => [hackers]},
+            "read" => {"actors" => [testy], "groups" => []},
+            "update" => {"actors" => [testy], "groups" => []},
+            "delete" => {"actors" => [testy], "groups" => []},
+            "grant" => {"actors" => [testy], "groups" => []}}
+        }
+
+        it "can read the acl" do
+
+          :alice.should_not directly_have_permission(:create).on_actor(:testy)
+          :alice.should be_a_direct_member_of(:hackers)
+          :hackers.should directly_have_permission(:create).on_actor(:testy)
+
+          get("/actors/#{testy}/acl", :alice).should have_status_code(200).with_body(body)
+        end
+      end
+
+      context "an actor inderectly in the READ ACE" do
+        with_actors :alice, :testy, :bob
+        with_group :hackers
+
+        with_ace_on_actor :testy, :read, :groups => [:hackers]
+        with_members :hackers, :actors => [:alice]
+
+        let(:body) {
+          {"create" => {"actors" => [testy], "groups" => []},
+            "read" => {"actors" => [], "groups" => [hackers]},
+            "update" => {"actors" => [testy], "groups" => []},
+            "delete" => {"actors" => [testy], "groups" => []},
+            "grant" => {"actors" => [testy], "groups" => []}}
+        }
+
+        it "can read the acl" do
+
+          :alice.should_not directly_have_permission(:read).on_actor(:testy)
+          :alice.should be_a_direct_member_of(:hackers)
+          :hackers.should directly_have_permission(:read).on_actor(:testy)
+
+          get("/actors/#{testy}/acl", :alice).should have_status_code(200).with_body(body)
+        end
+      end
+
+      context "an actor inderectly in the UPDATE ACE" do
+        with_actors :alice, :testy, :bob
+        with_group :hackers
+
+        with_ace_on_actor :testy, :update, :groups => [:hackers]
+        with_members :hackers, :actors => [:alice]
+
+        let(:body) {
+          {"create" => {"actors" => [testy], "groups" => []},
+            "read" => {"actors" => [testy], "groups" => []},
+            "update" => {"actors" => [], "groups" => [hackers]},
+            "delete" => {"actors" => [testy], "groups" => []},
+            "grant" => {"actors" => [testy], "groups" => []}}
+        }
+
+        it "can read the acl" do
+
+          :alice.should_not directly_have_permission(:update).on_actor(:testy)
+          :alice.should be_a_direct_member_of(:hackers)
+          :hackers.should directly_have_permission(:update).on_actor(:testy)
+
+          get("/actors/#{testy}/acl", :alice).should have_status_code(200).with_body(body)
+        end
+      end
+
+      context "an actor inderectly in the DELETE ACE" do
+        with_actors :alice, :testy, :bob
+        with_group :hackers
+
+        with_ace_on_actor :testy, :delete, :groups => [:hackers]
+        with_members :hackers, :actors => [:alice]
+
+        let(:body) {
+          {"create" => {"actors" => [testy], "groups" => []},
+            "read" => {"actors" => [testy], "groups" => []},
+            "update" => {"actors" => [testy], "groups" => []},
+            "delete" => {"actors" => [], "groups" => [hackers]},
+            "grant" => {"actors" => [testy], "groups" => []}}
+        }
+
+        it "can read the acl" do
+
+          :alice.should_not directly_have_permission(:delete).on_actor(:testy)
+          :alice.should be_a_direct_member_of(:hackers)
+          :hackers.should directly_have_permission(:delete).on_actor(:testy)
+
+          get("/actors/#{testy}/acl", :alice).should have_status_code(200).with_body(body)
+        end
+      end
+
+      context "an actor inderectly in the GRANT ACE" do
+        with_actors :alice, :testy, :bob
+        with_group :hackers
+
+        with_ace_on_actor :testy, :grant, :groups => [:hackers]
+        with_members :hackers, :actors => [:alice]
+
+        let(:body) {
+          {"create" => {"actors" => [testy], "groups" => []},
+            "read" => {"actors" => [testy], "groups" => []},
+            "update" => {"actors" => [testy], "groups" => []},
+            "delete" => {"actors" => [testy], "groups" => []},
+            "grant" => {"actors" => [], "groups" => [hackers]}}
+        }
+
+        it "can read the acl" do
+
+          :alice.should_not directly_have_permission(:grant).on_actor(:testy)
+          :alice.should be_a_direct_member_of(:hackers)
+          :hackers.should directly_have_permission(:grant).on_actor(:testy)
+
+          get("/actors/#{testy}/acl", :alice).should have_status_code(200).with_body(body)
+        end
+      end
+
+      context "with a non-existent target" do
+        with_actor :alice
+
+        it "can't be read, because it doesn't exist" do
+          fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+
+          get("/actors/#{fake_actor}/acl", :alice).should have_status_code(404)
+        end
+      end
+    end
 
     # NOTE: We'll want to eventually allow these operations in order
     # to facilitate bulk operations
@@ -239,6 +495,8 @@ describe "Actors Endpoint" do
 
   context "/actors/<actor_id>/acl/<action>/<member_type>" do
     # TODO: make sure there are no permissions here
+    # This has...  Interesting results:
+    # should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/"
   end # /actors/<actor_id>/acl/<action>/<member_type>
 
   context "/actors/<actor_id>/acl/<action>/<member_type>/<member_id>" do
