@@ -3,6 +3,8 @@ module Pedant
     module ActorsUtil
       # rspec dsl is mixed into every module
 
+      # TODO: generalize this so that we can test headers across endpoints, not
+      # just for create
       shared_context 'create an actor as' do
         # This whole '@actor_id' thing is a bit hacky, but I don't know
         # of another way to pass information from inside an example back
