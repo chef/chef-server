@@ -434,7 +434,7 @@ describe "Actors Endpoint" do
     should_not_allow :DELETE, "/actors/ffffffffffffffffffffffffffffffff/acl"
   end # /actors/<actor_id>/acl
 
-  context "/actors/<actor_id>/acl/<action>" do
+  context "/actors/<actor_id>/acl/<action>", :focus do
     # GET actors and groups for action
     #
     # Cucumber: a newly-created actor should itself be present in each
@@ -442,7 +442,94 @@ describe "Actors Endpoint" do
     #
     # Cucumber: Additionally, a newly-created actor should contain
     # *the actor that created it* in each of its ACEs
-    context "GET"
+    context "GET" do
+      include_context "create acl body"
+
+      ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
+        context "for #{action} action" do
+
+          ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |ace|
+
+            context "an actor directly in the #{ace} ACE" do
+              with_actors :alice, :testy
+
+              with_ace_on_actor :testy, ace.downcase.to_sym, :actors => [:alice]
+
+              if (action == ace)
+                let(:body) { {"actors" => [alice], "groups" => []} }
+              else
+                let(:body) { {"actors" => [testy], "groups" => []} }
+              end
+
+              it "can read the acl" do
+                :alice.should directly_have_permission(ace.downcase.to_sym).
+                  on_actor(:testy)
+                get("/actors/#{testy}/acl/#{action}",
+                    :alice).should have_status_code(200).with_body(body)
+              end
+            end
+
+            context "an actor inderectly in the #{ace} ACE" do
+              with_actors :alice, :testy, :bob
+              with_group :hackers
+
+              with_ace_on_actor :testy, ace.downcase.to_sym, :groups => [:hackers]
+              with_members :hackers, :actors => [:alice]
+
+              if (action == ace)
+                let(:body) { {"actors" => [], "groups" => [hackers]} }
+              else
+                let(:body) { {"actors" => [testy], "groups" => []} }
+              end
+
+              it "can read the acl" do
+                :alice.should_not directly_have_permission(ace.downcase.to_sym).
+                  on_actor(:testy)
+                :alice.should be_a_direct_member_of(:hackers)
+                :hackers.should directly_have_permission(ace.downcase.to_sym).
+                  on_actor(:testy)
+
+                get("/actors/#{testy}/acl/#{action}",
+                    :alice).should have_status_code(200).with_body(body)
+              end
+            end
+
+            context "an actor with NO ACE" do
+              with_actors :bob, :testy
+
+              # Give bob no access at all
+              with_acl_on_actor :testy, {
+                :create => {:actors => [], :groups => []},
+                :read   => {:actors => [], :groups => []},
+                :update => {:actors => [], :groups => []},
+                :delete => {:actors => [], :groups => []},
+                :grant  => {:actors => [], :groups => []}
+              }
+
+              it "cannot read the acl" do
+                :bob.should_not directly_have_permission(:create).on_actor(:testy) 
+                :bob.should_not directly_have_permission(:read).on_actor(:testy)
+                :bob.should_not directly_have_permission(:update).on_actor(:testy)
+                :bob.should_not directly_have_permission(:delete).on_actor(:testy)
+                :bob.should_not directly_have_permission(:grant).on_actor(:testy)
+                get("/actors/#{testy}/acl/#{action}", :bob).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
+              end
+            end
+
+            context "with a non-existent target" do
+              with_actor :alice
+
+              it "can't be read, because it doesn't exist" do
+                fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+
+                get("/actors/#{fake_actor}/acl/#{action}",
+                    :alice).should have_status_code(404)
+              end
+            end
+          end
+        end
+      end
+    end
 
     should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create"
 
