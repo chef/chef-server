@@ -57,7 +57,7 @@ describe "Actors Endpoint" do
       end
 
       context "created actor" do
-        with_actors :testy
+        with_actor :testy
 
         it "is in own ACEs" do
           :testy.should directly_have_permission(:create).on_actor(:testy)
@@ -65,6 +65,20 @@ describe "Actors Endpoint" do
           :testy.should directly_have_permission(:update).on_actor(:testy)
           :testy.should directly_have_permission(:delete).on_actor(:testy)
           :testy.should directly_have_permission(:grant).on_actor(:testy)
+        end
+
+        it "contains creator in ACLs" do
+          response = post("/actors", testy)
+          actor = parse(response)["id"]
+
+          body = {"create" => {"actors" => [actor, testy], "groups" => []},
+            "read" => {"actors" => [actor, testy], "groups" => []},
+            "update" => {"actors" => [actor, testy], "groups" => []},
+            "delete" => {"actors" => [actor, testy], "groups" => []},
+            "grant" => {"actors" => [actor, testy], "groups" => []}}
+          
+          get("/actors/#{actor}/acl",
+              :superuser).should have_status_code(200).with_body(body)
         end
       end
     end
@@ -441,7 +455,7 @@ describe "Actors Endpoint" do
 
   context "/actors/<actor_id>/acl/<action>/<member_type>" do
     # TODO: make sure there are no permissions here
-    # This has...  Interesting results:
+    # This has...  Interesting results (okay, is 404 not 405):
     # should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/"
   end # /actors/<actor_id>/acl/<action>/<member_type>
 
