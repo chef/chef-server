@@ -81,7 +81,7 @@ describe "Actors Endpoint" do
               :superuser).should have_status_code(200).with_body(body)
         end
       end
-    end
+    end # POST
 
     should_not_allow :PUT, "/actors"
     should_not_allow :DELETE, "/actors"
@@ -149,7 +149,7 @@ describe "Actors Endpoint" do
           get("/actors/#{fake_actor}", :alice).should have_status_code(404)
         end
       end
-    end
+    end # GET
 
     should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff"
     should_not_allow :PUT, "/actors/ffffffffffffffffffffffffffffffff"
@@ -221,7 +221,7 @@ describe "Actors Endpoint" do
           delete("/actors/#{fake_actor}", :alice).should have_status_code(404)
         end
       end
-    end
+    end # DELETE
   end # /actors/<actor_id>
 
   context "/actors/<actor_id>/acl" do
@@ -309,7 +309,7 @@ describe "Actors Endpoint" do
           get("/actors/#{fake_actor}/acl", :alice).should have_status_code(404)
         end
       end
-    end
+    end # GET
 
     # NOTE: We'll want to eventually allow these operations in order
     # to facilitate bulk operations
@@ -411,18 +411,58 @@ describe "Actors Endpoint" do
           end
         end
       end
-    end
+    end # GET
 
     should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create"
 
     # PUT replaces an ACE atomically
-    context "PUT"
+    context "PUT" do
+      ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
+        context "for #{action} action" do
+        end
+      end
+    end # PUT
 
     # DELETE clears actors and groups from ACE
-    context "DELETE"
+    context "DELETE" do
+      ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
+        context "for #{action} action" do
+        end
+      end
+    end # DELETE
   end # /actors/<actor_id>/acl/<action>
 
   context "/actors/<actor_id>/acl/<action>/<member_type>" do
+    with_actor :testy
+
+    ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
+      context "for #{action} action" do
+        ['ACTORS', 'CONTAINERS', 'GROUPS', 'OBJECTS'].each do |type|
+          context "for #{type} member type" do
+            it "get should not be found" do
+              get("/actors/#{testy}/acl/#{action.downcase}/#{type.downcase}/",
+                  :superuser).should have_status_code(404)
+            end
+
+            it "post should not be found" do
+              post("/actors/#{testy}/acl/#{action.downcase}/#{type.downcase}/",
+                   :superuser).should have_status_code(404)
+            end
+
+            it "put should not be found" do
+              put("/actors/#{testy}/acl/#{action.downcase}/#{type.downcase}/",
+                  :superuser).should have_status_code(404)
+            end
+
+            it "delete should not be found" do
+              delete("/actors/#{testy}/acl/#{action.downcase}/#{type.downcase}/",
+                     :superuser).should have_status_code(404)
+            end
+          end
+        end
+      end
+    end
+
     # TODO: make sure there are no permissions here
     # This has...  Interesting results (okay, is 404 not 405):
     # should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/"
