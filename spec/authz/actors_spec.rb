@@ -55,6 +55,18 @@ describe "Actors Endpoint" do
           end
         end
       end
+
+      context "created actor" do
+        with_actors :testy
+
+        it "is in own ACEs" do
+          :testy.should directly_have_permission(:create).on_actor(:testy)
+          :testy.should directly_have_permission(:read).on_actor(:testy)
+          :testy.should directly_have_permission(:update).on_actor(:testy)
+          :testy.should directly_have_permission(:delete).on_actor(:testy)
+          :testy.should directly_have_permission(:grant).on_actor(:testy)
+        end
+      end
     end
 
     should_not_allow :PUT, "/actors"
