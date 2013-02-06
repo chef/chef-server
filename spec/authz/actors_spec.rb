@@ -425,12 +425,12 @@ describe "Actors Endpoint" do
       ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
         context "for #{action} action" do
 
-          context "an actor directly in the GRANT ACE for actors" do
+          context "an actor directly in the GRANT ACE, modifying actors" do
             with_actors :alice, :rainbowdash, :testy
 
             with_ace_on_actor :testy, :grant, :actors => [:alice]
 
-            it "can modify the ACE" do
+            it "can modify the ACE for actors" do
               :alice.should directly_have_permission(:grant).on_actor(:testy)
               put("/actors/#{testy}/acl/#{action.downcase}",
                   :alice, :payload => {"actors" => [rainbowdash], "groups" => []}).
@@ -441,13 +441,13 @@ describe "Actors Endpoint" do
             end
           end
 
-          context "an actor directly in the GRANT ACE for groups" do
+          context "an actor directly in the GRANT ACE, modifying groups" do
             with_actors :alice, :testy
             with_group :ponies
 
             with_ace_on_actor :testy, :grant, :actors => [:alice]
 
-            it "can modify the ACE" do
+            it "can modify the ACE for groups" do
               :alice.should directly_have_permission(:grant).on_actor(:testy)
               put("/actors/#{testy}/acl/#{action.downcase}",
                   :alice, :payload => {"actors" => [], "groups" => [ponies]}).
@@ -486,14 +486,14 @@ describe "Actors Endpoint" do
             end
           end
 
-          context "an actor indirectly in the GRANT ACE for actors" do
+          context "an actor indirectly in the GRANT ACE, modifying actors" do
             with_actors :alice, :testy, :bob, :sparklepony
             with_groups :hackers
 
             with_ace_on_actor :testy, :grant, :groups => [:hackers]
             with_members :hackers, :actors => [:alice]
 
-            it "can modify the ACE" do
+            it "can modify the ACE for actors" do
               :alice.should_not directly_have_permission(:grant).on_actor(:testy)
               :alice.should be_a_direct_member_of(:hackers)
               :hackers.should directly_have_permission(:grant).on_actor(:testy)
@@ -507,14 +507,14 @@ describe "Actors Endpoint" do
             end
           end
 
-          context "an actor indirectly in the GRANT ACE for groups" do
+          context "an actor indirectly in the GRANT ACE, modifying groups" do
             with_actors :alice, :testy, :bob
             with_groups :hackers, :ponies
 
             with_ace_on_actor :testy, :grant, :groups => [:hackers]
             with_members :hackers, :actors => [:alice]
 
-            it "can modify the ACE" do
+            it "can modify the ACE for groups" do
               :alice.should_not directly_have_permission(:grant).on_actor(:testy)
               :alice.should be_a_direct_member_of(:hackers)
               :hackers.should directly_have_permission(:grant).on_actor(:testy)
