@@ -50,7 +50,8 @@ describe "Actors Endpoint" do
           pending "currently returns a 415 AND A NEW ACTOR!" do
             post("/actors",
                  :superuser,
-                 :headers => {}).should have_status_code(400).with_body({"error" => "That ain't right"})
+                 :headers => {}).should have_status_code(400).
+              with_body({"error" => "That ain't right"})
             # Obviously this is not the EXACT response that should come back...
           end
         end
@@ -119,7 +120,8 @@ describe "Actors Endpoint" do
 
         it "cannot read the actor" do
           :bob.should_not directly_have_permission(:read).on_actor(:testy)
-          get("/actors/#{testy}", :bob).should have_status_code(403).with_body({"error" => "must be in the read access control entry to perform this action"})
+          get("/actors/#{testy}",
+              :bob).should have_status_code(403).with_body({"error" => "must be in the read access control entry to perform this action"})
         end
       end
 
@@ -185,7 +187,8 @@ describe "Actors Endpoint" do
 
         it "cannot delete the actor" do
           :bob.should_not directly_have_permission(:delete).on_actor(:testy)
-          delete("/actors/#{testy}", :bob).should have_status_code(403).with_body({"error" => "must be in the delete access control entry to perform this action"})
+          delete("/actors/#{testy}",
+                 :bob).should have_status_code(403).with_body({"error" => "must be in the delete access control entry to perform this action"})
           get("/actors/#{testy}", :superuser).should have_status_code(200)
         end
       end
@@ -296,7 +299,8 @@ describe "Actors Endpoint" do
           :bob.should_not directly_have_permission(:update).on_actor(:testy)
           :bob.should_not directly_have_permission(:delete).on_actor(:testy)
           :bob.should_not directly_have_permission(:grant).on_actor(:testy)
-         get("/actors/#{testy}/acl", :bob).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
+         get("/actors/#{testy}/acl",
+             :bob).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
         end
       end
 
@@ -394,7 +398,8 @@ describe "Actors Endpoint" do
                 :bob.should_not directly_have_permission(:update).on_actor(:testy)
                 :bob.should_not directly_have_permission(:delete).on_actor(:testy)
                 :bob.should_not directly_have_permission(:grant).on_actor(:testy)
-                get("/actors/#{testy}/acl/#{action}", :bob).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
+                get("/actors/#{testy}/acl/#{action}",
+                    :bob).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
               end
             end
 
@@ -419,6 +424,123 @@ describe "Actors Endpoint" do
     context "PUT" do
       ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
         context "for #{action} action" do
+
+          context "an actor directly in the GRANT ACE for actors" do
+            with_actors :alice, :rainbowdash, :testy
+
+            with_ace_on_actor :testy, :grant, :actors => [:alice]
+
+            it "can modify the ACE" do
+              :alice.should directly_have_permission(:grant).on_actor(:testy)
+              put("/actors/#{testy}/acl/#{action.downcase}",
+                  :alice, :payload => {"actors" => [rainbowdash], "groups" => []}).
+                should have_status_code(200).with_body({})
+              get("/actors/#{testy}/acl/#{action.downcase}",
+                  :superuser).should have_status_code(200).
+                with_body({"actors" => [rainbowdash], "groups" => []})
+            end
+          end
+
+          context "an actor directly in the GRANT ACE for groups" do
+            with_actors :alice, :testy
+            with_group :ponies
+
+            with_ace_on_actor :testy, :grant, :actors => [:alice]
+
+            it "can modify the ACE" do
+              :alice.should directly_have_permission(:grant).on_actor(:testy)
+              put("/actors/#{testy}/acl/#{action.downcase}",
+                  :alice, :payload => {"actors" => [], "groups" => [ponies]}).
+                should have_status_code(200).with_body({})
+              get("/actors/#{testy}/acl/#{action.downcase}",
+                  :superuser).should have_status_code(200).
+                with_body({"actors" => [], "groups" => [ponies]})
+            end
+          end
+
+          context "an actor NOT in the GRANT ACE" do
+            with_actors :bob, :rainbowdash, :testy
+
+            # Give bob everything EXCEPT grant
+            with_acl_on_actor :testy, {
+              :create => {:actors => [:bob], :groups => []},
+              :read   => {:actors => [:bob], :groups => []},
+              :update => {:actors => [:bob], :groups => []},
+              :delete => {:actors => [:bob], :groups => []},
+              :grant  => {:actors => [],     :groups => []} # <--- That's the one!
+            }
+
+            if (action == 'GRANT')
+              let(:body) { {"actors" => [], "groups" => []} }
+            else
+              let(:body) { {"actors" => [bob], "groups" => []} }
+            end
+
+            it "cannot modify the ACE" do
+              :bob.should_not directly_have_permission(:grant).on_actor(:testy)
+              put("/actors/#{testy}/acl/#{action.downcase}",
+                  :bob, :payload => {"actors" => [rainbowdash], "groups" => []}).
+                should have_status_code(403).with_body({"error" => "must be in the grant access control entry to perform this action"})
+              get("/actors/#{testy}/acl/#{action.downcase}",
+                  :superuser).should have_status_code(200).with_body(body)
+            end
+          end
+
+          context "an actor indirectly in the GRANT ACE for actors" do
+            with_actors :alice, :testy, :bob, :sparklepony
+            with_groups :hackers
+
+            with_ace_on_actor :testy, :grant, :groups => [:hackers]
+            with_members :hackers, :actors => [:alice]
+
+            it "can modify the ACE" do
+              :alice.should_not directly_have_permission(:grant).on_actor(:testy)
+              :alice.should be_a_direct_member_of(:hackers)
+              :hackers.should directly_have_permission(:grant).on_actor(:testy)
+
+              put("/actors/#{testy}/acl/#{action.downcase}",
+                     :alice, :payload => {"actors" => [sparklepony], "groups" => []}).
+                should have_status_code(200)
+              get("/actors/#{testy}/acl/#{action.downcase}",
+                  :superuser).should have_status_code(200).
+                with_body({"actors" => [sparklepony], "groups" => []})
+            end
+          end
+
+          context "an actor indirectly in the GRANT ACE for groups" do
+            with_actors :alice, :testy, :bob
+            with_groups :hackers, :ponies
+
+            with_ace_on_actor :testy, :grant, :groups => [:hackers]
+            with_members :hackers, :actors => [:alice]
+
+            it "can modify the ACE" do
+              :alice.should_not directly_have_permission(:grant).on_actor(:testy)
+              :alice.should be_a_direct_member_of(:hackers)
+              :hackers.should directly_have_permission(:grant).on_actor(:testy)
+
+              put("/actors/#{testy}/acl/#{action.downcase}",
+                     :alice, :payload => {"actors" => [], "groups" => [ponies]}).
+                should have_status_code(200)
+              get("/actors/#{testy}/acl/#{action.downcase}",
+                  :superuser).should have_status_code(200).
+                with_body({"actors" => [], "groups" => [ponies]})
+            end
+          end
+
+          context "with a non-existent target" do
+            with_actor :alice
+
+            it "can't modify its ACE, because it doesn't exist" do
+              fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+
+              # Prove it doesn't exist
+              get("/actors/#{fake_actor}/acl/#{action.downcase}", :alice).should have_status_code(404)
+
+              # Now try to delete it
+              delete("/actors/#{fake_actor}/acl/#{action.downcase}", :alice).should have_status_code(404)
+            end
+          end
         end
       end
     end # PUT
@@ -427,6 +549,78 @@ describe "Actors Endpoint" do
     context "DELETE" do
       ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
         context "for #{action} action" do
+
+          context "an actor directly in the GRANT ACE" do
+            with_actors :alice, :testy
+
+            with_ace_on_actor :testy, :grant, :actors => [:alice]
+
+            it "can clear the ACE" do
+              pending "causes internal 500 errors" do
+                :alice.should directly_have_permission(:grant).on_actor(:testy)
+                delete("/actors/#{testy}/acl/#{action.downcase}",
+                       :alice).should have_status_code(200).with_body({})
+                get("/actors/#{testy}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(404)
+              end
+            end
+          end
+
+          context "an actor NOT in the GRANT ACE" do
+            with_actors :bob, :testy
+
+            # Give bob everything EXCEPT grant
+            with_acl_on_actor :testy, {
+              :create => {:actors => [:bob], :groups => []},
+              :read   => {:actors => [:bob], :groups => []},
+              :update => {:actors => [:bob], :groups => []},
+              :delete => {:actors => [:bob], :groups => []},
+              :grant  => {:actors => [],     :groups => []} # <--- That's the one!
+            }
+
+            it "cannot clear the ACE" do
+              :bob.should_not directly_have_permission(:grant).on_actor(:testy)
+              delete("/actors/#{testy}/acl/#{action.downcase}",
+                     :bob).should have_status_code(403).with_body({"error" => "must be in the grant access control entry to perform this action"})
+              get("/actors/#{testy}/acl/#{action.downcase}",
+                  :superuser).should have_status_code(200)
+            end
+          end
+
+          context "an actor indirectly in the GRANT ACE" do
+            with_actors :alice, :testy, :bob
+            with_group :hackers
+
+            with_ace_on_actor :testy, :grant, :groups => [:hackers]
+            with_members :hackers, :actors => [:alice]
+
+            it "can clear the ACE" do
+              pending "causes internal 500 errors" do
+                :alice.should_not directly_have_permission(:grant).on_actor(:testy)
+                :alice.should be_a_direct_member_of(:hackers)
+                :hackers.should directly_have_permission(:grant).on_actor(:testy)
+
+                delete("/actors/#{testy}/acl/#{action.downcase}",
+                       :alice).should have_status_code(200).with_body({})
+                get("/actors/#{testy}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(404)
+              end
+            end
+          end
+
+          context "with a non-existent target" do
+            with_actor :alice
+
+            it "can't clear its ACE, because it doesn't exist" do
+              fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+
+              # Prove it doesn't exist
+              get("/actors/#{fake_actor}/acl/#{action.downcase}", :alice).should have_status_code(404)
+
+              # Now try to delete it
+              delete("/actors/#{fake_actor}/acl/#{action.downcase}", :alice).should have_status_code(404)
+            end
+          end
         end
       end
     end # DELETE
@@ -434,6 +628,9 @@ describe "Actors Endpoint" do
 
   context "/actors/<actor_id>/acl/<action>/<member_type>" do
     with_actor :testy
+
+    # These are basically null tests; every one of these DO have subpaths to
+    # test, but certainly for smoke testing this is excessive.
 
     ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
       context "for #{action} action" do
