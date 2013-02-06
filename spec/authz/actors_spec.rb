@@ -80,6 +80,9 @@ describe "Actors Endpoint" do
           
           get("/actors/#{actor}/acl",
               :superuser).should have_status_code(200).with_body(body)
+
+          # TODO: move creation to before clause and this to an after clause
+          delete("/actors/#{actor}", testy)
         end
       end
     end # POST
@@ -428,6 +431,24 @@ describe "Actors Endpoint" do
       ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
         context "for #{action} action" do
 
+          context "an actor directly in the GRANT ACE, with bad input" do
+            with_actors :alice, :testy
+
+            with_ace_on_actor :testy, :grant, :actors => [:alice]
+
+            it "returns 400" do
+              pending "returns 500 instead" do
+                :alice.should directly_have_permission(:grant).on_actor(:testy)
+                put("/actors/#{testy}/acl/#{action.downcase}",
+                    :alice, :payload => {}).
+                  should have_status_code(400).with_body({"error" => "bad input"})
+                get("/actors/#{testy}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(200).
+                  with_body({"actors" => [alice], "groups" => []})
+              end
+            end
+          end
+
           context "an actor directly in the GRANT ACE, modifying actors" do
             with_actors :alice, :rainbowdash, :testy
 
@@ -633,9 +654,13 @@ describe "Actors Endpoint" do
     # These are basically null tests; every one of these DO have subpaths to
     # test, but certainly for smoke testing this is excessive.
 
+    # Might want to cut some of these out -- containers and object
+    # versions should always be 404 even when an ID is specified,
+    # since they can't have permissions
+
     ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
       context "for #{action} action" do
-        ['ACTORS', 'CONTAINERS', 'GROUPS', 'OBJECTS'].each do |type|
+        ['ACTORS', 'GROUPS', 'OBJECTS', 'CONTAINERS'].each do |type|
           context "for #{type} member type" do
             with_actor :testy
 
@@ -673,7 +698,7 @@ describe "Actors Endpoint" do
     # the permission
     #
     # TODO: Perhaps use 204 (OK, No Content) instead?
-    context "GET", :focus do
+    context "GET" do
       ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
         context "for #{action} action" do
           ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |ace|
@@ -692,7 +717,7 @@ describe "Actors Endpoint" do
                         :alice).should have_status_code(200).with_body({})
                   end
                 else
-                  it "returns 404 when not in ace" do
+                  it "returns 404 when not in ACE" do
                     :alice.should directly_have_permission(ace.downcase.to_sym).
                       on_actor(:testy)
                     # Alice does not have other access on testy
@@ -740,19 +765,125 @@ describe "Actors Endpoint" do
                 it "can't be read, because it doesn't exist" do
                   fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
 
-                  get("/actors/#{fake_actor}", :alice).should have_status_code(404)
+                  get("/actors/#{fake_actor}/acl/#{action.downcase}/actors/#{alice}",
+                      :alice).should have_status_code(404)
                 end
               end
             end
-          end
 
-          context "for CONTAINERS member type" do
-          end
+            context "for GROUPS member type" do
+              context "a group directly in the #{ace} ACE" do
+                with_actors :testy, :alice
+                with_group :ponies
 
-          context "for GROUPS member type" do
-          end
+                with_ace_on_actor :testy, ace.downcase.to_sym, :groups => [:ponies]
+                with_members :ponies, :actors => [:alice]
 
-          context "for OBJECT member type" do
+                if (action == ace)
+                  it "returns 200 when in ACE" do
+                    # My understanding is that if group X has permissions on actor X,
+                    # this should return 200, but as it is, it doesn't
+                    pending "doesn't seem to work" do
+                      :ponies.should directly_have_permission(ace.downcase.to_sym).
+                        on_actor(:testy)
+                      # Ponies has specific ACE access on testy
+                      get("/actors/#{testy}/acl/#{action.downcase}/groups/#{ponies}",
+                          :alice).should have_status_code(200).with_body({})
+                    end
+                  end
+                else
+                  it "returns 404 when not in ACE" do
+                    :ponies.should directly_have_permission(ace.downcase.to_sym).
+                      on_actor(:testy)
+                    # Ponies does not have other access on testy
+                    get("/actors/#{testy}/acl/#{action.downcase}/groups/#{ponies}",
+                        :alice).should have_status_code(404)
+                  end
+                end
+              end
+
+              context "a group inderectly in the #{ace} ACE" do
+                with_actors :alice, :testy, :bob
+                with_groups :hackers, :ponies
+
+                with_ace_on_actor :testy, ace.downcase.to_sym, :groups => [:ponies]
+                with_members :ponies, :groups => [:hackers]
+                with_members :hackers, :actors => [:alice]
+
+                if (action == ace)
+                  # See above
+                  it "returns 200 when in ACE" do
+                    pending "doesn't seem to work" do
+                      :alice.should_not directly_have_permission(ace.downcase.to_sym).
+                        on_actor(:testy)
+                      :alice.should be_a_direct_member_of(:hackers)
+                      :hackers.should be_a_direct_member_of(:ponies)
+                      :hackers.should_not directly_have_permission(ace.downcase.to_sym).
+                        on_actor(:testy)
+                      :ponies.should directly_have_permission(ace.downcase.to_sym).
+                        on_actor(:testy)
+
+                      get("/actors/#{testy}/acl/#{action.downcase}/groups/#{hackers}",
+                          :alice).should have_status_code(200).with_body({})
+                    end
+                  end
+                else
+                  it "returns 404 when not in ACE" do
+                    :alice.should_not directly_have_permission(ace.downcase.to_sym).
+                      on_actor(:testy)
+                    :alice.should be_a_direct_member_of(:hackers)
+                    :hackers.should be_a_direct_member_of(:ponies)
+                    :hackers.should_not directly_have_permission(ace.downcase.to_sym).
+                      on_actor(:testy)
+                    :ponies.should directly_have_permission(ace.downcase.to_sym).
+                      on_actor(:testy)
+
+                    get("/actors/#{testy}/acl/#{action.downcase}/groups/#{hackers}",
+                        :alice).should have_status_code(404)
+                  end
+                end
+              end
+
+              context "with a non-existent target" do
+                with_actor :alice
+                with_group :ponies
+
+                it "can't be read, because it doesn't exist" do
+                  fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+
+                  get("/actors/#{fake_actor}/acl/#{action.downcase}/groups/#{ponies}",
+                      :alice).should have_status_code(404)
+                end
+              end
+            end
+
+            # Some tests for an unexpected member_type -- don't really need to test
+            # more than one, do we?
+
+            # TODO: think about doing containers, too?
+
+            context "for OBJECT member type" do
+              context "an actor directly in the #{ace} ACE" do
+                with_actor :testy
+                with_object :widget
+
+                it "returns 404 all the time" do
+                  get("/actors/#{testy}/acl/#{action.downcase}/objects/#{widget}",
+                      :superuser).should have_status_code(404)
+                end
+              end
+
+              context "with a non-existent target" do
+                with_object :widget
+
+                it "can't be read, because it doesn't exist" do
+                  fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+
+                  get("/actors/#{fake_actor}/acl/#{action.downcase}/objects/#{widget}",
+                      :superuser).should have_status_code(404)
+                end
+              end
+            end
           end
         end
       end
@@ -762,5 +893,4 @@ describe "Actors Endpoint" do
     should_not_allow :PUT, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
     should_not_allow :DELETE, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
   end # /actors/<actor_id>/acl/<action>/<member_type>/<member_id>
-
 end
