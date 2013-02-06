@@ -659,10 +659,6 @@ describe "Actors Endpoint" do
         end
       end
     end
-
-    # TODO: make sure there are no permissions here
-    # This has...  Interesting results (okay, is 404 not 405):
-    # should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/"
   end # /actors/<actor_id>/acl/<action>/<member_type>
 
   context "/actors/<actor_id>/acl/<action>/<member_type>/<member_id>" do
