@@ -436,6 +436,8 @@ describe "Actors Endpoint" do
       ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
         context "for #{action} action" do
 
+          # TODO: probably want to expand this with various types of bad input,
+          # although at the moment pretty much anything at all will crash it
           context "an actor directly in the GRANT ACE, with bad input" do
             with_actors :alice, :testy
 
@@ -446,6 +448,89 @@ describe "Actors Endpoint" do
                 :alice.should directly_have_permission(:grant).on_actor(:testy)
                 put("/actors/#{testy}/acl/#{action.downcase}",
                     :alice, :payload => {}).
+                  should have_status_code(400).with_body({"error" => "bad input"})
+                get("/actors/#{testy}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(200).
+                  with_body({"actors" => [alice], "groups" => []})
+              end
+            end
+          end
+
+          # TODO: I'm not sure these are a problem or not; we may want to properly
+          # error these out down the road.  Also not sure we should return 400 for
+          # non-existent actors/groups, dunno what the right HTTP response code is
+          # for that.
+
+          context "an actor directly in the GRANT ACE, with invalid actor" do
+            with_actors :alice, :testy
+
+            with_ace_on_actor :testy, :grant, :actors => [:alice]
+
+            it "returns 400" do
+              pending "returns 200 instead" do
+                :alice.should directly_have_permission(:grant).on_actor(:testy)
+                put("/actors/#{testy}/acl/#{action.downcase}",
+                    :alice,
+                    :payload => {"actors" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"],
+                      "groups" => []}).
+                  should have_status_code(400).with_body({"error" => "bad input"})
+                get("/actors/#{testy}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(200).
+                  with_body({"actors" => [alice], "groups" => []})
+              end
+            end
+          end
+
+          context "an actor directly in the GRANT ACE, with invalid group" do
+            with_actors :alice, :testy
+
+            with_ace_on_actor :testy, :grant, :actors => [:alice]
+
+            it "returns 400" do
+              pending "returns 200 instead" do
+                :alice.should directly_have_permission(:grant).on_actor(:testy)
+                put("/actors/#{testy}/acl/#{action.downcase}",
+                    :alice, :payload => {"actors" => [],
+                      "groups" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"]}).
+                  should have_status_code(400).with_body({"error" => "bad input"})
+                get("/actors/#{testy}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(200).
+                  with_body({"actors" => [alice], "groups" => []})
+              end
+            end
+          end
+
+          context "an actor directly in the GRANT ACE, with non-existent actor" do
+            with_actors :alice, :testy
+
+            with_ace_on_actor :testy, :grant, :actors => [:alice]
+
+            it "returns 400" do
+              pending "returns 200 instead" do
+                :alice.should directly_have_permission(:grant).on_actor(:testy)
+                put("/actors/#{testy}/acl/#{action.downcase}",
+                    :alice,
+                    :payload => {"actors" => ["ffffffffffffffffffffffffffffffff"],
+                      "groups" => []}).
+                  should have_status_code(400).with_body({"error" => "bad input"})
+                get("/actors/#{testy}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(200).
+                  with_body({"actors" => [alice], "groups" => []})
+              end
+            end
+          end
+
+          context "an actor directly in the GRANT ACE, with non-existent group" do
+            with_actors :alice, :testy
+
+            with_ace_on_actor :testy, :grant, :actors => [:alice]
+
+            it "returns 400" do
+              pending "returns 200 instead" do
+                :alice.should directly_have_permission(:grant).on_actor(:testy)
+                put("/actors/#{testy}/acl/#{action.downcase}",
+                    :alice, :payload => {"actors" => [],
+                      "groups" => ["ffffffffffffffffffffffffffffffff"]}).
                   should have_status_code(400).with_body({"error" => "bad input"})
                 get("/actors/#{testy}/acl/#{action.downcase}",
                     :superuser).should have_status_code(200).
