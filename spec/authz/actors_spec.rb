@@ -421,6 +421,9 @@ describe "Actors Endpoint" do
     should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create"
 
     # PUT replaces an ACE atomically
+
+    # TODO: add tests for bad input; should be returning 400 instead of 500
+
     context "PUT" do
       ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
         context "for #{action} action" do
@@ -627,8 +630,6 @@ describe "Actors Endpoint" do
   end # /actors/<actor_id>/acl/<action>
 
   context "/actors/<actor_id>/acl/<action>/<member_type>" do
-    with_actor :testy
-
     # These are basically null tests; every one of these DO have subpaths to
     # test, but certainly for smoke testing this is excessive.
 
@@ -636,6 +637,8 @@ describe "Actors Endpoint" do
       context "for #{action} action" do
         ['ACTORS', 'CONTAINERS', 'GROUPS', 'OBJECTS'].each do |type|
           context "for #{type} member type" do
+            with_actor :testy
+
             it "get should not be found" do
               get("/actors/#{testy}/acl/#{action.downcase}/#{type.downcase}/",
                   :superuser).should have_status_code(404)
@@ -670,7 +673,90 @@ describe "Actors Endpoint" do
     # the permission
     #
     # TODO: Perhaps use 204 (OK, No Content) instead?
-    context "GET"
+    context "GET", :focus do
+      ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
+        context "for #{action} action" do
+          ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |ace|
+            context "for ACTORS member type" do
+              context "an actor directly in the #{ace} ACE" do
+                with_actors :alice, :testy
+
+                with_ace_on_actor :testy, ace.downcase.to_sym, :actors => [:alice]
+
+                if (action == ace)
+                  it "returns 200 when in ACE" do
+                    :alice.should directly_have_permission(ace.downcase.to_sym).
+                      on_actor(:testy)
+                    # Alice has specific ACE access on testy
+                    get("/actors/#{testy}/acl/#{action.downcase}/actors/#{alice}",
+                        :alice).should have_status_code(200).with_body({})
+                  end
+                else
+                  it "returns 404 when not in ace" do
+                    :alice.should directly_have_permission(ace.downcase.to_sym).
+                      on_actor(:testy)
+                    # Alice does not have other access on testy
+                    get("/actors/#{testy}/acl/#{action.downcase}/actors/#{alice}",
+                        :alice).should have_status_code(404)
+                  end
+                end
+              end
+
+              context "an actor inderectly in the #{ace} ACE" do
+                with_actors :alice, :testy, :bob
+                with_group :hackers
+
+                with_ace_on_actor :testy, ace.downcase.to_sym, :groups => [:hackers]
+                with_members :hackers, :actors => [:alice]
+
+                if (action == ace)
+                  it "returns 200 when in ACE" do
+                    :alice.should_not directly_have_permission(ace.downcase.to_sym).
+                      on_actor(:testy)
+                    :alice.should be_a_direct_member_of(:hackers)
+                    :hackers.should directly_have_permission(ace.downcase.to_sym).
+                      on_actor(:testy)
+
+                    get("/actors/#{testy}/acl/#{action.downcase}/actors/#{alice}",
+                        :alice).should have_status_code(200).with_body({})
+                  end
+                else
+                  it "returns 404 when not in ACE" do
+                    :alice.should_not directly_have_permission(ace.downcase.to_sym).
+                      on_actor(:testy)
+                    :alice.should be_a_direct_member_of(:hackers)
+                    :hackers.should directly_have_permission(ace.downcase.to_sym).
+                      on_actor(:testy)
+
+                    get("/actors/#{testy}/acl/#{action.downcase}/actors/#{alice}",
+                        :alice).should have_status_code(404)
+                  end
+                end
+              end
+
+              context "with a non-existent target" do
+                with_actor :alice
+
+                it "can't be read, because it doesn't exist" do
+                  fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+
+                  get("/actors/#{fake_actor}", :alice).should have_status_code(404)
+                end
+              end
+            end
+          end
+
+          context "for CONTAINERS member type" do
+          end
+
+          context "for GROUPS member type" do
+          end
+
+          context "for OBJECT member type" do
+          end
+        end
+      end
+    end
 
     should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
     should_not_allow :PUT, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
