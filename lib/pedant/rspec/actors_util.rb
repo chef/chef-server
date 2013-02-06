@@ -51,6 +51,30 @@ module Pedant
           end
         end
       end
+
+      shared_context 'create acl body' do
+
+        # This function is used to create ACLs for the actor tests; it creates a
+        # default ACL for the default actor, then replaces one of the actions with
+        # either a user or group of the caller's choice
+
+        # TODO: will this be useful for other tests?  If so, perhaps this should be
+        # moved to common
+        def acl_body_for_actor(default_actor, action, user = nil, group = nil)
+          rc = {"create" => {"actors" => [default_actor], "groups" => []},
+            "read" => {"actors" => [default_actor], "groups" => []},
+            "update" => {"actors" => [default_actor], "groups" => []},
+            "delete" => {"actors" => [default_actor], "groups" => []},
+            "grant" => {"actors" => [default_actor], "groups" => []}}
+          if (user)
+            rc[action] = {"actors" => [user], "groups" => []}
+          elsif (group)
+            rc[action] = {"actors" => [], "groups" => [group]}
+          end
+
+          return rc
+        end
+      end
     end
   end
 end

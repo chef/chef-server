@@ -223,21 +223,14 @@ describe "Actors Endpoint" do
     # re: ACL vs. ACEs apply)
 
     context "GET" do
+      include_context "create acl body"
+
       context "an actor directly in the CREATE ACE" do
         with_actors :alice, :testy
 
         with_ace_on_actor :testy, :create, :actors => [:alice]
 
-        # TODO: abstract body creation, since these are all very close to each other
-        # with only one actor/group change each
-
-        let(:body) {
-          {"create" => {"actors" => [alice], "groups" => []},
-            "read" => {"actors" => [testy], "groups" => []},
-            "update" => {"actors" => [testy], "groups" => []},
-            "delete" => {"actors" => [testy], "groups" => []},
-            "grant" => {"actors" => [testy], "groups" => []}}
-        }
+        let(:body) { acl_body_for_actor(testy, "create", alice) }
 
         it "can read the acl" do
           :alice.should directly_have_permission(:create).on_actor(:testy)
@@ -250,13 +243,7 @@ describe "Actors Endpoint" do
 
         with_ace_on_actor :testy, :read, :actors => [:alice]
 
-        let(:body) {
-          {"create" => {"actors" => [testy], "groups" => []},
-            "read" => {"actors" => [alice], "groups" => []},
-            "update" => {"actors" => [testy], "groups" => []},
-            "delete" => {"actors" => [testy], "groups" => []},
-            "grant" => {"actors" => [testy], "groups" => []}}
-        }
+        let(:body) { acl_body_for_actor(testy, "read", alice) }
 
         it "can read the acl" do
           :alice.should directly_have_permission(:read).on_actor(:testy)
@@ -269,13 +256,7 @@ describe "Actors Endpoint" do
 
         with_ace_on_actor :testy, :update, :actors => [:alice]
 
-        let(:body) {
-          {"create" => {"actors" => [testy], "groups" => []},
-            "read" => {"actors" => [testy], "groups" => []},
-            "update" => {"actors" => [alice], "groups" => []},
-            "delete" => {"actors" => [testy], "groups" => []},
-            "grant" => {"actors" => [testy], "groups" => []}}
-        }
+        let(:body) { acl_body_for_actor(testy, "update", alice) }
 
         it "can read the acl" do
           :alice.should directly_have_permission(:update).on_actor(:testy)
@@ -288,13 +269,7 @@ describe "Actors Endpoint" do
 
         with_ace_on_actor :testy, :delete, :actors => [:alice]
 
-        let(:body) {
-          {"create" => {"actors" => [testy], "groups" => []},
-            "read" => {"actors" => [testy], "groups" => []},
-            "update" => {"actors" => [testy], "groups" => []},
-            "delete" => {"actors" => [alice], "groups" => []},
-            "grant" => {"actors" => [testy], "groups" => []}}
-        }
+        let(:body) { acl_body_for_actor(testy, "delete", alice) }
 
         it "can read the acl" do
           :alice.should directly_have_permission(:delete).on_actor(:testy)
@@ -307,13 +282,7 @@ describe "Actors Endpoint" do
 
         with_ace_on_actor :testy, :grant, :actors => [:alice]
 
-        let(:body) {
-          {"create" => {"actors" => [testy], "groups" => []},
-            "read" => {"actors" => [testy], "groups" => []},
-            "update" => {"actors" => [testy], "groups" => []},
-            "delete" => {"actors" => [testy], "groups" => []},
-            "grant" => {"actors" => [alice], "groups" => []}}
-        }
+        let(:body) { acl_body_for_actor(testy, "grant", alice) }
 
         it "can read the acl" do
           :alice.should directly_have_permission(:grant).on_actor(:testy)
@@ -350,16 +319,9 @@ describe "Actors Endpoint" do
         with_ace_on_actor :testy, :create, :groups => [:hackers]
         with_members :hackers, :actors => [:alice]
 
-        let(:body) {
-          {"create" => {"actors" => [], "groups" => [hackers]},
-            "read" => {"actors" => [testy], "groups" => []},
-            "update" => {"actors" => [testy], "groups" => []},
-            "delete" => {"actors" => [testy], "groups" => []},
-            "grant" => {"actors" => [testy], "groups" => []}}
-        }
+        let(:body) { acl_body_for_actor(testy, "create", nil, hackers) }
 
         it "can read the acl" do
-
           :alice.should_not directly_have_permission(:create).on_actor(:testy)
           :alice.should be_a_direct_member_of(:hackers)
           :hackers.should directly_have_permission(:create).on_actor(:testy)
@@ -375,16 +337,9 @@ describe "Actors Endpoint" do
         with_ace_on_actor :testy, :read, :groups => [:hackers]
         with_members :hackers, :actors => [:alice]
 
-        let(:body) {
-          {"create" => {"actors" => [testy], "groups" => []},
-            "read" => {"actors" => [], "groups" => [hackers]},
-            "update" => {"actors" => [testy], "groups" => []},
-            "delete" => {"actors" => [testy], "groups" => []},
-            "grant" => {"actors" => [testy], "groups" => []}}
-        }
+        let(:body) { acl_body_for_actor(testy, "read", nil, hackers) }
 
         it "can read the acl" do
-
           :alice.should_not directly_have_permission(:read).on_actor(:testy)
           :alice.should be_a_direct_member_of(:hackers)
           :hackers.should directly_have_permission(:read).on_actor(:testy)
@@ -400,16 +355,9 @@ describe "Actors Endpoint" do
         with_ace_on_actor :testy, :update, :groups => [:hackers]
         with_members :hackers, :actors => [:alice]
 
-        let(:body) {
-          {"create" => {"actors" => [testy], "groups" => []},
-            "read" => {"actors" => [testy], "groups" => []},
-            "update" => {"actors" => [], "groups" => [hackers]},
-            "delete" => {"actors" => [testy], "groups" => []},
-            "grant" => {"actors" => [testy], "groups" => []}}
-        }
+        let(:body) { acl_body_for_actor(testy, "update", nil, hackers) }
 
         it "can read the acl" do
-
           :alice.should_not directly_have_permission(:update).on_actor(:testy)
           :alice.should be_a_direct_member_of(:hackers)
           :hackers.should directly_have_permission(:update).on_actor(:testy)
@@ -425,16 +373,9 @@ describe "Actors Endpoint" do
         with_ace_on_actor :testy, :delete, :groups => [:hackers]
         with_members :hackers, :actors => [:alice]
 
-        let(:body) {
-          {"create" => {"actors" => [testy], "groups" => []},
-            "read" => {"actors" => [testy], "groups" => []},
-            "update" => {"actors" => [testy], "groups" => []},
-            "delete" => {"actors" => [], "groups" => [hackers]},
-            "grant" => {"actors" => [testy], "groups" => []}}
-        }
+        let(:body) { acl_body_for_actor(testy, "delete", nil, hackers) }
 
         it "can read the acl" do
-
           :alice.should_not directly_have_permission(:delete).on_actor(:testy)
           :alice.should be_a_direct_member_of(:hackers)
           :hackers.should directly_have_permission(:delete).on_actor(:testy)
@@ -450,16 +391,9 @@ describe "Actors Endpoint" do
         with_ace_on_actor :testy, :grant, :groups => [:hackers]
         with_members :hackers, :actors => [:alice]
 
-        let(:body) {
-          {"create" => {"actors" => [testy], "groups" => []},
-            "read" => {"actors" => [testy], "groups" => []},
-            "update" => {"actors" => [testy], "groups" => []},
-            "delete" => {"actors" => [testy], "groups" => []},
-            "grant" => {"actors" => [], "groups" => [hackers]}}
-        }
+        let(:body) { acl_body_for_actor(testy, "grant", nil, hackers) }
 
         it "can read the acl" do
-
           :alice.should_not directly_have_permission(:grant).on_actor(:testy)
           :alice.should be_a_direct_member_of(:hackers)
           :hackers.should directly_have_permission(:grant).on_actor(:testy)
