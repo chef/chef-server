@@ -1,21 +1,39 @@
-#+TITLE: RFC: Migration of Chef_* couch database objects
+#+TITLE: RFC: OHC Migration 3, Uncle Ned Parity with Clients
 * Objective
-We want to cleanly migrate our customer's organization data from the couchdb chef_* databases to
-postgresql, and switch them to use erchef for the bulk of their requests.
+Move nine object types out of org specific CouchDB =chef_*= databases
+into pgsql and serve the corresponding endpoints from =oc_erchef=.
+
+The following object types and their endpoints will migrate:
+
+- clients
+- cookbooks, cookbook versions (dep solver)
+- data bags and data bag items
+- environments
+- roles
+- sandboxes (endpoint, no migration of data)
+- checksums
 
 * Requirements
-** We want to be able to migrate orgs independently
-We must allow some orgs to be in couch and some in sql
-This implies dark launch capability to route requests properly
-** Organizations can be down for 30 minutes or so during migration (DISCUSS)
-This simplifies migration; we can simply wait for requests to complete
-rather than the complex tracking we did for nodes
-** We want to keep the system up for orgs not in active migration (DISCUSS)
+** Migration of single orgs can be manually migrated
+This will allow us to test the migration tooling as deployed in prod
+and validate migration results with minimal risk to OHC customers. It
+will also allow us to migrate a small set of friendly customers to
+gain additional confidence in new code paths in OHC. Finally, we can
+use this mechanism to trigger the migration of heavy hitter orgs to
+unload couch and observe oc_erchef/pgsql under load in OHC.
+** Orgs can be down for up to 30 minutes during migration (DISCUSS)
+This simplifies migration; we can wait for requests to complete
+rather than the complex tracking of in-flight writes that we did for
+nodes.
+** The system will remain available for orgs not in active migration (DISCUSS)
 ** We will not migrate pre-created orgs
+Precreated orgs have a =_default= environment that would need to be
+migrated. Forcing new org creation in the post-migration
+configuration validates org creation early in the process. Also
+simplifies migration tooling since precreated orgs are a bit special.
 ** We will not attempt to migrate knife-test (the largest couchdb file)
-
 * High level migration sequence
-** A week or so before M-day
+** One week or more before M-day
 *** Install dark-launch routing system 
 This is to allow us to select on an org-by-org basis who is using ruby-couch
 and who is using erchef-sql, and have a 'maintainance mode' flag to
@@ -26,22 +44,39 @@ Migrate a small number of test orgs, and do sanity checking on them
 *** Migrate first testing wave
 A small group of friendly customers are migrated to get broader
 experience using erchef.
-** Shortly before M-day
+** 3-4 days before M-day
 *** Last minute test migration sweep over over all orgs
-Clone data to preprod, run migration tooling to v
+Clone data to preprod, run migration tooling to verify that recent
+data changes have not introduced data incompatible with
+erchef/pgsql/migration tooling.
 *** Identify customers who will not be migrated in the main body
+*** Identify high load customers to migrate first
+*** Prepare migration order list
 ** M-day
-*** Populate all unset dark launch databags to point to ruby-couch
-*** set dark launch default to use erchef-sql
+*** Disable new org creation
+*** Populate all unset dark launch to point to ruby-couch
+*** set dark launch default to use erchef-sql; all new orgs go to erchef-sql
 *** Fix org-creation (See below)
-*** Migrate main body
+*** Enable new org creation
+*** Migrate main body (see also [[Org migration flow]])
+Migration will proceed in batches of XXX orgs. To process a batch:
+1. All orgs are set to 503 mode in dark launch
+2. A fixed wait period is observed to eliminate inflight requests (30 seconds?)
+3. Batch is migration PPP orgs at a time
+4. All orgs are enabled in dark launch
 ** After M-day
 *** Migrate trailing edge
 We may have certain customers who are not able to be migrated with the
 main body. We'd like to drive this set to zero, but must plan for this
 possibility.
 *** Migration cleanup; remove migrated data from couchdb
+We will need to remove the CouchDB documents in the org databases
+corresponding to objects which have moved to SQL. We'll also want to
+delete the AuthJoin records for these objects since =authz_id= is now
+stored in SQL for these objects.
 
+We have a start at some tooling for throttled deletes used in the
+node migration which can be extended.
 * Dark launch 
 Our current plan is to have Nginx route requests based on per org configuration information, either
 using ruby chef or sql chef. Nginx would parse out the org name from the URI, look it up in a
@@ -99,7 +134,7 @@ Transitioning over is a multi-step process:
    this as part of org creation.
 
 5. Enable new org creation, should now use native sql orgs
-6. Wait for a new few orgs to accumulate
+6. Wait for a few new orgs to accumulate
 7. Enable org-creation at the webui
 
 * Research and Open questions
@@ -109,6 +144,10 @@ Transitioning over is a multi-step process:
 ** Dark launch
 *** Dark launch prototyping for NGINX (OC-5949)
 *** Current users of dark launch API should be able to either parse headers or use redis.
+Would much prefer an HTTP header based approach so that dark launch
+values are always consistent through processing of a single request
+and to reduce load/latency of darklaunch to a single set of lookups
+rather than multiple lookups sprinkled through the system. 
 *** We will want tooling to allow easy interogation and modification of dark launch entries.
 ** User communication
 *** We should have a maintainance mode darklaunch flag

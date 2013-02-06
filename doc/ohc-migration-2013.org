@@ -11,11 +11,9 @@ shape the migrations to best meet business needs.
    back end servers.
 2. Tighter correspondence between OHC and OPC.
 3. Remove couchdb from our infrastructure
-
 ** secondary goals
 1. OPC migration tooling
 2. OSC migration tooling
-
 ** Questions for all migrations
 *** Do we want to use a different proxy/FE (not nginx) to make migration easier
 *** Can we move the data in a downtime window
@@ -30,19 +28,14 @@ shape the migrations to best meet business needs.
    this time. Community site will be part of a major reworking of the
    web properties and migration to pgsql will be part of the larger
    refactor.
+2. Reporting data does not need to be migrated, will be handled
+   separately.
+3. We will migrate the database under a full site outage. Initial
+   timing data shows the dump/load will take 15 minutes. Adding time
+   to reconfigure services, we will announce a 60 minute outage with
+   an expected 30 minute actual downtime.
 ** Questions
-3. Can we do a full dump and load within an acceptable full outage
-   window? Do we have other options? Batches of orgs? Users separate
-   from nodes? Would a pre-load and UPDATE if modified time not
-   matching be faster? Would customers prefer a scenario in which we
-   snapshot and "restore" pg from snapshot and swap over so that OHC
-   remains maximally available, but some data will be lost?
-4. When will reporting be in its own db? Will it go straight into pg?
-5. Does reporting data need to be migrated if we migrate before GA of
-   reporting?
-6. If reporting data needs to migrate, is there read-only data that
-   could be moved ahead of time?
-7. Should we upgrade to a sane user table schema before, after, or as
+1. Should we upgrade to a sane user table schema before, after, or as
    a part of this migration? Where "sane" means looking much more like
    what is in OSC and where we upgrade hashed passwords to use bcrypt.
 ** Deploy postgres to preprod
@@ -59,18 +52,23 @@ are already using it for mysql.
 ** Write dump and load mysql to pg tool
 *** Time dump/load time, is it reasonable for a full downtime outage?
 ** Test data dump/load in preprod
-** Integrate pg client in oc-account
-** Integrate pg client into oc-chef
-** Integrate pg client into oc_erchef
+** Services that need reconfigure to talk to pg
+1. opscode-account
+2. opscode-chef
+3. opscode-erchef
+4. orgmapper
+5. opscode-support (may need work? do we move the table?)
+6. zmanda?
 ** Convert cron scripts that pull data from mysql for internal reports
-** Update support tool
-** Update org-mapper
 ** Migrate
 *** full outage
 *** dump, load
 *** config change and restart services
 * Implement 2.1: Finish /clients for oc_erchef OPC/OHC
 * Migration 3: Uncle Ned Parity + clients
+For the detailed plan for Migration 3, see
+[[file:./rfc-erchef-migration.org][OHC Migration 3, Uncle Ned Parity with Clients]].
+
 The following endpoints would move to oc_erchef and pgsql:
 - clients
 - cookbooks, cookbook versions (and dep solver)
