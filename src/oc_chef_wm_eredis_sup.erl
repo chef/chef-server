@@ -55,6 +55,7 @@ init_metrics() ->
     folsom_metrics:new_meter(search_cache_miss),
     folsom_metrics:new_meter(search_cache_get),
     folsom_metrics:new_meter(search_cache_put),
+    folsom_metrics:new_meter(search_cache_error),
     folsom_metrics:new_meter(search_cache_no_redis),
     folsom_metrics:new_meter(search_cache_no_cache_allowed),
     folsom_metrics:new_histogram(search_cache_redis_get),
