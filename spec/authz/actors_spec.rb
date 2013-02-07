@@ -131,7 +131,7 @@ describe "Actors Endpoint" do
         end
       end
 
-      context "an actor inderectly in the READ ACE" do
+      context "an actor indirectly in the READ ACE" do
         with_actors :alice, :testy, :bob
         with_group :hackers
 
@@ -265,7 +265,7 @@ describe "Actors Endpoint" do
           end
         end
 
-        context "an actor inderectly in the #{ace} ACE" do
+        context "an actor indirectly in the #{ace} ACE" do
           with_actors :alice, :testy, :bob
           with_group :hackers
 
@@ -361,7 +361,7 @@ describe "Actors Endpoint" do
               end
             end
 
-            context "an actor inderectly in the #{ace} ACE" do
+            context "an actor indirectly in the #{ace} ACE" do
               with_actors :alice, :testy, :bob
               with_group :hackers
 
@@ -813,7 +813,7 @@ describe "Actors Endpoint" do
                 end
               end
 
-              context "an actor inderectly in the #{ace} ACE" do
+              context "an actor indirectly in the #{ace} ACE" do
                 with_actors :alice, :testy, :bob
                 with_group :hackers
 
@@ -888,7 +888,7 @@ describe "Actors Endpoint" do
                 end
               end
 
-              context "a group inderectly in the #{ace} ACE" do
+              context "a group indirectly in the #{ace} ACE" do
                 with_actors :alice, :testy, :bob
                 with_groups :hackers, :ponies
 
