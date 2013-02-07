@@ -246,8 +246,6 @@ describe "Actors Endpoint" do
     # re: ACL vs. ACEs apply)
 
     context "GET" do
-      include_context "create acl body"
-
       ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |ace|
 
         context "an actor directly in the #{ace} ACE" do
@@ -255,11 +253,19 @@ describe "Actors Endpoint" do
 
           with_ace_on_actor :testy, ace.downcase.to_sym, :actors => [:alice]
 
-          let(:body) { acl_body_for_actor(testy, ace.downcase, alice) }
-
           it "can read the acl" do
             :alice.should directly_have_permission(ace.downcase.to_sym).
               on_actor(:testy)
+
+            body = {
+              "create" => {"actors" => [testy], "groups" => []},
+              "read" => {"actors" => [testy], "groups" => []},
+              "update" => {"actors" => [testy], "groups" => []},
+              "delete" => {"actors" => [testy], "groups" => []},
+              "grant" => {"actors" => [testy], "groups" => []}
+            }
+            body[ace.downcase] = {"actors" => [alice], "groups" => []}
+
             get("/actors/#{testy}/acl",
                 :alice).should have_status_code(200).with_body(body)
           end
@@ -272,14 +278,21 @@ describe "Actors Endpoint" do
           with_ace_on_actor :testy, ace.downcase.to_sym, :groups => [:hackers]
           with_members :hackers, :actors => [:alice]
 
-          let(:body) { acl_body_for_actor(testy, ace.downcase, nil, hackers) }
-
           it "can read the acl" do
             :alice.should_not directly_have_permission(ace.downcase.to_sym).
               on_actor(:testy)
             :alice.should be_a_direct_member_of(:hackers)
             :hackers.should directly_have_permission(ace.downcase.to_sym).
               on_actor(:testy)
+
+            body = {
+              "create" => {"actors" => [testy], "groups" => []},
+              "read" => {"actors" => [testy], "groups" => []},
+              "update" => {"actors" => [testy], "groups" => []},
+              "delete" => {"actors" => [testy], "groups" => []},
+              "grant" => {"actors" => [testy], "groups" => []}
+            }
+            body[ace.downcase] = {"actors" => [], "groups" => [hackers]}
 
             get("/actors/#{testy}/acl",
                 :alice).should have_status_code(200).with_body(body)
