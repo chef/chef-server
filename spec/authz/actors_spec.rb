@@ -3,8 +3,6 @@ require 'pedant/rspec/actors_util.rb'
 describe "Actors Endpoint" do
   include Pedant::RSpec::ActorsUtil
 
-  let(:requestor){superuser}
-
   context "/actors" do
     let(:request_url){"/actors"}
 
@@ -14,8 +12,6 @@ describe "Actors Endpoint" do
     #
     # NOTE: the return value for this a {"id": ID, "uri": URI} hash
     context "POST" do
-      let(:request_method){:POST}
-
       include_context "create an actor as"
 
       context "as a superuser" do
