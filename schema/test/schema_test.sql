@@ -26,11 +26,16 @@ SELECT tables_are(
 
 SELECT enums_are(ARRAY['auth_permission']);
 
--- All authz_id columns should be unique
-SELECT col_is_unique('container', ARRAY['authz_id']);
-SELECT col_is_unique('auth_actor', ARRAY['authz_id']);
-SELECT col_is_unique('auth_group', ARRAY['authz_id']);
-SELECT col_is_unique('auth_object', ARRAY['authz_id']);
+-- All authz_id columns should be unique and non-NULL
+SELECT col_is_unique('container', 'authz_id');
+SELECT col_is_unique('auth_actor', 'authz_id');
+SELECT col_is_unique('auth_group', 'authz_id');
+SELECT col_is_unique('auth_object', 'authz_id');
+
+SELECT col_not_null('container', 'authz_id');
+SELECT col_not_null('auth_actor', 'authz_id');
+SELECT col_not_null('auth_group', 'authz_id');
+SELECT col_not_null('auth_object', 'authz_id');
 
 -- But the 'id' column is the real PK
 SELECT col_is_pk('container', ARRAY['id']);

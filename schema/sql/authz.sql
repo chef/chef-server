@@ -4,25 +4,25 @@ CREATE TYPE auth_permission AS ENUM ('update', 'read', 'grant', 'delete', 'creat
 -- organizations in Authz to do the proper scoping. :(
 CREATE TABLE container(
     id bigserial PRIMARY KEY,
-    authz_id  CHAR(32) UNIQUE,
+    authz_id  CHAR(32) NOT NULL UNIQUE,
     name TEXT     NOT NULL
 );
 
 CREATE TABLE auth_actor(
     id bigserial PRIMARY KEY,
-    authz_id  CHAR(32) UNIQUE
+    authz_id  CHAR(32) NOT NULL UNIQUE
 );
 
 -- Can't scope Groups to organizations yet, because we have no
 -- organizations!
 CREATE TABLE auth_group(
     id bigserial PRIMARY KEY,
-    authz_id  CHAR(32) UNIQUE
+    authz_id  CHAR(32) NOT NULL UNIQUE
 );
 
 CREATE TABLE auth_object(
     id bigserial PRIMARY KEY,
-    authz_id  CHAR(32) UNIQUE
+    authz_id  CHAR(32) NOT NULL UNIQUE
 );
 
 -- ACL and membership graph information are kept in separate (but
