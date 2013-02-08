@@ -4,8 +4,6 @@ describe "Actors Endpoint" do
   include Pedant::RSpec::ActorsUtil
 
   context "/actors" do
-    let(:request_url){"/actors"}
-
     should_not_allow :GET, "/actors"
 
     # POST creates a new actor
