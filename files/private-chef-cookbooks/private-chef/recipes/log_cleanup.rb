@@ -10,7 +10,7 @@ commands = []
 node['private_chef']['logs']['log_retention'].each do |service, days|
   next unless node['private_chef'][service]['enable']
   log_directory = node['private_chef'][service]['log_directory']
-  commands << "find #{log_directory} -type f \\( -mtime +#{days} \\! -name config \\! -name lock \\! -name state \\! -name newstate \\) -print0 1>&2 | xargs -0 rm -f"
+  commands << "find #{log_directory} -type f \\( -mtime +#{days} \\! -name config \\! -name lock \\! -name state \\! -name newstate \\) -print0 2>/dev/null | xargs -0 rm -f"
 end
 
 template "/opt/opscode/bin/opc_log_cleanup" do
