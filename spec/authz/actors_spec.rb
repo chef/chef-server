@@ -2,6 +2,23 @@ describe "Actors Endpoint" do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
   context "pedant API sanity check" do
+    # What we are testing:
+
+    # Here we take all of the patterns used in the other tests and
+    # verify that the permissions are correctly set up by the helper
+    # functions.
+
+    # We are explictly testing:
+    #   with_ace_on_actor
+    #   with_acl_on_actor
+    # And indirectly:
+    #   with_actor(s)
+    #   with_group(s)
+    #   with_members (for actors and groups)
+    # We then verify the permissions and memberships with
+    #   directly_have_permission
+    #   be_a_direct_member_of
+
     ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
       context "for #{action} ACE" do
         context "for single ACE on actor" do
@@ -118,6 +135,16 @@ describe "Actors Endpoint" do
   end
 
   context "/actors" do
+    # What we are testing:
+
+    # Here we test actor creation (all other HTTP verbs should be
+    # disallowed), making sure the response body is correct and that
+    # id and id in the uri match, as well as basic header validation,
+    # as well as making sure that the correct ACLs are created both
+    # for the actor itself (i.e., an actor should default to having
+    # permissions on themselves) and the requesting actor (i.e., the
+    # requesting actor should have permissions on the new actor)
+
     should_not_allow :GET, "/actors"
 
     # POST creates a new actor
@@ -264,6 +291,15 @@ describe "Actors Endpoint" do
   end # /actors
 
   context "/actors/<actor_id>" do
+    # What we are testing:
+
+    # Here we test actor existence with GET (should require
+    # appropriate READ access, as well as the ability to delete actors
+    # (should require appropriate DELETE access).  All other HTTP
+    # verbs should be disallowed.
+
+    # Old notes:
+
     # GET returns the actor
     #
     # NOTE: This is borderline pointless, since it always returns an
@@ -393,6 +429,16 @@ describe "Actors Endpoint" do
   end # /actors/<actor_id>
 
   context "/actors/<actor_id>/acl" do
+    # What we are testing:
+
+    # Here we test access to actor's ACL and that the response body
+    # has the correct format.  Apparently, any ACE at all grants
+    # access to the ACL (is this a bug?) -- we test each ACE in turn,
+    # both directly and indirectly through a group.  All other HTTP
+    # verbs should be disallowed.
+
+    # Old notes:
+
     # GET full ACL if the requesting actor (from the header) has grant
     # permission on the actor
     #
@@ -487,6 +533,20 @@ describe "Actors Endpoint" do
   end # /actors/<actor_id>/acl
 
   context "/actors/<actor_id>/acl/<action>" do
+    # What we are testing:
+
+    # Here we test access to a specific ACE/action in actor's ACL and
+    # that the response body has the correct format.  Apparently, any
+    # ACE at all grants access to the ACL (is this a bug?) -- we test
+    # each ACE in turn, both directly and indirectly through a group.
+    # PUT is used for updating the ACL and is likewise tested
+    # (although there is currently no checking for request
+    # correctness, and authz will crash on badly formatted requests).
+    # DELETE is also tested, however it seems to be broken.  HTTP POST
+    # should be disallowed.
+
+    # Old notes:
+
     # GET actors and groups for action
     #
     # Cucumber: a newly-created actor should itself be present in each
@@ -878,8 +938,12 @@ describe "Actors Endpoint" do
   end # /actors/<actor_id>/acl/<action>
 
   context "/actors/<actor_id>/acl/<action>/<member_type>" do
-    # These are basically null tests; every one of these DO have subpaths to
-    # test, but certainly for smoke testing this is excessive.
+    # What we are testing:
+
+    # These are basically null tests to verify that the server does
+    # not act on incomplete requests; there are subpaths for these
+    # tests that do (sometimes, more or less) work, but we're testing
+    # this for completeness.
 
     # Might want to cut some of these out -- containers and object
     # versions should always be 404 even when an ID is specified,
@@ -917,6 +981,17 @@ describe "Actors Endpoint" do
   end # /actors/<actor_id>/acl/<action>/<member_type>
 
   context "/actors/<actor_id>/acl/<action>/<member_type>/<member_id>" do
+    # What we are testing:
+
+    # Here we test via GET access to specific ACE from member_id to
+    # actor_id.  Apparently this returns 200 (with no body) if access
+    # is available or 404 if not.  Supposedly groups are supported as
+    # a member_type, but tests seem to show that only actors work
+    # correctly.  We also test that a bogus member_type does not
+    # return as having access.  All other HTTP verbs should be
+    # disallowed.
+
+    # Old notes:
 
     # GET uses is_authorized_on_object to determine whether the
     # specified actor / group has the specified permission
