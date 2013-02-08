@@ -3,6 +3,122 @@ require 'pedant/rspec/actors_util.rb'
 describe "Actors Endpoint" do
   include Pedant::RSpec::ActorsUtil
 
+  context "pedant API sanity check" do
+    ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
+      context "for #{action} ACE" do
+        context "for single ACE on actor" do
+          with_actors :alice, :testy
+
+          with_ace_on_actor :testy, action.downcase.to_sym, :actors => [:alice]
+
+          it "has permission" do
+            :alice.should directly_have_permission(action.downcase.to_sym).
+              on_actor(:testy)
+          end
+        end
+
+        context "an actor NOT in the ACE" do
+          with_actors :bob, :testy
+
+          # Give bob everything EXCEPT action
+          acl = {
+            :create => {:actors => [:bob], :groups => []},
+            :read   => {:actors => [:bob], :groups => []},
+            :update => {:actors => [:bob], :groups => []},
+            :delete => {:actors => [:bob], :groups => []},
+            :grant  => {:actors => [:bob], :groups => []}
+          }
+          acl[action.downcase.to_sym] = {:actors => [], :groups => []}
+          
+          with_acl_on_actor :testy, acl
+
+          it "does not have permission" do
+            :bob.should_not directly_have_permission(action.downcase.to_sym).
+              on_actor(:testy)
+          end
+        end
+
+        context "an actor indirectly in the ACE" do
+          with_actors :alice, :testy, :bob
+          with_group :hackers
+
+          with_ace_on_actor :testy, action.downcase.to_sym, :groups => [:hackers]
+          with_members :hackers, :actors => [:alice]
+
+          it "has only indirect permission" do
+            :alice.should_not directly_have_permission(action.downcase.to_sym).
+              on_actor(:testy)
+            :alice.should be_a_direct_member_of(:hackers)
+            :hackers.should directly_have_permission(action.downcase.to_sym).
+              on_actor(:testy)
+          end
+        end
+
+        context "an actor doubly-indirectly in the ACE" do
+          with_actors :alice, :testy, :bob
+          with_groups :hackers, :ponies
+
+          with_ace_on_actor :testy, action.downcase.to_sym, :groups => [:ponies]
+          with_members :ponies, :groups => [:hackers]
+          with_members :hackers, :actors => [:alice]
+
+          it "has only doubly-indirect permission" do
+            :alice.should_not directly_have_permission(action.downcase.to_sym).
+              on_actor(:testy)
+            :alice.should be_a_direct_member_of(:hackers)
+            :hackers.should be_a_direct_member_of(:ponies)
+            :hackers.should_not directly_have_permission(action.downcase.to_sym).
+              on_actor(:testy)
+            :ponies.should directly_have_permission(action.downcase.to_sym).
+              on_actor(:testy)
+          end
+        end
+      end
+    end
+
+    context "an actor with NO ACE" do
+      with_actors :bob, :testy
+
+      # Give bob no access at all
+      with_acl_on_actor :testy, {
+        :create => {:actors => [], :groups => []},
+        :read   => {:actors => [], :groups => []},
+        :update => {:actors => [], :groups => []},
+        :delete => {:actors => [], :groups => []},
+        :grant  => {:actors => [], :groups => []}
+      }
+
+      it "has no permissions" do
+        :bob.should_not directly_have_permission(:create).on_actor(:testy) 
+        :bob.should_not directly_have_permission(:read).on_actor(:testy)
+        :bob.should_not directly_have_permission(:update).on_actor(:testy)
+        :bob.should_not directly_have_permission(:delete).on_actor(:testy)
+        :bob.should_not directly_have_permission(:grant).on_actor(:testy)
+      end
+    end
+
+    context "an actor with full ACE" do
+      with_actors :bob, :testy
+
+      # Give bob no access at all
+      with_acl_on_actor :testy, {
+        :create => {:actors => [:bob], :groups => []},
+        :read   => {:actors => [:bob], :groups => []},
+        :update => {:actors => [:bob], :groups => []},
+        :delete => {:actors => [:bob], :groups => []},
+        :grant  => {:actors => [:bob], :groups => []}
+      }
+
+      it "has all permissions" do
+        :bob.should directly_have_permission(:create).on_actor(:testy) 
+        :bob.should directly_have_permission(:read).on_actor(:testy)
+        :bob.should directly_have_permission(:update).on_actor(:testy)
+        :bob.should directly_have_permission(:delete).on_actor(:testy)
+        :bob.should directly_have_permission(:grant).on_actor(:testy)
+      end
+    end
+  end
+
   context "/actors" do
     should_not_allow :GET, "/actors"
 
@@ -105,7 +221,6 @@ describe "Actors Endpoint" do
         with_ace_on_actor :testy, :read, :actors => [:alice]
 
         it "can read the actor" do
-          :alice.should directly_have_permission(:read).on_actor(:testy)
           get("/actors/#{testy}", :alice).should have_status_code(200).with_body({})
         end
       end
@@ -123,7 +238,6 @@ describe "Actors Endpoint" do
         }
 
         it "cannot read the actor" do
-          :bob.should_not directly_have_permission(:read).on_actor(:testy)
           get("/actors/#{testy}",
               :bob).should have_status_code(403).with_body({"error" => "must be in the read access control entry to perform this action"})
         end
@@ -137,11 +251,6 @@ describe "Actors Endpoint" do
         with_members :hackers, :actors => [:alice]
 
         it "can read the actor" do
-
-          :alice.should_not directly_have_permission(:read).on_actor(:testy)
-          :alice.should be_a_direct_member_of(:hackers)
-          :hackers.should directly_have_permission(:read).on_actor(:testy)
-
           get("/actors/#{testy}", :alice).should have_status_code(200).with_body({})
         end
       end
@@ -171,7 +280,6 @@ describe "Actors Endpoint" do
         with_ace_on_actor :testy, :delete, :actors => [:alice]
 
         it "can delete the actor" do
-          :alice.should directly_have_permission(:delete).on_actor(:testy)
           delete("/actors/#{testy}", :alice).should have_status_code(200).with_body({})
           get("/actors/#{testy}", :superuser).should have_status_code(404)
         end
@@ -190,7 +298,6 @@ describe "Actors Endpoint" do
         }
 
         it "cannot delete the actor" do
-          :bob.should_not directly_have_permission(:delete).on_actor(:testy)
           delete("/actors/#{testy}",
                  :bob).should have_status_code(403).with_body({"error" => "must be in the delete access control entry to perform this action"})
           get("/actors/#{testy}", :superuser).should have_status_code(200)
@@ -205,11 +312,6 @@ describe "Actors Endpoint" do
         with_members :hackers, :actors => [:alice]
 
         it "can delete the actor" do
-
-          :alice.should_not directly_have_permission(:delete).on_actor(:testy)
-          :alice.should be_a_direct_member_of(:hackers)
-          :hackers.should directly_have_permission(:delete).on_actor(:testy)
-
           delete("/actors/#{testy}", :alice).should have_status_code(200).with_body({})
           get("/actors/#{testy}", :superuser).should have_status_code(404)
         end
@@ -252,9 +354,6 @@ describe "Actors Endpoint" do
           with_ace_on_actor :testy, ace.downcase.to_sym, :actors => [:alice]
 
           it "can read the acl" do
-            :alice.should directly_have_permission(ace.downcase.to_sym).
-              on_actor(:testy)
-
             body = {
               "create" => {"actors" => [testy], "groups" => []},
               "read" => {"actors" => [testy], "groups" => []},
@@ -277,12 +376,6 @@ describe "Actors Endpoint" do
           with_members :hackers, :actors => [:alice]
 
           it "can read the acl" do
-            :alice.should_not directly_have_permission(ace.downcase.to_sym).
-              on_actor(:testy)
-            :alice.should be_a_direct_member_of(:hackers)
-            :hackers.should directly_have_permission(ace.downcase.to_sym).
-              on_actor(:testy)
-
             body = {
               "create" => {"actors" => [testy], "groups" => []},
               "read" => {"actors" => [testy], "groups" => []},
@@ -311,13 +404,8 @@ describe "Actors Endpoint" do
         }
 
         it "cannot read the acl" do
-          :bob.should_not directly_have_permission(:create).on_actor(:testy) 
-          :bob.should_not directly_have_permission(:read).on_actor(:testy)
-          :bob.should_not directly_have_permission(:update).on_actor(:testy)
-          :bob.should_not directly_have_permission(:delete).on_actor(:testy)
-          :bob.should_not directly_have_permission(:grant).on_actor(:testy)
-         get("/actors/#{testy}/acl",
-             :bob).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
+          get("/actors/#{testy}/acl",
+              :bob).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
         end
       end
 
@@ -365,8 +453,6 @@ describe "Actors Endpoint" do
               end
 
               it "can read the acl" do
-                :alice.should directly_have_permission(ace.downcase.to_sym).
-                  on_actor(:testy)
                 get("/actors/#{testy}/acl/#{action}",
                     :alice).should have_status_code(200).with_body(body)
               end
@@ -386,12 +472,6 @@ describe "Actors Endpoint" do
               end
 
               it "can read the acl" do
-                :alice.should_not directly_have_permission(ace.downcase.to_sym).
-                  on_actor(:testy)
-                :alice.should be_a_direct_member_of(:hackers)
-                :hackers.should directly_have_permission(ace.downcase.to_sym).
-                  on_actor(:testy)
-
                 get("/actors/#{testy}/acl/#{action}",
                     :alice).should have_status_code(200).with_body(body)
               end
@@ -410,11 +490,6 @@ describe "Actors Endpoint" do
               }
 
               it "cannot read the acl" do
-                :bob.should_not directly_have_permission(:create).on_actor(:testy) 
-                :bob.should_not directly_have_permission(:read).on_actor(:testy)
-                :bob.should_not directly_have_permission(:update).on_actor(:testy)
-                :bob.should_not directly_have_permission(:delete).on_actor(:testy)
-                :bob.should_not directly_have_permission(:grant).on_actor(:testy)
                 get("/actors/#{testy}/acl/#{action}",
                     :bob).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
               end
@@ -452,7 +527,6 @@ describe "Actors Endpoint" do
 
             it "returns 400" do
               pending "returns 500 instead" do
-                :alice.should directly_have_permission(:grant).on_actor(:testy)
                 put("/actors/#{testy}/acl/#{action.downcase}",
                     :alice, :payload => {}).
                   should have_status_code(400).with_body({"error" => "bad input"})
@@ -475,7 +549,6 @@ describe "Actors Endpoint" do
 
             it "returns 400" do
               pending "returns 200 instead" do
-                :alice.should directly_have_permission(:grant).on_actor(:testy)
                 put("/actors/#{testy}/acl/#{action.downcase}",
                     :alice,
                     :payload => {"actors" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"],
@@ -495,7 +568,6 @@ describe "Actors Endpoint" do
 
             it "returns 400" do
               pending "returns 200 instead" do
-                :alice.should directly_have_permission(:grant).on_actor(:testy)
                 put("/actors/#{testy}/acl/#{action.downcase}",
                     :alice, :payload => {"actors" => [],
                       "groups" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"]}).
@@ -514,7 +586,6 @@ describe "Actors Endpoint" do
 
             it "returns 400" do
               pending "returns 200 instead" do
-                :alice.should directly_have_permission(:grant).on_actor(:testy)
                 put("/actors/#{testy}/acl/#{action.downcase}",
                     :alice,
                     :payload => {"actors" => ["ffffffffffffffffffffffffffffffff"],
@@ -534,7 +605,6 @@ describe "Actors Endpoint" do
 
             it "returns 400" do
               pending "returns 200 instead" do
-                :alice.should directly_have_permission(:grant).on_actor(:testy)
                 put("/actors/#{testy}/acl/#{action.downcase}",
                     :alice, :payload => {"actors" => [],
                       "groups" => ["ffffffffffffffffffffffffffffffff"]}).
@@ -552,7 +622,6 @@ describe "Actors Endpoint" do
             with_ace_on_actor :testy, :grant, :actors => [:alice]
 
             it "can modify the ACE for actors" do
-              :alice.should directly_have_permission(:grant).on_actor(:testy)
               put("/actors/#{testy}/acl/#{action.downcase}",
                   :alice, :payload => {"actors" => [rainbowdash], "groups" => []}).
                 should have_status_code(200).with_body({})
@@ -569,7 +638,6 @@ describe "Actors Endpoint" do
             with_ace_on_actor :testy, :grant, :actors => [:alice]
 
             it "can modify the ACE for groups" do
-              :alice.should directly_have_permission(:grant).on_actor(:testy)
               put("/actors/#{testy}/acl/#{action.downcase}",
                   :alice, :payload => {"actors" => [], "groups" => [ponies]}).
                 should have_status_code(200).with_body({})
@@ -598,7 +666,6 @@ describe "Actors Endpoint" do
             end
 
             it "cannot modify the ACE" do
-              :bob.should_not directly_have_permission(:grant).on_actor(:testy)
               put("/actors/#{testy}/acl/#{action.downcase}",
                   :bob, :payload => {"actors" => [rainbowdash], "groups" => []}).
                 should have_status_code(403).with_body({"error" => "must be in the grant access control entry to perform this action"})
@@ -615,10 +682,6 @@ describe "Actors Endpoint" do
             with_members :hackers, :actors => [:alice]
 
             it "can modify the ACE for actors" do
-              :alice.should_not directly_have_permission(:grant).on_actor(:testy)
-              :alice.should be_a_direct_member_of(:hackers)
-              :hackers.should directly_have_permission(:grant).on_actor(:testy)
-
               put("/actors/#{testy}/acl/#{action.downcase}",
                      :alice, :payload => {"actors" => [sparklepony], "groups" => []}).
                 should have_status_code(200)
@@ -636,10 +699,6 @@ describe "Actors Endpoint" do
             with_members :hackers, :actors => [:alice]
 
             it "can modify the ACE for groups" do
-              :alice.should_not directly_have_permission(:grant).on_actor(:testy)
-              :alice.should be_a_direct_member_of(:hackers)
-              :hackers.should directly_have_permission(:grant).on_actor(:testy)
-
               put("/actors/#{testy}/acl/#{action.downcase}",
                      :alice, :payload => {"actors" => [], "groups" => [ponies]}).
                 should have_status_code(200)
@@ -678,7 +737,6 @@ describe "Actors Endpoint" do
 
             it "can clear the ACE" do
               pending "causes internal 500 errors" do
-                :alice.should directly_have_permission(:grant).on_actor(:testy)
                 delete("/actors/#{testy}/acl/#{action.downcase}",
                        :alice).should have_status_code(200).with_body({})
                 get("/actors/#{testy}/acl/#{action.downcase}",
@@ -700,7 +758,6 @@ describe "Actors Endpoint" do
             }
 
             it "cannot clear the ACE" do
-              :bob.should_not directly_have_permission(:grant).on_actor(:testy)
               delete("/actors/#{testy}/acl/#{action.downcase}",
                      :bob).should have_status_code(403).with_body({"error" => "must be in the grant access control entry to perform this action"})
               get("/actors/#{testy}/acl/#{action.downcase}",
@@ -717,10 +774,6 @@ describe "Actors Endpoint" do
 
             it "can clear the ACE" do
               pending "causes internal 500 errors" do
-                :alice.should_not directly_have_permission(:grant).on_actor(:testy)
-                :alice.should be_a_direct_member_of(:hackers)
-                :hackers.should directly_have_permission(:grant).on_actor(:testy)
-
                 delete("/actors/#{testy}/acl/#{action.downcase}",
                        :alice).should have_status_code(200).with_body({})
                 get("/actors/#{testy}/acl/#{action.downcase}",
@@ -807,16 +860,12 @@ describe "Actors Endpoint" do
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
-                    :alice.should directly_have_permission(ace.downcase.to_sym).
-                      on_actor(:testy)
                     # Alice has specific ACE access on testy
                     get("/actors/#{testy}/acl/#{action.downcase}/actors/#{alice}",
                         :alice).should have_status_code(200).with_body({})
                   end
                 else
                   it "returns 404 when not in ACE" do
-                    :alice.should directly_have_permission(ace.downcase.to_sym).
-                      on_actor(:testy)
                     # Alice does not have other access on testy
                     get("/actors/#{testy}/acl/#{action.downcase}/actors/#{alice}",
                         :alice).should have_status_code(404)
@@ -833,23 +882,11 @@ describe "Actors Endpoint" do
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
-                    :alice.should_not directly_have_permission(ace.downcase.to_sym).
-                      on_actor(:testy)
-                    :alice.should be_a_direct_member_of(:hackers)
-                    :hackers.should directly_have_permission(ace.downcase.to_sym).
-                      on_actor(:testy)
-
                     get("/actors/#{testy}/acl/#{action.downcase}/actors/#{alice}",
                         :alice).should have_status_code(200).with_body({})
                   end
                 else
                   it "returns 404 when not in ACE" do
-                    :alice.should_not directly_have_permission(ace.downcase.to_sym).
-                      on_actor(:testy)
-                    :alice.should be_a_direct_member_of(:hackers)
-                    :hackers.should directly_have_permission(ace.downcase.to_sym).
-                      on_actor(:testy)
-
                     get("/actors/#{testy}/acl/#{action.downcase}/actors/#{alice}",
                         :alice).should have_status_code(404)
                   end
@@ -881,8 +918,6 @@ describe "Actors Endpoint" do
                     # My understanding is that if group X has permissions on actor X,
                     # this should return 200, but as it is, it doesn't
                     pending "doesn't seem to work" do
-                      :ponies.should directly_have_permission(ace.downcase.to_sym).
-                        on_actor(:testy)
                       # Ponies has specific ACE access on testy
                       get("/actors/#{testy}/acl/#{action.downcase}/groups/#{ponies}",
                           :alice).should have_status_code(200).with_body({})
@@ -890,8 +925,6 @@ describe "Actors Endpoint" do
                   end
                 else
                   it "returns 404 when not in ACE" do
-                    :ponies.should directly_have_permission(ace.downcase.to_sym).
-                      on_actor(:testy)
                     # Ponies does not have other access on testy
                     get("/actors/#{testy}/acl/#{action.downcase}/groups/#{ponies}",
                         :alice).should have_status_code(404)
@@ -911,30 +944,12 @@ describe "Actors Endpoint" do
                   # See above
                   it "returns 200 when in ACE" do
                     pending "doesn't seem to work" do
-                      :alice.should_not directly_have_permission(ace.downcase.to_sym).
-                        on_actor(:testy)
-                      :alice.should be_a_direct_member_of(:hackers)
-                      :hackers.should be_a_direct_member_of(:ponies)
-                      :hackers.should_not directly_have_permission(ace.downcase.to_sym).
-                        on_actor(:testy)
-                      :ponies.should directly_have_permission(ace.downcase.to_sym).
-                        on_actor(:testy)
-
                       get("/actors/#{testy}/acl/#{action.downcase}/groups/#{hackers}",
                           :alice).should have_status_code(200).with_body({})
                     end
                   end
                 else
                   it "returns 404 when not in ACE" do
-                    :alice.should_not directly_have_permission(ace.downcase.to_sym).
-                      on_actor(:testy)
-                    :alice.should be_a_direct_member_of(:hackers)
-                    :hackers.should be_a_direct_member_of(:ponies)
-                    :hackers.should_not directly_have_permission(ace.downcase.to_sym).
-                      on_actor(:testy)
-                    :ponies.should directly_have_permission(ace.downcase.to_sym).
-                      on_actor(:testy)
-
                     get("/actors/#{testy}/acl/#{action.downcase}/groups/#{hackers}",
                         :alice).should have_status_code(404)
                   end
