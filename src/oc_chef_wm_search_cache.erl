@@ -35,7 +35,10 @@ get(cache, _ReqId, Redis, Key) ->
         {ok, Value} ->
             folsom_metrics:notify({search_cache_hit, 1}),
             {Count, Gzip} = binary_to_term(Value),
-            {Count, zlib:gunzip(Gzip)}
+            {Count, zlib:gunzip(Gzip)};
+        _ ->
+            folsom_metrics:notify({search_cache_error, 1}),
+            not_found
     end.
 
 %% @doc Add entry to the search cache
@@ -154,9 +157,12 @@ caching_allowed(Redis, OrgName) ->
     Cmd = ["SISMEMBER", ?NO_CACHE_ORGS_KEY, OrgName],
     Fun = fun() -> eredis:q(Redis, Cmd) end,
     case folsom_time(search_cache_redis_member, Fun) of
+        {ok, <<"0">>} ->
+            cache;
         {ok, <<"1">>} ->
             folsom_metrics:notify({search_cache_no_cache_allowed, 1}),
             no_cache;
-        {ok, <<"0">>} ->
-            cache
+        _Any ->
+            folsom_metrics:notify({search_cache_error, 1}),
+            no_cache
     end.
