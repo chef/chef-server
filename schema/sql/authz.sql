@@ -29,20 +29,25 @@ CREATE TABLE auth_object(
 -- similar) tables for actors and groups.  This makes for a simpler
 -- schema, and allows for better use of foreign key constraints.
 -- Recursive queries make relevant graph traversals straightforward.
-
--- Removing an Object removes all ACL and graph information
--- automatically via foreign key cascades
 --
--- Deleting a user (or group) removes all related ACL and graph information
--- automatically via foreign key cascades
-
--- We can use the plv8 language to write JavaScript stored procedures
--- (for JSON manipulation).  We could create a stored proc that takes
--- ACL JSON and creates rows for them in the database. Similarly, we
--- could create a stored proc that generates the JSON for an entire
--- ACL entry
-
--- A record in an acl_* table indicates the permission is granted;
+-- By keeping permission tables separate this way, we gain some "type
+-- safety" with only foreign key constraints.  With this schema it
+-- would be impossible for, say, a container to have permissions on an
+-- actor.  However, putting everything into one table would make this
+-- possible, absent some logic in triggers.
+--
+-- It also allows for potentially quicker access, since we can bypass
+-- information that is irrelevant to our queries by using the
+-- appropriate tables (e.g., if we are interested in an actor's
+-- permissions on an object, we do not need to scan a table that also
+-- has information on that actor's permissions on other actors,
+-- groups, or containers).
+--
+-- We also don't have any NULLs in the tables, which eliminates an
+-- entire class of problems related to SQL handling NULLs in
+-- inconsistent ways.
+--
+-- A record in an acl table indicates the permission is granted;
 -- lack of a record indicates the permission is denied.
 CREATE TABLE object_acl_group(
        target bigint NOT NULL REFERENCES auth_object(id) ON UPDATE CASCADE ON DELETE CASCADE,
