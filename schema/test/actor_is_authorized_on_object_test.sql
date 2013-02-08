@@ -68,7 +68,7 @@ SELECT is(TRUE,
        'An actor indirectly granted permission XXX via nested groups has the XXX permission');
 SELECT is(FALSE,
        actor_has_permission_on_object('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww', 'oooooooooooooooooooooooooooooooo', 'grant'),
-       'An actor neither directly nor indirectly granted permission XXX has the XXX permission');
+       'An actor neither directly nor indirectly granted permission XXX does NOT have the XXX permission');
 
 -- Verify behavior on NULL input
 SELECT is(NULL,

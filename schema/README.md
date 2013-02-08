@@ -67,7 +67,7 @@ ok 4 - An actor directly granted permission XXX has the XXX permission
 ok 5 - An actor both directly and indirectly granted permission XXX has the XXX permission
 ok 6 - An actor indirectly granted permission XXX has the XXX permission
 ok 7 - An actor indirectly granted permission XXX via nested groups has the XXX permission
-ok 8 - An actor neither directly nor indirectly granted permission XXX has the XXX permission
+ok 8 - An actor neither directly nor indirectly granted permission XXX does NOT have the XXX permission
 ok 9 - actor_has_permission_on_object returns NULL if actor is NULL
 ok 10 - actor_has_permission_on_object returns NULL if object is NULL
 ok 11 - actor_has_permission_on_object returns NULL if permission is NULL
