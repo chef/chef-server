@@ -3,6 +3,8 @@ require 'pedant/rspec/actors_util.rb'
 describe "Actors Endpoint" do
   include Pedant::RSpec::ActorsUtil
 
+  let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
+
   context "pedant API sanity check" do
     ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
       context "for #{action} ACE" do
@@ -55,7 +57,7 @@ describe "Actors Endpoint" do
         end
 
         context "an actor doubly-indirectly in the ACE" do
-          with_actors :hasselhoff, :shatner, :malkovich
+          with_actors :hasselhoff, :shatner
           with_groups :hipsters, :brogrammers
 
           with_ace_on_actor :shatner, action.downcase.to_sym, :groups => [:brogrammers]
@@ -98,23 +100,23 @@ describe "Actors Endpoint" do
     end
 
     context "an actor with full ACE" do
-      with_actors :malkovich, :shatner
+      with_actors :hasselhoff, :shatner
 
-      # Give malkovich no access at all
+      # Give hasselhoff full access
       with_acl_on_actor :shatner, {
-        :create => {:actors => [:malkovich], :groups => []},
-        :read   => {:actors => [:malkovich], :groups => []},
-        :update => {:actors => [:malkovich], :groups => []},
-        :delete => {:actors => [:malkovich], :groups => []},
-        :grant  => {:actors => [:malkovich], :groups => []}
+        :create => {:actors => [:hasselhoff], :groups => []},
+        :read   => {:actors => [:hasselhoff], :groups => []},
+        :update => {:actors => [:hasselhoff], :groups => []},
+        :delete => {:actors => [:hasselhoff], :groups => []},
+        :grant  => {:actors => [:hasselhoff], :groups => []}
       }
 
       it "has all permissions" do
-        :malkovich.should directly_have_permission(:create).on_actor(:shatner) 
-        :malkovich.should directly_have_permission(:read).on_actor(:shatner)
-        :malkovich.should directly_have_permission(:update).on_actor(:shatner)
-        :malkovich.should directly_have_permission(:delete).on_actor(:shatner)
-        :malkovich.should directly_have_permission(:grant).on_actor(:shatner)
+        :hasselhoff.should directly_have_permission(:create).on_actor(:shatner) 
+        :hasselhoff.should directly_have_permission(:read).on_actor(:shatner)
+        :hasselhoff.should directly_have_permission(:update).on_actor(:shatner)
+        :hasselhoff.should directly_have_permission(:delete).on_actor(:shatner)
+        :hasselhoff.should directly_have_permission(:grant).on_actor(:shatner)
       end
     end
   end
@@ -133,7 +135,9 @@ describe "Actors Endpoint" do
       end
 
       context "as an unknown requestor" do
-        creates_an_actor_as("deadbeefdeadbeefdeadbeefdeadbeef")
+        fake_actor = :mattdamon
+
+        creates_an_actor_as(fake_actor)
       end
 
       # Apparently, this is the only item creation operation that
@@ -221,7 +225,8 @@ describe "Actors Endpoint" do
         with_ace_on_actor :shatner, :read, :actors => [:hasselhoff]
 
         it "can read the actor" do
-          get("/actors/#{shatner}", :hasselhoff).should have_status_code(200).with_body({})
+          get("/actors/#{shatner}",
+              :hasselhoff).should have_status_code(200).with_body({})
         end
       end
 
@@ -238,20 +243,21 @@ describe "Actors Endpoint" do
         }
 
         it "cannot read the actor" do
-          get("/actors/#{shatner}",
-              :malkovich).should have_status_code(403).with_body({"error" => "must be in the read access control entry to perform this action"})
+          get("/actors/#{shatner}", :malkovich).should have_status_code(403).
+            with_body({"error" => "must be in the read access control entry to perform this action"})
         end
       end
 
       context "an actor indirectly in the READ ACE" do
-        with_actors :hasselhoff, :shatner, :malkovich
+        with_actors :hasselhoff, :shatner
         with_group :hipsters
 
         with_ace_on_actor :shatner, :read, :groups => [:hipsters]
         with_members :hipsters, :actors => [:hasselhoff]
 
         it "can read the actor" do
-          get("/actors/#{shatner}", :hasselhoff).should have_status_code(200).with_body({})
+          get("/actors/#{shatner}",
+              :hasselhoff).should have_status_code(200).with_body({})
         end
       end
 
@@ -259,7 +265,7 @@ describe "Actors Endpoint" do
         with_actor :hasselhoff
 
         it "can't be read, because it doesn't exist" do
-          fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+          fake_actor = mattdamon
 
           get("/actors/#{fake_actor}", :hasselhoff).should have_status_code(404)
         end
@@ -280,7 +286,8 @@ describe "Actors Endpoint" do
         with_ace_on_actor :shatner, :delete, :actors => [:hasselhoff]
 
         it "can delete the actor" do
-          delete("/actors/#{shatner}", :hasselhoff).should have_status_code(200).with_body({})
+          delete("/actors/#{shatner}",
+                 :hasselhoff).should have_status_code(200).with_body({})
           get("/actors/#{shatner}", :superuser).should have_status_code(404)
         end
       end
@@ -298,21 +305,22 @@ describe "Actors Endpoint" do
         }
 
         it "cannot delete the actor" do
-          delete("/actors/#{shatner}",
-                 :malkovich).should have_status_code(403).with_body({"error" => "must be in the delete access control entry to perform this action"})
+          delete("/actors/#{shatner}", :malkovich).should have_status_code(403).
+            with_body({"error" => "must be in the delete access control entry to perform this action"})
           get("/actors/#{shatner}", :superuser).should have_status_code(200)
         end
       end
 
       context "an actor indirectly in the DELETE ACE" do
-        with_actors :hasselhoff, :shatner, :malkovich
+        with_actors :hasselhoff, :shatner
         with_group :hipsters
 
         with_ace_on_actor :shatner, :delete, :groups => [:hipsters]
         with_members :hipsters, :actors => [:hasselhoff]
 
         it "can delete the actor" do
-          delete("/actors/#{shatner}", :hasselhoff).should have_status_code(200).with_body({})
+          delete("/actors/#{shatner}",
+                 :hasselhoff).should have_status_code(200).with_body({})
           get("/actors/#{shatner}", :superuser).should have_status_code(404)
         end
       end
@@ -321,7 +329,7 @@ describe "Actors Endpoint" do
         with_actor :hasselhoff
 
         it "can't be deleted, because it doesn't exist" do
-          fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+          fake_actor = mattdamon
 
           # Prove it doesn't exist
           get("/actors/#{fake_actor}", :hasselhoff).should have_status_code(404)
@@ -369,7 +377,7 @@ describe "Actors Endpoint" do
         end
 
         context "an actor indirectly in the #{ace} ACE" do
-          with_actors :hasselhoff, :shatner, :malkovich
+          with_actors :hasselhoff, :shatner
           with_group :hipsters
 
           with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:hipsters]
@@ -404,8 +412,8 @@ describe "Actors Endpoint" do
         }
 
         it "cannot read the acl" do
-          get("/actors/#{shatner}/acl",
-              :malkovich).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
+          get("/actors/#{shatner}/acl", :malkovich).should have_status_code(403).
+            with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
         end
       end
 
@@ -413,7 +421,7 @@ describe "Actors Endpoint" do
         with_actor :hasselhoff
 
         it "can't be read, because it doesn't exist" do
-          fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+          fake_actor = mattdamon
 
           get("/actors/#{fake_actor}/acl", :hasselhoff).should have_status_code(404)
         end
@@ -459,7 +467,7 @@ describe "Actors Endpoint" do
             end
 
             context "an actor indirectly in the #{ace} ACE" do
-              with_actors :hasselhoff, :shatner, :malkovich
+              with_actors :hasselhoff, :shatner
               with_group :hipsters
 
               with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:hipsters]
@@ -499,7 +507,7 @@ describe "Actors Endpoint" do
               with_actor :hasselhoff
 
               it "can't be read, because it doesn't exist" do
-                fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+                fake_actor = mattdamon
 
                 get("/actors/#{fake_actor}/acl/#{action}",
                     :hasselhoff).should have_status_code(404)
@@ -530,6 +538,7 @@ describe "Actors Endpoint" do
                 put("/actors/#{shatner}/acl/#{action.downcase}",
                     :hasselhoff, :payload => {}).
                   should have_status_code(400).with_body({"error" => "bad input"})
+
                 get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(200).
                   with_body({"actors" => [hasselhoff], "groups" => []})
@@ -554,6 +563,7 @@ describe "Actors Endpoint" do
                     :payload => {"actors" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"],
                       "groups" => []}).
                   should have_status_code(400).with_body({"error" => "bad input"})
+
                 get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(200).
                   with_body({"actors" => [hasselhoff], "groups" => []})
@@ -572,6 +582,7 @@ describe "Actors Endpoint" do
                     :hasselhoff, :payload => {"actors" => [],
                       "groups" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"]}).
                   should have_status_code(400).with_body({"error" => "bad input"})
+
                 get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(200).
                   with_body({"actors" => [hasselhoff], "groups" => []})
@@ -591,6 +602,7 @@ describe "Actors Endpoint" do
                     :payload => {"actors" => ["ffffffffffffffffffffffffffffffff"],
                       "groups" => []}).
                   should have_status_code(400).with_body({"error" => "bad input"})
+
                 get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(200).
                   with_body({"actors" => [hasselhoff], "groups" => []})
@@ -609,6 +621,7 @@ describe "Actors Endpoint" do
                     :hasselhoff, :payload => {"actors" => [],
                       "groups" => ["ffffffffffffffffffffffffffffffff"]}).
                   should have_status_code(400).with_body({"error" => "bad input"})
+
                 get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(200).
                   with_body({"actors" => [hasselhoff], "groups" => []})
@@ -623,8 +636,10 @@ describe "Actors Endpoint" do
 
             it "can modify the ACE for actors" do
               put("/actors/#{shatner}/acl/#{action.downcase}",
-                  :hasselhoff, :payload => {"actors" => [schwartzenegger], "groups" => []}).
+                  :hasselhoff, :payload => {"actors" => [schwartzenegger],
+                    "groups" => []}).
                 should have_status_code(200).with_body({})
+
               get("/actors/#{shatner}/acl/#{action.downcase}",
                   :superuser).should have_status_code(200).
                 with_body({"actors" => [schwartzenegger], "groups" => []})
@@ -641,6 +656,7 @@ describe "Actors Endpoint" do
               put("/actors/#{shatner}/acl/#{action.downcase}",
                   :hasselhoff, :payload => {"actors" => [], "groups" => [brogrammers]}).
                 should have_status_code(200).with_body({})
+
               get("/actors/#{shatner}/acl/#{action.downcase}",
                   :superuser).should have_status_code(200).
                 with_body({"actors" => [], "groups" => [brogrammers]})
@@ -667,8 +683,10 @@ describe "Actors Endpoint" do
 
             it "cannot modify the ACE" do
               put("/actors/#{shatner}/acl/#{action.downcase}",
-                  :malkovich, :payload => {"actors" => [schwartzenegger], "groups" => []}).
-                should have_status_code(403).with_body({"error" => "must be in the grant access control entry to perform this action"})
+                  :malkovich, :payload => {"actors" => [schwartzenegger],
+                    "groups" => []}).should have_status_code(403).
+                with_body({"error" => "must be in the grant access control entry to perform this action"})
+
               get("/actors/#{shatner}/acl/#{action.downcase}",
                   :superuser).should have_status_code(200).with_body(body)
             end
@@ -700,8 +718,9 @@ describe "Actors Endpoint" do
 
             it "can modify the ACE for groups" do
               put("/actors/#{shatner}/acl/#{action.downcase}",
-                     :hasselhoff, :payload => {"actors" => [], "groups" => [brogrammers]}).
-                should have_status_code(200)
+                     :hasselhoff, :payload => {"actors" => [],
+                    "groups" => [brogrammers]}).should have_status_code(200)
+
               get("/actors/#{shatner}/acl/#{action.downcase}",
                   :superuser).should have_status_code(200).
                 with_body({"actors" => [], "groups" => [brogrammers]})
@@ -712,13 +731,15 @@ describe "Actors Endpoint" do
             with_actor :hasselhoff
 
             it "can't modify its ACE, because it doesn't exist" do
-              fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+              fake_actor = mattdamon
 
               # Prove it doesn't exist
-              get("/actors/#{fake_actor}/acl/#{action.downcase}", :hasselhoff).should have_status_code(404)
+              get("/actors/#{fake_actor}/acl/#{action.downcase}",
+                  :hasselhoff).should have_status_code(404)
 
               # Now try to delete it
-              delete("/actors/#{fake_actor}/acl/#{action.downcase}", :hasselhoff).should have_status_code(404)
+              delete("/actors/#{fake_actor}/acl/#{action.downcase}",
+                     :hasselhoff).should have_status_code(404)
             end
           end
         end
@@ -759,14 +780,16 @@ describe "Actors Endpoint" do
 
             it "cannot clear the ACE" do
               delete("/actors/#{shatner}/acl/#{action.downcase}",
-                     :malkovich).should have_status_code(403).with_body({"error" => "must be in the grant access control entry to perform this action"})
+                     :malkovich).should have_status_code(403).
+                with_body({"error" => "must be in the grant access control entry to perform this action"})
+
               get("/actors/#{shatner}/acl/#{action.downcase}",
                   :superuser).should have_status_code(200)
             end
           end
 
           context "an actor indirectly in the GRANT ACE" do
-            with_actors :hasselhoff, :shatner, :malkovich
+            with_actors :hasselhoff, :shatner
             with_group :hipsters
 
             with_ace_on_actor :shatner, :grant, :groups => [:hipsters]
@@ -776,6 +799,7 @@ describe "Actors Endpoint" do
               pending "causes internal 500 errors" do
                 delete("/actors/#{shatner}/acl/#{action.downcase}",
                        :hasselhoff).should have_status_code(200).with_body({})
+
                 get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(404)
               end
@@ -786,13 +810,15 @@ describe "Actors Endpoint" do
             with_actor :hasselhoff
 
             it "can't clear its ACE, because it doesn't exist" do
-              fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+              fake_actor = mattdamon
 
               # Prove it doesn't exist
-              get("/actors/#{fake_actor}/acl/#{action.downcase}", :hasselhoff).should have_status_code(404)
+              get("/actors/#{fake_actor}/acl/#{action.downcase}",
+                  :hasselhoff).should have_status_code(404)
 
               # Now try to delete it
-              delete("/actors/#{fake_actor}/acl/#{action.downcase}", :hasselhoff).should have_status_code(404)
+              delete("/actors/#{fake_actor}/acl/#{action.downcase}",
+                     :hasselhoff).should have_status_code(404)
             end
           end
         end
@@ -874,7 +900,7 @@ describe "Actors Endpoint" do
               end
 
               context "an actor indirectly in the #{ace} ACE" do
-                with_actors :hasselhoff, :shatner, :malkovich
+                with_actors :hasselhoff, :shatner
                 with_group :hipsters
 
                 with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:hipsters]
@@ -897,7 +923,7 @@ describe "Actors Endpoint" do
                 with_actor :hasselhoff
 
                 it "can't be read, because it doesn't exist" do
-                  fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+                  fake_actor = mattdamon
 
                   get("/actors/#{fake_actor}/acl/#{action.downcase}/actors/#{hasselhoff}",
                       :hasselhoff).should have_status_code(404)
@@ -933,7 +959,7 @@ describe "Actors Endpoint" do
               end
 
               context "a group indirectly in the #{ace} ACE" do
-                with_actors :hasselhoff, :shatner, :malkovich
+                with_actors :hasselhoff, :shatner
                 with_groups :hipsters, :brogrammers
 
                 with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:brogrammers]
@@ -961,7 +987,7 @@ describe "Actors Endpoint" do
                 with_group :brogrammers
 
                 it "can't be read, because it doesn't exist" do
-                  fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+                  fake_actor = mattdamon
 
                   get("/actors/#{fake_actor}/acl/#{action.downcase}/groups/#{brogrammers}",
                       :hasselhoff).should have_status_code(404)
@@ -989,7 +1015,7 @@ describe "Actors Endpoint" do
                 with_object :spork
 
                 it "can't be read, because it doesn't exist" do
-                  fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
+                  fake_actor = mattdamon
 
                   get("/actors/#{fake_actor}/acl/#{action.downcase}/objects/#{spork}",
                       :superuser).should have_status_code(404)
