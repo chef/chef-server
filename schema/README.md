@@ -1,6 +1,8 @@
 Authz PostgreSQL Schema
 =======================
 
+[a relative link](authz-schema.png)
+
 # Testing
 
 We use [pgTAP][] to test both the schema and the stored procedures in
