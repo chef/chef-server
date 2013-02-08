@@ -323,7 +323,7 @@ describe "Actors Endpoint" do
         # Give malkovich everything EXCEPT read
         with_acl_on_actor :shatner, {
           :create => {:actors => [:malkovich], :groups => []},
-          :read   => {:actors => [],     :groups => []}, # <--- That's the one!
+          :read   => {:actors => [],           :groups => []}, # <--- That's the one!
           :update => {:actors => [:malkovich], :groups => []},
           :delete => {:actors => [:malkovich], :groups => []},
           :grant  => {:actors => [:malkovich], :groups => []}
@@ -387,7 +387,7 @@ describe "Actors Endpoint" do
           :create => {:actors => [:malkovich], :groups => []},
           :read   => {:actors => [:malkovich], :groups => []},
           :update => {:actors => [:malkovich], :groups => []},
-          :delete => {:actors => [],     :groups => []}, # <--- That's the one!
+          :delete => {:actors => [],           :groups => []}, # <--- That's the one!
           :grant  => {:actors => [:malkovich], :groups => []}
         }
 
@@ -783,7 +783,7 @@ describe "Actors Endpoint" do
               :read   => {:actors => [:malkovich], :groups => []},
               :update => {:actors => [:malkovich], :groups => []},
               :delete => {:actors => [:malkovich], :groups => []},
-              :grant  => {:actors => [],     :groups => []} # <--- That's the one!
+              :grant  => {:actors => [],           :groups => []} # <--- That's the one!
             }
 
             if (action == 'GRANT')
@@ -886,7 +886,7 @@ describe "Actors Endpoint" do
               :read   => {:actors => [:malkovich], :groups => []},
               :update => {:actors => [:malkovich], :groups => []},
               :delete => {:actors => [:malkovich], :groups => []},
-              :grant  => {:actors => [],     :groups => []} # <--- That's the one!
+              :grant  => {:actors => [],           :groups => []} # <--- That's the one!
             }
 
             it "cannot clear the ACE" do
