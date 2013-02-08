@@ -15,27 +15,6 @@
 
 require 'pedant/rspec/http_status_codes'
 
-RSpec::Matchers.define :be_create_response_for do |type|
-  match do |response|
-
-    parsed = parse(response)
-    id = parsed["id"]
-
-    # The server is hard coded in the opscode-authz application... We'll warn about it for the time being.
-    puts "NOTE: URI returned from creation of a new #{type} is currently matching the server 'authz.opscode.com', which is hard coded!"
-    expected_uri = "http://authz.opscode.com/#{type}s/#{id}"
-
-    response.code == 201 && parsed.keys.sort == ["id", "uri"] && parsed["uri"] == expected_uri
-  end
-  description do
-    "yield a suitable response for #{type} creation"
-  end
-
-  failure_message_for_should do |response|
-    "Received a HTTP response with code #{response.code} (#{Pedant::RSpec::HTTP::STATUS_CODES[response.code]}) and a body of #{response}"
-  end
-end
-
 RSpec::Matchers.define :be_a_direct_member_of do |group_label|
   match do |actor_or_group_label|
 
@@ -163,13 +142,20 @@ end
 RSpec::Matchers.define :have_status_code do |code|
   match do |response|
     body_test = if @body
-                  parse(response) == @body
+                  response_body = parse(response)
+                  response_body.keys.sort.should == @body.keys.sort
+                  response_body.each_key do |key|
+                    if (@body[key].class == Regexp)
+                      response_body[key].should =~ @body[key]
+                    else
+                      response_body[key].should == @body[key]
+                    end
+                  end
+                  true
                 else
                   true
                 end
-
     (response.code == code) && body_test
-
   end
 
   chain :with_body do |body|
