@@ -7,80 +7,80 @@ describe "Actors Endpoint" do
     ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
       context "for #{action} ACE" do
         context "for single ACE on actor" do
-          with_actors :alice, :testy
+          with_actors :hasselhoff, :shatner
 
-          with_ace_on_actor :testy, action.downcase.to_sym, :actors => [:alice]
+          with_ace_on_actor :shatner, action.downcase.to_sym, :actors => [:hasselhoff]
 
           it "has permission" do
-            :alice.should directly_have_permission(action.downcase.to_sym).
-              on_actor(:testy)
+            :hasselhoff.should directly_have_permission(action.downcase.to_sym).
+              on_actor(:shatner)
           end
         end
 
         context "an actor NOT in the ACE" do
-          with_actors :bob, :testy
+          with_actors :malkovich, :shatner
 
-          # Give bob everything EXCEPT action
+          # Give malkovich everything EXCEPT action
           acl = {
-            :create => {:actors => [:bob], :groups => []},
-            :read   => {:actors => [:bob], :groups => []},
-            :update => {:actors => [:bob], :groups => []},
-            :delete => {:actors => [:bob], :groups => []},
-            :grant  => {:actors => [:bob], :groups => []}
+            :create => {:actors => [:malkovich], :groups => []},
+            :read   => {:actors => [:malkovich], :groups => []},
+            :update => {:actors => [:malkovich], :groups => []},
+            :delete => {:actors => [:malkovich], :groups => []},
+            :grant  => {:actors => [:malkovich], :groups => []}
           }
           acl[action.downcase.to_sym] = {:actors => [], :groups => []}
           
-          with_acl_on_actor :testy, acl
+          with_acl_on_actor :shatner, acl
 
           it "does not have permission" do
-            :bob.should_not directly_have_permission(action.downcase.to_sym).
-              on_actor(:testy)
+            :malkovich.should_not directly_have_permission(action.downcase.to_sym).
+              on_actor(:shatner)
           end
         end
 
         context "an actor indirectly in the ACE" do
-          with_actors :alice, :testy, :bob
-          with_group :hackers
+          with_actors :hasselhoff, :shatner, :malkovich
+          with_group :hipsters
 
-          with_ace_on_actor :testy, action.downcase.to_sym, :groups => [:hackers]
-          with_members :hackers, :actors => [:alice]
+          with_ace_on_actor :shatner, action.downcase.to_sym, :groups => [:hipsters]
+          with_members :hipsters, :actors => [:hasselhoff]
 
           it "has only indirect permission" do
-            :alice.should_not directly_have_permission(action.downcase.to_sym).
-              on_actor(:testy)
-            :alice.should be_a_direct_member_of(:hackers)
-            :hackers.should directly_have_permission(action.downcase.to_sym).
-              on_actor(:testy)
+            :hasselhoff.should_not directly_have_permission(action.downcase.to_sym).
+              on_actor(:shatner)
+            :hasselhoff.should be_a_direct_member_of(:hipsters)
+            :hipsters.should directly_have_permission(action.downcase.to_sym).
+              on_actor(:shatner)
           end
         end
 
         context "an actor doubly-indirectly in the ACE" do
-          with_actors :alice, :testy, :bob
-          with_groups :hackers, :ponies
+          with_actors :hasselhoff, :shatner, :malkovich
+          with_groups :hipsters, :brogrammers
 
-          with_ace_on_actor :testy, action.downcase.to_sym, :groups => [:ponies]
-          with_members :ponies, :groups => [:hackers]
-          with_members :hackers, :actors => [:alice]
+          with_ace_on_actor :shatner, action.downcase.to_sym, :groups => [:brogrammers]
+          with_members :brogrammers, :groups => [:hipsters]
+          with_members :hipsters, :actors => [:hasselhoff]
 
           it "has only doubly-indirect permission" do
-            :alice.should_not directly_have_permission(action.downcase.to_sym).
-              on_actor(:testy)
-            :alice.should be_a_direct_member_of(:hackers)
-            :hackers.should be_a_direct_member_of(:ponies)
-            :hackers.should_not directly_have_permission(action.downcase.to_sym).
-              on_actor(:testy)
-            :ponies.should directly_have_permission(action.downcase.to_sym).
-              on_actor(:testy)
+            :hasselhoff.should_not directly_have_permission(action.downcase.to_sym).
+              on_actor(:shatner)
+            :hasselhoff.should be_a_direct_member_of(:hipsters)
+            :hipsters.should be_a_direct_member_of(:brogrammers)
+            :hipsters.should_not directly_have_permission(action.downcase.to_sym).
+              on_actor(:shatner)
+            :brogrammers.should directly_have_permission(action.downcase.to_sym).
+              on_actor(:shatner)
           end
         end
       end
     end
 
     context "an actor with NO ACE" do
-      with_actors :bob, :testy
+      with_actors :malkovich, :shatner
 
-      # Give bob no access at all
-      with_acl_on_actor :testy, {
+      # Give malkovich no access at all
+      with_acl_on_actor :shatner, {
         :create => {:actors => [], :groups => []},
         :read   => {:actors => [], :groups => []},
         :update => {:actors => [], :groups => []},
@@ -89,32 +89,32 @@ describe "Actors Endpoint" do
       }
 
       it "has no permissions" do
-        :bob.should_not directly_have_permission(:create).on_actor(:testy) 
-        :bob.should_not directly_have_permission(:read).on_actor(:testy)
-        :bob.should_not directly_have_permission(:update).on_actor(:testy)
-        :bob.should_not directly_have_permission(:delete).on_actor(:testy)
-        :bob.should_not directly_have_permission(:grant).on_actor(:testy)
+        :malkovich.should_not directly_have_permission(:create).on_actor(:shatner) 
+        :malkovich.should_not directly_have_permission(:read).on_actor(:shatner)
+        :malkovich.should_not directly_have_permission(:update).on_actor(:shatner)
+        :malkovich.should_not directly_have_permission(:delete).on_actor(:shatner)
+        :malkovich.should_not directly_have_permission(:grant).on_actor(:shatner)
       end
     end
 
     context "an actor with full ACE" do
-      with_actors :bob, :testy
+      with_actors :malkovich, :shatner
 
-      # Give bob no access at all
-      with_acl_on_actor :testy, {
-        :create => {:actors => [:bob], :groups => []},
-        :read   => {:actors => [:bob], :groups => []},
-        :update => {:actors => [:bob], :groups => []},
-        :delete => {:actors => [:bob], :groups => []},
-        :grant  => {:actors => [:bob], :groups => []}
+      # Give malkovich no access at all
+      with_acl_on_actor :shatner, {
+        :create => {:actors => [:malkovich], :groups => []},
+        :read   => {:actors => [:malkovich], :groups => []},
+        :update => {:actors => [:malkovich], :groups => []},
+        :delete => {:actors => [:malkovich], :groups => []},
+        :grant  => {:actors => [:malkovich], :groups => []}
       }
 
       it "has all permissions" do
-        :bob.should directly_have_permission(:create).on_actor(:testy) 
-        :bob.should directly_have_permission(:read).on_actor(:testy)
-        :bob.should directly_have_permission(:update).on_actor(:testy)
-        :bob.should directly_have_permission(:delete).on_actor(:testy)
-        :bob.should directly_have_permission(:grant).on_actor(:testy)
+        :malkovich.should directly_have_permission(:create).on_actor(:shatner) 
+        :malkovich.should directly_have_permission(:read).on_actor(:shatner)
+        :malkovich.should directly_have_permission(:update).on_actor(:shatner)
+        :malkovich.should directly_have_permission(:delete).on_actor(:shatner)
+        :malkovich.should directly_have_permission(:grant).on_actor(:shatner)
       end
     end
   end
@@ -168,35 +168,35 @@ describe "Actors Endpoint" do
       end
 
       context "created actor" do
-        with_actor :testy
+        with_actor :shatner
 
         it "is in own ACEs" do
-          :testy.should directly_have_permission(:create).on_actor(:testy)
-          :testy.should directly_have_permission(:read).on_actor(:testy)
-          :testy.should directly_have_permission(:update).on_actor(:testy)
-          :testy.should directly_have_permission(:delete).on_actor(:testy)
-          :testy.should directly_have_permission(:grant).on_actor(:testy)
+          :shatner.should directly_have_permission(:create).on_actor(:shatner)
+          :shatner.should directly_have_permission(:read).on_actor(:shatner)
+          :shatner.should directly_have_permission(:update).on_actor(:shatner)
+          :shatner.should directly_have_permission(:delete).on_actor(:shatner)
+          :shatner.should directly_have_permission(:grant).on_actor(:shatner)
         end
       end
 
       context "created actor part deux" do
-        with_actor :testy
+        with_actor :shatner
 
         before :each do
-          response = post("/actors", testy)
+          response = post("/actors", shatner)
           @actor = parse(response)["id"]
         end
 
         after :each do
-          delete("/actors/#{@actor}", testy)
+          delete("/actors/#{@actor}", shatner)
         end
 
         it "contains creator in ACLs" do
-          body = {"create" => {"actors" => [@actor, testy], "groups" => []},
-            "read" => {"actors" => [@actor, testy], "groups" => []},
-            "update" => {"actors" => [@actor, testy], "groups" => []},
-            "delete" => {"actors" => [@actor, testy], "groups" => []},
-            "grant" => {"actors" => [@actor, testy], "groups" => []}}
+          body = {"create" => {"actors" => [@actor, shatner], "groups" => []},
+            "read" => {"actors" => [@actor, shatner], "groups" => []},
+            "update" => {"actors" => [@actor, shatner], "groups" => []},
+            "delete" => {"actors" => [@actor, shatner], "groups" => []},
+            "grant" => {"actors" => [@actor, shatner], "groups" => []}}
           
           get("/actors/#{@actor}/acl",
               :superuser).should have_status_code(200).with_body(body)
@@ -216,52 +216,52 @@ describe "Actors Endpoint" do
     # "Is there an actor with this ID?"
     context "GET" do
       context "an actor directly in the READ ACE" do
-        with_actors :alice, :testy
+        with_actors :hasselhoff, :shatner
 
-        with_ace_on_actor :testy, :read, :actors => [:alice]
+        with_ace_on_actor :shatner, :read, :actors => [:hasselhoff]
 
         it "can read the actor" do
-          get("/actors/#{testy}", :alice).should have_status_code(200).with_body({})
+          get("/actors/#{shatner}", :hasselhoff).should have_status_code(200).with_body({})
         end
       end
 
       context "an actor NOT in the READ ACE" do
-        with_actors :bob, :testy
+        with_actors :malkovich, :shatner
 
-        # Give bob everything EXCEPT read
-        with_acl_on_actor :testy, {
-          :create => {:actors => [:bob], :groups => []},
+        # Give malkovich everything EXCEPT read
+        with_acl_on_actor :shatner, {
+          :create => {:actors => [:malkovich], :groups => []},
           :read   => {:actors => [],     :groups => []}, # <--- That's the one!
-          :update => {:actors => [:bob], :groups => []},
-          :delete => {:actors => [:bob], :groups => []},
-          :grant  => {:actors => [:bob], :groups => []}
+          :update => {:actors => [:malkovich], :groups => []},
+          :delete => {:actors => [:malkovich], :groups => []},
+          :grant  => {:actors => [:malkovich], :groups => []}
         }
 
         it "cannot read the actor" do
-          get("/actors/#{testy}",
-              :bob).should have_status_code(403).with_body({"error" => "must be in the read access control entry to perform this action"})
+          get("/actors/#{shatner}",
+              :malkovich).should have_status_code(403).with_body({"error" => "must be in the read access control entry to perform this action"})
         end
       end
 
       context "an actor indirectly in the READ ACE" do
-        with_actors :alice, :testy, :bob
-        with_group :hackers
+        with_actors :hasselhoff, :shatner, :malkovich
+        with_group :hipsters
 
-        with_ace_on_actor :testy, :read, :groups => [:hackers]
-        with_members :hackers, :actors => [:alice]
+        with_ace_on_actor :shatner, :read, :groups => [:hipsters]
+        with_members :hipsters, :actors => [:hasselhoff]
 
         it "can read the actor" do
-          get("/actors/#{testy}", :alice).should have_status_code(200).with_body({})
+          get("/actors/#{shatner}", :hasselhoff).should have_status_code(200).with_body({})
         end
       end
 
       context "with a non-existent target" do
-        with_actor :alice
+        with_actor :hasselhoff
 
         it "can't be read, because it doesn't exist" do
           fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
 
-          get("/actors/#{fake_actor}", :alice).should have_status_code(404)
+          get("/actors/#{fake_actor}", :hasselhoff).should have_status_code(404)
         end
       end
     end # GET
@@ -275,59 +275,59 @@ describe "Actors Endpoint" do
     context "DELETE" do
 
       context "an actor directly in the DELETE ACE" do
-        with_actors :alice, :testy
+        with_actors :hasselhoff, :shatner
 
-        with_ace_on_actor :testy, :delete, :actors => [:alice]
+        with_ace_on_actor :shatner, :delete, :actors => [:hasselhoff]
 
         it "can delete the actor" do
-          delete("/actors/#{testy}", :alice).should have_status_code(200).with_body({})
-          get("/actors/#{testy}", :superuser).should have_status_code(404)
+          delete("/actors/#{shatner}", :hasselhoff).should have_status_code(200).with_body({})
+          get("/actors/#{shatner}", :superuser).should have_status_code(404)
         end
       end
 
       context "an actor NOT in the DELETE ACE" do
-        with_actors :bob, :testy
+        with_actors :malkovich, :shatner
 
-        # Give bob everything EXCEPT delete
-        with_acl_on_actor :testy, {
-          :create => {:actors => [:bob], :groups => []},
-          :read   => {:actors => [:bob], :groups => []},
-          :update => {:actors => [:bob], :groups => []},
+        # Give malkovich everything EXCEPT delete
+        with_acl_on_actor :shatner, {
+          :create => {:actors => [:malkovich], :groups => []},
+          :read   => {:actors => [:malkovich], :groups => []},
+          :update => {:actors => [:malkovich], :groups => []},
           :delete => {:actors => [],     :groups => []}, # <--- That's the one!
-          :grant  => {:actors => [:bob], :groups => []}
+          :grant  => {:actors => [:malkovich], :groups => []}
         }
 
         it "cannot delete the actor" do
-          delete("/actors/#{testy}",
-                 :bob).should have_status_code(403).with_body({"error" => "must be in the delete access control entry to perform this action"})
-          get("/actors/#{testy}", :superuser).should have_status_code(200)
+          delete("/actors/#{shatner}",
+                 :malkovich).should have_status_code(403).with_body({"error" => "must be in the delete access control entry to perform this action"})
+          get("/actors/#{shatner}", :superuser).should have_status_code(200)
         end
       end
 
       context "an actor indirectly in the DELETE ACE" do
-        with_actors :alice, :testy, :bob
-        with_group :hackers
+        with_actors :hasselhoff, :shatner, :malkovich
+        with_group :hipsters
 
-        with_ace_on_actor :testy, :delete, :groups => [:hackers]
-        with_members :hackers, :actors => [:alice]
+        with_ace_on_actor :shatner, :delete, :groups => [:hipsters]
+        with_members :hipsters, :actors => [:hasselhoff]
 
         it "can delete the actor" do
-          delete("/actors/#{testy}", :alice).should have_status_code(200).with_body({})
-          get("/actors/#{testy}", :superuser).should have_status_code(404)
+          delete("/actors/#{shatner}", :hasselhoff).should have_status_code(200).with_body({})
+          get("/actors/#{shatner}", :superuser).should have_status_code(404)
         end
       end
 
       context "with a non-existent target" do
-        with_actor :alice
+        with_actor :hasselhoff
 
         it "can't be deleted, because it doesn't exist" do
           fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
 
           # Prove it doesn't exist
-          get("/actors/#{fake_actor}", :alice).should have_status_code(404)
+          get("/actors/#{fake_actor}", :hasselhoff).should have_status_code(404)
 
           # Now try to delete it
-          delete("/actors/#{fake_actor}", :alice).should have_status_code(404)
+          delete("/actors/#{fake_actor}", :hasselhoff).should have_status_code(404)
         end
       end
     end # DELETE
@@ -349,53 +349,53 @@ describe "Actors Endpoint" do
       ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |ace|
 
         context "an actor directly in the #{ace} ACE" do
-          with_actors :alice, :testy
+          with_actors :hasselhoff, :shatner
 
-          with_ace_on_actor :testy, ace.downcase.to_sym, :actors => [:alice]
+          with_ace_on_actor :shatner, ace.downcase.to_sym, :actors => [:hasselhoff]
 
           it "can read the acl" do
             body = {
-              "create" => {"actors" => [testy], "groups" => []},
-              "read" => {"actors" => [testy], "groups" => []},
-              "update" => {"actors" => [testy], "groups" => []},
-              "delete" => {"actors" => [testy], "groups" => []},
-              "grant" => {"actors" => [testy], "groups" => []}
+              "create" => {"actors" => [shatner], "groups" => []},
+              "read" => {"actors" => [shatner], "groups" => []},
+              "update" => {"actors" => [shatner], "groups" => []},
+              "delete" => {"actors" => [shatner], "groups" => []},
+              "grant" => {"actors" => [shatner], "groups" => []}
             }
-            body[ace.downcase] = {"actors" => [alice], "groups" => []}
+            body[ace.downcase] = {"actors" => [hasselhoff], "groups" => []}
 
-            get("/actors/#{testy}/acl",
-                :alice).should have_status_code(200).with_body(body)
+            get("/actors/#{shatner}/acl",
+                :hasselhoff).should have_status_code(200).with_body(body)
           end
         end
 
         context "an actor indirectly in the #{ace} ACE" do
-          with_actors :alice, :testy, :bob
-          with_group :hackers
+          with_actors :hasselhoff, :shatner, :malkovich
+          with_group :hipsters
 
-          with_ace_on_actor :testy, ace.downcase.to_sym, :groups => [:hackers]
-          with_members :hackers, :actors => [:alice]
+          with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:hipsters]
+          with_members :hipsters, :actors => [:hasselhoff]
 
           it "can read the acl" do
             body = {
-              "create" => {"actors" => [testy], "groups" => []},
-              "read" => {"actors" => [testy], "groups" => []},
-              "update" => {"actors" => [testy], "groups" => []},
-              "delete" => {"actors" => [testy], "groups" => []},
-              "grant" => {"actors" => [testy], "groups" => []}
+              "create" => {"actors" => [shatner], "groups" => []},
+              "read" => {"actors" => [shatner], "groups" => []},
+              "update" => {"actors" => [shatner], "groups" => []},
+              "delete" => {"actors" => [shatner], "groups" => []},
+              "grant" => {"actors" => [shatner], "groups" => []}
             }
-            body[ace.downcase] = {"actors" => [], "groups" => [hackers]}
+            body[ace.downcase] = {"actors" => [], "groups" => [hipsters]}
 
-            get("/actors/#{testy}/acl",
-                :alice).should have_status_code(200).with_body(body)
+            get("/actors/#{shatner}/acl",
+                :hasselhoff).should have_status_code(200).with_body(body)
           end
         end
       end
 
       context "an actor with NO ACE" do
-        with_actors :bob, :testy
+        with_actors :malkovich, :shatner
 
-        # Give bob no access at all
-        with_acl_on_actor :testy, {
+        # Give malkovich no access at all
+        with_acl_on_actor :shatner, {
           :create => {:actors => [], :groups => []},
           :read   => {:actors => [], :groups => []},
           :update => {:actors => [], :groups => []},
@@ -404,18 +404,18 @@ describe "Actors Endpoint" do
         }
 
         it "cannot read the acl" do
-          get("/actors/#{testy}/acl",
-              :bob).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
+          get("/actors/#{shatner}/acl",
+              :malkovich).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
         end
       end
 
       context "with a non-existent target" do
-        with_actor :alice
+        with_actor :hasselhoff
 
         it "can't be read, because it doesn't exist" do
           fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
 
-          get("/actors/#{fake_actor}/acl", :alice).should have_status_code(404)
+          get("/actors/#{fake_actor}/acl", :hasselhoff).should have_status_code(404)
         end
       end
     end # GET
@@ -442,46 +442,46 @@ describe "Actors Endpoint" do
           ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |ace|
 
             context "an actor directly in the #{ace} ACE" do
-              with_actors :alice, :testy
+              with_actors :hasselhoff, :shatner
 
-              with_ace_on_actor :testy, ace.downcase.to_sym, :actors => [:alice]
+              with_ace_on_actor :shatner, ace.downcase.to_sym, :actors => [:hasselhoff]
 
               if (action == ace)
-                let(:body) { {"actors" => [alice], "groups" => []} }
+                let(:body) { {"actors" => [hasselhoff], "groups" => []} }
               else
-                let(:body) { {"actors" => [testy], "groups" => []} }
+                let(:body) { {"actors" => [shatner], "groups" => []} }
               end
 
               it "can read the acl" do
-                get("/actors/#{testy}/acl/#{action}",
-                    :alice).should have_status_code(200).with_body(body)
+                get("/actors/#{shatner}/acl/#{action}",
+                    :hasselhoff).should have_status_code(200).with_body(body)
               end
             end
 
             context "an actor indirectly in the #{ace} ACE" do
-              with_actors :alice, :testy, :bob
-              with_group :hackers
+              with_actors :hasselhoff, :shatner, :malkovich
+              with_group :hipsters
 
-              with_ace_on_actor :testy, ace.downcase.to_sym, :groups => [:hackers]
-              with_members :hackers, :actors => [:alice]
+              with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:hipsters]
+              with_members :hipsters, :actors => [:hasselhoff]
 
               if (action == ace)
-                let(:body) { {"actors" => [], "groups" => [hackers]} }
+                let(:body) { {"actors" => [], "groups" => [hipsters]} }
               else
-                let(:body) { {"actors" => [testy], "groups" => []} }
+                let(:body) { {"actors" => [shatner], "groups" => []} }
               end
 
               it "can read the acl" do
-                get("/actors/#{testy}/acl/#{action}",
-                    :alice).should have_status_code(200).with_body(body)
+                get("/actors/#{shatner}/acl/#{action}",
+                    :hasselhoff).should have_status_code(200).with_body(body)
               end
             end
 
             context "an actor with NO ACE" do
-              with_actors :bob, :testy
+              with_actors :malkovich, :shatner
 
-              # Give bob no access at all
-              with_acl_on_actor :testy, {
+              # Give malkovich no access at all
+              with_acl_on_actor :shatner, {
                 :create => {:actors => [], :groups => []},
                 :read   => {:actors => [], :groups => []},
                 :update => {:actors => [], :groups => []},
@@ -490,19 +490,19 @@ describe "Actors Endpoint" do
               }
 
               it "cannot read the acl" do
-                get("/actors/#{testy}/acl/#{action}",
-                    :bob).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
+                get("/actors/#{shatner}/acl/#{action}",
+                    :malkovich).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
               end
             end
 
             context "with a non-existent target" do
-              with_actor :alice
+              with_actor :hasselhoff
 
               it "can't be read, because it doesn't exist" do
                 fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
 
                 get("/actors/#{fake_actor}/acl/#{action}",
-                    :alice).should have_status_code(404)
+                    :hasselhoff).should have_status_code(404)
               end
             end
           end
@@ -521,18 +521,18 @@ describe "Actors Endpoint" do
           # TODO: probably want to expand this with various types of bad input,
           # although at the moment pretty much anything at all will crash it
           context "an actor directly in the GRANT ACE, with bad input" do
-            with_actors :alice, :testy
+            with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :testy, :grant, :actors => [:alice]
+            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 500 instead" do
-                put("/actors/#{testy}/acl/#{action.downcase}",
-                    :alice, :payload => {}).
+                put("/actors/#{shatner}/acl/#{action.downcase}",
+                    :hasselhoff, :payload => {}).
                   should have_status_code(400).with_body({"error" => "bad input"})
-                get("/actors/#{testy}/acl/#{action.downcase}",
+                get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(200).
-                  with_body({"actors" => [alice], "groups" => []})
+                  with_body({"actors" => [hasselhoff], "groups" => []})
               end
             end
           end
@@ -543,182 +543,182 @@ describe "Actors Endpoint" do
           # for that.
 
           context "an actor directly in the GRANT ACE, with invalid actor" do
-            with_actors :alice, :testy
+            with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :testy, :grant, :actors => [:alice]
+            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 200 instead" do
-                put("/actors/#{testy}/acl/#{action.downcase}",
-                    :alice,
+                put("/actors/#{shatner}/acl/#{action.downcase}",
+                    :hasselhoff,
                     :payload => {"actors" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"],
                       "groups" => []}).
                   should have_status_code(400).with_body({"error" => "bad input"})
-                get("/actors/#{testy}/acl/#{action.downcase}",
+                get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(200).
-                  with_body({"actors" => [alice], "groups" => []})
+                  with_body({"actors" => [hasselhoff], "groups" => []})
               end
             end
           end
 
           context "an actor directly in the GRANT ACE, with invalid group" do
-            with_actors :alice, :testy
+            with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :testy, :grant, :actors => [:alice]
+            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 200 instead" do
-                put("/actors/#{testy}/acl/#{action.downcase}",
-                    :alice, :payload => {"actors" => [],
+                put("/actors/#{shatner}/acl/#{action.downcase}",
+                    :hasselhoff, :payload => {"actors" => [],
                       "groups" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"]}).
                   should have_status_code(400).with_body({"error" => "bad input"})
-                get("/actors/#{testy}/acl/#{action.downcase}",
+                get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(200).
-                  with_body({"actors" => [alice], "groups" => []})
+                  with_body({"actors" => [hasselhoff], "groups" => []})
               end
             end
           end
 
           context "an actor directly in the GRANT ACE, with non-existent actor" do
-            with_actors :alice, :testy
+            with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :testy, :grant, :actors => [:alice]
+            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 200 instead" do
-                put("/actors/#{testy}/acl/#{action.downcase}",
-                    :alice,
+                put("/actors/#{shatner}/acl/#{action.downcase}",
+                    :hasselhoff,
                     :payload => {"actors" => ["ffffffffffffffffffffffffffffffff"],
                       "groups" => []}).
                   should have_status_code(400).with_body({"error" => "bad input"})
-                get("/actors/#{testy}/acl/#{action.downcase}",
+                get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(200).
-                  with_body({"actors" => [alice], "groups" => []})
+                  with_body({"actors" => [hasselhoff], "groups" => []})
               end
             end
           end
 
           context "an actor directly in the GRANT ACE, with non-existent group" do
-            with_actors :alice, :testy
+            with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :testy, :grant, :actors => [:alice]
+            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 200 instead" do
-                put("/actors/#{testy}/acl/#{action.downcase}",
-                    :alice, :payload => {"actors" => [],
+                put("/actors/#{shatner}/acl/#{action.downcase}",
+                    :hasselhoff, :payload => {"actors" => [],
                       "groups" => ["ffffffffffffffffffffffffffffffff"]}).
                   should have_status_code(400).with_body({"error" => "bad input"})
-                get("/actors/#{testy}/acl/#{action.downcase}",
+                get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(200).
-                  with_body({"actors" => [alice], "groups" => []})
+                  with_body({"actors" => [hasselhoff], "groups" => []})
               end
             end
           end
 
           context "an actor directly in the GRANT ACE, modifying actors" do
-            with_actors :alice, :rainbowdash, :testy
+            with_actors :hasselhoff, :schwartzenegger, :shatner
 
-            with_ace_on_actor :testy, :grant, :actors => [:alice]
+            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
 
             it "can modify the ACE for actors" do
-              put("/actors/#{testy}/acl/#{action.downcase}",
-                  :alice, :payload => {"actors" => [rainbowdash], "groups" => []}).
+              put("/actors/#{shatner}/acl/#{action.downcase}",
+                  :hasselhoff, :payload => {"actors" => [schwartzenegger], "groups" => []}).
                 should have_status_code(200).with_body({})
-              get("/actors/#{testy}/acl/#{action.downcase}",
+              get("/actors/#{shatner}/acl/#{action.downcase}",
                   :superuser).should have_status_code(200).
-                with_body({"actors" => [rainbowdash], "groups" => []})
+                with_body({"actors" => [schwartzenegger], "groups" => []})
             end
           end
 
           context "an actor directly in the GRANT ACE, modifying groups" do
-            with_actors :alice, :testy
-            with_group :ponies
+            with_actors :hasselhoff, :shatner
+            with_group :brogrammers
 
-            with_ace_on_actor :testy, :grant, :actors => [:alice]
+            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
 
             it "can modify the ACE for groups" do
-              put("/actors/#{testy}/acl/#{action.downcase}",
-                  :alice, :payload => {"actors" => [], "groups" => [ponies]}).
+              put("/actors/#{shatner}/acl/#{action.downcase}",
+                  :hasselhoff, :payload => {"actors" => [], "groups" => [brogrammers]}).
                 should have_status_code(200).with_body({})
-              get("/actors/#{testy}/acl/#{action.downcase}",
+              get("/actors/#{shatner}/acl/#{action.downcase}",
                   :superuser).should have_status_code(200).
-                with_body({"actors" => [], "groups" => [ponies]})
+                with_body({"actors" => [], "groups" => [brogrammers]})
             end
           end
 
           context "an actor NOT in the GRANT ACE" do
-            with_actors :bob, :rainbowdash, :testy
+            with_actors :malkovich, :schwartzenegger, :shatner
 
-            # Give bob everything EXCEPT grant
-            with_acl_on_actor :testy, {
-              :create => {:actors => [:bob], :groups => []},
-              :read   => {:actors => [:bob], :groups => []},
-              :update => {:actors => [:bob], :groups => []},
-              :delete => {:actors => [:bob], :groups => []},
+            # Give malkovich everything EXCEPT grant
+            with_acl_on_actor :shatner, {
+              :create => {:actors => [:malkovich], :groups => []},
+              :read   => {:actors => [:malkovich], :groups => []},
+              :update => {:actors => [:malkovich], :groups => []},
+              :delete => {:actors => [:malkovich], :groups => []},
               :grant  => {:actors => [],     :groups => []} # <--- That's the one!
             }
 
             if (action == 'GRANT')
               let(:body) { {"actors" => [], "groups" => []} }
             else
-              let(:body) { {"actors" => [bob], "groups" => []} }
+              let(:body) { {"actors" => [malkovich], "groups" => []} }
             end
 
             it "cannot modify the ACE" do
-              put("/actors/#{testy}/acl/#{action.downcase}",
-                  :bob, :payload => {"actors" => [rainbowdash], "groups" => []}).
+              put("/actors/#{shatner}/acl/#{action.downcase}",
+                  :malkovich, :payload => {"actors" => [schwartzenegger], "groups" => []}).
                 should have_status_code(403).with_body({"error" => "must be in the grant access control entry to perform this action"})
-              get("/actors/#{testy}/acl/#{action.downcase}",
+              get("/actors/#{shatner}/acl/#{action.downcase}",
                   :superuser).should have_status_code(200).with_body(body)
             end
           end
 
           context "an actor indirectly in the GRANT ACE, modifying actors" do
-            with_actors :alice, :testy, :bob, :sparklepony
-            with_groups :hackers
+            with_actors :hasselhoff, :shatner, :malkovich, :norris
+            with_groups :hipsters
 
-            with_ace_on_actor :testy, :grant, :groups => [:hackers]
-            with_members :hackers, :actors => [:alice]
+            with_ace_on_actor :shatner, :grant, :groups => [:hipsters]
+            with_members :hipsters, :actors => [:hasselhoff]
 
             it "can modify the ACE for actors" do
-              put("/actors/#{testy}/acl/#{action.downcase}",
-                     :alice, :payload => {"actors" => [sparklepony], "groups" => []}).
+              put("/actors/#{shatner}/acl/#{action.downcase}",
+                     :hasselhoff, :payload => {"actors" => [norris], "groups" => []}).
                 should have_status_code(200)
-              get("/actors/#{testy}/acl/#{action.downcase}",
+              get("/actors/#{shatner}/acl/#{action.downcase}",
                   :superuser).should have_status_code(200).
-                with_body({"actors" => [sparklepony], "groups" => []})
+                with_body({"actors" => [norris], "groups" => []})
             end
           end
 
           context "an actor indirectly in the GRANT ACE, modifying groups" do
-            with_actors :alice, :testy, :bob
-            with_groups :hackers, :ponies
+            with_actors :hasselhoff, :shatner, :malkovich
+            with_groups :hipsters, :brogrammers
 
-            with_ace_on_actor :testy, :grant, :groups => [:hackers]
-            with_members :hackers, :actors => [:alice]
+            with_ace_on_actor :shatner, :grant, :groups => [:hipsters]
+            with_members :hipsters, :actors => [:hasselhoff]
 
             it "can modify the ACE for groups" do
-              put("/actors/#{testy}/acl/#{action.downcase}",
-                     :alice, :payload => {"actors" => [], "groups" => [ponies]}).
+              put("/actors/#{shatner}/acl/#{action.downcase}",
+                     :hasselhoff, :payload => {"actors" => [], "groups" => [brogrammers]}).
                 should have_status_code(200)
-              get("/actors/#{testy}/acl/#{action.downcase}",
+              get("/actors/#{shatner}/acl/#{action.downcase}",
                   :superuser).should have_status_code(200).
-                with_body({"actors" => [], "groups" => [ponies]})
+                with_body({"actors" => [], "groups" => [brogrammers]})
             end
           end
 
           context "with a non-existent target" do
-            with_actor :alice
+            with_actor :hasselhoff
 
             it "can't modify its ACE, because it doesn't exist" do
               fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
 
               # Prove it doesn't exist
-              get("/actors/#{fake_actor}/acl/#{action.downcase}", :alice).should have_status_code(404)
+              get("/actors/#{fake_actor}/acl/#{action.downcase}", :hasselhoff).should have_status_code(404)
 
               # Now try to delete it
-              delete("/actors/#{fake_actor}/acl/#{action.downcase}", :alice).should have_status_code(404)
+              delete("/actors/#{fake_actor}/acl/#{action.downcase}", :hasselhoff).should have_status_code(404)
             end
           end
         end
@@ -731,68 +731,68 @@ describe "Actors Endpoint" do
         context "for #{action} action" do
 
           context "an actor directly in the GRANT ACE" do
-            with_actors :alice, :testy
+            with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :testy, :grant, :actors => [:alice]
+            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
 
             it "can clear the ACE" do
               pending "causes internal 500 errors" do
-                delete("/actors/#{testy}/acl/#{action.downcase}",
-                       :alice).should have_status_code(200).with_body({})
-                get("/actors/#{testy}/acl/#{action.downcase}",
+                delete("/actors/#{shatner}/acl/#{action.downcase}",
+                       :hasselhoff).should have_status_code(200).with_body({})
+                get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(404)
               end
             end
           end
 
           context "an actor NOT in the GRANT ACE" do
-            with_actors :bob, :testy
+            with_actors :malkovich, :shatner
 
-            # Give bob everything EXCEPT grant
-            with_acl_on_actor :testy, {
-              :create => {:actors => [:bob], :groups => []},
-              :read   => {:actors => [:bob], :groups => []},
-              :update => {:actors => [:bob], :groups => []},
-              :delete => {:actors => [:bob], :groups => []},
+            # Give malkovich everything EXCEPT grant
+            with_acl_on_actor :shatner, {
+              :create => {:actors => [:malkovich], :groups => []},
+              :read   => {:actors => [:malkovich], :groups => []},
+              :update => {:actors => [:malkovich], :groups => []},
+              :delete => {:actors => [:malkovich], :groups => []},
               :grant  => {:actors => [],     :groups => []} # <--- That's the one!
             }
 
             it "cannot clear the ACE" do
-              delete("/actors/#{testy}/acl/#{action.downcase}",
-                     :bob).should have_status_code(403).with_body({"error" => "must be in the grant access control entry to perform this action"})
-              get("/actors/#{testy}/acl/#{action.downcase}",
+              delete("/actors/#{shatner}/acl/#{action.downcase}",
+                     :malkovich).should have_status_code(403).with_body({"error" => "must be in the grant access control entry to perform this action"})
+              get("/actors/#{shatner}/acl/#{action.downcase}",
                   :superuser).should have_status_code(200)
             end
           end
 
           context "an actor indirectly in the GRANT ACE" do
-            with_actors :alice, :testy, :bob
-            with_group :hackers
+            with_actors :hasselhoff, :shatner, :malkovich
+            with_group :hipsters
 
-            with_ace_on_actor :testy, :grant, :groups => [:hackers]
-            with_members :hackers, :actors => [:alice]
+            with_ace_on_actor :shatner, :grant, :groups => [:hipsters]
+            with_members :hipsters, :actors => [:hasselhoff]
 
             it "can clear the ACE" do
               pending "causes internal 500 errors" do
-                delete("/actors/#{testy}/acl/#{action.downcase}",
-                       :alice).should have_status_code(200).with_body({})
-                get("/actors/#{testy}/acl/#{action.downcase}",
+                delete("/actors/#{shatner}/acl/#{action.downcase}",
+                       :hasselhoff).should have_status_code(200).with_body({})
+                get("/actors/#{shatner}/acl/#{action.downcase}",
                     :superuser).should have_status_code(404)
               end
             end
           end
 
           context "with a non-existent target" do
-            with_actor :alice
+            with_actor :hasselhoff
 
             it "can't clear its ACE, because it doesn't exist" do
               fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
 
               # Prove it doesn't exist
-              get("/actors/#{fake_actor}/acl/#{action.downcase}", :alice).should have_status_code(404)
+              get("/actors/#{fake_actor}/acl/#{action.downcase}", :hasselhoff).should have_status_code(404)
 
               # Now try to delete it
-              delete("/actors/#{fake_actor}/acl/#{action.downcase}", :alice).should have_status_code(404)
+              delete("/actors/#{fake_actor}/acl/#{action.downcase}", :hasselhoff).should have_status_code(404)
             end
           end
         end
@@ -812,25 +812,25 @@ describe "Actors Endpoint" do
       context "for #{action} action" do
         ['ACTORS', 'GROUPS', 'OBJECTS', 'CONTAINERS'].each do |type|
           context "for #{type} member type" do
-            with_actor :testy
+            with_actor :shatner
 
             it "get should not be found" do
-              get("/actors/#{testy}/acl/#{action.downcase}/#{type.downcase}/",
+              get("/actors/#{shatner}/acl/#{action.downcase}/#{type.downcase}/",
                   :superuser).should have_status_code(404)
             end
 
             it "post should not be found" do
-              post("/actors/#{testy}/acl/#{action.downcase}/#{type.downcase}/",
+              post("/actors/#{shatner}/acl/#{action.downcase}/#{type.downcase}/",
                    :superuser).should have_status_code(404)
             end
 
             it "put should not be found" do
-              put("/actors/#{testy}/acl/#{action.downcase}/#{type.downcase}/",
+              put("/actors/#{shatner}/acl/#{action.downcase}/#{type.downcase}/",
                   :superuser).should have_status_code(404)
             end
 
             it "delete should not be found" do
-              delete("/actors/#{testy}/acl/#{action.downcase}/#{type.downcase}/",
+              delete("/actors/#{shatner}/acl/#{action.downcase}/#{type.downcase}/",
                      :superuser).should have_status_code(404)
             end
           end
@@ -854,117 +854,117 @@ describe "Actors Endpoint" do
           ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |ace|
             context "for ACTORS member type" do
               context "an actor directly in the #{ace} ACE" do
-                with_actors :alice, :testy
+                with_actors :hasselhoff, :shatner
 
-                with_ace_on_actor :testy, ace.downcase.to_sym, :actors => [:alice]
+                with_ace_on_actor :shatner, ace.downcase.to_sym, :actors => [:hasselhoff]
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
-                    # Alice has specific ACE access on testy
-                    get("/actors/#{testy}/acl/#{action.downcase}/actors/#{alice}",
-                        :alice).should have_status_code(200).with_body({})
+                    # Hasselhoff has specific ACE access on shatner
+                    get("/actors/#{shatner}/acl/#{action.downcase}/actors/#{hasselhoff}",
+                        :hasselhoff).should have_status_code(200).with_body({})
                   end
                 else
                   it "returns 404 when not in ACE" do
-                    # Alice does not have other access on testy
-                    get("/actors/#{testy}/acl/#{action.downcase}/actors/#{alice}",
-                        :alice).should have_status_code(404)
+                    # Hasselhoff does not have other access on shatner
+                    get("/actors/#{shatner}/acl/#{action.downcase}/actors/#{hasselhoff}",
+                        :hasselhoff).should have_status_code(404)
                   end
                 end
               end
 
               context "an actor indirectly in the #{ace} ACE" do
-                with_actors :alice, :testy, :bob
-                with_group :hackers
+                with_actors :hasselhoff, :shatner, :malkovich
+                with_group :hipsters
 
-                with_ace_on_actor :testy, ace.downcase.to_sym, :groups => [:hackers]
-                with_members :hackers, :actors => [:alice]
+                with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:hipsters]
+                with_members :hipsters, :actors => [:hasselhoff]
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
-                    get("/actors/#{testy}/acl/#{action.downcase}/actors/#{alice}",
-                        :alice).should have_status_code(200).with_body({})
+                    get("/actors/#{shatner}/acl/#{action.downcase}/actors/#{hasselhoff}",
+                        :hasselhoff).should have_status_code(200).with_body({})
                   end
                 else
                   it "returns 404 when not in ACE" do
-                    get("/actors/#{testy}/acl/#{action.downcase}/actors/#{alice}",
-                        :alice).should have_status_code(404)
+                    get("/actors/#{shatner}/acl/#{action.downcase}/actors/#{hasselhoff}",
+                        :hasselhoff).should have_status_code(404)
                   end
                 end
               end
 
               context "with a non-existent target" do
-                with_actor :alice
+                with_actor :hasselhoff
 
                 it "can't be read, because it doesn't exist" do
                   fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
 
-                  get("/actors/#{fake_actor}/acl/#{action.downcase}/actors/#{alice}",
-                      :alice).should have_status_code(404)
+                  get("/actors/#{fake_actor}/acl/#{action.downcase}/actors/#{hasselhoff}",
+                      :hasselhoff).should have_status_code(404)
                 end
               end
             end
 
             context "for GROUPS member type" do
               context "a group directly in the #{ace} ACE" do
-                with_actors :testy, :alice
-                with_group :ponies
+                with_actors :shatner, :hasselhoff
+                with_group :brogrammers
 
-                with_ace_on_actor :testy, ace.downcase.to_sym, :groups => [:ponies]
-                with_members :ponies, :actors => [:alice]
+                with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:brogrammers]
+                with_members :brogrammers, :actors => [:hasselhoff]
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
                     # My understanding is that if group X has permissions on actor X,
                     # this should return 200, but as it is, it doesn't
                     pending "doesn't seem to work" do
-                      # Ponies has specific ACE access on testy
-                      get("/actors/#{testy}/acl/#{action.downcase}/groups/#{ponies}",
-                          :alice).should have_status_code(200).with_body({})
+                      # Brogrammers has specific ACE access on shatner
+                      get("/actors/#{shatner}/acl/#{action.downcase}/groups/#{brogrammers}",
+                          :hasselhoff).should have_status_code(200).with_body({})
                     end
                   end
                 else
                   it "returns 404 when not in ACE" do
-                    # Ponies does not have other access on testy
-                    get("/actors/#{testy}/acl/#{action.downcase}/groups/#{ponies}",
-                        :alice).should have_status_code(404)
+                    # Brogrammers does not have other access on shatner
+                    get("/actors/#{shatner}/acl/#{action.downcase}/groups/#{brogrammers}",
+                        :hasselhoff).should have_status_code(404)
                   end
                 end
               end
 
               context "a group indirectly in the #{ace} ACE" do
-                with_actors :alice, :testy, :bob
-                with_groups :hackers, :ponies
+                with_actors :hasselhoff, :shatner, :malkovich
+                with_groups :hipsters, :brogrammers
 
-                with_ace_on_actor :testy, ace.downcase.to_sym, :groups => [:ponies]
-                with_members :ponies, :groups => [:hackers]
-                with_members :hackers, :actors => [:alice]
+                with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:brogrammers]
+                with_members :brogrammers, :groups => [:hipsters]
+                with_members :hipsters, :actors => [:hasselhoff]
 
                 if (action == ace)
                   # See above
                   it "returns 200 when in ACE" do
                     pending "doesn't seem to work" do
-                      get("/actors/#{testy}/acl/#{action.downcase}/groups/#{hackers}",
-                          :alice).should have_status_code(200).with_body({})
+                      get("/actors/#{shatner}/acl/#{action.downcase}/groups/#{hipsters}",
+                          :hasselhoff).should have_status_code(200).with_body({})
                     end
                   end
                 else
                   it "returns 404 when not in ACE" do
-                    get("/actors/#{testy}/acl/#{action.downcase}/groups/#{hackers}",
-                        :alice).should have_status_code(404)
+                    get("/actors/#{shatner}/acl/#{action.downcase}/groups/#{hipsters}",
+                        :hasselhoff).should have_status_code(404)
                   end
                 end
               end
 
               context "with a non-existent target" do
-                with_actor :alice
-                with_group :ponies
+                with_actor :hasselhoff
+                with_group :brogrammers
 
                 it "can't be read, because it doesn't exist" do
                   fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
 
-                  get("/actors/#{fake_actor}/acl/#{action.downcase}/groups/#{ponies}",
-                      :alice).should have_status_code(404)
+                  get("/actors/#{fake_actor}/acl/#{action.downcase}/groups/#{brogrammers}",
+                      :hasselhoff).should have_status_code(404)
                 end
               end
             end
@@ -976,22 +976,22 @@ describe "Actors Endpoint" do
 
             context "for OBJECT member type" do
               context "an actor directly in the #{ace} ACE" do
-                with_actor :testy
-                with_object :widget
+                with_actor :shatner
+                with_object :spork
 
                 it "returns 404 all the time" do
-                  get("/actors/#{testy}/acl/#{action.downcase}/objects/#{widget}",
+                  get("/actors/#{shatner}/acl/#{action.downcase}/objects/#{spork}",
                       :superuser).should have_status_code(404)
                 end
               end
 
               context "with a non-existent target" do
-                with_object :widget
+                with_object :spork
 
                 it "can't be read, because it doesn't exist" do
                   fake_actor = "deadbeefdeadbeefdeadbeefdeadbeef"
 
-                  get("/actors/#{fake_actor}/acl/#{action.downcase}/objects/#{widget}",
+                  get("/actors/#{fake_actor}/acl/#{action.downcase}/objects/#{spork}",
                       :superuser).should have_status_code(404)
                 end
               end
