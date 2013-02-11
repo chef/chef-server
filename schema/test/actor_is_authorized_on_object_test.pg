@@ -99,4 +99,4 @@ SELECT throws_ok(
        'Checking a non-existent permission throws an exception');
 
 SELECT finish();
-ROLLBACK;
+--ROLLBACK;
