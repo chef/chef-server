@@ -1,7 +1,7 @@
 Authz PostgreSQL Schema
 =======================
 
-![alt text](authz-schema.png "schema diagram")
+![alt text](doc/assets/authz-schema.png "schema diagram")
 
 # Testing
 
