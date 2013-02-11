@@ -150,7 +150,7 @@ describe "Actors Endpoint" do
     # POST creates a new actor
     #
     # NOTE: the return value for this a {"id": ID, "uri": URI} hash
-    context "POST", :focus do
+    context "POST" do
 
       # We mainly do this to make sure the test cleans up after
       # itself; otherwise we have to repeat the hacky after :each with
@@ -197,13 +197,13 @@ describe "Actors Endpoint" do
 
       # Not quite clear the purpose of this header, actually
       context "without the X-Ops-User-Id header" do
-        creates_an_actor_as(:superuser,
+        creates_actor_as(:superuser,
                             :merge_headers => {"X-Ops-User-Id" => :DELETE})
       end
 
       # Yes, this is valid behavior according to the current Authz
       context "without ANY of the standard headers except Content-Type" do
-        creates_an_actor_as(:superuser,
+        creates_actor_as(:superuser,
                             :headers => {"Content-Type" => "application/json"})
       end
 
