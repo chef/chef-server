@@ -1,7 +1,16 @@
 describe "Groups Endpoint" do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
+  let(:honest_politicians) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
-  context "/groups", :focus do
+  context "/groups" do
+    # What we are testing:
+
+    # Here we test group creation (all other HTTP verbs should be
+    # disallowed), making sure the response body is correct and that
+    # id and id in the uri match, as well as basic header validation,
+    # as well as making sure that the requesting actor is contained in
+    # the newly created groups ACLs.
+
     should_not_allow :GET, "/groups"
 
     # POST creates a new group and its ACL, creating and pre-populating
@@ -116,7 +125,7 @@ describe "Groups Endpoint" do
     should_not_allow :DELETE, "/groups"
   end # /groups
 
-  context "/groups/<group_id>" do
+  context "/groups/<group_id>", :focus do
     # GET returns the actors and groups in the group
     #
     # Note that only DIRECT membership is reflected in group
@@ -127,6 +136,61 @@ describe "Groups Endpoint" do
     #
     # Can't get a group if the requesting actor isn't in the READ ACE
     context "GET" do
+      context "an actor directly in the READ ACE" do
+        with_actor :hasselhoff
+        with_group :hipsters
+
+        with_ace_on_group :hipsters, :read, :actors => [:hasselhoff]
+
+        it "can read the group" do
+          get("/groups/#{hipsters}",
+              :hasselhoff).should have_status_code(200).with_body({"actors" => [],
+                                                                    "groups" => []})
+        end
+      end
+
+      context "an actor NOT in the READ ACE" do
+        with_actor :malkovich
+        with_group :hipsters
+
+        # Give malkovich everything EXCEPT read
+        with_acl_on_group :hipsters, {
+          :create => {:actors => [:malkovich], :groups => []},
+          :read   => {:actors => [],           :groups => []}, # <--- That's the one!
+          :update => {:actors => [:malkovich], :groups => []},
+          :delete => {:actors => [:malkovich], :groups => []},
+          :grant  => {:actors => [:malkovich], :groups => []}
+        }
+
+        it "cannot read the group" do
+          get("/groups/#{hipsters}", :malkovich).should have_status_code(403).
+            with_body({"error" => "must be in the read access control entry to perform this action"})
+        end
+      end
+
+      context "an actor indirectly in the READ ACE" do
+        with_actor :hasselhoff
+        with_groups :hipsters, :brogrammers
+
+        with_ace_on_group :brogrammers, :read, :groups => [:hipsters]
+        with_members :hipsters, :actors => [:hasselhoff]
+
+        it "can read the groups" do
+          get("/groups/#{brogrammers}",
+              :hasselhoff).should have_status_code(200).with_body({"actors" => [],
+                                                                    "groups" => []})
+        end
+      end
+
+      context "with a non-existent target" do
+        with_actor :hasselhoff
+
+        it "can't be read, because it doesn't exist" do
+          fake_group = honest_politicians
+
+          get("/groups/#{fake_group}", :hasselhoff).should have_status_code(404)
+        end
+      end
     end # GET
 
     should_not_allow :POST, "/groups/ffffffffffffffffffffffffffffffff"
