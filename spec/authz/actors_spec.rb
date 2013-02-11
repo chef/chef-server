@@ -57,6 +57,7 @@ describe "Actors Endpoint" do
 
       # Apparently, this is the only item creation operation that
       # doesn't require this header; is this the "correct" behavior?
+      # Interestingly, this behaves differently than other endpoints
       context "without the X-Ops-Requesting-Actor-Id header" do
         creates_actor_as(:superuser,
                          :merge_headers => {"X-Ops-Requesting-Actor-Id" => :DELETE})
@@ -65,21 +66,20 @@ describe "Actors Endpoint" do
       # Not quite clear the purpose of this header, actually
       context "without the X-Ops-User-Id header" do
         creates_actor_as(:superuser,
-                            :merge_headers => {"X-Ops-User-Id" => :DELETE})
+                         :merge_headers => {"X-Ops-User-Id" => :DELETE})
       end
 
       # Yes, this is valid behavior according to the current Authz
+      # (and different than other endpoints)
       context "without ANY of the standard headers except Content-Type" do
         creates_actor_as(:superuser,
-                            :headers => {"Content-Type" => "application/json"})
+                         :headers => {"Content-Type" => "application/json"})
       end
 
       context "without any headers" do
         it "should NOT create an actor" do
           pending "currently returns a 415 AND A NEW ACTOR!" do
-            post("/actors",
-                 :superuser,
-                 :headers => {}).should have_status_code(400).
+            post("/actors", :superuser, :headers => {}).should have_status_code(400).
               with_body({"error" => "That ain't right"})
             # Obviously this is not the EXACT response that should come back...
           end
