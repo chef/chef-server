@@ -52,6 +52,41 @@
 	<key>GraphicsList</key>
 	<array>
 		<dict>
+			<key>Class</key>
+			<string>LineGraphic</string>
+			<key>Head</key>
+			<dict>
+				<key>ID</key>
+				<integer>12</integer>
+			</dict>
+			<key>ID</key>
+			<integer>53</integer>
+			<key>Points</key>
+			<array>
+				<string>{229.33334223429361, 160.33333079020181}</string>
+				<string>{183.66666666666683, 160.33332570393875}</string>
+			</array>
+			<key>Style</key>
+			<dict>
+				<key>stroke</key>
+				<dict>
+					<key>HeadArrow</key>
+					<string>FilledArrow</string>
+					<key>Legacy</key>
+					<true/>
+					<key>LineType</key>
+					<integer>1</integer>
+					<key>TailArrow</key>
+					<string>0</string>
+				</dict>
+			</dict>
+			<key>Tail</key>
+			<dict>
+				<key>ID</key>
+				<integer>14</integer>
+			</dict>
+		</dict>
+		<dict>
 			<key>Bounds</key>
 			<string>{{26.000050862630161, 450.00001207987481}, {153, 14}}</string>
 			<key>Class</key>
@@ -130,12 +165,17 @@
 					<key>Color</key>
 					<dict>
 						<key>b</key>
-						<string>1</string>
-						<key>g</key>
 						<string>0.74902</string>
+						<key>g</key>
+						<string>1</string>
 						<key>r</key>
 						<string>0.74902</string>
 					</dict>
+				</dict>
+				<key>shadow</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
 				</dict>
 			</dict>
 		</dict>
@@ -1495,6 +1535,15 @@
 				<dict>
 					<key>Bezier</key>
 					<true/>
+					<key>Color</key>
+					<dict>
+						<key>b</key>
+						<string>0</string>
+						<key>g</key>
+						<string>0.372549</string>
+						<key>r</key>
+						<string>0</string>
+					</dict>
 					<key>HeadArrow</key>
 					<string>FilledArrow</string>
 					<key>Legacy</key>
@@ -1534,6 +1583,15 @@
 			<dict>
 				<key>stroke</key>
 				<dict>
+					<key>Color</key>
+					<dict>
+						<key>b</key>
+						<string>0</string>
+						<key>g</key>
+						<string>0.372549</string>
+						<key>r</key>
+						<string>0</string>
+					</dict>
 					<key>HeadArrow</key>
 					<string>FilledArrow</string>
 					<key>Legacy</key>
@@ -1758,41 +1816,6 @@
 			<dict>
 				<key>ID</key>
 				<integer>12</integer>
-			</dict>
-		</dict>
-		<dict>
-			<key>Class</key>
-			<string>LineGraphic</string>
-			<key>Head</key>
-			<dict>
-				<key>ID</key>
-				<integer>12</integer>
-			</dict>
-			<key>ID</key>
-			<integer>53</integer>
-			<key>Points</key>
-			<array>
-				<string>{229.33334223429361, 160.33333079020181}</string>
-				<string>{183.66666666666683, 160.33332570393875}</string>
-			</array>
-			<key>Style</key>
-			<dict>
-				<key>stroke</key>
-				<dict>
-					<key>HeadArrow</key>
-					<string>FilledArrow</string>
-					<key>Legacy</key>
-					<true/>
-					<key>LineType</key>
-					<integer>1</integer>
-					<key>TailArrow</key>
-					<string>0</string>
-				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>14</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -4219,7 +4242,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2013-02-11 19:37:22 +0000</string>
+	<string>2013-02-11 20:56:33 +0000</string>
 	<key>Modifier</key>
 	<string>Douglas Triggs</string>
 	<key>NotesVisible</key>
@@ -4305,7 +4328,7 @@
 			</dict>
 		</array>
 		<key>Frame</key>
-		<string>{{2183, -173}, {1349, 993}}</string>
+		<string>{{68, 27}, {1349, 993}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
