@@ -36,11 +36,6 @@ To run the pgTAP tests, you will need to install `pg_prove`:
 sudo cpan TAP::Parser::SourceHandler::pgTAP
 ```
 
-While `pg_prove` is not _strictly_ needed to run the tests, it creates
-a much nicer experience.  It sets some formatting directives for you,
-and also has the nice effect of making the return code reflect the
-pass / fail state of the test suite.
-
 ## Running the Tests
 
 Now create the database and install the schema (note that these
