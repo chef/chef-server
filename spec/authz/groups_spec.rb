@@ -202,6 +202,66 @@ describe "Groups Endpoint" do
     #
     # Cucumber: Deleting a non-existent group should return 404
     context "DELETE" do
+      context "an actor directly in the DELETE ACE" do
+        with_actor :hasselhoff
+        with_group :hipsters
+
+        with_ace_on_group :hipsters, :delete, :actors => [:hasselhoff]
+
+        it "can delete the group" do
+          delete("/groups/#{hipsters}",
+                 :hasselhoff).should have_status_code(200).with_body({})
+          get("/groups/#{hipsters}", :superuser).should have_status_code(404)
+        end
+      end
+
+      context "an actor NOT in the DELETE ACE" do
+        with_actor :malkovich
+        with_group :hipsters
+
+        # Give malkovich everything EXCEPT delete
+        with_acl_on_group :hipsters, {
+          :create => {:actors => [:malkovich], :groups => []},
+          :read   => {:actors => [:malkovich], :groups => []},
+          :update => {:actors => [:malkovich], :groups => []},
+          :delete => {:actors => [],           :groups => []}, # <--- That's the one!
+          :grant  => {:actors => [:malkovich], :groups => []}
+        }
+
+        it "cannot delete the group" do
+          delete("/groups/#{hipsters}", :malkovich).should have_status_code(403).
+            with_body({"error" => "must be in the delete access control entry to perform this action"})
+          get("/groups/#{hipsters}", :superuser).should have_status_code(200)
+        end
+      end
+
+      context "an actor indirectly in the DELETE ACE" do
+        with_actor :hasselhoff
+        with_groups :hipsters, :brogrammers
+
+        with_ace_on_group :brogrammers, :delete, :groups => [:hipsters]
+        with_members :hipsters, :actors => [:hasselhoff]
+
+        it "can delete the groups" do
+          delete("/groups/#{brogrammers}",
+                 :hasselhoff).should have_status_code(200).with_body({})
+          get("/groups/#{brogrammers}", :superuser).should have_status_code(404)
+        end
+      end
+
+      context "with a non-existent target" do
+        with_actor :hasselhoff
+
+        it "can't be deleted, because it doesn't exist" do
+          fake_group = honest_politicians
+
+          # Prove it doesn't exist
+          get("/groups/#{fake_group}", :hasselhoff).should have_status_code(404)
+
+          # Now try to delete it
+          delete("/groups/#{fake_group}", :hasselhoff).should have_status_code(404)
+        end
+      end
     end # DELETE
   end # /groups/<group_id>
 
