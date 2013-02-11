@@ -150,23 +150,25 @@ describe "Actors Endpoint" do
     # POST creates a new actor
     #
     # NOTE: the return value for this a {"id": ID, "uri": URI} hash
-    context "POST" do
+    context "POST", :focus do
 
-      # TODO: de-hardcode uri hostname, make configurable
-      let(:successful_response_body) {
-        {"id" => /^[0-9a-f]{32}$/,
-          "uri" => /^http\:\/\/authz\.opscode\.com\/actors\/[0-9a-f]{32}$/}
-      }
-
-      context "as a superuser" do
+      # We mainly do this to make sure the test cleans up after
+      # itself; otherwise we have to repeat the hacky after :each with
+      # the @actor_id stuff, and, well this is pretty much the same
+      # for every creation
+      def self.creates_actor_as(requestor, headers = {})
         after :each do
           delete("/actors/#{@actor_id}", :superuser)
         end
 
         it "creates an actor" do
-          response = post("/actors", :superuser)
-          response.should have_status_code(201).with_body(successful_response_body)
+          response = post("/actors", requestor, headers)
 
+          # TODO: de-hardcode uri hostname in response body, make configurable
+          response.should have_status_code(201).
+            with_body({"id" => /^[0-9a-f]{32}$/,
+                        "uri" => /^http\:\/\/authz\.opscode\.com\/actors\/[0-9a-f]{32}$/})
+        
           @actor_id = parse(response)["id"]
 
           # Verify that uri and id are the same
@@ -175,66 +177,34 @@ describe "Actors Endpoint" do
         end
       end
 
+      context "as a superuser" do
+        creates_actor_as(:superuser)
+      end
+
       # Should this work?
       context "as an unknown requestor" do
-        after :each do
-          delete("/actors/#{@actor_id}", :superuser)
-        end
+        let(:fake_actor) { mattdamon }
 
-        it "creates an actor" do
-          fake_actor = mattdamon
-
-          response = post("/actors", fake_actor)
-          response.should have_status_code(201).with_body(successful_response_body)
-
-          @actor_id = parse(response)["id"]
-        end
+        creates_actor_as(:fake_actor)
       end
 
       # Apparently, this is the only item creation operation that
       # doesn't require this header; is this the "correct" behavior?
       context "without the X-Ops-Requesting-Actor-Id header" do
-        after :each do
-          delete("/actors/#{@actor_id}", :superuser)
-        end
-
-        it "creates an actor" do
-          response = post("/actors", :superuser,
-                          :merge_headers => {"X-Ops-Requesting-Actor-Id" => :DELETE})
-          response.should have_status_code(201).with_body(successful_response_body)
-
-          @actor_id = parse(response)["id"]
-        end
+        creates_actor_as(:superuser,
+                         :merge_headers => {"X-Ops-Requesting-Actor-Id" => :DELETE})
       end
 
       # Not quite clear the purpose of this header, actually
       context "without the X-Ops-User-Id header" do
-        after :each do
-          delete("/actors/#{@actor_id}", :superuser)
-        end
-
-        it "creates an actor" do
-          response = post("/actors", :superuser,
-                          :merge_headers => {"X-Ops-User-Id" => :DELETE})
-          response.should have_status_code(201).with_body(successful_response_body)
-
-          @actor_id = parse(response)["id"]
-        end
+        creates_an_actor_as(:superuser,
+                            :merge_headers => {"X-Ops-User-Id" => :DELETE})
       end
 
       # Yes, this is valid behavior according to the current Authz
       context "without ANY of the standard headers except Content-Type" do
-        after :each do
-          delete("/actors/#{@actor_id}", :superuser)
-        end
-
-        it "creates an actor" do
-          response = post("/actors", :superuser,
-                          :headers => {"Content-Type" => "application/json"})
-          response.should have_status_code(201).with_body(successful_response_body)
-
-          @actor_id = parse(response)["id"]
-        end
+        creates_an_actor_as(:superuser,
+                            :headers => {"Content-Type" => "application/json"})
       end
 
       context "without any headers" do
