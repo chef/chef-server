@@ -42,18 +42,21 @@ and also has the nice effect of making the return code reflect the
 pass / fail state of the test suite.
 
 ## Running the Tests
-Now create the database and install the schema:
+
+Now create the database and install the schema (note that these
+scripts must be run from the `schema` directory):
 
 ```
-psql -d postgres -c 'CREATE DATABASE authz;'
-psql -d authz -c 'CREATE EXTENSION pgtap;'
-psql -d authz -f sql/authz.sql
+shell/reload.sh
 ```
+
+(As the name implies, you can run the `reload.sh` script at any time
+to drop and re-create the database and have a "clean slate".)
 
 Now:
 
 ```
-pg_prove --dbname authz --verbose test/*_test.sql
+shell/test.sh
 ```
 
 You should see something like this:
