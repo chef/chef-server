@@ -125,7 +125,16 @@ describe "Groups Endpoint" do
     should_not_allow :DELETE, "/groups"
   end # /groups
 
-  context "/groups/<group_id>", :focus do
+  context "/groups/<group_id>" do
+    # What we are testing:
+
+    # Here we test group existence with GET (should require
+    # appropriate READ access), as well as the ability to delete
+    # groups (should require appropriate DELETE access).  All other
+    # HTTP verbs should be disallowed.
+
+    # Old notes:
+
     # GET returns the actors and groups in the group
     #
     # Note that only DIRECT membership is reflected in group
@@ -269,7 +278,7 @@ describe "Groups Endpoint" do
   # See https://tickets.corp.opscode.com/browse/PL-536
 
   # Alter group membership
-  context "/groups/<group_id>/<member_type>/<member_id>" do
+  context "/groups/<group_id>/<member_type>/<member_id>", :focus do
     should_not_allow :GET, "/groups/ffffffffffffffffffffffffffffffff/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
     should_not_allow :POST, "/groups/ffffffffffffffffffffffffffffffff/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
 

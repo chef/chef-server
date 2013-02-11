@@ -131,9 +131,9 @@ describe "Actors Endpoint" do
     # What we are testing:
 
     # Here we test actor existence with GET (should require
-    # appropriate READ access, as well as the ability to delete actors
-    # (should require appropriate DELETE access).  All other HTTP
-    # verbs should be disallowed.
+    # appropriate READ access), as well as the ability to delete
+    # actors (should require appropriate DELETE access).  All other
+    # HTTP verbs should be disallowed.
 
     # Old notes:
 
