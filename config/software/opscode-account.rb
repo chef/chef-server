@@ -1,5 +1,5 @@
 name "opscode-account"
-version "rel-1.30.4"
+version "fix-json-dos"
 
 dependencies ["ruby",
               "bundler",
