@@ -450,7 +450,7 @@ describe "Groups Endpoint" do
   end # /groups/<group_id>/acl
 
   # Manipulate a specific permission on a given group
-  context "/groups/<group_id>/acl/<action>", :focus do
+  context "/groups/<group_id>/acl/<action>" do
     # What we are testing:
 
     # Here we test access to a specific ACE/action in group's ACL and
@@ -566,10 +566,315 @@ describe "Groups Endpoint" do
     #
     # Cucumber: non-GRANTors cannot update ACEs at all
     context "PUT" do
+      ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
+        context "for #{action} action" do
+
+          # TODO: probably want to expand this with various types of bad input,
+          # although at the moment pretty much anything at all will crash it
+          context "an actor directly in the GRANT ACE, with bad input" do
+            with_actor :hasselhoff
+            with_group :hipsters
+
+            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+
+            it "returns 400" do
+              pending "returns 500 instead" do
+                put("/groups/#{hipsters}/acl/#{action.downcase}",
+                    :hasselhoff, :payload => {}).
+                  should have_status_code(400).with_body({"error" => "bad input"})
+
+                get("/groups/#{hipsters}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(200).
+                  with_body({"actors" => [hasselhoff], "groups" => []})
+              end
+            end
+          end
+
+          # TODO: I'm not sure these are a problem or not; we may want to properly
+          # error these out down the road.  Also not sure we should return 400 for
+          # non-existent actors/groups, dunno what the right HTTP response code is
+          # for that.
+
+          context "an actor directly in the GRANT ACE, with invalid actor" do
+            with_actor :hasselhoff
+            with_group :hipsters
+
+            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+
+            it "returns 400" do
+              pending "returns 200 instead" do
+                put("/groups/#{hipsters}/acl/#{action.downcase}",
+                    :hasselhoff,
+                    :payload => {"actors" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"],
+                      "groups" => []}).
+                  should have_status_code(400).with_body({"error" => "bad input"})
+
+                get("/groups/#{hipsters}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(200).
+                  with_body({"actors" => [hasselhoff], "groups" => []})
+              end
+            end
+          end
+
+          context "an actor directly in the GRANT ACE, with invalid group" do
+            with_actor :hasselhoff
+            with_group :hipsters
+
+            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+
+            it "returns 400" do
+              pending "returns 200 instead" do
+                put("/groups/#{hipsters}/acl/#{action.downcase}",
+                    :hasselhoff, :payload => {"actors" => [],
+                      "groups" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"]}).
+                  should have_status_code(400).with_body({"error" => "bad input"})
+
+                get("/groups/#{hipsters}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(200).
+                  with_body({"actors" => [hasselhoff], "groups" => []})
+              end
+            end
+          end
+
+          context "an actor directly in the GRANT ACE, with non-existent actor" do
+            with_actor :hasselhoff
+            with_group :hipsters
+
+            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+
+            it "returns 400" do
+              pending "returns 200 instead" do
+                put("/groups/#{hipsters}/acl/#{action.downcase}",
+                    :hasselhoff,
+                    :payload => {"actors" => ["ffffffffffffffffffffffffffffffff"],
+                      "groups" => []}).
+                  should have_status_code(400).with_body({"error" => "bad input"})
+
+                get("/groups/#{hipsters}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(200).
+                  with_body({"actors" => [hasselhoff], "groups" => []})
+              end
+            end
+          end
+
+          context "an actor directly in the GRANT ACE, with non-existent group" do
+            with_actor :hasselhoff
+            with_group :hipsters
+
+            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+
+            it "returns 400" do
+              pending "returns 200 instead" do
+                put("/groups/#{hipsters}/acl/#{action.downcase}",
+                    :hasselhoff, :payload => {"actors" => [],
+                      "groups" => ["ffffffffffffffffffffffffffffffff"]}).
+                  should have_status_code(400).with_body({"error" => "bad input"})
+
+                get("/groups/#{hipsters}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(200).
+                  with_body({"actors" => [hasselhoff], "groups" => []})
+              end
+            end
+          end
+
+          context "an actor directly in the GRANT ACE, modifying actors" do
+            with_actors :hasselhoff, :schwartzenegger
+            with_group :hipsters
+
+            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+
+            it "can modify the ACE for actors" do
+              put("/groups/#{hipsters}/acl/#{action.downcase}",
+                  :hasselhoff, :payload => {"actors" => [schwartzenegger],
+                    "groups" => []}).
+                should have_status_code(200).with_body({})
+
+              get("/groups/#{hipsters}/acl/#{action.downcase}",
+                  :superuser).should have_status_code(200).
+                with_body({"actors" => [schwartzenegger], "groups" => []})
+            end
+          end
+
+          context "an actor directly in the GRANT ACE, modifying groups" do
+            with_actor :hasselhoff
+            with_groups :brogrammers, :hipsters
+
+            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+
+            it "can modify the ACE for groups" do
+              put("/groups/#{hipsters}/acl/#{action.downcase}",
+                  :hasselhoff, :payload => {"actors" => [], "groups" => [brogrammers]}).
+                should have_status_code(200).with_body({})
+
+              get("/groups/#{hipsters}/acl/#{action.downcase}",
+                  :superuser).should have_status_code(200).
+                with_body({"actors" => [], "groups" => [brogrammers]})
+            end
+          end
+
+          context "an actor NOT in the GRANT ACE" do
+            with_actors :malkovich, :schwartzenegger
+            with_group :hipsters
+
+            # Give malkovich everything EXCEPT grant
+            with_acl_on_group :hipsters, {
+              :create => {:actors => [:malkovich], :groups => []},
+              :read   => {:actors => [:malkovich], :groups => []},
+              :update => {:actors => [:malkovich], :groups => []},
+              :delete => {:actors => [:malkovich], :groups => []},
+              :grant  => {:actors => [],           :groups => []} # <--- That's the one!
+            }
+
+            if (action == 'GRANT')
+              let(:body) { {"actors" => [], "groups" => []} }
+            else
+              let(:body) { {"actors" => [malkovich], "groups" => []} }
+            end
+
+            it "cannot modify the ACE" do
+              put("/groups/#{hipsters}/acl/#{action.downcase}",
+                  :malkovich, :payload => {"actors" => [schwartzenegger],
+                    "groups" => []}).should have_status_code(403).
+                with_body({"error" => "must be in the grant access control entry to perform this action"})
+
+              get("/groups/#{hipsters}/acl/#{action.downcase}",
+                  :superuser).should have_status_code(200).with_body(body)
+            end
+          end
+
+          context "an actor indirectly in the GRANT ACE, modifying actors" do
+            with_actors :hasselhoff, :malkovich, :norris
+            with_groups :hipsters, :brogrammers
+
+            with_ace_on_group :brogrammers, :grant, :groups => [:hipsters]
+            with_members :hipsters, :actors => [:hasselhoff]
+
+            it "can modify the ACE for actors" do
+              put("/groups/#{brogrammers}/acl/#{action.downcase}",
+                     :hasselhoff, :payload => {"actors" => [norris], "groups" => []}).
+                should have_status_code(200)
+              get("/groups/#{brogrammers}/acl/#{action.downcase}",
+                  :superuser).should have_status_code(200).
+                with_body({"actors" => [norris], "groups" => []})
+            end
+          end
+
+          context "an actor indirectly in the GRANT ACE, modifying groups" do
+            with_actors :hasselhoff, :malkovich
+            with_groups :hipsters, :brogrammers, :commies
+
+            with_ace_on_group :commies, :grant, :groups => [:hipsters]
+            with_members :hipsters, :actors => [:hasselhoff]
+
+            it "can modify the ACE for groups" do
+              put("/groups/#{commies}/acl/#{action.downcase}",
+                     :hasselhoff, :payload => {"actors" => [],
+                    "groups" => [brogrammers]}).should have_status_code(200)
+
+              get("/groups/#{commies}/acl/#{action.downcase}",
+                  :superuser).should have_status_code(200).
+                with_body({"actors" => [], "groups" => [brogrammers]})
+            end
+          end
+
+          context "with a non-existent target" do
+            with_actor :hasselhoff
+
+            it "can't modify its ACE, because it doesn't exist" do
+              fake_group = car_salesmen
+
+              # Prove it doesn't exist
+              get("/groups/#{fake_group}/acl/#{action.downcase}",
+                  :hasselhoff).should have_status_code(404)
+
+              # Now try to modify it
+              put("/groups/#{fake_group}/acl/#{action.downcase}",
+                  :hasselhoff).should have_status_code(404)
+            end
+          end
+        end
+      end
     end # GET
 
     # DELETE clears actors and groups from ACE
     context "DELETE" do
+      ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
+        context "for #{action} action" do
+
+          context "an actor directly in the GRANT ACE" do
+            with_actor :hasselhoff
+            with_group :hipsters
+
+            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+
+            it "can clear the ACE" do
+              pending "causes internal 500 errors" do
+                delete("/groups/#{hipsters}/acl/#{action.downcase}",
+                       :hasselhoff).should have_status_code(200).with_body({})
+                get("/groups/#{hipsters}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(404)
+              end
+            end
+          end
+
+          context "an actor NOT in the GRANT ACE" do
+            with_actor :malkovich
+            with_group :hipsters
+
+            # Give malkovich everything EXCEPT grant
+            with_acl_on_group :hipsters, {
+              :create => {:actors => [:malkovich], :groups => []},
+              :read   => {:actors => [:malkovich], :groups => []},
+              :update => {:actors => [:malkovich], :groups => []},
+              :delete => {:actors => [:malkovich], :groups => []},
+              :grant  => {:actors => [],           :groups => []} # <--- That's the one!
+            }
+
+            it "cannot clear the ACE" do
+              delete("/groups/#{hipsters}/acl/#{action.downcase}",
+                     :malkovich).should have_status_code(403).
+                with_body({"error" => "must be in the grant access control entry to perform this action"})
+
+              get("/groups/#{hipsters}/acl/#{action.downcase}",
+                  :superuser).should have_status_code(200)
+            end
+          end
+
+          context "an actor indirectly in the GRANT ACE" do
+            with_actor :hasselhoff
+            with_groups :hipsters, :brogrammers
+
+            with_ace_on_group :brogrammers, :grant, :groups => [:hipsters]
+            with_members :hipsters, :actors => [:hasselhoff]
+
+            it "can clear the ACE" do
+              pending "causes internal 500 errors" do
+                delete("/groups/#{brogrammers}/acl/#{action.downcase}",
+                       :hasselhoff).should have_status_code(200).with_body({})
+
+                get("/groups/#{brogrammers}/acl/#{action.downcase}",
+                    :superuser).should have_status_code(404)
+              end
+            end
+          end
+
+          context "with a non-existent target" do
+            with_actor :hasselhoff
+
+            it "can't clear its ACE, because it doesn't exist" do
+              fake_group = car_salesmen
+
+              # Prove it doesn't exist
+              get("/groups/#{fake_group}/acl/#{action.downcase}",
+                  :hasselhoff).should have_status_code(404)
+
+              # Now try to delete it
+              delete("/groups/#{fake_group}/acl/#{action.downcase}",
+                     :hasselhoff).should have_status_code(404)
+            end
+          end
+        end
+      end
     end # GET
   end # /groups/<group_id>/acl/<action>
 

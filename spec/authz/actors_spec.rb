@@ -689,9 +689,9 @@ describe "Actors Endpoint" do
               get("/actors/#{fake_actor}/acl/#{action.downcase}",
                   :hasselhoff).should have_status_code(404)
 
-              # Now try to delete it
-              delete("/actors/#{fake_actor}/acl/#{action.downcase}",
-                     :hasselhoff).should have_status_code(404)
+              # Now try to modify it
+              put("/actors/#{fake_actor}/acl/#{action.downcase}",
+                  :hasselhoff).should have_status_code(404)
             end
           end
         end
