@@ -275,13 +275,57 @@ describe "Groups Endpoint" do
     end # DELETE
   end # /groups/<group_id>
 
-  # Note: In the below tests, using a non-existent group_id should return 404, NOT 500!
-  # See https://tickets.corp.opscode.com/browse/PL-536
+  context "/groups/<group_id>/<member_type>" do
+    # What we are testing:
+
+    # These are basically null tests to verify that the server does
+    # not act on incomplete requests; there are subpaths for these
+    # tests that do (sometimes, more or less) work, but we're testing
+    # this for completeness.
+
+    # Might want to cut some of these out -- containers and object
+    # versions should always be 404 even when an ID is specified,
+    # since they can't be members of a group
+
+    ['ACTORS', 'GROUPS', 'OBJECTS', 'CONTAINERS'].each do |type|
+      context "for #{type} member type" do
+        with_group :commies
+
+        it "get should not be found" do
+          get("/groups/#{commies}/#{type.downcase}",
+              :superuser).should have_status_code(404)
+        end
+
+        it "post should not be found" do
+          post("/groups/#{commies}/#{type.downcase}",
+               :superuser).should have_status_code(404)
+        end
+
+        it "put should not be found" do
+          put("/groups/#{commies}/#{type.downcase}",
+              :superuser).should have_status_code(404)
+        end
+
+        it "delete should not be found" do
+          delete("/groups/#{commies}/#{type.downcase}",
+                 :superuser).should have_status_code(404)
+        end
+      end
+    end
+  end # /groups/<group_id>/<member_type>
 
   # Alter group membership
-  context "/groups/<group_id>/<member_type>/<member_id>" do
-    should_not_allow :GET, "/groups/ffffffffffffffffffffffffffffffff/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-    should_not_allow :POST, "/groups/ffffffffffffffffffffffffffffffff/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+  context "/groups/<group_id>/<member_type>/<member_id>", :focus do
+    ['actors', 'groups'].each do |type|
+      context "for #{type.upcase} type" do
+        should_not_allow :GET, "/groups/ffffffffffffffffffffffffffffffff/#{type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        should_not_allow :POST, "/groups/ffffffffffffffffffffffffffffffff/#{type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      end
+    end
+
+    # Note: In the below tests, using a non-existent group_id should
+    # return 404, NOT 500!  See
+    # https://tickets.corp.opscode.com/browse/PL-536
 
     # Add an actor / group to the group
     #
