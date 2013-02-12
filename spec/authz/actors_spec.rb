@@ -992,7 +992,7 @@ describe "Actors Endpoint" do
           end
         end
       end
-    end
+    end # GET
 
     ['create', 'read', 'update', 'delete', 'grant'].each do |action|
       context "for #{action.upcase} action" do

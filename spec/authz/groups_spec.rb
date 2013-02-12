@@ -923,6 +923,18 @@ describe "Groups Endpoint" do
 
   # Query the permission granted on an group of a given actor or group
   context "/groups/<group_id>/acl/<action>/<member_type>/<member_id>" do
+    # What we are testing:
+
+    # Here we test via GET access to specific ACE from member_id to
+    # group_id.  Apparently this returns 200 (with no body) if access
+    # is available or 404 if not.  Supposedly groups are supported as
+    # a member_type, but tests seem to show that only actors work
+    # correctly.  We also test that a bogus member_type does not
+    # return as having access.  All other HTTP verbs should be
+    # disallowed.
+
+    # Old notes:
+
     # GET uses is_authorized_on_object to determine whether the
     # specified actor / group has the specified permission
     #
@@ -931,6 +943,159 @@ describe "Groups Endpoint" do
     #
     # TODO: Perhaps use 204 (OK, No Content) instead?
     context "GET" do
+      ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
+        context "for #{action} action" do
+          ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |ace|
+            context "for ACTORS member type" do
+              context "an actor directly in the #{ace} ACE" do
+                with_actor :hasselhoff
+                with_group :hipsters
+
+                with_ace_on_group :hipsters, ace.downcase.to_sym, :actors => [:hasselhoff]
+
+                if (action == ace)
+                  it "returns 200 when in ACE" do
+                    # Hasselhoff has specific ACE access on hipsters
+                    get("/groups/#{hipsters}/acl/#{action.downcase}/actors/#{hasselhoff}",
+                        :hasselhoff).should have_status_code(200).with_body({})
+                  end
+                else
+                  it "returns 404 when not in ACE" do
+                    # Hasselhoff does not have other access on hipsters
+                    get("/groups/#{hipsters}/acl/#{action.downcase}/actors/#{hasselhoff}",
+                        :hasselhoff).should have_status_code(404)
+                  end
+                end
+              end
+
+              context "an actor indirectly in the #{ace} ACE" do
+                with_actor :hasselhoff
+                with_groups :hipsters, :commies
+
+                with_ace_on_group :commies, ace.downcase.to_sym,
+                                  :groups => [:hipsters]
+                with_members :hipsters, :actors => [:hasselhoff]
+
+                if (action == ace)
+                  it "returns 200 when in ACE" do
+                    get("/groups/#{commies}/acl/#{action.downcase}/actors/#{hasselhoff}",
+                        :hasselhoff).should have_status_code(200).with_body({})
+                  end
+                else
+                  it "returns 404 when not in ACE" do
+                    get("/groups/#{commies}/acl/#{action.downcase}/actors/#{hasselhoff}",
+                        :hasselhoff).should have_status_code(404)
+                  end
+                end
+              end
+
+              context "with a non-existent target" do
+                with_actor :hasselhoff
+
+                it "can't be read, because it doesn't exist" do
+                  fake_group = car_salesmen
+
+                  get("/groups/#{fake_group}/acl/#{action.downcase}/actors/#{hasselhoff}",
+                      :hasselhoff).should have_status_code(404)
+                end
+              end
+            end
+
+            context "for GROUPS member type" do
+              context "a group directly in the #{ace} ACE" do
+                with_actor :hasselhoff
+                with_groups :brogrammers, :hipsters
+
+                with_ace_on_group :hipsters, ace.downcase.to_sym,
+                                  :groups => [:brogrammers]
+                with_members :brogrammers, :actors => [:hasselhoff]
+
+                if (action == ace)
+                  it "returns 200 when in ACE" do
+                    # My understanding is that if group X has permissions on actor X,
+                    # this should return 200, but as it is, it doesn't
+                    pending "doesn't seem to work" do
+                      # Brogrammers has specific ACE access on hipsters
+                      get("/groups/#{hipsters}/acl/#{action.downcase}/groups/#{brogrammers}",
+                          :hasselhoff).should have_status_code(200).with_body({})
+                    end
+                  end
+                else
+                  it "returns 404 when not in ACE" do
+                    # Brogrammers does not have other access on hipsters
+                    get("/groups/#{hipsters}/acl/#{action.downcase}/groups/#{brogrammers}",
+                        :hasselhoff).should have_status_code(404)
+                  end
+                end
+              end
+
+              context "a group indirectly in the #{ace} ACE" do
+                with_actors :hasselhoff
+                with_groups :hipsters, :brogrammers, :commies
+
+                with_ace_on_group :commies, ace.downcase.to_sym, :groups => [:brogrammers]
+                with_members :brogrammers, :groups => [:hipsters]
+                with_members :hipsters, :actors => [:hasselhoff]
+
+                if (action == ace)
+                  # See above
+                  it "returns 200 when in ACE" do
+                    pending "doesn't seem to work" do
+                      get("/groups/#{commies}/acl/#{action.downcase}/groups/#{hipsters}",
+                          :hasselhoff).should have_status_code(200).with_body({})
+                    end
+                  end
+                else
+                  it "returns 404 when not in ACE" do
+                    get("/groups/#{commies}/acl/#{action.downcase}/groups/#{hipsters}",
+                        :hasselhoff).should have_status_code(404)
+                  end
+                end
+              end
+
+              context "with a non-existent target" do
+                with_actor :hasselhoff
+                with_group :brogrammers
+
+                it "can't be read, because it doesn't exist" do
+                  fake_group = car_salesmen
+
+                  get("/groups/#{fake_group}/acl/#{action.downcase}/groups/#{brogrammers}",
+                      :hasselhoff).should have_status_code(404)
+                end
+              end
+            end
+
+            # Some tests for an unexpected member_type -- don't really need to test
+            # more than one, do we?
+
+            # TODO: think about doing containers, too?
+
+            context "for OBJECT member type" do
+              context "an actor directly in the #{ace} ACE" do
+                with_group :hipsters
+                with_object :spork
+
+                it "returns 404 all the time" do
+                  get("/groups/#{hipsters}/acl/#{action.downcase}/objects/#{spork}",
+                      :superuser).should have_status_code(404)
+                end
+              end
+
+              context "with a non-existent target" do
+                with_object :spork
+
+                it "can't be read, because it doesn't exist" do
+                  fake_group = car_salesmen
+
+                  get("/groups/#{fake_group}/acl/#{action.downcase}/objects/#{spork}",
+                      :superuser).should have_status_code(404)
+                end
+              end
+            end
+          end
+        end
+      end
     end # GET
 
     ['create', 'read', 'update', 'delete', 'grant'].each do |action|
