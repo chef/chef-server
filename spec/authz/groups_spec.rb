@@ -916,9 +916,12 @@ describe "Groups Endpoint" do
 
     # Here we test access to group's ACL and that the response body
     # has the correct format.  Apparently, any ACE at all grants
-    # access to the ACL (is this a good idea?) -- we test each ACE in
+    # access to the ACL (is this a good idea?[1]) -- we test each ACE in
     # turn, both directly and indirectly through a group.  All other
     # HTTP verbs should be disallowed.
+
+    # [1] Apparently done intentionally, but the reasons are lost to the
+    # mists of time.  Would be nice to find those reasons again.
 
     # Old notes:
 
