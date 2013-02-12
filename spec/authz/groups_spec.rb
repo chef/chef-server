@@ -546,8 +546,8 @@ describe "Groups Endpoint" do
       end
     end # GET
 
-    context "for each action" do
-      ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+    ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+      context "for #{action.upcase} action", :focus do
         should_not_allow :POST, "/groups/ffffffffffffffffffffffffffffffff/acl/#{action}"
       end
     end
