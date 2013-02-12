@@ -324,8 +324,30 @@ describe "Groups Endpoint" do
     end # DELETE
   end
 
-  # See all permissions on a given group
   context "/groups/<group_id>/acl" do
+    # What we are testing:
+
+    # Here we test access to group's ACL and that the response body
+    # has the correct format.  Apparently, any ACE at all grants
+    # access to the ACL (is this a bug?) -- we test each ACE in turn,
+    # both directly and indirectly through a group.  All other HTTP
+    # verbs should be disallowed.
+
+    # Old notes:
+
+    # GET full ACL if the requesting actor (from the header) has grant
+    # permission on the actor
+    #
+    # Cucumber: a newly-created actor should itself be present in each
+    # of its own ACEs (the tests look at ACEs, not the whole ACL, but
+    # they should be consistent)
+    #
+    # Cucumber: Additionally, a newly-created actor should contain
+    # *the actor that created it* in each of its ACEs (same caveats
+    # re: ACL vs. ACEs apply)
+
+    # Old Notes:
+
     # GET full ACL if the requesting actor (from the header) has grant
     # permission on the group
     #
@@ -343,6 +365,80 @@ describe "Groups Endpoint" do
     # being run directly contradict that.  Unsure if this is a problem
     # with the tests or the description :(
     context "GET" do
+      ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |ace|
+
+        context "an actor directly in the #{ace} ACE" do
+          with_actor :hasselhoff
+          with_group :hipsters
+
+          with_ace_on_group :hipsters, ace.downcase.to_sym, :actors => [:hasselhoff]
+
+          it "can read the acl" do
+            body = {
+              "create" => {"actors" => [], "groups" => []},
+              "read" => {"actors" => [], "groups" => []},
+              "update" => {"actors" => [], "groups" => []},
+              "delete" => {"actors" => [], "groups" => []},
+              "grant" => {"actors" => [], "groups" => []}
+            }
+            body[ace.downcase] = {"actors" => [hasselhoff], "groups" => []}
+
+            get("/groups/#{hipsters}/acl",
+                :hasselhoff).should have_status_code(200).with_body(body)
+          end
+        end
+
+        context "an actor indirectly in the #{ace} ACE" do
+          with_actor :hasselhoff
+          with_groups :hipsters, :brogrammers
+
+          with_ace_on_group :brogrammers, ace.downcase.to_sym, :groups => [:hipsters]
+          with_members :hipsters, :actors => [:hasselhoff]
+
+          it "can read the acl" do
+            body = {
+              "create" => {"actors" => [], "groups" => []},
+              "read" => {"actors" => [], "groups" => []},
+              "update" => {"actors" => [], "groups" => []},
+              "delete" => {"actors" => [], "groups" => []},
+              "grant" => {"actors" => [], "groups" => []}
+            }
+            body[ace.downcase] = {"actors" => [], "groups" => [hipsters]}
+
+            get("/groups/#{brogrammers}/acl",
+                :hasselhoff).should have_status_code(200).with_body(body)
+          end
+        end
+      end
+
+      context "an actor with NO ACE" do
+        with_actor :malkovich
+        with_group :hipsters
+
+        # Give malkovich no access at all
+        with_acl_on_group :hipsters, {
+          :create => {:actors => [], :groups => []},
+          :read   => {:actors => [], :groups => []},
+          :update => {:actors => [], :groups => []},
+          :delete => {:actors => [], :groups => []},
+          :grant  => {:actors => [], :groups => []}
+        }
+
+        it "cannot read the acl" do
+          get("/groups/#{hipsters}/acl", :malkovich).should have_status_code(403).
+            with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
+        end
+      end
+
+      context "with a non-existent target" do
+        with_actor :hasselhoff
+
+        it "can't be read, because it doesn't exist" do
+          fake_group = honest_politicians
+
+          get("/groups/#{fake_group}/acl", :hasselhoff).should have_status_code(404)
+        end
+      end
     end # GET
 
     # NOTE: We'll want to eventually allow these operations in order
