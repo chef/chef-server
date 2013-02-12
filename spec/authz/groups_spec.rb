@@ -933,9 +933,17 @@ describe "Groups Endpoint" do
     context "GET" do
     end # GET
 
-    should_not_allow :POST, "/groups/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-    should_not_allow :PUT, "/groups/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-    should_not_allow :DELETE, "/groups/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+      context "for #{action.upcase} action" do
+        ['actors', 'groups'].each do |type|
+          context "for #{type.upcase} type" do
+            should_not_allow :POST, "/groups/ffffffffffffffffffffffffffffffff/acl/#{action}/#{type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            should_not_allow :PUT, "/groups/ffffffffffffffffffffffffffffffff/acl/#{action}/#{type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            should_not_allow :DELETE, "/groups/ffffffffffffffffffffffffffffffff/acl/#{action}/#{type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          end
+        end
+      end
+    end
   end # /groups/<group_id>/acl/<action>/<member_type>/<member_id>
 
 end

@@ -994,8 +994,16 @@ describe "Actors Endpoint" do
       end
     end
 
-    should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-    should_not_allow :PUT, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-    should_not_allow :DELETE, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+      context "for #{action.upcase} action" do
+        ['actors', 'groups'].each do |type|
+          context "for #{type.upcase} type" do
+            should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/#{action}/#{type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            should_not_allow :PUT, "/actors/ffffffffffffffffffffffffffffffff/acl/#{action}/#{type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            should_not_allow :DELETE, "/actors/ffffffffffffffffffffffffffffffff/acl/#{action}/#{type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          end
+        end
+      end
+    end
   end # /actors/<actor_id>/acl/<action>/<member_type>/<member_id>
 end
