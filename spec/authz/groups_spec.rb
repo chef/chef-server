@@ -1,6 +1,6 @@
 describe "Groups Endpoint" do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
-  let(:honest_politicians) { "deadbeefdeadbeefdeadbeefdeadbeef" }
+  let(:car_salesmen) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
   context "/groups" do
     # What we are testing:
@@ -129,9 +129,10 @@ describe "Groups Endpoint" do
     # What we are testing:
 
     # Here we test group existence with GET (should require
-    # appropriate READ access), as well as the ability to delete
-    # groups (should require appropriate DELETE access).  All other
-    # HTTP verbs should be disallowed.
+    # appropriate READ access) and that it has the correct response,
+    # as well as the ability to delete groups (should require
+    # appropriate DELETE access).  All other HTTP verbs should be
+    # disallowed.
 
     # Old notes:
 
@@ -195,7 +196,7 @@ describe "Groups Endpoint" do
         with_actor :hasselhoff
 
         it "can't be read, because it doesn't exist" do
-          fake_group = honest_politicians
+          fake_group = car_salesmen
 
           get("/groups/#{fake_group}", :hasselhoff).should have_status_code(404)
         end
@@ -262,7 +263,7 @@ describe "Groups Endpoint" do
         with_actor :hasselhoff
 
         it "can't be deleted, because it doesn't exist" do
-          fake_group = honest_politicians
+          fake_group = car_salesmen
 
           # Prove it doesn't exist
           get("/groups/#{fake_group}", :hasselhoff).should have_status_code(404)
@@ -278,7 +279,7 @@ describe "Groups Endpoint" do
   # See https://tickets.corp.opscode.com/browse/PL-536
 
   # Alter group membership
-  context "/groups/<group_id>/<member_type>/<member_id>", :focus do
+  context "/groups/<group_id>/<member_type>/<member_id>" do
     should_not_allow :GET, "/groups/ffffffffffffffffffffffffffffffff/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
     should_not_allow :POST, "/groups/ffffffffffffffffffffffffffffffff/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
 
@@ -434,7 +435,7 @@ describe "Groups Endpoint" do
         with_actor :hasselhoff
 
         it "can't be read, because it doesn't exist" do
-          fake_group = honest_politicians
+          fake_group = car_salesmen
 
           get("/groups/#{fake_group}/acl", :hasselhoff).should have_status_code(404)
         end
@@ -449,15 +450,107 @@ describe "Groups Endpoint" do
   end # /groups/<group_id>/acl
 
   # Manipulate a specific permission on a given group
-  context "/groups/<group_id>/acl/<action>" do
+  context "/groups/<group_id>/acl/<action>", :focus do
+    # What we are testing:
+
+    # Here we test access to a specific ACE/action in group's ACL and
+    # that the response body has the correct format.  Apparently, any
+    # ACE at all grants access to the ACL (is this a bug?) -- we test
+    # each ACE in turn, both directly and indirectly through a group.
+    # PUT is used for updating the ACL and is likewise tested
+    # (although there is currently no checking for request
+    # correctness, and authz will crash on badly formatted requests).
+    # DELETE is also tested, however it seems to be broken.  HTTP POST
+    # should be disallowed.
+
+    # Old notes:
+
     # GET actors and groups for action
     #
     # Cucumber: the group's creator (i.e., the one with GRANT
     # privileges) can read every ACE
     context "GET" do
+      ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
+        context "for #{action} action" do
+
+          ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |ace|
+
+            context "an actor directly in the #{ace} ACE" do
+              with_actor :hasselhoff
+              with_group :hipsters
+
+              with_ace_on_group :hipsters, ace.downcase.to_sym, :actors => [:hasselhoff]
+
+              if (action == ace)
+                let(:body) { {"actors" => [hasselhoff], "groups" => []} }
+              else
+                let(:body) { {"actors" => [], "groups" => []} }
+              end
+
+              it "can read the acl" do
+                get("/groups/#{hipsters}/acl/#{action}",
+                    :hasselhoff).should have_status_code(200).with_body(body)
+              end
+            end
+
+            context "an actor indirectly in the #{ace} ACE" do
+              with_actor :hasselhoff
+              with_groups :hipsters, :brogrammers
+
+              with_ace_on_group :brogrammers, ace.downcase.to_sym, :groups => [:hipsters]
+              with_members :hipsters, :actors => [:hasselhoff]
+
+              if (action == ace)
+                let(:body) { {"actors" => [], "groups" => [hipsters]} }
+              else
+                let(:body) { {"actors" => [], "groups" => []} }
+              end
+
+              it "can read the acl" do
+                get("/groups/#{brogrammers}/acl/#{action}",
+                    :hasselhoff).should have_status_code(200).with_body(body)
+              end
+            end
+
+            context "an actor with NO ACE" do
+              with_actor :malkovich
+              with_group :hipsters
+
+              # Give malkovich no access at all
+              with_acl_on_group :hipsters, {
+                :create => {:actors => [], :groups => []},
+                :read   => {:actors => [], :groups => []},
+                :update => {:actors => [], :groups => []},
+                :delete => {:actors => [], :groups => []},
+                :grant  => {:actors => [], :groups => []}
+              }
+
+              it "cannot read the acl" do
+                get("/groups/#{hipsters}/acl/#{action}",
+                    :malkovich).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
+              end
+            end
+
+            context "with a non-existent target" do
+              with_actor :hasselhoff
+
+              it "can't be read, because it doesn't exist" do
+                fake_group = car_salesmen
+
+                get("/groups/#{fake_group}/acl/#{action}",
+                    :hasselhoff).should have_status_code(404)
+              end
+            end
+          end
+        end
+      end
     end # GET
 
-    should_not_allow :POST, "/groups/ffffffffffffffffffffffffffffffff/acl/create"
+    context "for each action" do
+      ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+        should_not_allow :POST, "/groups/ffffffffffffffffffffffffffffffff/acl/#{action}"
+      end
+    end
 
     # PUT replaces an ACE atomically
     #

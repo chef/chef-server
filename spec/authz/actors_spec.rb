@@ -466,7 +466,11 @@ describe "Actors Endpoint" do
       end
     end # GET
 
-    should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create"
+    context "for each action" do
+      ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+        should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/#{action}"
+      end
+    end
 
     # PUT replaces an ACE atomically
 
