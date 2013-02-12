@@ -19,15 +19,17 @@
 /<type>/<id> endpoint
   GET
     response:
-      empty: 200 if <id> of <type> exists, 404 otherwise      
+      empty: 200 if <id> of <type> exists, 404 otherwise
+      [groups only]
+        "actors" => [<actors>]
+        "groups" => [<groups>]
   DELETE
     internal actions:
       delete record
         from auth_actor, auth_group, container, or auth_object
         records should cascade delete
     response:
-       empty
-         TODO: check this
+      empty
 
 /<type>/<id>/acl
   GET
