@@ -718,6 +718,149 @@ describe "Groups Endpoint" do
       end # for actors
 
       context "for groups" do
+        context "an actor directly in the UPDATE ACE" do
+          with_actor :shatner
+          with_group :hipsters
+
+          with_members :hipsters, :groups => [:hipsters]
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+
+          it "can delete a user from the group" do
+            delete("/groups/#{hipsters}/groups/#{hipsters}",
+                :shatner).should have_status_code(200).with_body({})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => []})
+          end
+        end
+
+        # Because this is a delete, we have to have a new context so
+        # that the group membership is properly (re-?)initialized
+        context "an actor directly in the UPDATE ACE (2)" do
+          with_actor :shatner
+          with_group :hipsters
+
+          with_members :hipsters, :groups => [:hipsters]
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+
+          it "cannot delete a user from an empty group" do
+            delete("/groups/#{hipsters}/groups/#{hipsters}",
+                :shatner).should have_status_code(200).with_body({})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => []})
+
+            delete("/groups/#{hipsters}/groups/#{hipsters}",
+                :shatner).should have_status_code(404).
+              with_body({"error" => "group is not a member of the group"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => []})
+          end
+        end
+
+        context "an actor directly in the UPDATE ACE (3)" do
+          with_actor :shatner
+          with_group :hipsters
+
+          with_members :hipsters, :groups => [:hipsters]
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+
+          it "deleting a bogus user raises an error" do
+            bogus_group = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+
+            # TODO: maybe change the test?  Not sure if a we really
+            # want to return 404s for bogus requests, though
+            pending "returns 404 instead" do
+              delete("/groups/#{hipsters}/groups/#{bogus_group}",
+                     :shatner).should have_status_code(403).
+                with_body({"error" => "invalid group"})
+              get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+                with_body({"actors" => [],
+                            "groups" => [hipsters]})
+            end
+          end
+        end
+
+        context "an actor directly in the UPDATE ACE (4)" do
+          with_actor :shatner
+          with_group :hipsters
+
+          with_members :hipsters, :groups => [:hipsters]
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+
+          it "deleting a non-existent user raises an error" do
+            fake_group = car_salesmen
+
+            pending "returns 404 instead" do
+              delete("/groups/#{hipsters}/groups/#{fake_group}",
+                     :shatner).should have_status_code(403).
+                with_body({"error" => "invalid group"})
+              get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+                with_body({"actors" => [],
+                            "groups" => [hipsters]})
+            end
+          end
+        end
+
+        context "an actor NOT in the UPDATE ACE" do
+          with_actor :shatner
+          with_group :hipsters
+
+          with_members :hipsters, :groups => [:hipsters]
+
+          # Give shatner everything EXCEPT update
+          with_acl_on_group :hipsters, {
+            :create => {:actors => [:shatner], :groups => []},
+            :read   => {:actors => [:shatner], :groups => []},
+            :update => {:actors => [],         :groups => []}, # <--- That's the one!
+            :delete => {:actors => [:shatner], :groups => []},
+            :grant  => {:actors => [:shatner], :groups => []}
+          }
+
+          it "cannot delete a user from the group" do
+            delete("/groups/#{hipsters}/groups/#{hipsters}",
+                :shatner).should have_status_code(403).
+              with_body({"error" => "must be in the update access control entry to perform this action"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => [hipsters]})
+          end
+        end
+
+        context "an actor indirectly in the UPDATE ACE" do
+          with_actor :shatner
+          with_groups :hipsters, :brogrammers
+
+          with_members :hipsters, :groups => [:hipsters]
+
+          with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
+          with_members :brogrammers, :actors => [:shatner]
+
+          it "can delete a user from the group" do
+            delete("/groups/#{hipsters}/groups/#{hipsters}",
+                :shatner).should have_status_code(200).with_body({})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => []})
+          end
+        end
+
+        context "with a non-existent target" do
+          with_actor :shatner
+          with_group :hipsters
+
+          it "can't delete a user from a group, because it doesn't exist" do
+            fake_group = car_salesmen
+
+            delete("/groups/#{fake_group}/groups/#{hipsters}",
+                   :shatner).should have_status_code(404)
+          end
+        end
       end # for groups
     end # DELETE
   end
