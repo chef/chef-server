@@ -350,10 +350,10 @@ describe "Groups Endpoint" do
     #
     # Multiple actors and groups can be in a group
     #
-    # A GROUP CAN ACTUALLY BE A MEMBER OF ITSELF?!?!
+    # A GROUP CAN ACTUALLY BE A MEMBER OF ITSELF?!?! [update: we'll be disallowing that]
     #
     # CYCLES OF GROUP MEMBERSHIP CAN ACTUALLY BE CREATED! (e.g. g1 <-
-    # g2 <- g3 <- g1)
+    # g2 <- g3 <- g1) [ditto]
     #
     # The effects of these recursive structures is apparently
     # "normal", but I think the structure is preserved, which is
