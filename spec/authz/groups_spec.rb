@@ -314,8 +314,17 @@ describe "Groups Endpoint" do
     end
   end # /groups/<group_id>/<member_type>
 
-  # Alter group membership
   context "/groups/<group_id>/<member_type>/<member_id>" do
+    # What we are testing:
+
+    # Here we test that groups and actor members of groups can be
+    # added with PUT and removed with DELETE (and that the other
+    # endpoints are disallowed).  We explicitly test several edge
+    # scenarios, such as adding groups/actors to groups they already
+    # belong to and deleting them from groups they don't belong to.
+    # We're also testing for cycles being forbidden (which they aren't
+    # in the old API, so those tests are pending for now).
+
     ['actors', 'groups'].each do |type|
       context "for #{type.upcase} type" do
         should_not_allow :GET, "/groups/ffffffffffffffffffffffffffffffff/#{type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
@@ -367,23 +376,36 @@ describe "Groups Endpoint" do
             put("/groups/#{hipsters}/actors/#{shatner}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [shatner],
-                          "groups" => []})
+              with_body({"actors" => [shatner], "groups" => []})
           end
+        end
+
+        # Because this has side effects, we have to have a new context so
+        # that the group membership is properly (re-?)initialized
+        context "an actor directly in the UPDATE ACE (2)" do
+          with_actor :shatner
+          with_group :hipsters
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
           it "can add the same user to the group" do
             put("/groups/#{hipsters}/actors/#{shatner}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [shatner],
-                          "groups" => []})
+              with_body({"actors" => [shatner], "groups" => []})
 
             put("/groups/#{hipsters}/actors/#{shatner}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [shatner],
-                          "groups" => []})
+              with_body({"actors" => [shatner], "groups" => []})
           end
+        end
+
+        context "an actor directly in the UPDATE ACE (3)" do
+          with_actor :shatner
+          with_group :hipsters
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
           it "adding a bogus user raises an error" do
             bogus_actor = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
@@ -392,8 +414,7 @@ describe "Groups Endpoint" do
                 :shatner).should have_status_code(403).
               with_body({"error" => "invalid actor"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
           end
 
           it "adding a non-existent user raises an error" do
@@ -403,8 +424,7 @@ describe "Groups Endpoint" do
                 :shatner).should have_status_code(403).
               with_body({"error" => "invalid actor"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
@@ -426,8 +446,7 @@ describe "Groups Endpoint" do
                 :shatner).should have_status_code(403).
               with_body({"error" => "must be in the update access control entry to perform this action"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
@@ -442,8 +461,7 @@ describe "Groups Endpoint" do
             put("/groups/#{hipsters}/actors/#{shatner}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [shatner],
-                          "groups" => []})
+              with_body({"actors" => [shatner], "groups" => []})
           end
         end
 
@@ -462,31 +480,61 @@ describe "Groups Endpoint" do
       context "for groups" do
         context "an actor directly in the UPDATE ACE" do
           with_actor :shatner
-          with_group :hipsters
+          with_groups :hipsters, :brogrammers
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
           it "can add a group to the group" do
-            put("/groups/#{hipsters}/groups/#{hipsters}",
+            put("/groups/#{hipsters}/groups/#{brogrammers}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => [hipsters]})
+              with_body({"actors" => [], "groups" => [brogrammers]})
           end
+        end
+
+        # Because this has side effects, we have to have a new context so
+        # that the group membership is properly (re-?)initialized
+        context "an actor directly in the UPDATE ACE (2)" do
+          with_actor :shatner
+          with_groups :hipsters, :brogrammers
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+
+          it "cannot add a group to itself" do
+            pending "you shouldn't be able to" do
+              put("/groups/#{hipsters}/groups/#{hipsters}",
+                  :shatner).should have_status_code(400).
+                with_body({"error" => "cycles are bad, mmmkay"})
+              get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+                with_body({"actors" => [], "groups" => []})
+            end
+          end
+        end
+
+        context "an actor directly in the UPDATE ACE (3)" do
+          with_actor :shatner
+          with_groups :hipsters, :brogrammers
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
           it "can add the same group to the group" do
-            put("/groups/#{hipsters}/groups/#{hipsters}",
+            put("/groups/#{hipsters}/groups/#{brogrammers}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => [hipsters]})
+              with_body({"actors" => [], "groups" => [brogrammers]})
 
-            put("/groups/#{hipsters}/groups/#{hipsters}",
+            put("/groups/#{hipsters}/groups/#{brogrammers}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => [hipsters]})
+              with_body({"actors" => [], "groups" => [brogrammers]})
           end
+        end
+
+        context "an actor directly in the UPDATE ACE (4)" do
+          with_actor :shatner
+          with_groups :hipsters, :brogrammers
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
           it "adding a bogus group raises an error" do
             bogus_group = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
@@ -495,8 +543,7 @@ describe "Groups Endpoint" do
                 :shatner).should have_status_code(403).
               with_body({"error" => "invalid group"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
           end
 
           it "adding a non-existent group raises an error" do
@@ -506,14 +553,13 @@ describe "Groups Endpoint" do
                 :shatner).should have_status_code(403).
               with_body({"error" => "invalid group"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
         context "an actor NOT in the UPDATE ACE" do
           with_actor :shatner
-          with_group :hipsters
+          with_groups :hipsters, :brogrammers
 
           # Give shatner everything EXCEPT update
           with_acl_on_group :hipsters, {
@@ -525,28 +571,44 @@ describe "Groups Endpoint" do
           }
 
           it "cannot add a group to the group" do
-            put("/groups/#{hipsters}/groups/#{hipsters}",
+            put("/groups/#{hipsters}/groups/#{brogrammers}",
                 :shatner).should have_status_code(403).
               with_body({"error" => "must be in the update access control entry to perform this action"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
         context "an actor indirectly in the UPDATE ACE" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
+          with_groups :hipsters, :brogrammers, :commies
 
           with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
           with_members :brogrammers, :actors => [:shatner]
 
           it "can add a group to the group" do
-            put("/groups/#{hipsters}/groups/#{brogrammers}",
+            put("/groups/#{hipsters}/groups/#{commies}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => [brogrammers]})
+              with_body({"actors" => [], "groups" => [commies]})
+          end
+        end
+
+        context "group cycles" do
+          with_actor :shatner
+          with_groups :hipsters, :brogrammers
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_members :brogrammers, :groups => [:hipsters]
+
+          it "are disallowed" do
+            pending "they should be" do
+              put("/groups/#{hipsters}/groups/#{brogrammers}",
+                  :shatner).should have_status_code(400).
+                with_body({"error" => "cycles are bad, mmmkay"})
+              get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+                with_body({"actors" => [], "groups" => []})
+            end
           end
         end
 
@@ -585,12 +647,11 @@ describe "Groups Endpoint" do
             delete("/groups/#{hipsters}/actors/#{shatner}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
-        # Because this is a delete, we have to have a new context so
+        # Because this has side effects, we have to have a new context so
         # that the group membership is properly (re-?)initialized
         context "an actor directly in the UPDATE ACE (2)" do
           with_actor :shatner
@@ -604,15 +665,13 @@ describe "Groups Endpoint" do
             delete("/groups/#{hipsters}/actors/#{shatner}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
 
             delete("/groups/#{hipsters}/actors/#{shatner}",
                 :shatner).should have_status_code(404).
               with_body({"error" => "actor is not a member of the group"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
@@ -634,8 +693,7 @@ describe "Groups Endpoint" do
                      :shatner).should have_status_code(403).
                 with_body({"error" => "invalid actor"})
               get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-                with_body({"actors" => [shatner],
-                            "groups" => []})
+                with_body({"actors" => [shatner], "groups" => []})
             end
           end
         end
@@ -656,8 +714,7 @@ describe "Groups Endpoint" do
                      :shatner).should have_status_code(403).
                 with_body({"error" => "invalid actor"})
               get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-                with_body({"actors" => [shatner],
-                            "groups" => []})
+                with_body({"actors" => [shatner], "groups" => []})
             end
           end
         end
@@ -682,8 +739,7 @@ describe "Groups Endpoint" do
                 :shatner).should have_status_code(403).
               with_body({"error" => "must be in the update access control entry to perform this action"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [shatner],
-                          "groups" => []})
+              with_body({"actors" => [shatner], "groups" => []})
           end
         end
 
@@ -700,8 +756,7 @@ describe "Groups Endpoint" do
             delete("/groups/#{hipsters}/actors/#{shatner}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
@@ -720,52 +775,49 @@ describe "Groups Endpoint" do
       context "for groups" do
         context "an actor directly in the UPDATE ACE" do
           with_actor :shatner
-          with_group :hipsters
+          with_groups :hipsters, :brogrammers
 
-          with_members :hipsters, :groups => [:hipsters]
+          with_members :hipsters, :groups => [:brogrammers]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
           it "can delete a user from the group" do
-            delete("/groups/#{hipsters}/groups/#{hipsters}",
+            delete("/groups/#{hipsters}/groups/#{brogrammers}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
-        # Because this is a delete, we have to have a new context so
-        # that the group membership is properly (re-?)initialized
+        # Because this has side effects, we have to have a new context
+        # so that the group membership is properly (re-?)initialized
         context "an actor directly in the UPDATE ACE (2)" do
           with_actor :shatner
-          with_group :hipsters
+          with_groups :hipsters, :brogrammers
 
-          with_members :hipsters, :groups => [:hipsters]
+          with_members :hipsters, :groups => [:brogrammers]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
           it "cannot delete a user from an empty group" do
-            delete("/groups/#{hipsters}/groups/#{hipsters}",
+            delete("/groups/#{hipsters}/groups/#{brogrammers}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
 
-            delete("/groups/#{hipsters}/groups/#{hipsters}",
+            delete("/groups/#{hipsters}/groups/#{brogrammers}",
                 :shatner).should have_status_code(404).
               with_body({"error" => "group is not a member of the group"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
         context "an actor directly in the UPDATE ACE (3)" do
           with_actor :shatner
-          with_group :hipsters
+          with_groups :hipsters, :brogrammers
 
-          with_members :hipsters, :groups => [:hipsters]
+          with_members :hipsters, :groups => [:brogrammers]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -779,17 +831,16 @@ describe "Groups Endpoint" do
                      :shatner).should have_status_code(403).
                 with_body({"error" => "invalid group"})
               get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-                with_body({"actors" => [],
-                            "groups" => [hipsters]})
+                with_body({"actors" => [], "groups" => [brogrammers]})
             end
           end
         end
 
         context "an actor directly in the UPDATE ACE (4)" do
           with_actor :shatner
-          with_group :hipsters
+          with_groups :hipsters, :brogrammers
 
-          with_members :hipsters, :groups => [:hipsters]
+          with_members :hipsters, :groups => [:brogrammers]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -801,17 +852,16 @@ describe "Groups Endpoint" do
                      :shatner).should have_status_code(403).
                 with_body({"error" => "invalid group"})
               get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-                with_body({"actors" => [],
-                            "groups" => [hipsters]})
+                with_body({"actors" => [], "groups" => [brogrammers]})
             end
           end
         end
 
         context "an actor NOT in the UPDATE ACE" do
           with_actor :shatner
-          with_group :hipsters
+          with_groups :hipsters, :brogrammers
 
-          with_members :hipsters, :groups => [:hipsters]
+          with_members :hipsters, :groups => [:brogrammers]
 
           # Give shatner everything EXCEPT update
           with_acl_on_group :hipsters, {
@@ -823,30 +873,28 @@ describe "Groups Endpoint" do
           }
 
           it "cannot delete a user from the group" do
-            delete("/groups/#{hipsters}/groups/#{hipsters}",
+            delete("/groups/#{hipsters}/groups/#{brogrammers}",
                 :shatner).should have_status_code(403).
               with_body({"error" => "must be in the update access control entry to perform this action"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => [hipsters]})
+              with_body({"actors" => [], "groups" => [brogrammers]})
           end
         end
 
         context "an actor indirectly in the UPDATE ACE" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
+          with_groups :hipsters, :brogrammers, :dirtycommies
 
-          with_members :hipsters, :groups => [:hipsters]
+          with_members :hipsters, :groups => [:dirtycommies]
 
           with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
           with_members :brogrammers, :actors => [:shatner]
 
           it "can delete a user from the group" do
-            delete("/groups/#{hipsters}/groups/#{hipsters}",
+            delete("/groups/#{hipsters}/groups/#{dirtycommies}",
                 :shatner).should have_status_code(200).with_body({})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-              with_body({"actors" => [],
-                          "groups" => []})
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
