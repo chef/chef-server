@@ -356,6 +356,212 @@ describe "Groups Endpoint" do
     #
     # Trying to add an actor to the groups list should fail, and vice versa.
     context "PUT" do
+      context "for actors" do
+        context "an actor directly in the UPDATE ACE" do
+          with_actor :shatner
+          with_group :hipsters
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+
+          it "can add a user to the group" do
+            put("/groups/#{hipsters}/actors/#{shatner}",
+                :shatner).should have_status_code(200).with_body({})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [shatner],
+                          "groups" => []})
+          end
+
+          it "can add the same user to the group" do
+            put("/groups/#{hipsters}/actors/#{shatner}",
+                :shatner).should have_status_code(200).with_body({})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [shatner],
+                          "groups" => []})
+
+            put("/groups/#{hipsters}/actors/#{shatner}",
+                :shatner).should have_status_code(200).with_body({})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [shatner],
+                          "groups" => []})
+          end
+
+          it "adding a bogus user raises an error" do
+            bogus_actor = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+
+            put("/groups/#{hipsters}/actors/#{bogus_actor}",
+                :shatner).should have_status_code(403).
+              with_body({"error" => "invalid actor"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => []})
+          end
+
+          it "adding a non-existent user raises an error" do
+            fake_actor = mattdamon
+
+            put("/groups/#{hipsters}/actors/#{fake_actor}",
+                :shatner).should have_status_code(403).
+              with_body({"error" => "invalid actor"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => []})
+          end
+        end
+
+        context "an actor NOT in the UPDATE ACE" do
+          with_actor :shatner
+          with_group :hipsters
+
+          # Give shatner everything EXCEPT update
+          with_acl_on_group :hipsters, {
+            :create => {:actors => [:shatner], :groups => []},
+            :read   => {:actors => [:shatner], :groups => []},
+            :update => {:actors => [],         :groups => []}, # <--- That's the one!
+            :delete => {:actors => [:shatner], :groups => []},
+            :grant  => {:actors => [:shatner], :groups => []}
+          }
+
+          it "cannot add a user to the group" do
+            put("/groups/#{hipsters}/actors/#{shatner}",
+                :shatner).should have_status_code(403).
+              with_body({"error" => "must be in the update access control entry to perform this action"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => []})
+          end
+        end
+
+        context "an actor indirectly in the UPDATE ACE" do
+          with_actor :shatner
+          with_groups :hipsters, :brogrammers
+
+          with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
+          with_members :brogrammers, :actors => [:shatner]
+
+          it "can add a user to the group" do
+            put("/groups/#{hipsters}/actors/#{shatner}",
+                :shatner).should have_status_code(200).with_body({})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [shatner],
+                          "groups" => []})
+          end
+        end
+
+        context "with a non-existent target" do
+          with_actor :shatner
+
+          it "can't add a user to a group, because it doesn't exist" do
+            fake_group = car_salesmen
+
+            put("/groups/#{fake_group}/actors/#{shatner}",
+                :shatner).should have_status_code(404)
+          end
+        end
+      end
+
+      context "for groups" do
+        context "an actor directly in the UPDATE ACE" do
+          with_actor :shatner
+          with_group :hipsters
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+
+          it "can add a group to the group" do
+            put("/groups/#{hipsters}/groups/#{hipsters}",
+                :shatner).should have_status_code(200).with_body({})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => [hipsters]})
+          end
+
+          it "can add the same group to the group" do
+            put("/groups/#{hipsters}/groups/#{hipsters}",
+                :shatner).should have_status_code(200).with_body({})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => [hipsters]})
+
+            put("/groups/#{hipsters}/groups/#{hipsters}",
+                :shatner).should have_status_code(200).with_body({})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => [hipsters]})
+          end
+
+          it "adding a bogus group raises an error" do
+            bogus_group = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+
+            put("/groups/#{hipsters}/groups/#{bogus_group}",
+                :shatner).should have_status_code(403).
+              with_body({"error" => "invalid group"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => []})
+          end
+
+          it "adding a non-existent group raises an error" do
+            fake_group = car_salesmen
+
+            put("/groups/#{hipsters}/groups/#{fake_group}",
+                :shatner).should have_status_code(403).
+              with_body({"error" => "invalid group"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => []})
+          end
+        end
+
+        context "an actor NOT in the UPDATE ACE" do
+          with_actor :shatner
+          with_group :hipsters
+
+          # Give shatner everything EXCEPT update
+          with_acl_on_group :hipsters, {
+            :create => {:actors => [:shatner], :groups => []},
+            :read   => {:actors => [:shatner], :groups => []},
+            :update => {:actors => [],         :groups => []}, # <--- That's the one!
+            :delete => {:actors => [:shatner], :groups => []},
+            :grant  => {:actors => [:shatner], :groups => []}
+          }
+
+          it "cannot add a group to the group" do
+            put("/groups/#{hipsters}/groups/#{hipsters}",
+                :shatner).should have_status_code(403).
+              with_body({"error" => "must be in the update access control entry to perform this action"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => []})
+          end
+        end
+
+        context "an actor indirectly in the UPDATE ACE" do
+          with_actor :shatner
+          with_groups :hipsters, :brogrammers
+
+          with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
+          with_members :brogrammers, :actors => [:shatner]
+
+          it "can add a group to the group" do
+            put("/groups/#{hipsters}/groups/#{brogrammers}",
+                :shatner).should have_status_code(200).with_body({})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [],
+                          "groups" => [brogrammers]})
+          end
+        end
+
+        context "with a non-existent target" do
+          with_actor :shatner
+          with_group :hipsters
+
+          it "can't add a user to a group, because it doesn't exist" do
+            fake_group = car_salesmen
+
+            put("/groups/#{fake_group}/groups/#{hipsters}",
+                :shatner).should have_status_code(404)
+          end
+        end
+      end
     end # PUT
 
     # Delete an actor / group from the group
