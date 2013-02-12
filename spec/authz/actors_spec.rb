@@ -270,9 +270,9 @@ describe "Actors Endpoint" do
 
     # Here we test access to actor's ACL and that the response body
     # has the correct format.  Apparently, any ACE at all grants
-    # access to the ACL (is this a bug?) -- we test each ACE in turn,
-    # both directly and indirectly through a group.  All other HTTP
-    # verbs should be disallowed.
+    # access to the ACL (is this a good idea?) -- we test each ACE in
+    # turn, both directly and indirectly through a group.  All other
+    # HTTP verbs should be disallowed.
 
     # Old notes:
 
