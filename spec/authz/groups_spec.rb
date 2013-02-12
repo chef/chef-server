@@ -610,6 +610,30 @@ describe "Groups Endpoint" do
           end
         end
 
+        context "deep group cycles" do
+          # Just in case we make an implementation error or major
+          # schema change that introduces errors that the above test
+          # doesn't catch
+
+          with_actor :shatner
+          with_groups :hipsters, :brogrammers, :commies, :dirtycommies
+
+          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_members :brogrammers, :groups => [:hipsters]
+          with_members :commies, :groups => [:brogrammers]
+          with_members :dirtycommies, :groups => [:commies]
+
+          it "are disallowed" do
+            pending "they should be" do
+              put("/groups/#{hipsters}/groups/#{dirtycommies}",
+                  :shatner).should have_status_code(400).
+                with_body({"error" => "cycles are bad, mmmkay"})
+              get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+                with_body({"actors" => [], "groups" => []})
+            end
+          end
+        end
+
         context "with a non-existent target" do
           with_actor :shatner
           with_group :hipsters
