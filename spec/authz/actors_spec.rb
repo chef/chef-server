@@ -467,7 +467,7 @@ describe "Actors Endpoint" do
     end # GET
 
     ['create', 'read', 'update', 'delete', 'grant'].each do |action|
-      context "for #{action.upcase} action", :focus do
+      context "for #{action.upcase} action" do
         should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/#{action}"
       end
     end

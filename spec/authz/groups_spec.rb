@@ -547,7 +547,7 @@ describe "Groups Endpoint" do
     end # GET
 
     ['create', 'read', 'update', 'delete', 'grant'].each do |action|
-      context "for #{action.upcase} action", :focus do
+      context "for #{action.upcase} action" do
         should_not_allow :POST, "/groups/ffffffffffffffffffffffffffffffff/acl/#{action}"
       end
     end
@@ -877,6 +877,49 @@ describe "Groups Endpoint" do
       end
     end # GET
   end # /groups/<group_id>/acl/<action>
+
+  context "/groups/<group_id>/acl/<action>/<member_type>" do
+    # What we are testing:
+
+    # These are basically null tests to verify that the server does
+    # not act on incomplete requests; there are subpaths for these
+    # tests that do (sometimes, more or less) work, but we're testing
+    # this for completeness.
+
+    # Might want to cut some of these out -- containers and object
+    # versions should always be 404 even when an ID is specified,
+    # since they can't have permissions
+
+    ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
+      context "for #{action} action" do
+        ['ACTORS', 'GROUPS', 'OBJECTS', 'CONTAINERS'].each do |type|
+          context "for #{type} member type" do
+            with_group :commies
+
+            it "get should not be found" do
+              get("/groups/#{commies}/acl/#{action.downcase}/#{type.downcase}/",
+                  :superuser).should have_status_code(404)
+            end
+
+            it "post should not be found" do
+              post("/groups/#{commies}/acl/#{action.downcase}/#{type.downcase}/",
+                   :superuser).should have_status_code(404)
+            end
+
+            it "put should not be found" do
+              put("/groups/#{commies}/acl/#{action.downcase}/#{type.downcase}/",
+                  :superuser).should have_status_code(404)
+            end
+
+            it "delete should not be found" do
+              delete("/groups/#{commies}/acl/#{action.downcase}/#{type.downcase}/",
+                     :superuser).should have_status_code(404)
+            end
+          end
+        end
+      end
+    end
+  end # /actors/<actor_id>/acl/<action>/<member_type>
 
   # Query the permission granted on an group of a given actor or group
   context "/groups/<group_id>/acl/<action>/<member_type>/<member_id>" do
