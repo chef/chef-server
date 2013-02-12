@@ -1,139 +1,6 @@
 describe "Actors Endpoint" do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
-  context "pedant API sanity check" do
-    # What we are testing:
-
-    # Here we take all of the patterns used in the other tests and
-    # verify that the permissions are correctly set up by the helper
-    # functions.
-
-    # We are explictly testing:
-    #   with_ace_on_actor
-    #   with_acl_on_actor
-    # And indirectly:
-    #   with_actor(s)
-    #   with_group(s)
-    #   with_members (for actors and groups)
-    # We then verify the permissions and memberships with
-    #   directly_have_permission
-    #   be_a_direct_member_of
-
-    ['CREATE', 'READ', 'UPDATE', 'DELETE', 'GRANT'].each do |action|
-      context "for #{action} ACE" do
-        context "for single ACE on actor" do
-          with_actors :hasselhoff, :shatner
-
-          with_ace_on_actor :shatner, action.downcase.to_sym, :actors => [:hasselhoff]
-
-          it "has permission" do
-            :hasselhoff.should directly_have_permission(action.downcase.to_sym).
-              on_actor(:shatner)
-          end
-        end
-
-        context "an actor NOT in the ACE" do
-          with_actors :malkovich, :shatner
-
-          # Give malkovich everything EXCEPT action
-          acl = {
-            :create => {:actors => [:malkovich], :groups => []},
-            :read   => {:actors => [:malkovich], :groups => []},
-            :update => {:actors => [:malkovich], :groups => []},
-            :delete => {:actors => [:malkovich], :groups => []},
-            :grant  => {:actors => [:malkovich], :groups => []}
-          }
-          acl[action.downcase.to_sym] = {:actors => [], :groups => []}
-          
-          with_acl_on_actor :shatner, acl
-
-          it "does not have permission" do
-            :malkovich.should_not directly_have_permission(action.downcase.to_sym).
-              on_actor(:shatner)
-          end
-        end
-
-        context "an actor indirectly in the ACE" do
-          with_actors :hasselhoff, :shatner, :malkovich
-          with_group :hipsters
-
-          with_ace_on_actor :shatner, action.downcase.to_sym, :groups => [:hipsters]
-          with_members :hipsters, :actors => [:hasselhoff]
-
-          it "has only indirect permission" do
-            :hasselhoff.should_not directly_have_permission(action.downcase.to_sym).
-              on_actor(:shatner)
-            :hasselhoff.should be_a_direct_member_of(:hipsters)
-            :hipsters.should directly_have_permission(action.downcase.to_sym).
-              on_actor(:shatner)
-          end
-        end
-
-        context "an actor doubly-indirectly in the ACE" do
-          with_actors :hasselhoff, :shatner
-          with_groups :hipsters, :brogrammers
-
-          with_ace_on_actor :shatner, action.downcase.to_sym, :groups => [:brogrammers]
-          with_members :brogrammers, :groups => [:hipsters]
-          with_members :hipsters, :actors => [:hasselhoff]
-
-          it "has only doubly-indirect permission" do
-            :hasselhoff.should_not directly_have_permission(action.downcase.to_sym).
-              on_actor(:shatner)
-            :hasselhoff.should be_a_direct_member_of(:hipsters)
-            :hipsters.should be_a_direct_member_of(:brogrammers)
-            :hipsters.should_not directly_have_permission(action.downcase.to_sym).
-              on_actor(:shatner)
-            :brogrammers.should directly_have_permission(action.downcase.to_sym).
-              on_actor(:shatner)
-          end
-        end
-      end
-    end
-
-    context "an actor with NO ACE" do
-      with_actors :malkovich, :shatner
-
-      # Give malkovich no access at all
-      with_acl_on_actor :shatner, {
-        :create => {:actors => [], :groups => []},
-        :read   => {:actors => [], :groups => []},
-        :update => {:actors => [], :groups => []},
-        :delete => {:actors => [], :groups => []},
-        :grant  => {:actors => [], :groups => []}
-      }
-
-      it "has no permissions" do
-        :malkovich.should_not directly_have_permission(:create).on_actor(:shatner) 
-        :malkovich.should_not directly_have_permission(:read).on_actor(:shatner)
-        :malkovich.should_not directly_have_permission(:update).on_actor(:shatner)
-        :malkovich.should_not directly_have_permission(:delete).on_actor(:shatner)
-        :malkovich.should_not directly_have_permission(:grant).on_actor(:shatner)
-      end
-    end
-
-    context "an actor with full ACE" do
-      with_actors :hasselhoff, :shatner
-
-      # Give hasselhoff full access
-      with_acl_on_actor :shatner, {
-        :create => {:actors => [:hasselhoff], :groups => []},
-        :read   => {:actors => [:hasselhoff], :groups => []},
-        :update => {:actors => [:hasselhoff], :groups => []},
-        :delete => {:actors => [:hasselhoff], :groups => []},
-        :grant  => {:actors => [:hasselhoff], :groups => []}
-      }
-
-      it "has all permissions" do
-        :hasselhoff.should directly_have_permission(:create).on_actor(:shatner) 
-        :hasselhoff.should directly_have_permission(:read).on_actor(:shatner)
-        :hasselhoff.should directly_have_permission(:update).on_actor(:shatner)
-        :hasselhoff.should directly_have_permission(:delete).on_actor(:shatner)
-        :hasselhoff.should directly_have_permission(:grant).on_actor(:shatner)
-      end
-    end
-  end
-
   context "/actors" do
     # What we are testing:
 
@@ -190,6 +57,7 @@ describe "Actors Endpoint" do
 
       # Apparently, this is the only item creation operation that
       # doesn't require this header; is this the "correct" behavior?
+      # Interestingly, this behaves differently than other endpoints
       context "without the X-Ops-Requesting-Actor-Id header" do
         creates_actor_as(:superuser,
                          :merge_headers => {"X-Ops-Requesting-Actor-Id" => :DELETE})
@@ -198,21 +66,20 @@ describe "Actors Endpoint" do
       # Not quite clear the purpose of this header, actually
       context "without the X-Ops-User-Id header" do
         creates_actor_as(:superuser,
-                            :merge_headers => {"X-Ops-User-Id" => :DELETE})
+                         :merge_headers => {"X-Ops-User-Id" => :DELETE})
       end
 
       # Yes, this is valid behavior according to the current Authz
+      # (and different than other endpoints)
       context "without ANY of the standard headers except Content-Type" do
         creates_actor_as(:superuser,
-                            :headers => {"Content-Type" => "application/json"})
+                         :headers => {"Content-Type" => "application/json"})
       end
 
       context "without any headers" do
         it "should NOT create an actor" do
           pending "currently returns a 415 AND A NEW ACTOR!" do
-            post("/actors",
-                 :superuser,
-                 :headers => {}).should have_status_code(400).
+            post("/actors", :superuser, :headers => {}).should have_status_code(400).
               with_body({"error" => "That ain't right"})
             # Obviously this is not the EXACT response that should come back...
           end
@@ -264,9 +131,9 @@ describe "Actors Endpoint" do
     # What we are testing:
 
     # Here we test actor existence with GET (should require
-    # appropriate READ access, as well as the ability to delete actors
-    # (should require appropriate DELETE access).  All other HTTP
-    # verbs should be disallowed.
+    # appropriate READ access), as well as the ability to delete
+    # actors (should require appropriate DELETE access).  All other
+    # HTTP verbs should be disallowed.
 
     # Old notes:
 
@@ -403,9 +270,9 @@ describe "Actors Endpoint" do
 
     # Here we test access to actor's ACL and that the response body
     # has the correct format.  Apparently, any ACE at all grants
-    # access to the ACL (is this a bug?) -- we test each ACE in turn,
-    # both directly and indirectly through a group.  All other HTTP
-    # verbs should be disallowed.
+    # access to the ACL -- we test each ACE in turn, both directly and
+    # indirectly through a group.  All other HTTP verbs should be
+    # disallowed.
 
     # Old notes:
 
@@ -599,7 +466,11 @@ describe "Actors Endpoint" do
       end
     end # GET
 
-    should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create"
+    ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+      context "for #{action.upcase} action" do
+        should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/#{action}"
+      end
+    end
 
     # PUT replaces an ACE atomically
 
@@ -818,9 +689,9 @@ describe "Actors Endpoint" do
               get("/actors/#{fake_actor}/acl/#{action.downcase}",
                   :hasselhoff).should have_status_code(404)
 
-              # Now try to delete it
-              delete("/actors/#{fake_actor}/acl/#{action.downcase}",
-                     :hasselhoff).should have_status_code(404)
+              # Now try to modify it
+              put("/actors/#{fake_actor}/acl/#{action.downcase}",
+                  :hasselhoff).should have_status_code(404)
             end
           end
         end
@@ -1121,10 +992,18 @@ describe "Actors Endpoint" do
           end
         end
       end
-    end
+    end # GET
 
-    should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-    should_not_allow :PUT, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-    should_not_allow :DELETE, "/actors/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+      context "for #{action.upcase} action" do
+        ['actors', 'groups'].each do |type|
+          context "for #{type.upcase} type" do
+            should_not_allow :POST, "/actors/ffffffffffffffffffffffffffffffff/acl/#{action}/#{type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            should_not_allow :PUT, "/actors/ffffffffffffffffffffffffffffffff/acl/#{action}/#{type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            should_not_allow :DELETE, "/actors/ffffffffffffffffffffffffffffffff/acl/#{action}/#{type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          end
+        end
+      end
+    end
   end # /actors/<actor_id>/acl/<action>/<member_type>/<member_id>
 end
