@@ -605,7 +605,7 @@ describe "Actors Endpoint", :focus do
               :grant  => {:actors => [],           :groups => []} # <--- That's the one!
             }
 
-            if (action == 'GRANT')
+            if (action == 'grant')
               let(:body) { {"actors" => [], "groups" => []} }
             else
               let(:body) { {"actors" => [malkovich], "groups" => []} }
