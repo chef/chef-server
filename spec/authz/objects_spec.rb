@@ -247,6 +247,6 @@ describe "Objects Endpoint" do
           delete("/objects/#{fake_object}", :hasselhoff).should have_status_code(404)
         end
       end
-    end # GET
+    end # DELETE
   end # /objects/<object_id>
 end
