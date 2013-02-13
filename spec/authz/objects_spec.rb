@@ -3,6 +3,14 @@ describe "Objects Endpoint" do
   let(:god) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
   context "/objects" do
+    # What we are testing:
+
+    # Here we test object creation (all other HTTP verbs should be
+    # disallowed), making sure the response body is correct and that
+    # id and id in the uri match, as well as basic header validation,
+    # as well as making sure that the requesting actor is contained in
+    # the newly created groups ACLs.
+
     should_not_allow :GET, "/objects"
 
     # POST creates a new object and its ACL, creating and
@@ -10,16 +18,102 @@ describe "Objects Endpoint" do
     #
     # If the superuser creates an object, though, the ACL
     # should be empty.
-    context "POST" do
-      context "without the X-Ops-Requesting-Actor-Id header" do
-        it "fails" do
-          post("/objects",
-               :superuser,
-               :merge_headers => {"X-Ops-Requesting-Actor-Id" => :DELETE}
-               ).should have_status_code(403).with_body({"error" => "must specify a requesting actor id"})
+
+    context "POST", :focus do
+
+      # We mainly do this to make sure the test cleans up after
+      # itself; otherwise we have to repeat the hacky after :each with
+      # the @object_id stuff, and, well this is pretty much the same
+      # for every creation
+      def self.creates_object_as(requestor, headers = {})
+        after :each do
+          delete("/objects/#{@object_id}", :superuser)
+        end
+
+        it "creates an object" do
+          response = post("/objects", requestor, headers)
+
+          # TODO: de-hardcode uri hostname in response body, make configurable
+          response.should have_status_code(201).
+            with_body({"id" => /^[0-9a-f]{32}$/,
+                       "uri" => /^http\:\/\/authz\.opscode\.com\/objects\/[0-9a-f]{32}$/})
+        
+          @object_id = parse(response)["id"]
+
+          # Verify that uri and id are the same
+          uri_id = parse(response)["uri"].split("/")[-1]
+          uri_id.should == @object_id
         end
       end
-    end
+
+      context "as a superuser" do
+        creates_object_as(:superuser)
+      end
+
+      # Should this work?
+      context "as an unknown requestor" do
+        let(:fake_actor) { mattdamon }
+
+        creates_object_as(:fake_actor)
+      end
+
+      context "without the X-Ops-Requesting-Actor-Id header" do
+        it "should not create a group" do
+          response = post("/objects", :superuser,
+                          :merge_headers => {"X-Ops-Requesting-Actor-Id" => :DELETE})
+
+          response.should have_status_code(403).
+            with_body({"error" => "must specify a requesting actor id"})
+        end
+      end
+
+      # Not quite clear the purpose of this header, actually
+      context "without the X-Ops-User-Id header" do
+        creates_object_as(:superuser,
+                         :merge_headers => {"X-Ops-User-Id" => :DELETE})
+      end
+
+      context "without ANY of the standard headers except Content-Type" do
+        it "should not create a group" do
+          response = post("/objects", :superuser,
+                          :headers => {"Content-Type" => "application/json"})
+
+          response.should have_status_code(403).
+            with_body({"error" => "must specify a requesting actor id"})
+        end
+      end
+
+      context "without any headers" do
+        it "should not create a group" do
+          post("/objects", :superuser, :headers => {}).should have_status_code(403).
+            with_body({"error" => "must specify a requesting actor id"})
+        end
+      end
+
+      context "created group" do
+        with_actor :shatner
+
+        before :each do
+          response = post("/objects", shatner)
+          @object = parse(response)["id"]
+        end
+
+        after :each do
+          delete("/objects/#{@object}", shatner)
+        end
+
+        it "contains creator in ACLs" do
+          body = {"create" => {"actors" => [shatner], "groups" => []},
+            "read" => {"actors" => [shatner], "groups" => []},
+            "update" => {"actors" => [shatner], "groups" => []},
+            "delete" => {"actors" => [shatner], "groups" => []},
+            "grant" => {"actors" => [shatner], "groups" => []}}
+          
+          get("/objects/#{@object}/acl",
+              :superuser).should have_status_code(200).with_body(body)
+        end
+      end
+    end # POST
 
     should_not_allow :PUT, "/objects"
     should_not_allow :DELETE, "/objects"
@@ -37,7 +131,7 @@ describe "Objects Endpoint" do
     context "DELETE"
   end # /objects/<object_id>
 
-  context "/<type>/<id>/acl", :focus do
+  context "/<type>/<id>/acl" do
     # What we are testing:
 
     # Here we test access to type's ACL and that the response body
