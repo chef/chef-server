@@ -1,5 +1,6 @@
 describe "Objects Endpoint" do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
+  let(:toupee) { "deadbeefdeadbeefdeadbeefdeadbeef" }
   let(:god) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
   context "/objects" do
@@ -9,7 +10,7 @@ describe "Objects Endpoint" do
     # disallowed), making sure the response body is correct and that
     # id and id in the uri match, as well as basic header validation,
     # as well as making sure that the requesting actor is contained in
-    # the newly created groups ACLs.
+    # the newly created object's ACLs.
 
     should_not_allow :GET, "/objects"
 
@@ -19,7 +20,7 @@ describe "Objects Endpoint" do
     # If the superuser creates an object, though, the ACL
     # should be empty.
 
-    context "POST", :focus do
+    context "POST" do
 
       # We mainly do this to make sure the test cleans up after
       # itself; otherwise we have to repeat the hacky after :each with
@@ -58,7 +59,7 @@ describe "Objects Endpoint" do
       end
 
       context "without the X-Ops-Requesting-Actor-Id header" do
-        it "should not create a group" do
+        it "should not create an object" do
           response = post("/objects", :superuser,
                           :merge_headers => {"X-Ops-Requesting-Actor-Id" => :DELETE})
 
@@ -74,7 +75,7 @@ describe "Objects Endpoint" do
       end
 
       context "without ANY of the standard headers except Content-Type" do
-        it "should not create a group" do
+        it "should not create an object" do
           response = post("/objects", :superuser,
                           :headers => {"Content-Type" => "application/json"})
 
@@ -84,13 +85,13 @@ describe "Objects Endpoint" do
       end
 
       context "without any headers" do
-        it "should not create a group" do
+        it "should not create an object" do
           post("/objects", :superuser, :headers => {}).should have_status_code(403).
             with_body({"error" => "must specify a requesting actor id"})
         end
       end
 
-      context "created group" do
+      context "created object" do
         with_actor :shatner
 
         before :each do
@@ -119,16 +120,75 @@ describe "Objects Endpoint" do
     should_not_allow :DELETE, "/objects"
   end # /objects
 
-  context "/objects/<object_id>" do
-    # NOTE: This appears to be essentially a meaningless operation
-    # right now... looks like it always returns an empty JSON hash
-    context "GET"
+  context "/objects/<object_id>", :focus do
+    # What we are testing:
+
+    # Here we test object existence with GET (should require
+    # appropriate READ access), as well as the ability to delete
+    # objects (should require appropriate DELETE access).  All other
+    # HTTP verbs should be disallowed.
+    context "GET" do
+      context "an actor directly in the READ ACE" do
+        with_actor :hasselhoff
+        with_object :spork
+
+        with_ace_on :spork, :read, :actors => [:hasselhoff]
+
+        it "can read the object" do
+          get("/objects/#{spork}",
+              :hasselhoff).should have_status_code(200).with_body({})
+        end
+      end
+
+      context "an actor NOT in the READ ACE" do
+        with_actor :malkovich
+        with_object :spork
+
+        # Give malkovich everything EXCEPT read
+        with_acl_on :spork, {
+          :create => {:actors => [:malkovich], :groups => []},
+          :read   => {:actors => [],           :groups => []}, # <--- That's the one!
+          :update => {:actors => [:malkovich], :groups => []},
+          :delete => {:actors => [:malkovich], :groups => []},
+          :grant  => {:actors => [:malkovich], :groups => []}
+        }
+
+        it "cannot read the object" do
+          get("/objects/#{spork}", :malkovich).should have_status_code(403).
+            with_body({"error" => "must be in the read access control entry to perform this action"})
+        end
+      end
+
+      context "an actor indirectly in the READ ACE" do
+        with_actor :hasselhoff
+        with_group :hipsters, :actors => [:hasselhoff]
+        with_object :spork
+
+        with_ace_on :spork, :read, :groups => [:hipsters]
+
+        it "can read the object" do
+          get("/objects/#{spork}",
+              :hasselhoff).should have_status_code(200).with_body({})
+        end
+      end
+
+      context "with a non-existent target" do
+        with_actor :hasselhoff
+
+        it "can't be read, because it doesn't exist" do
+          fake_object = toupee
+
+          get("/objects/#{fake_object}", :hasselhoff).should have_status_code(404)
+        end
+      end
+    end # GET
 
     should_not_allow :POST, "/objects/ffffffffffffffffffffffffffffffff"
     should_not_allow :PUT, "/objects/ffffffffffffffffffffffffffffffff"
 
     # DELETE deletes the object and its ACL and ACEs
-    context "DELETE"
+    context "DELETE" do
+    end # GET
   end # /objects/<object_id>
 
   context "/<type>/<id>/acl" do

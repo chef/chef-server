@@ -9,7 +9,7 @@ describe "Groups Endpoint" do
     # disallowed), making sure the response body is correct and that
     # id and id in the uri match, as well as basic header validation,
     # as well as making sure that the requesting actor is contained in
-    # the newly created groups ACLs.
+    # the newly created group's ACLs.
 
     should_not_allow :GET, "/groups"
 
@@ -183,7 +183,7 @@ describe "Groups Endpoint" do
 
         with_ace_on :brogrammers, :read, :groups => [:hipsters]
 
-        it "can read the groups" do
+        it "can read the group" do
           get("/groups/#{brogrammers}",
               :hasselhoff).should have_status_code(200).with_body({"actors" => [],
                                                                     "groups" => []})
