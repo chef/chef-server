@@ -146,7 +146,7 @@ describe "Actors Endpoint" do
       context "an actor directly in the READ ACE" do
         with_actors :hasselhoff, :shatner
 
-        with_ace_on_actor :shatner, :read, :actors => [:hasselhoff]
+        with_ace_on :shatner, :read, :actors => [:hasselhoff]
 
         it "can read the actor" do
           get("/actors/#{shatner}",
@@ -158,7 +158,7 @@ describe "Actors Endpoint" do
         with_actors :malkovich, :shatner
 
         # Give malkovich everything EXCEPT read
-        with_acl_on_actor :shatner, {
+        with_acl_on :shatner, {
           :create => {:actors => [:malkovich], :groups => []},
           :read   => {:actors => [],           :groups => []}, # <--- That's the one!
           :update => {:actors => [:malkovich], :groups => []},
@@ -176,7 +176,7 @@ describe "Actors Endpoint" do
         with_actors :hasselhoff, :shatner
         with_group :hipsters, :actors => [:hasselhoff]
 
-        with_ace_on_actor :shatner, :read, :groups => [:hipsters]
+        with_ace_on :shatner, :read, :groups => [:hipsters]
 
         it "can read the actor" do
           get("/actors/#{shatner}",
@@ -206,7 +206,7 @@ describe "Actors Endpoint" do
       context "an actor directly in the DELETE ACE" do
         with_actors :hasselhoff, :shatner
 
-        with_ace_on_actor :shatner, :delete, :actors => [:hasselhoff]
+        with_ace_on :shatner, :delete, :actors => [:hasselhoff]
 
         it "can delete the actor" do
           delete("/actors/#{shatner}",
@@ -219,7 +219,7 @@ describe "Actors Endpoint" do
         with_actors :malkovich, :shatner
 
         # Give malkovich everything EXCEPT delete
-        with_acl_on_actor :shatner, {
+        with_acl_on :shatner, {
           :create => {:actors => [:malkovich], :groups => []},
           :read   => {:actors => [:malkovich], :groups => []},
           :update => {:actors => [:malkovich], :groups => []},
@@ -238,7 +238,7 @@ describe "Actors Endpoint" do
         with_actors :hasselhoff, :shatner
         with_group :hipsters, :actors => [:hasselhoff]
 
-        with_ace_on_actor :shatner, :delete, :groups => [:hipsters]
+        with_ace_on :shatner, :delete, :groups => [:hipsters]
 
         it "can delete the actor" do
           delete("/actors/#{shatner}",
@@ -291,7 +291,7 @@ describe "Actors Endpoint" do
         context "an actor directly in the #{ace} ACE" do
           with_actors :hasselhoff, :shatner
 
-          with_ace_on_actor :shatner, ace.downcase.to_sym, :actors => [:hasselhoff]
+          with_ace_on :shatner, ace.downcase.to_sym, :actors => [:hasselhoff]
 
           it "can read the acl" do
             body = {
@@ -312,7 +312,7 @@ describe "Actors Endpoint" do
           with_actors :hasselhoff, :shatner
           with_group :hipsters, :actors => [:hasselhoff]
 
-          with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:hipsters]
+          with_ace_on :shatner, ace.downcase.to_sym, :groups => [:hipsters]
 
           it "can read the acl" do
             body = {
@@ -334,7 +334,7 @@ describe "Actors Endpoint" do
         with_actors :malkovich, :shatner
 
         # Give malkovich no access at all
-        with_acl_on_actor :shatner, {
+        with_acl_on :shatner, {
           :create => {:actors => [], :groups => []},
           :read   => {:actors => [], :groups => []},
           :update => {:actors => [], :groups => []},
@@ -397,7 +397,7 @@ describe "Actors Endpoint" do
             context "an actor directly in the #{ace} ACE" do
               with_actors :hasselhoff, :shatner
 
-              with_ace_on_actor :shatner, ace.downcase.to_sym, :actors => [:hasselhoff]
+              with_ace_on :shatner, ace.downcase.to_sym, :actors => [:hasselhoff]
 
               if (action == ace)
                 let(:body) { {"actors" => [hasselhoff], "groups" => []} }
@@ -415,7 +415,7 @@ describe "Actors Endpoint" do
               with_actors :hasselhoff, :shatner
               with_group :hipsters, :actors => [:hasselhoff]
 
-              with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:hipsters]
+              with_ace_on :shatner, ace.downcase.to_sym, :groups => [:hipsters]
 
               if (action == ace)
                 let(:body) { {"actors" => [], "groups" => [hipsters]} }
@@ -433,7 +433,7 @@ describe "Actors Endpoint" do
               with_actors :malkovich, :shatner
 
               # Give malkovich no access at all
-              with_acl_on_actor :shatner, {
+              with_acl_on :shatner, {
                 :create => {:actors => [], :groups => []},
                 :read   => {:actors => [], :groups => []},
                 :update => {:actors => [], :groups => []},
@@ -479,7 +479,7 @@ describe "Actors Endpoint" do
           context "an actor directly in the GRANT ACE, with bad input" do
             with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
+            with_ace_on :shatner, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 500 instead" do
@@ -502,7 +502,7 @@ describe "Actors Endpoint" do
           context "an actor directly in the GRANT ACE, with invalid actor" do
             with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
+            with_ace_on :shatner, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 200 instead" do
@@ -522,7 +522,7 @@ describe "Actors Endpoint" do
           context "an actor directly in the GRANT ACE, with invalid group" do
             with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
+            with_ace_on :shatner, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 200 instead" do
@@ -541,7 +541,7 @@ describe "Actors Endpoint" do
           context "an actor directly in the GRANT ACE, with non-existent actor" do
             with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
+            with_ace_on :shatner, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 200 instead" do
@@ -561,7 +561,7 @@ describe "Actors Endpoint" do
           context "an actor directly in the GRANT ACE, with non-existent group" do
             with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
+            with_ace_on :shatner, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 200 instead" do
@@ -580,7 +580,7 @@ describe "Actors Endpoint" do
           context "an actor directly in the GRANT ACE, modifying actors" do
             with_actors :hasselhoff, :schwartzenegger, :shatner
 
-            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
+            with_ace_on :shatner, :grant, :actors => [:hasselhoff]
 
             it "can modify the ACE for actors" do
               put("/actors/#{shatner}/acl/#{action.downcase}",
@@ -598,7 +598,7 @@ describe "Actors Endpoint" do
             with_actors :hasselhoff, :shatner
             with_group :brogrammers
 
-            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
+            with_ace_on :shatner, :grant, :actors => [:hasselhoff]
 
             it "can modify the ACE for groups" do
               put("/actors/#{shatner}/acl/#{action.downcase}",
@@ -615,7 +615,7 @@ describe "Actors Endpoint" do
             with_actors :malkovich, :schwartzenegger, :shatner
 
             # Give malkovich everything EXCEPT grant
-            with_acl_on_actor :shatner, {
+            with_acl_on :shatner, {
               :create => {:actors => [:malkovich], :groups => []},
               :read   => {:actors => [:malkovich], :groups => []},
               :update => {:actors => [:malkovich], :groups => []},
@@ -644,7 +644,7 @@ describe "Actors Endpoint" do
             with_actors :hasselhoff, :shatner, :malkovich, :norris
             with_group :hipsters, :actors => [:hasselhoff]
 
-            with_ace_on_actor :shatner, :grant, :groups => [:hipsters]
+            with_ace_on :shatner, :grant, :groups => [:hipsters]
 
             it "can modify the ACE for actors" do
               put("/actors/#{shatner}/acl/#{action.downcase}",
@@ -661,7 +661,7 @@ describe "Actors Endpoint" do
             with_group :hipsters, :actors => [:hasselhoff]
             with_group :brogrammers
 
-            with_ace_on_actor :shatner, :grant, :groups => [:hipsters]
+            with_ace_on :shatner, :grant, :groups => [:hipsters]
 
             it "can modify the ACE for groups" do
               put("/actors/#{shatner}/acl/#{action.downcase}",
@@ -701,7 +701,7 @@ describe "Actors Endpoint" do
           context "an actor directly in the GRANT ACE" do
             with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :shatner, :grant, :actors => [:hasselhoff]
+            with_ace_on :shatner, :grant, :actors => [:hasselhoff]
 
             it "can clear the ACE" do
               pending "causes internal 500 errors" do
@@ -717,7 +717,7 @@ describe "Actors Endpoint" do
             with_actors :malkovich, :shatner
 
             # Give malkovich everything EXCEPT grant
-            with_acl_on_actor :shatner, {
+            with_acl_on :shatner, {
               :create => {:actors => [:malkovich], :groups => []},
               :read   => {:actors => [:malkovich], :groups => []},
               :update => {:actors => [:malkovich], :groups => []},
@@ -739,7 +739,7 @@ describe "Actors Endpoint" do
             with_actors :hasselhoff, :shatner
             with_group :hipsters, :actors => [:hasselhoff]
 
-            with_ace_on_actor :shatner, :grant, :groups => [:hipsters]
+            with_ace_on :shatner, :grant, :groups => [:hipsters]
 
             it "can clear the ACE" do
               pending "causes internal 500 errors" do
@@ -843,7 +843,7 @@ describe "Actors Endpoint" do
               context "an actor directly in the #{ace} ACE" do
                 with_actors :hasselhoff, :shatner
 
-                with_ace_on_actor :shatner, ace.downcase.to_sym, :actors => [:hasselhoff]
+                with_ace_on :shatner, ace.downcase.to_sym, :actors => [:hasselhoff]
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
@@ -864,7 +864,7 @@ describe "Actors Endpoint" do
                 with_actors :hasselhoff, :shatner
                 with_group :hipsters, :actors => [:hasselhoff]
 
-                with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:hipsters]
+                with_ace_on :shatner, ace.downcase.to_sym, :groups => [:hipsters]
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
@@ -896,7 +896,7 @@ describe "Actors Endpoint" do
                 with_actors :shatner, :hasselhoff
                 with_group :brogrammers, :actors => [:hasselhoff]
 
-                with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:brogrammers]
+                with_ace_on :shatner, ace.downcase.to_sym, :groups => [:brogrammers]
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
@@ -922,7 +922,7 @@ describe "Actors Endpoint" do
                 with_group :hipsters, :actors => [:hasselhoff]
                 with_group :brogrammers, :groups => [:hipsters]
 
-                with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:brogrammers]
+                with_ace_on :shatner, ace.downcase.to_sym, :groups => [:brogrammers]
 
                 if (action == ace)
                   # See above

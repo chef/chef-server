@@ -7,14 +7,8 @@ describe "pedant API" do
     # functions.
 
     # We are explictly testing:
-    #   with_ace_on_actor
-    #   with_acl_on_actor
-    #   with_ace_on_group
-    #   with_acl_on_group
-    #   (with_ace_on_object) = not yet
-    #   (with_acl_on_object)
-    #   (with_ace_on_container)
-    #   (with_acl_on_container)
+    #   with_ace_on
+    #   with_acl_on
     # And indirectly:
     #   with_actor(s)
     #   with_group
@@ -34,7 +28,7 @@ describe "pedant API" do
           context "for single ACE on actor" do
             with_actors :hasselhoff, :shatner
 
-            with_ace_on_actor :shatner, action.downcase.to_sym, :actors => [:hasselhoff]
+            with_ace_on :shatner, action.downcase.to_sym, :actors => [:hasselhoff]
 
             it "has permission" do
               :hasselhoff.should directly_have_permission(action.downcase.to_sym).
@@ -55,7 +49,7 @@ describe "pedant API" do
             }
             acl[action.downcase.to_sym] = {:actors => [], :groups => []}
           
-            with_acl_on_actor :shatner, acl
+            with_acl_on :shatner, acl
 
             it "does not have permission" do
               :malkovich.should_not directly_have_permission(action.downcase.to_sym).
@@ -67,7 +61,7 @@ describe "pedant API" do
             with_actors :hasselhoff, :shatner
             with_group :hipsters, :actors => [:hasselhoff]
 
-            with_ace_on_actor :shatner, action.downcase.to_sym, :groups => [:hipsters]
+            with_ace_on :shatner, action.downcase.to_sym, :groups => [:hipsters]
 
             it "has only indirect permission" do
               :hasselhoff.should_not directly_have_permission(action.downcase.to_sym).
@@ -83,7 +77,7 @@ describe "pedant API" do
             with_group :hipsters, :actors => [:hasselhoff]
             with_group :brogrammers, :groups => [:hipsters]
 
-            with_ace_on_actor :shatner, action.downcase.to_sym, :groups => [:brogrammers]
+            with_ace_on :shatner, action.downcase.to_sym, :groups => [:brogrammers]
 
             it "has only doubly-indirect permission" do
               :hasselhoff.should_not directly_have_permission(action.downcase.to_sym).
@@ -103,7 +97,7 @@ describe "pedant API" do
         with_actors :malkovich, :shatner
 
         # Give malkovich no access at all
-        with_acl_on_actor :shatner, {
+        with_acl_on :shatner, {
           :create => {:actors => [], :groups => []},
           :read   => {:actors => [], :groups => []},
           :update => {:actors => [], :groups => []},
@@ -124,7 +118,7 @@ describe "pedant API" do
         with_actors :hasselhoff, :shatner
 
         # Give hasselhoff full access
-        with_acl_on_actor :shatner, {
+        with_acl_on :shatner, {
           :create => {:actors => [:hasselhoff], :groups => []},
           :read   => {:actors => [:hasselhoff], :groups => []},
           :update => {:actors => [:hasselhoff], :groups => []},
@@ -149,7 +143,7 @@ describe "pedant API" do
             with_actor :hasselhoff
             with_group :hipsters
 
-            with_ace_on_group :hipsters, action.downcase.to_sym, :actors => [:hasselhoff]
+            with_ace_on :hipsters, action.downcase.to_sym, :actors => [:hasselhoff]
 
             it "has permission" do
               :hasselhoff.should directly_have_permission(action.downcase.to_sym).
@@ -171,7 +165,7 @@ describe "pedant API" do
             }
             acl[action.downcase.to_sym] = {:actors => [], :groups => []}
           
-            with_acl_on_group :hipsters, acl
+            with_acl_on :hipsters, acl
 
             it "does not have permission" do
               :malkovich.should_not directly_have_permission(action.downcase.to_sym).
@@ -184,7 +178,7 @@ describe "pedant API" do
             with_group :hipsters, :actors => [:hasselhoff]
             with_group :commies
 
-            with_ace_on_group :commies, action.downcase.to_sym, :groups => [:hipsters]
+            with_ace_on :commies, action.downcase.to_sym, :groups => [:hipsters]
 
             it "has only indirect permission" do
               :hasselhoff.should_not directly_have_permission(action.downcase.to_sym).
@@ -201,7 +195,7 @@ describe "pedant API" do
             with_group :brogrammers, :groups => [:hipsters]
             with_group :commies
 
-            with_ace_on_group :commies, action.downcase.to_sym, :groups => [:brogrammers]
+            with_ace_on :commies, action.downcase.to_sym, :groups => [:brogrammers]
 
             it "has only doubly-indirect permission" do
               :hasselhoff.should_not directly_have_permission(action.downcase.to_sym).
@@ -222,7 +216,7 @@ describe "pedant API" do
         with_group :hipsters
 
         # Give malkovich no access at all
-        with_acl_on_group :hipsters, {
+        with_acl_on :hipsters, {
           :create => {:actors => [], :groups => []},
           :read   => {:actors => [], :groups => []},
           :update => {:actors => [], :groups => []},
@@ -244,7 +238,7 @@ describe "pedant API" do
         with_group :hipsters
 
         # Give hasselhoff full access
-        with_acl_on_group :hipsters, {
+        with_acl_on :hipsters, {
           :create => {:actors => [:hasselhoff], :groups => []},
           :read   => {:actors => [:hasselhoff], :groups => []},
           :update => {:actors => [:hasselhoff], :groups => []},

@@ -148,7 +148,7 @@ describe "Groups Endpoint" do
         with_actor :hasselhoff
         with_group :hipsters
 
-        with_ace_on_group :hipsters, :read, :actors => [:hasselhoff]
+        with_ace_on :hipsters, :read, :actors => [:hasselhoff]
 
         it "can read the group" do
           get("/groups/#{hipsters}",
@@ -162,7 +162,7 @@ describe "Groups Endpoint" do
         with_group :hipsters
 
         # Give malkovich everything EXCEPT read
-        with_acl_on_group :hipsters, {
+        with_acl_on :hipsters, {
           :create => {:actors => [:malkovich], :groups => []},
           :read   => {:actors => [],           :groups => []}, # <--- That's the one!
           :update => {:actors => [:malkovich], :groups => []},
@@ -181,7 +181,7 @@ describe "Groups Endpoint" do
         with_group :hipsters, :actors => [:hasselhoff]
         with_group :brogrammers
 
-        with_ace_on_group :brogrammers, :read, :groups => [:hipsters]
+        with_ace_on :brogrammers, :read, :groups => [:hipsters]
 
         it "can read the groups" do
           get("/groups/#{brogrammers}",
@@ -214,7 +214,7 @@ describe "Groups Endpoint" do
         with_actor :hasselhoff
         with_group :hipsters
 
-        with_ace_on_group :hipsters, :delete, :actors => [:hasselhoff]
+        with_ace_on :hipsters, :delete, :actors => [:hasselhoff]
 
         it "can delete the group" do
           delete("/groups/#{hipsters}",
@@ -228,7 +228,7 @@ describe "Groups Endpoint" do
         with_group :hipsters
 
         # Give malkovich everything EXCEPT delete
-        with_acl_on_group :hipsters, {
+        with_acl_on :hipsters, {
           :create => {:actors => [:malkovich], :groups => []},
           :read   => {:actors => [:malkovich], :groups => []},
           :update => {:actors => [:malkovich], :groups => []},
@@ -248,7 +248,7 @@ describe "Groups Endpoint" do
         with_group :hipsters, :actors => [:hasselhoff]
         with_group :brogrammers
 
-        with_ace_on_group :brogrammers, :delete, :groups => [:hipsters]
+        with_ace_on :brogrammers, :delete, :groups => [:hipsters]
 
         it "can delete the groups" do
           delete("/groups/#{brogrammers}",
@@ -368,7 +368,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "can add a user to the group" do
             put("/groups/#{hipsters}/actors/#{shatner}",
@@ -384,7 +384,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "can add the same user to the group" do
             put("/groups/#{hipsters}/actors/#{shatner}",
@@ -403,7 +403,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "adding a bogus user raises an error" do
             bogus_actor = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
@@ -431,7 +431,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
 
           # Give shatner everything EXCEPT update
-          with_acl_on_group :hipsters, {
+          with_acl_on :hipsters, {
             :create => {:actors => [:shatner], :groups => []},
             :read   => {:actors => [:shatner], :groups => []},
             :update => {:actors => [],         :groups => []}, # <--- That's the one!
@@ -453,7 +453,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
           with_group :brogrammers, :actors => [:shatner]
 
-          with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
+          with_ace_on :hipsters, :update, :groups => [:brogrammers]
 
           it "can add a user to the group" do
             put("/groups/#{hipsters}/actors/#{shatner}",
@@ -481,7 +481,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
           with_group :brogrammers
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "can add a group to the group" do
             put("/groups/#{hipsters}/groups/#{brogrammers}",
@@ -498,7 +498,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
           with_group :brogrammers
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "cannot add a group to itself" do
             pending "you shouldn't be able to" do
@@ -516,7 +516,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
           with_group :brogrammers
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "can add the same group to the group" do
             put("/groups/#{hipsters}/groups/#{brogrammers}",
@@ -536,7 +536,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
           with_group :brogrammers
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "adding a bogus group raises an error" do
             bogus_group = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
@@ -565,7 +565,7 @@ describe "Groups Endpoint" do
           with_group :brogrammers
 
           # Give shatner everything EXCEPT update
-          with_acl_on_group :hipsters, {
+          with_acl_on :hipsters, {
             :create => {:actors => [:shatner], :groups => []},
             :read   => {:actors => [:shatner], :groups => []},
             :update => {:actors => [],         :groups => []}, # <--- That's the one!
@@ -588,7 +588,7 @@ describe "Groups Endpoint" do
           with_group :brogrammers, :actors => [:shatner]
           with_group :commies
 
-          with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
+          with_ace_on :hipsters, :update, :groups => [:brogrammers]
 
           it "can add a group to the group" do
             put("/groups/#{hipsters}/groups/#{commies}",
@@ -603,7 +603,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
           with_group :brogrammers, :groups => [:hipsters]
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "are disallowed" do
             pending "they should be" do
@@ -627,7 +627,7 @@ describe "Groups Endpoint" do
           with_group :commies, :groups => [:brogrammers]
           with_group :dirtycommies, :groups => [:commies]
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "are disallowed" do
             pending "they should be" do
@@ -667,7 +667,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters, :actors => [:shatner]
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "can delete a user from the group" do
             delete("/groups/#{hipsters}/actors/#{shatner}",
@@ -683,7 +683,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters, :actors => [:shatner]
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "cannot delete a user from an empty group" do
             delete("/groups/#{hipsters}/actors/#{shatner}",
@@ -703,7 +703,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters, :actors => [:shatner]
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "deleting a bogus user raises an error" do
             bogus_actor = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
@@ -724,7 +724,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters, :actors => [:shatner]
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "deleting a non-existent user raises an error" do
             fake_actor = mattdamon
@@ -744,7 +744,7 @@ describe "Groups Endpoint" do
           with_group :hipsters, :actors => [:shatner]
 
           # Give shatner everything EXCEPT update
-          with_acl_on_group :hipsters, {
+          with_acl_on :hipsters, {
             :create => {:actors => [:shatner], :groups => []},
             :read   => {:actors => [:shatner], :groups => []},
             :update => {:actors => [],         :groups => []}, # <--- That's the one!
@@ -766,7 +766,7 @@ describe "Groups Endpoint" do
           with_group :hipsters, :actors => [:shatner]
           with_group :brogrammers, :actors => [:shatner]
 
-          with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
+          with_ace_on :hipsters, :update, :groups => [:brogrammers]
 
           it "can delete a user from the group" do
             delete("/groups/#{hipsters}/actors/#{shatner}",
@@ -794,7 +794,7 @@ describe "Groups Endpoint" do
           with_group :brogrammers
           with_group :hipsters, :groups => [:brogrammers]
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "can delete a user from the group" do
             delete("/groups/#{hipsters}/groups/#{brogrammers}",
@@ -811,7 +811,7 @@ describe "Groups Endpoint" do
           with_group :brogrammers
           with_group :hipsters, :groups => [:brogrammers]
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "cannot delete a user from an empty group" do
             delete("/groups/#{hipsters}/groups/#{brogrammers}",
@@ -832,7 +832,7 @@ describe "Groups Endpoint" do
           with_group :brogrammers
           with_group :hipsters, :groups => [:brogrammers]
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "deleting a bogus user raises an error" do
             bogus_group = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
@@ -854,7 +854,7 @@ describe "Groups Endpoint" do
           with_group :brogrammers
           with_group :hipsters, :groups => [:brogrammers]
 
-          with_ace_on_group :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :actors => [:shatner]
 
           it "deleting a non-existent user raises an error" do
             fake_group = car_salesmen
@@ -875,7 +875,7 @@ describe "Groups Endpoint" do
           with_group :hipsters, :groups => [:brogrammers]
 
           # Give shatner everything EXCEPT update
-          with_acl_on_group :hipsters, {
+          with_acl_on :hipsters, {
             :create => {:actors => [:shatner], :groups => []},
             :read   => {:actors => [:shatner], :groups => []},
             :update => {:actors => [],         :groups => []}, # <--- That's the one!
@@ -898,7 +898,7 @@ describe "Groups Endpoint" do
           with_group :hipsters, :groups => [:dirtycommies]
           with_group :brogrammers, :actors => [:shatner]
 
-          with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
+          with_ace_on :hipsters, :update, :groups => [:brogrammers]
 
           it "can delete a user from the group" do
             delete("/groups/#{hipsters}/groups/#{dirtycommies}",
@@ -973,7 +973,7 @@ describe "Groups Endpoint" do
           with_actor :hasselhoff
           with_group :hipsters
 
-          with_ace_on_group :hipsters, ace.downcase.to_sym, :actors => [:hasselhoff]
+          with_ace_on :hipsters, ace.downcase.to_sym, :actors => [:hasselhoff]
 
           it "can read the acl" do
             body = {
@@ -995,7 +995,7 @@ describe "Groups Endpoint" do
           with_group :hipsters, :actors => [:hasselhoff]
           with_group :brogrammers
 
-          with_ace_on_group :brogrammers, ace.downcase.to_sym, :groups => [:hipsters]
+          with_ace_on :brogrammers, ace.downcase.to_sym, :groups => [:hipsters]
 
           it "can read the acl" do
             body = {
@@ -1018,7 +1018,7 @@ describe "Groups Endpoint" do
         with_group :hipsters
 
         # Give malkovich no access at all
-        with_acl_on_group :hipsters, {
+        with_acl_on :hipsters, {
           :create => {:actors => [], :groups => []},
           :read   => {:actors => [], :groups => []},
           :update => {:actors => [], :groups => []},
@@ -1080,7 +1080,7 @@ describe "Groups Endpoint" do
               with_actor :hasselhoff
               with_group :hipsters
 
-              with_ace_on_group :hipsters, ace.downcase.to_sym, :actors => [:hasselhoff]
+              with_ace_on :hipsters, ace.downcase.to_sym, :actors => [:hasselhoff]
 
               if (action == ace)
                 let(:body) { {"actors" => [hasselhoff], "groups" => []} }
@@ -1099,7 +1099,7 @@ describe "Groups Endpoint" do
               with_group :hipsters, :actors => [:hasselhoff]
               with_group :brogrammers
 
-              with_ace_on_group :brogrammers, ace.downcase.to_sym, :groups => [:hipsters]
+              with_ace_on :brogrammers, ace.downcase.to_sym, :groups => [:hipsters]
 
               if (action == ace)
                 let(:body) { {"actors" => [], "groups" => [hipsters]} }
@@ -1118,7 +1118,7 @@ describe "Groups Endpoint" do
               with_group :hipsters
 
               # Give malkovich no access at all
-              with_acl_on_group :hipsters, {
+              with_acl_on :hipsters, {
                 :create => {:actors => [], :groups => []},
                 :read   => {:actors => [], :groups => []},
                 :update => {:actors => [], :groups => []},
@@ -1176,7 +1176,7 @@ describe "Groups Endpoint" do
             with_actor :hasselhoff
             with_group :hipsters
 
-            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+            with_ace_on :hipsters, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 500 instead" do
@@ -1200,7 +1200,7 @@ describe "Groups Endpoint" do
             with_actor :hasselhoff
             with_group :hipsters
 
-            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+            with_ace_on :hipsters, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 200 instead" do
@@ -1221,7 +1221,7 @@ describe "Groups Endpoint" do
             with_actor :hasselhoff
             with_group :hipsters
 
-            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+            with_ace_on :hipsters, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 200 instead" do
@@ -1241,7 +1241,7 @@ describe "Groups Endpoint" do
             with_actor :hasselhoff
             with_group :hipsters
 
-            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+            with_ace_on :hipsters, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 200 instead" do
@@ -1262,7 +1262,7 @@ describe "Groups Endpoint" do
             with_actor :hasselhoff
             with_group :hipsters
 
-            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+            with_ace_on :hipsters, :grant, :actors => [:hasselhoff]
 
             it "returns 400" do
               pending "returns 200 instead" do
@@ -1282,7 +1282,7 @@ describe "Groups Endpoint" do
             with_actors :hasselhoff, :schwartzenegger
             with_group :hipsters
 
-            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+            with_ace_on :hipsters, :grant, :actors => [:hasselhoff]
 
             it "can modify the ACE for actors" do
               put("/groups/#{hipsters}/acl/#{action.downcase}",
@@ -1301,7 +1301,7 @@ describe "Groups Endpoint" do
             with_group :brogrammers
             with_group :hipsters
 
-            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+            with_ace_on :hipsters, :grant, :actors => [:hasselhoff]
 
             it "can modify the ACE for groups" do
               put("/groups/#{hipsters}/acl/#{action.downcase}",
@@ -1319,7 +1319,7 @@ describe "Groups Endpoint" do
             with_group :hipsters
 
             # Give malkovich everything EXCEPT grant
-            with_acl_on_group :hipsters, {
+            with_acl_on :hipsters, {
               :create => {:actors => [:malkovich], :groups => []},
               :read   => {:actors => [:malkovich], :groups => []},
               :update => {:actors => [:malkovich], :groups => []},
@@ -1349,7 +1349,7 @@ describe "Groups Endpoint" do
             with_group :hipsters, :actors => [:hasselhoff]
             with_group :brogrammers
 
-            with_ace_on_group :brogrammers, :grant, :groups => [:hipsters]
+            with_ace_on :brogrammers, :grant, :groups => [:hipsters]
 
             it "can modify the ACE for actors" do
               put("/groups/#{brogrammers}/acl/#{action.downcase}",
@@ -1367,7 +1367,7 @@ describe "Groups Endpoint" do
             with_group :brogrammers
             with_group :commies
 
-            with_ace_on_group :commies, :grant, :groups => [:hipsters]
+            with_ace_on :commies, :grant, :groups => [:hipsters]
 
             it "can modify the ACE for groups" do
               put("/groups/#{commies}/acl/#{action.downcase}",
@@ -1408,7 +1408,7 @@ describe "Groups Endpoint" do
             with_actor :hasselhoff
             with_group :hipsters
 
-            with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
+            with_ace_on :hipsters, :grant, :actors => [:hasselhoff]
 
             it "can clear the ACE" do
               pending "causes internal 500 errors" do
@@ -1425,7 +1425,7 @@ describe "Groups Endpoint" do
             with_group :hipsters
 
             # Give malkovich everything EXCEPT grant
-            with_acl_on_group :hipsters, {
+            with_acl_on :hipsters, {
               :create => {:actors => [:malkovich], :groups => []},
               :read   => {:actors => [:malkovich], :groups => []},
               :update => {:actors => [:malkovich], :groups => []},
@@ -1448,7 +1448,7 @@ describe "Groups Endpoint" do
             with_group :hipsters, :actors => [:hasselhoff]
             with_group :brogrammers
 
-            with_ace_on_group :brogrammers, :grant, :groups => [:hipsters]
+            with_ace_on :brogrammers, :grant, :groups => [:hipsters]
 
             it "can clear the ACE" do
               pending "causes internal 500 errors" do
@@ -1554,7 +1554,7 @@ describe "Groups Endpoint" do
                 with_actor :hasselhoff
                 with_group :hipsters
 
-                with_ace_on_group :hipsters, ace.downcase.to_sym, :actors => [:hasselhoff]
+                with_ace_on :hipsters, ace.downcase.to_sym, :actors => [:hasselhoff]
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
@@ -1576,7 +1576,7 @@ describe "Groups Endpoint" do
                 with_group :hipsters, :actors => [:hasselhoff]
                 with_group :commies
 
-                with_ace_on_group :commies, ace.downcase.to_sym,
+                with_ace_on :commies, ace.downcase.to_sym,
                                   :groups => [:hipsters]
 
                 if (action == ace)
@@ -1610,7 +1610,7 @@ describe "Groups Endpoint" do
                 with_group :brogrammers, :actors => [:hasselhoff]
                 with_group :hipsters
 
-                with_ace_on_group :hipsters, ace.downcase.to_sym,
+                with_ace_on :hipsters, ace.downcase.to_sym,
                                   :groups => [:brogrammers]
 
                 if (action == ace)
@@ -1638,7 +1638,7 @@ describe "Groups Endpoint" do
                 with_group :brogrammers, :groups => [:hipsters]
                 with_group :commies
 
-                with_ace_on_group :commies, ace.downcase.to_sym, :groups => [:brogrammers]
+                with_ace_on :commies, ace.downcase.to_sym, :groups => [:brogrammers]
 
                 if (action == ace)
                   # See above

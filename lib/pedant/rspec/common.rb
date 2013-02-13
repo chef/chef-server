@@ -52,7 +52,14 @@ module Pedant
         def new_item(type, requestor, payload = {})
           r = post("/#{type}s", requestor, :payload => payload)
           r.code.should eq(201)
-          parse(r)["id"]
+
+          rc = parse(r)["id"]
+          unless @entities
+            @entities = {}
+          end
+          @entities[rc] = type
+
+          return rc
         end
 
         # Helper method for deleting an Authz object.  Do not use
@@ -88,6 +95,7 @@ module Pedant
           # item after each example.
           define_singleton_method "with_#{type}" do |label|
             let(label.to_sym){new_item(type, :superuser)}
+
             after :each do
               delete_item(type, label)
             end
@@ -112,7 +120,27 @@ module Pedant
           }
         end
 
-        define_singleton_method "with_group" do |label, members={}|
+        # +with_group+ accepts a Keyword / String argument and creates
+        # a new instance of a group, storing the Authz ID of the new
+        # group under a +let+ variable of the same name.  It also
+        # takes optional member parameters for :actors and :groups.
+        #
+        # So, if you want to create a new group with the label
+        # +:veggies+ with an actor member +:bunnicula+ and a subgroup
+        # +:citrus+, you would invoke
+        #
+        #  with_group :veggies, :actors => [:bunnicula], :groups => [:citrus]
+        #
+        # In subsequent test examples, use the symbol +:veggies+ in
+        # all custom matchers.  The variable +veggies+ will also be
+        # available, but should only really be used to create URL
+        # fragments via string interpolation (don't worry; the custom
+        # matchers will tell you what to do if you do the wrong
+        # thing).
+        #
+        # This method also handles the deletion of each created group
+        # after each example.
+        def self.with_group (label, members={})
           let(label.to_sym) {new_item(:group, :superuser)}
 
           before :each do
@@ -137,11 +165,53 @@ module Pedant
           end
         end
 
-        define_singleton_method "with_container" do |label|
+        # +with_container+ accepts a Keyword / String argument and
+        # creates a new instance of a container, storing the Authz ID
+        # of the new container under a +let+ variable of the same
+        # name.
+        #
+        # So, if you want to create a new container with the label
+        # +:box+, you would invoke
+        #
+        #  with_container :box
+        #
+        # In subsequent test examples, use the symbol +:box+ in all
+        # custom matchers.  The variable +box+ will also be available,
+        # but should only really be used to create URL fragments via
+        # string interpolation (don't worry; the custom matchers will
+        # tell you what to do if you do the wrong thing).
+        #
+        # This method also handles the deletion of each created
+        # container after each example.
+        def self.with_container(label)
           let(label.to_sym){new_item(:container, :superuser, {"name" => label})}
+
           after :each do
             delete_item(:container, label)
           end
+        end
+
+        # +with_entity+ accepts a type and a Keyword / String argument
+        # and creates a new instance of that type, storing the Authz
+        # ID of the new entity under a +let+ variable of the same
+        # name.
+        #
+        # So, if you want to create a new object with the label
+        # +:widget+, you would invoke
+        #
+        #  with_object :object, :widget
+        #
+        # In subsequent test examples, use the symbol +:widget+ in all
+        # custom matchers.  The variable +widget+ will also be
+        # available, but should only really be used to create URL
+        # fragments via string interpolation (don't worry; the custom
+        # matchers will tell you what to do if you do the wrong
+        # thing).
+        #
+        # This method also handles the deletion of each created
+        # entity after each example.
+        def self.with_entity(type, label)
+          self.public_send("with_#{type}", label)
         end
 
         # Asserts that a given HTTP verb is not allowed at a given API
@@ -171,51 +241,47 @@ module Pedant
           end
         end
 
-        # Define all the ACE / ACL setting methods.
+        # Define the ACE / ACL setting methods.
         #
         # Remember, they're all **context** methods, not **example**
         # methods.  They are only to be used for setting up test fixtures.
-        [:actor, :group, :object, :container].each do |type|
 
-          # with_ace_on_TYPE sets a single ACE on the +target+ object
-          #
-          # For instance, if you wish to add +:alice+ to the +actors+
-          # list of the +DELETE+ ACE of actor +:bob+, you would invoke
-          #
-          #   with_ace_on_actor :bob, :delete, :actors => [:alice]
-          #
-          # Similar instructions apply to other Authz types, mutatis
-          # mutandis.
-          #
-          # Note that these methods **set** the ACE; they do not
-          # **append** to it.
-          define_singleton_method "with_ace_on_#{type}" do |target, permission, ace|
-            before :each do
-              validate_entity_id(target)
+        # with_ace_on sets a single ACE on the +target+ object
+        #
+        # For instance, if you wish to add +:alice+ to the +actors+
+        # list of the +DELETE+ ACE of actor +:bob+, you would invoke
+        #
+        #   with_ace_on :bob, :delete, :actors => [:alice]
+        #
+        # Note that these methods **set** the ACE; they do not
+        # **append** to it.
+        def self.with_ace_on(target, permission, ace)
+          before :each do
+            validate_entity_id(target)
 
-              actors = (ace[:actors] || []).map{|n| resolve(n)}
-              groups = (ace[:groups] || []).map{|n| resolve(n)}
+            actors = (ace[:actors] || []).map{|n| resolve(n)}
+            groups = (ace[:groups] || []).map{|n| resolve(n)}
 
-              response = put("/#{type}s/#{resolve(target)}/acl/#{permission.downcase}",
-                             :superuser,
-                             :payload => {
-                               "actors" => actors,
-                               "groups" => groups
-                             })
-              response.should have_status_code(200)
-            end
+            type = @entities[resolve(target)]
+
+            response = put("/#{type}s/#{resolve(target)}/acl/#{permission.downcase}",
+                           :superuser,
+                           :payload => {
+                             "actors" => actors,
+                             "groups" => groups
+                           })
+            response.should have_status_code(200)
           end
+        end
 
-          # with_acl_on_TYPE sets a complete ACL on a target item.
-          #
-          # It is equivalent to calling +with_ace_on_TYPE+ once for
-          # each of the five Authz permissions.
-          define_singleton_method "with_acl_on_#{type}" do |target, acl|
-            [:create, :read, :update, :grant, :delete].each do |p|
-              send("with_ace_on_#{type}", target, p, (acl[p] || {}))
-            end
+        # with_acl_on_TYPE sets a complete ACL on a target item.
+        #
+        # It is equivalent to calling +with_ace_on_TYPE+ once for
+        # each of the five Authz permissions.
+        def self.with_acl_on(target, acl)
+          [:create, :read, :update, :grant, :delete].each do |p|
+            send("with_ace_on", target, p, (acl[p] || {}))
           end
-
         end
 
         def validate_entity_id(entity_id)
