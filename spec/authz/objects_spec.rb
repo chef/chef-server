@@ -1,4 +1,4 @@
-describe "Objects Endpoint" do
+describe "Objects Endpoint", :focus do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
   let(:toupee) { "deadbeefdeadbeefdeadbeefdeadbeef" }
   let(:easterbunny) { "deadbeefdeadbeefdeadbeefdeadbeef" }
@@ -262,14 +262,14 @@ describe "Objects Endpoint" do
 
     # [1] Apparently done intentionally, but the reasons are lost to the
     # mists of time.  Would be nice to find those reasons again.
-    ['group', 'container', 'object'].each do |type|
+    [:group, :container, :object].each do |type|
       context "for #{type.upcase} type" do
         context "GET" do
           ['create', 'read', 'update', 'delete', 'grant'].each do |ace|
 
             context "an actor directly in the #{ace.upcase} ACE" do
               with_actor :hasselhoff
-              with_entity type.to_sym, :gozer
+              with_entity type, :gozer
 
               with_ace_on :gozer, ace.to_sym, :actors => [:hasselhoff]
 
@@ -291,7 +291,7 @@ describe "Objects Endpoint" do
             context "an actor indirectly in the #{ace.upcase} ACE" do
               with_actor :hasselhoff
               with_group :hipsters, :actors => [:hasselhoff]
-              with_entity type.to_sym, :gozer
+              with_entity type, :gozer
 
               with_ace_on :gozer, ace.to_sym, :groups => [:hipsters]
 
@@ -313,7 +313,7 @@ describe "Objects Endpoint" do
 
           context "an actor with NO ACE" do
             with_actor :malkovich
-            with_entity type.to_sym, :gozer
+            with_entity type, :gozer
 
             # Give malkovich no access at all
             with_acl_on :gozer, {
@@ -388,7 +388,7 @@ describe "Objects Endpoint" do
     # Actually... this may be just an artifact of how the Cuke tests
     # are written.
     
-    ['group', 'container', 'object'].each do |type|
+    [:group, :container, :object].each do |type|
       context "for #{type.upcase} type" do
         context "GET" do
           ['create', 'read', 'update', 'delete', 'grant'].each do |action|
@@ -397,7 +397,7 @@ describe "Objects Endpoint" do
 
                 context "an actor directly in the #{ace.upcase} ACE" do
                   with_actor :hasselhoff
-                  with_entity type.to_sym, :gozer
+                  with_entity type, :gozer
 
                   with_ace_on :gozer, ace.to_sym, :actors => [:hasselhoff]
 
@@ -416,7 +416,7 @@ describe "Objects Endpoint" do
                 context "an actor indirectly in the #{ace.upcase} ACE" do
                   with_actor :hasselhoff
                   with_group :hipsters, :actors => [:hasselhoff]
-                  with_entity type.to_sym, :gozer
+                  with_entity type, :gozer
 
                   with_ace_on :gozer, ace.to_sym, :groups => [:hipsters]
 
@@ -434,7 +434,7 @@ describe "Objects Endpoint" do
 
                 context "an actor with NO ACE" do
                   with_actor :malkovich
-                  with_entity type.to_sym, :gozer
+                  with_entity type, :gozer
 
                   # Give malkovich no access at all
                   with_acl_on :gozer, {
@@ -481,7 +481,7 @@ describe "Objects Endpoint" do
               # although at the moment pretty much anything at all will crash it
               context "an actor directly in the GRANT ACE, with bad input" do
                 with_actor :hasselhoff
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :actors => [:hasselhoff]
 
@@ -506,7 +506,7 @@ describe "Objects Endpoint" do
 
               context "an actor directly in the GRANT ACE, with invalid actor" do
                 with_actor :hasselhoff
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :actors => [:hasselhoff]
 
@@ -527,7 +527,7 @@ describe "Objects Endpoint" do
 
               context "an actor directly in the GRANT ACE, with invalid group" do
                 with_actor :hasselhoff
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :actors => [:hasselhoff]
 
@@ -547,7 +547,7 @@ describe "Objects Endpoint" do
 
               context "an actor directly in the GRANT ACE, with non-existent actor" do
                 with_actor :hasselhoff
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :actors => [:hasselhoff]
 
@@ -568,7 +568,7 @@ describe "Objects Endpoint" do
 
               context "an actor directly in the GRANT ACE, with non-existent group" do
                 with_actor :hasselhoff
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :actors => [:hasselhoff]
 
@@ -588,7 +588,7 @@ describe "Objects Endpoint" do
 
               context "an actor directly in the GRANT ACE, modifying actors" do
                 with_actors :hasselhoff, :schwartzenegger
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :actors => [:hasselhoff]
 
@@ -607,7 +607,7 @@ describe "Objects Endpoint" do
               context "an actor directly in the GRANT ACE, modifying groups" do
                 with_actor :hasselhoff
                 with_group :brogrammers
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :actors => [:hasselhoff]
 
@@ -625,7 +625,7 @@ describe "Objects Endpoint" do
 
               context "an actor NOT in the GRANT ACE" do
                 with_actors :malkovich, :schwartzenegger
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 # Give malkovich everything EXCEPT grant
                 with_acl_on :gozer, {
@@ -656,7 +656,7 @@ describe "Objects Endpoint" do
               context "an actor indirectly in the GRANT ACE, modifying actors" do
                 with_actors :hasselhoff, :norris
                 with_group :hipsters, :actors => [:hasselhoff]
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :groups => [:hipsters]
 
@@ -674,7 +674,7 @@ describe "Objects Endpoint" do
                 with_actors :hasselhoff
                 with_group :hipsters, :actors => [:hasselhoff]
                 with_group :brogrammers
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :groups => [:hipsters]
 
@@ -718,7 +718,7 @@ describe "Objects Endpoint" do
 
               context "an actor directly in the GRANT ACE" do
                 with_actor :hasselhoff
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :actors => [:hasselhoff]
 
@@ -734,7 +734,7 @@ describe "Objects Endpoint" do
 
               context "an actor NOT in the GRANT ACE" do
                 with_actor :malkovich
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 # Give malkovich everything EXCEPT grant
                 with_acl_on :gozer, {
@@ -758,7 +758,7 @@ describe "Objects Endpoint" do
               context "an actor indirectly in the GRANT ACE" do
                 with_actor :hasselhoff
                 with_group :hipsters, :actors => [:hasselhoff]
-                with_entity type.to_sym, :gozer
+                with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :groups => [:hipsters]
 
@@ -807,13 +807,13 @@ describe "Objects Endpoint" do
     # versions should always be 404 even when an ID is specified,
     # since they can't have permissions
 
-    ['actor', 'group', 'container', 'object'].each do |type|
+    [:actor, :group, :container, :object].each do |type|
       context "for #{type.upcase} type" do
         ['create', 'read', 'update', 'delete', 'grant'].each do |action|
           context "for #{action.upcase} action" do
             ['actors', 'groups', 'objects', 'containers'].each do |member_type|
               context "for #{member_type.upcase} member type" do
-                with_entity type.to_sym, :zuul
+                with_entity type, :zuul
 
                 it "get should not be found" do
                   get("/#{type}s/#{zuul}/acl/#{action}/#{member_type}/",
@@ -873,7 +873,7 @@ describe "Objects Endpoint" do
     # (however if an actor is in multiple groups, and one of them is
     # removed, that actor should still have the permission by virtue
     # of their other group membership!  This wasn't tested in Cuke.)
-    ['actor', 'group', 'container', 'object'].each do |type|
+    [:actor, :group, :container, :object].each do |type|
       context "for #{type.upcase} type" do
         context "GET" do
           ['create', 'read', 'update', 'delete', 'grant'].each do |action|
@@ -882,7 +882,7 @@ describe "Objects Endpoint" do
                 context "for ACTORS member type" do
                   context "an actor directly in the #{ace.upcase} ACE" do
                     with_actor :hasselhoff
-                    with_entity type.to_sym, :gozer
+                    with_entity type, :gozer
 
                     with_ace_on :gozer, ace.to_sym, :actors => [:hasselhoff]
 
@@ -904,7 +904,7 @@ describe "Objects Endpoint" do
                   context "an actor indirectly in the #{ace} ACE" do
                     with_actor :hasselhoff
                     with_group :hipsters, :actors => [:hasselhoff]
-                    with_entity type.to_sym, :gozer
+                    with_entity type, :gozer
 
                     with_ace_on :gozer, ace.to_sym, :groups => [:hipsters]
 
@@ -937,7 +937,7 @@ describe "Objects Endpoint" do
                   context "a group directly in the #{ace} ACE" do
                     with_actor :hasselhoff
                     with_group :brogrammers, :actors => [:hasselhoff]
-                    with_entity type.to_sym, :gozer
+                    with_entity type, :gozer
 
                     with_ace_on :gozer, ace.to_sym, :groups => [:brogrammers]
 
@@ -964,7 +964,7 @@ describe "Objects Endpoint" do
                     with_actors :hasselhoff
                     with_group :hipsters, :actors => [:hasselhoff]
                     with_group :brogrammers, :groups => [:hipsters]
-                    with_entity type.to_sym, :gozer
+                    with_entity type, :gozer
 
                     with_ace_on :gozer, ace.to_sym, :groups => [:brogrammers]
 
@@ -1002,7 +1002,7 @@ describe "Objects Endpoint" do
 
                 context "for OBJECT member type" do
                   context "an actor directly in the #{ace} ACE" do
-                    with_entity type.to_sym, :gozer
+                    with_entity type, :gozer
                     with_object :spork
 
                     it "returns 404 all the time" do
@@ -1025,7 +1025,7 @@ describe "Objects Endpoint" do
 
                 context "for CONTAINER member type" do
                   context "an actor directly in the #{ace} ACE" do
-                    with_entity type.to_sym, :gozer
+                    with_entity type, :gozer
                     with_container :chumbucket
 
                     it "returns 404 all the time" do
