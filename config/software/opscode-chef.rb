@@ -1,5 +1,5 @@
 name "opscode-chef"
-version "patch-json-dos"
+version "rel-2.8.6"
 
 dependencies ["ruby",
               "bundler",
