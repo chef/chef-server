@@ -1,4 +1,4 @@
-describe "pedant API" do
+describe "Pedant API" do
   context "sanity check" do
     # What we are testing:
 

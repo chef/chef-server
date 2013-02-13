@@ -1,4 +1,4 @@
-describe "Objects Endpoint", :focus do
+describe "Objects Endpoint" do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
   let(:toupee) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
