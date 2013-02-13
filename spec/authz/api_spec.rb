@@ -12,8 +12,7 @@ describe "Pedant API" do
     # And indirectly:
     #   with_actor(s)
     #   with_group
-    #   (with_object)
-    #   (with_container)
+    #   with_entity
     # We then verify the permissions and memberships with
     #   directly_have_permission
     #     on
