@@ -8,13 +8,8 @@ build_iteration "1"
 # initialize the dependencies
 deps = []
 
-# Hacky but allows us to set the embedded chef version that is installed.
-# Once omnibus-ruby supports proper software definition version overrides
-# (either externally or at the project level) this can go away.
-ENV['CHEF_GIT_REV'] ||= "10.20.0"
-
 # global
-deps << "chef" # for embedded chef-solo
+deps << "chef-gem" # for embedded chef-solo
 deps << "preparation" # creates required build directories
 deps << "private-chef-cookbooks" # used by private-chef-ctl reconfigure
 deps << "private-chef-scripts" # assorted scripts used by installed instance

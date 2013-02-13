@@ -3,6 +3,7 @@
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 
+require 'uuidtools'
 require 'openssl'
 
 ENV['PATH'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:#{ENV['PATH']}"
