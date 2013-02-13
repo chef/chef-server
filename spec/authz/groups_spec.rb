@@ -178,10 +178,10 @@ describe "Groups Endpoint" do
 
       context "an actor indirectly in the READ ACE" do
         with_actor :hasselhoff
-        with_groups :hipsters, :brogrammers
+        with_group :hipsters, :actors => [:hasselhoff]
+        with_group :brogrammers
 
         with_ace_on_group :brogrammers, :read, :groups => [:hipsters]
-        with_members :hipsters, :actors => [:hasselhoff]
 
         it "can read the groups" do
           get("/groups/#{brogrammers}",
@@ -245,10 +245,10 @@ describe "Groups Endpoint" do
 
       context "an actor indirectly in the DELETE ACE" do
         with_actor :hasselhoff
-        with_groups :hipsters, :brogrammers
+        with_group :hipsters, :actors => [:hasselhoff]
+        with_group :brogrammers
 
         with_ace_on_group :brogrammers, :delete, :groups => [:hipsters]
-        with_members :hipsters, :actors => [:hasselhoff]
 
         it "can delete the groups" do
           delete("/groups/#{brogrammers}",
@@ -450,10 +450,10 @@ describe "Groups Endpoint" do
 
         context "an actor indirectly in the UPDATE ACE" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
+          with_group :hipsters
+          with_group :brogrammers, :actors => [:shatner]
 
           with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
-          with_members :brogrammers, :actors => [:shatner]
 
           it "can add a user to the group" do
             put("/groups/#{hipsters}/actors/#{shatner}",
@@ -478,7 +478,8 @@ describe "Groups Endpoint" do
       context "for groups" do
         context "an actor directly in the UPDATE ACE" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
+          with_group :hipsters
+          with_group :brogrammers
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -494,7 +495,8 @@ describe "Groups Endpoint" do
         # that the group membership is properly (re-?)initialized
         context "an actor directly in the UPDATE ACE (2)" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
+          with_group :hipsters
+          with_group :brogrammers
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -511,7 +513,8 @@ describe "Groups Endpoint" do
 
         context "an actor directly in the UPDATE ACE (3)" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
+          with_group :hipsters
+          with_group :brogrammers
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -530,7 +533,8 @@ describe "Groups Endpoint" do
 
         context "an actor directly in the UPDATE ACE (4)" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
+          with_group :hipsters
+          with_group :brogrammers
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -557,7 +561,8 @@ describe "Groups Endpoint" do
 
         context "an actor NOT in the UPDATE ACE" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
+          with_group :hipsters
+          with_group :brogrammers
 
           # Give shatner everything EXCEPT update
           with_acl_on_group :hipsters, {
@@ -579,10 +584,11 @@ describe "Groups Endpoint" do
 
         context "an actor indirectly in the UPDATE ACE" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers, :commies
+          with_group :hipsters
+          with_group :brogrammers, :actors => [:shatner]
+          with_group :commies
 
           with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
-          with_members :brogrammers, :actors => [:shatner]
 
           it "can add a group to the group" do
             put("/groups/#{hipsters}/groups/#{commies}",
@@ -594,10 +600,10 @@ describe "Groups Endpoint" do
 
         context "group cycles" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
+          with_group :hipsters
+          with_group :brogrammers, :groups => [:hipsters]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
-          with_members :brogrammers, :groups => [:hipsters]
 
           it "are disallowed" do
             pending "they should be" do
@@ -616,12 +622,12 @@ describe "Groups Endpoint" do
           # doesn't catch
 
           with_actor :shatner
-          with_groups :hipsters, :brogrammers, :commies, :dirtycommies
+          with_group :hipsters
+          with_group :brogrammers, :groups => [:hipsters]
+          with_group :commies, :groups => [:brogrammers]
+          with_group :dirtycommies, :groups => [:commies]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
-          with_members :brogrammers, :groups => [:hipsters]
-          with_members :commies, :groups => [:brogrammers]
-          with_members :dirtycommies, :groups => [:commies]
 
           it "are disallowed" do
             pending "they should be" do
@@ -659,9 +665,7 @@ describe "Groups Endpoint" do
       context "for actors" do
         context "an actor directly in the UPDATE ACE" do
           with_actor :shatner
-          with_group :hipsters
-
-          with_members :hipsters, :actors => [:shatner]
+          with_group :hipsters, :actors => [:shatner]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -677,9 +681,7 @@ describe "Groups Endpoint" do
         # that the group membership is properly (re-?)initialized
         context "an actor directly in the UPDATE ACE (2)" do
           with_actor :shatner
-          with_group :hipsters
-
-          with_members :hipsters, :actors => [:shatner]
+          with_group :hipsters, :actors => [:shatner]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -699,9 +701,7 @@ describe "Groups Endpoint" do
 
         context "an actor directly in the UPDATE ACE (3)" do
           with_actor :shatner
-          with_group :hipsters
-
-          with_members :hipsters, :actors => [:shatner]
+          with_group :hipsters, :actors => [:shatner]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -722,9 +722,7 @@ describe "Groups Endpoint" do
 
         context "an actor directly in the UPDATE ACE (4)" do
           with_actor :shatner
-          with_group :hipsters
-
-          with_members :hipsters, :actors => [:shatner]
+          with_group :hipsters, :actors => [:shatner]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -743,9 +741,7 @@ describe "Groups Endpoint" do
 
         context "an actor NOT in the UPDATE ACE" do
           with_actor :shatner
-          with_group :hipsters
-
-          with_members :hipsters, :actors => [:shatner]
+          with_group :hipsters, :actors => [:shatner]
 
           # Give shatner everything EXCEPT update
           with_acl_on_group :hipsters, {
@@ -767,12 +763,10 @@ describe "Groups Endpoint" do
 
         context "an actor indirectly in the UPDATE ACE" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
-
-          with_members :hipsters, :actors => [:shatner]
+          with_group :hipsters, :actors => [:shatner]
+          with_group :brogrammers, :actors => [:shatner]
 
           with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
-          with_members :brogrammers, :actors => [:shatner]
 
           it "can delete a user from the group" do
             delete("/groups/#{hipsters}/actors/#{shatner}",
@@ -797,9 +791,8 @@ describe "Groups Endpoint" do
       context "for groups" do
         context "an actor directly in the UPDATE ACE" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
-
-          with_members :hipsters, :groups => [:brogrammers]
+          with_group :brogrammers
+          with_group :hipsters, :groups => [:brogrammers]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -815,9 +808,8 @@ describe "Groups Endpoint" do
         # so that the group membership is properly (re-?)initialized
         context "an actor directly in the UPDATE ACE (2)" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
-
-          with_members :hipsters, :groups => [:brogrammers]
+          with_group :brogrammers
+          with_group :hipsters, :groups => [:brogrammers]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -837,9 +829,8 @@ describe "Groups Endpoint" do
 
         context "an actor directly in the UPDATE ACE (3)" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
-
-          with_members :hipsters, :groups => [:brogrammers]
+          with_group :brogrammers
+          with_group :hipsters, :groups => [:brogrammers]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -860,9 +851,8 @@ describe "Groups Endpoint" do
 
         context "an actor directly in the UPDATE ACE (4)" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
-
-          with_members :hipsters, :groups => [:brogrammers]
+          with_group :brogrammers
+          with_group :hipsters, :groups => [:brogrammers]
 
           with_ace_on_group :hipsters, :update, :actors => [:shatner]
 
@@ -881,9 +871,8 @@ describe "Groups Endpoint" do
 
         context "an actor NOT in the UPDATE ACE" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers
-
-          with_members :hipsters, :groups => [:brogrammers]
+          with_group :brogrammers
+          with_group :hipsters, :groups => [:brogrammers]
 
           # Give shatner everything EXCEPT update
           with_acl_on_group :hipsters, {
@@ -905,12 +894,11 @@ describe "Groups Endpoint" do
 
         context "an actor indirectly in the UPDATE ACE" do
           with_actor :shatner
-          with_groups :hipsters, :brogrammers, :dirtycommies
-
-          with_members :hipsters, :groups => [:dirtycommies]
+          with_group :dirtycommies
+          with_group :hipsters, :groups => [:dirtycommies]
+          with_group :brogrammers, :actors => [:shatner]
 
           with_ace_on_group :hipsters, :update, :groups => [:brogrammers]
-          with_members :brogrammers, :actors => [:shatner]
 
           it "can delete a user from the group" do
             delete("/groups/#{hipsters}/groups/#{dirtycommies}",
@@ -1004,10 +992,10 @@ describe "Groups Endpoint" do
 
         context "an actor indirectly in the #{ace} ACE" do
           with_actor :hasselhoff
-          with_groups :hipsters, :brogrammers
+          with_group :hipsters, :actors => [:hasselhoff]
+          with_group :brogrammers
 
           with_ace_on_group :brogrammers, ace.downcase.to_sym, :groups => [:hipsters]
-          with_members :hipsters, :actors => [:hasselhoff]
 
           it "can read the acl" do
             body = {
@@ -1108,10 +1096,10 @@ describe "Groups Endpoint" do
 
             context "an actor indirectly in the #{ace} ACE" do
               with_actor :hasselhoff
-              with_groups :hipsters, :brogrammers
+              with_group :hipsters, :actors => [:hasselhoff]
+              with_group :brogrammers
 
               with_ace_on_group :brogrammers, ace.downcase.to_sym, :groups => [:hipsters]
-              with_members :hipsters, :actors => [:hasselhoff]
 
               if (action == ace)
                 let(:body) { {"actors" => [], "groups" => [hipsters]} }
@@ -1310,7 +1298,8 @@ describe "Groups Endpoint" do
 
           context "an actor directly in the GRANT ACE, modifying groups" do
             with_actor :hasselhoff
-            with_groups :brogrammers, :hipsters
+            with_group :brogrammers
+            with_group :hipsters
 
             with_ace_on_group :hipsters, :grant, :actors => [:hasselhoff]
 
@@ -1357,10 +1346,10 @@ describe "Groups Endpoint" do
 
           context "an actor indirectly in the GRANT ACE, modifying actors" do
             with_actors :hasselhoff, :malkovich, :norris
-            with_groups :hipsters, :brogrammers
+            with_group :hipsters, :actors => [:hasselhoff]
+            with_group :brogrammers
 
             with_ace_on_group :brogrammers, :grant, :groups => [:hipsters]
-            with_members :hipsters, :actors => [:hasselhoff]
 
             it "can modify the ACE for actors" do
               put("/groups/#{brogrammers}/acl/#{action.downcase}",
@@ -1374,10 +1363,11 @@ describe "Groups Endpoint" do
 
           context "an actor indirectly in the GRANT ACE, modifying groups" do
             with_actors :hasselhoff, :malkovich
-            with_groups :hipsters, :brogrammers, :commies
+            with_group :hipsters, :actors => [:hasselhoff]
+            with_group :brogrammers
+            with_group :commies
 
             with_ace_on_group :commies, :grant, :groups => [:hipsters]
-            with_members :hipsters, :actors => [:hasselhoff]
 
             it "can modify the ACE for groups" do
               put("/groups/#{commies}/acl/#{action.downcase}",
@@ -1455,10 +1445,10 @@ describe "Groups Endpoint" do
 
           context "an actor indirectly in the GRANT ACE" do
             with_actor :hasselhoff
-            with_groups :hipsters, :brogrammers
+            with_group :hipsters, :actors => [:hasselhoff]
+            with_group :brogrammers
 
             with_ace_on_group :brogrammers, :grant, :groups => [:hipsters]
-            with_members :hipsters, :actors => [:hasselhoff]
 
             it "can clear the ACE" do
               pending "causes internal 500 errors" do
@@ -1583,11 +1573,11 @@ describe "Groups Endpoint" do
 
               context "an actor indirectly in the #{ace} ACE" do
                 with_actor :hasselhoff
-                with_groups :hipsters, :commies
+                with_group :hipsters, :actors => [:hasselhoff]
+                with_group :commies
 
                 with_ace_on_group :commies, ace.downcase.to_sym,
                                   :groups => [:hipsters]
-                with_members :hipsters, :actors => [:hasselhoff]
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
@@ -1617,11 +1607,11 @@ describe "Groups Endpoint" do
             context "for GROUPS member type" do
               context "a group directly in the #{ace} ACE" do
                 with_actor :hasselhoff
-                with_groups :brogrammers, :hipsters
+                with_group :brogrammers, :actors => [:hasselhoff]
+                with_group :hipsters
 
                 with_ace_on_group :hipsters, ace.downcase.to_sym,
                                   :groups => [:brogrammers]
-                with_members :brogrammers, :actors => [:hasselhoff]
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
@@ -1644,11 +1634,11 @@ describe "Groups Endpoint" do
 
               context "a group indirectly in the #{ace} ACE" do
                 with_actors :hasselhoff
-                with_groups :hipsters, :brogrammers, :commies
+                with_group :hipsters, :actors => [:hasselhoff]
+                with_group :brogrammers, :groups => [:hipsters]
+                with_group :commies
 
                 with_ace_on_group :commies, ace.downcase.to_sym, :groups => [:brogrammers]
-                with_members :brogrammers, :groups => [:hipsters]
-                with_members :hipsters, :actors => [:hasselhoff]
 
                 if (action == ace)
                   # See above

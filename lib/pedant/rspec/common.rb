@@ -49,8 +49,8 @@ module Pedant
 
         # Helper method for creating a new Authz object.  Do not use
         # directly in tests.
-        def new_item(type, requestor)
-          r = post("/#{type}s", requestor, :payload => nil)
+        def new_item(type, requestor, payload = {})
+          r = post("/#{type}s", requestor, :payload => payload)
           r.code.should eq(201)
           parse(r)["id"]
         end
@@ -64,10 +64,9 @@ module Pedant
         # Generate all creation helper methods
         #
         # NOTE: Doesn't include :container, because creating one
-        # requires a POST body
-        #
-        # TODO: Create corresponding container methods
-        [:actor, :object, :group].each do |type|
+        # requires a POST body, nor :group because it allows defining
+        # members on creation
+        [:actor, :object].each do |type|
 
           # +with_TYPE+ accepts a Keyword / String argument and
           # creates a new instance of that type, storing the Authz ID
@@ -111,6 +110,38 @@ module Pedant
               self.public_send("with_#{type}", label)
             end
           }
+        end
+
+        define_singleton_method "with_group" do |label, members={}|
+          let(label.to_sym) {new_item(:group, :superuser)}
+
+          before :each do
+            group = resolve(label)
+
+            actors = (members[:actors] || []).map{|n| resolve(n)}
+            groups = (members[:groups] || []).map{|n| resolve(n)}
+
+            actors.each do |a|
+              r = put("/groups/#{group}/actors/#{a}", :superuser, :payload => nil)
+              r.should have_status_code 200
+            end
+
+            groups.each do |g|
+              r = put("/groups/#{group}/groups/#{g}", :superuser, :payload => nil)
+              r.should have_status_code 200
+            end
+          end
+
+          after :each do
+            delete_item(:group, label)
+          end
+        end
+
+        define_singleton_method "with_container" do |label|
+          let(label.to_sym){new_item(:container, :superuser, {"name" => label})}
+          after :each do
+            delete_item(:container, label)
+          end
         end
 
         # Asserts that a given HTTP verb is not allowed at a given API
@@ -185,26 +216,6 @@ module Pedant
             end
           end
 
-        end
-
-        def self.with_members(group, members={})
-          before :each do
-
-            group = resolve(group)
-
-            actors = (members[:actors] || []).map{|n| resolve(n)}
-            groups = (members[:groups] || []).map{|n| resolve(n)}
-
-            actors.each do |a|
-              r = put("/groups/#{group}/actors/#{a}", :superuser, :payload => nil)
-              r.should have_status_code 200
-            end
-
-            groups.each do |g|
-              r = put("/groups/#{group}/groups/#{g}", :superuser, :payload => nil)
-              r.should have_status_code 200
-            end
-          end
         end
 
         def validate_entity_id(entity_id)

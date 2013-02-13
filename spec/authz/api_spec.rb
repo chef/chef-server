@@ -17,10 +17,9 @@ describe "pedant API" do
     #   (with_acl_on_container)
     # And indirectly:
     #   with_actor(s)
-    #   with_group(s)
+    #   with_group
     #   (with_object)
     #   (with_container)
-    #   with_members (for actors and groups)
     # We then verify the permissions and memberships with
     #   directly_have_permission
     #     on_actor
@@ -66,10 +65,9 @@ describe "pedant API" do
 
           context "an actor indirectly in the ACE" do
             with_actors :hasselhoff, :shatner
-            with_group :hipsters
+            with_group :hipsters, :actors => [:hasselhoff]
 
             with_ace_on_actor :shatner, action.downcase.to_sym, :groups => [:hipsters]
-            with_members :hipsters, :actors => [:hasselhoff]
 
             it "has only indirect permission" do
               :hasselhoff.should_not directly_have_permission(action.downcase.to_sym).
@@ -82,11 +80,10 @@ describe "pedant API" do
 
           context "an actor doubly-indirectly in the ACE" do
             with_actors :hasselhoff, :shatner
-            with_groups :hipsters, :brogrammers
+            with_group :hipsters, :actors => [:hasselhoff]
+            with_group :brogrammers, :groups => [:hipsters]
 
             with_ace_on_actor :shatner, action.downcase.to_sym, :groups => [:brogrammers]
-            with_members :brogrammers, :groups => [:hipsters]
-            with_members :hipsters, :actors => [:hasselhoff]
 
             it "has only doubly-indirect permission" do
               :hasselhoff.should_not directly_have_permission(action.downcase.to_sym).
@@ -184,10 +181,10 @@ describe "pedant API" do
 
           context "an actor indirectly in the ACE" do
             with_actor :hasselhoff
-            with_groups :hipsters, :commies
+            with_group :hipsters, :actors => [:hasselhoff]
+            with_group :commies
 
             with_ace_on_group :commies, action.downcase.to_sym, :groups => [:hipsters]
-            with_members :hipsters, :actors => [:hasselhoff]
 
             it "has only indirect permission" do
               :hasselhoff.should_not directly_have_permission(action.downcase.to_sym).
@@ -200,11 +197,11 @@ describe "pedant API" do
 
           context "an actor doubly-indirectly in the ACE" do
             with_actor :hasselhoff
-            with_groups :hipsters, :brogrammers, :commies
+            with_group :hipsters, :actors => [:hasselhoff]
+            with_group :brogrammers, :groups => [:hipsters]
+            with_group :commies
 
             with_ace_on_group :commies, action.downcase.to_sym, :groups => [:brogrammers]
-            with_members :brogrammers, :groups => [:hipsters]
-            with_members :hipsters, :actors => [:hasselhoff]
 
             it "has only doubly-indirect permission" do
               :hasselhoff.should_not directly_have_permission(action.downcase.to_sym).

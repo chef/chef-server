@@ -174,10 +174,9 @@ describe "Actors Endpoint" do
 
       context "an actor indirectly in the READ ACE" do
         with_actors :hasselhoff, :shatner
-        with_group :hipsters
+        with_group :hipsters, :actors => [:hasselhoff]
 
         with_ace_on_actor :shatner, :read, :groups => [:hipsters]
-        with_members :hipsters, :actors => [:hasselhoff]
 
         it "can read the actor" do
           get("/actors/#{shatner}",
@@ -237,10 +236,9 @@ describe "Actors Endpoint" do
 
       context "an actor indirectly in the DELETE ACE" do
         with_actors :hasselhoff, :shatner
-        with_group :hipsters
+        with_group :hipsters, :actors => [:hasselhoff]
 
         with_ace_on_actor :shatner, :delete, :groups => [:hipsters]
-        with_members :hipsters, :actors => [:hasselhoff]
 
         it "can delete the actor" do
           delete("/actors/#{shatner}",
@@ -312,10 +310,9 @@ describe "Actors Endpoint" do
 
         context "an actor indirectly in the #{ace} ACE" do
           with_actors :hasselhoff, :shatner
-          with_group :hipsters
+          with_group :hipsters, :actors => [:hasselhoff]
 
           with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:hipsters]
-          with_members :hipsters, :actors => [:hasselhoff]
 
           it "can read the acl" do
             body = {
@@ -416,10 +413,9 @@ describe "Actors Endpoint" do
 
             context "an actor indirectly in the #{ace} ACE" do
               with_actors :hasselhoff, :shatner
-              with_group :hipsters
+              with_group :hipsters, :actors => [:hasselhoff]
 
               with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:hipsters]
-              with_members :hipsters, :actors => [:hasselhoff]
 
               if (action == ace)
                 let(:body) { {"actors" => [], "groups" => [hipsters]} }
@@ -646,10 +642,9 @@ describe "Actors Endpoint" do
 
           context "an actor indirectly in the GRANT ACE, modifying actors" do
             with_actors :hasselhoff, :shatner, :malkovich, :norris
-            with_groups :hipsters
+            with_group :hipsters, :actors => [:hasselhoff]
 
             with_ace_on_actor :shatner, :grant, :groups => [:hipsters]
-            with_members :hipsters, :actors => [:hasselhoff]
 
             it "can modify the ACE for actors" do
               put("/actors/#{shatner}/acl/#{action.downcase}",
@@ -663,10 +658,10 @@ describe "Actors Endpoint" do
 
           context "an actor indirectly in the GRANT ACE, modifying groups" do
             with_actors :hasselhoff, :shatner, :malkovich
-            with_groups :hipsters, :brogrammers
+            with_group :hipsters, :actors => [:hasselhoff]
+            with_group :brogrammers
 
             with_ace_on_actor :shatner, :grant, :groups => [:hipsters]
-            with_members :hipsters, :actors => [:hasselhoff]
 
             it "can modify the ACE for groups" do
               put("/actors/#{shatner}/acl/#{action.downcase}",
@@ -742,10 +737,9 @@ describe "Actors Endpoint" do
 
           context "an actor indirectly in the GRANT ACE" do
             with_actors :hasselhoff, :shatner
-            with_group :hipsters
+            with_group :hipsters, :actors => [:hasselhoff]
 
             with_ace_on_actor :shatner, :grant, :groups => [:hipsters]
-            with_members :hipsters, :actors => [:hasselhoff]
 
             it "can clear the ACE" do
               pending "causes internal 500 errors" do
@@ -868,10 +862,9 @@ describe "Actors Endpoint" do
 
               context "an actor indirectly in the #{ace} ACE" do
                 with_actors :hasselhoff, :shatner
-                with_group :hipsters
+                with_group :hipsters, :actors => [:hasselhoff]
 
                 with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:hipsters]
-                with_members :hipsters, :actors => [:hasselhoff]
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
@@ -901,10 +894,9 @@ describe "Actors Endpoint" do
             context "for GROUPS member type" do
               context "a group directly in the #{ace} ACE" do
                 with_actors :shatner, :hasselhoff
-                with_group :brogrammers
+                with_group :brogrammers, :actors => [:hasselhoff]
 
                 with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:brogrammers]
-                with_members :brogrammers, :actors => [:hasselhoff]
 
                 if (action == ace)
                   it "returns 200 when in ACE" do
@@ -927,11 +919,10 @@ describe "Actors Endpoint" do
 
               context "a group indirectly in the #{ace} ACE" do
                 with_actors :hasselhoff, :shatner
-                with_groups :hipsters, :brogrammers
+                with_group :hipsters, :actors => [:hasselhoff]
+                with_group :brogrammers, :groups => [:hipsters]
 
                 with_ace_on_actor :shatner, ace.downcase.to_sym, :groups => [:brogrammers]
-                with_members :brogrammers, :groups => [:hipsters]
-                with_members :hipsters, :actors => [:hasselhoff]
 
                 if (action == ace)
                   # See above
