@@ -250,7 +250,7 @@ describe "Groups Endpoint" do
 
         with_ace_on :brogrammers, :delete, :groups => [:hipsters]
 
-        it "can delete the groups" do
+        it "can delete the group" do
           delete("/groups/#{brogrammers}",
                  :hasselhoff).should have_status_code(200).with_body({})
           get("/groups/#{brogrammers}", :superuser).should have_status_code(404)

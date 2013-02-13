@@ -188,6 +188,66 @@ describe "Objects Endpoint" do
 
     # DELETE deletes the object and its ACL and ACEs
     context "DELETE" do
+      context "an actor directly in the DELETE ACE" do
+        with_actor :hasselhoff
+        with_object :spork
+
+        with_ace_on :spork, :delete, :actors => [:hasselhoff]
+
+        it "can delete the object" do
+          delete("/objects/#{spork}",
+                 :hasselhoff).should have_status_code(200).with_body({})
+          get("/objects/#{spork}", :superuser).should have_status_code(404)
+        end
+      end
+
+      context "an actor NOT in the DELETE ACE" do
+        with_actor :malkovich
+        with_object :spork
+
+        # Give malkovich everything EXCEPT delete
+        with_acl_on :spork, {
+          :create => {:actors => [:malkovich], :groups => []},
+          :read   => {:actors => [:malkovich], :groups => []},
+          :update => {:actors => [:malkovich], :groups => []},
+          :delete => {:actors => [],           :groups => []}, # <--- That's the one!
+          :grant  => {:actors => [:malkovich], :groups => []}
+        }
+
+        it "cannot delete the object" do
+          delete("/objects/#{spork}", :malkovich).should have_status_code(403).
+            with_body({"error" => "must be in the delete access control entry to perform this action"})
+          get("/objects/#{spork}", :superuser).should have_status_code(200)
+        end
+      end
+
+      context "an actor indirectly in the DELETE ACE" do
+        with_actor :hasselhoff
+        with_group :hipsters, :actors => [:hasselhoff]
+        with_object :spork
+
+        with_ace_on :spork, :delete, :groups => [:hipsters]
+
+        it "can delete the object" do
+          delete("/objects/#{spork}",
+                 :hasselhoff).should have_status_code(200).with_body({})
+          get("/objects/#{spork}", :superuser).should have_status_code(404)
+        end
+      end
+
+      context "with a non-existent target" do
+        with_actor :hasselhoff
+
+        it "can't be deleted, because it doesn't exist" do
+          fake_object = toupee
+
+          # Prove it doesn't exist
+          get("/objects/#{fake_object}", :hasselhoff).should have_status_code(404)
+
+          # Now try to delete it
+          delete("/objects/#{fake_object}", :hasselhoff).should have_status_code(404)
+        end
+      end
     end # GET
   end # /objects/<object_id>
 
