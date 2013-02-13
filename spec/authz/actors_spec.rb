@@ -1,4 +1,4 @@
-describe "Actors Endpoint", :focus do
+describe "Actors Endpoint" do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
   context "/actors" do
