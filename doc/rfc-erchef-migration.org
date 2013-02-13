@@ -12,9 +12,8 @@ The following object types and their endpoints will migrate:
 - roles
 - sandboxes (endpoint, no migration of data)
 - checksums
-
-* Requirements
-** Migration of single orgs can be manually migrated
+* Assumptions
+** Orgs can be migrated individually
 This will allow us to test the migration tooling as deployed in prod
 and validate migration results with minimal risk to OHC customers. It
 will also allow us to migrate a small set of friendly customers to
@@ -26,39 +25,57 @@ This simplifies migration; we can wait for requests to complete
 rather than the complex tracking of in-flight writes that we did for
 nodes.
 ** The system will remain available for orgs not in active migration (DISCUSS)
+Applies to both the guinea pig migration and the subsequent migration of all orgs.
 ** We will not migrate pre-created orgs
 Precreated orgs have a =_default= environment that would need to be
 migrated. Forcing new org creation in the post-migration
 configuration validates org creation early in the process. Also
 simplifies migration tooling since precreated orgs are a bit special.
 ** We will not attempt to migrate knife-test (the largest couchdb file)
-* High level migration sequence
-** One week or more before M-day
-*** Install dark-launch routing system 
-This is to allow us to select on an org-by-org basis who is using ruby-couch
-and who is using erchef-sql, and have a 'maintainance mode' flag to
-completely disable access on a per org basis.
-*** Set darklaunch default to be ruby-couch
-*** Test migrate orgs
-Migrate a small number of test orgs, and do sanity checking on them
-*** Migrate first testing wave
-A small group of friendly customers are migrated to get broader
-experience using erchef.
-** 3-4 days before M-day
-*** Last minute test migration sweep over over all orgs
-Clone data to preprod, run migration tooling to verify that recent
-data changes have not introduced data incompatible with
-erchef/pgsql/migration tooling.
-*** Identify customers who will not be migrated in the main body
-*** Identify high load customers to migrate first
-*** Prepare migration order list
+* Dependencies
+** nginx darklaunch
+*** Description goes here along with reference to PBIs
+** erchef
+** Completion of clients endpoint
+*** Reference to clients endpoint PBIs
+* High level migration sequences
+** Guinea Pig Org Migration
+*** Impact Assessment
+**** Will we need to disable org creation or other site features during the migration?
+*** M-day - 1 week
+1. Support identifies 3-5 friendly customers who are willing to participate in the first
+   wave of migrations.
+2. Guinea pig customer data is inspected to verify the migration will be successful.
+3. Engineering and Support agree on migration success criteria.
+4. Install dark-launch routing system
+    This is to allow us to select on an org-by-org basis who is using ruby-couch
+    and who is using erchef-sql, and have a 'maintainance mode' flag to
+    completely disable access on a per org basis. The default darklaunch settings will
+   continue to route all incoming requests to the current set of Ruby/erchef/Couch servers.
+*** M-day
+**** Description of per-org migration process including darklaunch flag toggles
+*** M-day to M-day + 1 week
+**** Guinea pig customer usage is monitored for any problems which might have been caused
+     by the migration.
+** Full Org Migration
+*** Impact Assessment
+**** See Guinea Pig Migration
+*** M-day - 1 week
+1. Last minute test migration sweep over over all orgs
+    Clone data to preprod, run migration tooling to verify that recent
+    data changes have not introduced data incompatible with
+    erchef/pgsql/migration tooling.
+2. Identify high load customers to migrate first
+3. Prepare migration order list
 ** M-day
-*** Disable new org creation
-*** Populate all unset dark launch to point to ruby-couch
-*** set dark launch default to use erchef-sql; all new orgs go to erchef-sql
-*** Fix org-creation (See below)
-*** Enable new org creation
-*** Migrate main body (see also [[Org migration flow]])
+1. Disable new org creation
+2. Populate all unset dark launch to point to ruby-couch
+3. Set dark launch default to use erchef-sql; all new orgs go to erchef-sql
+4. Fix org-creation
+5. Move description & motivation here
+6. Enable new org creation
+7. Migrate main body (see also [[Org migration flow]])
+   Combine the bullet list below with the description of the org migration flow here.
 Migration will proceed in batches of XXX orgs. To process a batch:
 1. All orgs are set to 503 mode in dark launch
 2. A fixed wait period is observed to eliminate inflight requests (30 seconds?)
@@ -69,6 +86,7 @@ Migration will proceed in batches of XXX orgs. To process a batch:
 We may have certain customers who are not able to be migrated with the
 main body. We'd like to drive this set to zero, but must plan for this
 possibility.
+**** KS: Why? What are the conditions which would cause a customer to not migrate?
 *** Migration cleanup; remove migrated data from couchdb
 We will need to remove the CouchDB documents in the org databases
 corresponding to objects which have moved to SQL. We'll also want to
@@ -77,6 +95,8 @@ stored in SQL for these objects.
 
 We have a start at some tooling for throttled deletes used in the
 node migration which can be extended.
+**** KS: Where's the plan for this work? We should have this tooling ready to go
+     for the guinea pig migration wave so we can test all of it end-to-end.
 * Dark launch 
 Our current plan is to have Nginx route requests based on per org configuration information, either
 using ruby chef or sql chef. Nginx would parse out the org name from the URI, look it up in a
@@ -155,3 +175,6 @@ This disables the org at the LB, and indicates so in the webui.
 *** What's the cleanest messaging for the migration process? 
 Do we want the users to know they're being migrated? 
 Do we want to indicate some level of state in the webui?
+KS: Ideally this process is 100% transparent to customers. A user should only notice better response time
+and more stable performance. Support should definitely announce the beginning and end of the migration work
+since it might have operational impact and we need to follow our SLAs.
