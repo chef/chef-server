@@ -1,4 +1,4 @@
-describe "Groups Endpoint", :focus do
+describe "Groups Endpoint" do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
   let(:car_salesmen) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 

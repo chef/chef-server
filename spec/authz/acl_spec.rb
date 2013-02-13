@@ -1,4 +1,4 @@
-describe "ACL Tests" do
+describe "ACL Tests", :focus do
   let(:easterbunny) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
   context "/<type>/<id>/acl" do
@@ -12,9 +12,9 @@ describe "ACL Tests" do
 
     # [1] Apparently done intentionally, but the reasons are lost to the
     # mists of time.  Would be nice to find those reasons again.
-    [:group, :container, :object].each do |type|
-      context "for #{type.upcase} type" do
-        context "GET" do
+    context "GET" do
+      [:group, :container, :object].each do |type|
+        context "for #{type.upcase} type" do
           ['create', 'read', 'update', 'delete', 'grant'].each do |ace|
 
             context "an actor directly in the #{ace.upcase} ACE" do
@@ -90,8 +90,12 @@ describe "ACL Tests" do
                   :hasselhoff).should have_status_code(404)
             end
           end
-        end # GET
+        end
+      end
+    end # GET
 
+    [:group, :container, :object].each do |type|
+      context "for #{type.upcase} type" do
         # NOTE: We'll want to eventually allow these operations in order
         # to facilitate bulk operations
         should_not_allow :POST, "/#{type}s/ffffffffffffffffffffffffffffffff/acl"
@@ -114,35 +118,13 @@ describe "ACL Tests" do
     # crash on badly formatted requests).  DELETE is also tested,
     # however it seems to be broken.  HTTP POST should be disallowed.
 
-    # Old notes:
+    context "GET" do
+      [:group, :container, :object].each do |type|
+        context "for #{type.upcase} type" do
 
-    # GET actors and groups for action
-    #
-    # Cucumber: ensure a newly-created object has the requesting actor
-    # in the ACEs for each permission
-    #
-    # Cucumber: actors that are directly or indirectly (i.e., via a
-    # group) in an ACE are recognized as having that permission.
-    #
-    # An actor (that exists!) that is not in any ACE has no permissions.
-    #
-    # An actor (that doesn't exist!) has no permissions anyway.
-    #
-    # (Note that the above two scenarios both result in HTTP 404s)
-    #
-    # Also, it appears that we don't check to see if an ID is actually
-    # a valid 32-character hex string, since the test uses
-    # non-existent IDs like "frankenberry" (presumably this applies
-    # elsewhere, and not just for this endpoint.)
-    #
-    # Actually... this may be just an artifact of how the Cuke tests
-    # are written.
-    
-    [:group, :container, :object].each do |type|
-      context "for #{type.upcase} type" do
-        context "GET" do
           ['create', 'read', 'update', 'delete', 'grant'].each do |action|
             context "for #{action.upcase} action" do
+
               ['create', 'read', 'update', 'delete', 'grant'].each do |ace|
 
                 context "an actor directly in the #{ace.upcase} ACE" do
@@ -214,16 +196,25 @@ describe "ACL Tests" do
               end
             end
           end
-        end # GET
+        end
+      end
+    end # GET
 
+    [:group, :container, :object].each do |type|
+      context "for #{type.upcase} type" do
         ['create', 'read', 'update', 'delete', 'grant'].each do |action|
           context "for #{action.upcase} action" do
             should_not_allow :POST, "/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}"
           end
         end
+      end
+    end
 
-        # PUT replaces an ACE atomically
-        context "PUT" do
+    # PUT replaces an ACE atomically
+    context "PUT" do
+      [:group, :container, :object].each do |type|
+        context "for #{type.upcase} type" do
+
           ['create', 'read', 'update', 'delete', 'grant'].each do |action|
             context "for #{action.upcase} action" do
 
@@ -456,13 +447,14 @@ describe "ACL Tests" do
               end
             end
           end
-        end # PUT
+        end
+      end
+    end # PUT
 
-        # Only actors in the DELETE ACE (directly or indirectly) can delete an object
-        #
-        # Deleting a non-existent object returns a 404
-        #
-        context "DELETE" do
+    context "DELETE" do
+      [:group, :container, :object].each do |type|
+        context "for #{type.upcase} type" do
+
           ['create', 'read', 'update', 'delete', 'grant'].each do |action|
             context "for #{action.upcase} action" do
 
@@ -540,9 +532,9 @@ describe "ACL Tests" do
               end
             end
           end
-        end # DELETE
+        end
       end
-    end
+    end # DELETE
   end # /<type>/<id>/acl/<action>
 
   context "/<type>/<id>/acl/<action>/<member_type>" do
@@ -596,38 +588,28 @@ describe "ACL Tests" do
     # What we are testing:
 
     # Here we test via GET access to specific ACE from member_id to
-    # group_id.  Apparently this returns 200 (with no body) if access
-    # is available or 404 if not.  Supposedly groups are supported as
-    # a member_type, but tests seem to show that only actors work
-    # correctly.  We also test that a bogus member_type does not
-    # return as having access.  All other HTTP verbs should be
-    # disallowed.
+    # (<type>)_id.  Apparently this returns 200 (with no body) if
+    # access is available or 404 if not.  Supposedly groups are
+    # supported as a member_type, but tests seem to show that only
+    # actors work correctly.  We also test that a bogus member_type
+    # does not return as having access.  All other HTTP verbs should
+    # be disallowed.
 
-    # Old notes:
-
-    # GET uses is_authorized_on_object to determine whether the
-    # specified actor / group has the specified permission
-    #
-    # Returns a 200 and an empty JSON hash if the actor / group has
-    # the permission
-    #
     # TODO: Perhaps use 204 (OK, No Content) instead?
     #
-    # Cucumber: If object_id refers to a non-existent object, a 404
-    # should be returned (there is an open ticket for this, PL-536;
-    # this used to (still does?) cause a crash)
-    #
     # Deleting one group from a given ACE shouldn't affect other
-    # holders of that permission that were not in that group
-    #
-    # (however if an actor is in multiple groups, and one of them is
-    # removed, that actor should still have the permission by virtue
-    # of their other group membership!  This wasn't tested in Cuke.)
-    [:actor, :group, :container, :object].each do |type|
-      context "for #{type.upcase} type" do
-        context "GET" do
+    # holders of that permission that were not in that group (however
+    # if an actor is in multiple groups, and one of them is removed,
+    # that actor should still have the permission by virtue of their
+    # other group membership!  This wasn't tested in Cuke.)
+    # TODO:  Test this?  Probably not the right context though.
+    context "GET" do
+      [:actor, :group, :container, :object].each do |type|
+        context "for #{type.upcase} type" do
+
           ['create', 'read', 'update', 'delete', 'grant'].each do |action|
             context "for #{action.upcase} action" do
+
               ['create', 'read', 'update', 'delete', 'grant'].each do |ace|
                 context "for ACTORS member type" do
                   context "an actor directly in the #{ace.upcase} ACE" do
@@ -747,8 +729,8 @@ describe "ACL Tests" do
                   end
                 end
 
-                # Some tests for an unexpected member_type -- don't really need to test
-                # more than one, do we?
+                # Some tests for an unexpected member_type -- probably
+                # don't really need to test more than this, do we?
 
                 context "for OBJECT member type" do
                   context "an actor directly in the #{ace} ACE" do
@@ -798,8 +780,12 @@ describe "ACL Tests" do
               end
             end
           end
-        end # GET
+        end
+      end
+    end # GET
 
+    [:actor, :group, :container, :object].each do |type|
+      context "for #{type.upcase} type" do
         ['create', 'read', 'update', 'delete', 'grant'].each do |action|
           context "for #{action.upcase} action" do
             ['actors', 'groups'].each do |member_type|
