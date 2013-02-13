@@ -1,4 +1,4 @@
-describe "ACL Tests", :focus do
+describe "ACL Tests" do
   let(:easterbunny) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
   context "/<type>/<id>/acl" do

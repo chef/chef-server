@@ -54,10 +54,10 @@ module Pedant
           r.code.should eq(201)
 
           rc = parse(r)["id"]
-          unless @entities
-            @entities = {}
+          unless @thingies
+            @thingies = {}
           end
-          @entities[rc] = type
+          @thingies[rc] = type
 
           return rc
         end
@@ -262,7 +262,7 @@ module Pedant
             actors = (ace[:actors] || []).map{|n| resolve(n)}
             groups = (ace[:groups] || []).map{|n| resolve(n)}
 
-            type = @entities[resolve(target)]
+            type = @thingies[resolve(target)]
 
             response = put("/#{type}s/#{resolve(target)}/acl/#{permission.downcase}",
                            :superuser,
