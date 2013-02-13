@@ -641,7 +641,7 @@ describe "Actors Endpoint" do
           end
 
           context "an actor indirectly in the GRANT ACE, modifying actors" do
-            with_actors :hasselhoff, :shatner, :malkovich, :norris
+            with_actors :hasselhoff, :shatner, :norris
             with_group :hipsters, :actors => [:hasselhoff]
 
             with_ace_on :shatner, :grant, :groups => [:hipsters]
@@ -657,7 +657,7 @@ describe "Actors Endpoint" do
           end
 
           context "an actor indirectly in the GRANT ACE, modifying groups" do
-            with_actors :hasselhoff, :shatner, :malkovich
+            with_actors :hasselhoff, :shatner
             with_group :hipsters, :actors => [:hasselhoff]
             with_group :brogrammers
 

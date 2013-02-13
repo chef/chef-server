@@ -1344,7 +1344,7 @@ describe "Groups Endpoint" do
           end
 
           context "an actor indirectly in the GRANT ACE, modifying actors" do
-            with_actors :hasselhoff, :malkovich, :norris
+            with_actors :hasselhoff, :norris
             with_group :hipsters, :actors => [:hasselhoff]
             with_group :brogrammers
 
@@ -1361,7 +1361,7 @@ describe "Groups Endpoint" do
           end
 
           context "an actor indirectly in the GRANT ACE, modifying groups" do
-            with_actors :hasselhoff, :malkovich
+            with_actors :hasselhoff
             with_group :hipsters, :actors => [:hasselhoff]
             with_group :brogrammers
             with_group :commies
@@ -1396,7 +1396,7 @@ describe "Groups Endpoint" do
           end
         end
       end
-    end # GET
+    end # PUT
 
     # DELETE clears actors and groups from ACE
     context "DELETE" do
@@ -1477,7 +1477,7 @@ describe "Groups Endpoint" do
           end
         end
       end
-    end # GET
+    end # DELETE
   end # /groups/<group_id>/acl/<action>
 
   context "/groups/<group_id>/acl/<action>/<member_type>" do

@@ -1,7 +1,7 @@
 describe "Objects Endpoint" do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
   let(:toupee) { "deadbeefdeadbeefdeadbeefdeadbeef" }
-  let(:god) { "deadbeefdeadbeefdeadbeefdeadbeef" }
+  let(:easterbunny) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
   context "/objects" do
     # What we are testing:
@@ -334,7 +334,7 @@ describe "Objects Endpoint" do
             with_actor :hasselhoff
 
             it "can't be read, because it doesn't exist" do
-              fake_entity = god
+              fake_entity = easterbunny
 
               get("/#{type}s/#{fake_entity}/acl",
                   :hasselhoff).should have_status_code(404)
@@ -349,10 +349,10 @@ describe "Objects Endpoint" do
         should_not_allow :DELETE, "/#{type}s/ffffffffffffffffffffffffffffffff/acl"
       end
     end
-  end # /objects/<object_id>/acl
+  end # /<type>/<object_id>/acl
 
   # Manipulate a specific permission on a given object
-  context "/objects/<object_id>/acl/<action>" do
+  context "/<type>/<object_id>/acl/<action>" do
     # What we are testing:
 
     # Here we test access to a specific ACE/action in each type's ACL
@@ -455,7 +455,7 @@ describe "Objects Endpoint" do
                   with_actor :hasselhoff
 
                   it "can't be read, because it doesn't exist" do
-                    fake_entity = god
+                    fake_entity = easterbunny
 
                     get("/#{type}s/#{fake_entity}/acl/#{action}",
                         :hasselhoff).should have_status_code(404)
@@ -473,7 +473,239 @@ describe "Objects Endpoint" do
         end
 
         # PUT replaces an ACE atomically
-        context "PUT", :focus do
+        context "PUT" do
+          ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+            context "for #{action.upcase} action" do
+
+              # TODO: probably want to expand this with various types of bad input,
+              # although at the moment pretty much anything at all will crash it
+              context "an actor directly in the GRANT ACE, with bad input" do
+                with_actor :hasselhoff
+                with_entity type.to_sym, :gozer
+
+                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+
+                it "returns 400" do
+                  pending "returns 500 instead" do
+                    put("/#{type}s/#{gozer}/acl/#{action}",
+                        :hasselhoff, :payload => {}).
+                      should have_status_code(400).with_body({"error" => "bad input"})
+
+                    get("/#{type}s/#{gozer}/acl/#{action}",
+                        :superuser).should have_status_code(200).
+                      with_body({"actors" => [hasselhoff], "groups" => []})
+                  end
+                end
+              end
+
+              # TODO: I'm not sure these are a problem or not; we may
+              # want to properly error these out down the road.  Also
+              # not sure we should return 400 for non-existent
+              # actors/#{type}s, dunno what the right HTTP response code
+              # is for that.
+
+              context "an actor directly in the GRANT ACE, with invalid actor" do
+                with_actor :hasselhoff
+                with_entity type.to_sym, :gozer
+
+                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+
+                it "returns 400" do
+                  pending "returns 200 instead" do
+                    put("/#{type}s/#{gozer}/acl/#{action}",
+                        :hasselhoff,
+                        :payload => {"actors" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"],
+                          "groups" => []}).
+                      should have_status_code(400).with_body({"error" => "bad input"})
+
+                    get("/#{type}s/#{gozer}/acl/#{action}",
+                        :superuser).should have_status_code(200).
+                      with_body({"actors" => [hasselhoff], "groups" => []})
+                  end
+                end
+              end
+
+              context "an actor directly in the GRANT ACE, with invalid group" do
+                with_actor :hasselhoff
+                with_entity type.to_sym, :gozer
+
+                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+
+                it "returns 400" do
+                  pending "returns 200 instead" do
+                    put("/#{type}s/#{gozer}/acl/#{action}",
+                        :hasselhoff, :payload => {"actors" => [],
+                          "groups" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"]}).
+                      should have_status_code(400).with_body({"error" => "bad input"})
+
+                    get("/#{type}s/#{gozer}/acl/#{action}",
+                        :superuser).should have_status_code(200).
+                      with_body({"actors" => [hasselhoff], "groups" => []})
+                  end
+                end
+              end
+
+              context "an actor directly in the GRANT ACE, with non-existent actor" do
+                with_actor :hasselhoff
+                with_entity type.to_sym, :gozer
+
+                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+
+                it "returns 400" do
+                  pending "returns 200 instead" do
+                    put("/#{type}s/#{gozer}/acl/#{action}",
+                        :hasselhoff,
+                        :payload => {"actors" => ["ffffffffffffffffffffffffffffffff"],
+                          "groups" => []}).
+                      should have_status_code(400).with_body({"error" => "bad input"})
+
+                    get("/#{type}s/#{gozer}/acl/#{action}",
+                        :superuser).should have_status_code(200).
+                      with_body({"actors" => [hasselhoff], "groups" => []})
+                  end
+                end
+              end
+
+              context "an actor directly in the GRANT ACE, with non-existent group" do
+                with_actor :hasselhoff
+                with_entity type.to_sym, :gozer
+
+                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+
+                it "returns 400" do
+                  pending "returns 200 instead" do
+                    put("/#{type}s/#{gozer}/acl/#{action}",
+                        :hasselhoff, :payload => {"actors" => [],
+                          "groups" => ["ffffffffffffffffffffffffffffffff"]}).
+                      should have_status_code(400).with_body({"error" => "bad input"})
+
+                    get("/#{type}s/#{gozer}/acl/#{action}",
+                        :superuser).should have_status_code(200).
+                      with_body({"actors" => [hasselhoff], "groups" => []})
+                  end
+                end
+              end
+
+              context "an actor directly in the GRANT ACE, modifying actors" do
+                with_actors :hasselhoff, :schwartzenegger
+                with_entity type.to_sym, :gozer
+
+                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+
+                it "can modify the ACE for actors" do
+                  put("/#{type}s/#{gozer}/acl/#{action}",
+                      :hasselhoff, :payload => {"actors" => [schwartzenegger],
+                        "groups" => []}).
+                    should have_status_code(200).with_body({})
+
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                      :superuser).should have_status_code(200).
+                    with_body({"actors" => [schwartzenegger], "groups" => []})
+                end
+              end
+
+              context "an actor directly in the GRANT ACE, modifying groups" do
+                with_actor :hasselhoff
+                with_group :brogrammers
+                with_entity type.to_sym, :gozer
+
+                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+
+                it "can modify the ACE for groups" do
+                  put("/#{type}s/#{gozer}/acl/#{action}",
+                      :hasselhoff, :payload => {"actors" => [],
+                        "groups" => [brogrammers]}).
+                    should have_status_code(200).with_body({})
+
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                      :superuser).should have_status_code(200).
+                    with_body({"actors" => [], "groups" => [brogrammers]})
+                end
+              end
+
+              context "an actor NOT in the GRANT ACE" do
+                with_actors :malkovich, :schwartzenegger
+                with_entity type.to_sym, :gozer
+
+                # Give malkovich everything EXCEPT grant
+                with_acl_on :gozer, {
+                  :create => {:actors => [:malkovich], :groups => []},
+                  :read   => {:actors => [:malkovich], :groups => []},
+                  :update => {:actors => [:malkovich], :groups => []},
+                  :delete => {:actors => [:malkovich], :groups => []},
+                  :grant  => {:actors => [],           :groups => []} # <--- This is it!
+                }
+
+                if (action == 'grant')
+                  let(:body) { {"actors" => [], "groups" => []} }
+                else
+                  let(:body) { {"actors" => [malkovich], "groups" => []} }
+                end
+
+                it "cannot modify the ACE" do
+                  put("/#{type}s/#{gozer}/acl/#{action}",
+                      :malkovich, :payload => {"actors" => [schwartzenegger],
+                        "groups" => []}).should have_status_code(403).
+                    with_body({"error" => "must be in the grant access control entry to perform this action"})
+
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                      :superuser).should have_status_code(200).with_body(body)
+                end
+              end
+
+              context "an actor indirectly in the GRANT ACE, modifying actors" do
+                with_actors :hasselhoff, :norris
+                with_group :hipsters, :actors => [:hasselhoff]
+                with_entity type.to_sym, :gozer
+
+                with_ace_on :gozer, :grant, :groups => [:hipsters]
+
+                it "can modify the ACE for actors" do
+                  put("/#{type}s/#{gozer}/acl/#{action}",
+                      :hasselhoff, :payload => {"actors" => [norris], "groups" => []}).
+                    should have_status_code(200)
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                      :superuser).should have_status_code(200).
+                    with_body({"actors" => [norris], "groups" => []})
+                end
+              end
+
+              context "an actor indirectly in the GRANT ACE, modifying groups" do
+                with_actors :hasselhoff
+                with_group :hipsters, :actors => [:hasselhoff]
+                with_group :brogrammers
+                with_entity type.to_sym, :gozer
+
+                with_ace_on :gozer, :grant, :groups => [:hipsters]
+
+                it "can modify the ACE for groups" do
+                  put("/#{type}s/#{gozer}/acl/#{action}",
+                      :hasselhoff, :payload => {"actors" => [],
+                        "groups" => [brogrammers]}).should have_status_code(200)
+
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                      :superuser).should have_status_code(200).
+                    with_body({"actors" => [], "groups" => [brogrammers]})
+                end
+              end
+
+              context "with a non-existent target" do
+                with_actor :hasselhoff
+
+                it "can't modify its ACE, because it doesn't exist" do
+                  fake_entity = easterbunny
+
+                  # Prove it doesn't exist
+                  get("/#{type}s/#{fake_entity}/acl/#{action}",
+                      :hasselhoff).should have_status_code(404)
+
+                  # Now try to modify it
+                  put("/#{type}s/#{fake_entity}/acl/#{action}",
+                      :hasselhoff).should have_status_code(404)
+                end
+              end
+            end
+          end
         end # PUT
 
         # Only actors in the DELETE ACE (directly or indirectly) can delete an object
@@ -481,10 +713,87 @@ describe "Objects Endpoint" do
         # Deleting a non-existent object returns a 404
         #
         context "DELETE" do
+          ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+            context "for #{action.upcase} action" do
+
+              context "an actor directly in the GRANT ACE" do
+                with_actor :hasselhoff
+                with_entity type.to_sym, :gozer
+
+                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+
+                it "can clear the ACE" do
+                  pending "causes internal 500 errors" do
+                    delete("/#{type}s/#{gozer}/acl/#{action}",
+                           :hasselhoff).should have_status_code(200).with_body({})
+                    get("/#{type}s/#{gozer}/acl/#{action}",
+                        :superuser).should have_status_code(404)
+                  end
+                end
+              end
+
+              context "an actor NOT in the GRANT ACE" do
+                with_actor :malkovich
+                with_entity type.to_sym, :gozer
+
+                # Give malkovich everything EXCEPT grant
+                with_acl_on :gozer, {
+                  :create => {:actors => [:malkovich], :groups => []},
+                  :read   => {:actors => [:malkovich], :groups => []},
+                  :update => {:actors => [:malkovich], :groups => []},
+                  :delete => {:actors => [:malkovich], :groups => []},
+                  :grant  => {:actors => [],           :groups => []} # <--- Bingo
+                }
+
+                it "cannot clear the ACE" do
+                  delete("/#{type}s/#{gozer}/acl/#{action}",
+                         :malkovich).should have_status_code(403).
+                    with_body({"error" => "must be in the grant access control entry to perform this action"})
+
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                      :superuser).should have_status_code(200)
+                end
+              end
+
+              context "an actor indirectly in the GRANT ACE" do
+                with_actor :hasselhoff
+                with_group :hipsters, :actors => [:hasselhoff]
+                with_entity type.to_sym, :gozer
+
+                with_ace_on :gozer, :grant, :groups => [:hipsters]
+
+                it "can clear the ACE" do
+                  pending "causes internal 500 errors" do
+                    delete("/#{type}s/#{gozer}/acl/#{action}",
+                           :hasselhoff).should have_status_code(200).with_body({})
+
+                    get("/#{type}s/#{gozer}/acl/#{action}",
+                        :superuser).should have_status_code(404)
+                  end
+                end
+              end
+
+              context "with a non-existent target" do
+                with_actor :hasselhoff
+
+                it "can't clear its ACE, because it doesn't exist" do
+                  fake_entity = easterbunny
+
+                  # Prove it doesn't exist
+                  get("/#{type}s/#{fake_entity}/acl/#{action}",
+                      :hasselhoff).should have_status_code(404)
+
+                  # Now try to delete it
+                  delete("/#{type}s/#{fake_entity}/acl/#{action}",
+                         :hasselhoff).should have_status_code(404)
+                end
+              end
+            end
+          end
         end # DELETE
       end
     end
-  end # /objects/<object_id>/acl/<action>
+  end # /<type>/<object_id>/acl/<action>
 
   # Query the permission granted on an object of a given actor or group
   context "/objects/<object_id>/acl/<action>/<member_type>/<member_id>" do
