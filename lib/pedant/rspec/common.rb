@@ -259,9 +259,19 @@ module Pedant
           before :each do
             validate_entity_id(target)
 
-            actors = (ace[:actors] || []).map{|n| resolve(n)}
-            groups = (ace[:groups] || []).map{|n| resolve(n)}
+            actors = []
+            groups = []
 
+            all = (ace[:to] || []).map{|n| resolve(n)}
+            all.each do |member|
+              if (@thingies[member] == :actor)
+                actors.push(member)
+              elsif (@thingies[member] == :group)
+                groups.push(member)
+              else
+                "Type #{@thingies[member]} cannot have access on an item"
+              end
+            end
             type = @thingies[resolve(target)]
 
             response = put("/#{type}s/#{resolve(target)}/acl/#{permission.downcase}",
@@ -280,7 +290,9 @@ module Pedant
         # each of the five Authz permissions.
         def self.with_acl_on(target, acl)
           [:create, :read, :update, :grant, :delete].each do |p|
-            send("with_ace_on", target, p, (acl[p] || {}))
+            perm = acl[p] || {}
+            members = (perm[:actors] || []) + (perm[:group] || [])
+            send("with_ace_on", target, p, {:to => members})
           end
         end
 

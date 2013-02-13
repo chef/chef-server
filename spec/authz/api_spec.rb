@@ -25,7 +25,7 @@ describe "Pedant API" do
           context "for single ACE on actor" do
             with_actors :hasselhoff, :shatner
 
-            with_ace_on :shatner, action, :actors => [:hasselhoff]
+            with_ace_on :shatner, action, :to => [:hasselhoff]
 
             it "has permission" do
               :hasselhoff.should directly_have_permission(action).on(:actor, :shatner)
@@ -56,7 +56,7 @@ describe "Pedant API" do
             with_actors :hasselhoff, :shatner
             with_group :hipsters, :actors => [:hasselhoff]
 
-            with_ace_on :shatner, action, :groups => [:hipsters]
+            with_ace_on :shatner, action, :to => [:hipsters]
 
             it "has only indirect permission" do
               :hasselhoff.should_not directly_have_permission(action).on(:actor, :shatner)
@@ -70,7 +70,7 @@ describe "Pedant API" do
             with_group :hipsters, :actors => [:hasselhoff]
             with_group :brogrammers, :groups => [:hipsters]
 
-            with_ace_on :shatner, action, :groups => [:brogrammers]
+            with_ace_on :shatner, action, :to => [:brogrammers]
 
             it "has only doubly-indirect permission" do
               :hasselhoff.should_not directly_have_permission(action).on(:actor, :shatner)
@@ -134,7 +134,7 @@ describe "Pedant API" do
               with_actor :hasselhoff
               with_entity type, :gozer
 
-              with_ace_on :gozer, action, :actors => [:hasselhoff]
+              with_ace_on :gozer, action, :to => [:hasselhoff]
 
               it "has permission" do
                 :hasselhoff.should directly_have_permission(action).on(type, :gozer)
@@ -167,7 +167,7 @@ describe "Pedant API" do
               with_group :hipsters, :actors => [:hasselhoff]
               with_entity type, :gozer
 
-              with_ace_on :gozer, action, :groups => [:hipsters]
+              with_ace_on :gozer, action, :to => [:hipsters]
 
               it "has only indirect permission" do
                 :hasselhoff.should_not directly_have_permission(action).on(type, :gozer)
@@ -182,7 +182,7 @@ describe "Pedant API" do
               with_group :brogrammers, :groups => [:hipsters]
               with_entity type, :gozer
 
-              with_ace_on :gozer, action, :groups => [:brogrammers]
+              with_ace_on :gozer, action, :to => [:brogrammers]
 
               it "has only doubly-indirect permission" do
                 :hasselhoff.should_not directly_have_permission(action).on(type, :gozer)

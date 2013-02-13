@@ -131,7 +131,7 @@ describe "Objects Endpoint" do
         with_actor :hasselhoff
         with_object :spork
 
-        with_ace_on :spork, :read, :actors => [:hasselhoff]
+        with_ace_on :spork, :read, :to => [:hasselhoff]
 
         it "can read the object" do
           get("/objects/#{spork}",
@@ -163,7 +163,7 @@ describe "Objects Endpoint" do
         with_group :hipsters, :actors => [:hasselhoff]
         with_object :spork
 
-        with_ace_on :spork, :read, :groups => [:hipsters]
+        with_ace_on :spork, :read, :to => [:hipsters]
 
         it "can read the object" do
           get("/objects/#{spork}",
@@ -191,7 +191,7 @@ describe "Objects Endpoint" do
         with_actor :hasselhoff
         with_object :spork
 
-        with_ace_on :spork, :delete, :actors => [:hasselhoff]
+        with_ace_on :spork, :delete, :to => [:hasselhoff]
 
         it "can delete the object" do
           delete("/objects/#{spork}",
@@ -225,7 +225,7 @@ describe "Objects Endpoint" do
         with_group :hipsters, :actors => [:hasselhoff]
         with_object :spork
 
-        with_ace_on :spork, :delete, :groups => [:hipsters]
+        with_ace_on :spork, :delete, :to => [:hipsters]
 
         it "can delete the object" do
           delete("/objects/#{spork}",

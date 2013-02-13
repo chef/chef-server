@@ -21,7 +21,7 @@ describe "ACL Tests" do
               with_actor :hasselhoff
               with_entity type, :gozer
 
-              with_ace_on :gozer, ace.to_sym, :actors => [:hasselhoff]
+              with_ace_on :gozer, ace.to_sym, :to => [:hasselhoff]
 
               it "can read the acl" do
                 body = {
@@ -43,7 +43,7 @@ describe "ACL Tests" do
               with_group :hipsters, :actors => [:hasselhoff]
               with_entity type, :gozer
 
-              with_ace_on :gozer, ace.to_sym, :groups => [:hipsters]
+              with_ace_on :gozer, ace.to_sym, :to => [:hipsters]
 
               it "can read the acl" do
                 body = {
@@ -131,7 +131,7 @@ describe "ACL Tests" do
                   with_actor :hasselhoff
                   with_entity type, :gozer
 
-                  with_ace_on :gozer, ace.to_sym, :actors => [:hasselhoff]
+                  with_ace_on :gozer, ace.to_sym, :to => [:hasselhoff]
 
                   if (action == ace)
                     let(:body) { {"actors" => [hasselhoff], "groups" => []} }
@@ -150,7 +150,7 @@ describe "ACL Tests" do
                   with_group :hipsters, :actors => [:hasselhoff]
                   with_entity type, :gozer
 
-                  with_ace_on :gozer, ace.to_sym, :groups => [:hipsters]
+                  with_ace_on :gozer, ace.to_sym, :to => [:hipsters]
 
                   if (action == ace)
                     let(:body) { {"actors" => [], "groups" => [hipsters]} }
@@ -224,7 +224,7 @@ describe "ACL Tests" do
                 with_actor :hasselhoff
                 with_entity type, :gozer
 
-                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+                with_ace_on :gozer, :grant, :to => [:hasselhoff]
 
                 it "returns 400" do
                   pending "returns 500 instead" do
@@ -249,7 +249,7 @@ describe "ACL Tests" do
                 with_actor :hasselhoff
                 with_entity type, :gozer
 
-                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+                with_ace_on :gozer, :grant, :to => [:hasselhoff]
 
                 it "returns 400" do
                   pending "returns 200 instead" do
@@ -270,7 +270,7 @@ describe "ACL Tests" do
                 with_actor :hasselhoff
                 with_entity type, :gozer
 
-                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+                with_ace_on :gozer, :grant, :to => [:hasselhoff]
 
                 it "returns 400" do
                   pending "returns 200 instead" do
@@ -290,7 +290,7 @@ describe "ACL Tests" do
                 with_actor :hasselhoff
                 with_entity type, :gozer
 
-                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+                with_ace_on :gozer, :grant, :to => [:hasselhoff]
 
                 it "returns 400" do
                   pending "returns 200 instead" do
@@ -311,7 +311,7 @@ describe "ACL Tests" do
                 with_actor :hasselhoff
                 with_entity type, :gozer
 
-                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+                with_ace_on :gozer, :grant, :to => [:hasselhoff]
 
                 it "returns 400" do
                   pending "returns 200 instead" do
@@ -331,7 +331,7 @@ describe "ACL Tests" do
                 with_actors :hasselhoff, :schwartzenegger
                 with_entity type, :gozer
 
-                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+                with_ace_on :gozer, :grant, :to => [:hasselhoff]
 
                 it "can modify the ACE for actors" do
                   put("/#{type}s/#{gozer}/acl/#{action}",
@@ -350,7 +350,7 @@ describe "ACL Tests" do
                 with_group :brogrammers
                 with_entity type, :gozer
 
-                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+                with_ace_on :gozer, :grant, :to => [:hasselhoff]
 
                 it "can modify the ACE for groups" do
                   put("/#{type}s/#{gozer}/acl/#{action}",
@@ -399,7 +399,7 @@ describe "ACL Tests" do
                 with_group :hipsters, :actors => [:hasselhoff]
                 with_entity type, :gozer
 
-                with_ace_on :gozer, :grant, :groups => [:hipsters]
+                with_ace_on :gozer, :grant, :to => [:hipsters]
 
                 it "can modify the ACE for actors" do
                   put("/#{type}s/#{gozer}/acl/#{action}",
@@ -417,7 +417,7 @@ describe "ACL Tests" do
                 with_group :brogrammers
                 with_entity type, :gozer
 
-                with_ace_on :gozer, :grant, :groups => [:hipsters]
+                with_ace_on :gozer, :grant, :to => [:hipsters]
 
                 it "can modify the ACE for groups" do
                   put("/#{type}s/#{gozer}/acl/#{action}",
@@ -462,7 +462,7 @@ describe "ACL Tests" do
                 with_actor :hasselhoff
                 with_entity type, :gozer
 
-                with_ace_on :gozer, :grant, :actors => [:hasselhoff]
+                with_ace_on :gozer, :grant, :to => [:hasselhoff]
 
                 it "can clear the ACE" do
                   pending "causes internal 500 errors" do
@@ -502,7 +502,7 @@ describe "ACL Tests" do
                 with_group :hipsters, :actors => [:hasselhoff]
                 with_entity type, :gozer
 
-                with_ace_on :gozer, :grant, :groups => [:hipsters]
+                with_ace_on :gozer, :grant, :to => [:hipsters]
 
                 it "can clear the ACE" do
                   pending "causes internal 500 errors" do
@@ -616,7 +616,7 @@ describe "ACL Tests" do
                     with_actor :hasselhoff
                     with_entity type, :gozer
 
-                    with_ace_on :gozer, ace.to_sym, :actors => [:hasselhoff]
+                    with_ace_on :gozer, ace.to_sym, :to => [:hasselhoff]
 
                     if (action == ace)
                       it "returns 200 when in ACE" do
@@ -638,7 +638,7 @@ describe "ACL Tests" do
                     with_group :hipsters, :actors => [:hasselhoff]
                     with_entity type, :gozer
 
-                    with_ace_on :gozer, ace.to_sym, :groups => [:hipsters]
+                    with_ace_on :gozer, ace.to_sym, :to => [:hipsters]
 
                     if (action == ace)
                       it "returns 200 when in ACE" do
@@ -671,7 +671,7 @@ describe "ACL Tests" do
                     with_group :brogrammers, :actors => [:hasselhoff]
                     with_entity type, :gozer
 
-                    with_ace_on :gozer, ace.to_sym, :groups => [:brogrammers]
+                    with_ace_on :gozer, ace.to_sym, :to => [:brogrammers]
 
                     if (action == ace)
                       it "returns 200 when in ACE" do
@@ -698,7 +698,7 @@ describe "ACL Tests" do
                     with_group :brogrammers, :groups => [:hipsters]
                     with_entity type, :gozer
 
-                    with_ace_on :gozer, ace.to_sym, :groups => [:brogrammers]
+                    with_ace_on :gozer, ace.to_sym, :to => [:brogrammers]
 
                     if (action == ace)
                       # See above

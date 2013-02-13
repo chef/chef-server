@@ -140,7 +140,7 @@ describe "Groups Endpoint" do
         with_actor :hasselhoff
         with_group :hipsters
 
-        with_ace_on :hipsters, :read, :actors => [:hasselhoff]
+        with_ace_on :hipsters, :read, :to => [:hasselhoff]
 
         it "can read the group" do
           get("/groups/#{hipsters}",
@@ -173,7 +173,7 @@ describe "Groups Endpoint" do
         with_group :hipsters, :actors => [:hasselhoff]
         with_group :brogrammers
 
-        with_ace_on :brogrammers, :read, :groups => [:hipsters]
+        with_ace_on :brogrammers, :read, :to => [:hipsters]
 
         it "can read the group" do
           get("/groups/#{brogrammers}",
@@ -201,7 +201,7 @@ describe "Groups Endpoint" do
         with_actor :hasselhoff
         with_group :hipsters
 
-        with_ace_on :hipsters, :delete, :actors => [:hasselhoff]
+        with_ace_on :hipsters, :delete, :to => [:hasselhoff]
 
         it "can delete the group" do
           delete("/groups/#{hipsters}",
@@ -235,7 +235,7 @@ describe "Groups Endpoint" do
         with_group :hipsters, :actors => [:hasselhoff]
         with_group :brogrammers
 
-        with_ace_on :brogrammers, :delete, :groups => [:hipsters]
+        with_ace_on :brogrammers, :delete, :to => [:hipsters]
 
         it "can delete the group" do
           delete("/groups/#{brogrammers}",
@@ -344,7 +344,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "can add a user to the group" do
             put("/groups/#{hipsters}/actors/#{shatner}",
@@ -360,7 +360,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "can add the same user to the group" do
             put("/groups/#{hipsters}/actors/#{shatner}",
@@ -379,7 +379,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "adding a bogus user raises an error" do
             bogus_actor = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
@@ -429,7 +429,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
           with_group :brogrammers, :actors => [:shatner]
 
-          with_ace_on :hipsters, :update, :groups => [:brogrammers]
+          with_ace_on :hipsters, :update, :to => [:brogrammers]
 
           it "can add a user to the group" do
             put("/groups/#{hipsters}/actors/#{shatner}",
@@ -457,7 +457,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
           with_group :brogrammers
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "can add a group to the group" do
             put("/groups/#{hipsters}/groups/#{brogrammers}",
@@ -474,7 +474,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
           with_group :brogrammers
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "cannot add a group to itself" do
             pending "you shouldn't be able to" do
@@ -492,7 +492,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
           with_group :brogrammers
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "can add the same group to the group" do
             put("/groups/#{hipsters}/groups/#{brogrammers}",
@@ -512,7 +512,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
           with_group :brogrammers
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "adding a bogus group raises an error" do
             bogus_group = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
@@ -564,7 +564,7 @@ describe "Groups Endpoint" do
           with_group :brogrammers, :actors => [:shatner]
           with_group :commies
 
-          with_ace_on :hipsters, :update, :groups => [:brogrammers]
+          with_ace_on :hipsters, :update, :to => [:brogrammers]
 
           it "can add a group to the group" do
             put("/groups/#{hipsters}/groups/#{commies}",
@@ -579,7 +579,7 @@ describe "Groups Endpoint" do
           with_group :hipsters
           with_group :brogrammers, :groups => [:hipsters]
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "are disallowed" do
             pending "they should be" do
@@ -603,7 +603,7 @@ describe "Groups Endpoint" do
           with_group :commies, :groups => [:brogrammers]
           with_group :dirtycommies, :groups => [:commies]
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "are disallowed" do
             pending "they should be" do
@@ -641,7 +641,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters, :actors => [:shatner]
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "can delete a user from the group" do
             delete("/groups/#{hipsters}/actors/#{shatner}",
@@ -657,7 +657,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters, :actors => [:shatner]
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "cannot delete a user from an empty group" do
             delete("/groups/#{hipsters}/actors/#{shatner}",
@@ -677,7 +677,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters, :actors => [:shatner]
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "deleting a bogus user raises an error" do
             bogus_actor = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
@@ -698,7 +698,7 @@ describe "Groups Endpoint" do
           with_actor :shatner
           with_group :hipsters, :actors => [:shatner]
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "deleting a non-existent user raises an error" do
             fake_actor = mattdamon
@@ -740,7 +740,7 @@ describe "Groups Endpoint" do
           with_group :hipsters, :actors => [:shatner]
           with_group :brogrammers, :actors => [:shatner]
 
-          with_ace_on :hipsters, :update, :groups => [:brogrammers]
+          with_ace_on :hipsters, :update, :to => [:brogrammers]
 
           it "can delete a user from the group" do
             delete("/groups/#{hipsters}/actors/#{shatner}",
@@ -768,7 +768,7 @@ describe "Groups Endpoint" do
           with_group :brogrammers
           with_group :hipsters, :groups => [:brogrammers]
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "can delete a user from the group" do
             delete("/groups/#{hipsters}/groups/#{brogrammers}",
@@ -785,7 +785,7 @@ describe "Groups Endpoint" do
           with_group :brogrammers
           with_group :hipsters, :groups => [:brogrammers]
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "cannot delete a user from an empty group" do
             delete("/groups/#{hipsters}/groups/#{brogrammers}",
@@ -806,7 +806,7 @@ describe "Groups Endpoint" do
           with_group :brogrammers
           with_group :hipsters, :groups => [:brogrammers]
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "deleting a bogus user raises an error" do
             bogus_group = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
@@ -828,7 +828,7 @@ describe "Groups Endpoint" do
           with_group :brogrammers
           with_group :hipsters, :groups => [:brogrammers]
 
-          with_ace_on :hipsters, :update, :actors => [:shatner]
+          with_ace_on :hipsters, :update, :to => [:shatner]
 
           it "deleting a non-existent user raises an error" do
             fake_group = car_salesmen
@@ -872,7 +872,7 @@ describe "Groups Endpoint" do
           with_group :hipsters, :groups => [:dirtycommies]
           with_group :brogrammers, :actors => [:shatner]
 
-          with_ace_on :hipsters, :update, :groups => [:brogrammers]
+          with_ace_on :hipsters, :update, :to => [:brogrammers]
 
           it "can delete a user from the group" do
             delete("/groups/#{hipsters}/groups/#{dirtycommies}",
