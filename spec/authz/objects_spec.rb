@@ -1,10 +1,7 @@
 describe "Objects Endpoint" do
+  let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
+  let(:god) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
-  # Superusers should be able to read any ACL, update any ACL, delete
-  # objects, etc.  This applies everywhere.
-  let(:requestor){superuser}
-
-  # Create a new object
   context "/objects" do
     should_not_allow :GET, "/objects"
 
@@ -28,7 +25,6 @@ describe "Objects Endpoint" do
     should_not_allow :DELETE, "/objects"
   end # /objects
 
-  # Manipulate a specific object
   context "/objects/<object_id>" do
     # NOTE: This appears to be essentially a meaningless operation
     # right now... looks like it always returns an empty JSON hash
@@ -41,21 +37,104 @@ describe "Objects Endpoint" do
     context "DELETE"
   end # /objects/<object_id>
 
-  # See all permissions on a given object
-  context "/objects/<object_id>/acl" do
-    # GET full ACL if the requesting actor (from the header) has grant
-    # permission on the object or group
-    #
-    # Cucumber: tests each ACE individually to ensure the requesting
-    # actor is present... not sure if it also compares that to the
-    # full ACL to make sure they're the same.
-    context "GET"
+  context "/<type>/<id>/acl", :focus do
+    # What we are testing:
 
-    # NOTE: We'll want to eventually allow these operations in order
-    # to facilitate bulk operations
-    should_not_allow :POST, "/objects/ffffffffffffffffffffffffffffffff/acl"
-    should_not_allow :PUT, "/objects/ffffffffffffffffffffffffffffffff/acl"
-    should_not_allow :DELETE, "/objects/ffffffffffffffffffffffffffffffff/acl"
+    # Here we test access to type's ACL and that the response body
+    # has the correct format.  Apparently, any ACE at all grants
+    # access to the ACL (is this a good idea?[1]) -- we test each ACE in
+    # turn, both directly and indirectly through a group.  All other
+    # HTTP verbs should be disallowed.
+
+    # [1] Apparently done intentionally, but the reasons are lost to the
+    # mists of time.  Would be nice to find those reasons again.
+    ['group', 'container', 'object'].each do |type|
+      context "for #{type.upcase} type" do
+        context "GET" do
+          ['create', 'read', 'update', 'delete', 'grant'].each do |ace|
+
+            context "an actor directly in the #{ace.upcase} ACE" do
+              with_actor :hasselhoff
+              with_entity type.to_sym, :gozer
+
+              with_ace_on :gozer, ace.to_sym, :actors => [:hasselhoff]
+
+              it "can read the acl" do
+                body = {
+                  "create" => {"actors" => [], "groups" => []},
+                  "read" => {"actors" => [], "groups" => []},
+                  "update" => {"actors" => [], "groups" => []},
+                  "delete" => {"actors" => [], "groups" => []},
+                  "grant" => {"actors" => [], "groups" => []}
+                }
+                body[ace] = {"actors" => [hasselhoff], "groups" => []}
+
+                get("/#{type}s/#{gozer}/acl",
+                    :hasselhoff).should have_status_code(200).with_body(body)
+              end
+            end
+
+            context "an actor indirectly in the #{ace.upcase} ACE" do
+              with_actor :hasselhoff
+              with_group :hipsters, :actors => [:hasselhoff]
+              with_entity type.to_sym, :gozer
+
+              with_ace_on :gozer, ace.to_sym, :groups => [:hipsters]
+
+              it "can read the acl" do
+                body = {
+                  "create" => {"actors" => [], "groups" => []},
+                  "read" => {"actors" => [], "groups" => []},
+                  "update" => {"actors" => [], "groups" => []},
+                  "delete" => {"actors" => [], "groups" => []},
+                  "grant" => {"actors" => [], "groups" => []}
+                }
+                body[ace] = {"actors" => [], "groups" => [hipsters]}
+
+                get("/#{type}s/#{gozer}/acl",
+                    :hasselhoff).should have_status_code(200).with_body(body)
+              end
+            end
+          end
+
+          context "an actor with NO ACE" do
+            with_actor :malkovich
+            with_entity type.to_sym, :gozer
+
+            # Give malkovich no access at all
+            with_acl_on :gozer, {
+              :create => {:actors => [], :groups => []},
+              :read   => {:actors => [], :groups => []},
+              :update => {:actors => [], :groups => []},
+              :delete => {:actors => [], :groups => []},
+              :grant  => {:actors => [], :groups => []}
+            }
+
+            it "cannot read the acl" do
+              get("/#{type}s/#{gozer}/acl", :malkovich).should have_status_code(403).
+                with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
+            end
+          end
+
+          context "with a non-existent target" do
+            with_actor :hasselhoff
+
+            it "can't be read, because it doesn't exist" do
+              fake_entity = god
+
+              get("/#{type}s/#{fake_entity}/acl",
+                  :hasselhoff).should have_status_code(404)
+            end
+          end
+        end # GET
+
+        # NOTE: We'll want to eventually allow these operations in order
+        # to facilitate bulk operations
+        should_not_allow :POST, "/#{type}s/ffffffffffffffffffffffffffffffff/acl"
+        should_not_allow :PUT, "/#{type}s/ffffffffffffffffffffffffffffffff/acl"
+        should_not_allow :DELETE, "/#{type}s/ffffffffffffffffffffffffffffffff/acl"
+      end
+    end
   end # /objects/<object_id>/acl
 
   # Manipulate a specific permission on a given object
