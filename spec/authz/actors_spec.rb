@@ -91,11 +91,11 @@ describe "Actors Endpoint" do
         with_actor :shatner
 
         it "is in own ACEs" do
-          :shatner.should directly_have_permission(:create).on_actor(:shatner)
-          :shatner.should directly_have_permission(:read).on_actor(:shatner)
-          :shatner.should directly_have_permission(:update).on_actor(:shatner)
-          :shatner.should directly_have_permission(:delete).on_actor(:shatner)
-          :shatner.should directly_have_permission(:grant).on_actor(:shatner)
+          :shatner.should directly_have_permission(:create).on(:actor, :shatner)
+          :shatner.should directly_have_permission(:read).on(:actor, :shatner)
+          :shatner.should directly_have_permission(:update).on(:actor, :shatner)
+          :shatner.should directly_have_permission(:delete).on(:actor, :shatner)
+          :shatner.should directly_have_permission(:grant).on(:actor, :shatner)
         end
       end
 

@@ -1,4 +1,4 @@
-describe "Pedant API", :focus do
+describe "Pedant API" do
   context "sanity check" do
     # What we are testing:
 
