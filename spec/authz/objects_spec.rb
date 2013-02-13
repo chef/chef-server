@@ -120,7 +120,7 @@ describe "Objects Endpoint" do
     should_not_allow :DELETE, "/objects"
   end # /objects
 
-  context "/objects/<object_id>", :focus do
+  context "/objects/<object_id>" do
     # What we are testing:
 
     # Here we test object existence with GET (should require
@@ -353,6 +353,19 @@ describe "Objects Endpoint" do
 
   # Manipulate a specific permission on a given object
   context "/objects/<object_id>/acl/<action>" do
+    # What we are testing:
+
+    # Here we test access to a specific ACE/action in each type's ACL
+    # and that the response body has the correct format.  Apparently,
+    # any ACE at all grants access to the ACL -- we test each ACE in
+    # turn, both directly and indirectly through a group.  PUT is used
+    # for updating the ACL and is likewise tested (although there is
+    # currently no checking for request correctness, and authz will
+    # crash on badly formatted requests).  DELETE is also tested,
+    # however it seems to be broken.  HTTP POST should be disallowed.
+
+    # Old notes:
+
     # GET actors and groups for action
     #
     # Cucumber: ensure a newly-created object has the requesting actor
@@ -374,18 +387,103 @@ describe "Objects Endpoint" do
     #
     # Actually... this may be just an artifact of how the Cuke tests
     # are written.
-    context "GET"
+    
+    ['group', 'container', 'object'].each do |type|
+      context "for #{type.upcase} type" do
+        context "GET" do
+          ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+            context "for #{action.upcase} action" do
+              ['create', 'read', 'update', 'delete', 'grant'].each do |ace|
 
-    should_not_allow :POST, "/objects/ffffffffffffffffffffffffffffffff/acl/create"
+                context "an actor directly in the #{ace.upcase} ACE" do
+                  with_actor :hasselhoff
+                  with_entity type.to_sym, :gozer
 
-    # PUT replaces an ACE atomically
-    context "PUT"
+                  with_ace_on :gozer, ace.to_sym, :actors => [:hasselhoff]
 
-    # Only actors in the DELETE ACE (directly or indirectly) can delete an object
-    #
-    # Deleting a non-existent object returns a 404
-    #
-    context "DELETE"
+                  if (action == ace)
+                    let(:body) { {"actors" => [hasselhoff], "groups" => []} }
+                  else
+                    let(:body) { {"actors" => [], "groups" => []} }
+                  end
+
+                  it "can read the acl" do
+                    get("/#{type}s/#{gozer}/acl/#{action}",
+                        :hasselhoff).should have_status_code(200).with_body(body)
+                  end
+                end
+
+                context "an actor indirectly in the #{ace.upcase} ACE" do
+                  with_actor :hasselhoff
+                  with_group :hipsters, :actors => [:hasselhoff]
+                  with_entity type.to_sym, :gozer
+
+                  with_ace_on :gozer, ace.to_sym, :groups => [:hipsters]
+
+                  if (action == ace)
+                    let(:body) { {"actors" => [], "groups" => [hipsters]} }
+                  else
+                    let(:body) { {"actors" => [], "groups" => []} }
+                  end
+
+                  it "can read the acl" do
+                    get("/#{type}s/#{gozer}/acl/#{action}",
+                        :hasselhoff).should have_status_code(200).with_body(body)
+                  end
+                end
+
+                context "an actor with NO ACE" do
+                  with_actor :malkovich
+                  with_entity type.to_sym, :gozer
+
+                  # Give malkovich no access at all
+                  with_acl_on :gozer, {
+                    :create => {:actors => [], :groups => []},
+                    :read   => {:actors => [], :groups => []},
+                    :update => {:actors => [], :groups => []},
+                    :delete => {:actors => [], :groups => []},
+                    :grant  => {:actors => [], :groups => []}
+                  }
+
+                  it "cannot read the acl" do
+                    get("/#{type}s/#{gozer}/acl/#{action}",
+                        :malkovich).should have_status_code(403).with_body({"error" => "must be in one of the create, read, update, delete, grant access control entries to perform this action"})
+                  end
+                end
+
+                context "with a non-existent target" do
+                  with_actor :hasselhoff
+
+                  it "can't be read, because it doesn't exist" do
+                    fake_entity = god
+
+                    get("/#{type}s/#{fake_entity}/acl/#{action}",
+                        :hasselhoff).should have_status_code(404)
+                  end
+                end
+              end
+            end
+          end
+        end # GET
+
+        ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+          context "for #{action.upcase} action" do
+            should_not_allow :POST, "/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}"
+          end
+        end
+
+        # PUT replaces an ACE atomically
+        context "PUT", :focus do
+        end # PUT
+
+        # Only actors in the DELETE ACE (directly or indirectly) can delete an object
+        #
+        # Deleting a non-existent object returns a 404
+        #
+        context "DELETE" do
+        end # DELETE
+      end
+    end
   end # /objects/<object_id>/acl/<action>
 
   # Query the permission granted on an object of a given actor or group

@@ -1056,13 +1056,12 @@ describe "Groups Endpoint" do
 
     # Here we test access to a specific ACE/action in group's ACL and
     # that the response body has the correct format.  Apparently, any
-    # ACE at all grants access to the ACL (is this a bug?) -- we test
-    # each ACE in turn, both directly and indirectly through a group.
-    # PUT is used for updating the ACL and is likewise tested
-    # (although there is currently no checking for request
-    # correctness, and authz will crash on badly formatted requests).
-    # DELETE is also tested, however it seems to be broken.  HTTP POST
-    # should be disallowed.
+    # ACE at all grants access to the ACL -- we test each ACE in turn,
+    # both directly and indirectly through a group.  PUT is used for
+    # updating the ACL and is likewise tested (although there is
+    # currently no checking for request correctness, and authz will
+    # crash on badly formatted requests).  DELETE is also tested,
+    # however it seems to be broken.  HTTP POST should be disallowed.
 
     # Old notes:
 
