@@ -13,16 +13,6 @@ shape the migrations to best meet business needs.
 3. Substantially reduce our production use of CouchDB
 ** secondary goals
 1. OPC migration tooling
-
-* Operating Assumptions for All Migrations
-** We will integrate darklaunch into nginx to simplify migrations and increase darklaunch's utility.
-** Our goal is to perform the migrations in two steps. The first step is to migrate a few sympathetic
-   customers who've volunteered to be guinea pigs. A full migration and deploy will follow once these
-   users are running problem-free on the new code and database.
-** Full migrations will be carried out using a site-wide outage. We'll reduce the chance of exceeding the
-   outage window by having a good grasp of the migration process, understanding the execution time of
-   the migration, and announcing an outage window with sufficient padding to allow us to handle potential
-   issues.
 * TODO To be researched
 ** groups
 *** Do we use this as an excuse to drive USAG / SOSA's forward
@@ -57,106 +47,8 @@ shape the migrations to best meet business needs.
 *** quickstart wizard and job worker (or just drop them)
 *** utilities
 ** Understand groups and containers global vs local
-* Steps
-** DONE Step 0: Order new database hardware
-** TODO Step 1: Prepare PostgreSQL server for prod use
-   KS: How much of this work can we lean on Ops to do for us?
-*** cookbook development for pg
-*** monitoring
-*** Deploy server to prod environment
-**** At this point server is in prod but not used by any components
-*** HA configuration
-*** Test HA failover
-*** research backup options
-Looks like zmanda has [[http://www.zmanda.com/postgres-backup.html][an offering]] so that might be easiest since we
-are already using it for mysql.
-*** implement backup
-*** test recovery
-**** Server is now ready for production use
-** TODO Step 2: Prepare for migration
-*** Assumptions
-1. The databases for the community site and reporting beta will continue
-   to use MySQL.
-*** Write dump and load mysql to pg tool
-**** Time dump/load time, is it reasonable for a full downtime outage?
-*** Test data dump/load in preprod
-*** Identify all services which will need to interop with PostgreSQL
-
-**** For each service we need to determine the amount of work required
-     to move it to PostgreSQL. Extent of code changes, cookbook changes, etc.
-**** Current list:
-1. opscode-account
-2. opscode-chef
-3. opscode-erchef
-4. orgmapper
-5. opscode-support (may need work? do we move the table?)
-6. zmanda?
-7. Internal reporting cron scripts
-
-*** Write deploy plan
-*** Test deploy plan in preprod
-*** Questions
-**** Should we upgrade to a sane user table schema before, after, or as
-     a part of this migration? Where "sane" means looking much more like
-     what is in OSC and where we upgrade hashed passwords to use bcrypt.
-***** KS: Does deferring the schema change cause us to incur more work now?
-      If not, my preference is the path of least work. If we'd need to
-      change code to work with the existing schema then we should
-      do the Right Thing and upgrade to the OSC-like schema.
-** TODO Step 3: Guinea Pig MySQL -> PostgreSQL Migration
-*** TBD
-** TODO Step 4: Complete MySQL -> PostgreSQL Migration
-*** full outage
-*** dump, load
-*** config change and restart services
-** TODO Step 5: Finish /clients for oc_erchef OPC/OHC
-** TODO Step 6: Uncle Ned Parity + clients
-For the detailed plan for Migration 3, see
-[[file:./rfc-erchef-migration.org][OHC Migration 3, Uncle Ned Parity with Clients]].
-
-The following endpoints would move to oc_erchef and pgsql:
-- clients
-- cookbooks, cookbook versions (and dep solver)
-- data bags and data bag items
-- environments
-- roles
-- sandboxes
-- checksums
-** Build moser migrator tooling for the nine types
-** Enhance chef-mover to drive moser migrator
-** Measure migration time. Will batches be required?
-** Migrate guinea pigs?
-** Perform migration
-** What will be left in couchdb?
-- groups
-- containers
-- global stuff
-  - user/org association
-  - user/org invites
-  - global admin groups (one per org)
-  - global admin group container?
-  - orgs container
-  - users container
-** TODO Step 7: Global Data in SQL
-** TODO Step 8: Global Data
-At least the data for the following endpoints and magic objects would
-move to pgsql:
-- groups
-- orgs
-- global ORGX_admins_group groups
-- global containers (admins group, users, orgs)
-- user/org associations
-- user/org invites
-*** Questions
-1. Do we want to just move the data or move oc-account funcationality
-   to an Erlang-based webservice?
-2. Can the entire migration fit in an outage window?
-3. Do we have to migrate unassigned orgs? Is there a way to
-   pre-create unassigned orgs in the new system?
-** TODO Step 9: groups and containers in SQL
-** TODO Step 10: Remaining chef data to pgsql
-*** Survey of data to migrate
-**** Global Data
+** Survey of data to migrate
+*** Global Data
 Except for user data, global data currently lives in the
 =opscode_account= couchdb database. All global data is currently
 handled by the opscode-account service. The opscode-account service
@@ -172,17 +64,17 @@ is still implemented in Merb.
 | org invites          | oc-account      | couch "opscode_account" |      |
 | user/org association | oc-account      | couch "opscode_account" |      | 
    
-**** Org-specific
-**** Org Creation Details
+*** Org-specific
+*** Org Creation Details
 opscode-org-creator uses code in opscode-account (specifically the
 bin/bootstraptool script) to pre-create orgs.
 
-*** Flow of org pre-creation via bootstraptool
+** Flow of org pre-creation via bootstraptool
 1. Call create_org_internal making a POST to /internal-organizations
    with full_name, name, and org_type.
 2. Make the org "unassigned" via make_org_unassigned. PUT to
    /internal-organizations/ORGNAME with body ={"unassigned":true}=.
-*** What happens in processing a POST to /internal-organizations
+** What happens in processing a POST to /internal-organizations
 1. Fetch global organizations container
 2. Verify requesting actor has CREATE on organizations container
 3. Verify org name does not exist
@@ -195,7 +87,7 @@ bin/bootstraptool script) to pre-create orgs.
    1. Creates couchdb "chef_" database and initializes it with design
       docs. Creates default environment if environments are in couch.
    2. Uses =OrgAuthPolicy= to apply policy. See below.
-*** Details of OrgAuthPolicy
+** Details of OrgAuthPolicy
 Global groups are groups where the user/chef-side of the group lives
 in the opscode-account db rather than in the chef_beef db.
 
@@ -302,7 +194,102 @@ Mixlib::Authorization::OrgAuthPolicy.default do |org|
     Mixlib::Authorization::Models::Environment.on(org_db).new(:name=>"_default", :requester_id => requesting_actor_id, :orgname=>org_name).save
   end
 end
-#+END_SR
-** Miscellaneous Notes & Things To Research
+#+END_SRC
 
+* Overview of Migration Steps [0/6]
+Detailed plans are in top-level sections below.
+** TODO [[M1]]: MySQL-> PgSQL
+** TODO [[M2]]: Finish /clients for oc_erchef OPC/OHC
+** TODO [[M3]]: Uncle Ned Parity + clients
+** TODO [[M4]]: (NEEDS RESEARCH) Global Data CouchDB -> PgSQL
+** TODO [[M5]]: (NEEDS RESEARCH) Finish groups and containers for oc_erchef OPC/OHC
+** TODO [[M6]]: (NEEDS RESEARCH) groups and containers CouchDb -> PgSQL
+* <<M1>>: MySQL -> PgSQL [1/4]
+** DONE Step 0: Order new database hardware
+** TODO Step 1: Prepare PostgreSQL server for prod use
+*** cookbook development for pg
+*** monitoring
+*** Deploy server to prod environment
+**** At this point server is in prod but not used by any components
+*** HA configuration
+*** Test HA failover
+*** research backup options
+Looks like zmanda has [[http://www.zmanda.com/postgres-backup.html][an offering]] so that might be easiest since we
+are already using it for mysql.
+*** implement backup
+*** test recovery
+** TODO Step 2: Prepare for migration [0/5]
+*** Assumptions
+1. The databases for the community site and reporting beta will continue
+   to use MySQL.
+*** TODO Write dump and load mysql to pg tool
+**** Time dump/load time, is it reasonable for a full downtime outage?
+*** TODO Test data dump/load in preprod
+*** TODO Identify all services which will need to interop with PostgreSQL
+**** For each service we need to determine the amount of work required
+     to move it to PostgreSQL. Extent of code changes, cookbook changes, etc.
+**** Current list:
+1. opscode-account
+2. opscode-chef
+3. opscode-erchef
+4. orgmapper
+5. opscode-support (may need work? do we move the table?)
+6. zmanda?
+7. Internal reporting cron scripts
+*** TODO Write deploy plan
+*** TODO Test deploy plan in preprod
+*** Questions
+**** Should we upgrade to a sane user table schema before, after, or as
+     a part of this migration? Where "sane" means looking much more like
+     what is in OSC and where we upgrade hashed passwords to use bcrypt.
+***** KS: Does deferring the schema change cause us to incur more work now?
+      If not, my preference is the path of least work. If we'd need to
+      change code to work with the existing schema then we should
+      do the Right Thing and upgrade to the OSC-like schema.
+** TODO Step 3: Complete MySQL -> PostgreSQL Migration
+*** full outage
+*** dump, load
+*** config change and restart services
+* <<M2>>: Finish clients endpoint for OPC/OHC
+* <<M3>>: Uncle Ned Parity with Clients (CouchDB -> PgSQL)
+For the detailed plan for Migration 3, see
+[[file:./rfc-erchef-migration.org][OHC Migration 3, Uncle Ned Parity with Clients]].
 
+The following endpoints would move to oc_erchef and pgsql:
+- clients
+- cookbooks, cookbook versions (and dep solver)
+- data bags and data bag items
+- environments
+- roles
+- sandboxes
+- checksums
+** Build moser migrator tooling for the nine types
+** Enhance chef-mover to drive moser migrator
+** Measure migration time. Will batches be required?
+** Migrate guinea pigs?
+** Perform migration
+** What will be left in couchdb?
+- groups
+- containers
+- global stuff
+  - user/org association
+  - user/org invites
+  - global admin groups (one per org)
+  - global admin group container?
+  - orgs container
+  - users container
+* <<M4>>, <<M5>>, <<M6>> (NEEDS RESEARCH)
+At least the data for the following endpoints and magic objects would
+move to pgsql:
+- groups
+- orgs
+- global ORGX_admins_group groups
+- global containers (admins group, users, orgs)
+- user/org associations
+- user/org invites
+*** Questions
+1. Do we want to just move the data or move oc-account funcationality
+   to an Erlang-based webservice?
+2. Can the entire migration fit in an outage window?
+3. Do we have to migrate unassigned orgs? Is there a way to
+   pre-create unassigned orgs in the new system?
