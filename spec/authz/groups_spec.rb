@@ -1521,7 +1521,7 @@ describe "Groups Endpoint" do
         end
       end
     end
-  end # /actors/<actor_id>/acl/<action>/<member_type>
+  end # /groups/<actor_id>/acl/<action>/<member_type>
 
   # Query the permission granted on an group of a given actor or group
   context "/groups/<group_id>/acl/<action>/<member_type>/<member_id>" do

@@ -349,10 +349,10 @@ describe "Objects Endpoint" do
         should_not_allow :DELETE, "/#{type}s/ffffffffffffffffffffffffffffffff/acl"
       end
     end
-  end # /<type>/<object_id>/acl
+  end # /<type>/<id>/acl
 
   # Manipulate a specific permission on a given object
-  context "/<type>/<object_id>/acl/<action>" do
+  context "/<type>/<id>/acl/<action>" do
     # What we are testing:
 
     # Here we test access to a specific ACE/action in each type's ACL
@@ -793,10 +793,68 @@ describe "Objects Endpoint" do
         end # DELETE
       end
     end
-  end # /<type>/<object_id>/acl/<action>
+  end # /<type>/<id>/acl/<action>
 
-  # Query the permission granted on an object of a given actor or group
-  context "/objects/<object_id>/acl/<action>/<member_type>/<member_id>" do
+  context "/<type>/<id>/acl/<action>/<member_type>" do
+    # What we are testing:
+
+    # These are basically null tests to verify that the server does
+    # not act on incomplete requests; there are subpaths for these
+    # tests that do (sometimes, more or less) work, but we're testing
+    # this for completeness.
+
+    # Might want to cut some of these out -- containers and object
+    # versions should always be 404 even when an ID is specified,
+    # since they can't have permissions
+
+    ['actor', 'group', 'container', 'object'].each do |type|
+      context "for #{type.upcase} type" do
+        ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+          context "for #{action.upcase} action" do
+            ['actors', 'groups', 'objects', 'containers'].each do |member_type|
+              context "for #{member_type.upcase} member type" do
+                with_entity type.to_sym, :zuul
+
+                it "get should not be found" do
+                  get("/#{type}s/#{zuul}/acl/#{action}/#{member_type}/",
+                      :superuser).should have_status_code(404)
+                end
+
+                it "post should not be found" do
+                  post("/#{type}s/#{zuul}/acl/#{action}/#{member_type}/",
+                       :superuser).should have_status_code(404)
+                end
+
+                it "put should not be found" do
+                  put("/#{type}s/#{zuul}/acl/#{action}/#{member_type}/",
+                      :superuser).should have_status_code(404)
+                end
+
+                it "delete should not be found" do
+                  delete("/#{type}s/#{zuul}/acl/#{action}/#{member_type}/",
+                         :superuser).should have_status_code(404)
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+  end # /<type>/<id>/acl/<action>/<member_type>
+
+  context "/<type>/<id>/acl/<action>/<member_type>/<member_id>" do
+    # What we are testing:
+
+    # Here we test via GET access to specific ACE from member_id to
+    # group_id.  Apparently this returns 200 (with no body) if access
+    # is available or 404 if not.  Supposedly groups are supported as
+    # a member_type, but tests seem to show that only actors work
+    # correctly.  We also test that a bogus member_type does not
+    # return as having access.  All other HTTP verbs should be
+    # disallowed.
+
+    # Old notes:
+
     # GET uses is_authorized_on_object to determine whether the
     # specified actor / group has the specified permission
     #
@@ -815,10 +873,195 @@ describe "Objects Endpoint" do
     # (however if an actor is in multiple groups, and one of them is
     # removed, that actor should still have the permission by virtue
     # of their other group membership!  This wasn't tested in Cuke.)
-    context "GET"
+    ['actor', 'group', 'container', 'object'].each do |type|
+      context "for #{type.upcase} type" do
+        context "GET" do
+          ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+            context "for #{action.upcase} action" do
+              ['create', 'read', 'update', 'delete', 'grant'].each do |ace|
+                context "for ACTORS member type" do
+                  context "an actor directly in the #{ace.upcase} ACE" do
+                    with_actor :hasselhoff
+                    with_entity type.to_sym, :gozer
 
-    should_not_allow :POST, "/objects/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-    should_not_allow :PUT, "/objects/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-    should_not_allow :DELETE, "/objects/ffffffffffffffffffffffffffffffff/acl/create/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-  end # /objects/<object_id>/acl/<action>/<member_type>/<member_id>
+                    with_ace_on :gozer, ace.to_sym, :actors => [:hasselhoff]
+
+                    if (action == ace)
+                      it "returns 200 when in ACE" do
+                        # Hasselhoff has specific ACE access on gozer
+                        get("/#{type}s/#{gozer}/acl/#{action}/actors/#{hasselhoff}",
+                            :hasselhoff).should have_status_code(200).with_body({})
+                      end
+                    else
+                      it "returns 404 when not in ACE" do
+                        # Hasselhoff does not have other access on gozer
+                        get("/#{type}s/#{gozer}/acl/#{action}/actors/#{hasselhoff}",
+                            :hasselhoff).should have_status_code(404)
+                      end
+                    end
+                  end
+
+                  context "an actor indirectly in the #{ace} ACE" do
+                    with_actor :hasselhoff
+                    with_group :hipsters, :actors => [:hasselhoff]
+                    with_entity type.to_sym, :gozer
+
+                    with_ace_on :gozer, ace.to_sym, :groups => [:hipsters]
+
+                    if (action == ace)
+                      it "returns 200 when in ACE" do
+                        get("/#{type}s/#{gozer}/acl/#{action}/actors/#{hasselhoff}",
+                            :hasselhoff).should have_status_code(200).with_body({})
+                      end
+                    else
+                      it "returns 404 when not in ACE" do
+                        get("/#{type}s/#{gozer}/acl/#{action}/actors/#{hasselhoff}",
+                            :hasselhoff).should have_status_code(404)
+                      end
+                    end
+                  end
+
+                  context "with a non-existent target" do
+                    with_actor :hasselhoff
+
+                    it "can't be read, because it doesn't exist" do
+                      fake_entity = easterbunny
+
+                      get("/#{type}s/#{fake_entity}/acl/#{action}/actors/#{hasselhoff}",
+                          :hasselhoff).should have_status_code(404)
+                    end
+                  end
+                end
+
+                context "for GROUPS member type" do
+                  context "a group directly in the #{ace} ACE" do
+                    with_actor :hasselhoff
+                    with_group :brogrammers, :actors => [:hasselhoff]
+                    with_entity type.to_sym, :gozer
+
+                    with_ace_on :gozer, ace.to_sym, :groups => [:brogrammers]
+
+                    if (action == ace)
+                      it "returns 200 when in ACE" do
+                        # My understanding is that if group X has permissions on actor X,
+                        # this should return 200, but as it is, it doesn't
+                        pending "doesn't seem to work" do
+                          # Brogrammers has specific ACE access on gozer
+                          get("/#{type}s/#{gozer}/acl/#{action}/groups/#{brogrammers}",
+                              :hasselhoff).should have_status_code(200).with_body({})
+                        end
+                      end
+                    else
+                      it "returns 404 when not in ACE" do
+                        # Brogrammers does not have other access on gozer
+                        get("/#{type}s/#{gozer}/acl/#{action}/groups/#{brogrammers}",
+                            :hasselhoff).should have_status_code(404)
+                      end
+                    end
+                  end
+
+                  context "a group indirectly in the #{ace} ACE" do
+                    with_actors :hasselhoff
+                    with_group :hipsters, :actors => [:hasselhoff]
+                    with_group :brogrammers, :groups => [:hipsters]
+                    with_entity type.to_sym, :gozer
+
+                    with_ace_on :gozer, ace.to_sym, :groups => [:brogrammers]
+
+                    if (action == ace)
+                      # See above
+                      it "returns 200 when in ACE" do
+                        pending "doesn't seem to work" do
+                          get("/#{type}s/#{gozer}/acl/#{action}/groups/#{hipsters}",
+                              :hasselhoff).should have_status_code(200).with_body({})
+                        end
+                      end
+                    else
+                      it "returns 404 when not in ACE" do
+                        get("/#{type}s/#{gozer}/acl/#{action}/groups/#{hipsters}",
+                            :hasselhoff).should have_status_code(404)
+                      end
+                    end
+                  end
+
+                  context "with a non-existent target" do
+                    with_actor :hasselhoff
+                    with_group :brogrammers
+
+                    it "can't be read, because it doesn't exist" do
+                      fake_entity = easterbunny
+
+                      get("/#{type}s/#{fake_entity}/acl/#{action}/groups/#{brogrammers}",
+                          :hasselhoff).should have_status_code(404)
+                    end
+                  end
+                end
+
+                # Some tests for an unexpected member_type -- don't really need to test
+                # more than one, do we?
+
+                context "for OBJECT member type" do
+                  context "an actor directly in the #{ace} ACE" do
+                    with_entity type.to_sym, :gozer
+                    with_object :spork
+
+                    it "returns 404 all the time" do
+                      get("/#{type}s/#{gozer}/acl/#{action}/objects/#{spork}",
+                          :superuser).should have_status_code(404)
+                    end
+                  end
+
+                  context "with a non-existent target" do
+                    with_object :spork
+
+                    it "can't be read, because it doesn't exist" do
+                      fake_entity = easterbunny
+
+                      get("/#{type}s/#{fake_entity}/acl/#{action}/objects/#{spork}",
+                          :superuser).should have_status_code(404)
+                    end
+                  end
+                end
+
+                context "for CONTAINER member type" do
+                  context "an actor directly in the #{ace} ACE" do
+                    with_entity type.to_sym, :gozer
+                    with_container :chumbucket
+
+                    it "returns 404 all the time" do
+                      get("/#{type}s/#{gozer}/acl/#{action}/objects/#{chumbucket}",
+                          :superuser).should have_status_code(404)
+                    end
+                  end
+
+                  context "with a non-existent target" do
+                    with_container :chumbucket
+
+                    it "can't be read, because it doesn't exist" do
+                      fake_entity = easterbunny
+
+                      get("/#{type}s/#{fake_entity}/acl/#{action}/objects/#{chumbucket}",
+                          :superuser).should have_status_code(404)
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end # GET
+
+        ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+          context "for #{action.upcase} action" do
+            ['actors', 'groups'].each do |member_type|
+              context "for #{member_type.upcase} member type" do
+                should_not_allow :POST, "/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}/#{member_type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+                should_not_allow :PUT, "/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}/#{member_type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+                should_not_allow :DELETE, "/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}/#{member_type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+              end
+            end
+          end
+        end
+      end
+    end
+  end # /<type>/<id>/acl/<action>/<member_type>/<member_id>
 end
