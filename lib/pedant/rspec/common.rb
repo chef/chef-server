@@ -269,7 +269,7 @@ module Pedant
               elsif (@thingies[member] == :group)
                 groups.push(member)
               else
-                "Type #{@thingies[member]} cannot have access on an item"
+                raise "Type #{@thingies[member]} cannot have access on an item"
               end
             end
             type = @thingies[resolve(target)]
