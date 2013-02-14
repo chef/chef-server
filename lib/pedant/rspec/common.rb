@@ -266,14 +266,14 @@ module Pedant
         #
         # Note that these methods **set** the ACE; they do not
         # **append** to it.
-        def self.with_ace_on(target, permission, ace)
+        def self.with_ace_on(target, permission, agents)
           before :each do
             validate_entity_id(target)
 
             actors = []
             groups = []
 
-            all = (ace[:to] || []).map{|n| resolve(n)}
+            all = (agents[:to] || []).map{|n| resolve(n)}
             all.each do |member|
               if (@thingies[member] == :actor)
                 actors.push(member)
