@@ -198,8 +198,8 @@ describe "Actors Endpoint" do
     # DELETE deletes the actor
     #
     # TODO: How does this affect ACLs the actor is a member of?  (With the new
-    # schema, presumably the acter will be removed from all ACL and groups it
-    # belongs to, correct?)
+    # schema, presumably the actor will be removed from all ACL and groups it
+    # belongs to)
     context "DELETE" do
 
       context "an actor directly in the DELETE ACE" do
