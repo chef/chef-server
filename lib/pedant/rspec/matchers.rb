@@ -64,7 +64,7 @@ RSpec::Matchers.define :directly_have_permission do |permission|
 
         on
 
-      You may choose only one.
+      You may choose only 'on'. :)
       """
     end
 

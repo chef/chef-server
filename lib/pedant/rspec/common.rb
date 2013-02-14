@@ -149,8 +149,8 @@ module Pedant
             actors = []
             groups = []
 
-            all = (members[:members] || []).map{|n| resolve(n)}
-            all.each do |member|
+            resolved_members = (members[:members] || []).map{|n| resolve(n)}
+            resolved_members.each do |member|
               if (@thingies[member] == :actor)
                 actors.push(member)
               elsif (@thingies[member] == :group)
@@ -273,8 +273,8 @@ module Pedant
             actors = []
             groups = []
 
-            all = (agents[:to] || []).map{|n| resolve(n)}
-            all.each do |member|
+            resolved_members = (agents[:to] || []).map{|n| resolve(n)}
+            resolved_members.each do |member|
               if (@thingies[member] == :actor)
                 actors.push(member)
               elsif (@thingies[member] == :group)
