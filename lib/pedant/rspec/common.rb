@@ -303,7 +303,7 @@ module Pedant
           [:create, :read, :update, :grant, :delete].each do |p|
             perm = acl[p] || {}
             members = (perm[:actors] || []) + (perm[:group] || [])
-            send("with_ace_on", target, p, {:to => members})
+            self.public_send("with_ace_on", target, p, {:to => members})
           end
         end
 
