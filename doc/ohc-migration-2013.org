@@ -200,57 +200,66 @@ end
 Detailed plans are in top-level sections below.
 ** TODO [[M1]]: MySQL-> PgSQL
 ** TODO [[M2]]: Finish /clients for oc_erchef OPC/OHC
+** TODO M2.5: Sane users table schema
 ** TODO [[M3]]: Uncle Ned Parity + clients
 ** TODO [[M4]]: (NEEDS RESEARCH) Global Data CouchDB -> PgSQL
 ** TODO [[M5]]: (NEEDS RESEARCH) Finish groups and containers for oc_erchef OPC/OHC
 ** TODO [[M6]]: (NEEDS RESEARCH) groups and containers CouchDb -> PgSQL
 * <<M1>>: MySQL -> PgSQL [1/4]
 ** DONE Step 0: Order new database hardware
-** TODO Step 1: Prepare PostgreSQL server for prod use
-*** cookbook development for pg
-*** monitoring
-*** Deploy server to prod environment
-**** At this point server is in prod but not used by any components
-*** HA configuration
-*** Test HA failover
-*** research backup options
-Looks like zmanda has [[http://www.zmanda.com/postgres-backup.html][an offering]] so that might be easiest since we
-are already using it for mysql.
-*** implement backup
-*** test recovery
-** TODO Step 2: Prepare for migration [0/5]
+** TODO Step 1: Prepare PostgreSQL server for prod use [1/7]
+- [X] cookbook development for pg
+- [ ] Rename roles: chef-pgsql and reporting-pgsql
+- [ ] Test pg cookbook in preprod
+- [ ] Configure role to initialize schema if needed for oc_erchef
+- [ ] monitoring, metrics
+- [ ] Deploy pg to servers in prod
+- [ ] HA configuration and testing
+- [ ] Implement and test backup of pg
+** TODO Step 2: Prepare for migration [0/6]
 *** Assumptions
 1. The databases for the community site and reporting beta will continue
    to use MySQL.
 *** TODO Write dump and load mysql to pg tool
-**** Time dump/load time, is it reasonable for a full downtime outage?
+Almost done, need to include opc_customers and opc_users since there
+is a foreign key constraint.
 *** TODO Test data dump/load in preprod
-*** TODO Identify all services which will need to interop with PostgreSQL
-**** For each service we need to determine the amount of work required
-     to move it to PostgreSQL. Extent of code changes, cookbook changes, etc.
-**** Current list:
-1. opscode-account
-2. opscode-chef
-3. opscode-erchef
-4. orgmapper
-5. opscode-support (may need work? do we move the table?)
-6. zmanda?
-7. Internal reporting cron scripts
+*** TODO Timing test dump/load in prod (using mysql slave for read)
+*** TODO Identify all services which will need to interop with PostgreSQL [0/7]
+For each service we need to determine the amount of work required
+to move it to PostgreSQL. Extent of code changes, cookbook changes, etc.
+1. [ ] opscode-account
+2. [ ] opscode-chef
+3. [ ] opscode-erchef
+4. [ ] orgmapper
+5. [ ] opscode-support
+6. [ ] opscode-accountmanagement
+7. [ ] Internal reporting cron scripts
 *** TODO Write deploy plan
 *** TODO Test deploy plan in preprod
-*** Questions
-**** Should we upgrade to a sane user table schema before, after, or as
-     a part of this migration? Where "sane" means looking much more like
-     what is in OSC and where we upgrade hashed passwords to use bcrypt.
-***** KS: Does deferring the schema change cause us to incur more work now?
-      If not, my preference is the path of least work. If we'd need to
-      change code to work with the existing schema then we should
-      do the Right Thing and upgrade to the OSC-like schema.
 ** TODO Step 3: Complete MySQL -> PostgreSQL Migration
+*** notification with lead time
 *** full outage
 *** dump, load
 *** config change and restart services
+** TODO Step 4: Update OPC to match prod pgsql version 9.1.2 -> 9.2.3
+Not required for the migration itself, but important tech debt
+reduction.
 * <<M2>>: Finish clients endpoint for OPC/OHC
+* <<M2.5>>: Sane Users Table Schema
+Current users table stores hashed password and salt in a JSON
+blob. Want schema to look like the osc_users table. Want to upgrade
+to bcrypt password protection. See:
+http://wiki.corp.opscode.com/display/CORP/RFC+Extensible+Password+Hashing
+** TODO Write Sequel migration to add new fields to users table
+** TODO Research endpoint details
+- [ ] Is verify_password/authenticate_user the only thing in OHC that
+  reads the JSON blob in the user table?
+- [ ] Is Ruby bcrypt compat w/ Erlang bcrypt?
+** TODO Write migration that extracts JSON, bcrypts and inserts to columns
+** TODO Write migration to drop JSON blob in users table
+** TODO Implement authenticate_users in oc_erchef
+** TODO Deploy and config changes for authenticate_users in oc_erchef
 * <<M3>>: Uncle Ned Parity with Clients (CouchDB -> PgSQL)
 For the detailed plan for Migration 3, see
 [[file:./rfc-erchef-migration.org][OHC Migration 3, Uncle Ned Parity with Clients]].
