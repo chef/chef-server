@@ -1,5 +1,5 @@
 describe "ACL Tests" do
-  let(:easterbunny) { "deadbeefdeadbeefdeadbeefdeadbeef" }
+  let(:easterbunny) { "deaddeaddeaddeaddeaddeaddeaddead" }
 
   context "/<type>/<id>/acl" do
     # What we are testing:

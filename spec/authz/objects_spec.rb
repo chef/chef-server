@@ -1,6 +1,6 @@
 describe "Objects Endpoint" do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
-  let(:toupee) { "deadbeefdeadbeefdeadbeefdeadbeef" }
+  let(:toupee) { "beefdeadbeefdeadbeefdeadbeefdead" }
 
   context "/objects" do
     # What we are testing:

@@ -1,6 +1,6 @@
 describe "Groups Endpoint" do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
-  let(:car_salesmen) { "deadbeefdeadbeefdeadbeefdeadbeef" }
+  let(:car_salesmen) { "beefdeadbeefdeadbeefdeadbeefdead" }
 
   context "/groups" do
     # What we are testing:

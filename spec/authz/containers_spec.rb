@@ -1,6 +1,6 @@
 describe "Containers Endpoint" do
   let(:mattdamon) { "deadbeefdeadbeefdeadbeefdeadbeef" }
-  let(:colander) { "deadbeefdeadbeefdeadbeefdeadbeef" }
+  let(:colander) { "beefdeadbeefdeadbeefdeadbeefdead" }
 
   context "/containers" do
     # What we are testing:
