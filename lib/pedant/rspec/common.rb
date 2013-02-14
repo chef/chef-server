@@ -129,7 +129,7 @@ module Pedant
         # +:veggies+ with an actor member +:bunnicula+ and a subgroup
         # +:citrus+, you would invoke
         #
-        #  with_group :veggies, :actors => [:bunnicula], :groups => [:citrus]
+        #  with_group :veggies, :members => [:bunnicula, :citrus]
         #
         # In subsequent test examples, use the symbol +:veggies+ in
         # all custom matchers.  The variable +veggies+ will also be
@@ -210,7 +210,7 @@ module Pedant
         # So, if you want to create a new object with the label
         # +:widget+, you would invoke
         #
-        #  with_object :object, :widget
+        #  with_entity :object, :widget
         #
         # In subsequent test examples, use the symbol +:widget+ in all
         # custom matchers.  The variable +widget+ will also be
@@ -262,7 +262,7 @@ module Pedant
         # For instance, if you wish to add +:alice+ to the +actors+
         # list of the +DELETE+ ACE of actor +:bob+, you would invoke
         #
-        #   with_ace_on :bob, :delete, :actors => [:alice]
+        #   with_ace_on :bob, :delete, :to => [:alice]
         #
         # Note that these methods **set** the ACE; they do not
         # **append** to it.
