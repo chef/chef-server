@@ -62,8 +62,7 @@
         create record for <action>
         in actor_acl_group, group_acl_group, container_acl_group, or object_acl_group
     response:
-      don't actually care, but identical to GET is reasonable
-        TODO: check this
+      empty
   DELETE
     internal actions:
       delete ACL for action
@@ -73,7 +72,6 @@
           object_acl_grup]
     response:
       empty
-        TODO: check this
  
 /<type>/<id>/acl/<action>/<member_type>/<member_id>
   GET
@@ -82,8 +80,6 @@
         <id> of <type>, 404 otherwise
 
 /groups endpoint only:
-
-TODO: double-check all of this:
 
 /groups/<id>/<member_type>/<member_id>
   PUT
