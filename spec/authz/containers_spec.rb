@@ -154,7 +154,7 @@ describe "Containers Endpoint" do
 
       context "an actor indirectly in the READ ACE" do
         with_actor :hasselhoff
-        with_group :hipsters, :actors => [:hasselhoff]
+        with_group :hipsters, :members => [:hasselhoff]
         with_container :bucket
 
         with_ace_on :bucket, :read, :to => [:hipsters]
@@ -219,7 +219,7 @@ describe "Containers Endpoint" do
 
       context "an actor indirectly in the DELETE ACE" do
         with_actor :hasselhoff
-        with_group :hipsters, :actors => [:hasselhoff]
+        with_group :hipsters, :members => [:hasselhoff]
         with_container :bucket
 
         with_ace_on :bucket, :delete, :to => [:hipsters]

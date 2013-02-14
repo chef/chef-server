@@ -53,7 +53,7 @@ describe "Pedant API" do
 
           context "an actor indirectly in the ACE" do
             with_actors :hasselhoff, :shatner
-            with_group :hipsters, :actors => [:hasselhoff]
+            with_group :hipsters, :members => [:hasselhoff]
 
             with_ace_on :shatner, action, :to => [:hipsters]
 
@@ -66,8 +66,8 @@ describe "Pedant API" do
 
           context "an actor doubly-indirectly in the ACE" do
             with_actors :hasselhoff, :shatner
-            with_group :hipsters, :actors => [:hasselhoff]
-            with_group :brogrammers, :groups => [:hipsters]
+            with_group :hipsters, :members => [:hasselhoff]
+            with_group :brogrammers, :members => [:hipsters]
 
             with_ace_on :shatner, action, :to => [:brogrammers]
 
@@ -163,7 +163,7 @@ describe "Pedant API" do
 
             context "an actor indirectly in the ACE" do
               with_actor :hasselhoff
-              with_group :hipsters, :actors => [:hasselhoff]
+              with_group :hipsters, :members => [:hasselhoff]
               with_entity type, :gozer
 
               with_ace_on :gozer, action, :to => [:hipsters]
@@ -177,8 +177,8 @@ describe "Pedant API" do
 
             context "an actor doubly-indirectly in the ACE" do
               with_actor :hasselhoff
-              with_group :hipsters, :actors => [:hasselhoff]
-              with_group :brogrammers, :groups => [:hipsters]
+              with_group :hipsters, :members => [:hasselhoff]
+              with_group :brogrammers, :members => [:hipsters]
               with_entity type, :gozer
 
               with_ace_on :gozer, action, :to => [:brogrammers]

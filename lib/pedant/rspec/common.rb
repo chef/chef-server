@@ -146,8 +146,19 @@ module Pedant
           before :each do
             group = resolve(label)
 
-            actors = (members[:actors] || []).map{|n| resolve(n)}
-            groups = (members[:groups] || []).map{|n| resolve(n)}
+            actors = []
+            groups = []
+
+            all = (members[:members] || []).map{|n| resolve(n)}
+            all.each do |member|
+              if (@thingies[member] == :actor)
+                actors.push(member)
+              elsif (@thingies[member] == :group)
+                groups.push(member)
+              else
+                raise "Type #{@thingies[member]} cannot be a member of a group"
+              end
+            end
 
             actors.each do |a|
               r = put("/groups/#{group}/actors/#{a}", :superuser, :payload => nil)

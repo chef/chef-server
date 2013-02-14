@@ -171,7 +171,7 @@ describe "Actors Endpoint" do
 
       context "an actor indirectly in the READ ACE" do
         with_actors :hasselhoff, :shatner
-        with_group :hipsters, :actors => [:hasselhoff]
+        with_group :hipsters, :members => [:hasselhoff]
 
         with_ace_on :shatner, :read, :to => [:hipsters]
 
@@ -235,7 +235,7 @@ describe "Actors Endpoint" do
 
       context "an actor indirectly in the DELETE ACE" do
         with_actors :hasselhoff, :shatner
-        with_group :hipsters, :actors => [:hasselhoff]
+        with_group :hipsters, :members => [:hasselhoff]
 
         with_ace_on :shatner, :delete, :to => [:hipsters]
 
@@ -304,7 +304,7 @@ describe "Actors Endpoint" do
 
         context "an actor indirectly in the #{ace.upcase} ACE" do
           with_actors :hasselhoff, :shatner
-          with_group :hipsters, :actors => [:hasselhoff]
+          with_group :hipsters, :members => [:hasselhoff]
 
           with_ace_on :shatner, ace.to_sym, :to => [:hipsters]
 
@@ -396,7 +396,7 @@ describe "Actors Endpoint" do
 
             context "an actor indirectly in the #{ace.upcase} ACE" do
               with_actors :hasselhoff, :shatner
-              with_group :hipsters, :actors => [:hasselhoff]
+              with_group :hipsters, :members => [:hasselhoff]
 
               with_ace_on :shatner, ace.to_sym, :to => [:hipsters]
 
@@ -624,7 +624,7 @@ describe "Actors Endpoint" do
 
           context "an actor indirectly in the GRANT ACE, modifying actors" do
             with_actors :hasselhoff, :shatner, :norris
-            with_group :hipsters, :actors => [:hasselhoff]
+            with_group :hipsters, :members => [:hasselhoff]
 
             with_ace_on :shatner, :grant, :to => [:hipsters]
 
@@ -640,7 +640,7 @@ describe "Actors Endpoint" do
 
           context "an actor indirectly in the GRANT ACE, modifying groups" do
             with_actors :hasselhoff, :shatner
-            with_group :hipsters, :actors => [:hasselhoff]
+            with_group :hipsters, :members => [:hasselhoff]
             with_group :brogrammers
 
             with_ace_on :shatner, :grant, :to => [:hipsters]
@@ -719,7 +719,7 @@ describe "Actors Endpoint" do
 
           context "an actor indirectly in the GRANT ACE" do
             with_actors :hasselhoff, :shatner
-            with_group :hipsters, :actors => [:hasselhoff]
+            with_group :hipsters, :members => [:hasselhoff]
 
             with_ace_on :shatner, :grant, :to => [:hipsters]
 

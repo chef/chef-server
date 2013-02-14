@@ -40,7 +40,7 @@ describe "ACL Tests" do
 
             context "an actor indirectly in the #{ace.upcase} ACE" do
               with_actor :hasselhoff
-              with_group :hipsters, :actors => [:hasselhoff]
+              with_group :hipsters, :members => [:hasselhoff]
               with_entity type, :gozer
 
               with_ace_on :gozer, ace.to_sym, :to => [:hipsters]
@@ -147,7 +147,7 @@ describe "ACL Tests" do
 
                 context "an actor indirectly in the #{ace.upcase} ACE" do
                   with_actor :hasselhoff
-                  with_group :hipsters, :actors => [:hasselhoff]
+                  with_group :hipsters, :members => [:hasselhoff]
                   with_entity type, :gozer
 
                   with_ace_on :gozer, ace.to_sym, :to => [:hipsters]
@@ -396,7 +396,7 @@ describe "ACL Tests" do
 
               context "an actor indirectly in the GRANT ACE, modifying actors" do
                 with_actors :hasselhoff, :norris
-                with_group :hipsters, :actors => [:hasselhoff]
+                with_group :hipsters, :members => [:hasselhoff]
                 with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :to => [:hipsters]
@@ -413,7 +413,7 @@ describe "ACL Tests" do
 
               context "an actor indirectly in the GRANT ACE, modifying groups" do
                 with_actors :hasselhoff
-                with_group :hipsters, :actors => [:hasselhoff]
+                with_group :hipsters, :members => [:hasselhoff]
                 with_group :brogrammers
                 with_entity type, :gozer
 
@@ -499,7 +499,7 @@ describe "ACL Tests" do
 
               context "an actor indirectly in the GRANT ACE" do
                 with_actor :hasselhoff
-                with_group :hipsters, :actors => [:hasselhoff]
+                with_group :hipsters, :members => [:hasselhoff]
                 with_entity type, :gozer
 
                 with_ace_on :gozer, :grant, :to => [:hipsters]
@@ -635,7 +635,7 @@ describe "ACL Tests" do
 
                   context "an actor indirectly in the #{ace} ACE" do
                     with_actor :hasselhoff
-                    with_group :hipsters, :actors => [:hasselhoff]
+                    with_group :hipsters, :members => [:hasselhoff]
                     with_entity type, :gozer
 
                     with_ace_on :gozer, ace.to_sym, :to => [:hipsters]
@@ -668,7 +668,7 @@ describe "ACL Tests" do
                 context "for GROUPS member type" do
                   context "a group directly in the #{ace} ACE" do
                     with_actor :hasselhoff
-                    with_group :brogrammers, :actors => [:hasselhoff]
+                    with_group :brogrammers, :members => [:hasselhoff]
                     with_entity type, :gozer
 
                     with_ace_on :gozer, ace.to_sym, :to => [:brogrammers]
@@ -694,8 +694,8 @@ describe "ACL Tests" do
 
                   context "a group indirectly in the #{ace} ACE" do
                     with_actors :hasselhoff
-                    with_group :hipsters, :actors => [:hasselhoff]
-                    with_group :brogrammers, :groups => [:hipsters]
+                    with_group :hipsters, :members => [:hasselhoff]
+                    with_group :brogrammers, :members => [:hipsters]
                     with_entity type, :gozer
 
                     with_ace_on :gozer, ace.to_sym, :to => [:brogrammers]
