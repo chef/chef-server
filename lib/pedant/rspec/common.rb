@@ -273,7 +273,11 @@ module Pedant
             actors = []
             groups = []
 
-            resolved_members = (agents[:to] || []).map{|n| resolve(n)}
+            if (agents[:to].kind_of?(Array))
+              resolved_members = (agents[:to] || []).map{|n| resolve(n)}
+            else
+              resolved_members = [resolve(agents[:to])]
+            end
             resolved_members.each do |member|
               if (@thingies[member] == :actor)
                 actors.push(member)

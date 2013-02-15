@@ -125,7 +125,7 @@ describe "Containers Endpoint" do
         with_actor :hasselhoff
         with_container :bucket
 
-        with_ace_on :bucket, :read, :to => [:hasselhoff]
+        with_ace_on :bucket, :read, :to => :hasselhoff
 
         it "can read the container" do
           get("/containers/#{bucket}",
@@ -157,7 +157,7 @@ describe "Containers Endpoint" do
         with_group :hipsters, :members => [:hasselhoff]
         with_container :bucket
 
-        with_ace_on :bucket, :read, :to => [:hipsters]
+        with_ace_on :bucket, :read, :to => :hipsters
 
         it "can read the container" do
           get("/containers/#{bucket}",
@@ -188,7 +188,7 @@ describe "Containers Endpoint" do
         with_actor :hasselhoff
         with_container :bucket
 
-        with_ace_on :bucket, :delete, :to => [:hasselhoff]
+        with_ace_on :bucket, :delete, :to => :hasselhoff
 
         it "can delete the container" do
           delete("/containers/#{bucket}",
@@ -222,7 +222,7 @@ describe "Containers Endpoint" do
         with_group :hipsters, :members => [:hasselhoff]
         with_container :bucket
 
-        with_ace_on :bucket, :delete, :to => [:hipsters]
+        with_ace_on :bucket, :delete, :to => :hipsters
 
         it "can delete the container" do
           delete("/containers/#{bucket}",
