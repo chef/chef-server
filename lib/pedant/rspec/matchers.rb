@@ -62,12 +62,9 @@ RSpec::Matchers.define :directly_have_permission do |permission|
 
       Please select from:
 
-        on_actor
-        on_container
-        on_group
-        on_object
+        on
 
-      You may choose only one.
+      You may choose only 'on'. :)
       """
     end
 
@@ -98,20 +95,20 @@ RSpec::Matchers.define :directly_have_permission do |permission|
   def chain_symbols(maybe_symbol)
     unless maybe_symbol.is_a? Symbol
       raise """
-      Please pass a Symbol to the 'on_#{@type}' chain of the 'directly_have_permission' matcher.
+      Please pass a Symbol to the 'on' chain of the 'directly_have_permission' matcher.
       It allows for more informative error messages.
       """
     end
   end
 
-  [:actor, :container, :group, :object].each do |type|
-    chain "on_#{type}".to_sym do |label|
-      verify_only_one_chain
-      @type = type
-      chain_symbols(label)
-      @target = resolve(label)
-      @target_name = label
-    end
+  # This doesn't have access to @thingies (it's not the same class),
+  # so the type needs to be passed explicitly
+  chain :on do |type, label|
+    verify_only_one_chain
+    @type = type
+    chain_symbols(label)
+    @target = resolve(label)
+    @target_name = label
   end
 
   failure_message_for_should do |actor_or_group|

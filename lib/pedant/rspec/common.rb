@@ -49,10 +49,17 @@ module Pedant
 
         # Helper method for creating a new Authz object.  Do not use
         # directly in tests.
-        def new_item(type, requestor)
-          r = post("/#{type}s", requestor, :payload => nil)
+        def new_item(type, requestor, payload = {})
+          r = post("/#{type}s", requestor, :payload => payload)
           r.code.should eq(201)
-          parse(r)["id"]
+
+          rc = parse(r)["id"]
+          unless @thingies
+            @thingies = {}
+          end
+          @thingies[rc] = type
+
+          return rc
         end
 
         # Helper method for deleting an Authz object.  Do not use
@@ -64,10 +71,9 @@ module Pedant
         # Generate all creation helper methods
         #
         # NOTE: Doesn't include :container, because creating one
-        # requires a POST body
-        #
-        # TODO: Create corresponding container methods
-        [:actor, :object, :group].each do |type|
+        # requires a POST body, nor :group because it allows defining
+        # members on creation
+        [:actor, :object].each do |type|
 
           # +with_TYPE+ accepts a Keyword / String argument and
           # creates a new instance of that type, storing the Authz ID
@@ -89,6 +95,7 @@ module Pedant
           # item after each example.
           define_singleton_method "with_#{type}" do |label|
             let(label.to_sym){new_item(type, :superuser)}
+
             after :each do
               delete_item(type, label)
             end
@@ -111,6 +118,111 @@ module Pedant
               self.public_send("with_#{type}", label)
             end
           }
+        end
+
+        # +with_group+ accepts a Keyword / String argument and creates
+        # a new instance of a group, storing the Authz ID of the new
+        # group under a +let+ variable of the same name.  It also
+        # takes optional member parameters for :actors and :groups.
+        #
+        # So, if you want to create a new group with the label
+        # +:veggies+ with an actor member +:bunnicula+ and a subgroup
+        # +:citrus+, you would invoke
+        #
+        #  with_group :veggies, :members => [:bunnicula, :citrus]
+        #
+        # In subsequent test examples, use the symbol +:veggies+ in
+        # all custom matchers.  The variable +veggies+ will also be
+        # available, but should only really be used to create URL
+        # fragments via string interpolation (don't worry; the custom
+        # matchers will tell you what to do if you do the wrong
+        # thing).
+        #
+        # This method also handles the deletion of each created group
+        # after each example.
+        def self.with_group (label, members={})
+          let(label.to_sym) {new_item(:group, :superuser)}
+
+          before :each do
+            group = resolve(label)
+
+            actors = []
+            groups = []
+
+            resolved_members = (members[:members] || []).map{|n| resolve(n)}
+            resolved_members.each do |member|
+              if (@thingies[member] == :actor)
+                actors.push(member)
+              elsif (@thingies[member] == :group)
+                groups.push(member)
+              else
+                raise "Type #{@thingies[member]} cannot be a member of a group"
+              end
+            end
+
+            actors.each do |a|
+              r = put("/groups/#{group}/actors/#{a}", :superuser, :payload => nil)
+              r.should have_status_code 200
+            end
+
+            groups.each do |g|
+              r = put("/groups/#{group}/groups/#{g}", :superuser, :payload => nil)
+              r.should have_status_code 200
+            end
+          end
+
+          after :each do
+            delete_item(:group, label)
+          end
+        end
+
+        # +with_container+ accepts a Keyword / String argument and
+        # creates a new instance of a container, storing the Authz ID
+        # of the new container under a +let+ variable of the same
+        # name.
+        #
+        # So, if you want to create a new container with the label
+        # +:box+, you would invoke
+        #
+        #  with_container :box
+        #
+        # In subsequent test examples, use the symbol +:box+ in all
+        # custom matchers.  The variable +box+ will also be available,
+        # but should only really be used to create URL fragments via
+        # string interpolation (don't worry; the custom matchers will
+        # tell you what to do if you do the wrong thing).
+        #
+        # This method also handles the deletion of each created
+        # container after each example.
+        def self.with_container(label)
+          let(label.to_sym){new_item(:container, :superuser, {"name" => label})}
+
+          after :each do
+            delete_item(:container, label)
+          end
+        end
+
+        # +with_entity+ accepts a type and a Keyword / String argument
+        # and creates a new instance of that type, storing the Authz
+        # ID of the new entity under a +let+ variable of the same
+        # name.
+        #
+        # So, if you want to create a new object with the label
+        # +:widget+, you would invoke
+        #
+        #  with_entity :object, :widget
+        #
+        # In subsequent test examples, use the symbol +:widget+ in all
+        # custom matchers.  The variable +widget+ will also be
+        # available, but should only really be used to create URL
+        # fragments via string interpolation (don't worry; the custom
+        # matchers will tell you what to do if you do the wrong
+        # thing).
+        #
+        # This method also handles the deletion of each created
+        # entity after each example.
+        def self.with_entity(type, label)
+          self.public_send("with_#{type}", label)
         end
 
         # Asserts that a given HTTP verb is not allowed at a given API
@@ -140,70 +252,62 @@ module Pedant
           end
         end
 
-        # Define all the ACE / ACL setting methods.
+        # Define the ACE / ACL setting methods.
         #
         # Remember, they're all **context** methods, not **example**
         # methods.  They are only to be used for setting up test fixtures.
-        [:actor, :group, :object, :container].each do |type|
 
-          # with_ace_on_TYPE sets a single ACE on the +target+ object
-          #
-          # For instance, if you wish to add +:alice+ to the +actors+
-          # list of the +DELETE+ ACE of actor +:bob+, you would invoke
-          #
-          #   with_ace_on_actor :bob, :delete, :actors => [:alice]
-          #
-          # Similar instructions apply to other Authz types, mutatis
-          # mutandis.
-          #
-          # Note that these methods **set** the ACE; they do not
-          # **append** to it.
-          define_singleton_method "with_ace_on_#{type}" do |target, permission, ace|
-            before :each do
-              validate_entity_id(target)
+        # with_ace_on sets a single ACE on the +target+ object
+        #
+        # For instance, if you wish to add +:alice+ to the +actors+
+        # list of the +DELETE+ ACE of actor +:bob+, you would invoke
+        #
+        #   with_ace_on :bob, :delete, :to => [:alice]
+        #
+        # Note that these methods **set** the ACE; they do not
+        # **append** to it.
+        def self.with_ace_on(target, permission, agents)
+          before :each do
+            validate_entity_id(target)
 
-              actors = (ace[:actors] || []).map{|n| resolve(n)}
-              groups = (ace[:groups] || []).map{|n| resolve(n)}
+            actors = []
+            groups = []
 
-              response = put("/#{type}s/#{resolve(target)}/acl/#{permission.downcase}",
-                             :superuser,
-                             :payload => {
-                               "actors" => actors,
-                               "groups" => groups
-                             })
-              response.should have_status_code(200)
+            if (agents[:to].kind_of?(Array))
+              resolved_members = (agents[:to] || []).map{|n| resolve(n)}
+            else
+              resolved_members = [resolve(agents[:to])]
             end
-          end
-
-          # with_acl_on_TYPE sets a complete ACL on a target item.
-          #
-          # It is equivalent to calling +with_ace_on_TYPE+ once for
-          # each of the five Authz permissions.
-          define_singleton_method "with_acl_on_#{type}" do |target, acl|
-            [:create, :read, :update, :grant, :delete].each do |p|
-              send("with_ace_on_#{type}", target, p, (acl[p] || {}))
+            resolved_members.each do |member|
+              if (@thingies[member] == :actor)
+                actors.push(member)
+              elsif (@thingies[member] == :group)
+                groups.push(member)
+              else
+                raise "Type #{@thingies[member]} cannot have access on an item"
+              end
             end
-          end
+            type = @thingies[resolve(target)]
 
+            response = put("/#{type}s/#{resolve(target)}/acl/#{permission.downcase}",
+                           :superuser,
+                           :payload => {
+                             "actors" => actors,
+                             "groups" => groups
+                           })
+            response.should have_status_code(200)
+          end
         end
 
-        def self.with_members(group, members={})
-          before :each do
-
-            group = resolve(group)
-
-            actors = (members[:actors] || []).map{|n| resolve(n)}
-            groups = (members[:groups] || []).map{|n| resolve(n)}
-
-            actors.each do |a|
-              r = put("/groups/#{group}/actors/#{a}", :superuser, :payload => nil)
-              r.should have_status_code 200
-            end
-
-            groups.each do |g|
-              r = put("/groups/#{group}/groups/#{g}", :superuser, :payload => nil)
-              r.should have_status_code 200
-            end
+        # with_acl_on_TYPE sets a complete ACL on a target item.
+        #
+        # It is equivalent to calling +with_ace_on_TYPE+ once for
+        # each of the five Authz permissions.
+        def self.with_acl_on(target, acl)
+          [:create, :read, :update, :grant, :delete].each do |p|
+            perm = acl[p] || {}
+            members = (perm[:actors] || []) + (perm[:group] || [])
+            self.public_send("with_ace_on", target, p, {:to => members})
           end
         end
 
