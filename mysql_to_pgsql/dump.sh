@@ -64,6 +64,37 @@ time mysqldump \
           | sed "s/,0x\([0-9A-F]*\)/,encode(decode('\1','hex'),'escape')/g" \
           >> $DUMP_NAME
 
+#
+# SED Transforms
+# 1,2. convert {opc,ohc,osc}_customer fields from 0/1 -> false/true.
+#      conveniently they all appear in adjacent columns.
+#
+time mysqldump \
+    -u${DB_USER} \
+    --skip-quote-names \
+    --hex-blob \
+    --skip-triggers \
+    --compact \
+    --compatible=postgresql \
+    --no-create-info \
+    --complete-insert \
+    opscode_chef \
+    opc_customers | sed "s/,\([01]\),\([01]\),\([01]\),/,__\1__,__\2__,__\3__,/g" \
+                  | sed "s/,__0__/,false/g; s/,__1__/,true/g" \
+                  >> $DUMP_NAME
+
+time mysqldump \
+    -u${DB_USER} \
+    --skip-quote-names \
+    --hex-blob \
+    --skip-triggers \
+    --compact \
+    --compatible=postgresql \
+    --no-create-info \
+    --complete-insert \
+    opscode_chef \
+    opc_users >> $DUMP_NAME
+
 # TODO: handle errors on both dumps
 if [ $? -ne 0 ]; then
     echo "Error downloading schema dump"
