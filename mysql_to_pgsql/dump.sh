@@ -11,12 +11,12 @@ DB_USER=root
 # and we don't need opc user/customer tables since the apps
 # that use them aren't migrating
 #
-IGNORES="--ignore-table=opscode_chef.node_run \
-         --ignore-table=opscode_chef.node_run_detail \
-         --ignore-table=opscode_chef.reporting_schema_info \
-         --ignore-table=opscode_chef.opc_users \
-         --ignore-table=opscode_chef.opc_customers \
-         --ignore-table=opscode_chef.users"
+# IGNORES="--ignore-table=opscode_chef.node_run \
+#          --ignore-table=opscode_chef.node_run_detail \
+#          --ignore-table=opscode_chef.reporting_schema_info \
+#          --ignore-table=opscode_chef.opc_users \
+#          --ignore-table=opscode_chef.opc_customers \
+#          --ignore-table=opscode_chef.users"
 
 DUMP_NAME="prod-`date '+%Y%m%d-%H%M%S'`.dump"
 
@@ -35,9 +35,9 @@ time mysqldump \
     --compatible=postgresql \
     --no-create-info \
     --complete-insert \
-    ${IGNORES} \
-    opscode_chef | sed "s/,0x\([0-9A-F]*\)/,decode('\1','hex')/g" \
-                 > $DUMP_NAME
+    opscode_chef \
+    nodes | sed "s/,0x\([0-9A-F]*\)/,decode('\1','hex')/g" \
+          > $DUMP_NAME
 
 #
 # SED transforms
