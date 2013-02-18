@@ -95,5 +95,36 @@ SELECT fk_ok('container_acl_actor', 'authorizee', 'auth_actor', 'id');
 SELECT fk_ok('container_acl_group', 'target', 'container', 'id');
 SELECT fk_ok('container_acl_group', 'authorizee', 'auth_group', 'id');
 
+\set schema quote_ident('public')
+
+CREATE OR REPLACE FUNCTION opscode.has_index(p_table_schema NAME, p_table_name NAME, p_index_name NAME, p_indexed_columns TEXT[])
+RETURNS TEXT LANGUAGE SQL
+AS $$
+   SELECT has_index($1, $2, $3, $4, 'Columns ' || $1 || '.' || $2 || '(' || array_to_string($4, ', ') || ') should be indexed by index "' || $3 || '"' );
+$$;
+
+CREATE OR REPLACE FUNCTION opscode.has_index(p_table_schema NAME, p_table_name NAME, p_index_name NAME, p_indexed_column TEXT)
+RETURNS TEXT LANGUAGE SQL
+AS $$
+   SELECT opscode.has_index($1, $2, $3, ARRAY[$4]);
+$$;
+
+-- Indexes!
+SELECT opscode.has_index(:schema, 'object_acl_actor', 'object_acl_actor_authorizee', 'authorizee');
+SELECT opscode.has_index(:schema, 'object_acl_group', 'object_acl_group_authorizee', 'authorizee');
+
+SELECT opscode.has_index(:schema, 'group_acl_actor', 'group_acl_actor_authorizee', 'authorizee');
+SELECT opscode.has_index(:schema, 'group_acl_group', 'group_acl_group_authorizee', 'authorizee');
+
+SELECT opscode.has_index(:schema, 'actor_acl_actor', 'actor_acl_actor_authorizee', 'authorizee');
+SELECT opscode.has_index(:schema, 'actor_acl_group', 'actor_acl_group_authorizee', 'authorizee');
+
+SELECT opscode.has_index(:schema, 'container_acl_actor', 'container_acl_actor_authorizee', 'authorizee');
+SELECT opscode.has_index(:schema, 'container_acl_group', 'container_acl_group_authorizee', 'authorizee');
+
+SELECT opscode.has_index(:schema, 'group_group_relations', 'group_group_relations_child', 'child');
+SELECT opscode.has_index(:schema, 'group_actor_relations', 'group_actor_relations_child', 'child');
+
+
 SELECT finish();
 ROLLBACK;
