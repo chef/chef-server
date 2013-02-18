@@ -48,6 +48,8 @@ Vagrant::Config.run do |config|
   config.ssh.max_tries = 40
   config.ssh.timeout   = 120
 
+  config.ssh.forward_agent = true
+
   config.vm.provision :chef_solo do |chef|
     chef.json = {
       # When running in a chef-solo setting, the postgres user
@@ -60,9 +62,12 @@ Vagrant::Config.run do |config|
       },
     }
 
+    chef.roles_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/roles"
+    chef.data_bags_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/data_bags"
+
     chef.run_list = [
-                     "recipe[opscode-authz::default]",
-                     "recipe[opscode-authz::database]"
-                    ]
+                     "recipe[opscode-dev-shim]",
+                     "recipe[opscode-authz::development]"
+                 ]
   end
 end

@@ -21,8 +21,20 @@ following information:
 }
 ```
 
-Then, grab all the dependencies.  We're installing binary stubs into
-`bin` to ensure everything is as self-contained as possible.
+Also, while we still have a monolithic [chef repo][], we'll need to
+refer to our platform roles and data bags in order to replicate our
+production environment as much as possible in a local Vagrant setting.
+The easiest way to make this work is to set an environment variable
+that points to a local checkout of the platform cookbooks repo, which
+the [Vagrantfile](Vagrantfile) then uses.
+
+```
+export OPSCODE_PLATFORM_REPO=/path/to/local/checkout/of/repo
+```
+
+Now you're ready to grab all the dependencies.  We're installing
+binary stubs into `bin` to ensure everything is as self-contained as
+possible.
 
 ```
 bundle install --binstubs
@@ -80,7 +92,7 @@ cookbook "opscode-authz", path: "/path/to/local/checkout/of/opscode-authz"
 Re-provision your machine and you'll be running off the local version
 of the cookbook.
 
-
 [Berkshelf]:http://berkshelf.com
 [oc-authz-pedant]:https://github.com/opscode/oc-authz-pedant
 [opscode-authz]:https://github.com/opscode-cookbooks/opscode-authz
+[chef repo]:https://github.com/opscode/opscode-platform-cookbooks
