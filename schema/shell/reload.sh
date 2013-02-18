@@ -14,4 +14,3 @@ psql --dbname postgres --command "DROP DATABASE ${DB_NAME};"
 psql --dbname postgres --command "CREATE DATABASE ${DB_NAME};"
 psql --dbname ${DB_NAME} --command 'CREATE EXTENSION pgtap;'
 psql --dbname ${DB_NAME} --file sql/authz.sql
-psql --dbname ${DB_NAME} --file sql/authz_debug.sql
