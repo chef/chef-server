@@ -156,24 +156,26 @@ $$;
 -- NOTE: This function takes an internal database ID as an argument,
 -- and returns a table of the same.  It is not intended to be called
 -- directly from the outside.
-CREATE FUNCTION groups_for_actor(auth_actor.id%TYPE)
+CREATE OR REPLACE FUNCTION groups_for_actor(auth_actor.id%TYPE)
 RETURNS TABLE(auth_group auth_group.id%TYPE)
-LANGUAGE SQL
+LANGUAGE SQL STABLE STRICT
 AS $$
-       WITH RECURSIVE groups(g,a) AS (
-       SELECT parent, child
-       FROM group_actor_relations
-       WHERE child = $1
-       AND child IS NOT NULL
+WITH RECURSIVE
+    groups(id) AS (
+        -- direct group membership
+        SELECT parent
+        FROM group_actor_relations
+        WHERE child = $1
 
-       UNION
+        UNION
 
-       SELECT ggr.parent, ggr.child
-       FROM group_group_relations AS ggr
-       JOIN group_actor_relations AS gar
-       ON ggr.child = gar.parent
-       JOIN groups ON groups.a = gar.child)
-  SELECT DISTINCT(g) from groups;
+        -- indirect group membership; find parent groups of all groups
+        -- the actor is a direct member of, recursively
+        SELECT ggr.parent
+        FROM group_group_relations AS ggr
+        JOIN groups ON groups.id = ggr.child
+    )
+SELECT id from groups;
 $$;
 
 -- Need functions for permission on container, actor, and group.
