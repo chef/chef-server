@@ -133,22 +133,22 @@ DECLARE
 BEGIN
     SELECT INTO cycle_root (
         WITH RECURSIVE
-            children(id) AS (
-                -- direct children of this current parent group
-                SELECT child
+            parents(id) AS (
+                -- parent(s) of the current child group
+                SELECT parent
                 FROM group_group_relations
-                WHERE parent = NEW.parent
+                WHERE child = NEW.child
 
                 UNION
 
-                -- indirect children (recursively)
-                SELECT ggr.child
+                -- grandparents and other ancestors
+                SELECT ggr.parent
                 FROM group_group_relations AS ggr
-                JOIN children AS c ON ggr.parent = c.id
+                JOIN parents AS p ON ggr.child = p.id
             )
         SELECT TRUE
-        FROM children
-        WHERE id = NEW.parent
+        FROM parents
+        WHERE id = NEW.child
     );
 
     IF cycle_root THEN
@@ -190,8 +190,8 @@ are not involved in the present discussion).  Needless to say, this is
 not a good state of affairs.
 
 To implement this, the trigger function operates on each row that is
-inserted.  If insertion of the row creates a cycle containing 'parent'
-(that is, if it creates a path by which 'parent' may be reached from
+inserted.  If insertion of the row creates a cycle containing 'child'
+(that is, if it creates a path by which 'child' may be reached from
 itself), an exception is raised.
 $$;
 
