@@ -21,7 +21,8 @@ VALUES
 INSERT INTO group_actor_relations(parent, child)
 VALUES
        (group_id('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), actor_id('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')),
-       (group_id('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), actor_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'));
+       (group_id('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), actor_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')),
+       (group_id('cccccccccccccccccccccccccccccccc'), actor_id('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'));
 
 INSERT INTO auth_object(authz_id)
 VALUES
@@ -30,8 +31,7 @@ VALUES
 INSERT INTO object_acl_group(target, authorizee, permission)
 VALUES
         (object_id('oooooooooooooooooooooooooooooooo'), group_id('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), 'read'),
-        (object_id('oooooooooooooooooooooooooooooooo'), group_id('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), 'delete')
-        ;
+        (object_id('oooooooooooooooooooooooooooooooo'), group_id('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), 'delete');
 
 INSERT INTO object_acl_actor(target, authorizee, permission)
 VALUES

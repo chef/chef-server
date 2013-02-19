@@ -4,39 +4,14 @@ Running pgTAP Tests
 If you haven't already done so, please
 [set up your system](system_setup_for_testing.md).
 
-If you are impatient, you can just run `make` from the `schema`
-directory.
-
-You will need to create a database, load the pgTAP extension, and load
-the schema before you can run any tests.  The
-[reload.sh](../shell/reload.sh) script automates this process.
-Currently it is tailored for developer workflows, but in the future,
-this could be used by Jenkins in a CI environment. (Note that this
-script must be run from the `schema` directory):
+All you need to do is run
 
 ```
-shell/reload.sh
+make
 ```
 
-(As the name implies, you can run the `reload.sh` script at any time
-to drop and re-create the database and have a "clean slate".)
-
-It takes an optional argument as the name of the database to reload.
-The Makefile passes `"authz_test"`; without an argument, a database
-named `"authz`" is created.  This allows you to have multiple copies
-of the database for experimentation purposes.
-
-No you are ready to run the tests.  There is a helper script
-[test.sh](../shell/test.sh) for this as well, but you can also just
-invoke `pg_prove` directly, if you wish.  It must also be run from the
-`schema` directory.
-
-(`test.sh` also takes a database name as an optional argument, just
-like `reload.sh`.)
-
-```
-shell/test.sh
-```
+This will create the database, load the schema, install the pgTAP
+testing framework, and execute the tests.
 
 If all went well, you should see something like this:
 

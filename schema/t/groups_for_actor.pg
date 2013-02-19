@@ -1,0 +1,86 @@
+BEGIN;
+
+SELECT no_plan();
+
+INSERT INTO auth_actor(authz_id) VALUES ('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+
+INSERT INTO auth_group(authz_id)
+VALUES ('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'),
+       ('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'),
+       ('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'),
+       ('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz');
+
+-- This view is purely to remove verbosity from these tests.  We want
+-- to produce an ordered list of the authz_ids of all the groups our
+-- test actor is a member of
+
+CREATE VIEW testing_groups AS
+SELECT g.authz_id
+FROM groups_for_actor((SELECT id FROM auth_actor WHERE authz_id = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')) AS gfa(id)
+NATURAL JOIN auth_group AS g
+ORDER BY g.authz_id
+;
+
+SELECT results_eq(
+       'SELECT * FROM testing_groups;',
+       'SELECT authz_id FROM auth_group WHERE FALSE;', -- <-- Empty set
+       'no groups!'
+);
+
+-- Now we start adding groups, one at a time.  First, we add the actor
+-- directly to a group.  Then we successively add the last group to
+-- another group.  Each time we check to see that all appropriate
+-- groups are returned by the groups_for_actor function.
+
+INSERT INTO group_actor_relations(parent, child)
+VALUES (group_id('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'), actor_id('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'));
+
+SELECT results_eq(
+       'SELECT * FROM testing_groups;',
+       $$
+         VALUES ('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'::CHAR(32));
+       $$,
+       'one group, direct membership'
+);
+
+INSERT INTO group_group_relations(parent, child)
+VALUES (group_id('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'), group_id('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'));
+
+SELECT results_eq(
+       'SELECT * FROM testing_groups;',
+       $$
+         VALUES ('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'::CHAR(32)),
+                ('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'::CHAR(32));
+       $$,
+       'two groups'
+);
+
+INSERT INTO group_group_relations(parent, child)
+VALUES (group_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'), group_id('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'));
+
+SELECT results_eq(
+       'SELECT * FROM testing_groups;',
+       $$
+         VALUES ('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'::CHAR(32)),
+                ('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'::CHAR(32)),
+                ('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'::CHAR(32));
+       $$,
+       'three groups'
+);
+
+INSERT INTO group_group_relations(parent, child)
+VALUES (group_id('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'), group_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'));
+
+SELECT results_eq(
+       'SELECT * FROM testing_groups;',
+       $$
+         VALUES ('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'::CHAR(32)),
+                ('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'::CHAR(32)),
+                ('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'::CHAR(32)),
+                ('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'::CHAR(32));
+       $$,
+       'four groups'
+);
+
+SELECT * FROM finish();
+ROLLBACK;

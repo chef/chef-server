@@ -16,6 +16,9 @@ ORDER BY type, authorizee, permission, directly_granted
 -- Also, we have to do some explicit type casting because types can be gotten from cursors (really?).
 DECLARE expected CURSOR FOR
 VALUES
+
+    ('actor', 'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'::CHAR(32), 'read'::auth_permission, FALSE),
+    ('actor', 'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'::CHAR(32), 'delete'::auth_permission, FALSE),
     ('actor', 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'::CHAR(32), 'delete'::auth_permission, FALSE),
     ('actor', 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'::CHAR(32), 'delete'::auth_permission, TRUE),
     ('actor', 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'::CHAR(32), 'read'::auth_permission, FALSE),

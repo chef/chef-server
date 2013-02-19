@@ -110,7 +110,12 @@ CREATE TABLE container_acl_actor(
 CREATE TABLE group_group_relations(
        parent bigint REFERENCES auth_group(id) ON UPDATE CASCADE ON DELETE CASCADE,
        child bigint REFERENCES auth_group(id) ON UPDATE CASCADE ON DELETE CASCADE,
-       PRIMARY KEY (parent, child)
+       PRIMARY KEY (parent, child),
+       -- We can effectively perform this check in the
+       -- no_long_range_cycles trigger (see below), but there's no
+       -- harm in explicitly coding this simple (and cheap) base-case
+       -- check
+       CONSTRAINT no_trivial_cycles CHECK(parent != child)
 );
 
 CREATE TABLE group_actor_relations(
@@ -119,6 +124,82 @@ CREATE TABLE group_actor_relations(
        PRIMARY KEY (parent, child)
 );
 
+CREATE OR REPLACE FUNCTION forbid_group_cycles()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    cycle_root BOOLEAN DEFAULT FALSE;
+BEGIN
+    SELECT INTO cycle_root (
+        WITH RECURSIVE
+            parents(id) AS (
+                -- parent(s) of the current child group
+                SELECT parent
+                FROM group_group_relations
+                WHERE child = NEW.child
+
+                UNION
+
+                -- grandparents and other ancestors
+                SELECT ggr.parent
+                FROM group_group_relations AS ggr
+                JOIN parents AS p ON ggr.child = p.id
+            )
+        SELECT TRUE
+        FROM parents
+        WHERE id = NEW.child
+    );
+
+    IF cycle_root THEN
+      RAISE EXCEPTION 'This would create a group membership cycle, which is not allowed';
+    END IF;
+
+    RETURN NULL;
+END;
+$$;
+
+COMMENT ON FUNCTION forbid_group_cycles() IS
+$$We want to forbid the presence of group membership cycles.  That is,
+paths such as:
+
+  X -member-of-> Y -member-of-> Z -member-of-> X
+
+should be disallowed.  While the recursive group membership queries
+are written to effectively ignore such cycles, forbidding cycles
+allows us to eliminate a class of permission anomalies.
+
+For instance, using the above cycle, if group X was given READ
+permission (but not, say, DELETE) on an object and group Z was given
+DELETE on that same object, by virtue of the cyclical membership
+relationship, group X would inherit the DELETE permission!  If X was
+supposed to be the root of this group hierarchy, it clearly should not
+be inheriting DELETE from Z, its "child".  Alternatively, if Z the
+true root, it would be legitimate for X to inherit DELETE from Z, but
+not for Z to inherit READ!
+
+Since the cyclic nature of such relationships prevents us from saying
+which interpretation is correct, we explicitly forbid such scenarios
+in the first place.
+
+Put another way, by allowing group cycles, we are in effect declaring
+that all actors and groups that participate in a cycle will have the
+__union of all permissions granted to any of the groups__ in the cycle
+(permissions granted directly to actors managed separately, and thus
+are not involved in the present discussion).  Needless to say, this is
+not a good state of affairs.
+
+To implement this, the trigger function operates on each row that is
+inserted.  If insertion of the row creates a cycle containing 'child'
+(that is, if it creates a path by which 'child' may be reached from
+itself), an exception is raised.
+$$;
+
+CREATE CONSTRAINT TRIGGER no_long_range_cycles
+    AFTER INSERT OR UPDATE
+    ON group_group_relations
+    FOR EACH ROW
+    EXECUTE PROCEDURE forbid_group_cycles();
 
 -- These are to help adding data in terms of Authz IDs
 -- TODO: Consider views with rewrite rules instead?
@@ -156,24 +237,26 @@ $$;
 -- NOTE: This function takes an internal database ID as an argument,
 -- and returns a table of the same.  It is not intended to be called
 -- directly from the outside.
-CREATE FUNCTION groups_for_actor(auth_actor.id%TYPE)
+CREATE OR REPLACE FUNCTION groups_for_actor(auth_actor.id%TYPE)
 RETURNS TABLE(auth_group auth_group.id%TYPE)
-LANGUAGE SQL
+LANGUAGE SQL STABLE STRICT
 AS $$
-       WITH RECURSIVE groups(g,a) AS (
-       SELECT parent, child
-       FROM group_actor_relations
-       WHERE child = $1
-       AND child IS NOT NULL
+WITH RECURSIVE
+    groups(id) AS (
+        -- direct group membership
+        SELECT parent
+        FROM group_actor_relations
+        WHERE child = $1
 
-       UNION
+        UNION
 
-       SELECT ggr.parent, ggr.child
-       FROM group_group_relations AS ggr
-       JOIN group_actor_relations AS gar
-       ON ggr.child = gar.parent
-       JOIN groups ON groups.a = gar.child)
-  SELECT DISTINCT(g) from groups;
+        -- indirect group membership; find parent groups of all groups
+        -- the actor is a direct member of, recursively
+        SELECT ggr.parent
+        FROM group_group_relations AS ggr
+        JOIN groups ON groups.id = ggr.child
+    )
+SELECT id from groups;
 $$;
 
 -- Need functions for permission on container, actor, and group.
@@ -228,3 +311,80 @@ BEGIN
        RETURN FALSE;
 END;
 $$;
+
+
+--------------------------------------------------------------------------------
+-- Debug Schema
+--
+-- Helpers for inspecting / debugging a live system... an on-call
+-- dev's best friend.
+--------------------------------------------------------------------------------
+
+CREATE SCHEMA debug;
+
+CREATE VIEW debug.object_acl AS
+WITH RECURSIVE
+    all_groups(target, authorizee, perm, direct) AS (
+        -- direct groups
+        SELECT target, authorizee, permission, TRUE
+        FROM object_acl_group
+
+        UNION
+
+       -- indirect groups
+        SELECT all_groups.target, rel.child, all_groups.perm, FALSE
+        FROM group_group_relations AS rel
+        JOIN all_groups
+          ON all_groups.authorizee = rel.parent
+    ),
+
+    all_actors(target, authorizee, perm, direct) AS (
+        -- direct actors
+        SELECT target, authorizee, permission, TRUE
+        FROM object_acl_actor
+
+        UNION
+
+        -- indirect actors
+        SELECT gs.target, rel.child, gs.perm, FALSE
+        FROM group_actor_relations AS rel
+        JOIN all_groups AS gs
+          ON rel.parent = gs.authorizee
+    )
+SELECT o.authz_id AS "object",
+       a.authz_id AS "authorizee",
+       'actor' AS "type",
+        perm AS permission,
+        direct AS directly_granted
+FROM all_actors
+JOIN auth_object AS o
+  ON all_actors.target = o.id
+JOIN auth_actor AS a
+  ON all_actors.authorizee = a.id
+
+UNION
+
+SELECT o.authz_id AS "object",
+       g.authz_id AS "authorizee",
+       'group' AS "type",
+       perm AS permission,
+       direct AS directly_granted
+FROM all_groups
+JOIN auth_object AS o
+  ON all_groups.target = o.id
+JOIN auth_group AS g
+  ON all_groups.authorizee = g.id
+;
+
+COMMENT ON VIEW debug.object_acl IS
+    'Shows all directly and indirectly granted permissions for all actors and groups on objects';
+COMMENT ON COLUMN debug.object_acl.object IS
+    'The Authz ID of an object';
+COMMENT ON COLUMN debug.object_acl.authorizee IS
+    'The Authz ID of an actor or group with a permission on `object`';
+COMMENT ON COLUMN debug.object_acl.type IS
+    'Either "actor" or "group"; refers to `authorizee`';
+COMMENT ON COLUMN debug.object_acl.permission IS
+    'The permission `authorizee` has on `object`';
+COMMENT ON COLUMN debug.object_acl.directly_granted IS
+    'Is `permission` directly granted, or due to group membership?';
