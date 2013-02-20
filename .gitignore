@@ -10,3 +10,10 @@ Gemfile.lock
 .*.sw[a-z]
 *.un~
 /cookbooks
+rel/oc_heimdall
+heimdall.plt
+deps
+*.beam
+.eunit
+ebin
+erl_crash.dump
