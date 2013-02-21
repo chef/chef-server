@@ -3,10 +3,14 @@
 -export([generate_authz_id/0,
          set_created_response/2]).
 
+hexdigit(Num) when Num < 10 ->
+    Num + 48;
+hexdigit(Num) ->
+    Num + 87.
+
 %% Generate random authz IDs for new objects
 generate_authz_id() ->
-    % Okay, not so random stub here
-    "deadbeefdeadbeefdeadbeefdeadbeef".
+    [hexdigit(crypto:rand_uniform(0,16)) || _ <- lists:seq(1, 32)].
 
 scheme(Req) ->
     case wrq:get_req_header("x-forwarded-proto", Req) of
