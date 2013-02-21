@@ -1,0 +1,15 @@
+%%-*- mode: erlang -*-
+{application, heimdall,
+ [{description, "Heimdall: Opscode Authorization API"},
+  {vsn, "0.0.1"},
+  {modules, []},
+  {registered, []},
+  {mod, {heimdall_app, []}},
+  {env, []},
+  {applications, [kernel,
+                  stdlib,
+                  lager,
+                  sasl,
+                  sqerl,
+                  webmachine
+                 ]}]}.
