@@ -7,9 +7,12 @@
 %% Share resource state shared by all heimdall resource modules
 -record(base_state, {
 
-          %% Who's asking?
-          requestor_id :: binary(),
+          %% Who are we working with?
+          authz_id :: binary(),
 
-          %% What resource are we talking about?
-          request_type :: entity_type()
+          %% What kind of resource are we talking about here?
+          request_type :: entity_type(),
+
+          %% Who's asking?
+          requestor_id :: binary()
          }).

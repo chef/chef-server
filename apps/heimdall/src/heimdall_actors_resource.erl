@@ -29,7 +29,8 @@ create_path(Req, State) ->
     {"/actors", Req, State}.
 
 malformed_request(Req, State) ->
-    % Figures out the requestor (errors out if not there)
+    % Figures out the requestor (does NOT error out if not there, this endpoint
+    % only)
     {false, Req, State}.
 
 forbidden(Req, State) ->
@@ -39,6 +40,9 @@ auth_info(_Method) ->
     {any}.
 
 from_json(Req, State) ->
-    % Attempts to create the object, adds requestor to ACL (actor
-    % endpoint would also add actor to own ACL)
-    {ok, Req, State}.
+    AuthzId = heimdall_wm_util:generate_authz_id(),
+    % Attempt to store actor in DB
+    % Attempt to add actor to own ACL
+    % Attempt to add requestor to ACL
+    Req0 = heimdall_wm_util:set_created_response(Req, AuthzId),
+    {ok, Req0, State}.
