@@ -7,6 +7,9 @@ Chef::Config.local_cookbook_storage   = true
 Chef::Config.local_sandbox_path       = '<%= node['private_chef']['opscode-chef']['sandbox_path'] %>'
 Chef::Config.local_checksum_repo_path = '<%= node['private_chef']['opscode-chef']['checksum_path'] %>'
 
+# Fix for OC-6266
+Chef::Config.cache_options({ :path => "<%= node['private_chef']['opscode-chef']['checksum_path'] %>", :skip_expires => true })
+
 Merb::Config.use do |c|
 
   if Chef::Config[:log_location].kind_of?(String)
