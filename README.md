@@ -1,5 +1,18 @@
-oc_authz
+oc_heimdall
 ========
+
+Heimdall?
+=========
+
+`oc_heimdall` is the Opscode Authorization API server.  It is named
+after [Heimdall][], the all-seeing, all-hearing watchman of the
+rainbow bridge to Asgard in Norse mythology.
+
+`oc_heimdall` is a complete rewrite and replacement of the old
+[opscode-authz][] API server.
+
+[Heimdall]:http://en.wikipedia.org/wiki/Heimdallr
+[opscode-authz]:https://github.com/opscode/opscode-authz
 
 Testing and Development
 =======================
@@ -66,12 +79,12 @@ bin/vagrant destroy
 ```
 
 Eventually, we'll be adding Test Kitchen support for running
-[oc-authz-pedant][] and our pgTAP database schema tests.
+[oc-heimdall-pedant][] and our pgTAP database schema tests.
 
 Cookbook Hacking
 ================
 
-If you want to hack on the [opscode-authz][] cookbook, you'll need to
+If you want to hack on the [opscode-heimdall][] cookbook, you'll need to
 make a minor tweak to the Berksfile.
 
 First, perform a local checkout of the cookbook.  Then, modify the
@@ -80,19 +93,19 @@ dependency line in `Berksfile`.
 Change this:
 
 ``` ruby
-cookbook "opscode-authz", git: "git@github.com:opscode-cookbooks/opscode-authz"
+cookbook "opscode-heimdall, git: "git@github.com:opscode-cookbooks/opscode-heimdall"
 ```
 
 to this:
 
 ``` ruby
-cookbook "opscode-authz", path: "/path/to/local/checkout/of/opscode-authz"
+cookbook "opscode-heimdall", path: "/path/to/local/checkout/of/opscode-heimdall"
 ```
 
 Re-provision your machine and you'll be running off the local version
 of the cookbook.
 
 [Berkshelf]:http://berkshelf.com
-[oc-authz-pedant]:https://github.com/opscode/oc-authz-pedant
-[opscode-authz]:https://github.com/opscode-cookbooks/opscode-authz
+[oc-heimdall-pedant]:https://github.com/opscode/oc-heimdall-pedant
+[opscode-heimdall]:https://github.com/opscode-cookbooks/opscode-heimdall
 [chef repo]:https://github.com/opscode/opscode-platform-cookbooks

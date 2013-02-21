@@ -1,4 +1,4 @@
-TEST_DB = authz_test
+TEST_DB = heimdall_test
 
 .PHONY : test
 
@@ -9,7 +9,7 @@ setup:
 	@dropdb $(TEST_DB)
 	@createdb $(TEST_DB)
 	@psql --dbname $(TEST_DB) --quiet --command 'CREATE EXTENSION pgtap;'
-	@psql --dbname $(TEST_DB) --quiet --single-transaction --set ON_ERROR_STOP=1 --file sql/authz.sql
+	@psql --dbname $(TEST_DB) --quiet --single-transaction --set ON_ERROR_STOP=1 --file sql/heimdall.sql
 
 test: setup
 	@echo "Executing pgTAP tests in database '$(TEST_DB)'"

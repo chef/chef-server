@@ -16,7 +16,7 @@ Vagrant::Config.run do |config|
   # to skip installing and copying to Vagrant's shelf.
   # config.berkshelf.except = []
 
-  config.vm.host_name = "oc-authz-berkshelf"
+  config.vm.host_name = "oc-heimdall-berkshelf"
 
   config.vm.box = "opscode-ubuntu-10.04"
   config.vm.box_url = "https://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-ubuntu-10.04.box"
@@ -67,7 +67,7 @@ Vagrant::Config.run do |config|
 
     chef.run_list = [
                      "recipe[opscode-dev-shim]",
-                     "recipe[opscode-authz::development]"
+                     "recipe[opscode-heimdall::development]"
                  ]
   end
 end
