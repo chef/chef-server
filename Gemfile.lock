@@ -22,7 +22,7 @@ PATH
       chef-pedant (>= 0.0.10)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     activesupport (3.2.12)
       i18n (~> 0.6)
