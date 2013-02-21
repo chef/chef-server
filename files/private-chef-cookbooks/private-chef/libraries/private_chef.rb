@@ -42,6 +42,7 @@ module PrivateChef
   nginx Mash.new
   log_retention Mash.new
   log_rotation Mash.new
+  dark_launch Mash.new
 
   servers Mash.new
   backend_vips Mash.new
@@ -203,6 +204,7 @@ module PrivateChef
       results['private_chef']['logs'] = {}
       results['private_chef']['logs']['log_retention'] = PrivateChef['log_retention']
       results['private_chef']['logs']['log_rotation'] = PrivateChef['log_rotation']
+      results['private_chef']['dark_launch'] = PrivateChef['dark_launch']
       results
     end
 
