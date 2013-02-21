@@ -1,7 +1,7 @@
 chef_api :config
 site :opscode
 
-cookbook "opscode-authz", git: "git@github.com:opscode-cookbooks/opscode-authz"
+cookbook "opscode-heimdall", git: "git@github.com:opscode-cookbooks/opscode-heimdall"
 
 # These are only needed for local dev work
 cookbook "opscode-dev-shim", git: "git@github.com:opscode-cookbooks/opscode-dev-shim.git",
