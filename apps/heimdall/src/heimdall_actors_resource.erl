@@ -1,26 +1,14 @@
 -module(heimdall_actors_resource).
 
--include("heimdall_wm.hrl").
-
--mixin([{heimdall_wm_base, [content_types_accepted/2,
-                            content_types_provided/2,
-                            finish_request/2,
-                            ping/2,
-                            post_is_create/2,
-                            service_available/2]}]).
-
--behavior(heimdall_wm).
--export([auth_info/1,
-         forbidden/2,
-         malformed_request/2]).
+-include("heimdall_wm_rest_endpoint.hrl").
 
 -export([allowed_methods/2,
          create_path/2,
          from_json/2,
          init/1]).
 
-init(_Config) ->
-    {ok, #base_state{}}.
+init(Config) ->
+    heimdall_wm_base:init(?MODULE, Config).
 
 allowed_methods(Req, State) ->
     {['POST'], Req, State}.
@@ -28,14 +16,11 @@ allowed_methods(Req, State) ->
 create_path(Req, State) ->
     {"/actors", Req, State}.
 
-malformed_request(Req, State) ->
+validate_request(Req, State) ->
     % We really don't care if there's a requestor or not, so we just take whatever
     % comes back, even if the requestor_id remains undefined.
     State0 = heimdall_wm_util:get_requestor(Req, State),
     {false, Req, State0}.
-
-forbidden(Req, State) ->
-    {false, Req, State}.
 
 auth_info(_Method) ->
     {any}.

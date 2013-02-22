@@ -14,5 +14,8 @@
           request_type :: entity_type(),
 
           %% Who's asking?
-          requestor_id :: binary()
+          requestor_id :: binary(),
+
+          %% Which module is handling this request?
+          module :: atom()
          }).
