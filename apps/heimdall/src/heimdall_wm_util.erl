@@ -6,6 +6,8 @@
          get_requestor/2,
          set_created_response/2]).
 
+%% Convert 0-15 into ASCII '0' through '9' and 'a' through 'f'; those ASCII values
+%% are discontinuous, so there are two ranges to convert
 hexdigit(Num) when Num < 10 ->
     Num + 48;
 hexdigit(Num) ->
@@ -22,7 +24,7 @@ get_requestor(Req, State) ->
             State;
         Any ->
             % TODO: at some point, we should probably verify that the requestor
-            % actually exists
+            % actually exists or throw an exception
             State#base_state{requestor_id = Any}
     end.
 

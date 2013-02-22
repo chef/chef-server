@@ -20,9 +20,11 @@ service_available(Req, State) ->
 post_is_create(Req, State) ->
     {true, Req, State}.
 
+%% This is a stub for now
 malformed_request(Req, State) ->
     {false, Req, State}.
 
+%% This is a stub for now
 forbidden(Req, State) ->
     {false, Req, State}.
 
