@@ -3,8 +3,8 @@
 # Dump out a database from mysql such that we can
 # insert it into OPC/OHC postgres database
 #
-
-DB_USER=root
+DB_USER=opscode_chef
+read -s -p "Password for opscode_chef: " DB_PASSWORD
 
 
 # verify we have the my2pg tool available
@@ -37,6 +37,7 @@ echo "Creating $DUMP_NAME"
 #
 time mysqldump \
     -u${DB_USER} \
+    -p${DB_PASSWORD} \
     --skip-quote-names \
     --hex-blob \
     --skip-triggers \
@@ -58,6 +59,7 @@ time mysqldump \
 #
 time mysqldump \
     -u${DB_USER} \
+    -p${DB_PASSWORD} \
     --skip-quote-names \
     --hex-blob \
     --skip-triggers \
@@ -80,6 +82,7 @@ time mysqldump \
 #
 time mysqldump \
     -u${DB_USER} \
+    -p${DB_PASSWORD} \
     --skip-quote-names \
     --hex-blob \
     --skip-triggers \
@@ -90,10 +93,12 @@ time mysqldump \
     opscode_chef \
     opc_customers | sed "s/,\([01]\),\([01]\),\([01]\),/,__\1__,__\2__,__\3__,/g" \
                   | sed "s/,__0__/,false/g; s/,__1__/,true/g" \
+                  | sed "s/,'0000-00-00 00:00:00'/'1999-01-01 00:00:00'/g" \
                   >> $DUMP_NAME
 
 time mysqldump \
     -u${DB_USER} \
+    -p${DB_PASSWORD} \
     --skip-quote-names \
     --hex-blob \
     --skip-triggers \
