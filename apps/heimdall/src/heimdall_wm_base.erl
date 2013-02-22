@@ -16,11 +16,9 @@
 init(Resource, Config) ->
     State = #base_state{module = Resource},
     State0 = case Config of
-                 [Type, Action, MemberType] ->
-                     State#base_state{request_type = Type, action = Action,
+                 [Type, MemberType] ->
+                     State#base_state{request_type = Type,
                                       member_type = MemberType};
-                 [Type, Action] ->
-                     State#base_state{request_type = Type, action = Action};
                  [Type] ->
                      State#base_state{request_type = Type}
     end,
@@ -36,12 +34,19 @@ post_is_create(Req, State) ->
     {true, Req, State}.
 
 malformed_request(Req, #base_state{module = Module} = State) ->
-    % These following two may well come back as 'undefined' depending on the
+    % These following three may well come back as 'undefined' depending on the
     % requested endpoint, but that's fine, in those cases we don't care anyway since
     % we won't be using them in the first place:
     Id = wrq:path_info(id, Req),
+    Action = case wrq:path_info(action, Req) of
+                 undefined ->
+                     undefined;
+                 Permission ->
+                     list_to_atom(Permission)
+             end,
     MemberId = wrq:path_info(member_id, Req),
-    Module:validate_request(Req, State#base_state{authz_id = Id,
+    io:format("~n----->~n~p~n", [{Id, Action, MemberId}]),
+    Module:validate_request(Req, State#base_state{authz_id = Id, action = Action,
                                                   member_id = MemberId}).
 
 validate_requestor(Req, State) ->
