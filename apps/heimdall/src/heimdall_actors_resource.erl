@@ -23,12 +23,12 @@ validate_request(Req, State) ->
     {false, Req, State0}.
 
 auth_info(_Method) ->
-    {any}.
+    ignore.
 
 from_json(Req, State) ->
     AuthzId = heimdall_wm_util:generate_authz_id(),
-    % Attempt to store actor in DB
-    % Attempt to add actor to own ACL
-    % Attempt to add requestor to ACL
+    % TODO: Attempt to store actor in DB
+    % TODO: Attempt to add actor to own ACL
+    % TODO: Attempt to add requestor to ACL
     Req0 = heimdall_wm_util:set_created_response(Req, AuthzId),
     {ok, Req0, State}.

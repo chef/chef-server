@@ -8,12 +8,23 @@
          malformed_request/2,
          ping/2,
          post_is_create/2,
-         service_available/2]).
+         service_available/2,
+         validate_requestor/2]).
 
 -include("heimdall_wm.hrl").
 
-init(Resource, _Config) ->
-    {ok, #base_state{module = Resource}}.
+init(Resource, Config) ->
+    State = #base_state{module = Resource},
+    State0 = case Config of
+                 [Type, Action, MemberType] ->
+                     State#base_state{request_type = Type, action = Action,
+                                      member_type = MemberType};
+                 [Type, Action] ->
+                     State#base_state{request_type = Type, action = Action};
+                 [Type] ->
+                     State#base_state{request_type = Type}
+    end,
+    {ok, State0}.
 
 ping(Req, State) ->
     {pong, Req, State}.
@@ -24,19 +35,38 @@ service_available(Req, State) ->
 post_is_create(Req, State) ->
     {true, Req, State}.
 
-%% This is a stub for now
-malformed_request(Req, State) ->
-    Mod = State#base_state.module,
-    Mod:validate_request(Req, State).
+malformed_request(Req, #base_state{module = Module} = State) ->
+    % These following two may well come back as 'undefined' depending on the
+    % requested endpoint, but that's fine, in those cases we don't care anyway since
+    % we won't be using them in the first place:
+    Id = wrq:path_info(id, Req),
+    MemberId = wrq:path_info(member_id, Req),
+    Module:validate_request(Req, State#base_state{authz_id = Id,
+                                                  member_id = MemberId}).
 
-%% This is only a partial implementation for now
-forbidden(Req, State) ->
-    Mod = State#base_state.module,
-    case Mod:auth_info(wrq:method(Req)) of
-        {any} ->
-            {false, Req, State};
+validate_requestor(Req, State) ->
+    State0 = heimdall_wm_util:get_requestor(Req, State),
+    case State0#base_state.requestor_id of
+        undefined ->
+            heimdall_wm_error:set_malformed_request(Req, State, missing_actor);
         _ ->
-            error(not_implemented_yet)
+            {false, Req, State0}
+    end.
+
+forbidden(Req, #base_state{module = Module} = State) ->
+    case Module:auth_info(wrq:method(Req)) of
+        ignore ->
+            {false, Req, State};
+        Permission ->
+            % TODO: Check that authz_id exists for type
+            % TODO: GET ACL for entity, store in #base_state.acl
+            case Permission of
+                any ->
+                    % TODO: check all instead
+                    {false, Req, State};
+                Other ->
+                    % TODO: check that type instead
+                    {false, Req, State};
     end.
 
 content_types_accepted(Req, State) ->

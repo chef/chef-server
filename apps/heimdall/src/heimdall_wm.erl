@@ -11,7 +11,7 @@
     {ok, base_state()} | error().
 
 -callback auth_info(http_verb()) ->
-    {any} | permission().
+    ignore | any | permission().
 
 -callback forbidden(wm_req(), base_state()) ->
     {{halt, non_neg_integer()}, wm_req(), base_state()} |

@@ -13,6 +13,18 @@
           %% What kind of resource are we talking about here?
           request_type :: entity_type(),
 
+          %% What is the ACL on the resource?
+          acl :: term(),
+
+          %% What type of ACE request is this?
+          action :: permission(),
+
+          %% What member type are we checking for?
+          member_type :: entity_type(),
+
+          %% What's the ID of the member
+          member_id :: binary(),
+
           %% Who's asking?
           requestor_id :: binary(),
 

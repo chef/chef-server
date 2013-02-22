@@ -24,8 +24,8 @@ get_requestor(Req, State) ->
         undefined ->
             State;
         Any ->
-            % TODO: at some point, we should probably verify that the requestor
-            % actually exists or throw an exception
+            % TODO: we should probably verify that the requestor actually exists or
+            % throw an exception
             State#base_state{requestor_id = Any}
     end.
 
