@@ -4,8 +4,7 @@ CREATE TYPE auth_permission AS ENUM ('update', 'read', 'grant', 'delete', 'creat
 -- organizations in Authz to do the proper scoping. :(
 CREATE TABLE container(
     id bigserial PRIMARY KEY,
-    authz_id  CHAR(32) NOT NULL UNIQUE,
-    name TEXT     NOT NULL
+    authz_id  CHAR(32) NOT NULL UNIQUE
 );
 
 CREATE TABLE auth_actor(

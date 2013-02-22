@@ -48,8 +48,6 @@ SELECT col_type_is('auth_actor','id','bigint');
 SELECT col_type_is('auth_group','id','bigint');
 SELECT col_type_is('auth_object','id','bigint');
 
-SELECT col_type_is('container', 'name', 'text');
-
 -- All permission tables have the exact same columns, and all create the PKs
 SELECT columns_are('object_acl_group', ARRAY['target', 'authorizee', 'permission']);
 SELECT columns_are('object_acl_actor', ARRAY['target', 'authorizee', 'permission']);
