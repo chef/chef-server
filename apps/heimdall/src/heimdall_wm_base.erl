@@ -20,7 +20,9 @@ init(Resource, Config) ->
                      State#base_state{request_type = Type,
                                       member_type = MemberType};
                  [Type] ->
-                     State#base_state{request_type = Type}
+                     State#base_state{request_type = Type};
+                 [] ->
+                     State
     end,
     {ok, State0}.
 
@@ -45,7 +47,6 @@ malformed_request(Req, #base_state{module = Module} = State) ->
                      list_to_atom(Permission)
              end,
     MemberId = wrq:path_info(member_id, Req),
-    io:format("~n----->~n~p~n", [{Id, Action, MemberId}]),
     Module:validate_request(Req, State#base_state{authz_id = Id, action = Action,
                                                   member_id = MemberId}).
 

@@ -31,4 +31,4 @@ to_json(Req, #base_state{request_type = RequestType} = State) ->
 
 delete_resource(Req, State) ->
     % TODO: delete the entity
-    {ok, Req, State}.
+    {true, Req, State}.

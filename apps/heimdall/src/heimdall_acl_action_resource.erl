@@ -29,8 +29,8 @@ to_json(Req, State) ->
 from_json(Req, State) ->
     % TODO: parse the request body
     % TODO: update the relevant part of the ACL in the DB
-    {ok, Req, State}.
+    {true, Req, State}.
 
 delete_resource(Req, State) ->
     % TODO: delete the relevant part of the ACL from DB
-    {ok, Req, State}.
+    {true, Req, State}.
