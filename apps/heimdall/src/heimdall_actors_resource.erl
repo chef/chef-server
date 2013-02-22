@@ -29,9 +29,10 @@ create_path(Req, State) ->
     {"/actors", Req, State}.
 
 malformed_request(Req, State) ->
-    % Figures out the requestor (does NOT error out if not there, this endpoint
-    % only)
-    {false, Req, State}.
+    % We really don't care if there's a requestor or not, so we just take whatever
+    % comes back, even if the requestor_id remains undefined.
+    State0 = heimdall_wm_util:get_requestor(Req, State),
+    {false, Req, State0}.
 
 forbidden(Req, State) ->
     {false, Req, State}.

@@ -1,6 +1,9 @@
 -module(heimdall_wm_util).
 
+-include("heimdall_wm.hrl").
+
 -export([generate_authz_id/0,
+         get_requestor/2,
          set_created_response/2]).
 
 hexdigit(Num) when Num < 10 ->
@@ -11,6 +14,17 @@ hexdigit(Num) ->
 %% Generate random authz IDs for new objects
 generate_authz_id() ->
     [hexdigit(crypto:rand_uniform(0,16)) || _ <- lists:seq(1, 32)].
+
+%% Extract the requestor from the request headers and return updated base state.
+get_requestor(Req, State) ->
+    case wrq:get_req_header("X-Ops-Requesting-Actor-Id", Req) of
+        undefined ->
+            State;
+        Any ->
+            % TODO: at some point, we should probably verify that the requestor
+            % actually exists
+            State#base_state{requestor_id = Any}
+    end.
 
 scheme(Req) ->
     case wrq:get_req_header("x-forwarded-proto", Req) of
