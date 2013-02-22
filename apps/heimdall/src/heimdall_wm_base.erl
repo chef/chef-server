@@ -64,9 +64,10 @@ forbidden(Req, #base_state{module = Module} = State) ->
                 any ->
                     % TODO: check all instead
                     {false, Req, State};
-                Other ->
+                _Other ->
                     % TODO: check that type instead
-                    {false, Req, State};
+                    {false, Req, State}
+            end
     end.
 
 content_types_accepted(Req, State) ->

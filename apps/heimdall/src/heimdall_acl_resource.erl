@@ -20,4 +20,4 @@ auth_info('GET') ->
 
 to_json(Req, State) ->
     % TODO: output the ACL populated by forbidden
-    {<<"{}">>, Req, State}
+    {<<"{}">>, Req, State}.
