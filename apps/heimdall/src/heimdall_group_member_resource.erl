@@ -21,8 +21,8 @@ auth_info('DELETE') ->
 
 from_json(Req, State) ->
     % TODO: add the object to the group
-    {ok, Req, State}.
+    {true, Req, State}.
 
 delete_resource(Req, State) ->
     % TODO: delete the object from the group
-    {ok, Req, State}.
+    {true, Req, State}.
