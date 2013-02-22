@@ -10,5 +10,7 @@
                             service_available/2]}]).
 
 -behavior(heimdall_wm).
--export([auth_info/1,
+-export([allowed_methods/2,
+         auth_info/1,
+         init/1,
          validate_request/2]).

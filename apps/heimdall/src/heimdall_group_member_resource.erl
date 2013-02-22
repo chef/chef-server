@@ -2,10 +2,8 @@
 
 -include("heimdall_wm_rest_endpoint.hrl").
 
--export([allowed_methods/2,
-         delete_resource/2,
-         from_json/2,
-         init/1]).
+-export([delete_resource/2,
+         from_json/2]).
 
 init(Config) ->
     heimdall_wm_base:init(?MODULE, Config).

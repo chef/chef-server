@@ -2,9 +2,7 @@
 
 -include("heimdall_wm_rest_endpoint.hrl").
 
--export([allowed_methods/2,
-         delete_resource/2,
-         init/1,
+-export([delete_resource/2,
          to_json/2]).
 
 init(Config) ->
