@@ -4,7 +4,8 @@
 
 -export([generate_authz_id/0,
          get_requestor/2,
-         set_created_response/2]).
+         set_created_response/2,
+         set_json_body/2]).
 
 %% Convert 0-15 into ASCII '0' through '9' and 'a' through 'f'; those ASCII values
 %% are discontinuous, so there are two ranges to convert
