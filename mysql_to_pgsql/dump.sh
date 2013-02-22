@@ -93,7 +93,7 @@ time mysqldump \
     opscode_chef \
     opc_customers | sed "s/,\([01]\),\([01]\),\([01]\),/,__\1__,__\2__,__\3__,/g" \
                   | sed "s/,__0__/,false/g; s/,__1__/,true/g" \
-                  | sed "s/,'0000-00-00 00:00:00'/'1999-01-01 00:00:00'/g" \
+                  | sed "s/,'0000-00-00 00:00:00'/,'1999-01-01 00:00:00'/g" \
                   >> $DUMP_NAME
 
 time mysqldump \
