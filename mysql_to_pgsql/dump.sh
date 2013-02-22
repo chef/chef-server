@@ -79,7 +79,7 @@ time mysqldump \
 # SED Transforms
 # 1,2. convert {opc,ohc,osc}_customer fields from 0/1 -> false/true.
 #      conveniently they all appear in adjacent columns.
-#
+# 3. Replace invalid date string 0000-00-00 00:00:00 with a valid date
 time mysqldump \
     -u${DB_USER} \
     -p${DB_PASSWORD} \
