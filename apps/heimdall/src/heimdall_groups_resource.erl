@@ -30,16 +30,11 @@ create_path(Req, State) ->
 
 malformed_request(Req, State) ->
     State0 = heimdall_wm_util:get_requestor(Req, State),
-    try
-        case State0#base_state.requestor_id of
-            undefined ->
-                throw(missing_actor);
-            _ ->
-                {false, Req, State0}
-        end
-    catch
-        throw:missing_actor ->
-            heimdall_wm_error:set_malformed_request(Req, State, missing_actor)
+    case State0#base_state.requestor_id of
+        undefined ->
+            heimdall_wm_error:set_malformed_request(Req, State, missing_actor);
+        _ ->
+            {false, Req, State0}
     end.
 
 forbidden(Req, State) ->
