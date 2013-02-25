@@ -54,7 +54,7 @@ validate_requestor(Req, State) ->
     State0 = heimdall_wm_util:get_requestor(Req, State),
     case State0#base_state.requestor_id of
         undefined ->
-            heimdall_wm_error:set_malformed_request(Req, State, missing_actor);
+            heimdall_wm_error:set_malformed_request(Req, State, missing_requestor);
         _ ->
             {false, Req, State0}
     end.

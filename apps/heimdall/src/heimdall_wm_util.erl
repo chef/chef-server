@@ -23,10 +23,10 @@ get_requestor(Req, State) ->
     case wrq:get_req_header("X-Ops-Requesting-Actor-Id", Req) of
         undefined ->
             State;
-        Any ->
+        Id ->
             % TODO: we should probably verify that the requestor actually exists or
             % throw an exception
-            State#base_state{requestor_id = Any}
+            State#base_state{requestor_id = Id}
     end.
 
 scheme(Req) ->
