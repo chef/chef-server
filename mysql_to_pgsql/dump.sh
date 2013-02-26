@@ -6,6 +6,15 @@
 
 DB_USER=root
 
+
+# verify we have the my2pg tool available
+if test -x ./my2pg; then
+    true
+else
+    echo "./my2pg unavailable. Try running make"
+    exit 1
+fi
+
 #
 # We ignore reporting for now since the JSON in the tables
 # and we don't need opc user/customer tables since the apps
@@ -36,7 +45,7 @@ time mysqldump \
     --no-create-info \
     --complete-insert \
     opscode_chef \
-    nodes | sed "s/,0x\([0-9A-F]*\)/,decode('\1','hex')/g" \
+    nodes | ./my2pg \
           > $DUMP_NAME
 
 #
