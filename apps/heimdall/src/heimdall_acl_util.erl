@@ -16,8 +16,15 @@ add_access(Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
     end.
 
 add_full_access(TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
-    add_access(create, TargetType, TargetId, AuthorizeeType, AuthorizeeId),
-    add_access(read, TargetType, TargetId, AuthorizeeType, AuthorizeeId),
-    add_access(update, TargetType, TargetId, AuthorizeeType, AuthorizeeId),
-    add_access(delete, TargetType, TargetId, AuthorizeeType, AuthorizeeId),
-    add_access(grant, TargetType, TargetId, AuthorizeeType, AuthorizeeId).
+    case {AuthorizeeType, AuthorizeeId} of
+        {actor, undefined} ->
+            % The user we're giving access to doesn't exist (i.e., this is
+            % a superuser request) so don't add any access
+            ok;
+        {Type, Id} ->
+            add_access(create, TargetType, TargetId, Type, Id),
+            add_access(read, TargetType, TargetId, Type, Id),
+            add_access(update, TargetType, TargetId, Type, Id),
+            add_access(delete, TargetType, TargetId, Type, Id),
+            add_access(grant, TargetType, TargetId, Type, Id)
+    end.

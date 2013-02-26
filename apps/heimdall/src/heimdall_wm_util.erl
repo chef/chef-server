@@ -14,8 +14,12 @@ generate_authz_id() ->
 
 %% Extract the requestor from the request headers and return updated base state.
 get_requestor(Req, State) ->
+    {ok, SuperuserId} = application:get_env(heimdall, superuser_id),
     case wrq:get_req_header("X-Ops-Requesting-Actor-Id", Req) of
         undefined ->
+            State;
+        Id when Id =:= SuperuserId ->
+            % Superuser gets a pass
             State;
         Id ->
             case heimdall_db:exists(actor, Id) of
