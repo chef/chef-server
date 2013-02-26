@@ -7,16 +7,10 @@
          set_created_response/2,
          set_json_body/2]).
 
-%% Convert 0-15 into ASCII '0' through '9' and 'a' through 'f'; those ASCII values
-%% are discontinuous, so there are two ranges to convert
-hexdigit(Num) when Num < 10 ->
-    Num + 48;
-hexdigit(Num) ->
-    Num + 87.
-
 %% Generate random authz IDs for new objects
 generate_authz_id() ->
-    [hexdigit(crypto:rand_uniform(0,16)) || _ <- lists:seq(1, 32)].
+    lists:flatten([io_lib:format("~4.16.0b", [X]) ||
+                      <<X:16>> <= crypto:rand_bytes(16) ]).
 
 %% Extract the requestor from the request headers and return updated base state.
 get_requestor(Req, State) ->
