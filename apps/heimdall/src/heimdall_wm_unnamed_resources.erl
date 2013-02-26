@@ -1,4 +1,4 @@
--module(heimdall_objects_resource).
+-module(heimdall_wm_unnamed_resources).
 
 -include("heimdall_wm_rest_endpoint.hrl").
 
@@ -21,12 +21,12 @@ validate_request(Req, State) ->
 auth_info(_Method) ->
     ignore.
 
-from_json(Req, #base_state{authz_id = AuthzId,
+from_json(Req, #base_state{authz_id = AuthzId, request_type = Type,
                            requestor_id = RequestorId} = State) ->
-    case heimdall_db:create(object, AuthzId) of
+    case heimdall_db:create(Type, AuthzId) of
         ok ->
             try
-                heimdall_acl_util:add_full_access(object, AuthzId,
+                heimdall_acl_util:add_full_access(Type, AuthzId,
                                                   actor, RequestorId),
                 Req0 = heimdall_wm_util:set_created_response(Req, AuthzId),
                 {ok, Req0, State}
