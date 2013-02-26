@@ -42,14 +42,6 @@ compile_app:
 
 DIALYZER_OPTS = -Wrace_conditions -Wunderspecs
 
-DIALYZER_DEPS = deps/epgsql/ebin \
-		deps/epgsql/ebin \
-		deps/lager/ebin \
-		deps/mochiweb/ebin \
-		deps/pooler/ebin \
-		deps/sqerl/ebin \
-		deps/webmachine/ebin
-
 DEPS_PLT = heimdall.plt
 
 ERLANG_DIALYZER_APPS = asn1 \
@@ -58,8 +50,6 @@ ERLANG_DIALYZER_APPS = asn1 \
 		       edoc \
 		       edoc \
 		       erts \
-		       eunit \
-		       eunit \
 		       gs \
 		       hipe \
 		       inets \
@@ -78,13 +68,11 @@ ERLANG_DIALYZER_APPS = asn1 \
 		       webtool \
 		       xmerl
 
+$(DEPS_PLT):
+	dialyzer -nn --output_plt $(DEPS_PLT) --build_plt --apps $(ERLANG_DIALYZER_APPS)
 
-dialyze:
-	dialyzer --src $(DIALYZER_OPTS) --plts ~/.dialyzer_plt $(DEPS_PLT) -r apps/heimdall/src -I deps
-
-~/.dialyzer_plt:
-	@echo "ERROR: Missing ~/.dialyzer_plt. Please wait while a new PLT is compiled."
-	dialyzer --build_plt --apps $(ERLANG_DIALYZER_APPS)
+dialyze: compile $(DEPS_PLT)
+	dialyzer --src $(DIALYZER_OPTS) --plt $(DEPS_PLT) -r apps/heimdall/src -I deps
 
 # Testing ######################################################################
 
