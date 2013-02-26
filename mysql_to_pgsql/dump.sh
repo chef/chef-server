@@ -107,6 +107,6 @@ mysqldump \
 
 # TODO: handle errors on both dumps
 if [ $? -ne 0 ]; then
-    echo "Error downloading schema dump"
+    echo "Error downloading schema dump" >&2
     exit 1
 fi
