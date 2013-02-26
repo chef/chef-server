@@ -1,4 +1,4 @@
--module(heimdall_acl_action_resource).
+-module(heimdall_wm_acl_action_resource).
 
 -include("heimdall_wm_rest_endpoint.hrl").
 

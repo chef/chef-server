@@ -1,4 +1,4 @@
--module(heimdall_acl_resource).
+-module(heimdall_wm_acl_member_resource).
 
 -include("heimdall_wm_rest_endpoint.hrl").
 
@@ -17,5 +17,5 @@ auth_info('GET') ->
     {any}.
 
 to_json(Req, State) ->
-    % TODO: output the ACL populated by forbidden
+    % TODO: check if member has permission on entity; {halt 404} if not
     {<<"{}">>, Req, State}.

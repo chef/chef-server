@@ -1,4 +1,4 @@
--module(heimdall_named_resources).
+-module(heimdall_wm_named_resources).
 
 -include("heimdall_wm_rest_endpoint.hrl").
 

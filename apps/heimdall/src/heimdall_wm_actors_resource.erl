@@ -1,4 +1,4 @@
--module(heimdall_actors_resource).
+-module(heimdall_wm_actors_resource).
 
 -include("heimdall_wm_rest_endpoint.hrl").
 

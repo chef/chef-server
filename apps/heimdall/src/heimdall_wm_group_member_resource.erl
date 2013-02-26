@@ -1,4 +1,4 @@
--module(heimdall_group_member_resource).
+-module(heimdall_wm_group_member_resource).
 
 -include("heimdall_wm_rest_endpoint.hrl").
 

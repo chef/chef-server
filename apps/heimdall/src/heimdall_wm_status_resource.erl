@@ -1,4 +1,4 @@
--module(heimdall_status_resource).
+-module(heimdall_wm_status_resource).
 
 -export([
          allowed_methods/2,
