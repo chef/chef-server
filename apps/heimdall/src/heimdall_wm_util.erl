@@ -51,8 +51,8 @@ base_uri(Req) ->
     PortString = port_string(wrq:port(Req)),
     Scheme ++ "://" ++ Host ++ PortString.
 
-full_uri(Req, AuthzId) ->
-    base_uri(Req) ++ wrq:disp_path(Req) ++ "/" ++ AuthzId.
+full_uri(Req) ->
+    base_uri(Req) ++ wrq:disp_path(Req).
 
 set_json_body(Req, EjsonData) ->
     Json = jiffy:encode(EjsonData),
@@ -60,7 +60,7 @@ set_json_body(Req, EjsonData) ->
 
 %% Used for all POST /<type> response bodies; always contains ID + URI
 set_created_response(Req, AuthzId) ->
-    Uri = full_uri(Req, AuthzId),
+    Uri = full_uri(Req),
     Req0 = set_json_body(Req, {[{<<"id">>, list_to_binary(AuthzId)},
                                 {<<"uri">>, list_to_binary(Uri)}]}),
     wrq:set_resp_header("Location", Uri, Req0).

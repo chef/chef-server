@@ -12,7 +12,8 @@ allowed_methods(Req, State) ->
     {['POST'], Req, State}.
 
 create_path(Req, State) ->
-    {"/actors", Req, State}.
+    AuthzId = heimdall_wm_util:generate_authz_id(),
+    {AuthzId, Req, State#base_state{authz_id = AuthzId}}.
 
 validate_request(Req, State) ->
     % We really don't care if there's a requestor or not, so we just take whatever
@@ -23,8 +24,7 @@ validate_request(Req, State) ->
 auth_info(_Method) ->
     ignore.
 
-from_json(Req, State) ->
-    AuthzId = heimdall_wm_util:generate_authz_id(),
+from_json(Req, #base_state{authz_id = AuthzId} = State) ->
     % TODO: Attempt to store actor in DB
     % TODO: Attempt to add actor to own ACL
     % TODO: Attempt to add requestor to ACL
