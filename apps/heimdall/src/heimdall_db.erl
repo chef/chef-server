@@ -7,6 +7,7 @@
 
 -export([
          create/2,
+         create_acl/5,
          delete/2,
          exists/2,
          statements/0
@@ -55,7 +56,30 @@ exists(Type, AuthId) ->
     {ok, Answer} = sqerl:select(StatementName, [AuthId], first_as_scalar, [exists]),
     Answer.
 
+create_acl_stmt(actor, actor) -> insert_actor_acl_actor;
+create_acl_stmt(actor, group) -> insert_actor_acl_group;
+create_acl_stmt(group, actor) -> insert_group_acl_actor;
+create_acl_stmt(group, group) -> insert_group_acl_group;
+create_acl_stmt(object, actor) -> insert_object_acl_actor;
+create_acl_stmt(object, group) -> insert_object_acl_group;
+create_acl_stmt(container, actor) -> insert_container_acl_actor;
+create_acl_stmt(container, group) -> insert_container_acl_group.
 
+-spec create_acl(auth_type(), auth_id(), auth_type(), auth_id(),
+                 binary()) -> ok | {error, term()}.
+create_acl(TargetType, TargetId, AuthorizeeType, AuthorizeeId, Permission) ->
+    CreateStatement = create_acl_stmt(TargetType, AuthorizeeType),
+    case sqerl:statement(CreateStatement, [TargetId, AuthorizeeId, Permission],
+                         count) of
+        {ok, 1} ->
+            ok;
+        {conflict, _Reason} ->
+            % Conflicts are actually just fine here; if permission already exists,
+            % we simply don't add it again.
+            ok;
+        {error, Reason} ->
+            {error, Reason}
+    end.
 
 statements() ->
     Path = filename:join([code:priv_dir(heimdall), "pgsql_statements.config"]),

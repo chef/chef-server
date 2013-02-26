@@ -4,8 +4,6 @@
 -include_lib("mixer/include/mixer.hrl").
 -include("heimdall.hrl").
 
--type permission() :: create | read | update | delete | grant.
-
 %% Share resource state shared by all heimdall resource modules
 %%
 %% All ACL resources follow the pattern:
