@@ -44,7 +44,7 @@ malformed_request(Req, #base_state{module = Module} = State) ->
                  undefined ->
                      undefined;
                  Permission ->
-                     list_to_atom(Permission)
+                     list_to_existing_atom(Permission)
              end,
     MemberId = wrq:path_info(member_id, Req),
     Module:validate_request(Req, State#base_state{authz_id = Id, action = Action,

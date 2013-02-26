@@ -34,8 +34,7 @@ scheme(Req) ->
         undefined ->
             case wrq:scheme(Req) of
                 https -> "https";
-                http -> "http";
-                P -> erlang:atom_to_list(P)
+                http -> "http"
             end;
         Proto -> Proto
     end.

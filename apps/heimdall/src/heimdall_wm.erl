@@ -3,7 +3,7 @@
 -include("heimdall_wm.hrl").
 
 -type error() :: {error, term()}.
--type http_verb() :: 'GET' | 'PUT' | 'POST' | 'DELETE'.  %% 'HEAD' | 'OPTIONS' ?
+-type http_verb() :: 'GET' | 'PUT' | 'POST' | 'DELETE' | 'HEAD' | 'OPTIONS'.
 -type base_state() :: #base_state{}.
 -type wm_req() :: #wm_reqdata{}.
 

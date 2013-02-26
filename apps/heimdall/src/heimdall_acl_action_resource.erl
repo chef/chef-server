@@ -17,9 +17,8 @@ validate_request(Req, State) ->
 
 auth_info('GET') ->
     {any};
-auth_info('PUT') ->
-    {grant};
-auth_info('DELETE') ->
+auth_info(Verb) when Verb =:= 'PUT';
+                     Verb =:= 'DELETE' ->
     {grant}.
 
 to_json(Req, State) ->
