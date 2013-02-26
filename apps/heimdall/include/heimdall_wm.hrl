@@ -1,3 +1,5 @@
+%% We'd love to include webmachine.hrl instead, but unfortunately it contains
+%% a function declaration so breaks all of our behavior callbacks.
 -include_lib("webmachine/include/wm_reqdata.hrl").
 -include_lib("mixer/include/mixer.hrl").
 
