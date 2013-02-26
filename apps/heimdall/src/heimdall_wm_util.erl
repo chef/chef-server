@@ -18,9 +18,12 @@ get_requestor(Req, State) ->
         undefined ->
             State;
         Id ->
-            % TODO: we should probably verify that the requestor actually exists or
-            % throw an exception
-            State#base_state{requestor_id = Id}
+            case heimdall_db:exists(actor, Id) of
+                true ->
+                    State#base_state{requestor_id = Id};
+                false ->
+                    throw({bad_requestor, Id})
+            end
     end.
 
 scheme(Req) ->

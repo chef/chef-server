@@ -18,15 +18,31 @@ create_path(Req, State) ->
 validate_request(Req, State) ->
     % We really don't care if there's a requestor or not, so we just take whatever
     % comes back, even if the requestor_id remains undefined.
-    State0 = heimdall_wm_util:get_requestor(Req, State),
-    {false, Req, State0}.
+    try
+        State0 = heimdall_wm_util:get_requestor(Req, State),
+        {false, Req, State0}
+    catch
+        throw:{bad_requestor, Id} ->
+            heimdall_wm_error:set_malformed_request(Req, State, {bad_requestor, Id})
+    end.
 
 auth_info(_Method) ->
     ignore.
 
-from_json(Req, #base_state{authz_id = AuthzId} = State) ->
-    % TODO: Attempt to store actor in DB
-    % TODO: Attempt to add actor to own ACL
-    % TODO: Attempt to add requestor to ACL
-    Req0 = heimdall_wm_util:set_created_response(Req, AuthzId),
-    {ok, Req0, State}.
+from_json(Req, #base_state{authz_id = AuthzId,
+                           requestor_id = RequestorId} = State) ->
+    case heimdall_db:create(actor, AuthzId) of
+        ok ->
+            try
+                heimdall_acl_util:add_full_access(actor, AuthzId, actor, AuthzId),
+                heimdall_acl_util:add_full_access(actor, AuthzId,
+                                                  actor, RequestorId),
+                Req0 = heimdall_wm_util:set_created_response(Req, AuthzId),
+                {ok, Req0, State}
+            catch
+                throw:Error ->
+                    heimdall_wm_error:set_db_exception(Req, State, Error)
+            end;
+        Error ->
+            heimdall_wm_error:set_db_exception(Req, State, Error)
+    end.

@@ -51,12 +51,18 @@ malformed_request(Req, #base_state{module = Module} = State) ->
                                                   member_id = MemberId}).
 
 validate_requestor(Req, State) ->
-    State0 = heimdall_wm_util:get_requestor(Req, State),
-    case State0#base_state.requestor_id of
-        undefined ->
-            heimdall_wm_error:set_malformed_request(Req, State, missing_requestor);
-        _ ->
-            {false, Req, State0}
+    try
+        State0 = heimdall_wm_util:get_requestor(Req, State),
+        case State0#base_state.requestor_id of
+            undefined ->
+                heimdall_wm_error:set_malformed_request(Req, State,
+                                                        missing_requestor);
+            _ ->
+                {false, Req, State0}
+        end
+    catch
+        throw:{bad_requestor, Id} ->
+            heimdall_wm_error:set_malformed_request(Req, State, {bad_requestor, Id})
     end.
 
 forbidden(Req, #base_state{module = Module} = State) ->
