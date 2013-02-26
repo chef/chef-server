@@ -1,5 +1,5 @@
 GIT
-  remote: git@github.com:opscode/chef-pedant.git
+  remote: git://github.com/opscode/chef-pedant.git
   revision: 4dd7f9d787f6a7c936ae617dd2ac9d71c5a69239
   tag: 1.0.5
   specs:
