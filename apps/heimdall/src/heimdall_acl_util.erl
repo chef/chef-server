@@ -17,7 +17,7 @@ add_access(Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
 
 add_full_access(TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
     case {AuthorizeeType, AuthorizeeId} of
-        {actor, undefined} ->
+        {actor, superuser} ->
             % The user we're giving access to doesn't exist (i.e., this is
             % a superuser request) so don't add any access
             ok;

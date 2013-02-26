@@ -21,8 +21,19 @@ validate_request(Req, State) ->
 auth_info(_Method) ->
     ignore.
 
-from_json(Req, #base_state{authz_id = AuthzId} = State) ->
-    % TODO: Attempt to store group in DB
-    % TODO: Attempt to add requestor to ACL
-    Req0 = heimdall_wm_util:set_created_response(Req, AuthzId),
-    {ok, Req0, State}.
+from_json(Req, #base_state{authz_id = AuthzId,
+                           requestor_id = RequestorId} = State) ->
+    case heimdall_db:create(group, AuthzId) of
+        ok ->
+            try
+                heimdall_acl_util:add_full_access(group, AuthzId,
+                                                  actor, RequestorId),
+                Req0 = heimdall_wm_util:set_created_response(Req, AuthzId),
+                {ok, Req0, State}
+            catch
+                throw:Error ->
+                    heimdall_wm_error:set_db_exception(Req, State, Error)
+            end;
+        Error ->
+            heimdall_wm_error:set_db_exception(Req, State, Error)
+    end.

@@ -20,7 +20,7 @@ get_requestor(Req, State) ->
             State;
         Id when Id =:= SuperuserId ->
             % Superuser gets a pass
-            State;
+            State#base_state{requestor_id = superuser};
         Id ->
             case heimdall_db:exists(actor, Id) of
                 true ->
