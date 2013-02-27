@@ -84,39 +84,6 @@ create_acl(TargetType, TargetId, AuthorizeeType, AuthorizeeId, Permission) ->
             {error, Reason}
     end.
 
-permission_query(actor) -> actor_has_permission_on_actor;
-permission_query(group) -> actor_has_permission_on_group;
-permission_query(object) -> actor_has_permission_on_object;
-permission_query(container) -> actor_has_permission_on_container.
-
--spec has_permission(auth_type(), auth_id(), auth_id(), binary()) -> boolean().
-has_permission(TargetType, TargetId, RequestorId, Permission) ->
-    PermissionStatement = permission_query(TargetType),
-    case sqerl:select(PermissionStatement, [RequestorId, TargetId, Permission],
-                      first_as_scalar, [permission]) of
-        {ok, Answer} ->
-            Answer;
-        {error, <<"null value cannot be assigned to variable \"actor_id\" declared NOT NULL">>} ->
-            %% If we get a request for a bogus member_id, just return false
-            false
-    end.
-
-membership_query(actor) -> group_actor_members;
-membership_query(group) -> group_group_members.
-
--spec group_membership(auth_type(), auth_id()) -> list() | {error, term()}.
-group_membership(TargetType, GroupId) ->
-    MembershipStatement = membership_query(TargetType),
-    case sqerl:select(MembershipStatement, [GroupId], rows_as_scalars,
-                      [authz_id]) of
-        {ok, L} when is_list(L) ->
-            L;
-        {ok, none} ->
-            [];
-        {error, Error} ->
-            {error, Error}
-    end.
-
 acl_member_query(actor, actor) -> actors_in_actor_acl;
 acl_member_query(group, actor) -> groups_in_actor_acl;
 acl_member_query(actor, group) -> actors_in_group_acl;
@@ -158,6 +125,39 @@ delete_acl(AuthorizeeType, TargetType, TargetId, Permission) ->
             ok;
         {error, Reason} ->
             {error, Reason}
+    end.
+
+permission_query(actor) -> actor_has_permission_on_actor;
+permission_query(group) -> actor_has_permission_on_group;
+permission_query(object) -> actor_has_permission_on_object;
+permission_query(container) -> actor_has_permission_on_container.
+
+-spec has_permission(auth_type(), auth_id(), auth_id(), binary()) -> boolean().
+has_permission(TargetType, TargetId, RequestorId, Permission) ->
+    PermissionStatement = permission_query(TargetType),
+    case sqerl:select(PermissionStatement, [RequestorId, TargetId, Permission],
+                      first_as_scalar, [permission]) of
+        {ok, Answer} ->
+            Answer;
+        {error, <<"null value cannot be assigned to variable \"actor_id\" declared NOT NULL">>} ->
+            %% If we get a request for a bogus member_id, just return false
+            false
+    end.
+
+membership_query(actor) -> group_actor_members;
+membership_query(group) -> group_group_members.
+
+-spec group_membership(auth_type(), auth_id()) -> list() | {error, term()}.
+group_membership(TargetType, GroupId) ->
+    MembershipStatement = membership_query(TargetType),
+    case sqerl:select(MembershipStatement, [GroupId], rows_as_scalars,
+                      [authz_id]) of
+        {ok, L} when is_list(L) ->
+            L;
+        {ok, none} ->
+            [];
+        {error, Error} ->
+            {error, Error}
     end.
 
 statements() ->
