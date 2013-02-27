@@ -32,7 +32,6 @@ add_full_access(TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
     end.
 
 check_access(TargetType, TargetId, RequestorId, Permission) ->
-    io:format("~n----->~n~p~n", [{TargetType, TargetId, RequestorId, Permission}]),
     case RequestorId of
         superuser ->
             true;
