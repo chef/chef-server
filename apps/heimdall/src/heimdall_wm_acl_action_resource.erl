@@ -24,8 +24,8 @@ auth_info(Verb) when Verb =:= 'PUT';
 to_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType,
                          action = Action} = State) ->
     try
-        Ejson = heimdall_acl_util:make_ejson_action(Action, RequestType,
-                                                    AuthzId, Req, State),
+        Ejson = heimdall_acl:make_ejson_action(Action, RequestType, AuthzId,
+                                               Req, State),
         {heimdall_wm_util:encode(Ejson), Req, State}
     catch
         throw:{wm_db_error_tuple, Error} ->

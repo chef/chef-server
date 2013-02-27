@@ -26,8 +26,7 @@ from_json(Req, #base_state{authz_id = AuthzId, request_type = Type,
     case heimdall_db:create(Type, AuthzId) of
         ok ->
             try
-                heimdall_acl_util:add_full_access(Type, AuthzId,
-                                                  actor, RequestorId),
+                heimdall_acl:add_full_access(Type, AuthzId, actor, RequestorId),
                 Req0 = heimdall_wm_util:set_created_response(Req, AuthzId),
                 {ok, Req0, State}
             catch

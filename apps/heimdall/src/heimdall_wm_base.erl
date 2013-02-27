@@ -77,12 +77,12 @@ forbidden(Req, #base_state{module = Module, authz_id = Id, request_type = Type,
                 true ->
                     case Permission of
                         any ->
-                            {not heimdall_acl_util:check_any_access(Type, Id,
-                                                                    RequestorId),
+                            {not heimdall_acl:check_any_access(Type, Id,
+                                                               RequestorId),
                              Req, State};
                         Other ->
-                            {not heimdall_acl_util:check_access(Type, Id,
-                                                                RequestorId, Other),
+                            {not heimdall_acl:check_access(Type, Id,
+                                                           RequestorId, Other),
                              Req, State}
                     end
             end

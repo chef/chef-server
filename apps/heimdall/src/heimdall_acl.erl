@@ -1,4 +1,4 @@
--module(heimdall_acl_util).
+-module(heimdall_acl).
 
 -include("heimdall.hrl").
 
