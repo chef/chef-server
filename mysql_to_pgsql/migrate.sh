@@ -7,10 +7,11 @@ if [[ $EUID -eq 0 ]]; then
    exit 1
 fi
 
+# Quick and dirty way to make sure host key is added
+ssh $1 'echo ready for load' 
+echo ""
+
 read -s -p "Password for opscode_chef: " DB_PASSWORD
 
-# make sure host key gets prompted for before we start piping data, if
-# necessary
-ssh $1 'echo connected, ready for load' 
 
 ./dump.sh $DB_PASSWORD | ssh $1 'PGPASSWORD=$DB_PASSWORD psql -h localhost -U opscode_chef -d opscode_chef -w' 

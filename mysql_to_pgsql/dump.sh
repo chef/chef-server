@@ -4,6 +4,11 @@
 # insert it into OPC/OHC postgres database
 #
 DB_USER=opscode_chef
+if [ -z "$1" ]; then
+  read -s -p "Password for opscode_chef: " DB_PASSWORD
+else
+  DB_PASSWORD=$1
+fi
 
 # verify we have the my2pg tool available
 if test -x ./my2pg; then
@@ -13,19 +18,6 @@ else
     exit 1
 fi
 
-read -s -p "Password for opscode_chef: " DB_PASSWORD
-
-#
-# We ignore reporting for now since the JSON in the tables
-# and we don't need opc user/customer tables since the apps
-# that use them aren't migrating
-#
-# IGNORES="--ignore-table=opscode_chef.node_run \
-#          --ignore-table=opscode_chef.node_run_detail \
-#          --ignore-table=opscode_chef.reporting_schema_info \
-#          --ignore-table=opscode_chef.opc_users \
-#          --ignore-table=opscode_chef.opc_customers \
-#          --ignore-table=opscode_chef.users"
 
 
 #
