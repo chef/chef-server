@@ -81,6 +81,19 @@ create_acl(TargetType, TargetId, AuthorizeeType, AuthorizeeId, Permission) ->
             {error, Reason}
     end.
 
+permission_query(actor) -> actor_has_permission_on_actor;
+permission_query(group) -> actor_has_permission_on_group;
+permission_query(object) -> actor_has_permission_on_object;
+permission_query(container) -> actor_has_permission_on_container;
+
+-spec has_permission(auth_type(), auth_id(), auth_id(), binary()) -> boolean().
+has_permission(TargetType, TargetId, RequestorId, Permission) ->
+    PermissionStatement = permission_query(TargetType),
+    {ok, Answer} = sqerl:select(PermissionStatement,
+                                [TargetId, RequestorId, Permission],
+                                first_as_scalar, [permission]),
+    Answer.
+
 statements() ->
     Path = filename:join([code:priv_dir(heimdall), "pgsql_statements.config"]),
     {ok, Statements} = file:consult(Path),
