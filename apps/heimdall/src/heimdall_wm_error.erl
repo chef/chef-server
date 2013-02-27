@@ -25,8 +25,6 @@ malformed_request_message(Why, _Req, _State) ->
 %% Sets the error message in the body and returns the return tuple to malformed
 %% request (which should contain {halt, XXX} with whatever return code is
 %% appropriate.
-
-%% So far, all errors are unexpected, we bail on everything:
 set_db_exception(Req, State, Error) ->
     Msg = db_exception_message(Error, Req, State),
     {{halt, 400}, heimdall_wm_util:set_json_body(Req, Msg), State}.
