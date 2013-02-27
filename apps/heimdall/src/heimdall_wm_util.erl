@@ -2,7 +2,8 @@
 
 -include("heimdall_wm.hrl").
 
--export([encode/1,
+-export([decode/1,
+         encode/1,
          generate_authz_id/0,
          get_requestor/2,
          set_created_response/2,
@@ -59,8 +60,13 @@ set_json_body(Req, EjsonData) ->
     Json = encode(EjsonData),
     wrq:set_resp_body(Json, Req).
 
+%% ALL THE JIFFY in one place.  In case we decide to change the library or
+%% something.  LIKE WE DO.
 encode(EjsonData) ->
     jiffy:encode(EjsonData).
+
+decode(JsonData) ->
+    jiffy:decode(JsonData).
 
 %% Used for all POST /<type> response bodies; always contains ID + URI
 set_created_response(Req, AuthzId) ->

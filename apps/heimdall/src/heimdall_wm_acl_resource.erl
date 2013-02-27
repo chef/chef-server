@@ -22,5 +22,5 @@ to_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType} = State
         {heimdall_wm_util:encode(Ejson), Req, State}
     catch
         throw:{db_error, Error} ->
-            heimdall_wm_error:set_db_exception(Req, State, {error, Error})
+            heimdall_wm_error:set_db_exception(Req, State, Error)
     end.

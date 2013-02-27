@@ -3,22 +3,37 @@
 -include("heimdall.hrl").
 
 -export([add_access/5,
+         add_access_set/5,
          add_full_access/4,
          check_access/4,
          check_any_access/3,
          clear_access/3,
          make_ejson_acl/2,
-         make_ejson_action/3]).
+         make_ejson_action/3,
+         parse_acl_json/2]).
 
-add_access(Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
+add_access(Permission, TargetType, TargetId, AuthorizeeType,
+           AuthorizeeId) when is_list(AuthorizeeId) ->
     case heimdall_db:create_acl(TargetType, list_to_binary(TargetId),
                                 AuthorizeeType, list_to_binary(AuthorizeeId),
                                 atom_to_binary(Permission, latin1)) of
         ok ->
             ok;
-        Error ->
-            throw(Error)
+        {error, <<"null value in column \"authorizee\" violates not-null constraint">>} ->
+            throw({db_error, {non_existent_authorizee_for_acl,
+                              AuthorizeeType, AuthorizeeId}});
+        {error, Error} ->
+            throw({db_error, Error})
     end.
+
+add_access_set(_Perm, _Type, _Id, _OtherType, []) ->
+    ok;
+add_access_set(Permission, TargetType, TargetId, AuthorizeeType,
+               [AuthorizeeId | AuthorizeeList]) ->
+    add_access(Permission, TargetType, TargetId, AuthorizeeType,
+               binary_to_list(AuthorizeeId)),
+    add_access_set(Permission, TargetType, TargetId, AuthorizeeType,
+                   AuthorizeeList).
 
 add_full_access(TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
     case {AuthorizeeType, AuthorizeeId} of
@@ -89,3 +104,15 @@ make_ejson_acl(RequestType, AuthzId) ->
       make_ejson_part(<<"update">>, RequestType, AuthzId),
       make_ejson_part(<<"delete">>, RequestType, AuthzId),
       make_ejson_part(<<"grant">>, RequestType, AuthzId)]}.
+
+parse_acl_json(Json, Action) ->
+    try
+        Ejson = heimdall_wm_util:decode(Json),
+        ActionEjson = ej:get({atom_to_binary(Action, latin1)}, Ejson),
+        {ej:get({<<"actors">>}, ActionEjson), ej:get({<<"groups">>}, ActionEjson)}
+    catch
+        throw:{error, {_, invalid_json}} ->
+            throw({error, invalid_json});
+        throw:{error, {_, truncated_json}} ->
+            throw({error, invalid_json})
+    end.

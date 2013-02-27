@@ -30,9 +30,9 @@ from_json(Req, #base_state{authz_id = AuthzId, request_type = Type,
                 Req0 = heimdall_wm_util:set_created_response(Req, AuthzId),
                 {ok, Req0, State}
             catch
-                throw:Error ->
+                throw:{db_error, Error} ->
                     heimdall_wm_error:set_db_exception(Req, State, Error)
             end;
-        Error ->
+        {error, Error} ->
             heimdall_wm_error:set_db_exception(Req, State, Error)
     end.

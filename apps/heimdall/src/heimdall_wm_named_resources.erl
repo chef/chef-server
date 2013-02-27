@@ -39,7 +39,7 @@ to_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType} = State
                                            {<<"groups">>, Groups}]}), Req, State}
             catch
                 throw:{db_error, Error} ->
-                    heimdall_wm_error:set_db_exception(Req, State, {error, Error})
+                    heimdall_wm_error:set_db_exception(Req, State, Error)
             end;
         _ ->
             {<<"{}">>, Req, State}
@@ -50,6 +50,6 @@ delete_resource(Req, #base_state{authz_id = AuthzId,
     case heimdall_db:delete(Type, AuthzId) of
         ok ->
             {true, Req, State};
-        Error ->
+        {error, Error} ->
             heimdall_wm_error:set_db_exception(Req, State, Error)
     end.
