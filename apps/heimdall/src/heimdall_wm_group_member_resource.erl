@@ -14,10 +14,9 @@ allowed_methods(Req, State) ->
 validate_request(Req, State) ->
     heimdall_wm_base:validate_requestor(Req, State).
 
-auth_info('PUT') ->
-    {grant};
-auth_info('DELETE') ->
-    {grant}.
+auth_info(Verb) when Verb =:= 'PUT';
+                     Verb =:= 'DELETE' ->
+    grant.
 
 from_json(Req, State) ->
     % TODO: add the object to the group

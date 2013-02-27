@@ -10,6 +10,7 @@
          create_acl/5,
          delete/2,
          exists/2,
+         has_permission/4,
          statements/0
         ]).
 
@@ -84,13 +85,13 @@ create_acl(TargetType, TargetId, AuthorizeeType, AuthorizeeId, Permission) ->
 permission_query(actor) -> actor_has_permission_on_actor;
 permission_query(group) -> actor_has_permission_on_group;
 permission_query(object) -> actor_has_permission_on_object;
-permission_query(container) -> actor_has_permission_on_container;
+permission_query(container) -> actor_has_permission_on_container.
 
 -spec has_permission(auth_type(), auth_id(), auth_id(), binary()) -> boolean().
 has_permission(TargetType, TargetId, RequestorId, Permission) ->
     PermissionStatement = permission_query(TargetType),
     {ok, Answer} = sqerl:select(PermissionStatement,
-                                [TargetId, RequestorId, Permission],
+                                [RequestorId, TargetId, Permission],
                                 first_as_scalar, [permission]),
     Answer.
 

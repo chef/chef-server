@@ -15,9 +15,9 @@ validate_request(Req, State) ->
     heimdall_wm_base:validate_requestor(Req, State).
 
 auth_info('GET') ->
-    {read};
+    read;
 auth_info('DELETE') ->
-    {delete}.
+    delete.
 
 to_json(Req, #base_state{request_type = RequestType} = State) ->
     case RequestType of

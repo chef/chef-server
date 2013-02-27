@@ -14,7 +14,7 @@ validate_request(Req, State) ->
     heimdall_wm_base:validate_requestor(Req, State).
 
 auth_info('GET') ->
-    {any}.
+    any.
 
 to_json(Req, State) ->
     % TODO: output the ACL populated by forbidden
