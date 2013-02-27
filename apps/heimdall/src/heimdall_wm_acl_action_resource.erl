@@ -24,19 +24,26 @@ auth_info(Verb) when Verb =:= 'PUT';
 to_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType,
                          action = Action} = State) ->
     try
-        Ejson = heimdall_acl:make_ejson_action(Action, RequestType, AuthzId,
-                                               Req, State),
+        Ejson = heimdall_acl:make_ejson_action(Action, RequestType, AuthzId),
         {heimdall_wm_util:encode(Ejson), Req, State}
     catch
-        throw:{wm_db_error_tuple, Error} ->
-            Error
+        throw:{db_error, Error} ->
+            heimdall_wm_error:set_db_exception(Req, State, {error, Error})
     end.    
 
 from_json(Req, State) ->
+    % TODO: move this to a postgres function so that it can all happen
+    % in a transaction
     % TODO: parse the request body
     % TODO: update the relevant part of the ACL in the DB
     {true, Req, State}.
 
-delete_resource(Req, State) ->
-    % TODO: delete the relevant part of the ACL from DB
-    {true, Req, State}.
+delete_resource(Req, #base_state{authz_id = AuthzId, request_type = RequestType,
+                                 action = Action} = State) ->
+    try
+        heimdall_acl:clear_access(RequestType, AuthzId, Action),
+        {true, Req, State}
+    catch
+        throw:{db_error, Error} ->
+            heimdall_wm_util:set_db_exception(Req, State, {error, Error})
+    end.

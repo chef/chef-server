@@ -6,8 +6,9 @@
          add_full_access/4,
          check_access/4,
          check_any_access/3,
-         make_ejson_acl/4,
-         make_ejson_action/5]).
+         clear_access/3,
+         make_ejson_acl/2,
+         make_ejson_action/3]).
 
 add_access(Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
     case heimdall_db:create_acl(TargetType, list_to_binary(TargetId),
@@ -54,30 +55,37 @@ check_any_access(TargetType, TargetId, RequestorId) ->
         check_access(TargetType, TargetId, RequestorId, delete) or
         check_access(TargetType, TargetId, RequestorId, grant).
 
-acl_members(TargetType, AuthorizeeType, AuthzId, Permission, Req, State) ->
+clear_access(TargetType, TargetId, Permission) ->
+    case heimdall_db:delete_acl(actor, TargetType, TargetId,
+                                atom_to_binary(Permission, latin1)) of
+        {error, Error} ->
+            throw({db_error, Error});
+        ok ->
+            ok
+    end.
+
+acl_members(TargetType, AuthorizeeType, AuthzId, Permission) ->
     case heimdall_db:acl_membership(TargetType, AuthorizeeType, AuthzId,
                                     Permission) of
         {error, Error} ->
-            throw({wm_db_error_tuple,
-                   heimdall_wm_error:set_db_exception(Req, State, {error, Error})});
+            throw({db_error, Error});
         List ->
             List
     end.
 
-make_ejson_part(Permission, RequestType, AuthzId, Req, State) ->
+make_ejson_part(Permission, RequestType, AuthzId) ->
     {Permission,
      {[{<<"actors">>,
-       acl_members(RequestType, actor, AuthzId, Permission, Req, State)},
+       acl_members(RequestType, actor, AuthzId, Permission)},
       {<<"groups">>,
-       acl_members(RequestType, group, AuthzId, Permission, Req, State)}]}}.
+       acl_members(RequestType, group, AuthzId, Permission)}]}}.
 
-make_ejson_action(Permission, RequestType, AuthzId, Req, State) ->
-    {[make_ejson_part(atom_to_binary(Permission, latin1), RequestType,
-                      AuthzId, Req, State)]}.
+make_ejson_action(Permission, RequestType, AuthzId) ->
+    {[make_ejson_part(atom_to_binary(Permission, latin1), RequestType, AuthzId)]}.
 
-make_ejson_acl(RequestType, AuthzId, Req, State) ->
-    {[make_ejson_part(<<"create">>, RequestType, AuthzId, Req, State),
-      make_ejson_part(<<"read">>, RequestType, AuthzId, Req, State),
-      make_ejson_part(<<"update">>, RequestType, AuthzId, Req, State),
-      make_ejson_part(<<"delete">>, RequestType, AuthzId, Req, State),
-      make_ejson_part(<<"grant">>, RequestType, AuthzId, Req, State)]}.
+make_ejson_acl(RequestType, AuthzId) ->
+    {[make_ejson_part(<<"create">>, RequestType, AuthzId),
+      make_ejson_part(<<"read">>, RequestType, AuthzId),
+      make_ejson_part(<<"update">>, RequestType, AuthzId),
+      make_ejson_part(<<"delete">>, RequestType, AuthzId),
+      make_ejson_part(<<"grant">>, RequestType, AuthzId)]}.

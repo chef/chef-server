@@ -9,6 +9,7 @@
          create/2,
          create_acl/5,
          delete/2,
+         delete_acl/4,
          exists/2,
          group_membership/2,
          has_permission/4,
@@ -133,6 +134,26 @@ acl_membership(TargetType, AuthorizeeType, AuthzId, Permission) ->
             [];
         {error, Error} ->
             {error, Error}
+    end.
+
+delete_acl_stmt(actor, actor)    -> delete_actors_from_actor_acl;
+delete_acl_stmt(group, actor)    -> delete_groups_from_actor_acl;
+delete_acl_stmt(actor, group)    -> delete_actors_from_group_acl;
+delete_acl_stmt(group, group)    -> delete_groups_from_group_acl;
+delete_acl_stmt(actor, object)    -> delete_actors_from_object_acl;
+delete_acl_stmt(group, object)    -> delete_groups_from_object_acl;
+delete_acl_stmt(actor, container)    -> delete_actors_from_container_acl;
+delete_acl_stmt(group, container)    -> delete_groups_from_container_acl.
+
+-spec delete_acl(auth_type(), auth_type(), auth_id(), binary()) ->
+                        ok | {error, term()}.
+delete_acl(AuthorizeeType, TargetType, TargetId, Permission) ->
+    DeleteStatement = delete_acl_stmt(AuthorizeeType, TargetType),
+    case sqerl:statement(DeleteStatement, [TargetId, Permission], count) of
+        {ok, _Count} ->
+            ok;
+        {error, Reason} ->
+            {error, Reason}
     end.
 
 statements() ->
