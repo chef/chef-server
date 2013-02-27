@@ -92,10 +92,14 @@ permission_query(container) -> actor_has_permission_on_container.
 -spec has_permission(auth_type(), auth_id(), auth_id(), binary()) -> boolean().
 has_permission(TargetType, TargetId, RequestorId, Permission) ->
     PermissionStatement = permission_query(TargetType),
-    {ok, Answer} = sqerl:select(PermissionStatement,
-                                [RequestorId, TargetId, Permission],
-                                first_as_scalar, [permission]),
-    Answer.
+    case sqerl:select(PermissionStatement, [RequestorId, TargetId, Permission],
+                      first_as_scalar, [permission]) of
+        {ok, Answer} ->
+            Answer;
+        {error, <<"null value cannot be assigned to variable \"actor_id\" declared NOT NULL">>} ->
+            %% If we get a request for a bogus member_id, just return false
+            false
+    end.
 
 membership_query(actor) -> group_actor_members;
 membership_query(group) -> group_group_members.

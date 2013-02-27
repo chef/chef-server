@@ -16,6 +16,16 @@ validate_request(Req, State) ->
 auth_info('GET') ->
     any.
 
-to_json(Req, State) ->
-    % TODO: check if member has permission on entity; {halt 404} if not
-    {<<"{}">>, Req, State}.
+to_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType,
+                         action = Action, member_id = MemberId} = State) ->
+    try
+        case heimdall_acl:check_access(RequestType, AuthzId, MemberId, Action) of
+            true ->
+                {<<"{}">>, Req, State};
+            false ->
+                {{halt, 404}, Req, State}
+        end
+    catch
+        throw:{db_error, Error} ->
+            heimdall_wm_error:set_db_exception(Req, State, Error)
+    end.
