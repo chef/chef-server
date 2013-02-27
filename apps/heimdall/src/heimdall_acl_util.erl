@@ -64,16 +64,20 @@ acl_members(TargetType, AuthorizeeType, AuthzId, Permission, Req, State) ->
             List
     end.
 
-make_ejson_action(Permission, RequestType, AuthzId, Req, State) ->
+make_ejson_part(Permission, RequestType, AuthzId, Req, State) ->
     {Permission,
      {[{<<"actors">>,
        acl_members(RequestType, actor, AuthzId, Permission, Req, State)},
       {<<"groups">>,
        acl_members(RequestType, group, AuthzId, Permission, Req, State)}]}}.
 
+make_ejson_action(Permission, RequestType, AuthzId, Req, State) ->
+    {[make_ejson_part(atom_to_binary(Permission, latin1), RequestType,
+                      AuthzId, Req, State)]}.
+
 make_ejson_acl(RequestType, AuthzId, Req, State) ->
-    {[make_ejson_action(<<"create">>, RequestType, AuthzId, Req, State),
-      make_ejson_action(<<"read">>, RequestType, AuthzId, Req, State),
-      make_ejson_action(<<"update">>, RequestType, AuthzId, Req, State),
-      make_ejson_action(<<"delete">>, RequestType, AuthzId, Req, State),
-      make_ejson_action(<<"grant">>, RequestType, AuthzId, Req, State)]}.
+    {[make_ejson_part(<<"create">>, RequestType, AuthzId, Req, State),
+      make_ejson_part(<<"read">>, RequestType, AuthzId, Req, State),
+      make_ejson_part(<<"update">>, RequestType, AuthzId, Req, State),
+      make_ejson_part(<<"delete">>, RequestType, AuthzId, Req, State),
+      make_ejson_part(<<"grant">>, RequestType, AuthzId, Req, State)]}.
