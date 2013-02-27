@@ -14,4 +14,5 @@ echo ""
 read -s -p "Password for opscode_chef: " DB_PASSWORD
 
 
-./dump.sh $DB_PASSWORD | ssh $1 "PGPASSWORD=$DB_PASSWORD psql -h localhost -U opscode_chef -d opscode_chef -w" 
+./dump.sh $DB_PASSWORD | ssh $1 "PGPASSWORD=$DB_PASSWORD psql -h
+localhost -U opscode_chef -d opscode_chef -w > /dev/null" 
