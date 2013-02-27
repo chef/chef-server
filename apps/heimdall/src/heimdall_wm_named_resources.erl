@@ -19,12 +19,26 @@ auth_info('GET') ->
 auth_info('DELETE') ->
     delete.
 
-to_json(Req, #base_state{request_type = RequestType} = State) ->
+get_members(Type, AuthzId, Req, State) ->
+    case heimdall_db:group_membership(Type, AuthzId) of
+        {error, Error} ->
+            throw(heimdall_wm_error:set_db_exception(Req, State, {error, Error}));
+        List ->
+            List
+    end.
+
+to_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType} = State) ->
     case RequestType of
         group ->
-            % TODO: get group membership
-            % TODO: return group membership instead
-            {<<"{}">>, Req, State};
+            try
+                Actors = get_members(actor, AuthzId, Req, State),
+                Groups = get_members(group, AuthzId, Req, State),
+                {heimdall_wm_util:encode({[{<<"actors">>, Actors},
+                                           {<<"groups">>, Groups}]}), Req, State}
+            catch
+                throw:ErrorReturnTuple ->
+                    ErrorReturnTuple
+            end;
         _ ->
             {<<"{}">>, Req, State}
     end.

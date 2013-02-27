@@ -10,6 +10,7 @@
          create_acl/5,
          delete/2,
          exists/2,
+         group_membership/2,
          has_permission/4,
          statements/0
         ]).
@@ -94,6 +95,21 @@ has_permission(TargetType, TargetId, RequestorId, Permission) ->
                                 [RequestorId, TargetId, Permission],
                                 first_as_scalar, [permission]),
     Answer.
+
+membership_query(actor) -> group_actor_members;
+membership_query(group) -> group_group_members.
+
+group_membership(TargetType, GroupId) ->
+    MembershipStatement = membership_query(TargetType),
+    case sqerl:select(MembershipStatement, [GroupId], rows_as_scalars,
+                      [authz_id]) of
+        {ok, L} when is_list(L) ->
+            L;
+        {ok, none} ->
+            [];
+        {error, Error} ->
+            {error, Error}
+    end.
 
 statements() ->
     Path = filename:join([code:priv_dir(heimdall), "pgsql_statements.config"]),

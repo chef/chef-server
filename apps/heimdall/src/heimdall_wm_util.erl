@@ -2,7 +2,8 @@
 
 -include("heimdall_wm.hrl").
 
--export([generate_authz_id/0,
+-export([encode/1,
+         generate_authz_id/0,
          get_requestor/2,
          set_created_response/2,
          set_json_body/2]).
@@ -55,8 +56,11 @@ full_uri(Req) ->
     base_uri(Req) ++ wrq:disp_path(Req).
 
 set_json_body(Req, EjsonData) ->
-    Json = jiffy:encode(EjsonData),
+    Json = encode(EjsonData),
     wrq:set_resp_body(Json, Req).
+
+encode(EjsonData) ->
+    jiffy:encode(EjsonData).
 
 %% Used for all POST /<type> response bodies; always contains ID + URI
 set_created_response(Req, AuthzId) ->
