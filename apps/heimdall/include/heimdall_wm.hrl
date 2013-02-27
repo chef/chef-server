@@ -25,9 +25,6 @@
           %% What kind of resource are we talking about here?
           request_type :: auth_type(),
 
-          %% What is the ACL on the resource?
-          acl :: term(),
-
           %% What type of ACE request is this?
           action :: permission(),
 

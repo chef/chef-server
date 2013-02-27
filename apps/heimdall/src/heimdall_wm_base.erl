@@ -75,7 +75,6 @@ forbidden(Req, #base_state{module = Module, authz_id = Id, request_type = Type,
                 false ->
                     {{halt, 404}, Req, State};
                 true ->
-                    % TODO: GET ACL for entity, store in #base_state.acl
                     case Permission of
                         any ->
                             {not heimdall_acl_util:check_any_access(Type, Id,

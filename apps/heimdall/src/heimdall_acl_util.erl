@@ -5,7 +5,9 @@
 -export([add_access/5,
          add_full_access/4,
          check_access/4,
-         check_any_access/3]).
+         check_any_access/3,
+         make_ejson_acl/4,
+         make_ejson_action/5]).
 
 add_access(Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
     case heimdall_db:create_acl(TargetType, list_to_binary(TargetId),
@@ -51,3 +53,27 @@ check_any_access(TargetType, TargetId, RequestorId) ->
         check_access(TargetType, TargetId, RequestorId, update) or
         check_access(TargetType, TargetId, RequestorId, delete) or
         check_access(TargetType, TargetId, RequestorId, grant).
+
+acl_members(TargetType, AuthorizeeType, AuthzId, Permission, Req, State) ->
+    case heimdall_db:acl_membership(TargetType, AuthorizeeType, AuthzId,
+                                    Permission) of
+        {error, Error} ->
+            throw({wm_db_error_tuple,
+                   heimdall_wm_error:set_db_exception(Req, State, {error, Error})});
+        List ->
+            List
+    end.
+
+make_ejson_action(Permission, RequestType, AuthzId, Req, State) ->
+    {Permission,
+     {[{<<"actors">>,
+       acl_members(RequestType, actor, AuthzId, Permission, Req, State)},
+      {<<"groups">>,
+       acl_members(RequestType, group, AuthzId, Permission, Req, State)}]}}.
+
+make_ejson_acl(RequestType, AuthzId, Req, State) ->
+    {[make_ejson_action(<<"create">>, RequestType, AuthzId, Req, State),
+      make_ejson_action(<<"read">>, RequestType, AuthzId, Req, State),
+      make_ejson_action(<<"update">>, RequestType, AuthzId, Req, State),
+      make_ejson_action(<<"delete">>, RequestType, AuthzId, Req, State),
+      make_ejson_action(<<"grant">>, RequestType, AuthzId, Req, State)]}.

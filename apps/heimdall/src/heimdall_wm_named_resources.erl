@@ -19,10 +19,13 @@ auth_info('GET') ->
 auth_info('DELETE') ->
     delete.
 
+% maybe move this to heimdall_wm_util?  At the moment, however, this is the
+% only place it's used; there's no other way to directly get group membership
 get_members(Type, AuthzId, Req, State) ->
     case heimdall_db:group_membership(Type, AuthzId) of
         {error, Error} ->
-            throw(heimdall_wm_error:set_db_exception(Req, State, {error, Error}));
+            throw({wm_db_error_tuple,
+                   heimdall_wm_error:set_db_exception(Req, State, {error, Error})});
         List ->
             List
     end.
@@ -36,8 +39,8 @@ to_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType} = State
                 {heimdall_wm_util:encode({[{<<"actors">>, Actors},
                                            {<<"groups">>, Groups}]}), Req, State}
             catch
-                throw:ErrorReturnTuple ->
-                    ErrorReturnTuple
+                throw:{wm_db_error_tuple, Error} ->
+                    Error
             end;
         _ ->
             {<<"{}">>, Req, State}

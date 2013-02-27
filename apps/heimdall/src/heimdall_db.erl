@@ -5,7 +5,7 @@
 
 -include("heimdall.hrl").
 
--export([
+-export([acl_membership/4,
          create/2,
          create_acl/5,
          delete/2,
@@ -99,9 +99,33 @@ has_permission(TargetType, TargetId, RequestorId, Permission) ->
 membership_query(actor) -> group_actor_members;
 membership_query(group) -> group_group_members.
 
+-spec group_membership(auth_type(), auth_id()) -> list() | {error, term()}.
 group_membership(TargetType, GroupId) ->
     MembershipStatement = membership_query(TargetType),
     case sqerl:select(MembershipStatement, [GroupId], rows_as_scalars,
+                      [authz_id]) of
+        {ok, L} when is_list(L) ->
+            L;
+        {ok, none} ->
+            [];
+        {error, Error} ->
+            {error, Error}
+    end.
+
+acl_member_query(actor, actor) -> actors_in_actor_acl;
+acl_member_query(group, actor) -> groups_in_actor_acl;
+acl_member_query(actor, group) -> actors_in_group_acl;
+acl_member_query(group, group) -> groups_in_group_acl;
+acl_member_query(actor, object) -> actors_in_object_acl;
+acl_member_query(group, object) -> groups_in_object_acl;
+acl_member_query(actor, container) -> actors_in_container_acl;
+acl_member_query(group, container) -> groups_in_container_acl.
+
+-spec acl_membership(auth_type(), auth_type(), auth_id(), binary()) ->
+                              list() | {error, term()}.
+acl_membership(TargetType, AuthorizeeType, AuthzId, Permission) ->
+    MembershipStatement = acl_member_query(AuthorizeeType, TargetType),
+    case sqerl:select(MembershipStatement, [AuthzId, Permission], rows_as_scalars,
                       [authz_id]) of
         {ok, L} when is_list(L) ->
             L;
