@@ -33,11 +33,15 @@ db_exception_message({non_existent_authorizee_for_acl, Type, Id}, _Req, _State) 
     {[{<<"error">>, iolist_to_binary([<<"attempt to add non-existent ">>,
                                       atom_to_list(Type), <<" '">>, Id,
                                       <<"' to ACL">>])}]};
-db_exception_message({non_existent_actor_for_group, Id}, _Req, _State) ->
-    {[{<<"error">>, iolist_to_binary([<<"attempt to add non-existent actor '">>, Id,
+db_exception_message({non_existent_member_for_group, Type, Id}, _Req, _State) ->
+    {[{<<"error">>, iolist_to_binary([<<"attempt to add non-existent ">>,
+                                      atom_to_list(Type), <<" '">>, Id,
                                       <<"' to group">>])}]};
-db_exception_message({non_existent_group_for_group, Id}, _Req, _State) ->
-    {[{<<"error">>, iolist_to_binary([<<"attempt to add non-existent group '">>, Id,
-                                      <<"' to group">>])}]};
+db_exception_message({group_cycle, Id}, _Req, _State) ->
+    {[{<<"error">>, iolist_to_binary([<<"attempt to add group '">>, Id,
+                                      <<"' to itself, which is not allowed">>])}]};
+db_exception_message({not_found_in_group, Id}, _Req, _State) ->
+    {[{<<"error">>, iolist_to_binary([<<"supplied ID '">>, Id,
+                                      <<"' not in group, cannot be deleted">>])}]};
 db_exception_message(Why, _Req, _State) ->
     error({unexpected_error_message, Why}).

@@ -6,6 +6,7 @@
 -include("heimdall.hrl").
 
 -export([acl_membership/4,
+         add_to_group/3,
          create/2,
          create_acl/5,
          delete/2,
@@ -13,8 +14,8 @@
          exists/2,
          group_membership/2,
          has_permission/4,
-         statements/0
-        ]).
+         remove_from_group/3,
+         statements/0]).
 
 create_stmt(actor)     -> insert_actor;
 create_stmt(container) -> insert_container;
@@ -158,6 +159,37 @@ group_membership(TargetType, GroupId) ->
             [];
         {error, Error} ->
             {error, Error}
+    end.
+
+group_insert_stmt(actor)     -> insert_actor_into_group;
+group_insert_stmt(group)     -> insert_group_into_group.
+
+-spec add_to_group(auth_type(), auth_id(), auth_id()) -> ok | {error, term()}.
+add_to_group(Type, MemberId, GroupId) ->
+    InsertStatement = group_insert_stmt(Type),
+    case sqerl:statement(InsertStatement, [MemberId, GroupId], count) of
+        {ok, 1} ->
+            ok;
+        {conflict, Reason} ->
+            % Already in group, nothing to do here
+            ok;
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+group_remove_stmt(actor)     -> delete_actor_from_group;
+group_remove_stmt(group)     -> delete_group_from_group.
+
+-spec remove_from_group(auth_type(), auth_id(), auth_id()) -> ok | {error, term()}.
+remove_from_group(Type, MemberId, GroupId) ->
+    DeleteStatement = group_remove_stmt(Type),
+    case sqerl:statement(DeleteStatement, [MemberId, GroupId], count) of
+        {ok, 1} ->
+            ok;
+        {ok, none} ->
+            {error, not_found_in_group};
+        {error, Reason} ->
+            {error, Reason}
     end.
 
 statements() ->
