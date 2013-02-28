@@ -7,9 +7,13 @@ all : test
 setup:
 	@echo "Dropping and recreating database '$(TEST_DB)'"
 	@dropdb $(TEST_DB)
+	@psql --dbname template1 --single-transaction --set ON_ERROR_STOP=1 --file sql/drop_roles.sql
 	@createdb $(TEST_DB)
-	@psql --dbname $(TEST_DB) --quiet --command 'CREATE EXTENSION pgtap;'
-	@psql --dbname $(TEST_DB) --quiet --single-transaction --set ON_ERROR_STOP=1 --file sql/heimdall.sql
+	@psql --dbname $(TEST_DB) --command 'CREATE EXTENSION pgtap;'
+	@psql --dbname $(TEST_DB) --single-transaction --set ON_ERROR_STOP=1 --file t/custom_test_functions.sql
+	@psql --dbname $(TEST_DB) --single-transaction --set ON_ERROR_STOP=1 --file sql/heimdall.sql
+	@psql --dbname $(TEST_DB) --single-transaction --set ON_ERROR_STOP=1 --file sql/create_roles.sql
+	@psql --dbname $(TEST_DB) --single-transaction --set ON_ERROR_STOP=1 --set database_name=$(TEST_DB) --file sql/permissions.sql
 
 test: setup
 	@echo "Executing pgTAP tests in database '$(TEST_DB)'"
