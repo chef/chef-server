@@ -2,7 +2,7 @@
 -name mover@127.0.0.1
 
 ## Cookie for distributed erlang
--setcookie chef-mover
+-setcookie mover
 
 ## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
 ## (Disabled by default..use with caution!)
@@ -20,3 +20,4 @@
 
 ## Increase logfile size to 10M
 -env RUN_ERL_LOG_MAXSIZE 10000000
+
