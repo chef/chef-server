@@ -25,10 +25,7 @@ module Pedant
 
     def parser()
       @parser ||= OptionParser.new do |opts|
-        opts.banner = "Usage: oc-authz-pedant [options]"
-        # option_sets.each do |option_set|
-        #   self.send(option_set, opts)
-        # end
+        core_options(opts)
       end
     end
 
