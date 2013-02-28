@@ -42,9 +42,8 @@ module Pedant
 
         ####################################
 
-        # TODO: This needs to be configurable
         def api_url(path_fragment)
-          "http://127.0.0.1:6969#{path_fragment}"
+          "#{Pedant.config[:host]}:#{Pedant.config[:port]}#{path_fragment}"
         end
 
         # Helper method for creating a new Authz object.  Do not use
