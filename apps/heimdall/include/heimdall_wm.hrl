@@ -2,9 +2,7 @@
 %% a function declaration so breaks all of our behavior callbacks.
 -include_lib("webmachine/include/wm_reqdata.hrl").
 -include_lib("mixer/include/mixer.hrl").
-
--type permission() :: create | read | update | delete | grant.
--type entity_type() :: actor | group | container | object.
+-include("heimdall.hrl").
 
 %% Share resource state shared by all heimdall resource modules
 %%
@@ -22,26 +20,23 @@
 
           %% Who are we working with?  This is the object in question, i.e., for
           %% /<type>/<id> this is <id>
-          authz_id :: binary(),
+          authz_id :: auth_id(),
 
           %% What kind of resource are we talking about here?
-          request_type :: entity_type(),
-
-          %% What is the ACL on the resource?
-          acl :: term(),
+          request_type :: auth_type(),
 
           %% What type of ACE request is this?
           action :: permission(),
 
           %% What member type are we checking for?  This will always be an actor or
           %% a group
-          member_type :: entity_type(),
+          member_type :: auth_type(),
 
           %% What's the ID of the member
-          member_id :: binary(),
+          member_id :: auth_id(),
 
           %% Who's asking?
-          requestor_id :: binary(),
+          requestor_id :: auth_id() | superuser,
 
           %% Which module is handling this request?
           module :: atom()

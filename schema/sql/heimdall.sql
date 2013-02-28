@@ -258,10 +258,107 @@ WITH RECURSIVE
 SELECT id from groups;
 $$;
 
--- Need functions for permission on container, actor, and group.
 -- Don't think that we need similar functions for groups having a
 -- permission, since I don't think that's ever queried for directly
 -- from outside.
+CREATE FUNCTION actor_has_permission_on_actor(
+       query_actor auth_actor.authz_id%TYPE,
+       query_target auth_actor.authz_id%TYPE,
+       perm auth_permission)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+STABLE -- <- this function doesn't alter the database; just queries it
+STRICT -- <- returns NULL immediately if any arguments are NULL
+AS $$
+DECLARE
+  -- Convert Authz IDs into internal database IDs
+  --
+  -- If the Authz IDs don't refer to an existing item, an error will
+  -- be thrown.
+  actor_id  auth_actor.id%TYPE  NOT NULL := actor_id(query_actor);
+  target_id auth_actor.id%TYPE NOT NULL := actor_id(query_target);
+BEGIN
+
+        -- Check to see if the actor has the permission directly
+        PERFORM a.*
+        FROM actor_acl_actor AS a
+        WHERE a.target = target_id
+        AND a.authorizee = actor_id
+        AND a.permission = perm;
+
+       -- If that returned anything, we're done
+       IF FOUND THEN
+          RETURN TRUE;
+       END IF;
+
+       -- The permission wasn't granted directly to the actor, we need
+       -- to check the groups the actor is in
+       PERFORM a.*
+       FROM actor_acl_group AS a
+       JOIN groups_for_actor(actor_id)
+          AS gs(id) ON gs.id = a.authorizee
+       WHERE a.target = target_id
+       AND a.permission = perm;
+
+       -- If anything was found, we're done
+       IF FOUND THEN
+          RETURN TRUE;
+       END IF;
+
+       -- The actor doesn't have the permission
+       RETURN FALSE;
+END;
+$$;
+
+CREATE FUNCTION actor_has_permission_on_group(
+       query_actor auth_actor.authz_id%TYPE,
+       query_group auth_group.authz_id%TYPE,
+       perm auth_permission)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+STABLE -- <- this function doesn't alter the database; just queries it
+STRICT -- <- returns NULL immediately if any arguments are NULL
+AS $$
+DECLARE
+  -- Convert Authz IDs into internal database IDs
+  --
+  -- If the Authz IDs don't refer to an existing item, an error will
+  -- be thrown.
+  actor_id  auth_actor.id%TYPE  NOT NULL := actor_id(query_actor);
+  group_id auth_group.id%TYPE NOT NULL := group_id(query_group);
+BEGIN
+
+        -- Check to see if the actor has the permission directly
+        PERFORM a.*
+        FROM group_acl_actor AS a
+        WHERE a.target = group_id
+        AND a.authorizee = actor_id
+        AND a.permission = perm;
+
+       -- If that returned anything, we're done
+       IF FOUND THEN
+          RETURN TRUE;
+       END IF;
+
+       -- The permission wasn't granted directly to the actor, we need
+       -- to check the groups the actor is in
+       PERFORM a.*
+       FROM group_acl_group AS a
+       JOIN groups_for_actor(actor_id)
+          AS gs(id) ON gs.id = a.authorizee
+       WHERE a.target = group_id
+       AND a.permission = perm;
+
+       -- If anything was found, we're done
+       IF FOUND THEN
+          RETURN TRUE;
+       END IF;
+
+       -- The actor doesn't have the permission
+       RETURN FALSE;
+END;
+$$;
+
 CREATE FUNCTION actor_has_permission_on_object(
        query_actor auth_actor.authz_id%TYPE,
        query_object auth_object.authz_id%TYPE,
@@ -311,6 +408,54 @@ BEGIN
 END;
 $$;
 
+CREATE FUNCTION actor_has_permission_on_container(
+       query_actor auth_actor.authz_id%TYPE,
+       query_container container.authz_id%TYPE,
+       perm auth_permission)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+STABLE -- <- this function doesn't alter the database; just queries it
+STRICT -- <- returns NULL immediately if any arguments are NULL
+AS $$
+DECLARE
+  -- Convert Authz IDs into internal database IDs
+  --
+  -- If the Authz IDs don't refer to an existing item, an error will
+  -- be thrown.
+  actor_id  auth_actor.id%TYPE  NOT NULL := actor_id(query_actor);
+  container_id container.id%TYPE NOT NULL := container_id(query_container);
+BEGIN
+
+        -- Check to see if the actor has the permission directly
+        PERFORM a.*
+        FROM container_acl_actor AS a
+        WHERE a.target = container_id
+        AND a.authorizee = actor_id
+        AND a.permission = perm;
+
+       -- If that returned anything, we're done
+       IF FOUND THEN
+          RETURN TRUE;
+       END IF;
+
+       -- The permission wasn't granted directly to the actor, we need
+       -- to check the groups the actor is in
+       PERFORM a.*
+       FROM container_acl_group AS a
+       JOIN groups_for_actor(actor_id)
+          AS gs(id) ON gs.id = a.authorizee
+       WHERE a.target = container_id
+       AND a.permission = perm;
+
+       -- If anything was found, we're done
+       IF FOUND THEN
+          RETURN TRUE;
+       END IF;
+
+       -- The actor doesn't have the permission
+       RETURN FALSE;
+END;
+$$;
 
 --------------------------------------------------------------------------------
 -- Debug Schema

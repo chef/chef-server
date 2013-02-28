@@ -51,28 +51,40 @@ malformed_request(Req, #base_state{module = Module} = State) ->
                                                   member_id = MemberId}).
 
 validate_requestor(Req, State) ->
-    State0 = heimdall_wm_util:get_requestor(Req, State),
-    case State0#base_state.requestor_id of
-        undefined ->
-            heimdall_wm_error:set_malformed_request(Req, State, missing_requestor);
-        _ ->
-            {false, Req, State0}
+    try
+        State0 = heimdall_wm_util:get_requestor(Req, State),
+        case State0#base_state.requestor_id of
+            undefined ->
+                heimdall_wm_error:set_malformed_request(Req, State,
+                                                        missing_requestor);
+            _ ->
+                {false, Req, State0}
+        end
+    catch
+        throw:{bad_requestor, Id} ->
+            heimdall_wm_error:set_malformed_request(Req, State, {bad_requestor, Id})
     end.
 
-forbidden(Req, #base_state{module = Module} = State) ->
+forbidden(Req, #base_state{module = Module, authz_id = Id, request_type = Type,
+                           requestor_id = RequestorId} = State) ->
     case Module:auth_info(wrq:method(Req)) of
         ignore ->
             {false, Req, State};
         Permission ->
-            % TODO: Check that authz_id exists for type
-            % TODO: GET ACL for entity, store in #base_state.acl
-            case Permission of
-                any ->
-                    % TODO: check all instead
-                    {false, Req, State};
-                _Other ->
-                    % TODO: check that type instead
-                    {false, Req, State}
+            case heimdall_db:exists(Type, Id) of
+                false ->
+                    {{halt, 404}, Req, State};
+                true ->
+                    case Permission of
+                        any ->
+                            {not heimdall_acl:check_any_access(Type, Id,
+                                                               RequestorId),
+                             Req, State};
+                        Other ->
+                            {not heimdall_acl:check_access(Type, Id,
+                                                           RequestorId, Other),
+                             Req, State}
+                    end
             end
     end.
 

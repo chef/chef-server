@@ -2,3 +2,4 @@
 %% can get)
 -type auth_id() :: <<_:256>>.
 -type auth_type() :: actor | container | group | object.
+-type permission() :: create | read | update | delete | grant.

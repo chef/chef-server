@@ -2,7 +2,9 @@
 
 -include("heimdall_wm.hrl").
 
--export([generate_authz_id/0,
+-export([decode/1,
+         encode/1,
+         generate_authz_id/0,
          get_requestor/2,
          set_created_response/2,
          set_json_body/2]).
@@ -14,13 +16,20 @@ generate_authz_id() ->
 
 %% Extract the requestor from the request headers and return updated base state.
 get_requestor(Req, State) ->
+    {ok, SuperuserId} = application:get_env(heimdall, superuser_id),
     case wrq:get_req_header("X-Ops-Requesting-Actor-Id", Req) of
         undefined ->
             State;
+        Id when Id =:= SuperuserId ->
+            % Superuser gets a pass
+            State#base_state{requestor_id = superuser};
         Id ->
-            % TODO: we should probably verify that the requestor actually exists or
-            % throw an exception
-            State#base_state{requestor_id = Id}
+            case heimdall_db:exists(actor, Id) of
+                true ->
+                    State#base_state{requestor_id = Id};
+                false ->
+                    throw({bad_requestor, Id})
+            end
     end.
 
 scheme(Req) ->
@@ -48,8 +57,16 @@ full_uri(Req) ->
     base_uri(Req) ++ wrq:disp_path(Req).
 
 set_json_body(Req, EjsonData) ->
-    Json = jiffy:encode(EjsonData),
+    Json = encode(EjsonData),
     wrq:set_resp_body(Json, Req).
+
+%% ALL THE JIFFY in one place.  In case we decide to change the library or
+%% something.  LIKE WE DO.
+encode(EjsonData) ->
+    jiffy:encode(EjsonData).
+
+decode(JsonData) ->
+    jiffy:decode(JsonData).
 
 %% Used for all POST /<type> response bodies; always contains ID + URI
 set_created_response(Req, AuthzId) ->
