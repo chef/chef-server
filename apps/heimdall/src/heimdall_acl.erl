@@ -108,8 +108,7 @@ make_ejson_acl(RequestType, AuthzId) ->
 parse_acl_json(Json, Action) ->
     try
         Ejson = heimdall_wm_util:decode(Json),
-        ActionEjson = ej:get({atom_to_binary(Action, latin1)}, Ejson),
-        {ej:get({<<"actors">>}, ActionEjson), ej:get({<<"groups">>}, ActionEjson)}
+        {ej:get({<<"actors">>}, Ejson), ej:get({<<"groups">>}, Ejson)}
     catch
         throw:{error, {_, invalid_json}} ->
             throw({error, invalid_json});

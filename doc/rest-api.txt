@@ -45,9 +45,8 @@
   PUT
     request:
       create, read, update, delete, or grant (one):
-        "<action>" => {"actors" => [<actors>], "groups => [<groups>]}
+        "actors" => [<actors>], "groups => [<groups>]
       conditions:
-        <action> should match url
         <actors> and <groups> should exist
     internal actions:
       delete old ACL for action
