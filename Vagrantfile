@@ -86,7 +86,7 @@ Vagrant::Config.run do |config|
 
     chef.run_list = [
                      "recipe[opscode-dev-shim]",
-                     "recipe[opscode-heimdall::development]"
+                     "recipe[opscode-heimdall::dev]"
                  ]
   end
 end
