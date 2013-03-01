@@ -16,7 +16,7 @@ validate_request(Req, State) ->
 
 auth_info(Verb) when Verb =:= 'PUT';
                      Verb =:= 'DELETE' ->
-    grant.
+    update.
 
 from_json(Req, #base_state{authz_id = AuthzId, member_type = MemberType,
                            member_id = MemberId} = State) ->
@@ -29,7 +29,9 @@ from_json(Req, #base_state{authz_id = AuthzId, member_type = MemberType,
                                                {non_existent_member_for_group,
                                                 MemberType, MemberId});
         {error,
-         <<"This would create a group membership cycle, which is not allowed">>} ->
+         <<"new row for relation \"group_group_relations\" violates check constraint \"no_trivial_cycles\"">>} ->
+            heimdall_wm_error:set_db_exception(Req, State, {group_cycle, MemberId});
+        {error, <<"This would create a group membership cycle, which is not allowed">>} ->
             heimdall_wm_error:set_db_exception(Req, State, {group_cycle, MemberId});
         {error, Error} ->
             heimdall_wm_error:set_db_exception(Req, State, Error)
