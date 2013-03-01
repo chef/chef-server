@@ -3,6 +3,7 @@
 -include("heimdall_wm.hrl").
 
 -export([set_db_exception/3,
+         set_access_exception/3,
          set_malformed_request/3]).
 
 %% Sets the error message in the body and returns the return tuple to malformed
@@ -27,6 +28,19 @@ malformed_request_message({bad_requestor, Id}, _Req, _State) ->
                                             <<"' does not exist">>])}]}};
 malformed_request_message(Why, _Req, _State) ->
     error({unexpected_error_message, Why}).
+
+%% Sets the error message in the body and returns the return tuple to forbidden
+set_access_exception(Req, State, Permission) ->
+    Msg = access_exception_message(Permission),
+    {true, heimdall_wm_util:set_json_body(Req, Msg), State}.
+
+access_exception_message(any) ->
+    {[{<<"error">>,
+       <<"must be in one of the create, read, update, delete, grant access control entries to perform this action">>}]};
+access_exception_message(Other) ->
+    {[{<<"error">>,
+       iolist_to_binary([<<"must be in the ">>, atom_to_binary(Other, latin1),
+                         <<" access control entry to perform this action">>])}]}.
 
 %% Sets the error message in the body and returns the return tuple to malformed
 %% request (which should contain {halt, XXX} with whatever return code is

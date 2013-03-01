@@ -55,8 +55,7 @@ validate_requestor(Req, State) ->
         State0 = heimdall_wm_util:get_requestor(Req, State),
         case State0#base_state.requestor_id of
             undefined ->
-                heimdall_wm_error:set_malformed_request(Req, State,
-                                                        missing_requestor);
+                heimdall_wm_error:set_malformed_request(Req, State, missing_requestor);
             _ ->
                 {false, Req, State0}
         end
@@ -75,15 +74,17 @@ forbidden(Req, #base_state{module = Module, authz_id = Id, request_type = Type,
                 false ->
                     {{halt, 404}, Req, State};
                 true ->
-                    case Permission of
-                        any ->
-                            {not heimdall_acl:check_any_access(Type, Id,
-                                                               RequestorId),
-                             Req, State};
-                        Other ->
-                            {not heimdall_acl:check_access(Type, Id,
-                                                           RequestorId, Other),
-                             Req, State}
+                    Result = case Permission of
+                                 any ->
+                                     heimdall_acl:check_any_access(Type, Id, RequestorId);
+                                 Other ->
+                                     heimdall_acl:check_access(Type, Id, RequestorId, Other)
+                             end,
+                    case Result of
+                        true ->
+                            {false, Req, State};
+                        false ->
+                            heimdall_wm_error:set_access_exception(Req, State, Permission)
                     end
             end
     end.

@@ -41,7 +41,7 @@ from_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType,
         heimdall_acl:clear_access(RequestType, AuthzId, Action),
         heimdall_acl:add_access_set(Action, RequestType, AuthzId, actor, Actors),
         heimdall_acl:add_access_set(Action, RequestType, AuthzId, group, Groups),
-        {true, Req, State}
+        {true, wrq:set_resp_body(<<"{}">>, Req), State}
     catch
         throw:{error, invalid_json} ->
             {_Return, Req0, _State} =
@@ -57,7 +57,7 @@ delete_resource(Req, #base_state{authz_id = AuthzId, request_type = RequestType,
                                  action = Action} = State) ->
     try
         heimdall_acl:clear_access(RequestType, AuthzId, Action),
-        {true, Req, State}
+        {true, wrq:set_resp_body(<<"{}">>, Req), State}
     catch
         throw:{db_error, Error} ->
             heimdall_wm_error:set_db_exception(Req, State, Error)

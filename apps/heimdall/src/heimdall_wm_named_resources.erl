@@ -49,7 +49,7 @@ delete_resource(Req, #base_state{authz_id = AuthzId,
                                  request_type = Type} = State) ->
     case heimdall_db:delete(Type, AuthzId) of
         ok ->
-            {true, Req, State};
+            {true, wrq:set_resp_body(<<"{}">>, Req), State};
         {error, Error} ->
             heimdall_wm_error:set_db_exception(Req, State, Error)
     end.
