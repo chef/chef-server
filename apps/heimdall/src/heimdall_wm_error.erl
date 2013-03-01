@@ -16,6 +16,8 @@ set_malformed_request(Req, State, Error) ->
             {true, heimdall_wm_util:set_json_body(Req, Msg), State}
     end.
 
+% TODO: change this to 401 in the future?  Right now the old server returns 403,
+% so keeping it for compatibility although it's arguably wrong
 malformed_request_message(missing_requestor, _Req, _State) ->
     {403, {[{<<"error">>, <<"must specify a requesting actor id">>}]}};
 malformed_request_message(invalid_json, _Req, _State) ->
