@@ -1,5 +1,11 @@
 require 'berkshelf/vagrant'
 
+HEIMDALL_PORT             = 5959
+HEIMDALL_FORWARD_PORT    = 15959
+
+HEIMDALL_DB_PORT         =  5432
+HEIMDALL_FORWARD_DB_PORT = 15432
+
 Vagrant::Config.run do |config|
   # All Vagrant configuration is done here. The most common configuration
   # options are documented and commented below. For a complete reference,
@@ -40,6 +46,9 @@ Vagrant::Config.run do |config|
   # computers to access the VM, whereas host only networking does not.
   # config.vm.forward_port 80, 8080
 
+  config.vm.forward_port HEIMDALL_PORT, HEIMDALL_FORWARD_PORT
+  config.vm.forward_port HEIMDALL_DB_PORT, HEIMDALL_FORWARD_DB_PORT
+
   # Share an additional folder to the guest VM. The first argument is
   # an identifier, the second is the path on the guest to mount the
   # folder, and the third is the path on the host to the actual folder.
@@ -58,8 +67,18 @@ Vagrant::Config.run do |config|
       "postgresql" => {
         "password" => {
           "postgres" => "honeybadger"
+        },
+        "config" => {
+          "port" => HEIMDALL_DB_PORT
         }
       },
+      "oc_heimdall" => {
+        "host" => "0.0.0.0",
+        "port" => HEIMDALL_PORT,
+        "database" => {
+          "port" => HEIMDALL_DB_PORT
+        }
+      }
     }
 
     chef.roles_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/roles"
