@@ -9,16 +9,20 @@
 %% request (which could contain true or {halt, XXX} if some other return code is
 %% appropriate.
 set_malformed_request(Req, State, Error) ->
-    Msg = malformed_request_message(Error, Req, State),
-    {true, heimdall_wm_util:set_json_body(Req, Msg), State}.
+    case malformed_request_message(Error, Req, State) of
+        {Code, Msg} when is_integer(Code) ->
+            {{halt, Code}, heimdall_wm_util:set_json_body(Req, Msg), State};
+        Msg ->
+            {true, heimdall_wm_util:set_json_body(Req, Msg), State}
+    end.
 
 malformed_request_message(missing_requestor, _Req, _State) ->
-    {[{<<"error">>, <<"must specify a requesting actor id">>}]};
+    {403, {[{<<"error">>, <<"must specify a requesting actor id">>}]}};
 malformed_request_message(invalid_json, _Req, _State) ->
     {[{<<"error">>, <<"invalid JSON in request body">>}]};
 malformed_request_message({bad_requestor, Id}, _Req, _State) ->
-    {[{<<"error">>, iolist_to_binary([<<"requesting actor id of '">>, Id,
-                                      <<"' does not exist">>])}]};
+    {403, {[{<<"error">>, iolist_to_binary([<<"requesting actor id of '">>, Id,
+                                            <<"' does not exist">>])}]}};
 malformed_request_message(Why, _Req, _State) ->
     error({unexpected_error_message, Why}).
 
