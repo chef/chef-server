@@ -8,12 +8,6 @@
                   sasl,
                   crypto,
                   inets,
-                  oauth,
-                  ibrowse,
-                  ejson,
-                  couchbeam,
-                  emysql,
-                  chef_common,
-                  fast_log]},
+                  ibrowse]},
   {mod, {mover_app, []}}
  ]}.
