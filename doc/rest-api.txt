@@ -78,6 +78,7 @@
     response:
       empty: 200 if <member_id> of <member_type> has <action> permissiona against
         <id> of <type>, 404 otherwise
+      note: <member_type> is always actors now
 
 /groups endpoint only:
 

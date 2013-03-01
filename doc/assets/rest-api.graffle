@@ -3524,12 +3524,33 @@
 				<dict>
 					<key>Color</key>
 					<dict>
+						<key>archive</key>
+						<data>
+						YnBsaXN0MDDUAQIDBAUGHyBYJHZl
+						cnNpb25YJG9iamVjdHNZJGFyY2hp
+						dmVyVCR0b3ASAAGGoKUHCBEVHFUk
+						bnVsbNQJCgsMDQ4PEF8QEk5TQ3Vz
+						dG9tQ29sb3JTcGFjZVYkY2xhc3Nc
+						TlNDb2xvclNwYWNlV05TV2hpdGWA
+						AoAEEANEMC41ANIKEhMUVE5TSUSA
+						AxAC0hYXGBlaJGNsYXNzbmFtZVgk
+						Y2xhc3Nlc1xOU0NvbG9yU3BhY2Wi
+						GhtcTlNDb2xvclNwYWNlWE5TT2Jq
+						ZWN00hYXHR5XTlNDb2xvcqIdG18Q
+						D05TS2V5ZWRBcmNoaXZlctEhIlRy
+						b290gAEACAARABoAIwAtADIANwA9
+						AEMATABhAGgAdQB9AH8AgQCDAIgA
+						jQCSAJQAlgCbAKYArwC8AL8AzADV
+						ANoA4gDlAPcA+gD/AAAAAAAAAgEA
+						AAAAAAAAIwAAAAAAAAAAAAAAAAAA
+						AQE=
+						</data>
 						<key>b</key>
-						<string>0.74902</string>
+						<string>0.5</string>
 						<key>g</key>
-						<string>1</string>
+						<string>0.5</string>
 						<key>r</key>
-						<string>0.74902</string>
+						<string>0.5</string>
 					</dict>
 				</dict>
 			</dict>
@@ -4242,7 +4263,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2013-02-11 20:56:33 +0000</string>
+	<string>2013-03-01 15:51:58 +0000</string>
 	<key>Modifier</key>
 	<string>Douglas Triggs</string>
 	<key>NotesVisible</key>
@@ -4328,7 +4349,7 @@
 			</dict>
 		</array>
 		<key>Frame</key>
-		<string>{{68, 27}, {1349, 993}}</string>
+		<string>{{2316, -18}, {1349, 993}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
