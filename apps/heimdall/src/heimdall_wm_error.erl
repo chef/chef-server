@@ -21,7 +21,7 @@ malformed_request_message(missing_requestor, _Req, _State) ->
 malformed_request_message(invalid_json, _Req, _State) ->
     {[{<<"error">>, <<"invalid JSON in request body">>}]};
 malformed_request_message({bad_requestor, Id}, _Req, _State) ->
-    {403, {[{<<"error">>, iolist_to_binary([<<"requesting actor id of '">>, Id,
+    {401, {[{<<"error">>, iolist_to_binary([<<"requesting actor id of '">>, Id,
                                             <<"' does not exist">>])}]}};
 malformed_request_message(Why, _Req, _State) ->
     error({unexpected_error_message, Why}).
