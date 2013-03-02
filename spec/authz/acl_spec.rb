@@ -227,15 +227,14 @@ describe "ACL Tests" do
                 with_ace_on :gozer, :grant, :to => :hasselhoff
 
                 it "returns 400" do
-                  pending "returns 500 instead" do
-                    put("/#{type}s/#{gozer}/acl/#{action}",
-                        :hasselhoff, :payload => {}).
-                      should have_status_code(400).with_body({"error" => "bad input"})
+                  put("/#{type}s/#{gozer}/acl/#{action}",
+                    :hasselhoff, :payload => {}).
+                    should have_status_code(400).
+                    with_body({"error" => "invalid JSON in request body"})
 
-                    get("/#{type}s/#{gozer}/acl/#{action}",
-                        :superuser).should have_status_code(200).
-                      with_body({"actors" => [hasselhoff], "groups" => []})
-                  end
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                    :superuser).should have_status_code(200).
+                    with_body({"actors" => [hasselhoff], "groups" => []})
                 end
               end
 
@@ -251,18 +250,17 @@ describe "ACL Tests" do
 
                 with_ace_on :gozer, :grant, :to => :hasselhoff
 
-                it "returns 400" do
-                  pending "returns 200 instead" do
-                    put("/#{type}s/#{gozer}/acl/#{action}",
-                        :hasselhoff,
-                        :payload => {"actors" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"],
-                          "groups" => []}).
-                      should have_status_code(400).with_body({"error" => "bad input"})
+                it "returns 400", :pending do
+                  put("/#{type}s/#{gozer}/acl/#{action}",
+                    :hasselhoff,
+                    :payload => {"actors" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"],
+                      "groups" => []}).
+                    should have_status_code(400).
+                    with_body({"error" => "attempt to add non-existent actor 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz' to ACL"})
 
-                    get("/#{type}s/#{gozer}/acl/#{action}",
-                        :superuser).should have_status_code(200).
-                      with_body({"actors" => [hasselhoff], "groups" => []})
-                  end
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                    :superuser).should have_status_code(200).
+                    with_body({"actors" => [hasselhoff], "groups" => []})
                 end
               end
 
@@ -272,17 +270,16 @@ describe "ACL Tests" do
 
                 with_ace_on :gozer, :grant, :to => :hasselhoff
 
-                it "returns 400" do
-                  pending "returns 200 instead" do
-                    put("/#{type}s/#{gozer}/acl/#{action}",
-                        :hasselhoff, :payload => {"actors" => [],
-                          "groups" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"]}).
-                      should have_status_code(400).with_body({"error" => "bad input"})
+                it "returns 400", :pending do
+                  put("/#{type}s/#{gozer}/acl/#{action}",
+                    :hasselhoff, :payload => {"actors" => [],
+                      "groups" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"]}).
+                    should have_status_code(400).
+                    with_body({"error" => "attempt to add non-existent group 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz' to ACL"})
 
-                    get("/#{type}s/#{gozer}/acl/#{action}",
-                        :superuser).should have_status_code(200).
-                      with_body({"actors" => [hasselhoff], "groups" => []})
-                  end
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                    :superuser).should have_status_code(200).
+                    with_body({"actors" => [hasselhoff], "groups" => []})
                 end
               end
 
@@ -292,18 +289,17 @@ describe "ACL Tests" do
 
                 with_ace_on :gozer, :grant, :to => :hasselhoff
 
-                it "returns 400" do
-                  pending "returns 200 instead" do
-                    put("/#{type}s/#{gozer}/acl/#{action}",
-                        :hasselhoff,
-                        :payload => {"actors" => ["ffffffffffffffffffffffffffffffff"],
-                          "groups" => []}).
-                      should have_status_code(400).with_body({"error" => "bad input"})
+                it "returns 400", :pending do
+                  put("/#{type}s/#{gozer}/acl/#{action}",
+                    :hasselhoff,
+                    :payload => {"actors" => ["ffffffffffffffffffffffffffffffff"],
+                      "groups" => []}).
+                    should have_status_code(400).
+                    with_body({"error" => "attempt to add non-existent actor 'ffffffffffffffffffffffffffffffff' to ACL"})
 
-                    get("/#{type}s/#{gozer}/acl/#{action}",
-                        :superuser).should have_status_code(200).
-                      with_body({"actors" => [hasselhoff], "groups" => []})
-                  end
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                    :superuser).should have_status_code(200).
+                    with_body({"actors" => [hasselhoff], "groups" => []})
                 end
               end
 
@@ -313,17 +309,16 @@ describe "ACL Tests" do
 
                 with_ace_on :gozer, :grant, :to => :hasselhoff
 
-                it "returns 400" do
-                  pending "returns 200 instead" do
-                    put("/#{type}s/#{gozer}/acl/#{action}",
-                        :hasselhoff, :payload => {"actors" => [],
-                          "groups" => ["ffffffffffffffffffffffffffffffff"]}).
-                      should have_status_code(400).with_body({"error" => "bad input"})
+                it "returns 400", :pending do
+                  put("/#{type}s/#{gozer}/acl/#{action}",
+                    :hasselhoff, :payload => {"actors" => [],
+                      "groups" => ["ffffffffffffffffffffffffffffffff"]}).
+                    should have_status_code(400).
+                    with_body({"error" => "attempt to add non-existent group 'ffffffffffffffffffffffffffffffff' to ACL"})
 
-                    get("/#{type}s/#{gozer}/acl/#{action}",
-                        :superuser).should have_status_code(200).
-                      with_body({"actors" => [hasselhoff], "groups" => []})
-                  end
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                    :superuser).should have_status_code(200).
+                    with_body({"actors" => [hasselhoff], "groups" => []})
                 end
               end
 
@@ -465,12 +460,11 @@ describe "ACL Tests" do
                 with_ace_on :gozer, :grant, :to => :hasselhoff
 
                 it "can clear the ACE" do
-                  pending "causes internal 500 errors" do
-                    delete("/#{type}s/#{gozer}/acl/#{action}",
-                           :hasselhoff).should have_status_code(200).with_body({})
-                    get("/#{type}s/#{gozer}/acl/#{action}",
-                        :superuser).should have_status_code(404)
-                  end
+                  delete("/#{type}s/#{gozer}/acl/#{action}",
+                    :hasselhoff).should have_status_code(200).with_body({})
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                    :superuser).should have_status_code(200).
+                    with_body({"actors" => [], "groups" => []})
                 end
               end
 
@@ -492,8 +486,15 @@ describe "ACL Tests" do
                          :malkovich).should have_status_code(403).
                     with_body({"error" => "must be in the grant access control entry to perform this action"})
 
+                  if (action == "grant")
+                    response_body = {"actors" => [], "groups" => []}
+                  else
+                    response_body = {"actors" => [malkovich], "groups" => []}
+                  end
+
                   get("/#{type}s/#{gozer}/acl/#{action}",
-                      :superuser).should have_status_code(200)
+                      :superuser).should have_status_code(200).
+                    with_body(response_body)
                 end
               end
 
@@ -505,13 +506,18 @@ describe "ACL Tests" do
                 with_ace_on :gozer, :grant, :to => :hipsters
 
                 it "can clear the ACE" do
-                  pending "causes internal 500 errors" do
-                    delete("/#{type}s/#{gozer}/acl/#{action}",
-                           :hasselhoff).should have_status_code(200).with_body({})
+                  delete("/#{type}s/#{gozer}/acl/#{action}",
+                    :hasselhoff).should have_status_code(200).with_body({})
 
-                    get("/#{type}s/#{gozer}/acl/#{action}",
-                        :superuser).should have_status_code(404)
+                  if (action == "grant")
+                    response_body = {"actors" => [], "groups" => [hipsters]}
+                  else
+                    response_body = {"actors" => [], "groups" => []}
                   end
+
+                  get("/#{type}s/#{gozer}/acl/#{action}",
+                    :superuser).should have_status_code(200).
+                    with_body(response_body)
                 end
               end
 
@@ -673,22 +679,10 @@ describe "ACL Tests" do
 
                     with_ace_on :gozer, ace.to_sym, :to => :brogrammers
 
-                    if (action == ace)
-                      it "returns 200 when in ACE" do
-                        # My understanding is that if group X has permissions on actor X,
-                        # this should return 200, but as it is, it doesn't
-                        pending "doesn't seem to work" do
-                          # Brogrammers has specific ACE access on gozer
-                          get("/#{type}s/#{gozer}/acl/#{action}/groups/#{brogrammers}",
-                              :hasselhoff).should have_status_code(200).with_body({})
-                        end
-                      end
-                    else
-                      it "returns 404 when not in ACE" do
-                        # Brogrammers does not have other access on gozer
-                        get("/#{type}s/#{gozer}/acl/#{action}/groups/#{brogrammers}",
-                            :hasselhoff).should have_status_code(404)
-                      end
+                    it "always returns 404" do
+                      # Brogrammers does not have other access on gozer
+                      get("/#{type}s/#{gozer}/acl/#{action}/groups/#{brogrammers}",
+                        :hasselhoff).should have_status_code(404)
                     end
                   end
 
@@ -700,19 +694,9 @@ describe "ACL Tests" do
 
                     with_ace_on :gozer, ace.to_sym, :to => :brogrammers
 
-                    if (action == ace)
-                      # See above
-                      it "returns 200 when in ACE" do
-                        pending "doesn't seem to work" do
-                          get("/#{type}s/#{gozer}/acl/#{action}/groups/#{hipsters}",
-                              :hasselhoff).should have_status_code(200).with_body({})
-                        end
-                      end
-                    else
-                      it "returns 404 when not in ACE" do
-                        get("/#{type}s/#{gozer}/acl/#{action}/groups/#{hipsters}",
-                            :hasselhoff).should have_status_code(404)
-                      end
+                    it "always returns 404" do
+                      get("/#{type}s/#{gozer}/acl/#{action}/groups/#{hipsters}",
+                        :hasselhoff).should have_status_code(404)
                     end
                   end
 
@@ -788,11 +772,33 @@ describe "ACL Tests" do
       context "for #{type.upcase} type" do
         ['create', 'read', 'update', 'delete', 'grant'].each do |action|
           context "for #{action.upcase} action" do
-            ['actors', 'groups'].each do |member_type|
+            context "for ACTORS member type" do
+              should_not_allow :POST, "/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+              should_not_allow :PUT, "/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+              should_not_allow :DELETE, "/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}/actors/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            end
+          end
+        end
+      end
+    end
+    [:actor, :group, :container, :object].each do |type|
+      context "for #{type.upcase} type" do
+        ['create', 'read', 'update', 'delete', 'grant'].each do |action|
+          context "for #{action.upcase} action" do
+            ['groups', 'containers', 'objects'].each do |member_type|
               context "for #{member_type.upcase} member type" do
-                should_not_allow :POST, "/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}/#{member_type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-                should_not_allow :PUT, "/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}/#{member_type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-                should_not_allow :DELETE, "/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}/#{member_type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+                it "returns 404" do
+                  post("/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}/#{member_type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                    :superuser).should have_status_code(404)
+                end
+                it "returns 404" do
+                  put("/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}/#{member_type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                    :superuser).should have_status_code(404)
+                end
+                it "returns 404" do
+                  delete("/#{type}s/ffffffffffffffffffffffffffffffff/acl/#{action}/#{member_type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                    :superuser).should have_status_code(404)
+                end
               end
             end
           end

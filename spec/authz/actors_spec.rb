@@ -34,8 +34,8 @@ describe "Actors Endpoint" do
           # TODO: de-hardcode uri hostname in response body, make configurable
           response.should have_status_code(201).
             with_body({"id" => /^[0-9a-f]{32}$/,
-                        "uri" => /^http\:\/\/authz\.opscode\.com\/actors\/[0-9a-f]{32}$/})
-        
+               "uri" => /^#{Pedant.config[:host]}:#{Pedant.config[:port]}\/actors\/[0-9a-f]{32}$/})
+       
           @actor_id = parse(response)["id"]
 
           # Verify that uri and id are the same
@@ -48,11 +48,19 @@ describe "Actors Endpoint" do
         creates_actor_as(:superuser)
       end
 
-      # Should this work?
+      # This is one of the actual changes in behavior between old authz and new V1
+      # of Heimdall; this actually works with the old server, but it can't with the
+      # new schema because it's not possible to put bogus ACLs in the database which
+      # this would require
       context "as an unknown requestor" do
         let(:fake_actor) { mattdamon }
 
-        creates_actor_as(:fake_actor)
+        it "should not create an actor" do
+          response = post("/actors", fake_actor)
+
+          response.should have_status_code(401).
+            with_body({"error" => "requesting actor id of '#{fake_actor}' does not exist"})
+        end
       end
 
       # Interestingly, this behaves differently than other
@@ -79,11 +87,8 @@ describe "Actors Endpoint" do
 
       context "without any headers" do
         it "should NOT create an actor" do
-          pending "currently returns a 415 AND A NEW ACTOR!" do
-            post("/actors", :superuser, :headers => {}).should have_status_code(400).
-              with_body({"error" => "That ain't right"})
-            # Obviously this is not the EXACT response that should come back...
-          end
+          post("/actors", :superuser, :headers => {}).should have_status_code(400).
+            with_body({"error" => "That ain't right"})
         end
       end
 
@@ -465,15 +470,14 @@ describe "Actors Endpoint" do
             with_ace_on :shatner, :grant, :to => :hasselhoff
 
             it "returns 400" do
-              pending "returns 500 instead" do
-                put("/actors/#{shatner}/acl/#{action}",
-                    :hasselhoff, :payload => {}).
-                  should have_status_code(400).with_body({"error" => "bad input"})
+              put("/actors/#{shatner}/acl/#{action}",
+                :hasselhoff, :payload => {}).
+                should have_status_code(400).
+                with_body({"error" => "invalid JSON in request body"})
 
-                get("/actors/#{shatner}/acl/#{action}",
-                    :superuser).should have_status_code(200).
-                  with_body({"actors" => [hasselhoff], "groups" => []})
-              end
+              get("/actors/#{shatner}/acl/#{action}",
+                :superuser).should have_status_code(200).
+                with_body({"actors" => [shatner], "groups" => []})
             end
           end
 
@@ -481,81 +485,77 @@ describe "Actors Endpoint" do
           # error these out down the road.  Also not sure we should return 400 for
           # non-existent actors/groups, dunno what the right HTTP response code is
           # for that.
-          context "an actor directly in the GRANT ACE, with invalid actor" do
+          context "an actor directly in the GRANT ACE, with invalid actor", :pending do
             with_actors :hasselhoff, :shatner
 
             with_ace_on :shatner, :grant, :to => :hasselhoff
 
             it "returns 400" do
-              pending "returns 200 instead" do
-                put("/actors/#{shatner}/acl/#{action}",
-                    :hasselhoff,
-                    :payload => {"actors" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"],
-                      "groups" => []}).
-                  should have_status_code(400).with_body({"error" => "bad input"})
+              put("/actors/#{shatner}/acl/#{action}",
+                :hasselhoff,
+                :payload => {"actors" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"],
+                  "groups" => []}).
+                should have_status_code(400).
+                with_body({"error" => "attempt to add non-existent actor 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz' to ACL"})
 
-                get("/actors/#{shatner}/acl/#{action}",
-                    :superuser).should have_status_code(200).
-                  with_body({"actors" => [hasselhoff], "groups" => []})
-              end
+              get("/actors/#{shatner}/acl/#{action}",
+                :superuser).should have_status_code(200).
+                with_body({"actors" => [hasselhoff], "groups" => []})
             end
           end
 
-          context "an actor directly in the GRANT ACE, with invalid group" do
+          context "an actor directly in the GRANT ACE, with invalid group", :pending do
             with_actors :hasselhoff, :shatner
 
             with_ace_on :shatner, :grant, :to => :hasselhoff
 
             it "returns 400" do
-              pending "returns 200 instead" do
-                put("/actors/#{shatner}/acl/#{action}",
-                    :hasselhoff, :payload => {"actors" => [],
-                      "groups" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"]}).
-                  should have_status_code(400).with_body({"error" => "bad input"})
+              put("/actors/#{shatner}/acl/#{action}",
+                :hasselhoff, :payload => {"actors" => [],
+                  "groups" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"]}).
+                should have_status_code(400).
+                with_body({"error" => "attempt to add non-existent group 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz' to ACL"})
 
-                get("/actors/#{shatner}/acl/#{action}",
-                    :superuser).should have_status_code(200).
-                  with_body({"actors" => [hasselhoff], "groups" => []})
-              end
+              get("/actors/#{shatner}/acl/#{action}",
+                :superuser).should have_status_code(200).
+                with_body({"actors" => [hasselhoff], "groups" => []})
             end
           end
 
-          context "an actor directly in the GRANT ACE, with non-existent actor" do
+          context "an actor directly in the GRANT ACE, with non-existent actor", :pending do
             with_actors :hasselhoff, :shatner
 
             with_ace_on :shatner, :grant, :to => :hasselhoff
 
             it "returns 400" do
-              pending "returns 200 instead" do
-                put("/actors/#{shatner}/acl/#{action}",
-                    :hasselhoff,
-                    :payload => {"actors" => ["ffffffffffffffffffffffffffffffff"],
-                      "groups" => []}).
-                  should have_status_code(400).with_body({"error" => "bad input"})
+              put("/actors/#{shatner}/acl/#{action}",
+                :hasselhoff,
+                :payload => {"actors" => ["ffffffffffffffffffffffffffffffff"],
+                  "groups" => []}).
+                should have_status_code(400).
+                with_body({"error" => "attempt to add non-existent actor 'ffffffffffffffffffffffffffffffff' to ACL"})
 
-                get("/actors/#{shatner}/acl/#{action}",
-                    :superuser).should have_status_code(200).
-                  with_body({"actors" => [hasselhoff], "groups" => []})
-              end
+              get("/actors/#{shatner}/acl/#{action}",
+                :superuser).should have_status_code(200).
+                with_body({"actors" => [hasselhoff], "groups" => []})
             end
           end
 
-          context "an actor directly in the GRANT ACE, with non-existent group" do
+          context "an actor directly in the GRANT ACE, with non-existent group", :pending do
             with_actors :hasselhoff, :shatner
 
             with_ace_on :shatner, :grant, :to => :hasselhoff
 
             it "returns 400" do
-              pending "returns 200 instead" do
-                put("/actors/#{shatner}/acl/#{action}",
-                    :hasselhoff, :payload => {"actors" => [],
-                      "groups" => ["ffffffffffffffffffffffffffffffff"]}).
-                  should have_status_code(400).with_body({"error" => "bad input"})
+              put("/actors/#{shatner}/acl/#{action}",
+                :hasselhoff, :payload => {"actors" => [],
+                  "groups" => ["ffffffffffffffffffffffffffffffff"]}).
+                should have_status_code(400).
+                with_body({"error" => "attempt to add non-existent group 'ffffffffffffffffffffffffffffffff' to ACL"})
 
-                get("/actors/#{shatner}/acl/#{action}",
-                    :superuser).should have_status_code(200).
-                  with_body({"actors" => [hasselhoff], "groups" => []})
-              end
+              get("/actors/#{shatner}/acl/#{action}",
+                :superuser).should have_status_code(200).
+                with_body({"actors" => [hasselhoff], "groups" => []})
             end
           end
 
@@ -686,12 +686,11 @@ describe "Actors Endpoint" do
             with_ace_on :shatner, :grant, :to => :hasselhoff
 
             it "can clear the ACE" do
-              pending "causes internal 500 errors" do
-                delete("/actors/#{shatner}/acl/#{action}",
-                       :hasselhoff).should have_status_code(200).with_body({})
-                get("/actors/#{shatner}/acl/#{action}",
-                    :superuser).should have_status_code(404)
-              end
+              delete("/actors/#{shatner}/acl/#{action}",
+                :hasselhoff).should have_status_code(200).with_body({})
+              get("/actors/#{shatner}/acl/#{action}",
+                :superuser).should have_status_code(200).
+                with_body({"actors" => [], "groups" => []})
             end
           end
 
@@ -712,8 +711,14 @@ describe "Actors Endpoint" do
                      :malkovich).should have_status_code(403).
                 with_body({"error" => "must be in the grant access control entry to perform this action"})
 
+              if (action == 'grant')
+                response_body = {"actors" => [], "groups" => []}
+              else
+                response_body = {"actors" => [malkovich], "groups" => []}
+              end
+
               get("/actors/#{shatner}/acl/#{action}",
-                  :superuser).should have_status_code(200)
+                  :superuser).should have_status_code(200).with_body(response_body)
             end
           end
 
@@ -724,13 +729,17 @@ describe "Actors Endpoint" do
             with_ace_on :shatner, :grant, :to => :hipsters
 
             it "can clear the ACE" do
-              pending "causes internal 500 errors" do
-                delete("/actors/#{shatner}/acl/#{action}",
-                       :hasselhoff).should have_status_code(200).with_body({})
+              delete("/actors/#{shatner}/acl/#{action}",
+                :hasselhoff).should have_status_code(200).with_body({})
 
-                get("/actors/#{shatner}/acl/#{action}",
-                    :superuser).should have_status_code(404)
+              if (action == 'grant')
+                response_body = {"actors" => [], "groups" => [hipsters]}
+              else
+                response_body = {"actors" => [], "groups" => []}
               end
+
+              get("/actors/#{shatner}/acl/#{action}",
+                :superuser).should have_status_code(200).with_body(response_body)
             end
           end
 

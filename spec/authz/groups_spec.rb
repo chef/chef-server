@@ -38,7 +38,7 @@ describe "Groups Endpoint" do
           # TODO: de-hardcode uri hostname in response body, make configurable
           response.should have_status_code(201).
             with_body({"id" => /^[0-9a-f]{32}$/,
-                        "uri" => /^http\:\/\/authz\.opscode\.com\/groups\/[0-9a-f]{32}$/})
+              "uri" => /^#{Pedant.config[:host]}:#{Pedant.config[:port]}\/groups\/[0-9a-f]{32}$/})
         
           @group_id = parse(response)["id"]
 
@@ -52,11 +52,19 @@ describe "Groups Endpoint" do
         creates_group_as(:superuser)
       end
 
-      # Should this work?
+      # This is one of the actual changes in behavior between old authz and new V1
+      # of Heimdall; this actually works with the old server, but it can't with the
+      # new schema because it's not possible to put bogus ACLs in the database which
+      # this would require
       context "as an unknown requestor" do
         let(:fake_actor) { mattdamon }
 
-        creates_group_as(:fake_actor)
+        it "should not create a group" do
+          response = post("/groups", fake_actor)
+
+          response.should have_status_code(401).
+            with_body({"error" => "requesting actor id of '#{fake_actor}' does not exist"})
+        end
       end
 
       context "without the X-Ops-Requesting-Actor-Id header" do
@@ -308,7 +316,7 @@ describe "Groups Endpoint" do
     # scenarios, such as adding groups/actors to groups they already
     # belong to and deleting them from groups they don't belong to.
     # We're also testing for cycles being forbidden (which they aren't
-    # in the old API, so those tests are pending for now).
+    # in the old API, for the record).
 
     ['actors', 'groups'].each do |type|
       context "for #{type.upcase} type" do
@@ -385,8 +393,8 @@ describe "Groups Endpoint" do
             bogus_actor = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
 
             put("/groups/#{hipsters}/actors/#{bogus_actor}",
-                :shatner).should have_status_code(403).
-              with_body({"error" => "invalid actor"})
+                :shatner).should have_status_code(400).
+              with_body({"error" => "attempt to add non-existent actor '#{bogus_actor}' to group"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
               with_body({"actors" => [], "groups" => []})
           end
@@ -395,8 +403,8 @@ describe "Groups Endpoint" do
             fake_actor = mattdamon
 
             put("/groups/#{hipsters}/actors/#{fake_actor}",
-                :shatner).should have_status_code(403).
-              with_body({"error" => "invalid actor"})
+                :shatner).should have_status_code(400).
+              with_body({"error" => "attempt to add non-existent actor '#{fake_actor}' to group"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
               with_body({"actors" => [], "groups" => []})
           end
@@ -477,13 +485,11 @@ describe "Groups Endpoint" do
           with_ace_on :hipsters, :update, :to => :shatner
 
           it "cannot add a group to itself" do
-            pending "you shouldn't be able to" do
-              put("/groups/#{hipsters}/groups/#{hipsters}",
-                  :shatner).should have_status_code(400).
-                with_body({"error" => "cycles are bad, mmmkay"})
-              get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-                with_body({"actors" => [], "groups" => []})
-            end
+            put("/groups/#{hipsters}/groups/#{hipsters}",
+              :shatner).should have_status_code(400).
+              with_body({"error" => "attempt to add group '#{hipsters}' would create a cycle, which is not allowed"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
@@ -518,8 +524,8 @@ describe "Groups Endpoint" do
             bogus_group = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
 
             put("/groups/#{hipsters}/groups/#{bogus_group}",
-                :shatner).should have_status_code(403).
-              with_body({"error" => "invalid group"})
+                :shatner).should have_status_code(400).
+              with_body({"error" => "attempt to add non-existent group '#{bogus_group}' to group"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
               with_body({"actors" => [], "groups" => []})
           end
@@ -528,8 +534,8 @@ describe "Groups Endpoint" do
             fake_group = car_salesmen
 
             put("/groups/#{hipsters}/groups/#{fake_group}",
-                :shatner).should have_status_code(403).
-              with_body({"error" => "invalid group"})
+                :shatner).should have_status_code(400).
+              with_body({"error" => "attempt to add non-existent group '#{fake_group}' to group"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
               with_body({"actors" => [], "groups" => []})
           end
@@ -582,13 +588,11 @@ describe "Groups Endpoint" do
           with_ace_on :hipsters, :update, :to => :shatner
 
           it "are disallowed" do
-            pending "they should be" do
-              put("/groups/#{hipsters}/groups/#{brogrammers}",
-                  :shatner).should have_status_code(400).
-                with_body({"error" => "cycles are bad, mmmkay"})
-              get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-                with_body({"actors" => [], "groups" => []})
-            end
+            put("/groups/#{hipsters}/groups/#{brogrammers}",
+              :shatner).should have_status_code(400).
+              with_body({"error" => "attempt to add group '#{brogrammers}' would create a cycle, which is not allowed"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
@@ -606,13 +610,11 @@ describe "Groups Endpoint" do
           with_ace_on :hipsters, :update, :to => :shatner
 
           it "are disallowed" do
-            pending "they should be" do
-              put("/groups/#{hipsters}/groups/#{dirtycommies}",
-                  :shatner).should have_status_code(400).
-                with_body({"error" => "cycles are bad, mmmkay"})
-              get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-                with_body({"actors" => [], "groups" => []})
-            end
+            put("/groups/#{hipsters}/groups/#{dirtycommies}",
+              :shatner).should have_status_code(400).
+              with_body({"error" => "attempt to add group '#{dirtycommies}' would create a cycle, which is not allowed"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [], "groups" => []})
           end
         end
 
@@ -666,8 +668,8 @@ describe "Groups Endpoint" do
               with_body({"actors" => [], "groups" => []})
 
             delete("/groups/#{hipsters}/actors/#{shatner}",
-                :shatner).should have_status_code(404).
-              with_body({"error" => "actor is not a member of the group"})
+                :shatner).should have_status_code(400).
+              with_body({"error" => "supplied ID '#{shatner}' not in group, cannot be deleted"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
               with_body({"actors" => [], "groups" => []})
           end
@@ -684,13 +686,11 @@ describe "Groups Endpoint" do
 
             # TODO: maybe change the test?  Not sure if a we really
             # want to return 404s for bogus requests, though
-            pending "returns 404 instead" do
-              delete("/groups/#{hipsters}/actors/#{bogus_actor}",
-                     :shatner).should have_status_code(403).
-                with_body({"error" => "invalid actor"})
-              get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-                with_body({"actors" => [shatner], "groups" => []})
-            end
+            delete("/groups/#{hipsters}/actors/#{bogus_actor}",
+              :shatner).should have_status_code(400).
+              with_body({"error" => "supplied ID '#{bogus_actor}' not in group, cannot be deleted"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [shatner], "groups" => []})
           end
         end
 
@@ -703,13 +703,11 @@ describe "Groups Endpoint" do
           it "deleting a non-existent user raises an error" do
             fake_actor = mattdamon
 
-            pending "returns 404 instead" do
-              delete("/groups/#{hipsters}/actors/#{fake_actor}",
-                     :shatner).should have_status_code(403).
-                with_body({"error" => "invalid actor"})
-              get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-                with_body({"actors" => [shatner], "groups" => []})
-            end
+            delete("/groups/#{hipsters}/actors/#{fake_actor}",
+              :shatner).should have_status_code(400).
+              with_body({"error" => "supplied ID '#{fake_actor}' not in group, cannot be deleted"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [shatner], "groups" => []})
           end
         end
 
@@ -794,8 +792,8 @@ describe "Groups Endpoint" do
               with_body({"actors" => [], "groups" => []})
 
             delete("/groups/#{hipsters}/groups/#{brogrammers}",
-                :shatner).should have_status_code(404).
-              with_body({"error" => "group is not a member of the group"})
+                :shatner).should have_status_code(400).
+              with_body({"error" => "supplied ID '#{brogrammers}' not in group, cannot be deleted"})
             get("/groups/#{hipsters}", :superuser).should have_status_code(200).
               with_body({"actors" => [], "groups" => []})
           end
@@ -813,13 +811,11 @@ describe "Groups Endpoint" do
 
             # TODO: maybe change the test?  Not sure if a we really
             # want to return 404s for bogus requests, though
-            pending "returns 404 instead" do
-              delete("/groups/#{hipsters}/groups/#{bogus_group}",
-                     :shatner).should have_status_code(403).
-                with_body({"error" => "invalid group"})
-              get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-                with_body({"actors" => [], "groups" => [brogrammers]})
-            end
+            delete("/groups/#{hipsters}/groups/#{bogus_group}",
+              :shatner).should have_status_code(400).
+              with_body({"error" => "supplied ID '#{bogus_group}' not in group, cannot be deleted"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [], "groups" => [brogrammers]})
           end
         end
 
@@ -833,13 +829,11 @@ describe "Groups Endpoint" do
           it "deleting a non-existent user raises an error" do
             fake_group = car_salesmen
 
-            pending "returns 404 instead" do
-              delete("/groups/#{hipsters}/groups/#{fake_group}",
-                     :shatner).should have_status_code(403).
-                with_body({"error" => "invalid group"})
-              get("/groups/#{hipsters}", :superuser).should have_status_code(200).
-                with_body({"actors" => [], "groups" => [brogrammers]})
-            end
+            delete("/groups/#{hipsters}/groups/#{fake_group}",
+              :shatner).should have_status_code(400).
+              with_body({"error" => "supplied ID '#{fake_group}' not in group, cannot be deleted"})
+            get("/groups/#{hipsters}", :superuser).should have_status_code(200).
+              with_body({"actors" => [], "groups" => [brogrammers]})
           end
         end
 
