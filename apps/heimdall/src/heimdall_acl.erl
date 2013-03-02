@@ -96,7 +96,10 @@ make_ejson_part(Permission, RequestType, AuthzId) ->
        acl_members(RequestType, group, AuthzId, Permission)}]}}.
 
 make_ejson_action(Permission, RequestType, AuthzId) ->
-    {[make_ejson_part(atom_to_binary(Permission, latin1), RequestType, AuthzId)]}.
+    {[{<<"actors">>,
+       acl_members(RequestType, actor, AuthzId, Permission)},
+      {<<"groups">>,
+       acl_members(RequestType, group, AuthzId, Permission)}]}.
 
 make_ejson_acl(RequestType, AuthzId) ->
     {[make_ejson_part(<<"create">>, RequestType, AuthzId),
@@ -108,7 +111,14 @@ make_ejson_acl(RequestType, AuthzId) ->
 parse_acl_json(Json, Action) ->
     try
         Ejson = heimdall_wm_util:decode(Json),
-        {ej:get({<<"actors">>}, Ejson), ej:get({<<"groups">>}, Ejson)}
+        Actors = ej:get({<<"actors">>}, Ejson),
+        Groups = ej:get({<<"groups">>}, Ejson),
+        case {Actors, Groups} of
+            {ActorList, GroupList} when is_list(ActorList) andalso is_list(GroupList) ->
+                {ActorList, GroupList};
+            {_, _} ->
+                throw({error, invalid_json})
+        end
     catch
         throw:{error, {_, invalid_json}} ->
             throw({error, invalid_json});
