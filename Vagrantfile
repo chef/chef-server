@@ -56,7 +56,7 @@ Vagrant::Config.run do |config|
 
   # allow creating symlinks in /vagrant
   config.vm.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
-
+  config.vm.share_folder "moser", "/mnt/moser", "../moser"
   config.vm.provision :shell, :inline => <<-INSTALL_OMNIBUS
   if [ ! -d "/opt/chef" ] ||
      [ ! $(chef-solo --v | awk "{print \\$2}") = "#{OMNIBUS_CHEF_VERSION}" ]
