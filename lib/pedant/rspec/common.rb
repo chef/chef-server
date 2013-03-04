@@ -31,9 +31,9 @@ module Pedant
         # JSON Utilities
         def parse(json_string)
           ::JSON.parse(json_string,
-                       :create_additions => false,
-                       # some keys don't play nicely as Ruby symbols (embedded hyphens, e.g.)
-                       :symbolize_names => false)
+            :create_additions => false,
+            # some keys don't play nicely as Ruby symbols (embedded hyphens, e.g.)
+            :symbolize_names => false)
         end
 
         def to_json(data)
