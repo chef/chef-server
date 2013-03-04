@@ -181,6 +181,10 @@ RSpec::Matchers.define :have_status_code do |code|
     @body = body
   end
 
+  chain :with_info do |info|
+    @info = info
+  end
+
   codes = Pedant::RSpec::HTTP::STATUS_CODES
 
   failure_message_for_should do |response|
@@ -188,6 +192,12 @@ RSpec::Matchers.define :have_status_code do |code|
       parsed_response = parse(response)
     rescue JSON::ParserError => e
       parsed_response = "error parsing response: #{e}"
+    end
+
+    if (@info)
+      info_string = "\n    Additional Information:\n      #{@info}\n"
+    else
+      info_string = ""
     end
     """
     Expected:
@@ -197,7 +207,7 @@ RSpec::Matchers.define :have_status_code do |code|
     Got:
       #{response.code} ('#{codes[response.code]}')
       #{parsed_response}
-
+      #{info_string}
       (Note: the response body is always displayed for debugging purposes,
        even if you didn't explicitly match on it.)
     """

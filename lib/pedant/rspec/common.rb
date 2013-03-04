@@ -50,7 +50,10 @@ module Pedant
         # directly in tests.
         def new_item(type, requestor, payload = {})
           r = post("/#{type}s", requestor, :payload => payload)
-          r.code.should eq(201)
+          r.should have_status_code(201).
+            with_body({"id" => /^[0-9a-f]{32}$/, "uri" => /[0-9a-f]{32}$/}).
+            with_info("during creation of #{type} for #{requestor}\n" +
+                      "      with payload: #{payload}")
 
           rc = parse(r)["id"]
           unless @thingies
