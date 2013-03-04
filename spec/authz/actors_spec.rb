@@ -87,8 +87,12 @@ describe "Actors Endpoint" do
 
       context "without any headers" do
         it "should NOT create an actor" do
-          post("/actors", :superuser, :headers => {}).should have_status_code(400).
-            with_body({"error" => "That ain't right"})
+          post("/actors", :superuser, :headers => {}).should have_status_code(415)
+
+          # This has been verified (the hard way) that it doesn't create an actor --
+          # nothing shows up in the database.  It's impossible to test that here,
+          # because there's no ID to test -- we can't test every possible ID just to
+          # make sure nothing new exists.
         end
       end
 
