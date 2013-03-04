@@ -71,12 +71,19 @@ check_any_access(TargetType, TargetId, RequestorId) ->
         check_access(TargetType, TargetId, RequestorId, grant).
 
 clear_access(TargetType, TargetId, Permission) ->
+    % TODO: this needs to be a postgres function
     case heimdall_db:delete_acl(actor, TargetType, TargetId,
                                 atom_to_binary(Permission, latin1)) of
         {error, Error} ->
             throw({db_error, Error});
         ok ->
-            ok
+            case heimdall_db:delete_acl(group, TargetType, TargetId,
+                                        atom_to_binary(Permission, latin1)) of
+                {error, Error} ->
+                    throw({db_error, Error});
+                ok ->
+                    ok
+            end
     end.
 
 acl_members(TargetType, AuthorizeeType, AuthzId, Permission) ->
