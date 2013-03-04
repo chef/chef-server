@@ -475,9 +475,15 @@ describe "Actors Endpoint" do
                 should have_status_code(400).
                 with_body({"error" => "invalid JSON in request body"})
 
+              if (action == 'grant')
+                response_body = {"actors" => [hasselhoff], "groups" => []}
+              else
+                response_body = {"actors" => [shatner], "groups" => []}
+              end
+
               get("/actors/#{shatner}/acl/#{action}",
                 :superuser).should have_status_code(200).
-                with_body({"actors" => [shatner], "groups" => []})
+                with_body(response_body)
             end
           end
 
@@ -732,11 +738,7 @@ describe "Actors Endpoint" do
               delete("/actors/#{shatner}/acl/#{action}",
                 :hasselhoff).should have_status_code(200).with_body({})
 
-              if (action == 'grant')
-                response_body = {"actors" => [], "groups" => [hipsters]}
-              else
-                response_body = {"actors" => [], "groups" => []}
-              end
+              response_body = {"actors" => [], "groups" => []}
 
               get("/actors/#{shatner}/acl/#{action}",
                 :superuser).should have_status_code(200).with_body(response_body)

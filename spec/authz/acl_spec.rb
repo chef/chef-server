@@ -232,9 +232,15 @@ describe "ACL Tests" do
                     should have_status_code(400).
                     with_body({"error" => "invalid JSON in request body"})
 
+                  if (action == 'grant')
+                    response_body = {"actors" => [hasselhoff], "groups" => []}
+                  else
+                    response_body = {"actors" => [], "groups" => []}
+                  end
+
                   get("/#{type}s/#{gozer}/acl/#{action}",
                     :superuser).should have_status_code(200).
-                    with_body({"actors" => [hasselhoff], "groups" => []})
+                    with_body(response_body)
                 end
               end
 
@@ -509,11 +515,7 @@ describe "ACL Tests" do
                   delete("/#{type}s/#{gozer}/acl/#{action}",
                     :hasselhoff).should have_status_code(200).with_body({})
 
-                  if (action == "grant")
-                    response_body = {"actors" => [], "groups" => [hipsters]}
-                  else
-                    response_body = {"actors" => [], "groups" => []}
-                  end
+                  response_body = {"actors" => [], "groups" => []}
 
                   get("/#{type}s/#{gozer}/acl/#{action}",
                     :superuser).should have_status_code(200).
