@@ -54,6 +54,7 @@ CREATE TABLE object_acl_group(
        permission auth_permission NOT NULL,
        PRIMARY KEY (target, authorizee, permission)
 );
+CREATE INDEX object_acl_group_authorizee ON object_acl_group(authorizee);
 
 CREATE TABLE object_acl_actor(
        target bigint NOT NULL REFERENCES auth_object(id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -61,6 +62,7 @@ CREATE TABLE object_acl_actor(
        permission auth_permission NOT NULL,
        PRIMARY KEY (target, authorizee, permission)
 );
+CREATE INDEX object_acl_actor_authorizee ON object_acl_actor(authorizee);
 
 CREATE TABLE actor_acl_group(
        target bigint NOT NULL REFERENCES auth_actor(id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -68,6 +70,7 @@ CREATE TABLE actor_acl_group(
        permission auth_permission NOT NULL,
        PRIMARY KEY (target, authorizee, permission)
 );
+CREATE INDEX actor_acl_group_authorizee ON actor_acl_group(authorizee);
 
 CREATE TABLE actor_acl_actor(
        target bigint NOT NULL REFERENCES auth_actor(id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -75,6 +78,7 @@ CREATE TABLE actor_acl_actor(
        permission auth_permission NOT NULL,
        PRIMARY KEY (target, authorizee, permission)
 );
+CREATE INDEX actor_acl_actor_authorizee ON actor_acl_actor(authorizee);
 
 CREATE TABLE group_acl_group(
        target bigint NOT NULL REFERENCES auth_group(id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -82,6 +86,7 @@ CREATE TABLE group_acl_group(
        permission auth_permission NOT NULL,
        PRIMARY KEY (target, authorizee, permission)
 );
+CREATE INDEX group_acl_group_authorizee ON group_acl_group(authorizee);
 
 CREATE TABLE group_acl_actor(
        target bigint NOT NULL REFERENCES auth_group(id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -89,6 +94,7 @@ CREATE TABLE group_acl_actor(
        permission auth_permission NOT NULL,
        PRIMARY KEY (target, authorizee, permission)
 );
+CREATE INDEX group_acl_actor_authorizee ON group_acl_actor(authorizee);
 
 CREATE TABLE container_acl_group(
        target bigint NOT NULL REFERENCES container(id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -96,6 +102,7 @@ CREATE TABLE container_acl_group(
        permission auth_permission NOT NULL,
        PRIMARY KEY (target, authorizee, permission)
 );
+CREATE INDEX container_acl_group_authorizee ON container_acl_group(authorizee);
 
 CREATE TABLE container_acl_actor(
        target bigint NOT NULL REFERENCES container(id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -103,6 +110,7 @@ CREATE TABLE container_acl_actor(
        permission auth_permission NOT NULL,
        PRIMARY KEY (target, authorizee, permission)
 );
+CREATE INDEX container_acl_actor_authorizee ON container_acl_actor(authorizee);
 
 -- Manage the group hierarchies
 
@@ -116,12 +124,14 @@ CREATE TABLE group_group_relations(
        -- check
        CONSTRAINT no_trivial_cycles CHECK(parent != child)
 );
+CREATE INDEX group_group_relations_child ON group_group_relations(child);
 
 CREATE TABLE group_actor_relations(
        parent bigint REFERENCES auth_group(id) ON UPDATE CASCADE ON DELETE CASCADE,
        child bigint REFERENCES auth_actor(id) ON UPDATE CASCADE ON DELETE CASCADE,
        PRIMARY KEY (parent, child)
 );
+CREATE INDEX group_actor_relations_child ON group_actor_relations(child);
 
 CREATE OR REPLACE FUNCTION forbid_group_cycles()
 RETURNS TRIGGER
