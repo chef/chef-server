@@ -1,6 +1,18 @@
 require 'berkshelf/vagrant'
+require 'fileutils'
 
 OMNIBUS_CHEF_VERSION = "11.4.0"
+
+if ENV['OPSCODE_PLATFORM_REPO'].nil?
+  puts "ERROR: please export OPSCODE_PLATFORM_REPO"
+  exit 1
+end
+
+FileUtils::mkdir_p(".chef")
+if !File.exists?(".chef/knife.rb")
+  FileUtils::ln_s(File.join(ENV['OPSCODE_PLATFORM_REPO'], ".chef", "knife.rb"),
+                  ".chef/knife.rb")
+end
 
 Vagrant::Config.run do |config|
   # All Vagrant configuration is done here. The most common configuration
@@ -67,10 +79,6 @@ Vagrant::Config.run do |config|
   fi
   INSTALL_OMNIBUS
 
-  if ENV['OPSCODE_PLATFORM_REPO'].nil?
-    puts "ERROR: please export OPSCODE_PLATFORM_REPO"
-    exit 1
-  end
   config.vm.provision :chef_solo do |chef|
     chef.json = {
      "postgresql" => {

@@ -12,21 +12,8 @@ Erchef/PgSQL using moser and darklaunch.
 1. Obtain git checkouts of [this repo][] and the [moser][] repo and ensure they
    are in the same parent directory.
 
-2. Setup a `~/.berkshelf/config.json` like the following. There will
-   be a better way to handle this soon that doesn't involve a global
-   config:
-   ```
-   {
-   "chef": {
-     "chef_server_url": "https://opsmaster-api.opscode.us/organizations/preprod",
-     "node_name": "seth",
-     "client_key": "/Users/seth/oc/environments/rs-preprod/.chef/seth.pem"
-    }
-   }
-   ```
-
-3. Add an export for an `OPSCODE_PLATFORM_REPO` environment variable
-   to your shell config that points to the path of your rs-preprod
+2. Add an export for an `OPSCODE_PLATFORM_REPO` environment variable
+   to your shell config that points to the path of your **rs-preprod**
    checkout of the [opscode-platform-cookbooks][] repo.
 
 ### Running mover in a vm for dev work ###

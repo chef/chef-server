@@ -6,6 +6,7 @@ doc/*
 rel/mover
 rel/apps
 OLD
+/.chef
 /.bundle
 /.vagrant
 /Berksfile.lock
