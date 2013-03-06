@@ -5,3 +5,13 @@ doc/*
 */erl_crash.dump
 rel/mover
 rel/apps
+OLD
+/.chef
+/.bundle
+/.vagrant
+/Berksfile.lock
+/Gemfile.lock
+/bin
+/moser-couch-data
+/moser-data
+/sys.config

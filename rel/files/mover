@@ -8,8 +8,12 @@ RUNNER_BASE_DIR=${RUNNER_SCRIPT_DIR%/*}
 RUNNER_ETC_DIR=$RUNNER_BASE_DIR/etc
 RUNNER_LOG_DIR=$RUNNER_BASE_DIR/log
 # Note the trailing slash on $PIPE_DIR/
-PIPE_DIR=/tmp/$RUNNER_BASE_DIR/
+PIPE_DIR=$RUNNER_BASE_DIR/pipe_dir/
 RUNNER_USER=
+
+## Set the erlang log size
+export RUN_ERL_LOG_MAXSIZE=10000000
+export RUN_ERL_LOG_ALIVE_FORMAT=%d-%b-%Y::%H:%M:%S
 
 # Make sure this script is running as the appropriate user
 if [ ! -z "$RUNNER_USER" ] && [ `whoami` != "$RUNNER_USER" ]; then
@@ -53,20 +57,21 @@ NODETOOL="$ERTS_PATH/escript $ERTS_PATH/nodetool $NAME_ARG $COOKIE_ARG"
 # Check the first argument for instructions
 case "$1" in
     runit)
-        # Make sure there is not already a node running
-        RES=`$NODETOOL ping`
-        if [ "$RES" = "pong" ]; then
-            echo "Node is already running!"
-            exit 1
-        fi
-        HEART_COMMAND="$RUNNER_BASE_DIR/bin/$SCRIPT start"
-        export HEART_COMMAND
-        mkdir -p $PIPE_DIR
-        shift # remove $1
-        # no -daemon and no exec for use with runit
-        $ERTS_PATH/run_erl $PIPE_DIR $RUNNER_LOG_DIR "$RUNNER_BASE_DIR/bin/$SCRIPT console $@" 2>&1
-        ;;
+        BOOTFILE=$SCRIPT
+        # Setup beam-required vars
+        ROOTDIR=$RUNNER_BASE_DIR
+        BINDIR=$ROOTDIR/erts-$ERTS_VSN/bin
+        EMU=beam
+        PROGNAME=`echo $0 | sed 's/.*\\///'`
+        CMD="$BINDIR/erlexec -noshell -boot $RUNNER_BASE_DIR/releases/$APP_VSN/$BOOTFILE -embedded -config $RUNNER_ETC_DIR/sys.config -args_file $RUNNER_ETC_DIR/vm.args -- ${1+"$@"}"
+        export EMU
+        export ROOTDIR
+        export BINDIR
+        export PROGNAME
 
+        # Start the VM
+        exec $CMD
+        ;;
     start)
         # Make sure there is not already a node running
         RES=`$NODETOOL ping`
@@ -145,7 +150,7 @@ case "$1" in
         BINDIR=$ROOTDIR/erts-$ERTS_VSN/bin
         EMU=beam
         PROGNAME=`echo $0 | sed 's/.*\\///'`
-        CMD="$BINDIR/erlexec -boot $RUNNER_BASE_DIR/releases/$APP_VSN/$BOOTFILE -embedded -config $RUNNER_ETC_DIR/app.config -args_file $RUNNER_ETC_DIR/vm.args -- ${1+"$@"}"
+        CMD="$BINDIR/erlexec -boot $RUNNER_BASE_DIR/releases/$APP_VSN/$BOOTFILE -embedded -config $RUNNER_ETC_DIR/sys.config -args_file $RUNNER_ETC_DIR/vm.args -- ${1+"$@"}"
         export EMU
         export ROOTDIR
         export BINDIR
@@ -162,8 +167,35 @@ case "$1" in
         exec $CMD
         ;;
 
+    dbg)
+        # .boot file typically just $SCRIPT (ie, the app name)
+        # however, for debugging, sometimes start_clean.boot is useful:
+        BOOTFILE=$SCRIPT
+        # Setup beam-required vars
+        ROOTDIR=$RUNNER_BASE_DIR
+        BINDIR=$ROOTDIR/erts-$ERTS_VSN/bin
+        EMU=beam
+        PROGNAME=`echo $0 | sed 's/.*\\///'`
+        CMD="$BINDIR/erlexec -boot $RUNNER_BASE_DIR/releases/$APP_VSN/$BOOTFILE -embedded -config $RUNNER_ETC_DIR/sys.config -args_file $RUNNER_ETC_DIR/vm.args -- ${1+"$@"}"
+        export EMU
+        export ROOTDIR
+        export BINDIR
+        export PROGNAME
+
+        # Log the startup
+        logger -t "$SCRIPT[$$]" "Starting up in debug mode"
+
+        # Start the VM under GDB for debugging
+        echo "====="
+        echo "Starting $SCRIPT in debug mode..."
+        echo "====="
+        echo ""
+        echo ""
+        gdb --quiet --batch -x etc/debug.gdb --args $CMD
+        ;;
+
     *)
-        echo "Usage: $SCRIPT {start|stop|restart|reboot|ping|console|console_clean|attach}"
+        echo "Usage: $SCRIPT {start|stop|restart|reboot|ping|console|console_clean|dbg|attach}"
         exit 1
         ;;
 esac

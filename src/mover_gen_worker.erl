@@ -31,7 +31,6 @@
          mark_migration_end/2]).
 
 -include("mover.hrl").
--include_lib("chef_common/include/chef_sql.hrl").
 
 -define(MAX_INFLIGHT_CHECKS, 20).
 -define(INFLIGHT_WAIT, 1000).

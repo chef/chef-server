@@ -23,16 +23,18 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-    {ok, PreloadCount} = application:get_env(mover, preload_org_count),
-    Children0 = [?CHILD_SUP(mover_worker_sup, []),
-                 ?CHILD(mover_manager, [PreloadCount], 5000)],
-    Children = case application:get_env(mover, dry_run) of
-                   {ok, true} ->
-                       Children0;
-                   {ok, false} ->
-                       {ok, RedisHost} = application:get_env(mover, redis_host),
-                       {ok, RedisPort} = application:get_env(mover, redis_port),
-                       {ok, RedisConns} = application:get_env(mover, redis_conns),
-                       [?CHILD_SUP(erldis_pool_sup, [[{{RedisHost, RedisPort}, RedisConns}]])|Children0]
-               end,
+    %% {ok, PreloadCount} = application:get_env(mover, preload_org_count),
+    %% Children0 = [?CHILD_SUP(mover_worker_sup, []),
+    %%              ?CHILD(mover_manager, [PreloadCount], 5000)],
+    %% Children = case application:get_env(mover, dry_run) of
+    %%                {ok, true} ->
+    %%                    Children0;
+    %%                {ok, false} ->
+    %%                    {ok, RedisHost} = application:get_env(mover, redis_host),
+    %%                    {ok, RedisPort} = application:get_env(mover, redis_port),
+    %%                    {ok, RedisConns} = application:get_env(mover, redis_conns),
+    %%                    [?CHILD_SUP(erldis_pool_sup, [[{{RedisHost, RedisPort}, RedisConns}]])|Children0]
+    %%            end,
+    %% FIXME: for now we just want to start and do nothing
+    Children = [],
     {ok, {{one_for_one, 10, 10}, Children}}.
