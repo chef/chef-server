@@ -35,8 +35,9 @@ add_access_set(Permission, TargetType, TargetId, AuthorizeeType,
 add_full_access(TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
     case {AuthorizeeType, AuthorizeeId} of
         {actor, undefined} ->
-            % The user we're giving access to doesn't exist (i.e., this is
-            % an actor creation with no requestor) so don't add any access
+            % The user we're giving access to doesn't exist (this will happen
+            % when an actor creation request is made with with no requestor
+            % supplied) so don't add any access
             ok;
         {actor, superuser} ->
             % The user we're giving access to doesn't exist (i.e., this is
@@ -80,8 +81,8 @@ clear_access(TargetType, TargetId, Permission) ->
             end
     end.
 
-acl_members(TargetType, AuthorizeeType, AuthzId, Permission) ->
-    case heimdall_db:acl_membership(TargetType, AuthorizeeType, AuthzId,
+acl_members(ForType, MemberType, ForId, Permission) ->
+    case heimdall_db:acl_membership(ForType, MemberType, ForId,
                                     Permission) of
         {error, Error} ->
             throw({db_error, Error});
@@ -89,25 +90,25 @@ acl_members(TargetType, AuthorizeeType, AuthzId, Permission) ->
             List
     end.
 
-make_ejson_part(Permission, RequestType, AuthzId) ->
+make_ejson_part(Permission, ForType, ForId) ->
     {Permission,
      {[{<<"actors">>,
-       acl_members(RequestType, actor, AuthzId, Permission)},
+       acl_members(ForType, actor, ForId, Permission)},
       {<<"groups">>,
-       acl_members(RequestType, group, AuthzId, Permission)}]}}.
+       acl_members(ForType, group, ForId, Permission)}]}}.
 
-make_ejson_action(Permission, RequestType, AuthzId) ->
+make_ejson_action(Permission, ForType, ForId) ->
     {[{<<"actors">>,
-       acl_members(RequestType, actor, AuthzId, Permission)},
+       acl_members(ForType, actor, ForId, Permission)},
       {<<"groups">>,
-       acl_members(RequestType, group, AuthzId, Permission)}]}.
+       acl_members(ForType, group, ForId, Permission)}]}.
 
-make_ejson_acl(RequestType, AuthzId) ->
-    {[make_ejson_part(<<"create">>, RequestType, AuthzId),
-      make_ejson_part(<<"read">>, RequestType, AuthzId),
-      make_ejson_part(<<"update">>, RequestType, AuthzId),
-      make_ejson_part(<<"delete">>, RequestType, AuthzId),
-      make_ejson_part(<<"grant">>, RequestType, AuthzId)]}.
+make_ejson_acl(ForType, ForId) ->
+    {[make_ejson_part(<<"create">>, ForType, ForId),
+      make_ejson_part(<<"read">>, ForType, ForId),
+      make_ejson_part(<<"update">>, ForType, ForId),
+      make_ejson_part(<<"delete">>, ForType, ForId),
+      make_ejson_part(<<"grant">>, ForType, ForId)]}.
 
 parse_acl_json(Json, Action) ->
     try
