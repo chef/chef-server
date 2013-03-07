@@ -12,6 +12,7 @@
          make_ejson_action/3,
          parse_acl_json/2]).
 
+%% Add permission on target for authorizee
 add_access(Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
     case heimdall_db:create_ace(TargetType, TargetId, AuthorizeeType, AuthorizeeId,
                                 atom_to_list(Permission)) of
@@ -24,6 +25,7 @@ add_access(Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
             throw({db_error, Error})
     end.
 
+%% Add permission on target for list of authorizees
 add_access_set(_Perm, _Type, _Id, _OtherType, []) ->
     ok;
 add_access_set(Permission, TargetType, TargetId, AuthorizeeType,
@@ -32,6 +34,7 @@ add_access_set(Permission, TargetType, TargetId, AuthorizeeType,
     add_access_set(Permission, TargetType, TargetId, AuthorizeeType,
                    AuthorizeeList).
 
+%% Add all permissions on target for authorizee
 add_full_access(TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
     case {AuthorizeeType, AuthorizeeId} of
         {actor, undefined} ->
@@ -44,6 +47,7 @@ add_full_access(TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
             % a superuser request) so don't add any access
             ok;
         {Type, Id} ->
+            % TODO: this should be a postgres function instead
             add_access(create, TargetType, TargetId, Type, Id),
             add_access(read, TargetType, TargetId, Type, Id),
             add_access(update, TargetType, TargetId, Type, Id),
@@ -51,6 +55,7 @@ add_full_access(TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
             add_access(grant, TargetType, TargetId, Type, Id)
     end.
 
+%% Check to see if requestor has permission on target
 check_access(TargetType, TargetId, RequestorId, Permission) ->
     case RequestorId of
         superuser ->
@@ -59,6 +64,7 @@ check_access(TargetType, TargetId, RequestorId, Permission) ->
             heimdall_db:has_permission(TargetType, TargetId, Id, atom_to_list(Permission))
     end.
 
+%% Check to see if requestor has any permission on target
 check_any_access(TargetType, TargetId, RequestorId) ->
     check_access(TargetType, TargetId, RequestorId, create) or
         check_access(TargetType, TargetId, RequestorId, read) or
@@ -66,6 +72,7 @@ check_any_access(TargetType, TargetId, RequestorId) ->
         check_access(TargetType, TargetId, RequestorId, delete) or
         check_access(TargetType, TargetId, RequestorId, grant).
 
+%% Clear permission (for given permission type) on target for all actors and groups
 clear_access(TargetType, TargetId, Permission) ->
     % TODO: this needs to be a postgres function
     case heimdall_db:delete_acl(actor, TargetType, TargetId, atom_to_list(Permission)) of
@@ -81,6 +88,7 @@ clear_access(TargetType, TargetId, Permission) ->
             end
     end.
 
+%% Return all members for given member type on an ID
 acl_members(ForType, MemberType, ForId, Permission) ->
     case heimdall_db:acl_membership(ForType, MemberType, ForId,
                                     Permission) of
@@ -90,6 +98,7 @@ acl_members(ForType, MemberType, ForId, Permission) ->
             List
     end.
 
+%% Create EJSON object fragment for permission type on given ID
 make_ejson_part(Permission, ForType, ForId) ->
     {Permission,
      {[{<<"actors">>,
@@ -97,12 +106,14 @@ make_ejson_part(Permission, ForType, ForId) ->
       {<<"groups">>,
        acl_members(ForType, group, ForId, Permission)}]}}.
 
+%% Create full EJSON object for permission type on given ID
 make_ejson_action(Permission, ForType, ForId) ->
     {[{<<"actors">>,
        acl_members(ForType, actor, ForId, Permission)},
       {<<"groups">>,
        acl_members(ForType, group, ForId, Permission)}]}.
 
+%% Create full EJSON object for given ID
 make_ejson_acl(ForType, ForId) ->
     {[make_ejson_part(<<"create">>, ForType, ForId),
       make_ejson_part(<<"read">>, ForType, ForId),
@@ -110,6 +121,7 @@ make_ejson_acl(ForType, ForId) ->
       make_ejson_part(<<"delete">>, ForType, ForId),
       make_ejson_part(<<"grant">>, ForType, ForId)]}.
 
+%% Parse JSON ACL object, return members
 parse_acl_json(Json, Action) ->
     try
         Ejson = heimdall_wm_util:decode(Json),
