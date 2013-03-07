@@ -31,7 +31,7 @@ from_json(Req, #base_state{authz_id = AuthzId, member_type = MemberType,
                                                         MemberType, MemberId});
                 group_cycle ->
                     heimdall_wm_error:set_db_exception(Req, State, {group_cycle, MemberId});
-                UnknownError ->
+                Error ->
                     heimdall_wm_error:set_db_exception(Req, State, Error)
             end
     end.
