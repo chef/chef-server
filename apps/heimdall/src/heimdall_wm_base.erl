@@ -96,12 +96,14 @@ content_types_provided(Req, State) ->
     {[{"application/json", to_json}], Req, State}.
 
 finish_request(Req, #base_state{reqid=ReqId,
-                                requestor_id=RequestorId}=State) ->
+                                requestor_id=RequestorId,
+                                module=Module}=State) ->
     %% Add additional notes for the logger
     Req0 = lists:foldl(fun({K,V},R) -> wrq:add_note(K,V,R) end,
                        Req,
                        [{reqid, ReqId},
-                        {requestor_id, RequestorId}
+                        {requestor_id, RequestorId},
+                        {module, Module}
                        ]),
     {true, Req0, State}.
 
