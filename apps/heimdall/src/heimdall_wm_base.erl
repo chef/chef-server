@@ -14,7 +14,7 @@
 -include("heimdall_wm.hrl").
 
 init(Resource, Config) ->
-    State = #base_state{module = Resource},
+    State = #base_state{module = Resource, reqid = new_request_id()},
     State0 = case Config of
                  [Superuser, Type, MemberType] ->
                      State#base_state{superuser_id = Superuser, request_type = Type,
@@ -97,3 +97,15 @@ content_types_provided(Req, State) ->
 
 finish_request(Req, State) ->
     {true, Req, State}.
+
+%% @doc Generates a new, unique request ID that we can use to attach
+%% metrics to.  Taken from chef_wm, with the exception that we do not
+%% currently offer the option to take a pre-generated request ID from
+%% a header value.
+%%
+%% This generated ID is unique to Heimdall, and is distinct from the
+%% requests to Erchef, Reporting, Pushy, etc. that ultimately trigger
+%% this request.
+-spec new_request_id() -> request_id().
+new_request_id() ->
+    base64:encode(crypto:md5(term_to_binary(make_ref()))).
