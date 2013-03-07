@@ -22,6 +22,9 @@
           %% /<type>/<id> this is <id>
           authz_id :: auth_id(),
 
+          %% What is the superuser ID?
+          superuser_id :: auth_id(),
+
           %% What kind of resource are we talking about here?
           request_type :: auth_type(),
 

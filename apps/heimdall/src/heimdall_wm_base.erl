@@ -16,13 +16,13 @@
 init(Resource, Config) ->
     State = #base_state{module = Resource},
     State0 = case Config of
-                 [Type, MemberType] ->
-                     State#base_state{request_type = Type,
+                 [Superuser, Type, MemberType] ->
+                     State#base_state{superuser_id = Superuser, request_type = Type,
                                       member_type = MemberType};
-                 [Type] ->
-                     State#base_state{request_type = Type};
-                 [] ->
-                     State
+                 [Superuser, Type] ->
+                     State#base_state{superuser_id = Superuser, request_type = Type};
+                 [Superuser] ->
+                     State#base_state{superuser_id = Superuser}
     end,
     {ok, State0}.
 

@@ -40,12 +40,14 @@ init([]) ->
     {ok, Ip} = application:get_env(heimdall, ip),
     {ok, Port} = application:get_env(heimdall, port),
     {ok, Dispatch} = file:consult(filename:join(
-                                    [code:priv_dir(heimdall), "dispatch.conf"])),
+                                    [code:priv_dir(heimdall),
+                                     "dispatch.conf"])),
+
     WebConfig = [
                  {ip, Ip},
                  {port, Port},
                  {log_dir, "priv/log"},
-                 {dispatch, Dispatch}
+                 {dispatch, add_superuser_id(Dispatch)}
                 ],
 
     Web = {webmachine_mochiweb,
@@ -54,3 +56,12 @@ init([]) ->
 
     Processes = [Web],
     {ok, {{one_for_one, 10, 10}, Processes}}.
+
+superuser_to_config([], SuperuserId) ->
+    [];
+superuser_to_config([{Path, Module, Args}|Rest], SuperuserId) ->
+    [{Path, Module, [SuperuserId | Args]} | superuser_to_config(Rest, SuperuserId)].
+
+add_superuser_id(Dispatch) ->
+    {ok, SuperuserId} = application:get_env(heimdall, superuser_id),
+    superuser_to_config(Dispatch, SuperuserId).
