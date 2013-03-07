@@ -95,8 +95,15 @@ content_types_accepted(Req, State) ->
 content_types_provided(Req, State) ->
     {[{"application/json", to_json}], Req, State}.
 
-finish_request(Req, State) ->
-    {true, Req, State}.
+finish_request(Req, #base_state{reqid=ReqId,
+                                requestor_id=RequestorId}=State) ->
+    %% Add additional notes for the logger
+    Req0 = lists:foldl(fun({K,V},R) -> wrq:add_note(K,V,R) end,
+                       Req,
+                       [{reqid, ReqId},
+                        {requestor_id, RequestorId}
+                       ]),
+    {true, Req0, State}.
 
 %% @doc Generates a new, unique request ID that we can use to attach
 %% metrics to.  Taken from chef_wm, with the exception that we do not
