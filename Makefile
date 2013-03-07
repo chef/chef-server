@@ -1,4 +1,7 @@
-DEPS=$(CURDIR)/deps
+DEPS = $(CURDIR)/deps
+
+DIALYZER_OPTS = -Wunderspecs
+
 DIALYZER_DEPS = deps/chef_authn/ebin \
                 deps/depsolver/ebin \
                 deps/ej/ebin \
@@ -8,39 +11,82 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
 
 DEPS_PLT = chef_objects.plt
 
-.PHONY: doc
+ERLANG_DIALYZER_APPS = asn1 \
+                       compiler \
+                       crypto \
+                       edoc \
+                       edoc \
+                       erts \
+                       eunit \
+                       eunit \
+                       gs \
+                       hipe \
+                       inets \
+                       kernel \
+                       mnesia \
+                       mnesia \
+                       observer \
+                       public_key \
+                       runtime_tools \
+                       runtime_tools \
+                       ssl \
+                       stdlib \
+                       syntax_tools \
+                       syntax_tools \
+                       tools \
+                       webtool \
+                       xmerl
 
 all: compile eunit dialyzer
 
+# Clean ebin and .eunit of this project
 clean:
-	@rebar skip_deps=true clean
+	@rebar clean skip_deps=true
 
+# Clean this project and all deps
 allclean:
 	@rebar clean
-
-distclean:
-	@rebar skip_deps=true clean
-	@rm -rf deps $(DEPS_PLT)
 
 compile: $(DEPS)
 	@rebar compile
 
-doc:
-	@rebar doc skip_deps=true
-
-dialyzer: $(DEPS_PLT)
-	@dialyzer -Wrace_conditions -Wunderspecs --plts ~/.dialyzer_plt $(DEPS_PLT) -r ebin
-
-$(DEPS_PLT):
-	@dialyzer --build_plt $(DIALYZER_DEPS) --output_plt $(DEPS_PLT)
-
 $(DEPS):
 	@rebar get-deps
 
-eunit: compile
+# Full clean and removal of all deps. Remove deps first to avoid
+# wasted effort of cleaning deps before nuking them.
+distclean:
+	@rm -rf deps $(DEPS_PLT)
+	@rebar clean
+
+eunit:
 	@rebar skip_deps=true eunit
 
 test: eunit
 
+# Only include local PLT if we have deps that we are going to analyze
+ifeq ($(strip $(DIALYZER_DEPS)),)
+dialyzer: ~/.dialyzer_plt
+	@dialyzer $(DIALYZER_OPTS) -r ebin
+else
+dialyzer: ~/.dialyzer_plt $(DEPS_PLT)
+	@dialyzer $(DIALYZER_OPTS) --plts ~/.dialyzer_plt $(DEPS_PLT) -r ebin
+
+$(DEPS_PLT):
+	@dialyzer --build_plt $(DIALYZER_DEPS) --output_plt $(DEPS_PLT)
+endif
+
+# ignore exit code of dialyzer command because some modules cause
+# warnings, but those are ok to disregard
+~/.dialyzer_plt:
+	@echo "ERROR: Missing ~/.dialyzer_plt. Please wait while a new PLT is compiled."
+	-dialyzer --build_plt --apps $(ERLANG_DIALYZER_APPS)
+	@echo "now try your build again"
+
+doc:
+	@rebar doc skip_deps=true
+
 tags:
 	find src deps -name "*.[he]rl" -print | etags -
+
+.PHONY: all compile eunit test dialyzer clean allclean distclean doc tags
