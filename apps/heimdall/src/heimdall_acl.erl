@@ -14,7 +14,7 @@
 
 add_access(Permission, TargetType, TargetId, AuthorizeeType,
            AuthorizeeId) when is_list(AuthorizeeId) ->
-    case heimdall_db:create_acl(TargetType, list_to_binary(TargetId),
+    case heimdall_db:create_ace(TargetType, list_to_binary(TargetId),
                                 AuthorizeeType, list_to_binary(AuthorizeeId),
                                 atom_to_binary(Permission, latin1)) of
         ok ->

@@ -8,7 +8,7 @@
 -export([acl_membership/4,
          add_to_group/3,
          create/2,
-         create_acl/5,
+         create_ace/5,
          delete/2,
          delete_acl/4,
          exists/2,
@@ -60,19 +60,19 @@ exists(Type, AuthId) ->
     {ok, Answer} = sqerl:select(StatementName, [AuthId], first_as_scalar, [exists]),
     Answer.
 
-create_acl_stmt(actor, actor) -> insert_actor_acl_actor;
-create_acl_stmt(actor, group) -> insert_actor_acl_group;
-create_acl_stmt(group, actor) -> insert_group_acl_actor;
-create_acl_stmt(group, group) -> insert_group_acl_group;
-create_acl_stmt(object, actor) -> insert_object_acl_actor;
-create_acl_stmt(object, group) -> insert_object_acl_group;
-create_acl_stmt(container, actor) -> insert_container_acl_actor;
-create_acl_stmt(container, group) -> insert_container_acl_group.
+create_ace_stmt(actor, actor) -> insert_actor_acl_actor;
+create_ace_stmt(actor, group) -> insert_actor_acl_group;
+create_ace_stmt(group, actor) -> insert_group_acl_actor;
+create_ace_stmt(group, group) -> insert_group_acl_group;
+create_ace_stmt(object, actor) -> insert_object_acl_actor;
+create_ace_stmt(object, group) -> insert_object_acl_group;
+create_ace_stmt(container, actor) -> insert_container_acl_actor;
+create_ace_stmt(container, group) -> insert_container_acl_group.
 
--spec create_acl(auth_type(), auth_id(), auth_type(), auth_id(),
+-spec create_ace(auth_type(), auth_id(), auth_type(), auth_id(),
                  binary()) -> ok | {error, term()}.
-create_acl(TargetType, TargetId, AuthorizeeType, AuthorizeeId, Permission) ->
-    CreateStatement = create_acl_stmt(TargetType, AuthorizeeType),
+create_ace(TargetType, TargetId, AuthorizeeType, AuthorizeeId, Permission) ->
+    CreateStatement = create_ace_stmt(TargetType, AuthorizeeType),
     case sqerl:statement(CreateStatement, [TargetId, AuthorizeeId, Permission],
                          count) of
         {ok, 1} ->
