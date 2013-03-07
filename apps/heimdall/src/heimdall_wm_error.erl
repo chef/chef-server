@@ -2,7 +2,8 @@
 
 -include("heimdall_wm.hrl").
 
--export([set_db_exception/3,
+-export([db_error_string_to_atom/1,
+         set_db_exception/3,
          set_access_exception/3,
          set_malformed_request/3]).
 
@@ -67,3 +68,13 @@ db_exception_message({not_found_in_group, Id}) ->
     error_ejson([<<"supplied ID '">>, Id, <<"' not in group, cannot be deleted">>]);
 db_exception_message(Why) ->
     error({unexpected_error_message, Why}).
+
+%% This takes long ugly DB error strings and tokenizes them (if possible)
+db_error_string_to_atom(<<"new row for relation \"group_group_relations\" violates check constraint \"no_trivial_cycles\"">>) ->
+    group_cycle;
+db_error_string_to_atom(<<"This would create a group membership cycle, which is not allowed">>) ->
+    group_cycle;
+db_error_string_to_atom(<<"null value in column \"child\" violates not-null constraint">>) ->
+    null_violation;
+db_error_string_to_atom(String) ->
+    String.

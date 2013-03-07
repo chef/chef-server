@@ -23,18 +23,17 @@ from_json(Req, #base_state{authz_id = AuthzId, member_type = MemberType,
     case heimdall_db:add_to_group(MemberType, MemberId, AuthzId) of
         ok ->
             {true, wrq:set_resp_body(<<"{}">>, Req), State};
-        {error,
-         <<"null value in column \"child\" violates not-null constraint">>} ->
-            heimdall_wm_error:set_db_exception(Req, State,
-                                               {non_existent_member_for_group,
-                                                MemberType, MemberId});
-        {error,
-         <<"new row for relation \"group_group_relations\" violates check constraint \"no_trivial_cycles\"">>} ->
-            heimdall_wm_error:set_db_exception(Req, State, {group_cycle, MemberId});
-        {error, <<"This would create a group membership cycle, which is not allowed">>} ->
-            heimdall_wm_error:set_db_exception(Req, State, {group_cycle, MemberId});
-        {error, Error} ->
-            heimdall_wm_error:set_db_exception(Req, State, Error)
+        {error, ErrorString} ->
+            case heimdall_wm_error:db_error_string_to_atom(ErrorString) of
+                null_violation ->
+                    heimdall_wm_error:set_db_exception(Req, State,
+                                                       {non_existent_member_for_group,
+                                                        MemberType, MemberId});
+                group_cycle ->
+                    heimdall_wm_error:set_db_exception(Req, State, {group_cycle, MemberId});
+                UnknownError ->
+                    heimdall_wm_error:set_db_exception(Req, State, Error)
+            end
     end.
 
 delete_resource(Req, #base_state{authz_id = AuthzId, member_type = MemberType,
