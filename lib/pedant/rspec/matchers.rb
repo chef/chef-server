@@ -191,7 +191,12 @@ RSpec::Matchers.define :have_status_code do |code|
     begin
       parsed_response = parse(response)
     rescue JSON::ParserError => e
-      parsed_response = "error parsing response: #{e}"
+      parsed_response = "error parsing response:\n      #{e}"
+      if (response.nil?)
+        parsed_response += "\n      response is nil"
+      else
+        parsed_response += "\n      response is #{response}"
+      end
     end
 
     if (@info)
