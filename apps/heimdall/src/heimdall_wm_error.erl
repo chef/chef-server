@@ -39,7 +39,7 @@ access_exception_message(any) ->
        <<"must be in one of the create, read, update, delete, grant access control entries to perform this action">>}]};
 access_exception_message(Other) ->
     {[{<<"error">>,
-       iolist_to_binary([<<"must be in the ">>, atom_to_binary(Other, latin1),
+       iolist_to_binary([<<"must be in the ">>, atom_to_binary(Other, utf8),
                          <<" access control entry to perform this action">>])}]}.
 
 %% Sets the error message in the body and returns the return tuple to malformed

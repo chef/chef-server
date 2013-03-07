@@ -12,11 +12,9 @@
          make_ejson_action/3,
          parse_acl_json/2]).
 
-add_access(Permission, TargetType, TargetId, AuthorizeeType,
-           AuthorizeeId) when is_list(AuthorizeeId) ->
-    case heimdall_db:create_ace(TargetType, list_to_binary(TargetId),
-                                AuthorizeeType, list_to_binary(AuthorizeeId),
-                                atom_to_binary(Permission, latin1)) of
+add_access(Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
+    case heimdall_db:create_ace(TargetType, TargetId, AuthorizeeType, AuthorizeeId,
+                                atom_to_list(Permission)) of
         ok ->
             ok;
         {error, <<"null value in column \"authorizee\" violates not-null constraint">>} ->
@@ -30,8 +28,7 @@ add_access_set(_Perm, _Type, _Id, _OtherType, []) ->
     ok;
 add_access_set(Permission, TargetType, TargetId, AuthorizeeType,
                [AuthorizeeId | AuthorizeeList]) ->
-    add_access(Permission, TargetType, TargetId, AuthorizeeType,
-               binary_to_list(AuthorizeeId)),
+    add_access(Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId),
     add_access_set(Permission, TargetType, TargetId, AuthorizeeType,
                    AuthorizeeList).
 
@@ -58,9 +55,7 @@ check_access(TargetType, TargetId, RequestorId, Permission) ->
         superuser ->
             true;
         Id ->
-            heimdall_db:has_permission(TargetType, list_to_binary(TargetId),
-                                       list_to_binary(Id),
-                                       atom_to_binary(Permission, latin1))
+            heimdall_db:has_permission(TargetType, TargetId, Id, atom_to_list(Permission))
     end.
 
 check_any_access(TargetType, TargetId, RequestorId) ->
@@ -72,13 +67,12 @@ check_any_access(TargetType, TargetId, RequestorId) ->
 
 clear_access(TargetType, TargetId, Permission) ->
     % TODO: this needs to be a postgres function
-    case heimdall_db:delete_acl(actor, TargetType, TargetId,
-                                atom_to_binary(Permission, latin1)) of
+    case heimdall_db:delete_acl(actor, TargetType, TargetId, atom_to_list(Permission)) of
         {error, Error} ->
             throw({db_error, Error});
         ok ->
             case heimdall_db:delete_acl(group, TargetType, TargetId,
-                                        atom_to_binary(Permission, latin1)) of
+                                        atom_to_list(Permission)) of
                 {error, Error} ->
                     throw({db_error, Error});
                 ok ->
