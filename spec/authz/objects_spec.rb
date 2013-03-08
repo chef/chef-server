@@ -36,7 +36,7 @@ describe "Objects Endpoint" do
           # TODO: de-hardcode uri hostname in response body, make configurable
           response.should have_status_code(201).
             with_body({"id" => /^[0-9a-f]{32}$/,
-                       "uri" => /^http\:\/\/authz\.opscode\.com\/objects\/[0-9a-f]{32}$/})
+              "uri" => /^#{Pedant.config[:host]}:#{Pedant.config[:port]}\/objects\/[0-9a-f]{32}$/})
         
           @object_id = parse(response)["id"]
 
@@ -50,11 +50,19 @@ describe "Objects Endpoint" do
         creates_object_as(:superuser)
       end
 
-      # Should this work?
+      # This is one of the actual changes in behavior between old authz and new V1
+      # of Heimdall; this actually works with the old server, but it can't with the
+      # new schema because it's not possible to put bogus ACLs in the database which
+      # this would require
       context "as an unknown requestor" do
         let(:fake_actor) { mattdamon }
 
-        creates_object_as(:fake_actor)
+        it "should not create an object" do
+          response = post("/objects", fake_actor)
+
+          response.should have_status_code(401).
+            with_body({"error" => "requesting actor id of '#{fake_actor}' does not exist"})
+        end
       end
 
       context "without the X-Ops-Requesting-Actor-Id header" do

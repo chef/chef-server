@@ -136,19 +136,38 @@ RSpec::Matchers.define :directly_have_permission do |permission|
   end
 end
 
+RSpec::Matchers.define :nested_verify do |a, b|
+  if (b.class == Regexp)
+    a.should =~ b
+  elsif (b.class == Array)
+    a.length.should == b.length
+    sorted_a = a.sort
+    sorted_b = b.sort
+    sorted_b.each_index do |i|
+      nested_verify(sorted_a[i], sorted_b[i])
+    end
+  elsif (b.class == Hash)
+    a.each_key do |key|
+      nested_verify(a[key], b[key])
+    end
+  else
+    a.should == b
+  end
+end
+
 RSpec::Matchers.define :have_status_code do |code|
   match do |response|
     body_test = if @body
-                  response_body = parse(response)
-                  response_body.keys.sort.should == @body.keys.sort
-                  response_body.each_key do |key|
-                    if (@body[key].class == Regexp)
-                      response_body[key].should =~ @body[key]
-                    else
-                      response_body[key].should == @body[key]
+                  begin
+                    response_body = parse(response)
+                    response_body.keys.sort.should == @body.keys.sort
+                    response_body.each_key do |key|
+                      nested_verify(response_body[key], @body[key])
                     end
+                    true
+                  rescue JSON::ParserError => e
+                    false
                   end
-                  true
                 else
                   true
                 end
@@ -162,9 +181,29 @@ RSpec::Matchers.define :have_status_code do |code|
     @body = body
   end
 
+  chain :with_info do |info|
+    @info = info
+  end
+
   codes = Pedant::RSpec::HTTP::STATUS_CODES
 
   failure_message_for_should do |response|
+    begin
+      parsed_response = parse(response)
+    rescue JSON::ParserError => e
+      parsed_response = "error parsing response:\n      #{e}"
+      if (response.nil?)
+        parsed_response += "\n      response is nil"
+      else
+        parsed_response += "\n      response is #{response}"
+      end
+    end
+
+    if (@info)
+      info_string = "\n    Additional Information:\n      #{@info}\n"
+    else
+      info_string = ""
+    end
     """
     Expected:
       #{code} ('#{codes[code]}')
@@ -172,8 +211,8 @@ RSpec::Matchers.define :have_status_code do |code|
 
     Got:
       #{response.code} ('#{codes[response.code]}')
-      #{parse(response)}
-
+      #{parsed_response}
+      #{info_string}
       (Note: the response body is always displayed for debugging purposes,
        even if you didn't explicitly match on it.)
     """
