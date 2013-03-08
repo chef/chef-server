@@ -15,7 +15,7 @@
 %% Add permission on target for authorizee
 add_access(Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
     case heimdall_db:create_ace(TargetType, TargetId, AuthorizeeType, AuthorizeeId,
-                                atom_to_list(Permission)) of
+                                Permission) of
         ok ->
             ok;
         {error, <<"null value in column \"authorizee\" violates not-null constraint">>} ->
@@ -61,7 +61,7 @@ check_access(TargetType, TargetId, RequestorId, Permission) ->
         superuser ->
             true;
         Id ->
-            heimdall_db:has_permission(TargetType, TargetId, Id, atom_to_list(Permission))
+            heimdall_db:has_permission(TargetType, TargetId, Id, Permission)
     end.
 
 %% Check to see if requestor has any permission on target
@@ -75,12 +75,11 @@ check_any_access(TargetType, TargetId, RequestorId) ->
 %% Clear permission (for given permission type) on target for all actors and groups
 clear_access(TargetType, TargetId, Permission) ->
     % TODO: this needs to be a postgres function
-    case heimdall_db:delete_acl(actor, TargetType, TargetId, atom_to_list(Permission)) of
+    case heimdall_db:delete_acl(actor, TargetType, TargetId, Permission) of
         {error, Error} ->
             throw({db_error, Error});
         ok ->
-            case heimdall_db:delete_acl(group, TargetType, TargetId,
-                                        atom_to_list(Permission)) of
+            case heimdall_db:delete_acl(group, TargetType, TargetId, Permission) of
                 {error, Error} ->
                     throw({db_error, Error});
                 ok ->
@@ -98,20 +97,16 @@ acl_members(ForType, MemberType, ForId, Permission) ->
             List
     end.
 
-%% Create EJSON object fragment for permission type on given ID
-make_ejson_part(Permission, ForType, ForId) ->
-    {Permission,
-     {[{<<"actors">>,
-       acl_members(ForType, actor, ForId, Permission)},
-      {<<"groups">>,
-       acl_members(ForType, group, ForId, Permission)}]}}.
-
 %% Create full EJSON object for permission type on given ID
 make_ejson_action(Permission, ForType, ForId) ->
     {[{<<"actors">>,
        acl_members(ForType, actor, ForId, Permission)},
       {<<"groups">>,
        acl_members(ForType, group, ForId, Permission)}]}.
+
+%% Create EJSON object fragment for permission type on given ID
+make_ejson_part(Permission, ForType, ForId) ->
+    {Permission, make_ejson_action(Permission, ForType, ForId)}.
 
 %% Create full EJSON object for given ID
 make_ejson_acl(ForType, ForId) ->
