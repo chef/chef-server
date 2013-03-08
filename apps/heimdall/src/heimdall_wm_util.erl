@@ -15,8 +15,7 @@ generate_authz_id() ->
                       <<X:16>> <= crypto:rand_bytes(16) ]).
 
 %% Extract the requestor from the request headers and return updated base state.
-get_requestor(Req, State) ->
-    {ok, SuperuserId} = application:get_env(heimdall, superuser_id),
+get_requestor(Req, #base_state{superuser_id = SuperuserId} = State) ->
     case wrq:get_req_header("X-Ops-Requesting-Actor-Id", Req) of
         undefined ->
             State;

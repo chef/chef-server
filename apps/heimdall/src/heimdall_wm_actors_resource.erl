@@ -17,7 +17,9 @@ create_path(Req, State) ->
 
 validate_request(Req, State) ->
     % We really don't care if there's a requestor or not, so we just take whatever
-    % comes back, even if the requestor_id remains undefined.
+    % comes back from get_requestor without raising an error, even if the
+    % requestor_id remains undefined (yes, the old Authz and V1 of Heimdall do not
+    % require that a requestor be supplied.  This will probably change in V2).
     try
         State0 = heimdall_wm_util:get_requestor(Req, State),
         {false, Req, State0}

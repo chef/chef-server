@@ -16,30 +16,31 @@ validate_request(Req, State) ->
 
 auth_info(Verb) when Verb =:= 'PUT';
                      Verb =:= 'DELETE' ->
-    grant.
+    update.
 
 from_json(Req, #base_state{authz_id = AuthzId, member_type = MemberType,
                            member_id = MemberId} = State) ->
     case heimdall_db:add_to_group(MemberType, MemberId, AuthzId) of
         ok ->
-            {true, Req, State};
-        {error,
-         <<"null value in column \"child\" violates not-null constraint">>} ->
-            heimdall_wm_error:set_db_exception(Req, State,
-                                               {non_existent_member_for_group,
-                                                MemberType, MemberId});
-        {error,
-         <<"This would create a group membership cycle, which is not allowed">>} ->
-            heimdall_wm_error:set_db_exception(Req, State, {group_cycle, MemberId});
-        {error, Error} ->
-            heimdall_wm_error:set_db_exception(Req, State, Error)
+            {true, wrq:set_resp_body(<<"{}">>, Req), State};
+        {error, ErrorString} ->
+            case heimdall_wm_error:db_error_string_to_atom(ErrorString) of
+                null_violation ->
+                    heimdall_wm_error:set_db_exception(Req, State,
+                                                       {non_existent_member_for_group,
+                                                        MemberType, MemberId});
+                group_cycle ->
+                    heimdall_wm_error:set_db_exception(Req, State, {group_cycle, MemberId});
+                Error ->
+                    heimdall_wm_error:set_db_exception(Req, State, Error)
+            end
     end.
 
 delete_resource(Req, #base_state{authz_id = AuthzId, member_type = MemberType,
                                  member_id = MemberId} = State) ->
     case heimdall_db:remove_from_group(MemberType, MemberId, AuthzId) of
         ok ->
-            {true, Req, State};
+            {true, wrq:set_resp_body(<<"{}">>, Req), State};
         {error, not_found_in_group} ->
             heimdall_wm_error:set_db_exception(Req, State, {not_found_in_group,
                                                             MemberId});
