@@ -9,9 +9,9 @@
 
 %% Handy helper function for error handling
 error_ejson(Message) when is_binary(Message) ->
-    {[{<<"error">>, Message}]}; 
+    {[{<<"error">>, Message}]};
 error_ejson(Message) when is_list(Message) ->
-    error_ejson(iolist_to_binary(Message).
+    error_ejson(iolist_to_binary(Message)).
 
 halt(Code, Req, State, Msg) when is_integer(Code) ->
     {{halt, Code}, heimdall_wm_util:set_json_body(Req, Msg), State};
