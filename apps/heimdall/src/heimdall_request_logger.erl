@@ -56,17 +56,36 @@ log_access(#wm_log_data{}=LogData) ->
 generate_msg(#wm_log_data{response_code = ResponseCode,
                           method = Method,
                           path = Path,
-                          notes = Notes}=LD) ->
+                          notes = Notes}) ->
+
     ReqId = note(reqid, Notes),
     RequestorId = note(requestor_id, Notes),
     Module = note(module, Notes),
+    CreatedAuthzId = note(created_authz_id, Notes),
 
-    log_line([{status, ResponseCode},
-              {method, Method},
-              {path, Path},
-              {module, Module},
-              {reqid, ReqId},
-              {requestor_id, RequestorId}]).
+    %% We'll always output information in the log for these fields,
+    %% even if their value is 'undefined'.  These are key fields for
+    %% monitoring purposes, and always having a value present is
+    %% helpful for grouping reports, etc.
+    AlwaysLogged = [{status, ResponseCode},
+                    {method, Method},
+                    {path, Path},
+                    {module, Module},
+                    {reqid, ReqId},
+                    {requestor_id, RequestorId}],
+
+    %% Other fields, however, can be left out if the value is
+    %% undefined.
+    %%
+    %% create_authz_id will only be present for successful POSTs to
+    %% /actors, /groups, /objects, and /containers
+    LoggedIfPresent = [{created_authz_id, CreatedAuthzId}],
+
+    FinalFields = lists:append([AlwaysLogged,
+                                [{K,V} || {K,V} <- LoggedIfPresent, V /= undefined ]
+                               ]),
+
+    log_line(FinalFields).
 
 emit_log(ResponseCode, Msg) when ResponseCode >= 500 ->
     lager:error(Msg);
