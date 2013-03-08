@@ -2,6 +2,7 @@
 
 -export([content_types_accepted/2,
          content_types_provided/2,
+         create_path/2,
          finish_request/2,
          forbidden/2,
          init/2,
@@ -88,6 +89,13 @@ forbidden(Req, #base_state{module = Module, authz_id = Id, request_type = Type,
                     end
             end
     end.
+
+create_path(Req, State) ->
+    AuthzId = heimdall_wm_util:generate_authz_id(),
+    {AuthzId,
+     %% Add new AuthzID to notes for output in the request logger
+     wrq:add_note(created_authz_id, AuthzId, Req),
+     State#base_state{authz_id = AuthzId}}.
 
 content_types_accepted(Req, State) ->
     {[{"application/json", from_json}], Req, State}.
