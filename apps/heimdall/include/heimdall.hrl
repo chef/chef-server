@@ -3,3 +3,4 @@
 -type auth_id() :: <<_:256>>.
 -type auth_type() :: actor | container | group | object.
 -type permission() :: create | read | update | delete | grant.
+-type request_id() :: <<_:192>>. %% 24-byte binary; a base64-encoded MD5 digest of an Erlang reference

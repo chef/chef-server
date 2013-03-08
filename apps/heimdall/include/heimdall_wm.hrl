@@ -42,5 +42,8 @@
           requestor_id :: auth_id() | superuser,
 
           %% Which module is handling this request?
-          module :: atom()
+          module :: atom(),
+
+          %% A unique request identifier, used for aggregating metrics
+          reqid :: request_id()
          }).
