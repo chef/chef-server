@@ -2,6 +2,8 @@
 
 -include("heimdall_wm_rest_endpoint.hrl").
 
+-mixin([{heimdall_wm_base, [create_path/2]}]).
+
 -export([create_path/2,
          from_json/2]).
 
@@ -10,10 +12,6 @@ init(Config) ->
 
 allowed_methods(Req, State) ->
     {['POST'], Req, State}.
-
-create_path(Req, State) ->
-    AuthzId = heimdall_wm_util:generate_authz_id(),
-    {AuthzId, Req, State#base_state{authz_id = AuthzId}}.
 
 validate_request(Req, State) ->
     % We really don't care if there's a requestor or not, so we just take whatever
