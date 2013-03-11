@@ -6,9 +6,8 @@
 * Have available the database RW password from data bag secrets: chef\_db.rw\_password 
 * Have available a production org: 
     * should have one extra user associated that can be deleted 
-    * 
-* ccr on mysql master to ensure that the necessary components are in
-  place.
+* ccr on mysql master to ensure that the necessary components are in place.
+* clear test data from destination postgres database
 
 
 ## Initiate Downtime
@@ -21,7 +20,7 @@
 * Upload the role and CCR LBs: 
 
 ```
-    knife role from file opscode-lb.json
+    knife role edit opscode-lb
     knife ssh role:opscode-lb 'sudo chef-client'
 ```
 
@@ -78,48 +77,33 @@ The environments and vips data bags must be updated with new hosts.
     knife data bag from file environments rs-prod.json
 ```
 
-### CCR role opscode-erchef and erchef nodes
-Using a tool such as csshx, connect to each chef node: 
- 
-    knife ssh role:opscode-erchef OR role:opscode-chef csshx 
-
-* Initially in a single session: 
-
-    sudo chef-client
-
-* After conclusion of the chef-client run, check logs for errors: 
+### CCR all affected roles
 
 ```
-    tail -f /var/log/oc_erchef.log
-    tail -f /var/log/opscode-chef.log
+knife ssh 'role:opscode-account \
+           OR role:opscode-accountmanagement \
+           OR role:opscode-support \
+           OR role:opscode-org-creator \
+           OR role:opscode-erchef \
+           OR role:opscode-chef \
+           OR role:monitoring-nagios' \
+      csshx
 ```
 
-* Perform CCR on remaining chef server nodes and spot-check logs. 
+From command console:
+```
+sudo chef-client
+```
 
-### CCR role opscode-account: 
-In the same manner CCR opscode-account, starting with a single node.  Verify log: 
-
-    tail -f /var/log/opscode-account.log
-
-### CCR role opscode-accountmanagement and opscode-support
-Verify logs: 
-    
-    tail -f /var/log/opscode-accountmanagement.log
-    tail -f /var/log/opscode-support.log
- 
-
-### CCR role opscode-account 
-This role includes opscode-org-creator. 
-
-Verify logs: 
-
-    tail -f /var/log/opscode-account.log
-    tail -f /var/log/opscode-org-creator.log
-
-
-### CCR monitoring-nagios
-No log validation required here - however see "Batch" validation section
-below. 
+Tail and verify the logs (from the command console):
+```
+sudo tail -F /var/log/oc_erchef.log \
+             /var/log/opscode-chef.log \
+             /var/log/opscode-account.log \
+             /var/log/opscode-accountmanagement.log \
+             /var/log/opscode-support.log \
+             /var/log/opscode-org-creator.log
+```
 
 ## Validation 
 
@@ -128,7 +112,7 @@ below.
 
 ```
     cd rs-prod
-    ./bin/ohc-pedant -e rs-prod --smoke
+    ./bin/ohc-pedant -e rs-prod -- --smoke
 ```
 
 ### Knife
@@ -219,13 +203,22 @@ in that output, and ensure it contains org/node count data.
 * Upload the role and CCR LBs: 
 
 ```
-    knife role from file opscode-lb.json
+    knife role edit opscode-lb
     knife ssh role:opscode-lb 'sudo chef-client'
 ```
 
 ### Resume daemonized CCR 
 
-``knife ssh 'role:opscode-account OR role:opscode-accountmanagement OR role:opscode-support OR role:opscode-org-creator OR role:opscode-erchef OR role:opscode-chef OR role:monitoring-nagios' '/etc/init.d/chef-client start'``
+```
+knife ssh 'role:opscode-account \
+           OR role:opscode-accountmanagement \
+           OR role:opscode-support \
+           OR role:opscode-org-creator \
+           OR role:opscode-erchef \
+           OR role:opscode-chef \
+           OR role:monitoring-nagios' \
+      '/etc/init.d/chef-client start'
+```
 
 ### End Downtime
 * Status update: twitter, status.opscode.com
