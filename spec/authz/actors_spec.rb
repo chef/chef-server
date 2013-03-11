@@ -87,12 +87,14 @@ describe "Actors Endpoint" do
 
       context "without any headers" do
         it "should NOT create an actor" do
+          # Unsupported media type (i.e, no JSON content type header) = 415
           post("/actors", :superuser, :headers => {}).should have_status_code(415)
 
           # This has been verified (the hard way) that it doesn't create an actor --
           # nothing shows up in the database.  It's impossible to test that here,
-          # because there's no ID to test -- we can't test every possible ID just to
-          # make sure nothing new exists.
+          # because there's no ID to test, we get a 415 from webmachine before it
+          # really gets to any of our code -- we can't test every possible ID just
+          # to make sure nothing new exists.
         end
       end
 
