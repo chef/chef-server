@@ -16,15 +16,9 @@
 
 init(Resource, Config) ->
     State = #base_state{module = Resource, reqid = new_request_id()},
-    State0 = case Config of
-                 [Superuser, Type, MemberType] ->
-                     State#base_state{superuser_id = Superuser, request_type = Type,
-                                      member_type = MemberType};
-                 [Superuser, Type] ->
-                     State#base_state{superuser_id = Superuser, request_type = Type};
-                 [Superuser] ->
-                     State#base_state{superuser_id = Superuser}
-    end,
+    State0 = State#base_state{superuser_id = ?gv(superuser_id, Config),
+                              request_type = ?gv(request_type, Config),
+                              member_type = ?gv(member_type, Config)},
     {ok, State0}.
 
 ping(Req, State) ->
