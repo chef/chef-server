@@ -7,6 +7,9 @@
 * Have available a production org: 
     * should have one extra user associated that can be deleted 
     * 
+* ccr on mysql master to ensure that the necessary components are in
+  place.
+
 
 ## Initiate Downtime
 
@@ -24,11 +27,18 @@
 
 ### Suspend daemonized CCR 
 
-``knife ssh 'role:opscode-account OR role:opscode-accountmanagement OR role:opscode-support OR role:opscode-org-creator OR role:opscode-erchef OR role:opscode-chef OR role:monitoring-nagios' '/etc/init.d/chef-client stop'``
+```
+knife ssh 'role:opscode-account \
+           OR role:opscode-accountmanagement \
+           OR role:opscode-support \
+           OR role:opscode-org-creator \
+           OR role:opscode-erchef \
+           OR role:opscode-chef \
+           OR role:monitoring-nagios' \
+      '/etc/init.d/chef-client stop'
+```
 
-## Run Migration 
-* ccr on mysql master to ensure that the necessary components are in
-  place.
+## Run Migration
 * from mysql master, run migrate.sh as follows: 
 
 ```
