@@ -100,7 +100,7 @@ Tail and verify the logs (from the command console):
 sudo tail -F /var/log/oc_erchef.log \
              /var/log/opscode-chef.log \
              /var/log/opscode-account.log \
-             /var/log/opscode-accountmanagement.log \
+             /var/log/opscode-acct-mgmt.log \
              /var/log/opscode-support.log \
              /var/log/opscode-org-creator.log
 ```
