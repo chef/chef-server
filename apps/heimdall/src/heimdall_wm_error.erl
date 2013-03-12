@@ -15,7 +15,7 @@ error_ejson(Message) when is_list(Message) ->
 
 halt(Code, Req, State, Msg) when is_integer(Code) ->
     {{halt, Code}, heimdall_wm_util:set_json_body(Req, Msg), State};
-halt(Value, Req, State, Msg) when Value =:= true orelse Value =:= false ->
+halt(Value, Req, State, Msg) when is_binary(Value) ->
     {Value, heimdall_wm_util:set_json_body(Req, Msg), State}.
 
 %% Sets the error message in the body and returns the return tuple to malformed
@@ -42,8 +42,8 @@ set_access_exception(Req, State, Permission) ->
     halt(true, Req, State, Msg).
 
 access_exception_message(any) ->
-    error_ejson([<<"must be in one of the create, read, update, delete, grant ">>,
-                 <<"access control entries to perform this action">>]);
+    error_ejson(<<"must be in one of the create, read, update, delete, grant "
+                  "access control entries to perform this action">>);
 access_exception_message(Other) ->
     error_ejson([<<"must be in the ">>, atom_to_list(Other),
                  <<" access control entry to perform this action">>]).
@@ -70,6 +70,7 @@ db_exception_message(Why) ->
     error({unexpected_error_message, Why}).
 
 %% This takes long ugly DB error strings and tokenizes them (if possible)
+%% These changes coming with future PG refactor
 db_error_string_to_atom(<<"new row for relation \"group_group_relations\" violates check constraint \"no_trivial_cycles\"">>) ->
     group_cycle;
 db_error_string_to_atom(<<"This would create a group membership cycle, which is not allowed">>) ->
