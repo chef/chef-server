@@ -10,6 +10,7 @@
                   stdlib,
                   lager,
                   sasl,
+                  stats_hero,
                   sqerl,
                   webmachine
                  ]}]}.
