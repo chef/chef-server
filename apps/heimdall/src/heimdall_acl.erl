@@ -3,8 +3,7 @@
 -include("heimdall.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
--export([add_access/6,
-         add_access_set/6,
+-export([add_access_set/6,
          add_full_access/5,
          check_access/5,
          check_any_access/4,
