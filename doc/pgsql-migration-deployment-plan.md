@@ -8,7 +8,19 @@
     * should have one extra user associated that can be deleted 
 * ccr on mysql master to ensure that the necessary components are in place.
 * clear test data from destination postgres database
+* open up a command and control terminal for all the affected server (below)
+    * verify that you are connected to all of the server that you expect to be connected to
 
+```
+knife ssh "role:opscode-account \
+           OR role:opscode-accountmanagement \
+           OR role:opscode-support \
+           OR role:opscode-org-creator \
+           OR role:opscode-erchef \
+           OR role:opscode-chef \
+           OR role:monitoring-nagios" \
+      csshx
+```
 
 ## Initiate Downtime
 
@@ -24,18 +36,9 @@
     knife ssh role:opscode-lb 'sudo chef-client'
 ```
 
-### Suspend daemonized CCR 
+### Suspend daemonized CCR
 
-```
-knife ssh 'role:opscode-account \
-           OR role:opscode-accountmanagement \
-           OR role:opscode-support \
-           OR role:opscode-org-creator \
-           OR role:opscode-erchef \
-           OR role:opscode-chef \
-           OR role:monitoring-nagios' \
-      '/etc/init.d/chef-client stop'
-```
+**CSSHX**: `sudo /etc/init.d/chef-client stop`
 
 ## Run Migration
 * from mysql master, run migrate.sh as follows: 
@@ -79,23 +82,12 @@ The environments and vips data bags must be updated with new hosts.
 
 ### CCR all affected roles
 
-```
-knife ssh 'role:opscode-account \
-           OR role:opscode-accountmanagement \
-           OR role:opscode-support \
-           OR role:opscode-org-creator \
-           OR role:opscode-erchef \
-           OR role:opscode-chef \
-           OR role:monitoring-nagios' \
-      csshx
-```
+**CSSHX**: `sudo chef-client`
 
-From command console:
-```
-sudo chef-client
-```
 
 Tail and verify the logs (from the command console):
+
+**CSSHX**:
 ```
 sudo tail -F /var/log/oc_erchef.log \
              /var/log/opscode-chef.log \
@@ -209,16 +201,7 @@ in that output, and ensure it contains org/node count data.
 
 ### Resume daemonized CCR 
 
-```
-knife ssh 'role:opscode-account \
-           OR role:opscode-accountmanagement \
-           OR role:opscode-support \
-           OR role:opscode-org-creator \
-           OR role:opscode-erchef \
-           OR role:opscode-chef \
-           OR role:monitoring-nagios' \
-      '/etc/init.d/chef-client start'
-```
+**CSSHX**: `sudo /etc/init.d/chef-client start`
 
 ### End Downtime
 * Status update: twitter, status.opscode.com
