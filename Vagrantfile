@@ -34,7 +34,11 @@ Vagrant::Config.run do |config|
   # via the IP. Host-only networks can talk to the host machine as well as
   # any other machines on the same network, but cannot be accessed (through this
   # network interface) by any external networks.
-  config.vm.network :hostonly, "33.33.33.10"
+  config.vm.network :hostonly, "33.33.33.10", :adapter => 2
+
+  # Use virtio networking, cuz heimdall is FAST
+  config.vm.customize ["modifyvm", :id, "--nictype1", "virtio"] # NAT NIC
+  config.vm.customize ["modifyvm", :id, "--nictype2", "virtio"] # host-only NIC
 
   # Assign this VM to a bridged network, allowing you to connect directly to a
   # network using the host's network device. This makes the VM appear as another
