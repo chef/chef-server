@@ -70,7 +70,7 @@ create_ace_stmt(container, actor) -> insert_container_acl_actor;
 create_ace_stmt(container, group) -> insert_container_acl_group.
 
 -spec create_ace(auth_type(), auth_id(), auth_type(), auth_id(),
-                 atom()) -> ok | {error, term()}.
+                 permission()) -> ok | {error, term()}.
 create_ace(TargetType, TargetId, AuthorizeeType, AuthorizeeId, Permission) ->
     CreateStatement = create_ace_stmt(TargetType, AuthorizeeType),
     case sqerl:statement(CreateStatement, [TargetId, AuthorizeeId, Permission],
@@ -94,7 +94,7 @@ acl_member_query(group, object) -> groups_in_object_acl;
 acl_member_query(actor, container) -> actors_in_container_acl;
 acl_member_query(group, container) -> groups_in_container_acl.
 
--spec acl_membership(auth_type(), auth_type(), auth_id(), atom()) ->
+-spec acl_membership(auth_type(), auth_type(), auth_id(), permission()) ->
                               list() | {error, term()}.
 acl_membership(TargetType, AuthorizeeType, AuthzId, Permission) ->
     MembershipStatement = acl_member_query(AuthorizeeType, TargetType),
@@ -117,7 +117,7 @@ delete_acl_stmt(group, object)    -> delete_groups_from_object_acl;
 delete_acl_stmt(actor, container)    -> delete_actors_from_container_acl;
 delete_acl_stmt(group, container)    -> delete_groups_from_container_acl.
 
--spec delete_acl(auth_type(), auth_type(), auth_id(), atom()) ->
+-spec delete_acl(auth_type(), auth_type(), auth_id(), permission()) ->
                         ok | {error, term()}.
 delete_acl(AuthorizeeType, TargetType, TargetId, Permission) ->
     DeleteStatement = delete_acl_stmt(AuthorizeeType, TargetType),
@@ -133,7 +133,7 @@ permission_query(group) -> actor_has_permission_on_group;
 permission_query(object) -> actor_has_permission_on_object;
 permission_query(container) -> actor_has_permission_on_container.
 
--spec has_permission(auth_type(), auth_id(), auth_id(), atom()) -> boolean().
+-spec has_permission(auth_type(), auth_id(), auth_id(), permission()) -> boolean().
 has_permission(TargetType, TargetId, RequestorId, Permission) ->
     PermissionStatement = permission_query(TargetType),
     case sqerl:select(PermissionStatement, [RequestorId, TargetId, Permission],

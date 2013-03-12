@@ -4,8 +4,7 @@
 
 -mixin([{heimdall_wm_base, [create_path/2]}]).
 
--export([create_path/2,
-         from_json/2]).
+-export([from_json/2]).
 
 init(Config) ->
     heimdall_wm_base:init(?MODULE, Config).
