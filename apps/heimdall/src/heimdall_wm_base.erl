@@ -65,21 +65,24 @@ validate_requestor(Req, State) ->
             heimdall_wm_error:set_malformed_request(Req, State, {bad_requestor, Id})
     end.
 
-forbidden(Req, #base_state{module = Module, authz_id = Id, request_type = Type,
+forbidden(Req, #base_state{reqid = ReqId,
+                           module = Module,
+                           authz_id = Id,
+                           request_type = Type,
                            requestor_id = RequestorId} = State) ->
     case Module:auth_info(wrq:method(Req)) of
         ignore ->
             {false, Req, State};
         Permission ->
-            case heimdall_db:exists(Type, Id) of
+            case ?SH_TIME(ReqId, heimdall_db, exists, (Type, Id)) of
                 false ->
                     {{halt, 404}, Req, State};
                 true ->
                     Result = case Permission of
                                  any ->
-                                     heimdall_acl:check_any_access(Type, Id, RequestorId);
+                                     heimdall_acl:check_any_access(ReqId, Type, Id, RequestorId);
                                  Other ->
-                                     heimdall_acl:check_access(Type, Id, RequestorId, Other)
+                                     heimdall_acl:check_access(ReqId, Type, Id, RequestorId, Other)
                              end,
                     case Result of
                         true ->

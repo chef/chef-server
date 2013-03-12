@@ -1,6 +1,7 @@
 -module(heimdall_wm_group_member_resource).
 
 -include("heimdall_wm_rest_endpoint.hrl").
+-include_lib("stats_hero/include/stats_hero.hrl").
 
 -export([delete_resource/2,
          from_json/2]).
@@ -18,9 +19,11 @@ auth_info(Verb) when Verb =:= 'PUT';
                      Verb =:= 'DELETE' ->
     update.
 
-from_json(Req, #base_state{authz_id = AuthzId, member_type = MemberType,
+from_json(Req, #base_state{reqid = ReqId,
+                           authz_id = AuthzId,
+                           member_type = MemberType,
                            member_id = MemberId} = State) ->
-    case heimdall_db:add_to_group(MemberType, MemberId, AuthzId) of
+    case ?SH_TIME(ReqId, heimdall_db, add_to_group, (MemberType, MemberId, AuthzId)) of
         ok ->
             {true, wrq:set_resp_body(<<"{}">>, Req), State};
         {error, ErrorString} ->
@@ -36,9 +39,11 @@ from_json(Req, #base_state{authz_id = AuthzId, member_type = MemberType,
             end
     end.
 
-delete_resource(Req, #base_state{authz_id = AuthzId, member_type = MemberType,
+delete_resource(Req, #base_state{reqid = ReqId,
+                                 authz_id = AuthzId,
+                                 member_type = MemberType,
                                  member_id = MemberId} = State) ->
-    case heimdall_db:remove_from_group(MemberType, MemberId, AuthzId) of
+    case ?SH_TIME(ReqId, heimdall_db, remove_from_group, (MemberType, MemberId, AuthzId)) of
         ok ->
             {true, wrq:set_resp_body(<<"{}">>, Req), State};
         {error, not_found_in_group} ->
