@@ -15,7 +15,7 @@ error_ejson(Message) when is_list(Message) ->
 
 halt(Code, Req, State, Msg) when is_integer(Code) ->
     {{halt, Code}, heimdall_wm_util:set_json_body(Req, Msg), State};
-halt(Value, Req, State, Msg) when is_binary(Value) ->
+halt(Value, Req, State, Msg) when is_boolean(Value) ->
     {Value, heimdall_wm_util:set_json_body(Req, Msg), State}.
 
 %% Sets the error message in the body and returns the return tuple to malformed
