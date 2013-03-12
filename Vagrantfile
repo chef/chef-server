@@ -6,6 +6,9 @@ HEIMDALL_FORWARD_PORT    = 15959
 HEIMDALL_DB_PORT         =  5432
 HEIMDALL_FORWARD_DB_PORT = 15432
 
+# See Berksfile for more on this
+ENABLE_GRAPHITE = false
+
 Vagrant::Config.run do |config|
   # All Vagrant configuration is done here. The most common configuration
   # options are documented and commented below. For a complete reference,
@@ -82,6 +85,13 @@ Vagrant::Config.run do |config|
         "database" => {
           "port" => HEIMDALL_DB_PORT
         }
+      },
+      # These values are hard-coded into the PIAB monitoring cookbooks
+      # we're currently using for graphite in dev... we don't need a
+      # running estatsd server for this to work, though.
+      "stats_hero" => {
+        "estatsd_host" => "127.0.0.1",
+        "estatsd_port" => 5665
       }
     }
 
@@ -91,6 +101,17 @@ Vagrant::Config.run do |config|
     chef.run_list = [
                      "recipe[opscode-dev-shim]",
                      "recipe[opscode-heimdall::dev]"
-                 ]
+                    ]
+  end
+
+  if ENABLE_GRAPHITE
+    # The dev-vm cookbooks assume an Omnibus directory structure; this shell provisioner fakes it
+    config.vm.provision :shell, :inline => "mkdir -p /opt/opscode"
+    config.vm.provision :chef_solo do |chef|
+      chef.roles_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/roles"
+      chef.data_bags_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/data_bags"
+      chef.run_list = ["recipe[opscode-dev-shim]",
+                       "recipe[piab::monitoring]"]
+    end
   end
 end
