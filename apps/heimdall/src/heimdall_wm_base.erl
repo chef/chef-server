@@ -10,16 +10,19 @@
          ping/2,
          post_is_create/2,
          service_available/2,
+         stats_hero_label/1,
+         stats_hero_upstreams/0,
          validate_requestor/2]).
 
 -include("heimdall_wm.hrl").
 
 init(Resource, Config) ->
-    State = #base_state{module = Resource, reqid = new_request_id()},
-    State0 = State#base_state{superuser_id = ?gv(superuser_id, Config),
-                              request_type = ?gv(request_type, Config),
-                              member_type = ?gv(member_type, Config)},
-    {ok, State0}.
+    State = #base_state{module = Resource,
+                        reqid = new_request_id(),
+                        superuser_id = ?gv(superuser_id, Config),
+                        request_type = ?gv(request_type, Config),
+                        member_type =?gv(member_type, Config)},
+    {ok, State}.
 
 ping(Req, State) ->
     {pong, Req, State}.
@@ -120,3 +123,17 @@ finish_request(Req, #base_state{reqid=ReqId,
 -spec new_request_id() -> request_id().
 new_request_id() ->
     base64:encode(crypto:md5(term_to_binary(make_ref()))).
+
+
+%% Stats Hero metrics-related functions
+%%
+%% Pretty simple for the time being; we only talk to a relational
+%% database.  These functions keep the generated keys the same basic
+%% "shape" as those coming from Erchef.
+
+stats_hero_upstreams() ->
+    [<<"rdbms">>].
+
+stats_hero_label({heimdall_db, Fun}) ->
+    FunBin = erlang:atom_to_binary(Fun, utf8),
+    <<"rdbms.heimdall_db.", FunBin/binary>>.

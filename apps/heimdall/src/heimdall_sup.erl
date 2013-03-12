@@ -46,7 +46,7 @@ init([]) ->
                  {ip, Ip},
                  {port, Port},
                  {log_dir, "priv/log"},
-                 {dispatch, add_superuser_id(Dispatch)}
+                 {dispatch, add_dynamic_config(Dispatch)}
                 ],
 
     Web = {webmachine_mochiweb,
@@ -56,14 +56,33 @@ init([]) ->
     Processes = [Web],
     {ok, {{one_for_one, 10, 10}, Processes}}.
 
-%% Here we're adding the superuserID once when we set up the endpoints in webmachine
-%% so we don't have to do this repeatedly for every request
-superuser_to_config([], SuperuserId) ->
-    [];
-superuser_to_config([{Path, Module, Args}|Rest], SuperuserId) ->
-    NewConfig = {superuser_id, SuperuserId},
-    [{Path, Module, [NewConfig | Args]} | superuser_to_config(Rest, SuperuserId)].
+add_dynamic_config(Dispatch) ->
+    DynamicConfig = dynamic_config(),
+    add_resource_init(Dispatch, DynamicConfig, []).
 
-add_superuser_id(Dispatch) ->
+add_resource_init([Rule | Rest], Defaults, Acc) ->
+    add_resource_init(Rest, Defaults, [add_init(Rule, Defaults) | Acc]);
+add_resource_init([], _Defaults, Acc) ->
+    lists:reverse(Acc).
+
+add_init({Route, Guard, Module, Init}, Defaults) ->
+    InitParams = Init ++ Defaults,
+    {Route, Guard, Module, InitParams};
+add_init({Route, Module, Init}, Defaults) ->
+    InitParams = Init ++ Defaults,
+    {Route, Module, InitParams}.
+
+dynamic_config() ->
+    superuser_config() ++ stats_hero_config().
+
+superuser_config() ->
     {ok, SuperuserId} = application:get_env(heimdall, superuser_id),
-    superuser_to_config(Dispatch, SuperuserId).
+    [{superuser_id, SuperuserId}].
+
+stats_hero_config() ->
+    {ok, MetricKey} = application:get_env(heimdall, root_metric_key),
+    [{metrics_config, [
+                       {root_metric_key, MetricKey},
+                       {stats_hero_upstreams, heimdall_wm_base:stats_hero_upstreams()},
+                       {stats_hero_label_fun, {heimdall_wm_base, stats_hero_label}}
+                      ]}].
