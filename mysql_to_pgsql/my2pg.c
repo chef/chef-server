@@ -90,7 +90,35 @@ void emit_hex(char *buf, int len)
     printf(",decode('%s','hex'),", buf);
 }
 
-void my2pg()
+unsigned char decode(char x)
+{
+    if (x >= '0' && x <= '9')          /* 0-9 is offset by 48 */
+      return (x - 0x30);
+    else if (x >= 'A' && x <= 'F')    /* A-F offset by 55 */
+      return(x - 0x37);
+    else if (x >= 'a' && x <= 'f')   /* a-f offset by 87 */
+        return(x - 0x57);
+    else {                            /* Otherwise, an illegal hex digit */
+        fprintf(stderr,"\nInput is not in legal hex format\n");
+        exit(1);
+    }
+}
+
+void emit_decoded_hex(char *buf, int len)
+{
+    unsigned char a, b;
+    char *pos = buf;
+    printf(",E'");
+    while (*pos) {
+        a = *pos;
+        b = *(++pos);
+        putchar( ((decode(a) * 16) & 0xF0) + (decode(b) & 0xF) );
+        pos++;
+    }
+    printf("',");
+}
+
+void my2pg(int decode)
 {
     /* buf is used to accumulate serialized node hex data */
     char * buf = NULL;
@@ -113,7 +141,11 @@ void my2pg()
             /* We've found hex data, collect until next sep. XXX:
              * assumes hex data is not last column in input */
             len = collect_until_sep(buf, sep);
-            emit_hex(buf, len);
+            if (decode) {
+                emit_decoded_hex(buf, len);
+            } else {
+                emit_hex(buf, len);
+            }
             init_read_ahead_buf(rab);
             fputc(rab[0], stdout);
         } else {
@@ -126,7 +158,13 @@ void my2pg()
 
 int main(int argc, char *argv[])
 {
-    my2pg();
+    int decode = 0;
+    if (argc == 2) {
+        if (strncmp(argv[1], "users", 5) == 0) {
+            decode = 1;
+        }
+    }
+    my2pg(decode);
     fflush(NULL);
     return 0;
 }
