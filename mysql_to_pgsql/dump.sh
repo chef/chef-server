@@ -60,8 +60,7 @@ mysqldump \
           | sed 's/,1)/,true)/g' \
           | sed "s/\\\'/XXX/g" \
           | sed "s/'-----BEGIN/E&/g" \
-          | sed "s/,0x\([0-9A-F]*\)/,encode(decode('\1','hex'),'escape')/g"
-
+          | ./my2pg users
 
 #
 # SED Transforms
