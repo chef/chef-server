@@ -56,20 +56,28 @@ init([]) ->
     Processes = [Web],
     {ok, {{one_for_one, 10, 10}, Processes}}.
 
-add_dynamic_config(Dispatch) ->
-    DynamicConfig = dynamic_config(),
-    add_resource_init(Dispatch, DynamicConfig, []).
 
-add_resource_init([Rule | Rest], Defaults, Acc) ->
-    add_resource_init(Rest, Defaults, [add_init(Rule, Defaults) | Acc]);
-add_resource_init([], _Defaults, Acc) ->
+%% @doc We need to add some configuration to the resources that comes
+%% from our sys.config file.  This is stuff that we can't include
+%% directly in the dispatch.conf file, but that we don't want to look
+%% up for each request.
+%%
+%% We'll append this information to the config that *is* in the
+%% dispatch.conf file here.  We basically iterate through each
+%% dispatch rule and append our additional config information.
+add_dynamic_config(Dispatch) ->
+    add_resource_init(Dispatch, dynamic_config(), []).
+
+add_resource_init([Rule | Rest], AdditionalConfig, Acc) ->
+    add_resource_init(Rest, AdditionalConfig, [add_init(Rule, AdditionalConfig) | Acc]);
+add_resource_init([], _AdditionalConfig, Acc) ->
     lists:reverse(Acc).
 
-add_init({Route, Guard, Module, Init}, Defaults) ->
-    InitParams = Init ++ Defaults,
+add_init({Route, Guard, Module, Init}, AdditionalConfig) ->
+    InitParams = Init ++ AdditionalConfig,
     {Route, Guard, Module, InitParams};
-add_init({Route, Module, Init}, Defaults) ->
-    InitParams = Init ++ Defaults,
+add_init({Route, Module, Init}, AdditionalConfig) ->
+    InitParams = Init ++ AdditionalConfig,
     {Route, Module, InitParams}.
 
 dynamic_config() ->

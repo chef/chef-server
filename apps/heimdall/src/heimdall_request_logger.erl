@@ -76,7 +76,7 @@ generate_msg(#wm_log_data{response_code = ResponseCode,
                     {path, Path},
                     {module, Module},
                     {reqid, ReqId},
-                    {requestor_id, RequestorId}] ++ PerfStats, %% PerfStats is already a list
+                    {requestor_id, RequestorId} | PerfStats], %% PerfStats is already a list
 
     %% Other fields, however, can be left out if the value is
     %% undefined.
