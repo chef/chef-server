@@ -1,6 +1,7 @@
 -module(heimdall_wm_named_resources).
 
 -include("heimdall_wm_rest_endpoint.hrl").
+-include_lib("stats_hero/include/stats_hero.hrl").
 
 -export([delete_resource/2,
          to_json/2]).
@@ -21,20 +22,22 @@ auth_info('DELETE') ->
 
 % maybe move this to heimdall_wm_util?  At the moment, however, this is the
 % only place it's used; there's no other way to directly get group membership
-get_members(Type, AuthzId) ->
-    case heimdall_db:group_membership(Type, AuthzId) of
+get_members(ReqId, Type, AuthzId) ->
+    case ?SH_TIME(ReqId, heimdall_db, group_membership, (Type, AuthzId)) of
         {error, Error} ->
             throw({db_error, Error});
         List ->
             List
     end.
 
-to_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType} = State) ->
+to_json(Req, #base_state{reqid = ReqId,
+                         authz_id = AuthzId,
+                         request_type = RequestType} = State) ->
     case RequestType of
         group ->
             try
-                Actors = get_members(actor, AuthzId),
-                Groups = get_members(group, AuthzId),
+                Actors = get_members(ReqId, actor, AuthzId),
+                Groups = get_members(ReqId, group, AuthzId),
                 {heimdall_wm_util:encode({[{<<"actors">>, Actors},
                                            {<<"groups">>, Groups}]}), Req, State}
             catch
@@ -45,9 +48,10 @@ to_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType} = State
             {<<"{}">>, Req, State}
     end.
 
-delete_resource(Req, #base_state{authz_id = AuthzId,
+delete_resource(Req, #base_state{reqid = ReqId,
+                                 authz_id = AuthzId,
                                  request_type = Type} = State) ->
-    case heimdall_db:delete(Type, AuthzId) of
+    case ?SH_TIME(ReqId, heimdall_db, delete, (Type, AuthzId)) of
         ok ->
             {true, wrq:set_resp_body(<<"{}">>, Req), State};
         {error, Error} ->

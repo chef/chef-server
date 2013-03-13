@@ -62,6 +62,10 @@ generate_msg(#wm_log_data{response_code = ResponseCode,
     RequestorId = note(requestor_id, Notes),
     Module = note(module, Notes),
     CreatedAuthzId = note(created_authz_id, Notes),
+    PerfStats = case note(perf_stats, Notes) of
+                    undefined -> [];
+                    Stats -> Stats
+                end,
 
     %% We'll always output information in the log for these fields,
     %% even if their value is 'undefined'.  These are key fields for
@@ -72,7 +76,7 @@ generate_msg(#wm_log_data{response_code = ResponseCode,
                     {path, Path},
                     {module, Module},
                     {reqid, ReqId},
-                    {requestor_id, RequestorId}],
+                    {requestor_id, RequestorId} | PerfStats], %% PerfStats is already a list
 
     %% Other fields, however, can be left out if the value is
     %% undefined.

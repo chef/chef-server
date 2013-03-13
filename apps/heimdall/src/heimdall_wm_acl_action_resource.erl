@@ -21,26 +21,30 @@ auth_info(Verb) when Verb =:= 'PUT';
                      Verb =:= 'DELETE' ->
     grant.
 
-to_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType,
+to_json(Req, #base_state{reqid = ReqId,
+                         authz_id = AuthzId,
+                         request_type = RequestType,
                          action = Action} = State) ->
     try
-        Ejson = heimdall_acl:make_ejson_action(Action, RequestType, AuthzId),
+        Ejson = heimdall_acl:make_ejson_action(ReqId, Action, RequestType, AuthzId),
         {heimdall_wm_util:encode(Ejson), Req, State}
     catch
         throw:{db_error, Error} ->
             heimdall_wm_error:set_db_exception(Req, State, Error)
-    end.    
+    end.
 
-from_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType,
+from_json(Req, #base_state{reqid = ReqId,
+                           authz_id = AuthzId,
+                           request_type = RequestType,
                            action = Action} = State) ->
     try
         Body = wrq:req_body(Req),
         {Actors, Groups} = heimdall_acl:parse_acl_json(Body, Action),
         % TODO: move this to a postgres function so that it can all happen
         % in a transaction:
-        heimdall_acl:clear_access(RequestType, AuthzId, Action),
-        heimdall_acl:add_access_set(Action, RequestType, AuthzId, actor, Actors),
-        heimdall_acl:add_access_set(Action, RequestType, AuthzId, group, Groups),
+        heimdall_acl:clear_access(ReqId, RequestType, AuthzId, Action),
+        heimdall_acl:add_access_set(ReqId, Action, RequestType, AuthzId, actor, Actors),
+        heimdall_acl:add_access_set(ReqId, Action, RequestType, AuthzId, group, Groups),
         {true, wrq:set_resp_body(<<"{}">>, Req), State}
     catch
         throw:{error, invalid_json} ->
@@ -53,10 +57,12 @@ from_json(Req, #base_state{authz_id = AuthzId, request_type = RequestType,
 
 
 
-delete_resource(Req, #base_state{authz_id = AuthzId, request_type = RequestType,
+delete_resource(Req, #base_state{reqid = ReqId,
+                                 authz_id = AuthzId,
+                                 request_type = RequestType,
                                  action = Action} = State) ->
     try
-        heimdall_acl:clear_access(RequestType, AuthzId, Action),
+        heimdall_acl:clear_access(ReqId, RequestType, AuthzId, Action),
         {true, wrq:set_resp_body(<<"{}">>, Req), State}
     catch
         throw:{db_error, Error} ->

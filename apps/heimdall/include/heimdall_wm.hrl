@@ -45,5 +45,9 @@
           module :: atom(),
 
           %% A unique request identifier, used for aggregating metrics
-          reqid :: request_id()
+          reqid :: request_id(),
+
+          %% Proplist of config info to pass to stats_hero
+          metrics_config :: [{atom(), term()}]
+
          }).

@@ -1,6 +1,7 @@
 -module(heimdall_wm_util).
 
 -include("heimdall_wm.hrl").
+-include_lib("stats_hero/include/stats_hero.hrl").
 
 -export([decode/1,
          encode/1,
@@ -15,7 +16,7 @@ generate_authz_id() ->
                       <<X:16>> <= crypto:rand_bytes(16) ]).
 
 %% Extract the requestor from the request headers and return updated base state.
-get_requestor(Req, #base_state{superuser_id = SuperuserId} = State) ->
+get_requestor(Req, #base_state{reqid = ReqId, superuser_id = SuperuserId} = State) ->
     case wrq:get_req_header("X-Ops-Requesting-Actor-Id", Req) of
         undefined ->
             State;
@@ -23,7 +24,7 @@ get_requestor(Req, #base_state{superuser_id = SuperuserId} = State) ->
             % Superuser gets a pass
             State#base_state{requestor_id = superuser};
         Id ->
-            case heimdall_db:exists(actor, Id) of
+            case ?SH_TIME(ReqId, heimdall_db, exists, (actor, Id)) of
                 true ->
                     State#base_state{requestor_id = Id};
                 false ->

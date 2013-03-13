@@ -46,7 +46,7 @@ init([]) ->
                  {ip, Ip},
                  {port, Port},
                  {log_dir, "priv/log"},
-                 {dispatch, add_superuser_id(Dispatch)}
+                 {dispatch, add_dynamic_config(Dispatch)}
                 ],
 
     Web = {webmachine_mochiweb,
@@ -56,14 +56,41 @@ init([]) ->
     Processes = [Web],
     {ok, {{one_for_one, 10, 10}, Processes}}.
 
-%% Here we're adding the superuserID once when we set up the endpoints in webmachine
-%% so we don't have to do this repeatedly for every request
-superuser_to_config([], SuperuserId) ->
-    [];
-superuser_to_config([{Path, Module, Args}|Rest], SuperuserId) ->
-    NewConfig = {superuser_id, SuperuserId},
-    [{Path, Module, [NewConfig | Args]} | superuser_to_config(Rest, SuperuserId)].
 
-add_superuser_id(Dispatch) ->
+%% @doc We need to add some configuration to the resources that comes
+%% from our sys.config file.  This is stuff that we can't include
+%% directly in the dispatch.conf file, but that we don't want to look
+%% up for each request.
+%%
+%% We'll append this information to the config that *is* in the
+%% dispatch.conf file here.  We basically iterate through each
+%% dispatch rule and append our additional config information.
+add_dynamic_config(Dispatch) ->
+    add_resource_init(Dispatch, dynamic_config(), []).
+
+add_resource_init([Rule | Rest], AdditionalConfig, Acc) ->
+    add_resource_init(Rest, AdditionalConfig, [add_init(Rule, AdditionalConfig) | Acc]);
+add_resource_init([], _AdditionalConfig, Acc) ->
+    lists:reverse(Acc).
+
+add_init({Route, Guard, Module, Init}, AdditionalConfig) ->
+    InitParams = Init ++ AdditionalConfig,
+    {Route, Guard, Module, InitParams};
+add_init({Route, Module, Init}, AdditionalConfig) ->
+    InitParams = Init ++ AdditionalConfig,
+    {Route, Module, InitParams}.
+
+dynamic_config() ->
+    superuser_config() ++ stats_hero_config().
+
+superuser_config() ->
     {ok, SuperuserId} = application:get_env(heimdall, superuser_id),
-    superuser_to_config(Dispatch, SuperuserId).
+    [{superuser_id, SuperuserId}].
+
+stats_hero_config() ->
+    {ok, MetricKey} = application:get_env(heimdall, root_metric_key),
+    [{metrics_config, [
+                       {root_metric_key, MetricKey},
+                       {stats_hero_upstreams, heimdall_wm_base:stats_hero_upstreams()},
+                       {stats_hero_label_fun, {heimdall_wm_base, stats_hero_label}}
+                      ]}].
