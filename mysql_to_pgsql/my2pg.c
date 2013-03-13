@@ -106,13 +106,17 @@ unsigned char decode(char x)
 
 void emit_decoded_hex(char *buf, int len)
 {
-    unsigned char a, b;
+    unsigned char a, b, res;
     char *pos = buf;
     printf(",E'");
     while (*pos) {
         a = *pos;
         b = *(++pos);
-        putchar( ((decode(a) * 16) & 0xF0) + (decode(b) & 0xF) );
+        res = ((decode(a) * 16) & 0xF0) + (decode(b) & 0xF);
+        if (res == 0x27)     /* we need to escape the ' with \' */
+            printf("\\'");
+        else
+            putchar(res);
         pos++;
     }
     printf("',");
