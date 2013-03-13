@@ -185,5 +185,6 @@ stats_hero_upstreams() ->
     [<<"rdbms">>].
 
 stats_hero_label({heimdall_db, Fun}) ->
-    FunBin = erlang:atom_to_binary(Fun, utf8),
-    <<"rdbms.heimdall_db.", FunBin/binary>>.
+    %% DO NOT TAUNT HAPPY FUN BIN
+    HappyFunBin = erlang:atom_to_binary(Fun, utf8),
+    <<"rdbms.heimdall_db.", HappyFunBin/binary>>.
