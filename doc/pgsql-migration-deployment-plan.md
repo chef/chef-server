@@ -14,7 +14,7 @@ Assignemnts:
   <tr><td>00:04</td><td>5.1</td><td>Marc</td><td>Concurrent</td></tr>
   <tr><td>00:04</td><td>5.2</td><td>Stephen</td><td>Concurrent</td></tr>
   <tr><td>00:04</td><td>5.3</td><td>Seth</td><td>Concurrent</td></tr>
-  <tr><td>** **<td><td></td><td></td><td>Steps 4 and 5 must be completed before proceeding</td></tr>
+  <tr><td>** **</td><td></td><td></td><td>Steps 4 and 5 must be completed before proceeding</td></tr>
   <tr><td>00:10</td> <td>6.1</td> <td>Stephen</td> <td>Concurrent w/ 6.2, 6.3</td> </tr>
   <tr><td>00:10</td> <td>6.2</td> <td>Marc</td> <td></td> </tr>
   <tr><td>00:10</td> <td>6.3</td> <td>Seth/onsite</td> <td></td> </tr>
