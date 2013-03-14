@@ -11,7 +11,16 @@ if ENV['OPSCODE_SRC'].nil?
   exit 1
 end
 if ENV['OPSCODE_COOKBOOKS'].nil?
-  puts "ERROR: please export OPSCODE_COOKBOOKS variable."
+  puts """
+  ERROR: please export OPSCODE_COOKBOOKS variable.
+
+  This should be a directory with checkouts of cookbooks from the
+  'opscode-cookbooks' Github organization.
+
+  If you point it to anything else (like your checkout of the
+  opscode/opscode-platform-cookbooks repo), you are probably going
+  to be unhappy.
+  """
   exit 1
 end
 
