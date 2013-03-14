@@ -3,7 +3,7 @@ CREATE TYPE auth_type AS ENUM ('actor', 'group', 'object', 'container');
 
 -- No unique constraint on names now because we don't have
 -- organizations in Authz to do the proper scoping. :(
-CREATE TABLE container(
+CREATE TABLE auth_container(
     id bigserial PRIMARY KEY,
     authz_id  CHAR(32) NOT NULL UNIQUE
 );
@@ -98,7 +98,7 @@ CREATE TABLE group_acl_actor(
 CREATE INDEX group_acl_actor_authorizee ON group_acl_actor(authorizee);
 
 CREATE TABLE container_acl_group(
-       target bigint NOT NULL REFERENCES container(id) ON UPDATE CASCADE ON DELETE CASCADE,
+       target bigint NOT NULL REFERENCES auth_container(id) ON UPDATE CASCADE ON DELETE CASCADE,
        authorizee bigint NOT NULL REFERENCES auth_group(id) ON UPDATE CASCADE ON DELETE CASCADE,
        permission auth_permission NOT NULL,
        PRIMARY KEY (target, authorizee, permission)
@@ -106,7 +106,7 @@ CREATE TABLE container_acl_group(
 CREATE INDEX container_acl_group_authorizee ON container_acl_group(authorizee);
 
 CREATE TABLE container_acl_actor(
-       target bigint NOT NULL REFERENCES container(id) ON UPDATE CASCADE ON DELETE CASCADE,
+       target bigint NOT NULL REFERENCES auth_container(id) ON UPDATE CASCADE ON DELETE CASCADE,
        authorizee bigint NOT NULL REFERENCES auth_actor(id) ON UPDATE CASCADE ON DELETE CASCADE,
        permission auth_permission NOT NULL,
        PRIMARY KEY (target, authorizee, permission)
@@ -234,11 +234,11 @@ AS $$
    SELECT id FROM auth_object WHERE authz_id = $1;
 $$;
 
-CREATE FUNCTION container_id(container.authz_id%TYPE)
-RETURNS container.id%TYPE
+CREATE FUNCTION container_id(auth_container.authz_id%TYPE)
+RETURNS auth_container.id%TYPE
 LANGUAGE SQL STABLE STRICT
 AS $$
-   SELECT id FROM container WHERE authz_id = $1;
+   SELECT id FROM auth_container WHERE authz_id = $1;
 $$;
 
 CREATE FUNCTION authz_id_for_type(char(32), auth_type)
@@ -256,7 +256,7 @@ BEGIN
       WHEN 'object' THEN
         SELECT INTO return_id id FROM auth_object WHERE authz_id = $1;
       WHEN 'container' THEN
-        SELECT INTO return_id id FROM container WHERE authz_id = $1;
+        SELECT INTO return_id id FROM auth_container WHERE authz_id = $1;
     END CASE;
     RETURN return_id;
 END
