@@ -83,13 +83,11 @@ knife ssh  "role:opscode-erchef \
 
 ## 4) Run Migration 
 
-* from mysql master, run migrate.sh as follows: 
-
+1. from mysql master, run migrate.sh as follows: 
 ```
     cd /srv/chef-mover/mysql_to_pgsql
     ./migrate.sh POSTGRESQL-MASTER-HOST.opscode.us
 ```
-
 1. If prompted to confirm SSH key for POSTGRESQL-MASTER-HOST, do so.
 1. When prompted to provide password for opscode\_chef, provide the RW password obtained above. 
 1. Expected run time is between 1 and 2 minutes
@@ -162,7 +160,7 @@ sudo tail -F /var/log/oc_erchef.log \
 
 ### 6.4) Batch 
 1. **Important**: This validation will not complete prior to bringing OHC
-  back online. It may run longer than an hour.
+   back online. It may run longer than an hour.
 1. Ensure no early/immediate errors 
 1. Execute org count script (opscode-platform-debug) and verify output is
    consistent with output when script executed against mysql. 
@@ -178,8 +176,8 @@ in that output, and ensure it contains org/node count data.
 ## 7) Restore Services
 
 ### 7.1) Take OHC out of maintenance mode 
-* edit role ``opscode-lb`` and set ``deny_all_except_hq`` = false
-* Upload the role and CCR LBs: 
+1. edit role ``opscode-lb`` and set ``deny_all_except_hq`` = false
+1. Upload the role and CCR LBs: 
 
 ```
     knife role edit opscode-lb
@@ -187,35 +185,35 @@ in that output, and ensure it contains org/node count data.
 ```
 
 ### 7.2) Resume daemonized CCR 
-
-**CSSHX**: `sudo /etc/init.d/chef-client start`
+1. **CSSHX** Account: `sudo /etc/init.d/chef-client start`
+1. **CSSHX** Erchef: `sudo /etc/init.d/chef-client start`
 
 ### 7.3) End Downtime
-* Post status to #operations
-* Status update: twitter
-* Status update: status.opscode.com
+1. Post status to #operations
+1. Status update: twitter
+1. Status update: status.opscode.com
 
 ## 8) Post-Completion Validation 
 
 ### 8.1) WebUI
 
 In WebUI, create a new user account: 
-* www.opscode.com -> Sign Up -> Free Trial -> [enter requested info]
-* Use a unique email address and company short name
-* Verify the account by email.
+1. www.opscode.com -> Sign Up -> Free Trial -> [enter requested info]
+1. Use a unique email address and company short name
+1. Verify the account by email.
 
 In WebUI, invite the new user into the existing org: 
-* Go to manage.opscode.com and log in if necessary 
-* Choose "users" tab
-* Choose "invite" tab 
-* Provide new user name 
+1. Go to manage.opscode.com and log in if necessary 
+1. Choose "users" tab
+1. Choose "invite" tab 
+1. Provide new user name 
 
 That user should accept the pending invite via webui.  
 
 In WebUI dissociate the user from the org: 
-* Go to manage.opscode.com
-* Choose "users" tab 
-* Choose "dissociate" link next to the newly-joined user 
+1. Go to manage.opscode.com
+1. Choose "users" tab 
+1. Choose "dissociate" link next to the newly-joined user 
 
 ### 8.2) Orgmapper
 Using orgmapper, delete the user created above from OHC. Assuming a user named
