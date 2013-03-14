@@ -1,4 +1,5 @@
 CREATE TYPE auth_permission AS ENUM ('update', 'read', 'grant', 'delete', 'create');
+CREATE TYPE auth_type AS ENUM ('actor', 'group', 'object', 'container');
 
 -- No unique constraint on names now because we don't have
 -- organizations in Authz to do the proper scoping. :(
@@ -240,6 +241,26 @@ AS $$
    SELECT id FROM container WHERE authz_id = $1;
 $$;
 
+CREATE FUNCTION authz_id_for_type(char(32), auth_type)
+RETURNS bigint
+LANGUAGE plpgsql STABLE STRICT
+AS $$
+DECLARE
+    return_id bigint;
+BEGIN
+    CASE $2
+      WHEN 'actor' THEN
+        SELECT INTO return_id id FROM auth_actor WHERE authz_id = $1;
+      WHEN 'group' THEN
+        SELECT INTO return_id id FROM auth_group WHERE authz_id = $1;
+      WHEN 'object' THEN
+        SELECT INTO return_id id FROM auth_object WHERE authz_id = $1;
+      WHEN 'container' THEN
+        SELECT INTO return_id id FROM container WHERE authz_id = $1;
+    END CASE;
+    RETURN return_id;
+END
+$$;
 
 -- Select all the groups an actor is a member of, recursively
 --
@@ -268,12 +289,13 @@ WITH RECURSIVE
 SELECT id from groups;
 $$;
 
--- Don't think that we need similar functions for groups having a
--- permission, since I don't think that's ever queried for directly
--- from outside.
-CREATE FUNCTION actor_has_permission_on_actor(
+-- Generic check for actors having permission on authz entities of arbitrary
+-- type. Don't think that we need similar functions for groups having a permission,
+-- since I don't think that's ever queried for directly from outside.
+CREATE FUNCTION actor_has_permission_on(
        query_actor auth_actor.authz_id%TYPE,
-       query_target auth_actor.authz_id%TYPE,
+       query_target char(32),
+       target_type auth_type,
        perm auth_permission)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -285,180 +307,35 @@ DECLARE
   --
   -- If the Authz IDs don't refer to an existing item, an error will
   -- be thrown.
-  actor_id  auth_actor.id%TYPE  NOT NULL := actor_id(query_actor);
-  target_id auth_actor.id%TYPE NOT NULL := actor_id(query_target);
+  actor_id  auth_actor.id%TYPE NOT NULL := actor_id(query_actor);
+  target_id bigint NOT NULL := authz_id_for_type(query_target, target_type);
+  actor_table char(32) := quote_ident(target_type || '_acl_actor');
+  group_table char(32) := quote_ident(target_type || '_acl_group');
+  has_result bigint;  
 BEGIN
-
         -- Check to see if the actor has the permission directly
-        PERFORM a.*
-        FROM actor_acl_actor AS a
-        WHERE a.target = target_id
-        AND a.authorizee = actor_id
-        AND a.permission = perm;
+        EXECUTE 'SELECT a.target FROM ' || actor_table || ' AS a
+            WHERE a.target = $1
+            AND a.authorizee = $2
+            AND a.permission = $3' USING target_id, actor_id, perm
+          INTO has_result;
 
        -- If that returned anything, we're done
-       IF FOUND THEN
+       IF has_result IS NOT NULL THEN
           RETURN TRUE;
        END IF;
 
        -- The permission wasn't granted directly to the actor, we need
        -- to check the groups the actor is in
-       PERFORM a.*
-       FROM actor_acl_group AS a
-       JOIN groups_for_actor(actor_id)
-          AS gs(id) ON gs.id = a.authorizee
-       WHERE a.target = target_id
-       AND a.permission = perm;
+       EXECUTE 'SELECT a.target FROM ' || group_table || ' AS a
+           JOIN groups_for_actor($1)
+             AS gs(id) ON gs.id = a.authorizee
+           WHERE a.target = $2
+           AND a.permission = $3' USING actor_id, target_id, perm
+         INTO has_result;
 
        -- If anything was found, we're done
-       IF FOUND THEN
-          RETURN TRUE;
-       END IF;
-
-       -- The actor doesn't have the permission
-       RETURN FALSE;
-END;
-$$;
-
-CREATE FUNCTION actor_has_permission_on_group(
-       query_actor auth_actor.authz_id%TYPE,
-       query_group auth_group.authz_id%TYPE,
-       perm auth_permission)
-RETURNS BOOLEAN
-LANGUAGE plpgsql
-STABLE -- <- this function doesn't alter the database; just queries it
-STRICT -- <- returns NULL immediately if any arguments are NULL
-AS $$
-DECLARE
-  -- Convert Authz IDs into internal database IDs
-  --
-  -- If the Authz IDs don't refer to an existing item, an error will
-  -- be thrown.
-  actor_id  auth_actor.id%TYPE  NOT NULL := actor_id(query_actor);
-  group_id auth_group.id%TYPE NOT NULL := group_id(query_group);
-BEGIN
-
-        -- Check to see if the actor has the permission directly
-        PERFORM a.*
-        FROM group_acl_actor AS a
-        WHERE a.target = group_id
-        AND a.authorizee = actor_id
-        AND a.permission = perm;
-
-       -- If that returned anything, we're done
-       IF FOUND THEN
-          RETURN TRUE;
-       END IF;
-
-       -- The permission wasn't granted directly to the actor, we need
-       -- to check the groups the actor is in
-       PERFORM a.*
-       FROM group_acl_group AS a
-       JOIN groups_for_actor(actor_id)
-          AS gs(id) ON gs.id = a.authorizee
-       WHERE a.target = group_id
-       AND a.permission = perm;
-
-       -- If anything was found, we're done
-       IF FOUND THEN
-          RETURN TRUE;
-       END IF;
-
-       -- The actor doesn't have the permission
-       RETURN FALSE;
-END;
-$$;
-
-CREATE FUNCTION actor_has_permission_on_object(
-       query_actor auth_actor.authz_id%TYPE,
-       query_object auth_object.authz_id%TYPE,
-       perm auth_permission)
-RETURNS BOOLEAN
-LANGUAGE plpgsql
-STABLE -- <- this function doesn't alter the database; just queries it
-STRICT -- <- returns NULL immediately if any arguments are NULL
-AS $$
-DECLARE
-  -- Convert Authz IDs into internal database IDs
-  --
-  -- If the Authz IDs don't refer to an existing item, an error will
-  -- be thrown.
-  actor_id  auth_actor.id%TYPE  NOT NULL := actor_id(query_actor);
-  object_id auth_object.id%TYPE NOT NULL := object_id(query_object);
-BEGIN
-
-        -- Check to see if the actor has the permission directly
-        PERFORM a.*
-        FROM object_acl_actor AS a
-        WHERE a.target = object_id
-        AND a.authorizee = actor_id
-        AND a.permission = perm;
-
-       -- If that returned anything, we're done
-       IF FOUND THEN
-          RETURN TRUE;
-       END IF;
-
-       -- The permission wasn't granted directly to the actor, we need
-       -- to check the groups the actor is in
-       PERFORM a.*
-       FROM object_acl_group AS a
-       JOIN groups_for_actor(actor_id)
-          AS gs(id) ON gs.id = a.authorizee
-       WHERE a.target = object_id
-       AND a.permission = perm;
-
-       -- If anything was found, we're done
-       IF FOUND THEN
-          RETURN TRUE;
-       END IF;
-
-       -- The actor doesn't have the permission
-       RETURN FALSE;
-END;
-$$;
-
-CREATE FUNCTION actor_has_permission_on_container(
-       query_actor auth_actor.authz_id%TYPE,
-       query_container container.authz_id%TYPE,
-       perm auth_permission)
-RETURNS BOOLEAN
-LANGUAGE plpgsql
-STABLE -- <- this function doesn't alter the database; just queries it
-STRICT -- <- returns NULL immediately if any arguments are NULL
-AS $$
-DECLARE
-  -- Convert Authz IDs into internal database IDs
-  --
-  -- If the Authz IDs don't refer to an existing item, an error will
-  -- be thrown.
-  actor_id  auth_actor.id%TYPE  NOT NULL := actor_id(query_actor);
-  container_id container.id%TYPE NOT NULL := container_id(query_container);
-BEGIN
-
-        -- Check to see if the actor has the permission directly
-        PERFORM a.*
-        FROM container_acl_actor AS a
-        WHERE a.target = container_id
-        AND a.authorizee = actor_id
-        AND a.permission = perm;
-
-       -- If that returned anything, we're done
-       IF FOUND THEN
-          RETURN TRUE;
-       END IF;
-
-       -- The permission wasn't granted directly to the actor, we need
-       -- to check the groups the actor is in
-       PERFORM a.*
-       FROM container_acl_group AS a
-       JOIN groups_for_actor(actor_id)
-          AS gs(id) ON gs.id = a.authorizee
-       WHERE a.target = container_id
-       AND a.permission = perm;
-
-       -- If anything was found, we're done
-       IF FOUND THEN
+       IF has_result IS NOT NULL THEN
           RETURN TRUE;
        END IF;
 

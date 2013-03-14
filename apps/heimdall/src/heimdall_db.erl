@@ -128,15 +128,12 @@ delete_acl(AuthorizeeType, TargetType, TargetId, Permission) ->
             {error, Reason}
     end.
 
-permission_query(actor) -> actor_has_permission_on_actor;
-permission_query(group) -> actor_has_permission_on_group;
-permission_query(object) -> actor_has_permission_on_object;
-permission_query(container) -> actor_has_permission_on_container.
+permission_query() -> actor_has_permission_on.
 
 -spec has_permission(auth_type(), auth_id(), auth_id(), permission()) -> boolean().
 has_permission(TargetType, TargetId, RequestorId, Permission) ->
-    PermissionStatement = permission_query(TargetType),
-    case sqerl:select(PermissionStatement, [RequestorId, TargetId, Permission],
+    PermissionStatement = permission_query(),
+    case sqerl:select(PermissionStatement, [RequestorId, TargetId, TargetType, Permission],
                       first_as_scalar, [permission]) of
         {ok, Answer} ->
             Answer;
