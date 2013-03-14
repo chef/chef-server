@@ -6,7 +6,19 @@ site :opscode
 # cookbooks on your machine, you can set this to false
 ENABLE_METRICS_SERVER = true
 
-OPSCODE_COOKBOOK_DIR = "#{ENV['HOME']}/src/opscode-cookbooks"
+if ENV['OPSCODE_SRC'].nil?
+  puts """
+  ERROR: please export OPSCODE_SRC variable.
+
+  It should point to a directory that contains an 'opscode' and an
+  'opscode-cookbooks' directory, which in turn contain code checkouts
+  from the respective Github organizations.
+
+  """
+  exit 1
+end
+
+OPSCODE_COOKBOOK_DIR = "#{ENV['OPSCODE_SRC']}/opscode-cookbooks"
 
 cookbook "opscode-heimdall", git: "git@github.com:opscode-cookbooks/opscode-heimdall.git"
 # cookbook "opscode-heimdall", path: "#{OPSCODE_COOKBOOK_DIR}/opscode-heimdall"
@@ -21,7 +33,7 @@ cookbook "opscode-dev-shim", git: "git@github.com:opscode-cookbooks/opscode-dev-
 
 if ENABLE_METRICS_SERVER
   # These are currently needed if you want to get graphite running locally
-  DEV_VM_COOKBOOK_DIR = "#{ENV['HOME']}/src/opscode/opscode-dev-vm/cookbooks"
+  DEV_VM_COOKBOOK_DIR = "#{ENV['OPSCODE_SRC']}/opscode/opscode-dev-vm/cookbooks"
   cookbook "piab",     path: "#{DEV_VM_COOKBOOK_DIR}/piab"
   cookbook "estatsd",  path: "#{DEV_VM_COOKBOOK_DIR}/estatsd"
   cookbook "graphite", path: "#{DEV_VM_COOKBOOK_DIR}/graphite"
