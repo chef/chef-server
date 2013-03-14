@@ -1,8 +1,13 @@
-## 
+# Plan Execution
 
-## 1) Preparation
+<table>
+  <tr><th>Offset</th><th>Activity</th><th>Who</th><th>Notes</th></tr>
+  <tr><td></td><td></td><td></td><td></td></tr>
+</table>
+ 
+# 1) Preparation
 
-### 1.1) Hosts and Access
+## 1.1) Hosts and Access
 * Determine mysql master and postgres master host names. Referred to as
   MYSQL-MASTER-HOST and POSTGRESQL-MASTER-HOST respectively. 
 * Have available the database RW password from data bag secrets: chef\_db.rw\_password 
@@ -11,20 +16,22 @@
 * Any remote person performing valdiation should be logged into the VPN
   and SSHd into the host ``migration-validator-dev-ov-797f67ef.opscode.us``
 
-### 1.2) Pre-run CCR and Command Terminals
-* ccr into all hosts and perform a chef-client run prior to making any
+## 1.2) Pre-run CCR and Command Terminals
+* SSH into all hosts and perform a chef-client run prior to making any
   changes.  In addition to the roles listed below as impacted, this
-includes:
-``role:chef-pgsql``
-``role:opscode-lb``
-``role:mysql-master``
-``role:monitoring-nagios``
+  includes:
 
-* ccr on mysql master to ensure that the necessary components are in place.
+```
+    role:chef-pgsql
+    role:opscode-lb
+    role:mysql-master
+    role:monitoring-nagios
+```
 * clear test data from destination postgres database
 * open up a command and control terminal for all the affected servers (below)
     * verify that you are connected to all of the server that you expect to be connected to
 
+Command Terminal Group: Account
 ```
 knife ssh "role:opscode-account \
            OR role:opscode-accountmanagement \
@@ -34,6 +41,7 @@ knife ssh "role:opscode-account \
       csshx
 ```
 
+Command Terminal Group: Chef
 ```
 knife ssh  "role:opscode-erchef \
             role:opscode-chef"
