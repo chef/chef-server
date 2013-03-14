@@ -1,8 +1,36 @@
 # Plan Execution
-
+Assignemnts: 
+  
 <table>
   <tr><th>Offset</th><th>Activity</th><th>Who</th><th>Notes</th></tr>
-  <tr><td></td><td></td><td></td><td></td></tr>
+  <tr><td>n/a</td><td>1.2</td><td>Marc</td><td></td></tr>
+  <tr><td>n/a</td><td>1.3</td><td>Seth (Erchef), Stephen (Account)</td><td></td></tr>
+  <tr><td>n/a</td><td>2</td><td>Marc, All</td><td></td></tr>
+  <tr><td>n/a</td><td>3.1</td><td>Seth, Stephen</td><td></td></tr>
+  <tr><td>00:00</td><td>3.2</td><td>Ops</td><td></td></tr>
+  <tr><td>\*\*\*\*\*</td><td></td><td></td><td>Downtime Begins<td></tr>
+  <tr><td>00:02</td><td>3.3</td><td>Marc</td><td></td></tr>
+  <tr><td>00:03</td><td>4.1</td><td><Marc/td><td>Step 5 proceeds concurrently after this is started. Max time expected: 5 min</td></tr>
+  <tr><td>00:04</td><td>5.1</td><td>Marc</td><td>Concurrent</td></tr>
+  <tr><td>00:04</td><td>5.2</td><td>Stephen</td><td>Concurrent</td></tr>
+  <tr><td>00:04</td><td>5.3</td><td>Seth</td><td>Concurrent</td></tr>
+  <tr><td>\*\*\*\*\*</td><td></td><td></td><td>Steps 4 and 5 must be completed before proceeding</td></tr>
+  <tr><td>00:10</td> <td>6.1</td> <td>Stephen</td> <td>Concurrent w/ 6.2, 6.3</td> </tr>
+  <tr><td>00:10</td> <td>6.2</td> <td>Marc</td> <td></td> </tr>
+  <tr><td>00:10</td> <td>6.3</td> <td>Seth/onsite</td> <td></td> </tr>
+  <tr><td>00:11</td> <td>6.4</td> <td>Marc</td> <td> Concurrent w/ 6.2, 6.3</td> </tr>
+  <tr><td>\*\*\*\*\*</td><td></td><td></td><td>All of Step 6 must be completed before proceeding</td></tr>
+  <tr><td>00:15</td> <td>7.1</td> <td>Marc</td> <td></td> </tr>
+  <tr><td>00:16</td> <td>7.2</td> <td>Ops</td> <td></td> </tr>
+  <tr><td>\*\*\*\*\*</td><td></td><td></td><td>Downtime Ends<td></tr>
+  <tr><td>n/a</td> <td>7.3.1</td> <td>Stephen</td> <td></td> </tr>
+  <tr><td>n/a</td> <td>7.3.2</td> <td>Seth</td> <td></td> </tr>
+  <tr><td>n/a</td> <td>8.1</td> <td>Marc</td> <td></td> </tr>
+  <tr><td>n/a</td> <td>8.2</td> <td>Marc</td> <td></td> </tr>
+  <tr><td>n/a</td> <td>8.3</td> <td>Stephen</td> <td></td> </tr>
+  <tr><td>n/a</td> <td>8.4</td> <td>Seth</td> <td></td> </tr>
+  <!-- <tr><td>00:00</td> <td></td> <td></td> <td></td> </tr> -->
+
 </table>
  
 # Preparation
@@ -39,7 +67,8 @@
 1. open up a command and control terminal for all the affected servers (below)
     * verify that you are connected to all of the servers that you expect to be connected to
 
-Command Terminal Session: Account
+Command Terminal Session: **Account**
+
 ```
 knife ssh "role:opscode-account \
            OR role:opscode-accountmanagement \
@@ -49,7 +78,8 @@ knife ssh "role:opscode-account \
       csshx
 ```
 
-Command Terminal Session: Chef
+Command Terminal Session: **Erchef**
+
 ```
 knife ssh  "role:opscode-erchef \
             role:opscode-chef" \
@@ -84,6 +114,7 @@ knife ssh  "role:opscode-erchef \
 ## 4) Run Migration 
 
 1. from mysql master, run migrate.sh as follows: 
+
 ```
     cd /srv/chef-mover/mysql_to_pgsql
     ./migrate.sh POSTGRESQL-MASTER-HOST.opscode.us
@@ -116,9 +147,11 @@ knife ssh  "role:opscode-erchef \
 ```
 
 ### 5.2) CCR "account" session
+
 **CSSHX**: `sudo chef-client`
 
 Tail and verify the logs (from the command console):
+
 **CSSHX**:
 ```
 sudo tail -F /var/log/opscode-account.log \
@@ -128,9 +161,11 @@ sudo tail -F /var/log/opscode-account.log \
 ```
 
 ### 5.3) CCR "erchef" session 
+
 **CSSHX**: `sudo chef-client`
 
 Tail and verify the logs (from the command console):
+
 **CSSHX**:
 ```
 sudo tail -F /var/log/oc_erchef.log \
@@ -146,13 +181,14 @@ sudo tail -F /var/log/oc_erchef.log \
 
 ### 6.2) Pedant
 1. execute pedant against OHC. 
-1. After setup and first block of node tests completes successfully, 
-   call out completion of validation. 
+
 ```
     cd rs-prod
     ./bin/ohc-pedant -e rs-prod -- --smoke --focus-nodes
 ```
-* Allow tests to continue running and call out any errors.
+1. After setup and first block of node tests completes successfully, 
+   call out completion of validation. 
+1. Allow tests to continue running and call out any errors.
 
 ### 6.3) WebUI - onsite 
 1. Log into management console with a valid user 
@@ -184,14 +220,14 @@ in that output, and ensure it contains org/node count data.
     knife ssh role:opscode-lb 'sudo chef-client'
 ```
 
-### 7.2) Resume daemonized CCR 
-1. **CSSHX** Account: `sudo /etc/init.d/chef-client start`
-1. **CSSHX** Erchef: `sudo /etc/init.d/chef-client start`
-
-### 7.3) End Downtime
-1. Post status to #operations
+### 7.2) End Downtime
 1. Status update: twitter
 1. Status update: status.opscode.com
+1. Post status to #operations
+
+### 7.3) Resume daemonized CCR 
+1. **CSSHX** Account: `sudo /etc/init.d/chef-client start`
+1. **CSSHX** Erchef: `sudo /etc/init.d/chef-client start`
 
 ## 8) Post-Completion Validation 
 
