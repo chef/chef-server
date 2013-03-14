@@ -8,21 +8,21 @@ Assignemnts:
   <tr><td>n/a</td><td>2</td><td>Marc, All</td><td></td></tr>
   <tr><td>n/a</td><td>3.1</td><td>Seth, Stephen</td><td></td></tr>
   <tr><td>00:00</td><td>3.2</td><td>Ops</td><td></td></tr>
-  <tr><td>\*\*\*\*\*</td><td></td><td></td><td>Downtime Begins<td></tr>
+  <tr><td>** **</td><td></td><td></td><td>Downtime Begins<td></tr>
   <tr><td>00:02</td><td>3.3</td><td>Marc</td><td></td></tr>
   <tr><td>00:03</td><td>4.1</td><td><Marc/td><td>Step 5 proceeds concurrently after this is started. Max time expected: 5 min</td></tr>
   <tr><td>00:04</td><td>5.1</td><td>Marc</td><td>Concurrent</td></tr>
   <tr><td>00:04</td><td>5.2</td><td>Stephen</td><td>Concurrent</td></tr>
   <tr><td>00:04</td><td>5.3</td><td>Seth</td><td>Concurrent</td></tr>
-  <tr><td>\*\*\*\*\*</td><td></td><td></td><td>Steps 4 and 5 must be completed before proceeding</td></tr>
+  <tr><td>** **<td><td></td><td></td><td>Steps 4 and 5 must be completed before proceeding</td></tr>
   <tr><td>00:10</td> <td>6.1</td> <td>Stephen</td> <td>Concurrent w/ 6.2, 6.3</td> </tr>
   <tr><td>00:10</td> <td>6.2</td> <td>Marc</td> <td></td> </tr>
   <tr><td>00:10</td> <td>6.3</td> <td>Seth/onsite</td> <td></td> </tr>
   <tr><td>00:11</td> <td>6.4</td> <td>Marc</td> <td> Concurrent w/ 6.2, 6.3</td> </tr>
-  <tr><td>\*\*\*\*\*</td><td></td><td></td><td>All of Step 6 must be completed before proceeding</td></tr>
+  <tr><td>** **</td><td></td><td></td><td>All of Step 6 must be completed before proceeding</td></tr>
   <tr><td>00:15</td> <td>7.1</td> <td>Marc</td> <td></td> </tr>
   <tr><td>00:16</td> <td>7.2</td> <td>Ops</td> <td></td> </tr>
-  <tr><td>\*\*\*\*\*</td><td></td><td></td><td>Downtime Ends<td></tr>
+  <tr><td>** **</td><td></td><td></td><td>Downtime Ends<td></tr>
   <tr><td>n/a</td> <td>7.3.1</td> <td>Stephen</td> <td></td> </tr>
   <tr><td>n/a</td> <td>7.3.2</td> <td>Seth</td> <td></td> </tr>
   <tr><td>n/a</td> <td>8.1</td> <td>Marc</td> <td></td> </tr>
