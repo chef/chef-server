@@ -8,13 +8,13 @@ Assignemnts:
   <tr><td>n/a</td><td>2</td><td>Marc, All</td><td></td></tr>
   <tr><td>n/a</td><td>3.1</td><td>Seth, Stephen</td><td></td></tr>
   <tr><td>00:00</td><td>3.2</td><td>Ops</td><td></td></tr>
-  <tr><td>** **</td><td></td><td></td><td>Downtime Begins<td></tr>
-  <tr><td>00:02</td><td>3.3</td><td>Marc</td><td></td></tr>
+  <tr><td>** **</td><td></td><td></td><td><td></tr>
+  <tr><td>00:02</td><td>3.3</td><td>Marc</td><td>Downtime Begins</td></tr>
   <tr><td>00:03</td><td>4.1</td><td><Marc/td><td>Step 5 proceeds concurrently after this is started. Max time expected: 5 min</td></tr>
   <tr><td>00:04</td><td>5.1</td><td>Marc</td><td>Concurrent</td></tr>
   <tr><td>00:04</td><td>5.2</td><td>Stephen</td><td>Concurrent</td></tr>
   <tr><td>00:04</td><td>5.3</td><td>Seth</td><td>Concurrent</td></tr>
-  <tr><td>** **</td><td></td><td></td><td>Steps 4 and 5 must be completed before proceeding</td></tr>
+  <tr><td>** **</td><td>   </td><td>    </td><td>Steps 4 and 5 must be completed before proceeding</td></tr>
   <tr><td>00:10</td> <td>6.1</td> <td>Stephen</td> <td>Concurrent w/ 6.2, 6.3</td> </tr>
   <tr><td>00:10</td> <td>6.2</td> <td>Marc</td> <td></td> </tr>
   <tr><td>00:10</td> <td>6.3</td> <td>Seth/onsite</td> <td></td> </tr>
@@ -59,10 +59,10 @@ Assignemnts:
 1. SSH into all hosts and perform a chef-client run prior to making any
   changes.  In addition to the roles listed below as impacted, this
   includes:
-    * role:chef-pgsql
-    * role:opscode-lb
-    * role:mysql-master
-    * role:monitoring-nagios
+    1. role:chef-pgsql
+    1. role:opscode-lb
+    1. role:mysql-master
+    1. role:monitoring-nagios
 1. clear test data from destination postgres database
 1. open up a command and control terminal for all the affected servers (below)
     * verify that you are connected to all of the servers that you expect to be connected to
@@ -95,6 +95,7 @@ knife ssh  "role:opscode-erchef \
 ### 3.1) Suspend daemonized CCR
 
 **CSSHX** Account Sesssion: ``sudo /etc/init.d/chef-client stop``
+
 **CSSHX** Erchef Sesssion: ``sudo /etc/init.d/chef-client stop``
 
 ### 3.2) Status Update
