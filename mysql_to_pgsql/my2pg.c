@@ -113,8 +113,10 @@ void emit_decoded_hex(char *buf, int len)
         a = *pos;
         b = *(++pos);
         res = ((decode(a) * 16) & 0xF0) + (decode(b) & 0xF);
-        if (res == 0x27)     /* we need to escape the ' with \' */
+        if (res == '\'')      /* we need to escape the ' with \' */
             printf("\\'");
+        else if (res == '\\') /* we need to excape the \ with \\ */
+            printf("\\\\");
         else
             putchar(res);
         pos++;
