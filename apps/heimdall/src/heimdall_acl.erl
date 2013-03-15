@@ -3,35 +3,13 @@
 -include("heimdall.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
--export([add_access_set/6,
-         check_access/5,
+-export([check_access/5,
          check_any_access/4,
          clear_access/4,
          make_ejson_acl/3,
          make_ejson_action/4,
-         parse_acl_json/2]).
-
-%% @doc Add permission on target for authorizee
-add_access(ReqId, Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
-    case ?SH_TIME(ReqId, heimdall_db, create_ace, (TargetType, TargetId, AuthorizeeType,
-                                                   AuthorizeeId, Permission)) of
-        ok ->
-            ok;
-        {error, <<"null value in column \"authorizee\" violates not-null constraint">>} ->
-            throw({db_error, {non_existent_authorizee_for_acl,
-                              AuthorizeeType, AuthorizeeId}});
-        {error, Error} ->
-            throw({db_error, Error})
-    end.
-
-%% @doc Add permission on target for list of authorizees
-add_access_set(_ReqId, _Perm, _Type, _Id, _OtherType, []) ->
-    ok;
-add_access_set(ReqId, Permission, TargetType, TargetId, AuthorizeeType,
-               [AuthorizeeId | AuthorizeeList]) ->
-    add_access(ReqId, Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId),
-    add_access_set(ReqId, Permission, TargetType, TargetId, AuthorizeeType,
-                   AuthorizeeList).
+         parse_acl_json/1,
+         update_acl/6]).
 
 %% @doc Check to see if requestor has permission on a particular target
 check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
@@ -52,21 +30,14 @@ check_any_access(ReqId, TargetType, TargetId, RequestorId) ->
             ?SH_TIME(ReqId, heimdall_db, has_any_permission, (TargetType, TargetId, Id))
     end.
 
-%% @doc Clear permission (for given permission type) on target for all actors and groups
-clear_access(ReqId, TargetType, TargetId, Permission) ->
-    % TODO: this needs to be a postgres function
-    case ?SH_TIME(ReqId, heimdall_db, delete_acl, (actor, TargetType, TargetId,
-                                                   Permission)) of
+%% @doc Update ACL (for given permission type) on target for all actors and groups
+update_acl(ReqId, TargetType, TargetId, Permission, Actors, Groups) ->
+    case ?SH_TIME(ReqId, heimdall_db, update_acl, (TargetType, TargetId, Permission,
+                                                   Actors, Groups)) of
         {error, Error} ->
-            throw({db_error, Error});
+            throw({db_error, Error}); 
         ok ->
-            case ?SH_TIME(ReqId, heimdall_db, delete_acl, (group, TargetType, TargetId,
-                                                           Permission)) of
-                {error, Error} ->
-                    throw({db_error, Error});
-                ok ->
-                    ok
-            end
+            ok
     end.
 
 %% @doc Return all ACL members for given member type on an ID
@@ -79,8 +50,28 @@ acl_members(ReqId, ForType, MemberType, ForId, Permission) ->
                                                        Permission)) of
         {error, Error} ->
             throw({db_error, Error});
+        {error, <<"null value in column \"authorizee\" violates not-null constraint">>} ->
+            throw({db_error, {non_existent_authorizee_for_acl,
+                              MemberType, ForId}});
         List ->
             List
+    end.
+
+% @doc Clear permission (for given permission type) on target for all actors and groups
+clear_access(ReqId, TargetType, TargetId, Permission) ->
+    % TODO: Should this be in a postgres function?
+    case ?SH_TIME(ReqId, heimdall_db, delete_acl, (actor, TargetType, TargetId,
+                                                   Permission)) of
+        {error, Error} ->
+            throw({db_error, Error});
+        ok ->
+            case ?SH_TIME(ReqId, heimdall_db, delete_acl, (group, TargetType, TargetId,
+                                                           Permission)) of
+                {error, Error} ->
+                    throw({db_error, Error});
+                ok ->
+                    ok
+            end
     end.
 
 %% @doc Create full EJSON object for permission type on given ID
@@ -112,7 +103,7 @@ make_ejson_acl(ReqId, ForType, ForId) ->
 %% @doc Parse supplied JSON ACL object, return members it contains
 %%
 %% This is used by the PUT /<type>/<id>/acl/<action> endpoint
-parse_acl_json(Json, Action) ->
+parse_acl_json(Json) ->
     try
         Ejson = heimdall_wm_util:decode(Json),
         Actors = ej:get({<<"actors">>}, Ejson),

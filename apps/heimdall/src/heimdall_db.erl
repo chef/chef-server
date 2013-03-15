@@ -8,7 +8,6 @@
 -export([acl_membership/4,
          add_to_group/3,
          create/3,
-         create_ace/5,
          delete/2,
          delete_acl/4,
          exists/2,
@@ -16,7 +15,8 @@
          has_any_permission/3,
          has_permission/4,
          remove_from_group/3,
-         statements/0]).
+         statements/0,
+         update_acl/5]).
 
 -spec create(auth_type(), auth_id(), auth_id()) ->
                     ok | {conflict, term()} | {error, term()}.
@@ -65,31 +65,6 @@ exists(Type, AuthId) ->
     {ok, Answer} = sqerl:select(StatementName, [AuthId], first_as_scalar, [exists]),
     Answer.
 
-create_ace_stmt(actor, actor) -> insert_actor_acl_actor;
-create_ace_stmt(actor, group) -> insert_actor_acl_group;
-create_ace_stmt(group, actor) -> insert_group_acl_actor;
-create_ace_stmt(group, group) -> insert_group_acl_group;
-create_ace_stmt(object, actor) -> insert_object_acl_actor;
-create_ace_stmt(object, group) -> insert_object_acl_group;
-create_ace_stmt(container, actor) -> insert_container_acl_actor;
-create_ace_stmt(container, group) -> insert_container_acl_group.
-
--spec create_ace(auth_type(), auth_id(), auth_type(), auth_id(),
-                 permission()) -> ok | {error, term()}.
-create_ace(TargetType, TargetId, AuthorizeeType, AuthorizeeId, Permission) ->
-    CreateStatement = create_ace_stmt(TargetType, AuthorizeeType),
-    case sqerl:statement(CreateStatement, [TargetId, AuthorizeeId, Permission],
-                         count) of
-        {ok, 1} ->
-            ok;
-        {conflict, _Reason} ->
-            % Conflicts are actually just fine here; if permission already exists,
-            % we simply don't add it again.
-            ok;
-        {error, Reason} ->
-            {error, Reason}
-    end.
-
 acl_member_query(actor, actor) -> actors_in_actor_acl;
 acl_member_query(group, actor) -> groups_in_actor_acl;
 acl_member_query(actor, group) -> actors_in_group_acl;
@@ -111,6 +86,30 @@ acl_membership(TargetType, AuthorizeeType, AuthzId, Permission) ->
             [];
         {error, Error} ->
             {error, Error}
+    end.
+
+%% Is there a builtin function for this?  This seems like a basic kind of thing
+join(_, []) ->
+    "";
+join(_, [Tail]) ->
+    binary_to_list(Tail);
+join(Sep, [Head|Tail]) ->
+    binary_to_list(Head) ++ Sep ++ join(Sep, Tail).
+
+sql_array(List) ->
+    join(",", List).
+
+-spec update_acl(auth_type(), auth_id(), permission(), list(), list()) ->
+                        ok | {error, term()}.
+update_acl(TargetType, TargetId, Permission, Actors, Groups) ->
+    UpdateStatement = update_acl,
+    case sqerl:select(UpdateStatement, [TargetType, TargetId, Permission,
+                                        sql_array(Actors), sql_array(Groups)],
+                      first_as_scalar, [success]) of
+        {ok, true} ->
+            ok;
+        {error, Reason} ->
+            {error, Reason}
     end.
 
 delete_acl_stmt(actor, actor)    -> delete_actors_from_actor_acl;
