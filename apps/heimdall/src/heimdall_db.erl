@@ -7,7 +7,7 @@
 
 -export([acl_membership/4,
          add_to_group/3,
-         create/2,
+         create/3,
          create_ace/5,
          delete/2,
          delete_acl/4,
@@ -18,19 +18,23 @@
          remove_from_group/3,
          statements/0]).
 
-create_stmt(actor)     -> insert_actor;
-create_stmt(container) -> insert_container;
-create_stmt(group)     -> insert_group;
-create_stmt(object)    -> insert_object.
-
--spec create(auth_type(), auth_id()) -> ok | {conflict, term()} | {error, term()}.
-create(Type, AuthzId) ->
-    CreateStatement = create_stmt(Type),
-    case sqerl:statement(CreateStatement, [AuthzId], count) of
-        {ok, 1} ->
+-spec create(auth_type(), auth_id(), auth_id()) ->
+                    ok | {conflict, term()} | {error, term()}.
+create(Type, AuthzId, RequestorId) when RequestorId =:= superuser orelse
+                                        RequestorId =:= undefined ->
+    CreateStatement = create_entity_with_no_requestor,
+    case sqerl:select(CreateStatement, [Type, AuthzId], first_as_scalar, [success]) of
+        {ok, true} ->
             ok;
-        {conflict, Reason} ->
-            {conflict, Reason};
+        {error, Reason} ->
+            {error, Reason}
+    end;
+create(Type, AuthzId, RequestorId) ->
+    CreateStatement = create_entity,
+    case sqerl:select(CreateStatement, [Type, AuthzId, RequestorId], first_as_scalar,
+                      [success]) of
+        {ok, true} ->
+            ok;
         {error, Reason} ->
             {error, Reason}
     end.

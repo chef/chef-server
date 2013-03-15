@@ -394,6 +394,79 @@ BEGIN
 END;
 $$;
 
+-- This is for creating an authz_entity, and also adding permissions on the entity
+-- to an actor (presumably the requesting actor who created it).  This function will
+-- put a newly created actor into its own ACL if the entity_type is actor
+CREATE FUNCTION create_and_add_permissions(
+       entity_type auth_type,
+       entity_id char(32),
+       creator_id char(32))
+RETURNS BOOLEAN -- <- just returns true, since actually all we're doing is inserting stuff
+LANGUAGE plpgsql
+AS $$
+DECLARE
+        requestor_id auth_actor.id%TYPE NOT NULL := actor_id(creator_id);
+        entity_table char(32) := quote_ident('auth_' || entity_type);
+        acl_table char(32) := quote_ident(entity_type || '_acl_actor');
+BEGIN
+        -- Create entity
+        EXECUTE 'INSERT INTO ' || entity_table || '(authz_id)
+            VALUES ($1)' USING entity_id;
+
+        -- Add ACL on entity for requesting actor
+        EXECUTE 'INSERT INTO ' || acl_table || '(target, authorizee, permission)
+            VALUES ($1, $2, ''create''),
+                   ($1, $2, ''read''),
+                   ($1, $2, ''update''),
+                   ($1, $2, ''delete''),
+                   ($1, $2, ''grant'')' USING authz_id_for_type(entity_id, entity_type),
+                                              requestor_id;
+
+        -- If entity is actor, give itself permissions
+        IF entity_type = 'actor' THEN
+          EXECUTE 'INSERT INTO ' || acl_table || '(target, authorizee, permission)
+              VALUES ($1, $1, ''create''),
+                     ($1, $1, ''read''),
+                     ($1, $1, ''update''),
+                     ($1, $1, ''delete''),
+                     ($1, $1, ''grant'')' USING actor_id(entity_id);
+        END IF;
+
+        -- Need to return something, I guess?
+        RETURN TRUE;
+END;
+$$;
+
+-- Version of the above with no requestor
+CREATE FUNCTION create_and_add_permissions(
+       entity_type auth_type,
+       entity_id char(32))
+RETURNS BOOLEAN -- <- just returns true, since actually all we're doing is inserting stuff
+LANGUAGE plpgsql
+AS $$
+DECLARE
+        entity_table char(32) := quote_ident('auth_' || entity_type);
+        acl_table char(32) := quote_ident(entity_type || '_acl_actor');
+BEGIN
+        -- Create entity
+        EXECUTE 'INSERT INTO ' || entity_table || '(authz_id)
+            VALUES ($1)' USING entity_id;
+
+        -- If entity is actor, give itself permissions
+        IF entity_type = 'actor' THEN
+          EXECUTE 'INSERT INTO ' || acl_table || '(target, authorizee, permission)
+              VALUES ($1, $1, ''create''),
+                     ($1, $1, ''read''),
+                     ($1, $1, ''update''),
+                     ($1, $1, ''delete''),
+                     ($1, $1, ''grant'')' USING actor_id(entity_id);
+        END IF;
+
+        -- Need to return something, I guess?
+        RETURN TRUE;
+END;
+$$;
+
 --------------------------------------------------------------------------------
 -- Debug Schema
 --

@@ -4,7 +4,6 @@
 -include_lib("stats_hero/include/stats_hero.hrl").
 
 -export([add_access_set/6,
-         add_full_access/5,
          check_access/5,
          check_any_access/4,
          clear_access/4,
@@ -33,27 +32,6 @@ add_access_set(ReqId, Permission, TargetType, TargetId, AuthorizeeType,
     add_access(ReqId, Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId),
     add_access_set(ReqId, Permission, TargetType, TargetId, AuthorizeeType,
                    AuthorizeeList).
-
-%% @doc Add all permissions on target for authorizee
-add_full_access(ReqId, TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
-    case {AuthorizeeType, AuthorizeeId} of
-        {actor, undefined} ->
-            % The user we're giving access to doesn't exist (this will happen
-            % when an actor creation request is made with with no requestor
-            % supplied) so don't add any access
-            ok;
-        {actor, superuser} ->
-            % The user we're giving access to doesn't exist (i.e., this is
-            % a superuser request) so don't add any access
-            ok;
-        {Type, Id} ->
-            % TODO: this should be a postgres function instead
-            add_access(ReqId, create, TargetType, TargetId, Type, Id),
-            add_access(ReqId, read, TargetType, TargetId, Type, Id),
-            add_access(ReqId, update, TargetType, TargetId, Type, Id),
-            add_access(ReqId, delete, TargetType, TargetId, Type, Id),
-            add_access(ReqId, grant, TargetType, TargetId, Type, Id)
-    end.
 
 %% @doc Check to see if requestor has permission on a particular target
 check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
