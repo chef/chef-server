@@ -14,8 +14,8 @@
 
 %% @doc Add permission on target for authorizee
 add_access(ReqId, Permission, TargetType, TargetId, AuthorizeeType, AuthorizeeId) ->
-    case ?SH_TIME(ReqId, heimdall_db, create_ace, (TargetType, TargetId, AuthorizeeType, AuthorizeeId,
-                                Permission)) of
+    case ?SH_TIME(ReqId, heimdall_db, create_ace, (TargetType, TargetId, AuthorizeeType,
+                                                   AuthorizeeId, Permission)) of
         ok ->
             ok;
         {error, <<"null value in column \"authorizee\" violates not-null constraint">>} ->
@@ -61,25 +61,29 @@ check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
         superuser ->
             true;
         Id ->
-            ?SH_TIME(ReqId, heimdall_db, has_permission, (TargetType, TargetId, Id, Permission))
+            ?SH_TIME(ReqId, heimdall_db, has_permission, (TargetType, TargetId, Id,
+                                                          Permission))
     end.
 
 %% @doc Check to see if requestor has any permission on target
 check_any_access(ReqId, TargetType, TargetId, RequestorId) ->
-    check_access(ReqId, TargetType, TargetId, RequestorId, create) or
-        check_access(ReqId, TargetType, TargetId, RequestorId, read) or
-        check_access(ReqId, TargetType, TargetId, RequestorId, update) or
-        check_access(ReqId, TargetType, TargetId, RequestorId, delete) or
-        check_access(ReqId, TargetType, TargetId, RequestorId, grant).
+    case RequestorId of
+        superuser ->
+            true;
+        Id ->
+            ?SH_TIME(ReqId, heimdall_db, has_any_permission, (TargetType, TargetId, Id))
+    end.
 
 %% @doc Clear permission (for given permission type) on target for all actors and groups
 clear_access(ReqId, TargetType, TargetId, Permission) ->
     % TODO: this needs to be a postgres function
-    case ?SH_TIME(ReqId, heimdall_db, delete_acl, (actor, TargetType, TargetId, Permission)) of
+    case ?SH_TIME(ReqId, heimdall_db, delete_acl, (actor, TargetType, TargetId,
+                                                   Permission)) of
         {error, Error} ->
             throw({db_error, Error});
         ok ->
-            case ?SH_TIME(ReqId, heimdall_db, delete_acl, (group, TargetType, TargetId, Permission)) of
+            case ?SH_TIME(ReqId, heimdall_db, delete_acl, (group, TargetType, TargetId,
+                                                           Permission)) of
                 {error, Error} ->
                     throw({db_error, Error});
                 ok ->
@@ -93,7 +97,8 @@ clear_access(ReqId, TargetType, TargetId, Permission) ->
 %% of a given type (we'd be more generic about it, but we need the type to find
 %% the correct tables in the DB to return the answer).
 acl_members(ReqId, ForType, MemberType, ForId, Permission) ->
-    case ?SH_TIME(ReqId, heimdall_db, acl_membership, (ForType, MemberType, ForId, Permission)) of
+    case ?SH_TIME(ReqId, heimdall_db, acl_membership, (ForType, MemberType, ForId,
+                                                       Permission)) of
         {error, Error} ->
             throw({db_error, Error});
         List ->

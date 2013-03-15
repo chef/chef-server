@@ -13,6 +13,7 @@
          delete_acl/4,
          exists/2,
          group_membership/2,
+         has_any_permission/3,
          has_permission/4,
          remove_from_group/3,
          statements/0]).
@@ -128,12 +129,22 @@ delete_acl(AuthorizeeType, TargetType, TargetId, Permission) ->
             {error, Reason}
     end.
 
-permission_query() -> actor_has_permission_on.
-
 -spec has_permission(auth_type(), auth_id(), auth_id(), permission()) -> boolean().
 has_permission(TargetType, TargetId, RequestorId, Permission) ->
-    PermissionStatement = permission_query(),
+    PermissionStatement = actor_has_permission_on,
     case sqerl:select(PermissionStatement, [RequestorId, TargetId, TargetType, Permission],
+                      first_as_scalar, [permission]) of
+        {ok, Answer} ->
+            Answer;
+        {error, <<"null value cannot be assigned to variable \"actor_id\" declared NOT NULL">>} ->
+            %% If we get a request for a bogus member_id, just return false
+            false
+    end.
+
+-spec has_any_permission(auth_type(), auth_id(), auth_id()) -> boolean().
+has_any_permission(TargetType, TargetId, RequestorId) ->
+    PermissionStatement = actor_has_any_permission_on,
+    case sqerl:select(PermissionStatement, [RequestorId, TargetId, TargetType],
                       first_as_scalar, [permission]) of
         {ok, Answer} ->
             Answer;
