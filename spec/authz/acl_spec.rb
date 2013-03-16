@@ -256,7 +256,7 @@ describe "ACL Tests" do
 
                 with_ace_on :gozer, :grant, :to => :hasselhoff
 
-                it "returns 400", :pending do
+                it "returns 400" do
                   put("/#{type}s/#{gozer}/acl/#{action}",
                     :hasselhoff,
                     :payload => {"actors" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"],
@@ -264,9 +264,15 @@ describe "ACL Tests" do
                     should have_status_code(400).
                     with_body({"error" => "attempt to add non-existent actor 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz' to ACL"})
 
+                  if (action == 'grant')
+                    body = {"actors" => [hasselhoff], "groups" => []}
+                  else
+                    body = {"actors" => [], "groups" => []}
+                  end
+
                   get("/#{type}s/#{gozer}/acl/#{action}",
                     :superuser).should have_status_code(200).
-                    with_body({"actors" => [hasselhoff], "groups" => []})
+                    with_body(body)
                 end
               end
 
@@ -276,16 +282,22 @@ describe "ACL Tests" do
 
                 with_ace_on :gozer, :grant, :to => :hasselhoff
 
-                it "returns 400", :pending do
+                it "returns 400" do
                   put("/#{type}s/#{gozer}/acl/#{action}",
                     :hasselhoff, :payload => {"actors" => [],
                       "groups" => ["zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"]}).
                     should have_status_code(400).
                     with_body({"error" => "attempt to add non-existent group 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz' to ACL"})
 
+                  if (action == 'grant')
+                    body = {"actors" => [hasselhoff], "groups" => []}
+                  else
+                    body = {"actors" => [], "groups" => []}
+                  end
+
                   get("/#{type}s/#{gozer}/acl/#{action}",
                     :superuser).should have_status_code(200).
-                    with_body({"actors" => [hasselhoff], "groups" => []})
+                    with_body(body)
                 end
               end
 
@@ -295,7 +307,7 @@ describe "ACL Tests" do
 
                 with_ace_on :gozer, :grant, :to => :hasselhoff
 
-                it "returns 400", :pending do
+                it "returns 400" do
                   put("/#{type}s/#{gozer}/acl/#{action}",
                     :hasselhoff,
                     :payload => {"actors" => ["ffffffffffffffffffffffffffffffff"],
@@ -303,9 +315,15 @@ describe "ACL Tests" do
                     should have_status_code(400).
                     with_body({"error" => "attempt to add non-existent actor 'ffffffffffffffffffffffffffffffff' to ACL"})
 
+                  if (action == 'grant')
+                    body = {"actors" => [hasselhoff], "groups" => []}
+                  else
+                    body = {"actors" => [], "groups" => []}
+                  end
+
                   get("/#{type}s/#{gozer}/acl/#{action}",
                     :superuser).should have_status_code(200).
-                    with_body({"actors" => [hasselhoff], "groups" => []})
+                    with_body(body)
                 end
               end
 
@@ -315,16 +333,22 @@ describe "ACL Tests" do
 
                 with_ace_on :gozer, :grant, :to => :hasselhoff
 
-                it "returns 400", :pending do
+                it "returns 400" do
                   put("/#{type}s/#{gozer}/acl/#{action}",
                     :hasselhoff, :payload => {"actors" => [],
                       "groups" => ["ffffffffffffffffffffffffffffffff"]}).
                     should have_status_code(400).
                     with_body({"error" => "attempt to add non-existent group 'ffffffffffffffffffffffffffffffff' to ACL"})
 
+                  if (action == 'grant')
+                    body = {"actors" => [hasselhoff], "groups" => []}
+                  else
+                    body = {"actors" => [], "groups" => []}
+                  end
+
                   get("/#{type}s/#{gozer}/acl/#{action}",
                     :superuser).should have_status_code(200).
-                    with_body({"actors" => [hasselhoff], "groups" => []})
+                    with_body(body)
                 end
               end
 

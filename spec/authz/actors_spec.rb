@@ -497,7 +497,7 @@ describe "Actors Endpoint" do
           # error these out down the road.  Also not sure we should return 400 for
           # non-existent actors/groups, dunno what the right HTTP response code is
           # for that.
-          context "an actor directly in the GRANT ACE, with invalid actor", :pending do
+          context "an actor directly in the GRANT ACE, with invalid actor" do
             with_actors :hasselhoff, :shatner
 
             with_ace_on :shatner, :grant, :to => :hasselhoff
@@ -510,13 +510,19 @@ describe "Actors Endpoint" do
                 should have_status_code(400).
                 with_body({"error" => "attempt to add non-existent actor 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz' to ACL"})
 
+              if (action == 'grant')
+                body = {"actors" => [hasselhoff], "groups" => []}
+              else
+                body = {"actors" => [shatner], "groups" => []}
+              end
+
               get("/actors/#{shatner}/acl/#{action}",
                 :superuser).should have_status_code(200).
-                with_body({"actors" => [hasselhoff], "groups" => []})
+                with_body(body)
             end
           end
 
-          context "an actor directly in the GRANT ACE, with invalid group", :pending do
+          context "an actor directly in the GRANT ACE, with invalid group" do
             with_actors :hasselhoff, :shatner
 
             with_ace_on :shatner, :grant, :to => :hasselhoff
@@ -528,13 +534,19 @@ describe "Actors Endpoint" do
                 should have_status_code(400).
                 with_body({"error" => "attempt to add non-existent group 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz' to ACL"})
 
+              if (action == 'grant')
+                body = {"actors" => [hasselhoff], "groups" => []}
+              else
+                body = {"actors" => [shatner], "groups" => []}
+              end
+
               get("/actors/#{shatner}/acl/#{action}",
                 :superuser).should have_status_code(200).
-                with_body({"actors" => [hasselhoff], "groups" => []})
+                with_body(body)
             end
           end
 
-          context "an actor directly in the GRANT ACE, with non-existent actor", :pending do
+          context "an actor directly in the GRANT ACE, with non-existent actor" do
             with_actors :hasselhoff, :shatner
 
             with_ace_on :shatner, :grant, :to => :hasselhoff
@@ -547,13 +559,19 @@ describe "Actors Endpoint" do
                 should have_status_code(400).
                 with_body({"error" => "attempt to add non-existent actor 'ffffffffffffffffffffffffffffffff' to ACL"})
 
+              if (action == 'grant')
+                body = {"actors" => [hasselhoff], "groups" => []}
+              else
+                body = {"actors" => [shatner], "groups" => []}
+              end
+
               get("/actors/#{shatner}/acl/#{action}",
                 :superuser).should have_status_code(200).
-                with_body({"actors" => [hasselhoff], "groups" => []})
+                with_body(body)
             end
           end
 
-          context "an actor directly in the GRANT ACE, with non-existent group", :pending do
+          context "an actor directly in the GRANT ACE, with non-existent group" do
             with_actors :hasselhoff, :shatner
 
             with_ace_on :shatner, :grant, :to => :hasselhoff
@@ -565,9 +583,14 @@ describe "Actors Endpoint" do
                 should have_status_code(400).
                 with_body({"error" => "attempt to add non-existent group 'ffffffffffffffffffffffffffffffff' to ACL"})
 
+              if (action == 'grant')
+                body = {"actors" => [hasselhoff], "groups" => []}
+              else
+                body = {"actors" => [shatner], "groups" => []}
+              end
+
               get("/actors/#{shatner}/acl/#{action}",
-                :superuser).should have_status_code(200).
-                with_body({"actors" => [hasselhoff], "groups" => []})
+                :superuser).should have_status_code(200).with_body(body)
             end
           end
 
