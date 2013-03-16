@@ -34,6 +34,9 @@ check_any_access(ReqId, TargetType, TargetId, RequestorId) ->
 update_acl(ReqId, TargetType, TargetId, Permission, Actors, Groups) ->
     case ?SH_TIME(ReqId, heimdall_db, update_acl, (TargetType, TargetId, Permission,
                                                    Actors, Groups)) of
+        {error, <<"null value in column \"authorizee\" violates not-null constraint">>} ->
+            throw({db_error, {non_existent_member_for_acl,
+                              Actors, Groups}});
         {error, Error} ->
             throw({db_error, Error}); 
         ok ->
@@ -50,9 +53,6 @@ acl_members(ReqId, ForType, MemberType, ForId, Permission) ->
                                                        Permission)) of
         {error, Error} ->
             throw({db_error, Error});
-        {error, <<"null value in column \"authorizee\" violates not-null constraint">>} ->
-            throw({db_error, {non_existent_authorizee_for_acl,
-                              MemberType, ForId}});
         List ->
             List
     end.
@@ -60,6 +60,8 @@ acl_members(ReqId, ForType, MemberType, ForId, Permission) ->
 % @doc Clear permission (for given permission type) on target for all actors and groups
 clear_access(ReqId, TargetType, TargetId, Permission) ->
     % TODO: Should this be in a postgres function?
+    % This isn't really a critical path function; also it's unlikely for part of this
+    % to succeed and the other part to fail.
     case ?SH_TIME(ReqId, heimdall_db, delete_acl, (actor, TargetType, TargetId,
                                                    Permission)) of
         {error, Error} ->

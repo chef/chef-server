@@ -55,7 +55,31 @@ set_db_exception(Req, State, Error) ->
     Msg = db_exception_message(Error),
     halt(400, Req, State, Msg).
 
+find_non_existent(_, []) ->
+    none;
+find_non_existent(Type, [Head|Tail]) ->
+    case heimdall_db:exists(Type, Head) of
+        true ->
+            find_non_existent(Type, Tail);
+        false ->
+            {Head, Type}
+    end.
+
+find_non_existent_member(Actors, Groups) ->
+    case find_non_existent(actor, Actors) of
+        none ->
+            find_non_existent(group, Groups);
+        Other ->
+            Other
+    end.
+
 db_exception_message({non_existent_authorizee_for_acl, Type, Id}) ->
+    error_ejson([<<"attempt to add non-existent ">>, atom_to_list(Type), <<" '">>, Id,
+                 <<"' to ACL">>]);
+db_exception_message({non_existent_member_for_acl, Actors, Groups}) ->
+    % In this error, all we know is that we triggered an error with an invalid actor
+    % or group somewhere, so we have to go find it:
+    {Id, Type} = find_non_existent_member(Actors, Groups),
     error_ejson([<<"attempt to add non-existent ">>, atom_to_list(Type), <<" '">>, Id,
                  <<"' to ACL">>]);
 db_exception_message({non_existent_member_for_group, Type, Id}) ->
