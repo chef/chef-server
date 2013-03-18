@@ -3,16 +3,29 @@
 require 'rubygems'
 require 'pg'
 require 'yajl'
-require 'pp'
 
-errors = false
-conn = PG.connect(dbname: 'opscode_chef', user: 'opscode_chef')
+db_password = ARGV[0]
+unless db_password
+  `stty -echo` # turn off echo for #gets
+  print "Password for opscode_chef: "
+  db_password = gets.chomp
+  puts         # print output on the next line
+  `stty echo`
+end
+
+errors = total = 0
+
+conn = PG.connect({:dbname => 'opscode_chef',
+    :user => 'opscode_chef',
+    :password => db_password
+  })
 conn.exec("select username, serialized_object from users") do |result|
   result.each do |row|
+    total += 1 # really? no #size function?
     begin
       Yajl::Parser.parse(row['serialized_object'])
     rescue Yajl::ParseError => e
-      errors = true
+      errors += 1
       puts "Error parsing user '#{row['username']}':"
       puts e.message
       puts
@@ -20,6 +33,9 @@ conn.exec("select username, serialized_object from users") do |result|
   end
 end
 
-if errors
+if errors > 0
+  puts "Validation Failed: #{errors} / #{total} rows."
   exit 1
+else
+  puts "Validaton Successful: #{total} rows."
 end
