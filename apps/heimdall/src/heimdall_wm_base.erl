@@ -161,12 +161,8 @@ spawn_stats_hero_worker(Req, #base_state{reqid=ReqId,
 
     Config = [{request_id, ReqId},
 
-              %% Currently, stats_hero *requires* an org name under
-              %% which to aggregate request metrics.  Currently,
-              %% Heimdall has no notion of orgs, but it most likely
-              %% will in the near future.  Until then, we'll just use
-              %% a "dummy" org name.
-              {org_name, "HEIMDALL_ORG"},
+              %% Heimdall doesn't have organizations
+              {org_name, undefined},
 
               {my_app, ?gv(root_metric_key, MetricsConfig)},
               {request_action, atom_to_list(wrq:method(Req))},
