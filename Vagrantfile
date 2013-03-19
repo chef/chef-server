@@ -110,11 +110,20 @@ Vagrant::Config.run do |config|
     metrics_config.vm.provision :chef_solo do |chef|
       chef.roles_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/roles"
       chef.data_bags_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/data_bags"
+      chef.json = {
+        "gdash" => {
+          "graphite_url" => "http://#{METRICS_HOST}:8080",
+          "interface" => "0.0.0.0"
+        }
+      }
       chef.run_list = ["recipe[opscode-dev-shim]",
                        "recipe[git]",
                        "recipe[erlang_binary]",
                        "recipe[erlang_binary::rebar]",
-                       "recipe[piab::monitoring]"]
+                       "recipe[piab::monitoring]",
+                       "opscode-ruby::default",
+                       "gdash::default",
+                       "opscode-heimdall::gdash"]
     end
   end
 end
