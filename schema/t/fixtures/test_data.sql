@@ -37,3 +37,24 @@ INSERT INTO object_acl_actor(target, authorizee, permission)
 VALUES
         (object_id('oooooooooooooooooooooooooooooooo'), actor_id('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'), 'update'),
         (object_id('oooooooooooooooooooooooooooooooo'), actor_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'), 'delete');
+
+INSERT INTO auth_container(authz_id)
+VALUES ('nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn');
+
+INSERT INTO container_acl_actor(target, authorizee, permission)
+VALUES (container_id('nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'),
+        actor_id('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'), 'create');
+
+INSERT INTO auth_group(authz_id)
+VALUES ('gggggggggggggggggggggggggggggggg');
+
+INSERT INTO group_acl_actor(target, authorizee, permission)
+VALUES (group_id('gggggggggggggggggggggggggggggggg'),
+        actor_id('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'), 'read');
+
+INSERT INTO auth_actor(authz_id)
+VALUES ('tttttttttttttttttttttttttttttttt');
+
+INSERT INTO actor_acl_actor(target, authorizee, permission)
+VALUES (actor_id('tttttttttttttttttttttttttttttttt'),
+        actor_id('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'), 'delete');

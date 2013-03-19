@@ -482,7 +482,7 @@ DECLARE
         groups char(32)[] := string_to_array(groups_text, ',');
         actor_table char(32) := quote_ident(entity_type || '_acl_actor');
         group_table char(32) := quote_ident(entity_type || '_acl_group');
-        target_id bigint := authz_id_for_type(entity_id, entity_type);
+        target_id bigint NOT NULL := authz_id_for_type(entity_id, entity_type);
         count integer;
 BEGIN
         -- Clear out the old

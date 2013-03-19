@@ -9,6 +9,13 @@ SELECT volatility_is('actor_has_permission_on',
 SELECT function_returns('public', 'actor_has_permission_on',
        ARRAY['character', 'character', 'auth_type', 'auth_permission'], 'boolean');
 
+SELECT is_strict('actor_has_any_permission_on',
+       ARRAY['character', 'character', 'auth_type']);
+SELECT volatility_is('actor_has_any_permission_on',
+       ARRAY['character', 'character', 'auth_type'], 'stable');
+SELECT function_returns('public', 'actor_has_any_permission_on',
+       ARRAY['character', 'character', 'auth_type'], 'boolean');
+
 \i t/fixtures/test_data.sql
 
 -- Test the basic cases:
@@ -90,6 +97,50 @@ SELECT throws_ok(
        '22P02',
        'invalid input value for enum auth_permission: "license_to_kill"',
        'Checking a non-existent permission throws an exception');
+
+-- Additional tests to verify that other types work
+SELECT is(TRUE,
+       actor_has_permission_on('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'container', 'create'),
+       'Check that actor_has_permission_on also works on containers');
+SELECT is(TRUE,
+       actor_has_permission_on('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+                               'gggggggggggggggggggggggggggggggg', 'group', 'read'),
+       'Check that actor_has_permission_on also works on groups');
+SELECT is(TRUE,
+       actor_has_permission_on('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+                               'tttttttttttttttttttttttttttttttt', 'actor', 'delete'),
+       'Check that actor_has_permission_on also works on actors');
+
+-- Additional tests to verify that actor_has_any_permission_on works
+SELECT is(TRUE,
+       actor_has_any_permission_on('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+                                   'oooooooooooooooooooooooooooooooo', 'object'),
+       'An actor directly granted permission has permission');
+SELECT is(TRUE,
+       actor_has_any_permission_on('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+                                   'oooooooooooooooooooooooooooooooo', 'object'),
+       'An actor both directly and indirectly granted permission has permission');
+SELECT is(TRUE,
+       actor_has_any_permission_on('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy',
+                                   'oooooooooooooooooooooooooooooooo', 'object'),
+       'An actor indirectly granted permission has the permission');
+SELECT is(TRUE,
+       actor_has_any_permission_on('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
+                                   'oooooooooooooooooooooooooooooooo', 'object'),
+       'An actor granted permission "at a long range" has permission');
+SELECT is(TRUE,
+       actor_has_any_permission_on('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+                                   'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'container'),
+       'Check that actor_has_any_permission_on also works on containers');
+SELECT is(TRUE,
+       actor_has_any_permission_on('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+                                   'gggggggggggggggggggggggggggggggg', 'group'),
+       'Check that actor_has_any_permission_on also works on groups');
+SELECT is(TRUE,
+       actor_has_any_permission_on('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+                                   'tttttttttttttttttttttttttttttttt', 'actor'),
+       'Check that actor_has_any_permission_on also works on actors');
 
 SELECT finish();
 --ROLLBACK;
