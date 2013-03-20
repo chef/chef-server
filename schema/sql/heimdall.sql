@@ -393,36 +393,6 @@ BEGIN
 END;
 $$;
 
--- Version of the above with no requestor
-CREATE FUNCTION create_and_add_permissions_not_really(
-       entity_type auth_type,
-       entity_id char(32))
-RETURNS BOOLEAN -- <- just returns true, since actually all we're doing is inserting stuff
-LANGUAGE plpgsql
-AS $$
-DECLARE
-        entity_table char(32) := quote_ident('auth_' || entity_type);
-        acl_table char(32) := quote_ident(entity_type || '_acl_actor');
-BEGIN
-        -- Create entity
-        EXECUTE 'INSERT INTO ' || entity_table || '(authz_id)
-            VALUES ($1)' USING entity_id;
-
-        -- If entity is actor, give itself permissions
-        IF entity_type = 'actor' THEN
-          EXECUTE 'INSERT INTO ' || acl_table || '(target, authorizee, permission)
-              VALUES ($1, $1, ''create''),
-                     ($1, $1, ''read''),
-                     ($1, $1, ''update''),
-                     ($1, $1, ''delete''),
-                     ($1, $1, ''grant'')' USING actor_id(entity_id);
-        END IF;
-
-        -- Need to return something, I guess?
-        RETURN TRUE;
-END;
-$$;
-
 -- Function for clearing ACLs for arbitrary entities
 CREATE FUNCTION clear_acl(
        entity_type auth_type,
