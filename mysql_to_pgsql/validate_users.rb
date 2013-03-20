@@ -16,6 +16,7 @@ end
 errors = total = 0
 
 conn = PG.connect({:dbname => 'opscode_chef',
+    :host => 'localhost',
     :user => 'opscode_chef',
     :password => db_password
   })
