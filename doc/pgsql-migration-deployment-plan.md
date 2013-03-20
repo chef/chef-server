@@ -43,16 +43,10 @@ Assignemnts:
 * Have available the database RW password from data bag secrets: chef\_db.rw\_password 
 * Each person performing production validation must have a production
   org configured for testing.
-* Any remote person performing valdiation should be logged into the VPN
-  and SSHd into the host ``migration-validator-dev-ov-797f67ef.opscode.us``
 * Any remote person performing validation should have the user pem file
   and knife.rb in place on the host above for: 
      * rs-prod (preprod) 
      * production org 
-* Any remote person performing validation should have
-  opscode-platform-cookbooks checked out into the appropriate
-  rs-prod/preprod locations on the validator VM, in order to perforom
-  pedant testing.
 * Preprod-specific: Create a new platform user ahead of time. 
 
 ## 1.2) Edit data bags
@@ -72,7 +66,6 @@ Assignemnts:
     1. role:monitoring-nagios
 1. clear test data from destination postgres database
 1. open up a command and control terminal for all the affected servers (below)
-    * verify that you are connected to all of the servers that you expect to be connected to
 
 Command Terminal Session: **Account**
 
@@ -92,6 +85,13 @@ knife ssh  "role:opscode-erchef \
             role:opscode-chef" \
       csshx
 ```
+
+Additional Terminals:
+
+The person performing the migration should have the following sessions
+open:  
+1. role:chef-pgsql (active master) 
+1. role:mysql-master (active master) 
 
 # Implementation 
 
@@ -182,9 +182,22 @@ sudo tail -F /var/log/oc_erchef.log \
 
 ## 6) Validation 
 
-### 6.1) Opscode Support 
-1. Restart opscode support ``role:opscode-support`` 
-1. When tailing opscode support
+### 6.1) User Validation 
+1. From the postgresql master box: 
+
+``` 
+    cd /srv/chef-mover/mysql_to_pgsql
+    bundle exec ./validate_users.rb
+
+```
+Provide password when prompted.  Ensure no errors in validation occur. 
+
+### 6.1.1) User Validation Failure
+If any user validation fails, we will correct them on a one-off basis. 
+
+Impacts of failed user validation: 
+1. opscode-support will be unavailable until they are corrected 
+1. that specific user will be unable to modify org membership, user data in webui
 
 ### 6.2) Pedant
 1. execute pedant against OHC. 
