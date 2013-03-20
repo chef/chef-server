@@ -9,7 +9,7 @@
          add_to_group/3,
          create/3,
          delete/2,
-         delete_acl/4,
+         delete_acl/3,
          exists/2,
          group_membership/2,
          has_any_permission/3,
@@ -18,26 +18,20 @@
          statements/0,
          update_acl/5]).
 
--spec create(auth_type(), auth_id(), auth_id()) ->
+-spec create(auth_type(), auth_id(), auth_id() | null) ->
                     ok | {conflict, term()} | {error, term()}.
 create(Type, AuthzId, RequestorId) when RequestorId =:= superuser orelse
                                         RequestorId =:= undefined ->
-    CreateStatement = create_entity_with_no_requestor,
-    case sqerl:select(CreateStatement, [Type, AuthzId], first_as_scalar, [success]) of
-        {ok, true} ->
-            ok;
-        {error, Reason} ->
-            {error, Reason}
-    end;
+    create(Type, AuthzId, null);
 create(Type, AuthzId, RequestorId) ->
-    CreateStatement = create_entity,
-    case sqerl:select(CreateStatement, [Type, AuthzId, RequestorId], first_as_scalar,
-                      [success]) of
+    case sqerl:select(create_entity, [Type, AuthzId, RequestorId],
+                      first_as_scalar, [success]) of
         {ok, true} ->
             ok;
         {error, Reason} ->
             {error, Reason}
     end.
+
 
 delete_stmt(actor)     -> delete_actor_by_authz_id;
 delete_stmt(container) -> delete_container_by_authz_id;
@@ -88,23 +82,15 @@ acl_membership(TargetType, AuthorizeeType, AuthzId, Permission) ->
             {error, Error}
     end.
 
-%% Is there a builtin function for this?  This seems like a basic kind of thing
-join(_, []) ->
-    "";
-join(_, [Tail]) ->
-    binary_to_list(Tail);
-join(Sep, [Head|Tail]) ->
-    binary_to_list(Head) ++ Sep ++ join(Sep, Tail).
-
 sql_array(List) ->
-    join(",", List).
+    List0 = [binary_to_list(X) || X <- List],
+    string:join(List0, ",").
 
 -spec update_acl(auth_type(), auth_id(), permission(), list(), list()) ->
                         ok | {error, term()}.
 update_acl(TargetType, TargetId, Permission, Actors, Groups) ->
-    UpdateStatement = update_acl,
-    case sqerl:select(UpdateStatement, [TargetType, TargetId, Permission,
-                                        sql_array(Actors), sql_array(Groups)],
+    case sqerl:select(update_acl, [TargetType, TargetId, Permission,
+                                   sql_array(Actors), sql_array(Groups)],
                       first_as_scalar, [success]) of
         {ok, true} ->
             ok;
@@ -112,21 +98,11 @@ update_acl(TargetType, TargetId, Permission, Actors, Groups) ->
             {error, Reason}
     end.
 
-delete_acl_stmt(actor, actor)    -> delete_actors_from_actor_acl;
-delete_acl_stmt(group, actor)    -> delete_groups_from_actor_acl;
-delete_acl_stmt(actor, group)    -> delete_actors_from_group_acl;
-delete_acl_stmt(group, group)    -> delete_groups_from_group_acl;
-delete_acl_stmt(actor, object)    -> delete_actors_from_object_acl;
-delete_acl_stmt(group, object)    -> delete_groups_from_object_acl;
-delete_acl_stmt(actor, container)    -> delete_actors_from_container_acl;
-delete_acl_stmt(group, container)    -> delete_groups_from_container_acl.
-
--spec delete_acl(auth_type(), auth_type(), auth_id(), permission()) ->
-                        ok | {error, term()}.
-delete_acl(AuthorizeeType, TargetType, TargetId, Permission) ->
-    DeleteStatement = delete_acl_stmt(AuthorizeeType, TargetType),
-    case sqerl:statement(DeleteStatement, [TargetId, Permission], count) of
-        {ok, _Count} ->
+-spec delete_acl(auth_type(), auth_id(), permission()) -> ok | {error, term()}.
+delete_acl(TargetType, TargetId, Permission) ->
+    case sqerl:select(clear_acl, [TargetType, TargetId, Permission],
+                      first_as_scalar, [success]) of
+        {ok, true} ->
             ok;
         {error, Reason} ->
             {error, Reason}
@@ -134,8 +110,8 @@ delete_acl(AuthorizeeType, TargetType, TargetId, Permission) ->
 
 -spec has_permission(auth_type(), auth_id(), auth_id(), permission()) -> boolean().
 has_permission(TargetType, TargetId, RequestorId, Permission) ->
-    PermissionStatement = actor_has_permission_on,
-    case sqerl:select(PermissionStatement, [RequestorId, TargetId, TargetType, Permission],
+    case sqerl:select(actor_has_permission_on, [RequestorId, TargetId, TargetType,
+                                                Permission],
                       first_as_scalar, [permission]) of
         {ok, Answer} ->
             Answer;
@@ -146,8 +122,7 @@ has_permission(TargetType, TargetId, RequestorId, Permission) ->
 
 -spec has_any_permission(auth_type(), auth_id(), auth_id()) -> boolean().
 has_any_permission(TargetType, TargetId, RequestorId) ->
-    PermissionStatement = actor_has_any_permission_on,
-    case sqerl:select(PermissionStatement, [RequestorId, TargetId, TargetType],
+    case sqerl:select(actor_has_permission_on, [RequestorId, TargetId, TargetType, null],
                       first_as_scalar, [permission]) of
         {ok, Answer} ->
             Answer;
@@ -181,7 +156,7 @@ add_to_group(Type, MemberId, GroupId) ->
     case sqerl:statement(InsertStatement, [MemberId, GroupId], count) of
         {ok, 1} ->
             ok;
-        {conflict, Reason} ->
+        {conflict, _Reason} ->
             % Already in group, nothing to do here
             ok;
         {error, Reason} ->

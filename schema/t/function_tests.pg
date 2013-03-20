@@ -41,8 +41,6 @@ SELECT results_eq(
 
 SELECT function_returns('public', 'create_and_add_permissions',
        ARRAY['auth_type', 'character', 'character'], 'boolean');
-SELECT function_returns('public', 'create_and_add_permissions',
-       ARRAY['auth_type', 'character'], 'boolean');
 
 -- Tests for create_and_add_permissons,
 --   first with requestor
@@ -114,25 +112,27 @@ SELECT is(TRUE,
        'Created actor has grant permission on itself');
 
 --   without requestor
-SELECT * FROM create_and_add_permissions('object', 'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm');
+SELECT * FROM create_and_add_permissions('object', 'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm',
+                                         NULL);
 SELECT is(FALSE,
-       actor_has_any_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-                                   'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm', 'object'),
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm', 'object', NULL),
        'actor has no permission on new object');
 SELECT is(FALSE,
-       actor_has_any_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-                                   'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm', 'object'),
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm', 'object', NULL),
        'other actor has no permission on new object');
 
 --   actor with requestor
-SELECT * FROM create_and_add_permissions('actor', 'cccccccccccccccccccccccccccccccc');
+SELECT * FROM create_and_add_permissions('actor', 'cccccccccccccccccccccccccccccccc',
+                                         NULL);
 SELECT is(FALSE,
-       actor_has_any_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-                                   'cccccccccccccccccccccccccccccccc', 'actor'),
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'cccccccccccccccccccccccccccccccc', 'actor', NULL),
        'actor has no permission on new actor');
 SELECT is(FALSE,
-       actor_has_any_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-                                   'cccccccccccccccccccccccccccccccc', 'actor'),
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'cccccccccccccccccccccccccccccccc', 'actor', NULL),
        'other actor has no permission on new actor');
 SELECT is(TRUE,
        actor_has_permission_on('cccccccccccccccccccccccccccccccc',
@@ -156,13 +156,22 @@ SELECT is(TRUE,
        'Created actor has grant permission on itself');
 
 -- Try sending bogus information
-SELECT throws_ok(
-       $$SELECT create_and_add_permissions('object', 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
-                                           'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq')$$,
-       '22004',
-       'null value cannot be assigned to variable "requestor_id" declared NOT NULL',
-       'Attempting to create object with bogus requestor raises error');
 
+-- Since unifying this with the requestor-less version, this now behaves exactly the
+-- same as simply supplying NULL as the requestor -- no error is ever triggered.
+-- I suppose we could catch this, but honestly, it shouldn't ever get to this point since
+-- erlang already returns a bad header error, so why should we care?
+
+-- SELECT throws_ok(
+--       $$SELECT create_and_add_permissions('object', 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+--                                           'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq')$$,
+--       '22004',
+--       'null value cannot be assigned to variable "requestor_id" declared NOT NULL',
+--       'Attempting to create object with bogus requestor raises error');
+
+
+SELECT function_returns('public', 'clear_acl',
+       ARRAY['auth_type', 'character', 'auth_permission'], 'boolean');
 
 SELECT function_returns('public', 'update_acl',
        ARRAY['auth_type', 'character', 'auth_permission', 'text', 'text'], 'boolean');
@@ -189,7 +198,24 @@ SELECT is(TRUE,
                                'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
        'Indirect actor has permission on object in new ACL');
 
--- Try it again with just one actor this time
+-- Test out clear ACL
+select *
+  FROM clear_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'create');
+
+SELECT is(FALSE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Actor has permission on object in new ACL');
+SELECT is(FALSE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Other actor has permission on object in new ACL');
+SELECT is(FALSE,
+       actor_has_permission_on('cccccccccccccccccccccccccccccccc',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Indirect actor has permission on object in new ACL');
+
+-- Try update again with just one actor this time
 select *
   FROM update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'create',
                   'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
@@ -259,6 +285,11 @@ SELECT is(FALSE,
        'Indirect actor does not have permission on object in fourth ACL');
 
 -- Try sending bogus information
+SELECT throws_ok(
+       $$SELECT clear_acl('object', 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq', 'update')$$,
+       '22004',
+       'null value cannot be assigned to variable "target_id" declared NOT NULL',
+       'Updating non-existent ACL throws error');
 SELECT throws_ok(
        $$SELECT update_acl('object', 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq', 'update',
                            NULL, NULL)$$,

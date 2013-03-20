@@ -59,21 +59,11 @@ acl_members(ReqId, ForType, MemberType, ForId, Permission) ->
 
 % @doc Clear permission (for given permission type) on target for all actors and groups
 clear_access(ReqId, TargetType, TargetId, Permission) ->
-    % TODO: Should this be in a postgres function?
-    % This isn't really a critical path function; also it's unlikely for part of this
-    % to succeed and the other part to fail.
-    case ?SH_TIME(ReqId, heimdall_db, delete_acl, (actor, TargetType, TargetId,
-                                                   Permission)) of
+    case ?SH_TIME(ReqId, heimdall_db, delete_acl, (TargetType, TargetId, Permission)) of
         {error, Error} ->
             throw({db_error, Error});
         ok ->
-            case ?SH_TIME(ReqId, heimdall_db, delete_acl, (group, TargetType, TargetId,
-                                                           Permission)) of
-                {error, Error} ->
-                    throw({db_error, Error});
-                ok ->
-                    ok
-            end
+            ok
     end.
 
 %% @doc Create full EJSON object for permission type on given ID
