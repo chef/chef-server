@@ -45,7 +45,12 @@ malformed_request(Req, #base_state{module = Module} = State) ->
                  undefined ->
                      undefined;
                  Permission ->
-                     list_to_existing_atom(Permission)
+                     %% TODO: might want to revisit. Using list_to_atom
+                     %% potentially opens us up to some trouble if a caller
+                     %% tried many different perms (unlikely).
+                     %% list_to_existing_atom fails on grant (where do we
+                     %% populate that atom?).
+                     list_to_atom(Permission)
              end,
     MemberId = wrq:path_info(member_id, Req),
     Module:validate_request(Req, State#base_state{authz_id = Id, action = Action,
