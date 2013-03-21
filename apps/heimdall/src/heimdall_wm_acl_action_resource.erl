@@ -39,12 +39,8 @@ from_json(Req, #base_state{reqid = ReqId,
                            action = Action} = State) ->
     try
         Body = wrq:req_body(Req),
-        {Actors, Groups} = heimdall_acl:parse_acl_json(Body, Action),
-        % TODO: move this to a postgres function so that it can all happen
-        % in a transaction:
-        heimdall_acl:clear_access(ReqId, RequestType, AuthzId, Action),
-        heimdall_acl:add_access_set(ReqId, Action, RequestType, AuthzId, actor, Actors),
-        heimdall_acl:add_access_set(ReqId, Action, RequestType, AuthzId, group, Groups),
+        {Actors, Groups} = heimdall_acl:parse_acl_json(Body),
+        heimdall_acl:update_acl(ReqId, RequestType, AuthzId, Action, Actors, Groups),
         {true, wrq:set_resp_body(<<"{}">>, Req), State}
     catch
         throw:{error, invalid_json} ->

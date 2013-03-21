@@ -1,8 +1,9 @@
 CREATE TYPE auth_permission AS ENUM ('update', 'read', 'grant', 'delete', 'create');
+CREATE TYPE auth_type AS ENUM ('actor', 'group', 'object', 'container');
 
 -- No unique constraint on names now because we don't have
 -- organizations in Authz to do the proper scoping. :(
-CREATE TABLE container(
+CREATE TABLE auth_container(
     id bigserial PRIMARY KEY,
     authz_id  CHAR(32) NOT NULL UNIQUE
 );
@@ -97,7 +98,7 @@ CREATE TABLE group_acl_actor(
 CREATE INDEX group_acl_actor_authorizee ON group_acl_actor(authorizee);
 
 CREATE TABLE container_acl_group(
-       target bigint NOT NULL REFERENCES container(id) ON UPDATE CASCADE ON DELETE CASCADE,
+       target bigint NOT NULL REFERENCES auth_container(id) ON UPDATE CASCADE ON DELETE CASCADE,
        authorizee bigint NOT NULL REFERENCES auth_group(id) ON UPDATE CASCADE ON DELETE CASCADE,
        permission auth_permission NOT NULL,
        PRIMARY KEY (target, authorizee, permission)
@@ -105,7 +106,7 @@ CREATE TABLE container_acl_group(
 CREATE INDEX container_acl_group_authorizee ON container_acl_group(authorizee);
 
 CREATE TABLE container_acl_actor(
-       target bigint NOT NULL REFERENCES container(id) ON UPDATE CASCADE ON DELETE CASCADE,
+       target bigint NOT NULL REFERENCES auth_container(id) ON UPDATE CASCADE ON DELETE CASCADE,
        authorizee bigint NOT NULL REFERENCES auth_actor(id) ON UPDATE CASCADE ON DELETE CASCADE,
        permission auth_permission NOT NULL,
        PRIMARY KEY (target, authorizee, permission)
@@ -233,13 +234,33 @@ AS $$
    SELECT id FROM auth_object WHERE authz_id = $1;
 $$;
 
-CREATE FUNCTION container_id(container.authz_id%TYPE)
-RETURNS container.id%TYPE
+CREATE FUNCTION container_id(auth_container.authz_id%TYPE)
+RETURNS auth_container.id%TYPE
 LANGUAGE SQL STABLE STRICT
 AS $$
-   SELECT id FROM container WHERE authz_id = $1;
+   SELECT id FROM auth_container WHERE authz_id = $1;
 $$;
 
+CREATE FUNCTION authz_id_for_type(char(32), auth_type)
+RETURNS bigint
+LANGUAGE plpgsql STABLE STRICT
+AS $$
+DECLARE
+    return_id bigint;
+BEGIN
+    CASE $2
+      WHEN 'actor' THEN
+        SELECT INTO return_id id FROM auth_actor WHERE authz_id = $1;
+      WHEN 'group' THEN
+        SELECT INTO return_id id FROM auth_group WHERE authz_id = $1;
+      WHEN 'object' THEN
+        SELECT INTO return_id id FROM auth_object WHERE authz_id = $1;
+      WHEN 'container' THEN
+        SELECT INTO return_id id FROM auth_container WHERE authz_id = $1;
+    END CASE;
+    RETURN return_id;
+END
+$$;
 
 -- Select all the groups an actor is a member of, recursively
 --
@@ -268,50 +289,53 @@ WITH RECURSIVE
 SELECT id from groups;
 $$;
 
--- Don't think that we need similar functions for groups having a
--- permission, since I don't think that's ever queried for directly
--- from outside.
-CREATE FUNCTION actor_has_permission_on_actor(
+-- Generic check for actors having permission on authz entities of arbitrary
+-- type. Don't think that we need similar functions for groups having a permission,
+-- since I don't think that's ever queried for directly from outside.  Sending a
+-- permission of NULL is the equivalent of asking for any permission
+CREATE FUNCTION actor_has_permission_on(
        query_actor auth_actor.authz_id%TYPE,
-       query_target auth_actor.authz_id%TYPE,
+       query_target char(32),
+       target_type auth_type,
        perm auth_permission)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 STABLE -- <- this function doesn't alter the database; just queries it
-STRICT -- <- returns NULL immediately if any arguments are NULL
 AS $$
 DECLARE
   -- Convert Authz IDs into internal database IDs
   --
   -- If the Authz IDs don't refer to an existing item, an error will
   -- be thrown.
-  actor_id  auth_actor.id%TYPE  NOT NULL := actor_id(query_actor);
-  target_id auth_actor.id%TYPE NOT NULL := actor_id(query_target);
+  actor_id  auth_actor.id%TYPE NOT NULL := actor_id(query_actor);
+  target_id bigint NOT NULL := authz_id_for_type(query_target, target_type);
+  actor_table char(32) := quote_ident(target_type || '_acl_actor');
+  group_table char(32) := quote_ident(target_type || '_acl_group');
+  has_result bigint;  
 BEGIN
-
         -- Check to see if the actor has the permission directly
-        PERFORM a.*
-        FROM actor_acl_actor AS a
-        WHERE a.target = target_id
-        AND a.authorizee = actor_id
-        AND a.permission = perm;
+        EXECUTE 'SELECT a.target FROM ' || actor_table || ' AS a
+            WHERE a.target = $1
+            AND a.authorizee = $2
+            AND (a.permission = $3 OR $3 IS NULL)' USING target_id, actor_id, perm
+          INTO has_result;
 
        -- If that returned anything, we're done
-       IF FOUND THEN
+       IF has_result IS NOT NULL THEN
           RETURN TRUE;
        END IF;
 
        -- The permission wasn't granted directly to the actor, we need
        -- to check the groups the actor is in
-       PERFORM a.*
-       FROM actor_acl_group AS a
-       JOIN groups_for_actor(actor_id)
-          AS gs(id) ON gs.id = a.authorizee
-       WHERE a.target = target_id
-       AND a.permission = perm;
+       EXECUTE 'SELECT a.target FROM ' || group_table || ' AS a
+           JOIN groups_for_actor($1)
+             AS gs(id) ON gs.id = a.authorizee
+           WHERE a.target = $2
+           AND (a.permission = $3 OR $3 IS NULL)' USING actor_id, target_id, perm
+         INTO has_result;
 
        -- If anything was found, we're done
-       IF FOUND THEN
+       IF has_result IS NOT NULL THEN
           RETURN TRUE;
        END IF;
 
@@ -320,150 +344,124 @@ BEGIN
 END;
 $$;
 
-CREATE FUNCTION actor_has_permission_on_group(
-       query_actor auth_actor.authz_id%TYPE,
-       query_group auth_group.authz_id%TYPE,
-       perm auth_permission)
-RETURNS BOOLEAN
+-- This is for creating an authz_entity, and also adding permissions on the entity
+-- to an actor (presumably the requesting actor who created it).  This function will
+-- put a newly created actor into its own ACL if the entity_type is actor.  Passing
+-- a NULL creator_id is possible (e.g., in the case where this is something being
+-- created by the superuser).
+CREATE FUNCTION create_and_add_permissions(
+       entity_type auth_type,
+       entity_id char(32),
+       creator_id char(32))
+RETURNS BOOLEAN -- <- just returns true, since actually all we're doing is inserting stuff
 LANGUAGE plpgsql
-STABLE -- <- this function doesn't alter the database; just queries it
-STRICT -- <- returns NULL immediately if any arguments are NULL
 AS $$
 DECLARE
-  -- Convert Authz IDs into internal database IDs
-  --
-  -- If the Authz IDs don't refer to an existing item, an error will
-  -- be thrown.
-  actor_id  auth_actor.id%TYPE  NOT NULL := actor_id(query_actor);
-  group_id auth_group.id%TYPE NOT NULL := group_id(query_group);
+        new_id bigint;
+        requestor_id auth_actor.id%TYPE := actor_id(creator_id);
+        entity_table char(32) := quote_ident('auth_' || entity_type);
+        acl_table char(32) := quote_ident(entity_type || '_acl_actor');
 BEGIN
+        -- Create entity
+        EXECUTE 'INSERT INTO ' || entity_table || '(authz_id)
+            VALUES ($1)' USING entity_id;
 
-        -- Check to see if the actor has the permission directly
-        PERFORM a.*
-        FROM group_acl_actor AS a
-        WHERE a.target = group_id
-        AND a.authorizee = actor_id
-        AND a.permission = perm;
+        new_id := authz_id_for_type(entity_id, entity_type);
 
-       -- If that returned anything, we're done
-       IF FOUND THEN
-          RETURN TRUE;
-       END IF;
+        -- Add ACL on entity for requesting actor
+        IF requestor_id IS NOT NULL THEN
+          EXECUTE 'INSERT INTO ' || acl_table || '(target, authorizee, permission)
+              VALUES ($1, $2, ''create''),
+                     ($1, $2, ''read''),
+                     ($1, $2, ''update''),
+                     ($1, $2, ''delete''),
+                     ($1, $2, ''grant'')' USING new_id, requestor_id;
+        END IF;
 
-       -- The permission wasn't granted directly to the actor, we need
-       -- to check the groups the actor is in
-       PERFORM a.*
-       FROM group_acl_group AS a
-       JOIN groups_for_actor(actor_id)
-          AS gs(id) ON gs.id = a.authorizee
-       WHERE a.target = group_id
-       AND a.permission = perm;
+        -- If entity is actor, give itself permissions
+        IF entity_type = 'actor' THEN
+          EXECUTE 'INSERT INTO ' || acl_table || '(target, authorizee, permission)
+              VALUES ($1, $1, ''create''),
+                     ($1, $1, ''read''),
+                     ($1, $1, ''update''),
+                     ($1, $1, ''delete''),
+                     ($1, $1, ''grant'')' USING new_id;
+        END IF;
 
-       -- If anything was found, we're done
-       IF FOUND THEN
-          RETURN TRUE;
-       END IF;
-
-       -- The actor doesn't have the permission
-       RETURN FALSE;
+        -- Need to return something, I guess?
+        RETURN TRUE;
 END;
 $$;
 
-CREATE FUNCTION actor_has_permission_on_object(
-       query_actor auth_actor.authz_id%TYPE,
-       query_object auth_object.authz_id%TYPE,
+-- Function for clearing ACLs for arbitrary entities
+CREATE FUNCTION clear_acl(
+       entity_type auth_type,
+       entity_id char(32),
        perm auth_permission)
-RETURNS BOOLEAN
+RETURNS BOOLEAN -- <- just returns true, since we're just updating DB tables
 LANGUAGE plpgsql
-STABLE -- <- this function doesn't alter the database; just queries it
-STRICT -- <- returns NULL immediately if any arguments are NULL
 AS $$
 DECLARE
-  -- Convert Authz IDs into internal database IDs
-  --
-  -- If the Authz IDs don't refer to an existing item, an error will
-  -- be thrown.
-  actor_id  auth_actor.id%TYPE  NOT NULL := actor_id(query_actor);
-  object_id auth_object.id%TYPE NOT NULL := object_id(query_object);
+        actor_table char(32) := quote_ident(entity_type || '_acl_actor');
+        group_table char(32) := quote_ident(entity_type || '_acl_group');
+        target_id bigint NOT NULL := authz_id_for_type(entity_id, entity_type);
 BEGIN
+        EXECUTE 'DELETE FROM ' || actor_table || '
+            WHERE target = $1 AND permission = $2' USING target_id, perm;
+        EXECUTE 'DELETE FROM ' || group_table || '
+            WHERE target = $1 AND permission = $2' USING target_id, perm;
 
-        -- Check to see if the actor has the permission directly
-        PERFORM a.*
-        FROM object_acl_actor AS a
-        WHERE a.target = object_id
-        AND a.authorizee = actor_id
-        AND a.permission = perm;
-
-       -- If that returned anything, we're done
-       IF FOUND THEN
-          RETURN TRUE;
-       END IF;
-
-       -- The permission wasn't granted directly to the actor, we need
-       -- to check the groups the actor is in
-       PERFORM a.*
-       FROM object_acl_group AS a
-       JOIN groups_for_actor(actor_id)
-          AS gs(id) ON gs.id = a.authorizee
-       WHERE a.target = object_id
-       AND a.permission = perm;
-
-       -- If anything was found, we're done
-       IF FOUND THEN
-          RETURN TRUE;
-       END IF;
-
-       -- The actor doesn't have the permission
-       RETURN FALSE;
+        RETURN TRUE;
 END;
 $$;
 
-CREATE FUNCTION actor_has_permission_on_container(
-       query_actor auth_actor.authz_id%TYPE,
-       query_container container.authz_id%TYPE,
-       perm auth_permission)
-RETURNS BOOLEAN
+-- Function for updating ACLs with arbitrary sets of groups and actors
+CREATE FUNCTION update_acl(
+       entity_type auth_type,
+       entity_id char(32),
+       perm auth_permission,
+       actors_text text,
+       groups_text text)
+RETURNS BOOLEAN -- <- just returns true, since we're just updating DB tables
 LANGUAGE plpgsql
-STABLE -- <- this function doesn't alter the database; just queries it
-STRICT -- <- returns NULL immediately if any arguments are NULL
 AS $$
 DECLARE
-  -- Convert Authz IDs into internal database IDs
-  --
-  -- If the Authz IDs don't refer to an existing item, an error will
-  -- be thrown.
-  actor_id  auth_actor.id%TYPE  NOT NULL := actor_id(query_actor);
-  container_id container.id%TYPE NOT NULL := container_id(query_container);
+        actors char(32)[] := string_to_array(actors_text, ',');
+        groups char(32)[] := string_to_array(groups_text, ',');
+        actor_table char(32) := quote_ident(entity_type || '_acl_actor');
+        group_table char(32) := quote_ident(entity_type || '_acl_group');
+        target_id bigint NOT NULL := authz_id_for_type(entity_id, entity_type);
+        count integer;
 BEGIN
+        -- Clear out the old
+        EXECUTE 'DELETE FROM ' || actor_table || '
+            WHERE target = $1 AND permission = $2' USING target_id, perm;
+        EXECUTE 'DELETE FROM ' || group_table || '
+            WHERE target = $1 AND permission = $2' USING target_id, perm;
 
-        -- Check to see if the actor has the permission directly
-        PERFORM a.*
-        FROM container_acl_actor AS a
-        WHERE a.target = container_id
-        AND a.authorizee = actor_id
-        AND a.permission = perm;
+        -- Insert the new
+        count := 1;
+        LOOP
+          IF array_upper(actors, 1) IS NULL OR count > array_upper(actors, 1) THEN
+            EXIT;
+          END IF;
+          EXECUTE 'INSERT INTO ' || actor_table || '(target, authorizee, permission)
+            VALUES ($1, $2, $3)' USING target_id, actor_id(actors[count]), perm;
+          count := count + 1;
+        END LOOP;
 
-       -- If that returned anything, we're done
-       IF FOUND THEN
-          RETURN TRUE;
-       END IF;
+        -- Insert the new
+        count := 1;
+        LOOP
+          IF array_upper(groups, 1) IS NULL OR count > array_upper(groups, 1) THEN
+            EXIT;
+          END IF;
+          EXECUTE 'INSERT INTO ' || group_table || '(target, authorizee, permission)
+            VALUES ($1, $2, $3)' USING target_id, group_id(groups[count]), perm;
+          count := count + 1;
+        END LOOP;
 
-       -- The permission wasn't granted directly to the actor, we need
-       -- to check the groups the actor is in
-       PERFORM a.*
-       FROM container_acl_group AS a
-       JOIN groups_for_actor(actor_id)
-          AS gs(id) ON gs.id = a.authorizee
-       WHERE a.target = container_id
-       AND a.permission = perm;
-
-       -- If anything was found, we're done
-       IF FOUND THEN
-          RETURN TRUE;
-       END IF;
-
-       -- The actor doesn't have the permission
-       RETURN FALSE;
+        RETURN TRUE;
 END;
 $$;
 

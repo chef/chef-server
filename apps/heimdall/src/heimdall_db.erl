@@ -7,32 +7,31 @@
 
 -export([acl_membership/4,
          add_to_group/3,
-         create/2,
-         create_ace/5,
+         create/3,
          delete/2,
-         delete_acl/4,
+         delete_acl/3,
          exists/2,
          group_membership/2,
+         has_any_permission/3,
          has_permission/4,
          remove_from_group/3,
-         statements/0]).
+         statements/0,
+         update_acl/5]).
 
-create_stmt(actor)     -> insert_actor;
-create_stmt(container) -> insert_container;
-create_stmt(group)     -> insert_group;
-create_stmt(object)    -> insert_object.
-
--spec create(auth_type(), auth_id()) -> ok | {conflict, term()} | {error, term()}.
-create(Type, AuthzId) ->
-    CreateStatement = create_stmt(Type),
-    case sqerl:statement(CreateStatement, [AuthzId], count) of
-        {ok, 1} ->
+-spec create(auth_type(), auth_id(), auth_id() | null) ->
+                    ok | {conflict, term()} | {error, term()}.
+create(Type, AuthzId, RequestorId) when RequestorId =:= superuser orelse
+                                        RequestorId =:= undefined ->
+    create(Type, AuthzId, null);
+create(Type, AuthzId, RequestorId) ->
+    case sqerl:select(create_entity, [Type, AuthzId, RequestorId],
+                      first_as_scalar, [success]) of
+        {ok, true} ->
             ok;
-        {conflict, Reason} ->
-            {conflict, Reason};
         {error, Reason} ->
             {error, Reason}
     end.
+
 
 delete_stmt(actor)     -> delete_actor_by_authz_id;
 delete_stmt(container) -> delete_container_by_authz_id;
@@ -60,31 +59,6 @@ exists(Type, AuthId) ->
     {ok, Answer} = sqerl:select(StatementName, [AuthId], first_as_scalar, [exists]),
     Answer.
 
-create_ace_stmt(actor, actor) -> insert_actor_acl_actor;
-create_ace_stmt(actor, group) -> insert_actor_acl_group;
-create_ace_stmt(group, actor) -> insert_group_acl_actor;
-create_ace_stmt(group, group) -> insert_group_acl_group;
-create_ace_stmt(object, actor) -> insert_object_acl_actor;
-create_ace_stmt(object, group) -> insert_object_acl_group;
-create_ace_stmt(container, actor) -> insert_container_acl_actor;
-create_ace_stmt(container, group) -> insert_container_acl_group.
-
--spec create_ace(auth_type(), auth_id(), auth_type(), auth_id(),
-                 permission()) -> ok | {error, term()}.
-create_ace(TargetType, TargetId, AuthorizeeType, AuthorizeeId, Permission) ->
-    CreateStatement = create_ace_stmt(TargetType, AuthorizeeType),
-    case sqerl:statement(CreateStatement, [TargetId, AuthorizeeId, Permission],
-                         count) of
-        {ok, 1} ->
-            ok;
-        {conflict, _Reason} ->
-            % Conflicts are actually just fine here; if permission already exists,
-            % we simply don't add it again.
-            ok;
-        {error, Reason} ->
-            {error, Reason}
-    end.
-
 acl_member_query(actor, actor) -> actors_in_actor_acl;
 acl_member_query(group, actor) -> groups_in_actor_acl;
 acl_member_query(actor, group) -> actors_in_group_acl;
@@ -108,35 +82,47 @@ acl_membership(TargetType, AuthorizeeType, AuthzId, Permission) ->
             {error, Error}
     end.
 
-delete_acl_stmt(actor, actor)    -> delete_actors_from_actor_acl;
-delete_acl_stmt(group, actor)    -> delete_groups_from_actor_acl;
-delete_acl_stmt(actor, group)    -> delete_actors_from_group_acl;
-delete_acl_stmt(group, group)    -> delete_groups_from_group_acl;
-delete_acl_stmt(actor, object)    -> delete_actors_from_object_acl;
-delete_acl_stmt(group, object)    -> delete_groups_from_object_acl;
-delete_acl_stmt(actor, container)    -> delete_actors_from_container_acl;
-delete_acl_stmt(group, container)    -> delete_groups_from_container_acl.
+sql_array(List) ->
+    List0 = [binary_to_list(X) || X <- List],
+    string:join(List0, ",").
 
--spec delete_acl(auth_type(), auth_type(), auth_id(), permission()) ->
+-spec update_acl(auth_type(), auth_id(), permission(), list(), list()) ->
                         ok | {error, term()}.
-delete_acl(AuthorizeeType, TargetType, TargetId, Permission) ->
-    DeleteStatement = delete_acl_stmt(AuthorizeeType, TargetType),
-    case sqerl:statement(DeleteStatement, [TargetId, Permission], count) of
-        {ok, _Count} ->
+update_acl(TargetType, TargetId, Permission, Actors, Groups) ->
+    case sqerl:select(update_acl, [TargetType, TargetId, Permission,
+                                   sql_array(Actors), sql_array(Groups)],
+                      first_as_scalar, [success]) of
+        {ok, true} ->
             ok;
         {error, Reason} ->
             {error, Reason}
     end.
 
-permission_query(actor) -> actor_has_permission_on_actor;
-permission_query(group) -> actor_has_permission_on_group;
-permission_query(object) -> actor_has_permission_on_object;
-permission_query(container) -> actor_has_permission_on_container.
+-spec delete_acl(auth_type(), auth_id(), permission()) -> ok | {error, term()}.
+delete_acl(TargetType, TargetId, Permission) ->
+    case sqerl:select(clear_acl, [TargetType, TargetId, Permission],
+                      first_as_scalar, [success]) of
+        {ok, true} ->
+            ok;
+        {error, Reason} ->
+            {error, Reason}
+    end.
 
 -spec has_permission(auth_type(), auth_id(), auth_id(), permission()) -> boolean().
 has_permission(TargetType, TargetId, RequestorId, Permission) ->
-    PermissionStatement = permission_query(TargetType),
-    case sqerl:select(PermissionStatement, [RequestorId, TargetId, Permission],
+    case sqerl:select(actor_has_permission_on, [RequestorId, TargetId, TargetType,
+                                                Permission],
+                      first_as_scalar, [permission]) of
+        {ok, Answer} ->
+            Answer;
+        {error, <<"null value cannot be assigned to variable \"actor_id\" declared NOT NULL">>} ->
+            %% If we get a request for a bogus member_id, just return false
+            false
+    end.
+
+-spec has_any_permission(auth_type(), auth_id(), auth_id()) -> boolean().
+has_any_permission(TargetType, TargetId, RequestorId) ->
+    case sqerl:select(actor_has_permission_on, [RequestorId, TargetId, TargetType, null],
                       first_as_scalar, [permission]) of
         {ok, Answer} ->
             Answer;
@@ -170,7 +156,7 @@ add_to_group(Type, MemberId, GroupId) ->
     case sqerl:statement(InsertStatement, [MemberId, GroupId], count) of
         {ok, 1} ->
             ok;
-        {conflict, Reason} ->
+        {conflict, _Reason} ->
             % Already in group, nothing to do here
             ok;
         {error, Reason} ->

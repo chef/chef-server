@@ -32,17 +32,10 @@ auth_info(_Method) ->
 from_json(Req, #base_state{reqid = ReqId,
                            authz_id = AuthzId,
                            requestor_id = RequestorId} = State) ->
-    case ?SH_TIME(ReqId, heimdall_db, create, (actor, AuthzId)) of
+    case ?SH_TIME(ReqId, heimdall_db, create, (actor, AuthzId, RequestorId)) of
         ok ->
-            try
-                heimdall_acl:add_full_access(ReqId, actor, AuthzId, actor, AuthzId),
-                heimdall_acl:add_full_access(ReqId, actor, AuthzId, actor, RequestorId),
-                Req0 = heimdall_wm_util:set_created_response(Req, AuthzId),
-                {ok, Req0, State}
-            catch
-                throw:{db_error, Error} ->
-                    heimdall_wm_error:set_db_exception(Req, State, Error)
-            end;
+            Req0 = heimdall_wm_util:set_created_response(Req, AuthzId),
+            {ok, Req0, State};
         {error, Error} ->
             heimdall_wm_error:set_db_exception(Req, State, Error)
     end.
