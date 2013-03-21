@@ -654,7 +654,7 @@ describe "ACL Tests" do
                       it "returns 200 when in ACE" do
                         # Hasselhoff has specific ACE access on gozer
                         get("/#{type}s/#{gozer}/acl/#{action}/actors/#{hasselhoff}",
-                            :hasselhoff).should have_status_code(200).with_body({})
+                          :hasselhoff).should have_status_code(200).with_body({})
                       end
                     else
                       it "returns 404 when not in ACE" do
@@ -665,7 +665,7 @@ describe "ACL Tests" do
                     end
                   end
 
-                  context "an actor indirectly in the #{ace} ACE" do
+                  context "an actor indirectly in the #{ace.upcase} ACE" do
                     with_actor :hasselhoff
                     with_group :hipsters, :members => [:hasselhoff]
                     with_entity type, :gozer
@@ -675,7 +675,7 @@ describe "ACL Tests" do
                     if (action == ace)
                       it "returns 200 when in ACE" do
                         get("/#{type}s/#{gozer}/acl/#{action}/actors/#{hasselhoff}",
-                            :hasselhoff).should have_status_code(200).with_body({})
+                          :hasselhoff).should have_status_code(200).with_body({})
                       end
                     else
                       it "returns 404 when not in ACE" do
