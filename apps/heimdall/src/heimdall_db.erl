@@ -115,8 +115,10 @@ has_permission(TargetType, TargetId, RequestorId, Permission) ->
                       first_as_scalar, [permission]) of
         {ok, Answer} ->
             Answer;
-        {error, <<"null value cannot be assigned to variable \"actor_id\" declared NOT NULL">>} ->
-            %% If we get a request for a bogus member_id, just return false
+        {error, _} ->
+            %% If we get a request for a bogus member_id, just return false.
+            %% TODO: better match errors like
+            %% "null value cannot be assigned to variable \"actor_id\" declared NOT NULL"
             false
     end.
 
