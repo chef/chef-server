@@ -4,7 +4,6 @@
 -include_lib("stats_hero/include/stats_hero.hrl").
 
 -export([check_access/5,
-         check_any_access/4,
          clear_access/4,
          make_ejson_acl/3,
          make_ejson_action/4,
@@ -19,15 +18,6 @@ check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
         Id ->
             ?SH_TIME(ReqId, heimdall_db, has_permission, (TargetType, TargetId, Id,
                                                           Permission))
-    end.
-
-%% @doc Check to see if requestor has any permission on target
-check_any_access(ReqId, TargetType, TargetId, RequestorId) ->
-    case RequestorId of
-        superuser ->
-            true;
-        Id ->
-            ?SH_TIME(ReqId, heimdall_db, has_any_permission, (TargetType, TargetId, Id))
     end.
 
 %% @doc Update ACL (for given permission type) on target for all actors and groups

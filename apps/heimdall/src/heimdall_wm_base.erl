@@ -78,13 +78,8 @@ forbidden(Req, #base_state{reqid = ReqId,
                 false ->
                     {{halt, 404}, Req, State};
                 true ->
-                    Result = case Permission of
-                                 any ->
-                                     heimdall_acl:check_any_access(ReqId, Type, Id, RequestorId);
-                                 Other ->
-                                     heimdall_acl:check_access(ReqId, Type, Id, RequestorId, Other)
-                             end,
-                    case Result of
+                    case heimdall_acl:check_access(ReqId, Type, Id, RequestorId,
+                                                   Permission) of
                         true ->
                             {false, Req, State};
                         false ->
