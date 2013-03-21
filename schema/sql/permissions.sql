@@ -24,7 +24,7 @@ GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO heimdall_ro;
 -- tables is a nice thing to be able to do in that situation.  We
 -- don't need temporary tables as the 'heimdall' user, though; that's
 -- for the API server.
-GRANT TEMPORARY ON DATABASE :database_name TO heimdall_ro;
+GRANT TEMPORARY ON DATABASE heimdall TO heimdall_ro;
 
 -- Debug Schema Permissions
 --------------------------------------------------------------------------------
@@ -35,4 +35,4 @@ GRANT USAGE ON SCHEMA debug TO heimdall_ro;
 -- bulk GRANT command for views per se.  Also, we're not going to have
 -- tables in this schema.
 GRANT SELECT ON ALL TABLES IN SCHEMA debug TO heimdall;
-GRANT SELECT ON ALL TABLES IN SCHEMA debug TO heimdall_ro
+GRANT SELECT ON ALL TABLES IN SCHEMA debug TO heimdall_ro;
