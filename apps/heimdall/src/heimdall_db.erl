@@ -93,6 +93,8 @@ update_acl(TargetType, TargetId, Permission, Actors, Groups) ->
                       first_as_scalar, [success]) of
         {ok, true} ->
             ok;
+        {not_null_violation, _Reason} ->
+            {error, null_violation};
         {error, Reason} ->
             {error, Reason}
     end.
@@ -114,9 +116,11 @@ has_permission(TargetType, TargetId, RequestorId, Permission) ->
                       first_as_scalar, [permission]) of
         {ok, Answer} ->
             Answer;
-        {error, <<"null value cannot be assigned to variable \"actor_id\" declared NOT NULL">>} ->
-            %% If we get a request for a bogus member_id, just return false
-            false
+        {not_null_violation, _Error} ->
+            % If this fails because the target doesn't exist, can't have permission
+            false;
+        {error, Error} ->
+            {error, Error}
     end.
 
 membership_query(actor) -> group_actor_members;
@@ -147,6 +151,12 @@ add_to_group(Type, MemberId, GroupId) ->
         {conflict, _Reason} ->
             % Already in group, nothing to do here
             ok;
+        {group_cycle, _Reason} ->
+            {error, group_cycle};
+        {check_violation, _Reason} ->
+            {error, group_cycle};
+        {not_null_violation, _Reason} ->
+            {error, null_violation};
         {error, Reason} ->
             {error, Reason}
     end.

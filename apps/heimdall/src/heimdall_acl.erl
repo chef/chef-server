@@ -24,9 +24,8 @@ check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
 update_acl(ReqId, TargetType, TargetId, Permission, Actors, Groups) ->
     case ?SH_TIME(ReqId, heimdall_db, update_acl, (TargetType, TargetId, Permission,
                                                    Actors, Groups)) of
-        {error, <<"null value in column \"authorizee\" violates not-null constraint">>} ->
-            throw({db_error, {non_existent_member_for_acl,
-                              Actors, Groups}});
+        {error, null_violation} ->
+            throw({db_error, {non_existent_member_for_acl, Actors, Groups}});
         {error, Error} ->
             throw({db_error, Error}); 
         ok ->

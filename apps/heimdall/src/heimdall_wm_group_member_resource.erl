@@ -26,17 +26,13 @@ from_json(Req, #base_state{reqid = ReqId,
     case ?SH_TIME(ReqId, heimdall_db, add_to_group, (MemberType, MemberId, AuthzId)) of
         ok ->
             {true, wrq:set_resp_body(<<"{}">>, Req), State};
-        {error, ErrorString} ->
-            case heimdall_wm_error:db_error_string_to_atom(ErrorString) of
-                null_violation ->
-                    heimdall_wm_error:set_db_exception(Req, State,
-                                                       {non_existent_member_for_group,
-                                                        MemberType, MemberId});
-                group_cycle ->
-                    heimdall_wm_error:set_db_exception(Req, State, {group_cycle, MemberId});
-                Error ->
-                    heimdall_wm_error:set_db_exception(Req, State, Error)
-            end
+        {error, null_violation} ->
+            heimdall_wm_error:set_db_exception(Req, State, {non_existent_member_for_group,
+                                                            MemberType, MemberId});
+        {error, group_cycle} ->
+            heimdall_wm_error:set_db_exception(Req, State, {group_cycle, MemberId});
+        {error, Error} ->
+            heimdall_wm_error:set_db_exception(Req, State, Error)
     end.
 
 delete_resource(Req, #base_state{reqid = ReqId,
