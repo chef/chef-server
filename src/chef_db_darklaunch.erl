@@ -17,26 +17,21 @@
 %%
 -module(chef_db_darklaunch).
 
--export([is_enabled/1,
-         is_enabled/2]).
+-export([is_enabled/2]).
+
+-include_lib("eunit/include/eunit.hrl").
 
 %% The darklaunch module used by chef_db can be set using this
 %% define. The default included here ignores `OrgName' and answers
 %% false to all couchdb_* features and true otherwise.
 -ifndef(CHEF_DB_DARKLAUNCH).
-is_enabled(Feature, _OrgName) ->
-    is_enabled(Feature).
-
-is_enabled(<<"couchdb_", _Rest/binary>>) ->
+is_enabled(<<"couchdb_", _Rest/binary>>, _) ->
     false;
-is_enabled(_) ->
+is_enabled(_, _) ->
     true.
 -else.
-is_enabled(Feature, OrgName) ->
-    ?CHEF_DB_DARKLAUNCH:is_enabled(Feature, OrgName).
-
-is_enabled(Feature) ->
-    ?CHEF_DB_DARKLAUNCH:is_enabled(Feature).
+is_enabled(Feature, Darklaunch) ->
+    ?CHEF_DB_DARKLAUNCH:is_enabled(Feature, Darklaunch).
 -endif.
 
 

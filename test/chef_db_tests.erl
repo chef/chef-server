@@ -38,7 +38,7 @@ fetch_requestor_test_() ->
       {"a user is found SQL",
        fun() ->
                meck:expect(chef_db_darklaunch, is_enabled,
-                           fun(<<"couchdb_clients">>) -> false end),
+                           fun(<<"couchdb_clients">>, _) -> false end),
 
                meck:expect(chef_otto, connect, fun() -> otto_connect end),
                meck:expect(chef_otto, fetch_org_id,
@@ -86,9 +86,9 @@ fetch_requestor_test_() ->
                                    <<"mock-org-id-123">>
                            end),
                %% meck:expect(chef_db_darklaunch, is_enabled,
-               %%             fun(<<"sql_users">>) -> true end),
+               %%             fun(<<"sql_users">>, _) -> true end),
                meck:expect(chef_db_darklaunch, is_enabled,
-                           fun(<<"couchdb_clients">>) -> false end),
+                           fun(<<"couchdb_clients">>, _) -> false end),
                meck:expect(chef_sql, fetch_user,
                            fun(<<"alice">>) -> {ok, not_found} end),
                Client = #chef_client{id = <<"mock-client-id">>,
@@ -112,9 +112,9 @@ fetch_requestor_test_() ->
                                    <<"mock-org-id-123">>
                            end),
                meck:expect(chef_db_darklaunch, is_enabled,
-                           fun(<<"sql_users">>) -> true end),
+                           fun(<<"sql_users">>, _) -> true end),
                meck:expect(chef_db_darklaunch, is_enabled,
-                           fun(<<"couchdb_clients">>) -> false end),
+                           fun(<<"couchdb_clients">>, _) -> false end),
                meck:expect(chef_sql, fetch_user,
                            fun(<<"alice">>) -> {ok, not_found} end),
             Client = #chef_client{id = <<"mock-client-id">>,
@@ -146,7 +146,7 @@ fetch_requestor_test_() ->
        fun() ->
                OrgId = <<"org-123-456">>,
                meck:expect(chef_db_darklaunch, is_enabled,
-                           fun(<<"couchdb_clients">>) -> true end),
+                           fun(<<"couchdb_clients">>, _) -> true end),
 
                meck:expect(chef_otto, connect, fun() -> otto_connect end),
                meck:expect(chef_otto, fetch_org_id,
