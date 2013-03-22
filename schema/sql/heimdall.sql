@@ -166,7 +166,9 @@ BEGIN
     );
 
     IF cycle_root THEN
-      RAISE EXCEPTION 'This would create a group membership cycle, which is not allowed';
+      RAISE EXCEPTION USING
+        errcode='OC001',
+        message='This would create a group membership cycle, which is not allowed';
     END IF;
 
     RETURN NULL;
@@ -372,9 +374,8 @@ DECLARE
 BEGIN
         -- Create entity
         EXECUTE 'INSERT INTO ' || entity_table || '(authz_id)
-            VALUES ($1)' USING entity_id;
-
-        new_id := authz_id_for_type(entity_id, entity_type);
+            VALUES ($1) RETURNING id' USING entity_id
+            INTO STRICT new_id;
 
         -- Add ACL on entity for requesting actor
         IF requestor_id IS NOT NULL THEN
