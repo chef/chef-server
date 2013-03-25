@@ -266,10 +266,13 @@ delete_object(DbContext, Object, RequestId) ->
 
 set_req_contexts(Req, #base_state{reqid_header_name = HeaderName} = State) ->
     ReqId = read_req_id(HeaderName, Req),
+    {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
     AuthzContext = oc_chef_authz:make_context(ReqId),
-    DbContext = chef_db:make_context(ReqId),
-    State#base_state{chef_authz_context = AuthzContext,
+    Darklaunch = xdarklaunch_req:parse_header(GetHeader),
+    DbContext = chef_db:make_context(ReqId, Darklaunch),
+    State1#base_state{chef_authz_context = AuthzContext,
                      chef_db_context = DbContext,
+                     darklaunch = Darklaunch,
                      reqid = ReqId}.
 
 read_req_id(ReqHeaderName, Req) ->
