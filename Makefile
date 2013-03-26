@@ -72,7 +72,7 @@ $(DEPS_PLT):
 	dialyzer -nn --output_plt $(DEPS_PLT) --build_plt --apps $(ERLANG_DIALYZER_APPS)
 
 dialyze: compile $(DEPS_PLT)
-	dialyzer --src $(DIALYZER_OPTS) --plt $(DEPS_PLT) -r apps/heimdall/src -I deps
+	dialyzer $(DIALYZER_OPTS) --plt $(DEPS_PLT) -r apps/heimdall/ebin
 
 # Testing ######################################################################
 
