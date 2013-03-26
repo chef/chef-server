@@ -18,7 +18,7 @@
          update_acl/5]).
 
 translate(<<"OC001">>) -> group_cycle;
-translate(Code) -> Code.
+translate(Code) -> sqerl_pgsql_errors:translate_code(Code).
 
 select(Statement, Params, Transform, TransformParams) ->
     case sqerl:select(Statement, Params, Transform, TransformParams) of
@@ -168,7 +168,7 @@ add_to_group(Type, MemberId, GroupId) ->
     case statement(InsertStatement, [MemberId, GroupId], count) of
         {ok, 1} ->
             ok;
-        {error, {conflict, _Reason}} ->
+        {conflict, _Reason} ->
             % Already in group, nothing to do here
             ok;
         % Both of the next two errors are returned for cycles; the first is a custom
