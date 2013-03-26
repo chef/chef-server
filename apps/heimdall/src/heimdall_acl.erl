@@ -24,7 +24,7 @@ check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
 update_acl(ReqId, TargetType, TargetId, Permission, Actors, Groups) ->
     case ?SH_TIME(ReqId, heimdall_db, update_acl, (TargetType, TargetId, Permission,
                                                    Actors, Groups)) of
-        {error, null_violation} ->
+        {error, not_null_violation} ->
             throw({db_error, {non_existent_member_for_acl, Actors, Groups}});
         {error, Error} ->
             throw({db_error, Error}); 

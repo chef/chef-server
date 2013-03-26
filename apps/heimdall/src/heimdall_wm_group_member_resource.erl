@@ -26,7 +26,7 @@ from_json(Req, #base_state{reqid = ReqId,
     case ?SH_TIME(ReqId, heimdall_db, add_to_group, (MemberType, MemberId, AuthzId)) of
         ok ->
             {true, wrq:set_resp_body(<<"{}">>, Req), State};
-        {error, null_violation} ->
+        {error, not_null_violation} ->
             heimdall_wm_error:set_db_exception(Req, State, {non_existent_member_for_group,
                                                             MemberType, MemberId});
         {error, group_cycle} ->

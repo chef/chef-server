@@ -17,14 +17,33 @@
          statements/0,
          update_acl/5]).
 
+translate(<<"OC001">>) -> group_cycle;
+translate(Code) -> Code.
+
+select(Statement, Params, Transform, TransformParams) ->
+    case sqerl:select(Statement, Params, Transform, TransformParams) of
+        {error, {Code, Message}} ->
+            {error, {translate(Code), Message}};
+        Other ->
+            Other
+    end.
+
+statement(Statement, Params, Transform) ->
+    case sqerl:statement(Statement, Params, Transform) of
+        {error, {Code, Message}} ->
+            {error, {translate(Code), Message}};
+        Other ->
+            Other
+    end.
+
 -spec create(auth_type(), auth_id(), auth_id() | null) ->
                     ok | {conflict, term()} | {error, term()}.
 create(Type, AuthzId, RequestorId) when RequestorId =:= superuser orelse
                                         RequestorId =:= undefined ->
     create(Type, AuthzId, null);
 create(Type, AuthzId, RequestorId) ->
-    case sqerl:select(create_entity, [Type, AuthzId, RequestorId],
-                      first_as_scalar, [success]) of
+    case select(create_entity, [Type, AuthzId, RequestorId],
+                first_as_scalar, [success]) of
         {ok, true} ->
             ok;
         {error, Reason} ->
@@ -40,7 +59,7 @@ delete_stmt(object)    -> delete_object_by_authz_id.
 -spec delete(auth_type(), auth_id()) -> ok | {error, term()}.
 delete(Type, AuthzId) ->
     DeleteStatement = delete_stmt(Type),
-    case sqerl:statement(DeleteStatement, [AuthzId], count) of
+    case statement(DeleteStatement, [AuthzId], count) of
         {ok, 1} ->
             ok;
         {error, Reason} ->
@@ -55,7 +74,7 @@ exists_query(object)    -> object_exists.
 -spec exists(auth_type(), auth_id()) -> boolean().
 exists(Type, AuthId) ->
     StatementName = exists_query(Type),
-    {ok, Answer} = sqerl:select(StatementName, [AuthId], first_as_scalar, [exists]),
+    {ok, Answer} = select(StatementName, [AuthId], first_as_scalar, [exists]),
     Answer.
 
 acl_member_query(actor, actor) -> actors_in_actor_acl;
@@ -71,8 +90,8 @@ acl_member_query(group, container) -> groups_in_container_acl.
                               list() | {error, term()}.
 acl_membership(TargetType, AuthorizeeType, AuthzId, Permission) ->
     MembershipStatement = acl_member_query(AuthorizeeType, TargetType),
-    case sqerl:select(MembershipStatement, [AuthzId, Permission], rows_as_scalars,
-                      [authz_id]) of
+    case select(MembershipStatement, [AuthzId, Permission], rows_as_scalars,
+                [authz_id]) of
         {ok, L} when is_list(L) ->
             L;
         {ok, none} ->
@@ -88,21 +107,22 @@ sql_array(List) ->
 -spec update_acl(auth_type(), auth_id(), permission(), list(), list()) ->
                         ok | {error, term()}.
 update_acl(TargetType, TargetId, Permission, Actors, Groups) ->
-    case sqerl:select(update_acl, [TargetType, TargetId, Permission,
-                                   sql_array(Actors), sql_array(Groups)],
-                      first_as_scalar, [success]) of
+    case select(update_acl, [TargetType, TargetId, Permission,
+                             sql_array(Actors), sql_array(Groups)],
+                first_as_scalar, [success]) of
         {ok, true} ->
             ok;
-        {not_null_violation, _Reason} ->
-            {error, null_violation};
+        {error, {not_null_violation, _Reason}} ->
+            % We'll get this whenever there is an attempt to add a non-existent member
+            {error, not_null_violation};
         {error, Reason} ->
             {error, Reason}
     end.
 
 -spec delete_acl(auth_type(), auth_id(), permission()) -> ok | {error, term()}.
 delete_acl(TargetType, TargetId, Permission) ->
-    case sqerl:select(clear_acl, [TargetType, TargetId, Permission],
-                      first_as_scalar, [success]) of
+    case select(clear_acl, [TargetType, TargetId, Permission],
+                first_as_scalar, [success]) of
         {ok, true} ->
             ok;
         {error, Reason} ->
@@ -111,12 +131,12 @@ delete_acl(TargetType, TargetId, Permission) ->
 
 -spec has_permission(auth_type(), auth_id(), auth_id(), permission() | any) -> boolean().
 has_permission(TargetType, TargetId, RequestorId, Permission) ->
-    case sqerl:select(actor_has_permission_on, [RequestorId, TargetId, TargetType,
-                                                Permission],
-                      first_as_scalar, [permission]) of
+    case select(actor_has_permission_on, [RequestorId, TargetId, TargetType,
+                                          Permission],
+                first_as_scalar, [permission]) of
         {ok, Answer} ->
             Answer;
-        {not_null_violation, _Error} ->
+        {error, {not_null_violation, _Error}} ->
             % If this fails because the target doesn't exist, can't have permission
             false;
         {error, Error} ->
@@ -129,8 +149,8 @@ membership_query(group) -> group_group_members.
 -spec group_membership(auth_type(), auth_id()) -> list() | {error, term()}.
 group_membership(TargetType, GroupId) ->
     MembershipStatement = membership_query(TargetType),
-    case sqerl:select(MembershipStatement, [GroupId], rows_as_scalars,
-                      [authz_id]) of
+    case select(MembershipStatement, [GroupId], rows_as_scalars,
+                [authz_id]) of
         {ok, L} when is_list(L) ->
             L;
         {ok, none} ->
@@ -145,18 +165,22 @@ group_insert_stmt(group)     -> insert_group_into_group.
 -spec add_to_group(auth_type(), auth_id(), auth_id()) -> ok | {error, term()}.
 add_to_group(Type, MemberId, GroupId) ->
     InsertStatement = group_insert_stmt(Type),
-    case sqerl:statement(InsertStatement, [MemberId, GroupId], count) of
+    case statement(InsertStatement, [MemberId, GroupId], count) of
         {ok, 1} ->
             ok;
-        {conflict, _Reason} ->
+        {error, {conflict, _Reason}} ->
             % Already in group, nothing to do here
             ok;
-        {group_cycle, _Reason} ->
+        % Both of the next two errors are returned for cycles; the first is a custom
+        % error from our cycle-detection function, the second is due to the simpler
+        % validation (check) that groups aren't members of themselves
+        {error, {group_cycle, _Reason}} ->
             {error, group_cycle};
-        {check_violation, _Reason} ->
+        {error, {check_violation, _Reason}} ->
             {error, group_cycle};
-        {not_null_violation, _Reason} ->
-            {error, null_violation};
+        {error, {not_null_violation, _Reason}} ->
+            % We'll get this whenever there is an attempt to add a non-existent member
+            {error, not_null_violation};
         {error, Reason} ->
             {error, Reason}
     end.
@@ -167,7 +191,7 @@ group_remove_stmt(group)     -> delete_group_from_group.
 -spec remove_from_group(auth_type(), auth_id(), auth_id()) -> ok | {error, term()}.
 remove_from_group(Type, MemberId, GroupId) ->
     DeleteStatement = group_remove_stmt(Type),
-    case sqerl:statement(DeleteStatement, [MemberId, GroupId], count) of
+    case statement(DeleteStatement, [MemberId, GroupId], count) of
         {ok, 1} ->
             ok;
         {ok, none} ->
