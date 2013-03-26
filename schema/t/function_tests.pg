@@ -116,11 +116,11 @@ SELECT * FROM create_and_add_permissions('object', 'mmmmmmmmmmmmmmmmmmmmmmmmmmmm
                                          NULL);
 SELECT is(FALSE,
        actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-                               'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm', 'object', NULL),
+                               'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm', 'object', 'any'),
        'actor has no permission on new object');
 SELECT is(FALSE,
        actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-                               'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm', 'object', NULL),
+                               'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm', 'object', 'any'),
        'other actor has no permission on new object');
 
 --   actor with requestor
@@ -128,11 +128,11 @@ SELECT * FROM create_and_add_permissions('actor', 'ccccccccccccccccccccccccccccc
                                          NULL);
 SELECT is(FALSE,
        actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-                               'cccccccccccccccccccccccccccccccc', 'actor', NULL),
+                               'cccccccccccccccccccccccccccccccc', 'actor', 'any'),
        'actor has no permission on new actor');
 SELECT is(FALSE,
        actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-                               'cccccccccccccccccccccccccccccccc', 'actor', NULL),
+                               'cccccccccccccccccccccccccccccccc', 'actor', 'any'),
        'other actor has no permission on new actor');
 SELECT is(TRUE,
        actor_has_permission_on('cccccccccccccccccccccccccccccccc',

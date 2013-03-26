@@ -1,4 +1,8 @@
 CREATE TYPE auth_permission AS ENUM ('update', 'read', 'grant', 'delete', 'create');
+-- Used only for permission function (be nice if we could union this with 'any' and
+-- the above, but didn't see a way to do that in the PG docs):
+CREATE TYPE auth_any_permission AS ENUM ('update', 'read', 'grant', 'delete',
+                                         'create', 'any');
 CREATE TYPE auth_type AS ENUM ('actor', 'group', 'object', 'container');
 
 -- No unique constraint on names now because we don't have
@@ -162,7 +166,9 @@ BEGIN
     );
 
     IF cycle_root THEN
-      RAISE EXCEPTION 'This would create a group membership cycle, which is not allowed';
+      RAISE EXCEPTION USING
+        errcode='OC001',
+        message='This would create a group membership cycle, which is not allowed';
     END IF;
 
     RETURN NULL;
@@ -291,16 +297,18 @@ $$;
 
 -- Generic check for actors having permission on authz entities of arbitrary
 -- type. Don't think that we need similar functions for groups having a permission,
--- since I don't think that's ever queried for directly from outside.  Sending a
--- permission of NULL is the equivalent of asking for any permission
+-- since I don't think that's ever queried for directly from outside.
+-- auth_any_permission includes all the regular permissions plus 'any' for testing
+-- if query_actor has any permission
 CREATE FUNCTION actor_has_permission_on(
        query_actor auth_actor.authz_id%TYPE,
        query_target char(32),
        target_type auth_type,
-       perm auth_permission)
+       perm auth_any_permission)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 STABLE -- <- this function doesn't alter the database; just queries it
+STRICT -- <- returns NULL immediately if any arguments are NULL 
 AS $$
 DECLARE
   -- Convert Authz IDs into internal database IDs
@@ -317,7 +325,8 @@ BEGIN
         EXECUTE 'SELECT a.target FROM ' || actor_table || ' AS a
             WHERE a.target = $1
             AND a.authorizee = $2
-            AND (a.permission = $3 OR $3 IS NULL)' USING target_id, actor_id, perm
+            AND ($3 = ''any'' OR a.permission::text = $3::text)'
+          USING target_id, actor_id, perm
           INTO has_result;
 
        -- If that returned anything, we're done
@@ -331,7 +340,8 @@ BEGIN
            JOIN groups_for_actor($1)
              AS gs(id) ON gs.id = a.authorizee
            WHERE a.target = $2
-           AND (a.permission = $3 OR $3 IS NULL)' USING actor_id, target_id, perm
+           AND ($3 = ''any'' OR a.permission::text = $3::text)'
+         USING actor_id, target_id, perm
          INTO has_result;
 
        -- If anything was found, we're done
@@ -364,9 +374,8 @@ DECLARE
 BEGIN
         -- Create entity
         EXECUTE 'INSERT INTO ' || entity_table || '(authz_id)
-            VALUES ($1)' USING entity_id;
-
-        new_id := authz_id_for_type(entity_id, entity_type);
+            VALUES ($1) RETURNING id' USING entity_id
+            INTO STRICT new_id;
 
         -- Add ACL on entity for requesting actor
         IF requestor_id IS NOT NULL THEN

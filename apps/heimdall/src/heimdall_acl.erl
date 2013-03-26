@@ -4,7 +4,6 @@
 -include_lib("stats_hero/include/stats_hero.hrl").
 
 -export([check_access/5,
-         check_any_access/4,
          clear_access/4,
          make_ejson_acl/3,
          make_ejson_action/4,
@@ -21,22 +20,12 @@ check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
                                                           Permission))
     end.
 
-%% @doc Check to see if requestor has any permission on target
-check_any_access(ReqId, TargetType, TargetId, RequestorId) ->
-    case RequestorId of
-        superuser ->
-            true;
-        Id ->
-            ?SH_TIME(ReqId, heimdall_db, has_any_permission, (TargetType, TargetId, Id))
-    end.
-
 %% @doc Update ACL (for given permission type) on target for all actors and groups
 update_acl(ReqId, TargetType, TargetId, Permission, Actors, Groups) ->
     case ?SH_TIME(ReqId, heimdall_db, update_acl, (TargetType, TargetId, Permission,
                                                    Actors, Groups)) of
-        {error, <<"null value in column \"authorizee\" violates not-null constraint">>} ->
-            throw({db_error, {non_existent_member_for_acl,
-                              Actors, Groups}});
+        {error, not_null_violation} ->
+            throw({db_error, {non_existent_member_for_acl, Actors, Groups}});
         {error, Error} ->
             throw({db_error, Error}); 
         ok ->

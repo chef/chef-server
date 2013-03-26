@@ -24,7 +24,7 @@ SELECT throws_ok(
                 (group_id('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'), group_id('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww')),
                 (group_id('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'), group_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'));
        $$,
-       'P0001',
+       'OC001',
        'This would create a group membership cycle, which is not allowed',
        'Long-range cycles not allowed');
 
@@ -44,7 +44,7 @@ SELECT throws_ok(
          INSERT INTO group_group_relations(parent,child)
          VALUES (group_id('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'), group_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'));
        $$,
-       'P0001',
+       'OC001',
        'This would create a group membership cycle, which is not allowed',
        'New rules that would create a cycle are not allowed');
 

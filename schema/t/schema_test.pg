@@ -24,7 +24,7 @@ SELECT tables_are(
              'group_actor_relations'
          ]);
 
-SELECT enums_are(ARRAY['auth_permission', 'auth_type']);
+SELECT enums_are(ARRAY['auth_permission', 'auth_any_permission', 'auth_type']);
 
 -- All authz_id columns should be unique and non-NULL
 SELECT col_is_unique('auth_container', 'authz_id');
