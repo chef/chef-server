@@ -36,8 +36,7 @@ statement(Statement, Params, Transform) ->
             Other
     end.
 
--spec create(auth_type(), auth_id(), auth_id() | null) ->
-                    ok | {conflict, term()} | {error, term()}.
+-spec create(auth_type(), auth_id(), auth_id() | null) -> ok | {error, term()}.
 create(Type, AuthzId, RequestorId) when RequestorId =:= superuser orelse
                                         RequestorId =:= undefined ->
     create(Type, AuthzId, null);
@@ -100,15 +99,10 @@ acl_membership(TargetType, AuthorizeeType, AuthzId, Permission) ->
             {error, Error}
     end.
 
-sql_array(List) ->
-    List0 = [binary_to_list(X) || X <- List],
-    string:join(List0, ",").
-
 -spec update_acl(auth_type(), auth_id(), permission(), list(), list()) ->
                         ok | {error, term()}.
 update_acl(TargetType, TargetId, Permission, Actors, Groups) ->
-    case select(update_acl, [TargetType, TargetId, Permission,
-                             sql_array(Actors), sql_array(Groups)],
+    case select(update_acl, [TargetType, TargetId, Permission, Actors, Groups],
                 first_as_scalar, [success]) of
         {ok, true} ->
             ok;
