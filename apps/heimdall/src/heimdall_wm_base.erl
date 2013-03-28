@@ -56,6 +56,9 @@ malformed_request(Req, #base_state{module = Module} = State) ->
     Module:validate_request(Req, State#base_state{authz_id = Id, action = Action,
                                                   member_id = MemberId}).
 
+-spec validate_requestor(wm_req(), base_state()) ->
+                                {{halt, 401 | 403 | 404}, wm_req(), base_state()} |
+                                {boolean(), wm_req(), base_state()}.
 validate_requestor(Req, State) ->
     try
         State0 = heimdall_wm_util:get_requestor(Req, State),

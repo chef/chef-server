@@ -20,6 +20,9 @@ halt(Value, Req, State, Msg) when is_boolean(Value) ->
 %% Sets the error message in the body and returns the return tuple to malformed
 %% request (which could contain true or {halt, XXX} if some other return code is
 %% appropriate.
+-spec set_malformed_request(wm_req(), base_state(), atom() | tuple()) ->
+                                {{halt, non_neg_integer()}, wm_req(), base_state()} |
+                                {true, wm_req(), base_state()}.
 set_malformed_request(Req, State, Error) ->
     {Code, Msg} = malformed_request_message(Error),
     halt(Code, Req, State, Msg).
@@ -36,6 +39,8 @@ malformed_request_message(Why) ->
     error({unexpected_error_message, Why}).
 
 %% Sets the error message in the body and returns the return tuple to forbidden
+-spec set_access_exception(wm_req(), base_state(), permission()) ->
+                                {true, wm_req(), base_state()}.
 set_access_exception(Req, State, Permission) ->
     Msg = access_exception_message(Permission),
     halt(true, Req, State, Msg).
@@ -50,6 +55,8 @@ access_exception_message(Other) ->
 %% Sets the error message in the body and returns the return tuple to malformed
 %% request (which should contain {halt, XXX} with whatever return code is
 %% appropriate.
+-spec set_db_exception(wm_req(), base_state(), tuple()) ->
+                                {{halt, 400}, wm_req(), base_state()}.
 set_db_exception(Req, State, Error) ->
     Msg = db_exception_message(Error),
     halt(400, Req, State, Msg).

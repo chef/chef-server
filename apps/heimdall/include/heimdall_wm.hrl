@@ -51,3 +51,6 @@
           metrics_config :: [{atom(), term()}]
 
          }).
+
+-type base_state() :: #base_state{}.
+-type wm_req() :: #wm_reqdata{}.
