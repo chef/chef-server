@@ -39,7 +39,7 @@
           member_id :: auth_id(),
 
           %% Who's asking?
-          requestor_id :: auth_id() | superuser,
+          requestor_id :: auth_id() | superuser | undefined,
 
           %% Which module is handling this request?
           module :: atom(),

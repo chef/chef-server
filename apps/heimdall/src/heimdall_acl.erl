@@ -1,6 +1,7 @@
 -module(heimdall_acl).
 
 -include("heimdall.hrl").
+-include_lib("ej/include/ej.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
 -export([check_access/5,
@@ -11,6 +12,8 @@
          update_acl/6]).
 
 %% @doc Check to see if requestor has permission on a particular target
+-spec check_access(request_id(), auth_type(), auth_id(), auth_id(), permission()) ->
+                          boolean().
 check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
     case RequestorId of
         superuser ->
@@ -21,6 +24,8 @@ check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
     end.
 
 %% @doc Update ACL (for given permission type) on target for all actors and groups
+-spec update_acl(request_id(), auth_type(), auth_id(), permission(), list(), list()) ->
+                        ok.
 update_acl(ReqId, TargetType, TargetId, Permission, Actors, Groups) ->
     case ?SH_TIME(ReqId, heimdall_db, update_acl, (TargetType, TargetId, Permission,
                                                    Actors, Groups)) of
@@ -37,6 +42,8 @@ update_acl(ReqId, TargetType, TargetId, Permission, Actors, Groups) ->
 %% I.e., return all actors or groups with read permission for a supplied AuthzID
 %% of a given type (we'd be more generic about it, but we need the type to find
 %% the correct tables in the DB to return the answer).
+-spec acl_members(request_id(), auth_type(), auth_type(), auth_id(), permission()) ->
+                         list().
 acl_members(ReqId, ForType, MemberType, ForId, Permission) ->
     case ?SH_TIME(ReqId, heimdall_db, acl_membership, (ForType, MemberType, ForId,
                                                        Permission)) of
@@ -47,6 +54,7 @@ acl_members(ReqId, ForType, MemberType, ForId, Permission) ->
     end.
 
 % @doc Clear permission (for given permission type) on target for all actors and groups
+-spec clear_access(request_id(), auth_type(), auth_id(), permission()) -> ok.
 clear_access(ReqId, TargetType, TargetId, Permission) ->
     case ?SH_TIME(ReqId, heimdall_db, delete_acl, (TargetType, TargetId, Permission)) of
         {error, Error} ->
@@ -58,6 +66,8 @@ clear_access(ReqId, TargetType, TargetId, Permission) ->
 %% @doc Create full EJSON object for permission type on given ID
 %%
 %% This is returned by the GET /<type>/<id>/acl/<action> endpoint
+-spec make_ejson_action(request_id(), permission(), auth_type(), auth_id()) ->
+                               ej:json_object().
 make_ejson_action(ReqId, Permission, ForType, ForId) ->
     {[{<<"actors">>,
        acl_members(ReqId, ForType, actor, ForId, Permission)},
@@ -68,22 +78,28 @@ make_ejson_action(ReqId, Permission, ForType, ForId) ->
 %%
 %% This is a fragment for a specific permission, part of what make_ejson_acl
 %% returns
+-spec make_ejson_part(request_id(), permission(), auth_type(), auth_id()) ->
+                             {binary(), ej:json_object()}.
 make_ejson_part(ReqId, Permission, ForType, ForId) ->
-    {Permission, make_ejson_action(ReqId, Permission, ForType, ForId)}.
+    {atom_to_binary(Permission, utf8),
+     make_ejson_action(ReqId, Permission, ForType, ForId)}.
 
 %% @doc Create full EJSON object for given ID
 %%
 %% This is returned by the GET /<type>/<id>/acl endpoint
+-spec make_ejson_acl(request_id(), auth_type(), auth_id()) ->
+                            ej:json_object().
 make_ejson_acl(ReqId, ForType, ForId) ->
-    {[make_ejson_part(ReqId, <<"create">>, ForType, ForId),
-      make_ejson_part(ReqId, <<"read">>, ForType, ForId),
-      make_ejson_part(ReqId, <<"update">>, ForType, ForId),
-      make_ejson_part(ReqId, <<"delete">>, ForType, ForId),
-      make_ejson_part(ReqId, <<"grant">>, ForType, ForId)]}.
+    {[make_ejson_part(ReqId, create, ForType, ForId),
+      make_ejson_part(ReqId, read, ForType, ForId),
+      make_ejson_part(ReqId, update, ForType, ForId),
+      make_ejson_part(ReqId, delete, ForType, ForId),
+      make_ejson_part(ReqId, grant, ForType, ForId)]}.
 
 %% @doc Parse supplied JSON ACL object, return members it contains
 %%
 %% This is used by the PUT /<type>/<id>/acl/<action> endpoint
+-spec parse_acl_json(binary()) -> {list(), list()}.
 parse_acl_json(Json) ->
     try
         Ejson = heimdall_wm_util:decode(Json),
