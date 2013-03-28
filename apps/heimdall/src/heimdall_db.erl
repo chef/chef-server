@@ -1,4 +1,4 @@
-%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 80-*-
 %% ex: ts=4 sw=4 et
 
 -module(heimdall_db).
@@ -36,6 +36,12 @@ statement(Statement, Params, Transform) ->
             Other
     end.
 
+%% If this looks a bit odd, it's because we use the same PG function for authz
+%% types created with or without requestors (to avoid repeating logic in the DB
+%% function).  In the cases where no requestor is supplied (either because it's
+%% a superuser request, or for an actor -- the V1 API doesn't require that any
+%% requesting actor be supplied), it simply skips inserting the requestor into
+%% the new entity's ACL.
 -spec create(auth_type(), auth_id(), requestor_id()) -> ok | {error, term()}.
 create(Type, AuthzId, RequestorId) when RequestorId =:= superuser ->
     create(Type, AuthzId, undefined);

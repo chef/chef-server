@@ -1,6 +1,14 @@
-%% 32-character hex string, as a binary (well, as close to that as we
-%% can get)
+%% For the moment we're using string despite our informal standard of using binary
+%% for this sort of thing in other projects (mainly so our JSON encoding/decoding
+%% works smoothly).  We're doing this because the current version of the API barely
+%% interacts with JSON and spends a lot of time interacting with Web Machine which
+%% uses lists instead (we get authz_ids both from headers and the URL structure
+%% itself in multiple ways).  So, for the time being, we're going with lists.  This
+%% will VERY LIKELY change in V2 (presuming we decide to take a more JSON-oriented
+%% approach to the API).
 -type auth_id() :: string().
+%% If undefined looks a bit strange here, it's because we explicitly pass it to
+%% heimdall_db:create/3:
 -type requestor_id() :: auth_id() | superuser | undefined.
 -type auth_type() :: actor | container | group | object.
 -type permission() :: create | read | update | delete | grant.
