@@ -36,10 +36,9 @@ statement(Statement, Params, Transform) ->
             Other
     end.
 
--spec create(auth_type(), auth_id(), auth_id() | null) -> ok | {error, term()}.
-create(Type, AuthzId, RequestorId) when RequestorId =:= superuser orelse
-                                        RequestorId =:= undefined ->
-    create(Type, AuthzId, null);
+-spec create(auth_type(), auth_id(), requestor_id()) -> ok | {error, term()}.
+create(Type, AuthzId, RequestorId) when RequestorId =:= superuser ->
+    create(Type, AuthzId, undefined);
 create(Type, AuthzId, RequestorId) ->
     case select(create_entity, [Type, AuthzId, RequestorId],
                 first_as_scalar, [success]) of

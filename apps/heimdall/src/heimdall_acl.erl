@@ -12,7 +12,7 @@
          update_acl/6]).
 
 %% @doc Check to see if requestor has permission on a particular target
--spec check_access(request_id(), auth_type(), auth_id(), auth_id(), permission()) ->
+-spec check_access(request_id(), auth_type(), auth_id(), requestor_id(), permission()) ->
                           boolean().
 check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
     case RequestorId of
