@@ -89,7 +89,7 @@ from_json(Req, #base_state{reqid = RequestId,
     case create_from_json(Req, State, chef_user, {authz_id, AuthzId},
                           {UserWithKey, PasswordData}) of
         {true, Req1, State1} ->
-            Uri = list_to_binary(chef_wm_util:full_uri(Req1)),
+            Uri = ?BASE_ROUTES:route(user, Req1, [{name, Name}]),
             Ejson = chef_object:set_key_pair({[{<<"uri">>, Uri}]},
                         {public_key, PublicKey}, {private_key, PrivateKey}),
             {true, chef_wm_util:set_json_body(Req1, Ejson), State1};

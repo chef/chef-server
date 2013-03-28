@@ -122,7 +122,7 @@ from_json(Req, #base_state{reqid = RequestId,
             %% create_from_json by default sets the response to a json body
             %% containing only a uri key. Here we want to add the generated key
             %% pair so we replace the response.
-            URI = list_to_binary(chef_wm_util:full_uri(Req1)),
+            URI = ?BASE_ROUTES:route(client, Req1, [{name, Name}]),
             EJSON = chef_object:set_key_pair({[{<<"uri">>, URI}]},
                         {public_key, PublicKey}, {private_key, PrivateKey}),
             {true, chef_wm_util:set_json_body(Req1, EJSON), State1};

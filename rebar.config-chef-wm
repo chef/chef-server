@@ -4,6 +4,12 @@
 
 {deps,
  [
+  %% Note that webmachine needs to come before chef_index to ensure we
+  %% get mochiweb as specified by webmachine and not the one from
+  %% gen_bunny.
+  {webmachine, ".*",
+   {git, "git://github.com/basho/webmachine", {tag, "1.10.1"}}},
+
   {chef_authn, ".*",
    {git, "git://github.com/opscode/chef_authn.git", {branch, "master"}}},
 
@@ -21,9 +27,6 @@
 
   {bcrypt, ".*",
    {git, "git://github.com/opscode/erlang-bcrypt.git", {tag, "0.5.0.2"}}},
-
-  {webmachine, ".*",
-   {git, "git://github.com/basho/webmachine", {tag, "1.9.0-mochifix"}}},
 
   {fast_log, ".*",
    {git, "git://github.com/opscode/fast-log-erlang.git", {branch, "master"}}},

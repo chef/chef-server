@@ -26,7 +26,6 @@
          environment_not_found_message/1,
          error_message_envelope/1,
          extract_from_path/2,
-         full_uri/1,
          get_header_fun/2,
          malformed_request_message/3,
          admin_field_is_false/1,
@@ -36,7 +35,6 @@
          num_versions/2,
          object_name/2,
          set_json_body/2,
-         set_uri_of_created_resource/1,
          set_uri_of_created_resource/2,
          with_error_body/2,
          generate_keypair/2]).
@@ -55,12 +53,9 @@ base_mods() ->
 %% @doc Returns the base URI for the server as called by the client as a string.
 base_uri(Req) ->
     Scheme = scheme(Req),
-    Host = string:join(lists:reverse(wrq:host_tokens(Req)), "."),
+    Host = string:join(wrq:host_tokens(Req), "."),
     PortString = port_string(wrq:port(Req)),
     Scheme ++ "://" ++ Host ++ PortString.
-
-full_uri(Req) ->
-    base_uri(Req) ++ wrq:disp_path(Req).
 
 get_header_fun(Req, State = #base_state{header_fun = HFun})
   when HFun =:= undefined ->
@@ -158,8 +153,6 @@ with_error_body(Req, ErrorData) ->
 %%     {"uri":"http://foo.com/newresource"}
 %% '''
 %% Returns the updated request.
-set_uri_of_created_resource(Req) ->
-    set_uri_of_created_resource(chef_wm_util:full_uri(Req), Req).
 set_uri_of_created_resource(Uri, Req) when is_list(Uri) ->
     set_uri_of_created_resource(list_to_binary(Uri), Req);
 set_uri_of_created_resource(Uri, Req0) when is_binary(Uri) ->
