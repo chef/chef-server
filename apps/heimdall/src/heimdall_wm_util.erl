@@ -1,6 +1,7 @@
 -module(heimdall_wm_util).
 
 -include("heimdall_wm.hrl").
+-include_lib("ej/include/ej.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
 -export([decode/1,
@@ -11,11 +12,13 @@
          set_json_body/2]).
 
 %% Generate random authz IDs for new objects
+-spec generate_authz_id() -> auth_id().
 generate_authz_id() ->
     lists:flatten([io_lib:format("~4.16.0b", [X]) ||
                       <<X:16>> <= crypto:rand_bytes(16) ]).
 
 %% Extract the requestor from the request headers and return updated base state.
+-spec get_requestor(wm_req(), base_state()) -> base_state().
 get_requestor(Req, #base_state{reqid = ReqId, superuser_id = SuperuserId} = State) ->
     case wrq:get_req_header("X-Ops-Requesting-Actor-Id", Req) of
         undefined ->
@@ -56,19 +59,23 @@ base_uri(Req) ->
 full_uri(Req) ->
     base_uri(Req) ++ wrq:disp_path(Req).
 
+-spec set_json_body(wm_req(), ej:json_object()) -> wm_req().
 set_json_body(Req, EjsonData) ->
     Json = encode(EjsonData),
     wrq:set_resp_body(Json, Req).
 
 %% ALL THE JIFFY in one place.  In case we decide to change the library or
 %% something.  LIKE WE DO.
+-spec encode(ej:json_object()) -> binary().
 encode(EjsonData) ->
     jiffy:encode(EjsonData).
 
+-spec decode(binary()) -> ej:json_object().
 decode(JsonData) ->
     jiffy:decode(JsonData).
 
 %% Used for all POST /<type> response bodies; always contains ID + URI
+-spec set_created_response(wm_req(), auth_id()) -> wm_req().
 set_created_response(Req, AuthzId) ->
     Uri = full_uri(Req),
     Req0 = set_json_body(Req, {[{<<"id">>, list_to_binary(AuthzId)},

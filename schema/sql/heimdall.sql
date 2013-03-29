@@ -429,14 +429,12 @@ CREATE FUNCTION update_acl(
        entity_type auth_type,
        entity_id char(32),
        perm auth_permission,
-       actors_text text,
-       groups_text text)
+       actors char(32)[],
+       groups char(32)[])
 RETURNS BOOLEAN -- <- just returns true, since we're just updating DB tables
 LANGUAGE plpgsql
 AS $$
 DECLARE
-        actors char(32)[] := string_to_array(actors_text, ',');
-        groups char(32)[] := string_to_array(groups_text, ',');
         actor_table char(32) := quote_ident(entity_type || '_acl_actor');
         group_table char(32) := quote_ident(entity_type || '_acl_group');
         target_id bigint NOT NULL := authz_id_for_type(entity_id, entity_type);
@@ -449,7 +447,7 @@ BEGIN
             WHERE target = $1 AND permission = $2' USING target_id, perm;
 
         -- Insert the new
-        count := 1;
+        count := 0;
         LOOP
           IF array_upper(actors, 1) IS NULL OR count > array_upper(actors, 1) THEN
             EXIT;
@@ -460,7 +458,7 @@ BEGIN
         END LOOP;
 
         -- Insert the new
-        count := 1;
+        count := 0;
         LOOP
           IF array_upper(groups, 1) IS NULL OR count > array_upper(groups, 1) THEN
             EXIT;

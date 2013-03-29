@@ -56,6 +56,9 @@ malformed_request(Req, #base_state{module = Module} = State) ->
     Module:validate_request(Req, State#base_state{authz_id = Id, action = Action,
                                                   member_id = MemberId}).
 
+-spec validate_requestor(wm_req(), base_state()) ->
+                                {{halt, 401 | 403 | 404}, wm_req(), base_state()} |
+                                {boolean(), wm_req(), base_state()}.
 validate_requestor(Req, State) ->
     try
         State0 = heimdall_wm_util:get_requestor(Req, State),
@@ -149,8 +152,7 @@ new_request_id() ->
 %% database.  These functions keep the generated keys the same basic
 %% "shape" as those coming from Erchef.
 
-spawn_stats_hero_worker(Req, #base_state{module=Module,
-                                         reqid=ReqId,
+spawn_stats_hero_worker(Req, #base_state{reqid=ReqId,
                                          request_type=RequestType,
                                          metrics_config=MetricsConfig}) ->
 
