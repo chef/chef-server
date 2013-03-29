@@ -390,7 +390,7 @@ default['private_chef']['opscode-authz']['couchdb_max_conn'] = '100'
 ####
 # Bookshelf
 ####
-default['private_chef']['bookshelf']['enable'] = false
+default['private_chef']['bookshelf']['enable'] = default['private_chef']['dark_launch']["sql_migration_phase_1"]
 default['private_chef']['bookshelf']['ha'] = false
 default['private_chef']['bookshelf']['dir'] = "/var/opt/opscode/bookshelf"
 default['private_chef']['bookshelf']['data_dir'] = "/var/opt/opscode/bookshelf/data"
@@ -436,16 +436,17 @@ default['private_chef']['opscode-org-creator']['port'] = 4369
 ###
 # Dark Launch
 ###
+default['private_chef']['dark_launch']["sql_migration_phase_1"] = false
 default['private_chef']['dark_launch']["quick_start"] = false
 default['private_chef']['dark_launch']["new_theme"] = true
 default['private_chef']['dark_launch']["private-chef"] = true
 default['private_chef']['dark_launch']["sql_users"] = true
-default['private_chef']['dark_launch']["couchdb_roles"] = true
-default['private_chef']['dark_launch']["couchdb_data"] = true
-default['private_chef']['dark_launch']["couchdb_cookbooks"] = true
-default['private_chef']['dark_launch']["couchdb_checksums"] = true
-default['private_chef']['dark_launch']["couchdb_environments"] = true
-default['private_chef']['dark_launch']["couchdb_clients"] = true
+default['private_chef']['dark_launch']["couchdb_roles"]          = !default['private_chef']['dark_launch']["sql_migration_phase_1"]
+default['private_chef']['dark_launch']["couchdb_data"]           = !default['private_chef']['dark_launch']["sql_migration_phase_1"]
+default['private_chef']['dark_launch']["couchdb_cookbooks"]      = !default['private_chef']['dark_launch']["sql_migration_phase_1"]
+default['private_chef']['dark_launch']["couchdb_checksums"]      = !default['private_chef']['dark_launch']["sql_migration_phase_1"]
+default['private_chef']['dark_launch']["couchdb_environments"]   = !default['private_chef']['dark_launch']["sql_migration_phase_1"]
+default['private_chef']['dark_launch']["couchdb_clients"]        = true # Erchef clients is not finished
 default['private_chef']['dark_launch']["add_type_and_bag_to_items"] = true
 
 ###
