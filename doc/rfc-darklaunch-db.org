@@ -43,14 +43,56 @@ values. The mechanism used by the load balancers to perform the look
 up is undecided (details below). It could be static config updated on
 demand or live connection to pgsql or redis.
 
-Load balancers package darklaunch feature data into extra HTTP
-headers which are sent with the request to the upstream proxied
-server.
+Load balancers package darklaunch feature data into an extra HTTP
+header 'x-ops-darklaunch' which is sent with the request to the
+upstream proxied server. 
+
+** Data Format
+The header format is <KEY>=<VALUE> itemes separated by the ';'
+character. The <KEY> is restricted to the PCRE alnum character class
+and the '_' character. <VALUE> is restricted to be '0' or '1' for
+false and true respectively. This may be extended in the future.
+
+** Example
+
+X-OPS-DARKLAUNCH: maint=0;couch_roles=0
 
 Upstream servers (=opscode-account=, =opscode-chef=, and =oc_erchef=)
 will read the extra HTTP headers and make the data available
 throughout the processing of the request.
+
+Missing keys can be be treated as hard errors by the
+clients. Unparseable key-value pairs can be silently dropped. Some
+failure modes of the load balancer can result in an empty header, and
+this should not be an error until we request a key and don't find it.
+
 * Central Storage of Darklaunch Data
+** Use redis
+For the type of data and queries that we'll need for darklaunch, Redis
+is a good fit. 
+We can use the hash data type with an entry for each org and two
+entries for default and override values.
+
+The default hash is named dl_default, the override is dl_override, and
+the per-org is named dl_org_ORGNAME. The hashes contain key value
+pairs where the keys represent features and the values are the
+settings (initially 0 and 1 for disabled and enabled.)
+
+Each request through the load balancer will fetch all three hashes,
+and combine them to form the final dark launch value passed on to the
+clients. The per-org values, if present would override any found in
+the default entry, and the override values would in turn override
+those from the other two. 
+
+A possible optimization would be to use lua scripting in redis to
+combine the default, per-org, and override values into a single hash
+that is returned to the load balancer.
+
+We have less experience running Redis with strict reliability for disk
+storage. Some of our use of Redis for caching may go away as the
+underlying services are rewritten and become more robust. In that
+case, it would be unfortunate to have to keep redis just for
+darklaunch.
 ** Use pgsql
 Start with two tables, one for feature defaults and another for
 org-specific features. Tables could live in the main erchef database
@@ -77,14 +119,6 @@ Benefits of using pgsql:
   away. This is different from Redis, where we currently use it for
   caching and might be able to remove it if perf without caching was
   acceptable.
-  
-** Use redis
-For the type of data and queries that we'll need for darklaunch, Redis
-is a good fit. We have less experience running Redis with strict
-reliability for disk storage. Some of our use of Redis for caching
-may go away as the underlying services are rewritten and become more
-robust. In that case, it would be unfortunate to have to keep redis
-just for darklaunch.
 * How load balancers obtain darklaunch data stored in db
 The load balancers can obtain the darklaunch data in two ways: pull
 from a data store in-line on each request; use static config which
@@ -110,6 +144,7 @@ The static config approach keeps lb behavior in the realm of the well
 understood. Having to have darklaunch state live in many places: db,
 updater daemon (maybe), and each lb is a major downside. You have to
 manage rewriting the lb config and making the config active.
+
 * How oc_erchef access darklaunch data
 A new helper component is added that reads the HTTP headers added by
 the lbs and makes the darklaunch data accessible to all components
