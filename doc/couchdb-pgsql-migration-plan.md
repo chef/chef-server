@@ -5,7 +5,7 @@
 Hosts that you'll need access to during the migration:
 * couchdb-master
 * chef-pgsql-master (will we?)
-# opscode-lb (all external)
+* opscode-lb (all external)
 * opscode-lbint (internal master)
 
 ## 0.2 Staging
@@ -67,7 +67,7 @@ The clock for downtime starts as soon the following batch of `chef-client` runs 
 
 1. Run `chef-client` on all `opscode-lb` Nodes
 
-   _This applies to the internal and external nodes referenced above_
+   _This applies to the internal and external nodes referenced above._
 
    ```bash
    > sudo chef-client
