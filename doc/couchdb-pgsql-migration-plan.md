@@ -53,8 +53,13 @@ Hosts that you'll need access to during the migration:
    ```javascript
    {
      "id": "rs-preprod",
-     "dark_launch": {
-       "maintenance_mode": ["$ORGNAME"] // <- org to migrate here
+     "xdarklaunch": {
+       "dl_orgname": {
+         // your orgname below
+         "$ORG_NAME": {
+           "maintenance_mode": true
+         }
+       }
      }
    }
    ```
@@ -77,5 +82,64 @@ The clock for downtime starts as soon the following batch of `chef-client` runs 
 
 ## 1.3 Initiate Erchef Mode
 
+Erchef mode (`couchdb_chef = false` in `xdarklaunch`) is fully initiated before downtime is reversed to prevent the case where a single load balancer finishes its configuration before the rest and starts serving successful requests for an organization before the others are able to.
+
+1. Edit `darklaunch` DataBag
+
+   ```bash
+   > export OPS_ENV=rs-preprod
+   > knife edit databags/darklaunch/$OPS_ENV.json
+   ```
+
+   In your editor, modify the following:
+
+   ```javascript
+   {
+     "id": "rs-preprod",
+     "xdarklaunch": {
+       "dl_orgname": {
+         // your orgname below
+         "$ORG_NAME": {
+           "couchdb_chef": false
+         }
+       }
+     }
+   }
+   ```
+
+1. Run `chef-client` on all the `opscode-lb` Nodes
+
+   ```bash
+   > sudo chef-client
+   ```
+
 ## 1.4 Remove Maintenance Mode
 
+1. Edit `darklaunch` DataBag
+
+   ```bash
+   > export OPS_ENV=rs-preprod
+   > knife edit databags/darklaunch/$OPS_ENV.json
+   ```
+
+   In your editor, modify the following:
+
+   ```javascript
+   {
+     "id": "rs-preprod",
+     "xdarklaunch": {
+       "dl_orgname": {
+         // your orgname below
+         "$ORG_NAME": {
+           "maintenance_mode": false // we could also remove the maintenance mode line
+         }
+       }
+     }
+   }
+   ```
+
+1. Run `chef-client` on all the `opscode-lb` Nodes
+
+   ```bash
+   > sudo chef-client
+   ```
