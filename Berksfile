@@ -42,4 +42,15 @@ if ENABLE_METRICS_SERVER
   cookbook "estatsd",  path: "#{DEV_VM_COOKBOOK_DIR}/estatsd"
   cookbook "graphite", path: "#{DEV_VM_COOKBOOK_DIR}/graphite"
   cookbook "gunicorn", path: "#{DEV_VM_COOKBOOK_DIR}/gunicorn"
+
+  # This is my fork of the gdash cookbook from the community site
+  # (needed to fix a small bug); we have a home-grown gdash in
+  # preprod, but I've run into some issues using it.  We only really
+  # want it here to test out the Heimdall dashboards, so it's not
+  # necessary that it be exactly the same as in prod.
+  cookbook "gdash", github: "christophermaier/chef-gdash", branch: "fix_config"
+
+  # Use the community unicorn cookbook too for simplicity... again,
+  # this is just for testing out dashboards
+  cookbook "unicorn", site: :opscode
 end
