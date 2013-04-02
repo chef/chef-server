@@ -32,6 +32,8 @@ Hosts that you'll need access to during the migration:
 
 1. Load `opscode-account` Database into DETS Table
 
+   From `moser`:
+
    ```erlang
    moser> moser_acct_processor:process_account_file().
    ```
@@ -78,6 +80,16 @@ The clock for downtime starts as soon the following batch of `chef-client` runs 
    ```
 
 ## 1.2 Migration
+
+1. Run the Migration
+
+   From `moser`:
+
+   ```erlang
+   %% TODO: this probably no longer works
+   moser> Db = moser_chef_processor:process_organization("$ORG_NAME") %% <- your orgname here
+   moser> moser_chef_converter:insert(Db).
+   ```
 
 ## 1.3 Initiate Erchef Mode
 
