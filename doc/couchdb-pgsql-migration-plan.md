@@ -4,7 +4,6 @@
 
 Hosts that you'll need access to during the migration:
 * couchdb-master
-* chef-pgsql-master (will we?)
 * opscode-lb (all external)
 * opscode-lbint (internal master)
 
