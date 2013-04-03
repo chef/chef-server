@@ -95,11 +95,7 @@ The clock for downtime starts as soon the following batch of `chef-client` runs 
    moser_chef_converter:insert(Db).
    ```
 
-## 1.3 Initiate Erchef Mode
-
-Erchef mode (`couchdb_chef = false` in `xdarklaunch`) is fully initiated before downtime is reversed to prevent the case where a single load balancer finishes its configuration before the rest and starts serving successful requests for an organization before the others are able to.
-
-__This two-phase re-enable is only required while we are using `chef-client` to manage `xdarklaunch`.__
+## 1.3 Initiate Erchef Mode and Disable Maintenance Mode
 
 1. Edit `xdarklaunch` DataBag
 
@@ -118,36 +114,6 @@ __This two-phase re-enable is only required while we are using `chef-client` to 
          // your orgname below
          "$ORG_NAME": {
            "couchdb_chef": false
-         }
-       }
-     }
-   }
-   ```
-
-1. Run `chef-client` on all the `opscode-lb` Nodes
-
-   ```bash
-   sudo chef-client
-   ```
-
-## 1.4 Remove Maintenance Mode
-
-1. Edit `xdarklaunch` DataBag
-
-   ```bash
-   export OPS_ENV=rs-preprod
-   knife edit databags/xdarklaunch/$OPS_ENV.json
-   ```
-
-   In your editor, modify the following:
-
-   ```javascript
-   {
-     "id": "rs-preprod",
-     "xdarklaunch": {
-       "dl_orgname": {
-         // your orgname below
-         "$ORG_NAME": {
            "503_mode": false // we could also remove the maintenance mode line
          }
        }
