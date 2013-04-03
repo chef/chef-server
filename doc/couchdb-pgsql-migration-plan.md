@@ -30,27 +30,27 @@ Hosts that you'll need access to during the migration:
 1. Start up chef-mover
 
    ```bash
-   # todo: update with correct command
-   /srv/chef-mover/current/insert-command-here
+   cd /srv/mover
+   bin/mover/console
    ```
 
 1. Load `opscode-account` Database into DETS Table
 
-   From `moser`:
+   From `mover` console:
 
    ```erlang
-   moser> moser_acct_processor:process_account_file().
+   moser_acct_processor:process_account_file().
    ```
 
    This should take roughly **INSERT_TIME_HERE** minutes.
 
 ## 0.4 Maintenance Preparation
 
-1. Edit `darklaunch` DataBag
+1. Edit `xdarklaunch` DataBag
 
    ```bash
-   > export OPS_ENV=rs-preprod
-   > knife edit databags/darklaunch/$OPS_ENV.json
+   export OPS_ENV=rs-preprod
+   knife edit databags/xdarklaunch/$OPS_ENV.json
    ```
 
    In your editor, modify the following:
@@ -62,7 +62,7 @@ Hosts that you'll need access to during the migration:
        "dl_orgname": {
          // your orgname below
          "$ORG_NAME": {
-           "maintenance_mode": true
+           "503_mode": true
          }
        }
      }
@@ -80,30 +80,32 @@ The clock for downtime starts as soon the following batch of `chef-client` runs 
    _This applies to the internal and external nodes referenced above._
 
    ```bash
-   > sudo chef-client
+   sudo chef-client
    ```
 
 ## 1.2 Migration
 
 1. Run the Migration
 
-   From `moser`:
+   From `mover` console:
 
    ```erlang
    %% TODO: this probably no longer works
-   moser> Db = moser_chef_processor:process_organization("$ORG_NAME") %% <- your orgname here
-   moser> moser_chef_converter:insert(Db).
+   Db = moser_chef_processor:process_organization("$ORG_NAME") %% <- your orgname here
+   moser_chef_converter:insert(Db).
    ```
 
 ## 1.3 Initiate Erchef Mode
 
 Erchef mode (`couchdb_chef = false` in `xdarklaunch`) is fully initiated before downtime is reversed to prevent the case where a single load balancer finishes its configuration before the rest and starts serving successful requests for an organization before the others are able to.
 
-1. Edit `darklaunch` DataBag
+__This two-phase re-enable is only required while we are using `chef-client` to manage `xdarklaunch`.__
+
+1. Edit `xdarklaunch` DataBag
 
    ```bash
-   > export OPS_ENV=rs-preprod
-   > knife edit databags/darklaunch/$OPS_ENV.json
+   export OPS_ENV=rs-preprod
+   knife edit databags/xdarklaunch/$OPS_ENV.json
    ```
 
    In your editor, modify the following:
@@ -125,16 +127,16 @@ Erchef mode (`couchdb_chef = false` in `xdarklaunch`) is fully initiated before 
 1. Run `chef-client` on all the `opscode-lb` Nodes
 
    ```bash
-   > sudo chef-client
+   sudo chef-client
    ```
 
 ## 1.4 Remove Maintenance Mode
 
-1. Edit `darklaunch` DataBag
+1. Edit `xdarklaunch` DataBag
 
    ```bash
-   > export OPS_ENV=rs-preprod
-   > knife edit databags/darklaunch/$OPS_ENV.json
+   export OPS_ENV=rs-preprod
+   knife edit databags/xdarklaunch/$OPS_ENV.json
    ```
 
    In your editor, modify the following:
@@ -146,7 +148,7 @@ Erchef mode (`couchdb_chef = false` in `xdarklaunch`) is fully initiated before 
        "dl_orgname": {
          // your orgname below
          "$ORG_NAME": {
-           "maintenance_mode": false // we could also remove the maintenance mode line
+           "503_mode": false // we could also remove the maintenance mode line
          }
        }
      }
@@ -156,5 +158,5 @@ Erchef mode (`couchdb_chef = false` in `xdarklaunch`) is fully initiated before 
 1. Run `chef-client` on all the `opscode-lb` Nodes
 
    ```bash
-   > sudo chef-client
+   sudo chef-client
    ```
