@@ -46,7 +46,8 @@ init([]) ->
                  {ip, Ip},
                  {port, Port},
                  {log_dir, "priv/log"},
-                 {dispatch, add_dynamic_config(Dispatch)}
+                 {dispatch, add_dynamic_config(Dispatch)},
+                 {nodelay, true} % TCP 'no delay' for latency
                 ],
 
     Web = {webmachine_mochiweb,
