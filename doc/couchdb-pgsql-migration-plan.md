@@ -1,3 +1,7 @@
+# Overview
+
+This document is the evolving plan for migrating a single organization from `couchdb` to `postgresql`. Until further notice, this plan only covers migrating a single organization in preprod.
+
 # 0. Preparation
 
 ## 0.1 Hosts and Access
