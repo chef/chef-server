@@ -47,7 +47,7 @@
         "Mixlib::Authorization::Models::Environment-bd1a09cec7a4655bf54f4b98ec5ec156").
 
 -define(mixlib_auth_group_design,
-        "Mixlib::Authorization::Models::Group-59a505c964199e318b67910cc642a06").
+        "Mixlib::Authorization::Models::Group-59a505c964199e318b67910cc642a062").
 
 -define(mixlib_auth_node_design,
         "Mixlib::Authorization::Models::Node-8554f173ac3e9bfa55a0836e19b0f232").
