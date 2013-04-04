@@ -138,6 +138,9 @@ has_permission(TargetType, TargetId, RequestorId, Permission) ->
         {error, {not_null_violation, _Error}} ->
             % If this fails because the target doesn't exist, can't have permission
             false;
+        {error, {null_value_not_allowed, _Error}} ->
+            % If this fails because the actor doesn't exist, can't have permission
+            false;
         {error, Error} ->
             {error, Error}
     end.
