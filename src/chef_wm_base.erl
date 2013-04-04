@@ -48,6 +48,7 @@
 -export([assemble_principal_ejson/3,
          check_cookbook_authz/3,
          delete_object/3,
+         maybe_process_client/2,
          stats_hero_label/1,
          stats_hero_upstreams/0]).
 
@@ -294,6 +295,11 @@ create_from_json(#wm_reqdata{} = Req,
     Id = chef_object:id(ObjectRec),
     Name = chef_object:name(ObjectRec),
     TypeName = chef_object:type_name(ObjectRec),
+
+
+    ObjectRec = ?BASE_RESOURCE:maybe_process_client(ObjectRec, State),
+
+
     %% We send the object data to solr for indexing *first*. If it fails, we'll error out on
     %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
@@ -321,6 +327,9 @@ create_from_json(#wm_reqdata{} = Req,
             chef_object_db:delete_from_solr(ObjectRec),
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
+
+%% Open Source Chef Server doesn't need to do anything else.
+maybe_process_client(Object, _State) -> Object.
 
 -spec update_from_json(#wm_reqdata{},
                        #base_state{},
