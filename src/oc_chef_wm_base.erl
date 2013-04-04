@@ -18,6 +18,7 @@
 -export([assemble_principal_ejson/3,
          check_cookbook_authz/3,
          delete_object/3,
+         maybe_process_client/2,
          stats_hero_label/1,
          stats_hero_upstreams/0]).
 
@@ -60,8 +61,9 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
         {{container, Container}, Req1, State1} ->
             ContainerId = fetch_container_id(Container, Req1, State1),
             invert_perm(check_permission(container, ContainerId, Req1, State1));
-        {{object, ObjectId}, Req1, State1} ->
-            invert_perm(check_permission(object, ObjectId, Req1, State1));
+        {{Type, ObjectId}, Req1, State1} when Type =:= object;
+                                              Type =:= actor ->
+            invert_perm(check_permission(Type, ObjectId, Req1, State1));
         {AuthTuples, Req1, State1} when is_list(AuthTuples)->
             %% NOTE: multi_auth_check does not handle create_in_container yet, and expects
             %% each auth tuple to have a permission.  This code path is currently only used
@@ -138,8 +140,8 @@ create_in_container(Container, Req, #base_state{chef_authz_context = AuthzContex
                                                 organization_guid = OrgId,
                                                 requestor_id = RequestorId,
                                                 resource_state = RS} = State) ->
-    case oc_chef_authz:create_object_if_authorized(AuthzContext, OrgId, RequestorId,
-                                                Container) of
+    case oc_chef_authz:create_entity_if_authorized(AuthzContext, OrgId, RequestorId,
+                                                   Container) of
         {ok, AuthzId} ->
             State1 = State#base_state{resource_state = set_authz_id(AuthzId, RS)},
             %% return forbidden: false
@@ -421,7 +423,7 @@ assemble_principal_ejson(#principal_state{name = Name,
                                           type = Type,
                                           authz_id = AuthzId} = _Principal,
                          OrgName, DbContext) ->
-    Member = is_user_in_org(Type, DbContext, Name, OrgName),                 
+    Member = is_user_in_org(Type, DbContext, Name, OrgName),
     {[{<<"name">>, Name},
       {<<"public_key">>, PublicKey},
       {<<"type">>, Type},
@@ -454,3 +456,18 @@ stats_hero_label({BadPrefix, Fun}) ->
 stats_hero_upstreams() ->
     [<<"authz">>, <<"couchdb">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
 
+
+%% @doc Enterprise Chef Clients must be added to the clients group.
+%%
+%% Other objects can pass through.
+maybe_process_client(#chef_client{authz_id=ClientAuthzId}=Client,
+                     #base_state{chef_authz_context=AuthContext,
+                                 organization_guid = OrgId}) ->
+    case oc_chef_authz:add_client_to_clients_group(AuthContext, OrgId, ClientAuthzId) of
+        ok ->
+            Client;
+        {error, Error} ->
+            {error, Error}
+    end;
+maybe_process_client(NotAClient, _State) ->
+    NotAClient.
