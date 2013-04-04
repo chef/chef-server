@@ -4,5 +4,5 @@
                  size :: non_neg_integer(),
                  digest :: binary()}).
 
--record(bucket, {name::binary(),
+-record(bucket, {name:: string() | binary(),
                  date::calendar:datetime1970()}).

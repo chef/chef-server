@@ -36,7 +36,7 @@
          finish_write/1]).
 
 -record(entryref, {fd :: file:io_device(),
-                   path :: binary(),
+                   path :: string() | binary(),
                    ctx :: undefined | binary()}).
 
 -include_lib("kernel/include/file.hrl").
