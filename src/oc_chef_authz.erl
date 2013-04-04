@@ -31,7 +31,9 @@
 % (expecting we won't want to make everyone do this common task
 
 -ifndef(TEST).
--export([delete_resource/3,
+-export([
+         add_client_to_clients_group/3,
+         delete_resource/3,
          create_object_if_authorized/4,
          get_container_aid_for_object/3,
          make_context/1,
@@ -261,6 +263,27 @@ set_ace_for_object(RequestorId, Id, AccessMethod, #authz_ace{actors=Actors, grou
     case oc_chef_authz_http:request(Url, put, [], Body, RequestorId) of
         ok -> ok;
         %% Expected errors are forbidden, not_found, server_error
+        {error, Error} -> {error, Error}
+    end.
+
+%% @doc Adds the given client authz ID to the actors list of the organization's "clients"
+%% group.  Clients must be members of this group in order to behave properly as such.
+%%
+%% Taking this approach instead of a more general "add_to_group" approach since this client
+%% operation is the only instance.
+-spec add_client_to_clients_group(#oc_chef_authz_context{},
+                                 OrgId :: object_id(),
+                                 ClientAuthzId :: object_id()) ->
+                                          ok | {error, term()}.
+add_client_to_clients_group(Context, OrgId, ClientAuthzId) ->
+    %% We need the superuser ID here because when a validator creates a client, the won't
+    %% have the permissions required to add that new client to the clients group.
+    {ok, SuperuserId} = application:get_env(oc_chef_authz, authz_superuser_id),
+
+    ClientGroupAuthzId = oc_chef_authz_db:fetch_group_authz_id(Context, OrgId, <<"clients">>),
+    Url = make_url([<<"groups">>, ClientGroupAuthzId, <<"actors">>, ClientAuthzId]),
+    case oc_chef_authz_http:request(Url, put, [], [], SuperuserId) of
+        ok             -> ok;
         {error, Error} -> {error, Error}
     end.
 
