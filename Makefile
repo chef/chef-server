@@ -4,8 +4,7 @@ DEPS=$(CURDIR)/deps
 DIALYZER_OPTS = 
 
 # List dependencies that should be included in a cached dialyzer PLT file.
-DIALYZER_DEPS = deps/covertool/ebin \
-                deps/erlsom/ebin \
+DIALYZER_DEPS = deps/erlsom/ebin \
                 deps/ibrowse/ebin \
                 deps/iso8601/ebin \
                 deps/mini_s3/ebin \
