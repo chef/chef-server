@@ -1,6 +1,6 @@
--module(heimdall_wm).
+-module(bifrost_wm).
 
--include("heimdall_wm.hrl").
+-include("bifrost_wm.hrl").
 
 -type error() :: {error, term()}.
 -type http_verb() :: 'GET' | 'PUT' | 'POST' | 'DELETE' | 'HEAD' | 'OPTIONS'.

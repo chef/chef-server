@@ -1,17 +1,16 @@
-oc_heimdall
+oc_bifrost
 ========
 
-Heimdall?
+Bifrost?
 =========
 
-`oc_heimdall` is the Opscode Authorization API server.  It is named
-after [Heimdall][], the all-seeing, all-hearing watchman of the
-rainbow bridge to Asgard in Norse mythology.
+`oc_bifrost` is the Opscode Authorization API server.  It is named
+after [Bifrost][], the burning rainbow bridge to Asgard in Norse mythology.
 
-`oc_heimdall` is a complete rewrite and replacement of the old
+`oc_bifrost` is a complete rewrite and replacement of the old
 [opscode-authz][] API server.
 
-[Heimdall]:http://en.wikipedia.org/wiki/Heimdallr
+[Bifrost]:http://en.wikipedia.org/wiki/Bifrost
 [opscode-authz]:https://github.com/opscode/opscode-authz
 
 Testing and Development
@@ -52,7 +51,7 @@ pointing at an empty directory, it's still required):
 export OPSCODE_COOKBOOKS=/path/to/working/cookbooks
 
 Also, the following environmental variable must point to all the opscode
-cookbooks being worked on (i.e., oc_heimdall, etc. which are mounted into
+cookbooks being worked on (i.e., oc_bifrost, etc. which are mounted into
 the VM):
 
 export OPSCODE_SRC=/path/to/src/oc/
@@ -91,12 +90,12 @@ bin/vagrant destroy
 ```
 
 Eventually, we'll be adding Test Kitchen support for running
-[oc-heimdall-pedant][] and our pgTAP database schema tests.
+[oc-bifrost-pedant][] and our pgTAP database schema tests.
 
 Cookbook Hacking
 ================
 
-If you want to hack on the [opscode-heimdall][] cookbook, you'll need to
+If you want to hack on the [opscode-bifrost][] cookbook, you'll need to
 make a minor tweak to the Berksfile.
 
 First, perform a local checkout of the cookbook.  Then, modify the
@@ -105,19 +104,19 @@ dependency line in `Berksfile`.
 Change this:
 
 ``` ruby
-cookbook "opscode-heimdall, git: "git@github.com:opscode-cookbooks/opscode-heimdall"
+cookbook "opscode-bifrost, git: "git@github.com:opscode-cookbooks/opscode-bifrost"
 ```
 
 to this:
 
 ``` ruby
-cookbook "opscode-heimdall", path: "/path/to/local/checkout/of/opscode-heimdall"
+cookbook "opscode-bifrost", path: "/path/to/local/checkout/of/opscode-bifrost"
 ```
 
 Re-provision your machine and you'll be running off the local version
 of the cookbook.
 
 [Berkshelf]:http://berkshelf.com
-[oc-heimdall-pedant]:https://github.com/opscode/oc-heimdall-pedant
-[opscode-heimdall]:https://github.com/opscode-cookbooks/opscode-heimdall
+[oc-bifrost-pedant]:https://github.com/opscode/oc-bifrost-pedant
+[opscode-bifrost]:https://github.com/opscode-cookbooks/opscode-bifrost
 [chef repo]:https://github.com/opscode/opscode-platform-cookbooks

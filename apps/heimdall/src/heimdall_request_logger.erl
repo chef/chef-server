@@ -1,7 +1,7 @@
 %% -*- mode: erlang -*-
 %% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 ft=erlang et
--module(heimdall_request_logger).
+-module(bifrost_request_logger).
 
 -behaviour(gen_server).
 
@@ -100,7 +100,7 @@ emit_log(_ResponseCode, Msg) ->
 %% request's notes... just to cut down on the verbosity a bit.
 %%
 %% We have to handle the case where Notes is undefined.  Requests that
-%% make it through to finish_request/2 in Heimdall will have a notes
+%% make it through to finish_request/2 in Bifrost will have a notes
 %% list (we stuff information we carry around in our #base_state{}
 %% record into the notes there so they are available in this logger).
 %% However, a request to a path that does not match the dispatch rules
@@ -120,7 +120,7 @@ note(_Key, undefined) ->
 %%
 %% When fully rendered, a typical line might look like this:
 %%
-%% status=200; method=DELETE; path=/objects/bb93fcce290c975e83732d2b896740d2; module=heimdall_wm_named_resources; reqid=dLQmjjk48CrSTX0kODCr0A==; requestor_id=superuser;
+%% status=200; method=DELETE; path=/objects/bb93fcce290c975e83732d2b896740d2; module=bifrost_wm_named_resources; reqid=dLQmjjk48CrSTX0kODCr0A==; requestor_id=superuser;
 log_line(Pairs) ->
     [[as_io(K), <<"=">>, as_io(V), <<"; ">>] || {K,V} <- Pairs].
 

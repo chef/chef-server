@@ -1,4 +1,4 @@
--module(heimdall_wm_status_resource).
+-module(bifrost_wm_status_resource).
 
 -export([
          allowed_methods/2,

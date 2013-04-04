@@ -1,4 +1,4 @@
-TEST_DB = heimdall_test
+TEST_DB = bifrost_test
 
 .PHONY : test
 
@@ -11,7 +11,7 @@ setup:
 	@createdb $(TEST_DB)
 	@psql --dbname $(TEST_DB) --command 'CREATE EXTENSION pgtap;'
 	@psql --dbname $(TEST_DB) --single-transaction --set ON_ERROR_STOP=1 --file t/custom_test_functions.sql
-	@psql --dbname $(TEST_DB) --single-transaction --set ON_ERROR_STOP=1 --file sql/heimdall.sql
+	@psql --dbname $(TEST_DB) --single-transaction --set ON_ERROR_STOP=1 --file sql/bifrost.sql
 	@psql --dbname $(TEST_DB) --single-transaction --set ON_ERROR_STOP=1 --file sql/create_roles.sql
 	@psql --dbname $(TEST_DB) --single-transaction --set ON_ERROR_STOP=1 --set database_name=$(TEST_DB) --file sql/permissions.sql
 

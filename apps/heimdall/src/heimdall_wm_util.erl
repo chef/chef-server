@@ -1,6 +1,6 @@
--module(heimdall_wm_util).
+-module(bifrost_wm_util).
 
--include("heimdall_wm.hrl").
+-include("bifrost_wm.hrl").
 -include_lib("ej/include/ej.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
@@ -27,7 +27,7 @@ get_requestor(Req, #base_state{reqid = ReqId, superuser_id = SuperuserId} = Stat
             % Superuser gets a pass
             State#base_state{requestor_id = superuser};
         Id ->
-            case ?SH_TIME(ReqId, heimdall_db, exists, (actor, Id)) of
+            case ?SH_TIME(ReqId, bifrost_db, exists, (actor, Id)) of
                 true ->
                     State#base_state{requestor_id = Id};
                 false ->

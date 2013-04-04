@@ -1,4 +1,4 @@
--module(heimdall_wm_base).
+-module(bifrost_wm_base).
 
 -export([content_types_accepted/2,
          content_types_provided/2,
@@ -14,7 +14,7 @@
          stats_hero_upstreams/0,
          validate_requestor/2]).
 
--include("heimdall_wm.hrl").
+-include("bifrost_wm.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
 init(Resource, Config) ->
@@ -61,16 +61,16 @@ malformed_request(Req, #base_state{module = Module} = State) ->
                                 {boolean(), wm_req(), base_state()}.
 validate_requestor(Req, State) ->
     try
-        State0 = heimdall_wm_util:get_requestor(Req, State),
+        State0 = bifrost_wm_util:get_requestor(Req, State),
         case State0#base_state.requestor_id of
             undefined ->
-                heimdall_wm_error:set_malformed_request(Req, State, missing_requestor);
+                bifrost_wm_error:set_malformed_request(Req, State, missing_requestor);
             _ ->
                 {false, Req, State0}
         end
     catch
         throw:{bad_requestor, Id} ->
-            heimdall_wm_error:set_malformed_request(Req, State, {bad_requestor, Id})
+            bifrost_wm_error:set_malformed_request(Req, State, {bad_requestor, Id})
     end.
 
 forbidden(Req, #base_state{reqid = ReqId,
@@ -82,22 +82,22 @@ forbidden(Req, #base_state{reqid = ReqId,
         ignore ->
             {false, Req, State};
         Permission ->
-            case ?SH_TIME(ReqId, heimdall_db, exists, (Type, Id)) of
+            case ?SH_TIME(ReqId, bifrost_db, exists, (Type, Id)) of
                 false ->
                     {{halt, 404}, Req, State};
                 true ->
-                    case heimdall_acl:check_access(ReqId, Type, Id, RequestorId,
+                    case bifrost_acl:check_access(ReqId, Type, Id, RequestorId,
                                                    Permission) of
                         true ->
                             {false, Req, State};
                         false ->
-                            heimdall_wm_error:set_access_exception(Req, State, Permission)
+                            bifrost_wm_error:set_access_exception(Req, State, Permission)
                     end
             end
     end.
 
 create_path(Req, State) ->
-    AuthzId = heimdall_wm_util:generate_authz_id(),
+    AuthzId = bifrost_wm_util:generate_authz_id(),
     {AuthzId,
      %% Add new AuthzID to notes for output in the request logger
      wrq:add_note(created_authz_id, AuthzId, Req),
@@ -138,7 +138,7 @@ finish_request(Req, #base_state{reqid=ReqId,
 %% currently offer the option to take a pre-generated request ID from
 %% a header value.
 %%
-%% This generated ID is unique to Heimdall, and is distinct from the
+%% This generated ID is unique to Bifrost, and is distinct from the
 %% requests to Erchef, Reporting, Pushy, etc. that ultimately trigger
 %% this request.
 -spec new_request_id() -> request_id().
@@ -161,7 +161,7 @@ spawn_stats_hero_worker(Req, #base_state{reqid=ReqId,
 
     Config = [{request_id, ReqId},
 
-              %% Heimdall doesn't have organizations
+              %% Bifrost doesn't have organizations
               {org_name, undefined},
 
               {my_app, ?gv(root_metric_key, MetricsConfig)},
@@ -182,7 +182,7 @@ spawn_stats_hero_worker(Req, #base_state{reqid=ReqId,
 stats_hero_upstreams() ->
     [<<"rdbms">>].
 
-stats_hero_label({heimdall_db, Fun}) ->
+stats_hero_label({bifrost_db, Fun}) ->
     %% DO NOT TAUNT HAPPY FUN BIN
     HappyFunBin = erlang:atom_to_binary(Fun, utf8),
-    <<"rdbms.heimdall_db.", HappyFunBin/binary>>.
+    <<"rdbms.bifrost_db.", HappyFunBin/binary>>.

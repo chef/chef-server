@@ -1,6 +1,6 @@
--include("heimdall_wm.hrl").
+-include("bifrost_wm.hrl").
 
--mixin([{heimdall_wm_base, [content_types_accepted/2,
+-mixin([{bifrost_wm_base, [content_types_accepted/2,
                             content_types_provided/2,
                             finish_request/2,
                             forbidden/2,
@@ -9,7 +9,7 @@
                             post_is_create/2,
                             service_available/2]}]).
 
--behavior(heimdall_wm).
+-behavior(bifrost_wm).
 -export([allowed_methods/2,
          auth_info/1,
          init/1,

@@ -1,6 +1,6 @@
--module(heimdall_acl).
+-module(bifrost_acl).
 
--include("heimdall.hrl").
+-include("bifrost.hrl").
 -include_lib("ej/include/ej.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
@@ -19,7 +19,7 @@ check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
         superuser ->
             true;
         Id ->
-            ?SH_TIME(ReqId, heimdall_db, has_permission, (TargetType, TargetId, Id,
+            ?SH_TIME(ReqId, bifrost_db, has_permission, (TargetType, TargetId, Id,
                                                           Permission))
     end.
 
@@ -27,7 +27,7 @@ check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
 -spec update_acl(request_id(), auth_type(), auth_id(), permission(), list(), list()) ->
                         ok.
 update_acl(ReqId, TargetType, TargetId, Permission, Actors, Groups) ->
-    case ?SH_TIME(ReqId, heimdall_db, update_acl, (TargetType, TargetId, Permission,
+    case ?SH_TIME(ReqId, bifrost_db, update_acl, (TargetType, TargetId, Permission,
                                                    Actors, Groups)) of
         {error, not_null_violation} ->
             throw({db_error, {non_existent_member_for_acl, Actors, Groups}});
@@ -45,7 +45,7 @@ update_acl(ReqId, TargetType, TargetId, Permission, Actors, Groups) ->
 -spec acl_members(request_id(), auth_type(), auth_type(), auth_id(), permission()) ->
                          list().
 acl_members(ReqId, ForType, MemberType, ForId, Permission) ->
-    case ?SH_TIME(ReqId, heimdall_db, acl_membership, (ForType, MemberType, ForId,
+    case ?SH_TIME(ReqId, bifrost_db, acl_membership, (ForType, MemberType, ForId,
                                                        Permission)) of
         {error, Error} ->
             throw({db_error, Error});
@@ -56,7 +56,7 @@ acl_members(ReqId, ForType, MemberType, ForId, Permission) ->
 % @doc Clear permission (for given permission type) on target for all actors and groups
 -spec clear_access(request_id(), auth_type(), auth_id(), permission()) -> ok.
 clear_access(ReqId, TargetType, TargetId, Permission) ->
-    case ?SH_TIME(ReqId, heimdall_db, delete_acl, (TargetType, TargetId, Permission)) of
+    case ?SH_TIME(ReqId, bifrost_db, delete_acl, (TargetType, TargetId, Permission)) of
         {error, Error} ->
             throw({db_error, Error});
         ok ->
@@ -102,7 +102,7 @@ make_ejson_acl(ReqId, ForType, ForId) ->
 -spec parse_acl_json(binary()) -> {list(), list()}.
 parse_acl_json(Json) ->
     try
-        Ejson = heimdall_wm_util:decode(Json),
+        Ejson = bifrost_wm_util:decode(Json),
         Actors = ej:get({<<"actors">>}, Ejson),
         Groups = ej:get({<<"groups">>}, Ejson),
         case {Actors, Groups} of

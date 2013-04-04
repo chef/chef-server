@@ -8,7 +8,7 @@
 %% approach to the API).
 -type auth_id() :: string().
 %% If undefined looks a bit strange here, it's because we explicitly pass it to
-%% heimdall_db:create/3:
+%% bifrost_db:create/3:
 -type requestor_id() :: auth_id() | superuser | undefined.
 -type auth_type() :: actor | container | group | object.
 -type permission() :: create | read | update | delete | grant.

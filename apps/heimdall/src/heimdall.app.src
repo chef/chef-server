@@ -1,10 +1,10 @@
 %%-*- mode: erlang -*-
-{application, heimdall,
- [{description, "Heimdall: Opscode Authorization API"},
+{application, bifrost,
+ [{description, "Bifrost: Opscode Authorization API"},
   {vsn, "0.0.1"},
   {modules, []},
   {registered, []},
-  {mod, {heimdall_app, []}},
+  {mod, {bifrost_app, []}},
   {env, []},
   {applications, [kernel,
                   stdlib,
