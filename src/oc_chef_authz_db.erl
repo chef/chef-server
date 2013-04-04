@@ -35,25 +35,25 @@
         "Mixlib::Authorization::Models::Client-fec21b157b76e08b86e92ef7cbc2be81").
 
 -define(mixlib_auth_container_design,
-	"Mixlib::Authorization::Models::Container-f6aead5acfa18f649f9f951ad5570324").
+        "Mixlib::Authorization::Models::Container-f6aead5acfa18f649f9f951ad5570324").
 
 -define(mixlib_auth_cookbook_design,
-	"Mixlib::Authorization::Models::Cookbook-98638da9d7bfb86c50d448361c5ce691").
+        "Mixlib::Authorization::Models::Cookbook-98638da9d7bfb86c50d448361c5ce691").
 
 -define(mixlib_auth_data_bag_design,
-	"Mixlib::Authorization::Models::DataBag-ff80eed5150b3cf59c54630503d83bb5").
+        "Mixlib::Authorization::Models::DataBag-ff80eed5150b3cf59c54630503d83bb5").
 
 -define(mixlib_auth_environment_design,
-	"Mixlib::Authorization::Models::Environment-bd1a09cec7a4655bf54f4b98ec5ec156").
+        "Mixlib::Authorization::Models::Environment-bd1a09cec7a4655bf54f4b98ec5ec156").
 
 -define(mixlib_auth_group_design,
-	"Mixlib::Authorization::Models::Group-59a505c964199e318b67910cc642a06").
+        "Mixlib::Authorization::Models::Group-59a505c964199e318b67910cc642a06").
 
 -define(mixlib_auth_node_design,
-	"Mixlib::Authorization::Models::Node-8554f173ac3e9bfa55a0836e19b0f232").
+        "Mixlib::Authorization::Models::Node-8554f173ac3e9bfa55a0836e19b0f232").
 
 -define(mixlib_auth_role_design,
-	"Mixlib::Authorization::Models::Role-793b383e56e849fca5901cd66b92bde7").
+        "Mixlib::Authorization::Models::Role-793b383e56e849fca5901cd66b92bde7").
 
 -define(mixlib_auth_join_design,
         "Mixlib::Authorization::AuthJoin-25834c5a8d6a9586adb05320f3f725e8").
@@ -72,7 +72,7 @@ make_context(ReqId) when is_binary(ReqId) ->
     Port = get_env(couchdb_port),
     S = couchbeam:server_connection(Host, Port, "", []),
     #oc_chef_authz_context{reqid = ReqId, otto_connection = S}.
-    
+
 -spec fetch_container(oc_chef_authz_context(),
                       object_id(),
                       container_name()) ->
