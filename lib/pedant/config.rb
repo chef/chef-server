@@ -73,7 +73,7 @@ module Pedant
       end
 
       # Tell it which tests to run
-      args.concat ["spec/authz"]
+      args.concat ["spec/bifrost"]
 
       args.flatten
     end

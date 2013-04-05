@@ -7,7 +7,7 @@ require 'pedant'
 #require 'pedant/opensource'
 
 #Pedant.config.platform_class = Pedant::OpenSourcePlatform
-Pedant.config.suite = "authz"
+Pedant.config.suite = "bifrost"
 Pedant.setup(ARGV)
 puts Pedant::UI.new.info_banner
 
