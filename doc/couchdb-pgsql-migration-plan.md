@@ -58,12 +58,20 @@ Hosts that you'll need access to during the migration:
    ```javascript
    {
      "id": "rs-preprod",
-     "xdarklaunch": {
-       "dl_orgname": {
-         // your orgname below
-         "$ORG_NAME": {
-           "503_mode": true
-         }
+     // default values should already be there
+     "dl_default": {
+       "couchdb_checksums": true,
+       "coudhdb_clients": true,
+       "couchdb_cookbooks": true,
+       "couchdb_environments": true,
+       "couchdb_roles": true,
+       "couchdb_data": true,
+       "503_mode": false
+     },
+     "dl_orgname": {
+       // your orgname below
+       "$ORG_NAME": {
+         "503_mode": true
        }
      }
    }
@@ -109,13 +117,20 @@ The clock for downtime starts as soon the following batch of `chef-client` runs 
    ```javascript
    {
      "id": "rs-preprod",
-     "xdarklaunch": {
-       "dl_orgname": {
-         // your orgname below
-         "$ORG_NAME": {
-           "couchdb_chef": false
-           "503_mode": false // we could also remove the maintenance mode line
-         }
+     //
+     // ... default values here
+     //
+     "dl_orgname": {
+       // your orgname below
+       "$ORG_NAME": {
+         "couchdb_checksums": true,
+         "couchdb_cookbooks": true,
+         "couchdb_environments": true,
+         "couchdb_roles": true,
+         "couchdb_data": true
+         // NOTE:
+         // * 503_mode is removed and set to default
+         // * clients are not out of couchdb yet (this may change)
        }
      }
    }
