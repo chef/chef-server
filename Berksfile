@@ -35,6 +35,9 @@ cookbook "opscode-ruby", git: "git@github.com:opscode-cookbooks/opscode-ruby.git
 cookbook "opscode-dev-shim", git: "git@github.com:opscode-cookbooks/opscode-dev-shim.git"
 # cookbook "opscode-dev-shim", path: "#{ENV['OPSCODE_COOKBOOKS']}/opscode-dev-shim"
 
+# TODO recent versions of opscode-postgresql don't work for local dev--fix that and remove this!
+cookbook "opscode-postgresql", '= 0.1.3'
+
 if ENABLE_METRICS_SERVER
   # These are currently needed if you want to get graphite running locally
   DEV_VM_COOKBOOK_DIR = "#{ENV['OPSCODE_SRC']}/opscode-dev-vm/cookbooks"
