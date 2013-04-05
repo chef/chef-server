@@ -88,7 +88,8 @@ The clock for downtime starts as soon the following batch of `chef-client` runs 
    _This applies to the internal and external nodes referenced above._
 
    ```bash
-   sudo chef-client
+   # $OPS_ENV is the same as above: rs-prod or rs-preprod
+   sudo chef-client -o "role[$OPS_ENV],recipe[opscode-lb::lua_scripts]"
    ```
 
 ## 1.2 Migration
@@ -139,5 +140,6 @@ The clock for downtime starts as soon the following batch of `chef-client` runs 
 1. Run `chef-client` on all the `opscode-lb` Nodes
 
    ```bash
-   sudo chef-client
+   # $OPS_ENV is the same as above: rs-prod or rs-preprod
+   sudo chef-client -o "role[$OPS_ENV],recipe[opscode-lb::lua_scripts]"
    ```
