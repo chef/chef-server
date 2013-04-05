@@ -24,8 +24,8 @@ if ENV['OPSCODE_COOKBOOKS'].nil?
   exit 1
 end
 
-cookbook "opscode-heimdall", git: "git@github.com:opscode-cookbooks/opscode-heimdall.git"
-# cookbook "opscode-heimdall", path: "#{ENV['OPSCODE_COOKBOOKS']}/opscode-heimdall"
+cookbook "opscode-bifrost", git: "git@github.com:opscode-cookbooks/opscode-bifrost.git"
+# cookbook "opscode-bifrost", path: "#{ENV['OPSCODE_COOKBOOKS']}/opscode-bifrost"
 cookbook "opscode-pedant", git: "git@github.com:opscode-cookbooks/opscode-pedant.git"
 # cookbook "opscode-pedant", path: "#{ENV['OPSCODE_COOKBOOKS']}/opscode-pedant"
 cookbook "opscode-ruby", git: "git@github.com:opscode-cookbooks/opscode-ruby.git"
@@ -34,6 +34,9 @@ cookbook "opscode-ruby", git: "git@github.com:opscode-cookbooks/opscode-ruby.git
 # This is only needed for local dev work
 cookbook "opscode-dev-shim", git: "git@github.com:opscode-cookbooks/opscode-dev-shim.git"
 # cookbook "opscode-dev-shim", path: "#{ENV['OPSCODE_COOKBOOKS']}/opscode-dev-shim"
+
+# TODO recent versions of opscode-postgresql don't work for local dev--fix that and remove this!
+cookbook "opscode-postgresql", '= 0.1.3'
 
 if ENABLE_METRICS_SERVER
   # These are currently needed if you want to get graphite running locally
@@ -46,7 +49,7 @@ if ENABLE_METRICS_SERVER
   # This is my fork of the gdash cookbook from the community site
   # (needed to fix a small bug); we have a home-grown gdash in
   # preprod, but I've run into some issues using it.  We only really
-  # want it here to test out the Heimdall dashboards, so it's not
+  # want it here to test out the Bifrost dashboards, so it's not
   # necessary that it be exactly the same as in prod.
   cookbook "gdash", github: "christophermaier/chef-gdash", branch: "fix_config"
 

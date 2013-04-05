@@ -1,2 +1,2 @@
-DROP ROLE IF EXISTS heimdall;
-DROP ROLE IF EXISTS heimdall_ro;
+DROP ROLE IF EXISTS bifrost;
+DROP ROLE IF EXISTS bifrost_ro;

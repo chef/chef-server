@@ -17,8 +17,8 @@ depclean:
 	@rm -rf deps
 
 relclean:
-	@echo "Deleting rel/heimdall directory"
-	@rm -rf rel/heimdall
+	@echo "Deleting rel/bifrost directory"
+	@rm -rf rel/bifrost
 
 allclean: depclean clean
 
@@ -42,7 +42,7 @@ compile_app:
 
 DIALYZER_OPTS = -Wrace_conditions -Wunderspecs
 
-DEPS_PLT = heimdall.plt
+DEPS_PLT = bifrost.plt
 
 ERLANG_DIALYZER_APPS = asn1 \
 		       compiler \
@@ -72,7 +72,7 @@ $(DEPS_PLT):
 	dialyzer -nn --output_plt $(DEPS_PLT) --build_plt --apps $(ERLANG_DIALYZER_APPS)
 
 dialyze: compile $(DEPS_PLT)
-	dialyzer $(DIALYZER_OPTS) --plt $(DEPS_PLT) -r apps/heimdall/ebin
+	dialyzer $(DIALYZER_OPTS) --plt $(DEPS_PLT) -r apps/bifrost/ebin
 
 # Testing ######################################################################
 
@@ -82,21 +82,23 @@ eunit: compile
 	$(REBAR) eunit skip_deps=true
 
 eunit_app: compile_app
-	$(REBAR) eunit apps=heimdall skip_deps=true
+	$(REBAR) eunit apps=bifrost skip_deps=true
 
 # Release Creation #############################################################
 
-rel: compile test rel/heimdall
+rel: compile test rel/bifrost
 
-rel/heimdall:
+rel/bifrost:
 	@cd rel
 	$(REBAR) generate
-	@echo
-	@echo ' __  __  ____ __ ___  ___ ____    ___  __    __   '
-	@echo ' ||  || ||    || ||\\//|| || \\  // \\ ||    ||   '
-	@echo ' ||==|| ||==  || || \/ || ||  )) ||=|| ||    ||   '
-	@echo ' ||  || ||___ || ||    || ||_//  || || ||__| ||__|'
-	@echo '                                                  '
+	@echo '        (      (      (         )    (              '
+	@echo '   (    )\ )   )\ )   )\ )   ( /(    )\ )    *   )  '
+	@echo ' ( )\  (()/(  (()/(  (()/(   )\())  (()/(  `` )  /(  '
+	@echo ' )((_)  /(_))  /(_))  /(_)) ((_)\    /(_))  ( )(_)) '
+	@echo '((_)_  (_))   (_))_| (_))     ((_)  (_))   (_(_())  '
+	@echo ' | _ ) |_ _|  | |_   | _ \   / _ \  / __|  |_   _|  '
+	@echo ' | _ \  | |   | __|  |   /  | (_) | \__ \    | |    '
+	@echo ' |___/ |___|  |_|    |_|_\   \___/  |___/    |_|    '
 
 #
 # Unsure if we'll need these targets anymore...
@@ -104,16 +106,16 @@ rel/heimdall:
 
 # devrel: rel
 #	@/bin/echo -n Symlinking deps and apps into release
-#	@$(foreach lib,$(wildcard apps/* deps/*), /bin/echo -n .;rm -rf rel/heimdall/lib/$(shell basename $(lib))-* \
-#	   && ln -sf $(abspath $(lib)) rel/heimdall/lib;)
+#	@$(foreach lib,$(wildcard apps/* deps/*), /bin/echo -n .;rm -rf rel/bifrost/lib/$(shell basename $(lib))-* \
+#	   && ln -sf $(abspath $(lib)) rel/bifrost/lib;)
 #	@/bin/echo done.
 #	@/bin/echo  Run \'make update\' to pick up changes in a running VM.
 
 # update: compile
-#	@cd rel/heimdall;bin/heimdall restart
+#	@cd rel/bifrost;bin/bifrost restart
 
 # update_app: compile_app
-#	@cd rel/heimdall;bin/heimdall restart
+#	@cd rel/bifrost;bin/bifrost restart
 
 
 # Release Preparation ##########################################################

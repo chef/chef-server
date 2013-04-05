@@ -1,9 +1,9 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 80-*-
 %% ex: ts=4 sw=4 et
 
--module(heimdall_db).
+-module(bifrost_db).
 
--include("heimdall.hrl").
+-include("bifrost.hrl").
 
 -export([acl_membership/4,
          add_to_group/3,
@@ -203,6 +203,6 @@ remove_from_group(Type, MemberId, GroupId) ->
     end.
 
 statements() ->
-    Path = filename:join([code:priv_dir(heimdall), "pgsql_statements.config"]),
+    Path = filename:join([code:priv_dir(bifrost), "pgsql_statements.config"]),
     {ok, Statements} = file:consult(Path),
     Statements.

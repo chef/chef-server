@@ -10,8 +10,8 @@ Gemfile.lock
 .*.sw[a-z]
 *.un~
 /cookbooks
-rel/oc_heimdall
-heimdall.plt
+rel/oc_bifrost
+bifrost.plt
 deps
 *.beam
 .eunit

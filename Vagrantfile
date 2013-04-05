@@ -2,13 +2,13 @@
 
 require 'berkshelf/vagrant'
 
-HEIMDALL_DB_HOST         = "33.33.33.20"
-HEIMDALL_DB_PORT         =  5432 # This is actually fixed in the recipe currently
-HEIMDALL_FORWARD_DB_PORT = 15432
+BIFROST_DB_HOST         = "33.33.33.20"
+BIFROST_DB_PORT         =  5432 # This is actually fixed in the recipe currently
+BIFROST_FORWARD_DB_PORT = 15432
 
-HEIMDALL_API_HOST        = "33.33.33.21"
-HEIMDALL_PORT            = 5959
-HEIMDALL_FORWARD_PORT    = 15959
+BIFROST_API_HOST        = "33.33.33.21"
+BIFROST_PORT            = 5959
+BIFROST_FORWARD_PORT    = 15959
 
 METRICS_HOST             = "33.33.33.22"
 METRICS_ESTATSD_PORT     = 5665
@@ -30,16 +30,16 @@ Vagrant::Config.run do |config|
   config.ssh.forward_agent = true
 
   config.vm.define :db do |db_config|
-    db_config.vm.host_name = "oc-heimdall-db-berkshelf"
+    db_config.vm.host_name = "oc-bifrost-db-berkshelf"
 
-    db_config.vm.network :hostonly, HEIMDALL_DB_HOST, :adapter => 2
+    db_config.vm.network :hostonly, BIFROST_DB_HOST, :adapter => 2
     db_config.vm.customize ["modifyvm", :id, "--nictype2", "virtio"] # host-only NIC
 
-    db_config.vm.forward_port HEIMDALL_DB_PORT, HEIMDALL_FORWARD_DB_PORT
+    db_config.vm.forward_port BIFROST_DB_PORT, BIFROST_FORWARD_DB_PORT
 
     db_config.vm.provision :chef_solo do |chef|
       chef.json = {
-        "oc_heimdall" => {
+        "oc_bifrost" => {
           "development_mode" => true
         },
         # When running in a chef-solo setting, the postgres user
@@ -50,7 +50,7 @@ Vagrant::Config.run do |config|
             "postgres" => "honeybadger"
           },
           "config" => {
-            "port" => HEIMDALL_DB_PORT
+            "port" => BIFROST_DB_PORT
           }
         }
       }
@@ -59,25 +59,25 @@ Vagrant::Config.run do |config|
       chef.data_bags_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/data_bags"
 
       chef.run_list = ["recipe[opscode-dev-shim]",
-                       "recipe[opscode-heimdall::database]"]
+                       "recipe[opscode-bifrost::database]"]
     end
   end
 
   config.vm.define :api do |api_config|
-    api_config.vm.host_name = "oc-heimdall-api-berkshelf"
+    api_config.vm.host_name = "oc-bifrost-api-berkshelf"
 
-    api_config.vm.network :hostonly, HEIMDALL_API_HOST, :adapter => 2
+    api_config.vm.network :hostonly, BIFROST_API_HOST, :adapter => 2
     api_config.vm.customize ["modifyvm", :id, "--nictype2", "virtio"] # host-only NIC
 
-    api_config.vm.forward_port HEIMDALL_PORT, HEIMDALL_FORWARD_PORT
+    api_config.vm.forward_port BIFROST_PORT, BIFROST_FORWARD_PORT
 
     api_config.vm.provision :chef_solo do |chef|
       chef.json = {
-        "oc_heimdall" => {
+        "oc_bifrost" => {
           "development_mode" => true,
           "database" => {
-            "host" => HEIMDALL_DB_HOST,
-            "port" => HEIMDALL_DB_PORT
+            "host" => BIFROST_DB_HOST,
+            "port" => BIFROST_DB_PORT
           }
         },
         # These values are hard-coded into the PIAB monitoring cookbooks
@@ -94,13 +94,13 @@ Vagrant::Config.run do |config|
 
       chef.run_list = [
                        "recipe[opscode-dev-shim]",
-                       "recipe[opscode-heimdall::api_server]"
+                       "recipe[opscode-bifrost::api_server]"
                       ]
     end
   end
 
   config.vm.define :metrics do |metrics_config|
-    metrics_config.vm.host_name = "oc-heimdall-metrics-berkshelf"
+    metrics_config.vm.host_name = "oc-bifrost-metrics-berkshelf"
 
     metrics_config.vm.network :hostonly, METRICS_HOST, :adapter => 2
     metrics_config.vm.customize ["modifyvm", :id, "--nictype2", "virtio"] # host-only NIC
@@ -123,7 +123,7 @@ Vagrant::Config.run do |config|
                        "recipe[piab::monitoring]",
                        "opscode-ruby::default",
                        "gdash::default",
-                       "opscode-heimdall::gdash"]
+                       "opscode-bifrost::gdash"]
     end
   end
 end

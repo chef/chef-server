@@ -1,6 +1,6 @@
--module(heimdall_wm_error).
+-module(bifrost_wm_error).
 
--include("heimdall_wm.hrl").
+-include("bifrost_wm.hrl").
 
 -export([set_db_exception/3,
          set_access_exception/3,
@@ -13,9 +13,9 @@ error_ejson(Message) when is_list(Message) ->
     error_ejson(iolist_to_binary(Message)).
 
 halt(Code, Req, State, Msg) when is_integer(Code) ->
-    {{halt, Code}, heimdall_wm_util:set_json_body(Req, Msg), State};
+    {{halt, Code}, bifrost_wm_util:set_json_body(Req, Msg), State};
 halt(Value, Req, State, Msg) when is_boolean(Value) ->
-    {Value, heimdall_wm_util:set_json_body(Req, Msg), State}.
+    {Value, bifrost_wm_util:set_json_body(Req, Msg), State}.
 
 %% Sets the error message in the body and returns the return tuple to malformed
 %% request (which could contain true or {halt, XXX} if some other return code is
@@ -64,7 +64,7 @@ set_db_exception(Req, State, Error) ->
 find_non_existent(_, []) ->
     none;
 find_non_existent(Type, [Head|Tail]) ->
-    case heimdall_db:exists(Type, Head) of
+    case bifrost_db:exists(Type, Head) of
         true ->
             find_non_existent(Type, Tail);
         false ->

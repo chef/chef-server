@@ -1,4 +1,4 @@
--module(heimdall_sup).
+-module(bifrost_sup).
 
 -behaviour(supervisor).
 
@@ -37,9 +37,9 @@ upgrade() ->
 
 init([]) ->
 
-    {ok, Ip} = application:get_env(heimdall, ip),
-    {ok, Port} = application:get_env(heimdall, port),
-    {ok, Dispatch} = file:consult(filename:join([code:priv_dir(heimdall),
+    {ok, Ip} = application:get_env(bifrost, ip),
+    {ok, Port} = application:get_env(bifrost, port),
+    {ok, Dispatch} = file:consult(filename:join([code:priv_dir(bifrost),
                                                  "dispatch.conf"])),
 
     WebConfig = [
@@ -85,13 +85,13 @@ dynamic_config() ->
     superuser_config() ++ stats_hero_config().
 
 superuser_config() ->
-    {ok, SuperuserId} = application:get_env(heimdall, superuser_id),
+    {ok, SuperuserId} = application:get_env(bifrost, superuser_id),
     [{superuser_id, SuperuserId}].
 
 stats_hero_config() ->
-    {ok, MetricKey} = application:get_env(heimdall, root_metric_key),
+    {ok, MetricKey} = application:get_env(bifrost, root_metric_key),
     [{metrics_config, [
                        {root_metric_key, MetricKey},
-                       {stats_hero_upstreams, heimdall_wm_base:stats_hero_upstreams()},
-                       {stats_hero_label_fun, {heimdall_wm_base, stats_hero_label}}
+                       {stats_hero_upstreams, bifrost_wm_base:stats_hero_upstreams()},
+                       {stats_hero_label_fun, {bifrost_wm_base, stats_hero_label}}
                       ]}].

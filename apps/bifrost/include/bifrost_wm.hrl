@@ -2,9 +2,9 @@
 %% a function declaration so breaks all of our behavior callbacks.
 -include_lib("webmachine/include/wm_reqdata.hrl").
 -include_lib("mixer/include/mixer.hrl").
--include("heimdall.hrl").
+-include("bifrost.hrl").
 
-%% Share resource state shared by all heimdall resource modules
+%% Share resource state shared by all bifrost resource modules
 %%
 %% All ACL resources follow the pattern:
 %%

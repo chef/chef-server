@@ -1,4 +1,4 @@
-Heimdall Metrics
+Bifrost Metrics
 ================
 
 The following metrics are collected and sent to Graphite.
@@ -29,14 +29,14 @@ period.  These include:
 
 Again, these counts only apply to `histogram` metrics.  These will be
 found under the original metric key.  For instance, sending a
-histogram metric for `heimdall.application.allRequests` will result in
+histogram metric for `bifrost.application.allRequests` will result in
 the following metrics being available in Graphite:
 
-- `stats.timers.heimdall.application.allRequests.count`
-- `stats.timers.heimdall.application.allRequests.lower`
-- `stats.timers.heimdall.application.allRequests.mean`
-- `stats.timers.heimdall.application.allRequests.upper`
-- `stats.timers.heimdall.application.allRequests.upper_90`
+- `stats.timers.bifrost.application.allRequests.count`
+- `stats.timers.bifrost.application.allRequests.lower`
+- `stats.timers.bifrost.application.allRequests.mean`
+- `stats.timers.bifrost.application.allRequests.upper`
+- `stats.timers.bifrost.application.allRequests.upper_90`
 
 These measurements are taken over a 10 second window.  See `Caveats` below.
 
@@ -69,76 +69,76 @@ requests coming in over a 10-second interval.
 
 # Beginning of Request
 
-Heimdall, via [stats_hero][] creates a few metrics at the beginning of
+Bifrost, via [stats_hero][] creates a few metrics at the beginning of
 the request.
 
-* `heimdall.application.allRequests`
+* `bifrost.application.allRequests`
 
   A `meter` metric; increments by 1 on each request.  Keeps a tally of
-  all requests sent to the Heimdall application.
+  all requests sent to the Bifrost application.
 
-  Will be found in Graphite as `stats.heimdall.application.allRequests`.
+  Will be found in Graphite as `stats.bifrost.application.allRequests`.
 
-* `heimdall.$HOST.allRequests`
+* `bifrost.$HOST.allRequests`
 
   A `meter` metric; increments by 1 on each request. Keeps a tally of
   all requests sent to `$HOST`.
 
-  Will be found in Graphite as `stats.heimdall.$HOST.allRequests`.
+  Will be found in Graphite as `stats.bifrost.$HOST.allRequests`.
 
-* `heimdall.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB`
+* `bifrost.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB`
 
   A `meter` metric; increments by 1 on each request.
 
-  `$REQUEST_LABEL` is a label generated within Heimdall that reflects
+  `$REQUEST_LABEL` is a label generated within Bifrost that reflects
   what kind of request is being processed (e.g., `actor`, `object`,
-  etc.).  `$REQUEST_VERB` is one of the HTTP verbs that Heimdall
+  etc.).  `$REQUEST_VERB` is one of the HTTP verbs that Bifrost
   supports (currently `GET`, `POST`, `PUT`, and `DELETE`).
 
-  Will be found in Graphite as `stats.heimdall.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB`.
+  Will be found in Graphite as `stats.bifrost.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB`.
 
 # End of Request
 
 When the request is finished, several more metrics are generated.
 
-* `heimdall.application.byStatusCode.$HTTP_STATUS`
+* `bifrost.application.byStatusCode.$HTTP_STATUS`
 
   A `meter` metric; increments by 1 on each request.  Keeps a tally of
   how many overall requests resulted in the given HTTP status.
 
-  Will be found in Graphite as `stats.heimdall.application.byStatusCode.$HTTP_STATUS`
+  Will be found in Graphite as `stats.bifrost.application.byStatusCode.$HTTP_STATUS`
 
-* `heimdall.$HOST.byStatusCode.$HTTP_STATUS`
+* `bifrost.$HOST.byStatusCode.$HTTP_STATUS`
 
   A `meter` metric; increments by 1 on each request.  Same as
-  `heimdall.application.byStatusCode.$HTTP_STATUS`, but broken down by
+  `bifrost.application.byStatusCode.$HTTP_STATUS`, but broken down by
   server.
 
-  Will be found in Graphite as `stats.heimdall.$HOST.byStatusCode.$HTTP_STATUS`
+  Will be found in Graphite as `stats.bifrost.$HOST.byStatusCode.$HTTP_STATUS`
 
-* `heimdall.application.allRequests`
-
-  A `histogram` metric.  The total request processing time is sent.
-
-  Will be found in Graphite under `stats.timers.heimdall.application.allRequests`.
-
-* `heimdall.$HOST.allRequests`
+* `bifrost.application.allRequests`
 
   A `histogram` metric.  The total request processing time is sent.
 
-  Will be found in Graphite under `stats.timers.heimdall.$HOST.allRequests`.
+  Will be found in Graphite under `stats.timers.bifrost.application.allRequests`.
 
-* `heimdall.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB`
+* `bifrost.$HOST.allRequests`
 
   A `histogram` metric.  The total request processing time is sent.
 
-  Will be found in Graphite under `stats.timers.heimdall.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB`
+  Will be found in Graphite under `stats.timers.bifrost.$HOST.allRequests`.
+
+* `bifrost.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB`
+
+  A `histogram` metric.  The total request processing time is sent.
+
+  Will be found in Graphite under `stats.timers.bifrost.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB`
 
 # Upstreams
 
   [stats_hero][] does some aggregation of so-called "upstream"
   metrics.  These are measurements that are taken within an
-  application of calls to other services.  In Heimdall, this currently
+  application of calls to other services.  In Bifrost, this currently
   is only the relational database calls.
 
   These metrics are all `histogram` metrics, so they will be found
@@ -151,14 +151,14 @@ When the request is finished, several more metrics are generated.
 
   Examples:
 
-  - `heimdall.upstreamRequests.rdbms`
-  - `heimdall.upstreamRequests.rdbms.heimdall_db.my_fun1`
-  - `heimdall.upstreamRequests.rdbms.heimdall_db.my_fun2`
-  - `heimdall.upstreamRequests.rdbms.heimdall_db.my_fun3`
-  - `heimdall.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB.upstreamRequests.rdbms`
-  - `heimdall.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB.upstreamRequests.rdbms.heimdall_db.my_fun1`
-  - `heimdall.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB.upstreamRequests.rdbms.heimdall_db.my_fun2`
-  - `heimdall.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB.upstreamRequests.rdbms.heimdall_db.my_fun3`
+  - `bifrost.upstreamRequests.rdbms`
+  - `bifrost.upstreamRequests.rdbms.bifrost_db.my_fun1`
+  - `bifrost.upstreamRequests.rdbms.bifrost_db.my_fun2`
+  - `bifrost.upstreamRequests.rdbms.bifrost_db.my_fun3`
+  - `bifrost.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB.upstreamRequests.rdbms`
+  - `bifrost.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB.upstreamRequests.rdbms.bifrost_db.my_fun1`
+  - `bifrost.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB.upstreamRequests.rdbms.bifrost_db.my_fun2`
+  - `bifrost.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB.upstreamRequests.rdbms.bifrost_db.my_fun3`
 
 [estatsd]:https://github.com/opscode/estatsd
 [stats_hero]:https://github.com/opscode/stats_hero
