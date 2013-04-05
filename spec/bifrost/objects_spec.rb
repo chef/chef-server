@@ -51,7 +51,7 @@ describe "Objects Endpoint" do
       end
 
       # This is one of the actual changes in behavior between old authz and new V1
-      # of Heimdall; this actually works with the old server, but it can't with the
+      # of Bifrost; this actually works with the old server, but it can't with the
       # new schema because it's not possible to put bogus ACLs in the database which
       # this would require
       context "as an unknown requestor" do
