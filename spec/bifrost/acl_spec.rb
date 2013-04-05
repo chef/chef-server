@@ -1,5 +1,6 @@
 describe "ACL Tests" do
   let(:easterbunny) { "deaddeaddeaddeaddeaddeaddeaddead" }
+  let(:max_headroom) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
   context "/<type>/<id>/acl" do
     # What we are testing:
@@ -692,6 +693,20 @@ describe "ACL Tests" do
                       fake_entity = easterbunny
 
                       get("/#{type}s/#{fake_entity}/acl/#{action}/actors/#{hasselhoff}",
+                          :hasselhoff).should have_status_code(404)
+                    end
+                  end
+
+                  context "with a non-existent authorizee" do
+                    with_actor :hasselhoff
+                    with_entity type, :gozer
+
+                    with_ace_on :gozer, ace.to_sym, :to => :hasselhoff
+
+                    it "can't be read, because actor doesn't exist" do
+                      fake_actor = max_headroom
+
+                      get("/#{type}s/#{gozer}/acl/#{action}/actors/#{max_headroom}",
                           :hasselhoff).should have_status_code(404)
                     end
                   end
