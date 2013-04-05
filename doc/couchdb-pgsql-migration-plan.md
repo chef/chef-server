@@ -31,7 +31,7 @@ Hosts that you'll need access to during the migration:
 
    ```bash
    cd /srv/mover
-   bin/mover/console
+   bin/mover console
    ```
 
 1. Load `opscode-account` Database into DETS Table
