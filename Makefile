@@ -91,7 +91,6 @@ rel: compile test rel/bifrost
 rel/bifrost:
 	@cd rel
 	$(REBAR) generate
-
 	@echo '        (      (      (         )    (              '
 	@echo '   (    )\ )   )\ )   )\ )   ( /(    )\ )    *   )  '
 	@echo ' ( )\  (()/(  (()/(  (()/(   )\())  (()/(  `` )  /(  '
@@ -100,7 +99,6 @@ rel/bifrost:
 	@echo ' | _ ) |_ _|  | |_   | _ \   / _ \  / __|  |_   _|  '
 	@echo ' | _ \  | |   | __|  |   /  | (_) | \__ \    | |    '
 	@echo ' |___/ |___|  |_|    |_|_\   \___/  |___/    |_|    '
-                                                    
 
 #
 # Unsure if we'll need these targets anymore...
