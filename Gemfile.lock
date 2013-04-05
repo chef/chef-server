@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    oc-authz-pedant (0.0.1)
+    oc-bifrost-pedant (0.0.1)
       activesupport (~> 3.2.8)
       mixlib-config (~> 1.1.2)
       net-http-spy (~> 0.2.1)
@@ -44,4 +44,4 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  oc-authz-pedant!
+  oc-bifrost-pedant!

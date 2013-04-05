@@ -372,7 +372,7 @@ module Pedant
         # receive a single argument, the HTTP response (as a
         # RestClient::Response object).  Testing methods should use this to
         # carry out any validation tests of the response.
-        def authz_request(method, url_fragment, requestor, opts={})
+        def bifrost_request(method, url_fragment, requestor, opts={})
 
           url = api_url(url_fragment)
 
@@ -381,9 +381,9 @@ module Pedant
           default = {
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            'User-Agent' => 'oc-authz-pedant',
+            'User-Agent' => 'oc-bifrost-pedant',
             'X-Ops-Timestamp' => Time.now.utc.to_s,
-            'X-Ops-User-Id' => 'front-end-service', # simulates oc_chef_authz, anyway
+            'X-Ops-User-Id' => 'front-end-service', # simulates oc_chef_bifrost, anyway
             'X-Ops-Requesting-Actor-Id' => requestor
           }
 
@@ -413,19 +413,19 @@ module Pedant
         end
 
         def get(url_fragment, req, opts={})
-          authz_request(:GET, url_fragment, req, opts)
+          bifrost_request(:GET, url_fragment, req, opts)
         end
 
         def put(url_fragment, req, opts={})
-          authz_request(:PUT, url_fragment, req, opts)
+          bifrost_request(:PUT, url_fragment, req, opts)
         end
 
         def post(url_fragment, req, opts={})
-          authz_request(:POST, url_fragment, req, opts)
+          bifrost_request(:POST, url_fragment, req, opts)
         end
 
         def delete(url_fragment, req, opts={})
-          authz_request(:DELETE, url_fragment, req, opts)
+          bifrost_request(:DELETE, url_fragment, req, opts)
         end
 
         # We're using a lot of symbols to refer to things in RSpec let

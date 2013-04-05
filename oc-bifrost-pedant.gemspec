@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name          = 'oc-authz-pedant'
+  s.name          = 'oc-bifrost-pedant'
   s.version       = '0.0.1'
   s.date          = '2013-01-24'
   s.summary       = "Opscode Chef API Testing Framework"
@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.homepage      = 'http://opscode.com'
 
   s.bindir        = 'bin'
-  s.executables   = ['oc-authz-pedant']
+  s.executables   = ['oc-bifrost-pedant']
 
   s.add_dependency('rspec', '~> 2.11.0')
   s.add_dependency('activesupport', '~> 3.2.8') # For active_support/concern
