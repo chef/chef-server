@@ -38,7 +38,9 @@
          get_container_aid_for_object/3,
          make_context/1,
          is_authorized_on_resource/6,
-         ping/0]).
+         ping/0,
+         remove_actor_from_actor_acl/2
+        ]).
 -else.
 -compile([export_all]).
 -endif.
@@ -286,6 +288,49 @@ add_client_to_clients_group(Context, OrgId, ClientAuthzId) ->
         ok             -> ok;
         {error, Error} -> {error, Error}
     end.
+
+%% @doc As a given actor (`TargetActorId'), remove another actor (`ActorIdToRemove')
+%% completely from its ACL.
+%%
+%% This is originally intended to support the case of removing a validator client from its
+%% own ACL.  We only want the validator to be able to create a new non-validator client, and
+%% we really mean it!
+%%
+%% Both `TargetActorId' and `ActorIdToRemove' are assumed here to be the AuthzId of actors,
+%% not any other kind of Authz object (group, container, or object).  This should be
+%% verified by callers of this function.
+-spec remove_actor_from_actor_acl(ActorIdToRemove::object_id(),
+                                  TargetActorId::object_id()) -> ok | {error, any()}.
+remove_actor_from_actor_acl(ActorIdToRemove, TargetActorId) ->
+    %% Target actor fetches its own ACL
+    {ok, Acl} = get_acl_for_resource(TargetActorId, actor, TargetActorId),
+    FilteredAcl = remove_actor_from_acl(ActorIdToRemove, Acl),
+
+    %% Target actor updates its own ACL
+    set_acl(TargetActorId, actor, TargetActorId, FilteredAcl).
+
+%% @doc Front-end to recursive implementation in `remove_actor_from_acl/3`.
+-spec remove_actor_from_acl(ActorId::object_id(), Acl::authz_acl()) -> authz_acl().
+remove_actor_from_acl(ActorId, Acl) ->
+    remove_actor_from_acl(ActorId, Acl, []).
+
+%% @doc Removes `ActorId` from all `actors` lists in the given ACL.
+-spec remove_actor_from_acl(ActorId::object_id(),
+                            AclToProcess::authz_acl(),
+                            FilteredAcl::authz_acl()) ->
+                                   authz_acl().
+remove_actor_from_acl(_ActorId, [], Acc) ->
+    lists:reverse(Acc);
+remove_actor_from_acl(ActorId, [{Permission, Ace}|Rest], Acc) ->
+    Filtered = remove_actor_from_ace(ActorId, Ace),
+    remove_actor_from_acl(ActorId, Rest, [{Permission, Filtered} | Acc]).
+
+%% @doc Returns the given authz_ace with `ActorId` filtered out of the `actors` lists.  The
+%% `groups` list is untouched.
+-spec remove_actor_from_ace(ActorId::object_id(), Ace::#authz_ace{}) -> #authz_ace{}.
+remove_actor_from_ace(ActorId, #authz_ace{actors=Actors, groups=Groups}) ->
+    #authz_ace{actors=[A || A <- Actors, A /= ActorId],
+               groups=Groups}.
 
 -spec pluralize_resource(resource_type()) -> <<_:48,_:_*8>>.
 pluralize_resource(actor) -> <<"actors">>;
