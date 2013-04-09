@@ -99,9 +99,7 @@ The clock for downtime starts as soon the following batch of `chef-client` runs 
    From `mover` console:
 
    ```erlang
-   %% TODO: this probably no longer works
-   Db = moser_chef_processor:process_organization("$ORG_NAME") %% <- your orgname here
-   moser_chef_converter:insert(Db).
+   moser_converter:convert_org("$ORG_NAME").
    ```
 
 ## 1.3 Initiate Erchef Mode and Disable Maintenance Mode
