@@ -1,4 +1,4 @@
-
+include_recipe "omnibus"
 include_recipe "python"
 
 # We should consider making this proper config/software deps for
