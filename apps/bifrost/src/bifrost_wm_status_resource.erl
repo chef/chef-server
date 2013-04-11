@@ -20,4 +20,10 @@ content_types_provided(Req, State) ->
     {[{"application/json", to_json}], Req, State}.
 
 to_json(Req, State) ->
-    {<<"{\"status\": \"ok\"}">>, Req, State}.
+    case bifrost_db:ping() of
+        ok ->
+            {<<"{\"status\": \"ok\"}">>, Req, State};
+        {error, Reason} ->
+            lager:error(io_lib:format("status check: ~999p~n", [Reason])),
+            {{halt, 500}, Req, State}
+    end.

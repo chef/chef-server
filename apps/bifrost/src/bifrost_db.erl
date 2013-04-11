@@ -5,7 +5,8 @@
 
 -include("bifrost.hrl").
 
--export([acl_membership/4,
+-export([ping/0,
+         acl_membership/4,
          add_to_group/3,
          create/3,
          delete/2,
@@ -16,6 +17,12 @@
          remove_from_group/3,
          statements/0,
          update_acl/5]).
+
+ping() ->
+    case select(ping, [], first_as_scalar, [ping]) of
+        {ok, <<"pong">>} -> ok;
+        {error, Reason} -> {error, Reason}
+    end.
 
 translate(<<"OC001">>) -> group_cycle;
 translate(Code) -> sqerl_pgsql_errors:translate_code(Code).
