@@ -98,6 +98,10 @@ The plan:
    sudo chef-client
    ```
 
+1. Set IP to Static
+
+   For the NAT from the firewall to work properly we need to set the IP address of the new load balancer to be static.
+
 1. Add NAT Rule to ASA Firewall
 
    Once the ubuntu user has been removed from the load balancer, we can safely connect it to the Internet by adding a NAT rule to the Cisco ASA Firewalls in Rackspace.
@@ -121,13 +125,13 @@ The plan:
 
    *Nathan, Pauly, or Ian can do this.*
 
-1. Monitor Errors / Reource Utilization
+1. Monitor Errors / Resource Utilization
 
    While the load balancer is serving prodiction traffic, monitor that there are not an abnormal number of errors coming from this node and that it is not using exceptionally more resources than the other load balancers.
 
-## Deploy - External Rotation
+## Deploy - External
 
-Once we're satisfied with performance and correctness of the initial Openresty load balancer, we can replace the remaining Nginx nodes. Note that we will be over-provisioned on load-balancer resources because of the extra Openresty node which will allow us to take down existing Nginx nodes and build Openresty nodes in their place without an adverse impact on performance.
+Once we're satisfied with performance and correctness of the initial Openresty load balancer, we can replace the Nginx on the remaining nodes with Openresty.
 
 Do the following for each of the Nginx nodes:
 
@@ -138,31 +142,39 @@ Do the following for each of the Nginx nodes:
 export NODE_NAME=insert_node_name_here
 ```
 
+1. Take the Node Out of Dynect DNS Rotation
+
+   To stop traffic to the load balancer we will first need to take it out of the Dynect DNS rotation.
+
+   *Nathan, Pauly, or Ian can do this.*
+
 1. Nginx - Stop the `nginx` Service
+
+   Once the traffic has stopped on the load balancer we can safely stop the Nginx service.
 
    ```bash
    sudo /etc/init.d/nginx stop
    ```
 
-1. Nginx - Remove the Node From DNS
+1. Deploy Openresty
+
+   ```bash
+   sudo chef-client
+   ```
+
+1. Pedant Test the New Load Balancer
+
+   Once Openresty has been build and configured we will want to run pedant tests against it to verify that the functionality is correct.
+
+   Edit your `/etc/hosts` file to add the IP of the new load balancer for `api.opscode.com`:
+
+   ```
+   # - server ip below - # - hostname below - #
+   123.123.123.123       api.opscode.com
+   ```
+
+1. Add the Node Back Into Dynect DNS
 
    *Nathan, Pauly, or Ian can do this.*
 
-1. Nginx - Remove the VM
 
-   Once traffic has stopped flowing to the Nginx VM, we can safely remove it. ((wiki instructions)[http://wiki.corp.opscode.com/display/CORP/Rackspace+Production#RackspaceProduction-RemovingaVM])
-
-   ```bash
-   # stop the server
-   knife ssh name:$NODE_NAME 'sudo halt'
-
-   # delete the vm from `virsh`
-   knife ssh domains:$NODE_NAME 'virsh undefine $NODE_NAME'
-
-   # remove the disk image (says "carefully" in the wiki)
-   knife ssh domains:$NODE_NAME 'suo rm -rf /var/lib/libvirt/images/$NODE_NAME/'
-   ```
-
-1. Deploy Openresty Load Balancer
-
-   Follow the instructions above to deploy another Openresty load balancer
