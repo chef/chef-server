@@ -10,7 +10,7 @@ Since we'll be re-building and swapping out the existing nginx binary, it will b
 
 ## Preparation
 
-### Code Merge
+### 1. Code Merge
 
 There are two pull requests that compose the work to move to Openresty:
 
@@ -19,7 +19,7 @@ There are two pull requests that compose the work to move to Openresty:
 
 Both of these will need to be merged before deploy.
 
-### CCR Suspend
+### 2. CCR Suspend
 
 We'll want to permanently suspend chef-client runs on the the existing load balancers for the duration of the Openresty deploy. Once we upload the new cookbooks / roles / databags to the Chef Server (opsmaster) we'll be unalbe to run chef-client unless we roll back the cookbooks / roles / databags.
 
@@ -32,7 +32,7 @@ knife search node 'role:opscode-lb* OR role:corpsite-lb' 'sudo /etc/init.d/chef-
 
 Adding the `suicide-ctl` tag will ensure that if / when the node resumes daemonized chef-client runs (started by cron) that they will exit early and have no effect.
 
-### Knife Upload
+### 3. Knife Upload
 
 * Cookbooks
   * `opscode-lb 1.1.0`
@@ -44,7 +44,7 @@ Adding the `suicide-ctl` tag will ensure that if / when the node resumes daemoni
   * opscode-lb-int
   * corpsite-lb
 
-### Resource Planning - Load Balancer Distribution
+### 4. Resource Planning - Load Balancer Distribution
 
 * rm-366625 - none
 * rm-478879 - none
