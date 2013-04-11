@@ -26,6 +26,8 @@ to_json(Req, #base_state{reqid = ReqId,
             true ->
                 {<<"{}">>, Req, State};
             false ->
+                {{halt, 404}, Req, State};
+            {error, {invalid_actor, _}} ->
                 {{halt, 404}, Req, State}
         end
     catch

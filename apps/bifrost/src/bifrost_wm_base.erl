@@ -82,17 +82,16 @@ forbidden(Req, #base_state{reqid = ReqId,
         ignore ->
             {false, Req, State};
         Permission ->
-            case ?SH_TIME(ReqId, bifrost_db, exists, (Type, Id)) of
-                false ->
-                    {{halt, 404}, Req, State};
+            case bifrost_acl:check_access(ReqId, Type, Id, RequestorId,
+                                           Permission) of
                 true ->
-                    case bifrost_acl:check_access(ReqId, Type, Id, RequestorId,
-                                                   Permission) of
-                        true ->
-                            {false, Req, State};
-                        false ->
-                            bifrost_wm_error:set_access_exception(Req, State, Permission)
-                    end
+                    {false, Req, State};
+                false ->
+                    bifrost_wm_error:set_access_exception(Req, State, Permission);
+                {error, {invalid_target, _}} ->
+                    {{halt, 404}, Req, State};
+                {error, {invalid_actor, _}} ->
+                    {{halt, 404}, Req, State}
             end
     end.
 
