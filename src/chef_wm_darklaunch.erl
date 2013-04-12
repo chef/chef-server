@@ -20,7 +20,8 @@
 
 -module(chef_wm_darklaunch).
 
--export([is_enabled/2]).
+-export([get_proplist/1,
+         is_enabled/2]).
 
 -ifndef(CHEF_WM_DARKLAUNCH).
 is_enabled(<<"add_type_and_bag_to_items">>, _) ->
@@ -30,10 +31,16 @@ is_enabled(<<"couchdb_", _Rest/binary>>, _) ->
 is_enabled(_, _) ->
     true.
 
+get_proplist(_) ->
+    [].
+
 -else.
 %% This is a relic, and we should take a moment and make this an environment based config item.
 is_enabled(<<"add_type_and_bag_to_items">>, _) ->
     true;
 is_enabled(Feature, Darklaunch) ->
     ?CHEF_WM_DARKLAUNCH:is_enabled(Feature, Darklaunch).
+
+get_proplist(Darklaunch) ->
+    ?CHEF_WM_DARKLAUNCH:get_proplist(Darklaunch).
 -endif.
