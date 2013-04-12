@@ -6,7 +6,7 @@ This is the plan to deploy the `openresty` load balancer to production as a repl
 
 Openresty is a "distribution" of Nginx, packaging it up with plugins that enable Lua and Redis access from within the config, among other things.
 
-Since we'll be re-building and swapping out the existing nginx binary, it will be much more predictable to build the new load balancer nodes from scratch and move them into rotation (DNS load-balanced) one at a time.
+First, we'll "bake-test" an openresty load balancer to look for exceptional resource utilization and errors. After that, we'll proceed to replace nginx with openresty in-place on the existing load balancers.
 
 ## Preparation
 
@@ -23,44 +23,40 @@ Both of these will need to be merged before deploy.
 
 We'll want to permanently suspend chef-client runs on the the existing load balancers for the duration of the Openresty deploy. Once we upload the new cookbooks / roles / databags to the Chef Server (opsmaster) we'll be unalbe to run chef-client unless we roll back the cookbooks / roles / databags.
 
-**Note:** `suicide-ctl` does not currently support node tags as a trigger: [link](https://tickets.corp.opscode.com/browse/OC-7371)
-
 ```bash
-knife exec -E 'search(:node, "role:opscode-lb* OR role:copsite-lb").each{|n| n.tags << "suicide-ctl"; n.save}'
-knife search node 'role:opscode-lb* OR role:corpsite-lb' 'sudo /etc/init.d/chef-client stop'
+knife exec -E 'search(:node, "role:opscode-lb* OR role:copsite-lb").each{|n| n.tags << "suicide"; n.save}'
 ```
 
-Adding the `suicide-ctl` tag will ensure that if / when the node resumes daemonized chef-client runs (started by cron) that they will exit early and have no effect.
+Adding the `suicide` tag will ensure that if / when the node resumes daemonized chef-client runs (started by cron) that they will exit early and have no effect.
 
 ### 3. Knife Upload
 
-* Cookbooks
-  * `opscode-lb 1.1.0`
-  * `openresty 0.1.8`
-* Databags
-  * `xdarklaunch`
-* Roles
-  * opscode-lb
-  * opscode-lb-int
-  * corpsite-lb
+```bash
+knife upload cookbooks/opscode-lb \
+             cookbooks/openresty \
+             data/xdarklaunch/rs-prod.json \
+```
 
 ### 4. Resource Planning - Load Balancer Distribution
 
-* rm-366625 - none
-* rm-478879 - none
+Below is a list of the virt hosts that have a load balancer depoyed to them.
+
+**NOTE:** rm-478882 is the target node for the test-bake deploy.
+
 * rm-478864 - lb-rsprod-rv-def10b68
 * rm-423003 - lb-rsprod-rv-cc67526b
 * rm-478880 - lb-rsprod-rv-8ef1f3d1 (chef restarter)
 * rm-478884 - lbcorp-rsprod-rv-085d4ac0
 * rm-422842 - lb-rsprod-rv-e0ce9d29
 * rm-478881 - lbcorp-rsprod-rv-b5205de2
-* rm-478883 - none
-* rm-478882 - none
+* rm-478882 - *test-bake-target*
 * rm-478885 - lb-rsprod-rv-615143f3
 
 ## Deploy - External Test Bake
 
 The Openresty load balancer has been tested in preprod for correctness, but we'd like to get an idea in production of how it (combined with Lua) performs with "real" traffic. The plan is to insert one load openresty load balancer into the roatation alongside the existing nginx load balancers and watch for errors and exceptional resource utilization.
+
+We will let the new server bake for one day (overnight) before deploying openresty to the rest(y) of the fleet.
 
 **Note:** `ocvmb` does not currently install Chef from omnibus: [link](https://tickets.corp.opscode.com/browse/OC-7369)
 
@@ -129,6 +125,26 @@ The plan:
 
    While the load balancer is serving prodiction traffic, monitor that there are not an abnormal number of errors coming from this node and that it is not using exceptionally more resources than the other load balancers.
 
+## Bake Time - Problem Resolution
+
+Since we intend to have a test run of openresty that goes overnight, we don't want to be left in a position where we are unable to deploy new code to the existing load balancers. Here are the steps to roll back the state of the chef repo in order to deploy new code:
+
+```bash
+# delete the uploaded opscode-lb cookbook
+knife cookbook delete opscode-lb 1.1.0
+
+# revert the merge commit (the merge will have special text to help facilitate matching)
+git revert --no-edit `git log -n 1 --grep="openresty-merge-commit" --format=%H`
+
+# remove the suicide flag from the nginx nodes
+knife exec -E 'search(:node, "role:opscode-lb* OR role:copsite-lb").each{|n| n.tags.delete "suicide"; n.save}'
+
+# add the suicide flag to the openresty node
+knife exec -E 'search(:node, "openresty:*").each{|n| n.tags << "suicide"; n.save}'
+```
+
+You will now be able to safely deploy new code to the nginx load balancers without deploying openresty at the same time.
+
 ## Deploy - External
 
 Once we're satisfied with performance and correctness of the initial Openresty load balancer, we can replace the Nginx on the remaining nodes with Openresty.
@@ -156,6 +172,16 @@ export NODE_NAME=insert_node_name_here
    sudo /etc/init.d/nginx stop
    ```
 
+1. Remove the `:nginx` Node Attributes
+
+   The `openresty` cookbook depends on node attributes with the key `:openresty`. The old `nginx` cookbook used `:nginx` as the key. The `openresty` cookbook also ships an ohai plugin that writes to the `:nginx` node attribute. In order to prevent potential confusion, we should delete the previous `:nginx` node attributes before we deploy OpenResty.
+
+   ```bash
+   knife node edit $NODE_NAME
+   ```
+
+   Remove the `"nginx"` key and all of it's nested attributes from the JSON.
+
 1. Deploy Openresty
 
    ```bash
@@ -176,5 +202,3 @@ export NODE_NAME=insert_node_name_here
 1. Add the Node Back Into Dynect DNS
 
    *Nathan, Pauly, or Ian can do this.*
-
-
