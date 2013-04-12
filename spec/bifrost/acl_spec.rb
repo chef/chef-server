@@ -686,6 +686,27 @@ describe "ACL Tests" do
                     end
                   end
 
+                  context "when #{ace.upcase} ACE requested by third party" do
+                    with_actors :hasselhoff, :shatner
+                    with_entity type, :gozer
+
+                    with_ace_on :gozer, ace.to_sym, :to => :hasselhoff
+
+                    if (action == ace)
+                      it "returns 200 when in ACE" do
+                        # Hasselhoff has specific ACE access on gozer
+                        get("/#{type}s/#{gozer}/acl/#{action}/actors/#{hasselhoff}",
+                          :shatner).should have_status_code(200).with_body({})
+                      end
+                    else
+                      it "returns 404 when not in ACE" do
+                        # Hasselhoff does not have other access on gozer
+                        get("/#{type}s/#{gozer}/acl/#{action}/actors/#{hasselhoff}",
+                            :shatner).should have_status_code(404)
+                      end
+                    end
+                  end
+
                   context "with a non-existent target" do
                     with_actor :hasselhoff
 

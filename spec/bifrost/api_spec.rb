@@ -130,13 +130,17 @@ describe "Pedant API" do
         [:create, :read, :update, :delete, :grant].each do |action|
           context "for #{action} ACE" do
             context "for single ACE on actor" do
-              with_actor :hasselhoff
+              with_actors :hasselhoff, :shatner
               with_entity type, :gozer
 
               with_ace_on :gozer, action, :to => :hasselhoff
 
               it "has permission" do
                 :hasselhoff.should directly_have_permission(action).on(type, :gozer)
+              end
+
+              it "other actor does not have permission" do
+                :shatner.should_not directly_have_permission(action).on(type, :gozer)
               end
             end
 
