@@ -14,7 +14,7 @@ validate_request(Req, State) ->
     bifrost_wm_base:validate_requestor(Req, State).
 
 auth_info('GET') ->
-    any.
+    ignore.
 
 to_json(Req, #base_state{reqid = ReqId,
                          authz_id = AuthzId,
