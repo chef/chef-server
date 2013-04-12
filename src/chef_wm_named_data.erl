@@ -171,18 +171,12 @@ from_json(Req, #base_state{chef_db_context = DbContext,
             %% The Ruby API returns created items as-is, but with added chef_type and
             %% data_bag fields. If those fields are present in the request, they are put
             %% into the raw item data, but the values are overwritten for the return. When
-            %% this darklaunch feature is enabled, erchef will mimic the Ruby API and
-            %% force-add the chef_type and data_bag keys to the item data. It should be safe
-            %% to disable this and will make the API more sane. It is very confusing that
-            %% you can specify bogus values, that look like they are ignored, but actually
-            %% end up in the item data.
-            ItemDataWithCruft = case chef_wm_darklaunch:is_enabled(<<"add_type_and_bag_to_items">>, State#base_state.darklaunch) of
-                                    true ->
-                                        chef_data_bag_item:add_type_and_bag(DataBagName,
-                                                                            ItemData);
-                                    false ->
-                                        ItemData
-                                end,
+            %% this feature is enabled, erchef will mimic the Ruby API and force-add the
+            %% chef_type and data_bag keys to the item data. Current clients appear to rely
+            %% on this value, but it would be good to disable this and make the API more
+            %% sane. It is very confusing that you can specify bogus values, that look like
+            %% they are ignored, but actually end up in the item data.
+            ItemDataWithCruft = chef_data_bag_item:add_type_and_bag(DataBagName, ItemData),
             Req2 = chef_wm_util:set_json_body(Req1, ItemDataWithCruft),
             {true, Req2, State#base_state{log_msg = LogMsg}};
         What ->

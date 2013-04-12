@@ -130,14 +130,8 @@ from_json(Req, #base_state{resource_state = #data_state{
     %% fields for back-compatibility.
     case chef_wm_base:update_from_json(Req, State, Item, ItemData) of
         {true, Req1, State1} ->
-            case chef_wm_darklaunch:is_enabled(<<"add_type_and_bag_to_items">>, State#base_state.darklaunch) of
-                true ->
-                    CruftItemData = chef_data_bag_item:add_type_and_bag(BagName,
-                                                                        ItemData),
-                    {true, chef_wm_util:set_json_body(Req1, CruftItemData), State1};
-                false ->
-                    {true, Req1, State1}
-            end;
+            CruftItemData = chef_data_bag_item:add_type_and_bag(BagName, ItemData),
+            {true, chef_wm_util:set_json_body(Req1, CruftItemData), State1};
         {_, _, _} = Else ->
             Else
     end.
