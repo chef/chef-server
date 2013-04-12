@@ -1,5 +1,5 @@
 name "opscode-webui"
-version "pc-rel-3.6.6"
+version "rel-3.8.5"
 
 dependency "ruby"
 dependency "bundler"
