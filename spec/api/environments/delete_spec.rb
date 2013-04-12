@@ -78,6 +78,7 @@ describe "Environments API Endpoint", :environments do
 
         context 'with a user with all permissions EXCEPT delete' do
           let(:expected_response) { forbidden_response }
+          let(:requestor) { normal_user }
 
           before(:each) do
             restrict_permissions_to("/environments/#{new_environment_name}",
