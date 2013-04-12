@@ -36,7 +36,7 @@
          finish_write/1]).
 
 -record(entryref, {fd :: file:io_device(),
-                   path :: binary(),
+                   path :: string() | binary(),
                    ctx :: undefined | binary()}).
 
 -include_lib("kernel/include/file.hrl").
@@ -54,13 +54,14 @@
 -spec bucket_list() -> [#bucket{}] | [].
 bucket_list() ->
     Root = bksw_conf:disk_store(),
-    make_buckets(Root, [Dir || Dir <- filelib:wildcard("*", Root),
+    make_buckets(Root, [Dir || Dir <- filelib:wildcard("*", bksw_util:to_string(Root)),
                                filelib:is_dir(filename:join([Root, Dir]))]).
 
 -spec entry_list(binary()) -> [#object{}] | [].
 entry_list(Bucket) ->
     BucketPath = bksw_io_names:bucket_path(Bucket),
-    filter_entries(Bucket, filelib:wildcard("*", BucketPath)).
+    %% As of R16, second arg to filelib:wildcard must be string
+    filter_entries(Bucket, filelib:wildcard("*", bksw_util:to_string(BucketPath))).
 
 -spec bucket_exists(binary()) -> boolean().
 bucket_exists(Bucket) ->

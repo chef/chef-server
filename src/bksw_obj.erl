@@ -22,6 +22,7 @@
 
 -export([allowed_methods/2, content_types_accepted/2,
          content_types_provided/2, delete_resource/2, download/2,
+         validate_content_checksum/2,
          finish_request/2,
          generate_etag/2, init/1, is_authorized/2, last_modified/2,
          resource_exists/2, upload/2]).
@@ -36,6 +37,16 @@
 
 init(Config) ->
     {ok, bksw_conf:get_context(Config)}.
+
+%% By default, if wm sees a 'content-md5' header, it will read the request body to compute
+%% the md5 and compare to the header value. A 400 will then be returned automagically by wm
+%% if the digests do not match. Since we wish to read request bodies in a streaming fashion,
+%% we need to handle our own checksum validation. Using wm's default would mean having a
+%% full copy of the request body buffered into the request process state. So we define this
+%% resource callback to blindly say the content is valid and then do the verification in the
+%% upload/2 flow.
+validate_content_checksum(Rq, Ctx) ->
+    {true, Rq, Ctx}.
 
 is_authorized(Rq, Ctx) ->
     bksw_sec:is_authorized(Rq, Ctx).

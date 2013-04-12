@@ -1,11 +1,8 @@
 %% THIS FILE IS GENERATED. DO NOT EDIT IT MANUALLY %%
 
-{require_otp_vsn,"R1[45]B.*"}.
+{require_otp_vsn,"R1[456]B.*"}.
 {erl_dep_retries,10}.
-{deps,[{covertool,".*",
-                  {git,"git://github.com/opscode/covertool.git",
-                       "4cf6d7e6868a98bca24b9264f9de37dc40df1123"}},
-       {eper,".*",
+{deps,[{eper,".*",
              {git,"git://github.com/massemanet/eper.git",
                   "9c7be6201e74b35c62b8388123e5524f646d133d"}},
        {erlsom,".*",
@@ -25,13 +22,13 @@
                      "ddeaa30687918706eb70f2b380ecbc2d7fbe53d2"}},
        {mochiweb,".*",
                  {git,"git://github.com/basho/mochiweb",
-                      "2ffb00b142ac58f0ae87aa36832b04980a4f8346"}},
+                      "05b5b7eb7b830afbd9ba349a40bf40ba0462aa11"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
                                     "c35d2e1fb639ae6d81e468ca7e5bf03b884a1549"}},
        {webmachine,".*",
                    {git,"git://github.com/basho/webmachine.git",
-                        "0fffe21beb1bec3f87510cfad389d844782d457e"}}]}.
+                        "4c441d0f0ca9e343601eb39c8dd2e2117b781dfc"}}]}.
 {erl_opts,[debug_info,warnings_as_errors]}.
 {xref_checks,[exports_not_used,undefined_function_calls]}.
 {plugins,[rebar_lock_deps_plugin]}.

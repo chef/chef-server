@@ -27,19 +27,32 @@
 %% ===================================================================
 
 manual_start() ->
-    application:start(kernel),
-    application:start(stdlib),
-    application:start(sasl),
-    application:start(crypto),
-    application:start(public_key),
-    application:start(ssl),
-    application:start(inets),
-    application:start(erlsom),
-    application:start(webmachine),
-    application:start(xmerl),
-    application:start(ibrowse),
-    application:start(mini_s3),
-    application:start(bookshelf).
+    Apps = [kernel,
+            stdlib,
+            sasl,
+            crypto,
+            public_key,
+            ssl,
+            inets,
+            erlsom,
+            mochiweb,
+            webmachine,
+            xmerl,
+            ibrowse,
+            mini_s3,
+            bookshelf],
+    [ ensure_started(App) || App <- Apps ],
+    ok.
+
+ensure_started(App) ->
+    case application:start(App) of
+        ok ->
+            ok;
+        {error, {already_started, App}} ->
+            ok;
+        Error ->
+            erlang:error({application_start_failed, Error})
+    end.
 
 manual_stop() ->
     application:stop(bookshelf),
