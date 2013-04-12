@@ -11,13 +11,20 @@
          parse_acl_json/1,
          update_acl/6]).
 
-%% @doc Check to see if requestor has permission on a particular target
+%% @doc Check to see if actor has permission on a particular target
 -spec check_access(request_id(), auth_type(), auth_id(), requestor_id(), permission()) ->
-                          boolean().
-check_access(ReqId, TargetType, TargetId, RequestorId, Permission) ->
-    case RequestorId of
+                          boolean() | {error, _}.
+check_access(ReqId, TargetType, TargetId, ActorId, Permission) ->
+    case ActorId of
         superuser ->
-            true;
+            %% Super user has all access but
+            %% we should still validate the target.
+            case ?SH_TIME(ReqId, bifrost_db, exists, (TargetType, TargetId)) of
+              false ->
+                {error, {invalid_target, {TargetType, TargetId}}};
+              true ->
+                true
+            end;
         Id ->
             ?SH_TIME(ReqId, bifrost_db, has_permission, (TargetType, TargetId, Id,
                                                           Permission))

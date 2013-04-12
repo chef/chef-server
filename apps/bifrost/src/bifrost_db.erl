@@ -135,7 +135,8 @@ delete_acl(TargetType, TargetId, Permission) ->
             {error, Reason}
     end.
 
--spec has_permission(auth_type(), auth_id(), auth_id(), permission() | any) -> boolean().
+-spec has_permission(auth_type(), auth_id(), auth_id(), permission() | any) ->
+    boolean() | {error, _}.
 has_permission(TargetType, TargetId, RequestorId, Permission) ->
     case select(actor_has_permission_on, [RequestorId, TargetId, TargetType,
                                           Permission],
@@ -143,11 +144,11 @@ has_permission(TargetType, TargetId, RequestorId, Permission) ->
         {ok, Answer} ->
             Answer;
         {error, {not_null_violation, _Error}} ->
-            % If this fails because the target doesn't exist, can't have permission
-            false;
+            % This happens when the target doesn't exist
+            {error, {invalid_target, {TargetType, TargetId}}};
         {error, {null_value_not_allowed, _Error}} ->
-            % If this fails because the actor doesn't exist, can't have permission
-            false;
+            % This happens when the actor doesn't exist
+            {error, {invalid_actor, RequestorId}};
         {error, Error} ->
             {error, Error}
     end.
