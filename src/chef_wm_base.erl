@@ -510,7 +510,8 @@ spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
             ok
     end.
 
-log_request(Req, #base_state{reqid = ReqId, log_msg = Msg, organization_name = Org}) ->
+log_request(Req, #base_state{reqid = ReqId, log_msg = Msg, organization_name = Org,
+                             darklaunch = Darklaunch}) ->
     Status = wrq:response_code(Req),
     Tuples = [{req_id, ReqId},
               {status, Status},
@@ -520,7 +521,7 @@ log_request(Req, #base_state{reqid = ReqId, log_msg = Msg, organization_name = O
               {msg, {raw, Msg}}],
     PerfTuples = stats_hero:snapshot(ReqId, agg),
     Level = log_level(Status),
-    fast_log:Level(erchef, maybe_add_org_name(Org, Tuples) ++ PerfTuples).
+    fast_log:Level(erchef, maybe_add_org_specific(Org, Darklaunch, Tuples) ++ PerfTuples).
 
 log_level(Code) when Code >= 500 ->
     err;
@@ -537,10 +538,12 @@ fetch_org_guid(#base_state{organization_guid = undefined,
         Guid -> Guid
     end.
 
-maybe_add_org_name(?OSC_ORG_NAME, Items) ->
+maybe_add_org_specific(?OSC_ORG_NAME, _Darklaunch, Items) ->
     Items;
-maybe_add_org_name(OrgName, Items) ->
-    [{org_name, OrgName} | Items].
+maybe_add_org_specific(OrgName, Darklaunch, Items) ->
+    %% Generate the darklaunch header in a form that won't break log parsing
+    DLData = chef_wm_darklaunch:get_proplist(Darklaunch),
+    [{org_name, OrgName} | DLData] ++ Items.
 
 %% If request results in a rename, then set Location header and wm will return with a 201.
 %% Currently, only the clients endpoint supports rename
