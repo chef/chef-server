@@ -12,12 +12,15 @@ First, we'll "bake-test" an openresty load balancer to look for exceptional reso
 
 ### 1. Code Merge
 
-There are two pull requests that compose the work to move to Openresty:
+The OpenResty / Lua work has been combined into one pull request:
 
 * https://github.com/opscode/opscode-platform-cookbooks/pull/112
-* https://github.com/opscode/opscode-platform-cookbooks/pull/114
 
-Both of these will need to be merged before deploy.
+This will need to be merged before deploy. In order to simplify a potential rollback, prepend the first line of the merge commit with the following:
+
+```
+openresty-merge-commit
+```
 
 ### 2. CCR Suspend
 
