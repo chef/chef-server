@@ -202,6 +202,14 @@ export NODE_NAME=insert_node_name_here
    123.123.123.123       api.opscode.com
    ```
 
+   Run the `pedant` tests against this load balancer:
+
+   ```
+   # from ~/oc/environments/rs-prod
+   cd pedant
+   ./bin/pedant -e rs-prod -- --smoke
+   ```
+
 1. Add the Node Back Into Dynect DNS
 
    *Nathan, Pauly, or Ian can do this.*
