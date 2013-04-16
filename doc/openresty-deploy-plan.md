@@ -146,9 +146,16 @@ You will now be able to safely deploy new code to the nginx load balancers witho
 
 ## Deploy - External
 
-qOnce we're satisfied with performance and correctness of the initial Openresty load balancer, we can replace the Nginx on the remaining nodes with Openresty.
+Once we're satisfied with performance and correctness of the initial Openresty load balancer, we can replace the Nginx on the remaining nodes with Openresty.
 
-Do the following for each of the Nginx nodes:
+To find the Nginx nodes:
+
+```
+knife search node 'role:opscode-lb OR role:corpsite-lb`
+```
+
+Do the following for each of the Nginx nodes (start with opscode-lb then move to corpsite-lb):
+
 
 **NOTE:** The node name will bereferred to as `$NODE_NAME` below.
 
@@ -301,8 +308,6 @@ In the above case, `rm-319425` is the active node because it has the `IPaddr` re
 ## Deploy - Internal #2 (Previous Active)
 
 First, repeat steps 1-4 from above.
-
-**NOTE:** Will a `chef-client` run to deploy OpenResty also start heartbeat and initiate a failover?
 
 1. Start Hearbeat
 
