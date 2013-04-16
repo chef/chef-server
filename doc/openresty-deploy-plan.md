@@ -150,7 +150,7 @@ You will now be able to safely deploy new code to the nginx load balancers witho
 
 ## Deploy - External
 
-Once we're satisfied with performance and correctness of the initial Openresty load balancer, we can replace the Nginx on the remaining nodes with Openresty.
+qOnce we're satisfied with performance and correctness of the initial Openresty load balancer, we can replace the Nginx on the remaining nodes with Openresty.
 
 Do the following for each of the Nginx nodes:
 
@@ -207,9 +207,111 @@ export NODE_NAME=insert_node_name_here
    ```
    # from ~/oc/environments/rs-prod
    cd pedant
-   ./bin/pedant -e rs-prod -- --smoke
+   ./bin/ohc-pedant -e rs-prod -- --smoke
    ```
 
 1. Add the Node Back Into Dynect DNS
 
    *Nathan, Pauly, or Ian can do this.*
+
+## Deploy - Internal #1 (Inactive)
+
+The internal load balancers are an active-inactive pair. We'll first deploy OpenResty onto the inactive load balancer.
+
+To determine the active and inactive internal load balancers:
+
+```bash
+ssh api.opscode.us 'sudo crm status'
+```
+
+The output should look like:
+
+```
+============
+Last updated: Mon Apr 15 23:57:53 2013
+Stack: Heartbeat
+Current DC: lbint-rsprod-rm-319425 (5c14d79c-74ac-461d-9f9f-d5fd0acc5c7e) - partition with quorum
+Version: 1.0.8-042548a451fce8400660f6031f4da6f0223dd5dd
+2 Nodes configured, unknown expected votes
+5 Resources configured.
+============
+
+Online: [ lbint-rsprod-rm-319425 lbint-rsprod-rm-319424 ]
+
+ res_IPaddr_1   (ocf::heartbeat:IPaddr):        Started lbint-rsprod-rm-319425
+ res_nginx_1    (lsb:nginx):    Started lbint-rsprod-rm-319425
+ st-drac-319424 (stonith:external/ipmi):        Started lbint-rsprod-rm-319425
+ st-drac-319425 (stonith:external/ipmi):        Started lbint-rsprod-rm-319424
+ res_email_1    (ocf::heartbeat:MailTo):        Started lbint-rsprod-rm-319425
+```
+
+In the above case, `rm-319425` is the active node because it has the `IPaddr` resource, which is the internal load balancer's VIP (virtual IP). We'll start on the inactive node: `rm-319424`.
+
+1. Nginx - Stop the `nginx` Service
+
+   Once the traffic has stopped on the load balancer we can safely stop the Nginx service.
+
+   ```bash
+   sudo /etc/init.d/nginx stop
+   ```
+
+1. Remove the `:nginx` Node Attributes
+
+   The `openresty` cookbook depends on node attributes with the key `:openresty`. The old `nginx` cookbook used `:nginx` as the key. The `openresty` cookbook also ships an ohai plugin that writes to the `:nginx` node attribute. In order to prevent potential confusion, we should delete the previous `:nginx` node attributes before we deploy OpenResty.
+
+   ```bash
+   knife node edit $NODE_NAME
+   ```
+
+   Remove the `"nginx"` key and all of it's nested attributes from the JSON.
+
+1. Deploy Openresty
+
+   ```bash
+   sudo chef-client
+   ```
+
+1. Pedant Test the New Load Balancer
+
+   Once Openresty has been build and configured we will want to run pedant tests against it to verify that the functionality is correct.
+
+   Edit your `/etc/hosts` file to add the IP of the new load balancer for `api.opscode.us`:
+
+   ```
+   # - server ip below - # - hostname below - #
+   123.123.123.123       api.opscode.us
+   ```
+
+   **NOTE:** Pedant probaly can't run against the internal load balancer right now because it's configured to use the external hostname (api.opscode.com). 
+
+   Run the `pedant` tests against this load balancer:
+
+   ```
+   # from ~/oc/environments/rs-prod
+   cd pedant
+   ./bin/ohc-pedant -e rs-prod -- --smoke
+   ```
+
+1. Failover
+
+   Once OpenResty has been deployed and tested on the inactive internal load balancer, we need to fail over the resources from the active load balancer.
+
+   On the active load balancer:
+
+   ```
+   sudo /etc/init.d/heartbeat stop
+   ```
+
+## Deploy - Internal #2 (Previous Active)
+
+First, repeat steps 1-4 from above.
+
+**NOTE:** Will a `chef-client` run to deploy OpenResty also start heartbeat and initiate a failover?
+
+1. Start Hearbeat
+
+   Once the functionality of the load balancer has been verified with `pedant`, we need to add it back into the HA cluster.
+
+   ```
+   sudo /etc/init.d/heartbeat start
+   ```
