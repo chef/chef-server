@@ -46,6 +46,35 @@ opscode_chef schema via chef-sql-schema.
    cd rel/mover
    bin/mover console
 
+#### Authz Id Lookup Passthrough Configuration
+
+In order for authz id lookup passthrough to couchdb to work in the dev
+VM you will need to ensure that there is a chef_db configuration block
+containing entries for `couch_db_host` and `couch_db_port`
+
+Note that you can test without a valid couchdb configuration if you
+don't need authz id passthru functionality.
+
+If you're testing locally in the vm instance above, there is no valid couchdb
+configuration available.  You can test using preprod as follows assuming 
+your dev laptop is connected remotely: 
+* bin/vagrant ssh
+* Change etc/sys.config: `chef_db { couchdb_host = "localhost" }`
+* add to (or create) ~/.ssh/config:
+        Host *
+          ForwardAgent yes
+
+* in the same vagrant ssh session:
+        ssh -L 5984:localhost:5984 gateway.opscode.com
+        ssh -L 5984:localhost:5984 $PREPROD-COUCHDB-HOST
+
+Leave this session open for the duration of your testing. 
+If you are on-site at HQ you can skip the intermediary tunnel through
+gateway.opscode.com
+
+Moser will now be able to connect to preprod couch as needed to look up
+authz ids.
+
 #### Default file locations for moser ####
 
 The [opscode-chef-mover][] cookbook will configure moser to look in
