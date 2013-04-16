@@ -58,14 +58,16 @@ don't need authz id passthru functionality.
 If you're testing locally in the vm instance above, there is no valid couchdb
 configuration available.  You can test using preprod as follows assuming 
 your dev laptop is connected remotely: 
-* bin/vagrant ssh
-* Change etc/sys.config: `chef_db { couchdb_host = "localhost" }`
+* `bin/vagrant ssh`
+* Change /srv/mover-build/rel/mover/etc/sys.config: `chef_db { couchdb_host = "localhost" }`
 * add to (or create) ~/.ssh/config:
+
         Host *
           ForwardAgent yes
 
 * in the same vagrant ssh session:
-        ssh -L 5984:localhost:5984 gateway.opscode.com
+
+        ssh -L 5984:localhost:5984 $YOURUSERNAME@gateway.opscode.com
         ssh -L 5984:localhost:5984 $PREPROD-COUCHDB-HOST
 
 Leave this session open for the duration of your testing. 
