@@ -97,10 +97,6 @@ The plan:
    sudo chef-client
    ```
 
-1. Set IP to Static
-
-   For the NAT from the firewall to work properly we need to set the IP address of the new load balancer to be static.
-
 1. Add NAT Rule to ASA Firewall
 
    Once the ubuntu user has been removed from the load balancer, we can safely connect it to the Internet by adding a NAT rule to the Cisco ASA Firewalls in Rackspace.
