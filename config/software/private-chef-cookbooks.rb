@@ -2,7 +2,7 @@ name "private-chef-cookbooks"
 
 dependencies [ "rsync" ]
 
-source :path => File.expand_path("files/private-chef-cookbooks", Omnibus.root)
+source :path => File.expand_path("files/private-chef-cookbooks", Omnibus.project_root)
 
 build do
   gem "install uuidtools --no-rdoc --no-ri -v 2.1.3"
