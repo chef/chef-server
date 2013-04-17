@@ -107,11 +107,11 @@ The plan:
 
    Once the load balancer has been connected to the Internet, we will want to run pedant tests against it to verify that the functionality is correct.
 
-   Edit your `/etc/hosts` file to add the IP of the new load balancer for `api.opscode.com`:
+   **NOTE:** Replace `NEW_LB_FQDN` below with the FQDN of the new load balancer.
 
-   ```
-   # - server ip below - # - hostname below - #
-   123.123.123.123       api.opscode.com
+   ```bash
+   cd ~/oc/environments/rs-prod/pedant
+   ./bin/ohc-pedant -e rs-prod -s NEW_LB_FQDN -- --smoke
    ```
 
 1. Add the load balancer into Dynect DNS:
@@ -198,19 +198,11 @@ export NODE_NAME=insert_node_name_here
 
    Once Openresty has been build and configured we will want to run pedant tests against it to verify that the functionality is correct.
 
-   Edit your `/etc/hosts` file to add the IP of the new load balancer for `api.opscode.com`:
+   **NOTE:** Replace `NEW_LB_FQDN` below with the FQDN of the new load balancer.
 
-   ```
-   # - server ip below - # - hostname below - #
-   123.123.123.123       api.opscode.com
-   ```
-
-   Run the `pedant` tests against this load balancer:
-
-   ```
-   # from ~/oc/environments/rs-prod
-   cd pedant
-   ./bin/ohc-pedant -e rs-prod -- --smoke
+   ```bash
+   cd ~/oc/environments/rs-prod/pedant
+   ./bin/ohc-pedant -e rs-prod -s NEW_LB_FQDN -- --smoke
    ```
 
 1. Add the Node Back Into Dynect DNS
@@ -278,21 +270,11 @@ In the above case, `rm-319425` is the active node because it has the `IPaddr` re
 
    Once Openresty has been build and configured we will want to run pedant tests against it to verify that the functionality is correct.
 
-   Edit your `/etc/hosts` file to add the IP of the new load balancer for `api.opscode.us`:
+   **NOTE:** Replace `NEW_LB_FQDN` below with the FQDN of the new load balancer.
 
-   ```
-   # - server ip below - # - hostname below - #
-   123.123.123.123       api.opscode.us
-   ```
-
-   **NOTE:** Pedant probaly can't run against the internal load balancer right now because it's configured to use the external hostname (api.opscode.com). 
-
-   Run the `pedant` tests against this load balancer:
-
-   ```
-   # from ~/oc/environments/rs-prod
-   cd pedant
-   ./bin/ohc-pedant -e rs-prod -- --smoke
+   ```bash
+   cd ~/oc/environments/rs-prod/pedant
+   ./bin/ohc-pedant -e rs-prod -s NEW_LB_FQDN -- --smoke
    ```
 
 1. Failover
