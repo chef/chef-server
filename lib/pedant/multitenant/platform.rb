@@ -138,12 +138,12 @@ module Pedant
       puts "Creating client #{clientname}..."
       payload = { "name" => clientname }
 
-      r = post(api_url('/clients'), @superuser, :payload => payload)
+      r = post(api_url('/clients'), @test_org.validator, :payload => payload)
 
       if r.code == 409
         puts "The client #{clientname} already exists... regenerating a key for it now"
         payload["private_key"] = true
-        r = put(api_url("/clients/#{clientname}"), @superuser, :payload => payload)
+        r = put(api_url("/clients/#{clientname}"), @test_org.validator, :payload => payload)
       end
 
       private_key = parse(r)["private_key"]
@@ -203,9 +203,13 @@ module Pedant
         raise "Bad error code #{r.code} from create org: #{r}"
       end
 
-      private_key = parse(r)["private_key"]
+      parsed = parse(r)
+      validator_name = parsed["clientname"]
+      validator_key = parsed["private_key"]
 
-      Pedant::Organization.new(orgname, private_key)
+      validator = Pedant::Client.new(validator_name, validator_key)
+
+      Pedant::Organization.new(orgname, validator)
     end
 
     def delete_org(orgname)
