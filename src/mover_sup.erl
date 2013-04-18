@@ -36,5 +36,5 @@ init([]) ->
     %%                    [?CHILD_SUP(erldis_pool_sup, [[{{RedisHost, RedisPort}, RedisConns}]])|Children0]
     %%            end,
     %% FIXME: for now we just want to start and do nothing
-    Children = [],
+    Children = [?CHILD_SUP(mover_org_migrator_sup, [])],
     {ok, {{one_for_one, 10, 10}, Children}}.
