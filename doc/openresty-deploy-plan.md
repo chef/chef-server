@@ -136,7 +136,7 @@ knife cookbook delete opscode-lb 1.1.0
 git revert --no-edit `git log -n 1 --grep="openresty-merge-commit" --format=%H`
 
 # remove the suicide flag from the nginx nodes
-knife exec -E 'search(:node, "role:opscode-lb* OR role:copsite-lb").each{|n| n.tags.delete "suicide"; n.save}'
+knife exec -E 'search(:node, "role:opscode-lb* OR role:corpsite-lb").each{|n| n.tags.delete "suicide"; n.save}'
 
 # add the suicide flag to the openresty node
 knife exec -E 'search(:node, "openresty:*").each{|n| n.tags << "suicide"; n.save}'
