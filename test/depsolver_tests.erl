@@ -344,7 +344,8 @@ filter_packages_with_deps_test() ->
                                                       {app3, "40.0"}])),
 
     Ret = depsolver:filter_packages_with_deps(Packages, [{<<"ick">>, "1.0.0", '~~~~'}]),
-    ?assertEqual({error, {invalid_constraints, [{<<"ick">>, {1,0,0}, '~~~~'}]}}, Ret).
+    Expect = {error, {invalid_constraints, [{<<"ick">>, {{1, 0, 0}, {[], []}}, '~~~~'}]}},
+    ?assertEqual(Expect, Ret).
 
 filter_versions_test() ->
 
