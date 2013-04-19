@@ -121,8 +121,8 @@ depsolver_dep_no_version_test() ->
     World = [ cookbook(<<"foo">>, <<"1.2.3">>)],
     Constraints = [ ],
     Ret = chef_depsolver:solve_dependencies(World, Constraints, [{<<"foo">>, <<"2.0.0">>}]),
-    Detail = [{[{[{<<"foo">>, {2,0,0}}],
-                 [{<<"foo">>, {2,0,0}}]}],
+    Detail = [{[{[{<<"foo">>, {{2,0,0}, {[], []}}}],
+                 [{<<"foo">>, {{2,0,0}, {[], []}}}]}],
                []
               }],
     ?assertEqual({error, Detail}, Ret).
@@ -162,9 +162,9 @@ depsolver_dep_not_new_enough_test() ->
     Ret = chef_depsolver:solve_dependencies(World, Constraints, [<<"foo">>]),
     %% TODO: Should this have bar in bad ??
     Detail = [
-              {[{[<<"foo">>], [{<<"foo">>, {1, 2, 3}}]}],
-                  [{{<<"foo">>, {1, 2, 3}},
-                    [{<<"bar">>, {2, 0, 0}, '>'}]}]}
+              {[{[<<"foo">>], [{<<"foo">>, {{1, 2, 3}, {[], []}}}]}],
+                  [{{<<"foo">>, {{1, 2, 3}, {[], []}}},
+                    [{<<"bar">>, {{2, 0, 0}, {[], []}}, '>'}]}]}
              ],
     ?assertEqual({error, Detail}, Ret).
 
@@ -183,8 +183,9 @@ depsolver_impossible_dependency_test() ->
              cookbook(<<"bar">>, <<"2.0.0">>, { <<"foo">>, <<"3.0.0">>, gt})],
     Ret = chef_depsolver:solve_dependencies(World, [], [<<"foo">>]),
     Detail = [{[{[<<"foo">>],
-                 [{<<"foo">>, {1,2,3}}]}],
-               [{{<<"foo">>, {1,2,3}}, [{<<"bar">>, {2,0,0}, gt}]}]
+                 [{<<"foo">>, {{1,2,3}, {[], []}}}]}],
+               [{{<<"foo">>, {{1,2,3}, {[], []}}},
+                 [{<<"bar">>, {{2,0,0}, {[], []}}, gt}]}]
               }],
     ?assertEqual({error, Detail}, Ret).
 
@@ -220,8 +221,8 @@ depsolver_impossible_dependency_via_environment_test() ->
     ?assertMatch({ok, _}, chef_depsolver:solve_dependencies(World, [], [<<"foo">>])),
     %% with the constraints, foo can't be satisfied
     Ret = chef_depsolver:solve_dependencies(World, Constraints, [<<"foo">>]),
-    Expect = {error, [{[{[<<"foo">>], [{<<"foo">>, {1, 2, 3}}]}],
-                      [{{<<"foo">>, {1, 2, 3}}, [{<<"bar">>, {2, 0, 0}, gt}]}]}]},
+    Expect = {error, [{[{[<<"foo">>], [{<<"foo">>, {{1, 2, 3}, {[], []}}}]}],
+                      [{{<<"foo">>, {{1, 2, 3}, {[], []}}}, [{<<"bar">>, {{2, 0, 0}, {[], []}}, gt}]}]}]},
     ?assertEqual(Expect, Ret).
 
 %% A more complex test.
@@ -247,7 +248,7 @@ depsolver_complex_dependency_test() ->
              cookbook(<<"baz">>, <<"2.0.0">>)
             ],
     Ret = chef_depsolver:solve_dependencies(World, [], [<<"foo">>, <<"buzz">>]),
-    Expected = [{{<<"buzz">>,{1,0,0}},[{<<"baz">>,{1,2,0},gt}]}],
+    Expected = [{{<<"buzz">>,{{1,0,0}, {[], []}}},[{<<"baz">>,{{1,2,0}, {[], []}},gt}]}],
     %% Check the culprits
     {error, [{_Paths, Culprits}] } = Ret,
     ?assertEqual(Expected, Culprits),

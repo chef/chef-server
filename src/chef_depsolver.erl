@@ -94,4 +94,17 @@ solve_dependencies(AllVersions, EnvConstraints, Cookbooks) ->
     %% listing cookbooks within an environment.
     {ok, FilteredVersions} = depsolver:filter_packages_with_deps(AllVersions, EnvConstraints),
     Graph = depsolver:add_packages(depsolver:new_graph(), FilteredVersions),
-    depsolver:solve(Graph, Cookbooks).
+    sanitize_semver(depsolver:solve(Graph, Cookbooks)).
+
+%% @doc The depsolver module (as of version 0.1.0) supports semver and returns a version
+%% structure as `{Name, {{1, 2, 3}, {Alpha, Build}}}'. Chef does not currently support
+%% semver style versions for cookbooks. For successful solve results, we simplify the
+%% return. Error returns will contain version data (with semver details). These are left in
+%% place for two reasons: 1) the error structures are not as simple to sanitize; 2) the
+%% depsolver_culprits module is used to format the error returns and it is expecting data in
+%% this format.
+sanitize_semver({ok, WithSemver}) ->
+    XYZOnly = [ {Name, XYZVersion} || {Name, {XYZVersion, _SemVer}} <- WithSemver ],
+    {ok, XYZOnly};
+sanitize_semver(Error) ->
+    Error.
