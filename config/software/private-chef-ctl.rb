@@ -1,6 +1,7 @@
 name "private-chef-ctl"
 
-dependencies [ "rsync", "omnibus-ctl" ]
+dependency "rsync"
+dependency "omnibus-ctl"
 
 source :path => File.expand_path("files/private-chef-ctl-commands", Omnibus.project_root)
 

@@ -1,7 +1,9 @@
 name "oc_erchef"
 version "0.19.6"
 
-dependencies ["erlang", "rebar", "rsync"]
+dependency "erlang"
+dependency "rebar"
+dependency "rsync"
 
 source :git => "git@github.com:opscode/oc_erchef"
 

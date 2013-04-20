@@ -1,6 +1,6 @@
 name "private-chef-scripts"
 
-dependencies [ "rsync" ]
+dependency "rsync"
 
 source :path => File.expand_path("files/private-chef-scripts", Omnibus.project_root)
 

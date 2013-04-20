@@ -1,9 +1,9 @@
 name "oc-chef-pedant"
 version "1.0.3"
 
-dependencies ["ruby",
-              "bundler",
-              "rsync"]
+dependency "ruby"
+dependency "bundler"
+dependency "rsync"
 
 source :git => "git@github.com:opscode/oc-chef-pedant.git"
 

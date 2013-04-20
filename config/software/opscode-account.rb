@@ -1,10 +1,10 @@
 name "opscode-account"
 version "rel-1.30.7"
 
-dependencies ["ruby",
-              "bundler",
-              "postgresql",
-              "rsync"]
+dependency "ruby"
+dependency "bundler"
+dependency "postgresql"
+dependency "rsync"
 
 source :git => "git@github.com:opscode/opscode-account"
 

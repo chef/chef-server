@@ -1,14 +1,14 @@
 name "opscode-chef"
 version "rel-2.8.7"
 
-dependencies ["ruby",
-              "bundler",
-              "gecode",
-              "libxml2",
-              "libxslt",
-              "postgresql", # TODO: how do we install just the client library?
-              "curl",
-              "rsync"]
+dependency "ruby"
+dependency "bundler"
+dependency "gecode"
+dependency "libxml2"
+dependency "libxslt"
+dependency "postgresql" # TODO: how do we install just the client library?
+dependency "curl"
+dependency "rsync"
 
 source :git => "git@github.com:opscode/opscode-chef"
 

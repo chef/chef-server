@@ -1,7 +1,7 @@
 name "private-chef-administration"
 version "rel-1.4.0"
 
-dependencies ["rsync"]
+dependency "rsync"
 
 source :git => "git@github.com:opscode/private-chef-administration"
 
