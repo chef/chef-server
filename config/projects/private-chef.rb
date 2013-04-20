@@ -7,9 +7,11 @@ install_path    "/opt/opscode"
 build_version   Omnibus::BuildVersion.new.semver
 build_iteration 1
 
+# creates required build directories
+dependency "preparation"
+
 # global
 dependency "chef-gem" # for embedded chef-solo
-dependency "preparation" # creates required build directories
 dependency "private-chef-cookbooks" # used by private-chef-ctl reconfigure
 dependency "private-chef-scripts" # assorted scripts used by installed instance
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
