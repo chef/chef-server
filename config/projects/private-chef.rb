@@ -1,64 +1,63 @@
 name "private-chef"
+maintainer "Opscode, Inc."
+homepage "http://www.opscode.com"
 
 replaces        "private-chef-full"
 install_path    "/opt/opscode"
 build_version   Omnibus::BuildVersion.new.semver
-build_iteration "1"
+build_iteration 1
 
-# initialize the dependencies
-deps = []
+# creates required build directories
+dependency "preparation"
 
 # global
-deps << "chef-gem" # for embedded chef-solo
-deps << "preparation" # creates required build directories
-deps << "private-chef-cookbooks" # used by private-chef-ctl reconfigure
-deps << "private-chef-scripts" # assorted scripts used by installed instance
-deps << "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
-deps << "private-chef-administration"
-deps << "nginx"
-deps << "runit"
-deps << "unicorn"
+dependency "chef-gem" # for embedded chef-solo
+dependency "private-chef-cookbooks" # used by private-chef-ctl reconfigure
+dependency "private-chef-scripts" # assorted scripts used by installed instance
+dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
+dependency "private-chef-administration"
+dependency "nginx"
+dependency "runit"
+dependency "unicorn"
 
 # the backend
-deps << "couchdb"
-deps << "postgresql"
-deps << "redis"
-deps << "rabbitmq"
-deps << "opscode-solr"
-deps << "opscode-expander"
-deps << "chef-sql-schema" # needed to migrate the DB.
-deps << "keepalived"
-deps << "bookshelf"
+dependency "couchdb"
+dependency "postgresql"
+dependency "redis"
+dependency "rabbitmq"
+dependency "opscode-solr"
+dependency "opscode-expander"
+dependency "chef-sql-schema" # needed to migrate the DB.
+dependency "keepalived"
+dependency "bookshelf"
 
 # the front-end services
-deps << "oc_erchef"
-deps << "opscode-chef"
-deps << "opscode-account"
-deps << "opscode-webui"
-deps << "opscode-authz"
-deps << "opscode-org-creator"
-deps << "opscode-certificate"
-deps << "opscode-platform-debug"
-deps << "opscode-test"
-deps << "mysql2"
+dependency "oc_erchef"
+dependency "opscode-chef"
+dependency "opscode-account"
+dependency "opscode-webui"
+dependency "opscode-authz"
+dependency "opscode-org-creator"
+dependency "opscode-certificate"
+dependency "opscode-platform-debug"
+dependency "opscode-test"
+dependency "mysql2"
 
 # monitoring
-deps << "nagios"
-deps << "nagios-plugins"
-deps << "opscode-nagios-plugins"
-deps << "nrpe"
+dependency "nagios"
+dependency "nagios-plugins"
+dependency "opscode-nagios-plugins"
+dependency "nrpe"
 
 # oc-chef-pedant for integration/smoke testing
-deps << "oc-chef-pedant"
+dependency "oc-chef-pedant"
 
 # partybus and upgrade scripts
-deps << "partybus"
-deps << "private-chef-upgrades"
+dependency "partybus"
+dependency "private-chef-upgrades"
 
 # version manifest file
-deps << "version-manifest"
-
-dependencies deps
+dependency "version-manifest"
 
 exclude "\.git*"
 exclude "bundler\/git"

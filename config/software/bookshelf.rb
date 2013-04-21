@@ -1,7 +1,9 @@
 name "bookshelf"
 version "0.2.1"
 
-dependencies ["erlang", "rebar", "rsync"]
+dependency "erlang"
+dependency "rebar"
+dependency "rsync"
 
 source :git => "git://github.com/opscode/bookshelf.git"
 

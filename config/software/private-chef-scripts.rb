@@ -1,8 +1,8 @@
 name "private-chef-scripts"
 
-dependencies [ "rsync" ]
+dependency "rsync"
 
-source :path => File.expand_path("files/private-chef-scripts", Omnibus.root)
+source :path => File.expand_path("files/private-chef-scripts", Omnibus.project_root)
 
 build do
   command "mkdir -p #{install_dir}/embedded/bin"

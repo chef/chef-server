@@ -1,8 +1,10 @@
 name "partybus"
 
-dependencies ["rsync", "bundler", "postgresql"]
+dependency "rsync"
+dependency "bundler"
+dependency "postgresql"
 
-source :path => File.expand_path("partybus", Omnibus.root)
+source :path => File.expand_path("partybus", Omnibus.project_root)
 
 build do
   command "mkdir -p #{install_dir}/embedded/service/partybus"

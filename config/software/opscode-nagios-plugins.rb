@@ -1,6 +1,6 @@
 name "opscode-nagios-plugins"
 
-dependencies ["rsync"]
+dependency "rsync"
 
 version "pc-rel-1.0.0"
 

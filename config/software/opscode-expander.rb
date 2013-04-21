@@ -1,7 +1,9 @@
 name "opscode-expander"
 version "pc-rel-1.0.0.1"
 
-dependencies ["ruby", "bundler", "rsync"]
+dependency "ruby"
+dependency "bundler"
+dependency "rsync"
 
 source :git => "git@github.com:opscode/opscode-expander"
 

@@ -1,7 +1,8 @@
 name "opscode-authz"
 version "pc-rel-0.3.4"
 
-dependencies ["erlang", "rsync"]
+dependency "erlang"
+dependency "rsync"
 
 source :git => "git@github.com:opscode/opscode-authz"
 

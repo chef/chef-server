@@ -1,7 +1,8 @@
 name "opscode-solr"
 version "0.10.8"
 
-dependencies ["rsync", "jre"]
+dependency "rsync"
+dependency "jre"
 
 source :git => "git://github.com/opscode/chef"
 

@@ -1,7 +1,12 @@
 name "opscode-webui"
 version "pc-rel-3.6.6"
 
-dependencies ["ruby", "bundler", "libxml2", "libxslt", "curl", "rsync"]
+dependency "ruby"
+dependency "bundler"
+dependency "libxml2"
+dependency "libxslt"
+dependency "curl"
+dependency "rsync"
 
 source :git => "git@github.com:opscode/opscode-webui"
 
