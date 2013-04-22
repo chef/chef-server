@@ -168,7 +168,7 @@ module Pedant
 
     def delete_client(client, org = self.test_org)
       puts "Deleting client #{client.name} ..."
-      r = delete("#{@server}/organizations/#{org.name}/clients/#{client.name}", @superuser)
+      r = delete("#{@server}/organizations/#{org.name}/clients/#{client.name}", self.admin_user)
       if r.code != 200
         puts "Unexpected response #{r.code}: #{r}"
       end
