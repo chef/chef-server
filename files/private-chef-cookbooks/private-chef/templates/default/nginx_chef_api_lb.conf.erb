@@ -120,6 +120,12 @@
     # principals go to erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
 
+    # We only let the Chef API handle clients if we're off CouchDB;
+    # otherwise, it needs to be handled by opscode-account.
+    <%- unless node['private_chef']['dark_launch']['couchdb_clients'] -%>
+      <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", 'couchdb_clients') %>
+    <%- end -%>
+
     <%- if node['private_chef']['lb']['cache_cookbook_files'] && !node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
     # optional caching of cookbook files by nginx
     # Available only with couchdb_cookbooks (sql_migration_phase_1 off)
@@ -139,7 +145,13 @@
     include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_external.conf;
 
     # opscode-account service endpoints
-    <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", 'couchdb_clients') %>
+
+    # We only let the Chef API handle clients if we're off CouchDB;
+    # otherwise, it needs to be handled by opscode-account.
+    <%- if node['private_chef']['dark_launch']['couchdb_clients'] -%>
+      <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", 'couchdb_clients') %>
+    <%- end -%>
+
     <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/(?:groups|users|containers|association_requests)/{0,1}.*$", :account) %>
     <%= @helper.account_api("^/(?:organizations|users)/{0,1}$", :account) %>
     <%= @helper.account_api("^/organizations/[a-z0-9\-_]+/{0,1}$", :account) %>
