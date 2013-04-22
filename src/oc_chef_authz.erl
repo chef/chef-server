@@ -333,22 +333,22 @@ remove_actor_from_ace(ActorId, #authz_ace{actors=Actors, groups=Groups}) ->
                groups=Groups}.
 
 -spec pluralize_resource(resource_type()) -> <<_:48,_:_*8>>.
-pluralize_resource(actor) -> <<"actors">>;
+pluralize_resource(actor)     -> <<"actors">>;
 pluralize_resource(container) -> <<"containers">>;
-pluralize_resource(group) -> <<"groups">>;
-pluralize_resource(object) -> <<"objects">>.
+pluralize_resource(group)     -> <<"groups">>;
+pluralize_resource(object)    -> <<"objects">>.
 
 -spec object_type_to_container_name(contained_object_name()) -> <<_:32,_:_*8>>.
-object_type_to_container_name(client) -> <<"clients">>;
-object_type_to_container_name(container) -> <<"containers">>;
-object_type_to_container_name(cookbook) -> <<"cookbooks">>;
-object_type_to_container_name(data) -> <<"data">>; % breaks the simple atom() + s strategy
+object_type_to_container_name(client)      -> <<"clients">>;
+object_type_to_container_name(container)   -> <<"containers">>;
+object_type_to_container_name(cookbook)    -> <<"cookbooks">>;
+object_type_to_container_name(data)        -> <<"data">>; % breaks the simple atom() + s strategy
 object_type_to_container_name(environment) -> <<"environments">>;
-object_type_to_container_name(group) -> <<"groups">>;
-object_type_to_container_name(node) -> <<"nodes">>;
-object_type_to_container_name(role) -> <<"roles">>;
-object_type_to_container_name(sandbox) -> <<"sandboxes">>;
-object_type_to_container_name(search) -> <<"search">>.
+object_type_to_container_name(group)       -> <<"groups">>;
+object_type_to_container_name(node)        -> <<"nodes">>;
+object_type_to_container_name(role)        -> <<"roles">>;
+object_type_to_container_name(sandbox)     -> <<"sandboxes">>;
+object_type_to_container_name(search)      -> <<"search">>.
 
 %
 % This exists for testing and debugging; it's too expensive for day to day use.
