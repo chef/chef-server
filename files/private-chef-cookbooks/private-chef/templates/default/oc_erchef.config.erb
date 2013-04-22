@@ -53,7 +53,8 @@
   {oc_chef_authz, [
                 {authz_root_url, "http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>" },
                 {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
-                {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
+                {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> },
+                {authz_superuser_id, <<"<%= node['private_chef']['opscode-authz']['superuser_id'] %>">>}
                ]},
   {chef_db, [
              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
