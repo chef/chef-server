@@ -34,7 +34,7 @@
 -export([
          add_client_to_clients_group/3,
          delete_resource/3,
-         create_object_if_authorized/4,
+         create_entity_if_authorized/4,
          get_container_aid_for_object/3,
          make_context/1,
          is_authorized_on_resource/6,
@@ -82,23 +82,25 @@ ping() ->
 make_context(ReqId)  ->
     oc_chef_authz_db:make_context(ReqId).
 
-%%%
-%%% Takes a Creator authz id,  an object type atom and an OrgId and
-%%% creates the authz permissions for the object if the creator is permitted
-%%% otherwise returns {error, forbidden}
-%%%
--spec create_object_if_authorized(oc_chef_authz_context(),
-                                  object_id(),
-                                  object_id(),
-                                  contained_object_name()) ->
+%% @doc Creates a new Authz entity, if the requestor has the necessary permissions.
+%%
+%% `CreatorAId' is the Authz ID of the actor that wishes to create the entity. `ObjectType'
+%% is used to determine what kind of Authz entity should be created (e.g., a client should
+%% be an actor, while a node should be an object, etc.).
+%%
+%% If the permissions are in place, the Authz ID of the newly-created entity is returned.
+-spec create_entity_if_authorized(oc_chef_authz_context(),
+                                  OrgId :: object_id(),
+                                  CreatorAId :: object_id(),
+                                  ObjectType :: contained_object_name()) ->
                                          {ok, object_id()} |
                                          {error, forbidden}.
-create_object_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
+create_entity_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
     ContainerAId = get_container_aid_for_object(Context, OrgId, ObjectType),
     case is_authorized_on_resource(CreatorAId, container, ContainerAId, actor, CreatorAId, create) of
         false -> {error, forbidden};
         true ->
-            create_object_with_container_acl(CreatorAId, ContainerAId)
+            create_entity_with_container_acl(CreatorAId, ContainerAId, ObjectType)
     end.
 
 %%%
@@ -113,39 +115,58 @@ get_container_aid_for_object(Context, OrgId, ObjectType) ->
     Container = oc_chef_authz_db:fetch_container(Context, OrgId, ContainerName),
     Container#chef_container.authz_id.
 
-%% @doc Create a new authz object using the ACL of a container as a template for the new
-%% object's ACL.
+%% @doc Create a new Authz entity using the ACL of a container as a template for the new
+%% entity's ACL.
 %%
 %% `RequestorId' will have all permissions on the new object.  The permissions associated
 %% with the ACL for `ContainerAId' will be merged into the ACL for the new object.
 %%
-%% TODO: consider error cases in more detail
--spec create_object_with_container_acl(requestor_id(), object_id()) -> {ok, object_id()} |
-                                                                       {error, forbidden}.
-create_object_with_container_acl(RequestorId, ContainerAId) ->
-    {ok, ObjectId} = create_resource(RequestorId, object),
-    case merge_acl_from_container(RequestorId, ContainerAId, ObjectId) of
+%% @end TODO: consider error cases in more detail
+-spec create_entity_with_container_acl(RequestorId::requestor_id(),
+                                       ContainerAId::object_id(),
+                                       ObjectType :: contained_object_name()) -> {ok, object_id()} |
+                                                                                 {error, forbidden}.
+create_entity_with_container_acl(RequestorId, ContainerAId, ObjectType) ->
+
+    %% Create the entity
+    AuthzType = authz_type_from_container(ObjectType),
+    {ok, Id} = create_resource(RequestorId, AuthzType),
+
+    %% Ensure it inherits the ACL of its container
+    case merge_acl_from_container(RequestorId, ContainerAId, AuthzType, Id) of
         ok ->
-            {ok, ObjectId};
+            {ok, Id};
         {error, object_acl} ->
-            error_logger:error_msg("Unable to read ACL for newly created resource: ~p~n", [ObjectId]),
+            error_logger:error_msg("Unable to read ACL for newly created ~p: ~p~n", [ObjectType, Id]),
             {error, forbidden};
-        _Error ->
+        Error ->
+            error_logger:error_msg("Error encountered when trying to merge container ACL: ~p~n", [Error]),
             {error, forbidden}
     end.
 
-%%%
-%%% merge_acl_from_container
-%%% TODO: consider error cases in more detail
--spec merge_acl_from_container(requestor_id(), object_id(), object_id()) -> ok |
-                                                                            {error, object_acl | container_acl}.
-merge_acl_from_container(RequestorId, ContainerId, ObjectId) ->
+%% @doc Merges the ACL of an entity's container with the ACL of the entity itself.
+%%
+%% Currently is only used for actors and objects, since those are the only kinds of Authz
+%% entities we currently create via Erchef.
+%%
+%% Nothing in this method checks that the `ContainerId' and the `ObjectId' correspond
+%% properly (e.g., that an object id that represents a Node implies that the container id is
+%% that of the organization's node container).  That correspondence is assumed to have been
+%% verified elsewhere.
+%%
+%% @end TODO: consider error cases in more detail
+-spec merge_acl_from_container(requestor_id(),
+                               ContainerId :: object_id(),
+                               AuthzType :: 'actor' | 'object',
+                               ObjectId :: object_id()) -> ok |
+                                                           {error, object_acl | container_acl}.
+merge_acl_from_container(RequestorId, ContainerId, AuthzType, ObjectId) ->
     case get_acl_for_resource(RequestorId, container, ContainerId) of
         {ok, CAcl} ->
-            case get_acl_for_resource(RequestorId, object, ObjectId) of
+            case get_acl_for_resource(RequestorId, AuthzType, ObjectId) of
                 {ok, OAcl} ->
                     NAcl = merge_acl(CAcl, OAcl),
-                    case set_acl(RequestorId, ObjectId, NAcl) of
+                    case set_acl(RequestorId, AuthzType, ObjectId, NAcl) of
                         ok ->
                             ok;
                         {error, _} ->
@@ -163,24 +184,28 @@ merge_acl_from_container(RequestorId, ContainerId, ObjectId) ->
             {error, container_acl}
     end.
 
-%% @doc Set the ACL of the object to the given ACL, one ACE at a time.
+%% @doc Set the ACL of the entity to the given ACL, one ACE at a time.  As currently coded,
+%% it expects to only operate on actors or objects, since these are the only Authz entities
+%% that Erchef currently creates.
 %%
 %% Returns 'ok' if all ACEs are successfully set, and {error, Reason} at the first failure.
 %%
 %% No, this is not transactional in any sense, but then again, neither is CouchDB.  In any
 %% case, this will change dramatically once we move to SQL.
 -spec set_acl(requestor_id(),
-              object_id(),
-              authz_acl()) -> ok | {error, any()}.
-set_acl(_RequestorId, _ObjectId, []) ->
+              AuthzType :: 'actor' | 'object',
+              ObjectId :: object_id(),
+              NewAcl :: authz_acl()) -> ok | {error, any()}.
+set_acl(_RequestorId, _AuthzType, _ObjectId, []) ->
     ok;
-set_acl(RequestorId, ObjectId, [{Method, ACE}|Rest]) ->
-    case set_ace_for_object(RequestorId, ObjectId, Method, ACE) of
+set_acl(RequestorId, AuthzType, ObjectId, [{Method, ACE}|Rest]) when AuthzType =:= 'actor';
+                                                                     AuthzType =:= 'object' ->
+    case set_ace_for_object(RequestorId, AuthzType, ObjectId, Method, ACE) of
         ok ->
-            set_acl(RequestorId, ObjectId, Rest);
+            set_acl(RequestorId, AuthzType, ObjectId, Rest);
         {error, Reason} ->
-            error_logger:error_msg("Error setting ACE ~p for method ~p on object ~p for requestor ~p: ~p~n",
-                                   [ACE, Method, ObjectId, RequestorId, Reason]),
+            error_logger:error_msg("Error setting ACE ~p for method ~p on ~p ~p for requestor ~p: ~p~n",
+                                   [ACE, Method, AuthzType, ObjectId, RequestorId, Reason]),
             {error, Reason}
     end.
 
@@ -255,12 +280,13 @@ get_acl_for_resource(RequestorId, ResourceType, Id) ->
 % PUT {objects|groups|actors|containers}/:id/acl/:action
 %
 -spec set_ace_for_object(requestor_id(),
+                         AuthzType :: 'actor' | 'container' | 'object',
                          object_id(),
                          access_method(),
                          authz_ace()) -> ok |
                                          {error, any()}.
-set_ace_for_object(RequestorId, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
-    Url = make_url([pluralize_resource(object), Id, acl, AccessMethod]),
+set_ace_for_object(RequestorId, AuthzType, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
+    Url = make_url([pluralize_resource(AuthzType), Id, acl, AccessMethod]),
     Body = jiffy:encode({[{<<"actors">>, Actors}, {<<"groups">>, Groups}]}),
     case oc_chef_authz_http:request(Url, put, [], Body, RequestorId) of
         ok -> ok;
@@ -325,8 +351,8 @@ remove_actor_from_acl(ActorId, [{Permission, Ace}|Rest], Acc) ->
     Filtered = remove_actor_from_ace(ActorId, Ace),
     remove_actor_from_acl(ActorId, Rest, [{Permission, Filtered} | Acc]).
 
-%% @doc Returns the given authz_ace with `ActorId` filtered out of the `actors` lists.  The
-%% `groups` list is untouched.
+%% @doc Returns the given authz_ace with `ActorId' filtered out of the `actors' list.  The
+%% `groups' list is untouched.
 -spec remove_actor_from_ace(ActorId::object_id(), Ace::#authz_ace{}) -> #authz_ace{}.
 remove_actor_from_ace(ActorId, #authz_ace{actors=Actors, groups=Groups}) ->
     #authz_ace{actors=[A || A <- Actors, A /= ActorId],
@@ -349,6 +375,12 @@ object_type_to_container_name(node)        -> <<"nodes">>;
 object_type_to_container_name(role)        -> <<"roles">>;
 object_type_to_container_name(sandbox)     -> <<"sandboxes">>;
 object_type_to_container_name(search)      -> <<"search">>.
+
+%% @doc When creating a new Authz entity in a given container, we need to ensure we're
+%% creating the correct kind.
+-spec authz_type_from_container(contained_object_name()) -> 'actor' | 'object'.
+authz_type_from_container(client) -> 'actor';
+authz_type_from_container(_)      -> 'object'.
 
 %
 % This exists for testing and debugging; it's too expensive for day to day use.
