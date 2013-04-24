@@ -45,17 +45,6 @@
         [<<"name">>, <<"description">>, <<"json_class">>, <<"chef_type">>,
          <<"default_attributes">>, <<"override_attributes">>, <<"cookbook_versions">>]).
 
-cookbook_version_array_test([]) ->
-    ok;
-cookbook_version_array_test([Head|[]]) ->
-    {Regex, _Msg} = chef_regex:regex_for(cookbook_version_constraint),
-    case re:run(Head, Regex) of
-        nomatch -> bad;
-        {match, _} -> ok
-    end;
-cookbook_version_array_test([_|_]) ->
-    bad.
-
 environment_spec() ->
     {[
       {<<"name">>, {string_match, chef_regex:regex_for(environment_name)}},
@@ -64,17 +53,7 @@ environment_spec() ->
       {{opt, <<"chef_type">>}, <<"environment">>},
       {{opt, <<"default_attributes">>}, chef_json_validator:attribute_spec()},
       {{opt, <<"override_attributes">>}, chef_json_validator:attribute_spec()},
-      {{opt, <<"cookbook_versions">>}, {object_map, {{keys, {string_match, chef_regex:regex_for(cookbook_name)}},
-                                                     {values, {any_of, {[{string_match,
-                                                                          chef_regex:regex_for(cookbook_version_constraint)},
-                                                                         %% This is required because a simple array_map will
-                                                                         %% succeed with multiple entries -- only arrays of
-                                                                         %% length one (or zero) can be valid
-                                                                         {fun_match, {fun cookbook_version_array_test/1,
-                                                                                      array,
-                                                                                      <<"Invalid cookbook version">>}},
-                                                                         null],
-                                                                        <<"Invalid cookbook version">>}}}}}}
+      {{opt, <<"cookbook_versions">>}, chef_cookbook:constraint_map_spec(cookbook_name)}
      ]}.
 
 %% @doc If certain fields are missing from a Environment, fill them in with

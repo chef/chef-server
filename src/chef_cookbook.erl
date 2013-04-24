@@ -27,6 +27,7 @@
          minimal_cookbook_ejson/1,
          parse_binary_json/2,
          extract_checksums/1,
+         constraint_map_spec/1,
          version_to_binary/1,
          parse_version/1,
          qualified_recipe_names/2
@@ -145,10 +146,9 @@ cookbook_spec(CBName, CBVersion) ->
                         {{opt, <<"suggestions">>}, constraint_map_spec(cookbook_name)},
                         {{opt, <<"conflicting">>}, constraint_map_spec(cookbook_name)},
                         {{opt, <<"replacing">>}, constraint_map_spec(cookbook_name)},
-
                         {{opt, <<"providing">>}, constraint_map_spec(recipe_name)},
-                         %% FIXME: what's this?
-                         {{opt, <<"groupings">>}, object}
+                        %% FIXME: what's this? -
+                        {{opt, <<"groupings">>}, object}
 
                        ]}},
       {{opt, <<"attributes">>}, file_list_spec()},
@@ -190,17 +190,6 @@ extract_checksums(CBJson) ->
 extract_checksums_from_segment(Segment) ->
     [ ej:get({<<"checksum">>}, Item) || Item <- Segment ].
 
-%% FIXME: It isn't clear to me if we want to validate the platforms data
-%% separately. Technically the names and versions might not conform to our cookbook-specific
-%% policy since they describe external entities like Ubuntu, OS X, etc. However, the
-%% existing Ruby code uses the same validation across the board.
-%%
-%% generic_contraint_map_spec() ->
-%%     {object_map,
-%%      {{keys, string},
-%%       {values, {fun_match, {fun valid_constraint/1, string,
-%%                             <<"Invalid version constraint">>}}}}}.
-
 constraint_map_spec(RegexName) ->
     {object_map,
      {{keys, {string_match, chef_regex:regex_for(RegexName)}},
@@ -219,15 +208,13 @@ valid_cookbook_constraint(Str) when is_binary(Str) ->
             end;
         error ->
             error
-    end;
-valid_cookbook_constraint([Str]) ->
-    %% allow an array with a single constraint for back-compat (see
-    %% chef/version_constraint.rb).
-    valid_cookbook_constraint(Str);
-valid_cookbook_constraint([_Str|_Rest]) ->
-    %% disallow multiple contraints
-    error.
+    end.
 
+%% @doc given a binary parse it to a version tuple {Major, Minor, Patch}
+%% @end
+-spec parse_version(Version::binary()) -> {Major::non_neg_integer(),
+                                           Minor::non_neg_integer(),
+                                           Patch::non_neg_integer()}.
 parse_version(Version) when is_binary(Version) ->
     Parts = [list_to_integer(binary_to_list(V))
              || V <- binary:split(Version, <<".">>, [global])],
