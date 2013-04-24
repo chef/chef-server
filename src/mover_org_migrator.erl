@@ -31,7 +31,7 @@
 -export([start_link/1]).
 
 -define(PHASE_2_MIGRATION_COMPONENTS,
-            [checksums, clients, cookbooks, environments, roles, data]).
+            [checksums, cookbooks, environments, roles, data]).
 
 -define(ORG_META(OrgName), [{org_name, OrgName}]).
 
