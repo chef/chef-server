@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
 
-describe "opscode-account groups", :focus do
+describe "opscode-account groups" do
   context "/groups endpoint" do
     let(:request_url) { api_url("groups") }
 
@@ -393,6 +393,7 @@ describe "opscode-account groups", :focus do
 
     context "DELETE /groups" do
       context "admin user" do
+        # A 405 here would be fine (better, even)
         it "returns 404" do
           delete(request_url, platform.admin_user).should look_like({
               :status => 404
@@ -403,6 +404,7 @@ describe "opscode-account groups", :focus do
 
     context "PUT /groups" do
       context "admin user" do
+        # A 405 here would be fine (better, even)
         it "returns 404" do
           put(request_url, platform.admin_user).should look_like({
               :status => 404
@@ -993,7 +995,7 @@ describe "opscode-account groups", :focus do
             }}
 
           it "returns 400" do
-            pending "returns 200(!) instead (doesn't change anything)" do
+            pending "returns 200(!) instead (but it doesn't actually change anything)" do
               put(request_url, platform.admin_user,
                 :payload => new_group_payload).should look_like({
                   :status => 400
@@ -1010,6 +1012,7 @@ describe "opscode-account groups", :focus do
 
     context "POST /groups/<name>" do
       context "admin user" do
+        # A 405 here would be fine (better, even)
         it "returns 404" do
           post(request_url, platform.admin_user).should look_like({
               :status => 404
