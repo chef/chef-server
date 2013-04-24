@@ -37,6 +37,7 @@
 
 -record(state, { account_info :: term(), % TODO #account_info for moser, provided via init config
                  org_name :: string(),   % name of the org being migrated
+                 org_guid :: string(),   % guid of the org being migrated
                  start_time :: term(),   % timestamp indicating start of migration operation
                  error :: term()         % the error that has placed us in failure state.
                }).
@@ -47,9 +48,11 @@ start_link(Config) ->
 init(Config) ->
     % TODO config is currently just org name, we may want to
     % factor up some of the account_info stuff out of moser.
-    {ok, disable_org_access, #state{org_name = Config, start_time = os:timestamp()}, 0}.
+    OrgGuid = moser_utils:orgname_to_guid(Config),
+    {ok, disable_org_access, #state{org_name = Config, org_guid = OrgGuid, start_time = os:timestamp()}, 0}.
 
 disable_org_access(timeout, #state{org_name = OrgName} = State) ->
+    lager:info(?ORG_META(OrgName), "Placing organization into maintenance mode", []),
     case mover_org_darklaunch:disable_org(OrgName) of
         ok ->
             {next_state, migrate_org, State, 0};
@@ -59,6 +62,7 @@ disable_org_access(timeout, #state{org_name = OrgName} = State) ->
     end.
 
 migrate_org(timeout, #state{org_name = OrgName} = State) ->
+    lager:info(?ORG_META(OrgName), "Migrating organization data", []),
     case moser_converter:convert_org(OrgName) of
         [{ok, _}] ->
             {next_state, verify_org, State, 0};
@@ -68,7 +72,8 @@ migrate_org(timeout, #state{org_name = OrgName} = State) ->
             {next_state, abort_migration, #state{error = Error} = State, 0}
     end.
 
-verify_org(timeout, #state{org_name = _OrgName} = State) ->
+verify_org(timeout, #state{org_name = OrgName} = State) ->
+    lager:info(?ORG_META(OrgName), "Validating organizaton migration (placeholder)", []),
     % TODO do we have any validation we can run?
     % case moser_validator:validate_org(OrgName) of
     case ok of
@@ -81,6 +86,7 @@ verify_org(timeout, #state{org_name = _OrgName} = State) ->
 
 
 set_org_to_sql(timeout, #state{org_name = OrgName} = State) ->
+    lager:info(?ORG_META(OrgName), "Setting organization to SQL mode", []),
     case mover_org_darklaunch:org_to_sql(OrgName, ?PHASE_2_MIGRATION_COMPONENTS) of
         ok ->
             {next_state, enable_org_access, State, 0};
@@ -91,6 +97,7 @@ set_org_to_sql(timeout, #state{org_name = OrgName} = State) ->
     end.
 
 enable_org_access(timeout, #state{org_name = OrgName} = State) ->
+    lager:info(?ORG_META(OrgName), "Removing organization from maintenance mode, enabling access", []),
     case mover_org_darklaunch:enable_org(OrgName) of
         ok ->
             {next_state, complete_migration, State, 0};
@@ -104,6 +111,7 @@ enable_org_access(timeout, #state{org_name = OrgName} = State) ->
     end.
 
 complete_migration(timeout, #state{org_name = OrgName, start_time = Start} = State) ->
+    lager:info(?ORG_META(OrgName), "Migration completed", []),
     % TODO update migration state
     Time = moser_utils:us_to_secs(timer:now_diff(os:timestamp(), Start)),
     % TODO lager misbehaving for now: lager:info(?ORG_META(OrgName), "Migration completed successfully in ~.3f seconds.", Time),
@@ -112,6 +120,7 @@ complete_migration(timeout, #state{org_name = OrgName, start_time = Start} = Sta
     {stop, normal, State}.
 
 abort_migration(timeout, #state{org_name = OrgName, error = Error} = State) ->
+    lager:info(?ORG_META(OrgName), "Migration aborted, rolling back", []),
     % TODO roll it back...
     %lager:warn(?ORG_META(OrgName), "Aborting migration."),
     io:fwrite("Failed to migrate org: ~p~n", [OrgName]),
