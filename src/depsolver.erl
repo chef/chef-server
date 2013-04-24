@@ -99,6 +99,7 @@
 
 -export_type([t/0,
               pkg/0,
+              constraint_op/0,
               pkg_name/0,
               vsn/0,
               constraint/0,
@@ -114,39 +115,23 @@
 -opaque t() :: {?MODULE, dep_graph()}.
 -type pkg() :: {pkg_name(), vsn()}.
 -type pkg_name() :: binary() | atom().
--type raw_vsn() :: string() | binary() | vsn().
+-type raw_vsn() :: ec_semver:any_version().
+
 -type vsn() :: 'NO_VSN'
-             | {non_neg_integer()}
-             | {non_neg_integer(), non_neg_integer()}
-             | {non_neg_integer(), non_neg_integer(), non_neg_integer()}.
+             | ec_semver:semver().
+
+-type constraint_op() ::
+        '=' | gte | '>=' | lte | '<='
+      | gt | '>' | lt | '<' | pes | '~>' | between.
+
 -type raw_constraint() :: pkg_name()
                         | {pkg_name(), raw_vsn()}
-                        | {pkg_name(), raw_vsn(), '='}
-                        | {pkg_name(), raw_vsn(), gte}
-                        | {pkg_name(), raw_vsn(),'>='}
-                        | {pkg_name(), raw_vsn(), lte}
-                        | {pkg_name(), raw_vsn(), '<='}
-                        | {pkg_name(), raw_vsn(), gt}
-                        | {pkg_name(), raw_vsn(), '>'}
-                        | {pkg_name(), raw_vsn(), lt}
-                        | {pkg_name(), raw_vsn(), '<'}
-                        | {pkg_name(), raw_vsn(), pes}
-                        | {pkg_name(), raw_vsn(), '~>'}
+                        | {pkg_name(), raw_vsn(), constraint_op()}
                         | {pkg_name(), raw_vsn(), vsn(), between}.
 
 -type constraint() :: pkg_name()
                     | {pkg_name(), vsn()}
-                    | {pkg_name(), vsn(), '='}
-                    | {pkg_name(), vsn(), gte}
-                    | {pkg_name(), vsn(),'>='}
-                    | {pkg_name(), vsn(), lte}
-                    | {pkg_name(), vsn(), '<='}
-                    | {pkg_name(), vsn(), gt}
-                    | {pkg_name(), vsn(), '>'}
-                    | {pkg_name(), vsn(), lt}
-                    | {pkg_name(), vsn(), '<'}
-                    | {pkg_name(), vsn(), pes}
-                    | {pkg_name(), vsn(), '~>'}
+                    | {pkg_name(), vsn(), constraint_op()}
                     | {pkg_name(), vsn(), vsn(), between}.
 
 
@@ -268,37 +253,12 @@ solve({?MODULE, DepGraph0}, RawGoals)
 
 %% Parse a string version into a tuple based version
 -spec parse_version(raw_vsn() | vsn()) -> vsn().
-parse_version(RawVsn) when erlang:is_list(RawVsn) ->
-    case string:tokens(RawVsn, ".") of
-        [MajorVsn, MinorVsn, RawPatch]  ->
-            {erlang:list_to_integer(MajorVsn),
-             erlang:list_to_integer(MinorVsn),
-             erlang:list_to_integer(RawPatch)};
-        [MajorVsn, MinorVsn] ->
-            {erlang:list_to_integer(MajorVsn),
-             erlang:list_to_integer(MinorVsn)};
-        [MajorVsn] ->
-            {erlang:list_to_integer(MajorVsn)}
-    end;
-parse_version(RawVsn) when erlang:is_binary(RawVsn) ->
-    parse_version(erlang:binary_to_list(RawVsn));
-parse_version(Vsn = {Major, Minor, Patch})
-  when erlang:is_integer(Major),
-       erlang:is_integer(Minor),
-       erlang:is_integer(Patch),
-       Major >= 0,
-       Minor >= 0,
-       Patch >= 0 ->
-    Vsn;
-parse_version(Vsn = {Major, Minor})
-  when erlang:is_integer(Major),
-       erlang:is_integer(Minor),
-       Major >= 0,
-       Minor >= 0 ->
-    Vsn;
-parse_version(Vsn = {Major})
-  when erlang:is_integer(Major),
-       Major >= 0 ->
+parse_version(RawVsn)
+  when erlang:is_list(RawVsn);
+       erlang:is_binary(RawVsn) ->
+    ec_semver:parse(RawVsn);
+parse_version(Vsn)
+  when erlang:is_tuple(Vsn) ->
     Vsn.
 
 %% @doc given a list of package name version pairs, and a list of constraints
@@ -553,58 +513,37 @@ extend_constraints(SrcPkg, SrcVsn, ExistingConstraints0, NewConstraints) ->
                 end,
                 ExistingConstraints0, [{SrcPkg, SrcVsn} | NewConstraints]).
 
--spec normalize_version(vsn()) -> vsn().
-normalize_version({M}) ->
-    {M, 0, 0};
-normalize_version({M, MI}) ->
-    {M, MI, 0};
-normalize_version({M, MI, P}) ->
-    {M, MI, P}.
-
--spec is_within_pessimistic_version(vsn(),vsn()) -> boolean().
-is_within_pessimistic_version(Vsn, {LM, LMI}) ->
-    NVsn = normalize_version(Vsn),
-    NVsn >= {LM, LMI, 0} andalso NVsn < {LM + 1, 0, 0};
-is_within_pessimistic_version(Vsn, LVsn = {LM, LMI, _}) ->
-    NVsn= normalize_version(Vsn),
-    NVsn >= LVsn andalso NVsn < {LM, LMI + 1, 0};
-is_within_pessimistic_version(Vsn = {_}, LVsn) ->
-    normalize_version(Vsn) >= normalize_version(LVsn).
-
 -spec is_version_within_constraint(vsn(),constraint()) -> boolean().
 is_version_within_constraint(_Vsn, Pkg) when is_atom(Pkg) orelse is_binary(Pkg) ->
     true;
 is_version_within_constraint(Vsn, {_Pkg, NVsn}) ->
-    normalize_version(Vsn) == normalize_version(NVsn);
+    ec_semver:eql(Vsn, NVsn);
 is_version_within_constraint(Vsn, {_Pkg, NVsn, '='}) ->
-    normalize_version(Vsn) == normalize_version(NVsn);
+    ec_semver:eql(Vsn, NVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn, gte})  ->
-    normalize_version(Vsn) >= normalize_version(LVsn);
+    ec_semver:gte(Vsn, LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn, '>='}) ->
-    normalize_version(Vsn) >= normalize_version(LVsn);
+    ec_semver:gte(Vsn, LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn, lte}) ->
-    normalize_version(Vsn) =< normalize_version(LVsn);
+    ec_semver:lte(Vsn, LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn, '<='}) ->
-    normalize_version(Vsn) =< normalize_version(LVsn);
+    ec_semver:lte(Vsn, LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn, gt}) ->
-    normalize_version(Vsn) > normalize_version(LVsn);
+    ec_semver:gt(Vsn, LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn, '>'}) ->
-    normalize_version(Vsn) > normalize_version(LVsn);
+    ec_semver:gt(Vsn, LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn, lt}) ->
-    normalize_version(Vsn) < normalize_version(LVsn);
+    ec_semver:lt(Vsn, LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn, '<'}) ->
-    normalize_version(Vsn) < normalize_version(LVsn);
+    ec_semver:lt(Vsn, LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn, 'pes'}) ->
-    is_within_pessimistic_version(Vsn, LVsn);
+    ec_semver:pes(Vsn, LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn, '~>'}) ->
-    is_within_pessimistic_version(Vsn, LVsn);
+    ec_semver:pes(Vsn, LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn1, LVsn2, between}) ->
-    NVsn = normalize_version(Vsn),
-    NVsn >= normalize_version(LVsn1) andalso
-        NVsn =< normalize_version(LVsn2);
+    ec_semver:between(LVsn1, LVsn2, Vsn);
 is_version_within_constraint(_Vsn, _Pkg) ->
     false.
-
 
 %% @doc
 %% Get the currently active constraints that relate to the specified package

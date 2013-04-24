@@ -15,12 +15,7 @@ Building
 --------
 1) In order to build you need rebar (https://github.com/basho/rebar)
 
-2) (Optional) Build dialyzer PLT which includes erts, kernel, stdlib, crypto,
-   and public_key. If you've never done this before, use the command below:
-
-    dialyzer --build_plt --apps erts kernel stdlib crypto public_key
-
-3) run `make`
+2) run `make`
 
 API
 -----
@@ -92,4 +87,3 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-

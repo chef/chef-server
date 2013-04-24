@@ -17,15 +17,32 @@
 
 ERL = $(shell which erl)
 
-ERLFLAGS= -pa $(CURDIR)/.eunit -pa $(CURDIR)/ebin -pa $(CURDIR)/*/ebin
+ERLFLAGS= -pa $(CURDIR)/.eunit -pa $(CURDIR)/ebin -pa $(CURDIR)/deps/*/ebin
 
 REBAR=$(shell which rebar)
 
 ifeq ($(REBAR),)
-	$(error "Rebar not available on this system")
+$(error "Rebar not available on this system")
 endif
 
+# If there is a user global plt use that. However, if there is not a user global plt
+# setup the plt for creation
+GLOBAL_PLT := $(wildcard $(HOME)/.dialyzer_plt)
+DEPSOLVER_PLT=
+
+ifeq ($(strip $(GLOBAL_PLT)),)
+DEPSOLVER_PLT=$(CURDIR)/.depsolver_plt
+else
+DEPSOLVER_PLT=$(GLOBAL_PLT)
+endif
+
+.PHONY: all compile doc clean eunit dialyzer typer shell distclean get-deps
+
 all: compile eunit dialyzer
+
+get-deps:
+	$(REBAR) get-deps
+	$(REBAR) compile
 
 compile:
 	@$(REBAR) compile
@@ -39,11 +56,16 @@ clean:
 eunit: compile
 	@$(REBAR) skip_deps=true eunit
 
-dialyzer:
-	@dialyzer -Wrace_conditions -r ebin
+# This rule should only be invoked for the a local plt
+$(DEPSOLVER_PLT):
+	dialyzer --output_plt $(DEPSOLVER_PLT) --build_plt \
+	   --apps erts kernel stdlib crypto public_key -r deps
+
+dialyzer: $(DEPSOLVER_PLT)
+	@dialyzer --plt $(DEPSOLVER_PLT) -Wrace_conditions --src src
 
 typer:
-	typer -r ./src
+	typer --plt $(DEPSOLVER_PLT) -r ./src
 
 shell: compile
 # You often want *rebuilt* rebar tests to be available to the
@@ -51,7 +73,7 @@ shell: compile
 # rebuilt). However, eunit runs the tests, which probably
 # fails (thats probably why You want them in the shell). This
 # runs eunit but tells make to ignore the result.
-	- @$(REBAR) eunit
+	- @$(REBAR) skip_deps=true eunit
 	@$(ERL) $(ERLFLAGS)
 
 distclean: clean

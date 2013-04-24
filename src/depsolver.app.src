@@ -22,6 +22,6 @@
 
 {application, depsolver,
  [{description, "Package Constraint Solver"},
-  {vsn, "0.1.0a"},
+  {vsn, "0.1.0"},
   {modules, []},
-  {applications, [kernel, stdlib]}]}.
+  {applications, [kernel, stdlib, erlware_commons]}]}.

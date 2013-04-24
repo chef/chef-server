@@ -106,17 +106,36 @@ format_culprits(FailingDeps) ->
                         ", " | Acc1]
                 end, [], Deps).
 
+-spec format_alpha_part(binary() | string(), [integer() | binary()]) -> iolist().
+format_alpha_part(_TypeMark, []) ->
+    [];
+format_alpha_part(TypeMark, [Head | Rest]) ->
+    [TypeMark, Head |
+     [[".", to_list(Detail)] || Detail <- Rest]].
+
+-spec to_list(integer() | binary() | string()) -> string().
+to_list(Detail) when erlang:is_integer(Detail) ->
+    erlang:integer_to_list(Detail);
+to_list(Detail) ->
+    Detail.
 
 -spec format_version(depsolver:vsn()) -> iolist().
-format_version({Maj}) ->
-    erlang:integer_to_list(Maj);
-format_version({Maj, Min}) ->
+format_version({Maj, {AlphaPart, BuildPart}})
+  when erlang:is_integer(Maj) ->
+    [erlang:integer_to_list(Maj),
+     format_alpha_part(<<"-">>, AlphaPart),
+     format_alpha_part(<<"+">>, BuildPart)];
+format_version({{Maj, Min}, {AlphaPart, BuildPart}}) ->
     [erlang:integer_to_list(Maj), ".",
-     erlang:integer_to_list(Min)];
-format_version({Maj, Min, Patch}) ->
+     erlang:integer_to_list(Min),
+     format_alpha_part(<<"-">>, AlphaPart),
+     format_alpha_part(<<"+">>, BuildPart)];
+format_version({{Maj, Min, Patch}, {AlphaPart, BuildPart}}) ->
     [erlang:integer_to_list(Maj), ".",
      erlang:integer_to_list(Min), ".",
-     erlang:integer_to_list(Patch)].
+     erlang:integer_to_list(Patch),
+     format_alpha_part(<<"-">>, AlphaPart),
+     format_alpha_part(<<"+">>, BuildPart)].
 
 -spec format_constraint(depsolver:constraint()) -> list().
 format_constraint(Pkg) when is_atom(Pkg) ->
