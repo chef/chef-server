@@ -43,14 +43,15 @@ class NginxErb
     node['private_chef']['dark_launch'][key] ? 1 : 0
   end
 
-  def xdl_couchdb(key)
-    xdl("couchdb_#{key}")
+  def not_xdl(key)
+    !node['private_chef']['dark_launch'][key] ? 1 : 0
   end
 
   def xdl_couchdb_headers
-    %w(checksums clients cookbooks environments roles data).
-      map { |key| "couchdb_#{key}=#{xdl_couchdb(key)}" }.
-      join(';')
+    xdl_couchdb_flag = not_xdl('sql_migration_phase_1')
+    sql_xdl = %w(checksums cookbooks environments roles data).map { |key| "couchdb_#{key}=#{xdl_couchdb_flag}" }
+    sql_xdl << "couchdb_clients=#{xdl('couchdb_clients')}"
+    sql_xdl.join(';')
   end
 
   def rewrite_by_xdarklaunch_couchdb(options = {})

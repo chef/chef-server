@@ -77,12 +77,12 @@
 
         -- set ngx.ctx.dl_config
         dl_config = {}
-        dl_config["couchdb_checksums"]    = <%= @helper.xdl_couchdb :checksums %>
-        dl_config["couchdb_clients"]      = <%= @helper.xdl_couchdb :clients %>
-        dl_config["couchdb_cookbooks"]    = <%= @helper.xdl_couchdb :cookbooks %>
-        dl_config["couchdb_environments"] = <%= @helper.xdl_couchdb :environments %>
-        dl_config["couchdb_roles"]        = <%= @helper.xdl_couchdb :roles %>
-        dl_config["couchdb_data"]         = <%= @helper.xdl_couchdb :data %>
+        dl_config["couchdb_checksums"]    = <%= @helper.not_xdl :sql_migration_phase_1 %>
+        dl_config["couchdb_cookbooks"]    = <%= @helper.not_xdl :sql_migration_phase_1 %>
+        dl_config["couchdb_environments"] = <%= @helper.not_xdl :sql_migration_phase_1 %>
+        dl_config["couchdb_roles"]        = <%= @helper.not_xdl :sql_migration_phase_1 %>
+        dl_config["couchdb_data"]         = <%= @helper.not_xdl :sql_migration_phase_1 %>
+        dl_config["couchdb_clients"]      = <%= @helper.xdl :couchdb_clients %>
         ngx.ctx.dl_config = dl_config
       ';
 
@@ -120,10 +120,10 @@
     # principals go to erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
 
+    <%- if node['private_chef']['lb']['cache_cookbook_files'] && !node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
     # optional caching of cookbook files by nginx
-    # Available only with couchdb_cookbooks
-    <%- if node['private_chef']['lb']['cache_cookbook_files'] && node['private_chef']['dark_launch']['couchdb_cookbooks'] -%>
-    #location ~ "^/organizations/[a-z0-9\-_]+?/cookbooks/[\w\.]+/(\d+\.\d+\.\d+|_latest)/files/.+$" {
+    # Available only with couchdb_cookbooks (sql_migration_phase_1 off)
+    location ~ "^/organizations/[a-z0-9\-_]+?/cookbooks/[\w\.]+/(\d+\.\d+\.\d+|_latest)/files/.+$" {
     <%= @helper.select_upstream("#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}",
                                 "opscode_webui",
                                 node['private_chef']['opscode-chef']['upload_proto']) %>
@@ -132,6 +132,7 @@
     }
     <%- end -%>
 
+    # Status endpoint
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/status/{0,1}.*$", :ruby) %>
 
     # Include external routes for addons
