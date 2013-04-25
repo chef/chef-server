@@ -37,11 +37,16 @@ end
 # Create the Chef User
 include_recipe "private-chef::users"
 
+sql_migration_phase_1     = node['private_chef']['dark_launch']['sql_migration_phase_1']
+# Add clients here to generate couchdb_clients feature flag in dark_launch_features.json
+dark_launch_couchdb_flags = %w(roles data cookbooks checksums environments).map {|k| ["couchdb_#{k}", !sql_migration_phase_1] }.flatten
+dark_launch_features_hash = node['private_chef']['dark_launch'].to_hash.merge(Hash[*dark_launch_couchdb_flags])
+
 file "/etc/opscode/dark_launch_features.json" do
   owner node["private_chef"]["user"]["username"]
   group "root"
   mode "0644"
-  content Chef::JSONCompat.to_json_pretty(node['private_chef']['dark_launch'].to_hash)
+  content Chef::JSONCompat.to_json_pretty(dark_launch_features_hash)
 end
 
 webui_key = OpenSSL::PKey::RSA.generate(2048) unless File.exists?('/etc/opscode/webui_pub.pem')
@@ -125,7 +130,7 @@ include_recipe "runit"
   "opscode-account",
   "opscode-solr",
   "opscode-expander",
-  "bookshelf",
+#  "bookshelf",
   "bootstrap",
   "opscode-org-creator",
   "opscode-chef",
@@ -141,6 +146,13 @@ include_recipe "runit"
   else
     include_recipe "private-chef::#{service}_disable"
   end
+end
+
+# Enable Bookshelf when sql_migration_phase_1 is enabled
+if node["private_chef"]['dark_launch']['sql_migration_phase_1']
+  include_recipe "private-chef::bookshelf"
+else
+  include_recipe "private-chef::bookshelf_disable"
 end
 
 include_recipe "private-chef::orgmapper"

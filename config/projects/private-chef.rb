@@ -16,7 +16,7 @@ dependency "private-chef-cookbooks" # used by private-chef-ctl reconfigure
 dependency "private-chef-scripts" # assorted scripts used by installed instance
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 dependency "private-chef-administration"
-dependency "nginx"
+dependency "openresty"
 dependency "runit"
 dependency "unicorn"
 

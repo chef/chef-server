@@ -132,12 +132,12 @@ requestors({
 # necessary.  A common reason is to take into account different error
 # message formatting between the two implementations.
 #
-ruby_environment_endpoint? true
-ruby_sandbox_endpoint? true
-ruby_data_endpoint? true
-ruby_role_endpoint? true
-ruby_cookbook_endpoint? true
-ruby_client_endpoint? true
+ruby_environment_endpoint? <%= !node['private_chef']['dark_launch']['sql_migration_phase_1'] %>
+ruby_sandbox_endpoint?     <%= !node['private_chef']['dark_launch']['sql_migration_phase_1'] %>
+ruby_data_endpoint?        <%= !node['private_chef']['dark_launch']['sql_migration_phase_1'] %>
+ruby_role_endpoint?        <%= !node['private_chef']['dark_launch']['sql_migration_phase_1'] %>
+ruby_cookbook_endpoint?    <%= !node['private_chef']['dark_launch']['sql_migration_phase_1'] %>
+ruby_client_endpoint?      <%=  node['private_chef']['dark_launch']['couchdb_clients'] %>
 
 old_runlists_and_search true
 

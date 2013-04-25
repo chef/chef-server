@@ -390,7 +390,9 @@ default['private_chef']['opscode-authz']['couchdb_max_conn'] = '100'
 ####
 # Bookshelf
 ####
-default['private_chef']['bookshelf']['enable'] = false
+# We are not using this for now, and instead, enable bookshelf based upon whether
+# sql_migration_phase_1 is enabled
+#default['private_chef']['bookshelf']['enable'] = false
 default['private_chef']['bookshelf']['ha'] = false
 default['private_chef']['bookshelf']['dir'] = "/var/opt/opscode/bookshelf"
 default['private_chef']['bookshelf']['data_dir'] = "/var/opt/opscode/bookshelf/data"
@@ -436,16 +438,15 @@ default['private_chef']['opscode-org-creator']['port'] = 4369
 ###
 # Dark Launch
 ###
+default['private_chef']['dark_launch']['sql_migration_phase_1'] = false
 default['private_chef']['dark_launch']["quick_start"] = false
 default['private_chef']['dark_launch']["new_theme"] = true
 default['private_chef']['dark_launch']["private-chef"] = true
 default['private_chef']['dark_launch']["sql_users"] = true
-default['private_chef']['dark_launch']["couchdb_roles"] = true
-default['private_chef']['dark_launch']["couchdb_data"] = true
-default['private_chef']['dark_launch']["couchdb_cookbooks"] = true
-default['private_chef']['dark_launch']["couchdb_checksums"] = true
-default['private_chef']['dark_launch']["couchdb_environments"] = true
-default['private_chef']['dark_launch']["couchdb_clients"] = true
+# couchdb_roles, _data, _cookbooks, _checksums, and _environments are consolidated into sql_migration_phase_1
+# When couchdb_client need to be folded into xdarklaunch, make sure to add it to dark_launch_features.json
+# generator as well located in recipes/default.rb
+default['private_chef']['dark_launch']["couchdb_clients"]        = true # Erchef clients is not finished
 default['private_chef']['dark_launch']["add_type_and_bag_to_items"] = true
 
 ###
