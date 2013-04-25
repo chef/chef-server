@@ -56,6 +56,7 @@ class NginxErb
 
   def rewrite_by_xdarklaunch_couchdb(options = {})
     # By default, use the endpoint in the location capture.
+    # There is a possibility for refining this code better for clarity.
     dl_key = options[:xdl_couchdb_flag] ? "\"couchdb_#{options[:xdl_couchdb_flag]}\"" : "\"couchdb_\" .. ngx.var.endpoint"
     options[:sql_upstream]     ||= "http://opscode_erchef"
     options[:couchdb_upstream] ||= "http://opscode_chef"
@@ -66,7 +67,6 @@ class NginxErb
             res = ngx.location.capture("/organizations/" .. ngx.var.org .. "/darklaunch",
                                        { ctx = ngx.ctx, share_all_vars = true })
 
-            ngx.req.set_header("X-Ops-DarkLaunch", ngx.var.dl_header)
             local dl_key = #{dl_key}
 
             -- we will default to routing to chef instead of erchef, so we are
