@@ -204,12 +204,9 @@ compress_maybe(Data, Type) ->
 ejson_for_indexing(#chef_data_bag_item{data_bag_name = BagName,
                                        item_name = ItemName}, Item) ->
     %% See Chef::DataBagItem#to_hash
+    %% We basically set data_bag and chef_type key against the original data bag item.
     ItemName = ej:get({<<"id">>}, Item),
-    {[{<<"name">>, <<"data_bag_item_", BagName/binary, "_", ItemName/binary>>},
-      {<<"data_bag">>, BagName},
-      {<<"chef_type">>, <<"data_bag_item">>},
-      {<<"json_class">>, <<"Chef::DataBagItem">>},
-      {<<"raw_data">>, Item}]};
+    ej:set({<<"data_bag">>}, ej:set({<<"chef_type">>}, Item, <<"data_bag_item">>), BagName);
 ejson_for_indexing(#chef_data_bag{}, <<Name/binary>>) ->
     %% We do not currently index data_bag objects in solr. This is here to allow us to take
     %% advantage of shared code paths which expect a valid convert function to get indexable
