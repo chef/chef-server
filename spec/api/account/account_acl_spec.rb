@@ -112,7 +112,7 @@ describe "ACL API" do
 
         before :each do
           if (type == "cookbooks")
-            # Bloody inconsistent API needs a PUT here
+            # Inconsistent API needs a PUT here.  We love consistency!
             put(creation_url, setup_user,
               :payload => creation_body).should look_like({
                 :status => 200
@@ -141,7 +141,7 @@ describe "ACL API" do
             end
           end
 
-          context "normal user" do
+          context "default normal user" do
             it "returns 403" do
               get(request_url, platform.non_admin_user).should look_like({
                   :status => 403
@@ -149,7 +149,7 @@ describe "ACL API" do
             end
           end
 
-          context "client" do
+          context "default client" do
             it "returns 403" do
               get(request_url, platform.non_admin_client).should look_like({
                   :status => 403
@@ -173,9 +173,9 @@ describe "ACL API" do
             end
           end
 
-          ["create", "read", "update", "delete", "grant"].each do |perm|
-            context "when normal user granted #{perm}" do
-              it "can get object ACL" do
+          context "when normal user granted all permissions except GRANT" do
+            it "returns 403" do
+              ["create", "read", "update", "delete"].each do |perm|
                 put("#{request_url}/#{perm}", platform.admin_user,
                   :payload => {perm => {
                       "actors" => [platform.non_admin_user.name,
@@ -184,10 +184,60 @@ describe "ACL API" do
                     }}).should look_like({
                     :status => 200
                   })
-                get(request_url, platform.admin_user).should look_like({
+              end
+              get(request_url, platform.non_admin_user).should look_like({
+                  :status => 403
+                })
+            end
+          end
+
+          context "when normal client granted all permisions except GRANT" do
+            it "returns 403" do
+              ["create", "read", "update", "delete"].each do |perm|
+                put("#{request_url}/#{perm}", platform.admin_user,
+                  :payload => {perm => {
+                      "actors" => [platform.non_admin_client.name,
+                        platform.admin_user.name, "pivotal"],
+                      "groups" => ["admins"]
+                    }}).should look_like({
                     :status => 200
                   })
               end
+              get(request_url, platform.non_admin_client).should look_like({
+                  :status => 403
+                })
+            end
+          end
+
+          context "when normal user granted GRANT permission" do
+            it "can get object ACL" do
+              put("#{request_url}/grant", platform.admin_user,
+                :payload => {"grant" => {
+                    "actors" => [platform.non_admin_user.name,
+                      platform.admin_user.name, "pivotal"],
+                    "groups" => ["admins"]
+                  }}).should look_like({
+                  :status => 200
+                })
+              get(request_url, platform.non_admin_user).should look_like({
+                  :status => 200
+                })
+            end
+          end
+
+          context "when normal client granted GRANT permision" do
+            it "can get object ACL" do
+              put("#{request_url}/grant", platform.admin_user,
+                :payload => {"grant" => {
+                    "actors" => [platform.non_admin_client.name,
+                      platform.admin_user.name, "pivotal"],
+                    "groups" => ["admins"]
+                  }}).should look_like({
+                  :status => 200
+                })
+              get(request_url, platform.non_admin_client).should look_like({
+                  :status => 200
+                })
             end
           end
         end # context GET /<type>/<name>/_acl
@@ -268,7 +318,7 @@ describe "ACL API" do
                 end
               end
 
-              context "normal user" do
+              context "default normal user" do
                 it "returns 403" do
                   put(permission_request_url, platform.non_admin_user,
                     :payload => update_body).should look_like({
@@ -281,7 +331,7 @@ describe "ACL API" do
                 end
               end
 
-              context "client" do
+              context "default client" do
                 it "returns 403" do
                   put(permission_request_url, platform.non_admin_client,
                     :payload => update_body).should look_like({
@@ -320,7 +370,7 @@ describe "ACL API" do
                 end
               end
 
-              context "normal user with all permissions except grant" do
+              context "normal user with all permissions except GRANT" do
                 it "returns 403" do
                   ["create", "read", "update", "delete"].each do |perm|
                     put("#{request_url}/#{perm}", platform.admin_user,
@@ -340,7 +390,7 @@ describe "ACL API" do
                 end
               end
 
-              context "normal user with grant permission" do
+              context "normal user with GRANT permission" do
                 it "can update ACL" do
                   put("#{request_url}/grant", platform.admin_user,
                     :payload => {"grant" => {
@@ -352,6 +402,44 @@ describe "ACL API" do
                     })
 
                   put(permission_request_url, platform.non_admin_user,
+                    :payload => update_body).should look_like({
+                      :status => 200
+                    })
+                end
+              end
+
+              context "normal client with all permissions except GRANT" do
+                it "returns 403" do
+                  ["create", "read", "update", "delete"].each do |perm|
+                    put("#{request_url}/#{perm}", platform.admin_user,
+                      :payload => {perm => {
+                          "actors" => [platform.non_admin_client.name,
+                            platform.admin_user.name, "pivotal"],
+                          "groups" => []
+                        }}).should look_like({
+                        :status => 200
+                      })
+                  end
+
+                  put(permission_request_url, platform.non_admin_client,
+                    :payload => update_body).should look_like({
+                      :status => 403
+                    })
+                end
+              end
+
+              context "normal client with GRANT permission" do
+                it "can update ACL" do
+                  put("#{request_url}/grant", platform.admin_user,
+                    :payload => {"grant" => {
+                        "actors" => [platform.non_admin_client.name,
+                          platform.admin_user.name, "pivotal"],
+                        "groups" => []
+                      }}).should look_like({
+                      :status => 200
+                    })
+
+                  put(permission_request_url, platform.non_admin_client,
                     :payload => update_body).should look_like({
                       :status => 200
                     })
