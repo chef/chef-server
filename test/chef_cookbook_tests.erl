@@ -149,56 +149,29 @@ bad_dependencies_test_() ->
 
     ].
 
+% http://tickets.opscode.com/browse/CHEF-3976
 providing_constraint_test_() ->
     CB0 = basic_cookbook(<<"php">>, <<"1.2.3">>),
     NameVer = {<<"php">>, <<"1.2.3">>},
-    SetProviding = fun(Recipe) ->
-        ej:set({<<"metadata">>, <<"providing">>}, CB0,
-               {[
-                   {Recipe, <<"> 1.0.0">>}
-                ]})
-           end,
+    SetProviding = fun(Providing) ->
+                           ej:set({<<"metadata">>, <<"providing">>}, CB0, Providing)
+                   end,
+    AllowedValues = [<<"cats::sleep">>,
+                     <<"here(:kitty, :time_to_eat)">>,
+                     <<"service[snuggle]">>,
+                     <<"">>,
+                     1,
+                     true,
+                     null,
+                     [<<"arrays allowed">>],
+                     {[{<<"key">>, <<"objects_allowed">>}]}],
+    %% bad values tests skipped (providing should accept anything)
+    %% allowed value tests
     [
-     {"default recipe ok",
       fun() ->
-              CB = SetProviding(<<"nginx">>),
+              CB = SetProviding(P),
               ?assertEqual({ok, CB}, chef_cookbook:validate_cookbook(CB, NameVer))
-      end},
-     {"recipe with :: ok",
-      fun() ->
-              CB = SetProviding(<<"nginx::foo">>),
-              ?assertEqual({ok, CB}, chef_cookbook:validate_cookbook(CB, NameVer))
-      end},
-     {"empty recipe NOT ok",
-      fun() ->
-              CB = SetProviding(<<"">>),
-              ?assertThrow(#ej_invalid{type = object_key},
-                           chef_cookbook:validate_cookbook(CB, NameVer))
-      end},
-     {"recipe with single : NOT ok",
-      fun() ->
-              CB = SetProviding(<<"nginx:foo">>),
-              ?assertThrow(#ej_invalid{type = object_key},
-                           chef_cookbook:validate_cookbook(CB, NameVer))
-      end},
-     {"recipe ending in :: NOT ok",
-      fun() ->
-              CB = SetProviding(<<"nginx::">>),
-              ?assertThrow(#ej_invalid{type = object_key},
-                           chef_cookbook:validate_cookbook(CB, NameVer))
-      end},
-     {"recipe with second :: NOT ok",
-      fun() ->
-              CB = SetProviding(<<"nginx::foo::bar">>),
-              ?assertThrow(#ej_invalid{type = object_key},
-                           chef_cookbook:validate_cookbook(CB, NameVer))
-      end},
-     {"recipe with bad characters NOT ok",
-      fun() ->
-              CB = SetProviding(<<"nginx foo+bar">>),
-              ?assertThrow(#ej_invalid{type = object_key},
-                           chef_cookbook:validate_cookbook(CB, NameVer))
-      end}
+      end || P <- AllowedValues
     ].
 
 assemble_cookbook_ejson_test_() ->
