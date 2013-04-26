@@ -30,7 +30,7 @@ Hosts that you'll need access to during the migration:
 1. Start up chef-mover
 
    ```bash
-   cd /srv/mover
+   cd /srv/chef_mover/current
    bin/mover console
    ```
 
@@ -42,102 +42,18 @@ Hosts that you'll need access to during the migration:
    moser_acct_processor:process_account_file().
    ```
 
-   This should take roughly **INSERT_TIME_HERE** minutes.
+   This should take roughly **10 minutes**. Alternatively, if you've previously loaded the account database into a DETS table, you can simply open the tables:
 
-## 0.4 Maintenance Preparation
-
-1. Edit `xdarklaunch` DataBag
-
-   ```bash
-   export OPS_ENV=rs-preprod
-   knife edit databags/xdarklaunch/$OPS_ENV.json
-   ```
-
-   In your editor, modify the following:
-
-   ```javascript
-   {
-     "id": "rs-preprod",
-     // default values should already be there
-     "dl_default": {
-       "couchdb_checksums": true,
-       "coudhdb_clients": true,
-       "couchdb_cookbooks": true,
-       "couchdb_environments": true,
-       "couchdb_roles": true,
-       "couchdb_data": true,
-       "503_mode": false
-     },
-     "dl_orgname": {
-       // your orgname below
-       "$ORG_NAME": {
-         "503_mode": true
-       }
-     }
-   }
+   ```erlang
+   moser_acct_processor:open_account().
    ```
 
 # 1. Migration
-
-The clock for downtime starts as soon the following batch of `chef-client` runs finishes.
-
-## 1.1 Initiate Maintenance Mode
-
-1. Run `chef-client` on all `opscode-lb` Nodes
-
-   _This applies to the internal and external nodes referenced above._
-
-   ```bash
-   # $OPS_ENV is the same as above: rs-prod or rs-preprod
-   sudo chef-client -o "role[$OPS_ENV],recipe[opscode-lb::lua_scripts]"
-   ```
-
-## 1.2 Migration
 
 1. Run the Migration
 
    From `mover` console:
 
    ```erlang
-   moser_converter:convert_org("$ORG_NAME").
-   ```
-
-## 1.3 Initiate Erchef Mode and Disable Maintenance Mode
-
-1. Edit `xdarklaunch` DataBag
-
-   ```bash
-   export OPS_ENV=rs-preprod
-   knife edit databags/xdarklaunch/$OPS_ENV.json
-   ```
-
-   In your editor, modify the following:
-
-   ```javascript
-   {
-     "id": "rs-preprod",
-     //
-     // ... default values here
-     //
-     "dl_orgname": {
-       // your orgname below
-       "$ORG_NAME": {
-         "couchdb_checksums": true,
-         "couchdb_cookbooks": true,
-         "couchdb_environments": true,
-         "couchdb_roles": true,
-         "couchdb_data": true
-         // NOTE:
-         // * 503_mode is removed and set to default
-         // * clients are not out of couchdb yet (this may change)
-       }
-     }
-   }
-   ```
-
-1. Run `chef-client` on all the `opscode-lb` Nodes
-
-   ```bash
-   # $OPS_ENV is the same as above: rs-prod or rs-preprod
-   sudo chef-client -o "role[$OPS_ENV],recipe[opscode-lb::lua_scripts]"
+   mover_org_migrator_sup:start_org_migrator("$ORG_NAME").
    ```
