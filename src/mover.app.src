@@ -8,6 +8,7 @@
                   sasl,
                   crypto,
                   inets,
-                  ibrowse]},
+                  ibrowse,
+                  lager]},
   {mod, {mover_app, []}}
  ]}.

@@ -9,12 +9,11 @@ Erchef/PgSQL using moser and darklaunch.
 
 ### One-time configuration ###
 
-1. Obtain git checkouts of [this repo][] and the [moser][] repo and ensure they
-   are in the same parent directory.
+1. Obtain git checkouts of [this repo][] and the [moser][] repo and ensure they are in the same parent directory.
 
-2. Add an export for an `OPSCODE_PLATFORM_REPO` environment variable
-   to your shell config that points to the path of your **rs-preprod**
-   checkout of the [opscode-platform-cookbooks][] repo.
+1. Add an export for an `OPSCODE_PLATFORM_REPO` environment variable to your shell config that points to the path of your **rs-preprod** checkout of the [opscode-platform-cookbooks][] repo.
+
+1. Obtain couchdb data from either preprod or a local dev-vm and put the `.couch` files in a sub-directory of this repo named `moser-couch-data`.
 
 ### Running mover in a vm for dev work ###
 
@@ -32,11 +31,25 @@ opscode_chef schema via chef-sql-schema.
    cd chef-mover
    bundle install --binstubs
    ```
-2. Start a vm
+1. **TEMPORARY:** Pull in `opscode-postgresql` Cookbook Fixes
+   Seth Falcon has a branch of `opscode-platform-cookbooks` that fixes issues with dev-mode for the `opscode-postgresql` cookbook. The branch is `sf/pg-dev-mode-fixes`. Check out this branch and the update your Berksfile:
+   ```diff
+   diff --git a/Berksfile b/Berksfile
+   index e9f7001..3559ce3 100644
+   --- a/Berksfile
+   +++ b/Berksfile
+   @@ -3,3 +3,4 @@ site :opscode
+
+    cookbook "opscode-dev-shim", :git => "git@github.com:opscode-cookbooks/opscode-dev-shim"
+    cookbook "opscode-chef-mover", "~> 0.2.0"
+   +cookbook "opscode-postgresql", :path => "~/oc/environments/rs-preprod/cookbooks/opscode-postgresql"
+   \ No newline at end of file
+   ```
+1. Start a vm
    ```
    bin/vagrant up
    ```
-3. Log in, build release, start mover
+1. Log in, build release, start mover
    ```
    bin/vagrant ssh
    cd /srv/mover-build
@@ -45,6 +58,7 @@ opscode_chef schema via chef-sql-schema.
    cp sys.config rel/mover/etc
    cd rel/mover
    bin/mover console
+   ```
 
 #### Authz Id Lookup Passthrough Configuration
 

@@ -69,6 +69,7 @@ Vagrant::Config.run do |config|
   # allow creating symlinks in /vagrant
   config.vm.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
   config.vm.share_folder "moser", "/mnt/moser", "../moser"
+  config.vm.share_folder "decouch", "/mnt/decouch", "../decouch"
   config.vm.provision :shell, :inline => <<-INSTALL_OMNIBUS
   if [ ! -d "/opt/chef" ] ||
      [ ! $(chef-solo --v | awk "{print \\$2}") = "#{OMNIBUS_CHEF_VERSION}" ]
@@ -86,14 +87,17 @@ Vagrant::Config.run do |config|
           "postgres" => "iloverandompasswordsbutthiswilldo"
         }
       },
-      "mover" => { "dev_mode" => true }
+      "mover" => { "dev_mode" => true },
+      "munin" => { "stub" => true }
     }
     chef.data_bags_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/data_bags"
     chef.roles_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/roles"
     chef.run_list = [
       "recipe[opscode-dev-shim]",
       "recipe[opscode-chef-mover::dev]",
-      "recipe[opscode-chef-mover::default]"
+      "recipe[opscode-chef-mover::default]",
+      "recipe[opscode-xdarklaunch::dev]",
+      "recipe[opscode-xdarklaunch::default]"
     ]
   end
 end
