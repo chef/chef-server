@@ -111,11 +111,10 @@ data_bag_item_ejson_for_indexing_test() ->
                 {<<"a_key">>, <<"a_value">>}]},
     Item = #chef_data_bag_item{data_bag_name = <<"the_bag_name">>,
                                item_name = <<"the_item_name">>},
-    Expected = {[{<<"name">>, <<"data_bag_item_the_bag_name_the_item_name">>},
-                {<<"data_bag">>, <<"the_bag_name">>},
-                {<<"chef_type">>, <<"data_bag_item">>},
-                {<<"json_class">>, <<"Chef::DataBagItem">>},
-                {<<"raw_data">>, RawItem}]},
+    Expected = {[{<<"id">>, <<"the_item_name">>},
+                 {<<"a_key">>, <<"a_value">>},
+                 {<<"chef_type">>, <<"data_bag_item">>},
+                 {<<"data_bag">>, <<"the_bag_name">>}]},
     Got = chef_object:ejson_for_indexing(Item, RawItem),
     ?assertEqual(Expected, Got).
 
