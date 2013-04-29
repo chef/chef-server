@@ -289,6 +289,106 @@ describe "ACL API", :focus do
           end
         end
 
+        context "malformed requests" do
+          context "invalid actor" do
+            let(:request_body) {{
+                permission => {
+                  "actors" => ["pivotal", "bogus", platform.admin_user.name,
+                    platform.non_admin_user.name],
+                  "groups" => groups
+                }
+              }}
+
+            it "returns 400" do
+              pending "it just adds it instead" do
+                put(request_url, platform.admin_user,
+                  :payload => request_body).should look_like({
+                    :status => 400
+                  })
+                get(acl_url, platform.admin_user).should look_like({
+                    :status => 200,
+                    :body_exact => default_body
+                  })
+              end
+            end
+          end
+
+          context "invalid group" do
+            let(:request_body) {{
+                permission => {
+                  "actors" => ["pivotal", platform.admin_user.name,
+                    platform.non_admin_user.name],
+                  "groups" => ["admins", "bogus"]
+                }
+              }}
+
+            it "returns 400" do
+              put(request_url, platform.admin_user,
+                :payload => request_body).should look_like({
+                  :status => 400
+                })
+              get(acl_url, platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => default_body
+                })
+            end
+          end
+
+          context "missing actors" do
+            let(:request_body) {{
+                permission => {
+                  "groups" => groups
+                }
+              }}
+
+            it "returns 400" do
+              put(request_url, platform.admin_user,
+                :payload => request_body).should look_like({
+                  :status => 400
+                })
+              get(acl_url, platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => default_body
+                })
+            end
+          end
+
+          context "missing groups" do
+            let(:request_body) {{
+                permission => {
+                  "actors" => ["pivotal", "bogus", platform.admin_user.name,
+                    platform.non_admin_user.name]
+                }
+              }}
+
+            it "returns 400" do
+              put(request_url, platform.admin_user,
+                :payload => request_body).should look_like({
+                  :status => 400
+                })
+              get(acl_url, platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => default_body
+                })
+            end
+          end
+
+          context "empty body" do
+            let(:request_body) { {} }
+
+            it "returns 400" do
+              put(request_url, platform.admin_user,
+                :payload => request_body).should look_like({
+                  :status => 400
+                })
+              get(acl_url, platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => default_body
+                })
+            end
+          end
+        end # context malformed requests
+
         context "with modified ACLs" do
           after :each do
             ["create", "read", "update", "delete", "grant"].each do |perm|
@@ -783,6 +883,106 @@ describe "ACL API", :focus do
                     })
                 end
               end
+
+              context "malformed requests" do
+                context "invalid actor" do
+                  let(:update_body) {{
+                      permission => {
+                        "actors" => ["pivotal", "bogus", platform.admin_user.name,
+                          platform.non_admin_user.name],
+                        "groups" => ["admins", "users", "clients"]
+                      }
+                    }}
+
+                  it "returns 400" do
+                    pending "it just adds it instead" do
+                      put(permission_request_url, platform.admin_user,
+                        :payload => update_body).should look_like({
+                          :status => 400
+                        })
+                      get(request_url, platform.admin_user).should look_like({
+                          :status => 200,
+                          :body_exact => acl_body
+                        })
+                    end
+                  end
+                end
+
+                context "invalid group" do
+                  let(:update_body) {{
+                      permission => {
+                        "actors" => ["pivotal", platform.admin_user.name,
+                          platform.non_admin_user.name],
+                        "groups" => ["admins", "users", "clients", "bogus"]
+                      }
+                    }}
+
+                  it "returns 400" do
+                    put(permission_request_url, platform.admin_user,
+                      :payload => update_body).should look_like({
+                        :status => 400
+                      })
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body_exact => acl_body
+                      })
+                  end
+                end
+
+                context "missing actors" do
+                  let(:update_body) {{
+                      permission => {
+                        "groups" => ["admins", "users", "clients"]
+                      }
+                    }}
+
+                  it "returns 400" do
+                    put(permission_request_url, platform.admin_user,
+                      :payload => update_body).should look_like({
+                        :status => 400
+                      })
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body_exact => acl_body
+                      })
+                  end
+                end
+
+                context "missing groups" do
+                  let(:update_body) {{
+                      permission => {
+                        "actors" => ["pivotal", platform.admin_user.name,
+                          platform.non_admin_user.name]
+                      }
+                    }}
+
+                  it "returns 400" do
+                    put(permission_request_url, platform.admin_user,
+                      :payload => update_body).should look_like({
+                        :status => 400
+                      })
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body_exact => acl_body
+                      })
+                  end
+                end
+
+                context "empty body" do
+                  let(:update_body) { {} }
+
+                  it "returns 400" do
+                    put(permission_request_url, platform.admin_user,
+                      :payload => update_body).should look_like({
+                        :status => 400
+                      })
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body_exact => acl_body
+                      })
+                  end
+                end
+              end # context malformed requests
 
               context "normal user with all permissions except GRANT" do
                 it "returns 403" do
