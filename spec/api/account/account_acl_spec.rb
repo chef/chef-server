@@ -71,7 +71,9 @@ describe "ACL API", :focus do
               })
           end
           # Make sure everything's the same again -- this could really screw up the
-          # rest of the test suite if the permissions aren't right
+          # rest of the test suite if the permissions aren't right -- in the long
+          # run this is an obvious candidate for moving to a different org when we
+          # support multi-org tests.
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
               :body_exact => acl_body
