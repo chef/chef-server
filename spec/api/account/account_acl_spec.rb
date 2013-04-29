@@ -18,7 +18,6 @@ describe "ACL API", :focus do
 
       context "admin user" do
         it "can get object ACL" do
-          puts request_url
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
               :body_exact => acl_body
