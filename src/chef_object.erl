@@ -769,4 +769,3 @@ valid_public_key(PublicKey) ->
 -spec throw_invalid_fun_match(binary()) -> none().
 throw_invalid_fun_match(Message) ->
     throw(#ej_invalid{type = fun_match, msg = Message}).
-
