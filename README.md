@@ -8,7 +8,6 @@ Erchef/PgSQL using moser and darklaunch.
 ## Dev Setup ##
 
 ### One-time configuration ###
-
 1. Obtain git checkouts of [this repo][] and the [moser][] repo and ensure they are in the same parent directory.
 
 1. Add an export for an `OPSCODE_PLATFORM_REPO` environment variable to your shell config that points to the path of your **rs-preprod** checkout of the [opscode-platform-cookbooks][] repo.
@@ -31,20 +30,6 @@ opscode_chef schema via chef-sql-schema.
    cd chef-mover
    bundle install --binstubs
    ```
-1. **TEMPORARY:** Pull in `opscode-postgresql` Cookbook Fixes
-   Seth Falcon has a branch of `opscode-platform-cookbooks` that fixes issues with dev-mode for the `opscode-postgresql` cookbook. The branch is `sf/pg-dev-mode-fixes`. Check out this branch and the update your Berksfile:
-   ```diff
-   diff --git a/Berksfile b/Berksfile
-   index e9f7001..3559ce3 100644
-   --- a/Berksfile
-   +++ b/Berksfile
-   @@ -3,3 +3,4 @@ site :opscode
-
-    cookbook "opscode-dev-shim", :git => "git@github.com:opscode-cookbooks/opscode-dev-shim"
-    cookbook "opscode-chef-mover", "~> 0.2.0"
-   +cookbook "opscode-postgresql", :path => "~/oc/environments/rs-preprod/cookbooks/opscode-postgresql"
-   \ No newline at end of file
-   ```
 1. Start a vm
    ```
    bin/vagrant up
@@ -64,16 +49,17 @@ opscode_chef schema via chef-sql-schema.
 
 In order for authz id lookup passthrough to couchdb to work in the dev
 VM you will need to ensure that there is a chef_db configuration block
-containing entries for `couch_db_host` and `couch_db_port`
+containing entries for ``couch_db_host`` and ``couch_db_port``
 
 Note that you can test without a valid couchdb configuration if you
 don't need authz id passthru functionality.
 
 If you're testing locally in the vm instance above, there is no valid couchdb
-configuration available.  You can test using preprod as follows assuming 
-your dev laptop is connected remotely: 
-* `bin/vagrant ssh`
-* Change /srv/mover-build/rel/mover/etc/sys.config: `chef_db { couchdb_host = "localhost" }`
+configuration available.  You can test using preprod as follows assuming
+your dev laptop is connected remotely:
+
+* ``bin/vagrant ssh``
+* Change /srv/mover-build/rel/mover/etc/sys.config: ``chef_db { couchdb_host = "localhost" }``
 * add to (or create) ~/.ssh/config:
 
         Host *
@@ -84,7 +70,7 @@ your dev laptop is connected remotely:
         ssh -L 5984:localhost:5984 $YOURUSERNAME@gateway.opscode.com
         ssh -L 5984:localhost:5984 $PREPROD-COUCHDB-HOST
 
-Leave this session open for the duration of your testing. 
+Leave this session open for the duration of your testing.
 If you are on-site at HQ you can skip the intermediary tunnel through
 gateway.opscode.com
 

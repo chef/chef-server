@@ -12,16 +12,24 @@
          enable_org/1,
          org_to_sql/2]).
 
+-include_lib("moser/include/moser_state.hrl").
+
+disable_org(#migration_state{org_name = OrgName} = MS) ->
+    {disable_org(OrgName), MS};
 disable_org(OrgName) ->
     OrgKey = iolist_to_binary(["dl_org_", OrgName]),
     eredis:q(mover_eredis_client, ["HSET", OrgKey, "503_mode", "true"]),
     ok.
 
+enable_org(#migration_state{org_name = OrgName} = MS) ->
+    {enable_org(OrgName), MS};
 enable_org(OrgName) ->
     OrgKey = iolist_to_binary(["dl_org_", OrgName]),
     eredis:q(mover_eredis_client, ["HSET", OrgKey, "503_mode", "false"]),
     ok.
 
+org_to_sql(#migration_state{org_name = OrgName} = MS, Components) ->
+    {org_to_sql(OrgName, Components), MS};
 org_to_sql(OrgName, Components) ->
     OrgKey = iolist_to_binary(["dl_org_", OrgName]),
     PropKVs = lists:foldl(fun(X, Accum) -> ["couchdb_" ++ atom_to_list(X), "false" | Accum] end, [], Components),

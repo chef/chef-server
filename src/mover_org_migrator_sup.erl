@@ -3,9 +3,9 @@
 %% @author Marc Paradise <marc@opscode.com>
 %% @copyright 2011-2012 Opscode, Inc.
 
-% @doc a throwaway supervisor to allow for testing of mover_org_migrator 
+% @doc a throwaway supervisor to allow for testing of mover_org_migrator
 
--module(mover_org_migrator_sup). 
+-module(mover_org_migrator_sup).
 
 -behaviour(supervisor).
 
@@ -20,6 +20,6 @@ init([]) ->
                  temporary, 10000, worker, [mover_org_migrator]},
     {ok, {{simple_one_for_one, 10, 10}, [Spec]}}.
 
-start_org_migrator(OrgName) -> 
-    supervisor:start_child(?SERVER, [OrgName]).
-
+start_org_migrator(OrgName) ->
+    {ok, MS} = moser_state_tracker:fetch_state(OrgName),
+    supervisor:start_child(?SERVER, [MS]).
