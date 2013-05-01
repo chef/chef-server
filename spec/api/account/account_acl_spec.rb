@@ -594,7 +594,7 @@ describe "ACL API" do
         end
 
         after :each do
-          delete(deletion_url, setup_user).should look_like({
+          delete(deletion_url, platform.admin_user).should look_like({
               :status => 200
             })
         end
