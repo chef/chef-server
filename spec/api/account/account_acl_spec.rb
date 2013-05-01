@@ -1,6 +1,6 @@
 require 'pedant/rspec/common'
 
-describe "ACL API" do
+describe "ACL API", :focus do
   context "/organization/_acl endpoint" do
     let(:request_url) { api_url("organization/_acl") }
 
@@ -98,7 +98,7 @@ describe "ACL API" do
         end
 
         context "when normal client granted all permisions except GRANT" do
-          it "returns 403" do
+          it "returns 403", :smoke do
             ["create", "read", "update", "delete"].each do |perm|
               put("#{request_url}/#{perm}", platform.admin_user,
                 :payload => {perm => {
@@ -130,7 +130,7 @@ describe "ACL API" do
         end
 
         context "when normal client granted GRANT permision" do
-          it "can get ACL" do
+          it "can get ACL", :smoke do
             put("#{request_url}/grant", platform.admin_user,
               :payload => {"grant" => {
                   "actors" => [platform.non_admin_client.name, "pivotal"],
@@ -182,6 +182,14 @@ describe "ACL API" do
 
   ["create", "read", "update", "delete", "grant"].each do |permission|
     context "/organization/_acl/#{permission} endpoint" do
+      # Don't run a smoke test test for every permission (to keep the smoke test count
+      # from being unnecessarily repetetive)
+      if (permission == "read")
+        smoketest = :smoke
+      else
+        smoketest = :notsmoke
+      end
+
       let(:acl_url) { api_url("organization/_acl") }
       let(:request_url) { api_url("organization/_acl/#{permission}") }
 
@@ -412,7 +420,8 @@ describe "ACL API" do
           end
 
           context "when normal user granted all permissions except GRANT" do
-            it "returns 403" do
+            # We only run the smoke tests for read permission (set above)
+            it "returns 403", smoketest do
               ["create", "read", "update", "delete"].each do |perm|
                 put("#{acl_url}/#{perm}", platform.admin_user,
                   :payload => {perm => {
@@ -430,6 +439,7 @@ describe "ACL API" do
           end
 
           context "when normal client granted all permisions except GRANT" do
+            # We only run the smoke tests for read permission (set above)
             it "returns 403" do
               ["create", "read", "update", "delete"].each do |perm|
                 put("#{acl_url}/#{perm}", platform.admin_user,
@@ -448,7 +458,8 @@ describe "ACL API" do
           end
 
           context "when normal user granted GRANT permission" do
-            it "can modify ACL" do
+            # We only run the smoke tests for read permission (set above)
+            it "can modify ACL", smoketest do
               put("#{acl_url}/grant", platform.admin_user,
                 :payload => {"grant" => {
                     "actors" => [platform.non_admin_user.name, "pivotal"],
@@ -464,6 +475,7 @@ describe "ACL API" do
           end
 
           context "when normal client granted GRANT permision" do
+            # We only run the smoke tests for read permission (set above)
             it "can modify ACL" do
               put("#{acl_url}/grant", platform.admin_user,
                 :payload => {"grant" => {
@@ -523,6 +535,7 @@ describe "ACL API" do
     ["clients", "groups", "containers", "data", "nodes", "roles", "environments",
       "cookbooks"].each do |type|
       context "for #{type} type" do
+
         let(:new_object) { "new-object" }
         let(:creation_url) { api_url(type) }
         let(:deletion_url) { api_url("#{type}/#{new_object}") }
@@ -792,6 +805,14 @@ describe "ACL API" do
 
         ["create", "read", "update", "delete", "grant"].each do |permission|
           context "/#{type}/<name>/_acl/#{permission} endpoint" do
+            # Don't run a smoke test test for every permission (to keep the smoke
+            # test count from being unnecessarily repetetive). Also avoid minor
+            # overlap with somewhat similar group and container tests
+            if (permission == "update" && type != "groups" && type != "containers")
+              smoketest = :smoke
+            else
+              smoketest = :nosmoke
+            end
 
             let(:permission_request_url) { "#{request_url}/#{permission}" }
 
@@ -986,7 +1007,8 @@ describe "ACL API" do
               end # context malformed requests
 
               context "normal user with all permissions except GRANT" do
-                it "returns 403" do
+                # We only run the smoke tests for read permission (set above)
+                it "returns 403", smoketest do
                   ["create", "read", "update", "delete"].each do |perm|
                     put("#{request_url}/#{perm}", platform.admin_user,
                       :payload => {perm => {
@@ -1006,7 +1028,8 @@ describe "ACL API" do
               end
 
               context "normal user with GRANT permission" do
-                it "can update ACL" do
+                # We only run the smoke tests for read permission (set above)
+                it "can update ACL", smoketest do
                   put("#{request_url}/grant", platform.admin_user,
                     :payload => {"grant" => {
                         "actors" => [platform.non_admin_user.name,

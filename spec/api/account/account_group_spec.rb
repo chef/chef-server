@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
 
-describe "opscode-account groups" do
+describe "opscode-account groups", :focus do
   context "/groups endpoint" do
     let(:request_url) { api_url("groups") }
 
@@ -16,7 +16,7 @@ describe "opscode-account groups" do
         }}
 
       context "admin user" do
-        it "can get groups" do
+        it "can get groups", :smoke do
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
               :body => list_of_groups
@@ -43,7 +43,7 @@ describe "opscode-account groups" do
       end
 
       context "outside user" do
-        it "returns 403" do
+        it "returns 403", :smoke do
           get(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -99,7 +99,7 @@ describe "opscode-account groups" do
 
       context "permissions" do
         context "admin user" do
-          it "can create group" do
+          it "can create group", :smoke do
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 201,
@@ -148,7 +148,7 @@ describe "opscode-account groups" do
         end
 
         context "outside user" do
-          it "returns 403" do
+          it "returns 403", :smoke do
             post(request_url, outside_user,
               :payload => request_body).should look_like({
                 :status => 403
@@ -439,7 +439,7 @@ describe "opscode-account groups" do
 
     context "GET /groups/<name>" do
       context "admin user" do
-        it "can get group" do
+        it "can get group", :smoke do
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
               :body_exact => default_group_body
@@ -465,7 +465,7 @@ describe "opscode-account groups" do
         end
       end
 
-      context "outside user" do
+      context "outside user", :smoke do
         it "returns 403" do
           get(request_url, outside_user).should look_like({
               :status => 403
@@ -484,7 +484,7 @@ describe "opscode-account groups" do
 
     context "DELETE /groups/<name>" do
       context "admin user" do
-        it "can delete group" do
+        it "can delete group", :smoke do
           delete(request_url, platform.admin_user).should look_like({
               :status => 200
             })
@@ -517,7 +517,7 @@ describe "opscode-account groups" do
         end
       end
 
-      context "outside user" do
+      context "outside user", :smoke do
         it "returns 403" do
           delete(request_url, outside_user).should look_like({
               :status => 403
@@ -573,7 +573,7 @@ describe "opscode-account groups" do
         end
 
         context "normal user with update ACE" do
-          it "can update group" do
+          it "can update group", :smoke do
             put(api_url("groups/#{test_group}/_acl/update"), platform.admin_user,
               :payload => {"update" => {
                   "actors" => [platform.non_admin_user.name,
@@ -595,7 +595,7 @@ describe "opscode-account groups" do
         end
 
         context "normal user without update ACE" do
-          it "returns 403" do
+          it "returns 403", :smoke do
             put(request_url, platform.non_admin_user,
               :payload => new_group_payload).should look_like({
                 :status => 403

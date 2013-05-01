@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
 
-describe "opscode-account containers" do
+describe "opscode-account containers", :focus do
   context "/containers endpoint" do
     let(:request_url) { api_url("containers") }
 
@@ -21,7 +21,7 @@ describe "opscode-account containers" do
         }}
 
       context "admin user" do
-        it "can get containers" do
+        it "can get containers", :smoke do
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
               :body_exact => list_of_containers
@@ -48,7 +48,7 @@ describe "opscode-account containers" do
       end
 
       context "outside user" do
-        it "returns 403" do
+        it "returns 403", :smoke do
           get(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -115,7 +115,7 @@ describe "opscode-account containers" do
 
       context "permissions" do
         context "admin user" do
-          it "can create container" do
+          it "can create container", :smoke do
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 201,
@@ -164,7 +164,7 @@ describe "opscode-account containers" do
         end
 
         context "outside user" do
-          it "returns 403" do
+          it "returns 403", :smoke do
             post(request_url, outside_user,
               :payload => request_body).should look_like({
                 :status => 403
@@ -541,7 +541,7 @@ describe "opscode-account containers" do
 
     context "GET /containers/<name>" do
       context "admin user" do
-        it "can get container" do
+        it "can get container", :smoke do
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
               :body_exact => default_container_body
@@ -566,7 +566,7 @@ describe "opscode-account containers" do
       end
 
       context "outside user" do
-        it "returns 403" do
+        it "returns 403", :smoke do
           get(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -584,7 +584,7 @@ describe "opscode-account containers" do
 
     context "DELETE /containers/<name>" do
       context "admin user" do
-        it "can delete container" do
+        it "can delete container", :smoke do
           delete(request_url, platform.admin_user).should look_like({
               :status => 200
             })
@@ -618,7 +618,7 @@ describe "opscode-account containers" do
       end
 
       context "outside user" do
-        it "returns 403" do
+        it "returns 403", :smoke do
           delete(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -663,7 +663,7 @@ describe "opscode-account containers" do
         end
 
         context "normal user with update ACE" do
-          it "can update container" do
+          it "can update container", :smoke do
             put(api_url("containers/#{test_container}/_acl/update"), platform.admin_user,
               :payload => {"update" => {
                   "actors" => [platform.non_admin_user.name, "pivotal"],
@@ -684,7 +684,7 @@ describe "opscode-account containers" do
         end
 
         context "normal user without update ACE" do
-          it "returns 403" do
+          it "returns 403", :smoke do
             put(request_url, platform.non_admin_user,
               :payload => new_container_payload).should look_like({
                 :status => 403
