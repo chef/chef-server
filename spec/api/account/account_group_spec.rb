@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
 
-describe "opscode-account groups", :focus do
+describe "opscode-account groups" do
   context "/groups endpoint" do
     let(:request_url) { api_url("groups") }
 
