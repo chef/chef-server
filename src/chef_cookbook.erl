@@ -146,10 +146,9 @@ cookbook_spec(CBName, CBVersion) ->
                         {{opt, <<"suggestions">>}, constraint_map_spec(cookbook_name)},
                         {{opt, <<"conflicting">>}, constraint_map_spec(cookbook_name)},
                         {{opt, <<"replacing">>}, constraint_map_spec(cookbook_name)},
-                        {{opt, <<"providing">>}, constraint_map_spec(recipe_name)},
-                        %% FIXME: what's this? -
-                        {{opt, <<"groupings">>}, object}
-
+                        %% Accept anything for "providing"
+                         %% FIXME: what's this?
+                         {{opt, <<"groupings">>}, object}
                        ]}},
       {{opt, <<"attributes">>}, file_list_spec()},
       {{opt, <<"definitions">>}, file_list_spec()},
