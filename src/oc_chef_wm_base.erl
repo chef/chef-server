@@ -136,12 +136,53 @@ auth_check({object, ObjectId, Permission}, Req, State) ->
 %% permission. Otherwise, the created AuthzId is stored in the
 %% resource_state record using set_authz_id/2 (which knows how to deal
 %% with the different resource_state records).
-create_in_container(Container, Req, #base_state{chef_authz_context = AuthzContext,
-                                                organization_guid = OrgId,
-                                                requestor_id = RequestorId,
-                                                resource_state = RS} = State) ->
-    case oc_chef_authz:create_entity_if_authorized(AuthzContext, OrgId, RequestorId,
-                                                   Container) of
+create_in_container(client=Container, Req,
+                    #base_state{requestor=#chef_client{validator=true}}=State) ->
+    %% This function head is an abomination and an affront to all that is good and pure.
+    %%
+    %% HOWEVER, if we actually add validators to ACL of the client container, then they
+    %% automatically get those same permissions on any subsequently-created clients, due to
+    %% how we currently inherit the container ACL as a "template" for new items.
+    %%
+    %% It was initially assumed that validators needed both CREATE and READ permission on
+    %% the clients container (CREATE to actually create a client, READ to subsequently grab
+    %% the ACL of the client container in order to merge it into the ACL of the new client).
+    %% However, testing done in the course of writing Bifrost indicates that having ANY
+    %% permission on an object is sufficient for getting an ACL on that object, so the
+    %% requirement for READ is probably spurious (we didn't have super thorough tests for
+    %% Authz back in the day).
+    %%
+    %% This means that we only really need to handle the CREATE case. To do this, we
+    %% substitute the validator's AuthzId for the Authz superuser and use it to do the
+    %% creation.
+    %%
+    %% NOTE: having a CREATE permission on an already created object that isn't a container
+    %% is, in fact, meaningless, but there's no sense in storing additional data.  We're
+    %% going to loop back through later and fix up that situation.  Having extra "noise" in
+    %% the ACLs is confusing anyway, and this is an area of our API where we should not be
+    %% confusing.
+    %%
+    %% TODO: we really should differentiate between "container permissions" and "permission
+    %% templates".  We'll take a look at this in an upcoming version of Bifrost.
+    {ok, AuthzSuperuserId} = application:get_env(oc_chef_authz, authz_superuser_id),
+
+    %% We'll pass a tagged tuple as a way to indicate to downstream code that this is the
+    %% superuser ID, so we only do the lookup in this one case, as opposed to every time we
+    %% create a new Authz object.
+    do_create_in_container(Container, Req, State, {superuser, AuthzSuperuserId});
+create_in_container(Container, Req, #base_state{requestor_id = RequestorId} = State) ->
+    %% Here, the requestor isn't a validator client, so they should go through the normal
+    %% auth checking process.
+    do_create_in_container(Container, Req, State, {normal, RequestorId}).
+
+%% @doc Perform the actual creation of a new entity.
+do_create_in_container(Container, Req,
+                       #base_state{chef_authz_context = AuthzContext,
+                                   organization_guid = OrgId,
+                                   resource_state = RS} = State,
+                       EffectiveRequestorId) ->
+    case oc_chef_authz:create_entity_if_authorized(AuthzContext, OrgId,
+                                                   EffectiveRequestorId, Container) of
         {ok, AuthzId} ->
             State1 = State#base_state{resource_state = set_authz_id(AuthzId, RS)},
             %% return forbidden: false
