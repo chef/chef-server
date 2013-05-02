@@ -84,21 +84,47 @@ make_context(ReqId)  ->
 
 %% @doc Creates a new Authz entity, if the requestor has the necessary permissions.
 %%
-%% `CreatorAId' is the Authz ID of the actor that wishes to create the entity. `ObjectType'
-%% is used to determine what kind of Authz entity should be created (e.g., a client should
-%% be an actor, while a node should be an object, etc.).
+%% `Creator' is a tagged tuple that indicates whether the contained Requestor ID is that of
+%% the Authz superuser or not.  It should only be the superuser when the requestor is a
+%% validator client, and we're trying to create a new client.  If that is the case, the
+%% entity created does NOT have the superuser in its ACL.  In all other cases, the creating
+%% actor IS present in the new entity's ACL.
+%%
+%% If the `Creator' is the Authz superuser, it is by definition authorized to create a new
+%% entity; a request to Authz is not issued,(such a request would fail anyway, due to the
+%% shape of the current Authz API, and because the superuser ID is not present in any ACL
+%% anywhere).
+%%
+%% We could just pass a requestor's ID here instead of a tagged tuple, query the application
+%% environment to obtain the superuser ID, and compare the two to determine whether the
+%% requestor is a superuser or not.  However, that would require us to perform the
+%% environment check each time we create an entity; we only need it when a validator client
+%% is creating a new client.  This is all internal code, though, so we should be trusting
+%% the caller.  We trust our own code, right?
+%%
+%% `ObjectType' is used to determine what kind of Authz entity should be created (e.g., a
+%% client should be an actor, while a node should be an object, etc.).
 %%
 %% If the permissions are in place, the Authz ID of the newly-created entity is returned.
 -spec create_entity_if_authorized(oc_chef_authz_context(),
                                   OrgId :: object_id(),
-                                  CreatorAId :: object_id(),
+                                  Creator :: {superuser | normal, object_id()},
                                   ObjectType :: contained_object_name()) ->
                                          {ok, object_id()} |
                                          {error, forbidden}.
-create_entity_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
+create_entity_if_authorized(Context, OrgId, {CreatorPrivilege, CreatorAId}, ObjectType) ->
     ContainerAId = get_container_aid_for_object(Context, OrgId, ObjectType),
-    case is_authorized_on_resource(CreatorAId, container, ContainerAId, actor, CreatorAId, create) of
-        false -> {error, forbidden};
+
+    Authorized = case CreatorPrivilege of
+                     superuser ->
+                         true;
+                     normal ->
+                         is_authorized_on_resource(CreatorAId, container,
+                                                   ContainerAId, actor, CreatorAId, create)
+                 end,
+    case Authorized of
+        false ->
+            {error, forbidden};
         true ->
             create_entity_with_container_acl(CreatorAId, ContainerAId, ObjectType)
     end.
