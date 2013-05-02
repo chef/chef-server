@@ -137,7 +137,9 @@ auth_check({object, ObjectId, Permission}, Req, State) ->
 %% resource_state record using set_authz_id/2 (which knows how to deal
 %% with the different resource_state records).
 create_in_container(client=Container, Req,
-                    #base_state{requestor=#chef_client{validator=true}}=State) ->
+                    #base_state{requestor=#chef_client{validator=true},
+                                resource_state=#client_state{client_data=Data}
+                               }=State) ->
     %% This function head is an abomination and an affront to all that is good and pure.
     %%
     %% HOWEVER, if we actually add validators to ACL of the client container, then they
@@ -164,12 +166,25 @@ create_in_container(client=Container, Req,
     %%
     %% TODO: we really should differentiate between "container permissions" and "permission
     %% templates".  We'll take a look at this in an upcoming version of Bifrost.
-    {ok, AuthzSuperuserId} = application:get_env(oc_chef_authz, authz_superuser_id),
+    %%
+    %% Oh, and validators shouldn't be able to create other validators (mirrors the behavior
+    %% of the Open Source Chef Server), so we need to check the contents of the
+    %% client-to-be's data, which is a proplist, and so not very amenable to pattern
+    %% matching :(
+    CreatingAValidator = ej:get({<<"validator">>}, Data),
 
-    %% We'll pass a tagged tuple as a way to indicate to downstream code that this is the
-    %% superuser ID, so we only do the lookup in this one case, as opposed to every time we
-    %% create a new Authz object.
-    do_create_in_container(Container, Req, State, {superuser, AuthzSuperuserId});
+    case CreatingAValidator of
+        true ->
+            %% NOT IN MY HOUSE!
+            {true, Req, State};  %% answers the question "is this operation forbidden?"
+        false ->
+            {ok, AuthzSuperuserId} = application:get_env(oc_chef_authz, authz_superuser_id),
+
+            %% We'll pass a tagged tuple as a way to indicate to downstream code that this
+            %% is the superuser ID, so we only do the lookup in this one case, as opposed to
+            %% every time we create a new Authz object.
+            do_create_in_container(Container, Req, State, {superuser, AuthzSuperuserId})
+    end;
 create_in_container(Container, Req, #base_state{requestor_id = RequestorId} = State) ->
     %% Here, the requestor isn't a validator client, so they should go through the normal
     %% auth checking process.
