@@ -643,7 +643,7 @@ describe "ACL API" do
             # Inconsistent API needs a PUT here.  We love consistency!
             put(creation_url, setup_user,
               :payload => creation_body).should look_like({
-                :status => 200
+                :status => Pedant::Config.ruby_cookbook_endpoint? ? 200 : 201
               })
           else
             post(creation_url, setup_user,
