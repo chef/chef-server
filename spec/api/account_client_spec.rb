@@ -1,7 +1,15 @@
 require 'pedant/rspec/common'
 require 'pp'
 
-describe "opscode-account endpoint", :focus do
+describe "opscode-account endpoint" do
+
+  def self.ruby?
+    Pedant::Config.ruby_client_endpoint?
+  end
+
+  def self.erlang?
+    not ruby?
+  end
 
   let(:requestor){ platform.admin_user}
 
@@ -14,19 +22,19 @@ describe "opscode-account endpoint", :focus do
                                                                                         :status => 200,
                                                                                         :body_exact =>{
                                                                                           "create" => {
-                                                                                            "actors" => ["pivotal",client],
+                                                                                            "actors" => ["pivotal"],
                                                                                             "groups" => ["admins"]},
                                                                                           "read" => {
-                                                                                            "actors" => ["pivotal",client],
+                                                                                            "actors" => ["pivotal"],
                                                                                             "groups" => ["users","admins"]},
                                                                                           "update" => {
-                                                                                            "actors" => ["pivotal",client],
+                                                                                            "actors" => ["pivotal"],
                                                                                             "groups" => ["admins"]},
                                                                                           "delete" => {
-                                                                                            "actors" => ["pivotal",client],
+                                                                                            "actors" => ["pivotal"],
                                                                                             "groups" => ["users","admins"]},
                                                                                           "grant" => {
-                                                                                            "actors" => ["pivotal",client],
+                                                                                            "actors" => ["pivotal"],
                                                                                             "groups" => ["admins"]}
                                                                                         }
                                                                                       })
@@ -49,19 +57,19 @@ describe "opscode-account endpoint", :focus do
                                                                                         :status => 200,
                                                                                         :body_exact =>{
                                                                                           "create" => {
-                                                                                            "actors" => ["pivotal", requestor.name, platform.test_org.validator.name, client],
+                                                                                            "actors" => ["pivotal", requestor.name],
                                                                                             "groups" => ["admins"]},
                                                                                           "read" => {
-                                                                                            "actors" => ["pivotal", requestor.name, platform.test_org.validator.name, client],
+                                                                                            "actors" => ["pivotal", requestor.name],
                                                                                             "groups" => ["users","admins"]},
                                                                                           "update" => {
-                                                                                            "actors" => ["pivotal", requestor.name, client],
+                                                                                            "actors" => ["pivotal", requestor.name],
                                                                                             "groups" => ["admins"]},
                                                                                           "delete" => {
-                                                                                            "actors" => ["pivotal", requestor.name, client],
+                                                                                            "actors" => ["pivotal", requestor.name],
                                                                                             "groups" => ["users","admins"]},
                                                                                           "grant" => {
-                                                                                            "actors" => ["pivotal", requestor.name, client],
+                                                                                            "actors" => ["pivotal", requestor.name],
                                                                                             "groups" => ["admins"]}
                                                                                         }
                                                                                       })
@@ -153,26 +161,34 @@ describe "opscode-account endpoint", :focus do
     end
 
     it "retrieves the Clients container's ACL" do
-        get(api_url("/containers/clients/_acl"), requestor).should look_like({
-                                                                               :status => 200,
-                                                                               :body_exact => {
-                                                                                 "create" => {
-                                                                                   "actors" => ["pivotal", platform.test_org.validator.name],
-                                                                                   "groups" => ["admins"]},
-                                                                                 "read" => {
-                                                                                   "actors" => ["pivotal", platform.test_org.validator.name],
-                                                                                   "groups" => ["admins", "users"]},
-                                                                                 "update" => {
-                                                                                   "actors" => ["pivotal"],
-                                                                                   "groups" => ["admins"]},
-                                                                                 "delete" => {
-                                                                                   "actors" => ["pivotal"],
-                                                                                   # really?  Any user can nuke a client?
-                                                                                   "groups" => ["admins", "users"]},
-                                                                                 "grant" => {
-                                                                                   "actors" => ["pivotal"],
-                                                                                   "groups" => ["admins"]}
-                                                                               }})
+
+      create_and_read_actors = ["pivotal"]
+      if ruby?
+        # The Erlang endpoint doesn't add validators to the container
+        # ACL; it handles this authorization directly in the code.
+        create_and_read_actors << platform.test_org.validator.name
+      end
+
+      get(api_url("/containers/clients/_acl"), requestor).should look_like({
+                                                                             :status => 200,
+                                                                             :body_exact => {
+                                                                               "create" => {
+                                                                                 "actors" => create_and_read_actors,
+                                                                                 "groups" => ["admins"]},
+                                                                               "read" => {
+                                                                                 "actors" => create_and_read_actors,
+                                                                                 "groups" => ["admins", "users"]},
+                                                                               "update" => {
+                                                                                 "actors" => ["pivotal"],
+                                                                                 "groups" => ["admins"]},
+                                                                               "delete" => {
+                                                                                 "actors" => ["pivotal"],
+                                                                                 # really?  Any user can nuke a client?
+                                                                                 "groups" => ["admins", "users"]},
+                                                                               "grant" => {
+                                                                                 "actors" => ["pivotal"],
+                                                                                 "groups" => ["admins"]}
+                                                                             }})
     end
   end
 
@@ -204,9 +220,12 @@ describe "opscode-account endpoint", :focus do
                                                                        })
       end
 
-      it "cannot create a new validator client" do
-        post(api_url("/clients"), requestor,
+      if erlang?
+        # This can happen on Ruby..
+        it "cannot create a new validator client" do
+          post(api_url("/clients"), requestor,
              :payload => {"name" => new_client_name, "validator" => true}).should have_status_code(403)
+        end
       end
 
       it "has the validator removed from the new client's ACL" do
