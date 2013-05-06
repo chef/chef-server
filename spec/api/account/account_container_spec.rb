@@ -69,7 +69,8 @@ describe "opscode-account containers" do
 
       let(:request_body) {{
           "containername" => new_container,
-          "containerpath" => "/"
+          "containerpath" => "/" # containerpath is vestigal cruft, but current
+                                 # opscode-account still validates it, so we need it
         }}
 
       let(:response_body) {{
@@ -241,26 +242,6 @@ describe "opscode-account containers" do
           end
         end
 
-        context "with no container path" do
-          let(:request_body) {{
-              "id" => new_container
-            }}
-
-          it "returns 400" do
-            post(request_url, platform.admin_user,
-              :payload => request_body).should look_like({
-                :status => 400
-              })
-            get(request_url, platform.admin_user).should look_like({
-                :status => 200,
-                :body_exact => list_of_containers_without_new_container
-              })
-            get("#{request_url}/#{new_container}", platform.admin_user).should look_like({
-                :status => 404
-              })
-          end
-        end
-
         context "name instead of container name" do
           let(:request_body) {{
               "name" => new_container,
@@ -300,69 +281,6 @@ describe "opscode-account containers" do
               })
             get("#{request_url}/#{new_container}", platform.admin_user).should look_like({
                 :status => 200
-              })
-          end
-        end
-
-        context "with empty container path" do
-          let(:request_body) {{
-              "containername" => new_container,
-              "containerpath" => ""
-            }}
-
-          it "returns 400" do
-            post(request_url, platform.admin_user,
-              :payload => request_body).should look_like({
-                :status => 400
-              })
-            get(request_url, platform.admin_user).should look_like({
-                :status => 200,
-                :body_exact => list_of_containers_without_new_container
-              })
-            get("#{request_url}/#{new_container}", platform.admin_user).should look_like({
-                :status => 404
-              })
-          end
-        end
-
-        context "with space in container path" do
-          let(:request_body) {{
-              "containername" => new_container,
-              "containerpath" => "/ path"
-            }}
-
-          it "returns 400" do
-            post(request_url, platform.admin_user,
-              :payload => request_body).should look_like({
-                :status => 400
-              })
-            get(request_url, platform.admin_user).should look_like({
-                :status => 200,
-                :body_exact => list_of_containers_without_new_container
-              })
-            get("#{request_url}/#{new_container}", platform.admin_user).should look_like({
-                :status => 404
-              })
-          end
-        end
-
-        context "with unicode in container path" do
-          let(:request_body) {{
-              "containername" => new_container,
-              "containerpath" => "/パス"
-            }}
-
-          it "returns 400" do
-            post(request_url, platform.admin_user,
-              :payload => request_body).should look_like({
-                :status => 400
-              })
-            get(request_url, platform.admin_user).should look_like({
-                :status => 200,
-                :body_exact => list_of_containers_without_new_container
-              })
-            get("#{request_url}/#{new_container}", platform.admin_user).should look_like({
-                :status => 404
               })
           end
         end
@@ -812,59 +730,6 @@ describe "opscode-account containers" do
               })
           end
         end # context without containername
-
-        context "without containerpath" do
-          let(:new_container_payload) {{
-              "containername" => test_container
-            }}
-
-          it "returns 400" do
-            put(request_url, platform.admin_user,
-              :payload => new_container_payload).should look_like({
-                :status => 400
-              })
-            get(request_url, platform.admin_user).should look_like({
-                :status => 200,
-                :body_exact => default_container_body
-              })
-          end
-        end # context without containerpath
-
-        context "with empty containerpath" do
-          let(:new_container_payload) {{
-              "containername" => test_container,
-              "containerpath" => ""
-            }}
-
-          it "returns 400" do
-            put(request_url, platform.admin_user,
-              :payload => new_container_payload).should look_like({
-                :status => 400
-              })
-            get(request_url, platform.admin_user).should look_like({
-                :status => 200,
-                :body_exact => default_container_body
-              })
-          end
-        end # context with empty containerpath
-
-        context "with space in containerpath" do
-          let(:new_container_payload) {{
-              "containername" => test_container,
-              "containerpath" => "/new/ path"
-            }}
-
-          it "returns 400" do
-            put(request_url, platform.admin_user,
-              :payload => new_container_payload).should look_like({
-                :status => 400
-              })
-            get(request_url, platform.admin_user).should look_like({
-                :status => 200,
-                :body_exact => default_container_body
-              })
-          end
-        end # context with space in containerpath
 
         context "with bogus id instead of containername" do
           let(:new_container_payload) {{

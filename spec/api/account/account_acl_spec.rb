@@ -60,12 +60,8 @@ describe "ACL API" do
       context "with modified ACLs" do
         after :each do
           ["create", "read", "update", "delete", "grant"].each do |perm|
-            if (perm == "read")
-              reset_body = {perm => {"actors" => actors, "groups" => read_groups}}
-            else
-              reset_body = {perm => {"actors" => actors, "groups" => groups}}
-            end
-            put("#{request_url}/#{perm}", platform.admin_user,
+            reset_body = { perm => acl_body[perm] }
+            put("#{request_url}/#{perm}", superuser,
               :payload => reset_body).should look_like({
                 :status => 200
               })
@@ -82,15 +78,8 @@ describe "ACL API" do
 
         context "when normal user granted all permissions except GRANT" do
           it "returns 403" do
-            ["create", "read", "update", "delete"].each do |perm|
-              put("#{request_url}/#{perm}", platform.admin_user,
-                :payload => {perm => {
-                    "actors" => [platform.non_admin_user.name, "pivotal"],
-                    "groups" => ["admins"]
-                  }}).should look_like({
-                  :status => 200
-                })
-            end
+            restrict_permissions_to("organization",
+              platform.non_admin_user => ['create', 'read', 'update', 'delete'])
             get(request_url, platform.non_admin_user).should look_like({
                 :status => 403
               })
@@ -99,15 +88,8 @@ describe "ACL API" do
 
         context "when normal client granted all permisions except GRANT" do
           it "returns 403", :smoke do
-            ["create", "read", "update", "delete"].each do |perm|
-              put("#{request_url}/#{perm}", platform.admin_user,
-                :payload => {perm => {
-                    "actors" => [platform.non_admin_client.name, "pivotal"],
-                    "groups" => ["admins"]
-                  }}).should look_like({
-                  :status => 200
-                })
-            end
+            restrict_permissions_to("organization",
+              platform.non_admin_client => ['create', 'read', 'update', 'delete'])
             get(request_url, platform.non_admin_client).should look_like({
                 :status => 403
               })
@@ -116,13 +98,8 @@ describe "ACL API" do
 
         context "when normal user granted GRANT permission" do
           it "can get ACL" do
-            put("#{request_url}/grant", platform.admin_user,
-              :payload => {"grant" => {
-                  "actors" => [platform.non_admin_user.name, "pivotal"],
-                  "groups" => ["admins"]
-                }}).should look_like({
-                :status => 200
-              })
+            restrict_permissions_to("organization",
+              platform.non_admin_user => ['grant'])
             get(request_url, platform.non_admin_user).should look_like({
                 :status => 200
               })
@@ -131,13 +108,8 @@ describe "ACL API" do
 
         context "when normal client granted GRANT permision" do
           it "can get ACL", :smoke do
-            put("#{request_url}/grant", platform.admin_user,
-              :payload => {"grant" => {
-                  "actors" => [platform.non_admin_client.name, "pivotal"],
-                  "groups" => ["admins"]
-                }}).should look_like({
-                :status => 200
-              })
+            restrict_permissions_to("organization",
+              platform.non_admin_client => ['grant'])
             get(request_url, platform.non_admin_client).should look_like({
                 :status => 200
               })
@@ -214,11 +186,7 @@ describe "ACL API" do
           }}
 
         after :each do
-          if (permission == "read")
-            reset_body = {permission => {"actors" => actors, "groups" => read_groups}}
-          else
-            reset_body = {permission => {"actors" => actors, "groups" => groups}}
-          end
+          reset_body = {permission => default_body[permission]}
           put(request_url, platform.admin_user,
             :payload => reset_body).should look_like({
               :status => 200
@@ -401,12 +369,8 @@ describe "ACL API" do
         context "with modified ACLs" do
           after :each do
             ["create", "read", "update", "delete", "grant"].each do |perm|
-              if (perm == "read")
-                reset_body = {perm => {"actors" => actors, "groups" => read_groups}}
-              else
-                reset_body = {perm => {"actors" => actors, "groups" => groups}}
-              end
-              put("#{acl_url}/#{perm}", platform.admin_user,
+                reset_body = { perm => default_body[perm] }
+              put("#{acl_url}/#{perm}", superuser,
                 :payload => reset_body).should look_like({
                   :status => 200
                 })
@@ -422,15 +386,8 @@ describe "ACL API" do
           context "when normal user granted all permissions except GRANT" do
             # We only run the smoke tests for read permission (set above)
             it "returns 403", smoketest do
-              ["create", "read", "update", "delete"].each do |perm|
-                put("#{acl_url}/#{perm}", platform.admin_user,
-                  :payload => {perm => {
-                      "actors" => [platform.non_admin_user.name, "pivotal"],
-                      "groups" => ["admins"]
-                    }}).should look_like({
-                    :status => 200
-                  })
-              end
+              restrict_permissions_to("organization",
+                platform.non_admin_user => ['create', 'read', 'update', 'delete'])
               put(request_url, platform.non_admin_user,
                 :payload => request_body).should look_like({
                   :status => 403
@@ -441,15 +398,8 @@ describe "ACL API" do
           context "when normal client granted all permisions except GRANT" do
             # We only run the smoke tests for read permission (set above)
             it "returns 403" do
-              ["create", "read", "update", "delete"].each do |perm|
-                put("#{acl_url}/#{perm}", platform.admin_user,
-                  :payload => {perm => {
-                      "actors" => [platform.non_admin_client.name, "pivotal"],
-                      "groups" => ["admins"]
-                    }}).should look_like({
-                    :status => 200
-                  })
-              end
+              restrict_permissions_to("organization",
+                platform.non_admin_client => ['create', 'read', 'update', 'delete'])
               put(request_url, platform.non_admin_client,
                 :payload => request_body).should look_like({
                   :status => 403
@@ -460,13 +410,8 @@ describe "ACL API" do
           context "when normal user granted GRANT permission" do
             # We only run the smoke tests for read permission (set above)
             it "can modify ACL", smoketest do
-              put("#{acl_url}/grant", platform.admin_user,
-                :payload => {"grant" => {
-                    "actors" => [platform.non_admin_user.name, "pivotal"],
-                    "groups" => ["admins"]
-                  }}).should look_like({
-                  :status => 200
-                })
+              restrict_permissions_to("organization",
+                platform.non_admin_user => ['grant'])
               put(request_url, platform.non_admin_user,
                 :payload => request_body).should look_like({
                   :status => 200
@@ -477,13 +422,8 @@ describe "ACL API" do
           context "when normal client granted GRANT permision" do
             # We only run the smoke tests for read permission (set above)
             it "can modify ACL" do
-              put("#{acl_url}/grant", platform.admin_user,
-                :payload => {"grant" => {
-                    "actors" => [platform.non_admin_client.name, "pivotal"],
-                    "groups" => ["admins"]
-                  }}).should look_like({
-                  :status => 200
-                })
+              restrict_permissions_to("organization",
+                platform.non_admin_client => ['grant'])
               put(request_url, platform.non_admin_client,
                 :payload => request_body).should look_like({
                   :status => 200

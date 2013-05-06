@@ -8,7 +8,7 @@ describe "opscode-account groups" do
     context "GET /groups" do
       # This is only a partial body -- there are other groups as well, but these
       # should all exist for an organization:
-      let(:list_of_groups) {{
+      let(:default_groups) {{
           "admins" => "#{request_url}/admins",
           "billing-admins" => "#{request_url}/billing-admins",
           "clients" => "#{request_url}/clients",
@@ -19,7 +19,7 @@ describe "opscode-account groups" do
         it "can get groups", :smoke do
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
-              :body => list_of_groups
+              :body => default_groups
             })
         end
       end
@@ -28,7 +28,7 @@ describe "opscode-account groups" do
         it "can get groups" do
           get(request_url, platform.non_admin_user).should look_like({
               :status => 200,
-              :body => list_of_groups
+              :body => default_groups
             })
         end
       end
