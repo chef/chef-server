@@ -518,9 +518,20 @@ stats_hero_upstreams() ->
 %% Other objects can pass through.
 maybe_process_client(#chef_client{authz_id=ClientAuthzId}=Client,
                      #base_state{chef_authz_context=AuthContext,
+                                 requestor=Requestor,
+                                 requestor_id=RequestorId,
                                  organization_guid = OrgId}) ->
     case oc_chef_authz:add_client_to_clients_group(AuthContext, OrgId, ClientAuthzId) of
         ok ->
+            case Client of
+                #chef_client{validator=true} ->
+                    %% Validators have no permissions on anything; remove it from its own ACL
+                    oc_chef_authz:remove_actor_from_actor_acl(ClientAuthzId, ClientAuthzId);
+                _ ->
+                    ok %% No need to remove anything otherwise
+            end,
+
+            %% Return the client
             Client;
         {error, Error} ->
             {error, Error}
