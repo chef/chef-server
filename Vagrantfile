@@ -70,6 +70,7 @@ Vagrant::Config.run do |config|
   config.vm.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
   config.vm.share_folder "moser", "/mnt/moser", "../moser"
   config.vm.share_folder "decouch", "/mnt/decouch", "../decouch"
+  # config.vm.share_folder "chef-sql-schema", "/srv/chef-sql-schema", "../chef-sql-schema"
   config.vm.provision :shell, :inline => <<-INSTALL_OMNIBUS
   if [ ! -d "/opt/chef" ] ||
      [ ! $(chef-solo --v | awk "{print \\$2}") = "#{OMNIBUS_CHEF_VERSION}" ]
