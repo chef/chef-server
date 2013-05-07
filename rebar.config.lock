@@ -1,6 +1,5 @@
 %% THIS FILE IS GENERATED. DO NOT EDIT IT MANUALLY %%
 
-{erl_opts,[{parse_transform,lager_transform}]}.
 {plugins,[rebar_lock_deps_plugin]}.
 {cover_enabled,true}.
 {deps,[{automeck,".*",
