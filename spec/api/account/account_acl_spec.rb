@@ -481,7 +481,6 @@ describe "ACL API" do
         let(:deletion_url) { api_url("#{type}/#{new_object}") }
         let(:request_url) { api_url("#{type}/#{new_object}/_acl") }
 
-        # Because clients need to be created by superuser, but everything else shouldn't:
         let(:setup_user) { platform.admin_user }
 
         # Body used to create object (generally overriden):
@@ -512,8 +511,12 @@ describe "ACL API" do
         # different default ACLs for each type, etc.  We love consistency!
         case type
         when "clients"
-          let(:setup_user) { platform.superuser }
-          let(:actors) { ["pivotal", new_object] }
+          let(:actors) {
+            # As long as 'new_object' isn't a validator (and you're on
+            # the Erchef client endpoint), new_object will be in the
+            # actors list
+            ["pivotal", new_object, setup_user.name]
+          }
           let(:read_groups) { ["users", "admins"] }
           let(:delete_groups) { ["users", "admins"] }
         when "groups"
