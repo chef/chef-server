@@ -53,23 +53,38 @@ describe "opscode-account endpoint" do
       end
 
       it "has the appropriate ACLs" do
+
+        actors = ["pivotal", requestor.name]
+        if ruby?
+          # Ruby doesn't really support proper creation of additional
+          # validator clients.  The first (the "real") validator is
+          # specially-created with the organization, and is removed
+          # from its own ACL.  Additional clients can be created, but
+          # the "validator" flag is not recognized; that's an Erchef
+          # feature.
+          #
+          # As such, this new "validator" client on Ruby is going to
+          # be in its ACL; not so in Erchef.
+          actors << client
+        end
+
         get(api_url("/clients/#{client}/_acl"), platform.admin_user).should look_like({
                                                                                         :status => 200,
                                                                                         :body_exact =>{
                                                                                           "create" => {
-                                                                                            "actors" => ["pivotal", requestor.name],
+                                                                                            "actors" => actors,
                                                                                             "groups" => ["admins"]},
                                                                                           "read" => {
-                                                                                            "actors" => ["pivotal", requestor.name],
+                                                                                            "actors" => actors,
                                                                                             "groups" => ["users","admins"]},
                                                                                           "update" => {
-                                                                                            "actors" => ["pivotal", requestor.name],
+                                                                                            "actors" => actors,
                                                                                             "groups" => ["admins"]},
                                                                                           "delete" => {
-                                                                                            "actors" => ["pivotal", requestor.name],
+                                                                                            "actors" => actors,
                                                                                             "groups" => ["users","admins"]},
                                                                                           "grant" => {
-                                                                                            "actors" => ["pivotal", requestor.name],
+                                                                                            "actors" => actors,
                                                                                             "groups" => ["admins"]}
                                                                                         }
                                                                                       })
