@@ -277,16 +277,14 @@ describe "ACL API" do
               }}
 
             it "returns 400" do
-              pending "it just adds it instead" do
-                put(request_url, platform.admin_user,
-                  :payload => request_body).should look_like({
-                    :status => 400
-                  })
-                get(acl_url, platform.admin_user).should look_like({
-                    :status => 200,
-                    :body_exact => default_body
-                  })
-              end
+              put(request_url, platform.admin_user,
+                :payload => request_body).should look_like({
+                  :status => 400
+                })
+              get(acl_url, platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => default_body
+                })
             end
           end
 
@@ -860,16 +858,14 @@ describe "ACL API" do
                     }}
 
                   it "returns 400" do
-                    pending "it just adds it instead" do
-                      put(permission_request_url, platform.admin_user,
-                        :payload => update_body).should look_like({
-                          :status => 400
-                        })
-                      get(request_url, platform.admin_user).should look_like({
-                          :status => 200,
-                          :body_exact => acl_body
-                        })
-                    end
+                    put(permission_request_url, platform.admin_user,
+                      :payload => update_body).should look_like({
+                        :status => 400
+                      })
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body_exact => acl_body
+                      })
                   end
                 end
 
