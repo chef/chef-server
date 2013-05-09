@@ -3,13 +3,16 @@
 %% @author Marc Paradise <marc@opscode.com>
 %% @copyright 2011-2012 Opscode, Inc.
 
-% @doc a throwaway supervisor to allow for testing of mover_org_migrator
+% @doc a supervisor for mover_org_migrator
 
 -module(mover_org_migrator_sup).
 
 -behaviour(supervisor).
 
--export([init/1, start_link/0, start_org_migrator/1]).
+-export([init/1,
+         start_link/0,
+         start_org_migrator/1]).
+
 
 -define(SERVER, ?MODULE).
 start_link() ->
@@ -21,5 +24,4 @@ init([]) ->
     {ok, {{simple_one_for_one, 10, 10}, [Spec]}}.
 
 start_org_migrator(OrgName) ->
-    {ok, MS} = moser_state_tracker:fetch_state(OrgName),
-    supervisor:start_child(?SERVER, [MS]).
+    supervisor:start_child(?SERVER, [OrgName]).

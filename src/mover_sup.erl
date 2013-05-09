@@ -23,6 +23,7 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
+    migrator_manager:start_link(),
     %% {ok, PreloadCount} = application:get_env(mover, preload_org_count),
     %% Children0 = [?CHILD_SUP(mover_worker_sup, []),
     %%              ?CHILD(mover_manager, [PreloadCount], 5000)],

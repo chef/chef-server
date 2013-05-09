@@ -9,9 +9,10 @@
 -module(mover_org_migrator).
 -behaviour(gen_fsm).
 
+%% Comment this out for VIM syntax check/compiles to work.
 -compile([{parse_transform, lager_transform}]).
 
-% gen_fsm callbacks
+%% gen_fsm callbacks
 -export([init/1,
          handle_event/3,
          handle_sync_event/4,
@@ -19,137 +20,101 @@
          terminate/3,
          code_change/4]).
 
-% states
+%% states
 -export([disable_org_access/2,
          migrate_org/2,
          verify_org/2,
          set_org_to_sql/2,
-         enable_org_access/2,
-         complete_migration/2,
-         abort_migration/2 ]).
+         enable_org_access/2 ]).
 
-% api
+%% api
 -export([start_link/1]).
-
--include_lib("moser/include/moser_state.hrl").
 
 -define(PHASE_2_MIGRATION_COMPONENTS,
             [checksums, cookbooks, environments, roles, data]).
 
--record(state, { account_info :: term(),   % TODO #account_info for moser, provided via init config
-                 ms :: #migration_state{}, % migration state persistance record
-                 start_time :: term(),     % timestamp indicating start of migration operation
-                 error :: term()           % the error that has placed us in failure state.
+-record(state, {
+                 org_name :: string()     %% The org we are migrating
                }).
 
 start_link(Config) ->
     gen_fsm:start_link(?MODULE, Config, []).
 
-init(#migration_state{} = MS) ->
-    State = #state{ms = MS, start_time = os:timestamp()},
-    State1 = persist_state(State, inflight, init),
-    {ok, disable_org_access, State1, 0}.
-
-disable_org_access(timeout, State) ->
-    State1 = persist_state(State, inflight, disable_org_access),
-    case mover_org_darklaunch:disable_org(State1#state.ms) of
-        {ok, MS} ->
-            {next_state, migrate_org, State1#state{ms = MS}, 0};
-        {{error, Error}, MS} ->
-            State2 = persist_state(State1#state{ms = MS}, failure, disable_org_access),
-            {stop, {error, Error}, State2}
-    end.
-
-migrate_org(timeout, State) ->
-    State1 = persist_state(State, inflight, migrate_org),
-    case moser_converter:convert_org(State1#state.ms) of
-        [{ok, _}] ->
-            {next_state, verify_org, State1, 0};
-        {error, Error} ->
-            State2 = persist_state(State1, inflight, migrate_org, Error),
-            {next_state, abort_migration, State2, 0}
-    end.
-
-verify_org(timeout, State) ->
-    State1 = persist_state(State, inflight, verify_org),
-    % TODO do we have any validation we can run?
-    % case moser_validator:validate_org(MS) of
-    case ok of
+init(OrgName) ->
+    State = #state{org_name = OrgName},
+    case moser_state_tracker:migration_started(OrgName) of
         ok ->
-            {next_state, set_org_to_sql, State1, 0};
+            lager:info([{org_name, OrgName}], "Starting migration."),
+            {ok, disable_org_access, State, 0};
+        Error ->
+            stop_with_failure(OrgName, Error, disable_org_access)
+    end.
+
+disable_org_access(timeout, #state{org_name = OrgName} = State) ->
+    case mover_org_darklaunch:disable_org(OrgName) of
+        ok ->
+            {next_state, migrate_org, State, 0};
         {error, Error} ->
-            State2 = persist_state(State1, failed, verify_org, Error),
-            {next_state, abort_migration, State2, 0}
+            stop_with_failure(State, Error, disable_org_access)
     end.
 
-set_org_to_sql(timeout, State) ->
-    State1 = persist_state(State, inflight, set_org_to_sql),
-    case mover_org_darklaunch:org_to_sql(State1#state.ms, ?PHASE_2_MIGRATION_COMPONENTS) of
-        {ok, MS} ->
-            {next_state, enable_org_access, State1#state{ms = MS}, 0};
-        {{error, Error}, MS} ->
-            State2 = persist_state(State1#state{ms = MS}, failed, set_org_to_sql, Error),
-            {next_state, abort_migration, State2, 0}
+migrate_org(timeout, #state{org_name = OrgName} = State) ->
+    try moser_converter:convert_org(OrgName) of
+        [{ok, _}] ->
+            {next_state, verify_org, State, 0};
+        Error ->
+            stop_with_migration_error(State, Error)
+    catch
+        _ErrorType:Reason ->
+            stop_with_migration_error(State, Reason)
     end.
 
-enable_org_access(timeout, State) ->
-    State1 = persist_state(State, inflight, enable_org_access),
-    case mover_org_darklaunch:enable_org(State1#state.ms) of
-        {ok, MS} ->
-            {next_state, complete_migration, State1#state{ms = MS}, 0};
-        {{error, Error}, MS} ->
-            State2 = persist_state(State1#state{ms = MS}, failed, enable_org_access, Error),
-            {stop, {error, Error}, State2}
+verify_org(timeout, #state{org_name = _OrgName} = State) ->
+    %% Placeholder: verification is currently external.
+    {next_state, set_org_to_sql, State, 0}.
+
+set_org_to_sql(timeout, #state{org_name = OrgName} = State) ->
+    case mover_org_darklaunch:org_to_sql(OrgName, ?PHASE_2_MIGRATION_COMPONENTS) of
+        ok ->
+            {next_state, enable_org_access, State, 0};
+        {error, Error} ->
+            stop_with_failure(State, Error, set_org_to_sql)
     end.
 
-complete_migration(timeout, State) ->
-    State1 = persist_state(State, complete, complete_migration),
-    {stop, normal, State1}.
-
-abort_migration(timeout, #state{error = Error} = State) ->
-    % Do NOT persist state here - we would overwrite the failure detail
-    % previously captured.
-    {stop, {shutdown, {error, Error}}, State}.
+enable_org_access(timeout, #state{org_name = OrgName} = State) ->
+    case mover_org_darklaunch:enable_org(OrgName) of
+        ok ->
+            {stop, normal, State};
+        {error, Error} ->
+            stop_with_failure(State, Error, enable_org_access)
+    end.
 
 handle_event(_Event, StateName, State) ->
-    io:fwrite("GOT handle_event ~p!", [StateName]),
     {next_state, StateName, State}.
 
 handle_sync_event(_Event, _From, StateName, State) ->
-    io:fwrite("GOT handle_sync_event ~p!", [StateName]),
     {reply, ok, StateName, State}.
 
 handle_info(_Info, StateName, State) ->
-    io:fwrite("GOT handle_info~p!", [StateName]),
     {next_state, StateName, State}.
 
-terminate(_Reason, _StateName, _State) ->
-    ok.
+terminate(normal, _StateName, #state{org_name = OrgName}) ->
+    lager:info("Terminating after successful migration of ~p", [OrgName]),
+    moser_state_tracker:migration_successful(OrgName);
+terminate(_Other, StateName, #state{org_name = OrgName}) ->
+    lager:info("Terminating after failed migration of ~p", [OrgName]),
+    moser_state_tracker:migration_failed(OrgName, StateName).
 
 code_change(_OldVsn, StateName, State, _Extra) ->
     {ok, StateName, State}.
 
-
+%%
 %% Internal
 %%
-persist_state(MS, OrgState, Stage) ->
-    persist_state(MS, OrgState, Stage, undefined).
+stop_with_failure(#state{org_name = OrgName} = State, Error, LastState) ->
+    lager:error([{org_name, OrgName}], "Migration halted in ~p due to error: ~p", [LastState, Error]),
+    {stop, {error, Error, LastState}, State}.
 
-persist_state(#state{start_time = Start, ms = MS} = State, OrgState, Stage, Error) ->
-    MS2 = MS#migration_state{
-                state = OrgState,
-                last_step = Stage,
-                migration_duration = timer:now_diff(os:timestamp(), Start)},
-    log_state_result(MS2, Error),
-    {_, MS3} = moser_state_tracker:update_state(MS2),
-    State#state{ms = MS3, error = Error}.
-
-log_state_result(#migration_state{ state = failure, last_step = Stage } = MS, Error) ->
-    lager:error(?MS_LOG_META(MS),
-                "mover_org_migrator failed in state ~p with error ~p",
-                [Stage, Error]);
-log_state_result(#migration_state{ last_step = Stage } = MS, _Error ) ->
-    lager:info(?MS_LOG_META(MS),
-               "mover_org_migrator in progress, migration stage: ~p",
-               [Stage]).
-
+stop_with_migration_error(#state{org_name = OrgName} = State, Error) ->
+    lager:error([{org_name, OrgName}], "Error in converting org data, skipping:  ~p", [Error]),
+    {stop, {migration_error, Error}, State}.
