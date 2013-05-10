@@ -26,6 +26,7 @@
 -export([
          add_org_guid_to_query/2,
          delete_search_db/1,
+         delete_search_db_by_type/2,
          make_query_from_params/4,
          ping/0,
          search/1
@@ -115,6 +116,18 @@ delete_search_db(OrgId) ->
     ok = solr_commit(),
     ok.
 
+%% TODO: Deal properly with errors
+%% @doc Delete all search index entries for a given organization and type.
+-spec delete_search_db_by_type(OrgId :: binary(), Type :: binary()) -> ok.
+delete_search_db_by_type(OrgId, Type) ->
+    DeleteQuery = "<?xml version='1.0' encoding='UTF-8'?><delete><query>" ++
+        search_db_from_orgid(OrgId) ++ " AND " ++
+        search_type_constraint(Type) ++
+        "</query></delete>",
+    ok = solr_update(DeleteQuery),
+    ok = solr_commit(),
+    ok.
+
 %% Internal functions
 
 %% @doc Generates the name of the organization's search database from its ID
@@ -126,6 +139,13 @@ delete_search_db(OrgId) ->
 -spec search_db_from_orgid(OrgId :: binary()) -> DBName :: [byte(),...].
 search_db_from_orgid(OrgId) ->
     "X_CHEF_database_CHEF_X:chef_" ++ binary_to_list(OrgId).
+
+%% @doc Generates a constraint for chef_type
+%% @end
+-spec search_type_constraint(Type :: binary()) -> TypeConstraint :: [byte(),...].
+search_type_constraint(Type) ->
+    "X_CHEF_type_CHEF_X:" ++ binary_to_list(Type).
+
 
 % /solr/select?
     % fq=%2BX_CHEF_type_CHEF_X%3Anode+%2BX_CHEF_database_CHEF_X%3Achef_288da1c090ff45c987346d2829257256
