@@ -38,5 +38,6 @@ init([]) ->
     %%            end,
     %% FIXME: for now we just want to start and do nothing
     Children = [?CHILD_SUP(mover_org_migrator_sup, []),
-                ?CHILD_SUP(mover_eredis_sup, [])],
+                ?CHILD_SUP(mover_eredis_sup, []),
+                ?CHILD_SUP(chef_index_sup, [])],
     {ok, {{one_for_one, 10, 10}, Children}}.
