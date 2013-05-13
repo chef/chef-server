@@ -26,9 +26,11 @@
 -export([
          add_org_guid_to_query/2,
          delete_search_db/1,
+         delete_search_db_by_type/2,
          make_query_from_params/4,
          ping/0,
-         search/1
+         search/1,
+         solr_commit/0
         ]).
 
 -include("chef_solr.hrl").
@@ -115,6 +117,25 @@ delete_search_db(OrgId) ->
     ok = solr_commit(),
     ok.
 
+%% @doc Delete all search index entries for a given
+%% organization and type.  Types are generally binaries or strings elsewhere in this
+%% module. We should think about converting the other APIs in this file to use atoms
+%% instead.
+%% Note: This omits solr_commit because of the high cost of that call in production.
+%% Some users will want to call the commit directly.
+%% @end
+-spec delete_search_db_by_type(OrgId :: binary(), Type :: atom()) -> ok.
+delete_search_db_by_type(OrgId, Type)
+  when Type == client orelse Type == data_bag_item orelse
+       Type == environment orelse Type == node orelse
+       Type == role ->
+    DeleteQuery = "<?xml version='1.0' encoding='UTF-8'?><delete><query>" ++
+        search_db_from_orgid(OrgId) ++ " AND " ++
+        search_type_constraint(Type) ++
+        "</query></delete>",
+    solr_update(DeleteQuery).
+
+
 %% Internal functions
 
 %% @doc Generates the name of the organization's search database from its ID
@@ -126,6 +147,13 @@ delete_search_db(OrgId) ->
 -spec search_db_from_orgid(OrgId :: binary()) -> DBName :: [byte(),...].
 search_db_from_orgid(OrgId) ->
     "X_CHEF_database_CHEF_X:chef_" ++ binary_to_list(OrgId).
+
+%% @doc Generates a constraint for chef_type
+%% @end
+-spec search_type_constraint(Type :: atom()) -> TypeConstraint :: [byte(),...].
+search_type_constraint(Type) ->
+    "X_CHEF_type_CHEF_X:" ++ atom_to_list(Type).
+
 
 % /solr/select?
     % fq=%2BX_CHEF_type_CHEF_X%3Anode+%2BX_CHEF_database_CHEF_X%3Achef_288da1c090ff45c987346d2829257256
@@ -249,6 +277,7 @@ solr_update(Body) ->
     end.
 
 %% @doc Sends a "commit" message directly to Solr
+%% This is exposed for the users of delete_search_db_by_type
 -spec solr_commit() -> ok | {error, term()}.
 solr_commit() ->
     solr_update("<?xml version='1.0' encoding='UTF-8'?><commit/>").
