@@ -511,21 +511,48 @@ stats_hero_upstreams() ->
     [<<"authz">>, <<"couchdb">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
 
 
-%% @doc Enterprise Chef Clients must be added to the clients group.
-%%
-%% Other objects can pass through.
-object_creation_hook(#chef_client{authz_id=ClientAuthzId}=Client,
+
+object_creation_hook(#chef_client{}=Client,
                      #base_state{chef_authz_context=AuthContext,
-                                 requestor=Requestor,
+                                 requestor=#chef_client{validator=true},
+                                 organization_guid = OrgId}) ->
+    %% Validator-initiated requests must have Authz operations
+    %% performed by the Authz superuser.
+    client_cleanup(Client, AuthContext, OrgId, superuser);
+object_creation_hook(#chef_client{}=Client,
+                     #base_state{chef_authz_context=AuthContext,
                                  requestor_id=RequestorId,
                                  organization_guid = OrgId}) ->
-    case oc_chef_authz:add_client_to_clients_group(AuthContext, OrgId, ClientAuthzId) of
+    %% Client cleanup initiated by anyone besides a validator client
+    %% proceeds with an un-spoofed identity.
+    client_cleanup(Client, AuthContext, OrgId, RequestorId);
+object_creation_hook(Object, _State) ->
+    %% Everything else passes through unaffected
+    Object.
+
+%% @doc Perform needed post-creation cleanup on Client objects.
+%% Clients must be added to the clients group, and newly-created
+%% validators must have themselves removed from their ACL.
+%%
+%% See oc_chef_authz:add_client_to_clients_group/4 for more
+%% information on the `RequestorId` argument
+-spec client_cleanup(#chef_client{},
+                     AuthContext :: chef_authz:chef_authz_context(),
+                     OrgId :: object_id(),
+                     RequestorId :: superuser | object_id()) -> #chef_client{} |
+                                                                {error, term()}.
+client_cleanup(#chef_client{authz_id=ClientAuthzId,
+                            validator=IsValidator}=Client,
+               AuthContext,
+               OrgId,
+               RequestorId) ->
+    case oc_chef_authz:add_client_to_clients_group(AuthContext, OrgId, ClientAuthzId, RequestorId) of
         ok ->
-            case Client of
-                #chef_client{validator=true} ->
+            case IsValidator of
+                true ->
                     %% Validators have no permissions on anything; remove it from its own ACL
                     oc_chef_authz:remove_actor_from_actor_acl(ClientAuthzId, ClientAuthzId);
-                _ ->
+                false ->
                     ok %% No need to remove anything otherwise
             end,
 
@@ -533,6 +560,4 @@ object_creation_hook(#chef_client{authz_id=ClientAuthzId}=Client,
             Client;
         {error, Error} ->
             {error, Error}
-    end;
-object_creation_hook(Object, _State) ->
-    Object.
+    end.
