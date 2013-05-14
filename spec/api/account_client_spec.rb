@@ -19,25 +19,25 @@ describe "opscode-account endpoint" do
 
       it "has the appropriate ACLs" do
         get(api_url("/clients/#{client}/_acl"), platform.admin_user).should look_like({
-                                                                                        :status => 200,
-                                                                                        :body_exact =>{
-                                                                                          "create" => {
-                                                                                            "actors" => ["pivotal"],
-                                                                                            "groups" => ["admins"]},
-                                                                                          "read" => {
-                                                                                            "actors" => ["pivotal"],
-                                                                                            "groups" => ["users","admins"]},
-                                                                                          "update" => {
-                                                                                            "actors" => ["pivotal"],
-                                                                                            "groups" => ["admins"]},
-                                                                                          "delete" => {
-                                                                                            "actors" => ["pivotal"],
-                                                                                            "groups" => ["users","admins"]},
-                                                                                          "grant" => {
-                                                                                            "actors" => ["pivotal"],
-                                                                                            "groups" => ["admins"]}
-                                                                                        }
-                                                                                      })
+            :status => 200,
+            :body_exact =>{
+              "create" => {
+                "actors" => ["pivotal"],
+                "groups" => ["admins"]},
+              "read" => {
+                "actors" => ["pivotal"],
+                "groups" => ["users","admins"]},
+              "update" => {
+                "actors" => ["pivotal"],
+                "groups" => ["admins"]},
+              "delete" => {
+                "actors" => ["pivotal"],
+                "groups" => ["users","admins"]},
+              "grant" => {
+                "actors" => ["pivotal"],
+                "groups" => ["admins"]}
+            }
+          })
       end
     end
 
@@ -45,7 +45,7 @@ describe "opscode-account endpoint" do
       let(:client){ "pedant_test_validator" }
       before :each do
         post(api_url("/clients"), requestor,
-             :payload => {"name" => client, "validator" => true}).should have_status_code(201)
+          :payload => {"name" => client, "validator" => true}).should have_status_code(201)
       end
 
       after :each do
@@ -69,25 +69,25 @@ describe "opscode-account endpoint" do
         end
 
         get(api_url("/clients/#{client}/_acl"), platform.admin_user).should look_like({
-                                                                                        :status => 200,
-                                                                                        :body_exact =>{
-                                                                                          "create" => {
-                                                                                            "actors" => actors,
-                                                                                            "groups" => ["admins"]},
-                                                                                          "read" => {
-                                                                                            "actors" => actors,
-                                                                                            "groups" => ["users","admins"]},
-                                                                                          "update" => {
-                                                                                            "actors" => actors,
-                                                                                            "groups" => ["admins"]},
-                                                                                          "delete" => {
-                                                                                            "actors" => actors,
-                                                                                            "groups" => ["users","admins"]},
-                                                                                          "grant" => {
-                                                                                            "actors" => actors,
-                                                                                            "groups" => ["admins"]}
-                                                                                        }
-                                                                                      })
+            :status => 200,
+            :body_exact =>{
+              "create" => {
+                "actors" => actors,
+                "groups" => ["admins"]},
+              "read" => {
+                "actors" => actors,
+                "groups" => ["users","admins"]},
+              "update" => {
+                "actors" => actors,
+                "groups" => ["admins"]},
+              "delete" => {
+                "actors" => actors,
+                "groups" => ["users","admins"]},
+              "grant" => {
+                "actors" => actors,
+                "groups" => ["admins"]}
+            }
+          })
       end
     end
   end
@@ -95,17 +95,17 @@ describe "opscode-account endpoint" do
   context "Admin User Group" do
     it "has the appropriate members" do
       get(api_url("/groups/admins"), platform.superuser).should look_like({
-                                                                            :status => 200,
-                                                                            :body_exact => {
-                                                                              "actors" => ["pivotal",platform.admin_user.name],
-                                                                              "users" => ["pivotal",platform.admin_user.name],
-                                                                              "clients" => [],
-                                                                              "groups" => [],
-                                                                              "orgname" => platform.test_org.name,
-                                                                              "name" => "admins",
-                                                                              "groupname" => "admins"
-                                                                            }
-                                                                          })
+          :status => 200,
+          :body_exact => {
+            "actors" => ["pivotal",platform.admin_user.name],
+            "users" => ["pivotal",platform.admin_user.name],
+            "clients" => [],
+            "groups" => [],
+            "orgname" => platform.test_org.name,
+            "name" => "admins",
+            "groupname" => "admins"
+          }
+        })
     end
   end
 
@@ -118,20 +118,20 @@ describe "opscode-account endpoint" do
 
       it 'retrieves the group' do
         all_clients = [platform.test_org.validator.name,
-                       platform.non_admin_client.name,
-                       platform.admin_client.name]
+          platform.non_admin_client.name,
+          platform.admin_client.name]
 
         get(request_url, requestor).should look_like({
-                                                       :status => 200,
-                                                       :body_exact => {
-                                                         'name' => group_name,
-                                                         'groupname' => group_name,
-                                                         'orgname' => platform.test_org.name,
-                                                         'actors' => all_clients,
-                                                         'clients' => all_clients,
-                                                         'users' => [],
-                                                         'groups' => []
-                                                       }})
+            :status => 200,
+            :body_exact => {
+              'name' => group_name,
+              'groupname' => group_name,
+              'orgname' => platform.test_org.name,
+              'actors' => all_clients,
+              'clients' => all_clients,
+              'users' => [],
+              'groups' => []
+            }})
       end
     end # group retrieval
 
@@ -140,24 +140,24 @@ describe "opscode-account endpoint" do
 
       it 'retrieves the ACL' do
         get(request_url, requestor).should look_like({
-                                                       :status => 200,
-                                                       :body_exact => {
-                                                         "create" => {
-                                                           "actors" => ["pivotal"],
-                                                           "groups" => ["admins"]},
-                                                         "read" => {
-                                                           "actors" => ["pivotal"],
-                                                           "groups" => ["admins"]},
-                                                         "update" => {
-                                                           "actors" => ["pivotal"],
-                                                           "groups" => ["admins"]},
-                                                         "delete" => {
-                                                           "actors" => ["pivotal"],
-                                                           "groups" => ["admins"]},
-                                                         "grant" => {
-                                                           "actors" => ["pivotal"],
-                                                           "groups" => ["admins"]}
-                                                       }})
+            :status => 200,
+            :body_exact => {
+              "create" => {
+                "actors" => ["pivotal"],
+                "groups" => ["admins"]},
+              "read" => {
+                "actors" => ["pivotal"],
+                "groups" => ["admins"]},
+              "update" => {
+                "actors" => ["pivotal"],
+                "groups" => ["admins"]},
+              "delete" => {
+                "actors" => ["pivotal"],
+                "groups" => ["admins"]},
+              "grant" => {
+                "actors" => ["pivotal"],
+                "groups" => ["admins"]}
+            }})
       end
     end
   end
@@ -167,12 +167,12 @@ describe "opscode-account endpoint" do
 
     it "retrieves the Clients container" do
       get(api_url("/containers/clients"), requestor).should look_like({
-                                                                        :status => 200,
-                                                                        :body_exact => {
-                                                                          "containername" => "clients",
-                                                                          "containerpath" => "clients"
-                                                                        }
-                                                                      })
+          :status => 200,
+          :body_exact => {
+            "containername" => "clients",
+            "containerpath" => "clients"
+          }
+        })
     end
 
     it "retrieves the Clients container's ACL" do
@@ -185,25 +185,25 @@ describe "opscode-account endpoint" do
       end
 
       get(api_url("/containers/clients/_acl"), requestor).should look_like({
-                                                                             :status => 200,
-                                                                             :body_exact => {
-                                                                               "create" => {
-                                                                                 "actors" => create_and_read_actors,
-                                                                                 "groups" => ["admins"]},
-                                                                               "read" => {
-                                                                                 "actors" => create_and_read_actors,
-                                                                                 "groups" => ["admins", "users"]},
-                                                                               "update" => {
-                                                                                 "actors" => ["pivotal"],
-                                                                                 "groups" => ["admins"]},
-                                                                               "delete" => {
-                                                                                 "actors" => ["pivotal"],
-                                                                                 # really?  Any user can nuke a client?
-                                                                                 "groups" => ["admins", "users"]},
-                                                                               "grant" => {
-                                                                                 "actors" => ["pivotal"],
-                                                                                 "groups" => ["admins"]}
-                                                                             }})
+          :status => 200,
+          :body_exact => {
+            "create" => {
+              "actors" => create_and_read_actors,
+              "groups" => ["admins"]},
+            "read" => {
+              "actors" => create_and_read_actors,
+              "groups" => ["admins", "users"]},
+            "update" => {
+              "actors" => ["pivotal"],
+              "groups" => ["admins"]},
+            "delete" => {
+              "actors" => ["pivotal"],
+              # really?  Any user can nuke a client?
+              "groups" => ["admins", "users"]},
+            "grant" => {
+              "actors" => ["pivotal"],
+              "groups" => ["admins"]}
+          }})
     end
   end
 
@@ -218,7 +218,7 @@ describe "opscode-account endpoint" do
 
       it "cannot create a client" do
         post(api_url("/clients"), requestor,
-             :payload => {"name" => new_client_name}).should have_status_code(403)
+          :payload => {"name" => new_client_name}).should have_status_code(403)
       end
     end
 
@@ -227,19 +227,19 @@ describe "opscode-account endpoint" do
 
       it "creates a new non-validator client" do
         post(api_url("/clients"), requestor,
-             :payload => {"name" => new_client_name}).should look_like({
-                                                                         :status => 201,
-                                                                         :body => {
-                                                                           'uri' => api_url("/clients/#{new_client_name}")
-                                                                         }
-                                                                       })
+          :payload => {"name" => new_client_name}).should look_like({
+            :status => 201,
+            :body => {
+              'uri' => api_url("/clients/#{new_client_name}")
+            }
+          })
       end
 
       if erlang?
         # This can happen on Ruby..
         it "cannot create a new validator client" do
           post(api_url("/clients"), requestor,
-             :payload => {"name" => new_client_name, "validator" => true}).should have_status_code(403)
+            :payload => {"name" => new_client_name, "validator" => true}).should have_status_code(403)
         end
       end
 
@@ -247,44 +247,44 @@ describe "opscode-account endpoint" do
         post(api_url("/clients"), requestor, :payload => {"name" => new_client_name}).should have_status_code(201)
 
         get(api_url("/clients/#{new_client_name}/_acl"), platform.admin_user).should look_like({
-                                                                                       :status => 200,
-                                                                                       :body_exact => {
-                                                                                         "create"=>
-                                                                                         {"actors"=>["pivotal", new_client_name],
-                                                                                           "groups"=>["admins"]},
-                                                                                         "read"=>
-                                                                                         {"actors"=>["pivotal", new_client_name],
-                                                                                           "groups"=>["admins", "users"]},
-                                                                                         "update"=>
-                                                                                         {"actors"=>["pivotal", new_client_name],
-                                                                                           "groups"=>["admins"]},
-                                                                                         "delete"=>
-                                                                                         {"actors"=>["pivotal", new_client_name],
-                                                                                           "groups"=>["admins", "users"]},
-                                                                                         "grant"=>
-                                                                                         {"actors"=>["pivotal", new_client_name],
-                                                                                           "groups"=>["admins"]}}
-                                                                                     })
+            :status => 200,
+            :body_exact => {
+              "create"=>
+              {"actors"=>["pivotal", new_client_name],
+                "groups"=>["admins"]},
+              "read"=>
+              {"actors"=>["pivotal", new_client_name],
+                "groups"=>["admins", "users"]},
+              "update"=>
+              {"actors"=>["pivotal", new_client_name],
+                "groups"=>["admins"]},
+              "delete"=>
+              {"actors"=>["pivotal", new_client_name],
+                "groups"=>["admins", "users"]},
+              "grant"=>
+              {"actors"=>["pivotal", new_client_name],
+                "groups"=>["admins"]}}
+          })
       end
 
       it "puts the new client into the 'clients' group" do
         post(api_url("/clients"), requestor, :payload => {"name" => new_client_name}).should have_status_code(201)
 
         all_clients = [platform.test_org.validator.name,
-                       platform.admin_client.name,
-                       platform.non_admin_client.name,
-                       new_client_name]
+          platform.admin_client.name,
+          platform.non_admin_client.name,
+          new_client_name]
 
         get(api_url("/groups/clients"), platform.admin_user).should look_like({:status => 200,
-                                                                               :body_exact => {
-                                                                                 'name' => 'clients',
-                                                                                 'groupname' => 'clients',
-                                                                                 'orgname' => platform.test_org.name,
-                                                                                 'actors' => all_clients,
-                                                                                 'clients' => all_clients,
-                                                                                 'users' => [],
-                                                                                 'groups' => []
-                                                                               }})
+            :body_exact => {
+              'name' => 'clients',
+              'groupname' => 'clients',
+              'orgname' => platform.test_org.name,
+              'actors' => all_clients,
+              'clients' => all_clients,
+              'users' => [],
+              'groups' => []
+            }})
       end
 
       pending "a new validator should have read / create permissions on clients container"
