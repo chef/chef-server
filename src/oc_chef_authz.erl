@@ -32,7 +32,7 @@
 
 -ifndef(TEST).
 -export([
-         add_client_to_clients_group/3,
+         add_client_to_clients_group/4,
          delete_resource/3,
          create_entity_if_authorized/4,
          get_container_aid_for_object/3,
@@ -313,20 +313,32 @@ set_ace_for_object(RequestorId, AuthzType, Id, AccessMethod, #authz_ace{actors=A
 %% @doc Adds the given client authz ID to the actors list of the organization's "clients"
 %% group.  Clients must be members of this group in order to behave properly as such.
 %%
+%% `RequestorId' can be the atom `superuser'; in that case, the underlying Authz requests
+%% will be made by the Authz superuser.  If it is a normal ID, that requestor will make the
+%% Authz requests.
+%%
 %% Taking this approach instead of a more general "add_to_group" approach since this client
 %% operation is the only instance.
 -spec add_client_to_clients_group(#oc_chef_authz_context{},
                                  OrgId :: object_id(),
-                                 ClientAuthzId :: object_id()) ->
+                                 ClientAuthzId :: object_id(),
+                                 RequestorId :: superuser | object_id()) ->
                                           ok | {error, term()}.
-add_client_to_clients_group(Context, OrgId, ClientAuthzId) ->
+add_client_to_clients_group(Context, OrgId, ClientAuthzId, RequestorId) ->
     %% We need the superuser ID here because when a validator creates a client, the won't
     %% have the permissions required to add that new client to the clients group.
-    {ok, SuperuserId} = application:get_env(oc_chef_authz, authz_superuser_id),
+
+    EffectiveRequestorId = case RequestorId of
+                               superuser ->
+                                   {ok, SuperuserId} = application:get_env(oc_chef_authz, authz_superuser_id),
+                                   SuperuserId;
+                               RequestorId ->
+                                   RequestorId
+                           end,
 
     ClientGroupAuthzId = oc_chef_authz_db:fetch_group_authz_id(Context, OrgId, <<"clients">>),
     Url = make_url([<<"groups">>, ClientGroupAuthzId, <<"actors">>, ClientAuthzId]),
-    case oc_chef_authz_http:request(Url, put, [], [], SuperuserId) of
+    case oc_chef_authz_http:request(Url, put, [], [], EffectiveRequestorId) of
         ok             -> ok;
         {error, Error} -> {error, Error}
     end.
