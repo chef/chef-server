@@ -18,7 +18,7 @@
 -export([assemble_principal_ejson/3,
          check_cookbook_authz/3,
          delete_object/3,
-         maybe_process_client/2,
+         object_creation_hook/2,
          stats_hero_label/1,
          stats_hero_upstreams/0]).
 
@@ -516,7 +516,7 @@ stats_hero_upstreams() ->
 %% @doc Enterprise Chef Clients must be added to the clients group.
 %%
 %% Other objects can pass through.
-maybe_process_client(#chef_client{authz_id=ClientAuthzId}=Client,
+object_creation_hook(#chef_client{authz_id=ClientAuthzId}=Client,
                      #base_state{chef_authz_context=AuthContext,
                                  requestor=Requestor,
                                  requestor_id=RequestorId,
@@ -536,5 +536,5 @@ maybe_process_client(#chef_client{authz_id=ClientAuthzId}=Client,
         {error, Error} ->
             {error, Error}
     end;
-maybe_process_client(NotAClient, _State) ->
-    NotAClient.
+object_creation_hook(Object, _State) ->
+    Object.
