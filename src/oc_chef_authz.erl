@@ -216,7 +216,7 @@ set_acl(_RequestorId, _AuthzType, _ObjectId, []) ->
     ok;
 set_acl(RequestorId, AuthzType, ObjectId, [{Method, ACE}|Rest]) when AuthzType =:= 'actor';
                                                                      AuthzType =:= 'object' ->
-    case set_ace_for_object(RequestorId, AuthzType, ObjectId, Method, ACE) of
+    case set_ace_for_entity(RequestorId, AuthzType, ObjectId, Method, ACE) of
         ok ->
             set_acl(RequestorId, AuthzType, ObjectId, Rest);
         {error, Reason} ->
@@ -295,13 +295,13 @@ get_acl_for_resource(RequestorId, ResourceType, Id) ->
 % Replace the actors and groups of an ace
 % PUT {objects|groups|actors|containers}/:id/acl/:action
 %
--spec set_ace_for_object(requestor_id(),
+-spec set_ace_for_entity(requestor_id(),
                          AuthzType :: 'actor' | 'container' | 'object',
                          object_id(),
                          access_method(),
                          authz_ace()) -> ok |
                                          {error, any()}.
-set_ace_for_object(RequestorId, AuthzType, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
+set_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
     Url = make_url([pluralize_resource(AuthzType), Id, acl, AccessMethod]),
     Body = jiffy:encode({[{<<"actors">>, Actors}, {<<"groups">>, Groups}]}),
     case oc_chef_authz_http:request(Url, put, [], Body, RequestorId) of
