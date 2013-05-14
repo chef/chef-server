@@ -146,17 +146,16 @@ create_in_container(client=Container, Req,
     %% automatically get those same permissions on any subsequently-created clients, due to
     %% how we currently inherit the container ACL as a "template" for new items.
     %%
-    %% It was initially assumed that validators needed both CREATE and READ permission on
+    %% It used to be the case that validators needed both CREATE and READ permission on
     %% the clients container (CREATE to actually create a client, READ to subsequently grab
     %% the ACL of the client container in order to merge it into the ACL of the new client).
-    %% However, testing done in the course of writing Bifrost indicates that having ANY
-    %% permission on an object is sufficient for getting an ACL on that object, so the
-    %% requirement for READ is probably spurious (we didn't have super thorough tests for
-    %% Authz back in the day).
+    %% However, it appears that this requirement has been relaxed in recent history, such that
+    %% READ is not explicitly required to read an ACL; membership in the ACL (any permission)
+    %% is sufficient.
     %%
     %% This means that we only really need to handle the CREATE case. To do this, we
-    %% substitute the validator's AuthzId for the Authz superuser and use it to do the
-    %% creation.
+    %% effectively replace the validator's AuthzId with that of the Authz superuser (for this
+    %% one operation!) and use it to do the creation.
     %%
     %% NOTE: having a CREATE permission on an already created object that isn't a container
     %% is, in fact, meaningless, but there's no sense in storing additional data.  We're
@@ -167,7 +166,7 @@ create_in_container(client=Container, Req,
     %% TODO: we really should differentiate between "container permissions" and "permission
     %% templates".  We'll take a look at this in an upcoming version of Bifrost.
     %%
-    %% Oh, and validators shouldn't be able to create other validators (mirrors the behavior
+    %% Oh, and validators shouldn't be able to create other validators (to mirror the behavior
     %% of the Open Source Chef Server), so we need to check the contents of the
     %% client-to-be's data, which is a proplist, and so not very amenable to pattern
     %% matching :(
