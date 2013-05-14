@@ -177,17 +177,16 @@ create_in_container(client=Container, Req,
             %% NOT IN MY HOUSE!
             {true, Req, State};  %% answers the question "is this operation forbidden?"
         false ->
-            {ok, AuthzSuperuserId} = application:get_env(oc_chef_authz, authz_superuser_id),
+            %% We'll pass the atom 'superuser' as a way to indicate to
+            %% downstream code that this should be done by the Authz
+            %% superuser (NOT the Chef API platform superuser!)
 
-            %% We'll pass a tagged tuple as a way to indicate to downstream code that this
-            %% is the superuser ID, so we only do the lookup in this one case, as opposed to
-            %% every time we create a new Authz object.
-            do_create_in_container(Container, Req, State, {superuser, AuthzSuperuserId})
+            do_create_in_container(Container, Req, State, superuser)
     end;
 create_in_container(Container, Req, #base_state{requestor_id = RequestorId} = State) ->
     %% Here, the requestor isn't a validator client, so they should go through the normal
     %% auth checking process.
-    do_create_in_container(Container, Req, State, {normal, RequestorId}).
+    do_create_in_container(Container, Req, State, RequestorId).
 
 %% @doc Perform the actual creation of a new entity.
 do_create_in_container(Container, Req,
