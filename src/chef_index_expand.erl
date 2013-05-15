@@ -248,9 +248,12 @@ expand_list(Keys, List, Acc) ->
 
 expand_obj(Keys, {PL}, Acc) ->
     lists:foldl(fun({K, V}, MyAcc) ->
-                        expand([K|Keys], V, MyAcc)
+                        MyAcc1 = expand(Keys, K, MyAcc),
+                        expand([K|Keys], V, MyAcc1)
                 end, Acc, PL).
 
+add_kv_pair([], _Value, Acc) ->
+    Acc;
 add_kv_pair([K], Value, Acc) ->
     [encode_pair(K, Value) | Acc];
 add_kv_pair([K|_]=Keys, Value, Acc) ->
