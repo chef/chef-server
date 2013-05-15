@@ -1,6 +1,6 @@
 require 'pedant/rspec/common'
 
-describe "ACL API" do
+describe "ACL API", :acl do
   context "/organization/_acl endpoint" do
     let(:request_url) { api_url("organization/_acl") }
 

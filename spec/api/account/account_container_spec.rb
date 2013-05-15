@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
 
-describe "opscode-account containers" do
+describe "opscode-account containers", :containers do
   context "/containers endpoint" do
     let(:request_url) { api_url("containers") }
 
