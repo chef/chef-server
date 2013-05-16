@@ -140,8 +140,10 @@ get_container_aid_for_object(Context, OrgId, ObjectType) ->
 %% @end TODO: consider error cases in more detail
 -spec create_entity_with_container_acl(RequestorId::requestor_id(),
                                        ContainerAId::object_id(),
-                                       ObjectType :: contained_object_name()) -> {ok, object_id()} |
-                                                                                 {error, forbidden}.
+                                       ObjectType :: 'client' | 'container' |
+                                                     'cookbook' | 'data' | 'environment' |
+                                                     'group' | 'node' | 'role' | 'search'
+                                                     ) -> {ok, object_id()} | {error, forbidden}.
 create_entity_with_container_acl(RequestorId, ContainerAId, ObjectType) ->
 
     %% Create the entity
@@ -296,7 +298,7 @@ get_acl_for_resource(RequestorId, ResourceType, Id) ->
 % PUT {objects|groups|actors|containers}/:id/acl/:action
 %
 -spec set_ace_for_entity(requestor_id(),
-                         AuthzType :: 'actor' | 'container' | 'object',
+                         AuthzType :: 'actor' | 'object',
                          object_id(),
                          access_method(),
                          authz_ace()) -> ok |
@@ -370,8 +372,8 @@ remove_actor_from_acl(ActorId, Acl) ->
 
 %% @doc Removes `ActorId` from all `actors` lists in the given ACL.
 -spec remove_actor_from_acl(ActorId::object_id(),
-                            AclToProcess::authz_acl(),
-                            FilteredAcl::authz_acl()) ->
+                            AclToProcess:: [] | authz_acl(),
+                            FilteredAcl::[] | authz_acl()) ->
                                    authz_acl().
 remove_actor_from_acl(_ActorId, [], Acc) ->
     lists:reverse(Acc);
@@ -406,7 +408,6 @@ object_type_to_container_name(search)      -> <<"search">>.
 
 %% @doc When creating a new Authz entity in a given container, we need to ensure we're
 %% creating the correct kind.
--spec authz_type_from_container(contained_object_name()) -> 'actor' | 'object'.
 authz_type_from_container(client) -> 'actor';
 authz_type_from_container(_)      -> 'object'.
 

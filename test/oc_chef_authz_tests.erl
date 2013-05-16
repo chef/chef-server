@@ -207,7 +207,7 @@ get_container_aid_for_object_test_() ->
                end}
       end]}.
 
-create_object_if_authorized_test_() ->
+create_entity_if_authorized_test_() ->
     {foreach,
      fun() -> test_utils:test_setup() end,
      fun(_) -> meck:unload() end,
@@ -220,7 +220,7 @@ create_object_if_authorized_test_() ->
                       %% so bobo doesn't get created by setup test, probably only by running
                       %% features.
                       %% TODO: also need to decide on behavor for user_record_to_authz_id(not_found)
-                      {ok, ObjectId} = oc_chef_authz:create_object_if_authorized(Server, ?test_org_id, AdminAID, node),
+                      {ok, ObjectId} = oc_chef_authz:create_entity_if_authorized(Server, ?test_org_id, AdminAID, node),
                       ?assert(is_authz_id(ObjectId)),
                       %% the creator should have access
                       [ ?assert(oc_chef_authz:is_authorized_on_resource(AdminAID, object, ObjectId, actor,
@@ -236,7 +236,7 @@ create_object_if_authorized_test_() ->
               fun() ->
                       UserAID = <<"cf5d90545fbbac541225fbd9e73e4e42">>,
                       ?assertEqual({error, forbidden},
-                                   oc_chef_authz:create_object_if_authorized(Server, ?test_org_id, UserAID, node))
+                                   oc_chef_authz:create_entity_if_authorized(Server, ?test_org_id, UserAID, node))
               end}
      end]}.
 
