@@ -69,7 +69,7 @@ http {
     # The name doesn't matter; this is the only listener on this port
     server_name <%= node['fqdn'] %>;
 
-		client_max_body_size <%= @client_max_body_size %>;
+    client_max_body_size <%= @client_max_body_size %>;
     proxy_set_header        Host            $host;
     proxy_set_header        X-Real-IP       $remote_addr;
     proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -108,6 +108,13 @@ http {
 
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/{0,1}.*$", 'couchdb_environments') %>
 
+
+    # We only let the Chef API handle clients if we're off CouchDB;
+    # otherwise, it needs to be handled by opscode-account.
+    <%- unless node['private_chef']['dark_launch']['couchdb_clients'] -%>
+      <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", 'couchdb_clients') %>
+    <%- end -%>
+
     # principals go to erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
 
@@ -135,7 +142,7 @@ http {
     # The name doesn't matter; this is the only listener on this port
     server_name <%= node['fqdn'] %>;
 
-		client_max_body_size <%= @client_max_body_size %>;
+    client_max_body_size <%= @client_max_body_size %>;
     proxy_set_header        Host            $host;
     proxy_set_header        X-Real-IP       $remote_addr;
     proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -159,7 +166,7 @@ http {
     listen <%= node['private_chef']['lb_internal']['authz_port'] %>;
     server_name <%= node['fqdn'] %>;
 
-		client_max_body_size <%= @client_max_body_size %>;
+    client_max_body_size <%= @client_max_body_size %>;
     proxy_set_header        Host            $host;
     proxy_set_header        X-Real-IP       $remote_addr;
     proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
