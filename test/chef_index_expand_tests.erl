@@ -43,7 +43,7 @@ flatten_non_recursive_type_test() ->
     %% as below. Formatting of floats is tricky. We should investigate
     %% what the Ruby code does.
     Expect = <<"a_false__=__false "
-               "a_float__=__1.23000000000000 "
+               "a_float__=__1.23 "
                "a_int__=__2 "
                "a_null__=__ "
                "a_string__=__hello "
@@ -58,10 +58,49 @@ flatten_lists_test() ->
                           [<<"b">>, 2], <<"c">>]}]},
     Expanded = chef_index_expand:flatten(Input),
     Expect = <<"k1__=__ "
-               "k1__=__0 k1__=__1.12300000000000 "
+               "k1__=__0 k1__=__1.123 "
                "k1__=__2 k1__=__a k1__=__b k1__=__c "
                "k1__=__false k1__=__true ">>,
     ?assertEqual(Expect, iolist_to_binary(Expanded)).
+
+example_test() ->
+    {ok, Bin} = file:read_file("../test/sample_node.json"),
+    Node = jiffy:decode(Bin),
+    Expanded = chef_index_expand:flatten(Node),
+    file:write_file("../test/sample.out", Expanded),
+    ok.
+
+example_nested_test() ->
+    Input = {[
+              {<<"k1">>, [<<"a1">>, <<"a2">>, [<<"aa1">>, <<"aa2">>]]},
+              {<<"k2">>, 5},
+              {<<"k3">>, {[{<<"kk1">>, <<"h">>},
+                           {<<"kk2">>, [1, 2]},
+                           {<<"kk3">>, {[
+                                         {<<"kkk1">>, true},
+                                         {<<"kkk2">>, <<"i<&>">>},
+                                         {<<"kk&k3">>, [<<"j">>,
+                                                        {[
+                                                          {<<"lkk<>k1">>, 1},
+                                                          {<<"lkkk2">>, 2}
+                                                         ]}]}
+                                        ]}}
+                          ]}}]},
+    Expanded = chef_index_expand:flatten(Input),
+    file:write_file("../test/example_nested.out", Expanded),
+    ok.
+
+example_flat_test() ->
+        Input = {[{<<"a_null">>, null},
+              {<<"a_true">>, true},
+              {<<"a_false">>, false},
+              {<<"a_int">>, 2},
+              {<<"a_float">>, 1.23},
+              {<<"a_string">>, <<"hello, \"you\"">>}
+             ]},
+    Expanded = chef_index_expand:flatten(Input),
+    file:write_file("../test/example_flat.out", Expanded),
+    ok.
 
 flatten_nested_test() ->
     Input = {[
@@ -187,7 +226,6 @@ post_single_test_() ->
        fun() ->
                Cmd = chef_index_expand:make_command(add, data_bag_item, <<"abc123">>,
                                              "dbdb1212", ?DB_ITEM),
-
                Expect = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                           "<add>"
                           "<doc>"

@@ -232,7 +232,9 @@ expand(Keys, Int, Acc) when is_integer(Int) ->
     I = list_to_binary(integer_to_list(Int)),
     add_kv_pair(Keys, I, Acc);
 expand(Keys, Flt, Acc) when is_float(Flt) ->
-    F = iolist_to_binary(io_lib:format("~.15g", [Flt])),
+    %% trying to match closest to Ruby implementation, we can't use
+    %% ~f.
+    F = iolist_to_binary(io_lib:format("~p", [Flt])),
     add_kv_pair(Keys, F, Acc);
 expand(Keys, true, Acc) ->
     add_kv_pair(Keys, <<"true">>, Acc);
