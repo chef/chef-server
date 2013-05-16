@@ -19,7 +19,9 @@
 
 -export([container_record_to_authz_id/2,
          fetch_container/3,
-         make_context/1]).
+         fetch_group_authz_id/3,
+         make_context/1
+        ]).
 
 -include("oc_chef_authz.hrl").
 -include("oc_chef_authz_db.hrl").
@@ -35,25 +37,25 @@
         "Mixlib::Authorization::Models::Client-fec21b157b76e08b86e92ef7cbc2be81").
 
 -define(mixlib_auth_container_design,
-	"Mixlib::Authorization::Models::Container-f6aead5acfa18f649f9f951ad5570324").
+        "Mixlib::Authorization::Models::Container-f6aead5acfa18f649f9f951ad5570324").
 
 -define(mixlib_auth_cookbook_design,
-	"Mixlib::Authorization::Models::Cookbook-98638da9d7bfb86c50d448361c5ce691").
+        "Mixlib::Authorization::Models::Cookbook-98638da9d7bfb86c50d448361c5ce691").
 
 -define(mixlib_auth_data_bag_design,
-	"Mixlib::Authorization::Models::DataBag-ff80eed5150b3cf59c54630503d83bb5").
+        "Mixlib::Authorization::Models::DataBag-ff80eed5150b3cf59c54630503d83bb5").
 
 -define(mixlib_auth_environment_design,
-	"Mixlib::Authorization::Models::Environment-bd1a09cec7a4655bf54f4b98ec5ec156").
+        "Mixlib::Authorization::Models::Environment-bd1a09cec7a4655bf54f4b98ec5ec156").
 
 -define(mixlib_auth_group_design,
-	"Mixlib::Authorization::Models::Group-59a505c964199e318b67910cc642a06").
+        "Mixlib::Authorization::Models::Group-59a505c964199e318b67910cc642a062").
 
 -define(mixlib_auth_node_design,
-	"Mixlib::Authorization::Models::Node-8554f173ac3e9bfa55a0836e19b0f232").
+        "Mixlib::Authorization::Models::Node-8554f173ac3e9bfa55a0836e19b0f232").
 
 -define(mixlib_auth_role_design,
-	"Mixlib::Authorization::Models::Role-793b383e56e849fca5901cd66b92bde7").
+        "Mixlib::Authorization::Models::Role-793b383e56e849fca5901cd66b92bde7").
 
 -define(mixlib_auth_join_design,
         "Mixlib::Authorization::AuthJoin-25834c5a8d6a9586adb05320f3f725e8").
@@ -72,7 +74,7 @@ make_context(ReqId) when is_binary(ReqId) ->
     Port = get_env(couchdb_port),
     S = couchbeam:server_connection(Host, Port, "", []),
     #oc_chef_authz_context{reqid = ReqId, otto_connection = S}.
-    
+
 -spec fetch_container(oc_chef_authz_context(),
                       object_id(),
                       container_name()) ->
@@ -94,6 +96,26 @@ fetch_container(#oc_chef_authz_context{otto_connection=Server}, OrgId, Container
                             last_updated_by = Updated
                            };
         Error -> Error
+    end.
+
+%% @doc Retrieve the authz ID for a given group in an organaization.
+%%
+%% This is not `fetch_group`, because currently, we have no need for
+%% complete group "objects" in the system.  This is only really used
+%% to retrieve the clients group, so that we may add newly-created
+%% clients to it (we could also start deleting clients from it, too).
+-spec fetch_group_authz_id(Context :: oc_chef_authz_context(),
+                           OrgId :: binary(),
+                           GroupName :: binary()) ->  object_id() |
+                                                      {not_found, authz_group}.
+fetch_group_authz_id(#oc_chef_authz_context{otto_connection=Server}, OrgId, GroupName) ->
+    case fetch_by_name(Server, OrgId, GroupName, authz_group) of
+        {ok, Group} ->
+            Id = ej:get({<<"_id">>}, Group),
+            AuthzId = fetch_auth_join_id(Server, Id, user_to_auth),
+            AuthzId;
+        {not_found, authz_group} ->
+            {not_found, authz_group}
     end.
 
 -spec container_record_to_authz_id(any(), any()) -> object_id().
@@ -151,15 +173,15 @@ fetch_auth_join_id(Server, Id, Direction) when is_binary(Id) ->
 %% design_and_view_for_type(authz_client) ->
 %%     {?mixlib_auth_client_design, "by_clientname"};
 design_and_view_for_type(authz_container) ->
-    {?mixlib_auth_container_design, "by_containername"}.
+    {?mixlib_auth_container_design, "by_containername"};
 %% design_and_view_for_type(authz_cookbook) ->
 %%     {?mixlib_auth_container_design, "by_display_name"};
 %% design_and_view_for_type(authz_data_bag) ->
 %%     {?mixlib_auth_data_bag_design, "by_name"};
 %% design_and_view_for_type(authz_environment) ->
 %%     {?mixlib_auth_environment_design, "all_id"};
-%% design_and_view_for_type(authz_group) ->
-%%     {?mixlib_auth_group_design, "by_groupname"};
+design_and_view_for_type(authz_group) ->
+    {?mixlib_auth_group_design, "by_groupname"}.
 %% design_and_view_for_type(authz_node) ->
 %%     {?mixlib_auth_node_design, "by_name"};
 %% design_and_view_for_type(authz_role) ->
