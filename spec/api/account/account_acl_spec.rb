@@ -277,16 +277,14 @@ describe "ACL API", :acl do
               }}
 
             it "returns 400" do
-              pending "it just adds it instead" do
-                put(request_url, platform.admin_user,
-                  :payload => request_body).should look_like({
-                    :status => 400
-                  })
-                get(acl_url, platform.admin_user).should look_like({
-                    :status => 200,
-                    :body_exact => default_body
-                  })
-              end
+              put(request_url, platform.admin_user,
+                :payload => request_body).should look_like({
+                  :status => 400
+                })
+              get(acl_url, platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => default_body
+                })
             end
           end
 
@@ -481,7 +479,6 @@ describe "ACL API", :acl do
         let(:deletion_url) { api_url("#{type}/#{new_object}") }
         let(:request_url) { api_url("#{type}/#{new_object}/_acl") }
 
-        # Because clients need to be created by superuser, but everything else shouldn't:
         let(:setup_user) { platform.admin_user }
 
         # Body used to create object (generally overriden):
@@ -512,8 +509,12 @@ describe "ACL API", :acl do
         # different default ACLs for each type, etc.  We love consistency!
         case type
         when "clients"
-          let(:setup_user) { platform.superuser }
-          let(:actors) { ["pivotal", new_object] }
+          let(:actors) {
+            # As long as 'new_object' isn't a validator (and you're on
+            # the Erchef client endpoint), new_object will be in the
+            # actors list
+            ["pivotal", new_object, setup_user.name]
+          }
           let(:read_groups) { ["users", "admins"] }
           let(:delete_groups) { ["users", "admins"] }
         when "groups"
@@ -594,7 +595,7 @@ describe "ACL API", :acl do
         end
 
         after :each do
-          delete(deletion_url, setup_user).should look_like({
+          delete(deletion_url, platform.admin_user).should look_like({
               :status => 200
             })
         end
@@ -857,16 +858,14 @@ describe "ACL API", :acl do
                     }}
 
                   it "returns 400" do
-                    pending "it just adds it instead" do
-                      put(permission_request_url, platform.admin_user,
-                        :payload => update_body).should look_like({
-                          :status => 400
-                        })
-                      get(request_url, platform.admin_user).should look_like({
-                          :status => 200,
-                          :body_exact => acl_body
-                        })
-                    end
+                    put(permission_request_url, platform.admin_user,
+                      :payload => update_body).should look_like({
+                        :status => 400
+                      })
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body_exact => acl_body
+                      })
                   end
                 end
 
