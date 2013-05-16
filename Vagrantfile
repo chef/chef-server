@@ -1,8 +1,6 @@
 require 'berkshelf/vagrant'
 require 'fileutils'
 
-OMNIBUS_CHEF_VERSION = "11.4.0"
-
 if ENV['OPSCODE_PLATFORM_REPO'].nil?
   puts "ERROR: please export OPSCODE_PLATFORM_REPO"
   exit 1
@@ -32,10 +30,8 @@ Vagrant::Config.run do |config|
 
   config.vm.host_name = "opscode-chef-mover-berkshelf"
 
-  #config.vm.box = "opscode-ubuntu-10.04"
-  #config.vm.box_url = "http://opscode-vm.s3.amazonaws.com/vagrant/opscode_ubuntu-10.04_chef-10.18.2.box"
-  config.vm.box = "opscode-ubuntu-12.04"
-  config.vm.box_url = "https://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-ubuntu-12.04.box"
+  config.vm.box = "opscode-ubuntu-12.04-chef-11.4.4"
+  config.vm.box_url = "https://opscode-vm.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_chef-11.4.4.box"
 
   # Boot with a GUI so you can see the screen. (Default is headless)
   # config.vm.boot_mode = :gui
@@ -70,17 +66,6 @@ Vagrant::Config.run do |config|
   config.vm.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
   config.vm.share_folder "moser", "/mnt/moser", "../moser"
   config.vm.share_folder "decouch", "/mnt/decouch", "../decouch"
-  # config.vm.share_folder "chef-sql-schema", "/srv/chef-sql-schema", "../chef-sql-schema"
-  config.vm.provision :shell, :inline => <<-INSTALL_OMNIBUS
-  if [ ! -d "/opt/chef" ] ||
-     [ ! $(chef-solo --v | awk "{print \\$2}") = "#{OMNIBUS_CHEF_VERSION}" ]
-  then
-    wget -qO- https://www.opscode.com/chef/install.sh | sudo bash -s -- -v #{OMNIBUS_CHEF_VERSION}
-  else
-    echo "Chef #{OMNIBUS_CHEF_VERSION} already installed...skipping installation."
-  fi
-  INSTALL_OMNIBUS
-
   config.vm.provision :chef_solo do |chef|
     chef.json = {
      "postgresql" => {

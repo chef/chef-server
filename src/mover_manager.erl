@@ -290,8 +290,8 @@ preload_orgs(BatchSize, State) ->
     end.
 
 -spec load_org_objects([{binary(), binary()}], #state{}) -> {ok, #state{}}.
-%% @doc Load objects using the module in `State#state.object_mod` for the specified list of
-%% `{OrgId, OrgName}` tuples. For each org, we fetch a list of objects and then load meta
+%% @doc Load objects using the module in `State#state.object_mod' for the specified list of
+%% `{OrgId, OrgName}' tuples. For each org, we fetch a list of objects and then load meta
 %% data for all of those objects. Each processed org is marked as state "preload".
 load_org_objects([], State) ->
     {ok, State};
@@ -310,7 +310,7 @@ load_org_objects([{OrgId, OrgName}|T],
 
 -spec find_preload_candidates(non_neg_integer()) -> {ok, [{binary(), binary()}] | none }
                                                         | {error, term()}.
-%% @doc Grovel through org dets file and return a list of `{OrgId, OrgName}` tuples for orgs
+%% @doc Grovel through org dets file and return a list of `{OrgId, OrgName}' tuples for orgs
 %% that are not yet preloaded, not avtive, not migrated, and have not errored out.
 find_preload_candidates(BatchSize) ->
     %% dets:match/3 with N does not act like ets:match/3 with Limit. So to keep it simple,
@@ -335,8 +335,8 @@ find_preload_candidates(BatchSize) ->
 -type org_state() :: preload | read_only | not_read_only | migrated | objects_failed.
 
 -spec mark_org(org_state(), binary()) -> not_found | #org{}.
-%% @doc Update the state of the org record in the `all_orgs` table.
-%% States: `preload`, `read_only`, `not_read_only`, `migrated`, `objects_failed`.
+%% @doc Update the state of the org record in the `all_orgs' table.
+%% States: `preload', `read_only', `not_read_only', `migrated', `objects_failed'.
 mark_org(preload, OrgId) ->
     case dets:lookup(all_orgs, OrgId) of
         [] ->

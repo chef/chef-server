@@ -60,7 +60,7 @@
 
           %% Used to batch groups of objects for migration and track progress.
           object_list = {[], []},
-          
+
           %% These objects encounted known skippable errors.  Objects in this list are removed
           %% from the objects in couch_objects for final comparison.
           skip_objects = [],
@@ -210,7 +210,7 @@ get_object_list(timeout, #state{module = Module,
     State1 = State#state{object_list = safe_split(BatchSize, ObjectList),
                          couch_objects = ObjectList},
     {next_state, migrate_objects, State1, 0}.
-    
+
 migrate_objects(timeout, #state{object_list = {[], []}}=State) ->
     {next_state, mark_migration_end, State, 0};
 migrate_objects(timeout, #state{module = Module,
@@ -222,7 +222,7 @@ migrate_objects(timeout, #state{module = Module,
                                 skip_objects = SkipObjects0}=State) ->
     log(info, OrgName, "starting batch ~B objects (~B remaining)",
         [length(ObjectBatch), length(ObjectList)]),
-    
+
     OrgDb = chef_otto:dbname(OrgId),
     %% Get the object meta data first via read-through cache.  This way, we can filter out
     %% objects that don't have authz data (yes, it happens) and avoid pulling the object data
@@ -284,7 +284,7 @@ mark_migration_end(timeout, #state{module = Module,
                 [length(CouchNames), length(SqlNames)]),
             throw(object_name_mismatch)
     end.
-    
+
 handle_event(_Event, StateName, State) ->
     {next_state, StateName, State}.
 
