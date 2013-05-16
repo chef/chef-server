@@ -18,6 +18,7 @@
 -export([assemble_principal_ejson/3,
          check_cookbook_authz/3,
          delete_object/3,
+         object_creation_hook/2,
          stats_hero_label/1,
          stats_hero_upstreams/0]).
 
@@ -60,8 +61,9 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
         {{container, Container}, Req1, State1} ->
             ContainerId = fetch_container_id(Container, Req1, State1),
             invert_perm(check_permission(container, ContainerId, Req1, State1));
-        {{object, ObjectId}, Req1, State1} ->
-            invert_perm(check_permission(object, ObjectId, Req1, State1));
+        {{Type, ObjectId}, Req1, State1} when Type =:= object;
+                                              Type =:= actor ->
+            invert_perm(check_permission(Type, ObjectId, Req1, State1));
         {AuthTuples, Req1, State1} when is_list(AuthTuples)->
             %% NOTE: multi_auth_check does not handle create_in_container yet, and expects
             %% each auth tuple to have a permission.  This code path is currently only used
@@ -134,12 +136,66 @@ auth_check({object, ObjectId, Permission}, Req, State) ->
 %% permission. Otherwise, the created AuthzId is stored in the
 %% resource_state record using set_authz_id/2 (which knows how to deal
 %% with the different resource_state records).
-create_in_container(Container, Req, #base_state{chef_authz_context = AuthzContext,
-                                                organization_guid = OrgId,
-                                                requestor_id = RequestorId,
-                                                resource_state = RS} = State) ->
-    case oc_chef_authz:create_object_if_authorized(AuthzContext, OrgId, RequestorId,
-                                                Container) of
+create_in_container(client=Container, Req,
+                    #base_state{requestor=#chef_client{validator=true},
+                                resource_state=#client_state{client_data=Data}
+                               }=State) ->
+    %% This function head is an abomination and an affront to all that is good and pure.
+    %%
+    %% HOWEVER, if we actually add validators to ACL of the client container, then they
+    %% automatically get those same permissions on any subsequently-created clients, due to
+    %% how we currently inherit the container ACL as a "template" for new items.
+    %%
+    %% It used to be the case that validators needed both CREATE and READ permission on
+    %% the clients container (CREATE to actually create a client, READ to subsequently grab
+    %% the ACL of the client container in order to merge it into the ACL of the new client).
+    %% However, it appears that this requirement has been relaxed in recent history, such that
+    %% READ is not explicitly required to read an ACL; membership in the ACL (any permission)
+    %% is sufficient.
+    %%
+    %% This means that we only really need to handle the CREATE case. To do this, we
+    %% effectively replace the validator's AuthzId with that of the Authz superuser (for this
+    %% one operation!) and use it to do the creation.
+    %%
+    %% NOTE: having a CREATE permission on an already created object that isn't a container
+    %% is, in fact, meaningless, but there's no sense in storing additional data.  We're
+    %% going to loop back through later and fix up that situation.  Having extra "noise" in
+    %% the ACLs is confusing anyway, and this is an area of our API where we should not be
+    %% confusing.
+    %%
+    %% TODO: we really should differentiate between "container permissions" and "permission
+    %% templates".  We'll take a look at this in an upcoming version of Bifrost.
+    %%
+    %% Oh, and validators shouldn't be able to create other validators (to mirror the behavior
+    %% of the Open Source Chef Server), so we need to check the contents of the
+    %% client-to-be's data, which is a proplist, and so not very amenable to pattern
+    %% matching :(
+    CreatingAValidator = ej:get({<<"validator">>}, Data),
+
+    case CreatingAValidator of
+        true ->
+            %% NOT IN MY HOUSE!
+            {true, Req, State};  %% answers the question "is this operation forbidden?"
+        false ->
+            %% We'll pass the atom 'superuser' as a way to indicate to
+            %% downstream code that this should be done by the Authz
+            %% superuser (NOT the Chef API platform superuser!)
+
+            do_create_in_container(Container, Req, State, superuser)
+    end;
+create_in_container(Container, Req, #base_state{requestor_id = RequestorId} = State) ->
+    %% Here, the requestor isn't a validator client, so they should go through the normal
+    %% auth checking process.
+    do_create_in_container(Container, Req, State, RequestorId).
+
+%% @doc Perform the actual creation of a new entity.
+do_create_in_container(Container, Req,
+                       #base_state{chef_authz_context = AuthzContext,
+                                   organization_guid = OrgId,
+                                   resource_state = RS} = State,
+                       EffectiveRequestorId) ->
+    case oc_chef_authz:create_entity_if_authorized(AuthzContext, OrgId,
+                                                   EffectiveRequestorId, Container) of
         {ok, AuthzId} ->
             State1 = State#base_state{resource_state = set_authz_id(AuthzId, RS)},
             %% return forbidden: false
@@ -421,7 +477,7 @@ assemble_principal_ejson(#principal_state{name = Name,
                                           type = Type,
                                           authz_id = AuthzId} = _Principal,
                          OrgName, DbContext) ->
-    Member = is_user_in_org(Type, DbContext, Name, OrgName),                 
+    Member = is_user_in_org(Type, DbContext, Name, OrgName),
     {[{<<"name">>, Name},
       {<<"public_key">>, PublicKey},
       {<<"type">>, Type},
@@ -454,3 +510,54 @@ stats_hero_label({BadPrefix, Fun}) ->
 stats_hero_upstreams() ->
     [<<"authz">>, <<"couchdb">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
 
+
+
+object_creation_hook(#chef_client{}=Client,
+                     #base_state{chef_authz_context=AuthContext,
+                                 requestor=#chef_client{validator=true},
+                                 organization_guid = OrgId}) ->
+    %% Validator-initiated requests must have Authz operations
+    %% performed by the Authz superuser.
+    client_cleanup(Client, AuthContext, OrgId, superuser);
+object_creation_hook(#chef_client{}=Client,
+                     #base_state{chef_authz_context=AuthContext,
+                                 requestor_id=RequestorId,
+                                 organization_guid = OrgId}) ->
+    %% Client cleanup initiated by anyone besides a validator client
+    %% proceeds with an un-spoofed identity.
+    client_cleanup(Client, AuthContext, OrgId, RequestorId);
+object_creation_hook(Object, _State) ->
+    %% Everything else passes through unaffected
+    Object.
+
+%% @doc Perform needed post-creation cleanup on Client objects.
+%% Clients must be added to the clients group, and newly-created
+%% validators must have themselves removed from their ACL.
+%%
+%% See oc_chef_authz:add_client_to_clients_group/4 for more
+%% information on the `RequestorId` argument
+-spec client_cleanup(#chef_client{},
+                     AuthContext :: chef_authz:chef_authz_context(),
+                     OrgId :: object_id(),
+                     RequestorId :: superuser | object_id()) -> #chef_client{} |
+                                                                {error, term()}.
+client_cleanup(#chef_client{authz_id=ClientAuthzId,
+                            validator=IsValidator}=Client,
+               AuthContext,
+               OrgId,
+               RequestorId) ->
+    case oc_chef_authz:add_client_to_clients_group(AuthContext, OrgId, ClientAuthzId, RequestorId) of
+        ok ->
+            case IsValidator of
+                true ->
+                    %% Validators have no permissions on anything; remove it from its own ACL
+                    oc_chef_authz:remove_actor_from_actor_acl(ClientAuthzId, ClientAuthzId);
+                false ->
+                    ok %% No need to remove anything otherwise
+            end,
+
+            %% Return the client
+            Client;
+        {error, Error} ->
+            {error, Error}
+    end.
