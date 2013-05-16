@@ -34,14 +34,26 @@ opscode_chef schema via chef-sql-schema.
    ```
    bin/vagrant up
    ```
-1. Log in, build release, start mover
+1. Log in, build release
    ```
    bin/vagrant ssh
    cd /srv/mover-build
    rebar get-deps
    make devrel
    cp sys.config rel/mover/etc
-   cd rel/mover
+   ```
+1. Execute SQL schema modifications (temporary until integrated to
+   cookbook). When prompted for password, use the password present in
+   /srv/mover-build/sys.config.
+
+   ```
+   cd /tmp
+   git clone git@github.com:opscode/moser.git
+   psql -U opscode_chef -h localhost opscode_chef_test -W < org_migration_state.sql
+   ```
+1. Start mover
+   ```
+   cd /srv/mover-build/rel/mover
    bin/mover console
    ```
 
