@@ -26,15 +26,18 @@ once you ssh in). The database will have been initialized with the
 opscode_chef schema via chef-sql-schema.
 
 1. Spindle, stub, and mutilate your bundle
+
    ```
    cd chef-mover
    bundle install --binstubs
    ```
 1. Start a vm
+
    ```
    bin/vagrant up
    ```
 1. Log in, build release
+
    ```
    bin/vagrant ssh
    cd /srv/mover-build
