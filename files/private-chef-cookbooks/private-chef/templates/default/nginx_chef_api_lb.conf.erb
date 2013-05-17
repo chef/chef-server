@@ -120,10 +120,11 @@
     # principals go to erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
 
-    # We only let the Chef API handle clients if we're off CouchDB;
-    # otherwise, it needs to be handled by opscode-account.
-    <%- unless node['private_chef']['dark_launch']['couchdb_clients'] -%>
-      <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", 'couchdb_clients') %>
+    # If we're in sql_migration_phase_1, then clients are handled by
+    # Erchef, not opscode-account.  In that case, we need to add the
+    # chef_api routing.
+    <%- if node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
+      <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
     <%- end -%>
 
     <%- if node['private_chef']['lb']['cache_cookbook_files'] && !node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
@@ -146,10 +147,14 @@
 
     # opscode-account service endpoints
 
-    # We only let the Chef API handle clients if we're off CouchDB;
-    # otherwise, it needs to be handled by opscode-account.
-    <%- if node['private_chef']['dark_launch']['couchdb_clients'] -%>
-      <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", 'couchdb_clients') %>
+    # If we're NOT in sql_migration_phase_1, then clients are still
+    # handled by opscode-account.  In that case, we need to add the
+    # account_api routing.
+    #
+    # Note that this and the routing above for the Chef API for
+    # clients are mutually exclusive.
+    <%- unless node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
+      <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", :account) %>
     <%- end -%>
 
     <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/(?:groups|users|containers|association_requests)/{0,1}.*$", :account) %>

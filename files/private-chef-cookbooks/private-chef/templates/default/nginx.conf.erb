@@ -108,11 +108,11 @@ http {
 
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/{0,1}.*$", 'couchdb_environments') %>
 
-
-    # We only let the Chef API handle clients if we're off CouchDB;
-    # otherwise, it needs to be handled by opscode-account.
-    <%- unless node['private_chef']['dark_launch']['couchdb_clients'] -%>
-      <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", 'couchdb_clients') %>
+    # If we're in sql_migration_phase_1, then clients are handled by
+    # Erchef, not opscode-account.  In that case, we need to add the
+    # chef_api routing.
+    <%- if node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
+      <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
     <%- end -%>
 
     # principals go to erchef
