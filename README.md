@@ -50,9 +50,7 @@ opscode_chef schema via chef-sql-schema.
    /srv/mover-build/sys.config.
 
    ```
-   cd /tmp
-   git clone git@github.com:opscode/moser.git
-   psql -U opscode_chef -h localhost opscode_chef_test -W < moser/org_migration_state.sql
+   psql -U opscode_chef -h localhost opscode_chef_test -W < /mnt/moser/org_migration_state.sql
    ```
 1. Start mover
    ```
@@ -109,4 +107,5 @@ basic dev work.
 [this repo]: https://githubt.com/opscode/chef-mover
 [opscode-platform-cookbooks]: https://githubt.com/opscode/opscode-platform-cookbooks
 [opscode-chef-mover]: https://githubt.com/opscode/opscode-chef-mover
+
 
