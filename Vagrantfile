@@ -1,71 +1,84 @@
-require 'berkshelf/vagrant'
-require 'fileutils'
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
 
-if ENV['OPSCODE_PLATFORM_REPO'].nil?
-  puts "ERROR: please export OPSCODE_PLATFORM_REPO"
-  exit 1
-end
-
-FileUtils::mkdir_p(".chef")
-if !File.exists?(".chef/knife.rb")
-  FileUtils::ln_s(File.join(ENV['OPSCODE_PLATFORM_REPO'], ".chef", "knife.rb"),
-                  ".chef/knife.rb")
-end
-
-Vagrant::Config.run do |config|
+Vagrant.configure("2") do |config|
   # All Vagrant configuration is done here. The most common configuration
   # options are documented and commented below. For a complete reference,
   # please see the online documentation at vagrantup.com.
 
-  # The path to the Berksfile to use with Vagrant Berkshelf
-  # config.berkshelf.berksfile_path = "./Berksfile"
+  config.vm.hostname = "opscode-chef-mover-berkshelf"
 
-  # An array of symbols representing groups of cookbook described in the Vagrantfile
-  # to skip installing and copying to Vagrant's shelf.
-  # config.berkshelf.only = []
+  # Every Vagrant virtual environment requires a box to build off of.
+  config.vm.box = "opscode-ubuntu-12.04"
 
-  # An array of symbols representing groups of cookbook described in the Vagrantfile
-  # to skip installing and copying to Vagrant's shelf.
-  # config.berkshelf.except = []
-
-  config.vm.host_name = "opscode-chef-mover-berkshelf"
-
-  config.vm.box = "opscode-ubuntu-12.04-chef-11.4.4"
+  # The url from where the 'config.vm.box' box will be fetched if it
+  # doesn't already exist on the user's system.
   config.vm.box_url = "https://opscode-vm.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_chef-11.4.4.box"
-
-  # Boot with a GUI so you can see the screen. (Default is headless)
-  # config.vm.boot_mode = :gui
 
   # Assign this VM to a host-only network IP, allowing you to access it
   # via the IP. Host-only networks can talk to the host machine as well as
   # any other machines on the same network, but cannot be accessed (through this
   # network interface) by any external networks.
-  config.vm.network :hostonly, "33.33.33.10"
+  config.vm.network :private_network, ip: "33.33.33.10"
 
-  # Assign this VM to a bridged network, allowing you to connect directly to a
-  # network using the host's network device. This makes the VM appear as another
-  # physical device on your network.
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
 
-  # config.vm.network :bridged
+  # config.vm.network :public_network
 
-  # Forward a port from the guest to the host, which allows for outside
-  # computers to access the VM, whereas host only networking does not.
-  # config.vm.forward_port 80, 8080
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
 
   # Share an additional folder to the guest VM. The first argument is
-  # an identifier, the second is the path on the guest to mount the
-  # folder, and the third is the path on the host to the actual folder.
-  # config.vm.share_folder "v-data", "/vagrant_data", "../data"
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
+
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  #
+   config.vm.provider :virtualbox do |vb|
+  #   # Don't boot with headless mode
+  #   vb.gui = true
+  #
+  #   # Use VBoxManage to customize the VM. For example to change memory:
+  # allow creating symlinks in /vagrant
+			vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
+			vb.customize ["modifyvm", :id, "--memory", "1024"]
+   end
+  #
+  # View the documentation for the provider you're using for more
+  # information on available options.
+	config.vm.synced_folder "../moser", "/mnt/moser"
+	config.vm.synced_folder "../decouch", "/mnt/decouch"
 
   config.ssh.max_tries = 40
   config.ssh.timeout   = 120
   # Enable SSH agent forwarding for git clones
   config.ssh.forward_agent = true
 
-  # allow creating symlinks in /vagrant
-  config.vm.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
-  config.vm.share_folder "moser", "/mnt/moser", "../moser"
-  config.vm.share_folder "decouch", "/mnt/decouch", "../decouch"
+  # The path to the Berksfile to use with Vagrant Berkshelf
+  # config.berkshelf.berksfile_path = "./Berksfile"
+
+  # Enabling the Berkshelf plugin. To enable this globally, add this configuration
+  # option to your ~/.vagrant.d/Vagrantfile file
+  config.berkshelf.enabled = true
+
+  # An array of symbols representing groups of cookbook described in the Vagrantfile
+  # to exclusively install and copy to Vagrant's shelf.
+  # config.berkshelf.only = []
+
+  # An array of symbols representing groups of cookbook described in the Vagrantfile
+  # to skip installing and copying to Vagrant's shelf.
+  # config.berkshelf.except = []
+
+  # Ensure Chef is installed for provisioning
+  config.omnibus.chef_version = ENV['OMNIBUS_CHEF_VERSION'] || :latest
+
   config.vm.provision :chef_solo do |chef|
     chef.json = {
      "postgresql" => {

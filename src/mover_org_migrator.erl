@@ -47,7 +47,7 @@ init(OrgName) ->
             lager:info([{org_name, OrgName}], "Starting migration."),
             {ok, disable_org_access, State, 0};
         Error ->
-            stop_with_failure(OrgName, Error, disable_org_access)
+            stop_with_failure(State, Error, disable_org_access)
     end.
 
 disable_org_access(timeout, #state{org_name = OrgName} = State) ->

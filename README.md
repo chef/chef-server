@@ -43,6 +43,7 @@ opscode_chef schema via chef-sql-schema.
    cd /srv/mover-build
    rebar get-deps
    make devrel
+   For VM test, remove the chef_index clause from sys.config
    cp sys.config rel/mover/etc
    ```
 1. Execute SQL schema modifications (temporary until integrated to
