@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
 
-describe "users", :focus do
+describe "users", :users do
   context "/organizations/<org>/users endpoint" do
     let(:request_url) { api_url("users") }
 
