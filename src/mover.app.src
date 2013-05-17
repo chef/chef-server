@@ -9,6 +9,8 @@
                   crypto,
                   inets,
                   ibrowse,
-                  lager]},
+                  lager,
+                  gen_bunny,
+                  chef_index]},
   {mod, {mover_app, []}}
  ]}.
