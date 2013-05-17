@@ -12,7 +12,7 @@ describe "users", :users do
         ]}
 
       context "admin user" do
-        it "can get org users" do
+        it "can get org users", :smoke do
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
               :body_exact => users_body
@@ -21,7 +21,7 @@ describe "users", :users do
       end
 
       context "default normal user" do
-        it "can get org users" do
+        it "can get org users", :smoke do
           get(request_url, platform.non_admin_user).should look_like({
               :status => 200,
               :body_exact => users_body
@@ -112,7 +112,7 @@ describe "users", :users do
       end
 
       context "admin user" do
-        it "can get user" do
+        it "can get user", :smoke do
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
               :body_exact => user_body
@@ -121,7 +121,7 @@ describe "users", :users do
       end
 
       context "default normal user" do
-        it "can get self" do
+        it "can get self", :smoke do
           get(request_url, platform.non_admin_user).should look_like({
               :status => 200,
               :body_exact => user_body
@@ -190,7 +190,7 @@ describe "users", :users do
       end
 
       context "admin user" do
-        it "can delete user" do
+        it "can delete user", :smoke do
           delete(request_url, platform.admin_user).should look_like({
               :status => 200
             })
@@ -253,7 +253,7 @@ describe "users", :users do
         }}
 
       context "superuser" do
-        it "can get all users" do
+        it "can get all users", :smoke do
           get(request_url, platform.superuser).should look_like({
               :status => 200,
               :body => users_body
@@ -262,7 +262,7 @@ describe "users", :users do
       end
 
       context "admin user" do
-        it "returns 403" do
+        it "returns 403", :smoke do
           get(request_url, platform.admin_user).should look_like({
               :status => 403
             })
@@ -348,7 +348,7 @@ describe "users", :users do
       end
 
       context "superuser" do
-        it "can create new user" do
+        it "can create new user", :smoke do
           post(request_url, platform.superuser,
             :payload => request_body).should look_like({
               :status => 201,
@@ -365,7 +365,7 @@ describe "users", :users do
       end
 
       context "admin user" do
-        it "returns 403" do
+        it "returns 403", :smoke do
           post(request_url, platform.admin_user,
             :payload => request_body).should look_like({
               :status => 403
@@ -803,7 +803,7 @@ describe "users", :users do
       end
 
       context "superuser" do
-        it "can modify user" do
+        it "can modify user", :smoke do
           put(request_url, platform.superuser,
             :payload => request_body).should look_like({
               :status => 200,
@@ -817,7 +817,7 @@ describe "users", :users do
       end
 
       context "admin user" do
-        it "returns 403" do
+        it "returns 403", :smoke do
           put(request_url, platform.admin_user,
             :payload => request_body).should look_like({
               :status => 403
