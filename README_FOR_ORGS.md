@@ -1,12 +1,12 @@
-== Org Migration Handbook ==
+## Org Migration Handbook
 
-=== Dev VM Usage ===
+### Dev VM Usage
+
 * follow the directions in the README.md to get your VM
   up and running, including applying the state tracking schema update.
 * start console as described in README.md
-*
 
-=== Migration Setup ===
+### Migration Setup
 * For a migration to run, it must have a state record present.
   Initialize states for all orgs in mover console.  At present you will
   see duplicate errors which can be ignored:
@@ -30,7 +30,7 @@ mover_util:reset_orgs([Org1, Org2, ... OrgN]).
 ```
 * To prepare orgs listed in a file (single line per org):
 
-[[```]]
+```
 mover_util:reset_orgs_from_file("/path/to/file").
 ```
 * If you need to mark an org as ready for migration without deleting
@@ -41,11 +41,12 @@ moser_state_tracker:ready_migration(OrgName).
 ```
 * You can confirm an org's state via:
 
-[[```]]
+```
 moser_state_tracker:org_status(OrgName).
 ```
 
-=== Migration Execution ===
+### Migration Execution
+
 To migrate a single org directly by name (note that it must be in
 `ready` state via one of the methods described above):
 
