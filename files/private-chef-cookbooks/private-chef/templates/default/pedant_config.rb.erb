@@ -137,7 +137,7 @@ ruby_sandbox_endpoint?     <%= !node['private_chef']['dark_launch']['sql_migrati
 ruby_data_endpoint?        <%= !node['private_chef']['dark_launch']['sql_migration_phase_1'] %>
 ruby_role_endpoint?        <%= !node['private_chef']['dark_launch']['sql_migration_phase_1'] %>
 ruby_cookbook_endpoint?    <%= !node['private_chef']['dark_launch']['sql_migration_phase_1'] %>
-ruby_client_endpoint?      <%=  node['private_chef']['dark_launch']['couchdb_clients'] %>
+ruby_client_endpoint?      <%= !node['private_chef']['dark_launch']['sql_migration_phase_1'] %>
 
 old_runlists_and_search true
 
