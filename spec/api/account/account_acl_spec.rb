@@ -276,7 +276,7 @@ describe "ACL API", :acl do
                 }
               }}
 
-            it "returns 400" do
+            it "returns 400", :pending => Pedant::Config.ruby_client_endpoint? do
               put(request_url, platform.admin_user,
                 :payload => request_body).should look_like({
                   :status => 400
@@ -857,7 +857,7 @@ describe "ACL API", :acl do
                       }
                     }}
 
-                  it "returns 400" do
+                  it "returns 400", :pending => Pedant::Config.ruby_client_endpoint? do
                     put(permission_request_url, platform.admin_user,
                       :payload => update_body).should look_like({
                         :status => 400
