@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name          = 'oc-chef-pedant'
-  s.version       = '1.0.8'
-  s.date          = '2012-11-19'
+  s.version       = '1.0.9'
+  s.date          = '2013-05-17'
   s.summary       = "Opscode Private Chef API Testing Framework"
   s.authors       = ["Opscode Software Engineering"]
   s.email         = 'dev@opscode.com'
@@ -12,5 +12,5 @@ Gem::Specification.new do |s|
   s.bindir        = 'bin'
   s.executables   = ['oc-chef-pedant']
 
-  s.add_dependency('chef-pedant', '>= 0.0.10')
+  s.add_dependency('chef-pedant', '>= 1.0.0')
 end
