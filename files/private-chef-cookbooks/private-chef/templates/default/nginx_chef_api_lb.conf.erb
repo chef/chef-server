@@ -82,7 +82,7 @@
         dl_config["couchdb_environments"] = <%= @helper.not_xdl :sql_migration_phase_1 %>
         dl_config["couchdb_roles"]        = <%= @helper.not_xdl :sql_migration_phase_1 %>
         dl_config["couchdb_data"]         = <%= @helper.not_xdl :sql_migration_phase_1 %>
-        dl_config["couchdb_clients"]      = <%= @helper.xdl :couchdb_clients %>
+        dl_config["couchdb_clients"]      = <%= @helper.not_xdl :sql_migration_phase_1 %>
         ngx.ctx.dl_config = dl_config
       ';
 
