@@ -32,9 +32,17 @@ org_to_sql(OrgName, Components) ->
     send_eredis_q(["HMSET", OrgKey] ++ PropKVs).
 
 send_eredis_q(Command) ->
+    %% if we're configured for- dry_run mode, don't send the commands to redis
+    send_eredis_q(envy:get(mover, dry_run, boolean), Command).
+
+send_eredis_q(true, _) ->
+	lager:info("Redis dry-run enabled"),
+    ok;
+send_eredis_q(false, Command) ->
     case eredis:q(mover_eredis_client, Command) of
         {ok, _} ->
             ok;
         {error, Error} ->
             {error, Error}
     end.
+
