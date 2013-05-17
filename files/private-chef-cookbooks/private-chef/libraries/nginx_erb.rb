@@ -49,8 +49,7 @@ class NginxErb
 
   def xdl_couchdb_headers
     xdl_couchdb_flag = not_xdl('sql_migration_phase_1')
-    sql_xdl = %w(checksums cookbooks environments roles data).map { |key| "couchdb_#{key}=#{xdl_couchdb_flag}" }
-    sql_xdl << "couchdb_clients=#{xdl('couchdb_clients')}"
+    sql_xdl = %w(checksums clients cookbooks environments roles data).map { |key| "couchdb_#{key}=#{xdl_couchdb_flag}" }
     sql_xdl.join(';')
   end
 

@@ -38,7 +38,6 @@ end
 include_recipe "private-chef::users"
 
 sql_migration_phase_1     = node['private_chef']['dark_launch']['sql_migration_phase_1']
-# Add clients here to generate couchdb_clients feature flag in dark_launch_features.json
 dark_launch_couchdb_flags = %w(roles data cookbooks checksums clients environments).map {|k| ["couchdb_#{k}", !sql_migration_phase_1] }.flatten
 dark_launch_features_hash = node['private_chef']['dark_launch'].to_hash.merge(Hash[*dark_launch_couchdb_flags])
 
