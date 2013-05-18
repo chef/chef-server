@@ -23,7 +23,7 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-    migrator_manager:start_link(),
+    mover_manager:start_link(),
     Children = [?CHILD_SUP(mover_org_migrator_sup, []),
                 ?CHILD_SUP(mover_eredis_sup, []),
                 ?CHILD_SUP(chef_index_sup, [])],
