@@ -1,6 +1,0 @@
-#!/usr/bin/env ruby
-rackup_file = File.expand_path('../../config.ru', __FILE__)
-
-command = "bundle exec rackup -s thin #{rackup_file} #{ARGV.join(' ')}"
-puts command
-exec command

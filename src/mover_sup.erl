@@ -24,19 +24,6 @@ start_link() ->
 
 init([]) ->
     migrator_manager:start_link(),
-    %% {ok, PreloadCount} = application:get_env(mover, preload_org_count),
-    %% Children0 = [?CHILD_SUP(mover_worker_sup, []),
-    %%              ?CHILD(mover_manager, [PreloadCount], 5000)],
-    %% Children = case application:get_env(mover, dry_run) of
-    %%                {ok, true} ->
-    %%                    Children0;
-    %%                {ok, false} ->
-    %%                    {ok, RedisHost} = application:get_env(mover, redis_host),
-    %%                    {ok, RedisPort} = application:get_env(mover, redis_port),
-    %%                    {ok, RedisConns} = application:get_env(mover, redis_conns),
-    %%                    [?CHILD_SUP(erldis_pool_sup, [[{{RedisHost, RedisPort}, RedisConns}]])|Children0]
-    %%            end,
-    %% FIXME: for now we just want to start and do nothing
     Children = [?CHILD_SUP(mover_org_migrator_sup, []),
                 ?CHILD_SUP(mover_eredis_sup, []),
                 ?CHILD_SUP(chef_index_sup, [])],
