@@ -1,7 +1,0 @@
-source :rubygems
-
-gem "pg"
-gem 'highline'
-gem 'sequel'
-gem 'yajl-ruby'
-
