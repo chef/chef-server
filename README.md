@@ -8,8 +8,11 @@ Erchef/PgSQL using moser and darklaunch.
 ### One-time configuration ###
 1. Ensure that you have vagrant 1.1 or later installed, and that you
    have installed the vagrant-berkshelf and vagrant-omnibus plugins.
-1. Obtain git checkouts of [this repo][], the [moser][] repo, and
-   [decouch][] repo, and ensure they are in the same parent directory.
+1. Obtain git clones of the following projects, and ensure that they're
+   in the same parent directory:
+   * `git@github.com:opscode/moser.git`
+   * `git@github.com:opscode/decouch.git`
+   * `git@github.com:opscode/chef-mover.git`
 1. Add an export for an `OPSCODE_PLATFORM_REPO` environment variable to your shell
    config that points to the path of your **rs-preprod** checkout of the
    [opscode-platform-cookbooks][] repo.
