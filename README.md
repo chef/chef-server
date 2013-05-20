@@ -1,69 +1,68 @@
 # CHEF MOVER #
 
-![Migration Visualization](http://images.memegenerator.net/instances/400x/10601974.jpg)
-
 Orchestrate and execute data migration from Ruby-Chef/CouchDB to
 Erchef/PgSQL using moser and darklaunch.
 
 ## Dev Setup ##
 
 ### One-time configuration ###
-1. Obtain git checkouts of [this repo][] and the [moser][] repo and ensure they are in the same parent directory.
-
-1. Add an export for an `OPSCODE_PLATFORM_REPO` environment variable to your shell config that points to the path of your **rs-preprod** checkout of the [opscode-platform-cookbooks][] repo.
-
-1. Obtain couchdb data from either preprod or a local dev-vm and put the `.couch` files in a sub-directory of this repo named `moser-couch-data`.
+1. Ensure that you have vagrant 1.1 or later installed, and that you
+   have installed the vagrant-berkshelf and vagrant-omnibus plugins.
+1. Obtain git clones of the following projects, and ensure that they're
+   in the same parent directory:
+   * `git@github.com:opscode/moser.git`
+   * `git@github.com:opscode/decouch.git`
+   * `git@github.com:opscode/chef-mover.git`
+1. Add an export for an `OPSCODE_PLATFORM_REPO` environment variable to your shell
+   config that points to the path of your **rs-preprod** checkout of the
+   [opscode-platform-cookbooks][] repo.
+1. Obtain couchdb data from either preprod or a local dev-vm and put the `.couch`
+   files in a sub-directory of this repo named `moser-couch-data`.
+1. Your github ssh key must be in your keychain - you can add it via
+   ssh-add prior to starting the VM.
 
 ### Running mover in a vm for dev work ###
 
 Assuming you following the above setup instructions, the following
-steps should give you a vm with postgres, mover, moser (symlinked into
-deps ala dev-vm), and a usable `sys.config` in  `/srv/mover-build`
-which you can copy into `rel/mover/etc` once you build a release. The
-release is not built because of a quirk of Vagrant provisioning
-preventing SSH auth forwarding at provision time (should work fine
-once you ssh in). The database will have been initialized with the
-opscode_chef schema via chef-sql-schema.
+steps should give you a vm with postgres, built and configured
+mover, with  moser and decouch symlinked into deps ala dev-vm.
 
-1. Spindle, stub, and mutilate your bundle
+The database will have been initialized with the
+opscode_chef schema via chef-sql-schema, using schema name
+opscode_chef_test.
+
+1. Start the VM
 
    ```
    cd chef-mover
-   bundle install --binstubs
+   vagrant up
    ```
-1. Start a vm
+1. Wait for resource "get_mover_deps" to fail because of git auth
+failure, then do the following to complete the configuration:
 
    ```
-   bin/vagrant up
+   vagrant provision
    ```
-1. Log in, build release
+1. SSH in and start mover
 
    ```
    bin/vagrant ssh
-   cd /srv/mover-build
-   rebar get-deps
-   make devrel
-   For VM test, remove the chef_index clause from sys.config
-   cp sys.config rel/mover/etc
-   ```
-1. Execute SQL schema modifications (temporary until integrated to
-   cookbook). When prompted for password, use the password present in
-   /srv/mover-build/sys.config.
-
-   ```
-   psql -U opscode_chef -h localhost opscode_chef_test -W < /mnt/moser/org_migration_state.sql
-   ```
-1. Start mover
-   ```
    cd /srv/mover-build/rel/mover
    bin/mover console
    ```
+1. Reference README_FOR_ORGS.md for details around loading and preparing
+   the migration state tracking data to allow migrations to occur.
+
+#### Demigrate Testing Configuration
+To enable demigration testing, you must have available a properly
+configured rabbitmq server.  If present, edit Vagrantfile and set
+`"demigrate_override" => true` then re-provision via `vagrant provision`.
 
 #### Authz Id Lookup Passthrough Configuration
 
 In order for authz id lookup passthrough to couchdb to work in the dev
 VM you will need to ensure that there is a chef_db configuration block
-containing entries for ``couch_db_host`` and ``couch_db_port``
+containing entries for `couch_db_host` and `couch_db_port`
 
 Note that you can test without a valid couchdb configuration if you
 don't need authz id passthru functionality.
@@ -72,8 +71,7 @@ If you're testing locally in the vm instance above, there is no valid couchdb
 configuration available.  You can test using preprod as follows assuming
 your dev laptop is connected remotely:
 
-* ``bin/vagrant ssh``
-* Change /srv/mover-build/rel/mover/etc/sys.config: ``chef_db { couchdb_host = "localhost" }``
+* `bin/vagrant ssh`
 * add to (or create) ~/.ssh/config:
 
         Host *
@@ -82,6 +80,9 @@ your dev laptop is connected remotely:
 * in the same vagrant ssh session:
 
         ssh -L 5984:localhost:5984 $YOURUSERNAME@gateway.opscode.com
+
+* then once connected:
+
         ssh -L 5984:localhost:5984 $PREPROD-COUCHDB-HOST
 
 Leave this session open for the duration of your testing.

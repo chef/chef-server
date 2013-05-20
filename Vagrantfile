@@ -58,7 +58,9 @@ Vagrant.configure("2") do |config|
 
   config.ssh.max_tries = 40
   config.ssh.timeout   = 120
+
   # Enable SSH agent forwarding for git clones
+  # and (if necessary) preprod couchdb access.
   config.ssh.forward_agent = true
 
   # The path to the Berksfile to use with Vagrant Berkshelf
@@ -86,7 +88,8 @@ Vagrant.configure("2") do |config|
           "postgres" => "iloverandompasswordsbutthiswilldo"
         }
       },
-      "mover" => { "dev_mode" => true },
+      "mover" => { "dev_mode" => true,
+                   "enable_demigrate" => false },
       "munin" => { "stub" => true }
     }
     chef.data_bags_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/data_bags"
