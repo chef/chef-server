@@ -108,7 +108,7 @@ from_json(Req, #base_state{reqid = ReqId,
                                     <<": the following checksums have not been uploaded: ">>,
                                     SumList]),
             EMsg = chef_wm_util:error_message_envelope(Msg),
-            {{halt, 400}, chef_wm_util:set_json_body(Req, EMsg), State}
+            {{halt, 503}, chef_wm_util:set_json_body(Req, EMsg), State}
     end.
 
 %% Private utility functions
