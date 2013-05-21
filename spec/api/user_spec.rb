@@ -2,6 +2,16 @@
 require 'pedant/rspec/common'
 
 describe "users", :users do
+  def self.ruby?
+    # This is not implemented yet in the pedant config, nor does erchef default to
+    # erlang user endpoints yet; this will need to be uncommented when that changes
+    # instead of hardcoding this to true:
+
+    # Pedant::Config.ruby_user_endpoint?
+
+    true
+  end
+
   context "/organizations/<org>/users endpoint" do
     let(:request_url) { api_url("users") }
 
@@ -56,10 +66,10 @@ describe "users", :users do
 
     context "PUT /organizations/<org>/users" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        # A 405 here would be fine (and is no doubt coming with erlang)
+        it "returns 404 (or 405?)" do
           put(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => ruby? ? 404 : 405
             })
         end
       end
@@ -67,10 +77,10 @@ describe "users", :users do
 
     context "POST /organizations/<org>/users" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        # A 405 here would be fine (and is no doubt coming with erlang)
+        it "returns 404 (or 405?)" do
           post(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => ruby? ? 404 : 405
             })
         end
       end
@@ -78,10 +88,10 @@ describe "users", :users do
 
     context "DELETE /organizations/<org>/users" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        # A 405 here would be fine (and is no doubt coming with erlang)
+        it "returns 404 (or 405?)" do
           delete(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => ruby? ? 404 : 405
             })
         end
       end
@@ -152,14 +162,23 @@ describe "users", :users do
             })
         end
       end
+
+      context "when requesting user that doesn't exist" do
+        let(:username) { "bogus" }
+        it "returns 404" do
+          get(request_url, platform.admin_user).should look_like({
+              :status => 404
+            })
+        end
+      end
     end # context GET /organizations/<org>/users/<name>
 
     context "PUT /organizations/<org>/users/<name>" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        # A 405 here would be fine (and is no doubt coming with erlang)
+        it "returns 404 (or 405?)" do
           put(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => ruby? ? 404 : 405
             })
         end
       end
@@ -167,10 +186,10 @@ describe "users", :users do
 
     context "POST /organizations/<org>/users/<name>" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        # A 405 here would be fine (and is no doubt coming with erlang)
+        it "returns 404 (or 405?)" do
           post(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => ruby? ? 404 : 405
             })
         end
       end
@@ -234,6 +253,22 @@ describe "users", :users do
                   {"user" => {"username" => username}}
                 ]})
           end
+        end
+      end
+
+      context "when user doesn't exist" do
+        let(:request_url) { api_url("users/bogus") }
+        it "returns 404" do
+          delete(request_url, platform.non_admin_client).should look_like({
+              :status => 404
+            })
+          get(api_url("users"), platform.admin_user).should look_like({
+              :status => 200,
+              :body_exact => [
+                {"user" => {"username" => "pedant_admin_user"}},
+                {"user" => {"username" => "pedant_user"}},
+                {"user" => {"username" => username}}
+              ]})
         end
       end
     end # context DELETE /organizations/<org>/users/<name>
@@ -304,10 +339,10 @@ describe "users", :users do
 
     context "PUT /users" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        # A 405 here would be fine (and is no doubt coming with erlang)
+        it "returns 404 (or 405?)" do
           put(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => ruby? ? 404 : 405
             })
         end
       end
@@ -683,10 +718,10 @@ describe "users", :users do
 
     context "DELETE /users" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        # A 405 here would be fine (and is no doubt coming with erlang)
+        it "returns 404 (or 405?)" do
           delete(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => ruby? ? 404 : 405
             })
         end
       end
@@ -754,6 +789,15 @@ describe "users", :users do
         it "returns 401" do
           get(request_url, invalid_user).should look_like({
               :status => 401
+            })
+        end
+      end
+
+      context "when user doesn't exist" do
+        let(:username) { "bogus" }
+        it "returns 404" do
+          get(request_url, platform.superuser).should look_like({
+              :status => 404
             })
         end
       end
@@ -830,6 +874,16 @@ describe "users", :users do
           put(request_url, platform.non_admin_client,
             :payload => request_body).should look_like({
               :status => 401
+            })
+        end
+      end
+
+      context "when modifying non-existent user" do
+        let(:request_url) { "#{platform.server}/users/bogus" }
+        it "returns 404" do
+          put(request_url, platform.superuser,
+            :payload => request_body).should look_like({
+              :status => 404
             })
         end
       end
@@ -1264,10 +1318,10 @@ describe "users", :users do
 
     context "POST /users/<name>" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        # A 405 here would be fine (and is no doubt coming with erlang)
+        it "returns 404 (or 405?)" do
           post(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => ruby? ? 404 : 405
             })
         end
       end
@@ -1329,6 +1383,15 @@ describe "users", :users do
           get("#{platform.server}/users/#{username}",
             platform.superuser).should look_like({
               :status => 200
+            })
+        end
+      end
+
+      context "when deleting a non-existent user" do
+          let(:request_url) { "#{platform.server}/users/bogus" }
+        it "returns 404" do
+          delete(request_url, platform.superuser).should look_like({
+              :status => 404
             })
         end
       end
