@@ -16,10 +16,12 @@ describe "users", :users do
     let(:request_url) { api_url("users") }
 
     context "GET /organizations/<org>/users" do
-      let(:users_body) {[
+      let(:users_body) do
+        [
           {"user" => {"username" => "pedant_admin_user"}},
           {"user" => {"username" => "pedant_user"}}
-        ]}
+        ]
+      end
 
       context "admin user" do
         it "can get org users", :smoke do
@@ -103,14 +105,16 @@ describe "users", :users do
     let(:request_url) { api_url("users/#{username}") }
 
     context "GET /organizations/<org>/users/<name>" do
-      let(:user_body) {{
+      let(:user_body) do
+        {
           "first_name" => username,
           "last_name" => username,
           "display_name" => username,
           "email" => "#{username}@opscode.com",
           "username" => username,
           "public_key" => /^-----BEGIN PUBLIC KEY-----/
-        }}
+        }
+      end
 
       context "superuser" do
         it "can get user" do
@@ -278,14 +282,16 @@ describe "users", :users do
     let(:request_url) { "#{platform.server}/users" }
 
     context "GET /users" do
-      let(:users_body) {{
+      let(:users_body) do
+        {
           # There are other users, but these are ours, so they should always be
           # somewhere in the userspace soup.
           "pivotal" => "#{request_url}/pivotal",
           "pedant-nobody" => "#{request_url}/pedant-nobody",
           "pedant_admin_user" => "#{request_url}/pedant_admin_user",
           "pedant_user" => "#{request_url}/pedant_user"
-        }}
+        }
+      end
 
       context "superuser" do
         it "can get all users", :smoke do
@@ -351,19 +357,26 @@ describe "users", :users do
     context "POST /users" do
       let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
       let(:user_url) { "#{request_url}/#{username}" }
-      let(:request_body) {{
+      let(:request_body) do
+        {
           "username" => username,
           "email" => "#{username}@opscode.com",
           "first_name" => username,
           "last_name" => username,
           "display_name" => username,
           "password" => "badger badger"
-        }}
-      let(:response_body) {{
+        }
+      end
+
+      let(:response_body) do
+        {
           "uri" => "#{platform.server}/users/#{username}",
           "private_key" => /^-----BEGIN RSA PRIVATE KEY-----/
-        }}
-      let(:users_with_new_user) {{
+        }
+      end
+
+      let(:users_with_new_user) do
+        {
           # There are other users, but these are ours, so they should always be
           # somewhere in the userspace soup:
           "pivotal" => "#{request_url}/pivotal",
@@ -372,7 +385,8 @@ describe "users", :users do
           "pedant_user" => "#{request_url}/pedant_user",
           # As should our test user:
           username => user_url
-        }}
+        }
+      end
 
       after :each do
         # For the test with a space: we can't create it -- but also can't delete it,
@@ -413,13 +427,15 @@ describe "users", :users do
 
       context "creating users" do
         context "without password" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -432,13 +448,15 @@ describe "users", :users do
         end
 
         context "without display_name" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -451,12 +469,14 @@ describe "users", :users do
         end
 
         context "without first and last name" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "can create new user" do
             post(request_url, platform.superuser,
@@ -472,13 +492,15 @@ describe "users", :users do
         end
 
         context "without email" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -491,13 +513,15 @@ describe "users", :users do
         end
 
         context "without username" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -510,14 +534,16 @@ describe "users", :users do
         end
 
         context "with invalid email" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@foo @ bar ahhh it's eating my eyes",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -530,14 +556,16 @@ describe "users", :users do
         end
 
         context "with spaces in names" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => "Yi Ling",
               "last_name" => "van Dijk",
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "can create new user" do
             post(request_url, platform.superuser,
@@ -553,7 +581,8 @@ describe "users", :users do
         end
 
         context "with bogus field" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
@@ -561,7 +590,8 @@ describe "users", :users do
               "display_name" => username,
               "password" => "badger badger",
               "bogus" => "look at me"
-            }}
+            }
+          end
 
           it "can create new user" do
             post(request_url, platform.superuser,
@@ -577,14 +607,16 @@ describe "users", :users do
         end
 
         context "with space in display_name" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "some user",
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "can create new user" do
             post(request_url, platform.superuser,
@@ -600,14 +632,16 @@ describe "users", :users do
         end
 
         context "with UTF-8 in display_name" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "超人",
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "can create new user" do
             post(request_url, platform.superuser,
@@ -623,14 +657,16 @@ describe "users", :users do
         end
 
         context "with UTF-8 in first/last name" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => "Guðrún",
               "last_name" => "Guðmundsdóttir",
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "can create new user" do
             post(request_url, platform.superuser,
@@ -647,14 +683,16 @@ describe "users", :users do
 
         context "with capitalized username" do
           let(:username) { "Test-#{Time.now.to_i}-#{Process.pid}" }
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -668,14 +706,16 @@ describe "users", :users do
 
         context "with space in username" do
           let(:username) { "test #{Time.now.to_i}-#{Process.pid}" }
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -688,14 +728,16 @@ describe "users", :users do
         end
 
         context "when user already exists" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 409" do
             post(request_url, platform.superuser,
@@ -733,14 +775,16 @@ describe "users", :users do
     let(:request_url) { "#{platform.server}/users/#{username}" }
 
     context "GET /users/<name>" do
-      let(:user_body) {{
+      let(:user_body) do
+        {
           "first_name" => username,
           "last_name" => username,
           "display_name" => username,
           "email" => "#{username}@opscode.com",
           "username" => username,
           "public_key" => /^-----BEGIN PUBLIC KEY-----/
-        }}
+        }
+      end
 
       context "superuser" do
         it "can get user" do
@@ -805,25 +849,33 @@ describe "users", :users do
 
     context "PUT /users/<name>" do
       let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
-      let(:request_body) {{
+      let(:request_body) do
+        {
           "username" => username,
           "email" => "#{username}@opscode.com",
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
           "password" => "badger badger"
-        }}
-      let(:response_body) {{
+        }
+      end
+
+      let(:response_body) do
+        {
           "uri" => "#{platform.server}/users/#{username}"
-        }}
-      let(:modified_user) {{
+        }
+      end
+
+      let(:modified_user) do
+        {
           "username" => username,
           "email" => "#{username}@opscode.com",
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
           "public_key" => /^-----BEGIN PUBLIC KEY----/
-        }}
+        }
+      end
 
       before :each do
         post("#{platform.server}/users", platform.superuser,
@@ -890,13 +942,15 @@ describe "users", :users do
 
       context "modifying users" do
         context "without password" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "new name"
-            }}
+            }
+          end
 
           it "can modify user" do
             put(request_url, platform.superuser,
@@ -911,7 +965,8 @@ describe "users", :users do
         end
 
         context "with bogus field" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
@@ -919,7 +974,8 @@ describe "users", :users do
               "display_name" => "new name",
               "password" => "badger badger",
               "bogus" => "not a badger"
-            }}
+            }
+          end
 
           it "can modify user" do
             put(request_url, platform.superuser,
@@ -934,13 +990,15 @@ describe "users", :users do
         end
 
         context "without display_name" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -953,18 +1011,23 @@ describe "users", :users do
         end
 
         context "without first and last name" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "display_name" => "new name",
               "password" => "badger badger"
-            }}
-          let(:modified_user) {{
+            }
+          end
+
+          let(:modified_user) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "display_name" => "new name",
               "public_key" => /^-----BEGIN PUBLIC KEY----/
-            }}
+            }
+          end
 
           it "can modify user" do
             put(request_url, platform.superuser,
@@ -979,13 +1042,15 @@ describe "users", :users do
         end
 
         context "without email" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -998,13 +1063,15 @@ describe "users", :users do
         end
 
         context "without username" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -1017,14 +1084,16 @@ describe "users", :users do
         end
 
         context "with invalid email" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@foo @ bar no go",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -1037,22 +1106,27 @@ describe "users", :users do
         end
 
         context "with spaces in names" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => "Ren Kai",
               "last_name" => "de Boers",
               "display_name" => username,
               "password" => "badger badger"
-            }}
-          let(:modified_user) {{
+            }
+          end
+
+          let(:modified_user) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => "Ren Kai",
               "last_name" => "de Boers",
               "display_name" => username,
               "public_key" => /^-----BEGIN PUBLIC KEY----/
-            }}
+            }
+          end
 
           it "can modify user" do
             put(request_url, platform.superuser,
@@ -1067,22 +1141,27 @@ describe "users", :users do
         end
 
         context "with space in display_name" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "some user",
               "password" => "badger badger"
-            }}
-          let(:modified_user) {{
+            }
+          end
+
+          let(:modified_user) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "some user",
               "public_key" => /^-----BEGIN PUBLIC KEY----/
-            }}
+            }
+          end
 
           it "can modify user" do
             put(request_url, platform.superuser,
@@ -1097,22 +1176,27 @@ describe "users", :users do
         end
 
         context "with UTF-8 in display_name" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "ギリギリ",
               "password" => "badger badger"
-            }}
-          let(:modified_user) {{
+            }
+          end
+
+          let(:modified_user) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "ギリギリ",
               "public_key" => /^-----BEGIN PUBLIC KEY----/
-            }}
+            }
+          end
 
           it "can modify user" do
             put(request_url, platform.superuser,
@@ -1127,22 +1211,27 @@ describe "users", :users do
         end
 
         context "with UTF-8 in first/last name" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => "Eliška",
               "last_name" => "Horáčková",
               "display_name" => username,
               "password" => "badger badger"
-            }}
-          let(:modified_user) {{
+            }
+          end
+
+          let(:modified_user) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => "Eliška",
               "last_name" => "Horáčková",
               "display_name" => username,
               "public_key" => /^-----BEGIN PUBLIC KEY----/
-            }}
+            }
+          end
 
           it "can modify user" do
             put(request_url, platform.superuser,
@@ -1162,22 +1251,27 @@ describe "users", :users do
         let(:new_request_url) { "#{platform.server}/users/#{new_name}" }
 
         context "changing username" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => new_name,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
-          let(:modified_user) {{
+            }
+          end
+
+          let(:modified_user) do
+            {
               "username" => new_name,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "public_key" => /^-----BEGIN PUBLIC KEY----/
-            }}
+            }
+          end
 
           after :each do
             delete("#{platform.server}/users/#{new_name}", platform.superuser)
@@ -1201,14 +1295,16 @@ describe "users", :users do
         context "changing username with UTF-8" do
           let(:new_name) { "テスト-#{Time.now.to_i}-#{Process.pid}" }
 
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => new_name,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -1229,14 +1325,16 @@ describe "users", :users do
         context "changing username with spaces" do
           let(:new_name) { "test #{Time.now.to_i}-#{Process.pid}" }
 
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => new_name,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -1257,14 +1355,16 @@ describe "users", :users do
         context "changing username with capital letters" do
           let(:new_name) { "Test-#{Time.now.to_i}-#{Process.pid}" }
 
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => new_name,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
+            }
+          end
 
           it "returns 400" do
             pending "actually returns 500" do
@@ -1283,22 +1383,27 @@ describe "users", :users do
         end
 
         context "new name already exists" do
-          let(:request_body) {{
+          let(:request_body) do
+            {
               "username" => platform.non_admin_user.name,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger"
-            }}
-          let(:unmodified_user) {{
+            }
+          end
+
+          let(:unmodified_user) do
+            {
               "username" => username,
               "email" => "#{username}@opscode.com",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
               "public_key" => /^-----BEGIN PUBLIC KEY----/
-            }}
+            }
+          end
 
           it "returns 409" do
             pending "actually returns 500" do
