@@ -1,9 +1,9 @@
 GIT
   remote: git://github.com/opscode/chef-pedant.git
-  revision: a50339fce32cec6f74ed6973bf9915e8dc8323ef
-  tag: 1.0.12
+  revision: 3d08774a89f459fe0a5f0f48d86c8cd09707069a
+  tag: 1.0.13
   specs:
-    chef-pedant (1.0.12)
+    chef-pedant (1.0.13)
       activesupport (~> 3.2.8)
       erubis (~> 2.7.0)
       mixlib-authentication (~> 1.3.0)
@@ -18,7 +18,7 @@ GIT
 PATH
   remote: .
   specs:
-    oc-chef-pedant (1.0.9)
+    oc-chef-pedant (1.0.10)
       chef-pedant (>= 1.0.0)
 
 GEM
