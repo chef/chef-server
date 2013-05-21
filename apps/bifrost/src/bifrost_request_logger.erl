@@ -60,7 +60,6 @@ generate_msg(#wm_log_data{response_code = ResponseCode,
 
     ReqId = note(reqid, Notes),
     RequestorId = note(requestor_id, Notes),
-    Module = note(module, Notes),
     CreatedAuthzId = note(created_authz_id, Notes),
     PerfStats = case note(perf_stats, Notes) of
                     undefined -> [];
@@ -74,7 +73,6 @@ generate_msg(#wm_log_data{response_code = ResponseCode,
     AlwaysLogged = [{status, ResponseCode},
                     {method, Method},
                     {path, Path},
-                    {module, Module},
                     {requestor_id, RequestorId} | PerfStats], %% PerfStats is already a list
 
     %% Other fields, however, can be left out if the value is
