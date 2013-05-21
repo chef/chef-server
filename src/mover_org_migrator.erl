@@ -31,7 +31,7 @@
 -export([start_link/1]).
 
 -define(PHASE_2_MIGRATION_COMPONENTS,
-            [checksums, cookbooks, environments, roles, data, clients]).
+            [checksums, sandboxes, cookbooks, environments, roles, data, clients]).
 
 -record(state, {
                  org_name :: string()     %% The org we are migrating
