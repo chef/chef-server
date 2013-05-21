@@ -61,10 +61,11 @@ generate_msg(#wm_log_data{response_code = ResponseCode,
     ReqId = note(reqid, Notes),
     RequestorId = note(requestor_id, Notes),
     CreatedAuthzId = note(created_authz_id, Notes),
-    PerfStats = case note(perf_stats, Notes) of
+    RawPerfStats = case note(perf_stats, Notes) of
                     undefined -> [];
                     Stats -> Stats
                 end,
+    PerfStats = filter_perf_stats(ResponseCode, RawPerfStats),
 
     %% We'll always output information in the log for these fields,
     %% even if their value is 'undefined'.  These are key fields for
@@ -87,6 +88,17 @@ generate_msg(#wm_log_data{response_code = ResponseCode,
                                ]),
 
     log_line(FinalFields).
+
+%% @doc To stay in Splunk's good graces, we'll only add the total
+%% request time for 200 responses, and keep all other performance
+%% stats for all other responses.
+%%
+%% (200 is the overwhelming majority of the output of the entire
+%% Bifrost API).
+filter_perf_stats(200, RawPerfStats) ->
+    [ {K,V} || {K,V} <- RawPerfStats, K =:= <<"req_time">> ];
+filter_perf_stats(_, RawPerfStats) ->
+    RawPerfStats.
 
 emit_log(ResponseCode, Msg) when ResponseCode >= 500 ->
     lager:error(Msg);
