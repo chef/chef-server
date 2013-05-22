@@ -120,3 +120,20 @@ of the cookbook.
 [oc-bifrost-pedant]:https://github.com/opscode/oc-bifrost-pedant
 [opscode-bifrost]:https://github.com/opscode-cookbooks/opscode-bifrost
 [chef repo]:https://github.com/opscode/opscode-platform-cookbooks
+
+Cutting A Release
+=================
+
+To cut a proper release, we're using the [rebar_lock_deps_plugin][].
+The executive summary is this:
+
+```
+BUMP=patch make prepare_release && rebar commit-release
+```
+
+Substitute `minor` or `major` for `BUMP` as necessary.  This should
+only be done on the `release` branch, as the presence of the
+`USE_REBAR_LOCKED` on `master` will cause all subsequent builds to use
+the locked dependencies.
+
+[rebar_lock_deps_plugin]:https://github.com/seth/rebar_lock_deps_plugin
