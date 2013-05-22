@@ -1,7 +1,5 @@
 # -*- mode: ruby -*-
 
-require 'berkshelf/vagrant'
-
 BIFROST_DB_HOST         = "33.33.33.20"
 BIFROST_DB_PORT         =  5432 # This is actually fixed in the recipe currently
 BIFROST_FORWARD_DB_PORT = 15432
@@ -16,26 +14,33 @@ METRICS_ESTATSD_PORT     = 5665
 BOX_ID = "opscode-ubuntu-10.04"
 BOX_URL = "https://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-ubuntu-10.04.box"
 
-Vagrant::Config.run do |config|
+Vagrant.configure("2") do |config|
+
+  config.berkshelf.enabled = true
 
   config.vm.box = BOX_ID
   config.vm.box_url = BOX_URL
-  config.vm.customize ["modifyvm", :id, "--nictype1", "virtio"] # NAT NIC
 
-  # Use the host's resolver for DNS queries
-  config.vm.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--nictype1", "virtio"] # NAT NIC
+    # Use the host's resolver for DNS queries
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+  end
 
   config.ssh.max_tries = 40
   config.ssh.timeout   = 120
   config.ssh.forward_agent = true
 
   config.vm.define :db do |db_config|
-    db_config.vm.host_name = "oc-bifrost-db-berkshelf"
+    db_config.vm.hostname = "oc-bifrost-db-berkshelf"
 
-    db_config.vm.network :hostonly, BIFROST_DB_HOST, :adapter => 2
-    db_config.vm.customize ["modifyvm", :id, "--nictype2", "virtio"] # host-only NIC
+    db_config.vm.network :private_network, :ip => BIFROST_DB_HOST, :adapter => 2
 
-    db_config.vm.forward_port BIFROST_DB_PORT, BIFROST_FORWARD_DB_PORT
+    db_config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--nictype2", "virtio"] # host-only NIC
+    end
+
+    db_config.vm.network :forwarded_port, :guest => BIFROST_DB_PORT,:host => BIFROST_FORWARD_DB_PORT
 
     db_config.vm.provision :chef_solo do |chef|
       chef.json = {
@@ -64,12 +69,15 @@ Vagrant::Config.run do |config|
   end
 
   config.vm.define :api do |api_config|
-    api_config.vm.host_name = "oc-bifrost-api-berkshelf"
+    api_config.vm.hostname = "oc-bifrost-api-berkshelf"
 
-    api_config.vm.network :hostonly, BIFROST_API_HOST, :adapter => 2
-    api_config.vm.customize ["modifyvm", :id, "--nictype2", "virtio"] # host-only NIC
+    api_config.vm.network :private_network, :ip => BIFROST_API_HOST, :adapter => 2
 
-    api_config.vm.forward_port BIFROST_PORT, BIFROST_FORWARD_PORT
+    api_config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--nictype2", "virtio"] # host-only NIC
+    end
+
+    api_config.vm.network :forwarded_port, :guest => BIFROST_PORT, :host => BIFROST_FORWARD_PORT
 
     api_config.vm.provision :chef_solo do |chef|
       chef.json = {
@@ -100,10 +108,13 @@ Vagrant::Config.run do |config|
   end
 
   config.vm.define :metrics do |metrics_config|
-    metrics_config.vm.host_name = "oc-bifrost-metrics-berkshelf"
+    metrics_config.vm.hostname = "oc-bifrost-metrics-berkshelf"
 
-    metrics_config.vm.network :hostonly, METRICS_HOST, :adapter => 2
-    metrics_config.vm.customize ["modifyvm", :id, "--nictype2", "virtio"] # host-only NIC
+    metrics_config.vm.network :private_network, :ip => METRICS_HOST, :adapter => 2
+
+    metrics_config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--nictype2", "virtio"] # host-only NIC
+    end
 
     # The dev-vm cookbooks assume an Omnibus directory structure; this shell provisioner fakes it
     metrics_config.vm.provision :shell, :inline => "mkdir -p /opt/opscode"
