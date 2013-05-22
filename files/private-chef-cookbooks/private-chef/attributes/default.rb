@@ -445,6 +445,7 @@ default['private_chef']['dark_launch']["private-chef"] = true
 default['private_chef']['dark_launch']["sql_users"] = true
 # couchdb_roles, _data, _cookbooks, _checksums, _clients, and _environments are consolidated into sql_migration_phase_1
 default['private_chef']['dark_launch']["add_type_and_bag_to_items"] = true
+default['private_chef']['dark_launch']["erlang_user_endpoint"] = false
 
 ###
 # Opscode Account
