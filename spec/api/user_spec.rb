@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
 
-describe "users", :users do
+describe "users", :users, :focus do
   def self.ruby?
-    # This is not implemented yet in the pedant config, nor does erchef default to
-    # erlang user endpoints yet; this will need to be uncommented when that changes
-    # instead of hardcoding this to true:
-
-    # Pedant::Config.ruby_user_endpoint?
-
-    true
+    Pedant::Config.ruby_users_endpoint?
   end
 
   context "/organizations/<org>/users endpoint" do
