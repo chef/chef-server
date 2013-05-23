@@ -128,7 +128,7 @@ To cut a proper release, we're using the [rebar_lock_deps_plugin][].
 The executive summary is this:
 
 ```
-BUMP=patch make prepare_release && rebar commit-release
+BUMP=patch make prepare_release && rebar commit-release && rebar tag-release
 ```
 
 Substitute `minor` or `major` for `BUMP` as necessary.  This should
