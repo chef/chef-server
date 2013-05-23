@@ -167,6 +167,7 @@ requestors({
 #
 ruby_environment_endpoint? false
 ruby_client_endpoint? false
+ruby_users_endpoint? false
 ruby_sandbox_endpoint? false
 ruby_data_endpoint? false
 ruby_role_endpoint? false
