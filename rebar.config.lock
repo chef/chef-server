@@ -54,3 +54,4 @@
 {eunit_opts,[verbose,{report,{eunit_surefire,[{dir,"."}]}}]}.
 {cover_enabled,true}.
 {plugins,[rebar_lock_deps_plugin]}.
+
