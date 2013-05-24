@@ -1,7 +1,7 @@
 %% THIS FILE IS GENERATED. DO NOT EDIT IT MANUALLY %%
 
 {sub_dirs,["rel","apps/bifrost"]}.
-{erl_opts,[{parse_transform,lager_transform},{debug_info}]}.
+{erl_opts,[{debug_info}]}.
 {deps,[{meck,".*",{git,"git://github.com/eproxus/meck.git",{branch,"master"}}},
        {automeck,".*",
                  {git,"git://github.com/opscode/automeck.git",
@@ -54,4 +54,3 @@
 {eunit_opts,[verbose,{report,{eunit_surefire,[{dir,"."}]}}]}.
 {cover_enabled,true}.
 {plugins,[rebar_lock_deps_plugin]}.
-
