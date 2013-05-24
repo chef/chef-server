@@ -7,6 +7,7 @@
 %% Placeholder module for darklaunch redis functions.
 %%
 -module(mover_org_darklaunch).
+-compile([{parse_transform, lager_transform}]).
 
 -export([disable_org/1,
          enable_org/1,
