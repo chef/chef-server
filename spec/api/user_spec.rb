@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
 
-describe "users", :users, :focus do
+describe "users", :users do
   def self.ruby?
     Pedant::Config.ruby_users_endpoint?
   end
