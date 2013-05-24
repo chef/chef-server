@@ -20,6 +20,8 @@
 
 -include_lib("webmachine/src/webmachine_logger.hrl").
 
+-compile([{parse_transform, lager_transform}]).
+
 %% We can safely ignore BaseDir because our lager configuration takes
 %% care of it for us.
 start_link(_BaseDir) ->
