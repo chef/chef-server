@@ -6,6 +6,12 @@ describe "users", :users do
     Pedant::Config.ruby_users_endpoint?
   end
 
+  let(:public_key_regex) do
+    # Because of a difference in the OpenSSL library between ruby 1.8.7
+    # (actually 1.9.2) and 1.93, we have to accept multiple patterns here:
+    /^-----BEGIN (RSA PUBLIC|PUBLIC) KEY-----/
+  end
+
   context "/organizations/<org>/users endpoint" do
     let(:request_url) { api_url("users") }
 
@@ -106,7 +112,7 @@ describe "users", :users do
           "display_name" => username,
           "email" => "#{username}@opscode.com",
           "username" => username,
-          "public_key" => /^-----BEGIN PUBLIC KEY-----/
+          "public_key" => public_key_regex
         }
       end
 
@@ -776,7 +782,7 @@ describe "users", :users do
           "display_name" => username,
           "email" => "#{username}@opscode.com",
           "username" => username,
-          "public_key" => /^-----BEGIN PUBLIC KEY-----/
+          "public_key" => public_key_regex
         }
       end
 
@@ -867,7 +873,7 @@ describe "users", :users do
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
-          "public_key" => /^-----BEGIN PUBLIC KEY----/
+          "public_key" => public_key_regex
         }
       end
 
@@ -1019,7 +1025,7 @@ describe "users", :users do
               "username" => username,
               "email" => "#{username}@opscode.com",
               "display_name" => "new name",
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
@@ -1118,7 +1124,7 @@ describe "users", :users do
               "first_name" => "Ren Kai",
               "last_name" => "de Boers",
               "display_name" => username,
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
@@ -1153,7 +1159,7 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => "some user",
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
@@ -1188,7 +1194,7 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => "ギリギリ",
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
@@ -1223,7 +1229,7 @@ describe "users", :users do
               "first_name" => "Eliška",
               "last_name" => "Horáčková",
               "display_name" => username,
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
@@ -1263,7 +1269,7 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
@@ -1395,7 +1401,7 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
