@@ -8,7 +8,7 @@ describe "users", :users do
 
   let(:public_key_regex) do
     # Because of a difference in the OpenSSL library between ruby 1.8.7
-    # (actually 1.9.2) and 1.93, we have to accept multiple patterns here:
+    # (actually 1.9.2) and 1.9.3, we have to accept multiple patterns here:
     /^-----BEGIN (RSA PUBLIC|PUBLIC) KEY-----/
   end
 
