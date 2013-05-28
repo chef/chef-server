@@ -22,6 +22,7 @@
 
 %% states
 -export([disable_org_access/2,
+         sleep/2,
          migrate_org/2,
          verify_org/2,
          set_org_to_sql/2,
@@ -53,10 +54,21 @@ init(OrgName) ->
 disable_org_access(timeout, #state{org_name = OrgName} = State) ->
     case mover_org_darklaunch:disable_org(OrgName) of
         ok ->
-            {next_state, migrate_org, State, 0};
+            {next_state, sleep, State, 0};
         {error, Error} ->
             stop_with_failure(State, Error, disable_org_access)
     end.
+
+%% The sleep state is configured to add a wait period immediately
+%% after placing an org in 503 (downtime) mode. This wait period
+%% helps ensure that any in-flight writes to an organizaiton at the
+%% start of a migration will be captured. The configurable value of
+%% the sleep time will be calculated after analyzing the reponse
+%% times of CUD operations to OHC organizations.
+%%
+sleep(timeout, #state{} = State) ->
+    timer:sleep(envy:get(mover, sleep_time, integer)),
+    {next_state, migrate_org, State, 0}.
 
 migrate_org(timeout, #state{org_name = OrgName} = State) ->
     try moser_converter:convert_org(OrgName) of
