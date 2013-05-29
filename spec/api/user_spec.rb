@@ -6,14 +6,20 @@ describe "users", :users do
     Pedant::Config.ruby_users_endpoint?
   end
 
+  let(:public_key_regex) do
+    # Because of a difference in the OpenSSL library between ruby 1.8.7
+    # (actually 1.9.2) and 1.9.3, we have to accept multiple patterns here:
+    /^-----BEGIN (RSA PUBLIC|PUBLIC) KEY-----/
+  end
+
   context "/organizations/<org>/users endpoint" do
     let(:request_url) { api_url("users") }
 
     context "GET /organizations/<org>/users" do
       let(:users_body) do
         [
-          {"user" => {"username" => "pedant_admin_user"}},
-          {"user" => {"username" => "pedant_user"}}
+          {"user" => {"username" => platform.admin_user.name}},
+          {"user" => {"username" => platform.non_admin_user.name}}
         ]
       end
 
@@ -106,7 +112,7 @@ describe "users", :users do
           "display_name" => username,
           "email" => "#{username}@opscode.com",
           "username" => username,
-          "public_key" => /^-----BEGIN PUBLIC KEY-----/
+          "public_key" => public_key_regex
         }
       end
 
@@ -214,8 +220,8 @@ describe "users", :users do
           get(api_url("users"), platform.admin_user).should look_like({
               :status => 200,
               :body_exact => [
-                {"user" => {"username" => "pedant_admin_user"}},
-                {"user" => {"username" => "pedant_user"}}
+                {"user" => {"username" => platform.admin_user.name}},
+                {"user" => {"username" => platform.non_admin_user.name}}
               ]})
         end
       end
@@ -229,8 +235,8 @@ describe "users", :users do
             get(api_url("users"), platform.admin_user).should look_like({
                 :status => 200,
                 :body_exact => [
-                  {"user" => {"username" => "pedant_admin_user"}},
-                  {"user" => {"username" => "pedant_user"}},
+                  {"user" => {"username" => platform.admin_user.name}},
+                  {"user" => {"username" => platform.non_admin_user.name}},
                   {"user" => {"username" => username}}
                 ]})
           end
@@ -246,8 +252,8 @@ describe "users", :users do
             get(api_url("users"), platform.admin_user).should look_like({
                 :status => 200,
                 :body_exact => [
-                  {"user" => {"username" => "pedant_admin_user"}},
-                  {"user" => {"username" => "pedant_user"}},
+                  {"user" => {"username" => platform.admin_user.name}},
+                  {"user" => {"username" => platform.non_admin_user.name}},
                   {"user" => {"username" => username}}
                 ]})
           end
@@ -263,8 +269,8 @@ describe "users", :users do
           get(api_url("users"), platform.admin_user).should look_like({
               :status => 200,
               :body_exact => [
-                {"user" => {"username" => "pedant_admin_user"}},
-                {"user" => {"username" => "pedant_user"}},
+                {"user" => {"username" => platform.admin_user.name}},
+                {"user" => {"username" => platform.non_admin_user.name}},
                 {"user" => {"username" => username}}
               ]})
         end
@@ -282,8 +288,8 @@ describe "users", :users do
           # somewhere in the userspace soup.
           "pivotal" => "#{request_url}/pivotal",
           "pedant-nobody" => "#{request_url}/pedant-nobody",
-          "pedant_admin_user" => "#{request_url}/pedant_admin_user",
-          "pedant_user" => "#{request_url}/pedant_user"
+          platform.admin_user.name => "#{request_url}/#{platform.admin_user.name}",
+          platform.non_admin_user.name => "#{request_url}/#{platform.non_admin_user.name}"
         }
       end
 
@@ -375,8 +381,8 @@ describe "users", :users do
           # somewhere in the userspace soup:
           "pivotal" => "#{request_url}/pivotal",
           "pedant-nobody" => "#{request_url}/pedant-nobody",
-          "pedant_admin_user" => "#{request_url}/pedant_admin_user",
-          "pedant_user" => "#{request_url}/pedant_user",
+          platform.admin_user.name => "#{request_url}/#{platform.admin_user.name}",
+          platform.non_admin_user.name => "#{request_url}/#{platform.non_admin_user.name}",
           # As should our test user:
           username => user_url
         }
@@ -776,7 +782,7 @@ describe "users", :users do
           "display_name" => username,
           "email" => "#{username}@opscode.com",
           "username" => username,
-          "public_key" => /^-----BEGIN PUBLIC KEY-----/
+          "public_key" => public_key_regex
         }
       end
 
@@ -867,7 +873,7 @@ describe "users", :users do
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
-          "public_key" => /^-----BEGIN PUBLIC KEY----/
+          "public_key" => public_key_regex
         }
       end
 
@@ -1019,7 +1025,7 @@ describe "users", :users do
               "username" => username,
               "email" => "#{username}@opscode.com",
               "display_name" => "new name",
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
@@ -1118,7 +1124,7 @@ describe "users", :users do
               "first_name" => "Ren Kai",
               "last_name" => "de Boers",
               "display_name" => username,
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
@@ -1153,7 +1159,7 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => "some user",
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
@@ -1188,7 +1194,7 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => "ギリギリ",
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
@@ -1223,7 +1229,7 @@ describe "users", :users do
               "first_name" => "Eliška",
               "last_name" => "Horáčková",
               "display_name" => username,
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
@@ -1263,7 +1269,7 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
@@ -1395,7 +1401,7 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "public_key" => /^-----BEGIN PUBLIC KEY----/
+              "public_key" => public_key_regex
             }
           end
 
