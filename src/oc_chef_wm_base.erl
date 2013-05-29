@@ -512,20 +512,14 @@ stats_hero_upstreams() ->
 
 
 
+
 object_creation_hook(#chef_client{}=Client,
                      #base_state{chef_authz_context=AuthContext,
-                                 requestor=#chef_client{validator=true},
                                  organization_guid = OrgId}) ->
-    %% Validator-initiated requests must have Authz operations
-    %% performed by the Authz superuser.
+    %% NOTE: client create authorization is handled entirely by having CREATE on the clients
+    %% container. We use system privilege to add the client to the clients group without
+    %% regard for the ACL on the clients group.
     client_cleanup(Client, AuthContext, OrgId, superuser);
-object_creation_hook(#chef_client{}=Client,
-                     #base_state{chef_authz_context=AuthContext,
-                                 requestor_id=RequestorId,
-                                 organization_guid = OrgId}) ->
-    %% Client cleanup initiated by anyone besides a validator client
-    %% proceeds with an un-spoofed identity.
-    client_cleanup(Client, AuthContext, OrgId, RequestorId);
 object_creation_hook(Object, _State) ->
     %% Everything else passes through unaffected
     Object.
@@ -539,7 +533,7 @@ object_creation_hook(Object, _State) ->
 -spec client_cleanup(#chef_client{},
                      AuthContext :: chef_authz:chef_authz_context(),
                      OrgId :: object_id(),
-                     RequestorId :: superuser | object_id()) -> #chef_client{} |
+                     RequestorId :: superuser) -> #chef_client{} |
                                                                 {error, term()}.
 client_cleanup(#chef_client{authz_id=ClientAuthzId,
                             validator=IsValidator}=Client,
