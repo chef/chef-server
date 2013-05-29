@@ -1,3 +1,4 @@
+include_recipe "nodejs"
 include_recipe "omnibus"
 include_recipe "python"
 
