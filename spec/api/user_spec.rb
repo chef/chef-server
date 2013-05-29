@@ -18,8 +18,8 @@ describe "users", :users do
     context "GET /organizations/<org>/users" do
       let(:users_body) do
         [
-          {"user" => {"username" => "pedant_admin_user"}},
-          {"user" => {"username" => "pedant_user"}}
+          {"user" => {"username" => platform.admin_user.name}},
+          {"user" => {"username" => platform.non_admin_user.name}}
         ]
       end
 
@@ -220,8 +220,8 @@ describe "users", :users do
           get(api_url("users"), platform.admin_user).should look_like({
               :status => 200,
               :body_exact => [
-                {"user" => {"username" => "pedant_admin_user"}},
-                {"user" => {"username" => "pedant_user"}}
+                {"user" => {"username" => platform.admin_user.name}},
+                {"user" => {"username" => platform.non_admin_user.name}}
               ]})
         end
       end
@@ -235,8 +235,8 @@ describe "users", :users do
             get(api_url("users"), platform.admin_user).should look_like({
                 :status => 200,
                 :body_exact => [
-                  {"user" => {"username" => "pedant_admin_user"}},
-                  {"user" => {"username" => "pedant_user"}},
+                  {"user" => {"username" => platform.admin_user.name}},
+                  {"user" => {"username" => platform.non_admin_user.name}},
                   {"user" => {"username" => username}}
                 ]})
           end
@@ -252,8 +252,8 @@ describe "users", :users do
             get(api_url("users"), platform.admin_user).should look_like({
                 :status => 200,
                 :body_exact => [
-                  {"user" => {"username" => "pedant_admin_user"}},
-                  {"user" => {"username" => "pedant_user"}},
+                  {"user" => {"username" => platform.admin_user.name}},
+                  {"user" => {"username" => platform.non_admin_user.name}},
                   {"user" => {"username" => username}}
                 ]})
           end
@@ -269,8 +269,8 @@ describe "users", :users do
           get(api_url("users"), platform.admin_user).should look_like({
               :status => 200,
               :body_exact => [
-                {"user" => {"username" => "pedant_admin_user"}},
-                {"user" => {"username" => "pedant_user"}},
+                {"user" => {"username" => platform.admin_user.name}},
+                {"user" => {"username" => platform.non_admin_user.name}},
                 {"user" => {"username" => username}}
               ]})
         end
@@ -288,8 +288,8 @@ describe "users", :users do
           # somewhere in the userspace soup.
           "pivotal" => "#{request_url}/pivotal",
           "pedant-nobody" => "#{request_url}/pedant-nobody",
-          "pedant_admin_user" => "#{request_url}/pedant_admin_user",
-          "pedant_user" => "#{request_url}/pedant_user"
+          platform.admin_user.name => "#{request_url}/#{platform.admin_user.name}",
+          platform.non_admin_user.name => "#{request_url}/#{platform.non_admin_user.name}"
         }
       end
 
@@ -381,8 +381,8 @@ describe "users", :users do
           # somewhere in the userspace soup:
           "pivotal" => "#{request_url}/pivotal",
           "pedant-nobody" => "#{request_url}/pedant-nobody",
-          "pedant_admin_user" => "#{request_url}/pedant_admin_user",
-          "pedant_user" => "#{request_url}/pedant_user",
+          platform.admin_user.name => "#{request_url}/#{platform.admin_user.name}",
+          platform.non_admin_user.name => "#{request_url}/#{platform.non_admin_user.name}",
           # As should our test user:
           username => user_url
         }
