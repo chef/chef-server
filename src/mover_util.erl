@@ -18,10 +18,14 @@
 reset_org(OrgName) when is_list(OrgName) ->
     reset_org(iolist_to_binary(OrgName));
 reset_org(OrgName) when is_binary(OrgName) ->
-    moser_state_tracker:ready_migration(OrgName),
-    Acct = moser_acct_processor:open_account(),
-    GUID = moser_acct_processor:get_org_guid_by_name(OrgName, Acct),
-    moser_chef_converter:cleanup_orgid(GUID).
+    case moser_state_tracker:ready_migration(OrgName) of
+        ok ->
+            Acct = moser_acct_processor:open_account(),
+            GUID = moser_acct_processor:get_org_guid_by_name(OrgName, Acct),
+            moser_chef_converter:cleanup_orgid(GUID);
+        Other ->
+            Other
+    end.
 
 %% @doc Reset each org in the provided list of orgs.
 reset_orgs(Orgs) when is_list(Orgs) ->
