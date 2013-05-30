@@ -4,20 +4,34 @@ This document is the evolving plan for migrating a single organization from `cou
 
 # 0. Preparation
 
-## 0.1 Hosts and Access
+## 0.1 Staging
 
-Hosts that you'll need access to during the migration:
-* couchdb-master
-* opscode-lb (all external)
-* opscode-lbint (internal master)
+1. Verify Code Deploys
 
-## 0.2 Staging
+   * opscode-chef - rel-2.9.0
+   * opscode-erchef - 0.20.3
+   * opscode-account - rel-1.32.1
+   * opscode-lb - TODO
+   * opscode-lb-int - TODO
+   * chef-mover - 1.0.17
 
-1. Run `chef-client` on `couchdb-master`
+1. Verify Mover Dry-Run is Off
 
-   We will need to run `chef-client` on the `couchdb-master` node to deploy the latest version of the `chef-mover` project, which will be handling the migration.
+   Neither of the couchdb nodes (which run mover) should have the `mover-dry-run` tag.
 
-## 0.3 Pre-migration Loading
+   ```bash
+   knife search node role:couchdb -a tags
+   ```
+
+   To double-check, ssh to the active couchdb node and verify that the dry_ryn config is false:
+
+   ```bash
+   grep dry_run /srv/chef_mover/current/etc/sys.config
+   ```
+
+   If not, run `chef-client`.
+
+## 0.2 Pre-migration Loading
 
 1. Restart Couchdb
 
@@ -42,11 +56,21 @@ Hosts that you'll need access to during the migration:
    moser_acct_processor:process_account_file().
    ```
 
-   This should take roughly **10 minutes**. Alternatively, if you've previously loaded the account database into a DETS table, you can simply open the tables:
+1. Reset customer organizations
+
+   We've been test-migrating customer orgs with dry-run in production for the past week. It's time to clean up the data in SQL. From the `mover` console:
 
    ```erlang
-   moser_acct_processor:open_account().
+   mover_util:reset_org("__INSERT_ORGNAME_HERE__"). %% I'm not putting the orgname here because you better not copy-pasta this
    ```
+
+   To double-check the state of the recently reset organization, head over to the active chef-pgsql box. From `psql`:
+
+   ```sql
+   select * from org_migration_state where org_name = '__INSERT_ORGNAME_HERE__';
+   ```
+
+   The state should be set to `'holding'`.
 
 # 1. Migration
 
@@ -55,5 +79,39 @@ Hosts that you'll need access to during the migration:
    From `mover` console:
 
    ```erlang
-   mover_org_migrator_sup:start_org_migrator("$ORG_NAME").
+   mover_org_migrator_sup:start_org_migrator("__INSERT_ORGNAME_HERE__").
+   ```
+
+# 2. Migration Rollback - Disaster Recovery
+
+In the event of a SEV1 issue with one of the initial migrated customers and they cannot make forward progress with their infrastructure, we reserve the option to unmigrate an organization. This is a last-resort option and should be considered carefully before proceeding. Any data that has been successfully saved after the migration will be lost.
+
+To make this operation as quick as possible, open connections to the following nodes:
+
+* active mysql
+* active couchdb
+
+1. Initialize 503 Mode
+
+   From the active mysql node, run `/opt/redis/bin/redis-cli`:
+
+   ```
+   HSET dl_org_$ORGNAME 503_mode true
+   ```
+
+1. Reset and Re-Index
+
+   From the active couchdb node in `mover console`:
+
+   ```erlang
+   mover_util:reset_org("__INSERT_ORGNAME_HERE__").
+   moser_chef_reindex:reindex_org("__INSERT_ORGNAME_HERE__").
+   ```
+
+1. End 503 Mode and Re-Route to CouchDB / opscode-chef
+
+   From `redis-cli` on the active mysql node:
+
+   ```
+   DEL dl_org_$ORGNAME
    ```
