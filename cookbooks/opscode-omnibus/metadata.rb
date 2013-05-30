@@ -9,6 +9,5 @@ version           "0.10.0"
 supports "centos"
 supports "ubuntu"
 
-depends "nodejs"
 depends "python"
 depends "omnibus"
