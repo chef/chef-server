@@ -1,9 +1,9 @@
 OrgMapper.configure do |mapper|
   mapper.couchdb_uri = "http://<%= node['private_chef']['couchdb']['vip'] %>:<%= node['private_chef']['couchdb']['port'] %>"
   mapper.database = 'opscode_account'
-  mapper.auth_uri = "http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>"
+  mapper.auth_uri = "http://<%= node['private_chef']['oc_bifrost']['vip'] %>:<%= node['private_chef']['oc_bifrost']['port'] %>"
   mapper.authz_couch = "http://<%= node['private_chef']['couchdb']['vip'] %>:<%= node['private_chef']['couchdb']['port'] %>"
-  mapper.superuser_id = '<%= node['private_chef']['opscode-authz']['superuser_id'] %>'
+  mapper.superuser_id = '<%= node['private_chef']['oc_bifrost']['superuser_id'] %>'
   mapper.chargify_site = ''
   mapper.chargify_api_secret = ''
   mapper.sql_database = 'postgres://<%= node['private_chef']['postgresql']['sql_user'] %>:<%= node['private_chef']['postgresql']['sql_password'] %>@<%= node['private_chef']['postgresql']['vip'] %>/opscode_chef'

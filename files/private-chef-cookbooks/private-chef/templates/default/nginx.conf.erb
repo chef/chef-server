@@ -139,9 +139,9 @@ http {
     }
   }
 
-  # internal service access for opscode-authz
+  # internal service access for oc_bifrost
   server {
-    listen <%= @helper.listen_port(node['private_chef']['lb_internal']['authz_port']) %>;
+    listen <%= @helper.listen_port(node['private_chef']['lb_internal']['oc_bifrost_port']) %>;
     server_name <%= node['fqdn'] %>;
 
     client_max_body_size <%= @client_max_body_size %>;
@@ -160,7 +160,7 @@ http {
     error_log  /var/log/opscode/nginx/internal-authz.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
 
     location / {
-      proxy_pass http://opscode_authz;
+      proxy_pass http://oc_bifrost;
     }
   }
   <%- end -%>

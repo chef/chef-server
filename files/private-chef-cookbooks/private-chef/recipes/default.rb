@@ -130,7 +130,7 @@ include_recipe "private-chef::runit"
   "rabbitmq",
   "postgresql",
   "redis",
-  "opscode-authz",
+  "oc_bifrost",
   "opscode-certificate",
   "opscode-account",
   "opscode-solr",

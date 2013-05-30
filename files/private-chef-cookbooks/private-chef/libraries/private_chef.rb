@@ -26,7 +26,7 @@ module PrivateChef
   lb Mash.new
   postgresql Mash.new
   redis Mash.new
-  opscode_authz Mash.new
+  oc_bifrost Mash.new
   opscode_certificate Mash.new
   opscode_org_creator Mash.new
   opscode_account Mash.new
@@ -110,7 +110,9 @@ module PrivateChef
       PrivateChef['opscode_account']['session_secret_key'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['opscode_authz']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
+      PrivateChef['oc_bifrost']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
+      PrivateChef['oc_bifrost']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['oc_bifrost']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['bookshelf']['access_key_id'] ||= generate_hex_if_bootstrap(20, ha_guard)
       PrivateChef['bookshelf']['secret_access_key'] ||= generate_hex_if_bootstrap(40, ha_guard)
 
@@ -138,8 +140,10 @@ module PrivateChef
               'keepalived' => {
                 'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
               },
-              'opscode_authz' => {
-                'superuser_id' => PrivateChef['opscode_authz']['superuser_id']
+              'oc_bifrost' => {
+                'superuser_id' => PrivateChef['oc_bifrost']['superuser_id'],
+                'sql_password' => PrivateChef['oc_bifrost']['sql_password'],
+                'sql_ro_password' => PrivateChef['oc_bifrost']['sql_ro_password']
               },
               'bookshelf' => {
                 'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
@@ -164,7 +168,7 @@ module PrivateChef
         "lb",
         "postgresql",
         "redis",
-        "opscode_authz",
+        "oc_bifrost",
         "opscode_certificate",
         "opscode_org_creator",
         "opscode_account",
@@ -239,7 +243,7 @@ module PrivateChef
       PrivateChef["lb"]["ha"] ||= true
       PrivateChef["postgresql"]["ha"] ||= true
       PrivateChef["redis"]["ha"] ||= true
-      PrivateChef["opscode_authz"]["ha"] ||= true
+      PrivateChef["oc_bifrost"]["ha"] ||= true
       PrivateChef["opscode_certificate"]["ha"] ||= true
       PrivateChef["opscode_org_creator"]["ha"] ||= true
       PrivateChef["opscode_account"]["ha"] ||= true
