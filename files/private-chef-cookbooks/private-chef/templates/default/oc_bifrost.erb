@@ -6,7 +6,7 @@ RUNNER_SCRIPT_DIR=$(cd ${0%/*} && pwd)
 
 RUNNER_BASE_DIR=${RUNNER_SCRIPT_DIR%/*}
 RUNNER_ETC_DIR=$RUNNER_BASE_DIR/etc
-RUNNER_LOG_DIR=<%= File.join(@dir, "log") %>
+RUNNER_LOG_DIR=<%= @log_directory %>
 # Note the trailing slash on $PIPE_DIR/
 PIPE_DIR=$RUNNER_BASE_DIR/pipe_dir/
 RUNNER_USER=
@@ -63,7 +63,7 @@ case "$1" in
         BINDIR=$ROOTDIR/erts-$ERTS_VSN/bin
         EMU=beam
         PROGNAME=`echo $0 | sed 's/.*\\///'`
-        CMD="$BINDIR/erlexec -noshell -boot $RUNNER_BASE_DIR/releases/$APP_VSN/$BOOTFILE -embedded -config $RUNNER_ETC_DIR/app.config -args_file $RUNNER_ETC_DIR/vm.args -- ${1+"$@"}"
+        CMD="$BINDIR/erlexec -noshell -boot $RUNNER_BASE_DIR/releases/$APP_VSN/$BOOTFILE -embedded -config $RUNNER_ETC_DIR/sys.config -args_file $RUNNER_ETC_DIR/vm.args -- ${1+"$@"}"
         export EMU
         export ROOTDIR
         export BINDIR
@@ -88,6 +88,14 @@ case "$1" in
         ;;
 
     stop)
+        # XXX FIXME XXX
+        # Under runit, you want to just issue .../init.d/oc_erchef
+        # stop and let runit take care of things. With erlexec the
+        # signal sent by runit gets handled correctly.
+        # Not sure exactly what happens when this gets called because
+        # in general it seems like nodetool is functioning and
+        # nodetool stop does an rpc for init:stop. But not sure if
+        # runit then restarts and then we timeout.
         # Wait for the node to completely stop...
         case `uname -s` in
             Linux|Darwin|FreeBSD|DragonFly|NetBSD|OpenBSD)
@@ -151,7 +159,7 @@ case "$1" in
         BINDIR=$ROOTDIR/erts-$ERTS_VSN/bin
         EMU=beam
         PROGNAME=`echo $0 | sed 's/.*\\///'`
-        CMD="$BINDIR/erlexec -boot $RUNNER_BASE_DIR/releases/$APP_VSN/$BOOTFILE -embedded -config $RUNNER_ETC_DIR/app.config -args_file $RUNNER_ETC_DIR/vm.args -- ${1+"$@"}"
+        CMD="$BINDIR/erlexec -boot $RUNNER_BASE_DIR/releases/$APP_VSN/$BOOTFILE -embedded -config $RUNNER_ETC_DIR/sys.config -args_file $RUNNER_ETC_DIR/vm.args -- ${1+"$@"}"
         export EMU
         export ROOTDIR
         export BINDIR
@@ -169,10 +177,9 @@ case "$1" in
         ;;
 
     *)
-        echo "Usage: $SCRIPT {start|stop|restart|reboot|ping|console|console_clean|attach}"
+        echo "Usage: $SCRIPT {runit|start|stop|restart|reboot|ping|console|console_clean|attach}"
         exit 1
         ;;
 esac
 
 exit 0
-

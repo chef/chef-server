@@ -22,7 +22,7 @@ Merb::Config.use do |c|
   c[:certificateservice_uri] = 'http://<%= node['private_chef']['opscode-certificate']['vip'] %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificate'
   c[:account_database] = 'opscode_account'
   c[:org_database_prefix] = 'chef'
-  c[:authorizationservice_uri] = 'http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>'
+  c[:authorizationservice_uri] = 'http://<%= node['private_chef']['oc_bifrost']['vip'] %>:<%= node['private_chef']['oc_bifrost']['port'] %>'
   c[:cookbook_cache_path] = '<%= File.join(private_chef_api_dir, "cookbooks_cache") %>'
     #File.join("/tmp", "cookbooks_cache")
   c[:solr_uri] = 'http://<%= node['private_chef']['opscode-solr']['vip'] %>:<%= node['private_chef']['opscode-solr']['port'] %>'
