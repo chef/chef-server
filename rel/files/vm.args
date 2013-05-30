@@ -1,0 +1,24 @@
+## Name of the node
+-name oc_bifrost@127.0.0.1
+
+## Cookie for distributed erlang
+-setcookie oc_bifrost
+
+## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
+## (Disabled by default..use with caution!)
+##-heart
+
+## Enable kernel poll and a few async threads
++K true
++A 10
+
++P 262144
+
+## Increase number of concurrent ports/sockets
+-env ERL_MAX_PORTS 65536
+
+## Tweak GC to run more often
+-env ERL_FULLSWEEP_AFTER 10
+
+## Increase logfile size to 10M
+-env RUN_ERL_LOG_MAXSIZE 10000000
