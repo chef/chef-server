@@ -17,7 +17,7 @@
                     "9b18b00cd998c1f37f516d6358e715276fca7b48"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "8cf87a6088f3a6e779075777578191556c551850"}},
+                  "35636bc4de07bc803ea4fc9731fab005d0378c2b"}},
        {epgsql,".*",
                {git,"git://github.com/opscode/epgsql.git",
                     "f24cee4170395ba69e96e5e56c876d947394e471"}},
