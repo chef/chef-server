@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-# Build oc_erchef. If building a release tag, create a tarball and upload to
+# Build oc_bifrost. If building a release tag, create a tarball and upload to
 # s3. To customize for another project, you should only need to edit
 # PROJ_NAME and the make command.
 
