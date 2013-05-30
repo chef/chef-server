@@ -11,8 +11,8 @@ This document is the evolving plan for migrating a single organization from `cou
    * opscode-chef - rel-2.9.0
    * opscode-erchef - 0.20.3
    * opscode-account - rel-1.32.1
-   * opscode-lb - TODO
-   * opscode-lb-int - TODO
+   * opscode-lb - Cookbook Version 1.3.5
+   * opscode-lb-int - Cookbook Version 1.3.5
    * chef-mover - 1.0.17
 
 1. Verify Mover Dry-Run is Off
@@ -41,7 +41,7 @@ This document is the evolving plan for migrating a single organization from `cou
 
    Since we're going to be running a memory-heavy operation in loading the `opscode-account` database into a DETS table, we're going to restart `couchdb` in order to give us some head-room.
 
-1. Start up chef-mover
+1. Start Up chef-mover
 
    ```bash
    cd /srv/chef_mover/current
@@ -56,7 +56,7 @@ This document is the evolving plan for migrating a single organization from `cou
    moser_acct_processor:process_account_file().
    ```
 
-1. Reset customer organizations
+1. Reset Customer Organizations
 
    We've been test-migrating customer orgs with dry-run in production for the past week. It's time to clean up the data in SQL. From the `mover` console:
 
