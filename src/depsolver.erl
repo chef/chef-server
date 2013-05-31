@@ -246,6 +246,8 @@ solve({?MODULE, DepGraph0}, RawGoals)
                 {fail, _} ->
                     [FirstCons | Rest] = Goals,
                     {error, depsolver_culprit:search(DepGraph1, [FirstCons], Rest)};
+				{missing, Pkg} ->
+				  {error, {unreachable_package, Pkg}};
                 Solution ->
                     {ok, Solution}
             end
@@ -514,6 +516,8 @@ extend_constraints(SrcPkg, SrcVsn, ExistingConstraints0, NewConstraints) ->
                 ExistingConstraints0, [{SrcPkg, SrcVsn} | NewConstraints]).
 
 -spec is_version_within_constraint(vsn(),constraint()) -> boolean().
+is_version_within_constraint({missing}, _Pkg)->
+    nope;
 is_version_within_constraint(_Vsn, Pkg) when is_atom(Pkg) orelse is_binary(Pkg) ->
     true;
 is_version_within_constraint(Vsn, {_Pkg, NVsn}) ->
@@ -542,7 +546,8 @@ is_version_within_constraint(Vsn, {_Pkg, LVsn, '~>'}) ->
     ec_semver:pes(Vsn, LVsn);
 is_version_within_constraint(Vsn, {_Pkg, LVsn1, LVsn2, between}) ->
     ec_semver:between(LVsn1, LVsn2, Vsn);
-is_version_within_constraint(_Vsn, _Pkg) ->
+is_version_within_constraint(Vsn, _Pkg) ->
+  io:format("Bad version ~p~n", [Vsn]),
     false.
 
 %% @doc
@@ -563,18 +568,30 @@ get_versions(DepGraph, PkgName) ->
     case gb_trees:lookup(PkgName, DepGraph) of
         none ->
             [];
-        {value, AllVsns} ->
-            [Vsn || {Vsn, _} <- AllVsns]
+        {value, AllVsns} when is_list(AllVsns) ->
+            [Vsn || {Vsn, _} <- AllVsns];
+		 _ ->
+		  []
     end.
 
 %% @doc
 %% make sure a given name/vsn meets all current constraints
 -spec valid_version(pkg_name(),vsn(),constraints()) -> boolean().
 valid_version(PkgName, Vsn, PkgConstraints) ->
-    lists:all(fun ({L, _ConstraintSrc}) ->
-                      is_version_within_constraint(Vsn, L)
-              end,
-              get_constraints(PkgConstraints, PkgName)).
+  Constraints = get_constraints(PkgConstraints, PkgName),
+  case lists:any(fun ({L, _}) ->
+		  is_version_within_constraint(Vsn, L) == nope
+	  end,
+	  Constraints) of
+	true ->
+	  io:format("Missing"),
+	  missing;
+	false ->
+	  lists:all(fun ({L, _ConstraintSrc}) ->
+			is_version_within_constraint(Vsn, L)
+		end,
+		Constraints)
+	end.
 
 %% @doc
 %% Given a Package Name and a set of constraints get a list of package
@@ -645,14 +662,22 @@ pkgs(DepGraph, Visited, Pkg, Constraints, OtherPkgs, PathInd) ->
                 NewVisited = [{Pkg, Vsn} | Visited],
                 Res = all_pkgs(DepGraph, NewVisited, DepPkgs ++ OtherPkgs, UConstraints, PathInd),
                 Res
-
-        end,
-    case constrained_package_versions(DepGraph, Pkg, Constraints) of
-        [] ->
-            {fail, [{Visited, Constraints}]};
-        Res ->
-            lists_some(F, Res, PathInd)
-    end.
+			end,
+			try
+			  case constrained_package_versions(DepGraph, Pkg, Constraints) of
+				[] ->
+				  {fail, [{Visited, Constraints}]};
+				missing ->
+				  {missing, Pkg};
+				Res ->
+				  lists_some(F, Res, PathInd)
+			  end
+			catch
+			  error:{case_clause,missing} ->
+				{missing, Pkg};
+			  Error ->
+				erlang:throw(Error)
+			end.
 
 
 %% @doc This gathers the dependency constraints for a given package vsn from the
@@ -736,7 +761,8 @@ find_reachable_packages(ExistingGraph, NewGraph0, PkgName) ->
                     NewGraph1 = gb_trees:insert(PkgName, Info, NewGraph0),
                     rewrite_vsns(ExistingGraph, NewGraph1, Info);
                 none ->
-                    NewGraph0 %{error, {unreachable_package, PkgName}}
+				  NewGraph1 = gb_trees:insert(PkgName, [{{missing},[]}],NewGraph0), %{error, {unreachable_package, PkgName}}
+                    rewrite_vsns(ExistingGraph, NewGraph1, [{{missing},[]}])
             end
     end.
 

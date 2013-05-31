@@ -52,6 +52,8 @@ search(State, ActiveCons, []) ->
     case depsolver:primitive_solve(State, ActiveCons, keep_paths) of
         {fail, FailPaths} ->
             extract_culprit_information0(ActiveCons, lists:flatten(FailPaths));
+		{missing, Pkg} ->
+		  {error, {unreachable_package, Pkg}};
         _Success ->
             %% This should *never* happen. 'Culprit' above represents the last
             %% possible constraint that could cause things to fail. There for
@@ -62,6 +64,8 @@ search(State, ActiveCons, [NewCon | Constraints]) ->
     case depsolver:primitive_solve(State, ActiveCons, keep_paths) of
         {fail, FailPaths} ->
             extract_culprit_information0(ActiveCons, lists:flatten(FailPaths));
+		{missing, Pkg} ->
+		  {error, {unreachable_package, Pkg}};
         _Success ->
             %% Move one constraint from the inactive to the active
             %% constraints and run again
