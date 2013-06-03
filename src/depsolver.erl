@@ -515,11 +515,6 @@ extend_constraints(SrcPkg, SrcVsn, ExistingConstraints0, NewConstraints) ->
                 end,
                 ExistingConstraints0, [{SrcPkg, SrcVsn} | NewConstraints]).
 
--spec is_version_missing(vsn(),constraint()) -> boolean().
-is_version_missing({missing}, _Pkg)->
-    true;
-is_version_missing(_Vsn, _Pkg)->
-    false.
 -spec is_version_within_constraint(vsn(),constraint()) -> boolean().
 is_version_within_constraint({missing}, _Pkg)->
     false;
@@ -574,28 +569,20 @@ get_versions(DepGraph, PkgName) ->
         none ->
             [];
         {value, AllVsns} when is_list(AllVsns) ->
-            [Vsn || {Vsn, _} <- AllVsns];
-		 _ ->
-		  []
+            [Vsn || {Vsn, _} <- AllVsns]
     end.
 
 %% @doc
 %% make sure a given name/vsn meets all current constraints
 -spec valid_version(pkg_name(),vsn(),constraints()) -> boolean().
+valid_version(_PkgName, {missing}, _PkgConstraints) ->
+  true;
 valid_version(PkgName, Vsn, PkgConstraints) ->
   Constraints = get_constraints(PkgConstraints, PkgName),
-	  case lists:all(fun ({L, _ConstraintSrc}) ->
+	  lists:all(fun ({L, _ConstraintSrc}) ->
 			is_version_within_constraint(Vsn, L)
 		end,
-		Constraints) of
-	false ->
-	  lists:any(fun ({L, _}) ->
-			  is_version_missing(Vsn, L)
-		  end,
-		  Constraints);
-	true ->
-	  true
-	end.
+		Constraints).
 
 %% @doc
 %% Given a Package Name and a set of constraints get a list of package
@@ -610,11 +597,9 @@ constrained_package_versions(State, PkgName, PkgConstraints) ->
 	  [{missing}] ->
 		missing;
 	  Result ->
-		Result
-%	  Result ->
-%		lists:filter(fun({{missing, _},_,_}) ->
-%			  false;
-%			(_FilteredVersion) -> true  end, Result)
+		lists:filter(fun({missing}) ->
+			  false;
+			(_FilteredVersion) -> true  end, Result)
 	end.
 
 %% Given a list of constraints filter said list such that only fail (for things
