@@ -515,9 +515,14 @@ extend_constraints(SrcPkg, SrcVsn, ExistingConstraints0, NewConstraints) ->
                 end,
                 ExistingConstraints0, [{SrcPkg, SrcVsn} | NewConstraints]).
 
+-spec is_version_missing(vsn(),constraint()) -> boolean().
+is_version_missing({missing}, _Pkg)->
+    true;
+is_version_missing(_Vsn, _Pkg)->
+    false.
 -spec is_version_within_constraint(vsn(),constraint()) -> boolean().
 is_version_within_constraint({missing}, _Pkg)->
-    nope;
+    false;
 is_version_within_constraint(_Vsn, Pkg) when is_atom(Pkg) orelse is_binary(Pkg) ->
     true;
 is_version_within_constraint(Vsn, {_Pkg, NVsn}) ->
@@ -579,18 +584,17 @@ get_versions(DepGraph, PkgName) ->
 -spec valid_version(pkg_name(),vsn(),constraints()) -> boolean().
 valid_version(PkgName, Vsn, PkgConstraints) ->
   Constraints = get_constraints(PkgConstraints, PkgName),
-  case lists:any(fun ({L, _}) ->
-		  is_version_within_constraint(Vsn, L) == nope
-	  end,
-	  Constraints) of
-	true ->
-	  io:format("Missing"),
-	  missing;
-	false ->
-	  lists:all(fun ({L, _ConstraintSrc}) ->
+	  case lists:all(fun ({L, _ConstraintSrc}) ->
 			is_version_within_constraint(Vsn, L)
 		end,
-		Constraints)
+		Constraints) of
+	false ->
+	  lists:any(fun ({L, _}) ->
+			  is_version_missing(Vsn, L)
+		  end,
+		  Constraints);
+	true ->
+	  true
 	end.
 
 %% @doc
@@ -600,7 +604,18 @@ valid_version(PkgName, Vsn, PkgConstraints) ->
                                           [vsn()].
 constrained_package_versions(State, PkgName, PkgConstraints) ->
     Versions = get_versions(State, PkgName),
-    [Vsn || Vsn <- Versions, valid_version(PkgName, Vsn, PkgConstraints)].
+    Result = [Vsn || Vsn <- Versions, valid_version(PkgName, Vsn, PkgConstraints)],
+	io:format("Result ~p", [Result]),
+	case Result of
+	  [{missing}] ->
+		missing;
+	  Result ->
+		Result
+%	  Result ->
+%		lists:filter(fun({{missing, _},_,_}) ->
+%			  false;
+%			(_FilteredVersion) -> true  end, Result)
+	end.
 
 %% Given a list of constraints filter said list such that only fail (for things
 %% that do not match a package and pkg are returned. Since at the end only pkg()
@@ -663,7 +678,6 @@ pkgs(DepGraph, Visited, Pkg, Constraints, OtherPkgs, PathInd) ->
                 Res = all_pkgs(DepGraph, NewVisited, DepPkgs ++ OtherPkgs, UConstraints, PathInd),
                 Res
 			end,
-			try
 			  case constrained_package_versions(DepGraph, Pkg, Constraints) of
 				[] ->
 				  {fail, [{Visited, Constraints}]};
@@ -671,13 +685,7 @@ pkgs(DepGraph, Visited, Pkg, Constraints, OtherPkgs, PathInd) ->
 				  {missing, Pkg};
 				Res ->
 				  lists_some(F, Res, PathInd)
-			  end
-			catch
-			  error:{case_clause,missing} ->
-				{missing, Pkg};
-			  Error ->
-				erlang:throw(Error)
-			end.
+			  end.
 
 
 %% @doc This gathers the dependency constraints for a given package vsn from the
