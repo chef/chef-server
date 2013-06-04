@@ -83,6 +83,7 @@
          format_version/1,
          new_graph/0,
          solve/2,
+         solve/3,
          add_packages/2,
          add_package/3,
          add_package_version/3,
@@ -237,9 +238,10 @@ add_package_version(State, Pkg, Vsn) ->
 -spec solve(t(),[constraint()]) -> {ok, [pkg()]} | {error, term()}.
 solve({?MODULE, DepGraph0}, RawGoals)
   when erlang:length(RawGoals) > 0 ->
-do_solve(DepGraph0, RawGoals, 2000).
+solve(DepGraph0, RawGoals, 2000).
 
-do_solve(DepGraph0, RawGoals, Timeout) ->
+solve(DepGraph0, RawGoals, Timeout)
+  when erlang:length(RawGoals) > 0 ->
     Goals = [fix_con(Goal) || Goal <- RawGoals],
 case lists:filter(fun (Goal) ->
         PkgName = dep_pkg(Goal),
