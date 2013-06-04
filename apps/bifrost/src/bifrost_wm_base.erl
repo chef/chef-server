@@ -153,10 +153,13 @@ new_request_id() ->
 
 spawn_stats_hero_worker(Req, #base_state{reqid=ReqId,
                                          request_type=RequestType,
+                                         module=Module,
                                          metrics_config=MetricsConfig}) ->
-
-    %% TODO: stats_hero:as_bin/1 should probably handle this, right?
-    RequestLabel = erlang:atom_to_binary(RequestType, utf8),
+    %% Add the module and request type as a two-part label to allow us
+    %% more fine-grained graphing capabilities.  Many modules handle
+    %% multiple kinds of requests, so without this change, we end up
+    %% obscuring quite a bit.
+    RequestLabel = erlang:atom_to_list(Module) ++ "." ++ erlang:atom_to_list(RequestType),
 
     Config = [{request_id, ReqId},
 
