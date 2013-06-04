@@ -697,10 +697,11 @@ pkgs(DepGraph, Visited, Pkg, Constraints, OtherPkgs, PathInd) ->
                   {fail, [{Visited, Constraints}]};
                 missing ->
                     case length(OtherPkgs) == 0 of
+                        %No where else to look in this version, fail, but keep looking
+                        true ->
+                          {fail, [{Visited, Constraints}]};
                         false ->
-                          {missing, Pkg};
-                        _ ->
-                          {fail, [{Visited, Constraints}]}
+                          {missing, Pkg}
                   end;
                 Res ->
                   lists_some(F, Res, PathInd)
