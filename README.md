@@ -66,14 +66,32 @@ Now you're ready to grab all the dependencies.  We're installing
 binary stubs into `bin` to ensure everything is as self-contained as
 possible.
 
-```
-bundle install --binstubs
-```
+Our `Vagrantfile` is geared for the latest installer-based versions.
+If you do not already have this, please download the latest from
+http://downloads.vagrantup.com.  Note that it __will not work__ with
+earlier gem-based versions of Vagrant!
 
-Now, to fire up and provision a VM:
+If you used earlier versions of this process with `bundle install
+--binstubs`, go ahead and delete the `bin` directory now; you will not
+need it anymore, and it will probably just confuse things and bring
+you much woe and heartache.  Nobody needs that.
+
+Also, if you still have old gem-based vagrant on your system, and you
+use RBEnv, you may have some shims around.  Since `opscode-dev-vm` is
+still using the old Vagrant, you probably don't want to remove your
+vagrant gem and nuke your shim just yet (you could do a `bundle
+install --binstubs` in `opscode-dev-vm` if you wanted to, but I
+digress).  To ensure you're using the installer-based Vagrant, you can
+invoke it directly using `/usr/bin/vagrant` and remove all doubt.
+
+Also, you'll need to set up the Berkshelf plugin for Vagrant:
+
+    /usr/bin/vagrant plugin install vagrant-berkshelf
+
+Now, to fire up and provision all the VMs:
 
 ```
-bin/vagrant up
+/usr/bin/vagrant up
 ```
 
 Go muck around on the machine now:
