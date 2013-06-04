@@ -242,38 +242,38 @@ do_solve(DepGraph0, RawGoals, 2000).
 do_solve(DepGraph0, RawGoals, Timeout) ->
     Goals = [fix_con(Goal) || Goal <- RawGoals],
 case lists:filter(fun (Goal) ->
-		PkgName = dep_pkg(Goal),
-		contains_package_version(DepGraph0, PkgName) == false
-	end,
-	Goals) of
-	[] ->
-	  Self = self(),
-	  F = fun() ->
+        PkgName = dep_pkg(Goal),
+        contains_package_version(DepGraph0, PkgName) == false
+    end,
+    Goals) of
+    [] ->
+      Self = self(),
+      F = fun() ->
     case trim_unreachable_packages(DepGraph0, Goals) of
-			Error = {error, _} ->
-				Error;
-			DepGraph1 ->
-				case primitive_solve(DepGraph1, Goals, no_path) of
-					{fail, _} ->
-						[FirstCons | Rest] = Goals,
-						Self ! {error, depsolver_culprit:search(DepGraph1, [FirstCons], Rest)};
-					{missing, Pkg} ->
-					  Self ! {error, {unreachable_package, Pkg}};
-					Solution ->
-						Self ! {ok, Solution}
-				end
-		end
-	end,
-	Pid = proc_lib:spawn(F),
-	receive
-	  Result ->
-		Result
-	after Timeout ->
-		exit(Pid, kill),
-		{error, resolution_timeout}
-	end;
-	[MissingPackage | _] ->
-	  {error, {unreachable_package, dep_pkg(MissingPackage)}}
+            Error = {error, _} ->
+                Error;
+            DepGraph1 ->
+                case primitive_solve(DepGraph1, Goals, no_path) of
+                    {fail, _} ->
+                        [FirstCons | Rest] = Goals,
+                        Self ! {error, depsolver_culprit:search(DepGraph1, [FirstCons], Rest)};
+                    {missing, Pkg} ->
+                      Self ! {error, {unreachable_package, Pkg}};
+                    Solution ->
+                        Self ! {ok, Solution}
+                end
+        end
+    end,
+    Pid = proc_lib:spawn(F),
+    receive
+      Result ->
+        Result
+    after Timeout ->
+        exit(Pid, kill),
+        {error, resolution_timeout}
+    end;
+    [MissingPackage | _] ->
+      {error, {unreachable_package, dep_pkg(MissingPackage)}}
   end.
 
 %% Parse a string version into a tuple based version
@@ -461,12 +461,12 @@ new_constraints() ->
                              [pkg()] | fail_detail().
 primitive_solve(State, PackageList, PathInd)
   when erlang:length(PackageList) > 0 ->
-	  Constraints = lists:foldl(fun(Info, Acc) ->
-										add_constraint('_GOAL_', 'NO_VSN', Acc, Info)
-								end, new_constraints(), PackageList),
+      Constraints = lists:foldl(fun(Info, Acc) ->
+                                        add_constraint('_GOAL_', 'NO_VSN', Acc, Info)
+                                end, new_constraints(), PackageList),
 
-	  Pkgs = lists:map(fun dep_pkg/1, PackageList),
-	  all_pkgs(State, [], Pkgs, Constraints, PathInd).
+      Pkgs = lists:map(fun dep_pkg/1, PackageList),
+      all_pkgs(State, [], Pkgs, Constraints, PathInd).
 
 
 %% @doc
@@ -603,10 +603,10 @@ valid_version(_PkgName, {missing}, _PkgConstraints) ->
   true;
 valid_version(PkgName, Vsn, PkgConstraints) ->
   Constraints = get_constraints(PkgConstraints, PkgName),
-	  lists:all(fun ({L, _ConstraintSrc}) ->
-			is_version_within_constraint(Vsn, L)
-		end,
-		Constraints).
+      lists:all(fun ({L, _ConstraintSrc}) ->
+            is_version_within_constraint(Vsn, L)
+        end,
+        Constraints).
 
 %% @doc
 %% Given a Package Name and a set of constraints get a list of package
@@ -616,14 +616,14 @@ valid_version(PkgName, Vsn, PkgConstraints) ->
 constrained_package_versions(State, PkgName, PkgConstraints) ->
     Versions = get_versions(State, PkgName),
     Result = [Vsn || Vsn <- Versions, valid_version(PkgName, Vsn, PkgConstraints)],
-	case Result of
-	  [{missing}] ->
-		missing;
-	  Result ->
-		lists:filter(fun({missing}) ->
-			  false;
-			(_FilteredVersion) -> true  end, Result)
-	end.
+    case Result of
+      [{missing}] ->
+        missing;
+      Result ->
+        lists:filter(fun({missing}) ->
+              false;
+            (_FilteredVersion) -> true  end, Result)
+    end.
 
 %% Given a list of constraints filter said list such that only fail (for things
 %% that do not match a package and pkg are returned. Since at the end only pkg()
@@ -685,15 +685,15 @@ pkgs(DepGraph, Visited, Pkg, Constraints, OtherPkgs, PathInd) ->
                 NewVisited = [{Pkg, Vsn} | Visited],
                 Res = all_pkgs(DepGraph, NewVisited, DepPkgs ++ OtherPkgs, UConstraints, PathInd),
                 Res
-			end,
-			  case constrained_package_versions(DepGraph, Pkg, Constraints) of
-				[] ->
-				  {fail, [{Visited, Constraints}]};
-				missing ->
-				  {missing, Pkg};
-				Res ->
-				  lists_some(F, Res, PathInd)
-			  end.
+            end,
+              case constrained_package_versions(DepGraph, Pkg, Constraints) of
+                [] ->
+                  {fail, [{Visited, Constraints}]};
+                missing ->
+                  {missing, Pkg};
+                Res ->
+                  lists_some(F, Res, PathInd)
+              end.
 
 
 %% @doc This gathers the dependency constraints for a given package vsn from the
@@ -777,7 +777,7 @@ find_reachable_packages(ExistingGraph, NewGraph0, PkgName) ->
                     NewGraph1 = gb_trees:insert(PkgName, Info, NewGraph0),
                     rewrite_vsns(ExistingGraph, NewGraph1, Info);
                 none ->
-				  NewGraph1 = gb_trees:insert(PkgName, [{{missing},[]}],NewGraph0), %{error, {unreachable_package, PkgName}}
+                  NewGraph1 = gb_trees:insert(PkgName, [{{missing},[]}],NewGraph0), %{error, {unreachable_package, PkgName}}
                     rewrite_vsns(ExistingGraph, NewGraph1, [{{missing},[]}])
             end
     end.
