@@ -26,12 +26,18 @@ following information:
 
 {
     "chef": {
-        "chef_server_url": "https://opsmaster-api.opscode.us/organizations/preprod",
-        "node_name": <YOUR_OPSMASTER_ACCOUNT_NAME>,
-        "client_key": <PATH_TO_YOUR_OPSMASTER_SSH_KEY>
+      "chef_server_url": "https://opsmaster-api.opscode.us/organizations/preprod",
+      "node_name": <YOUR_OPSMASTER_ACCOUNT_NAME>,
+      "client_key": <PATH_TO_YOUR_OPSMASTER_SSH_KEY>
+    },
+    "ssl": {
+      "verify": false
+      }
     }
 }
 ```
+
+The `ssl` directive is important!
 
 Also, while we still have a monolithic [chef repo][], we'll need to
 refer to our platform roles and data bags in order to replicate our
@@ -48,46 +54,57 @@ The following environmental variable is used for locating local cookbooks
 (however, even if no local cookbooks are used and the variable is empty or
 pointing at an empty directory, it's still required):
 
-export OPSCODE_COOKBOOKS=/path/to/working/cookbooks
+    export OPSCODE_COOKBOOKS=/path/to/working/cookbooks
 
 Also, the following environmental variable must point to all the opscode
 cookbooks being worked on (i.e., oc_bifrost, etc. which are mounted into
 the VM):
 
-export OPSCODE_SRC=/path/to/src/oc/
+    export OPSCODE_SRC=/path/to/src/oc/
 
 Now you're ready to grab all the dependencies.  We're installing
 binary stubs into `bin` to ensure everything is as self-contained as
 possible.
 
+The `Vagrantfile` will only work for the latest installer-based
+versions of Vagrant.  If you do not already have this, please download
+it from http://downloads.vagrantup.com.  Note that it __will not
+work__ with earlier gem-based versions of Vagrant!  Please see
+[these instructions](doc/vagrant.md) for help in transitioning.
+
+You'll need to set up the Berkshelf plugin for Vagrant:
+
+    /usr/bin/vagrant plugin install vagrant-berkshelf
+
+Now, to fire up and provision all the VMs:
+
 ```
-bundle install --binstubs
+/usr/bin/vagrant up
 ```
 
-Now, to fire up and provision a VM:
+We currently have 3 VMs:
 
-```
-bin/vagrant up
-```
+- `db`: the database server
+- `api`: the API server
+- `metrics`: an estatsd / graphite / gdash server, useful for
+  developing graphs for Bifrost.
 
-Go muck around on the machine now:
+Remember: you can interact with each VM individually by providing its name, e.g.:
 
-```
-bin/vagrant ssh
-```
+    /usr/bin/vagrant up db
+
+Go muck around on a specific machine now:
+
+    /usr/bin/vagrant ssh db
 
 To re-run `chef-client` on your test machine:
 
-```
-bin/vagrant provision
-```
+    /usr/bin/vagrant provision db
 
 If you screw something up horribly, just destroy the machine and start
 again:
 
-```
-bin/vagrant destroy
-```
+    /usr/bin/vagrant destroy db
 
 Eventually, we'll be adding Test Kitchen support for running
 [oc-bifrost-pedant][] and our pgTAP database schema tests.
@@ -131,9 +148,8 @@ The executive summary is this:
 BUMP=patch make prepare_release && rebar commit-release && rebar tag-release
 ```
 
-Substitute `minor` or `major` for `BUMP` as necessary.  This should
-only be done on the `release` branch, as the presence of the
-`USE_REBAR_LOCKED` on `master` will cause all subsequent builds to use
-the locked dependencies.
+Substitute `minor` or `major` for `BUMP` as necessary.  Note that the
+presence of the `USE_REBAR_LOCKED` on `master` will cause all
+subsequent builds to use the locked dependencies.
 
 [rebar_lock_deps_plugin]:https://github.com/seth/rebar_lock_deps_plugin
