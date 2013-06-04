@@ -10,7 +10,7 @@ nrpe_etc_dir = File.join(nrpe_dir, "etc")
 nrpe_bin_dir = File.join(nrpe_dir, "bin")
 nrpe_log_dir = node['private_chef']['nrpe']['log_directory']
 
-[ 
+[
   nrpe_dir,
   nrpe_etc_dir,
   nrpe_bin_dir,
@@ -44,8 +44,8 @@ end
 runit_service "nrpe" do
   options({
     :log_directory => nrpe_log_dir,
-    :svlogd_size => node['private_chef']['nrpe']['svlogd_size'],
-    :svlogd_num  => node['private_chef']['nrpe']['svlogd_num']
+    :svlogd_size => node['private_chef']['nrpe']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['nrpe']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 

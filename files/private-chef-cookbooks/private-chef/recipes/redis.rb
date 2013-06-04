@@ -48,8 +48,8 @@ runit_service "redis" do
   down node['private_chef']['redis']['ha']
   options({
     :log_directory => redis_log_dir,
-    :svlogd_size => node['private_chef']['rabbitmq']['svlogd_size'],
-    :svlogd_num  => node['private_chef']['rabbitmq']['svlogd_num']
+    :svlogd_size => node['private_chef']['redis']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['redis']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 

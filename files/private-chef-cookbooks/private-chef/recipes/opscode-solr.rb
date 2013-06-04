@@ -89,8 +89,8 @@ runit_service "opscode-solr" do
   down node['private_chef']['opscode-solr']['ha']
   options({
     :log_directory => solr_log_dir,
-    :svlogd_size => node['private_chef']['opscode-solr']['svlogd_size'],
-    :svlogd_num  => node['private_chef']['opscode-solr']['svlogd_num']
+    :svlogd_size => node['private_chef']['opscode-solr']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['opscode-solr']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 

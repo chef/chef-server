@@ -95,8 +95,8 @@ runit_service "opscode-chef" do
   down node['private_chef']['opscode-chef']['ha']
   options({
     :log_directory => private_chef_api_log_dir,
-    :svlogd_size => node['private_chef']['opscode-chef']['svlogd_size'],
-    :svlogd_num  => node['private_chef']['opscode-chef']['svlogd_num']
+    :svlogd_size => node['private_chef']['opscode-chef']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['opscode-chef']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 

@@ -72,8 +72,8 @@ runit_service "opscode-authz" do
   down node['private_chef']['opscode-authz']['ha']
   options({
     :log_directory => opscode_authz_log_dir,
-    :svlogd_size => node['private_chef']['opscode-authz']['svlogd_size'],
-    :svlogd_num  => node['private_chef']['opscode-authz']['svlogd_num']
+    :svlogd_size => node['private_chef']['opscode-authz']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['opscode-authz']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 

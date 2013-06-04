@@ -139,8 +139,8 @@ runit_service "postgresql" do
   control(['t'])
   options({
     :log_directory => postgresql_log_dir,
-    :svlogd_size => node['private_chef']['postgresql']['svlogd_size'],
-    :svlogd_num  => node['private_chef']['postgresql']['svlogd_num']
+    :svlogd_size => node['private_chef']['postgresql']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['postgresql']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 

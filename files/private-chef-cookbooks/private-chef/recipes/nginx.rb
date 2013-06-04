@@ -149,8 +149,8 @@ runit_service "nginx" do
   down node['private_chef']['nginx']['ha']
   options({
     :log_directory => nginx_log_dir,
-    :svlogd_size => node['private_chef']['nginx']['svlogd_size'],
-    :svlogd_num  => node['private_chef']['nginx']['svlogd_num']
+    :svlogd_size => node['private_chef']['nginx']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['nginx']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 
