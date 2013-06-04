@@ -66,38 +66,11 @@ Now you're ready to grab all the dependencies.  We're installing
 binary stubs into `bin` to ensure everything is as self-contained as
 possible.
 
-Our `Vagrantfile` is geared for the latest installer-based versions.
-If you do not already have this, please download the latest from
-http://downloads.vagrantup.com.  Note that it __will not work__ with
-earlier gem-based versions of Vagrant!
-
-If you used earlier versions of this process with `bundle install
---binstubs`, go ahead and delete the `bin` directory now; you will not
-need it anymore, and it will probably just confuse things and bring
-you much woe and heartache.  Nobody needs that.
-
-If you still have old gem-based vagrant on your system, and you
-use RBEnv, you may have some shims around.  Since `opscode-dev-vm` is
-still using the old Vagrant, you probably don't want to remove your
-vagrant gem and nuke your shim just yet (you could do a `bundle
-install --binstubs` in `opscode-dev-vm` if you wanted to, but I
-digress).  To ensure you're using the installer-based Vagrant, you can
-invoke it directly using `/usr/bin/vagrant` and remove all doubt.
-
-Due to incompatibilities between the on-disk representation of
-Vagrant boxes for the gem-based and installer-based Vagrant, you may
-run into issues if you need to continue to use both versions of
-Vagrant.  The first time you run the installer-based Vagrant, it will
-notify you that it will update the format of your existing boxes.  If
-you accept this, these boxes will no longer work with the gem-based
-Vagrant.  However, there is an environment variable (`VAGRANT_HOME`)
-that you can set which will enable you to use different directories
-for the different Vagrants.  If you update your boxes for
-installer-based Vagrant (recommended), you'll need to set
-`VAGRANT_HOME` to point to somewhere other than `~/.vagrant.d` when
-using gem-based Vagrant in the future; if you don't update the boxes,
-you'll need to set `VAGRANT_HOME` when running the installer-based
-Vagrant.  The choice is yours.
+The `Vagrantfile` will only work for the latest installer-based
+versions of Vagrant.  If you do not already have this, please download
+it from http://downloads.vagrantup.com.  Note that it __will not
+work__ with earlier gem-based versions of Vagrant!  Please see
+[these instructions](doc/vagrant.md) for help in transitioning.
 
 You'll need to set up the Berkshelf plugin for Vagrant:
 
