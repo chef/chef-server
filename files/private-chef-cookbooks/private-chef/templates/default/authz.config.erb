@@ -5,14 +5,14 @@
          {sasl_error_logger, {file, "<%= File.join(@log_directory, 'sasl-error.log') %>"}},
          {errlog_type, error},
          {error_logger_mf_dir, "<%= File.join(@log_directory, 'sasl') %>"},      % Log directory
-         {error_logger_mf_maxbytes, 104857600},   % 10 MB max file size
-         {error_logger_mf_maxfiles, 5}           % 5 files max
+         {error_logger_mf_maxbytes, <%= @log_rotation['file_maxbytes'] %>},
+         {error_logger_mf_maxfiles, <%= @log_rotation['num_to_keep'] %>}
         ]},
  {fast_log, [
              {loggers, [[{name, authz},
                          {file, "<%= File.join(@log_directory, 'authz.log') %>"},
-                         {files, 5},
-                         {file_size, 50}]]}
+                         {files, <%= @log_rotation['num_to_keep'] %>},
+                         {file_size, <%= (@log_rotation['file_maxbytes'].to_f/1024/1024).round %>}]]}
             ]},
  {authorization, [{couchdb_ip, {"<%= node['private_chef']['couchdb']['vip'] %>", <%= node['private_chef']['couchdb']['port'] %>}},
                   {authz_db_name, "authorization"},
