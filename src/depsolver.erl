@@ -143,7 +143,7 @@
 -type constraints() :: [constraint()].
 -type ordered_constraints() :: [{pkg_name(), constraints()}].
 -type fail_info() :: {[pkg()], ordered_constraints()}.
--type fail_detail() :: {fail, [fail_info()]}.
+-type fail_detail() :: {fail, [fail_info()]} | {missing, pkg_name()}.
 -type version_checker() :: fun((vsn()) -> fail_detail() | vsn()).
 
 %%============================================================================
@@ -618,7 +618,7 @@ valid_version(PkgName, Vsn, PkgConstraints) ->
 %% Given a Package Name and a set of constraints get a list of package
 %% versions that meet all constraints.
 -spec constrained_package_versions(dep_graph(),pkg_name(),constraints()) ->
-                                          [vsn()].
+                                          [vsn()] | missing.
 constrained_package_versions(State, PkgName, PkgConstraints) ->
     Versions = get_versions(State, PkgName),
     Result = [Vsn || Vsn <- Versions, valid_version(PkgName, Vsn, PkgConstraints)],

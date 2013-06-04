@@ -213,7 +213,7 @@ strip_goal(Else) ->
 
 -spec extract_culprit_information0(depsolver:constraints(),
                              [depsolver:fail_info()]) ->
-                                           [term()].
+							 [term()] | {missing, depsolver:pkg_name()}.
 extract_culprit_information0(ActiveCons, FailInfo)
   when is_list(FailInfo) ->
     [extract_culprit_information1(ActiveCons, FI) || FI <- FailInfo].
