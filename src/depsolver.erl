@@ -147,6 +147,10 @@
 -type version_checker() :: fun((vsn()) -> fail_detail() | vsn()).
 
 %%============================================================================
+%% Macros
+%%============================================================================
+-define(DEFAULT_TIMEOUT, 2000).
+%%============================================================================
 %% API
 %%============================================================================
 %% @doc create a new empty dependency graph
@@ -238,7 +242,7 @@ add_package_version(State, Pkg, Vsn) ->
 -spec solve(t(),[constraint()]) -> {ok, [pkg()]} | {error, term()}.
 solve({?MODULE, DepGraph0}, RawGoals)
   when erlang:length(RawGoals) > 0 ->
-solve(DepGraph0, RawGoals, 2000).
+solve(DepGraph0, RawGoals, ?DEFAULT_TIMEOUT).
 
 solve(DepGraph0, RawGoals, Timeout)
   when erlang:length(RawGoals) > 0 ->
