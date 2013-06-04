@@ -29,9 +29,15 @@ following information:
       "chef_server_url": "https://opsmaster-api.opscode.us/organizations/preprod",
       "node_name": <YOUR_OPSMASTER_ACCOUNT_NAME>,
       "client_key": <PATH_TO_YOUR_OPSMASTER_SSH_KEY>
+    },
+    "ssl": {
+      "verify": false
+      }
     }
 }
 ```
+
+The `ssl` directive is important!
 
 Also, while we still have a monolithic [chef repo][], we'll need to
 refer to our platform roles and data bags in order to replicate our
