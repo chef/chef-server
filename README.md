@@ -76,7 +76,7 @@ If you used earlier versions of this process with `bundle install
 need it anymore, and it will probably just confuse things and bring
 you much woe and heartache.  Nobody needs that.
 
-Also, if you still have old gem-based vagrant on your system, and you
+If you still have old gem-based vagrant on your system, and you
 use RBEnv, you may have some shims around.  Since `opscode-dev-vm` is
 still using the old Vagrant, you probably don't want to remove your
 vagrant gem and nuke your shim just yet (you could do a `bundle
@@ -84,7 +84,22 @@ install --binstubs` in `opscode-dev-vm` if you wanted to, but I
 digress).  To ensure you're using the installer-based Vagrant, you can
 invoke it directly using `/usr/bin/vagrant` and remove all doubt.
 
-Also, you'll need to set up the Berkshelf plugin for Vagrant:
+Due to incompatibilities between the on-disk representation of
+Vagrant boxes for the gem-based and installer-based Vagrant, you may
+run into issues if you need to continue to use both versions of
+Vagrant.  The first time you run the installer-based Vagrant, it will
+notify you that it will update the format of your existing boxes.  If
+you accept this, these boxes will no longer work with the gem-based
+Vagrant.  However, there is an environment variable (`VAGRANT_HOME`)
+that you can set which will enable you to use different directories
+for the different Vagrants.  If you update your boxes for
+installer-based Vagrant (recommended), you'll need to set
+`VAGRANT_HOME` to point to somewhere other than `~/.vagrant.d` when
+using gem-based Vagrant in the future; if you don't update the boxes,
+you'll need to set `VAGRANT_HOME` when running the installer-based
+Vagrant.  The choice is yours.
+
+You'll need to set up the Berkshelf plugin for Vagrant:
 
     /usr/bin/vagrant plugin install vagrant-berkshelf
 
