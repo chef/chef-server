@@ -604,9 +604,14 @@ missing2_test_() ->
 	 %% Current implementation fails on first missing package.  This is a
 	 %% compromise solution until depsolver can be enhanced to handle this
 	 %% better.
-     %?_assertEqual({ok,[{app2,{{0,2},{[],[]}}},{app1,{{0,4},{[],[]}}}]},
-	 ?_assertEqual({error, {unreachable_package, noapp}},
-                   depsolver:solve(Dom0, [{app1, "0.4"}]))
+     ?_assertEqual({ok,[{app2,{{0,2},{[],[]}}},{app1,{{0,4},{[],[]}}}]},
+	 %?_assertEqual({error, {unreachable_package, noapp}},
+                   depsolver:solve(Dom0, [{app1, "0.4"}])),
+
+     %% should end up with app1 0.3, app2 0.4
+     ?_assertEqual({ok,[{app2,{{0,2},{[],[]}}},{app1,{{0,4},{[],[]}}}]},
+     %?_assertEqual({ok,[{app2,{{0,4},{[],[]}}},{app1,{{0,3},{[],[]}}}]},
+                  depsolver:solve(Dom0, [{app1, "0.4", '<='}]))
     ].
 %%
 %% Internal functions
