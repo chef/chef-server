@@ -95,22 +95,16 @@ Remember: you can interact with each VM individually by providing its name, e.g.
 
 Go muck around on a specific machine now:
 
-```
-bin/vagrant ssh db
-```
+    /usr/bin/vagrant ssh db
 
 To re-run `chef-client` on your test machine:
 
-```
-bin/vagrant provision db
-```
+    /usr/bin/vagrant provision db
 
 If you screw something up horribly, just destroy the machine and start
 again:
 
-```
-bin/vagrant destroy db
-```
+    /usr/bin/vagrant destroy db
 
 Eventually, we'll be adding Test Kitchen support for running
 [oc-bifrost-pedant][] and our pgTAP database schema tests.
