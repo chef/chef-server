@@ -238,6 +238,12 @@ add_package_version(State, Pkg, Vsn) ->
 solve({?MODULE, DepGraph0}, RawGoals)
   when erlang:length(RawGoals) > 0 ->
     Goals = [fix_con(Goal) || Goal <- RawGoals],
+case lists:filter(fun (Goal) ->
+		PkgName = dep_pkg(Goal),
+		contains_package_version(DepGraph0, PkgName) == false
+	end,
+	Goals) of
+	[] ->
     case trim_unreachable_packages(DepGraph0, Goals) of
         Error = {error, _} ->
             Error;
@@ -251,7 +257,10 @@ solve({?MODULE, DepGraph0}, RawGoals)
                 Solution ->
                     {ok, Solution}
             end
-    end.
+    end;
+	[MissingPackage | _] ->
+	  {error, {unreachable_package, dep_pkg(MissingPackage)}}
+  end.
 
 %% Parse a string version into a tuple based version
 -spec parse_version(raw_vsn() | vsn()) -> vsn().
@@ -438,12 +447,13 @@ new_constraints() ->
                              [pkg()] | fail_detail().
 primitive_solve(State, PackageList, PathInd)
   when erlang:length(PackageList) > 0 ->
-    Constraints = lists:foldl(fun(Info, Acc) ->
-                                      add_constraint('_GOAL_', 'NO_VSN', Acc, Info)
-                              end, new_constraints(), PackageList),
+	  Constraints = lists:foldl(fun(Info, Acc) ->
+										add_constraint('_GOAL_', 'NO_VSN', Acc, Info)
+								end, new_constraints(), PackageList),
 
-    Pkgs = lists:map(fun dep_pkg/1, PackageList),
-    all_pkgs(State, [], Pkgs, Constraints, PathInd).
+	  Pkgs = lists:map(fun dep_pkg/1, PackageList),
+	  all_pkgs(State, [], Pkgs, Constraints, PathInd).
+
 
 %% @doc
 %% given a Pkg | {Pkg, Vsn} | {Pkg, Vsn, Constraint} return Pkg
@@ -592,7 +602,6 @@ valid_version(PkgName, Vsn, PkgConstraints) ->
 constrained_package_versions(State, PkgName, PkgConstraints) ->
     Versions = get_versions(State, PkgName),
     Result = [Vsn || Vsn <- Versions, valid_version(PkgName, Vsn, PkgConstraints)],
-	io:format("Result ~p", [Result]),
 	case Result of
 	  [{missing}] ->
 		missing;

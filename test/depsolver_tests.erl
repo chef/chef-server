@@ -587,6 +587,10 @@ missing2_test_() ->
      ?_assertEqual(UnreachableError,
                   depsolver:solve(Dom0, [{app1, "0.2"}])),
 
+     %% should fail because dep of dep not found
+     ?_assertEqual({error, {unreachable_package, non_existent}},
+                  depsolver:solve(Dom0, [{app1, "0.3"}, {non_existent, "0.0.0"}])),
+
      %% should fail, pkg exists, but not at version
      ?_assertMatch({error, _},
                   depsolver:solve(Dom0, [{app4, "0.1"}])),
