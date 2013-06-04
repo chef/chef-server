@@ -75,6 +75,8 @@ search(State, ActiveCons, [NewCon | Constraints]) ->
 format_error({error, {unreachable_package, AppName}}) ->
     ["Dependency ", format_constraint(AppName), " is specified as a dependency ",
      "but is not reachable by the system.\n"];
+format_error({error, resolution_timeout}) ->
+    ["Dependency graph resulted in a resolution_timeout.\n"];
 format_error({error, {invalid_constraints, Constraints}}) ->
     ["Invalid constraint ", add_s(Constraints), " specified ",
      lists:foldl(fun(Con, "") ->
