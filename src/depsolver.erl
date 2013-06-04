@@ -237,6 +237,9 @@ add_package_version(State, Pkg, Vsn) ->
 -spec solve(t(),[constraint()]) -> {ok, [pkg()]} | {error, term()}.
 solve({?MODULE, DepGraph0}, RawGoals)
   when erlang:length(RawGoals) > 0 ->
+do_solve(DepGraph0, RawGoals, 2000).
+
+do_solve(DepGraph0, RawGoals, Timeout) ->
     Goals = [fix_con(Goal) || Goal <- RawGoals],
 case lists:filter(fun (Goal) ->
 		PkgName = dep_pkg(Goal),
@@ -244,20 +247,31 @@ case lists:filter(fun (Goal) ->
 	end,
 	Goals) of
 	[] ->
+	  Self = self(),
+	  F = fun() ->
     case trim_unreachable_packages(DepGraph0, Goals) of
-        Error = {error, _} ->
-            Error;
-        DepGraph1 ->
-            case primitive_solve(DepGraph1, Goals, no_path) of
-                {fail, _} ->
-                    [FirstCons | Rest] = Goals,
-                    {error, depsolver_culprit:search(DepGraph1, [FirstCons], Rest)};
-				{missing, Pkg} ->
-				  {error, {unreachable_package, Pkg}};
-                Solution ->
-                    {ok, Solution}
-            end
-    end;
+			Error = {error, _} ->
+				Error;
+			DepGraph1 ->
+				case primitive_solve(DepGraph1, Goals, no_path) of
+					{fail, _} ->
+						[FirstCons | Rest] = Goals,
+						Self ! {error, depsolver_culprit:search(DepGraph1, [FirstCons], Rest)};
+					{missing, Pkg} ->
+					  Self ! {error, {unreachable_package, Pkg}};
+					Solution ->
+						Self ! {ok, Solution}
+				end
+		end
+	end,
+	Pid = proc_lib:spawn(F),
+	receive
+	  Result ->
+		Result
+	after Timeout ->
+		exit(Pid, kill),
+		{error, resolution_timeout}
+	end;
 	[MissingPackage | _] ->
 	  {error, {unreachable_package, dep_pkg(MissingPackage)}}
   end.
