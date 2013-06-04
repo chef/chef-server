@@ -94,23 +94,34 @@ Now, to fire up and provision all the VMs:
 /usr/bin/vagrant up
 ```
 
-Go muck around on the machine now:
+We currently have 3 VMs:
+
+- `db`: the database server
+- `api`: the API server
+- `metrics`: an estatsd / graphite / gdash server, useful for
+  developing graphs for Bifrost.
+
+Remember: you can interact with each VM individually by providing its name, e.g.:
+
+    /usr/bin/vagrant up db
+
+Go muck around on a specific machine now:
 
 ```
-bin/vagrant ssh
+bin/vagrant ssh db
 ```
 
 To re-run `chef-client` on your test machine:
 
 ```
-bin/vagrant provision
+bin/vagrant provision db
 ```
 
 If you screw something up horribly, just destroy the machine and start
 again:
 
 ```
-bin/vagrant destroy
+bin/vagrant destroy db
 ```
 
 Eventually, we'll be adding Test Kitchen support for running
