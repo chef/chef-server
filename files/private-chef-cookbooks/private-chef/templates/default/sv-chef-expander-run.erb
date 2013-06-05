@@ -1,3 +1,0 @@
-#!/bin/sh
-exec 2>&1
-exec /opt/opscode/bin/chef-expander -n <%= node['private_chef']['chef-expander']['nodes'] %> -c <%= File.join(node["private_chef"]['chef-expander']['dir'], "etc", "expander.rb") %>
