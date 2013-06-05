@@ -67,7 +67,6 @@ parse_body(Body) ->
         case {ReqId, Collection} of
             {Id, Targets} when is_binary(Id) andalso is_list(Targets) ->
                 case Permission of
-                    % Although the query backend supports "any" perm we don't here (yet?)
                     Perm when Perm =:= create orelse Perm =:= read orelse
                               Perm =:= update orelse Perm =:= delete orelse
                               Perm =:= grant ->
