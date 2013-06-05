@@ -606,7 +606,7 @@ constrained_package_versions(State, PkgName, PkgConstraints) ->
       [{missing}] ->
         missing;
       Result ->
-		[ R || R <- Result, R =/= {missing} ]
+        [ R || R <- Result, R =/= {missing} ]
     end.
 
 %% Given a list of constraints filter said list such that only fail (for things
