@@ -1,11 +1,14 @@
-describe "Bulk Permission Tests", :focus do
+describe "Bulk Permission Tests" do
   let(:easterbunny) { "deaddeaddeaddeaddeaddeaddeaddead" }
   let(:max_headroom) { "deadbeefdeadbeefdeadbeefdeadbeef" }
 
   context "/bulk" do
     # What we are testing:
 
-    # TODO: STUFF HERE
+    # Testing the bulk permission endpoint.  We test POST (there are no other
+    # working HTTP verbs), testing for correctness and responses to malformed
+    # requests, as well as for permissions (i.e., that everyone can access it, since
+    # we don't restrict it).
 
     context "POST" do
       context "sanity tests" do
@@ -255,11 +258,11 @@ describe "Bulk Permission Tests", :focus do
                   "requestor_id" => shatner,
                   "permission" => ace,
                   "type" => type,
-                  "collection" => [zuul, crystal, max_headroom]
+                  "collection" => [zuul, crystal, easterbunny]
                   }
                 post("/bulk", :shatner,
                   :payload => request).should have_status_code(200).
-                  with_body({"unauthorized" => [zuul, max_headroom]})
+                  with_body({"unauthorized" => [zuul, easterbunny]})
               end
             end
 
@@ -340,11 +343,11 @@ describe "Bulk Permission Tests", :focus do
                   "requestor_id" => shatner,
                   "permission" => ace,
                   "type" => type,
-                  "collection" => [zuul, crystal, max_headroom]
+                  "collection" => [zuul, crystal, easterbunny]
                   }
                 post("/bulk", :shatner,
                   :payload => request).should have_status_code(200).
-                  with_body({"unauthorized" => [zuul, max_headroom]})
+                  with_body({"unauthorized" => [zuul, easterbunny]})
               end
             end
 
@@ -424,33 +427,13 @@ describe "Bulk Permission Tests", :focus do
                   "requestor_id" => shatner,
                   "permission" => ace,
                   "type" => type,
-                  "collection" => [zuul, crystal, max_headroom]
+                  "collection" => [zuul, crystal, easterbunny]
                   }
                 post("/bulk", :shatner,
                   :payload => request).should have_status_code(200).
-                  with_body({"unauthorized" => [zuul, max_headroom]})
+                  with_body({"unauthorized" => [zuul, easterbunny]})
               end
             end
-
-
-#            context "an actor indirectly in the #{ace.upcase} ACE" do
-
-#              it "can read the acl" do
-#                body = {
-#                  "create" => {"actors" => [], "groups" => []},
-#                  "read" => {"actors" => [], "groups" => []},
-#                  "update" => {"actors" => [], "groups" => []},
-#                  "delete" => {"actors" => [], "groups" => []},
-#                  "grant" => {"actors" => [], "groups" => []}
-#                }
-#                body[ace] = {"actors" => [], "groups" => [hipsters]}
-
-#                get("/#{type}s/#{gozer}/acl",
-#                    :hasselhoff).should have_status_code(200).with_body(body)
-#              end
-#            end
-#          end
-
           end
         end
       end
