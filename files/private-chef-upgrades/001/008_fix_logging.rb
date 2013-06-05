@@ -39,4 +39,9 @@ define_upgrade do
       run_command("/opt/opscode/embedded/bin/sv force-restart /opt/opscode/sv/#{service}/log")
     end
   end
+
+  # Clean up legacy log retention cron job
+  run_command("rm -f /etc/cron.d/opc_log_cleanup")
+  # Clean up legacy log retention script
+  run_command("rm -f /opt/opscode/bin/opc_log_cleanup")
 end
