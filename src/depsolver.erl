@@ -251,7 +251,7 @@ solve(DepGraph0, RawGoals, Timeout)
     Goals = [fix_con(Goal) || Goal <- RawGoals],
     case find_unreachable_goals(DepGraph0, Goals) of
         [] ->
-			Pid = proc_lib:spawn(depsolver, do_solve, [DepGraph0, Goals, self()]),
+            Pid = proc_lib:spawn(depsolver, do_solve, [DepGraph0, Goals, self()]),
             receive
                 Result ->
                     Result
