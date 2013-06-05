@@ -176,3 +176,29 @@ if node['private_chef']['bootstrap']['enable']
 		retries 20
 	end
 end
+
+# log rotation
+template "/etc/opscode/logrotate.d/nagios" do
+  source "logrotate.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(node['private_chef']['nagios'].to_hash.merge(
+    'owner' => 'opscode-nagios',
+    'group' => 'opscode-nagios'
+  ))
+end
+
+template "/etc/opscode/logrotate.d/php-fpm" do
+  source "logrotate.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(
+    'log_directory' => php_fpm_log_directory,
+    'log_rotation' => {
+      'num_to_keep' => node['private_chef']['nagios']['php_fpm_log_rotation']['num_to_keep'],
+      'file_maxbytes' => node['private_chef']['nagios']['php_fpm_log_rotation']['file_maxbytes']
+    }
+  )
+end

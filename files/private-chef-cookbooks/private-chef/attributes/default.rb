@@ -632,23 +632,6 @@ default['private_chef']['logs']['log_retention'] = {
   "nginx" => 14
 }
 
-default['private_chef']['logs']['log_rotation'] = {
-  "/var/log/opscode/nginx/*.log" => {
-    "rotate" => 14
-  },
-  "/var/log/opscode/php-fpm/php-fpm.log" => {
-    "rotate" => 14
-  },
-  "/var/log/opscode/couchdb/couchdb.log" => {
-    "rotate" => 14,
-    "owner"  => "opscode",
-    "group"  => "opscode"
-  },
-  "/var/log/opscode/nagios/nagios.log" => {
-    "rotate" => 14
-  },
-}
-
 ##
 # LDAP Authentication Integration
 ##

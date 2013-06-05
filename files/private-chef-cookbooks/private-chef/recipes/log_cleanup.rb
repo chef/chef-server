@@ -1,6 +1,7 @@
 #
 # Author:: Lamont Granquist (<lamont@opscode.com>)
-# Copyright:: Copyright (c) 2012 Opscode, Inc.
+# Author:: Seth Chisamore (<schisamo@opscode.com>)
+# Copyright:: Copyright (c) 2012-2013 Opscode, Inc.
 #
 # All Rights Reserved
 #
@@ -38,12 +39,11 @@ template "/etc/opscode/logrotate.conf" do
   mode   "0644"
   owner  "root"
   group  "root"
-  variables(node['private_chef']['logs'].to_hash)
 end
 
-template "/etc/cron.d/opc_logrotate.cron" do
+template "/etc/cron.hourly/opc_logrotate" do
   source "opc_logrotate.cron"
-  mode   "0600"
+  mode   "0755"
   owner  "root"
   group  "root"
 end

@@ -111,3 +111,11 @@ end
 
 add_nagios_hostgroup("couchdb")
 
+# log rotation
+template "/etc/opscode/logrotate.d/couchdb" do
+  source "logrotate.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(node['private_chef']['couchdb'].to_hash)
+end

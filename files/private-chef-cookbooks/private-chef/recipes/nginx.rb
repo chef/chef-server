@@ -165,3 +165,16 @@ add_nagios_hostgroup("nginx")
 add_nagios_hostgroup("lb") if node['private_chef']['lb']['enable']
 
 add_nagios_hostgroup("lb_internal") if node['private_chef']['lb_internal']['enable']
+
+# log rotation
+template "/etc/opscode/logrotate.d/nginx" do
+  source "logrotate.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(node['private_chef']['nginx'].to_hash.merge(
+    'postrotate' => "/opt/opscode/embedded/sbin/nginx -s reopen",
+    'owner' => 'root',
+    'group' => 'root'
+  ))
+end
