@@ -8,6 +8,7 @@
 -export([ping/0,
          acl_membership/4,
          add_to_group/3,
+         bulk_check/3,
          create/3,
          delete/2,
          delete_acl/3,
@@ -60,7 +61,6 @@ create(Type, AuthzId, RequestorId) ->
         {error, Reason} ->
             {error, Reason}
     end.
-
 
 delete_stmt(actor)     -> delete_actor_by_authz_id;
 delete_stmt(container) -> delete_container_by_authz_id;
@@ -133,6 +133,23 @@ delete_acl(TargetType, TargetId, Permission) ->
             ok;
         {error, Reason} ->
             {error, Reason}
+    end.
+
+bulk_permission(actor)     -> bulk_actor_permission;
+bulk_permission(container) -> bulk_container_permission;
+bulk_permission(group)     -> bulk_group_permission;
+bulk_permission(object)    -> bulk_object_permission.
+
+-spec bulk_check(auth_id(), permission(), auth_type()) -> list() | {error, term()}.
+bulk_check(AuthId, Perm, Type) ->
+    BulkStatement = bulk_permission(Type),
+    case select(BulkStatement, [AuthId, Perm], rows_as_scalars, [authz_id]) of
+        {ok, L} when is_list(L) ->
+            L;
+        {ok, none} ->
+            [];
+        {error, Error} ->
+            {error, Error}
     end.
 
 -spec has_permission(auth_type(), auth_id(), auth_id(), permission() | any) ->
