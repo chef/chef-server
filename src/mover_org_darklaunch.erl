@@ -11,6 +11,7 @@
 
 -export([disable_org/1,
          enable_org/1,
+         init_org_to_couch/2,
          org_to_couch/2,
          org_to_sql/2]).
 
@@ -26,6 +27,11 @@ org_to_couch(OrgName, Components) ->
     OrgKey = iolist_to_binary(["dl_org_", OrgName]),
     PropKVs = lists:foldl(fun(X, Accum) -> ["couchdb_" ++ atom_to_list(X), "true" | Accum] end, [], Components),
     send_eredis_q(["HMSET", OrgKey] ++ PropKVs).
+
+init_org_to_couch(OrgName, Components) ->
+    %% Use HSETNX so that couchdb_* flags are set only if it does not already exist
+    OrgKey = iolist_to_binary(["dl_org_", OrgName]),
+    [send_eredis_q(["HSETNX", OrgKey, "couchdb_" ++ atom_to_list(X), "true"]) || X <- Components].
 
 org_to_sql(OrgName, Components) ->
     OrgKey = iolist_to_binary(["dl_org_", OrgName]),

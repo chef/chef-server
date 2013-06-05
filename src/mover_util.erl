@@ -9,9 +9,19 @@
 
 -module(mover_util).
 
--export([reset_org/1,
+-export([populate_xdl_with_unmigrated_orgs/0,
+         reset_org/1,
          reset_orgs/1,
          reset_orgs_from_file/1]).
+
+%% This component list was pulled from dl_default. Check and make sure this is the correct list
+-define(XDL_COMPONENTS, [clients, checksums, cookbooks, data, roles, sandboxes, environments]).
+
+%% @doc Get a list of unmigrated orgs from migration_state_table
+%% and set the xdarklaunch flags
+populate_xdl_with_unmigrated_orgs() ->
+    Orgnames = moser_state_tracker:unmigrated_orgs(),
+    [mover_org_darklaunch:init_org_to_couch(Orgname, ?XDL_COMPONENTS) || Orgname <- Orgnames].
 
 %% @doc delete any SQL data for the named org and reset its state
 %% to indicate it's ready to migrate.
