@@ -47,7 +47,7 @@ user node['private_chef']['postgresql']['username'] do
 end
 
 directory postgresql_log_dir do
-  owner node['private_chef']['postgresql']['username']
+  owner node['private_chef']['user']['username']
   recursive true
 end
 

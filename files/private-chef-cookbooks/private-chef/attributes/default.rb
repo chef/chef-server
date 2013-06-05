@@ -565,6 +565,8 @@ end
 default['private_chef']['keepalived']['enable'] = false
 default['private_chef']['keepalived']['dir'] = "/var/opt/opscode/keepalived"
 default['private_chef']['keepalived']['log_directory'] = "/var/log/opscode/keepalived"
+default['private_chef']['keepalived']['log_rotation']['file_maxbytes'] = 1000000
+default['private_chef']['keepalived']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['keepalived']['smtp_server'] = "127.0.0.1"
 default['private_chef']['keepalived']['smtp_connect_timeout'] = "30"
 default['private_chef']['keepalived']['vrrp_sync_group'] = "PC_GROUP"
