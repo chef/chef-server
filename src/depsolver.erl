@@ -83,7 +83,6 @@
          format_version/1,
          new_graph/0,
          solve/2,
-         solve/3,
          add_packages/2,
          add_package/3,
          add_package_version/3,
@@ -97,7 +96,7 @@
 -export([dep_pkg/1,
          filter_package/2,
          primitive_solve/3,
-         do_solve/3
+         do_solve/2
      ]).
 
 -export_type([t/0,
@@ -244,21 +243,14 @@ add_package_version(State, Pkg, Vsn) ->
 -spec solve(t(),[constraint()]) -> {ok, [pkg()]} | {error, term()}.
 solve({?MODULE, DepGraph0}, RawGoals)
   when erlang:length(RawGoals) > 0 ->
-solve(DepGraph0, RawGoals, ?DEFAULT_TIMEOUT).
+depsolver_supervisor:solve(DepGraph0, RawGoals, ?DEFAULT_TIMEOUT).
 
-solve(DepGraph0, RawGoals, Timeout)
+do_solve(DepGraph0, RawGoals)
   when erlang:length(RawGoals) > 0 ->
     Goals = [fix_con(Goal) || Goal <- RawGoals],
     case find_unreachable_goals(DepGraph0, Goals) of
         [] ->
-            Pid = proc_lib:spawn(depsolver, do_solve, [DepGraph0, Goals, self()]),
-            receive
-                Result ->
-                    Result
-            after Timeout ->
-                    exit(Pid, kill),
-                    {error, resolution_timeout}
-            end;
+            trim_then_solve(DepGraph0, Goals);
         [MissingPackage | _] ->
             {error, {unreachable_package, dep_pkg(MissingPackage)}}
     end.
@@ -781,7 +773,7 @@ contains_package_version(Dom0, PkgName) ->
 find_unreachable_goals(DepGraph0, Goals) ->
     [G || G <- Goals, contains_package_version(DepGraph0, dep_pkg(G)) == false].
 
-do_solve(DepGraph0, Goals, Parent) ->
+trim_then_solve(DepGraph0, Goals) ->
         case trim_unreachable_packages(DepGraph0, Goals) of
             Error = {error, _} ->
                 Error;
@@ -789,10 +781,10 @@ do_solve(DepGraph0, Goals, Parent) ->
                 case primitive_solve(DepGraph1, Goals, no_path) of
                     {fail, _} ->
                         [FirstCons | Rest] = Goals,
-                        Parent ! {error, depsolver_culprit:search(DepGraph1, [FirstCons], Rest)};
+                        {error, depsolver_culprit:search(DepGraph1, [FirstCons], Rest)};
                     {missing, Pkg} ->
-                        Parent ! {error, {unreachable_package, Pkg}};
+                        {error, {unreachable_package, Pkg}};
                     Solution ->
-                        Parent ! {ok, Solution}
+                        {ok, Solution}
                 end
         end.
