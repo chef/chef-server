@@ -29,8 +29,8 @@
 %%============================================================================
 all_test_() ->
   {foreach,
-    fun() -> depsolver_supervisor:start_link() end,
-    fun(_) -> no_op end,
+    fun() -> depsolver_app:start() end,
+    fun(_) -> depsolver_app:stop() end,
     [ 
       {?MODULE, first},
       {?MODULE, second},
@@ -51,10 +51,6 @@ all_test_() ->
       {?MODULE, integration},
       {generator, ?MODULE, format},
       {generator, ?MODULE, missing2}
-%      {?MODULE, FunctionAtom} || {FunctionAtom, Arity} <- ?MODULE:module_info(exports),
-%    Arity == 0,
-%    %string:rstr(atom_to_list(FunctionAtom), "_test") == 0,
-%    Arity == 1
   ]
 }.
 first() ->
