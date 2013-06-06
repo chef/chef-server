@@ -22,7 +22,7 @@
 
 {application, depsolver,
  [{description, "Package Constraint Solver"},
-  {vsn, "0.1.0"},
+  {vsn, "1.0.0"},
   {modules, []},
   {mod, {depsolver_app, []}},
   {applications, [kernel, stdlib, erlware_commons]}]}.
