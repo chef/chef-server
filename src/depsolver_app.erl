@@ -18,11 +18,11 @@
 %% under the License.
 %%
 %%%-------------------------------------------------------------------
-%%% @author Oliver Ferrigni <oliverferrigni@seaof001.local>
+%%% @author Oliver Ferrigni <oliver@opscode.com>
 %%% @doc
 %%%
 %%% @end
-%%% Created :  6 Jun 2013 by Oliver Ferrigni <oliver@opscode.com>
+%%% Created :  5 Jun 2013 by Oliver Ferrigni <oliver@opscode.com>
 %%%-------------------------------------------------------------------
 -module(depsolver_app).
 

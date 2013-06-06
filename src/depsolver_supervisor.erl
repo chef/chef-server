@@ -18,7 +18,7 @@
 %% under the License.
 %%
 %%%-------------------------------------------------------------------
-%%% @author Oliver Ferrigni <oliver@opscode.come>
+%%% @author Oliver Ferrigni <oliver@opscode.com>
 %%% @doc
 %%%
 %%% @end
