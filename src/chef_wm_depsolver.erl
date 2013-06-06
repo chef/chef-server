@@ -240,18 +240,18 @@ handle_depsolver_results(ok, {ok, Cookbooks}, Req, #base_state{chef_db_context =
 
 %% @doc Utility function to remove some of the verbosity
 precondition_failed(Req, State, ErrorData, LogMsg) when is_atom(LogMsg) ->
-    halt(412, Req, State, ErrorData, LogMsg).
+    wm_halt(412, Req, State, ErrorData, LogMsg).
 
 %% @doc Utility function to remove some of the verbosity.  Note that
 %% this is specific to Chef, and has absolutely nothing to do with the
 %% Webmachine callback.
 forbid(Req, State, ErrorData, LogMsg) ->
-    halt(403, Req, State, ErrorData, LogMsg).
+    wm_halt(403, Req, State, ErrorData, LogMsg).
 
 server_error(Req, State, ErrorData, LogMsg) ->
-    halt(500, Req, State, ErrorData, LogMsg).
+    wm_halt(500, Req, State, ErrorData, LogMsg).
 
-halt(Code, Req, State, ErrorData, LogMsg) ->
+wm_halt(Code, Req, State, ErrorData, LogMsg) ->
     {{halt, Code},
      chef_wm_util:with_error_body(Req, ErrorData),
      State#base_state{log_msg = LogMsg}}.
