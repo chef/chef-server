@@ -49,6 +49,7 @@ solve(DepGraph, Goals, Timeout) ->
     catch
         exit:{timeout, _} ->
             supervisor:terminate_child(?SERVER, Pid),
+            supervisor:delete_child(?SERVER, Pid),
             {error, resolution_timeout}
     end.
 %%%===================================================================
