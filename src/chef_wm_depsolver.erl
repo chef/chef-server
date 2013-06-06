@@ -116,9 +116,16 @@ process_post(Req, #base_state{chef_db_context = DbContext,
                                    [OrgName, EnvName, Error]),
             server_error(Req, State, <<"Dependency retrieval failed">>, dep_retrieval_failure);
         AllVersions ->
-            NotFound = not_found_cookbooks(AllVersions, Cookbooks),
-            Deps = chef_depsolver:solve_dependencies(AllVersions, EnvConstraints, Cookbooks),
-            handle_depsolver_results(NotFound, Deps, Req, State)
+            case not_found_cookbooks(AllVersions, Cookbooks) of
+                ok ->
+                    Deps = chef_depsolver:solve_dependencies(AllVersions,
+                                                             EnvConstraints, Cookbooks),
+                    handle_depsolver_results(ok, Deps, Req, State);
+                NotFound ->
+                    %% We ignore Deps result if expanded run list contains missing
+                    %% cookbooks, so no need to call depsolver at all.
+                    handle_depsolver_results(NotFound, ignore, Req, State)
+            end
     end.
 
 %%------------------------------------------------------------------------------
@@ -217,11 +224,11 @@ handle_depsolver_results({not_found, CookbookNames}, _Deps, Req, State) when is_
     precondition_failed(Req, State,
                         not_found_message(cookbook_version, CookbookNames),
                         cookbook_version_not_found);
-handle_depsolver_results(_NotFound, {error, {unreachable_package, Unreachable}}, Req, State) ->
+handle_depsolver_results(ok, {error, {unreachable_package, Unreachable}}, Req, State) ->
     precondition_failed(Req, State,
                         not_reachable_message(Unreachable),
                         not_reachable_dep);
-handle_depsolver_results(_NotFound, {error, _} = Ret, Req, State) ->
+handle_depsolver_results(ok, {error, _} = Ret, Req, State) ->
     precondition_failed(Req, State,
                         unable_to_solve_message(Ret),
                         unable_to_solve_deps);
