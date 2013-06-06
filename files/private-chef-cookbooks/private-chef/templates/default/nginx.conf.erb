@@ -50,7 +50,7 @@ http {
         include <%= @chef_http_config %>;
       <%- else -%>
           server {
-            listen <%= @non_ssl_port %>;
+            listen <%= @helper.listen_port('http') %>;
             server_name <%= @server_name %>;
             access_log /var/log/opscode/nginx/rewrite-port-80.log;
             rewrite ^(.*) https://$server_name$1 permanent;
@@ -65,7 +65,7 @@ http {
   # internal lb config for Chef API Services
   <%- if node['private_chef']['lb_internal']['enable'] -%>
   server {
-    listen <%= node['private_chef']['lb_internal']['chef_port'] %>;
+    listen <%= @helper.listen_port(node['private_chef']['lb_internal']['chef_port']) %>;
     # The name doesn't matter; this is the only listener on this port
     server_name <%= node['fqdn'] %>;
 
@@ -138,7 +138,7 @@ http {
 
   # internal service access for opscode-account
   server {
-    listen <%= node['private_chef']['lb_internal']['account_port'] %>;
+    listen <%= @helper.listen_port(node['private_chef']['lb_internal']['account_port']) %>;
     # The name doesn't matter; this is the only listener on this port
     server_name <%= node['fqdn'] %>;
 
@@ -163,7 +163,7 @@ http {
 
   # internal service access for opscode-authz
   server {
-    listen <%= node['private_chef']['lb_internal']['authz_port'] %>;
+    listen <%= @helper.listen_port(node['private_chef']['lb_internal']['authz_port']) %>;
     server_name <%= node['fqdn'] %>;
 
     client_max_body_size <%= @client_max_body_size %>;
@@ -189,7 +189,7 @@ http {
   <%- if node['private_chef']['nagios']['enable'] -%>
   # nagios server
   server {
-    listen   <%= node['private_chef']['nagios']['port'] %>;
+    listen <%= @helper.listen_port(node['private_chef']['nagios']['port']) %>;
     server_name <%= node['fqdn'] %>;
 
     access_log /var/log/opscode/nginx/nagios.access.log;

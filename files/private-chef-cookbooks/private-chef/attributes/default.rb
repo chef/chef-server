@@ -300,6 +300,7 @@ default['private_chef']['nginx']['gzip_types'] = [ "text/plain", "text/css", "ap
 default['private_chef']['nginx']['keepalive_timeout'] = 65
 default['private_chef']['nginx']['client_max_body_size'] = '250m'
 default['private_chef']['nginx']['cache_max_size'] = '5000m'
+default['private_chef']['nginx']['enable_ipv6'] = false
 
 ###
 # MySQL
