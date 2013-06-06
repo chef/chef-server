@@ -224,6 +224,10 @@ handle_depsolver_results({not_found, CookbookNames}, _Deps, Req, State) when is_
     precondition_failed(Req, State,
                         not_found_message(cookbook_version, CookbookNames),
                         cookbook_version_not_found);
+handle_depsolver_results(ok, {error, resolution_timeout}, Req, State) ->
+        precondition_failed(Req, State,
+                            timeout_message(),
+                            solve_timeout);
 handle_depsolver_results(ok, {error, {unreachable_package, Unreachable}}, Req, State) ->
     precondition_failed(Req, State,
                         not_reachable_message(Unreachable),
@@ -310,6 +314,11 @@ not_reachable_message(CookbookName) ->
                                ", which does not exist."]),
     {[{<<"message">>, Reason},
       {<<"non_existent_cookbooks">>, [ CookbookName ]},
+      {<<"most_constrained_cookbooks">>,[]}]}.
+
+timeout_message() ->
+    {[{<<"message">>, <<"unable to solve dependencies in alotted time">>},
+      {<<"non_existent_cookbooks">>, []},
       {<<"most_constrained_cookbooks">>,[]}]}.
 
 %% Main entry point for parsing the depsolver error structure
