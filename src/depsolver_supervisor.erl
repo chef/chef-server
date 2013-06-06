@@ -35,12 +35,6 @@
 start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 solve(DepGraph, Goals, Timeout) ->
-    case erlang:whereis(?SERVER) of
-      undefined ->
-        start_link();
-      _ ->
-        ok
-    end,
     {ok, Pid} = supervisor:start_child(?SERVER,[]),
     try
         Result = depsolver_worker:solve(Pid, DepGraph, Goals, Timeout),

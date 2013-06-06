@@ -25,7 +25,7 @@
 %%-------------------------------------------------------------------
 -module(depsolver_tester).
 
--export([run_data/1, run_log/1]).
+-compile([export_all]).
 -include_lib("eunit/include/eunit.hrl").
 
 -define(ADD_PKG, "^DepSelector\\sinst#\\s(\\d+)\\s-\\s"
@@ -47,8 +47,26 @@ run_data(FileName) ->
 run_log(FileName) ->
     {ok, Device} = file:open(FileName, [read]),
     run_log_file(Device).
-
-data1_test() ->
+all_test_() ->
+  {foreach,
+    fun() -> depsolver_supervisor:start_link() end,
+    fun(_) -> no_op end,
+    [ 
+      {?MODULE, data1},
+      {?MODULE, data2},
+      {?MODULE, data3},
+      {?MODULE, data4},
+      {?MODULE, data5},
+      {?MODULE, data6},
+      {?MODULE, log_07be9e47},
+      {?MODULE, log_183998c1},
+      {?MODULE, log_311a15e7},
+      {?MODULE, log_382cfe5b},
+      {?MODULE, log_d3564ef6},
+      {?MODULE, log_ea2d264b}
+  ]
+}.
+data1() ->
     ExpectedResult = versionify([{"app6","0.0.1"},
                                  {"dep_pkg13","0.0.2"},
                                  {"app13","0.0.1"},
@@ -59,7 +77,7 @@ data1_test() ->
     ?assertMatch({ok, ExpectedResult},
                  run_data(fix_rebar_brokenness("data1.txt"))).
 
-data2_test() ->
+data2() ->
     ExpectedResult = versionify([{"app18","0.0.1"},
                                  {"app4","0.0.1"},
                                  {"app1","0.0.1"},
@@ -75,7 +93,7 @@ data2_test() ->
     ?assertMatch({ok, ExpectedResult},
                  run_data(fix_rebar_brokenness("data2.txt"))).
 
-data3_test() ->
+data3() ->
     ExpectedResult = versionify([{"app68","0.0.1"},
                                  {"app58","0.0.1"},
                                  {"app48","0.0.7"},
@@ -95,7 +113,7 @@ data3_test() ->
                                  {"dep_pkg16","1.0.2"}]),
     ?assertMatch({ok,ExpectedResult}, run_data(fix_rebar_brokenness("data3.txt"))).
 
-data4_test() ->
+data4() ->
     ExpectedResult = versionify([{"dep_pkg20","0.0.2"},
                                  {"app78","0.0.1"},
                                  {"app68","0.0.1"},
@@ -118,7 +136,7 @@ data4_test() ->
     ?assertMatch({ok, ExpectedResult},
                  run_data(fix_rebar_brokenness("data4.txt"))).
 
-data5_test() ->
+data5() ->
     ExpectedResult = versionify([{"dep_pkg14","0.0.2"},
                                  {"dep_pkg22","0.0.2"},
                                  {"dep_pkg20","0.0.2"},
@@ -143,7 +161,7 @@ data5_test() ->
     ?assertMatch({ok, ExpectedResult},
                  run_data(fix_rebar_brokenness("data5.txt"))).
 
-data6_test() ->
+data6() ->
     ExpectedResult = versionify([{"app108","0.0.1"},
                                  {"app98","0.0.1"},
                                  {"app88","0.0.1"},
@@ -171,7 +189,7 @@ data6_test() ->
     ?assertMatch({ok, ExpectedResult},
                  run_data(fix_rebar_brokenness("data6.txt"))).
 
-log_07be9e47_test() ->
+log_07be9e47() ->
     Data = run_log(fix_rebar_brokenness("log-07be9e47-6f42-4a5d-b8b5-1d2eae1ad83b.txt")),
     ExpectedResult = versionify([{"0","0"},
                                   {"1","0"},
@@ -199,12 +217,12 @@ log_07be9e47_test() ->
     ?assertMatch({ok, ExpectedResult},
                  Data).
 
-log_183998c1_test() ->
+log_183998c1() ->
     ?assertMatch({error, {unreachable_package,<<"9">>}},
                  run_log(fix_rebar_brokenness("log-183998c1-2ada-4214-b308-e480345c42f2.txt"))).
 
 
-log_311a15e7_test() ->
+log_311a15e7() ->
     {ok, Data} = run_log(fix_rebar_brokenness("log-311a15e7-3378-4c5b-beb7-86a1b9cf0ea9.txt")),
     ExpectedResult = lists:sort(versionify([{"45", "22"},
                                             {"40","1"},
@@ -250,7 +268,7 @@ log_311a15e7_test() ->
                                             {"20","0"}])),
     ?assertMatch(ExpectedResult, lists:sort(Data)).
 
-log_382cfe5b_test() ->
+log_382cfe5b() ->
     {ok, Data} =
         run_log(fix_rebar_brokenness("log-382cfe5b-0ac2-48b8-83d1-717cb4620990.txt")),
     ExpectedResult = lists:sort(versionify([{"18","0"},
@@ -268,7 +286,7 @@ log_382cfe5b_test() ->
                                             {"0","0"}])),
     ?assertMatch(ExpectedResult, lists:sort(Data)).
 
-log_d3564ef6_test() ->
+log_d3564ef6() ->
     {ok, Data} = run_log(fix_rebar_brokenness("log-d3564ef6-6437-41e7-90b6-dbdb849551a6_mod.txt")),
     ExpectedResult = lists:sort(versionify([{"57","5"},
                                             {"56","3"},
@@ -326,7 +344,7 @@ log_d3564ef6_test() ->
                                             {"30","2"}])),
     ?assertMatch(ExpectedResult, lists:sort(Data)).
 
-log_ea2d264b_test() ->
+log_ea2d264b() ->
     {ok, Data} = run_log(fix_rebar_brokenness("log-ea2d264b-003e-4611-94ed-14efc7732083.txt")),
     ExpectedResult = lists:sort(versionify([{"18","1"},
                                             {"17","0"},
