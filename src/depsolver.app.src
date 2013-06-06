@@ -25,4 +25,4 @@
   {vsn, "1.0.0"},
   {modules, []},
   {mod, {depsolver_app, []}},
-  {applications, [kernel, stdlib, erlware_commons]}]}.
+  {applications, [kernel, stdlib]}]}.

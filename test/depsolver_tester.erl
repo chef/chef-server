@@ -49,8 +49,11 @@ run_log(FileName) ->
     run_log_file(Device).
 all_test_() ->
   {foreach,
-    fun() -> depsolver_app:start() end,
-    fun(_) -> depsolver_app:stop() end,
+    fun() ->
+        error_logger:delete_report_handler(error_logger_tty_h),
+        application:start(depsolver)
+    end,
+    fun(_) -> application:stop(depsolver) end,
     [ 
       {?MODULE, data1},
       {?MODULE, data2},
