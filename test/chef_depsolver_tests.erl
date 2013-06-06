@@ -25,7 +25,25 @@
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
 -include_lib("chef_objects/include/chef_osc_defaults.hrl").
-
+-compile([export_all]).
+all_test_() ->
+  {foreach,
+    fun() ->
+        error_logger:delete_report_handler(error_logger_tty_h),
+        application:start(depsolver)
+    end,
+    fun(_) -> application:stop(depsolver) end,
+    [
+        {?MODULE, depsolver_dep_empty_world},
+        {?MODULE, depsolver_dep_no_version},
+        {?MODULE, depsolver_dep_doesnt_exist},
+        {?MODULE, depsolver_dep_not_new_enough},
+        {?MODULE, depsolver_impossible_dependency},
+        {generator, ?MODULE, depsolver_environment_respected},
+        {?MODULE, depsolver_impossible_dependency_via_environment},
+        {?MODULE, depsolver_complex_dependency}
+  ]
+}.
 %% Contains all allowed variants of run list items
 good_runlist() ->
     {[ {<<"run_list">>, [<<"ntp">>, <<"recipe[ntp]">>, <<"recipe[apache2::default]">>, <<"role[foo]">>]} ]}.
@@ -105,19 +123,19 @@ cookbook(Name, Version, Dep = {_Name, _Version}) ->
 cookbook(Name, Version, Dep = {_Name, _Version, _Reln}) ->
     {Name, [{Version, [ Dep ] }] }.
 
-depsolver_dep_empty_deps_test() ->
+depsolver_dep_empty_deps() ->
     World = [ ],
     Constraints = [ ],
     Ret = chef_depsolver:solve_dependencies(World, Constraints, []),
     ?assertEqual({ok, []}, Ret).
 
-depsolver_dep_empty_world_test() ->
+depsolver_dep_empty_world() ->
     World = [ ],
     Constraints = [ ],
     Ret = chef_depsolver:solve_dependencies(World, Constraints, [<<"foo">>]),
     ?assertEqual({error, {unreachable_package, <<"foo">>}}, Ret).
 
-depsolver_dep_no_version_test() ->
+depsolver_dep_no_version() ->
     World = [ cookbook(<<"foo">>, <<"1.2.3">>)],
     Constraints = [ ],
     Ret = chef_depsolver:solve_dependencies(World, Constraints, [{<<"foo">>, <<"2.0.0">>}]),
@@ -139,11 +157,13 @@ depsolver_dep_no_version_test() ->
 %% "non_existent_cookbooks":["bar"],"
 %% "most_constrained_cookbooks":[]}"
 %%
-depsolver_dep_doesnt_exist_test() ->
+depsolver_dep_doesnt_exist() ->
     World = [ cookbook(<<"foo">>, <<"1.2.3">>, {<<"bar">>, <<"2.0.0">>, gt})],
     Constraints = [],
     Ret = chef_depsolver:solve_dependencies(World, Constraints, [<<"foo">>]),
-    ?assertEqual({error, {unreachable_package, <<"bar">>}}, Ret).
+    ?assertEqual({error,
+            [{[{[<<102,111,111>>],[{<<102,111,111>>,{{1,2,3},{[],[]}}}]}],[{{<<102,111,111>>,{{1,2,3},{[],[]}}},[{<<98,97,114>>,{{2,0,0},{[],[]}},gt}]}]}]}
+        , Ret).
 
 %%
 %% We have v 2.0.0 of bar but want > 2.0.0
@@ -155,7 +175,7 @@ depsolver_dep_doesnt_exist_test() ->
 %% "non_existent_cookbooks":[],
 %% "most_constrained_cookbooks":["bar 2.0.0 -> []"]
 %%
-depsolver_dep_not_new_enough_test() ->
+depsolver_dep_not_new_enough() ->
     World = [ cookbook(<<"foo">>, <<"1.2.3">>, {<<"bar">>, <<"2.0.0">>, '>'}),
               cookbook(<<"bar">>, <<"2.0.0">>)],
     Constraints = [{<<"foo">>, <<"1.2.3">>, '='}],
@@ -178,7 +198,7 @@ depsolver_dep_not_new_enough_test() ->
 %% "non_existent_cookbooks":[],
 %% "most_constrained_cookbooks:["bar = 2.0.0 -> [(foo > 3.0.0)]"]
 %%
-depsolver_impossible_dependency_test() ->
+depsolver_impossible_dependency() ->
     World = [ cookbook(<<"foo">>, <<"1.2.3">>, { <<"bar">>, <<"2.0.0">>, gt}),
              cookbook(<<"bar">>, <<"2.0.0">>, { <<"foo">>, <<"3.0.0">>, gt})],
     Ret = chef_depsolver:solve_dependencies(World, [], [<<"foo">>]),
@@ -189,7 +209,7 @@ depsolver_impossible_dependency_test() ->
               }],
     ?assertEqual({error, Detail}, Ret).
 
-depsolver_environment_respected_test_() ->
+depsolver_environment_respected() ->
     World = [ cookbook(<<"foo">>, <<"1.2.3">>, {<<"bar">>, <<"2.0.0">>, gt}),
               cookbook(<<"foo">>, <<"1.0.0">>, {<<"bar">>, <<"1.0.0">>, '='}),
               cookbook(<<"bar">>, <<"1.0.0">>),
@@ -210,7 +230,7 @@ depsolver_environment_respected_test_() ->
                                                               [<<"foo">>]))
       || {Cons, Expect} <- Tests ].
 
-depsolver_impossible_dependency_via_environment_test() ->
+depsolver_impossible_dependency_via_environment() ->
     World = [ cookbook(<<"foo">>, <<"1.2.3">>, { <<"bar">>, <<"2.0.0">>, gt}),
               cookbook(<<"bar">>, <<"1.0.0">>),
               cookbook(<<"bar">>, <<"3.0.0">>) ],
@@ -237,7 +257,7 @@ depsolver_impossible_dependency_via_environment_test() ->
 %%
 %% solve(foo@1.2.3, buzz)
 %% Fail since buzz@2.0.0 and foo@1.2.3 collide over baz
-depsolver_complex_dependency_test() ->
+depsolver_complex_dependency() ->
     World = [cookbook(<<"foo">>, <<"1.2.3">>, [{ <<"bar">>, <<"1.0.0">>},
                                                { <<"buzz">>, <<"1.0.0">>}]),
              cookbook(<<"bar">>, <<"1.0.0">>, { <<"baz">>, <<"1.0.0">>}),
