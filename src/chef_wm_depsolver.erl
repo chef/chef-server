@@ -116,9 +116,16 @@ process_post(Req, #base_state{chef_db_context = DbContext,
                                    [OrgName, EnvName, Error]),
             server_error(Req, State, <<"Dependency retrieval failed">>, dep_retrieval_failure);
         AllVersions ->
-            NotFound = not_found_cookbooks(AllVersions, Cookbooks),
-            Deps = chef_depsolver:solve_dependencies(AllVersions, EnvConstraints, Cookbooks),
-            handle_depsolver_results(NotFound, Deps, Req, State)
+            case not_found_cookbooks(AllVersions, Cookbooks) of
+                ok ->
+                    Deps = chef_depsolver:solve_dependencies(AllVersions,
+                                                             EnvConstraints, Cookbooks),
+                    handle_depsolver_results(ok, Deps, Req, State);
+                NotFound ->
+                    %% We ignore Deps result if expanded run list contains missing
+                    %% cookbooks, so no need to call depsolver at all.
+                    handle_depsolver_results(NotFound, ignore, Req, State)
+            end
     end.
 
 %%------------------------------------------------------------------------------
@@ -217,11 +224,15 @@ handle_depsolver_results({not_found, CookbookNames}, _Deps, Req, State) when is_
     precondition_failed(Req, State,
                         not_found_message(cookbook_version, CookbookNames),
                         cookbook_version_not_found);
-handle_depsolver_results(_NotFound, {error, {unreachable_package, Unreachable}}, Req, State) ->
+handle_depsolver_results(ok, {error, resolution_timeout}, Req, State) ->
+        precondition_failed(Req, State,
+                            timeout_message(),
+                            solve_timeout);
+handle_depsolver_results(ok, {error, {unreachable_package, Unreachable}}, Req, State) ->
     precondition_failed(Req, State,
                         not_reachable_message(Unreachable),
                         not_reachable_dep);
-handle_depsolver_results(_NotFound, {error, _} = Ret, Req, State) ->
+handle_depsolver_results(ok, {error, _} = Ret, Req, State) ->
     precondition_failed(Req, State,
                         unable_to_solve_message(Ret),
                         unable_to_solve_deps);
@@ -233,18 +244,18 @@ handle_depsolver_results(ok, {ok, Cookbooks}, Req, #base_state{chef_db_context =
 
 %% @doc Utility function to remove some of the verbosity
 precondition_failed(Req, State, ErrorData, LogMsg) when is_atom(LogMsg) ->
-    halt(412, Req, State, ErrorData, LogMsg).
+    wm_halt(412, Req, State, ErrorData, LogMsg).
 
 %% @doc Utility function to remove some of the verbosity.  Note that
 %% this is specific to Chef, and has absolutely nothing to do with the
 %% Webmachine callback.
 forbid(Req, State, ErrorData, LogMsg) ->
-    halt(403, Req, State, ErrorData, LogMsg).
+    wm_halt(403, Req, State, ErrorData, LogMsg).
 
 server_error(Req, State, ErrorData, LogMsg) ->
-    halt(500, Req, State, ErrorData, LogMsg).
+    wm_halt(500, Req, State, ErrorData, LogMsg).
 
-halt(Code, Req, State, ErrorData, LogMsg) ->
+wm_halt(Code, Req, State, ErrorData, LogMsg) ->
     {{halt, Code},
      chef_wm_util:with_error_body(Req, ErrorData),
      State#base_state{log_msg = LogMsg}}.
@@ -303,6 +314,11 @@ not_reachable_message(CookbookName) ->
                                ", which does not exist."]),
     {[{<<"message">>, Reason},
       {<<"non_existent_cookbooks">>, [ CookbookName ]},
+      {<<"most_constrained_cookbooks">>,[]}]}.
+
+timeout_message() ->
+    {[{<<"message">>, <<"unable to solve dependencies in alotted time">>},
+      {<<"non_existent_cookbooks">>, []},
       {<<"most_constrained_cookbooks">>,[]}]}.
 
 %% Main entry point for parsing the depsolver error structure
