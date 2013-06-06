@@ -28,15 +28,15 @@
          set_org_to_sql/2,
          enable_org_access/2 ]).
 
+-include("mover.hrl").
+
 %% api
 -export([start_link/1]).
-
--define(PHASE_2_MIGRATION_COMPONENTS,
-            [checksums, sandboxes, cookbooks, environments, roles, data, clients]).
 
 -record(state, {
                  org_name :: string()     %% The org we are migrating
                }).
+
 
 start_link(Config) ->
     gen_fsm:start_link(?MODULE, Config, []).

@@ -45,6 +45,22 @@ moser_state_tracker:ready_migration(OrgName).
 moser_state_tracker:org_status(OrgName).
 ```
 
+### Setting xdarklaunch flags for Unmigrated orgs
+
+The migration_state table in Postgres needs to be updated
+```
+moser_state_tracker:capture_full_org_state_list().
+```
+
+After which, you run this command to populate redis with all the unmigrated orgs:
+```
+mover_util:populate_xdl_with_unmigrated_orgs().
+```
+
+NOTE: This will ONLY populate redis xdl flags for:
+  - orgs marked as 'holding' or 'ready' in the state database
+  - non-existant xdl flags for that org. (If a particular xdl flag exists for that org, it will not overwrite it).
+
 ### Migration Execution
 
 To migrate a single org directly by name (note that it must be in
