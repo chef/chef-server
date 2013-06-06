@@ -55,14 +55,13 @@ start_link() ->
 solve(DepGraph, Goals, Timeout) ->
     {ok, Pid} = supervisor:start_child(?SERVER,[]),
     try
-        Result = depsolver_worker:solve(Pid, DepGraph, Goals, Timeout),
-        depsolver_worker:stop(Pid),
-        Result
+        depsolver_worker:solve(Pid, DepGraph, Goals, Timeout)
     catch
         exit:{timeout, _} ->
-            supervisor:terminate_child(?SERVER, Pid),
-            supervisor:delete_child(?SERVER, Pid),
             {error, resolution_timeout}
+    after
+        supervisor:terminate_child(?SERVER, Pid),
+        supervisor:delete_child(?SERVER, Pid)
     end.
 %%%===================================================================
 %%% Supervisor callbacks

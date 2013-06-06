@@ -31,8 +31,7 @@
 %% API
 -export([
          start_link/0,
-         solve/4,
-         stop/1
+         solve/4
         ]).
 
 %% gen_server callbacks
@@ -58,8 +57,6 @@ start_link() ->
     gen_server:start_link(?MODULE, [], []).
 solve(Pid, DepGraph, Goals, Timeout) ->
     gen_server:call(Pid, {solve, DepGraph, Goals}, Timeout).
-stop(Pid) ->
-    gen_server:cast(Pid, stop).
 %%%===================================================================
 %%% gen_server callbacks
 %%%===================================================================
@@ -109,8 +106,6 @@ handle_call(_Request, _From, State) ->
 %%                                  {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_cast(stop, State) ->
-    {stop, normal, State};
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
