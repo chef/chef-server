@@ -1,7 +1,7 @@
 {application, oc_chef_wm,
  [
   {description, "Base bits needed to write Web Machine API endpoints"},
-  {vsn, "0.0.1"},
+  {vsn, "0.1.0"},
   {registered, []},
   {applications, [
                   kernel,
@@ -15,6 +15,7 @@
                   couchbeam,
                   darklaunch,
                   chef_index,
+                  depsolver,
                   mochiweb,
                   webmachine
                  ]},
