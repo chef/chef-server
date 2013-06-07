@@ -1,8 +1,6 @@
 %% -*- erlang-indent-level: 4; indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sx=4 et
 %%
-%% @author Eric Merritt <ericbmerritt@gmail.com>
-%%
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -19,10 +17,33 @@
 %% specific language governing permissions and limitations
 %% under the License.
 %%
+%%%-------------------------------------------------------------------
+%%% @author Oliver Ferrigni <oliver@opscode.com>
+%%% @doc
+%%%
+%%% @end
+%%% Created :  5 Jun 2013 by Oliver Ferrigni <oliver@opscode.com>
+%%%-------------------------------------------------------------------
+-module(depsolver_app).
 
-{application, depsolver,
- [{description, "Package Constraint Solver"},
-  {vsn, "1.0.0"},
-  {modules, []},
-  {mod, {depsolver_app, []}},
-  {applications, [kernel, stdlib]}]}.
+-behaviour(application).
+%% API
+-export([start/0, stop/0]).
+%% Application callbacks
+-export([start/2, stop/1]).
+
+start()->
+  start(type,args).
+
+stop()->
+  stop(state).
+
+start(_StartType, _StartArgs) ->
+    case depsolver_supervisor:start_link() of
+        {ok, Pid} ->
+            {ok, Pid};
+        Error ->
+            Error
+                end.
+stop(_State) ->
+    ok.

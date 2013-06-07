@@ -52,6 +52,8 @@ search(State, ActiveCons, []) ->
     case depsolver:primitive_solve(State, ActiveCons, keep_paths) of
         {fail, FailPaths} ->
             extract_culprit_information0(ActiveCons, lists:flatten(FailPaths));
+		{missing, Pkg} ->
+		  {error, {unreachable_package, Pkg}};
         _Success ->
             %% This should *never* happen. 'Culprit' above represents the last
             %% possible constraint that could cause things to fail. There for
@@ -62,6 +64,8 @@ search(State, ActiveCons, [NewCon | Constraints]) ->
     case depsolver:primitive_solve(State, ActiveCons, keep_paths) of
         {fail, FailPaths} ->
             extract_culprit_information0(ActiveCons, lists:flatten(FailPaths));
+		{missing, Pkg} ->
+		  {error, {unreachable_package, Pkg}};
         _Success ->
             %% Move one constraint from the inactive to the active
             %% constraints and run again
@@ -71,6 +75,8 @@ search(State, ActiveCons, [NewCon | Constraints]) ->
 format_error({error, {unreachable_package, AppName}}) ->
     ["Dependency ", format_constraint(AppName), " is specified as a dependency ",
      "but is not reachable by the system.\n"];
+format_error({error, resolution_timeout}) ->
+    ["Dependency graph resulted in a resolution_timeout.\n"];
 format_error({error, {invalid_constraints, Constraints}}) ->
     ["Invalid constraint ", add_s(Constraints), " specified ",
      lists:foldl(fun(Con, "") ->
@@ -209,7 +215,7 @@ strip_goal(Else) ->
 
 -spec extract_culprit_information0(depsolver:constraints(),
                              [depsolver:fail_info()]) ->
-                                           [term()].
+							 [term()] | {missing, depsolver:pkg_name()}.
 extract_culprit_information0(ActiveCons, FailInfo)
   when is_list(FailInfo) ->
     [extract_culprit_information1(ActiveCons, FI) || FI <- FailInfo].
