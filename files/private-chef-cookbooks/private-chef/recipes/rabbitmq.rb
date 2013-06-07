@@ -72,8 +72,8 @@ runit_service "rabbitmq" do
   down rabbitmq['ha']
   options({
     :log_directory => rabbitmq_log_dir,
-    :svlogd_size => rabbitmq['svlogd_size'],
-    :svlogd_num  => rabbitmq['svlogd_num']
+    :svlogd_size => rabbitmq['log_rotation']['file_maxbytes'],
+    :svlogd_num  => rabbitmq['log_rotation']['num_to_keep']
   }.merge(params))
 end
 

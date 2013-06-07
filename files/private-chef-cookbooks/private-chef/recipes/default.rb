@@ -15,6 +15,13 @@ directory "/etc/opscode" do
   action :nothing
 end.run_action(:create)
 
+directory "/etc/opscode/logrotate.d" do
+  owner "root"
+  group "root"
+  mode "0755"
+  action :nothing
+end.run_action(:create)
+
 if File.exists?("/etc/opscode/chef-server.json")
   Chef::Log.warn("Please move to /etc/opscode/private-chef.rb for configuration - /etc/opscode/chef-server.json is deprecated.")
 else

@@ -47,7 +47,7 @@ user node['private_chef']['postgresql']['username'] do
 end
 
 directory postgresql_log_dir do
-  owner node['private_chef']['postgresql']['username']
+  owner node['private_chef']['user']['username']
   recursive true
 end
 
@@ -139,8 +139,8 @@ runit_service "postgresql" do
   control(['t'])
   options({
     :log_directory => postgresql_log_dir,
-    :svlogd_size => node['private_chef']['postgresql']['svlogd_size'],
-    :svlogd_num  => node['private_chef']['postgresql']['svlogd_num']
+    :svlogd_size => node['private_chef']['postgresql']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['postgresql']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 

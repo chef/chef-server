@@ -1,2 +1,4 @@
-MAILTO=<%= node['private_chef']['notification_email'] %>
-53 4 * * * root /usr/sbin/logrotate /etc/opscode/logrotate.conf
+#!/bin/sh
+
+/usr/bin/test -x /usr/sbin/logrotate || exit 0
+/usr/bin/nice -n 19 /usr/bin/ionice -c3 /usr/sbin/logrotate /etc/opscode/logrotate.conf

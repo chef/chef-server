@@ -39,8 +39,8 @@ runit_service "couchdb" do
   down node['private_chef']['couchdb']['ha']
   options({
     :log_directory => couchdb_log_dir,
-    :svlogd_size => node['private_chef']['couchdb']['svlogd_size'],
-    :svlogd_num  => node['private_chef']['couchdb']['svlogd_num']
+    :svlogd_size => node['private_chef']['couchdb']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['couchdb']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 
@@ -111,3 +111,11 @@ end
 
 add_nagios_hostgroup("couchdb")
 
+# log rotation
+template "/etc/opscode/logrotate.d/couchdb" do
+  source "logrotate.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(node['private_chef']['couchdb'].to_hash)
+end

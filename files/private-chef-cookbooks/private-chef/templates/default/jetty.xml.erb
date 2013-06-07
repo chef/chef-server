@@ -22,7 +22,7 @@
     <!-- Server Thread Pool                                          -->
     <!-- =========================================================== -->
     <Set name="ThreadPool">
-      <!-- Default bounded blocking threadpool 
+      <!-- Default bounded blocking threadpool
       -->
       <New class="org.mortbay.thread.BoundedThreadPool">
         <Set name="minThreads">10</Set>
@@ -30,7 +30,7 @@
         <Set name="maxThreads">10000</Set>
       </New>
 
-      <!-- Optional Java 5 bounded threadpool with job queue 
+      <!-- Optional Java 5 bounded threadpool with job queue
       <New class="org.mortbay.thread.concurrent.ThreadPool">
         <Arg type="int">0</Arg>
         <Set name="corePoolSize">10</Set>
@@ -59,7 +59,7 @@
           </New>
       </Arg>
     </Call>
-   -->     
+   -->
 
     <!-- Use this connector if NIO is not available. -->
     <!-- This connector is currently being used for Solr because the
@@ -83,7 +83,7 @@
     <!-- see jetty-ssl.xml to add an ssl connector. use                  -->
     <!-- java -jar start.jar etc/jetty.xml etc/jetty-ssl.xml             -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    
+
     <!-- =========================================================== -->
     <!-- Set up global session ID manager                            -->
     <!-- =========================================================== -->
@@ -96,7 +96,7 @@
     -->
 
     <!-- =========================================================== -->
-    <!-- Set handler Collection Structure                            --> 
+    <!-- Set handler Collection Structure                            -->
     <!-- =========================================================== -->
     <Set name="handler">
       <New id="Handlers" class="org.mortbay.jetty.handler.HandlerCollection">
@@ -108,14 +108,11 @@
            <Item>
              <New id="DefaultHandler" class="org.mortbay.jetty.handler.DefaultHandler"/>
            </Item>
-           <Item>
-             <New id="RequestLog" class="org.mortbay.jetty.handler.RequestLogHandler"/>
-           </Item>
          </Array>
         </Set>
       </New>
     </Set>
-    
+
     <!-- =========================================================== -->
     <!-- Configure the context deployer                              -->
     <!-- A context deployer will deploy contexts described in        -->
@@ -182,25 +179,6 @@
 	-->
       </Array>
     </Set>
-
-    <!-- =========================================================== -->
-    <!-- Configure Request Log                                       -->
-    <!-- Request logs  may be configured for the entire server here, -->
-    <!-- or they can be configured for a specific web app in a       -->
-    <!-- contexts configuration (see $(jetty.home)/contexts/test.xml -->
-    <!-- for an example).                                            -->
-    <!-- =========================================================== -->
-    <Ref id="RequestLog">
-      <Set name="requestLog">
-        <New id="RequestLogImpl" class="org.mortbay.jetty.NCSARequestLog">
-          <Arg><SystemProperty name="jetty.logs" default="<%= @log_directory %>"/>/yyyy_mm_dd.jetty.request.log</Arg>
-          <Set name="retainDays"><%= @log_retention['jetty'] %></Set>
-          <Set name="append">true</Set>
-          <Set name="extended">false</Set>
-          <Set name="LogTimeZone">GMT</Set>
-        </New>
-      </Set>
-    </Ref>
 
     <!-- =========================================================== -->
     <!-- extra options                                               -->

@@ -95,8 +95,8 @@ runit_service "opscode-webui" do
   down node['private_chef']['opscode-webui']['ha']
   options({
     :log_directory => private_chef_webui_log_dir,
-    :svlogd_size => node['private_chef']['opscode-webui']['svlogd_size'],
-    :svlogd_num  => node['private_chef']['opscode-webui']['svlogd_num']
+    :svlogd_size => node['private_chef']['opscode-webui']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['opscode-webui']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 

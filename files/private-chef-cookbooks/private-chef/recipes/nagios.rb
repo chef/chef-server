@@ -74,7 +74,7 @@ directory log_directory do
   action :create
 end
 
-fcgiwrap_log_directory = node['private_chef']['nagios']['fcgiwrap_log_directory']
+fcgiwrap_log_directory = File.join(log_directory, "fcgiwrap")
 directory fcgiwrap_log_directory do
   owner "root"
   group "opscode-nagios"
@@ -83,7 +83,7 @@ directory fcgiwrap_log_directory do
   action :create
 end
 
-php_fpm_log_directory = node['private_chef']['nagios']['php_fpm_log_directory']
+php_fpm_log_directory = File.join(log_directory, "php-fpm")
 directory php_fpm_log_directory do
   owner node['private_chef']['user']['username']
   group "opscode-nagios"
@@ -142,8 +142,8 @@ runit_service "nagios" do
   down node['private_chef']['nagios']['ha']
   options({
     :log_directory => log_directory,
-    :svlogd_size => node['private_chef']['nagios']['svlogd_size'],
-    :svlogd_num  => node['private_chef']['nagios']['svlogd_num']
+    :svlogd_size => node['private_chef']['nagios']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['nagios']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 
@@ -151,8 +151,8 @@ runit_service "fcgiwrap" do
   down node['private_chef']['nagios']['ha']
   options({
     :log_directory => fcgiwrap_log_directory,
-    :svlogd_size => node['private_chef']['nagios']['fcgiwrap_svlogd_size'],
-    :svlogd_num  => node['private_chef']['nagios']['fcgiwrap_svlogd_num']
+    :svlogd_size => node['private_chef']['nagios']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['nagios']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 
@@ -160,8 +160,8 @@ runit_service "php-fpm" do
   down node['private_chef']['nagios']['ha']
   options({
     :log_directory => php_fpm_log_directory,
-    :svlogd_size => node['private_chef']['nagios']['php_fpm_svlogd_size'],
-    :svlogd_num  => node['private_chef']['nagios']['php_fpm_svlogd_num']
+    :svlogd_size => node['private_chef']['nagios']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['nagios']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 
@@ -175,4 +175,16 @@ if node['private_chef']['bootstrap']['enable']
 	execute "/opt/opscode/bin/private-chef-ctl start fcgiwrap" do
 		retries 20
 	end
+end
+
+# log rotation
+template "/etc/opscode/logrotate.d/nagios" do
+  source "logrotate.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(node['private_chef']['nagios'].to_hash.merge(
+    'owner' => 'opscode-nagios',
+    'group' => 'opscode-nagios'
+  ))
 end

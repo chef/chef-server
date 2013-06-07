@@ -149,8 +149,8 @@ runit_service "nginx" do
   down node['private_chef']['nginx']['ha']
   options({
     :log_directory => nginx_log_dir,
-    :svlogd_size => node['private_chef']['nginx']['svlogd_size'],
-    :svlogd_num  => node['private_chef']['nginx']['svlogd_num']
+    :svlogd_size => node['private_chef']['nginx']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['nginx']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 
@@ -165,3 +165,16 @@ add_nagios_hostgroup("nginx")
 add_nagios_hostgroup("lb") if node['private_chef']['lb']['enable']
 
 add_nagios_hostgroup("lb_internal") if node['private_chef']['lb_internal']['enable']
+
+# log rotation
+template "/etc/opscode/logrotate.d/nginx" do
+  source "logrotate.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(node['private_chef']['nginx'].to_hash.merge(
+    'postrotate' => "/opt/opscode/embedded/sbin/nginx -s reopen",
+    'owner' => 'root',
+    'group' => 'root'
+  ))
+end
