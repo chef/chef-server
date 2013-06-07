@@ -919,10 +919,12 @@ stats_hero_label({chef_solr, Fun}) ->
     chef_metrics:label(solr, {chef_solr, Fun});
 stats_hero_label({chef_s3, Fun}) ->
     chef_metrics:label(s3, {chef_s3, Fun});
+stats_hero_label({chef_depsolver, Fun}) ->
+    chef_metrics:label(depsolver, {chef_depsolver, Fun});
 stats_hero_label({BadPrefix, Fun}) ->
     erlang:error({bad_prefix, {BadPrefix, Fun}}).
 
 %% @doc The prefixes that stats_hero should use for aggregating timing data over each
 %% request.
 stats_hero_upstreams() ->
-    [<<"rdbms">>, <<"s3">>, <<"solr">>].
+    [<<"depsolver">>, <<"rdbms">>, <<"s3">>, <<"solr">>].

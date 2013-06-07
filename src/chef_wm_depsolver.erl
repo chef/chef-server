@@ -104,7 +104,8 @@ forbidden_for_environment(#chef_environment{authz_id = EnvAuthzId} = Env, Req,
 post_is_create(Req, State) ->
     {false, Req, State}.
 
-process_post(Req, #base_state{chef_db_context = DbContext,
+process_post(Req, #base_state{reqid = ReqId,
+                              chef_db_context = DbContext,
                               organization_name = OrgName,
                               resource_state = #depsolver_state{run_list_cookbooks = Cookbooks,
                                                                 environment_name = EnvName,
@@ -118,8 +119,8 @@ process_post(Req, #base_state{chef_db_context = DbContext,
         AllVersions ->
             case not_found_cookbooks(AllVersions, Cookbooks) of
                 ok ->
-                    Deps = chef_depsolver:solve_dependencies(AllVersions,
-                                                             EnvConstraints, Cookbooks),
+                    Deps = ?SH_TIME(ReqId, chef_depsolver, solve_dependencies,
+                                    (AllVersions, EnvConstraints, Cookbooks)),
                     handle_depsolver_results(ok, Deps, Req, State);
                 NotFound ->
                     %% We ignore Deps result if expanded run list contains missing
