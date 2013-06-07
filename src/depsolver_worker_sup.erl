@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4; indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sx=4 et
 %%
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2013 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -24,7 +24,7 @@
 %%% @end
 %%% Created :  5 Jun 2013 by Oliver Ferrigni <oliver@opscode.com>
 %%%-------------------------------------------------------------------
--module(depsolver_supervisor).
+-module(depsolver_worker_sup).
 
 -behaviour(supervisor).
 
@@ -52,17 +52,21 @@
 %%--------------------------------------------------------------------
 start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+
 solve(DepGraph, Goals, Timeout) ->
-    {ok, Pid} = supervisor:start_child(?SERVER,[]),
-    try
-        depsolver_worker:solve(Pid, DepGraph, Goals, Timeout)
-    catch
-        exit:{timeout, _} ->
-            {error, resolution_timeout}
-    after
-        supervisor:terminate_child(?SERVER, Pid),
-        supervisor:delete_child(?SERVER, Pid)
-    end.
+    {ok, Pid} = supervisor:start_child(?SERVER, []),
+    Result = try
+                 depsolver_worker:solve(Pid, DepGraph, Goals, Timeout)
+             catch
+                 exit:{timeout, _} ->
+                     {error, resolution_timeout}
+             after
+                 supervisor:terminate_child(?SERVER, Pid),
+                 supervisor:delete_child(?SERVER, Pid)
+             end,
+    depsolver_event_logger:log(DepGraph, Goals, Result),
+    Result.
+
 %%%===================================================================
 %%% Supervisor callbacks
 %%%===================================================================

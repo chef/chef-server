@@ -39,11 +39,7 @@ stop()->
   stop(state).
 
 start(_StartType, _StartArgs) ->
-    case depsolver_supervisor:start_link() of
-        {ok, Pid} ->
-            {ok, Pid};
-        Error ->
-            Error
-                end.
+    depsolver_sup:start_link().
+
 stop(_State) ->
     ok.

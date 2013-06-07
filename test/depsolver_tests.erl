@@ -56,6 +56,57 @@ all_test_() ->
       {generator, ?MODULE, missing2}
   ]
 }.
+
+event_logging_test_() ->
+  {foreach,
+    fun() ->
+            error_logger:delete_report_handler(error_logger_tty_h),
+            application:start(depsolver),
+            depsolver_event_logger:add_handler([{root_dir, "/tmp/depsolver-test"},
+                                                {max_files, 4}])
+    end,
+    fun(_) ->
+            application:stop(depsolver),
+            %% ugly, hack
+            os:cmd("rm -rf /tmp/depsolver-test")
+    end,
+    [
+     {"event logs are captured",
+      fun() ->
+              %% Six ok results, should only record a total of four
+              [ first() || _I <- lists:seq(1, 6) ],
+
+              %% Three error results
+              [ fail() || _I <- lists:seq(1, 3) ],
+
+              %% 21 unreachable
+              Dom0 = depsolver:add_packages(depsolver:new_graph(), [{app1, [{"0.1", [{app2, "0.2"}]}]}]),
+              [ depsolver:solve(Dom0, [{app4, "8"}]) || _I <- lists:seq(1, 21) ],
+
+              OkExpect = [ "/tmp/depsolver-test/ok/" ++ integer_to_list(I) || I <- lists:seq(1, 4) ],
+              ?assertEqual(OkExpect, filelib:wildcard("/tmp/depsolver-test/ok/*")),
+
+              ErrorExpect = [ "/tmp/depsolver-test/error/" ++ integer_to_list(I) || I <- lists:seq(1, 3) ],
+              ?assertEqual(ErrorExpect, filelib:wildcard("/tmp/depsolver-test/error/*")),
+
+              UnreachableExpect = [ "/tmp/depsolver-test/unreachable/" ++ integer_to_list(I)
+                                    || I <- lists:seq(1, 4) ],
+              ?assertEqual(UnreachableExpect, filelib:wildcard("/tmp/depsolver-test/unreachable/*")),
+
+              %% we don't have a timeout test at present
+              ?assertEqual([], filelib:wildcard("/tmp/depsolver-test/timeout/*"))
+      end},
+
+     {"removing handler prevent event log capture",
+      fun() ->
+              depsolver_event_logger:remove_handler(),
+              %% Six ok results
+              [ first() || _I <- lists:seq(1, 6) ],
+              ?assertEqual([], filelib:wildcard("/tmp/depsolver-test/ok/*"))
+      end}
+    ]
+  }.
+
 first() ->
     Dom0 = depsolver:add_packages(depsolver:new_graph(), [{app1, [{"0.1", [{app2, "0.2+build.33"},
                                                                            {app3, "0.2", '>='}]},
