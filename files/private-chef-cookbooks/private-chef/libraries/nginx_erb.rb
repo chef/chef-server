@@ -7,12 +7,17 @@ class NginxErb
   end
 
   def listen_port(proto)
-    case proto
-    when "http"
-      node['private_chef']['nginx']['non_ssl_port'] || 80
-    when "https"
-      node['private_chef']['nginx']['ssl_port']
-    end
+    listen_port = ""
+    listen_port << "[::]:" if node['private_chef']['nginx']['enable_ipv6']
+    listen_port << case proto
+                   when "http"
+                     node['private_chef']['nginx']['non_ssl_port'].to_s || "80"
+                   when "https"
+                     node['private_chef']['nginx']['ssl_port'].to_s
+                   else
+                     proto.to_s
+                   end
+    listen_port
   end
 
   def access_log(proto)
