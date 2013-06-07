@@ -74,7 +74,7 @@ directory log_directory do
   action :create
 end
 
-fcgiwrap_log_directory = node['private_chef']['nagios']['fcgiwrap_log_directory']
+fcgiwrap_log_directory = File.join(log_directory, "fcgiwrap")
 directory fcgiwrap_log_directory do
   owner "root"
   group "opscode-nagios"
@@ -83,7 +83,7 @@ directory fcgiwrap_log_directory do
   action :create
 end
 
-php_fpm_log_directory = node['private_chef']['nagios']['php_fpm_log_directory']
+php_fpm_log_directory = File.join(log_directory, "php-fpm")
 directory php_fpm_log_directory do
   owner node['private_chef']['user']['username']
   group "opscode-nagios"
@@ -151,8 +151,8 @@ runit_service "fcgiwrap" do
   down node['private_chef']['nagios']['ha']
   options({
     :log_directory => fcgiwrap_log_directory,
-    :svlogd_size => node['private_chef']['nagios']['fcgiwrap_log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['nagios']['fcgiwrap_log_rotation']['num_to_keep']
+    :svlogd_size => node['private_chef']['nagios']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['nagios']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 
@@ -160,8 +160,8 @@ runit_service "php-fpm" do
   down node['private_chef']['nagios']['ha']
   options({
     :log_directory => php_fpm_log_directory,
-    :svlogd_size => node['private_chef']['nagios']['php_fpm_log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['nagios']['php_fpm_log_rotation']['num_to_keep']
+    :svlogd_size => node['private_chef']['nagios']['log_rotation']['file_maxbytes'],
+    :svlogd_num  => node['private_chef']['nagios']['log_rotation']['num_to_keep']
   }.merge(params))
 end
 
@@ -187,18 +187,4 @@ template "/etc/opscode/logrotate.d/nagios" do
     'owner' => 'opscode-nagios',
     'group' => 'opscode-nagios'
   ))
-end
-
-template "/etc/opscode/logrotate.d/php-fpm" do
-  source "logrotate.erb"
-  owner "root"
-  group "root"
-  mode "0644"
-  variables(
-    'log_directory' => php_fpm_log_directory,
-    'log_rotation' => {
-      'num_to_keep' => node['private_chef']['nagios']['php_fpm_log_rotation']['num_to_keep'],
-      'file_maxbytes' => node['private_chef']['nagios']['php_fpm_log_rotation']['file_maxbytes']
-    }
-  )
 end

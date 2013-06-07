@@ -29,7 +29,7 @@ pid = <%= File.join(node['private_chef']['nagios']['dir'], 'php-fpm.pid') %>
 ; in a local file.
 ; Note: the default prefix is /opt/opscode/embedded/var
 ; Default Value: log/php-fpm.log
-error_log = /var/log/opscode/php-fpm/php-fpm.log
+error_log = /var/log/opscode/nagios/php-fpm/php-fpm.log
 
 ; syslog_facility is used to specify what type of program is logging the
 ; message. This lets syslogd specify that messages from different facilities
