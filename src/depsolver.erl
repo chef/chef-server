@@ -83,6 +83,7 @@
          format_version/1,
          new_graph/0,
          solve/2,
+         solve/3,
          add_packages/2,
          add_package/3,
          add_package_version/3,
@@ -236,13 +237,19 @@ add_package_version({?MODULE, Dom0}, RawPkg, RawVsn, RawPkgConstraints) ->
 add_package_version(State, Pkg, Vsn) ->
     add_package_version(State, Pkg, Vsn, []).
 
-%% @doc Given a set of goals (in the form of constrains) find a set of packages
-%% and versions that satisfy all constraints. If no solution can be found then
-%% an exception is thrown.
+
+%% @doc Given a set of goals, in the form of constraints, find a set of packages
+%% and versions that satisfy all constraints. An error tuple is returned if no
+%% solution can be found or if solving takes longer than `Timeout' milliseconds.
 %% ``` depsolver:solve(State, [{app1, "0.1", '>='}]).'''
+-spec solve(t(),[constraint()], non_neg_integer()) -> {ok, [pkg()]} | {error, term()}.
+solve({?MODULE, DepGraph0}, RawGoals = [_H|_T], Timeout) ->
+    depsolver_worker_sup:solve(DepGraph0, RawGoals, Timeout).
+
+%% @doc Same as {@link solve/3} but use a default timeout.
 -spec solve(t(),[constraint()]) -> {ok, [pkg()]} | {error, term()}.
-solve({?MODULE, DepGraph0}, RawGoals) when erlang:length(RawGoals) > 0 ->
-    depsolver_worker_sup:solve(DepGraph0, RawGoals, ?DEFAULT_TIMEOUT).
+solve(G, RawGoals) ->
+    solve(G, RawGoals, ?DEFAULT_TIMEOUT).
 
 do_solve(DepGraph0, RawGoals)
   when erlang:length(RawGoals) > 0 ->
