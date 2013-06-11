@@ -1,5 +1,5 @@
 %% -*- erlang-indent-level: 4; indent-tabs-mode: nil; fill-column: 80 -*-
-%% ex: ts=4 sx=4 et
+%% ex: ts=4 sw=4 et
 %%
 %%-------------------------------------------------------------------
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
@@ -52,6 +52,7 @@ all_test_() ->
       {?MODULE, not_new_enough},
       {?MODULE, impossible_dependency},
       {?MODULE, integration},
+      {?MODULE, missing_via_culprit_search},
       {generator, ?MODULE, format},
       {generator, ?MODULE, missing2}
   ]
@@ -479,7 +480,6 @@ filter_versions() ->
 
 -spec missing() -> ok.
 missing() ->
-
     Dom0 = depsolver:add_packages(depsolver:new_graph(), [{app1, [{"0.1", [{app2, "0.2"},
                                                              {app3, "0.2", '>='},
                                                              {app4, "0.2", '='}]},
@@ -500,6 +500,13 @@ missing() ->
     ?assertMatch({error,_},
                  Ret2).
 
+missing_via_culprit_search() ->
+    World = [{<<"app1">>,[{"1.1.0",[]}]},
+             {<<"app2">>,[{"0.0.1",[{<<"app1::oops">>,<<"0.0.0">>,'>='}]} ]} ],
+    Dom0 = depsolver:add_packages(depsolver:new_graph(), World),
+    Ret1 = depsolver:solve(Dom0, [<<"app1">>,<<"app2">>]),
+    _ = depsolver:format_error(Ret1),
+    ?assertMatch({error,{unreachable_package,<<"app1::oops">>}}, Ret1).
 
 binary() ->
 
