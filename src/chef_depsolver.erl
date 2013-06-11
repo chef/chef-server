@@ -4,7 +4,7 @@
 %%
 %% Regex from chef_json_validator.erl
 %% @author Marc Paradise <marc@opscode.com>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -42,6 +42,8 @@
         {[
           {<<"run_list">>, chef_json_validator:run_list_spec()}
          ]}).
+
+-define(DEFAULT_DEPSOLVER_TIMEOUT, 2000).
 
 %% @doc Convert a binary JSON string representing a Chef runlist into an
 %% EJson-encoded Erlang data structure.
@@ -94,7 +96,7 @@ solve_dependencies(AllVersions, EnvConstraints, Cookbooks) ->
     %% listing cookbooks within an environment.
     {ok, FilteredVersions} = depsolver:filter_packages_with_deps(AllVersions, EnvConstraints),
     Graph = depsolver:add_packages(depsolver:new_graph(), FilteredVersions),
-    sanitize_semver(depsolver:solve(Graph, Cookbooks)).
+    sanitize_semver(depsolver:solve(Graph, Cookbooks, depsolver_timeout())).
 
 %% @doc The depsolver module (as of version 0.1.0) supports semver and returns a version
 %% structure as `{Name, {{1, 2, 3}, {Alpha, Build}}}'. Chef does not currently support
@@ -108,3 +110,13 @@ sanitize_semver({ok, WithSemver}) ->
     {ok, XYZOnly};
 sanitize_semver(Error) ->
     Error.
+
+depsolver_timeout() ->
+    case application:get_env(chef_objects, depsolver_timeout) of
+        undefined ->
+            ?DEFAULT_DEPSOLVER_TIMEOUT;
+        {ok, Value} when is_integer(Value) ->
+            Value;
+        Bad ->
+            error({invalid_config, {chef_objects, depsolver_timeout, Bad}})
+    end.
