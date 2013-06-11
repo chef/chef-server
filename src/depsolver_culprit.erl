@@ -1,5 +1,5 @@
 %% -*- erlang-indent-level: 4; indent-tabs-mode: nil; fill-column: 80 -*-
-%% ex: ts=4 sx=4 et
+%% ex: ts=4 sw=4 et
 %%
 %% @author Eric Merritt <ericbmerritt@gmail.com>
 %%
@@ -53,7 +53,7 @@ search(State, ActiveCons, []) ->
         {fail, FailPaths} ->
             extract_culprit_information0(ActiveCons, lists:flatten(FailPaths));
 		{missing, Pkg} ->
-		  {error, {unreachable_package, Pkg}};
+		    {unreachable_package, Pkg};
         _Success ->
             %% This should *never* happen. 'Culprit' above represents the last
             %% possible constraint that could cause things to fail. There for
@@ -65,7 +65,7 @@ search(State, ActiveCons, [NewCon | Constraints]) ->
         {fail, FailPaths} ->
             extract_culprit_information0(ActiveCons, lists:flatten(FailPaths));
 		{missing, Pkg} ->
-		  {error, {unreachable_package, Pkg}};
+		    {unreachable_package, Pkg};
         _Success ->
             %% Move one constraint from the inactive to the active
             %% constraints and run again
