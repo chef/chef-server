@@ -26,13 +26,18 @@
 -include_lib("ej/include/ej.hrl").
 -include_lib("chef_objects/include/chef_osc_defaults.hrl").
 -compile([export_all]).
+
+-define(NEEDED_APPS, [depsolver, folsom]).
+
 all_test_() ->
   {foreach,
     fun() ->
         error_logger:delete_report_handler(error_logger_tty_h),
-        application:start(depsolver)
+        [ application:start(App) || App <- ?NEEDED_APPS ]
     end,
-    fun(_) -> application:stop(depsolver) end,
+    fun(_) ->
+            [ application:stop(App) || App <- lists:reverse(?NEEDED_APPS) ]
+    end,
     [
         {?MODULE, depsolver_dep_empty_world},
         {?MODULE, depsolver_dep_no_version},

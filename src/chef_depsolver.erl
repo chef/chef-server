@@ -94,9 +94,22 @@ solve_dependencies(AllVersions, EnvConstraints, Cookbooks) ->
     %% environment, the solver is unable to backtrack and provide extra error detail. With
     %% this approach, the "world" of cookbooks conforms to what the user will see from
     %% listing cookbooks within an environment.
-    {ok, FilteredVersions} = depsolver:filter_packages_with_deps(AllVersions, EnvConstraints),
-    Graph = depsolver:add_packages(depsolver:new_graph(), FilteredVersions),
-    sanitize_semver(depsolver:solve(Graph, Cookbooks, depsolver_timeout())).
+    {ok, FilteredVersions} =
+        folsom_time(depsolver, filter_packages_with_deps,
+                    fun() ->
+                            depsolver:filter_packages_with_deps(AllVersions,
+                                                                EnvConstraints)
+                    end),
+    Graph = folsom_time(depsolver, add_packages,
+                        fun() ->
+                                depsolver:add_packages(depsolver:new_graph(),
+                                                       FilteredVersions)
+                        end),
+    Result = folsom_time(depsolver, solve,
+                         fun() ->
+                                 depsolver:solve(Graph, Cookbooks, depsolver_timeout())
+                         end),
+    sanitize_semver(Result).
 
 %% @doc The depsolver module (as of version 0.1.0) supports semver and returns a version
 %% structure as `{Name, {{1, 2, 3}, {Alpha, Build}}}'. Chef does not currently support
@@ -120,3 +133,7 @@ depsolver_timeout() ->
         Bad ->
             error({invalid_config, {chef_objects, depsolver_timeout, Bad}})
     end.
+
+folsom_time(M, F, Fun) ->
+    Label = oc_folsom:mf_label(M, F),
+    oc_folsom:time(Label, Fun).
