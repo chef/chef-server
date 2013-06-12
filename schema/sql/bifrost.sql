@@ -378,7 +378,6 @@ DECLARE
   actor_table char(32) := quote_ident(target_type || '_acl_actor');
   group_table char(32) := quote_ident(target_type || '_acl_group');
   authz_table char(32) := quote_ident('auth_' || target_type);
-  authorized char(32);
 BEGIN
         -- Get everything in our supplied targets that query_actor has permission on;
         -- to keep things simple, we union the direct and indirect permission
