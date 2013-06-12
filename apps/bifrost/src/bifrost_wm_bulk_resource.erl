@@ -33,61 +33,91 @@ process_post(Req, State) ->
     try
         Body = wrq:req_body(Req),
         {ReqId, Permission, Type, Collection} = parse_body(Body),
-        case ?SH_TIME(ReqId, bifrost_db, bulk_check, (ReqId, Permission, Type)) of
+        case ?SH_TIME(ReqId, bifrost_db, bulk_permission,
+                      (ReqId, Collection, Permission, Type)) of
             List when is_list(List) ->
                 Excluded = lists:filter(fun(X) -> not lists:member(X, List) end,
                                         Collection),
                 case Excluded of
                     [] ->
-                        {true, wrq:set_resp_body(<<"{}">>, Req), State};
+                        % If we don't set a body here (or anywhere else, of course,
+                        % but that shouldn't happen anyway), web machine should
+                        % return 204, which is exactly the behavior we want.
+                        {true, Req, State};
                     Unauthorized ->
                         Req0 = bifrost_wm_util:set_json_body(Req, {[{<<"unauthorized">>,
                                                                      Unauthorized}]}),
                         {true, Req0, State}
                 end;
-            {error, ErrorType} ->
-                bifrost_wm_error:set_db_exception(Req, State, ErrorType)
+            {error, Error} ->
+                bifrost_wm_error:set_db_exception(Req, State, Error)
         end
     catch
-        throw:{error, invalid_json} ->
+        throw:{error, ErrorType} ->
             {_Return, ErrReq, _State} =
-                bifrost_wm_error:set_malformed_request(Req, State, invalid_json),
+                bifrost_wm_error:set_malformed_request(Req, State, ErrorType),
             {{halt, 400}, ErrReq, State};
-        throw:{db_error, Error} ->
-            bifrost_wm_error:set_db_exception(Req, State, Error)
+        throw:{db_error, ErrorType} ->
+            bifrost_wm_error:set_db_exception(Req, State, ErrorType)
     end.
+
+valid_perm(<<"create">>) -> ok;
+valid_perm(<<"read">>) -> ok;
+valid_perm(<<"update">>) -> ok;
+valid_perm(<<"delete">>) -> ok;
+valid_perm(<<"grant">>) -> ok;
+valid_perm(_) -> error.
+
+valid_type(<<"actor">>) -> ok;
+valid_type(<<"container">>) -> ok;
+valid_type(<<"group">>) -> ok;
+valid_type(<<"object">>) -> ok;
+valid_type(_) -> error.
+
+regex_for(authz_id) ->
+    {ok, Regex} = re:compile("^[a-fA-F0-9]{32}$"),
+    {Regex, <<"invalid authz ID, must be 32-digit hex string">>};
+regex_for(_) ->
+    error.
+
+bulk_spec() ->
+    {[
+      {<<"requestor_id">>, {string_match, regex_for(authz_id)}},
+      {<<"permission">>, {fun_match, {fun valid_perm/1, string,
+                                      <<"invalid permission type, must be 'create',"
+                                        " 'read', 'update', 'delete', or 'grant'">>}}},
+      {<<"type">>, {fun_match, {fun valid_type/1, string,
+                                <<"invalid authz type, must be 'actor', 'container',"
+                                  " 'group', or 'object'">>}}},
+      {<<"collection">>, {array_map, {string_match, regex_for(authz_id)}}}
+     ]}.
 
 parse_body(Body) ->
     try
         Ejson = bifrost_wm_util:decode(Body),
-        ReqId = ej:get({<<"requestor_id">>}, Ejson),
-        Permission = binary_to_atom(ej:get({<<"permission">>}, Ejson), utf8),
-        AuthType = binary_to_atom(ej:get({<<"type">>}, Ejson), utf8),
-        Collection = ej:get({<<"collection">>}, Ejson),
-        case {ReqId, Collection} of
-            {Id, Targets} when is_binary(Id) andalso is_list(Targets) ->
-                case Permission of
-                    Perm when Perm =:= create orelse Perm =:= read orelse
-                              Perm =:= update orelse Perm =:= delete orelse
-                              Perm =:= grant ->
-                        case AuthType of
-                            Type when Type =:= actor orelse Type =:= container orelse
-                                      Type =:= group orelse Type =:= object ->
-                                {ReqId, Permission, AuthType, Collection};
-                            _ ->
-                                throw({error, invalid_json})
-                        end;
-                    _ ->
-                        throw({error, invalid_json})
-                end;
-            {_, _} ->
-                throw({error, invalid_json})
+        case ej:valid(bulk_spec(), Ejson) of
+            ok ->
+                ReqId = ej:get({<<"requestor_id">>}, Ejson),
+                Permission = binary_to_atom(ej:get({<<"permission">>}, Ejson), utf8),
+                AuthType = binary_to_atom(ej:get({<<"type">>}, Ejson), utf8),
+                Collection = ej:get({<<"collection">>}, Ejson),
+                {ReqId, Permission, AuthType, Collection};
+            BadSpec ->
+                throw(BadSpec)
         end
     catch
-        error:badarg ->
-            throw({error, invalid_json});
         throw:{error, {_, invalid_json}} ->
             throw({error, invalid_json});
         throw:{error, {_, truncated_json}} ->
-            throw({error, invalid_json})
+            throw({error, invalid_json});
+        throw:{ej_invalid, string_match, _, _, _, _, Message} ->
+            throw({error, {ej_invalid, Message}});
+        throw:{ej_invalid, fun_match, _, _, _, _, Message} ->
+            throw({error, {ej_invalid, Message}});
+        throw:{ej_invalid, array_elt, _, _, _, _, Message} ->
+            throw({error, {ej_invalid, Message}});
+        throw:{ej_invalid, missing, Type, _, _, _, _} ->
+            throw({error, {missing, Type}});
+        throw:{ej_invalid, json_type, Type, _, _, _, _} ->
+            throw({error, {json_type, Type}})
     end.

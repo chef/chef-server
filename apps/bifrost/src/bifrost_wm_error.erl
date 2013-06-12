@@ -35,6 +35,12 @@ malformed_request_message(invalid_json) ->
     {true, error_ejson(<<"invalid JSON in request body">>)};
 malformed_request_message({bad_requestor, Id}) ->
     {401, error_ejson([<<"requesting actor id of '">>, Id, <<"' does not exist">>])};
+malformed_request_message({ej_invalid, Message}) ->
+    {true, error_ejson([Message])};
+malformed_request_message({missing, Type}) ->
+    {true, error_ejson([<<"required request key '">>, Type, <<"' is missing">>])};
+malformed_request_message({json_type, Type}) ->
+    {true, error_ejson([<<"request key '">>, Type, <<"' is incorrect JSON type">>])};
 malformed_request_message(Why) ->
     error({unexpected_error_message, Why}).
 
@@ -96,5 +102,7 @@ db_exception_message({group_cycle, Id}) ->
                  <<"' would create a cycle, which is not allowed">>]);
 db_exception_message({not_found_in_group, Id}) ->
     error_ejson([<<"supplied ID '">>, Id, <<"' not in group, cannot be deleted">>]);
+db_exception_message({invalid_actor, Id}) ->
+    error_ejson([<<"supplied ID '">>, Id, <<"' does not exist">>]);
 db_exception_message(Why) ->
     error({unexpected_error_message, Why}).

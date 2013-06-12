@@ -8,7 +8,7 @@
 -export([ping/0,
          acl_membership/4,
          add_to_group/3,
-         bulk_check/3,
+         bulk_permission/4,
          create/3,
          delete/2,
          delete_acl/3,
@@ -135,25 +135,24 @@ delete_acl(TargetType, TargetId, Permission) ->
             {error, Reason}
     end.
 
-bulk_permission(actor)     -> bulk_actor_permission;
-bulk_permission(container) -> bulk_container_permission;
-bulk_permission(group)     -> bulk_group_permission;
-bulk_permission(object)    -> bulk_object_permission.
-
--spec bulk_check(auth_id(), permission(), auth_type()) -> list() | {error, term()}.
-bulk_check(AuthId, Perm, Type) ->
-    BulkStatement = bulk_permission(Type),
-    case select(BulkStatement, [AuthId, Perm], rows_as_scalars, [authz_id]) of
+-spec bulk_permission(auth_id(), list(), permission(), auth_type()) ->
+                             list() | {error, term()}.
+bulk_permission(ActorId, Targets, Perm, TargetType) ->
+    case select(actor_has_bulk_permission, [ActorId, Targets, TargetType, Perm],
+                rows_as_scalars, [authz_id]) of
         {ok, L} when is_list(L) ->
             L;
         {ok, none} ->
             [];
+        {error, {null_value_not_allowed, _Error}} ->
+            % This happends when AuthId doesn't exist
+            {error, {invalid_actor, ActorId}};
         {error, Error} ->
             {error, Error}
     end.
 
 -spec has_permission(auth_type(), auth_id(), auth_id(), permission() | any) ->
-    boolean() | {error, _}.
+                            boolean() | {error, _}.
 has_permission(TargetType, TargetId, RequestorId, Permission) ->
     case select(actor_has_permission_on, [RequestorId, TargetId, TargetType,
                                           Permission],
