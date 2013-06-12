@@ -138,6 +138,9 @@ delete_acl(TargetType, TargetId, Permission) ->
 -spec bulk_permission(auth_id(), list(), permission(), auth_type()) ->
                              list() | {error, term()}.
 bulk_permission(ActorId, Targets, Perm, TargetType) ->
+    % Note: this returns which of the supplied Targets actually have permission;
+    % the bulk endpoint takes them and returns the opposite list, i.e., the
+    % targets that the supplied actor does NOT have permission on
     case select(actor_has_bulk_permission, [ActorId, Targets, TargetType, Perm],
                 rows_as_scalars, [authz_id]) of
         {ok, L} when is_list(L) ->
