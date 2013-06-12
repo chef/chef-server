@@ -24,7 +24,7 @@ describe "Bulk Permission Tests" do
               "collection" => [hasselhoff]
             }
             post("/bulk", :shatner,
-              :payload => request).should have_status_code(200).with_body({})
+              :payload => request).should have_status_code(204)
           end
 
           it "target can read it" do
@@ -35,7 +35,7 @@ describe "Bulk Permission Tests" do
               "collection" => [hasselhoff]
             }
             post("/bulk", :hasselhoff,
-              :payload => request).should have_status_code(200).with_body({})
+              :payload => request).should have_status_code(204)
           end
 
           it "third party can read it" do
@@ -46,7 +46,7 @@ describe "Bulk Permission Tests" do
               "collection" => [hasselhoff]
             }
             post("/bulk", :nemoy,
-              :payload => request).should have_status_code(200).with_body({})
+              :payload => request).should have_status_code(204)
           end
 
           it "superuser can read it" do
@@ -57,7 +57,7 @@ describe "Bulk Permission Tests" do
               "collection" => [hasselhoff]
             }
             post("/bulk", :superuser,
-              :payload => request).should have_status_code(200).with_body({})
+              :payload => request).should have_status_code(204)
           end
         end
 
@@ -68,13 +68,22 @@ describe "Bulk Permission Tests" do
           it "empty body returns 400" do
             request = ''
             post("/bulk", :superuser,
-              :payload => request).should have_status_code(400)
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "invalid JSON in request body"})
+          end
+
+          it "invalid body returns 400" do
+            request = 'bogus'
+            post("/bulk", :superuser,
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "invalid JSON in request body"})
           end
 
           it "empty body object returns 400" do
             request = {}
             post("/bulk", :superuser,
-              :payload => request).should have_status_code(400)
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "required request key 'requestor_id' is missing"})
           end
 
           it "missing requestor returns 400" do
@@ -84,12 +93,11 @@ describe "Bulk Permission Tests" do
               "collection" => [hasselhoff]
             }
             post("/bulk", :superuser,
-              :payload => request).should have_status_code(400)
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "required request key 'requestor_id' is missing"})
           end
 
-          it "bad requestor returns 200" do
-            # But it's never going to have permission, so it's okay.  You're just
-            # wasting your time looking.
+          it "bad requestor returns 400" do
             request = {
               "requestor_id" => max_headroom,
               "permission" => 'read',
@@ -97,8 +105,20 @@ describe "Bulk Permission Tests" do
               "collection" => [hasselhoff]
             }
             post("/bulk", :superuser,
-              :payload => request).should have_status_code(200).
-              with_body({"unauthorized" => [hasselhoff]})
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "supplied ID 'deadbeefdeadbeefdeadbeefdeadbeef' does not exist"})
+          end
+
+          it "invalid requestor returns 400" do
+            request = {
+              "requestor_id" => 'nobody',
+              "permission" => 'read',
+              "type" => 'actor',
+              "collection" => [hasselhoff]
+            }
+            post("/bulk", :superuser,
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "invalid authz ID, must be 32-digit hex string"})
           end
 
           it "missing permission returns 400" do
@@ -108,7 +128,8 @@ describe "Bulk Permission Tests" do
               "collection" => [hasselhoff]
             }
             post("/bulk", :superuser,
-              :payload => request).should have_status_code(400)
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "required request key 'permission' is missing"})
           end
 
           it "bad permission returns 400" do
@@ -119,7 +140,8 @@ describe "Bulk Permission Tests" do
               "collection" => [hasselhoff]
             }
             post("/bulk", :superuser,
-              :payload => request).should have_status_code(400)
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "invalid permission type, must be 'create', 'read', 'update', 'delete', or 'grant'"})
           end
 
           it "missing type returns 400" do
@@ -129,7 +151,8 @@ describe "Bulk Permission Tests" do
               "collection" => [hasselhoff]
             }
             post("/bulk", :superuser,
-              :payload => request).should have_status_code(400)
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "required request key 'type' is missing"})
           end
 
           it "bad type returns 400" do
@@ -140,7 +163,8 @@ describe "Bulk Permission Tests" do
               "collection" => [hasselhoff]
             }
             post("/bulk", :superuser,
-              :payload => request).should have_status_code(400)
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "invalid authz type, must be 'actor', 'container', 'group', or 'object'"})
           end
 
           it "missing collection returns 400" do
@@ -150,18 +174,32 @@ describe "Bulk Permission Tests" do
               "type" => 'actor'
             }
             post("/bulk", :superuser,
-              :payload => request).should have_status_code(400)
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "required request key 'collection' is missing"})
           end
 
           it "bad collection returns 400" do
             request = {
               "requestor_id" => shatner,
               "permission" => 'read',
-              "type" => 'bucket',
-              "collection" => 'IRS'
+              "type" => 'actor',
+              "collection" => 'summer'
             }
             post("/bulk", :superuser,
-              :payload => request).should have_status_code(400)
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "request key 'collection' is incorrect JSON type"})
+          end
+
+          it "invalid member in collection returns 400" do
+            request = {
+              "requestor_id" => shatner,
+              "permission" => 'read',
+              "type" => 'actor',
+              "collection" => ['fall']
+            }
+            post("/bulk", :superuser,
+              :payload => request).should have_status_code(400).
+              with_body({"error" => "invalid authz ID, must be 32-digit hex string"})
           end
 
           it "bogus key is ignored" do
@@ -173,7 +211,7 @@ describe "Bulk Permission Tests" do
               "bogus" => 'bogus'
             }
             post("/bulk", :superuser,
-              :payload => request).should have_status_code(200).with_body({})
+              :payload => request).should have_status_code(204)
           end
 
         end
@@ -190,7 +228,7 @@ describe "Bulk Permission Tests" do
 
               with_ace_on :crystal, ace.to_sym, :to => :shatner
 
-              it "entity with permission doesn't return" do
+              it "entity with permission returns 204" do
                 request = {
                   "requestor_id" => shatner,
                   "permission" => ace,
@@ -198,7 +236,7 @@ describe "Bulk Permission Tests" do
                   "collection" => [crystal]
                   }
                 post("/bulk", :shatner,
-                  :payload => request).should have_status_code(200).with_body({})
+                  :payload => request).should have_status_code(204)
               end
 
               it "entity with different permission returns unauthorized" do
@@ -275,7 +313,7 @@ describe "Bulk Permission Tests" do
 
               with_ace_on :crystal, ace.to_sym, :to => :brogrammers
 
-              it "entity with permission doesn't return" do
+              it "entity with permission returns 204" do
                 request = {
                   "requestor_id" => shatner,
                   "permission" => ace,
@@ -283,7 +321,7 @@ describe "Bulk Permission Tests" do
                   "collection" => [crystal]
                   }
                 post("/bulk", :shatner,
-                  :payload => request).should have_status_code(200).with_body({})
+                  :payload => request).should have_status_code(204)
               end
 
               it "entity with different permission returns unauthorized" do
@@ -359,7 +397,7 @@ describe "Bulk Permission Tests" do
 
               with_ace_on :crystal, ace.to_sym, :to => :hipsters
 
-              it "entity with permission doesn't return" do
+              it "entity with permission returns 204" do
                 request = {
                   "requestor_id" => shatner,
                   "permission" => ace,
@@ -367,7 +405,7 @@ describe "Bulk Permission Tests" do
                   "collection" => [crystal]
                   }
                 post("/bulk", :shatner,
-                  :payload => request).should have_status_code(200).with_body({})
+                  :payload => request).should have_status_code(204)
               end
 
               it "entity with different permission returns unauthorized" do
