@@ -3,7 +3,8 @@
 -include("bifrost_wm_rest_endpoint.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
--mixin([{bifrost_wm_base, [create_path/2]}]).
+-mixin([{bifrost_wm_base, [create_path/2,
+                           post_is_create/2]}]).
 
 -export([from_json/2]).
 

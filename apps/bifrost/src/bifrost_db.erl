@@ -8,6 +8,7 @@
 -export([ping/0,
          acl_membership/4,
          add_to_group/3,
+         bulk_permission/4,
          create/3,
          delete/2,
          delete_acl/3,
@@ -60,7 +61,6 @@ create(Type, AuthzId, RequestorId) ->
         {error, Reason} ->
             {error, Reason}
     end.
-
 
 delete_stmt(actor)     -> delete_actor_by_authz_id;
 delete_stmt(container) -> delete_container_by_authz_id;
@@ -135,8 +135,27 @@ delete_acl(TargetType, TargetId, Permission) ->
             {error, Reason}
     end.
 
+-spec bulk_permission(auth_id(), list(), permission(), auth_type()) ->
+                             list() | {error, term()}.
+bulk_permission(ActorId, Targets, Perm, TargetType) ->
+    % Note: this returns which of the supplied Targets actually have permission;
+    % the bulk endpoint takes them and returns the opposite list, i.e., the
+    % targets that the supplied actor does NOT have permission on
+    case select(actor_has_bulk_permission, [ActorId, Targets, TargetType, Perm],
+                rows_as_scalars, [authz_id]) of
+        {ok, L} when is_list(L) ->
+            L;
+        {ok, none} ->
+            [];
+        {error, {null_value_not_allowed, _Error}} ->
+            % This happends when AuthId doesn't exist
+            {error, {invalid_actor, ActorId}};
+        {error, Error} ->
+            {error, Error}
+    end.
+
 -spec has_permission(auth_type(), auth_id(), auth_id(), permission() | any) ->
-    boolean() | {error, _}.
+                            boolean() | {error, _}.
 has_permission(TargetType, TargetId, RequestorId, Permission) ->
     case select(actor_has_permission_on, [RequestorId, TargetId, TargetType,
                                           Permission],

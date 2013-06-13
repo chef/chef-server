@@ -6,7 +6,6 @@
                             forbidden/2,
                             malformed_request/2,
                             ping/2,
-                            post_is_create/2,
                             service_available/2]}]).
 
 -behavior(bifrost_wm).
