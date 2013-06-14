@@ -32,7 +32,8 @@
          is_admin/1,
          is_requesting_client/2,
          is_requesting_node/2,
-         is_validator/1]).
+         is_validator/1,
+         use_custom_acls/4]).
 
 -include("chef_wm.hrl").
 
@@ -97,4 +98,65 @@ is_validator(#chef_client{validator = true}) -> true;
 is_validator(#chef_client{})                 -> false;
 is_validator(#chef_user{})                   -> false.
 
+-spec use_custom_acls(Endpoint :: atom(),
+                      Auth :: {object, object_id()} |
+                              {container, container_name()} | [auth_tuple()],
+                      Req :: wrq:req(),
+                      State :: #base_state{})
+    -> {_, _, #base_state{}}.
+%% Check if we should use contact opscode-authz and chef requestor-specific acls for an endpoint.
+%% If the config variable is false, then we don't check the object/container ACLs and instead
+%% use the fact that a client has passed authn as allowing them to access a resource
+use_custom_acls(_Endpoint, Auth, Req, #base_state{requestor = #chef_user{} } = State) ->
+    {Auth, Req, State};
+use_custom_acls(Endpoint, Auth, Req, #base_state{requestor = #chef_client{} } = State) ->
+    case application:get_env(oc_chef_wm, config_for(Endpoint)) of
+        {ok, false} ->
+            {customize_for_modification_maybe(Endpoint, wrq:method(Req), Auth), Req, State};
+        _Else -> %% use standard behaviour
+            {Auth, Req, State}
+    end.
+
+%% Allow the option to contact opscode-authz with custom acls for all create,update,delete
+%% requests. When 'custom_acls_always_for_modification' is set to true the
+%% 'custom_acls_FOO' flags only apply to the GET method.
+%%
+%% Controlled by the config variable {oc_chef_wm, custom_acls_always_for_modification}
+customize_for_modification_maybe(Endpoint, Method, Auth) ->
+    case is_modification(Endpoint, Method) of
+        true ->
+            case auth_for_modification() of
+                true ->
+                    Auth;
+                false ->
+                    authorized
+            end;
+        false ->
+            authorized
+    end.
+
+config_for(cookbooks) ->
+    custom_acls_cookbooks;
+config_for(roles) ->
+    custom_acls_roles;
+config_for(data) ->
+    custom_acls_data;
+config_for(depsolver) ->
+    custom_acls_depsolver.
+
+is_modification(depsolver, 'POST') ->
+    false;
+is_modification(_Endpoint, Method) when Method =:= 'GET';
+                                        Method =:= 'HEAD' ->
+    false;
+is_modification(_Endpoint, _Method) ->
+    true.
+
+auth_for_modification() ->
+    case application:get_env(oc_chef_wm, custom_acls_always_for_modification) of
+        {ok, Value} ->
+            Value =:= true;
+        _Else -> 
+           true 
+    end.
 

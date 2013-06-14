@@ -68,7 +68,7 @@ validate_request('GET', Req, #base_state{resource_state = CBState0} = State) ->
     {Req, State1}.
 
 auth_info(Req, State) ->
-    {{container, cookbook}, Req, State}.
+    chef_wm_authz:use_custom_acls(cookbooks, {container, cookbook}, Req, State).
 
 %% @doc We generate three different kinds of JSON responses from this resource, based on the
 %% `qualifier' URL path element.  If this is not present, then the 'default' JSON response

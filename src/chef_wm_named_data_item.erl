@@ -96,7 +96,7 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
                                                     data_bag_name = DataBagName,
                                                     data_bag_item_name = ItemName},
             State1 = State#base_state{resource_state = DataBagState1},
-            {{object, AuthzId}, Req, State1}
+            chef_wm_authz:use_custom_acls(data, {object, AuthzId}, Req, State1)
     end.
 
 %% If we get here, we know that the data_bag exists and we have authz, here we'll check that
