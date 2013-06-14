@@ -10,9 +10,11 @@
 
 get(_ReqId, _Key) ->
     %% this is an ugly way of making dialyzer happy with this
-    case random:uniform(1) of
+    case random:uniform(3) of
         1 ->
             not_found;
+        2 ->
+            error;
         _ ->
             {0, <<"dummy cache value">>}
     end.

@@ -124,7 +124,8 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                                               Ids, wrq:raw_path(Req), Paths),
             {CacheStatus, {DbNumFound, Ans}} =
                 case ?SEARCH_CACHE:get(ReqId, CacheKey) of
-                    not_found ->
+                    Miss when Miss =:= not_found;
+                              Miss =:= error ->
                         BulkGetFun = make_bulk_get_fun(DbContext, OrgName,
                                                        IndexType, Paths,
                                                        Req, Darklaunch),
@@ -132,7 +133,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                                                        BatchSize, Start,
                                                        SolrNumFound),
                         ?SEARCH_CACHE:put(ReqId, CacheKey, DbResult),
-                        {cache_miss, DbResult};
+                        {Miss, DbResult};
                     CacheValue ->
                         {cache_hit, CacheValue}
                 end,
@@ -165,8 +166,10 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                 State#base_state{log_msg=Why}}
     end.
 
-search_log_msg(cache_miss, SolrNumFound, NumIds, DbNumFound) ->
+search_log_msg(not_found, SolrNumFound, NumIds, DbNumFound) ->
     {search, SolrNumFound, NumIds, DbNumFound};
+search_log_msg(error, SolrNumFound, NumIds, DbNumFound) ->
+    {search_cache_error, SolrNumFound, NumIds, DbNumFound};
 search_log_msg(cache_hit, SolrNumFound, NumIds, DbNumFound) ->
     {cached_search, SolrNumFound, NumIds, DbNumFound}.
 
