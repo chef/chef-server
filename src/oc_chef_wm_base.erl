@@ -410,9 +410,27 @@ set_authz_id(Id, #data_state{}=D) ->
 -spec check_cookbook_authz(Cookbooks :: [#chef_cookbook_version{}],
                            Req :: wm_req(),
                            State :: #base_state{}) ->
-                                  ok | {error, {[any()]}} |
-                                  {timeout, Msg :: binary()}.
+                                  ok | {error, {[any(),...]}} |
+                                  {timeout, Msg :: <<_:336>>}.
 check_cookbook_authz(Cookbooks, Req, State) ->
+    ShouldSkip = case application:get_env(oc_chef_wm, custom_acls_depsolver) of
+                     {ok, Value} ->
+                         Value =:= false;
+                     _ -> %% use standard behaviour
+                         false
+                 end,
+    check_cookbook_authz(ShouldSkip, Cookbooks, Req, State).
+
+-spec check_cookbook_authz(SkipCheck :: boolean(),
+                           Cookbooks :: [#chef_cookbook_version{}],
+                           Req :: wm_req(),
+                           State :: #base_state{}) ->
+                                  ok | {error, {[any()]}} |
+                                  {timeout, Msg :: <<_:336>>}.
+check_cookbook_authz(true, _Cookbooks, _Req, _State) ->
+    %% skip cookbook authz check
+    ok;
+check_cookbook_authz(false, Cookbooks, Req, State) ->
     %% How long should we allow for each individual Authz request?
     Timeout = chef_config:config_option(oc_chef_wm, authz_timeout, pos_integer),
 
