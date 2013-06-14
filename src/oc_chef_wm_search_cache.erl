@@ -14,9 +14,12 @@
         ]).
 
 -define(NO_CACHE_ORGS_KEY, <<",,NO_CACHE_ORGS">>).
+%% Estimate this value by looking at db perc90 times for search requests. No sense waiting
+%% on a cache for any longer than it would have taken you to go direct to the data.
+-define(REDIS_CALL_TIMEOUT, 200).
 
 %% @doc Fetch an entry from the search cache.
--spec get(_, {binary(), binary()}) -> not_found | {integer(), binary()}.
+-spec get(_, {binary(), binary()}) -> not_found | {integer(), binary()} | error.
 get(ReqId, {OrgName, _} = Key) ->
     folsom_metrics:notify({search_cache_get, 1}),
     Redis = redis_client(),
@@ -27,7 +30,7 @@ get(no_cache, _ReqId, _Redis, _Key) ->
 get(_, _ReqId, no_redis, _Key) ->
     not_found;
 get(cache, _ReqId, Redis, Key) ->
-    Fun = fun() -> eredis:q(Redis, ["GET", key_to_bin(Key)]) end,
+    Fun = make_eredis_fun(Redis, ["GET", key_to_bin(Key)]),
     case folsom_time(search_cache_redis_get, Fun) of
         {ok, undefined} ->
             folsom_metrics:notify({search_cache_miss, 1}),
@@ -38,7 +41,7 @@ get(cache, _ReqId, Redis, Key) ->
             {Count, zlib:gunzip(Gzip)};
         _ ->
             folsom_metrics:notify({search_cache_error, 1}),
-            not_found
+            error
     end.
 
 %% @doc Add entry to the search cache
@@ -56,7 +59,7 @@ put(cache, _ReqId, Redis, Key, {Count, Raw}) ->
     Gzip = zlib:gzip(Raw),
     Value = term_to_binary({Count, Gzip}),
     Cmd = ["SETEX", key_to_bin(Key), integer_to_list(cache_entry_ttl()), Value],
-    Fun = fun() -> eredis:q(Redis, Cmd) end,
+    Fun = make_eredis_fun(Redis, Cmd),
     case folsom_time(search_cache_redis_set, Fun) of
         {ok, <<"OK">>} ->
             ok;
@@ -155,7 +158,7 @@ caching_allowed(no_redis, _OrgName) ->
     no_cache;
 caching_allowed(Redis, OrgName) ->
     Cmd = ["SISMEMBER", ?NO_CACHE_ORGS_KEY, OrgName],
-    Fun = fun() -> eredis:q(Redis, Cmd) end,
+    Fun = make_eredis_fun(Redis, Cmd),
     case folsom_time(search_cache_redis_member, Fun) of
         {ok, <<"0">>} ->
             cache;
@@ -165,4 +168,18 @@ caching_allowed(Redis, OrgName) ->
         _Any ->
             folsom_metrics:notify({search_cache_error, 1}),
             no_cache
+    end.
+
+make_eredis_fun(Redis, Cmd) when is_list(Cmd) ->
+    fun() ->
+            %% Under load we are seeing gen_server timeout errors of unknown origin. Until
+            %% we identify the root cause, protect the caller from uncontrolled crashes and
+            %% return error atom so that requests can fall-back to cache-miss behavior.
+            try
+                eredis:q(Redis, Cmd, ?REDIS_CALL_TIMEOUT)
+            catch
+                EType:Why ->
+                    error_logger:error_report({EType, ?MODULE, Why, Redis, hd(Cmd)}),
+                    error
+            end
     end.
