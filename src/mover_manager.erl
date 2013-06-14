@@ -160,7 +160,7 @@ working(timeout, #state {max_worker_count = MW,
         no_more_orgs ->
             %% Stop and wait for workers to end.
             {next_state, halting, State#state {orgs_remaining = 0}, 0};
-        {ok, OrgName} ->
+        OrgName ->
             start_org_migrator(OrgName, State)
     end.
 
