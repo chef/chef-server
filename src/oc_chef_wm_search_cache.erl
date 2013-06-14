@@ -178,8 +178,17 @@ make_eredis_fun(Redis, Cmd) when is_list(Cmd) ->
             try
                 eredis:q(Redis, Cmd, ?REDIS_CALL_TIMEOUT)
             catch
-                EType:Why ->
+                EType:LargeWhy ->
+                    %% The error tuple from eredis may include a large binary which we want
+                    %% to avoid logging to reduce memory spikes.
+                    Why = classify_eredis_error(LargeWhy),
                     error_logger:error_report({EType, ?MODULE, Why, Redis, hd(Cmd)}),
                     error
             end
     end.
+
+classify_eredis_error({timeout, {gen_server, call, _}}) ->
+    gen_server_timeout;
+classify_eredis_error(_) ->
+    {error, 'REDACTED'}.
+
