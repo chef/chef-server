@@ -204,7 +204,7 @@ if node['private_chef']['bootstrap']['enable']
   #
   # Bifrost uses a separate database running under the same PostgreSQL service.
   # Although it may make sense to perform this bootstrapping in the
-  # `private-chef::oc_bifrost` recipe (or it's own recipe) we've left it here
+  # `private-chef::bifrost` recipe (or it's own recipe) we've left it here
   # to follow the idioms of the rest of this cookbook. This should make a
   # cookbooks-wide refactor easier and allow cut down on the tribal knowledge
   # required to get a new engineer up to speed.
@@ -222,23 +222,23 @@ if node['private_chef']['bootstrap']['enable']
     /opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} \
     /opt/opscode/embedded/bin/psql --dbname template1 \
                                    --tuples-only \
-                                   --command "SELECT rolname FROM pg_roles WHERE rolname='#{node['private_chef']['oc_bifrost']['sql_user']}';" \
-    | grep #{node['private_chef']['oc_bifrost']['sql_user']}
+                                   --command "SELECT rolname FROM pg_roles WHERE rolname='#{node['private_chef']['bifrost']['sql_user']}';" \
+    | grep #{node['private_chef']['bifrost']['sql_user']}
   EOH
 
   bifrost_ro_user_exists = <<-EOH
     /opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} \
     /opt/opscode/embedded/bin/psql --dbname template1 \
                                    --tuples-only \
-                                   --command "SELECT rolname FROM pg_roles WHERE rolname='#{node['private_chef']['oc_bifrost']['sql_ro_user']}';" \
-    | grep #{node['private_chef']['oc_bifrost']['sql_ro_user']}
+                                   --command "SELECT rolname FROM pg_roles WHERE rolname='#{node['private_chef']['bifrost']['sql_ro_user']}';" \
+    | grep #{node['private_chef']['bifrost']['sql_ro_user']}
   EOH
 
   # create users
   execute "create_db_user_bifrost" do
     command <<-EOH
       /opt/opscode/embedded/bin/psql --dbname template1 \
-                                     --command "CREATE ROLE #{node['private_chef']['oc_bifrost']['sql_user']} WITH LOGIN ENCRYPTED PASSWORD '#{node['private_chef']['oc_bifrost']['sql_password']}'"
+                                     --command "CREATE ROLE #{node['private_chef']['bifrost']['sql_user']} WITH LOGIN ENCRYPTED PASSWORD '#{node['private_chef']['bifrost']['sql_password']}'"
     EOH
     user node['private_chef']['postgresql']['username']
     not_if bifrost_user_exists
@@ -246,7 +246,7 @@ if node['private_chef']['bootstrap']['enable']
   execute "create_db_ro_user_bifrost" do
     command <<-EOH
       /opt/opscode/embedded/bin/psql --dbname template1 \
-                                     --command "CREATE ROLE #{node['private_chef']['oc_bifrost']['sql_ro_user']} WITH LOGIN ENCRYPTED PASSWORD '#{node['private_chef']['oc_bifrost']['sql_ro_password']}'"
+                                     --command "CREATE ROLE #{node['private_chef']['bifrost']['sql_ro_user']} WITH LOGIN ENCRYPTED PASSWORD '#{node['private_chef']['bifrost']['sql_ro_password']}'"
     EOH
     user node['private_chef']['postgresql']['username']
     not_if bifrost_ro_user_exists
@@ -257,7 +257,7 @@ if node['private_chef']['bootstrap']['enable']
     command <<-EOH
       /opt/opscode/embedded/bin/createdb --template template0 \
                                          --encoding UTF-8 \
-                                         --owner #{node['private_chef']['oc_bifrost']['sql_user']} \
+                                         --owner #{node['private_chef']['bifrost']['sql_user']} \
                                          bifrost
     EOH
     user node['private_chef']['postgresql']['username']
@@ -272,7 +272,7 @@ if node['private_chef']['bootstrap']['enable']
   # (https://github.com/theory/sqitch), from the creator of pgTAP.
   execute "migrate_database_bifrost" do
     command "psql -d bifrost --set ON_ERROR_STOP=1 --single-transaction -f bifrost.sql"
-    cwd "/opt/opscode/embedded/service/oc_bifrost/db"
+    cwd "/opt/opscode/embedded/service/bifrost/db"
     user node['private_chef']['postgresql']['username']
 
     # Once we're using proper migrations, we can just have this action
@@ -290,7 +290,7 @@ if node['private_chef']['bootstrap']['enable']
            --set database_name=bifrost \
            --file permissions.sql
     EOH
-    cwd "/opt/opscode/embedded/service/oc_bifrost/db"
+    cwd "/opt/opscode/embedded/service/bifrost/db"
     user node['private_chef']['postgresql']['username']
 
     # Eventually, this will probably just be part of the migration
