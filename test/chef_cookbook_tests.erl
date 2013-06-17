@@ -371,3 +371,14 @@ maybe_qualify_name_test_() ->
       ?_assertEqual(<<"cookbook::default.rb">>,
                     chef_cookbook:maybe_qualify_name(<<"cookbook">>, <<"default.rb.rb">>))}
     ].
+
+base_cookbook_name_test_() ->
+    Tests = [
+             %% {Input, Expected}
+             {<<"apache2::default">>, <<"apache2">>},
+             {"apache2::default",     <<"apache2">>},
+             {<<"apache2">>,          <<"apache2">>},
+             {"apache2",              <<"apache2">>}
+            ],
+    [ ?_assertEqual(Expected, chef_cookbook:base_cookbook_name(Input))
+      || {Input, Expected} <- Tests ].

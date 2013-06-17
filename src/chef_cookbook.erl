@@ -30,7 +30,8 @@
          constraint_map_spec/1,
          version_to_binary/1,
          parse_version/1,
-         qualified_recipe_names/2
+         qualified_recipe_names/2,
+         base_cookbook_name/1
         ]).
 
 -ifdef(TEST).
@@ -320,6 +321,19 @@ qualified_recipe_names(CookbookName, SerializedObject) ->
     Recipes = extract_recipe_names(SerializedObject),
     [ maybe_qualify_name(CookbookName, RecipeName)
       || RecipeName <- Recipes ].
+
+
+%% @doc for a given qualified recipe name, extract the base cookbook
+%% name. If the input is not a qualified recipe name, return it
+%% unmodified.
+-spec base_cookbook_name(binary() | string()) -> binary().
+base_cookbook_name(Recipe) ->
+    case re:split(Recipe, <<"::">>, [{return, binary}]) of
+        [Cookbook, _Recipe] ->
+            Cookbook;
+        [Cookbook] ->
+            Cookbook
+    end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Private Functions
