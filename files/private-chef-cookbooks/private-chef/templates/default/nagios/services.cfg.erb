@@ -89,8 +89,8 @@ define service {
 # authz service checks
 define service {
     service_description HTTP Bifrost
-    hostgroup_name      oc_bifrost
-    check_command       check_http_port_expect!<%= node['private_chef']['oc_bifrost']['port'] %>!"HTTP/1.1 404 Object Not Found"
+    hostgroup_name      bifrost
+    check_command       check_http_port_expect!<%= node['private_chef']['bifrost']['port'] %>!"HTTP/1.1 404 Object Not Found"
     use                 default-service
 }
 

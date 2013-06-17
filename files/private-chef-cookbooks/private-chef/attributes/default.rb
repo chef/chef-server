@@ -241,14 +241,14 @@ default['private_chef']['lb']['upstream']['opscode-chef'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-erchef'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-account'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-webui'] = [ "127.0.0.1" ]
-default['private_chef']['lb']['upstream']['oc_bifrost'] = [ "127.0.0.1" ]
+default['private_chef']['lb']['upstream']['bifrost'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-solr'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['bookshelf'] = [ "127.0.0.1" ]
 default['private_chef']['lb_internal']['enable'] = true
 default['private_chef']['lb_internal']['vip'] = "127.0.0.1"
 default['private_chef']['lb_internal']['chef_port'] = 9680
 default['private_chef']['lb_internal']['account_port'] = 9685
-default['private_chef']['lb_internal']['oc_bifrost_port'] = 9683
+default['private_chef']['lb_internal']['bifrost_port'] = 9683
 
 ####
 # Nginx
@@ -376,27 +376,27 @@ default['private_chef']['redis']['maxmemory_policy'] = "volatile-lru"
 ###
 # Bifrost
 ###
-default['private_chef']['oc_bifrost']['enable'] = true
-default['private_chef']['oc_bifrost']['ha'] = false
-default['private_chef']['oc_bifrost']['dir'] = "/var/opt/opscode/oc_bifrost"
-default['private_chef']['oc_bifrost']['log_directory'] = "/var/log/opscode/oc_bifrost"
-default['private_chef']['oc_bifrost']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['oc_bifrost']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['oc_bifrost']['vip'] = '127.0.0.1'
-default['private_chef']['oc_bifrost']['listen'] = '127.0.0.1'
-default['private_chef']['oc_bifrost']['port'] = 9463
-default['private_chef']['oc_bifrost']['superuser_id'] = '5ca1ab1ef005ba111abe11eddecafbad'
-default['private_chef']['oc_bifrost']['db_pool_size'] = '20'
-default['private_chef']['oc_bifrost']['sql_user'] = "bifrost"
-default['private_chef']['oc_bifrost']['sql_password'] = "challengeaccepted"
-default['private_chef']['oc_bifrost']['sql_ro_user'] = "bifrost_ro"
-default['private_chef']['oc_bifrost']['sql_ro_password'] = "foreveralone"
+default['private_chef']['bifrost']['enable'] = true
+default['private_chef']['bifrost']['ha'] = false
+default['private_chef']['bifrost']['dir'] = "/var/opt/opscode/bifrost"
+default['private_chef']['bifrost']['log_directory'] = "/var/log/opscode/bifrost"
+default['private_chef']['bifrost']['log_rotation']['file_maxbytes'] = 104857600
+default['private_chef']['bifrost']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['bifrost']['vip'] = '127.0.0.1'
+default['private_chef']['bifrost']['listen'] = '127.0.0.1'
+default['private_chef']['bifrost']['port'] = 9463
+default['private_chef']['bifrost']['superuser_id'] = '5ca1ab1ef005ba111abe11eddecafbad'
+default['private_chef']['bifrost']['db_pool_size'] = '20'
+default['private_chef']['bifrost']['sql_user'] = "bifrost"
+default['private_chef']['bifrost']['sql_password'] = "challengeaccepted"
+default['private_chef']['bifrost']['sql_ro_user'] = "bifrost_ro"
+default['private_chef']['bifrost']['sql_ro_password'] = "foreveralone"
 
-default['private_chef']['oc_bifrost']['custom_acls_always_for_modification'] = true
-default['private_chef']['oc_bifrost']['custom_acls_cookbooks'] = true
-default['private_chef']['oc_bifrost']['custom_acls_data'] = true
-default['private_chef']['oc_bifrost']['custom_acls_depsolver'] = true
-default['private_chef']['oc_bifrost']['custom_acls_roles'] = true
+default['private_chef']['bifrost']['custom_acls_always_for_modification'] = true
+default['private_chef']['bifrost']['custom_acls_cookbooks'] = true
+default['private_chef']['bifrost']['custom_acls_data'] = true
+default['private_chef']['bifrost']['custom_acls_depsolver'] = true
+default['private_chef']['bifrost']['custom_acls_roles'] = true
 
 ####
 # Bookshelf
@@ -594,7 +594,7 @@ default['private_chef']['keepalived']['service_order'] = [
   { "key" => "postgresql", "service_name" => "postgresql" },
   { "key" => "rabbitmq", "service_name" => "rabbitmq" },
   { "key" => "redis", "service_name" => "redis" },
-  { "key" => "oc_bifrost", "service_name" => "oc_bifrost" },
+  { "key" => "bifrost", "service_name" => "bifrost" },
   { "key" => "opscode-certificate", "service_name" => "opscode-certificate" },
   { "key" => "opscode-account", "service_name" => "opscode-account" },
   { "key" => "opscode-solr", "service_name" => "opscode-solr" },

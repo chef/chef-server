@@ -17,9 +17,9 @@ env = {
 build do
   command "make distclean", :env => env
   command "make rel", :env => env
-  command "mkdir -p #{install_dir}/embedded/service/oc_bifrost"
-  command "#{install_dir}/embedded/bin/rsync -a --delete ./rel/oc_bifrost/ #{install_dir}/embedded/service/oc_bifrost/"
+  command "mkdir -p #{install_dir}/embedded/service/bifrost"
+  command "#{install_dir}/embedded/bin/rsync -a --delete ./rel/oc_bifrost/ #{install_dir}/embedded/service/bifrost/"
   # TODO: git cleanup in oc_bifrost service directory
-  command "rm -rf #{install_dir}/embedded/service/oc_bifrost/log"
-  command "#{install_dir}/embedded/bin/rsync -a --delete ./schema/sql/ #{install_dir}/embedded/service/oc_bifrost/db/"
+  command "rm -rf #{install_dir}/embedded/service/bifrost/log"
+  command "#{install_dir}/embedded/bin/rsync -a --delete ./schema/sql/ #{install_dir}/embedded/service/bifrost/db/"
 end
