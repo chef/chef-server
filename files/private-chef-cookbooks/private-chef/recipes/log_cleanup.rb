@@ -6,6 +6,21 @@
 # All Rights Reserved
 #
 
+# BEGIN LEGACY CRONTAB CLEANUP
+#
+# OPC log rotation was previously controlled by multiple full-blown crontabs.
+# A simple `/etc/cron.hourly/` script now controlls the rotation so we'll
+# cleanup all legacy crontabs.
+#
+file "/etc/cron.d/opc_log_cleanup" do
+  action :delete
+end
+
+file "/etc/cron.d/opc_logrotate.cron" do
+  action :delete
+end
+# END LEGACY CRONTAB CLEANUP
+
 package "logrotate"
 
 # not using /etc/logrotate.d on purpose here so that busted system logrotation will not break
