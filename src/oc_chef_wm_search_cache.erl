@@ -14,9 +14,6 @@
         ]).
 
 -define(NO_CACHE_ORGS_KEY, <<",,NO_CACHE_ORGS">>).
-%% Estimate this value by looking at db perc90 times for search requests. No sense waiting
-%% on a cache for any longer than it would have taken you to go direct to the data.
--define(REDIS_CALL_TIMEOUT, 200).
 
 %% @doc Fetch an entry from the search cache.
 -spec get(_, {binary(), binary()}) -> not_found | {integer(), binary()} | error.
@@ -176,10 +173,27 @@ make_eredis_fun(Redis, Cmd) when is_list(Cmd) ->
             %% we identify the root cause, protect the caller from uncontrolled crashes and
             %% return error atom so that requests can fall-back to cache-miss behavior.
             try
-                eredis:q(Redis, Cmd, ?REDIS_CALL_TIMEOUT)
+                eredis:q(Redis, Cmd, eredis_call_timeout())
             catch
-                EType:Why ->
+                EType:LargeWhy ->
+                    %% The error tuple from eredis may include a large binary which we want
+                    %% to avoid logging to reduce memory spikes.
+                    Why = classify_eredis_error(LargeWhy),
                     error_logger:error_report({EType, ?MODULE, Why, Redis, hd(Cmd)}),
                     error
             end
+    end.
+
+classify_eredis_error({timeout, {gen_server, call, _}}) ->
+    gen_server_timeout;
+classify_eredis_error(_) ->
+    {error, 'REDACTED'}.
+
+eredis_call_timeout() ->
+    case application:get_env(oc_chef_wm, redis_call_timeout) of
+        undefined ->
+            %% gen_server default
+            5000;
+        {ok, Millis} when is_integer(Millis) ->
+            Millis
     end.
