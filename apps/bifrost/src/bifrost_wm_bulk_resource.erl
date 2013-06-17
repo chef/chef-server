@@ -36,12 +36,12 @@ process_post(Req, State) ->
         case ?SH_TIME(ReqId, bifrost_db, bulk_permission,
                       (ReqId, Collection, Permission, Type)) of
             List when is_list(List) ->
-                % The query above returns which of the supplied targets in the
-                % parsed collection have permission, but we need to return the
-                % opposite, so we do this:
                 Excluded = lists:filter(fun(X) -> not lists:member(X, List) end,
                                         Collection),
                 case Excluded of
+                %% The query above returns which of the supplied targets in the
+                %% parsed collection have permission, but we need to return the
+                %% opposite, so we do this:
                     [] ->
                         % If we don't set a body here (or anywhere else, of course,
                         % but that shouldn't happen anyway), web machine should
