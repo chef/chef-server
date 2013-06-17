@@ -26,5 +26,7 @@ init([]) ->
     mover_manager:start_link(),
     Children = [?CHILD_SUP(mover_org_migrator_sup, []),
                 ?CHILD_SUP(mover_eredis_sup, []),
-                ?CHILD_SUP(chef_index_sup, [])],
+                ?CHILD_SUP(chef_index_sup, []),
+                ?CHILD(mover_chef_couch_removal_worker, [], 5000)
+            ],
     {ok, {{one_for_one, 10, 10}, Children}}.
