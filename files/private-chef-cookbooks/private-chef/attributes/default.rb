@@ -38,9 +38,6 @@ default['private_chef']['couchdb']['data_dir'] = "/var/opt/opscode/couchdb/db"
 default['private_chef']['couchdb']['log_directory'] = "/var/log/opscode/couchdb"
 default['private_chef']['couchdb']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['couchdb']['log_rotation']['num_to_keep'] = 10
-
-# The port to listen on
-default['private_chef']['couchdb']['port'] = 5984
 # The IP Address to bind on - use 0.0.0.0 for everything
 default['private_chef']['couchdb']['bind_address'] = '127.0.0.1'
 # The VIP
@@ -54,6 +51,18 @@ default['private_chef']['couchdb']['batch_save_size'] = 1000
 default['private_chef']['couchdb']['batch_save_interval'] = 1000
 default['private_chef']['couchdb']['log_level'] = 'error'
 default['private_chef']['couchdb']['reduce_limit'] = 'false'
+
+# The port other services expect Couch to be on -- couch is hardcoded
+# at 5984 and varnish is at 6984, so set this to 5984 for direct Couch,
+# or 6984 to go through Varnish.
+default['private_chef']['couchdb']['port'] = 5984
+
+####
+# Varnish
+####
+default['private_chef']['varnish']['enable'] = true
+default['private_chef']['varnish']['log_directory'] = "/var/log/opscode/varnish"
+default['private_chef']['varnish']['dir'] = "/var/opt/opscode/varnish"
 
 ####
 # RabbitMQ
