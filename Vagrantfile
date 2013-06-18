@@ -16,6 +16,9 @@ BOX_URL = "https://opscode-vm.s3.amazonaws.com/vagrant/boxes/opscode-ubuntu-10.0
 
 Vagrant.configure("2") do |config|
 
+  # Current version of Chef in prod... update as needed.
+  config.omnibus.chef_version = '11.4.4'
+
   config.berkshelf.enabled = true
 
   config.vm.box = BOX_ID

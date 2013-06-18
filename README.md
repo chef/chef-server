@@ -76,6 +76,11 @@ You'll need to set up the Berkshelf plugin for Vagrant:
 
     /usr/bin/vagrant plugin install vagrant-berkshelf
 
+You will also need the Omnibus plugin, to ensure that we have an
+up-to-date version of Chef on the VMs:
+
+    /usr/bin/vagrant plugin install vagrant-omnibus
+
 Now, to fire up and provision all the VMs:
 
 ```
