@@ -108,13 +108,6 @@ define service {
     use                 default-service
 }
 
-define service {
-    service_description HTTP Chef
-    hostgroup_name      opscode-chef-vip
-    check_command       check_http_port_expect_json!<%= node['private_chef']['opscode-chef']['port'] %>!"HTTP/1.1 200 OK"
-    use                 default-service
-}
-
 
 # RabbitMQ checks
 define service {
@@ -132,7 +125,7 @@ define service {
 }
 
 
-# opscode-chef service checks
+# opscode-erchef service checks
 define service {
     service_description HTTP Opscode Erchef
     hostgroup_name      opscode-erchef-vip

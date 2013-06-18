@@ -83,56 +83,34 @@ http {
     access_log /var/log/opscode/nginx/internal-chef.access.log opscode;
     error_log  /var/log/opscode/nginx/internal-chef.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
 
-    location /checksum/ {
-      internal;
-      root <%= node['private_chef']['opscode-chef']['checksum_path'].gsub('checksum', '') %>;
-    }
-
     # search requests
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/?$") %>
 
-    <% if node['private_chef']['dark_launch']['couchdb_cookbooks'] %>
-    # backwards compatible for Chef 0.9.x and below clients
-    # the nodes/:node_name/cookbooks is still handled by Ruby-Chef
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/nodes/[^/]+/cookbooks$", :ruby) %>
-    <% end %>
-
-    # nodes and environments/*/nodes go to erchef
+    # erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/nodes/{0,1}.*$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/[^/]+/nodes$") %>
-
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/roles/{0,1}.*$", 'couchdb_roles') %>
-
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$", 'couchdb_data') %>
-
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/{0,1}.*$", 'couchdb_environments') %>
-
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/roles/{0,1}.*$") %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$") %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/{0,1}.*$") %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/cookbooks/{0,1}.*$") %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/sandboxes/{0,1}.*$") %>
+    
     # If we're in sql_migration_phase_1, then clients are handled by
     # Erchef, not opscode-account.  In that case, we need to add the
     # chef_api routing.
     <%- if node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
       <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
     <%- end -%>
-
-    # principals go to erchef
+    
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
-
-    # no caching of cookbook files for internal-lb
-
-    # cookbook uploads and sandboxes, specialized for internal-lb
-    <%= @helper.make_location("^/organizations/[a-z0-9\-_]+?/(?:cookbooks|sandboxes)/{0,1}.*$",
-                              "#{node['private_chef']['opscode-chef']['upload_internal_vip']}:#{node['private_chef']['opscode-chef']['upload_internal_port']}",
-                              "opscode_webui",
-                              node['private_chef']['opscode-chef']['upload_internal_proto']) %>
 
     # Include internal routes for addons
     include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_internal.conf;
 
-
     location / {
-      proxy_redirect http://opscode_chef /;
-      proxy_pass http://opscode_chef;
+      proxy_redirect http://opscode_erchef /;
+      proxy_pass http://opscode_erchef;
     }
   }
 
