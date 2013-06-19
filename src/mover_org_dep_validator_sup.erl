@@ -1,11 +1,8 @@
-%% -*- erlang-indent-level: 4;indent-tabs-mode: nil;fill-column: 92 -*-
-%% ex: ts=4 sw=4 et
-%% @author Marc Paradise <marc@opscode.com>
 %% @copyright 2011-2012 Opscode, Inc.
 
-% @doc a supervisor for mover_org_migrator
+% @doc a supervisor for mover_org_dep_validator
 
--module(mover_org_migrator_sup).
+-module(mover_org_dep_validator_sup).
 
 -behaviour(supervisor).
 
@@ -19,10 +16,11 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-    Spec = {undefined, {mover_org_migrator, start_link, []},
-                 temporary, 10000, worker, [mover_org_migrator]},
+    Spec = {undefined, {mover_org_dep_validator, start_link, []},
+                 temporary, 10000, worker, [mover_org_dep_validator]},
     {ok, {{simple_one_for_one, 10, 10}, [Spec]}}.
 
 start_worker(OrgName) ->
     supervisor:start_child(?SERVER, [OrgName]).
+
 
