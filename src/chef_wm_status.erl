@@ -59,6 +59,7 @@ to_json(Req, State) ->
 check_health() ->
     Pings = spawn_health_checks(),
     Status = overall_status(Pings),
+    log_failure(Status, Pings),
     {Status, chef_json:encode({[{<<"status">>, ?A2B(Status)}, {<<"upstreams">>, {Pings}}]})}.
 
 overall_status(Pings) ->
@@ -69,6 +70,14 @@ overall_status(Pings) ->
         _Failure ->
             fail
     end.
+
+-spec log_failure(fail | pong, [{binary(), <<_:32>>}]) -> ok.
+log_failure(fail, Pings) ->
+    FailureData = {{status, fail}, {upstreams, {Pings}}},
+    error_logger:error_msg("/_status~n~p~n", [FailureData]),
+    ok;
+log_failure(_,_) ->
+    ok.
 
 %% Execute health checks in parallel such that no check will exceed `ping_timeout()'
 %% milliseconds. This call does not return until all health checks have been executed (or
