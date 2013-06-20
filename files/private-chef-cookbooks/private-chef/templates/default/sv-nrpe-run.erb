@@ -1,4 +1,0 @@
-#!/bin/sh
-exec 2>&1
-exec /opt/opscode/embedded/bin/chpst -P -u opscode -U opscode /opt/opscode/embedded/nagios/bin/nrpe -c <%= File.join(node['private_chef']['nrpe']['dir'], 'etc', 'nrpe.cfg') %> -d
-
