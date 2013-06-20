@@ -87,5 +87,3 @@ if node['private_chef']['bootstrap']['enable']
     not_if "curl http://#{node['private_chef']['couchdb']['vip']}:#{node['private_chef']['couchdb']['port']}/_all_dbs | grep authorization_design_documents"
   end
 end
-
-add_nagios_hostgroup("opscode-authz")
