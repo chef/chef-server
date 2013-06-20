@@ -109,8 +109,6 @@ template "/etc/cron.d/couchdb_bounce" do
   mode "0600"
 end
 
-add_nagios_hostgroup("couchdb")
-
 # log rotation
 template "/etc/opscode/logrotate.d/couchdb" do
   source "logrotate.erb"

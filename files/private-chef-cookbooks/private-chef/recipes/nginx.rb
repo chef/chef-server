@@ -151,12 +151,6 @@ if node['private_chef']['nginx']['bootstrap']
         end
 end
 
-add_nagios_hostgroup("nginx")
-
-add_nagios_hostgroup("lb") if node['private_chef']['lb']['enable']
-
-add_nagios_hostgroup("lb_internal") if node['private_chef']['lb_internal']['enable']
-
 # log rotation
 template "/etc/opscode/logrotate.d/nginx" do
   source "logrotate.erb"
