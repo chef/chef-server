@@ -54,7 +54,7 @@ Chef::Config.solr_url 'http://<%= node['private_chef']['opscode-solr']['vip'] %>
 # user <=> org association
 Chef::Config.web_ui_private_key "/etc/opscode/webui_priv.pem"
 Chef::Config.web_ui_proxy_user = '<%= @proxy_user %>'
-Opscode::Mappers.connection_string = '<%= node['private_chef']['database_type'] == "postgresql" ? "postgres" : "mysql2" %>://<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>:<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>@<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>/opscode_chef'
+Opscode::Mappers.connection_string = 'postgres://<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>:<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>@<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>/opscode_chef'
 
 Chef::Config.account_service_uri 'http://<%= node['private_chef']['opscode-account']['vip'] %>:<%= node['private_chef']['opscode-account']['port'] %>'
 
