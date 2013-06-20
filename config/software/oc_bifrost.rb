@@ -1,5 +1,5 @@
 name "oc_bifrost"
-version "1.1.5"
+version "1.2.2"
 
 dependencies ["erlang", "rebar", "rsync"]
 
