@@ -36,8 +36,6 @@ module PrivateChef
   bootstrap Mash.new
   drbd Mash.new
   keepalived Mash.new
-  nagios Mash.new
-  nrpe Mash.new
   estatsd Mash.new
   nginx Mash.new
   log_retention Mash.new
@@ -114,7 +112,6 @@ module PrivateChef
       PrivateChef['postgresql']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['opscode_account']['session_secret_key'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['nagios']['admin_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['opscode_authz']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
@@ -141,9 +138,6 @@ module PrivateChef
               },
               'opscode_account' => {
                 'session_secret_key' => PrivateChef['opscode_account']['session_secret_key']
-              },
-              'nagios' => {
-                'admin_password' => PrivateChef['nagios']['admin_password']
               },
               'drbd' => {
                 'shared_secret' => PrivateChef['drbd']['shared_secret']
@@ -187,8 +181,6 @@ module PrivateChef
         "bootstrap",
         "drbd",
         "keepalived",
-        "nagios",
-        "nrpe",
         "estatsd",
         "nginx",
         "ldap",
@@ -213,19 +205,6 @@ module PrivateChef
       PrivateChef["lb"]["web_ui_fqdn"] ||= PrivateChef['api_fqdn']
       PrivateChef["nginx"]["server_name"] ||= PrivateChef['api_fqdn']
       PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
-    end
-
-    def gen_nrpe_allowed_hosts
-      nrpe_allowed_hosts = [ "127.0.0.1" ]
-      if PrivateChef['backend_vips']['ipaddress']
-        nrpe_allowed_hosts << PrivateChef['backend_vips']['ipaddress']
-      end
-      PrivateChef['servers'].each do |k,v|
-        if v["role"] == "backend"
-          nrpe_allowed_hosts << v["ipaddress"]
-        end
-      end
-      PrivateChef["nrpe"]["allowed_hosts"] ||= nrpe_allowed_hosts
     end
 
     def gen_drbd
@@ -278,7 +257,6 @@ module PrivateChef
       PrivateChef["opscode_org_creator"]["ha"] ||= true
       PrivateChef["opscode_account"]["ha"] ||= true
       PrivateChef["nginx"]["ha"] ||= true
-      PrivateChef["nagios"]["ha"] ||= true
     end
 
     def gen_backend(bootstrap=false)
@@ -324,7 +302,6 @@ module PrivateChef
       PrivateChef["lb"]["cache_cookbook_files"] ||= true
       PrivateChef["lb"]["upstream"] = Mash.new
       PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ PrivateChef["backend_vips"]["ipaddress"] ]
-      PrivateChef["nagios"]["enable"] ||= false
       PrivateChef["bootstrap"]["enable"] = false
     end
 
@@ -360,7 +337,6 @@ module PrivateChef
 
     def generate_config(node_name)
       generate_secrets(node_name)
-      gen_nrpe_allowed_hosts
 
       case PrivateChef['topology']
       when "standalone","manual"
