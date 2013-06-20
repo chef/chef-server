@@ -129,7 +129,6 @@ include_recipe "runit"
   "couchdb",
   "rabbitmq",
   "postgresql",
-  "mysql",
   "redis",
   "opscode-authz",
   "opscode-certificate",

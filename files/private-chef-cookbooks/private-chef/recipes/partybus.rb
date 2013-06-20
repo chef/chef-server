@@ -23,7 +23,7 @@ partybus_config = File.join(upgrades_etc_dir, "config.rb")
 
 # set the db connection string
 db_type     = node['private_chef']['database_type']
-db_protocol = db_type == "postgresql" ? "postgres" : "mysql2"
+db_protocol = "postgres"
 db_user     = node['private_chef'][db_type]['sql_user']
 db_password = node['private_chef'][db_type]['sql_password']
 db_vip      = node['private_chef'][db_type]['vip']
@@ -31,7 +31,7 @@ db_name     = "opscode_chef"
 
 db_connection_string = "#{db_protocol}://#{db_user}:#{db_password}@#{db_vip}/#{db_name}"
 
-db_service_name = db_type == "postgresql" ? "postgres" : "mysql"
+db_service_name = "postgres"
 
 # set the node role
 node_role = node['private_chef']['role']
