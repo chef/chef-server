@@ -48,7 +48,6 @@ module PrivateChef
 
   notification_email nil
   from_email nil
-  database_type nil
   role nil
   user Mash.new
 
@@ -183,7 +182,6 @@ module PrivateChef
         rkey = key.gsub('_', '-')
         results['private_chef'][rkey] = PrivateChef[key]
       end
-      results['private_chef']['database_type'] = PrivateChef['database_type']
       results['private_chef']['notification_email'] = PrivateChef['notification_email']
       results['private_chef']['from_email'] = PrivateChef['from_email']
       results['private_chef']['role'] = PrivateChef['role']

@@ -6,7 +6,7 @@ OrgMapper.configure do |mapper|
   mapper.superuser_id = '<%= node['private_chef']['opscode-authz']['superuser_id'] %>'
   mapper.chargify_site = ''
   mapper.chargify_api_secret = ''
-  mapper.sql_database = 'postgres://<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>:<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>@<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>/opscode_chef'
+  mapper.sql_database = 'postgres://<%= node['private_chef']['postgresql']['sql_user'] %>:<%= node['private_chef']['postgresql']['sql_password'] %>@<%= node['private_chef']['postgresql']['vip'] %>/opscode_chef'
 end
 
 Chef::Config[:persistent_queue] = true

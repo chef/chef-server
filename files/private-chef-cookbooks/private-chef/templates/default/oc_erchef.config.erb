@@ -101,10 +101,10 @@
            {db_type, pgsql },
 
            %% Database connection parameters
-           {db_host, "<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>"},
+           {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
            {db_port, 5432},
-           {db_user, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>"},
-           {db_pass, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>"},
+           {db_user, "<%= node['private_chef']['postgresql']['sql_user'] %>"},
+           {db_pass, "<%= node['private_chef']['postgresql']['sql_password'] %>"},
            {db_name, "opscode_chef" },
            {idle_check, 10000},
 
