@@ -77,8 +77,6 @@ runit_service "rabbitmq" do
   }.merge(params))
 end
 
-add_nagios_hostgroup("rabbitmq")
-
 if node['private_chef']['bootstrap']['enable']
   rmq_ctl = "/opt/opscode/embedded/bin/rabbitmqctl"
   opc_ctl = "/opt/opscode/bin/private-chef-ctl"
@@ -136,5 +134,3 @@ if node['private_chef']['bootstrap']['enable']
     retries 10
   end
 end
-
-

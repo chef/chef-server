@@ -1,9 +1,9 @@
 self.output_directory = '/tmp/opscode-platform-test'
 
-self.db_driver = "postgres"
-self.db_host = '<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>'
-self.db_user = '<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>'
-self.db_password = '<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>'
+self.db_driver = "postgres" 
+self.db_host = '<%= node['private_chef']['postgresql']['vip'] %>'
+self.db_user = '<%= node['private_chef']['postgresql']['sql_user'] %>'
+self.db_password = '<%= node['private_chef']['postgresql']['sql_password'] %>'
 
 self.couchdb_host = '<%= node['private_chef']['couchdb']['vip'] %>'
 self.couchdb_port = '<%= node['private_chef']['couchdb']['port'] %>'

@@ -164,56 +164,6 @@ http {
     }
   }
   <%- end -%>
-  <%- if node['private_chef']['nagios']['enable'] -%>
-  # nagios server
-  server {
-    listen <%= @helper.listen_port(node['private_chef']['nagios']['port']) %>;
-    server_name <%= node['fqdn'] %>;
-
-    access_log /var/log/opscode/nginx/nagios.access.log;
-    error_log  /var/log/opscode/nginx/nagios.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
-
-    auth_basic            "Private Chef Nagios";
-    auth_basic_user_file  <%= File.join(node['private_chef']['nagios']['dir'], "etc", "htpasswd") %>;
-
-    location / {
-      root   /opt/opscode/embedded/nagios/share/;
-      index  index.php;
-    }
-
-    location /nagios {
-      index index.php;
-      alias /opt/opscode/embedded/nagios/share/;
-    }
-
-    location /cgi-bin {
-      alias /opt/opscode/embedded/nagios/sbin;
-    }
-
-    location ~ ^/nagios/(.*\.php)$ {
-      alias /opt/opscode/embedded/nagios/share/$1;
-      include <%= File.join(@dir, "etc", "fastcgi.conf") %>;
-      fastcgi_pass 127.0.0.1:<%= node['private_chef']['nagios']['php_fpm_port'] %>;
-    }
-
-    location ~ \.cgi$ {
-      root /opt/opscode/embedded/nagios/sbin;
-      rewrite ^/nagios/cgi-bin/(.*)\.cgi /$1.cgi break;
-      include <%= File.join(@dir, "etc", "fastcgi.conf") %>;
-      fastcgi_param AUTH_USER $remote_user;
-      fastcgi_param REMOTE_USER $remote_user;
-      fastcgi_param DOCUMENT_ROOT  /opt/opscode/embedded/nagios/sbin;
-      fastcgi_param SCRIPT_FILENAME    $fastcgi_script_name;
-      fastcgi_pass 127.0.0.1:<%= node['private_chef']['nagios']['fcgiwrap_port'] %>;
-    }
-
-    location ~ \.php$ {
-      include <%= File.join(@dir, "etc", "fastcgi.conf") %>;
-      fastcgi_pass 127.0.0.1:<%= node['private_chef']['nagios']['php_fpm_port'] %>;
-    }
-
-  }
-  <%- end -%>
 
   include <%= node['private_chef']['nginx']['dir'] %>/etc/nginx.d/*.conf;
 }

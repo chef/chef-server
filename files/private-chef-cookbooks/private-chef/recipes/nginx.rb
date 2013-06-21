@@ -128,15 +128,6 @@ template nginx_config do
   notifies :restart, 'service[nginx]' if OmnibusHelper.should_notify?("nginx")
 end
 
-template File.join(nginx_etc_dir, "fastcgi.conf") do
-  source "fastcgi.conf.erb"
-  owner "root"
-  group "root"
-  mode "0644"
-  variables(node['private_chef']['nginx'].to_hash)
-  notifies :restart, 'service[nginx]' if OmnibusHelper.should_notify?("nginx")
-end
-
 template File.join(nginx_addon_dir, "README.md") do
   source "nginx-addons.README.erb"
   owner "root"
@@ -159,12 +150,6 @@ if node['private_chef']['nginx']['bootstrap']
                 retries 20
         end
 end
-
-add_nagios_hostgroup("nginx")
-
-add_nagios_hostgroup("lb") if node['private_chef']['lb']['enable']
-
-add_nagios_hostgroup("lb_internal") if node['private_chef']['lb_internal']['enable']
 
 # log rotation
 template "/etc/opscode/logrotate.d/nginx" do

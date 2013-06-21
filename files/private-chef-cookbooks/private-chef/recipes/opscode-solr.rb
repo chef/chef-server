@@ -99,7 +99,3 @@ if node['private_chef']['bootstrap']['enable']
 		retries 20
 	end
 end
-
-
-add_nagios_hostgroup("opscode-solr")
-

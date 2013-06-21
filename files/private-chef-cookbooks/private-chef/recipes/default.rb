@@ -129,7 +129,6 @@ include_recipe "runit"
   "couchdb",
   "rabbitmq",
   "postgresql",
-  "mysql",
   "redis",
   "bifrost",
   "opscode-certificate",
@@ -141,8 +140,6 @@ include_recipe "runit"
   "opscode-org-creator",
   "opscode-erchef",
   "opscode-webui",
-  "nagios",
-  "nrpe",
   "nginx",
 	"keepalived"
 ].each do |service|

@@ -298,5 +298,3 @@ if node['private_chef']['bootstrap']['enable']
   end
 
 end
-
-add_nagios_hostgroup("postgresql")

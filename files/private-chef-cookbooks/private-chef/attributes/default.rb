@@ -13,7 +13,6 @@ default['private_chef']['flavor'] = "opc"
 
 default['private_chef']['notification_email'] = "pc-default@opscode.com"
 default['private_chef']['from_email'] = '"Opscode" <donotreply@opscode.com>'
-default['private_chef']['database_type'] = "postgresql"
 default['private_chef']['role'] = "standalone"
 
 ####
@@ -269,17 +268,6 @@ default['private_chef']['nginx']['cache_max_size'] = '5000m'
 default['private_chef']['nginx']['enable_ipv6'] = false
 
 ###
-# MySQL
-###
-default['private_chef']['mysql']['enable'] = false
-default['private_chef']['mysql']['sql_user'] = "opscode_chef"
-default['private_chef']['mysql']['sql_password'] = "snakepliskin"
-default['private_chef']['mysql']['vip'] = "127.0.0.1"
-default['private_chef']['mysql']['destructive_migrate'] = false
-default['private_chef']['mysql']['install_libs'] = true
-default['private_chef']['mysql']['mysql2_versions'] = IO.readlines("/opt/opscode/version-manifest.txt").detect { |l| l =~ /^mysql2/ }.gsub(/^mysql2\s+(\d.+)$/, '\1').chomp.strip.split("-")
-
-###
 # PostgreSQL
 ###
 default['private_chef']['postgresql']['enable'] = true
@@ -461,51 +449,6 @@ default['private_chef']['estatsd']['log_directory'] = "/var/log/opscode/estatsd"
 default['private_chef']['estatsd']['vip'] = "127.0.0.1"
 default['private_chef']['estatsd']['port'] = 9466
 
-###
-# Nagios
-###
-default['private_chef']['nagios']['enable'] = true
-default['private_chef']['nagios']['ha'] = false
-default['private_chef']['nagios']['dir'] = "/var/opt/opscode/nagios"
-default['private_chef']['nagios']['log_directory'] = "/var/log/opscode/nagios"
-default['private_chef']['nagios']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['nagios']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['nagios']['admin_user'] = "nagiosadmin"
-default['private_chef']['nagios']['admin_password'] = "privatechef"
-default['private_chef']['nagios']['admin_email'] = "nobody@example.com"
-default['private_chef']['nagios']['admin_pager'] = "nobody@example.com"
-default['private_chef']['nagios']['debug_level'] = 0
-default['private_chef']['nagios']['debug_verbosity'] = 1
-default['private_chef']['nagios']['alert_email'] = "nobody@example.com"
-default['private_chef']['nagios']['interval_length'] = 1
-default['private_chef']['nagios']['default_host']['check_interval']     = 15
-default['private_chef']['nagios']['default_host']['retry_interval']     = 15
-default['private_chef']['nagios']['default_host']['max_check_attempts'] = 1
-default['private_chef']['nagios']['default_host']['notification_interval'] = 300
-default['private_chef']['nagios']['default_service']['check_interval']     = 60
-default['private_chef']['nagios']['default_service']['retry_interval']     = 15
-default['private_chef']['nagios']['default_service']['max_check_attempts'] = 3
-default['private_chef']['nagios']['default_service']['notification_interval'] = 1200
-default['private_chef']['nagios']['port'] = 9671
-default['private_chef']['nagios']['fcgiwrap_port'] = 9670
-default['private_chef']['nagios']['php_fpm_port'] = 9000
-default['private_chef']['nagios']['hosts'][node['hostname']] = {
-  "ipaddress" => node['ipaddress'],
-  "hostgroups" => [ ]
-}
-
-###
-# NRPE
-###
-default['private_chef']['nrpe']['enable'] = true
-default['private_chef']['nrpe']['dir'] = "/var/opt/opscode/nrpe"
-default['private_chef']['nrpe']['log_directory'] = "/var/log/opscode/nrpe"
-default['private_chef']['nrpe']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['nrpe']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['nrpe']['port'] = 9672
-default['private_chef']['nrpe']['listen'] = node['ipaddress']
-default['private_chef']['nrpe']['allowed_hosts'] = ["127.0.0.1", node['ipaddress']]
-
 ##
 # DRBD
 ##
@@ -569,9 +512,6 @@ default['private_chef']['keepalived']['service_order'] = [
   { "key" => "opscode-org-creator", "service_name" => "opscode-org-creator" },
   { "key" => "opscode-erchef", "service_name" => "opscode-erchef" },
   { "key" => "opscode-webui", "service_name" => "opscode-webui" },
-  { "key" => "nagios", "service_name" => "php-fpm" },
-  { "key" => "nagios", "service_name" => "fcgiwrap" },
-  { "key" => "nagios", "service_name" => "nagios" },
   { "key" => "nginx", "service_name" => "nginx" }
 ]
 
