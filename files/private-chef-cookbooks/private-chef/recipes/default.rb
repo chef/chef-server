@@ -131,7 +131,7 @@ include_recipe "runit"
   "postgresql",
   "mysql",
   "redis",
-  "opscode-authz",
+  "bifrost",
   "opscode-certificate",
   "opscode-account",
   "opscode-solr",

@@ -1,5 +1,5 @@
 name "opscode-test"
-version "pc-rel-0.2.0.1"
+version "0.3.0"
 
 dependency "ruby"
 dependency "libxml2"

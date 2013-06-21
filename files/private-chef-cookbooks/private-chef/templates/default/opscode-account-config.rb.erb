@@ -42,7 +42,7 @@ couchdb_uri = '<%= node['private_chef']['couchdb']['vip'] %>:<%= node['private_c
 account_database = 'opscode_account'
 internal_database = 'opscode_account_internal'
 webui_public_key = OpenSSL::PKey::RSA.new(File.read('/etc/opscode/webui_pub.pem'))
-authorization_service_uri = 'http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>'
+authorization_service_uri = 'http://<%= node['private_chef']['bifrost']['vip'] %>:<%= node['private_chef']['bifrost']['port'] %>'
 certificate_service_uri = 'http://<%= node['private_chef']['opscode-certificate']['vip'] %>:<%= node['private_chef']['opscode-certificate']['port'] %>'
 
 couchrest = CouchRest.new(couchdb_uri)
