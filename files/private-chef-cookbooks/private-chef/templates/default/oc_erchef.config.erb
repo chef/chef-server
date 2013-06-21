@@ -104,6 +104,7 @@
            {db_user, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>"},
            {db_pass, "<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>"},
            {db_name, "opscode_chef" },
+           {idle_check, 10000},
 
            {prepared_statements, {oc_chef_sql, statements, [<%= node['private_chef']['database_type'] == "postgresql" ? "pgsql" : "mysql" %>]}},
            {column_transforms,
