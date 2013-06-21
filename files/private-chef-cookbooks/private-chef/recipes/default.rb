@@ -136,10 +136,9 @@ include_recipe "runit"
   "opscode-account",
   "opscode-solr",
   "opscode-expander",
-#  "bookshelf",
+  "bookshelf",
   "bootstrap",
   "opscode-org-creator",
-  "opscode-chef",
   "opscode-erchef",
   "opscode-webui",
   "nagios",
@@ -152,13 +151,6 @@ include_recipe "runit"
   else
     include_recipe "private-chef::#{service}_disable"
   end
-end
-
-# Enable Bookshelf when sql_migration_phase_1 is enabled
-if node["private_chef"]['dark_launch']['sql_migration_phase_1']
-  include_recipe "private-chef::bookshelf"
-else
-  include_recipe "private-chef::bookshelf_disable"
 end
 
 include_recipe "private-chef::orgmapper"

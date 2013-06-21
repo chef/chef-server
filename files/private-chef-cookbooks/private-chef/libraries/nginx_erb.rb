@@ -30,19 +30,6 @@ class NginxErb
     end
   end
 
-  def choose_upstream(key=:erchef)
-    if (key == :ruby) || node['private_chef']['dark_launch'][key]
-      "opscode_chef"
-    else
-      "opscode_erchef"
-    end
-  end
-
-  # Upload upstream for cookbooks and sandboxes
-  def upload_upstream
-    "#{node['private_chef']['opscode-chef']['upload_proto']}://#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}"
-  end
-
   # Helper to extract static dark_launch configuration
   def xdl(key)
     node['private_chef']['dark_launch'][key] ? 1 : 0
@@ -113,7 +100,7 @@ EOS
     # the following is totally gross and bizzare, but seems to
     # result in passably formatted nginx location stanza's when
     # rendered in our erb template for nginx config
-    make_location(path, choose_upstream(key), alternative, proto)
+    make_location(path, "opscode_erchef", alternative, proto)
   end
 
   def choose_account_upstream(key=:erchef)

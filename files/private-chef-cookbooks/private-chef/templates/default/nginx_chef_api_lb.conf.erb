@@ -52,13 +52,6 @@
       proxy_pass http://opscode_erchef;
     }
 
-    # This internal location is used to serve checksum file content
-    # via the X-Accel-Redirect header. See http://wiki.nginx.org/XSendfile
-    location /checksum/ {
-      internal;
-      root <%= node['private_chef']['opscode-chef']['checksum_path'].gsub('checksum', '') %>;
-    }
-
     # == darklaunch sub-request ==
     #
     # sets:
@@ -98,12 +91,6 @@
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/?$") %>
 
-
-    # backwards compatible for Chef 0.9.x and below clients
-    # If we're using couchdb_cookbooks, then
-    # the nodes/:node_name/cookbooks is still handled by Ruby-Chef
-    <%= @helper.xdl_chef_api("^/organizations/[a-z0-9\-_]+?/nodes/[^/]+/cookbooks$", :xdl_couchdb_flag => 'cookbooks') %>
-
     # nodes and environments/*/nodes go to erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/nodes/{0,1}.*$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/[^/]+/nodes$") %>
@@ -114,8 +101,7 @@
     # cookbooks, sandboxes go to xdarklaunch
     # Sandboxes always go where couchdb_cookbooks is set
     <%= @helper.xdl_chef_api "^/organizations/(?<org>[a-z0-9\-_]+?)/(?<endpoint>cookbooks|sandboxes)/{0,1}.*$",
-                :xdl_couchdb_flag => 'cookbooks',
-                :couchdb_upstream => @helper.upload_upstream %>
+                :xdl_couchdb_flag => 'cookbooks' %>
 
     # principals go to erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
@@ -126,21 +112,6 @@
     <%- if node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
       <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
     <%- end -%>
-
-    <%- if node['private_chef']['lb']['cache_cookbook_files'] && !node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
-    # optional caching of cookbook files by nginx
-    # Available only with couchdb_cookbooks (sql_migration_phase_1 off)
-    location ~ "^/organizations/[a-z0-9\-_]+?/cookbooks/[\w\.]+/(\d+\.\d+\.\d+|_latest)/files/.+$" {
-    <%= @helper.select_upstream("#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}",
-                                "opscode_webui",
-                                node['private_chef']['opscode-chef']['upload_proto']) %>
-      proxy_cache webui-cache;
-      proxy_cache_valid 200 300m;
-    }
-    <%- end -%>
-
-    # Status endpoint
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/status/{0,1}.*$", :ruby) %>
 
     # Include external routes for addons
     include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_external.conf;
