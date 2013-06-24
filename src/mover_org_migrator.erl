@@ -111,10 +111,10 @@ handle_info(_Info, StateName, State) ->
     {next_state, StateName, State}.
 
 terminate(normal, _StateName, #state{org_name = OrgName}) ->
-    lager:info("Terminating after successful migration of ~p", [OrgName]),
+    lager:info([{org_name, OrgName}], "Terminating after successful migration"),
     moser_state_tracker:migration_successful(OrgName);
 terminate(_Other, StateName, #state{org_name = OrgName}) ->
-    lager:info("Terminating after failed migration of ~p", [OrgName]),
+    lager:info([{org_name, OrgName}], "Terminating after failed migration"),
     moser_state_tracker:migration_failed(OrgName, StateName).
 
 code_change(_OldVsn, StateName, State, _Extra) ->
