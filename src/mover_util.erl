@@ -39,19 +39,29 @@ reset_org(OrgName, Line) when is_binary(OrgName) ->
             Acct = moser_acct_processor:open_account(),
             case moser_acct_processor:get_org_guid_by_name(OrgName, Acct) of
                 not_found ->
-                  org_reset_error(OrgName, Line, "org does not exist in account table");
+                    org_reset_error(OrgName, Line, "org does not exist in account table");
                 GUID ->
-                  moser_chef_converter:cleanup_orgid(GUID)
+                    moser_chef_converter:cleanup_orgid(GUID)
             end;
         Other ->
             org_reset_error(OrgName, Line, Other)
     end.
 
 org_reset_error(OrgName, Line, Reason) ->
+    log_org_reset_error(OrgName, Line, Reason),
     % Advance state if possible, so that we can mark as failed.
-    moser_state_tracker:migration_started(OrgName),
-    moser_state_tracker:migration_failed(OrgName, reset_org),
-    log_org_reset_error(OrgName, Line, Reason).
+    ok = case moser_state_tracker:migration_started(OrgName) of
+        ok -> ok;
+        {error, not_in_expected_state, _} -> ok;
+        Error -> Error
+    end,
+    ok = case moser_state_tracker:migration_failed(OrgName, reset_org) of
+        ok -> ok;
+        {error, not_in_expected_state, State} ->
+            log_org_reset_error(OrgName, Line, "Org state could not be set to failed."),
+            State;
+         Error2 -> Error2
+    end.
 
 log_org_reset_error(OrgName, not_applicable, Error) ->
     lager:error([{org_name, OrgName}], "Error while resetting org: ~p", [Error]);
@@ -66,7 +76,7 @@ reset_orgs(Orgs) when is_list(Orgs) ->
 %% one org per line.
 reset_orgs_from_file(FileName) ->
     {ok, Dev} = file:open(FileName, [read]),
-    process_lines(Dev, fun reset_org/2, 0).
+    process_lines(Dev, fun reset_org/2, 1).
 
 process_lines(Dev, Processor, LineNo) ->
     case io:get_line(Dev, "") of
