@@ -30,6 +30,8 @@
 -type actor_list() :: [ binary() ].
 -type group_list() :: [ binary() ].
 
+-type oc_authz_id() :: <<_:256>>.
+
 -record(authz_group, {actors = [] :: actor_list(),
 		      groups = [] :: group_list()}).
 
