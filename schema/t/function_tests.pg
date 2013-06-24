@@ -174,7 +174,7 @@ SELECT function_returns('public', 'clear_acl',
        ARRAY['auth_type', 'character', 'auth_permission'], 'boolean');
 
 SELECT function_returns('public', 'update_acl',
-       ARRAY['auth_type', 'character', 'auth_permission', 'text', 'text'], 'boolean');
+       ARRAY['auth_type', 'character', 'auth_permission', 'character[]', 'character[]'], 'boolean');
 
 INSERT INTO group_actor_relations(parent, child)
   VALUES (group_id('gggggggggggggggggggggggggggggggg'),
@@ -183,8 +183,8 @@ INSERT INTO group_actor_relations(parent, child)
 -- Test out update ACL
 select *
   FROM update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'create',
-                  'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-                  'gggggggggggggggggggggggggggggggg');
+                  ARRAY['bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'],
+                  ARRAY['gggggggggggggggggggggggggggggggg']);
 SELECT is(TRUE,
        actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                                'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
@@ -218,8 +218,8 @@ SELECT is(FALSE,
 -- Try update again with just one actor this time
 select *
   FROM update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'create',
-                  'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-                  'gggggggggggggggggggggggggggggggg');
+                  ARRAY['aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'],
+                  ARRAY['gggggggggggggggggggggggggggggggg']);
 SELECT is(TRUE,
        actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                                'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
@@ -236,7 +236,7 @@ SELECT is(TRUE,
 -- Try it again with no (empty) groups
 select *
   FROM update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'create',
-                  'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', '');
+                  ARRAY['aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'], NULL);
 SELECT is(TRUE,
        actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                                'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
@@ -253,7 +253,7 @@ SELECT is(FALSE,
 -- Try it again with no (NULL) actors
 select *
   FROM update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'create',
-                  NULL, 'gggggggggggggggggggggggggggggggg');
+                  NULL, ARRAY['gggggggggggggggggggggggggggggggg']);
 SELECT is(FALSE,
        actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                                'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
@@ -298,13 +298,13 @@ SELECT throws_ok(
        'Updating non-existent ACL throws error');
 SELECT throws_ok(
        $$SELECT update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'update',
-                           'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq', NULL)$$,
+                           ARRAY['qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'], NULL)$$,
        '23502',
        'null value in column "authorizee" violates not-null constraint',
        'Updating ACL with non-existent actor throws error');
 SELECT throws_ok(
        $$SELECT update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'update',
-                           NULL, 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq')$$,
+                           NULL, ARRAY['qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'])$$,
        '23502',
        'null value in column "authorizee" violates not-null constraint',
        'Updating ACL with non-existent group throws error');
