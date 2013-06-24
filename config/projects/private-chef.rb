@@ -41,7 +41,6 @@ dependency "opscode-org-creator"
 dependency "opscode-certificate"
 dependency "opscode-platform-debug"
 dependency "opscode-test"
-dependency "mysql2"
 
 # oc-chef-pedant for integration/smoke testing
 dependency "oc-chef-pedant"
