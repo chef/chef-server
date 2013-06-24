@@ -240,6 +240,21 @@ create_entity_if_authorized_test_() ->
               end}
      end]}.
 
+join_url_test_() ->
+    Root = "root/",
+    Tests = [{"foo", "root/foo"},
+             {"/foo", "root/foo"}],
+    [
+     ?_assertEqual(Expect, oc_chef_authz_http:join_url(Root, In))
+     || {In, Expect} <- Tests ].
+
+enforce_trailing_slash_test_() ->
+    Tests = [{"bare", "bare/"},
+             {"with/", "with/"},
+             {"onyourown//", "onyourown//"}],
+    [ ?_assertEqual(Expect, oc_chef_authz_http:enforce_trailing_slash(In))
+      || {In, Expect} <- Tests ].
+    
 %% helper for tests
 is_authz_id(Id) when is_binary(Id) ->
     case re:run(Id, "[0-9a-f]*", []) of
