@@ -16,6 +16,8 @@
 
 -include("mover.hrl").
 
+-compile([{parse_transform, lager_transform}]).
+
 %% @doc Get a list of unmigrated orgs from migration_state_table
 %% and set the xdarklaunch flags
 populate_xdl_with_unmigrated_orgs() ->
@@ -24,17 +26,37 @@ populate_xdl_with_unmigrated_orgs() ->
 
 %% @doc delete any SQL data for the named org and reset its state
 %% to indicate it's ready to migrate.
-reset_org(OrgName) when is_list(OrgName) ->
-    reset_org(iolist_to_binary(OrgName));
-reset_org(OrgName) when is_binary(OrgName) ->
+%%
+
+reset_org(OrgName) ->
+    reset_org(OrgName, not_applicable).
+
+reset_org(OrgName, Line) when is_list(OrgName) ->
+    reset_org(iolist_to_binary(OrgName), Line);
+reset_org(OrgName, Line) when is_binary(OrgName) ->
     case moser_state_tracker:ready_migration(OrgName) of
         ok ->
             Acct = moser_acct_processor:open_account(),
-            GUID = moser_acct_processor:get_org_guid_by_name(OrgName, Acct),
-            moser_chef_converter:cleanup_orgid(GUID);
+            case moser_acct_processor:get_org_guid_by_name(OrgName, Acct) of
+                not_found ->
+                  org_reset_error(OrgName, Line, "org does not exist in account table");
+                GUID ->
+                  moser_chef_converter:cleanup_orgid(GUID)
+            end;
         Other ->
-            Other
+            org_reset_error(OrgName, Line, Other)
     end.
+
+org_reset_error(OrgName, Line, Reason) ->
+    % Advance state if possible, so that we can mark as failed.
+    moser_state_tracker:migration_started(OrgName),
+    moser_state_tracker:migration_failed(OrgName, reset_org),
+    log_org_reset_error(OrgName, Line, Reason).
+
+log_org_reset_error(OrgName, not_applicable, Error) ->
+    lager:error([{org_name, OrgName}], "Error while resetting org: ~p", [Error]);
+log_org_reset_error(OrgName, Line, Error) ->
+    lager:error([{org_name, OrgName}], "Error on line ~p while resetting org: ~p", [Line, Error]).
 
 %% @doc Reset each org in the provided list of orgs.
 reset_orgs(Orgs) when is_list(Orgs) ->
@@ -44,16 +66,16 @@ reset_orgs(Orgs) when is_list(Orgs) ->
 %% one org per line.
 reset_orgs_from_file(FileName) ->
     {ok, Dev} = file:open(FileName, [read]),
-    process_lines(Dev, fun reset_org/1).
+    process_lines(Dev, fun reset_org/2, 0).
 
-process_lines(Dev, Processor) ->
+process_lines(Dev, Processor, LineNo) ->
     case io:get_line(Dev, "") of
         eof ->
             file:close(Dev),
             ok;
         "\n" ->
-            process_lines(Dev, Processor);
+            process_lines(Dev, Processor, LineNo + 1);
         Line ->
-            Processor(string:strip(Line, right, $\n)),
-            process_lines(Dev, Processor)
+            Processor(string:strip(Line, right, $\n), LineNo),
+            process_lines(Dev, Processor, LineNo + 1)
     end.
