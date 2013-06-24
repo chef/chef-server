@@ -33,6 +33,7 @@
 -ifndef(TEST).
 -export([
          add_client_to_clients_group/4,
+         bulk_actor_is_authorized/4,
          delete_resource/3,
          create_entity_if_authorized/4,
          get_container_aid_for_object/3,
@@ -225,6 +226,58 @@ set_acl(RequestorId, AuthzType, ObjectId, [{Method, ACE}|Rest]) when AuthzType =
             error_logger:error_msg("Error setting ACE ~p for method ~p on ~p ~p for requestor ~p: ~p~n",
                                    [ACE, Method, AuthzType, ObjectId, RequestorId, Reason]),
             {error, Reason}
+    end.
+
+%% @doc Determine if the actor with id `ActorId' has `Permission' on each resource object in
+%% the `Resources' list. If the actor has permission on all of the resources, then the atom
+%% `ok' is returned, otherwise, a list of `{false, ResourceData}' tuples are returned. If an
+%% error occurs during a check, the function immediately returns a detailed error tuple.
+-spec bulk_actor_is_authorized(ReqId,
+                               ActorId,
+                               Resources,
+                               Permission) -> ok | [{false, ResourceData}] |
+                                              {error, {ResourceData, _}} when
+      ReqId :: binary(),
+      ActorId :: actor_id(),
+      Resources :: [{resource_type(), oc_authz_id(), ResourceData}],
+      ResourceData :: any(),
+      Permission :: access_method().
+bulk_actor_is_authorized(ReqId, ActorId, Resources, Permission) ->
+    CheckAuthz = fun(RequestFun) ->
+                         bulk_actor_is_authorized_checker(RequestFun, ActorId,
+                                                          Permission, Resources)
+                 end,
+    oc_chef_authz_http:with_new_http_client(ReqId, ActorId, CheckAuthz).
+
+bulk_actor_is_authorized_checker(RequestFun, ActorId, Permission, Resources) ->
+    case bulk_actor_is_authorized_checker(RequestFun, ActorId,
+                                          Permission, Resources, []) of
+        [] ->
+            ok;
+        Other ->
+            Other
+    end.
+
+bulk_actor_is_authorized_checker(_RequestFun, _ActorId, _Permission, [], Acc) ->
+    Acc;
+bulk_actor_is_authorized_checker(RequestFun, ActorId, Permission, [ResourceElt | Rest], Acc) ->
+    case single_actor_is_authorized(RequestFun, ResourceElt, ActorId, Permission) of
+        {error, _} = Error ->
+            Error;
+        true ->
+            bulk_actor_is_authorized_checker(RequestFun, ActorId, Permission, Rest, Acc);
+        Result ->
+            bulk_actor_is_authorized_checker(RequestFun, ActorId, Permission,
+                                             Rest, [Result | Acc])
+    end.
+
+single_actor_is_authorized(RequestFun, {ResourceType, ResourceId, Data}, ActorId, Permission) ->
+    Url = make_url([pluralize_resource(ResourceType), ResourceId, <<"acl">>,
+                    Permission, pluralize_resource(actor), ActorId]),
+    case RequestFun(Url, get, [], []) of
+        ok -> true;
+        {error, not_found} -> {false, Data};
+        {error, Why} -> {error, {Data, Why}}
     end.
 
 %
