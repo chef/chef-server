@@ -1,7 +1,11 @@
-Authz PostgreSQL Schema
+Bifrost PostgreSQL Schema
 =======================
 
 ![alt text](doc/assets/authz-schema.png "schema diagram")
+
+# Modifying the Schema
+
+* [Set up and Use Sqitch](doc/sqitch_background.md)
 
 # Testing
 
