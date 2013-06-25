@@ -16,3 +16,5 @@ debug_object_acl_view [debug_schema base] 2013-06-24T13:36:09Z Christopher Maier
 
 actor_has_bulk_permission_on 2013-06-25T15:28:59Z Christopher Maier <cm@opscode.com> # Add actor_has_bulk_permission_on function, enabling the bulk authorization endpoint
 @1.2.0 2013-06-25T15:41:51Z Christopher Maier <cm@opscode.com> # Bulk authorization endpoint
+@1.2.1 2013-06-25T18:19:42Z Christopher Maier <cm@opscode.com> # Placeholder version to keep in sync with code version
+@1.2.2 2013-06-25T18:19:47Z Christopher Maier <cm@opscode.com> # Placeholder version to keep in sync with code version
