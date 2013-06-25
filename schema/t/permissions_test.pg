@@ -1,6 +1,6 @@
 BEGIN;
 
-\set schema quote_ident('public')
+\set schema '\'public\''
 
 SELECT no_plan();
 
