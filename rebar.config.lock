@@ -97,7 +97,7 @@
                    "2b796ea7973c0f38aad569bf2506bd8026eca004"}},
        {oc_chef_authz,".*",
                       {git,"git@github.com:opscode/oc_chef_authz.git",
-                           "d50a20a93e95a2e57acb419f71a175022c12b4ee"}},
+                           "9eddd646128a770e00ad975d54daa5789e24db87"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
                         "a36a2426f81fcf56c194a8fbfca4780ca6b0c152"}},
