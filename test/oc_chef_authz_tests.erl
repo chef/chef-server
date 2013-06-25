@@ -240,6 +240,79 @@ create_entity_if_authorized_test_() ->
               end}
      end]}.
 
+start_apps() ->
+    application:start(ibrowse),
+    application:start(oc_chef_authz),
+    ok.
+
+stop_apps() ->
+    application:stop(oc_chef_authz),
+    application:stop(ibrowse),
+    ok.
+
+ping_test_() ->
+    {foreach,
+     fun() ->
+             application:set_env(oc_chef_authz, authz_service,
+                                 [{root_url, "http://test-authz-service:2323"},
+                                  {timeout, 200}]),
+             MockMods = [ibrowse, ibrowse_http_client],
+             error_logger:tty(false),
+             [ meck:new(M) || M <- MockMods ],
+             MockMods
+     end,
+     fun(MockMods) ->
+             [ meck:unload(M) || M <- MockMods ],
+             error_logger:tty(true),
+             ok
+     end,
+     [
+      {"ping pong",
+       fun() ->
+               FakePid = spawn(fun() -> ok end),
+               meck:expect(ibrowse_http_client, start_link,
+                           fun("http://test-authz-service:2323") ->
+                                   {ok, FakePid}
+                           end),
+               meck:expect(ibrowse, send_req_direct,
+                           fun(Pid, "http://test-authz-service:2323/_ping", _,
+                               get, _, _, 200) when Pid =:= FakePid ->
+                                   {ok, "200", [], <<"{\"status\":\"ok\"}">>}
+                           end),
+               ?assertEqual(pong, oc_chef_authz_http:ping())
+       end},
+
+      {"ping pang 500",
+       fun() ->
+               FakePid = spawn(fun() -> ok end),
+               meck:expect(ibrowse_http_client, start_link,
+                           fun("http://test-authz-service:2323") ->
+                                   {ok, FakePid}
+                           end),
+               meck:expect(ibrowse, send_req_direct,
+                           fun(Pid, "http://test-authz-service:2323/_ping", _,
+                               get, _, _, 200) when Pid =:= FakePid ->
+                                   {ok, "500", [], <<"{\"status\":\"NOT OK\"}">>}
+                           end),
+               ?assertEqual(pang, oc_chef_authz_http:ping())
+       end},
+
+      {"ping pang error",
+       fun() ->
+               FakePid = spawn(fun() -> ok end),
+               meck:expect(ibrowse_http_client, start_link,
+                           fun("http://test-authz-service:2323") ->
+                                   {ok, FakePid}
+                           end),
+               meck:expect(ibrowse, send_req_direct,
+                           fun(Pid, "http://test-authz-service:2323/_ping", _,
+                               get, _, _, 200) when Pid =:= FakePid ->
+                                   {error, req_timedout}
+                           end),
+               ?assertEqual(pang, oc_chef_authz_http:ping())
+       end}
+      ]}.
+
 join_url_test_() ->
     Root = "root/",
     Tests = [{"foo", "root/foo"},
@@ -254,7 +327,7 @@ enforce_trailing_slash_test_() ->
              {"onyourown//", "onyourown//"}],
     [ ?_assertEqual(Expect, oc_chef_authz_http:enforce_trailing_slash(In))
       || {In, Expect} <- Tests ].
-    
+
 %% helper for tests
 is_authz_id(Id) when is_binary(Id) ->
     case re:run(Id, "[0-9a-f]*", []) of

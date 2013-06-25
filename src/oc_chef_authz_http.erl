@@ -233,13 +233,13 @@ ping(RequestFun) ->
         Url = "/_ping",
         Headers = [{"Accept", "application/json"}],
         case RequestFun(Url, get, Headers, []) of
-            {ok, "200", _H, _B} ->
+            {ok, _} ->
                 pong;
-            {ok, Status, _H, _B} ->
-                error_logger:error_report({oc_chef_authz_http_ping, pang, Status}),
-                pang;
-            {error, Why} ->
-                error_logger:error_report({oc_chef_authz_http_ping, pang, Why}),
+            ok ->
+                %% in case upstream status endpoint returns "{}"
+                pong;
+            {error, Reason} ->
+                error_logger:error_report({oc_chef_authz_http_ping, pang, Reason}),
                 pang
         end
     catch
