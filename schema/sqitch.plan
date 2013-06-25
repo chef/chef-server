@@ -12,3 +12,4 @@ clear_acl [base id_resolution_functions] 2013-06-24T13:23:19Z Christopher Maier 
 update_acl [base id_resolution_functions] 2013-06-24T13:32:28Z Christopher Maier <cm@opscode.com> # add update_acl function
 debug_schema 2013-06-24T13:34:20Z Christopher Maier <cm@opscode.com> # add debug schema
 debug_object_acl_view [debug_schema base] 2013-06-24T13:36:09Z Christopher Maier <cm@opscode.com> # add object_acl view in debug schema
+@1.1.6 2013-06-25T15:05:55Z Christopher Maier <cm@opscode.com> # Base schema back-ported to sqitch
