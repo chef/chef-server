@@ -100,7 +100,7 @@
                            "9eddd646128a770e00ad975d54daa5789e24db87"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
-                        "a36a2426f81fcf56c194a8fbfca4780ca6b0c152"}},
+                        "29c4d2925d54217e1525d79e55a7a1db5a2c938b"}},
        {opscoderl_folsom,".*",
                          {git,"git://github.com/opscode/opscoderl_folsom.git",
                               "91c77678e2111e54c94ac567569fa8759d0d62a0"}},
