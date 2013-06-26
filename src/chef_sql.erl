@@ -213,7 +213,7 @@ fetch_node(OrgId, NodeName) ->
 -spec fetch_nodes(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
 %% @doc Return list of node names for a given organization
 fetch_nodes(OrgId) ->
-    fetch_objects(OrgId, chef_node).
+    fetch_object_names(OrgId, chef_node).
 
 -spec fetch_nodes(bin_or_string(), bin_or_string()) -> {ok, [binary()] | not_found} |
                                                        {error, term()}.
@@ -264,7 +264,7 @@ fetch_role(OrgId, RoleName) ->
 -spec fetch_roles(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
 %% @doc Return list of role names for a given organization
 fetch_roles(OrgId) ->
-    fetch_objects(OrgId, chef_role).
+    fetch_object_names(OrgId, chef_role).
 
 -spec bulk_get_roles([binary()]) -> {ok, [binary()] | not_found} |
                                     {error, term()}.
@@ -314,7 +314,6 @@ fetch_data_bag_item(OrgId, DataBagName, DataBagItemName) ->
                                   {ok, [binary()]} | {error, term()}.
 %% @doc Return list of data_bag_item names for a given organization
 fetch_data_bag_items(OrgId, DataBagName) ->
-    %% Again, coding this following fetch_objects in hopes of future refactoring
     RecordName = chef_data_bag_item,
     QueryName = list_query_for(RecordName),
     case sqerl:select(QueryName, [OrgId, DataBagName], rows_as_scalars, [item_name]) of
@@ -330,7 +329,6 @@ fetch_data_bag_items(OrgId, DataBagName) ->
                                      {ok, [binary()]} | {error, term()}.
 %% @doc Return list of data_bag_item names for a given organization
 fetch_data_bag_item_ids(OrgId, DataBagName) ->
-    %% Again, coding this following fetch_objects in hopes of future refactoring
     QueryName = find_data_bag_item_id_by_orgid_name,
     case sqerl:select(QueryName, [OrgId, DataBagName], rows_as_scalars, [id]) of
         {ok, L} when is_list(L) ->
@@ -376,7 +374,7 @@ fetch_environment(OrgId, EnvironmentName) ->
 -spec fetch_environments(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
 %% @doc Return list of environment names for a given organization
 fetch_environments(OrgId) ->
-    fetch_objects(OrgId, chef_environment).
+    fetch_object_names(OrgId, chef_environment).
 
 -spec bulk_get_environments([binary()]) -> {ok, [binary()] | not_found} |
                                            {error, term()}.
@@ -414,7 +412,7 @@ fetch_client(OrgId, ClientName) ->
 -spec fetch_clients(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
 %% @doc Return list of client names for a given organization
 fetch_clients(OrgId) ->
-    fetch_objects(OrgId, chef_client).
+    fetch_object_names(OrgId, chef_client).
 
 -spec bulk_get_clients([binary()]) -> {ok, [ [proplists:property()] ] | not_found} |
                                       {error, term()}.
@@ -470,7 +468,7 @@ fetch_data_bag(OrgId, DataBagName) ->
 -spec fetch_data_bags(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
 %% @doc Return list of data_bag names for a given organization
 fetch_data_bags(OrgId) ->
-    fetch_objects(OrgId, chef_data_bag).
+    fetch_object_names(OrgId, chef_data_bag).
 
 -spec create_data_bag(#chef_data_bag{}) -> {ok, 1} | {error, term()}.
 create_data_bag(#chef_data_bag{}=DataBag) ->
@@ -1070,10 +1068,10 @@ query_and_txfm_for_record(fetch, chef_cookbook_version) ->
 query_and_txfm_for_record(fetch_latest, chef_cookbook_version) ->
     {find_latest_cookbook_version_by_orgid_name, ?FIRST(chef_cookbook_version)}.
 
--spec fetch_objects(bin_or_string(), chef_object_name()) ->
+-spec fetch_object_names(bin_or_string(), chef_object_name()) ->
                            {ok, [binary()]} | {error, term()}.
 %% @doc Return list of object names for a given organization and object type
-fetch_objects(OrgId, RecordName) ->
+fetch_object_names(OrgId, RecordName) ->
     QueryName = list_query_for(RecordName),
     case sqerl:select(QueryName, [OrgId], rows_as_scalars, [name]) of
         {ok, L} when is_list(L) ->
