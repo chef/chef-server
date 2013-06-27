@@ -1,0 +1,10 @@
+start on runlevel [2345]
+stop on shutdown
+respawn
+post-stop script
+   # To avoid stomping on runsv's owned by a different runsvdir
+   # process, kill any runsv process that has been orphaned, and is
+   # now owned by init (process 1).
+   pkill -HUP -P 1 runsv$
+end script
+exec <%= @install_path %>/embedded/bin/runsvdir-start

@@ -120,8 +120,8 @@ directory "/var/opt/opscode" do
   action :create
 end
 
-# Install our runit instance
-include_recipe "runit"
+# Configure and install our runit instance
+include_recipe "private-chef::runit"
 
 # Configure Services
 [
