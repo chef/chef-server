@@ -47,29 +47,10 @@ template reindexer_config do
   notifies :restart, 'service[opscode-expander-reindexer]' if OmnibusHelper.should_notify?("opscode-expander-reindexer")
 end
 
-runit_service "opscode-expander" do
-  down node['private_chef']['opscode-expander']['ha']
-  options({
-    :log_directory => expander_log_dir,
-    :svlogd_size => node['private_chef']['opscode-expander']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['opscode-expander']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
-
-runit_service "opscode-expander-reindexer" do
-  down node['private_chef']['opscode-expander']['ha']
-  options({
-    :log_directory => expander_reindexer_log_dir,
-    :svlogd_size => node['private_chef']['opscode-expander']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['opscode-expander']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
-
-if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl start opscode-expander" do
-		retries 20
-	end
-	execute "/opt/opscode/bin/private-chef-ctl start opscode-expander-reindexer" do
-		retries 20
-	end
+component_runit_service "opscode-expander"
+component_runit_service "opscode-expander-reindexer" do
+  log_directory expander_reindexer_log_dir
+  svlogd_size node['private_chef']['opscode-expander']['log_rotation']['file_maxbytes']
+  svlogd_num node['private_chef']['opscode-expander']['log_rotation']['num_to_keep']
+  ha node['private_chef']['opscode-expander']['ha']
 end

@@ -30,10 +30,4 @@ template File.join(keepalived_bin_dir, "cluster.sh") do
   variables(node['private_chef']['keepalived'].to_hash)
 end
 
-runit_service "keepalived" do
-  options({
-    :log_directory => keepalived_log_dir,
-    :svlogd_size => node['private_chef']['keepalived']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['keepalived']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
+component_runit_service "keepalived"

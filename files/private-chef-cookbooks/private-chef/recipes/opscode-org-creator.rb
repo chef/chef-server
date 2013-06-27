@@ -46,17 +46,4 @@ template "/opt/opscode/embedded/service/opscode-org-creator/rel/org_app/bin/org_
   notifies :restart, 'service[opscode-org-creator]' if OmnibusHelper.should_notify?("opscode-org-creator")
 end
 
-runit_service "opscode-org-creator" do
-  down node['private_chef']['opscode-org-creator']['ha']
-  options({
-    :log_directory => opscode_org_creator_log_dir,
-    :svlogd_size => node['private_chef']['opscode-org-creator']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['opscode-org-creator']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
-
-if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl start opscode-org-creator" do
-		retries 20
-	end
-end
+component_runit_service "opscode-org-creator"

@@ -91,17 +91,4 @@ end
 
 execute "chown -R #{node['private_chef']['user']['username']} /opt/opscode/embedded/service/opscode-webui/public"
 
-runit_service "opscode-webui" do
-  down node['private_chef']['opscode-webui']['ha']
-  options({
-    :log_directory => private_chef_webui_log_dir,
-    :svlogd_size => node['private_chef']['opscode-webui']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['opscode-webui']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
-
-if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl start opscode-webui" do
-		retries 20
-	end
-end
+component_runit_service "opscode-webui"

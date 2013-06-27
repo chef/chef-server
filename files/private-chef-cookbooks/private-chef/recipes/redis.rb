@@ -44,17 +44,4 @@ template redis_config do
   notifies :restart, 'service[redis]' if OmnibusHelper.should_notify?("redis")
 end
 
-runit_service "redis" do
-  down node['private_chef']['redis']['ha']
-  options({
-    :log_directory => redis_log_dir,
-    :svlogd_size => node['private_chef']['redis']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['redis']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
-
-if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl start redis" do
-		retries 20
-	end
-end
+component_runit_service "redis"

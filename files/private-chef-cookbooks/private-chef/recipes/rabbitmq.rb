@@ -68,24 +68,13 @@ template config_file do
   variables(rabbitmq.to_hash)
 end
 
-runit_service "rabbitmq" do
-  down rabbitmq['ha']
-  options({
-    :log_directory => rabbitmq_log_dir,
-    :svlogd_size => rabbitmq['log_rotation']['file_maxbytes'],
-    :svlogd_num  => rabbitmq['log_rotation']['num_to_keep']
-  }.merge(params))
-end
+component_runit_service "rabbitmq"
 
 if node['private_chef']['bootstrap']['enable']
   rmq_ctl = "/opt/opscode/embedded/bin/rabbitmqctl"
   opc_ctl = "/opt/opscode/bin/private-chef-ctl"
   opc_username = node["private_chef"]["user"]["username"]
   rmq_ctl_chpost = "/opt/opscode/embedded/bin/chpst -u #{opc_username} -U #{opc_username} #{rmq_ctl}"
-
-  execute "/opt/opscode/bin/private-chef-ctl start rabbitmq" do
-    retries 20
-  end
 
   execute "#{rmq_ctl_chpost} wait #{rabbitmq_data_dir}/rabbit@localhost.pid" do
     retries 10

@@ -47,17 +47,4 @@ link "/opt/opscode/embedded/service/opscode-erchef/etc/app.config" do
   to erchef_config
 end
 
-runit_service "opscode-erchef" do
-  down node['private_chef']['opscode-erchef']['ha']
-  options({
-    :log_directory => opscode_erchef_log_dir,
-    :svlogd_size => node['private_chef']['opscode-erchef']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['opscode-erchef']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
-
-if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl start opscode-erchef" do
-		retries 20
-	end
-end
+component_runit_service "opscode-erchef"

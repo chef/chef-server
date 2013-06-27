@@ -91,17 +91,4 @@ unicorn_config File.join(private_chef_api_etc_dir, "unicorn.rb") do
   notifies :restart, 'service[opscode-chef]' if should_notify
 end
 
-runit_service "opscode-chef" do
-  down node['private_chef']['opscode-chef']['ha']
-  options({
-    :log_directory => private_chef_api_log_dir,
-    :svlogd_size => node['private_chef']['opscode-chef']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['opscode-chef']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
-
-if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl start opscode-chef" do
-		retries 20
-	end
-end
+component_runit_service "opscode-chef"
