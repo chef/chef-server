@@ -30,6 +30,8 @@ cookbook "opscode-pedant", git: "git@github.com:opscode-cookbooks/opscode-pedant
 # cookbook "opscode-pedant", path: "#{ENV['OPSCODE_COOKBOOKS']}/opscode-pedant"
 cookbook "opscode-ruby", git: "git@github.com:opscode-cookbooks/opscode-ruby.git"
 # cookbook "opscode-ruby", path: "#{ENV['OPSCODE_COOKBOOKS']}/opscode-ruby"
+cookbook "sqitch", git: "git@github.com:opscode-cookbooks/sqitch.git"
+# cookbook "sqitch", path: "#{ENV['OPSCODE_COOKBOOKS']}/sqitch"
 
 # This is only needed for local dev work
 cookbook "opscode-dev-shim", git: "git@github.com:opscode-cookbooks/opscode-dev-shim.git"
