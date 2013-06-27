@@ -43,7 +43,7 @@ template chef_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-chef'].to_hash)
-  notifies :restart, 'service[opscode-chef]' if should_notify
+  notifies :restart, 'runit_service[opscode-chef]' if should_notify
 end
 
 link "/opt/opscode/embedded/service/opscode-chef/chef-server-api/config/opscode-chef.conf" do
@@ -56,7 +56,7 @@ template env_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-chef'].to_hash)
-  notifies :restart, 'service[opscode-chef]' if should_notify
+  notifies :restart, 'runit_service[opscode-chef]' if should_notify
 end
 
 link "/opt/opscode/embedded/service/opscode-chef/chef-server-api/config/environments/#{node['private_chef']['opscode-chef']['environment']}.rb" do
@@ -69,7 +69,7 @@ template statsd_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-chef'].to_hash)
-  notifies :restart, 'service[opscode-chef]' if should_notify
+  notifies :restart, 'runit_service[opscode-chef]' if should_notify
 end
 
 link "/opt/opscode/embedded/service/opscode-chef/chef-server-api/statsd_config.rb" do
@@ -88,7 +88,7 @@ unicorn_config File.join(private_chef_api_etc_dir, "unicorn.rb") do
   group "root"
   mode "0644"
   log_listener true
-  notifies :restart, 'service[opscode-chef]' if should_notify
+  notifies :restart, 'runit_service[opscode-chef]' if should_notify
 end
 
 component_runit_service "opscode-chef"

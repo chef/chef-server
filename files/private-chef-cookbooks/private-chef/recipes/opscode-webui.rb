@@ -38,7 +38,7 @@ template env_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-webui'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?))
-  notifies :restart, 'service[opscode-webui]' if should_notify
+  notifies :restart, 'runit_service[opscode-webui]' if should_notify
 end
 
 link "/opt/opscode/embedded/service/opscode-webui/config/environments/#{node['private_chef']['opscode-webui']['environment']}.rb" do
@@ -51,7 +51,7 @@ template session_store_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-webui'].to_hash)
-  notifies :restart, 'service[opscode-webui]' if should_notify
+  notifies :restart, 'runit_service[opscode-webui]' if should_notify
 end
 
 link "/opt/opscode/embedded/service/opscode-webui/config/initializers/session_store.rb" do
@@ -64,7 +64,7 @@ template secret_token_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-webui'].to_hash)
-  notifies :restart, 'service[opscode-webui]' if should_notify
+  notifies :restart, 'runit_service[opscode-webui]' if should_notify
 end
 
 link "/opt/opscode/embedded/service/opscode-webui/config/initializers/secret_token.rb" do
@@ -82,7 +82,7 @@ unicorn_config File.join(private_chef_webui_etc_dir, "unicorn.rb") do
   owner "root"
   group "root"
   mode "0644"
-  notifies :restart, 'service[opscode-webui]' if should_notify
+  notifies :restart, 'runit_service[opscode-webui]' if should_notify
 end
 
 link "/opt/opscode/embedded/service/opscode-webui/tmp" do

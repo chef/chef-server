@@ -119,7 +119,7 @@ template postgresql_config do
   owner node['private_chef']['postgresql']['username']
   mode "0644"
   variables(node['private_chef']['postgresql'].to_hash)
-  notifies :restart, 'service[postgresql]' if OmnibusHelper.should_notify?("postgresql")
+  notifies :restart, 'runit_service[postgresql]' if OmnibusHelper.should_notify?("postgresql")
 end
 
 pg_hba_config = File.join(postgresql_data_dir, "pg_hba.conf")
@@ -129,7 +129,7 @@ template pg_hba_config do
   owner node['private_chef']['postgresql']['username']
   mode "0644"
   variables(node['private_chef']['postgresql'].to_hash)
-  notifies :restart, 'service[postgresql]' if OmnibusHelper.should_notify?("postgresql")
+  notifies :restart, 'runit_service[postgresql]' if OmnibusHelper.should_notify?("postgresql")
 end
 
 should_notify = OmnibusHelper.should_notify?("postgresql")

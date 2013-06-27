@@ -31,7 +31,7 @@ template "/opt/opscode/embedded/service/opscode-erchef/bin/oc_erchef" do
   group "root"
   mode "0755"
   variables(node['private_chef']['opscode-erchef'].to_hash)
-  notifies :restart, 'service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
+  notifies :restart, 'runit_service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
 end
 
 erchef_config = File.join(opscode_erchef_etc_dir, "app.config")
@@ -40,7 +40,7 @@ template erchef_config do
   source "oc_erchef.config.erb"
   mode "644"
   variables(node['private_chef']['opscode-erchef'].to_hash)
-  notifies :restart, 'service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
+  notifies :restart, 'runit_service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
 end
 
 link "/opt/opscode/embedded/service/opscode-erchef/etc/app.config" do

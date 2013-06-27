@@ -21,7 +21,7 @@ template File.join(keepalived_etc_dir, "keepalived.conf") do
 	source "keepalived.conf.erb"
 	mode "0644"
   variables(node['private_chef']['keepalived'].to_hash)
-	notifies :restart, 'service[keepalived]' if OmnibusHelper.should_notify?("kepalived")
+	notifies :restart, 'runit_service[keepalived]' if OmnibusHelper.should_notify?("kepalived")
 end
 
 template File.join(keepalived_bin_dir, "cluster.sh") do

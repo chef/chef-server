@@ -35,7 +35,7 @@ template authz_config do
   source "authz.config.erb"
   mode "644"
   variables(node['private_chef']['opscode-authz'].to_hash)
-  notifies :restart, 'service[opscode-authz]' if OmnibusHelper.should_notify?("opscode-authz")
+  notifies :restart, 'runit_service[opscode-authz]' if OmnibusHelper.should_notify?("opscode-authz")
 end
 
 link "/opt/opscode/embedded/service/opscode-authz/rel/authz/etc/app.config" do
@@ -48,7 +48,7 @@ template authz do
   source "authz.erb"
   mode "755"
   variables(node['private_chef']['opscode-authz'].to_hash)
-  notifies :restart, 'service[opscode-authz]' if OmnibusHelper.should_notify?("opscode-authz")
+  notifies :restart, 'runit_service[opscode-authz]' if OmnibusHelper.should_notify?("opscode-authz")
 end
 
 link "/opt/opscode/embedded/service/opscode-authz/rel/authz/bin/authz" do
@@ -61,7 +61,7 @@ template authz_ibrowse_config do
   source "ibrowse.config.erb"
   mode "0644"
   variables(node['private_chef']['opscode-authz'].to_hash)
-  notifies :restart, 'service[opscode-authz]' if OmnibusHelper.should_notify?("opscode-authz")
+  notifies :restart, 'runit_service[opscode-authz]' if OmnibusHelper.should_notify?("opscode-authz")
 end
 
 link "/opt/opscode/embedded/service/opscode-authz/rel/authz/etc/ibrowse/ibrowse.config" do

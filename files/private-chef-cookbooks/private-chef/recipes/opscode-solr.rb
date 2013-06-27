@@ -42,12 +42,12 @@ solr_installed_file = File.join(solr_dir, "installed")
 
 execute "cp -R /opt/opscode/embedded/service/opscode-solr/home/conf #{File.join(solr_home_dir, 'conf')}" do
   not_if { File.exists?(solr_installed_file) }
-  notifies(:restart, "service[opscode-solr]") if should_notify
+  notifies(:restart, "runit_service[opscode-solr]") if should_notify
 end
 
 execute "cp -R /opt/opscode/embedded/service/opscode-solr/jetty #{File.dirname(solr_jetty_dir)}" do
   not_if { File.exists?(solr_installed_file) }
-  notifies(:restart, "service[opscode-solr]") if should_notify
+  notifies(:restart, "runit_service[opscode-solr]") if should_notify
 end
 
 execute "chown -R #{node['private_chef']['user']['username']} #{solr_dir}" do
@@ -67,7 +67,7 @@ template File.join(solr_jetty_dir, "etc", "jetty.xml") do
   mode "0644"
   source "jetty.xml.erb"
   variables(node['private_chef']['opscode-solr'].to_hash.merge(node['private_chef']['logs'].to_hash))
-  notifies :restart, 'service[opscode-solr]' if should_notify
+  notifies :restart, 'runit_service[opscode-solr]' if should_notify
 end
 
 template File.join(solr_home_dir, "conf", "solrconfig.xml") do
@@ -75,7 +75,7 @@ template File.join(solr_home_dir, "conf", "solrconfig.xml") do
   mode "0644"
   source "solrconfig.xml.erb"
   variables(node['private_chef']['opscode-solr'].to_hash)
-  notifies :restart, 'service[opscode-solr]' if should_notify
+  notifies :restart, 'runit_service[opscode-solr]' if should_notify
 end
 
 node.default['private_chef']['opscode-solr']['command'] =  "java -Xmx#{node['private_chef']['opscode-solr']['heap_size']} -Xms#{node['private_chef']['opscode-solr']['heap_size']}"

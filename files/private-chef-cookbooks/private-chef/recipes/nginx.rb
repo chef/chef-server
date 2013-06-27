@@ -114,7 +114,7 @@ nginx_vars = nginx_vars.merge({ :helper => NginxErb.new(node),
     group "root"
     mode "0644"
     variables(nginx_vars.merge({:server_proto => server_proto}))
-    notifies :restart, 'service[nginx]' if OmnibusHelper.should_notify?("nginx")
+    notifies :restart, 'runit_service[nginx]' if OmnibusHelper.should_notify?("nginx")
   end
 
 end

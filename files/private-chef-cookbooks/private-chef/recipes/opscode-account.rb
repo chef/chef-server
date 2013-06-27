@@ -43,7 +43,7 @@ template env_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-account'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?))
-  notifies :restart, 'service[opscode-account]' if should_notify
+  notifies :restart, 'runit_service[opscode-account]' if should_notify
 end
 
 link "/opt/opscode/embedded/service/opscode-account/config/environments/#{node['private_chef']['opscode-account']['environment']}.rb" do
@@ -56,7 +56,7 @@ template statsd_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-account'].to_hash)
-  notifies :restart, 'service[opscode-account]' if should_notify
+  notifies :restart, 'runit_service[opscode-account]' if should_notify
 end
 
 link "/opt/opscode/embedded/service/opscode-account/statsd_config.rb" do
@@ -75,7 +75,7 @@ unicorn_config File.join(private_chef_account_etc_dir, "unicorn.rb") do
   group "root"
   mode "0644"
   log_listener true
-  notifies :restart, 'service[opscode-account]' if should_notify
+  notifies :restart, 'runit_service[opscode-account]' if should_notify
 end
 
 component_runit_service "opscode-account"
