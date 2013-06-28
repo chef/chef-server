@@ -95,7 +95,7 @@ SELECT fk_ok('container_acl_actor', 'authorizee', 'auth_actor', 'id');
 SELECT fk_ok('container_acl_group', 'target', 'auth_container', 'id');
 SELECT fk_ok('container_acl_group', 'authorizee', 'auth_group', 'id');
 
-\set schema quote_ident('public')
+\set schema '\'public\''
 
 CREATE OR REPLACE FUNCTION opscode.has_index(p_table_schema NAME, p_table_name NAME, p_index_name NAME, p_indexed_columns TEXT[])
 RETURNS TEXT LANGUAGE SQL

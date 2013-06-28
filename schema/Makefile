@@ -6,7 +6,7 @@ all : test
 
 setup:
 	@echo "Dropping and recreating database '$(TEST_DB)'"
-	@dropdb $(TEST_DB)
+	@psql --dbname template1 --single-transaction --command 'DROP DATABASE IF EXISTS $(TEST_DB)'
 	@psql --dbname template1 --single-transaction --set ON_ERROR_STOP=1 --file sql/drop_roles.sql
 	@createdb $(TEST_DB)
 	@psql --dbname $(TEST_DB) --command 'CREATE EXTENSION pgtap;'
