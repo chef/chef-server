@@ -20,7 +20,7 @@ init([]) ->
                  temporary, 10000, worker, [mover_org_dep_validator]},
     {ok, {{simple_one_for_one, 10, 10}, [Spec]}}.
 
-start_worker(OrgName) ->
+start_worker({OrgName, _AcctInfo}) ->
     supervisor:start_child(?SERVER, [OrgName]).
 
 

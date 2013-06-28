@@ -101,7 +101,9 @@
                  error_count = 0        :: non_neg_integer(),
                  %% if true, a worker encountered a fatal error that forced
                  %% us to stop spawning new migration workers.
-                 fatal_stop = false     :: boolean()
+                 fatal_stop = false     :: boolean(),
+          %% moser account info as returned by `moser_acct_processor:open_account/0'
+          acct_info
              }).
 %%
 %% API
@@ -136,7 +138,8 @@ halt_actions() ->
     gen_fsm:sync_send_all_state_event(?SERVER, halt).
 
 init([]) ->
-    {ok, ready, #state{}}.
+    AcctInfo = moser_acct_processor:open_account(),
+    {ok, ready, #state{acct_info = AcctInfo}}.
 
 %%
 %% States
@@ -195,8 +198,9 @@ working({start, _, _, _, _}, _From, State) ->
 
 
 start_org_worker(SupMod, OrgName, #state{live_worker_count = LW,
-                                         orgs_remaining = OR} = State) ->
-    case SupMod:start_worker(OrgName) of
+                                         orgs_remaining = OR,
+                                         acct_info = AcctInfo} = State) ->
+    case SupMod:start_worker({OrgName, AcctInfo}) of
         {ok, Pid} ->
             monitor(process, Pid),
             {next_state, working, State#state{live_worker_count = (LW + 1),
