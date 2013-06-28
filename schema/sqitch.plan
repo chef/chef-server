@@ -1,0 +1,20 @@
+%syntax-version=1.0.0-b2
+%project=bifrost
+%uri=https://github.com/opscode/oc_bifrost
+
+base 2013-06-24T11:10:23Z Christopher Maier <cm@opscode.com> # The initial base install of the bifrost schema
+forbid_group_cycles [base] 2013-06-24T13:04:05Z Christopher Maier <cm@opscode.com> # Add forbid_group_cycles function and accompanying trigger
+id_resolution_functions [base] 2013-06-24T13:10:28Z Christopher Maier <cm@opscode.com> # Add several accessory functions for resolving database IDs
+groups_for_actor [base] 2013-06-24T13:14:17Z Christopher Maier <cm@opscode.com> # Add groups_for_actor function
+actor_has_permission_on [base id_resolution_functions] 2013-06-24T13:18:21Z Christopher Maier <cm@opscode.com> # add actor_has_permission_on function
+create_and_add_permissions [base id_resolution_functions] 2013-06-24T13:21:01Z Christopher Maier <cm@opscode.com> # add create_and_add_permissions function
+clear_acl [base id_resolution_functions] 2013-06-24T13:23:19Z Christopher Maier <cm@opscode.com> # add clear_acl function
+update_acl [base id_resolution_functions] 2013-06-24T13:32:28Z Christopher Maier <cm@opscode.com> # add update_acl function
+debug_schema 2013-06-24T13:34:20Z Christopher Maier <cm@opscode.com> # add debug schema
+debug_object_acl_view [debug_schema base] 2013-06-24T13:36:09Z Christopher Maier <cm@opscode.com> # add object_acl view in debug schema
+@1.1.6 2013-06-25T15:05:55Z Christopher Maier <cm@opscode.com> # Base schema back-ported to sqitch
+
+actor_has_bulk_permission_on 2013-06-25T15:28:59Z Christopher Maier <cm@opscode.com> # Add actor_has_bulk_permission_on function, enabling the bulk authorization endpoint
+@1.2.0 2013-06-25T15:41:51Z Christopher Maier <cm@opscode.com> # Bulk authorization endpoint
+@1.2.1 2013-06-25T18:19:42Z Christopher Maier <cm@opscode.com> # Placeholder version to keep in sync with code version
+@1.2.2 2013-06-25T18:19:47Z Christopher Maier <cm@opscode.com> # Placeholder version to keep in sync with code version
