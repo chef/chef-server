@@ -20,18 +20,11 @@
 -include_lib("chef_objects/include/chef_types.hrl").
 -include_lib("ej/include/ej.hrl").
 
-%% The only place we need an org name in all this code is in the
-%% chef_db:bulk_get/4 call, but that argument is completely ignored
-%% when accessing data in a SQL database.  Since this code will only
-%% ever be used in an all-SQL environment, we can define a dummy value
-%% here and avoid carrying around the real org name.  When chef_db no
-%% longer needs to interact with CouchDB, bulk_get/4 will become
-%% bulk_get/3, and we can dispense with this dummy placeholder
-%% entirely.
--define(ORG_NAME, <<"does_not_matter">>).
-
 %% A binary() index is taken to be a data bag name.
 -type index() :: client | environment | node | role | binary().
+
+%% A bundle of OrgID and Org name
+-type org_info() :: {object_id(), binary()}.
 
 -export([
          reindex/2
@@ -42,12 +35,12 @@
 %% reindexing.  Does not drop existing index entries beforehand; this
 %% is explicitly a separate step.
 -spec reindex(Ctx :: chef_db:db_context(),
-              OrgId :: object_id()) -> ok.
-reindex(Ctx, OrgId) ->
+              OrgInfo :: org_info()) -> ok.
+reindex(Ctx, {OrgId, _OrgName}=OrgInfo) ->
     BuiltInIndexes = [node, role, environment, client],
     DataBags = chef_db:data_bag_names(Ctx, OrgId),
     AllIndexes = BuiltInIndexes ++ DataBags,
-    [ reindex(Ctx, OrgId, Index) || Index <- AllIndexes ],
+    [ reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
     ok.
 
 %% A note about our approach to reindexing:
@@ -97,16 +90,16 @@ reindex(Ctx, OrgId) ->
 %% data reconstruction and begins the batch reindexing of all items of
 %% the given indexable type.
 -spec reindex(DbContext :: chef_db:db_context(),
-              OrgId :: object_id(),
+              OrgInfo :: org_info(),
               Index :: index()) -> ok.
-reindex(Ctx, OrgId, Index) ->
+reindex(Ctx, {OrgId, _OrgName}=OrgInfo, Index) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
     %% Grab all the database IDs to do batch retrieval on
     AllIds = dict:fold(fun(_K, V, Acc) -> [V|Acc] end,
                        [],
                        NameIdDict), %% All dict values will be unique anyway
     {ok, BatchSize} = application:get_env(chef_wm, bulk_fetch_batch_size),
-    batch_reindex(Ctx, AllIds, BatchSize, OrgId, Index, NameIdDict).
+    batch_reindex(Ctx, AllIds, BatchSize, OrgInfo, Index, NameIdDict).
 
 %% @doc Recursively batch-process a list of database IDs by retrieving
 %% the serialized_object data from the database, processing them as
@@ -115,30 +108,30 @@ reindex(Ctx, OrgId, Index) ->
                     Ids :: [object_id()] |                   %% Initial entry
                            {[object_id()], [object_id()]},   %% Recursive calls; current batch & remaining IDs
                     BatchSize :: non_neg_integer(),
-                    OrgId :: object_id(),
+                    OrgInfo :: org_info(),
                     Index :: index(),
                     NameIdDict :: dict()) -> ok.
 batch_reindex(_, [], _, _, _, _) ->
     %% Nothing to process!
     ok;
-batch_reindex(Ctx, Ids, BatchSize, OrgId, Index, NameIdDict) when is_list(Ids) ->
-    batch_reindex(Ctx, safe_split(BatchSize, Ids), BatchSize, OrgId, Index, NameIdDict);
-batch_reindex(Ctx, {LastBatch, []}, _BatchSize, OrgId, Index, NameIdDict) ->
-    ok = index_a_batch(Ctx, LastBatch, OrgId, Index, NameIdDict),
+batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids) ->
+    batch_reindex(Ctx, safe_split(BatchSize, Ids), BatchSize, OrgInfo, Index, NameIdDict);
+batch_reindex(Ctx, {LastBatch, []}, _BatchSize, OrgInfo, Index, NameIdDict) ->
+    ok = index_a_batch(Ctx, LastBatch, OrgInfo, Index, NameIdDict),
     ok;
-batch_reindex(Ctx, {CurrentBatch, Rest}, BatchSize, OrgId, Index, NameIdDict) ->
-    ok = index_a_batch(Ctx, CurrentBatch, OrgId, Index, NameIdDict),
-    batch_reindex(Ctx, safe_split(BatchSize, Rest), BatchSize, OrgId, Index, NameIdDict).
+batch_reindex(Ctx, {CurrentBatch, Rest}, BatchSize, OrgInfo, Index, NameIdDict) ->
+    ok = index_a_batch(Ctx, CurrentBatch, OrgInfo, Index, NameIdDict),
+    batch_reindex(Ctx, safe_split(BatchSize, Rest), BatchSize, OrgInfo, Index, NameIdDict).
 
 %% @doc Helper function to retrieve and index objects for a single
 %% batch of database IDs.
 -spec index_a_batch(chef_db:db_context(),
                     BatchOfIds :: [object_id()],
-                    OrgId :: object_id(),
+                    OrgInfo :: org_info(),
                     Index :: index(),
                     NameIdDict :: dict()) -> ok.
-index_a_batch(Ctx, BatchOfIds, OrgId, Index, NameIdDict) ->
-    SerializedObjects = chef_db:bulk_get(Ctx, ?ORG_NAME, chef_object_type(Index), BatchOfIds),
+index_a_batch(Ctx, BatchOfIds, {OrgId, OrgName}, Index, NameIdDict) ->
+    SerializedObjects = chef_db:bulk_get(Ctx, OrgName, chef_object_type(Index), BatchOfIds),
     ok = send_to_index_queue(OrgId, Index, SerializedObjects, NameIdDict),
     ok.
 
