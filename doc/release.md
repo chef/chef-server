@@ -3,7 +3,7 @@ Cutting a New Release of Bifrost
 
 Currently, a few steps are required to cut a release of Bifrost.  We
 first need to tag a release of the schema using
-[sqitch](schema/doc/sqitch_background.md).  Then we need to create
+[sqitch](../schema/doc/sqitch_background.md).  Then we need to create
 the OTP release of the application.
 
 ## Rationale
