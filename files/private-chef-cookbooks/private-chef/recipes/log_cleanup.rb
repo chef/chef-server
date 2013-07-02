@@ -21,7 +21,7 @@ file "/etc/cron.d/opc_logrotate.cron" do
 end
 # END LEGACY CRONTAB CLEANUP
 
-package "logrotate"
+# package "logrotate"
 
 # not using /etc/logrotate.d on purpose here so that busted system logrotation will not break
 # the privatechef logrotation.

@@ -49,6 +49,9 @@ dependency "nagios-plugins"
 dependency "opscode-nagios-plugins"
 dependency "nrpe"
 
+# log management
+dependency "logrotate"
+
 # oc-chef-pedant for integration/smoke testing
 dependency "oc-chef-pedant"
 
