@@ -26,6 +26,8 @@ end
 
 cookbook "opscode-bifrost", git: "git@github.com:opscode-cookbooks/opscode-bifrost.git"
 # cookbook "opscode-bifrost", path: "#{ENV['OPSCODE_COOKBOOKS']}/opscode-bifrost"
+cookbook "opscode-erlang", git: "git@github.com:opscode-cookbooks/opscode-erlang"
+# cookbook "opscode-erlang", path: "#{ENV['OPSCODE_COOKBOOKS']}/opscode-erlang"
 cookbook "opscode-pedant", git: "git@github.com:opscode-cookbooks/opscode-pedant.git"
 # cookbook "opscode-pedant", path: "#{ENV['OPSCODE_COOKBOOKS']}/opscode-pedant"
 cookbook "opscode-ruby", git: "git@github.com:opscode-cookbooks/opscode-ruby.git"
