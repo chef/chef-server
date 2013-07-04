@@ -34,35 +34,13 @@
 -type index() :: client | environment | node | role | binary().
 
 -export([
-         reindex/1
+         reindex/2
         ]).
 
 %% @doc Sends all indexed items (clients, data bag items,
 %% environments, nodes, and roles) from an organization to Solr for
 %% reindexing.  Does not drop existing index entries beforehand; this
 %% is explicitly a separate step.
--spec reindex(OrgName :: binary()) -> ok |
-                                      {error, {not_found, org}}.
-reindex(OrgName) ->
-    Ctx = chef_db:make_context(make_req_id()),
-    case chef_db:fetch_org_id(Ctx, OrgName) of
-        not_found ->
-            {error, {not_found, org}};
-        OrgId ->
-            reindex(Ctx, OrgId)
-    end.
-
-%% @doc Create a unique request ID.  Extracted from
-%% chef_wm_base:read_req_id/2 for the time being.
-%% @end
-%%
-%% TODO: Create a reqid() type
-%% TODO: Extract this function to a common location, and use it in chef_wm_base
--spec make_req_id() -> binary().
-make_req_id() ->
-    base64:encode(crypto:md5(term_to_binary(make_ref()))).
-
-%% @doc Implementation of reindex/1.
 -spec reindex(Ctx :: chef_db:db_context(),
               OrgId :: object_id()) -> ok.
 reindex(Ctx, OrgId) ->
