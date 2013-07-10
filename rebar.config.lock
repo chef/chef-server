@@ -91,7 +91,7 @@
                       "bed36252198ae7159e3d2b3a9ca9a9bb9817e1de"}},
        {moser,".*",
               {git,"git@github.com:opscode/moser.git",
-                   "6e671e5cdf74380a837150ca7c5a2aaf8ca0c95e"}},
+                   "ded7a5f73e8ec8b13720581ff054b0ad81206478"}},
        {oauth,".*",
               {git,"git://github.com/opscode/erlang-oauth.git",
                    "2b796ea7973c0f38aad569bf2506bd8026eca004"}},
@@ -112,7 +112,7 @@
                               "07978662cf362368c75e0a03b94ff5b3cb3fa0e7"}},
        {sqerl,".*",
               {git,"git://github.com/opscode/sqerl.git",
-                   "80ad99ab31f3583b97ab1b82ff1d9bb41449f079"}},
+                   "b03ecf57d5ba88f932ffd2aba0ca3c4f743e1b03"}},
        {stats_hero,".*",
                    {git,"git://github.com/opscode/stats_hero.git",
                         "0bd34aae8220021d5619a132d00e48623522ad10"}}]}.
