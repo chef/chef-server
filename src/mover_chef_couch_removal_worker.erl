@@ -13,7 +13,8 @@
     purge_org/1,
     pause/0,
     resume/0,
-    cancel/0
+    cancel/0,
+    restore/1
   ]).
 
 %% FSM states
@@ -21,7 +22,8 @@
     ready/2,
     purging/2,
     paused/2,
-    purge_one/2
+    purge_one/2,
+    restore_one/2
   ]).
 %% gen_fsm callbacks
 -export([init/1,
@@ -62,6 +64,11 @@ cancel() ->
 resume() ->
   gen_fsm:send_event(?SERVER, continue).
 
+restore(Org) when is_list(Org) ->
+  restore(list_to_binary(Org));
+restore(Org) when is_binary(Org) ->
+  gen_fsm:send_event(?SERVER, {restore, Org}).
+
 init([]) ->
     {ok, ready, #state{}}.
 %%event
@@ -71,7 +78,14 @@ ready({start_purge, OrgNameFun, Maximum}, State) ->
 ready({start_purge, Org}, State) ->
     gen_fsm:send_event(self(), {purge_one, Org}),
     {next_state, purge_one, State};
-ready(_Event, State) ->
+ready({restore, Org}, State) ->
+    gen_fsm:send_event(self(), {restore, Org}),
+    {next_state, restore_one, State};
+ready(cancel, _State) ->
+    {next_state, ready, #state{}};
+ready(pause, State) ->
+    {next_state, ready, State};
+ready(continue, State) ->
     {next_state, ready, State}.
 
 purge_one({purge_one, Org}, State) ->
@@ -97,8 +111,11 @@ purging(purge, State = #state{org_names_fun = OrgNameFun, counter = Counter, tot
 		end,
     gen_fsm:send_event(self(), purge),
     {next_state, purging, NewState};
-purging(cancel, #state{org_names_fun = Orgs, counter = _Counter}) ->
+purging(cancel, #state{org_names_fun = Orgs}) ->
     lager:info("purging cancelled, remaining orgs ~p", [Orgs]),
+    {next_state, ready, #state{}};
+purging({restore, Org}, #state{org_names_fun = Orgs }) ->
+    restore_and_log(Org, Orgs),
     {next_state, ready, #state{}};
 purging(pause, State) ->
     lager:info("purging paused", []),
@@ -111,8 +128,13 @@ paused(continue, State) ->
     lager:info("purging continued", []),
     gen_fsm:send_event(self(), purge),
     {next_state, purging, State};
-paused(_Event, State) ->
-    {next_state, paused, State}.
+paused({restore, Org}, #state{org_names_fun = Orgs }) ->
+    restore_and_log(Org, Orgs),
+    {next_state, ready, #state{}}.
+
+restore_one({restore, Org}, #state{}) ->
+    restore_and_log(Org),
+    {next_state, ready, #state{}}.
 
 handle_event(_Event, StateName, State) ->
     {next_state, StateName, State}.
@@ -137,3 +159,22 @@ do_purge(Org, Counter, TotalCount) ->
     lager:info("[~p/~p] purged in ~p milliseconds ~p", [Counter, TotalCount, Time div 1000, Org]),
     %% put org in deleted state
 		ok = moser_state_tracker:purge_successful(Org).
+restore_and_log(Org) ->
+    lager:info("purging cancelled by restore request for Org ~p", [Org]),
+    restore_and_reset(Org).
+
+restore_and_log(Org, Orgs) ->
+    lager:info("purging cancelled by restore request for Org ~p, remaining orgs ~p", [Org, Orgs]),
+    restore_and_reset(Org).
+
+restore_and_reset(Org) ->
+    ok = case moser_state_tracker:org_state(Org) of
+      <<"purge_started">> ->
+        moser_state_tracker:reset_purge_started_org_to_completed(Org);
+      <<"purge_successful">> ->
+        moser_state_tracker:reset_purged_org_to_completed(Org);
+      State ->
+        lager:error("Org ~p not in expected state. In state ~p", [Org, State]),
+        {error, org_not_state_to_be_reset, State}
+    end,
+    ok = moser_purge_backup:restore_org(Org).
