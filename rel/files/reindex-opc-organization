@@ -1,0 +1,115 @@
+#!/usr/bin/env escript
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
+%% ex: ts=4 sw=4 et
+
+%% Copyright (c) 2013 Opscode, Inc.
+%% All Rights Reserved
+
+%% TODO: The cookie used by erchef should be part of config
+-define(SELF, 'reindexer@127.0.0.1').
+-define(ERCHEF, 'erchef@127.0.0.1').
+-define(ERCHEF_COOKIE, 'erchef').
+
+%% @doc Perform server-side reindexing of an individual organization on Private Chef Server.
+%% Pre-Chef 11 servers provided a REST API endpoint to perform reindexing via knife, but
+%% this is more properly thought of as an administrative task, rather than a "user" task.
+%%
+%% Currently, three commands are accepted:
+%%
+%%     drop: Removes all the organization's entries from the index.  Information in the database is untouched.
+%%     reindex: Sends the organization's information from the database to the index again.
+%%     complete: same as "drop" followed by "reindex"
+%%
+%% In most cases, 'complete' is desired, but the option to perform the individual steps is
+%% made avilable for POWER USERS!
+%%
+%% Supplying commands other than those listed above, omitting an organization name, or
+%% providing a non-existent organization name are errors.
+%%
+%% Examples:
+%%
+%% Perform a complete reindexing of the 'mycompany-engineering' organization:
+%%     reindex-opc-organization complete mycompany-engineering
+%%
+%% Drop all existing index information for the 'mycompany-accounting' organization
+%%     reindex-opc-organization drop mycompany-accounting
+%%
+%% Exit Codes:
+%%
+%%   0 - Success
+%%   1 - Incorrect arguments given
+%%   2 - Invalid organization name given
+%%
+main(Args) ->
+    init_network(),
+    Context = make_context(),
+    [Command, OrgInfo] = validate_args(Context, Args),
+    perform(Command, Context, OrgInfo).
+
+%% @doc Ensure that the arguments are all valid, meaning a recognized action is specified,
+%% and the given organization name actually exists.  If everything checks out, return the
+%% expanded arguments (we need to get the corresponding organization ID as well), with
+%% proper type conversions performed.
+%%
+%% If the arguments are invalid for any reason, print a message and halt.
+validate_args(_, []) ->
+    io:format("You didn't specify a command!  Use either 'drop', 'reindex', or 'complete'"),
+    halt(1);
+validate_args(_, [Command]) when Command =:= "reindex";
+                              Command =:= "drop";
+                              Command =:= "complete" ->
+    io:format("Must supply an organization name for this command~n"),
+    halt(1);
+validate_args(_Context, [Command]) ->
+    io:format("Unrecognized command '~s'~n", [Command]),
+    halt(1);
+validate_args(Context, [Command, OrgName]) when Command =:= "reindex";
+                                       Command =:= "drop";
+                                       Command =:= "complete" ->
+    OrgBin = list_to_binary(OrgName), %% We use binaries around here...
+
+    %% Some operations require the organization's ID.  This also serves as a convenient
+    %% check for organization existence.
+    case get_org_id(Context, OrgBin) of
+        not_found ->
+            io:format("Could not find an organization named '~s'~n", [OrgBin]),
+            halt(2);
+        OrgId ->
+            %% Everything checks out!  Let's do some reindexing!
+            [list_to_atom(Command), {OrgId, OrgBin}]
+    end;
+validate_args(_Context, [Command, _OrgName]) ->
+    io:format("Unrecognized command ~p~n", [Command]),
+    halt(1).
+
+%% @doc Actually do the reindexing.
+-spec perform(drop | complete | reindex,
+              Context :: term(),
+              {OrgId::binary(), OrgName::binary()}) -> term().
+perform(drop, _Context, {OrgId, OrgName}) ->
+    io:format("Removing all index entries for organization '~s'...~n", [OrgName]),
+    ok = rpc:call(?ERCHEF, chef_solr, delete_search_db, [OrgId]);
+perform(reindex, Context, {_OrgId, OrgName}=OrgInfo) ->
+    io:format("Sending all data for organization '~s' to be indexed again.  It may take some time before everything is available via search.~n", [OrgName]),
+    ok = rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo]);
+perform(complete, Context, OrgInfo) ->
+    %% Just do everything
+    perform(drop, Context, OrgInfo),
+    perform(reindex, Context, OrgInfo).
+
+make_context() ->
+    ReqId = base64:encode(crypto:md5(term_to_binary(make_ref()))),
+    rpc:call(?ERCHEF, chef_db, make_context, [ReqId, no_header]).
+
+%% @doc Verify that the given `OrgName' actually corresponds to a real
+%% organization.  Returns the organization's ID if so; 'not_found' otherwise.
+-spec get_org_id(Context :: term(), OrgName :: binary()) -> OrgId::binary() | not_found.
+get_org_id(Context, OrgName) ->
+    rpc:call(?ERCHEF, chef_db, fetch_org_id, [Context, OrgName]).
+
+%% @doc Connect to the node actually running Erchef.  Kind of hard to do RPC calls
+%% otherwise....
+init_network() ->
+    net_kernel:start([?SELF, longnames]),
+    erlang:set_cookie(node(), ?ERCHEF_COOKIE),
+    pong = net_adm:ping(?ERCHEF).
