@@ -79,6 +79,35 @@ template File.join(solr_home_dir, "conf", "solrconfig.xml") do
 end
 
 node.default['private_chef']['opscode-solr']['command'] =  "java -Xmx#{node['private_chef']['opscode-solr']['heap_size']} -Xms#{node['private_chef']['opscode-solr']['heap_size']}"
+# Compute some sane JVM tunings. The user can still override these computed
+# defaults using /etc/opscode/private-chef.rb
+solr_mem = if node['private_chef']['opscode-solr']['heap_size']
+              node['private_chef']['opscode-solr']['heap_size']
+           else
+             node[:memory][:total] =~ /^(\d+)kB/
+             memory_total_in_mb = $1.to_i / 1024
+             # Total heap size for solr is the smaller of:
+             #    25% of total system memory
+             #    1024 MB
+             [(memory_total_in_mb / 4), 1024].min
+           end
+new_size =  if node['private_chef']['opscode-solr']['new_size']
+              node['private_chef']['opscode-solr']['new_size']
+            else
+              [(solr_mem / 16), 32].max
+            end
+
+java_opts = node['private_chef']['opscode-solr']['java_opts']
+java_opts << " -XX:NewSize=#{new_size}M" unless java_opts =~ /NewSize/
+java_opts << " -XX:+UseConcMarkSweepGC" unless java_opts =~ /UseConcMarkSweepGC/
+java_opts << " -XX:+UseParNewGC" unless java_opts =~ /UseParNewGC/
+
+# Save the values back onto the node attributes
+node.default['private_chef']['opscode-solr']['heap_size'] = solr_mem
+node.default['private_chef']['opscode-solr']['new_size'] = new_size
+
+node.default['private_chef']['opscode-solr']['command'] =  "java -Xmx#{solr_mem}M -Xms#{solr_mem}M"
+node.default['private_chef']['opscode-solr']['command'] << "#{java_opts}"
 node.default['private_chef']['opscode-solr']['command'] << " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=8086 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
 node.default['private_chef']['opscode-solr']['command'] << " -Dsolr.data.dir=#{solr_data_dir}"
 node.default['private_chef']['opscode-solr']['command'] << " -Dsolr.solr.home=#{solr_home_dir}"
