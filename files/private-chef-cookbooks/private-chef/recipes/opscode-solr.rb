@@ -108,6 +108,8 @@ node.default['private_chef']['opscode-solr']['new_size'] = new_size
 
 node.default['private_chef']['opscode-solr']['command'] =  "java -Xmx#{solr_mem}M -Xms#{solr_mem}M"
 node.default['private_chef']['opscode-solr']['command'] << "#{java_opts}"
+# Enable GC Logging (very useful for debugging issues)
+node.default['private_chef']['opscode-solr']['command'] << " -Xloggc:#{File.join(solr_log_dir, "gclog.log")} -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution"
 node.default['private_chef']['opscode-solr']['command'] << " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=8086 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
 node.default['private_chef']['opscode-solr']['command'] << " -Dsolr.data.dir=#{solr_data_dir}"
 node.default['private_chef']['opscode-solr']['command'] << " -Dsolr.solr.home=#{solr_home_dir}"
@@ -115,3 +117,14 @@ node.default['private_chef']['opscode-solr']['command'] << " -server"
 node.default['private_chef']['opscode-solr']['command'] << " -jar '#{solr_jetty_dir}/start.jar'"
 
 component_runit_service "opscode-solr"
+
+# log rotation
+template "/etc/opscode/logrotate.d/opscode-solr" do
+  source "logrotate.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(node['private_chef']['opscode-solr'].to_hash.merge(
+    'copytruncate' => true
+  ))
+end
