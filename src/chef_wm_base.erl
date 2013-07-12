@@ -19,7 +19,6 @@
 %% under the License.
 %%
 
-
 -module(chef_wm_base).
 
 %% Complete webmachine callbacks
@@ -38,9 +37,9 @@
          validate_request/3]).
 
 %% Helpers for webmachine callbacks
--export([create_from_json/5,
+-export([add_notes/2,
+         create_from_json/5,
          init/2,
-         log_request/2,
          verify_request_signature/2,
          update_from_json/4]).
 
@@ -184,19 +183,25 @@ content_types_accepted(Req, State) ->
 content_types_provided(Req, State) ->
     {[{"application/json", to_json}], Req, State}.
 
-finish_request(Req, #base_state{reqid = ReqId}=State) ->
+finish_request(Req, #base_state{reqid = ReqId,
+                                organization_name = OrgName,
+                                darklaunch = Darklaunch}=State) ->
     try
         Code = wrq:response_code(Req),
-        log_request(Req, State),
+        PerfTuples = stats_hero:snapshot(ReqId, agg),
+        Req0 = add_notes([{reqid, ReqId},
+                            {perf_stats, PerfTuples}], Req),
+        AnnotatedReq = maybe_annotate_org_specific(OrgName, Darklaunch, Req0),
         stats_hero:report_metrics(ReqId, Code),
         stats_hero:stop_worker(ReqId),
         case Code of
             500 ->
-                Req1 = create_500_response(Req, State),
-                {true, Req1, State};
+                % Sanitize response body
+                ErrReq = create_500_response(AnnotatedReq, State),
+                {true, ErrReq, State};
             _ ->
-                Req1 = add_api_info_header(Req, State),
-                {true, Req1, State}
+                AnnotatedReq1 = add_api_info_header(AnnotatedReq, State),
+                {true, AnnotatedReq1, State}
         end
     catch
         X:Y ->
@@ -518,23 +523,11 @@ spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
             ok
     end.
 
-log_request(Req, #base_state{reqid = ReqId, log_msg = Msg, organization_name = Org,
-                             darklaunch = Darklaunch}) ->
-    Status = wrq:response_code(Req),
-    Tuples = [{req_id, ReqId},
-              {status, Status},
-              {method, wrq:method(Req)},
-              {path, wrq:raw_path(Req)},
-              {user, wrq:get_req_header("x-ops-userid", Req)},
-              {msg, {raw, Msg}}],
-    PerfTuples = stats_hero:snapshot(ReqId, agg),
-    Level = log_level(Status),
-    fast_log:Level(erchef, maybe_add_org_specific(Org, Darklaunch, Tuples) ++ PerfTuples).
-
-log_level(Code) when Code >= 500 ->
-    err;
-log_level(_) ->
-    info.
+%% @doc Helper function to annotate requests for logging
+add_notes([], Req) ->
+    Req;
+add_notes([{Key, Value} | Rest], Req) ->
+    add_notes(Rest, wrq:add_note(Key, Value, Req)).
 
 fetch_org_guid(#base_state{organization_guid = Id}) when is_binary(Id) ->
     Id;
@@ -546,12 +539,13 @@ fetch_org_guid(#base_state{organization_guid = undefined,
         Guid -> Guid
     end.
 
-maybe_add_org_specific(?OSC_ORG_NAME, _Darklaunch, Items) ->
-    Items;
-maybe_add_org_specific(OrgName, Darklaunch, Items) ->
+maybe_annotate_org_specific(?OSC_ORG_NAME, _Darklaunch, Req) ->
+    Req;
+maybe_annotate_org_specific(OrgName, Darklaunch, Req) ->
     %% Generate the darklaunch header in a form that won't break log parsing
     DLData = chef_wm_darklaunch:get_proplist(Darklaunch),
-    [{org_name, OrgName} | DLData] ++ Items.
+    add_notes([{org_name, OrgName},
+               {darklaunch, DLData}], Req).
 
 %% If request results in a rename, then set Location header and wm will return with a 201.
 %% Currently, only the clients endpoint supports rename
