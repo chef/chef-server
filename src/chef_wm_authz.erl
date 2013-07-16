@@ -104,16 +104,83 @@ is_validator(#chef_user{})                   -> false.
                       Req :: wrq:req(),
                       State :: #base_state{})
     -> {_, _, #base_state{}}.
-%% Check if we should use contact opscode-authz and chef requestor-specific acls for an endpoint.
-%% If the config variable is false, then we don't check the object/container ACLs and instead
-%% use the fact that a client has passed authn as allowing them to access a resource
+
+%% Should customized ACLs be consulted to authorize this request, or should we just assume
+%% Chef Server default ACLs?
+%%
+%% Custom ACLs refers to any system ACLs that you have modified in any way.  If you have
+%% kept the default ACLs of a Chef Server intact (and intend to keep it that way), you can
+%% opt for a bit of a performance boost by effectively "baking in" these defaults into
+%% erchef, such that it will not interact with the authorization system to check the
+%% permissions.
+%%
+%% If you wish to take advantage of this performance boost, there are a few configuration
+%% parameters to be aware of.  Note that all are for the oc_chef_wm application.
+%%
+%%   custom_acls_cookbooks
+%%   custom_acls_roles
+%%   custom_acls_data
+%%   custom_acls_depsolver
+%%
+%% as well as
+%%
+%%  custom_acls_always_for_modification
+%%
+%% For each of the first four that are either undefined OR set to true, the Chef Server will
+%% issue requests to the authorization system for each request that is serviced by the
+%% specified endpoint.
+%%
+%% If any of the first four parameters are set to FALSE, however, this indicates that the
+%% default ACL rules should be assumed to be in effect for requests to that endpoint;
+%% therefore, the authorization system will NOT be consulted, and you'll save an HTTP
+%% request.  That is to say, you must declare explicitly to Chef that you will NOT be using
+%% customized ACLs for the given endpoint.
+%%
+%% This can further be tuned using the custom_acls_always_for_modification parameter.  When
+%% this is set to false, both read and write operations to a given endpoint will be governed
+%% by the default ACL rules.  However, if it is set to true (or is undefined), then only
+%% read operations are assumed to be governed by the defaults; all write operations will
+%% still go to through the authorization system.
+%%
+%% In summary, if you want your read operations to go a little faster, and you haven't
+%% customized your ACLs, set custom_acls_ENDPOINT to false.  If you want to go further and
+%% have your write operations bypass the authorization check as well, you must additionally
+%% set custom_acls_always_for_modification to false.  Remember that you must have set
+%% custom_acls_ENDPOINT to false for custom_acls_always_for_modification to have any effect.
+%%
+%% We differentiate between read and write operations because read operations dominate a
+%% typical Chef Server workload.
+%%
+%% Remember, this does not disable authorization; it merely assumes that the default ACLs
+%% are in place and responds accordingly without the additional overhead of making
+%% additional HTTP requests to the internal authorization service.  If you modify your
+%% system's ACLs from the default IN ANY WAY, you should NOT use these configuration
+%% parameters, as your ACL customizations will be ignored.
+%%
+%% (Of course, if you have modified the ACLs relevant to one endpoint, you can just not set
+%% the corresponding parameter; the authorization system will still be checked for all
+%% requests to that endpoint, but can still be bypassed for others.  This is pretty advanced
+%% stuff, though, so only even think about doing it if you know what you're doing.)
+%%
+%% Also, remember that all requests made by users, as opposed to clients, ALWAYS go through
+%% the authorization system.  These configuration parameters ONLY affect requests made by
+%% clients.  This is because users are not inherently associated with an organization like
+%% clients are; the organization-association check (performed earlier) is what allows us to
+%% take this shortcut.
+%%
+%% Note that the inputs (and outputs) of this function correspond to the valid return values
+%% for the chef_wm:auth_info/2 callback
 use_custom_acls(_Endpoint, Auth, Req, #base_state{requestor = #chef_user{} } = State) ->
     {Auth, Req, State};
 use_custom_acls(Endpoint, Auth, Req, #base_state{requestor = #chef_client{} } = State) ->
     case application:get_env(oc_chef_wm, config_for(Endpoint)) of
         {ok, false} ->
+            %% The server is configured as though we have NOT customized any ACLs relevant
+            %% for the current endpoint (i.e. they remain unchanged from the defaults).  Now
+            %% we just need to determine if the request is a read or write operation, and
+            %% (if it is write) if we are still consulting custom ACLs.
             {customize_for_modification_maybe(Endpoint, wrq:method(Req), Auth), Req, State};
-        _Else -> %% use standard behaviour
+        _Else -> %% consult the authorization system
             {Auth, Req, State}
     end.
 
@@ -123,6 +190,11 @@ use_custom_acls(Endpoint, Auth, Req, #base_state{requestor = #chef_client{} } = 
 %%
 %% Controlled by the config variable {oc_chef_wm, custom_acls_always_for_modification}
 customize_for_modification_maybe(Endpoint, Method, Auth) ->
+    %% If the current request is modifying the system, and we are configured to always use
+    %% customized ACLs when servicing modification requests, defer to the authorization
+    %% system to determine if this request should be authorized (i.e., allow the original
+    %% `Auth' value to be used).  Otherwise, short-circuit and declare unilaterally that the
+    %% request is authorized.
     case is_modification(Endpoint, Method) of
         true ->
             case auth_for_modification() of
@@ -132,31 +204,31 @@ customize_for_modification_maybe(Endpoint, Method, Auth) ->
                     authorized
             end;
         false ->
+            %% It's not a modification request; allow it.
             authorized
     end.
 
-config_for(cookbooks) ->
-    custom_acls_cookbooks;
-config_for(roles) ->
-    custom_acls_roles;
-config_for(data) ->
-    custom_acls_data;
-config_for(depsolver) ->
-    custom_acls_depsolver.
+%% @doc Determine the configuration parmeter that corresponds to the given endpoint.
+config_for(cookbooks) -> custom_acls_cookbooks;
+config_for(roles)     -> custom_acls_roles;
+config_for(data)      -> custom_acls_data;
+config_for(depsolver) -> custom_acls_depsolver.
 
-is_modification(depsolver, 'POST') ->
-    false;
-is_modification(_Endpoint, Method) when Method =:= 'GET';
-                                        Method =:= 'HEAD' ->
-    false;
-is_modification(_Endpoint, _Method) ->
-    true.
+%% @doc Is the current request one that modifies the system, as determined by the endpoint
+%% and HTTP verb being used?
+is_modification(depsolver, 'POST')  -> false;
+is_modification(_Endpoint, 'GET')   -> false;
+is_modification(_Endpoint, 'HEAD')  -> false;
+is_modification(_Endpoint, _Method) -> true.
 
+%% @doc Determine if we should use the authorization system for modification requests, or if
+%% we should just follow the default ACL rules.  We only skip the check if [oc_chef_wm
+%% custom_acls_always_for_modification] is explicitly set to false; undefined is the same as
+%% true.
 auth_for_modification() ->
     case application:get_env(oc_chef_wm, custom_acls_always_for_modification) of
         {ok, Value} ->
             Value =:= true;
-        _Else -> 
-           true 
+        _Else ->
+           true
     end.
-
