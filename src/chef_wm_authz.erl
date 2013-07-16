@@ -140,7 +140,7 @@ is_validator(#chef_user{})                   -> false.
 %% this is set to false, both read and write operations to a given endpoint will be governed
 %% by the default ACL rules.  However, if it is set to true (or is undefined), then only
 %% read operations are assumed to be governed by the defaults; all write operations will
-%% still go to through the authorization system.
+%% still be actively checked against the authorization system.
 %%
 %% In summary, if you want your read operations to go a little faster, and you haven't
 %% customized your ACLs, set custom_acls_ENDPOINT to false.  If you want to go further and
