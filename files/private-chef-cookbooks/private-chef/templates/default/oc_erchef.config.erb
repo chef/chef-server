@@ -117,6 +117,16 @@
                                 {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}]
            }
           ]},
+  {webmachine, [
+          {log_handlers, [
+               {oc_wm_request_logger, [
+                       {file, "<%= File.join(@log_directory, 'requests.log') %>"},
+                       {file_size, 100},  %% Size in MB
+                       {files, 5},
+                       {annotations, [{reqid, "req_id"}, {org_name, "org"}, {darklaunch, "darklaunch"}]}
+                       ]
+                      }]}]
+      },
   {ibrowse, [
              {default_max_sessions, <%= @ibrowse_max_sessions %>},
              {default_max_pipeline_size, <%= @ibrowse_max_pipeline_size %>}
