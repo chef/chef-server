@@ -4,11 +4,12 @@
 
 {deps,
  [
-  %% Note that webmachine needs to come before chef_index to ensure we
-  %% get mochiweb as specified by webmachine and not the one from
-  %% gen_bunny.
-  {webmachine, ".*",
-   {git, "git://github.com/basho/webmachine", {tag, "1.10.1"}}},
+  %% opscoderl_wm wraps around webmachine and adds helper functions.
+  %% Note that opscoderl_wm (webmachine) needs to come before chef_index
+  %% to ensure we get mochiweb as specified by webmachine and not the
+  %% one from gen_bunny.
+  {opscoderl_wm, ".*",
+   {git, "git@github.com:opscode/opscoderl_wm.git", {branch, "master"}}},
 
   {chef_authn, ".*",
    {git, "git://github.com/opscode/chef_authn.git", {branch, "master"}}},
