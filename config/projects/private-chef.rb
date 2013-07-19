@@ -53,6 +53,7 @@ dependency "oc-chef-pedant"
 # partybus and upgrade scripts
 dependency "partybus"
 dependency "private-chef-upgrades"
+dependency "oc_authz_migrator" # migrate authz to bifrost
 
 # version manifest file
 dependency "version-manifest"
