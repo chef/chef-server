@@ -121,8 +121,8 @@
           {log_handlers, [
                {oc_wm_request_logger, [
                        {file, "<%= File.join(@log_directory, 'requests.log') %>"},
-                       {file_size, 100},  %% Size in MB
-                       {files, 5},
+                       {file_size, <%= (@log_rotation['file_maxbytes'].to_f/1024/1024).round %>},  %% Size in MB
+                       {files, <%= @log_rotation['num_to_keep'] %>},
                        {annotations, [{reqid, "req_id"}, {org_name, "org"}, {darklaunch, "darklaunch"}]}
                        ]
                       }]}]
