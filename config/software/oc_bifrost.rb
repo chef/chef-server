@@ -1,7 +1,7 @@
 name "oc_bifrost"
-version "1.2.2"
+version "1.3.0"
 
-dependencies ["erlang", "rebar", "rsync"]
+dependencies ["erlang", "rebar", "rsync", "sqitch"]
 
 source :git => "git@github.com:opscode/oc_bifrost"
 
@@ -21,5 +21,5 @@ build do
   command "#{install_dir}/embedded/bin/rsync -a --delete ./rel/oc_bifrost/ #{install_dir}/embedded/service/oc_bifrost/"
   # TODO: git cleanup in oc_bifrost service directory
   command "rm -rf #{install_dir}/embedded/service/oc_bifrost/log"
-  command "#{install_dir}/embedded/bin/rsync -a --delete ./schema/sql/ #{install_dir}/embedded/service/oc_bifrost/db/"
+  command "#{install_dir}/embedded/bin/rsync -a --delete ./schema/ #{install_dir}/embedded/service/oc_bifrost/db/"
 end
