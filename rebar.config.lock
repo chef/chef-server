@@ -1,10 +1,10 @@
 %% THIS FILE IS GENERATED. DO NOT EDIT IT MANUALLY %%
 
-{require_otp_vsn,"R1[456]B.*"}.
+{require_otp_vsn,"R1[56]B.*"}.
 {erl_dep_retries,10}.
 {deps,[{eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "9c7be6201e74b35c62b8388123e5524f646d133d"}},
+                  "35636bc4de07bc803ea4fc9731fab005d0378c2b"}},
        {erlsom,".*",
                {git,"git://github.com/opscode/erlsom.git",
                     "c5ca9fca1257f563d78b048e35ac60832ec80584"}},
@@ -23,11 +23,14 @@
        {mochiweb,".*",
                  {git,"git://github.com/basho/mochiweb",
                       "05b5b7eb7b830afbd9ba349a40bf40ba0462aa11"}},
+       {opscoderl_wm,".*",
+                     {git,"git@github.com:opscode/opscoderl_wm.git",
+                          "bf45be514c605f9f58a6c6d4107129affa9745c6"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
-                                    "c35d2e1fb639ae6d81e468ca7e5bf03b884a1549"}},
+                                    "758d1cf4cc79483e1fbaf2ea59ed9e9f76b4a012"}},
        {webmachine,".*",
-                   {git,"git://github.com/basho/webmachine.git",
+                   {git,"git://github.com/basho/webmachine",
                         "4c441d0f0ca9e343601eb39c8dd2e2117b781dfc"}}]}.
 {erl_opts,[debug_info,warnings_as_errors]}.
 {xref_checks,[exports_not_used,undefined_function_calls]}.
