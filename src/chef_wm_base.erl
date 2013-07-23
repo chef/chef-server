@@ -487,17 +487,10 @@ body_or_default(Req, Default) ->
     end.
 
 set_req_contexts(Req, #base_state{reqid_header_name = HeaderName} = State) ->
-    ReqId = read_req_id(HeaderName, Req),
+    ReqId = oc_wm_request:read_req_id(HeaderName, Req),
     DbContext = chef_db:make_context(ReqId),
     State#base_state{chef_db_context = DbContext, reqid = ReqId}.
 
-read_req_id(ReqHeaderName, Req) ->
-    case wrq:get_req_header(ReqHeaderName, Req) of
-        undefined ->
-            base64:encode(crypto:md5(term_to_binary(make_ref())));
-        HV ->
-            iolist_to_binary(HV)
-    end.
 
 spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
                                          organization_name = OrgName,
