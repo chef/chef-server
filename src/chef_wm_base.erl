@@ -37,8 +37,7 @@
          validate_request/3]).
 
 %% Helpers for webmachine callbacks
--export([add_notes/2,
-         create_from_json/5,
+-export([create_from_json/5,
          init/2,
          verify_request_signature/2,
          update_from_json/4]).
@@ -189,8 +188,8 @@ finish_request(Req, #base_state{reqid = ReqId,
     try
         Code = wrq:response_code(Req),
         PerfTuples = stats_hero:snapshot(ReqId, agg),
-        Req0 = add_notes([{reqid, ReqId},
-                            {perf_stats, PerfTuples}], Req),
+        Req0 = oc_wm_request:add_notes([{reqid, ReqId},
+                                        {perf_stats, PerfTuples}], Req),
         AnnotatedReq = maybe_annotate_org_specific(OrgName, Darklaunch, Req0),
         stats_hero:report_metrics(ReqId, Code),
         stats_hero:stop_worker(ReqId),
@@ -523,12 +522,6 @@ spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
             ok
     end.
 
-%% @doc Helper function to annotate requests for logging
-add_notes([], Req) ->
-    Req;
-add_notes([{Key, Value} | Rest], Req) ->
-    add_notes(Rest, wrq:add_note(Key, Value, Req)).
-
 fetch_org_guid(#base_state{organization_guid = Id}) when is_binary(Id) ->
     Id;
 fetch_org_guid(#base_state{organization_guid = undefined,
@@ -544,8 +537,8 @@ maybe_annotate_org_specific(?OSC_ORG_NAME, _Darklaunch, Req) ->
 maybe_annotate_org_specific(OrgName, Darklaunch, Req) ->
     %% Generate the darklaunch header in a form that won't break log parsing
     DLData = chef_wm_darklaunch:get_proplist(Darklaunch),
-    add_notes([{org_name, OrgName},
-               {darklaunch, DLData}], Req).
+    oc_wm_request:add_notes([{org_name, OrgName},
+                             {darklaunch, DLData}], Req).
 
 %% If request results in a rename, then set Location header and wm will return with a 201.
 %% Currently, only the clients endpoint supports rename
