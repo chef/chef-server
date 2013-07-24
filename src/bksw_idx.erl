@@ -22,7 +22,8 @@
 
 -export([init/1, is_authorized/2, allowed_methods/2, content_types_provided/2,
          finish_request/2,
-         resource_exists/2, to_xml/2]).
+         resource_exists/2, to_xml/2,
+         service_available/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
 %%===================================================================
@@ -40,6 +41,9 @@ allowed_methods(Rq, Ctx) ->
 
 content_types_provided(Rq, Ctx) ->
     {[{"text/xml", to_xml}], Rq, Ctx}.
+
+service_available(Req, Ctx) ->
+    bksw_util:service_available(Req, Ctx).
 
 resource_exists(Rq, Ctx) ->
     {erlang:is_list(bksw_io:bucket_list()), Rq, Ctx}.

@@ -19,6 +19,7 @@
 -export([init/1, is_authorized/2, allowed_methods/2, content_types_provided/2,
          content_types_accepted/2,
          finish_request/2,
+         service_available/2,
          resource_exists/2, delete_resource/2, create_resource/2, to_xml/2]).
 
 -include("amazon_s3.hrl").
@@ -55,6 +56,9 @@ content_types_provided(Rq, Ctx) ->
                 C
         end,
     {[{CType, to_xml}], Rq, Ctx}.
+
+service_available(Req, Ctx) ->
+    bksw_util:service_available(Req, Ctx).
 
 resource_exists(Rq0, Ctx) ->
     Bucket = bksw_util:get_bucket(Rq0),

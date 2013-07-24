@@ -61,6 +61,7 @@ init_per_testcase(_TestCase, Config) ->
     error_logger:info_msg("Using disk_store: ~p~n", [DiskStore]),
     AccessKeyID = random_string(10, "abcdefghijklmnopqrstuvwxyz"),
     SecretAccessKey = random_string(30, "abcdefghijklmnopqrstuvwxyz"),
+    application:set_env(bookshelf, reqid_header_name, "X-Request-Id"),
     application:set_env(bookshelf, disk_store, DiskStore),
     application:set_env(bookshelf, keys, {AccessKeyID, SecretAccessKey}),
     application:set_env(bookshelf, log_dir, LogDir),

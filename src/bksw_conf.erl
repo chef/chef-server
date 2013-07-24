@@ -33,10 +33,6 @@
 
 -include("internal.hrl").
 
--record(context, {access_key_id,
-                  secret_access_key,
-                  stream_download}).
-
 %%%===================================================================
 %%% types
 %%%===================================================================
@@ -51,7 +47,8 @@
 get_context(Config) ->
     #context{access_key_id = proplists:get_value(access_key_id, Config),
              secret_access_key = proplists:get_value(secret_access_key, Config),
-             stream_download = proplists:get_value(stream_download, Config)}.
+             stream_download = proplists:get_value(stream_download, Config),
+             reqid_header_name = proplists:get_value(reqid_header_name, Config)}.
 
 -spec summarize_config() -> proplists:proplist().
 summarize_config() ->
@@ -59,6 +56,7 @@ summarize_config() ->
     lists:flatten([ip(), port(), log_dir(),
                    {disk_store, disk_store()},
                    {stream_download, stream_download()},
+                   {reqid_header_name, reqid_header_name()},
                    {access_key_id, KeyId}]).
 
 -spec get_configuration() -> list().
@@ -155,6 +153,9 @@ log_dir() ->
         {ok, Dir} ->
             {log_dir, Dir}
     end.
+
+reqid_header_name() ->
+    application:get_env(bookshelf, reqid_header_name).
 
 stream_download() ->
     case application:get_env(bookshelf, stream_download) of
