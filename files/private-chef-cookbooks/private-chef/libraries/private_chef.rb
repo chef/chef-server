@@ -95,7 +95,11 @@ module PrivateChef
       end
       existing_secrets.each do |k, v|
         v.each do |pk, p|
-          PrivateChef[k][pk] = p
+          if not PrivateChef[k]
+            Chef::Log.info("Ignoring unused secret for #{k}.")
+          else
+            PrivateChef[k][pk] = p
+          end
         end
       end
 
