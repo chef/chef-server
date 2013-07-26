@@ -25,6 +25,7 @@
          validate_content_checksum/2,
          finish_request/2,
          generate_etag/2, init/1, is_authorized/2, last_modified/2,
+         service_available/2,
          resource_exists/2, upload/2]).
 
 -include("bksw_obj.hrl").
@@ -75,6 +76,9 @@ content_types_accepted(Rq, Ctx) ->
          end,
     {MT, _Params} = webmachine_util:media_type_to_detail(CT),
     {[{MT, upload}], Rq, Ctx}.
+
+service_available(Req, Ctx) ->
+    bksw_util:service_available(Req, Ctx).
 
 resource_exists(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
