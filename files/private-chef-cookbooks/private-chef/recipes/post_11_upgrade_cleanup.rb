@@ -49,3 +49,9 @@ end
 private_chef_package_cleaner "php-fpm" do
   directories ["/var/log/opscode/php-fpm"]
 end
+
+private_chef_package_cleaner "opscode-chef" do
+  directories ["/var/opt/opscode/opscode-chef",
+               "/var/log/opscode/opscode-chef",
+               "/opt/opscode/embedded/service/opscode-chef"]
+end
