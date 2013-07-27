@@ -9,7 +9,7 @@
   %% to ensure we get mochiweb as specified by webmachine and not the
   %% one from gen_bunny.
   {opscoderl_wm, ".*",
-   {git, "git@github.com:opscode/opscoderl_wm.git", {branch, "master"}}},
+   {git, "git://github.com/opscode/opscoderl_wm.git", {branch, "master"}}},
 
   {chef_authn, ".*",
    {git, "git://github.com/opscode/chef_authn.git", {branch, "master"}}},
