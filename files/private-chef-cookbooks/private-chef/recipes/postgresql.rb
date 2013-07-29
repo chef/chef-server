@@ -23,11 +23,32 @@ postgresql_data_dir = node['private_chef']['postgresql']['data_dir']
 postgresql_data_dir_symlink = File.join(postgresql_dir, "data")
 postgresql_log_dir = node['private_chef']['postgresql']['log_directory']
 
+# Postgres User Setup
 user node['private_chef']['postgresql']['username'] do
   system true
   shell node['private_chef']['postgresql']['shell']
   home node['private_chef']['postgresql']['home']
 end
+
+# TODO: Currently this is set up to be a parent directory of
+# node['private_chef']['postgresql']['dir'].  Is it necessary that
+# this is exposed as a settable attribute, or can we make some
+# simplifying assumptions about our directory structure?
+directory node['private_chef']['postgresql']['home'] do
+  owner node['private_chef']['postgresql']['username']
+  recursive true
+  mode "0700"
+end
+
+file File.join(node['private_chef']['postgresql']['home'], ".profile") do
+  owner node['private_chef']['postgresql']['username']
+  mode "0644"
+  content <<-EOH
+    PATH=#{node['private_chef']['postgresql']['user_path']}
+  EOH
+end
+
+####
 
 directory postgresql_log_dir do
   owner node['private_chef']['user']['username']
@@ -36,27 +57,11 @@ end
 
 directory postgresql_dir do
   owner node['private_chef']['postgresql']['username']
-  mode "0700"
-end
-
-directory postgresql_data_dir do
-  owner node['private_chef']['postgresql']['username']
-  mode "0700"
   recursive true
+  mode "0700"
 end
 
-link postgresql_data_dir_symlink do
-  to postgresql_data_dir
-  not_if { postgresql_data_dir == postgresql_data_dir_symlink }
-end
-
-file File.join(node['private_chef']['postgresql']['home'], ".profile") do
-  owner node['private_chef']['postgresql']['username']
-  mode "0644"
-  content <<-EOH
-PATH=#{node['private_chef']['postgresql']['user_path']}
-EOH
-end
+####
 
 if File.directory?("/etc/sysctl.d") && File.exists?("/etc/init.d/procps")
   # smells like ubuntu...
@@ -90,186 +95,21 @@ else
   end
 end
 
-execute "/opt/opscode/embedded/bin/initdb -D #{postgresql_data_dir}" do
-  user node['private_chef']['postgresql']['username']
-  not_if { File.exists?(File.join(postgresql_data_dir, "PG_VERSION")) }
-end
+# Upgrade the cluster if you gotta
+private_chef_pg_upgrade "upgrade_if_necessary"
 
-postgresql_config = File.join(postgresql_data_dir, "postgresql.conf")
-
-template postgresql_config do
-  source "postgresql.conf.erb"
-  owner node['private_chef']['postgresql']['username']
-  mode "0644"
-  variables(node['private_chef']['postgresql'].to_hash)
+private_chef_pg_cluster postgresql_data_dir do
   notifies :restart, 'runit_service[postgresql]' if OmnibusHelper.should_notify?("postgresql")
 end
 
-pg_hba_config = File.join(postgresql_data_dir, "pg_hba.conf")
-
-template pg_hba_config do
-  source "pg_hba.conf.erb"
-  owner node['private_chef']['postgresql']['username']
-  mode "0644"
-  variables(node['private_chef']['postgresql'].to_hash)
-  notifies :restart, 'runit_service[postgresql]' if OmnibusHelper.should_notify?("postgresql")
+link postgresql_data_dir_symlink do
+  to postgresql_data_dir
+  not_if { postgresql_data_dir == postgresql_data_dir_symlink }
 end
-
-should_notify = OmnibusHelper.should_notify?("postgresql")
 
 component_runit_service "postgresql" do
   control ['t']
 end
 
-if node['private_chef']['bootstrap']['enable']
-  ###
-  # Create the database, migrate it, and create the users we need, and grant them
-  # privileges.
-
-  #
-  # oc_erchef
-  #
-  erchef_database_exists = "/opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} /opt/opscode/embedded/bin/psql -d 'template1' -c 'select datname from pg_database' -x|grep opscode_chef"
-  erchef_user_exists     = "/opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} /opt/opscode/embedded/bin/psql -d 'template1' -c 'select usename from pg_user' -x|grep #{node['private_chef']['postgresql']['sql_user']}"
-  erchef_ro_user_exists  = "/opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} /opt/opscode/embedded/bin/psql -d 'template1' -c 'select usename from pg_user' -x|grep #{node['private_chef']['postgresql']['sql_ro_user']}"
-
-  execute "/opt/opscode/embedded/bin/createdb -T template0 -E UTF-8 opscode_chef" do
-    user node['private_chef']['postgresql']['username']
-    not_if erchef_database_exists
-    retries 30
-    notifies :run, "execute[migrate_database]", :immediately
-  end
-
-  execute "migrate_database" do
-    command "/opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/bin/rake pg:remigrate"
-    cwd "/opt/opscode/embedded/service/chef-sql-schema"
-    user node['private_chef']['postgresql']['username']
-    action :nothing
-  end
-
-  execute "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"CREATE USER #{node['private_chef']['postgresql']['sql_user']} WITH SUPERUSER ENCRYPTED PASSWORD '#{node['private_chef']['postgresql']['sql_password']}'\"" do
-    cwd "/opt/opscode/embedded/service/chef-sql-schema"
-    user node['private_chef']['postgresql']['username']
-    notifies :run, "execute[grant opscode_chef privileges]", :immediately
-    not_if erchef_user_exists
-  end
-
-  execute "grant opscode_chef privileges" do
-    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_user']}\""
-    user node['private_chef']['postgresql']['username']
-    action :nothing
-  end
-
-  execute "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"CREATE USER #{node['private_chef']['postgresql']['sql_ro_user']} WITH SUPERUSER ENCRYPTED PASSWORD '#{node['private_chef']['postgresql']['sql_ro_password']}'\"" do
-    cwd "/opt/opscode/embedded/service/chef-sql-schema"
-    user node['private_chef']['postgresql']['username']
-    notifies :run, "execute[grant opscode_chef_ro privileges]", :immediately
-    not_if erchef_ro_user_exists
-  end
-
-  execute "grant opscode_chef_ro privileges" do
-    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_ro_user']}\""
-    user node['private_chef']['postgresql']['username']
-    action :nothing
-  end
-
-  #
-  # oc_bifrost
-  #
-  # Bifrost uses a separate database running under the same PostgreSQL service.
-  # Although it may make sense to perform this bootstrapping in the
-  # `private-chef::oc_bifrost` recipe (or it's own recipe) we've left it here
-  # to follow the idioms of the rest of this cookbook. This should make a
-  # cookbooks-wide refactor easier and allow cut down on the tribal knowledge
-  # required to get a new engineer up to speed.
-  #
-
-  bifrost_database_exists = <<-EOH
-    /opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} \
-    /opt/opscode/embedded/bin/psql --dbname template1 \
-                                   --command "SELECT datname FROM pg_database" \
-                                   -x \
-    |grep bifrost
-  EOH
-
-  bifrost_user_exists = <<-EOH
-    /opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} \
-    /opt/opscode/embedded/bin/psql --dbname template1 \
-                                   --tuples-only \
-                                   --command "SELECT rolname FROM pg_roles WHERE rolname='#{node['private_chef']['oc_bifrost']['sql_user']}';" \
-    | grep #{node['private_chef']['oc_bifrost']['sql_user']}
-  EOH
-
-  bifrost_ro_user_exists = <<-EOH
-    /opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} \
-    /opt/opscode/embedded/bin/psql --dbname template1 \
-                                   --tuples-only \
-                                   --command "SELECT rolname FROM pg_roles WHERE rolname='#{node['private_chef']['oc_bifrost']['sql_ro_user']}';" \
-    | grep #{node['private_chef']['oc_bifrost']['sql_ro_user']}
-  EOH
-
-  # create users
-  execute "create_db_user_bifrost" do
-    command <<-EOH
-      /opt/opscode/embedded/bin/psql --dbname template1 \
-                                     --command "CREATE ROLE #{node['private_chef']['oc_bifrost']['sql_user']} WITH LOGIN ENCRYPTED PASSWORD '#{node['private_chef']['oc_bifrost']['sql_password']}'"
-    EOH
-    user node['private_chef']['postgresql']['username']
-    not_if bifrost_user_exists
-  end
-  execute "create_db_ro_user_bifrost" do
-    command <<-EOH
-      /opt/opscode/embedded/bin/psql --dbname template1 \
-                                     --command "CREATE ROLE #{node['private_chef']['oc_bifrost']['sql_ro_user']} WITH LOGIN ENCRYPTED PASSWORD '#{node['private_chef']['oc_bifrost']['sql_ro_password']}'"
-    EOH
-    user node['private_chef']['postgresql']['username']
-    not_if bifrost_ro_user_exists
-  end
-
-  # create database
-  execute "create_database_bifrost" do
-    command <<-EOH
-      /opt/opscode/embedded/bin/createdb --template template0 \
-                                         --encoding UTF-8 \
-                                         --owner #{node['private_chef']['oc_bifrost']['sql_user']} \
-                                         bifrost
-    EOH
-    user node['private_chef']['postgresql']['username']
-    not_if bifrost_database_exists
-    retries 30
-  end
-
-
-  execute "bifrost_schema" do
-    # The version of the schema to be deployed will the the maximum
-    # available in the oc_bifrost repository.  This will be the same
-    # version needed by the code that is deployed here.  If we ever
-    # split bifrost's code and schema into separate repositories,
-    # we'll need to deploy to a specific schema tag
-
-    command "/opt/opscode/embedded/bin/sqitch --engine pg --db-name bifrost --top-dir opt/opscode/embedded/service/oc_bifrost/db deploy --verify"
-    user node['private_chef']['postgresql']['username']
-
-    # If sqitch is deploying the first time, it'll return 0 on
-    # success.  If it's running a second time and ends up deploying
-    # nothing (since we've already deployed all changesets), it'll
-    # return 1.  Both scenarios should be considered successful.
-    returns [0,1]
-  end
-
-  # Permissions for the database users got set in the schema... though that means that the role names should be hard-coded in this cookbook.
-  execute "add_permissions_bifrost" do
-    command <<-EOH
-      psql --dbname bifrost \
-           --single-transaction \
-           --set ON_ERROR_STOP=1 \
-           --set database_name=bifrost \
-           --file sql/permissions.sql
-    EOH
-    cwd "/opt/opscode/embedded/service/oc_bifrost/db"
-    user node['private_chef']['postgresql']['username']
-
-    # This can run each time, since the commands in the SQL file are all idempotent anyway
-  end
-
-end
+include_recipe "private-chef::erchef_database"
+include_recipe "private-chef::bifrost_database"
