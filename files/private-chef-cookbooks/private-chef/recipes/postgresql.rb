@@ -16,24 +16,7 @@
 # limitations under the License.
 #
 
-# BEGIN POSTGRES CLEANUP
-#
-# private-chef 2.0.0+ renamed postges service to postgresql, we need to cleanup
-# all traces of the previously-named service
-#
-execute "/opt/opscode/bin/private-chef-ctl stop postgres" do
-  retries 20
-end
-
-runit_service "postgres" do
-  action :disable
-end
-
-directory "/opt/opscode/sv/postgres" do
-  action :delete
-  recursive true
-end
-# END POSTGRES CLEANUP
+include_recipe "private-chef::old_postgres_cleanup"
 
 postgresql_dir = node['private_chef']['postgresql']['dir']
 postgresql_data_dir = node['private_chef']['postgresql']['data_dir']
