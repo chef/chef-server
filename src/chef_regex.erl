@@ -88,9 +88,6 @@ regex_for(recipe_name) ->
     %% Note that this does NOT include a version suffix!
     generate_regex_msg_tuple(?ANCHOR_REGEX(?COOKBOOK_QUALIFIED_RECIPE_REGEX),
                              <<"Invalid recipe name. Must only contain A-Z, a-z, 0-9, _ or -">>);
-regex_for(cookbook_version) ->
-    generate_regex_msg_tuple(?ANCHOR_REGEX(?VERSION_REGEX),
-                             <<"Invalid cookbook version">>);
 regex_for(cookbook_name) ->
     generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
                              <<"Malformed cookbook name. Must only contain A-Z, a-z, 0-9, _ or -">>);

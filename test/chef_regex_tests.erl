@@ -74,31 +74,3 @@ regex_for_names_test_() ->
              ?assertEqual(ok, match(<<"foo::foo_bar-123.a">>, Regex))
          end}
     ].
-
-
-regex_for_cookbook_version_test_() ->
-    Regex = chef_regex:regex_for(cookbook_version),
-    Tests = [{<<"">>, nomatch},
-             %% incomplete no good
-             {<<"1.">>, nomatch},
-             %% digits only
-             {<<"a">>, nomatch},
-             {<<"a.b">>, nomatch},
-             {<<"1.1a">>, nomatch},
-             {<<"1.a">>, nomatch},
-             {<<"1.a.121">>, nomatch},
-             {<<"1.0.foo">>, nomatch},
-             {<<"foo.0">>, nomatch},
-             {<<"foo.0.0">>, nomatch},
-
-             %% we only allow MAJOR.MINOR or MAJOR.MINOR.PATCH
-             {<<"1">>, nomatch},
-             {<<"1.2.3.4">>, nomatch},
-
-             {<<"0.0.0">>, ok},
-             {<<"1.2.3">>, ok},
-             {<<"1.0">>, ok},
-             {<<"1.0123456542824723">>, ok},
-             {<<"1.0.1">>, ok}
-            ],
-    [?_assertEqual(Expected, match(Input, Regex)) || {Input, Expected} <- Tests].
