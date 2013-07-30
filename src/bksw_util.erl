@@ -29,6 +29,7 @@
          to_binary/1]).
 
 -include("internal.hrl").
+-include_lib("webmachine/include/wm_reqdata.hrl").
 
 %%===================================================================
 %% API functions
@@ -75,7 +76,12 @@ get_object_and_bucket(Rq0) ->
              bksw_util:to_binary(filename:join(Path))}
     end.
 
-service_available(Req, #context{reqid_header_name = HeaderName} = State) ->
+service_available(#wm_reqdata{req_headers = Headers} = Req,
+                  #context{reqid_header_name = HeaderName} = State) ->
     %% Extract or generate a request id
     ReqId = oc_wm_request:read_req_id(HeaderName, Req),
-    {true, oc_wm_request:add_notes([{reqid, ReqId}], Req), State#context{reqid = ReqId}}.
+    UserId = mochiweb_headers:get_value("x-ops-userid", Headers),
+    Req0 = oc_wm_request:add_notes([{req_id, ReqId},
+                                    {user, UserId}], Req),
+
+    {true, Req0, State#context{reqid = ReqId}}.
