@@ -112,11 +112,6 @@ regex_for(node_name) ->
     generate_regex_msg_tuple(?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
                              <<"Malformed node name.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>);
 
-%% used in environments
-regex_for(cookbook_version_constraint) ->
-    generate_regex_msg_tuple("^(~>|=|>=?|<=?) " ++ ?VERSION_REGEX ++ "$",
-                             <<"Invalid cookbook version constraint">>);
-
 regex_for(qualified_role) ->
    %% Roles MUST be wrapped in "role[...]" to be recognized as such.
    %% Also, they have no cookbook prefix or version suffix.
