@@ -430,9 +430,9 @@ check_cookbook_authz(true, _Cookbooks, _Req, _State) ->
     ok;
 check_cookbook_authz(false, Cookbooks, _Req, #base_state{reqid = ReqId,
                                                         requestor_id = RequestorId}) ->
-    Resources = [{object, AuthzId, Name}
+    Resources = [{AuthzId, Name}
                  || #chef_cookbook_version{name = Name, authz_id = AuthzId} <- Cookbooks],
-    case ?SH_TIME(ReqId, oc_chef_authz, bulk_actor_is_authorized, (ReqId, RequestorId, Resources, read)) of
+    case ?SH_TIME(ReqId, oc_chef_authz, bulk_actor_is_authorized, (ReqId, RequestorId, object, Resources, read)) of
         ok -> ok;
         {error, {Name, Why}} ->
             Report = {check_cookbook_authz, {Name, Why, ReqId}},
