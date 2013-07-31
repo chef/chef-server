@@ -182,14 +182,13 @@ content_types_accepted(Req, State) ->
 content_types_provided(Req, State) ->
     {[{"application/json", to_json}], Req, State}.
 
-finish_request(#wm_reqdata{req_headers = Headers} = Req,
-               #base_state{reqid = ReqId,
-                           organization_name = OrgName,
-                           darklaunch = Darklaunch}=State) ->
+finish_request(Req, #base_state{reqid = ReqId,
+                                organization_name = OrgName,
+                                darklaunch = Darklaunch}=State) ->
     try
         Code = wrq:response_code(Req),
         PerfTuples = stats_hero:snapshot(ReqId, agg),
-        UserId = mochiweb_headers:get_value("x-ops-userid", Headers),
+        UserId = wrq:get_req_header("x-ops-userid", Req),
         Req0 = oc_wm_request:add_notes([{req_id, ReqId},
                                         {user, UserId},
                                         {perf_stats, PerfTuples}], Req),
