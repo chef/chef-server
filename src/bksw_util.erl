@@ -29,7 +29,6 @@
          to_binary/1]).
 
 -include("internal.hrl").
--include_lib("webmachine/include/wm_reqdata.hrl").
 
 %%===================================================================
 %% API functions
@@ -76,11 +75,14 @@ get_object_and_bucket(Rq0) ->
              bksw_util:to_binary(filename:join(Path))}
     end.
 
-service_available(#wm_reqdata{req_headers = Headers} = Req,
-                  #context{reqid_header_name = HeaderName} = State) ->
+service_available(Req, #context{reqid_header_name = HeaderName} = State) ->
     %% Extract or generate a request id
     ReqId = oc_wm_request:read_req_id(HeaderName, Req),
-    UserId = mochiweb_headers:get_value("x-ops-userid", Headers),
+
+    %% If no UserId is generated, this will return undefined. The opscoderl_wm request
+    %% logger will omit user=; downstream.
+    UserId = wrq:get_req_header("x-ops-userid", Req),
+
     Req0 = oc_wm_request:add_notes([{req_id, ReqId},
                                     {user, UserId}], Req),
 
