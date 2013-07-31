@@ -224,9 +224,21 @@ handle_depsolver_results({not_found, CookbookNames}, _Deps, Req, State) when is_
                         not_found_message(cookbook_version, CookbookNames),
                         cookbook_version_not_found);
 handle_depsolver_results(ok, {error, resolution_timeout}, Req, State) ->
-        precondition_failed(Req, State,
-                            timeout_message(),
-                            solve_timeout);
+    precondition_failed(Req, State,
+                        timeout_message(),
+                        solve_timeout);
+handle_depsolver_results(ok, {error, no_depsolver_workers}, Req, State) ->
+    wm_halt(503,
+            Req,
+            State,
+            {[{<<"message">>,<<"Out of depednecy solvers. Try again later.">>}]},
+            no_depsolver_workers);
+handle_depsolver_results(ok, {error, invalid_constraints, Detail}, Req, State) ->
+    precondition_failed(Req, State,
+                        invalid_constraints_message(Detail),
+                        invalid_constraints);
+handle_depsolver_results(ok, {error, no_solution, Detail}, Req, State) ->
+    precondition_failed(Req, State, {Detail}, no_solution);
 handle_depsolver_results(ok, {error, {unreachable_package, Unreachable}}, Req, State) ->
     precondition_failed(Req, State,
                         not_reachable_message(Unreachable),
@@ -288,6 +300,39 @@ assemble_response(Req, State, CookbookVersions) ->
 %%------------------------------------------------------------------------------
 %% Message Functions
 %%------------------------------------------------------------------------------
+
+invalid_constraints_message(ErrorDetails) ->
+    NonExistentCBs = proplists:get_value(non_existent_cookbooks, ErrorDetails),
+    ConstraintsNotMet = proplists:get_value(constraints_not_met, ErrorDetails),
+    Msg1 = build_constraints_message(<<"">>, non_existent_cookbooks, NonExistentCBs),
+    Msg2 = build_constraints_message(Msg1, constraints_not_met, ConstraintsNotMet),
+    Message = iolist_to_binary(["Run list contains invalid items: ", Msg2, "."]),
+    {[{<<"message">>, Message},
+      {<<"non_existent_cookbooks">>, NonExistentCBs},
+      {<<"cookbooks_with_no_versions">>, ConstraintsNotMet}]}.
+
+build_constraints_message(<<"">>, Part, Data) ->
+    build_constraints_message_part(Part, Data);
+build_constraints_message(Message, Part, Data) ->
+    iolist_to_binary([Message,
+                      <<"; ">>,
+                      build_constraints_message_part(Part, Data)]).
+
+%% TODO: refactor common parts into sub-function
+%%   OR: handle the error reporting on the ruby side
+build_constraints_message_part(non_existent_cookbooks, []) ->
+    <<"">>;
+build_constraints_message_part(non_existent_cookbooks, [Cookbook]) ->
+    iolist_to_binary(["no such cokbook ", Cookbook]);
+build_constraints_message_part(non_existent_cookbooks, Cookbooks) ->
+    iolist_to_binary(["no such cookbooks ", bin_str_join(Cookbooks, <<", ">>)]);
+build_constraints_message_part(constraints_not_met, []) ->
+    <<"">>;
+build_constraints_message_part(constraints_not_met, [Constraint]) ->
+    iolist_to_binary(["no versions match the constraints on cookbook ", Constraint]);
+build_constraints_message_part(constraints_not_met, Constraints) ->
+    iolist_to_binary(["no versions match the constraints on cookbooks ",
+                      bin_str_join(Constraints, <<", ">>)]).
 
 -spec not_found_message(environment | cookbook_version,
                         EnvironmentName :: binary() | [CookbookName :: binary()]) ->
