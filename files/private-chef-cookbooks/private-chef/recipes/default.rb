@@ -8,6 +8,30 @@ require 'openssl'
 
 ENV['PATH'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:#{ENV['PATH']}"
 
+# Capture old node attribute values (if there are any, that is) in
+# case we need them for comparison purposes for making changes or
+# updates
+#
+# TODO: extract this into something that add-ons can use; no sense
+# cargo-culting it around everywhere
+if File.exists?("/etc/opscode/chef-server-running.json")
+  old_config = JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))
+
+  # We're stashing these outside the "private_chef" attributes tree to
+  # prevent us from carrying them along forever when we write out the
+  # chef-server-running.json file at the end of the run.
+  #
+  # For example, to access the old version of the attribute
+  # ['private_chef']['foo']['bar'], you'll look at
+  # ['previous_run']['foo']['bar'].
+  #
+  # Take care to check that ['previous_run'] exists, though, otherwise
+  # you'll run into trouble doing the initial Chef run.
+  #
+  # TODO: Provide an API for getting this information
+  node.consume_attributes({"previous_run" => old_config['private_chef']})
+end
+
 directory "/etc/opscode" do
   owner "root"
   group "root"
@@ -38,7 +62,7 @@ end
 node.set['private_chef']['bootstrap']['bootstrap_server'] = node['private_chef']['bootstrap']['enable']
 
 if File.exists?("/var/opt/opscode/bootstrapped")
-	node.set['private_chef']['bootstrap']['enable'] = false
+        node.set['private_chef']['bootstrap']['enable'] = false
 end
 
 # Create the Chef User
@@ -121,7 +145,7 @@ include_recipe "private-chef::runit"
 
 # Configure Services
 [
-	"drbd",
+        "drbd",
   "couchdb",
   "rabbitmq",
   "postgresql",
@@ -137,7 +161,7 @@ include_recipe "private-chef::runit"
   "opscode-erchef",
   "opscode-webui",
   "nginx",
-	"keepalived"
+        "keepalived"
 ].each do |service|
   if node["private_chef"][service]["enable"]
     include_recipe "private-chef::#{service}"
@@ -157,4 +181,3 @@ file "/etc/opscode/chef-server-running.json" do
   mode "0600"
   content Chef::JSONCompat.to_json_pretty({ "private_chef" => node['private_chef'].to_hash, "run_list" => node.run_list })
 end
-
