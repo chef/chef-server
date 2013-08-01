@@ -184,9 +184,9 @@ remove_dups(L) ->
 %% cookbook_missing calls proplists:is_defined/2 which will traverse
 %% the AllVersions structure for each cookbook lookup.  It might be
 %% better to loop over the list of Cookbooks instead
--spec not_found_cookbooks(AllVersions :: [depsolver:dependency_set()],
+-spec not_found_cookbooks(AllVersions :: [chef_depsolver:dependency_set()],
                           Cookbooks :: [cookbook_with_version()]) ->
-                                 ok | {not_found, [cookbook_with_version()]}.
+                                 ok | {not_found, [binary(),...]}.
 not_found_cookbooks(AllVersions, Cookbooks) ->
     NotFound = [ cookbook_name(Cookbook) || Cookbook <- Cookbooks, cookbook_missing(Cookbook, AllVersions)],
     case NotFound of
@@ -210,7 +210,7 @@ cookbook_name({Name, _Version}) ->
 %% cookbook name in the list of all cookbook version. This means if any version of a cookbook
 %% exists it returns false
 -spec cookbook_missing(CB::cookbook_with_version(),
-                       AllVersions::[depsolver:dependency_set()]) -> boolean().
+                       AllVersions::[chef_depsolver:dependency_set()]) -> boolean().
 cookbook_missing(CB, AllVersions) when is_binary(CB) ->
     not proplists:is_defined(CB, AllVersions);
 cookbook_missing({Name, _Version}, AllVersions) ->
@@ -243,10 +243,6 @@ handle_depsolver_results(ok, {error, {unreachable_package, Unreachable}}, Req, S
     precondition_failed(Req, State,
                         not_reachable_message(Unreachable),
                         not_reachable_dep);
-handle_depsolver_results(ok, {error, _} = Ret, Req, State) ->
-    precondition_failed(Req, State,
-                        unable_to_solve_message(Ret),
-                        unable_to_solve_deps);
 handle_depsolver_results(ok, {ok, Cookbooks}, Req, #base_state{chef_db_context = DbContext,
                                                                organization_name = OrgName} = State) ->
     %% TODO - helper function to deal with the call and match on a chef_cookbook version
@@ -364,63 +360,6 @@ timeout_message() ->
     {[{<<"message">>, <<"unable to solve dependencies in alotted time">>},
       {<<"non_existent_cookbooks">>, []},
       {<<"most_constrained_cookbooks">>,[]}]}.
-
-%% Main entry point for parsing the depsolver error structure
-%% It consists of a list of solutions that were tried where each solution has the form:
-%%
-%%   {RawPaths::[ { Roots::[constraint()], Path::[pkg()] }],
-%%    FailingDeps::[constraint()]}
-%%
-%% The nth item in RawPaths failed due to the constraint in the n'th item of FailingDeps
-%%
-%% The textual error message will show all solutions but we fill in the structures only
-%% with the first solution
-%%
-unable_to_solve_message({error, [Why| _Rest]} = Details) ->
-    Reason = iolist_to_binary(depsolver:format_error(Details)),
-    { RawPaths, FailingDeps } = Why,
-    unable_to_solve_message(Reason, RawPaths, FailingDeps).
-
-%% versions specified that do not exist, so output a "no versions match" error
-unable_to_solve_message(_Reason, RawPaths, []) ->
-    RunlistItems = formatted_roots(RawPaths),
-    InvalidItemsReason = iolist_to_binary(["Run list contains invalid items: no versions match the constraints on cookbook ",
-                                           bin_str_join(RunlistItems, <<",">>),
-                                           "."
-                                          ]),
-    {[{<<"message">>, InvalidItemsReason},
-      {<<"non_existent_cookbooks">>, []},
-      {<<"cookbooks_with_no_versions">>, RunlistItems}]};
-%% If constraint paths are non-empty, find the reason that the constraint is not satisfied
-%% and return the run list item ()root of the failure tree) along with the most constrained
-%% cookbook in the tree
-unable_to_solve_message(Reason, RawPaths, FailingDeps) ->
-    RunlistItems = formatted_roots(RawPaths),
-    Constraints = formatted_constraints(FailingDeps),
-    {[{<<"message">>, Reason},
-      {<<"unsatisfiable_run_list_item">>, RunlistItems},
-      {<<"non_existent_cookbooks">>, []},
-      {<<"most_constrained_cookbooks">>, Constraints}]}.
-
-%% @doc Give a set of run list items that are roots in the dependency
-%% tree, format them as binaries.  They could be either simple names
-%% or name, version tuple pairs
--spec formatted_roots([{Root::[depsolver:constraint()],
-                        Path::[depsolver:pkg()]}]) -> [binary()].
-formatted_roots(RawRoots) ->
-    %% A RootSet is a list of packages
-    Roots = [ RootSet || {RootSet, _} <- RawRoots],
-    %% We flatten to turn [ [ Roots] ] into something we can iterate over
-    [ iolist_to_binary(depsolver_culprit:format_constraint(Ver)) || Ver <- lists:flatten(Roots) ].
-
-%% @doc Give a set of constraint paths representing failing
-%% dependencies, extract out the constraints which could not be met
--spec formatted_constraints(FailingDeps::[{Root::[depsolver:constraint()],
-                                           Constraints::[depsolver:constraint()]}]) -> [binary()].
-formatted_constraints(FailingDeps) ->
-    ConstraintSets = [ ConstraintSet || {_Root, ConstraintSet} <- FailingDeps ],
-    %% Each ConstraintSet is a list so we flatten to turn [ [ Constraint] ] into something we can iterate over
-    [iolist_to_binary(depsolver_culprit:format_constraint(Con)) || Con <- lists:flatten(ConstraintSets)].
 
 %%------------------------------------------------------------------------------
 %% Miscellaneous Utilities
