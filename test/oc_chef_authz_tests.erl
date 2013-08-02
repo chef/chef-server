@@ -194,64 +194,6 @@ is_authorized_on_resource_test_() ->
                end}
       end]}.
 
-bulk_actor_is_authorized_test_() ->
-    {foreach,
-     fun() -> test_utils:test_setup(),
-              ibrowse:start(),
-              Server = "http://127.0.0.1:9463",
-              Superuser = <<"1d774f20735e25fa8a0e97d624b68346">>,
-              application:set_env(oc_chef_authz, authz_superuser, Superuser),
-              application:set_env(oc_chef_authz, authz_root_url, Server),
-              application:set_env(oc_chef_authz, authz_service, [{root_url, Server}, {timeout, 10000000}] ),
-              {Server, Superuser}
-     end,
-     fun(_) -> ibrowse:stop(), meck:unload() end,
-     [fun({_Server, Superuser}) ->
-%%              automeck:mocks(?AUTOMECK_FILE(bulk_is_authorized1)),
-              {"check if the owner is authorized for grant on a newly created resource",
-               fun() ->
-                       {ok, ActorId} = oc_chef_authz:create_resource(Superuser, actor),
-                       {ok, ObjectId} = oc_chef_authz:create_resource(ActorId, object),
-                       ?assert(oc_chef_authz:bulk_actor_is_authorized(<<"">>, ActorId, object, [{ObjectId, ObjectId}], grant))
-               end}
-      end,
-      fun({_Server, Superuser}) ->
-%%              automeck:mocks(?AUTOMECK_FILE(bulk_is_authorized2)),
-              {"check that someone else is not authorized for grant on an newly created resource",
-               fun() ->
-                       {ok, ActorId} = oc_chef_authz:create_resource(Superuser, actor),
-                       {ok, ObjectId} = oc_chef_authz:create_resource(Superuser, object),
-                       ?assertEqual({false, [ObjectId]}, oc_chef_authz:bulk_actor_is_authorized(<<"">>, ActorId, object, [{ObjectId, ObjectId}], grant))
-               end}
-      end,
-      fun({_Server, Superuser}) ->
-%%              automeck:mocks(?AUTOMECK_FILE(bulk_is_authorized3)),
-              {"check that we can return mixed results where one is accesible and another isn't",
-               fun() ->
-                       {ok, ActorId} = oc_chef_authz:create_resource(Superuser, actor),
-                       {ok, ObjectId1} = oc_chef_authz:create_resource(Superuser, object),
-                       {ok, ObjectId2} = oc_chef_authz:create_resource(Superuser, object),
-                       {ok, MyObjectId} = oc_chef_authz:create_resource(ActorId, object),
-                       ObjectList = lists:sort( [{O, O} || O <- [ObjectId1, MyObjectId, ObjectId2]] ),
-                       ExpectedObjectList = lists:sort([ObjectId1, ObjectId2]),
-                       Reply = oc_chef_authz:bulk_actor_is_authorized(<<"">>, ActorId, object, ObjectList, grant),
-                       ?assertMatch({false, _}, Reply),
-                       {false, ReturnedObjectList} = Reply,
-                       ?assertEqual(ExpectedObjectList, lists:sort(ReturnedObjectList))
-               end}
-      end,
-      fun({_Server, Superuser}) ->
-%%              automeck:mocks(?AUTOMECK_FILE(bulk_is_authorized3)),
-              {"queries on a nonexistient object fail",
-               fun() ->
-                       %% would expect not_found
-                       ?assertEqual({error, {[?no_such_id], "400"}},
-                                    oc_chef_authz:bulk_actor_is_authorized(<<"">>, Superuser, object, [{?no_such_id, ?no_such_id}], grant))
-               end}
-      end]}.
-
-
-
 get_container_aid_for_object_test_() ->
     {foreach,
      fun() -> automeck:mocks(?AUTOMECK_FILE(container_aid)),

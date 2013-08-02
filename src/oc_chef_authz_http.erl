@@ -112,8 +112,6 @@ ibrowse_request(Pid, Url, Headers, Method, Body, Options, Timeout) ->
 handle_ibrowse_response({ok, Status, _, ResponseBody}) when Status =:= "200";
                                                             Status =:= "201" ->
     handle_response_body(ResponseBody);
-handle_ibrowse_response({ok, "204", _H, _B}) ->
-    ok;
 handle_ibrowse_response({ok, "403", _H, _B}) ->
     {error, forbidden};
 handle_ibrowse_response({ok, "404", _H, _B}) ->
