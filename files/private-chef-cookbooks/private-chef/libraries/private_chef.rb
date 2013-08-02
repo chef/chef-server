@@ -56,6 +56,14 @@ module PrivateChef
 
   class << self
 
+    def from_file(filename)
+      begin
+        self.instance_eval(IO.read(filename), filename, 1)
+      rescue
+        raise "Error loading file: #{$!.backtrace[0]}: #{$!.message}"
+      end
+    end
+
     def server(name=nil, opts={})
       if name
         PrivateChef["servers"] ||= Mash.new
