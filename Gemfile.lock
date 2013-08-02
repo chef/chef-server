@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/opscode/omnibus-software.git
-  revision: 2fb8e373ebe6d0fd7b147426bf500e28b8b874d2
+  revision: accb4dd554bddae1de51617f9683063f588d80a0
   branch: master
   specs:
     omnibus-software (0.0.1)
@@ -17,7 +17,7 @@ GEM
       ffi (~> 1.0, >= 1.0.11)
     clamp (0.6.1)
     ffi (1.9.0)
-    fpm (0.4.40)
+    fpm (0.4.42)
       arr-pm (~> 0.0.8)
       backports (>= 2.6.2)
       cabin (>= 0.6.0)
@@ -33,12 +33,12 @@ GEM
     http_parser.rb (0.5.3)
     ipaddress (0.8.0)
     json (1.8.0)
-    mime-types (1.23)
+    mime-types (1.24)
     mixlib-cli (1.3.0)
     mixlib-config (1.1.2)
     mixlib-log (1.6.0)
-    mixlib-shellout (1.1.0)
-    ohai (6.16.0)
+    mixlib-shellout (1.2.0)
+    ohai (6.18.0)
       ipaddress
       mixlib-cli
       mixlib-config
