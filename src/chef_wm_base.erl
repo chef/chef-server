@@ -532,8 +532,8 @@ maybe_annotate_org_specific(?OSC_ORG_NAME, _Darklaunch, Req) ->
 maybe_annotate_org_specific(OrgName, Darklaunch, Req) ->
     %% Generate the darklaunch header in a form that won't break log parsing
     DLData = chef_wm_darklaunch:get_proplist(Darklaunch),
-    oc_wm_request:add_notes([{<<"org">>, OrgName},
-                             {<<"darklaunch">>, DLData}], Req).
+    oc_wm_request:add_notes([{org_name, OrgName},
+                             {darklaunch, DLData}], Req).
 
 %% If request results in a rename, then set Location header and wm will return with a 201.
 %% Currently, only the clients endpoint supports rename
