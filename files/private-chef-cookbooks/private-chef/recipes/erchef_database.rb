@@ -8,7 +8,7 @@ end
 # (like Bifrost does), so subsequent schema upgrades are handled by
 # the 'private-chef-ctl upgrade' mechanism.
 execute "migrate_database" do
-  command "/opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/bin/rake pg:remigrate"
+  command "bundle exec rake pg:remigrate"
   cwd "/opt/opscode/embedded/service/chef-sql-schema"
   user node['private_chef']['postgresql']['username']
   action :nothing
