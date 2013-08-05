@@ -1,0 +1,47 @@
+{warning}
+These builds are intended for demo and evaluation purposes only!
+Under no circumstances should a customer or sales prospect use them in a production or other business critical environment.
+{warning}
+
+{info}
+<% expiration_date =  Time.now + (60 * 60 * 24 * days_valid) %>
+All links expire on <%= expiration_date.strftime("%B %-d, %Y") %>.
+To regenerate the contents of this page, use [this code|https://github.com/opscode/opscode-omnibus/tree/master/package_links]
+{info}
+
+h3. Private Chef Server
+<% info[:private_chef].each do |kv| %>
+[<%= kv[0] %>|<%= kv[1] %>]
+<% end %>
+
+h3. Run History (Reporting)
+<% info[:reporting].each do |kv| %>
+[<%= kv[0] %>|<%= kv[1] %>]
+<% end %>
+
+h3. Run History Knife Plugin (Reporting)
+<% info[:knife_reporting].each do |kv| %>
+[<%= kv[0] %>|<%= kv[1] %>]
+<% end %>
+
+h3. Push Jobs Server
+{note}The server requires at least 2 CPU cores. DO NOT attempt to run the server on a single core configuration as it will crash.{note}
+<% info[:push_jobs_server].each do |kv| %>
+[<%= kv[0] %>|<%= kv[1] %>]
+<% end %>
+
+h3. Push Jobs Client
+<% info[:push_jobs_client].each do |kv| %>
+[<%= kv[0] %>|<%= kv[1] %>]
+<% end %>
+
+h3. Push Job Knife Plugin
+<% info[:knife_push_jobs].each do |kv| %>
+[<%= kv[0] %>|<%= kv[1] %>]
+<% end %>
+
+h3. Web UI
+{note}After [configuration|https://github.com/opscode/omnibus-webui#configuration] it should run on port 2013 by default.{note}
+<% info[:webui].each do |kv| %>
+[<%= kv[0] %>|<%= kv[1] %>]
+<% end %>
