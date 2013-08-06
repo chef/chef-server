@@ -1,3 +1,17 @@
+# NOTE:
+#
+# Uses the value of certain node attributes in the course of execution.
+#
+# * node['previous_run']['postgresql']['data_dir']: the PostgreSQL
+#   data directory on the last Chef run
+# * node['private_chef']['postgresql']['data_dir']: the PostgreSQL
+#   data directory on the the current Chef run
+# * node['private_chef']['postgresql']['username']: the user the
+#   pg_upgrade process is run as
+#
+# Assumes that binaries are stored in
+# /opt/opscode/embedded/postgresql/$VERSION/bin.
+
 def whyrun_supported?
   true
 end

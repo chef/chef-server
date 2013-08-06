@@ -1,3 +1,8 @@
+# NOTE:
+#
+# Uses the value of node['private_chef']['postgresql']['username'] as
+# the user to run the user-creation psql command
+
 def whyrun_supported?
   true
 end

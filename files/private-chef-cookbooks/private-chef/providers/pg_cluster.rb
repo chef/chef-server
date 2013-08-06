@@ -1,3 +1,12 @@
+# NOTE:
+#
+# Uses the value of node['private_chef']['postgresql']['username'] as
+# the user to run the initdb command.  This user will also be the
+# owner of the data directory and configuration files.
+#
+# Additionally, the node['private_chef']['postgresql'] hash is used
+# for configuration file template creation.
+
 def whyrun_supported?
   true
 end
