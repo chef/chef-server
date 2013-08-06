@@ -7,10 +7,6 @@
 # Prior to Private Chef 11, the PostgreSQL service was named
 # 'postgres', not 'postgresql'.  We need to cleanup all traces of the
 # previously-named service if it is present.
-#
-# execute "/opt/opscode/bin/private-chef-ctl stop postgres" do
-#   retries 20
-# end
 
 runit_service "postgres" do
   action [:stop, :disable]
