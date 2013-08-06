@@ -56,6 +56,19 @@ module PrivateChef
 
   class << self
 
+    def from_file(filename)
+      # We're overriding this here so that we can get more meaningful errors from
+      # the reconfigure chef run; we don't particularly care what line in the chef
+      # recipes is failing to evaluate the loaded file (in the case of what
+      # originally triggered this, private_chef.rb), what we care about is which
+      # line in the loaded file is causing the error.
+      begin
+        self.instance_eval(IO.read(filename), filename, 1)
+      rescue
+        raise "Error loading file: #{$!.backtrace[0]}: #{$!.message}"
+      end
+    end
+
     def server(name=nil, opts={})
       if name
         PrivateChef["servers"] ||= Mash.new
