@@ -3,7 +3,7 @@ version "rel-1.32.1"
 
 dependency "ruby"
 dependency "bundler"
-dependency "postgresql"
+dependency "postgresql92"
 dependency "rsync"
 
 source :git => "git@github.com:opscode/opscode-account"

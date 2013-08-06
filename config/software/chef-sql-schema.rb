@@ -3,7 +3,7 @@ version "pc-rel-1.13.0"
 
 dependency "ruby"
 dependency "bundler"
-dependency "postgresql"
+dependency "postgresql92"
 dependency "rsync"
 
 source :git => "git@github.com:opscode/chef-sql-schema.git"

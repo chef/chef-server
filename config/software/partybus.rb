@@ -2,7 +2,7 @@ name "partybus"
 
 dependency "rsync"
 dependency "bundler"
-dependency "postgresql"
+dependency "postgresql92"
 
 source :path => File.expand_path("partybus", Omnibus.project_root)
 

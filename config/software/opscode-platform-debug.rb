@@ -3,7 +3,7 @@ version "pc-rel-0.2.11"
 
 dependency "ruby"
 dependency "bundler"
-dependency "postgresql"
+dependency "postgresql92"
 dependency "rsync"
 
 source :git => "git@github.com:opscode/opscode-platform-debug"

@@ -5,6 +5,7 @@ dependency "ruby"
 dependency "libxml2"
 dependency "rsync"
 dependency "bundler"
+dependency "postgresql92"
 
 source :git => "git@github.com:opscode/opscode-test"
 

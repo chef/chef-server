@@ -10,6 +10,9 @@ build_iteration 1
 # creates required build directories
 dependency "preparation"
 
+# needs to be before postgresql, otherwise build problems...
+dependency "postgresql91" # for pg_upgrade
+
 # global
 dependency "chef-gem" # for embedded chef-solo
 dependency "private-chef-cookbooks" # used by private-chef-ctl reconfigure
@@ -22,7 +25,7 @@ dependency "unicorn"
 
 # the backend
 dependency "couchdb"
-dependency "postgresql"
+dependency "postgresql92"
 dependency "redis"
 dependency "rabbitmq"
 dependency "opscode-solr"
