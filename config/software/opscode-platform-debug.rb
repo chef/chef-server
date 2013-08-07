@@ -12,10 +12,16 @@ relative_path "opscode-plaform-debug"
 
 orgmapper_dir = "#{project_dir}/orgmapper"
 
+# Since this project pulls in the pg gem (or depends on something that
+# does) we need to have the pg_config binary on the PATH so the
+# correct library and header locations can be found
+env = {
+  'PATH' => "#{install_dir}/embedded/bin:#{ENV['PATH']}"
+}
+
 build do
   # bundle install orgmapper
-  bundle "install --without mysql --path=/opt/opscode/embedded/service/gem", :cwd => orgmapper_dir
-
+  bundle "install --path=/opt/opscode/embedded/service/gem", :cwd => orgmapper_dir, :env => env
   command "mkdir -p #{install_dir}/embedded/service/opscode-platform-debug"
   command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./ #{install_dir}/embedded/service/opscode-platform-debug/"
 end
