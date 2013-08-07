@@ -41,9 +41,11 @@
          request/5,
          request/6,
          request/7,
-         request/8,
          with_new_http_client/3,
-         with_new_http_client/5]).
+         with_new_http_client/5,
+         create_pool/0,
+         delete_pool/0
+     ]).
 
 -ifdef(TEST).
 -compile([export_all]).
@@ -69,45 +71,14 @@ request(Path, Method, Headers, Body, RequestorId) ->
 request(ReqId, Path, Method, Headers, Body, RequestorId) ->
     request(ReqId, no_pid, Path, Method, Headers, Body, RequestorId).
 
--spec request(req_id(),
-              pid() | 'no_pid',
-              http_path(),
-              http_method(),
-              [{string(), string()}],
-              http_body(),
-              requestor_id()) -> ok | {ok, _} | {error, _}.
-request(ReqId, Pid, Path, Method, Headers, Body, RequestorId) ->
+-spec request(req_id(), pid() | 'no_pid', http_path(), http_method(), [{string(),
+              string()}], http_body(), requestor_id()) -> ok | {ok, _} | {error, _}.
+              request(ReqId, _Pid, Path, Method, Headers, Body, RequestorId) ->
     FullHeaders = full_headers(ReqId, RequestorId, Headers),
     {ok, AuthzConfig} = application:get_env(oc_chef_authz, authz_service),
-    AuthzHost = proplists:get_value(root_url, AuthzConfig),
     Timeout = proplists:get_value(timeout, AuthzConfig),
-    Url = AuthzHost ++ "/" ++ to_str(Path),
-    Response = ibrowse_request(Pid, Url, FullHeaders, Method, Body,
-                               ?IBROWSE_OPTIONS, Timeout),
+    Response = oc_httpc:request(?MODULE, to_str(Path), FullHeaders, Method, Body, Timeout),
     handle_ibrowse_response(Response).
-
-%% @doc Execute request on the HTTP connection managed by `Pid'. Since `Pid' encapsulates
-%% the host and port, the `Path' is used as-is. When making a series of requests against the
-%% same connection, this avoids querying for the root URL and timeout repeatedly.
--spec request(req_id(),
-              pid(),
-              http_path(),
-              http_method(),
-              [{string(), string()}],
-              http_body(),
-              requestor_id(),
-              non_neg_integer()) -> ok | {ok, _} | {error, _}.
-request(ReqId, Pid, Path, Method, Headers, Body, RequestorId, Timeout) when is_pid(Pid) ->
-    FullHeaders = full_headers(ReqId, RequestorId, Headers),
-    Response = ibrowse_request(Pid, to_str(Path), FullHeaders, Method, Body,
-                               ?IBROWSE_OPTIONS, Timeout),
-    handle_ibrowse_response(Response).
-
-ibrowse_request(no_pid, Url, Headers, Method, Body, Options, Timeout) ->
-    ibrowse:send_req(Url, Headers, Method, Body, Options, Timeout);
-ibrowse_request(Pid, Url, Headers, Method, Body, Options, Timeout) ->
-    ibrowse:send_req_direct(Pid, Url, Headers, Method, Body, Options, Timeout).
-
 
 handle_ibrowse_response({ok, Status, _, ResponseBody}) when Status =:= "200";
                                                             Status =:= "201" ->
@@ -167,59 +138,20 @@ with_new_http_client(ReqId, RequestorId, Fun) ->
                            string(),
                            non_neg_integer(),
                            new_client_fun()) -> any().
-with_new_http_client(ReqId, RequestorId, RootUrl, Timeout, Fun) ->
-    case spawn_http_client(RootUrl) of
-        {ok, Pid} ->
-            try
-                RequestFun = make_request_fun(ReqId, Pid, RootUrl, Timeout, RequestorId),
-                Fun(RequestFun)
-            after
-                stop_http_client(Pid)
-            end;
-        {error, Why} ->
-            {error, Why}
-    end.
+with_new_http_client(ReqId, RequestorId, _RootUrl, Timeout, Fun) ->
+    DecoratedFun = fun(RealRequestFun) ->
+                           DecoratedRequestFun = make_request_fun(ReqId, ignored, "", Timeout, RequestorId, RealRequestFun),
+                           Fun(DecoratedRequestFun)
+                           end,
+    oc_httpc:multi_request(?MODULE, DecoratedFun, Timeout).
 
-%% @doc Create a new HTTP connection to the upstream authz service located at
-%% `RootUrl'. When finished making requests, call {@link stop_http_client/1} to cleanup.
-spawn_http_client(RootUrl) ->
-    ibrowse_http_client:start_link(RootUrl).
-
-%% @doc Close and stop an HTTP connection started via {@link spawn_http_client/0}. Allows
-%% 200 ms for a clean shutdown before sending a kill message.
-stop_http_client(Pid) ->
-    case catch gen_server:call(Pid, stop, 200) of
-        {'EXIT', {timeout, _}} ->
-            exit(Pid, kill),
-            ok;
-        _ ->
-            ok
-    end.
-
-make_request_fun(ReqId, Pid, RawRootUrl, Timeout, RequestorId) ->
-    RootUrl = enforce_trailing_slash(RawRootUrl),
+make_request_fun(ReqId, _Pid, _RawRootUrl, _Timeout, RequestorId, RealRequestFun) ->
     fun(Path, Method, Headers, Body) ->
             FullHeaders = full_headers(ReqId, RequestorId, Headers),
-            FullPath = join_url(RootUrl, to_str(Path)),
-            Resp = ibrowse_request(Pid, FullPath, FullHeaders, Method, Body,
-                                   ?IBROWSE_OPTIONS, Timeout),
+            Resp = RealRequestFun(Path, FullHeaders, Method, Body),
             handle_ibrowse_response(Resp)
     end.
 
-enforce_trailing_slash(S) ->
-    Rev = lists:reverse(S),
-    case Rev of
-        [$/ | _Rest] ->
-            S;
-        RevNoSlash ->
-            lists:reverse([$/ | RevNoSlash])
-    end.
-
-%% Join `Root' to `Path'. NOTE: assumes `Root' has a trailing slash.
-join_url(Root, [$/ | JoinPath]) ->
-        Root ++ JoinPath;
-join_url(Root, JoinPath) ->
-    Root ++ JoinPath.
 
 -spec ping() -> pong | pang.
 ping() ->
@@ -253,3 +185,17 @@ authz_url_and_timeout() ->
     Url = proplists:get_value(root_url, Config),
     Timeout = proplists:get_value(timeout, Config),
     {Url, Timeout}.
+
+create_pool() ->
+    Pools = get_pool_configs(),
+    [oc_httpc:add_pool(PoolNameAtom, Config) || {PoolNameAtom, Config} <- Pools],
+    ok.
+
+delete_pool() ->
+    Pools = get_pool_configs(),
+    [ok = oc_httpc:delete_pool(PoolNameAtom) || {PoolNameAtom, _Config} <- Pools],
+    ok.
+
+get_pool_configs() ->
+    Config = envy:get(oc_chef_authz, authz_service, [], any),
+    [{?MODULE, Config}].
