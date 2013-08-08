@@ -43,4 +43,16 @@ build do
            "--with-libraries=#{install_dir}/embedded/lib"].join(" "), :env => configure_env
   command "make world -j #{max_build_jobs}", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
   command "make install-world"
+
+  # Postgres 9.2 is our "real" Postgres installation (prior versions
+  # that are installed are solely to facilitate upgrades).  As a
+  # result, we need to have the binaries for this version available
+  # with the other binaries used by Private Chef.  This one-liner is
+  # probably the easiest way to do that.
+  #
+  # NOTE: The single-quotes wrapping the inner command are required;
+  # otherwise, we end up getting some kind of weird Inception-style
+  # variable interpolation, such that the value of $BIN in each
+  # iteration of the loop is the last file in the directory.
+ command "sh -c 'for BIN in #{install_dir}/embedded/postgresql/9.2/bin/*; do ln -s ${BIN} #{install_dir}/embedded/bin/$(basename ${BIN}); done'"
 end
