@@ -26,8 +26,15 @@ init([]) ->
     mover_manager:start_link(),
     Children = [?CHILD_SUP(mover_org_migrator_sup, []),
                 ?CHILD_SUP(mover_org_dep_validator_sup, []),
-                ?CHILD_SUP(mover_eredis_sup, []),
                 ?CHILD_SUP(chef_index_sup, []),
                 ?CHILD(mover_chef_couch_removal_worker, [], 5000)
             ],
-    {ok, {{one_for_one, 10, 10}, Children}}.
+    % Don't launch the eredis sup (whose client process requires
+    % a valid redis instance) if we won't be using redis.
+    AllChildren = case envy:get(mover, dry_run, true, boolean) of
+        true ->
+            Children;
+        false ->
+            [?CHILD_SUP(mover_eredis_sup, []) | Children]
+    end,
+    {ok, {{one_for_one, 10, 10}, AllChildren}}.
