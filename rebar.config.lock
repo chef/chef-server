@@ -109,7 +109,7 @@
                               "91c77678e2111e54c94ac567569fa8759d0d62a0"}},
        {opscoderl_httpc,".*",
                         {git,"git@github.com:opscode/opscoderl_httpc.git",
-                             "bf5d10d065ba3d31192e76d833fb7e5e41bef866"}},
+                             "2072b4c6568fbe61354144420061f13c727e0a28"}},
        {opscoderl_wm,".*",
                      {git,"git@github.com:opscode/opscoderl_wm.git",
                           "1d5cde85fbfe33dbaa30bc1cb28960d8752d843d"}},
