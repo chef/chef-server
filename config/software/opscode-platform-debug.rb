@@ -1,5 +1,5 @@
 name "opscode-platform-debug"
-version "pc-rel-0.2.11"
+version "rel-0.4.3"
 
 dependency "ruby"
 dependency "bundler"
@@ -8,7 +8,7 @@ dependency "rsync"
 
 source :git => "git@github.com:opscode/opscode-platform-debug"
 
-relative_path "opscode-plaform-debug"
+relative_path "opscode-platform-debug"
 
 orgmapper_dir = "#{project_dir}/orgmapper"
 
