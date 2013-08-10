@@ -353,6 +353,16 @@ default['private_chef']['oc_bifrost']['custom_acls_depsolver'] = true
 default['private_chef']['oc_bifrost']['custom_acls_roles'] = true
 
 ####
+# Authz
+####
+default['private_chef']['oc_chef_authz']['http_init_count'] = 25
+default['private_chef']['oc_chef_authz']['http_max_count'] = 100
+default['private_chef']['oc_chef_authz']['http_cull_interval'] = "{1, min}"
+default['private_chef']['oc_chef_authz']['http_max_age'] = "{70, sec}"
+default['private_chef']['oc_chef_authz']['http_max_connection_duration'] = "{70, sec}"
+default['private_chef']['oc_chef_authz']['ibrowse_options'] = "[{connect_timeout, 5000}]"
+
+####
 # Bookshelf
 ####
 default['private_chef']['bookshelf']['enable'] = true
