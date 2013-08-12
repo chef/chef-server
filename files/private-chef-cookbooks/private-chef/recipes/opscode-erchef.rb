@@ -40,7 +40,25 @@ template erchef_config do
   source "oc_erchef.config.erb"
   mode "644"
   variables(node['private_chef']['opscode-erchef'].to_hash)
+  notifies :run, 'execute[remove_erchef_siz_files]', :immediately
   notifies :restart, 'runit_service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
+end
+
+# Erchef still ultimately uses disk_log [1] for request logging, and if
+# you change the log file sizing in the configuration **without also
+# issuing a call to disk_log:change_size/2, Erchef won't start.
+#
+# Since we currently don't perform live upgrades, we can fake this by
+# removing the *.siz files, which is where disk_log looks to determine
+# what size the log files should be in the first place.  If they're
+# not there, then we just use whatever size is listed in the
+# configuration.
+#
+# [1]: http://erlang.org/doc/man/disk_log.html
+execute "remove_erchef_siz_files" do
+  command "rm *.siz"
+  cwd node['private_chef']['opscode-erchef']['log_directory']
+  action :nothing
 end
 
 link "/opt/opscode/embedded/service/opscode-erchef/etc/app.config" do
