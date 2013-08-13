@@ -72,7 +72,7 @@ devrel: rel
 	@/bin/echo done.
 	@/bin/echo  Run \'make update\' to pick up changes in a running VM.
 
-rel/oc_erchef: compile
+rel/oc_erchef: compile bundle
 	@/bin/echo 'building OTP release package for oc_erchef'
 	@/bin/echo "using rebar as: $(REBAR)"
 	@$(REBAR) generate
@@ -83,6 +83,9 @@ rel/oc_erchef: compile
 	@/bin/echo ' \__/ \___/  |__/   |_/\___/|   |_/|__/|__/'
 	@/bin/echo '                                       |\  '
 	@/bin/echo '                                       |/  '
+
+bundle: deps/chef_objects
+	@cd deps/chef_objects/priv/depselector_rb; bundle install --deployment --path .bundle
 
 relclean:
 	@rm -rf rel/oc_erchef

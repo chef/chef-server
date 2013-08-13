@@ -6,7 +6,7 @@
 
 PROJ_NAME=oc_erchef
 
-export PATH=$PATH:/usr/local/bin
+export PATH=/opt/ruby1.9/bin:$PATH:/usr/local/bin
 jenkins/builder_info.rb
 source machine_info
 ARTIFACT_BASE=opscode-ci/artifacts/$os/$machine/$PROJ_NAME
