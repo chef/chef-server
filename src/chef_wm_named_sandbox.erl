@@ -64,7 +64,7 @@ allowed_methods(Req, State) ->
 auth_info(Req, State) ->
     % POST /sandboxes and PUT /sandboxes/<id> are two halves of a single upload
     % operation, so we use the same permission for both (create sandbox perm)
-    chef_wm_authz:use_custom_acls(cookbooks, [{container, sandbox, create}], Req, State).
+    {[{container, sandbox, create}], Req, State}.
 
 %% Org is checked for in malformed_request/2, sandbox is checked for in forbidden/2;
 %% if we get this far, it exists.

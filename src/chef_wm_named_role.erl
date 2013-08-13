@@ -96,7 +96,7 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
         #chef_role{authz_id = AuthzId} = Role ->
             RoleState1 = RoleState#role_state{chef_role = Role},
             State1 = State#base_state{resource_state = RoleState1},
-            chef_wm_authz:use_custom_acls(roles, {object, AuthzId}, Req, State1)
+            {{object, AuthzId}, Req, State1}
     end.
 
 %% Org is checked for in malformed_request/2, role is checked for in forbidden/2;
