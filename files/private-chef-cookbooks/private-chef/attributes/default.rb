@@ -416,6 +416,23 @@ default['private_chef']['opscode-account']['umask'] = "0022"
 default['private_chef']['opscode-account']['worker_processes'] = node['cpu']['total'].to_i
 
 ###
+# Chef Mover
+###
+default['private_chef']['opscode-chef-mover']['enable'] = false
+default['private_chef']['opscode-chef-mover']['ha'] = false
+default['private_chef']['opscode-chef-mover']['dir'] = "/var/opt/opscode/opscode-chef-mover"
+default['private_chef']['opscode-chef-mover']['data_dir'] = "/var/opt/opscode/opscode-chef-mover/data"
+default['private_chef']['opscode-chef-mover']['log_directory'] = "/var/log/opscode/opscode-chef-mover"
+default['private_chef']['opscode-chef-mover']['log_rotation']['file_maxbytes'] = 1073741824
+default['private_chef']['opscode-chef-mover']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['opscode-chef-mover']['bulk_fetch_batch_size'] = '5'
+default['private_chef']['opscode-chef-mover']['max_cache_size'] = '10000'
+default['private_chef']['opscode-chef-mover']['cache_ttl'] = '3600'
+default['private_chef']['opscode-chef-mover']['db_pool_size'] = '5'
+default['private_chef']['opscode-chef-mover']['ibrowse_max_sessions'] = 256
+default['private_chef']['opscode-chef-mover']['ibrowse_max_pipeline_size'] = 1
+
+###
 # Opscode Test
 ###
 default['private_chef']['bootstrap']['enable'] = true

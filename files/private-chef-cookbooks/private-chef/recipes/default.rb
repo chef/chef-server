@@ -159,6 +159,7 @@ include_recipe "private-chef::runit"
   "opscode-org-creator",
   "opscode-erchef",
   "opscode-webui",
+  "opscode-chef-mover",
   "nginx",
         "keepalived"
 ].each do |service|

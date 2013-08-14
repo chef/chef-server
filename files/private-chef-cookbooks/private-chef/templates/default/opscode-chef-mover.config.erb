@@ -1,0 +1,143 @@
+%% -*- mode: erlang -*-
+%% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ts=4 sw=4 ft=erlang et
+[
+ {kernel, [{start_pg2, true}]},
+ %% SASL config
+ {sasl, [
+         {sasl_error_logger, {file, "<%= File.join(@log_directory, 'sasl-error.log') %>"}},
+         {errlog_type, error},
+         {error_logger_mf_dir, "<%= File.join(@log_directory, 'sasl') %>"},      % Log directory
+         {error_logger_mf_maxbytes, <%= @log_rotation['file_maxbytes'] %>},
+         {error_logger_mf_maxfiles, <%= @log_rotation['num_to_keep'] %>}
+        ]},
+ %% Lager Config
+  {lager, [
+          %% https://github.com/basho/lager/blob/master/README.org
+          {handlers, [
+                      {lager_console_backend,
+                       [error,
+                        {lager_default_formatter,
+                         [time, " [", severity, "] ",
+                          {error_type, [error_type, " "], ""},
+                          {org_name, [org_name, " (", org_id, "): "], ""}, message, "\n"]}]},
+
+                      {lager_file_backend, [
+                                            [{"<%=File.join(@log_directory, 'error.log') %>", error, <%= @log_rotation['file_maxbytes'] %>, "$D0", <%= @log_rotation['num_to_keep'] %>},
+                                             {lager_default_formatter,
+                                              [date, " ", time, " [", severity, "] ",
+                                               {org_name, [org_name, " (", org_id, "): "], "no_org (no_id):"},
+                                               {error_type, [error_type, " "], ""},
+                                               message, "\n"]}],
+
+                                            [{"<%=File.join(@log_directory, 'console.log') %>", info, <%= @log_rotation['file_maxbytes'] %>, "$D0", <%= @log_rotation['num_to_keep'] %>},
+                                             {lager_default_formatter,
+                                              [date, " ", time, " [", severity, "] ",
+                                               {org_name, [org_name, " (", org_id, "): "], "no_org (no_id):"},
+                                               {error_type, [error_type, " "], ""},
+                                               message, "\n"]}]
+                                           ]}
+                     ]},
+          {crash_log, "<%= File.join(@log_directory, 'crash.log') %>"},
+          {crash_log_msg_size, 65536},
+          {crash_log_size, 10485760},
+          {crash_log_date, "$D0"},
+          {crash_log_count, 5},
+          {error_logger_redirect, true},
+          {error_logger_hwm, 1000 }
+         ]},
+
+  {oc_chef_authz, [
+                {authz_root_url, "http://<%= node['private_chef']['oc_bifrost']['vip'] %>:<%= node['private_chef']['oc_bifrost']['port'] %>" },
+                {authz_service, [{root_url, "http://<%= node['private_chef']['oc_bifrost']['vip'] %>:<%= node['private_chef']['oc_bifrost']['port'] %>" },
+                                 {timeout, 2000}]},
+                {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
+                {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> },
+                {authz_superuser_id, <<"<%= node['private_chef']['oc_bifrost']['superuser_id'] %>">>}
+               ]},
+  {chef_db, [
+             {bulk_fetch_batch_size, 5},
+             {cache_defaults, [{max_size, <%= @max_cache_size %> },
+                               {ttl, <%= @cache_ttl %>}]},
+             {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
+             {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
+            ]},
+  {chef_objects, [
+                  {certificate_root_url, "http://<%= node['private_chef']['opscode-certificate']['vip'] %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificates"},
+                  {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
+                  {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
+                  {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= node['private_chef']['bookshelf']['vip'] %>"},
+                  <% # Re-using erchef's configuration here %>
+                  {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
+                  {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>},
+                  {s3_parallel_ops_timeout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] %>},
+                  {s3_parallel_ops_fanout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] %>}
+                 ]},
+  {stats_hero, [
+               %% Set sender pool size to DB max_connections to avoid contention
+               {udp_socket_pool_size, <%= node['private_chef']['postgresql']['max_connections'] %> },
+               {estatsd_host, "<%= node['private_chef']['estatsd']['vip'] %>"},
+               {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>}
+              ]},
+
+ {sqerl, [
+           %% The database system you are using (e.g. pgsql)
+           {db_driver_mod, sqerl_pgsql_client},
+
+           %% Database connection parameters
+           {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
+           {db_port, 5432},
+           {db_user, "<%= node['private_chef']['postgresql']['sql_user'] %>"},
+           {db_pass, "<%= node['private_chef']['postgresql']['sql_password'] %>"},
+           {db_name, "opscode_chef" },
+           {idle_check, 10000},
+           {prepared_statements, {chef_sql, opc_statements, [pgsql]}},
+           {column_transforms,
+                              [{<<"created_at">>,
+                                {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
+                               {<<"updated_at">>,
+                                {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}]
+           }
+         ]},
+
+ {pooler, [
+           {pools, [[{name, sqerl},
+                     {max_count, <%= @db_pool_size %>},
+                     {init_count, <%= @db_pool_size %>},
+                     {start_mfa, {sqerl_client, start_link, []}}]]},
+           {metrics_module, folsom_metrics}
+          ]},
+ {ibrowse, [
+            {default_max_sessions, <%= @ibrowse_max_sessions %>},
+            {default_max_pipeline_size, <%= @ibrowse_max_pipeline_size %> }
+           ]},
+ {moser, [
+           {moser_dets_dir, "<%= @data_dir %>"},
+           {couch_path, "<%= node['private_chef']['couchdb']['data_dir'] %>"},
+            % We are not purging, these are not relevant.
+           {purge_chunksize, 10},
+           {purge_throttle, 0},
+           {purge_backup, false},
+           {purge_auth, false},
+           {purge_backup_dir, ""}
+           ]},
+ {mover, [
+          % Duration to sleep between marking an org unavailable
+          % and proceeding with migration. For EC, we are guaranteed no
+          % in-flight activity for migrating orgs, % so 0 is safe.
+          {sleep_time, 0},
+
+          % dry_run refers to updating redis to indicate an org has
+          % been migrated via xdarklaunch.  However in EC, xdarklaunch
+          % is managed via 'reconfigure' and is not redis-based,
+          %
+          % Setting this to 'true' indicated that we will neither start
+          % a connection to redis, nor attempt to update redis with org migration
+          % results.
+          {dry_run, true},
+
+          % If dry_run is true, eredis host and port will be ignored.
+          {eredis_host, "127.0.0.1"},
+          {eredis_port, 6379}
+         ]}
+].
