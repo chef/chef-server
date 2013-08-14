@@ -2,7 +2,11 @@ define :component_runit_service, :log_directory => nil, :svlogd_size => nil, :sv
 
   component = params[:name]
   log_directory = params[:log_directory] || node['private_chef'][component]['log_directory']
-  enable = (params[:enable] == nil ? node['private_chef'][component]['enable'] : params[:enable])
+  enable = if params[:enable].nil?
+             node['private_chef'][component]['enable']
+           else
+             params[:enable]
+           end
 
   runit_service component do
     action :nothing
