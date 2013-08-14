@@ -160,6 +160,8 @@ default['private_chef']['opscode-erchef']['root_metric_key'] = "chefAPI"
 default['private_chef']['opscode-erchef']['eredis_client_pool_size'] = 0
 default['private_chef']['opscode-erchef']['redis_db'] = 6
 default['private_chef']['opscode-erchef']['search_cache_entry_ttl'] = 60
+default['private_chef']['opscode-erchef']['depsolver_worker_count'] = 5
+default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
 
 ####
 # Chef Server WebUI
