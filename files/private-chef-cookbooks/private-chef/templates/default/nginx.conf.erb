@@ -51,9 +51,8 @@ http {
       <%- else -%>
           server {
             listen <%= @helper.listen_port('http') %>;
-            server_name <%= @server_name %>;
             access_log /var/log/opscode/nginx/rewrite-port-80.log;
-            rewrite ^(.*) https://$server_name$1 permanent;
+            return 301 https://$host$request_uri;
           }
       <%- end -%>
     <%-  end %>
