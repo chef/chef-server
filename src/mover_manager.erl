@@ -138,7 +138,7 @@ halt_actions() ->
     gen_fsm:sync_send_all_state_event(?SERVER, halt).
 
 init([]) ->
-    AcctInfo = moser_acct_processor:open_account(),
+    AcctInfo = moser_acct_processor:open_account_ro(),
     {ok, ready, #state{acct_info = AcctInfo}}.
 
 %%
