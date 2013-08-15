@@ -189,6 +189,8 @@ working(timeout, #state {max_worker_count = MW,
         {ok, no_more_orgs} ->
             %% Stop and wait for workers to end.
             {next_state, halting, State#state {orgs_remaining = 0}, 0};
+        [OrgName] ->
+            start_org_worker(SupMod, OrgName, State);
         OrgName ->
             start_org_worker(SupMod, OrgName, State)
     end.
