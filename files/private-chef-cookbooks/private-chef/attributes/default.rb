@@ -346,12 +346,6 @@ default['private_chef']['oc_bifrost']['sql_password'] = "challengeaccepted"
 default['private_chef']['oc_bifrost']['sql_ro_user'] = "bifrost_ro"
 default['private_chef']['oc_bifrost']['sql_ro_password'] = "foreveralone"
 
-default['private_chef']['oc_bifrost']['custom_acls_always_for_modification'] = true
-default['private_chef']['oc_bifrost']['custom_acls_cookbooks'] = true
-default['private_chef']['oc_bifrost']['custom_acls_data'] = true
-default['private_chef']['oc_bifrost']['custom_acls_depsolver'] = true
-default['private_chef']['oc_bifrost']['custom_acls_roles'] = true
-
 ####
 # Authz
 ####
