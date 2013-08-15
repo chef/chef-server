@@ -155,11 +155,11 @@ init([]) ->
 %%     we have preserved FSM state until the next explicit `{start, Orgs, Workers}'
 %%     is issued, so that results of the last batch can be queried via `status/0'</li>
 %% </ul>
-ready({start, NumOrgs, NumWorkers, Supervisor, OrgGenerator}, _From, _) ->
+ready({start, NumOrgs, NumWorkers, Supervisor, OrgGenerator}, _From, CurrentState) ->
 
     %% Do not carry forward existing state - create a new
     %% state record to reflect the new attempted migrations.
-    State = #state{max_worker_count = NumWorkers,
+    State = CurrentState#state{max_worker_count = NumWorkers,
                    orgs_requested = NumOrgs,
                    orgs_remaining = NumOrgs,
                    next_org_generator = OrgGenerator,
