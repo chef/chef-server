@@ -411,24 +411,7 @@ set_authz_id(Id, #data_state{}=D) ->
                            Req :: wm_req(),
                            State :: #base_state{}) ->
                                   ok | {error, {[any(),...]}}.
-check_cookbook_authz(Cookbooks, Req, State) ->
-    ShouldSkip = case application:get_env(oc_chef_wm, custom_acls_depsolver) of
-                     {ok, Value} ->
-                         Value =:= false;
-                     _ -> %% use standard behaviour
-                         false
-                 end,
-    check_cookbook_authz(ShouldSkip, Cookbooks, Req, State).
-
--spec check_cookbook_authz(SkipCheck :: boolean(),
-                           Cookbooks :: [#chef_cookbook_version{}],
-                           Req :: wm_req(),
-                           State :: #base_state{}) ->
-                                  ok | {error, {[any()]}}.
-check_cookbook_authz(true, _Cookbooks, _Req, _State) ->
-    %% skip cookbook authz check
-    ok;
-check_cookbook_authz(false, Cookbooks, _Req, #base_state{reqid = ReqId,
+check_cookbook_authz(Cookbooks, _Req, #base_state{reqid = ReqId,
                                                         requestor_id = RequestorId}) ->
     Resources = [{object, AuthzId, Name}
                  || #chef_cookbook_version{name = Name, authz_id = AuthzId} <- Cookbooks],
