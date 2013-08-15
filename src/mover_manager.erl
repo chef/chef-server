@@ -64,7 +64,9 @@
           validate_deps/2,
           validate_deps_next/0,
           status/0,
-          halt_actions/0 ]).
+          halt_actions/0,
+          create_account_dets/0,
+          get_account_dets/0]).
 
 %% gen_fsm callbacks
 -export([ init/1,
@@ -137,8 +139,14 @@ status() ->
 halt_actions() ->
     gen_fsm:sync_send_all_state_event(?SERVER, halt).
 
+create_account_dets() ->
+    gen_fsm:sync_send_event(?SERVER, create_account_dets, infinity).
+
+get_account_dets() ->
+    gen_fsm:sync_send_all_state_event(?SERVER, get_account_dets).
+
 init([]) ->
-    AcctInfo = moser_acct_processor:open_account_ro(),
+    AcctInfo = moser_acct_processor:open_account(),
     {ok, ready, #state{acct_info = AcctInfo}}.
 
 %%
@@ -164,7 +172,14 @@ ready({start, NumOrgs, NumWorkers, Supervisor, OrgGenerator}, _From, CurrentStat
                    orgs_remaining = NumOrgs,
                    next_org_generator = OrgGenerator,
                    supervisor = Supervisor},
-    {reply, {ok, burning_couches}, working, State, 0}.
+    {reply, {ok, burning_couches}, working, State, 0};
+
+ready(create_account_dets, _From, State = #state{ acct_info = Acct} ) ->
+    moser_acct_processor:close_account(Acct),
+    moser_acct_processor:process_account_file(),
+    NewAccount = moser_acct_processor:open_account(),
+    {reply, NewAccount, ready, State#state{acct_info = NewAccount}}.
+
 
 working(timeout, #state{orgs_remaining = 0} = State) ->
     %% All orgs requested have been started. Move to
@@ -266,6 +281,9 @@ handle_sync_event(status, _From, StateName, #state{live_worker_count = LW,
                {orgs_failed, EC},
                {fatal_stop, FS}],
     {reply, {ok, Summary}, StateName, State};
+
+handle_sync_event(get_account_dets, _From, StateName, State = #state{ acct_info = AcctInfo }) ->
+    {reply, AcctInfo, StateName, State};
 handle_sync_event(_Event, _From, StateName, State) -> {next_state, StateName, State}.
 
 normalize_org_count(Count) when Count < 0 ->
