@@ -156,10 +156,6 @@ default['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] = 20
 default['private_chef']['opscode-erchef']['authz_timeout'] = 1000
 default['private_chef']['opscode-erchef']['authz_fanout'] = 20
 default['private_chef']['opscode-erchef']['root_metric_key'] = "chefAPI"
-# redis client pool size of 0 disables search caching
-default['private_chef']['opscode-erchef']['eredis_client_pool_size'] = 0
-default['private_chef']['opscode-erchef']['redis_db'] = 6
-default['private_chef']['opscode-erchef']['search_cache_entry_ttl'] = 60
 
 ####
 # Chef Server WebUI
@@ -300,32 +296,6 @@ default['private_chef']['postgresql']['checkpoint_segments'] = 3
 default['private_chef']['postgresql']['checkpoint_timeout'] = "5min"
 default['private_chef']['postgresql']['checkpoint_completion_target'] = 0.5
 default['private_chef']['postgresql']['checkpoint_warning'] = "30s"
-
-###
-# Redis
-###
-default['private_chef']['redis']['enable'] = true
-default['private_chef']['redis']['ha'] = false
-default['private_chef']['redis']['dir'] = "/var/opt/opscode/redis"
-default['private_chef']['redis']['log_directory'] = "/var/log/opscode/redis"
-default['private_chef']['redis']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['redis']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['redis']['port'] = "6379"
-default['private_chef']['redis']['bind'] = "127.0.0.1"
-default['private_chef']['redis']['vip'] = "127.0.0.1"
-default['private_chef']['redis']['timeout'] = "300"
-default['private_chef']['redis']['loglevel'] = "notice"
-default['private_chef']['redis']['databases'] = "16"
-default['private_chef']['redis']['appendonly'] = "no"
-default['private_chef']['redis']['appendfsync'] = "everysec"
-default['private_chef']['redis']['vm']['enabled'] = "no"
-default['private_chef']['redis']['vm']['max_memory'] = "0"
-default['private_chef']['redis']['vm']['page_size'] = "32"
-default['private_chef']['redis']['vm']['pages'] = "134217728"
-default['private_chef']['redis']['vm']['max_threads'] = "4"
-default['private_chef']['redis']['root'] = '/var/opt/opscode/redis'
-default['private_chef']['redis']['maxmemory'] = "1g"
-default['private_chef']['redis']['maxmemory_policy'] = "volatile-lru"
 
 ###
 # Bifrost
@@ -505,7 +475,6 @@ default['private_chef']['keepalived']['service_order'] = [
   { "key" => "couchdb", "service_name" => "couchdb" },
   { "key" => "postgresql", "service_name" => "postgresql" },
   { "key" => "rabbitmq", "service_name" => "rabbitmq" },
-  { "key" => "redis", "service_name" => "redis" },
   { "key" => "oc_bifrost", "service_name" => "oc_bifrost" },
   { "key" => "opscode-certificate", "service_name" => "opscode-certificate" },
   { "key" => "opscode-account", "service_name" => "opscode-account" },

@@ -129,7 +129,6 @@ include_recipe "private-chef::runit"
   "couchdb",
   "rabbitmq",
   "postgresql",
-  "redis",
   "oc_bifrost",
   "opscode-certificate",
   "opscode-account",
