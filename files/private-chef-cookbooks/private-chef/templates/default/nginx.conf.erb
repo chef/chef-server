@@ -95,14 +95,14 @@ http {
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/{0,1}.*$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/cookbooks/{0,1}.*$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/sandboxes/{0,1}.*$") %>
-    
+
     # If we're in sql_migration_phase_1, then clients are handled by
     # Erchef, not opscode-account.  In that case, we need to add the
     # chef_api routing.
     <%- if node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
       <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
     <%- end -%>
-    
+
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
 
     # Include internal routes for addons
@@ -133,6 +133,13 @@ http {
 
     access_log /var/log/opscode/nginx/internal-account.access.log opscode;
     error_log  /var/log/opscode/nginx/internal-account.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
+
+    # This is currently needed ONLY for webui 1.  It issues calls
+    # directly to opscode_account for for retrieving and interacting
+    # with clients, but this is now handled by erchef.
+    <%- if node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
+      <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
+    <%- end -%>
 
     location / {
       proxy_pass http://opscode_account;
