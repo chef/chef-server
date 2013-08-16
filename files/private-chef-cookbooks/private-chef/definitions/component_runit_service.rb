@@ -1,7 +1,12 @@
-define :component_runit_service, :log_directory => nil, :svlogd_size => nil, :svlogd_num => nil, :ha => nil, :control => nil do
+define :component_runit_service, :log_directory => nil, :svlogd_size => nil, :svlogd_num => nil, :ha => nil, :control => nil, :enable => nil do
 
   component = params[:name]
   log_directory = params[:log_directory] || node['private_chef'][component]['log_directory']
+  enable = if params[:enable].nil?
+             node['private_chef'][component]['enable']
+           else
+             params[:enable]
+           end
 
   runit_service component do
     action :nothing
@@ -29,7 +34,7 @@ define :component_runit_service, :log_directory => nil, :svlogd_size => nil, :sv
     end
   end
 
-  if node['private_chef']['bootstrap']['enable']
+  if enable and node['private_chef']['bootstrap']['bootstrap_server']
     log "enable runit_service[#{component}]" do
       notifies :enable, "runit_service[#{component}]", :immediately
     end
