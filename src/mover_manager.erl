@@ -64,7 +64,9 @@
           validate_deps/2,
           validate_deps_next/0,
           status/0,
-          halt_actions/0 ]).
+          halt_actions/0,
+          create_account_dets/0,
+          get_account_dets/0]).
 
 %% gen_fsm callbacks
 -export([ init/1,
@@ -101,7 +103,9 @@
                  error_count = 0        :: non_neg_integer(),
                  %% if true, a worker encountered a fatal error that forced
                  %% us to stop spawning new migration workers.
-                 fatal_stop = false     :: boolean()
+                 fatal_stop = false     :: boolean(),
+          %% moser account info as returned by `moser_acct_processor:open_account/0'
+          acct_info
              }).
 %%
 %% API
@@ -135,8 +139,30 @@ status() ->
 halt_actions() ->
     gen_fsm:sync_send_all_state_event(?SERVER, halt).
 
+create_account_dets() ->
+    gen_fsm:sync_send_event(?SERVER, create_account_dets, infinity).
+
+get_account_dets() ->
+    gen_fsm:sync_send_all_state_event(?SERVER, get_account_dets).
+
 init([]) ->
-    {ok, ready, #state{}}.
+    AcctInfo = try moser_acct_processor:open_account() of
+                   Result ->
+                       Result
+               catch
+                   error:{badmatch, {error, {file_error, _, enoent}}} ->
+                       error_logger:warning_report({dets_file_not_found,
+                                                   mover_manager,
+                                                   "Dets files not found."}),
+                       undefined;
+
+                   error:{badmatch, {error, {not_closed, _}}} ->
+                       error_logger:warning_report({dets_files_not_closed,
+                                                    mover_manager,
+                                                    "Dets files not closed properly."}),
+                       undefined
+               end,
+    {ok, ready, #state{acct_info = AcctInfo}}.
 
 %%
 %% States
@@ -152,16 +178,21 @@ init([]) ->
 %%     we have preserved FSM state until the next explicit `{start, Orgs, Workers}'
 %%     is issued, so that results of the last batch can be queried via `status/0'</li>
 %% </ul>
-ready({start, NumOrgs, NumWorkers, Supervisor, OrgGenerator}, _From, _) ->
+ready({start, NumOrgs, NumWorkers, Supervisor, OrgGenerator}, _From, CurrentState) ->
 
     %% Do not carry forward existing state - create a new
     %% state record to reflect the new attempted migrations.
-    State = #state{max_worker_count = NumWorkers,
+    State = CurrentState#state{max_worker_count = NumWorkers,
                    orgs_requested = NumOrgs,
                    orgs_remaining = NumOrgs,
                    next_org_generator = OrgGenerator,
                    supervisor = Supervisor},
-    {reply, {ok, burning_couches}, working, State, 0}.
+    {reply, {ok, burning_couches}, working, State, 0};
+
+ready(create_account_dets, _From, State = #state{ acct_info = Acct} ) ->
+    NewAccount = create_dets_files(Acct),
+    {reply, NewAccount, ready, State#state{acct_info = NewAccount}}.
+
 
 working(timeout, #state{orgs_remaining = 0} = State) ->
     %% All orgs requested have been started. Move to
@@ -186,6 +217,8 @@ working(timeout, #state {max_worker_count = MW,
         {ok, no_more_orgs} ->
             %% Stop and wait for workers to end.
             {next_state, halting, State#state {orgs_remaining = 0}, 0};
+        [OrgName] ->
+            start_org_worker(SupMod, OrgName, State);
         OrgName ->
             start_org_worker(SupMod, OrgName, State)
     end.
@@ -195,8 +228,9 @@ working({start, _, _, _, _}, _From, State) ->
 
 
 start_org_worker(SupMod, OrgName, #state{live_worker_count = LW,
-                                         orgs_remaining = OR} = State) ->
-    case SupMod:start_worker(OrgName) of
+                                         orgs_remaining = OR,
+                                         acct_info = AcctInfo} = State) ->
+    case SupMod:start_worker({OrgName, AcctInfo}) of
         {ok, Pid} ->
             monitor(process, Pid),
             {next_state, working, State#state{live_worker_count = (LW + 1),
@@ -260,6 +294,9 @@ handle_sync_event(status, _From, StateName, #state{live_worker_count = LW,
                {orgs_failed, EC},
                {fatal_stop, FS}],
     {reply, {ok, Summary}, StateName, State};
+
+handle_sync_event(get_account_dets, _From, StateName, State = #state{ acct_info = AcctInfo }) ->
+    {reply, AcctInfo, StateName, State};
 handle_sync_event(_Event, _From, StateName, State) -> {next_state, StateName, State}.
 
 normalize_org_count(Count) when Count < 0 ->
@@ -273,3 +310,9 @@ terminate(_Reason, _StateName, _State) ->
 code_change(_OldVsn, StateName, State, _Extra) ->
     {ok, StateName, State}.
 
+create_dets_files(undefined) ->
+    moser_acct_processor:process_account_file(),
+    moser_acct_processor:open_account();
+create_dets_files(Acct) ->
+    moser_acct_processor:close_account(Acct),
+    create_dets_files(undefined).

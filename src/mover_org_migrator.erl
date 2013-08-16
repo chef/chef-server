@@ -34,15 +34,16 @@
 -export([start_link/1]).
 
 -record(state, {
-                 org_name :: string()     %% The org we are migrating
-               }).
+          org_name :: string(),     %% The org we are migrating
+          acct_info
+         }).
 
 
 start_link(Config) ->
     gen_fsm:start_link(?MODULE, Config, []).
 
-init(OrgName) ->
-    State = #state{org_name = OrgName},
+init({OrgName, AcctInfo}) ->
+    State = #state{org_name = OrgName, acct_info = AcctInfo},
     case moser_state_tracker:migration_started(OrgName) of
         ok ->
             lager:info([{org_name, OrgName}], "Starting migration."),
@@ -70,8 +71,8 @@ sleep(timeout, #state{} = State) ->
     timer:sleep(envy:get(mover, sleep_time, integer)),
     {next_state, migrate_org, State, 0}.
 
-migrate_org(timeout, #state{org_name = OrgName} = State) ->
-    try moser_converter:convert_org(OrgName) of
+migrate_org(timeout, #state{org_name = OrgName, acct_info = AcctInfo} = State) ->
+    try moser_converter:convert_org(OrgName, AcctInfo) of
         [{ok, _}] ->
             {next_state, verify_org, State, 0};
         Error ->

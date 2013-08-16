@@ -32,7 +32,7 @@ migrate_all() ->
     application:set_env(mover, sleep_time, 0),
 
     % Build dets tables
-    moser_acct_processor:process_account_file(),
+    mover_manager:create_account_dets(),
 
     % Migrate
     R = proceed_migration(),
@@ -149,7 +149,7 @@ wait_for_status() ->
 %% in order to avoid any inadvertent possibility of rebuilding org state
 %% table after org creation was cut over to sql in production.
 capture_org_state() ->
-    Info = moser_acct_processor:open_account(),
+    Info = mover_manager:get_account_dets(),
     AllOrgs = moser_acct_processor:all_orgs(Info),
     case insert_orgs(AllOrgs, []) of
        {error, Reason} ->
