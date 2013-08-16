@@ -85,7 +85,7 @@
                       "bed36252198ae7159e3d2b3a9ca9a9bb9817e1de"}},
        {moser,".*",
               {git,"git@github.com:opscode/moser.git",
-                   "1886b5809333cfec0e0b267434d076ecd5328117"}},
+                   "2f94092b21f959b56249a62ada7b0714163d4d30"}},
        {oauth,".*",
               {git,"git://github.com/opscode/erlang-oauth.git",
                    "2b796ea7973c0f38aad569bf2506bd8026eca004"}},
