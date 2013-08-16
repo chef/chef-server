@@ -23,7 +23,6 @@ dependency "unicorn"
 # the backend
 dependency "couchdb"
 dependency "postgresql"
-dependency "redis"
 dependency "rabbitmq"
 dependency "opscode-solr"
 dependency "opscode-expander"
