@@ -146,7 +146,22 @@ get_account_dets() ->
     gen_fsm:sync_send_all_state_event(?SERVER, get_account_dets).
 
 init([]) ->
-    AcctInfo = moser_acct_processor:open_account(),
+    AcctInfo = try moser_acct_processor:open_account() of
+                   Result ->
+                       Result
+               catch
+                   error:{badmatch, {error, {file_error, _, enoent}}} ->
+                       error_logger:warning_report({dets_file_not_found,
+                                                   mover_manager,
+                                                   "Dets files not found."}),
+                       undefined;
+
+                   error:{badmatch, {error, {not_closed, _}}} ->
+                       error_logger:warning_report({dets_files_not_closed,
+                                                    mover_manager,
+                                                    "Dets files not closed properly."}),
+                       undefined
+               end,
     {ok, ready, #state{acct_info = AcctInfo}}.
 
 %%
@@ -175,9 +190,7 @@ ready({start, NumOrgs, NumWorkers, Supervisor, OrgGenerator}, _From, CurrentStat
     {reply, {ok, burning_couches}, working, State, 0};
 
 ready(create_account_dets, _From, State = #state{ acct_info = Acct} ) ->
-    moser_acct_processor:close_account(Acct),
-    moser_acct_processor:process_account_file(),
-    NewAccount = moser_acct_processor:open_account(),
+    NewAccount = create_dets_files(Acct),
     {reply, NewAccount, ready, State#state{acct_info = NewAccount}}.
 
 
@@ -297,3 +310,9 @@ terminate(_Reason, _StateName, _State) ->
 code_change(_OldVsn, StateName, State, _Extra) ->
     {ok, StateName, State}.
 
+create_dets_files(undefined) ->
+    moser_acct_processor:process_account_file(),
+    moser_acct_processor:open_account();
+create_dets_files(Acct) ->
+    moser_acct_processor:close_account(Acct),
+    create_dets_files(undefined).
