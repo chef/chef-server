@@ -19,6 +19,16 @@ if [ -e /etc/opscode/chef-server-running.json ]; then
   echo "The next step in the upgrade process is to run:"
   echo
   echo -e "\033[1;31mprivate-chef-ctl upgrade\033[0m"
+  echo
+  echo "Then, to remove configuration files, logs, directories,"
+  echo "users, etc. that were used by internal services that"
+  echo "have been removed from this version of Private Chef,"
+  echo "please run:"
+  echo
+  echo -e "\033[1;31mprivate-chef-ctl cleanup\033[0m"
+  echo
+  echo "(Add the '--no-op' option to see what would be removed by"
+  echo "this command)"
 else
   echo -e "\033[1mThank you for installing Private Chef!\033[0m"
 fi

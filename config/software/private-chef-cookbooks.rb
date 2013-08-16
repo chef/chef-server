@@ -22,6 +22,9 @@ build do
     File.open("#{install_dir}/embedded/cookbooks/show-config.json", "w") do |f|
       f.puts "{\"run_list\": [ \"recipe[#{project_name}::show_config]\" ]}"
     end
+    File.open("#{install_dir}/embedded/cookbooks/post_upgrade_cleanup.json", "w") do |f|
+      f.puts "{\"run_list\": [ \"recipe[#{project_name}::post_11_upgrade_cleanup]\" ]}"
+    end
     File.open("#{install_dir}/embedded/cookbooks/solo.rb", "w") do |f|
       f.puts "CURRENT_PATH = File.expand_path(File.dirname(__FILE__))"
       f.puts "file_cache_path \"\#\{CURRENT_PATH\}/cache\""
