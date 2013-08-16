@@ -1,0 +1,126 @@
+#!/usr/bin/env escript
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil;fill-column: 92 -*-
+%% %% ex: ts=4 sw=4 et ft=erlang
+%%! -hidden
+%%
+%% Copyright(c) 2013 Opscode, Inc
+%% All Rights Reserved
+%%
+%% @doc Migrate all orgs, one at a time, and output the summary results to stdout
+%% in the form:
+%%
+%% `
+%% Successfully Migrated: org-name-list
+%%     Failed to Migrate: org-name-list
+%%         Not Attempted: org-name-list
+%% '
+%%
+%% Output will be suppressed if the argument `silent' is provided to this script.
+%%
+%% Exit code is a bitmasked value as follows:
+%%
+%%   0 - migration completed with no errors or warnings
+%%   1 - aborted due to unexpected errors
+%%   2 - one or more orgs completed successfully
+%%   4 - one or more orgs failed to migrate
+%%   8 - one or more orgs could not be reset to a valid state, and
+%%       so no migration was attempted.
+%%
+%% Additionally, if these error codes occur they will not be bitmasked:
+%%   128 - invalid argument
+%%   256 - could not connect to mover node
+%%   512 - rpc request to mover node failed.
+%%  1024 - unknown error has occurred.
+%% <b>Important</b>: this must be run as root or connect will fail.
+
+
+-define(SELF, 'migrate-script@127.0.0.1').
+-define(MOVER, 'mover@127.0.0.1').
+-define(MOVER_COOKIE, 'mover').
+-define(MOVER_MOD, 'mover_batch_migrator').
+
+-define(ABORTED, 1).
+-define(ORGS_MIGRATED, 2).
+-define(ORGS_FAILED, 4).
+-define(ORGS_BAD_STATE, 8).
+-define(INVALID_ARGUMENT, 128).
+-define(MOVER_CONNECT_FAIL, 256).
+-define(MOVER_RPC_FAIL, 512).
+-define(UNKNOWN_ERROR, 1024).
+
+main([]) ->
+    main(normal);
+main(["silent"]) ->
+    main(silent);
+main(Other) when is_list(Other) ->
+    io:fwrite("Unknown argument(s): ~p.~nUsage: migrate [silent]~n", [Other]),
+    halt(?INVALID_ARGUMENT);
+main(NoiseLevel) when is_atom(NoiseLevel) ->
+    ExitCode = try
+        init_network(),
+        Results = migrate(),
+        parse_and_format(NoiseLevel, Results)
+    catch
+        error:Code when is_number(Code) ->
+            Code;
+        _:_ ->
+            ?UNKNOWN_ERROR
+    end,
+    halt(ExitCode).
+
+init_network() ->
+    net_kernel:start([?SELF]),
+    erlang:set_cookie(?MOVER, ?MOVER_COOKIE),
+    verify_ping(net_adm:ping(?MOVER), ?MOVER_CONNECT_FAIL),
+    R = try
+            rpc:call(?MOVER, ?MOVER_MOD, ping, [])
+        catch
+            _M:_R  ->
+               pang
+        end,
+    verify_ping(R, ?MOVER_RPC_FAIL).
+
+migrate() ->
+%[{status,complete},
+%       {successful_orgs,["org1"]},
+%       {failed_orgs,["org2"]},
+%       {reset_failed,["org3", "org4"]}].
+    rpc:call(?MOVER, ?MOVER_MOD, migrate_all, []).
+
+parse_and_format(NoiseLevel, Results) ->
+    C0 = status_to_response_code(proplists:get_value(status, Results)),
+    {C1, Success} = list_to_response_code(successful_orgs, Results, ?ORGS_MIGRATED),
+    {C2, Failed} = list_to_response_code(failed_orgs, Results, ?ORGS_FAILED),
+    {C3, ResetFail} = list_to_response_code(reset_failed, Results, ?ORGS_BAD_STATE),
+    write_org_list(NoiseLevel, "Successfully Migrated", Success),
+    write_org_list(NoiseLevel, "    Failed to Migrate", Failed),
+    write_org_list(NoiseLevel, "        Not Attempted", ResetFail),
+    C0 bor C1 bor C2 bor C3.
+
+status_to_response_code(complete) -> 0;
+status_to_response_code(aborted) -> 1.
+
+list_to_response_code(Key, Results, ResponseCode) ->
+    List = proplists:get_value(Key, Results),
+    Code = case length(List) of
+        0 -> 0;
+        _ -> ResponseCode
+    end,
+    {Code, List}.
+
+write_org_list(silent, _, _) -> ok;
+write_org_list(_, Subject, []) ->
+    io:fwrite("  ~s: none~n", [Subject]);
+write_org_list(_, Subject, Orgs) ->
+    io:fwrite("  ~s: ~s~n", [Subject, string:join(Orgs, ", ")]).
+
+
+verify_ping(pong, _HaltWith) -> ok;
+verify_ping(_Other, HaltWith) ->
+    % Doing a halt from here will not actual set exit code, presumably
+    % because trhere's additional program flow following this call.
+    % Throw an error instead.
+    error(HaltWith).
+
+
+
