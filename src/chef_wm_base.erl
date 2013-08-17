@@ -192,7 +192,8 @@ finish_request(Req, #base_state{reqid = ReqId,
         Req0 = oc_wm_request:add_notes([{req_id, ReqId},
                                         {user, UserId},
                                         {perf_stats, PerfTuples}], Req),
-        AnnotatedReq = maybe_annotate_org_specific(OrgName, Darklaunch, Req0),
+        Req1 = maybe_annotate_log_msg(Req0, State),
+        AnnotatedReq = maybe_annotate_org_specific(OrgName, Darklaunch, Req1),
         stats_hero:report_metrics(ReqId, Code),
         stats_hero:stop_worker(ReqId),
         case Code of
@@ -534,6 +535,12 @@ maybe_annotate_org_specific(OrgName, Darklaunch, Req) ->
     DLData = chef_wm_darklaunch:get_proplist(Darklaunch),
     oc_wm_request:add_notes([{org_name, OrgName},
                              {darklaunch, DLData}], Req).
+
+%% Filters out log_msg that are undefined
+maybe_annotate_log_msg(Req, #base_state{log_msg = undefined}) ->
+    Req;
+maybe_annotate_log_msg(Req, #base_state{log_msg = Msg}) ->
+    oc_wm_request:add_notes([{msg, {raw, Msg}}], Req).
 
 %% If request results in a rename, then set Location header and wm will return with a 201.
 %% Currently, only the clients endpoint supports rename

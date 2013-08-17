@@ -93,7 +93,9 @@
           %% shared request logging code.
           %%
           %% Formatted using ~p, but expected to be reasonably small.
-          log_msg = "" :: term(),
+          %% If log_msg is remains undefined during finish_request,
+          %% then it won't be added into the log annotations.
+          log_msg = undefined :: term(),
 
           %% Time drift in seconds allowed between the timestamp in a
           %% singed request and the clock on the server.  Set in
