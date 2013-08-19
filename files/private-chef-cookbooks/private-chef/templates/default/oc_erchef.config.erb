@@ -90,7 +90,8 @@
                   {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
                   {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>},
                   {s3_parallel_ops_timeout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] %>},
-                  {s3_parallel_ops_fanout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] %>}
+                  {s3_parallel_ops_fanout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] %>},
+                  {depsolver_timeout, <%= @depsolver_timeout %>}
                  ]},
   {stats_hero, [
                %% Set sender pool size to DB max_connections to avoid contention
@@ -136,7 +137,11 @@
            {pools, [[{name, sqerl},
                      {max_count, <%= @db_pool_size %>},
                      {init_count, <%= @db_pool_size %>},
-                     {start_mfa, {sqerl_client, start_link, []}}]]},
+                     {start_mfa, {sqerl_client, start_link, []}}],
+                    [{name, chef_depsolver},
+                     {max_count, <%= @depsolver_worker_count %>},
+                     {init_count, <%= @depsolver_worker_count %>},
+                     {start_mfa, {chef_depsolver_worker, start_link, []}}]]},
            {metrics_module, folsom_metrics}
           ]}
 
