@@ -70,12 +70,12 @@
 
         -- set ngx.ctx.dl_config
         dl_config = {}
-        dl_config["couchdb_checksums"]    = <%= @helper.not_xdl :sql_migration_phase_1 %>
-        dl_config["couchdb_cookbooks"]    = <%= @helper.not_xdl :sql_migration_phase_1 %>
-        dl_config["couchdb_environments"] = <%= @helper.not_xdl :sql_migration_phase_1 %>
-        dl_config["couchdb_roles"]        = <%= @helper.not_xdl :sql_migration_phase_1 %>
-        dl_config["couchdb_data"]         = <%= @helper.not_xdl :sql_migration_phase_1 %>
-        dl_config["couchdb_clients"]      = <%= @helper.not_xdl :sql_migration_phase_1 %>
+        dl_config["couchdb_checksums"]    = false
+        dl_config["couchdb_cookbooks"]    = false
+        dl_config["couchdb_environments"] = false
+        dl_config["couchdb_roles"]        = false
+        dl_config["couchdb_data"]         = false
+        dl_config["couchdb_clients"]      = false
         ngx.ctx.dl_config = dl_config
       ';
 
@@ -106,27 +106,12 @@
     # principals go to erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
 
-    # If we're in sql_migration_phase_1, then clients are handled by
-    # Erchef, not opscode-account.  In that case, we need to add the
-    # chef_api routing.
-    <%- if node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
-      <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
-    <%- end -%>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
 
     # Include external routes for addons
     include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_external.conf;
 
     # opscode-account service endpoints
-
-    # If we're NOT in sql_migration_phase_1, then clients are still
-    # handled by opscode-account.  In that case, we need to add the
-    # account_api routing.
-    #
-    # Note that this and the routing above for the Chef API for
-    # clients are mutually exclusive.
-    <%- unless node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
-      <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", :account) %>
-    <%- end -%>
 
     <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/(?:groups|users|containers|association_requests)/{0,1}.*$", :account) %>
     <%= @helper.account_api("^/(?:organizations|users)/{0,1}$", :account) %>
