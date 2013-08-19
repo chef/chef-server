@@ -31,7 +31,7 @@
                           "3807d59dfc64d7e2a8e1d4766950f39fd3763ba1"}},
        {chef_wm,".*",
                 {git,"git@github.com:opscode/chef_wm.git",
-                     "9372d3f24a3c819f7754db4308ae52698e24fea0"}},
+                     "15718697492bc67b0a0413cb7c871ad1c43a0247"}},
        {couchbeam,".*",
                   {git,"git://github.com/opscode/couchbeam.git",
                        "c7881f6247a92cd62a818fe9f637ff973a5f8923"}},
@@ -130,7 +130,7 @@
                    "c371b223683e109449d761de3afda468695592d6"}},
        {stats_hero,".*",
                    {git,"git@github.com:opscode/stats_hero.git",
-                        "0bd34aae8220021d5619a132d00e48623522ad10"}},
+                        "6a56cdff79ec095ab6a4e0d32745d81e1d43854f"}},
        {webmachine,".*",
                    {git,"git://github.com/basho/webmachine",
                         "4c441d0f0ca9e343601eb39c8dd2e2117b781dfc"}}]}.
