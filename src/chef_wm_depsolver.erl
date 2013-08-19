@@ -233,13 +233,13 @@ handle_depsolver_results(ok, {error, no_depsolver_workers}, Req, State) ->
             State,
             {[{<<"message">>,<<"Out of depednecy solvers. Try again later.">>}]},
             no_depsolver_workers);
-%% log the exception and return a bare 500
+%% log the exception and return a 500
 handle_depsolver_results(ok, {error, exception, Message, Backtrace}, Req, State) ->
     error_logger:error_report([{module, ?MODULE},
                                {error_type, ruby_exception},
                                {message, Message},
                                {backtrace, Backtrace}]),
-    {{halt, 500}, Req, State};
+    server_error(Req, State, <<"Dependency solving failed.">>, ruby_exception);
 handle_depsolver_results(ok, {error, invalid_constraints, Detail}, Req, State) ->
     precondition_failed(Req, State,
                         invalid_constraints_message(Detail),
