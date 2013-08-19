@@ -84,6 +84,7 @@ default['private_chef']['rabbitmq']['consumer_id'] = 'hotsauce'
 # Should always be enable = false, we control Jetty+Solr through opscode-solr
 default['private_chef']['jetty']['enable'] = false
 default['private_chef']['jetty']['ha'] = false
+default['private_chef']['jetty']['log_directory'] = "/var/opt/opscode/opscode-solr/jetty/logs"
 
 ####
 # Chef Solr
