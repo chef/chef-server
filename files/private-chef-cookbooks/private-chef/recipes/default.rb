@@ -44,15 +44,11 @@ end
 # Create the Chef User
 include_recipe "private-chef::users"
 
-sql_migration_phase_1     = node['private_chef']['dark_launch']['sql_migration_phase_1']
-dark_launch_couchdb_flags = %w(roles data cookbooks checksums clients environments).map {|k| ["couchdb_#{k}", !sql_migration_phase_1] }.flatten
-dark_launch_features_hash = node['private_chef']['dark_launch'].to_hash.merge(Hash[*dark_launch_couchdb_flags])
-
 file "/etc/opscode/dark_launch_features.json" do
   owner node["private_chef"]["user"]["username"]
   group "root"
   mode "0644"
-  content Chef::JSONCompat.to_json_pretty(dark_launch_features_hash)
+  content Chef::JSONCompat.to_json_pretty(node['private_chef']['dark_launch'].to_hash)
 end
 
 webui_key = OpenSSL::PKey::RSA.generate(2048) unless File.exists?('/etc/opscode/webui_pub.pem')
