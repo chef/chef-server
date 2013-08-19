@@ -67,14 +67,8 @@
         ngx.req.set_header("X-Ops-DarkLaunch", "")
 
         -- set ngx.ctx.dl_config
-        dl_config = {}
-        dl_config["couchdb_checksums"]    = false
-        dl_config["couchdb_cookbooks"]    = false
-        dl_config["couchdb_environments"] = false
-        dl_config["couchdb_roles"]        = false
-        dl_config["couchdb_data"]         = false
-        dl_config["couchdb_clients"]      = false
-        ngx.ctx.dl_config = dl_config
+        -- Not currently used, but leaving it in as a "hook" for future use
+        ngx.ctx.dl_config = {}
       ';
 
       # We need to return a body. The caller of this sub-request will ignore the
