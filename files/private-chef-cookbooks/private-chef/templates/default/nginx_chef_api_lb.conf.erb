@@ -94,8 +94,8 @@
     # nodes and environments/*/nodes go to erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/nodes/{0,1}.*$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/[^/]+/nodes$") %>
-    <%= @helper.chef_api "^/organizations/(?<org>[a-z0-9\-_]+?)/(?<endpoint>data|roles|environments)/{0,1}.*$" %>
-    <%= @helper.chef_api "^/organizations/(?<org>[a-z0-9\-_]+?)/(?<endpoint>cookbooks|sandboxes)/{0,1}.*$" %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:data|roles|environments)/{0,1}.*$") %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:cookbooks|sandboxes)/{0,1}.*$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
 
