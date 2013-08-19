@@ -18,7 +18,7 @@
 %% under the License.
 %%
 
--module(bksw_idx).
+-module(bksw_wm_index).
 
 -export([init/1, is_authorized/2, allowed_methods/2, content_types_provided/2,
          finish_request/2,

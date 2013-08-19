@@ -18,7 +18,7 @@
 %% under the License.
 %%
 
--module(bksw_obj).
+-module(bksw_wm_object).
 
 -export([allowed_methods/2, content_types_accepted/2,
          content_types_provided/2, delete_resource/2, download/2,

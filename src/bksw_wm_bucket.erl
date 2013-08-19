@@ -14,7 +14,7 @@
 %% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 %% implied.  See the License for the specific language governing
 %% permissions and limitations under the License.
--module(bksw_bkt).
+-module(bksw_wm_bucket).
 
 -export([init/1, is_authorized/2, allowed_methods/2, content_types_provided/2,
          content_types_accepted/2,
