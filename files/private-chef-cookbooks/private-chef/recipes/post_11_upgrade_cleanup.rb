@@ -56,6 +56,11 @@ private_chef_package_cleaner "opscode-chef" do
                "/opt/opscode/embedded/service/opscode-chef"]
 end
 
+private_chef_package_cleaner "redis" do
+  directories ["/var/opt/opscode/redis",
+               "/var/log/opscode/redis"]
+end
+
 # Remove old PostgreSQL data directory
 #
 # pg_upgrade will helpfully generate a cleanup script which removes

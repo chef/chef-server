@@ -33,14 +33,7 @@
               {root_metric_key, "<%= @root_metric_key %>"},
 
               {authz_timeout, <%= node['private_chef']['opscode-erchef']['authz_timeout'] %>},
-              {authz_fanout, <%= node['private_chef']['opscode-erchef']['authz_fanout'] %>},
-
-              %% search cache
-              {eredis_client_pool_size, <%= @eredis_client_pool_size %>},
-              {redis_host, "<%= node['private_chef']['redis']['vip'] %>"},
-              {redis_port, <%= node['private_chef']['redis']['port'] %>},
-              {redis_db, <%= @redis_db %>},
-              {search_cache_entry_ttl, <%= @search_cache_entry_ttl %>}
+              {authz_fanout, <%= node['private_chef']['opscode-erchef']['authz_fanout'] %>}
              ]},
   {chef_wm, [
              {server_version, "<%= node['private_chef']['version'] %>"},
