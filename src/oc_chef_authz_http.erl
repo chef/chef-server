@@ -28,7 +28,7 @@
 -define(IBROWSE_OPTIONS, [{response_format, binary}]).
 -define(REQ_ID_HEADER, "X-Request-Id").
 
--type http_body() :: binary() | pid() | [].
+-type http_body() :: binary() | [].
 -type requestor_id() :: binary().
 -type http_method() :: atom().
 -type http_path() :: string() | binary().
@@ -83,6 +83,8 @@ request(ReqId, Path, Method, Headers, Body, RequestorId) ->
 handle_ibrowse_response({ok, Status, _, ResponseBody}) when Status =:= "200";
                                                             Status =:= "201" ->
     handle_response_body(ResponseBody);
+handle_ibrowse_response({ok, "204", _H, _B}) ->
+    ok;
 handle_ibrowse_response({ok, "403", _H, _B}) ->
     {error, forbidden};
 handle_ibrowse_response({ok, "404", _H, _B}) ->

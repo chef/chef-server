@@ -26,11 +26,15 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--define(pool_name, pool_name).
--define(pool_opts, [{root_url, "http://www.google.com"}, {max_count, 1}, {init_count, 1}]).
+%% a fake URL for setting up the connection pool. We rely on an implementation detail that
+%% no connection is attempted until a request is made and we mock out that part of things in
+%% the tests.
+-define(pool_opts, [{root_url, "http://oc_chef_authz.localhost:5121"},
+                    {max_count, 1},
+                    {init_count, 1}]).
 
 test_setup() ->
-    application:set_env(oc_chef_authz, http_pool, [{?pool_name, ?pool_opts}]),
+    application:set_env(oc_chef_authz, http_pool, [{oc_chef_authz_test_pool, ?pool_opts}]),
     Server = {context,<<"test-req-id">>,{server,"localhost",5984,[],[]}},
     Superuser = <<"cb4dcaabd91a87675a14ec4f4a00050d">>,
     {Server, Superuser}.

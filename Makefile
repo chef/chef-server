@@ -5,6 +5,7 @@ DIALYZER_OPTS = -Wunderspecs
 # List dependencies that should be included in a cached dialyzer PLT file.
 DIALYZER_DEPS = deps/jiffy/ebin \
                 deps/ibrowse/ebin \
+                deps/opscoderl_httpc/ebin \
                 deps/ej/ebin
 
 DEPS_PLT = oc_chef_authz.plt

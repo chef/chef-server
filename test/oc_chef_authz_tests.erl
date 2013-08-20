@@ -60,6 +60,7 @@
 resource_test_() ->
     {foreach,
     fun() ->
+            error_logger:tty(false),
             automeck:mocks(?AUTOMECK_FILE(resource)),
             test_utils:test_setup() end,
      fun(_) -> meck:unload() end,
@@ -114,6 +115,7 @@ resource_test_() ->
 get_acl_from_resource_test_() ->
     {foreach,
      fun() ->
+             error_logger:tty(false),
              automeck:mocks(?AUTOMECK_FILE(get_acl)),
              test_utils:test_setup() end,
      fun(_) -> meck:unload() end,
@@ -144,8 +146,13 @@ get_acl_from_resource_test_() ->
 
 is_authorized_on_resource_test_() ->
     {foreach,
-     fun() -> test_utils:test_setup() end,
-     fun(_) -> meck:unload() end,
+     fun() ->
+             error_logger:tty(false),
+             test_utils:test_setup()
+     end,
+     fun(_) ->
+             meck:unload()
+     end,
      [fun({_Server, Superuser}) ->
               automeck:mocks(?AUTOMECK_FILE(is_authorized1)),
               {"check if the owner is authorized for grant on a newly created resource",
@@ -194,9 +201,123 @@ is_authorized_on_resource_test_() ->
                end}
       end]}.
 
+bulk_actor_is_authorized_test_() ->
+    {foreach,
+     fun() ->
+             error_logger:tty(false),
+             test_utils:test_setup(),
+              start_apps(),
+              meck:new(oc_httpc),
+              Server = "http://127.0.0.1:9463",
+              Superuser = <<"1d774f20735e25fa8a0e97d624b68346">>,
+              application:set_env(oc_chef_authz, authz_superuser, Superuser),
+              application:set_env(oc_chef_authz, authz_root_url, Server),
+              application:set_env(oc_chef_authz, authz_service, [{root_url, Server}, {timeout, 10000000}] ),
+              {Server, Superuser}
+     end,
+     fun(_) ->
+             stop_apps(),
+             meck:unload()
+     end,
+     [
+      {"all allowed",
+       fun() ->
+               WantHeaders = [{"X-Ops-User-Id", "front-end-service"},
+                              {"Accept", "application/json"},
+                              {"Content-Type", "application/json"},
+                              {"X-Ops-Requesting-Actor-Id", "abcabc123"},
+                              {"X-Request-Id","test-req-id"}],
+               BifrostBody = <<"{\"requestor_id\":\"abcabc123\","
+                               "\"permission\":\"read\","
+                               "\"type\":\"object\","
+                               "\"collection\":[\"a\",\"b\"]}">>,
+               meck:expect(oc_httpc, request,
+                           fun(oc_chef_authz_http, "bulk", Headers, post, Body, 10000000)
+                                 when Headers == WantHeaders andalso
+                                      Body == BifrostBody ->
+                                   {ok, "204", [], []}
+                           end),
+               Resources = [{<<"a">>, a_data}, {<<"b">>, b_data}],
+               ?assertEqual(true,
+                            oc_chef_authz:bulk_actor_is_authorized(<<"test-req-id">>, <<"abcabc123">>, object,
+                                                                   Resources, read))
+       end},
+
+      {"all not allowed",
+              fun() ->
+               WantHeaders = [{"X-Ops-User-Id", "front-end-service"},
+                              {"Accept", "application/json"},
+                              {"Content-Type", "application/json"},
+                              {"X-Ops-Requesting-Actor-Id", "abcabc123"},
+                              {"X-Request-Id","test-req-id"}],
+               BifrostBody = <<"{\"requestor_id\":\"abcabc123\","
+                               "\"permission\":\"read\","
+                               "\"type\":\"object\","
+                               "\"collection\":[\"a\",\"b\"]}">>,
+               meck:expect(oc_httpc, request,
+                           fun(oc_chef_authz_http, "bulk", Headers, post, Body, 10000000)
+                                 when Headers == WantHeaders andalso
+                                      Body == BifrostBody ->
+                                   {ok, "200", [], <<"{\"unauthorized\":[\"a\",\"b\"]}">>}
+                           end),
+               Resources = [{<<"a">>, a_data}, {<<"b">>, b_data}],
+               ?assertEqual({false,[b_data, a_data]},
+                            oc_chef_authz:bulk_actor_is_authorized(<<"test-req-id">>, <<"abcabc123">>, object,
+                                                                   Resources, read))
+       end},
+
+      {"bad response",
+                     fun() ->
+               WantHeaders = [{"X-Ops-User-Id", "front-end-service"},
+                              {"Accept", "application/json"},
+                              {"Content-Type", "application/json"},
+                              {"X-Ops-Requesting-Actor-Id", "abcabc123"},
+                              {"X-Request-Id","test-req-id"}],
+               BifrostBody = <<"{\"requestor_id\":\"abcabc123\","
+                               "\"permission\":\"read\","
+                               "\"type\":\"object\","
+                               "\"collection\":[\"a\",\"b\"]}">>,
+               meck:expect(oc_httpc, request,
+                           fun(oc_chef_authz_http, "bulk", Headers, post, Body, 10000000)
+                                 when Headers == WantHeaders andalso
+                                      Body == BifrostBody ->
+                                   {ok, "200", [], <<"{\"not_expected\":[\"a\",\"b\"]}">>}
+                           end),
+               Resources = [{<<"a">>, a_data}, {<<"b">>, b_data}],
+               ?assertEqual({error, unexpected_body},
+                            oc_chef_authz:bulk_actor_is_authorized(<<"test-req-id">>, <<"abcabc123">>, object,
+                                                                   Resources, read))
+       end},
+
+      {"server error",
+                     fun() ->
+               WantHeaders = [{"X-Ops-User-Id", "front-end-service"},
+                              {"Accept", "application/json"},
+                              {"Content-Type", "application/json"},
+                              {"X-Ops-Requesting-Actor-Id", "abcabc123"},
+                              {"X-Request-Id","test-req-id"}],
+               BifrostBody = <<"{\"requestor_id\":\"abcabc123\","
+                               "\"permission\":\"read\","
+                               "\"type\":\"object\","
+                               "\"collection\":[\"a\",\"b\"]}">>,
+               meck:expect(oc_httpc, request,
+                           fun(oc_chef_authz_http, "bulk", Headers, post, Body, 10000000)
+                                 when Headers == WantHeaders andalso
+                                      Body == BifrostBody ->
+                                   {ok, "500", [], <<"boom">>}
+                           end),
+               Resources = [{<<"a">>, a_data}, {<<"b">>, b_data}],
+               ?assertEqual({error, server_error},
+                            oc_chef_authz:bulk_actor_is_authorized(<<"test-req-id">>, <<"abcabc123">>, object,
+                                                                   Resources, read))
+       end}
+     ]}.
+
 get_container_aid_for_object_test_() ->
     {foreach,
-     fun() -> automeck:mocks(?AUTOMECK_FILE(container_aid)),
+     fun() ->
+             error_logger:tty(false),
+             automeck:mocks(?AUTOMECK_FILE(container_aid)),
               test_utils:test_setup() end,
      fun(_) -> meck:unload() end,
      [fun({Context, _Superuser}) ->
@@ -209,7 +330,9 @@ get_container_aid_for_object_test_() ->
 
 create_entity_if_authorized_test_() ->
     {foreach,
-     fun() -> test_utils:test_setup() end,
+     fun() ->
+             error_logger:tty(false),
+             test_utils:test_setup() end,
      fun(_) -> meck:unload() end,
     [fun({Server, _Superuser}) ->
              automeck:mocks(?AUTOMECK_FILE(create_if_authorized1)),
@@ -243,16 +366,14 @@ create_entity_if_authorized_test_() ->
 start_apps() ->
     error_logger:tty(false),
     application:set_env(oc_chef_authz, authz_service,
-          [{root_url, "http://test-authz-service:2323"},
-          {timeout, 200}, {init_count, 5}, {max_count, 6}]),
-    application:start(ibrowse),
-    application:start(pooler),
-    application:start(sasl),
-    application:start(oc_chef_authz),
+                        [{root_url, "http://test-authz-service:2323"},
+                         {timeout, 200}, {init_count, 5}, {max_count, 6}]),
+    ok = application:start(ibrowse),
+    ok = application:start(pooler),
+    ok = application:start(oc_chef_authz),
     ok.
 
 stop_apps() ->
-    application:stop(sasl),
     application:stop(oc_chef_authz),
     application:stop(ibrowse),
     application:stop(pooler),
@@ -261,6 +382,7 @@ stop_apps() ->
 ping_test_() ->
     {foreach,
      fun() ->
+             error_logger:tty(false),
              start_apps(),
              MockMods = [ibrowse, ibrowse_http_client],
              [ meck:new(M) || M <- MockMods ],
@@ -311,15 +433,23 @@ ping_test_() ->
       ]}.
 
 application_lifecycle_test() ->
-    application:start(crypto),
-    application:start(public_key),
-    application:start(ssl),
-    application:start(ibrowse),
-    application:start(pooler),
-    application:start(sasl),
-    ok = application:start(oc_chef_authz),
-
-    ?assertEqual(ok, application:stop(oc_chef_authz)).
+    {setup,
+     fun() ->
+             error_logger:tty(false),
+             Apps = [ibrowse, pooler],
+             [ application:start(A) || A <- Apps ],
+             Apps
+     end,
+     fun(Apps) ->
+             [ application:stop(A) || A <- lists:reverse(Apps) ],
+             error_logger:tty(true)
+     end,
+     [
+      fun() ->
+              ?assertEqual(ok, application:start(oc_chef_authz)),
+              ?assertEqual(ok, application:stop(oc_chef_authz))
+      end
+     ]}.
 
 %% helper for tests
 is_authz_id(Id) when is_binary(Id) ->
