@@ -28,6 +28,8 @@
 %% Helper functions
 -export([create_500_response/2]).
 
+-include("internal.hrl").
+
 %%
 %% Complete webmachine callbacks
 %%
@@ -52,8 +54,18 @@ finish_request(Rq0, Ctx) ->
             error_logger:error_report({X, Y, erlang:get_stacktrace()})
     end.
 
-service_available(Req, Ctx) ->
-    bksw_util:service_available(Req, Ctx).
+service_available(Req, #context{reqid_header_name = HeaderName} = State) ->
+    %% Extract or generate a request id
+    ReqId = oc_wm_request:read_req_id(HeaderName, Req),
+
+    %% If no UserId is generated, this will return undefined. The opscoderl_wm request
+    %% logger will omit user=; downstream.
+    UserId = wrq:get_req_header("x-ops-userid", Req),
+
+    Req0 = oc_wm_request:add_notes([{req_id, ReqId},
+                                    {user, UserId}], Req),
+
+    {true, Req0, State#context{reqid = ReqId}}.
 
 %%
 %% Helper functions
