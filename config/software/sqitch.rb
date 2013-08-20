@@ -2,7 +2,7 @@ name "sqitch"
 version "0.973"
 
 dependency "perl"
-dependency "postgresql" # only because we're compiling DBD::Pg here, too.
+dependency "postgresql92" # only because we're compiling DBD::Pg here, too.
 
 source :url => "http://www.cpan.org/authors/id/D/DW/DWHEELER/App-Sqitch-#{version}.tar.gz",
        :md5 => "0994e9f906a7a4a2e97049c8dbaef584"

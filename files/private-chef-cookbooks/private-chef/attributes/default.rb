@@ -272,11 +272,18 @@ default['private_chef']['nginx']['enable_ipv6'] = false
 ###
 # PostgreSQL
 ###
+# For now, we're hardcoding the version directory suffix here:
+default['private_chef']['postgresql']['version'] = "9.2"
+# In the future, we're probably going to want to do something more elegant so we
+# don't accidentally overwrite this directory if we upgrade PG to 9.3: keeping these
+# directories straight is important because in the distant future (the year 2000)
+# we'll be using these directories to determine what versions we have installed and
+# whether we need to run pg_upgrade.
 default['private_chef']['postgresql']['enable'] = true
 default['private_chef']['postgresql']['ha'] = false
-default['private_chef']['postgresql']['dir'] = "/var/opt/opscode/postgresql"
-default['private_chef']['postgresql']['data_dir'] = "/var/opt/opscode/postgresql/data"
-default['private_chef']['postgresql']['log_directory'] = "/var/log/opscode/postgresql"
+default['private_chef']['postgresql']['dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
+default['private_chef']['postgresql']['data_dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}/data"
+default['private_chef']['postgresql']['log_directory'] = "/var/log/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
 default['private_chef']['postgresql']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['postgresql']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['postgresql']['username'] = "opscode-pgsql"
