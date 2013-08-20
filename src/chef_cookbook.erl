@@ -42,7 +42,7 @@
 
 %% This is the maximum size of an int value in postgres used to store major, minor, and
 %% patch versions.
--define(MAX_VERSION, 2147483647).
+-define(MAX_VERSION, 9223372036854775807).
 
 -define(DEFAULT_S3_URL_TTL, 900).
 
