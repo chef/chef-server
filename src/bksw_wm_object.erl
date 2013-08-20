@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Tim Dysinger <dysinger@opscode.com>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -18,15 +18,29 @@
 %% under the License.
 %%
 
--module(bksw_obj).
+-module(bksw_wm_object).
 
--export([allowed_methods/2, content_types_accepted/2,
-         content_types_provided/2, delete_resource/2, download/2,
+-include_lib("mixer/include/mixer.hrl").
+-mixin([{bksw_wm_base, [init/1,
+                        is_authorized/2,
+                        finish_request/2,
+                        service_available/2]}]).
+
+%% Webmachine callbacks
+-export([allowed_methods/2,
+         content_types_accepted/2,
+         content_types_provided/2,
+         delete_resource/2,
+         generate_etag/2,
+         last_modified/2,
+         resource_exists/2,
+
+         %% Override
          validate_content_checksum/2,
-         finish_request/2,
-         generate_etag/2, init/1, is_authorized/2, last_modified/2,
-         service_available/2,
-         resource_exists/2, upload/2]).
+
+         %% Resource helpers
+         download/2,
+         upload/2]).
 
 -include("bksw_obj.hrl").
 -include_lib("webmachine/include/webmachine.hrl").
@@ -35,9 +49,6 @@
 %%===================================================================
 %% Public API
 %%===================================================================
-
-init(Config) ->
-    {ok, bksw_conf:get_context(Config)}.
 
 %% By default, if wm sees a 'content-md5' header, it will read the request body to compute
 %% the md5 and compare to the header value. A 400 will then be returned automagically by wm
@@ -48,9 +59,6 @@ init(Config) ->
 %% upload/2 flow.
 validate_content_checksum(Rq, Ctx) ->
     {true, Rq, Ctx}.
-
-is_authorized(Rq, Ctx) ->
-    bksw_sec:is_authorized(Rq, Ctx).
 
 allowed_methods(Rq, Ctx) ->
     {['HEAD', 'GET', 'PUT', 'DELETE'], Rq, Ctx}.
@@ -77,9 +85,6 @@ content_types_accepted(Rq, Ctx) ->
     {MT, _Params} = webmachine_util:media_type_to_detail(CT),
     {[{MT, upload}], Rq, Ctx}.
 
-service_available(Req, Ctx) ->
-    bksw_util:service_available(Req, Ctx).
-
 resource_exists(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     %% Buckets always exist for writes since we create them on the fly
@@ -89,10 +94,6 @@ resource_exists(Rq0, Ctx) ->
         _ ->
             {bksw_io:entry_exists(Bucket, Path), Rq0, Ctx}
     end.
-
-delete_resource(Rq0, Ctx) ->
-    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
-    {bksw_io:entry_delete(Bucket, Path), Rq0, Ctx}.
 
 last_modified(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
@@ -112,6 +113,14 @@ generate_etag(Rq0, Ctx) ->
             {halt, Rq0, Ctx}
     end.
 
+delete_resource(Rq0, Ctx) ->
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
+    {bksw_io:entry_delete(Bucket, Path), Rq0, Ctx}.
+
+%%
+%% Resource Helpers
+%%
+
 download(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bksw_io:open_for_read(Bucket, Path) of
@@ -126,6 +135,15 @@ download(Rq0, Ctx) ->
             {false, Rq0, Ctx}
     end.
 
+upload(Rq0, Ctx) ->
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
+    case bksw_io:open_for_write(Bucket, Path) of
+        {ok, Ref} ->
+            write_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE), Ref, Rq0, Ctx);
+        Error ->
+            error_logger:error_msg("Erroring opening ~p/~p for writing: ~p~n", [Bucket, Path, Error]),
+            {false, Rq0, Ctx}
+    end.
 
 
 %%===================================================================
@@ -161,16 +179,6 @@ fully_read(Ref, Accum) ->
             lists:reverse(Accum)
     end.
 
-upload(Rq0, Ctx) ->
-    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
-    case bksw_io:open_for_write(Bucket, Path) of
-        {ok, Ref} ->
-            write_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE), Ref, Rq0, Ctx);
-        Error ->
-            error_logger:error_msg("Erroring opening ~p/~p for writing: ~p~n", [Bucket, Path, Error]),
-            {false, Rq0, Ctx}
-    end.
-
 write_streamed_body({Data, done}, Ref, Rq0, Ctx) ->
     {ok, Ref1} = bksw_io:write(Ref, Data),
     {ok, Digest} = bksw_io:finish_write(Ref1),
@@ -194,24 +202,3 @@ write_streamed_body({Data, Next}, Ref, Rq0, Ctx) ->
 
 get_header(Header, Rq) ->
     wrq:get_req_header(Header, Rq).
-
-finish_request(Rq0, Ctx) ->
-    try
-        case wrq:response_code(Rq0) of
-            500 ->
-                Rq1 = create_500_response(Rq0, Ctx),
-                {true, Rq1, Ctx};
-            _ ->
-                {true, Rq0, Ctx}
-        end
-    catch
-        X:Y ->
-            error_logger:error_report({X, Y, erlang:get_stacktrace()})
-    end.
-
-create_500_response(Rq0, _Ctx) ->
-    %% sanitize response body
-    Msg = <<"internal service error">>,
-    Rq1 = wrq:set_resp_header("Content-Type",
-                               "text/plain", Rq0),
-    wrq:set_resp_body(Msg, Rq1).

@@ -124,9 +124,9 @@ dispatch() ->
               {access_key_id, AccessKeyId},
               {secret_access_key, SecretAccessKey}],
     %% per wm docs, init args for resources should be a list
-    [{dispatch, [{[bucket, obj_part, '*'], bksw_obj, Config},
-                 {[bucket], bksw_bkt, Config},
-                 {[], bksw_idx, Config}]}].
+    [{dispatch, [{[bucket, obj_part, '*'], bksw_wm_object, Config},
+                 {[bucket], bksw_wm_bucket, Config},
+                 {[], bksw_wm_index, Config}]}].
 
 port() ->
     case application:get_env(bookshelf, port) of
