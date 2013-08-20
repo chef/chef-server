@@ -26,12 +26,21 @@
                         finish_request/2,
                         service_available/2]}]).
 
--export([allowed_methods/2, content_types_accepted/2,
-         content_types_provided/2, delete_resource/2, download/2,
-         validate_content_checksum/2,
+%% Webmachine callbacks
+-export([allowed_methods/2,
+         content_types_accepted/2,
+         content_types_provided/2,
+         delete_resource/2,
          generate_etag/2,
          last_modified/2,
-         resource_exists/2, upload/2]).
+         resource_exists/2,
+
+         %% Override
+         validate_content_checksum/2,
+
+         %% Resource helpers
+         download/2,
+         upload/2]).
 
 -include("bksw_obj.hrl").
 -include_lib("webmachine/include/webmachine.hrl").
@@ -76,7 +85,6 @@ content_types_accepted(Rq, Ctx) ->
     {MT, _Params} = webmachine_util:media_type_to_detail(CT),
     {[{MT, upload}], Rq, Ctx}.
 
-
 resource_exists(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     %% Buckets always exist for writes since we create them on the fly
@@ -86,10 +94,6 @@ resource_exists(Rq0, Ctx) ->
         _ ->
             {bksw_io:entry_exists(Bucket, Path), Rq0, Ctx}
     end.
-
-delete_resource(Rq0, Ctx) ->
-    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
-    {bksw_io:entry_delete(Bucket, Path), Rq0, Ctx}.
 
 last_modified(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
@@ -109,6 +113,14 @@ generate_etag(Rq0, Ctx) ->
             {halt, Rq0, Ctx}
     end.
 
+delete_resource(Rq0, Ctx) ->
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
+    {bksw_io:entry_delete(Bucket, Path), Rq0, Ctx}.
+
+%%
+%% Resource Helpers
+%%
+
 download(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bksw_io:open_for_read(Bucket, Path) of
@@ -123,6 +135,15 @@ download(Rq0, Ctx) ->
             {false, Rq0, Ctx}
     end.
 
+upload(Rq0, Ctx) ->
+    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
+    case bksw_io:open_for_write(Bucket, Path) of
+        {ok, Ref} ->
+            write_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE), Ref, Rq0, Ctx);
+        Error ->
+            error_logger:error_msg("Erroring opening ~p/~p for writing: ~p~n", [Bucket, Path, Error]),
+            {false, Rq0, Ctx}
+    end.
 
 
 %%===================================================================
@@ -156,16 +177,6 @@ fully_read(Ref, Accum) ->
         Error ->
             error_logger:error_msg("Error occurred during content download: ~p~n", [Error]),
             lists:reverse(Accum)
-    end.
-
-upload(Rq0, Ctx) ->
-    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
-    case bksw_io:open_for_write(Bucket, Path) of
-        {ok, Ref} ->
-            write_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE), Ref, Rq0, Ctx);
-        Error ->
-            error_logger:error_msg("Erroring opening ~p/~p for writing: ~p~n", [Bucket, Path, Error]),
-            {false, Rq0, Ctx}
     end.
 
 write_streamed_body({Data, done}, Ref, Rq0, Ctx) ->

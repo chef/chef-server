@@ -26,9 +26,12 @@
                         finish_request/2,
                         service_available/2]}]).
 
+%% Webmachine callbacks
 -export([allowed_methods/2,
          content_types_provided/2,
          resource_exists/2,
+
+         %% Resource helpers
          to_xml/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").

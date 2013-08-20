@@ -22,10 +22,16 @@
                         finish_request/2,
                         service_available/2]}]).
 
+%% Webmachine callbacks
 -export([allowed_methods/2,
          content_types_provided/2,
          content_types_accepted/2,
-         resource_exists/2, delete_resource/2, create_resource/2, to_xml/2]).
+         delete_resource/2,
+         resource_exists/2,
+
+         %% Resource helpers
+         create_resource/2,
+         to_xml/2]).
 
 -include("amazon_s3.hrl").
 -include_lib("webmachine/include/webmachine.hrl").
