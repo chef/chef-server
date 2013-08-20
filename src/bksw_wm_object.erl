@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Tim Dysinger <dysinger@opscode.com>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -20,12 +20,17 @@
 
 -module(bksw_wm_object).
 
+-include_lib("mixer/include/mixer.hrl").
+-mixin([{bksw_wm_base, [init/1,
+                        is_authorized/2,
+                        finish_request/2,
+                        service_available/2]}]).
+
 -export([allowed_methods/2, content_types_accepted/2,
          content_types_provided/2, delete_resource/2, download/2,
          validate_content_checksum/2,
-         finish_request/2,
-         generate_etag/2, init/1, is_authorized/2, last_modified/2,
-         service_available/2,
+         generate_etag/2,
+         last_modified/2,
          resource_exists/2, upload/2]).
 
 -include("bksw_obj.hrl").
@@ -36,9 +41,6 @@
 %% Public API
 %%===================================================================
 
-init(Config) ->
-    {ok, bksw_conf:get_context(Config)}.
-
 %% By default, if wm sees a 'content-md5' header, it will read the request body to compute
 %% the md5 and compare to the header value. A 400 will then be returned automagically by wm
 %% if the digests do not match. Since we wish to read request bodies in a streaming fashion,
@@ -48,9 +50,6 @@ init(Config) ->
 %% upload/2 flow.
 validate_content_checksum(Rq, Ctx) ->
     {true, Rq, Ctx}.
-
-is_authorized(Rq, Ctx) ->
-    bksw_sec:is_authorized(Rq, Ctx).
 
 allowed_methods(Rq, Ctx) ->
     {['HEAD', 'GET', 'PUT', 'DELETE'], Rq, Ctx}.
@@ -77,8 +76,6 @@ content_types_accepted(Rq, Ctx) ->
     {MT, _Params} = webmachine_util:media_type_to_detail(CT),
     {[{MT, upload}], Rq, Ctx}.
 
-service_available(Req, Ctx) ->
-    bksw_util:service_available(Req, Ctx).
 
 resource_exists(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
@@ -194,24 +191,3 @@ write_streamed_body({Data, Next}, Ref, Rq0, Ctx) ->
 
 get_header(Header, Rq) ->
     wrq:get_req_header(Header, Rq).
-
-finish_request(Rq0, Ctx) ->
-    try
-        case wrq:response_code(Rq0) of
-            500 ->
-                Rq1 = create_500_response(Rq0, Ctx),
-                {true, Rq1, Ctx};
-            _ ->
-                {true, Rq0, Ctx}
-        end
-    catch
-        X:Y ->
-            error_logger:error_report({X, Y, erlang:get_stacktrace()})
-    end.
-
-create_500_response(Rq0, _Ctx) ->
-    %% sanitize response body
-    Msg = <<"internal service error">>,
-    Rq1 = wrq:set_resp_header("Content-Type",
-                               "text/plain", Rq0),
-    wrq:set_resp_body(Msg, Rq1).
