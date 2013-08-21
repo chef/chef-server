@@ -266,6 +266,23 @@ bulk_actor_is_authorized_test_() ->
                                                                    Resources, read))
        end},
 
+      {"some not allowed",
+       fun() ->
+               %% this test exercises the internal get_data_for_id
+               Ids = [ list_to_binary([$a + I]) || I <- lists:seq(0, 25) ],
+               meck:expect(oc_httpc, request,
+                           fun(oc_chef_authz_http, "bulk", _Headers, post, _Body, 10000000) ->
+                                   {ok, "200", [], <<"{\"unauthorized\":[\"b\",\"l\",\"o\",\"t\"]}">>}
+                           end),
+               Resources = [ {I, binary_to_atom(<<I/binary, "_data">>, utf8)} || I <- Ids ],
+               ?assertEqual({false,[t_data, o_data, l_data, b_data]},
+                            oc_chef_authz:bulk_actor_is_authorized(<<"test-req-id">>,
+                                                                   <<"abcabc123">>,
+                                                                   object,
+                                                                   Resources,
+                                                                   read))
+       end},
+
       {"bad response",
                      fun() ->
                WantHeaders = [{"X-Ops-User-Id", "front-end-service"},
