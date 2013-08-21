@@ -15,6 +15,5 @@ env = {
 build do
   command "./configure.gnu --prefix=#{install_dir}/embedded", :env => env
   command "make", :env => env
-  command "make test", :env => env
   command "make install", :env => env
 end
