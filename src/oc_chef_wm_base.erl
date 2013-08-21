@@ -413,18 +413,17 @@ set_authz_id(Id, #data_state{}=D) ->
                                   ok | {error, {[any(),...]}}.
 check_cookbook_authz(Cookbooks, _Req, #base_state{reqid = ReqId,
                                                         requestor_id = RequestorId}) ->
-    Resources = [{object, AuthzId, Name}
+    Resources = [{AuthzId, Name}
                  || #chef_cookbook_version{name = Name, authz_id = AuthzId} <- Cookbooks],
-    case ?SH_TIME(ReqId, oc_chef_authz, bulk_actor_is_authorized, (ReqId, RequestorId, Resources, read)) of
-        ok -> ok;
-        {error, {Name, Why}} ->
-            Report = {check_cookbook_authz, {Name, Why, ReqId}},
+    case ?SH_TIME(ReqId, oc_chef_authz, bulk_actor_is_authorized, (ReqId, RequestorId, object, Resources, read)) of
+        true -> ok;
+        {error, Why} ->
+            Report = {check_cookbook_authz, {Why, ReqId}},
             error_logger:error_report(Report),
             error(Report);
-        NoAuthzList ->
-            Names = [ Name || {false, Name} <- NoAuthzList ],
+        {false, NoAuthzList} ->
             {error, {[{<<"message">>, <<"Read permission is not granted for one or more cookbooks">>},
-                      {<<"unauthorized_cookbooks">>, Names}]}}
+                      {<<"unauthorized_cookbooks">>, NoAuthzList}]}}
     end.
 
 %% This version should work for Open Source:
