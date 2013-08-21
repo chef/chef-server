@@ -85,10 +85,6 @@ fetch_requestor_test_() ->
                            fun(_, <<"mock-org">>) ->
                                    <<"mock-org-id-123">>
                            end),
-               %% meck:expect(chef_db_darklaunch, is_enabled,
-               %%             fun(<<"sql_users">>, _) -> true end),
-               meck:expect(chef_db_darklaunch, is_enabled,
-                           fun(<<"couchdb_clients">>, _) -> false end),
                meck:expect(chef_sql, fetch_user,
                            fun(<<"alice">>) -> {ok, not_found} end),
                Client = #chef_client{id = <<"mock-client-id">>,
@@ -113,8 +109,6 @@ fetch_requestor_test_() ->
                            end),
                meck:expect(chef_db_darklaunch, is_enabled,
                            fun(<<"sql_users">>, _) -> true end),
-               meck:expect(chef_db_darklaunch, is_enabled,
-                           fun(<<"couchdb_clients">>, _) -> false end),
                meck:expect(chef_sql, fetch_user,
                            fun(<<"alice">>) -> {ok, not_found} end),
             Client = #chef_client{id = <<"mock-client-id">>,
@@ -141,41 +135,8 @@ fetch_requestor_test_() ->
                GotKeys = [ Key || {Key, _} <- Stats ],
                ?assertEqual(lists:sort(ExpectKeys), lists:sort(GotKeys))
        end
-      },
-      {"a client is found Couchdb",
-       fun() ->
-               OrgId = <<"org-123-456">>,
-               meck:expect(chef_db_darklaunch, is_enabled,
-                           fun(<<"couchdb_clients">>, _) -> true end),
-
-               meck:expect(chef_otto, connect, fun() -> otto_connect end),
-               meck:expect(chef_otto, fetch_org_id,
-                           fun(_, <<"mock-org">>) -> OrgId end),
-
-               Client = #chef_client{id = <<"mock-client-id">>,
-                                     authz_id = <<"mock-client-authz-id">>,
-                                     org_id = OrgId,
-                                     name = <<"alice">>,
-                                     pubkey_version = 1,
-                                     public_key = <<"key data">>},
-               meck:expect(chef_otto, fetch_client,
-                           fun(_, O, <<"alice">>) when O =:= OrgId -> Client end),
-               Context = chef_db:make_context(<<"req-id-123">>),
-               Got = chef_db:fetch_requestor(Context, <<"mock-org">>, <<"alice">>),
-               ?assertEqual(Got, Client),
-               Stats = stats_hero:snapshot(<<"req-id-123">>, all),
-               ExpectKeys = [<<"req_time">>,
-                             <<"couchdb.chef_otto.fetch_client_time">>,
-                             <<"couchdb.chef_otto.fetch_client_count">>,
-                             <<"couchdb.chef_otto.fetch_org_id_time">>,
-                             <<"couchdb.chef_otto.fetch_org_id_count">>,
-                             <<"couchdb_count">>,
-                             <<"couchdb_time">>],
-               GotKeys = [ Key || {Key, _} <- Stats ],
-               ?assertEqual(lists:sort(ExpectKeys), lists:sort(GotKeys))
-       end
       }
-     ]}.
+    ]}.
 
 fetch_cookbook_versions_test_() ->
     {foreach,
