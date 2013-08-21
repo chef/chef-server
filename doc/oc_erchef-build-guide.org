@@ -25,7 +25,7 @@ for oc_erchef tested in CI.
    should be based off of the opc-11-int branch in opscode-omnibus.
 
 5. [[Trigger build]] of custom branch of opscode-omnibus project in
-   andra.opscode.us using the [[http://andra.ci.opscode.us/job/private-chef-trigger-ad-hoc/][private-chef-trigger-ad-hoc]] job.
+   andra.ci.opscode.us using the [[http://andra.ci.opscode.us/job/private-chef-trigger-ad-hoc/][private-chef-trigger-ad-hoc]] job.
 
 * Coffee
 
