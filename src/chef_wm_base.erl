@@ -80,7 +80,6 @@ ping(Req, State) ->
 
 init_base_state(ResourceMod, InitParams) ->
     #base_state{reqid_header_name = ?gv(reqid_header_name, InitParams),
-                batch_size = ?gv(batch_size, InitParams),
                 auth_skew = ?gv(auth_skew, InitParams),
 
                 otp_info = ?gv(otp_info, InitParams),

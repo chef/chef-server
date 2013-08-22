@@ -29,6 +29,8 @@
 -include("chef_wm.hrl").
 -include_lib("chef_index/include/chef_solr.hrl").
 
+-define(DEFAULT_BATCH_SIZE, 5).
+
 %% We chose to *not* mixin chef_wm_base:post_is_create/2 as a POST in
 %% this resource is purely for processing...not resource creation.
 -mixin([{chef_wm_base, [content_types_accepted/2,
@@ -113,8 +115,8 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                          resource_state = SearchState,
                          organization_name = OrgName,
                          darklaunch = Darklaunch,
-                         batch_size = BatchSize,
                          reqid = ReqId} = State) ->
+    BatchSize = batch_size(),
     Query = SearchState#search_state.solr_query,
     case ?SH_TIME(ReqId, chef_solr, search, (Query)) of
         {ok, Start, SolrNumFound, Ids} ->
@@ -164,6 +166,20 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                 chef_wm_util:set_json_body(Req,
                     malformed_request_message(Why, Req, State)),
                 State#base_state{log_msg=Why}}
+    end.
+
+%% Return current app config value for batch size. If value from config is not a positive
+%% integer or if the config key is missing, use a default value and log an error message.
+batch_size() ->
+    case application:get_env(chef_wm, bulk_fetch_batch_size) of
+        {ok, BatchSize} when is_integer(BatchSize) andalso BatchSize > 0 ->
+            BatchSize;
+        undefined ->
+            error_logger:error_report({missing_config, {chef_wm, bulk_fetch_batch_size}, "using default"}),
+            ?DEFAULT_BATCH_SIZE;
+        {ok, BadSize} ->
+            error_logger:error_report({invalid_config, {chef_wm, bulk_fetch_batch_size, BadSize}, "using default"}),
+            ?DEFAULT_BATCH_SIZE
     end.
 
 search_log_msg(not_found, SolrNumFound, NumIds, DbNumFound) ->

@@ -31,11 +31,6 @@
 %% supervisor callbacks
 -export([init/1]).
 
-%% The bulk_get implementation relies on hard-coded prepared queries for 1, 2, ..., N for a
-%% batch size of N. For now, we just ensure that we don't configure something too large by
-%% accident.
--define(MAX_BULK_GET_SIZE, 5).
-
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.
 start_link() ->
@@ -63,7 +58,6 @@ upgrade() ->
 %% @spec init([]) -> SupervisorTree
 %% @doc supervisor callback.
 init([]) ->
-    validate_bulk_fetch_batch_size(),
     {ok, Ip} = application:get_env(chef_wm, ip),
     {ok, Port} = application:get_env(chef_wm, port),
     {ok, Dispatch} = file:consult(filename:join(
@@ -93,22 +87,6 @@ init([]) ->
 
     Processes = [Folsom, KeyRing, Web, Index],
     {ok, { {one_for_one, 10, 10}, Processes} }.
-
-validate_bulk_fetch_batch_size() ->
-    %% Batch size for bulk_fetch is currently tightly coupled to hard-coded prepared SQL
-    %% queries. We verify the value does not exceed the the predefined queries here while we
-    %% are investigating a more elegant solution.
-    {ok, BatchSize} = application:get_env(chef_wm, bulk_fetch_batch_size),
-    case BatchSize > ?MAX_BULK_GET_SIZE of
-        true ->
-            error_logger:error_msg("bulk_fetch_batch_size of ~p is larger than "
-                                   "supported max of ~p~n",
-                                   [BatchSize, ?MAX_BULK_GET_SIZE]),
-            erlang:error({error, {bulk_fetch_batch_size_too_large, BatchSize}});
-        false ->
-            error_logger:info_msg("bulk_fetch_batch_size set to ~p ~n", [BatchSize]),
-            ok
-    end.
 
 add_custom_settings(Dispatch) ->
     Dispatch1 = add_resource_init(Dispatch),
@@ -163,8 +141,7 @@ default_resource_init() ->
     %% and if that time comes, this will probably fail.
     [{ServerName, ServerVersion, _, _}] = release_handler:which_releases(permanent),
 
-    Defaults = [{batch_size, get_env(chef_wm, bulk_fetch_batch_size)},
-                {auth_skew, get_env(chef_wm, auth_skew)},
+    Defaults = [{auth_skew, get_env(chef_wm, auth_skew)},
                 {reqid_header_name, get_env(chef_wm, reqid_header_name)},
 
                 %% These will be used to generate the X-Ops-API-Info header

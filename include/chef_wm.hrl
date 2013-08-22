@@ -117,11 +117,6 @@
           %% In OPC/OHC it will either contain dark launch info or no_header
           darklaunch = undefined :: any(), %% do not want to expose darklaunch record globally
 
-          %% Batch size used to pull back large objects from couchdb.
-          %% Currently used by the search resource to limit the number
-          %% of nodes that are in memory at one time.
-          batch_size = 5 :: non_neg_integer(),
-
           %% Opaque db connection context record as returned by
           %% chef_db:make_context.  Allows db layer access to request
           %% ID.  Set in chef_rest_wm:service_available
