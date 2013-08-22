@@ -23,9 +23,9 @@
   {applications, [
                   kernel,
                   stdlib,
-                  ejson,
                   ibrowse,
-                  depsolver
+                  folsom,
+                  pooler
                  ]},
   {env, []}
  ]}.
