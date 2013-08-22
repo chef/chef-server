@@ -63,10 +63,6 @@ init([]) ->
            {webmachine_mochiweb, start, [WebConfig]},
            permanent, 5000, worker, dynamic},
 
-    Folsom = {folsom_sup,
-              {folsom_sup, start_link, []},
-              permanent, 5000, supervisor, [folsom_sup]},
-
     KeyRing = {chef_keyring,
                {chef_keyring, start_link, []},
                permanent, brutal_kill, worker, [chef_keyring]},
@@ -83,7 +79,7 @@ init([]) ->
                      {oc_chef_wm_eredis_starter, start_link, []},
                      transient, brutal_kill, worker, [oc_chef_wm_eredis_starter]},
 
-    Processes = [Folsom, KeyRing, EredisSup, EredisStarter, Index, Web],
+    Processes = [KeyRing, EredisSup, EredisStarter, Index, Web],
     {ok, { {one_for_one, 10, 10}, Processes} }.
 
 
