@@ -423,8 +423,7 @@ fetch_clients(OrgId) ->
 %% Note this return a list of chef_client records, different from the other bulk_get_X
 %% calls
 bulk_get_clients(Ids) ->
-    Query = bulk_get_query_for_count(client, length(Ids)),
-    case sqerl:select(Query, Ids, ?ALL(chef_client)) of
+    case sqerl:select(bulk_get_clients, [Ids], ?ALL(chef_client)) of
         {ok, none} ->
             {ok, not_found};
         {ok, L} when is_list(L) ->
@@ -1104,8 +1103,8 @@ list_query_for(chef_data_bag_item) ->
 %% column in the table.
 %%
 bulk_get_objects(Type, Ids) ->
-    Query = bulk_get_query_for_count(Type, length(Ids)),
-    case sqerl:select(Query, Ids, rows_as_scalars, [serialized_object]) of
+    Query = list_to_existing_atom("bulk_get_" ++ atom_to_list(Type) ++ "s"),
+    case sqerl:select(Query, [Ids], rows_as_scalars, [serialized_object]) of
         {ok, none} ->
             {ok, not_found};
         {ok, L} when is_list(L) ->
@@ -1283,12 +1282,6 @@ flatten_record(Rec) ->
         false -> ok
     end,
     Tail.
-
-%% @doc Render the name of the bulk get query according to the bulk_get naming convention
-%% (RFC 56667)
-bulk_get_query_for_count(Type, X) ->
-    TypeStr = atom_to_list(Type) ++ "s_",
-    list_to_existing_atom("bulk_get_" ++ TypeStr ++ integer_to_list(X)).
 
 do_update(QueryName, UpdateFields) ->
     case sqerl:statement(QueryName, UpdateFields) of
@@ -1767,14 +1760,7 @@ fetch_cookbook_version_serialized_objects(UnprocessedIds, BatchSize, AllResults)
                                                                                     SerializedObject :: binary()}]} |
                                                                              {error, term()}.
 fetch_cookbook_version_serialized_objects_batch(Ids) when is_list(Ids)->
-    BatchSize = length(Ids),
-    %% Not using bulk_get_query_for_count/2 since our semantics are
-    %% slightly different (those queries are intended for pulling back
-    %% just a serialized object, whereas we need to pull back a
-    %% cookbook name as well; I didn't want to introduce any
-    %% confusion)
-    Query = list_to_existing_atom("bulk_get_cbv_serialized_object_" ++ integer_to_list(BatchSize)),
-    case sqerl:select(Query, Ids) of
+    case sqerl:select(bulk_get_cbv_serialized_object, [Ids]) of
         {ok, none} ->
             {ok, []};
         {ok, Results} ->
