@@ -184,9 +184,9 @@ remove_dups(L) ->
 %% cookbook_missing calls proplists:is_defined/2 which will traverse
 %% the AllVersions structure for each cookbook lookup.  It might be
 %% better to loop over the list of Cookbooks instead
--spec not_found_cookbooks(AllVersions :: [depsolver:dependency_set()],
+-spec not_found_cookbooks(AllVersions :: [chef_depsolver:dependency_set()],
                           Cookbooks :: [cookbook_with_version()]) ->
-                                 ok | {not_found, [cookbook_with_version()]}.
+                                 ok | {not_found, [binary(),...]}.
 not_found_cookbooks(AllVersions, Cookbooks) ->
     NotFound = [ cookbook_name(Cookbook) || Cookbook <- Cookbooks, cookbook_missing(Cookbook, AllVersions)],
     case NotFound of
@@ -210,7 +210,7 @@ cookbook_name({Name, _Version}) ->
 %% cookbook name in the list of all cookbook version. This means if any version of a cookbook
 %% exists it returns false
 -spec cookbook_missing(CB::cookbook_with_version(),
-                       AllVersions::[depsolver:dependency_set()]) -> boolean().
+                       AllVersions::[chef_depsolver:dependency_set()]) -> boolean().
 cookbook_missing(CB, AllVersions) when is_binary(CB) ->
     not proplists:is_defined(CB, AllVersions);
 cookbook_missing({Name, _Version}, AllVersions) ->
@@ -224,17 +224,32 @@ handle_depsolver_results({not_found, CookbookNames}, _Deps, Req, State) when is_
                         not_found_message(cookbook_version, CookbookNames),
                         cookbook_version_not_found);
 handle_depsolver_results(ok, {error, resolution_timeout}, Req, State) ->
-        precondition_failed(Req, State,
-                            timeout_message(),
-                            solve_timeout);
+    precondition_failed(Req, State,
+                        timeout_message(),
+                        {timeout, depsolver});
+handle_depsolver_results(ok, {error, no_depsolver_workers}, Req, State) ->
+    wm_halt(503,
+            Req,
+            State,
+            <<"Dependency solver overloaded. Try again later.">>,
+            no_depsolver_workers);
+%% log the exception and return a 500
+handle_depsolver_results(ok, {error, exception, Message, Backtrace}, Req, State) ->
+    error_logger:error_report([{module, ?MODULE},
+                               {error_type, depsolver_ruby_exception},
+                               {message, Message},
+                               {backtrace, Backtrace}]),
+    server_error(Req, State, <<"Dependency solver exception.">>, depsolver_ruby_exception);
+handle_depsolver_results(ok, {error, invalid_constraints, Detail}, Req, State) ->
+    precondition_failed(Req, State,
+                        invalid_constraints_message(Detail),
+                        invalid_constraints);
+handle_depsolver_results(ok, {error, no_solution, Detail}, Req, State) ->
+    precondition_failed(Req, State, {Detail}, no_solution);
 handle_depsolver_results(ok, {error, {unreachable_package, Unreachable}}, Req, State) ->
     precondition_failed(Req, State,
                         not_reachable_message(Unreachable),
-                        not_reachable_dep);
-handle_depsolver_results(ok, {error, _} = Ret, Req, State) ->
-    precondition_failed(Req, State,
-                        unable_to_solve_message(Ret),
-                        unable_to_solve_deps);
+                        unreachable_dep);
 handle_depsolver_results(ok, {ok, Cookbooks}, Req, #base_state{chef_db_context = DbContext,
                                                                organization_name = OrgName} = State) ->
     %% TODO - helper function to deal with the call and match on a chef_cookbook version
@@ -280,7 +295,7 @@ assemble_response(Req, State, CookbookVersions) ->
             CBMapJson = chef_json:encode(JsonList),
             {true, wrq:append_to_response_body(CBMapJson, Req), State};
         {error, Msg} ->
-            forbid(Req, State, Msg, {read, forbidden});
+            forbid(Req, State, Msg, {forbidden, read});
         {timeout, Msg} ->
             server_error(Req, State, Msg, {timeout, cookbook_authz})
     end.
@@ -288,6 +303,39 @@ assemble_response(Req, State, CookbookVersions) ->
 %%------------------------------------------------------------------------------
 %% Message Functions
 %%------------------------------------------------------------------------------
+
+invalid_constraints_message(ErrorDetails) ->
+    NonExistentCBs = proplists:get_value(non_existent_cookbooks, ErrorDetails),
+    ConstraintsNotMet = proplists:get_value(constraints_not_met, ErrorDetails),
+    Msg1 = build_constraints_message(<<"">>, non_existent_cookbooks, NonExistentCBs),
+    Msg2 = build_constraints_message(Msg1, constraints_not_met, ConstraintsNotMet),
+    Message = iolist_to_binary(["Run list contains invalid items: ", Msg2, "."]),
+    {[{<<"message">>, Message},
+      {<<"non_existent_cookbooks">>, NonExistentCBs},
+      {<<"cookbooks_with_no_versions">>, ConstraintsNotMet}]}.
+
+build_constraints_message(<<"">>, Part, Data) ->
+    build_constraints_message_part(Part, Data);
+build_constraints_message(Message, Part, Data) ->
+    iolist_to_binary([Message,
+                      <<"; ">>,
+                      build_constraints_message_part(Part, Data)]).
+
+%% TODO: refactor common parts into sub-function
+%%   OR: handle the error reporting on the ruby side
+build_constraints_message_part(non_existent_cookbooks, []) ->
+    <<"">>;
+build_constraints_message_part(non_existent_cookbooks, [Cookbook]) ->
+    iolist_to_binary(["no such cokbook ", Cookbook]);
+build_constraints_message_part(non_existent_cookbooks, Cookbooks) ->
+    iolist_to_binary(["no such cookbooks ", bin_str_join(Cookbooks, <<", ">>)]);
+build_constraints_message_part(constraints_not_met, []) ->
+    <<"">>;
+build_constraints_message_part(constraints_not_met, [Constraint]) ->
+    iolist_to_binary(["no versions match the constraints on cookbook ", Constraint]);
+build_constraints_message_part(constraints_not_met, Constraints) ->
+    iolist_to_binary(["no versions match the constraints on cookbooks ",
+                      bin_str_join(Constraints, <<", ">>)]).
 
 -spec not_found_message(environment | cookbook_version,
                         EnvironmentName :: binary() | [CookbookName :: binary()]) ->
@@ -319,63 +367,6 @@ timeout_message() ->
     {[{<<"message">>, <<"unable to solve dependencies in alotted time">>},
       {<<"non_existent_cookbooks">>, []},
       {<<"most_constrained_cookbooks">>,[]}]}.
-
-%% Main entry point for parsing the depsolver error structure
-%% It consists of a list of solutions that were tried where each solution has the form:
-%%
-%%   {RawPaths::[ { Roots::[constraint()], Path::[pkg()] }],
-%%    FailingDeps::[constraint()]}
-%%
-%% The nth item in RawPaths failed due to the constraint in the n'th item of FailingDeps
-%%
-%% The textual error message will show all solutions but we fill in the structures only
-%% with the first solution
-%%
-unable_to_solve_message({error, [Why| _Rest]} = Details) ->
-    Reason = iolist_to_binary(depsolver:format_error(Details)),
-    { RawPaths, FailingDeps } = Why,
-    unable_to_solve_message(Reason, RawPaths, FailingDeps).
-
-%% versions specified that do not exist, so output a "no versions match" error
-unable_to_solve_message(_Reason, RawPaths, []) ->
-    RunlistItems = formatted_roots(RawPaths),
-    InvalidItemsReason = iolist_to_binary(["Run list contains invalid items: no versions match the constraints on cookbook ",
-                                           bin_str_join(RunlistItems, <<",">>),
-                                           "."
-                                          ]),
-    {[{<<"message">>, InvalidItemsReason},
-      {<<"non_existent_cookbooks">>, []},
-      {<<"cookbooks_with_no_versions">>, RunlistItems}]};
-%% If constraint paths are non-empty, find the reason that the constraint is not satisfied
-%% and return the run list item ()root of the failure tree) along with the most constrained
-%% cookbook in the tree
-unable_to_solve_message(Reason, RawPaths, FailingDeps) ->
-    RunlistItems = formatted_roots(RawPaths),
-    Constraints = formatted_constraints(FailingDeps),
-    {[{<<"message">>, Reason},
-      {<<"unsatisfiable_run_list_item">>, RunlistItems},
-      {<<"non_existent_cookbooks">>, []},
-      {<<"most_constrained_cookbooks">>, Constraints}]}.
-
-%% @doc Give a set of run list items that are roots in the dependency
-%% tree, format them as binaries.  They could be either simple names
-%% or name, version tuple pairs
--spec formatted_roots([{Root::[depsolver:constraint()],
-                        Path::[depsolver:pkg()]}]) -> [binary()].
-formatted_roots(RawRoots) ->
-    %% A RootSet is a list of packages
-    Roots = [ RootSet || {RootSet, _} <- RawRoots],
-    %% We flatten to turn [ [ Roots] ] into something we can iterate over
-    [ iolist_to_binary(depsolver_culprit:format_constraint(Ver)) || Ver <- lists:flatten(Roots) ].
-
-%% @doc Give a set of constraint paths representing failing
-%% dependencies, extract out the constraints which could not be met
--spec formatted_constraints(FailingDeps::[{Root::[depsolver:constraint()],
-                                           Constraints::[depsolver:constraint()]}]) -> [binary()].
-formatted_constraints(FailingDeps) ->
-    ConstraintSets = [ ConstraintSet || {_Root, ConstraintSet} <- FailingDeps ],
-    %% Each ConstraintSet is a list so we flatten to turn [ [ Constraint] ] into something we can iterate over
-    [iolist_to_binary(depsolver_culprit:format_constraint(Con)) || Con <- lists:flatten(ConstraintSets)].
 
 %%------------------------------------------------------------------------------
 %% Miscellaneous Utilities

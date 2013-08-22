@@ -33,8 +33,7 @@
                   couchbeam,
                   chef_index,
                   mochiweb,
-                  webmachine,
-                  depsolver
+                  webmachine
                  ]},
   {mod, {chef_wm_app, []}},
   {env, []}
