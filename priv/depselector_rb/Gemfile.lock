@@ -1,0 +1,26 @@
+GIT
+  remote: git://github.com/opscode/dep-selector
+  revision: 9f97b663e923700070e8fb08f6b94629147a152d
+  branch: master
+  specs:
+    dep_selector (0.1.0)
+
+GIT
+  remote: git://github.com/sdelano/erlectricity
+  revision: b8b627fbc4b82cbfe2807ab62733ba0a65d0c209
+  branch: master
+  specs:
+    erlectricity (1.1.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    uuidtools (2.1.4)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  dep_selector!
+  erlectricity!
+  uuidtools

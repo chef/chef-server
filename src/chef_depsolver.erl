@@ -45,6 +45,37 @@
 
 -define(DEFAULT_DEPSOLVER_TIMEOUT, 2000).
 
+-export_type([constraint/0,
+              dependency_set/0,
+              pkg/0]).
+
+%%============================================================================
+%% Types
+%%============================================================================
+-type pkg_name() :: binary() | atom().
+-type pkg() :: {pkg_name(), vsn()}.
+-type raw_vsn() :: ec_semver:any_version().
+
+-type vsn() :: 'NO_VSN'
+             | ec_semver:semver().
+
+-type constraint_op() ::
+        '=' | gte | '>=' | lte | '<='
+      | gt | '>' | lt | '<' | pes | '~>' | between.
+
+-type raw_constraint() :: pkg_name()
+                        | {pkg_name(), raw_vsn()}
+                        | {pkg_name(), raw_vsn(), constraint_op()}
+                        | {pkg_name(), raw_vsn(), vsn(), between}.
+
+-type constraint() :: pkg_name()
+                    | {pkg_name(), vsn()}
+                    | {pkg_name(), vsn(), constraint_op()}
+                    | {pkg_name(), vsn(), vsn(), between}.
+
+-type vsn_constraint() :: {raw_vsn(), [raw_constraint()]}.
+-type dependency_set() :: {pkg_name(), [vsn_constraint()]}.
+
 %% @doc Convert a binary JSON string representing a Chef runlist into an
 %% EJson-encoded Erlang data structure.
 %% @end
@@ -72,12 +103,11 @@ validate_body(Body) ->
         Bad -> throw(Bad)
     end.
 
--spec solve_dependencies(AllVersions :: [depsolver:dependency_set()],
-                         EnvConstraints :: [depsolver:constraint()],
+-spec solve_dependencies(AllVersions :: [dependency_set()],
+                         EnvConstraints :: [constraint()],
                          Cookbooks :: [Name::binary() |
                                              {Name::binary(), Version::binary()}]) ->
-    {ok, [ versioned_cookbook()]} | {error, term()}.
-
+                                {ok, [ versioned_cookbook()]} | {error, term()}.
 
 %% @doc Main entry point into the depsolver.  It is supplied with a dependency_set()
 %% containing all the cookbook versions and their dependencies that are in the database
@@ -88,41 +118,10 @@ validate_body(Body) ->
 solve_dependencies(_AllVersions, _EnvConstraints, []) ->
     {ok, []};
 solve_dependencies(AllVersions, EnvConstraints, Cookbooks) ->
-    %% We apply the environment cookbook version constraints as a pre-filter, removing
-    %% cookbook versions that don't satisfy early. This makes for a smaller graph and an
-    %% easier problem to solve. However, when cookbooks are filtered out due to the
-    %% environment, the solver is unable to backtrack and provide extra error detail. With
-    %% this approach, the "world" of cookbooks conforms to what the user will see from
-    %% listing cookbooks within an environment.
-    {ok, FilteredVersions} =
-        folsom_time(depsolver, filter_packages_with_deps,
-                    fun() ->
-                            depsolver:filter_packages_with_deps(AllVersions,
-                                                                EnvConstraints)
-                    end),
-    Graph = folsom_time(depsolver, add_packages,
-                        fun() ->
-                                depsolver:add_packages(depsolver:new_graph(),
-                                                       FilteredVersions)
-                        end),
-    Result = folsom_time(depsolver, solve,
-                         fun() ->
-                                 depsolver:solve(Graph, Cookbooks, depsolver_timeout())
-                         end),
-    sanitize_semver(Result).
-
-%% @doc The depsolver module (as of version 0.1.0) supports semver and returns a version
-%% structure as `{Name, {{1, 2, 3}, {Alpha, Build}}}'. Chef does not currently support
-%% semver style versions for cookbooks. For successful solve results, we simplify the
-%% return. Error returns will contain version data (with semver details). These are left in
-%% place for two reasons: 1) the error structures are not as simple to sanitize; 2) the
-%% depsolver_culprits module is used to format the error returns and it is expecting data in
-%% this format.
-sanitize_semver({ok, WithSemver}) ->
-    XYZOnly = [ {Name, XYZVersion} || {Name, {XYZVersion, _SemVer}} <- WithSemver ],
-    {ok, XYZOnly};
-sanitize_semver(Error) ->
-    Error.
+    chef_depsolver_worker:solve_dependencies(AllVersions,
+                                             EnvConstraints,
+                                             Cookbooks,
+                                             depsolver_timeout()).
 
 depsolver_timeout() ->
     case application:get_env(chef_objects, depsolver_timeout) of
