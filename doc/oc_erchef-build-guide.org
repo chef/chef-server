@@ -1,0 +1,126 @@
+#+TITLE: Build Guide for oc_erchef
+#+OPTIONS: ^:{}
+
+
+* Overview
+
+You want to test your feature work in CI. You trigger a build in
+Jenkins and CI does the rest. An EC deb with the changes that
+comprise your feature work is built and tested. Do you want to live
+this dream? Read on.
+
+Here's an outline of the steps you need to take to get feature work
+for oc_erchef tested in CI.
+
+1. [[Coffee]]
+
+2. [[Hacking]]. Hack on feature work on feature branches of repos that are
+   part of oc_erchef.
+
+3. [[Lock Deps]]. Create a feature branch of oc_erchef with deps locked to your
+   changes. Feature branches of oc-chef-pedant and chef-pedant may
+   also be needed.
+
+4. [[Branch opscode-omnibus]]. Create a custom feature branch in opscode-omnibus. Your branch
+   should be based off of the opc-11-int branch in opscode-omnibus.
+
+5. [[Trigger build]] of custom branch of opscode-omnibus project in
+   andra.ci.opscode.us using the [[http://andra.ci.opscode.us/job/private-chef-trigger-ad-hoc/][private-chef-trigger-ad-hoc]] job.
+
+* Coffee
+
+This is not a real step. But proceed to hacking in an uncaffeinated
+state at your discretion.
+
+* Hacking
+
+The oc_erchef project itself has very little code in it and primarily
+exists to pull together the component repositories (as dependencies)
+and package the OTP release.
+
+Want to see a menu of repos you could hack on?
+
+#+BEGIN_EXAMPLE
+cd oc_erchef
+make
+ls deps
+#+END_EXAMPLE
+
+* Lock Deps
+
+When you are done hacking on the various repos that are involved in
+your feature work, you need to create a branch of oc_erchef that will
+pull in all of your work (and hopefully not pull in unrelated changes
+so that you can test your stuff in isolation).
+
+The outline of this process is:
+
+1. Create a feature branch of oc_erchef
+2. On your branch, execute the following:
+#+BEGIN_EXAMPLE
+cd oc_erchef
+# ensure your feature branch is based off of latest master
+git fetch opscode
+git checkout -b sf/example-feature opscode/master
+make prepare_release && rebar commit-release
+#+END_EXAMPLE
+
+There are two scenarios to consider. Option 1 is the easier one to
+handle so it comes first. For more larger features, option 2 is
+prefered since it allows you to integration test your work in CI
+without blessing any code by the action of merging to a master branch.
+
+** Option 1: feature branches merged to master
+If you're feature branches have been merged to the master branches of
+the component repos, then you just need to follow the outline above
+and push your feature branch.
+** Option 2: unmerged feature branches
+If your feature branches are unmerged, you will need to modify
+=oc_erchef/rebar.config= *before* running =make
+prepare_release=. Here's the scoop:
+
+1. In oc_erchef the top-level rebar.config pulls in oc_chef_wm as a
+   dep. If you don't already have a feature branch of oc_chef_wm, go
+   make one and go to #2.
+
+2. On your feature branch of oc_chef_wm, edit =rebar.config= to point
+   to your feature branches. If you don't have feature branches of
+   these repos, continue this process. If you want to see which repos
+   pull in the repo where you've made changes as a dep, try this:
+#+BEGIN_EXAMPLE
+# quick-n-dirty way to find projects using chef_db as a dep.
+find deps -name rebar.config |xargs grep chef_db
+#+END_EXAMPLE
+
+3. Once you have feature branches created with adjusted
+   =rebar.config= files all the up the chain of deps, you'll create a
+   commit in oc_erchef with the modified rebar.config and then
+   execute the steps described in the outline above to prepare and
+   commit a release (all on your feature branch).
+
+* Branch opscode-omnibus
+
+The opscode-omnibus repo controls the omnibus build of EC. To prepare
+your build:
+
+1. Create a feature branch in this repo.
+2. Edit =config/software/oc_erchef.rb=. Change the version value to be
+   the name of your oc_erchef feature branch. You might also need to
+   update other components (e.g. oc-chef-pedant).
+3. If your changes require app config changes, edit the [[https://github.com/opscode/opscode-omnibus/blob/master/files/private-chef-cookbooks/private-chef/attributes/default.rb#L166][defaults]] and
+   [[https://github.com/opscode/opscode-omnibus/blob/master/files/private-chef-cookbooks/private-chef/templates/default/oc_erchef.config.erb][template]].
+4. Push your feature branch of opscode-omnibus
+
+* Trigger Build
+Go to http://andra.ci.opscode.us/job/private-chef-trigger-ad-hoc/
+(andra is behind the VPN). Click on "Build Now". In the form where it
+says "OMNIBUS_GIT_BRANCH", enter your branch. You DO NOT need to
+prefix with origin. Example: =sf/a-feature=.
+
+The trigger should succeed quickly. You can click on a trigger job
+and in the left panel select "Downstream build view" to monitor
+progress.
+
+
+
+
