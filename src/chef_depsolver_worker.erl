@@ -104,7 +104,11 @@ solve_dependencies(AllVersions, EnvConstraints, Cookbooks, Timeout) ->
 %%--------------------------------------------------------------------
 init([]) ->
     RubyExecutable = filename:join([code:priv_dir(chef_objects), "depselector_rb", "depselector.rb"]),
-    Port = open_port({spawn, "ruby " ++ RubyExecutable},
+    %% - redirect stderr to /dev/null -
+    %% The C-level implementation of the ruby depsolver prints out statistics to stderr.
+    %% These show up in the erchef console log, and the data we care about here is
+    %% already captured in stats_hero and logs.
+    Port = open_port({spawn, "ruby " ++ RubyExecutable ++ " 2> /dev/null"},
                      [{packet, 4}, nouse_stdio, exit_status, binary]),
     {ok, #state{port=Port}}.
 

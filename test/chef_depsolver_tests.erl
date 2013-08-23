@@ -64,7 +64,8 @@ all_test_() ->
     {?MODULE, depsolver_missing},
     {?MODULE, depsolver_missing_via_culprit_search},
     {?MODULE, depsolver_binary},
-    {?MODULE, depsolver_no_workers}
+    {?MODULE, depsolver_no_workers},
+    {?MODULE, depsolver_negative_version}
    ]
   }.
 
@@ -614,6 +615,12 @@ depsolver_no_workers() ->
     RunList = [<<"app1">>],
     _Steal = pooler:take_member(chef_depsolver),
     ?assertEqual({error, no_depsolver_workers},
+                 chef_depsolver:solve_dependencies(World, [], RunList)).
+
+depsolver_negative_version() ->
+    World = [{<<"app1">>, [{<<"1.1.-42">>}], []}],
+    RunList = [<<"app1">>],
+    ?assertMatch({error, exception, _Message, _Backtrace},
                  chef_depsolver:solve_dependencies(World, [], RunList)).
 
 make_env(Name, Deps) ->
