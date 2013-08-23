@@ -175,7 +175,6 @@ providing_constraint_test_() ->
     ].
 
 assemble_cookbook_ejson_test_() ->
-    MockedModules = [chef_db],
     CBEJson = basic_cookbook(<<"php">>,
                              <<"1.2.3">>,
                              [
@@ -184,14 +183,10 @@ assemble_cookbook_ejson_test_() ->
                              ]),
     {foreach,
      fun() ->
-             test_utils:mock(MockedModules, [passthrough]),
-             meck:expect(chef_db, make_org_prefix_id,
-                         fun(_OrgId, _Name) ->
-                                 <<"deadbeefdeadbeefdeadbeefdeadbeef">>
-                         end)
+             ok
      end,
      fun(_) ->
-             test_utils:unmock(MockedModules)
+             ok
      end,
     [
      {"basic rehydration test",
@@ -204,9 +199,8 @@ assemble_cookbook_ejson_test_() ->
                                               CBEJson),
 
               chef_test_utility:ejson_match(CBEJson,
-                                            chef_cookbook:assemble_cookbook_ejson(Record)),
+                                            chef_cookbook:assemble_cookbook_ejson(Record))
 
-              test_utils:validate_modules(MockedModules)
       end},
 
      {"minimal rehydration test",
@@ -221,8 +215,7 @@ assemble_cookbook_ejson_test_() ->
               MinCb = chef_cookbook:minimal_cookbook_ejson(Record),
               ?assertEqual(undefined, ej:get({"metadata", "attributes"}, MinCb)),
               ?assertEqual(undefined, ej:get({"metadata", "long_description"}, MinCb)),
-              ?assertEqual({[{<<"ruby">>, []}]}, ej:get({"metadata", "dependencies"}, MinCb)),
-              test_utils:validate_modules(MockedModules)
+              ?assertEqual({[{<<"ruby">>, []}]}, ej:get({"metadata", "dependencies"}, MinCb))
       end}
     ]}.
 
