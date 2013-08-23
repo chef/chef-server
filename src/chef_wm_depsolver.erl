@@ -257,7 +257,7 @@ handle_depsolver_results(ok, {ok, Cookbooks}, Req, #base_state{chef_db_context =
     assemble_response(Req, State, CookbookRecords).
 
 %% @doc Utility function to remove some of the verbosity
-precondition_failed(Req, State, ErrorData, LogMsg) when is_atom(LogMsg) ->
+precondition_failed(Req, State, ErrorData, LogMsg) ->
     wm_halt(412, Req, State, ErrorData, LogMsg).
 
 %% @doc Utility function to remove some of the verbosity.  Note that
