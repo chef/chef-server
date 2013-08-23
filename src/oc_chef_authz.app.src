@@ -1,4 +1,4 @@
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -18,10 +18,9 @@
 {application, oc_chef_authz,
  [
   {description, "Opscode authz client"},
-  {vsn, "1.0"},
+  {vsn, "2.0.0"},
   {registered, []},
   {applications, [kernel,
-                  stdlib,
-		  sasl]},
+                  stdlib]},
   {mod, {oc_chef_authz_app, []}}
  ]}.

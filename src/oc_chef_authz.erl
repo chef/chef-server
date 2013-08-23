@@ -30,10 +30,10 @@
 % Helper function to ADD/DELETE actors and groups from record
 % (expecting we won't want to make everyone do this common task
 
--ifndef(TEST).
+
 -export([
          add_client_to_clients_group/4,
-         bulk_actor_is_authorized/4,
+         bulk_actor_is_authorized/5,
          delete_resource/3,
          create_entity_if_authorized/4,
          get_container_aid_for_object/3,
@@ -42,7 +42,8 @@
          ping/0,
          remove_actor_from_actor_acl/2
         ]).
--else.
+
+-ifdef(TEST).
 -compile([export_all]).
 -endif.
 
@@ -234,51 +235,71 @@ set_acl(RequestorId, AuthzType, ObjectId, [{Method, ACE}|Rest]) when AuthzType =
 %% error occurs during a check, the function immediately returns a detailed error tuple.
 -spec bulk_actor_is_authorized(ReqId,
                                ActorId,
+                               ResourceType,
                                Resources,
-                               Permission) -> ok | [{false, ResourceData}] |
-                                              {error, {ResourceData, _}} when
+                               Permission) -> true | {false, [ResourceData]} |
+                                              {error, _} when
       ReqId :: binary(),
       ActorId :: actor_id(),
-      Resources :: [{resource_type(), oc_authz_id(), ResourceData}],
+      ResourceType :: resource_type(),
+      Resources :: [{oc_authz_id(), ResourceData}],
       ResourceData :: any(),
       Permission :: access_method().
-bulk_actor_is_authorized(ReqId, ActorId, Resources, Permission) ->
-    CheckAuthz = fun(RequestFun) ->
-                         bulk_actor_is_authorized_checker(RequestFun, ActorId,
-                                                          Permission, Resources)
-                 end,
-    oc_chef_authz_http:with_new_http_client(ReqId, ActorId, CheckAuthz).
-
-bulk_actor_is_authorized_checker(RequestFun, ActorId, Permission, Resources) ->
-    case bulk_actor_is_authorized_checker(RequestFun, ActorId,
-                                          Permission, Resources, []) of
-        [] ->
-            ok;
-        Other ->
-            Other
-    end.
-
-bulk_actor_is_authorized_checker(_RequestFun, _ActorId, _Permission, [], Acc) ->
-    Acc;
-bulk_actor_is_authorized_checker(RequestFun, ActorId, Permission, [ResourceElt | Rest], Acc) ->
-    case single_actor_is_authorized(RequestFun, ResourceElt, ActorId, Permission) of
-        {error, _} = Error ->
-            Error;
-        true ->
-            bulk_actor_is_authorized_checker(RequestFun, ActorId, Permission, Rest, Acc);
-        Result ->
-            bulk_actor_is_authorized_checker(RequestFun, ActorId, Permission,
-                                             Rest, [Result | Acc])
-    end.
-
-single_actor_is_authorized(RequestFun, {ResourceType, ResourceId, Data}, ActorId, Permission) ->
-    Url = make_url([pluralize_resource(ResourceType), ResourceId, <<"acl">>,
-                    Permission, pluralize_resource(actor), ActorId]),
-    case RequestFun(Url, get, [], []) of
+bulk_actor_is_authorized(ReqId, ActorId, ResourceType, Resources, Permission) ->
+    Url = <<"bulk">>,
+    {AuthzIds, _Data} = lists:unzip(Resources),
+    EJSON = make_bulk_request_body(ActorId, Permission, ResourceType, AuthzIds),
+    Body = json_encode(EJSON),
+    case oc_chef_authz_http:request(ReqId, Url, post, [], Body, ActorId) of
         ok -> true;
-        {error, not_found} -> {false, Data};
-        {error, Why} -> {error, {Data, Why}}
+        {ok, ResponseBody} ->
+            case ej:get({<<"unauthorized">>}, ResponseBody) of
+                undefined ->
+                    {error, unexpected_body};
+                Unauthorized ->
+                   {false, get_data_for_id(Unauthorized, Resources) }
+            end;
+        {error, Why} ->
+            {error, Why}
     end.
+
+json_encode(EJSON) ->
+    %% jiffy:encode can return an iolist which breaks the http code. This has only been
+    %% observed with floats, but may occur elsewhere.
+    iolist_to_binary(jiffy:encode(EJSON)).
+
+make_bulk_request_body(RequestorId, Permission, ResourceType, AuthzIds) ->
+    {[{<<"requestor_id">>, RequestorId},
+      {<<"permission">>, Permission},
+      {<<"type">>, ResourceType},
+      {<<"collection">>, AuthzIds}
+     ]}.
+
+%% Fetch Data from Resources for each Id in list of Ids
+%% Resources is a list of Id, Data tuples.
+%% Its an error for an id to appear on the list that isn't in resources
+
+get_data_for_id(Ids, Resources) ->
+    %% Sorting the lists lets us do the extraction in a single pass through the list.
+    get_data_for_id(lists:sort(Ids), lists:sort(Resources), []).
+
+%% Two cases that might be suggested by symmetry should cause a bad match, because they would only happen if
+%% we got an id that wasn't found on the resource list
+%% get_data_for_id(_, [], Acc) ->
+%%   Acc
+%% get_data_for_id([Id | Ids], [{RId, _RData} | _Resources] = OResources, Acc ) when Id < RId -
+%%   get_data_for_id(Ids, OResources, Acc);
+
+%% We've found all the ids.
+get_data_for_id([], _, Acc) ->
+    Acc;
+%% We found a match for the id
+get_data_for_id([Id | Ids], [{Id, RData} | Resources], Acc) ->
+    get_data_for_id(Ids, Resources, [RData | Acc]);
+%% If the current id on the id list sorts later than the one on the resource list, then skip
+%% to next entry on resource list
+get_data_for_id([Id | _Ids] = OIds , [{RId, _RData} | Resources], Acc ) when Id > RId ->
+    get_data_for_id(OIds, Resources, Acc).
 
 %
 % Test if an actor is authorized
@@ -358,7 +379,9 @@ get_acl_for_resource(RequestorId, ResourceType, Id) ->
                                          {error, any()}.
 set_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
     Url = make_url([pluralize_resource(AuthzType), Id, acl, AccessMethod]),
-    Body = jiffy:encode({[{<<"actors">>, Actors}, {<<"groups">>, Groups}]}),
+    %% jiffy:encode can return an iolist which breaks the http code. This has only been
+    %% observed with floats, but may occur elsewhere.
+    Body = iolist_to_binary(jiffy:encode({[{<<"actors">>, Actors}, {<<"groups">>, Groups}]})),
     case oc_chef_authz_http:request(Url, put, [], Body, RequestorId) of
         ok -> ok;
         %% Expected errors are forbidden, not_found, server_error
