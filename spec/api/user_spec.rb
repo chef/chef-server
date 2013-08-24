@@ -438,12 +438,10 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              post(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-            end
+            post(request_url, platform.superuser,
+                 :payload => request_body).should look_like({
+                   :status => 400
+                 })
           end
         end
 
@@ -459,12 +457,10 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              post(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-            end
+            post(request_url, platform.superuser,
+                 :payload => request_body).should look_like({
+                   :status => 400
+                 })
           end
         end
 
@@ -503,12 +499,10 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              post(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-            end
+            post(request_url, platform.superuser,
+                 :payload => request_body).should look_like({
+                   :status => 400
+                 })
           end
         end
 
@@ -524,12 +518,10 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              post(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-            end
+            post(request_url, platform.superuser,
+                 :payload => request_body).should look_like({
+                   :status => 400
+                 })
           end
         end
 
@@ -546,12 +538,10 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              post(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-            end
+            post(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 400
+              })
           end
         end
 
@@ -695,12 +685,10 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              post(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-            end
+            post(request_url, platform.superuser,
+                 :payload => request_body).should look_like({
+                   :status => 400
+                 })
           end
         end
 
@@ -718,12 +706,10 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              post(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-            end
+            post(request_url, platform.superuser,
+                 :payload => request_body).should look_like({
+                   :status => 400
+                 })
           end
         end
 
@@ -1001,12 +987,10 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-            end
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 400
+              })
           end
         end
 
@@ -1053,12 +1037,10 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-            end
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 400
+              })
           end
         end
 
@@ -1074,12 +1056,10 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-            end
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 400
+              })
           end
         end
 
@@ -1096,12 +1076,10 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-            end
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 400
+              })
           end
         end
 
@@ -1367,18 +1345,16 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-              get(request_url, platform.superuser).should look_like({
-                  :status => 200
-                })
-              get(new_request_url, platform.superuser).should look_like({
-                  :status => 404
-                })
-            end
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 400
+              })
+            get(request_url, platform.superuser).should look_like({
+                :status => 200
+              })
+            get(new_request_url, platform.superuser).should look_like({
+                :status => 404
+              })
           end
         end
 
