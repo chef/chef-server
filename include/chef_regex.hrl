@@ -21,8 +21,6 @@
 
 
 -type regex_name() :: cookbook_name |
-                      cookbook_version |
-                      cookbook_version_constraint |
                       data_bag_item_id |
                       data_bag_name |
                       environment_name |

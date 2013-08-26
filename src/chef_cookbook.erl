@@ -40,6 +40,10 @@
 
 -include("chef_types.hrl").
 
+%% This is the maximum size of an int value in postgres used to store major, minor, and
+%% patch versions.
+-define(MAX_VERSION, 9223372036854775807).
+
 -define(DEFAULT_S3_URL_TTL, 900).
 
 -define(DEFAULT_FIELD_VALUES,
@@ -115,11 +119,10 @@ valid_name(Name) ->
     end.
 
 valid_version(Version) ->
-    {Regex, Msg} = chef_regex:regex_for(cookbook_version),
-    case re:run(Version, Regex) of
-        nomatch ->
-            throw({bad_cookbook_version, Version, Msg});
-        _ ->
+    case is_valid_version(Version) of
+        false ->
+            throw({bad_cookbook_version, Version, <<"Invalid cookbook version">>});
+        true ->
             ok
     end.
 
@@ -199,18 +202,36 @@ constraint_map_spec(RegexName) ->
 valid_cookbook_constraint(Str) when is_binary(Str) ->
     case chef_object:parse_constraint(Str) of
         {_Constr, Version} ->
-            {Regex, _Msg} = chef_regex:regex_for(cookbook_version),
-            case re:run(Version, Regex) of
-                nomatch ->
+            case is_valid_version(Version) of
+                false ->
                     error;
-                _ ->
+                true ->
                     ok
             end;
         error ->
             error
     end.
 
-%% @doc given a binary parse it to a version tuple {Major, Minor, Patch}
+%% Returns true if `Version' is a binary that can be parsed into a valid cookbook version
+%% and false otherwise.
+-spec is_valid_version(binary()) -> boolean().
+is_valid_version(Version) ->
+    %% since parse_version uses list_to_integer blindly, try/catch on badarg is the best way
+    %% to capture all invalid cases.
+    try
+        {_, _, _} = parse_version(Version),
+        true
+    catch
+        error:badarg ->
+            false
+    end.
+
+%% @doc Given a binary parse it to a valid cookbook version tuple {Major, Minor, Patch} or
+%% raise a `badarg' error. Each of `Major', `Minor', and `Patch' must be non-negative
+%% integer values less than 2147483647 (max size of value in pg int column). It is
+%% acceptable to provide a value with zero, one, or two dots (1 is the same as 1.0.0). More
+%% than two dots is an error.
+%%
 %% @end
 -spec parse_version(Version::binary()) -> {Major::non_neg_integer(),
                                            Minor::non_neg_integer(),
@@ -218,10 +239,39 @@ valid_cookbook_constraint(Str) when is_binary(Str) ->
 parse_version(Version) when is_binary(Version) ->
     Parts = [list_to_integer(binary_to_list(V))
              || V <- binary:split(Version, <<".">>, [global])],
-    case length(Parts) of
-        3 -> list_to_tuple(Parts);
-        _ -> error(badarg)
+    %% normalize will error if too many dotted elements
+    VList = normalize_version(Parts),
+    NotNeg = not_neg(VList),
+    NotLarger = not_larger_than(?MAX_VERSION, VList),
+    case {NotNeg, NotLarger} of
+        {true, true} ->
+            list_to_tuple(VList);
+        _ ->
+            error(badarg)
     end.
+
+normalize_version([X]) ->
+    [X, 0, 0];
+normalize_version([X, Y]) ->
+    [X, Y, 0];
+normalize_version([_, _, _] = V) ->
+    V;
+normalize_version(_) ->
+    error(badarg).
+
+not_neg(L) ->
+    not lists:any(fun(X) when X < 0 ->
+                          true;
+                     (_) ->
+                          false
+                  end, L).
+
+not_larger_than(Max, L) ->
+    not lists:any(fun(X) when X > Max ->
+                          true;
+                     (_) ->
+                          false
+                  end, L).
 
 %% @doc given a version tuple {Major, Minor, Patch} return it as a
 %% binary()

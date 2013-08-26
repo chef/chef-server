@@ -24,6 +24,9 @@
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
 
+-define(MAX_GOOD_VERSION, "9223372036854775807").
+-define(MAX_GOOD_VERSION_INT, list_to_integer(?MAX_GOOD_VERSION)).
+-define(BAD_POSITIVE_VERSION, "9223372036854775808").
 
 basic_cookbook(Name, Version) ->
     basic_cookbook(Name, Version, []).
@@ -223,15 +226,38 @@ version_to_binary_test() ->
     ?assertEqual(<<"1.2.3">>, chef_cookbook:version_to_binary({1,2,3})),
     ?assertEqual(<<"0.0.1">>, chef_cookbook:version_to_binary({0,0,1})).
 
-parse_version_test() ->
-    ?assertEqual({1,2,3}, chef_cookbook:parse_version(<<"1.2.3">>)),
-    ?assertEqual({0,0,0}, chef_cookbook:parse_version(<<"0.0.0">>)).
+parse_version_test_() ->
+    GoodVersions = [{<<"0">>, {0, 0, 0}},
+                    {<<"1">>, {1, 0, 0}},
+                    {<<"1.2">>, {1, 2, 0}},
+                    {<<"1.2.3">>, {1, 2, 3}},
+                    {<<"1.2.", ?MAX_GOOD_VERSION>>, {1,2, ?MAX_GOOD_VERSION_INT}},
+                    {<<"1.", ?MAX_GOOD_VERSION>>, {1, ?MAX_GOOD_VERSION_INT, 0}},
+                    {<<?MAX_GOOD_VERSION>>, {?MAX_GOOD_VERSION_INT, 0, 0}},
+                    {<<?MAX_GOOD_VERSION, ".0">>, {?MAX_GOOD_VERSION_INT, 0, 0}},
+                    {<<"0.",?MAX_GOOD_VERSION,".0">>, {0, ?MAX_GOOD_VERSION_INT, 0}},
+                    {<<"0.0.0">>, {0, 0, 0}},
+                    {<<"123.456.789">>, {123, 456, 789}}],
+    [ ?_assertEqual(Expect, chef_cookbook:parse_version(In)) ||
+        {In, Expect} <- GoodVersions ].
 
-parse_version_badversion_test() ->
-    ?assertError(badarg, chef_cookbook:parse_version(<<"1.2.a">>)),
-    ?assertError(badarg, chef_cookbook:parse_version(<<"1.2.0.0">>)),
-    ?assertError(badarg, chef_cookbook:parse_version(<<"1.2">>)),
-    ?assertError(badarg, chef_cookbook:parse_version(<<"-1">>)).
+parse_version_badversion_test_() ->
+    BadVersions = [
+                   <<"">>,
+                   <<"A">>,
+                   <<"1.2.a">>,
+                   <<"1.2.0.0">>,
+                   <<"-3">>,
+                   <<"1.2.-1">>,
+                   <<"1.-2.1">>,
+                   <<"-1.2.1">>,
+                   << ?BAD_POSITIVE_VERSION, ".2.1">>,
+                   <<"1.",?BAD_POSITIVE_VERSION,".1">>,
+                   <<"1.2.",?BAD_POSITIVE_VERSION >>
+                   %% we store maj, min, pat in pg int field in the db, so we should enforce
+                   %% the max value and avoid wrapping.
+                  ],
+    [ ?_assertError(badarg, chef_cookbook:parse_version(V)) || V <- BadVersions ].
 
 dependencies_to_depsolver_constraints_test_() ->
     {foreachx,
