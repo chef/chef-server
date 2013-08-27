@@ -1,9 +1,9 @@
 GIT
   remote: git://github.com/opscode/chef-pedant.git
-  revision: 38361fb8fbd04944641ad48e4d228155b4caffe1
-  tag: 1.0.16
+  revision: 5a510df682eddb36b15514c5ce1e489a7098bde8
+  tag: 1.0.17
   specs:
-    chef-pedant (1.0.16)
+    chef-pedant (1.0.17)
       activesupport (~> 3.2.8)
       erubis (~> 2.7.0)
       mixlib-authentication (~> 1.3.0)
@@ -18,7 +18,7 @@ GIT
 PATH
   remote: .
   specs:
-    oc-chef-pedant (1.0.13)
+    oc-chef-pedant (1.0.16)
       chef-pedant (>= 1.0.0)
 
 GEM
@@ -60,5 +60,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  chef-pedant (= 1.0.16)!
+  chef-pedant (= 1.0.17)!
   oc-chef-pedant!
