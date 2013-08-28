@@ -59,9 +59,6 @@
 %% -callback request_type() -> string().
 %% -callback auth_info(#wm_reqdata{}, any()) -> {not_found | binary(), #wm_reqdata{}, any()}.
 
-%% This is the max size allowed for incoming request bodies.
--define(MAX_SIZE, 1000000).
-
 -include("chef_wm.hrl").
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("public_key/include/public_key.hrl").
@@ -117,7 +114,7 @@ malformed_request(Req, #base_state{resource_mod=Mod,
     {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
     try
         chef_authn:validate_headers(GetHeader, AuthSkew),
-        Req1 = body_not_too_big(Req),
+        Req1 = chef_wm_enforce:max_size(Req),
         OrgId = fetch_org_guid(State1),
         {Req2, State2} = Mod:validate_request(wrq:method(Req1), Req1,
                                               State1#base_state{organization_guid = OrgId}),
@@ -603,31 +600,6 @@ select_user_or_webui_key(Req, Requestor) ->
         _Else ->
             public_key(Requestor)
     end.
-
--spec body_not_too_big(#wm_reqdata{}) -> #wm_reqdata{}.
-%% Verify that the request body is not larger than ?MAX_SIZE bytes. Throws `{too_big, Msg}`
-%% if the request body is too large.
-body_not_too_big(Req) ->
-    body_not_too_big(wrq:method(Req), wrq:set_max_recv_body(?MAX_SIZE, Req)).
-
-body_not_too_big(Method, Req) when Method =:= 'POST';
-                                   Method =:= 'PUT' ->
-    try
-        %% Force a read of request body. Webmachine memoizes this in the process
-        %% dictionary. Webmachine will read in chunks and call exit/1 if the body exceeds
-        %% the max set above. It would be nice if there was something other than a string to
-        %% match against. TODO: patch webmachine.
-        wrq:req_body(Req),
-        Req
-    catch
-        exit:"request body too large" ->
-            Msg = iolist_to_binary([<<"JSON must be no more than ">>,
-                                    integer_to_list(?MAX_SIZE),
-                                    <<" bytes.">>]),
-            throw({too_big, Msg})
-    end;
-body_not_too_big(_Method, Req) ->
-    Req.
 
 method_as_binary(Req) ->
     iolist_to_binary(atom_to_list(wrq:method(Req))).
