@@ -19,7 +19,7 @@
                         "b584c0a4373f977f0a15a7a139b7a49d07d59322"}},
        {chef_objects,".*",
                      {git,"git@github.com:opscode/chef_objects.git",
-                          "f6e9f77cdcb35d68804c574e90e0e551cdd2c252"}},
+                          "ef2dc1700cd61a6ebc9e82cef249d3ecbd07a6f6"}},
        {couchbeam,".*",
                   {git,"git://github.com/opscode/couchbeam.git",
                        "c7881f6247a92cd62a818fe9f637ff973a5f8923"}},
@@ -51,7 +51,7 @@
                {git,"git://github.com/wooga/eredis.git",
                     "313fce73b0fdb53f3a5f146a7adf19677b417cb5"}},
        {erlware_commons,".*",
-                        {git,"https://github.com/erlware/erlware_commons.git",
+                        {git,"git://github.com/erlware/erlware_commons.git",
                              "0fbd4576ceb919bc0d5a9ad392441b71179774fb"}},
        {folsom,".*",
                {git,"git://github.com/boundary/folsom.git",
@@ -109,5 +109,5 @@
                    "c371b223683e109449d761de3afda468695592d6"}},
        {stats_hero,".*",
                    {git,"git://github.com/opscode/stats_hero.git",
-                        "0bd34aae8220021d5619a132d00e48623522ad10"}}]}.
+                        "6a56cdff79ec095ab6a4e0d32745d81e1d43854f"}}]}.
 
