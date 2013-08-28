@@ -1,7 +1,7 @@
 GIT
   remote: git://github.com/opscode/chef-pedant.git
-  revision: 5a510df682eddb36b15514c5ce1e489a7098bde8
-  tag: 1.0.17
+  revision: 05f31efbf243f28f7365373444025a11af3c825b
+  branch: OC-8689/pedant-cleanup-int
   specs:
     chef-pedant (1.0.17)
       activesupport (~> 3.2.8)
@@ -60,5 +60,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  chef-pedant (= 1.0.17)!
+  chef-pedant!
   oc-chef-pedant!
