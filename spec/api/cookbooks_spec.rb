@@ -13,10 +13,6 @@ require 'pedant/rspec/cookbook_util'
 describe "Cookbooks API endpoint", :cookbooks do
   include Pedant::RSpec::CookbookUtil
 
-  def self.ruby?
-    Pedant::Config.ruby_cookbook_endpoint?
-  end
-
   context "DELETE /cookbooks/<name>/<version>" do
     let(:request_method) { :DELETE }
     let(:request_url)    { named_cookbook_url }
