@@ -19,10 +19,6 @@ describe "Environments API Endpoint", :environments do
   # include roles for testing w/ environments roles method
   include Pedant::RSpec::RoleUtil
 
-  def self.ruby?
-    Pedant::Config.ruby_environment_endpoint?
-  end
-
   # TODO: pull this up somewhere else, eventually
   let(:organizations_url){ "#{server}/organizations" }
 

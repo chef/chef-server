@@ -14,10 +14,6 @@ describe "Environments API Endpoint", :environments do
   include Pedant::RSpec::EnvironmentUtil
   include Pedant::RSpec::AuthHeadersUtil
 
-  def self.ruby?
-    Pedant::Config.ruby_environment_endpoint?
-  end
-
   # TODO: pull this up somewhere else, eventually
   let(:organizations_url){ "#{server}/organizations" }
 

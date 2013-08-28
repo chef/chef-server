@@ -18,10 +18,6 @@ describe "Environments API Endpoint", :environments do
   # include roles for testing w/ environments roles method
   #include Pedant::RSpec::RoleUtil
 
-  def self.ruby?
-    Pedant::Config.ruby_environment_endpoint?
-  end
-
   let(:requestor) { admin_user }
 
   # TODO: pull this up somewhere else, eventually
@@ -160,11 +156,7 @@ describe "Environments API Endpoint", :environments do
             let(:request_headers) { { "Accept" => "application/xml" } }
             let(:expected_response) { not_acceptable_response }
 
-            if erlang?
-              should_respond_with 406
-            else
-              pending "should respond with 406 Not Acceptable"
-            end
+            should_respond_with 406
           end
 
           context 'when sending something other than application/json' do
@@ -193,13 +185,8 @@ describe "Environments API Endpoint", :environments do
           context 'with oversized payload' do
             let(:request_payload) { '{"x" = [' + ("\"xxxxxxxx\",\n"*200000) + '"xxxxxxxx"]}' }
 
-            if erlang?
-              let(:expected_response) { request_entity_too_large_response }
-              should_respond_with 413
-            else
-              let(:expected_response) { bad_request_response }
-              should_respond_with 400
-            end
+            let(:expected_response) { request_entity_too_large_response }
+            should_respond_with 413
           end
 
           context 'with a non-existent organization' do
