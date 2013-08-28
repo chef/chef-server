@@ -15,38 +15,21 @@
 %%         Not Attempted: org-name-list
 %% '
 %%
-%% Output will be suppressed if the argument `silent' is provided to this script.
-%%
-%% Exit code is a bitmasked value as follows:
-%%
-%%   0 - migration completed with no errors or warnings
-%%   1 - aborted due to unexpected errors
-%%   2 - one or more orgs completed successfully
-%%   4 - one or more orgs failed to migrate
-%%   8 - one or more orgs could not be reset to a valid state, and
-%%       so no migration was attempted.
-%%
-%% Additionally, if these error codes occur they will not be bitmasked:
-%%   128 - invalid argument
-%%   256 - could not connect to mover node
-%%   512 - rpc request to mover node failed.
-%%  1024 - unknown error has occurred.
 %% <b>Important</b>: this must be run as root or connect will fail.
+%% If an error occurs, it will also be displayed on the console.
+%% If any org encounters errors in migrating or resetting state,
+%% the script will exit with exit code 1. Otherwise it will exit
+%% with exit code0, including if there are no orgs to migrate.
+
 
 
 -define(SELF, 'migrate-script@127.0.0.1').
 -define(MOVER, 'mover@127.0.0.1').
 -define(MOVER_COOKIE, 'mover').
 -define(MOVER_MOD, 'mover_batch_migrator').
+-define(SUCCESS_EXIT, 0).
+-define(FAILURE_EXIT, 1).
 
--define(ABORTED, 1).
--define(ORGS_MIGRATED, 2).
--define(ORGS_FAILED, 4).
--define(ORGS_BAD_STATE, 8).
--define(INVALID_ARGUMENT, 128).
--define(MOVER_CONNECT_FAIL, 256).
--define(MOVER_RPC_FAIL, 512).
--define(UNKNOWN_ERROR, 1024).
 
 main([]) ->
     main(normal);
@@ -54,31 +37,32 @@ main(["silent"]) ->
     main(silent);
 main(Other) when is_list(Other) ->
     io:fwrite("Unknown argument(s): ~p.~nUsage: migrate [silent]~n", [Other]),
-    halt(?INVALID_ARGUMENT);
+    halt(?FAILURE_EXIT);
 main(NoiseLevel) when is_atom(NoiseLevel) ->
-    ExitCode = try
+    {ExitCode, Message} = try
         init_network(),
         Results = migrate(),
         parse_and_format(NoiseLevel, Results)
     catch
-        error:Code when is_number(Code) ->
-            Code;
+        error:{error, HaltWith} ->
+            {?FAILURE_EXIT, HaltWith};
         _:_ ->
-            ?UNKNOWN_ERROR
+            {?FAILURE_EXIT, "An unknown error has occurred."}
     end,
+    io:fwrite("~n~s~n~n", [Message]),
     halt(ExitCode).
 
 init_network() ->
     net_kernel:start([?SELF]),
     erlang:set_cookie(?MOVER, ?MOVER_COOKIE),
-    verify_ping(net_adm:ping(?MOVER), ?MOVER_CONNECT_FAIL),
+    verify_ping(net_adm:ping(?MOVER), "Could not connect to mover service"),
     R = try
             rpc:call(?MOVER, ?MOVER_MOD, ping, [])
         catch
             _M:_R  ->
                pang
         end,
-    verify_ping(R, ?MOVER_RPC_FAIL).
+    verify_ping(R, "RPC to mover service failed").
 
 migrate() ->
 %[{status,complete},
@@ -88,19 +72,25 @@ migrate() ->
     rpc:call(?MOVER, ?MOVER_MOD, migrate_all, []).
 
 parse_and_format(NoiseLevel, Results) ->
-    C0 = status_to_response_code(proplists:get_value(status, Results)),
-    {C1, Success} = list_to_response_code(successful_orgs, Results, ?ORGS_MIGRATED),
-    {C2, Failed} = list_to_response_code(failed_orgs, Results, ?ORGS_FAILED),
-    {C3, ResetFail} = list_to_response_code(reset_failed, Results, ?ORGS_BAD_STATE),
+    C0 = status_to_exit_code(proplists:get_value(status, Results)),
+    {C1, Success} = list_to_exit_code(successful_orgs, Results, ?SUCCESS_EXIT),
+    {C2, Failed} = list_to_exit_code(failed_orgs, Results, ?FAILURE_EXIT),
+    {C3, ResetFail} = list_to_exit_code(reset_failed, Results, ?FAILURE_EXIT),
     write_org_list(NoiseLevel, "Successfully Migrated", Success),
     write_org_list(NoiseLevel, "    Failed to Migrate", Failed),
     write_org_list(NoiseLevel, "        Not Attempted", ResetFail),
-    C0 bor C1 bor C2 bor C3.
+    Exit = C0 bor C1 bor C2 bor C3,
+    {Exit, exit_code_message(Exit)}.
 
-status_to_response_code(complete) -> 0;
-status_to_response_code(aborted) -> 1.
+status_to_exit_code(complete) -> ?SUCCESS_EXIT;
+status_to_exit_code(aborted) -> ?FAILURE_EXIT.
 
-list_to_response_code(Key, Results, ResponseCode) ->
+exit_code_message(?FAILURE_EXIT) ->
+    "Errors or warnings occurred.";
+exit_code_message(?SUCCESS_EXIT) ->
+    "Migrations completed successfully.".
+
+list_to_exit_code(Key, Results, ResponseCode) ->
     List = proplists:get_value(Key, Results),
     Code = case length(List) of
         0 -> 0;
@@ -120,7 +110,7 @@ verify_ping(_Other, HaltWith) ->
     % Doing a halt from here will not actual set exit code, presumably
     % because trhere's additional program flow following this call.
     % Throw an error instead.
-    error(HaltWith).
+    error({error, HaltWith}).
 
 
 
