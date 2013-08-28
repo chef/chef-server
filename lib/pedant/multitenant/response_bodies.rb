@@ -11,14 +11,16 @@ module Pedant
         # Cross-endpoint Responses
         let(:unauthorized_access_credential_response) { multi_tenant_user_not_associated_response }
         let(:invalid_credential_error_message) do
-          if ruby?
+          if false # ruby?
             ["Failed to authenticate as invalid. Ensure that your node_name and client key are correct."]
           else
             ["Failed to authenticate as 'invalid'. Ensure that your node_name and client key are correct."]
           end
         end
 
-        let(:forbidden_action_error_message) { ruby? ? ["Merb::ControllerExceptions::Forbidden"] : ["missing delete permission"] }
+        let(:forbidden_action_error_message) { false ? # ruby? ?
+          ["Merb::ControllerExceptions::Forbidden"] : ["missing delete permission"]
+        }
 
         let(:multi_tenant_user_not_associated_response) do
           {
@@ -44,7 +46,7 @@ module Pedant
         # Cookbook endpoint overrides
         let(:named_cookbook_org_path) { "/organizations/#{org}/cookbooks/#{cookbook_name}/#{cookbook_version}" }
         let(:invalid_cookbook_version_error_message) do
-          if ruby?
+          if false #ruby?
             ["No routes match the request: #{named_cookbook_org_path}"]
           else
             ["Invalid cookbook version '#{cookbook_version}'."]
