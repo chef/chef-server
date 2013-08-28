@@ -276,7 +276,7 @@ describe "ACL API", :acl do
                 }
               }}
 
-            it "returns 400", :pending => Pedant::Config.ruby_client_endpoint? do
+            it "returns 400" do
               put(request_url, platform.admin_user,
                 :payload => request_body).should look_like({
                   :status => 400
@@ -584,7 +584,7 @@ describe "ACL API", :acl do
             # Inconsistent API needs a PUT here.  We love consistency!
             put(creation_url, setup_user,
               :payload => creation_body).should look_like({
-                :status => Pedant::Config.ruby_cookbook_endpoint? ? 200 : 201
+                :status => 201
               })
           else
             post(creation_url, setup_user,
@@ -857,7 +857,7 @@ describe "ACL API", :acl do
                       }
                     }}
 
-                  it "returns 400", :pending => Pedant::Config.ruby_client_endpoint? do
+                  it "returns 400" do
                     put(permission_request_url, platform.admin_user,
                       :payload => update_body).should look_like({
                         :status => 400
