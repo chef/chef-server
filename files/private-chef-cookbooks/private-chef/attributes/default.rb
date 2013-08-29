@@ -158,6 +158,7 @@ default['private_chef']['opscode-erchef']['authz_fanout'] = 20
 default['private_chef']['opscode-erchef']['root_metric_key'] = "chefAPI"
 default['private_chef']['opscode-erchef']['depsolver_worker_count'] = 5
 default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
+default['private_chef']['opscode-erchef']['max_request_size'] = 1000000
 
 ####
 # Chef Server WebUI
