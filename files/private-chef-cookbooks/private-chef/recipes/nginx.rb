@@ -119,6 +119,7 @@ nginx_vars = nginx_vars.merge({ :helper => NginxErb.new(node),
 
 end
 
+# top-level and internal load balancer config
 template nginx_config do
   source "nginx.conf.erb"
   owner "root"
