@@ -2,4 +2,4 @@ site :opscode
 
 metadata
 
-cookbook 'runit', git: 'https://github.com/opscode-cookbooks/runit.git', branch: 'COOK-3243'
+cookbook 'runit', git: 'https://github.com/opscode-cookbooks/runit.git', ref: "c06d81bcc997795ad146a40b7b6fd7babffb2da7" # "master" on Aug 26, 2013
