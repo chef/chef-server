@@ -33,6 +33,9 @@ dependency "chef-sql-schema" # needed to migrate the DB.
 dependency "keepalived"
 dependency "bookshelf"
 
+# migration tooling , which also lives on the backend
+dependency "opscode-chef-mover"
+
 # the front-end services
 dependency "oc_erchef"
 dependency "opscode-account"
@@ -42,6 +45,7 @@ dependency "opscode-org-creator"
 dependency "opscode-certificate"
 dependency "opscode-platform-debug"
 dependency "opscode-test"
+
 
 # log management
 dependency "logrotate"
