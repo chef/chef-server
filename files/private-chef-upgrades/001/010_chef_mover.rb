@@ -24,17 +24,17 @@ define_upgrade do
 
   # Perform the actual migration
 
-  mover_log_file    = "/var/log/opscode/opscode-chef-mover/console.log"
+  mover_log_file_glob    = "/var/log/opscode/opscode-chef-mover/console.log*"
   parsed_log_output = "/var/log/opscode/opscode-chef-mover/parsed_console.log"
 
   # Remove any mover log files from a previous run, if they exist.
   # The log message parser requires a "clean slate".
-  run_command("rm -f #{mover_log_file}")
+  run_command("rm -f #{mover_log_file_glob}")
   run_command("rm -f #{parsed_log_output}")
 
   run_command("/opt/opscode/embedded/bin/escript /opt/opscode/embedded/service/opscode-chef-mover/scripts/migrate")
 
-  run_command("./check_logs.rb #{parsed_log_output} #{mover_log_file}",
+  run_command("./check_logs.rb #{parsed_log_output} #{mover_log_file_glob}",
               :cwd => "/opt/opscode/embedded/service/opscode-chef-mover/scripts")
 
   restart_service "opscode-account"
