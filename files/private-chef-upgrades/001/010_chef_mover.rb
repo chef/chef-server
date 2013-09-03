@@ -1,8 +1,6 @@
 
 define_upgrade do
   upgrade_schema_to 32
-  restart_service "opscode-account"
-  restart_service "opscode-erchef"
 
   # Need to remove any existing pre-created orgs, since chef-mover
   # doesn't migrate them.  Otherwise, the next handful of orgs that
@@ -19,8 +17,20 @@ define_upgrade do
   run_command("/opt/opscode/embedded/bin/ruby scripts/delete-pre-created-orgs.rb /etc/opscode/orgmapper.conf all",
               :cwd => "/opt/opscode/embedded/service/opscode-platform-debug/orgmapper",
               :env => {"RUBYOPT" => "-I/opt/opscode/embedded/lib/ruby/gems/1.9.1/gems/bundler-1.1.5/lib"})
-  restart_service "opscode-org-creator"
 
+  # Shut down everything but couch & postgres
+  run_command("private-chef-ctl stop nginx")
+  run_command("private-chef-ctl stop opscode-org-creator")
+  run_command("private-chef-ctl stop bookshelf")
+  run_command("private-chef-ctl stop oc_bifrost")
+  run_command("private-chef-ctl stop opscode-account")
+  run_command("private-chef-ctl stop opscode-certificate")
+  run_command("private-chef-ctl stop opscode-erchef")
+  run_command("private-chef-ctl stop opscode-expander")
+  run_command("private-chef-ctl stop opscode-expander-reindexer")
+  run_command("private-chef-ctl stop opscode-solr")
+  run_command("private-chef-ctl stop opscode-webui")
+  run_command("private-chef-ctl stop opscode-rabbitmq")
 
   # Perform the actual migration
 
@@ -37,12 +47,18 @@ define_upgrade do
   run_command("./check_logs.rb #{parsed_log_output} #{mover_log_file_glob}",
               :cwd => "/opt/opscode/embedded/service/opscode-chef-mover/scripts")
 
-  restart_service "opscode-account"
-  restart_service "opscode-erchef"
-
-  # Restarting nginx at this point appears to be necessary; otherwise,
-  # creation of new environments seems to not be going through erchef
-  # for some reason.
-  restart_service "nginx"
+  # Bring everything back up
+  run_command("private-chef-ctl start opscode-rabbitmq")
+  run_command("private-chef-ctl start opscode-webui")
+  run_command("private-chef-ctl start opscode-solr")
+  run_command("private-chef-ctl start opscode-expander-reindexer")
+  run_command("private-chef-ctl start opscode-expander")
+  run_command("private-chef-ctl start opscode-erchef")
+  run_command("private-chef-ctl start opscode-certificate")
+  run_command("private-chef-ctl start opscode-account")
+  run_command("private-chef-ctl start oc_bifrost")
+  run_command("private-chef-ctl start bookshelf")
+  run_command("private-chef-ctl start opscode-org-creator")
+  run_command("private-chef-ctl start nginx")
 
 end
