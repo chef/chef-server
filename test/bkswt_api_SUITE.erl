@@ -89,7 +89,7 @@ all(doc) ->
     ["This test is runs the fs implementation of the bkss_store signature"].
 
 all() ->
-    [head_object, put_object, wi_basic, sec_fail, signed_url, signed_url_fail].
+    [head_object, put_object, wi_basic, sec_fail, signed_url, signed_url_fail, at_the_same_time].
 
 %%====================================================================
 %% TEST CASES
@@ -241,6 +241,38 @@ signed_url_fail(Config) when is_list(Config) ->
                                    "text/xml", Content}, [], []),
     ?assertMatch({ok,{{"HTTP/1.1",403,"Forbidden"}, _, _}},
                  Response).
+
+at_the_same_time(doc) ->
+    ["should handle concurrent reads and writes"];
+at_the_same_time(suite) -> [];
+at_the_same_time(Config) when is_list(Config) ->
+    S3Conf = proplists:get_value(s3_conf, Config),
+    Bucket = "bukkit",
+    ?assertEqual(ok, mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)),
+    BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
+    ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
+    ?assertEqual([], proplists:get_value(contents, BucketContents)),
+    Count = 100,
+    BigData = list_to_binary(lists:duplicate(2000000, 2)),
+    Key = filename:join(random_binary(), random_binary()),
+    error_logger:info_report({at_the_same_time, key, Key}),
+    mini_s3:put_object(Bucket, Key, BigData, [], [], S3Conf),
+    DoOp = fun(read) ->
+                   Res = mini_s3:get_object(Bucket, Key, [], S3Conf),
+                   ResContent = proplists:get_value(content, Res),
+                   ?assertEqual(BigData, ResContent),
+                   ok;
+              (write) ->
+                   mini_s3:put_object(Bucket, Key, BigData, [], [], S3Conf),
+                   ok
+           end,
+    Ops = lists:flatten([[write, read] || _ <- lists:seq(1, Count)]),
+    Results = ec_plists:map(fun(O) -> DoOp(O) end, Ops),
+    ?assertEqual([ ok || _ <- lists:seq(1, 2 * Count)], Results),
+    error_logger:info_msg("done with plists map of ops"),
+    Result = mini_s3:list_objects(Bucket, [], S3Conf),
+    ObjList = proplists:get_value(contents, Result),
+    ?assertEqual(1, length(ObjList)).
 
 
 %%====================================================================

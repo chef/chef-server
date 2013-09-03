@@ -124,18 +124,12 @@ entry_delete(Bucket, Entry) ->
 entry_delete(#object{path=Path}) ->
     entry_delete(bksw_io_names:entry_path(Path));
 entry_delete(FullPath) ->
-    ok = bksw_coordinator:commit(FullPath),
-    try
-
-        case file:delete(FullPath) of
-            ok ->
-                true;
-            Error ->
-                error_logger:error_msg("Error deleting bucket entry ~p: ~p~n", [FullPath, Error]),
-                false
-        end
-    after
-        bksw_coordinator:end_commit(FullPath)
+    case file:delete(FullPath) of
+        ok ->
+            true;
+        Error ->
+            error_logger:error_msg("Error deleting bucket entry ~p: ~p~n", [FullPath, Error]),
+            false
     end.
 
 -spec entry_exists(binary(), binary()) -> boolean().
@@ -166,7 +160,6 @@ open_for_write(Bucket, Entry) ->
 -spec open_for_read(binary(), binary()) -> {ok, #entryref{}} | {error, term()}.
 open_for_read(Bucket, Entry) ->
     FileName = bksw_io_names:entry_path(Bucket, Entry),
-    ok = bksw_coordinator:start_read(FileName),
     case file:open(FileName, [read, binary]) of
         {ok, Fd} ->
             case file:read(Fd, 2) of
@@ -177,7 +170,6 @@ open_for_read(Bucket, Entry) ->
                     {ok, #entryref{fd=Fd, path=FileName}};
                 _ ->
                     file:close(Fd),
-                    bksw_coordinator:end_read(FileName),
                     {error, corrupt_file}
             end;
         Error ->
@@ -222,9 +214,8 @@ read(#entryref{fd=Fd}, Size) ->
     end.
 
 -spec finish_read(#entryref{}) -> ok.
-finish_read(#entryref{fd=Fd, path=Path}) ->
-    file:close(Fd),
-    bksw_coordinator:end_read(Path).
+finish_read(#entryref{fd=Fd}) ->
+    file:close(Fd).
 
 -spec write(#entryref{}, binary()) -> {ok, #entryref{}} | {error, file:posix() | badarg | terminated}.
 write(#entryref{fd=Fd, ctx=Ctx}=ERef, Data) when is_binary(Data) ->
@@ -250,13 +241,10 @@ finish_write(#entryref{fd=Fd, path=Path, ctx=Ctx}) ->
             file:write(Fd, Digest),
             file:close(Fd),
             Entry = bksw_io_names:write_path_to_entry(Path),
-            bksw_coordinator:commit(Entry),
             case file:rename(Path, Entry) of
                 ok ->
-                    bksw_coordinator:end_commit(Entry),
                     {ok, Digest};
                 Error ->
-                    bksw_coordinator:end_commit(Entry),
                     Error
             end;
         Error ->
