@@ -48,12 +48,8 @@ init(_Args) ->
     SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
 
     Restart = permanent,
-    Shutdown = 2000,
-
-    Coordinator = {bksw_coordinator, {bksw_coordinator, start_link, []},
-                     Restart, Shutdown, worker, [bksw_coordinator]},
 
     WebmachineSup = {bks_webmachine_sup, {bksw_webmachine_sup, start_link, []},
                      Restart, infinity, supervisor, [bksw_webmachine_sup]},
 
-    {ok, {SupFlags, [Coordinator, WebmachineSup]}}.
+    {ok, {SupFlags, [WebmachineSup]}}.
