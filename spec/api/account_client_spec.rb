@@ -1,16 +1,6 @@
 require 'pedant/rspec/common'
-require 'pp'
 
-describe "opscode-account endpoint" do
-
-  def self.ruby?
-    Pedant::Config.ruby_client_endpoint?
-  end
-
-  def self.erlang?
-    not ruby?
-  end
-
+describe "opscode-account endpoint", :clients => true do
   let(:requestor){ platform.admin_user}
 
   context "Client ACLs" do
@@ -53,20 +43,7 @@ describe "opscode-account endpoint" do
       end
 
       it "has the appropriate ACLs" do
-
         actors = ["pivotal", requestor.name]
-        if ruby?
-          # Ruby doesn't really support proper creation of additional
-          # validator clients.  The first (the "real") validator is
-          # specially-created with the organization, and is removed
-          # from its own ACL.  Additional clients can be created, but
-          # the "validator" flag is not recognized; that's an Erchef
-          # feature.
-          #
-          # As such, this new "validator" client on Ruby is going to
-          # be in its ACL; not so in Erchef.
-          actors << client
-        end
 
         get(api_url("/clients/#{client}/_acl"), platform.admin_user).should look_like({
             :status => 200,
@@ -176,13 +153,7 @@ describe "opscode-account endpoint" do
     end
 
     it "retrieves the Clients container's ACL" do
-
       create_and_read_actors = ["pivotal"]
-      if ruby?
-        # The Erlang endpoint doesn't add validators to the container
-        # ACL; it handles this authorization directly in the code.
-        create_and_read_actors << platform.test_org.validator.name
-      end
 
       get(api_url("/containers/clients/_acl"), requestor).should look_like({
           :status => 200,
@@ -235,12 +206,9 @@ describe "opscode-account endpoint" do
           })
       end
 
-      if erlang?
-        # This can happen on Ruby..
-        it "cannot create a new validator client" do
-          post(api_url("/clients"), requestor,
-            :payload => {"name" => new_client_name, "validator" => true}).should have_status_code(403)
-        end
+      it "cannot create a new validator client" do
+        post(api_url("/clients"), requestor,
+             :payload => {"name" => new_client_name, "validator" => true}).should have_status_code(403)
       end
 
       it "has the validator removed from the new client's ACL" do
