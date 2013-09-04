@@ -62,13 +62,13 @@ EOF
         restarter = Partybus::ServiceRestarter.new
         restarter.restart_service(service_name)
       end
-      
-      def run_command(command)
-        log("\tRunning Command: #{command}")
+
+      def run_command(command, options={})
+        log("\tRunning Command: #{command} with options #{options.inspect}")
         runner = Partybus::CommandRunner.new
-        runner.run_command(command)
+        runner.run_command(command, options)
       end
-      
+
       def migrate
 
       end
