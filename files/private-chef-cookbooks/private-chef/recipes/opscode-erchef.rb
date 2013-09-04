@@ -56,7 +56,7 @@ end
 #
 # [1]: http://erlang.org/doc/man/disk_log.html
 execute "remove_erchef_siz_files" do
-  command "rm *.siz"
+  command "rm -f *.siz"
   cwd node['private_chef']['opscode-erchef']['log_directory']
   action :nothing
 end
