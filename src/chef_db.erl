@@ -253,21 +253,6 @@ fetch_org_id(#context{reqid = ReqId,
             Guid
     end.
 
-%%% Client access
-%%%
-fetch_couchdb_client(#context{} = _Context, not_found, _ClientName) ->
-    not_found;
-fetch_couchdb_client(#context{reqid = ReqId, otto_connection = Server} = Context,
-                     OrgName, ClientName) ->
-    case fetch_org_id(Context, OrgName) of
-        not_found ->
-            not_found;
-        OrgId ->
-            case ?SH_TIME(ReqId, chef_otto, fetch_client, (Server, OrgId, ClientName)) of
-                {not_found, _} -> not_found;
-                Other -> Other
-            end
-    end.
 
 client_record_to_authz_id(_Context, ClientRecord) ->
     ClientRecord#chef_client.authz_id.
@@ -406,13 +391,8 @@ fetch_environment(#context{} = Ctx, OrgName, EnvironmentName) ->
                                                       not_found | {error, _}.
 %% @doc Return the client in `OrgName' with name `ClientName'. Returns a
 %% `#chef_client{}' record.
-fetch_client(#context{darklaunch=Darklaunch} = Ctx, OrgName, ClientName) ->
-    case chef_db_darklaunch:is_enabled(<<"couchdb_clients">>, Darklaunch) of
-        true ->
-            fetch_couchdb_client(Ctx, OrgName, ClientName);
-        false ->
-            fetch_object(Ctx, chef_client, OrgName, ClientName)
-    end.
+fetch_client(#context{} = Ctx, OrgName, ClientName) ->
+    fetch_object(Ctx, chef_client, OrgName, ClientName).
 
 -spec fetch_node(#context{}, binary(), binary()) -> #chef_node{} |
                                                     not_found |
@@ -665,13 +645,8 @@ fetch_clients(#context{} = Ctx, OrgName) ->
                                                                    {not_found, org} |
                                                                    {error, any()}.
 %% @doc Return a list of all data_bag names in an org
-fetch_data_bags(#context{darklaunch=Darklaunch} = Ctx, OrgName) ->
-    case chef_db_darklaunch:is_enabled(<<"couchdb_data">>, Darklaunch) of
-        true ->
-            fetch_couchdb_data_bags(Ctx, OrgName);
-        false ->
-            fetch_objects(Ctx, fetch_data_bags, OrgName)
-    end.
+fetch_data_bags(#context{} = Ctx, OrgName) ->
+    fetch_objects(Ctx, fetch_data_bags, OrgName).
 
 -spec fetch_nodes(#context{}, binary()) -> {not_found, org} |
                                            [binary()] |
@@ -839,39 +814,15 @@ connect() ->
 %% IDs.
 bulk_get(#context{reqid = ReqId}, _OrgName, node, Ids) ->
     bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_nodes, (Ids)));
-bulk_get(#context{reqid = ReqId, darklaunch = Darklaunch}=Ctx, OrgName, role, Ids) ->
-    %% TODO: remove after roles migration to Erchef/SQL
-    case chef_db_darklaunch:is_enabled(<<"couchdb_roles">>, Darklaunch) of
-        true ->
-            bulk_get_couchdb(Ctx, OrgName, role, Ids);
-        false ->
-            bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_roles, (Ids)))
-    end;
-bulk_get(#context{reqid = ReqId, darklaunch = Darklaunch}=Ctx, OrgName, data_bag_item, Ids) ->
-    %% TODO: remove after data_bag data_bag_item migration to Erchef/SQL
-    case chef_db_darklaunch:is_enabled(<<"couchdb_data">>, Darklaunch) of
-        true ->
-            bulk_get_couchdb(Ctx, OrgName, data_bag_item, Ids);
-        false ->
-            bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_data_bag_items, (Ids)))
-    end;
-bulk_get(#context{reqid = ReqId, darklaunch = Darklaunch}=Ctx, OrgName, environment, Ids) ->
-    %% TODO: remove after environments migration to Erchef/SQL
-    case chef_db_darklaunch:is_enabled(<<"couchdb_environments">>, Darklaunch) of
-        true ->
-            bulk_get_couchdb(Ctx, OrgName, environment, Ids);
-        false ->
-            bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_environments, (Ids)))
-    end;
-bulk_get(#context{reqid = ReqId, darklaunch = Darklaunch}=Ctx, OrgName, client, Ids) ->
-    %% TODO: remove after environments migration to Erchef/SQL
-    case chef_db_darklaunch:is_enabled(<<"couchdb_clients">>, Darklaunch) of
-        true ->
-            bulk_get_couchdb(Ctx, OrgName, client, Ids);
-        false ->
-            ClientRecords = bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_clients, (Ids))),
-            [chef_client:assemble_client_ejson(C, OrgName) || #chef_client{}=C <- ClientRecords]
-    end;
+bulk_get(#context{reqid = ReqId}, _OrgName, role, Ids) ->
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_roles, (Ids)));
+bulk_get(#context{reqid = ReqId}, _OrgName, data_bag_item, Ids) ->
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_data_bag_items, (Ids)));
+bulk_get(#context{reqid = ReqId}, _OrgName, environment, Ids) ->
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_environments, (Ids)));
+bulk_get(#context{reqid = ReqId}, OrgName, client, Ids) ->
+    ClientRecords = bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_clients, (Ids))),
+    [chef_client:assemble_client_ejson(C, OrgName) || #chef_client{}=C <- ClientRecords];
 
 % TODO: Can this come out now?
 bulk_get(Ctx, OrgName, Type, Ids) ->
@@ -896,20 +847,10 @@ bulk_get_couchdb(#context{reqid = ReqId, otto_connection = S}=Ctx, OrgName, _Typ
 
 -spec data_bag_exists(#context{}, binary(), binary() | string()) -> boolean().
 %% @doc Return true if data bag `DataBag' exists in org `OrgName' and false otherwise.
-data_bag_exists(#context{reqid = ReqId, darklaunch = Darklaunch, otto_connection = S}=Ctx, OrgName, DataBag) ->
-    case chef_db_darklaunch:is_enabled(<<"couchdb_data">>, Darklaunch) of
-        true ->
-            case fetch_org_id(Ctx, OrgName) of
-                not_found ->
-                    false;
-                OrgId ->
-                    ?SH_TIME(ReqId, chef_otto, data_bag_exists, (S, OrgId, DataBag))
-            end;
-        false ->
-            case fetch_data_bag(Ctx, OrgName, DataBag) of
-                #chef_data_bag{} -> true;
-                not_found -> false
-            end
+data_bag_exists(#context{}=Ctx, OrgName, DataBag) ->
+    case fetch_data_bag(Ctx, OrgName, DataBag) of
+        #chef_data_bag{} -> true;
+        not_found -> false
     end.
 
 %% @doc Return a lit of the names of all an organization's data bags.
@@ -921,16 +862,11 @@ data_bag_names(#context{}=Ctx, OrgId) ->
 
 -spec environment_exists(#context{}, binary(), binary() | string()) -> boolean().
 %% @doc Return true if environment `EnvName' exists in org `OrgId' and false otherwise.
-environment_exists(#context{reqid = ReqId, darklaunch = Darklaunch, otto_connection = S}=Ctx, OrgId, EnvName) ->
-    case chef_db_darklaunch:is_enabled(<<"couchdb_environments">>, Darklaunch) of
-        true ->
-            ?SH_TIME(ReqId, chef_otto, environment_exists, (S, OrgId, EnvName));
-        false ->
-            %% FIXME: we should implement a specialized environment exists function
-            case fetch_environment(Ctx, {id, OrgId}, EnvName) of
-                #chef_environment{} -> true;
-                _ -> false
-            end
+environment_exists(#context{}=Ctx, OrgId, EnvName) ->
+    %% FIXME: we should implement a specialized environment exists function
+    case fetch_environment(Ctx, {id, OrgId}, EnvName) of
+        #chef_environment{} -> true;
+        _ -> false
     end.
 
 -spec create(chef_object() | #chef_user{} | #chef_sandbox{}, #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
@@ -1146,18 +1082,6 @@ fetch_objects(#context{}=Ctx, Fun, OrgName, Arg) ->
         not_found -> {not_found, org};
         OrgId -> fetch_objects(Ctx, Fun, {id, OrgId}, Arg)
     end.
-
-%% For back-compat with data bags in couchdb, this is used to fetch the data bag names which
-%% are valid as part of search queries.
-fetch_couchdb_data_bags(#context{} = Ctx, OrgName) when is_binary(OrgName) ->
-    case fetch_org_id(Ctx, OrgName) of
-        not_found ->
-            {not_found, org};
-        OrgId ->
-            fetch_couchdb_data_bags(Ctx, {id, OrgId})
-    end;
-fetch_couchdb_data_bags(#context{reqid = ReqId, otto_connection = S}, {id, OrgId}) ->
-    ?SH_TIME(ReqId, chef_otto, data_bag_names, (S, OrgId)).
 
 %% FIXME: seems like delete_object should take either object ID or orgid+object_name only.
 %% Also might want to take ActorId here and at least log who deleted the object.
