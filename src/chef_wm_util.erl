@@ -66,6 +66,7 @@ get_header_fun(Req, State = #base_state{header_fun = HFun})
                                end,
                         case wrq:get_req_header(string:to_lower(Name), Req) of
                             B when is_binary(B) -> B;
+                            "" -> undefined; %% We want to treat empty header values as missing
                             S when is_list(S) -> iolist_to_binary(S);
                             undefined -> undefined
                         end
