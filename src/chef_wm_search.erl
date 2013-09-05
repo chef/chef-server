@@ -114,7 +114,6 @@ resource_exists_message(org_not_found, Org) ->
 to_json(Req, #base_state{chef_db_context = DbContext,
                          resource_state = SearchState,
                          organization_name = OrgName,
-                         darklaunch = Darklaunch,
                          reqid = ReqId} = State) ->
     BatchSize = batch_size(),
     Query = SearchState#search_state.solr_query,
@@ -130,7 +129,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                               Miss =:= error ->
                         BulkGetFun = make_bulk_get_fun(DbContext, OrgName,
                                                        IndexType, Paths,
-                                                       Req, Darklaunch),
+                                                       Req),
                         DbResult = make_search_results(BulkGetFun, Ids,
                                                        BatchSize, Start,
                                                        SolrNumFound),
@@ -211,8 +210,7 @@ process_post(Req, State) ->
                                 node |
                                 role,
                         NamePaths :: any(), %% really: [{binary(), [binary()]}],
-                        Req :: wm_req(),
-                        Darklaunch :: any() ) -> %% TODO Refine this before final merge
+                        Req :: wm_req() ) ->
                                fun(([binary()]) -> [ej:json_object() | binary()]).
 
 %% @doc Returns a fun/1 that can be given a list of object IDs and returns a list of the
@@ -223,7 +221,7 @@ process_post(Req, State) ->
 %% If `NamePaths' is non-empty, then the returned fun will create partial search results by
 %% extracting the values specified by the paths and mapping them to the specified names in
 %% the returned EJSON object.
-make_bulk_get_fun(DbContext, OrgName, client, [], _Req, _Darklaunch) ->
+make_bulk_get_fun(DbContext, OrgName, client, [], _Req) ->
     %% clients get special handling to add json_class which is not stored in the db (not
     %% even in couch).
     %%
@@ -233,37 +231,29 @@ make_bulk_get_fun(DbContext, OrgName, client, [], _Req, _Darklaunch) ->
             [ ej:set({<<"json_class">>}, Client, <<"Chef::ApiClient">>)
               || Client <- Clients ]
     end;
-make_bulk_get_fun(DbContext, OrgName, {data_bag, BagName}, [], _Req, Darklaunch) ->
-    %% For data bag items, we return the raw object if the data bag item is coming from
-    %% couchdb. Otherwise, we need to wrap the item in some additional JSON cruft to make it
+make_bulk_get_fun(DbContext, OrgName, {data_bag, BagName}, [], _Req) ->
+    %% We need to wrap the item in some additional JSON cruft to make it
     %% match the expected shape.
     %%
     %% BUGBUG BUGBUG: special casing for two classes is MEGA UBER CODE STENCH
-    case chef_wm_darklaunch:is_enabled(<<"couchdb_data">>, Darklaunch) of
-        true ->
-            fun(Ids) ->
-                    chef_db:bulk_get(DbContext, OrgName, data_bag_item, Ids)
-            end;
-        false ->
-            fun(Ids) ->
-                    Items = chef_db:bulk_get(DbContext, OrgName, data_bag_item, Ids),
-                    %% FIXME: it would be great if we didn't have to wrap the data_bag_item
-                    %% results this way at all. To reduce the CPU and memory use, we could
-                    %% add a special bulk get query that also returns bag_name and item_name
-                    %% and hand-craft the json to avoid parsing.
-                    [ begin
-                          RawItem = chef_json:decode(chef_db_compression:decompress(Item)),
-                          ItemName = ej:get({<<"id">>}, RawItem),
-                          chef_data_bag_item:wrap_item(BagName, ItemName, RawItem)
-                      end || Item <- Items ]
-            end
+    fun(Ids) ->
+            Items = chef_db:bulk_get(DbContext, OrgName, data_bag_item, Ids),
+            %% FIXME: it would be great if we didn't have to wrap the data_bag_item
+            %% results this way at all. To reduce the CPU and memory use, we could
+            %% add a special bulk get query that also returns bag_name and item_name
+            %% and hand-craft the json to avoid parsing.
+            [ begin
+                        RawItem = chef_json:decode(chef_db_compression:decompress(Item)),
+                        ItemName = ej:get({<<"id">>}, RawItem),
+                        chef_data_bag_item:wrap_item(BagName, ItemName, RawItem)
+                end || Item <- Items ]
     end;
-make_bulk_get_fun(DbContext, OrgName, Type, [], _Req, _Darklaunch) ->
+make_bulk_get_fun(DbContext, OrgName, Type, [], _Req) ->
     %% all other types just call into chef_db
     fun(Ids) ->
             chef_db:bulk_get(DbContext, OrgName, Type, Ids)
     end;
-make_bulk_get_fun(DbContext, OrgName, Type, NamePaths, Req, _Darklaunch) ->
+make_bulk_get_fun(DbContext, OrgName, Type, NamePaths, Req) ->
     %% Here NamePaths is a non-empty list of {Name, Path} tuples. This is the bulk_get fun
     %% that will be created if the user has requested partial search.
     fun(Ids) ->
