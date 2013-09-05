@@ -18,7 +18,6 @@
 -module(chef_db_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("emysql/include/emysql.hrl").
 -include_lib("chef_objects/include/chef_types.hrl").
 
 -define(REQ_ID, <<"req-id-123">>).
