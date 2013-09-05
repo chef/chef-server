@@ -94,21 +94,17 @@ default['private_chef']['opscode-solr']['data_dir'] = "/var/opt/opscode/opscode-
 default['private_chef']['opscode-solr']['log_directory'] = "/var/log/opscode/opscode-solr"
 default['private_chef']['opscode-solr']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['opscode-solr']['log_rotation']['num_to_keep'] = 10
-# node[:memory][:total] =~ /^(\d+)kB/
-# memory_total_in_kb = $1.to_i
-# solr_mem = (memory_total_in_kb - 600000) / 1024
-# # cap solr memory at 6G
-# if solr_mem > 6144
-#   solr_mem = 6144
-# end
-default['private_chef']['opscode-solr']['heap_size'] = "256M"
+# defaults for heap size and new generation size are computed in the chef-solr
+# recipe based on node memory
+default['private_chef']['opscode-solr']['heap_size'] = nil
+default['private_chef']['opscode-solr']['new_size'] = nil
 default['private_chef']['opscode-solr']['java_opts'] = ""
 default['private_chef']['opscode-solr']['url'] = "http://localhost:8983"
 default['private_chef']['opscode-solr']['ip_address'] = '127.0.0.1'
 default['private_chef']['opscode-solr']['vip'] = '127.0.0.1'
 default['private_chef']['opscode-solr']['port'] = 8983
 default['private_chef']['opscode-solr']['ram_buffer_size'] = 200
-default['private_chef']['opscode-solr']['merge_factor'] = 100
+default['private_chef']['opscode-solr']['merge_factor'] = 25
 default['private_chef']['opscode-solr']['max_merge_docs'] = 2147483647
 default['private_chef']['opscode-solr']['max_field_length'] = 100000
 default['private_chef']['opscode-solr']['max_commit_docs'] = 1000
