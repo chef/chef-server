@@ -1,24 +1,16 @@
 self.output_directory = '/tmp/opscode-platform-test'
 
-self.db_driver = "<%= node['private_chef']['database_type'] == 'postgresql' ?'postgres' : 'mysql2' %>" 
-self.db_host = '<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>'
-self.db_user = '<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>'
-self.db_password = '<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>'
-
-#self.db_driver = "mysql2"
-#self.db_host = 'localhost'
-#self.db_user = 'root'
-#self.db_password = ''
+self.db_driver = "postgres" 
+self.db_host = '<%= node['private_chef']['postgresql']['vip'] %>'
+self.db_user = '<%= node['private_chef']['postgresql']['sql_user'] %>'
+self.db_password = '<%= node['private_chef']['postgresql']['sql_password'] %>'
 
 self.couchdb_host = '<%= node['private_chef']['couchdb']['vip'] %>'
 self.couchdb_port = '<%= node['private_chef']['couchdb']['port'] %>'
 
-self.couchdbauthz_host = '<%= node['private_chef']['couchdb']['vip'] %>'
-self.couchdbauthz_port = '<%= node['private_chef']['couchdb']['port'] %>'
-
-self.authz_host = '<%= node['private_chef']['opscode-authz']['vip'] %>'
-self.authz_port = '<%= node['private_chef']['opscode-authz']['port'] %>'
+self.bifrost_host = '<%= node['private_chef']['oc_bifrost']['vip'] %>'
+self.bifrost_port = '<%= node['private_chef']['oc_bifrost']['port'] %>'
+self.bifrost_superuser_id = '<%= node['private_chef']['oc_bifrost']['superuser_id'] %>'
 
 self.superuser_cert = '/etc/opscode/pivotal.cert'
 self.superuser_key  = '/etc/opscode/pivotal.pem'
-

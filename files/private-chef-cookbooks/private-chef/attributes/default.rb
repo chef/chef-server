@@ -9,11 +9,10 @@
 # High level options
 ###
 default['private_chef']['api_version'] = "11.0.0"
-default['private_chef']['flavor'] = "opc"
+default['private_chef']['flavor'] = "ec"
 
 default['private_chef']['notification_email'] = "pc-default@opscode.com"
 default['private_chef']['from_email'] = '"Opscode" <donotreply@opscode.com>'
-default['private_chef']['database_type'] = "postgresql"
 default['private_chef']['role'] = "standalone"
 
 ####
@@ -96,21 +95,17 @@ default['private_chef']['opscode-solr']['data_dir'] = "/var/opt/opscode/opscode-
 default['private_chef']['opscode-solr']['log_directory'] = "/var/log/opscode/opscode-solr"
 default['private_chef']['opscode-solr']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['opscode-solr']['log_rotation']['num_to_keep'] = 10
-# node[:memory][:total] =~ /^(\d+)kB/
-# memory_total_in_kb = $1.to_i
-# solr_mem = (memory_total_in_kb - 600000) / 1024
-# # cap solr memory at 6G
-# if solr_mem > 6144
-#   solr_mem = 6144
-# end
-default['private_chef']['opscode-solr']['heap_size'] = "256M"
+# defaults for heap size and new generation size are computed in the chef-solr
+# recipe based on node memory
+default['private_chef']['opscode-solr']['heap_size'] = nil
+default['private_chef']['opscode-solr']['new_size'] = nil
 default['private_chef']['opscode-solr']['java_opts'] = ""
 default['private_chef']['opscode-solr']['url'] = "http://localhost:8983"
 default['private_chef']['opscode-solr']['ip_address'] = '127.0.0.1'
 default['private_chef']['opscode-solr']['vip'] = '127.0.0.1'
 default['private_chef']['opscode-solr']['port'] = 8983
 default['private_chef']['opscode-solr']['ram_buffer_size'] = 200
-default['private_chef']['opscode-solr']['merge_factor'] = 100
+default['private_chef']['opscode-solr']['merge_factor'] = 25
 default['private_chef']['opscode-solr']['max_merge_docs'] = 2147483647
 default['private_chef']['opscode-solr']['max_field_length'] = 100000
 default['private_chef']['opscode-solr']['max_commit_docs'] = 1000
@@ -129,39 +124,6 @@ default['private_chef']['opscode-expander']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['opscode-expander']['reindexer_log_directory'] = "/var/log/opscode/opscode-expander-reindexer"
 default['private_chef']['opscode-expander']['consumer_id'] = "default"
 default['private_chef']['opscode-expander']['nodes'] = 2
-
-####
-# Chef Server API
-####
-default['private_chef']['opscode-chef']['enable'] = true
-default['private_chef']['opscode-chef']['ha'] = false
-default['private_chef']['opscode-chef']['dir'] = "/var/opt/opscode/opscode-chef"
-default['private_chef']['opscode-chef']['log_directory'] = "/var/log/opscode/opscode-chef"
-default['private_chef']['opscode-chef']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['opscode-chef']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-chef']['sandbox_path'] = "/var/opt/opscode/opscode-chef/sandbox"
-default['private_chef']['opscode-chef']['checksum_path'] = "/var/opt/opscode/opscode-chef/checksum"
-default['private_chef']['opscode-chef']['proxy_user'] = "pivotal"
-default['private_chef']['opscode-chef']['environment'] = 'privatechef'
-default['private_chef']['opscode-chef']['url'] = "http://127.0.0.1:9460"
-default['private_chef']['opscode-chef']['upload_vip'] = "127.0.0.1"
-default['private_chef']['opscode-chef']['upload_port'] = 9460
-default['private_chef']['opscode-chef']['upload_proto'] = "http"
-default['private_chef']['opscode-chef']['upload_internal_vip'] = "127.0.0.1"
-default['private_chef']['opscode-chef']['upload_internal_port'] = 9460
-default['private_chef']['opscode-chef']['upload_internal_proto'] = "http"
-default['private_chef']['opscode-chef']['vip'] = "127.0.0.1"
-default['private_chef']['opscode-chef']['port'] = 9460
-default['private_chef']['opscode-chef']['listen'] = '127.0.0.1:9460'
-default['private_chef']['opscode-chef']['backlog'] = 1024
-default['private_chef']['opscode-chef']['tcp_nodelay'] = true
-default['private_chef']['opscode-chef']['worker_timeout'] = 3600
-default['private_chef']['opscode-chef']['validation_client_name'] = "chef"
-default['private_chef']['opscode-chef']['umask'] = "0022"
-default['private_chef']['opscode-chef']['worker_processes'] = node["cpu"]["total"].to_i
-default['private_chef']['opscode-chef']['web_ui_client_name'] = "chef-webui"
-default['private_chef']['opscode-chef']['web_ui_admin_user_name'] = "admin"
-default['private_chef']['opscode-chef']['web_ui_admin_default_password'] = "p@ssw0rd1"
 
 ####
 # Erlang Chef Server API
@@ -191,10 +153,9 @@ default['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] = 20
 default['private_chef']['opscode-erchef']['authz_timeout'] = 1000
 default['private_chef']['opscode-erchef']['authz_fanout'] = 20
 default['private_chef']['opscode-erchef']['root_metric_key'] = "chefAPI"
-# redis client pool size of 0 disables search caching
-default['private_chef']['opscode-erchef']['eredis_client_pool_size'] = 0
-default['private_chef']['opscode-erchef']['redis_db'] = 6
-default['private_chef']['opscode-erchef']['search_cache_entry_ttl'] = 60
+default['private_chef']['opscode-erchef']['depsolver_worker_count'] = 5
+default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
+default['private_chef']['opscode-erchef']['max_request_size'] = 1000000
 
 ####
 # Chef Server WebUI
@@ -238,18 +199,17 @@ default['private_chef']['lb']['api_fqdn'] = node['fqdn']
 default['private_chef']['lb']['web_ui_fqdn'] = node['fqdn']
 default['private_chef']['lb']['cache_cookbook_files'] = false
 default['private_chef']['lb']['debug'] = false
-default['private_chef']['lb']['upstream']['opscode-chef'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-erchef'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-account'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-webui'] = [ "127.0.0.1" ]
-default['private_chef']['lb']['upstream']['opscode-authz'] = [ "127.0.0.1" ]
+default['private_chef']['lb']['upstream']['oc_bifrost'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-solr'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['bookshelf'] = [ "127.0.0.1" ]
 default['private_chef']['lb_internal']['enable'] = true
 default['private_chef']['lb_internal']['vip'] = "127.0.0.1"
 default['private_chef']['lb_internal']['chef_port'] = 9680
 default['private_chef']['lb_internal']['account_port'] = 9685
-default['private_chef']['lb_internal']['authz_port'] = 9683
+default['private_chef']['lb_internal']['oc_bifrost_port'] = 9683
 
 ####
 # Nginx
@@ -304,24 +264,20 @@ default['private_chef']['nginx']['cache_max_size'] = '5000m'
 default['private_chef']['nginx']['enable_ipv6'] = false
 
 ###
-# MySQL
-###
-default['private_chef']['mysql']['enable'] = false
-default['private_chef']['mysql']['sql_user'] = "opscode_chef"
-default['private_chef']['mysql']['sql_password'] = "snakepliskin"
-default['private_chef']['mysql']['vip'] = "127.0.0.1"
-default['private_chef']['mysql']['destructive_migrate'] = false
-default['private_chef']['mysql']['install_libs'] = true
-default['private_chef']['mysql']['mysql2_versions'] = IO.readlines("/opt/opscode/version-manifest.txt").detect { |l| l =~ /^mysql2/ }.gsub(/^mysql2\s+(\d.+)$/, '\1').chomp.strip.split("-")
-
-###
 # PostgreSQL
 ###
+# For now, we're hardcoding the version directory suffix here:
+default['private_chef']['postgresql']['version'] = "9.2"
+# In the future, we're probably going to want to do something more elegant so we
+# don't accidentally overwrite this directory if we upgrade PG to 9.3: keeping these
+# directories straight is important because in the distant future (the year 2000)
+# we'll be using these directories to determine what versions we have installed and
+# whether we need to run pg_upgrade.
 default['private_chef']['postgresql']['enable'] = true
 default['private_chef']['postgresql']['ha'] = false
-default['private_chef']['postgresql']['dir'] = "/var/opt/opscode/postgresql"
-default['private_chef']['postgresql']['data_dir'] = "/var/opt/opscode/postgresql/data"
-default['private_chef']['postgresql']['log_directory'] = "/var/log/opscode/postgresql"
+default['private_chef']['postgresql']['dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
+default['private_chef']['postgresql']['data_dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}/data"
+default['private_chef']['postgresql']['log_directory'] = "/var/log/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
 default['private_chef']['postgresql']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['postgresql']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['postgresql']['username'] = "opscode-pgsql"
@@ -349,58 +305,38 @@ default['private_chef']['postgresql']['checkpoint_completion_target'] = 0.5
 default['private_chef']['postgresql']['checkpoint_warning'] = "30s"
 
 ###
-# Redis
+# Bifrost
 ###
-default['private_chef']['redis']['enable'] = true
-default['private_chef']['redis']['ha'] = false
-default['private_chef']['redis']['dir'] = "/var/opt/opscode/redis"
-default['private_chef']['redis']['log_directory'] = "/var/log/opscode/redis"
-default['private_chef']['redis']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['redis']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['redis']['port'] = "6379"
-default['private_chef']['redis']['bind'] = "127.0.0.1"
-default['private_chef']['redis']['vip'] = "127.0.0.1"
-default['private_chef']['redis']['timeout'] = "300"
-default['private_chef']['redis']['loglevel'] = "notice"
-default['private_chef']['redis']['databases'] = "16"
-default['private_chef']['redis']['appendonly'] = "no"
-default['private_chef']['redis']['appendfsync'] = "everysec"
-default['private_chef']['redis']['vm']['enabled'] = "no"
-default['private_chef']['redis']['vm']['max_memory'] = "0"
-default['private_chef']['redis']['vm']['page_size'] = "32"
-default['private_chef']['redis']['vm']['pages'] = "134217728"
-default['private_chef']['redis']['vm']['max_threads'] = "4"
-default['private_chef']['redis']['root'] = '/var/opt/opscode/redis'
-default['private_chef']['redis']['maxmemory'] = "1g"
-default['private_chef']['redis']['maxmemory_policy'] = "volatile-lru"
+default['private_chef']['oc_bifrost']['enable'] = true
+default['private_chef']['oc_bifrost']['ha'] = false
+default['private_chef']['oc_bifrost']['dir'] = "/var/opt/opscode/oc_bifrost"
+default['private_chef']['oc_bifrost']['log_directory'] = "/var/log/opscode/oc_bifrost"
+default['private_chef']['oc_bifrost']['log_rotation']['file_maxbytes'] = 104857600
+default['private_chef']['oc_bifrost']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['oc_bifrost']['vip'] = '127.0.0.1'
+default['private_chef']['oc_bifrost']['listen'] = '127.0.0.1'
+default['private_chef']['oc_bifrost']['port'] = 9463
+default['private_chef']['oc_bifrost']['superuser_id'] = '5ca1ab1ef005ba111abe11eddecafbad'
+default['private_chef']['oc_bifrost']['db_pool_size'] = '20'
+default['private_chef']['oc_bifrost']['sql_user'] = "bifrost"
+default['private_chef']['oc_bifrost']['sql_password'] = "challengeaccepted"
+default['private_chef']['oc_bifrost']['sql_ro_user'] = "bifrost_ro"
+default['private_chef']['oc_bifrost']['sql_ro_password'] = "foreveralone"
 
-###
-# Opscode Authorization
-###
-default['private_chef']['opscode-authz']['enable'] = true
-default['private_chef']['opscode-authz']['ha'] = false
-default['private_chef']['opscode-authz']['dir'] = "/var/opt/opscode/opscode-authz"
-default['private_chef']['opscode-authz']['log_directory'] = "/var/log/opscode/opscode-authz"
-default['private_chef']['opscode-authz']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['opscode-authz']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-authz']['caching'] = "enabled"
-default['private_chef']['opscode-authz']['port'] = 9463
-default['private_chef']['opscode-authz']['vip'] = '127.0.0.1'
-default['private_chef']['opscode-authz']['superuser_id'] = '5ca1ab1ef005ba111abe11eddecafbad'
-default['private_chef']['opscode-authz']['couchdb_max_conn'] = '100'
-
-default['private_chef']['opscode-authz']['custom_acls_always_for_modification'] = true
-default['private_chef']['opscode-authz']['custom_acls_cookbooks'] = true
-default['private_chef']['opscode-authz']['custom_acls_data'] = true
-default['private_chef']['opscode-authz']['custom_acls_depsolver'] = true
-default['private_chef']['opscode-authz']['custom_acls_roles'] = true
+####
+# Authz
+####
+default['private_chef']['oc_chef_authz']['http_init_count'] = 25
+default['private_chef']['oc_chef_authz']['http_max_count'] = 100
+default['private_chef']['oc_chef_authz']['http_cull_interval'] = "{1, min}"
+default['private_chef']['oc_chef_authz']['http_max_age'] = "{70, sec}"
+default['private_chef']['oc_chef_authz']['http_max_connection_duration'] = "{70, sec}"
+default['private_chef']['oc_chef_authz']['ibrowse_options'] = "[{connect_timeout, 5000}]"
 
 ####
 # Bookshelf
 ####
-# We are not using this for now, and instead, enable bookshelf based upon whether
-# sql_migration_phase_1 is enabled
-#default['private_chef']['bookshelf']['enable'] = false
+default['private_chef']['bookshelf']['enable'] = true
 default['private_chef']['bookshelf']['ha'] = false
 default['private_chef']['bookshelf']['dir'] = "/var/opt/opscode/bookshelf"
 default['private_chef']['bookshelf']['data_dir'] = "/var/opt/opscode/bookshelf/data"
@@ -446,14 +382,13 @@ default['private_chef']['opscode-org-creator']['port'] = 4369
 ###
 # Dark Launch
 ###
-default['private_chef']['dark_launch']['sql_migration_phase_1'] = false
 default['private_chef']['dark_launch']["quick_start"] = false
 default['private_chef']['dark_launch']["new_theme"] = true
 default['private_chef']['dark_launch']["private-chef"] = true
 default['private_chef']['dark_launch']["sql_users"] = true
-# couchdb_roles, _data, _cookbooks, _checksums, _clients, and _environments are consolidated into sql_migration_phase_1
 default['private_chef']['dark_launch']["add_type_and_bag_to_items"] = true
 default['private_chef']['dark_launch']["erlang_user_endpoint"] = false
+default['private_chef']['dark_launch']["reporting"] = true
 
 ###
 # Opscode Account
@@ -479,6 +414,23 @@ default['private_chef']['opscode-account']['umask'] = "0022"
 default['private_chef']['opscode-account']['worker_processes'] = node['cpu']['total'].to_i
 
 ###
+# Chef Mover
+###
+default['private_chef']['opscode-chef-mover']['enable'] = false
+default['private_chef']['opscode-chef-mover']['ha'] = false
+default['private_chef']['opscode-chef-mover']['dir'] = "/var/opt/opscode/opscode-chef-mover"
+default['private_chef']['opscode-chef-mover']['data_dir'] = "/var/opt/opscode/opscode-chef-mover/data"
+default['private_chef']['opscode-chef-mover']['log_directory'] = "/var/log/opscode/opscode-chef-mover"
+default['private_chef']['opscode-chef-mover']['log_rotation']['file_maxbytes'] = 1073741824
+default['private_chef']['opscode-chef-mover']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['opscode-chef-mover']['bulk_fetch_batch_size'] = '5'
+default['private_chef']['opscode-chef-mover']['max_cache_size'] = '10000'
+default['private_chef']['opscode-chef-mover']['cache_ttl'] = '3600'
+default['private_chef']['opscode-chef-mover']['db_pool_size'] = '5'
+default['private_chef']['opscode-chef-mover']['ibrowse_max_sessions'] = 256
+default['private_chef']['opscode-chef-mover']['ibrowse_max_pipeline_size'] = 1
+
+###
 # Opscode Test
 ###
 default['private_chef']['bootstrap']['enable'] = true
@@ -491,51 +443,6 @@ default['private_chef']['estatsd']['dir'] = "/var/opt/opscode/estatsd"
 default['private_chef']['estatsd']['log_directory'] = "/var/log/opscode/estatsd"
 default['private_chef']['estatsd']['vip'] = "127.0.0.1"
 default['private_chef']['estatsd']['port'] = 9466
-
-###
-# Nagios
-###
-default['private_chef']['nagios']['enable'] = true
-default['private_chef']['nagios']['ha'] = false
-default['private_chef']['nagios']['dir'] = "/var/opt/opscode/nagios"
-default['private_chef']['nagios']['log_directory'] = "/var/log/opscode/nagios"
-default['private_chef']['nagios']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['nagios']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['nagios']['admin_user'] = "nagiosadmin"
-default['private_chef']['nagios']['admin_password'] = "privatechef"
-default['private_chef']['nagios']['admin_email'] = "nobody@example.com"
-default['private_chef']['nagios']['admin_pager'] = "nobody@example.com"
-default['private_chef']['nagios']['debug_level'] = 0
-default['private_chef']['nagios']['debug_verbosity'] = 1
-default['private_chef']['nagios']['alert_email'] = "nobody@example.com"
-default['private_chef']['nagios']['interval_length'] = 1
-default['private_chef']['nagios']['default_host']['check_interval']     = 15
-default['private_chef']['nagios']['default_host']['retry_interval']     = 15
-default['private_chef']['nagios']['default_host']['max_check_attempts'] = 1
-default['private_chef']['nagios']['default_host']['notification_interval'] = 300
-default['private_chef']['nagios']['default_service']['check_interval']     = 60
-default['private_chef']['nagios']['default_service']['retry_interval']     = 15
-default['private_chef']['nagios']['default_service']['max_check_attempts'] = 3
-default['private_chef']['nagios']['default_service']['notification_interval'] = 1200
-default['private_chef']['nagios']['port'] = 9671
-default['private_chef']['nagios']['fcgiwrap_port'] = 9670
-default['private_chef']['nagios']['php_fpm_port'] = 9000
-default['private_chef']['nagios']['hosts'][node['hostname']] = {
-  "ipaddress" => node['ipaddress'],
-  "hostgroups" => [ ]
-}
-
-###
-# NRPE
-###
-default['private_chef']['nrpe']['enable'] = true
-default['private_chef']['nrpe']['dir'] = "/var/opt/opscode/nrpe"
-default['private_chef']['nrpe']['log_directory'] = "/var/log/opscode/nrpe"
-default['private_chef']['nrpe']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['nrpe']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['nrpe']['port'] = 9672
-default['private_chef']['nrpe']['listen'] = node['ipaddress']
-default['private_chef']['nrpe']['allowed_hosts'] = ["127.0.0.1", node['ipaddress']]
 
 ##
 # DRBD
@@ -590,20 +497,15 @@ default['private_chef']['keepalived']['service_order'] = [
   { "key" => "couchdb", "service_name" => "couchdb" },
   { "key" => "postgresql", "service_name" => "postgresql" },
   { "key" => "rabbitmq", "service_name" => "rabbitmq" },
-  { "key" => "redis", "service_name" => "redis" },
-  { "key" => "opscode-authz", "service_name" => "opscode-authz" },
+  { "key" => "oc_bifrost", "service_name" => "oc_bifrost" },
   { "key" => "opscode-certificate", "service_name" => "opscode-certificate" },
   { "key" => "opscode-account", "service_name" => "opscode-account" },
   { "key" => "opscode-solr", "service_name" => "opscode-solr" },
   { "key" => "opscode-expander", "service_name" => "opscode-expander" },
   { "key" => "opscode-expander", "service_name" => "opscode-expander-reindexer" },
   { "key" => "opscode-org-creator", "service_name" => "opscode-org-creator" },
-  { "key" => "opscode-chef", "service_name" => "opscode-chef" },
   { "key" => "opscode-erchef", "service_name" => "opscode-erchef" },
   { "key" => "opscode-webui", "service_name" => "opscode-webui" },
-  { "key" => "nagios", "service_name" => "php-fpm" },
-  { "key" => "nagios", "service_name" => "fcgiwrap" },
-  { "key" => "nagios", "service_name" => "nagios" },
   { "key" => "nginx", "service_name" => "nginx" }
 ]
 

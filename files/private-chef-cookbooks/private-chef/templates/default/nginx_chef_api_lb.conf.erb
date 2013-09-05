@@ -52,13 +52,6 @@
       proxy_pass http://opscode_erchef;
     }
 
-    # This internal location is used to serve checksum file content
-    # via the X-Accel-Redirect header. See http://wiki.nginx.org/XSendfile
-    location /checksum/ {
-      internal;
-      root <%= node['private_chef']['opscode-chef']['checksum_path'].gsub('checksum', '') %>;
-    }
-
     # == darklaunch sub-request ==
     #
     # sets:
@@ -71,19 +64,11 @@
       set $dl_header "";
 
       rewrite_by_lua '
-        -- set ngx.var.dl_header
-        ngx.var.dl_header = "<%= @helper.xdl_couchdb_headers %>"
-        ngx.req.set_header("X-Ops-DarkLaunch", ngx.var.dl_header)
+        ngx.req.set_header("X-Ops-DarkLaunch", "")
 
         -- set ngx.ctx.dl_config
-        dl_config = {}
-        dl_config["couchdb_checksums"]    = <%= @helper.not_xdl :sql_migration_phase_1 %>
-        dl_config["couchdb_cookbooks"]    = <%= @helper.not_xdl :sql_migration_phase_1 %>
-        dl_config["couchdb_environments"] = <%= @helper.not_xdl :sql_migration_phase_1 %>
-        dl_config["couchdb_roles"]        = <%= @helper.not_xdl :sql_migration_phase_1 %>
-        dl_config["couchdb_data"]         = <%= @helper.not_xdl :sql_migration_phase_1 %>
-        dl_config["couchdb_clients"]      = <%= @helper.not_xdl :sql_migration_phase_1 %>
-        ngx.ctx.dl_config = dl_config
+        -- Not currently used, but leaving it in as a "hook" for future use
+        ngx.ctx.dl_config = {}
       ';
 
       # We need to return a body. The caller of this sub-request will ignore the
@@ -98,64 +83,18 @@
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/?$") %>
 
-
-    # backwards compatible for Chef 0.9.x and below clients
-    # If we're using couchdb_cookbooks, then
-    # the nodes/:node_name/cookbooks is still handled by Ruby-Chef
-    <%= @helper.xdl_chef_api("^/organizations/[a-z0-9\-_]+?/nodes/[^/]+/cookbooks$", :xdl_couchdb_flag => 'cookbooks') %>
-
     # nodes and environments/*/nodes go to erchef
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/nodes/{0,1}.*$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/[^/]+/nodes$") %>
-
-    # data, roles, environments go to xdarklaunch
-    <%= @helper.xdl_chef_api "^/organizations/(?<org>[a-z0-9\-_]+?)/(?<endpoint>data|roles|environments)/{0,1}.*$" %>
-
-    # cookbooks, sandboxes go to xdarklaunch
-    # Sandboxes always go where couchdb_cookbooks is set
-    <%= @helper.xdl_chef_api "^/organizations/(?<org>[a-z0-9\-_]+?)/(?<endpoint>cookbooks|sandboxes)/{0,1}.*$",
-                :xdl_couchdb_flag => 'cookbooks',
-                :couchdb_upstream => @helper.upload_upstream %>
-
-    # principals go to erchef
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:data|roles|environments)/{0,1}.*$") %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:cookbooks|sandboxes)/{0,1}.*$") %>
     <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
-
-    # If we're in sql_migration_phase_1, then clients are handled by
-    # Erchef, not opscode-account.  In that case, we need to add the
-    # chef_api routing.
-    <%- if node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
-      <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
-    <%- end -%>
-
-    <%- if node['private_chef']['lb']['cache_cookbook_files'] && !node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
-    # optional caching of cookbook files by nginx
-    # Available only with couchdb_cookbooks (sql_migration_phase_1 off)
-    location ~ "^/organizations/[a-z0-9\-_]+?/cookbooks/[\w\.]+/(\d+\.\d+\.\d+|_latest)/files/.+$" {
-    <%= @helper.select_upstream("#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}",
-                                "opscode_webui",
-                                node['private_chef']['opscode-chef']['upload_proto']) %>
-      proxy_cache webui-cache;
-      proxy_cache_valid 200 300m;
-    }
-    <%- end -%>
-
-    # Status endpoint
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/status/{0,1}.*$", :ruby) %>
+    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
 
     # Include external routes for addons
     include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_external.conf;
 
     # opscode-account service endpoints
-
-    # If we're NOT in sql_migration_phase_1, then clients are still
-    # handled by opscode-account.  In that case, we need to add the
-    # account_api routing.
-    #
-    # Note that this and the routing above for the Chef API for
-    # clients are mutually exclusive.
-    <%- unless node['private_chef']['dark_launch']['sql_migration_phase_1'] -%>
-      <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$", :account) %>
-    <%- end -%>
 
     <%= @helper.account_api("^/organizations/[a-z0-9\-_]+?/(?:groups|users|containers|association_requests)/{0,1}.*$", :account) %>
     <%= @helper.account_api("^/(?:organizations|users)/{0,1}$", :account) %>

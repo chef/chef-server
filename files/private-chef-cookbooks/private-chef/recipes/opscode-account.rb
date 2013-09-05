@@ -43,7 +43,7 @@ template env_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-account'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?))
-  notifies :restart, 'service[opscode-account]' if should_notify
+  notifies :restart, 'runit_service[opscode-account]' if should_notify
 end
 
 link "/opt/opscode/embedded/service/opscode-account/config/environments/#{node['private_chef']['opscode-account']['environment']}.rb" do
@@ -56,7 +56,7 @@ template statsd_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-account'].to_hash)
-  notifies :restart, 'service[opscode-account]' if should_notify
+  notifies :restart, 'runit_service[opscode-account]' if should_notify
 end
 
 link "/opt/opscode/embedded/service/opscode-account/statsd_config.rb" do
@@ -75,23 +75,7 @@ unicorn_config File.join(private_chef_account_etc_dir, "unicorn.rb") do
   group "root"
   mode "0644"
   log_listener true
-  notifies :restart, 'service[opscode-account]' if should_notify
+  notifies :restart, 'runit_service[opscode-account]' if should_notify
 end
 
-runit_service "opscode-account" do
-  down node['private_chef']['opscode-account']['ha']
-  options({
-    :log_directory => private_chef_account_log_dir,
-    :svlogd_size => node['private_chef']['opscode-account']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['opscode-account']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
-
-if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl start opscode-account" do
-		retries 20
-	end
-end
-
-add_nagios_hostgroup("opscode-account")
-
+component_runit_service "opscode-account"

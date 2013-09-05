@@ -1,4 +1,0 @@
-#!/bin/sh
-exec 2>&1
-exec /opt/opscode/embedded/bin/chpst -P -u <%= node['private_chef']['user']['username'] %> -U <%= node['private_chef']['user']['username'] %> /opt/opscode/embedded/sbin/php-fpm -c <%= File.join(node['private_chef']['nagios']['dir'], 'etc', 'php.ini') %> -y <%= File.join(node['private_chef']['nagios']['dir'], 'etc', 'php-fpm.conf') %>
-

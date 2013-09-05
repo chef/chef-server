@@ -1,18 +1,18 @@
 OrgMapper.configure do |mapper|
   mapper.couchdb_uri = "http://<%= node['private_chef']['couchdb']['vip'] %>:<%= node['private_chef']['couchdb']['port'] %>"
   mapper.database = 'opscode_account'
-  mapper.auth_uri = "http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>"
+  mapper.auth_uri = "http://<%= node['private_chef']['oc_bifrost']['vip'] %>:<%= node['private_chef']['oc_bifrost']['port'] %>"
   mapper.authz_couch = "http://<%= node['private_chef']['couchdb']['vip'] %>:<%= node['private_chef']['couchdb']['port'] %>"
-  mapper.superuser_id = '<%= node['private_chef']['opscode-authz']['superuser_id'] %>'
+  mapper.superuser_id = '<%= node['private_chef']['oc_bifrost']['superuser_id'] %>'
   mapper.chargify_site = ''
   mapper.chargify_api_secret = ''
-  mapper.sql_database = '<%= node['private_chef']['database_type'] == "postgresql" ? "postgres" : "mysql2" %>://<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>:<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>@<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>/opscode_chef'
+  mapper.sql_database = 'postgres://<%= node['private_chef']['postgresql']['sql_user'] %>:<%= node['private_chef']['postgresql']['sql_password'] %>@<%= node['private_chef']['postgresql']['vip'] %>/opscode_chef'
 end
 
 Chef::Config[:persistent_queue] = true
 Chef::Config[:amqp_host] = '<%= node['private_chef']['rabbitmq']['node_ip_address'] %>'
-Chef::Config[:amqp_port] = '<%= node['private_chef']['rabbitmq']['node_port'] %>' 
-Chef::Config[:amqp_chef] = '<%= node['private_chef']['rabbitmq']['user'] %>' 
+Chef::Config[:amqp_port] = '<%= node['private_chef']['rabbitmq']['node_port'] %>'
+Chef::Config[:amqp_chef] = '<%= node['private_chef']['rabbitmq']['user'] %>'
 Chef::Config[:amqp_pass] = '<%= node['private_chef']['rabbitmq']['password'] %>'
 Chef::Config[:amqp_vhost] = '<%= node['private_chef']['rabbitmq']['vhost'] %>'
 Chef::Config[:amqp_identity] = ''

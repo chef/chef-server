@@ -42,7 +42,7 @@ couchdb_uri = '<%= node['private_chef']['couchdb']['vip'] %>:<%= node['private_c
 account_database = 'opscode_account'
 internal_database = 'opscode_account_internal'
 webui_public_key = OpenSSL::PKey::RSA.new(File.read('/etc/opscode/webui_pub.pem'))
-authorization_service_uri = 'http://<%= node['private_chef']['opscode-authz']['vip'] %>:<%= node['private_chef']['opscode-authz']['port'] %>'
+authorization_service_uri = 'http://<%= node['private_chef']['oc_bifrost']['vip'] %>:<%= node['private_chef']['oc_bifrost']['port'] %>'
 certificate_service_uri = 'http://<%= node['private_chef']['opscode-certificate']['vip'] %>:<%= node['private_chef']['opscode-certificate']['port'] %>'
 
 couchrest = CouchRest.new(couchdb_uri)
@@ -60,7 +60,7 @@ Mixlib::Authorization::Config.web_ui_public_key = webui_public_key
 Mixlib::Authorization::Config.authorization_service_uri = authorization_service_uri
 Mixlib::Authorization::Config.certificate_service_uri = certificate_service_uri
 
-Opscode::Mappers.connection_string = '<%= node['private_chef']['database_type'] == "postgresql" ? "postgres" : "mysql2" %>://<%= node['private_chef'][node['private_chef']['database_type']]['sql_user'] %>:<%= node['private_chef'][node['private_chef']['database_type']]['sql_password'] %>@<%= node['private_chef'][node['private_chef']['database_type']]['vip'] %>/opscode_chef'
+Opscode::Mappers.connection_string = 'postgres://<%= node['private_chef']['postgresql']['sql_user'] %>:<%= node['private_chef']['postgresql']['sql_password'] %>@<%= node['private_chef']['postgresql']['vip'] %>/opscode_chef'
 
 <% if @ldap_enabled -%>
 # LDAP Authentication Enabled

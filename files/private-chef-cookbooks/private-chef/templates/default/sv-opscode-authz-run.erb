@@ -1,3 +1,0 @@
-#!/bin/sh
-exec 2>&1
-exec chpst -P -u <%= node['private_chef']['user']['username'] %> -U <%= node['private_chef']['user']['username'] %> env HOME=<%= node['private_chef']['opscode-authz']['dir'] %> RUNNER_LOG_DIR=<%= @log_directory %> /opt/opscode/embedded/service/opscode-authz/rel/authz/bin/authz runit

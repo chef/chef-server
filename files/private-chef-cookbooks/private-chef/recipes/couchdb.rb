@@ -31,24 +31,10 @@ template File.join(couchdb_etc_dir, "local.ini") do
   owner node['private_chef']['user']['username']
   mode "0600"
   variables(node['private_chef']['couchdb'].to_hash)
-  notifies :restart, "service[couchdb]" if OmnibusHelper.should_notify?("couchdb")
+  notifies :restart, "runit_service[couchdb]" if OmnibusHelper.should_notify?("couchdb")
 end
 
-# Start and enable the service
-runit_service "couchdb" do
-  down node['private_chef']['couchdb']['ha']
-  options({
-    :log_directory => couchdb_log_dir,
-    :svlogd_size => node['private_chef']['couchdb']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['couchdb']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
-
-if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl start couchdb" do
-		retries 20
-	end
-end
+component_runit_service "couchdb"
 
 # Cron may not be installed in a minimal install:
 case node["platform"]
@@ -108,8 +94,6 @@ template "/etc/cron.d/couchdb_bounce" do
   source "couchdb-bounce-cron.erb"
   mode "0600"
 end
-
-add_nagios_hostgroup("couchdb")
 
 # log rotation
 template "/etc/opscode/logrotate.d/couchdb" do

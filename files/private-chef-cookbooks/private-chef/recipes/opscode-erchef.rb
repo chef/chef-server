@@ -31,7 +31,7 @@ template "/opt/opscode/embedded/service/opscode-erchef/bin/oc_erchef" do
   group "root"
   mode "0755"
   variables(node['private_chef']['opscode-erchef'].to_hash)
-  notifies :restart, 'service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
+  notifies :restart, 'runit_service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
 end
 
 erchef_config = File.join(opscode_erchef_etc_dir, "app.config")
@@ -40,27 +40,29 @@ template erchef_config do
   source "oc_erchef.config.erb"
   mode "644"
   variables(node['private_chef']['opscode-erchef'].to_hash)
-  notifies :restart, 'service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
+  notifies :run, 'execute[remove_erchef_siz_files]', :immediately
+  notifies :restart, 'runit_service[opscode-erchef]' if OmnibusHelper.should_notify?("opscode-erchef")
+end
+
+# Erchef still ultimately uses disk_log [1] for request logging, and if
+# you change the log file sizing in the configuration **without also
+# issuing a call to disk_log:change_size/2, Erchef won't start.
+#
+# Since we currently don't perform live upgrades, we can fake this by
+# removing the *.siz files, which is where disk_log looks to determine
+# what size the log files should be in the first place.  If they're
+# not there, then we just use whatever size is listed in the
+# configuration.
+#
+# [1]: http://erlang.org/doc/man/disk_log.html
+execute "remove_erchef_siz_files" do
+  command "rm -f *.siz"
+  cwd node['private_chef']['opscode-erchef']['log_directory']
+  action :nothing
 end
 
 link "/opt/opscode/embedded/service/opscode-erchef/etc/app.config" do
   to erchef_config
 end
 
-runit_service "opscode-erchef" do
-  down node['private_chef']['opscode-erchef']['ha']
-  options({
-    :log_directory => opscode_erchef_log_dir,
-    :svlogd_size => node['private_chef']['opscode-erchef']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['opscode-erchef']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
-
-if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl start opscode-erchef" do
-		retries 20
-	end
-end
-
-add_nagios_hostgroup("opscode-erchef")
-
+component_runit_service "opscode-erchef"

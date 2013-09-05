@@ -1,4 +1,0 @@
-#!/bin/sh
-exec 2>&1
-exec chpst -P -o 131071 -u <%= node["private_chef"]["user"]["username"] %> -U <%= node["private_chef"]["user"]["username"] %> -o 100000 env HOME="<%= node["private_chef"]["redis"]["dir"] %>" /opt/opscode/embedded/bin/redis-server <%= File.join(node["private_chef"]["redis"]["dir"], "etc", "redis.conf") %>
-

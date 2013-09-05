@@ -8,6 +8,30 @@ require 'openssl'
 
 ENV['PATH'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:#{ENV['PATH']}"
 
+# Capture old node attribute values (if there are any, that is) in
+# case we need them for comparison purposes for making changes or
+# updates
+#
+# TODO: extract this into something that add-ons can use; no sense
+# cargo-culting it around everywhere
+if File.exists?("/etc/opscode/chef-server-running.json")
+  old_config = JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))
+
+  # We're stashing these outside the "private_chef" attributes tree to
+  # prevent us from carrying them along forever when we write out the
+  # chef-server-running.json file at the end of the run.
+  #
+  # For example, to access the old version of the attribute
+  # ['private_chef']['foo']['bar'], you'll look at
+  # ['previous_run']['foo']['bar'].
+  #
+  # Take care to check that ['previous_run'] exists, though, otherwise
+  # you'll run into trouble doing the initial Chef run.
+  #
+  # TODO: Provide an API for getting this information
+  node.consume_attributes({"previous_run" => old_config['private_chef']})
+end
+
 directory "/etc/opscode" do
   owner "root"
   group "root"
@@ -38,21 +62,17 @@ end
 node.set['private_chef']['bootstrap']['bootstrap_server'] = node['private_chef']['bootstrap']['enable']
 
 if File.exists?("/var/opt/opscode/bootstrapped")
-	node.set['private_chef']['bootstrap']['enable'] = false
+        node.set['private_chef']['bootstrap']['enable'] = false
 end
 
 # Create the Chef User
 include_recipe "private-chef::users"
 
-sql_migration_phase_1     = node['private_chef']['dark_launch']['sql_migration_phase_1']
-dark_launch_couchdb_flags = %w(roles data cookbooks checksums clients environments).map {|k| ["couchdb_#{k}", !sql_migration_phase_1] }.flatten
-dark_launch_features_hash = node['private_chef']['dark_launch'].to_hash.merge(Hash[*dark_launch_couchdb_flags])
-
 file "/etc/opscode/dark_launch_features.json" do
   owner node["private_chef"]["user"]["username"]
   group "root"
   mode "0644"
-  content Chef::JSONCompat.to_json_pretty(dark_launch_features_hash)
+  content Chef::JSONCompat.to_json_pretty(node['private_chef']['dark_launch'].to_hash)
 end
 
 webui_key = OpenSSL::PKey::RSA.generate(2048) unless File.exists?('/etc/opscode/webui_pub.pem')
@@ -120,45 +140,34 @@ directory "/var/opt/opscode" do
   action :create
 end
 
-# Install our runit instance
-include_recipe "runit"
+# Configure and install our runit instance
+include_recipe "private-chef::runit"
 
 # Configure Services
 [
-	"drbd",
+        "drbd",
   "couchdb",
   "rabbitmq",
   "postgresql",
-  "mysql",
-  "redis",
-  "opscode-authz",
+  "oc_bifrost",
   "opscode-certificate",
   "opscode-account",
   "opscode-solr",
   "opscode-expander",
-#  "bookshelf",
+  "bookshelf",
   "bootstrap",
   "opscode-org-creator",
-  "opscode-chef",
   "opscode-erchef",
   "opscode-webui",
-  "nagios",
-  "nrpe",
+  "opscode-chef-mover",
   "nginx",
-	"keepalived"
+        "keepalived"
 ].each do |service|
   if node["private_chef"][service]["enable"]
     include_recipe "private-chef::#{service}"
   else
     include_recipe "private-chef::#{service}_disable"
   end
-end
-
-# Enable Bookshelf when sql_migration_phase_1 is enabled
-if node["private_chef"]['dark_launch']['sql_migration_phase_1']
-  include_recipe "private-chef::bookshelf"
-else
-  include_recipe "private-chef::bookshelf_disable"
 end
 
 include_recipe "private-chef::orgmapper"
@@ -172,4 +181,3 @@ file "/etc/opscode/chef-server-running.json" do
   mode "0600"
   content Chef::JSONCompat.to_json_pretty({ "private_chef" => node['private_chef'].to_hash, "run_list" => node.run_list })
 end
-

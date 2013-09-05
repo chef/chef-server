@@ -30,90 +30,13 @@ class NginxErb
     end
   end
 
-  def choose_upstream(key=:erchef)
-    if (key == :ruby) || node['private_chef']['dark_launch'][key]
-      "opscode_chef"
-    else
-      "opscode_erchef"
-    end
-  end
-
-  # Upload upstream for cookbooks and sandboxes
-  def upload_upstream
-    "#{node['private_chef']['opscode-chef']['upload_proto']}://#{node['private_chef']['opscode-chef']['upload_vip']}:#{node['private_chef']['opscode-chef']['upload_port']}"
-  end
-
-  # Helper to extract static dark_launch configuration
-  def xdl(key)
-    node['private_chef']['dark_launch'][key] ? 1 : 0
-  end
-
-  def not_xdl(key)
-    !node['private_chef']['dark_launch'][key] ? 1 : 0
-  end
-
-  def xdl_couchdb_headers
-    xdl_couchdb_flag = not_xdl('sql_migration_phase_1')
-    sql_xdl = %w(checksums clients cookbooks environments roles data).map { |key| "couchdb_#{key}=#{xdl_couchdb_flag}" }
-    sql_xdl.join(';')
-  end
-
-  def rewrite_by_xdarklaunch_couchdb(options = {})
-    # By default, use the endpoint in the location capture.
-    # There is a possibility for refining this code better for clarity.
-    dl_key = options[:xdl_couchdb_flag] ? "\"couchdb_#{options[:xdl_couchdb_flag]}\"" : "\"couchdb_\" .. ngx.var.endpoint"
-    options[:sql_upstream]     ||= "http://opscode_erchef"
-    options[:couchdb_upstream] ||= "http://opscode_chef"
-
-<<EOS
-        rewrite_by_lua '
-            -- Get xdarklaunch and inject headers
-            res = ngx.location.capture("/organizations/" .. ngx.var.org .. "/darklaunch",
-                                       { ctx = ngx.ctx, share_all_vars = true })
-
-            local dl_key = #{dl_key}
-
-            -- we will default to routing to chef instead of erchef, so we are
-            -- evaluating the falseness of the couchdb value to determine if
-            -- we route to erchef:
-            --   couchdb_$endpoint == true / nil will route to ruby chef
-            --
-            local sql_endpoint = ngx.ctx.dl_config[dl_key] == 0
-
-            if sql_endpoint then
-                ngx.var.chef_upstream = "#{options[:sql_upstream]}"
-            else
-                ngx.var.chef_upstream = "#{options[:couchdb_upstream]}"
-            end
-        ';
-EOS
-  end
-
-  def xdl_chef_api(path, options = {})
-out = <<EOS
-location ~ "#{path}" {
-\tset $chef_upstream "";
-\tif ($http_x_ops_userid = "") {
-\t\tset $chef_upstream "opscode_webui";
-\t}
-
-\tif ($http_x_ops_userid != "") {
-\t\t#{rewrite_by_xdarklaunch_couchdb(options)}
-\t}
-
-\tproxy_redirect $chef_upstream /;
-\tproxy_pass $chef_upstream;
-}
-EOS
-  end
-
   # Generate an nginx location directive, selecting opscode_chef or
   # opscode_erchef based on the node's dark_launch config.
   def chef_api(path, key=:erchef, alternative="opscode_webui", proto="http")
     # the following is totally gross and bizzare, but seems to
     # result in passably formatted nginx location stanza's when
     # rendered in our erb template for nginx config
-    make_location(path, choose_upstream(key), alternative, proto)
+    make_location(path, "opscode_erchef", alternative, proto)
   end
 
   def choose_account_upstream(key=:erchef)
@@ -130,9 +53,24 @@ EOS
     make_location(path, choose_account_upstream(key), alternative, proto)
   end
 
+  ### NOTE: X-Ops-Darklaunch Header Setting - 2013/08/29 ###
+  # This will clear X-Ops-Darklaunch headers set by the client
+  # on their way to the chef server. The chef server should
+  # not respond to darklaunch headers set by the client. Since
+  # we're no longer using the darklaunch sub-request to set
+  # these headers, we'll do it the simple way here.
+  #
+  # In the near future, the load balancer routing logic
+  # will be re-written in lua and this block of code will
+  # be removed. It is not expected that we will need to
+  # darklaunch endpoints before that happens. If we do,
+  # we should use the built-in darklaunch sub-request mechanism
+  # that's in the nginx config.
+  #
   def make_location(path, upstream, alternative, proto)
     <<EOS
 location ~ "#{path}" {
+    \tmore_set_headers 'X-Ops-Darklaunch:';
     \tset $my_upstream #{upstream};
     \tif ($http_x_ops_userid = "") {
     \t\tset $my_upstream #{alternative};

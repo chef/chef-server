@@ -10,6 +10,9 @@ build_iteration 1
 # creates required build directories
 dependency "preparation"
 
+# needs to be before postgresql, otherwise build problems...
+dependency "postgresql91" # for pg_upgrade
+
 # global
 dependency "chef-gem" # for embedded chef-solo
 dependency "private-chef-cookbooks" # used by private-chef-ctl reconfigure
@@ -22,8 +25,7 @@ dependency "unicorn"
 
 # the backend
 dependency "couchdb"
-dependency "postgresql"
-dependency "redis"
+dependency "postgresql92"
 dependency "rabbitmq"
 dependency "opscode-solr"
 dependency "opscode-expander"
@@ -31,23 +33,22 @@ dependency "chef-sql-schema" # needed to migrate the DB.
 dependency "keepalived"
 dependency "bookshelf"
 
+# migration tooling , which also lives on the backend
+dependency "opscode-chef-mover"
+
 # the front-end services
 dependency "oc_erchef"
-dependency "opscode-chef"
 dependency "opscode-account"
 dependency "opscode-webui"
-dependency "opscode-authz"
+dependency "oc_bifrost"
 dependency "opscode-org-creator"
 dependency "opscode-certificate"
 dependency "opscode-platform-debug"
 dependency "opscode-test"
-dependency "mysql2"
 
-# monitoring
-dependency "nagios"
-dependency "nagios-plugins"
-dependency "opscode-nagios-plugins"
-dependency "nrpe"
+
+# log management
+dependency "logrotate"
 
 # oc-chef-pedant for integration/smoke testing
 dependency "oc-chef-pedant"
@@ -55,6 +56,7 @@ dependency "oc-chef-pedant"
 # partybus and upgrade scripts
 dependency "partybus"
 dependency "private-chef-upgrades"
+dependency "oc_authz_migrator" # migrate authz to bifrost
 
 # version manifest file
 dependency "version-manifest"

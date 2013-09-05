@@ -30,27 +30,11 @@ template certificate_config do
   source "certgen_web.config.erb"
   mode "644"
   variables(node['private_chef']['opscode-certificate'].to_hash)
-  notifies :restart, 'service[opscode-certificate]' if OmnibusHelper.should_notify?("opscode-certificate")
+  notifies :restart, 'runit_service[opscode-certificate]' if OmnibusHelper.should_notify?("opscode-certificate")
 end
 
 link "/opt/opscode/embedded/service/opscode-certificate/priv/certgen_web.config" do
   to certificate_config
 end
 
-runit_service "opscode-certificate" do
-  down node['private_chef']['opscode-certificate']['ha']
-  options({
-    :log_directory => opscode_certificate_log_dir,
-    :svlogd_size => node['private_chef']['opscode-certificate']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['opscode-certificate']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
-
-if node['private_chef']['bootstrap']['enable']
-	execute "/opt/opscode/bin/private-chef-ctl start opscode-certificate" do
-		retries 20
-	end
-end
-
-add_nagios_hostgroup("opscode-certificate")
-
+component_runit_service "opscode-certificate"

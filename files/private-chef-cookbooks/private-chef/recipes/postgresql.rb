@@ -16,35 +16,39 @@
 # limitations under the License.
 #
 
-# BEGIN POSTGRES CLEANUP
-#
-# private-chef 2.0.0+ renamed postges service to postgresql, we need to cleanup
-# all traces of the previously-named service
-#
-execute "/opt/opscode/bin/private-chef-ctl stop postgres" do
-  retries 20
-end
-
-runit_service "postgres" do
-  action :disable
-end
-
-directory "/opt/opscode/sv/postgres" do
-  action :delete
-  recursive true
-end
-# END POSTGRES CLEANUP
+include_recipe "private-chef::old_postgres_cleanup"
 
 postgresql_dir = node['private_chef']['postgresql']['dir']
 postgresql_data_dir = node['private_chef']['postgresql']['data_dir']
 postgresql_data_dir_symlink = File.join(postgresql_dir, "data")
 postgresql_log_dir = node['private_chef']['postgresql']['log_directory']
 
+# Postgres User Setup
 user node['private_chef']['postgresql']['username'] do
   system true
   shell node['private_chef']['postgresql']['shell']
   home node['private_chef']['postgresql']['home']
 end
+
+# TODO: Currently this is set up to be a parent directory of
+# node['private_chef']['postgresql']['dir'].  Is it necessary that
+# this is exposed as a settable attribute, or can we make some
+# simplifying assumptions about our directory structure?
+directory node['private_chef']['postgresql']['home'] do
+  owner node['private_chef']['postgresql']['username']
+  recursive true
+  mode "0700"
+end
+
+file File.join(node['private_chef']['postgresql']['home'], ".profile") do
+  owner node['private_chef']['postgresql']['username']
+  mode "0644"
+  content <<-EOH
+    PATH=#{node['private_chef']['postgresql']['user_path']}
+  EOH
+end
+
+####
 
 directory postgresql_log_dir do
   owner node['private_chef']['user']['username']
@@ -53,27 +57,11 @@ end
 
 directory postgresql_dir do
   owner node['private_chef']['postgresql']['username']
-  mode "0700"
-end
-
-directory postgresql_data_dir do
-  owner node['private_chef']['postgresql']['username']
-  mode "0700"
   recursive true
+  mode "0700"
 end
 
-link postgresql_data_dir_symlink do
-  to postgresql_data_dir
-  not_if { postgresql_data_dir == postgresql_data_dir_symlink }
-end
-
-file File.join(node['private_chef']['postgresql']['home'], ".profile") do
-  owner node['private_chef']['postgresql']['username']
-  mode "0644"
-  content <<-EOH
-PATH=#{node['private_chef']['postgresql']['user_path']}
-EOH
-end
+####
 
 if File.directory?("/etc/sysctl.d") && File.exists?("/etc/init.d/procps")
   # smells like ubuntu...
@@ -107,95 +95,21 @@ else
   end
 end
 
-execute "/opt/opscode/embedded/bin/initdb -D #{postgresql_data_dir}" do
-  user node['private_chef']['postgresql']['username']
-  not_if { File.exists?(File.join(postgresql_data_dir, "PG_VERSION")) }
+# Upgrade the cluster if you gotta
+private_chef_pg_upgrade "upgrade_if_necessary"
+
+private_chef_pg_cluster postgresql_data_dir do
+  notifies :restart, 'runit_service[postgresql]' if OmnibusHelper.should_notify?("postgresql")
 end
 
-postgresql_config = File.join(postgresql_data_dir, "postgresql.conf")
-
-template postgresql_config do
-  source "postgresql.conf.erb"
-  owner node['private_chef']['postgresql']['username']
-  mode "0644"
-  variables(node['private_chef']['postgresql'].to_hash)
-  notifies :restart, 'service[postgresql]' if OmnibusHelper.should_notify?("postgresql")
+link postgresql_data_dir_symlink do
+  to postgresql_data_dir
+  not_if { postgresql_data_dir == postgresql_data_dir_symlink }
 end
 
-pg_hba_config = File.join(postgresql_data_dir, "pg_hba.conf")
-
-template pg_hba_config do
-  source "pg_hba.conf.erb"
-  owner node['private_chef']['postgresql']['username']
-  mode "0644"
-  variables(node['private_chef']['postgresql'].to_hash)
-  notifies :restart, 'service[postgresql]' if OmnibusHelper.should_notify?("postgresql")
+component_runit_service "postgresql" do
+  control ['t']
 end
 
-should_notify = OmnibusHelper.should_notify?("postgresql")
-
-runit_service "postgresql" do
-  down node['private_chef']['postgresql']['ha']
-  control(['t'])
-  options({
-    :log_directory => postgresql_log_dir,
-    :svlogd_size => node['private_chef']['postgresql']['log_rotation']['file_maxbytes'],
-    :svlogd_num  => node['private_chef']['postgresql']['log_rotation']['num_to_keep']
-  }.merge(params))
-end
-
-if node['private_chef']['bootstrap']['enable']
-  execute "/opt/opscode/bin/private-chef-ctl start postgresql" do
-    retries 20
-  end
-
-  ###
-  # Create the database, migrate it, and create the users we need, and grant them
-  # privileges.
-  ###
-  database_exists = "/opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} /opt/opscode/embedded/bin/psql -d 'template1' -c 'select datname from pg_database' -x|grep opscode_chef"
-  user_exists     = "/opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} /opt/opscode/embedded/bin/psql -d 'template1' -c 'select usename from pg_user' -x|grep #{node['private_chef']['postgresql']['sql_user']}"
-  ro_user_exists  = "/opt/opscode/embedded/bin/chpst -u #{node['private_chef']['postgresql']['username']} /opt/opscode/embedded/bin/psql -d 'template1' -c 'select usename from pg_user' -x|grep #{node['private_chef']['postgresql']['sql_ro_user']}"
-
-  execute "/opt/opscode/embedded/bin/createdb -T template0 -E UTF-8 opscode_chef" do
-    user node['private_chef']['postgresql']['username']
-    not_if database_exists
-    retries 30
-    notifies :run, "execute[migrate_database]", :immediately
-  end
-
-  execute "migrate_database" do
-    command "/opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/bin/rake pg:remigrate"
-    cwd "/opt/opscode/embedded/service/chef-sql-schema"
-    user node['private_chef']['postgresql']['username']
-    action :nothing
-  end
-
-  execute "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"CREATE USER #{node['private_chef']['postgresql']['sql_user']} WITH SUPERUSER ENCRYPTED PASSWORD '#{node['private_chef']['postgresql']['sql_password']}'\"" do
-    cwd "/opt/opscode/embedded/service/chef-sql-schema"
-    user node['private_chef']['postgresql']['username']
-    notifies :run, "execute[grant opscode_chef privileges]", :immediately
-    not_if user_exists
-  end
-
-  execute "grant opscode_chef privileges" do
-    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_user']}\""
-    user node['private_chef']['postgresql']['username']
-    action :nothing
-  end
-
-  execute "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"CREATE USER #{node['private_chef']['postgresql']['sql_ro_user']} WITH SUPERUSER ENCRYPTED PASSWORD '#{node['private_chef']['postgresql']['sql_ro_password']}'\"" do
-    cwd "/opt/opscode/embedded/service/chef-sql-schema"
-    user node['private_chef']['postgresql']['username']
-    notifies :run, "execute[grant opscode_chef_ro privileges]", :immediately
-    not_if ro_user_exists
-  end
-
-  execute "grant opscode_chef_ro privileges" do
-    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_ro_user']}\""
-    user node['private_chef']['postgresql']['username']
-    action :nothing
-  end
-end
-
-add_nagios_hostgroup("postgresql")
+include_recipe "private-chef::erchef_database"
+include_recipe "private-chef::bifrost_database"

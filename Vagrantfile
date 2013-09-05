@@ -70,7 +70,7 @@ Vagrant.configure("2") do |config|
     }
 
     chef.run_list = [
-      "recipe[opscode-omnibus]"
+      "recipe[omnibus::default]"
     ]
   end
 

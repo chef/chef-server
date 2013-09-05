@@ -1,3 +1,4 @@
+name "private-chef"
 maintainer        "Opscode, Inc."
 maintainer_email  "cookbooks@opscode.com"
 license           "Apache 2.0"
@@ -10,4 +11,4 @@ recipe            "chef-server", "Configures the Chef Server from Omnibus"
   supports os
 end
 
-depends "runit"
+depends "runit", "= 1.2.0"
