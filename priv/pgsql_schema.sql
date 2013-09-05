@@ -82,9 +82,9 @@ CREATE TABLE cookbook_version_checksums (
 
 CREATE TABLE cookbook_versions (
     id character(32) NOT NULL,
-    major integer NOT NULL,
-    minor integer NOT NULL,
-    patch integer NOT NULL,
+    major bigint NOT NULL,
+    minor bigint NOT NULL,
+    patch bigint NOT NULL,
     frozen boolean NOT NULL,
     meta_attributes bytea NOT NULL,
     meta_deps text NOT NULL,
