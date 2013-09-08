@@ -6,6 +6,10 @@ DIALYZER_OPTS = -Wunderspecs
 DIALYZER_DEPS = deps/jiffy/ebin \
                 deps/ibrowse/ebin \
                 deps/opscoderl_httpc/ebin \
+                deps/stats_hero/ebin \
+                deps/envy/ebin \
+                deps/sqerl/ebin \
+                deps/darklaunch/ebin \
                 deps/ej/ebin
 
 DEPS_PLT = oc_chef_authz.plt
