@@ -380,21 +380,39 @@ create_entity_if_authorized_test_() ->
               end}
      end]}.
 
+random_bogus_port() ->
+    {ok, S} = gen_udp:open(0, [binary, {active, once}]),
+    {ok, Port} = inet:port(S),
+    gen_udp:close(S),
+    Port.
+
+needed_apps() ->
+    [ibrowse, pooler, stats_hero, public_key, ssl, epgsql, sqerl, oc_chef_authz].
+
 start_apps() ->
     error_logger:tty(false),
+    application:set_env(stats_hero, estatsd_host, "localhost"),
+    application:set_env(stats_hero, estatsd_port, random_bogus_port()),
+    application:set_env(stats_hero, udp_socket_pool_size, 1),
     application:set_env(oc_chef_authz, authz_service,
                         [{root_url, "http://test-authz-service:2323"},
                          {timeout, 200}, {init_count, 5}, {max_count, 6}]),
-    ok = application:start(ibrowse),
-    ok = application:start(pooler),
-    ok = application:start(oc_chef_authz),
+    [ ok = ensure_started(A) || A <- needed_apps() ],
     ok.
 
 stop_apps() ->
-    application:stop(oc_chef_authz),
-    application:stop(ibrowse),
-    application:stop(pooler),
+    [ application:stop(A) || A <- lists:reverse(needed_apps()) ],
     ok.
+
+ensure_started(App) ->
+    case application:start(App) of
+        ok ->
+            ok;
+        {error, {already_started, App}} ->
+            ok;
+        E ->
+            E
+    end.
 
 ping_test_() ->
     {foreach,

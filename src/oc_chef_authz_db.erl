@@ -25,6 +25,7 @@
 
 -include("oc_chef_authz.hrl").
 -include("oc_chef_authz_db.hrl").
+-include_lib("sqerl/include/sqerl.hrl").
 
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
 -define(user_db, "opscode_account").
@@ -212,4 +213,23 @@ get_env(Key) ->
             throw({missing_application_config, oc_chef_authz, Key});
         {ok, Value} ->
             Value
+    end.
+
+-spec fetch_container_sql(#context{}, binary(), binary()) -> {ok, #chef_container{} | not_found} |
+                                                             {error, _}.
+fetch_container_sql(#context{reqid = ReqId}, OrgId, Name) ->
+    %% since ?FIRST uses record_info, it can't be placed within the fun.
+    Transform = ?FIRST(chef_container),
+    case stats_hero:ctime(ReqId,
+                          %% aggregate perf timing with other sql queries
+                          {chef_sql, fetch_container_sql},
+                          fun() ->
+                                  sqerl:select(find_container_by_orgid_name, [OrgId, Name], Transform)
+                          end) of
+        {ok, #chef_container{} = C} ->
+            {ok, C};
+        {ok, none} ->
+            {ok, not_found};
+        {error, Error} ->
+            {error, Error}
     end.
