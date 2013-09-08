@@ -37,7 +37,7 @@
          delete_resource/3,
          create_entity_if_authorized/4,
          get_container_aid_for_object/3,
-         make_context/1,
+         make_context/2,
          is_authorized_on_resource/6,
          ping/0,
          remove_actor_from_actor_acl/2
@@ -80,9 +80,9 @@
 ping() ->
     oc_chef_authz_http:ping().
 
--spec make_context(binary()) -> #oc_chef_authz_context{}.
-make_context(ReqId)  ->
-    oc_chef_authz_db:make_context(ReqId).
+-spec make_context(binary(), term()) -> #oc_chef_authz_context{}.
+make_context(ReqId, Darklaunch)  ->
+    oc_chef_authz_db:make_context(ReqId, Darklaunch).
 
 %% @doc Creates a new Authz entity, if the requestor has the necessary permissions.
 %%
