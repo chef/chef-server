@@ -37,8 +37,12 @@
 -define(auth_join_db, "opscode_account").
 
 statements(pgsql) ->
-    {ok, S} = file:consult(filename:join([code:priv_dir(oc_chef_authz), "pgsql_statements.config"])),
-    S.
+    [
+     {find_container_by_orgid_name,
+      <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
+        " FROM containers "
+        " WHERE (org_id = $1 AND name = $2) LIMIT 1">>}
+     ].
 
 %
 % Opscode Chef_views.
