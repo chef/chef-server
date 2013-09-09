@@ -95,5 +95,6 @@ itest: clean
 	@rebar compile -DTEST
 	@mkdir -p itest/ct_logs
 	@ct_run -spec itest/spec.spec -pa deps/*/ebin -pa ebin
+	@echo "Review results with: open itest/ct_logs/index.html"
 
 .PHONY: all compile eunit test dialyzer clean allclean distclean doc ct
