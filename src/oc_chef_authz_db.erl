@@ -20,7 +20,8 @@
 -export([container_record_to_authz_id/2,
          fetch_container/3,
          fetch_group_authz_id/3,
-         make_context/2
+         make_context/2,
+         statements/1
         ]).
 
 -ifdef(TEST).
@@ -34,6 +35,10 @@
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
 -define(user_db, "opscode_account").
 -define(auth_join_db, "opscode_account").
+
+statements(pgsql) ->
+    {ok, S} = file:consult(filename:join([code:priv_dir(oc_chef_authz), "pgsql_statements.config"])),
+    S.
 
 %
 % Opscode Chef_views.
