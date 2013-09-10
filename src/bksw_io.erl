@@ -163,7 +163,7 @@ entry_md(Bucket, Entry) ->
     Result.
 
 -spec entry_md(#entryref{}) -> {ok, #object{}} | {error, term()}.
-entry_md(#entryref{fd=Fd, path=Path, bucket=Bucket, entry=Entry}) ->
+entry_md(#entryref{fd=Fd, path=Path, entry=Entry}) ->
     case file:read_file_info(Path) of
         {ok, #file_info{mtime = Date, size = Size}} ->
             [UTC | _] = %% FIXME This is a hack until R15B
@@ -172,8 +172,7 @@ entry_md(#entryref{fd=Fd, path=Path, bucket=Bucket, entry=Entry}) ->
                 error ->
                     error;
                 {ok, MD5} ->
-                    EntryPath = bksw_io_names:entry_path(Bucket, Entry),
-                    {ok, #object{path=EntryPath,
+                    {ok, #object{path=Path,
                                  name=Entry,
                                  date=UTC,
                                  size=Size - ?TOTAL_HEADER_SIZE_BYTES,
