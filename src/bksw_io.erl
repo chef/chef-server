@@ -28,7 +28,6 @@
          open_for_read/2,
          open_for_write/2,
          entry_md/2,
-         entry_md/1,
          write/2,
          read/2,
          finish_read/1,
