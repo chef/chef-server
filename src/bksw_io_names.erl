@@ -20,7 +20,6 @@
 -export([encode/1,
          decode/1,
          bucket_path/1,
-         entry_path/1,
          entry_path/2,
          parse_path/1,
          write_path/2
@@ -43,11 +42,6 @@ decode(Data) when is_list(Data) ->
 bucket_path(Bucket) when Bucket =/= <<>> ->
     Root = bksw_conf:disk_store(),
     filename:join([Root, encode(Bucket)]).
-
-entry_path(BucketEntryPath) when BucketEntryPath =/= <<>> ->
-    Root = bksw_conf:disk_store(),
-    EP = entry_path_sha(BucketEntryPath),
-    iolist_to_binary(filename:join([Root, EP])).
 
 entry_path(Bucket, Entry) when Bucket =/= <<>> andalso Entry =/= <<>> ->
     Root = bksw_conf:disk_store(),
