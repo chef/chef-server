@@ -146,7 +146,7 @@ open_for_read(Bucket, Entry) ->
                 {ok, ?MAGIC_NUMBER} ->
                     %% Skip past checksum data for now
                     {ok, ?TOTAL_HEADER_SIZE_BYTES} = file:position(Fd, {bof, ?TOTAL_HEADER_SIZE_BYTES}),
-                    {ok, #entryref{fd=Fd, path=FileName}};
+                    {ok, #entryref{fd=Fd, path=FileName, bucket=Bucket, entry=Entry}};
                 _ ->
                     file:close(Fd),
                     {error, corrupt_file}
@@ -163,7 +163,7 @@ entry_md(Bucket, Entry) ->
     Result.
 
 -spec entry_md(#entryref{}) -> {ok, #object{}} | {error, term()}.
-entry_md(#entryref{fd=Fd, path=Path}) ->
+entry_md(#entryref{fd=Fd, path=Path, bucket=Bucket, entry=Entry}) ->
     case file:read_file_info(Path) of
         {ok, #file_info{mtime = Date, size = Size}} ->
             [UTC | _] = %% FIXME This is a hack until R15B
@@ -172,8 +172,7 @@ entry_md(#entryref{fd=Fd, path=Path}) ->
                 error ->
                     error;
                 {ok, MD5} ->
-                    {entry, Bucket, Entry} = bksw_io_names:parse_path(Path),
-                    EntryPath = filename:join([Bucket, Entry]),
+                    EntryPath = bksw_io_names:entry_path(Bucket, Entry),
                     {ok, #object{path=EntryPath,
                                  name=Entry,
                                  date=UTC,

@@ -21,7 +21,6 @@
          decode/1,
          bucket_path/1,
          entry_path/2,
-         parse_path/1,
          write_path/2
         ]).
 
@@ -59,22 +58,6 @@ sha_str(X) ->
 sha_to_hex_str(<<SHA:160/big-unsigned-integer>>) ->
     lists:flatten(io_lib:format("~40.16.0b", [SHA])).
 
-parse_path(Path) when is_binary(Path) ->
-    parse_path(binary_to_list(Path));
-parse_path(Path) when is_list(Path) ->
-    Root = bksw_conf:disk_store(),
-    case filename:dirname(Path) -- Root of
-        "" ->
-            case Path == Root orelse (Root -- Path == "/") of
-                false ->
-                    {bucket, decode(filename:basename(Path))};
-                true ->
-                    {error, bad_bucket}
-            end;
-        Bucket ->
-            {entry, decode(Bucket), decode(filename:basename(Path))}
-    end.
-
 -spec write_path(string() | binary(), string() | binary()) -> binary().
 write_path(Bucket, Path) ->
     Root = bksw_conf:disk_store(),
@@ -97,10 +80,5 @@ entry_path_test() ->
 
     ?assertEqual(<<"/tmp/foo/74/a0/4a/95/entry%20path%2Fabc">>,
                  entry_path(<<"foo">>, <<"entry path/abc">>)).
-
-parse_path_test() ->
-    ?assertMatch({entry, "foo", "test entry"}, parse_path("/tmp/foo/test%20entry")),
-    ?assertMatch({bucket, "foo"}, parse_path(<<"/tmp/foo">>)),
-    ?assertMatch({error, bad_bucket}, parse_path("/tmp")).
 
 -endif.
