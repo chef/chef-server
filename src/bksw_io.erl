@@ -85,34 +85,13 @@ bucket_create(Bucket) ->
 
 -spec bucket_delete(binary()) -> boolean().
 bucket_delete(Bucket) ->
-    case entry_list(Bucket) of
-        [] ->
-            delete_bucket_dir(Bucket);
-        Entries ->
-            case delete_entries(Entries) of
-                true ->
-                    delete_bucket_dir(Bucket);
-                 false ->
-                    false
-            end
-    end.
+    delete_bucket_dir(Bucket).
 
 delete_bucket_dir(Bucket) ->
     case os:cmd("rm -rf " ++ bksw_io_names:bucket_path(binary_to_list(Bucket))) of
         [] ->
             true;
         _ ->
-            false
-    end.
-
-
-delete_entries([]) ->
-    true;
-delete_entries([Entry|T]) ->
-    case entry_delete(Entry) of
-        true ->
-            delete_entries(T);
-        false ->
             false
     end.
 
