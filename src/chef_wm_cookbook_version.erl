@@ -119,7 +119,7 @@ fetch_cookbook_version(DbContext, OrgName, Name, Version) ->
   chef_db:fetch_cookbook_version(DbContext, OrgName, {Name, Version}).
 
 to_json(Req, #base_state{resource_state=#cookbook_state{chef_cookbook_version=CBV}}=State) ->
-    CompleteEJson = chef_cookbook:assemble_cookbook_ejson(CBV),
+    CompleteEJson = chef_cookbook:assemble_cookbook_ejson(CBV, chef_wm_util:base_uri(Req)),
     {chef_json:encode(CompleteEJson), Req, State}.
 
 from_json(Req, #base_state{resource_state = CookbookState} = State) ->
@@ -159,7 +159,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                      chef_cookbook_version = CookbookVersion}
                                 } = State) ->
     ok = ?BASE_RESOURCE:delete_object(DbContext, CookbookVersion, RequestorId),
-    Json = chef_cookbook:assemble_cookbook_ejson(CookbookVersion),
+    Json = chef_cookbook:assemble_cookbook_ejson(CookbookVersion, chef_wm_util:base_uri(Req)),
     {true, chef_wm_util:set_json_body(Req, Json), State}.
 
 %% Private utility functions

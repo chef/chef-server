@@ -109,7 +109,7 @@ sandbox_to_response(Req, #chef_sandbox{id = Id, org_id = OrgId, checksums = Chec
             {<<"uri">>, ?BASE_ROUTES:route(sandbox, Req, [{id, Id}])},
             {<<"checksums">>,
              {
-               [ {CSum, checksum_data(CSum, Flag, OrgId)} || {CSum, Flag} <- ChecksumList ]
+               [ {CSum, checksum_data(CSum, Flag, OrgId, chef_wm_util:base_uri(Req))} || {CSum, Flag} <- ChecksumList ]
              }
             }
            ]},
@@ -117,15 +117,15 @@ sandbox_to_response(Req, #chef_sandbox{id = Id, org_id = OrgId, checksums = Chec
 
 -define(PUT_URL_TTL, 900).
 
-checksum_data(_CSum, true, _OrgId) ->
+checksum_data(_CSum, true, _OrgId, _VHost) ->
     {[
       {<<"needs_upload">>, false}
      ]};
-checksum_data(CSum, false, OrgId) ->
+checksum_data(CSum, false, OrgId, VHost) ->
     %% FIXME: need to do a lookup either one at a time or in bulk to find out which
     %% checksums are already in the db.
     %% FIXME: will this be a problem for OSC w/ bookshelf?
-    PutUrl = chef_s3:generate_presigned_url(OrgId, ?PUT_URL_TTL, put, CSum),
+    PutUrl = chef_s3:generate_presigned_url(OrgId, ?PUT_URL_TTL, put, CSum, VHost),
     {[
       {<<"url">>, PutUrl},
       {<<"needs_upload">>, true}

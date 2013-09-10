@@ -3,7 +3,8 @@
 %% @author Christopher Brown <cb@opscode.com>
 %% @author Christopher Maier <cm@opscode.com>
 %% @author Seth Falcon <seth@opscode.com>
-%% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+%% @author Ho-Sheng Hsiao <hosh@opscode.com>
+%% Copyright 2011-2013 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -51,18 +52,26 @@ base_mods() ->
     [{base_resource, ?BASE_RESOURCE}, {base_routes, ?BASE_ROUTES}].
 
 %% @doc Returns the base URI for the server as called by the client as a string.
+%% By default, use the Host: header value, or if configured with the atom 'host_header'
+%% Otherwise, use the configured url.
 base_uri(Req) ->
-    scheme(Req) ++ "://" ++ vhost_or_peer(Req).
+    case application:get_env(chef_wm, base_resource_url) of
+        undefined         -> scheme(Req) ++ "://" ++ vhost(Req);
+        {ok, host_header} -> scheme(Req) ++ "://" ++ vhost(Req);
+        {ok, ExternalUrl} -> ExternalUrl
+    end.
 
 %% @doc Returns the host from the request headers, or use the webmachine default
-vhost_or_peer(Req) ->
+vhost(Req) ->
     case wrq:get_req_header("host", Req) of
         B when is_binary(B) -> binary_to_list(B);
         S when is_list(S) -> S;
-        undefined ->
-            string:join(wrq:host_tokens(Req), ".") ++ port_string(wrq:port(Req))
+        undefined -> fqdn_with_port(Req)
     end.
 
+%% @doc Returns the host via webmachine
+fqdn_with_port(Req) ->
+    string:join(wrq:host_tokens(Req), ".") ++ port_string(wrq:port(Req)).
 
 get_header_fun(Req, State = #base_state{header_fun = HFun})
   when HFun =:= undefined ->
