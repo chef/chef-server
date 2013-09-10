@@ -37,6 +37,8 @@
 
 -record(entryref, {fd :: file:io_device(),
                    path :: string() | binary(),
+                   bucket :: binary(),
+                   entry :: binary(),
                    ctx :: undefined | binary()}).
 
 -include_lib("kernel/include/file.hrl").
@@ -61,7 +63,7 @@ bucket_list() ->
 entry_list(Bucket) ->
     BucketPath = bksw_io_names:bucket_path(Bucket),
     %% As of R16, second arg to filelib:wildcard must be string
-    filter_entries(Bucket, filelib:wildcard("*", bksw_util:to_string(BucketPath))).
+    filter_entries(Bucket, filelib:wildcard("*/*/*/*/*", bksw_util:to_string(BucketPath))).
 
 -spec bucket_exists(binary()) -> boolean().
 bucket_exists(Bucket) ->
@@ -99,9 +101,7 @@ delete_bucket_dir(Bucket) ->
 entry_delete(Bucket, Entry) ->
     entry_delete(bksw_io_names:entry_path(Bucket, Entry)).
 
--spec entry_delete(#object{} | binary()) -> boolean().
-entry_delete(#object{path=Path}) ->
-    entry_delete(bksw_io_names:entry_path(Path));
+-spec entry_delete(binary()) -> boolean().
 entry_delete(FullPath) ->
     case file:delete(FullPath) of
         ok ->
@@ -118,8 +118,7 @@ entry_exists(Bucket, Path) ->
 
 -spec open_for_write(binary(), binary()) -> {ok, #entryref{}} | {error, term()}.
 open_for_write(Bucket, Entry) ->
-    EntryPath = bksw_io_names:entry_path(Bucket, Entry),
-    FileName = bksw_io_names:write_path(EntryPath),
+    FileName = bksw_io_names:write_path(Bucket, Entry),
     filelib:ensure_dir(FileName),
     case file:open(FileName, [exclusive, write, binary]) of
         {ok, Fd} ->
@@ -127,7 +126,9 @@ open_for_write(Bucket, Entry) ->
             case file:write(Fd, ?MAGIC_NUMBER) of
                 ok ->
                     {ok, ?TOTAL_HEADER_SIZE_BYTES} = file:position(Fd, {bof, ?TOTAL_HEADER_SIZE_BYTES}),
-                    {ok, #entryref{fd=Fd, path=FileName, ctx=erlang:md5_init()}};
+                    {ok, #entryref{fd=Fd, path=FileName,
+                                   bucket=Bucket, entry=Entry,
+                                   ctx=erlang:md5_init()}};
                 Error ->
                     file:close(Fd),
                     Error
@@ -211,7 +212,7 @@ abort_write(#entryref{fd=Fd, path=Path}) ->
     file:delete(Path).
 
 -spec finish_write(#entryref{}) -> {ok, binary()} | {error, file:posix() | badarg}.
-finish_write(#entryref{fd=Fd, path=Path, ctx=Ctx}) ->
+finish_write(#entryref{fd=Fd, path=Path, bucket=Bucket, entry=Entry, ctx=Ctx}) ->
     case file:sync(Fd) of
         ok ->
             Digest = erlang:md5_final(Ctx),
@@ -219,12 +220,17 @@ finish_write(#entryref{fd=Fd, path=Path, ctx=Ctx}) ->
             {ok, ?MAGIC_NUMBER_SIZE_BYTES} = file:position(Fd, {bof, ?MAGIC_NUMBER_SIZE_BYTES}),
             file:write(Fd, Digest),
             file:close(Fd),
-            Entry = bksw_io_names:write_path_to_entry(Path),
-            case file:rename(Path, Entry) of
+            FinalPath = bksw_io_names:entry_path(Bucket, Entry),
+            case filelib:ensure_dir(FinalPath) of
                 ok ->
-                    {ok, Digest};
-                Error ->
-                    Error
+                    case file:rename(Path, FinalPath) of
+                        ok ->
+                            {ok, Digest};
+                        Error ->
+                            Error
+                    end;
+                DirError ->
+                    DirError
             end;
         Error ->
             file:close(Fd),
