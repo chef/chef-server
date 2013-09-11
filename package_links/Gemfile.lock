@@ -36,6 +36,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  aws-sdk
+  aws-sdk (= 1.8.5)
   bitly (~> 0.9.0)
   erubis

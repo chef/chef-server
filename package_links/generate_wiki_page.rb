@@ -41,7 +41,7 @@ module OCTechPreview
 
     def url_for(package)
       o = @s3.buckets[@bucket].objects[package]
-      url o.url_for(:get, :expires => (60 * 60 * 24 * @days_valid)
+      url = o.url_for(:get, :expires => (60 * 60 * 24 * @days_valid))
       @bitly.shorten(url).short_url
     end
 
