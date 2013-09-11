@@ -167,7 +167,20 @@ wi_basic(Config) when is_list(Config) ->
                          ?assertEqual(ok, mini_s3:delete_bucket(DelBuck, S3Conf)),
                          [{buckets, NewBuckets}] = mini_s3:list_buckets(S3Conf),
                          error_logger:info_msg("NewBuckets: ~p~n", [NewBuckets]),
-                         ?assertEqual(Count - 1, length(NewBuckets))
+                         ?assertEqual(Count - 1, length(NewBuckets)),
+
+                         %% bucket name encoding should work
+                         OddBucket = "a bucket",
+                         OddBucketEnc = "a%20bucket",
+                         mini_s3:create_bucket(OddBucketEnc, public_read_write, none, S3Conf),
+                         Buckets1 = ?config(buckets, mini_s3:list_buckets(S3Conf)),
+                         BucketNames1 = [ ?config(name, B) || B <- Buckets1 ],
+                         error_logger:error_msg("Bucket Names:~n~p~n", [BucketNames1]),
+                         ?assert(lists:member(OddBucket, BucketNames1)),
+                         OddResult = mini_s3:list_objects(OddBucketEnc, [], S3Conf),
+                         ?assertEqual("a bucket", ?config(name, OddResult)),
+                         ?assertEqual([], ?config(contents, OddResult)),
+                         mini_s3:delete_bucket(OddBucketEnc, S3Conf)
                  end),
     error_logger:info_msg("WI_BASIC TIMING ~p", [Timings]).
 
@@ -328,7 +341,8 @@ upgrade_from_v0(Config) ->
                    {"bucket-1", "xjbrpodcionabrzhikgliowdzvbvbc/kqvfgzhnlkizzvbidsxwavrktxcasx"},
                    {"bucket-1", "zrcsghibdgwjghkqsdajycrjwitntu/ahnsvorjeauuwusthkdunsslzffkfn"},
                    {"bucket-2", "drniwxjwkasvovjjoafthnoqgtlung/lhfivdpsosyjybnmfpxkgplycrclmz"},
-                   {"bucket-2", "nbmxbspdkbubastgtzzkhtunqznkcg/afbtmzfyyftrdxfbnmkslckewisxns"}
+                   {"bucket-2", "nbmxbspdkbubastgtzzkhtunqznkcg/afbtmzfyyftrdxfbnmkslckewisxns"},
+                   {"bucket%20space", "xjbrpodcionabrzhikgliowdzvbvbc/kqvfgzhnlkizzvbidsxwavrktxcasx"}
                   ],
 
     S3Conf = ?config(s3_conf, Config),
@@ -343,6 +357,7 @@ upgrade_from_v0(Config) ->
     AssertCount("bucket-2", 45),
     AssertCount("bucket-3", 1),
     AssertCount("bucket-4", 0),
+    AssertCount("bucket%20space", 2),
 
     [ begin
           Res = mini_s3:get_object(Bucket, Key, [], S3Conf),

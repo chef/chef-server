@@ -288,7 +288,7 @@ make_buckets(Root, [BucketDir|T], Buckets) ->
                    {ok, #file_info{mtime=Date}} ->
                        [UTC | _] = %% FIXME This is a hack until R15B
                            calendar:local_time_to_universal_time_dst(Date),
-                       [#bucket{name=BucketDir,
+                       [#bucket{name=bksw_io_names:decode(BucketDir),
                                 date=UTC}|Buckets];
                    _Error ->
                        Buckets
