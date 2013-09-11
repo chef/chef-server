@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    aws-sdk (1.17.0)
+    aws-sdk (1.8.5)
       json (~> 1.4)
       nokogiri (< 1.6.0)
       uuidtools (~> 2.1)

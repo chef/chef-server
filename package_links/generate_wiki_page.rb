@@ -41,8 +41,7 @@ module OCTechPreview
 
     def url_for(package)
       o = @s3.buckets[@bucket].objects[package]
-      # bit.ly API spec wants properly escaped URLs
-      url = URI::escape(o.url_for(:get, :expires => (60 * 60 * 24 * @days_valid)).to_s)
+      url o.url_for(:get, :expires => (60 * 60 * 24 * @days_valid)
       @bitly.shorten(url).short_url
     end
 
