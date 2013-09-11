@@ -34,6 +34,11 @@
          abort_write/1,
          finish_write/1]).
 
+-export([
+         disk_format_version/0,
+         upgrade_disk_format/0
+         ]).
+
 -record(entryref, {fd :: file:io_device(),
                    path :: string() | binary(),
                    bucket :: binary(),
@@ -43,6 +48,12 @@
 -include_lib("kernel/include/file.hrl").
 -include("bksw_obj.hrl").
 
+-define(DISK_FORMAT_VERSION, 1).
+%% Use _%_ prefix since this cannot appear as a bucket name (we
+%% encode bucket names so no bare %'s). Prefer this to a hidden
+%% file since that reduces the chance of missing the version file
+%% as part of backup/restore.
+-define(FORMAT_VERSION_FILE, "_%_BOOKSHELF_DISK_FORMAT").
 -define(MAGIC_NUMBER, <<16#b00c:16/integer>>).
 -define(MAGIC_NUMBER_SIZE_BYTES, 2).
 -define(CHECKSUM_SIZE_BYTES, 16).
@@ -283,3 +294,67 @@ make_buckets(Root, [BucketDir|T], Buckets) ->
                        Buckets
                end,
     make_buckets(Root, T, Buckets1).
+
+%% @doc Return the on disk format version. If no version file is
+%% found, returns `{version, 0}' which is the first shipping format.
+-spec disk_format_version() -> {version, integer()}.
+disk_format_version() ->
+    Root = bksw_conf:disk_store(),
+    VersionFile = filename:join([Root, ?FORMAT_VERSION_FILE]),
+    case filelib:is_file(VersionFile) of
+        false ->
+            %% we assume version 0 if no version file is found.
+            {version, 0};
+        true ->
+            {version, read_format_version(file:read_file(VersionFile))}
+    end.
+
+read_format_version({ok, Bin}) ->
+    %% format version data is plain text with integer version number
+    %% as first space separated token on first line.
+    Line1 = hd(re:split(Bin, "\n")),
+    Token1 = hd(string:tokens(binary_to_list(Line1), " ")),
+    list_to_integer(Token1).
+
+upgrade_disk_format() ->
+    upgrade_disk_format(disk_format_version()).
+
+upgrade_disk_format({version, ?DISK_FORMAT_VERSION}) ->
+    ok;
+upgrade_disk_format({version, 0}) ->
+    upgrade_from_v0();
+upgrade_disk_format({version, X}) ->
+    error({upgrade_disk_format, "unsupported upgrade", X, ?DISK_FORMAT_VERSION}).
+
+
+%% write in-progress version file?
+%% get list of buckets.
+%% for each bucket, list of entries (flat, ignore directories).
+%% within bucket, move entry to new path
+%% write version file.
+upgrade_from_v0() ->
+    [ upgrade_bucket(B) || #bucket{name = B} <- bucket_list() ],
+    write_format_version(),
+    ok.
+
+upgrade_bucket(Bucket) ->
+    error_logger:info_msg("migrating bucket: ~p~n", [Bucket]),
+    RawBucket = bksw_io_names:decode(Bucket),
+    BucketPath = bksw_io_names:bucket_path(RawBucket),
+    Entries = filelib:wildcard(bksw_util:to_string(BucketPath) ++ "/*"),
+    FileEntries = [ F || F <- Entries,
+                         filelib:is_dir(F) == false ],
+    [
+     begin
+         BaseName = filename:basename(F),
+         %% entry_path wants the decoded name since it encodes.
+         NewPath = bksw_io_names:entry_path(RawBucket,
+                                            bksw_io_names:decode(BaseName)),
+         ok = filelib:ensure_dir(NewPath),
+         ok = file:rename(F, NewPath)
+     end || F <- FileEntries ].
+
+write_format_version() ->
+    Path = filename:join(bksw_conf:disk_store(), ?FORMAT_VERSION_FILE),
+    ok = file:write_file(Path, io_lib:format("~B~n", [?DISK_FORMAT_VERSION])),
+    ok.
