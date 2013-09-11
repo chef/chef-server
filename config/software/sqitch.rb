@@ -15,6 +15,18 @@ env = {
 
 # See https://github.com/theory/sqitch for more
 build do
+
+  # What the hell... all of a sudden, we have a missing dependency in
+  # Role::HasMessage
+  #
+  # Install cpanminus in order to install it, because cpan is such a
+  # pain.
+  #
+  #   ;_;
+  #
+  command "cpan App::Cpanminus", :env => env
+  command "cpanm Role::HasMessage", :env => env
+
   command "perl Build.PL", :env => env
   command "./Build installdeps", :env => env
   command "./Build", :env => env
