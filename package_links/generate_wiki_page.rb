@@ -2,6 +2,8 @@
 
 require 'aws'
 require 'erubis'
+require 'uri'
+require 'bitly'
 
 module OCTechPreview
 
@@ -24,16 +26,25 @@ module OCTechPreview
   class URLGenerator
     attr_reader :days_valid
 
-    def initialize(id, secret, bucket, days_valid=7)
-      @id, @secret, @bucket, @days_valid = id, secret, bucket, days_valid
+    def initialize(id, secret, bucket, days_valid, bitlyuser, bitlyapi)
+      @id, @secret, @bucket, @days_valid, @bitlyuser, @bitlyapi = id, secret, bucket, days_valid, bitlyuser, bitlyapi
       @config = AWS.config(:access_key_id => @id, :secret_access_key => @secret, :region => 'us-west-2')
       @s3 = AWS::S3.new
+      # Bitly library makes us declare that we're using api version 3 for now
+      Bitly.configure do |config|
+        config.api_version = 3
+        config.login = @bitlyuser
+        config.api_key = @bitlyapi
+      end
+      @bitly = Bitly.client
     end
 
     def url_for(package)
       o = @s3.buckets[@bucket].objects[package]
-      o.url_for(:get, :expires => (60 * 60 * 24 * @days_valid))
+      url = o.url_for(:get, :expires => (60 * 60 * 24 * @days_valid))
+      @bitly.shorten(url).short_url
     end
+
   end
 
   class PreviewInfo
@@ -134,8 +145,11 @@ if __FILE__ == $0
   BUCKET_NAME = "opc11-tech-preview"
   DAYS_VALID  = 7
 
-  id     = ENV['AWS_ACCESS_KEY_ID']     || raise("No AWS_ACCESS_KEY_ID environment variable set!")
-  secret = ENV['AWS_SECRET_ACCESS_KEY'] || raise("No AWS_SECRET_ACCESS_KEY environment variable set!")
+  id        = ENV['AWS_ACCESS_KEY_ID']     || raise("No AWS_ACCESS_KEY_ID environment variable set!")
+  secret    = ENV['AWS_SECRET_ACCESS_KEY'] || raise("No AWS_SECRET_ACCESS_KEY environment variable set!")
+  bitlyuser = ENV['BITLY_USER']            || raise("No BITLY_USER environment variable set!")
+  bitlyapi  = ENV['BITLY_APIKEY']          || raise("No BITLY_APIKEY environment variable set!")
+
 
   packages = [
               # Private Chef
@@ -177,7 +191,7 @@ if __FILE__ == $0
               "opscode-webui_2.4.0-tech.preview.1-1.ubuntu.11.04_amd64.deb"
              ]
 
-  url_generator = OCTechPreview::URLGenerator.new(id, secret, BUCKET_NAME, DAYS_VALID)
+  url_generator = OCTechPreview::URLGenerator.new(id, secret, BUCKET_NAME, DAYS_VALID, bitlyuser, bitlyapi)
   preview_info  = OCTechPreview::PreviewInfo.new(packages, url_generator)
   wiki_page     = OCTechPreview::WikiPage.new(preview_info)
 
