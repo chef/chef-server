@@ -24,7 +24,7 @@ build do
   #
   #   ;_;
   #
-  command "cpan App::Cpanminus", :env => env
+  command "cpan App::cpanminus", :env => env
   command "cpanm Role::HasMessage", :env => env
 
   command "perl Build.PL", :env => env
