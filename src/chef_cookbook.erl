@@ -23,8 +23,8 @@
 -module(chef_cookbook).
 
 -export([
-         assemble_cookbook_ejson/1,
-         minimal_cookbook_ejson/1,
+         assemble_cookbook_ejson/2,
+         minimal_cookbook_ejson/2,
          parse_binary_json/2,
          extract_checksums/1,
          constraint_map_spec/1,
@@ -290,7 +290,7 @@ version_to_binary({Major, Minor, Patch}) ->
 %%
 %% The Ejson structure is a 1-1 mapping from the #chef_cookbook_version{} and does
 %% not contain any extra information, e.g. S3 URLs.
--spec assemble_cookbook_ejson(#chef_cookbook_version{}) -> ejson_term().
+-spec assemble_cookbook_ejson(#chef_cookbook_version{}, string()) -> ejson_term().
 assemble_cookbook_ejson(#chef_cookbook_version{
                            org_id = OrgId,
                            frozen=Frozen,
@@ -298,7 +298,7 @@ assemble_cookbook_ejson(#chef_cookbook_version{
                            metadata=XMetadataJSON,
                            meta_attributes=XMetaAttributesJSON,
                            meta_long_desc=XLongDescription,
-                           meta_deps=DependenciesJSON}) ->
+                           meta_deps=DependenciesJSON}, ExternalUrl) ->
     %% The serialized_object is everything but the metadata, and metadata in turn is all the
     %% metadata except the attributes, long description, and dependencies.  All need to be
     %% merged back together.
@@ -314,7 +314,7 @@ assemble_cookbook_ejson(#chef_cookbook_version{
                            [{<<"attributes">>, XMetaAttributesJSON},
                             {<<"dependencies">>, DependenciesJSON},
                             {<<"long_description">>, XLongDescription}]),
-    CookbookJSON = annotate_with_s3_urls(inflate(<<"cookbook">>, XCookbookJSON), OrgId),
+    CookbookJSON = annotate_with_s3_urls(inflate(<<"cookbook">>, XCookbookJSON), OrgId, ExternalUrl),
 
     %% Now that the metadata is assembled, piece the final cookbook together
     lists:foldl(fun({Key, Data}, CB) ->
@@ -324,12 +324,12 @@ assemble_cookbook_ejson(#chef_cookbook_version{
                 [{<<"frozen?">>, Frozen},
                  {<<"metadata">>, Metadata}]).
 
--spec minimal_cookbook_ejson(#chef_cookbook_version{}) -> ejson_term().
+-spec minimal_cookbook_ejson(#chef_cookbook_version{}, string()) -> ejson_term().
 minimal_cookbook_ejson(#chef_cookbook_version{org_id = OrgId,
                                               frozen=Frozen,
                                               serialized_object=XCookbookJSON,
                                               metadata=XMetadataJSON,
-                                              meta_deps=DependenciesJSON}) ->
+                                              meta_deps=DependenciesJSON}, ExternalUrl) ->
     %% The serialized_object is everything but the metadata, and metadata in turn is all the
     %% metadata except the attributes and long description.  We do not add in the sub pieces
     %% of the metadata when merging
@@ -338,7 +338,7 @@ minimal_cookbook_ejson(#chef_cookbook_version{org_id = OrgId,
     Metadata = ej:set({<<"dependencies">>}, Metadata0,
                       inflate(<<"dependencies">>, DependenciesJSON)),
 
-    CookbookJSON = annotate_with_s3_urls(inflate(<<"cookbook">>, XCookbookJSON), OrgId),
+    CookbookJSON = annotate_with_s3_urls(inflate(<<"cookbook">>, XCookbookJSON), OrgId, ExternalUrl),
 
     lists:foldl(fun({Key, Data}, CB) ->
                         ej:set({Key}, CB, Data)
@@ -348,12 +348,12 @@ minimal_cookbook_ejson(#chef_cookbook_version{org_id = OrgId,
                  {<<"metadata">>, Metadata}]).
 
 %% @doc Add S3 download URLs for all files in the cookbook
-annotate_with_s3_urls(Ejson, OrgId) ->
+annotate_with_s3_urls(Ejson, OrgId, ExternalUrl) ->
     lists:foldl(fun(Segment, CB) ->
                     case ej:get({Segment}, CB) of
                         undefined -> CB;
                         Data ->
-                            WithUrls = add_urls_for_segment(OrgId, Data),
+                            WithUrls = add_urls_for_segment(OrgId, Data, ExternalUrl),
                             ej:set({Segment}, CB, WithUrls)
                     end
                 end,
@@ -430,13 +430,14 @@ url_ttl() ->
 
 %% @doc Given a list of files for a particular segment add in a S3 URL per file
 %% based on the checksum
-add_urls_for_segment(OrgId, FileList) ->
+add_urls_for_segment(OrgId, FileList, ExternalUrl) ->
     [ ej:set({<<"url">>},
              File,
              chef_s3:generate_presigned_url(OrgId,
                                             url_ttl(),
                                             get,
-                                            ej:get({<<"checksum">>}, File)))
+                                            ej:get({<<"checksum">>}, File),
+                                            ExternalUrl))
      || File <- FileList].
 
 %% @doc Removes any ".rb" suffix from a recipe name

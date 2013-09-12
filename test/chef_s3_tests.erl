@@ -44,69 +44,149 @@ make_key_test() ->
     ?assertEqual(chef_s3:make_key(OrgId, Checksum),
                  "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb").
 
-url_test_() ->
+%% There are no public API functions in mini_s3 for deserializing
+%% AWS config information
+-record(config, {
+          s3_url="http://s3.amazonaws.com"::string(),
+          access_key_id::string(),
+          secret_access_key::string(),
+          bucket_access_type=virtual_hosted::mini_s3:bucket_access_type()
+
+}).
+setup_s3(InternalS3Url, ExternalS3Url) ->
     MockedModules = [mini_s3],
-    {
-      foreach,
-      fun() ->
-              test_utils:mock(MockedModules, [passthrough]),
-              application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
-              application:set_env(chef_objects, s3_access_key_id, "super_id"),
-              application:set_env(chef_objects, s3_secret_key_id, "super_secret"),
-              application:set_env(chef_objects, s3_url, "https://FAKE_S3.com"),
+    test_utils:mock(MockedModules, [passthrough]),
+    application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
+    application:set_env(chef_objects, s3_access_key_id, "super_id"),
+    application:set_env(chef_objects, s3_secret_key_id, "super_secret"),
+    application:set_env(chef_objects, s3_url, InternalS3Url),
+    application:set_env(chef_objects, s3_external_url, ExternalS3Url),
 
-              meck:expect(mini_s3, new, 3, blah),
-              meck:expect(mini_s3, get_object_metadata, 4, something),
+    meck:expect(mini_s3, new, 3, mock_mini_s3_ctx),
+    meck:expect(mini_s3, get_object_metadata, 4, mock_metadata).
 
-              meck:expect(mini_s3, s3_url,
-                          fun(_Method, BucketName, Key, _Lifetime, _ContentMD5, _Config) ->
-                                  X = "https://FAKE_S3.com/" ++ BucketName ++ "/" ++ Key,
-                                  list_to_binary(X)
-                          end)
-      end,
-      fun(_) ->
-              test_utils:unmock(MockedModules)
-      end,
-      [{"Generates presigned url for post",
-        fun() ->
-                OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
-                Lifetime = 15,
-                Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
-                Type = put,
+generate_presigned_url_uses_configured_s3_url_test_() ->
+    MockedModules = [mini_s3],
+    HostHeaderUrl = "https://api.example.com:443",
+    OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
+    Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+    Lifetime = 15,
+    Expect_s3_url = fun(ExpectMethod, ExpectUrl) ->
+                            meck:expect(mini_s3, s3_url,
+                                        fun(HTTPMethod, Bucket, Key, MyLifeTime, _ContentMD5,
+                                            #config{s3_url = S3Url}) ->
+                                                ?assertEqual(ExpectMethod, HTTPMethod),
+                                                ?assertEqual("testbucket", Bucket),
+                                                ?assertEqual(Lifetime, MyLifeTime),
+                                                ?assertEqual(ExpectUrl, S3Url),
+                                                stub_s3_url_response
+                                        end)
+                    end,
+    [{"Calls mini_s3:s3_url with HostHeaderUrl when"
+      "external s3 url is set to host_header",
+      {foreach,
+       fun() ->
+               InternalS3Url = "https://FAKE_S3.com",
+               ExternalS3Url = host_header,
+               setup_s3(InternalS3Url, ExternalS3Url),
+               {InternalS3Url, ExternalS3Url}
+       end,
+       fun(_) ->
+               test_utils:unmock(MockedModules)
+       end,
+       [
+        fun({InternalS3Url, ExternalS3Url}) ->
+                [
+                 {" (" ++ atom_to_list(Method) ++ ")",
+                  fun() ->
+                          Expect_s3_url(Method, HostHeaderUrl),
+                          chef_s3:generate_presigned_url(OrgId, Lifetime, Method,
+                                                         Checksum, HostHeaderUrl),
+                          test_utils:validate_modules(MockedModules)
+                  end}
+                 || Method <- [put, get]] ++
+                    [{" (batch checksums)",
+                      fun() ->
+                              Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                           <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
+                                           <<"cccccccccccccccccccccccccccccccc">>],
+                              Expect_s3_url(put, HostHeaderUrl),
+                              chef_s3:generate_presigned_urls(OrgId, Lifetime, put,
+                                                              Checksums, HostHeaderUrl),
+                              test_utils:validate_modules(MockedModules)
+                      end}]
+        end]}},
 
-                ?assertEqual(chef_s3:generate_presigned_url(OrgId, Lifetime, Type, Checksum),
-                             <<"https://FAKE_S3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>),
-                test_utils:validate_modules(MockedModules)
-        end},
-      {"Generates presigned url for get",
-        fun() ->
-                OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
-                Lifetime = 15,
-                Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
-                Type = get,
+     {"Calls mini_s3:s3_url with InternalS3Url when"
+      "external s3 url is set same as internal",
+      {foreach,
+       fun() ->
+               InternalS3Url = "https://FAKE_S3.com",
+               ExternalS3Url = InternalS3Url,
+               setup_s3(InternalS3Url, ExternalS3Url),
+               {InternalS3Url, ExternalS3Url}
+       end,
+       fun(_) ->
+               test_utils:unmock(MockedModules)
+       end,
+       [
+        fun({InternalS3Url, ExternalS3Url}) ->
+                [
+                 {" (" ++ atom_to_list(Method) ++ ")",
+                  fun() ->
+                          Expect_s3_url(Method, InternalS3Url),
+                          chef_s3:generate_presigned_url(OrgId, Lifetime, Method,
+                                                         Checksum, HostHeaderUrl),
+                          test_utils:validate_modules(MockedModules)
+                  end}
+                 || Method <- [put, get]] ++
+                    [{" (batch checksums)",
+                      fun() ->
+                              Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                           <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
+                                           <<"cccccccccccccccccccccccccccccccc">>],
+                              Expect_s3_url(put, InternalS3Url),
+                              chef_s3:generate_presigned_urls(OrgId, Lifetime, put,
+                                                              Checksums, HostHeaderUrl),
+                              test_utils:validate_modules(MockedModules)
+                      end}]
+        end]}},
 
-                ?assertEqual(chef_s3:generate_presigned_url(OrgId, Lifetime, Type, Checksum),
-                             <<"https://FAKE_S3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>),
-                test_utils:validate_modules(MockedModules)
-        end},
-       {"Generates presigned checksum / url tuples in a batch",
-        fun() ->
-                OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
-                Lifetime = 15,
-                Type = put,
-                Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
-                             <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
-                             <<"cccccccccccccccccccccccccccccccc">>],
-
-                ?assertEqual(chef_s3:generate_presigned_urls(OrgId, Lifetime, Type, Checksums),
-                             [{<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
-                               <<"https://FAKE_S3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>},
-                              {<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
-                               <<"https://FAKE_S3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>},
-                              {<<"cccccccccccccccccccccccccccccccc">>,
-                               <<"https://FAKE_S3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-cccccccccccccccccccccccccccccccc">>}]),
-                test_utils:validate_modules(MockedModules)
-        end}]}.
+     {"Calls mini_s3:s3_url with external url when"
+      "external s3 url is customized",
+      {foreach,
+       fun() ->
+               InternalS3Url = "https://FAKE_S3.com",
+               ExternalS3Url = "https://external-s3.com",
+               setup_s3(InternalS3Url, ExternalS3Url),
+               {InternalS3Url, ExternalS3Url}
+       end,
+       fun(_) ->
+               test_utils:unmock(MockedModules)
+       end,
+       [
+        fun({InternalS3Url, ExternalS3Url}) ->
+                [
+                 {" (" ++ atom_to_list(Method) ++ ")",
+                  fun() ->
+                          Expect_s3_url(Method, ExternalS3Url),
+                          chef_s3:generate_presigned_url(OrgId, Lifetime, Method,
+                                                         Checksum, HostHeaderUrl),
+                          test_utils:validate_modules(MockedModules)
+                  end}
+                 || Method <- [put, get]] ++
+                    [{" (batch checksums)",
+                      fun() ->
+                              Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                                           <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
+                                           <<"cccccccccccccccccccccccccccccccc">>],
+                              Expect_s3_url(put, ExternalS3Url),
+                              chef_s3:generate_presigned_urls(OrgId, Lifetime, put,
+                                                              Checksums, HostHeaderUrl),
+                              test_utils:validate_modules(MockedModules)
+                      end}]
+        end]}}
+    ].
 
 checksum_test_() ->
     MockedModules = [mini_s3, chef_s3, chef_s3_ops],
@@ -115,7 +195,7 @@ checksum_test_() ->
              %% Temporarily disable logging chef_s3:delete_checksums/2
              error_logger:tty(false),
              test_utils:mock(MockedModules, [passthrough]),
-             meck:expect(chef_s3, get_config, fun() -> mock_config end),
+             meck:expect(chef_s3, get_internal_config, fun() -> mock_config end),
              application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
 
              application:set_env(chef_objects, s3_parallel_ops_fanout, 3),

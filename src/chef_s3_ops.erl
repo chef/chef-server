@@ -161,7 +161,7 @@ check_file(OrgId, AwsConfig, Bucket, Checksum) ->
 s3_checksum_op(OrgId, Checksums, Fun, TimeoutMsgTemplate) ->
 
     Bucket = chef_s3:bucket(),
-    AwsConfig = chef_s3:get_config(),
+    AwsConfig = chef_s3:get_internal_config(),
     Timeout = chef_config:config_option(chef_objects, s3_parallel_ops_timeout, pos_integer),
     Fanout = chef_config:config_option(chef_objects, s3_parallel_ops_fanout, pos_integer),
 

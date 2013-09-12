@@ -3,9 +3,10 @@
 %% @author Mark Anderson <mark@opscode.com>
 %% @author Christopher Maier <cm@opscode.com>
 %% @author Seth Chisamore <schisamo@opscode.com>
+%% @author Ho-Sheng Hsiao <hosh@ospcode.com>
 %% @doc chef_s3 - Manage S3 activities for erchef
 %%
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -29,11 +30,12 @@
 -export([
          check_checksums/2,
          delete_checksums/2,
-         generate_presigned_url/4,
-         generate_presigned_urls/4,
+         generate_presigned_url/5,
+         generate_presigned_urls/5,
          make_key/2,
          bucket/0,
-         get_config/0
+         get_internal_config/0,
+         get_external_config/1
         ]).
 
 -ifdef(TEST).
@@ -69,17 +71,23 @@ delete_checksums(OrgId, Checksums) ->
 -spec generate_presigned_urls(OrgId :: object_id(),
                               Lifetime :: integer(),
                               Method :: http_verb(),
-                              Checksums :: [binary()]) -> Urls :: [{binary(), binary()}].
-generate_presigned_urls(OrgId, Lifetime, Method, Checksums) ->
+                              Checksums :: [binary()],
+                              ExternalUrl :: string()) -> Urls :: [{binary(), binary()}].
+generate_presigned_urls(OrgId, Lifetime, Method, Checksums, ExternalUrl) ->
     Bucket = bucket(),
-    AwsConfig = get_config(),
+    AwsConfig = get_external_config(ExternalUrl),
     Urls = [{Checksum, generate_presigned_url(OrgId, Bucket, Lifetime, Method, Checksum, AwsConfig)}
             || Checksum <- Checksums],
     Urls.
 
-generate_presigned_url(OrgId, Lifetime, Method, Checksum) ->
+-spec generate_presigned_url(OrgId :: object_id(),
+                              Lifetime :: integer(),
+                              Method :: http_verb(),
+                              Checksum :: binary(),
+                              ExternalUrl :: string()) -> Url :: binary().
+generate_presigned_url(OrgId, Lifetime, Method, Checksum, ExternalUrl) ->
     Bucket = bucket(),
-    AwsConfig = get_config(),
+    AwsConfig = get_external_config(ExternalUrl),
     generate_presigned_url(OrgId, Bucket, Lifetime, Method, Checksum, AwsConfig).
 
 generate_presigned_url(OrgId, Bucket, Lifetime, Method, Checksum, AwsConfig) ->
@@ -132,15 +140,46 @@ headers_for_type(put, Checksum) ->
 headers_for_type(get, _Checksum) ->
     [].
 
-get_config() ->
+%% @doc returns the S3 credentials for erchef to talk to bookshelf or S3
+get_internal_config() ->
+    aws_config(s3_internal_url()).
+
+%% @doc returns the S3 credentials for generating a presigned url
+%% to send back to the requestor. This url will be used by the
+%% requestor to  contact bookshelf or S3 directly, and as such,
+%% the URL needs to be publicly accessible.
+get_external_config(VHostUrl) ->
+    aws_config(s3_external_url(VHostUrl)).
+
+aws_config(S3Url) ->
     {ok, S3AccessKeyId } =  application:get_env(chef_objects, s3_access_key_id),
     {ok, S3SecretKeyId } =  application:get_env(chef_objects, s3_secret_key_id),
+    mini_s3:new(S3AccessKeyId, S3SecretKeyId, S3Url, path).
 
-    S3Url = case application:get_env(chef_objects, s3_url) of
+%% @doc returns a url for accessing s3 internally. This is used
+%% to contact bookshelf or S3.
+s3_internal_url() ->
+    case application:get_env(chef_objects, s3_url) of
         undefined ->
             throw({error, missing_s3_url});
         {ok, Url} ->
             Url
-    end,
+    end.
 
-    mini_s3:new(S3AccessKeyId, S3SecretKeyId, S3Url, path).
+%% @doc returns a url for generating a presigned url to send back
+%% to the requestor. This url will be used by the requestor to
+%% contact bookshelf or S3 directly, and as such, the URL needs
+%% to be publicly accessible. If the url is configured with the
+%% atom host_header, then use the passed-in vhost url parameter.
+s3_external_url(VHostUrl) ->
+    case application:get_env(chef_objects, s3_external_url) of
+        undefined ->
+            throw({error, missing_s3_url});
+        {ok, host_header} ->
+            VHostUrl;
+        {ok, "http" ++ _ = Url} when is_list(Url) ->
+            Url;
+        {ok, Bad} ->
+            {invalid_s3_url, Bad}
+    end.
+
