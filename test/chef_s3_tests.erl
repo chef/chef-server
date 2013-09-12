@@ -44,52 +44,70 @@ make_key_test() ->
     ?assertEqual(chef_s3:make_key(OrgId, Checksum),
                  "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb").
 
-url_test_() ->
+%% There are no public API functions in mini_s3 for deserializing
+%% AWS config information
+-record(config, {
+          s3_url="http://s3.amazonaws.com"::string(),
+          access_key_id::string(),
+          secret_access_key::string(),
+          bucket_access_type=virtual_hosted::mini_s3:bucket_access_type()
+
+}).
+setup_s3(InternalS3Url, ExternalS3Url) ->
+    MockedModules = [mini_s3],
+    test_utils:mock(MockedModules, [passthrough]),
+    application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
+    application:set_env(chef_objects, s3_access_key_id, "super_id"),
+    application:set_env(chef_objects, s3_secret_key_id, "super_secret"),
+    application:set_env(chef_objects, s3_url, InternalS3Url),
+    application:set_env(chef_objects, s3_external_url, ExternalS3Url),
+
+    meck:expect(mini_s3, new, 3, blah),
+    meck:expect(mini_s3, get_object_metadata, 4, something),
+
+    meck:expect(mini_s3, s3_url,
+                fun(_Method, BucketName, Key, _Lifetime, _ContentMD5, #config{s3_url = S3Url}) ->
+                        X = S3Url ++ "/" ++ BucketName ++ "/" ++ Key,
+                        list_to_binary(X)
+                end).
+
+generate_presigned_url_when_using_vhost_test_() ->
+    S3Url = "https://FAKE_S3.com",
+    VHostUrl = "https://api.example.com:443",
     MockedModules = [mini_s3],
     {
       foreach,
       fun() ->
-              test_utils:mock(MockedModules, [passthrough]),
-              application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
-              application:set_env(chef_objects, s3_access_key_id, "super_id"),
-              application:set_env(chef_objects, s3_secret_key_id, "super_secret"),
-              application:set_env(chef_objects, s3_url, "https://FAKE_S3.com"),
-
-              meck:expect(mini_s3, new, 3, blah),
-              meck:expect(mini_s3, get_object_metadata, 4, something),
-
-              meck:expect(mini_s3, s3_url,
-                          fun(_Method, BucketName, Key, _Lifetime, _ContentMD5, _Config) ->
-                                  X = "https://FAKE_S3.com/" ++ BucketName ++ "/" ++ Key,
-                                  list_to_binary(X)
-                          end)
+              %% Internal: "https://FAKE_S3.com"
+              %% External: host_header
+              setup_s3(S3Url, host_header)
       end,
       fun(_) ->
               test_utils:unmock(MockedModules)
       end,
-      [{"Generates presigned url for post",
+      [{"When external s3 url is set to host_header, generates presigned url for post",
         fun() ->
                 OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
                 Lifetime = 15,
                 Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                 Type = put,
 
-                ?assertEqual(chef_s3:generate_presigned_url(OrgId, Lifetime, Type, Checksum),
-                             <<"https://FAKE_S3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>),
+                ?assertEqual(chef_s3:generate_presigned_url(OrgId, Lifetime, Type, Checksum, VHostUrl),
+                             <<"https://api.example.com:443/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>),
                 test_utils:validate_modules(MockedModules)
         end},
-      {"Generates presigned url for get",
+      {"When external s3 url is set to host_header, generates presigned url for get",
         fun() ->
                 OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
                 Lifetime = 15,
                 Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                 Type = get,
 
-                ?assertEqual(chef_s3:generate_presigned_url(OrgId, Lifetime, Type, Checksum),
-                             <<"https://FAKE_S3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>),
+                ?assertEqual(chef_s3:generate_presigned_url(OrgId, Lifetime, Type, Checksum, VHostUrl),
+                             <<"https://api.example.com:443/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>),
                 test_utils:validate_modules(MockedModules)
         end},
-       {"Generates presigned checksum / url tuples in a batch",
+       {"When external s3 url is set to host_header, generates presigned checksum / url tuples in a batch",
         fun() ->
                 OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
                 Lifetime = 15,
@@ -98,13 +116,121 @@ url_test_() ->
                              <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
                              <<"cccccccccccccccccccccccccccccccc">>],
 
-                ?assertEqual(chef_s3:generate_presigned_urls(OrgId, Lifetime, Type, Checksums),
+                ?assertEqual(chef_s3:generate_presigned_urls(OrgId, Lifetime, Type, Checksums, VHostUrl),
+                             [{<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                               <<"https://api.example.com:443/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>},
+                              {<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
+                               <<"https://api.example.com:443/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>},
+                              {<<"cccccccccccccccccccccccccccccccc">>,
+                               <<"https://api.example.com:443/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-cccccccccccccccccccccccccccccccc">>}]),
+                test_utils:validate_modules(MockedModules)
+        end}]}.
+
+generate_presigned_url_when_s3_urls_are_same_test_() ->
+    S3Url = "https://FAKE_S3.com",
+    VHostUrl = "https://api.example.com:443",
+    MockedModules = [mini_s3],
+    {
+      foreach,
+      fun() ->
+              setup_s3(S3Url, S3Url)
+      end,
+      fun(_) ->
+              test_utils:unmock(MockedModules)
+      end,
+      [{"When internal and external S3 urls are the same, generates presigned url for post",
+        fun() ->
+                OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
+                Lifetime = 15,
+                Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                Type = put,
+
+                ?assertEqual(chef_s3:generate_presigned_url(OrgId, Lifetime, Type, Checksum, VHostUrl),
+                             <<"https://FAKE_S3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>),
+                test_utils:validate_modules(MockedModules)
+        end},
+      {"When internal and external S3 urls are the same, generates presigned url for get",
+        fun() ->
+                OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
+                Lifetime = 15,
+                Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                Type = get,
+
+                ?assertEqual(chef_s3:generate_presigned_url(OrgId, Lifetime, Type, Checksum, VHostUrl),
+                             <<"https://FAKE_S3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>),
+                test_utils:validate_modules(MockedModules)
+        end},
+       {"With default S3 url, generates presigned checksum / url tuples in a batch",
+        fun() ->
+                OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
+                Lifetime = 15,
+                Type = put,
+                Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                             <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
+                             <<"cccccccccccccccccccccccccccccccc">>],
+
+                ?assertEqual(chef_s3:generate_presigned_urls(OrgId, Lifetime, Type, Checksums, VHostUrl),
                              [{<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                <<"https://FAKE_S3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>},
                               {<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
                                <<"https://FAKE_S3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>},
                               {<<"cccccccccccccccccccccccccccccccc">>,
                                <<"https://FAKE_S3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-cccccccccccccccccccccccccccccccc">>}]),
+                test_utils:validate_modules(MockedModules)
+        end}]}.
+
+generate_presigned_url_when_s3_urls_are_different_test_() ->
+    InternalS3Url = "https://FAKE_S3.com",
+    ExternalS3Url = "https://real-s3.com",
+    VHostUrl = "https://api.example.com:443",
+    MockedModules = [mini_s3],
+    {
+      foreach,
+      fun() ->
+              setup_s3(InternalS3Url, ExternalS3Url)
+      end,
+      fun(_) ->
+              test_utils:unmock(MockedModules)
+      end,
+      [{"When internal and external S3 urls are different, generates presigned url for post",
+        fun() ->
+                OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
+                Lifetime = 15,
+                Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                Type = put,
+
+
+                ?assertEqual(<<"https://real-s3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                    chef_s3:generate_presigned_url(OrgId, Lifetime, Type, Checksum, VHostUrl)),
+                test_utils:validate_modules(MockedModules)
+        end},
+      {"When internal and external S3 urls are different, generates presigned url for get",
+        fun() ->
+                OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
+                Lifetime = 15,
+                Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                Type = get,
+
+                ?assertEqual(chef_s3:generate_presigned_url(OrgId, Lifetime, Type, Checksum, VHostUrl),
+                             <<"https://real-s3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>),
+                test_utils:validate_modules(MockedModules)
+        end},
+       {"When internal and external S3 urls are different, generates presigned checksum / url tuples in a batch",
+        fun() ->
+                OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
+                Lifetime = 15,
+                Type = put,
+                Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                             <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
+                             <<"cccccccccccccccccccccccccccccccc">>],
+
+                ?assertEqual(chef_s3:generate_presigned_urls(OrgId, Lifetime, Type, Checksums, VHostUrl),
+                             [{<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                               <<"https://real-s3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>},
+                              {<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
+                               <<"https://real-s3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>},
+                              {<<"cccccccccccccccccccccccccccccccc">>,
+                               <<"https://real-s3.com/testbucket/organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-cccccccccccccccccccccccccccccccc">>}]),
                 test_utils:validate_modules(MockedModules)
         end}]}.
 
@@ -115,7 +241,7 @@ checksum_test_() ->
              %% Temporarily disable logging chef_s3:delete_checksums/2
              error_logger:tty(false),
              test_utils:mock(MockedModules, [passthrough]),
-             meck:expect(chef_s3, get_config, fun() -> mock_config end),
+             meck:expect(chef_s3, get_internal_config, fun() -> mock_config end),
              application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
 
              application:set_env(chef_objects, s3_parallel_ops_fanout, 3),

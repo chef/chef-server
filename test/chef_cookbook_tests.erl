@@ -178,6 +178,7 @@ providing_constraint_test_() ->
     ].
 
 assemble_cookbook_ejson_test_() ->
+    VHostUrl = "https://api.example.org",
     CBEJson = basic_cookbook(<<"php">>,
                              <<"1.2.3">>,
                              [
@@ -202,7 +203,7 @@ assemble_cookbook_ejson_test_() ->
                                               CBEJson),
 
               chef_test_utility:ejson_match(CBEJson,
-                                            chef_cookbook:assemble_cookbook_ejson(Record))
+                                            chef_cookbook:assemble_cookbook_ejson(Record, VHostUrl))
 
       end},
 
@@ -215,7 +216,7 @@ assemble_cookbook_ejson_test_() ->
                                               AuthzId,
                                               CBEJson),
 
-              MinCb = chef_cookbook:minimal_cookbook_ejson(Record),
+              MinCb = chef_cookbook:minimal_cookbook_ejson(Record, VHostUrl),
               ?assertEqual(undefined, ej:get({"metadata", "attributes"}, MinCb)),
               ?assertEqual(undefined, ej:get({"metadata", "long_description"}, MinCb)),
               ?assertEqual({[{<<"ruby">>, []}]}, ej:get({"metadata", "dependencies"}, MinCb))
