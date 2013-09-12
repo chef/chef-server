@@ -233,8 +233,15 @@ head_object(Config) when is_list(Config) ->
                                   mini_s3:get_object_metadata(Bucket, Obj, [], S3Conf)
                           end, Objs, 10000),
     error_logger:info_msg("Got: ~p~n", [Got]),
-    [ ?assertMatch({value, _}, Item) || Item <- Got ].
-
+    [ ?assertMatch({value, _}, Item) || Item <- Got ],
+    %% verify 404 behavior
+    V = try
+            mini_s3:get_object_metadata(Bucket, "no-such-object", [], S3Conf)
+        catch
+            error:Why ->
+                Why
+        end,
+    ct:pal("HEAD 404: ~p", [V]).
 
 
 sec_fail(doc) ->

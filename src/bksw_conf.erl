@@ -25,7 +25,6 @@
          get_context/1,
          access_key_id/1,
          disk_store/0,
-         is_stream_download/1,
          reset_dispatch/0,
          secret_access_key/1,
          stream_download/0,
@@ -65,12 +64,6 @@ get_configuration() ->
                    dispatch(),
                    port(),
                    log_dir()]).
-
--spec is_stream_download(context()) -> boolean().
-is_stream_download(#context{stream_download = true}) ->
-    true;
-is_stream_download(#context{}) ->
-    false.
 
 -spec access_key_id(context()) -> binary().
 access_key_id(#context{access_key_id=AccessKeyId}) ->

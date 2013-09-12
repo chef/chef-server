@@ -27,6 +27,7 @@
          entry_exists/2,
          open_for_read/2,
          open_for_write/2,
+         entry_md/1,
          entry_md/2,
          write/2,
          read/2,
@@ -39,14 +40,8 @@
          upgrade_disk_format/0
          ]).
 
--record(entryref, {fd :: file:io_device(),
-                   path :: string() | binary(),
-                   bucket :: binary(),
-                   entry :: binary(),
-                   ctx :: undefined | binary()}).
-
 -include_lib("kernel/include/file.hrl").
--include("bksw_obj.hrl").
+-include("internal.hrl").
 
 -define(DISK_FORMAT_VERSION, 1).
 %% Use _%_ prefix since this cannot appear as a bucket name (we
@@ -173,7 +168,7 @@ entry_md(Bucket, Entry) ->
     finish_read(Ref),
     Result.
 
--spec entry_md(#entryref{}) -> {ok, #object{}} | {error, term()}.
+-spec entry_md(#entryref{}) -> {ok, #object{}} | error.
 entry_md(#entryref{fd=Fd, path=Path, entry=Entry}) ->
     case file:read_file_info(Path) of
         {ok, #file_info{mtime = Date, size = Size}} ->

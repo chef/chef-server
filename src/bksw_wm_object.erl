@@ -42,7 +42,7 @@
          download/2,
          upload/2]).
 
--include("bksw_obj.hrl").
+
 -include_lib("webmachine/include/webmachine.hrl").
 -include("internal.hrl").
 
@@ -92,23 +92,30 @@ resource_exists(Rq0, Ctx) ->
         'PUT' ->
             {true, Rq0, Ctx};
         _ ->
-            {bksw_io:entry_exists(Bucket, Path), Rq0, Ctx}
+            %% determine if the entry exists by opening it. This way, we can cache the fd
+            %% and avoid extra system calls. It also helps to keep the request processing
+            %% more consistent since we will open the fd once at start and hold on to it.
+            %% Note that there is still a possible discrepency when we read the meta data.
+            case bksw_io:open_for_read(Bucket, Path) of
+                {error, enoent} ->
+                    {false, Rq0, Ctx};
+                {ok, Ref} ->
+                    {true, Rq0, Ctx#context{entry_ref = Ref}}
+            end
     end.
 
 last_modified(Rq0, Ctx) ->
-    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
-    case bksw_io:entry_md(Bucket, Path) of
-        {ok, #object{date = Date}} ->
-            {Date, Rq0, Ctx};
+    case entry_md(Ctx) of
+        {#object{date = Date}, CtxNew} ->
+            {Date, Rq0, CtxNew};
         _ ->
             {halt, Rq0, Ctx}
     end.
 
 generate_etag(Rq0, Ctx) ->
-    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
-    case bksw_io:entry_md(Bucket, Path) of
-        {ok, #object{digest = Digest}} ->
-            {bksw_format:to_base64(Digest), Rq0, Ctx};
+    case entry_md(Ctx) of
+        {#object{digest = Digest}, CtxNew} ->
+            {bksw_format:to_base64(Digest), Rq0, CtxNew};
         _ ->
             {halt, Rq0, Ctx}
     end.
@@ -117,23 +124,27 @@ delete_resource(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     {bksw_io:entry_delete(Bucket, Path), Rq0, Ctx}.
 
+%% Return `{Obj, CtxNew}' where `Obj' is the entry meta data `#object{}' record or the atom
+%% `error'. The `CtxNew' may have been updated and should be kept. Accessing entry md
+%% through this function ensures we only ever read the md from the file system once.
+entry_md(#context{entry_md = #object{} = Obj} = Ctx) ->
+    {Obj, Ctx};
+entry_md(#context{entry_ref = Ref, entry_md = undefined} = Ctx) ->
+    case bksw_io:entry_md(Ref) of
+        {ok, #object{} = Obj} ->
+            {Obj, Ctx#context{entry_md = Obj}};
+        Error ->
+            {Error, Ctx}
+    end.
+
 %%
 %% Resource Helpers
 %%
 
-download(Rq0, Ctx) ->
-    {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
-    case bksw_io:open_for_read(Bucket, Path) of
-        {ok, Ref} ->
-            case bksw_conf:is_stream_download(Ctx) of
-                true ->
-                    {{stream, send_streamed_body(Ref)}, Rq0, Ctx};
-                false ->
-                    {fully_read(Ref, []), Rq0, Ctx}
-            end;
-        _Error ->
-            {false, Rq0, Ctx}
-    end.
+download(Rq0, #context{entry_ref = Ref, stream_download = true} = Ctx) ->
+    {{stream, send_streamed_body(Ref)}, Rq0, Ctx};
+download(Rq0, #context{entry_ref = Ref, stream_download = false} = Ctx) ->
+    {fully_read(Ref, []), Rq0, Ctx}.
 
 upload(Rq0, Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
