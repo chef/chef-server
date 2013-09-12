@@ -182,7 +182,7 @@ if __FILE__ == $0
               "opscode-push-jobs-client_0.9.0-tech.preview.1+20130621231152.git.1.b4a8992-1.ubuntu.11.04_i386.deb",
               "opscode-push-jobs-client_0.9.0-tech.preview.1+20130621231152.git.1.b4a8992-1.ubuntu.11.04_amd64.deb",
 
-              "knife-pushy-0.1.gem",
+              "knife-pushy-0.3.gem",
 
               # Web UI
               "opscode-webui-2.4.0_tech.preview.1-1.el5.x86_64.rpm",
