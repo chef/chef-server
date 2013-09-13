@@ -24,6 +24,19 @@
 -define(TIMEOUT_MS, 4096).
 -define(BLOCK_SIZE, 16384).
 
+%% logging utilities
+-compile([{parse_transform, lager_transform}]).
+%% For general info and error logging, we use error_logger and take advantage of lager's
+%% error_logger handler. The main benefit is seeing the logs via sasl instead of lager for
+%% common test. We _could_ take this approach to make lager a soft dependency, but once you
+%% want to add debug-level logging you need direct lager calls.
+-define(LOG_INFO(X, Y), error_logger:info_msg(X, Y)).
+-define(LOG_INFO(X), error_logger:info_msg(X)).
+-define(LOG_ERROR(X, Y), error_logger:error_msg(X, Y)).
+-define(LOG_ERROR(X), error_logger:error_msg(X)).
+-define(LOG_DEBUG(X, Y), lager:debug(X, Y)).
+-define(LOG_DEBUG(X), lager:debug(X)).
+
 -include("bksw_obj.hrl").
 
 -record(entryref, {fd :: file:io_device(),
