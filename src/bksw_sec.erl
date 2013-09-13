@@ -23,6 +23,7 @@
 -export([is_authorized/2]).
 
 -define(SECONDS_AT_EPOCH, 62167219200).
+-include("internal.hrl").
 
 %%===================================================================
 %% API functions
@@ -37,7 +38,7 @@ is_authorized(Req0, Context) ->
             do_standard_authorization(RequestId, IncomingAuth, Req1, Context)
     end.
 
-do_signed_url_authorization(RequestId, Req0, Context) ->
+do_signed_url_authorization(RequestId, Req0, #context{reqid = ReqId} = Context) ->
     AWSAccessKeyId = wrq:get_qs_value("AWSAccessKeyId", Req0),
     Expires = wrq:get_qs_value("Expires", Req0),
     IncomingSignature = wrq:get_qs_value("Signature", Req0),
@@ -55,6 +56,8 @@ do_signed_url_authorization(RequestId, Req0, Context) ->
         {StringToSign, Signature} ->
             case is_expired(Expires) of
                 true ->
+                    ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p",
+                               [ReqId, Expires, Path]),
                     encode_access_denied_error_response(RequestId, Req0, Context);
                 false ->
                     case ((erlang:iolist_to_binary(AWSAccessKeyId) ==
@@ -64,6 +67,7 @@ do_signed_url_authorization(RequestId, Req0, Context) ->
                         true ->
                             {true, Req0, Context};
                         false ->
+                            ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, Path]),
                             encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
                                                        StringToSign, Req0, Context)
                     end
