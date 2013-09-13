@@ -22,6 +22,8 @@ module PrivateChef
   opscode_solr Mash.new
   opscode_expander Mash.new
   opscode_erchef Mash.new
+  # Need old path for cookbook migration:
+  opscode_chef Mash.new
   opscode_webui Mash.new
   lb Mash.new
   postgresql Mash.new
@@ -224,6 +226,8 @@ module PrivateChef
       PrivateChef["opscode_solr"]["data_dir"] ||= "/var/opt/opscode/drbd/data/opscode-solr"
       PrivateChef["postgresql"]["data_dir"] ||= "/var/opt/opscode/drbd/data/postgresql"
       PrivateChef["drbd"]["enable"] ||= true
+      # Need old path for cookbook migration
+      PrivateChef['opscode_chef']['checksum_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/checksum"
       drbd_role = "primary"
       PrivateChef['servers'].each do |k, v|
         next unless v['role'] == "backend"
