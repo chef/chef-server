@@ -146,6 +146,8 @@ default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = '20'
 default['private_chef']['opscode-erchef']['couchdb_max_conn'] = '100'
 default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
+# Default: generate signed URLs based upon Host: header. Override with a url, "http:// ..."
+default['private_chef']['opscode-erchef']['base_resource_url'] = :host_header
 default['private_chef']['opscode-erchef']['s3_bucket'] = 'bookshelf'
 default['private_chef']['opscode-erchef']['s3_url_ttl'] = 900
 default['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] = 5000
@@ -354,6 +356,8 @@ default['private_chef']['bookshelf']['port'] = 4321
 default['private_chef']['bookshelf']['stream_download'] = true
 default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
 default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
+# Default: set to Host: header. Override to hardcode a url, "http://..."
+default['private_chef']['bookshelf']['external_url'] = :host_header
 
 ###
 # Opscode Certificate
