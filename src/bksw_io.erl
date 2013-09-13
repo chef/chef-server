@@ -27,21 +27,28 @@
          entry_exists/2,
          open_for_read/2,
          open_for_write/2,
-         entry_md/2,
          entry_md/1,
+         entry_md/2,
          write/2,
          read/2,
          finish_read/1,
          abort_write/1,
          finish_write/1]).
 
--record(entryref, {fd :: file:io_device(),
-                   path :: string() | binary(),
-                   ctx :: undefined | binary()}).
+-export([
+         disk_format_version/0,
+         upgrade_disk_format/0
+         ]).
 
 -include_lib("kernel/include/file.hrl").
--include("bksw_obj.hrl").
+-include("internal.hrl").
 
+-define(DISK_FORMAT_VERSION, 1).
+%% Use _%_ prefix since this cannot appear as a bucket name (we
+%% encode bucket names so no bare %'s). Prefer this to a hidden
+%% file since that reduces the chance of missing the version file
+%% as part of backup/restore.
+-define(FORMAT_VERSION_FILE, "_%_BOOKSHELF_DISK_FORMAT").
 -define(MAGIC_NUMBER, <<16#b00c:16/integer>>).
 -define(MAGIC_NUMBER_SIZE_BYTES, 2).
 -define(CHECKSUM_SIZE_BYTES, 16).
@@ -61,7 +68,7 @@ bucket_list() ->
 entry_list(Bucket) ->
     BucketPath = bksw_io_names:bucket_path(Bucket),
     %% As of R16, second arg to filelib:wildcard must be string
-    filter_entries(Bucket, filelib:wildcard("*", bksw_util:to_string(BucketPath))).
+    filter_entries(Bucket, filelib:wildcard("*/*/*/*/*", bksw_util:to_string(BucketPath))).
 
 -spec bucket_exists(binary()) -> boolean().
 bucket_exists(Bucket) ->
@@ -85,17 +92,7 @@ bucket_create(Bucket) ->
 
 -spec bucket_delete(binary()) -> boolean().
 bucket_delete(Bucket) ->
-    case entry_list(Bucket) of
-        [] ->
-            delete_bucket_dir(Bucket);
-        Entries ->
-            case delete_entries(Entries) of
-                true ->
-                    delete_bucket_dir(Bucket);
-                 false ->
-                    false
-            end
-    end.
+    delete_bucket_dir(Bucket).
 
 delete_bucket_dir(Bucket) ->
     case os:cmd("rm -rf " ++ bksw_io_names:bucket_path(binary_to_list(Bucket))) of
@@ -105,24 +102,11 @@ delete_bucket_dir(Bucket) ->
             false
     end.
 
-
-delete_entries([]) ->
-    true;
-delete_entries([Entry|T]) ->
-    case entry_delete(Entry) of
-        true ->
-            delete_entries(T);
-        false ->
-            false
-    end.
-
 -spec entry_delete(binary(), binary()) -> boolean().
 entry_delete(Bucket, Entry) ->
     entry_delete(bksw_io_names:entry_path(Bucket, Entry)).
 
--spec entry_delete(#object{} | binary()) -> boolean().
-entry_delete(#object{path=Path}) ->
-    entry_delete(bksw_io_names:entry_path(Path));
+-spec entry_delete(binary()) -> boolean().
 entry_delete(FullPath) ->
     case file:delete(FullPath) of
         ok ->
@@ -139,8 +123,7 @@ entry_exists(Bucket, Path) ->
 
 -spec open_for_write(binary(), binary()) -> {ok, #entryref{}} | {error, term()}.
 open_for_write(Bucket, Entry) ->
-    EntryPath = bksw_io_names:entry_path(Bucket, Entry),
-    FileName = bksw_io_names:write_path(EntryPath),
+    FileName = bksw_io_names:write_path(Bucket, Entry),
     filelib:ensure_dir(FileName),
     case file:open(FileName, [exclusive, write, binary]) of
         {ok, Fd} ->
@@ -148,7 +131,9 @@ open_for_write(Bucket, Entry) ->
             case file:write(Fd, ?MAGIC_NUMBER) of
                 ok ->
                     {ok, ?TOTAL_HEADER_SIZE_BYTES} = file:position(Fd, {bof, ?TOTAL_HEADER_SIZE_BYTES}),
-                    {ok, #entryref{fd=Fd, path=FileName, ctx=erlang:md5_init()}};
+                    {ok, #entryref{fd=Fd, path=FileName,
+                                   bucket=Bucket, entry=Entry,
+                                   ctx=erlang:md5_init()}};
                 Error ->
                     file:close(Fd),
                     Error
@@ -167,7 +152,7 @@ open_for_read(Bucket, Entry) ->
                 {ok, ?MAGIC_NUMBER} ->
                     %% Skip past checksum data for now
                     {ok, ?TOTAL_HEADER_SIZE_BYTES} = file:position(Fd, {bof, ?TOTAL_HEADER_SIZE_BYTES}),
-                    {ok, #entryref{fd=Fd, path=FileName}};
+                    {ok, #entryref{fd=Fd, path=FileName, bucket=Bucket, entry=Entry}};
                 _ ->
                     file:close(Fd),
                     {error, corrupt_file}
@@ -183,8 +168,8 @@ entry_md(Bucket, Entry) ->
     finish_read(Ref),
     Result.
 
--spec entry_md(#entryref{}) -> {ok, #object{}} | {error, term()}.
-entry_md(#entryref{fd=Fd, path=Path}) ->
+-spec entry_md(#entryref{}) -> {ok, #object{}} | error.
+entry_md(#entryref{fd=Fd, path=Path, entry=Entry}) ->
     case file:read_file_info(Path) of
         {ok, #file_info{mtime = Date, size = Size}} ->
             [UTC | _] = %% FIXME This is a hack until R15B
@@ -193,9 +178,7 @@ entry_md(#entryref{fd=Fd, path=Path}) ->
                 error ->
                     error;
                 {ok, MD5} ->
-                    {entry, Bucket, Entry} = bksw_io_names:parse_path(Path),
-                    EntryPath = filename:join([Bucket, Entry]),
-                    {ok, #object{path=EntryPath,
+                    {ok, #object{path=Path,
                                  name=Entry,
                                  date=UTC,
                                  size=Size - ?TOTAL_HEADER_SIZE_BYTES,
@@ -232,7 +215,7 @@ abort_write(#entryref{fd=Fd, path=Path}) ->
     file:delete(Path).
 
 -spec finish_write(#entryref{}) -> {ok, binary()} | {error, file:posix() | badarg}.
-finish_write(#entryref{fd=Fd, path=Path, ctx=Ctx}) ->
+finish_write(#entryref{fd=Fd, path=Path, bucket=Bucket, entry=Entry, ctx=Ctx}) ->
     case file:sync(Fd) of
         ok ->
             Digest = erlang:md5_final(Ctx),
@@ -240,12 +223,17 @@ finish_write(#entryref{fd=Fd, path=Path, ctx=Ctx}) ->
             {ok, ?MAGIC_NUMBER_SIZE_BYTES} = file:position(Fd, {bof, ?MAGIC_NUMBER_SIZE_BYTES}),
             file:write(Fd, Digest),
             file:close(Fd),
-            Entry = bksw_io_names:write_path_to_entry(Path),
-            case file:rename(Path, Entry) of
+            FinalPath = bksw_io_names:entry_path(Bucket, Entry),
+            case filelib:ensure_dir(FinalPath) of
                 ok ->
-                    {ok, Digest};
-                Error ->
-                    Error
+                    case file:rename(Path, FinalPath) of
+                        ok ->
+                            {ok, Digest};
+                        Error ->
+                            Error
+                    end;
+                DirError ->
+                    DirError
             end;
         Error ->
             file:close(Fd),
@@ -295,9 +283,73 @@ make_buckets(Root, [BucketDir|T], Buckets) ->
                    {ok, #file_info{mtime=Date}} ->
                        [UTC | _] = %% FIXME This is a hack until R15B
                            calendar:local_time_to_universal_time_dst(Date),
-                       [#bucket{name=BucketDir,
+                       [#bucket{name=bksw_io_names:decode(BucketDir),
                                 date=UTC}|Buckets];
                    _Error ->
                        Buckets
                end,
     make_buckets(Root, T, Buckets1).
+
+%% @doc Return the on disk format version. If no version file is
+%% found, returns `{version, 0}' which is the first shipping format.
+-spec disk_format_version() -> {version, integer()}.
+disk_format_version() ->
+    Root = bksw_conf:disk_store(),
+    VersionFile = filename:join([Root, ?FORMAT_VERSION_FILE]),
+    case filelib:is_file(VersionFile) of
+        false ->
+            %% we assume version 0 if no version file is found.
+            {version, 0};
+        true ->
+            {version, read_format_version(file:read_file(VersionFile))}
+    end.
+
+read_format_version({ok, Bin}) ->
+    %% format version data is plain text with integer version number
+    %% as first space separated token on first line.
+    Line1 = hd(re:split(Bin, "\n")),
+    Token1 = hd(string:tokens(binary_to_list(Line1), " ")),
+    list_to_integer(Token1).
+
+upgrade_disk_format() ->
+    upgrade_disk_format(disk_format_version()).
+
+upgrade_disk_format({version, ?DISK_FORMAT_VERSION}) ->
+    ok;
+upgrade_disk_format({version, 0}) ->
+    upgrade_from_v0();
+upgrade_disk_format({version, X}) ->
+    error({upgrade_disk_format, "unsupported upgrade", X, ?DISK_FORMAT_VERSION}).
+
+
+%% write in-progress version file?
+%% get list of buckets.
+%% for each bucket, list of entries (flat, ignore directories).
+%% within bucket, move entry to new path
+%% write version file.
+upgrade_from_v0() ->
+    [ upgrade_bucket(B) || #bucket{name = B} <- bucket_list() ],
+    write_format_version(),
+    ok.
+
+upgrade_bucket(Bucket) ->
+    error_logger:info_msg("migrating bucket: ~p~n", [Bucket]),
+    RawBucket = bksw_io_names:decode(Bucket),
+    BucketPath = bksw_io_names:bucket_path(RawBucket),
+    Entries = filelib:wildcard(bksw_util:to_string(BucketPath) ++ "/*"),
+    FileEntries = [ F || F <- Entries,
+                         filelib:is_dir(F) == false ],
+    [
+     begin
+         BaseName = filename:basename(F),
+         %% entry_path wants the decoded name since it encodes.
+         NewPath = bksw_io_names:entry_path(RawBucket,
+                                            bksw_io_names:decode(BaseName)),
+         ok = filelib:ensure_dir(NewPath),
+         ok = file:rename(F, NewPath)
+     end || F <- FileEntries ].
+
+write_format_version() ->
+    Path = filename:join(bksw_conf:disk_store(), ?FORMAT_VERSION_FILE),
+    ok = file:write_file(Path, io_lib:format("~B~n", [?DISK_FORMAT_VERSION])),
+    ok.

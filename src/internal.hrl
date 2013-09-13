@@ -24,6 +24,14 @@
 -define(TIMEOUT_MS, 4096).
 -define(BLOCK_SIZE, 16384).
 
+-include("bksw_obj.hrl").
+
+-record(entryref, {fd :: file:io_device(),
+                   path :: string() | binary(),
+                   bucket :: binary(),
+                   entry :: binary(),
+                   ctx :: undefined | binary()}).
+
 -record(context, {
                   %% AWS credentials
                   access_key_id :: binary(),
@@ -37,5 +45,8 @@
 
                   %% The name of the HTTP request header containing the unique ID set by the load
                   %% balancer
-                  reqid_header_name :: string()
+                  reqid_header_name :: string(),
+
+                  entry_ref :: #entryref{},
+                  entry_md :: #object{}
               }).

@@ -49,6 +49,7 @@ to_binary(Val) when is_list(Val) ->
 to_binary(Val) when is_binary(Val) ->
     Val.
 
+%% Return the URL decoded bucket name
 -spec get_bucket(term()) -> term().
 get_bucket(Req0) ->
     case wrq:path_info(bucket, Req0) of
@@ -57,17 +58,19 @@ get_bucket(Req0) ->
             %% guards in a match which is really unfortunate
             erlang:error(bad_bucket_dep);
         GoodValue ->
-            to_binary(GoodValue)
+            bksw_io_names:decode(to_binary(GoodValue))
     end.
 
+%% Return the URL decoded bucket name and "raw" entry path. Note that this returns `{ok,
+%% Bucket, Entry}' so might be better named `get_bucket_and_object'.
 get_object_and_bucket(Rq0) ->
     case string:tokens(wrq:path(Rq0), "/") of
         [] ->
             {ok, <<"">>, <<"">>};
         [Bucket] ->
-            {ok, bksw_util:to_binary(Bucket),
+            {ok, bksw_io_names:decode(bksw_util:to_binary(Bucket)),
              <<"">>};
         [Bucket | Path] ->
-            {ok, bksw_util:to_binary(Bucket),
+            {ok, bksw_io_names:decode(bksw_util:to_binary(Bucket)),
              bksw_util:to_binary(filename:join(Path))}
     end.

@@ -20,12 +20,9 @@
 -export([encode/1,
          decode/1,
          bucket_path/1,
-         entry_path/1,
          entry_path/2,
-         parse_path/1,
-         write_path/2,
-         write_path/1,
-         write_path_to_entry/1]).
+         write_path/2
+        ]).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -45,65 +42,43 @@ bucket_path(Bucket) when Bucket =/= <<>> ->
     Root = bksw_conf:disk_store(),
     filename:join([Root, encode(Bucket)]).
 
-entry_path(BucketEntryPath) when BucketEntryPath =/= <<>> ->
-    Root = bksw_conf:disk_store(),
-    filename:join([Root, BucketEntryPath]).
-
 entry_path(Bucket, Entry) when Bucket =/= <<>> andalso Entry =/= <<>> ->
     Root = bksw_conf:disk_store(),
-    filename:join([Root, encode(Bucket), encode(Entry)]).
+    EP = filename:join([Root, encode(Bucket), entry_path_sha(Entry)]),
+    iolist_to_binary(EP).
 
-parse_path(Path) when is_binary(Path) ->
-    parse_path(binary_to_list(Path));
-parse_path(Path) when is_list(Path) ->
-    Root = bksw_conf:disk_store(),
-    case filename:dirname(Path) -- Root of
-        "" ->
-            case Path == Root orelse (Root -- Path == "/") of
-                false ->
-                    {bucket, decode(filename:basename(Path))};
-                true ->
-                    {error, bad_bucket}
-            end;
-        Bucket ->
-            {entry, decode(Bucket), decode(filename:basename(Path))}
-    end.
+entry_path_sha(Path) ->
+    EncodedPath = encode(Path),
+    [D11, D12, D21, D22, D31, D32, D41, D42 | _PSHA] = sha_str(EncodedPath),
+    filename:join([[D11, D12], [D21, D22], [D31, D32], [D41, D42], EncodedPath]).
 
+sha_str(X) ->
+    sha_to_hex_str(crypto:sha(X)).
+
+sha_to_hex_str(<<SHA:160/big-unsigned-integer>>) ->
+    lists:flatten(io_lib:format("~40.16.0b", [SHA])).
+
+-spec write_path(string() | binary(), string() | binary()) -> binary().
 write_path(Bucket, Path) ->
-    write_path(entry_path(Bucket, Path)).
-
--spec write_path(string() | binary()) -> string() | binary().
-write_path(Entry) when is_binary(Entry) ->
-    list_to_binary(write_path(binary_to_list(Entry)));
-write_path(Entry) when is_list(Entry) ->
+    Root = bksw_conf:disk_store(),
     {T1, T2, T3} = erlang:now(),
-    FileName = lists:flatten([Entry, io_lib:format(".~p~p~p_bkwbuf", [T1, T2, T3])]),
-    case filelib:wildcard(FileName) of
-        [] ->
-            FileName;
-        [_] ->
-            write_path(Entry)
-    end.
-
-write_path_to_entry(TempName) ->
-    filename:join([filename:dirname(TempName), filename:rootname(filename:basename(TempName))]).
+    UniqueExt = io_lib:format(".~p~p~p_bkwbuf", [T1, T2, T3]),
+    iolist_to_binary([Root, "/", encode(Bucket), "-", sha_str(encode(Path)), UniqueExt]).
 
 -ifdef(TEST).
 encode_decode_test() ->
-    ?assertMatch(<<"testing%20123">>, encode(<<"testing 123">>)),
-    ?assertMatch("testing%20123", encode("testing 123")).
+    ?assertEqual(<<"testing%20123">>, encode(<<"testing 123">>)),
+    ?assertEqual("testing%20123", encode("testing 123")).
 
 bucket_path_test() ->
-    ?assertMatch(<<"/tmp/foo">>, bucket_path(<<"foo">>)),
-    ?assertMatch(<<"/tmp/hello%20world">>, bucket_path(<<"hello world">>)).
+    ?assertEqual(<<"/tmp/foo">>, bucket_path(<<"foo">>)),
+    ?assertEqual(<<"/tmp/hello%20world">>, bucket_path(<<"hello world">>)).
 
 entry_path_test() ->
-    ?assertMatch(<<"/tmp/foo/bar">>, entry_path(<<"foo">>, <<"bar">>)),
-    ?assertMatch(<<"/tmp/foo/entry%20path">>, entry_path(<<"foo">>, <<"entry path">>)).
+    ?assertEqual(<<"/tmp/foo/62/cd/b7/02/bar">>,
+                 entry_path(<<"foo">>, <<"bar">>)),
 
-parse_path_test() ->
-    ?assertMatch({entry, "foo", "test entry"}, parse_path("/tmp/foo/test%20entry")),
-    ?assertMatch({bucket, "foo"}, parse_path(<<"/tmp/foo">>)),
-    ?assertMatch({error, bad_bucket}, parse_path("/tmp")).
+    ?assertEqual(<<"/tmp/foo/74/a0/4a/95/entry%20path%2Fabc">>,
+                 entry_path(<<"foo">>, <<"entry path/abc">>)).
 
 -endif.

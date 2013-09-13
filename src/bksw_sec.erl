@@ -95,7 +95,10 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context) ->
     ContentMD5 = proplists:get_value('Content-Md5', Headers, ""),
     ContentType = proplists:get_value('Content-Type', Headers, ""),
     Date = proplists:get_value('Date', Headers, ""),
-    {ok, Bucket, Resource} = bksw_util:get_object_and_bucket(Req0),
+    %% get_object_and_bucket decodes the bucket, but the request will have been signed with
+    %% the encoded bucket.
+    {ok, Bucket0, Resource} = bksw_util:get_object_and_bucket(Req0),
+    Bucket = bksw_io_names:encode(Bucket0),
     AccessKey = bksw_conf:access_key_id(Context),
     SecretKey = bksw_conf:secret_access_key(Context),
 

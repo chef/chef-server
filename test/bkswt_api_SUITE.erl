@@ -23,6 +23,7 @@
 %% Note: This directive should only be used in test suites.
 -compile(export_all).
 
+-include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
 -include("../src/internal.hrl").
 
@@ -47,6 +48,45 @@ init_per_testcase(sec_fail, Config0) ->
                                                       [Port])),
                          path),
     lists:keyreplace(s3_conf, 1, Config1, {s3_conf, S3State});
+init_per_testcase(upgrade_from_v0, Config) ->
+    %% This fixes another rebar brokenness. We cant specify any options to
+    %% common test in rebar
+    Seed = now(),
+    random:seed(Seed),
+    error_logger:info_msg("Using random seed: ~p~n", [Seed]),
+    Format0Data = filename:join([?config(data_dir, Config),
+                                 "format_0_data"]),
+    DiskStore = filename:join(proplists:get_value(priv_dir, Config),
+                              random_string(10, "abcdefghijklmnopqrstuvwxyz")),
+    LogDir = filename:join(proplists:get_value(priv_dir, Config),
+                           "logs"),
+    filelib:ensure_dir(filename:join(DiskStore, "tmp")),
+    error_logger:info_msg("Using disk_store: ~p~n", [DiskStore]),
+    CMD = ["cd ", Format0Data, "; tar cf - * | (cd ", DiskStore, "; tar xf -)"],
+    error_logger:info_msg("copying format 0 data into disk store with command:~n~s~n",
+                         [CMD]),
+    os:cmd(CMD),
+    AccessKeyID = random_string(10, "abcdefghijklmnopqrstuvwxyz"),
+    SecretAccessKey = random_string(30, "abcdefghijklmnopqrstuvwxyz"),
+    application:set_env(bookshelf, reqid_header_name, "X-Request-Id"),
+    application:set_env(bookshelf, disk_store, DiskStore),
+    application:set_env(bookshelf, keys, {AccessKeyID, SecretAccessKey}),
+    application:set_env(bookshelf, log_dir, LogDir),
+    application:set_env(bookshelf, stream_download, true),
+    ok = bksw_app:manual_start(),
+    %% force webmachine to pickup new dispatch_list. I don't understand why it
+    %% isn't enough to do application:stop/start for webmachine, but it isn't.
+    bksw_conf:reset_dispatch(),
+    %% increase max sessions per server for ibrowse
+    application:set_env(ibrowse, default_max_sessions, 256),
+    %% disable request pipelining for ibrowse.
+    application:set_env(ibrowse, default_max_pipeline_size, 1),
+    Port = 4321,
+    S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
+                          lists:flatten(io_lib:format("http://127.0.0.1:~p",
+                                                      [Port])),
+                          path),
+    [{s3_conf, S3State}, {disk_store, DiskStore} | Config];
 init_per_testcase(_TestCase, Config) ->
     %% This fixes another rebar brokenness. We cant specify any options to
     %% common test in rebar
@@ -89,7 +129,14 @@ all(doc) ->
     ["This test is runs the fs implementation of the bkss_store signature"].
 
 all() ->
-    [head_object, put_object, wi_basic, sec_fail, signed_url, signed_url_fail, at_the_same_time].
+    [head_object,
+     put_object,
+     wi_basic,
+     sec_fail,
+     signed_url,
+     signed_url_fail,
+     at_the_same_time,
+     upgrade_from_v0].
 
 %%====================================================================
 %% TEST CASES
@@ -107,7 +154,6 @@ wi_basic(Config) when is_list(Config) ->
                          %% descriptors on a normal box
                          Count = 50,
                          Buckets = [random_binary() || _ <- lists:seq(1, Count)],
-                         error_logger:error_msg("~p~n", [Buckets]),
                          Res = ec_plists:map(fun(B) ->
                                                      mini_s3:create_bucket(B, public_read_write, none, S3Conf)
                                              end,
@@ -121,7 +167,20 @@ wi_basic(Config) when is_list(Config) ->
                          ?assertEqual(ok, mini_s3:delete_bucket(DelBuck, S3Conf)),
                          [{buckets, NewBuckets}] = mini_s3:list_buckets(S3Conf),
                          error_logger:info_msg("NewBuckets: ~p~n", [NewBuckets]),
-                         ?assertEqual(Count - 1, length(NewBuckets))
+                         ?assertEqual(Count - 1, length(NewBuckets)),
+
+                         %% bucket name encoding should work
+                         OddBucket = "a bucket",
+                         OddBucketEnc = "a%20bucket",
+                         mini_s3:create_bucket(OddBucketEnc, public_read_write, none, S3Conf),
+                         Buckets1 = ?config(buckets, mini_s3:list_buckets(S3Conf)),
+                         BucketNames1 = [ ?config(name, B) || B <- Buckets1 ],
+                         error_logger:error_msg("Bucket Names:~n~p~n", [BucketNames1]),
+                         ?assert(lists:member(OddBucket, BucketNames1)),
+                         OddResult = mini_s3:list_objects(OddBucketEnc, [], S3Conf),
+                         ?assertEqual("a bucket", ?config(name, OddResult)),
+                         ?assertEqual([], ?config(contents, OddResult)),
+                         mini_s3:delete_bucket(OddBucketEnc, S3Conf)
                  end),
     error_logger:info_msg("WI_BASIC TIMING ~p", [Timings]).
 
@@ -174,8 +233,15 @@ head_object(Config) when is_list(Config) ->
                                   mini_s3:get_object_metadata(Bucket, Obj, [], S3Conf)
                           end, Objs, 10000),
     error_logger:info_msg("Got: ~p~n", [Got]),
-    [ ?assertMatch({value, _}, Item) || Item <- Got ].
-
+    [ ?assertMatch({value, _}, Item) || Item <- Got ],
+    %% verify 404 behavior
+    V = try
+            mini_s3:get_object_metadata(Bucket, "no-such-object", [], S3Conf)
+        catch
+            error:Why ->
+                Why
+        end,
+    ct:pal("HEAD 404: ~p", [V]).
 
 
 sec_fail(doc) ->
@@ -273,6 +339,39 @@ at_the_same_time(Config) when is_list(Config) ->
     Result = mini_s3:list_objects(Bucket, [], S3Conf),
     ObjList = proplists:get_value(contents, Result),
     ?assertEqual(1, length(ObjList)).
+
+upgrade_from_v0(doc) ->
+    ["Upgrades from version 0 disk format to current version"];
+upgrade_from_v0(suite) -> [];
+upgrade_from_v0(Config) ->
+    ShouldExist = [
+                   {"bucket-1", "xjbrpodcionabrzhikgliowdzvbvbc/kqvfgzhnlkizzvbidsxwavrktxcasx"},
+                   {"bucket-1", "zrcsghibdgwjghkqsdajycrjwitntu/ahnsvorjeauuwusthkdunsslzffkfn"},
+                   {"bucket-2", "drniwxjwkasvovjjoafthnoqgtlung/lhfivdpsosyjybnmfpxkgplycrclmz"},
+                   {"bucket-2", "nbmxbspdkbubastgtzzkhtunqznkcg/afbtmzfyyftrdxfbnmkslckewisxns"},
+                   {"bucket%20space", "xjbrpodcionabrzhikgliowdzvbvbc/kqvfgzhnlkizzvbidsxwavrktxcasx"}
+                  ],
+
+    S3Conf = ?config(s3_conf, Config),
+
+    AssertCount = fun(Bucket, Count) ->
+                           Res = mini_s3:list_objects(Bucket, [], S3Conf),
+                           Contents = proplists:get_value(contents, Res),
+                           ?assertEqual(Count, length(Contents))
+                   end,
+
+    AssertCount("bucket-1", 2),
+    AssertCount("bucket-2", 45),
+    AssertCount("bucket-3", 1),
+    AssertCount("bucket-4", 0),
+    AssertCount("bucket%20space", 2),
+
+    [ begin
+          Res = mini_s3:get_object(Bucket, Key, [], S3Conf),
+          ct:pal("Found: ~p~n", [Res])
+      end || {Bucket, Key} <- ShouldExist ],
+
+    ok.
 
 
 %%====================================================================

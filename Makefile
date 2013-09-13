@@ -9,7 +9,8 @@ DIALYZER_DEPS = deps/erlsom/ebin \
                 deps/iso8601/ebin \
                 deps/mini_s3/ebin \
                 deps/mochiweb/ebin \
-                deps/webmachine/ebin
+                deps/webmachine/ebin \
+                deps/opscoderl_wm/ebin
 
 DEPS_PLT = bookshelf.plt
 
