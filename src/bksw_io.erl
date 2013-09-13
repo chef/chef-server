@@ -351,13 +351,14 @@ upgrade_disk_format() ->
     upgrade_disk_format(disk_format_version()).
 
 upgrade_disk_format({version, ?DISK_FORMAT_VERSION}) ->
-    ?LOG_INFO("Skipping upgrade. Found disk format version ~p",
+    ?LOG_INFO("Found disk format version ~p",
               [?DISK_FORMAT_VERSION]),
     ok;
 upgrade_disk_format({version, 0}) ->
     ?LOG_INFO("Found disk format version 0. Starting upgrade to version ~p",
               [?DISK_FORMAT_VERSION]),
-    upgrade_from_v0();
+    ok = upgrade_from_v0(),
+    upgrade_disk_format(disk_format_version());
 upgrade_disk_format({version, X}) ->
     error({upgrade_disk_format, "unsupported upgrade", X, ?DISK_FORMAT_VERSION}).
 
