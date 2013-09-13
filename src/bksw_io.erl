@@ -60,6 +60,7 @@
 
 -spec bucket_list() -> [#bucket{}] | [].
 bucket_list() ->
+    ?LOG_DEBUG("reading bucket list"),
     Root = bksw_conf:disk_store(),
     make_buckets(Root, [Dir || Dir <- filelib:wildcard("*", bksw_util:to_string(Root)),
                                filelib:is_dir(filename:join([Root, Dir]))]).
@@ -67,6 +68,7 @@ bucket_list() ->
 -spec entry_list(binary()) -> [#object{}] | [].
 entry_list(Bucket) ->
     BucketPath = bksw_io_names:bucket_path(Bucket),
+    ?LOG_DEBUG("reading entries for bucket '~p'", [Bucket]),
     %% As of R16, second arg to filelib:wildcard must be string
     filter_entries(Bucket, filelib:wildcard("*/*/*/*/*", bksw_util:to_string(BucketPath))).
 
@@ -81,9 +83,10 @@ bucket_create(Bucket) ->
             BucketPath = bksw_io_names:bucket_path(Bucket),
             case file:make_dir(BucketPath) of
                 ok ->
+                    ?LOG_DEBUG("created bucket '~p' at '~p'", [Bucket, BucketPath]),
                     true;
                 {error, Reason} ->
-                    error_logger:error_msg("Error creating bucket ~p on path ~p: ~p~n", [Bucket, BucketPath, Reason]),
+                    ?LOG_ERROR("Error creating bucket ~p on path ~p: ~p~n", [Bucket, BucketPath, Reason]),
                     false
             end;
         true ->
@@ -97,8 +100,10 @@ bucket_delete(Bucket) ->
 delete_bucket_dir(Bucket) ->
     case os:cmd("rm -rf " ++ bksw_io_names:bucket_path(binary_to_list(Bucket))) of
         [] ->
+            ?LOG_DEBUG("deleted bucket ~p", [Bucket]),
             true;
-        _ ->
+        Why ->
+            ?LOG_ERROR("bucket delete failed for bucket ~p: ~p", [Bucket, Why]),
             false
     end.
 
@@ -110,6 +115,7 @@ entry_delete(Bucket, Entry) ->
 entry_delete(FullPath) ->
     case file:delete(FullPath) of
         ok ->
+            ?LOG_DEBUG("deleted bucket entry: ~p", [FullPath]),
             true;
         Error ->
             error_logger:error_msg("Error deleting bucket entry ~p: ~p~n", [FullPath, Error]),
@@ -119,7 +125,9 @@ entry_delete(FullPath) ->
 -spec entry_exists(binary(), binary()) -> boolean().
 entry_exists(Bucket, Path) ->
     FullPath = bksw_io_names:entry_path(Bucket, Path),
-    filelib:is_regular(FullPath).
+    Ans = filelib:is_regular(FullPath),
+    ?LOG_DEBUG("entry_exists ~p ~p ~p", [Bucket, Path, Ans]),
+    Ans.
 
 -spec open_for_write(binary(), binary()) -> {ok, #entryref{}} | {error, term()}.
 open_for_write(Bucket, Entry) ->
@@ -127,6 +135,7 @@ open_for_write(Bucket, Entry) ->
     filelib:ensure_dir(FileName),
     case file:open(FileName, [exclusive, write, binary]) of
         {ok, Fd} ->
+            ?LOG_DEBUG("open_for_write ~p ~p at ~p", [Bucket, Entry, FileName]),
             %% Magic number to guard against file corruption
             case file:write(Fd, ?MAGIC_NUMBER) of
                 ok ->
@@ -135,10 +144,14 @@ open_for_write(Bucket, Entry) ->
                                    bucket=Bucket, entry=Entry,
                                    ctx=erlang:md5_init()}};
                 Error ->
+                    ?LOG_ERROR("header write failed ~p ~p at ~p: ~p",
+                               [Bucket, Entry, FileName, Error]),
                     file:close(Fd),
                     Error
             end;
         Error ->
+            ?LOG_ERROR("open_for_write failed ~p ~p at ~p: ~p",
+                       [Bucket, Entry, FileName, Error]),
             Error
     end.
 
@@ -147,17 +160,23 @@ open_for_read(Bucket, Entry) ->
     FileName = bksw_io_names:entry_path(Bucket, Entry),
     case file:open(FileName, [read, binary]) of
         {ok, Fd} ->
+            ?LOG_DEBUG("open_for_read entry ~p ~p at ~p",
+                       [Bucket, Entry, FileName]),
             case file:read(Fd, 2) of
                 %% Verify magic number is intact
                 {ok, ?MAGIC_NUMBER} ->
                     %% Skip past checksum data for now
                     {ok, ?TOTAL_HEADER_SIZE_BYTES} = file:position(Fd, {bof, ?TOTAL_HEADER_SIZE_BYTES}),
                     {ok, #entryref{fd=Fd, path=FileName, bucket=Bucket, entry=Entry}};
-                _ ->
+                ReadError ->
+                    ?LOG_ERROR("open_for_read corrupt file ~p ~p at ~p",
+                               [Bucket, Entry, FileName, ReadError]),
                     file:close(Fd),
                     {error, corrupt_file}
             end;
         Error ->
+            ?LOG_ERROR("open_for_read failed for ~p ~p at ~p: ~p",
+                       [Bucket, Entry, FileName, Error]),
             Error
     end.
 
@@ -166,16 +185,19 @@ entry_md(Bucket, Entry) ->
     {ok, Ref} = open_for_read(Bucket, bksw_io_names:decode(Entry)),
     Result = entry_md(Ref),
     finish_read(Ref),
+    ?LOG_DEBUG("entry_md read ~p ~p", [Bucket, Entry]),
     Result.
 
 -spec entry_md(#entryref{}) -> {ok, #object{}} | error.
-entry_md(#entryref{fd=Fd, path=Path, entry=Entry}) ->
+entry_md(#entryref{fd=Fd, path=Path, bucket=Bucket, entry=Entry}) ->
     case file:read_file_info(Path) of
         {ok, #file_info{mtime = Date, size = Size}} ->
             [UTC | _] = %% FIXME This is a hack until R15B
                 calendar:local_time_to_universal_time_dst(Date),
             case file_md5(Fd) of
                 error ->
+                    ?LOG_ERROR("entry_md md5 read failed ~p ~p at ~p",
+                               [Bucket, Entry, Path]),
                     error;
                 {ok, MD5} ->
                     {ok, #object{path=Path,
@@ -183,7 +205,11 @@ entry_md(#entryref{fd=Fd, path=Path, entry=Entry}) ->
                                  date=UTC,
                                  size=Size - ?TOTAL_HEADER_SIZE_BYTES,
                                  digest=MD5}}
-            end
+            end;
+        Error ->
+            ?LOG_ERROR("entry_md failed ~p ~p at ~p: ~p",
+                       [Bucket, Entry, Path, Error]),
+            erlang:error(Error)
     end.
 
 
@@ -197,15 +223,19 @@ read(#entryref{fd=Fd}, Size) ->
     end.
 
 -spec finish_read(#entryref{}) -> ok.
-finish_read(#entryref{fd=Fd}) ->
+finish_read(#entryref{fd=Fd, bucket=Bucket, entry=Entry}) ->
+    ?LOG_DEBUG("finish_read ~p ~p", [Bucket, Entry]),
     file:close(Fd).
 
 -spec write(#entryref{}, binary()) -> {ok, #entryref{}} | {error, file:posix() | badarg | terminated}.
-write(#entryref{fd=Fd, ctx=Ctx}=ERef, Data) when is_binary(Data) ->
+write(#entryref{fd=Fd, ctx=Ctx,
+                bucket=Bucket, entry=Entry}=ERef, Data) when is_binary(Data) ->
     case file:write(Fd, Data) of
         ok ->
             {ok, ERef#entryref{ctx=erlang:md5_update(Ctx, Data)}};
         Error ->
+            ?LOG_ERROR("write failed ~p ~p: ~p",
+                       [Bucket, Entry, Error]),
             Error
     end.
 
@@ -228,14 +258,20 @@ finish_write(#entryref{fd=Fd, path=Path, bucket=Bucket, entry=Entry, ctx=Ctx}) -
                 ok ->
                     case file:rename(Path, FinalPath) of
                         ok ->
+                            ?LOG_DEBUG("write completed ~p ~p", [Bucket, Entry]),
                             {ok, Digest};
                         Error ->
+                            ?LOG_ERROR("rename failed ~p ~p (~p > ~p): ~p",
+                                       [Bucket, Entry, Path, FinalPath, Error]),
                             Error
                     end;
                 DirError ->
+                    ?LOG_ERROR("mkdir failed ~p ~p (~p): ~p",
+                               [Bucket, Entry, FinalPath, DirError]),
                     DirError
             end;
         Error ->
+            ?LOG_ERROR("sync failed ~p ~p: ~p", [Bucket, Entry, Error]),
             file:close(Fd),
             Error
     end.
@@ -315,9 +351,14 @@ upgrade_disk_format() ->
     upgrade_disk_format(disk_format_version()).
 
 upgrade_disk_format({version, ?DISK_FORMAT_VERSION}) ->
+    ?LOG_INFO("Found disk format version ~p",
+              [?DISK_FORMAT_VERSION]),
     ok;
 upgrade_disk_format({version, 0}) ->
-    upgrade_from_v0();
+    ?LOG_INFO("Found disk format version 0. Starting upgrade to version ~p",
+              [?DISK_FORMAT_VERSION]),
+    ok = upgrade_from_v0(),
+    upgrade_disk_format(disk_format_version());
 upgrade_disk_format({version, X}) ->
     error({upgrade_disk_format, "unsupported upgrade", X, ?DISK_FORMAT_VERSION}).
 
@@ -333,12 +374,16 @@ upgrade_from_v0() ->
     ok.
 
 upgrade_bucket(Bucket) ->
-    error_logger:info_msg("migrating bucket: ~p~n", [Bucket]),
+    ?LOG_INFO("migrating bucket: ~p~n", [Bucket]),
     RawBucket = bksw_io_names:decode(Bucket),
     BucketPath = bksw_io_names:bucket_path(RawBucket),
     Entries = filelib:wildcard(bksw_util:to_string(BucketPath) ++ "/*"),
     FileEntries = [ F || F <- Entries,
                          filelib:is_dir(F) == false ],
+    EntryCount = length(FileEntries),
+    ?LOG_INFO("bucket ~p: found ~p entries",
+               [Bucket, EntryCount]),
+    init_progress_log(["bucket ", Bucket, ": "], EntryCount),
     [
      begin
          BaseName = filename:basename(F),
@@ -346,10 +391,32 @@ upgrade_bucket(Bucket) ->
          NewPath = bksw_io_names:entry_path(RawBucket,
                                             bksw_io_names:decode(BaseName)),
          ok = filelib:ensure_dir(NewPath),
-         ok = file:rename(F, NewPath)
+         ok = file:rename(F, NewPath),
+         log_progress()
      end || F <- FileEntries ].
 
 write_format_version() ->
     Path = filename:join(bksw_conf:disk_store(), ?FORMAT_VERSION_FILE),
     ok = file:write_file(Path, io_lib:format("~B~n", [?DISK_FORMAT_VERSION])),
+    ok.
+
+init_progress_log(Prefix, Total) ->
+    put(progress_log, {iolist_to_binary(Prefix), Total, 0}).
+
+log_progress() ->
+    log_progress(get(progress_log)).
+
+log_progress(undefined) ->
+    erlang:error(uninitialized);
+log_progress({Prefix, Total, Current0}) ->
+    Current = Current0 + 1,
+    Pct = (Current * 100) div Total,
+    %% emit log every 10%
+    case Pct rem 10 of
+        0 ->
+            error_logger:info_msg("~s~p% complete (~p/~p)", [Prefix, Pct, Current, Total]);
+        _ ->
+            ok
+    end,
+    put(progress_log, {Prefix, Total, Current}),
     ok.

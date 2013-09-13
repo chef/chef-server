@@ -24,4 +24,4 @@
   {registered, [bksw_sup]},
   {applications , [kernel, stdlib, sasl, crypto,
                    public_key, ssl, mochiweb, webmachine, erlsom,
-                   mini_s3, inets]}]}.
+                   mini_s3, inets, lager]}]}.

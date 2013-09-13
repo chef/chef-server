@@ -25,23 +25,33 @@
 %% ===================================================================
 %%                          API functions
 %% ===================================================================
+-define(APPS,
+        [crypto,
+         public_key,
+         ssl,
+         inets,
+         erlsom,
+         mochiweb,
+         webmachine,
+         xmerl,
+         ibrowse,
+         mini_s3,
+         bookshelf]).
 
 manual_start() ->
-    Apps = [kernel,
-            stdlib,
-            sasl,
-            crypto,
-            public_key,
-            ssl,
-            inets,
-            erlsom,
-            mochiweb,
-            webmachine,
-            xmerl,
-            ibrowse,
-            mini_s3,
-            bookshelf],
-    [ ensure_started(App) || App <- Apps ],
+    %% manual_* are used for testing. For common test, we don't want
+    %% to stop sasl or else we end up not getting complete logs in the
+    %% test reports. So we ensure sasl is started, but omit it from
+    %% the ?APPS list so that we don't start/stop on each test.
+    application:start(sasl),
+    %% we start lager since we depend on it for the release. However,
+    %% we want to keep error_logger on its own so that we continue to
+    %% see messages in common test output.
+    application:load(lager),
+    application:set_env(lager, error_logger_redirect, false),
+    application:set_env(lager, handlers, []),
+    lager:start(),
+    [ ensure_started(App) || App <- ?APPS ],
     ok.
 
 ensure_started(App) ->
@@ -55,13 +65,8 @@ ensure_started(App) ->
     end.
 
 manual_stop() ->
-    application:stop(bookshelf),
-    application:stop(webmachine),
-    application:stop(mochiweb),
-    application:stop(mini_s3),
-    application:stop(erlsom),
-    application:stop(inets),
-    application:stop(ibrowse).
+    [ application:stop(App) || App <- (lists:reverse(?APPS)) ],
+    application:stop(lager).
 
 %% ===================================================================
 %%                      Application callbacks
