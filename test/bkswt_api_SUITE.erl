@@ -62,7 +62,7 @@ init_per_testcase(upgrade_from_v0, Config) ->
                            "logs"),
     filelib:ensure_dir(filename:join(DiskStore, "tmp")),
     error_logger:info_msg("Using disk_store: ~p~n", [DiskStore]),
-    CMD = ["cd ", Format0Data, "; tar cf - * | (cd ", DiskStore, "; tar xf -)"],
+    CMD = ["cd ", Format0Data, "; tar cf - * | (cd ", DiskStore, "; tar xf -; mkdir bucket-4)"],
     error_logger:info_msg("copying format 0 data into disk store with command:~n~s~n",
                          [CMD]),
     os:cmd(CMD),
