@@ -37,6 +37,7 @@
 
 -export([
          disk_format_version/0,
+         ensure_disk_store/0,
          upgrade_disk_format/0
          ]).
 
@@ -346,6 +347,16 @@ read_format_version({ok, Bin}) ->
     Line1 = hd(re:split(Bin, "\n")),
     Token1 = hd(string:tokens(binary_to_list(Line1), " ")),
     list_to_integer(Token1).
+
+ensure_disk_store() ->
+    Root = bksw_conf:disk_store(),
+    ToEnsure = filename:join([Root, "placehold"]),
+    case filelib:is_dir(Root) of
+        true -> ?LOG_INFO("Found disk_store at ~s", [Root]);
+        false -> ?LOG_INFO("Disk store dir did not exist. creating disk_store at ~s", [Root])
+    end,
+    ok = filelib:ensure_dir(ToEnsure),
+    ok.
 
 upgrade_disk_format() ->
     upgrade_disk_format(disk_format_version()).

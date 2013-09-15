@@ -41,6 +41,7 @@ reconfigure_server() ->
 %%===================================================================
 
 init(_Args) ->
+    bksw_io:ensure_disk_store(),
     bksw_io:upgrade_disk_format(),
     RestartStrategy = one_for_one,
     MaxRestarts = 1000,
