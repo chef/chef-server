@@ -4,6 +4,10 @@
 ## Cookie for distributed erlang
 -setcookie bookshelf
 
+## Add a directory to the code path where hot patches can be
+## placed and easily accessed.
+-pa lib/patches
+
 ## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
 ## (Disabled by default..use with caution!)
 ##-heart
