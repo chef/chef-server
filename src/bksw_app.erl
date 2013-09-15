@@ -18,7 +18,8 @@
 
 -behaviour(application).
 
--export([manual_start/0, manual_stop/0]).
+-export([manual_start/0, manual_stop/0,
+         remsh_welcome/0]).
 
 -export([start/2, stop/1]).
 
@@ -76,4 +77,18 @@ start(_StartType, _StartArgs) ->
     bksw_sup:start_link().
 
 stop(_State) ->
+    ok.
+
+%% @doc Print an informative message about how to use a remote shell
+%% attached to a live bookshelf node. The idea is to call this from a
+%% wrapper script used to start a remote shell, like:
+%% `erl -name user1@127.0.0.7 -setcookie bookshelf -remsh bookshelf@127.0.0.1 -s bksw_app remsh_welcome'.
+%%
+remsh_welcome() ->
+    Msg =
+        "~n~n==> Welcome to the bookshelf remote shell <==~n~n"
+        "    TO EXIT: hit ctrl-g followed by q~n"
+        "~n"
+        "    DO NOT use q() or init:stop(), as these will stop the bookshelf node~n~n",
+    io:format(Msg),
     ok.
