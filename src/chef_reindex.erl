@@ -100,7 +100,7 @@ reindex(Ctx, {OrgId, _OrgName}=OrgInfo, Index) ->
     AllIds = dict:fold(fun(_K, V, Acc) -> [V|Acc] end,
                        [],
                        NameIdDict), %% All dict values will be unique anyway
-    {ok, BatchSize} = application:get_env(chef_wm, bulk_fetch_batch_size),
+    BatchSize = envy:get(chef_wm, bulk_fetch_batch_size, pos_integer),
     batch_reindex(Ctx, AllIds, BatchSize, OrgInfo, Index, NameIdDict).
 
 %% @doc Recursively batch-process a list of database IDs by retrieving

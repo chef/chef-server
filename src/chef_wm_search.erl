@@ -168,19 +168,9 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                 State#base_state{log_msg=Why}}
     end.
 
-%% Return current app config value for batch size. If value from config is not a positive
-%% integer or if the config key is missing, use a default value and log an error message.
+%% Return current app config value for batch size, defaulting if absent.
 batch_size() ->
-    case application:get_env(chef_wm, bulk_fetch_batch_size) of
-        {ok, BatchSize} when is_integer(BatchSize) andalso BatchSize > 0 ->
-            BatchSize;
-        undefined ->
-            error_logger:error_report({missing_config, {chef_wm, bulk_fetch_batch_size}, "using default"}),
-            ?DEFAULT_BATCH_SIZE;
-        {ok, BadSize} ->
-            error_logger:error_report({invalid_config, {chef_wm, bulk_fetch_batch_size, BadSize}, "using default"}),
-            ?DEFAULT_BATCH_SIZE
-    end.
+    envy:get(chef_wm, bulk_fetch_batch_size, ?DEFAULT_BATCH_SIZE, positive_integer).
 
 search_log_msg(not_found, SolrNumFound, NumIds, DbNumFound) ->
     {search, SolrNumFound, NumIds, DbNumFound};

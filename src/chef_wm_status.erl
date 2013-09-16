@@ -151,17 +151,8 @@ gather_health_workers([], Acc) ->
     Acc.
 
 ping_timeout() ->
-    case application:get_env(chef_wm, health_ping_timeout) of
-        {ok, Timeout} ->
-            Timeout;
-        _ ->
-            error({missing_config, {chef_wm, health_ping_timeout}})
-    end.
+    envy:get(chef_wm, health_ping_timeout, pos_integer).
 
 ping_modules() ->
-    case application:get_env(chef_wm, health_ping_modules) of
-        {ok, Modules} ->
-            Modules;
-        _ ->
-            error({missing_config, {chef_wm, health_ping_modules}})
-    end.
+    envy:get(chef_wm, health_ping_modules,list).
+
