@@ -1,10 +1,10 @@
 #!/usr/bin/env escript
 
 -define(MAGIC_NUMBER, <<16#b00c:16/integer>>).
--define(OLD_COOKBOOK_PATH, "<%= node['private_chef']['opscode-chef']['dir'] %>/").
+-define(OLD_COOKBOOK_PATH, "<%= node['private_chef']['opscode-chef']['checksum_path'] %>/").
 -define(BOOKSHELF_PATH, "<%= node['private_chef']['bookshelf']['dir'] %>/").
 -define(BOOKSHELF_DATA_PATH, "<%= node['private_chef']['bookshelf']['data_dir'] %>/").
--define(NEW_BOOKSHELF_CONTAINER, ?BOOKSHELF_DATA_PATH ++ "<%= node['private_chef']['opscode-erchef']['s3-bucket'] %>/").
+-define(NEW_BOOKSHELF_CONTAINER, ?BOOKSHELF_DATA_PATH ++ "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/").
 
 main(_) ->
     ok = create_destination(),

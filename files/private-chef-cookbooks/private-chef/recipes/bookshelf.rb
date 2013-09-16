@@ -4,7 +4,7 @@
 #
 # All Rights Reserved
 
-cookbook_migration = "/opt/opscode/embedded/service/bin/cookbook_migration.sh"
+cookbook_migration = "/opt/opscode/embedded/bin/cookbook_migration.sh"
 
 template cookbook_migration do
   source "cookbook_migration.sh.erb"
@@ -15,8 +15,8 @@ end
 
 execute "cookbook migration" do
   command cookbook_migration
-  only_if {File.exist? node['private_chef']['opscode-chef']['dir'] &&
-      !File.exist? node['private_chef']['bookshelf']['data_dir']}
+  only_if { File.exist?(node['private_chef']['opscode-chef']['checksum_path']) &&
+    !File.exist?(node['private_chef']['bookshelf']['data_dir']) }
 end
 
 bookshelf_dir = node['private_chef']['bookshelf']['dir']
