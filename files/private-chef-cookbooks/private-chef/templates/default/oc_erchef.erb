@@ -32,6 +32,8 @@ if [ -z "$NAME_ARG" ]; then
     echo "vm.args needs to have either -name or -sname parameter."
     exit 1
 fi
+NODE_NAME=`echo $NAME_ARG|awk '{print $2}'`
+NAME_TYPE=`echo $NAME_ARG|awk '{print $1}'`
 
 # Extract the target cookie
 COOKIE_ARG=`grep -e '^-setcookie' $RUNNER_ETC_DIR/vm.args`
@@ -141,15 +143,7 @@ case "$1" in
         ;;
 
     attach)
-        # Make sure a node IS running
-        RES=`$NODETOOL ping`
-        if [ "$RES" != "pong" ]; then
-            echo "Node is not running!"
-            exit 1
-        fi
-
-        shift
-        $ERTS_PATH/to_erl $PIPE_DIR
+        $ERTS_PATH/erl $NAME_TYPE $USER-erchef@127.0.0.1 $COOKIE_ARG -remsh $NODE_NAME -s oc_chef_wm_app remsh_welcome
         ;;
 
     console|console_clean)
