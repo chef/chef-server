@@ -53,22 +53,19 @@ move_files(_, _, []) ->
 move_files(Org, Dir, [File|Rest]) ->
     OldPath = ?OLD_COOKBOOK_PATH ++ Org ++ "/" ++ Dir ++ "/" ++ File,
     NewPath = ?NEW_BOOKSHELF_CONTAINER ++ new_file_name(Org, File),
-    ok = file:rename(OldPath, NewPath),
-    update_header(NewPath),
+    update_header(OldPath, NewPath),
     ok = move_files(Org, Dir, Rest).
 
 new_file_name(Org, File) ->
     "organization-" ++ Org ++ "%2Fchecksum-" ++ File.
 
-update_header(Path) ->
-    {ok, Data} = file:read_file(Path),
-    NewFile = Path ++ ".tmp",
-    {ok, Fd} = file:open(NewFile, [exclusive, write, binary]),
+update_header(OldPath, NewPath) ->
+    {ok, Data} = file:read_file(OldPath),
+    {ok, Fd} = file:open(NewPath, [exclusive, write, binary]),
     Ctx0 = erlang:md5_init(),
     Ctx1 = erlang:md5_update(Ctx0, Data),
     Digest = erlang:md5_final(Ctx1),
     file:write(Fd, ?MAGIC_NUMBER),
     file:write(Fd, Digest),
     file:write(Fd, Data),
-    file:close(Fd),
-    file:rename(NewFile, Path).
+    file:close(Fd).
