@@ -15,6 +15,9 @@
 ## Increase number of concurrent ports/sockets
 -env ERL_MAX_PORTS 4096
 
+## Add directory for hot patches to the front of the code path
+-pa lib/patches
+
 ## Tweak GC to run more often
 -env ERL_FULLSWEEP_AFTER 10
 
