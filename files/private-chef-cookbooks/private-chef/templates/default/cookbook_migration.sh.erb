@@ -61,11 +61,16 @@ new_file_name(Org, File) ->
 
 update_header(OldPath, NewPath) ->
     {ok, Data} = file:read_file(OldPath),
-    {ok, Fd} = file:open(NewPath, [exclusive, write, binary]),
-    Ctx0 = erlang:md5_init(),
-    Ctx1 = erlang:md5_update(Ctx0, Data),
-    Digest = erlang:md5_final(Ctx1),
-    file:write(Fd, ?MAGIC_NUMBER),
-    file:write(Fd, Digest),
-    file:write(Fd, Data),
-    file:close(Fd).
+    case file:open(NewPath, [exclusive, write, binary]) of
+        {ok, Fd} ->
+            Ctx0 = erlang:md5_init(),
+            Ctx1 = erlang:md5_update(Ctx0, Data),
+            Digest = erlang:md5_final(Ctx1),
+            file:write(Fd, ?MAGIC_NUMBER),
+            file:write(Fd, Digest),
+            file:write(Fd, Data),
+            file:close(Fd);
+        {error, eexist} ->
+            % Already done, just return ok
+            ok
+    end.
