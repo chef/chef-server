@@ -1,7 +1,7 @@
 GIT
   remote: git://github.com/opscode/chef-pedant.git
-  revision: b8121d757c0a970501cf8efe43e6a8269e837048
-  tag: 1.0.18
+  revision: 07fef10c2a99aa359c01194ba0bfa1f77f761717
+  tag: 1.0.20
   specs:
     chef-pedant (1.0.18)
       activesupport (~> 3.2.8)
@@ -37,7 +37,7 @@ GEM
     mixlib-config (1.1.2)
     mixlib-log (1.6.0)
     mixlib-shellout (1.1.0)
-    multi_json (1.7.9)
+    multi_json (1.8.0)
     net-http-spy (0.2.1)
     rest-client (1.6.7)
       mime-types (>= 1.16)
