@@ -29,7 +29,15 @@ dependency "postgresql92"
 dependency "rabbitmq"
 dependency "opscode-solr"
 dependency "opscode-expander"
-dependency "chef-sql-schema" # needed to migrate the DB.
+
+# We are transitioning away from Sequel toward Sqitch for managing
+# Erchef's schema.  We still need the old code ('chef-sql-schema') for
+# existing upgrades.  However, after Enterprise Chef 11's release,
+# that will be removed entirely in favor of the new code
+# ('enterprise-chef-server-schema').
+dependency "chef-sql-schema" # EOL
+dependency "enterprise-chef-server-schema"
+
 dependency "keepalived"
 dependency "bookshelf"
 
