@@ -20,15 +20,29 @@
 -export([container_record_to_authz_id/2,
          fetch_container/3,
          fetch_group_authz_id/3,
-         make_context/1
+         make_context/2,
+         statements/1
         ]).
+
+-ifdef(TEST).
+-compile([export_all]).
+-endif.
 
 -include("oc_chef_authz.hrl").
 -include("oc_chef_authz_db.hrl").
+-include_lib("sqerl/include/sqerl.hrl").
 
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
 -define(user_db, "opscode_account").
 -define(auth_join_db, "opscode_account").
+
+statements(pgsql) ->
+    [
+     {find_container_by_orgid_name,
+      <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
+        " FROM containers "
+        " WHERE (org_id = $1 AND name = $2) LIMIT 1">>}
+     ].
 
 %
 % Opscode Chef_views.
@@ -68,19 +82,31 @@
 -define(node_design, "nodes").
 -define(role_design, "roles").
 
--spec make_context(binary()) -> #oc_chef_authz_context{}.
-make_context(ReqId) when is_binary(ReqId) ->
+-spec make_context(binary(), term()) -> #oc_chef_authz_context{}.
+make_context(ReqId, Darklaunch) when is_binary(ReqId) ->
     Host = get_env(couchdb_host),
     Port = get_env(couchdb_port),
     S = couchbeam:server_connection(Host, Port, "", []),
-    #oc_chef_authz_context{reqid = ReqId, otto_connection = S}.
+    #oc_chef_authz_context{reqid = ReqId,
+                           otto_connection = S,
+                           darklaunch = Darklaunch}.
 
 -spec fetch_container(oc_chef_authz_context(),
                       object_id(),
-                      container_name()) ->
-                             #chef_container{} |
-                             {not_found, authz_container | org}.
-fetch_container(#oc_chef_authz_context{otto_connection=Server}, OrgId, ContainerName) ->
+                      container_name()) -> #chef_container{} |
+                                           not_found |
+                                           {error, _}.
+fetch_container(#oc_chef_authz_context{otto_connection=Server,
+                                       darklaunch = Darklaunch} = Ctx,
+                OrgId, ContainerName) ->
+    case xdarklaunch_req:is_enabled(<<"couchdb_containers">>, Darklaunch) of
+        true ->
+            fetch_container_couchdb(Server, OrgId, ContainerName);
+        false ->
+            fetch_container_sql(Ctx, OrgId, ContainerName)
+    end.
+
+fetch_container_couchdb(Server, OrgId, ContainerName) ->
     case fetch_by_name(Server, OrgId, ContainerName, authz_container) of
         {ok, Container} ->
             Id = ej:get({<<"_id">>}, Container),
@@ -95,7 +121,8 @@ fetch_container(#oc_chef_authz_context{otto_connection=Server}, OrgId, Container
                             path = Path,
                             last_updated_by = Updated
                            };
-        Error -> Error
+        {not_found, _} ->
+            not_found
     end.
 
 %% @doc Retrieve the authz ID for a given group in an organaization.
@@ -212,4 +239,24 @@ get_env(Key) ->
             throw({missing_application_config, oc_chef_authz, Key});
         {ok, Value} ->
             Value
+    end.
+
+-spec fetch_container_sql(#oc_chef_authz_context{}, binary(), binary()) -> #chef_container{} |
+                                                                           not_found |
+                                                                           {error, _}.
+fetch_container_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
+    %% since ?FIRST uses record_info, it can't be placed within the fun.
+    Transform = ?FIRST(chef_container),
+    case stats_hero:ctime(ReqId,
+                          %% aggregate perf timing with other sql queries
+                          {chef_sql, fetch_container_sql},
+                          fun() ->
+                                  sqerl:select(find_container_by_orgid_name, [OrgId, Name], Transform)
+                          end) of
+        {ok, #chef_container{} = C} ->
+            C;
+        {ok, none} ->
+            not_found;
+        {error, Error} ->
+            {error, Error}
     end.

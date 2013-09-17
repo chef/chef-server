@@ -3,3 +3,6 @@ deps/
 ebin/
 ebin_dialyzer/
 /oc_chef_authz.plt
+/itest/ct_logs
+/itest/oc_chef_authz_SUITE.beam
+/variables-ct@*

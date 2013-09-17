@@ -6,6 +6,10 @@ DIALYZER_OPTS = -Wunderspecs
 DIALYZER_DEPS = deps/jiffy/ebin \
                 deps/ibrowse/ebin \
                 deps/opscoderl_httpc/ebin \
+                deps/stats_hero/ebin \
+                deps/envy/ebin \
+                deps/sqerl/ebin \
+                deps/darklaunch/ebin \
                 deps/ej/ebin
 
 DEPS_PLT = oc_chef_authz.plt
@@ -45,6 +49,7 @@ clean:
 # Clean this project and all deps
 allclean:
 	@rebar clean
+	@rm -rf itest/ct_logs
 
 compile: $(DEPS)
 	@rebar compile
@@ -55,7 +60,7 @@ $(DEPS):
 # Full clean and removal of all deps. Remove deps first to avoid
 # wasted effort of cleaning deps before nuking them.
 distclean:
-	@rm -rf deps $(DEPS_PLT)
+	@rm -rf deps $(DEPS_PLT) itest/ct_logs
 	@rebar clean
 
 eunit:
@@ -83,4 +88,13 @@ endif
 doc:
 	@rebar doc skip_deps=true
 
-.PHONY: all compile eunit test dialyzer clean allclean distclean doc
+itest: clean
+        # recompile, setting TEST define so we can play with
+        # unexported functions.
+	@echo "Recompiling with -DTEST ..."
+	@rebar compile -DTEST
+	@mkdir -p itest/ct_logs
+	@ct_run -spec itest/spec.spec -pa deps/*/ebin -pa ebin
+	@echo "Review results with: open itest/ct_logs/index.html"
+
+.PHONY: all compile eunit test dialyzer clean allclean distclean doc ct

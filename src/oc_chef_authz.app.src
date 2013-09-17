@@ -18,9 +18,11 @@
 {application, oc_chef_authz,
  [
   {description, "Opscode authz client"},
-  {vsn, "2.0.0"},
+  {vsn, "3.0.0"},
   {registered, []},
   {applications, [kernel,
-                  stdlib]},
+                  stdlib,
+                  stats_hero,
+                  sqerl]},
   {mod, {oc_chef_authz_app, []}}
  ]}.
