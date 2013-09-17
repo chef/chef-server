@@ -92,8 +92,8 @@
 
 -spec connect() -> couch_server().
 connect() ->
-    {ok, Host} = application:get_env(chef_db, couchdb_host),
-    {ok, Port} = application:get_env(chef_db, couchdb_port),
+    Host = envy:get(chef_db, couchdb_host, string),
+    Port = envy:get(chef_db, couchdb_port, non_neg_integer),
     connect(Host, Port).
 
 -spec connect(string(), http_port()) -> couch_server().

@@ -51,12 +51,8 @@
          prune_worker/1]).
 
 init(Name) when is_atom(Name) ->
-    case application:get_env(chef_db, cache_defaults) of
-        undefined ->
-            error(missing_defaults);
-        {ok, Defaults} ->
-            init([{?NAME_OPT, Name}|Defaults])
-    end;
+    init([{?NAME_OPT, Name} | envy:get(chef_db, cache_defaults, list)]);
+
 init(Options) when is_list(Options) ->
     {ok, Config} = build_config(Options),
     Name = proplists:get_value(?NAME_KEY, Config),
