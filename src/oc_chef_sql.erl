@@ -48,9 +48,11 @@ statements(DbType) ->
                           count_user_admins,
                           update_user_by_id],
 
-    dict:to_list(lists:foldl(fun dict:erase/2,
-                             Merged,
-                             StatementsToRemove)).
+    AuthzStatements = oc_chef_authz_db:statements(pgsql),
+    ChefStatements = dict:to_list(lists:foldl(fun dict:erase/2,
+                                              Merged,
+                                              StatementsToRemove)),
+    AuthzStatements ++ ChefStatements.
 
 %% @doc Return a proplist of the parameterized SQL queries needed for
 %% chef_sql.  `Class' is used to distinguish between OPC and OSC
