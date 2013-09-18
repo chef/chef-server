@@ -5,7 +5,7 @@ module Pedant
 
     GLOBAL_OBJECTS = ['users', 'organizations']
 
-    attr_reader :test_org
+    attr_reader :test_org, :test_org_owner, :validate_org
 
     def initialize(server, superuser_key_file, super_user_name='pivotal')
       super(server, superuser_key_file, super_user_name)
@@ -286,19 +286,52 @@ module Pedant
       org = Pedant::Config[:org]
       name = org[:name]
       if org[:create_me]
+        @validate_org = true
         create_org(name)
       else
         key = org[:validator_key]
         Pedant::Organization.new(name, key)
+        puts "Using pre-created org. Skipping org creation validation tests."
       end
     end
 
     def delete_org_from_config
       if Pedant.config[:org][:create_me] && Pedant.config[:delete_org]
         delete_org(Pedant.config[:org][:name])
+        delete_user(test_org_owner)
       else
         puts "Pedant did not create the org, so will it not delete it"
       end
     end
+
+    # When this is defined, pedant will run this before running anything else.
+    def before_configure_rspec
+      validate_created_org(test_org) if validate_org
+    end
+
+    def validate_created_org(org)
+      puts "Validating Org Creation"
+
+      @test_org_owner = create_user("#{org.name}_owner")
+      make_owner(self.test_org_owner, org)
+
+      ::RSpec.configure do |c|
+        c.treat_symbols_as_metadata_keys_with_true_values = true
+        c.include Pedant::RSpec::Common
+      end
+
+      args = Pedant.config.rspec_formatting_args + Pedant::Gem.test_directories("org_creation")
+      #args = Pedant::Gem.test_directories("org_creation")
+      if ::RSpec::Core::Runner.run(args) > 0
+        delete_org_from_config
+        puts "Error: unable to validate testing org"
+        exit 2
+      end
+
+      # We need to reset RSpec after using it. Below are the hacks necessary for reset
+      ::RSpec.reset
+      ::RSpec.configuration.extend RSpecShared::Methods
+    end
+
   end
 end

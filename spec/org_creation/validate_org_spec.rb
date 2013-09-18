@@ -6,23 +6,13 @@
 
 describe "Org Creation", :org_creation do
   let(:requestor)  { superuser }
-  let(:org)        { platform.create_org(org_name) }
-  let(:owner)      { platform.create_user(owner_name) }
+  let(:org)        { platform.test_org }
+  let(:owner)      { platform.test_owner }
 
-  let(:org_name)   { unique_name("org_creation") }
-  let(:owner_name) { unique_name("org_owner") }
-
-  let(:org_with_owner) { platform.make_owner(owner, org) }
-
-  before(:all) { org_with_owner }
-  after(:all)  do
-    platform.delete_org(org_name)
-    platform.delete_user(owner)
-  end
+  let(:request_method) { :GET }
 
   context "when validating default containers" do
-    let(:request_method) { :GET }
-    let(:request_url)    { platform.api_url("/containers", org) }
+    let(:request_url)    { api_url("/containers") }
 
     let(:default_containers) { %w(clients containers cookbooks data environments groups nodes roles sandboxes) }
     let(:default_container_hash) { Hash[*default_containers.map(&container_to_url).flatten]  }
@@ -30,6 +20,14 @@ describe "Org Creation", :org_creation do
 
     it 'should have default containers' do
       parsed_response.should eql(default_container_hash)
+    end
+
+    context 'for clients container' do
+      let(:request_url)    { api_url("/containers/clients") }
+
+      it 'should have default settings' do
+        puts parsed_response
+      end
     end
   end
 
