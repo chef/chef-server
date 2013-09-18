@@ -109,7 +109,7 @@ make_context(ReqId, Darklaunch)  ->
                                          {error, forbidden}.
 create_entity_if_authorized(Context, OrgId, superuser, ObjectType) ->
     ContainerAId = get_container_aid_for_object(Context, OrgId, ObjectType),
-    {ok, AuthzSuperuserId} = application:get_env(oc_chef_authz, authz_superuser_id),
+    AuthzSuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
     create_entity_with_container_acl(AuthzSuperuserId, ContainerAId, ObjectType);
 create_entity_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
     ContainerAId = get_container_aid_for_object(Context, OrgId, ObjectType),
@@ -408,8 +408,7 @@ add_client_to_clients_group(Context, OrgId, ClientAuthzId, RequestorId) ->
 
     EffectiveRequestorId = case RequestorId of
                                superuser ->
-                                   {ok, SuperuserId} = application:get_env(oc_chef_authz, authz_superuser_id),
-                                   SuperuserId;
+                                   envy:get(oc_chef_authz, authz_superuser_id, binary);
                                RequestorId ->
                                    RequestorId
                            end,

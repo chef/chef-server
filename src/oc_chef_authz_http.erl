@@ -75,7 +75,7 @@ request(ReqId, Path, Method, Headers, Body, RequestorId) ->
               string()}], http_body(), requestor_id()) -> ok | {ok, _} | {error, _}.
               request(ReqId, _Pid, Path, Method, Headers, Body, RequestorId) ->
     FullHeaders = full_headers(ReqId, RequestorId, Headers),
-    {ok, AuthzConfig} = application:get_env(oc_chef_authz, authz_service),
+    AuthzConfig = envy:get(oc_chef_authz, authz_service, list),
     Timeout = proplists:get_value(timeout, AuthzConfig),
     Response = oc_httpc:request(?MODULE, to_str(Path), FullHeaders, Method, Body, Timeout),
     handle_ibrowse_response(Response).
@@ -183,7 +183,7 @@ ping(RequestFun) ->
     end.
 
 authz_url_and_timeout() ->
-    {ok, Config} = application:get_env(oc_chef_authz, authz_service),
+    Config = envy:get(oc_chef_authz, authz_service, list),
     Url = proplists:get_value(root_url, Config),
     Timeout = proplists:get_value(timeout, Config),
     {Url, Timeout}.

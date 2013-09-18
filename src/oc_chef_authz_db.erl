@@ -84,8 +84,8 @@ statements(pgsql) ->
 
 -spec make_context(binary(), term()) -> #oc_chef_authz_context{}.
 make_context(ReqId, Darklaunch) when is_binary(ReqId) ->
-    Host = get_env(couchdb_host),
-    Port = get_env(couchdb_port),
+    Host = envy:get(oc_chef_authz, couchdb_host, string),
+    Port = envy:get(oc_chef_authz, couchdb_port, pos_integer),
     S = couchbeam:server_connection(Host, Port, "", []),
     #oc_chef_authz_context{reqid = ReqId,
                            otto_connection = S,
@@ -232,14 +232,6 @@ design_and_view_for_type(authz_group) ->
 -spec dbname(binary()) -> <<_:40,_:_*8>>.
 dbname(OrgId) ->
     <<"chef_", OrgId/binary>>.
-
-get_env(Key) ->
-    case application:get_env(oc_chef_authz, Key) of
-        undefined ->
-            throw({missing_application_config, oc_chef_authz, Key});
-        {ok, Value} ->
-            Value
-    end.
 
 -spec fetch_container_sql(#oc_chef_authz_context{}, binary(), binary()) -> #chef_container{} |
                                                                            not_found |
