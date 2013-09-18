@@ -366,10 +366,8 @@ http_method_to_authz_perm('PUT') ->
 
 %% Tells whether this user is the superuser.
 is_superuser(UserName) ->
-    case application:get_env(oc_chef_wm, superusers) of
-        {ok,Superusers} -> lists:member(UserName, Superusers);
-        undefined -> false
-    end.
+    Superusers = envy:get(oc_chef_wm, superusers, [], list),
+    lists:member(UserName, Superusers).
 
 %% Get the username from the request (and tell whether it is a superuser)
 get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) ->
