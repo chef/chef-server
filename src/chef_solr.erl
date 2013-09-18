@@ -65,7 +65,7 @@ add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery},
                     {error, {solr_400, string()}} |
                     {error, {solr_500, string()}}.
 search(#chef_solr_query{}=Query) ->
-    {ok, SolrUrl} = application:get_env(chef_index, solr_url),
+    SolrUrl = envy:get(chef_index, solr_url, string),
     Url = SolrUrl ++ make_solr_query_url(Query),
     % FIXME: error handling
     {ok, Code, _Head, Body} = ibrowse:send_req(Url, [], get),
@@ -92,7 +92,7 @@ search(#chef_solr_query{}=Query) ->
 -spec ping() -> pong | pang.
 ping() ->
     try
-        {ok, SolrUrl} = application:get_env(chef_index, solr_url),
+        SolrUrl = envy:get(chef_index, solr_url, string),
         %% FIXME: solr will barf on doubled '/'s so SolrUrl must not end with a trailing slash
         Url = SolrUrl ++ "/admin/ping?wt=json",
         case ibrowse:send_req(Url, [], get) of
@@ -261,7 +261,7 @@ validate_non_neg(_Key, Int, _OrigValue) ->
 -spec solr_update(Body :: [byte(),...]) -> ok | {error, term()}.
 solr_update(Body) ->
     try
-        {ok, SolrUrl} = application:get_env(chef_index, solr_url),
+        SolrUrl = envy:get(chef_index, solr_url, string),
         %% FIXME: solr will barf on doubled '/'s so SolrUrl must not end with a trailing slash
         Url = SolrUrl ++ "/update",
         Headers = [],
