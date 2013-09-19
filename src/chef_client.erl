@@ -22,19 +22,19 @@
 
 -export([
          add_authn_fields/2,
-
          assemble_client_ejson/2,
+         id/1,
+         name/1,
+         new_record/3,
          oc_assemble_client_ejson/2,
-         osc_assemble_client_ejson/2,
-
          oc_parse_binary_json/2,
          oc_parse_binary_json/3,
-
+         osc_assemble_client_ejson/2,
          osc_parse_binary_json/2,
          osc_parse_binary_json/3,
-
          parse_binary_json/2,
-         parse_binary_json/3
+         parse_binary_json/3,
+         type_name/1
         ]).
 
 -include_lib("ej/include/ej.hrl").
@@ -65,6 +65,36 @@
 -undef(PARSE_BINARY).
 -define(PARSE_BINARY, oc_parse_binary_json).
 -endif.
+
+-behaviour(chef_object).
+
+-spec name(#chef_client{}) -> binary().
+name(#chef_client{name = Name}) ->
+    Name.
+
+-spec id(#chef_client{}) -> object_id().
+id(#chef_client{id = Id}) ->
+    Id.
+
+%% TODO: this doesn't need an argument
+type_name(#chef_client{}) ->
+    client.
+
+-spec new_record(object_id(), object_id(), ejson_term()) -> #chef_client{}.
+new_record(OrgId, AuthzId, ClientData) ->
+    Name = ej:get({<<"name">>}, ClientData),
+    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    Validator = ej:get({<<"validator">>}, ClientData) =:= true,
+    Admin = ej:get({<<"admin">>}, ClientData) =:= true,
+    {PublicKey, PubkeyVersion} = cert_or_key(ClientData),
+    #chef_client{id = Id,
+                 authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+                 org_id = OrgId,
+                 name = Name,
+                 validator = Validator,
+                 admin = Admin,
+                 public_key = PublicKey,
+                 pubkey_version = PubkeyVersion}.
 
 -spec add_authn_fields(ejson_term(), binary()) -> ejson_term().
 %% @doc Add in the generated public key along with other authn related
@@ -293,3 +323,27 @@ value_or_default(undefined, Default) ->
     Default;
 value_or_default(Value, _) ->
     Value.
+
+cert_or_key(Payload) ->
+    %% Some consumers of the API, such as webui, will generate a
+    %% JSON { public_key: null } to mean, "do not change it". By
+    %% default, null is treated as a defined, and will erase the
+    %% public_key in the database. We use value_or_undefined() to
+    %% convert all null into undefined.
+    Cert = value_or_undefined({<<"certificate">>}, Payload),
+    PublicKey = value_or_undefined({<<"public_key">>}, Payload),
+    %% Take certificate first, then public_key
+    case Cert of
+        undefined ->
+            {PublicKey, ?KEY_VERSION};
+        _ ->
+            {Cert, ?CERT_VERSION}
+    end.
+
+value_or_undefined(Key, Data) ->
+  case ej:get(Key, Data) of
+    null ->
+      undefined;
+    Value ->
+      Value
+  end.
