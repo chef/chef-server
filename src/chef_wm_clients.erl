@@ -110,20 +110,20 @@ from_json(Req, #base_state{reqid = RequestId,
                            resource_state = #client_state{client_data = ClientData,
                                                           client_authz_id = AuthzId}} = State) ->
     Name = ej:get({<<"name">>}, ClientData),
-    {PublicKey, PrivateKey} = case chef_object:cert_or_key(ClientData) of
+    {PublicKey, PrivateKey} = case chef_object_base:cert_or_key(ClientData) of
         {undefined, _} ->
             chef_wm_util:generate_keypair(Name, RequestId);
         {PubKey, _PubKeyVersion} ->
             {PubKey, undefined}
     end,
-    ClientData1 = chef_object:set_public_key(ClientData, PublicKey),
+    ClientData1 = chef_object_base:set_public_key(ClientData, PublicKey),
     case chef_wm_base:create_from_json(Req, State, chef_client, {authz_id, AuthzId}, ClientData1) of
         {true, Req1, State1} ->
             %% create_from_json by default sets the response to a json body
             %% containing only a uri key. Here we want to add the generated key
             %% pair so we replace the response.
             URI = ?BASE_ROUTES:route(client, Req1, [{name, Name}]),
-            EJSON = chef_object:set_key_pair({[{<<"uri">>, URI}]},
+            EJSON = chef_object_base:set_key_pair({[{<<"uri">>, URI}]},
                         {public_key, PublicKey}, {private_key, PrivateKey}),
             {true, chef_wm_util:set_json_body(Req1, EJSON), State1};
         Else ->

@@ -108,7 +108,7 @@ process_post(Req, #base_state{reqid = ReqId,
                               resource_state = #depsolver_state{run_list_cookbooks = Cookbooks,
                                                                 environment_name = EnvName,
                                                                 chef_environment = Env}} = State) ->
-    EnvConstraints = chef_object:depsolver_constraints(Env),
+    EnvConstraints = chef_object_base:depsolver_constraints(Env),
     case chef_db:fetch_all_cookbook_version_dependencies(DbContext, OrgName) of
         {error, Error} ->
             error_logger:error_msg("Dependency retrieval failure for org ~p with environment ~p: ~p~n",

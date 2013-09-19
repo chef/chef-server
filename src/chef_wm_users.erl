@@ -78,19 +78,19 @@ from_json(Req, #base_state{reqid = RequestId,
                            resource_state = #user_state{user_data = UserData,
                            user_authz_id = AuthzId}} = State) ->
     Name = ej:get({<<"name">>}, UserData),
-    {PublicKey, PrivateKey} = case chef_object:cert_or_key(UserData) of
+    {PublicKey, PrivateKey} = case chef_object_base:cert_or_key(UserData) of
         {undefined, _} ->
             chef_wm_util:generate_keypair(Name, RequestId);
         {PubKey, _PubKeyVersion} ->
             {PubKey, undefined}
     end,
-    UserWithKey = chef_object:set_public_key(UserData, PublicKey),
+    UserWithKey = chef_object_base:set_public_key(UserData, PublicKey),
     PasswordData = chef_wm_password:encrypt(ej:get({<<"password">>}, UserWithKey)),
     case create_from_json(Req, State, chef_user, {authz_id, AuthzId},
                           {UserWithKey, PasswordData}) of
         {true, Req1, State1} ->
             Uri = ?BASE_ROUTES:route(user, Req1, [{name, Name}]),
-            Ejson = chef_object:set_key_pair({[{<<"uri">>, Uri}]},
+            Ejson = chef_object_base:set_key_pair({[{<<"uri">>, Uri}]},
                         {public_key, PublicKey}, {private_key, PrivateKey}),
             {true, chef_wm_util:set_json_body(Req1, Ejson), State1};
         Else ->
@@ -117,8 +117,8 @@ create_from_json(#wm_reqdata{} = Req,
                  RecType, {authz_id, AuthzId}, ObjectEjson) ->
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
-    ObjectRec = chef_object:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
-    Name = chef_object:name(ObjectRec),
+    ObjectRec = chef_object_base:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
+    Name = chef_object_base:name(ObjectRec),
     case chef_db:create(ObjectRec, DbContext, ActorId) of
         {conflict, _} ->
             %% FIXME: created authz_id is leaked for this case, cleanup?

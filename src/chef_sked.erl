@@ -91,15 +91,15 @@ create_from_json(RecType, ObjectEjson) ->
     DbContext = chef_db:make_context(make_req_id()),
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
-    ObjectRec = chef_object:new_record(RecType, ?OSC_ORG_ID, unset, ObjectEjson),
-    Id = chef_object:id(ObjectRec),
-    TypeName = chef_object:type_name(ObjectRec),
+    ObjectRec = chef_object_base:new_record(RecType, ?OSC_ORG_ID, unset, ObjectEjson),
+    Id = chef_object_base:id(ObjectRec),
+    TypeName = chef_object_base:type_name(ObjectRec),
     %% We send the object data to solr for indexing *first*. If it fails, we'll error out on
     %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
     %% the world.
     ok = chef_object_db:add_to_solr(TypeName, Id, ?OSC_ORG_ID,
-                                 chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
+                                 chef_object_base:ejson_for_indexing(ObjectRec, ObjectEjson)),
 
     case chef_db:create(ObjectRec, DbContext, ?CHEF_SKED_AUTHZ_ID) of
         {conflict, Msg} ->

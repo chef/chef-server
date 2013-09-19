@@ -294,10 +294,10 @@ create_from_json(#wm_reqdata{} = Req,
                  RecType, {authz_id, AuthzId}, ObjectEjson) ->
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
-    ObjectRec = chef_object:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
-    Id = chef_object:id(ObjectRec),
-    Name = chef_object:name(ObjectRec),
-    TypeName = chef_object:type_name(ObjectRec),
+    ObjectRec = chef_object_base:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
+    Id = chef_object_base:id(ObjectRec),
+    Name = chef_object_base:name(ObjectRec),
+    TypeName = chef_object_base:type_name(ObjectRec),
 
     %% Perform any additional platform-specific work on the object
     ObjectRec = ?BASE_RESOURCE:object_creation_hook(ObjectRec, State),
@@ -307,7 +307,7 @@ create_from_json(#wm_reqdata{} = Req,
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
     %% the world.
     ok = chef_object_db:add_to_solr(TypeName, Id, OrgId,
-                                 chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
+                                 chef_object_base:ejson_for_indexing(ObjectRec, ObjectEjson)),
     case chef_db:create(ObjectRec, DbContext, ActorId) of
         {conflict, _} ->
             %% ignore return value of solr delete, this is best effort.
@@ -346,15 +346,15 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                                                   organization_guid = OrgId,
                                                   requestor_id = ActorId}=State,
                  OrigObjectRec, ObjectEjson) ->
-    ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectEjson),
+    ObjectRec = chef_object_base:update_from_ejson(OrigObjectRec, ObjectEjson),
 
     %% Send object to solr for indexing *first*. If the update fails, we will have sent
     %% incorrect data, but that should get corrected when the client retries. This is a
     %% compromise.
-    ok = chef_object_db:add_to_solr(chef_object:type_name(ObjectRec),
-                                    chef_object:id(ObjectRec),
+    ok = chef_object_db:add_to_solr(chef_object_base:type_name(ObjectRec),
+                                    chef_object_base:id(ObjectRec),
                                     OrgId,
-                                    chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
+                                    chef_object_base:ejson_for_indexing(ObjectRec, ObjectEjson)),
 
     %% Ignore updates that don't change anything. If the user PUTs identical data, we skip
     %% going to the database and skip updating updated_at. This allows us to avoid RDBMS
@@ -376,13 +376,13 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     %% request. In this case, we return 404 just as we would if the client
                     %% retried.
                     State1 = State#base_state{log_msg = not_found},
-                    Msg = chef_wm_util:not_found_message(chef_object:type_name(ObjectRec),
-                                                           chef_object:name(ObjectRec)),
+                    Msg = chef_wm_util:not_found_message(chef_object_base:type_name(ObjectRec),
+                                                           chef_object_base:name(ObjectRec)),
                     Req1 = chef_wm_util:set_json_body(Req, Msg),
                     {{halt, 404}, Req1, State1};
                 {conflict, _} ->
-                    Name = chef_object:name(ObjectRec),
-                    TypeName = chef_object:type_name(ObjectRec),
+                    Name = chef_object_base:name(ObjectRec),
+                    TypeName = chef_object_base:type_name(ObjectRec),
                     RecType = erlang:element(1,ObjectRec),
                     LogMsg = {RecType, name_conflict, Name},
                     ConflictMsg = conflict_message(TypeName, Name),
