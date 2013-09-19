@@ -24,7 +24,11 @@
 
 -export([
          add_type_and_bag/2,
+         id/1,
+         name/1,
+         new_record/3,
          parse_binary_json/2,
+         type_name/1,
          wrap_item/3
         ]).
 
@@ -39,6 +43,33 @@
         {[
           {<<"id">>, {string_match, chef_regex:regex_for(data_bag_item_id)}}
          ]}).
+
+-behaviour(chef_object).
+
+-spec new_record(object_id(), object_id(), {binary(), ejson_term()}) -> #chef_data_bag_item{}.
+new_record(OrgId, _AuthzId, {BagName, ItemData}) ->
+    ItemName = ej:get({<<"id">>}, ItemData),
+    Id = chef_object_base:make_org_prefix_id(OrgId, <<BagName/binary, ItemName/binary>>),
+    Data = chef_db_compression:compress(chef_data_bag_item, chef_json:encode(ItemData)),
+    #chef_data_bag_item{id = Id,
+                        org_id = OrgId,
+                        data_bag_name = BagName,
+                        item_name = ItemName,
+                        serialized_object = Data
+                       }.
+
+-spec id(#chef_data_bag_item{}) -> object_id().
+id(#chef_data_bag_item{id = Id}) ->
+    Id.
+
+-spec name(#chef_data_bag_item{}) -> {binary(), binary()}.
+name(#chef_data_bag_item{data_bag_name = BagName, item_name = ItemName}) ->
+    {BagName, ItemName}.
+
+-spec type_name(#chef_data_bag_item{}) -> data_bag_item.
+type_name(#chef_data_bag_item{}) ->
+    data_bag_item.
+
 
 -spec add_type_and_bag(BagName :: binary(), Item :: ejson_term()) -> ejson_term().
 %% @doc Returns data bag item EJSON `Item' with keys `chef_type' and `data_bag' added.

@@ -7,6 +7,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
+-include("chef_types.hrl").
 
 validate_data_bag_item_test_() ->
     [
@@ -44,3 +45,11 @@ validate_data_bag_item_test_() ->
                             <<"foo-123-bar">>,
                             <<"FOO">>]]
     ].
+
+new_record_test() ->
+    OrgId = <<"12345678123456781234567812345678">>,
+    Data = {[{<<"id">>, <<"my-item">>}, {<<"alpha">>, <<"bravo">>}]},
+    Item = chef_data_bag_item:new_record(OrgId, no_authz_id, {<<"my-bag">>, Data}),
+    ?assertMatch(#chef_data_bag_item{}, Item),
+    %% TODO: validate more fields?
+    ?assertEqual({<<"my-bag">>,<<"my-item">>}, chef_data_bag_item:name(Item)).
