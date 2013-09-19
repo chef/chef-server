@@ -24,14 +24,18 @@
 
 -export([
          assemble_cookbook_ejson/2,
-         minimal_cookbook_ejson/2,
-         parse_binary_json/2,
-         extract_checksums/1,
+         base_cookbook_name/1,
          constraint_map_spec/1,
-         version_to_binary/1,
+         extract_checksums/1,
+         id/1,
+         minimal_cookbook_ejson/2,
+         name/1,
+         new_record/3,
+         parse_binary_json/2,
          parse_version/1,
          qualified_recipe_names/2,
-         base_cookbook_name/1
+         type_name/1,
+         version_to_binary/1
         ]).
 
 -ifdef(TEST).
@@ -67,6 +71,69 @@
          {<<"chef_type">>,          {match, "cookbook_version"}}
          %% FIXME: more to come soon
         ]).
+
+-behaviour(chef_object).
+
+-spec name(#chef_cookbook_version{}) -> binary().
+name(#chef_cookbook_version{name = Name}) ->
+    Name.
+
+-spec id(#chef_cookbook_version{}) -> object_id().
+id(#chef_cookbook_version{id = Id}) ->
+    Id.
+
+%% TODO: this doesn't need an argument
+type_name(#chef_cookbook_version{}) ->
+    cookbook_version.
+
+-spec new_record(object_id(), object_id(), ejson_term()) -> #chef_cookbook_version{}.
+new_record(OrgId, AuthzId, CBVData) ->
+    %% name for a cookbook_version is actually cb_name-cb_version which is good for ID
+    %% creation
+    Name = ej:get({<<"name">>}, CBVData),
+    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    {Major, Minor, Patch} = parse_version(ej:get({<<"metadata">>, <<"version">>},
+                                                 CBVData)),
+
+    Metadata0 = ej:get({<<"metadata">>}, CBVData),
+
+    MAttributes = compress_maybe(ej:get({<<"attributes">>}, Metadata0, {[]}),
+                                 cookbook_meta_attributes),
+
+    %% Do not compress the deps!
+    Deps = chef_json:encode(ej:get({<<"dependencies">>}, Metadata0, {[]})),
+
+    LongDesc = compress_maybe(ej:get({<<"long_description">>}, Metadata0, <<"">>),
+                              cookbook_long_desc),
+
+    Metadata = compress_maybe(lists:foldl(fun(Key, MD) ->
+                                                  ej:delete({Key}, MD)
+                                          end, Metadata0, [<<"attributes">>,
+                                                           <<"dependencies">>,
+                                                           <<"long_description">>]),
+                              cookbook_metadata),
+
+    Data = compress_maybe(ej:delete({<<"metadata">>}, CBVData),
+                          chef_cookbook_version),
+    #chef_cookbook_version{id = Id,
+                           authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+                           org_id = OrgId,
+                           name = ej:get({<<"cookbook_name">>}, CBVData),
+                           major = Major,
+                           minor = Minor,
+                           patch = Patch,
+                           frozen = ej:get({<<"frozen?">>}, CBVData, false),
+                           meta_attributes = MAttributes,
+                           meta_deps = Deps,
+                           meta_long_desc = LongDesc,
+                           metadata = Metadata,
+                           checksums = extract_checksums(CBVData),
+                           serialized_object = Data}.
+
+compress_maybe(Data, cookbook_long_desc) ->
+    chef_db_compression:compress(cookbook_long_desc, Data);
+compress_maybe(Data, Type) ->
+    chef_db_compression:compress(Type, chef_json:encode(Data)).
 
 %% @doc Convert a binary JSON string representing a Chef Cookbook Version into an
 %% EJson-encoded Erlang data structure.

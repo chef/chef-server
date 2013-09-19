@@ -23,6 +23,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
+-include("chef_types.hrl").
 
 -define(MAX_GOOD_VERSION, "9223372036854775807").
 -define(MAX_GOOD_VERSION_INT, list_to_integer(?MAX_GOOD_VERSION)).
@@ -402,3 +403,40 @@ base_cookbook_name_test_() ->
             ],
     [ ?_assertEqual(Expected, chef_cookbook:base_cookbook_name(Input))
       || {Input, Expected} <- Tests ].
+
+new_record_test() ->
+    OrgId = <<"12345678123456781234567812345678">>,
+    AuthzId = <<"00000000000000000000000011111111">>,
+    CBVData = example_cookbook_version_json(),
+    CBV = chef_cookbook:new_record(OrgId, AuthzId, CBVData),
+    ?assertMatch(#chef_cookbook_version{}, CBV),
+    %% TODO: validate more fields?
+    ?assertEqual(<<"apache2">>, chef_cookbook:name(CBV)).
+
+example_cookbook_version_json() ->
+    Name = <<"apache2">>,
+    Version = <<"1.2.3">>,
+    {[
+      {<<"name">>, <<Name/binary, "-", Version/binary>>},
+      {<<"cookbook_name">>,  Name},
+      {<<"json_class">>, <<"Chef::CookbookVersion">>},
+      {<<"chef_type">>, <<"cookbook_version">>},
+      {<<"metadata">>,  {[
+                          {<<"description">>,  <<"A fabulous new cookbook">>},
+                          {<<"long_description">>,  <<"">>},
+                          {<<"maintainer">>,  <<"Your Name">>},
+                          {<<"maintainer_email">>,  <<"youremail@example.com">>},
+                          {<<"license">>,  <<"Apache v2.0">>},
+                          {<<"platforms">>,  {[]}},
+                          {<<"dependencies">>,  {[{<<"foo">>, <<"> 1.0">>}]}},
+                          {<<"recommendations">>,  {[]}},
+                          {<<"suggestions">>,  {[]}},
+                          {<<"conflicting">>,  {[]}},
+                          {<<"providing">>,  {[]}},
+                          {<<"replacing">>,  {[]}},
+                          {<<"attributes">>,  {[]}},
+                          {<<"groupings">>,  {[]}},
+                          {<<"recipes">>,  {[]}},
+                          {<<"version">>,  Version}
+                         ]}}
+     ]}.
