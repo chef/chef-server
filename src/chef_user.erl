@@ -24,7 +24,11 @@
          parse_binary_json/2,
          password_data/1,
          set_password_data/2,
-         update_from_ejson/2]).
+         update_from_ejson/2,
+         id/1,
+         name/1,
+         type_name/1,
+         new_record/3]).
 
 -include("chef_types.hrl").
 
@@ -38,6 +42,75 @@
         [
           {<<"admin">>, false}
         ]).
+
+
+-behaviour(chef_object).
+
+-spec name(#chef_user{}) -> binary().
+name(#chef_user{username = Name}) ->
+    Name.
+
+-spec id(#chef_user{}) -> object_id().
+id(#chef_user{id = Id}) ->
+    Id.
+
+%% TODO: this doesn't need an argument
+type_name(#chef_user{}) ->
+    user.
+
+-spec new_record(object_id(), object_id(), {ejson_term(), {binary(), binary(), binary()}}) -> #chef_user{}.
+    %% This only works for Open Source Users currently
+new_record(OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
+Name = ej:get({<<"name">>}, UserData),
+    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    Email = value_or_null({<<"email">>}, UserData),
+    Admin = ej:get({<<"admin">>}, UserData) =:= true,
+    {PublicKey, _PubkeyVersion} = cert_or_key(UserData),
+    #chef_user{id = Id,
+               authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+               username = Name,
+               email = Email,
+               public_key = PublicKey,
+               hashed_password = HashPass,
+               salt = Salt,
+               hash_type = HashType,
+               external_authentication_uid = null, %% Not used in open source user
+               recovery_authentication_enabled = false, %% Not used in open source user
+               admin = Admin
+    }.
+
+value_or_null(Key, Data) ->
+ Value = ej:get(Key, Data),
+  case Value of
+    undefined ->
+      null;
+    _ ->
+      Value
+  end.
+
+cert_or_key(Payload) ->
+    %% Some consumers of the API, such as webui, will generate a
+    %% JSON { public_key: null } to mean, "do not change it". By
+    %% default, null is treated as a defined, and will erase the
+    %% public_key in the database. We use value_or_undefined() to
+    %% convert all null into undefined.
+    Cert = value_or_undefined({<<"certificate">>}, Payload),
+    PublicKey = value_or_undefined({<<"public_key">>}, Payload),
+    %% Take certificate first, then public_key
+    case Cert of
+        undefined ->
+            {PublicKey, ?KEY_VERSION};
+        _ ->
+            {Cert, ?CERT_VERSION}
+    end.
+
+value_or_undefined(Key, Data) ->
+  case ej:get(Key, Data) of
+    null ->
+      undefined;
+    Value ->
+      Value
+  end.
 
 user_spec(create) ->
   {[
