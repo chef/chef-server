@@ -23,6 +23,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
+-include("chef_types.hrl").
 
 basic_role() ->
     {[
@@ -216,3 +217,12 @@ normalize_test_() ->
                                                   {<<"dev">>, [<<"recipe[oof]">>, <<"recipe[rab]">>, <<"recipe[zab]">>]}]})}
                                        ]
     ].
+
+new_record_test() ->
+    OrgId = <<"12345678123456781234567812345678">>,
+    AuthzId = <<"00000000000000000000000011111111">>,
+    NodeData = {[{<<"name">>, <<"my-role">>}, {<<"alpha">>, <<"bravo">>}]},
+    Role = chef_role:new_record(OrgId, AuthzId, NodeData),
+    ?assertMatch(#chef_role{}, Role),
+    %% TODO: validate more fields?
+    ?assertEqual(<<"my-role">>, chef_role:name(Role)).

@@ -23,8 +23,12 @@
 -module(chef_role).
 
 -export([
+         id/1,
+         name/1,
          environments/1,
-         parse_binary_json/2
+         new_record/3,
+         parse_binary_json/2,
+         type_name/1
         ]).
 
 -ifdef(TEST).
@@ -32,6 +36,8 @@
 -endif.
 
 -include("chef_types.hrl").
+
+-behaviour(chef_object).
 
 -define(DEFAULT_FIELD_VALUES,
         [
@@ -64,6 +70,30 @@
          <<"run_list">> ]).
 
 -type role_action() :: create | { update, Name::binary() }.
+
+-spec name(#chef_role{}) -> binary().
+name(#chef_role{name = Name}) ->
+    Name.
+
+-spec id(#chef_role{}) -> object_id().
+id(#chef_role{id = Id}) ->
+    Id.
+
+%% TODO: this doesn't need an argument
+type_name(#chef_role{}) ->
+    role.
+
+-spec new_record(object_id(), object_id(), ejson_term()) -> #chef_role{}.
+new_record(OrgId, AuthzId, RoleData) ->
+    Name = ej:get({<<"name">>}, RoleData),
+    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    Data = chef_db_compression:compress(chef_role, chef_json:encode(RoleData)),
+    #chef_role{id = Id,
+               authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+               org_id = OrgId,
+               name = Name,
+               serialized_object = Data}.
+
 
 %% @doc Given the EJSON representation of a role, return a sorted list of the environment names
 %% present in the role's `env_run_list` hash.
