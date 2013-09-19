@@ -221,8 +221,8 @@ normalize_test_() ->
 new_record_test() ->
     OrgId = <<"12345678123456781234567812345678">>,
     AuthzId = <<"00000000000000000000000011111111">>,
-    NodeData = {[{<<"name">>, <<"my-role">>}, {<<"alpha">>, <<"bravo">>}]},
-    Role = chef_role:new_record(OrgId, AuthzId, NodeData),
+    RoleData = {[{<<"name">>, <<"my-role">>}, {<<"alpha">>, <<"bravo">>}]},
+    Role = chef_role:new_record(OrgId, AuthzId, RoleData),
     ?assertMatch(#chef_role{}, Role),
     %% TODO: validate more fields?
     ?assertEqual(<<"my-role">>, chef_role:name(Role)).
