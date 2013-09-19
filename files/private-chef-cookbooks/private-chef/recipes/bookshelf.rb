@@ -4,6 +4,21 @@
 #
 # All Rights Reserved
 
+cookbook_migration = "/opt/opscode/embedded/bin/cookbook_migration.sh"
+
+template cookbook_migration do
+  source "cookbook_migration.sh.erb"
+  owner "root"
+  group "root"
+  mode "0755"
+end
+
+execute "cookbook migration" do
+  command cookbook_migration
+  only_if { File.exist?(node['private_chef']['opscode-chef']['checksum_path']) &&
+    !File.exist?(node['private_chef']['bookshelf']['data_dir']) }
+end
+
 bookshelf_dir = node['private_chef']['bookshelf']['dir']
 bookshelf_etc_dir = File.join(bookshelf_dir, "etc")
 bookshelf_log_dir = node['private_chef']['bookshelf']['log_directory']

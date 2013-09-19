@@ -157,6 +157,11 @@ default['private_chef']['opscode-erchef']['depsolver_worker_count'] = 5
 default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
 default['private_chef']['opscode-erchef']['max_request_size'] = 1000000
 
+###
+# Legacy path (required for cookbok migration)
+###
+default['private_chef']['opscode-chef']['checksum_path'] = "/var/opt/opscode/opscode-chef/checksum"
+
 ####
 # Chef Server WebUI
 ####
