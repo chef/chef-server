@@ -21,11 +21,17 @@
 
 -module(chef_node).
 
--export([extract_recipes/1,
+-export([
+         extract_recipes/1,
          extract_roles/1,
-         validate_json_node/2,
+         id/1,
          insert_autofill_fields/1,
-         parse_check_binary_as_json_node/2]).
+         name/1,
+         new_record/3,
+         parse_check_binary_as_json_node/2,
+         type_name/1,
+         validate_json_node/2
+        ]).
 
 -ifdef(TEST).
 -compile(export_all).
@@ -62,6 +68,29 @@
          {<<"automatic">>,        ?EMPTY_EJSON_HASH},
          {<<"run_list">>,         []}
         ]).
+
+-behaviour(chef_object).
+
+new_record(OrgId, AuthzId, NodeData) ->
+    Name = ej:get({<<"name">>}, NodeData),
+    Environment = ej:get({<<"chef_environment">>}, NodeData),
+    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    Data = chef_db_compression:compress(chef_node, chef_json:encode(NodeData)),
+    #chef_node{id = Id,
+               authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+               org_id = OrgId,
+               name = Name,
+               environment = Environment,
+               serialized_object = Data}.
+
+name(#chef_node{name = Name}) ->
+    Name.
+
+id(#chef_node{id = Id}) ->
+    Id.
+
+type_name(#chef_node{}) ->
+    node.
 
 extract_recipes(RunList) ->
     [ binary:part(Item, {0, byte_size(Item) - 1})

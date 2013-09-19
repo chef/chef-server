@@ -108,17 +108,6 @@ new_record(chef_data_bag_item, OrgId, _AuthzId, {BagName, ItemData}) ->
                         item_name = ItemName,
                         serialized_object = Data
                        };
-new_record(chef_node, OrgId, AuthzId, NodeData) ->
-    Name = ej:get({<<"name">>}, NodeData),
-    Environment = ej:get({<<"chef_environment">>}, NodeData),
-    Id = make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(chef_node, chef_json:encode(NodeData)),
-    #chef_node{id = Id,
-               authz_id = maybe_stub_authz_id(AuthzId, Id),
-               org_id = OrgId,
-               name = Name,
-               environment = Environment,
-               serialized_object = Data};
 new_record(chef_user, OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
     %% This only works for Open Source Users currently
     Name = ej:get({<<"name">>}, UserData),
@@ -332,8 +321,6 @@ update_from_ejson(#chef_cookbook_version{org_id = OrgId,
 
 -spec id(chef_object() | #chef_user{}) -> object_id().
 %% @doc Return the `id' field from a `chef_object()' record type.
-id(#chef_node{id = Id}) ->
-    Id;
 id(#chef_role{id = Id}) ->
     Id;
 id(#chef_user{id = Id}) ->
@@ -423,8 +410,6 @@ set_updated(#chef_cookbook_version{} = Object, ActorId) ->
 %% @doc Return the `name' field from a `chef_object()' record type. For `data_bag_items' the
 %% return value is a tuple of `{BagName, ItemName}',
 %% for a chef_user, the username is returned.
-name(#chef_node{name = Name}) ->
-    Name;
 name(#chef_role{name = Name}) ->
     Name;
 name(#chef_user{username = Name}) ->
@@ -451,8 +436,6 @@ type_name(#chef_environment{}) ->
     environment;
 type_name(#chef_client{}) ->
     client;
-type_name(#chef_node{}) ->
-    node;
 type_name(#chef_role{}) ->
     role;
 type_name(#chef_user{}) ->
