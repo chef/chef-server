@@ -20,26 +20,26 @@
 %%
 
 
--module(chef_object_tests).
+-module(chef_object_base_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 -include("chef_types.hrl").
 
 id_test_() ->
-    [?_assertEqual(<<"1">>, chef_object:id(#chef_data_bag_item{id = <<"1">>})),
-     ?_assertEqual(<<"1">>, chef_object:id(#chef_data_bag{id = <<"1">>})),
-     ?_assertEqual(<<"1">>, chef_object:id(#chef_environment{id = <<"1">>})),
-     ?_assertEqual(<<"1">>, chef_object:id(#chef_node{id = <<"1">>})),
-     ?_assertEqual(<<"1">>, chef_object:id(#chef_role{id = <<"1">>})),
-     ?_assertEqual(<<"1">>, chef_object:id(#chef_cookbook_version{id = <<"1">>}))].
+    [?_assertEqual(<<"1">>, chef_object_base:id(#chef_data_bag_item{id = <<"1">>})),
+     ?_assertEqual(<<"1">>, chef_object_base:id(#chef_data_bag{id = <<"1">>})),
+     ?_assertEqual(<<"1">>, chef_object_base:id(#chef_environment{id = <<"1">>})),
+     ?_assertEqual(<<"1">>, chef_object_base:id(#chef_node{id = <<"1">>})),
+     ?_assertEqual(<<"1">>, chef_object_base:id(#chef_role{id = <<"1">>})),
+     ?_assertEqual(<<"1">>, chef_object_base:id(#chef_cookbook_version{id = <<"1">>}))].
 
 set_created_test_() ->
     ActorId = <<"12121212121212121212121212121212">>,
     [?_assertMatch(<<_Year:4/binary, "-", _Month:2/binary, "-", _Day:2/binary,
                      " ", _H:2/binary, ":", _M:2/binary, ":", _S:2/binary>>,
-                   (chef_object:set_created(#chef_node{}, ActorId))#chef_node.created_at),
+                   (chef_object_base:set_created(#chef_node{}, ActorId))#chef_node.created_at),
      fun() ->
-             Obj = chef_object:set_created(#chef_role{}, ActorId),
+             Obj = chef_object_base:set_created(#chef_role{}, ActorId),
              ?assertMatch(<<_Year:4/binary, "-", _Month:2/binary, "-", _Day:2/binary,
                             " ", _H:2/binary, ":", _M:2/binary, ":", _S:2/binary>>,
                           Obj#chef_role.created_at),
@@ -49,22 +49,22 @@ set_created_test_() ->
 
 name_test_() ->
     [?_assertEqual({<<"bag name">>, <<"item name">>},
-                   chef_object:name(#chef_data_bag_item{data_bag_name = <<"bag name">>,
+                   chef_object_base:name(#chef_data_bag_item{data_bag_name = <<"bag name">>,
                                                         item_name =  <<"item name">>})),
-     ?_assertEqual(<<"a_name">>, chef_object:name(#chef_data_bag{name =  <<"a_name">>})),
-     ?_assertEqual(<<"a_name">>, chef_object:name(#chef_environment{name =  <<"a_name">>})),
-     ?_assertEqual(<<"a_name">>, chef_object:name(#chef_node{name =  <<"a_name">>})),
-     ?_assertEqual(<<"a_name">>, chef_object:name(#chef_role{name =  <<"a_name">>})),
+     ?_assertEqual(<<"a_name">>, chef_object_base:name(#chef_data_bag{name =  <<"a_name">>})),
+     ?_assertEqual(<<"a_name">>, chef_object_base:name(#chef_environment{name =  <<"a_name">>})),
+     ?_assertEqual(<<"a_name">>, chef_object_base:name(#chef_node{name =  <<"a_name">>})),
+     ?_assertEqual(<<"a_name">>, chef_object_base:name(#chef_role{name =  <<"a_name">>})),
      ?_assertEqual(<<"a_name">>,
-                   chef_object:name(#chef_cookbook_version{name =  <<"a_name">>}))].
+                   chef_object_base:name(#chef_cookbook_version{name =  <<"a_name">>}))].
 
 type_name_test_() ->
     [
-     ?_assertEqual(data_bag_item, chef_object:type_name(#chef_data_bag_item{})),
-     ?_assertEqual(data_bag, chef_object:type_name(#chef_data_bag{})),
-     ?_assertEqual(environment, chef_object:type_name(#chef_environment{})),
-     ?_assertEqual(node, chef_object:type_name(#chef_node{})),
-     ?_assertEqual(role, chef_object:type_name(#chef_role{}))
+     ?_assertEqual(data_bag_item, chef_object_base:type_name(#chef_data_bag_item{})),
+     ?_assertEqual(data_bag, chef_object_base:type_name(#chef_data_bag{})),
+     ?_assertEqual(environment, chef_object_base:type_name(#chef_environment{})),
+     ?_assertEqual(node, chef_object_base:type_name(#chef_node{})),
+     ?_assertEqual(role, chef_object_base:type_name(#chef_role{}))
     ].
 
 new_record_test_() ->
@@ -91,9 +91,9 @@ new_record_test_() ->
             ],
     [ {atom_to_list(RecName),
        fun() ->
-              Got = chef_object:new_record(RecName, O, A, Data),
-              ?assertEqual(NameForInput(Data), chef_object:name(Got)),
-              ?assertEqual(32, size(chef_object:id(Got)))
+              Got = chef_object_base:new_record(RecName, O, A, Data),
+              ?assertEqual(NameForInput(Data), chef_object_base:name(Got)),
+              ?assertEqual(32, size(chef_object_base:id(Got)))
       end} || {RecName, O, A, Data} <- Tests ].
 
 %% ejson_for_indexing tests
@@ -103,7 +103,7 @@ data_bag_ejson_for_indexing_test() ->
     Expected = {[{<<"name">>, <<"the_bag_name">>},
                 {<<"chef_type">>, <<"data_bag">>},
                 {<<"json_class">>, <<"Chef::DataBag">>}]},
-    Got = chef_object:ejson_for_indexing(Bag, <<"the_bag_name">>),
+    Got = chef_object_base:ejson_for_indexing(Bag, <<"the_bag_name">>),
     ?assertEqual(Expected, Got).
 
 data_bag_item_ejson_for_indexing_test() ->
@@ -115,7 +115,7 @@ data_bag_item_ejson_for_indexing_test() ->
                  {<<"a_key">>, <<"a_value">>},
                  {<<"chef_type">>, <<"data_bag_item">>},
                  {<<"data_bag">>, <<"the_bag_name">>}]},
-    Got = chef_object:ejson_for_indexing(Item, RawItem),
+    Got = chef_object_base:ejson_for_indexing(Item, RawItem),
     ?assertEqual(Expected, Got).
 
 role_ejson_for_indexing_test_() ->
@@ -133,7 +133,7 @@ role_ejson_for_indexing_test_() ->
     [{"empty env_run_lists",
       fun() ->
               Expected = RawRole,
-              Got = chef_object:ejson_for_indexing(Role, RawRole),
+              Got = chef_object_base:ejson_for_indexing(Role, RawRole),
               ?assertEqual(Expected, Got)
       end},
      {"_default in env_run_lists is removed",
@@ -143,7 +143,7 @@ role_ejson_for_indexing_test_() ->
                               {<<"_default">>, [<<"recipe[a0]">>, <<"role[b0]">>]}]},
               RawRole1 = ej:set({<<"env_run_lists">>}, RawRole, EnvRunLists),
               Expected = ej:set({<<"env_run_lists">>}, RawRole, EnvRunListsExpected),
-              Got = chef_object:ejson_for_indexing(Role, RawRole1),
+              Got = chef_object_base:ejson_for_indexing(Role, RawRole1),
               ?assertEqual(Expected, Got)
       end}
     ].
@@ -153,7 +153,7 @@ node_ejson_for_indexing_test_() ->
       fun() ->
               Node = merge(basic_node(), {[{<<"default">>, {[]}}]}),
               assert_ejson_equal(basic_node_index(),
-                                 chef_object:ejson_for_indexing(basic_node_record(), Node))
+                                 chef_object_base:ejson_for_indexing(basic_node_record(), Node))
       end},
 
      {"default_only_test",
@@ -161,7 +161,7 @@ node_ejson_for_indexing_test_() ->
               Defaults = {[{<<"a">>, 1}]},
               Node = merge(basic_node(), {[{<<"default">>, Defaults}]}),
               assert_ejson_equal(merge(basic_node_index(), Defaults),
-                                 chef_object:ejson_for_indexing(basic_node_record(), Node))
+                                 chef_object_base:ejson_for_indexing(basic_node_record(), Node))
       end},
 
      {"normal_over_default_test",
@@ -172,7 +172,7 @@ node_ejson_for_indexing_test_() ->
                                            {<<"normal">>, Normal}]}),
               Expect = merge(basic_node_index(), {[{<<"a">>, 1}, {<<"b">>, 11},
                                                    {<<"c">>, 3}]}),
-              Got = chef_object:ejson_for_indexing(basic_node_record(), Node),
+              Got = chef_object_base:ejson_for_indexing(basic_node_record(), Node),
               assert_ejson_equal(Expect, Got)
       end},
 
@@ -186,7 +186,7 @@ node_ejson_for_indexing_test_() ->
                              {<<"override">>, Override}]}),
               Expect = merge(basic_node_index(),
                              {[{<<"a">>, 1}, {<<"b">>, 22}, {<<"c">>, 3}, {<<"d">>, 4}]}),
-              Got = chef_object:ejson_for_indexing(basic_node_record(), Node),
+              Got = chef_object_base:ejson_for_indexing(basic_node_record(), Node),
               assert_ejson_equal(Expect, Got)
       end},
 
@@ -202,7 +202,7 @@ node_ejson_for_indexing_test_() ->
               Expect = merge(basic_node_index(),
                              {[{<<"a">>, 1}, {<<"b">>, 22}, {<<"c">>, 3}, {<<"d">>, 40},
                                {<<"e">>, 5}]}),
-              Got = chef_object:ejson_for_indexing(basic_node_record(), Node),
+              Got = chef_object_base:ejson_for_indexing(basic_node_record(), Node),
               assert_ejson_equal(Expect, Got)
       end}].
 
@@ -218,7 +218,7 @@ data_Bag_item_update_from_ejson_test_() ->
       [
        {atom_to_list(DbType),
         fun() ->
-                Item1 = chef_object:update_from_ejson(Item, RawItem),
+                Item1 = chef_object_base:update_from_ejson(Item, RawItem),
                 GotData = Item1#chef_data_bag_item.serialized_object,
                 GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
                 ?assertEqual(<<"the_item_name">>, Item1#chef_data_bag_item.item_name),
@@ -237,7 +237,7 @@ environment_update_from_ejson_test_() ->
       [
        {atom_to_list(DbType),
         fun() ->
-                Env1 = chef_object:update_from_ejson(Env, RawEnv),
+                Env1 = chef_object_base:update_from_ejson(Env, RawEnv),
                 GotData = Env1#chef_environment.serialized_object,
                 GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
                 ?assertEqual(<<"new_name">>, Env1#chef_environment.name),
@@ -252,7 +252,7 @@ node_update_from_ejson_test_() ->
       [
        {atom_to_list(DbType),
         fun() ->
-                Node1 = chef_object:update_from_ejson(Node, RawNode),
+                Node1 = chef_object_base:update_from_ejson(Node, RawNode),
                 GotData = Node1#chef_node.serialized_object,
                 GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
                 ?assertEqual(<<"a_node">>, Node1#chef_node.name),
@@ -278,7 +278,7 @@ role_update_from_ejson_test_() ->
       [
        {atom_to_list(DbType),
         fun() ->
-                Role1 = chef_object:update_from_ejson(Role, RawRole),
+                Role1 = chef_object_base:update_from_ejson(Role, RawRole),
                 GotData = Role1#chef_role.serialized_object,
                 GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
                 ?assertEqual(<<"new_name">>, Role1#chef_role.name),
@@ -362,7 +362,7 @@ depsolver_constraints_test_() ->
      [ {{Input,Expected}, fun({I, E}, _) ->
                                   {Description,
                                    fun() ->
-                                           Actual = chef_object:depsolver_constraints(I),
+                                           Actual = chef_object_base:depsolver_constraints(I),
                                            ?assertEqual(E, Actual)
                                    end}
                           end}
@@ -391,7 +391,7 @@ make_org_prefix_id_test_() ->
     Inputs = [{OrgId, "some-node"}, {OrgId, <<"some-node">>},
               %% repeat on purpose
               {OrgId, <<"some-node">>}],
-    NodeIds = [ chef_object:make_org_prefix_id(OrgGuid, NodeName)
+    NodeIds = [ chef_object_base:make_org_prefix_id(OrgGuid, NodeName)
                 || {OrgGuid, NodeName} <- Inputs ],
     [{"node ids are unique",
       ?_assertEqual(length(NodeIds), length(lists:usort(NodeIds)))},
@@ -419,7 +419,7 @@ deduplicate_run_list_test_() ->
     [{Message,
       fun() ->
               ?assertEqual(Expected,
-                           chef_object:deduplicate_run_list(Input))
+                           chef_object_base:deduplicate_run_list(Input))
       end}
      || {Message, Input, Expected} <- [
                                        {"'deduplicates' an empty list", [], []},
@@ -439,7 +439,7 @@ normalize_item_test_() ->
     [{Message,
      fun() ->
              ?assertEqual(Normalized,
-                         chef_object:normalize_item(Input))
+                         chef_object_base:normalize_item(Input))
      end}
      || {Message, Input, Normalized} <- [
                                          {"Explicit recipes are unchanged",
@@ -467,7 +467,7 @@ normalize_run_list_test_() ->
     [{Message,
       fun() ->
               ?assertEqual(Normalized,
-                           chef_object:normalize_run_list(Input))
+                           chef_object_base:normalize_run_list(Input))
       end}
      || {Message, Input, Normalized} <- [
                                          {"Normalizes an empty run list", [], []},
@@ -493,7 +493,7 @@ semantic_duplication_test_() ->
               Input = [<<"foo">>, <<"foo::default">>],
               Normalized = [<<"recipe[foo]">>, <<"recipe[foo::default]">>],
               ?assertEqual(Normalized,
-                           chef_object:normalize_run_list(Input))
+                           chef_object_base:normalize_run_list(Input))
       end}
     ].
 
@@ -525,7 +525,7 @@ set_key_pair_test_() ->
                     end,
     Tests = [
              begin
-                 Got = chef_object:set_key_pair(Ejson,
+                 Got = chef_object_base:set_key_pair(Ejson,
                                                 {public_key, DataForType(Type)},
                                                 {private_key, PrivateKey}),
                  [?_assertEqual(PrivateKey, ej:get({<<"private_key">>}, Got)),

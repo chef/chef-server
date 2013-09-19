@@ -197,7 +197,7 @@ assemble_cookbook_ejson_test_() ->
       fun() ->
               OrgId = <<"12341234123412341234123412341234">>,
               AuthzId = <<"auth">>,
-              Record = chef_object:new_record(chef_cookbook_version,
+              Record = chef_object_base:new_record(chef_cookbook_version,
                                               OrgId,
                                               AuthzId,
                                               CBEJson),
@@ -211,7 +211,7 @@ assemble_cookbook_ejson_test_() ->
       fun() ->
               OrgId = <<"12341234123412341234123412341234">>,
               AuthzId = <<"auth">>,
-              Record = chef_object:new_record(chef_cookbook_version,
+              Record = chef_object_base:new_record(chef_cookbook_version,
                                               OrgId,
                                               AuthzId,
                                               CBEJson),
@@ -272,7 +272,7 @@ dependencies_to_depsolver_constraints_test_() ->
         fun({_Terms, Expected}, JSON) ->
                 {Description,
                  fun() ->
-                         Actual = chef_object:depsolver_constraints(JSON),
+                         Actual = chef_object_base:depsolver_constraints(JSON),
                          ?assertEqual(Expected, Actual)
                  end}
         end}

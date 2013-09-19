@@ -76,7 +76,7 @@ add_authn_fields(ClientData, PublicKey) ->
                 end,
                 ClientData,
                 [
-                    {<<"pubkey_version">>, chef_object:key_version(PublicKey)},
+                    {<<"pubkey_version">>, chef_object_base:key_version(PublicKey)},
                     {<<"public_key">>, PublicKey}
                 ]).
 
@@ -97,7 +97,7 @@ oc_assemble_client_ejson(#chef_client{name = Name, validator = Validator,
         undefined ->
             {Values};
         _ ->
-            case chef_object:key_version(PublicKey) of
+            case chef_object_base:key_version(PublicKey) of
                 0 ->
                     {[{<<"public_key">>, PublicKey} | Values]};
                 1 ->
@@ -138,7 +138,7 @@ osc_parse_binary_json(Bin, ReqName) ->
 %% EJson-encoded Erlang data structure, using passed defaults
 %% @end
 osc_parse_binary_json(Bin, ReqName, CurrentClient) ->
-    Client = osc_set_values_from_current_client(chef_object:delete_null_public_key(chef_json:decode_body(Bin)), CurrentClient),
+    Client = osc_set_values_from_current_client(chef_object_base:delete_null_public_key(chef_json:decode_body(Bin)), CurrentClient),
     Client1 = set_default_values(Client, ?DEFAULT_FIELD_VALUES),
     {Name, FinalClient} = osc_destination_name(Client1, ReqName),
     valid_name(Name),
@@ -177,7 +177,7 @@ validate_admin_xor_validator(Client) ->
     IsValidator = ej:get({<<"validator">>}, Client),
     case {IsAdmin, IsValidator} of
         {true, true} ->
-            chef_object:throw_invalid_fun_match(<<"Client can be either an admin or a validator, but not both.">>);
+            chef_object_base:throw_invalid_fun_match(<<"Client can be either an admin or a validator, but not both.">>);
         {_, _} ->
             {ok, Client}
     end.
@@ -189,9 +189,9 @@ osc_set_values_from_current_client(Client, #chef_client{admin = IsAdmin,
                                                         public_key = PublicKey}) ->
     C = set_default_values(Client, [{<<"admin">>, IsAdmin},
                                     {<<"validator">>, IsValidator}]),
-    case chef_object:cert_or_key(C) of
+    case chef_object_base:cert_or_key(C) of
         {undefined, _} ->
-            chef_object:set_public_key(C, PublicKey);
+            chef_object_base:set_public_key(C, PublicKey);
         {_NewPublicKey, _} ->
             C
     end.
@@ -201,9 +201,9 @@ oc_set_values_from_current_client(Client, not_found) ->
 oc_set_values_from_current_client(Client, #chef_client{validator = IsValidator,
                                                        public_key = Cert}) ->
     C = set_default_values(Client, [{<<"validator">>, IsValidator}]),
-    case chef_object:cert_or_key(C) of
+    case chef_object_base:cert_or_key(C) of
         {undefined, _} ->
-            chef_object:set_public_key(C, Cert);
+            chef_object_base:set_public_key(C, Cert);
         {_NewPublicKey, _} ->
             C
     end.
@@ -225,7 +225,7 @@ osc_client_spec(Name) ->
       {{opt, <<"private_key">>}, boolean},
       {{opt, <<"json_class">>}, <<"Chef::ApiClient">>},
       {{opt, <<"chef_type">>}, <<"client">>},
-      {{opt, <<"public_key">>}, {fun_match, {fun chef_object:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
+      {{opt, <<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
      ]}.
 
 oc_client_spec(Name) ->

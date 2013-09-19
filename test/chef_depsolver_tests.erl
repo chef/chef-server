@@ -244,10 +244,10 @@ depsolver_environment_respected() ->
               cookbook(<<"bar">>, <<"3.0.0">>) ],
 
     Env100 = make_env(<<"myenv">>, {[{<<"bar">>, <<"= 1.0.0">>}]}),
-    Constraints100 = chef_object:depsolver_constraints(Env100),
+    Constraints100 = chef_object_base:depsolver_constraints(Env100),
 
     Env123 = make_env(<<"myenv">>, {[{<<"bar">>, <<"> 1.1.0">>}]}),
-    Constraints123 = chef_object:depsolver_constraints(Env123),
+    Constraints123 = chef_object_base:depsolver_constraints(Env123),
 
     Expect100 = {ok, [{<<"foo">>, {1, 0, 0}}, {<<"bar">>, {1, 0, 0}}]},
     Expect123 = {ok, [{<<"foo">>, {1, 2, 3}}, {<<"bar">>, {3, 0, 0}}]},
@@ -264,7 +264,7 @@ depsolver_impossible_dependency_via_environment() ->
               cookbook(<<"bar">>, <<"3.0.0">>) ],
     CookbookCons = {[{<<"bar">>, <<"= 1.0.0">>}]},
     Env = make_env(<<"myenv">>, CookbookCons),
-    Constraints = chef_object:depsolver_constraints(Env),
+    Constraints = chef_object_base:depsolver_constraints(Env),
     %% without constraints in env, ok
     ?assertMatch({ok, _}, chef_depsolver:solve_dependencies(World, [], [<<"foo">>])),
     %% with the constraints, foo can't be satisfied
@@ -631,4 +631,4 @@ make_env(Name, Deps) ->
              ]},
     Json = chef_json:encode(Ejson0),
     {ok, Ejson} = chef_environment:parse_binary_json(Json),
-    chef_object:new_record(chef_environment, ?OSC_ORG_ID, unset, Ejson).
+    chef_object_base:new_record(chef_environment, ?OSC_ORG_ID, unset, Ejson).

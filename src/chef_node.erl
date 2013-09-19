@@ -72,7 +72,7 @@ extract_roles(RunList) ->
       || <<"role[", Item/binary>> <- RunList ].
 
 validate(Node) ->
-    case chef_object:strictly_valid(?VALIDATION_CONSTRAINTS, ?VALID_KEYS, Node) of
+    case chef_object_base:strictly_valid(?VALIDATION_CONSTRAINTS, ?VALID_KEYS, Node) of
         ok ->
             {ok, Node};
         Bad ->
@@ -131,6 +131,6 @@ parse_check_binary_as_json_node(NodeBin, Action) ->
 -spec normalize(ej:json_object()) -> ej:json_object().
 normalize(NodeEjson) ->
     RunList = ej:get({<<"run_list">>}, NodeEjson, []),
-    Normalized = chef_object:normalize_run_list(RunList),
+    Normalized = chef_object_base:normalize_run_list(RunList),
     ej:set({<<"run_list">>}, NodeEjson, Normalized).
 

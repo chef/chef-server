@@ -111,7 +111,7 @@ set_default_values(Role, Defaults) ->
 
 -spec validate(ej:ejson_object()) -> {ok, ej:ejson_object()}.
 validate(Role) ->
-    case chef_object:strictly_valid(?VALIDATION_CONSTRAINTS, ?VALID_KEYS, Role) of
+    case chef_object_base:strictly_valid(?VALIDATION_CONSTRAINTS, ?VALID_KEYS, Role) of
         ok ->
             {ok, Role};
         Bad ->
@@ -144,11 +144,11 @@ normalize(RoleEjson) ->
     EnvRunListsKey = <<"env_run_lists">>,
 
     RunList = ej:get({RunListKey}, RoleEjson, []),
-    NormalizedRunList = chef_object:normalize_run_list(RunList),
+    NormalizedRunList = chef_object_base:normalize_run_list(RunList),
 
     %% Roles have a hash of {environment -> run list} that need to be normalized as well.
     {EnvRunLists} = ej:get({EnvRunListsKey}, RoleEjson, ?EMPTY_EJSON_HASH),
-    NormalizedEnvRunLists = {[{Env, chef_object:normalize_run_list(List)} || {Env, List} <- EnvRunLists]},
+    NormalizedEnvRunLists = {[{Env, chef_object_base:normalize_run_list(List)} || {Env, List} <- EnvRunLists]},
 
     lists:foldl(fun({Key, Value}, Role) ->
                         ej:set({Key}, Role, Value)

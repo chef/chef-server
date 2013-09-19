@@ -104,7 +104,7 @@ set_default_values(Cookbook, Defaults) ->
                          UrlVersion :: binary()}) -> {ok, ej:json_object()}.
 validate_cookbook(Cookbook, {UrlName, UrlVersion}) ->
     %% WARNING: UrlName and UrlVersion are assumed to be valid
-    case chef_object:strictly_valid(cookbook_spec(UrlName, UrlVersion), ?VALID_KEYS, Cookbook) of
+    case chef_object_base:strictly_valid(cookbook_spec(UrlName, UrlVersion), ?VALID_KEYS, Cookbook) of
         ok -> {ok, Cookbook};
         Bad -> throw(Bad)
     end.
@@ -200,7 +200,7 @@ constraint_map_spec(RegexName) ->
                             <<"Invalid version constraint">>}}}}}.
 
 valid_cookbook_constraint(Str) when is_binary(Str) ->
-    case chef_object:parse_constraint(Str) of
+    case chef_object_base:parse_constraint(Str) of
         {_Constr, Version} ->
             case is_valid_version(Version) of
                 false ->

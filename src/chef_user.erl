@@ -44,7 +44,7 @@ user_spec(create) ->
     {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
     {<<"password">>, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
     {{opt,<<"admin">>}, boolean},
-    {{opt,<<"public_key">>}, {fun_match, {fun chef_object:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
+    {{opt,<<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
    ]};
 user_spec(update) ->
   {[
@@ -52,7 +52,7 @@ user_spec(update) ->
     {{opt,<<"password">>}, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
     {{opt,<<"private_key">>}, boolean},
     {{opt,<<"admin">>}, boolean},
-    {{opt,<<"public_key">>}, {fun_match, {fun chef_object:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
+    {{opt,<<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
    ]}.
 
 valid_password(Password) when is_binary(Password) andalso byte_size(Password) >= 6 ->
@@ -78,7 +78,7 @@ parse_binary_json(Bin) ->
 
 -spec parse_binary_json(binary(), create | update) -> {ok, ej:json_object()}. % or throw
 parse_binary_json(Bin, Operation) ->
-  User = chef_object:delete_null_public_key(chef_json:decode(Bin)),
+  User = chef_object_base:delete_null_public_key(chef_json:decode(Bin)),
   %% If user is invalid, an error is thown
   validate_user(User, user_spec(Operation)),
   %% Set default values after validating input, so admin can be set to false
@@ -125,7 +125,7 @@ update_from_ejson(#chef_user{} = User, {UserData, PasswordData}) ->
     Name = ej:get({<<"name">>}, UserData),
     IsAdmin = ej:get({<<"admin">>}, UserData) =:= true,
 
-    {Key, _Version} = chef_object:cert_or_key(UserData),
+    {Key, _Version} = chef_object_base:cert_or_key(UserData),
     UserWithPassword = chef_user:set_password_data(User, PasswordData),
     case Key of
         undefined ->

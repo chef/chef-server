@@ -22,7 +22,7 @@
 
 %% @doc General utility module for common functions that operate on
 %% "Chef Objects", such as nodes, roles, etc.
--module(chef_object).
+-module(chef_object_base).
 
 -include("chef_types.hrl").
 -include_lib("ej/include/ej.hrl").
