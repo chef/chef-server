@@ -19,16 +19,37 @@ describe "Org Creation", :org_creation do
     let(:container_to_url) { ->(x) { [x, platform.api_url("/containers/#{x}", org)] } }
 
     it 'should have default containers' do
+      # This also tests to make sure there are no extraneous containers in the response
       parsed_response.should eql(default_container_hash)
     end
 
-    context 'for clients container' do
-      let(:request_url)    { api_url("/containers/clients") }
+    def self.should_have_container_for(resource)
+      # The exact message currently has "containerpath", but it is universally ignored
+      # We don't want to validate it, since it might be taken out in the port.
+      # If that happens, the expected_response should be ok_exact_response to keep
+      # validations stricter.
 
-      it 'should have default settings' do
-        puts parsed_response
+      resource = resource.to_s
+
+      context "for #{resource} container" do
+        let(:request_url)       { api_url("/containers/#{resource}") }
+        let(:expected_response) { ok_full_response }
+        let(:success_message)   { {"containername" => resource } }
+
+
+        should_respond_with 200, 'and have default settings'
       end
     end
+
+    should_have_container_for :clients
+    should_have_container_for :containers
+    should_have_container_for :cookbooks
+    should_have_container_for :data
+    should_have_container_for :environments
+    should_have_container_for :groups
+    should_have_container_for :nodes
+    should_have_container_for :roles
+    should_have_container_for :sandboxes
   end
 
 end
