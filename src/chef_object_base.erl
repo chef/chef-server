@@ -68,7 +68,12 @@
                                 binary() |
                                 {binary(), ejson_term()} |
                                 {ejson_term(), _}) ->
-                        chef_object() | #chef_cookbook_version{}.
+                        #chef_data_bag{} |
+                        #chef_data_bag_item{} |
+                        #chef_environment{} |
+                        #chef_client{} |
+                        #chef_role{} |
+                        #chef_cookbook_version{}.
 new_record(chef_environment, OrgId, AuthzId, EnvData) ->
     Name = ej:get({<<"name">>}, EnvData),
     Id = make_org_prefix_id(OrgId, Name),
@@ -425,7 +430,15 @@ name(#chef_data_bag_item{data_bag_name = BagName, item_name = ItemName}) ->
 name(#chef_cookbook_version{name = Name}) ->
     Name.
 
--spec type_name(chef_object() | #chef_user{}) -> chef_type() | cookbook_version | user.
+-spec type_name(chef_object() | #chef_user{}) ->
+                       'data_bag' |
+                       'data_bag_item' |
+                       'environment' |
+                       'client' |
+                       'role' |
+                       'user' |
+                       'cookbook_version' |
+                       'user'.
 %% @doc Return the common type name of a `chef_object()' record. For example, the common
 %% type name of a `chef_node{}' record is `node'.
 type_name(#chef_data_bag{}) ->
