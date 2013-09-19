@@ -27,7 +27,7 @@
 -include("chef_types.hrl").
 -include_lib("ej/include/ej.hrl").
 
--export([cert_or_key/1,
+-export([
          delete_null_public_key/1,
          depsolver_constraints/1,
          ejson_for_indexing/2,
@@ -35,6 +35,7 @@
          key_version/1,
          make_org_prefix_id/1,
          make_org_prefix_id/2,
+         maybe_stub_authz_id/2,
          name/1,
          new_record/4,
          normalize_run_list/1,
@@ -47,7 +48,8 @@
          throw_invalid_fun_match/1,
          type_name/1,
          update_from_ejson/2,
-         valid_public_key/1
+         valid_public_key/1,
+         cert_or_key/1
         ]).
 
 %% In order to fully test things
