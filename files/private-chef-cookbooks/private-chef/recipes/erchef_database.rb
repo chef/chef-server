@@ -1,18 +1,33 @@
 private_chef_pg_database "opscode_chef" do
 #  owner node['private_chef']['postgresql']['username'] # Do we really want this?
-  notifies :run, "execute[migrate_database]", :immediately
+  notifies :run, "execute[chef-server-schema]", :immediately
 end
 
-# Note: as currently coded, this only runs the database migration when
-# the database is first created.  Erchef does not currently use Sqitch
-# (like Bifrost does), so subsequent schema upgrades are handled by
-# the 'private-chef-ctl upgrade' mechanism.
-execute "migrate_database" do
-  command "bundle exec rake pg:remigrate"
-  cwd "/opt/opscode/embedded/service/chef-sql-schema"
+# Though Sqitch runs are idempotent, we need to have them run only
+# when the database is first created (thus the chained notifications).
+# This is only for EC11; subsequent versions can run them
+# idempotently, like normal.  This is just to allow fresh EC11
+# installs to use Sqitch; upgraded installations have a Partybus
+# upgrade to run.  The end result should be that whether or not you
+# are installing or upgrading EC11, at the end of the day, you'll have
+# Sqitch metadata info in your database.
+execute "chef-server-schema" do
+  command "sqitch --db-name opscode_chef deploy --verify"
+  cwd "/opt/opscode/embedded/service/chef-server-schema"
   user node['private_chef']['postgresql']['username']
+  returns [0,1]
+  action :nothing
+  notifies :run, "execute[enterprise-chef-server-schema]", :immediately
+end
+
+execute "enterprise-chef-server-schema" do
+  command "sqitch --db-name opscode_chef deploy --verify"
+  cwd "/opt/opscode/embedded/service/enterprise-chef-server-schema"
+  user node['private_chef']['postgresql']['username']
+  returns [0,1]
   action :nothing
 end
+
 
 # Create Database Users
 
