@@ -61,7 +61,7 @@ module Pedant
     end
 
     # TODO: expose the entire payload as an input parameter
-    def create_user(username)
+    def create_user(username, options = {})
       payload = {
         "username" => username,
         "email" => "#{username}@opscode.com",
@@ -82,7 +82,10 @@ module Pedant
 
       private_key = parse(r)["private_key"]
 
-      Pedant::User.new(username, private_key, platform: self, preexisting: false)
+      # The "admin" and "associate" options here are more of a metadata
+      # than actually creating an admin or associating. This allows
+      # Pedant tests to succeed even if the users config table has changed.
+      Pedant::User.new(username, private_key, platform: self, preexisting: false, admin: options[:admin], associate: options[:associate])
     end
 
     def delete_user(user)
@@ -112,9 +115,11 @@ module Pedant
       name = requestor_spec[:name]
       create_me = requestor_spec[:create_me]
       key_file = requestor_spec[:key_file]
+      associate = requestor_spec[:associate]
+      admin  = requestor_spec[:admin]
 
       if create_me
-        create_user(name).tap do |user|
+        create_user(name, admin: admin, associate: associate).tap do |user|
           user.populate_dot_chef! if requestor_spec[:create_knife]
         end
       else
@@ -298,7 +303,6 @@ module Pedant
     def delete_org_from_config
       if Pedant.config[:org][:create_me] && Pedant.config[:delete_org]
         delete_org(Pedant.config[:org][:name])
-        delete_user(test_org_owner)
       else
         puts "Pedant did not create the org, so will it not delete it"
       end
@@ -312,7 +316,8 @@ module Pedant
     def validate_created_org(org)
       puts "Validating Org Creation"
 
-      @test_org_owner = create_user("#{org.name}_owner")
+      @test_org_owner = create_user("#{org.name}_owner", associate: true, admin: true)
+      requestor_cache[:owner] = @test_org_owner
       make_owner(self.test_org_owner, org)
 
       ::RSpec.configure do |c|
@@ -324,6 +329,7 @@ module Pedant
       #args = Pedant::Gem.test_directories("org_creation")
       if ::RSpec::Core::Runner.run(args) > 0
         delete_org_from_config
+        delete_user(test_org_owner)
         puts "Error: unable to validate testing org"
         exit 2
       end
