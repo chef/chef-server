@@ -23,8 +23,12 @@
 -module(chef_environment).
 
 -export([
+         id/1,
+         name/1,
+         new_record/3,
          parse_binary_json/1,
-         set_default_values/1
+         set_default_values/1,
+         type_name/1
         ]).
 
 -include_lib("ej/include/ej.hrl").
@@ -44,6 +48,27 @@
 -define(VALID_KEYS,
         [<<"name">>, <<"description">>, <<"json_class">>, <<"chef_type">>,
          <<"default_attributes">>, <<"override_attributes">>, <<"cookbook_versions">>]).
+
+-behaviour(chef_object).
+
+new_record(OrgId, AuthzId, EnvData) ->
+    Name = ej:get({<<"name">>}, EnvData),
+    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    Data = chef_db_compression:compress(chef_environment, chef_json:encode(EnvData)),
+    #chef_environment{id = Id,
+                      authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+                      org_id = OrgId,
+                      name = Name,
+                      serialized_object = Data}.
+
+id(#chef_environment{id = Id}) ->
+    Id.
+
+name(#chef_environment{name = Name}) ->
+    Name.
+
+type_name(#chef_environment{}) ->
+    environment.
 
 environment_spec() ->
     {[
