@@ -70,7 +70,7 @@ class NginxErb
   def make_location(path, upstream, alternative, proto)
     <<EOS
 location ~ "#{path}" {
-    \tmore_set_headers 'X-Ops-Darklaunch:';
+    \tmore_set_input_headers 'X-Ops-Darklaunch:';
     \tset $my_upstream #{upstream};
     \tif ($http_x_ops_userid = "") {
     \t\tset $my_upstream #{alternative};
