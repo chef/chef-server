@@ -1,4 +1,4 @@
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -19,6 +19,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
+-include("chef_types.hrl").
 
 extended_node() ->
     {[{<<"name">>, <<"a_node">>},
@@ -218,3 +219,12 @@ normalize_test_() ->
               ?assertEqual(Normalized,
                            chef_node:normalize(Input))
       end}].
+
+new_record_test() ->
+    OrgId = <<"12345678123456781234567812345678">>,
+    AuthzId = <<"00000000000000000000000011111111">>,
+    NodeData = {[{<<"name">>, <<"my-node">>}, {<<"alpha">>, <<"bravo">>}]},
+    Node = chef_node:new_record(OrgId, AuthzId, NodeData),
+    ?assertMatch(#chef_node{}, Node),
+    %% TODO: validate more fields?
+    ?assertEqual(<<"my-node">>, chef_node:name(Node)).

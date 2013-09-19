@@ -29,7 +29,6 @@ id_test_() ->
     [?_assertEqual(<<"1">>, chef_object_base:id(#chef_data_bag_item{id = <<"1">>})),
      ?_assertEqual(<<"1">>, chef_object_base:id(#chef_data_bag{id = <<"1">>})),
      ?_assertEqual(<<"1">>, chef_object_base:id(#chef_environment{id = <<"1">>})),
-     ?_assertEqual(<<"1">>, chef_object_base:id(#chef_node{id = <<"1">>})),
      ?_assertEqual(<<"1">>, chef_object_base:id(#chef_role{id = <<"1">>})),
      ?_assertEqual(<<"1">>, chef_object_base:id(#chef_cookbook_version{id = <<"1">>}))].
 
@@ -53,7 +52,6 @@ name_test_() ->
                                                         item_name =  <<"item name">>})),
      ?_assertEqual(<<"a_name">>, chef_object_base:name(#chef_data_bag{name =  <<"a_name">>})),
      ?_assertEqual(<<"a_name">>, chef_object_base:name(#chef_environment{name =  <<"a_name">>})),
-     ?_assertEqual(<<"a_name">>, chef_object_base:name(#chef_node{name =  <<"a_name">>})),
      ?_assertEqual(<<"a_name">>, chef_object_base:name(#chef_role{name =  <<"a_name">>})),
      ?_assertEqual(<<"a_name">>,
                    chef_object_base:name(#chef_cookbook_version{name =  <<"a_name">>}))].
@@ -63,7 +61,6 @@ type_name_test_() ->
      ?_assertEqual(data_bag_item, chef_object_base:type_name(#chef_data_bag_item{})),
      ?_assertEqual(data_bag, chef_object_base:type_name(#chef_data_bag{})),
      ?_assertEqual(environment, chef_object_base:type_name(#chef_environment{})),
-     ?_assertEqual(node, chef_object_base:type_name(#chef_node{})),
      ?_assertEqual(role, chef_object_base:type_name(#chef_role{}))
     ].
 
@@ -84,7 +81,6 @@ new_record_test_() ->
     Tests = [
              {chef_data_bag, OrgId, AuthzId, <<"bag-name">>},
              {chef_data_bag_item, OrgId, AuthzId, {<<"bag-name">>, IdJson}},
-             {chef_node, OrgId, AuthzId, NameJson},
              {chef_role, OrgId, AuthzId, NameJson},
              {chef_cookbook_version, OrgId, AuthzId,
               example_cookbook_version_json()}
