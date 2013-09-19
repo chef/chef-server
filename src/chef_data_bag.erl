@@ -22,6 +22,10 @@
 -module(chef_data_bag).
 
 -export([
+         id/1,
+         name/1,
+         type_name/1,
+         new_record/3,
          parse_binary_json/2
         ]).
 
@@ -44,6 +48,28 @@
           %% have no 'serialized object' that is saved and also returned to clients upon
           %% retrieval.
          ]}).
+
+-behaviour(chef_object).
+
+-spec name(#chef_data_bag{}) -> binary().
+name(#chef_data_bag{name = Name}) ->
+    Name.
+
+-spec id(#chef_data_bag{}) -> object_id().
+id(#chef_data_bag{id = Id}) ->
+    Id.
+
+%% TODO: this doesn't need an argument
+type_name(#chef_data_bag{}) ->
+    data_bag.
+
+-spec new_record(object_id(), object_id(), binary() | string()) -> #chef_data_bag{}.
+new_record(OrgId, AuthzId, Name) ->
+    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    #chef_data_bag{id = Id,
+                   authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+                   org_id = OrgId,
+                   name = Name}.
 
 %% @doc Convert a binary JSON string representing a Chef data_bag into an EJson-encoded
 %% Erlang data structure.
