@@ -845,7 +845,7 @@ bulk_get_couchdb(#context{reqid = ReqId, otto_connection = S}=Ctx, OrgName, _Typ
             ?SH_TIME(ReqId, chef_otto, bulk_get, (S, DbName, Ids))
     end.
 
--spec data_bag_exists(#context{}, binary(), binary() | string()) -> boolean().
+-spec data_bag_exists(#context{}, binary(), binary()) -> boolean().
 %% @doc Return true if data bag `DataBag' exists in org `OrgName' and false otherwise.
 data_bag_exists(#context{}=Ctx, OrgName, DataBag) ->
     case fetch_data_bag(Ctx, OrgName, DataBag) of
@@ -860,7 +860,7 @@ data_bag_exists(#context{}=Ctx, OrgName, DataBag) ->
 data_bag_names(#context{}=Ctx, OrgId) ->
     fetch_data_bags(Ctx, {id, OrgId}).
 
--spec environment_exists(#context{}, binary(), binary() | string()) -> boolean().
+-spec environment_exists(#context{}, <<_:256>>, binary()) -> boolean().
 %% @doc Return true if environment `EnvName' exists in org `OrgId' and false otherwise.
 environment_exists(#context{}=Ctx, OrgId, EnvName) ->
     %% FIXME: we should implement a specialized environment exists function
