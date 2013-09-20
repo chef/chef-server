@@ -19,7 +19,10 @@
 %
 -module(chef_user).
 
--export([assemble_user_ejson/2,
+-export([
+         authz_id/1,
+         ejson_for_indexing/2,
+         assemble_user_ejson/2,
          parse_binary_json/1,
          parse_binary_json/2,
          password_data/1,
@@ -28,7 +31,19 @@
          id/1,
          name/1,
          type_name/1,
-         new_record/3]).
+         new_record/3,
+         set_created/2,
+         set_updated/2]).
+
+%% database named queries
+-export([
+         bulk_get_query/0,
+         create_query/0,
+         delete_query/0,
+         find_query/0,
+         list_query/0,
+         update_query/0
+        ]).
 
 -include("chef_types.hrl").
 
@@ -45,6 +60,10 @@
 
 
 -behaviour(chef_object).
+
+-spec authz_id(#chef_user{}) -> object_id().
+authz_id(#chef_user{authz_id = AuthzId}) ->
+    AuthzId.
 
 -spec name(#chef_user{}) -> binary().
 name(#chef_user{username = Name}) ->
@@ -212,3 +231,33 @@ update_from_ejson(#chef_user{} = User, {UserData, PasswordData}) ->
             }
     end.
 
+-spec set_created(#chef_user{}, object_id()) -> #chef_user{}.
+set_created(#chef_user{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_user{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
+
+-spec set_updated(#chef_user{}, object_id()) -> #chef_user{}.
+set_updated(#chef_user{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_user{updated_at = Now, last_updated_by = ActorId}.
+
+create_query() ->
+    insert_user.
+
+update_query() ->
+    update_user_by_id.
+
+delete_query() ->
+    delete_user_by_id.
+
+find_query() ->
+    find_user_by_orgid_name.
+
+list_query() ->
+    list_users_for_org.
+
+bulk_get_query() ->
+    bulk_get_users.
+
+ejson_for_indexing(#chef_user{}, _) ->
+    error(not_indexed).
