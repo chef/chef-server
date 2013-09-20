@@ -56,11 +56,6 @@ else
   node.consume_attributes(PrivateChef.generate_config(node['fqdn']))
 end
 
-# the bootstrap_server attribute is set to signify that this node is
-# cofigured to be the bootstrap server. If bootstrap#enable is set in
-# the OPC config, then we know we should be the bootstrap server.
-node.set['private_chef']['bootstrap']['bootstrap_server'] = node['private_chef']['bootstrap']['enable']
-
 if File.exists?("/var/opt/opscode/bootstrapped")
         node.set['private_chef']['bootstrap']['enable'] = false
 end

@@ -41,7 +41,8 @@ template partybus_config do
   mode   "0644"
   variables(:connection_string => db_connection_string,
             :node_role => node_role,
-            :db_service_name => db_service_name)
+            :db_service_name => db_service_name,
+            :bootstrap_server => node['private_chef']['bootstrap']['enable'])
 end
 
 link "/opt/opscode/embedded/service/partybus/config.rb" do
