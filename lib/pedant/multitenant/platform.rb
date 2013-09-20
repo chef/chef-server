@@ -325,8 +325,13 @@ module Pedant
         c.include Pedant::RSpec::Common
       end
 
-      args = Pedant.config.rspec_formatting_args + Pedant::Gem.test_directories("org_creation")
-      #args = Pedant::Gem.test_directories("org_creation")
+      args = if Pedant.config.debug_org_creation
+               Pedant.config.rspec_formatting_args
+             else
+               []
+             end
+      args.concat(Pedant::Gem.test_directories("org_creation"))
+
       if ::RSpec::Core::Runner.run(args) > 0
         delete_org_from_config
         delete_user(test_org_owner)
