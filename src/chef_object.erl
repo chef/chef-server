@@ -33,12 +33,12 @@
 -callback set_created(object_rec(), object_id()) -> object_rec().
 -callback set_updated(object_rec(), object_id()) -> object_rec().
 
--callback create_query(object_rec()) -> atom().
--callback update_query(object_rec()) -> atom().
--callback delete_query(object_rec()) -> atom().
--callback find_query(object_rec()) -> atom().
--callback list_query(object_rec()) -> atom().
--callback bulk_get_query(object_rec()) -> atom().
+-callback create_query() -> atom().
+-callback update_query() -> atom().
+-callback delete_query() -> atom().
+-callback find_query() -> atom().
+-callback list_query() -> atom().
+-callback bulk_get_query() -> atom().
 
 -callback new_record(OrgId :: object_id(),
                      AuthzId :: object_id() | unset,
@@ -125,22 +125,22 @@ set_created(Rec, ActorId) ->
     Mod:set_created(Rec, ActorId).
 
 create_query(Rec) ->
-    call(Rec, create_query).
+    call0(Rec, create_query).
 
 update_query(Rec) ->
-    call(Rec, update_query).
+    call0(Rec, update_query).
 
 delete_query(Rec) ->
-    call(Rec, delete_query).
+    call0(Rec, delete_query).
 
 find_query(Rec) ->
-    call(Rec, find_query).
+    call0(Rec, find_query).
 
 list_query(Rec) ->
-    call(Rec, list_query).
+    call0(Rec, list_query).
 
 bulk_get_query(Rec) ->
-    call(Rec, bulk_get_query).
+    call0(Rec, bulk_get_query).
 
 %% Return the callback module for a given object record type. We're putting the abstraction
 %% in place in case we need to do something other than the identity mapping of record name
@@ -152,3 +152,7 @@ callback_mod(Rec) ->
 call(Rec, Fun) ->
     Mod = callback_mod(Rec),
     Mod:Fun(Rec).
+
+call0(Rec, Fun) ->
+    Mod = callback_mod(Rec),
+    Mod:Fun().
