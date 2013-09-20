@@ -278,11 +278,8 @@ module PrivateChef
       PrivateChef["postgresql"]["listen_address"] ||= "0.0.0.0"
       PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"]
       PrivateChef["opscode_account"]["worker_processes"] ||= 4
-      if bootstrap
-        PrivateChef["bootstrap"]["enable"] = true
-      else
-        PrivateChef["bootstrap"]["enable"] = false
-      end
+
+      PrivateChef["bootstrap"]["enable"] = !!bootstrap
     end
 
     def gen_frontend
