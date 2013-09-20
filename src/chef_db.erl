@@ -360,7 +360,7 @@ make_sandbox(#context{}=Ctx, OrgName, ActorId, Checksums) ->
         not_found ->
             not_found;
         OrgId ->
-            Id = chef_object:make_org_prefix_id(OrgId),
+            Id = chef_object_base:make_org_prefix_id(OrgId),
             %% TempSandbox doesn't know if the checksums have been uploaded yet or not
             TempSandbox = #chef_sandbox{id=Id,
                                         org_id=OrgId,
@@ -927,7 +927,7 @@ update(DbContext, #chef_user{} = Record, ActorId) ->
 %% module to use for the creation and determines the return type (will return the
 %% appropriate chef object record type).
 create_object(#context{reqid = ReqId}, Fun, Object, ActorId) ->
-    Object1 = chef_object:set_created(Object, ActorId),
+    Object1 = chef_object_base:set_created(Object, ActorId),
     case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(Object1) end) of
         {ok, 1} -> ok;
@@ -1122,7 +1122,7 @@ delete_object(#context{reqid = ReqId}, Fun, Id) ->
 %% @doc Generic update for Chef object types. `Fun' is the appropriate function in the
 %% `chef_sql' module. `Object' is a Chef object (record) with updated data.
 update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
-    Object1 = chef_object:set_updated(Object, ActorId),
+    Object1 = chef_object_base:set_updated(Object, ActorId),
     case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(Object1) end) of
         #chef_db_cb_version_update{}=CookbookVersionUpdate -> CookbookVersionUpdate;

@@ -657,7 +657,7 @@ fetch_all_cookbook_version_dependencies(OrgId) ->
 fetch_environment_filtered_cookbook_versions(OrgId, EnvName, CookbookName, NumVersions) ->
     case fetch_environment(OrgId, EnvName) of
         {ok, #chef_environment{}=Environment} ->
-            Constraints = chef_object:depsolver_constraints(Environment),
+            Constraints = chef_object_base:depsolver_constraints(Environment),
 
             %% Due to how environment constraint information is
             %% currently modeled, as well as the fact that the logic
@@ -1563,7 +1563,7 @@ row_to_dependency_set(Row) ->
     Version = proplists:get_value(<<"version">>, Row),
     DependenciesJSON = proplists:get_value(<<"dependencies">>, Row),
 
-    Dependencies = chef_object:depsolver_constraints(DependenciesJSON),
+    Dependencies = chef_object_base:depsolver_constraints(DependenciesJSON),
 
     {CookbookName, [{Version, Dependencies}]}.
 
