@@ -56,8 +56,8 @@ else
   node.consume_attributes(PrivateChef.generate_config(node['fqdn']))
 end
 
-if File.exists?("/var/opt/opscode/bootstrapped")
-        node.set['private_chef']['bootstrap']['enable'] = false
+if ECBootstrap.has_been_bootstrapped?
+  node.set['private_chef']['bootstrap']['enable'] = false
 end
 
 # Create the Chef User
