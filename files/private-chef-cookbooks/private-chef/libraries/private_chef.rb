@@ -342,12 +342,10 @@ module PrivateChef
       when "standalone","manual"
         PrivateChef[:api_fqdn] ||= node_name
         gen_api_fqdn
-      when "ha","tier"
-        if PrivateChef['topology'] == "ha"
-          gen_redundant(node_name, true)
-        else
-          gen_redundant(node_name, false)
-        end
+      when "ha"
+        gen_redundant(node_name, true)
+      when "tier"
+        gen_redundant(node_name, false)
       else
         Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha or tier.")
         exit 55
