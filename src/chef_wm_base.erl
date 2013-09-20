@@ -292,12 +292,14 @@ create_from_json(#wm_reqdata{} = Req,
                              organization_guid = OrgId,
                              requestor_id = ActorId} = State,
                  RecType, {authz_id, AuthzId}, ObjectEjson) ->
+    %% TODO: ObjectMod passed in as an explicit argument?
+    ObjectMod = RecType,
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
-    ObjectRec = chef_object_base:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
-    Id = chef_object_base:id(ObjectRec),
-    Name = chef_object_base:name(ObjectRec),
-    TypeName = chef_object_base:type_name(ObjectRec),
+    ObjectRec = ObjectMod:new_record(OrgId, maybe_authz_id(AuthzId), ObjectEjson),
+    Id = ObjectMod:id(ObjectRec),
+    Name = ObjectMod:name(ObjectRec),
+    TypeName = ObjectMod:type_name(ObjectRec),
 
     %% Perform any additional platform-specific work on the object
     ObjectRec = ?BASE_RESOURCE:object_creation_hook(ObjectRec, State),
