@@ -146,7 +146,7 @@ new_record(chef_cookbook_version, OrgId, AuthzId, CBVData) ->
     %% creation
     Name = ej:get({<<"name">>}, CBVData),
     Id = make_org_prefix_id(OrgId, Name),
-    {Major, Minor, Patch} = chef_cookbook:parse_version(ej:get({<<"metadata">>, <<"version">>},
+    {Major, Minor, Patch} = chef_cookbook_version:parse_version(ej:get({<<"metadata">>, <<"version">>},
                                                         CBVData)),
 
     Metadata0 = ej:get({<<"metadata">>}, CBVData),
@@ -181,7 +181,7 @@ new_record(chef_cookbook_version, OrgId, AuthzId, CBVData) ->
                            meta_deps = Deps,
                            meta_long_desc = LongDesc,
                            metadata = Metadata,
-                           checksums = chef_cookbook:extract_checksums(CBVData),
+                           checksums = chef_cookbook_version:extract_checksums(CBVData),
                            serialized_object = Data}.
 
 compress_maybe(Data, cookbook_long_desc) ->
@@ -498,7 +498,7 @@ depsolver_constraints({Constraints}) when is_list(Constraints) ->
 -spec process_constraint_for_depsolver({binary(), binary()}) -> {binary(), binary(), '<' | '<=' | '=' | '>' | '>=' | '~>'}.
 process_constraint_for_depsolver({Name, ConstraintString}) ->
     {Comparator, Version} = parse_constraint(ConstraintString),
-    {chef_cookbook:base_cookbook_name(Name), Version, Comparator}.
+    {chef_cookbook_version:base_cookbook_name(Name), Version, Comparator}.
 
 %% @doc Given a version constraint string (e.g., `<<">= 1.5.0">>'), extract the comparison
 %% operator and version and present them as a paired tuple.

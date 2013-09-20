@@ -19,7 +19,7 @@
 %%
 
 
--module(chef_cookbook_tests).
+-module(chef_cookbook_version_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
@@ -55,7 +55,7 @@ basic_cookbook(Name, Version, Options) ->
 
 minimal_cookbook_is_valid_test() ->
     CookbookEjson = basic_cookbook(<<"php">>, <<"1.2.3">>),
-    Got = chef_cookbook:validate_cookbook(CookbookEjson, {<<"php">>, <<"1.2.3">>}),
+    Got = chef_cookbook_version:validate_cookbook(CookbookEjson, {<<"php">>, <<"1.2.3">>}),
     ?assertEqual({ok, CookbookEjson}, Got).
 
 valid_resources_test() ->
@@ -68,7 +68,7 @@ valid_resources_test() ->
                    {<<"checksum">>, <<"abababababababababababababababab">>},
                    {<<"specificity">>, <<"default">>}
                   ]}]),
-    ?assertEqual({ok, CB}, chef_cookbook:validate_cookbook(CB, NameVer)).
+    ?assertEqual({ok, CB}, chef_cookbook_version:validate_cookbook(CB, NameVer)).
 
 top_level_key_validation_test() ->
     Name = <<"test_name">>,
@@ -79,7 +79,7 @@ top_level_key_validation_test() ->
       fun() ->
               C = ej:set({<<"not_valid_key">>}, Cookbook, <<"some junk">>),
               ?assertThrow({invalid_key, <<"not_valid_key">>},
-                           chef_cookbook:validate_role(C, {Name, Version}))
+                           chef_cookbook_version:validate_role(C, {Name, Version}))
       end}
     ].
 
@@ -91,21 +91,21 @@ bad_resources_test_() ->
       fun() ->
               CB = ej:set({<<"resources">>}, CB0, {[]}),
               ?assertThrow(#ej_invalid{type = json_type},
-                           chef_cookbook:validate_cookbook(CB, NameVer))
+                           chef_cookbook_version:validate_cookbook(CB, NameVer))
       end},
 
      {"resource value must be an array not a string",
       fun() ->
               CB = ej:set({<<"resources">>}, CB0, <<"not-this">>),
               ?assertThrow(#ej_invalid{type = json_type},
-                           chef_cookbook:validate_cookbook(CB, NameVer))
+                           chef_cookbook_version:validate_cookbook(CB, NameVer))
       end},
 
      {"resource array value must not be empty",
       fun() ->
               CB = ej:set({<<"resources">>}, CB0, [{[]}]),
               ?assertThrow(#ej_invalid{type = array_elt},
-                           chef_cookbook:validate_cookbook(CB, NameVer))
+                           chef_cookbook_version:validate_cookbook(CB, NameVer))
       end}
 
     ].
@@ -123,7 +123,7 @@ valid_dependencies_test() ->
                   {<<"cc">>, <<"<= 1.2.3">>},
                   {<<"dd">>, <<"4.4.4">>}
                  ]}),
-    ?assertEqual({ok, CB}, chef_cookbook:validate_cookbook(CB, NameVer)).
+    ?assertEqual({ok, CB}, chef_cookbook_version:validate_cookbook(CB, NameVer)).
 
 bad_dependencies_test_() ->
     CB0 = basic_cookbook(<<"php">>, <<"1.2.3">>),
@@ -136,7 +136,7 @@ bad_dependencies_test_() ->
                             {<<"not valid name">>, <<"> 1.0.0">>}
                            ]}),
               ?assertThrow(#ej_invalid{type = object_key},
-                           chef_cookbook:validate_cookbook(CB, NameVer))
+                           chef_cookbook_version:validate_cookbook(CB, NameVer))
 
       end},
 
@@ -147,7 +147,7 @@ bad_dependencies_test_() ->
                             {<<"apache2">>, <<"1b">>}
                            ]}),
               ?assertThrow(#ej_invalid{type = object_value},
-                           chef_cookbook:validate_cookbook(CB, NameVer))
+                           chef_cookbook_version:validate_cookbook(CB, NameVer))
 
       end}
 
@@ -174,7 +174,7 @@ providing_constraint_test_() ->
     [
       fun() ->
               CB = SetProviding(P),
-              ?assertEqual({ok, CB}, chef_cookbook:validate_cookbook(CB, NameVer))
+              ?assertEqual({ok, CB}, chef_cookbook_version:validate_cookbook(CB, NameVer))
       end || P <- AllowedValues
     ].
 
@@ -204,7 +204,7 @@ assemble_cookbook_ejson_test_() ->
                                               CBEJson),
 
               chef_test_utility:ejson_match(CBEJson,
-                                            chef_cookbook:assemble_cookbook_ejson(Record, VHostUrl))
+                                            chef_cookbook_version:assemble_cookbook_ejson(Record, VHostUrl))
 
       end},
 
@@ -217,7 +217,7 @@ assemble_cookbook_ejson_test_() ->
                                               AuthzId,
                                               CBEJson),
 
-              MinCb = chef_cookbook:minimal_cookbook_ejson(Record, VHostUrl),
+              MinCb = chef_cookbook_version:minimal_cookbook_ejson(Record, VHostUrl),
               ?assertEqual(undefined, ej:get({"metadata", "attributes"}, MinCb)),
               ?assertEqual(undefined, ej:get({"metadata", "long_description"}, MinCb)),
               ?assertEqual({[{<<"ruby">>, []}]}, ej:get({"metadata", "dependencies"}, MinCb))
@@ -225,8 +225,8 @@ assemble_cookbook_ejson_test_() ->
     ]}.
 
 version_to_binary_test() ->
-    ?assertEqual(<<"1.2.3">>, chef_cookbook:version_to_binary({1,2,3})),
-    ?assertEqual(<<"0.0.1">>, chef_cookbook:version_to_binary({0,0,1})).
+    ?assertEqual(<<"1.2.3">>, chef_cookbook_version:version_to_binary({1,2,3})),
+    ?assertEqual(<<"0.0.1">>, chef_cookbook_version:version_to_binary({0,0,1})).
 
 parse_version_test_() ->
     GoodVersions = [{<<"0">>, {0, 0, 0}},
@@ -240,7 +240,7 @@ parse_version_test_() ->
                     {<<"0.",?MAX_GOOD_VERSION,".0">>, {0, ?MAX_GOOD_VERSION_INT, 0}},
                     {<<"0.0.0">>, {0, 0, 0}},
                     {<<"123.456.789">>, {123, 456, 789}}],
-    [ ?_assertEqual(Expect, chef_cookbook:parse_version(In)) ||
+    [ ?_assertEqual(Expect, chef_cookbook_version:parse_version(In)) ||
         {In, Expect} <- GoodVersions ].
 
 parse_version_badversion_test_() ->
@@ -259,7 +259,7 @@ parse_version_badversion_test_() ->
                    %% we store maj, min, pat in pg int field in the db, so we should enforce
                    %% the max value and avoid wrapping.
                   ],
-    [ ?_assertError(badarg, chef_cookbook:parse_version(V)) || V <- BadVersions ].
+    [ ?_assertError(badarg, chef_cookbook_version:parse_version(V)) || V <- BadVersions ].
 
 dependencies_to_depsolver_constraints_test_() ->
     {foreachx,
@@ -366,31 +366,31 @@ dependencies_to_depsolver_constraints_test_() ->
 recipe_name_test_() ->
     [{"Appropriately removes a '.rb' extension (normal, everyday case)",
       ?_assertEqual(<<"foo">>,
-                    chef_cookbook:recipe_name(<<"foo.rb">>))},
+                    chef_cookbook_version:recipe_name(<<"foo.rb">>))},
      {"Behaves if recipes don't end in '.rb' (shouldn't happen in practice, though)",
       ?_assertEqual(<<"foo">>,
-                    chef_cookbook:recipe_name(<<"foo">>))},
+                    chef_cookbook_version:recipe_name(<<"foo">>))},
      {"Can still produce bizarre recipe names, if given a bizarre recipe name",
       ?_assertEqual(<<"foo.rb">>,
-                    chef_cookbook:recipe_name(<<"foo.rb.rb">>))}].
+                    chef_cookbook_version:recipe_name(<<"foo.rb.rb">>))}].
 
 maybe_qualify_name_test_() ->
     [{"Qualifies a 'normal' recipe name",
       ?_assertEqual(<<"cookbook::recipe">>,
-                    chef_cookbook:maybe_qualify_name(<<"cookbook">>, <<"recipe.rb">>))},
+                    chef_cookbook_version:maybe_qualify_name(<<"cookbook">>, <<"recipe.rb">>))},
      {"Qualifies a recipe name even without a '.rb' suffix (shouldn't happen in practice, though)",
       ?_assertEqual(<<"cookbook::recipe">>,
-                    chef_cookbook:maybe_qualify_name(<<"cookbook">>, <<"recipe">>))},
+                    chef_cookbook_version:maybe_qualify_name(<<"cookbook">>, <<"recipe">>))},
      {"Does NOT qualifies a 'default' recipe; uses just the cookbook name instead",
       ?_assertEqual(<<"cookbook">>,
-                    chef_cookbook:maybe_qualify_name(<<"cookbook">>, <<"default.rb">>))},
+                    chef_cookbook_version:maybe_qualify_name(<<"cookbook">>, <<"default.rb">>))},
      {"Does NOT qualifies a 'default' recipe, even if it doesn't end in '.rb'; uses just the cookbook name instead",
       ?_assertEqual(<<"cookbook">>,
-                    chef_cookbook:maybe_qualify_name(<<"cookbook">>, <<"default">>))},
+                    chef_cookbook_version:maybe_qualify_name(<<"cookbook">>, <<"default">>))},
      %% Not really expecting this next one to happen, just documenting the behavior
      {"Does NOT treat a recipe as the default if it is not named either 'default.rb' or just 'default'",
       ?_assertEqual(<<"cookbook::default.rb">>,
-                    chef_cookbook:maybe_qualify_name(<<"cookbook">>, <<"default.rb.rb">>))}
+                    chef_cookbook_version:maybe_qualify_name(<<"cookbook">>, <<"default.rb.rb">>))}
     ].
 
 base_cookbook_name_test_() ->
@@ -401,17 +401,17 @@ base_cookbook_name_test_() ->
              {<<"apache2">>,          <<"apache2">>},
              {"apache2",              <<"apache2">>}
             ],
-    [ ?_assertEqual(Expected, chef_cookbook:base_cookbook_name(Input))
+    [ ?_assertEqual(Expected, chef_cookbook_version:base_cookbook_name(Input))
       || {Input, Expected} <- Tests ].
 
 new_record_test() ->
     OrgId = <<"12345678123456781234567812345678">>,
     AuthzId = <<"00000000000000000000000011111111">>,
     CBVData = example_cookbook_version_json(),
-    CBV = chef_cookbook:new_record(OrgId, AuthzId, CBVData),
+    CBV = chef_cookbook_version:new_record(OrgId, AuthzId, CBVData),
     ?assertMatch(#chef_cookbook_version{}, CBV),
     %% TODO: validate more fields?
-    ?assertEqual(<<"apache2">>, chef_cookbook:name(CBV)).
+    ?assertEqual(<<"apache2">>, chef_cookbook_version:name(CBV)).
 
 example_cookbook_version_json() ->
     Name = <<"apache2">>,

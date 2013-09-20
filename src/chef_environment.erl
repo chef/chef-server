@@ -78,7 +78,7 @@ environment_spec() ->
       {{opt, <<"chef_type">>}, <<"environment">>},
       {{opt, <<"default_attributes">>}, chef_json_validator:attribute_spec()},
       {{opt, <<"override_attributes">>}, chef_json_validator:attribute_spec()},
-      {{opt, <<"cookbook_versions">>}, chef_cookbook:constraint_map_spec(cookbook_name)}
+      {{opt, <<"cookbook_versions">>}, chef_cookbook_version:constraint_map_spec(cookbook_name)}
      ]}.
 
 %% @doc If certain fields are missing from a Environment, fill them in with

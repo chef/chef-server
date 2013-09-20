@@ -20,7 +20,7 @@
 %%
 
 
--module(chef_cookbook).
+-module(chef_cookbook_version).
 
 -export([
          assemble_cookbook_ejson/2,
