@@ -177,7 +177,7 @@ make_version_list(CookbookVersionFun, Versions, NumVersions) ->
         _ -> lists:sublist(Versions, NumVersions)
     end,
     [ begin
-        VersionBinary = chef_cookbook:version_to_binary(Version),
+        VersionBinary = chef_cookbook_version:version_to_binary(Version),
         {[{<<"version">>, VersionBinary},
           {<<"url">>, CookbookVersionFun(VersionBinary) }]}
       end  || Version <- TrimmedVersions].

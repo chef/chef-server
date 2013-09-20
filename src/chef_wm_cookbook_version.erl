@@ -71,7 +71,7 @@ validate_request(Method, Req, #base_state{resource_state = CBState0} = State) ->
     CBState = case Method of
                 'PUT' ->
                   Body = wrq:req_body(Req),
-                  {ok, Cookbook} = chef_cookbook:parse_binary_json(Body, {UrlName, UrlVersion}),
+                  {ok, Cookbook} = chef_cookbook_version:parse_binary_json(Body, {UrlName, UrlVersion}),
                   CBState1#cookbook_state{cookbook_data = Cookbook};
                 _ ->
                   CBState1
@@ -119,7 +119,7 @@ fetch_cookbook_version(DbContext, OrgName, Name, Version) ->
   chef_db:fetch_cookbook_version(DbContext, OrgName, {Name, Version}).
 
 to_json(Req, #base_state{resource_state=#cookbook_state{chef_cookbook_version=CBV}}=State) ->
-    CompleteEJson = chef_cookbook:assemble_cookbook_ejson(CBV, chef_wm_util:base_uri(Req)),
+    CompleteEJson = chef_cookbook_version:assemble_cookbook_ejson(CBV, chef_wm_util:base_uri(Req)),
     {chef_json:encode(CompleteEJson), Req, State}.
 
 from_json(Req, #base_state{resource_state = CookbookState} = State) ->
@@ -159,7 +159,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                      chef_cookbook_version = CookbookVersion}
                                 } = State) ->
     ok = ?BASE_RESOURCE:delete_object(DbContext, CookbookVersion, RequestorId),
-    Json = chef_cookbook:assemble_cookbook_ejson(CookbookVersion, chef_wm_util:base_uri(Req)),
+    Json = chef_cookbook_version:assemble_cookbook_ejson(CookbookVersion, chef_wm_util:base_uri(Req)),
     {true, chef_wm_util:set_json_body(Req, Json), State}.
 
 %% Private utility functions
@@ -226,7 +226,7 @@ parse_cookbook_version(_, UrlVersion) ->
   parse_cookbook_version(UrlVersion).
 
 parse_cookbook_version(UrlVersion) ->
-  try chef_cookbook:parse_version(UrlVersion) of
+  try chef_cookbook_version:parse_version(UrlVersion) of
     {_Major, _Minor, _Patch} = Version ->
      Version
     catch
@@ -242,7 +242,7 @@ error_message(Msg) when is_binary(Msg) ->
 conflict_message(#chef_cookbook_version{name = Name,
                                         major = Major, minor = Minor, patch = Patch}) ->
     Msg = [<<"The cookbook ">>, Name, <<" at version ">>,
-           chef_cookbook:version_to_binary({Major, Minor, Patch}),
+           chef_cookbook_version:version_to_binary({Major, Minor, Patch}),
            <<" is frozen. Use the 'force' option to override.">>],
     {[{<<"error">>, [iolist_to_binary(Msg)]}]}.
 
