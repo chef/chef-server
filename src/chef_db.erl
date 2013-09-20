@@ -871,44 +871,21 @@ environment_exists(#context{}=Ctx, OrgId, EnvName) ->
 
 -spec create(chef_object() | #chef_user{} | #chef_sandbox{}, #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
 %% @doc Call the appropriate create function based on the given chef_object record
-create(#chef_data_bag{} = Record, DbContext, ActorId) ->
-    create_data_bag(DbContext, Record, ActorId);
-create(#chef_data_bag_item{} = Record, DbContext, ActorId) ->
-    create_data_bag_item(DbContext, Record, ActorId);
-create(#chef_environment{} = Record, DbContext, ActorId) ->
-    create_environment(DbContext, Record, ActorId);
-create(#chef_client{} = Record, DbContext, ActorId) ->
-  create_client(DbContext, Record, ActorId);
-create(#chef_node{} = Record, DbContext, ActorId) ->
-    create_node(DbContext, Record, ActorId);
-create(#chef_user{} = Record, DbContext, ActorId) ->
-    create_user(DbContext, Record, ActorId);
-create(#chef_role{} = Record, DbContext, ActorId) ->
-    create_role(DbContext, Record, ActorId);
-create(#chef_cookbook_version{} = Record, DbContext, ActorId) ->
-    create_cookbook_version(DbContext, Record, ActorId).
+create(ObjectRec, DbContext, ActorId) ->
+    create_object(DbContext, chef_object:create_query(ObjectRec), ObjectRec, ActorId).
 
 -spec update(#context{}, chef_updatable_object() | #chef_user{}, object_id()) ->
              ok | not_found | {conflict, term()} | {error, term()}.
-update(DbContext, #chef_data_bag_item{} = Record, ActorId) ->
-    update_object(DbContext, ActorId, update_data_bag_item, Record);
-update(DbContext, #chef_environment{} = Record, ActorId) ->
-    update_object(DbContext, ActorId, update_environment, Record);
-update(DbContext, #chef_client{} = Record, ActorId) ->
-    update_object(DbContext, ActorId, update_client, Record);
-update(DbContext, #chef_node{} = Record, ActorId) ->
-    update_object(DbContext, ActorId, update_node, Record);
-update(DbContext, #chef_role{} = Record, ActorId) ->
-    update_object(DbContext, ActorId, update_role, Record);
 update(#context{reqid=ReqId}=DbContext, #chef_cookbook_version{org_id=OrgId} = Record, ActorId) ->
-    case update_object(DbContext, ActorId, update_cookbook_version, Record) of
+    case update_object(DbContext, ActorId, chef_object:update_query(Record), Record) of
         #chef_db_cb_version_update{deleted_checksums=DeletedChecksums} ->
             ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, DeletedChecksums)),
             ok;
         Result -> Result %% {conflict, _} or {error, _}
     end;
-update(DbContext, #chef_user{} = Record, ActorId) ->
-    update_object(DbContext, ActorId, update_user, Record).
+update(DbContext, Record, ActorId) ->
+    update_object(DbContext, ActorId, chef_object:update_query(Record), Record).
+
 
 %% -------------------------------------
 %% private functions
