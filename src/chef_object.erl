@@ -40,3 +40,37 @@
 
 -callback type_name(tuple()) ->
     atom().
+
+-export([
+         new_record/4,
+         name/1,
+         id/1,
+         type_name/1
+        ]).
+
+-spec new_record(RecType :: atom(),
+                 OrgId :: object_id(),
+                 AuthzId :: object_id() | unset,
+                 ObjectEjson :: ejson_term() |
+                                binary() |
+                                {binary(), ejson_term()} |
+                                {ejson_term(), _}) ->
+                        tuple().
+new_record(RecType, OrgId, AuthzId, ObjectEjson) ->
+    RecType:new_record(OrgId, AuthzId, ObjectEjson).
+
+-spec name(tuple()) -> binary() | {binary(), binary()}.
+name(Rec) ->
+    call(Rec, name).
+
+-spec id(tuple()) -> object_id().
+id(Rec) ->
+    call(Rec, id).
+
+-spec type_name(tuple()) -> atom().
+type_name(Rec) ->
+    call(Rec, type_name).
+
+call(Rec, Fun) ->
+    Mod = element(1, Rec),
+    Mod:Fun(Rec).
