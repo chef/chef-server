@@ -225,4 +225,62 @@ new_record_test() ->
     Role = chef_role:new_record(OrgId, AuthzId, RoleData),
     ?assertMatch(#chef_role{}, Role),
     %% TODO: validate more fields?
-    ?assertEqual(<<"my-role">>, chef_role:name(Role)).
+    ?assertEqual(<<"my-role">>, chef_role:name(Role)),
+    ?assertEqual(OrgId, chef_role:org_id(Role)),
+    ?assertEqual(AuthzId, chef_role:authz_id(Role)),
+    ?assert(is_binary(chef_role:id(Role))).
+
+role_ejson_for_indexing_test_() ->
+    Role = #chef_role{name = <<"a_role">>},
+    RawRole = {[{<<"name">>, <<"a_role">>},
+                {<<"description">>, <<"role description">>},
+                {<<"json_class">>, <<"Chef::Role">>},
+                {<<"default_attributes">>, {[{<<"a">>, <<"b">>}]}},
+                {<<"override_attributes">>, {[{<<"a">>, <<"b">>},
+                                              {<<"x">>, <<"y">>}]}},
+                {<<"chef_type">>, <<"role">>},
+                {<<"run_list">>, [<<"recipe[apache2]">>, <<"role[web]">>]},
+                {<<"env_run_lists">>, {[]}}
+               ]},
+    [{"empty env_run_lists",
+      fun() ->
+              Expected = RawRole,
+              Got = chef_role:ejson_for_indexing(Role, RawRole),
+              ?assertEqual(Expected, Got)
+      end},
+     {"_default in env_run_lists is removed",
+      fun() ->
+              EnvRunListsExpected = {[{<<"prod">>, [<<"recipe[a2]">>, <<"role[b3]">>]}]},
+              EnvRunLists = {[{<<"prod">>, [<<"recipe[a2]">>, <<"role[b3]">>]},
+                              {<<"_default">>, [<<"recipe[a0]">>, <<"role[b0]">>]}]},
+              RawRole1 = ej:set({<<"env_run_lists">>}, RawRole, EnvRunLists),
+              Expected = ej:set({<<"env_run_lists">>}, RawRole, EnvRunListsExpected),
+              Got = chef_role:ejson_for_indexing(Role, RawRole1),
+              ?assertEqual(Expected, Got)
+      end}
+    ].
+
+role_update_from_ejson_test_() ->
+    Role = #chef_role{name = <<"a_role">>},
+    RawRole = {[{<<"name">>, <<"new_name">>},
+                {<<"description">>, <<"role description">>},
+                {<<"json_class">>, <<"Chef::Role">>},
+                {<<"default_attributes">>, {[{<<"a">>, <<"b">>}]}},
+                {<<"override_attributes">>, {[{<<"a">>, <<"b">>},
+                                              {<<"x">>, <<"y">>}]}},
+                {<<"chef_type">>, <<"role">>},
+                {<<"run_list">>, [<<"recipe[apache2]">>, <<"role[web]">>]},
+                {<<"env_run_lists">>, {[]}}
+               ]},
+
+    [{"chef_role fields are set from json for all dbs",
+      [
+       {atom_to_list(DbType),
+        fun() ->
+                Role1 = chef_role:update_from_ejson(Role, RawRole),
+                GotData = Role1#chef_role.serialized_object,
+                GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
+                ?assertEqual(<<"new_name">>, Role1#chef_role.name),
+                ?assertEqual(RawRole, GotEjson)
+        end} || DbType <- [mysql, pgsql] ]}
+    ].

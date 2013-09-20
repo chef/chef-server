@@ -23,12 +23,16 @@
 -module(chef_role).
 
 -export([
+         authz_id/1,
+         ejson_for_indexing/2,
          id/1,
          name/1,
          environments/1,
          new_record/3,
+         org_id/1,
          parse_binary_json/2,
-         type_name/1
+         type_name/1,
+         update_from_ejson/2
         ]).
 
 -ifdef(TEST).
@@ -83,6 +87,14 @@ id(#chef_role{id = Id}) ->
 type_name(#chef_role{}) ->
     role.
 
+-spec authz_id(#chef_role{}) -> object_id().
+authz_id(#chef_role{authz_id = AuthzId}) ->
+    AuthzId.
+
+-spec org_id(#chef_role{}) -> object_id().
+org_id(#chef_role{org_id = OrgId}) ->
+    OrgId.
+
 -spec new_record(object_id(), object_id(), ejson_term()) -> #chef_role{}.
 new_record(OrgId, AuthzId, RoleData) ->
     Name = ej:get({<<"name">>}, RoleData),
@@ -94,6 +106,17 @@ new_record(OrgId, AuthzId, RoleData) ->
                name = Name,
                serialized_object = Data}.
 
+-spec ejson_for_indexing(#chef_role{}, ejson_term()) -> ejson_term().
+ejson_for_indexing(#chef_role{}, Role) ->
+    EnvironmentRunLists0 = ej:get({<<"env_run_lists">>}, Role, ?EMPTY_EJSON_HASH),
+    EnvironmentRunLists = ej:delete({<<"_default">>}, EnvironmentRunLists0),
+    ej:set({<<"env_run_lists">>}, Role, EnvironmentRunLists).
+
+-spec update_from_ejson(#chef_role{}, ejson_term()) -> #chef_role{}.
+update_from_ejson(#chef_role{} = Role, RoleData) ->
+    Name = ej:get({<<"name">>}, RoleData),
+    Data = chef_db_compression:compress(chef_role, chef_json:encode(RoleData)),
+    Role#chef_role{name = Name, serialized_object = Data}.
 
 %% @doc Given the EJSON representation of a role, return a sorted list of the environment names
 %% present in the role's `env_run_list` hash.
