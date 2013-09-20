@@ -22,11 +22,26 @@
 -module(chef_data_bag).
 
 -export([
+         authz_id/1,
+         ejson_for_indexing/2,
          id/1,
          name/1,
-         type_name/1,
          new_record/3,
-         parse_binary_json/2
+         parse_binary_json/2,
+         set_created/2,
+         set_updated/2,
+         type_name/1,
+         update_from_ejson/2
+        ]).
+
+%% database named queries
+-export([
+         bulk_get_query/0,
+         create_query/0,
+         delete_query/0,
+         find_query/0,
+         list_query/0,
+         update_query/0
         ]).
 
 -ifdef(TEST).
@@ -70,6 +85,45 @@ new_record(OrgId, AuthzId, Name) ->
                    authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                    org_id = OrgId,
                    name = Name}.
+
+-spec authz_id(#chef_data_bag{}) -> object_id().
+authz_id(#chef_data_bag{authz_id = AuthzId}) ->
+    AuthzId.
+
+ejson_for_indexing(#chef_data_bag{}, _Name) ->
+    error(not_indexed).
+
+-spec update_from_ejson(#chef_data_bag{}, ejson_term()) -> #chef_data_bag{}.
+update_from_ejson(#chef_data_bag{} = DataBag, DataBagData) ->
+    %% here for completeness
+    Name = ej:get({<<"name">>}, DataBagData),
+    DataBag#chef_data_bag{name = Name}.
+
+set_created(#chef_data_bag{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_data_bag{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
+
+set_updated(#chef_data_bag{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_data_bag{updated_at = Now, last_updated_by = ActorId}.
+
+bulk_get_query() ->
+    error(not_implemented).
+
+create_query() ->
+    insert_data_bag.
+
+delete_query() ->
+    delete_data_bag_by_id.
+
+find_query() ->
+    find_data_bag_by_orgid_name.
+
+update_query() ->
+    udpate_data_bag_by_id.
+
+list_query() ->
+    list_data_bags_for_org.
 
 %% @doc Convert a binary JSON string representing a Chef data_bag into an EJson-encoded
 %% Erlang data structure.
