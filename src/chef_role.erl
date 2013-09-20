@@ -31,6 +31,8 @@
          new_record/3,
          org_id/1,
          parse_binary_json/2,
+         set_created/2,
+         set_updated/2,
          type_name/1,
          update_from_ejson/2
         ]).
@@ -209,3 +211,14 @@ normalize(RoleEjson) ->
                 RoleEjson,
                 [{RunListKey, NormalizedRunList},
                  {EnvRunListsKey, NormalizedEnvRunLists}]).
+
+-spec set_created(#chef_role{}, object_id()) -> #chef_role{}.
+set_created(#chef_role{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_role{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
+
+-spec set_updated(#chef_role{}, object_id()) -> #chef_role{}.
+set_updated(#chef_role{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_role{updated_at = Now, last_updated_by = ActorId}.
+

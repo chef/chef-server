@@ -45,6 +45,7 @@
          set_public_key/2,
          set_updated/2,
          strictly_valid/3,
+         sql_date/1,
          throw_invalid_fun_match/1,
          type_name/1,
          update_from_ejson/2,
