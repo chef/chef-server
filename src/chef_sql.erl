@@ -582,7 +582,7 @@ fetch_latest_cookbook_recipes(OrgId) ->
                             fun(Row) ->
                                     CookbookName = proplists:get_value(<<"name">>, Row),
                                     SerializedObject = proplists:get_value(<<"serialized_object">>, Row),
-                                    chef_cookbook:qualified_recipe_names(CookbookName, SerializedObject)
+                                    chef_cookbook_version:qualified_recipe_names(CookbookName, SerializedObject)
                             end,
                             Rows),
             {ok, lists:sort(RecipeNames)};
@@ -1786,7 +1786,7 @@ fetch_cookbook_version_serialized_objects_batch(Ids) when is_list(Ids)->
 extract_recipe_names_from_serialized_objects(Pairs) ->
     Results = lists:flatmap(
                 fun({CookbookName, SerializedObject}) ->
-                        chef_cookbook:qualified_recipe_names(CookbookName, SerializedObject)
+                        chef_cookbook_version:qualified_recipe_names(CookbookName, SerializedObject)
                 end,
                 Pairs),
     lists:sort(Results).
