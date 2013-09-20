@@ -117,8 +117,8 @@ create_from_json(#wm_reqdata{} = Req,
                  RecType, {authz_id, AuthzId}, ObjectEjson) ->
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
-    ObjectRec = chef_object_base:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
-    Name = chef_object_base:name(ObjectRec),
+    ObjectRec = chef_object:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
+    Name = chef_object:name(ObjectRec),
     case chef_db:create(ObjectRec, DbContext, ActorId) of
         {conflict, _} ->
             %% FIXME: created authz_id is leaked for this case, cleanup?

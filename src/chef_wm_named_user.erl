@@ -196,12 +196,12 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     %% request. In this case, we return 404 just as we would if the client
                     %% retried.
                     State1 = State#base_state{log_msg = not_found},
-                    Msg = chef_wm_util:not_found_message(chef_object_base:type_name(ObjectRec),
-                                                           chef_object_base:name(ObjectRec)),
+                    Msg = chef_wm_util:not_found_message(chef_object:type_name(ObjectRec),
+                                                           chef_object:name(ObjectRec)),
                     Req1 = chef_wm_util:set_json_body(Req, Msg),
                     {{halt, 404}, Req1, State1};
                 {conflict, _} ->
-                    Name = chef_object_base:name(ObjectRec),
+                    Name = chef_object:name(ObjectRec),
                     RecType = erlang:element(1,ObjectRec),
                     LogMsg = {RecType, name_conflict, Name},
                     ConflictMsg = conflict_message(Name),

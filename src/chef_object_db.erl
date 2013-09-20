@@ -49,7 +49,7 @@ delete_from_solr(Object) when is_record(Object, chef_cookbook_version);
                  ok; %%These types are not indexed, so don't need to issue delete
 delete_from_solr(Object) ->
     {Id, OrgId} = get_id_and_org_id(Object),
-    chef_index_queue:delete(chef_object_base:type_name(Object), Id, chef_otto:dbname(OrgId)).
+    chef_index_queue:delete(chef_object:type_name(Object), Id, chef_otto:dbname(OrgId)).
 
 %% @doc Deletes an object from the database and queues a delete of the object's data in the
 %% search index (Solr). Throws an error if the database delete operation fails. Crashing on

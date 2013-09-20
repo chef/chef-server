@@ -292,14 +292,12 @@ create_from_json(#wm_reqdata{} = Req,
                              organization_guid = OrgId,
                              requestor_id = ActorId} = State,
                  RecType, {authz_id, AuthzId}, ObjectEjson) ->
-    %% TODO: ObjectMod passed in as an explicit argument?
-    ObjectMod = RecType,
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
-    ObjectRec = ObjectMod:new_record(OrgId, maybe_authz_id(AuthzId), ObjectEjson),
-    Id = ObjectMod:id(ObjectRec),
-    Name = ObjectMod:name(ObjectRec),
-    TypeName = ObjectMod:type_name(ObjectRec),
+    ObjectRec = chef_object:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
+    Id = chef_object:id(ObjectRec),
+    Name = chef_object:name(ObjectRec),
+    TypeName = chef_object:type_name(ObjectRec),
 
     %% Perform any additional platform-specific work on the object
     ObjectRec = ?BASE_RESOURCE:object_creation_hook(ObjectRec, State),
@@ -353,8 +351,8 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
     %% Send object to solr for indexing *first*. If the update fails, we will have sent
     %% incorrect data, but that should get corrected when the client retries. This is a
     %% compromise.
-    ok = chef_object_db:add_to_solr(chef_object_base:type_name(ObjectRec),
-                                    chef_object_base:id(ObjectRec),
+    ok = chef_object_db:add_to_solr(chef_object:type_name(ObjectRec),
+                                    chef_object:id(ObjectRec),
                                     OrgId,
                                     chef_object_base:ejson_for_indexing(ObjectRec, ObjectEjson)),
 
@@ -378,13 +376,13 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     %% request. In this case, we return 404 just as we would if the client
                     %% retried.
                     State1 = State#base_state{log_msg = not_found},
-                    Msg = chef_wm_util:not_found_message(chef_object_base:type_name(ObjectRec),
-                                                           chef_object_base:name(ObjectRec)),
+                    Msg = chef_wm_util:not_found_message(chef_object:type_name(ObjectRec),
+                                                           chef_object:name(ObjectRec)),
                     Req1 = chef_wm_util:set_json_body(Req, Msg),
                     {{halt, 404}, Req1, State1};
                 {conflict, _} ->
-                    Name = chef_object_base:name(ObjectRec),
-                    TypeName = chef_object_base:type_name(ObjectRec),
+                    Name = chef_object:name(ObjectRec),
+                    TypeName = chef_object:type_name(ObjectRec),
                     RecType = erlang:element(1,ObjectRec),
                     LogMsg = {RecType, name_conflict, Name},
                     ConflictMsg = conflict_message(TypeName, Name),
