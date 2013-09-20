@@ -41,6 +41,7 @@ module PrivateChef
   log_rotation Mash.new
   dark_launch Mash.new
   opscode_chef_mover Mash.new
+  oc_chef_pedant Mash.new
 
   servers Mash.new
   backend_vips Mash.new
@@ -210,6 +211,7 @@ module PrivateChef
                end
         results['private_chef'][rkey] = PrivateChef[key]
       end
+      results['private_chef']['oc-chef-pedant'] = PrivateChef['oc_chef_pedant']
       results['private_chef']['notification_email'] = PrivateChef['notification_email']
       results['private_chef']['from_email'] = PrivateChef['from_email']
       results['private_chef']['role'] = PrivateChef['role']
