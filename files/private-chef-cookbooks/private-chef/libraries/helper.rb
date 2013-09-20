@@ -5,10 +5,28 @@ class OmnibusHelper
     File.symlink?("/opt/opscode/service/#{service_name}") && check_status(service_name)
   end
 
+  # Note that this WON'T WORK on a non-bootstrap backend server,
+  # because private-chef-ctl status will return 0 when there are no
+  # services to query.
+  #
+  # This cannot be used as a check for a service being up on a backend
+  # slave :(
   def self.check_status(service_name)
     o = Mixlib::ShellOut.new("/opt/opscode/bin/private-chef-ctl status #{service_name}")
     o.run_command
     o.exitstatus == 0 ? true : false
+  end
+
+  # Specifically determine if a PostgreSQL service is running on this
+  # machine by looking for the presence of a PID file.  We're not
+  # using #check_status above, because that doesn't work on a backend
+  # slave (returns 0 if there are no services defined).
+  #
+  # @todo: make private-chef-ctl status more robust in this scenario
+  # @todo This is probably why #should_notify? above has a symlink
+  #   check; if so, address that as well
+  def self.postgres_up?
+    File.exists?(File.join(PrivateChef['postgresql']['data_dir'], "postmaster.pid"))
   end
 
   # generate a certificate signed by the opscode ca key

@@ -111,5 +111,16 @@ component_runit_service "postgresql" do
   control ['t']
 end
 
-include_recipe "private-chef::erchef_database"
-include_recipe "private-chef::bifrost_database"
+# NOTE: These recipes are written idempotently, but require a running
+# PostgreSQL service.  They should run each time (on the appropriate
+# backend machine, of course), because they also handle schema
+# upgrades for new releases of Enterprise Chef.  As a result, we can't
+# just do a check against node['private_chef']['bootstrap']['enable'],
+# which would only run them one time.
+#
+# Only the backend master will have a running server, so that's what
+# we'll check.
+if OmnibusHelper.postgres_up?
+  include_recipe "private-chef::erchef_database"
+  include_recipe "private-chef::bifrost_database"
+end
