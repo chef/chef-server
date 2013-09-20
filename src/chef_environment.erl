@@ -23,12 +23,27 @@
 -module(chef_environment).
 
 -export([
+         authz_id/1,
+         ejson_for_indexing/2,
          id/1,
          name/1,
          new_record/3,
          parse_binary_json/1,
+         set_created/2,
          set_default_values/1,
-         type_name/1
+         set_updated/2,
+         type_name/1,
+         update_from_ejson/2
+        ]).
+
+%% database named queries
+-export([
+         bulk_get_query/0,
+         create_query/0,
+         delete_query/0,
+         find_query/0,
+         list_query/0,         
+         update_query/0
         ]).
 
 -include_lib("ej/include/ej.hrl").
@@ -125,3 +140,43 @@ validate_keys([{Item, _}|Rest]) ->
         _ ->
             throw({invalid_key, Item})
     end.
+
+update_from_ejson(#chef_environment{} = Env, EnvData) ->
+    Name = ej:get({<<"name">>}, EnvData),
+    Data = chef_db_compression:compress(chef_environment, chef_json:encode(EnvData)),
+    Env#chef_environment{name = Name, serialized_object = Data}.
+
+ejson_for_indexing(#chef_environment{}, Environment) ->
+    Environment.
+
+-spec authz_id(#chef_environment{}) -> object_id().
+authz_id(#chef_environment{authz_id = AuthzId}) ->
+    AuthzId.
+
+-spec set_created(#chef_environment{}, object_id()) -> #chef_environment{}.
+set_created(#chef_environment{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_environment{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
+
+-spec set_updated(#chef_environment{}, object_id()) -> #chef_environment{}.
+set_updated(#chef_environment{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_environment{updated_at = Now, last_updated_by = ActorId}.
+
+create_query() ->
+    insert_environment.
+
+update_query() ->
+    update_environment_by_id.
+
+delete_query() ->
+    delete_environment_by_id.
+
+find_query() ->
+    find_environment_by_orgid_name.
+
+list_query() ->
+    list_environments_for_org.
+
+bulk_get_query() ->
+    bulk_get_environments.
