@@ -22,16 +22,14 @@ template File.join(opscode_test_config_dir, "script.rb") do
   mode "0600"
 end
 
-bootstrap_status_file = "/var/opt/opscode/bootstrapped"
-
 execute "boostrap-platform" do
   command "bash -c 'echo y | /opt/opscode/embedded/bin/bundle exec ./bin/bootstrap-platform -c ./bootstrapper-config/config.rb -s ./bootstrapper-config/script.rb'"
   cwd opscode_test_dir
-  not_if { File.exists?(bootstrap_status_file) }
+  not_if { ECBootstrap.has_been_bootstrapped? }
   notifies :restart, 'service[opscode-erchef]'
 end
 
-file bootstrap_status_file do 
+file ECBootstrap.bootstrap_sentinel_file do
   owner "root"
   group "root"
   mode "0600"
