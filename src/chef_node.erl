@@ -22,6 +22,8 @@
 -module(chef_node).
 
 -export([
+         authz_id/1,
+         ejson_for_indexing/2,
          extract_recipes/1,
          extract_roles/1,
          id/1,
@@ -29,8 +31,21 @@
          name/1,
          new_record/3,
          parse_check_binary_as_json_node/2,
+         set_created/2,
+         set_updated/2,
          type_name/1,
+         update_from_ejson/2,
          validate_json_node/2
+        ]).
+
+%% database named queries
+-export([
+         bulk_get_query/0,
+         create_query/0,
+         delete_query/0,
+         find_query/0,
+         list_query/0,
+         update_query/0
         ]).
 
 -ifdef(TEST).
@@ -71,6 +86,10 @@
 
 -behaviour(chef_object).
 
+-spec new_record(OrgId :: object_id(),
+                 AuthzId :: object_id() | unset,
+                 ObjectEjson :: ejson_term()) ->
+                        #chef_node{}.
 new_record(OrgId, AuthzId, NodeData) ->
     Name = ej:get({<<"name">>}, NodeData),
     Environment = ej:get({<<"chef_environment">>}, NodeData),
@@ -83,14 +102,85 @@ new_record(OrgId, AuthzId, NodeData) ->
                environment = Environment,
                serialized_object = Data}.
 
+-spec name(#chef_node{}) -> binary().
 name(#chef_node{name = Name}) ->
     Name.
 
+-spec id(#chef_node{}) -> object_id().
 id(#chef_node{id = Id}) ->
     Id.
 
+-spec type_name(#chef_node{}) -> node.
 type_name(#chef_node{}) ->
     node.
+
+-spec authz_id(#chef_node{}) -> object_id().
+authz_id(#chef_node{authz_id = AuthzId}) ->
+    AuthzId.
+
+-spec ejson_for_indexing(#chef_node{}, ejson_term()) -> ejson_term().
+ejson_for_indexing(#chef_node{name = Name, environment = Environment}, Node) ->
+    Defaults = ej:get({<<"default">>}, Node, ?EMPTY_EJSON_HASH),
+    Normal = ej:get({<<"normal">>}, Node, ?EMPTY_EJSON_HASH),
+    Override = ej:get({<<"override">>}, Node, ?EMPTY_EJSON_HASH),
+    %% automatic may not always be present
+    Automatic = ej:get({<<"automatic">>}, Node, ?EMPTY_EJSON_HASH),
+    DefaultNormal = chef_deep_merge:merge(Defaults, Normal),
+    DefaultNormalOverride = chef_deep_merge:merge(DefaultNormal, Override),
+    {Merged} = chef_deep_merge:merge(DefaultNormalOverride, Automatic),
+    RunList = ej:get({<<"run_list">>}, Node, []),
+    %% We transform to a dict to ensure we override the top-level keys
+    %% with the appropriate values and don't introduce any duplicate
+    %% keys
+    NodeDict = dict:from_list(Merged),
+    TopLevelDict = dict:from_list([{<<"name">>, Name},
+                                   {<<"chef_type">>, <<"node">>},
+                                   %% FIXME: nodes may have environment in the db, but not in JSON
+                                   %% or not set at all (pre-environments nodes).
+                                   {<<"chef_environment">>, Environment},
+                                   {<<"recipe">>, extract_recipes(RunList)},
+                                   {<<"role">>, extract_roles(RunList)},
+                                   {<<"run_list">>, RunList}]),
+    NodeDict1 = dict:merge(fun(_Key, TopVal, _AttrVal) ->
+                                   TopVal
+                           end, TopLevelDict, NodeDict),
+    {dict:to_list(NodeDict1)}.
+
+-spec update_from_ejson(#chef_node{}, ejson_term()) -> #chef_node{}.
+update_from_ejson(#chef_node{} = Node, NodeJson) ->
+    Name = ej:get({<<"name">>}, NodeJson),
+    %% We expect that the insert_autofill_fields call will insert default when necessary
+    Environment = ej:get({<<"chef_environment">>}, NodeJson),
+    Data = chef_db_compression:compress(chef_node, chef_json:encode(NodeJson)),
+    Node#chef_node{name = Name, environment = Environment, serialized_object = Data}.
+
+-spec set_created(#chef_node{}, object_id()) -> #chef_node{}.
+set_created(#chef_node{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_node{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
+
+-spec set_updated(#chef_node{}, object_id()) -> #chef_node{}.
+set_updated(#chef_node{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_node{updated_at = Now, last_updated_by = ActorId}.
+
+bulk_get_query() ->
+    bulk_get_nodes.
+
+create_query() ->
+    insert_node.
+
+delete_query() ->
+    delete_node_by_id.
+
+find_query() ->
+    find_node_by_orgid_name.
+
+list_query() ->
+    list_nodes_for_org.
+
+update_query() ->
+    update_node_by_id.
 
 extract_recipes(RunList) ->
     [ binary:part(Item, {0, byte_size(Item) - 1})
