@@ -1081,7 +1081,7 @@ delete_object(#context{reqid = ReqId}, Fun, #chef_cookbook_version{} = CookbookV
         Result -> Result
     end;
 delete_object(#context{}=Ctx, Fun, Object) when is_tuple(Object) ->
-    delete_object(Ctx, Fun, get_id(Object));
+    delete_object(Ctx, Fun, chef_object:id(Object));
 delete_object(#context{reqid = ReqId}, Fun, Id) ->
     case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(Id) end) of
@@ -1108,25 +1108,6 @@ update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
         {conflict, Message} -> {conflict, Message};
         {error, Error} -> {error, Error}
     end.
-
-  -spec get_id(chef_object() | #chef_user{} | #chef_client{} | #chef_sandbox{} | #chef_cookbook_version{}) -> object_id().
-%% @doc Return the `id' field from a `chef_object()' record type.
-get_id(#chef_client{id = Id}) ->
-    Id;
-get_id(#chef_node{id = Id}) ->
-    Id;
-get_id(#chef_role{id = Id}) ->
-    Id;
-get_id(#chef_environment{id = Id}) ->
-    Id;
-get_id(#chef_data_bag{id = Id}) ->
-    Id;
-get_id(#chef_data_bag_item{id = Id}) ->
-    Id;
-get_id(#chef_sandbox{id = Id}) ->
-    Id;
-get_id(#chef_user{username = Username}) ->
-    Username.
 
 %% @doc Make a dict mapping an object's unique name to its database ID for all objects
 %% within a given "index". (This is currently only used for reindexing, so it only works on

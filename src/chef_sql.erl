@@ -126,7 +126,7 @@
 -include_lib("chef_objects/include/chef_types.hrl").
 
 -type delete_query() :: delete_cookbook_version_by_id |
-                        delete_user_by_username |
+                        delete_user_by_id |
                         delete_data_bag_by_id |
                         delete_data_bag_item_by_id |
                         delete_environment_by_id |
@@ -182,13 +182,11 @@ update_user(#chef_user{last_updated_by = LastUpdatedBy,
                 UpdateFields = [IsAdmin =:= true, PublicKey, HashedPassword, Salt, HashType, LastUpdatedBy, UpdatedAt, Id],
                 do_update(update_user_by_id, UpdateFields).
 
--spec delete_user(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_user(Username) when is_list(Username) ->
-    delete_user(list_to_binary(Username));
-delete_user(#chef_user{username=Username}) ->
-    delete_user(Username);
-delete_user(Username) when is_binary(Username)->
-  delete_object(delete_user_by_username, Username).
+-spec delete_user(#chef_user{} | binary()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
+delete_user(#chef_user{id=Id}) ->
+    delete_user(Id);
+delete_user(Id)  ->
+  delete_object(delete_user_by_id, Id).
 
 -spec fetch_users() -> {ok, none | [binary()]} | {error, _}.
 %% Return a list of all usernames.
