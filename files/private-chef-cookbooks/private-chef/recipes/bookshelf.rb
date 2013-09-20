@@ -6,6 +6,12 @@
 
 cookbook_migration = "/opt/opscode/embedded/bin/cookbook_migration.sh"
 
+checksum_path = node['private_chef']['opscode-chef']['checksum_path']
+data_path = node['private_chef']['bookshelf']['data_dir']
+
+owner = node['private_chef']['user']['username']
+group = owner
+
 template cookbook_migration do
   source "cookbook_migration.sh.erb"
   owner "root"
@@ -15,8 +21,17 @@ end
 
 execute "cookbook migration" do
   command cookbook_migration
-  only_if { File.exist?(node['private_chef']['opscode-chef']['checksum_path']) &&
-    !File.exist?(node['private_chef']['bookshelf']['data_dir']) }
+  only_if { File.exist?(checksum_path) && !File.exist?(data_path) }
+end
+
+execute "reset bookshelf data owner" do
+  command "chown -R #{owner} #{data_path}"
+  only_if { File.exist?(data_path) }
+end
+
+execute "reset bookshelf data group" do
+  command "chgrp -R #{group} #{data_path}"
+  only_if { File.exist?(data_path) }
 end
 
 bookshelf_dir = node['private_chef']['bookshelf']['dir']
