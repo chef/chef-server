@@ -37,6 +37,16 @@
          update_from_ejson/2
         ]).
 
+%% database named queries
+-export([
+         bulk_get_query/0,
+         create_query/0,
+         delete_query/0,
+         find_query/0,
+         list_query/0,
+         update_query/0
+        ]).
+
 -ifdef(TEST).
 -compile(export_all).
 -endif.
@@ -222,3 +232,20 @@ set_updated(#chef_role{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#chef_role{updated_at = Now, last_updated_by = ActorId}.
 
+create_query() ->
+    insert_role.
+
+update_query() ->
+    update_role_by_id.
+
+delete_query() ->
+    delete_role_by_id.
+
+find_query() ->
+    find_role_by_orgid_name.
+
+list_query() ->
+    list_roles_for_org.
+
+bulk_get_query() ->
+    bulk_get_roles.
