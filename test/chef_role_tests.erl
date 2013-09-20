@@ -193,6 +193,14 @@ parse_binary_json_test_() ->
               ?assertEqual([<<"recipe[foo]">>, <<"recipe[bar]">>],
                            ej:get({<<"env_run_lists">>, <<"dev">>}, ProcessedForUpdate))
       end
+     },
+     {"Mismatched URL and name for update is invalid",
+      fun() ->
+              R = basic_role(),
+              JSON = jiffy:encode(R),
+              ?assertThrow({url_json_name_mismatch, _},
+                           chef_role:parse_binary_json(JSON, {update, <<"wrong-name-here">>}))
+      end
      }
     ].
 
@@ -286,18 +294,27 @@ role_update_from_ejson_test_() ->
     ].
 
 set_created_and_updated_test_() ->
-    ActorId = <<"12121212121212121212121212121212">>,
-    [?_assertMatch(<<_Year:4/binary, "-", _Month:2/binary, "-", _Day:2/binary,
-                     " ", _H:2/binary, ":", _M:2/binary, ":", _S:2/binary>>,
-                   (chef_role:set_created(#chef_role{}, ActorId))#chef_role.created_at),
-     fun() ->
-             Obj = chef_role:set_created(#chef_role{}, ActorId),
-             ?assertMatch(<<_Year:4/binary, "-", _Month:2/binary, "-", _Day:2/binary,
-                            " ", _H:2/binary, ":", _M:2/binary, ":", _S:2/binary>>,
-                          Obj#chef_role.created_at),
-             ?assertEqual(Obj#chef_role.created_at, Obj#chef_role.updated_at),
-             ?assertEqual(ActorId, Obj#chef_role.last_updated_by)
-     end].
+    CreateActorId = <<"12121212121212121212121212121212">>,
+    UpdateActorId = <<"20202020202020202020202020202020">>,
+    CreatedRole = chef_role:set_created(#chef_role{}, CreateActorId),
+    UpdatedRole = chef_role:set_updated(CreatedRole, UpdateActorId),
+
+    [{"set_created makes a date looking thing and also sets updated_at",
+      ?_assertMatch(<<_Year:4/binary, "-", _Month:2/binary, "-", _Day:2/binary,
+                      " ", _H:2/binary, ":", _M:2/binary, ":", _S:2/binary>>,
+                    CreatedRole#chef_role.created_at)},
+     {"set_created also sets updated_at",
+      ?_assertEqual(CreatedRole#chef_role.created_at, CreatedRole#chef_role.updated_at)},
+
+     {"set_created sets last_updated_by",
+      ?_assertEqual(CreateActorId, CreatedRole#chef_role.last_updated_by)},
+
+     {"updated_at makes a date looking thing",
+      ?_assertMatch(<<_Year:4/binary, "-", _Month:2/binary, "-", _Day:2/binary,
+                      " ", _H:2/binary, ":", _M:2/binary, ":", _S:2/binary>>,
+                    UpdatedRole#chef_role.created_at)},
+     {"updated_at updates last_updated_by",
+      ?_assertMatch(UpdateActorId, UpdatedRole#chef_role.last_updated_by)}].
 
 query_name_test_() ->
     Tests = [{create_query, insert_role},
@@ -307,3 +324,6 @@ query_name_test_() ->
              {list_query, list_roles_for_org},
              {bulk_get_query, bulk_get_roles}],
     [ ?_assertEqual(E, chef_role:F()) || {F, E} <- Tests ].
+
+type_name_test() ->
+    ?assertEqual(role, chef_role:type_name(#chef_role{})).
