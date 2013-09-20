@@ -24,12 +24,27 @@
 
 -export([
          add_type_and_bag/2,
+         authz_id/1,
+         ejson_for_indexing/2,
          id/1,
          name/1,
          new_record/3,
          parse_binary_json/2,
+         set_created/2,
+         set_updated/2,
          type_name/1,
+         update_from_ejson/2,
          wrap_item/3
+        ]).
+
+%% database named queries
+-export([
+         bulk_get_query/0,
+         create_query/0,
+         delete_query/0,
+         find_query/0,
+         list_query/0,
+         update_query/0
         ]).
 
 -ifdef(TEST).
@@ -70,6 +85,51 @@ name(#chef_data_bag_item{data_bag_name = BagName, item_name = ItemName}) ->
 type_name(#chef_data_bag_item{}) ->
     data_bag_item.
 
+authz_id(#chef_data_bag_item{}) ->
+    error(not_implemented).
+
+-spec set_created(#chef_data_bag_item{}, object_id()) -> #chef_data_bag_item{}.
+set_created(#chef_data_bag_item{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_data_bag_item{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
+
+-spec set_updated(#chef_data_bag_item{}, object_id()) -> #chef_data_bag_item{}.
+set_updated(#chef_data_bag_item{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_data_bag_item{updated_at = Now, last_updated_by = ActorId}.
+
+-spec ejson_for_indexing(#chef_data_bag_item{}, ejson_term()) -> ejson_term().
+ejson_for_indexing(#chef_data_bag_item{data_bag_name = BagName,
+                                       item_name = ItemName}, Item) ->
+    %% See Chef::DataBagItem#to_hash
+    %% We basically set data_bag and chef_type key against the original data bag item.
+    ItemName = ej:get({<<"id">>}, Item),
+    ej:set({<<"data_bag">>}, ej:set({<<"chef_type">>}, Item, <<"data_bag_item">>), BagName).
+
+-spec update_from_ejson(#chef_data_bag_item{}, ejson_term()) -> #chef_data_bag_item{}.
+update_from_ejson(#chef_data_bag_item{} = DataBagItem, DataBagItemData) ->
+    Name = ej:get({<<"id">>}, DataBagItemData),
+    DataBagItemJson = chef_json:encode(DataBagItemData),
+    Data = chef_db_compression:compress(chef_data_bag_item, DataBagItemJson),
+    DataBagItem#chef_data_bag_item{item_name = Name, serialized_object = Data}.
+
+bulk_get_query() ->
+    bulk_get_data_bag_items.
+
+create_query() ->
+    insert_data_bag_item.
+
+delete_query() ->
+    delete_data_bag_item_by_id.
+
+find_query() ->
+    find_data_bag_item_by_orgid_name.
+
+list_query() ->
+    list_data_bag_items_for_data_bag.
+
+update_query() ->
+    update_data_bag_item_by_id.
 
 -spec add_type_and_bag(BagName :: binary(), Item :: ejson_term()) -> ejson_term().
 %% @doc Returns data bag item EJSON `Item' with keys `chef_type' and `data_bag' added.
