@@ -21,8 +21,10 @@
 -module(chef_client).
 
 -export([
+         authz_id/1,
          add_authn_fields/2,
          assemble_client_ejson/2,
+         ejson_for_indexing/2,
          id/1,
          name/1,
          new_record/3,
@@ -34,7 +36,20 @@
          osc_parse_binary_json/3,
          parse_binary_json/2,
          parse_binary_json/3,
-         type_name/1
+         set_created/2,
+         set_updated/2,
+         type_name/1,
+         update_from_ejson/2
+        ]).
+
+%% database named queries
+-export([
+         bulk_get_query/0,
+         create_query/0,
+         delete_query/0,
+         find_query/0,
+         list_query/0,
+         update_query/0
         ]).
 
 -include_lib("ej/include/ej.hrl").
@@ -79,6 +94,59 @@ id(#chef_client{id = Id}) ->
 %% TODO: this doesn't need an argument
 type_name(#chef_client{}) ->
     client.
+
+authz_id(#chef_client{authz_id = AuthzId})->
+    AuthzId.
+
+ejson_for_indexing(#chef_client{}, Client) ->
+    Client.
+
+update_from_ejson(#chef_client{} = Client, ClientData) ->
+    Name = ej:get({<<"name">>}, ClientData),
+    IsAdmin = ej:get({<<"admin">>}, ClientData) =:= true,
+    IsValidator = ej:get({<<"validator">>}, ClientData) =:= true,
+    %% Take certificate first, then public_key
+    {Key, Version} = cert_or_key(ClientData),
+    case Key of
+        undefined ->
+            Client#chef_client{name = Name,
+                admin = IsAdmin,
+                validator = IsValidator};
+        _ ->
+            Client#chef_client{name = Name,
+                admin = IsAdmin,
+                validator = IsValidator,
+                public_key = Key,
+                pubkey_version = Version}
+    end.
+
+-spec set_created(#chef_client{}, object_id()) -> #chef_client{}.
+set_created(#chef_client{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_client{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
+
+-spec set_updated(#chef_client{}, object_id()) -> #chef_client{}.
+set_updated(#chef_client{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_client{updated_at = Now, last_updated_by = ActorId}.
+
+create_query() ->
+    insert_client.
+
+update_query() ->
+    update_client_by_id.
+
+delete_query() ->
+    delete_client_by_id.
+
+find_query() ->
+    find_client_by_orgid_name.
+
+list_query() ->
+    list_clients_for_org.
+
+bulk_get_query() ->
+    bulk_get_clients.
 
 -spec new_record(object_id(), object_id(), ejson_term()) -> #chef_client{}.
 new_record(OrgId, AuthzId, ClientData) ->
