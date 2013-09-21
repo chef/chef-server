@@ -28,51 +28,30 @@
 -include_lib("chef_db.hrl").
 -include_lib("chef_objects/include/chef_types.hrl").
 
-make_id(Prefix) when is_binary(Prefix) ->
-    case size(Prefix) of
-        Size when Size > 32 ->
-            error(prefix_too_long_for_id);
-        Size when Size =:= 32 ->
-              Prefix;
-          Size ->
-            iolist_to_binary([Prefix, lists:duplicate(32 - Size, $0)])
-    end.
-
-make_az_id(Prefix) ->
-    make_id(<<"a11", Prefix/binary>>).
-
-actor_id() ->
-    make_az_id(<<"ffff">>).
-
-the_org_id() ->
-    make_id(<<"aa1">>).
-
-other_org_id() ->
-    make_id(<<"bb2">>).
 
 make_data_bag(Prefix) ->
-    Id = make_id(Prefix),
-    AzId = make_az_id(Prefix),
-    OrgId = the_org_id(),
+    Id = itest_util:make_id(Prefix),
+    AzId = itest_util:make_az_id(Prefix),
+    OrgId = itest_util:the_org_id(),
     Name = <<"data_bag_", Prefix/binary>>,
     #chef_data_bag{id = Id, authz_id = AzId, org_id = OrgId,
                    name = Name,
-                   last_updated_by = actor_id(),
+                   last_updated_by = itest_util:actor_id(),
                    created_at = {datetime, {{2011,10,1},{16,47,46}}},
                    updated_at = {datetime, {{2011,10,1},{16,47,46}}} }.
 
 make_node(Prefix) ->
-    Id = make_id(Prefix),
-    AzId = make_az_id(Prefix),
+    Id = itest_util:make_id(Prefix),
+    AzId = itest_util:make_az_id(Prefix),
     Name = <<"node_", Prefix/binary>>,
     #chef_node{
-                id=Id, authz_id=AzId, org_id=the_org_id(), name=Name,
+                id=Id, authz_id=AzId, org_id=itest_util:the_org_id(), name=Name,
                 environment="_default", last_updated_by="noone", serialized_object= <<"">>,
                 created_at= {datetime,{{2011,10,1},{16,47,46}}}, updated_at= {datetime,{{2011,10,1},{16,47,46}}} }.
 
 make_sandbox(Prefix) ->
-    #chef_sandbox{id=make_id(Prefix),
-                  org_id=the_org_id(),
+    #chef_sandbox{id=itest_util:make_id(Prefix),
+                  org_id=itest_util:the_org_id(),
                   created_at = {datetime,{{2011,10,1},{16,47,46}}},
                   checksums=[{<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>, false},
                              {<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>, false},
@@ -86,13 +65,13 @@ data_bags() ->
     [make_data_bag(<<"01">>),
      make_data_bag(<<"02">>),
      make_data_bag(<<"03">>),
-     (make_data_bag(<<"04">>))#chef_data_bag{org_id = other_org_id()}].
+     (make_data_bag(<<"04">>))#chef_data_bag{org_id = itest_util:other_org_id()}].
 
 make_data_bag_item(Prefix, BagName) ->
-    Id = make_id(Prefix),
+    Id = itest_util:make_id(Prefix),
     Name = <<"item_", Prefix/binary>>,
-    #chef_data_bag_item{id= Id, org_id= the_org_id(), item_name= Name, data_bag_name= BagName,
-                        last_updated_by= actor_id(),
+    #chef_data_bag_item{id= Id, org_id= itest_util:the_org_id(), item_name= Name, data_bag_name= BagName,
+                        last_updated_by= itest_util:actor_id(),
                         created_at= {datetime, {{2011,10,1},{16,47,46}}},
                         updated_at= {datetime, {{2011,10,1},{16,47,46}}},
                         serialized_object= Prefix }.
@@ -109,10 +88,10 @@ cookbook_name_from_prefix(Prefix) ->
     <<"cookbook_", Prefix/binary>>.
 
 make_client(Prefix) ->
-    AzId = make_az_id(Prefix),
+    AzId = itest_util:make_az_id(Prefix),
     #chef_client{
 	    id = AzId,
-	    org_id = the_org_id(),
+	    org_id = itest_util:the_org_id(),
 	    name = AzId,
 	    authz_id = AzId,
             admin = true,
@@ -126,47 +105,14 @@ make_client(Prefix) ->
 	      "KxavHMeCuSgyReDZpsFOn2Saie26jvLxWrGyn870yIh36wMvCvWKwUQPnluSnstJ"
 	      "xwIDAQAB">>,
 	    pubkey_version = 1,
-	    last_updated_by = actor_id(),
+	    last_updated_by = itest_util:actor_id(),
 	    created_at = {datetime, {{2011,10,1},{16,47,46}}},
 	    updated_at = {datetime, {{2011,10,1},{16,47,46}}}
     }.
 
-make_user(Prefix) ->
-  AzId = make_az_id(Prefix),
-  chef_user_record(AzId, false).
-
-make_admin_user(Prefix) ->
-  AzId = make_az_id(Prefix),
-  chef_user_record(AzId, true).
-
-chef_user_record(AzId, Admin) ->
-  #chef_user{
-    id = AzId,
-    authz_id = AzId,
-    username = AzId,
-    email = AzId,
-    public_key =
-    <<"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwxOFcrbsV7bEbqzOvW5u"
-	      "W5lyB23qsenlUdIGyRttqzGEaki01s7X+PpYy4BLfmVVmA6A6FCbL38CzzTUFX1a"
-	      "p6LYQR2Pb1tYjBjZZMUiVnjEgl12Zd1JF8dsPMj2BgPggx5GaGLvCOsajZ0YCDgW"
-	      "WkoO/HAEbztFIx2jdSCyD0ZH0ep4fSGDjmkN+5XurS0dBH8J5qPeJjriA/s/RzUb"
-	      "ULjr3gvfg49onHxr/kTKbhc78GBOfKSH1ftECCoWnidadW7/lfKbAZ3xiSjLsIxS"
-	      "KxavHMeCuSgyReDZpsFOn2Saie26jvLxWrGyn870yIh36wMvCvWKwUQPnluSnstJ"
-	      "xwIDAQAB">>,
-    hashed_password = <<"secretHaxorz">>,
-    salt = <<"kosher">>,
-    hash_type = <<"bcrypt">>,
-    last_updated_by = actor_id(),
-    created_at = {datetime, {{2011,10,1},{16,47,46}}},
-    updated_at = {datetime, {{2011,10,1},{16,47,46}}},
-    external_authentication_uid = <<"an open id of some kind">>,
-    recovery_authentication_enabled = false,
-    admin = Admin
-  }.
-
 make_cookbook(Prefix) ->
-    AzId = make_az_id(Prefix),
-    OrgId = the_org_id(),
+    AzId = itest_util:make_az_id(Prefix),
+    OrgId = itest_util:the_org_id(),
     Name = cookbook_name_from_prefix(Prefix),
     {AzId, OrgId, Name}.
 
@@ -196,7 +142,7 @@ make_cookbook_version(Prefix, Version, Cookbook) when is_integer(Version);
 %% More can be added in the future as needed.
 make_cookbook_version(Prefix, Version, {AuthzId, OrgId, Name}, Properties) when is_integer(Version);
                                                                                 is_tuple(Version) ->
-    Id = make_id(Prefix),
+    Id = itest_util:make_id(Prefix),
     {Major, Minor, Patch} = version_tuple(Version),
 
     #chef_cookbook_version{id=Id,
@@ -208,7 +154,7 @@ make_cookbook_version(Prefix, Version, {AuthzId, OrgId, Name}, Properties) when 
                            meta_deps= process_property(dependencies, Properties),
                            meta_long_desc= <<"">>,
                            metadata=Prefix,
-                           last_updated_by= actor_id(),
+                           last_updated_by= itest_util:actor_id(),
                            created_at= {datetime, {{2011,10,1},{16,47,46}}},
                            updated_at= {datetime, {{2011,10,1},{16,47,46}}},
                            serialized_object= process_property(serialized_object, Properties),
@@ -348,12 +294,12 @@ basic_test_() ->
          %% Always run fetch user list first, so no users
          %% yet exist in DB, so results are predictable,
          %% since we don't clean up after every test
-         {<<"Fetch user list">>, fun fetch_user_list/0},
-         {<<"Insert user">>, fun insert_user_data/0},
-         {<<"Fetch single user">>, fun fetch_user_data/0},
-         {<<"Update user">>, fun update_user_data/0},
-         {<<"Delete user">>, fun delete_user_data/0},
-         {<<"Count admin users">>, fun count_admin_users/0}
+         {<<"Fetch user list">>, fun chef_sql_users:fetch_user_list/0},
+         {<<"Insert user">>, fun chef_sql_users:insert_user_data/0},
+         {<<"Fetch single user">>, fun chef_sql_users:fetch_user_data/0},
+         {<<"Update user">>, fun chef_sql_users:update_user_data/0},
+         {<<"Delete user">>, fun chef_sql_users:delete_user_data/0},
+         {<<"Count admin users">>, fun chef_sql_users:count_admin_users/0}
        ]
       },
       {<<"Client Operations">>,
@@ -431,7 +377,7 @@ basic_test_() ->
                          {Description,
                           fun() ->
                                   Expected = latest_from_cookbook_specs(CookbookSpecs, NumVersions),
-                                  {ok, Actual} = chef_sql:fetch_latest_cookbook_versions(the_org_id(), all, NumVersions),
+                                  {ok, Actual} = chef_sql:fetch_latest_cookbook_versions(itest_util:the_org_id(), all, NumVersions),
                                   ?_assertEqual(Expected, Actual)
                           end}
                  end}
@@ -548,7 +494,7 @@ basic_test_() ->
         [{Specs, fun(CookbookSpecs, _) ->
                          {Description,
                           fun() -> Expected = recipes_from_cookbook_specs(CookbookSpecs),
-                                   {ok, Actual} = chef_sql:fetch_latest_cookbook_recipes(the_org_id()),
+                                   {ok, Actual} = chef_sql:fetch_latest_cookbook_recipes(itest_util:the_org_id()),
                                    ?assertEqual(Expected, Actual)
                           end}
                  end}
@@ -623,7 +569,7 @@ basic_test_() ->
         [{Spec, fun(_,_) ->
                         {Description,
                          fun() ->
-                                 {ok, Actual} = chef_sql:fetch_all_cookbook_version_dependencies(the_org_id()),
+                                 {ok, Actual} = chef_sql:fetch_all_cookbook_version_dependencies(itest_util:the_org_id()),
                                  ?assertEqual(Expected, Actual)
                          end}
                 end}
@@ -801,7 +747,7 @@ basic_test_() ->
                   {Description,
                    fun() ->
                            EnvName = RealEnvironment#chef_environment.name,
-                           {ok, Actual} = chef_sql:fetch_environment_filtered_cookbook_versions(the_org_id(), EnvName, all, NumVersions),
+                           {ok, Actual} = chef_sql:fetch_environment_filtered_cookbook_versions(itest_util:the_org_id(), EnvName, all, NumVersions),
                            ?assertEqual(Expected, Actual)
                    end}
           end}
@@ -921,7 +867,7 @@ basic_test_() ->
                   {Description,
                    fun() ->
                            EnvName = RealEnvironment#chef_environment.name,
-                           {ok, Actual} = chef_sql:fetch_environment_filtered_recipes(the_org_id(), EnvName),
+                           {ok, Actual} = chef_sql:fetch_environment_filtered_recipes(itest_util:the_org_id(), EnvName),
                            ?assertEqual(Expected, Actual)
                    end}
           end}
@@ -1018,7 +964,7 @@ basic_test_() ->
                            EnvName = RealEnvironment#chef_environment.name,
                            lists:map(fun({CookbookName, NumToVersions}) ->
                                              lists:map(fun({NumVersions, Versions}) ->
-                                                               {ok, Actual} = chef_sql:fetch_environment_filtered_cookbook_versions(the_org_id(),
+                                                               {ok, Actual} = chef_sql:fetch_environment_filtered_cookbook_versions(itest_util:the_org_id(),
                                                                                                                                     EnvName, CookbookName,
                                                                                                                                     NumVersions),
                                                                ?assertEqual([{CookbookName, Versions}], Actual)
@@ -1127,71 +1073,6 @@ insert_node_data() ->
     Results = [chef_sql:create_node(Node) || Node <- Nodes ],
     ?assertEqual(Expected, Results).
 
-%%%======================================================================
-%%% USERS
-%%%======================================================================
-
-insert_user_data() ->
-  Users = [make_user(<<"user01">>), make_user(<<"user02">>)],
-  Expected = lists:duplicate(length(Users), {ok, 1}),
-  Results = [chef_sql:create_user(User) || User <- Users ],
-  ?assertEqual(Expected, Results).
-
-
-fetch_user_data() ->
-  Expected = make_user(<<"user03">>),
-  Username = Expected#chef_user.username,
-  %% Make sure client create succeeds
-  ?assertEqual({ok, 1}, chef_sql:create_user(Expected)),
-  {ok, Result} = chef_sql:fetch_user(Username),
-  ?assertEqual(Expected, Result).
-
-fetch_user_list() ->
-  Users = [make_user(<<"user04">>), make_user(<<"user05">>)],
-  CreatedResults = lists:duplicate(length(Users), {ok, 1}),
-  Created = [chef_sql:create_user(User) || User <- Users ],
-  ?assertEqual(CreatedResults, Created),
-  Results = chef_sql:fetch_users(),
-  Expected = {ok, [ User#chef_user.username || User <- Users ]},
-  ?assertEqual(Expected, Results).
-
-delete_user_data() ->
-  User = make_user(<<"user06">>),
-  Username = User#chef_user.username,
-  ?assertEqual({ok, 1}, chef_sql:create_user(User)),
-  Result = chef_sql:delete_user(Username),
-  ?assertEqual({ok, 1}, Result),
-  Result1 = chef_sql:fetch_user(Username),
-  ?assertEqual({ok, not_found}, Result1).
-
-update_user_data() ->
-  User = make_user(<<"user07">>),
-  Username = User#chef_user.username,
-  ?assertEqual({ok, 1}, chef_sql:create_user(User)),
-
-  % Is the user really a non-admin?
-  {ok, CreatedUser} = chef_sql:fetch_user(Username),
-  ?assertEqual(false, CreatedUser#chef_user.admin),
-
-  % Make user an admin
-  UpdatedUserData = User#chef_user{ admin = true },
-  Result = chef_sql:update_user(UpdatedUserData),
-  ?assertEqual({ok, 1}, Result),
-
-  % Is the user really an admin?
-  {ok, PersistedUser} = chef_sql:fetch_user(Username),
-  ?assertEqual(true, PersistedUser#chef_user.admin),
-
-  %% Cleanup admin user so count_admin_users() tests will work
-  chef_sql:delete_user(Username).
-
-count_admin_users() ->
-  User = make_admin_user(<<"user08">>),
-  ?assertEqual({ok, 1}, chef_sql:create_user(User)),
-  ?assertEqual({ok, 1}, chef_sql:count_user_admins()),
-  User2 = make_admin_user(<<"user09">>),
-  ?assertEqual({ok, 1}, chef_sql:create_user(User2)),
-  ?assertEqual({ok, 2}, chef_sql:count_user_admins()).
 
 %%%======================================================================
 %%% CLIENTS
@@ -1246,8 +1127,8 @@ insert_data_bag_data() ->
 
 fetch_data_bags() ->
     DBS = data_bags(),
-    Expected = [ Db#chef_data_bag.name || Db <- DBS, Db#chef_data_bag.org_id =:= the_org_id() ],
-    {ok, Results} = chef_sql:fetch_data_bags(the_org_id()),
+    Expected = [ Db#chef_data_bag.name || Db <- DBS, Db#chef_data_bag.org_id =:= itest_util:the_org_id() ],
+    {ok, Results} = chef_sql:fetch_data_bags(itest_util:the_org_id()),
     ?assertEqual(Expected, Results).
 
 fetch_data_bag() ->
@@ -1258,10 +1139,10 @@ fetch_data_bag() ->
 %% bulk_get_data_bags() ->
 %%     Ids = lists:sort([ list_to_binary(Db#chef_data_bag.id) ||
 %%                          Db <- data_bags(),
-%%                          Db#chef_data_bag.org_id =:= the_org_id() ]),
+%%                          Db#chef_data_bag.org_id =:= itest_util:the_org_id() ]),
 %%     Expected = lists:sort([ list_to_binary(Db#chef_data_bag.name) ||
 %%                               Db <- data_bags(),
-%%                               Db#chef_data_bag.org_id =:= the_org_id() ]),
+%%                               Db#chef_data_bag.org_id =:= itest_util:the_org_id() ]),
 %%     {ok, Results} = chef_sql:bulk_get_data_bags(Ids),
 %%    ?assertEqual(Expected, lists:sort(Results)).
 
@@ -1285,9 +1166,9 @@ insert_data_bag_item_data() ->
 
 fetch_data_bag_items() ->
     DBS = data_bag_items(),
-    Expected = [ Db#chef_data_bag_item.item_name || Db <- DBS, Db#chef_data_bag_item.org_id =:= the_org_id(),
+    Expected = [ Db#chef_data_bag_item.item_name || Db <- DBS, Db#chef_data_bag_item.org_id =:= itest_util:the_org_id(),
                                                     Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">> ],
-    {ok, Results} = chef_sql:fetch_data_bag_items(the_org_id(), <<"data_bag_02">>),
+    {ok, Results} = chef_sql:fetch_data_bag_items(itest_util:the_org_id(), <<"data_bag_02">>),
     ?assertEqual(Expected, Results).
 
 fetch_data_bag_item()->
@@ -1301,9 +1182,9 @@ fetch_data_bag_item()->
 fetch_data_bag_item_ids() ->
     Expected = [ Db#chef_data_bag_item.id ||
                    Db <- data_bag_items(),
-                   Db#chef_data_bag_item.org_id =:= the_org_id(),
+                   Db#chef_data_bag_item.org_id =:= itest_util:the_org_id(),
                    Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">>],
-    {ok, Results} = chef_sql:fetch_data_bag_item_ids(the_org_id(), <<"data_bag_02">>),
+    {ok, Results} = chef_sql:fetch_data_bag_item_ids(itest_util:the_org_id(), <<"data_bag_02">>),
     ?assertEqual(Expected,Results).
 
 bulk_get_data_bag_items()-> ok.
@@ -1311,13 +1192,13 @@ bulk_get_data_bag_items()-> ok.
 update_data_bag_item()->
     [Old | _T] = [ Db ||
                      Db <- data_bag_items(),
-                     Db#chef_data_bag_item.org_id =:= the_org_id(),
+                     Db#chef_data_bag_item.org_id =:= itest_util:the_org_id(),
                      Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">>],
     NewData = <<"new object">>,
     New = Old#chef_data_bag_item{serialized_object= NewData},
     {ok, UResults} = chef_sql:update_data_bag_item(New),
     ?assertEqual(1, UResults),
-    {ok, FResults} = chef_sql:fetch_data_bag_item(the_org_id(), New#chef_data_bag_item.data_bag_name, New#chef_data_bag_item.item_name),
+    {ok, FResults} = chef_sql:fetch_data_bag_item(itest_util:the_org_id(), New#chef_data_bag_item.data_bag_name, New#chef_data_bag_item.item_name),
     ?assertEqual(NewData,
                  (FResults#chef_data_bag_item.serialized_object)).
 
@@ -1342,22 +1223,22 @@ mark_some_checksums_as_uploaded() ->
     %% Hold one aside for checking non-uploaded checksums
     Checksums = [C || {C, false} <- ChecksumSpec, C /= <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>],
     ?assertEqual(ok,
-                 chef_sql:mark_checksums_as_uploaded(the_org_id(), Checksums)).
+                 chef_sql:mark_checksums_as_uploaded(itest_util:the_org_id(), Checksums)).
 
 check_non_uploaded_checksums() ->
     ?assertEqual([<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>],
-                 chef_sql:non_uploaded_checksums(make_id(<<"abcd">>), the_org_id())).
+                 chef_sql:non_uploaded_checksums(itest_util:make_id(<<"abcd">>), itest_util:the_org_id())).
 
 upload_last_checksum() ->
     ?assertEqual(ok,
-                 chef_sql:mark_checksums_as_uploaded(the_org_id(), [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>])),
+                 chef_sql:mark_checksums_as_uploaded(itest_util:the_org_id(), [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>])),
     ?assertEqual([],
-                 chef_sql:non_uploaded_checksums(make_id(<<"abcd">>), the_org_id())).
+                 chef_sql:non_uploaded_checksums(itest_util:make_id(<<"abcd">>), itest_util:the_org_id())).
 
 fetch_sandbox() ->
-    {ok, ActualValue} = chef_sql:fetch_sandbox(the_org_id(), make_id(<<"abcd">>)),
-    ?assertEqual(#chef_sandbox{id=make_id(<<"abcd">>),
-                               org_id=the_org_id(),
+    {ok, ActualValue} = chef_sql:fetch_sandbox(itest_util:the_org_id(), itest_util:make_id(<<"abcd">>)),
+    ?assertEqual(#chef_sandbox{id=itest_util:make_id(<<"abcd">>),
+                               org_id=itest_util:the_org_id(),
                                created_at={datetime,{{2011,10,1},{16,47,46}}},
                                checksums=[{<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>, true},
                                           {<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>, true},
@@ -1367,7 +1248,7 @@ fetch_sandbox() ->
 %% delete the sandbox
 delete_sandbox() ->
     ?assertEqual({ok, 1},
-                 chef_sql:delete_sandbox(make_id(<<"abcd">>))).
+                 chef_sql:delete_sandbox(itest_util:make_id(<<"abcd">>))).
 
 %%%======================================================================
 %%% COOKBOOKS
@@ -1419,7 +1300,7 @@ insert_cbv_null_id() ->
                                              meta_deps= <<"">>,
                                              meta_long_desc= <<"">>,
                                              metadata= <<"">>,
-                                             last_updated_by= actor_id(),
+                                             last_updated_by= itest_util:actor_id(),
                                              created_at= {datetime, {{2011,10,1},{16,47,46}}},
                                              updated_at= {datetime, {{2011,10,1},{16,47,46}}},
                                              serialized_object= <<"">>,
@@ -1440,7 +1321,7 @@ insert_cbv_no_id() ->
       meta_deps= <<"">>,
       meta_long_desc= <<"">>,
       metadata= <<"">>,
-      last_updated_by= actor_id(),
+      last_updated_by= itest_util:actor_id(),
       created_at= {datetime, {{2011,10,1},{16,47,46}}},
       updated_at= {datetime, {{2011,10,1},{16,47,46}}},
       serialized_object= <<"">>,
@@ -1481,8 +1362,8 @@ fetch_cookbook_version_no_checksums() ->
 fetch_cookbook_version_checksums() ->
     Cookbook = make_cookbook(<<"fetch_checksums">>),
     CookbookVersion0 = make_cookbook_version(<<"001fetch_checksums">>, 0, Cookbook),
-    Checksums = [ make_id(<<"checksum1">>),
-                  make_id(<<"checksum2">>)],
+    Checksums = [ itest_util:make_id(<<"checksum1">>),
+                  itest_util:make_id(<<"checksum2">>)],
     CookbookVersion = CookbookVersion0#chef_cookbook_version{checksums=Checksums},
     ok = chef_sql:mark_checksums_as_uploaded(CookbookVersion#chef_cookbook_version.org_id,
                                              Checksums),
@@ -1510,7 +1391,7 @@ fetch_cookbook_version_different_version() ->
     ?assertEqual(Expected, Got).
 
 fetch_cookbook_versions() ->
-    OrgId = the_org_id(),
+    OrgId = itest_util:the_org_id(),
     {ok, Versions} = chef_sql:fetch_cookbook_versions(OrgId),
     %% FIXME Hard to test the exact return value given we don't have
     %% a clean state.  For now check the shape of the returned
@@ -1524,7 +1405,7 @@ fetch_cookbook_versions() ->
       end || Row <- Versions].
 
 fetch_cookbook_versions_single_cookbook_no_versions() ->
-    OrgId = the_org_id(),
+    OrgId = itest_util:the_org_id(),
     {ok, Versions} = chef_sql:fetch_cookbook_versions(OrgId, <<"does_not_exist">>),
     ?assertEqual([], Versions).
 
@@ -1568,29 +1449,29 @@ fetch_latest_cookbook_version_different_versions() ->
 update_cookbook_version_checksums() ->
     Cookbook = make_cookbook(<<"update_checksums">>),
     ExistingVersion = make_cookbook_version(<<"update_version_01">>, 1, Cookbook),
-    Checksums = [ make_id(<<"1checksum2">>),
-                  make_id(<<"1checksum1">>) ],
+    Checksums = [ itest_util:make_id(<<"1checksum2">>),
+                  itest_util:make_id(<<"1checksum1">>) ],
     update_cookbook_version_checksums(ExistingVersion, Checksums, Checksums).
 
 update_cookbook_version_checksums_with_deletions() ->
     Cookbook = make_cookbook(<<"update_checksums">>),
     ExistingVersion = make_cookbook_version(<<"update_version_02">>, 2, Cookbook),
-    ExistingChecksums = [ make_id(<<"2checksum2_2">>), make_id(<<"2checksum1">>), make_id(<<"2checksum3">>) ],
-    UpdatedChecksums = [ make_id(<<"2checksum1">>) ],
+    ExistingChecksums = [ itest_util:make_id(<<"2checksum2_2">>), itest_util:make_id(<<"2checksum1">>), itest_util:make_id(<<"2checksum3">>) ],
+    UpdatedChecksums = [ itest_util:make_id(<<"2checksum1">>) ],
     update_cookbook_version_checksums(ExistingVersion, ExistingChecksums, UpdatedChecksums).
 
 update_cookbook_version_checksums_with_additions() ->
     Cookbook = make_cookbook(<<"update_checksums">>),
     ExistingVersion = make_cookbook_version(<<"update_version_03">>, 3, Cookbook),
-    ExistingChecksums = [ make_id(<<"3checksum2">>) ],
-    UpdatedChecksums = [ make_id(<<"3checksum1">>), make_id(<<"3checksum2">>), make_id(<<"3checksum0">>) ],
+    ExistingChecksums = [ itest_util:make_id(<<"3checksum2">>) ],
+    UpdatedChecksums = [ itest_util:make_id(<<"3checksum1">>), itest_util:make_id(<<"3checksum2">>), itest_util:make_id(<<"3checksum0">>) ],
     update_cookbook_version_checksums(ExistingVersion, ExistingChecksums, UpdatedChecksums).
 
 update_cookbook_version_checksums_with_deletions_and_additions() ->
     Cookbook = make_cookbook(<<"update_checksums">>),
     ExistingVersion = make_cookbook_version(<<"update_version_04">>, 4, Cookbook),
-    ExistingChecksums = [ make_id(<<"4checksum2">>), make_id(<<"4checksum1">>), make_id(<<"4checksums6">>) ],
-    UpdatedChecksums = [ make_id(<<"4checksums6">>), make_id(<<"4checksum5">>), make_id(<<"4checksum0">>) ],
+    ExistingChecksums = [ itest_util:make_id(<<"4checksum2">>), itest_util:make_id(<<"4checksum1">>), itest_util:make_id(<<"4checksums6">>) ],
+    UpdatedChecksums = [ itest_util:make_id(<<"4checksums6">>), itest_util:make_id(<<"4checksum5">>), itest_util:make_id(<<"4checksum0">>) ],
     update_cookbook_version_checksums(ExistingVersion, ExistingChecksums, UpdatedChecksums).
 
 
@@ -1642,9 +1523,9 @@ update_cookbook_version_checksums_with_missing_checksums() ->
     %% get the full CB including checksums
     Cookbook = make_cookbook(<<"update_checksums">>),
     ExistingVersion = make_cookbook_version(<<"update_version_05">>, 5, Cookbook),
-    MissingChecksum = make_id(<<"5missing1">>),
-    ExistingChecksums = [ make_id(<<"5checksum2">>), make_id(<<"5checksum1">>), make_id(<<"5checksums6">>) ],
-    UpdatedChecksums = [ make_id(<<"5checksums2">>), MissingChecksum ],
+    MissingChecksum = itest_util:make_id(<<"5missing1">>),
+    ExistingChecksums = [ itest_util:make_id(<<"5checksum2">>), itest_util:make_id(<<"5checksum1">>), itest_util:make_id(<<"5checksums6">>) ],
+    UpdatedChecksums = [ itest_util:make_id(<<"5checksums2">>), MissingChecksum ],
 
     UpdatedVersion = ExistingVersion#chef_cookbook_version{ meta_long_desc = <<"Updated Description">>, checksums = UpdatedChecksums },
 
@@ -1668,10 +1549,10 @@ update_cookbook_version_checksums_with_shared_checksums() ->
     OlderVersion    = make_cookbook_version(<<"update_version_06">>, 6, Cookbook),
     ExistingVersion = make_cookbook_version(<<"update_version_07">>, 7, Cookbook),
 
-    SharedChecksum = make_id(<<"shared-1">>),
-    OlderChecksums = [ make_id(<<"v6-1">>), make_id(<<"v6-2">>), SharedChecksum ],
-    ExistingChecksums = [ make_id(<<"v7-1">>), make_id(<<"v7-2">>), SharedChecksum ],
-    UpdatedChecksums = [ make_id(<<"v7-3">>), make_id(<<"v7-2">>) ],
+    SharedChecksum = itest_util:make_id(<<"shared-1">>),
+    OlderChecksums = [ itest_util:make_id(<<"v6-1">>), itest_util:make_id(<<"v6-2">>), SharedChecksum ],
+    ExistingChecksums = [ itest_util:make_id(<<"v7-1">>), itest_util:make_id(<<"v7-2">>), SharedChecksum ],
+    UpdatedChecksums = [ itest_util:make_id(<<"v7-3">>), itest_util:make_id(<<"v7-2">>) ],
 
     UpdatedVersion = ExistingVersion#chef_cookbook_version{ meta_long_desc = <<"Updated Description">>, checksums = UpdatedChecksums },
 
@@ -1694,8 +1575,8 @@ update_cookbook_version_checksums_with_shared_checksums() ->
     #chef_db_cb_version_update{
         added_checksums=AddedChecksums,
         deleted_checksums=DeletedChecksums} = chef_sql:update_cookbook_version(UpdatedVersion),
-    ?assertEqual([make_id(<<"v7-3">>)] , AddedChecksums),
-    ?assertEqual([make_id(<<"v7-1">>)], DeletedChecksums),
+    ?assertEqual([itest_util:make_id(<<"v7-3">>)] , AddedChecksums),
+    ?assertEqual([itest_util:make_id(<<"v7-1">>)], DeletedChecksums),
 
     Updated = chef_sql:fetch_cookbook_version(UpdatedVersion#chef_cookbook_version.org_id,
                                                {UpdatedVersion#chef_cookbook_version.name,
@@ -1752,8 +1633,8 @@ delete_cookbook_multiple_versions() ->
 
     CookbookVersion0 = make_cookbook_version(<<"000delete_multiple">>, 0, {AuthzId, OrgId, Name}),
     CookbookVersion1 = make_cookbook_version(<<"001delete_multiple">>, 1, {AuthzId, OrgId, Name}),
-    Checksums = [ make_id(<<"checksum1">>),
-                  make_id(<<"checksum2">>)],
+    Checksums = [ itest_util:make_id(<<"checksum1">>),
+                  itest_util:make_id(<<"checksum2">>)],
     CookbookVersion20 = CookbookVersion0#chef_cookbook_version{checksums=Checksums},
     CookbookVersion21 = CookbookVersion1#chef_cookbook_version{checksums=Checksums},
     ok = chef_sql:mark_checksums_as_uploaded(CookbookVersion20#chef_cookbook_version.org_id,
@@ -1802,7 +1683,7 @@ delete_cookbook_multiple_versions() ->
 
 %% Cover the case where nothing exists in the DB
 cookbook_create_from_scratch() ->
-    OrgId = the_org_id(),
+    OrgId = itest_util:the_org_id(),
     Name = <<"cookbook_itest_create">>,
 
     %% Step 1.
@@ -1810,7 +1691,7 @@ cookbook_create_from_scratch() ->
     ?assertEqual(not_found, chef_sql:fetch_cookbook_authz(OrgId, Name)),
 
     %% Step 2b. - AUTHZ
-    AzId = make_az_id(<<"itest_create">>),
+    AzId = itest_util:make_az_id(<<"itest_create">>),
     Cookbook = {AzId, OrgId, Name},
 
     %% Step 3.
@@ -1822,11 +1703,11 @@ cookbook_create_from_scratch() ->
 
 %% Cover the case where the cookbook exists, but not the actual cookbook version
 cookbook_create_new_version() ->
-    OrgId = the_org_id(),
+    OrgId = itest_util:the_org_id(),
     Name = <<"cookbook_itest_create_new">>,
 
     %% Setup - upload a different version of the Cookbook
-    Cookbook0 = {make_az_id(<<"itest_create_new">>), OrgId, Name},
+    Cookbook0 = {itest_util:make_az_id(<<"itest_create_new">>), OrgId, Name},
     CbVersion0 = make_cookbook_version(<<"000itest_create_new">>, 0, Cookbook0),
     ?assertEqual({ok, 1}, chef_sql:create_cookbook_version(CbVersion0)),
 
@@ -2110,9 +1991,9 @@ environment_from_spec(Prefix) when is_binary(Prefix)->
 
 %% TODO: This doesn't handle the "_default" environment yet
 make_environment(Prefix, Properties) ->
-    AuthzId = make_az_id(Prefix),
-    OrgId = the_org_id(),
-    Id = make_id(Prefix),
+    AuthzId = itest_util:make_az_id(Prefix),
+    OrgId = itest_util:the_org_id(),
+    Id = itest_util:make_id(Prefix),
 
     %% These are the various properties of the Environment's
     %% `serialized_object' field we currently give hooks for
@@ -2130,7 +2011,7 @@ make_environment(Prefix, Properties) ->
                        authz_id = AuthzId,
                        org_id = OrgId,
                        name = environment_name_from_prefix(Prefix),
-                       last_updated_by = actor_id(),
+                       last_updated_by = itest_util:actor_id(),
                        created_at = default_date(),
                        updated_at = default_date(),
                        serialized_object = encode_and_compress(Object)
