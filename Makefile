@@ -3,7 +3,6 @@ DIALYZER_DEPS = deps/chef_objects/ebin \
                 deps/depsolver/ebin \
                 deps/ej/ebin \
                 deps/ejson/ebin \
-                deps/emysql/ebin \
                 deps/epgsql/ebin \
                 deps/ibrowse/ebin \
                 deps/mini_s3/ebin \
