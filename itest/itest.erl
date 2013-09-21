@@ -1680,10 +1680,10 @@ update_cookbook_version_checksums_with_shared_checksums() ->
     OlderVersion    = make_cookbook_version(<<"update_version_06">>, 6, Cookbook),
     ExistingVersion = make_cookbook_version(<<"update_version_07">>, 7, Cookbook),
 
-    SharedChecksum = make_id(<<"6shared1">>),
-    OlderChecksums = [ make_id(<<"6checksum2">>), make_id(<<"5checksums6">>), SharedChecksum ],
-    ExistingChecksums = [ make_id(<<"7checksum2">>), make_id(<<"7checksums6">>), SharedChecksum ],
-    UpdatedChecksums = [ make_id(<<"7checksums2">>) ],
+    SharedChecksum = make_id(<<"shared-1">>),
+    OlderChecksums = [ make_id(<<"v6-1">>), make_id(<<"v6-2">>), SharedChecksum ],
+    ExistingChecksums = [ make_id(<<"v7-1">>), make_id(<<"v7-2">>), SharedChecksum ],
+    UpdatedChecksums = [ make_id(<<"v7-3">>), make_id(<<"v7-2">>) ],
 
     UpdatedVersion = ExistingVersion#chef_cookbook_version{ meta_long_desc = <<"Updated Description">>, checksums = UpdatedChecksums },
 
@@ -1708,8 +1708,8 @@ update_cookbook_version_checksums_with_shared_checksums() ->
     #chef_db_cb_version_update{
         added_checksums=AddedChecksums,
         deleted_checksums=DeletedChecksums} = chef_sql:update_cookbook_version(UpdatedVersion),
-    ?assertEqual(lists:sort(UpdatedChecksums) , lists:sort(AddedChecksums)),
-    ?assertEqual(lists:sort(ExistingChecksums), lists:sort(DeletedChecksums)),
+    ?assertEqual([make_id(<<"v7-3">>)] , AddedChecksums),
+    ?assertEqual([make_id(<<"v7-1">>)], DeletedChecksums),
 
     Updated = chef_sql:fetch_cookbook_version(UpdatedVersion#chef_cookbook_version.org_id,
                                                {UpdatedVersion#chef_cookbook_version.name,
