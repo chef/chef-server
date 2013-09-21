@@ -66,7 +66,7 @@ itest: test itest_create itest_run itest_clean
 
 itest_run:
 	cd itest;erlc -I ../include -pz ../deps/chef_objects/ebin *.erl
-	@erl -I include -pa deps/*/ebin -pa .eunit -pa itest -noshell -eval "eunit:test(itest, [verbose])" \
+	@erl -I include -pa deps/*/ebin -pa .eunit -pa itest -noshell -eval "eunit:test(itest)" \
 	-s erlang halt -db_type pgsql
 
 .PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest
