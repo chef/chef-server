@@ -29,15 +29,6 @@
 -include_lib("chef_objects/include/chef_types.hrl").
 
 
-make_node(Prefix) ->
-    Id = itest_util:make_id(Prefix),
-    AzId = itest_util:make_az_id(Prefix),
-    Name = <<"node_", Prefix/binary>>,
-    #chef_node{
-                id=Id, authz_id=AzId, org_id=itest_util:the_org_id(), name=Name,
-                environment="_default", last_updated_by="noone", serialized_object= <<"">>,
-                created_at= {datetime,{{2011,10,1},{16,47,46}}}, updated_at= {datetime,{{2011,10,1},{16,47,46}}} }.
-
 make_sandbox(Prefix) ->
     #chef_sandbox{id=itest_util:make_id(Prefix),
                   org_id=itest_util:the_org_id(),
@@ -46,9 +37,6 @@ make_sandbox(Prefix) ->
                              {<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>, false},
                              {<<"cccccccccccccccccccccccccccccccc">>, false},
                              {<<"dddddddddddddddddddddddddddddddd">>, false}]}.
-
-node_list() ->
-    [ make_node(<<"01">>) ].
 
 cookbook_name_from_prefix(Prefix) ->
     <<"cookbook_", Prefix/binary>>.
@@ -230,7 +218,7 @@ basic_test_() ->
      [
       {<<"Node Operations">>,
        [
-        {<<"Insert operations">>, fun insert_node_data/0}
+        {<<"Insert operations">>, fun chef_sql_nodes:insert_node_data/0}
        ]
       },
       {<<"User Operations">>,
@@ -1006,16 +994,6 @@ basic_test_() ->
       } %% Environment-filtered Cookbook Versions Tests for a Single Cookbook
 
      ]}.
-
-%%%======================================================================
-%%% NODES
-%%%======================================================================
-
-insert_node_data() ->
-    Nodes = node_list(),
-    Expected = lists:duplicate(length(Nodes), {ok, 1}),
-    Results = [chef_sql:create_node(Node) || Node <- Nodes ],
-    ?assertEqual(Expected, Results).
 
 %%%======================================================================
 %%% SANDBOXES AND CHECKSUMS
