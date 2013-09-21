@@ -1,4 +1,4 @@
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -242,20 +242,26 @@ cookbook_version_list(Cookbook) ->
     [ make_cookbook_version(<<"01">>, 1, Cookbook),
       make_cookbook_version(<<"02">>, 2, Cookbook) ].
 
-get_db_type() ->
-    {ok, [[Type]]} = init:get_argument(db_type),
-    list_to_atom(Type).
-
 read_db_config() ->
-    Type = get_db_type(),
-    Path = filename:join([filename:dirname(code:which(?MODULE)), atom_to_list(Type) ++ ".config"]),
+    Path = filename:join([filename:dirname(code:which(?MODULE)), "pgsql.config"]),
     {ok, Config} = file:consult(Path),
     Config.
 
+app_list() ->
+    [crypto, public_key, ssl, epgsql, pooler].
+
+ensure_started(App) ->
+    case application:start(App) of
+        ok ->
+            ok;
+        {error, {already_started, App}} ->
+            ok;
+        Error ->
+            Error
+    end.
+
 setup_env() ->
-    Type = get_db_type(),
     Info = read_db_config(),
-    ok = application:set_env(sqerl, db_type, Type),
     ok = application:set_env(sqerl, db_host, ?GET_ARG(host, Info)),
     ok = application:set_env(sqerl, db_port, ?GET_ARG(port, Info)),
     ok = application:set_env(sqerl, db_user, "itest"),
@@ -265,56 +271,39 @@ setup_env() ->
     %% we could also call it like this:
     %% {prepared_statements, statements(Type)},
     %% {prepared_statements, "itest/statements_pgsql.conf"},
-    ok = application:set_env(sqerl, prepared_statements, {?MODULE, statements, [Type]}),
+    ok = application:set_env(sqerl, prepared_statements, {?MODULE, statements, [pgsql]}),
 
     %% In production we use 5, but I'm using 2 here for the time being
     %% to exercise the joining together of multiple database calls.  See the TODO
     %% in the "Environment-filtered Recipes Tests" section for more.
     ok = application:set_env(chef_db, bulk_fetch_batch_size, 2),
 
-    ColumnTransforms = case Type of
-                           pgsql ->
-                               [{<<"created_at">>,
-                                 fun sqerl_transformers:convert_YMDHMS_tuple_to_datetime/1},
-                                {<<"updated_at">>,
-                                 fun sqerl_transformers:convert_YMDHMS_tuple_to_datetime/1}];
-                           mysql ->
-                               [{<<"frozen">>,
-                                 fun sqerl_transformers:convert_integer_to_boolean/1},
-                                {<<"validator">>,
-                                 fun sqerl_transformers:convert_integer_to_boolean/1},
-                                {<<"admin">>,
-                                 fun sqerl_transformers:convert_integer_to_boolean/1},
-                                {<<"recovery_authentication_enabled">>,
-                                 fun sqerl_transformers:convert_integer_to_boolean/1}]
-                       end,
+    ColumnTransforms = [{<<"created_at">>,
+                         fun sqerl_transformers:convert_YMDHMS_tuple_to_datetime/1},
+                        {<<"updated_at">>,
+                         fun sqerl_transformers:convert_YMDHMS_tuple_to_datetime/1}],
     ok = application:set_env(sqerl, column_transforms, ColumnTransforms),
 
-    PoolConfig = [{name, "sqerl"},
+    PoolConfig = [{name, sqerl},
                   {max_count, 3},
                   {init_count, 1},
                   {start_mfa, {sqerl_client, start_link, []}}],
     ok = application:set_env(pooler, pools, [PoolConfig]),
-    application:start(crypto),
-    application:start(emysql),
-    application:start(public_key),
-    application:start(ssl),
-    application:start(epgsql),
-
+    [ ensure_started(App) || App <- app_list() ],
     %% Temporarily disable logging for sqerl startup
     %% TODO: refactor so we only setup and destroy once
-    error_logger:tty(false),
-    application:start(sqerl),
-    error_logger:tty(true).
+    %% error_logger:tty(false),
+    ok = application:start(sqerl),
+    ok.
+    %% error_logger:tty(true).
 
 %% @doc Shutdown all the infrastructure that was started up by
 %% setup_env/0.  Use as a final cleanup function for test suites.
 destroy_env() ->
-    %% TODO: pull this list of apps out, and perhaps use it in setup_env/0 as well.
-    Apps = [sqerl, epgsql, ssl, public_key, emysql, crypto],
     %% Suppress output of logging for shutdowns... it muddies up the output
     error_logger:tty(false),
-    [ application:stop(App) || App <- Apps ],
+    application:stop(sqerl),
+    [ application:stop(App) || App <- lists:reverse(app_list()) ],
     error_logger:tty(true).
 
 %% @doc Until Sqerl gets the ability to fire off generated SQL, use
@@ -329,11 +318,6 @@ cleanup_statements() ->
       <<"DELETE FROM cookbook_version_checksums">>},
      {delete_cookbooks,
       <<"DELETE FROM cookbooks">>}].
-
-statements(mysql) ->
-    {ok, Statements} = file:consult("priv/mysql_statements.config"),
-    {ok, HelperStatements} = file:consult("itest/helper_mysql_statements.config"),
-    Statements ++ HelperStatements ++ cleanup_statements();
 
 statements(pgsql) ->
     {ok, Statements} = file:consult("priv/pgsql_statements.config"),

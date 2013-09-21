@@ -15,7 +15,7 @@ DEPS_PLT = chef_db.plt
 
 ## Set the environment variable $DB_TYPE to either mysql or pgsql
 ## to run the correct integration tests.
--include itest/$(DB_TYPE)_conf.mk
+-include itest/pgsql_conf.mk
 
 all: compile eunit dialyzer
 
@@ -54,12 +54,12 @@ tags:
 
 itest_create:
 	@echo Creating integration test database
-	@cd itest;./create_schema.rb ${DB_TYPE} create
+	@cd itest;./create_schema.rb pgsql create
 
 itest_clean:
 	@rm -f itest/*.beam
 	@echo Dropping integration test database
-	@cd itest;./create_schema.rb ${DB_TYPE} destroy
+	@cd itest;./create_schema.rb pgsql destroy
 	@rm -rf itest/Gemfile.lock
 
 itest: test itest_create itest_run itest_clean
@@ -67,6 +67,6 @@ itest: test itest_create itest_run itest_clean
 itest_run:
 	cd itest;erlc -I ../include -pz ../deps/chef_objects/ebin *.erl
 	@erl -I include -pa deps/*/ebin -pa .eunit -pa itest -noshell -eval "eunit:test(itest, [verbose])" \
-	-s erlang halt -db_type $(DB_TYPE)
+	-s erlang halt -db_type pgsql
 
 .PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest
