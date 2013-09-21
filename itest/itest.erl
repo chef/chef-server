@@ -29,14 +29,6 @@
 -include_lib("chef_objects/include/chef_types.hrl").
 
 
-make_sandbox(Prefix) ->
-    #chef_sandbox{id=itest_util:make_id(Prefix),
-                  org_id=itest_util:the_org_id(),
-                  created_at = {datetime,{{2011,10,1},{16,47,46}}},
-                  checksums=[{<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>, false},
-                             {<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>, false},
-                             {<<"cccccccccccccccccccccccccccccccc">>, false},
-                             {<<"dddddddddddddddddddddddddddddddd">>, false}]}.
 
 cookbook_name_from_prefix(Prefix) ->
     <<"cookbook_", Prefix/binary>>.
@@ -259,12 +251,12 @@ basic_test_() ->
        ]},
       {<<"Sandbox Operations">>,
        [
-        {<<"Insert operations">>, fun insert_sandbox/0},
-        {<<"Mark most checksums as uploaded">>, fun mark_some_checksums_as_uploaded/0},
-        {<<"Check which checksums are not uploaded">>, fun check_non_uploaded_checksums/0},
-        {<<"Upload and verify last checksum">>, fun upload_last_checksum/0},
-        {<<"Fetch sandbox">>, fun fetch_sandbox/0},
-        {<<"Delete sandbox">>, fun delete_sandbox/0}
+        {<<"Insert operations">>, fun chef_sql_sandboxes:insert_sandbox/0},
+        {<<"Mark most checksums as uploaded">>, fun chef_sql_sandboxes:mark_some_checksums_as_uploaded/0},
+        {<<"Check which checksums are not uploaded">>, fun chef_sql_sandboxes:check_non_uploaded_checksums/0},
+        {<<"Upload and verify last checksum">>, fun chef_sql_sandboxes:upload_last_checksum/0},
+        {<<"Fetch sandbox">>, fun chef_sql_sandboxes:fetch_sandbox/0},
+        {<<"Delete sandbox">>, fun chef_sql_sandboxes:delete_sandbox/0}
 
        ]},
       {<<"Cookbook Operations">>,
@@ -995,45 +987,6 @@ basic_test_() ->
 
      ]}.
 
-%%%======================================================================
-%%% SANDBOXES AND CHECKSUMS
-%%%======================================================================
-
-insert_sandbox() ->
-    ?assertEqual({ok, 1},
-                 chef_sql:create_sandbox(make_sandbox(<<"abcd">>))).
-
-mark_some_checksums_as_uploaded() ->
-    #chef_sandbox{checksums=ChecksumSpec} = make_sandbox(<<"abcd">>),
-    %% Hold one aside for checking non-uploaded checksums
-    Checksums = [C || {C, false} <- ChecksumSpec, C /= <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>],
-    ?assertEqual(ok,
-                 chef_sql:mark_checksums_as_uploaded(itest_util:the_org_id(), Checksums)).
-
-check_non_uploaded_checksums() ->
-    ?assertEqual([<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>],
-                 chef_sql:non_uploaded_checksums(itest_util:make_id(<<"abcd">>), itest_util:the_org_id())).
-
-upload_last_checksum() ->
-    ?assertEqual(ok,
-                 chef_sql:mark_checksums_as_uploaded(itest_util:the_org_id(), [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>])),
-    ?assertEqual([],
-                 chef_sql:non_uploaded_checksums(itest_util:make_id(<<"abcd">>), itest_util:the_org_id())).
-
-fetch_sandbox() ->
-    {ok, ActualValue} = chef_sql:fetch_sandbox(itest_util:the_org_id(), itest_util:make_id(<<"abcd">>)),
-    ?assertEqual(#chef_sandbox{id=itest_util:make_id(<<"abcd">>),
-                               org_id=itest_util:the_org_id(),
-                               created_at={datetime,{{2011,10,1},{16,47,46}}},
-                               checksums=[{<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>, true},
-                                          {<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>, true},
-                                          {<<"cccccccccccccccccccccccccccccccc">>, true},
-                                          {<<"dddddddddddddddddddddddddddddddd">>, true}]},
-                 ActualValue).
-%% delete the sandbox
-delete_sandbox() ->
-    ?assertEqual({ok, 1},
-                 chef_sql:delete_sandbox(itest_util:make_id(<<"abcd">>))).
 
 %%%======================================================================
 %%% COOKBOOKS
