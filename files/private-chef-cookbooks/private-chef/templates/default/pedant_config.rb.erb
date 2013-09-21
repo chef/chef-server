@@ -125,6 +125,12 @@ requestors({
              }
            })
 
+# To facilitate testing, we have added a org creation validation tests.
+# These tests run before the main Pedant tests, so their output has been
+# suppressed. To make it easier to debug org creation, you can turn this
+# on and get the full output
+debug_org_creation <%= node['private_chef']['oc-chef-pedant']['debug_org_creation'] %>
+
 # To facilitate testing as we transition from Ruby to Erlang endpoint
 # implementations, you can specify in your configuration which
 # implementation for each endpoint is currently active on the system

@@ -196,6 +196,7 @@ default['private_chef']['oc-chef-pedant']['log_directory'] = "/var/log/opscode/o
 default['private_chef']['oc-chef-pedant']['log_http_requests'] = true
 default['private_chef']['oc-chef-pedant']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['oc-chef-pedant']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['oc-chef-pedant']['debug_org_creation'] = false
 
 ###
 # Load Balancer
