@@ -29,17 +29,6 @@
 -include_lib("chef_objects/include/chef_types.hrl").
 
 
-make_data_bag(Prefix) ->
-    Id = itest_util:make_id(Prefix),
-    AzId = itest_util:make_az_id(Prefix),
-    OrgId = itest_util:the_org_id(),
-    Name = <<"data_bag_", Prefix/binary>>,
-    #chef_data_bag{id = Id, authz_id = AzId, org_id = OrgId,
-                   name = Name,
-                   last_updated_by = itest_util:actor_id(),
-                   created_at = {datetime, {{2011,10,1},{16,47,46}}},
-                   updated_at = {datetime, {{2011,10,1},{16,47,46}}} }.
-
 make_node(Prefix) ->
     Id = itest_util:make_id(Prefix),
     AzId = itest_util:make_az_id(Prefix),
@@ -60,29 +49,6 @@ make_sandbox(Prefix) ->
 
 node_list() ->
     [ make_node(<<"01">>) ].
-
-data_bags() ->
-    [make_data_bag(<<"01">>),
-     make_data_bag(<<"02">>),
-     make_data_bag(<<"03">>),
-     (make_data_bag(<<"04">>))#chef_data_bag{org_id = itest_util:other_org_id()}].
-
-make_data_bag_item(Prefix, BagName) ->
-    Id = itest_util:make_id(Prefix),
-    Name = <<"item_", Prefix/binary>>,
-    #chef_data_bag_item{id= Id, org_id= itest_util:the_org_id(), item_name= Name, data_bag_name= BagName,
-                        last_updated_by= itest_util:actor_id(),
-                        created_at= {datetime, {{2011,10,1},{16,47,46}}},
-                        updated_at= {datetime, {{2011,10,1},{16,47,46}}},
-                        serialized_object= Prefix }.
-
-data_bag_items() ->
-    [
-     %% NOTE: we delete data_bag_01 as part of the delete test, so put the items into other bags
-     make_data_bag_item(<<"101">>, <<"data_bag_02">>),
-     make_data_bag_item(<<"102">>, <<"data_bag_02">>),
-     make_data_bag_item(<<"103">>, <<"data_bag_02">>)
-    ].
 
 cookbook_name_from_prefix(Prefix) ->
     <<"cookbook_", Prefix/binary>>.
@@ -289,19 +255,19 @@ basic_test_() ->
        ]
       },
       {<<"Data Bag Operations">>,
-       [ {<<"Insert operations">>, fun insert_data_bag_data/0},
-         {<<"Fetch multiple">>, fun fetch_data_bags/0},
-         {<<"Fetch single">>, fun fetch_data_bag/0},
-         {<<"Delete">>, fun delete_data_bag/0} ] }
+       [ {<<"Insert operations">>, fun chef_sql_data_bag:insert_data_bag_data/0},
+         {<<"Fetch multiple">>, fun chef_sql_data_bag:fetch_data_bags/0},
+         {<<"Fetch single">>, fun chef_sql_data_bag:fetch_data_bag/0},
+         {<<"Delete">>, fun chef_sql_data_bag:delete_data_bag/0} ] }
       ,
       {<<"Data Bag Item Operations">>,
-       [ {<<"Insert operations">>, fun insert_data_bag_item_data/0},
-         {<<"Fetch multiple">>, fun fetch_data_bag_items/0},
-         {<<"Fetch single">>, fun fetch_data_bag_item/0},
-         {<<"Id get">>, fun fetch_data_bag_item_ids/0},
-         {<<"Bulk Get">>, fun bulk_get_data_bag_items/0},
-         {<<"Update">>, fun update_data_bag_item/0},
-         {<<"Delete">>, fun delete_data_bag_item/0}
+       [ {<<"Insert operations">>, fun chef_sql_data_bag_item:insert_data_bag_item_data/0},
+         {<<"Fetch multiple">>, fun chef_sql_data_bag_item:fetch_data_bag_items/0},
+         {<<"Fetch single">>, fun chef_sql_data_bag_item:fetch_data_bag_item/0},
+         {<<"Id get">>, fun chef_sql_data_bag_item:fetch_data_bag_item_ids/0},
+         {<<"Bulk Get">>, fun chef_sql_data_bag_item:bulk_get_data_bag_items/0},
+         {<<"Update">>, fun chef_sql_data_bag_item:update_data_bag_item/0},
+         {<<"Delete">>, fun chef_sql_data_bag_item:delete_data_bag_item/0}
        ]},
       {<<"Sandbox Operations">>,
        [
@@ -1050,101 +1016,6 @@ insert_node_data() ->
     Expected = lists:duplicate(length(Nodes), {ok, 1}),
     Results = [chef_sql:create_node(Node) || Node <- Nodes ],
     ?assertEqual(Expected, Results).
-
-
-%%%======================================================================
-%%% DATA BAGS
-%%%======================================================================
-
-insert_data_bag_data() ->
-    Expected = lists:duplicate(length(data_bags()), {ok, 1}),
-    Results = [chef_sql:create_data_bag(Bag) || Bag <- data_bags() ],
-    ?assertEqual(Expected, Results).
-
-fetch_data_bags() ->
-    DBS = data_bags(),
-    Expected = [ Db#chef_data_bag.name || Db <- DBS, Db#chef_data_bag.org_id =:= itest_util:the_org_id() ],
-    {ok, Results} = chef_sql:fetch_data_bags(itest_util:the_org_id()),
-    ?assertEqual(Expected, Results).
-
-fetch_data_bag() ->
-    Db = hd(data_bags()),
-    {ok, Got} = chef_sql:fetch_data_bag(Db#chef_data_bag.org_id, Db#chef_data_bag.name),
-    ?assertEqual(Db, Got).
-
-%% bulk_get_data_bags() ->
-%%     Ids = lists:sort([ list_to_binary(Db#chef_data_bag.id) ||
-%%                          Db <- data_bags(),
-%%                          Db#chef_data_bag.org_id =:= itest_util:the_org_id() ]),
-%%     Expected = lists:sort([ list_to_binary(Db#chef_data_bag.name) ||
-%%                               Db <- data_bags(),
-%%                               Db#chef_data_bag.org_id =:= itest_util:the_org_id() ]),
-%%     {ok, Results} = chef_sql:bulk_get_data_bags(Ids),
-%%    ?assertEqual(Expected, lists:sort(Results)).
-
-delete_data_bag() ->
-    First = hd(data_bags()),
-    ?assertEqual({ok, 1}, chef_sql:delete_data_bag(First#chef_data_bag.id)),
-    %% verify data is gone
-    ?assertEqual({ok, not_found}, chef_sql:fetch_data_bag(First#chef_data_bag.org_id,
-                                                          First#chef_data_bag.name)),
-    %% deleting a non existing data bag is OK
-    ?assertEqual({ok, not_found}, chef_sql:delete_data_bag(First#chef_data_bag.id)).
-
-%%%======================================================================
-%%% DATA BAGS
-%%%======================================================================
-
-insert_data_bag_item_data() ->
-    Expected = lists:duplicate(length(data_bag_items()), {ok, 1}),
-    Results = [chef_sql:create_data_bag_item(Bag) || Bag <- data_bag_items() ],
-    ?assertEqual(Expected, Results).
-
-fetch_data_bag_items() ->
-    DBS = data_bag_items(),
-    Expected = [ Db#chef_data_bag_item.item_name || Db <- DBS, Db#chef_data_bag_item.org_id =:= itest_util:the_org_id(),
-                                                    Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">> ],
-    {ok, Results} = chef_sql:fetch_data_bag_items(itest_util:the_org_id(), <<"data_bag_02">>),
-    ?assertEqual(Expected, Results).
-
-fetch_data_bag_item()->
-    Item = hd(data_bag_items()),
-
-    {ok, Got} = chef_sql:fetch_data_bag_item(Item#chef_data_bag_item.org_id,
-                                             Item#chef_data_bag_item.data_bag_name,
-                                             Item#chef_data_bag_item.item_name),
-    ?assertEqual(Item, Got).
-
-fetch_data_bag_item_ids() ->
-    Expected = [ Db#chef_data_bag_item.id ||
-                   Db <- data_bag_items(),
-                   Db#chef_data_bag_item.org_id =:= itest_util:the_org_id(),
-                   Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">>],
-    {ok, Results} = chef_sql:fetch_data_bag_item_ids(itest_util:the_org_id(), <<"data_bag_02">>),
-    ?assertEqual(Expected,Results).
-
-bulk_get_data_bag_items()-> ok.
-
-update_data_bag_item()->
-    [Old | _T] = [ Db ||
-                     Db <- data_bag_items(),
-                     Db#chef_data_bag_item.org_id =:= itest_util:the_org_id(),
-                     Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">>],
-    NewData = <<"new object">>,
-    New = Old#chef_data_bag_item{serialized_object= NewData},
-    {ok, UResults} = chef_sql:update_data_bag_item(New),
-    ?assertEqual(1, UResults),
-    {ok, FResults} = chef_sql:fetch_data_bag_item(itest_util:the_org_id(), New#chef_data_bag_item.data_bag_name, New#chef_data_bag_item.item_name),
-    ?assertEqual(NewData,
-                 (FResults#chef_data_bag_item.serialized_object)).
-
-
-delete_data_bag_item()->
-    Item = hd(data_bag_items()),
-    {ok, DResults} = chef_sql:delete_data_bag_item(Item#chef_data_bag_item.id),
-    ?assertEqual(1, DResults),
-    {ok, FResults} = chef_sql:fetch_data_bag_item(Item#chef_data_bag_item.org_id, Item#chef_data_bag_item.data_bag_name, Item#chef_data_bag_item.item_name),
-    ?assertEqual(not_found, FResults).
 
 %%%======================================================================
 %%% SANDBOXES AND CHECKSUMS
