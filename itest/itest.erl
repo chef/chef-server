@@ -87,28 +87,6 @@ data_bag_items() ->
 cookbook_name_from_prefix(Prefix) ->
     <<"cookbook_", Prefix/binary>>.
 
-make_client(Prefix) ->
-    AzId = itest_util:make_az_id(Prefix),
-    #chef_client{
-	    id = AzId,
-	    org_id = itest_util:the_org_id(),
-	    name = AzId,
-	    authz_id = AzId,
-            admin = true,
-	    validator = false,
-	    public_key =
-	    <<"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwxOFcrbsV7bEbqzOvW5u"
-	      "W5lyB23qsenlUdIGyRttqzGEaki01s7X+PpYy4BLfmVVmA6A6FCbL38CzzTUFX1a"
-	      "p6LYQR2Pb1tYjBjZZMUiVnjEgl12Zd1JF8dsPMj2BgPggx5GaGLvCOsajZ0YCDgW"
-	      "WkoO/HAEbztFIx2jdSCyD0ZH0ep4fSGDjmkN+5XurS0dBH8J5qPeJjriA/s/RzUb"
-	      "ULjr3gvfg49onHxr/kTKbhc78GBOfKSH1ftECCoWnidadW7/lfKbAZ3xiSjLsIxS"
-	      "KxavHMeCuSgyReDZpsFOn2Saie26jvLxWrGyn870yIh36wMvCvWKwUQPnluSnstJ"
-	      "xwIDAQAB">>,
-	    pubkey_version = 1,
-	    last_updated_by = itest_util:actor_id(),
-	    created_at = {datetime, {{2011,10,1},{16,47,46}}},
-	    updated_at = {datetime, {{2011,10,1},{16,47,46}}}
-    }.
 
 make_cookbook(Prefix) ->
     AzId = itest_util:make_az_id(Prefix),
@@ -304,10 +282,10 @@ basic_test_() ->
       },
       {<<"Client Operations">>,
        [
-        {<<"Insert operations">>, fun insert_client_data/0},
-        {<<"Fetch operations">>,  fun fetch_client_data/0},
-        {<<"Bulk Fetch operations">>,  fun bulk_fetch_client_data/0},
-        {<<"Delete operations">>, fun delete_client_data/0}
+        {<<"Insert operations">>, fun chef_sql_clients:insert_client_data/0},
+        {<<"Fetch operations">>,  fun chef_sql_clients:fetch_client_data/0},
+        {<<"Bulk Fetch operations">>,  fun chef_sql_clients:bulk_fetch_client_data/0},
+        {<<"Delete operations">>, fun chef_sql_clients:delete_client_data/0}
        ]
       },
       {<<"Data Bag Operations">>,
@@ -1073,48 +1051,6 @@ insert_node_data() ->
     Results = [chef_sql:create_node(Node) || Node <- Nodes ],
     ?assertEqual(Expected, Results).
 
-
-%%%======================================================================
-%%% CLIENTS
-%%%======================================================================
-
-insert_client_data() ->
-    Clients = [ make_client(<<"client01">>), make_client(<<"client02">>) ],
-    Expected = lists:duplicate(length(Clients), {ok, 1}),
-    Results = [chef_sql:create_client(Client) || Client <- Clients ],
-    ?assertEqual(Expected, Results).
-
-fetch_client_data() ->
-    Expected = make_client(<<"client03">>),
-
-    % Assume an existing client
-    ?assertEqual({ok, 1}, chef_sql:create_client(Expected)),
-
-    {ok, Got} = chef_sql:fetch_client(Expected#chef_client.org_id, Expected#chef_client.name),
-    ?assertEqual(Expected, Got).
-
-bulk_fetch_client_data() ->
-  Clients =  [ make_client(<<"client_bulk", Num/binary>>) || Num <- [ <<"0">>, <<"1">>, <<"2">> ] ],
-  [ ?assertEqual({ok, 1}, chef_sql:create_client(C)) || C <- Clients ],
-  Ids = [ C#chef_client.id || C <- Clients ],
-  Expected = Clients,
-
-  {ok, Got} = chef_sql:bulk_get_clients(Ids),
-  ?assertEqual(length(Got), 3),
-  ?assertEqual(Expected, Got).
-
-delete_client_data() ->
-    Existing = make_client(<<"client04">>),
-
-    % Assume an existing client
-    ?assertEqual({ok, 1}, chef_sql:create_client(Existing)),
-    {ok, BeforeDelete} = chef_sql:fetch_client(Existing#chef_client.org_id, Existing#chef_client.name),
-    ?assertEqual(Existing, BeforeDelete),
-
-    ?assertEqual({ok, 1}, chef_sql:delete_client(Existing#chef_client.id)),
-    % Is {ok, not_found} correct?
-    % This is what chef_sql:fetch_object returns
-    ?assertEqual({ok, not_found}, chef_sql:fetch_client(Existing#chef_client.org_id, Existing#chef_client.name)).
 
 %%%======================================================================
 %%% DATA BAGS
