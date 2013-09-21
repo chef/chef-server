@@ -307,7 +307,7 @@ create_from_json(#wm_reqdata{} = Req,
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
     %% the world.
     ok = chef_object_db:add_to_solr(TypeName, Id, OrgId,
-                                 chef_object_base:ejson_for_indexing(ObjectRec, ObjectEjson)),
+                                 chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
     case chef_db:create(ObjectRec, DbContext, ActorId) of
         {conflict, _} ->
             %% ignore return value of solr delete, this is best effort.
@@ -346,7 +346,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                                                   organization_guid = OrgId,
                                                   requestor_id = ActorId}=State,
                  OrigObjectRec, ObjectEjson) ->
-    ObjectRec = chef_object_base:update_from_ejson(OrigObjectRec, ObjectEjson),
+    ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectEjson),
 
     %% Send object to solr for indexing *first*. If the update fails, we will have sent
     %% incorrect data, but that should get corrected when the client retries. This is a
@@ -354,7 +354,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
     ok = chef_object_db:add_to_solr(chef_object:type_name(ObjectRec),
                                     chef_object:id(ObjectRec),
                                     OrgId,
-                                    chef_object_base:ejson_for_indexing(ObjectRec, ObjectEjson)),
+                                    chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
 
     %% Ignore updates that don't change anything. If the user PUTs identical data, we skip
     %% going to the database and skip updating updated_at. This allows us to avoid RDBMS

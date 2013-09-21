@@ -293,7 +293,7 @@ parse_item(node, Item) ->
     %% This is fairly hacky. :(
     NodeRecStub = #chef_node{name = ej:get({<<"name">>}, Node),
                              environment = ej:get({<<"chef_environment">>}, Node)},
-    chef_object_base:ejson_for_indexing(NodeRecStub, Node);
+    chef_object:ejson_for_indexing(NodeRecStub, Node);
 parse_item({data_bag, _}, Item) ->
     RawItem = parse_item0(Item),
     %% TODO: when data bags are no longer in couchdb, clean this

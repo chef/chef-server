@@ -175,18 +175,18 @@ name_key(_Type)         -> <<"name">>.
 %% @doc For a given EJSON object, generate the appropriate index data.
 -spec ejson_for_indexing(Index :: index(), EJson :: ej:json_object()) -> ej:json_object().
 ejson_for_indexing(role, EJson) ->
-    chef_object_base:ejson_for_indexing(#chef_role{}, EJson);
+    chef_object:ejson_for_indexing(#chef_role{}, EJson);
 ejson_for_indexing(client, EJson) ->
-    chef_object_base:ejson_for_indexing(#chef_client{}, EJson);
+    chef_object:ejson_for_indexing(#chef_client{}, EJson);
 ejson_for_indexing(environment, EJson) ->
-    chef_object_base:ejson_for_indexing(#chef_environment{}, EJson);
+    chef_object:ejson_for_indexing(#chef_environment{}, EJson);
 ejson_for_indexing(node, EJson) ->
     Name = ej:get({<<"name">>}, EJson),
     Environment = ej:get({<<"chef_environment">>}, EJson),
-    chef_object_base:ejson_for_indexing(#chef_node{name=Name, environment=Environment}, EJson);
+    chef_object:ejson_for_indexing(#chef_node{name=Name, environment=Environment}, EJson);
 ejson_for_indexing(DataBagName, EJson) when is_binary(DataBagName) ->
     ItemName = ej:get({<<"id">>}, EJson),
-    chef_object_base:ejson_for_indexing(#chef_data_bag_item{data_bag_name=DataBagName, item_name=ItemName}, EJson).
+    chef_object:ejson_for_indexing(#chef_data_bag_item{data_bag_name=DataBagName, item_name=ItemName}, EJson).
 
 % TODO: Create a chef_common module for this stuff
 safe_split(N, L) ->

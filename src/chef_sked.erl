@@ -99,7 +99,7 @@ create_from_json(RecType, ObjectEjson) ->
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
     %% the world.
     ok = chef_object_db:add_to_solr(TypeName, Id, ?OSC_ORG_ID,
-                                 chef_object_base:ejson_for_indexing(ObjectRec, ObjectEjson)),
+                                 chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
 
     case chef_db:create(ObjectRec, DbContext, ?CHEF_SKED_AUTHZ_ID) of
         {conflict, Msg} ->

@@ -153,7 +153,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
     #chef_data_bag_item{id = Id} = DataBagItem,
     ok = chef_index_queue:set(data_bag_item, Id,
                               chef_otto:dbname(OrgId),
-                              chef_object_base:ejson_for_indexing(DataBagItem, ItemData)),
+                              chef_object:ejson_for_indexing(DataBagItem, ItemData)),
 
     case chef_db:create_data_bag_item(DbContext, DataBagItem, ActorId) of
         {conflict, _} ->
