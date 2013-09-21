@@ -175,9 +175,11 @@ make_cookbook(Prefix) ->
 %% In the case of the former, the "real" version will be {0,0,Patch},
 %% in accordance with the pattern of our cookbook-related testing
 %% functions up to this point.
--spec version_tuple( non_neg_integer() | version() ) -> version().
+-spec version_tuple( non_neg_integer() | version() | #chef_cookbook_version{}) -> version().
 version_tuple(Patch) when is_integer(Patch) ->
     {0,0,Patch};
+version_tuple(#chef_cookbook_version{major = Maj, minor = Min, patch = Patch}) ->
+    {Maj, Min, Patch};
 version_tuple(Version) when is_tuple(Version) ->
     Version.
 
@@ -1464,9 +1466,7 @@ fetch_cookbook_version_not_exist() ->
 
     Got = chef_sql:fetch_cookbook_version(CookbookVersion#chef_cookbook_version.org_id,
                                           {CookbookVersion#chef_cookbook_version.name,
-                                           {CookbookVersion#chef_cookbook_version.major,
-                                            CookbookVersion#chef_cookbook_version.minor,
-                                            CookbookVersion#chef_cookbook_version.patch}}),
+                                           version_tuple(CookbookVersion)}),
     ?assertEqual(not_found, Got).
 
 fetch_cookbook_version_no_checksums() ->
@@ -1475,9 +1475,7 @@ fetch_cookbook_version_no_checksums() ->
     ?assertEqual({ok, 1}, chef_sql:create_cookbook_version(CookbookVersion)),
     Got = chef_sql:fetch_cookbook_version(CookbookVersion#chef_cookbook_version.org_id,
                                           {CookbookVersion#chef_cookbook_version.name,
-                                           {CookbookVersion#chef_cookbook_version.major,
-                                            CookbookVersion#chef_cookbook_version.minor,
-                                            CookbookVersion#chef_cookbook_version.patch}}),
+                                           version_tuple(CookbookVersion)}),
     ?assertEqual(CookbookVersion, Got).
 
 fetch_cookbook_version_checksums() ->
@@ -1492,9 +1490,7 @@ fetch_cookbook_version_checksums() ->
     ?assertEqual({ok, 1}, chef_sql:create_cookbook_version(CookbookVersion)),
     Got = chef_sql:fetch_cookbook_version(CookbookVersion#chef_cookbook_version.org_id,
                                           {CookbookVersion#chef_cookbook_version.name,
-                                           {CookbookVersion#chef_cookbook_version.major,
-                                            CookbookVersion#chef_cookbook_version.minor,
-                                            CookbookVersion#chef_cookbook_version.patch}}),
+                                           version_tuple(CookbookVersion)}),
     % We don't know the order the checksums will come back as
     NormalizedGotChecksums = lists:sort(Got#chef_cookbook_version.checksums),
     NormalizedGot = Got#chef_cookbook_version{checksums = NormalizedGotChecksums},
@@ -1510,9 +1506,7 @@ fetch_cookbook_version_different_version() ->
     Expected = {cookbook_exists, CookbookVersion0#chef_cookbook_version.authz_id},
     Got = chef_sql:fetch_cookbook_version(CookbookVersion#chef_cookbook_version.org_id,
                                           {CookbookVersion#chef_cookbook_version.name,
-                                           {CookbookVersion#chef_cookbook_version.major,
-                                            CookbookVersion#chef_cookbook_version.minor,
-                                            CookbookVersion#chef_cookbook_version.patch}}),
+                                           version_tuple(CookbookVersion)}),
     ?assertEqual(Expected, Got).
 
 fetch_cookbook_versions() ->
@@ -1618,9 +1612,7 @@ update_cookbook_version_checksums(#chef_cookbook_version{} = ExistingVersion, Ex
     % A cookbook version should already exist in the datastore
     Existing = chef_sql:fetch_cookbook_version(ExistingVersion#chef_cookbook_version.org_id,
                                                {ExistingVersion#chef_cookbook_version.name,
-                                                 {ExistingVersion#chef_cookbook_version.major,
-                                                   ExistingVersion#chef_cookbook_version.minor,
-                                                   ExistingVersion#chef_cookbook_version.patch}}),
+                                                version_tuple(ExistingVersion)}),
     ?assertEqual(ExistingVersion#chef_cookbook_version{checksums = []}, Existing#chef_cookbook_version{checksums = []}),
     ?assertEqual(NormalizedExistingChecksums, lists:sort(Existing#chef_cookbook_version.checksums)),
 
@@ -1639,9 +1631,7 @@ update_cookbook_version_checksums(#chef_cookbook_version{} = ExistingVersion, Ex
 
     Updated = chef_sql:fetch_cookbook_version(UpdatedVersion#chef_cookbook_version.org_id,
                                                {UpdatedVersion#chef_cookbook_version.name,
-                                                 {UpdatedVersion#chef_cookbook_version.major,
-                                                   UpdatedVersion#chef_cookbook_version.minor,
-                                                   UpdatedVersion#chef_cookbook_version.patch}}),
+                                                version_tuple(UpdatedVersion)}),
     ?assertEqual(UpdatedVersion#chef_cookbook_version{checksums = []}, Updated#chef_cookbook_version{checksums = []}),
     ?assertEqual(UpdatedVersion#chef_cookbook_version.meta_long_desc, Updated#chef_cookbook_version.meta_long_desc),
 
@@ -1667,9 +1657,7 @@ update_cookbook_version_checksums_with_missing_checksums() ->
     % A cookbook version should already exist in the datastore
     Existing = chef_sql:fetch_cookbook_version(ExistingVersion#chef_cookbook_version.org_id,
                                                {ExistingVersion#chef_cookbook_version.name,
-                                                 {ExistingVersion#chef_cookbook_version.major,
-                                                   ExistingVersion#chef_cookbook_version.minor,
-                                                   ExistingVersion#chef_cookbook_version.patch}}),
+                                                version_tuple(ExistingVersion)}),
     ?assertEqual(ExistingVersion#chef_cookbook_version{checksums = []}, Existing#chef_cookbook_version{checksums = []}),
     ?assertEqual(lists:sort(ExistingChecksums), lists:sort(Existing#chef_cookbook_version.checksums)),
 
@@ -1699,9 +1687,7 @@ update_cookbook_version_checksums_with_shared_checksums() ->
     % A cookbook version should already exist in the datastore
     Existing = chef_sql:fetch_cookbook_version(ExistingVersion#chef_cookbook_version.org_id,
                                                {ExistingVersion#chef_cookbook_version.name,
-                                                 {ExistingVersion#chef_cookbook_version.major,
-                                                   ExistingVersion#chef_cookbook_version.minor,
-                                                   ExistingVersion#chef_cookbook_version.patch}}),
+                                                version_tuple(ExistingVersion)}),
     ?assertEqual(lists:sort(ExistingChecksums), lists:sort(Existing#chef_cookbook_version.checksums)),
 
     % Update a version which causes the shared checksum to be deleted
@@ -1713,9 +1699,7 @@ update_cookbook_version_checksums_with_shared_checksums() ->
 
     Updated = chef_sql:fetch_cookbook_version(UpdatedVersion#chef_cookbook_version.org_id,
                                                {UpdatedVersion#chef_cookbook_version.name,
-                                                 {UpdatedVersion#chef_cookbook_version.major,
-                                                   UpdatedVersion#chef_cookbook_version.minor,
-                                                   UpdatedVersion#chef_cookbook_version.patch}}),
+                                                version_tuple(UpdatedVersion)}),
     % Prove that checksums have been updated
     ?assertEqual(UpdatedVersion#chef_cookbook_version{checksums = []}, Updated#chef_cookbook_version{checksums = []}),
     ?assertEqual(UpdatedVersion#chef_cookbook_version.meta_long_desc, Updated#chef_cookbook_version.meta_long_desc),
@@ -1724,9 +1708,7 @@ update_cookbook_version_checksums_with_shared_checksums() ->
     % Prove that the shared checksum have not been overwritten
     Older = chef_sql:fetch_cookbook_version(OlderVersion#chef_cookbook_version.org_id,
                                                {OlderVersion#chef_cookbook_version.name,
-                                                 {OlderVersion#chef_cookbook_version.major,
-                                                   OlderVersion#chef_cookbook_version.minor,
-                                                   OlderVersion#chef_cookbook_version.patch}}),
+                                                version_tuple(OlderVersion)}),
     ?assertEqual(lists:sort(OlderChecksums), lists:sort(Older#chef_cookbook_version.checksums)).
 
 
@@ -1738,9 +1720,7 @@ delete_cookbook_version_checksums() ->
     CookbookVersion = make_cookbook_version(<<"001fetch_checksums">>, 0, Cookbook),
     Got = chef_sql:fetch_cookbook_version(CookbookVersion#chef_cookbook_version.org_id,
                                           {CookbookVersion#chef_cookbook_version.name,
-                                           {CookbookVersion#chef_cookbook_version.major,
-                                            CookbookVersion#chef_cookbook_version.minor,
-                                            CookbookVersion#chef_cookbook_version.patch}}),
+                                           version_tuple(CookbookVersion)}),
 
     %% Verify all checksums exist
     [Checksum1, Checksum2] = Got#chef_cookbook_version.checksums,
@@ -1758,9 +1738,7 @@ delete_cookbook_version_checksums() ->
 
     ?assertEqual(not_found, chef_sql:fetch_cookbook_version(Got#chef_cookbook_version.org_id,
                                                             {Got#chef_cookbook_version.name,
-                                                             {Got#chef_cookbook_version.major,
-                                                              Got#chef_cookbook_version.minor,
-                                                              Got#chef_cookbook_version.patch}})),
+                                                             version_tuple(Got)})),
 
     %% Ensure the checksums don't exist in the checksum table
     ?assertEqual(false, checksum_exists(Got#chef_cookbook_version.org_id, Checksum1)),
