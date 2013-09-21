@@ -1634,8 +1634,8 @@ update_cookbook_version_checksums(#chef_cookbook_version{} = ExistingVersion, Ex
         added_checksums=AddedChecksums,
         deleted_checksums=DeletedChecksums} = chef_sql:update_cookbook_version(UpdatedVersion),
 
-    ?assertEqual(Additions, AddedChecksums),
-    ?assertEqual(Deletions, DeletedChecksums),
+    ?assertEqual(lists:sort(Additions), lists:sort(AddedChecksums)),
+    ?assertEqual(lists:sort(Deletions), lists:sort(DeletedChecksums)),
 
     Updated = chef_sql:fetch_cookbook_version(UpdatedVersion#chef_cookbook_version.org_id,
                                                {UpdatedVersion#chef_cookbook_version.name,
