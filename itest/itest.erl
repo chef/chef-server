@@ -49,27 +49,22 @@ ensure_started(App) ->
 
 setup_env() ->
     Info = read_db_config(),
-    ok = application:set_env(sqerl, db_host, ?GET_ARG(host, Info)),
-    ok = application:set_env(sqerl, db_port, ?GET_ARG(port, Info)),
-    ok = application:set_env(sqerl, db_user, "itest"),
-    ok = application:set_env(sqerl, db_pass, "itest"),
-    ok = application:set_env(sqerl, db_name, ?GET_ARG(db, Info)),
-    ok = application:set_env(sqerl, idle_check, 10000),
-    %% we could also call it like this:
-    %% {prepared_statements, statements(Type)},
-    %% {prepared_statements, "itest/statements_pgsql.conf"},
-    ok = application:set_env(sqerl, prepared_statements, {?MODULE, statements, [pgsql]}),
-
+    itest_util:set_env(sqerl,
+                       [{db_host, ?GET_ARG(host, Info)},
+                        {db_port, ?GET_ARG(port, Info)},
+                        {db_user, "itest"},
+                        {db_pass, "itest"},
+                        {db_name, ?GET_ARG(db, Info)},
+                        {idle_check, 10000},
+                        {prepared_statements, {?MODULE, statements, [pgsql]}},
+                        {column_transforms,
+                         [{<<"created_at">>, fun sqerl_transformers:convert_YMDHMS_tuple_to_datetime/1},
+                        {<<"updated_at">>, fun sqerl_transformers:convert_YMDHMS_tuple_to_datetime/1}]}
+                       ]),
     %% In production we use 5, but I'm using 2 here for the time being
     %% to exercise the joining together of multiple database calls.  See the TODO
     %% in the "Environment-filtered Recipes Tests" section for more.
     ok = application:set_env(chef_db, bulk_fetch_batch_size, 2),
-
-    ColumnTransforms = [{<<"created_at">>,
-                         fun sqerl_transformers:convert_YMDHMS_tuple_to_datetime/1},
-                        {<<"updated_at">>,
-                         fun sqerl_transformers:convert_YMDHMS_tuple_to_datetime/1}],
-    ok = application:set_env(sqerl, column_transforms, ColumnTransforms),
 
     PoolConfig = [{name, sqerl},
                   {max_count, 3},

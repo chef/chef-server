@@ -27,3 +27,6 @@ the_org_id() ->
 
 other_org_id() ->
     make_id(<<"bb2">>).
+
+set_env(App, Config) ->
+    [ok = application:set_env(App, Key, Value) || {Key, Value} <- Config ].
