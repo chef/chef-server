@@ -2,6 +2,10 @@
 
 -compile([export_all]).
 
+-include_lib("eunit/include/eunit.hrl").
+-include_lib("chef_db.hrl").
+-include_lib("chef_objects/include/chef_types.hrl").
+
 make_id(Prefix) when is_binary(Prefix) ->
     case size(Prefix) of
         Size when Size > 32 ->
