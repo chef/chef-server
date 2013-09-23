@@ -871,8 +871,15 @@ environment_exists(#context{}=Ctx, OrgId, EnvName) ->
 
 -spec create(chef_object() | #chef_user{} | #chef_sandbox{}, #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
 %% @doc Call the appropriate create function based on the given chef_object record
-create(ObjectRec, DbContext, ActorId) ->
-    create_object(DbContext, chef_object:create_query(ObjectRec), ObjectRec, ActorId).
+create(ObjectRec0, #context{reqid = ReqId} = DbContext, ActorId) ->
+    ObjectRec = chef_object:set_created(ObjectRec0, ActorId),
+    QueryName = chef_object:create_query(ObjectRec),
+    case stats_hero:ctime(ReqId, {chef_sql, create_object},
+                          fun() -> chef_sql:create_object(QueryName, ObjectRec) end) of
+        {ok, 1} -> ok;
+        {conflict, Msg}-> {conflict, Msg};
+        {error, Why} -> {error, Why}
+    end.
 
 -spec update(#context{}, chef_updatable_object() | #chef_user{}, object_id()) ->
              ok | not_found | {conflict, term()} | {error, term()}.
