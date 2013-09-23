@@ -70,12 +70,18 @@ describe "opscode-account endpoint", :clients => true do
   end
 
   context "Admin User Group" do
+    let(:default_pedant_admin_names) { default_pedant_admins.map(&:name)}
+    let(:default_pedant_admins) { [ platform.superuser ] + default_pedant_org_admins }
+
+    # Selects pedant users that are marked as associated and admins
+    let(:default_pedant_org_admins) { platform.users.select(&:associate).select(&:admin) }
+
     it "has the appropriate members" do
       get(api_url("/groups/admins"), platform.superuser).should look_like({
           :status => 200,
           :body_exact => {
-            "actors" => ["pivotal",platform.admin_user.name],
-            "users" => ["pivotal",platform.admin_user.name],
+            "actors" => default_pedant_admin_names,
+            "users" => default_pedant_admin_names,
             "clients" => [],
             "groups" => [],
             "orgname" => platform.test_org.name,

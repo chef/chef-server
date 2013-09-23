@@ -12,16 +12,16 @@ describe "users", :users do
     /^-----BEGIN (RSA PUBLIC|PUBLIC) KEY-----/
   end
 
+  # Pedant has configurable test users.
+  # Selects Pedant users that are marked as associated
+  let(:default_pedant_user_names) { platform.users.select(&:associate).map(&:name).sort }
+  let(:default_users_body)        { default_pedant_user_names.map { |user| {"user" => {"username" => user} } } }
+
   context "/organizations/<org>/users endpoint" do
     let(:request_url) { api_url("users") }
 
     context "GET /organizations/<org>/users" do
-      let(:users_body) do
-        [
-          {"user" => {"username" => platform.admin_user.name}},
-          {"user" => {"username" => platform.non_admin_user.name}}
-        ]
-      end
+      let(:users_body) { default_users_body }
 
       context "admin user" do
         it "can get org users", :smoke do
@@ -219,10 +219,7 @@ describe "users", :users do
             })
           get(api_url("users"), platform.admin_user).should look_like({
               :status => 200,
-              :body_exact => [
-                {"user" => {"username" => platform.admin_user.name}},
-                {"user" => {"username" => platform.non_admin_user.name}}
-              ]})
+              :body_exact => default_users_body })
         end
       end
 
@@ -268,11 +265,7 @@ describe "users", :users do
             })
           get(api_url("users"), platform.admin_user).should look_like({
               :status => 200,
-              :body_exact => [
-                {"user" => {"username" => platform.admin_user.name}},
-                {"user" => {"username" => platform.non_admin_user.name}},
-                {"user" => {"username" => username}}
-              ]})
+              :body_exact => default_users_body + [ {"user" => {"username" => username}} ]})
         end
       end
     end # context DELETE /organizations/<org>/users/<name>

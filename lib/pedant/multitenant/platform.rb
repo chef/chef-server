@@ -5,7 +5,7 @@ module Pedant
 
     GLOBAL_OBJECTS = ['users', 'organizations']
 
-    attr_reader :test_org
+    attr_reader :test_org, :test_org_owner, :validate_org
 
     def initialize(server, superuser_key_file, super_user_name='pivotal')
       super(server, superuser_key_file, super_user_name)
@@ -61,7 +61,7 @@ module Pedant
     end
 
     # TODO: expose the entire payload as an input parameter
-    def create_user(username)
+    def create_user(username, options = {})
       payload = {
         "username" => username,
         "email" => "#{username}@opscode.com",
@@ -82,7 +82,10 @@ module Pedant
 
       private_key = parse(r)["private_key"]
 
-      Pedant::User.new(username, private_key, platform: self, preexisting: false)
+      # The "admin" and "associate" options here are more of a metadata
+      # than actually creating an admin or associating. This allows
+      # Pedant tests to succeed even if the users config table has changed.
+      Pedant::User.new(username, private_key, platform: self, preexisting: false, admin: options[:admin], associate: options[:associate])
     end
 
     def delete_user(user)
@@ -112,9 +115,11 @@ module Pedant
       name = requestor_spec[:name]
       create_me = requestor_spec[:create_me]
       key_file = requestor_spec[:key_file]
+      associate = requestor_spec[:associate]
+      admin  = requestor_spec[:admin]
 
       if create_me
-        create_user(name).tap do |user|
+        create_user(name, admin: admin, associate: associate).tap do |user|
           user.populate_dot_chef! if requestor_spec[:create_knife]
         end
       else
@@ -286,10 +291,12 @@ module Pedant
       org = Pedant::Config[:org]
       name = org[:name]
       if org[:create_me]
+        @validate_org = true
         create_org(name)
       else
         key = org[:validator_key]
         Pedant::Organization.new(name, key)
+        puts "Using pre-created org. Skipping org creation validation tests."
       end
     end
 
@@ -300,5 +307,42 @@ module Pedant
         puts "Pedant did not create the org, so will it not delete it"
       end
     end
+
+    # When this is defined, pedant will run this before running anything else.
+    def before_configure_rspec
+      validate_created_org(test_org) if validate_org
+    end
+
+    def validate_created_org(org)
+      puts "Validating Org Creation"
+
+      @test_org_owner = create_user("#{org.name}_owner", associate: true, admin: true)
+      requestor_cache[:owner] = @test_org_owner
+      make_owner(self.test_org_owner, org)
+
+      ::RSpec.configure do |c|
+        c.treat_symbols_as_metadata_keys_with_true_values = true
+        c.include Pedant::RSpec::Common
+      end
+
+      args = if Pedant.config.debug_org_creation
+               Pedant.config.rspec_formatting_args
+             else
+               []
+             end
+      args.concat(Pedant::Gem.test_directories("org_creation"))
+
+      if ::RSpec::Core::Runner.run(args) > 0
+        delete_org_from_config
+        delete_user(test_org_owner)
+        puts "Error: unable to validate testing org"
+        exit 2
+      end
+
+      # We need to reset RSpec after using it. Below are the hacks necessary for reset
+      ::RSpec.reset
+      ::RSpec.configuration.extend RSpecShared::Methods
+    end
+
   end
 end
