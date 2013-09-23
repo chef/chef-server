@@ -65,8 +65,19 @@ itest_clean:
 itest: test itest_create itest_run itest_clean
 
 itest_run:
-	cd itest;erlc -I ../include -pz ../deps/chef_objects/ebin *.erl
-	@erl -I include -pa deps/*/ebin -pa .eunit -pa itest -noshell -eval "eunit:test(itest)" \
+	cd itest;erlc -pa ../ebin *.erl
+	@erl -I include -pa deps/*/ebin  ebin itest -noshell -eval "eunit:test(itest)" \
 	-s erlang halt -db_type pgsql
+
+itest_ct:
+        # recompile, setting TEST define so we can play with
+        # unexported functions.
+	@echo "Recompiling with -DTEST ..."
+	@rebar clean skip_deps=true
+	@rebar compile skip_deps=true -DTEST
+	@mkdir -p itest/ct_logs
+	@ct_run -spec itest/spec.spec -pa deps/*/ebin -pa ebin
+	@echo "Review results with: open itest/ct_logs/index.html"
+
 
 .PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest

@@ -25,7 +25,7 @@
 -define(GET_ARG(Name, Args), proplists:get_value(Name, Args)).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("chef_db.hrl").
+-include_lib("chef_db/include/chef_db.hrl").
 -include_lib("chef_objects/include/chef_types.hrl").
 
 
