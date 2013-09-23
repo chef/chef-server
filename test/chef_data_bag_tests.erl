@@ -84,3 +84,21 @@ new_record_test() ->
     ?assertEqual(DataBagData, chef_data_bag:name(DataBag)),
     ?assert(is_binary(chef_data_bag:id(DataBag))),
     ?assertEqual(data_bag, chef_data_bag:type_name(DataBag)).
+
+ejson_for_indexing_test() ->
+    %% data bags are not indexed. For compatility reasons, we still need to
+    %% define the ejson_for_indexing callback, but we want the result to be
+    %% empty
+    Bag = #chef_data_bag{name = <<"the_bag_name">>},
+    Expected = {[]},
+    Got = chef_object:ejson_for_indexing(Bag, <<"the_bag_name">>),
+    ?assertEqual(Expected, Got).
+
+id_test() ->
+    ?assertEqual(<<"1">>, chef_object:id(#chef_data_bag{id = <<"1">>})).
+
+name_test() ->
+    ?assertEqual(<<"a_name">>, chef_object:name(#chef_data_bag{name =  <<"a_name">>})).
+
+type_name_test() ->
+    ?assertEqual(data_bag, chef_object:type_name(#chef_data_bag{})).

@@ -91,7 +91,7 @@ authz_id(#chef_data_bag{authz_id = AuthzId}) ->
     AuthzId.
 
 ejson_for_indexing(#chef_data_bag{}, _Name) ->
-    error(not_indexed).
+    {[]}.
 
 -spec update_from_ejson(#chef_data_bag{}, ejson_term()) -> #chef_data_bag{}.
 update_from_ejson(#chef_data_bag{} = DataBag, DataBagData) ->

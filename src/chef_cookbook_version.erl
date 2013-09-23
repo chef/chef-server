@@ -593,4 +593,4 @@ update_from_ejson(#chef_cookbook_version{org_id = OrgId,
                                           serialized_object = UpdatedVersion#chef_cookbook_version.serialized_object}.
 
 ejson_for_indexing(#chef_cookbook_version{}, _CBV) ->
-    error(not_indexed).
+    {[]}.

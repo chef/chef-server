@@ -53,3 +53,43 @@ new_record_test() ->
     ?assertMatch(#chef_data_bag_item{}, Item),
     %% TODO: validate more fields?
     ?assertEqual({<<"my-bag">>,<<"my-item">>}, chef_data_bag_item:name(Item)).
+
+ejson_for_indexing_test() ->
+    RawItem = {[{<<"id">>, <<"the_item_name">>},
+                {<<"a_key">>, <<"a_value">>}]},
+    Item = #chef_data_bag_item{data_bag_name = <<"the_bag_name">>,
+                               item_name = <<"the_item_name">>},
+    Expected = {[{<<"id">>, <<"the_item_name">>},
+                 {<<"a_key">>, <<"a_value">>},
+                 {<<"chef_type">>, <<"data_bag_item">>},
+                 {<<"data_bag">>, <<"the_bag_name">>}]},
+    Got = chef_object:ejson_for_indexing(Item, RawItem),
+    ?assertEqual(Expected, Got).
+
+update_from_ejson_test_() ->
+    RawItem = {[{<<"id">>, <<"the_item_name">>},
+                {<<"a_key">>, <<"a_value">>}]},
+    Item = #chef_data_bag_item{data_bag_name = <<"the_bag_name">>,
+                               item_name = <<"old_item_name">>},
+    [{"chef_data_bag_item fields are set from json for all dbs",
+      [
+       {atom_to_list(DbType),
+        fun() ->
+                Item1 = chef_object:update_from_ejson(Item, RawItem),
+                GotData = Item1#chef_data_bag_item.serialized_object,
+                GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
+                ?assertEqual(<<"the_item_name">>, Item1#chef_data_bag_item.item_name),
+                ?assertEqual(RawItem, GotEjson)
+        end} || DbType <- [mysql, pgsql] ]}
+    ].
+
+id_test() ->
+    ?assertEqual(<<"1">>, chef_object:id(#chef_data_bag_item{id = <<"1">>})).
+
+name_test() ->
+    ?assertEqual({<<"bag name">>, <<"item name">>},
+                 chef_object:name(#chef_data_bag_item{data_bag_name = <<"bag name">>,
+                                                      item_name =  <<"item name">>})).
+
+type_name_test() ->
+    ?assertEqual(data_bag_item, chef_object:type_name(#chef_data_bag_item{})).

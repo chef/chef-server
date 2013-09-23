@@ -30,14 +30,10 @@
 -export([
          delete_null_public_key/1,
          depsolver_constraints/1,
-         ejson_for_indexing/2,
-         id/1,
          key_version/1,
          make_org_prefix_id/1,
          make_org_prefix_id/2,
          maybe_stub_authz_id/2,
-         name/1,
-         new_record/4,
          normalize_run_list/1,
          parse_constraint/1,
          set_created/2,
@@ -47,8 +43,6 @@
          strictly_valid/3,
          sql_date/1,
          throw_invalid_fun_match/1,
-         type_name/1,
-         update_from_ejson/2,
          valid_public_key/1,
          cert_or_key/1
         ]).
@@ -58,200 +52,10 @@
 -compile([export_all]).
 -endif.
 
-%% @doc Create a new Chef object record of type specified by `RecType'. This function will
-%% generate a unique id for the object using `make_org_prefix_id/2'. If `AuthzId' is the
-%% atom 'unset', then the object's generated id will be used as a placeholder authorization
-%% identifier.
--spec new_record(RecType :: chef_object_name() | chef_cookbook_version,
-                 OrgId :: object_id(),
-                 AuthzId :: object_id() | unset,
-                 ObjectEjson :: ejson_term() |
-                                binary() |
-                                {binary(), ejson_term()} |
-                                {ejson_term(), _}) ->
-                        #chef_data_bag{} |
-                        #chef_data_bag_item{} |
-                        #chef_environment{} |
-                        #chef_client{} |
-                        #chef_role{} |
-                        #chef_cookbook_version{}.
-new_record(chef_environment, OrgId, AuthzId, EnvData) ->
-    Name = ej:get({<<"name">>}, EnvData),
-    Id = make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(chef_environment, chef_json:encode(EnvData)),
-    #chef_environment{id = Id,
-                      authz_id = maybe_stub_authz_id(AuthzId, Id),
-                      org_id = OrgId,
-                      name = Name,
-                      serialized_object = Data};
-new_record(chef_client, OrgId, AuthzId, ClientData) ->
-    Name = ej:get({<<"name">>}, ClientData),
-    Id = make_org_prefix_id(OrgId, Name),
-    Validator = ej:get({<<"validator">>}, ClientData) =:= true,
-    Admin = ej:get({<<"admin">>}, ClientData) =:= true,
-    {PublicKey, PubkeyVersion} = cert_or_key(ClientData),
-    #chef_client{id = Id,
-                 authz_id = maybe_stub_authz_id(AuthzId, Id),
-                 org_id = OrgId,
-                 name = Name,
-                 validator = Validator,
-                 admin = Admin,
-                 public_key = PublicKey,
-                 pubkey_version = PubkeyVersion};
-new_record(chef_data_bag, OrgId, AuthzId, Name) ->
-    Id = make_org_prefix_id(OrgId, Name),
-    #chef_data_bag{id = Id,
-                   authz_id = maybe_stub_authz_id(AuthzId, Id),
-                   org_id = OrgId,
-                   name = Name};
-new_record(chef_data_bag_item, OrgId, _AuthzId, {BagName, ItemData}) ->
-    ItemName = ej:get({<<"id">>}, ItemData),
-    Id = make_org_prefix_id(OrgId, <<BagName/binary, ItemName/binary>>),
-    Data = chef_db_compression:compress(chef_data_bag_item, chef_json:encode(ItemData)),
-    #chef_data_bag_item{id = Id,
-                        org_id = OrgId,
-                        data_bag_name = BagName,
-                        item_name = ItemName,
-                        serialized_object = Data
-                       };
-new_record(chef_user, OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
-    %% This only works for Open Source Users currently
-    Name = ej:get({<<"name">>}, UserData),
-    Id = make_org_prefix_id(OrgId, Name),
-    Email = value_or_null({<<"email">>}, UserData),
-    Admin = ej:get({<<"admin">>}, UserData) =:= true,
-    {PublicKey, _PubkeyVersion} = cert_or_key(UserData),
-    #chef_user{id = Id,
-               authz_id = maybe_stub_authz_id(AuthzId, Id),
-               username = Name,
-               email = Email,
-               public_key = PublicKey,
-               hashed_password = HashPass,
-               salt = Salt,
-               hash_type = HashType,
-               external_authentication_uid = null, %% Not used in open source user
-               recovery_authentication_enabled = false, %% Not used in open source user
-               admin = Admin
-    };
-new_record(chef_role, OrgId, AuthzId, RoleData) ->
-    Name = ej:get({<<"name">>}, RoleData),
-    Id = make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(chef_role, chef_json:encode(RoleData)),
-    #chef_role{id = Id,
-               authz_id = maybe_stub_authz_id(AuthzId, Id),
-               org_id = OrgId,
-               name = Name,
-               serialized_object = Data};
-new_record(chef_cookbook_version, OrgId, AuthzId, CBVData) ->
-    %% name for a cookbook_version is actually cb_name-cb_version which is good for ID
-    %% creation
-    Name = ej:get({<<"name">>}, CBVData),
-    Id = make_org_prefix_id(OrgId, Name),
-    {Major, Minor, Patch} = chef_cookbook_version:parse_version(ej:get({<<"metadata">>, <<"version">>},
-                                                        CBVData)),
-
-    Metadata0 = ej:get({<<"metadata">>}, CBVData),
-
-    MAttributes = compress_maybe(ej:get({<<"attributes">>}, Metadata0, {[]}),
-                                 cookbook_meta_attributes),
-
-    %% Do not compress the deps!
-    Deps = chef_json:encode(ej:get({<<"dependencies">>}, Metadata0, {[]})),
-
-    LongDesc = compress_maybe(ej:get({<<"long_description">>}, Metadata0, <<"">>),
-                              cookbook_long_desc),
-
-    Metadata = compress_maybe(lists:foldl(fun(Key, MD) ->
-                                                  ej:delete({Key}, MD)
-                                          end, Metadata0, [<<"attributes">>,
-                                                           <<"dependencies">>,
-                                                           <<"long_description">>]),
-                              cookbook_metadata),
-
-    Data = compress_maybe(ej:delete({<<"metadata">>}, CBVData),
-                          chef_cookbook_version),
-    #chef_cookbook_version{id = Id,
-                           authz_id = maybe_stub_authz_id(AuthzId, Id),
-                           org_id = OrgId,
-                           name = ej:get({<<"cookbook_name">>}, CBVData),
-                           major = Major,
-                           minor = Minor,
-                           patch = Patch,
-                           frozen = ej:get({<<"frozen?">>}, CBVData, false),
-                           meta_attributes = MAttributes,
-                           meta_deps = Deps,
-                           meta_long_desc = LongDesc,
-                           metadata = Metadata,
-                           checksums = chef_cookbook_version:extract_checksums(CBVData),
-                           serialized_object = Data}.
-
 compress_maybe(Data, cookbook_long_desc) ->
     chef_db_compression:compress(cookbook_long_desc, Data);
 compress_maybe(Data, Type) ->
     chef_db_compression:compress(Type, chef_json:encode(Data)).
-
--spec ejson_for_indexing(chef_indexable_object() | #chef_data_bag_item{},
-                         ejson_term() | {ejson_term(), _}) -> ejson_term().
-%% @doc Return EJSON terms appropriate for sending to opscode-expander for
-%% indexing. Although the EJSON data is embedded in the ChefRecord, it is stored in a
-%% possibly compressed form. To avoid double work, we pass both the Chef object record
-%% (mostly for dispatch, but also used in the case of data_bag_item to obtain data_bag name)
-%% and the object EJSON as inputs. The returned EJSON is only suitable for sending to the
-%% queue for indexing.
-ejson_for_indexing(#chef_data_bag_item{data_bag_name = BagName,
-                                       item_name = ItemName}, Item) ->
-    %% See Chef::DataBagItem#to_hash
-    %% We basically set data_bag and chef_type key against the original data bag item.
-    ItemName = ej:get({<<"id">>}, Item),
-    ej:set({<<"data_bag">>}, ej:set({<<"chef_type">>}, Item, <<"data_bag_item">>), BagName);
-ejson_for_indexing(#chef_data_bag{}, <<Name/binary>>) ->
-    %% We do not currently index data_bag objects in solr. This is here to allow us to take
-    %% advantage of shared code paths which expect a valid convert function to get indexable
-    %% data. The return value is not used, but is nominally valid:
-    {[{<<"name">>, Name},
-      {<<"chef_type">>, <<"data_bag">>},
-      {<<"json_class">>, <<"Chef::DataBag">>}]};
-ejson_for_indexing(#chef_cookbook_version{}, _CBVersion) ->
-    %% FIXME: cleanup how we handle non-indexed objects
-    %% cookbook_versions don't get indexed.
-    {[]};
-ejson_for_indexing(#chef_user{}, _) ->
-    %% FIXME: we don't index users, so this is a dummy value
-    {[]};
-ejson_for_indexing(#chef_node{name = Name, environment = Environment}, Node) ->
-    Defaults = ej:get({<<"default">>}, Node, ?EMPTY_EJSON_HASH),
-    Normal = ej:get({<<"normal">>}, Node, ?EMPTY_EJSON_HASH),
-    Override = ej:get({<<"override">>}, Node, ?EMPTY_EJSON_HASH),
-    %% automatic may not always be present
-    Automatic = ej:get({<<"automatic">>}, Node, ?EMPTY_EJSON_HASH),
-    DefaultNormal = chef_deep_merge:merge(Defaults, Normal),
-    DefaultNormalOverride = chef_deep_merge:merge(DefaultNormal, Override),
-    {Merged} = chef_deep_merge:merge(DefaultNormalOverride, Automatic),
-    RunList = ej:get({<<"run_list">>}, Node, []),
-    %% We transform to a dict to ensure we override the top-level keys
-    %% with the appropriate values and don't introduce any duplicate
-    %% keys
-    NodeDict = dict:from_list(Merged),
-    TopLevelDict = dict:from_list([{<<"name">>, Name},
-                                   {<<"chef_type">>, <<"node">>},
-                                   %% FIXME: nodes may have environment in the db, but not in JSON
-                                   %% or not set at all (pre-environments nodes).
-                                   {<<"chef_environment">>, Environment},
-                                   {<<"recipe">>, extract_recipes(RunList)},
-                                   {<<"role">>, extract_roles(RunList)},
-                                   {<<"run_list">>, RunList}]),
-    NodeDict1 = dict:merge(fun(_Key, TopVal, _AttrVal) ->
-                                   TopVal
-                           end, TopLevelDict, NodeDict),
-    {dict:to_list(NodeDict1)};
-ejson_for_indexing(#chef_role{}, Role) ->
-    EnvironmentRunLists0 = ej:get({<<"env_run_lists">>}, Role, ?EMPTY_EJSON_HASH),
-    EnvironmentRunLists = ej:delete({<<"_default">>}, EnvironmentRunLists0),
-    ej:set({<<"env_run_lists">>}, Role, EnvironmentRunLists);
-ejson_for_indexing(#chef_environment{}, Environment) ->
-    Environment;
-ejson_for_indexing(#chef_client{}, Client) ->
-    Client.
 
 extract_recipes(RunList) ->
     [ binary:part(Item, {0, byte_size(Item) - 1})
@@ -261,86 +65,6 @@ extract_roles(RunList) ->
     [ binary:part(Item, {0, byte_size(Item) - 1})
       || <<"role[", Item/binary>> <- RunList ].
 
--spec update_from_ejson(chef_object() | #chef_cookbook_version{},
-                        ejson_term()) -> chef_object().
-%% @doc Return a new `chef_object()' record updated according to the specified EJSON
-%% terms. Data normalization on the EJSON should occur before making this call. Fields in
-%% the EJSON that exist in the record are updated. The serialized_object record field is
-%% updated with appropriately compressed data. No sanity checks are made; you can "rename"
-%% an object record with this function.
-update_from_ejson(#chef_environment{} = Env, EnvData) ->
-    Name = ej:get({<<"name">>}, EnvData),
-    Data = chef_db_compression:compress(chef_environment, chef_json:encode(EnvData)),
-    Env#chef_environment{name = Name, serialized_object = Data};
-update_from_ejson(#chef_client{} = Client, ClientData) ->
-    Name = ej:get({<<"name">>}, ClientData),
-    IsAdmin = ej:get({<<"admin">>}, ClientData) =:= true,
-    IsValidator = ej:get({<<"validator">>}, ClientData) =:= true,
-    %% Take certificate first, then public_key
-    {Key, Version} = cert_or_key(ClientData),
-    case Key of
-        undefined ->
-            Client#chef_client{name = Name,
-                admin = IsAdmin,
-                validator = IsValidator};
-        _ ->
-            Client#chef_client{name = Name,
-                admin = IsAdmin,
-                validator = IsValidator,
-                public_key = Key,
-                pubkey_version = Version}
-    end;
-update_from_ejson(#chef_data_bag{} = DataBag, DataBagData) ->
-    %% here for completeness
-    Name = ej:get({<<"name">>}, DataBagData),
-    DataBag#chef_data_bag{name = Name};
-update_from_ejson(#chef_data_bag_item{} = DataBagItem, DataBagItemData) ->
-    Name = ej:get({<<"id">>}, DataBagItemData),
-    DataBagItemJson = chef_json:encode(DataBagItemData),
-    Data = chef_db_compression:compress(chef_data_bag_item, DataBagItemJson),
-    DataBagItem#chef_data_bag_item{item_name = Name, serialized_object = Data};
-update_from_ejson(#chef_node{} = Node, NodeJson) ->
-    Name = ej:get({<<"name">>}, NodeJson),
-    %% We expect that the insert_autofill_fields call will insert default when necessary
-    Environment = ej:get({<<"chef_environment">>}, NodeJson),
-    Data = chef_db_compression:compress(chef_node, chef_json:encode(NodeJson)),
-    Node#chef_node{name = Name, environment = Environment, serialized_object = Data};
-update_from_ejson(#chef_role{} = Role, RoleData) ->
-    Name = ej:get({<<"name">>}, RoleData),
-    Data = chef_db_compression:compress(chef_role, chef_json:encode(RoleData)),
-    Role#chef_role{name = Name, serialized_object = Data};
-update_from_ejson(#chef_cookbook_version{org_id = OrgId,
-                                         authz_id = AuthzId,
-                                         frozen = FrozenOrig} = CookbookVersion,
-                  CookbookVersionData) ->
-    UpdatedVersion = new_record(chef_cookbook_version, OrgId, AuthzId, CookbookVersionData),
-    %% frozen is immutable once it is set to true
-    Frozen = FrozenOrig =:= true orelse UpdatedVersion#chef_cookbook_version.frozen,
-    CookbookVersion#chef_cookbook_version{frozen            = Frozen,
-                                          meta_attributes   = UpdatedVersion#chef_cookbook_version.meta_attributes,
-                                          meta_deps         = UpdatedVersion#chef_cookbook_version.meta_deps,
-                                          meta_long_desc    = UpdatedVersion#chef_cookbook_version.meta_long_desc,
-                                          metadata          = UpdatedVersion#chef_cookbook_version.metadata,
-                                          checksums         = UpdatedVersion#chef_cookbook_version.checksums,
-                                          serialized_object = UpdatedVersion#chef_cookbook_version.serialized_object}.
-
-
--spec id(chef_object() | #chef_user{}) -> object_id().
-%% @doc Return the `id' field from a `chef_object()' record type.
-id(#chef_role{id = Id}) ->
-    Id;
-id(#chef_user{id = Id}) ->
-    Id;
-id(#chef_environment{id = Id}) ->
-    Id;
-id(#chef_client{id = Id}) ->
-    Id;
-id(#chef_data_bag{id = Id}) ->
-    Id;
-id(#chef_data_bag_item{id = Id}) ->
-    Id;
-id(#chef_cookbook_version{id = Id}) ->
-    Id.
 
 -spec set_created(Object :: chef_object() |
                             #chef_user{} |
@@ -411,54 +135,6 @@ set_updated(#chef_user{} = Object, ActorId) ->
 set_updated(#chef_cookbook_version{} = Object, ActorId) ->
     Now = sql_date(now),
     Object#chef_cookbook_version{updated_at = Now, last_updated_by = ActorId}.
-
--spec name(chef_object() | #chef_user{}) -> binary() | {binary(), binary()}.
-%% @doc Return the `name' field from a `chef_object()' record type. For `data_bag_items' the
-%% return value is a tuple of `{BagName, ItemName}',
-%% for a chef_user, the username is returned.
-name(#chef_role{name = Name}) ->
-    Name;
-name(#chef_user{username = Name}) ->
-    Name;
-name(#chef_environment{name = Name}) ->
-    Name;
-name(#chef_client{name = Name}) ->
-    Name;
-name(#chef_data_bag{name = Name}) ->
-    Name;
-name(#chef_data_bag_item{data_bag_name = BagName, item_name = ItemName}) ->
-    {BagName, ItemName};
-name(#chef_cookbook_version{name = Name}) ->
-    Name.
-
--spec type_name(chef_object() | #chef_user{}) ->
-                       'data_bag' |
-                       'data_bag_item' |
-                       'environment' |
-                       'client' |
-                       'role' |
-                       'user' |
-                       'cookbook_version' |
-                       'user'.
-%% @doc Return the common type name of a `chef_object()' record. For example, the common
-%% type name of a `chef_node{}' record is `node'.
-type_name(#chef_data_bag{}) ->
-    data_bag;
-type_name(#chef_data_bag_item{}) ->
-    data_bag_item;
-type_name(#chef_environment{}) ->
-    environment;
-type_name(#chef_client{}) ->
-    client;
-type_name(#chef_role{}) ->
-    role;
-type_name(#chef_user{}) ->
-    user;
-type_name(#chef_cookbook_version{}) ->
-    cookbook_version.
-
-
-%% TODO: Why don't we also have a 'delete_fun/1' function?
 
 
 -spec sql_date(now | {non_neg_integer(), non_neg_integer(), non_neg_integer()}) -> binary().

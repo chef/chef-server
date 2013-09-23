@@ -33,3 +33,30 @@ new_record_test() ->
     %% TODO: validate more fields?
     ?assertEqual(<<"my-env">>, chef_environment:name(Env)).
 
+update_from_ejson_test_() ->
+    Env = #chef_environment{name = <<"old_name">>},
+    RawEnv = {[{<<"name">>, <<"new_name">>},
+                {<<"description">>, <<"environment description">>},
+                {<<"json_class">>, <<"Chef::Environment">>}
+               %% FIXME: fill out more compelte environment json object
+               ]},
+    [{"chef_environment fields are set from json for all dbs",
+      [
+       {atom_to_list(DbType),
+        fun() ->
+                Env1 = chef_object:update_from_ejson(Env, RawEnv),
+                GotData = Env1#chef_environment.serialized_object,
+                GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
+                ?assertEqual(<<"new_name">>, Env1#chef_environment.name),
+                ?assertEqual(RawEnv, GotEjson)
+        end} || DbType <- [mysql, pgsql] ]}
+    ].
+
+id_test() ->
+    ?assertEqual(<<"1">>, chef_object:id(#chef_environment{id = <<"1">>})).
+
+name_test() ->
+    ?assertEqual(<<"a_name">>, chef_object:name(#chef_environment{name =  <<"a_name">>})).
+
+type_name_test() ->
+    ?assertEqual(environment, chef_object:type_name(#chef_environment{})).

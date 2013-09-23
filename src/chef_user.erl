@@ -260,4 +260,4 @@ bulk_get_query() ->
     bulk_get_users.
 
 ejson_for_indexing(#chef_user{}, _) ->
-    error(not_indexed).
+    {[]}.

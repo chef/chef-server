@@ -228,3 +228,110 @@ new_record_test() ->
     ?assertMatch(#chef_node{}, Node),
     %% TODO: validate more fields?
     ?assertEqual(<<"my-node">>, chef_node:name(Node)).
+
+ejson_for_indexing_test_() ->
+    [{"empty_node_test",
+      fun() ->
+              Node = merge(basic_node(), {[{<<"default">>, {[]}}]}),
+              assert_ejson_equal(basic_node_index(),
+                                 chef_object:ejson_for_indexing(basic_node_record(), Node))
+      end},
+
+     {"default_only_test",
+      fun() ->
+              Defaults = {[{<<"a">>, 1}]},
+              Node = merge(basic_node(), {[{<<"default">>, Defaults}]}),
+              assert_ejson_equal(merge(basic_node_index(), Defaults),
+                                 chef_object:ejson_for_indexing(basic_node_record(), Node))
+      end},
+
+     {"normal_over_default_test",
+      fun() ->
+              Defaults = {[{<<"a">>, 1}, {<<"b">>, 2}]},
+              Normal = {[{<<"b">>, 11}, {<<"c">>, 3}]},
+              Node = merge(basic_node(), {[{<<"default">>, Defaults},
+                                           {<<"normal">>, Normal}]}),
+              Expect = merge(basic_node_index(), {[{<<"a">>, 1}, {<<"b">>, 11},
+                                                   {<<"c">>, 3}]}),
+              Got = chef_object:ejson_for_indexing(basic_node_record(), Node),
+              assert_ejson_equal(Expect, Got)
+      end},
+
+     {"override_over_normal_over_default_test",
+      fun() ->
+              Defaults = {[{<<"a">>, 1}, {<<"b">>, 2}]},
+              Normal = {[{<<"b">>, 11}, {<<"c">>, 3}]},
+              Override = {[{<<"b">>, 22}, {<<"d">>, 4}]},
+              Node = merge(basic_node(),
+                           {[{<<"default">>, Defaults}, {<<"normal">>, Normal},
+                             {<<"override">>, Override}]}),
+              Expect = merge(basic_node_index(),
+                             {[{<<"a">>, 1}, {<<"b">>, 22}, {<<"c">>, 3}, {<<"d">>, 4}]}),
+              Got = chef_object:ejson_for_indexing(basic_node_record(), Node),
+              assert_ejson_equal(Expect, Got)
+      end},
+
+     {"automatic_over_override_over_normal_over_default_test",
+      fun() ->
+              Defaults = {[{<<"a">>, 1}, {<<"b">>, 2}]},
+              Normal = {[{<<"b">>, 11}, {<<"c">>, 3}]},
+              Override = {[{<<"b">>, 22}, {<<"d">>, 4}]},
+              Automatic = {[{<<"b">>, 22}, {<<"d">>, 40}, {<<"e">>, 5}]},
+              Node = merge(basic_node(),
+                           {[{<<"default">>, Defaults}, {<<"normal">>, Normal},
+                             {<<"override">>, Override}, {<<"automatic">>, Automatic}]}),
+              Expect = merge(basic_node_index(),
+                             {[{<<"a">>, 1}, {<<"b">>, 22}, {<<"c">>, 3}, {<<"d">>, 40},
+                               {<<"e">>, 5}]}),
+              Got = chef_object:ejson_for_indexing(basic_node_record(), Node),
+              assert_ejson_equal(Expect, Got)
+      end}].
+
+update_from_ejson_test_() ->
+    Node = #chef_node{name = <<"old_node">>, environment = <<"old_env">>},
+    RawNode = basic_node(),
+    [{"chef_node fields are set from json for all dbs",
+      [
+       {atom_to_list(DbType),
+        fun() ->
+                Node1 = chef_object:update_from_ejson(Node, RawNode),
+                GotData = Node1#chef_node.serialized_object,
+                GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
+                ?assertEqual(<<"a_node">>, Node1#chef_node.name),
+                ?assertEqual(<<"prod">>, Node1#chef_node.environment),
+                ?assertEqual(RawNode, GotEjson)
+        end} || DbType <- [mysql, pgsql] ]}
+    ].
+
+
+assert_ejson_equal(E1, E2) ->
+    ?assertEqual(to_sorted_list(E1), to_sorted_list(E2)).
+
+basic_node() ->
+    {[{<<"name">>, <<"a_node">>},
+      {<<"chef_environment">>, <<"prod">>},
+      {<<"run_list">>, [<<"recipe[web]">>, <<"role[prod]">>]}
+     ]}.
+
+basic_node_record() ->
+    #chef_node{name = <<"a_node">>, environment = <<"prod">>}.
+
+basic_node_index() ->
+    {[{<<"name">>, <<"a_node">>},
+      {<<"chef_type">>, <<"node">>},
+      {<<"chef_environment">>, <<"prod">>},
+      {<<"recipe">>, [<<"web">>]},
+      {<<"role">>, [<<"prod">>]},
+      {<<"run_list">>, [<<"recipe[web]">>, <<"role[prod]">>]}
+     ]}.
+
+%% @doc Merge two proplists together, returning a proplist.  Treats them as dictionaries to
+%% prevent repeated keys.  Values in L2 take precedence of values in L1.
+merge({L1}, {L2}) ->
+    D1 = dict:from_list(L1),
+    D2 = dict:from_list(L2),
+    Merged = dict:merge(fun(_K,_V1,V2) -> V2 end, D1,D2),
+    {dict:to_list(Merged)}.
+
+to_sorted_list({L}) ->
+    lists:sort(L).

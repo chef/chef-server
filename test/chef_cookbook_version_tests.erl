@@ -198,7 +198,7 @@ assemble_cookbook_ejson_test_() ->
       fun() ->
               OrgId = <<"12341234123412341234123412341234">>,
               AuthzId = <<"auth">>,
-              Record = chef_object_base:new_record(chef_cookbook_version,
+              Record = chef_object:new_record(chef_cookbook_version,
                                               OrgId,
                                               AuthzId,
                                               CBEJson),
@@ -212,7 +212,7 @@ assemble_cookbook_ejson_test_() ->
       fun() ->
               OrgId = <<"12341234123412341234123412341234">>,
               AuthzId = <<"auth">>,
-              Record = chef_object_base:new_record(chef_cookbook_version,
+              Record = chef_object:new_record(chef_cookbook_version,
                                               OrgId,
                                               AuthzId,
                                               CBEJson),
@@ -440,3 +440,10 @@ example_cookbook_version_json() ->
                           {<<"version">>,  Version}
                          ]}}
      ]}.
+
+id_test() ->
+    ?assertEqual(<<"1">>, chef_object:id(#chef_cookbook_version{id = <<"1">>})).
+
+name_test() ->
+    ?assertEqual(<<"a_name">>,
+                  chef_object:name(#chef_cookbook_version{name =  <<"a_name">>})).

@@ -268,7 +268,7 @@ role_ejson_for_indexing_test_() ->
       end}
     ].
 
-role_update_from_ejson_test_() ->
+update_from_ejson_test_() ->
     Role = #chef_role{name = <<"a_role">>},
     RawRole = {[{<<"name">>, <<"new_name">>},
                 {<<"description">>, <<"role description">>},
@@ -325,5 +325,41 @@ query_name_test_() ->
              {bulk_get_query, bulk_get_roles}],
     [ ?_assertEqual(E, chef_role:F()) || {F, E} <- Tests ].
 
+ejson_for_indexing_test_() ->
+    Role = #chef_role{name = <<"a_role">>},
+    RawRole = {[{<<"name">>, <<"a_role">>},
+                {<<"description">>, <<"role description">>},
+                {<<"json_class">>, <<"Chef::Role">>},
+                {<<"default_attributes">>, {[{<<"a">>, <<"b">>}]}},
+                {<<"override_attributes">>, {[{<<"a">>, <<"b">>},
+                                              {<<"x">>, <<"y">>}]}},
+                {<<"chef_type">>, <<"role">>},
+                {<<"run_list">>, [<<"recipe[apache2]">>, <<"role[web]">>]},
+                {<<"env_run_lists">>, {[]}}
+               ]},
+    [{"empty env_run_lists",
+      fun() ->
+              Expected = RawRole,
+              Got = chef_object:ejson_for_indexing(Role, RawRole),
+              ?assertEqual(Expected, Got)
+      end},
+     {"_default in env_run_lists is removed",
+      fun() ->
+              EnvRunListsExpected = {[{<<"prod">>, [<<"recipe[a2]">>, <<"role[b3]">>]}]},
+              EnvRunLists = {[{<<"prod">>, [<<"recipe[a2]">>, <<"role[b3]">>]},
+                              {<<"_default">>, [<<"recipe[a0]">>, <<"role[b0]">>]}]},
+              RawRole1 = ej:set({<<"env_run_lists">>}, RawRole, EnvRunLists),
+              Expected = ej:set({<<"env_run_lists">>}, RawRole, EnvRunListsExpected),
+              Got = chef_object:ejson_for_indexing(Role, RawRole1),
+              ?assertEqual(Expected, Got)
+      end}
+    ].
+
+id_test() ->
+    ?assertEqual(<<"1">>, chef_object:id(#chef_role{id = <<"1">>})).
+
+name_test() ->
+    ?assertEqual(<<"a_name">>, chef_object:name(#chef_role{name =  <<"a_name">>})).
+
 type_name_test() ->
-    ?assertEqual(role, chef_role:type_name(#chef_role{})).
+    ?assertEqual(role, chef_object:type_name(#chef_role{})).
