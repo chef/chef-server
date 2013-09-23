@@ -17,19 +17,6 @@ test_one(Description, Specs) ->
     ?assertEqual(Expected, Actual),
     itest_cookbook_util:cookbook_cleanup(a, a).
 
-cookbook_recipes() ->
-    {foreachx,
-     fun itest_cookbook_util:cookbook_setup/1,
-     fun itest_cookbook_util:cookbook_cleanup/2,
-     [{Specs, fun(CookbookSpecs, _) ->
-                      {Description,
-                       fun() -> Expected = itest_cookbook_util:recipes_from_cookbook_specs(CookbookSpecs),
-                                {ok, Actual} = chef_sql:fetch_latest_cookbook_recipes(itest_util:the_org_id()),
-                                ?assertEqual(Expected, Actual)
-                       end}
-              end}
-      || {Description, Specs} <- cbv_specs() ]}.
-
 cbv_specs() ->
     [
      {"Nothing in the database",

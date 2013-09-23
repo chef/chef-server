@@ -18,19 +18,6 @@ test_deps_retrieval(Description, Specs, Expected) ->
     ?assertEqual(Expected, Actual),
     itest_cookbook_util:cookbook_cleanup(a, a).
 
-deps_retrieval() ->
-    {foreachx,
-     fun itest_cookbook_util:cookbook_setup/1,
-     fun itest_cookbook_util:cookbook_cleanup/2,
-     [{Spec, fun(_,_) ->
-                     {Description,
-                      fun() ->
-                              {ok, Actual} = chef_sql:fetch_all_cookbook_version_dependencies(itest_util:the_org_id()),
-                              ?assertEqual(Expected, Actual)
-                      end}
-             end}
-      || {Description, Spec, Expected} <- cbv_specs() ]}.
-
 cbv_specs() ->
     [
      {"No Cookbooks!",

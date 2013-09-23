@@ -18,21 +18,6 @@ test_latest_cookbooks(Description, Specs, NumVersions, Expected) ->
     ?assertEqual(Expected, Actual),
     itest_cookbook_util:cookbook_cleanup(a, a).
 
-latest_cookbooks() ->
-    {foreachx,
-     fun itest_cookbook_util:cookbook_setup/1,
-     fun itest_cookbook_util:cookbook_cleanup/2,
-     [{Specs, fun(_, _) ->
-                      {Description,
-                       fun() ->
-                               {ok, Actual} =
-                                   chef_sql:fetch_latest_cookbook_versions(itest_util:the_org_id(),
-                                                                           all, NumVersions),
-                               ?assertEqual(Expected, Actual)
-                       end}
-              end}
-      || {Description, Specs, NumVersions, Expected} <- cbv_specs() ]}.
-
 cbv_specs() ->
     [
      %% The format of the following test data is:
