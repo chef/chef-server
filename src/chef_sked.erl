@@ -98,8 +98,7 @@ create_from_json(RecType, ObjectEjson) ->
     %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
     %% the world.
-    ok = chef_object_db:add_to_solr(TypeName, Id, ?OSC_ORG_ID,
-                                 chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
+    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
 
     case chef_db:create(ObjectRec, DbContext, ?CHEF_SKED_AUTHZ_ID) of
         {conflict, Msg} ->
