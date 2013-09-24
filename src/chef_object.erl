@@ -40,6 +40,8 @@
 -callback list_query() -> atom().
 -callback bulk_get_query() -> atom().
 
+-callback fields_for_update(object_rec()) -> list().
+
 -callback new_record(OrgId :: object_id(),
                      AuthzId :: object_id() | unset,
                      ObjectEjson :: ejson_term() |
@@ -73,8 +75,9 @@
          delete_query/1,
          find_query/1,
          list_query/1,
-         update_query/1
+         update_query/1,
 
+         fields_for_update/1
         ]).
 
 -spec new_record(RecType :: atom(),
@@ -141,6 +144,9 @@ list_query(Rec) ->
 
 bulk_get_query(Rec) ->
     call0(Rec, bulk_get_query).
+
+fields_for_update(Rec) ->
+    call(Rec, fields_for_update).
 
 %% Return the callback module for a given object record type. We're putting the abstraction
 %% in place in case we need to do something other than the identity mapping of record name

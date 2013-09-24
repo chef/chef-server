@@ -29,6 +29,7 @@
          constraint_map_spec/1,
          ejson_for_indexing/2,
          extract_checksums/1,
+         fields_for_update/1,
          id/1,
          minimal_cookbook_ejson/2,
          name/1,
@@ -594,3 +595,14 @@ update_from_ejson(#chef_cookbook_version{org_id = OrgId,
 
 ejson_for_indexing(#chef_cookbook_version{}, _CBV) ->
     {[]}.
+
+fields_for_update(#chef_cookbook_version{ id                = Id,
+                                          frozen            = Frozen,
+                                          meta_attributes   = MetaAttributes,
+                                          meta_deps         = MetaDeps,
+                                          meta_long_desc    = MetaLongDesc,
+                                          metadata          = Metadata,
+                                          serialized_object = SerializeObject,
+                                          last_updated_by   = LastUpdatedBy,
+                                          updated_at        = UpdatedAt }) ->
+    [Frozen, MetaAttributes, MetaDeps, MetaLongDesc, Metadata, SerializeObject, LastUpdatedBy, UpdatedAt, Id].

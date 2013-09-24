@@ -26,6 +26,7 @@
          add_type_and_bag/2,
          authz_id/1,
          ejson_for_indexing/2,
+         fields_for_update/1,
          id/1,
          name/1,
          new_record/3,
@@ -130,6 +131,12 @@ list_query() ->
 
 update_query() ->
     update_data_bag_item_by_id.
+
+fields_for_update(#chef_data_bag_item{last_updated_by = LastUpdatedBy,
+                                      updated_at = UpdatedAt,
+                                      serialized_object = Object,
+                                      id = Id}) ->
+    [LastUpdatedBy, UpdatedAt, Object, Id].
 
 -spec add_type_and_bag(BagName :: binary(), Item :: ejson_term()) -> ejson_term().
 %% @doc Returns data bag item EJSON `Item' with keys `chef_type' and `data_bag' added.

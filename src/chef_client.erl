@@ -25,6 +25,7 @@
          add_authn_fields/2,
          assemble_client_ejson/2,
          ejson_for_indexing/2,
+         fields_for_update/1,
          id/1,
          name/1,
          new_record/3,
@@ -163,6 +164,19 @@ new_record(OrgId, AuthzId, ClientData) ->
                  admin = Admin,
                  public_key = PublicKey,
                  pubkey_version = PubkeyVersion}.
+
+fields_for_update(#chef_client{last_updated_by = LastUpdatedBy,
+                               updated_at = UpdatedAt,
+                               name = Name,
+                               public_key = PublicKey,
+                               pubkey_version = PubkeyVersion,
+                               admin = IsAdmin,
+                               validator = IsValidator,
+                               id = Id}) ->
+    [LastUpdatedBy, UpdatedAt, Name,
+     PublicKey, PubkeyVersion,
+     IsValidator =:= true,
+     IsAdmin =:= true, Id].
 
 -spec add_authn_fields(ejson_term(), binary()) -> ejson_term().
 %% @doc Add in the generated public key along with other authn related

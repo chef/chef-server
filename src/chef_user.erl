@@ -20,20 +20,22 @@
 -module(chef_user).
 
 -export([
+         assemble_user_ejson/2,
          authz_id/1,
          ejson_for_indexing/2,
-         assemble_user_ejson/2,
+         fields_for_update/1,
+         id/1,
+         name/1,
+         new_record/3,
          parse_binary_json/1,
          parse_binary_json/2,
          password_data/1,
-         set_password_data/2,
-         update_from_ejson/2,
-         id/1,
-         name/1,
-         type_name/1,
-         new_record/3,
          set_created/2,
-         set_updated/2]).
+         set_password_data/2,
+         set_updated/2,
+         type_name/1,
+         update_from_ejson/2
+        ]).
 
 %% database named queries
 -export([
@@ -261,3 +263,13 @@ bulk_get_query() ->
 
 ejson_for_indexing(#chef_user{}, _) ->
     {[]}.
+
+fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
+                             updated_at      = UpdatedAt,
+                             admin           = IsAdmin,
+                             public_key      = PublicKey,
+                             hashed_password = HashedPassword,
+                             salt            = Salt,
+                             hash_type       = HashType,
+                             id              = Id }) ->
+    [IsAdmin =:= true, PublicKey, HashedPassword, Salt, HashType, LastUpdatedBy, UpdatedAt, Id].

@@ -26,6 +26,7 @@
          ejson_for_indexing/2,
          extract_recipes/1,
          extract_roles/1,
+         fields_for_update/1,
          id/1,
          insert_autofill_fields/1,
          name/1,
@@ -181,6 +182,13 @@ list_query() ->
 
 update_query() ->
     update_node_by_id.
+
+fields_for_update(#chef_node{environment = Environment,
+                             last_updated_by = LastUpdatedBy,
+                             updated_at = UpdatedAt,
+                             serialized_object = Object,
+                             id = Id}) ->
+    [Environment, LastUpdatedBy, UpdatedAt, Object, Id].
 
 extract_recipes(RunList) ->
     [ binary:part(Item, {0, byte_size(Item) - 1})

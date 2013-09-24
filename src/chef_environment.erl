@@ -25,6 +25,7 @@
 -export([
          authz_id/1,
          ejson_for_indexing/2,
+         fields_for_update/1,
          id/1,
          name/1,
          new_record/3,
@@ -180,3 +181,10 @@ list_query() ->
 
 bulk_get_query() ->
     bulk_get_environments.
+
+fields_for_update(#chef_environment{last_updated_by = LastUpdatedBy,
+                                    updated_at = UpdatedAt,
+                                    name = Name,
+                                    serialized_object = Object,
+                                    id = Id}) ->
+    [LastUpdatedBy, UpdatedAt, Name, Object, Id].

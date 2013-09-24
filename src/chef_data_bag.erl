@@ -24,6 +24,7 @@
 -export([
          authz_id/1,
          ejson_for_indexing/2,
+         fields_for_update/1,
          id/1,
          name/1,
          new_record/3,
@@ -124,6 +125,9 @@ update_query() ->
 
 list_query() ->
     list_data_bags_for_org.
+
+fields_for_update(_Rec) ->
+    error(not_implemented).
 
 %% @doc Convert a binary JSON string representing a Chef data_bag into an EJson-encoded
 %% Erlang data structure.

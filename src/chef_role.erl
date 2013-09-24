@@ -25,6 +25,7 @@
 -export([
          authz_id/1,
          ejson_for_indexing/2,
+         fields_for_update/1,
          id/1,
          name/1,
          environments/1,
@@ -249,3 +250,9 @@ list_query() ->
 
 bulk_get_query() ->
     bulk_get_roles.
+
+fields_for_update(#chef_role{last_updated_by = LastUpdatedBy,
+                             updated_at = UpdatedAt,
+                             serialized_object = Object,
+                             id = Id}) ->
+    [LastUpdatedBy, UpdatedAt, Object, Id].
