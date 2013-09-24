@@ -52,20 +52,6 @@
 -compile([export_all]).
 -endif.
 
-compress_maybe(Data, cookbook_long_desc) ->
-    chef_db_compression:compress(cookbook_long_desc, Data);
-compress_maybe(Data, Type) ->
-    chef_db_compression:compress(Type, chef_json:encode(Data)).
-
-extract_recipes(RunList) ->
-    [ binary:part(Item, {0, byte_size(Item) - 1})
-      || <<"recipe[", Item/binary>> <- RunList ].
-
-extract_roles(RunList) ->
-    [ binary:part(Item, {0, byte_size(Item) - 1})
-      || <<"role[", Item/binary>> <- RunList ].
-
-
 -spec set_created(Object :: chef_object() |
                             #chef_user{} |
                             #chef_sandbox{} |
@@ -311,15 +297,6 @@ normalize_item(Recipe) when is_binary(Recipe) ->
 deduplicate_run_list(L) ->
     WithIdx = lists:zip(L, lists:seq(1, length(L))),
     [ Elt || {Elt, _} <- lists:ukeysort(2, lists:ukeysort(1, WithIdx)) ].
-
-value_or_null(Key, Data) ->
- Value = ej:get(Key, Data),
-  case Value of
-    undefined ->
-      null;
-    _ ->
-      Value
-  end.
 
 value_or_undefined(Key, Data) ->
   case ej:get(Key, Data) of

@@ -30,10 +30,6 @@ public_key_data() ->
     {ok, Bin} = file:read_file("../test/spki_public.pem"),
     Bin.
 
-cert_data() ->
-    {ok, Bin} = file:read_file("../test/cert.pem"),
-    Bin.
-
 assemble_user_ejson_test_() ->
     [{"obtain expected EJSON",
       fun() ->

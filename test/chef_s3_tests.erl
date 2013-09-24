@@ -73,7 +73,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
     Lifetime = 15,
     Expect_s3_url = fun(ExpectMethod, ExpectUrl) ->
                             meck:expect(mini_s3, s3_url,
-                                        fun(HTTPMethod, Bucket, Key, MyLifeTime, _ContentMD5,
+                                        fun(HTTPMethod, Bucket, _Key, MyLifeTime, _ContentMD5,
                                             #config{s3_url = S3Url}) ->
                                                 ?assertEqual(ExpectMethod, HTTPMethod),
                                                 ?assertEqual("testbucket", Bucket),
@@ -95,7 +95,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                test_utils:unmock(MockedModules)
        end,
        [
-        fun({InternalS3Url, ExternalS3Url}) ->
+        fun({_InternalS3Url, _ExternalS3Url}) ->
                 [
                  {" (" ++ atom_to_list(Method) ++ ")",
                   fun() ->
@@ -130,7 +130,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                test_utils:unmock(MockedModules)
        end,
        [
-        fun({InternalS3Url, ExternalS3Url}) ->
+        fun({InternalS3Url, _ExternalS3Url}) ->
                 [
                  {" (" ++ atom_to_list(Method) ++ ")",
                   fun() ->
@@ -165,7 +165,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                test_utils:unmock(MockedModules)
        end,
        [
-        fun({InternalS3Url, ExternalS3Url}) ->
+        fun({_InternalS3Url, ExternalS3Url}) ->
                 [
                  {" (" ++ atom_to_list(Method) ++ ")",
                   fun() ->
