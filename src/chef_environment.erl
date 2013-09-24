@@ -28,6 +28,7 @@
          fields_for_update/1,
          id/1,
          name/1,
+         org_id/1,
          new_record/3,
          parse_binary_json/1,
          set_created/2,
@@ -79,6 +80,10 @@ new_record(OrgId, AuthzId, EnvData) ->
 
 id(#chef_environment{id = Id}) ->
     Id.
+
+-spec org_id(#chef_environment{}) -> object_id().
+org_id(#chef_environment{org_id = OrgId}) ->
+    OrgId.
 
 name(#chef_environment{name = Name}) ->
     Name.

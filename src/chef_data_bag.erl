@@ -27,6 +27,7 @@
          fields_for_update/1,
          id/1,
          name/1,
+         org_id/1,
          new_record/3,
          parse_binary_json/2,
          set_created/2,
@@ -74,6 +75,10 @@ name(#chef_data_bag{name = Name}) ->
 -spec id(#chef_data_bag{}) -> object_id().
 id(#chef_data_bag{id = Id}) ->
     Id.
+
+-spec org_id(#chef_data_bag{}) -> object_id().
+org_id(#chef_data_bag{org_id = OrgId}) ->
+    OrgId.
 
 %% TODO: this doesn't need an argument
 type_name(#chef_data_bag{}) ->

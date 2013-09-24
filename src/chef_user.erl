@@ -26,6 +26,7 @@
          fields_for_update/1,
          id/1,
          name/1,
+         org_id/1,
          new_record/3,
          parse_binary_json/1,
          parse_binary_json/2,
@@ -74,6 +75,9 @@ name(#chef_user{username = Name}) ->
 -spec id(#chef_user{}) -> object_id().
 id(#chef_user{id = Id}) ->
     Id.
+
+org_id(#chef_user{}) ->
+    error(not_valid_for_chef_user).
 
 %% TODO: this doesn't need an argument
 type_name(#chef_user{}) ->

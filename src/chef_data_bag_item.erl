@@ -29,6 +29,7 @@
          fields_for_update/1,
          id/1,
          name/1,
+         org_id/1,
          new_record/3,
          parse_binary_json/2,
          set_created/2,
@@ -77,6 +78,10 @@ new_record(OrgId, _AuthzId, {BagName, ItemData}) ->
 -spec id(#chef_data_bag_item{}) -> object_id().
 id(#chef_data_bag_item{id = Id}) ->
     Id.
+
+-spec org_id(#chef_data_bag_item{}) -> object_id().
+org_id(#chef_data_bag_item{org_id = OrgId}) ->
+    OrgId.
 
 -spec name(#chef_data_bag_item{}) -> {binary(), binary()}.
 name(#chef_data_bag_item{data_bag_name = BagName, item_name = ItemName}) ->

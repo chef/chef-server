@@ -33,6 +33,7 @@
          id/1,
          minimal_cookbook_ejson/2,
          name/1,
+         org_id/1,
          new_record/3,
          parse_binary_json/2,
          parse_version/1,
@@ -101,6 +102,10 @@ name(#chef_cookbook_version{name = Name}) ->
 -spec id(#chef_cookbook_version{}) -> object_id().
 id(#chef_cookbook_version{id = Id}) ->
     Id.
+
+-spec org_id(#chef_cookbook_version{}) -> object_id().
+org_id(#chef_cookbook_version{org_id = OrgId}) ->
+    OrgId.
 
 -spec set_created(#chef_cookbook_version{}, object_id()) -> #chef_cookbook_version{}.
 set_created(#chef_cookbook_version{} = Object, ActorId) ->

@@ -56,6 +56,8 @@
 -callback id(object_rec()) ->
     object_id().
 
+-callback org_id(object_rec()) -> object_id().
+
 -callback type_name(object_rec()) ->
     atom().
 
@@ -67,6 +69,7 @@
          update_from_ejson/2,
          new_record/4,
          name/1,
+         org_id/1,
          id/1,
          type_name/1,
 
@@ -98,6 +101,10 @@ name(Rec) ->
 -spec id(object_rec()) -> object_id().
 id(Rec) ->
     call(Rec, id).
+
+-spec org_id(object_rec()) -> object_id().
+org_id(Rec) ->
+    call(Rec, org_id).
 
 -spec type_name(object_rec()) -> atom().
 type_name(Rec) ->

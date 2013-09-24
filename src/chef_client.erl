@@ -28,6 +28,7 @@
          fields_for_update/1,
          id/1,
          name/1,
+         org_id/1,
          new_record/3,
          oc_assemble_client_ejson/2,
          oc_parse_binary_json/2,
@@ -91,6 +92,10 @@ name(#chef_client{name = Name}) ->
 -spec id(#chef_client{}) -> object_id().
 id(#chef_client{id = Id}) ->
     Id.
+
+-spec org_id(#chef_client{}) -> object_id().
+org_id(#chef_client{org_id = OrgId}) ->
+    OrgId.
 
 %% TODO: this doesn't need an argument
 type_name(#chef_client{}) ->

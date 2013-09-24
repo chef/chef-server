@@ -30,6 +30,7 @@
          id/1,
          insert_autofill_fields/1,
          name/1,
+         org_id/1,
          new_record/3,
          parse_check_binary_as_json_node/2,
          set_created/2,
@@ -110,6 +111,10 @@ name(#chef_node{name = Name}) ->
 -spec id(#chef_node{}) -> object_id().
 id(#chef_node{id = Id}) ->
     Id.
+
+-spec org_id(#chef_node{}) -> object_id().
+org_id(#chef_node{org_id = OrgId}) ->
+    OrgId.
 
 -spec type_name(#chef_node{}) -> node.
 type_name(#chef_node{}) ->
