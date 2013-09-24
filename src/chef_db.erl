@@ -48,42 +48,35 @@
          %% user ops
          fetch_user/2,
          fetch_users/1,
-         create_user/3,
          count_user_admins/1,
 
          %% node ops
          fetch_node/3,
          fetch_nodes/2,
          fetch_nodes/3,
-         create_node/3,
          node_record_to_authz_id/2,
 
          %% role ops
          fetch_role/3,
          fetch_roles/2,
-         create_role/3,
          %% role_record_to_authz_id/2,
 
          %% environment ops
          fetch_environment/3,
          fetch_environments/2,
-         create_environment/3,
 
          %% client ops
          fetch_client/3,
          fetch_clients/2,
-         create_client/3,
 
          %% data_bag ops
          fetch_data_bag/3,
          fetch_data_bags/2,
-         create_data_bag/3,
 
          %% data_bag_item ops
          fetch_data_bag_item/4,
          fetch_data_bag_items/3,
          fetch_data_bag_item_ids/3,
-         create_data_bag_item/3,
 
          %% cookbook_version ops
          cookbook_exists/3,
@@ -92,7 +85,6 @@
          fetch_cookbook_versions/2,
          fetch_cookbook_versions/3,
          fetch_latest_cookbook_version/3,
-         create_cookbook_version/3,
          fetch_latest_cookbook_versions/2,
          fetch_latest_cookbook_versions/3,
          fetch_latest_cookbook_recipes/2,
@@ -279,50 +271,6 @@ fetch_requestor(Context, OrgName, ClientName) ->
         #chef_client{} = Client ->
             Client
     end.
-
--spec create_node(#context{}, #chef_node{}, object_id()) -> ok | {conflict, term()} | term().
-%% @doc Store a new node in the datastore.
-create_node(#context{}=Ctx, Node, ActorId) ->
-    create_object(Ctx, create_node, Node, ActorId).
-
--spec create_role(#context{}, #chef_role{}, object_id()) -> ok | {conflict, term()} | term().
-%% @doc Store a new role in the datastore.
-create_role(#context{}=Ctx, Role, ActorId) ->
-    create_object(Ctx, create_role, Role, ActorId).
-
--spec create_user(#context{}, #chef_user{}, object_id()) -> ok | {conflict, term()} | term().
-%% @doc Store a new user in the datastore.
-create_user(#context{}=Ctx, User, ActorId) ->
-    create_object(Ctx, create_user, User, ActorId).
-
--spec create_environment(#context{}, #chef_environment{}, object_id()) -> ok | {conflict, term()} | term().
-%% @doc Store a new environment in the datastore.
-create_environment(#context{}=Ctx, Environment, ActorId) ->
-    create_object(Ctx, create_environment, Environment, ActorId).
-
--spec create_client(#context{}, #chef_client{}, object_id()) -> ok | {conflict, term()} | term().
-%% @doc Store a new client in the datastore.
-create_client(#context{}=Ctx, Client, ActorId) ->
-    create_object(Ctx, create_client, Client, ActorId).
-
--spec create_data_bag(#context{}, #chef_data_bag{}, object_id()) -> 'ok' |
-                                                                    {'conflict', _} |
-                                                                    {'error', _}.
-%% @doc Store a new data_bag in the datastore.
-create_data_bag(#context{}=Ctx, #chef_data_bag{}=DataBag, ActorId) ->
-    create_object(Ctx, create_data_bag, DataBag, ActorId).
-
--spec create_data_bag_item(#context{}, #chef_data_bag_item{}, object_id()) -> ok | {conflict, term()} | term().
-%% @doc Store a new data_bag_item in the datastore.
-create_data_bag_item(#context{}=Ctx, DataBagItem, ActorId) ->
-    create_object(Ctx, create_data_bag_item, DataBagItem, ActorId).
-
--spec create_cookbook_version(DbContext :: #context{},
-                              CBVersion :: #chef_cookbook_version{},
-                              ActorId :: object_id()) -> ok | {conflict, _} | {error, _}.
-%% @doc Store a new cookbook_version in the datastore.
-create_cookbook_version(#context{}=Ctx, CookbookVersion, ActorId) ->
-    create_object(Ctx, create_cookbook_version, CookbookVersion, ActorId).
 
 %% Currently, this is only used internally, but will be useful for future enhancements to
 %% the sandboxes protocol that allow for partial progress monitoring (e.g., upload a few
@@ -823,9 +771,7 @@ environment_exists(#context{}=Ctx, OrgId, EnvName) ->
 
 -spec create(chef_object() | #chef_user{} | #chef_sandbox{}, #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
 create(#chef_cookbook_version{} = Record, DbContext, ActorId) ->
-    create_cookbook_version(DbContext, Record, ActorId);
-
-%% @doc Call the appropriate create function based on the given chef_object record
+    create_object(DbContext, create_cookbook_version, Record, ActorId);
 create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
     ObjectRec = chef_object:set_created(ObjectRec0, ActorId),
     QueryName = chef_object:create_query(ObjectRec),
