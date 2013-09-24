@@ -187,7 +187,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
             {true, chef_wm_util:set_json_body(Req, ObjectEjson), State1};
         false ->
-            case chef_db:update(DbContext, ObjectRec, ActorId) of
+            case chef_db:update(ObjectRec, DbContext, ActorId) of
                 ok ->
                     {true, chef_wm_util:set_json_body(Req, ObjectEjson), State};
                 not_found ->
