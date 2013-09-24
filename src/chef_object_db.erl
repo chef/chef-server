@@ -103,9 +103,6 @@ delete(DbContext, ObjectRec, _RequestorId) ->
 %% delete functions, making the `delete` function in this module very simple. Throws if the
 %% database call returns an error, otherwise returns `ok' ignoring specific return value
 %% from the chef_db module.
-delete_from_db(DbContext, #chef_cookbook_version{}=CBVersion) ->
-    %% chef_cookbook_version is still a special case
-    handle_delete_from_db(chef_db:delete_cookbook_version(DbContext, CBVersion));
 delete_from_db(DbContext, ObjectRec) ->
     handle_delete_from_db(chef_db:delete(DbContext, ObjectRec)).
 
