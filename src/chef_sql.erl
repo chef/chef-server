@@ -39,6 +39,7 @@
          create_object/2,
          delete_object/2,
          do_update/2,
+         fetch_object_names2/2,
 
          %%user ops
          fetch_user/1,
@@ -1068,6 +1069,20 @@ query_and_txfm_for_record(fetch, chef_cookbook_version) ->
     {find_cookbook_version_by_orgid_name_version, ?FIRST(chef_cookbook_version)};
 query_and_txfm_for_record(fetch_latest, chef_cookbook_version) ->
     {find_latest_cookbook_version_by_orgid_name, ?FIRST(chef_cookbook_version)}.
+
+
+-spec fetch_object_names2(bin_or_string(), atom()) ->
+                           {ok, [binary()]} | {error, term()}.
+%% @doc Return list of object names for a given organization and object type
+fetch_object_names2(OrgId, QueryName) ->
+    case sqerl:select(QueryName, [OrgId], rows_as_scalars, [name]) of
+        {ok, L} when is_list(L) ->
+            L;
+        {ok, none} ->
+            [];
+        {error, Error} ->
+            {error, Error}
+    end.
 
 -spec fetch_object_names(bin_or_string(), chef_object_name()) ->
                            {ok, [binary()]} | {error, term()}.

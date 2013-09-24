@@ -103,6 +103,7 @@
          connect/0,
          create/3,
          delete/2,
+         list/2,
          update/3,
          bulk_get/4,
          data_bag_exists/3,
@@ -781,6 +782,12 @@ create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
         {conflict, Msg}-> {conflict, Msg};
         {error, Why} -> {error, Why}
     end.
+
+-spec list(#context{}, tuple()) -> {ok, [binary()]} | {error, _}.
+list(#context{reqid = ReqId} = Ctx, StubRec) ->
+    QueryName = chef_object:list_query(StubRec),
+    OrgId = chef_object:org_id(StubRec),
+    chef_sql:fetch_object_names2(OrgId, QueryName).
 
 -spec update(tuple(), #context{}, object_id()) ->
              ok | not_found | {conflict, term()} | {error, term()}.
