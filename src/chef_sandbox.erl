@@ -21,7 +21,9 @@
 -module(chef_sandbox).
 
 -export([
-         parse_binary_json/2
+         id/1,
+         parse_binary_json/2,
+         set_created/2
         ]).
 
 -ifdef(TEST).
@@ -101,3 +103,12 @@ is_hex(<<"D", Rest/binary>>) -> is_hex(Rest);
 is_hex(<<"E", Rest/binary>>) -> is_hex(Rest);
 is_hex(<<"F", Rest/binary>>) -> is_hex(Rest);
 is_hex(_)                    -> false.
+
+%% start of chef_object behaviour callbacks
+-spec set_created(#chef_sandbox{}, object_id()) -> #chef_sandbox{}.
+set_created(#chef_sandbox{} = Object, _ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_sandbox{created_at = Now}.
+
+id(#chef_sandbox{id = Id}) ->
+    Id.
