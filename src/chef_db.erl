@@ -836,10 +836,10 @@ create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
         {error, Why} -> {error, Why}
     end.
 
--spec update(#context{}, chef_updatable_object() | #chef_user{}, object_id()) ->
+-spec update(tuple(), #context{}, object_id()) ->
              ok | not_found | {conflict, term()} | {error, term()}.
 %% TODO: get rid of cookbook_version special case
-update(#context{reqid=ReqId}=DbContext, #chef_cookbook_version{org_id=OrgId} = Record, ActorId) ->
+update(#chef_cookbook_version{org_id =OrgId} = Record, #context{reqid = ReqId} = DbContext, ActorId) ->
     case update_object(DbContext, ActorId, chef_object:update_query(Record), Record) of
         #chef_db_cb_version_update{deleted_checksums=DeletedChecksums} ->
             ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, DeletedChecksums)),
