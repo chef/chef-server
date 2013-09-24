@@ -49,7 +49,6 @@
          fetch_user/2,
          fetch_users/1,
          create_user/3,
-         delete_user/2,
          count_user_admins/1,
 
          %% node ops
@@ -57,40 +56,34 @@
          fetch_nodes/2,
          fetch_nodes/3,
          create_node/3,
-         delete_node/2,
          node_record_to_authz_id/2,
 
          %% role ops
          fetch_role/3,
          fetch_roles/2,
          create_role/3,
-         delete_role/2,
          %% role_record_to_authz_id/2,
 
          %% environment ops
          fetch_environment/3,
          fetch_environments/2,
          create_environment/3,
-         delete_environment/2,
 
          %% client ops
          fetch_client/3,
          fetch_clients/2,
          create_client/3,
-         delete_client/2,
 
          %% data_bag ops
          fetch_data_bag/3,
          fetch_data_bags/2,
          create_data_bag/3,
-         delete_data_bag/2,
 
          %% data_bag_item ops
          fetch_data_bag_item/4,
          fetch_data_bag_items/3,
          fetch_data_bag_item_ids/3,
          create_data_bag_item/3,
-         delete_data_bag_item/2,
 
          %% cookbook_version ops
          cookbook_exists/3,
@@ -100,7 +93,6 @@
          fetch_cookbook_versions/3,
          fetch_latest_cookbook_version/3,
          create_cookbook_version/3,
-         delete_cookbook_version/2,
          fetch_latest_cookbook_versions/2,
          fetch_latest_cookbook_versions/3,
          fetch_latest_cookbook_recipes/2,
@@ -706,69 +698,6 @@ delete(#context{reqid = ReqId}, ObjectRec) ->
         {ok, not_found} -> not_found;
         Result -> Result
     end.
-
-%% @doc Delete a cookbook version
--spec delete_cookbook_version(Ctx :: #context{},
-                              CookbookVersion :: #chef_cookbook_version{}) ->
-                                {ok, 1 | 2} | not_found | {error, term()}.
-delete_cookbook_version(#context{reqid=ReqId}=Ctx, #chef_cookbook_version{org_id=OrgId}=CookbookVersion) ->
-    case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
-        #chef_db_cb_version_delete{cookbook_delete=CookbookDeleted, deleted_checksums=DeletedChecksums} ->
-            ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, DeletedChecksums)),
-            %% TODO: return the actual chef_db_cb_version_delete record to the caller
-            case CookbookDeleted of
-                false -> {ok, 1};
-                true -> {ok, 2}
-            end;
-        Result -> Result %% not_found or {error, _}
-    end.
-
--spec delete_node(#context{}, #chef_node{}) -> {ok, 1 | 2} | not_found | {error, _}.
-%% @doc Delete a node. You can provide either a `#chef_node{}' record or just the ID of the
-%% node.
-delete_node(#context{}=Ctx, #chef_node{}=Node) -> delete_object(Ctx, delete_node, Node).
-
--spec delete_user(#context{}, #chef_user{}) -> {ok, 1 | 2 } | not_found | {error, _}.
-delete_user(#context{}=Ctx, #chef_user{}=User) ->
-  delete_object(Ctx, delete_user, User).
-
--spec delete_role(#context{}, #chef_role{}) -> {ok, 1 | 2} | not_found | {error, _}.
-%% @doc Delete a role. You can provide either a `#chef_role{}' record or just the ID of the
-%% role.
-delete_role(#context{}=Ctx, #chef_role{}=Role) -> delete_object(Ctx, delete_role, Role).
-
--spec delete_environment(#context{}, #chef_environment{}) -> {ok, 1 | 2} |
-                                                             not_found |
-                                                             {error, _}.
-%% @doc Delete a environment. You can provide either a `#chef_environment{}' record or just
-%% the ID of the environment.
-delete_environment(#context{}=Ctx, #chef_environment{}=Environment) ->
-    delete_object(Ctx, delete_environment, Environment).
-
--spec delete_client(#context{}, #chef_client{}) -> {ok, 1 | 2} |
-                                                   not_found |
-                                                   {error, _}.
-%% @doc Delete a client. You can provide either a `#chef_client{}' record or just
-%% the ID of the client.
-delete_client(#context{}=Ctx, #chef_client{}=Client) ->
-    delete_object(Ctx, delete_client, Client).
-
--spec delete_data_bag(#context{}, #chef_data_bag{}) -> {ok, 1 | 2} |
-                                                       not_found |
-                                                       {error, _}.
-%% @doc Delete a data_bag. You can provide either a `#chef_data_bag{}' record or just
-%% the ID of the data_bag.
-delete_data_bag(#context{}=Ctx, #chef_data_bag{}=DataBag) ->
-    delete_object(Ctx, delete_data_bag, DataBag).
-
--spec delete_data_bag_item(#context{}, #chef_data_bag_item{}) -> {ok, 1 | 2} |
-                                                                 not_found |
-                                                                 {error, _}.
-%% @doc Delete a data_bag_item. You can provide either a `#chef_data_bag_item{}' record or just
-%% the ID of the data_bag_item.
-delete_data_bag_item(#context{}=Ctx, #chef_data_bag_item{}=DataBagItem) ->
-    delete_object(Ctx, delete_data_bag_item, DataBagItem).
-
 
 %% @doc Verifies that all checksums in the given sandbox are marked as uploaded, and if so,
 %% deletes the sandbox from the database.
