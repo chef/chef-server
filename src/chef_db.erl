@@ -118,6 +118,7 @@
          is_user_in_org/3,
          connect/0,
          create/3,
+         delete/2,
          update/3,
          bulk_get/4,
          data_bag_exists/3,
@@ -683,6 +684,28 @@ fetch_data_bag_items(#context{} = Ctx, OrgName, DataBagName) ->
 %% @doc Returns list of data_bag_item names in `DataBagName' for `OrgName'.
 fetch_data_bag_item_ids(#context{} = Ctx, OrgName, DataBagName) ->
     fetch_objects(Ctx, fetch_data_bag_item_ids, OrgName, DataBagName).
+
+-spec delete(#context{}, tuple()) -> {ok, 1 | 2} | not_found | {error, _}.
+delete(#context{reqid = ReqId} = Ctx,
+       #chef_cookbook_version{org_id = OrgId} = CookbookVersion) ->
+    case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
+        #chef_db_cb_version_delete{cookbook_delete=CookbookDeleted, deleted_checksums=DeletedChecksums} ->
+            ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, DeletedChecksums)),
+            %% TODO: return the actual chef_db_cb_version_delete record to the caller
+            case CookbookDeleted of
+                false -> {ok, 1};
+                true -> {ok, 2}
+            end;
+        Result -> Result %% not_found or {error, _}
+    end;
+delete(#context{reqid = ReqId}, ObjectRec) ->
+    QueryName = chef_object:delete_query(ObjectRec),
+    Id = chef_object:id(ObjectRec),
+    case stats_hero:ctime(ReqId, {chef_sql, delete_object},
+                     fun() -> chef_sql:delete_object(QueryName, Id) end) of
+        {ok, not_found} -> not_found;
+        Result -> Result
+    end.
 
 %% @doc Delete a cookbook version
 -spec delete_cookbook_version(Ctx :: #context{},
