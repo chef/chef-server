@@ -27,6 +27,7 @@
          ejson_for_indexing/2,
          fields_for_update/1,
          id/1,
+         is_indexed/0,
          name/1,
          org_id/1,
          new_record/3,
@@ -103,6 +104,9 @@ type_name(#chef_client{}) ->
 
 authz_id(#chef_client{authz_id = AuthzId})->
     AuthzId.
+
+is_indexed() ->
+    true.
 
 ejson_for_indexing(#chef_client{}, Client) ->
     Client.

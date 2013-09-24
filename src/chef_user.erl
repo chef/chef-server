@@ -25,6 +25,7 @@
          ejson_for_indexing/2,
          fields_for_update/1,
          id/1,
+         is_indexed/0,
          name/1,
          org_id/1,
          new_record/3,
@@ -265,8 +266,11 @@ list_query() ->
 bulk_get_query() ->
     bulk_get_users.
 
+is_indexed() ->
+    false.
+
 ejson_for_indexing(#chef_user{}, _) ->
-    {[]}.
+    error(not_indexed).
 
 fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
                              updated_at      = UpdatedAt,

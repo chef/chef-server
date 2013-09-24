@@ -28,6 +28,7 @@
          extract_roles/1,
          fields_for_update/1,
          id/1,
+         is_indexed/0,
          insert_autofill_fields/1,
          name/1,
          org_id/1,
@@ -123,6 +124,9 @@ type_name(#chef_node{}) ->
 -spec authz_id(#chef_node{}) -> object_id().
 authz_id(#chef_node{authz_id = AuthzId}) ->
     AuthzId.
+
+is_indexed() ->
+    true.
 
 -spec ejson_for_indexing(#chef_node{}, ejson_term()) -> ejson_term().
 ejson_for_indexing(#chef_node{name = Name, environment = Environment}, Node) ->

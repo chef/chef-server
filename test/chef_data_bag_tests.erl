@@ -90,9 +90,7 @@ ejson_for_indexing_test() ->
     %% define the ejson_for_indexing callback, but we want the result to be
     %% empty
     Bag = #chef_data_bag{name = <<"the_bag_name">>},
-    Expected = {[]},
-    Got = chef_object:ejson_for_indexing(Bag, <<"the_bag_name">>),
-    ?assertEqual(Expected, Got).
+    ?assertError(not_indexed, chef_object:ejson_for_indexing(Bag, <<"the_bag_name">>)).
 
 id_test() ->
     ?assertEqual(<<"1">>, chef_object:id(#chef_data_bag{id = <<"1">>})).

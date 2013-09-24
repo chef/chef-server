@@ -27,6 +27,7 @@
          ejson_for_indexing/2,
          fields_for_update/1,
          id/1,
+         is_indexed/0,
          name/1,
          org_id/1,
          new_record/3,
@@ -151,6 +152,9 @@ update_from_ejson(#chef_environment{} = Env, EnvData) ->
     Name = ej:get({<<"name">>}, EnvData),
     Data = chef_db_compression:compress(chef_environment, chef_json:encode(EnvData)),
     Env#chef_environment{name = Name, serialized_object = Data}.
+
+is_indexed() ->
+    true.
 
 ejson_for_indexing(#chef_environment{}, Environment) ->
     Environment.

@@ -31,6 +31,7 @@
          extract_checksums/1,
          fields_for_update/1,
          id/1,
+         is_indexed/0,
          minimal_cookbook_ejson/2,
          name/1,
          org_id/1,
@@ -598,8 +599,11 @@ update_from_ejson(#chef_cookbook_version{org_id = OrgId,
                                           checksums         = UpdatedVersion#chef_cookbook_version.checksums,
                                           serialized_object = UpdatedVersion#chef_cookbook_version.serialized_object}.
 
+is_indexed() ->
+    false.
+
 ejson_for_indexing(#chef_cookbook_version{}, _CBV) ->
-    {[]}.
+    error(not_indexed).
 
 fields_for_update(#chef_cookbook_version{ id                = Id,
                                           frozen            = Frozen,

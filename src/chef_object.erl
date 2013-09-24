@@ -27,6 +27,7 @@
 -type object_rec() :: tuple().
 
 -callback authz_id(object_rec()) -> object_id().
+-callback is_indexed() -> boolean().
 -callback ejson_for_indexing(object_rec(), ejson_term()) -> ejson_term().
 -callback update_from_ejson(object_rec(), any()) -> object_rec().
 
@@ -66,6 +67,7 @@
          set_created/2,
          set_updated/2,
          ejson_for_indexing/2,
+         is_indexed/1,
          update_from_ejson/2,
          new_record/4,
          name/1,
@@ -154,6 +156,9 @@ bulk_get_query(Rec) ->
 
 fields_for_update(Rec) ->
     call(Rec, fields_for_update).
+
+is_indexed(Rec) ->
+    call0(Rec, is_indexed).
 
 %% Return the callback module for a given object record type. We're putting the abstraction
 %% in place in case we need to do something other than the identity mapping of record name

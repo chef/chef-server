@@ -26,6 +26,7 @@
          ejson_for_indexing/2,
          fields_for_update/1,
          id/1,
+         is_indexed/0,
          name/1,
          org_id/1,
          new_record/3,
@@ -96,8 +97,11 @@ new_record(OrgId, AuthzId, Name) ->
 authz_id(#chef_data_bag{authz_id = AuthzId}) ->
     AuthzId.
 
+is_indexed() ->
+    false.
+
 ejson_for_indexing(#chef_data_bag{}, _Name) ->
-    {[]}.
+    error(not_indexed).
 
 -spec update_from_ejson(#chef_data_bag{}, ejson_term()) -> #chef_data_bag{}.
 update_from_ejson(#chef_data_bag{} = DataBag, DataBagData) ->

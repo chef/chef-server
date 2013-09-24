@@ -26,6 +26,7 @@
          add_type_and_bag/2,
          authz_id/1,
          ejson_for_indexing/2,
+         is_indexed/0,
          fields_for_update/1,
          id/1,
          name/1,
@@ -103,6 +104,9 @@ set_created(#chef_data_bag_item{} = Object, ActorId) ->
 set_updated(#chef_data_bag_item{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#chef_data_bag_item{updated_at = Now, last_updated_by = ActorId}.
+
+is_indexed() ->
+    true.
 
 -spec ejson_for_indexing(#chef_data_bag_item{}, ejson_term()) -> ejson_term().
 ejson_for_indexing(#chef_data_bag_item{data_bag_name = BagName,

@@ -27,6 +27,7 @@
          ejson_for_indexing/2,
          fields_for_update/1,
          id/1,
+         is_indexed/0,
          name/1,
          environments/1,
          new_record/3,
@@ -118,6 +119,9 @@ new_record(OrgId, AuthzId, RoleData) ->
                org_id = OrgId,
                name = Name,
                serialized_object = Data}.
+
+is_indexed() ->
+    true.
 
 -spec ejson_for_indexing(#chef_role{}, ejson_term()) -> ejson_term().
 ejson_for_indexing(#chef_role{}, Role) ->
