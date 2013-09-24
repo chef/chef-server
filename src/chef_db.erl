@@ -870,8 +870,11 @@ environment_exists(#context{}=Ctx, OrgId, EnvName) ->
     end.
 
 -spec create(chef_object() | #chef_user{} | #chef_sandbox{}, #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
+create(#chef_cookbook_version{} = Record, DbContext, ActorId) ->
+    create_cookbook_version(DbContext, Record, ActorId);
+
 %% @doc Call the appropriate create function based on the given chef_object record
-create(ObjectRec0, #context{reqid = ReqId} = DbContext, ActorId) ->
+create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
     ObjectRec = chef_object:set_created(ObjectRec0, ActorId),
     QueryName = chef_object:create_query(ObjectRec),
     case stats_hero:ctime(ReqId, {chef_sql, create_object},
@@ -883,6 +886,7 @@ create(ObjectRec0, #context{reqid = ReqId} = DbContext, ActorId) ->
 
 -spec update(#context{}, chef_updatable_object() | #chef_user{}, object_id()) ->
              ok | not_found | {conflict, term()} | {error, term()}.
+%% TODO: get rid of cookbook_version special case
 update(#context{reqid=ReqId}=DbContext, #chef_cookbook_version{org_id=OrgId} = Record, ActorId) ->
     case update_object(DbContext, ActorId, chef_object:update_query(Record), Record) of
         #chef_db_cb_version_update{deleted_checksums=DeletedChecksums} ->
@@ -890,9 +894,18 @@ update(#context{reqid=ReqId}=DbContext, #chef_cookbook_version{org_id=OrgId} = R
             ok;
         Result -> Result %% {conflict, _} or {error, _}
     end;
-update(DbContext, Record, ActorId) ->
-    update_object(DbContext, ActorId, chef_object:update_query(Record), Record).
-
+update(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
+    ObjectRec = chef_object:set_updated(ObjectRec0, ActorId),
+    QueryName = chef_object:update_query(ObjectRec),
+    UpdatedFields = chef_object:fields_for_update(ObjectRec),
+    case stats_hero:ctime(ReqId, {chef_sql, do_update},
+                          fun() -> chef_sql:do_update(QueryName, UpdatedFields) end) of
+        #chef_db_cb_version_update{}=CookbookVersionUpdate -> CookbookVersionUpdate;
+        {ok, 1} -> ok;
+        {ok, not_found} -> not_found;
+        {conflict, Message} -> {conflict, Message};
+        {error, Error} -> {error, Error}
+    end.
 
 %% -------------------------------------
 %% private functions

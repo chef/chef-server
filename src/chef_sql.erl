@@ -37,6 +37,7 @@
          create_name_id_dict/2,
 
          create_object/2,
+         do_update/2,
 
          %%user ops
          fetch_user/1,
