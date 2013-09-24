@@ -66,12 +66,7 @@ delete_from_solr(ObjectRec) ->
 %% pulled out of the db so it will be as if the data was correctly deleted. If we deleted
 %% the solr data when a db error was encountered, we could have data in the db that could
 %% not be findable via search.
--spec delete(chef_db:db_context(),
-             chef_object() |
-             #chef_cookbook_version{checksums::'undefined' |
-                                               [binary()]} |
-             #chef_user{},
-             object_id() ) -> ok.
+-spec delete(chef_db:db_context(), tuple(), object_id() ) -> ok.
 delete(DbContext, #chef_data_bag{org_id = OrgId,
                                  name = DataBagName}=DataBag,
        _RequestorId) ->
@@ -103,28 +98,16 @@ delete(DbContext, ObjectRec, _RequestorId) ->
     delete_from_solr(ObjectRec),
     ok.
 
--spec delete_from_db(chef_db:db_context(),
-                     chef_object() | #chef_user{} | #chef_cookbook_version{}) -> ok.
+-spec delete_from_db(chef_db:db_context(), tuple()) -> ok.
 %% @doc Delete an object from the database.  Provides pattern-matching sugar over chef_db
 %% delete functions, making the `delete` function in this module very simple. Throws if the
 %% database call returns an error, otherwise returns `ok' ignoring specific return value
 %% from the chef_db module.
-delete_from_db(DbContext, #chef_client{}=Client) ->
-    handle_delete_from_db(chef_db:delete_client(DbContext, Client));
-delete_from_db(DbContext, #chef_node{}=Node) ->
-    handle_delete_from_db(chef_db:delete_node(DbContext, Node));
-delete_from_db(DbContext, #chef_user{}=User) ->
-    handle_delete_from_db(chef_db:delete_user(DbContext, User));
-delete_from_db(DbContext, #chef_role{}=Role) ->
-    handle_delete_from_db(chef_db:delete_role(DbContext, Role));
-delete_from_db(DbContext, #chef_environment{}=Environment) ->
-    handle_delete_from_db(chef_db:delete_environment(DbContext, Environment));
-delete_from_db(DbContext, #chef_data_bag{}=DataBag) ->
-    handle_delete_from_db(chef_db:delete_data_bag(DbContext, DataBag));
-delete_from_db(DbContext, #chef_data_bag_item{}=DataBagItem) ->
-    handle_delete_from_db(chef_db:delete_data_bag_item(DbContext, DataBagItem));
 delete_from_db(DbContext, #chef_cookbook_version{}=CBVersion) ->
-    handle_delete_from_db(chef_db:delete_cookbook_version(DbContext, CBVersion)).
+    %% chef_cookbook_version is still a special case
+    handle_delete_from_db(chef_db:delete_cookbook_version(DbContext, CBVersion));
+delete_from_db(DbContext, ObjectRec) ->
+    handle_delete_from_db(chef_db:delete(DbContext, ObjectRec)).
 
 handle_delete_from_db({error, _}=Error) ->
     throw({delete_from_db, Error});
