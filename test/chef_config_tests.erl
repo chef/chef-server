@@ -47,13 +47,13 @@ config_option_test_() ->
 		fun() ->
 			case {Value, ErrorState} of
 			    {undefined, _} ->
-				?assertError({configuration, TestApplication, TestOption, undefined},
+				?assertError(config_missing_item,
 					     chef_config:config_option(TestApplication, TestOption, Type));
 			    {_, no_error} ->
 				?assertEqual(Value,
 					     chef_config:config_option(TestApplication, TestOption, Type));
 			    {_, error} ->
-				?assertError({configuration, TestApplication, TestOption, Value, Type},
+				?assertError(config_bad_type,
 					     chef_config:config_option(TestApplication, TestOption, Type))
 			end
 		end}

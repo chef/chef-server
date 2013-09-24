@@ -28,32 +28,9 @@
 -type option_type() :: pos_integer.
 -type value_type() :: pos_integer().
 
-%% @doc Fetch a configuration value via `application:get_env/2` and
-%% verify it is of the given type.  Valid values are returned; invalid
-%% values trigger an error @end
 -spec config_option(Application :: atom(),
 		    OptionName :: atom(),
 		    Type :: option_type()) ->
 			   Value :: value_type().
 config_option(Application, OptionName, Type) ->
-    case application:get_env(Application, OptionName) of
-        {ok, Value} ->
-            case validate(Value, Type) of
-		true ->
-		    Value;
-		false ->
-		    error_logger:error_msg("Improper Configuration: ~p / ~p was ~p; should be a ~p~n",
-					   [Application, OptionName, Value, Type]),
-		    erlang:error({configuration, Application, OptionName, Value, Type})
-	    end;
-        undefined ->
-            error_logger:error_msg("Improper Configuration: ~p / ~p was undefined!~n",
-                                   [Application, OptionName]),
-            erlang:error({configuration, Application, OptionName, undefined})
-    end.
-
-%% @doc Return `true' if `Value' is of the specified `Type'; `false'
-%% otherwise.
--spec validate(Value :: term(), Type :: option_type()) -> boolean().
-validate(Value, pos_integer) when is_integer(Value) -> Value > 0;
-validate(_Value, pos_integer) -> false.
+    envy:get(Application, OptionName, Type).

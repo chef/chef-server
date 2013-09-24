@@ -124,14 +124,7 @@ solve_dependencies(AllVersions, EnvConstraints, Cookbooks) ->
                                              depsolver_timeout()).
 
 depsolver_timeout() ->
-    case application:get_env(chef_objects, depsolver_timeout) of
-        undefined ->
-            ?DEFAULT_DEPSOLVER_TIMEOUT;
-        {ok, Value} when is_integer(Value) ->
-            Value;
-        Bad ->
-            error({invalid_config, {chef_objects, depsolver_timeout, Bad}})
-    end.
+    envy:get(chef_objects, depsolver_timeout, ?DEFAULT_DEPSOLVER_TIMEOUT, non_neg_integer).
 
 folsom_time(M, F, Fun) ->
     Label = oc_folsom:mf_label(M, F),

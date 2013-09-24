@@ -124,9 +124,8 @@ base64_checksum(Checksum) ->
 %% @doc Utility function for fetching the S3 bucket name from config.
 -spec bucket() -> string().
 bucket() ->
-    {ok, Bucket} = application:get_env(chef_objects, s3_platform_bucket_name),
-    Bucket.
-
+    envy:get(chef_objects, s3_platform_bucket_name, string).
+   
 -spec headers_for_type(http_verb(), Checksum::binary()) -> [ {string(), string()} ].
 %% @doc helper function for generating headers for the S3 URL
 %%
@@ -152,19 +151,14 @@ get_external_config(VHostUrl) ->
     aws_config(s3_external_url(VHostUrl)).
 
 aws_config(S3Url) ->
-    {ok, S3AccessKeyId } =  application:get_env(chef_objects, s3_access_key_id),
-    {ok, S3SecretKeyId } =  application:get_env(chef_objects, s3_secret_key_id),
+    S3AccessKeyId =  envy:get(chef_objects, s3_access_key_id, string),
+    S3SecretKeyId =  envy:get(chef_objects, s3_secret_key_id, string),
     mini_s3:new(S3AccessKeyId, S3SecretKeyId, S3Url, path).
 
 %% @doc returns a url for accessing s3 internally. This is used
 %% to contact bookshelf or S3.
 s3_internal_url() ->
-    case application:get_env(chef_objects, s3_url) of
-        undefined ->
-            throw({error, missing_s3_url});
-        {ok, Url} ->
-            Url
-    end.
+    envy:get(chef_objects, s3_url, string).
 
 %% @doc returns a url for generating a presigned url to send back
 %% to the requestor. This url will be used by the requestor to
@@ -172,14 +166,12 @@ s3_internal_url() ->
 %% to be publicly accessible. If the url is configured with the
 %% atom host_header, then use the passed-in vhost url parameter.
 s3_external_url(VHostUrl) ->
-    case application:get_env(chef_objects, s3_external_url) of
-        undefined ->
-            throw({error, missing_s3_url});
-        {ok, host_header} ->
+    case envy:get(chef_objects, s3_external_url, [atom,string]) of
+        host_header ->
             VHostUrl;
-        {ok, "http" ++ _ = Url} when is_list(Url) ->
+         "http" ++ _ = Url ->
             Url;
-        {ok, Bad} ->
-            {invalid_s3_url, Bad}
+        BadUrl ->
+            {invalid_s3_url, BadUrl}
     end.
 

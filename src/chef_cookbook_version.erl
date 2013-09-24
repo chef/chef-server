@@ -537,10 +537,7 @@ extract_recipe_names(<<31, 139, _Rest/binary>>=XCookbookJSON) ->
 %% @doc Return the s3_url_ttl from the application environment, if it is
 %% undefined return the default value set in ?DEFAULT_S3_URL_TTL
 url_ttl() ->
-    case application:get_env(chef_objects, s3_url_ttl) of
-        {ok, S3TTL} -> S3TTL;
-        undefined          -> ?DEFAULT_S3_URL_TTL
-    end.
+    envy:get(chef_objects, s3_url_ttl, ?DEFAULT_S3_URL_TTL, pos_integer).
 
 %% @doc Given a list of files for a particular segment add in a S3 URL per file
 %% based on the checksum

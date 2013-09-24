@@ -50,8 +50,8 @@ label(s3=Upstream, {Mod, Fun}) when is_atom(Mod),
     %% using different S3 regions on latency and performance.
     %%
     %% Because data.
-    {ok, Url} = application:get_env(chef_objects, s3_url),
-    {ok, Bucket} = application:get_env(chef_objects, s3_platform_bucket_name),
+    Url = envy:get(chef_objects, s3_url, string),
+    Bucket = envy:get(chef_objects, s3_platform_bucket_name, string),
 
     %% These two components need to have '.' characters stripped so
     %% that we don't inadvertently introduce new hierarchy levels into
