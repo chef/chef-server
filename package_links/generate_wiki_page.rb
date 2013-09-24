@@ -95,6 +95,8 @@ module OCTechPreview
         "Ubuntu 10.04"
       when /ubuntu\.11\.04/
         "Ubuntu 11.04"
+      when /ubuntu\.12\.04/
+        "Ubuntu 12.04"
       when /windows\.msi/
         "Windows"
       when /\.gem/
@@ -153,10 +155,11 @@ if __FILE__ == $0
 
   packages = [
               # Private Chef
-              "private-chef-11.0.0_tech.preview.2+20130624205025-1.el5.x86_64.rpm",
-              "private-chef-11.0.0_tech.preview.2+20130624205025-1.el6.x86_64.rpm",
-              "private-chef_11.0.0-tech.preview.2+20130624205025-1.ubuntu.10.04_amd64.deb",
-              "private-chef_11.0.0-tech.preview.2+20130624205025-1.ubuntu.11.04_amd64.deb",
+              "private-chef-11.0.0_rc.2-1.el5.x86_64.rpm",
+              "private-chef-11.0.0_rc.2.el6.x86_64.rpm",
+              "private-chef_11.0.0-rc.2-1.ubuntu.10.04_amd64.deb",
+              "private-chef_11.0.0-rc.2-1.ubuntu.11.04_amd64.deb",
+              "private-chef_11.0.0-rc.2-1.ubuntu.12.04_amd64.deb",
 
               # Reporting
               "opscode-reporting-0.2.0_tech.preview.2-1.el5.x86_64.rpm",
@@ -167,20 +170,23 @@ if __FILE__ == $0
               "knife-reporting-0.1.0.gem",
 
               # Pushy
-              "opscode-push-jobs-server-0.9.0_tech.preview.1-1.el5.x86_64.rpm",
-              "opscode-push-jobs-server-0.9.0_tech.preview.1-1.el6.x86_64.rpm",
-              "opscode-push-jobs-server_0.9.0-tech.preview.1-1.ubuntu.10.04_amd64.deb",
-              "opscode-push-jobs-server_0.9.0-tech.preview.1-1.ubuntu.11.04_amd64.deb",
+              "opscode-push-jobs-server-1.0.0_rc.1-1.el5.x86_64.rpm",
+              "opscode-push-jobs-server-1.0.0_rc.1-1.el6.x86_64.rpm",
+              "opscode-push-jobs-server_1.0.0-rc.1-1.ubuntu.10.04_amd64.deb",
+              "opscode-push-jobs-server_1.0.0-rc.1-1.ubuntu.11.04_amd64.deb",
+              "opscode-push-jobs-server_1.0.0-rc.1-1.ubuntu.12.04_amd64.deb",
 
               "opscode-push-jobs-client-0.0.1+20130307153525.git.98.c04f587-1.windows.msi",
-              "opscode-push-jobs-client-0.9.0_tech.preview.1+20130621231152.git.1.b4a8992-1.el5.i686.rpm",
-              "opscode-push-jobs-client-0.9.0_tech.preview.1+20130621231152.git.1.b4a8992-1.el5.x86_64.rpm",
-              "opscode-push-jobs-client-0.9.0_tech.preview.1+20130621231152.git.1.b4a8992-1.el6.i686.rpm",
-              "opscode-push-jobs-client-0.9.0_tech.preview.1+20130621231152.git.1.b4a8992-1.el6.x86_64.rpm",
-              "opscode-push-jobs-client_0.9.0-tech.preview.1+20130621231152.git.1.b4a8992-1.ubuntu.10.04_i386.deb",
-              "opscode-push-jobs-client_0.9.0-tech.preview.1+20130621231152.git.1.b4a8992-1.ubuntu.10.04_amd64.deb",
-              "opscode-push-jobs-client_0.9.0-tech.preview.1+20130621231152.git.1.b4a8992-1.ubuntu.11.04_i386.deb",
-              "opscode-push-jobs-client_0.9.0-tech.preview.1+20130621231152.git.1.b4a8992-1.ubuntu.11.04_amd64.deb",
+              "opscode-push-jobs-client-1.0.0_rc.1+20130918224717-1.el5.i686.rpm",
+              "opscode-push-jobs-client-1.0.0_rc.1+20130918224717-1.el5.x86_64.rpm",
+              "opscode-push-jobs-client-1.0.0_rc.1+20130918224717-1.el6.i686.rpm",
+              "opscode-push-jobs-client-1.0.0_rc.1+20130918224717-1.el6.x86_64.rpm",
+              "opscode-push-jobs-client_1.0.0-rc.1+20130918224717-1.ubuntu.10.04_i386.deb",
+              "opscode-push-jobs-client_1.0.0-rc.1+20130918224717-1.ubuntu.10.04_amd64.deb",
+              "opscode-push-jobs-client_1.0.0-rc.1+20130918224717-1.ubuntu.11.04_i386.deb",
+              "opscode-push-jobs-client_1.0.0-rc.1+20130918224717-1.ubuntu.11.04_amd64.deb",
+              "opscode-push-jobs-client_1.0.0-rc.1+20130918224717-1.ubuntu.12.04_i386.deb",
+              "opscode-push-jobs-client_1.0.0-rc.1+20130918224717-1.ubuntu.12.04_amd64.deb",
 
               "knife-pushy-0.3.gem",
 
