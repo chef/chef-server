@@ -39,6 +39,7 @@
 %% Helpers for webmachine callbacks
 -export([create_from_json/5,
          init/2,
+         list_objects_json/2,
          verify_request_signature/2,
          update_from_json/4]).
 
@@ -883,3 +884,19 @@ stats_hero_label({BadPrefix, Fun}) ->
 %% request.
 stats_hero_upstreams() ->
     [<<"depsolver">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
+
+%% @doc Webmachine content producing callback (that can be wired into
+%% content_types_provided) that returns a JSON map of object names to object URLs. This
+%% leverages the `chef_object' behavior and relies upon a stub object record with `org_id'
+%% being present in `State#base_state.resource_state'.
+%%
+%% Note that since this module provides {@link content_types_provided/2} with a hard-coded
+%% callback of `to_json', you can make use of this function using mixer and renaming it to
+%% to_json.
+-spec list_objects_json(#wm_reqdata{}, #base_state{}) -> {binary(), #wm_reqdata{}, #base_state{}}.
+list_objects_json(Req, #base_state{chef_db_context = DbContext,
+                                   resource_state = StubRec} = State) ->
+    Names = chef_db:list(DbContext, StubRec),
+    RouteFun = ?BASE_ROUTES:bulk_route_fun(chef_object:type_name(StubRec), Req),
+    UriMap= [{Name, RouteFun(Name)} || Name <- Names],
+    {chef_json:encode({UriMap}), Req, State}.
