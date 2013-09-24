@@ -155,7 +155,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
                               chef_otto:dbname(OrgId),
                               chef_object:ejson_for_indexing(DataBagItem, ItemData)),
 
-    case chef_db:create_data_bag_item(DbContext, DataBagItem, ActorId) of
+    case chef_db:create(DataBagItem, DbContext, ActorId) of
         {conflict, _} ->
             LogMsg = {data_bag_name_conflict, DataBagName},
             {{halt, 409}, chef_wm_util:set_json_body(Req,
