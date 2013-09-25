@@ -41,6 +41,8 @@
                         ping/2,
                         post_is_create/2]}]).
 
+-mixin([{chef_wm_base, [{list_objects_json/2, to_json}]}]).
+
 -mixin([{?BASE_RESOURCE, [forbidden/2,
                           is_authorized/2,
                           service_available/2]}]).
@@ -60,8 +62,7 @@
 -export([
          allowed_methods/2,
          create_path/2,
-         from_json/2,
-         to_json/2
+         from_json/2
        ]).
 
 init(Config) ->
@@ -80,8 +81,11 @@ allowed_methods(Req, State) ->
 %% We set up the state such that the superuser avoids the ACL checks.
 %% FIXME: This is a temporary fix until pedant uses the validator which has
 %% permissions to create a new client
-validate_request('GET', Req, State) ->
-    {Req, State#base_state{resource_state = #client_state{}}};
+validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
+    %% Put a stub chef_client record into the resource_state. This allows us to use shared
+    %% code for generating the map of name => URL returned for GET /clients.  OrgId is set via
+    %% malformed_request.
+    {Req, State#base_state{resource_state = #chef_client{org_id = OrgId}}};
 validate_request('POST', Req, State) ->
     case wrq:req_body(Req) of
         undefined ->
@@ -129,17 +133,6 @@ from_json(Req, #base_state{reqid = RequestId,
         Else ->
             Else
     end.
-
-to_json(Req, State) ->
-    {all_clients_json(Req, State), Req, State}.
-
-%% Internal Functions
-all_clients_json(Req, #base_state{chef_db_context = DbContext,
-                                  organization_name = OrgName}) ->
-    ClientNames = chef_db:fetch_clients(DbContext, OrgName),
-    RouteFun = ?BASE_ROUTES:bulk_route_fun(client, Req),
-    UriMap = [ {Name, RouteFun(Name)} || Name <- ClientNames ],
-    chef_json:encode({UriMap}).
 
 malformed_request_message(Any, Req, State) ->
     chef_wm_malformed:malformed_request_message(Any, Req, State).

@@ -633,9 +633,11 @@ public_key(#chef_client{public_key = PublicKey}) ->
 -spec handle_auth_info(atom(), wm_req(), #base_state{}) -> authorized | forbidden.
 handle_auth_info(chef_wm_clients, Req,
                  #base_state{requestor = Requestor,
-                             resource_state = #client_state{client_data = Client}}) ->
+                             resource_state = ResourceState}) ->
     case wrq:method(Req) of
         'POST' -> %% create
+            %% Hack, GET and POST passes two different data structures for resource_state
+            Client = ResourceState#client_state.client_data,
             IsAdmin = chef_wm_authz:is_admin(Requestor),
 
             IsValidator = chef_wm_authz:is_validator(Requestor),
