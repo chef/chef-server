@@ -6,6 +6,8 @@
 require 'uuidtools'
 require 'openssl'
 
+# Ensure that all our Omnibus-ed binaries are the ones that get used;
+# much better than having to specify this on each resource!
 ENV['PATH'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:#{ENV['PATH']}"
 
 # Capture old node attribute values (if there are any, that is) in
