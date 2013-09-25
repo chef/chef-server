@@ -41,6 +41,7 @@
          do_update/2,
          fetch_object_names2/2,
          fetch_object/4,
+         fetch_object_names2/1,
 
          %%user ops
          fetch_users/0,
@@ -1016,6 +1017,19 @@ fetch_object_names2(OrgId, QueryName) ->
         {error, Error} ->
             {error, Error}
     end.
+
+fetch_object_names2(StubRec) ->
+    case chef_object:list(StubRec, fun sqerl_fun/3) of
+        {ok, L} when is_list(L) ->
+            L;
+        {ok, none} ->
+            [];
+        {error, _} = Error->
+            Error
+    end.
+
+sqerl_fun(QueryName, Args, SelectedFields) ->
+    sqerl:select(QueryName, Args, rows_as_scalars, SelectedFields).
 
 -spec fetch_object_names(bin_or_string(), chef_object_name()) ->
                            {ok, [binary()]} | {error, term()}.
