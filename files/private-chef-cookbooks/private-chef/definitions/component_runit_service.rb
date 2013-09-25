@@ -8,14 +8,6 @@ define :component_runit_service, :log_directory => nil, :svlogd_size => nil, :sv
              params[:enable]
            end
 
-  # Currently, only the opscode-expander-reindexer service declaration
-  # uses this :ha flag; all others rely on the node attribute
-  high_availability = if params[:ha].nil?
-                        node['private_chef'][component]['ha']
-                      else
-                        params[:ha]
-                      end
-
   runit_service component do
     action :nothing
     retries 20
@@ -36,16 +28,12 @@ define :component_runit_service, :log_directory => nil, :svlogd_size => nil, :sv
     )
   end
 
-  if high_availability
-    log "bring runit_service[#{component}] down" do
-      notifies :down, "runit_service[#{component}]", :immediately
-    end
-  end
-
-  if enable
-    log "enable runit_service[#{component}]" do
-      notifies :enable, "runit_service[#{component}]", :immediately
-    end
+  # If a service is supposed to be enabled on a backend or frontend
+  # box, the appropriate recipe will be loaded in that box's run list.
+  # Keepalived will handle shutting down services on the backend
+  # slave.
+  log "enable runit_service[#{component}]" do
+    notifies :enable, "runit_service[#{component}]", :immediately
   end
 
 end
