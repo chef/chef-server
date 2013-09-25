@@ -40,6 +40,7 @@
          delete_object/2,
          do_update/2,
          fetch_object_names2/2,
+         fetch_object/4,
 
          %%user ops
          fetch_user/1,
@@ -1041,7 +1042,13 @@ non_uploaded_checksums(SandboxId, OrgId) when is_binary(SandboxId),
 %% is determined by `RecordName'.
 fetch_object(OrgId, Name, RecordName) ->
     {QueryName, FirstRecordTxfm} = query_and_txfm_for_record(fetch, RecordName),
-    case sqerl:select(QueryName, [OrgId, Name], FirstRecordTxfm) of
+    %% UGLY: We'll eventually delete this code
+    {first_as_record, [RecordName, RecordFields]} = FirstRecordTxfm,
+    fetch_object([OrgId, Name], RecordName, QueryName, RecordFields).
+
+fetch_object(Keys, RecordName, QueryName, RecordFields) ->
+    FirstRecordTxfm = {first_as_record, [RecordName, RecordFields]},
+    case sqerl:select(QueryName, Keys, FirstRecordTxfm) of
         %% Awkward sanity check that we got back the expected record type here.
         {ok, Object} when RecordName =:= element(1, Object) ->
             {ok, Object};

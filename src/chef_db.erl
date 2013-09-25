@@ -105,6 +105,7 @@
          delete/2,
          list/2,
          update/3,
+         fetch/2,
          bulk_get/4,
          data_bag_exists/3,
          data_bag_names/2,
@@ -812,6 +813,21 @@ update(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
         {error, Error} -> {error, Error}
     end.
 
+-spec fetch(ObjectRec :: chef_object() | #chef_user{} | #chef_sandbox{},
+            DbContext :: #context{}) ->
+                   chef_object() | #chef_user{} | #chef_sandbox{}.
+fetch(ObjectRec, #context{reqid = ReqId}) ->
+    RecordType = element(1, ObjectRec), %% record type is not the same as type name :(
+    QueryName = chef_object:find_query(ObjectRec),
+    Keys = chef_object:fields_for_fetch(ObjectRec),
+    RecordFields = chef_object:record_fields(ObjectRec),
+    case stats_hero:ctime(ReqId, {chef_sql, fetch_object},
+                          fun() -> chef_sql:fetch_object(Keys, RecordType, QueryName, RecordFields) end) of
+        {ok, not_found} -> not_found;
+        {ok, Object} -> assert_chef_object(Object, RecordType);
+        {error, _Why} = Error -> Error
+    end.
+
 %% -------------------------------------
 %% private functions
 %% -------------------------------------
@@ -900,9 +916,8 @@ assert_chef_object(Object, chef_client) ->
 assert_chef_object(Object, chef_data_bag) ->
     ?ASSERT_RECORD(Object, chef_data_bag);
 
-%% not used, so left out for now to avoid dialyzer warning
-%% assert_chef_object(Object, chef_data_bag_item) ->
-%%     ?ASSERT_RECORD(Object, chef_data_bag_item);
+assert_chef_object(Object, chef_data_bag_item) ->
+    ?ASSERT_RECORD(Object, chef_data_bag_item);
 
 assert_chef_object(Object, chef_environment) ->
     ?ASSERT_RECORD(Object, chef_environment);
@@ -914,8 +929,13 @@ assert_chef_object(Object, chef_role) ->
     ?ASSERT_RECORD(Object, chef_role);
 
 assert_chef_object(Object, chef_sandbox) ->
-    ?ASSERT_RECORD(Object, chef_sandbox).
+    ?ASSERT_RECORD(Object, chef_sandbox);
 
+assert_chef_object(Object, chef_cookbook_version) ->
+    ?ASSERT_RECORD(Object, chef_cookbook_version);
+
+assert_chef_object(Object, chef_user) ->
+    ?ASSERT_RECORD(Object, chef_user).
 
 %% assert_chef_object(Object, chef_data_bag) ->
 %%     case Object of
