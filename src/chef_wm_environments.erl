@@ -31,6 +31,8 @@
                         ping/2,
                         post_is_create/2]}]).
 
+-mixin([{chef_wm_base, [{list_objects_json/2, to_json}]}]).
+
 -mixin([{?BASE_RESOURCE, [forbidden/2,
                           is_authorized/2,
                           service_available/2]}]).
@@ -47,8 +49,7 @@
 -export([allowed_methods/2,
          create_path/2,
          from_json/2,
-         resource_exists/2,
-         to_json/2]).
+         resource_exists/2]).
 
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
@@ -62,9 +63,11 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['POST', 'GET'], Req, State}.
 
-validate_request('GET', Req, State) ->
-    {Req, State#base_state{resource_state =
-                               #environment_state{}}};
+validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
+    %% Put a stub chef_environment record into the resource_state. This allows us to use shared
+    %% code for generating the map of name => URL returned for GET /environments.  OrgId is set via
+    %% malformed_request.
+    {Req, State#base_state{resource_state = #chef_environment{org_id = OrgId}}};
 validate_request('POST', Req, State) ->
     Body = wrq:req_body(Req),
     {ok, Environment} = chef_environment:parse_binary_json(Body),
@@ -101,16 +104,6 @@ from_json(Req, #base_state{resource_state = EnvironmentState}=State) ->
                       } = EnvironmentState,
     chef_wm_base:create_from_json(Req, State, chef_environment, {authz_id, AuthzId},
                                   EnvironmentData).
-
-to_json(Req, State) ->
-    {all_environments_json(Req, State), Req, State}.
-
-all_environments_json(Req, #base_state{chef_db_context = DbContext,
-                                       organization_name = OrgName}) ->
-    EnvNames = chef_db:fetch_environments(DbContext, OrgName),
-    RouteFun = ?BASE_ROUTES:bulk_route_fun(environment, Req),
-    UriMap= [{Name, RouteFun(Name)} || Name <- EnvNames],
-    chef_json:encode({UriMap}).
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
