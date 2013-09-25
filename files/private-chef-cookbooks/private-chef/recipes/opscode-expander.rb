@@ -50,7 +50,6 @@ end
 component_runit_service "opscode-expander"
 component_runit_service "opscode-expander-reindexer" do
   log_directory expander_reindexer_log_dir
-  enable node['private_chef']['opscode-expander']['enable']
   svlogd_size node['private_chef']['opscode-expander']['log_rotation']['file_maxbytes']
   svlogd_num node['private_chef']['opscode-expander']['log_rotation']['num_to_keep']
   ha node['private_chef']['opscode-expander']['ha']

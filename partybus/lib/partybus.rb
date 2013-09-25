@@ -16,6 +16,7 @@ module Partybus
     attr_accessor :partybus_migration_directory
     attr_accessor :migration_state_file
     attr_accessor :private_chef_role
+    attr_accessor :is_data_master
     attr_accessor :bootstrap_server
 
   end

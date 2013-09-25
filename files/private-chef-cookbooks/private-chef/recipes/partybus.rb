@@ -42,6 +42,7 @@ template partybus_config do
   variables(:connection_string => db_connection_string,
             :node_role => node_role,
             :db_service_name => db_service_name,
+            :is_data_master => OmnibusHelper.is_data_master?,
             :bootstrap_server => node['private_chef']['bootstrap']['enable'])
 end
 

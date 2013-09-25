@@ -49,5 +49,7 @@ link "/opt/opscode/embedded/service/opscode-chef-mover/etc/sys.config" do
   to mover_config
 end
 
-component_runit_service "opscode-chef-mover"
-
+# We want the service defined, but dead
+component_runit_service "opscode-chef-mover" do
+  action :down
+end
