@@ -12,7 +12,8 @@ private_chef_package_cleaner "opscode-authz" do
   directories ["/var/opt/opscode/opscode-authz",
                "/var/log/opscode/opscode-authz",
                "/opt/opscode/embedded/service/opscode-authz",
-               "/var/opt/opscode/couchdb/db/.authorization_design"]
+               "/var/opt/opscode/couchdb/db/.authorization_design",
+               "/var/opt/opscode/upgrades/oc_authz_migrator"]
   files ["/var/opt/opscode/couchdb/db/authorization.couch",
          "/var/opt/opscode/couchdb/db/authorization_design_documents.couch"]
 end
