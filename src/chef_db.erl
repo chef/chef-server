@@ -46,35 +46,28 @@
          mark_checksums_as_uploaded/3,
 
          %% user ops
-         fetch_user/2,
          fetch_users/1,
          count_user_admins/1,
 
          %% node ops
-         fetch_node/3,
          fetch_nodes/2,
          fetch_nodes/3,
          node_record_to_authz_id/2,
 
          %% role ops
-         fetch_role/3,
          fetch_roles/2,
          %% role_record_to_authz_id/2,
 
          %% environment ops
-         fetch_environment/3,
          fetch_environments/2,
 
          %% client ops
-         fetch_client/3,
          fetch_clients/2,
 
          %% data_bag ops
-         fetch_data_bag/3,
          fetch_data_bags/2,
 
          %% data_bag_item ops
-         fetch_data_bag_item/4,
          fetch_data_bag_items/3,
          fetch_data_bag_item_ids/3,
 
@@ -97,7 +90,6 @@
          fetch_sandbox/3,
          commit_sandbox/2,
 
-         %% fetch_orgs_for_user/2,
 
          is_user_in_org/3,
          connect/0,
@@ -182,19 +174,6 @@ darklaunch_from_context(#context{darklaunch = Darklaunch}) ->
 %%%
 %%% User access
 %%%
--spec fetch_user(#context{}, binary() | string()) -> #chef_user{} |
-                                                     not_found |
-                                                     {error, term()}.
-fetch_user(#context{reqid = ReqId, otto_connection = _Server} = _Context, UserName) ->
-    case ?SH_TIME(ReqId, chef_sql, fetch_user, (UserName)) of
-        {ok, not_found} ->
-            not_found;
-        {ok, #chef_user{}=User} ->
-            User;
-        {error, Error} ->
-            {error, Error}
-    end.
-
 -spec fetch_users(#context{}) -> [binary()] | {error, _}.
 fetch_users(#context{reqid = ReqId}) ->
     case stats_hero:ctime(ReqId, {chef_sql, fetch_users},
@@ -211,16 +190,12 @@ count_user_admins(#context{reqid = ReqId}) ->
        Other -> Other
   end.
 
-%%%
 -spec user_record_to_authz_id(#context{}, #chef_user{} | not_found) -> id().
 user_record_to_authz_id(#context{}, #chef_user{} = UserRecord) ->
     UserRecord#chef_user.authz_id;
 user_record_to_authz_id(#context{}, not_found) ->
     %% FIXME: is this what we want here?
     erlang:error({error, not_found}).
-
-%% fetch_org(S, OrgName) ->
-%%     chef_otto:fetch_org(S, OrgName).
 
 -spec fetch_org_id(#context{}, binary() | ?OSC_ORG_NAME) -> not_found | binary().
 fetch_org_id(_, ?OSC_ORG_NAME) ->
@@ -260,10 +235,10 @@ client_record_to_authz_id(_Context, ClientRecord) ->
                       binary()) -> #chef_client{} | #chef_user{} |
                                    %% TODO: fix chef_wm so we can just return 'not_found'
                                    {'not_found', 'client'}.
-fetch_requestor(Context, OrgName, ClientName) ->
-    case fetch_client(Context, OrgName, ClientName) of
+fetch_requestor(Context, OrgId, ClientName) ->
+    case fetch(#chef_client{org_id = OrgId, name = ClientName}, Context) of
         not_found ->
-            case fetch_user(Context, ClientName) of
+            case fetch(#chef_user{username = ClientName}, Context) of
                 not_found ->
                     %% back compat for now until we update chef_wm
                     {not_found, client};
@@ -317,69 +292,6 @@ make_sandbox(#context{}=Ctx, OrgName, ActorId, Checksums) ->
                     {conflict, Msg};
                 {error, Why} ->
                     {error, Why}
-            end
-    end.
-
--spec fetch_environment(#context{},
-                        OrgName :: binary() | {id, object_id()},
-                        EnvironmentName :: binary()) -> #chef_environment{} |
-                                                        not_found |
-                                                        {error, _}.
-%% @doc Return the environment in `OrgName' with name `EnvironmentName'. Returns a
-%% `#chef_environment{}' record.
-fetch_environment(#context{} = Ctx, OrgName, EnvironmentName) ->
-    fetch_object(Ctx, chef_environment, OrgName, EnvironmentName).
-
--spec fetch_client(#context{}, binary(), binary()) -> #chef_client{} |
-                                                      not_found | {error, _}.
-%% @doc Return the client in `OrgName' with name `ClientName'. Returns a
-%% `#chef_client{}' record.
-fetch_client(#context{} = Ctx, OrgName, ClientName) ->
-    fetch_object(Ctx, chef_client, OrgName, ClientName).
-
--spec fetch_node(#context{}, binary(), binary()) -> #chef_node{} |
-                                                    not_found |
-                                                    {error, _}.
-%% @doc Return the node in `OrgName' with name `NodeName'. Returns a `#chef_node{}' record.
-fetch_node(#context{} = Ctx, OrgName, NodeName) ->
-    fetch_object(Ctx, chef_node, OrgName, NodeName).
-
--spec fetch_role(#context{}, binary(), binary()) -> #chef_role{} |
-                                                    not_found |
-                                                    {error, _}.
-%% @doc Return the role in `OrgName' with name `RoleName'. Returns a `#chef_role{}' record.
-fetch_role(#context{} = Ctx, OrgName, RoleName) ->
-    fetch_object(Ctx, chef_role, OrgName, RoleName).
-
--spec fetch_data_bag(#context{}, binary(), binary()) -> #chef_data_bag{} |
-                                                        not_found |
-                                                        {error, _}.
-%% @doc Return the data_bag in `OrgName' with name `DataBagName'. Returns a
-%% `#chef_data_bag{}' record.
-fetch_data_bag(#context{} = Ctx, OrgName, DataBagName) ->
-    fetch_object(Ctx, chef_data_bag, OrgName, DataBagName).
-
--spec fetch_data_bag_item(#context{}, binary(), binary(), binary()) ->
-                                 #chef_data_bag_item{} |
-                                 not_found |
-                                 {error, _}.
-%% @doc Return the data_bag_item in the `DataBagName' data_bag in the `OrgName'
-%% org.. Returns a `#chef_data_bag_item{}' record.
-fetch_data_bag_item(#context{reqid = ReqId} = Ctx, OrgName, DataBagName, ItemName) ->
-    case fetch_org_id(Ctx, OrgName) of
-        not_found ->
-            %% FIXME: do we want to indicate that the issue is the org not found?
-            %%    {not_found, org};
-            not_found;
-        OrgId ->
-            case ?SH_TIME(ReqId, chef_sql, fetch_data_bag_item, (OrgId, DataBagName,
-                                                                 ItemName)) of
-                {ok, not_found} ->
-                    not_found;
-                {ok, #chef_data_bag_item{}=DataBagItem} ->
-                    DataBagItem;
-                {error, _Why} = Error ->
-                    Error
             end
     end.
 
@@ -542,31 +454,32 @@ fetch_environment_filtered_cookbook_versions(#context{reqid=ReqId}=DbContext, Or
         not_found ->
             not_found;
         OrgId ->
-            case ?SH_TIME(ReqId, chef_sql, fetch_environment_filtered_cookbook_versions, (OrgId, EnvName, CookbookName, NumVersions)) of
-                {ok, Results} ->
-                    Results;
-                {error, Error} ->
-                    {error, Error}
+            case fetch(#chef_environment{org_id = OrgId, name = EnvName}, DbContext) of
+                #chef_environment{} = Environment ->
+                    case ?SH_TIME(ReqId, chef_sql, fetch_environment_filtered_cookbook_versions, (OrgId, Environment, CookbookName, NumVersions)) of
+                        {ok, Results} ->
+                            Results;
+                        {error, Error} ->
+                            {error, Error}
+                    end;
+                {error, Error} -> {error, Error}
             end
     end.
 
-%% @doc Given an environment in an organization, return a sorted list
-%% of qualified recipe names for the cookbook versions that best match
-%% the environment's version constraints, if any.
--spec fetch_environment_filtered_recipes(DbContext :: #context{},
-                                         OrgName :: binary(),
-                                         EnvName :: binary()) ->
-                                                [QualifiedRecipeName :: binary()].
 fetch_environment_filtered_recipes(#context{reqid=ReqId}=DbContext, OrgName, EnvName) ->
     case fetch_org_id(DbContext, OrgName) of
         not_found ->
             not_found;
         OrgId ->
-            case ?SH_TIME(ReqId, chef_sql, fetch_environment_filtered_recipes, (OrgId, EnvName)) of
-                {ok, Results} ->
-                    Results;
-                {error, Error} ->
-                    {error, Error}
+            case fetch(#chef_environment{org_id = OrgId, name = EnvName}, DbContext) of
+                #chef_environment{} = Environment ->
+                    case ?SH_TIME(ReqId, chef_sql, fetch_environment_filtered_recipes, (OrgId, Environment)) of
+                        {ok, Results} ->
+                            Results;
+                        {error, Error} ->
+                            {error, Error}
+                    end;
+                {error, Error} -> {error, Error}
             end
     end.
 
@@ -698,7 +611,7 @@ node_record_to_authz_id(_Context, NodeRecord) ->
 
 -spec is_user_in_org(#context{}, binary(), binary()) -> boolean() | {error, _}.
 is_user_in_org(#context{reqid = ReqId, otto_connection = S}=Ctx, User, OrgName) ->
-    case fetch_user(Ctx, User) of
+    case fetch(#chef_user{username = User}, Ctx) of
         #chef_user{id = UserId} ->
             ?SH_TIME(ReqId, chef_otto, is_user_in_org, (S, UserId, OrgName));
         not_found ->
@@ -749,8 +662,8 @@ bulk_get_couchdb(#context{reqid = ReqId, otto_connection = S}=Ctx, OrgName, _Typ
 
 -spec data_bag_exists(#context{}, binary(), binary()) -> boolean().
 %% @doc Return true if data bag `DataBag' exists in org `OrgName' and false otherwise.
-data_bag_exists(#context{}=Ctx, OrgName, DataBag) ->
-    case fetch_data_bag(Ctx, OrgName, DataBag) of
+data_bag_exists(#context{}=Ctx, OrgId, DataBag) ->
+    case fetch(#chef_data_bag{org_id = OrgId, name = DataBag}, Ctx) of
         #chef_data_bag{} -> true;
         not_found -> false
     end.
@@ -766,7 +679,7 @@ data_bag_names(#context{}=Ctx, OrgId) ->
 %% @doc Return true if environment `EnvName' exists in org `OrgId' and false otherwise.
 environment_exists(#context{}=Ctx, OrgId, EnvName) ->
     %% FIXME: we should implement a specialized environment exists function
-    case fetch_environment(Ctx, {id, OrgId}, EnvName) of
+    case fetch(#chef_environment{org_id = OrgId, name = EnvName}, Ctx) of
         #chef_environment{} -> true;
         _ -> false
     end.
@@ -815,7 +728,9 @@ update(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
 
 -spec fetch(ObjectRec :: chef_object() | #chef_user{} | #chef_sandbox{},
             DbContext :: #context{}) ->
-                   chef_object() | #chef_user{} | #chef_sandbox{}.
+                   {ok, chef_object() | #chef_user{} | #chef_sandbox{}} |
+                   {ok, not_found} |
+                   {error, term()}.
 fetch(ObjectRec, #context{reqid = ReqId}) ->
     RecordType = element(1, ObjectRec), %% record type is not the same as type name :(
     QueryName = chef_object:find_query(ObjectRec),
@@ -889,18 +804,6 @@ fetch_object(#context{}=Ctx, ObjectType, OrgName, ObjectIdentifier) ->
             fetch_object(Ctx, ObjectType, {id, OrgId}, ObjectIdentifier)
     end.
 
-%% note that chef_data_bag_item is handled separately because it requires an extra argument
-%% to fetch.
-fetch_query_for_type(chef_client) ->
-    fetch_client;
-fetch_query_for_type(chef_data_bag) ->
-    fetch_data_bag;
-fetch_query_for_type(chef_environment) ->
-    fetch_environment;
-fetch_query_for_type(chef_node) ->
-    fetch_node;
-fetch_query_for_type(chef_role) ->
-    fetch_role;
 fetch_query_for_type(chef_sandbox) ->
     fetch_sandbox.
 
