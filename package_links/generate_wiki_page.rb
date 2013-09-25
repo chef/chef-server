@@ -156,7 +156,7 @@ if __FILE__ == $0
   packages = [
               # Private Chef
               "private-chef-11.0.0_rc.2-1.el5.x86_64.rpm",
-              "private-chef-11.0.0_rc.2.el6.x86_64.rpm",
+              "private-chef-11.0.0_rc.2-1.el6.x86_64.rpm",
               "private-chef_11.0.0-rc.2-1.ubuntu.10.04_amd64.deb",
               "private-chef_11.0.0-rc.2-1.ubuntu.11.04_amd64.deb",
               "private-chef_11.0.0-rc.2-1.ubuntu.12.04_amd64.deb",
