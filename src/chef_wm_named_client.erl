@@ -65,10 +65,10 @@ allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
 validate_any_request(Req, #base_state{chef_db_context = DbContext,
-                                      organization_name = OrgName,
+                                      organization_guid = OrgId,
                                       resource_state = ClientState} = State) ->
     Name = chef_wm_util:object_name(client, Req),
-    Client = case chef_db:fetch_client(DbContext, OrgName, Name) of
+    Client = case chef_db:fetch(#chef_client{org_id = OrgId, name = Name}, DbContext) of
                  not_found ->
                      not_found;
                  #chef_client{} = Found ->

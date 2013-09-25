@@ -86,9 +86,9 @@ validate_request('PUT', Req, #base_state{resource_state = RoleState} = State) ->
 %% Memoize the container id so we don't hammer the database
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = RoleState,
-                           organization_name=OrgName}=State) ->
+                           organization_guid = OrgId} = State) ->
     RoleName = chef_wm_util:object_name(role, Req),
-    case chef_db:fetch_role(DbContext, OrgName, RoleName) of
+    case chef_db:fetch(#chef_role{org_id = OrgId, name = RoleName}, DbContext) of
         not_found ->
             Message = chef_wm_util:not_found_message(role, RoleName),
             Req1 = chef_wm_util:set_json_body(Req, Message),

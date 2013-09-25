@@ -96,12 +96,13 @@ malformed_request_message(Any, _Req, _State) ->
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            organization_name = OrgName,
+                           organization_guid = OrgId,
                            resource_state = #environment_state{cookbook=CookbookName}} = State) ->
 
     EnvironmentName = chef_wm_util:object_name(environment, Req),
 
     %% First we need to see if the environment even exists
-    case chef_db:fetch_environment(DbContext, OrgName, EnvironmentName) of
+    case chef_db:fetch(#chef_environment{org_id = OrgId, name = EnvironmentName}, DbContext) of
         #chef_environment{} = Env ->
             %% Now that we know the environment exists, we should check to see if the
             %% cookbook exists (maybe)

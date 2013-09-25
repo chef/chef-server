@@ -78,7 +78,8 @@ validate_request('PUT', Req, #base_state{resource_state = UserState} = State) ->
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = UserState}=State) ->
     UserName = chef_wm_util:object_name(user, Req),
-    case chef_db:fetch_user(DbContext, UserName) of
+    %% TODO chef_users don't follow chef_object callback pattern
+    case chef_db:fetch(#chef_user{username = UserName}, DbContext) of
         not_found ->
             Message = chef_wm_util:not_found_message(user, UserName),
             Req1 = chef_wm_util:set_json_body(Req, Message),

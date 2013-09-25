@@ -80,11 +80,11 @@ validate_request('POST', Req, #base_state{resource_state=DepsolverState}=State) 
     {Req, State1}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
-                           organization_name = OrgName,
+                           organization_guid = OrgId,
                            resource_state = #depsolver_state{environment_name = EnvName}} = State) ->
-    forbidden_for_environment(chef_db:fetch_environment(DbContext, OrgName, EnvName),
-                              Req,
-                              State).
+    Environment = chef_db:fetch(#chef_environment{org_id = OrgId, name = EnvName}, DbContext),
+    forbidden_for_environment(Environment, Req, State).
+
 
 %% @doc helper function for auth_info/2 which when given the output of chef_db:fetch_environment,
 %% checks the permissions of the requestor against the environment and cookbook container

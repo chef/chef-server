@@ -67,16 +67,17 @@ malformed_request_message(Any, _Req, _State) ->
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            organization_name = OrgName,
+                           organization_guid = OrgId,
                            resource_state = RoleState} = State) ->
     RoleName = chef_wm_util:object_name(role, Req),
     EnvName = chef_wm_util:object_name(environment, Req),
-    case chef_db:fetch_role(DbContext, OrgName, RoleName) of
+    case chef_db:fetch(#chef_role{org_id = OrgId, name = RoleName}, DbContext) of
         not_found ->
             Message = chef_wm_util:not_found_message(role, RoleName),
             Req1 = chef_wm_util:set_json_body(Req, Message),
             {{halt, 404}, Req1, State#base_state{log_msg = role_not_found}};
         #chef_role{authz_id = AuthzId} = Role ->
-            case environment_exists(EnvName, OrgName, DbContext) of
+            case environment_exists(EnvName, OrgId, DbContext) of
                 true ->
                     %% check authz here
                     RoleState1 = RoleState#role_state{chef_role = Role},
@@ -106,8 +107,8 @@ retrieve_run_list(EnvName, RoleJson) ->
 environment_exists(<<"_default">>, _OrgName, _DbContext) ->
     %% The default environment always exists, by definition
     true;
-environment_exists(Name, OrgName, DbContext) ->
-    case chef_db:fetch_environment(DbContext, OrgName, Name) of
+environment_exists(Name, OrgId, DbContext) ->
+    case chef_db:fetch(#chef_environment{org_id = OrgId, name = Name}, DbContext) of
         not_found ->
             false;
         #chef_environment{} ->

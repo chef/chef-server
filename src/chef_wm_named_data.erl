@@ -108,10 +108,10 @@ validate_request('POST', Req, #base_state{resource_state = DataState} = State) -
                                               data_bag_item_ejson = DataBagItemEjson}}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
-                           organization_name = OrgName,
+                           organization_guid = OrgId,
                            resource_state = DataBagState} = State) ->
     DataBagName = chef_wm_util:object_name(data_bag, Req),
-    case chef_db:fetch_data_bag(DbContext, OrgName, DataBagName) of
+    case chef_db:fetch(#chef_data_bag{org_id = OrgId, name = DataBagName}, DbContext) of
         not_found ->
             Message = custom_404_msg(Req, DataBagName),
             Req1 = chef_wm_util:set_json_body(Req, Message),
