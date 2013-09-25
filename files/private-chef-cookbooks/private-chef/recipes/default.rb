@@ -140,7 +140,7 @@ include_recipe "private-chef::runit"
 
 # Configure Services
 [
-        "drbd",
+  "drbd",
   "couchdb",
   "rabbitmq",
   "postgresql",
@@ -156,7 +156,7 @@ include_recipe "private-chef::runit"
   "opscode-webui",
   "opscode-chef-mover",
   "nginx",
-        "keepalived"
+  "keepalived"
 ].each do |service|
   if node["private_chef"][service]["enable"]
     include_recipe "private-chef::#{service}"
