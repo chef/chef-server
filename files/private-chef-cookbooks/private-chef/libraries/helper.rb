@@ -17,18 +17,6 @@ class OmnibusHelper
     o.exitstatus == 0 ? true : false
   end
 
-  # Specifically determine if a PostgreSQL service is running on this
-  # machine by looking for the presence of a PID file.  We're not
-  # using #check_status above, because that doesn't work on a backend
-  # slave (returns 0 if there are no services defined).
-  #
-  # @todo: make private-chef-ctl status more robust in this scenario
-  # @todo This is probably why #should_notify? above has a symlink
-  #   check; if so, address that as well
-  def self.postgres_up?
-    File.exists?(File.join(PrivateChef['postgresql']['data_dir'], "postmaster.pid"))
-  end
-
   # generate a certificate signed by the opscode ca key
   #
   # === Returns
