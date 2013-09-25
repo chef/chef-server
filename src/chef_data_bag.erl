@@ -24,6 +24,7 @@
 -export([
          authz_id/1,
          ejson_for_indexing/2,
+         fields_for_fetch/1,
          fields_for_update/1,
          id/1,
          is_indexed/0,
@@ -31,6 +32,7 @@
          org_id/1,
          new_record/3,
          parse_binary_json/2,
+         record_fields/0,
          set_created/2,
          set_updated/2,
          type_name/1,
@@ -137,6 +139,13 @@ list_query() ->
 
 fields_for_update(_Rec) ->
     error(not_implemented).
+
+fields_for_fetch(#chef_data_bag{org_id = OrgId,
+                                name = Name}) ->
+    [OrgId, Name].
+
+record_fields() ->
+    record_info(fields, chef_data_bag).
 
 %% @doc Convert a binary JSON string representing a Chef data_bag into an EJson-encoded
 %% Erlang data structure.

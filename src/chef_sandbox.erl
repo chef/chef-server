@@ -23,7 +23,10 @@
 -export([
          id/1,
          parse_binary_json/2,
-         set_created/2
+         set_created/2,
+         fields_for_fetch/1,
+         find_query/0,
+         record_fields/0
         ]).
 
 -ifdef(TEST).
@@ -112,3 +115,13 @@ set_created(#chef_sandbox{} = Object, _ActorId) ->
 
 id(#chef_sandbox{id = Id}) ->
     Id.
+
+fields_for_fetch(#chef_sandbox{org_id = OrgId,
+                               id = Id}) ->
+    [OrgId, Id].
+
+find_query() ->
+    find_sandbox_by_id.
+
+record_fields() ->
+    record_info(fields, chef_sandbox).

@@ -23,6 +23,7 @@
          assemble_user_ejson/2,
          authz_id/1,
          ejson_for_indexing/2,
+         fields_for_fetch/1,
          fields_for_update/1,
          id/1,
          is_indexed/0,
@@ -32,6 +33,7 @@
          parse_binary_json/1,
          parse_binary_json/2,
          password_data/1,
+         record_fields/0,
          set_created/2,
          set_password_data/2,
          set_updated/2,
@@ -258,7 +260,7 @@ delete_query() ->
     delete_user_by_id.
 
 find_query() ->
-    find_user_by_orgid_name.
+    find_user_by_username.
 
 list_query() ->
     list_users_for_org.
@@ -281,3 +283,9 @@ fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
                              hash_type       = HashType,
                              id              = Id }) ->
     [IsAdmin =:= true, PublicKey, HashedPassword, Salt, HashType, LastUpdatedBy, UpdatedAt, Id].
+
+fields_for_fetch(#chef_user{username = UserName}) ->
+    [UserName].
+
+record_fields() ->
+    record_info(fields, chef_user).

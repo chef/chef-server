@@ -30,6 +30,7 @@
          ejson_for_indexing/2,
          extract_checksums/1,
          fields_for_update/1,
+         fields_for_fetch/1,
          id/1,
          is_indexed/0,
          minimal_cookbook_ejson/2,
@@ -39,6 +40,7 @@
          parse_binary_json/2,
          parse_version/1,
          qualified_recipe_names/2,
+         record_fields/0,
          set_created/2,
          set_updated/2,
 
@@ -615,3 +617,13 @@ fields_for_update(#chef_cookbook_version{ id                = Id,
                                           last_updated_by   = LastUpdatedBy,
                                           updated_at        = UpdatedAt }) ->
     [Frozen, MetaAttributes, MetaDeps, MetaLongDesc, Metadata, SerializeObject, LastUpdatedBy, UpdatedAt, Id].
+
+fields_for_fetch(#chef_cookbook_version{org_id = OrgId,
+                                        name = Name,
+                                        major = Major,
+                                        minor = Minor,
+                                        patch = Patch}) ->
+    [OrgId, Name, Major, Minor, Patch].
+
+record_fields() ->
+    record_info(fields, chef_cookbook_version).

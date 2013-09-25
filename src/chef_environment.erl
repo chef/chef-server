@@ -25,6 +25,7 @@
 -export([
          authz_id/1,
          ejson_for_indexing/2,
+         fields_for_fetch/1,
          fields_for_update/1,
          id/1,
          is_indexed/0,
@@ -32,6 +33,7 @@
          org_id/1,
          new_record/3,
          parse_binary_json/1,
+         record_fields/0,
          set_created/2,
          set_default_values/1,
          set_updated/2,
@@ -197,3 +199,10 @@ fields_for_update(#chef_environment{last_updated_by = LastUpdatedBy,
                                     serialized_object = Object,
                                     id = Id}) ->
     [LastUpdatedBy, UpdatedAt, Name, Object, Id].
+
+fields_for_fetch(#chef_environment{org_id = OrgId,
+                                   name = Name}) ->
+    [OrgId, Name].
+
+record_fields() ->
+    record_info(fields, chef_environment).

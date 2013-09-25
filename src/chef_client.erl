@@ -25,6 +25,7 @@
          add_authn_fields/2,
          assemble_client_ejson/2,
          ejson_for_indexing/2,
+         fields_for_fetch/1,
          fields_for_update/1,
          id/1,
          is_indexed/0,
@@ -39,6 +40,7 @@
          osc_parse_binary_json/3,
          parse_binary_json/2,
          parse_binary_json/3,
+         record_fields/0,
          set_created/2,
          set_updated/2,
          type_name/1,
@@ -186,6 +188,13 @@ fields_for_update(#chef_client{last_updated_by = LastUpdatedBy,
      PublicKey, PubkeyVersion,
      IsValidator =:= true,
      IsAdmin =:= true, Id].
+
+fields_for_fetch(#chef_client{org_id = OrgId,
+                              name = Name}) ->
+    [OrgId, Name].
+
+record_fields() ->
+    record_info(fields, chef_client).
 
 -spec add_authn_fields(ejson_term(), binary()) -> ejson_term().
 %% @doc Add in the generated public key along with other authn related

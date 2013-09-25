@@ -42,6 +42,8 @@
 -callback bulk_get_query() -> atom().
 
 -callback fields_for_update(object_rec()) -> list().
+-callback fields_for_fetch(object_rec()) -> list().
+-callback record_fields() -> list(atom()).
 
 -callback new_record(OrgId :: object_id(),
                      AuthzId :: object_id() | unset,
@@ -82,7 +84,9 @@
          list_query/1,
          update_query/1,
 
-         fields_for_update/1
+         fields_for_fetch/1,
+         fields_for_update/1,
+         record_fields/1
         ]).
 
 -spec new_record(RecType :: atom(),
@@ -136,6 +140,10 @@ set_created(Rec, ActorId) ->
     Mod = callback_mod(Rec),
     Mod:set_created(Rec, ActorId).
 
+-spec record_fields(object_rec()) -> list(atom()).
+record_fields(Rec) ->
+    call0(Rec, record_fields).
+
 create_query(Rec) ->
     call0(Rec, create_query).
 
@@ -156,6 +164,9 @@ bulk_get_query(Rec) ->
 
 fields_for_update(Rec) ->
     call(Rec, fields_for_update).
+
+fields_for_fetch(Rec) ->
+    call(Rec, fields_for_fetch).
 
 is_indexed(Rec) ->
     call0(Rec, is_indexed).

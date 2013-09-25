@@ -26,6 +26,7 @@
          ejson_for_indexing/2,
          extract_recipes/1,
          extract_roles/1,
+         fields_for_fetch/1,
          fields_for_update/1,
          id/1,
          is_indexed/0,
@@ -34,6 +35,7 @@
          org_id/1,
          new_record/3,
          parse_check_binary_as_json_node/2,
+         record_fields/0,
          set_created/2,
          set_updated/2,
          type_name/1,
@@ -198,6 +200,13 @@ fields_for_update(#chef_node{environment = Environment,
                              serialized_object = Object,
                              id = Id}) ->
     [Environment, LastUpdatedBy, UpdatedAt, Object, Id].
+
+fields_for_fetch(#chef_node{org_id = OrgId,
+                            name = Name}) ->
+    [OrgId, Name].
+
+record_fields() ->
+    record_info(fields, chef_node).
 
 extract_recipes(RunList) ->
     [ binary:part(Item, {0, byte_size(Item) - 1})

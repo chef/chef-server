@@ -27,12 +27,14 @@
          authz_id/1,
          ejson_for_indexing/2,
          is_indexed/0,
+         fields_for_fetch/1,
          fields_for_update/1,
          id/1,
          name/1,
          org_id/1,
          new_record/3,
          parse_binary_json/2,
+         record_fields/0,
          set_created/2,
          set_updated/2,
          type_name/1,
@@ -146,6 +148,14 @@ fields_for_update(#chef_data_bag_item{last_updated_by = LastUpdatedBy,
                                       serialized_object = Object,
                                       id = Id}) ->
     [LastUpdatedBy, UpdatedAt, Object, Id].
+
+fields_for_fetch(#chef_data_bag_item{org_id = OrgId,
+                                     data_bag_name = BagName,
+                                     item_name = ItemName}) ->
+    [OrgId, BagName, ItemName].
+
+record_fields() ->
+    record_info(fields, chef_data_bag_item).
 
 -spec add_type_and_bag(BagName :: binary(), Item :: ejson_term()) -> ejson_term().
 %% @doc Returns data bag item EJSON `Item' with keys `chef_type' and `data_bag' added.
