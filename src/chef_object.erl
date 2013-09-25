@@ -82,6 +82,7 @@
          delete_query/1,
          find_query/1,
          list_query/1,
+         list/2,
          update_query/1,
 
          fields_for_fetch/1,
@@ -170,6 +171,10 @@ fields_for_fetch(Rec) ->
 
 is_indexed(Rec) ->
     call0(Rec, is_indexed).
+
+list(Rec, CallbackFun) ->
+    Mod = element(1, Rec),
+    Mod:list(Rec, CallbackFun).
 
 %% Return the callback module for a given object record type. We're putting the abstraction
 %% in place in case we need to do something other than the identity mapping of record name

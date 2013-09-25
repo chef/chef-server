@@ -52,6 +52,10 @@
          update_query/0
         ]).
 
+-export([
+         list/2
+         ]).
+
 -ifdef(TEST).
 -compile(export_all).
 -endif.
@@ -224,3 +228,7 @@ unwrap_item(Ejson) ->
 is_wrapped_item(Ejson) ->
     (undefined =/= ej:get({<<"raw_data">>}, Ejson) andalso
      <<"Chef::DataBagItem">> =:= ej:get({<<"json_class">>}, Ejson)).
+
+list(#chef_data_bag_item{org_id = OrgId, data_bag_name = DataBagName}, CallBackFun) ->
+    CallBackFun(list_query(), [OrgId, DataBagName], [item_name]).
+    
