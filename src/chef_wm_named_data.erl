@@ -204,12 +204,12 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
 
 %% Private utility functions
 items_for_data_bag(Req, #base_state{chef_db_context = DbContext,
-                                    organization_name = OrgName,
+                                    organization_guid = OrgId,
                                     resource_state = #data_state{
                                       data_bag_name = DataBagName}}) ->
     %% FIXME: error handling for {error, _}. Can also return {not_found, org}, but I think
     %% we will have encountered that earlier on in the request processing.
-    ItemNames = chef_db:fetch_data_bag_items(DbContext, OrgName, DataBagName),
+    ItemNames = chef_db:list(#chef_data_bag_item{org_id = OrgId, data_bag_name = DataBagName}),
     RouteFun = ?BASE_ROUTES:bulk_route_fun(data_bag_item, DataBagName, Req),
     UriMap = [ {Name, RouteFun(Name)}  || Name <- ItemNames ],
     chef_json:encode({UriMap}).
