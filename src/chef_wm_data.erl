@@ -30,6 +30,8 @@
                         ping/2,
                         post_is_create/2]}]).
 
+-mixin([{chef_wm_base, [{list_objects_json/2, to_json}]}]).
+
 -mixin([{?BASE_RESOURCE, [forbidden/2,
                           is_authorized/2,
                           service_available/2]}]).
@@ -67,8 +69,11 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET','POST'], Req, State}.
 
-validate_request('GET', Req, State) ->
-    {Req, State};
+validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
+    %% Put a stub chef_data record into the resource_state. This allows us to use shared
+    %% code for generating the map of name => URL returned for GET /datas.  OrgId is set via
+    %% malformed_request.
+    {Req, State#base_state{resource_state = #chef_data_bag{org_id = OrgId}}};
 validate_request('POST', Req, #base_state{resource_state = DataState} = State) ->
     Body = wrq:req_body(Req),
     {ok, DataBagEjson} = chef_data_bag:parse_binary_json(Body, create),
@@ -94,25 +99,6 @@ from_json(Req, #base_state{resource_state =
                                #data_state{data_bag_name = DataBagName,
                                            data_bag_authz_id = AuthzId}} = State) ->
     chef_wm_base:create_from_json(Req, State, chef_data_bag, {authz_id, AuthzId}, DataBagName).
-
-to_json(Req, State) ->
-    {all_data_bags_json(Req, State), Req, State}.
-
-
-%% Internal functions
-%% @doc Generate a JSON string for a hash of rolename => role URI
-%% pairs.
-%% @end
-%%
-%% TODO: try to extract this to a common function, as this pattern
-%% pops up with a few other endpoints, too
-all_data_bags_json(Req, #base_state{chef_db_context = DbContext,
-                                    organization_name = OrgName}) ->
-    DataBagNames = chef_db:fetch_data_bags(DbContext, OrgName),
-    RouteFun = ?BASE_ROUTES:bulk_route_fun(data_bag, Req),
-    UriMap= [{Name, RouteFun(Name)} || Name <- DataBagNames],
-    chef_json:encode({UriMap}).
-
 
 %% error message functions
 
