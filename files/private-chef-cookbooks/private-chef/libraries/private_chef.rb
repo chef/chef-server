@@ -290,6 +290,7 @@ module PrivateChef
       PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"]
       PrivateChef["opscode_account"]["worker_processes"] ||= 4
 
+      PrivateChef["opscode-chef-mover"]["enable"] = !!bootstrap
       PrivateChef["bootstrap"]["enable"] = !!bootstrap
     end
 
