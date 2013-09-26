@@ -2,6 +2,13 @@ require 'mixlib/shellout'
 
 class OmnibusHelper
 
+  # Returns 'true' if this machine was designated as the bootstrap
+  # server in private-chef.rb
+  def self.is_bootstrap_server?(node)
+    node_name = node['fqdn']
+    !!(PrivateChef["servers"][node_name]['bootstrap'])
+  end
+
   # Return true if the node is the master for data storage replication
   # purposes.
   #
@@ -38,8 +45,7 @@ class OmnibusHelper
           # after everything else.  In this case, we'll consider
           # ourself the master if we're defined as the bootstrap
           # server
-          node_name = node['fqdn']
-          !!(PrivateChef["servers"][node_name]['bootstrap'])
+          is_bootstrap_server?(node)
         end
       else
         false # frontends can't be masters, by definition
