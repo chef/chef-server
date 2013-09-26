@@ -30,7 +30,7 @@
 
 -include_lib("chef_objects/include/chef_types.hrl").
 
--spec add_to_solr(tuple(), ejson_term()) -> ok.
+-spec add_to_solr(tuple(), ejson_term() | {ejson_term(), _}) -> ok.
 add_to_solr(ObjectRec, ObjectEjson) ->
     case chef_object:is_indexed(ObjectRec) of
         true ->
