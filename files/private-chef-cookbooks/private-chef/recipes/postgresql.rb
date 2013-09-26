@@ -117,7 +117,7 @@ end
 # upgrades for new releases of Enterprise Chef.  As a result, we can't
 # just do a check against node['private_chef']['bootstrap']['enable'],
 # which would only run them one time.
-if OmnibusHelper.is_data_master?
+if OmnibusHelper.is_data_master?(node)
   include_recipe "private-chef::erchef_database"
   include_recipe "private-chef::bifrost_database"
 end
