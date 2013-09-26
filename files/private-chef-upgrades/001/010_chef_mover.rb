@@ -2,7 +2,9 @@
 define_upgrade do
   upgrade_schema_to 32
 
-  if Partybus.config.is_data_master
+  if Partybus.config.bootstrap_server
+
+    must_be_data_master
 
     # Need to remove any existing pre-created orgs, since chef-mover
     # doesn't migrate them.  Otherwise, the next handful of orgs that

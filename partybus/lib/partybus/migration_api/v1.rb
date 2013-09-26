@@ -29,7 +29,7 @@ module Partybus
 ****
 ERROR: Database is not running on bootstrap server.
 ****
-You must run database schema migraitons on the bootstrap server, and the
+You must run database schema migrations on the bootstrap server, and the
 bootstrap server must be the HA-master at the time of the migration.
 If the bootstrap server is not currently the HA-master, please see the
 Private Chef documentation for issuing a graceful transition of the HA
@@ -67,6 +67,22 @@ EOF
         log("\tRunning Command: #{command} with options #{options.inspect}")
         runner = Partybus::CommandRunner.new
         runner.run_command(command, options)
+      end
+
+      def must_be_data_master
+        if !Partybus.config.is_data_master
+          log <<EOF
+****
+ERROR: 
+****
+The bootstrap server must be the HA-master at the time of upgrade.
+If the bootstrap server is not currently the HA-master, please see the
+Private Chef documentation for issuing a graceful transition of the HA
+cluster.
+****
+EOF
+          exit 1
+        end
       end
 
       def migrate

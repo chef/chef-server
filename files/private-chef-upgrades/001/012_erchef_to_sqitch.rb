@@ -2,6 +2,8 @@ define_upgrade do
 
   if Partybus.config.bootstrap_server
 
+    must_be_data_master
+
     # This command ensures Sqitch has all the metadata for changes to
     # the core schema up to version 1.0.1.  All these changes are
     # already in the schema.
