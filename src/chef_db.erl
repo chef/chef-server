@@ -95,7 +95,6 @@
          create/3,
          delete/2,
          list/2,
-         list/1,
          update/3,
          fetch/2,
          bulk_get/4,
@@ -698,13 +697,11 @@ create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
     end.
 
 -spec list(#context{}, tuple()) -> {ok, [binary()]} | {error, _}.
-list(#context{reqid = ReqId} = Ctx, StubRec) ->
-    QueryName = chef_object:list_query(StubRec),
-    OrgId = chef_object:org_id(StubRec),
-    chef_sql:fetch_object_names2(OrgId, QueryName).
-
-list(StubRec) ->
-    chef_sql:fetch_object_names2(StubRec).
+list(#context{reqid = ReqId} = _Ctx, StubRec) ->
+    stats_hero:ctime(ReqId, {chef_sql, fetch_object_names2},
+                      fun() ->
+                              chef_sql:fetch_object_names2(StubRec)
+                      end).
 
 -spec update(tuple(), #context{}, object_id()) ->
              ok | not_found | {conflict, term()} | {error, term()}.
