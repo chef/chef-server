@@ -28,6 +28,7 @@ template File.join(keepalived_bin_dir, "cluster.sh") do
 	source "cluster.sh.erb"
 	mode "0755"
   variables(node['private_chef']['keepalived'].to_hash)
+  notifies :restart, 'runit_service[keepalived]' if OmnibusHelper.should_notify?("kepalived")
 end
 
 component_runit_service "keepalived"
