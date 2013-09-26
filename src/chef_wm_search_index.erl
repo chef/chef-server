@@ -80,7 +80,7 @@ generate_index_list(DBContext, OrgId) ->
     %% Chef indexes.  Since ++ copies the LHS list, though, we'll put the fixed list of four
     %% items on the left to avoid copying a potentially long list of data bags.
     [<<"client">>, <<"environment">>, <<"node">>, <<"role">>]
-        ++ chef_db:data_bag_names(DBContext, OrgId).
+        ++ chef_db:list(DBContext, #chef_data_bag{org_id = OrgId}).
 
 %% @doc Return a proplist of `{IndexName, URL}' pairs, denoting all the search indexes an
 %% organization has access to.  The host, port, and organization name are all derived from
