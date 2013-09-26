@@ -28,6 +28,6 @@ template pedant_config do
   mode  "0755"
   variables({
     :api_url  => node['private_chef']['nginx']['url'],
-    :solr_url => node['private_chef']['opscode-solr']['url']
+    :solr_url => "http://#{node['private_chef']['opscode-solr']['vip']}:#{node['private_chef']['opscode-solr']['port']}"
   }.merge(node['private_chef']['oc-chef-pedant'].to_hash))
 end
