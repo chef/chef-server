@@ -129,13 +129,11 @@ from_json(Req, #base_state{resource_state = NodeState} = State) ->
     chef_wm_base:create_from_json(Req, State, chef_node, {authz_id, AuthzId}, NodeJson).
 
 %% internal functions
-list_nodes(undefined, Req, #base_state{chef_db_context = DbContext,
-                                       organization_name = OrgName}=State) ->
-    NodeNames = chef_db:fetch_nodes(DbContext, OrgName),
-    package_node_list(NodeNames, Req, State);
-list_nodes(EnvName, Req, #base_state{chef_db_context = DbContext,
-                                     organization_name = OrgName}=State) ->
-    NodeNames = chef_db:fetch_nodes(DbContext, OrgName, EnvName),
+list_nodes(EnvName, Req, #base_state{
+                              organization_guid = OrgId,
+                              chef_db_context = DbContext,
+                              organization_name = OrgName}=State) ->
+    NodeNames = chef_db:list(DbContext, #chef_node{environment = EnvName, org_id = OrgId}),
     package_node_list(NodeNames, Req, State).
 
 package_node_list(NodeNames, Req, #base_state{}=State) ->
