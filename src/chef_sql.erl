@@ -955,7 +955,7 @@ query_and_txfm_for_record(fetch_latest, chef_cookbook_version) ->
                            [binary()] | {error, term()}.
 %% @doc Return list of object names for a object record
 fetch_object_names(StubRec) ->
-    case chef_object:list(StubRec, fun sqerl_fun/3) of
+    case chef_object:list(StubRec, fun select_rows_as_scalars/3) of
         {ok, L} when is_list(L) ->
             L;
         {ok, none} ->
@@ -964,7 +964,7 @@ fetch_object_names(StubRec) ->
             Error
     end.
 
-sqerl_fun(QueryName, Args, SelectedFields) ->
+select_rows_as_scalars(QueryName, Args, SelectedFields) ->
     sqerl:select(QueryName, Args, rows_as_scalars, SelectedFields).
 
 list_query_for(chef_node) ->
