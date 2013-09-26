@@ -39,12 +39,10 @@
          create_object/2,
          delete_object/2,
          do_update/2,
-         fetch_object_names2/2,
          fetch_object/4,
-         fetch_object_names2/1,
+         fetch_object_names/1,
 
          %%user ops
-         fetch_users/0,
          create_user/1,
          update_user/1,
          delete_user/1,
@@ -55,7 +53,6 @@
          non_uploaded_checksums/2,
 
          %% data_bag ops
-         fetch_data_bags/1,
          create_data_bag/1,
          delete_data_bag/1,
 
@@ -68,29 +65,25 @@
          update_data_bag_item/1,
 
          %% environment ops
-         fetch_environments/1,
          bulk_get_environments/1,
          create_environment/1,
          delete_environment/1,
          update_environment/1,
 
          %% client ops
-         fetch_clients/1,
+
          bulk_get_clients/1,
          create_client/1,
          delete_client/1,
          update_client/1,
 
          %% node ops
-         fetch_nodes/1,
-         fetch_nodes/2,
          bulk_get_nodes/1,
          create_node/1,
          delete_node/1,
          update_node/1,
 
          %% role ops
-         fetch_roles/1,
          bulk_get_roles/1,
          create_role/1,
          delete_role/1,
@@ -178,15 +171,6 @@ delete_user(#chef_user{id=Id}) ->
 delete_user(Id)  ->
   delete_object(delete_user_by_id, Id).
 
--spec fetch_users() -> {ok, none | [binary()]} | {error, _}.
-%% Return a list of all usernames.
-fetch_users() ->
-    case sqerl:select(list_users, [], rows_as_scalars, [username]) of
-        {ok, none} ->
-            {ok, []};
-        Other ->
-            Other
-    end.
 -spec count_user_admins() -> {ok, none} | {ok, integer()} | {error, _}.
 %% Return a count of the user admins
 count_user_admins() ->
@@ -195,24 +179,6 @@ count_user_admins() ->
 %%
 %% node ops
 %%
-
--spec fetch_nodes(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
-%% @doc Return list of node names for a given organization
-fetch_nodes(OrgId) ->
-    fetch_object_names(OrgId, chef_node).
-
--spec fetch_nodes(bin_or_string(), bin_or_string()) -> {ok, [binary()] | not_found} |
-                                                       {error, term()}.
-%% @doc Return list of node names for given organization and environment
-fetch_nodes(OrgId, EnvName) ->
-    case sqerl:select(list_env_nodes_for_org, [OrgId, EnvName], rows_as_scalars, [name]) of
-        {ok, L} when is_list(L) ->
-            {ok, L};
-        {ok, none} ->
-            {ok, []};
-        {error, Error} ->
-            {error, Error}
-    end.
 
 -spec create_node(#chef_node{}) -> {ok, 1} | {error, term()}.
 create_node(#chef_node{}=Node) ->
@@ -243,11 +209,6 @@ bulk_get_nodes(Ids) ->
 %%
 %% role ops
 %%
-
--spec fetch_roles(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
-%% @doc Return list of role names for a given organization
-fetch_roles(OrgId) ->
-    fetch_object_names(OrgId, chef_role).
 
 -spec bulk_get_roles([binary()]) -> {ok, [binary()] | not_found} |
                                     {error, term()}.
@@ -336,11 +297,6 @@ update_data_bag_item(#chef_data_bag_item{last_updated_by = LastUpdatedBy,
 %% environment ops
 %%
 
--spec fetch_environments(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
-%% @doc Return list of environment names for a given organization
-fetch_environments(OrgId) ->
-    fetch_object_names(OrgId, chef_environment).
-
 -spec bulk_get_environments([binary()]) -> {ok, [binary()] | not_found} |
                                            {error, term()}.
 bulk_get_environments(Ids) ->
@@ -370,11 +326,6 @@ update_environment(#chef_environment{last_updated_by = LastUpdatedBy,
 %%
 %% client ops
 %%
-
--spec fetch_clients(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
-%% @doc Return list of client names for a given organization
-fetch_clients(OrgId) ->
-    fetch_object_names(OrgId, chef_client).
 
 -spec bulk_get_clients([binary()]) -> {ok, [ [proplists:property()] ] | not_found} |
                                       {error, term()}.
@@ -422,11 +373,6 @@ update_client(#chef_client{last_updated_by = LastUpdatedBy,
 %%
 %% data_bag ops
 %%
-
--spec fetch_data_bags(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
-%% @doc Return list of data_bag names for a given organization
-fetch_data_bags(OrgId) ->
-    fetch_object_names(OrgId, chef_data_bag).
 
 -spec create_data_bag(#chef_data_bag{}) -> {ok, 1} | {error, term()}.
 create_data_bag(#chef_data_bag{}=DataBag) ->
@@ -1005,20 +951,10 @@ query_and_txfm_for_record(fetch_latest, chef_cookbook_version) ->
     {find_latest_cookbook_version_by_orgid_name, ?FIRST(chef_cookbook_version)}.
 
 
--spec fetch_object_names2(bin_or_string(), atom()) ->
-                           {ok, [binary()]} | {error, term()}.
-%% @doc Return list of object names for a given organization and object type
-fetch_object_names2(OrgId, QueryName) ->
-    case sqerl:select(QueryName, [OrgId], rows_as_scalars, [name]) of
-        {ok, L} when is_list(L) ->
-            L;
-        {ok, none} ->
-            [];
-        {error, Error} ->
-            {error, Error}
-    end.
-
-fetch_object_names2(StubRec) ->
+-spec fetch_object_names(tuple()) ->
+                           [binary()] | {error, term()}.
+%% @doc Return list of object names for a object record
+fetch_object_names(StubRec) ->
     case chef_object:list(StubRec, fun sqerl_fun/3) of
         {ok, L} when is_list(L) ->
             L;
@@ -1030,20 +966,6 @@ fetch_object_names2(StubRec) ->
 
 sqerl_fun(QueryName, Args, SelectedFields) ->
     sqerl:select(QueryName, Args, rows_as_scalars, SelectedFields).
-
--spec fetch_object_names(bin_or_string(), chef_object_name()) ->
-                           {ok, [binary()]} | {error, term()}.
-%% @doc Return list of object names for a given organization and object type
-fetch_object_names(OrgId, RecordName) ->
-    QueryName = list_query_for(RecordName),
-    case sqerl:select(QueryName, [OrgId], rows_as_scalars, [name]) of
-        {ok, L} when is_list(L) ->
-            {ok, L};
-        {ok, none} ->
-            {ok, []};
-        {error, Error} ->
-            {error, Error}
-    end.
 
 list_query_for(chef_node) ->
     list_nodes_for_org;

@@ -45,12 +45,7 @@
          mark_checksums_as_uploaded/3,
 
          %% user ops
-         fetch_users/1,
          count_user_admins/1,
-
-         %% node ops
-         fetch_nodes/2,
-         fetch_nodes/3,
          node_record_to_authz_id/2,
 
          %% role ops
@@ -58,16 +53,6 @@
          %% role_record_to_authz_id/2,
 
          %% environment ops
-         fetch_environments/2,
-
-         %% client ops
-         fetch_clients/2,
-
-         %% data_bag ops
-         fetch_data_bags/2,
-
-         %% data_bag_item ops
-         fetch_data_bag_items/3,
          fetch_data_bag_item_ids/3,
 
          %% cookbook_version ops
@@ -99,7 +84,6 @@
          fetch/2,
          bulk_get/4,
          data_bag_exists/3,
-         data_bag_names/2,
          environment_exists/3]).
 
 -include_lib("chef_db/include/chef_db.hrl").
@@ -169,17 +153,6 @@ make_context(ReqId, Darklaunch, OttoServer) ->
 
 darklaunch_from_context(#context{darklaunch = Darklaunch}) ->
     Darklaunch.
-
-%%%
-%%% User access
-%%%
--spec fetch_users(#context{}) -> [binary()] | {error, _}.
-fetch_users(#context{reqid = ReqId}) ->
-    case stats_hero:ctime(ReqId, {chef_sql, fetch_users},
-                          fun() -> chef_sql:fetch_users() end) of
-        {ok, L} -> L;
-        Other -> Other
-    end.
 
 -spec count_user_admins(#context{}) -> integer() | {error, term()}.
 count_user_admins(#context{reqid = ReqId}) ->
@@ -482,33 +455,6 @@ fetch_environment_filtered_recipes(#context{reqid=ReqId}=DbContext, OrgName, Env
             end
     end.
 
--spec fetch_environments(#context{}, binary()) -> {not_found, org} |
-                                                  [binary()] |
-                                                  {error, any()}.
-%% @doc Return a list of all environment names in an org
-fetch_environments(#context{} = Ctx, OrgName) ->
-    fetch_objects(Ctx, fetch_environments, OrgName).
-
--spec fetch_clients(#context{}, binary()) -> {not_found, org} |
-                                             [binary()] | {error, any()}.
-%% @doc Return a list of all client names in an org
-%%
-fetch_clients(#context{} = Ctx, OrgName) ->
-    fetch_objects(Ctx, fetch_clients, OrgName).
-
--spec fetch_data_bags(#context{}, binary() | {id, object_id()}) -> [binary()] |
-                                                                   {not_found, org} |
-                                                                   {error, any()}.
-%% @doc Return a list of all data_bag names in an org
-fetch_data_bags(#context{} = Ctx, OrgName) ->
-    fetch_objects(Ctx, fetch_data_bags, OrgName).
-
--spec fetch_nodes(#context{}, binary()) -> {not_found, org} |
-                                           [binary()] |
-                                           {error, any()}.
-%% @doc Return a list of all node names in an org
-fetch_nodes(#context{} = Ctx, OrgName) ->
-    fetch_objects(Ctx, fetch_nodes, OrgName).
 
 -spec fetch_roles(#context{}, binary()) -> {not_found, org} |
                                            [binary()] |
@@ -517,19 +463,6 @@ fetch_nodes(#context{} = Ctx, OrgName) ->
 fetch_roles(#context{} = Ctx, OrgName) ->
     fetch_objects(Ctx, fetch_roles, OrgName).
 
--spec fetch_nodes(#context{}, binary(), binary()) -> [binary()] |
-                                                     {not_found, org} |
-                                                     {error, _}.
-%% @doc Returns list of node names for `OrgName' that are in the `EnvName' environment.
-fetch_nodes(#context{} = Ctx, OrgName, EnvName) ->
-    fetch_objects(Ctx, fetch_nodes, OrgName, EnvName).
-
--spec fetch_data_bag_items(#context{}, binary(), binary()) -> [binary()] |
-                                                              {not_found, org} |
-                                                              {error, _}.
-%% @doc Returns list of data_bag_item names in `DataBagName' for `OrgName'.
-fetch_data_bag_items(#context{} = Ctx, OrgName, DataBagName) ->
-    fetch_objects(Ctx, fetch_data_bag_items, OrgName, DataBagName).
 
 -spec fetch_data_bag_item_ids(#context{}, binary() | {id, object_id()},
                               binary()) -> [binary()] |
@@ -667,13 +600,6 @@ data_bag_exists(#context{}=Ctx, OrgId, DataBag) ->
         not_found -> false
     end.
 
-%% @doc Return a lit of the names of all an organization's data bags.
--spec data_bag_names(#context{}, OrgId::object_id()) ->  [binary()] |
-                                                         {not_found, org} |
-                                                         {error, any()}.
-data_bag_names(#context{}=Ctx, OrgId) ->
-    fetch_data_bags(Ctx, {id, OrgId}).
-
 -spec environment_exists(#context{}, <<_:256>>, binary()) -> boolean().
 %% @doc Return true if environment `EnvName' exists in org `OrgId' and false otherwise.
 environment_exists(#context{}=Ctx, OrgId, EnvName) ->
@@ -698,9 +624,9 @@ create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
 
 -spec list(#context{}, tuple()) -> {ok, [binary()]} | {error, _}.
 list(#context{reqid = ReqId} = _Ctx, StubRec) ->
-    stats_hero:ctime(ReqId, {chef_sql, fetch_object_names2},
+    stats_hero:ctime(ReqId, {chef_sql, fetch_object_names},
                       fun() ->
-                              chef_sql:fetch_object_names2(StubRec)
+                              chef_sql:fetch_object_names(StubRec)
                       end).
 
 -spec update(tuple(), #context{}, object_id()) ->
