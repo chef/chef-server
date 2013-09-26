@@ -43,7 +43,7 @@ template partybus_config do
             :node_role => node_role,
             :db_service_name => db_service_name,
             :is_data_master => OmnibusHelper.is_data_master?(node),
-            :bootstrap_server => node['private_chef']['bootstrap']['enable'])
+            :bootstrap_server => OmnibusHelper.is_bootstrap_server?(node))
 end
 
 link "/opt/opscode/embedded/service/partybus/config.rb" do
