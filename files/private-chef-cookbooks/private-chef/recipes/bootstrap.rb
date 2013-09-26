@@ -25,28 +25,28 @@ end
 # opscode-account, opscode-erchef, and oc_bifrost MUST be up and running to bootstrap
 
 execute "/opt/opscode/bin/private-chef-ctl start oc_bifrost" do
-  not_if { ECBootstrap.has_been_bootstrapped? }
+  not_if { OmnibusHelper.has_been_bootstrapped? }
   retries 20
 end
 
 execute "/opt/opscode/bin/private-chef-ctl start opscode-account" do
-  not_if { ECBootstrap.has_been_bootstrapped? }
+  not_if { OmnibusHelper.has_been_bootstrapped? }
   retries 20
 end
 
 execute "/opt/opscode/bin/private-chef-ctl start opscode-erchef" do
-  not_if { ECBootstrap.has_been_bootstrapped? }
+  not_if { OmnibusHelper.has_been_bootstrapped? }
   retries 20
 end
 
 execute "bootstrap-platform" do
   command "bash -c 'echo y | /opt/opscode/embedded/bin/bundle exec ./bin/bootstrap-platform -c ./bootstrapper-config/config.rb -s ./bootstrapper-config/script.rb'"
   cwd opscode_test_dir
-  not_if { ECBootstrap.has_been_bootstrapped? }
+  not_if { OmnibusHelper.has_been_bootstrapped? }
   notifies :restart, 'service[opscode-erchef]'
 end
 
-file ECBootstrap.bootstrap_sentinel_file do
+file OmnibusHelper.bootstrap_sentinel_file do
   owner "root"
   group "root"
   mode "0600"

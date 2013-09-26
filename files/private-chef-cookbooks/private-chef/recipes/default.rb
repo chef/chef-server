@@ -58,7 +58,9 @@ else
   node.consume_attributes(PrivateChef.generate_config(node['fqdn']))
 end
 
-if ECBootstrap.has_been_bootstrapped?
+# @todo: This seems like it might belong in the PrivateChef helper;
+#   many other attributes like are set automatically there as well.
+if OmnibusHelper.has_been_bootstrapped?
   node.set['private_chef']['bootstrap']['enable'] = false
 end
 

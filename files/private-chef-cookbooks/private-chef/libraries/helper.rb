@@ -47,6 +47,21 @@ class OmnibusHelper
     end
   end
 
+  # This file is touched once initial bootstrapping of the system is
+  # done.
+  def self.bootstrap_sentinel_file
+    "var/opt/opscode/bootstrapped"
+  end
+
+  # Use the presence of a sentinel file as an indicator for whether
+  # the server has already had initial bootstrapping performed.
+  #
+  # @todo: Is there a more robust way to determine this, i.e., based
+  #   on some functional aspect of the system?
+  def self.has_been_bootstrapped?
+    File.exists?(bootstrap_sentinel_file)
+  end
+
   def self.should_notify?(service_name)
     File.symlink?("/opt/opscode/service/#{service_name}") && check_status(service_name)
   end
