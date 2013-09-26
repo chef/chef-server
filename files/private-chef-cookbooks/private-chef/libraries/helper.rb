@@ -3,11 +3,15 @@ require 'mixlib/shellout'
 class OmnibusHelper
 
   # Return true if the node is the master for data storage replication
-  # purposes.  Frontend machines are not, by definition.  HA backend
-  # slaves are not, either.
+  # purposes.
   #
-  # Basically, if you're a standalone EC server, or an HA backend
-  # kepalived master, this returns true.
+  # This will return true if the node is any of the following:
+  #
+  #   * A stand-alone EC install
+  #   * A tier-topology backend machine
+  #   * An HA topology backend keepalived master machine
+  #
+  # Any other machine will get 'false'.
   #
   # @param node [Node] needs to be passed in to access kepalive
   #   directory path information
