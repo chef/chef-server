@@ -247,10 +247,11 @@ add_api_info_header(Req, State) ->
 %% explaining why.
 verify_request_signature(Req,
                          #base_state{organization_name = OrgName,
+                                     organization_guid = OrgId,
                                      auth_skew = AuthSkew,
                                      chef_db_context = DbContext}=State) ->
     UserName = wrq:get_req_header("x-ops-userid", Req),
-    case chef_db:fetch_requestor(DbContext, OrgName, UserName) of
+    case chef_db:fetch_requestor(DbContext, OrgId, UserName) of
         {not_found, What} ->
             NotFoundMsg = verify_request_message({not_found, What},
                                                  UserName, OrgName),

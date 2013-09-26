@@ -72,10 +72,10 @@ malformed_request(Req, State) ->
     {false, Req, State}.
 
 resource_exists(Req, #base_state{chef_db_context = DbContext,
-                                 organization_name = OrgName,
+                                 organization_guid = OrgId,
                                  resource_state = ResourceState} = State) ->
     Name = chef_wm_util:object_name(principal, Req),
-    case chef_db:fetch_requestor(DbContext, OrgName, Name) of
+    case chef_db:fetch_requestor(DbContext, OrgId, Name) of
         {not_found, client} ->
             Message = chef_wm_util:not_found_message(client, Name),
             Req1 = chef_wm_util:set_json_body(Req, Message),

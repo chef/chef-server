@@ -66,7 +66,6 @@ malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
-                           organization_name = OrgName,
                            organization_guid = OrgId,
                            resource_state = RoleState} = State) ->
     RoleName = chef_wm_util:object_name(role, Req),
