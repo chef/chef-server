@@ -116,7 +116,7 @@ malformed_request(Req, #base_state{resource_mod=Mod,
     try
         chef_authn:validate_headers(GetHeader, AuthSkew),
         Req1 = chef_wm_enforce:max_size(Req),
-        OrgId = fetch_org_guid(State1),
+        OrgId = chef_wm_util:fetch_org_guid(State1),
         {Req2, State2} = Mod:validate_request(wrq:method(Req1), Req1,
                                               State1#base_state{organization_guid = OrgId}),
         {false, Req2, State2}
@@ -509,16 +509,6 @@ spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
             error_logger:error_msg("FAILED stats_hero_worker_sup:new_worker: ~p~n",
                                    [Reason]),
             ok
-    end.
-
-fetch_org_guid(#base_state{organization_guid = Id}) when is_binary(Id) ->
-    Id;
-fetch_org_guid(#base_state{organization_guid = undefined,
-                           organization_name = OrgName,
-                           chef_db_context = DbContext}) ->
-    case chef_db:fetch_org_id(DbContext, OrgName) of
-        not_found -> throw({org_not_found, OrgName});
-        Guid -> Guid
     end.
 
 maybe_annotate_org_specific(?OSC_ORG_NAME, _Darklaunch, Req) ->

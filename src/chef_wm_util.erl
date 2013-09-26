@@ -28,6 +28,7 @@
          error_message_envelope/1,
          extract_from_path/2,
          get_header_fun/2,
+         fetch_org_guid/1,
          malformed_request_message/3,
          admin_field_is_false/1,
          base_mods/0,
@@ -90,6 +91,16 @@ get_header_fun(Req, State = #base_state{header_fun = HFun})
     {GetHeader, State#base_state{header_fun = GetHeader}};
 get_header_fun(_Req, State) ->
     {State#base_state.header_fun, State}.
+
+fetch_org_guid(#base_state{organization_guid = Id}) when is_binary(Id) ->
+    Id;
+fetch_org_guid(#base_state{organization_guid = undefined,
+                           organization_name = OrgName,
+                           chef_db_context = DbContext}) ->
+    case chef_db:fetch_org_id(DbContext, OrgName) of
+        not_found -> throw({org_not_found, OrgName});
+        Guid -> Guid
+    end.
 
 -spec environment_not_found_message( bin_or_string() ) -> ejson().
 environment_not_found_message(EnvName) ->
