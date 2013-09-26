@@ -44,6 +44,8 @@
 -callback fields_for_update(object_rec()) -> list().
 -callback fields_for_fetch(object_rec()) -> list().
 -callback record_fields() -> list(atom()).
+-callback list(object_rec(), fun(([any()], [any()], [any()]) -> [any()])) -> [any()].
+    
 
 -callback new_record(OrgId :: object_id(),
                      AuthzId :: object_id() | unset,
@@ -82,12 +84,13 @@
          delete_query/1,
          find_query/1,
          list_query/1,
-         list/2,
          update_query/1,
 
          fields_for_fetch/1,
          fields_for_update/1,
-         record_fields/1
+         record_fields/1,
+
+         list/2
         ]).
 
 -spec new_record(RecType :: atom(),
@@ -172,6 +175,7 @@ fields_for_fetch(Rec) ->
 is_indexed(Rec) ->
     call0(Rec, is_indexed).
 
+-spec(list(any(), fun(([any()],[any()],[any()]) -> [any()])) -> [any()]).
 list(Rec, CallbackFun) ->
     Mod = element(1, Rec),
     Mod:list(Rec, CallbackFun).
