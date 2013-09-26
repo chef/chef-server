@@ -26,6 +26,9 @@ h3. Run History Knife Plugin (Reporting)
 
 h3. Push Jobs Server
 {note}The server requires at least 2 CPU cores. DO NOT attempt to run the server on a single core configuration as it will crash.{note}
+{warning}
+There is currently a problem with the CentOS 5 build of the Push Jobs Server, and it should _not_ be distributed.  See [OC-9825|https://tickets.corp.opscode.com/browse/OC-9825] for more details.
+{warning}
 <% info[:push_jobs_server].each do |kv| %>
 [<%= kv[0] %>|<%= kv[1] %>]
 <% end %>
