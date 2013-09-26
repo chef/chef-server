@@ -51,12 +51,6 @@ class OmnibusHelper
     File.symlink?("/opt/opscode/service/#{service_name}") && check_status(service_name)
   end
 
-  # Note that this WON'T WORK on a non-bootstrap backend server,
-  # because private-chef-ctl status will return 0 when there are no
-  # services to query.
-  #
-  # This cannot be used as a check for a service being up on a backend
-  # slave :(
   def self.check_status(service_name)
     o = Mixlib::ShellOut.new("/opt/opscode/bin/private-chef-ctl status #{service_name}")
     o.run_command
