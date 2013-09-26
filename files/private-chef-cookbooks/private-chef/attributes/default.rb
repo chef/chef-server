@@ -509,6 +509,7 @@ default['private_chef']['keepalived']['service_order'] = [
   { "key" => "opscode-expander", "service_name" => "opscode-expander" },
   { "key" => "opscode-expander", "service_name" => "opscode-expander-reindexer" },
   { "key" => "opscode-org-creator", "service_name" => "opscode-org-creator" },
+  { "key" => "bookshelf", "service_name" => "bookshelf" },
   { "key" => "opscode-erchef", "service_name" => "opscode-erchef" },
   { "key" => "opscode-webui", "service_name" => "opscode-webui" },
   { "key" => "nginx", "service_name" => "nginx" }
