@@ -12,6 +12,7 @@ class OmnibusHelper
   # @param node [Node] needs to be passed in to access kepalive
   #   directory path information
   def self.is_data_master?(node)
+
     topology = PrivateChef['topology']
     role = PrivateChef['role']
 
@@ -24,13 +25,23 @@ class OmnibusHelper
       if (role == "backend")
         dir = node['private_chef']['keepalived']['dir']
         cluster_status_file = "#{dir}/current_cluster_status"
-        File.exists?(cluster_status_file) && File.open(cluster_status_file).read.chomp == "master"
+
+        if File.exists?(cluster_status_file)
+          File.open(cluster_status_file).read.chomp == "master"
+        else
+          # If the file doesn't exist, then we are most likely doing
+          # the initial setup, because keepalived must be configured
+          # after everything else.  In this case, we'll consider
+          # ourself the master if we're defined as the bootstrap
+          # server
+          node_name = node['fqdn']
+          !!(PrivateChef["servers"][node_name]['bootstrap'])
+        end
       else
         false # frontends can't be masters, by definition
       end
     end
   end
-
 
   def self.should_notify?(service_name)
     File.symlink?("/opt/opscode/service/#{service_name}") && check_status(service_name)
