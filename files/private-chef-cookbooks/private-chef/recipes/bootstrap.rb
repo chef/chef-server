@@ -22,7 +22,24 @@ template File.join(opscode_test_config_dir, "script.rb") do
   mode "0600"
 end
 
-execute "boostrap-platform" do
+# opscode-account, opscode-erchef, and oc_bifrost MUST be up and running to bootstrap
+
+execute "/opt/opscode/bin/private-chef-ctl start oc_bifrost" do
+  not_if { ECBootstrap.has_been_bootstrapped? }
+  retries 20
+end
+
+execute "/opt/opscode/bin/private-chef-ctl start opscode-account" do
+  not_if { ECBootstrap.has_been_bootstrapped? }
+  retries 20
+end
+
+execute "/opt/opscode/bin/private-chef-ctl start opscode-erchef" do
+  not_if { ECBootstrap.has_been_bootstrapped? }
+  retries 20
+end
+
+execute "bootstrap-platform" do
   command "bash -c 'echo y | /opt/opscode/embedded/bin/bundle exec ./bin/bootstrap-platform -c ./bootstrapper-config/config.rb -s ./bootstrapper-config/script.rb'"
   cwd opscode_test_dir
   not_if { ECBootstrap.has_been_bootstrapped? }
