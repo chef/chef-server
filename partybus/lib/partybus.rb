@@ -18,6 +18,7 @@ module Partybus
     attr_accessor :private_chef_role
     attr_accessor :is_data_master
     attr_accessor :bootstrap_server
+    attr_accessor :couchdb_data_dir
 
   end
 

@@ -21,7 +21,7 @@ define_upgrade do
     down_services.each{|s| run_command("private-chef-ctl stop #{s}")}
 
     migrate_script = "/opt/opscode/embedded/service/oc_authz_migrator/scripts/opc-run.sh"
-    run_command(migrate_script)
+    run_command("#{migrate_script} #{Partybus.config.couchdb_data_dir}/authorization.couch")
 
     # Bring everything back up
     down_services.reverse.each{|s| run_command("private-chef-ctl start #{s}")}
