@@ -66,13 +66,13 @@ create_user(Name, Password, IsAdmin, create_key) ->
       Error ->
         Error
   end;
-create_user(Name, Password, IsAdmin, PublicKey) ->
-  PasswordData = chef_wm_password:encrypt(Password),
-  Ejson = {[{<<"name">>, Name},
-            {<<"admin">>, IsAdmin =:= true},
-            {<<"public_key">>, PublicKey}]},
-  create_from_json(chef_user, {Ejson, PasswordData}).
 
+create_user(Name, Password, IsAdmin, PublicKey) ->
+    PasswordData = chef_wm_password:encrypt(Password),
+    Ejson = {[{<<"name">>, Name},
+              {<<"admin">>, IsAdmin =:= true},
+              {<<"public_key">>, PublicKey}]},
+    create_from_json(chef_user, {Ejson, PasswordData}).
 
 %% @doc Create the _default environment
 create_default_environment() ->
