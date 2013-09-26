@@ -98,14 +98,7 @@ from_json(Req, #base_state{reqid = RequestId,
     end.
 
 to_json(Req, State) ->
-    {all_users_json(Req, State), Req, State}.
-
-%% Internal Functions
-all_users_json(Req, #base_state{chef_db_context = DbContext}) ->
-    UserNames = chef_db:fetch_users(DbContext),
-    RouteFun = ?BASE_ROUTES:bulk_route_fun(user, Req),
-    UriMap = [ {Name, RouteFun(Name)} || Name <- UserNames ],
-    ejson:encode({UriMap}).
+    chef_wm_base:list_objects_json(Req, State#base_state{resource_state = #chef_user{}}).
 
 %% FIXME: we will likely be able to re-use something from chef_wm_base once a bit of
 %% refaactoring happens. This is largely copy pasta from chef_wm_base, but with solr bits
