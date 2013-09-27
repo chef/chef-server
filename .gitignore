@@ -13,3 +13,4 @@ itest/.bundle
 itest/mysql-migration.log
 itest/pgsql-migration.log
 /chef_db.plt
+/itest/ct_logs

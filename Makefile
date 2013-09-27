@@ -25,7 +25,7 @@ clean:
 allclean:
 	@rebar clean
 
-distclean:
+distclean: itest_clean
 	@rebar skip_deps=true clean
 	@rm -rf deps $(DEPS_PLT)
 
@@ -52,21 +52,18 @@ doc:
 tags:
 	find src deps -name "*.[he]rl" -print | etags -
 
-itest_create:
-	@echo Creating integration test database
-	@cd itest;./create_schema.rb pgsql create
-
 itest_clean:
-	@rm -f itest/*.beam
-	@echo Dropping integration test database
-	@cd itest;./create_schema.rb pgsql destroy
-	@rm -rf itest/Gemfile.lock
+	@rm -rf itest/*.beam itest/ct_logs
 
-itest: test itest_create itest_run itest_clean
+itest: test
+        # recompile, setting TEST define so we can play with
+        # unexported functions.
+	@echo "Recompiling with -DTEST ..."
+	@rebar clean skip_deps=true
+	@rebar compile skip_deps=true -DTEST
+	@mkdir -p itest/ct_logs
+	@ct_run -spec itest/spec.spec -pa deps/*/ebin -pa ebin
+	@echo "Review results with: open itest/ct_logs/index.html"
 
-itest_run:
-	cd itest;erlc -I ../include -pz ../deps/chef_objects/ebin *.erl
-	@erl -I include -pa deps/*/ebin -pa .eunit -pa itest -noshell -eval "eunit:test(itest)" \
-	-s erlang halt -db_type pgsql
 
 .PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest
