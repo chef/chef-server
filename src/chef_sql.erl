@@ -36,64 +36,34 @@
 -export([
          create_name_id_dict/2,
 
+         create_object/2,
+         delete_object/2,
+         do_update/2,
+         fetch_object/4,
+         fetch_object_names/1,
+
          %%user ops
-         fetch_user/1,
-         fetch_users/0,
-         create_user/1,
-         update_user/1,
-         delete_user/1,
          count_user_admins/0,
 
          %% checksum ops
          mark_checksums_as_uploaded/2,
          non_uploaded_checksums/2,
 
-         %% data_bag ops
-         fetch_data_bag/2,
-         fetch_data_bags/1,
-         create_data_bag/1,
-         delete_data_bag/1,
-
          %% data_bag_item ops
-         fetch_data_bag_item/3,
-         fetch_data_bag_items/2,
          fetch_data_bag_item_ids/2,
          bulk_get_data_bag_items/1,
-         create_data_bag_item/1,
-         delete_data_bag_item/1,
-         update_data_bag_item/1,
 
          %% environment ops
-         fetch_environment/2,
-         fetch_environments/1,
          bulk_get_environments/1,
-         create_environment/1,
-         delete_environment/1,
-         update_environment/1,
 
          %% client ops
-         fetch_client/2,
-         fetch_clients/1,
          bulk_get_clients/1,
-         create_client/1,
-         delete_client/1,
-         update_client/1,
 
          %% node ops
-         fetch_node/2,
-         fetch_nodes/1,
-         fetch_nodes/2,
          bulk_get_nodes/1,
-         create_node/1,
-         delete_node/1,
-         update_node/1,
+
          %% role ops
-         fetch_role/2,
-         fetch_roles/1,
          bulk_get_roles/1,
-         create_role/1,
-         delete_role/1,
-         update_role/1,
 
          %% cookbook version ops
          cookbook_exists/2,
@@ -126,7 +96,7 @@
 -include_lib("chef_objects/include/chef_types.hrl").
 
 -type delete_query() :: delete_cookbook_version_by_id |
-                        delete_user_by_username |
+                        delete_user_by_id |
                         delete_data_bag_by_id |
                         delete_data_bag_item_by_id |
                         delete_environment_by_id |
@@ -150,180 +120,36 @@ ping() ->
             pang
     end.
 
+%%
 %% chef user ops
-
--spec fetch_user(bin_or_string()) -> {ok, #chef_user{} | not_found } | {error, term()}.
-%% @doc Return user data for the given username
 %%
-%%
-fetch_user(UserName) ->
-    case sqerl:select(find_user_by_username, [UserName], ?FIRST(chef_user)) of
-        {ok, none} ->
-            {ok, not_found};
-        {ok, #chef_user{}=User} ->
-            {ok, User};
-        {error, Error} -> {error, Error}
-    end.
 
--spec create_user(#chef_user{}) -> {ok, 1} | {error, term()}.
-%% doc Insert user data into database
-create_user(#chef_user{}=User) ->
-    create_object(User).
-
--spec update_user(#chef_user{}) -> {ok, 1 | not_found} | {error, term()}.
-update_user(#chef_user{last_updated_by = LastUpdatedBy,
-                       updated_at      = UpdatedAt,
-                       admin           = IsAdmin,
-                       public_key      = PublicKey,
-                       hashed_password = HashedPassword,
-                       salt            = Salt,
-                       hash_type       = HashType,
-                       id              = Id }) ->
-                UpdateFields = [IsAdmin =:= true, PublicKey, HashedPassword, Salt, HashType, LastUpdatedBy, UpdatedAt, Id],
-                do_update(update_user_by_id, UpdateFields).
-
--spec delete_user(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_user(Username) when is_list(Username) ->
-    delete_user(list_to_binary(Username));
-delete_user(#chef_user{username=Username}) ->
-    delete_user(Username);
-delete_user(Username) when is_binary(Username)->
-  delete_object(delete_user_by_username, Username).
-
--spec fetch_users() -> {ok, none | [binary()]} | {error, _}.
-%% Return a list of all usernames.
-fetch_users() ->
-    case sqerl:select(list_users, [], rows_as_scalars, [username]) of
-        {ok, none} ->
-            {ok, []};
-        Other ->
-            Other
-    end.
 -spec count_user_admins() -> {ok, none} | {ok, integer()} | {error, _}.
 %% Return a count of the user admins
 count_user_admins() ->
   sqerl:select(count_user_admins, [], first_as_scalar, [count]).
 
+%%
 %% node ops
-
--spec fetch_node(bin_or_string(), bin_or_string()) -> {ok, #chef_node{} | not_found} | {error, term()}.
-fetch_node(OrgId, NodeName) ->
-    fetch_object(OrgId, NodeName, chef_node).
-
--spec fetch_nodes(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
-%% @doc Return list of node names for a given organization
-fetch_nodes(OrgId) ->
-    fetch_object_names(OrgId, chef_node).
-
--spec fetch_nodes(bin_or_string(), bin_or_string()) -> {ok, [binary()] | not_found} |
-                                                       {error, term()}.
-%% @doc Return list of node names for given organization and environment
-fetch_nodes(OrgId, EnvName) ->
-    case sqerl:select(list_env_nodes_for_org, [OrgId, EnvName], rows_as_scalars, [name]) of
-        {ok, L} when is_list(L) ->
-            {ok, L};
-        {ok, none} ->
-            {ok, []};
-        {error, Error} ->
-            {error, Error}
-    end.
-
--spec create_node(#chef_node{}) -> {ok, 1} | {error, term()}.
-create_node(#chef_node{}=Node) ->
-    create_object(Node).
-
--spec delete_node(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_node(NodeId) when is_list(NodeId) ->
-    delete_node(list_to_binary(NodeId));
-delete_node(#chef_node{id=NodeId})->
-    delete_node(NodeId);
-delete_node(NodeId) when is_binary(NodeId) ->
-    delete_object(delete_node_by_id, NodeId).
-
--spec update_node(#chef_node{}) -> {ok, 1 | not_found} | {error, term()}.
-update_node(#chef_node{environment = Environment,
-                       last_updated_by = LastUpdatedBy,
-                       updated_at = UpdatedAt,
-                       serialized_object = Object,
-                       id = Id}) ->
-    UpdateFields = [Environment, LastUpdatedBy, UpdatedAt, Object, Id],
-    do_update(update_node_by_id, UpdateFields).
+%%
 
 -spec bulk_get_nodes([binary()]) -> {ok, [binary()] | not_found} |
                                     {error, term()}.
 bulk_get_nodes(Ids) ->
     bulk_get_objects(node, Ids).
 
+%%
 %% role ops
-
--spec fetch_role(bin_or_string(), bin_or_string()) ->
-                        {ok, #chef_role{} | not_found} | {error, term()}.
-fetch_role(OrgId, RoleName) ->
-    fetch_object(OrgId, RoleName, chef_role).
-
--spec fetch_roles(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
-%% @doc Return list of role names for a given organization
-fetch_roles(OrgId) ->
-    fetch_object_names(OrgId, chef_role).
+%%
 
 -spec bulk_get_roles([binary()]) -> {ok, [binary()] | not_found} |
                                     {error, term()}.
 bulk_get_roles(Ids) ->
     bulk_get_objects(role, Ids).
 
--spec create_role(#chef_role{}) -> {ok, 1} | {error, term()}.
-create_role(#chef_role{}=Role) ->
-    create_object(Role).
-
--spec delete_role(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_role(RoleId) when is_list(RoleId) ->
-    delete_role(list_to_binary(RoleId));
-delete_role(#chef_role{id=RoleId})->
-    delete_role(RoleId);
-delete_role(RoleId) when is_binary(RoleId) ->
-    delete_object(delete_role_by_id, RoleId).
-
--spec update_role(#chef_role{}) -> {ok, 1 | not_found} | {error, term()}.
-update_role(#chef_role{last_updated_by = LastUpdatedBy,
-                       updated_at = UpdatedAt,
-                       serialized_object = Object,
-                       id = Id}) ->
-    UpdateFields = [LastUpdatedBy, UpdatedAt, Object, Id],
-    do_update(update_role_by_id, UpdateFields).
-
+%%
 %% data_bag_item ops
-
--spec fetch_data_bag_item(bin_or_string(), bin_or_string(), bin_or_string()) ->
-                        {ok, #chef_data_bag_item{} | not_found} | {error, term()}.
-fetch_data_bag_item(OrgId, DataBagName, DataBagItemName) ->
-    %% This is coded following fetch_object in the hopes of factoring it back in when we
-    %% have another case that differs in arity. Perhaps cookbook versions.
-    RecordName = chef_data_bag_item,
-    {QueryName, FirstRecordTxfm} = query_and_txfm_for_record(fetch, RecordName),
-    case sqerl:select(QueryName, [OrgId, DataBagName, DataBagItemName], FirstRecordTxfm) of
-        %% Awkward sanity check that we got back the expected record type here.
-        {ok, Object} when RecordName =:= element(1, Object) ->
-            {ok, Object};
-        {ok, none} ->
-            {ok, not_found};
-        {error, Error} ->
-            {error, Error}
-    end.
-
--spec fetch_data_bag_items(bin_or_string(), bin_or_string()) ->
-                                  {ok, [binary()]} | {error, term()}.
-%% @doc Return list of data_bag_item names for a given organization
-fetch_data_bag_items(OrgId, DataBagName) ->
-    RecordName = chef_data_bag_item,
-    QueryName = list_query_for(RecordName),
-    case sqerl:select(QueryName, [OrgId, DataBagName], rows_as_scalars, [item_name]) of
-        {ok, L} when is_list(L) ->
-            {ok, L};
-        {ok, none} ->
-            {ok, []};
-        {error, Error} ->
-            {error, Error}
-    end.
+%%
 
 -spec fetch_data_bag_item_ids(bin_or_string(), bin_or_string()) ->
                                      {ok, [binary()]} | {error, term()}.
@@ -344,75 +170,18 @@ fetch_data_bag_item_ids(OrgId, DataBagName) ->
 bulk_get_data_bag_items(Ids) ->
     bulk_get_objects(data_bag_item, Ids).
 
--spec create_data_bag_item(#chef_data_bag_item{}) -> {ok, 1} | {error, term()}.
-create_data_bag_item(#chef_data_bag_item{}=DataBagItem) ->
-    create_object(DataBagItem).
-
--spec delete_data_bag_item(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_data_bag_item(DataBagItemId) when is_list(DataBagItemId) ->
-    delete_data_bag_item(list_to_binary(DataBagItemId));
-delete_data_bag_item(#chef_data_bag_item{id=DataBagItemId})->
-    delete_data_bag_item(DataBagItemId);
-delete_data_bag_item(DataBagItemId) when is_binary(DataBagItemId) ->
-    delete_object(delete_data_bag_item_by_id, DataBagItemId).
-
--spec update_data_bag_item(#chef_data_bag_item{}) -> {ok, 1 | not_found} | {error, term()}.
-update_data_bag_item(#chef_data_bag_item{last_updated_by = LastUpdatedBy,
-                       updated_at = UpdatedAt,
-                       serialized_object = Object,
-                       id = Id}) ->
-    UpdateFields = [LastUpdatedBy, UpdatedAt, Object, Id],
-    do_update(update_data_bag_item_by_id, UpdateFields).
-
+%%
 %% environment ops
-
--spec fetch_environment(bin_or_string(), bin_or_string()) ->
-                        {ok, #chef_environment{} | not_found} | {error, term()}.
-fetch_environment(OrgId, EnvironmentName) ->
-    fetch_object(OrgId, EnvironmentName, chef_environment).
-
--spec fetch_environments(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
-%% @doc Return list of environment names for a given organization
-fetch_environments(OrgId) ->
-    fetch_object_names(OrgId, chef_environment).
+%%
 
 -spec bulk_get_environments([binary()]) -> {ok, [binary()] | not_found} |
                                            {error, term()}.
 bulk_get_environments(Ids) ->
     bulk_get_objects(environment, Ids).
 
--spec create_environment(#chef_environment{}) -> {ok, 1} | {error, term()}.
-create_environment(#chef_environment{}=Environment) ->
-    create_object(Environment).
-
--spec delete_environment(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_environment(EnvironmentId) when is_list(EnvironmentId) ->
-    delete_environment(list_to_binary(EnvironmentId));
-delete_environment(#chef_environment{id=EnvironmentId})->
-    delete_environment(EnvironmentId);
-delete_environment(EnvironmentId) when is_binary(EnvironmentId) ->
-    delete_object(delete_environment_by_id, EnvironmentId).
-
--spec update_environment(#chef_environment{}) -> {ok, 1 | not_found} | {error, term()}.
-update_environment(#chef_environment{last_updated_by = LastUpdatedBy,
-                       updated_at = UpdatedAt,
-                       name = Name,
-                       serialized_object = Object,
-                       id = Id}) ->
-    UpdateFields = [LastUpdatedBy, UpdatedAt, Name, Object, Id],
-    do_update(update_environment_by_id, UpdateFields).
-
+%%
 %% client ops
-
--spec fetch_client(bin_or_string(), bin_or_string()) ->
-                          {ok, #chef_client{} | not_found} | {error, term()}.
-fetch_client(OrgId, ClientName) ->
-    fetch_object(OrgId, ClientName, chef_client).
-
--spec fetch_clients(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
-%% @doc Return list of client names for a given organization
-fetch_clients(OrgId) ->
-    fetch_object_names(OrgId, chef_client).
+%%
 
 -spec bulk_get_clients([binary()]) -> {ok, [ [proplists:property()] ] | not_found} |
                                       {error, term()}.
@@ -431,55 +200,6 @@ bulk_get_clients(Ids) ->
         {error, Error} ->
             {error, Error}
     end.
-
--spec create_client(#chef_client{}) -> {ok, 1} | {error, term()}.
-create_client(#chef_client{}=Client) ->
-    create_object(Client).
-
--spec delete_client(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_client(ClientId) when is_list(ClientId) ->
-    delete_client(list_to_binary(ClientId));
-delete_client(ClientId) when is_binary(ClientId) ->
-    delete_object(delete_client_by_id, ClientId).
-
--spec update_client(#chef_client{}) -> {ok, 1 | not_found} | {error, term()}.
-update_client(#chef_client{last_updated_by = LastUpdatedBy,
-                           updated_at = UpdatedAt,
-                           name = Name,
-                           public_key = PublicKey,
-                           pubkey_version = PubkeyVersion,
-                           admin = IsAdmin,
-                           validator = IsValidator,
-                           id = Id}) ->
-    UpdateFields = [LastUpdatedBy, UpdatedAt, Name,
-                    PublicKey, PubkeyVersion,
-                    IsValidator =:= true,
-                    IsAdmin =:= true, Id],
-    do_update(update_client_by_id, UpdateFields).
-
-%% data_bag ops
-
--spec fetch_data_bag(bin_or_string(), bin_or_string()) ->
-                        {ok, #chef_data_bag{} | not_found} | {error, term()}.
-fetch_data_bag(OrgId, DataBagName) ->
-    fetch_object(OrgId, DataBagName, chef_data_bag).
-
--spec fetch_data_bags(bin_or_string()) -> {ok, [binary()]} | {error, term()}.
-%% @doc Return list of data_bag names for a given organization
-fetch_data_bags(OrgId) ->
-    fetch_object_names(OrgId, chef_data_bag).
-
--spec create_data_bag(#chef_data_bag{}) -> {ok, 1} | {error, term()}.
-create_data_bag(#chef_data_bag{}=DataBag) ->
-    create_object(DataBag).
-
--spec delete_data_bag(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_data_bag(DataBagId) when is_list(DataBagId) ->
-    delete_data_bag(list_to_binary(DataBagId));
-delete_data_bag(#chef_data_bag{id=DataBagId})->
-    delete_data_bag(DataBagId);
-delete_data_bag(DataBagId) when is_binary(DataBagId) ->
-    delete_object(delete_data_bag_by_id, DataBagId).
 
 -spec fetch_cookbook_versions(OrgId::object_id()) ->
     {ok, [versioned_cookbook()]} | {error, term()}.
@@ -582,7 +302,7 @@ fetch_latest_cookbook_recipes(OrgId) ->
                             fun(Row) ->
                                     CookbookName = proplists:get_value(<<"name">>, Row),
                                     SerializedObject = proplists:get_value(<<"serialized_object">>, Row),
-                                    chef_cookbook:qualified_recipe_names(CookbookName, SerializedObject)
+                                    chef_cookbook_version:qualified_recipe_names(CookbookName, SerializedObject)
                             end,
                             Rows),
             {ok, lists:sort(RecipeNames)};
@@ -649,81 +369,73 @@ fetch_all_cookbook_version_dependencies(OrgId) ->
 %% Results are sorted by cookbook name; version lists are sorted with
 %% most recent version first.
 -spec fetch_environment_filtered_cookbook_versions(OrgId :: object_id(),
-                                                   EnvName :: binary(),
+                                                   Environment :: #chef_environment{},
                                                    CookbookName :: binary() | all,
                                                    NumVersions :: num_versions()) ->
                                                           {ok, [{CookbookName :: binary(), [Version :: binary()]}]} |
                                                           {error, term()}.
-fetch_environment_filtered_cookbook_versions(OrgId, EnvName, CookbookName, NumVersions) ->
-    case fetch_environment(OrgId, EnvName) of
-        {ok, #chef_environment{}=Environment} ->
-            Constraints = chef_object:depsolver_constraints(Environment),
+fetch_environment_filtered_cookbook_versions(OrgId, Environment, CookbookName, NumVersions) ->
+    Constraints = chef_object_base:depsolver_constraints(Environment),
 
-            %% Due to how environment constraint information is
-            %% currently modeled, as well as the fact that the logic
-            %% already exists in Depsolver, we do not do any filtering
-            %% in the database; instead, we grab "the world" of
-            %% cookbook version information for the org (as name /
-            %% version pairs), and pass this information to Depsolver
-            %% along with the environment constraints; Depsolver then
-            %% filters out all cookbook versions that do not satisfy
-            %% the given constraints.  We then take this filtered list
-            %% and limit the number of versions returned according to
-            %% `NumVersions'
+    %% Due to how environment constraint information is
+    %% currently modeled, as well as the fact that the logic
+    %% already exists in Depsolver, we do not do any filtering
+    %% in the database; instead, we grab "the world" of
+    %% cookbook version information for the org (as name /
+    %% version pairs), and pass this information to Depsolver
+    %% along with the environment constraints; Depsolver then
+    %% filters out all cookbook versions that do not satisfy
+    %% the given constraints.  We then take this filtered list
+    %% and limit the number of versions returned according to
+    %% `NumVersions'
 
-            %% Remember, `CookbookName' can be the atom `all',
-            %% in which case, all versions of all cookbooks are
-            %% retrieved
-            case fetch_latest_cookbook_versions(OrgId, CookbookName, all) of
-                {ok, Packages} ->
-                    {ok, Filtered} = depsolver:filter_packages(Packages, Constraints),
-                    Result = case {Filtered, CookbookName} of
-                                 %% In the odd case that an environment's
-                                 %% constraints completely invalidate every
-                                 %% cookbook version in an org, we still need
-                                 %% to return some data to fulfill our
-                                 %% published API; this case statement handles
-                                 %% the various situations that may arise
-                                 {[], all} ->
-                                     %% Everything was filtered out,
-                                     %% but we're looking for more
-                                     %% than one cookbook; since
-                                     %% `Packages' already has all the
-                                     %% names of all the cookbooks, we
-                                     %% just pull the data from there.
-                                     [{Name, []}
-                                      || Name <- lists:sort(proplists:get_keys(Packages))];
-                                 {[], _} ->
-                                     %% Everything was filtered out,
-                                     %% but we're looking for exactly
-                                     %% one cookbook
-                                     [{CookbookName, []}];
-                                 {_, _} ->
-                                     %% Something made it past the
-                                     %% filter; proceed.  This will be
-                                     %% the most common code path.
-                                     condense_depsolver_results(Filtered, NumVersions)
-                             end,
-                    {ok, Result};
-                {error, Reason} ->
-                    %% Problem fetching latest cookbook versions
-                    {error, Reason}
-            end;
+    %% Remember, `CookbookName' can be the atom `all',
+    %% in which case, all versions of all cookbooks are
+    %% retrieved
+    case fetch_latest_cookbook_versions(OrgId, CookbookName, all) of
+        {ok, Packages} ->
+            {ok, Filtered} = depsolver:filter_packages(Packages, Constraints),
+            Result = case {Filtered, CookbookName} of
+                         %% In the odd case that an environment's
+                         %% constraints completely invalidate every
+                         %% cookbook version in an org, we still need
+                         %% to return some data to fulfill our
+                         %% published API; this case statement handles
+                         %% the various situations that may arise
+                         {[], all} ->
+                             %% Everything was filtered out,
+                             %% but we're looking for more
+                             %% than one cookbook; since
+                             %% `Packages' already has all the
+                             %% names of all the cookbooks, we
+                             %% just pull the data from there.
+                             [{Name, []}
+                              || Name <- lists:sort(proplists:get_keys(Packages))];
+                         {[], _} ->
+                             %% Everything was filtered out,
+                             %% but we're looking for exactly
+                             %% one cookbook
+                             [{CookbookName, []}];
+                         {_, _} ->
+                             %% Something made it past the
+                             %% filter; proceed.  This will be
+                             %% the most common code path.
+                             condense_depsolver_results(Filtered, NumVersions)
+                     end,
+            {ok, Result};
         {error, Reason} ->
-            %% Problem fetching environment information
+            %% Problem fetching latest cookbook versions
             {error, Reason}
     end.
-
-
 
 %% @doc Given an environment in an organization, return a sorted list
 %% of qualified recipe names for the cookbook versions that best match
 %% the environment's version constraints, if any.
 -spec fetch_environment_filtered_recipes(OrgId :: object_id(),
-                                         EnvName :: binary()) ->
+                                         EnvName :: #chef_environment{}) ->
                                                 {ok, [QualifiedRecipeName :: binary()]} |
                                                 {error, term()}.
-fetch_environment_filtered_recipes(OrgId, EnvName) ->
+fetch_environment_filtered_recipes(OrgId, Environment) ->
     %% We're going to fetch the database ID for *all*
     %% cookbook versions in a single query and process the results
     %% into an dict data structure, keyed on the {CookbookName,
@@ -748,7 +460,7 @@ fetch_environment_filtered_recipes(OrgId, EnvName) ->
 
     {ok, CookbookVersionIdDict} = create_cookbook_version_dict(OrgId),
 
-    case fetch_environment_filtered_cookbook_versions(OrgId, EnvName, all, 1) of
+    case fetch_environment_filtered_cookbook_versions(OrgId, Environment, all, 1) of
         {ok, Versions} ->
             %% Determine the IDs we are interested in
             OnlyValidIds = extract_ids_using_filtered_results(CookbookVersionIdDict, Versions),
@@ -799,12 +511,7 @@ fetch_cookbook_version(OrgId, {Name, {Major, Minor, Patch}}) ->
             {error, Error}
     end.
 
-
-
-
-
 %% TODO: Refactor this to use num_versions
-
 
 -spec fetch_latest_cookbook_version(OrgId::object_id(),
                              CookbookName::binary()) ->
@@ -1030,15 +737,11 @@ non_uploaded_checksums(SandboxId, OrgId) when is_binary(SandboxId),
             {error, Reason}
     end.
 
-%% private functions
-
--spec fetch_object(bin_or_string(), bin_or_string(), chef_object_name() | chef_cookbook) ->
-    {ok, chef_object() | not_found} | {error, term()}.
-%% @doc Fetch a single Chef object with the specified `Name'. The type of object to retrieve
-%% is determined by `RecordName'.
-fetch_object(OrgId, Name, RecordName) ->
-    {QueryName, FirstRecordTxfm} = query_and_txfm_for_record(fetch, RecordName),
-    case sqerl:select(QueryName, [OrgId, Name], FirstRecordTxfm) of
+-spec fetch_object(list(), chef_object_name() | chef_cookbook, atom(), list()) ->
+                          {ok, chef_object() | not_found} | {error, term()}.
+fetch_object(Keys, RecordName, QueryName, RecordFields) ->
+    FirstRecordTxfm = {first_as_record, [RecordName, RecordFields]},
+    case sqerl:select(QueryName, Keys, FirstRecordTxfm) of
         %% Awkward sanity check that we got back the expected record type here.
         {ok, Object} when RecordName =:= element(1, Object) ->
             {ok, Object};
@@ -1048,51 +751,37 @@ fetch_object(OrgId, Name, RecordName) ->
             {error, Error}
     end.
 
+%% private functions
+
 %% @doc Given a query type and chef_object() record name, return the appropriate prepared
 %% query name and sqerl record transform data to use in a call to sqerl.
-query_and_txfm_for_record(fetch, chef_node) ->
-    {find_node_by_orgid_name, ?FIRST(chef_node)};
-query_and_txfm_for_record(fetch, chef_role) ->
-    {find_role_by_orgid_name, ?FIRST(chef_role)};
-query_and_txfm_for_record(fetch, chef_environment) ->
-    {find_environment_by_orgid_name, ?FIRST(chef_environment)};
-query_and_txfm_for_record(fetch, chef_client) ->
-    {find_client_by_orgid_name, ?FIRST(chef_client)};
-query_and_txfm_for_record(fetch, chef_data_bag) ->
-    {find_data_bag_by_orgid_name, ?FIRST(chef_data_bag)};
-query_and_txfm_for_record(fetch, chef_data_bag_item) ->
-    {find_data_bag_item_by_orgid_name, ?FIRST(chef_data_bag_item)};
 query_and_txfm_for_record(fetch, chef_cookbook_version) ->
     {find_cookbook_version_by_orgid_name_version, ?FIRST(chef_cookbook_version)};
 query_and_txfm_for_record(fetch_latest, chef_cookbook_version) ->
     {find_latest_cookbook_version_by_orgid_name, ?FIRST(chef_cookbook_version)}.
 
--spec fetch_object_names(bin_or_string(), chef_object_name()) ->
-                           {ok, [binary()]} | {error, term()}.
-%% @doc Return list of object names for a given organization and object type
-fetch_object_names(OrgId, RecordName) ->
-    QueryName = list_query_for(RecordName),
-    case sqerl:select(QueryName, [OrgId], rows_as_scalars, [name]) of
+
+-spec fetch_object_names(tuple()) ->
+                           [binary()] | {error, term()}.
+%% @doc Return list of object names for a object record
+fetch_object_names(StubRec) ->
+    case chef_object:list(StubRec, fun select_rows_as_scalars/3) of
         {ok, L} when is_list(L) ->
-            {ok, L};
+            L;
         {ok, none} ->
-            {ok, []};
-        {error, Error} ->
-            {error, Error}
+            [];
+        {error, _} = Error->
+            Error
     end.
 
-list_query_for(chef_node) ->
-    list_nodes_for_org;
-list_query_for(chef_role) ->
-    list_roles_for_org;
-list_query_for(chef_environment) ->
-    list_environments_for_org;
-list_query_for(chef_client) ->
-    list_clients_for_org;
-list_query_for(chef_data_bag) ->
-    list_data_bags_for_org;
-list_query_for(chef_data_bag_item) ->
-    list_data_bag_items_for_data_bag.
+-spec select_rows_as_scalars(QueryName :: atom(),
+                             Args :: list(),
+                             SelectedFields :: list(atom())) ->
+                                    {ok, none} |
+                                    {ok, list()} |
+                                    {error, term()}.
+select_rows_as_scalars(QueryName, Args, SelectedFields) ->
+    sqerl:select(QueryName, Args, rows_as_scalars, SelectedFields).
 
 -spec bulk_get_objects(chef_type(),
                        [binary()]) ->
@@ -1119,20 +808,6 @@ bulk_get_objects(Type, Ids) ->
                               #chef_cookbook_version{}) -> {ok, non_neg_integer()} |
                                                            sqerl_error().
 %% @doc create an object given a chef object record
-create_object(#chef_user{}=User) ->
-  create_object(insert_user, User);
-create_object(#chef_node{}=Node) ->
-    create_object(insert_node, Node);
-create_object(#chef_role{}=Role) ->
-    create_object(insert_role, Role);
-create_object(#chef_environment{}=Environment) ->
-    create_object(insert_environment, Environment);
-create_object(#chef_client{}=Client) ->
-    create_object(insert_client, Client);
-create_object(#chef_data_bag{}=DataBag) ->
-    create_object(insert_data_bag, DataBag);
-create_object(#chef_data_bag_item{}=DataBagItem) ->
-    create_object(insert_data_bag_item, DataBagItem);
 %% This does not exactly follow the same pattern as it needs to
 %% insert a list of checksums into a separate table.
 %%
@@ -1189,7 +864,6 @@ create_object(#chef_sandbox{id=SandboxId,
             %% the failure back up
             Error
     end.
-
 -spec create_object(atom(), tuple() | list()) -> {ok, non_neg_integer()} | {error, term()} | {conflict, term()}.
 create_object(QueryName, Args) when is_atom(QueryName), is_list(Args) ->
     sqerl:statement(QueryName, Args, count);
@@ -1563,7 +1237,7 @@ row_to_dependency_set(Row) ->
     Version = proplists:get_value(<<"version">>, Row),
     DependenciesJSON = proplists:get_value(<<"dependencies">>, Row),
 
-    Dependencies = chef_object:depsolver_constraints(DependenciesJSON),
+    Dependencies = chef_object_base:depsolver_constraints(DependenciesJSON),
 
     {CookbookName, [{Version, Dependencies}]}.
 
@@ -1786,7 +1460,7 @@ fetch_cookbook_version_serialized_objects_batch(Ids) when is_list(Ids)->
 extract_recipe_names_from_serialized_objects(Pairs) ->
     Results = lists:flatmap(
                 fun({CookbookName, SerializedObject}) ->
-                        chef_cookbook:qualified_recipe_names(CookbookName, SerializedObject)
+                        chef_cookbook_version:qualified_recipe_names(CookbookName, SerializedObject)
                 end,
                 Pairs),
     lists:sort(Results).

@@ -335,7 +335,7 @@ convert_couch_json_to_node_record(OrgId, AuthzId, RequestorId, NodeBlob) ->
     CleanBlob = cleanup_couch_node_record(NodeBlob),
     Name = ej:get({<<"name">>}, CleanBlob),
     Date = sql_date(now),
-    #chef_node{id = chef_object:make_org_prefix_id(OrgId, Name),
+    #chef_node{id = chef_object_base:make_org_prefix_id(OrgId, Name),
                authz_id = AuthzId,
                org_id = OrgId,
                name = Name,

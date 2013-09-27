@@ -33,7 +33,7 @@ compile: $(DEPS)
 	@rebar compile
 
 dialyzer: $(DEPS_PLT)
-	@dialyzer -Wrace_conditions -Wunderspecs --plts ~/.dialyzer_plt $(DEPS_PLT) -r ebin
+	@dialyzer --plts ~/.dialyzer_plt $(DEPS_PLT) -r ebin
 
 $(DEPS_PLT):
 	@dialyzer --build_plt $(DIALYZER_DEPS) --output_plt $(DEPS_PLT)
