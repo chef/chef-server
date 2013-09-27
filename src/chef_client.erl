@@ -21,21 +21,45 @@
 -module(chef_client).
 
 -export([
+         authz_id/1,
          add_authn_fields/2,
-
          assemble_client_ejson/2,
+         ejson_for_indexing/2,
+         fields_for_fetch/1,
+         fields_for_update/1,
+         id/1,
+         is_indexed/0,
+         name/1,
+         org_id/1,
+         new_record/3,
          oc_assemble_client_ejson/2,
-         osc_assemble_client_ejson/2,
-
          oc_parse_binary_json/2,
          oc_parse_binary_json/3,
-
+         osc_assemble_client_ejson/2,
          osc_parse_binary_json/2,
          osc_parse_binary_json/3,
-
          parse_binary_json/2,
-         parse_binary_json/3
+         parse_binary_json/3,
+         record_fields/0,
+         set_created/2,
+         set_updated/2,
+         type_name/1,
+         update_from_ejson/2
         ]).
+
+%% database named queries
+-export([
+         bulk_get_query/0,
+         create_query/0,
+         delete_query/0,
+         find_query/0,
+         list_query/0,
+         update_query/0
+        ]).
+
+-export([
+         list/2
+         ]).
 
 -include_lib("ej/include/ej.hrl").
 -include("chef_types.hrl").
@@ -66,6 +90,116 @@
 -define(PARSE_BINARY, oc_parse_binary_json).
 -endif.
 
+-behaviour(chef_object).
+
+-spec name(#chef_client{}) -> binary().
+name(#chef_client{name = Name}) ->
+    Name.
+
+-spec id(#chef_client{}) -> object_id().
+id(#chef_client{id = Id}) ->
+    Id.
+
+-spec org_id(#chef_client{}) -> object_id().
+org_id(#chef_client{org_id = OrgId}) ->
+    OrgId.
+
+%% TODO: this doesn't need an argument
+type_name(#chef_client{}) ->
+    client.
+
+authz_id(#chef_client{authz_id = AuthzId})->
+    AuthzId.
+
+is_indexed() ->
+    true.
+
+ejson_for_indexing(#chef_client{}, Client) ->
+    Client.
+
+update_from_ejson(#chef_client{} = Client, ClientData) ->
+    Name = ej:get({<<"name">>}, ClientData),
+    IsAdmin = ej:get({<<"admin">>}, ClientData) =:= true,
+    IsValidator = ej:get({<<"validator">>}, ClientData) =:= true,
+    %% Take certificate first, then public_key
+    {Key, Version} = cert_or_key(ClientData),
+    case Key of
+        undefined ->
+            Client#chef_client{name = Name,
+                admin = IsAdmin,
+                validator = IsValidator};
+        _ ->
+            Client#chef_client{name = Name,
+                admin = IsAdmin,
+                validator = IsValidator,
+                public_key = Key,
+                pubkey_version = Version}
+    end.
+
+-spec set_created(#chef_client{}, object_id()) -> #chef_client{}.
+set_created(#chef_client{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_client{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
+
+-spec set_updated(#chef_client{}, object_id()) -> #chef_client{}.
+set_updated(#chef_client{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_client{updated_at = Now, last_updated_by = ActorId}.
+
+create_query() ->
+    insert_client.
+
+update_query() ->
+    update_client_by_id.
+
+delete_query() ->
+    delete_client_by_id.
+
+find_query() ->
+    find_client_by_orgid_name.
+
+list_query() ->
+    list_clients_for_org.
+
+bulk_get_query() ->
+    bulk_get_clients.
+
+-spec new_record(object_id(), object_id(), ejson_term()) -> #chef_client{}.
+new_record(OrgId, AuthzId, ClientData) ->
+    Name = ej:get({<<"name">>}, ClientData),
+    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    Validator = ej:get({<<"validator">>}, ClientData) =:= true,
+    Admin = ej:get({<<"admin">>}, ClientData) =:= true,
+    {PublicKey, PubkeyVersion} = cert_or_key(ClientData),
+    #chef_client{id = Id,
+                 authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+                 org_id = OrgId,
+                 name = Name,
+                 validator = Validator,
+                 admin = Admin,
+                 public_key = PublicKey,
+                 pubkey_version = PubkeyVersion}.
+
+fields_for_update(#chef_client{last_updated_by = LastUpdatedBy,
+                               updated_at = UpdatedAt,
+                               name = Name,
+                               public_key = PublicKey,
+                               pubkey_version = PubkeyVersion,
+                               admin = IsAdmin,
+                               validator = IsValidator,
+                               id = Id}) ->
+    [LastUpdatedBy, UpdatedAt, Name,
+     PublicKey, PubkeyVersion,
+     IsValidator =:= true,
+     IsAdmin =:= true, Id].
+
+fields_for_fetch(#chef_client{org_id = OrgId,
+                              name = Name}) ->
+    [OrgId, Name].
+
+record_fields() ->
+    record_info(fields, chef_client).
+
 -spec add_authn_fields(ejson_term(), binary()) -> ejson_term().
 %% @doc Add in the generated public key along with other authn related
 %% fields to the EJson encoded request body. Return the modified EJson
@@ -76,7 +210,7 @@ add_authn_fields(ClientData, PublicKey) ->
                 end,
                 ClientData,
                 [
-                    {<<"pubkey_version">>, chef_object:key_version(PublicKey)},
+                    {<<"pubkey_version">>, chef_object_base:key_version(PublicKey)},
                     {<<"public_key">>, PublicKey}
                 ]).
 
@@ -97,7 +231,7 @@ oc_assemble_client_ejson(#chef_client{name = Name, validator = Validator,
         undefined ->
             {Values};
         _ ->
-            case chef_object:key_version(PublicKey) of
+            case chef_object_base:key_version(PublicKey) of
                 0 ->
                     {[{<<"public_key">>, PublicKey} | Values]};
                 1 ->
@@ -138,7 +272,7 @@ osc_parse_binary_json(Bin, ReqName) ->
 %% EJson-encoded Erlang data structure, using passed defaults
 %% @end
 osc_parse_binary_json(Bin, ReqName, CurrentClient) ->
-    Client = osc_set_values_from_current_client(chef_object:delete_null_public_key(chef_json:decode_body(Bin)), CurrentClient),
+    Client = osc_set_values_from_current_client(chef_object_base:delete_null_public_key(chef_json:decode_body(Bin)), CurrentClient),
     Client1 = set_default_values(Client, ?DEFAULT_FIELD_VALUES),
     {Name, FinalClient} = osc_destination_name(Client1, ReqName),
     valid_name(Name),
@@ -177,7 +311,7 @@ validate_admin_xor_validator(Client) ->
     IsValidator = ej:get({<<"validator">>}, Client),
     case {IsAdmin, IsValidator} of
         {true, true} ->
-            chef_object:throw_invalid_fun_match(<<"Client can be either an admin or a validator, but not both.">>);
+            chef_object_base:throw_invalid_fun_match(<<"Client can be either an admin or a validator, but not both.">>);
         {_, _} ->
             {ok, Client}
     end.
@@ -189,9 +323,9 @@ osc_set_values_from_current_client(Client, #chef_client{admin = IsAdmin,
                                                         public_key = PublicKey}) ->
     C = set_default_values(Client, [{<<"admin">>, IsAdmin},
                                     {<<"validator">>, IsValidator}]),
-    case chef_object:cert_or_key(C) of
+    case chef_object_base:cert_or_key(C) of
         {undefined, _} ->
-            chef_object:set_public_key(C, PublicKey);
+            chef_object_base:set_public_key(C, PublicKey);
         {_NewPublicKey, _} ->
             C
     end.
@@ -201,9 +335,9 @@ oc_set_values_from_current_client(Client, not_found) ->
 oc_set_values_from_current_client(Client, #chef_client{validator = IsValidator,
                                                        public_key = Cert}) ->
     C = set_default_values(Client, [{<<"validator">>, IsValidator}]),
-    case chef_object:cert_or_key(C) of
+    case chef_object_base:cert_or_key(C) of
         {undefined, _} ->
-            chef_object:set_public_key(C, Cert);
+            chef_object_base:set_public_key(C, Cert);
         {_NewPublicKey, _} ->
             C
     end.
@@ -225,7 +359,7 @@ osc_client_spec(Name) ->
       {{opt, <<"private_key">>}, boolean},
       {{opt, <<"json_class">>}, <<"Chef::ApiClient">>},
       {{opt, <<"chef_type">>}, <<"client">>},
-      {{opt, <<"public_key">>}, {fun_match, {fun chef_object:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
+      {{opt, <<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
      ]}.
 
 oc_client_spec(Name) ->
@@ -293,3 +427,30 @@ value_or_default(undefined, Default) ->
     Default;
 value_or_default(Value, _) ->
     Value.
+
+cert_or_key(Payload) ->
+    %% Some consumers of the API, such as webui, will generate a
+    %% JSON { public_key: null } to mean, "do not change it". By
+    %% default, null is treated as a defined, and will erase the
+    %% public_key in the database. We use value_or_undefined() to
+    %% convert all null into undefined.
+    Cert = value_or_undefined({<<"certificate">>}, Payload),
+    PublicKey = value_or_undefined({<<"public_key">>}, Payload),
+    %% Take certificate first, then public_key
+    case Cert of
+        undefined ->
+            {PublicKey, ?KEY_VERSION};
+        _ ->
+            {Cert, ?CERT_VERSION}
+    end.
+
+value_or_undefined(Key, Data) ->
+  case ej:get(Key, Data) of
+    null ->
+      undefined;
+    Value ->
+      Value
+  end.
+-spec(list(#chef_client{}, fun(([any()],[any()],[any()]) -> [any()])) -> [any()]).
+list(#chef_client{org_id = OrgId}, CallbackFun) ->
+    CallbackFun(list_query(), [OrgId], [name]).

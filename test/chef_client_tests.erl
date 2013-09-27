@@ -276,3 +276,13 @@ oc_parse_binary_json_test_() ->
       end
      }
     ].
+
+
+new_record_test() ->
+    OrgId = <<"12345678123456781234567812345678">>,
+    AuthzId = <<"00000000000000000000000011111111">>,
+    ClientData = {[{<<"name">>, <<"my-client">>}, {<<"alpha">>, <<"bravo">>}]},
+    Client = chef_client:new_record(OrgId, AuthzId, ClientData),
+    ?assertMatch(#chef_client{}, Client),
+    %% TODO: validate more fields?
+    ?assertEqual(<<"my-client">>, chef_client:name(Client)).

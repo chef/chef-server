@@ -30,10 +30,6 @@ public_key_data() ->
     {ok, Bin} = file:read_file("../test/spki_public.pem"),
     Bin.
 
-cert_data() ->
-    {ok, Bin} = file:read_file("../test/cert.pem"),
-    Bin.
-
 assemble_user_ejson_test_() ->
     [{"obtain expected EJSON",
       fun() ->
@@ -143,3 +139,18 @@ parse_binary_json_test_() ->
                 || Body <- Bodies ]
       end}
     ].
+
+new_record_test() ->
+    UserData = {[
+                 {<<"name">>, <<"bob">>},
+                 {<<"password">>, <<"top secret 123456">>}
+                ]},
+    OrgId = <<"12345678123456781234567812345678">>,
+    AuthzId = <<"00000000000000000000000011111111">>,
+    Hashed = <<"blahblah">>,
+    Salt = <<"nacl">>,
+    HashType = <<"bogus">>,
+    Password = {Hashed, Salt, HashType},
+    User = chef_user:new_record(OrgId, AuthzId, {UserData, Password}),
+    ?assertMatch(#chef_user{}, User),
+    ?assertEqual(<<"bob">>, chef_user:name(User)).

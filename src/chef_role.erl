@@ -23,15 +23,45 @@
 -module(chef_role).
 
 -export([
+         authz_id/1,
+         ejson_for_indexing/2,
+         fields_for_fetch/1,
+         fields_for_update/1,
+         id/1,
+         is_indexed/0,
+         name/1,
          environments/1,
-         parse_binary_json/2
+         new_record/3,
+         org_id/1,
+         parse_binary_json/2,
+         record_fields/0,
+         set_created/2,
+         set_updated/2,
+         type_name/1,
+         update_from_ejson/2
         ]).
+
+%% database named queries
+-export([
+         bulk_get_query/0,
+         create_query/0,
+         delete_query/0,
+         find_query/0,
+         list_query/0,
+         update_query/0
+        ]).
+
+-export([
+         list/2
+         ]).
 
 -ifdef(TEST).
 -compile(export_all).
 -endif.
 
 -include("chef_types.hrl").
+
+-behaviour(chef_object).
 
 -define(DEFAULT_FIELD_VALUES,
         [
@@ -64,6 +94,52 @@
          <<"run_list">> ]).
 
 -type role_action() :: create | { update, Name::binary() }.
+
+-spec name(#chef_role{}) -> binary().
+name(#chef_role{name = Name}) ->
+    Name.
+
+-spec id(#chef_role{}) -> object_id().
+id(#chef_role{id = Id}) ->
+    Id.
+
+%% TODO: this doesn't need an argument
+type_name(#chef_role{}) ->
+    role.
+
+-spec authz_id(#chef_role{}) -> object_id().
+authz_id(#chef_role{authz_id = AuthzId}) ->
+    AuthzId.
+
+-spec org_id(#chef_role{}) -> object_id().
+org_id(#chef_role{org_id = OrgId}) ->
+    OrgId.
+
+-spec new_record(object_id(), object_id(), ejson_term()) -> #chef_role{}.
+new_record(OrgId, AuthzId, RoleData) ->
+    Name = ej:get({<<"name">>}, RoleData),
+    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    Data = chef_db_compression:compress(chef_role, chef_json:encode(RoleData)),
+    #chef_role{id = Id,
+               authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+               org_id = OrgId,
+               name = Name,
+               serialized_object = Data}.
+
+is_indexed() ->
+    true.
+
+-spec ejson_for_indexing(#chef_role{}, ejson_term()) -> ejson_term().
+ejson_for_indexing(#chef_role{}, Role) ->
+    EnvironmentRunLists0 = ej:get({<<"env_run_lists">>}, Role, ?EMPTY_EJSON_HASH),
+    EnvironmentRunLists = ej:delete({<<"_default">>}, EnvironmentRunLists0),
+    ej:set({<<"env_run_lists">>}, Role, EnvironmentRunLists).
+
+-spec update_from_ejson(#chef_role{}, ejson_term()) -> #chef_role{}.
+update_from_ejson(#chef_role{} = Role, RoleData) ->
+    Name = ej:get({<<"name">>}, RoleData),
+    Data = chef_db_compression:compress(chef_role, chef_json:encode(RoleData)),
+    Role#chef_role{name = Name, serialized_object = Data}.
 
 %% @doc Given the EJSON representation of a role, return a sorted list of the environment names
 %% present in the role's `env_run_list` hash.
@@ -111,7 +187,7 @@ set_default_values(Role, Defaults) ->
 
 -spec validate(ej:ejson_object()) -> {ok, ej:ejson_object()}.
 validate(Role) ->
-    case chef_object:strictly_valid(?VALIDATION_CONSTRAINTS, ?VALID_KEYS, Role) of
+    case chef_object_base:strictly_valid(?VALIDATION_CONSTRAINTS, ?VALID_KEYS, Role) of
         ok ->
             {ok, Role};
         Bad ->
@@ -144,11 +220,11 @@ normalize(RoleEjson) ->
     EnvRunListsKey = <<"env_run_lists">>,
 
     RunList = ej:get({RunListKey}, RoleEjson, []),
-    NormalizedRunList = chef_object:normalize_run_list(RunList),
+    NormalizedRunList = chef_object_base:normalize_run_list(RunList),
 
     %% Roles have a hash of {environment -> run list} that need to be normalized as well.
     {EnvRunLists} = ej:get({EnvRunListsKey}, RoleEjson, ?EMPTY_EJSON_HASH),
-    NormalizedEnvRunLists = {[{Env, chef_object:normalize_run_list(List)} || {Env, List} <- EnvRunLists]},
+    NormalizedEnvRunLists = {[{Env, chef_object_base:normalize_run_list(List)} || {Env, List} <- EnvRunLists]},
 
     lists:foldl(fun({Key, Value}, Role) ->
                         ej:set({Key}, Role, Value)
@@ -156,3 +232,47 @@ normalize(RoleEjson) ->
                 RoleEjson,
                 [{RunListKey, NormalizedRunList},
                  {EnvRunListsKey, NormalizedEnvRunLists}]).
+
+-spec set_created(#chef_role{}, object_id()) -> #chef_role{}.
+set_created(#chef_role{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_role{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
+
+-spec set_updated(#chef_role{}, object_id()) -> #chef_role{}.
+set_updated(#chef_role{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_role{updated_at = Now, last_updated_by = ActorId}.
+
+create_query() ->
+    insert_role.
+
+update_query() ->
+    update_role_by_id.
+
+delete_query() ->
+    delete_role_by_id.
+
+find_query() ->
+    find_role_by_orgid_name.
+
+list_query() ->
+    list_roles_for_org.
+
+bulk_get_query() ->
+    bulk_get_roles.
+
+fields_for_update(#chef_role{last_updated_by = LastUpdatedBy,
+                             updated_at = UpdatedAt,
+                             serialized_object = Object,
+                             id = Id}) ->
+    [LastUpdatedBy, UpdatedAt, Object, Id].
+
+fields_for_fetch(#chef_role{org_id = OrgId,
+                            name = Name}) ->
+    [OrgId, Name].
+
+record_fields() ->
+    record_info(fields, chef_role).
+
+list(#chef_role{org_id = OrgId}, CallbackFun) ->
+    CallbackFun(list_query(), [OrgId], [name]).

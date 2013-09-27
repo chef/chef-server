@@ -23,6 +23,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
+-include("chef_types.hrl").
 
 basic_role() ->
     {[
@@ -192,6 +193,14 @@ parse_binary_json_test_() ->
               ?assertEqual([<<"recipe[foo]">>, <<"recipe[bar]">>],
                            ej:get({<<"env_run_lists">>, <<"dev">>}, ProcessedForUpdate))
       end
+     },
+     {"Mismatched URL and name for update is invalid",
+      fun() ->
+              R = basic_role(),
+              JSON = jiffy:encode(R),
+              ?assertThrow({url_json_name_mismatch, _},
+                           chef_role:parse_binary_json(JSON, {update, <<"wrong-name-here">>}))
+      end
      }
     ].
 
@@ -216,3 +225,141 @@ normalize_test_() ->
                                                   {<<"dev">>, [<<"recipe[oof]">>, <<"recipe[rab]">>, <<"recipe[zab]">>]}]})}
                                        ]
     ].
+
+new_record_test() ->
+    OrgId = <<"12345678123456781234567812345678">>,
+    AuthzId = <<"00000000000000000000000011111111">>,
+    RoleData = {[{<<"name">>, <<"my-role">>}, {<<"alpha">>, <<"bravo">>}]},
+    Role = chef_role:new_record(OrgId, AuthzId, RoleData),
+    ?assertMatch(#chef_role{}, Role),
+    %% TODO: validate more fields?
+    ?assertEqual(<<"my-role">>, chef_role:name(Role)),
+    ?assertEqual(OrgId, chef_role:org_id(Role)),
+    ?assertEqual(AuthzId, chef_role:authz_id(Role)),
+    ?assert(is_binary(chef_role:id(Role))).
+
+role_ejson_for_indexing_test_() ->
+    Role = #chef_role{name = <<"a_role">>},
+    RawRole = {[{<<"name">>, <<"a_role">>},
+                {<<"description">>, <<"role description">>},
+                {<<"json_class">>, <<"Chef::Role">>},
+                {<<"default_attributes">>, {[{<<"a">>, <<"b">>}]}},
+                {<<"override_attributes">>, {[{<<"a">>, <<"b">>},
+                                              {<<"x">>, <<"y">>}]}},
+                {<<"chef_type">>, <<"role">>},
+                {<<"run_list">>, [<<"recipe[apache2]">>, <<"role[web]">>]},
+                {<<"env_run_lists">>, {[]}}
+               ]},
+    [{"empty env_run_lists",
+      fun() ->
+              Expected = RawRole,
+              Got = chef_role:ejson_for_indexing(Role, RawRole),
+              ?assertEqual(Expected, Got)
+      end},
+     {"_default in env_run_lists is removed",
+      fun() ->
+              EnvRunListsExpected = {[{<<"prod">>, [<<"recipe[a2]">>, <<"role[b3]">>]}]},
+              EnvRunLists = {[{<<"prod">>, [<<"recipe[a2]">>, <<"role[b3]">>]},
+                              {<<"_default">>, [<<"recipe[a0]">>, <<"role[b0]">>]}]},
+              RawRole1 = ej:set({<<"env_run_lists">>}, RawRole, EnvRunLists),
+              Expected = ej:set({<<"env_run_lists">>}, RawRole, EnvRunListsExpected),
+              Got = chef_role:ejson_for_indexing(Role, RawRole1),
+              ?assertEqual(Expected, Got)
+      end}
+    ].
+
+update_from_ejson_test_() ->
+    Role = #chef_role{name = <<"a_role">>},
+    RawRole = {[{<<"name">>, <<"new_name">>},
+                {<<"description">>, <<"role description">>},
+                {<<"json_class">>, <<"Chef::Role">>},
+                {<<"default_attributes">>, {[{<<"a">>, <<"b">>}]}},
+                {<<"override_attributes">>, {[{<<"a">>, <<"b">>},
+                                              {<<"x">>, <<"y">>}]}},
+                {<<"chef_type">>, <<"role">>},
+                {<<"run_list">>, [<<"recipe[apache2]">>, <<"role[web]">>]},
+                {<<"env_run_lists">>, {[]}}
+               ]},
+
+    [{"chef_role fields are set from json for all dbs",
+      [
+       {atom_to_list(DbType),
+        fun() ->
+                Role1 = chef_role:update_from_ejson(Role, RawRole),
+                GotData = Role1#chef_role.serialized_object,
+                GotEjson = jiffy:decode(chef_db_compression:decompress(GotData)),
+                ?assertEqual(<<"new_name">>, Role1#chef_role.name),
+                ?assertEqual(RawRole, GotEjson)
+        end} || DbType <- [mysql, pgsql] ]}
+    ].
+
+set_created_and_updated_test_() ->
+    CreateActorId = <<"12121212121212121212121212121212">>,
+    UpdateActorId = <<"20202020202020202020202020202020">>,
+    CreatedRole = chef_role:set_created(#chef_role{}, CreateActorId),
+    UpdatedRole = chef_role:set_updated(CreatedRole, UpdateActorId),
+
+    [{"set_created makes a date looking thing and also sets updated_at",
+      ?_assertMatch(<<_Year:4/binary, "-", _Month:2/binary, "-", _Day:2/binary,
+                      " ", _H:2/binary, ":", _M:2/binary, ":", _S:2/binary>>,
+                    CreatedRole#chef_role.created_at)},
+     {"set_created also sets updated_at",
+      ?_assertEqual(CreatedRole#chef_role.created_at, CreatedRole#chef_role.updated_at)},
+
+     {"set_created sets last_updated_by",
+      ?_assertEqual(CreateActorId, CreatedRole#chef_role.last_updated_by)},
+
+     {"updated_at makes a date looking thing",
+      ?_assertMatch(<<_Year:4/binary, "-", _Month:2/binary, "-", _Day:2/binary,
+                      " ", _H:2/binary, ":", _M:2/binary, ":", _S:2/binary>>,
+                    UpdatedRole#chef_role.created_at)},
+     {"updated_at updates last_updated_by",
+      ?_assertMatch(UpdateActorId, UpdatedRole#chef_role.last_updated_by)}].
+
+query_name_test_() ->
+    Tests = [{create_query, insert_role},
+             {update_query, update_role_by_id},
+             {delete_query, delete_role_by_id},
+             {find_query, find_role_by_orgid_name},
+             {list_query, list_roles_for_org},
+             {bulk_get_query, bulk_get_roles}],
+    [ ?_assertEqual(E, chef_role:F()) || {F, E} <- Tests ].
+
+ejson_for_indexing_test_() ->
+    Role = #chef_role{name = <<"a_role">>},
+    RawRole = {[{<<"name">>, <<"a_role">>},
+                {<<"description">>, <<"role description">>},
+                {<<"json_class">>, <<"Chef::Role">>},
+                {<<"default_attributes">>, {[{<<"a">>, <<"b">>}]}},
+                {<<"override_attributes">>, {[{<<"a">>, <<"b">>},
+                                              {<<"x">>, <<"y">>}]}},
+                {<<"chef_type">>, <<"role">>},
+                {<<"run_list">>, [<<"recipe[apache2]">>, <<"role[web]">>]},
+                {<<"env_run_lists">>, {[]}}
+               ]},
+    [{"empty env_run_lists",
+      fun() ->
+              Expected = RawRole,
+              Got = chef_object:ejson_for_indexing(Role, RawRole),
+              ?assertEqual(Expected, Got)
+      end},
+     {"_default in env_run_lists is removed",
+      fun() ->
+              EnvRunListsExpected = {[{<<"prod">>, [<<"recipe[a2]">>, <<"role[b3]">>]}]},
+              EnvRunLists = {[{<<"prod">>, [<<"recipe[a2]">>, <<"role[b3]">>]},
+                              {<<"_default">>, [<<"recipe[a0]">>, <<"role[b0]">>]}]},
+              RawRole1 = ej:set({<<"env_run_lists">>}, RawRole, EnvRunLists),
+              Expected = ej:set({<<"env_run_lists">>}, RawRole, EnvRunListsExpected),
+              Got = chef_object:ejson_for_indexing(Role, RawRole1),
+              ?assertEqual(Expected, Got)
+      end}
+    ].
+
+id_test() ->
+    ?assertEqual(<<"1">>, chef_object:id(#chef_role{id = <<"1">>})).
+
+name_test() ->
+    ?assertEqual(<<"a_name">>, chef_object:name(#chef_role{name =  <<"a_name">>})).
+
+type_name_test() ->
+    ?assertEqual(role, chef_object:type_name(#chef_role{})).

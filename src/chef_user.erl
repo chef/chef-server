@@ -19,12 +19,41 @@
 %
 -module(chef_user).
 
--export([assemble_user_ejson/2,
+-export([
+         assemble_user_ejson/2,
+         authz_id/1,
+         ejson_for_indexing/2,
+         fields_for_fetch/1,
+         fields_for_update/1,
+         id/1,
+         is_indexed/0,
+         name/1,
+         org_id/1,
+         new_record/3,
          parse_binary_json/1,
          parse_binary_json/2,
          password_data/1,
+         record_fields/0,
+         set_created/2,
          set_password_data/2,
-         update_from_ejson/2]).
+         set_updated/2,
+         type_name/1,
+         update_from_ejson/2
+        ]).
+
+%% database named queries
+-export([
+         bulk_get_query/0,
+         create_query/0,
+         delete_query/0,
+         find_query/0,
+         list_query/0,
+         update_query/0
+        ]).
+
+-export([
+         list/2
+         ]).
 
 -include("chef_types.hrl").
 
@@ -39,12 +68,88 @@
           {<<"admin">>, false}
         ]).
 
+
+-behaviour(chef_object).
+
+-spec authz_id(#chef_user{}) -> object_id().
+authz_id(#chef_user{authz_id = AuthzId}) ->
+    AuthzId.
+
+-spec name(#chef_user{}) -> binary().
+name(#chef_user{username = Name}) ->
+    Name.
+
+-spec id(#chef_user{}) -> object_id().
+id(#chef_user{id = Id}) ->
+    Id.
+
+org_id(#chef_user{}) ->
+    error(not_valid_for_chef_user).
+
+%% TODO: this doesn't need an argument
+type_name(#chef_user{}) ->
+    user.
+
+-spec new_record(object_id(), object_id(), {ejson_term(), {binary(), binary(), binary()}}) -> #chef_user{}.
+    %% This only works for Open Source Users currently
+new_record(OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
+Name = ej:get({<<"name">>}, UserData),
+    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    Email = value_or_null({<<"email">>}, UserData),
+    Admin = ej:get({<<"admin">>}, UserData) =:= true,
+    {PublicKey, _PubkeyVersion} = cert_or_key(UserData),
+    #chef_user{id = Id,
+               authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+               username = Name,
+               email = Email,
+               public_key = PublicKey,
+               hashed_password = HashPass,
+               salt = Salt,
+               hash_type = HashType,
+               external_authentication_uid = null, %% Not used in open source user
+               recovery_authentication_enabled = false, %% Not used in open source user
+               admin = Admin
+    }.
+
+value_or_null(Key, Data) ->
+ Value = ej:get(Key, Data),
+  case Value of
+    undefined ->
+      null;
+    _ ->
+      Value
+  end.
+
+cert_or_key(Payload) ->
+    %% Some consumers of the API, such as webui, will generate a
+    %% JSON { public_key: null } to mean, "do not change it". By
+    %% default, null is treated as a defined, and will erase the
+    %% public_key in the database. We use value_or_undefined() to
+    %% convert all null into undefined.
+    Cert = value_or_undefined({<<"certificate">>}, Payload),
+    PublicKey = value_or_undefined({<<"public_key">>}, Payload),
+    %% Take certificate first, then public_key
+    case Cert of
+        undefined ->
+            {PublicKey, ?KEY_VERSION};
+        _ ->
+            {Cert, ?CERT_VERSION}
+    end.
+
+value_or_undefined(Key, Data) ->
+  case ej:get(Key, Data) of
+    null ->
+      undefined;
+    Value ->
+      Value
+  end.
+
 user_spec(create) ->
   {[
     {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
     {<<"password">>, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
     {{opt,<<"admin">>}, boolean},
-    {{opt,<<"public_key">>}, {fun_match, {fun chef_object:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
+    {{opt,<<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
    ]};
 user_spec(update) ->
   {[
@@ -52,7 +157,7 @@ user_spec(update) ->
     {{opt,<<"password">>}, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
     {{opt,<<"private_key">>}, boolean},
     {{opt,<<"admin">>}, boolean},
-    {{opt,<<"public_key">>}, {fun_match, {fun chef_object:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
+    {{opt,<<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
    ]}.
 
 valid_password(Password) when is_binary(Password) andalso byte_size(Password) >= 6 ->
@@ -78,7 +183,7 @@ parse_binary_json(Bin) ->
 
 -spec parse_binary_json(binary(), create | update) -> {ok, ej:json_object()}. % or throw
 parse_binary_json(Bin, Operation) ->
-  User = chef_object:delete_null_public_key(chef_json:decode(Bin)),
+  User = chef_object_base:delete_null_public_key(chef_json:decode(Bin)),
   %% If user is invalid, an error is thown
   validate_user(User, user_spec(Operation)),
   %% Set default values after validating input, so admin can be set to false
@@ -125,7 +230,7 @@ update_from_ejson(#chef_user{} = User, {UserData, PasswordData}) ->
     Name = ej:get({<<"name">>}, UserData),
     IsAdmin = ej:get({<<"admin">>}, UserData) =:= true,
 
-    {Key, _Version} = chef_object:cert_or_key(UserData),
+    {Key, _Version} = chef_object_base:cert_or_key(UserData),
     UserWithPassword = chef_user:set_password_data(User, PasswordData),
     case Key of
         undefined ->
@@ -139,3 +244,56 @@ update_from_ejson(#chef_user{} = User, {UserData, PasswordData}) ->
             }
     end.
 
+-spec set_created(#chef_user{}, object_id()) -> #chef_user{}.
+set_created(#chef_user{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_user{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
+
+-spec set_updated(#chef_user{}, object_id()) -> #chef_user{}.
+set_updated(#chef_user{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_user{updated_at = Now, last_updated_by = ActorId}.
+
+create_query() ->
+    insert_user.
+
+update_query() ->
+    update_user_by_id.
+
+delete_query() ->
+    delete_user_by_id.
+
+find_query() ->
+    find_user_by_username.
+
+list_query() ->
+    list_users.
+
+bulk_get_query() ->
+    bulk_get_users.
+
+is_indexed() ->
+    false.
+
+ejson_for_indexing(#chef_user{}, _) ->
+    error(not_indexed).
+
+fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
+                             updated_at      = UpdatedAt,
+                             admin           = IsAdmin,
+                             public_key      = PublicKey,
+                             hashed_password = HashedPassword,
+                             salt            = Salt,
+                             hash_type       = HashType,
+                             id              = Id }) ->
+    [IsAdmin =:= true, PublicKey, HashedPassword, Salt, HashType, LastUpdatedBy, UpdatedAt, Id].
+
+fields_for_fetch(#chef_user{username = UserName}) ->
+    [UserName].
+
+record_fields() ->
+    record_info(fields, chef_user).
+
+list(#chef_user{}, CallbackFun) ->
+    CallbackFun(list_query(), [], [username]).
+    

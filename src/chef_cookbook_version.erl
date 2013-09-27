@@ -20,19 +20,48 @@
 %%
 
 
--module(chef_cookbook).
+-module(chef_cookbook_version).
 
 -export([
          assemble_cookbook_ejson/2,
-         minimal_cookbook_ejson/2,
-         parse_binary_json/2,
-         extract_checksums/1,
+         authz_id/1,
+         base_cookbook_name/1,
          constraint_map_spec/1,
-         version_to_binary/1,
+         ejson_for_indexing/2,
+         extract_checksums/1,
+         fields_for_update/1,
+         fields_for_fetch/1,
+         id/1,
+         is_indexed/0,
+         minimal_cookbook_ejson/2,
+         name/1,
+         org_id/1,
+         new_record/3,
+         parse_binary_json/2,
          parse_version/1,
          qualified_recipe_names/2,
-         base_cookbook_name/1
+         record_fields/0,
+         set_created/2,
+         set_updated/2,
+
+         type_name/1,
+         update_from_ejson/2,
+         version_to_binary/1
         ]).
+
+%% database named queries
+-export([
+         bulk_get_query/0,
+         create_query/0,
+         delete_query/0,
+         find_query/0,
+         list_query/0,
+         update_query/0
+        ]).
+
+-export([
+         list/2
+         ]).
 
 -ifdef(TEST).
 -compile(export_all).
@@ -67,6 +96,86 @@
          {<<"chef_type">>,          {match, "cookbook_version"}}
          %% FIXME: more to come soon
         ]).
+
+-behaviour(chef_object).
+
+authz_id(#chef_cookbook_version{authz_id = AuthzId})->
+    AuthzId.
+
+-spec name(#chef_cookbook_version{}) -> binary().
+name(#chef_cookbook_version{name = Name}) ->
+    Name.
+
+-spec id(#chef_cookbook_version{}) -> object_id().
+id(#chef_cookbook_version{id = Id}) ->
+    Id.
+
+-spec org_id(#chef_cookbook_version{}) -> object_id().
+org_id(#chef_cookbook_version{org_id = OrgId}) ->
+    OrgId.
+
+-spec set_created(#chef_cookbook_version{}, object_id()) -> #chef_cookbook_version{}.
+set_created(#chef_cookbook_version{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_cookbook_version{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
+
+-spec set_updated(#chef_cookbook_version{}, object_id()) -> #chef_cookbook_version{}.
+set_updated(#chef_cookbook_version{} = Object, ActorId) ->
+    Now = chef_object_base:sql_date(now),
+    Object#chef_cookbook_version{updated_at = Now, last_updated_by = ActorId}.
+
+%% TODO: this doesn't need an argument
+type_name(#chef_cookbook_version{}) ->
+    cookbook_version.
+
+-spec new_record(object_id(), object_id(), ejson_term()) -> #chef_cookbook_version{}.
+new_record(OrgId, AuthzId, CBVData) ->
+    %% name for a cookbook_version is actually cb_name-cb_version which is good for ID
+    %% creation
+    Name = ej:get({<<"name">>}, CBVData),
+    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    {Major, Minor, Patch} = parse_version(ej:get({<<"metadata">>, <<"version">>},
+                                                 CBVData)),
+
+    Metadata0 = ej:get({<<"metadata">>}, CBVData),
+
+    MAttributes = compress_maybe(ej:get({<<"attributes">>}, Metadata0, {[]}),
+                                 cookbook_meta_attributes),
+
+    %% Do not compress the deps!
+    Deps = chef_json:encode(ej:get({<<"dependencies">>}, Metadata0, {[]})),
+
+    LongDesc = compress_maybe(ej:get({<<"long_description">>}, Metadata0, <<"">>),
+                              cookbook_long_desc),
+
+    Metadata = compress_maybe(lists:foldl(fun(Key, MD) ->
+                                                  ej:delete({Key}, MD)
+                                          end, Metadata0, [<<"attributes">>,
+                                                           <<"dependencies">>,
+                                                           <<"long_description">>]),
+                              cookbook_metadata),
+
+    Data = compress_maybe(ej:delete({<<"metadata">>}, CBVData),
+                          chef_cookbook_version),
+    #chef_cookbook_version{id = Id,
+                           authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+                           org_id = OrgId,
+                           name = ej:get({<<"cookbook_name">>}, CBVData),
+                           major = Major,
+                           minor = Minor,
+                           patch = Patch,
+                           frozen = ej:get({<<"frozen?">>}, CBVData, false),
+                           meta_attributes = MAttributes,
+                           meta_deps = Deps,
+                           meta_long_desc = LongDesc,
+                           metadata = Metadata,
+                           checksums = extract_checksums(CBVData),
+                           serialized_object = Data}.
+
+compress_maybe(Data, cookbook_long_desc) ->
+    chef_db_compression:compress(cookbook_long_desc, Data);
+compress_maybe(Data, Type) ->
+    chef_db_compression:compress(Type, chef_json:encode(Data)).
 
 %% @doc Convert a binary JSON string representing a Chef Cookbook Version into an
 %% EJson-encoded Erlang data structure.
@@ -104,7 +213,7 @@ set_default_values(Cookbook, Defaults) ->
                          UrlVersion :: binary()}) -> {ok, ej:json_object()}.
 validate_cookbook(Cookbook, {UrlName, UrlVersion}) ->
     %% WARNING: UrlName and UrlVersion are assumed to be valid
-    case chef_object:strictly_valid(cookbook_spec(UrlName, UrlVersion), ?VALID_KEYS, Cookbook) of
+    case chef_object_base:strictly_valid(cookbook_spec(UrlName, UrlVersion), ?VALID_KEYS, Cookbook) of
         ok -> {ok, Cookbook};
         Bad -> throw(Bad)
     end.
@@ -200,7 +309,7 @@ constraint_map_spec(RegexName) ->
                             <<"Invalid version constraint">>}}}}}.
 
 valid_cookbook_constraint(Str) when is_binary(Str) ->
-    case chef_object:parse_constraint(Str) of
+    case chef_object_base:parse_constraint(Str) of
         {_Constr, Version} ->
             case is_valid_version(Version) of
                 false ->
@@ -462,3 +571,66 @@ maybe_qualify_name(CookbookName, RecipeName) ->
         _ ->
             <<CookbookName/binary, "::", StrippedName/binary>>
     end.
+
+create_query() ->
+    insert_cookbook_version.
+
+update_query() ->
+    update_cookbook_version.
+
+delete_query() ->
+    delete_cookbook_version_by_id.
+
+find_query() ->
+    find_cookbook_version_by_orgid_name_version.
+
+list_query() ->
+    list_cookbook_versions_by_orgid.
+
+bulk_get_query() ->
+    error(not_implemented).
+
+update_from_ejson(#chef_cookbook_version{org_id = OrgId,
+                                         authz_id = AuthzId,
+                                         frozen = FrozenOrig} = CookbookVersion,
+                  CookbookVersionData) ->
+    UpdatedVersion = new_record(OrgId, AuthzId, CookbookVersionData),
+    %% frozen is immutable once it is set to true
+    Frozen = FrozenOrig =:= true orelse UpdatedVersion#chef_cookbook_version.frozen,
+    CookbookVersion#chef_cookbook_version{frozen            = Frozen,
+                                          meta_attributes   = UpdatedVersion#chef_cookbook_version.meta_attributes,
+                                          meta_deps         = UpdatedVersion#chef_cookbook_version.meta_deps,
+                                          meta_long_desc    = UpdatedVersion#chef_cookbook_version.meta_long_desc,
+                                          metadata          = UpdatedVersion#chef_cookbook_version.metadata,
+                                          checksums         = UpdatedVersion#chef_cookbook_version.checksums,
+                                          serialized_object = UpdatedVersion#chef_cookbook_version.serialized_object}.
+
+is_indexed() ->
+    false.
+
+ejson_for_indexing(#chef_cookbook_version{}, _CBV) ->
+    error(not_indexed).
+
+fields_for_update(#chef_cookbook_version{ id                = Id,
+                                          frozen            = Frozen,
+                                          meta_attributes   = MetaAttributes,
+                                          meta_deps         = MetaDeps,
+                                          meta_long_desc    = MetaLongDesc,
+                                          metadata          = Metadata,
+                                          serialized_object = SerializeObject,
+                                          last_updated_by   = LastUpdatedBy,
+                                          updated_at        = UpdatedAt }) ->
+    [Frozen, MetaAttributes, MetaDeps, MetaLongDesc, Metadata, SerializeObject, LastUpdatedBy, UpdatedAt, Id].
+
+fields_for_fetch(#chef_cookbook_version{org_id = OrgId,
+                                        name = Name,
+                                        major = Major,
+                                        minor = Minor,
+                                        patch = Patch}) ->
+    [OrgId, Name, Major, Minor, Patch].
+
+record_fields() ->
+    record_info(fields, chef_cookbook_version).
+
+list(#chef_cookbook_version{org_id = OrgId}, CallbackFun) ->
+    CallbackFun(list_query(), [OrgId], [name]).
