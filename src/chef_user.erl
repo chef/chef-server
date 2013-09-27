@@ -51,6 +51,10 @@
          update_query/0
         ]).
 
+-export([
+         list/2
+         ]).
+
 -include("chef_types.hrl").
 
 %% fields:
@@ -263,7 +267,7 @@ find_query() ->
     find_user_by_username.
 
 list_query() ->
-    list_users_for_org.
+    list_users.
 
 bulk_get_query() ->
     bulk_get_users.
@@ -289,3 +293,7 @@ fields_for_fetch(#chef_user{username = UserName}) ->
 
 record_fields() ->
     record_info(fields, chef_user).
+
+list(#chef_user{}, CallbackFun) ->
+    CallbackFun(list_query(), [], [username]).
+    

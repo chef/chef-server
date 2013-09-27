@@ -49,6 +49,10 @@
          update_query/0
         ]).
 
+-export([
+         list/2
+         ]).
+
 -ifdef(TEST).
 -compile(export_all).
 -endif.
@@ -166,3 +170,6 @@ validate_data_bag(DataBag) ->
         Bad ->
             throw(Bad)
     end.
+
+list(#chef_data_bag{org_id = OrgId}, CallbackFun) ->
+    CallbackFun(list_query(), [OrgId], [name]).

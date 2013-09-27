@@ -59,6 +59,10 @@
          update_query/0
         ]).
 
+-export([
+         list/2
+         ]).
+
 -ifdef(TEST).
 -compile(export_all).
 -endif.
@@ -627,3 +631,6 @@ fields_for_fetch(#chef_cookbook_version{org_id = OrgId,
 
 record_fields() ->
     record_info(fields, chef_cookbook_version).
+
+list(#chef_cookbook_version{org_id = OrgId}, CallbackFun) ->
+    CallbackFun(list_query(), [OrgId], [name]).

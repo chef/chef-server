@@ -53,6 +53,10 @@
          update_query/0
         ]).
 
+-export([
+         list/2
+         ]).
+
 -ifdef(TEST).
 -compile(export_all).
 -endif.
@@ -279,3 +283,8 @@ normalize(NodeEjson) ->
     Normalized = chef_object_base:normalize_run_list(RunList),
     ej:set({<<"run_list">>}, NodeEjson, Normalized).
 
+
+list(#chef_node{environment = undefined, org_id = OrgId}, CallbackFun) ->
+    CallbackFun(list_nodes_for_org, [OrgId], [name]);
+list(#chef_node{environment = EnvName, org_id = OrgId}, CallbackFun) ->
+    CallbackFun(list_env_nodes_for_org, [OrgId, EnvName], [name]).

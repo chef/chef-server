@@ -51,6 +51,10 @@
          update_query/0
         ]).
 
+-export([
+         list/2
+         ]).
+
 -ifdef(TEST).
 -compile(export_all).
 -endif.
@@ -269,3 +273,6 @@ fields_for_fetch(#chef_role{org_id = OrgId,
 
 record_fields() ->
     record_info(fields, chef_role).
+
+list(#chef_role{org_id = OrgId}, CallbackFun) ->
+    CallbackFun(list_query(), [OrgId], [name]).

@@ -57,6 +57,10 @@
          update_query/0
         ]).
 
+-export([
+         list/2
+         ]).
+
 -include_lib("ej/include/ej.hrl").
 -include("chef_types.hrl").
 -include("chef_osc_defaults.hrl").
@@ -447,3 +451,6 @@ value_or_undefined(Key, Data) ->
     Value ->
       Value
   end.
+-spec(list(#chef_client{}, fun(([any()],[any()],[any()]) -> [any()])) -> [any()]).
+list(#chef_client{org_id = OrgId}, CallbackFun) ->
+    CallbackFun(list_query(), [OrgId], [name]).
