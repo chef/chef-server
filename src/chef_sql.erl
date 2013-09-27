@@ -808,20 +808,6 @@ bulk_get_objects(Type, Ids) ->
                               #chef_cookbook_version{}) -> {ok, non_neg_integer()} |
                                                            sqerl_error().
 %% @doc create an object given a chef object record
-create_object(#chef_user{}=User) ->
-  create_object(insert_user, User);
-create_object(#chef_node{}=Node) ->
-    create_object(insert_node, Node);
-create_object(#chef_role{}=Role) ->
-    create_object(insert_role, Role);
-create_object(#chef_environment{}=Environment) ->
-    create_object(insert_environment, Environment);
-create_object(#chef_client{}=Client) ->
-    create_object(insert_client, Client);
-create_object(#chef_data_bag{}=DataBag) ->
-    create_object(insert_data_bag, DataBag);
-create_object(#chef_data_bag_item{}=DataBagItem) ->
-    create_object(insert_data_bag_item, DataBagItem);
 %% This does not exactly follow the same pattern as it needs to
 %% insert a list of checksums into a separate table.
 %%
@@ -878,7 +864,6 @@ create_object(#chef_sandbox{id=SandboxId,
             %% the failure back up
             Error
     end.
-
 -spec create_object(atom(), tuple() | list()) -> {ok, non_neg_integer()} | {error, term()} | {conflict, term()}.
 create_object(QueryName, Args) when is_atom(QueryName), is_list(Args) ->
     sqerl:statement(QueryName, Args, count);
