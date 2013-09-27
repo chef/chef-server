@@ -43,51 +43,27 @@
          fetch_object_names/1,
 
          %%user ops
-         create_user/1,
-         update_user/1,
-         delete_user/1,
          count_user_admins/0,
 
          %% checksum ops
          mark_checksums_as_uploaded/2,
          non_uploaded_checksums/2,
 
-         %% data_bag ops
-         create_data_bag/1,
-         delete_data_bag/1,
-
          %% data_bag_item ops
-         fetch_data_bag_items/2,
          fetch_data_bag_item_ids/2,
          bulk_get_data_bag_items/1,
-         create_data_bag_item/1,
-         delete_data_bag_item/1,
-         update_data_bag_item/1,
 
          %% environment ops
          bulk_get_environments/1,
-         create_environment/1,
-         delete_environment/1,
-         update_environment/1,
 
          %% client ops
-
          bulk_get_clients/1,
-         create_client/1,
-         delete_client/1,
-         update_client/1,
 
          %% node ops
          bulk_get_nodes/1,
-         create_node/1,
-         delete_node/1,
-         update_node/1,
 
          %% role ops
          bulk_get_roles/1,
-         create_role/1,
-         delete_role/1,
-         update_role/1,
 
          %% cookbook version ops
          cookbook_exists/2,
@@ -148,29 +124,6 @@ ping() ->
 %% chef user ops
 %%
 
--spec create_user(#chef_user{}) -> {ok, 1} | {error, term()}.
-%% doc Insert user data into database
-create_user(#chef_user{}=User) ->
-    create_object(User).
-
--spec update_user(#chef_user{}) -> {ok, 1 | not_found} | {error, term()}.
-update_user(#chef_user{last_updated_by = LastUpdatedBy,
-                       updated_at      = UpdatedAt,
-                       admin           = IsAdmin,
-                       public_key      = PublicKey,
-                       hashed_password = HashedPassword,
-                       salt            = Salt,
-                       hash_type       = HashType,
-                       id              = Id }) ->
-                UpdateFields = [IsAdmin =:= true, PublicKey, HashedPassword, Salt, HashType, LastUpdatedBy, UpdatedAt, Id],
-                do_update(update_user_by_id, UpdateFields).
-
--spec delete_user(#chef_user{} | binary()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_user(#chef_user{id=Id}) ->
-    delete_user(Id);
-delete_user(Id)  ->
-  delete_object(delete_user_by_id, Id).
-
 -spec count_user_admins() -> {ok, none} | {ok, integer()} | {error, _}.
 %% Return a count of the user admins
 count_user_admins() ->
@@ -179,27 +132,6 @@ count_user_admins() ->
 %%
 %% node ops
 %%
-
--spec create_node(#chef_node{}) -> {ok, 1} | {error, term()}.
-create_node(#chef_node{}=Node) ->
-    create_object(Node).
-
--spec delete_node(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_node(NodeId) when is_list(NodeId) ->
-    delete_node(list_to_binary(NodeId));
-delete_node(#chef_node{id=NodeId})->
-    delete_node(NodeId);
-delete_node(NodeId) when is_binary(NodeId) ->
-    delete_object(delete_node_by_id, NodeId).
-
--spec update_node(#chef_node{}) -> {ok, 1 | not_found} | {error, term()}.
-update_node(#chef_node{environment = Environment,
-                       last_updated_by = LastUpdatedBy,
-                       updated_at = UpdatedAt,
-                       serialized_object = Object,
-                       id = Id}) ->
-    UpdateFields = [Environment, LastUpdatedBy, UpdatedAt, Object, Id],
-    do_update(update_node_by_id, UpdateFields).
 
 -spec bulk_get_nodes([binary()]) -> {ok, [binary()] | not_found} |
                                     {error, term()}.
@@ -215,44 +147,9 @@ bulk_get_nodes(Ids) ->
 bulk_get_roles(Ids) ->
     bulk_get_objects(role, Ids).
 
--spec create_role(#chef_role{}) -> {ok, 1} | {error, term()}.
-create_role(#chef_role{}=Role) ->
-    create_object(Role).
-
--spec delete_role(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_role(RoleId) when is_list(RoleId) ->
-    delete_role(list_to_binary(RoleId));
-delete_role(#chef_role{id=RoleId})->
-    delete_role(RoleId);
-delete_role(RoleId) when is_binary(RoleId) ->
-    delete_object(delete_role_by_id, RoleId).
-
--spec update_role(#chef_role{}) -> {ok, 1 | not_found} | {error, term()}.
-update_role(#chef_role{last_updated_by = LastUpdatedBy,
-                       updated_at = UpdatedAt,
-                       serialized_object = Object,
-                       id = Id}) ->
-    UpdateFields = [LastUpdatedBy, UpdatedAt, Object, Id],
-    do_update(update_role_by_id, UpdateFields).
-
 %%
 %% data_bag_item ops
 %%
-
--spec fetch_data_bag_items(bin_or_string(), bin_or_string()) ->
-                                  {ok, [binary()]} | {error, term()}.
-%% @doc Return list of data_bag_item names for a given organization
-fetch_data_bag_items(OrgId, DataBagName) ->
-    RecordName = chef_data_bag_item,
-    QueryName = list_query_for(RecordName),
-    case sqerl:select(QueryName, [OrgId, DataBagName], rows_as_scalars, [item_name]) of
-        {ok, L} when is_list(L) ->
-            {ok, L};
-        {ok, none} ->
-            {ok, []};
-        {error, Error} ->
-            {error, Error}
-    end.
 
 -spec fetch_data_bag_item_ids(bin_or_string(), bin_or_string()) ->
                                      {ok, [binary()]} | {error, term()}.
@@ -273,26 +170,6 @@ fetch_data_bag_item_ids(OrgId, DataBagName) ->
 bulk_get_data_bag_items(Ids) ->
     bulk_get_objects(data_bag_item, Ids).
 
--spec create_data_bag_item(#chef_data_bag_item{}) -> {ok, 1} | {error, term()}.
-create_data_bag_item(#chef_data_bag_item{}=DataBagItem) ->
-    create_object(DataBagItem).
-
--spec delete_data_bag_item(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_data_bag_item(DataBagItemId) when is_list(DataBagItemId) ->
-    delete_data_bag_item(list_to_binary(DataBagItemId));
-delete_data_bag_item(#chef_data_bag_item{id=DataBagItemId})->
-    delete_data_bag_item(DataBagItemId);
-delete_data_bag_item(DataBagItemId) when is_binary(DataBagItemId) ->
-    delete_object(delete_data_bag_item_by_id, DataBagItemId).
-
--spec update_data_bag_item(#chef_data_bag_item{}) -> {ok, 1 | not_found} | {error, term()}.
-update_data_bag_item(#chef_data_bag_item{last_updated_by = LastUpdatedBy,
-                       updated_at = UpdatedAt,
-                       serialized_object = Object,
-                       id = Id}) ->
-    UpdateFields = [LastUpdatedBy, UpdatedAt, Object, Id],
-    do_update(update_data_bag_item_by_id, UpdateFields).
-
 %%
 %% environment ops
 %%
@@ -301,27 +178,6 @@ update_data_bag_item(#chef_data_bag_item{last_updated_by = LastUpdatedBy,
                                            {error, term()}.
 bulk_get_environments(Ids) ->
     bulk_get_objects(environment, Ids).
-
--spec create_environment(#chef_environment{}) -> {ok, 1} | {error, term()}.
-create_environment(#chef_environment{}=Environment) ->
-    create_object(Environment).
-
--spec delete_environment(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_environment(EnvironmentId) when is_list(EnvironmentId) ->
-    delete_environment(list_to_binary(EnvironmentId));
-delete_environment(#chef_environment{id=EnvironmentId})->
-    delete_environment(EnvironmentId);
-delete_environment(EnvironmentId) when is_binary(EnvironmentId) ->
-    delete_object(delete_environment_by_id, EnvironmentId).
-
--spec update_environment(#chef_environment{}) -> {ok, 1 | not_found} | {error, term()}.
-update_environment(#chef_environment{last_updated_by = LastUpdatedBy,
-                       updated_at = UpdatedAt,
-                       name = Name,
-                       serialized_object = Object,
-                       id = Id}) ->
-    UpdateFields = [LastUpdatedBy, UpdatedAt, Name, Object, Id],
-    do_update(update_environment_by_id, UpdateFields).
 
 %%
 %% client ops
@@ -344,47 +200,6 @@ bulk_get_clients(Ids) ->
         {error, Error} ->
             {error, Error}
     end.
-
--spec create_client(#chef_client{}) -> {ok, 1} | {error, term()}.
-create_client(#chef_client{}=Client) ->
-    create_object(Client).
-
--spec delete_client(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_client(ClientId) when is_list(ClientId) ->
-    delete_client(list_to_binary(ClientId));
-delete_client(ClientId) when is_binary(ClientId) ->
-    delete_object(delete_client_by_id, ClientId).
-
--spec update_client(#chef_client{}) -> {ok, 1 | not_found} | {error, term()}.
-update_client(#chef_client{last_updated_by = LastUpdatedBy,
-                           updated_at = UpdatedAt,
-                           name = Name,
-                           public_key = PublicKey,
-                           pubkey_version = PubkeyVersion,
-                           admin = IsAdmin,
-                           validator = IsValidator,
-                           id = Id}) ->
-    UpdateFields = [LastUpdatedBy, UpdatedAt, Name,
-                    PublicKey, PubkeyVersion,
-                    IsValidator =:= true,
-                    IsAdmin =:= true, Id],
-    do_update(update_client_by_id, UpdateFields).
-
-%%
-%% data_bag ops
-%%
-
--spec create_data_bag(#chef_data_bag{}) -> {ok, 1} | {error, term()}.
-create_data_bag(#chef_data_bag{}=DataBag) ->
-    create_object(DataBag).
-
--spec delete_data_bag(bin_or_string()) -> {ok, 1 | 'none' | 'not_found'} | {error, term()}.
-delete_data_bag(DataBagId) when is_list(DataBagId) ->
-    delete_data_bag(list_to_binary(DataBagId));
-delete_data_bag(#chef_data_bag{id=DataBagId})->
-    delete_data_bag(DataBagId);
-delete_data_bag(DataBagId) when is_binary(DataBagId) ->
-    delete_object(delete_data_bag_by_id, DataBagId).
 
 -spec fetch_cookbook_versions(OrgId::object_id()) ->
     {ok, [versioned_cookbook()]} | {error, term()}.
