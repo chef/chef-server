@@ -175,7 +175,11 @@ fields_for_fetch(Rec) ->
 is_indexed(Rec) ->
     call0(Rec, is_indexed).
 
--spec(list(any(), fun(([any()],[any()],[any()]) -> [any()])) -> [any()]).
+-spec list(Rec:: tuple(),
+           CallbackFun :: fun((atom(), list(), [atom()]) ->
+                                     {ok, none | list()} |
+                                     {error, _})) ->
+                  {ok, none | list()} | {error, _}.
 list(Rec, CallbackFun) ->
     Mod = element(1, Rec),
     Mod:list(Rec, CallbackFun).
