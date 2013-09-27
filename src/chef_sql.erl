@@ -511,12 +511,7 @@ fetch_cookbook_version(OrgId, {Name, {Major, Minor, Patch}}) ->
             {error, Error}
     end.
 
-
-
-
-
 %% TODO: Refactor this to use num_versions
-
 
 -spec fetch_latest_cookbook_version(OrgId::object_id(),
                              CookbookName::binary()) ->
@@ -779,21 +774,14 @@ fetch_object_names(StubRec) ->
             Error
     end.
 
+-spec select_rows_as_scalars(QueryName :: atom(),
+                             Args :: list(),
+                             SelectedFields :: list(atom())) ->
+                                    {ok, none} |
+                                    {ok, list()} |
+                                    {error, term()}.
 select_rows_as_scalars(QueryName, Args, SelectedFields) ->
     sqerl:select(QueryName, Args, rows_as_scalars, SelectedFields).
-
-list_query_for(chef_node) ->
-    list_nodes_for_org;
-list_query_for(chef_role) ->
-    list_roles_for_org;
-list_query_for(chef_environment) ->
-    list_environments_for_org;
-list_query_for(chef_client) ->
-    list_clients_for_org;
-list_query_for(chef_data_bag) ->
-    list_data_bags_for_org;
-list_query_for(chef_data_bag_item) ->
-    list_data_bag_items_for_data_bag.
 
 -spec bulk_get_objects(chef_type(),
                        [binary()]) ->
