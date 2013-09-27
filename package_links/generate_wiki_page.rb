@@ -162,10 +162,10 @@ if __FILE__ == $0
               "private-chef_11.0.0-rc.2-1.ubuntu.12.04_amd64.deb",
 
               # Reporting
-              "opscode-reporting-0.2.0_tech.preview.2-1.el5.x86_64.rpm",
-              "opscode-reporting-0.2.0_tech.preview.2-1.el6.x86_64.rpm",
-              "opscode-reporting_0.2.0-tech.preview.2-1.ubuntu.10.04_amd64.deb",
-              "opscode-reporting_0.2.0-tech.preview.2-1.ubuntu.11.04_amd64.deb",
+              "opscode-reporting-0.2.2_tech.preview.2-1.el5.x86_64.rpm",
+              "opscode-reporting-0.2.2_tech.preview.2-1.el6.x86_64.rpm",
+              "opscode-reporting_0.2.2-tech.preview.2-1.ubuntu.10.04_amd64.deb",
+              "opscode-reporting_0.2.2-tech.preview.2-1.ubuntu.11.04_amd64.deb",
 
               "knife-reporting-0.1.0.gem",
 
