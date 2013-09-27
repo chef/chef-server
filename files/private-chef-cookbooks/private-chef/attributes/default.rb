@@ -421,7 +421,7 @@ default['private_chef']['opscode-account']['worker_processes'] = node['cpu']['to
 ###
 # Chef Mover
 ###
-default['private_chef']['opscode-chef-mover']['enable'] = false
+default['private_chef']['opscode-chef-mover']['enable'] = true
 default['private_chef']['opscode-chef-mover']['ha'] = false
 default['private_chef']['opscode-chef-mover']['dir'] = "/var/opt/opscode/opscode-chef-mover"
 default['private_chef']['opscode-chef-mover']['data_dir'] = "/var/opt/opscode/opscode-chef-mover/data"

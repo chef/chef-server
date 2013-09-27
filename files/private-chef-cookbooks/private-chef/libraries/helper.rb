@@ -5,8 +5,15 @@ class OmnibusHelper
   # Returns 'true' if this machine was designated as the bootstrap
   # server in private-chef.rb
   def self.is_bootstrap_server?(node)
-    node_name = node['fqdn']
-    !!(PrivateChef["servers"][node_name]['bootstrap'])
+    case PrivateChef['topology']
+    when 'standalone', 'manual'
+      true
+    when 'tier'
+      PrivateChef['role'] == 'backend'
+    when 'ha'
+      node_name = node['fqdn']
+      !!(PrivateChef["servers"][node_name]['bootstrap'])
+    end
   end
 
   # Return true if the node is the master for data storage replication
