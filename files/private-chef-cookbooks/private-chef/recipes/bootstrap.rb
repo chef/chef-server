@@ -22,19 +22,7 @@ template File.join(opscode_test_config_dir, "script.rb") do
   mode "0600"
 end
 
-# opscode-account, opscode-erchef, and oc_bifrost MUST be up and running to bootstrap
-
-execute "/opt/opscode/bin/private-chef-ctl start oc_bifrost" do
-  not_if { OmnibusHelper.has_been_bootstrapped? }
-  retries 20
-end
-
-execute "/opt/opscode/bin/private-chef-ctl start opscode-account" do
-  not_if { OmnibusHelper.has_been_bootstrapped? }
-  retries 20
-end
-
-execute "/opt/opscode/bin/private-chef-ctl start opscode-erchef" do
+execute "/opt/opscode/bin/private-chef-ctl start" do
   not_if { OmnibusHelper.has_been_bootstrapped? }
   retries 20
 end
