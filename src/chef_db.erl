@@ -166,9 +166,9 @@ create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
         {error, Why} -> {error, Why}
     end.
 
--spec delete(#context{}, object_rec()) -> {ok, 1 | 2} | not_found | {error, _}.
-delete(#context{reqid = ReqId} = Ctx,
-       #chef_cookbook_version{org_id = OrgId} = CookbookVersion) ->
+-spec delete(object_rec(), #context{}) -> {ok, 1 | 2} | not_found | {error, _}.
+delete(#chef_cookbook_version{org_id = OrgId} = CookbookVersion,
+       #context{reqid = ReqId} = Ctx) ->
     case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
         #chef_db_cb_version_delete{cookbook_delete=CookbookDeleted, deleted_checksums=DeletedChecksums} ->
             ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, DeletedChecksums)),
@@ -179,7 +179,7 @@ delete(#context{reqid = ReqId} = Ctx,
             end;
         Result -> Result %% not_found or {error, _}
     end;
-delete(#context{reqid = ReqId}, ObjectRec) ->
+delete(ObjectRec, #context{reqid = ReqId}) ->
     QueryName = chef_object:delete_query(ObjectRec),
     Id = chef_object:id(ObjectRec),
     case stats_hero:ctime(ReqId, {chef_sql, delete_object},
@@ -205,8 +205,8 @@ fetch(ObjectRec, #context{reqid = ReqId}) ->
         {error, _Why} = Error -> Error
     end.
 
--spec list(#context{}, object_rec()) -> {ok, [binary()]} | {error, _}.
-list(#context{reqid = ReqId} = _Ctx, StubRec) ->
+-spec list(object_rec(), #context{}) -> {ok, [binary()]} | {error, _}.
+list(StubRec, #context{reqid = ReqId} = _Ctx) ->
     stats_hero:ctime(ReqId, {chef_sql, fetch_object_names},
                       fun() ->
                               chef_sql:fetch_object_names(StubRec)
