@@ -227,12 +227,24 @@ fetch_requestor(Context, OrgId, ClientName) ->
 %% the sandboxes protocol that allow for partial progress monitoring (e.g., upload a few
 %% files, retrieve the current state of the sandbox, upload a few more, etc.)
 -spec fetch_sandbox(DbContext::#context{},
-                    OrgName::binary(),
+                    OrgName :: binary() | {id, binary()},
                     SandboxId::object_id()) -> #chef_sandbox{} |
                                                not_found |
                                                {error, any()}.
-fetch_sandbox(#context{} = Ctx, OrgName, SandboxId) ->
-    fetch_object(Ctx, chef_sandbox, OrgName, SandboxId).
+fetch_sandbox(#context{reqid = ReqId} = Ctx, {id, OrgId}, SandboxId) ->
+    case stats_hero:ctime(ReqId, {chef_sql, fetch_sandbox},
+                          fun() -> chef_sql:fetch_sandbox(OrgId, SandboxId) end) of
+        {ok, not_found} -> not_found;
+        {ok, Object} -> Object;
+        {error, _Why} = Error -> Error
+    end;
+fetch_sandbox(#context{}=Ctx, OrgName, SandboxId) ->
+    case fetch_org_id(Ctx, OrgName) of
+        not_found ->
+            not_found;
+        OrgId ->
+            fetch_sandbox(Ctx, {id, OrgId}, SandboxId)
+    end.
 
 %% @doc Saves sandbox information for a new sandbox in the database, and returns a
 %% chef_sandbox record representing the new sandbox.  This is a different pattern from other
@@ -695,45 +707,6 @@ create_object(#context{reqid = ReqId}, Fun, Object, ActorId) ->
         {conflict, Msg}-> {conflict, Msg};
         {error, Why} -> {error, Why}
     end.
-
-%% @doc Generic fetching of a single Chef object. `Fun' is the name of a function in the
-%% `chef_sql' module to use to fetch for the specified `OrgIdentifier' is either the binary
-%% name of the org, or it is an `{id, OrgId}' tuple.  In most cases, `ObjectIdentifier',
-%% will just be the name of the object.  In the case of a Cookbook Version, however, it is a
-%% `{Name, Version}' tuple.
-%%
-%% TODO: Fold data_bag_item back into this
--spec fetch_object(DbContext :: #context{},
-                   ObjectType :: atom(),
-                   OrgIdentifier :: binary() | {id, object_id()},
-                   ObjectIdentifier :: binary() |
-                                       versioned_cookbook()) -> not_found |
-                                                                #chef_client{} |
-                                                                #chef_environment{} |
-                                                                #chef_data_bag{} |
-                                                                %% #chef_data_bag_item{} handled separately
-                                                                #chef_node{} |
-                                                                #chef_role{} |
-                                                                #chef_sandbox{} |
-                                                                {error, any()}.
-fetch_object(#context{reqid = ReqId}, ObjectType, {id, OrgId}, ObjectIdentifier) ->
-    Fun = fetch_query_for_type(ObjectType),
-    case stats_hero:ctime(ReqId, {chef_sql, Fun},
-                          fun() -> chef_sql:Fun(OrgId, ObjectIdentifier) end) of
-        {ok, not_found} -> not_found;
-        {ok, Object} -> Object;
-        {error, _Why} = Error -> Error
-    end;
-fetch_object(#context{}=Ctx, ObjectType, OrgName, ObjectIdentifier) ->
-    case fetch_org_id(Ctx, OrgName) of
-        not_found ->
-            not_found;
-        OrgId ->
-            fetch_object(Ctx, ObjectType, {id, OrgId}, ObjectIdentifier)
-    end.
-
-fetch_query_for_type(chef_sandbox) ->
-    fetch_sandbox.
 
 -spec fetch_objects(#context{}, atom(),
                     binary() | {id, object_id()}) -> {not_found, org} |
