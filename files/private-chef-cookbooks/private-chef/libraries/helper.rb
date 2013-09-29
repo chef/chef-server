@@ -63,7 +63,7 @@ class OmnibusHelper
   # This file is touched once initial bootstrapping of the system is
   # done.
   def self.bootstrap_sentinel_file
-    "var/opt/opscode/bootstrapped"
+    "/var/opt/opscode/bootstrapped"
   end
 
   # Use the presence of a sentinel file as an indicator for whether
