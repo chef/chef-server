@@ -486,7 +486,7 @@ fetch_roles(#context{} = Ctx, OrgName) ->
 fetch_data_bag_item_ids(#context{} = Ctx, OrgName, DataBagName) ->
     fetch_objects(Ctx, fetch_data_bag_item_ids, OrgName, DataBagName).
 
--spec delete(#context{}, tuple()) -> {ok, 1 | 2} | not_found | {error, _}.
+-spec delete(#context{}, object_rec()) -> {ok, 1 | 2} | not_found | {error, _}.
 delete(#context{reqid = ReqId} = Ctx,
        #chef_cookbook_version{org_id = OrgId} = CookbookVersion) ->
     case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
