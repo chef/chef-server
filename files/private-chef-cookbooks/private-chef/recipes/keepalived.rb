@@ -32,3 +32,7 @@ template File.join(keepalived_bin_dir, "cluster.sh") do
 end
 
 component_runit_service "keepalived"
+
+log "ensure keepalived is running" do
+  notifies :up, "runit_service[keepalived]", :immediately
+end
