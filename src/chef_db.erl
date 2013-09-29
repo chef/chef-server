@@ -135,6 +135,8 @@
               update_fun/0
              ]).
 
+-type object_rec() :: tuple().
+
 %% -type chef_object_name() :: 'chef_node' |
 %%                             'chef_role'.
 
@@ -609,7 +611,7 @@ environment_exists(#context{}=Ctx, OrgId, EnvName) ->
         _ -> false
     end.
 
--spec create(chef_object() | #chef_user{} | #chef_sandbox{}, #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
+-spec create(object_rec(), #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
 create(#chef_cookbook_version{} = Record, DbContext, ActorId) ->
     create_object(DbContext, create_cookbook_version, Record, ActorId);
 create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
@@ -622,14 +624,14 @@ create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
         {error, Why} -> {error, Why}
     end.
 
--spec list(#context{}, tuple()) -> {ok, [binary()]} | {error, _}.
+-spec list(#context{}, object_rec()) -> {ok, [binary()]} | {error, _}.
 list(#context{reqid = ReqId} = _Ctx, StubRec) ->
     stats_hero:ctime(ReqId, {chef_sql, fetch_object_names},
                       fun() ->
                               chef_sql:fetch_object_names(StubRec)
                       end).
 
--spec update(tuple(), #context{}, object_id()) ->
+-spec update(object_rec(), #context{}, object_id()) ->
              ok | not_found | {conflict, term()} | {error, term()}.
 %% TODO: get rid of cookbook_version special case
 update(#chef_cookbook_version{org_id =OrgId} = Record, #context{reqid = ReqId} = DbContext, ActorId) ->
@@ -652,10 +654,10 @@ update(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
         {error, Error} -> {error, Error}
     end.
 
--spec fetch(ObjectRec :: chef_object() | #chef_user{} | #chef_sandbox{},
+-spec fetch(object_rec(),
             DbContext :: #context{}) ->
-                   {ok, chef_object() | #chef_user{} | #chef_sandbox{}} |
-                   {ok, not_found} |
+                   object_rec() |
+                   not_found |
                    {error, term()}.
 fetch(ObjectRec, #context{reqid = ReqId}) ->
     RecordType = element(1, ObjectRec), %% record type is not the same as type name :(
@@ -665,7 +667,7 @@ fetch(ObjectRec, #context{reqid = ReqId}) ->
     case stats_hero:ctime(ReqId, {chef_sql, fetch_object},
                           fun() -> chef_sql:fetch_object(Keys, RecordType, QueryName, RecordFields) end) of
         {ok, not_found} -> not_found;
-        {ok, Object} -> assert_chef_object(Object, RecordType);
+        {ok, Object} -> Object;
         {error, _Why} = Error -> Error
     end.
 
@@ -719,7 +721,7 @@ fetch_object(#context{reqid = ReqId}, ObjectType, {id, OrgId}, ObjectIdentifier)
     case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(OrgId, ObjectIdentifier) end) of
         {ok, not_found} -> not_found;
-        {ok, Object} -> assert_chef_object(Object, ObjectType);
+        {ok, Object} -> Object;
         {error, _Why} = Error -> Error
     end;
 fetch_object(#context{}=Ctx, ObjectType, OrgName, ObjectIdentifier) ->
@@ -732,66 +734,6 @@ fetch_object(#context{}=Ctx, ObjectType, OrgName, ObjectIdentifier) ->
 
 fetch_query_for_type(chef_sandbox) ->
     fetch_sandbox.
-
--define(ASSERT_RECORD(Object, RecName),
-        case Object of
-            #RecName{} -> Object;
-            _ -> error({unexpected_type, {expected, #RecName{}}, {found, Object}})
-        end).
-
-assert_chef_object(Object, chef_client) ->
-    ?ASSERT_RECORD(Object, chef_client);
-
-assert_chef_object(Object, chef_data_bag) ->
-    ?ASSERT_RECORD(Object, chef_data_bag);
-
-assert_chef_object(Object, chef_data_bag_item) ->
-    ?ASSERT_RECORD(Object, chef_data_bag_item);
-
-assert_chef_object(Object, chef_environment) ->
-    ?ASSERT_RECORD(Object, chef_environment);
-
-assert_chef_object(Object, chef_node) ->
-    ?ASSERT_RECORD(Object, chef_node);
-
-assert_chef_object(Object, chef_role) ->
-    ?ASSERT_RECORD(Object, chef_role);
-
-assert_chef_object(Object, chef_sandbox) ->
-    ?ASSERT_RECORD(Object, chef_sandbox);
-
-assert_chef_object(Object, chef_cookbook_version) ->
-    ?ASSERT_RECORD(Object, chef_cookbook_version);
-
-assert_chef_object(Object, chef_user) ->
-    ?ASSERT_RECORD(Object, chef_user).
-
-%% assert_chef_object(Object, chef_data_bag) ->
-%%     case Object of
-%%         #chef_data_bag{} -> true;
-%%         _ -> error({unexpected_type, {expected, #chef_data_bag{}}, {found, Object}})
-%%     end;
-%% assert_chef_object(Object, chef_data_bag_item) ->
-%%     case Object of
-%%         #chef_data_bag_item{} -> true;
-%%         _ -> error({unexpected_type, {expected, #chef_data_bag_item{}}, {found, Object}})
-%%     end;
-%% assert_chef_object(Object, chef_environment) ->
-%%     case Object of
-%%         #chef_environment{} -> true;
-%%         _ -> error({unexpected_type, {expected, #chef_environment{}}, {found, Object}})
-%%     end;
-%% assert_chef_object(Object, chef_node) ->
-%%     case Object of
-%%         #chef_node{} -> true;
-%%         _ -> error({unexpected_type, {expected, #chef_node{}}, {found, Object}})
-%%     end;
-%% assert_chef_object(Object, chef_role) ->
-%%     case Object of
-%%         #chef_role{} -> true;
-%%         _ -> error({unexpected_type, {expected, #chef_role{}}, {found, Object}})
-%%     end.
-
 
 -spec fetch_objects(#context{}, atom(),
                     binary() | {id, object_id()}) -> {not_found, org} |
