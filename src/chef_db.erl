@@ -153,6 +153,88 @@ make_context(ReqId, Darklaunch) ->
 make_context(ReqId, Darklaunch, OttoServer) ->
     #context{reqid = ReqId, darklaunch = Darklaunch, otto_connection = OttoServer}.
 
+-spec create(object_rec(), #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
+create(#chef_cookbook_version{} = Record, DbContext, ActorId) ->
+    create_object(DbContext, create_cookbook_version, Record, ActorId);
+create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
+    ObjectRec = chef_object:set_created(ObjectRec0, ActorId),
+    QueryName = chef_object:create_query(ObjectRec),
+    case stats_hero:ctime(ReqId, {chef_sql, create_object},
+                          fun() -> chef_sql:create_object(QueryName, ObjectRec) end) of
+        {ok, 1} -> ok;
+        {conflict, Msg}-> {conflict, Msg};
+        {error, Why} -> {error, Why}
+    end.
+
+-spec delete(#context{}, object_rec()) -> {ok, 1 | 2} | not_found | {error, _}.
+delete(#context{reqid = ReqId} = Ctx,
+       #chef_cookbook_version{org_id = OrgId} = CookbookVersion) ->
+    case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
+        #chef_db_cb_version_delete{cookbook_delete=CookbookDeleted, deleted_checksums=DeletedChecksums} ->
+            ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, DeletedChecksums)),
+            %% TODO: return the actual chef_db_cb_version_delete record to the caller
+            case CookbookDeleted of
+                false -> {ok, 1};
+                true -> {ok, 2}
+            end;
+        Result -> Result %% not_found or {error, _}
+    end;
+delete(#context{reqid = ReqId}, ObjectRec) ->
+    QueryName = chef_object:delete_query(ObjectRec),
+    Id = chef_object:id(ObjectRec),
+    case stats_hero:ctime(ReqId, {chef_sql, delete_object},
+                     fun() -> chef_sql:delete_object(QueryName, Id) end) of
+        {ok, not_found} -> not_found;
+        Result -> Result
+    end.
+
+-spec fetch(object_rec(),
+            DbContext :: #context{}) ->
+                   object_rec() |
+                   not_found |
+                   {error, term()}.
+fetch(ObjectRec, #context{reqid = ReqId}) ->
+    RecordType = element(1, ObjectRec), %% record type is not the same as type name :(
+    QueryName = chef_object:find_query(ObjectRec),
+    Keys = chef_object:fields_for_fetch(ObjectRec),
+    RecordFields = chef_object:record_fields(ObjectRec),
+    case stats_hero:ctime(ReqId, {chef_sql, fetch_object},
+                          fun() -> chef_sql:fetch_object(Keys, RecordType, QueryName, RecordFields) end) of
+        {ok, not_found} -> not_found;
+        {ok, Object} -> Object;
+        {error, _Why} = Error -> Error
+    end.
+
+-spec list(#context{}, object_rec()) -> {ok, [binary()]} | {error, _}.
+list(#context{reqid = ReqId} = _Ctx, StubRec) ->
+    stats_hero:ctime(ReqId, {chef_sql, fetch_object_names},
+                      fun() ->
+                              chef_sql:fetch_object_names(StubRec)
+                      end).
+
+-spec update(object_rec(), #context{}, object_id()) ->
+             ok | not_found | {conflict, term()} | {error, term()}.
+%% TODO: get rid of cookbook_version special case
+update(#chef_cookbook_version{org_id =OrgId} = Record, #context{reqid = ReqId} = DbContext, ActorId) ->
+    case update_object(DbContext, ActorId, chef_object:update_query(Record), Record) of
+        #chef_db_cb_version_update{deleted_checksums=DeletedChecksums} ->
+            ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, DeletedChecksums)),
+            ok;
+        Result -> Result %% {conflict, _} or {error, _}
+    end;
+update(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
+    ObjectRec = chef_object:set_updated(ObjectRec0, ActorId),
+    QueryName = chef_object:update_query(ObjectRec),
+    UpdatedFields = chef_object:fields_for_update(ObjectRec),
+    case stats_hero:ctime(ReqId, {chef_sql, do_update},
+                          fun() -> chef_sql:do_update(QueryName, UpdatedFields) end) of
+        #chef_db_cb_version_update{}=CookbookVersionUpdate -> CookbookVersionUpdate;
+        {ok, 1} -> ok;
+        {ok, not_found} -> not_found;
+        {conflict, Message} -> {conflict, Message};
+        {error, Error} -> {error, Error}
+    end.
+
 darklaunch_from_context(#context{darklaunch = Darklaunch}) ->
     Darklaunch.
 
@@ -188,7 +270,6 @@ fetch_org_id(#context{reqid = ReqId,
         {ok, Guid} ->
             Guid
     end.
-
 
 client_record_to_authz_id(_Context, ClientRecord) ->
     ClientRecord#chef_client.authz_id.
@@ -486,28 +567,6 @@ fetch_roles(#context{} = Ctx, OrgName) ->
 fetch_data_bag_item_ids(#context{} = Ctx, OrgName, DataBagName) ->
     fetch_objects(Ctx, fetch_data_bag_item_ids, OrgName, DataBagName).
 
--spec delete(#context{}, object_rec()) -> {ok, 1 | 2} | not_found | {error, _}.
-delete(#context{reqid = ReqId} = Ctx,
-       #chef_cookbook_version{org_id = OrgId} = CookbookVersion) ->
-    case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
-        #chef_db_cb_version_delete{cookbook_delete=CookbookDeleted, deleted_checksums=DeletedChecksums} ->
-            ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, DeletedChecksums)),
-            %% TODO: return the actual chef_db_cb_version_delete record to the caller
-            case CookbookDeleted of
-                false -> {ok, 1};
-                true -> {ok, 2}
-            end;
-        Result -> Result %% not_found or {error, _}
-    end;
-delete(#context{reqid = ReqId}, ObjectRec) ->
-    QueryName = chef_object:delete_query(ObjectRec),
-    Id = chef_object:id(ObjectRec),
-    case stats_hero:ctime(ReqId, {chef_sql, delete_object},
-                     fun() -> chef_sql:delete_object(QueryName, Id) end) of
-        {ok, not_found} -> not_found;
-        Result -> Result
-    end.
-
 %% @doc Verifies that all checksums in the given sandbox are marked as uploaded, and if so,
 %% deletes the sandbox from the database.
 %%
@@ -623,65 +682,6 @@ environment_exists(#context{}=Ctx, OrgId, EnvName) ->
         _ -> false
     end.
 
--spec create(object_rec(), #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
-create(#chef_cookbook_version{} = Record, DbContext, ActorId) ->
-    create_object(DbContext, create_cookbook_version, Record, ActorId);
-create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
-    ObjectRec = chef_object:set_created(ObjectRec0, ActorId),
-    QueryName = chef_object:create_query(ObjectRec),
-    case stats_hero:ctime(ReqId, {chef_sql, create_object},
-                          fun() -> chef_sql:create_object(QueryName, ObjectRec) end) of
-        {ok, 1} -> ok;
-        {conflict, Msg}-> {conflict, Msg};
-        {error, Why} -> {error, Why}
-    end.
-
--spec list(#context{}, object_rec()) -> {ok, [binary()]} | {error, _}.
-list(#context{reqid = ReqId} = _Ctx, StubRec) ->
-    stats_hero:ctime(ReqId, {chef_sql, fetch_object_names},
-                      fun() ->
-                              chef_sql:fetch_object_names(StubRec)
-                      end).
-
--spec update(object_rec(), #context{}, object_id()) ->
-             ok | not_found | {conflict, term()} | {error, term()}.
-%% TODO: get rid of cookbook_version special case
-update(#chef_cookbook_version{org_id =OrgId} = Record, #context{reqid = ReqId} = DbContext, ActorId) ->
-    case update_object(DbContext, ActorId, chef_object:update_query(Record), Record) of
-        #chef_db_cb_version_update{deleted_checksums=DeletedChecksums} ->
-            ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, DeletedChecksums)),
-            ok;
-        Result -> Result %% {conflict, _} or {error, _}
-    end;
-update(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
-    ObjectRec = chef_object:set_updated(ObjectRec0, ActorId),
-    QueryName = chef_object:update_query(ObjectRec),
-    UpdatedFields = chef_object:fields_for_update(ObjectRec),
-    case stats_hero:ctime(ReqId, {chef_sql, do_update},
-                          fun() -> chef_sql:do_update(QueryName, UpdatedFields) end) of
-        #chef_db_cb_version_update{}=CookbookVersionUpdate -> CookbookVersionUpdate;
-        {ok, 1} -> ok;
-        {ok, not_found} -> not_found;
-        {conflict, Message} -> {conflict, Message};
-        {error, Error} -> {error, Error}
-    end.
-
--spec fetch(object_rec(),
-            DbContext :: #context{}) ->
-                   object_rec() |
-                   not_found |
-                   {error, term()}.
-fetch(ObjectRec, #context{reqid = ReqId}) ->
-    RecordType = element(1, ObjectRec), %% record type is not the same as type name :(
-    QueryName = chef_object:find_query(ObjectRec),
-    Keys = chef_object:fields_for_fetch(ObjectRec),
-    RecordFields = chef_object:record_fields(ObjectRec),
-    case stats_hero:ctime(ReqId, {chef_sql, fetch_object},
-                          fun() -> chef_sql:fetch_object(Keys, RecordType, QueryName, RecordFields) end) of
-        {ok, not_found} -> not_found;
-        {ok, Object} -> Object;
-        {error, _Why} = Error -> Error
-    end.
 
 %% -------------------------------------
 %% private functions
