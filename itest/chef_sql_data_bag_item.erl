@@ -28,22 +28,21 @@ data_bag_items() ->
 
 insert_data_bag_item_data() ->
     Expected = lists:duplicate(length(data_bag_items()), {ok, 1}),
-    Results = [chef_sql:create_data_bag_item(Bag) || Bag <- data_bag_items() ],
+    Results = [create_record(Bag) || Bag <- data_bag_items() ],
     ?assertEqual(Expected, Results).
 
 fetch_data_bag_items() ->
     DBS = data_bag_items(),
     Expected = [ Db#chef_data_bag_item.item_name || Db <- DBS, Db#chef_data_bag_item.org_id =:= itest_util:the_org_id(),
                                                     Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">> ],
-    {ok, Results} = chef_sql:fetch_data_bag_items(itest_util:the_org_id(), <<"data_bag_02">>),
+    Results = list_records(hd(DBS)),
     ?assertEqual(Expected, Results).
 
 fetch_data_bag_item()->
     Item = hd(data_bag_items()),
 
-    {ok, Got} = chef_sql:fetch_data_bag_item(Item#chef_data_bag_item.org_id,
-                                             Item#chef_data_bag_item.data_bag_name,
-                                             Item#chef_data_bag_item.item_name),
+    {ok, Got} = fetch_record(Item),
+
     ?assertEqual(Item, Got).
 
 fetch_data_bag_item_ids() ->
@@ -63,16 +62,38 @@ update_data_bag_item()->
                      Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">>],
     NewData = <<"new object">>,
     New = Old#chef_data_bag_item{serialized_object= NewData},
-    {ok, UResults} = chef_sql:update_data_bag_item(New),
+    {ok, UResults} = update_record(New),
     ?assertEqual(1, UResults),
-    {ok, FResults} = chef_sql:fetch_data_bag_item(itest_util:the_org_id(), New#chef_data_bag_item.data_bag_name, New#chef_data_bag_item.item_name),
+    {ok, FResults} = fetch_record(Old),
     ?assertEqual(NewData,
                  (FResults#chef_data_bag_item.serialized_object)).
 
 
 delete_data_bag_item()->
     Item = hd(data_bag_items()),
-    {ok, DResults} = chef_sql:delete_data_bag_item(Item#chef_data_bag_item.id),
+    {ok, DResults} = delete_record(Item),
     ?assertEqual(1, DResults),
-    {ok, FResults} = chef_sql:fetch_data_bag_item(Item#chef_data_bag_item.org_id, Item#chef_data_bag_item.data_bag_name, Item#chef_data_bag_item.item_name),
+    {ok, FResults} = fetch_record(Item),
     ?assertEqual(not_found, FResults).
+
+%% Generic functions
+
+update_record(Record) ->
+  chef_sql:do_update(chef_object:update_query(Record), chef_object:fields_for_update(Record)).
+
+fetch_record(Record) ->
+    chef_sql:fetch_object(
+      chef_object:fields_for_fetch(Record),
+      element(1, Record),
+      chef_object:find_query(Record),
+      chef_object:record_fields(Record)
+          ).
+
+create_record(Record) -> chef_sql:create_object(chef_object:create_query(Record), Record).
+
+delete_record(Record) ->
+    chef_sql:delete_object(chef_object:delete_query(Record), chef_object:id(Record)).
+
+
+list_records(Record) ->
+    chef_sql:fetch_object_names(Record).
