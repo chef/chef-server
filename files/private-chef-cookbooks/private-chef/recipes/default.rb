@@ -6,6 +6,8 @@
 require 'uuidtools'
 require 'openssl'
 
+# Ensure that all our Omnibus-ed binaries are the ones that get used;
+# much better than having to specify this on each resource!
 ENV['PATH'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:#{ENV['PATH']}"
 
 # Capture old node attribute values (if there are any, that is) in
@@ -56,13 +58,10 @@ else
   node.consume_attributes(PrivateChef.generate_config(node['fqdn']))
 end
 
-# the bootstrap_server attribute is set to signify that this node is
-# cofigured to be the bootstrap server. If bootstrap#enable is set in
-# the OPC config, then we know we should be the bootstrap server.
-node.set['private_chef']['bootstrap']['bootstrap_server'] = node['private_chef']['bootstrap']['enable']
-
-if File.exists?("/var/opt/opscode/bootstrapped")
-        node.set['private_chef']['bootstrap']['enable'] = false
+# @todo: This seems like it might belong in the PrivateChef helper;
+#   many other attributes like are set automatically there as well.
+if OmnibusHelper.has_been_bootstrapped?
+  node.set['private_chef']['bootstrap']['enable'] = false
 end
 
 # Create the Chef User
@@ -145,7 +144,7 @@ include_recipe "private-chef::runit"
 
 # Configure Services
 [
-        "drbd",
+  "drbd",
   "couchdb",
   "rabbitmq",
   "postgresql",
@@ -155,13 +154,13 @@ include_recipe "private-chef::runit"
   "opscode-solr",
   "opscode-expander",
   "bookshelf",
-  "bootstrap",
   "opscode-org-creator",
   "opscode-erchef",
+  "bootstrap",
   "opscode-webui",
   "opscode-chef-mover",
   "nginx",
-        "keepalived"
+  "keepalived"
 ].each do |service|
   if node["private_chef"][service]["enable"]
     include_recipe "private-chef::#{service}"

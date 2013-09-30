@@ -5,5 +5,7 @@ Partybus.configure do |c|
   c.migration_state_file          = "/var/opt/opscode/upgrades/migration-level"
   c.private_chef_role             = "<%= @node_role %>"
   c.database_service_name         = "<%= @db_service_name %>"
-  c.bootstrap_server              = <%= !!(node['private_chef']['bootstrap']['bootstrap_server']) %>
+  c.is_data_master                = <%= @is_data_master %>
+  c.bootstrap_server              = <%= @bootstrap_server %>
+  c.couchdb_data_dir              = "<%= node['private_chef']['couchdb']['data_dir'] %>"
 end

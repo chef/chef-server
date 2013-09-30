@@ -157,7 +157,7 @@ add_command "ha-status", "Show the status of high availability services.", 1 do
   end
 
   ha_services = running_config['private_chef'].select {|k,v| v.is_a?(Hash) && v['ha'] }.map {|k,v| k}
-  ha_services += %w{php-fpm fcgiwrap opscode-expander-reindexer}
+  ha_services << "opscode-expander-reindexer"
 
   get_all_services.sort.each do |service_name|
     if service_enabled?(service_name)

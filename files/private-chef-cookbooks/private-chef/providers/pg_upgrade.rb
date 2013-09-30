@@ -123,7 +123,7 @@ def shutdown_postgres
   end
 
   log "Shutting down PostgreSQL for update" do
-    notifies :stop, "service[postgresql]", :immediately
+    notifies :stop, "runit_service[postgresql]", :immediately
   end
 end
 

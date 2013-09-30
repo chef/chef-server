@@ -9,13 +9,15 @@
 # only when the user is satisfied with the state of their system.
 
 private_chef_package_cleaner "opscode-authz" do
+  # Note that the data directory can be different depending on whether
+  # you're on a DRBD-enabled system or not.
   directories ["/var/opt/opscode/opscode-authz",
                "/var/log/opscode/opscode-authz",
                "/opt/opscode/embedded/service/opscode-authz",
-               "/var/opt/opscode/couchdb/db/.authorization_design",
+               "#{node['private_chef']['couchdb']['data_dir']}/db/.authorization_design",
                "/var/opt/opscode/upgrades/oc_authz_migrator"]
-  files ["/var/opt/opscode/couchdb/db/authorization.couch",
-         "/var/opt/opscode/couchdb/db/authorization_design_documents.couch"]
+  files ["#{node['private_chef']['couchdb']['data_dir']}/db/authorization.couch",
+         "#{node['private_chef']['couchdb']['data_dir']}/db/authorization_design_documents.couch"]
 end
 
 private_chef_package_cleaner "nagios" do
@@ -61,6 +63,8 @@ private_chef_package_cleaner "redis" do
   directories ["/var/opt/opscode/redis",
                "/var/log/opscode/redis"]
 end
+
+private_chef_package_cleaner "varnish"
 
 # Remove old PostgreSQL data directory
 #

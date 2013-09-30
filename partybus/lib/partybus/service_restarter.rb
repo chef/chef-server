@@ -3,7 +3,7 @@ class Partybus::ServiceRestarter
   def restart_service(service_name)
 
     if ["runit", "keepalived"].include?(service_name)
-      raise "Sorry yo, can't to that yet"
+      raise "Sorry yo, can't do that yet"
     end
 
     system("private-chef-ctl status #{service_name}")
