@@ -1,5 +1,5 @@
 name "oc_authz_migrator"
-version "master"
+version "0.0.1"
 
 dependencies ["erlang", "rebar", "rsync"]
 
