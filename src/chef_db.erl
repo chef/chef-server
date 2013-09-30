@@ -205,7 +205,7 @@ fetch(ObjectRec, #context{reqid = ReqId}) ->
         {error, _Why} = Error -> Error
     end.
 
--spec list(object_rec(), #context{}) -> {ok, [binary()]} | {error, _}.
+-spec list(object_rec(), #context{}) -> [binary()] | {error, _}.
 list(StubRec, #context{reqid = ReqId} = _Ctx) ->
     stats_hero:ctime(ReqId, {chef_sql, fetch_object_names},
                       fun() ->
