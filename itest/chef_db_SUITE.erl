@@ -132,6 +132,12 @@ setup_chef_db(Config) ->
                          [{<<"created_at">>, fun sqerl_transformers:convert_YMDHMS_tuple_to_datetime/1},
                         {<<"updated_at">>, fun sqerl_transformers:convert_YMDHMS_tuple_to_datetime/1}]}
                        ]),
+
+    itest_util:set_env(stats_hero,
+                       [{udp_socket_pool_size, 1},
+                        {estatsd_host, "localhost"},
+                        {estatsd_port, 3001}]),
+
     %% In production we use 5, but I'm using 2 here for the time being
     %% to exercise the joining together of multiple database calls.  See the TODO
     %% in the "Environment-filtered Recipes Tests" section for more.
@@ -158,7 +164,7 @@ cleanup_chef_db() ->
     error_logger:tty(true).
 
 app_list() ->
-    [crypto, public_key, ssl, epgsql, pooler].
+    [crypto, public_key, ssl, epgsql, pooler, stats_hero].
 
 ensure_started(App) ->
     case application:start(App) of
