@@ -39,6 +39,7 @@
 %% Helpers for webmachine callbacks
 -export([create_from_json/5,
          init/2,
+         list_objects_json/2,
          verify_request_signature/2,
          update_from_json/4]).
 
@@ -115,7 +116,7 @@ malformed_request(Req, #base_state{resource_mod=Mod,
     try
         chef_authn:validate_headers(GetHeader, AuthSkew),
         Req1 = chef_wm_enforce:max_size(Req),
-        OrgId = fetch_org_guid(State1),
+        OrgId = chef_wm_util:fetch_org_guid(State1),
         {Req2, State2} = Mod:validate_request(wrq:method(Req1), Req1,
                                               State1#base_state{organization_guid = OrgId}),
         {false, Req2, State2}
@@ -246,10 +247,11 @@ add_api_info_header(Req, State) ->
 %% explaining why.
 verify_request_signature(Req,
                          #base_state{organization_name = OrgName,
+                                     organization_guid = OrgId,
                                      auth_skew = AuthSkew,
                                      chef_db_context = DbContext}=State) ->
     UserName = wrq:get_req_header("x-ops-userid", Req),
-    case chef_db:fetch_requestor(DbContext, OrgName, UserName) of
+    case chef_db:fetch_requestor(DbContext, OrgId, UserName) of
         {not_found, What} ->
             NotFoundMsg = verify_request_message({not_found, What},
                                                  UserName, OrgName),
@@ -295,7 +297,6 @@ create_from_json(#wm_reqdata{} = Req,
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
     ObjectRec = chef_object:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
-    Id = chef_object:id(ObjectRec),
     Name = chef_object:name(ObjectRec),
     TypeName = chef_object:type_name(ObjectRec),
 
@@ -306,8 +307,7 @@ create_from_json(#wm_reqdata{} = Req,
     %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
     %% the world.
-    ok = chef_object_db:add_to_solr(TypeName, Id, OrgId,
-                                 chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
+    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
     case chef_db:create(ObjectRec, DbContext, ActorId) of
         {conflict, _} ->
             %% ignore return value of solr delete, this is best effort.
@@ -351,10 +351,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
     %% Send object to solr for indexing *first*. If the update fails, we will have sent
     %% incorrect data, but that should get corrected when the client retries. This is a
     %% compromise.
-    ok = chef_object_db:add_to_solr(chef_object:type_name(ObjectRec),
-                                    chef_object:id(ObjectRec),
-                                    OrgId,
-                                    chef_object:ejson_for_indexing(ObjectRec, ObjectEjson)),
+    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
 
     %% Ignore updates that don't change anything. If the user PUTs identical data, we skip
     %% going to the database and skip updating updated_at. This allows us to avoid RDBMS
@@ -366,7 +363,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
             {true, chef_wm_util:set_json_body(Req, ObjectEjson), State1};
         false ->
-            case chef_db:update(DbContext, ObjectRec, ActorId) of
+            case chef_db:update(ObjectRec, DbContext, ActorId) of
                 ok ->
                     Req1 = handle_rename(ObjectRec, Req),
                     {true, chef_wm_util:set_json_body(Req1, ObjectEjson), State};
@@ -514,16 +511,6 @@ spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
             ok
     end.
 
-fetch_org_guid(#base_state{organization_guid = Id}) when is_binary(Id) ->
-    Id;
-fetch_org_guid(#base_state{organization_guid = undefined,
-                           organization_name = OrgName,
-                           chef_db_context = DbContext}) ->
-    case chef_db:fetch_org_id(DbContext, OrgName) of
-        not_found -> throw({org_not_found, OrgName});
-        Guid -> Guid
-    end.
-
 maybe_annotate_org_specific(?OSC_ORG_NAME, _Darklaunch, Req) ->
     Req;
 maybe_annotate_org_specific(OrgName, Darklaunch, Req) ->
@@ -636,9 +623,11 @@ public_key(#chef_client{public_key = PublicKey}) ->
 -spec handle_auth_info(atom(), wm_req(), #base_state{}) -> authorized | forbidden.
 handle_auth_info(chef_wm_clients, Req,
                  #base_state{requestor = Requestor,
-                             resource_state = #client_state{client_data = Client}}) ->
+                             resource_state = ResourceState}) ->
     case wrq:method(Req) of
         'POST' -> %% create
+            %% Hack, GET and POST passes two different data structures for resource_state
+            Client = ResourceState#client_state.client_data,
             IsAdmin = chef_wm_authz:is_admin(Requestor),
 
             IsValidator = chef_wm_authz:is_validator(Requestor),
@@ -888,3 +877,19 @@ stats_hero_label({BadPrefix, Fun}) ->
 %% request.
 stats_hero_upstreams() ->
     [<<"depsolver">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
+
+%% @doc Webmachine content producing callback (that can be wired into
+%% content_types_provided) that returns a JSON map of object names to object URLs. This
+%% leverages the `chef_object' behavior and relies upon a stub object record with `org_id'
+%% being present in `State#base_state.resource_state'.
+%%
+%% Note that since this module provides {@link content_types_provided/2} with a hard-coded
+%% callback of `to_json', you can make use of this function using mixer and renaming it to
+%% to_json.
+-spec list_objects_json(#wm_reqdata{}, #base_state{}) -> {binary(), #wm_reqdata{}, #base_state{}}.
+list_objects_json(Req, #base_state{chef_db_context = DbContext,
+                                   resource_state = StubRec} = State) ->
+    Names = chef_db:list(StubRec, DbContext),
+    RouteFun = ?BASE_ROUTES:bulk_route_fun(chef_object:type_name(StubRec), Req),
+    UriMap= [{Name, RouteFun(Name)} || Name <- Names],
+    {chef_json:encode({UriMap}), Req, State}.

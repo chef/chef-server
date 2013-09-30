@@ -41,6 +41,8 @@
                         ping/2,
                         post_is_create/2]}]).
 
+-mixin([{chef_wm_base, [{list_objects_json/2, to_json}]}]).
+
 -mixin([{?BASE_RESOURCE, [forbidden/2,
                           is_authorized/2,
                           service_available/2]}]).
@@ -60,8 +62,7 @@
 -export([
          allowed_methods/2,
          create_path/2,
-         from_json/2,
-         to_json/2
+         from_json/2
        ]).
 
 init(Config) ->
@@ -80,8 +81,11 @@ allowed_methods(Req, State) ->
 %% We set up the state such that the superuser avoids the ACL checks.
 %% FIXME: This is a temporary fix until pedant uses the validator which has
 %% permissions to create a new client
-validate_request('GET', Req, State) ->
-    {Req, State#base_state{resource_state = #client_state{}}};
+validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
+    %% Put a stub chef_client record into the resource_state. This allows us to use shared
+    %% code for generating the map of name => URL returned for GET /clients.  OrgId is set via
+    %% malformed_request.
+    {Req, State#base_state{resource_state = #chef_client{org_id = OrgId}}};
 validate_request('POST', Req, State) ->
     case wrq:req_body(Req) of
         undefined ->
@@ -110,36 +114,25 @@ from_json(Req, #base_state{reqid = RequestId,
                            resource_state = #client_state{client_data = ClientData,
                                                           client_authz_id = AuthzId}} = State) ->
     Name = ej:get({<<"name">>}, ClientData),
-    {PublicKey, PrivateKey} = case chef_object:cert_or_key(ClientData) of
+    {PublicKey, PrivateKey} = case chef_object_base:cert_or_key(ClientData) of
         {undefined, _} ->
             chef_wm_util:generate_keypair(Name, RequestId);
         {PubKey, _PubKeyVersion} ->
             {PubKey, undefined}
     end,
-    ClientData1 = chef_object:set_public_key(ClientData, PublicKey),
+    ClientData1 = chef_object_base:set_public_key(ClientData, PublicKey),
     case chef_wm_base:create_from_json(Req, State, chef_client, {authz_id, AuthzId}, ClientData1) of
         {true, Req1, State1} ->
             %% create_from_json by default sets the response to a json body
             %% containing only a uri key. Here we want to add the generated key
             %% pair so we replace the response.
             URI = ?BASE_ROUTES:route(client, Req1, [{name, Name}]),
-            EJSON = chef_object:set_key_pair({[{<<"uri">>, URI}]},
+            EJSON = chef_object_base:set_key_pair({[{<<"uri">>, URI}]},
                         {public_key, PublicKey}, {private_key, PrivateKey}),
             {true, chef_wm_util:set_json_body(Req1, EJSON), State1};
         Else ->
             Else
     end.
-
-to_json(Req, State) ->
-    {all_clients_json(Req, State), Req, State}.
-
-%% Internal Functions
-all_clients_json(Req, #base_state{chef_db_context = DbContext,
-                                  organization_name = OrgName}) ->
-    ClientNames = chef_db:fetch_clients(DbContext, OrgName),
-    RouteFun = ?BASE_ROUTES:bulk_route_fun(client, Req),
-    UriMap = [ {Name, RouteFun(Name)} || Name <- ClientNames ],
-    chef_json:encode({UriMap}).
 
 malformed_request_message(Any, Req, State) ->
     chef_wm_malformed:malformed_request_message(Any, Req, State).

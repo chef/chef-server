@@ -114,6 +114,7 @@ resource_exists_message(org_not_found, Org) ->
 to_json(Req, #base_state{chef_db_context = DbContext,
                          resource_state = SearchState,
                          organization_name = OrgName,
+                         organization_guid = OrgId,
                          reqid = ReqId} = State) ->
     BatchSize = batch_size(),
     Query = SearchState#search_state.solr_query,
@@ -142,7 +143,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                                                                length(Ids), DbNumFound)},
             case IndexType of
                 {data_bag, BagName} when DbNumFound =:= 0 ->
-                    case chef_db:data_bag_exists(DbContext, OrgName, BagName) of
+                    case chef_db:data_bag_exists(DbContext, OrgId, BagName) of
                         true ->
                             {Ans, Req, State1};
                         false ->

@@ -70,7 +70,7 @@ process_post(Req, #base_state{chef_db_context = DbContext,
                               resource_state =
                                   #user_state{user_data = UserData}} = State) ->
     Name = ej:get({<<"name">>}, UserData),
-    Verified = case chef_db:fetch_user(DbContext, Name) of
+    Verified = case chef_db:fetch(#chef_user{username = Name}, DbContext) of
                    not_found ->
                        false;
                    #chef_user{hashed_password = HashedPass,

@@ -78,7 +78,8 @@ validate_request('PUT', Req, #base_state{resource_state = UserState} = State) ->
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = UserState}=State) ->
     UserName = chef_wm_util:object_name(user, Req),
-    case chef_db:fetch_user(DbContext, UserName) of
+    %% TODO chef_users don't follow chef_object callback pattern
+    case chef_db:fetch(#chef_user{username = UserName}, DbContext) of
         not_found ->
             Message = chef_wm_util:not_found_message(user, UserName),
             Req1 = chef_wm_util:set_json_body(Req, Message),
@@ -128,7 +129,7 @@ maybe_generate_key_pair(UserData, RequestId) ->
     case ej:get({<<"private_key">>}, UserData) of
         true ->
             {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
-            chef_object:set_key_pair(UserData,
+            chef_object_base:set_key_pair(UserData,
                                    {public_key, PublicKey},
                                    {private_key, PrivateKey});
         _ ->
@@ -187,7 +188,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
             {true, chef_wm_util:set_json_body(Req, ObjectEjson), State1};
         false ->
-            case chef_db:update(DbContext, ObjectRec, ActorId) of
+            case chef_db:update(ObjectRec, DbContext, ActorId) of
                 ok ->
                     {true, chef_wm_util:set_json_body(Req, ObjectEjson), State};
                 not_found ->

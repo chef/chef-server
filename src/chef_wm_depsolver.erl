@@ -80,11 +80,11 @@ validate_request('POST', Req, #base_state{resource_state=DepsolverState}=State) 
     {Req, State1}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
-                           organization_name = OrgName,
+                           organization_guid = OrgId,
                            resource_state = #depsolver_state{environment_name = EnvName}} = State) ->
-    forbidden_for_environment(chef_db:fetch_environment(DbContext, OrgName, EnvName),
-                              Req,
-                              State).
+    Environment = chef_db:fetch(#chef_environment{org_id = OrgId, name = EnvName}, DbContext),
+    forbidden_for_environment(Environment, Req, State).
+
 
 %% @doc helper function for auth_info/2 which when given the output of chef_db:fetch_environment,
 %% checks the permissions of the requestor against the environment and cookbook container
@@ -108,7 +108,7 @@ process_post(Req, #base_state{reqid = ReqId,
                               resource_state = #depsolver_state{run_list_cookbooks = Cookbooks,
                                                                 environment_name = EnvName,
                                                                 chef_environment = Env}} = State) ->
-    EnvConstraints = chef_object:depsolver_constraints(Env),
+    EnvConstraints = chef_object_base:depsolver_constraints(Env),
     case chef_db:fetch_all_cookbook_version_dependencies(DbContext, OrgName) of
         {error, Error} ->
             error_logger:error_msg("Dependency retrieval failure for org ~p with environment ~p: ~p~n",
@@ -289,7 +289,7 @@ assemble_response(Req, State, CookbookVersions) ->
             %% cookbook which has just enough information for chef-client to run
             JsonList = {
                     [ { CBV#chef_cookbook_version.name,
-                       chef_cookbook:minimal_cookbook_ejson(CBV, chef_wm_util:base_uri(Req)) }
+                       chef_cookbook_version:minimal_cookbook_ejson(CBV, chef_wm_util:base_uri(Req)) }
                       || CBV <- CookbookVersions ]
                     },
             CBMapJson = chef_json:encode(JsonList),

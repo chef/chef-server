@@ -108,10 +108,10 @@ validate_request('POST', Req, #base_state{resource_state = DataState} = State) -
                                               data_bag_item_ejson = DataBagItemEjson}}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
-                           organization_name = OrgName,
+                           organization_guid = OrgId,
                            resource_state = DataBagState} = State) ->
     DataBagName = chef_wm_util:object_name(data_bag, Req),
-    case chef_db:fetch_data_bag(DbContext, OrgName, DataBagName) of
+    case chef_db:fetch(#chef_data_bag{org_id = OrgId, name = DataBagName}, DbContext) of
         not_found ->
             Message = custom_404_msg(Req, DataBagName),
             Req1 = chef_wm_util:set_json_body(Req, Message),
@@ -155,7 +155,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
                               chef_otto:dbname(OrgId),
                               chef_object:ejson_for_indexing(DataBagItem, ItemData)),
 
-    case chef_db:create_data_bag_item(DbContext, DataBagItem, ActorId) of
+    case chef_db:create(DataBagItem, DbContext, ActorId) of
         {conflict, _} ->
             LogMsg = {data_bag_name_conflict, DataBagName},
             {{halt, 409}, chef_wm_util:set_json_body(Req,
@@ -204,12 +204,13 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
 
 %% Private utility functions
 items_for_data_bag(Req, #base_state{chef_db_context = DbContext,
-                                    organization_name = OrgName,
+                                    organization_guid = OrgId,
                                     resource_state = #data_state{
                                       data_bag_name = DataBagName}}) ->
     %% FIXME: error handling for {error, _}. Can also return {not_found, org}, but I think
     %% we will have encountered that earlier on in the request processing.
-    ItemNames = chef_db:fetch_data_bag_items(DbContext, OrgName, DataBagName),
+    ItemNames = chef_db:list(#chef_data_bag_item{org_id = OrgId, data_bag_name = DataBagName},
+                             DbContext),
     RouteFun = ?BASE_ROUTES:bulk_route_fun(data_bag_item, DataBagName, Req),
     UriMap = [ {Name, RouteFun(Name)}  || Name <- ItemNames ],
     chef_json:encode({UriMap}).

@@ -17,6 +17,8 @@
 %% under the License.
 
 -module(chef_reindex).
+-compile([warnings_as_errors]).
+
 -include_lib("chef_objects/include/chef_types.hrl").
 -include_lib("ej/include/ej.hrl").
 
@@ -38,7 +40,7 @@
               OrgInfo :: org_info()) -> ok.
 reindex(Ctx, {OrgId, _OrgName}=OrgInfo) ->
     BuiltInIndexes = [node, role, environment, client],
-    DataBags = chef_db:data_bag_names(Ctx, OrgId),
+    DataBags = chef_db:list(#chef_data_bag{org_id = OrgId}, Ctx),
     AllIndexes = BuiltInIndexes ++ DataBags,
     [ reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
     ok.
@@ -163,8 +165,10 @@ send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict) ->
     NameKey = name_key(chef_object_type(Index)),
     ItemName = ej:get({NameKey}, PreliminaryEJson),
     {ok, ObjectId} = dict:find(ItemName, NameIdDict),
-    EJson = ejson_for_indexing(Index, PreliminaryEJson),
-    ok = chef_object_db:add_to_solr(chef_object_type(Index), ObjectId, OrgId, EJson),
+    StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PreliminaryEJson),
+    %% Since we get here via valid `Index', we don't have to check that the objects are
+    %% indexable.
+    ok = chef_object_db:add_to_solr(StubRec, PreliminaryEJson),
     send_to_index_queue(OrgId, Index, Rest, NameIdDict).
 
 %% @doc Determine the proper key to use to retrieve the unique name of
@@ -172,21 +176,24 @@ send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict) ->
 name_key(data_bag_item) -> <<"id">>;
 name_key(_Type)         -> <<"name">>.
 
-%% @doc For a given EJSON object, generate the appropriate index data.
--spec ejson_for_indexing(Index :: index(), EJson :: ej:json_object()) -> ej:json_object().
-ejson_for_indexing(role, EJson) ->
-    chef_object:ejson_for_indexing(#chef_role{}, EJson);
-ejson_for_indexing(client, EJson) ->
-    chef_object:ejson_for_indexing(#chef_client{}, EJson);
-ejson_for_indexing(environment, EJson) ->
-    chef_object:ejson_for_indexing(#chef_environment{}, EJson);
-ejson_for_indexing(node, EJson) ->
-    Name = ej:get({<<"name">>}, EJson),
-    Environment = ej:get({<<"chef_environment">>}, EJson),
-    chef_object:ejson_for_indexing(#chef_node{name=Name, environment=Environment}, EJson);
-ejson_for_indexing(DataBagName, EJson) when is_binary(DataBagName) ->
+%% The {@link chef_object_db:add_to_solr} expects a Chef object record and EJSON as
+%% arguments. Since we have only some meta data and the EJSON, we stub out enough of an
+%% object record to work. This is a fragile hack. The reindexing function should retrieve a
+%% list of complete records from the db and process those.
+stub_record(client, OrgId, Id, Name, _EJson) ->
+    #chef_client{org_id = OrgId, id = Id, name = Name};
+stub_record(environment, OrgId, Id, Name, _EJson) ->
+    #chef_environment{org_id = OrgId, id = Id, name = Name};
+stub_record(node, OrgId, Id, Name, EJson) ->
+    #chef_node{org_id = OrgId, id = Id, name = Name,
+               environment = ej:get({<<"chef_environment">>}, EJson)};
+stub_record(role, OrgId, Id, Name, _EJson) ->
+    #chef_role{org_id = OrgId, id = Id, name = Name};
+stub_record(DataBagName, OrgId, Id, _Name, EJson) ->
     ItemName = ej:get({<<"id">>}, EJson),
-    chef_object:ejson_for_indexing(#chef_data_bag_item{data_bag_name=DataBagName, item_name=ItemName}, EJson).
+    #chef_data_bag_item{org_id = OrgId, id = Id,
+                        data_bag_name = DataBagName,
+                        item_name = ItemName}.
 
 % TODO: Create a chef_common module for this stuff
 safe_split(N, L) ->

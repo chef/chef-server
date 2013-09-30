@@ -82,11 +82,11 @@ validate_request('PUT', Req, #base_state{resource_state = DataState0} = State) -
     {Req, State#base_state{resource_state = DataState}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
-                           organization_name = OrgName,
+                           organization_guid = OrgId,
                            resource_state = DataBagState} = State) ->
     DataBagName = chef_wm_util:object_name(data_bag, Req),
     ItemName = chef_wm_util:object_name(data_bag_item, Req),
-    case chef_db:fetch_data_bag(DbContext, OrgName, DataBagName) of
+    case chef_db:fetch(#chef_data_bag{org_id = OrgId, name = DataBagName}, DbContext) of
         not_found ->
             Message = custom_404_msg(Req, DataBagName, ItemName),
             Req1 = chef_wm_util:set_json_body(Req, Message),
@@ -103,11 +103,14 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
 %% the item exists. If items grow their own authz, this logic will move into an enhanced
 %% forbidden function.
 resource_exists(Req, #base_state{chef_db_context = DbContext,
-                                 organization_name = OrgName,
+                                 organization_guid = OrgId,
                                  resource_state = DataBagState} = State) ->
     DataBagName = DataBagState#data_state.data_bag_name,
     ItemName = chef_wm_util:object_name(data_bag_item, Req),
-    case chef_db:fetch_data_bag_item(DbContext, OrgName, DataBagName, ItemName) of
+    case chef_db:fetch(#chef_data_bag_item{org_id = OrgId,
+                                           data_bag_name = DataBagName,
+                                           item_name = ItemName},
+                       DbContext) of
         not_found ->
             Message = custom_404_msg(Req, DataBagName, ItemName),
             Req1 = chef_wm_util:set_json_body(Req, Message),

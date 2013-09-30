@@ -66,16 +66,29 @@ principal_type(#chef_client{}) ->
 principal_type(#chef_user{}) ->
     <<"user">>.
 
-% We need to override this instead of using the mixin; otherwise we reject unsigned
-% requests, which is silly when we're not doing any authentication in the first place
-malformed_request(Req, State) ->
-    {false, Req, State}.
+%% We need to be able to accept unsigned requests while still extracting the org id
+%% If this kind of an unauthenticated request is used by more than one endpoint,
+%% consider moving this into a mixin
+malformed_request(Req, #base_state{}=State) ->
+    try
+        OrgId = chef_wm_util:fetch_org_guid(State),
+        {false, Req, State#base_state{organization_guid = OrgId}}
+    catch
+        throw:{org_not_found, Org} ->
+            Msg = iolist_to_binary([<<"organization '">>, Org, <<"' does not exist.">>]),
+            Req3 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Msg]}]}), Req),
+            {{halt, 404}, Req3, State#base_state{log_msg = org_not_found}};
+        throw:Why ->
+            Msg =  chef_wm_malformed:malformed_request_message(Why, Req, State),
+            NewReq = wrq:set_resp_body(chef_json:encode(Msg), Req),
+            {true, NewReq, State#base_state{log_msg = Why}}
+    end.
 
 resource_exists(Req, #base_state{chef_db_context = DbContext,
-                                 organization_name = OrgName,
+                                 organization_guid = OrgId,
                                  resource_state = ResourceState} = State) ->
     Name = chef_wm_util:object_name(principal, Req),
-    case chef_db:fetch_requestor(DbContext, OrgName, Name) of
+    case chef_db:fetch_requestor(DbContext, OrgId, Name) of
         {not_found, client} ->
             Message = chef_wm_util:not_found_message(client, Name),
             Req1 = chef_wm_util:set_json_body(Req, Message),

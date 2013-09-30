@@ -78,19 +78,19 @@ from_json(Req, #base_state{reqid = RequestId,
                            resource_state = #user_state{user_data = UserData,
                            user_authz_id = AuthzId}} = State) ->
     Name = ej:get({<<"name">>}, UserData),
-    {PublicKey, PrivateKey} = case chef_object:cert_or_key(UserData) of
+    {PublicKey, PrivateKey} = case chef_object_base:cert_or_key(UserData) of
         {undefined, _} ->
             chef_wm_util:generate_keypair(Name, RequestId);
         {PubKey, _PubKeyVersion} ->
             {PubKey, undefined}
     end,
-    UserWithKey = chef_object:set_public_key(UserData, PublicKey),
+    UserWithKey = chef_object_base:set_public_key(UserData, PublicKey),
     PasswordData = chef_wm_password:encrypt(ej:get({<<"password">>}, UserWithKey)),
     case create_from_json(Req, State, chef_user, {authz_id, AuthzId},
                           {UserWithKey, PasswordData}) of
         {true, Req1, State1} ->
             Uri = ?BASE_ROUTES:route(user, Req1, [{name, Name}]),
-            Ejson = chef_object:set_key_pair({[{<<"uri">>, Uri}]},
+            Ejson = chef_object_base:set_key_pair({[{<<"uri">>, Uri}]},
                         {public_key, PublicKey}, {private_key, PrivateKey}),
             {true, chef_wm_util:set_json_body(Req1, Ejson), State1};
         Else ->
@@ -98,14 +98,7 @@ from_json(Req, #base_state{reqid = RequestId,
     end.
 
 to_json(Req, State) ->
-    {all_users_json(Req, State), Req, State}.
-
-%% Internal Functions
-all_users_json(Req, #base_state{chef_db_context = DbContext}) ->
-    UserNames = chef_db:fetch_users(DbContext),
-    RouteFun = ?BASE_ROUTES:bulk_route_fun(user, Req),
-    UriMap = [ {Name, RouteFun(Name)} || Name <- UserNames ],
-    ejson:encode({UriMap}).
+    chef_wm_base:list_objects_json(Req, State#base_state{resource_state = #chef_user{}}).
 
 %% FIXME: we will likely be able to re-use something from chef_wm_base once a bit of
 %% refaactoring happens. This is largely copy pasta from chef_wm_base, but with solr bits

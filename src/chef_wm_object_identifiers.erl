@@ -98,9 +98,9 @@ to_json(Req, #base_state{resource_state = #object_identifier_state{
                                                                not_found |
                                                                unknown_object_type.
 object_identifiers(<<"nodes">>,  NodeName, #base_state{chef_db_context = DbContext,
-                                                       organization_name = OrgName,
+                                                       organization_guid = OrgId,
                                                        resource_state = ObjectIdState}) ->
-    case chef_db:fetch_node(DbContext, OrgName, NodeName) of
+    case chef_db:fetch(#chef_node{org_id = OrgId, name = NodeName}, DbContext) of
         not_found ->
             not_found;
         #chef_node{} = Node ->

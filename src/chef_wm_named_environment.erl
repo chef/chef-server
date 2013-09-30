@@ -79,10 +79,10 @@ validate_request(_Other, Req, State) ->
     {Req, State#base_state{resource_state = #environment_state{}}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
-                           organization_name = OrgName,
+                           organization_guid = OrgId,
                            resource_state = EnvironmentState} = State) ->
     Name = chef_wm_util:object_name(environment, Req),
-    case chef_db:fetch_environment(DbContext, OrgName, Name) of
+    case chef_db:fetch(#chef_environment{org_id = OrgId, name = Name}, DbContext) of
         not_found ->
             Message = chef_wm_util:not_found_message(environment, Name),
             Req1 = chef_wm_util:set_json_body(Req, Message),
