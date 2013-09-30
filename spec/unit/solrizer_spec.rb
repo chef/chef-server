@@ -8,6 +8,7 @@ require 'rexml/document'
 describe Expander::Solrizer do
   SEP = "__=__"
 
+
   describe "when created with an add request" do
     before do
       @now = Time.now.utc.to_i
@@ -92,6 +93,16 @@ describe Expander::Solrizer do
       update_json = Yajl::Encoder.encode(update_hash)
       uneql_solrizer = Expander::Solrizer.new(update_json)
       @solrizer.should_not eql(uneql_solrizer)
+    end
+
+    describe "when using a non-default config" do
+      before do
+        Expander.config.solr_url = "http://solrbox.com:4567"
+      end
+
+      it "should return the correct solr url" do
+        @solrizer.solr_url.should eql("http://solrbox.com:4567/solr/update")
+      end
     end
 
     describe "when flattening to XML" do

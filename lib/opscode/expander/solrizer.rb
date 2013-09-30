@@ -231,7 +231,7 @@ module Opscode
       end
 
       def solr_url
-        'http://127.0.0.1:8983/solr/update'
+        @solr_url ||= Expander.config.solr_url + '/solr/update'
       end
 
       def indexed_object
