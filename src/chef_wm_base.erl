@@ -889,7 +889,7 @@ stats_hero_upstreams() ->
 -spec list_objects_json(#wm_reqdata{}, #base_state{}) -> {binary(), #wm_reqdata{}, #base_state{}}.
 list_objects_json(Req, #base_state{chef_db_context = DbContext,
                                    resource_state = StubRec} = State) ->
-    Names = chef_db:list(DbContext, StubRec),
+    Names = chef_db:list(StubRec, DbContext),
     RouteFun = ?BASE_ROUTES:bulk_route_fun(chef_object:type_name(StubRec), Req),
     UriMap= [{Name, RouteFun(Name)} || Name <- Names],
     {chef_json:encode({UriMap}), Req, State}.

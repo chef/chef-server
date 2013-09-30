@@ -133,7 +133,8 @@ list_nodes(EnvName, Req, #base_state{
                               organization_guid = OrgId,
                               chef_db_context = DbContext,
                               organization_name = OrgName}=State) ->
-    NodeNames = chef_db:list(DbContext, #chef_node{environment = EnvName, org_id = OrgId}),
+    NodeNames = chef_db:list(#chef_node{environment = EnvName, org_id = OrgId},
+                             DbContext),
     package_node_list(NodeNames, Req, State).
 
 package_node_list(NodeNames, Req, #base_state{}=State) ->

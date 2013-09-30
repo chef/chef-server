@@ -104,7 +104,7 @@ delete(DbContext, ObjectRec, _RequestorId) ->
 %% database call returns an error, otherwise returns `ok' ignoring specific return value
 %% from the chef_db module.
 delete_from_db(DbContext, ObjectRec) ->
-    handle_delete_from_db(chef_db:delete(DbContext, ObjectRec)).
+    handle_delete_from_db(chef_db:delete(ObjectRec, DbContext)).
 
 handle_delete_from_db({error, _}=Error) ->
     throw({delete_from_db, Error});

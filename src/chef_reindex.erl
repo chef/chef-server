@@ -40,7 +40,7 @@
               OrgInfo :: org_info()) -> ok.
 reindex(Ctx, {OrgId, _OrgName}=OrgInfo) ->
     BuiltInIndexes = [node, role, environment, client],
-    DataBags = chef_db:list(Ctx, #chef_data_bag{org_id = OrgId}),
+    DataBags = chef_db:list(#chef_data_bag{org_id = OrgId}, Ctx),
     AllIndexes = BuiltInIndexes ++ DataBags,
     [ reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
     ok.
