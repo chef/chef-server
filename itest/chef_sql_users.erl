@@ -63,7 +63,7 @@ fetch_user_list() ->
   CreatedResults = lists:duplicate(length(Users), {ok, 1}),
   Created = [create_record(User) || User <- Users ],
   ?assertEqual(CreatedResults, Created),
-  Results = chef_sql:fetch_object_names(#chef_user{}),
+  Results = list_records(#chef_user{}),
   Expected = [ User#chef_user.username || User <- Users ],
   ?assertEqual(Expected, Results).
 
@@ -118,3 +118,7 @@ count_admin_users() ->
 
 delete_record(Record) ->
     chef_sql:delete_object(chef_object:delete_query(Record), chef_object:id(Record)).
+
+
+list_records(Record) ->
+    chef_sql:fetch_object_names(Record).
