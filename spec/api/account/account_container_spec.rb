@@ -558,11 +558,22 @@ describe "opscode-account containers", :containers do
       end
     end # context DELETE /containers/<name>
 
+    # 2013-09-31 mark@opscode.com
+    #
+    # I've altered the container path tests below to expect the
+    # container name to be returned. We've obsoleted container path,
+    # which means that setting it is ignored, and it is filled out
+    # from the container name on get. This updates the tests to
+    # acknowledge this. There is also some question of the actual
+    # value allowing 'PUT' has in this circumstance, beyond the
+    # possibility of allowing 'rename'
+    #
+    # We may just remove these tests and the 'update' API in the future.
     context "PUT /containers/<name>" do
       context "permissions" do
         let(:new_container_payload) {{
             "containername" => test_container,
-            "containerpath" => "/new/path"
+            "containerpath" => test_container
           }}
 
         let(:modified_container_body) { new_container_payload }
@@ -658,7 +669,7 @@ describe "opscode-account containers", :containers do
       context "updating containers" do
         let(:new_container_payload) {{
             "containername" => test_container,
-            "containerpath" => "/new/path"
+            "containerpath" => test_container,
           }}
 
         let(:modified_container_body) { new_container_payload }
@@ -668,7 +679,7 @@ describe "opscode-account containers", :containers do
 
           let(:new_container_payload) {{
               "containername" => new_container_name,
-              "containerpath" => "/new/path"
+              "containerpath" => new_container_name
             }}
 
           let(:modified_container_body) { new_container_payload }
