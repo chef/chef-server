@@ -58,7 +58,8 @@
         ]).
 
 -export([
-         list/2
+         list/2,
+         fetch/2
          ]).
 
 -include_lib("ej/include/ej.hrl").
@@ -451,6 +452,15 @@ value_or_undefined(Key, Data) ->
     Value ->
       Value
   end.
--spec(list(#chef_client{}, fun(([any()],[any()],[any()]) -> [any()])) -> [any()]).
+-spec(list(#chef_client{}, chef_object:select_callback()) -> chef_object:select_return()).
 list(#chef_client{org_id = OrgId}, CallbackFun) ->
-    CallbackFun(list_query(), [OrgId], [name]).
+    CallbackFun({list_query(), [OrgId], [name]}).
+
+-spec(fetch(#chef_client{}, chef_object:select_callback()) -> chef_object:select_return()).
+fetch(#chef_client{} = ObjRec, CallbackFun) ->
+    CallbackFun(
+      {find_query(),
+       fields_for_fetch(ObjRec),
+       {first_as_record, [element(1, ObjRec), record_fields()]}
+       }
+      ).

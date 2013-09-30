@@ -60,7 +60,8 @@
         ]).
 
 -export([
-         list/2
+         list/2,
+         fetch/2
          ]).
 
 -ifdef(TEST).
@@ -631,6 +632,15 @@ fields_for_fetch(#chef_cookbook_version{org_id = OrgId,
 
 record_fields() ->
     record_info(fields, chef_cookbook_version).
-
+-spec(list(#chef_cookbook_version{}, chef_object:select_callback()) -> chef_object:select_return()).
 list(#chef_cookbook_version{org_id = OrgId}, CallbackFun) ->
-    CallbackFun(list_query(), [OrgId], [name]).
+    CallbackFun({list_query(), [OrgId], [name]}).
+
+-spec(fetch(#chef_cookbook_version{}, chef_object:select_callback()) -> chef_object:select_return()).
+fetch(#chef_cookbook_version{} = ObjRec, CallbackFun) ->
+    CallbackFun(
+      {find_query(),
+       fields_for_fetch(ObjRec),
+       {first_as_record, [element(1, ObjRec), record_fields()]}
+       }
+      ).

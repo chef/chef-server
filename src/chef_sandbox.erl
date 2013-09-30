@@ -29,6 +29,10 @@
          record_fields/0
         ]).
 
+-export([
+         fetch/2
+         ]).
+
 -ifdef(TEST).
 -compile(export_all).
 -endif.
@@ -125,3 +129,53 @@ find_query() ->
 
 record_fields() ->
     record_info(fields, chef_sandbox).
+
+-spec(fetch(#chef_sandbox{}, chef_object:select_callback()) -> chef_object:select_return()).
+fetch(#chef_sandbox{org_id = OrgId, id = SandboxID}, CallbackFun) ->
+    case CallbackFun({find_sandbox_by_id, [OrgId, SandboxID]}) of
+        Rows when is_list(Rows) ->
+            sandbox_join_rows_to_record(Rows);
+        Other ->
+            Other
+    end.
+
+
+ 
+%% @doc Transforms a collection of proplists representing a sandbox / checksum join query
+%% result and collapses them all into a single sandbox record.  There is a row for each
+%% checksum.  A checksum tuple is extracted from each row; sandbox information is extracted
+%% from the final row (since it's the same in every row).
+%%
+%% See the 'find_sandbox_by_id' prepared query for the row "shape".
+sandbox_join_rows_to_record(Rows) ->
+    sandbox_join_rows_to_record(Rows, []).
+sandbox_join_rows_to_record([LastRow|[]], Checksums) ->
+    C = proplist_to_checksum(LastRow),
+    #chef_sandbox{id = safe_get(<<"sandbox_id">>, LastRow),
+                  org_id = safe_get(<<"org_id">>, LastRow),
+                  created_at = safe_get(<<"created_at">>, LastRow),
+                  checksums = lists:reverse([C|Checksums])};
+sandbox_join_rows_to_record([Row|Rest], Checksums ) ->
+    C = proplist_to_checksum(Row),
+    sandbox_join_rows_to_record(Rest, [C|Checksums]).
+
+%% @doc Safely retrieves a value from a proplist.  Throws an error if the specified key does
+%% not exist in the list.
+-spec safe_get(Key::binary(), Proplist::[{binary(), term()}]) -> term().
+safe_get(Key, Proplist) ->
+    {Key, Value} = lists:keyfind(Key, 1, Proplist),
+    Value.
+
+%% @doc Convenience function for assembling a checksum tuple from a proplist containing
+%% 'checksum' and 'uploaded' keys.
+proplist_to_checksum(Proplist) ->
+    {safe_get(<<"checksum">>, Proplist),
+     %% Normalize boolean representations
+     %% TODO: It would be nice for this transformation to reside in sqerl
+     case safe_get(<<"uploaded">>, Proplist) of
+         0 -> false;
+         1 -> true;
+         true -> true;
+         false -> false
+     end}.
+

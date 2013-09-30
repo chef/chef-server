@@ -54,7 +54,8 @@
         ]).
 
 -export([
-         list/2
+         list/2,
+         fetch/2
          ]).
 
 -ifdef(TEST).
@@ -285,6 +286,15 @@ normalize(NodeEjson) ->
 
 
 list(#chef_node{environment = undefined, org_id = OrgId}, CallbackFun) ->
-    CallbackFun(list_nodes_for_org, [OrgId], [name]);
+    CallbackFun({list_nodes_for_org, [OrgId], [name]});
 list(#chef_node{environment = EnvName, org_id = OrgId}, CallbackFun) ->
-    CallbackFun(list_env_nodes_for_org, [OrgId, EnvName], [name]).
+    CallbackFun({list_env_nodes_for_org, [OrgId, EnvName], [name]}).
+
+-spec(fetch(#chef_node{}, chef_object:select_callback()) -> chef_object:select_return()).
+fetch(#chef_node{} = ObjRec, CallbackFun) ->
+    CallbackFun(
+      {find_query(),
+       fields_for_fetch(ObjRec),
+       {first_as_record, [element(1, ObjRec), record_fields()]}
+       }
+      ).

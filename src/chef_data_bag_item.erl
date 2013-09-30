@@ -53,7 +53,8 @@
         ]).
 
 -export([
-         list/2
+         list/2,
+         fetch/2
          ]).
 
 -ifdef(TEST).
@@ -229,6 +230,15 @@ is_wrapped_item(Ejson) ->
     (undefined =/= ej:get({<<"raw_data">>}, Ejson) andalso
      <<"Chef::DataBagItem">> =:= ej:get({<<"json_class">>}, Ejson)).
 
+-spec(list(#chef_data_bag_item{}, chef_object:select_callback()) -> chef_object:select_return()).
 list(#chef_data_bag_item{org_id = OrgId, data_bag_name = DataBagName}, CallBackFun) ->
-    CallBackFun(list_query(), [OrgId, DataBagName], [item_name]).
+    CallBackFun({list_query(), [OrgId, DataBagName], [item_name]}).
     
+-spec(fetch(#chef_data_bag_item{}, chef_object:select_callback()) -> chef_object:select_return()).
+fetch(#chef_data_bag_item{} = ObjRec, CallbackFun) ->
+    CallbackFun(
+      {find_query(),
+       fields_for_fetch(ObjRec),
+       {first_as_record, [element(1, ObjRec), record_fields()]}
+       }
+      ).

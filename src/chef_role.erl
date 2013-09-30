@@ -52,7 +52,8 @@
         ]).
 
 -export([
-         list/2
+         list/2,
+         fetch/2
          ]).
 
 -ifdef(TEST).
@@ -275,4 +276,14 @@ record_fields() ->
     record_info(fields, chef_role).
 
 list(#chef_role{org_id = OrgId}, CallbackFun) ->
-    CallbackFun(list_query(), [OrgId], [name]).
+    CallbackFun({list_query(), [OrgId], [name]}).
+
+-spec(fetch(#chef_role{}, chef_object:select_callback()) -> chef_object:select_return()).
+fetch(#chef_role{} = ObjRec, CallbackFun) ->
+    CallbackFun(
+      {find_query(),
+       fields_for_fetch(ObjRec),
+       {first_as_record, [element(1, ObjRec), record_fields()]}
+       }
+      ).
+
