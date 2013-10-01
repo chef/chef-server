@@ -35,21 +35,21 @@ make_client(Prefix) ->
 insert_client_data() ->
     Clients = [ make_client(<<"client01">>), make_client(<<"client02">>) ],
     Expected = lists:duplicate(length(Clients), {ok, 1}),
-    Results = [chef_sql_users:create_record(Client) || Client <- Clients ],
+    Results = [itest_util:create_record(Client) || Client <- Clients ],
     ?assertEqual(Expected, Results).
 
 fetch_client_data() ->
     Expected = make_client(<<"client03">>),
 
     % Assume an existing client
-    ?assertEqual({ok, 1}, chef_sql_users:create_record(Expected)),
+    ?assertEqual({ok, 1}, itest_util:create_record(Expected)),
 
-    {ok, Got} = chef_sql_users:fetch_record(Expected),
+    {ok, Got} = itest_util:fetch_record(Expected),
     ?assertEqual(Expected, Got).
 
 bulk_fetch_client_data() ->
   Clients =  [ make_client(<<"client_bulk", Num/binary>>) || Num <- [ <<"0">>, <<"1">>, <<"2">> ] ],
-  [ ?assertEqual({ok, 1}, chef_sql_users:create_record(C)) || C <- Clients ],
+  [ ?assertEqual({ok, 1}, itest_util:create_record(C)) || C <- Clients ],
   Ids = [ C#chef_client.id || C <- Clients ],
   Expected = Clients,
 
@@ -61,11 +61,11 @@ delete_client_data() ->
     Existing = make_client(<<"client04">>),
 
     % Assume an existing client
-    ?assertEqual({ok, 1}, chef_sql_users:create_record(Existing)),
-    {ok, BeforeDelete} = chef_sql_users:fetch_record(Existing),
+    ?assertEqual({ok, 1}, itest_util:create_record(Existing)),
+    {ok, BeforeDelete} = itest_util:fetch_record(Existing),
     ?assertEqual(Existing, BeforeDelete),
 
-    ?assertEqual({ok, 1}, chef_sql_users:delete_record(Existing)),
+    ?assertEqual({ok, 1}, itest_util:delete_record(Existing)),
     % Is {ok, not_found} correct?
     % This is what chef_sql:fetch_object returns
-    ?assertEqual({ok, not_found}, chef_sql_users:fetch_record(Existing)).
+    ?assertEqual({ok, not_found}, itest_util:fetch_record(Existing)).

@@ -30,3 +30,23 @@ other_org_id() ->
 
 set_env(App, Config) ->
     [ok = application:set_env(App, Key, Value) || {Key, Value} <- Config ].
+
+create_record(Record) ->
+    chef_sql:create_object(chef_object:create_query(Record), Record).
+
+fetch_record(Record) ->
+    chef_sql:fetch_object(
+      chef_object:fields_for_fetch(Record),
+      element(1, Record),
+      chef_object:find_query(Record),
+      chef_object:record_fields(Record)
+          ).
+
+update_record(Record) ->
+  chef_sql:do_update(chef_object:update_query(Record), chef_object:fields_for_update(Record)).
+
+delete_record(Record) ->
+    chef_sql:delete_object(chef_object:delete_query(Record), chef_object:id(Record)).
+
+list_records(Record) ->
+    chef_sql:fetch_object_names(Record).

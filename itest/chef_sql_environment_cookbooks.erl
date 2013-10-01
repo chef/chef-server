@@ -41,13 +41,13 @@ environment_cookbooks_test(Description, EnvironmentSpec, NumVersions, Expected) 
     ct:pal("~p", [Description]),
     itest_cookbook_util:cookbook_setup(AllCookbooks),
     FullEnvironment = environment_from_spec(EnvironmentSpec),
-    create_record(FullEnvironment),
-    {ok, PersistedEnvironment} = fetch_record(FullEnvironment),
+    itest_util:create_record(FullEnvironment),
+    {ok, PersistedEnvironment} = itest_util:fetch_record(FullEnvironment),
     {ok, Actual} = chef_sql:fetch_environment_filtered_cookbook_versions(itest_util:the_org_id(),
                                                                          PersistedEnvironment, all, NumVersions),
     ?assertEqual(Expected, Actual),
     itest_cookbook_util:remove_all_cookbooks(),
-    delete_record(FullEnvironment).
+    itest_util:delete_record(FullEnvironment).
 
 
 environment_recipes_test(Description, EnvironmentSpec, Expected) ->
@@ -75,12 +75,12 @@ environment_recipes_test(Description, EnvironmentSpec, Expected) ->
     ct:pal("~p", [Description]),
     itest_cookbook_util:cookbook_setup(AllCookbooks),
     FullEnvironment = environment_from_spec(EnvironmentSpec),
-    create_record(FullEnvironment),
-    {ok, PersistedEnvironment} = fetch_record(FullEnvironment),
+    itest_util:create_record(FullEnvironment),
+    {ok, PersistedEnvironment} = itest_util:fetch_record(FullEnvironment),
     {ok, Actual} = chef_sql:fetch_environment_filtered_recipes(itest_util:the_org_id(), PersistedEnvironment),
     ?assertEqual(Expected, Actual),
     itest_cookbook_util:remove_all_cookbooks(),
-    delete_record(FullEnvironment).
+    itest_util:delete_record(FullEnvironment).
 
 environment_filtered_cookbooks_test(Description, EnvironmentSpec, ResultsSpec) ->
     AllCookbooks = [{<<"one">>, [
@@ -100,8 +100,8 @@ environment_filtered_cookbooks_test(Description, EnvironmentSpec, ResultsSpec) -
     ct:pal("~p", [Description]),
     itest_cookbook_util:cookbook_setup(AllCookbooks),
     FullEnvironment = environment_from_spec(EnvironmentSpec),
-    create_record(FullEnvironment),
-    {ok, PersistedEnvironment} = fetch_record(FullEnvironment),
+    itest_util:create_record(FullEnvironment),
+    {ok, PersistedEnvironment} = itest_util:fetch_record(FullEnvironment),
 
     lists:map(fun({CookbookName, NumToVersions}) ->
                       lists:map(fun({NumVersions, Versions}) ->
@@ -114,7 +114,7 @@ environment_filtered_cookbooks_test(Description, EnvironmentSpec, ResultsSpec) -
               end,
               ResultsSpec),
     itest_cookbook_util:remove_all_cookbooks(),
-    delete_record(FullEnvironment).
+    itest_util:delete_record(FullEnvironment).
 
 environment_cookbooks_specs() ->
     [
@@ -376,24 +376,3 @@ environment_name_from_prefix(Prefix) ->
 %% function, instead
 default_date() ->
     {datetime, {{2011,10,1},{16,47,46}}}.
-
-
-update_record(Record) ->
-  chef_sql:do_update(chef_object:update_query(Record), chef_object:fields_for_update(Record)).
-
-fetch_record(Record) ->
-    chef_sql:fetch_object(
-      chef_object:fields_for_fetch(Record),
-      element(1, Record),
-      chef_object:find_query(Record),
-      chef_object:record_fields(Record)
-          ).
-
-create_record(Record) -> chef_sql:create_object(chef_object:create_query(Record), Record).
-
-delete_record(Record) ->
-    chef_sql:delete_object(chef_object:delete_query(Record), chef_object:id(Record)).
-
-
-list_records(Record) ->
-    chef_sql:fetch_object_names(Record).
