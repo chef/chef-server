@@ -678,8 +678,7 @@ statements() ->
     {ok, Statements} = file:consult(Path),
     Statements.
 
-%% Sandbox Operations
-
+-spec(fetch(chef_object:object_rec()) -> chef_object:object_rec()).
 fetch(Record) ->
     chef_object:fetch(Record, fun select_rows/1).
 
