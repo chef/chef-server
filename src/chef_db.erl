@@ -71,7 +71,6 @@
 
          %% Sandbox ops
          make_sandbox/4,
-         fetch_sandbox/3,
          commit_sandbox/2,
 
 
@@ -298,24 +297,6 @@ fetch_requestor(Context, OrgId, ClientName) ->
             Client
     end.
 
-%% Currently, this is only used internally, but will be useful for future enhancements to
-%% the sandboxes protocol that allow for partial progress monitoring (e.g., upload a few
-%% files, retrieve the current state of the sandbox, upload a few more, etc.)
--spec fetch_sandbox(DbContext::#context{},
-                    OrgName :: binary() | {id, binary()},
-                    SandboxId::object_id()) -> #chef_sandbox{} |
-                                               not_found |
-                                               {error, any()}.
-fetch_sandbox(#context{} = Ctx, {id, OrgId}, SandboxId) ->
-    fetch(#chef_sandbox{org_id = OrgId, id = SandboxId}, Ctx);
-fetch_sandbox(#context{}=Ctx, OrgName, SandboxId) ->
-    case fetch_org_id(Ctx, OrgName) of
-        not_found ->
-            not_found;
-        OrgId ->
-            fetch_sandbox(Ctx, {id, OrgId}, SandboxId)
-    end.
-
 %% @doc Saves sandbox information for a new sandbox in the database, and returns a
 %% chef_sandbox record representing the new sandbox.  This is a different pattern from other
 %% Chef objects, because the creation of a record for the object requires data that the
@@ -343,7 +324,7 @@ make_sandbox(#context{}=Ctx, OrgName, ActorId, Checksums) ->
             case create_object(Ctx, create_sandbox, TempSandbox, ActorId) of
                 ok ->
                     %% this sandbox will know if the checksums have been uploaded
-                    fetch_sandbox(Ctx, OrgName, Id);
+                    fetch(TempSandbox, Ctx);
                 {conflict, Msg} ->
                     {conflict, Msg};
                 {error, Why} ->

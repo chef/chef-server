@@ -85,7 +85,6 @@
 
          %% Sandbox Ops
          create_sandbox/1,
-         fetch_sandbox/2,
          delete_sandbox/1,
 
          sql_now/0,
@@ -681,11 +680,9 @@ statements() ->
 
 %% Sandbox Operations
 
-fetch_sandbox(OrgId, SandboxID) ->
-    chef_object:fetch(#chef_sandbox{org_id = OrgId, id = SandboxID}, fun select_rows/1).
-
 fetch(Record) ->
     chef_object:fetch(Record, fun select_rows/1).
+
 -spec select_rows(
         {Query :: atom(), BindParameters :: list() } |
         {Query :: atom(), BindParameters :: list(),
