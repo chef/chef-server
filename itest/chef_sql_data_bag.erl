@@ -28,18 +28,18 @@ data_bags() ->
 
 insert_data_bag_data() ->
     Expected = lists:duplicate(length(data_bags()), {ok, 1}),
-    Results = [chef_sql:create_data_bag(Bag) || Bag <- data_bags() ],
+    Results = [itest_util:create_record(Bag) || Bag <- data_bags() ],
     ?assertEqual(Expected, Results).
 
 fetch_data_bags() ->
     DBS = data_bags(),
     Expected = [ Db#chef_data_bag.name || Db <- DBS, Db#chef_data_bag.org_id =:= itest_util:the_org_id() ],
-    {ok, Results} = chef_sql:fetch_data_bags(itest_util:the_org_id()),
+    Results = itest_util:list_records(hd(DBS)),
     ?assertEqual(Expected, Results).
 
 fetch_data_bag() ->
     Db = hd(data_bags()),
-    {ok, Got} = chef_sql:fetch_data_bag(Db#chef_data_bag.org_id, Db#chef_data_bag.name),
+    {ok, Got} = itest_util:fetch_record(Db),
     ?assertEqual(Db, Got).
 
 %% bulk_get_data_bags() ->
@@ -54,9 +54,8 @@ fetch_data_bag() ->
 
 delete_data_bag() ->
     First = hd(data_bags()),
-    ?assertEqual({ok, 1}, chef_sql:delete_data_bag(First#chef_data_bag.id)),
+    ?assertEqual({ok, 1}, itest_util:delete_record(First)),
     %% verify data is gone
-    ?assertEqual({ok, not_found}, chef_sql:fetch_data_bag(First#chef_data_bag.org_id,
-                                                          First#chef_data_bag.name)),
+    ?assertEqual({ok, not_found}, itest_util:fetch_record(First)),
     %% deleting a non existing data bag is OK
-    ?assertEqual({ok, not_found}, chef_sql:delete_data_bag(First#chef_data_bag.id)).
+    ?assertEqual({ok, not_found}, itest_util:delete_record(First)).

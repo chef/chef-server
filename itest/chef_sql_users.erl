@@ -46,62 +46,59 @@ chef_user_record(AzId, Admin) ->
 insert_user_data() ->
   Users = [make_user(<<"user01">>), make_user(<<"user02">>)],
   Expected = lists:duplicate(length(Users), {ok, 1}),
-  Results = [chef_sql:create_user(User) || User <- Users ],
+  Results = [itest_util:create_record(User) || User <- Users],
   ?assertEqual(Expected, Results).
+
 
 
 fetch_user_data() ->
   Expected = make_user(<<"user03">>),
-  Username = Expected#chef_user.username,
   %% Make sure client create succeeds
-  ?assertEqual({ok, 1}, chef_sql:create_user(Expected)),
-  {ok, Result} = chef_sql:fetch_user(Username),
+  ?assertEqual({ok, 1}, itest_util:create_record(Expected)),
+  {ok, Result} = itest_util:fetch_record(Expected),
   ?assertEqual(Expected, Result).
 
 fetch_user_list() ->
   Users = [make_user(<<"user04">>), make_user(<<"user05">>)],
   CreatedResults = lists:duplicate(length(Users), {ok, 1}),
-  Created = [chef_sql:create_user(User) || User <- Users ],
+  Created = [itest_util:create_record(User) || User <- Users ],
   ?assertEqual(CreatedResults, Created),
-  Results = chef_sql:fetch_users(),
-  Expected = {ok, [ User#chef_user.username || User <- Users ]},
+  Results = itest_util:list_records(#chef_user{}),
+  Expected = [ User#chef_user.username || User <- Users ],
   ?assertEqual(Expected, Results).
 
 delete_user_data() ->
   User = make_user(<<"user06">>),
-  Username = User#chef_user.username,
-  ?assertEqual({ok, 1}, chef_sql:create_user(User)),
-  Result = chef_sql:delete_user(Username),
+  ?assertEqual({ok, 1}, itest_util:create_record(User)),
+  Result = itest_util:delete_record(User),
   ?assertEqual({ok, 1}, Result),
-  Result1 = chef_sql:fetch_user(Username),
-  ?assertEqual({ok, not_found}, Result1).
+  {ok, Result1} = itest_util:fetch_record(User),
+  ?assertEqual(not_found, Result1).
 
 update_user_data() ->
   User = make_user(<<"user07">>),
-  Username = User#chef_user.username,
-  ?assertEqual({ok, 1}, chef_sql:create_user(User)),
+  ?assertEqual({ok, 1}, itest_util:create_record(User)),
 
   % Is the user really a non-admin?
-  {ok, CreatedUser} = chef_sql:fetch_user(Username),
+  {ok, CreatedUser} = itest_util:fetch_record(User),
   ?assertEqual(false, CreatedUser#chef_user.admin),
 
   % Make user an admin
   UpdatedUserData = User#chef_user{ admin = true },
-  Result = chef_sql:update_user(UpdatedUserData),
+  Result = itest_util:update_record(UpdatedUserData),
   ?assertEqual({ok, 1}, Result),
 
   % Is the user really an admin?
-  {ok, PersistedUser} = chef_sql:fetch_user(Username),
+  {ok, PersistedUser} = itest_util:fetch_record(User),
   ?assertEqual(true, PersistedUser#chef_user.admin),
 
   %% Cleanup admin user so count_admin_users() tests will work
-  chef_sql:delete_user(Username).
+  chef_sql:delete_object(chef_object:delete_query(UpdatedUserData), chef_object:id(UpdatedUserData)).
 
 count_admin_users() ->
   User = make_admin_user(<<"user08">>),
-  ?assertEqual({ok, 1}, chef_sql:create_user(User)),
+  ?assertEqual({ok, 1}, itest_util:create_record(User)),
   ?assertEqual({ok, 1}, chef_sql:count_user_admins()),
   User2 = make_admin_user(<<"user09">>),
-  ?assertEqual({ok, 1}, chef_sql:create_user(User2)),
+  ?assertEqual({ok, 1}, itest_util:create_record(User2)),
   ?assertEqual({ok, 2}, chef_sql:count_user_admins()).
-

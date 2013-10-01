@@ -41,13 +41,13 @@ environment_cookbooks_test(Description, EnvironmentSpec, NumVersions, Expected) 
     ct:pal("~p", [Description]),
     itest_cookbook_util:cookbook_setup(AllCookbooks),
     FullEnvironment = environment_from_spec(EnvironmentSpec),
-    add_environment_to_db(FullEnvironment),
-    EnvName = FullEnvironment#chef_environment.name,
+    itest_util:create_record(FullEnvironment),
+    {ok, PersistedEnvironment} = itest_util:fetch_record(FullEnvironment),
     {ok, Actual} = chef_sql:fetch_environment_filtered_cookbook_versions(itest_util:the_org_id(),
-                                                                         EnvName, all, NumVersions),
+                                                                         PersistedEnvironment, all, NumVersions),
     ?assertEqual(Expected, Actual),
     itest_cookbook_util:remove_all_cookbooks(),
-    destroy_environment(FullEnvironment).
+    itest_util:delete_record(FullEnvironment).
 
 
 environment_recipes_test(Description, EnvironmentSpec, Expected) ->
@@ -75,12 +75,12 @@ environment_recipes_test(Description, EnvironmentSpec, Expected) ->
     ct:pal("~p", [Description]),
     itest_cookbook_util:cookbook_setup(AllCookbooks),
     FullEnvironment = environment_from_spec(EnvironmentSpec),
-    add_environment_to_db(FullEnvironment),
-    EnvName = FullEnvironment#chef_environment.name,
-    {ok, Actual} = chef_sql:fetch_environment_filtered_recipes(itest_util:the_org_id(), EnvName),
+    itest_util:create_record(FullEnvironment),
+    {ok, PersistedEnvironment} = itest_util:fetch_record(FullEnvironment),
+    {ok, Actual} = chef_sql:fetch_environment_filtered_recipes(itest_util:the_org_id(), PersistedEnvironment),
     ?assertEqual(Expected, Actual),
     itest_cookbook_util:remove_all_cookbooks(),
-    destroy_environment(FullEnvironment).
+    itest_util:delete_record(FullEnvironment).
 
 environment_filtered_cookbooks_test(Description, EnvironmentSpec, ResultsSpec) ->
     AllCookbooks = [{<<"one">>, [
@@ -100,13 +100,13 @@ environment_filtered_cookbooks_test(Description, EnvironmentSpec, ResultsSpec) -
     ct:pal("~p", [Description]),
     itest_cookbook_util:cookbook_setup(AllCookbooks),
     FullEnvironment = environment_from_spec(EnvironmentSpec),
-    add_environment_to_db(FullEnvironment),
+    itest_util:create_record(FullEnvironment),
+    {ok, PersistedEnvironment} = itest_util:fetch_record(FullEnvironment),
 
-    EnvName = FullEnvironment#chef_environment.name,
     lists:map(fun({CookbookName, NumToVersions}) ->
                       lists:map(fun({NumVersions, Versions}) ->
                                         {ok, Actual} = chef_sql:fetch_environment_filtered_cookbook_versions(itest_util:the_org_id(),
-                                                                                                             EnvName, CookbookName,
+                                                                                                             PersistedEnvironment, CookbookName,
                                                                                                              NumVersions),
                                         ?assertEqual([{CookbookName, Versions}], Actual)
                                 end,
@@ -114,11 +114,11 @@ environment_filtered_cookbooks_test(Description, EnvironmentSpec, ResultsSpec) -
               end,
               ResultsSpec),
     itest_cookbook_util:remove_all_cookbooks(),
-    destroy_environment(FullEnvironment).
+    itest_util:delete_record(FullEnvironment).
 
 environment_cookbooks_specs() ->
     [
-     {"multiple cookbooks, no environment constraints, one version",
+     {"[environment cookbooks] multiple cookbooks, no environment constraints, one version",
       <<"testing">>,
       1,
       [{<<"cookbook_one">>, [<<"3.0.0">>]},
@@ -127,7 +127,7 @@ environment_cookbooks_specs() ->
       ]
      },
 
-     {"multiple cookbooks, no environment constraints, all versions",
+     {"[environment cookbooks] multiple cookbooks, no environment constraints, all versions",
       <<"testing">>,
       all,
       [{<<"cookbook_one">>, [<<"3.0.0">>, <<"2.0.0">>]},
@@ -136,7 +136,7 @@ environment_cookbooks_specs() ->
       ]
      },
 
-     {"multiple cookbooks, no environment constraints, no versions",
+     {"[environment cookbooks] multiple cookbooks, no environment constraints, no versions",
       <<"testing">>,
       0,
       [{<<"cookbook_one">>, []},
@@ -145,7 +145,7 @@ environment_cookbooks_specs() ->
       ]
      },
 
-     {"multiple cookbooks, environment constraints, no versions",
+     {"[environment cookbooks] multiple cookbooks, environment constraints, no versions",
       {<<"testing">>, [{cookbook_versions, [{<<"cookbook_one">>, <<"> 1.0.0">>},
                                             {<<"cookbook_two">>, <<"< 1.2.3">>}]}]},
       0,
@@ -155,7 +155,7 @@ environment_cookbooks_specs() ->
       ]
      },
 
-     {"multiple cookbooks, environment constraints, one version",
+     {"[environment cookbooks] multiple cookbooks, environment constraints, one version",
       {<<"testing">>, [{cookbook_versions, [{<<"cookbook_one">>, <<"> 1.0.0">>},
                                             {<<"cookbook_two">>, <<"< 1.2.3">>}]}]},
       1,
@@ -165,7 +165,7 @@ environment_cookbooks_specs() ->
       ]
      },
 
-     {"multiple cookbooks, different constraints, one version",
+     {"[environment cookbooks] multiple cookbooks, different constraints, one version",
       {<<"testing">>, [{cookbook_versions, [{<<"cookbook_one">>, <<"< 2.5.0">>},
                                             {<<"cookbook_three">>, <<"= 0.5.0">>}]}]},
       1,
@@ -175,7 +175,7 @@ environment_cookbooks_specs() ->
       ]
      },
 
-     {"multiple cookbooks, different constraints (completely removing one cookbook), one version",
+     {"[environment cookbooks] multiple cookbooks, different constraints (completely removing one cookbook), one version",
       {<<"testing">>, [{cookbook_versions, [{<<"cookbook_one">>, <<"= 6.6.6">>},
                                             {<<"cookbook_three">>, <<"= 0.5.0">>}]}]},
       1,
@@ -187,7 +187,7 @@ environment_cookbooks_specs() ->
 
 environment_recipes_specs() ->
     [
-     {"multiple cookbooks, no environment constraints",
+     {"[environment recipes] multiple cookbooks, no environment constraints",
       <<"testing">>,
       [
        <<"cookbook_one::foo">>,
@@ -198,7 +198,7 @@ environment_recipes_specs() ->
        <<"cookbook_two::baz">>
       ]
      },
-     {"multiple cookbooks, environment constraints",
+     {"[environment recipes] multiple cookbooks, environment constraints",
       {<<"testing">>, [{cookbook_versions, [{<<"cookbook_one">>, <<"> 1.0.0">>},
                                             {<<"cookbook_two">>, <<"< 1.2.3">>}]}]},
       [
@@ -211,7 +211,7 @@ environment_recipes_specs() ->
       ]
      },
 
-     {"multiple cookbooks, different constraints",
+     {"[environment recipes] multiple cookbooks, different constraints",
       {<<"testing">>, [{cookbook_versions, [{<<"cookbook_one">>, <<"< 2.5.0">>},
                                             {<<"cookbook_three">>, <<"= 0.5.0">>}]}]},
       [
@@ -224,7 +224,7 @@ environment_recipes_specs() ->
       ]
      },
 
-     {"multiple cookbooks, different constraints (completely removing one cookbook)",
+     {"[environment recipes] multiple cookbooks, different constraints (completely removing one cookbook)",
       {<<"testing">>, [{cookbook_versions, [{<<"cookbook_one">>, <<"= 6.6.6">>},
                                             {<<"cookbook_three">>, <<"= 0.5.0">>}]}]},
       [
@@ -234,7 +234,7 @@ environment_recipes_specs() ->
        <<"cookbook_two::baz">>
       ]
      },
-     {"multiple cookbooks, different constraints (completely removing all cookbooks)",
+     {"[environment recipes] multiple cookbooks, different constraints (completely removing all cookbooks)",
       {<<"testing">>, [{cookbook_versions, [{<<"cookbook_one">>, <<"= 6.6.6">>},
                                             {<<"cookbook_two">>, <<"= 6.6.6">>},
                                             {<<"cookbook_three">>, <<"= 6.6.6">>}]}]},
@@ -244,7 +244,7 @@ environment_recipes_specs() ->
 
 environment_filtered_cookbooks_spec() ->
     [
-     {"no environment constraints",
+     {"[environment filtered] no environment constraints",
       <<"testing">>,
       [{<<"cookbook_one">>, [{0, []},
                              {1, [<<"3.0.0">>]},
@@ -264,7 +264,7 @@ environment_filtered_cookbooks_spec() ->
                                {all, [<<"1.0.0">>, <<"0.5.0">>, <<"0.0.1">>]}]}]
      },
 
-     {"Add environment constraints that are functionally equivalenat to no constraints",
+     {"[environment filtered] Add environment constraints that are functionally equivalenat to no constraints",
       {<<"testing">>, [{cookbook_versions, [{<<"cookbook_one">>, <<"> 1.0.0">>},
                                             {<<"cookbook_two">>, <<"< 1.2.3">>}]}]},
       [{<<"cookbook_one">>, [{0, []},
@@ -284,7 +284,7 @@ environment_filtered_cookbooks_spec() ->
                                {4, [<<"1.0.0">>, <<"0.5.0">>, <<"0.0.1">>]},
                                {all, [<<"1.0.0">>, <<"0.5.0">>, <<"0.0.1">>]}]}]
      },
-     {"Try different constraints",
+     {"[environment filtered] Try different constraints",
       {<<"testing">>, [{cookbook_versions, [{<<"cookbook_one">>, <<"< 2.5.0">>},
                                             {<<"cookbook_three">>, <<"= 0.5.0">>}]}]},
       [{<<"cookbook_one">>, [{0, []},
@@ -305,7 +305,7 @@ environment_filtered_cookbooks_spec() ->
                                {all, [<<"0.5.0">>]}]}]
      },
 
-     {"Try different constraints (completely removing one cookbook)",
+     {"[environment filtered] Try different constraints (completely removing one cookbook)",
       {<<"testing">>, [{cookbook_versions, [{<<"cookbook_one">>, <<"= 6.6.6">>},
                                             {<<"cookbook_three">>, <<"= 0.5.0">>}]}]},
       [{<<"cookbook_one">>, [{0, []},
@@ -326,12 +326,6 @@ environment_filtered_cookbooks_spec() ->
                                {all, [<<"0.5.0">>]}]}]
      }
     ].
-
-add_environment_to_db(#chef_environment{}=Environment) ->
-    chef_sql:create_environment(Environment).
-
-destroy_environment(#chef_environment{id=Id}) ->
-    chef_sql:delete_environment(Id).
 
 environment_from_spec({Prefix, Properties}) ->
     make_environment(Prefix, Properties);

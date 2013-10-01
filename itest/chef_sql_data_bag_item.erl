@@ -28,22 +28,21 @@ data_bag_items() ->
 
 insert_data_bag_item_data() ->
     Expected = lists:duplicate(length(data_bag_items()), {ok, 1}),
-    Results = [chef_sql:create_data_bag_item(Bag) || Bag <- data_bag_items() ],
+    Results = [itest_util:create_record(Bag) || Bag <- data_bag_items() ],
     ?assertEqual(Expected, Results).
 
 fetch_data_bag_items() ->
     DBS = data_bag_items(),
     Expected = [ Db#chef_data_bag_item.item_name || Db <- DBS, Db#chef_data_bag_item.org_id =:= itest_util:the_org_id(),
                                                     Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">> ],
-    {ok, Results} = chef_sql:fetch_data_bag_items(itest_util:the_org_id(), <<"data_bag_02">>),
+    Results = itest_util:list_records(hd(DBS)),
     ?assertEqual(Expected, Results).
 
 fetch_data_bag_item()->
     Item = hd(data_bag_items()),
 
-    {ok, Got} = chef_sql:fetch_data_bag_item(Item#chef_data_bag_item.org_id,
-                                             Item#chef_data_bag_item.data_bag_name,
-                                             Item#chef_data_bag_item.item_name),
+    {ok, Got} = itest_util:fetch_record(Item),
+
     ?assertEqual(Item, Got).
 
 fetch_data_bag_item_ids() ->
@@ -63,16 +62,16 @@ update_data_bag_item()->
                      Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">>],
     NewData = <<"new object">>,
     New = Old#chef_data_bag_item{serialized_object= NewData},
-    {ok, UResults} = chef_sql:update_data_bag_item(New),
+    {ok, UResults} = itest_util:update_record(New),
     ?assertEqual(1, UResults),
-    {ok, FResults} = chef_sql:fetch_data_bag_item(itest_util:the_org_id(), New#chef_data_bag_item.data_bag_name, New#chef_data_bag_item.item_name),
+    {ok, FResults} = itest_util:fetch_record(Old),
     ?assertEqual(NewData,
                  (FResults#chef_data_bag_item.serialized_object)).
 
 
 delete_data_bag_item()->
     Item = hd(data_bag_items()),
-    {ok, DResults} = chef_sql:delete_data_bag_item(Item#chef_data_bag_item.id),
+    {ok, DResults} = itest_util:delete_record(Item),
     ?assertEqual(1, DResults),
-    {ok, FResults} = chef_sql:fetch_data_bag_item(Item#chef_data_bag_item.org_id, Item#chef_data_bag_item.data_bag_name, Item#chef_data_bag_item.item_name),
+    {ok, FResults} = itest_util:fetch_record(Item),
     ?assertEqual(not_found, FResults).
