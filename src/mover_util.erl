@@ -40,8 +40,8 @@ reset_org(OrgName, Line) when is_binary(OrgName) ->
             case moser_acct_processor:get_org_guid_by_name(OrgName, Acct) of
                 not_found ->
                     org_reset_error(OrgName, Line, "org does not exist in account table");
-                GUID ->
-                    moser_chef_converter:cleanup_orgid(GUID)
+                _GUID ->
+                    ok
             end;
         Other ->
             org_reset_error(OrgName, Line, Other)
