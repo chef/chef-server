@@ -67,25 +67,9 @@ delete(DbContext, Object, RequestorId) ->
 %% last cookbook_version of a given name is being deleted, and otherwise deletes the authz
 %% object as desired. If an error is returned by the `chef_db:delete_*` call, this function
 %% throws a `{delete_from_db, {error, Why}}' tuple.
-delete_from_db(DbContext, RequestorId, #chef_client{}=Client) ->
-    maybe_delete_authz_id_or_error(chef_db:delete_client(DbContext, Client),
-                                   Client, RequestorId);
-delete_from_db(DbContext, RequestorId, #chef_node{}=Node) ->
-    maybe_delete_authz_id_or_error(chef_db:delete_node(DbContext, Node), Node, RequestorId);
-delete_from_db(DbContext, RequestorId, #chef_role{}=Role) ->
-    maybe_delete_authz_id_or_error(chef_db:delete_role(DbContext, Role), Role, RequestorId);
-delete_from_db(DbContext, RequestorId, #chef_environment{}=Environment) ->
-    maybe_delete_authz_id_or_error(chef_db:delete_environment(DbContext, Environment),
-                                   Environment, RequestorId);
-delete_from_db(DbContext, RequestorId, #chef_data_bag{}=DataBag) ->
-    maybe_delete_authz_id_or_error(chef_db:delete_data_bag(DbContext, DataBag),
-                                   DataBag, RequestorId);
-delete_from_db(DbContext, RequestorId, #chef_data_bag_item{}=DataBagItem) ->
-    maybe_delete_authz_id_or_error(chef_db:delete_data_bag_item(DbContext, DataBagItem),
-                                   DataBagItem, RequestorId);
-delete_from_db(DbContext, RequestorId, #chef_cookbook_version{}=CBVersion) ->
-    maybe_delete_authz_id_or_error(chef_db:delete_cookbook_version(DbContext, CBVersion),
-                                   CBVersion, RequestorId).
+delete_from_db(DbContext, RequestorId, ObjectRec) ->
+    maybe_delete_authz_id_or_error(chef_db:delete(ObjectRec, DbContext),
+                                   ObjectRec, RequestorId).
 
 -spec maybe_delete_authz_id_or_error(Status, Object, RequestorId) -> ok | not_found when
       Status :: {ok, 1 | 2} | not_found | {error, _},
