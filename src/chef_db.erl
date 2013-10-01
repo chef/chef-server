@@ -193,22 +193,11 @@ delete(ObjectRec, #context{reqid = ReqId}) ->
                    object_rec() |
                    not_found |
                    {error, term()}.
-fetch(#chef_sandbox{} = ObjectRec, #context{reqid = ReqId}) ->
+fetch(ObjectRec, #context{reqid = ReqId}) ->
     stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
                                   chef_sql:fetch(ObjectRec)
-                          end);
-fetch(ObjectRec, #context{reqid = ReqId}) ->
-    RecordType = element(1, ObjectRec), %% record type is not the same as type name :(
-    QueryName = chef_object:find_query(ObjectRec),
-    Keys = chef_object:fields_for_fetch(ObjectRec),
-    RecordFields = chef_object:record_fields(ObjectRec),
-    case stats_hero:ctime(ReqId, {chef_sql, fetch_object},
-                          fun() -> chef_sql:fetch_object(Keys, RecordType, QueryName, RecordFields) end) of
-        {ok, not_found} -> not_found;
-        {ok, Object} -> Object;
-        {error, _Why} = Error -> Error
-    end.
+                          end).
 
 -spec list(object_rec(), #context{}) -> [binary()] | {error, _}.
 list(StubRec, #context{reqid = ReqId} = _Ctx) ->

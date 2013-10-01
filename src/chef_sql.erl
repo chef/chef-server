@@ -695,11 +695,20 @@ fetch(Record) ->
                                     {error, term()}.
 
 select_rows({Query, BindParameters}) ->
-    sqerl:select(Query, BindParameters);
+    match_result(sqerl:select(Query, BindParameters));
 select_rows({Query, BindParameters, Transform}) when is_tuple(Transform) ->
-    sqerl:select(Query, BindParameters, Transform);
+    match_result(sqerl:select(Query, BindParameters, Transform));
 select_rows({Query, BindParameters, Fields = [_|_]}) ->
-    sqerl:select(Query, BindParameters, rows_as_scalars, Fields).
+    match_result(sqerl:select(Query, BindParameters, rows_as_scalars, Fields)).
+
+match_result({ok, none}) ->
+    not_found;
+match_result({ok, Result}) ->
+    Result;
+match_result({error, _} = Error) ->
+    Error.
+
+
 
 create_sandbox(#chef_sandbox{} = Sandbox) ->
     create_object(Sandbox).
@@ -777,9 +786,9 @@ query_and_txfm_for_record(fetch_latest, chef_cookbook_version) ->
 %% @doc Return list of object names for a object record
 fetch_object_names(StubRec) ->
     case chef_object:list(StubRec, fun select_rows/1) of
-        {ok, L} when is_list(L) ->
+        L when is_list(L) ->
             L;
-        {ok, none} ->
+        not_found ->
             [];
         {error, _} = Error->
             Error
