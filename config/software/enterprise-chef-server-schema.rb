@@ -1,5 +1,5 @@
 name "enterprise-chef-server-schema"
-version "2.0.0"
+version "2.2.1"
 
 # Note that if you need changes that came in for the base schema (the
 # one shared with Open Source Chef Server), you'll need to explicitly
