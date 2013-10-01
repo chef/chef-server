@@ -69,10 +69,10 @@ auth_info(Req, State) ->
 %% Org is checked for in malformed_request/2, sandbox is checked for in forbidden/2;
 %% if we get this far, it exists.
 resource_exists(Req, #base_state{chef_db_context = DbContext,
-                                 organization_name = OrgName,
+                                 organization_guid = OrgId,
                                  resource_state = SandboxState} = State) ->
     SandboxId = chef_wm_util:object_name(sandbox, Req),
-    case chef_db:fetch_sandbox(DbContext, OrgName, SandboxId) of
+    case chef_db:fetch(#chef_sandbox{org_id = OrgId, id = SandboxId}, DbContext) of
         not_found ->
             Message = chef_wm_util:not_found_message(sandbox, SandboxId),
             Req1 = chef_wm_util:set_json_body(Req, Message),
