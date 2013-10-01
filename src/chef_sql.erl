@@ -41,6 +41,7 @@
          do_update/2,
          fetch_object/4,
          fetch_object_names/1,
+         fetch/1,
 
          %%user ops
          count_user_admins/0,
@@ -681,14 +682,24 @@ statements() ->
 %% Sandbox Operations
 
 fetch_sandbox(OrgId, SandboxID) ->
-    case sqerl:select(find_sandbox_by_id, [OrgId, SandboxID]) of
-        {ok, Rows} when is_list(Rows) ->
-            {ok, sandbox_join_rows_to_record(Rows)};
-        {ok, none} ->
-            {ok, not_found};
-        {error, Error} ->
-            {error, Error}
-    end.
+    chef_object:fetch(#chef_sandbox{org_id = OrgId, id = SandboxID}, fun select_rows/1).
+
+fetch(Record) ->
+    chef_object:fetch(Record, fun select_rows/1).
+-spec select_rows(
+        {Query :: atom(), BindParameters :: list() } |
+        {Query :: atom(), BindParameters :: list(),
+                             Fields :: list(atom())}) ->
+                                    {ok, none} |
+                                    {ok, list()} |
+                                    {error, term()}.
+
+select_rows({Query, BindParameters}) ->
+    sqerl:select(Query, BindParameters);
+select_rows({Query, BindParameters, Transform}) when is_tuple(Transform) ->
+    sqerl:select(Query, BindParameters, Transform);
+select_rows({Query, BindParameters, Fields = [_|_]}) ->
+    sqerl:select(Query, BindParameters, rows_as_scalars, Fields).
 
 create_sandbox(#chef_sandbox{} = Sandbox) ->
     create_object(Sandbox).
@@ -765,7 +776,7 @@ query_and_txfm_for_record(fetch_latest, chef_cookbook_version) ->
                            [binary()] | {error, term()}.
 %% @doc Return list of object names for a object record
 fetch_object_names(StubRec) ->
-    case chef_object:list(StubRec, fun select_rows_as_scalars/3) of
+    case chef_object:list(StubRec, fun select_rows/1) of
         {ok, L} when is_list(L) ->
             L;
         {ok, none} ->
@@ -773,15 +784,6 @@ fetch_object_names(StubRec) ->
         {error, _} = Error->
             Error
     end.
-
--spec select_rows_as_scalars(QueryName :: atom(),
-                             Args :: list(),
-                             SelectedFields :: list(atom())) ->
-                                    {ok, none} |
-                                    {ok, list()} |
-                                    {error, term()}.
-select_rows_as_scalars(QueryName, Args, SelectedFields) ->
-    sqerl:select(QueryName, Args, rows_as_scalars, SelectedFields).
 
 -spec bulk_get_objects(chef_type(),
                        [binary()]) ->
@@ -965,44 +967,6 @@ do_update(QueryName, UpdateFields) ->
             Error
     end.
 
-
-%% @doc Safely retrieves a value from a proplist.  Throws an error if the specified key does
-%% not exist in the list.
--spec safe_get(Key::binary(), Proplist::[{binary(), term()}]) -> term().
-safe_get(Key, Proplist) ->
-    {Key, Value} = lists:keyfind(Key, 1, Proplist),
-    Value.
-
-%% @doc Transforms a collection of proplists representing a sandbox / checksum join query
-%% result and collapses them all into a single sandbox record.  There is a row for each
-%% checksum.  A checksum tuple is extracted from each row; sandbox information is extracted
-%% from the final row (since it's the same in every row).
-%%
-%% See the 'find_sandbox_by_id' prepared query for the row "shape".
-sandbox_join_rows_to_record(Rows) ->
-    sandbox_join_rows_to_record(Rows, []).
-sandbox_join_rows_to_record([LastRow|[]], Checksums) ->
-    C = proplist_to_checksum(LastRow),
-    #chef_sandbox{id = safe_get(<<"sandbox_id">>, LastRow),
-                  org_id = safe_get(<<"org_id">>, LastRow),
-                  created_at = safe_get(<<"created_at">>, LastRow),
-                  checksums = lists:reverse([C|Checksums])};
-sandbox_join_rows_to_record([Row|Rest], Checksums ) ->
-    C = proplist_to_checksum(Row),
-    sandbox_join_rows_to_record(Rest, [C|Checksums]).
-
-%% @doc Convenience function for assembling a checksum tuple from a proplist containing
-%% 'checksum' and 'uploaded' keys.
-proplist_to_checksum(Proplist) ->
-    {safe_get(<<"checksum">>, Proplist),
-     %% Normalize boolean representations
-     %% TODO: It would be nice for this transformation to reside in sqerl
-     case safe_get(<<"uploaded">>, Proplist) of
-         0 -> false;
-         1 -> true;
-         true -> true;
-         false -> false
-     end}.
 
 
 %% @doc Inserts sandboxed checksum records into the database.  All records are timestamped
