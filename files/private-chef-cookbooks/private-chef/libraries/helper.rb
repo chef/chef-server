@@ -53,6 +53,39 @@ class OmnibusHelper
     File.exists?(bootstrap_sentinel_file)
   end
 
+  # Parse a config string as a memory value returning an integer in MB
+  # units.  Supported inputs (not case sensitive) are B, K/Kb, M/Mb,
+  # G/Gb. Uses integer division so values in B and Kb must exceed 1Mb.
+  def self.parse_mem_to_mb(mem_str)
+    if mem_str.is_a?(Integer)
+      return mem_str
+    end
+    regex = /(\d+)([GgmMkKbB]{0,2})/
+    m  = regex.match(mem_str)
+    raise "bad arg" if !m
+    raw_value = m[1].to_i
+    units = m[2]
+    value = case units
+            when /^b$/i
+              raw_value / (1024 * 1024)
+            when /^kb?$/i
+              raw_value / 1024
+            when /^mb?$/i
+              raw_value
+            when ""                       # no units, assume Mb
+              raw_value
+            when /^gb?$/i
+              raw_value * 1024
+            else
+              raise "unsupported memory units: #{mem_str}"
+            end
+    if value > 0
+      value
+    else
+      raise "zero Mb value not allowed: #{mem_str}"
+    end
+  end
+
   # generate a certificate signed by the opscode ca key
   #
   # === Returns

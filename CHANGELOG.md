@@ -68,6 +68,7 @@
   backend.
 * Introduce pluggable HA architecture as an alternative to DRBD
 * [OC-11673] Tune PostgreSQL keepalive timeouts
+* [OC-10117] opscode-solr4 accepts Java-like memory attributes
 
 ### openssl 1.0.1h
 * Allow ['lb']['upstream'] to have a custom setting
