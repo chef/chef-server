@@ -45,8 +45,17 @@ statements(pgsql) ->
      {find_group_by_orgid_name,
       <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
         " FROM groups"
-        " WHERE (org_id = $1 AND name = $2) LIMIT 1">>}
-     ].
+        " WHERE (org_id = $1 AND name = $2) LIMIT 1">>},
+     {insert_container,
+      <<"INSERT INTO containers (id, authz_id, org_id, name,"
+        " last_updated_by, created_at, updated_at) VALUES"
+        " ($1, $2, $3, $4, $5, $6, $7)">>},
+     {update_container_by_id,
+      <<"UPDATE containers SET last_updated_by= $1, updated_at= $2, name= $3"
+        "WHERE id= $4">>},
+     {delete_container_by_id, <<"DELETE FROM containers WHERE id= $1">>},
+     {list_containers_for_org, <<"SELECT name FROM containers WHERE org_id= $1">>}
+    ].
 
 %
 % Opscode Chef_views.
