@@ -113,7 +113,7 @@ record_fields() ->
     record_info(fields, oc_chef_container).
 
 list(#oc_chef_container{org_id = OrgId}, CallbackFun) ->
-    CallbackFun(list_query(), [OrgId], [name]).
+    CallbackFun({list_query(), [OrgId], [name]}).
 
 parse_binary_json(Bin) ->
     {ok, chef_json:decode_body(Bin)}.
