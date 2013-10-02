@@ -683,7 +683,6 @@ fetch(Record) ->
     chef_object:fetch(Record, fun select_rows/1).
 
 -spec select_rows(
-        
         {QueryName, BindParameters } |
         {QueryName, BindParameters, ReturnTransform} |
         {QueryName, BindParameters, ReturnFieldNames}         
@@ -693,13 +692,13 @@ fetch(Record) ->
       BindParameters :: list(),
       ReturnFieldNames :: [atom()],
       ReturnTransform :: tuple().
-
 select_rows({Query, BindParameters}) ->
     match_result(sqerl:select(Query, BindParameters));
 select_rows({Query, BindParameters, Transform}) when is_tuple(Transform) ->
     match_result(sqerl:select(Query, BindParameters, Transform));
 select_rows({Query, BindParameters, Fields = [_|_]}) ->
     match_result(sqerl:select(Query, BindParameters, rows_as_scalars, Fields)).
+
 -spec match_result(Input) -> NormalizedResult when
       Input :: {ok, list()} | {ok, tuple()} | {error, term()},
       NormalizedResult ::  chef_object:select_return().
