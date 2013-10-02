@@ -40,7 +40,8 @@ upload_last_checksum() ->
                  chef_sql:non_uploaded_checksums(itest_util:make_id(<<"abcd">>), itest_util:the_org_id())).
 
 fetch_sandbox() ->
-    {ok, ActualValue} = chef_sql:fetch_sandbox(itest_util:the_org_id(), itest_util:make_id(<<"abcd">>)),
+    ActualValue = chef_sql:fetch(#chef_sandbox{org_id = itest_util:the_org_id(),
+                                                     id = itest_util:make_id(<<"abcd">>)}),
     ?assertEqual(#chef_sandbox{id=itest_util:make_id(<<"abcd">>),
                                org_id=itest_util:the_org_id(),
                                created_at={datetime,{{2011,10,1},{16,47,46}}},

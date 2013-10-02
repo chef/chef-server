@@ -54,17 +54,17 @@ fetch_requestor_test_() ->
                                  recovery_authentication_enabled = <<"0">>,
                                  admin = <<"false">>
                                },
-               meck:expect(chef_sql, fetch_object,
-                           fun([<<"mock-org-id-123">>, <<"alice">>], chef_client, _, _) -> {ok, not_found}; % client_fetch
-                              ([<<"alice">>], chef_user, _, _) -> {ok, User}                                % user fetch
+               meck:expect(chef_sql, fetch,
+                           fun(#chef_client{org_id = <<"mock-org-id-123">>, name =  <<"alice">>}) -> not_found; % client_fetch
+                              (#chef_user{username = <<"alice">>}) -> User                                % user fetch
                            end),
                Context = chef_db:make_context(<<"req-id-123">>),
                Got = chef_db:fetch_requestor(Context, <<"mock-org-id-123">>, <<"alice">>),
                ?assertEqual(Got, User),
                Stats = stats_hero:snapshot(<<"req-id-123">>, all),
                ExpectKeys = [<<"req_time">>,
-                             <<"rdbms.chef_sql.fetch_object_time">>,
-                             <<"rdbms.chef_sql.fetch_object_count">>,
+                             <<"rdbms.chef_sql.fetch_time">>,
+                             <<"rdbms.chef_sql.fetch_count">>,
                              <<"rdbms_time">>,
                              <<"rdbms_count">>],
                GotKeys = [ Key || {Key, _} <- Stats ],
@@ -84,9 +84,9 @@ fetch_requestor_test_() ->
                                      name = <<"alice">>,
                                      pubkey_version = 1,
                                      public_key = <<"key data">>},
-               meck:expect(chef_sql, fetch_object,
-                           fun([<<"alice">>], chef_user, _, _) -> {ok, not_found};
-                              ([<<"mock-org-id-123">>, <<"alice">>], chef_client, _, _) -> {ok, Client}
+               meck:expect(chef_sql, fetch,
+                           fun(#chef_user{username = <<"alice">>}) -> not_found;
+                              (#chef_client{org_id = <<"mock-org-id-123">>, name = <<"alice">>}) -> Client
                            end),
                Context = chef_db:make_context(<<"req-id-123">>),
                Got = chef_db:fetch_requestor(Context, <<"mock-org-id-123">>, <<"alice">>),
@@ -108,17 +108,17 @@ fetch_requestor_test_() ->
                                      name = <<"alice">>,
                                      pubkey_version = 0,
                                      public_key = <<"key data">>},
-               meck:expect(chef_sql, fetch_object,
-                           fun([<<"alice">>], chef_user, _, _) -> {ok, not_found};
-                              ([<<"mock-org-id-123">>, <<"alice">>], chef_client, _, _) -> {ok, Client}
+               meck:expect(chef_sql, fetch,
+                           fun(#chef_user{username = <<"alice">>}) -> not_found;
+                              (#chef_client{org_id = <<"mock-org-id-123">>, name = <<"alice">>}) -> Client
                            end),
                Context = chef_db:make_context(<<"req-id-123">>),
                Got = chef_db:fetch_requestor(Context, <<"mock-org-id-123">>, <<"alice">>),
                ?assertEqual(Got, Client),
                Stats = stats_hero:snapshot(<<"req-id-123">>, all),
                ExpectKeys = [<<"req_time">>,
-                             <<"rdbms.chef_sql.fetch_object_time">>,
-                             <<"rdbms.chef_sql.fetch_object_count">>,
+                             <<"rdbms.chef_sql.fetch_time">>,
+                             <<"rdbms.chef_sql.fetch_count">>,
                              <<"rdbms_time">>,
                              <<"rdbms_count">>],
                GotKeys = [ Key || {Key, _} <- Stats ],

@@ -71,7 +71,6 @@
 
          %% Sandbox ops
          make_sandbox/4,
-         fetch_sandbox/3,
          commit_sandbox/2,
 
 
@@ -194,16 +193,10 @@ delete(ObjectRec, #context{reqid = ReqId}) ->
                    not_found |
                    {error, term()}.
 fetch(ObjectRec, #context{reqid = ReqId}) ->
-    RecordType = element(1, ObjectRec), %% record type is not the same as type name :(
-    QueryName = chef_object:find_query(ObjectRec),
-    Keys = chef_object:fields_for_fetch(ObjectRec),
-    RecordFields = chef_object:record_fields(ObjectRec),
-    case stats_hero:ctime(ReqId, {chef_sql, fetch_object},
-                          fun() -> chef_sql:fetch_object(Keys, RecordType, QueryName, RecordFields) end) of
-        {ok, not_found} -> not_found;
-        {ok, Object} -> Object;
-        {error, _Why} = Error -> Error
-    end.
+    stats_hero:ctime(ReqId, {chef_sql, fetch},
+                          fun() ->
+                                  chef_sql:fetch(ObjectRec)
+                          end).
 
 -spec list(object_rec(), #context{}) -> [binary()] | {error, _}.
 list(StubRec, #context{reqid = ReqId} = _Ctx) ->
@@ -304,29 +297,6 @@ fetch_requestor(Context, OrgId, ClientName) ->
             Client
     end.
 
-%% Currently, this is only used internally, but will be useful for future enhancements to
-%% the sandboxes protocol that allow for partial progress monitoring (e.g., upload a few
-%% files, retrieve the current state of the sandbox, upload a few more, etc.)
--spec fetch_sandbox(DbContext::#context{},
-                    OrgName :: binary() | {id, binary()},
-                    SandboxId::object_id()) -> #chef_sandbox{} |
-                                               not_found |
-                                               {error, any()}.
-fetch_sandbox(#context{reqid = ReqId} = Ctx, {id, OrgId}, SandboxId) ->
-    case stats_hero:ctime(ReqId, {chef_sql, fetch_sandbox},
-                          fun() -> chef_sql:fetch_sandbox(OrgId, SandboxId) end) of
-        {ok, not_found} -> not_found;
-        {ok, Object} -> Object;
-        {error, _Why} = Error -> Error
-    end;
-fetch_sandbox(#context{}=Ctx, OrgName, SandboxId) ->
-    case fetch_org_id(Ctx, OrgName) of
-        not_found ->
-            not_found;
-        OrgId ->
-            fetch_sandbox(Ctx, {id, OrgId}, SandboxId)
-    end.
-
 %% @doc Saves sandbox information for a new sandbox in the database, and returns a
 %% chef_sandbox record representing the new sandbox.  This is a different pattern from other
 %% Chef objects, because the creation of a record for the object requires data that the
@@ -354,7 +324,7 @@ make_sandbox(#context{}=Ctx, OrgName, ActorId, Checksums) ->
             case create_object(Ctx, create_sandbox, TempSandbox, ActorId) of
                 ok ->
                     %% this sandbox will know if the checksums have been uploaded
-                    fetch_sandbox(Ctx, OrgName, Id);
+                    fetch(TempSandbox, Ctx);
                 {conflict, Msg} ->
                     {conflict, Msg};
                 {error, Why} ->
@@ -681,7 +651,6 @@ environment_exists(#context{}=Ctx, OrgId, EnvName) ->
         #chef_environment{} -> true;
         _ -> false
     end.
-
 
 %% -------------------------------------
 %% private functions
