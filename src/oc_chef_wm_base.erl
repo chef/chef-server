@@ -34,6 +34,7 @@
 -define(MAX_SIZE, 1000000).
 
 -include_lib("chef_wm/include/chef_wm.hrl").
+-include_lib("oc_chef_wm/include/oc_chef_wm.hrl").
 
 %% @doc Determines if service is available.
 %%
@@ -61,6 +62,8 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
         {{container, Container}, Req1, State1} ->
             ContainerId = fetch_container_id(Container, Req1, State1),
             invert_perm(check_permission(container, ContainerId, Req1, State1));
+        {{container_id, AuthzId}, Req1, State1} ->
+            invert_perm(check_permission(container, AuthzId, Req1, State1));
         {{Type, ObjectId}, Req1, State1} when Type =:= object;
                                               Type =:= actor ->
             invert_perm(check_permission(Type, ObjectId, Req1, State1));
@@ -229,7 +232,7 @@ invert_perm(Other) ->
 has_permission(AuthzObjectType, AuthzId, Permission, _Req,
                #base_state{reqid=ReqId, requestor_id=RequestorId}) ->
     ?SH_TIME(ReqId, oc_chef_authz, is_authorized_on_resource,
-                  (RequestorId, AuthzObjectType, AuthzId, actor, RequestorId, Permission)).
+             (RequestorId, AuthzObjectType, AuthzId, actor, RequestorId, Permission)).
 
 %% NOTE: derives the permission check from the HTTP verb of the Request
 check_permission(AuthzObjectType, AuthzId, Req,
@@ -388,7 +391,10 @@ set_authz_id(Id, #role_state{}=R) ->
 set_authz_id(Id, #sandbox_state{}=S) ->
     S#sandbox_state{sandbox_authz_id = Id};
 set_authz_id(Id, #data_state{}=D) ->
-    D#data_state{data_bag_authz_id = Id}.
+    D#data_state{data_bag_authz_id = Id};
+set_authz_id(Id, #container_state{} = C) ->
+    C#container_state{container_authz_id = Id}.
+
 
 %%------------------------------------------------------------------------------
 %% GRAB BAG FUNCTIONS AHEAD!!

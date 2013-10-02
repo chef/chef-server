@@ -54,6 +54,7 @@ route(data_bag, Req, Args) -> route_organization_rest_object("data", Req, Args);
 route(environment, Req, Args) -> route_organization_rest_object("environments", Req, Args);
 route(principal, Req, Args) -> route_organization_rest_object("principals", Req, Args);
 route(client, Req, Args) -> route_organization_rest_object("clients", Req, Args);
+route(container, Req, Args) -> route_organization_rest_object("containers", Req, Args);
 route(sandbox, Req, Args) ->
     Org = org_name(Req),
     {id, Id} = lists:keyfind(id, 1, Args),
@@ -99,7 +100,8 @@ bulk_route_fun(Type, Req) when Type =:= role;
                                Type =:= principal;
                                Type =:= client;
                                Type =:= data_bag;
-                               Type =:= data_bag_item ->
+                               Type =:= data_bag_item;
+                               Type =:= container ->
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(Type),
     fun(Name) ->
@@ -143,7 +145,9 @@ template_for_type(data_bag_item) ->
     "/organizations/~s/data/~s/~s";
 template_for_type({data_bag, _}) ->
     %% another way of asking for data_bag_item
-    "/organizations/~s/data/~s/~s".
+    "/organizations/~s/data/~s/~s";
+template_for_type(container) ->
+    "/organizations/~s/containers/~s".
 
 %% This is extracted from search, needs more cleanup
 url_for_search_item_fun(Req, Type, OrgName) ->
