@@ -51,10 +51,12 @@
          update_query/0
         ]).
 
+-include_lib("mixer/include/mixer.hrl").
+-mixin([{chef_object,[{default_fetch/2, fetch}]}]).
+
 -export([
          list/2
          ]).
-
 -include_lib("ej/include/ej.hrl").
 
 -include("chef_types.hrl").
@@ -212,5 +214,4 @@ record_fields() ->
     record_info(fields, chef_environment).
 
 list(#chef_environment{org_id = OrgId}, CallbackFun) ->
-    CallbackFun(list_query(), [OrgId], [name]).
-    
+    CallbackFun({list_query(), [OrgId], [name]}).

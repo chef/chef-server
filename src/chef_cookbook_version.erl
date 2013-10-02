@@ -59,6 +59,9 @@
          update_query/0
         ]).
 
+-include_lib("mixer/include/mixer.hrl").
+-mixin([{chef_object,[{default_fetch/2, fetch}]}]).
+
 -export([
          list/2
          ]).
@@ -631,6 +634,6 @@ fields_for_fetch(#chef_cookbook_version{org_id = OrgId,
 
 record_fields() ->
     record_info(fields, chef_cookbook_version).
-
+-spec(list(#chef_cookbook_version{}, chef_object:select_callback()) -> chef_object:select_return()).
 list(#chef_cookbook_version{org_id = OrgId}, CallbackFun) ->
-    CallbackFun(list_query(), [OrgId], [name]).
+    CallbackFun({list_query(), [OrgId], [name]}).

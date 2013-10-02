@@ -51,6 +51,9 @@
          update_query/0
         ]).
 
+-include_lib("mixer/include/mixer.hrl").
+-mixin([{chef_object,[{default_fetch/2, fetch}]}]).
+
 -export([
          list/2
          ]).
@@ -295,5 +298,4 @@ record_fields() ->
     record_info(fields, chef_user).
 
 list(#chef_user{}, CallbackFun) ->
-    CallbackFun(list_query(), [], [username]).
-    
+    CallbackFun({list_query(), [], [username]}).

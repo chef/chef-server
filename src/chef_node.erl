@@ -53,10 +53,12 @@
          update_query/0
         ]).
 
+-include_lib("mixer/include/mixer.hrl").
+-mixin([{chef_object,[{default_fetch/2, fetch}]}]).
+
 -export([
          list/2
          ]).
-
 -ifdef(TEST).
 -compile(export_all).
 -endif.
@@ -285,6 +287,6 @@ normalize(NodeEjson) ->
 
 
 list(#chef_node{environment = undefined, org_id = OrgId}, CallbackFun) ->
-    CallbackFun(list_nodes_for_org, [OrgId], [name]);
+    CallbackFun({list_nodes_for_org, [OrgId], [name]});
 list(#chef_node{environment = EnvName, org_id = OrgId}, CallbackFun) ->
-    CallbackFun(list_env_nodes_for_org, [OrgId, EnvName], [name]).
+    CallbackFun({list_env_nodes_for_org, [OrgId, EnvName], [name]}).

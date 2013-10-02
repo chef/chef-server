@@ -49,6 +49,9 @@
          update_query/0
         ]).
 
+-include_lib("mixer/include/mixer.hrl").
+-mixin([{chef_object,[{default_fetch/2, fetch}]}]).
+
 -export([
          list/2
          ]).
@@ -170,6 +173,7 @@ validate_data_bag(DataBag) ->
         Bad ->
             throw(Bad)
     end.
-
+-spec(list(#chef_data_bag{}, chef_object:select_callback()) -> chef_object:select_return()).
 list(#chef_data_bag{org_id = OrgId}, CallbackFun) ->
-    CallbackFun(list_query(), [OrgId], [name]).
+    CallbackFun({list_query(), [OrgId], [name]}).
+

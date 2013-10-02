@@ -23,6 +23,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
+-include_lib("chef_objects/include/chef_types.hrl").
 
 validate_sandbox_test_() ->
     [
@@ -95,3 +96,46 @@ make_checksums(N, Acc) ->
 
 md5_to_hex(<<X:128/big-unsigned-integer>>) ->
     iolist_to_binary(io_lib:format("~32.16.0b", [X])).
+
+sandbox_join_rows_to_record_test_() ->
+    [
+     {"Condenses several sandboxed checksum rows into a single sandbox record",
+      fun() ->
+              ?assertEqual(chef_sandbox:sandbox_join_rows_to_record(sandbox_rows()),
+                           #chef_sandbox{id = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
+                                         org_id = <<"abad1deaabad1deaabad1deaabad1dea">>,
+                                         created_at = {{2012,4,25},{3,7,43.0}},
+                                         checksums = [
+                                                      {<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>, false},
+                                                      {<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>, true},
+                                                      {<<"cccccccccccccccccccccccccccccccc">>, false},
+                                                      {<<"dddddddddddddddddddddddddddddddd">>, true}
+                                                     ]})
+      end}
+    ].
+%% Sandbox Tests
+
+sandbox_rows() ->
+  [
+   [{<<"sandbox_id">>, <<"deadbeefdeadbeefdeadbeefdeadbeef">>},
+    {<<"org_id">>, <<"abad1deaabad1deaabad1deaabad1dea">>},
+    {<<"created_at">>, {{2012,4,25},{3,7,43.0}}},
+    {<<"checksum">>, <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>},
+    {<<"uploaded">>, false}],
+   [{<<"sandbox_id">>, <<"deadbeefdeadbeefdeadbeefdeadbeef">>},
+    {<<"org_id">>, <<"abad1deaabad1deaabad1deaabad1dea">>},
+    {<<"created_at">>, {{2012,4,25},{3,7,43.0}}},
+    {<<"checksum">>, <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>},
+    {<<"uploaded">>, true}],
+   [{<<"sandbox_id">>, <<"deadbeefdeadbeefdeadbeefdeadbeef">>},
+    {<<"org_id">>, <<"abad1deaabad1deaabad1deaabad1dea">>},
+    {<<"created_at">>, {{2012,4,25},{3,7,43.0}}},
+    {<<"checksum">>, <<"cccccccccccccccccccccccccccccccc">>},
+    {<<"uploaded">>, false}],
+   [{<<"sandbox_id">>, <<"deadbeefdeadbeefdeadbeefdeadbeef">>},
+    {<<"org_id">>, <<"abad1deaabad1deaabad1deaabad1dea">>},
+    {<<"created_at">>, {{2012,4,25},{3,7,43.0}}},
+    {<<"checksum">>, <<"dddddddddddddddddddddddddddddddd">>},
+    {<<"uploaded">>, true}]
+  ].
+
