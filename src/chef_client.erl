@@ -57,9 +57,11 @@
          update_query/0
         ]).
 
+-include_lib("mixer/include/mixer.hrl").
+-mixin([{chef_object,[{default_fetch/2, fetch}]}]).
+
 -export([
-         list/2,
-         fetch/2
+         list/2
          ]).
 
 -include_lib("ej/include/ej.hrl").
@@ -456,11 +458,4 @@ value_or_undefined(Key, Data) ->
 list(#chef_client{org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_query(), [OrgId], [name]}).
 
--spec(fetch(#chef_client{}, chef_object:select_callback()) -> chef_object:select_return()).
-fetch(#chef_client{} = ObjRec, CallbackFun) ->
-    CallbackFun(
-      {find_query(),
-       fields_for_fetch(ObjRec),
-       {first_as_record, [element(1, ObjRec), record_fields()]}
-       }
-      ).
+

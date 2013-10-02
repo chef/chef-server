@@ -25,10 +25,13 @@
 -include_lib("ej/include/ej.hrl").
 
 -type object_rec() :: tuple().
--type select_return() :: not_found | list(object_rec()) | object_rec() | {error, _}.
--type select_callback() :: fun(({atom(), list(), [atom()]}
-                              |{atom(), list()}
-                              |{atom(), list(), tuple()}) ->
+-type select_return() :: not_found | list(object_rec()) | object_rec() |
+                         {error, _}.
+-type select_callback() :: fun(({ QueryName ::atom(), BindParameters :: list(),
+                                  ReturnFieldNames :: [atom()]}
+                              | {QueryName :: atom(), BindParameters :: list()}
+                              | {QueryName :: atom(), BindParameters :: list(),
+                                 ReturnTransform :: tuple()}) ->
                                       select_return()).
 
 
@@ -96,7 +99,8 @@
          record_fields/1,
 
          list/2,
-         fetch/2
+         fetch/2,
+         default_fetch/2
         ]).
 
 -export_type([
@@ -209,3 +213,8 @@ call0(Rec, Fun) ->
     Mod = callback_mod(Rec),
     Mod:Fun().
 
+
+default_fetch(Rec, CallbackFun) ->
+    CallbackFun({call0(Rec, find_query),
+            call(Rec, fields_for_fetch),
+            {first_as_record, [element(1, Rec), call0(Rec, record_fields)]}}).
