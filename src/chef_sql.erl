@@ -683,12 +683,16 @@ fetch(Record) ->
     chef_object:fetch(Record, fun select_rows/1).
 
 -spec select_rows(
-        {Query :: atom(), BindParameters :: list() } |
-        {Query :: atom(), BindParameters :: list(),
-                             Fields :: list(atom())}) ->
-                                    {ok, none} |
-                                    {ok, list()} |
-                                    {error, term()}.
+        
+        {QueryName, BindParameters } |
+        {QueryName, BindParameters, ReturnTransform} |
+        {QueryName, BindParameters, ReturnFieldNames}         
+     ) ->
+                         chef_object:select_return()  when
+      QueryName ::atom(),
+      BindParameters :: list(),
+      ReturnFieldNames :: [atom()],
+      ReturnTransform :: tuple().
 
 select_rows({Query, BindParameters}) ->
     match_result(sqerl:select(Query, BindParameters));
@@ -696,7 +700,9 @@ select_rows({Query, BindParameters, Transform}) when is_tuple(Transform) ->
     match_result(sqerl:select(Query, BindParameters, Transform));
 select_rows({Query, BindParameters, Fields = [_|_]}) ->
     match_result(sqerl:select(Query, BindParameters, rows_as_scalars, Fields)).
-
+-spec match_result(Input) -> NormalizedResult when
+      Input :: {ok, list()} | {ok, tuple()} | {error, term()},
+      NormalizedResult ::  chef_object:select_return().
 match_result({ok, none}) ->
     not_found;
 match_result({ok, Result}) ->
