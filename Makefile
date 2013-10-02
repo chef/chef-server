@@ -55,7 +55,7 @@ tags:
 itest_clean:
 	@rm -rf itest/*.beam itest/ct_logs
 
-itest: test
+itest: compile
         # recompile, setting TEST define so we can play with
         # unexported functions.
 	@echo "Recompiling with -DTEST ..."
