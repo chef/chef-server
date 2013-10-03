@@ -12,9 +12,11 @@
 -behaviour(chef_object).
 
 -export([
+         assemble_container_ejson/1,
          parse_binary_json/1
         ]).
 
+%% chef_object behaviour callbacks
 -export([
          authz_id/1,
          bulk_get_query/0,
@@ -117,3 +119,7 @@ list(#oc_chef_container{org_id = OrgId}, CallbackFun) ->
 
 parse_binary_json(Bin) ->
     {ok, chef_json:decode_body(Bin)}.
+
+assemble_container_ejson(#oc_chef_container{name = ContainerName}) ->
+    {[{<<"containername">>, ContainerName},
+      {<<"containerpath">>, ContainerName}]}.
