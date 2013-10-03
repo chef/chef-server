@@ -39,6 +39,7 @@
          create_object/2,
          delete_object/2,
          do_update/2,
+         update/2,
          fetch_object/4,
          fetch_object_names/1,
          fetch/1,
@@ -968,6 +969,9 @@ flatten_record(Rec) ->
         false -> ok
     end,
     Tail.
+
+update(ObjectRec, ActorId) ->
+    chef_object:update(ObjectRec, ActorId, fun do_update/2).
 
 do_update(QueryName, UpdateFields) ->
     case sqerl:statement(QueryName, UpdateFields) of
