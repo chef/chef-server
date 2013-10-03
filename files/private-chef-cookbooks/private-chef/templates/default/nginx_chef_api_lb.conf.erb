@@ -102,6 +102,7 @@
     <%= @helper.account_api("^/users/[a-z0-9\-_]+/{0,1}$", :account) %>
     <%= @helper.account_api("^/users/[a-z0-9\-_]+/{0,1}/association_requests/{0,1}.*$", :account) %>
     <%= @helper.account_api("^/users/[a-z0-9\-_]+/organizations/{0,1}$", :account) %>
+    <%= @helper.account_api("^/users/[a-z0-9\-_]+/_acl.*$", :account) %>
     <%= @helper.account_api("^/verify_password$", :account) %>
     <%= @helper.account_api("^/authenticate_user$", :account) %>
 
