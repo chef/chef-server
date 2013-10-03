@@ -6,8 +6,7 @@
 -module(oc_chef_container).
 
 -include("oc_chef_types.hrl").
-
--include_lib("eunit/include/eunit.hrl").
+-include_lib("mixer/include/mixer.hrl").
 
 -behaviour(chef_object).
 
@@ -40,6 +39,10 @@
          update_from_ejson/2,
          update_query/0
         ]).
+
+-mixin([
+        {chef_object, [{default_fetch/2, fetch}]}
+       ]).
 
 name(#oc_chef_container{name = Name}) ->
     Name.
