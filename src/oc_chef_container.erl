@@ -41,7 +41,8 @@
         ]).
 
 -mixin([
-        {chef_object, [{default_fetch/2, fetch}]}
+        {chef_object, [{default_fetch/2, fetch},
+                       {default_update/2, update}]}
        ]).
 
 name(#oc_chef_container{name = Name}) ->
