@@ -36,9 +36,6 @@
 
 -type update_return() :: {ok, 1} | {ok, not_found} | {error, _}.
 
--type update_callback() :: fun((UpdateQueryName :: atom(), BindParameters :: list()) ->
-                                      update_return()).
-
 
 -callback authz_id(object_rec()) -> object_id().
 -callback is_indexed() -> boolean().
@@ -59,7 +56,7 @@
 -callback record_fields() -> list(atom()).
 -callback list(object_rec(), select_callback()) -> select_return().
 -callback fetch(object_rec(), select_callback()) -> select_return().
--callback update(object_rec(), update_callback()) ->
+-callback update(object_rec(), select_callback()) ->
      update_return().
     
 
@@ -236,4 +233,4 @@ default_fetch(Rec, CallbackFun) ->
 default_update(ObjectRec, CallbackFun) ->
     QueryName = chef_object:update_query(ObjectRec),
     UpdatedFields = chef_object:fields_for_update(ObjectRec),
-    CallbackFun(QueryName, UpdatedFields).
+    CallbackFun({QueryName, UpdatedFields}).
