@@ -538,6 +538,7 @@ fetch_latest_cookbook_version(OrgId, CookbookName) ->
 -spec create_cookbook_version(#chef_cookbook_version{}) ->
     {ok, non_neg_integer()} | {error, term()}.
 create_cookbook_version(CookbookVersion) ->
+    
     case create_cookbook_if_needed(CookbookVersion) of
         ok ->
             create_object(CookbookVersion);
@@ -701,10 +702,14 @@ select_rows({Query, BindParameters, Fields = [_|_]}) ->
     match_result(sqerl:select(Query, BindParameters, rows_as_scalars, Fields)).
 
 -spec match_result(Input) -> NormalizedResult when
-      Input :: {ok, list()} | {ok, tuple()} | {error, term()},
+      Input :: {ok, list()} | {ok, none} | {ok, non_neg_integer()} | {ok, tuple()} | {error, term()},
       NormalizedResult ::  chef_object:select_return().
 match_result({ok, none}) ->
     not_found;
+match_result({ok, 0}) ->
+    not_found;
+match_result({conflict, _} = Conflict) ->
+    Conflict;
 match_result({ok, Result}) ->
     Result;
 match_result({error, _} = Error) ->
@@ -971,7 +976,7 @@ flatten_record(Rec) ->
     Tail.
 
 update(ObjectRec, ActorId) ->
-    chef_object:update(ObjectRec, ActorId, fun do_update/2).
+    chef_object:update(ObjectRec, ActorId, fun select_rows/1).
 
 do_update(QueryName, UpdateFields) ->
     case sqerl:statement(QueryName, UpdateFields) of

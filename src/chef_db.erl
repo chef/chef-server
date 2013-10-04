@@ -220,8 +220,8 @@ update(ObjectRec, #context{reqid = ReqId}, ActorId) ->
                           fun() ->
                                   chef_sql:update(ObjectRec, ActorId) end) of
         #chef_db_cb_version_update{}=CookbookVersionUpdate -> CookbookVersionUpdate;
-        {ok, 1} -> ok;
-        {ok, not_found} -> not_found;
+        1 -> ok;
+        not_found -> not_found;
         {conflict, Message} -> {conflict, Message};
         {error, Error} -> {error, Error}
     end.
