@@ -34,7 +34,7 @@
                                  ReturnTransform :: tuple()}) ->
                                       select_return()).
 
--type update_return() :: {ok, 1} | {ok, not_found} | {error, _}.
+-type update_return() :: pos_integer() | not_found | {conflict, _} | {error, _}.
 
 
 -callback authz_id(object_rec()) -> object_id().
