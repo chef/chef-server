@@ -215,15 +215,13 @@ update(#chef_cookbook_version{org_id =OrgId} = Record, #context{reqid = ReqId} =
             ok;
         Result -> Result %% {conflict, _} or {error, _}
     end;
-update(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
-    ObjectRec = chef_object:set_updated(ObjectRec0, ActorId),
-    QueryName = chef_object:update_query(ObjectRec),
-    UpdatedFields = chef_object:fields_for_update(ObjectRec),
+update(ObjectRec, #context{reqid = ReqId}, ActorId) ->
     case stats_hero:ctime(ReqId, {chef_sql, do_update},
-                          fun() -> chef_sql:do_update(QueryName, UpdatedFields) end) of
+                          fun() ->
+                                  chef_sql:update(ObjectRec, ActorId) end) of
         #chef_db_cb_version_update{}=CookbookVersionUpdate -> CookbookVersionUpdate;
-        {ok, 1} -> ok;
-        {ok, not_found} -> not_found;
+        1 -> ok;
+        not_found -> not_found;
         {conflict, Message} -> {conflict, Message};
         {error, Error} -> {error, Error}
     end.
