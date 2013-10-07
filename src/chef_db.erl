@@ -219,8 +219,7 @@ update(ObjectRec, #context{reqid = ReqId}, ActorId) ->
     case stats_hero:ctime(ReqId, {chef_sql, do_update},
                           fun() ->
                                   chef_sql:update(ObjectRec, ActorId) end) of
-        #chef_db_cb_version_update{}=CookbookVersionUpdate -> CookbookVersionUpdate;
-        1 -> ok;
+        N when is_integer(N), N > 0 -> ok;
         not_found -> not_found;
         {conflict, Message} -> {conflict, Message};
         {error, Error} -> {error, Error}
