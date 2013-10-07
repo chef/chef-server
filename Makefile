@@ -61,8 +61,7 @@ itest: compile
 	@echo "Recompiling with -DTEST ..."
 	@rebar clean skip_deps=true
 	@rebar compile skip_deps=true -DTEST
-	@mkdir -p itest/ct_logs
-	@ct_run -spec itest/spec.spec -pa deps/*/ebin -pa ebin
+	@rebar skip_deps=true ct
 	@echo "Review results with: open itest/ct_logs/index.html"
 
 
