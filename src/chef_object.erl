@@ -34,6 +34,8 @@
                                  ReturnTransform :: tuple()}) ->
                                       select_return()).
 
+-type update_return() :: {ok, 1} | {ok, not_found} | {error, _}.
+
 
 -callback authz_id(object_rec()) -> object_id().
 -callback is_indexed() -> boolean().
@@ -54,6 +56,8 @@
 -callback record_fields() -> list(atom()).
 -callback list(object_rec(), select_callback()) -> select_return().
 -callback fetch(object_rec(), select_callback()) -> select_return().
+-callback update(object_rec(), select_callback()) ->
+     update_return().
     
 
 -callback new_record(OrgId :: object_id(),
@@ -100,7 +104,9 @@
 
          list/2,
          fetch/2,
-         default_fetch/2
+         update/3,
+         default_fetch/2,
+         default_update/2
         ]).
 
 -export_type([
@@ -198,6 +204,11 @@ fetch(Rec, CallbackFun) ->
     Mod = element(1, Rec),
     Mod:fetch(Rec, CallbackFun).
 
+update(Rec, ActorId, CallbackFun) ->
+    Mod = element(1, Rec),
+    Mod:update(chef_object:set_updated(Rec, ActorId), CallbackFun).
+    
+
 %% Return the callback module for a given object record type. We're putting the abstraction
 %% in place in case we need to do something other than the identity mapping of record name
 %% to callback module name that we're doing there. If we needed to swap in something else,
@@ -218,3 +229,8 @@ default_fetch(Rec, CallbackFun) ->
     CallbackFun({call0(Rec, find_query),
             call(Rec, fields_for_fetch),
             {first_as_record, [element(1, Rec), call0(Rec, record_fields)]}}).
+
+default_update(ObjectRec, CallbackFun) ->
+    QueryName = chef_object:update_query(ObjectRec),
+    UpdatedFields = chef_object:fields_for_update(ObjectRec),
+    CallbackFun({QueryName, UpdatedFields}).

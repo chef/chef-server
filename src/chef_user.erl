@@ -52,7 +52,10 @@
         ]).
 
 -include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[{default_fetch/2, fetch}]}]).
+-mixin([{chef_object,[
+                      {default_fetch/2, fetch},
+                      {default_update/2, update}
+                     ]}]).
 
 -export([
          list/2
