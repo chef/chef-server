@@ -5,7 +5,7 @@
 
 -compile([export_all]).
  
-all() -> [fetch_container_sql].
+all() -> [fetch_container_sql, fetch_group_sql].
 
 init_per_suite(Config) ->
     ct:pal("hi from init~n"),
@@ -29,6 +29,21 @@ fetch_container_sql(_Config) ->
         Bad ->
             erlang:error({unexpected_result, Bad})
     end.
+
+fetch_group_sql(_Config) ->
+    OrgId = <<"7777224947d7ed92e872e53b620e94b7">>,
+    Name = <<"admins">>,
+    ReqId = <<"test-2-req-id">>,
+    Ctx = oc_chef_authz:make_context(ReqId, darklaunch_stub),
+    case oc_chef_authz_db:fetch_group_authz_id_sql(Ctx, OrgId, Name) of
+        <<"6666224947d7ed92e872e53b620e94b7">> = V ->
+            ct:pal("Found group with authz_id: ~p", [V]),
+            ok;
+        Bad ->
+            erlang:error({unexpected_result, Bad})
+    end.
+
+
 
 random_bogus_port() ->
     {ok, S} = gen_udp:open(0, [binary, {active, once}]),

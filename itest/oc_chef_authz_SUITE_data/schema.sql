@@ -18,3 +18,24 @@ INSERT INTO containers
           '2004-10-19 10:23:54',
           '2004-10-19 10:23:54'
   );
+
+CREATE TABLE groups (
+    id character varying(36) NOT NULL,
+    authz_id character(32) NOT NULL,
+    org_id character(32) NOT NULL,
+    name text NOT NULL,
+    last_updated_by character(32) NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+INSERT INTO groups
+  VALUES ('5555e9532d61a632f2a431b0299198b4',
+          '6666224947d7ed92e872e53b620e94b7',
+          '7777224947d7ed92e872e53b620e94b7',
+          'admins',
+          '8888224947d7ed92e872e53b620e94b7',
+          '1989-11-09 10:45:00',
+          '1989-11-09 10:45:00'
+  );
