@@ -17,22 +17,32 @@ Vagrant.configure("2") do |config|
 
   config.vm.define 'ubuntu-10.04' do |c|
     c.vm.box = "opscode-ubuntu-10.04"
-    c.vm.box_url = "https://opscode-vm.s3.amazonaws.com/vagrant/opscode_ubuntu-10.04_provisionerless.box"
+    c.vm.box_url = "https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-10.04_provisionerless.box"
+  end
+
+  config.vm.define 'ubuntu-11.04' do |c|
+    c.vm.box = "opscode-ubuntu-11.04"
+    c.vm.box_url = "https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-11.04_provisionerless.box"
   end
 
   config.vm.define 'ubuntu-12.04' do |c|
     c.vm.box = "opscode-ubuntu-12.04"
-    c.vm.box_url = "https://opscode-vm.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_provisionerless.box"
+    c.vm.box_url = "https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_provisionerless.box"
+  end
+
+  config.vm.define 'ubuntu-13.04' do |c|
+    c.vm.box = "opscode-ubuntu-13.04"
+    c.vm.box_url = "https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-13.04_provisionerless.box"
   end
 
   config.vm.define 'centos-5' do |c|
     c.vm.box = "opscode-centos-5.9"
-    c.vm.box_url = "https://opscode-vm.s3.amazonaws.com/vagrant/opscode_centos-5.9_provisionerless.box"
+    c.vm.box_url = "https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_centos-5.9_provisionerless.box"
   end
 
   config.vm.define 'centos-6' do |c|
     c.vm.box = "opscode-centos-6.4"
-    c.vm.box_url = "https://opscode-vm.s3.amazonaws.com/vagrant/opscode_centos-6.4_provisionerless.box"
+    c.vm.box_url = "https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_centos-6.4_provisionerless.box"
   end
 
   config.vm.provider :virtualbox do |vb|
@@ -45,7 +55,7 @@ Vagrant.configure("2") do |config|
   end
 
   # Ensure a recent version of the Chef Omnibus packages are installed
-  config.omnibus.chef_version = "11.4.4"
+  config.omnibus.chef_version = "11.6.0"
 
   # Enable the berkshelf-vagrant plugin
   config.berkshelf.enabled = true
