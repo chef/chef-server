@@ -9,11 +9,6 @@ All links expire on <%= expiration_date.strftime("%B %-d, %Y") %>.
 To regenerate the contents of this page, use [this code|https://github.com/opscode/opscode-omnibus/tree/master/package_links]
 {info}
 
-h3. Private Chef Server
-<% info[:private_chef].each do |kv| %>
-[<%= kv[0] %>|<%= kv[1] %>]
-<% end %>
-
 h3. Run History (Reporting)
 <% info[:reporting].each do |kv| %>
 [<%= kv[0] %>|<%= kv[1] %>]
