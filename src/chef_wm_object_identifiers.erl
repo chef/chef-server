@@ -98,8 +98,16 @@ to_json(Req, #base_state{resource_state = #object_identifier_state{
                                                                not_found |
                                                                unknown_object_type.
 object_identifiers(<<"nodes">>,  NodeName, #base_state{chef_db_context = DbContext,
-                                                       organization_guid = OrgId,
+                                                       organization_name = OrgName,
                                                        resource_state = ObjectIdState}) ->
+    OrgId = chef_db:fetch_org_id(DbContext, OrgName),
+    do_node_fetch(NodeName, OrgId, ObjectIdState, DbContext);
+object_identifiers(_Type, _Name, _State) ->
+    unknown_object_type.
+
+do_node_fetch(_NodeName, not_found, _ObjectIdState, _DbContext) ->
+    not_found;
+do_node_fetch(NodeName, OrgId, ObjectIdState, DbContext) ->
     case chef_db:fetch(#chef_node{org_id = OrgId, name = NodeName}, DbContext) of
         not_found ->
             not_found;
@@ -107,9 +115,7 @@ object_identifiers(<<"nodes">>,  NodeName, #base_state{chef_db_context = DbConte
             ObjectIdState#object_identifier_state{id = Node#chef_node.id,
                                                   authz_id = Node#chef_node.authz_id,
                                                   org_id = Node#chef_node.org_id}
-    end;
-object_identifiers(_Type, _Name, _State) ->
-    unknown_object_type.
+    end.
 
 error_message(not_found, ObjType, ObjName) ->
     chef_wm_util:error_message_envelope(iolist_to_binary([<<"No such '">>, ObjType,
