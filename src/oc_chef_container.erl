@@ -7,6 +7,7 @@
 
 -include("oc_chef_types.hrl").
 -include_lib("mixer/include/mixer.hrl").
+-include_lib("chef_objects/include/chef_types.hrl").
 
 -behaviour(chef_object).
 
@@ -33,6 +34,7 @@
          new_record/3,
          org_id/1,
          record_fields/0,
+         rename_supported/0,
          set_created/2,
          set_updated/2,
          type_name/1,
@@ -122,8 +124,45 @@ list(#oc_chef_container{org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_query(), [OrgId], [name]}).
 
 parse_binary_json(Bin) ->
-    {ok, chef_json:decode_body(Bin)}.
+    InputEjson = chef_json:decode_body(Bin),
+
+    %% The pedant tests explicitly state that the id should win in
+    %% the case of both fields being available.
+    %% TODO: add unit tests for this
+    Name = case ej:get({"id"}, InputEjson) of
+               undefined ->
+                   case ej:get({"containername"}, InputEjson) of
+                       undefined -> throw({missing, <<"containername">>});
+                       ContainerName -> ContainerName
+                   end;
+               ContainerId -> ContainerId
+           end,
+
+    %% validation functions return 'ok' or throw exceptions
+    valid_name(Name),
+
+    {ok, {[{<<"containername">>, Name},
+           {<<"containerpath">>, Name}]}}.
 
 assemble_container_ejson(#oc_chef_container{name = ContainerName}) ->
     {[{<<"containername">>, ContainerName},
       {<<"containerpath">>, ContainerName}]}.
+
+rename_supported() ->
+    true.
+
+%% TODO: functions from chef_regex need to get refactored out into the
+%%       chef object behaviours, this is a hack and a copy of that
+%%       logic
+-define(ANCHOR_REGEX(Regex), "^" ++ Regex ++ "$").
+-define(NAME_REGEX, "[.[:alnum:]_-]+").
+
+valid_name(Name) ->
+    {ok, Regex} = re:compile(?ANCHOR_REGEX(?NAME_REGEX)),
+    Msg = <<"Malformed container name. Must only contain A-Z, a-z, 0-9, _, -, or .">>,
+    case re:run(Name, Regex) of
+        nomatch ->
+            throw({bad_container_name, Name, Msg});
+        _ ->
+            ok
+    end.
