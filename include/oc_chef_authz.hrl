@@ -52,14 +52,5 @@
           'last_updated_by' % authz guid of last actor to update object
          }).
 
--record(chef_group, {
-          'id',             % guid for object (unique)
-          'authz_id',       % authorization guid (unique)
-          'org_id',         % organization guid
-          'name',           % name of group
-          'last_updated_by' % authz guid of last actor to update object
-         }).
-
-
 -record(context, {reqid,
                   otto_connection}).

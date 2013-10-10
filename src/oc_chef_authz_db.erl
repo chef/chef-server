@@ -17,6 +17,8 @@
 
 -module(oc_chef_authz_db).
 
+-include_lib("oc_chef_authz/include/oc_chef_types.hrl").
+
 -export([container_record_to_authz_id/2,
          fetch_container/3,
          fetch_group_authz_id/3,
@@ -286,17 +288,16 @@ fetch_container_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
                                                           {error, _}.
 fetch_group_authz_id_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
     %% since ?FIRST uses record_info, it can't be placed within the fun.
-    Transform = ?FIRST(chef_group),
-    case stats_hero:ctime(ReqId,
-                          %% aggregate perf timing with other sql queries
-                          {chef_sql, fetch_group_sql},
+    case stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
-                                  sqerl:select(find_group_by_orgid_name, [OrgId, Name], Transform)
+                                  chef_sql:fetch(#oc_chef_group{
+                                                   org_id = OrgId,
+                                                   name = Name})
                           end) of
-        {ok, #chef_group{authz_id=AuthzId}} ->
+        #oc_chef_group{authz_id = AuthzId} ->
             AuthzId;
-        {ok, none} ->
+        not_found ->
             {not_found, authz_group};
-        {error, Error} ->
-            {error, Error}
+        {error, _} = Error ->
+            Error
     end.

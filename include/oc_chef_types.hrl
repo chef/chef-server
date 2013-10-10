@@ -12,3 +12,13 @@
           created_at,
           updated_at
          }).
+
+-record(oc_chef_group, {
+          id,
+          authz_id,
+          org_id,
+          name,
+          last_updated_by,
+          created_at,
+          updated_at
+          }).
