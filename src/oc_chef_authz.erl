@@ -219,7 +219,8 @@ merge_acl_from_container(RequestorId, ContainerId, AuthzType, ObjectId) ->
 set_acl(_RequestorId, _AuthzType, _ObjectId, []) ->
     ok;
 set_acl(RequestorId, AuthzType, ObjectId, [{Method, ACE}|Rest]) when AuthzType =:= 'actor';
-                                                                     AuthzType =:= 'object' ->
+                                                                     AuthzType =:= 'object';
+                                                                     AuthzType =:= 'container' ->
     case set_ace_for_entity(RequestorId, AuthzType, ObjectId, Method, ACE) of
         ok ->
             set_acl(RequestorId, AuthzType, ObjectId, Rest);
@@ -483,8 +484,9 @@ object_type_to_container_name(search)      -> <<"search">>.
 
 %% @doc When creating a new Authz entity in a given container, we need to ensure we're
 %% creating the correct kind.
-authz_type_from_container(client) -> 'actor';
-authz_type_from_container(_)      -> 'object'.
+authz_type_from_container(client)    -> 'actor';
+authz_type_from_container(container) -> 'container';
+authz_type_from_container(_)         -> 'object'.
 
 %
 % This exists for testing and debugging; it's too expensive for day to day use.
