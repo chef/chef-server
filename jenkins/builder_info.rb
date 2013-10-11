@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/opt/chef/embedded/bin/ruby
 
 require 'rubygems'
 require 'yajl'
