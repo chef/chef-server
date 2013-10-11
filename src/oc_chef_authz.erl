@@ -177,9 +177,13 @@ create_entity_with_container_acl(RequestorId, ContainerAId, ObjectType) ->
 %% @end TODO: consider error cases in more detail
 -spec merge_acl_from_container(requestor_id(),
                                ContainerId :: object_id(),
-                               AuthzType :: 'actor' | 'object',
+                               AuthzType :: 'actor' | 'object' | 'container',
                                ObjectId :: object_id()) -> ok |
                                                            {error, object_acl | container_acl}.
+merge_acl_from_container(_RequestorId, _ContainerId, container, _ObjectId) ->
+    %% When creating containers, the new container does NOT inherit the ACLs from the
+    %% parent container.
+    ok;
 merge_acl_from_container(RequestorId, ContainerId, AuthzType, ObjectId) ->
     case get_acl_for_resource(RequestorId, container, ContainerId) of
         {ok, CAcl} ->
