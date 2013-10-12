@@ -2,6 +2,11 @@
 require 'pedant/rspec/common'
 
 describe "opscode-account containers", :containers do
+
+  def self.ruby?
+    Pedant::Config.ruby_container_endpoint?
+  end
+
   context "/containers endpoint" do
     let(:request_url) { api_url("containers") }
 
@@ -213,11 +218,13 @@ describe "opscode-account containers", :containers do
             # This sort of makes sense (default container perms are empty), but
             # still seems wrong -- no matter what the permissions are, this should
             # still be a 409
-            pending "returns 403 instead" do
-              post(request_url, platform.admin_user,
-                :payload => request_body).should look_like({
-                  :status => 409
-                })
+            if ruby?
+              pending "returns 403 instead" do
+                post(request_url, platform.admin_user,
+                  :payload => request_body).should look_like({
+                    :status => 409
+                  })
+              end
             end
           end
         end
@@ -393,7 +400,11 @@ describe "opscode-account containers", :containers do
 
           let(:container_body) {{
               "containername" => new_container,
-              "containerpath" => "/"
+              # containerpath: a discussion took place between Mark A. and I that
+              # revolved around leaving the containerpath implemented the same way
+              # HEC sets it when creating a new org, which is the same as the
+              # containername
+              "containerpath" => ruby? ? "/" : new_container
             }}
 
           it "ignores them" do
@@ -416,23 +427,48 @@ describe "opscode-account containers", :containers do
     end # context POST /containers
 
     context "DELETE /containers" do
+
+      let(:not_allowed_response) do
+        if ruby?
+          {:status => 404}
+        else
+          {
+            :status => 405,
+            :headers => {
+              "allow" => ["GET, POST"]
+            }
+          }
+        end
+      end
+
       context "admin user" do
         # A 405 here would be fine (better, even)
         it "returns 404" do
-          delete(request_url, platform.admin_user).should look_like({
-              :status => 404
-            })
+          delete(request_url, platform.admin_user).should look_like(not_allowed_response)
         end
       end
     end
 
     context "PUT /containers" do
+
+      let(:not_allowed_response) do
+        if ruby?
+          {:status => 404}
+        else
+          {
+            :status => 405,
+            :headers => {
+              "allow" => ["GET, POST"]
+            }
+          }
+        end
+      end
+
+
       context "admin user" do
         # A 405 here would be fine (better, even)
         it "returns 404" do
-          put(request_url, platform.admin_user).should look_like({
-              :status => 404
-            })
+          put(request_url, platform.admin_user).should look_like(not_allowed_response)
         end
       end
     end
@@ -454,7 +490,7 @@ describe "opscode-account containers", :containers do
 
     let(:default_container_body) {{
         "containername" => test_container,
-        "containerpath" => "/"
+        "containerpath" => ruby? ? "/" : test_container
       }}
 
     context "GET /containers/<name>" do
@@ -704,23 +740,25 @@ describe "opscode-account containers", :containers do
           end
 
           it "will not overwrite existing container" do
-            pending "returns 403 instead of 409" do
-              post(api_url("containers"), platform.admin_user,
-                :payload => {"id" => new_container_name,
-                  "containerpath" => "/"}).should look_like({:status => 201})
+            if ruby?
+              pending "returns 403 instead of 409" do
+                post(api_url("containers"), platform.admin_user,
+                  :payload => {"id" => new_container_name,
+                    "containerpath" => "/"}).should look_like({:status => 201})
 
-              put(request_url, platform.admin_user,
-                :payload => new_container_payload).should look_like({
-                  :status => 409
-                })
-              get(request_url, platform.admin_user).should look_like({
-                  :status => 200,
-                  :body_exact => default_container_body
-                })
-              get(api_url("containers/#{new_container_name}"),
-                platform.admin_user).should look_like({
-                  :status => 200
-                })
+                put(request_url, platform.admin_user,
+                  :payload => new_container_payload).should look_like({
+                    :status => 409
+                  })
+                get(request_url, platform.admin_user).should look_like({
+                    :status => 200,
+                    :body_exact => default_container_body
+                  })
+                get(api_url("containers/#{new_container_name}"),
+                  platform.admin_user).should look_like({
+                    :status => 200
+                  })
+              end
             end
           end
         end # context with different container name
@@ -742,21 +780,25 @@ describe "opscode-account containers", :containers do
           end
         end # context without containername
 
-        context "with bogus id instead of containername" do
-          let(:new_container_payload) {{
-              "id" => "foo",
-              "containerpath" => "/new/path"
-            }}
+        # if we can create a container and name it with the json attribute 'id',
+        # then we should be able to rename it with that value as well
+        if ruby?
+          context "with bogus id instead of containername" do
+            let(:new_container_payload) {{
+                "id" => "foo",
+                "containerpath" => "/new/path"
+              }}
 
-          it "returns 400" do
-            put(request_url, platform.admin_user,
-              :payload => new_container_payload).should look_like({
-                :status => 400
-              })
-            get(request_url, platform.admin_user).should look_like({
-                :status => 200,
-                :body_exact => default_container_body
-              })
+            it "returns 400" do
+              put(request_url, platform.admin_user,
+                :payload => new_container_payload).should look_like({
+                  :status => 400
+                })
+              get(request_url, platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => default_container_body
+                })
+            end
           end
         end # context with bogus id instead of containername
 
@@ -767,9 +809,10 @@ describe "opscode-account containers", :containers do
               "containerpath" => "/new/path"
             }}
 
-          let(:modified_container_body) {{
+          let(:response_container_body) {{
               "containername" => test_container,
-              "containerpath" => "/new/path"
+              # I'm pretty sure that the path in ruby should be "/"
+              "containerpath" => ruby? ? "/new/path" : test_container
             }}
 
           it "will update container (ignores bogus key)" do
@@ -779,7 +822,7 @@ describe "opscode-account containers", :containers do
               })
             get(request_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => modified_container_body
+                :body_exact => response_container_body
               })
           end
         end # context with random bogus value
@@ -805,12 +848,24 @@ describe "opscode-account containers", :containers do
     end # context PUT /containers/<name>
 
     context "POST /containers/<name>" do
+
+      let(:not_allowed_response) do
+        if ruby?
+          {:status => 404}
+        else
+          {
+            :status => 405,
+            :headers => {
+              "allow" => ["GET, PUT, DELETE"]
+            }
+          }
+        end
+      end
+
       context "admin user" do
         # A 405 here would be fine (better, even)
         it "returns 404" do
-          post(request_url, platform.admin_user).should look_like({
-              :status => 404
-            })
+          post(request_url, platform.admin_user).should look_like(not_allowed_response)
         end
       end
     end # context POST /containers/<name>
