@@ -292,7 +292,8 @@ verify_request_signature(Req,
 create_from_json(#wm_reqdata{} = Req,
                  #base_state{chef_db_context = DbContext,
                              organization_guid = OrgId,
-                             requestor_id = ActorId} = State,
+                             requestor_id = ActorId,
+                             resource_mod = ResourceMod} = State,
                  RecType, {authz_id, AuthzId}, ObjectEjson) ->
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
@@ -314,7 +315,7 @@ create_from_json(#wm_reqdata{} = Req,
             chef_object_db:delete_from_solr(ObjectRec),
             %% FIXME: created authz_id is leaked for this case, cleanup?
             LogMsg = {RecType, name_conflict, Name},
-            ConflictMsg = conflict_message(TypeName, Name),
+            ConflictMsg = ResourceMod:conflict_message(Name),
             {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
              State#base_state{log_msg = LogMsg}};
         ok ->
@@ -344,7 +345,8 @@ object_creation_hook(Object, _State) -> Object.
 %% record. `ObjectEjson' is the parsed EJSON from the request body.
 update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                                                   organization_guid = OrgId,
-                                                  requestor_id = ActorId}=State,
+                                                  requestor_id = ActorId,
+                                                  resource_mod = ResourceMod} = State,
                  OrigObjectRec, ObjectEjson) ->
     ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectEjson),
 
@@ -382,7 +384,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     TypeName = chef_object:type_name(ObjectRec),
                     RecType = erlang:element(1,ObjectRec),
                     LogMsg = {RecType, name_conflict, Name},
-                    ConflictMsg = conflict_message(TypeName, Name),
+                    ConflictMsg = ResourceMod:conflict_message(Name),
                     {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
                      State#base_state{log_msg = LogMsg}};
                 {error, {checksum_missing, Checksum}} ->
@@ -431,26 +433,6 @@ assemble_principal_ejson(#principal_state{name = Name,
       {<<"public_key">>, PublicKey},
       {<<"type">>, Type},
       {<<"authz_id">>, AuthzId}]}.
-
-conflict_message(cookbook_version, _Name) ->
-    {[{<<"error">>, [<<"Cookbook already exists">>]}]};
-conflict_message(role, _Name) ->
-    {[{<<"error">>, [<<"Role already exists">>]}]};
-conflict_message(node, _Name) ->
-    %% Msg = iolist_to_binary([<<"A node named '">>, Name, <<"' already exists.">>]),
-    Msg = <<"Node already exists">>,
-    {[{<<"error">>, [Msg]}]};
-conflict_message(data_bag_item, {BagName, ItemName}) ->
-    Msg = <<"Data Bag Item '", ItemName/binary, "' already exists in Data Bag '",
-            BagName/binary, "'.">>,
-    {[{<<"error">>, [Msg]}]};
-conflict_message(data_bag, _Name) ->
-    %% {[{<<"error">>, [<<"Data Bag '", Name/binary, "' already exists">>]}]}.
-    {[{<<"error">>, [<<"Data bag already exists">>]}]};
-conflict_message(environment, _Name) ->
-    {[{<<"error">>, [<<"Environment already exists">>]}]};
-conflict_message(client, _Name) ->
-    {[{<<"error">>, [<<"Client already exists">>]}]}.
 
 error_message(checksum_missing, Checksum) ->
     {[{<<"error">>, [iolist_to_binary([<<"Manifest has checksum ">>, Checksum,

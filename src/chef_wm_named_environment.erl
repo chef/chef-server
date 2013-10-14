@@ -44,6 +44,7 @@
          validate_request/3]).
 
 -export([allowed_methods/2,
+         conflict_message/1,
          delete_resource/2,
          from_json/2,
          resource_exists/2,
@@ -121,3 +122,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
+
+-spec conflict_message(binary()) -> ejson_term().
+conflict_message(_Name) ->
+    {[{<<"error">>, [<<"Environment already exists">>]}]}.

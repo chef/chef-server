@@ -49,6 +49,7 @@
 
 -export([
          allowed_methods/2,
+         conflict_message/1,
          delete_resource/2,
          from_json/2,
          resource_exists/2,
@@ -174,3 +175,9 @@ custom_404_msg(Req, BagName, ItemName) ->
         'DELETE' ->
             chef_wm_util:not_found_message(data_bag_item1, {BagName, ItemName})
     end.
+
+-spec conflict_message({binary(), binary()}) -> ejson_term().
+conflict_message({BagName, ItemName}) ->
+    Msg = <<"Data Bag Item '", ItemName/binary, "' already exists in Data Bag '",
+            BagName/binary, "'.">>,
+    {[{<<"error">>, [Msg]}]}.
