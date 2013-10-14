@@ -76,6 +76,10 @@ malformed_request_message({client_name_mismatch}, _Req, _State) ->
 malformed_request_message({bad_client_name, Name, Pattern}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Invalid client name '", Name,
                                        "' using regex: '", Pattern, "'."])]}]};
+%% generic invalid name case
+malformed_request_message({bad_object_name, Name, Pattern}, _Req, _State) ->
+    {[{<<"error">>, [iolist_to_binary(["Invalid name '", Name,
+                                       "' using regex: '", Pattern, "'."])]}]};
 
 %% Not sure if we want to be this specific, or just want to fold this into an 'invalid JSON'
 %% case.  At any rate, here it is.
