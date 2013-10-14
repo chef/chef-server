@@ -367,7 +367,8 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
         false ->
             case chef_db:update(ObjectRec, DbContext, ActorId) of
                 ok ->
-                    Req1 = handle_rename(ObjectRec, Req),
+                    IsRename = chef_object:name(OrigObjectRec) =/= chef_object:name(ObjectRec),
+                    Req1 = handle_rename(ObjectRec, Req, IsRename),
                     {true, chef_wm_util:set_json_body(Req1, ObjectEjson), State};
                 not_found ->
                     %% We will get this if no rows were affected by the query. This could
@@ -508,18 +509,19 @@ maybe_annotate_log_msg(Req, #base_state{log_msg = Msg}) ->
     oc_wm_request:add_notes([{msg, {raw, Msg}}], Req).
 
 %% If request results in a rename, then set Location header and wm will return with a 201.
-%% Currently, only the clients endpoint supports rename
-handle_rename(#chef_client{name = ObjectName}, Req) ->
-    ReqName = chef_wm_util:object_name(client, Req),
-    case ObjectName of
-        ReqName ->
-            Req;
-        _ ->
-            Uri = ?BASE_ROUTES:route(client, Req, [{name, ObjectName}]),
-            wrq:set_resp_header("Location", binary_to_list(Uri), Req)
-    end;
-handle_rename(_, Req) ->
-    Req.
+%% When we rename an object, we want to return 201 because the location of the object
+%% has now changed. Setting the location header here to correspond to the new name
+%% will force webmachine to return 201.
+handle_rename(_ObjectRec, Req, false) ->
+    Req;
+handle_rename(ObjectRec, Req, true) ->
+    TypeName = chef_object:type_name(ObjectRec),
+    ObjectName = case chef_object:name(ObjectRec) of
+                     {_ParentName, ObjName} -> ObjName; % ugh, special case for databag items
+                     ObjName -> ObjName
+                 end,
+    Uri = ?BASE_ROUTES:route(TypeName, Req, [{name, ObjectName}]),
+    wrq:set_resp_header("Location", binary_to_list(Uri), Req).
 
 %%% @doc Return appropriate public key based on request source
 %%%
