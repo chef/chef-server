@@ -153,7 +153,8 @@ rename_supported() ->
 
 %% TODO: functions from chef_regex need to get refactored out into the
 %%       chef object behaviours, this is a hack and a copy of that
-%%       logic
+%%       logic, otherwise we could make the chef_regex code more generic
+%%       and decouple the error messages from the regular expressions used
 -define(ANCHOR_REGEX(Regex), "^" ++ Regex ++ "$").
 -define(NAME_REGEX, "[.[:alnum:]_-]+").
 
@@ -162,7 +163,7 @@ valid_name(Name) ->
     Msg = <<"Malformed container name. Must only contain A-Z, a-z, 0-9, _, -, or .">>,
     case re:run(Name, Regex) of
         nomatch ->
-            throw({bad_container_name, Name, Msg});
+            throw({bad_object_name, Name, Msg});
         _ ->
             ok
     end.
