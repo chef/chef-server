@@ -282,15 +282,16 @@ join_keys([K | Rest], Sep, Acc) ->
     join_keys(Rest, Sep, [Sep, K | Acc]).
            
 %% @doc Given a binary or list of binaries, replace occurances of `<',
-%% `&', and `>' with the corresponding entity code such that the
+%% `&', `"', and `>' with the corresponding entity code such that the
 %% resulting binary or list of binaries is suitable for inclusion as
 %% text in an XML element.
 %%
 %% We cheat and simply process the binaries byte at a time. This
 %% should be OK for UTF-8 binaries, but relies on multi-byte
-%% characters not starting the same value as those we are searching
-%% for to escape.  Note that technically we don't need to escape '>',
-%% but symmetry.
+%% characters not starting with the same value as those we are
+%% searching for to escape.  Note that technically we don't need to
+%% escape `>' nor `"', symmetry and matching of a pre-existing Ruby
+%% implementation suggest otherwise.
 xml_text_escape(BinStr) ->
     iolist_to_binary(xml_text_escape1(BinStr)).
 
@@ -305,6 +306,8 @@ escape_char($&) ->
     "&amp;";
 escape_char($>) ->
     "&gt;";
+escape_char($") ->
+    "&quot;";
 escape_char(C) ->
     C.
 

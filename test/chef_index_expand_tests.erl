@@ -34,7 +34,9 @@ flatten_non_recursive_type_test() ->
               {<<"a_false">>, false},
               {<<"a_int">>, 2},
               {<<"a_float">>, 1.23},
-              {<<"a_string">>, <<"hello">>}
+              {<<"a_string">>, <<"hello">>},
+              {<<"q1">>, <<"with \"quotes\"">>},
+              {<<"q2 \"2\"">>, <<"with quotes in key">>}
              ]},
     Expanded = chef_index_expand:flatten(Input),
     %% Expected final result when flattened should be space separated
@@ -45,7 +47,9 @@ flatten_non_recursive_type_test() ->
                "a_int__=__2 "
                "a_null__=__null "
                "a_string__=__hello "
-               "a_true__=__true ">>,
+               "a_true__=__true "
+               "q1__=__with &quot;quotes&quot; "
+               "q2 &quot;2&quot;__=__with quotes in key ">>,
     ?assertEqual(Expect, iolist_to_binary(Expanded)).
 
 flatten_lists_test() ->
@@ -114,7 +118,7 @@ flatten_and_xml_escape_test() ->
     Input = {[
               {<<"A & W">>, <<"The \"question\" is < > !&">>}
              ]},
-    Expect = <<"A &amp; W__=__The \"question\" is &lt; &gt; !&amp; ">>,
+    Expect = <<"A &amp; W__=__The &quot;question&quot; is &lt; &gt; !&amp; ">>,
     ?assertEqual(Expect, iolist_to_binary(chef_index_expand:flatten(Input))).
 
 make_command_role_test_() ->
