@@ -213,6 +213,9 @@ module PrivateChef
       results['private_chef']['notification_email'] = PrivateChef['notification_email']
       results['private_chef']['from_email'] = PrivateChef['from_email']
       results['private_chef']['role'] = PrivateChef['role']
+      results['private_chef']['topology'] = PrivateChef['topology']
+      results['private_chef']['servers'] = PrivateChef['servers']
+      results['private_chef']['backend_vips'] = PrivateChef['backend_vips']
       results['private_chef']['logs'] = {}
       results['private_chef']['logs']['log_retention'] = PrivateChef['log_retention']
       results['private_chef']['logs']['log_rotation'] = PrivateChef['log_rotation']
