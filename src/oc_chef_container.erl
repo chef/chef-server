@@ -34,7 +34,6 @@
          new_record/3,
          org_id/1,
          record_fields/0,
-         rename_supported/0,
          set_created/2,
          set_updated/2,
          type_name/1,
@@ -147,9 +146,6 @@ parse_binary_json(Bin) ->
 assemble_container_ejson(#oc_chef_container{name = ContainerName}) ->
     {[{<<"containername">>, ContainerName},
       {<<"containerpath">>, ContainerName}]}.
-
-rename_supported() ->
-    true.
 
 %% TODO: functions from chef_regex need to get refactored out into the
 %%       chef object behaviours, this is a hack and a copy of that
