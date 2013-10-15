@@ -5,14 +5,14 @@ class OmnibusHelper
   # Returns 'true' if this machine was designated as the bootstrap
   # server in private-chef.rb
   def self.is_bootstrap_server?(node)
-    case PrivateChef['topology']
+    case node['private_chef']['topology']
     when 'standalone', 'manual'
       true
     when 'tier'
-      PrivateChef['role'] == 'backend'
+      node['private_chef']['role'] == 'backend'
     when 'ha'
       node_name = node['fqdn']
-      !!(PrivateChef["servers"][node_name]['bootstrap'])
+      !!(node['private_chef']["servers"][node_name]['bootstrap'])
     end
   end
 
@@ -31,8 +31,8 @@ class OmnibusHelper
   #   directory path information
   def self.is_data_master?(node)
 
-    topology = PrivateChef['topology']
-    role = PrivateChef['role']
+    topology = node['private_chef']['topology']
+    role = node['private_chef']['role']
 
     case topology
     when "standalone"
