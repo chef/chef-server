@@ -45,7 +45,7 @@ flatten_non_recursive_type_test() ->
     Expect = <<"a_false__=__false "
                "a_float__=__1.23000000000000 "
                "a_int__=__2 "
-               "a_null__=__null "
+               "a_null__=__ "
                "a_string__=__hello "
                "a_true__=__true "
                "q1__=__with &quot;quotes&quot; "
@@ -57,9 +57,10 @@ flatten_lists_test() ->
                           <<"a">>, 0, 1.123,
                           [<<"b">>, 2], <<"c">>]}]},
     Expanded = chef_index_expand:flatten(Input),
-    Expect = <<"k1__=__0 k1__=__1.12300000000000 "
+    Expect = <<"k1__=__ "
+               "k1__=__0 k1__=__1.12300000000000 "
                "k1__=__2 k1__=__a k1__=__b k1__=__c "
-               "k1__=__false k1__=__null k1__=__true ">>,
+               "k1__=__false k1__=__true ">>,
     ?assertEqual(Expect, iolist_to_binary(Expanded)).
 
 flatten_nested_test() ->

@@ -239,7 +239,7 @@ expand(Keys, true, Acc) ->
 expand(Keys, false, Acc) ->
     add_kv_pair(Keys, <<"false">>, Acc);
 expand(Keys, null, Acc) ->
-    add_kv_pair(Keys, <<"null">>, Acc).
+    add_kv_pair(Keys, <<"">>, Acc).
 
 expand_list(Keys, List, Acc) ->
     lists:foldl(fun(Item, MyAcc) ->
