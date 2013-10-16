@@ -20,36 +20,36 @@
          terminate/2,
          code_change/3]).
 
--record(state, {q :: term()}).
+-record(state, {q :: list(term())}).
 
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-    {ok, #state{q = queue:new()}}.
+    {ok, #state{q = []}}.
 
 %% populate the queue with items contained in  Items
 initialize_queue(Items) when is_list(Items) ->
     gen_server:call(?MODULE, {init_queue, Items}).
 
+%% How many items in the queue?
 length() ->
     gen_server:call(?MODULE, length).
 
+%% Get the next item from the head of the queue.
 next() ->
     gen_server:call(?MODULE, next).
 
 handle_call({init_queue, Items}, _From, State) ->
-    {reply, ok, State#state{q = queue:from_list(Items)}};
+    {reply, ok, State#state{q = Items}};
 handle_call(length, _From, #state{q = Q} = State) ->
-    {reply, queue:len(Q), State};
-handle_call(next, _From, #state{q = Q} = State) ->
-    {Result, NewQ} = queue:out(Q),
-    {reply, result_to_reply(Result), State#state{q = NewQ}};
+    {reply, length(Q), State};
+handle_call(next, _From, #state{q = []} = State) ->
+    {reply, {ok, no_more}, State};
+handle_call(next, _From, #state{q = [H|T]} = State) ->
+    {reply, H, State#state{q = T}};
 handle_call(_Request, _From, State) ->
     {reply, ignored, State}.
-
-result_to_reply({value, Item}) -> Item;
-result_to_reply(empty) -> {ok, no_more}.
 
 handle_cast(_Msg, State) ->
     {noreply, State}.
@@ -62,4 +62,3 @@ terminate(_Reason, _State) ->
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
-

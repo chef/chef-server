@@ -14,7 +14,6 @@
 -export([remaining_user_ids/0,
          convert_user/1,
          start_bcrypt_pool/0]).
-%         start_bcrypt_worker_link/0]).
 
 -record(tiny_user, {
         'username',         %% capture for debugging purposes.
@@ -27,41 +26,54 @@ remaining_user_ids() ->
     {ok, Data} = all_unconverted_users(),
     Data.
 
-%% Stop any existing bcrypt worker pool and brin gup a new one.
+%% Stop any existing bcrypt worker pool and bring up a new one.
 %% This must be invoked prior to any attempt to convert_user/1.
 start_bcrypt_pool() ->
     pooler:rm_pool(bcrypt),
     pooler:new_pool([{name, bcrypt},
                      {init_count, envy:get(mover, bcrypt_worker_count, integer)},
                      {max_count, envy:get(mover, bcrypt_worker_count, integer)},
+                     % We will start the worker directly via gen_server, since
+                     % the start_link included in bcrypt_nif_worker will create only
+                     % a single named worker
                      {start_mfa, {gen_server, start_link,
                                   [bcrypt_nif_worker, [], []]}}]).
 
 convert_user(Id) ->
-    {ok, #tiny_user{username = Name, serialized_object = Object}} = user_data(Id),
+    {ok, #tiny_user{serialized_object = Object}} = user_data(Id),
     Json1 = chef_json:decode(Object),
     {SHA1Hash, Json2} = get_and_delete(<<"hashed_password">>, Json1),
     {Salt, Json3} = get_and_delete(<<"salt">>, Json2),
     {Type, NewSalt, NewHash} = convert_password_hash(SHA1Hash, Salt),
     Encoded = chef_json:encode(Json3),
-    update_user_record(Name, Id, Type, NewHash, NewSalt, Encoded).
+    update_user_record(Id, Type, NewHash, NewSalt, Encoded).
 
 %%
 %% Internal
 %%
+convert_password_hash(<<>>, Salt) ->
+    convert_password_hash(undefined, Salt);
 convert_password_hash(undefined, _Salt) ->
-    % TODO type of None?
-    {'SHA1', "", ""};
+    % User password is unknown, so they cna't log in anyway.
+    % Let's generate a new password so that we don't leave their account
+    % unprotected.
+    NewPass = base64:encode_to_string(crypto:rand_bytes(18)),
+    {ok, BCryptHash} = hash_password(NewPass),
+    {bcrypt, "", BCryptHash};
 convert_password_hash(SHA1Hash, Salt) ->
+    {ok, BcryptHash} = hash_password(SHA1Hash),
+    {'SHA1-bcrypt', Salt, BcryptHash}.
+
+hash_password(Password) ->
     case pooler:take_member(bcrypt) of
         error_no_members ->
             {error, no_bcrypt_workers};
         Worker when is_pid(Worker) ->
-            {ok, BcryptSalt} = gen_server:call(Worker, {gen_salt, 12}, infinity),
-            % NOte that the original password went in as: OrigSalt ++ "--" ++ PlainPassword ++ "--",
-            {ok, BcryptHash} = gen_server:call(Worker, {hashpw, SHA1Hash, BcryptSalt}, infinity),
+            Rounds = envy:get(mover, bcrypt_encryption_rounds, integer),
+            {ok, BcryptSalt} = gen_server:call(Worker, {gen_salt, Rounds}, infinity),
+            {ok, BcryptHash} = gen_server:call(Worker, {hashpw, Password, BcryptSalt}, infinity),
             pooler:return_member(bcrypt, Worker),
-            {'SHA1-bcrypt', Salt, BcryptHash}
+            {ok, BcryptHash}
     end.
 
 user_data(Id) ->
@@ -80,7 +92,7 @@ get_and_delete(Key, Json) ->
     Final = ej:delete({Key}, Json),
     {Value, Final}.
 
-update_user_record(_Name, Id, Type, Hash, Salt, Encoded) ->
+update_user_record(Id, Type, Hash, Salt, Encoded) ->
     case sqerl:execute(user_update_sql(), [Id, Type, Hash, Salt, Encoded]) of
         {ok, _Num} ->
             ok;

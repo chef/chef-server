@@ -83,6 +83,10 @@
           halting/3 ]).
 
 -define(SERVER, ?MODULE).
+
+-type object_generator_fun() :: fun(() -> binary()).
+-type object_processor_fun() :: fun((binary()) -> term()).
+
 -record(migration_worker, { %% Supervisor module that knows how to start workers
                             supervisor :: atom(),
                             %% this can be used to match a pattern on
@@ -92,10 +96,9 @@
                             migration_type :: atom(),
                             %% fun that retrieves identifier for next
                             %% object to run through worker
-                            next_object_generator :: fun(),
+                            next_object_generator :: object_generator_fun(),
                             %% Processor function for generic workers
-                            processor_fun :: fun() }).
-
+                            processor_fun :: object_processor_fun() }).
 
 -record(state, { %% Number of active workers
                  live_worker_count = 0  :: non_neg_integer(),
@@ -170,8 +173,7 @@ migrate_user_password_storage(NumUsers, NumWorkers) ->
 status_check() ->
 	{ok, Status} = mover_manager:status(),
     ready = proplists:get_value(state, Status),
-    0 = mover_transient_migration_queue:length().
-
+    mover_transient_migration_queue:initialize_queue([]).
 
 status() ->
     gen_fsm:sync_send_all_state_event(?SERVER, status).
@@ -244,11 +246,13 @@ working(timeout, #state {max_worker_count = MW,
                          worker = #migration_worker{next_object_generator = Next,
                                                     supervisor = SupMod}}
                          = State) when LW < MW ->
-    %% We have fewer workers than requested, start another one
-    %% if there is still work to do
 
+    %% We have fewer workers than requested, start another one
+    %% asl ong as there is work to do
     case Next() of
-        {ok, no_more} ->
+        {ok, no_more_orgs} -> % no more orgs to migrate
+            {next_state, halting, State#state {objects_remaining = 0}, 0};
+        {ok, no_more} ->      % no more anything else to do
             %% Stop and wait for workers to end.
             {next_state, halting, State#state {objects_remaining = 0}, 0};
         [Object] ->
