@@ -6,3 +6,4 @@ ebin_dialyzer/
 /itest/ct_logs
 /itest/*.beam
 /variables-ct@*
+/itest/*_data/
