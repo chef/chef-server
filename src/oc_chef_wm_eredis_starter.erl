@@ -52,7 +52,7 @@ start_link() ->
 %%
 
 init([]) ->
-    ClientCount = get_env(eredis_client_pool_size, 0),
+    ClientCount = envy:get(oc_chef_wm, eredis_client_pool_size, 0, non_neg_integer),
     ChildCount = child_count(),
     State = #state{want_count = ClientCount, ok_count = ChildCount},
     case ClientCount of
@@ -76,9 +76,9 @@ handle_info(timeout, #state{want_count = 0} = State) ->
     {stop, normal, State};
 handle_info(timeout, #state{ok_count = OkCount, want_count = WantCount} = State) ->
     %% we could move these into server state, but for now this is fine.
-    Host = get_env(redis_host),
-    Port = get_env(redis_port),
-    RedisDb = get_env(redis_db, 0),
+    Host = envy:env(oc_chef_wm, redis_host, string),
+    Port = envy:env(oc_chef_wm, redis_port, pos_integer),
+    RedisDb = envy:env(oc_chef_wm, redis_db, 0, non_neg_integer),
     StartUp = {?MODULE, eredis_start_wrapper, [Host, Port, RedisDb]},
     %% Query supervisor for current child count so that if we've been
     %% restarted, we give additional children correct Ids.
@@ -114,22 +114,6 @@ eredis_start_wrapper(Host, Port, RedisDb) ->
             {ok, Pid};
         Error ->
             Error
-    end.
-
-get_env(Key, Default) ->
-    case application:get_env(oc_chef_wm, Key) of
-        {ok, Value} ->
-            Value;
-        undefined ->
-            Default
-    end.
-
-get_env(Key) ->
-    case application:get_env(oc_chef_wm, Key) of
-        {ok, Value} ->
-            Value;
-        undefined ->
-            error({required_config_missing, {oc_chef_wm, Key}})
     end.
 
 make_id(I) ->

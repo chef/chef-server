@@ -42,8 +42,8 @@ upgrade() ->
 init([]) ->
     ok = load_ibrowse_config(),
     ok = enable_org_cache(),
-    {ok, Ip} = application:get_env(oc_chef_wm, ip),
-    {ok, Port} = application:get_env(oc_chef_wm, port),
+    Ip = envy:get(oc_chef_wm, ip, string),
+    Port = envy:get(oc_chef_wm, port, pos_integer),
     {ok, Dispatch} = file:consult(filename:join(
                          [filename:dirname(code:which(?MODULE)),
                           "..", "priv", "dispatch.conf"])),
@@ -87,10 +87,10 @@ load_ibrowse_config() ->
 
 enable_org_cache() ->
     %% FIXME: should this config live at the oc_chef_wm level?
-    case application:get_env(chef_db, cache_defaults) of
+    case envy:get(chef_db, cache_defaults, undefined, any) of
         undefined ->
             error_logger:info_msg("Org guid cache disabled~n");
-        {ok, _Defaults} ->
+        _Defaults ->
             chef_cache:init(org_guid),
             error_logger:info_msg("Org guid cache enabled~n")
     end,
@@ -98,8 +98,8 @@ enable_org_cache() ->
 
 add_custom_settings(Dispatch) ->
     Dispatch1 = add_resource_init(Dispatch),
-    case application:get_env(oc_chef_wm, request_tracing) of
-        {ok, true} ->
+    case envy:get(oc_chef_wm, request_tracing, undefined, boolean) of
+        true ->
             [{["_debug", "trace", '*'], wmtrace_resource, [{trace_dir, "/tmp"}]} | Dispatch1];
         _ ->
             Dispatch1
@@ -149,19 +149,19 @@ default_resource_init() ->
     %% and if that time comes, this will probably fail.
     [{ServerName, ServerVersion, _, _}] = release_handler:which_releases(permanent),
 
-    Defaults = [{auth_skew, get_env(oc_chef_wm, auth_skew)},
-                {db_type, get_env(sqerl, db_type)},
-                {reqid_header_name, get_env(oc_chef_wm, reqid_header_name)},
+    Defaults = [{auth_skew, envy:get(oc_chef_wm, auth_skew, non_neg_integer)},
+                {db_type, envy:get(sqerl, db_type, atom)},
+                {reqid_header_name, envy:get(oc_chef_wm, reqid_header_name, string)},
 
                 %% These will be used to generate the X-Ops-API-Info header
                 {otp_info, {ServerName, ServerVersion}},
-                {server_flavor, get_env(oc_chef_wm, server_flavor)},
-                {api_version, get_env(oc_chef_wm, api_version)},
+                {server_flavor, envy:get(oc_chef_wm, server_flavor, string)},
+                {api_version, envy:get(oc_chef_wm, api_version, string)},
                 %% metrics and stats_hero config. We organize these into a proplist which
                 %% will end up in the base_state record rather than having a key for each of
                 %% these in base state.
                 {metrics_config,
-                 [{root_metric_key, get_env(oc_chef_wm, root_metric_key)},
+                 [{root_metric_key, envy:get(oc_chef_wm, root_metric_key, string)},
                   %% the following two are hard-coded calls to ?BASE_RESOURCE. These could
                   %% be factored out into app config if we wanted ultimate flexibility. At
                   %% that point, we might want a label and upstream function to form a
@@ -169,13 +169,10 @@ default_resource_init() ->
                   {stats_hero_upstreams, oc_chef_wm_base:stats_hero_upstreams()},
                   {stats_hero_label_fun, {oc_chef_wm_base, stats_hero_label}}]}
                ],
-    case application:get_env(oc_chef_wm, request_tracing) of
-        {ok, true} ->
+    case envy:get(oc_chef_wm, request_tracing, undefined, boolean) of
+        true ->
             [{trace, true}|Defaults];
         _ ->
             Defaults
     end.
 
-get_env(App, Key) ->
-    {ok, Value} = application:get_env(App, Key),
-    Value.

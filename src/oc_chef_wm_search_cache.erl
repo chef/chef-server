@@ -108,13 +108,8 @@ remove_no_cache_org(OrgName) ->
 %% expiration for keys stored with SET.
 -spec cache_entry_ttl() -> non_neg_integer().
 cache_entry_ttl() ->
-    case application:get_env(oc_chef_wm, search_cache_entry_ttl) of
-        undefined ->
-            %% default to 60 seconds
-            60;
-        {ok, Seconds} when is_integer(Seconds) ->
-            Seconds
-    end.
+    envy:get(oc_chef_wm, search_cache_entry_ttl, 60, non_neg_integer).
+
 
 %% @doc Return the cache key for specified inputs that describe a search
 %% request. The key combines request attributes and solr results to identify
@@ -190,10 +185,4 @@ classify_eredis_error(_) ->
     {error, 'REDACTED'}.
 
 eredis_call_timeout() ->
-    case application:get_env(oc_chef_wm, redis_call_timeout) of
-        undefined ->
-            %% gen_server default
-            5000;
-        {ok, Millis} when is_integer(Millis) ->
-            Millis
-    end.
+    envy:get(oc_chef_wm, redis_call_timeout, 5000, non_neg_integer).
