@@ -338,11 +338,16 @@ port_string(Port) ->
 %% Return either a public key or a public key wrapped in a certificate along
 %% with the corresponding private key.
 generate_keypair(Name, RequestId) ->
-    case application:get_env(chef_wm, local_key_gen) of
-        {ok, {true, Bits}} ->
+    case envy:get(chef_wm, local_key_gen, false, fun validate_local_key_gen/1) of
+       {true, Bits} ->
             KeyPair = chef_certgen:rsa_generate_keypair(Bits),
             #rsa_key_pair{public_key = PublicKey, private_key = PrivateKey} = KeyPair,
             {PublicKey, PrivateKey};
-        _ ->
+        false ->
             chef_cert_http:gen_cert(Name, RequestId)
     end.
+
+validate_local_key_gen({true, _Bits}) ->
+    true;
+validate_local_key_gen(Val) ->
+    {invalid_value, Val, "Should be a tuple of {true, Bits}"}.

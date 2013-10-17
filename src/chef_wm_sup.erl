@@ -58,8 +58,8 @@ upgrade() ->
 %% @spec init([]) -> SupervisorTree
 %% @doc supervisor callback.
 init([]) ->
-    {ok, Ip} = application:get_env(chef_wm, ip),
-    {ok, Port} = application:get_env(chef_wm, port),
+    Ip = envy:get(chef_wm, ip, string),
+    Port = envy:get(chef_wm, port, positive_integer),
     {ok, Dispatch} = file:consult(filename:join(
                          [filename:dirname(code:which(?MODULE)),
                           "..", "priv", "dispatch.conf"])),
@@ -141,19 +141,19 @@ default_resource_init() ->
     %% and if that time comes, this will probably fail.
     [{ServerName, ServerVersion, _, _}] = release_handler:which_releases(permanent),
 
-    Defaults = [{auth_skew, get_env(chef_wm, auth_skew)},
-                {reqid_header_name, get_env(chef_wm, reqid_header_name)},
+    Defaults = [{auth_skew, envy:get(chef_wm, auth_skew, positive_integer)},
+                {reqid_header_name, envy:get(chef_wm, reqid_header_name, string)},
 
                 %% These will be used to generate the X-Ops-API-Info header
                 {otp_info, {ServerName, ServerVersion}},
-                {server_flavor, get_env(chef_wm, server_flavor)},
-                {api_version, get_env(chef_wm, api_version)},
+                {server_flavor, envy:get(chef_wm, server_flavor, string)},
+                {api_version, envy:get(chef_wm, api_version, string)},
 
                 %% metrics and stats_hero config. We organize these into a proplist which
                 %% will end up in the base_state record rather than having a key for each of
                 %% these in base state.
                 {metrics_config,
-                 [{root_metric_key, get_env(chef_wm, root_metric_key)},
+                 [{root_metric_key, envy:get(chef_wm, root_metric_key, string)},
                   %% the following two are hard-coded calls to ?BASE_RESOURCE. These could
                   %% be factored out into app config if we wanted ultimate flexibility. At
                   %% that point, we might want a label and upstream function to form a
@@ -161,13 +161,9 @@ default_resource_init() ->
                   {stats_hero_upstreams, ?BASE_RESOURCE:stats_hero_upstreams()},
                   {stats_hero_label_fun, {?BASE_RESOURCE, stats_hero_label}}]}
                ],
-    case application:get_env(chef_wm, request_tracing) of
-        {ok, true} ->
-            [{trace, true}|Defaults];
-        _ ->
+    case envy:get(chef_wm, request_tracing, boolean, Defaults) of
+        true ->
+            [{trace, true} | Defaults];
+        Defaults ->
             Defaults
     end.
-
-get_env(App, Key) ->
-    {ok, Value} = application:get_env(App, Key),
-    Value.
