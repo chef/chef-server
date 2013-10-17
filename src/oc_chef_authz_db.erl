@@ -57,6 +57,7 @@ statements(pgsql) ->
         "WHERE id= $4">>},
      {delete_container_by_id, <<"DELETE FROM containers WHERE id= $1">>},
      {list_containers_for_org, <<"SELECT name FROM containers WHERE org_id= $1">>},
+     {list_groups_for_org, <<"SELECT name FROM groups WHERE org_id= $1">>},
      {find_group_by_orgid_name,
       <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
         " FROM groups"

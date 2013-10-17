@@ -72,7 +72,7 @@ find_query() ->
     find_group_by_orgid_name.
 
 list_query() ->
-    error(not_implemented).
+    list_groups_for_org.
 
 bulk_get_query() ->
     %% TODO: do we need this?
@@ -113,8 +113,8 @@ fields_for_fetch(#oc_chef_group{org_id = OrgId,
 record_fields() ->
     record_info(fields, oc_chef_group).
 
-list(#oc_chef_group{org_id = _OrgId}, _CallbackFun) ->
-    error(not_implemented).
+list(#oc_chef_group{org_id = OrgId}, CallbackFun) ->
+    CallbackFun({list_query(), [OrgId], [name]}).
 
 update(_,_) ->
     error(not_implemented).

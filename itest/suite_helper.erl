@@ -71,7 +71,12 @@ random_bogus_port() ->
 
 init_pg_db(Config) ->
     Dir = ?config(data_dir, Config),
-    Schema = filename:join([?config(data_dir, Config), "../common/schema.sql"]),
+    DbName = "testdb",
+    CommonDir = filename:join([?config(data_dir, Config), "../common"]),
+    Schema = filename:join([CommonDir, "schema.sql"]),
+    ECSchema = filename:join([CommonDir, "deps", "enterprise-chef-server-schema"]),
+    OSCSchema = filename:join([ECSchema, "deps", "chef-server-schema"]),
+
     PgData = filename:join(Dir, "pg_data"),
     PgLog = filename:join(Dir, "pg.log"),
     Port = random_bogus_port(),
@@ -80,8 +85,12 @@ init_pg_db(Config) ->
             ["initdb -D", PgData],
             ["pg_ctl -D", PgData, "-l", PgLog, "-o \"-p", PortStr, "\" start"],
             %% db start is async, sleep? :(
-            ["sleep 1 && createdb -p", PortStr, "testdb"],
-            ["psql -p", PortStr, "testdb", "<", Schema]
+            ["sleep 1 && createdb -p", PortStr, DbName],
+            ["cd", OSCSchema, "&& sqitch --engine pg --db-name", DbName,
+             "--db-port", PortStr, "deploy"],
+            ["cd", ECSchema, "&& sqitch --engine pg --db-name", DbName,
+             "--db-port", PortStr, "deploy"],
+            ["psql -p", PortStr, DbName, "<", Schema]
            ],
     ct:pal("~s", [run_cmds(CMDS)]),
     [{pg_port, Port}, {pg_data, PgData}, {pg_log, PgLog} | Config ].

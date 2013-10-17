@@ -1,7 +1,7 @@
 DEPS = $(CURDIR)/deps
 
 DIALYZER_OPTS = -Wunderspecs
-
+ITEST_DEPS = $(CURDIR)/itest/common/deps
 # List dependencies that should be included in a cached dialyzer PLT file.
 DIALYZER_DEPS = deps/jiffy/ebin \
                 deps/ibrowse/ebin \
@@ -84,7 +84,16 @@ endif
 doc:
 	@rebar doc skip_deps=true
 
-itest: clean
+$(ITEST_DEPS):
+	mkdir -p $(ITEST_DEPS)
+
+$(ITEST_DEPS)/enterprise-chef-server-schema: $(ITEST_DEPS)
+	cd $(ITEST_DEPS); git clone git@github.com:opscode/enterprise-chef-server-schema.git; cd enterprise-chef-server-schema; git checkout $(EC_SCHEMA_VERSION); make install
+
+
+itest_deps: $(ITEST_DEPS)/enterprise-chef-server-schema
+
+itest: clean itest_deps
         # recompile, setting TEST define so we can play with
         # unexported functions.
 	@echo "Recompiling with -DTEST ..."

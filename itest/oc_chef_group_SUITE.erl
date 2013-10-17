@@ -18,39 +18,30 @@ suite() ->
     [{timetrap,{seconds,30}}].
 
 init_per_suite(Config) ->
-    Config.
-end_per_suite(_Config) ->
-    ok.
+    suite_helper:init(Config).
 
-init_per_group(_GroupName, Config) ->
-    Config.
-
-end_per_group(_GroupName, _Config) ->
-    ok.
-
-init_per_testcase(_TestCase, Config) ->
-    Config.
-
-end_per_testcase(_TestCase, _Config) ->
-    ok.
-
-groups() ->
-    [].
+end_per_suite(Config) ->
+    suite_helper:stop(Config).
  
 all() -> 
-    [fetch_group_sql, list_should_return_empty_list_when_no_groups].
+    [fetch_group_sql, list_should_return_empty_list_when_no_groups,
+    list_should_return_group_name_when_group_exists].
 
 list_should_return_empty_list_when_no_groups(_Config) ->
-    ?assertEqual([], chef_db:list(#oc_chef_group{})),
+    OrgId = <<"77770000000000000000000000000001">>,
+    ?assertEqual([], chef_sql:fetch_object_names(#oc_chef_group{org_id = OrgId})),
+    ok.
+
+list_should_return_group_name_when_group_exists(_Config) ->
+    OrgId = <<"77770000000000000000000000000000">>,
+    ?assertEqual([<<"admins">>], chef_sql:fetch_object_names(#oc_chef_group{org_id = OrgId})),
     ok.
 
 fetch_group_sql(_Config) ->
     OrgId = <<"77770000000000000000000000000000">>,
-    Name = <<"admins">>,
-    ReqId = <<"test-2-req-id">>,
-    Ctx = oc_chef_authz:make_context(ReqId, darklaunch_stub),
-    case oc_chef_authz_db:fetch_group_authz_id_sql(Ctx, OrgId, Name) of
-        <<"66660000000000000000000000000000">> = V ->
+    Name = <<"admins">>,    
+    case chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = Name}) of
+        #oc_chef_group{authz_id = <<"66660000000000000000000000000000">> = V} ->
             ct:pal("Found group with authz_id: ~p", [V]),
             ok;
         Bad ->
