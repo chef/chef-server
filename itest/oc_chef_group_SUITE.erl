@@ -11,6 +11,8 @@
 -compile(export_all).
 
 -include_lib("common_test/include/ct.hrl").
+-include_lib("oc_chef_authz/include/oc_chef_types.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
 suite() ->
     [{timetrap,{seconds,30}}].
@@ -42,4 +44,5 @@ list_should_return_empty_list_when_no_groups() ->
     [].
 
 list_should_return_empty_list_when_no_groups(_Config) ->
+    ?assertEqual([], chef_db:list(#oc_chef_group{})),
     ok.
