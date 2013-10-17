@@ -4,8 +4,8 @@
 -include_lib("oc_chef_authz/include/oc_chef_authz.hrl").
 
 -compile([export_all]).
- 
-all() -> [fetch_container_sql].
+
+all() -> [fetch_container_sql, fetch_group_sql].
 
 init_per_suite(Config) ->
     ct:pal("hi from init~n"),
@@ -13,12 +13,38 @@ init_per_suite(Config) ->
 
 end_per_suite(Config) ->
     ct:pal("bye from init~n"),
+    %% Note: We see a noisy error message of the form below when terminating.
+    %% This trains us to ignore errors, which is a bad thing.
+    %% Silencing the error message is a short term fix, we need a better one.
+    %%
+    %% ** State machine <0.133.0> terminating
+    %% ** Last message in was {'EXIT',<0.132.0>,killed}
+    %% ** When State == ready
+    %% **      Data  == {state,undefined,<0.134.0>,5000,
+    %%                         [{<<"application_name">>,<<>>},
+    %%                          {<<"client_encoding">>,<<"UTF8">>},
+    %%                          {<<"DateStyle">>,<<"ISO, MDY">>},
+    %%                          {<<"integer_datetimes">>,<<"on">>},
+    %%                          {<<"IntervalStyle">>,<<"postgres">>},
+    %%                          {<<"is_superuser">>,<<"on">>},
+    %%                          {<<"server_encoding">>,<<"UTF8">>},
+    %%                          {<<"server_version">>,<<"9.2.3">>},
+    %%                          {<<"session_authorization">>,<<"mark">>},
+    %%                          {<<"standard_conforming_strings">>,<<"on">>},
+    %%                          {<<"TimeZone">>,<<"US/Pacific">>}],
+    %%                         undefined,
+    %%                         {<0.132.0>,#Ref<0.0.0.1089>},
+    %%                         undefined,false,[],
+    %%                         {90852,579277529},
+    %%                         undefined,73}
+    error_logger:tty(false),
     stop_apps(),
+    error_logger:tty(true),
     ct:pal("~s", [stop_pg_db(Config)]),
     ok.
 
 fetch_container_sql(_Config) ->
-    OrgId = <<"3333224947d7ed92e872e53b620e94b7">>,
+    OrgId = <<"33330000000000000000000000000000">>,
     ContainerName = <<"nodes">>,
     ReqId = <<"test-1-req-id">>,
     Ctx = oc_chef_authz:make_context(ReqId, darklaunch_stub),
@@ -29,6 +55,21 @@ fetch_container_sql(_Config) ->
         Bad ->
             erlang:error({unexpected_result, Bad})
     end.
+
+fetch_group_sql(_Config) ->
+    OrgId = <<"77770000000000000000000000000000">>,
+    Name = <<"admins">>,
+    ReqId = <<"test-2-req-id">>,
+    Ctx = oc_chef_authz:make_context(ReqId, darklaunch_stub),
+    case oc_chef_authz_db:fetch_group_authz_id_sql(Ctx, OrgId, Name) of
+        <<"66660000000000000000000000000000">> = V ->
+            ct:pal("Found group with authz_id: ~p", [V]),
+            ok;
+        Bad ->
+            erlang:error({unexpected_result, Bad})
+    end.
+
+
 
 random_bogus_port() ->
     {ok, S} = gen_udp:open(0, [binary, {active, once}]),

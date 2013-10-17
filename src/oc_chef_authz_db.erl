@@ -41,6 +41,10 @@ statements(pgsql) ->
      {find_container_by_orgid_name,
       <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
         " FROM containers "
+        " WHERE (org_id = $1 AND name = $2) LIMIT 1">>},
+     {find_group_by_orgid_name,
+      <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
+        " FROM groups"
         " WHERE (org_id = $1 AND name = $2) LIMIT 1">>}
      ].
 
@@ -135,7 +139,17 @@ fetch_container_couchdb(Server, OrgId, ContainerName) ->
                            OrgId :: binary(),
                            GroupName :: binary()) ->  object_id() |
                                                       {not_found, authz_group}.
-fetch_group_authz_id(#oc_chef_authz_context{otto_connection=Server}, OrgId, GroupName) ->
+fetch_group_authz_id(#oc_chef_authz_context{otto_connection=Server,
+                                            darklaunch = Darklaunch} = Ctx,
+                     OrgId, GroupName) ->
+    case xdarklaunch_req:is_enabled(<<"couchdb_groups">>, Darklaunch) of
+        true ->
+            fetch_group_authz_id_couchdb(Server, OrgId, GroupName);
+        false ->
+            fetch_group_authz_id_sql(Ctx, OrgId, GroupName)
+    end.
+
+fetch_group_authz_id_couchdb(Server, OrgId, GroupName) ->
     case fetch_by_name(Server, OrgId, GroupName, authz_group) of
         {ok, Group} ->
             Id = ej:get({<<"_id">>}, Group),
@@ -175,7 +189,7 @@ fetch_by_name(Server, OrgId, Name, Type) when is_binary(Name), is_binary(OrgId) 
             end;
         {ok, []} -> {not_found, Type};
         {error, not_found} -> {not_found, Type}
-    end.
+     end.
 
 -spec fetch_auth_join_id(couchbeam:server(), db_key(), auth_to_user|user_to_auth) -> binary() | {not_found, term()}.
 fetch_auth_join_id(Server, Id, Direction) when is_list(Id) ->
@@ -249,6 +263,27 @@ fetch_container_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
             C;
         {ok, none} ->
             not_found;
+        {error, Error} ->
+            {error, Error}
+    end.
+-spec fetch_group_authz_id_sql(Context :: oc_chef_authz_context(),
+                               OrgId :: binary(),
+                               GroupName :: binary()) ->  object_id() |
+                                                          {not_found, authz_group} |
+                                                          {error, _}.
+fetch_group_authz_id_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
+    %% since ?FIRST uses record_info, it can't be placed within the fun.
+    Transform = ?FIRST(chef_group),
+    case stats_hero:ctime(ReqId,
+                          %% aggregate perf timing with other sql queries
+                          {chef_sql, fetch_group_sql},
+                          fun() ->
+                                  sqerl:select(find_group_by_orgid_name, [OrgId, Name], Transform)
+                          end) of
+        {ok, #chef_group{authz_id=AuthzId}} ->
+            AuthzId;
+        {ok, none} ->
+            {not_found, authz_group};
         {error, Error} ->
             {error, Error}
     end.
