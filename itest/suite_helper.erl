@@ -70,7 +70,7 @@ random_bogus_port() ->
     Port.
 
 init_pg_db(Config) ->
-    Dir = ?config(priv_dir, Config),
+    Dir = ?config(data_dir, Config),
     Schema = filename:join([?config(data_dir, Config), "../common/schema.sql"]),
     PgData = filename:join(Dir, "pg_data"),
     PgLog = filename:join(Dir, "pg.log"),
