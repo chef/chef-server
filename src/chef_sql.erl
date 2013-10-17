@@ -1387,7 +1387,7 @@ extract_ids_using_filtered_results(MappingDict, FilteredCookbookVersions) ->
                                                               SerializedObject :: binary()}]} |
                                                        {error, term()}.
 fetch_cookbook_version_serialized_objects(Ids) ->
-    {ok, BatchSize} = application:get_env(chef_db, bulk_fetch_batch_size),
+    BatchSize = envy:get(chef_db, bulk_fetch_batch_size, pos_integer),
     fetch_cookbook_version_serialized_objects(Ids, BatchSize, []).
 
 %% @doc Recursive implementation of {@link fetch_cookbook_version_serialized_objects/1}.
