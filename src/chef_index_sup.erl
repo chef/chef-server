@@ -46,29 +46,16 @@ init([]) ->
 
 amqp_child_spec() ->
     %% Lookup AMQP connection info
-    case application:get_env(chef_index, rabbitmq_host) of
-        undefined ->
-            error_logger:info_msg("RabbitMQ config missing. Indexing for search is disabled.~n"),
-            [];
-        {ok, Host} ->
-            Port = get_env(rabbitmq_port),
-            User = get_env(rabbitmq_user),
-            Password = get_env(rabbitmq_password),
-            VHost = get_env(rabbitmq_vhost),
-            ExchgName = get_env(rabbitmq_exchange),
-            Exchange = {#'exchange.declare'{exchange=ExchgName, durable=true}},
-            Network = {network, Host, Port, {User, Password}, VHost},
-            error_logger:info_msg("Connecting to Rabbit at ~s:~p~s (exchange: ~p)~n",
-                                  [Host, Port, VHost, ExchgName]),
-            IndexDesc = {chef_index_queue, {bunnyc, start_link, [chef_index_queue, Network, Exchange, []]},
-                         permanent, 5000, worker, dynamic},
-            [IndexDesc]
-    end.
-
-get_env(Key) ->
-    case application:get_env(chef_index, Key) of
-        undefined ->
-            throw({missing_application_config, {chef_index, Key}});
-        {ok, Value} ->
-            Value
-    end.
+    Host =  envy:get(chef_index, rabbitmq_host, string),
+    Port = envy:get(chef_index,rabbitmq_port, non_neg_integer),
+    User = envy:get(chef_index,rabbitmq_user, binary),
+    Password = envy:get(chef_index,rabbitmq_password, binary),
+    VHost = envy:get(chef_index,rabbitmq_vhost, binary),
+    ExchgName = envy:get(chef_index,rabbitmq_exchange, binary),
+    Exchange = {#'exchange.declare'{exchange=ExchgName, durable=true}},
+    Network = {network, Host, Port, {User, Password}, VHost},
+    error_logger:info_msg("Connecting to Rabbit at ~s:~p~s (exchange: ~p)~n",
+        [Host, Port, VHost, ExchgName]),
+    IndexDesc = {chef_index_queue, {bunnyc, start_link, [chef_index_queue, Network, Exchange, []]},
+        permanent, 5000, worker, dynamic},
+    [IndexDesc].
