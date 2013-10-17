@@ -17,6 +17,8 @@
 
 -module(oc_chef_authz_db).
 
+-include_lib("oc_chef_authz/include/oc_chef_types.hrl").
+
 -export([container_record_to_authz_id/2,
          fetch_container/3,
          fetch_group_authz_id/3,
@@ -42,6 +44,19 @@ statements(pgsql) ->
       <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
         " FROM containers "
         " WHERE (org_id = $1 AND name = $2) LIMIT 1">>},
+     {find_group_by_orgid_name,
+      <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
+        " FROM groups"
+        " WHERE (org_id = $1 AND name = $2) LIMIT 1">>},
+     {insert_container,
+      <<"INSERT INTO containers (id, authz_id, org_id, name,"
+        " last_updated_by, created_at, updated_at) VALUES"
+        " ($1, $2, $3, $4, $5, $6, $7)">>},
+     {update_container_by_id,
+      <<"UPDATE containers SET last_updated_by= $1, updated_at= $2, name= $3"
+        "WHERE id= $4">>},
+     {delete_container_by_id, <<"DELETE FROM containers WHERE id= $1">>},
+     {list_containers_for_org, <<"SELECT name FROM containers WHERE org_id= $1">>},
      {find_group_by_orgid_name,
       <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
         " FROM groups"
@@ -273,17 +288,16 @@ fetch_container_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
                                                           {error, _}.
 fetch_group_authz_id_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
     %% since ?FIRST uses record_info, it can't be placed within the fun.
-    Transform = ?FIRST(chef_group),
-    case stats_hero:ctime(ReqId,
-                          %% aggregate perf timing with other sql queries
-                          {chef_sql, fetch_group_sql},
+    case stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
-                                  sqerl:select(find_group_by_orgid_name, [OrgId, Name], Transform)
+                                  chef_sql:fetch(#oc_chef_group{
+                                                   org_id = OrgId,
+                                                   name = Name})
                           end) of
-        {ok, #chef_group{authz_id=AuthzId}} ->
+        #oc_chef_group{authz_id = AuthzId} ->
             AuthzId;
-        {ok, none} ->
+        not_found ->
             {not_found, authz_group};
-        {error, Error} ->
-            {error, Error}
+        {error, _} = Error ->
+            Error
     end.
