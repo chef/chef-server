@@ -24,8 +24,20 @@ end_per_suite(Config) ->
     suite_helper:stop(Config).
  
 all() -> 
-    [fetch_group_sql, list_should_return_empty_list_when_no_groups,
-    list_should_return_group_name_when_group_exists].
+    [create_should_create_new_group,
+     fetch_group_sql, list_should_return_empty_list_when_no_groups,
+     list_should_return_group_name_when_group_exists].
+
+create_should_create_new_group(_Config) ->
+    ReqId = <<"test-1-req-id">>,
+    Ctx = {context, <<"req_id">>, otto, undefined},
+    OrgId = <<"GGGG0000000000000000000000000000">>,
+    GroupName = <<"group_name">>,
+        ?assertEqual([], chef_sql:fetch_object_names(#oc_chef_group{org_id = OrgId})),
+    chef_db:create(oc_chef_group:new_record(OrgId, <<"authzid">>, {[{<<"groupname">>,GroupName}]}), Ctx, <<"authz">>),
+    ?assertEqual([<<"group_name">>], chef_sql:fetch_object_names(#oc_chef_group{org_id = OrgId})),
+    ok.
+    
 
 list_should_return_empty_list_when_no_groups(_Config) ->
     OrgId = <<"77770000000000000000000000000001">>,
@@ -47,4 +59,3 @@ fetch_group_sql(_Config) ->
         Bad ->
             erlang:error({unexpected_result, Bad})
     end.
-

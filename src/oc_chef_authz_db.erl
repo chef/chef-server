@@ -61,7 +61,11 @@ statements(pgsql) ->
      {find_group_by_orgid_name,
       <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
         " FROM groups"
-        " WHERE (org_id = $1 AND name = $2) LIMIT 1">>}
+        " WHERE (org_id = $1 AND name = $2) LIMIT 1">>},
+     {insert_group,
+      <<"INSERT INTO groups (id, authz_id, org_id, name,"
+        " last_updated_by, created_at, updated_at) VALUES"
+        " ($1, $2, $3, $4, $5, $6, $7)">>}
      ].
 
 %
