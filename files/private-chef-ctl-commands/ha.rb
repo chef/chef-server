@@ -156,8 +156,9 @@ add_command "ha-status", "Show the status of high availability services.", 1 do
     error_exit = 6
   end
 
-  ha_services = running_config['private_chef'].select {|k,v| v.is_a?(Hash) && v['ha'] }.map {|k,v| k}
-  ha_services << "opscode-expander-reindexer"
+  # HA services are those that have a 'keepalive_me' file in their
+  # runit directories
+  ha_services = Dir.chdir(running_config['runit']['sv_dir']){Dir.glob('**/keepalive_me').map{|f| File.dirname(f)}}.sort
 
   get_all_services.sort.each do |service_name|
     if service_enabled?(service_name)
