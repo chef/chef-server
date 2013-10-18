@@ -38,7 +38,7 @@ define :component_runit_service, :log_directory => nil, :svlogd_size => nil, :sv
   if node['private_chef']['topology'] == 'ha'
     is_keepalive_service = params[:ha] || node['private_chef'][component]['ha']
     file "#{node['runit']['sv_dir']}/#{component}/keepalive_me" do
-      action is_keepalive_service ? :touch : :delete
+      action is_keepalive_service ? :create : :delete
     end
   end
 
