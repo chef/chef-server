@@ -113,3 +113,17 @@ run_cmds(CMDS) ->
 space_join(L) ->
     [ [Elt, " "] || Elt <- L ].
 
+cleanup_test_case(Config) ->
+    Tables = ?config(tables, Config),
+    [delete_all_from_table(TableName) || TableName <- Tables],
+    Config.
+
+delete_all_from_table(TableName) ->
+    Result = case sqerl:adhoc_delete(TableName, all) of
+        {ok, Count} ->
+            Count;
+        Error ->
+            throw(Error)
+    end,
+    error_logger:info_msg("Delete ~p: ~p", [TableName, Result]),
+    ok.
