@@ -32,7 +32,7 @@ init(Config0) ->
              {db_port, ?config(pg_port, Config)},
              {db_user, os:getenv("USER")},
              {db_pass, "sesame1-ignored"},
-             {db_name, "testdb" },
+             {db_name, ?config(pg_name, Config) },
              {idle_check, 10000},
              {prepared_statements, {oc_chef_authz_db, statements, [pgsql]}},
              {column_transforms,
@@ -70,18 +70,19 @@ random_bogus_port() ->
     Port.
 
 init_pg_db(Config) ->
-    Dir = ?config(data_dir, Config),
-    DbName = "testdb",
-    CommonDir = filename:join([?config(data_dir, Config), "../common"]),
+    DataDir = ?config(data_dir, Config),
+    DbName = "oc_chef_authz_itests",
+    CommonDir = filename:join([DataDir, "../common"]),
     Schema = filename:join([CommonDir, "schema.sql"]),
     ECSchema = filename:join([CommonDir, "deps", "enterprise-chef-server-schema"]),
     OSCSchema = filename:join([ECSchema, "deps", "chef-server-schema"]),
 
-    PgData = filename:join(Dir, "pg_data"),
-    PgLog = filename:join(Dir, "pg.log"),
+    PgData = filename:join(DataDir, "pg_data"),
+    PgLog = filename:join(DataDir, "pg.log"),
     Port = random_bogus_port(),
     PortStr = integer_to_list(Port),
     CMDS = [
+            ["mkdir -p", DataDir],
             ["initdb -D", PgData],
             ["pg_ctl -D", PgData, "-l", PgLog, "-o \"-p", PortStr, "\" start"],
             %% db start is async, sleep? :(
@@ -93,12 +94,13 @@ init_pg_db(Config) ->
             ["psql -p", PortStr, DbName, "<", Schema]
            ],
     ct:pal("~s", [run_cmds(CMDS)]),
-    [{pg_port, Port}, {pg_data, PgData}, {pg_log, PgLog} | Config ].
+    [{pg_port, Port}, {pg_data, PgData}, {pg_log, PgLog}, {pg_name, DbName} | Config ].
 
 stop_pg_db(Config) ->
     PgData = ?config(pg_data, Config),
     CMDS = [
-            ["pg_ctl -D", PgData, "-m fast", "stop"]
+            ["pg_ctl -D", PgData, "-m fast", "stop"],
+            ["rm -rf", ?config(data_dir, Config)]
            ],
     run_cmds(CMDS).
 
