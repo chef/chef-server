@@ -66,7 +66,7 @@ update_query() ->
     error(not_implemented).
 
 delete_query() ->
-    error(not_implemented).
+    delete_group_by_id.
 
 find_query() ->
     find_group_by_orgid_name.
