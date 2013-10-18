@@ -497,24 +497,6 @@ default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_bind'] = node[
 default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_peer'] = nil
 default['private_chef']['keepalived']['vrrp_instance_preempt_delay'] = 30
 default['private_chef']['keepalived']['vrrp_instance_nopreempt'] = true
-
-default['private_chef']['keepalived']['service_order'] = [
-  { "key" => "couchdb", "service_name" => "couchdb" },
-  { "key" => "postgresql", "service_name" => "postgresql" },
-  { "key" => "rabbitmq", "service_name" => "rabbitmq" },
-  { "key" => "oc_bifrost", "service_name" => "oc_bifrost" },
-  { "key" => "opscode-certificate", "service_name" => "opscode-certificate" },
-  { "key" => "opscode-account", "service_name" => "opscode-account" },
-  { "key" => "opscode-solr", "service_name" => "opscode-solr" },
-  { "key" => "opscode-expander", "service_name" => "opscode-expander" },
-  { "key" => "opscode-expander", "service_name" => "opscode-expander-reindexer" },
-  { "key" => "opscode-org-creator", "service_name" => "opscode-org-creator" },
-  { "key" => "bookshelf", "service_name" => "bookshelf" },
-  { "key" => "opscode-erchef", "service_name" => "opscode-erchef" },
-  { "key" => "opscode-webui", "service_name" => "opscode-webui" },
-  { "key" => "nginx", "service_name" => "nginx" }
-]
-
 default['private_chef']['keepalived']['service_posthooks'] = {
     "rabbitmq" => "/opt/opscode/bin/wait-for-rabbit"
 }

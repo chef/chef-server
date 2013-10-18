@@ -26,6 +26,8 @@ function error_exit
   exit 1
 }
 
+<%- keepalive_services = Dir.chdir(node['runit']['sv_dir']){Dir.glob('**/keepalive_me').map{|f| File.dirname(f)}}.sort -%>
+
 function transition
 {
   log_me "Transitioning to $1"
@@ -50,25 +52,22 @@ function transition
       log_me "Mounting <%= node['private_chef']['drbd']['device'] %> at <%= node['private_chef']['drbd']['data_dir'] %>"
       mount <%= node['private_chef']['drbd']['device'] %> <%= node['private_chef']['drbd']['data_dir'] %> || true
 
-<%- node['private_chef']['keepalived']['service_order'].each do |item| -%>
-<%- if node['private_chef'][item['key']]['ha'] -%>
-      log_me "Starting service <%= item['service_name'] %>"
-      /opt/opscode/bin/private-chef-ctl start <%= item['service_name'] %> || error_exit "Cannot start <%= item['service_name'] %>"
-      <%- if node['private_chef']['keepalived']['service_posthooks'][item['service_name']] -%>
-        log_me "Doing post-start hook for <%= item['service_name'] %>"
-        <%= node['private_chef']['keepalived']['service_posthooks'][item['service_name']] %>
+<%- keepalive_services.each do |service| -%>
+      log_me "Starting service <%= service %>"
+      /opt/opscode/bin/private-chef-ctl start <%= service %> || error_exit "Cannot start <%= service %>"
+      <%- if node['private_chef']['keepalived']['service_posthooks'][service] -%>
+        log_me "Doing post-start hook for <%= service %>"
+        <%= node['private_chef']['keepalived']['service_posthooks'][service] %>
       <%- end -%>
-<%- end -%>
 <%- end -%>
 
       ;;
     backup)
-<%- node['private_chef']['keepalived']['service_order'].reverse.each do |item| -%>
-<%- if node['private_chef'][item['key']]['ha'] -%>
-      log_me "Stopping service <%= item['service_name'] %>"
-      /opt/opscode/bin/private-chef-ctl graceful-kill <%= item['service_name'] %> || error_exit "Cannot kill <%= item['service_name'] %>"
+<%- keepalive_services.reverse.each do |service| -%>
+      log_me "Stopping service <%= service %>"
+      /opt/opscode/bin/private-chef-ctl graceful-kill <%= service %> || error_exit "Cannot kill <%= service %>"
 <%- end -%>
-<%- end -%>
+
       # 10 * SVWAIT
       try=300
       while true; do
