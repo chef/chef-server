@@ -82,6 +82,7 @@ init_pg_db(Config) ->
     Port = random_bogus_port(),
     PortStr = integer_to_list(Port),
     CMDS = [
+            ["rm -rf", ?config(data_dir, Config)],
             ["mkdir -p", DataDir],
             ["initdb -D", PgData],
             ["pg_ctl -D", PgData, "-l", PgLog, "-o \"-p", PortStr, "\" start"],
@@ -99,8 +100,7 @@ init_pg_db(Config) ->
 stop_pg_db(Config) ->
     PgData = ?config(pg_data, Config),
     CMDS = [
-            ["pg_ctl -D", PgData, "-m fast", "stop"],
-            ["rm -rf", ?config(data_dir, Config)]
+            ["pg_ctl -D", PgData, "-m fast", "stop"]
            ],
     run_cmds(CMDS).
 
@@ -127,3 +127,30 @@ delete_all_from_table(TableName) ->
     end,
     error_logger:info_msg("Delete ~p: ~p", [TableName, Result]),
     ok.
+make_id(Prefix) when is_binary(Prefix) ->
+    case size(Prefix) of
+        Size when Size > 32 ->
+            error(prefix_too_long_for_id);
+        Size when Size =:= 32 ->
+              Prefix;
+          Size ->
+            iolist_to_binary([Prefix, lists:duplicate(32 - Size, $0)])
+    end;
+make_id(Prefix) when is_list(Prefix) ->
+    make_id(list_to_binary(Prefix)).
+
+
+make_az_id(Prefix) when is_list(Prefix) ->
+    make_az_id(list_to_binary(Prefix));
+
+make_az_id(Prefix) ->
+    make_id(<<"a11", Prefix/binary>>).
+
+actor_id() ->
+    make_az_id(<<"ffff">>).
+
+the_org_id() ->
+    make_id(<<"aa1">>).
+
+other_org_id() ->
+    make_id(<<"bb2">>).
