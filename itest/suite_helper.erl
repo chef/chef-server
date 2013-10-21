@@ -34,13 +34,19 @@ init(Config0) ->
              {db_pass, "sesame1-ignored"},
              {db_name, ?config(pg_name, Config) },
              {idle_check, 10000},
-             {prepared_statements, {oc_chef_authz_db, statements, [pgsql]}},
+             {prepared_statements, {?MODULE, statements, [pgsql]}},
              {column_transforms,
               [{<<"created_at">>, {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
                {<<"updated_at">>, {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}]}]),
 
     [ ok = ensure_started(A) || A <- needed_apps() ],
     Config.
+
+statements(pgsql) ->
+   ChefDbStatements = chef_sql:statements(),
+   AuthzDbStatements = oc_chef_authz_db:statements(pgsql),
+    ChefDbStatements ++ AuthzDbStatements.
+    
 
 set_env(App, AppConfig) ->
     [ application:set_env(App, Key, Value) || {Key, Value} <- AppConfig ].

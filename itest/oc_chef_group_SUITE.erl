@@ -137,13 +137,12 @@ expect_get_group(GroupName, Actors, Groups) ->
                 {ok, "200", [], prepare_group_body(Actors, Groups)}
              end).
 
-insert_user(_Username) ->
-    UserRecord = chef_user_record(suite_helper:make_az_id("user"), true),
-        
-    ?assertEqual(ok, chef_db:create(
-                       UserRecord,
-                       ?CTX,
-                       suite_helper:make_az_id("root"))).
+insert_user(Username) ->
+    UserRecord = chef_user_record(Username, suite_helper:make_az_id("user"), true),
+    [_| Values] = tuple_to_list(UserRecord),
+    FieldNames = record_info(fields, chef_user),
+    Input = [{pubkey_version,1} | lists:zip(FieldNames, Values)],
+    ?assertEqual({ok, 1}, sqerl:adhoc_insert(users, [Input])).        
 
 insert_client(OrgId, Clientname) ->
     ClientRecord = chef_object:new_record(chef_client,
@@ -153,6 +152,7 @@ insert_client(OrgId, Clientname) ->
                                             {<<"validator">>, true},
                                             {<<"admin">>, true},
                                             {<<"public_key">>, <<"stub-pub">>}]}),
+
 
     ?assertEqual(ok, chef_db:create(ClientRecord, ?CTX, suite_helper:make_az_id("root"))).
 
@@ -170,11 +170,11 @@ create_group(OrgId, GroupName) ->
 fetch_group(OrgId, GroupName) ->
     chef_db:fetch(#oc_chef_group{org_id = OrgId, name = GroupName}, ?CTX).
 
-chef_user_record(AzId, Admin) ->
+chef_user_record(Username, AzId, Admin) ->
   #chef_user{
     id = AzId,
     authz_id = AzId,
-    username = AzId,
+    username = Username,
     email = AzId,
     public_key =
     <<"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwxOFcrbsV7bEbqzOvW5u"
@@ -188,8 +188,8 @@ chef_user_record(AzId, Admin) ->
     salt = <<"kosher">>,
     hash_type = <<"bcrypt">>,
     last_updated_by = suite_helper:actor_id(),
-    created_at = {datetime, {{2011,10,1},{16,47,46}}},
-    updated_at = {datetime, {{2011,10,1},{16,47,46}}},
+    created_at = <<"2011-10-1 16:47:46">>,
+    updated_at = <<"2011-10-1 16:47:46">>,
     external_authentication_uid = <<"an open id of some kind">>,
     recovery_authentication_enabled = false,
     admin = Admin
