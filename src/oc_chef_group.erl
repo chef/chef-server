@@ -138,14 +138,27 @@ update(#oc_chef_group{authz_id = AuthzId,
     BasePath = "/groups/" ++ binary_to_list(AuthzId),
     ActorsPath = BasePath ++ "/actors/",
     GroupsPath = BasePath ++ "/groups/",
-    
-    put_authz_ids(ActorsPath, UserAuthzIds ++ ClientAuthzIds, AuthzId),
+    UserSideActorsAuthzIds = UserAuthzIds ++ ClientAuthzIds,
+    put_authz_ids(ActorsPath, UserSideActorsAuthzIds, AuthzId),
     put_authz_ids(GroupsPath, GroupAuthzIds, AuthzId),
+    ActorsToRemove = default_to_empty(AuthSideActors) -- UserSideActorsAuthzIds,
+    GroupsToRemove = default_to_empty(AuthSideGroups) -- GroupAuthzIds,
+    delete_authz_ids(ActorsPath, ActorsToRemove, AuthzId),
+    delete_authz_ids(GroupsPath, GroupsToRemove, AuthzId),
     ok.
+
+default_to_empty(List) when is_list(List) ->
+    List;
+default_to_empty(_) ->
+    [].
+
+    
 
 put_authz_ids(Path, UpdateAuthzIds, AuthzId) ->
     [oc_chef_authz_http:request(Path ++ binary_to_list(UpdateAuthzId), put, ?DEFAULT_HEADERS, [], AuthzId) || UpdateAuthzId <- UpdateAuthzIds].
     
+delete_authz_ids(Path, UpdateAuthzIds, AuthzId) ->
+    [oc_chef_authz_http:request(Path ++ binary_to_list(UpdateAuthzId), delete, ?DEFAULT_HEADERS, [], AuthzId) || UpdateAuthzId <- UpdateAuthzIds].
     
 
 parse_binary_json(Bin) ->

@@ -137,7 +137,6 @@ update_group_with_client(_Config) ->
     expect_get_group(RootGroupAuthzId, [], [], GroupName),
     {Group, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName}),
     expect_put_group(RootGroupAuthzId, [suite_helper:make_az_id(ClientName)], [], GroupName),
-    expect_get_group(RootGroupAuthzId, [], [], GroupName),
     Result = oc_chef_authz_db:update_group(Group, [ClientName], [],[]),
     ?assertEqual(ok, Result),
     ok.
@@ -197,8 +196,9 @@ delete_client_from_group(_Config) ->
     RootGroupAuthzId = suite_helper:make_az_id(GroupName),
     expect_get_group(suite_helper:make_az_id(GroupName), [ClientName], [], GroupName),
     {Group, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName}),
-    expect_delete_group(suite_helper:make_az_id(GroupName), [ClientName],[], GroupName),
-    Result = oc_chef_authz_db:update_group(Group, [], [], []),
+    meck:delete(oc_chef_authz_http, request, 5),
+    expect_delete_group(suite_helper:make_az_id(GroupName), [suite_helper:make_az_id(ClientName)],[], GroupName),
+    Result = oc_chef_authz_db:update_group(Group#oc_chef_group{auth_side_actors = [suite_helper:make_az_id(ClientName)]}, [], [], []),
     ?assertEqual(ok, Result),
     ok.
 
