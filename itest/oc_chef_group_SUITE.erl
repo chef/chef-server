@@ -44,7 +44,6 @@ all() ->
      update_group_with_client,
      update_group_with_user,
      update_group_with_group,
-     update_group_with_groupname,
      delete_client_from_group,
      delete_user_from_group,
      delete_group_from_group,
@@ -194,27 +193,50 @@ delete_client_from_group(_Config) ->
     insert_client(OrgId, ClientName),
     create_group(OrgId, GroupName),
     RootGroupAuthzId = suite_helper:make_az_id(GroupName),
-    expect_get_group(suite_helper:make_az_id(GroupName), [ClientName], [], GroupName),
+    expect_get_group(RootGroupAuthzId, [ClientName], [], GroupName),
     {Group, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName}),
     meck:delete(oc_chef_authz_http, request, 5),
-    expect_delete_group(suite_helper:make_az_id(GroupName), [suite_helper:make_az_id(ClientName)],[], GroupName),
+    expect_delete_group(RootGroupAuthzId, [suite_helper:make_az_id(ClientName)],[], GroupName),
     Result = oc_chef_authz_db:update_group(Group#oc_chef_group{auth_side_actors = [suite_helper:make_az_id(ClientName)]}, [], [], []),
     ?assertEqual(ok, Result),
     ok.
 
 delete_user_from_group(_Config) ->
+    OrgId = <<"GGGG0000000000000000000000000000">>,
+    GroupName = <<"test-group">>,
+    UserName = <<"test-user">>,
+    insert_user(UserName),
+    create_group(OrgId, GroupName),
+    RootGroupAuthzId = suite_helper:make_az_id(GroupName),
+    expect_get_group(RootGroupAuthzId, [UserName], [], GroupName),
+    {Group, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName}),
+    meck:delete(oc_chef_authz_http, request, 5),
+    UserAuthzId = suite_helper:make_az_id(UserName),
+    expect_delete_group(RootGroupAuthzId, [UserAuthzId],[], GroupName),
+    Result = oc_chef_authz_db:update_group(Group#oc_chef_group{auth_side_actors = [UserAuthzId]}, [], [], []),
+    ?assertEqual(ok, Result),
     ok.
 
 delete_group_from_group(_Config) ->
+    OrgId = <<"GGGG0000000000000000000000000000">>,
+    GroupName = <<"test-group">>,
+    TestGroupName = <<"test-group-name">>,
+    create_group(OrgId, TestGroupName),
+    create_group(OrgId, GroupName),
+    RootGroupAuthzId = suite_helper:make_az_id(GroupName),
+    expect_get_group(RootGroupAuthzId, [], [TestGroupName], GroupName),
+    {Group, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName}),
+    meck:delete(oc_chef_authz_http, request, 5),
+    TestGroupAuthzId = suite_helper:make_az_id(TestGroupName),
+    expect_delete_group(RootGroupAuthzId, [],[TestGroupAuthzId], GroupName),
+    Result = oc_chef_authz_db:update_group(Group#oc_chef_group{auth_side_groups = [TestGroupAuthzId]}, [], [], []),
+    ?assertEqual(ok, Result),
     ok.
 
 update_group_with_clients_users_groups(_Config) ->
     ok.
 
 delete_clients_users_groups_from_group(_Config) ->
-    ok.
-
-update_group_with_groupname(_Config) ->
     ok.
 
 expect_delete_group(GroupAuthzId, Actors, Groups, GroupName) ->
