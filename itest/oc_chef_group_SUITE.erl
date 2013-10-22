@@ -137,6 +137,7 @@ update_group_with_client(_Config) ->
     expect_get_group(RootGroupAuthzId, [], [], GroupName),
     {Group, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName}),
     expect_put_group(RootGroupAuthzId, [suite_helper:make_az_id(ClientName)], [], GroupName),
+    expect_get_group(RootGroupAuthzId, [], [], GroupName),
     Result = oc_chef_authz_db:update_group(Group, [ClientName], [],[]),
     ?assertEqual(ok, Result),
     ok.
@@ -188,6 +189,17 @@ update_group_with_rename(_Config) ->
     ok.
     
 delete_client_from_group(_Config) ->
+    OrgId = <<"GGGG0000000000000000000000000000">>,
+    GroupName = <<"test-group">>,
+    ClientName = <<"test-client">>,
+    insert_client(OrgId, ClientName),
+    create_group(OrgId, GroupName),
+    RootGroupAuthzId = suite_helper:make_az_id(GroupName),
+    expect_get_group(suite_helper:make_az_id(GroupName), [ClientName], [], GroupName),
+    {Group, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName}),
+    expect_delete_group(suite_helper:make_az_id(GroupName), [ClientName],[], GroupName),
+    Result = oc_chef_authz_db:update_group(Group, [], [], []),
+    ?assertEqual(ok, Result),
     ok.
 
 delete_user_from_group(_Config) ->
@@ -204,6 +216,21 @@ delete_clients_users_groups_from_group(_Config) ->
 
 update_group_with_groupname(_Config) ->
     ok.
+
+expect_delete_group(GroupAuthzId, Actors, Groups, GroupName) ->
+    Path = "/groups/" ++ binary_to_list(GroupAuthzId),
+    meck:expect(oc_chef_authz_http, request,
+                fun(InputPath, delete, _, _, AzId) ->
+                        ActorBasePath = Path ++ "/actors/",
+                        GroupBasePath = Path ++ "/groups/",
+                        PossiblePaths = convert_to_path(ActorBasePath, Actors) ++ convert_to_path(GroupBasePath, Groups),
+                        FilteredPaths = lists:filter(fun(Elem) ->
+                                              Elem =:= InputPath
+                                         end, PossiblePaths),
+                        ?assertEqual([InputPath], FilteredPaths),
+                    ?assertEqual(AzId, suite_helper:make_az_id(GroupName)),
+                    {ok, "200", [], prepare_group_body(Actors, Groups)}
+                end).
 
 expect_put_group(GroupAuthzId, Actors, Groups, GroupName) ->
     Path = "/groups/" ++ binary_to_list(GroupAuthzId),

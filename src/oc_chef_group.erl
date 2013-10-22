@@ -13,7 +13,8 @@
 -define(DEFAULT_HEADERS, []).
 
 -export([
-         parse_binary_json/1
+         parse_binary_json/1,
+         flatten/1
         ]).
 
 %% chef_object behaviour callbacks
@@ -39,8 +40,7 @@
          type_name/1,
          update_from_ejson/2,
          update_query/0,
-         update/2, % Groups are Special(tm)
-         update/5,
+         update/2,
          fetch/2
         ]).
 
@@ -102,7 +102,10 @@ ejson_for_indexing(#oc_chef_group{}, _EjsonTerm) ->
 
 update_from_ejson(#oc_chef_group{} = Group, GroupData) ->
     Name = ej:get({<<"groupname">>}, GroupData),
-    Group#oc_chef_group{name = Name}.
+    Clients = ej:get({<<"clients">>}, GroupData),
+    Groups = ej:get({<<"groups">>}, GroupData),
+    Users = ej:get({<<"users">>}, GroupData),
+    Group#oc_chef_group{name = Name, clients = Clients, groups = Groups, users = Users}.
 
 fields_for_update(#oc_chef_group{last_updated_by = LastUpdatedBy,
                                      updated_at = UpdatedAt,
@@ -116,16 +119,18 @@ fields_for_fetch(#oc_chef_group{org_id = OrgId,
     [OrgId, Name].
 
 record_fields() ->
-    [id, authz_id, org_id, name, last_updated_by, created_at, updated_at].
-%    record_info(fields, oc_chef_group).
+    record_info(fields, oc_chef_group).
 
 list(#oc_chef_group{org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_query(), [OrgId], [name]}).
 
-update(_,_) ->
-    error(not_implemented).
-
-update(#oc_chef_group{authz_id = AuthzId} = Record, Clients, Users, Groups, CallbackFun) ->
+update(#oc_chef_group{authz_id = AuthzId,
+                      clients = Clients,
+                      users = Users,
+                      groups = Groups,
+                      auth_side_actors = AuthSideActors,
+                      auth_side_groups = AuthSideGroups
+                     } = Record, CallbackFun) ->
     chef_object:default_update(Record, CallbackFun),
     ClientAuthzIds = find_client_authz_ids(Clients, CallbackFun),
     UserAuthzIds = find_user_authz_ids(Users, CallbackFun),
@@ -133,6 +138,7 @@ update(#oc_chef_group{authz_id = AuthzId} = Record, Clients, Users, Groups, Call
     BasePath = "/groups/" ++ binary_to_list(AuthzId),
     ActorsPath = BasePath ++ "/actors/",
     GroupsPath = BasePath ++ "/groups/",
+    
     put_authz_ids(ActorsPath, UserAuthzIds ++ ClientAuthzIds, AuthzId),
     put_authz_ids(GroupsPath, GroupAuthzIds, AuthzId),
     ok.
@@ -208,3 +214,12 @@ query_and_diff_authz_ids(QueryName, AuthzIds, Key, CallbackFun) ->
 
 extra_mile(_AuthzIdsToBeDeleted) ->
     [].
+
+flatten(#oc_chef_group{id = Id,
+          authz_id = AuthzId,
+          org_id = OrgId,
+          name = Name,
+          last_updated_by = LastUpdatedBy,
+          created_at = CreatedAt,
+          updated_at = UpdatedAt}) ->
+    [Id, AuthzId, OrgId, Name, LastUpdatedBy, CreatedAt, UpdatedAt].
