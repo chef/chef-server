@@ -121,7 +121,7 @@ update(_,_) ->
 parse_binary_json(Bin) ->
     {ok, chef_json:decode_body(Bin)}.
 
-fetch(#oc_chef_group{name = GroupName} = Record, CallbackFun) ->
+fetch( Record, CallbackFun) ->
     case chef_object:default_fetch(Record, CallbackFun) of
         #oc_chef_group{authz_id = GroupAuthzId} = GroupRecord ->
             {ActorAuthzIds, GroupAuthzIds} = fetch_authz_ids(GroupAuthzId),
@@ -140,46 +140,28 @@ fetch_authz_ids(GroupAuthzId) ->
     {ej:get({<<"actors">>}, DecodedJson), ej:get({<<"groups">>}, DecodedJson)}.
 
 find_clients_names(ActorsAuthzIds) ->
-    error_logger:info_msg({find_clients_names, ActorsAuthzIds}),   
-    case sqerl:select(find_client_name_in_authz_ids, [ActorsAuthzIds]) of
-        {ok, none} ->
-            {[], []};
-        {ok, Results} ->
-            Flattened = lists:flatten(Results),
-            ClientNames = proplists:get_all_values(<<"name">>, Flattened),
-            FoundAuthzIds = proplists:get_all_values(<<"authz_id">>, Flattened),
-            {ClientNames, sets:to_list(sets:subtract(sets:from_list(ActorsAuthzIds), sets:from_list(FoundAuthzIds)))};
-        _Other ->
-            {[], []}
-    end.
+    query_and_diff_authz_ids(find_client_name_in_authz_ids, ActorsAuthzIds, <<"name">>).
 
 find_users_names(UsersAuthzIds) ->
-    error_logger:info_msg({find_users_names, UsersAuthzIds}),
-    case sqerl:select(find_user_name_in_authz_ids, [UsersAuthzIds]) of
-        {ok, none} ->
-            {[], []};
-        {ok, Results} ->
-            Flattened = lists:flatten(Results),
-            UserNames = proplists:get_all_values(<<"username">>, Flattened),
-            FoundAuthzIds = proplists:get_all_values(<<"authz_id">>, Flattened),
-            {UserNames, sets:to_list(sets:subtract(sets:from_list(UsersAuthzIds), sets:from_list(FoundAuthzIds)))};
-        _Other ->
-            {[], []}
-    end.
+    query_and_diff_authz_ids(find_user_name_in_authz_ids, UsersAuthzIds, <<"username">>).
 
 find_groups_names(GroupsAuthzIds) ->
-    error_logger:info_msg({find_groups_names, GroupsAuthzIds}),
-    case sqerl:select(find_group_name_in_authz_ids, [GroupsAuthzIds]) of
+    {GroupNames, _} = query_and_diff_authz_ids(find_group_name_in_authz_ids, GroupsAuthzIds, <<"name">>),
+    GroupNames.
+
+query_and_diff_authz_ids(QueryName, AuthzIds, Key) ->
+    error_logger:info_msg({QueryName, AuthzIds}),   
+    case sqerl:select(QueryName, [AuthzIds]) of
         {ok, none} ->
             {[], []};
         {ok, Results} ->
             Flattened = lists:flatten(Results),
-            GroupNames = proplists:get_all_values(<<"name">>, Flattened),
-            GroupNames;
+            ResultNames = proplists:get_all_values(Key, Flattened),
+            FoundAuthzIds = proplists:get_all_values(<<"authz_id">>, Flattened),
+            {ResultNames, sets:to_list(sets:subtract(sets:from_list(AuthzIds), sets:from_list(FoundAuthzIds)))};
         _Other ->
             {[], []}
     end.
-
 
 extra_mile(_AuthzIdsToBeDeleted) ->
     [].
