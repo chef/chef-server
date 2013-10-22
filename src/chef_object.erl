@@ -101,6 +101,7 @@
          fields_for_fetch/1,
          fields_for_update/1,
          record_fields/1,
+         flatten/1,
 
          list/2,
          fetch/2,
@@ -234,3 +235,27 @@ default_update(ObjectRec, CallbackFun) ->
     QueryName = chef_object:update_query(ObjectRec),
     UpdatedFields = chef_object:fields_for_update(ObjectRec),
     CallbackFun({QueryName, UpdatedFields}).
+
+flatten(ObjectRec) ->
+    Mod = callback_mod(ObjectRec),
+    case erlang:function_exported(Mod, flatten, 1) of
+        true ->
+            Mod:flatten(ObjectRec);
+        false  ->
+            default_flatten(ObjectRec)
+    end.
+
+default_flatten(ObjectRec) ->
+    [_RecName|Tail] = tuple_to_list(ObjectRec),
+    %% We detect if any of the fields in the record have not been set
+    %% and throw an error
+    case lists:any(fun is_undefined/1, Tail) of
+        true -> error({undefined_in_record, ObjectRec});
+        false -> ok
+    end,
+    Tail.
+
+is_undefined(undefined) ->
+    true;
+is_undefined(_) ->
+    false.
