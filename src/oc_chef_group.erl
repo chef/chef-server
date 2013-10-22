@@ -152,7 +152,7 @@ fetch(Record, CallbackFun) ->
             {ClientNames, RemainingAuthzIds} = find_clients_names(ActorAuthzIds, CallbackFun),
             {Usernames, DefunctAuthzIds} = find_users_names(RemainingAuthzIds, CallbackFun),
             {GroupNames, DefunctGroupAuthzIds} = find_groups_names(GroupAuthzIds, CallbackFun),
-            extra_mile(DefunctAuthzIds ++ DefunctAuthzIds),            
+            extra_mile(DefunctAuthzIds ++ DefunctGroupAuthzIds),
             {GroupRecord, ClientNames, Usernames, GroupNames};
         Error ->
             erlang:error(Error)

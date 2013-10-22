@@ -142,12 +142,49 @@ update_group_with_client(_Config) ->
     ok.
 
 update_group_with_user(_Config) ->
+    OrgId = <<"GGGG0000000000000000000000000000">>,
+    GroupName = <<"test-group">>,
+    UserName = <<"test-user">>,
+    create_group(OrgId, GroupName),
+    insert_user(UserName),
+    RootGroupAuthzId = suite_helper:make_az_id(GroupName),
+    expect_get_group(suite_helper:make_az_id(GroupName), [], [], GroupName),
+    {Group, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName}),
+    expect_put_group(RootGroupAuthzId, [suite_helper:make_az_id(UserName)], [], GroupName),
+    Result = oc_chef_authz_db:update_group(Group, [], [UserName],[]),
+    ?assertEqual(ok, Result),
     ok.
 
 update_group_with_group(_Config) ->
+    OrgId = <<"GGGG0000000000000000000000000000">>,
+    GroupName = <<"test-group">>,
+    TestGroupName = <<"test-group-added">>,
+    create_group(OrgId, GroupName),
+    create_group(OrgId, TestGroupName),
+    RootGroupAuthzId = suite_helper:make_az_id(GroupName),
+    expect_get_group(suite_helper:make_az_id(GroupName), [], [], GroupName),
+    {Group, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName}),
+    expect_put_group(RootGroupAuthzId, [], [suite_helper:make_az_id(TestGroupName)], GroupName),
+    Result = oc_chef_authz_db:update_group(Group, [], [], [TestGroupName]),
+    ?assertEqual(ok, Result),
     ok.
 
 update_group_with_rename(_Config) ->
+    OrgId = <<"GGGG0000000000000000000000000000">>,
+    GroupName = <<"test-group">>,
+    TestGroupName = <<"test-group-added">>,
+    create_group(OrgId, GroupName),
+    RootGroupAuthzId = suite_helper:make_az_id(GroupName),
+    expect_get_group(suite_helper:make_az_id(GroupName), [], [], GroupName),
+    {Group, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName}),
+    meck:delete(oc_chef_authz_http, request, 5),
+    expect_get_group(suite_helper:make_az_id(GroupName), [], [], TestGroupName),
+    Result = oc_chef_authz_db:update_group(Group#oc_chef_group{name = TestGroupName}, [], [], []),
+    {GroupUpdated, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = TestGroupName}),
+    ?assertEqual(Group#oc_chef_group.id, GroupUpdated#oc_chef_group.id),
+    ?assertEqual(GroupUpdated#oc_chef_group.name, TestGroupName),
+    ?assertEqual(ok, Result),
+
     ok.
     
 delete_client_from_group(_Config) ->
@@ -187,7 +224,7 @@ expect_get_group(GroupAuthzId, Actors, Groups, GroupName) ->
     Path = "/groups/" ++ binary_to_list(GroupAuthzId),
     meck:expect(oc_chef_authz_http, request,
                 fun(InputPath, get,  _, _, AzId) ->
-                    ?assertEqual(AzId, suite_helper:make_az_id(GroupName)),
+                    ?assertEqual(AzId, GroupAuthzId),
                     ?assertEqual(Path, InputPath),
                     {ok, "200", [], prepare_group_body(Actors, Groups)}
                 end).
