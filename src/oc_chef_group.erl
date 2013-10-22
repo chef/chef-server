@@ -40,7 +40,7 @@
          update_from_ejson/2,
          update_query/0,
          update/2, % Groups are Special(tm)
-         update/4,
+         update/5,
          fetch/2
         ]).
 
@@ -63,7 +63,7 @@ create_query() ->
     insert_group.
 
 update_query() ->
-    error(not_implemented).
+    update_group_by_id.
 
 delete_query() ->
     delete_group_by_id.
@@ -104,8 +104,12 @@ update_from_ejson(#oc_chef_group{} = Group, GroupData) ->
     Name = ej:get({<<"groupname">>}, GroupData),
     Group#oc_chef_group{name = Name}.
 
-fields_for_update(#oc_chef_group{name = Name, last_updated_by = LastUpdatedBy, updated_at = UpdatedAt}) ->
-    [LastUpdatedBy, UpdatedAt, Name].
+fields_for_update(#oc_chef_group{last_updated_by = LastUpdatedBy,
+                                     updated_at = UpdatedAt,
+                                     name = Name,
+                                     id = Id}) ->
+    [LastUpdatedBy, UpdatedAt, Name, Id].
+
 
 fields_for_fetch(#oc_chef_group{org_id = OrgId,
                                     name = Name}) ->
@@ -121,8 +125,21 @@ list(#oc_chef_group{org_id = OrgId}, CallbackFun) ->
 update(_,_) ->
     error(not_implemented).
 
-update(#oc_chef_group{id = _Id, name = _Name}, _Clients, _Users, _Groups) ->
+update(#oc_chef_group{authz_id = AuthzId} = Record, Clients, Users, Groups, CallbackFun) ->
+    chef_object:default_update(Record, CallbackFun),
+    ClientAuthzIds = find_client_authz_ids(Clients, CallbackFun),
+    UserAuthzIds = find_user_authz_ids(Users, CallbackFun),
+    GroupAuthzIds = find_group_authz_ids(Groups, CallbackFun),
+    BasePath = "/groups/" ++ binary_to_list(AuthzId),
+    ActorsPath = BasePath ++ "/actors/",
+    GroupsPath = BasePath ++ "/groups/",
+    put_authz_ids(ActorsPath, UserAuthzIds ++ ClientAuthzIds, AuthzId),
+    put_authz_ids(GroupsPath, GroupAuthzIds, AuthzId),
     ok.
+
+put_authz_ids(Path, UpdateAuthzIds, AuthzId) ->
+    [oc_chef_authz_http:request(Path ++ binary_to_list(UpdateAuthzId), put, ?DEFAULT_HEADERS, [], AuthzId) || UpdateAuthzId <- UpdateAuthzIds].
+    
     
 
 parse_binary_json(Bin) ->
@@ -154,6 +171,26 @@ find_users_names(UsersAuthzIds, CallbackFun) ->
 
 find_groups_names(GroupsAuthzIds, CallbackFun) ->
     query_and_diff_authz_ids(find_group_name_in_authz_ids, GroupsAuthzIds, <<"name">>, CallbackFun).
+
+find_client_authz_ids(ClientNames, CallbackFun) ->
+    find_authz_id_in_names(find_client_authz_id_in_names, ClientNames, CallbackFun).
+
+find_group_authz_ids(GroupNames, CallbackFun) ->
+    find_authz_id_in_names(find_group_authz_id_in_names, GroupNames, CallbackFun).
+
+find_user_authz_ids(UserNames, CallbackFun) ->
+    find_authz_id_in_names(find_user_authz_id_in_names, UserNames, CallbackFun).
+
+find_authz_id_in_names(QueryName, Names, CallbackFun) ->
+    case CallbackFun({QueryName, [Names]}) of
+        List when is_list(List) ->
+            Flattened = lists:flatten(List),
+            proplists:get_all_values(<<"authz_id">>, Flattened);
+        not_found ->
+            [];
+        Other ->
+            Other
+    end.
 
 query_and_diff_authz_ids(QueryName, AuthzIds, Key, CallbackFun) ->
     error_logger:info_msg({QueryName, AuthzIds}), 

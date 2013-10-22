@@ -138,7 +138,7 @@ update_group_with_client(_Config) ->
     {Group, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName}),
     expect_put_group(RootGroupAuthzId, [suite_helper:make_az_id(ClientName)], [], GroupName),
     Result = oc_chef_authz_db:update_group(Group, [ClientName], [],[]),
-    ?assertEqual(1, Result),
+    ?assertEqual(ok, Result),
     ok.
 
 update_group_with_user(_Config) ->
@@ -172,8 +172,14 @@ expect_put_group(GroupAuthzId, Actors, Groups, GroupName) ->
     Path = "/groups/" ++ binary_to_list(GroupAuthzId),
     meck:expect(oc_chef_authz_http, request,
                 fun(InputPath, put, _, _, AzId) ->
+                        ActorBasePath = Path ++ "/actors/",
+                        GroupBasePath = Path ++ "/groups/",
+                        PossiblePaths = convert_to_path(ActorBasePath, Actors) ++ convert_to_path(GroupBasePath, Groups),
+                        FilteredPaths = lists:filter(fun(Elem) ->
+                                              Elem =:= InputPath
+                                         end, PossiblePaths),
+                        ?assertEqual([InputPath], FilteredPaths),
                     ?assertEqual(AzId, suite_helper:make_az_id(GroupName)),
-                    ?assertEqual(Path, InputPath),
                     {ok, "200", [], prepare_group_body(Actors, Groups)}
                 end).
 
@@ -185,6 +191,10 @@ expect_get_group(GroupAuthzId, Actors, Groups, GroupName) ->
                     ?assertEqual(Path, InputPath),
                     {ok, "200", [], prepare_group_body(Actors, Groups)}
                 end).
+
+convert_to_path(BasePath, Elements) ->
+   [BasePath ++ binary_to_list(Elem) || Elem <- Elements].
+    
 
 insert_user(Username) ->
     UserRecord = chef_user_record(Username, suite_helper:make_az_id(Username), true),

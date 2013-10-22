@@ -63,7 +63,7 @@ statements(pgsql) ->
         " last_updated_by, created_at, updated_at) VALUES"
         " ($1, $2, $3, $4, $5, $6, $7)">>},
      {update_group_by_id,
-      <<"UPDATE group SET last_updated_by= $1, updated_at= $2, name= $3"
+      <<"UPDATE groups SET last_updated_by= $1, updated_at= $2, name= $3"
         "WHERE id= $4">>},
      {delete_group_by_id, <<"DELETE FROM groups WHERE id= $1">>},
      {find_client_name_in_authz_ids,
@@ -72,7 +72,7 @@ statements(pgsql) ->
       <<"SELECT authz_id FROM clients WHERE name = ANY($1)">>},
      {find_user_name_in_authz_ids,
       <<"SELECT username, authz_id FROM users WHERE authz_id = ANY($1)">>},
-     {find_users_authz_id_in_names,
+     {find_user_authz_id_in_names,
       <<"SELECT authz_id FROM users WHERE username = ANY($1)">>},
      {find_group_name_in_authz_ids,
       <<"SELECT name, authz_id FROM groups where authz_id = ANY($1)">>},
@@ -319,4 +319,4 @@ fetch_group_authz_id_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
     end.
 -spec update_group(#oc_chef_group{}, [binary()], [binary()], [binary()]) -> pos_integer() | not_found | {conflict, _} | {error, _}.
 update_group(#oc_chef_group{} = GroupRec, Clients, Users, Groups) ->
-    oc_chef_group:update(GroupRec, Clients, Users, Groups, fun chef_sql:do_update/2).
+    oc_chef_group:update(GroupRec, Clients, Users, Groups, fun chef_sql:select_rows/1).
