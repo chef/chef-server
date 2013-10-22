@@ -41,7 +41,6 @@ all() ->
      fetch_group_sql, list_should_return_empty_list_when_no_groups,
      list_should_return_group_name_when_group_exists,
      delete_should_delete_group_form_org,
-     fetch_group_with_clients_users_groups,
      update_group_with_client,
      update_group_with_user,
      update_group_with_group,
@@ -51,7 +50,8 @@ all() ->
      delete_group_from_group,
      update_group_with_clients_users_groups,
      delete_clients_users_groups_from_group,
-     fetch_group_with_forward_lookup_clients_users_groups
+     fetch_group_with_forward_lookup_clients_users_groups,
+     update_group_with_rename
     ].
 
 create_should_create_new_group(_Config) ->
@@ -104,8 +104,7 @@ delete_should_delete_group_form_org(_Config) ->
     chef_db:delete(Group, ?CTX),
     ?assertEqual([], chef_sql:fetch_object_names(#oc_chef_group{org_id = OrgId})),
     ok.
-
-fetch_group_with_clients_users_groups(_Config) ->
+fetch_group_with_forward_lookup_clients_users_groups(_Config) ->
     OrgId = <<"GGGG0000000000000000000000000000">>,
     insert_user(<<"user1">>),
     insert_user(<<"user2">>),
@@ -129,6 +128,17 @@ fetch_group_with_clients_users_groups(_Config) ->
     ok.
 
 update_group_with_client(_Config) ->
+    OrgId = <<"GGGG0000000000000000000000000000">>,
+    GroupName = <<"test-group">>,
+    ClientName = <<"test-client">>,
+    create_group(OrgId, GroupName),
+    insert_client(OrgId, ClientName),
+    RootGroupAuthzId = suite_helper:make_az_id(GroupName),
+    expect_get_group(RootGroupAuthzId, [], [], GroupName),
+    {Group, _, _, _ } = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName}),
+    expect_put_group(RootGroupAuthzId, [suite_helper:make_az_id(ClientName)], [], GroupName),
+    Result = oc_chef_authz_db:update_group(Group, [ClientName], [],[]),
+    ?assertEqual(1, Result),
     ok.
 
 update_group_with_user(_Config) ->
@@ -137,6 +147,9 @@ update_group_with_user(_Config) ->
 update_group_with_group(_Config) ->
     ok.
 
+update_group_with_rename(_Config) ->
+    ok.
+    
 delete_client_from_group(_Config) ->
     ok.
 
@@ -155,18 +168,19 @@ delete_clients_users_groups_from_group(_Config) ->
 update_group_with_groupname(_Config) ->
     ok.
 
-fetch_group_with_forward_lookup_clients_users_groups(_Config) ->
-    % #oc_chef_group has group_name set, go get the authz_id of the group
-    % fetch the group from oc_bifrost
-    % resolve the list actor actor_authz_ids against clients and users
-    % resolve the list of group authz_ids against groups
-    ok.
-
+expect_put_group(GroupAuthzId, Actors, Groups, GroupName) ->
+    Path = "/groups/" ++ binary_to_list(GroupAuthzId),
+    meck:expect(oc_chef_authz_http, request,
+                fun(InputPath, put, _, _, AzId) ->
+                    ?assertEqual(AzId, suite_helper:make_az_id(GroupName)),
+                    ?assertEqual(Path, InputPath),
+                    {ok, "200", [], prepare_group_body(Actors, Groups)}
+                end).
 
 expect_get_group(GroupAuthzId, Actors, Groups, GroupName) ->
     Path = "/groups/" ++ binary_to_list(GroupAuthzId),
     meck:expect(oc_chef_authz_http, request,
-                fun(InputPath, _, _, _, AzId) ->
+                fun(InputPath, get,  _, _, AzId) ->
                     ?assertEqual(AzId, suite_helper:make_az_id(GroupName)),
                     ?assertEqual(Path, InputPath),
                     {ok, "200", [], prepare_group_body(Actors, Groups)}

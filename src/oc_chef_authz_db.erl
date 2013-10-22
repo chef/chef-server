@@ -68,15 +68,20 @@ statements(pgsql) ->
      {delete_group_by_id, <<"DELETE FROM groups WHERE id= $1">>},
      {find_client_name_in_authz_ids,
       <<"SELECT name, authz_id FROM clients WHERE authz_id = ANY($1)">>},
+     {find_client_authz_id_in_names,
+      <<"SELECT authz_id FROM clients WHERE name = ANY($1)">>},
      {find_user_name_in_authz_ids,
       <<"SELECT username, authz_id FROM users WHERE authz_id = ANY($1)">>},
+     {find_users_authz_id_in_names,
+      <<"SELECT authz_id FROM users WHERE username = ANY($1)">>},
      {find_group_name_in_authz_ids,
-      <<"SELECT name, authz_id FROM groups where authz_id = ANY($1)">>}
-     ].
-
-%
-% Opscode Chef_views.
-%
+      <<"SELECT name, authz_id FROM groups where authz_id = ANY($1)">>},
+     {find_group_authz_id_in_names,
+      <<"SELECT authz_id FROM groups WHERE name = ANY($1)">>}
+    ].
+                                                %
+                                                % Opscode Chef_views.
+                                                %
 -define(mixlib_auth_client_design,
         "Mixlib::Authorization::Models::Client-fec21b157b76e08b86e92ef7cbc2be81").
 
@@ -215,7 +220,7 @@ fetch_by_name(Server, OrgId, Name, Type) when is_binary(Name), is_binary(OrgId) 
             end;
         {ok, []} -> {not_found, Type};
         {error, not_found} -> {not_found, Type}
-     end.
+    end.
 
 -spec fetch_auth_join_id(couchbeam:server(), db_key(), auth_to_user|user_to_auth) -> binary() | {not_found, term()}.
 fetch_auth_join_id(Server, Id, Direction) when is_list(Id) ->
@@ -223,7 +228,7 @@ fetch_auth_join_id(Server, Id, Direction) when is_list(Id) ->
 fetch_auth_join_id(Server, Id, Direction) when is_binary(Id) ->
     {FieldName, ViewName} =
         case Direction of
-%%            auth_to_user -> { <<"user_object_id">>, "by_auth_object_id"};
+            %%            auth_to_user -> { <<"user_object_id">>, "by_auth_object_id"};
             user_to_auth -> { <<"auth_object_id">>, "by_user_object_id"}
         end,
     {ok, Db} = couchbeam:open_db(Server, ?auth_join_db, []),
@@ -302,8 +307,8 @@ fetch_group_authz_id_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
     case stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
                                   chef_sql:fetch(#oc_chef_group{
-                                                   org_id = OrgId,
-                                                   name = Name})
+                                                    org_id = OrgId,
+                                                    name = Name})
                           end) of
         #oc_chef_group{authz_id = AuthzId} ->
             AuthzId;
@@ -312,3 +317,6 @@ fetch_group_authz_id_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
         {error, _} = Error ->
             Error
     end.
+-spec update_group(#oc_chef_group{}, [binary()], [binary()], [binary()]) -> pos_integer() | not_found | {conflict, _} | {error, _}.
+update_group(#oc_chef_group{} = GroupRec, Clients, Users, Groups) ->
+    oc_chef_group:update(GroupRec, Clients, Users, Groups, fun chef_sql:do_update/2).

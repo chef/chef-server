@@ -39,7 +39,8 @@
          type_name/1,
          update_from_ejson/2,
          update_query/0,
-         update/2,
+         update/2, % Groups are Special(tm)
+         update/4,
          fetch/2
         ]).
 
@@ -81,7 +82,7 @@ new_record(OrgId, AuthzId, GroupData) ->
     Name = ej:get({<<"groupname">>}, GroupData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     #oc_chef_group{id = Id,
-                       authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+                       authz_id = AuthzId,
                        org_id = OrgId,
                        name = Name}.
 
@@ -99,18 +100,20 @@ is_indexed() ->
 ejson_for_indexing(#oc_chef_group{}, _EjsonTerm) ->
    {[]}.
 
-update_from_ejson(#oc_chef_group{}, _) ->
-    error(not_implemented).
+update_from_ejson(#oc_chef_group{} = Group, GroupData) ->
+    Name = ej:get({<<"groupname">>}, GroupData),
+    Group#oc_chef_group{name = Name}.
 
-fields_for_update(#oc_chef_group{}) ->
-    error(not_implemented).
+fields_for_update(#oc_chef_group{name = Name, last_updated_by = LastUpdatedBy, updated_at = UpdatedAt}) ->
+    [LastUpdatedBy, UpdatedAt, Name].
 
 fields_for_fetch(#oc_chef_group{org_id = OrgId,
                                     name = Name}) ->
     [OrgId, Name].
 
 record_fields() ->
-    record_info(fields, oc_chef_group).
+    [id, authz_id, org_id, name, last_updated_by, created_at, updated_at].
+%    record_info(fields, oc_chef_group).
 
 list(#oc_chef_group{org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_query(), [OrgId], [name]}).
@@ -118,10 +121,14 @@ list(#oc_chef_group{org_id = OrgId}, CallbackFun) ->
 update(_,_) ->
     error(not_implemented).
 
+update(#oc_chef_group{id = _Id, name = _Name}, _Clients, _Users, _Groups) ->
+    ok.
+    
+
 parse_binary_json(Bin) ->
     {ok, chef_json:decode_body(Bin)}.
 
-fetch( Record, CallbackFun) ->
+fetch(Record, CallbackFun) ->
     case chef_object:default_fetch(Record, CallbackFun) of
         #oc_chef_group{authz_id = GroupAuthzId} = GroupRecord ->
             {ActorAuthzIds, GroupAuthzIds} = fetch_authz_ids(GroupAuthzId),
