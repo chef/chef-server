@@ -158,8 +158,9 @@ create(#chef_cookbook_version{} = Record, DbContext, ActorId) ->
 create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
     ObjectRec = chef_object:set_created(ObjectRec0, ActorId),
     QueryName = chef_object:create_query(ObjectRec),
+    FlattenedRecord = chef_object:flatten(ObjectRec),
     case stats_hero:ctime(ReqId, {chef_sql, create_object},
-                          fun() -> chef_sql:create_object(QueryName, ObjectRec) end) of
+                          fun() -> chef_sql:create_object(QueryName, FlattenedRecord) end) of
         {ok, 1} -> ok;
         {conflict, Msg}-> {conflict, Msg};
         {error, Why} -> {error, Why}
