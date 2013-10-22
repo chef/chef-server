@@ -62,6 +62,9 @@ statements(pgsql) ->
       <<"INSERT INTO groups (id, authz_id, org_id, name,"
         " last_updated_by, created_at, updated_at) VALUES"
         " ($1, $2, $3, $4, $5, $6, $7)">>},
+     {update_group_by_id,
+      <<"UPDATE group SET last_updated_by= $1, updated_at= $2, name= $3"
+        "WHERE id= $4">>},
      {delete_group_by_id, <<"DELETE FROM groups WHERE id= $1">>}
      ].
 

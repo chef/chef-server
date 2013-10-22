@@ -10,6 +10,8 @@
 
 -behaviour(chef_object).
 
+-define(DEFAULT_HEADERS, []).
+
 -export([
          parse_binary_json/1
         ]).
@@ -37,12 +39,9 @@
          type_name/1,
          update_from_ejson/2,
          update_query/0,
-         update/2
+         update/2,
+         fetch/2
         ]).
-
--mixin([
-        {chef_object, [{default_fetch/2, fetch}]}
-       ]).
 
 name(#oc_chef_group{name = Name}) ->
     Name.
@@ -122,3 +121,32 @@ update(_,_) ->
 parse_binary_json(Bin) ->
     {ok, chef_json:decode_body(Bin)}.
 
+fetch(#oc_chef_group{name = GroupName} = Record, CallbackFun) ->
+    case chef_object:default_fetch(Record, CallbackFun) of
+        #oc_chef_group{authz_id = GroupAuthzId} = GroupRecord ->
+            {ActorAuthzIds, GroupAuthzIds} = fetch_authz_ids(GroupAuthzId),
+            {ClientNames, RemainingAuthzIds} = find_clients_names(ActorAuthzIds),
+            {Usernames, DefunctAuthzIds} = find_users_names(RemainingAuthzIds),
+            GroupNames = find_groups_names(GroupAuthzIds),
+            extra_mile(DefunctAuthzIds),
+            {GroupRecord, ClientNames, Usernames, GroupNames};
+        Error ->
+            erlang:error(Error)
+    end.
+
+fetch_authz_ids(GroupAuthzId) ->
+    {ok, "200", _, GroupJsonBody} = oc_chef_authz_http:request("/groups/" ++ binary_to_list(GroupAuthzId), get, ?DEFAULT_HEADERS, [], GroupAuthzId),
+    DecodedJson = ejson:decode(GroupJsonBody),
+    {ej:get({<<"actors">>}, DecodedJson), ej:get({<<"groups">>}, DecodedJson)}.
+
+find_clients_names(_ActorsAuthzIds) ->
+    {[], []}.
+
+find_users_names(_UsersAuthzIds) ->
+    {[], []}.
+
+find_groups_names(_GroupsAuthzIds) ->
+    [].
+
+extra_mile(_AuthzIdsToBeDeleted) ->
+    [].
