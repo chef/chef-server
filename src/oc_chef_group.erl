@@ -139,14 +139,47 @@ fetch_authz_ids(GroupAuthzId) ->
     DecodedJson = ejson:decode(GroupJsonBody),
     {ej:get({<<"actors">>}, DecodedJson), ej:get({<<"groups">>}, DecodedJson)}.
 
-find_clients_names(_ActorsAuthzIds) ->
-    {[], []}.
+find_clients_names(ActorsAuthzIds) ->
+    error_logger:info_msg({find_clients_names, ActorsAuthzIds}),   
+    case sqerl:select(find_client_name_in_authz_ids, [ActorsAuthzIds]) of
+        {ok, none} ->
+            {[], []};
+        {ok, Results} ->
+            Flattened = lists:flatten(Results),
+            ClientNames = proplists:get_all_values(<<"name">>, Flattened),
+            FoundAuthzIds = proplists:get_all_values(<<"authz_id">>, Flattened),
+            {ClientNames, sets:to_list(sets:subtract(sets:from_list(ActorsAuthzIds), sets:from_list(FoundAuthzIds)))};
+        _Other ->
+            {[], []}
+    end.
 
-find_users_names(_UsersAuthzIds) ->
-    {[], []}.
+find_users_names(UsersAuthzIds) ->
+    error_logger:info_msg({find_users_names, UsersAuthzIds}),
+    case sqerl:select(find_user_name_in_authz_ids, [UsersAuthzIds]) of
+        {ok, none} ->
+            {[], []};
+        {ok, Results} ->
+            Flattened = lists:flatten(Results),
+            UserNames = proplists:get_all_values(<<"username">>, Flattened),
+            FoundAuthzIds = proplists:get_all_values(<<"authz_id">>, Flattened),
+            {UserNames, sets:to_list(sets:subtract(sets:from_list(UsersAuthzIds), sets:from_list(FoundAuthzIds)))};
+        _Other ->
+            {[], []}
+    end.
 
-find_groups_names(_GroupsAuthzIds) ->
-    [].
+find_groups_names(GroupsAuthzIds) ->
+    error_logger:info_msg({find_groups_names, GroupsAuthzIds}),
+    case sqerl:select(find_group_name_in_authz_ids, [GroupsAuthzIds]) of
+        {ok, none} ->
+            {[], []};
+        {ok, Results} ->
+            Flattened = lists:flatten(Results),
+            GroupNames = proplists:get_all_values(<<"name">>, Flattened),
+            GroupNames;
+        _Other ->
+            {[], []}
+    end.
+
 
 extra_mile(_AuthzIdsToBeDeleted) ->
     [].

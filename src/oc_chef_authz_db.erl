@@ -65,7 +65,13 @@ statements(pgsql) ->
      {update_group_by_id,
       <<"UPDATE group SET last_updated_by= $1, updated_at= $2, name= $3"
         "WHERE id= $4">>},
-     {delete_group_by_id, <<"DELETE FROM groups WHERE id= $1">>}
+     {delete_group_by_id, <<"DELETE FROM groups WHERE id= $1">>},
+     {find_client_name_in_authz_ids,
+      <<"SELECT name, authz_id FROM clients WHERE authz_id = ANY($1)">>},
+     {find_user_name_in_authz_ids,
+      <<"SELECT username, authz_id FROM users WHERE authz_id = ANY($1)">>},
+     {find_group_name_in_authz_ids,
+      <<"SELECT name, authz_id FROM groups where authz_id = ANY($1)">>}
      ].
 
 %

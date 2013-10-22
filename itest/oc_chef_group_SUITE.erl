@@ -123,9 +123,9 @@ fetch_group_with_clients_users_groups(_Config) ->
     expect_get_group(RootGroupAuthzId, Actors, Groups, GroupName),
     {GroupRecord, ClientNames, Usernames, Groupnames} = chef_sql:fetch(#oc_chef_group{org_id = OrgId, name = GroupName, authz_id = RootGroupAuthzId}),
     ?assertMatch(#oc_chef_group{name = GroupName, org_id = OrgId, authz_id = RootGroupAuthzId}, GroupRecord),
-    ?assertEqual(["client1", "client2"], ClientNames),
-    ?assertEqual(["user1", "user2"], Usernames),
-    ?assertEqual(["group1", "group2"], Groupnames),
+    ?assertEqual([<<"client1">>, <<"client2">>], ClientNames),
+    ?assertEqual([<<"user1">>, <<"user2">>], Usernames),
+    ?assertEqual([<<"group1">>, <<"group2">>], Groupnames),
     ok.
 
 update_group_with_client(_Config) ->
