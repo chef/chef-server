@@ -212,7 +212,6 @@ find_authz_id_in_names(QueryName, Names, CallbackFun) ->
     end.
 
 query_and_diff_authz_ids(QueryName, AuthzIds, Key, CallbackFun) ->
-    error_logger:info_msg({QueryName, AuthzIds}), 
     case CallbackFun({QueryName, [AuthzIds]}) of
         not_found ->
             {[], []};

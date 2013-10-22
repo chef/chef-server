@@ -47,8 +47,6 @@ all() ->
      delete_client_from_group,
      delete_user_from_group,
      delete_group_from_group,
-     update_group_with_clients_users_groups,
-     delete_clients_users_groups_from_group,
      fetch_group_with_forward_lookup_clients_users_groups,
      update_group_with_rename
     ].
@@ -231,12 +229,6 @@ delete_group_from_group(_Config) ->
     expect_delete_group(RootGroupAuthzId, [],[TestGroupAuthzId], GroupName),
     Result = oc_chef_authz_db:update_group(Group#oc_chef_group{auth_side_groups = [TestGroupAuthzId]}, [], [], []),
     ?assertEqual(ok, Result),
-    ok.
-
-update_group_with_clients_users_groups(_Config) ->
-    ok.
-
-delete_clients_users_groups_from_group(_Config) ->
     ok.
 
 expect_delete_group(GroupAuthzId, Actors, Groups, GroupName) ->
