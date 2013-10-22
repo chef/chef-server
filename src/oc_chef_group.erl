@@ -132,10 +132,10 @@ fetch(Record, CallbackFun) ->
     case chef_object:default_fetch(Record, CallbackFun) of
         #oc_chef_group{authz_id = GroupAuthzId} = GroupRecord ->
             {ActorAuthzIds, GroupAuthzIds} = fetch_authz_ids(GroupAuthzId),
-            {ClientNames, RemainingAuthzIds} = find_clients_names(ActorAuthzIds),
-            {Usernames, DefunctAuthzIds} = find_users_names(RemainingAuthzIds),
-            GroupNames = find_groups_names(GroupAuthzIds),
-            extra_mile(DefunctAuthzIds),
+            {ClientNames, RemainingAuthzIds} = find_clients_names(ActorAuthzIds, CallbackFun),
+            {Usernames, DefunctAuthzIds} = find_users_names(RemainingAuthzIds, CallbackFun),
+            {GroupNames, DefunctGroupAuthzIds} = find_groups_names(GroupAuthzIds, CallbackFun),
+            extra_mile(DefunctAuthzIds ++ DefunctAuthzIds),            
             {GroupRecord, ClientNames, Usernames, GroupNames};
         Error ->
             erlang:error(Error)
@@ -146,22 +146,21 @@ fetch_authz_ids(GroupAuthzId) ->
     DecodedJson = ejson:decode(GroupJsonBody),
     {ej:get({<<"actors">>}, DecodedJson), ej:get({<<"groups">>}, DecodedJson)}.
 
-find_clients_names(ActorsAuthzIds) ->
-    query_and_diff_authz_ids(find_client_name_in_authz_ids, ActorsAuthzIds, <<"name">>).
+find_clients_names(ActorsAuthzIds, CallbackFun) ->
+    query_and_diff_authz_ids(find_client_name_in_authz_ids, ActorsAuthzIds, <<"name">>, CallbackFun).
 
-find_users_names(UsersAuthzIds) ->
-    query_and_diff_authz_ids(find_user_name_in_authz_ids, UsersAuthzIds, <<"username">>).
+find_users_names(UsersAuthzIds, CallbackFun) ->
+    query_and_diff_authz_ids(find_user_name_in_authz_ids, UsersAuthzIds, <<"username">>, CallbackFun).
 
-find_groups_names(GroupsAuthzIds) ->
-    {GroupNames, _} = query_and_diff_authz_ids(find_group_name_in_authz_ids, GroupsAuthzIds, <<"name">>),
-    GroupNames.
+find_groups_names(GroupsAuthzIds, CallbackFun) ->
+    query_and_diff_authz_ids(find_group_name_in_authz_ids, GroupsAuthzIds, <<"name">>, CallbackFun).
 
-query_and_diff_authz_ids(QueryName, AuthzIds, Key) ->
-    error_logger:info_msg({QueryName, AuthzIds}),   
-    case sqerl:select(QueryName, [AuthzIds]) of
-        {ok, none} ->
+query_and_diff_authz_ids(QueryName, AuthzIds, Key, CallbackFun) ->
+    error_logger:info_msg({QueryName, AuthzIds}), 
+    case CallbackFun({QueryName, [AuthzIds]}) of
+        not_found ->
             {[], []};
-        {ok, Results} ->
+        Results when is_list(Results)->
             Flattened = lists:flatten(Results),
             ResultNames = proplists:get_all_values(Key, Flattened),
             FoundAuthzIds = proplists:get_all_values(<<"authz_id">>, Flattened),
