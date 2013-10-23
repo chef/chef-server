@@ -42,8 +42,8 @@ template partybus_config do
   variables(:connection_string => db_connection_string,
             :node_role => node_role,
             :db_service_name => db_service_name,
-            :is_data_master => OmnibusHelper.is_data_master?(node),
-            :bootstrap_server => OmnibusHelper.is_bootstrap_server?(node))
+            :is_data_master => is_data_master?,
+            :bootstrap_server => is_bootstrap_server?)
 end
 
 link "/opt/opscode/embedded/service/partybus/config.rb" do
