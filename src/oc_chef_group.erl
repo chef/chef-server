@@ -124,7 +124,9 @@ record_fields() ->
 list(#oc_chef_group{org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_query(), [OrgId], [name]}).
 
-update(#oc_chef_group{authz_id = AuthzId,
+update(#oc_chef_group{
+                      authz_id = GroupAuthzId,
+                      last_updated_by = AuthzId,
                       clients = Clients,
                       users = Users,
                       groups = Groups,
@@ -135,7 +137,7 @@ update(#oc_chef_group{authz_id = AuthzId,
     ClientAuthzIds = find_client_authz_ids(Clients, CallbackFun),
     UserAuthzIds = find_user_authz_ids(Users, CallbackFun),
     GroupAuthzIds = find_group_authz_ids(Groups, CallbackFun),
-    BasePath = "/groups/" ++ binary_to_list(AuthzId),
+    BasePath = "/groups/" ++ binary_to_list(GroupAuthzId),
     ActorsPath = BasePath ++ "/actors/",
     GroupsPath = BasePath ++ "/groups/",
     UserSideActorsAuthzIds = UserAuthzIds ++ ClientAuthzIds,
@@ -145,7 +147,7 @@ update(#oc_chef_group{authz_id = AuthzId,
     GroupsToRemove = default_to_empty(AuthSideGroups) -- GroupAuthzIds,
     delete_authz_ids(ActorsPath, ActorsToRemove, AuthzId),
     delete_authz_ids(GroupsPath, GroupsToRemove, AuthzId),
-    ok.
+    1.
 
 default_to_empty(List) when is_list(List) ->
     List;
@@ -166,8 +168,8 @@ parse_binary_json(Bin) ->
 
 fetch(Record, CallbackFun) ->
     case chef_object:default_fetch(Record, CallbackFun) of
-        #oc_chef_group{authz_id = GroupAuthzId} = GroupRecord ->
-            {ActorAuthzIds, GroupAuthzIds} = fetch_authz_ids(GroupAuthzId),
+        #oc_chef_group{authz_id = GroupAuthzId, last_updated_by = LastUpdatedBy} = GroupRecord ->
+            {ActorAuthzIds, GroupAuthzIds} = fetch_authz_ids(GroupAuthzId, LastUpdatedBy),
             {ClientNames, RemainingAuthzIds} = find_clients_names(ActorAuthzIds, CallbackFun),
             {Usernames, DefunctAuthzIds} = find_users_names(RemainingAuthzIds, CallbackFun),
             {GroupNames, DefunctGroupAuthzIds} = find_groups_names(GroupAuthzIds, CallbackFun),
@@ -177,8 +179,8 @@ fetch(Record, CallbackFun) ->
             erlang:error(Error)
     end.
 
-fetch_authz_ids(GroupAuthzId) ->
-    {ok, "200", _, GroupJsonBody} = oc_chef_authz_http:request("/groups/" ++ binary_to_list(GroupAuthzId), get, ?DEFAULT_HEADERS, [], GroupAuthzId),
+fetch_authz_ids(GroupAuthzId, LastUpdatedBy) ->
+    {ok, "200", _, GroupJsonBody} = oc_chef_authz_http:request("/groups/" ++ binary_to_list(GroupAuthzId), get, ?DEFAULT_HEADERS, [], LastUpdatedBy),
     DecodedJson = ejson:decode(GroupJsonBody),
     {ej:get({<<"actors">>}, DecodedJson), ej:get({<<"groups">>}, DecodedJson)}.
 

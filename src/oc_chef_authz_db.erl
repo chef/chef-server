@@ -317,6 +317,3 @@ fetch_group_authz_id_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
         {error, _} = Error ->
             Error
     end.
--spec update_group(#oc_chef_group{}, [binary()], [binary()], [binary()]) -> pos_integer() | not_found | {conflict, _} | {error, _}.
-update_group(#oc_chef_group{} = GroupRec, Clients, Users, Groups) ->
-    oc_chef_group:update(GroupRec#oc_chef_group{clients = Clients, users = Users, groups = Groups}, fun chef_sql:select_rows/1).

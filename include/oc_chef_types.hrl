@@ -21,7 +21,6 @@
           last_updated_by,
           created_at,
           updated_at,
-          requestor_authz_id,
           clients = [],
           users = [],
           groups = [],
