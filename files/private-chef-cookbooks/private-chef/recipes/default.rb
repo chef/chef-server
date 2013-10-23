@@ -178,5 +178,7 @@ file "/etc/opscode/chef-server-running.json" do
   owner node["private_chef"]["user"]["username"]
   group "root"
   mode "0600"
-  content Chef::JSONCompat.to_json_pretty({ "private_chef" => node['private_chef'].to_hash, "run_list" => node.run_list })
+  content Chef::JSONCompat.to_json_pretty({ "private_chef" => node['private_chef'].to_hash,
+                                            "run_list" => node.run_list,
+                                            "runit" => node['runit'].to_hash})
 end

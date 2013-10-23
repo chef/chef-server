@@ -29,4 +29,17 @@ define :component_runit_service, :log_directory => nil, :svlogd_size => nil, :sv
     end
   end
 
+
+  # Keepalive management
+  #
+  # Our keepalived setup knows which services it must manage by
+  # looking for a 'keepalive_me' sentinel file in the service's
+  # directory.
+  if node['private_chef']['topology'] == 'ha'
+    is_keepalive_service = params[:ha] || node['private_chef'][component]['ha']
+    file "#{node['runit']['sv_dir']}/#{component}/keepalive_me" do
+      action is_keepalive_service ? :create : :delete
+    end
+  end
+
 end
