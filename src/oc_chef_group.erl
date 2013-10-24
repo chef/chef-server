@@ -174,14 +174,15 @@ fetch(Record, CallbackFun) ->
             {Usernames, DefunctAuthzIds} = find_users_names(RemainingAuthzIds, CallbackFun),
             {GroupNames, DefunctGroupAuthzIds} = find_groups_names(GroupAuthzIds, CallbackFun),
             extra_mile(DefunctAuthzIds ++ DefunctGroupAuthzIds),
-            {GroupRecord, ClientNames, Usernames, GroupNames};
-        Error ->
-            erlang:error(Error)
+            GroupRecord#oc_chef_group{clients = ClientNames, users =  Usernames, groups =  GroupNames, auth_side_actors = ActorAuthzIds, auth_side_groups = GroupAuthzIds};
+        not_foud ->
+            not_found;
+        Other ->
+            Other
     end.
 
 fetch_authz_ids(GroupAuthzId, LastUpdatedBy) ->
-    {ok, "200", _, GroupJsonBody} = oc_chef_authz_http:request("/groups/" ++ binary_to_list(GroupAuthzId), get, ?DEFAULT_HEADERS, [], LastUpdatedBy),
-    DecodedJson = ejson:decode(GroupJsonBody),
+    {ok,  DecodedJson} = oc_chef_authz_http:request("/groups/" ++ binary_to_list(GroupAuthzId), get, ?DEFAULT_HEADERS, [], LastUpdatedBy),
     {ej:get({<<"actors">>}, DecodedJson), ej:get({<<"groups">>}, DecodedJson)}.
 
 find_clients_names(ActorsAuthzIds, CallbackFun) ->
