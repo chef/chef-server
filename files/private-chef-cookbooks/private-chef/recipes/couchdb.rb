@@ -31,7 +31,7 @@ template File.join(couchdb_etc_dir, "local.ini") do
   owner node['private_chef']['user']['username']
   mode "0600"
   variables(node['private_chef']['couchdb'].to_hash)
-  notifies :restart, "runit_service[couchdb]" if OmnibusHelper.should_notify?("couchdb")
+  notifies :restart, "runit_service[couchdb]" if is_data_master?
 end
 
 component_runit_service "couchdb"

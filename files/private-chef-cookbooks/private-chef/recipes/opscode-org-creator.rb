@@ -27,7 +27,7 @@ template org_creator_config do
   source "opscode-org-creator.config.erb"
   mode "644"
   variables(node['private_chef']['opscode-org-creator'].to_hash)
-  notifies :restart, 'runit_service[opscode-org-creator]' if OmnibusHelper.should_notify?("opscode-org-creator")
+  notifies :restart, 'runit_service[opscode-org-creator]' if is_data_master?
 end
 
 link "/opt/opscode/embedded/service/opscode-org-creator/rel/org_app/etc/app.config" do
@@ -43,7 +43,7 @@ template "/opt/opscode/embedded/service/opscode-org-creator/rel/org_app/bin/org_
   mode 0755
   owner 'root'
   group 'root'
-  notifies :restart, 'runit_service[opscode-org-creator]' if OmnibusHelper.should_notify?("opscode-org-creator")
+  notifies :restart, 'runit_service[opscode-org-creator]' if is_data_master?
 end
 
 component_runit_service "opscode-org-creator"

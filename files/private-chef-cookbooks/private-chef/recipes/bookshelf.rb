@@ -63,7 +63,7 @@ template "/opt/opscode/embedded/service/bookshelf/bin/bookshelf" do
   group "root"
   mode "0755"
   variables(node['private_chef']['bookshelf'].to_hash)
-  notifies :restart, 'runit_service[bookshelf]' if OmnibusHelper.should_notify?("bookshelf")
+  notifies :restart, 'runit_service[bookshelf]' if is_data_master?
 end
 
 bookshelf_config = File.join(bookshelf_etc_dir, "app.config")
@@ -72,7 +72,7 @@ template bookshelf_config do
   source "bookshelf.config.erb"
   mode "644"
   variables(node['private_chef']['bookshelf'].to_hash)
-  notifies :restart, 'runit_service[bookshelf]' if OmnibusHelper.should_notify?("bookshelf")
+  notifies :restart, 'runit_service[bookshelf]' if is_data_master?
 end
 
 link "/opt/opscode/embedded/service/bookshelf/etc/app.config" do
