@@ -165,7 +165,34 @@ include_recipe "private-chef::runit"
   if node["private_chef"][service]["enable"]
     include_recipe "private-chef::#{service}"
   else
-    include_recipe "private-chef::#{service}_disable"
+    # All non-enabled services get disabled; couchdb and
+    # opscode-expander get additional special treatment
+    #
+    # drbd and bootstrap aren't really services, though, so there's
+    # nothing to disable, really.
+    unless ["drbd", "bootstrap"].include?(service)
+
+      runit_service service do
+        action :disable
+      end
+
+      case service
+      when "couchdb"
+        %w[couchdb_bounce couchdb_compact couchdb_compact_major_offenders].each do |file_name|
+          file File.join("/etc/cron.d/", file_name) do
+            action :delete
+          end
+        end
+      when "opscode-expander"
+        runit_service "opscode-expander-reindexer" do
+          action :disable
+        end
+      else
+        # nothing to see, move along
+      end
+
+    end # unless
+
   end
 end
 
