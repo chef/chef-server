@@ -81,10 +81,11 @@ to_json(Req, #base_state{
                 organization_name = OrgName,
                 resource_state = #group_state{
                                              oc_chef_group = Group
-                                            }} = State) ->
+                                            }} = State) ->   
     Ejson = oc_chef_group:assemble_group_ejson(Group, OrgName),
     
     Json = chef_json:encode(Ejson),
+    error_logger:info_msg({group_to_json, wrq:method(Req)}),
     {Json, Req, State}.
 
 from_json(Req, #base_state{resource_state = #group_state{
@@ -92,6 +93,7 @@ from_json(Req, #base_state{resource_state = #group_state{
                                                group_data = GroupData
                                               }
                           } = State) ->
+    error_logger:info_msg({from_json, GroupData, Group}),
     chef_wm_base:update_from_json(Req, State, Group, GroupData).
 
 delete_resource(Req, #base_state{chef_db_context = DbContext,
@@ -101,6 +103,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                 } = State) ->
     ok = oc_chef_wm_base:delete_object(DbContext, Group, RequestorId),
     Ejson = oc_chef_group:assemble_group_ejson(Group),
+    error_logger:info_msg({group_delete_resource, wrq:method(Req)}),
     {true, chef_wm_util:set_json_body(Req, Ejson), State}.
 
 malformed_request_message(Any, _Req, _state) ->
