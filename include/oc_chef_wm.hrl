@@ -11,3 +11,9 @@
           oc_chef_container :: #oc_chef_container{}
          }).
 
+-record(group_state, {
+          group_data,
+          group_authz_id,
+          oc_chef_group :: #oc_chef_group{}
+         }).
+

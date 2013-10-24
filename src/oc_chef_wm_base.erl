@@ -64,6 +64,10 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
             invert_perm(check_permission(container, ContainerId, Req1, State1));
         {{container_id, AuthzId}, Req1, State1} ->
             invert_perm(check_permission(container, AuthzId, Req1, State1));
+        {{group, AuthzId}, Req1, State1} ->
+            invert_perm(check_permission(group, AuthzId, Req1, State1));
+        {{group_id, AuthzId}, Req1, State1} ->
+            invert_perm(check_permission(group, AuthzId, Req1, State1));
         {{Type, ObjectId}, Req1, State1} when Type =:= object;
                                               Type =:= actor ->
             invert_perm(check_permission(Type, ObjectId, Req1, State1));
@@ -75,9 +79,10 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
                 true ->
                     %% All auth checks out, so we're not forbidden
                     {false, Req1, State1};
-                {false, {_AuthzObjectType, _AuthzId, Permission}} ->
+                {false, {AuthzObjectType, AuthzId, Permission}} ->
                     %% NOTE: No specific message for the auth check that failed (but this is
                     %% the same behavior we had before)
+                    error_logger:info_msg({multi_auth_check_failed, AuthzObjectType, AuthzId, AuthTuples}),
                     {Req2, State2} = set_forbidden_msg(Permission, Req1, State1),
                     {true, Req2, State2};
                 {Error, {AuthzObjectType, AuthzId, Permission}} ->
@@ -242,6 +247,7 @@ check_permission(AuthzObjectType, AuthzId, Req,
         true ->
             {true, Req, State};
         false ->
+            error_logger:info_msg({does_not_have_permission, AuthzObjectType, AuthzId, Perm}),
             {Req1, State1} = set_forbidden_msg(Req, State),
             {false, Req1, State1};
         Error ->
@@ -274,7 +280,8 @@ is_authorized(Req, State) ->
 authorized_by_org_membership_check(Req, #base_state{requestor=#chef_client{}}=State) ->
     {true, Req, State};
 authorized_by_org_membership_check(Req, State = #base_state{organization_name = OrgName,
-                                                            chef_db_context = DbContext}) ->
+                                                            chef_db_context = DbContext,
+                                                           resource_state = Resource}) ->
     {UserName, BypassesChecks} = get_user(Req, State),
     case BypassesChecks of
         true -> {true, Req, State};

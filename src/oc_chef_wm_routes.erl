@@ -101,7 +101,8 @@ bulk_route_fun(Type, Req) when Type =:= role;
                                Type =:= client;
                                Type =:= data_bag;
                                Type =:= data_bag_item;
-                               Type =:= container ->
+                               Type =:= container;
+                               Type =:= group ->
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(Type),
     fun(Name) ->
@@ -147,7 +148,10 @@ template_for_type({data_bag, _}) ->
     %% another way of asking for data_bag_item
     "/organizations/~s/data/~s/~s";
 template_for_type(container) ->
-    "/organizations/~s/containers/~s".
+    "/organizations/~s/containers/~s";
+template_for_type(group) ->
+    "/organizations/~s/groups/~s".
+
 
 %% This is extracted from search, needs more cleanup
 url_for_search_item_fun(Req, Type, OrgName) ->
