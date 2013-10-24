@@ -26,8 +26,6 @@ private_chef_webui_log_dir = node['private_chef']['opscode-webui']['log_director
   end
 end
 
-should_notify = OmnibusHelper.should_notify?("opscode-webui")
-
 env_config = File.join(private_chef_webui_etc_dir, "#{node['private_chef']['opscode-webui']['environment']}.rb")
 session_store_config = File.join(private_chef_webui_etc_dir, "session_store.rb")
 secret_token_config = File.join(private_chef_webui_etc_dir, "secret_token.rb")
@@ -38,7 +36,7 @@ template env_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-webui'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?))
-  notifies :restart, 'runit_service[opscode-webui]' if should_notify
+  notifies :restart, 'runit_service[opscode-webui]' unless backend_secondary?
 end
 
 link "/opt/opscode/embedded/service/opscode-webui/config/environments/#{node['private_chef']['opscode-webui']['environment']}.rb" do
@@ -51,7 +49,7 @@ template session_store_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-webui'].to_hash)
-  notifies :restart, 'runit_service[opscode-webui]' if should_notify
+  notifies :restart, 'runit_service[opscode-webui]' unless backend_secondary?
 end
 
 link "/opt/opscode/embedded/service/opscode-webui/config/initializers/session_store.rb" do
@@ -64,7 +62,7 @@ template secret_token_config do
   group "root"
   mode "0644"
   variables(node['private_chef']['opscode-webui'].to_hash)
-  notifies :restart, 'runit_service[opscode-webui]' if should_notify
+  notifies :restart, 'runit_service[opscode-webui]' unless backend_secondary?
 end
 
 link "/opt/opscode/embedded/service/opscode-webui/config/initializers/secret_token.rb" do
@@ -82,7 +80,7 @@ unicorn_config File.join(private_chef_webui_etc_dir, "unicorn.rb") do
   owner "root"
   group "root"
   mode "0644"
-  notifies :restart, 'runit_service[opscode-webui]' if should_notify
+  notifies :restart, 'runit_service[opscode-webui]' unless backend_secondary?
 end
 
 link "/opt/opscode/embedded/service/opscode-webui/tmp" do
