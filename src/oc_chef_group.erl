@@ -14,7 +14,8 @@
 
 -export([
          parse_binary_json/1,
-         flatten/1
+         flatten/1,
+         assemble_group_ejson/2
         ]).
 
 %% chef_object behaviour callbacks
@@ -100,11 +101,12 @@ is_indexed() ->
 ejson_for_indexing(#oc_chef_group{}, _EjsonTerm) ->
    {[]}.
 
-update_from_ejson(#oc_chef_group{} = Group, GroupData) ->
-    Name = ej:get({<<"groupname">>}, GroupData),
-    Clients = ej:get({<<"clients">>}, GroupData),
-    Groups = ej:get({<<"groups">>}, GroupData),
-    Users = ej:get({<<"users">>}, GroupData),
+update_from_ejson(#oc_chef_group{name = OrigName, clients = OrigClients, users = OrigUsers, groups = OrigGroups} = Group, GroupData) ->
+    error_logger:info_msg({update_from_ejson, Group}),
+    Name = ej:get({<<"groupname">>}, GroupData, OrigName),
+    Clients = ej:get({<<"clients">>}, GroupData, OrigClients),
+    Groups = ej:get({<<"groups">>}, GroupData, OrigGroups),
+    Users = ej:get({<<"users">>}, GroupData, OrigUsers),
     Group#oc_chef_group{name = Name, clients = Clients, groups = Groups, users = Users}.
 
 fields_for_update(#oc_chef_group{last_updated_by = LastUpdatedBy,
@@ -238,3 +240,15 @@ flatten(#oc_chef_group{id = Id,
           created_at = CreatedAt,
           updated_at = UpdatedAt}) ->
     [Id, AuthzId, OrgId, Name, LastUpdatedBy, CreatedAt, UpdatedAt].
+
+
+assemble_group_ejson(#oc_chef_group{name = Name, clients = Clients, users = Users, groups = Groups}, OrgName) ->
+    {[
+      {<<"actors">>, Clients ++ Users},
+      {<<"users">>, Users},
+      {<<"clients">>, Clients},
+      {<<"groups">>, Groups},
+      {<<"orgname">>, OrgName},
+      {<<"name">>, Name},
+      {<<"groupname">>, Name}
+     ]}.
