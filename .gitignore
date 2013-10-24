@@ -11,3 +11,5 @@ doc/*.html
 /doc/stylesheet.css
 .test
 /chef_wm.plt
+ct_logs
+*_data
