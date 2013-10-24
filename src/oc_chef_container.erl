@@ -100,7 +100,7 @@ is_indexed() ->
     false.
 
 ejson_for_indexing(#oc_chef_container{}, _EjsonTerm) ->
-   {[]}.
+   erlang:error(not_indexed).
 
 update_from_ejson(#oc_chef_container{} = Container, ContainerData) ->
     Name = ej:get({<<"containername">>}, ContainerData),
