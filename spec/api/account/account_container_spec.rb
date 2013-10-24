@@ -7,6 +7,12 @@ describe "opscode-account containers", :containers do
     Pedant::Config.ruby_container_endpoint?
   end
 
+  def self.in_sql?
+    !ruby? || Pedant::Config.ruby_container_endpoint_in_sql?
+  end
+
+  let(:in_sql?) { self.class.in_sql? }
+
   context "/containers endpoint" do
     let(:request_url) { api_url("containers") }
 
@@ -404,7 +410,7 @@ describe "opscode-account containers", :containers do
               # revolved around leaving the containerpath implemented the same way
               # HEC sets it when creating a new org, which is the same as the
               # containername
-              "containerpath" => ruby? ? "/" : new_container
+              "containerpath" => in_sql? ? new_container : "/"
             }}
 
           it "ignores them" do
@@ -450,7 +456,6 @@ describe "opscode-account containers", :containers do
     end
 
     context "PUT /containers" do
-
       let(:not_allowed_response) do
         if ruby?
           {:status => 404}
@@ -488,9 +493,12 @@ describe "opscode-account containers", :containers do
       delete(request_url, platform.admin_user)
     end
 
+    #
+    # When containers are in sql we eliminate the containerpath field and return the containername instead
+    #
     let(:default_container_body) {{
         "containername" => test_container,
-        "containerpath" => ruby? ? "/" : test_container
+        "containerpath" => in_sql? ?  test_container : "/"
       }}
 
     context "GET /containers/<name>" do
