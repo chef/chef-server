@@ -84,7 +84,7 @@ new_record(OrgId, AuthzId, ContainerData) ->
     Name = ej:get({<<"containername">>}, ContainerData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     #oc_chef_container{id = Id,
-                       authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+                       authz_id = AuthzId,
                        org_id = OrgId,
                        name = Name}.
 
