@@ -126,8 +126,13 @@ parse_binary_json(Bin) ->
     InputEjson = chef_json:decode_body(Bin),
 
     %% The pedant tests explicitly state that the id should win in
-    %% the case of both fields being available.
-    %% TODO: add unit tests for this
+    %% the case of both fields being available. This is the way that
+    %% opscode-account is implemented as well. In order to be backward
+    %% compatible, we'll adopt the same behavior as well, but when
+    %% both 'id' and 'containername' are missing, we'll inform the user
+    %% that the latter is missing. This is intended to keep the input
+    %% to the API consistent with the output, which returns 'containername'
+    %% as the field.
     Name = case ej:get({"id"}, InputEjson) of
                undefined ->
                    case ej:get({"containername"}, InputEjson) of
