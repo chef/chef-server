@@ -80,7 +80,7 @@ bulk_get_query() ->
     ok.
 
 new_record(OrgId, AuthzId, GroupData) ->
-    Name = ej:get({<<"groupname">>}, GroupData),
+    Name = ej:get({<<"groupname">>}, GroupData, ej:get({<<"id">>}, GroupData)),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     #oc_chef_group{id = Id,
                        authz_id = AuthzId,
@@ -102,12 +102,14 @@ ejson_for_indexing(#oc_chef_group{}, _EjsonTerm) ->
    {[]}.
 
 update_from_ejson(#oc_chef_group{name = OrigName, clients = OrigClients, users = OrigUsers, groups = OrigGroups} = Group, GroupData) ->
-    error_logger:info_msg({update_from_ejson, Group}),
+    error_logger:info_msg({update_from_ejson, Group, group_data, GroupData}),
     Name = ej:get({<<"groupname">>}, GroupData, OrigName),
-    Clients = ej:get({<<"clients">>}, GroupData, OrigClients),
-    Groups = ej:get({<<"groups">>}, GroupData, OrigGroups),
-    Users = ej:get({<<"users">>}, GroupData, OrigUsers),
-    Group#oc_chef_group{name = Name, clients = Clients, groups = Groups, users = Users}.
+    Clients = ej:get({<<"actors">>, <<"clients">>}, GroupData, OrigClients),
+    Groups = ej:get({<<"actors">>, <<"groups">>}, GroupData, OrigGroups),
+    Users = ej:get({<<"actors">>, <<"users">>}, GroupData, OrigUsers),
+    Result = Group#oc_chef_group{name = Name, clients = Clients, groups = Groups, users = Users},
+    error_logger:info_msg({update_from_ejson_result, Result, Group =:= Result}),
+    Result.
 
 fields_for_update(#oc_chef_group{last_updated_by = LastUpdatedBy,
                                      updated_at = UpdatedAt,
@@ -127,6 +129,7 @@ list(#oc_chef_group{org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_query(), [OrgId], [name]}).
 
 update(#oc_chef_group{
+                      org_id = OrgId,
                       authz_id = GroupAuthzId,
                       last_updated_by = AuthzId,
                       clients = Clients,
@@ -135,17 +138,20 @@ update(#oc_chef_group{
                       auth_side_actors = AuthSideActors,
                       auth_side_groups = AuthSideGroups
                      } = Record, CallbackFun) ->
+    error_logger:info_msg({group_update_record, Record}),
     chef_object:default_update(Record, CallbackFun),
-    ClientAuthzIds = find_client_authz_ids(Clients, CallbackFun),
+    ClientAuthzIds = find_client_authz_ids(Clients, OrgId, CallbackFun),
     UserAuthzIds = find_user_authz_ids(Users, CallbackFun),
-    GroupAuthzIds = find_group_authz_ids(Groups, CallbackFun),
+    GroupAuthzIds = find_group_authz_ids(Groups, OrgId, CallbackFun),
     BasePath = "/groups/" ++ binary_to_list(GroupAuthzId),
     ActorsPath = BasePath ++ "/actors/",
     GroupsPath = BasePath ++ "/groups/",
     UserSideActorsAuthzIds = UserAuthzIds ++ ClientAuthzIds,
+    error_logger:info_msg({putting_to_actors_path, UserSideActorsAuthzIds}),
     put_authz_ids(ActorsPath, UserSideActorsAuthzIds, AuthzId),
     put_authz_ids(GroupsPath, GroupAuthzIds, AuthzId),
     ActorsToRemove = default_to_empty(AuthSideActors) -- UserSideActorsAuthzIds,
+    error_logger:info_msg({delete_to_actors_path, ActorsToRemove}),
     GroupsToRemove = default_to_empty(AuthSideGroups) -- GroupAuthzIds,
     delete_authz_ids(ActorsPath, ActorsToRemove, AuthzId),
     delete_authz_ids(GroupsPath, GroupsToRemove, AuthzId),
@@ -159,27 +165,36 @@ default_to_empty(_) ->
     
 
 put_authz_ids(Path, UpdateAuthzIds, AuthzId) ->
-    [oc_chef_authz_http:request(Path ++ binary_to_list(UpdateAuthzId), put, ?DEFAULT_HEADERS, [], AuthzId) || UpdateAuthzId <- UpdateAuthzIds].
+    [ok = oc_chef_authz_http:request(Path ++ binary_to_list(UpdateAuthzId), put, ?DEFAULT_HEADERS, [], AuthzId) || UpdateAuthzId <- UpdateAuthzIds].
     
 delete_authz_ids(Path, UpdateAuthzIds, AuthzId) ->
-    [oc_chef_authz_http:request(Path ++ binary_to_list(UpdateAuthzId), delete, ?DEFAULT_HEADERS, [], AuthzId) || UpdateAuthzId <- UpdateAuthzIds].
+    [ok = oc_chef_authz_http:request(Path ++ binary_to_list(UpdateAuthzId), delete, ?DEFAULT_HEADERS, [], AuthzId) || UpdateAuthzId <- UpdateAuthzIds].
     
 
 parse_binary_json(Bin) ->
     {ok, chef_json:decode_body(Bin)}.
 
 fetch(Record, CallbackFun) ->
+    error_logger:info_msg({fetch, Record}),
     case chef_object:default_fetch(Record, CallbackFun) of
         #oc_chef_group{authz_id = GroupAuthzId, last_updated_by = LastUpdatedBy} = GroupRecord ->
             {ActorAuthzIds, GroupAuthzIds} = fetch_authz_ids(GroupAuthzId, LastUpdatedBy),
+            error_logger:info_msg({actors_authz_ids, ActorAuthzIds}),
             {ClientNames, RemainingAuthzIds} = find_clients_names(ActorAuthzIds, CallbackFun),
+            error_logger:info_msg({found_client_names, ClientNames}),
+            error_logger:info_msg({remaining_authz_ids, RemainingAuthzIds}),
             {Usernames, DefunctAuthzIds} = find_users_names(RemainingAuthzIds, CallbackFun),
+            error_logger:info_msg({defunct_authz_ids, DefunctAuthzIds}),
+            error_logger:info_msg({name_search_results, ClientNames, Usernames}),
             {GroupNames, DefunctGroupAuthzIds} = find_groups_names(GroupAuthzIds, CallbackFun),
             extra_mile(DefunctAuthzIds ++ DefunctGroupAuthzIds),
-            GroupRecord#oc_chef_group{clients = ClientNames, users =  Usernames, groups =  GroupNames, auth_side_actors = ActorAuthzIds, auth_side_groups = GroupAuthzIds};
+            Result = GroupRecord#oc_chef_group{clients = ClientNames, users =  Usernames, groups =  GroupNames, auth_side_actors = ActorAuthzIds, auth_side_groups = GroupAuthzIds},
+            error_logger:info_msg({fetch_found, Result}),
+            Result;
         not_foud ->
             not_found;
         Other ->
+            error_logger:info_msg({fetch_found_other, Other}),
             Other
     end.
 
@@ -196,19 +211,20 @@ find_users_names(UsersAuthzIds, CallbackFun) ->
 find_groups_names(GroupsAuthzIds, CallbackFun) ->
     query_and_diff_authz_ids(find_group_name_in_authz_ids, GroupsAuthzIds, <<"name">>, CallbackFun).
 
-find_client_authz_ids(ClientNames, CallbackFun) ->
-    find_authz_id_in_names(find_client_authz_id_in_names, ClientNames, CallbackFun).
+find_client_authz_ids(ClientNames, OrgId, CallbackFun) ->
+    find_authz_id_in_names(find_client_authz_id_in_names, [ClientNames], CallbackFun).
 
-find_group_authz_ids(GroupNames, CallbackFun) ->
-    find_authz_id_in_names(find_group_authz_id_in_names, GroupNames, CallbackFun).
+find_group_authz_ids(GroupNames, OrgId, CallbackFun) ->
+    find_authz_id_in_names(find_group_authz_id_in_names, [GroupNames], CallbackFun).
 
 find_user_authz_ids(UserNames, CallbackFun) ->
-    find_authz_id_in_names(find_user_authz_id_in_names, UserNames, CallbackFun).
+    find_authz_id_in_names(find_user_authz_id_in_names, [UserNames], CallbackFun).
 
-find_authz_id_in_names(QueryName, Names, CallbackFun) ->
-    case CallbackFun({QueryName, [Names]}) of
+find_authz_id_in_names(QueryName, Args, CallbackFun) ->
+    case CallbackFun({QueryName, Args}) of
         List when is_list(List) ->
             Flattened = lists:flatten(List),
+            error_logger:info_msg({QueryName, Args, Flattened}),
             proplists:get_all_values(<<"authz_id">>, Flattened);
         not_found ->
             [];
@@ -219,12 +235,16 @@ find_authz_id_in_names(QueryName, Names, CallbackFun) ->
 query_and_diff_authz_ids(QueryName, AuthzIds, Key, CallbackFun) ->
     case CallbackFun({QueryName, [AuthzIds]}) of
         not_found ->
-            {[], []};
+            {[], AuthzIds};
         Results when is_list(Results)->
             Flattened = lists:flatten(Results),
+            error_logger:info_msg({callback_fun_results, Flattened}),
             ResultNames = proplists:get_all_values(Key, Flattened),
             FoundAuthzIds = proplists:get_all_values(<<"authz_id">>, Flattened),
-            {ResultNames, sets:to_list(sets:subtract(sets:from_list(AuthzIds), sets:from_list(FoundAuthzIds)))};
+            DiffedList = sets:to_list(sets:subtract(sets:from_list(AuthzIds), sets:from_list(FoundAuthzIds))),
+            ReverseList = sets:to_list(sets:subtract(sets:from_list(FoundAuthzIds), sets:from_list(AuthzIds))),
+            error_logger:info_msg({DiffedList, ReverseList}),
+            {ResultNames, DiffedList};
         _Other ->
             {[], []}
     end.
