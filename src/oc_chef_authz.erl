@@ -177,9 +177,13 @@ create_entity_with_container_acl(RequestorId, ContainerAId, ObjectType) ->
 %% @end TODO: consider error cases in more detail
 -spec merge_acl_from_container(requestor_id(),
                                ContainerId :: object_id(),
-                               AuthzType :: 'actor' | 'object',
+                               AuthzType :: 'actor' | 'object' | 'container',
                                ObjectId :: object_id()) -> ok |
                                                            {error, object_acl | container_acl}.
+merge_acl_from_container(_RequestorId, _ContainerId, container, _ObjectId) ->
+    %% When creating containers, the new container does NOT inherit the ACLs from the
+    %% parent container.
+    ok;
 merge_acl_from_container(RequestorId, ContainerId, AuthzType, ObjectId) ->
     case get_acl_for_resource(RequestorId, container, ContainerId) of
         {ok, CAcl} ->
@@ -219,7 +223,8 @@ merge_acl_from_container(RequestorId, ContainerId, AuthzType, ObjectId) ->
 set_acl(_RequestorId, _AuthzType, _ObjectId, []) ->
     ok;
 set_acl(RequestorId, AuthzType, ObjectId, [{Method, ACE}|Rest]) when AuthzType =:= 'actor';
-                                                                     AuthzType =:= 'object' ->
+                                                                     AuthzType =:= 'object';
+                                                                     AuthzType =:= 'container' ->
     case set_ace_for_entity(RequestorId, AuthzType, ObjectId, Method, ACE) of
         ok ->
             set_acl(RequestorId, AuthzType, ObjectId, Rest);
@@ -483,8 +488,9 @@ object_type_to_container_name(search)      -> <<"search">>.
 
 %% @doc When creating a new Authz entity in a given container, we need to ensure we're
 %% creating the correct kind.
-authz_type_from_container(client) -> 'actor';
-authz_type_from_container(_)      -> 'object'.
+authz_type_from_container(client)    -> 'actor';
+authz_type_from_container(container) -> 'container';
+authz_type_from_container(_)         -> 'object'.
 
 %
 % This exists for testing and debugging; it's too expensive for day to day use.

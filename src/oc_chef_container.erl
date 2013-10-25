@@ -7,6 +7,7 @@
 
 -include("oc_chef_types.hrl").
 -include_lib("mixer/include/mixer.hrl").
+-include_lib("chef_objects/include/chef_types.hrl").
 
 -behaviour(chef_object).
 
@@ -83,7 +84,7 @@ new_record(OrgId, AuthzId, ContainerData) ->
     Name = ej:get({<<"containername">>}, ContainerData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     #oc_chef_container{id = Id,
-                       authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+                       authz_id = AuthzId,
                        org_id = OrgId,
                        name = Name}.
 
@@ -99,7 +100,7 @@ is_indexed() ->
     false.
 
 ejson_for_indexing(#oc_chef_container{}, _EjsonTerm) ->
-   {[]}.
+   erlang:error(not_indexed).
 
 update_from_ejson(#oc_chef_container{} = Container, ContainerData) ->
     Name = ej:get({<<"containername">>}, ContainerData),
@@ -122,8 +123,48 @@ list(#oc_chef_container{org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_query(), [OrgId], [name]}).
 
 parse_binary_json(Bin) ->
-    {ok, chef_json:decode_body(Bin)}.
+    InputEjson = chef_json:decode_body(Bin),
+
+    %% The pedant tests explicitly state that the id should win in
+    %% the case of both fields being available. This is the way that
+    %% opscode-account is implemented as well. In order to be backward
+    %% compatible, we'll adopt the same behavior as well, but when
+    %% both 'id' and 'containername' are missing, we'll inform the user
+    %% that the latter is missing. This is intended to keep the input
+    %% to the API consistent with the output, which returns 'containername'
+    %% as the field.
+    Name = case ej:get({"id"}, InputEjson) of
+               undefined ->
+                   case ej:get({"containername"}, InputEjson) of
+                       undefined -> throw({missing, <<"containername">>});
+                       ContainerName -> ContainerName
+                   end;
+               ContainerId -> ContainerId
+           end,
+
+    %% validation functions return 'ok' or throw exceptions
+    valid_name(Name),
+
+    {ok, {[{<<"containername">>, Name},
+           {<<"containerpath">>, Name}]}}.
 
 assemble_container_ejson(#oc_chef_container{name = ContainerName}) ->
     {[{<<"containername">>, ContainerName},
       {<<"containerpath">>, ContainerName}]}.
+
+%% TODO: functions from chef_regex need to get refactored out into the
+%%       chef object behaviours, this is a hack and a copy of that
+%%       logic, otherwise we could make the chef_regex code more generic
+%%       and decouple the error messages from the regular expressions used
+-define(ANCHOR_REGEX(Regex), "^" ++ Regex ++ "$").
+-define(NAME_REGEX, "[.[:alnum:]_-]+").
+
+valid_name(Name) ->
+    {ok, Regex} = re:compile(?ANCHOR_REGEX(?NAME_REGEX)),
+    Msg = <<"Malformed container name. Must only contain A-Z, a-z, 0-9, _, -, or .">>,
+    case re:run(Name, Regex) of
+        nomatch ->
+            throw({bad_object_name, Name, Msg});
+        _ ->
+            ok
+    end.
