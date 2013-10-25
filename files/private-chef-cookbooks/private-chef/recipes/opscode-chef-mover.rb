@@ -33,7 +33,6 @@ template "/opt/opscode/embedded/service/opscode-chef-mover/bin/mover" do
   group "root"
   mode "0755"
   variables(node['private_chef']['opscode-chef-mover'].to_hash)
-  notifies :restart, 'runit_service[opscode-chef-mover]' if OmnibusHelper.should_notify?("opscode-chef-mover")
 end
 
 mover_config = File.join(opscode_chef_mover_etc_dir, "sys.config")
@@ -42,7 +41,6 @@ template mover_config do
   source "opscode-chef-mover.config.erb"
   mode "644"
   variables(node['private_chef']['opscode-chef-mover'].to_hash)
-  notifies :restart, 'service[opscode-chef-mover]' if OmnibusHelper.should_notify?("opscode-chef-mover")
 end
 
 link "/opt/opscode/embedded/service/opscode-chef-mover/etc/sys.config" do

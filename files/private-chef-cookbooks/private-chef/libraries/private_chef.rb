@@ -308,6 +308,11 @@ module PrivateChef
       PrivateChef["couchdb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["rabbitmq"]["enable"] ||= false
       PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+
+      PrivateChef["opscode_certificate"]["enable"] ||= false
+      # Why is this even needed?
+      PrivateChef["opscode_certificate"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+
       PrivateChef["opscode_solr"]["enable"] ||= false
       PrivateChef["opscode_solr"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["opscode_expander"]["enable"] ||= false

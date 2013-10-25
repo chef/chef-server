@@ -114,7 +114,7 @@ nginx_vars = nginx_vars.merge({ :helper => NginxErb.new(node),
     group "root"
     mode "0644"
     variables(nginx_vars.merge({:server_proto => server_proto}))
-    notifies :restart, 'runit_service[nginx]' if OmnibusHelper.should_notify?("nginx")
+    notifies :restart, 'runit_service[nginx]' unless backend_secondary?
   end
 
 end
@@ -126,7 +126,7 @@ template nginx_config do
   group "root"
   mode "0644"
   variables(nginx_vars.merge(chef_lb_configs))
-  notifies :restart, 'service[nginx]' if OmnibusHelper.should_notify?("nginx")
+  notifies :restart, 'service[nginx]' unless backend_secondary?
 end
 
 template File.join(nginx_addon_dir, "README.md") do

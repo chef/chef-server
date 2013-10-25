@@ -99,7 +99,7 @@ end
 private_chef_pg_upgrade "upgrade_if_necessary"
 
 private_chef_pg_cluster postgresql_data_dir do
-  notifies :restart, 'runit_service[postgresql]' if OmnibusHelper.should_notify?("postgresql")
+  notifies :restart, 'runit_service[postgresql]' if is_data_master?
 end
 
 link postgresql_data_dir_symlink do
@@ -117,7 +117,7 @@ end
 # upgrades for new releases of Enterprise Chef.  As a result, we can't
 # just do a check against node['private_chef']['bootstrap']['enable'],
 # which would only run them one time.
-if OmnibusHelper.is_data_master?(node)
+if is_data_master?
   execute "/opt/opscode/bin/private-chef-ctl start postgresql" do
     retries 20
   end

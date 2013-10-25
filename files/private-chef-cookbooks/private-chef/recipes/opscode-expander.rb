@@ -29,7 +29,7 @@ template expander_config do
   options = node['private_chef']['opscode-expander'].to_hash
   options['reindexer'] = false
   variables(options)
-  notifies :restart, 'runit_service[opscode-expander]' if OmnibusHelper.should_notify?("opscode-expander")
+  notifies :restart, 'runit_service[opscode-expander]' if is_data_master?
 end
 
 link "/opt/opscode/embedded/service/opscode-expander/conf/opscode-expander.rb" do
@@ -44,7 +44,7 @@ template reindexer_config do
   options = node['private_chef']['opscode-expander'].to_hash
   options['reindexer'] = true
   variables(options)
-  notifies :restart, 'runit_service[opscode-expander-reindexer]' if OmnibusHelper.should_notify?("opscode-expander-reindexer")
+  notifies :restart, 'runit_service[opscode-expander-reindexer]' if is_data_master?
 end
 
 component_runit_service "opscode-expander"

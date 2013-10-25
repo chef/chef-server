@@ -11,4 +11,4 @@ recipe            "chef-server", "Configures the Chef Server from Omnibus"
   supports os
 end
 
-depends "runit", "= 1.2.0"
+depends          'enterprise' # grabbed via Berkshelf + Git

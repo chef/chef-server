@@ -2,64 +2,6 @@ require 'mixlib/shellout'
 
 class OmnibusHelper
 
-  # Returns 'true' if this machine was designated as the bootstrap
-  # server in private-chef.rb
-  def self.is_bootstrap_server?(node)
-    case node['private_chef']['topology']
-    when 'standalone', 'manual'
-      true
-    when 'tier'
-      node['private_chef']['role'] == 'backend'
-    when 'ha'
-      node_name = node['fqdn']
-      !!(node['private_chef']["servers"][node_name]['bootstrap'])
-    end
-  end
-
-  # Return true if the node is the master for data storage replication
-  # purposes.
-  #
-  # This will return true if the node is any of the following:
-  #
-  #   * A stand-alone EC install
-  #   * A tier-topology backend machine
-  #   * An HA topology backend keepalived master machine
-  #
-  # Any other machine will get 'false'.
-  #
-  # @param node [Node] needs to be passed in to access kepalive
-  #   directory path information
-  def self.is_data_master?(node)
-
-    topology = node['private_chef']['topology']
-    role = node['private_chef']['role']
-
-    case topology
-    when "standalone"
-      true # by definition
-    when "tier"
-      role == "backend"
-    when "ha"
-      if (role == "backend")
-        dir = node['private_chef']['keepalived']['dir']
-        cluster_status_file = "#{dir}/current_cluster_status"
-
-        if File.exists?(cluster_status_file)
-          File.open(cluster_status_file).read.chomp == "master"
-        else
-          # If the file doesn't exist, then we are most likely doing
-          # the initial setup, because keepalived must be configured
-          # after everything else.  In this case, we'll consider
-          # ourself the master if we're defined as the bootstrap
-          # server
-          is_bootstrap_server?(node)
-        end
-      else
-        false # frontends can't be masters, by definition
-      end
-    end
-  end
-
   # This file is touched once initial bootstrapping of the system is
   # done.
   def self.bootstrap_sentinel_file
@@ -73,16 +15,6 @@ class OmnibusHelper
   #   on some functional aspect of the system?
   def self.has_been_bootstrapped?
     File.exists?(bootstrap_sentinel_file)
-  end
-
-  def self.should_notify?(service_name)
-    File.symlink?("/opt/opscode/service/#{service_name}") && check_status(service_name)
-  end
-
-  def self.check_status(service_name)
-    o = Mixlib::ShellOut.new("/opt/opscode/bin/private-chef-ctl status #{service_name}")
-    o.run_command
-    o.exitstatus == 0 ? true : false
   end
 
   # generate a certificate signed by the opscode ca key
