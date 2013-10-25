@@ -5,9 +5,8 @@
 
 
 describe "Org Creation", :org_creation do
-  let(:requestor)  { superuser }
+  let(:requestor)  { platform.test_org_owner }
   let(:org)        { platform.test_org }
-  let(:owner)      { platform.test_owner }
 
   let(:request_method) { :GET }
 
