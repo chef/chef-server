@@ -47,6 +47,7 @@
 
 -export([
          allowed_methods/2,
+         conflict_message/1,
          delete_resource/2,
          from_json/2,
          to_json/2
@@ -154,3 +155,7 @@ maybe_generate_key_pair(ClientData, RequestId) ->
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
+
+-spec conflict_message(binary()) -> ejson_term().
+conflict_message(_Name) ->
+    {[{<<"error">>, [<<"Client already exists">>]}]}.

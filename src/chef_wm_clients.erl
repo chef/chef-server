@@ -62,6 +62,7 @@
 -export([
          allowed_methods/2,
          create_path/2,
+         conflict_message/1,
          from_json/2
        ]).
 
@@ -136,3 +137,7 @@ from_json(Req, #base_state{reqid = RequestId,
 
 malformed_request_message(Any, Req, State) ->
     chef_wm_malformed:malformed_request_message(Any, Req, State).
+
+-spec conflict_message(binary()) -> ejson_term().
+conflict_message(_Name) ->
+    {[{<<"error">>, [<<"Client already exists">>]}]}.

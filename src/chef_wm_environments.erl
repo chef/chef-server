@@ -47,6 +47,7 @@
          validate_request/3]).
 
 -export([allowed_methods/2,
+         conflict_message/1,
          create_path/2,
          from_json/2,
          resource_exists/2]).
@@ -107,3 +108,7 @@ from_json(Req, #base_state{resource_state = EnvironmentState}=State) ->
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
+
+-spec conflict_message(binary()) -> ejson_term().
+conflict_message(_Name) ->
+    {[{<<"error">>, [<<"Environment already exists">>]}]}.

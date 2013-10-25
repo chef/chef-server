@@ -47,6 +47,7 @@
 -export([allowed_methods/2,
          delete_resource/2,
          from_json/2,
+         conflict_message/1,
          is_conflict/2,
          to_json/2]).
 
@@ -244,7 +245,9 @@ conflict_message(#chef_cookbook_version{name = Name,
     Msg = [<<"The cookbook ">>, Name, <<" at version ">>,
            chef_cookbook_version:version_to_binary({Major, Minor, Patch}),
            <<" is frozen. Use the 'force' option to override.">>],
-    {[{<<"error">>, [iolist_to_binary(Msg)]}]}.
+    {[{<<"error">>, [iolist_to_binary(Msg)]}]};
+conflict_message(_Name) ->
+    {[{<<"error">>, [<<"Cookbook already exists">>]}]}.
 
 -spec is_forced(#wm_reqdata{}) ->  true | false.
 is_forced(Req) ->
