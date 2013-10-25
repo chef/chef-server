@@ -69,15 +69,15 @@ statements(pgsql) ->
      {find_client_name_in_authz_ids,
       <<"SELECT name, authz_id FROM clients WHERE authz_id = ANY($1)">>},
      {find_client_authz_id_in_names,
-      <<"SELECT authz_id FROM clients WHERE name = ANY($1)">>},
+      <<"SELECT authz_id FROM clients WHERE org_id = $1 AND name = ANY($2)">>},
      {find_user_name_in_authz_ids,
       <<"SELECT username, authz_id FROM users WHERE authz_id = ANY($1)">>},
      {find_user_authz_id_in_names,
       <<"SELECT authz_id FROM users WHERE username = ANY($1)">>},
      {find_group_name_in_authz_ids,
-      <<"SELECT name, authz_id FROM groups where authz_id = ANY($1)">>},
+      <<"SELECT name, authz_id FROM groups WHERE authz_id = ANY($1)">>},
      {find_group_authz_id_in_names,
-      <<"SELECT authz_id FROM groups WHERE name = ANY($1)">>}
+      <<"SELECT authz_id FROM groups WHERE org_id = $1 AND name = ANY($2)">>}
     ].
                                                 %
                                                 % Opscode Chef_views.

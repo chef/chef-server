@@ -212,10 +212,10 @@ find_groups_names(GroupsAuthzIds, CallbackFun) ->
     query_and_diff_authz_ids(find_group_name_in_authz_ids, GroupsAuthzIds, <<"name">>, CallbackFun).
 
 find_client_authz_ids(ClientNames, OrgId, CallbackFun) ->
-    find_authz_id_in_names(find_client_authz_id_in_names, [ClientNames], CallbackFun).
+    find_authz_id_in_names(find_client_authz_id_in_names, [OrgId, ClientNames], CallbackFun).
 
 find_group_authz_ids(GroupNames, OrgId, CallbackFun) ->
-    find_authz_id_in_names(find_group_authz_id_in_names, [GroupNames], CallbackFun).
+    find_authz_id_in_names(find_group_authz_id_in_names, [OrgId, GroupNames], CallbackFun).
 
 find_user_authz_ids(UserNames, CallbackFun) ->
     find_authz_id_in_names(find_user_authz_id_in_names, [UserNames], CallbackFun).
