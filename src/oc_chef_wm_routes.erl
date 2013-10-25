@@ -55,6 +55,7 @@ route(environment, Req, Args) -> route_organization_rest_object("environments", 
 route(principal, Req, Args) -> route_organization_rest_object("principals", Req, Args);
 route(client, Req, Args) -> route_organization_rest_object("clients", Req, Args);
 route(container, Req, Args) -> route_organization_rest_object("containers", Req, Args);
+route(group, Req, Args) -> route_organization_rest_object("groups", Req, Args);
 route(sandbox, Req, Args) ->
     Org = org_name(Req),
     {id, Id} = lists:keyfind(id, 1, Args),

@@ -400,7 +400,10 @@ set_authz_id(Id, #sandbox_state{}=S) ->
 set_authz_id(Id, #data_state{}=D) ->
     D#data_state{data_bag_authz_id = Id};
 set_authz_id(Id, #container_state{} = C) ->
-    C#container_state{container_authz_id = Id}.
+    C#container_state{container_authz_id = Id};
+set_authz_id(Id, #group_state{} = G) ->
+    G#group_state{group_authz_id = Id}.
+
 
 
 %%------------------------------------------------------------------------------

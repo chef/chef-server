@@ -76,7 +76,8 @@ resource_exists(Req, State) ->
     {true, Req, State}.
 
 create_path(Req, #base_state{resource_state = #group_state{group_data = GroupData}} = State) ->
-    Name = ej:get({<<"groupname">>}, GroupData),
+    error_logger:info_msg({create_path, GroupData}),
+    Name = ej:get({<<"groupname">>}, GroupData, ej:get({<<"id">>}, GroupData)),
     {binary_to_list(Name), Req, State}.
 
 from_json(Req, #base_state{resource_state = #group_state{group_data = GroupData,

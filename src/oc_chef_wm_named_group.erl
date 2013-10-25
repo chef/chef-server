@@ -96,13 +96,15 @@ from_json(Req, #base_state{resource_state = #group_state{
     error_logger:info_msg({from_json, GroupData, Group}),
     chef_wm_base:update_from_json(Req, State, Group, GroupData).
 
-delete_resource(Req, #base_state{chef_db_context = DbContext,
+delete_resource(Req, #base_state{
+                        organization_name = OrgName,
+                        chef_db_context = DbContext,
                                  requestor_id = RequestorId,
                                  resource_state = #group_state{
                                                      oc_chef_group = Group}
                                 } = State) ->
     ok = oc_chef_wm_base:delete_object(DbContext, Group, RequestorId),
-    Ejson = oc_chef_group:assemble_group_ejson(Group),
+    Ejson = oc_chef_group:assemble_group_ejson(Group, OrgName),
     error_logger:info_msg({group_delete_resource, wrq:method(Req)}),
     {true, chef_wm_util:set_json_body(Req, Ejson), State}.
 
