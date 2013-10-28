@@ -65,15 +65,7 @@ init([]) ->
              {chef_index_sup, start_link, []},
              permanent, 5000, supervisor, [chef_index_sup]},
 
-    EredisSup = {oc_chef_wm_eredis_sup,
-                 {oc_chef_wm_eredis_sup, start_link, []},
-                 permanent, 2000, supervisor, [oc_chef_wm_eredis_sup]},
-
-    EredisStarter = {oc_chef_wm_eredis_starter,
-                     {oc_chef_wm_eredis_starter, start_link, []},
-                     transient, brutal_kill, worker, [oc_chef_wm_eredis_starter]},
-
-    Processes = [KeyRing, EredisSup, EredisStarter, Index, Web],
+    Processes = [KeyRing, Index, Web],
     {ok, { {one_for_one, 10, 10}, Processes} }.
 
 
