@@ -176,7 +176,7 @@ custom_404_msg(Req, BagName, ItemName) ->
             chef_wm_util:not_found_message(data_bag_item1, {BagName, ItemName})
     end.
 
--spec conflict_message({binary(), binary()}) -> ejson_term().
+-spec conflict_message({binary(), binary()}) -> {[{<<_:40>>, [any(), ...]}, ...]}.
 conflict_message({BagName, ItemName}) ->
     Msg = <<"Data Bag Item '", ItemName/binary, "' already exists in Data Bag '",
             BagName/binary, "'.">>,
