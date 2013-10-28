@@ -122,24 +122,10 @@ to_json(Req, #base_state{chef_db_context = DbContext,
         {ok, Start, SolrNumFound, Ids} ->
             IndexType = Query#chef_solr_query.index,
             Paths = SearchState#search_state.partial_paths,
-            CacheKey = ?SEARCH_CACHE:make_key(OrgName, BatchSize, Start,
-                                              Ids, wrq:raw_path(Req), Paths),
-            {CacheStatus, {DbNumFound, Ans}} =
-                case ?SEARCH_CACHE:get(ReqId, CacheKey) of
-                    Miss when Miss =:= not_found;
-                              Miss =:= error ->
-                        BulkGetFun = make_bulk_get_fun(DbContext, OrgName,
-                                                       IndexType, Paths,
-                                                       Req),
-                        DbResult = make_search_results(BulkGetFun, Ids,
-                                                       BatchSize, Start,
-                                                       SolrNumFound),
-                        ?SEARCH_CACHE:put(ReqId, CacheKey, DbResult),
-                        {Miss, DbResult};
-                    CacheValue ->
-                        {cache_hit, CacheValue}
-                end,
-            State1 = State#base_state{log_msg = search_log_msg(CacheStatus, SolrNumFound,
+            BulkGetFun = make_bulk_get_fun(DbContext, OrgName, IndexType, Paths, Req),
+            {DbNumFound, Ans} = make_search_results(BulkGetFun, Ids, BatchSize,
+                                                    Start, SolrNumFound),
+            State1 = State#base_state{log_msg = search_log_msg(SolrNumFound,
                                                                length(Ids), DbNumFound)},
             case IndexType of
                 {data_bag, BagName} when DbNumFound =:= 0 ->
@@ -172,12 +158,8 @@ to_json(Req, #base_state{chef_db_context = DbContext,
 batch_size() ->
     envy:get(chef_wm, bulk_fetch_batch_size, ?DEFAULT_BATCH_SIZE, positive_integer).
 
-search_log_msg(not_found, SolrNumFound, NumIds, DbNumFound) ->
-    {search, SolrNumFound, NumIds, DbNumFound};
-search_log_msg(error, SolrNumFound, NumIds, DbNumFound) ->
-    {search_cache_error, SolrNumFound, NumIds, DbNumFound};
-search_log_msg(cache_hit, SolrNumFound, NumIds, DbNumFound) ->
-    {cached_search, SolrNumFound, NumIds, DbNumFound}.
+search_log_msg(SolrNumFound, NumIds, DbNumFound) ->
+    {search, SolrNumFound, NumIds, DbNumFound}.
 
 %% POST to /search represents a partial search request
 %% The posted request body should be of the form:
