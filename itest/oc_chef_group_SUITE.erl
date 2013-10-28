@@ -243,7 +243,7 @@ expect_delete_group(GroupAuthzId, Actors, Groups, _GroupName) ->
                                          end, PossiblePaths),
                         ?assertEqual([InputPath], FilteredPaths),
                     ?assertEqual(AzId, ?AUTHZ),
-                    {ok, "200", [], prepare_group_body(Actors, Groups)}
+                    ok
                 end).
 
 expect_put_group(GroupAuthzId, Actors, Groups, _GroupName) ->
@@ -258,7 +258,7 @@ expect_put_group(GroupAuthzId, Actors, Groups, _GroupName) ->
                                          end, PossiblePaths),
                         ?assertEqual([InputPath], FilteredPaths),
                     ?assertEqual(AzId, ?AUTHZ),
-                    {ok, "200", [], prepare_group_body(Actors, Groups)}
+                    ok
                 end).
 
 expect_get_group(GroupAuthzId, Actors, Groups, _GroupName) ->
