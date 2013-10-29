@@ -970,14 +970,7 @@ is_undefined(_) ->
     false.
 
 flatten_record(Rec) ->
-    [_RecName|Tail] = tuple_to_list(Rec),
-    %% We detect if any of the fields in the record have not been set
-    %% and throw an error
-    case lists:any(fun is_undefined/1, Tail) of
-        true -> error({undefined_in_record, Rec});
-        false -> ok
-    end,
-    Tail.
+    chef_object:flatten(Rec).
 
 update(ObjectRec, ActorId) ->
     chef_object:update(ObjectRec, ActorId, fun select_rows/1).
