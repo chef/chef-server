@@ -6,7 +6,6 @@
 -module(oc_chef_wm_groups).
 
 -include_lib("chef_wm/include/chef_wm.hrl").
-%%-include_lib("oc_chef_authz/include/oc_chef_types.hrl").
 -include_lib("oc_chef_wm.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
@@ -61,18 +60,24 @@ allowed_methods(Req, State) ->
     {['GET', 'POST'], Req, State}.
 
 validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
-    {Req, State#base_state{superuser_bypasses_checks = true, resource_state = #oc_chef_group{org_id = OrgId}}};
-validate_request('POST', Req, #base_state{organization_guid = OrgId, resource_state = ResourceState} = State) ->
+    {Req, State#base_state{superuser_bypasses_checks = true,
+                           resource_state = #oc_chef_group{org_id = OrgId}}};
+validate_request('POST', Req, #base_state{organization_guid = OrgId,
+                                          resource_state = ResourceState}
+                 = State) ->
     Body = wrq:req_body(Req),
     {ok, Json} = oc_chef_group:parse_binary_json(Body),
-    {Req, State#base_state{superuser_bypasses_checks = true,resource_state = ResourceState#group_state{oc_chef_group = #oc_chef_group{org_id = OrgId}, group_data = Json}}}.
+    {Req, State#base_state{superuser_bypasses_checks = true,
+                           resource_state = ResourceState#group_state{
+                                              oc_chef_group =
+                                                  #oc_chef_group{
+                                                     org_id = OrgId},
+                                              group_data = Json}}}.
 
 auth_info(Req, State) ->
     auth_info(wrq:method(Req), Req, State).
 
-%% TODO: Figure out where these hook in
-auth_info('GET', Req, State = #base_state{ resource_state = ResourceState}) ->
-    error_logger:info_msg(ResourceState),
+auth_info('GET', Req, State ) ->
     {{container, group}, Req, State};
 auth_info('POST', Req, State = #base_state{resource_state = #group_state{group_data = Json}}) ->
     case validate_group_name(ej:get({<<"id">>}, Json, ej:get({<<"groupname">>}, Json))) of
@@ -88,7 +93,6 @@ resource_exists(Req, State) ->
     {true, Req, State}.
 
 create_path(Req, #base_state{resource_state = #group_state{group_data = GroupData}} = State) ->
-    error_logger:info_msg({create_path, GroupData}),
     Name = ej:get({<<"id">>}, GroupData, ej:get({<<"groupname">>}, GroupData)),
     {binary_to_list(Name), Req, State}.
 
