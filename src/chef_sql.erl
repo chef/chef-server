@@ -37,6 +37,7 @@
          create_name_id_dict/2,
 
          create_object/2,
+         delete_object/1,
          delete_object/2,
          do_update/2,
          update/2,
@@ -926,6 +927,9 @@ unlink_checksums_from_cbv([Checksum|Rest], OrgId, CookbookVersionId) ->
         Error ->
             Error
     end.
+
+delete_object(Rec) ->
+    chef_object:delete(Rec, fun select_rows/1).
 
 -spec delete_object(delete_query(), binary()) -> {ok, 1 | 'not_found'} | sqerl_error().
 delete_object(delete_sandbox_by_id = Query, Id) ->

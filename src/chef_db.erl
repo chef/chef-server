@@ -180,13 +180,8 @@ delete(#chef_cookbook_version{org_id = OrgId} = CookbookVersion,
         Result -> Result %% not_found or {error, _}
     end;
 delete(ObjectRec, #context{reqid = ReqId}) ->
-    QueryName = chef_object:delete_query(ObjectRec),
-    Id = chef_object:id(ObjectRec),
-    case stats_hero:ctime(ReqId, {chef_sql, delete_object},
-                     fun() -> chef_sql:delete_object(QueryName, Id) end) of
-        {ok, not_found} -> not_found;
-        Result -> Result
-    end.
+    stats_hero:ctime(ReqId, {chef_sql, delete_object},
+                     fun() -> chef_sql:delete_object(ObjectRec) end).
 
 -spec fetch(object_rec(),
             DbContext :: #context{}) ->
