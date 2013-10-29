@@ -26,7 +26,8 @@
          init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
-         validate_request/3]).
+         validate_request/3,
+         conflict_message/1]).
 
 -export([allowed_methods/2,
          delete_resource/2,
@@ -106,27 +107,10 @@ from_json(Req, #base_state{resource_state = #group_state{
                                                group_data = GroupData
                                               }
                           } = State) ->
-    NewGroupName = ej:get({<<"groupname">>}, GroupData),
-    case chef_wm_base:update_from_json(Req, State, Group , GroupData) of
-        {true, NewReq, NewState } = Orig ->
-            error_logger:info_msg({from_json, NewGroupName, GroupName, GroupData, Group}),
-            case NewGroupName of
-                GroupName ->
-                    error_logger:info_msg(returning_orig),
-                    Orig;
-                undefined ->
-                    Orig;
-                _ ->
-                    error_logger:info_msg(returning_new),
-                    Uri = ?BASE_ROUTES:route(group, NewReq, [{name, binary_to_list(NewGroupName)}]),
-                    {true, wrq:set_resp_header("Location", binary_to_list(Uri), NewReq), NewState}
-            end;
-        Other ->
-            Other
-   end.
+    chef_wm_base:update_from_json(Req, State, Group , GroupData).
 
-            
-            
+conflict_message(_Name) ->
+    {[{<<"error">>, <<"Group already exists">>}]}.
         
 
 delete_resource(Req, #base_state{
