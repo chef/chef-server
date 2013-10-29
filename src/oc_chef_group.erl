@@ -103,7 +103,6 @@ ejson_for_indexing(#oc_chef_group{}, _EjsonTerm) ->
    {[]}.
 
 update_from_ejson(#oc_chef_group{name = OrigName, clients = OrigClients, users = OrigUsers, groups = OrigGroups} = Group, GroupData) ->
-    error_logger:info_msg({ejson, GroupData}),
     Name = ej:get({<<"groupname">>}, GroupData, OrigName),
     Clients = ej:get({<<"actors">>, <<"clients">>}, GroupData, OrigClients),
     Groups = ej:get({<<"actors">>, <<"groups">>}, GroupData, OrigGroups),
@@ -127,6 +126,20 @@ record_fields() ->
 list(#oc_chef_group{org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_query(), [OrgId], [name]}).
 
+%%The process for updating a group is as follows
+%% 1. Update the group in sql for renames
+%% 2. Collect all authz_ids for the names
+%%    in the list of clients/users/groups
+%%    to add to the group.
+%% 3. Update bifrost with new actor/group
+%%    authz ids
+%% 4. Diff the authz ids previously in
+%%    bifrost with the list of authz ids
+%%    from the user.
+%% 5. Delete from the group in bifrost
+%%    the authz ids thare now removed in
+%%    bifrost.
+
 update(#oc_chef_group{
                       org_id = OrgId,
                       authz_id = GroupAuthzId,
@@ -143,19 +156,28 @@ update(#oc_chef_group{
             UserAuthzIds = find_user_authz_ids(Users, CallbackFun),
             GroupAuthzIds = find_group_authz_ids(Groups, OrgId, CallbackFun),
             BasePath = "/groups/" ++ binary_to_list(GroupAuthzId),
-            ActorsPath = BasePath ++ "/actors/",
-            GroupsPath = BasePath ++ "/groups/",
             UserSideActorsAuthzIds = UserAuthzIds ++ ClientAuthzIds,
-            put_authz_ids(ActorsPath, UserSideActorsAuthzIds, AuthzId),
-            put_authz_ids(GroupsPath, GroupAuthzIds, AuthzId),
+            update_bifrost_with_added_authz_ids(BasePath, UserSideActorsAuthzIds, GroupAuthzIds, AuthzId),
             ActorsToRemove = default_to_empty(AuthSideActors) -- UserSideActorsAuthzIds,
             GroupsToRemove = default_to_empty(AuthSideGroups) -- GroupAuthzIds,
-            delete_authz_ids(ActorsPath, ActorsToRemove, AuthzId),
-            delete_authz_ids(GroupsPath, GroupsToRemove, AuthzId),
+            update_bifrost_with_removed_authz_ids(BasePath, ActorsToRemove, GroupsToRemove, AuthzId),
             1;
        Other  ->
             Other
     end.
+
+update_bifrost_with_added_authz_ids(BasePath, UserSideActorsAuthzIds, GroupAuthzIds, AuthzId) ->
+            ActorsPath = BasePath ++ "/actors/",
+            GroupsPath = BasePath ++ "/groups/",
+            put_authz_ids(ActorsPath, UserSideActorsAuthzIds, AuthzId),
+            put_authz_ids(GroupsPath, GroupAuthzIds, AuthzId).
+
+update_bifrost_with_removed_authz_ids(BasePath, ActorsToRemove, GroupsToRemove, AuthzId) ->
+            ActorsPath = BasePath ++ "/actors/",
+            GroupsPath = BasePath ++ "/groups/",
+            delete_authz_ids(ActorsPath, ActorsToRemove, AuthzId),
+            delete_authz_ids(GroupsPath, GroupsToRemove, AuthzId).
+
 
 default_to_empty(List) when is_list(List) ->
     List;
@@ -228,11 +250,14 @@ query_and_diff_authz_ids(QueryName, AuthzIds, Key, CallbackFun) ->
         not_found ->
             {[], AuthzIds};
         Results when is_list(Results)->
-            Flattened = lists:flatten(Results),
-            ResultNames = proplists:get_all_values(Key, Flattened),
-            FoundAuthzIds = proplists:get_all_values(<<"authz_id">>, Flattened),
+            {ResultNames, FoundAuthzIds} = lists:foldl(
+                                             fun([{_NameKey, Name},
+                                                  {<<"authz_id">>, AuthzId}],
+                                                 {NamesIn, AuthzIdsIn}) ->
+                                                     {[Name | NamesIn], [AuthzId | AuthzIdsIn]}
+                                             end, {[],[]}, Results),
             DiffedList = sets:to_list(sets:subtract(sets:from_list(AuthzIds), sets:from_list(FoundAuthzIds))),
-            {ResultNames, DiffedList};
+            {lists:reverse(ResultNames), DiffedList};
         _Other ->
             {[], []}
     end.

@@ -88,7 +88,7 @@ $(ITEST_DEPS):
 	mkdir -p $(ITEST_DEPS)
 
 $(ITEST_DEPS)/enterprise-chef-server-schema: $(ITEST_DEPS)
-	cd $(ITEST_DEPS); git clone git@github.com:opscode/enterprise-chef-server-schema.git; cd enterprise-chef-server-schema; git checkout $(EC_SCHEMA_VERSION); make install
+	cd $(ITEST_DEPS); git clone git@github.com:opscode/enterprise-chef-server-schema.git; cd enterprise-chef-server-schema; git checkout $(EC_SCHEMA_VERSION); $(MAKE) install
 
 
 itest_deps: $(ITEST_DEPS)/enterprise-chef-server-schema

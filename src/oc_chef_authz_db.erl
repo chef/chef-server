@@ -228,7 +228,7 @@ fetch_auth_join_id(Server, Id, Direction) when is_list(Id) ->
 fetch_auth_join_id(Server, Id, Direction) when is_binary(Id) ->
     {FieldName, ViewName} =
         case Direction of
-            %%            auth_to_user -> { <<"user_object_id">>, "by_auth_object_id"};
+%%            auth_to_user -> { <<"user_object_id">>, "by_auth_object_id"};
             user_to_auth -> { <<"auth_object_id">>, "by_user_object_id"}
         end,
     {ok, Db} = couchbeam:open_db(Server, ?auth_join_db, []),
