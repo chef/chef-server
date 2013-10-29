@@ -59,20 +59,34 @@ validate_request('PUT', Req, #base_state{organization_guid = OrgId, resource_sta
                                group_data = Group}}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
-                           resource_state = GroupState,
+                           resource_state = GroupState = #group_state{group_data = GroupData},
                            organization_guid = OrgId} =State) ->
     GroupName = chef_wm_util:extract_from_path(group_name, Req),
-    case chef_db:fetch(#oc_chef_group{org_id = OrgId, name = GroupName}, DbContext) of
-        not_found ->
-            Message = chef_wm_util:error_message_envelope(iolist_to_binary(["Cannot load group ",
-                                                                            GroupName])),
-            Req1 = chef_wm_util:set_json_body(Req, Message),
-            {{halt, 404}, Req1, State#base_state{log_msg = group_not_found}};
-        #oc_chef_group{authz_id = AuthzId} = Group ->
-            GroupState1 = GroupState#group_state{oc_chef_group = Group},
-            State1 = State#base_state{resource_state = GroupState1},
-            {{group_id, AuthzId}, Req, State1}
+    case wrq:method(Req) of
+        'PUT' ->
+            case oc_chef_wm_groups:validate_group_name(ej:get({<<"id">>}, GroupData, ej:get({<<"groupname">>}, GroupData))) of
+                valid ->
+                    validate_group(OrgId, GroupName, DbContext, Req, State, GroupState);
+                missing ->
+                    validate_group(OrgId, GroupName, DbContext, Req, State, GroupState);
+                invalid  ->
+                    oc_chef_wm_groups:group_name_invalid(Req, State)
+            end;
+        _ ->
+            validate_group(OrgId, GroupName, DbContext, Req, State, GroupState)
     end.
+validate_group(OrgId, GroupName, DbContext, Req, State, GroupState) ->
+            case chef_db:fetch(#oc_chef_group{org_id = OrgId, name = GroupName}, DbContext) of
+                not_found ->
+                    Message = chef_wm_util:error_message_envelope(iolist_to_binary(["Cannot load group ",
+                                                                                    GroupName])),
+                    Req1 = chef_wm_util:set_json_body(Req, Message),
+                    {{halt, 404}, Req1, State#base_state{log_msg = group_not_found}};
+                #oc_chef_group{authz_id = AuthzId} = Group ->
+                    GroupState1 = GroupState#group_state{oc_chef_group = Group},
+                    State1 = State#base_state{resource_state = GroupState1},
+                    {{group_id, AuthzId}, Req, State1}
+            end.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
@@ -85,27 +99,46 @@ to_json(Req, #base_state{
     Ejson = oc_chef_group:assemble_group_ejson(Group, OrgName),
     
     Json = chef_json:encode(Ejson),
-    error_logger:info_msg({group_to_json, wrq:method(Req)}),
     {Json, Req, State}.
 
 from_json(Req, #base_state{resource_state = #group_state{
-                                               oc_chef_group = Group,
+                                               oc_chef_group = Group = #oc_chef_group{name = GroupName},
                                                group_data = GroupData
                                               }
                           } = State) ->
-    error_logger:info_msg({from_json, GroupData, Group}),
-    chef_wm_base:update_from_json(Req, State, Group, GroupData).
+    NewGroupName = ej:get({<<"groupname">>}, GroupData),
+    case chef_wm_base:update_from_json(Req, State, Group , GroupData) of
+        {true, NewReq, NewState } = Orig ->
+            error_logger:info_msg({from_json, NewGroupName, GroupName, GroupData, Group}),
+            case NewGroupName of
+                GroupName ->
+                    error_logger:info_msg(returning_orig),
+                    Orig;
+                undefined ->
+                    Orig;
+                _ ->
+                    error_logger:info_msg(returning_new),
+                    Uri = ?BASE_ROUTES:route(group, NewReq, [{name, binary_to_list(NewGroupName)}]),
+                    {true, wrq:set_resp_header("Location", binary_to_list(Uri), NewReq), NewState}
+            end;
+        Other ->
+            Other
+   end.
+
+            
+            
+        
 
 delete_resource(Req, #base_state{
                         organization_name = OrgName,
                         chef_db_context = DbContext,
                                  requestor_id = RequestorId,
                                  resource_state = #group_state{
-                                                     oc_chef_group = Group}
+                                                     oc_chef_group = InputGroup }
                                 } = State) ->
+    Group = InputGroup#oc_chef_group{last_updated_by = RequestorId},
     ok = oc_chef_wm_base:delete_object(DbContext, Group, RequestorId),
     Ejson = oc_chef_group:assemble_group_ejson(Group, OrgName),
-    error_logger:info_msg({group_delete_resource, wrq:method(Req)}),
     {true, chef_wm_util:set_json_body(Req, Ejson), State}.
 
 malformed_request_message(Any, _Req, _state) ->

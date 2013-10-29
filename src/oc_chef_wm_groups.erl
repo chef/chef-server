@@ -43,6 +43,11 @@
          resource_exists/2
         ]).
 
+-export([
+         validate_group_name/1,
+         group_name_invalid/2
+        ]).
+
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
@@ -60,7 +65,7 @@ validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
 validate_request('POST', Req, #base_state{organization_guid = OrgId, resource_state = ResourceState} = State) ->
     Body = wrq:req_body(Req),
     {ok, Json} = oc_chef_group:parse_binary_json(Body),
-    {Req, State#base_state{superuser_bypasses_checks = true,resource_state = ResourceState#group_state{oc_chef_group = #oc_chef_group{org_id = OrgId}, group_data = Json}}}. 
+    {Req, State#base_state{superuser_bypasses_checks = true,resource_state = ResourceState#group_state{oc_chef_group = #oc_chef_group{org_id = OrgId}, group_data = Json}}}.
 
 auth_info(Req, State) ->
     auth_info(wrq:method(Req), Req, State).
@@ -69,15 +74,22 @@ auth_info(Req, State) ->
 auth_info('GET', Req, State = #base_state{ resource_state = ResourceState}) ->
     error_logger:info_msg(ResourceState),
     {{container, group}, Req, State};
-auth_info('POST', Req, State) ->
-    {{create_in_container, group}, Req, State}.
+auth_info('POST', Req, State = #base_state{resource_state = #group_state{group_data = Json}}) ->
+    case validate_group_name(ej:get({<<"id">>}, Json, ej:get({<<"groupname">>}, Json))) of
+        invalid ->
+            group_name_invalid(Req, State);
+        missing ->
+            group_name_invalid(Req, State);
+        valid ->
+            {{create_in_container, group}, Req, State}
+    end.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
 
 create_path(Req, #base_state{resource_state = #group_state{group_data = GroupData}} = State) ->
     error_logger:info_msg({create_path, GroupData}),
-    Name = ej:get({<<"groupname">>}, GroupData, ej:get({<<"id">>}, GroupData)),
+    Name = ej:get({<<"id">>}, GroupData, ej:get({<<"groupname">>}, GroupData)),
     {binary_to_list(Name), Req, State}.
 
 from_json(Req, #base_state{resource_state = #group_state{group_data = GroupData,
@@ -90,3 +102,22 @@ malformed_request_message(Any, _Req, _State) ->
 -spec conflict_message(binary()) -> ejson_term().
 conflict_message(_Name) ->
     {[{<<"error">>, [<<"Group already exists">>]}]}.
+
+-define(VALID_NAME_REGEX, "^[a-z0-9\-_]+$").
+
+validate_group_name(undefined) ->
+    missing;
+validate_group_name(Name) ->
+    {ok, CompiledRegex} = re:compile(?VALID_NAME_REGEX),
+    case re:run(Name, CompiledRegex) of
+        {match, _} ->
+            valid;
+        nomatch  ->
+            invalid
+    end.
+
+group_name_invalid(Req, State) ->
+    Msg = <<"Invalid group name.">>,
+    JsonError = {[{<<"error">>, [Msg]}]},
+    {{halt, 400}, chef_wm_util:set_json_body(Req, JsonError), State}.
+
