@@ -22,7 +22,13 @@
 
 -module(test_utils).
 
--export([test_setup/0]).
+-export([test_setup/0,
+         make_id/1,
+         make_az_id/1,
+         actor_id/0,
+         the_org_id/0,
+         other_org_id/0
+        ]).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -39,3 +45,30 @@ test_setup() ->
     Superuser = <<"cb4dcaabd91a87675a14ec4f4a00050d">>,
     {Server, Superuser}.
 
+make_id(Prefix) when is_binary(Prefix) ->
+    case size(Prefix) of
+        Size when Size > 32 ->
+            error(prefix_too_long_for_id);
+        Size when Size =:= 32 ->
+              Prefix;
+          Size ->
+            iolist_to_binary([Prefix, lists:duplicate(32 - Size, $0)])
+    end;
+make_id(Prefix) when is_list(Prefix) ->
+    make_id(list_to_binary(Prefix)).
+
+
+make_az_id(Prefix) when is_list(Prefix) ->
+    make_az_id(list_to_binary(Prefix));
+
+make_az_id(Prefix) ->
+    make_id(<<"a11", Prefix/binary>>).
+
+actor_id() ->
+    make_az_id(<<"ffff">>).
+
+the_org_id() ->
+    make_id(<<"aa1">>).
+
+other_org_id() ->
+    make_id(<<"bb2">>).
