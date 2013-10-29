@@ -99,6 +99,10 @@ delete_should_delete_group_form_org(_Config) ->
     ?assertEqual([GroupName], chef_sql:fetch_object_names(#oc_chef_group{org_id = OrgId})),
     Group = fetch_group(OrgId, GroupName),
 
+    meck:delete(oc_chef_authz_http, request, 5),
+
+    expect_delete_group(Group#oc_chef_group.authz_id),
+
     chef_db:delete(Group, ?CTX),
     ?assertEqual([], chef_sql:fetch_object_names(#oc_chef_group{org_id = OrgId})),
     ok.
@@ -230,6 +234,13 @@ delete_group_from_group(_Config) ->
     Result = chef_db:update(Group#oc_chef_group{auth_side_groups = [TestGroupAuthzId], clients = [], users = [], groups = []}, ?CTX, ?AUTHZ),
     ?assertEqual(ok, Result),
     ok.
+
+expect_delete_group(GroupAuthzId) ->
+    Path = "/groups/" ++ binary_to_list(GroupAuthzId),
+    meck:expect(oc_chef_authz_http, request, fun(InputPath, Method, _, _, AzId) ->
+                                                     ?assertEqual(InputPath, Path),
+                                                     ?assertEqual(delete, Method)
+                                                         end).
 
 expect_delete_group(GroupAuthzId, Actors, Groups, _GroupName) ->
     Path = "/groups/" ++ binary_to_list(GroupAuthzId),
