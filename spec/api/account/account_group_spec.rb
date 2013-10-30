@@ -2,6 +2,11 @@
 require 'pedant/rspec/common'
 
 describe "opscode-account groups", :groups do
+  
+  def self.ruby?
+    Pedant::Config.ruby_container_endpoint?
+  end
+
   context "/groups endpoint" do
     let(:request_url) { api_url("groups") }
 
@@ -393,9 +398,9 @@ describe "opscode-account groups", :groups do
 
     context "DELETE /groups" do
       context "admin user" do
-        it "returns 405" do
+        it "returns #{ruby? ? 404 : 405}" do
           delete(request_url, platform.admin_user).should look_like({
-              :status => 405
+              :status => ruby? ? 404 : 405
             })
         end
       end
@@ -403,9 +408,9 @@ describe "opscode-account groups", :groups do
 
     context "PUT /groups" do
       context "admin user" do
-        it "returns 405" do
+        it "returns #{ruby? ? 404 : 405}" do
           put(request_url, platform.admin_user).should look_like({
-              :status => 405
+              :status => ruby? ? 404 : 405
             })
         end
       end
@@ -1010,9 +1015,9 @@ describe "opscode-account groups", :groups do
 
     context "POST /groups/<name>" do
       context "admin user" do
-        it "returns 405" do
+        it "returns #{ruby? ? 404 : 405}" do
           post(request_url, platform.admin_user).should look_like({
-              :status => 405
+              :status => ruby? ? 404 : 405
             })
         end
       end
