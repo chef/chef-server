@@ -83,7 +83,7 @@ auth_info('POST', Req, State = #base_state{resource_state = #group_state{group_d
     case validate_group_name(fetch_id_name_from_json(Json)) of
         valid ->
             {{create_in_container, group}, Req, State};
-        invalid ->
+        _ ->
             group_name_invalid(Req, State)
     end.
 
@@ -108,7 +108,7 @@ conflict_message(_Name) ->
 -define(VALID_NAME_REGEX, "^[a-z0-9\-_]+$").
 
 validate_group_name(undefined) ->
-    invalid;
+    missing;
 validate_group_name(Name) ->
     {ok, CompiledRegex} = re:compile(?VALID_NAME_REGEX),
     case re:run(Name, CompiledRegex) of
