@@ -964,11 +964,6 @@ delete_object(delete_cookbook_by_orgid_name = Query, OrgId, Name) ->
             Error
     end.
 
-is_undefined(undefined) ->
-    true;
-is_undefined(_) ->
-    false.
-
 flatten_record(Rec) ->
     chef_object:flatten(Rec).
 
