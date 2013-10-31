@@ -217,13 +217,13 @@ fetch_authz_ids(GroupAuthzId, LastUpdatedBy) ->
     {ej:get({<<"actors">>}, DecodedJson), ej:get({<<"groups">>}, DecodedJson)}.
 
 find_clients_names(ActorsAuthzIds, CallbackFun) ->
-    query_and_diff_authz_ids(find_client_name_in_authz_ids, ActorsAuthzIds, <<"name">>, CallbackFun).
+    query_and_diff_authz_ids(find_client_name_in_authz_ids, ActorsAuthzIds, CallbackFun).
 
 find_users_names(UsersAuthzIds, CallbackFun) ->
-    query_and_diff_authz_ids(find_user_name_in_authz_ids, UsersAuthzIds, <<"username">>, CallbackFun).
+    query_and_diff_authz_ids(find_user_name_in_authz_ids, UsersAuthzIds, CallbackFun).
 
 find_groups_names(GroupsAuthzIds, CallbackFun) ->
-    query_and_diff_authz_ids(find_group_name_in_authz_ids, GroupsAuthzIds, <<"name">>, CallbackFun).
+    query_and_diff_authz_ids(find_group_name_in_authz_ids, GroupsAuthzIds, CallbackFun).
 
 find_client_authz_ids(ClientNames, OrgId, CallbackFun) ->
     find_authz_id_in_names(find_client_authz_id_in_names, [OrgId, ClientNames], CallbackFun).
@@ -245,7 +245,7 @@ find_authz_id_in_names(QueryName, Args, CallbackFun) ->
             Other
     end.
 
-query_and_diff_authz_ids(QueryName, AuthzIds, Key, CallbackFun) ->
+query_and_diff_authz_ids(QueryName, AuthzIds, CallbackFun) ->
     case CallbackFun({QueryName, [AuthzIds]}) of
         not_found ->
             {[], AuthzIds};
