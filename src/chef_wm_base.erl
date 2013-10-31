@@ -344,7 +344,6 @@ object_creation_hook(Object, _State) -> Object.
 %% objects. `OrigObjectRec' should be the existing and unmodified `chef_object()'
 %% record. `ObjectEjson' is the parsed EJSON from the request body.
 update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
-                                                  organization_guid = OrgId,
                                                   requestor_id = ActorId,
                                                   resource_mod = ResourceMod} = State,
                  OrigObjectRec, ObjectEjson) ->
@@ -382,7 +381,6 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     {{halt, 404}, Req1, State1};
                 {conflict, _} ->
                     Name = chef_object:name(ObjectRec),
-                    TypeName = chef_object:type_name(ObjectRec),
                     RecType = erlang:element(1,ObjectRec),
                     LogMsg = {RecType, name_conflict, Name},
                     ConflictMsg = ResourceMod:conflict_message(Name),
