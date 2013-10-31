@@ -64,6 +64,10 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
             invert_perm(check_permission(container, ContainerId, Req1, State1));
         {{container_id, AuthzId}, Req1, State1} ->
             invert_perm(check_permission(container, AuthzId, Req1, State1));
+        {{group, AuthzId}, Req1, State1} ->
+            invert_perm(check_permission(group, AuthzId, Req1, State1));
+        {{group_id, AuthzId}, Req1, State1} ->
+            invert_perm(check_permission(group, AuthzId, Req1, State1));
         {{Type, ObjectId}, Req1, State1} when Type =:= object;
                                               Type =:= actor ->
             invert_perm(check_permission(Type, ObjectId, Req1, State1));
@@ -393,7 +397,10 @@ set_authz_id(Id, #sandbox_state{}=S) ->
 set_authz_id(Id, #data_state{}=D) ->
     D#data_state{data_bag_authz_id = Id};
 set_authz_id(Id, #container_state{} = C) ->
-    C#container_state{container_authz_id = Id}.
+    C#container_state{container_authz_id = Id};
+set_authz_id(Id, #group_state{} = G) ->
+    G#group_state{group_authz_id = Id}.
+
 
 
 %%------------------------------------------------------------------------------

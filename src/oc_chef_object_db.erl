@@ -86,7 +86,7 @@ maybe_delete_authz_id_or_error(Error = {error, _}, _Object, _RequestorId) ->
 maybe_delete_authz_id_or_error(not_found, _Object, _RequestorId) ->
     %% if the object wasn't found, we take no further action
     not_found;
-maybe_delete_authz_id_or_error({ok, 1}, #chef_data_bag_item{}, _RequestorId) ->
+maybe_delete_authz_id_or_error(1, #chef_data_bag_item{}, _RequestorId) ->
     %% no authz_id for data_bag_items so just return
     ok;
 maybe_delete_authz_id_or_error({ok, 1}, #chef_cookbook_version{}, _RequestorId) ->
@@ -96,7 +96,7 @@ maybe_delete_authz_id_or_error({ok, 2}, #chef_cookbook_version{} = CBV, Requesto
     %% With status {ok, 2} we've deleted the cbv _and_ the cb so we delete the authz_id
     oc_chef_authz:delete_resource(RequestorId, object, chef_object:authz_id(CBV)),
     ok;
-maybe_delete_authz_id_or_error({ok, 1}, Object, RequestorId) ->
+maybe_delete_authz_id_or_error(1, Object, RequestorId) ->
     %% for all other object types, successful delete of 1 record means we should delete authz id
     oc_chef_authz:delete_resource(RequestorId, object, chef_object:authz_id(Object)),
     ok.
