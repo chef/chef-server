@@ -18,7 +18,7 @@ GIT
 PATH
   remote: .
   specs:
-    oc-chef-pedant (1.0.20)
+    oc-chef-pedant (1.0.22)
       chef-pedant (>= 1.0.0)
 
 GEM
