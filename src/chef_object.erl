@@ -101,10 +101,12 @@
          fields_for_fetch/1,
          fields_for_update/1,
          record_fields/1,
+         flatten/1,
 
          list/2,
          fetch/2,
          update/3,
+         delete/2,
          default_fetch/2,
          default_update/2
         ]).
@@ -207,8 +209,10 @@ fetch(Rec, CallbackFun) ->
 update(Rec, ActorId, CallbackFun) ->
     Mod = element(1, Rec),
     Mod:update(chef_object:set_updated(Rec, ActorId), CallbackFun).
-    
 
+delete(Rec, CallbackFun) ->
+    call_if_exported(Rec, delete, [Rec, CallbackFun], fun do_delete/2).
+  
 %% Return the callback module for a given object record type. We're putting the abstraction
 %% in place in case we need to do something other than the identity mapping of record name
 %% to callback module name that we're doing there. If we needed to swap in something else,
@@ -234,3 +238,34 @@ default_update(ObjectRec, CallbackFun) ->
     QueryName = chef_object:update_query(ObjectRec),
     UpdatedFields = chef_object:fields_for_update(ObjectRec),
     CallbackFun({QueryName, UpdatedFields}).
+
+flatten(ObjectRec) ->
+    call_if_exported(ObjectRec, flatten, [ObjectRec], fun default_flatten/1).
+
+call_if_exported(ObjectRec, FunName, Args, DefaultFun) ->
+    Mod = callback_mod(ObjectRec),
+    case erlang:function_exported(Mod, FunName, length(Args)) of
+        true ->
+            erlang:apply(Mod, FunName, Args);
+        false  ->
+            erlang:apply(DefaultFun, Args)
+    end.
+default_flatten(ObjectRec) ->
+    [_RecName|Tail] = tuple_to_list(ObjectRec),
+    %% We detect if any of the fields in the record have not been set
+    %% and throw an error
+    case lists:any(fun is_undefined/1, Tail) of
+        true -> error({undefined_in_record, ObjectRec});
+        false -> ok
+    end,
+    Tail.
+
+is_undefined(undefined) ->
+    true;
+is_undefined(_) ->
+    false.
+
+do_delete(ObjectRec, CallbackFun) ->
+    QueryName = delete_query(ObjectRec),
+    Id = id(ObjectRec),
+    CallbackFun({QueryName, [Id]}).
