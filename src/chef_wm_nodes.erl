@@ -132,8 +132,7 @@ from_json(Req, #base_state{resource_state = NodeState} = State) ->
 %% internal functions
 list_nodes(EnvName, Req, #base_state{
                               organization_guid = OrgId,
-                              chef_db_context = DbContext,
-                              organization_name = OrgName}=State) ->
+                              chef_db_context = DbContext}=State) ->
     NodeNames = chef_db:list(#chef_node{environment = EnvName, org_id = OrgId},
                              DbContext),
     package_node_list(NodeNames, Req, State).
