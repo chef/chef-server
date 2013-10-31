@@ -79,7 +79,7 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
                 true ->
                     %% All auth checks out, so we're not forbidden
                     {false, Req1, State1};
-                {false, {_AuthzObjectType, AuthzId, Permission}} ->
+                {false, {_AuthzObjectType, _AuthzId, Permission}} ->
                     %% NOTE: No specific message for the auth check that failed (but this is
                     %% the same behavior we had before)
                     {Req2, State2} = set_forbidden_msg(Permission, Req1, State1),

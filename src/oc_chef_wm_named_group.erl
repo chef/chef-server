@@ -103,7 +103,7 @@ to_json(Req, #base_state{
     {Json, Req, State}.
 
 from_json(Req, #base_state{resource_state = #group_state{
-                                               oc_chef_group = Group = #oc_chef_group{name = GroupName},
+                                               oc_chef_group = Group,
                                                group_data = GroupData
                                               }
                           } = State) ->
