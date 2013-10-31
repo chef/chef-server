@@ -80,20 +80,18 @@ auth_info(Req, State) ->
 auth_info('GET', Req, State ) ->
     {{container, group}, Req, State};
 auth_info('POST', Req, State = #base_state{resource_state = #group_state{group_data = Json}}) ->
-    case validate_group_name(ej:get({<<"id">>}, Json, ej:get({<<"groupname">>}, Json))) of
-        invalid ->
-            group_name_invalid(Req, State);
-        missing ->
-            group_name_invalid(Req, State);
+    case validate_group_name(fetch_id_name_from_json(Json)) of
         valid ->
-            {{create_in_container, group}, Req, State}
+            {{create_in_container, group}, Req, State};
+        invalid ->
+            group_name_invalid(Req, State)
     end.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
 
 create_path(Req, #base_state{resource_state = #group_state{group_data = GroupData}} = State) ->
-    Name = ej:get({<<"id">>}, GroupData, ej:get({<<"groupname">>}, GroupData)),
+    Name = fetch_id_name_from_json(GroupData),
     {binary_to_list(Name), Req, State}.
 
 from_json(Req, #base_state{resource_state = #group_state{group_data = GroupData,
@@ -110,7 +108,7 @@ conflict_message(_Name) ->
 -define(VALID_NAME_REGEX, "^[a-z0-9\-_]+$").
 
 validate_group_name(undefined) ->
-    missing;
+    invalid;
 validate_group_name(Name) ->
     {ok, CompiledRegex} = re:compile(?VALID_NAME_REGEX),
     case re:run(Name, CompiledRegex) of
@@ -125,3 +123,7 @@ group_name_invalid(Req, State) ->
     JsonError = {[{<<"error">>, [Msg]}]},
     {{halt, 400}, chef_wm_util:set_json_body(Req, JsonError), State}.
 
+%% We allow either id or groupname to be set for a group.  Precedence is
+%% given to id over groupname if both set.
+fetch_id_name_from_json(GroupJson) ->
+    ej:get({<<"id">>}, GroupJson, ej:get({<<"groupname">>}, GroupJson)).
