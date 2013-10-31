@@ -177,7 +177,7 @@ create_entity_with_container_acl(RequestorId, ContainerAId, ObjectType) ->
 %% @end TODO: consider error cases in more detail
 -spec merge_acl_from_container(requestor_id(),
                                ContainerId :: object_id(),
-                               AuthzType :: 'actor' | 'object' | 'container',
+                               AuthzType :: 'actor' | 'object' | 'container' | 'group',
                                ObjectId :: object_id()) -> ok |
                                                            {error, object_acl | container_acl}.
 merge_acl_from_container(_RequestorId, _ContainerId, container, _ObjectId) ->
@@ -224,7 +224,8 @@ set_acl(_RequestorId, _AuthzType, _ObjectId, []) ->
     ok;
 set_acl(RequestorId, AuthzType, ObjectId, [{Method, ACE}|Rest]) when AuthzType =:= 'actor';
                                                                      AuthzType =:= 'object';
-                                                                     AuthzType =:= 'container' ->
+                                                                     AuthzType =:= 'container';
+                                                                     AuthzType =:= 'group' ->
     case set_ace_for_entity(RequestorId, AuthzType, ObjectId, Method, ACE) of
         ok ->
             set_acl(RequestorId, AuthzType, ObjectId, Rest);
@@ -490,6 +491,7 @@ object_type_to_container_name(search)      -> <<"search">>.
 %% creating the correct kind.
 authz_type_from_container(client)    -> 'actor';
 authz_type_from_container(container) -> 'container';
+authz_type_from_container(group)     -> 'group';
 authz_type_from_container(_)         -> 'object'.
 
 %

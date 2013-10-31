@@ -44,10 +44,6 @@ statements(pgsql) ->
       <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
         " FROM containers "
         " WHERE (org_id = $1 AND name = $2) LIMIT 1">>},
-     {find_group_by_orgid_name,
-      <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
-        " FROM groups"
-        " WHERE (org_id = $1 AND name = $2) LIMIT 1">>},
      {insert_container,
       <<"INSERT INTO containers (id, authz_id, org_id, name,"
         " last_updated_by, created_at, updated_at) VALUES"
@@ -57,15 +53,35 @@ statements(pgsql) ->
         "WHERE id= $4">>},
      {delete_container_by_id, <<"DELETE FROM containers WHERE id= $1">>},
      {list_containers_for_org, <<"SELECT name FROM containers WHERE org_id= $1">>},
+     {list_groups_for_org, <<"SELECT name FROM groups WHERE org_id= $1">>},
      {find_group_by_orgid_name,
       <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
         " FROM groups"
-        " WHERE (org_id = $1 AND name = $2) LIMIT 1">>}
-     ].
-
-%
-% Opscode Chef_views.
-%
+        " WHERE (org_id = $1 AND name = $2) LIMIT 1">>},
+     {insert_group,
+      <<"INSERT INTO groups (id, authz_id, org_id, name,"
+        " last_updated_by, created_at, updated_at) VALUES"
+        " ($1, $2, $3, $4, $5, $6, $7)">>},
+     {update_group_by_id,
+      <<"UPDATE groups SET last_updated_by= $1, updated_at= $2, name= $3"
+        "WHERE id= $4">>},
+     {delete_group_by_id, <<"DELETE FROM groups WHERE id= $1">>},
+     {find_client_name_in_authz_ids,
+      <<"SELECT name, authz_id FROM clients WHERE authz_id = ANY($1)">>},
+     {find_client_authz_id_in_names,
+      <<"SELECT authz_id FROM clients WHERE org_id = $1 AND name = ANY($2)">>},
+     {find_user_name_in_authz_ids,
+      <<"SELECT username, authz_id FROM users WHERE authz_id = ANY($1)">>},
+     {find_user_authz_id_in_names,
+      <<"SELECT authz_id FROM users WHERE username = ANY($1)">>},
+     {find_group_name_in_authz_ids,
+      <<"SELECT name, authz_id FROM groups WHERE authz_id = ANY($1)">>},
+     {find_group_authz_id_in_names,
+      <<"SELECT authz_id FROM groups WHERE org_id = $1 AND name = ANY($2)">>}
+    ].
+                                                %
+                                                % Opscode Chef_views.
+                                                %
 -define(mixlib_auth_client_design,
         "Mixlib::Authorization::Models::Client-fec21b157b76e08b86e92ef7cbc2be81").
 
@@ -204,7 +220,7 @@ fetch_by_name(Server, OrgId, Name, Type) when is_binary(Name), is_binary(OrgId) 
             end;
         {ok, []} -> {not_found, Type};
         {error, not_found} -> {not_found, Type}
-     end.
+    end.
 
 -spec fetch_auth_join_id(couchbeam:server(), db_key(), auth_to_user|user_to_auth) -> binary() | {not_found, term()}.
 fetch_auth_join_id(Server, Id, Direction) when is_list(Id) ->
@@ -291,8 +307,8 @@ fetch_group_authz_id_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
     case stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
                                   chef_sql:fetch(#oc_chef_group{
-                                                   org_id = OrgId,
-                                                   name = Name})
+                                                    org_id = OrgId,
+                                                    name = Name})
                           end) of
         #oc_chef_group{authz_id = AuthzId} ->
             AuthzId;

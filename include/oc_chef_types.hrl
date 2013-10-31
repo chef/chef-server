@@ -20,5 +20,10 @@
           name,
           last_updated_by,
           created_at,
-          updated_at
+          updated_at,
+          clients = [],
+          users = [],
+          groups = [],
+          auth_side_actors = [],
+          auth_side_groups = []
           }).
