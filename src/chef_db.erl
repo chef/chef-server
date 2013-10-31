@@ -158,8 +158,9 @@ create(#chef_cookbook_version{} = Record, DbContext, ActorId) ->
 create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
     ObjectRec = chef_object:set_created(ObjectRec0, ActorId),
     QueryName = chef_object:create_query(ObjectRec),
+    FlattenedRecord = chef_object:flatten(ObjectRec),
     case stats_hero:ctime(ReqId, {chef_sql, create_object},
-                          fun() -> chef_sql:create_object(QueryName, ObjectRec) end) of
+                          fun() -> chef_sql:create_object(QueryName, FlattenedRecord) end) of
         {ok, 1} -> ok;
         {conflict, Msg}-> {conflict, Msg};
         {error, Why} -> {error, Why}
@@ -179,13 +180,8 @@ delete(#chef_cookbook_version{org_id = OrgId} = CookbookVersion,
         Result -> Result %% not_found or {error, _}
     end;
 delete(ObjectRec, #context{reqid = ReqId}) ->
-    QueryName = chef_object:delete_query(ObjectRec),
-    Id = chef_object:id(ObjectRec),
-    case stats_hero:ctime(ReqId, {chef_sql, delete_object},
-                     fun() -> chef_sql:delete_object(QueryName, Id) end) of
-        {ok, not_found} -> not_found;
-        Result -> Result
-    end.
+    stats_hero:ctime(ReqId, {chef_sql, delete_object},
+                     fun() -> chef_sql:delete_object(ObjectRec) end).
 
 -spec fetch(object_rec(),
             DbContext :: #context{}) ->

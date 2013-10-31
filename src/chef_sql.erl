@@ -37,6 +37,7 @@
          create_name_id_dict/2,
 
          create_object/2,
+         delete_object/1,
          delete_object/2,
          do_update/2,
          update/2,
@@ -927,6 +928,9 @@ unlink_checksums_from_cbv([Checksum|Rest], OrgId, CookbookVersionId) ->
             Error
     end.
 
+delete_object(Rec) ->
+    chef_object:delete(Rec, fun select_rows/1).
+
 -spec delete_object(delete_query(), binary()) -> {ok, 1 | 'not_found'} | sqerl_error().
 delete_object(delete_sandbox_by_id = Query, Id) ->
     %% Special-casing sandbox deletion, since it involves deleting multiple rows from a
@@ -960,20 +964,8 @@ delete_object(delete_cookbook_by_orgid_name = Query, OrgId, Name) ->
             Error
     end.
 
-is_undefined(undefined) ->
-    true;
-is_undefined(_) ->
-    false.
-
 flatten_record(Rec) ->
-    [_RecName|Tail] = tuple_to_list(Rec),
-    %% We detect if any of the fields in the record have not been set
-    %% and throw an error
-    case lists:any(fun is_undefined/1, Tail) of
-        true -> error({undefined_in_record, Rec});
-        false -> ok
-    end,
-    Tail.
+    chef_object:flatten(Rec).
 
 update(ObjectRec, ActorId) ->
     chef_object:update(ObjectRec, ActorId, fun select_rows/1).
