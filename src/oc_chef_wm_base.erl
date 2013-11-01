@@ -322,7 +322,10 @@ forbidden_message(unverified_org_membership, User, Org) ->
     {[{<<"error">>, [Msg]}]}.
 
 -spec delete_object(chef_db:db_context(),
-                    chef_object() | #chef_cookbook_version{},
+                    chef_object() |
+                    #chef_cookbook_version{} |
+                    #oc_chef_container{} |
+                    #oc_chef_group{},
                     object_id()) -> ok.
 delete_object(DbContext, Object, RequestId) ->
     oc_chef_object_db:delete(DbContext, Object, RequestId).

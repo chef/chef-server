@@ -10,6 +10,7 @@
 -export([delete/3]).
 
 -include_lib("chef_objects/include/chef_types.hrl").
+-include_lib("oc_chef_authz/include/oc_chef_types.hrl").
 
 %% @doc Deletes an object from the database, removes the object's authz record (if needed),
 %% and queues a delete of the object's data in the search index (Solr). Throws an error if
@@ -22,12 +23,14 @@
 %% db error was encountered, we could have data in the db that could not be accessed nor be
 %% findable via search.
 -spec delete( chef_db:db_context(),
-    chef_object() | #chef_cookbook_version{checksums::'undefined' | [binary()]},
-    object_id() ) -> ok.
-
-delete(DbContext,#chef_data_bag{org_id = OrgId,
-                                name = DataBagName}=DataBag,
-                                RequestorId) ->
+              chef_object() |
+              #chef_cookbook_version{checksums::'undefined' | [binary()]} |
+              #oc_chef_container{} |
+              #oc_chef_group{},
+              object_id() ) -> ok.
+delete(DbContext, #chef_data_bag{org_id = OrgId,
+                                 name = DataBagName}=DataBag,
+       RequestorId) ->
     %% This is a special case, because of the hierarchical relationship between Data Bag
     %% Items and Data Bags.  We need to get the ids of all the data bag's items so that we
     %% can remove them from Solr as well; a cascade-on-delete foreign key takes care of the
@@ -58,7 +61,10 @@ delete(DbContext, Object, RequestorId) ->
 
 -spec delete_from_db(chef_db:db_context(),
                      RequestorId :: object_id(),
-                     chef_object() | #chef_cookbook_version{}) -> ok |
+                     chef_object() |
+                     #chef_cookbook_version{} |
+                     #oc_chef_container{} |
+                     #oc_chef_group{}) -> ok |
                                                                   not_found.
 %% @doc Delete an object from the database.  Provides pattern-matching sugar over chef_db
 %% delete functions, making the `delete` function in this module very simple. Also deletes
@@ -73,7 +79,9 @@ delete_from_db(DbContext, RequestorId, ObjectRec) ->
 
 -spec maybe_delete_authz_id_or_error(Status, Object, RequestorId) -> ok | not_found when
       Status :: {ok, 1 | 2} | not_found | {error, _},
-      Object :: chef_object() | #chef_cookbook_version{},
+      Object :: chef_object() | #chef_cookbook_version{} |
+                #oc_chef_container{} |
+                #oc_chef_group{},
       RequestorId :: object_id().
 %% Some Chef objects do not have an authz id (data_bag_items) and some (cookbook_versions)
 %% share an authz id (cookbook). This code determins when the parent authz id should be
@@ -86,17 +94,10 @@ maybe_delete_authz_id_or_error(Error = {error, _}, _Object, _RequestorId) ->
 maybe_delete_authz_id_or_error(not_found, _Object, _RequestorId) ->
     %% if the object wasn't found, we take no further action
     not_found;
-maybe_delete_authz_id_or_error(1, #chef_data_bag_item{}, _RequestorId) ->
-    %% no authz_id for data_bag_items so just return
-    ok;
 maybe_delete_authz_id_or_error({ok, 1}, #chef_cookbook_version{}, _RequestorId) ->
     %% With status {ok, 1} we've deleted _only_ the cbv, not the cb so we leave the authz_id
     ok;
 maybe_delete_authz_id_or_error({ok, 2}, #chef_cookbook_version{} = CBV, RequestorId) ->
     %% With status {ok, 2} we've deleted the cbv _and_ the cb so we delete the authz_id
     oc_chef_authz:delete_resource(RequestorId, object, chef_object:authz_id(CBV)),
-    ok;
-maybe_delete_authz_id_or_error(1, Object, RequestorId) ->
-    %% for all other object types, successful delete of 1 record means we should delete authz id
-    oc_chef_authz:delete_resource(RequestorId, object, chef_object:authz_id(Object)),
     ok.
