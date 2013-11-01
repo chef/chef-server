@@ -49,6 +49,7 @@
                           node |
                           role |
                           client |
+                          container |
                           sandbox.
 
 -type auth_tuple() :: {object, object_id(), permission()} |
