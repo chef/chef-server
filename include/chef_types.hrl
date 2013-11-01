@@ -49,7 +49,12 @@
                             'chef_client' |
                             'chef_role' |
                             'chef_node'|
-                            'chef_user'.
+                            'chef_user' |
+                            %% these belong to EC and should
+                            %% eventually be included in a pluggable
+                            %% fashion.
+                            'oc_chef_container' |
+                            'oc_chef_group'.
 
 -type chef_type() :: 'data_bag' |
                      'data_bag_item' |
@@ -208,9 +213,4 @@
                                  #chef_role{} |
                                  #chef_node{}.
 
--type chef_updatable_object() :: #chef_cookbook_version{} |
-                                 #chef_data_bag_item{} |
-                                 #chef_environment{} |
-                                 #chef_client{} |
-                                 #chef_node{} |
-                                 #chef_role{}.
+-type chef_updatable_object() :: tuple().
