@@ -139,7 +139,7 @@ update_group_with_client(_Config) ->
     RootGroupAuthzId = suite_helper:make_az_id(GroupName),
     expect_get_group(RootGroupAuthzId, [], [], GroupName),
     Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
-    expect_put_group(RootGroupAuthzId, [suite_helper:make_az_id(ClientName)], [], GroupName),
+    expect_put_group(RootGroupAuthzId, [suite_helper:make_az_id(ClientName)], []),
     Result = chef_db:update(Group#oc_chef_group{clients = [ClientName], users =  [], groups = []}, ?CTX, ?AUTHZ),
     ?assertEqual(ok, Result),
     ok.
@@ -153,7 +153,7 @@ update_group_with_user(_Config) ->
     RootGroupAuthzId = suite_helper:make_az_id(GroupName),
     expect_get_group(suite_helper:make_az_id(GroupName), [], [], GroupName),
     Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
-    expect_put_group(RootGroupAuthzId, [suite_helper:make_az_id(UserName)], [], GroupName),
+    expect_put_group(RootGroupAuthzId, [suite_helper:make_az_id(UserName)], []),
     Result = chef_db:update(Group#oc_chef_group{ clients = [], users = [UserName], groups = []}, ?CTX, ?AUTHZ),
     ?assertEqual(ok, Result),
     ok.
@@ -167,7 +167,7 @@ update_group_with_group(_Config) ->
     RootGroupAuthzId = suite_helper:make_az_id(GroupName),
     expect_get_group(suite_helper:make_az_id(GroupName), [], [], GroupName),
     Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
-    expect_put_group(RootGroupAuthzId, [], [suite_helper:make_az_id(TestGroupName)], GroupName),
+    expect_put_group(RootGroupAuthzId, [], [suite_helper:make_az_id(TestGroupName)]),
     Result = chef_db:update(Group#oc_chef_group{clients = [], users = [], groups =  [TestGroupName]}, ?CTX, ?AUTHZ),
     ?assertEqual(ok, Result),
     ok.
@@ -198,9 +198,9 @@ update_group_with_insufficient_privs(_Config) ->
     RootGroupAuthzId = suite_helper:make_az_id(GroupName),
     expect_get_group(RootGroupAuthzId, [], [], GroupName),
     Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
-    expect_put_group(RootGroupAuthzId, [suite_helper:make_az_id(ClientName)], [], GroupName, {error, forbidden}),
+    expect_put_group({error, forbidden}),
     Result = chef_db:update(Group#oc_chef_group{clients = [ClientName], users =  [], groups = []}, ?CTX, ?AUTHZ),
-    ?assertEqual({error, {forbidden, [ClientAuthzId] }}, Result),
+    ?assertEqual({error, error_in_bifrost }, Result),
     ok.
 
 delete_client_from_group(_Config) ->
@@ -213,7 +213,7 @@ delete_client_from_group(_Config) ->
     expect_get_group(RootGroupAuthzId, [ClientName], [], GroupName),
     Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
     meck:delete(oc_chef_authz_http, request, 5),
-    expect_delete_group(RootGroupAuthzId, [suite_helper:make_az_id(ClientName)],[], GroupName),
+    expect_delete_group(RootGroupAuthzId, [suite_helper:make_az_id(ClientName)],[]),
     Result = chef_db:update(Group#oc_chef_group{auth_side_actors = [suite_helper:make_az_id(ClientName)], clients = [], users = [], groups = []}, ?CTX, ?AUTHZ),
     ?assertEqual(ok, Result),
     ok.
@@ -229,7 +229,7 @@ delete_user_from_group(_Config) ->
     Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
     meck:delete(oc_chef_authz_http, request, 5),
     UserAuthzId = suite_helper:make_az_id(UserName),
-    expect_delete_group(RootGroupAuthzId, [UserAuthzId],[], GroupName),
+    expect_delete_group(RootGroupAuthzId, [UserAuthzId],[]),
     Result = chef_db:update(Group#oc_chef_group{auth_side_actors = [UserAuthzId], users = [], clients = [], groups = []}, ?CTX, ?AUTHZ),
     ?assertEqual(ok, Result),
     ok.
@@ -245,19 +245,19 @@ delete_group_from_group(_Config) ->
     Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
     meck:delete(oc_chef_authz_http, request, 5),
     TestGroupAuthzId = suite_helper:make_az_id(TestGroupName),
-    expect_delete_group(RootGroupAuthzId, [],[TestGroupAuthzId], GroupName),
+    expect_delete_group(RootGroupAuthzId, [],[TestGroupAuthzId]),
     Result = chef_db:update(Group#oc_chef_group{auth_side_groups = [TestGroupAuthzId], clients = [], users = [], groups = []}, ?CTX, ?AUTHZ),
     ?assertEqual(ok, Result),
     ok.
 
 expect_delete_group(GroupAuthzId) ->
     Path = "/groups/" ++ binary_to_list(GroupAuthzId),
-    meck:expect(oc_chef_authz_http, request, fun(InputPath, Method, _, _, AzId) ->
+    meck:expect(oc_chef_authz_http, request, fun(InputPath, Method, _, _, _AzId) ->
                                                      ?assertEqual(InputPath, Path),
                                                      ?assertEqual(delete, Method)
                                                          end).
 
-expect_delete_group(GroupAuthzId, Actors, Groups, _GroupName) ->
+expect_delete_group(GroupAuthzId, Actors, Groups) ->
     Path = "/groups/" ++ binary_to_list(GroupAuthzId),
     meck:delete(oc_chef_authz_http, request, 5),
     meck:expect(oc_chef_authz_http, request,
@@ -273,7 +273,7 @@ expect_delete_group(GroupAuthzId, Actors, Groups, _GroupName) ->
                     ok
                 end).
 
-expect_put_group(GroupAuthzId, Actors, Groups, _GroupName) ->
+expect_put_group(GroupAuthzId, Actors, Groups) ->
     Path = "/groups/" ++ binary_to_list(GroupAuthzId),
     meck:delete(oc_chef_authz_http, request, 5),
     meck:expect(oc_chef_authz_http, request,
@@ -289,11 +289,10 @@ expect_put_group(GroupAuthzId, Actors, Groups, _GroupName) ->
                     ok
                 end).
 
-expect_put_group(GroupAuthzId, Actors, Groups, _GroupName, Response) ->
-    Path = "/groups/" ++ binary_to_list(GroupAuthzId),
+expect_put_group( Response) ->
     meck:delete(oc_chef_authz_http, request, 5),
     meck:expect(oc_chef_authz_http, request,
-                fun(InputPath, put, _, _, AzId) ->
+                fun(_InputPath, put, _, _, _AzId) ->
                     Response
                 end).
 
