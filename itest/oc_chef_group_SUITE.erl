@@ -49,7 +49,8 @@ all() ->
      delete_user_from_group,
      delete_group_from_group,
      fetch_group_with_forward_lookup_clients_users_groups,
-     update_group_with_rename
+     update_group_with_rename,
+     update_group_with_insufficient_privs
     ].
 
 create_should_create_new_group(_Config) ->
@@ -178,7 +179,7 @@ update_group_with_rename(_Config) ->
     create_group(OrgId, GroupName),
     expect_get_group(suite_helper:make_az_id(GroupName), [], [], GroupName),
     Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
-    meck:delete(oc_chef_authz_http, request, 5),
+
     expect_get_group(suite_helper:make_az_id(GroupName), [], [], TestGroupName),
     Result = chef_db:update(Group#oc_chef_group{name = TestGroupName, clients = [], users = [], groups = []}, ?CTX, ?AUTHZ),
     GroupUpdated = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = TestGroupName, last_updated_by = ?AUTHZ}),
@@ -187,7 +188,21 @@ update_group_with_rename(_Config) ->
     ?assertEqual(ok, Result),
 
     ok.
-    
+
+update_group_with_insufficient_privs(_Config) ->
+    OrgId = <<"GGGG0000000000000000000000000000">>,
+    GroupName = <<"test-group">>,
+    ClientName = <<"test-client">>,
+    create_group(OrgId, GroupName),
+    #chef_client{authz_id = ClientAuthzId} = insert_client(OrgId, ClientName),
+    RootGroupAuthzId = suite_helper:make_az_id(GroupName),
+    expect_get_group(RootGroupAuthzId, [], [], GroupName),
+    Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
+    expect_put_group(RootGroupAuthzId, [suite_helper:make_az_id(ClientName)], [], GroupName, {error, forbidden}),
+    Result = chef_db:update(Group#oc_chef_group{clients = [ClientName], users =  [], groups = []}, ?CTX, ?AUTHZ),
+    ?assertEqual({error, {forbidden, [ClientAuthzId] }}, Result),
+    ok.
+
 delete_client_from_group(_Config) ->
     OrgId = <<"GGGG0000000000000000000000000000">>,
     GroupName = <<"test-group">>,
@@ -244,6 +259,7 @@ expect_delete_group(GroupAuthzId) ->
 
 expect_delete_group(GroupAuthzId, Actors, Groups, _GroupName) ->
     Path = "/groups/" ++ binary_to_list(GroupAuthzId),
+    meck:delete(oc_chef_authz_http, request, 5),
     meck:expect(oc_chef_authz_http, request,
                 fun(InputPath, delete, _, _, AzId) ->
                         ActorBasePath = Path ++ "/actors/",
@@ -259,6 +275,7 @@ expect_delete_group(GroupAuthzId, Actors, Groups, _GroupName) ->
 
 expect_put_group(GroupAuthzId, Actors, Groups, _GroupName) ->
     Path = "/groups/" ++ binary_to_list(GroupAuthzId),
+    meck:delete(oc_chef_authz_http, request, 5),
     meck:expect(oc_chef_authz_http, request,
                 fun(InputPath, put, _, _, AzId) ->
                         ActorBasePath = Path ++ "/actors/",
@@ -270,6 +287,14 @@ expect_put_group(GroupAuthzId, Actors, Groups, _GroupName) ->
                         ?assertEqual([InputPath], FilteredPaths),
                     ?assertEqual(AzId, ?AUTHZ),
                     ok
+                end).
+
+expect_put_group(GroupAuthzId, Actors, Groups, _GroupName, Response) ->
+    Path = "/groups/" ++ binary_to_list(GroupAuthzId),
+    meck:delete(oc_chef_authz_http, request, 5),
+    meck:expect(oc_chef_authz_http, request,
+                fun(InputPath, put, _, _, AzId) ->
+                    Response
                 end).
 
 expect_get_group(GroupAuthzId, Actors, Groups, _GroupName) ->
@@ -302,7 +327,8 @@ insert_client(OrgId, Clientname) ->
                                             {<<"public_key">>, <<"stub-pub">>}]}),
 
 
-    ?assertEqual(ok, chef_db:create(ClientRecord, ?CTX, suite_helper:make_az_id("root"))).
+    ?assertEqual(ok, chef_db:create(ClientRecord, ?CTX, suite_helper:make_az_id("root"))),
+    ClientRecord.
 
 
 
