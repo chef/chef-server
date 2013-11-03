@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Author:: Adam Jacob (<adam@opscode.com>)
 # Copyright:: Copyright (c) 2011 Opscode, Inc.
@@ -10,9 +11,19 @@ solr_data_dir         = node['private_chef']['opscode-solr4']['data_dir']       
 solr_data_dir_symlink = File.join(solr_dir, "data")                             # /var/opt/opscode/opscode-solr4/data
 solr_home_dir         = File.join(solr_dir, "home")                             # /var/opt/opscpde/opscode-solr4/home
 solr_log_dir          = node['private_chef']['opscode-solr4']['log_directory']  # /var/log/opscode/opscode-solr4
+solr_collection_dir   = File.join(solr_home_dir, "collection1")                 # /var/opt/opscode/opscode-solr4/home/collection1
+solr_conf_dir         = File.join(solr_collection_dir, "conf")                  # /var/opt/opscode/opscode-solr4/home/collection1/conf
 solr_jetty_dir        = "/opt/opscode/embedded/service/opscode-solr4/jetty"
 
-[ solr_dir, solr_etc_dir, solr_data_dir, solr_home_dir, solr_log_dir ].each do |dir_name|
+# set up the basic solr directory structure
+[ solr_dir,
+  solr_etc_dir,
+  solr_data_dir,
+  solr_home_dir,
+  solr_log_dir,
+  solr_collection_dir,
+  solr_conf_dir
+].each do |dir_name|
   directory dir_name do
     owner node['private_chef']['user']['username']
     mode '0700'
@@ -20,33 +31,50 @@ solr_jetty_dir        = "/opt/opscode/embedded/service/opscode-solr4/jetty"
   end
 end
 
+# convenience symlink for finding solr data (if not in solr dir)
 link solr_data_dir_symlink do
   to solr_data_dir
   not_if { solr_data_dir == solr_data_dir_symlink }
 end
 
-solr_installed_file = File.join(solr_dir, "installed")
+## Solr 4 Home Structure
+# .
+# ├── collection1
+# │   ├── conf
+# │   │   ├── schema.xml
+# │   │   └── solrconfig.xml
+# │   └── core.properties
+# └── solr.xml
 
-execute "cp -R /opt/opscode/embedded/service/opscode-solr4/home/conf #{File.join(solr_home_dir, 'conf')}" do
-  not_if { File.exists?(solr_installed_file) }
-  notifies(:restart, "runit_service[opscode-solr4]") if is_data_master?
-end
-
-execute "cp -R /opt/opscode/embedded/service/opscode-solr4/jetty #{File.dirname(solr_jetty_dir)}" do
-  not_if { File.exists?(solr_installed_file) }
-  notifies(:restart, "runit_service[opscode-solr4]") if is_data_master?
-end
-
-execute "chown -R #{node['private_chef']['user']['username']} #{solr_dir}" do
-  not_if { File.exists?(solr_installed_file) }
-end
-
-file solr_installed_file do
-  owner "root"
-  group "root"
+template File.join(solr_home_dir, "solr.xml") do
+  source "solr.xml.erb"
+  owner node['private_chef']['user']['username']
   mode "0644"
-  content "Delete me to force re-install solr - dangerous"
-  action :create
+  notifies :restart 'runit_service[opscode-solr4]' if is_data_master?
+end
+
+file File.join(solr_collection_dir, "core.properties") do
+  owner node['private_chef']['user']['username']
+  mode "0644"
+  notifies :restart 'runit_service[opscode-solr4]' if is_data_master?
+  content <<EOF
+name=collection1
+EOF
+end
+
+template File.join(solr_conf_dir, "solrconfig.xml") do
+  source "solrconfig.xml.erb"
+  owner node['private_chef']['user']['username']
+  mode "0644"
+  variables(node['private_chef']['opscode-solr4'].to_hash)
+  notifies :restart 'runit_service[opscode-solr4]' if is_data_master?
+end
+
+file File.join(solr_conf_dir, "schema.xml") do
+  source "schema.xml"
+  owner node['private_chef']['user']['username']
+  mode "0644"
+  notifies :restart 'runit_service[opscode-solr4]' if is_data_master?
 end
 
 template File.join(solr_jetty_dir, "etc", "jetty.xml") do
@@ -54,14 +82,6 @@ template File.join(solr_jetty_dir, "etc", "jetty.xml") do
   mode "0644"
   source "jetty.xml.erb"
   variables(node['private_chef']['opscode-solr4'].to_hash.merge(node['private_chef']['logs'].to_hash))
-  notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
-end
-
-template File.join(solr_home_dir, "conf", "solrconfig.xml") do
-  owner node['private_chef']['user']['username']
-  mode "0644"
-  source "solrconfig.xml.erb"
-  variables(node['private_chef']['opscode-solr4'].to_hash)
   notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
 end
 
