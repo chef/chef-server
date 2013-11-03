@@ -5,13 +5,13 @@
 # All Rights Reserved
 #
 
-solr_dir = node['private_chef']['opscode-solr4']['dir']
-solr_etc_dir = File.join(solr_dir, "etc")
-solr_jetty_dir = File.join(solr_dir, "jetty")
-solr_data_dir = node['private_chef']['opscode-solr4']['data_dir']
-solr_data_dir_symlink = File.join(solr_dir, "data")
-solr_home_dir = File.join(solr_dir, "home")
-solr_log_dir = node['private_chef']['opscode-solr4']['log_directory']
+solr_dir              = node['private_chef']['opscode-solr4']['dir']            # /var/opt/opscode/opscode-solr4
+solr_etc_dir          = File.join(solr_dir, "etc")                              # /var/opt/opscode/opscode-solr4/etc
+solr_data_dir         = node['private_chef']['opscode-solr4']['data_dir']       # /var/opt/opscpde/opscode-solr4/data
+solr_data_dir_symlink = File.join(solr_dir, "data")                             # /var/opt/opscode/opscode-solr4/data
+solr_home_dir         = File.join(solr_dir, "home")                             # /var/opt/opscpde/opscode-solr4/home
+solr_log_dir          = node['private_chef']['opscode-solr4']['log_directory']  # /var/log/opscode/opscode-solr4
+solr_jetty_dir        = "/opt/opscode/embedded/service/opscode-solr4/jetty"
 
 [ solr_dir, solr_etc_dir, solr_data_dir, solr_home_dir, solr_log_dir ].each do |dir_name|
   directory dir_name do
