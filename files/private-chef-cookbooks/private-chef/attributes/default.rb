@@ -117,6 +117,33 @@ default['private_chef']['opscode-solr']['commit_interval'] = 60000 # in ms
 default['private_chef']['opscode-solr']['poll_seconds'] = 20 # slave -> master poll interval in seconds, max of 60 (see solrconfig.xml.erb)
 
 ####
+# Chef Solr 4
+####
+default['private_chef']['opscode-solr4']['enable'] = true
+default['private_chef']['opscode-solr4']['ha'] = false
+default['private_chef']['opscode-solr4']['dir'] = "/var/opt/opscode/opscode-solr4"
+default['private_chef']['opscode-solr4']['data_dir'] = "/var/opt/opscode/opscode-solr4/data"
+default['private_chef']['opscode-solr4']['log_directory'] = "/var/log/opscode/opscode-solr4"
+default['private_chef']['opscode-solr4']['log_rotation']['file_maxbytes'] = 104857600
+default['private_chef']['opscode-solr4']['log_rotation']['num_to_keep'] = 10
+# defaults for heap size and new generation size are computed in the chef-solr
+# recipe based on node memory
+default['private_chef']['opscode-solr4']['heap_size'] = nil
+default['private_chef']['opscode-solr4']['new_size'] = nil
+default['private_chef']['opscode-solr4']['java_opts'] = ""
+default['private_chef']['opscode-solr4']['url'] = "http://localhost:8983"
+default['private_chef']['opscode-solr4']['ip_address'] = '127.0.0.1'
+default['private_chef']['opscode-solr4']['vip'] = '127.0.0.1'
+default['private_chef']['opscode-solr4']['port'] = 8983
+default['private_chef']['opscode-solr4']['ram_buffer_size'] = 200
+default['private_chef']['opscode-solr4']['merge_factor'] = 25
+default['private_chef']['opscode-solr4']['max_merge_docs'] = 2147483647
+default['private_chef']['opscode-solr4']['max_field_length'] = 100000
+default['private_chef']['opscode-solr4']['max_commit_docs'] = 1000
+default['private_chef']['opscode-solr4']['commit_interval'] = 60000 # in ms
+default['private_chef']['opscode-solr4']['poll_seconds'] = 20 # slave -> master poll interval in seconds, max of 60 (see solrconfig.xml.erb)
+
+####
 # Chef Expander
 ####
 default['private_chef']['opscode-expander']['enable'] = true
