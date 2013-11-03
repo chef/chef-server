@@ -6,7 +6,6 @@
 #
 
 solr_dir              = node['private_chef']['opscode-solr4']['dir']            # /var/opt/opscode/opscode-solr4
-solr_etc_dir          = File.join(solr_dir, "etc")                              # /var/opt/opscode/opscode-solr4/etc
 solr_data_dir         = node['private_chef']['opscode-solr4']['data_dir']       # /var/opt/opscpde/opscode-solr4/data
 solr_data_dir_symlink = File.join(solr_dir, "data")                             # /var/opt/opscode/opscode-solr4/data
 solr_home_dir         = File.join(solr_dir, "home")                             # /var/opt/opscpde/opscode-solr4/home
@@ -24,16 +23,6 @@ end
 link solr_data_dir_symlink do
   to solr_data_dir
   not_if { solr_data_dir == solr_data_dir_symlink }
-end
-
-solr_config = File.join(solr_etc_dir, "solr.rb")
-
-template File.join(solr_etc_dir, "solr.rb") do
-  source "solr.rb.erb"
-  owner "root"
-  group "root"
-  mode "0644"
-  variables(node['private_chef']['opscode-solr4'].to_hash)
 end
 
 solr_installed_file = File.join(solr_dir, "installed")
