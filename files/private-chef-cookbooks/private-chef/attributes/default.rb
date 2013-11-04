@@ -92,7 +92,7 @@ default['private_chef']['jetty']['log_directory'] = "/var/opt/opscode/opscode-so
 ####
 # Chef Solr
 ####
-default['private_chef']['opscode-solr']['enable'] = true
+default['private_chef']['opscode-solr']['enable'] = false
 default['private_chef']['opscode-solr']['ha'] = false
 default['private_chef']['opscode-solr']['dir'] = "/var/opt/opscode/opscode-solr"
 default['private_chef']['opscode-solr']['data_dir'] = "/var/opt/opscode/opscode-solr/data"
