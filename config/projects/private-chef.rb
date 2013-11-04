@@ -33,6 +33,7 @@ dependency "postgresql92"
 dependency "rabbitmq"
 dependency "redis" # dynamic routing controls
 dependency "opscode-solr"
+dependency "opscode-solr4"
 dependency "opscode-expander"
 
 # We are transitioning away from Sequel toward Sqitch for managing
