@@ -17,7 +17,6 @@ solr_jetty_dir        = "/opt/opscode/embedded/service/opscode-solr4/jetty"
 
 # set up the basic solr directory structure
 [ solr_dir,
-  solr_etc_dir,
   solr_data_dir,
   solr_home_dir,
   solr_log_dir,
@@ -46,17 +45,17 @@ end
 # │   └── core.properties
 # └── solr.xml
 
-file File.join(solr_home_dir, "solr.xml") do
-  source "solr4/solr.xml.erb"
+cookbook_file File.join(solr_home_dir, "solr.xml") do
+  source "solr4/solr.xml"
   owner node['private_chef']['user']['username']
   mode "0644"
-  notifies :restart 'runit_service[opscode-solr4]' if is_data_master?
+  notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
 end
 
 file File.join(solr_collection_dir, "core.properties") do
   owner node['private_chef']['user']['username']
   mode "0644"
-  notifies :restart 'runit_service[opscode-solr4]' if is_data_master?
+  notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
   content <<EOF
 name=collection1
 EOF
@@ -67,14 +66,14 @@ template File.join(solr_conf_dir, "solrconfig.xml") do
   owner node['private_chef']['user']['username']
   mode "0644"
   variables(node['private_chef']['opscode-solr4'].to_hash)
-  notifies :restart 'runit_service[opscode-solr4]' if is_data_master?
+  notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
 end
 
-file File.join(solr_conf_dir, "schema.xml") do
+cookbook_file File.join(solr_conf_dir, "schema.xml") do
   source "solr4/schema.xml"
   owner node['private_chef']['user']['username']
   mode "0644"
-  notifies :restart 'runit_service[opscode-solr4]' if is_data_master?
+  notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
 end
 
 template File.join(solr_jetty_dir, "etc", "jetty.xml") do
