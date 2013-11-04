@@ -17,6 +17,9 @@ module PrivateChef
   # options are 'standalone', 'manual', 'ha', and 'tier'
   topology "standalone"
 
+  # options are 'ipv4' 'ipv6'
+  ip_version "ipv4"
+
   couchdb Mash.new
   rabbitmq Mash.new
   opscode_solr Mash.new
@@ -50,6 +53,7 @@ module PrivateChef
   notification_email nil
   from_email nil
   role nil
+
   user Mash.new
 
   ldap Mash.new
@@ -287,12 +291,14 @@ module PrivateChef
 
     def gen_backend(bootstrap=false)
       PrivateChef[:role] = "backend" #mixlib-config wants a symbol :(
-      PrivateChef["bookshelf"]["listen"] ||= "0.0.0.0"
-      PrivateChef["couchdb"]["bind_address"] ||= "0.0.0.0"
-      PrivateChef["rabbitmq"]["node_ip_address"] ||= "0.0.0.0"
-      PrivateChef["opscode_solr"]["ip_address"] ||= "0.0.0.0"
+      PrivateChef["bookshelf"]["listen"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["couchdb"]["bind_address"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["nginx"]["enable_ipv6"] = PrivateChef["use_ipv6"]
+      PrivateChef["opscode_solr"]["ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
-      PrivateChef["postgresql"]["listen_address"] ||= "0.0.0.0"
+      PrivateChef["postgresql"]["listen_address"] ||= PrivateChef["default_listen_address"]
+      # TODO RETHINK WRT ipv6
       PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"]
       PrivateChef["opscode_account"]["worker_processes"] ||= 4
 
@@ -358,6 +364,19 @@ module PrivateChef
 
     def generate_config(node_name)
       generate_secrets(node_name)
+
+      PrivateChef["default_listen_address"] = "127.0.0.1"
+      # 'ipv4, ipv6, maybe add both
+      case PrivateChef['ip_version']
+      when 'ipv4', nil
+        PrivateChef["use_ipv4"] = true
+        PrivateChef["use_ipv6"] = false
+        PrivateChef["default_listen_address"] = "127.0.0.1"
+      when 'ipv6'
+        PrivateChef["use_ipv4"] = false
+        PrivateChef["use_ipv6"] = true
+        PrivateChef["default_listen_address"] = "::0/0"
+      end
 
       case PrivateChef['topology']
       when "standalone","manual"
