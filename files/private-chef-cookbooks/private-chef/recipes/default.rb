@@ -166,6 +166,7 @@ include_recipe "private-chef::sysctl-updates"
   "opscode-certificate",
   "opscode-account",
   "opscode-solr",
+  "opscode-solr4",
   "opscode-expander",
   "bookshelf",
   "opscode-org-creator",
