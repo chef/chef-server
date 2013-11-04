@@ -1,0 +1,41 @@
+#+TITLE: Verification of Erlang Based Flatten/Expand
+
+
+* Test Data Preparation
+** Node Set
+From preprod download node JSON. Note that these nodes will be
+unmerged.
+#+BEGIN_EXAMPLE
+cd ~/oc/environments/preprod
+knife download nodes
+#+END_EXAMPLE
+** Deep Merged Node Set
+An escript in chef_objects runs the deep merge code in the chef_nodes
+module and writes out files with a =.merged= suffix.
+
+#+BEGIN_EXAMPLE
+cd ~/oc/code/opscode/chef_objects
+./test/node_merger ~/oc/environments/preprod/nodes/*
+#+END_EXAMPLE
+** Build XML using Ruby based chef-expander
+#+BEGIN_EXAMPLE
+bundle exec bin/expand-test ~/oc/environments/preprod/nodes/*.merged
+#+END_EXAMPLE
+** Build XML using Erlang based code
+#+BEGIN_EXAMPLE
+cd ~/oc/code/opscode/chef_index
+make test
+./test/do_xml ~/oc/environments/preprod/nodes/*.merged
+#+END_EXAMPLE
+** Extract sorted content lines from XML files
+#+BEGIN_EXAMPLE
+cd ~/oc/code/opscode/chef_index
+./test/extract_content ~/oc/environments/preprod/nodes/*.xml.*
+#+END_EXAMPLE
+(Be sure there are no *.xml.*.lines files when you run this).
+** Compare Results
+Note that the Erlang code forces a =chef_BLAH= chef db value so
+you'll want to set that in test values for =expand-test=.
+#+BEGIN_EXAMPLE
+./test/compare_lines ~/oc/environments/preprod/nodes
+#+END_EXAMPLE

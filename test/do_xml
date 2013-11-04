@@ -1,0 +1,24 @@
+#!/usr/bin/env escript
+%% -*- erlang -*-
+%%! -pa .eunit deps/jiffy/ebin deps/ej/ebin
+
+%% requires access to unexported handle_command so uses .eunit on code path
+
+-module(do_xml).
+
+-compile([export_all]).
+
+-include_lib("xmerl/include/xmerl.hrl").
+
+main(Files) ->
+    [ process_file(F) || F <- Files ],
+    ok.
+
+process_file(File) ->
+    {ok, Bin} = file:read_file(File),
+    Node = jiffy:decode(Bin),
+    Cmd = chef_index_expand:make_command(add, node, <<"beef123">>, <<"db123">>, Node),
+    Doc = chef_index_expand:handle_command(Cmd),
+    OutFile = File ++ ".xml.erlang",
+    file:write_file(OutFile, [<<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>">>, Doc]),
+    ok.

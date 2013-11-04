@@ -1,0 +1,24 @@
+#!/usr/bin/env escript
+-module(compare_lines).
+
+-mode(compile).
+
+-compile([export_all]).
+
+main(Dir) ->
+    Files = filelib:wildcard(Dir ++ "/*.merged"),
+    [ process_file(File) || File <- Files ],
+    ok.
+
+process_file(File) ->
+    Ruby = File ++ ".xml.ruby.lines",
+    Erlang = File ++ ".xml.erlang.lines",
+    DiffCmd = "diff -u " ++ Erlang ++ " " ++ Ruby,
+    Ans = os:cmd(DiffCmd),
+    case Ans of
+        [] ->
+            io:format("OK === ~p ===~n", [File]);
+        _ ->
+            io:format("=== ~p ===~n~s~n~n", [File, Ans])
+    end,
+    ok.
