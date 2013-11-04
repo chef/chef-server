@@ -166,7 +166,7 @@ create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
         {error, Why} -> {error, Why}
     end.
 
--spec delete(object_rec(), #context{}) -> {ok, 1 | 2} | not_found | {error, _}.
+-spec delete(object_rec(), #context{}) -> {ok, 1 | 2} | 1 | 2 | not_found | {error, _}.
 delete(#chef_cookbook_version{org_id = OrgId} = CookbookVersion,
        #context{reqid = ReqId} = Ctx) ->
     case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
