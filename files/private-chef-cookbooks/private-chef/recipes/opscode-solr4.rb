@@ -80,7 +80,7 @@ end
 template File.join(solr_jetty_dir, "etc", "jetty.xml") do
   owner node['private_chef']['user']['username']
   mode "0644"
-  source "jetty.xml.erb"
+  source "solr4/jetty.xml.erb"
   variables(node['private_chef']['opscode-solr4'].to_hash.merge(node['private_chef']['logs'].to_hash))
   notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
 end
