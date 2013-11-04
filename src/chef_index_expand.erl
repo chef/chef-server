@@ -201,7 +201,12 @@ maybe_data_bag_field(Payload) ->
 %% @doc Extract the Chef object content, flatten/expand, and return an
 %% iolist of the `content' field.
 make_content(Payload) ->
-    ?FIELD(<<"content">>, flatten(ej:get({?K_ITEM}, Payload))).
+    %% The Ruby code in chef-expander adds the database name, id, and
+    %% type as fields. So we do the same.
+    Meta = [ {Key, ej:get({Key0}, Payload)} || {Key0, Key} <- ?META_FIELDS ],
+    {Item0} = ej:get({?K_ITEM}, Payload),
+    Item = {Meta ++ Item0},
+    ?FIELD(<<"content">>, flatten(Item)).
 
 %% @doc Main interface to flatten/expand for Chef object EJSON. Given
 %% an EJSON term representing a Chef object, returns an iolist of the
