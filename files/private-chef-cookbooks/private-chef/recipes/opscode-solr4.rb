@@ -46,8 +46,8 @@ end
 # │   └── core.properties
 # └── solr.xml
 
-template File.join(solr_home_dir, "solr.xml") do
-  source "solr.xml.erb"
+file File.join(solr_home_dir, "solr.xml") do
+  source "solr4/solr.xml.erb"
   owner node['private_chef']['user']['username']
   mode "0644"
   notifies :restart 'runit_service[opscode-solr4]' if is_data_master?
@@ -63,7 +63,7 @@ EOF
 end
 
 template File.join(solr_conf_dir, "solrconfig.xml") do
-  source "solrconfig.xml.erb"
+  source "solr4/solrconfig.xml.erb"
   owner node['private_chef']['user']['username']
   mode "0644"
   variables(node['private_chef']['opscode-solr4'].to_hash)
@@ -71,7 +71,7 @@ template File.join(solr_conf_dir, "solrconfig.xml") do
 end
 
 file File.join(solr_conf_dir, "schema.xml") do
-  source "schema.xml"
+  source "solr4/schema.xml"
   owner node['private_chef']['user']['username']
   mode "0644"
   notifies :restart 'runit_service[opscode-solr4]' if is_data_master?
