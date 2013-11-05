@@ -375,7 +375,7 @@ module PrivateChef
       when 'ipv6'
         PrivateChef["use_ipv4"] = false
         PrivateChef["use_ipv6"] = true
-        PrivateChef["default_listen_address"] = "::0/0"
+        PrivateChef["default_listen_address"] = "::"
       end
 
       case PrivateChef['topology']
