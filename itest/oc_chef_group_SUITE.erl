@@ -100,7 +100,6 @@ delete_should_delete_group_form_org(_Config) ->
     ?assertEqual([GroupName], chef_sql:fetch_object_names(#oc_chef_group{org_id = OrgId})),
     Group = fetch_group(OrgId, GroupName),
 
-    meck:delete(oc_chef_authz_http, request, 5),
 
     expect_delete_group(Group#oc_chef_group.authz_id),
 
@@ -212,7 +211,6 @@ delete_client_from_group(_Config) ->
     RootGroupAuthzId = suite_helper:make_az_id(GroupName),
     expect_get_group(RootGroupAuthzId, [ClientName], [], GroupName),
     Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
-    meck:delete(oc_chef_authz_http, request, 5),
     expect_delete_group(RootGroupAuthzId, [suite_helper:make_az_id(ClientName)],[]),
     Result = chef_db:update(Group#oc_chef_group{auth_side_actors = [suite_helper:make_az_id(ClientName)], clients = [], users = [], groups = []}, ?CTX, ?AUTHZ),
     ?assertEqual(ok, Result),
@@ -227,7 +225,6 @@ delete_user_from_group(_Config) ->
     RootGroupAuthzId = suite_helper:make_az_id(GroupName),
     expect_get_group(RootGroupAuthzId, [UserName], [], GroupName),
     Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
-    meck:delete(oc_chef_authz_http, request, 5),
     UserAuthzId = suite_helper:make_az_id(UserName),
     expect_delete_group(RootGroupAuthzId, [UserAuthzId],[]),
     Result = chef_db:update(Group#oc_chef_group{auth_side_actors = [UserAuthzId], users = [], clients = [], groups = []}, ?CTX, ?AUTHZ),
@@ -243,7 +240,6 @@ delete_group_from_group(_Config) ->
     RootGroupAuthzId = suite_helper:make_az_id(GroupName),
     expect_get_group(RootGroupAuthzId, [], [TestGroupName], GroupName),
     Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
-    meck:delete(oc_chef_authz_http, request, 5),
     TestGroupAuthzId = suite_helper:make_az_id(TestGroupName),
     expect_delete_group(RootGroupAuthzId, [],[TestGroupAuthzId]),
     Result = chef_db:update(Group#oc_chef_group{auth_side_groups = [TestGroupAuthzId], clients = [], users = [], groups = []}, ?CTX, ?AUTHZ),
@@ -252,6 +248,7 @@ delete_group_from_group(_Config) ->
 
 expect_delete_group(GroupAuthzId) ->
     Path = "/groups/" ++ binary_to_list(GroupAuthzId),
+    meck:delete(oc_chef_authz_http, request, 5),
     meck:expect(oc_chef_authz_http, request, fun(InputPath, Method, _, _, _AzId) ->
                                                      ?assertEqual(InputPath, Path),
                                                      ?assertEqual(delete, Method)
@@ -298,6 +295,7 @@ expect_put_group( Response) ->
 
 expect_get_group(GroupAuthzId, Actors, Groups, _GroupName) ->
     Path = "/groups/" ++ binary_to_list(GroupAuthzId),
+    meck:delete(oc_chef_authz_http, request, 5),
     meck:expect(oc_chef_authz_http, request,
                 fun(InputPath, get,  _, _, AzId) ->
                     ?assertEqual(AzId, ?AUTHZ),
