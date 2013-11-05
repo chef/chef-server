@@ -97,6 +97,7 @@ start_server(Config) ->
                            {annotations, [req_id, org_name, msg, darklaunch, perf_stats]}
                           ]
                          }]),
+    application:set_env(chef_index, disable_rabbitmq, true),
 
     [begin
          ct:pal("Starting ~p~n", [App]),
