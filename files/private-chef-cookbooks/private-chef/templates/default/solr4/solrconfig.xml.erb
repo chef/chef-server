@@ -1515,7 +1515,6 @@
     </arr>
   </requestHandler>
 
-
   <!-- Query Elevation Component
 
        http://wiki.apache.org/solr/QueryElevationComponent
@@ -1524,23 +1523,6 @@
        results for a given query regardless of the normal lucene
        scoring.
     -->
-  <searchComponent name="elevator" class="solr.QueryElevationComponent" >
-    <!-- pick a fieldType to analyze queries -->
-    <str name="queryFieldType">string</str>
-    <str name="config-file">elevate.xml</str>
-  </searchComponent>
-
-  <!-- A request handler for demonstrating the elevator component -->
-  <requestHandler name="/elevate" class="solr.SearchHandler" startup="lazy">
-    <lst name="defaults">
-      <str name="echoParams">explicit</str>
-      <str name="df">text</str>
-    </lst>
-    <arr name="last-components">
-      <str>elevator</str>
-    </arr>
-  </requestHandler>
-
   <!-- Highlighting Component
 
        http://wiki.apache.org/solr/HighlightingParameters
