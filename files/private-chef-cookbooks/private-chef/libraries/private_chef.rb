@@ -298,8 +298,11 @@ module PrivateChef
       PrivateChef["opscode_solr"]["ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
       PrivateChef["postgresql"]["listen_address"] ||= PrivateChef["default_listen_address"]
-      # TODO RETHINK WRT ipv6
-      PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"]
+
+      authaddr = []
+      authaddr << "0.0.0.0/0" if PrivateChef["use_ipv4"]
+      authaddr << "::" if PrivateChef["use_ipv6"]
+      PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= authaddr
       PrivateChef["opscode_account"]["worker_processes"] ||= 4
 
       PrivateChef["opscode_chef_mover"]["enable"] = !!bootstrap
@@ -308,6 +311,7 @@ module PrivateChef
 
     def gen_frontend
       PrivateChef[:role] = "frontend"
+      PrivateChef["nginx"]["enable_ipv6"] = PrivateChef["use_ipv6"]
       PrivateChef["bookshelf"]["enable"] ||= false
       PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["couchdb"]["enable"] ||= false
