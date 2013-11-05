@@ -95,7 +95,7 @@
 
 
     <fieldtype name="stuff" class="solr.TextField" omitNorms="true">
-      <analyzer class="org.apache.lucene.analysis.WhitespaceAnalyzer"/>
+      <analyzer class="org.apache.lucene.analysis.core.WhitespaceAnalyzer"/>
     </fieldtype>
 
     <!-- The format for this date field is of the form 1995-12-31T23:59:59Z, and
