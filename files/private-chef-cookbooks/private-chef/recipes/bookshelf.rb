@@ -21,17 +21,8 @@ end
 
 execute "cookbook migration" do
   command cookbook_migration
+  user owner
   only_if { File.exist?(checksum_path) && !File.exist?(data_path) }
-end
-
-execute "reset bookshelf data owner" do
-  command "chown -R #{owner} #{data_path}"
-  only_if { File.exist?(data_path) }
-end
-
-execute "reset bookshelf data group" do
-  command "chgrp -R #{group} #{data_path}"
-  only_if { File.exist?(data_path) }
 end
 
 bookshelf_dir = node['private_chef']['bookshelf']['dir']
