@@ -84,6 +84,8 @@ template File.join(solr_jetty_dir, "etc", "jetty.xml") do
   notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
 end
 
+execute "chown -R #{node['private_chef']['user']['username']} #{solr_jetty_dir}"
+
 node.default['private_chef']['opscode-solr4']['command'] =  "java -Xmx#{node['private_chef']['opscode-solr4']['heap_size']} -Xms#{node['private_chef']['opscode-solr4']['heap_size']}"
 # Compute some sane JVM tunings. The user can still override these computed
 # defaults using /etc/opscode/private-chef.rb
