@@ -46,16 +46,22 @@ init([]) ->
 
 amqp_child_spec() ->
     %% Lookup AMQP connection info
-    Host =  envy:get(chef_index, rabbitmq_host, string),
-    Port = envy:get(chef_index,rabbitmq_port, non_neg_integer),
-    User = envy:get(chef_index,rabbitmq_user, binary),
-    Password = envy:get(chef_index,rabbitmq_password, binary),
-    VHost = envy:get(chef_index,rabbitmq_vhost, binary),
-    ExchgName = envy:get(chef_index,rabbitmq_exchange, binary),
-    Exchange = {#'exchange.declare'{exchange=ExchgName, durable=true}},
-    Network = {network, Host, Port, {User, Password}, VHost},
-    error_logger:info_msg("Connecting to Rabbit at ~s:~p~s (exchange: ~p)~n",
-        [Host, Port, VHost, ExchgName]),
-    IndexDesc = {chef_index_queue, {bunnyc, start_link, [chef_index_queue, Network, Exchange, []]},
-        permanent, 5000, worker, dynamic},
-    [IndexDesc].
+    case envy:get(chef_index, disable_rabbitmq, false, boolean) of
+        true ->
+            error_logger:info_msg("RabbitMQ config disabled. Indexing for search is disabled.~n"),
+            [];
+        false ->
+            Host = envy:get(chef_index, rabbitmq_host, string),
+            Port = envy:get(chef_index,rabbitmq_port, non_neg_integer),
+            User = envy:get(chef_index,rabbitmq_user, binary),
+            Password = envy:get(chef_index,rabbitmq_password, binary),
+            VHost = envy:get(chef_index,rabbitmq_vhost, binary),
+            ExchgName = envy:get(chef_index,rabbitmq_exchange, binary),
+            Exchange = {#'exchange.declare'{exchange=ExchgName, durable=true}},
+            Network = {network, Host, Port, {User, Password}, VHost},
+            error_logger:info_msg("Connecting to Rabbit at ~s:~p~s (exchange: ~p)~n",
+                                  [Host, Port, VHost, ExchgName]),
+            IndexDesc = {chef_index_queue, {bunnyc, start_link, [chef_index_queue, Network, Exchange, []]},
+                         permanent, 5000, worker, dynamic},
+            [IndexDesc]
+    end.
