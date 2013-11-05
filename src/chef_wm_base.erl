@@ -46,7 +46,7 @@
 %% "Grab Bag" functions that will also need to be implemented by other base resources
 -export([assemble_principal_ejson/3,
          check_cookbook_authz/3,
-         delete_object/3,
+         delete_object/4,
          object_creation_hook/2,
          object_creation_error_hook/2,
          stats_hero_label/1,
@@ -294,7 +294,8 @@ create_from_json(#wm_reqdata{} = Req,
                  #base_state{chef_db_context = DbContext,
                              organization_guid = OrgId,
                              requestor_id = ActorId,
-                             resource_mod = ResourceMod} = State,
+                             resource_mod = ResourceMod,
+                             darklaunch = Darklaunch} = State,
                  RecType, {authz_id, AuthzId}, ObjectEjson) ->
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
@@ -309,12 +310,13 @@ create_from_json(#wm_reqdata{} = Req,
     %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
     %% the world.
-    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
+    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson, Darklaunch),
     case chef_db:create(ObjectRec, DbContext, ActorId) of
         {conflict, _} ->
             %% ignore return value of solr delete, this is best effort.
-            chef_object_db:delete_from_solr(ObjectRec),
+            chef_object_db:delete_from_solr(ObjectRec, Darklaunch),
             ?BASE_RESOURCE:object_creation_error_hook(ObjectRec, ActorId),
+            %% FIXME: created authz_id is leaked for this case, cleanup?
             LogMsg = {RecType, name_conflict, Name},
             ConflictMsg = ResourceMod:conflict_message(Name),
             {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
@@ -328,7 +330,7 @@ create_from_json(#wm_reqdata{} = Req,
         What ->
             %% ignore return value of solr delete, this is best effort.
             %% FIXME: created authz_id is leaked for this case, cleanup?
-            chef_object_db:delete_from_solr(ObjectRec),
+            chef_object_db:delete_from_solr(ObjectRec, Darklaunch),
             ?BASE_RESOURCE:object_creation_error_hook(ObjectRec, ActorId),
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
@@ -347,14 +349,15 @@ object_creation_hook(Object, _State) -> Object.
 %% record. `ObjectEjson' is the parsed EJSON from the request body.
 update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                                                   requestor_id = ActorId,
-                                                  resource_mod = ResourceMod} = State,
+                                                  resource_mod = ResourceMod,
+                                                  darklaunch = Darklaunch} = State,
                  OrigObjectRec, ObjectEjson) ->
     ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectEjson),
 
     %% Send object to solr for indexing *first*. If the update fails, we will have sent
     %% incorrect data, but that should get corrected when the client retries. This is a
     %% compromise.
-    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
+    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson, Darklaunch),
 
     %% Ignore updates that don't change anything. If the user PUTs identical data, we skip
     %% going to the database and skip updating updated_at. This allows us to avoid RDBMS
@@ -406,9 +409,10 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
 
 -spec delete_object(chef_db:db_context(),
                     chef_object() | #chef_cookbook_version{},
-                    object_id()) -> ok.
-delete_object(DbContext, Object, RequestId) ->
-    chef_object_db:delete(DbContext, Object, RequestId).
+                    object_id(),
+                    any()) -> ok.
+delete_object(DbContext, Object, RequestId, Darklaunch) ->
+    chef_object_db:delete(DbContext, Object, RequestId, Darklaunch).
 
 -spec check_cookbook_authz(Cookbooks :: [#chef_cookbook_version{}],
                            Req :: wm_req(),

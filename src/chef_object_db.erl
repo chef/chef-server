@@ -24,35 +24,37 @@
 -module(chef_object_db).
 
 -export([
-         add_to_solr/2,
-         delete/3,
-         delete_from_solr/1]).
+         add_to_solr/3,
+         delete/4,
+         delete_from_solr/2]).
 
 -include_lib("chef_objects/include/chef_types.hrl").
 
--spec add_to_solr(tuple(), ejson_term() | {ejson_term(), _}) -> ok.
-add_to_solr(ObjectRec, ObjectEjson) ->
+-type darklaunch() :: any().
+
+-spec add_to_solr(tuple(), ejson_term() | {ejson_term(), _}, darklaunch()) -> ok.
+add_to_solr(ObjectRec, ObjectEjson, Darklaunch) ->
     case chef_object:is_indexed(ObjectRec) of
         true ->
             IndexEjson = chef_object:ejson_for_indexing(ObjectRec, ObjectEjson),
             DbName = chef_otto:dbname(chef_object:org_id(ObjectRec)),
             Id = chef_object:id(ObjectRec),
             TypeName = chef_object:type_name(ObjectRec),
-            chef_index_queue:set(TypeName, Id, DbName, IndexEjson);
+            index_queue_add(TypeName, Id, DbName, IndexEjson, Darklaunch);
         false ->
             ok
     end.
 
 %% @doc Helper function to easily delete an object from Solr, instead
 %% of calling chef_index_queue directly.
--spec delete_from_solr(tuple()) -> ok.
-delete_from_solr(ObjectRec) ->
+-spec delete_from_solr(tuple(), darklaunch()) -> ok.
+delete_from_solr(ObjectRec, Darklaunch) ->
     case chef_object:is_indexed(ObjectRec) of
         true ->
             Id = chef_object:id(ObjectRec),
             DbName = chef_otto:dbname(chef_object:org_id(ObjectRec)),
             TypeName = chef_object:type_name(ObjectRec),
-            chef_index_queue:delete(TypeName, Id, DbName);
+            index_queue_delete(TypeName, Id, DbName, Darklaunch);
         false ->
             ok
     end.
@@ -66,10 +68,10 @@ delete_from_solr(ObjectRec) ->
 %% pulled out of the db so it will be as if the data was correctly deleted. If we deleted
 %% the solr data when a db error was encountered, we could have data in the db that could
 %% not be findable via search.
--spec delete(chef_db:db_context(), tuple(), object_id() ) -> ok.
+-spec delete(chef_db:db_context(), tuple(), object_id(), darklaunch()) -> ok.
 delete(DbContext, #chef_data_bag{org_id = OrgId,
                                  name = DataBagName}=DataBag,
-       _RequestorId) ->
+       _RequestorId, Darklaunch) ->
     %% This is a special case, because of the hierarchical relationship between Data Bag
     %% Items and Data Bags.  We need to get the ids of all the data bag's items so that we
     %% can remove them from Solr as well; a cascade-on-delete foreign key takes care of the
@@ -83,31 +85,77 @@ delete(DbContext, #chef_data_bag{org_id = OrgId,
 
     %% Remove data bag from database; no need to remove from Solr, since they're not indexed
     %% anyway (what's there to index, after all?)
-    delete_from_db(DbContext, DataBag), % throws on error
+    delete_from_db(DbContext, DataBag, Darklaunch), % throws on error
     %% Remove data bag items from Solr now; directly calling chef_index_queue:delete since
     %% we've just got ids, and not proper data bag item records required for
     %% chef_object_db:delete_from_solr
-    [ chef_index_queue:delete(data_bag_item, Id, OrgId) || Id <- DataBagItemIds ],
+    [ index_queue_delete(data_bag_item, Id, OrgId, Darklaunch) || Id <- DataBagItemIds ],
     ok;
-delete(DbContext, ObjectRec, _RequestorId) ->
+delete(DbContext, ObjectRec, _RequestorId, Darklaunch) ->
     %% All other object deletion is relatively sane :)
     %% Note that this will throw if an error is encountered
-    delete_from_db(DbContext, ObjectRec),
+    delete_from_db(DbContext, ObjectRec, Darklaunch),
     %% This is fire and forget as well. If we're here, we've already deleted the db record
     %% and won't be able to get back here for a retry.
-    delete_from_solr(ObjectRec),
+    delete_from_solr(ObjectRec, Darklaunch),
     ok.
 
--spec delete_from_db(chef_db:db_context(), tuple()) -> ok.
+-spec delete_from_db(chef_db:db_context(), tuple(), darklaunch()) -> ok.
 %% @doc Delete an object from the database.  Provides pattern-matching sugar over chef_db
 %% delete functions, making the `delete` function in this module very simple. Throws if the
 %% database call returns an error, otherwise returns `ok' ignoring specific return value
 %% from the chef_db module.
-delete_from_db(DbContext, ObjectRec) ->
+delete_from_db(DbContext, ObjectRec, _Darklaunch) ->
     handle_delete_from_db(chef_db:delete(ObjectRec, DbContext)).
 
 handle_delete_from_db({error, _}=Error) ->
     throw({delete_from_db, Error});
 handle_delete_from_db(_Result) ->
     ok.
+
+index_queue_add(TypeName, Id, DbName, IndexEjson, Darklaunch) ->
+    SendToSolr4 = fun() ->
+                          error_logger:info_msg("STUB: sending to solr4~n"),
+                          ok
+                  end,
+    with_darklaunch(<<"send_to_solr4">>, Darklaunch, SendToSolr4, ok),
+
+    SendToRabbit = fun() ->
+                           chef_index_queue:set(TypeName, Id, DbName, IndexEjson)
+                   end,
+    with_darklaunch(<<"disable_send_to_rabbit">>, Darklaunch,
+                    fun() ->
+                            error_logger:info_msg("send to rabbit DISABLED by darklaunch~n"),
+                            ok
+                    end,
+                    SendToRabbit).
+
+index_queue_delete(TypeName, Id, DbName, Darklaunch) ->
+    with_darklaunch(<<"send_to_solr4">>, Darklaunch,
+                    fun() ->
+                            error_logger:info_msg("STUB: send delete to solr4~n"),
+                            ok
+                    end,
+                    ok),
+
+    with_darklaunch(<<"disable_send_to_rabbit">>, Darklaunch,
+                    fun() ->
+                            error_logger:info_msg("delete to rabbit DISABLED by darklaunch~n"),
+                            ok
+                    end,
+                    fun() ->
+                            chef_index_queue:delete(TypeName, Id, DbName)
+                    end).
+
+with_darklaunch(Key, Darklaunch, True, False) ->
+    case chef_wm_darklaunch:is_enabled(Key, Darklaunch) of
+        true when is_function(True) ->
+            True();
+        true ->
+            True;
+        false when is_function(False) ->
+            False();
+        false ->
+            False
+    end.
 

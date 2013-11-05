@@ -137,7 +137,8 @@ from_json(Req, #base_state{chef_db_context = DbContext,
                            resource_state = #data_state{data_bag_name = DataBagName,
                                                         data_bag_item_name = ItemName,
                                                         data_bag_item_ejson = ItemData},
-                           organization_guid = OrgId} = State) ->
+                           organization_guid = OrgId,
+                           darklaunch = Darklaunch} = State) ->
 
     %% Note: potential race condition.  If we don't have perms, the create will fail.
     %% Although we checked rights above, they could have changed.
@@ -181,7 +182,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
             {true, Req2, State#base_state{log_msg = LogMsg}};
         What ->
             %% ignore return value of solr delete, this is best effort.
-            chef_object_db:delete_from_solr(DataBagItem),
+            chef_object_db:delete_from_solr(DataBagItem, Darklaunch),
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
@@ -192,10 +193,11 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  requestor_id = RequestorId,
                                  resource_state = #data_state{
                                      chef_data_bag = DataBag,
-                                     data_bag_name = DataBagName}
+                                     data_bag_name = DataBagName},
+                                 darklaunch = Darklaunch
                                 } = State) ->
 
-    ok = ?BASE_RESOURCE:delete_object(DbContext, DataBag, RequestorId),
+    ok = ?BASE_RESOURCE:delete_object(DbContext, DataBag, RequestorId, Darklaunch),
     NakedBag = {[{<<"name">>, DataBagName},
                  {<<"json_class">>, <<"Chef::DataBag">>},
                  {<<"chef_type">>, <<"data_bag">>}]},

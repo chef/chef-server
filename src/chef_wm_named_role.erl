@@ -124,10 +124,10 @@ from_json(Req, #base_state{resource_state = #role_state{chef_role = Role,
 delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  requestor_id = RequestorId,
                                  resource_state = #role_state{
-                                     chef_role = Role}
-                                } = State) ->
+                                                     chef_role = Role},
+                                 darklaunch = Darklaunch} = State) ->
 
-    ok = ?BASE_RESOURCE:delete_object(DbContext, Role, RequestorId),
+    ok = ?BASE_RESOURCE:delete_object(DbContext, Role, RequestorId, Darklaunch),
 
     Json = chef_db_compression:decompress(Role#chef_role.serialized_object),
     {true, wrq:set_resp_body(Json, Req), State}.
