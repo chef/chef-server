@@ -143,6 +143,8 @@
      termOffsets: Store offset information with the term vector. This will increase storage costs.
    -->
 
+   <field name="_version_" type="long" indexed="true" stored="true"/>
+
    <field name="X_CHEF_id_CHEF_X" type="string" indexed="true" stored="true" required="true" /> 
    <field name="X_CHEF_database_CHEF_X" type="string" indexed="true" stored="true" required="true" /> 
    <field name="X_CHEF_type_CHEF_X" type="string" indexed="true" stored="true" required="true" /> 
