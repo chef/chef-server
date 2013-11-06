@@ -301,7 +301,7 @@ module PrivateChef
 
       authaddr = []
       authaddr << "0.0.0.0/0" if PrivateChef["use_ipv4"]
-      authaddr << "::" if PrivateChef["use_ipv6"]
+      authaddr << "::/0" if PrivateChef["use_ipv6"]
       PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= authaddr
       PrivateChef["opscode_account"]["worker_processes"] ||= 4
 
