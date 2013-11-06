@@ -25,6 +25,7 @@
 
 -export([
          add_to_solr/3,
+         bulk_delete_from_solr/4,
          delete/4,
          delete_from_solr/2]).
 
@@ -89,7 +90,7 @@ delete(DbContext, #chef_data_bag{org_id = OrgId,
     %% Remove data bag items from Solr now; directly calling chef_index_queue:delete since
     %% we've just got ids, and not proper data bag item records required for
     %% chef_object_db:delete_from_solr
-    [ index_queue_delete(data_bag_item, Id, OrgId, Darklaunch) || Id <- DataBagItemIds ],
+    bulk_delete_from_solr(data_bag_item, DataBagItemIds, OrgId, Darklaunch),
     ok;
 delete(DbContext, ObjectRec, _RequestorId, Darklaunch) ->
     %% All other object deletion is relatively sane :)
@@ -98,6 +99,15 @@ delete(DbContext, ObjectRec, _RequestorId, Darklaunch) ->
     %% This is fire and forget as well. If we're here, we've already deleted the db record
     %% and won't be able to get back here for a retry.
     delete_from_solr(ObjectRec, Darklaunch),
+    ok.
+
+%% @doc Given an object type and a list of ids, delete the corresponding search index data
+%% from solr. The delete is achieved by putting a delete message on the indexing queue
+%% (rabbitmq). The delete happens asynchronously (best effort) and this function returns
+%% immediately.
+-spec bulk_delete_from_solr(atom(), [binary()], binary(), any()) -> ok.
+bulk_delete_from_solr(Type, Ids, OrgId, Darklaunch) ->
+    [ index_queue_delete(Type, Id, OrgId, Darklaunch) || Id <- Ids ],
     ok.
 
 -spec delete_from_db(chef_db:db_context(), tuple(), darklaunch()) -> ok.
