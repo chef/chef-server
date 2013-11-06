@@ -48,6 +48,7 @@
          check_cookbook_authz/3,
          delete_object/3,
          object_creation_hook/2,
+         object_creation_error_hook/2,
          stats_hero_label/1,
          stats_hero_upstreams/0]).
 
@@ -313,7 +314,7 @@ create_from_json(#wm_reqdata{} = Req,
         {conflict, _} ->
             %% ignore return value of solr delete, this is best effort.
             chef_object_db:delete_from_solr(ObjectRec),
-            %% FIXME: created authz_id is leaked for this case, cleanup?
+            ?BASE_RESOURCE:object_creation_error_hook(ObjectRec, ActorId),
             LogMsg = {RecType, name_conflict, Name},
             ConflictMsg = ResourceMod:conflict_message(Name),
             {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
@@ -328,6 +329,7 @@ create_from_json(#wm_reqdata{} = Req,
             %% ignore return value of solr delete, this is best effort.
             %% FIXME: created authz_id is leaked for this case, cleanup?
             chef_object_db:delete_from_solr(ObjectRec),
+            ?BASE_RESOURCE:object_creation_error_hook(ObjectRec, ActorId),
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
@@ -875,3 +877,7 @@ list_objects_json(Req, #base_state{chef_db_context = DbContext,
     RouteFun = ?BASE_ROUTES:bulk_route_fun(chef_object:type_name(StubRec), Req),
     UriMap= [{Name, RouteFun(Name)} || Name <- Names],
     {chef_json:encode({UriMap}), Req, State}.
+
+%% @doc Nothing else to do in open source
+object_creation_error_hook(_ObjectRec, _ActorId) ->
+    ok.
