@@ -45,8 +45,8 @@ define_upgrade do
     run_command("rm -f #{mover_log_file_glob}")
     run_command("rm -f #{parsed_log_output}")
 
-    # Start chef-mover for the duration of the migration
-    run_command("private-chef-ctl start opscode-chef-mover")
+    # Restart chef-mover for the duration of the migration
+    run_command("private-chef-ctl restart opscode-chef-mover")
 
     # Perform the actual migration
     run_command("/opt/opscode/embedded/bin/escript /opt/opscode/embedded/service/opscode-chef-mover/scripts/migrate")
