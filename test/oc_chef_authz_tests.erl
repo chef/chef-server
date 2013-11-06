@@ -387,10 +387,13 @@ random_bogus_port() ->
     Port.
 
 needed_apps() ->
-    [ibrowse, pooler, stats_hero, public_key, ssl, epgsql, sqerl, oc_chef_authz].
+    [crypto, ibrowse, pooler, stats_hero, public_key, ssl, epgsql, sqerl, oc_chef_authz].
 
 start_apps() ->
     error_logger:tty(false),
+    application:set_env(oc_chef_authz, cleanup_batch_size, 100),
+    application:set_env(oc_chef_authz, authz_superuser_id, <<"superuser">>),
+    application:set_env(oc_chef_authz, cleanup_interval, 5000),
     application:set_env(stats_hero, estatsd_host, "localhost"),
     application:set_env(stats_hero, estatsd_port, random_bogus_port()),
     application:set_env(stats_hero, udp_socket_pool_size, 1),

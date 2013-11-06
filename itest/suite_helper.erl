@@ -25,7 +25,9 @@ init(Config0) ->
                               {ibrowse_options, [{connect_timeout, 5000}]}]},
              {couchdb_host, "localhost"},
              {couchdb_port, 6984},
-             {authz_superuser_id, <<"beefbeefbeef">>}]),
+             {authz_superuser_id, <<"beefbeefbeef">>},
+             {cleanup_interval, 60000},
+             {cleanup_batch_size, 100}]),
 
     set_env(sqerl,
             [{db_host, "localhost"},

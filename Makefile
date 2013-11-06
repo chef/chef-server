@@ -36,7 +36,7 @@ ERLANG_DIALYZER_APPS = asn1 \
                        webtool \
                        xmerl
 
-all: compile eunit dialyzer
+all: compile eunit itest dialyzer
 
 # Clean ebin and .eunit of this project
 clean:
