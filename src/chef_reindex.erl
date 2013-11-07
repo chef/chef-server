@@ -33,6 +33,7 @@
          ez_name_id_dict/2,
          ez_reindex_by_id/3,
          ez_reindex_by_name/3,
+         ez_reindex_direct/3,
          ez_reindex_from_file/1,
          make_context/0,
          reindex/2,
@@ -105,9 +106,7 @@ reindex(Ctx, {OrgId, _OrgName}=OrgInfo) ->
 reindex(Ctx, {OrgId, _OrgName}=OrgInfo, Index) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
     %% Grab all the database IDs to do batch retrieval on
-    AllIds = dict:fold(fun(_K, V, Acc) -> [V|Acc] end,
-                       [],
-                       NameIdDict), %% All dict values will be unique anyway
+    AllIds = all_ids_from_name_id_dict(NameIdDict),
     BatchSize = envy:get(chef_wm, bulk_fetch_batch_size, pos_integer),
     batch_reindex(Ctx, AllIds, BatchSize, OrgInfo, Index, NameIdDict).
 
@@ -115,7 +114,7 @@ reindex(Ctx, {OrgId, _OrgName}=OrgInfo, Index) ->
 -spec reindex_by_id(DbContext :: chef_db:db_context(),
                     OrgInfo :: org_info(),
                     Index :: index(),
-                    Ids :: [binary()]) -> ok.
+                    Ids :: [<<_:256>>]) -> ok.
 reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
     %% This is overkill, but workable until we have more robust reindexing
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
@@ -155,6 +154,35 @@ ez_reindex_by_id(OrgName, Index, Ids) ->
     OrgInfo = {OrgId, OrgName},
     reindex_by_id(Ctx, OrgInfo, Index, Ids).
 
+%% @doc Reindex the specified `Index' in `OrgName'. This function avoids use of rabbitmq and
+%% POSTs updates directly to `SolrUrl'. Flatten/expand is handled by `chef_index_expand'
+%% which also takes care of POSTing the data to solr. When this function returns, all
+%% objects in the specified index will have been reindexed and received by solr.
+%%
+%% The `chef_wm' app's `bulk_fetch_batch_size' is used to determine both the size of the
+%% batch of objects to `bulk_get' from the db and the size of the multi-doc POSTs sent to
+%% solr. Parallelization of flatten/expand is the responsibility of `chef_index_expand' and
+%% is not a concern of this code.
+-spec ez_reindex_direct(binary(), index(), string()) -> ok.
+ez_reindex_direct(OrgName, Index, SolrUrl) ->
+    DbCtx = make_context(),
+    OrgId = chef_db:fetch_org_id(DbCtx, OrgName),
+    NameIdDict = chef_db:create_name_id_dict(DbCtx, Index, OrgId),
+    AllIds = all_ids_from_name_id_dict(NameIdDict),
+    BatchSize = envy:get(chef_wm, bulk_fetch_batch_size, pos_integer),
+    ObjType = chef_object_type(Index),
+    DoBatch = fun(Batch, _Acc) ->
+                      Objects = chef_db:bulk_get(DbCtx, OrgName, ObjType, Batch),
+                      send_direct_to_solr(OrgId, Index, Objects, NameIdDict, SolrUrl)
+              end,
+    chefp:batch_fold(DoBatch, AllIds, ok, BatchSize),
+    ok.
+
+all_ids_from_name_id_dict(NameIdDict) ->
+    dict:fold(fun(_K, V, Acc) -> [V|Acc] end,
+              [],
+              NameIdDict).
+
 -spec ez_name_id_dict(binary(), index()) -> dict().
 ez_name_id_dict(OrgName, Index) ->
     Ctx = make_context(),
@@ -174,6 +202,39 @@ make_context() ->
                                      Time
                                     ]),
     chef_db:make_context(ReqId).
+
+send_direct_to_solr(_, _, {error, _} = Error, _, _) ->
+    %% handle error from chef_db:bulk_get
+    erlang:error(Error);
+send_direct_to_solr(OrgId, Index, Objects, NameIdDict, SolrUrl) ->
+    %% NOTE: we could handle the mapping of Object to Id in the caller and pass in here a
+    %% list of {Id, Object} tuples. This might be better?
+    SolrCtx = lists:foldl(
+      fun(SO, Ctx) ->
+              {Id, IndexEjson} = ejson_for_indexing(Index, OrgId, SO, NameIdDict),
+              chef_index_expand:add_item(Ctx, Id, IndexEjson, Index, OrgId)
+      end, chef_index_expand:init_items(SolrUrl), Objects),
+    chef_index_expand:send_items(SolrCtx).
+
+ejson_for_indexing(Index, OrgId, SO, NameIdDict) ->
+    PrelimEJson = decompress_and_decode(SO),
+    NameKey = name_key(chef_object_type(Index)),
+    ItemName = ej:get({NameKey}, PrelimEJson),
+    {ok, ObjectId} = dict:find(ItemName, NameIdDict),
+    StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PrelimEJson),
+    IndexEjson = chef_object:ejson_for_indexing(StubRec, PrelimEJson),
+    {ObjectId, IndexEjson}.
+
+%% All object types are returned from chef_db:bulk_get/4 as
+%% binaries (compressed or not) EXCEPT for clients, which are
+%% returned as EJson directly, because none of their
+%% information is actually stored as a JSON "blob" in the
+%% database.
+decompress_and_decode(Bin) when is_binary(Bin) ->
+    chef_db_compression:decompress_and_decode(Bin);
+decompress_and_decode(Object) ->
+    Object.
+
 
 %% @doc Reindex objects listed in file `File'.
 %%
@@ -305,12 +366,7 @@ send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict) ->
     %% returned as EJson directly, because none of their
     %% information is actually stored as a JSON "blob" in the
     %% database.
-    PreliminaryEJson = case is_binary(SO) of
-                           true ->
-                               chef_db_compression:decompress_and_decode(SO);
-                           false ->
-                                    SO
-                       end,
+    PreliminaryEJson = decompress_and_decode(SO),
     NameKey = name_key(chef_object_type(Index)),
     ItemName = ej:get({NameKey}, PreliminaryEJson),
     {ok, ObjectId} = dict:find(ItemName, NameIdDict),
