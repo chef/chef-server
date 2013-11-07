@@ -267,17 +267,12 @@ normalize_index(Index, _) ->
                     OrgInfo :: org_info(),
                     Index :: index(),
                     NameIdDict :: dict()) -> ok.
-batch_reindex(_, [], _, _, _, _) ->
-    %% Nothing to process!
-    ok;
 batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids) ->
-    batch_reindex(Ctx, safe_split(BatchSize, Ids), BatchSize, OrgInfo, Index, NameIdDict);
-batch_reindex(Ctx, {LastBatch, []}, _BatchSize, OrgInfo, Index, NameIdDict) ->
-    ok = index_a_batch(Ctx, LastBatch, OrgInfo, Index, NameIdDict),
-    ok;
-batch_reindex(Ctx, {CurrentBatch, Rest}, BatchSize, OrgInfo, Index, NameIdDict) ->
-    ok = index_a_batch(Ctx, CurrentBatch, OrgInfo, Index, NameIdDict),
-    batch_reindex(Ctx, safe_split(BatchSize, Rest), BatchSize, OrgInfo, Index, NameIdDict).
+    DoBatch = fun(Batch, _Acc) ->
+                      ok = index_a_batch(Ctx, Batch, OrgInfo, Index, NameIdDict),
+                      ok
+                 end,
+    chefp:batch_fold(DoBatch, Ids, ok, BatchSize).
 
 %% @doc Helper function to retrieve and index objects for a single
 %% batch of database IDs.
@@ -348,12 +343,3 @@ stub_record(DataBagName, OrgId, Id, _Name, EJson) ->
     #chef_data_bag_item{org_id = OrgId, id = Id,
                         data_bag_name = DataBagName,
                         item_name = ItemName}.
-
-% TODO: Create a chef_common module for this stuff
-safe_split(N, L) ->
-    try
-        lists:split(N, L)
-    catch
-        error:badarg ->
-            {L, []}
-    end.
