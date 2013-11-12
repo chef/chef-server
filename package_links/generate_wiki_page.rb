@@ -132,8 +132,8 @@ module OCTechPreview
         :push_jobs_client
       when /knife-pushy/
         :knife_push_jobs
-      when /opscode-webui/
-        :webui
+      when /opscode-manage/
+        :manage
       else
         raise "Unrecognized package format for '#{@package}; could not determine product!"
       end
@@ -155,10 +155,11 @@ if __FILE__ == $0
 
   packages = [
               # Reporting
-              "opscode-reporting-0.2.2_tech.preview.2-1.el5.x86_64.rpm",
-              "opscode-reporting-0.2.2_tech.preview.2-1.el6.x86_64.rpm",
-              "opscode-reporting_0.2.2-tech.preview.2-1.ubuntu.10.04_amd64.deb",
-              "opscode-reporting_0.2.2-tech.preview.2-1.ubuntu.11.04_amd64.deb",
+              "opscode-reporting-11.0.0_rc.1-1.el5.x86_64.rpm",
+              "opscode-reporting-11.0.0_rc.1-1.el6.x86_64.rpm",
+              "opscode-reporting_11.0.0-rc.1-1.ubuntu.10.04_amd64.deb",
+              "opscode-reporting_11.0.0-rc.1-1.ubuntu.11.04_amd64.deb",
+              "opscode-reporting_11.0.0-rc.1-1.ubuntu.12.04_amd64.deb",
 
               "knife-reporting-0.1.0.gem",
 
@@ -184,10 +185,10 @@ if __FILE__ == $0
               "knife-pushy-0.3.gem",
 
               # Web UI
-              "opscode-webui-2.4.0_tech.preview.1-1.el5.x86_64.rpm",
-              "opscode-webui-2.4.0_tech.preview.1-1.el6.x86_64.rpm",
-              "opscode-webui_2.4.0-tech.preview.1-1.ubuntu.10.04_amd64.deb",
-              "opscode-webui_2.4.0-tech.preview.1-1.ubuntu.11.04_amd64.deb"
+              "opscode-manage-2.10.0-1.el5.x86_64.rpm",
+              "opscode-manage-2.10.0-1.el6.x86_64.rpm",
+              "opscode-manage_2.10.0-1.ubuntu.10.04_amd64.deb",
+              "opscode-manage_2.10.0-1.ubuntu.11.04_amd64.deb"
              ]
 
   url_generator = OCTechPreview::URLGenerator.new(id, secret, BUCKET_NAME, DAYS_VALID, bitlyuser, bitlyapi)
