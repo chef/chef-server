@@ -1,9 +1,45 @@
+%% @doc Chef object flatten/expand and POSTing to Solr
+%%
+%% This module implements Chef object flatten/expand using the same
+%% algorithm as `chef-expander' and handles POSTing updates (both adds
+%% and deletes) to Solr. You will interact with four functions:
+%%
+%% <ol>
+%% <li>{@link init_items/1}</li>
+%% <li>{@link add_item/5}</li>
+%% <li>{@link delete_item/4}</li>
+%% <li>{@link send_items/1}</li>
+%% </ol>
+%%
+%% Start by initializing an item context object using {@link
+%% init_items/1} to which you pass the URL for the Solr instance you
+%% want to work with.
+%%
+%% Next, use {@link add_item/5} to add/update items in the
+%% index. These items will go through the flatten/expand process. If
+%% you want to stage an item delete, use {@link delete_item/4}. Both
+%% of these functions take an item context object and return a
+%% possibly updated context. It is important to keep track of the
+%% possibly modified context to use for your next call. This API
+%% allows this module to handle the flatten/expand and post in
+%% different ways. For example, the flatten/expand can be done inline,
+%% accumulating the result in the context, or the context can contain
+%% a pid and the work can be done async and in parallel.
+%%
+%% Finally, call {@link send_items/1} passing the accumulated context
+%% object. Calling this function triggers the actual POST to solr.
+%%
+%% @end
 -module(chef_index_expand).
 
 -export([
+         add_item/5,
+         delete_item/4,
+         init_items/1,
          make_command/5,
          post_multi/1,
-         post_single/1
+         post_single/1,
+         send_items/1
         ]).
 
 -ifdef(TEST).
@@ -18,6 +54,8 @@
 -define(XML_HEADER, <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>">>).
 -define(ADD_S, <<"<add>">>).
 -define(ADD_E, <<"</add>">>).
+-define(UPDATE_S, <<"<update>">>).
+-define(UPDATE_E, <<"</update>">>).
 -define(DOC_S, <<"<doc>">>).
 -define(DOC_E, <<"</doc>">>).
 
@@ -39,6 +77,58 @@
 -define(META_FIELDS, [{?K_ID, <<"X_CHEF_id_CHEF_X">>},
                       {?K_DATABASE, <<"X_CHEF_database_CHEF_X">>},
                       {?K_TYPE, <<"X_CHEF_type_CHEF_X">>}]).
+
+-record(idx_exp_ctx, {
+          to_add = [],
+          to_del = [],
+          solr_url
+         }).
+
+-opaque index_expand_ctx() :: #idx_exp_ctx{}.
+-export_type([index_expand_ctx/0]).
+
+%% @doc Create a new index expand context.
+-spec init_items(string()) -> index_expand_ctx().
+init_items(SolrUrl) ->
+    #idx_exp_ctx{solr_url = SolrUrl}.
+
+%% @doc Add an EJSON item to the provided index expand context. The
+%% backing implementation will flatten/expand `Ejson' either inline
+%% (blocking) or async/parallel (in which case this function returns
+%% immediately).
+-spec add_item(index_expand_ctx(), binary(), ej:json_object(),
+               binary() | atom(), binary()) -> index_expand_ctx().
+add_item(#idx_exp_ctx{to_add = Added} = Ctx, Id, Ejson, Index, OrgId) ->
+    %% TODO: we don't really need the intermediate "command" object.
+    Command = make_command(add, Index, Id, OrgId, Ejson),
+    Doc = make_doc_for_add(Command),
+    Ctx#idx_exp_ctx{to_add = [Doc | Added]}.
+
+%% @doc Add `Id' to the list of items to delete from solr.
+-spec delete_item(index_expand_ctx(),
+                  binary(),
+                  binary() | atom(), binary()) -> index_expand_ctx().
+delete_item(#idx_exp_ctx{to_del = Deleted} = Ctx, Id, Index, OrgId) ->
+    Command = make_command(delete, Index, Id, OrgId, {[]}),
+    Doc = make_doc_for_del(Command),
+    Ctx#idx_exp_ctx{to_del = [Doc | Deleted]}.
+
+%% @doc Send items accumulated in the index expand context to
+%% Solr. The URL used to talk to Solr is embedded in the context
+%% object and determined when `{@link init_items/1}' was called.
+-spec send_items(index_expand_ctx()) -> ok | {error, {_, _}}.
+send_items(#idx_exp_ctx{to_add = Added, to_del = Deleted, solr_url = Url}) ->
+    case {Added, Deleted} of
+        {[], []} ->
+            ok;
+        {ToAdd, ToDel} ->
+            Doc = [?XML_HEADER,
+                   ?UPDATE_S,
+                   ToDel,
+                   value_or_empty(ToAdd, [?ADD_S, ToAdd, ?ADD_E]),
+                   ?UPDATE_E],
+            post_to_solr(Doc, Url)
+    end.
 
 %% --- start copy from chef_index (chef_index_queue) ---
 
@@ -90,94 +180,84 @@ normalize_db_name(OrgId) ->
 %% @doc Given a list of command EJSON terms, as returned by {@link
 %% make_command/4}, perform the appropriate flatten/expand operation
 %% and POST the result to Solr as a single update.
--spec post_multi(list()) -> ok | skip | {error, string(), term()}.
+-spec post_multi(list()) -> ok | {error, {_, _}}.
 post_multi(Commands) ->
-    case separate_add_delete(Commands) of
+    case handle_commands(Commands) of
         {[], []} ->
-            skip;
+            ok;
         {ToAdd, ToDel} ->
-            Deletes = [ handle_command(C) || C <- ToDel ],
-            Adds = [ make_doc_for_add(C) || C <- ToAdd ],
             Doc = [?XML_HEADER,
-                   <<"<update>">>,
-                   Deletes,
-                   <<"<add>">>,
-                   Adds,
-                   <<"</add>">>,
-                   <<"</update>">>],
+                   ?UPDATE_S,
+                   ToDel,
+                   value_or_empty(ToAdd, [?ADD_S, ToAdd, ?ADD_E]),
+                   ?UPDATE_E],
             post_to_solr(Doc)
     end.
 
-separate_add_delete(Commands) ->
+value_or_empty([], _V) ->
+    [];
+value_or_empty([_|_], V) ->
+    V.
+
+%% @doc Given a command EJSON term as returned by {@link
+%% make_command/4}, flatten/expand and POST to Solr.
+-spec post_single(term()) -> ok | {error, {_, _}}.
+post_single(Command) ->
+    post_multi([Command]).
+
+%% @doc Return tuple of `{ToAdd, ToDel}' where `ToAdd' and `ToDel' are
+%% iolists of XML data appropriate for including in an
+%% `<update>...</update>' doc and POSTing to Solr.
+-spec handle_commands(list()) -> {list(), list()}.
+handle_commands(Commands) ->
     lists:foldl(fun(C, {Adds, Deletes}) ->
                         case ej:get({?K_ACTION}, C) of
                             <<"add">> ->
-                                {[C | Adds], Deletes};
+                                {[make_doc_for_add(C) | Adds], Deletes};
                             <<"delete">> ->
-                                {Adds, [C | Deletes]};
+                                {Adds, [make_doc_for_del(C) | Deletes]};
                             _ ->
                                 {Adds, Deletes}
                         end
                 end, {[], []}, Commands).
 
-%% @doc Given a command EJSON term as returned by {@link
-%% make_command/4}, flatten/expand and POST to Solr.
--spec post_single(term()) -> ok | skip | {error, string(), term()}.
-post_single(Command) ->
-    case handle_command(Command) of
-        skip ->
-            skip;
-        SubDoc ->
-            Doc = [?XML_HEADER, SubDoc],
-            post_to_solr(Doc)
-    end.
-
-%% @doc Post iolist `Doc' to Solr's `/update' URL. The atom `ok' is
-%% returned if Solr responds with a 2xx status code. Otherwise, an
-%% error tuple is returned.
 post_to_solr(Doc) ->
+    post_to_solr(Doc, solr_url()).
+
+%% @doc Post iolist `Doc' to Solr's `/update' endpoint at
+%% `SolrUrl'.
+%%
+%% The atom `ok' is returned if Solr responds with a 2xx
+%% status code. Otherwise, an error tuple is returned.
+-spec post_to_solr(iolist(), string()) -> ok | {error, {_, _}}.
+post_to_solr(Doc, SolrUrl) ->
     Headers = [{"Content-Type", "text/xml"}],
     %% Note: we should try to enhance ibrowse to allow sending an
     %% iolist to avoid having to do iolist_to_binary here.
     DocBin = iolist_to_binary(Doc),
-    {ok, Code, _Head, Body} = ibrowse:send_req(solr_url(), Headers, post, DocBin),
+    {ok, Code, _Head, Body} = ibrowse:send_req(SolrUrl, Headers, post, DocBin),
     case Code of
         "2" ++ _Rest ->
             %% FIXME: add logging and timing
             ok;
         _ ->
             %% FIXME: add logging, timing
-            {error, Code, Body}
+            {error, {Code, Body}}
     end.
 
 solr_url() ->
-    case application:get_env(mover, solr_url) of
+    case application:get_env(chef_index, solr_url) of
         {ok, Url} ->
             Url ++ "/update";
         undefined ->
             "http://localhost:8983/update"
     end.
 
-%% @doc Return an iolist of XML data appropriate for POSTing to
-%% Solr. If `Command' has an unexpected format, the atom `skip' is
-%% returned.
-%%
-%% There are two supported actions: "add" and "delete". The
-%% appropriate iolist is returned that can be used to construct a
-%% single or multi update XML doc for POSTing to solr.
--spec handle_command(term()) -> iolist() | skip.
-handle_command(Command) ->
-    handle_command(ej:get({?K_ACTION}, Command), Command).
-
-handle_command(<<"add">>, Command) ->
-    [?ADD_S, make_doc_for_add(Command), ?ADD_E];
-handle_command(<<"delete">>, Command) ->    
-            Payload = ej:get({?K_PAYLOAD}, Command),
-            [<<"<delete><id>">>,
-                  ej:get({?K_ID}, Payload),
-                  <<"</id></delete>\n">>];
-handle_command(_, _) ->    
-    skip.
+make_doc_for_del(Command) ->
+    Payload = ej:get({?K_PAYLOAD}, Command),
+    [<<"<delete><id>">>,
+     ej:get({?K_ID}, Payload),
+     <<"</id></delete>">>].
 
 make_doc_for_add(Command) ->
     Payload = ej:get({?K_PAYLOAD}, Command),

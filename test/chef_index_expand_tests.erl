@@ -189,6 +189,7 @@ post_single_test_() ->
                                              "dbdb1212", MinItem),
 
                Expect = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                          "<update>"
                           "<add><doc>"
                           "<field name=\"X_CHEF_id_CHEF_X\">abc123</field>"
                           "<field name=\"X_CHEF_database_CHEF_X\">chef_dbdb1212</field>"
@@ -198,7 +199,7 @@ post_single_test_() ->
                           "X_CHEF_id_CHEF_X__=__abc123 "
                           "X_CHEF_type_CHEF_X__=__role "
                           "key1__=__value1 key2__=__value2 </field>"
-                          "</doc></add>">>,
+                          "</doc></add></update>">>,
                meck:expect(ibrowse, send_req,
                            fun(Url, Headers, post, Doc) ->
                                    ?assertEqual("http://localhost:8983/update", Url),
@@ -215,7 +216,7 @@ post_single_test_() ->
                                              "dbdb1212", {[]}),
 
                Expect = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-                          "<delete><id>abc123</id></delete>\n">>,
+                          "<update><delete><id>abc123</id></delete></update>">>,
                meck:expect(ibrowse, send_req,
                            fun(Url, Headers, post, Doc) ->
                                    ?assertEqual("http://localhost:8983/update", Url),
@@ -231,6 +232,7 @@ post_single_test_() ->
                Cmd = chef_index_expand:make_command(add, data_bag_item, <<"abc123">>,
                                              "dbdb1212", ?DB_ITEM),
                Expect = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                          "<update>"
                           "<add>"
                           "<doc>"
                           "<field name=\"X_CHEF_id_CHEF_X\">abc123</field>"
@@ -254,7 +256,8 @@ post_single_test_() ->
                           "soccerballs__=__2 "
                           "</field>"
                           "</doc>"
-                          "</add>">>,
+                          "</add>"
+                          "</update>">>,
                meck:expect(ibrowse, send_req,
                            fun(Url, Headers, post, Doc) ->
                                    ?assertEqual("http://localhost:8983/update", Url),
@@ -269,7 +272,7 @@ post_single_test_() ->
        fun() ->
                Cmd = chef_index_expand:make_command(bogus, role, <<"abc123">>,
                                              "chef_dbdb1212", MinItem),
-               ?assertEqual(skip, chef_index_expand:post_single(Cmd))
+               ?assertEqual(ok, chef_index_expand:post_single(Cmd))
        end},
 
       {"error from ibrowse",
@@ -280,7 +283,7 @@ post_single_test_() ->
                            fun(_Url, _Headers, post, _Doc) ->
                                    {ok, "500", [], <<"oh no">>}
                            end),
-               ?assertEqual({error, "500", <<"oh no">>}, chef_index_expand:post_single(Cmd))
+               ?assertEqual({error, {"500", <<"oh no">>}}, chef_index_expand:post_single(Cmd))
        end}
      ]}.
 
@@ -301,38 +304,7 @@ post_multi_test_() ->
      end,
      [{"happy path mix post_multi",
        fun() ->
-               %% See http://wiki.apache.org/solr/UpdateXmlMessages
-               %% for expected format of mixed add/delete POSTs
-               Expect = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-                          "<update>"
-                          "<delete>"
-                          "<id>a5</id>"
-                          "</delete>\n"
-                          "<add>"
-
-                          "<doc>"
-                          "<field name=\"X_CHEF_id_CHEF_X\">a2</field>"
-                          "<field name=\"X_CHEF_database_CHEF_X\">chef_db2</field>"
-                          "<field name=\"X_CHEF_type_CHEF_X\">role</field>"
-                          "<field name=\"content\">"
-                          "X_CHEF_database_CHEF_X__=__chef_db2 "
-                          "X_CHEF_id_CHEF_X__=__a2 "
-                          "X_CHEF_type_CHEF_X__=__role "
-                          "key1__=__value1 key2__=__value2 </field>"
-                          "</doc>"
-
-                          "<doc>"
-                          "<field name=\"X_CHEF_id_CHEF_X\">a1</field>"
-                          "<field name=\"X_CHEF_database_CHEF_X\">chef_db1</field>"
-                          "<field name=\"X_CHEF_type_CHEF_X\">role</field>"
-                          "<field name=\"content\">"
-                          "X_CHEF_database_CHEF_X__=__chef_db1 "
-                          "X_CHEF_id_CHEF_X__=__a1 "
-                          "X_CHEF_type_CHEF_X__=__role "
-                          "key1__=__value1 key2__=__value2 </field>"
-                          "</doc>"
-                          "</add>"
-                          "</update>">>,
+               Expect = multi_update_xml_expect(),
                meck:expect(ibrowse, send_req,
                            fun(Url, Headers, post, Doc) ->
                                    ?assertEqual("http://localhost:8983/update", Url),
@@ -347,11 +319,83 @@ post_multi_test_() ->
        fun() ->
                AllBogus = [chef_index_expand:make_command(bogus, role, <<"a3">>, "db2", MinItem),
                            chef_index_expand:make_command(bogus, role, <<"a4">>, "db2", MinItem)],
-               ?assertEqual(skip, chef_index_expand:post_multi(AllBogus))
+               ?assertEqual(ok, chef_index_expand:post_multi(AllBogus))
        end}
 
       ]}.
 
-%% TODO:
-%% - test data bag special case
-%% - test empty multi
+context_based_api_test_() ->
+    MinItem = {[{<<"key1">>, <<"value1">>},
+                {<<"key2">>, <<"value2">>}]},
+    Cmds = [{add, role, <<"a1">>, "db1", MinItem},
+            {add, role, <<"a2">>, "db2", MinItem},
+            {delete, role, <<"a5">>, "db3", {[]}}],
+    {setup,
+     fun() ->
+             meck:new(ibrowse, [])
+     end,
+     fun(_) ->
+             meck:unload()
+     end,
+     [{"happy path add_item and delete_item",
+       fun() ->
+               Expect = multi_update_xml_expect(),
+               meck:expect(ibrowse, send_req,
+                           fun(Url, Headers, post, Doc) ->
+                                   ?assertEqual("http://localhost:8983/update", Url),
+                                   ?assertEqual([{"Content-Type", "text/xml"}], Headers),
+                                   ?assertEqual(Expect, Doc),
+                                   {ok, "200", [], []}
+                           end),
+               Ctx0 = chef_index_expand:init_items("http://localhost:8983/update"),
+               Ctx1 = lists:foldl(
+                        fun({add, Index, Id, OrgId, Item}, Ctx) ->
+                                chef_index_expand:add_item(Ctx, Id, Item, Index, OrgId);
+                           ({delete, Index, Id, OrgId, _Item}, Ctx) ->
+                                chef_index_expand:delete_item(Ctx, Id, Index, OrgId)
+                           end,
+                        Ctx0, Cmds),
+               ?assertEqual(ok, chef_index_expand:send_items(Ctx1))
+       end},
+
+      {"all empty post_multi",
+       fun() ->
+               Ctx0 = chef_index_expand:init_items("http://localhost:8983/update"),
+               ?assertEqual(ok, chef_index_expand:send_items(Ctx0))
+       end}
+
+      ]}.
+
+multi_update_xml_expect() ->
+    %% See http://wiki.apache.org/solr/UpdateXmlMessages
+    %% for expected format of mixed add/delete POSTs
+    <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<update>"
+      "<delete>"
+      "<id>a5</id>"
+      "</delete>"
+      "<add>"
+
+      "<doc>"
+      "<field name=\"X_CHEF_id_CHEF_X\">a2</field>"
+      "<field name=\"X_CHEF_database_CHEF_X\">chef_db2</field>"
+      "<field name=\"X_CHEF_type_CHEF_X\">role</field>"
+      "<field name=\"content\">"
+      "X_CHEF_database_CHEF_X__=__chef_db2 "
+      "X_CHEF_id_CHEF_X__=__a2 "
+      "X_CHEF_type_CHEF_X__=__role "
+      "key1__=__value1 key2__=__value2 </field>"
+      "</doc>"
+
+      "<doc>"
+      "<field name=\"X_CHEF_id_CHEF_X\">a1</field>"
+      "<field name=\"X_CHEF_database_CHEF_X\">chef_db1</field>"
+      "<field name=\"X_CHEF_type_CHEF_X\">role</field>"
+      "<field name=\"content\">"
+      "X_CHEF_database_CHEF_X__=__chef_db1 "
+      "X_CHEF_id_CHEF_X__=__a1 "
+      "X_CHEF_type_CHEF_X__=__role "
+      "key1__=__value1 key2__=__value2 </field>"
+      "</doc>"
+      "</add>"
+      "</update>">>.
