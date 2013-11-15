@@ -169,6 +169,8 @@ ez_reindex_direct(OrgName, Index, SolrUrl) ->
     OrgId = chef_db:fetch_org_id(DbCtx, OrgName),
     NameIdDict = chef_db:create_name_id_dict(DbCtx, Index, OrgId),
     AllIds = all_ids_from_name_id_dict(NameIdDict),
+    error_logger:info_msg("ez_reindex_direct: start ~p ~p ~p ~p",
+                          [OrgName, OrgId, Index, length(AllIds)]),
     BatchSize = envy:get(chef_wm, bulk_fetch_batch_size, pos_integer),
     ObjType = chef_object_type(Index),
     DoBatch = fun(Batch, _Acc) ->
@@ -176,6 +178,8 @@ ez_reindex_direct(OrgName, Index, SolrUrl) ->
                       send_direct_to_solr(OrgId, Index, Objects, NameIdDict, SolrUrl)
               end,
     chefp:batch_fold(DoBatch, AllIds, ok, BatchSize),
+    error_logger:info_msg("ez_reindex_direct: complete ~p ~p",
+                          [OrgName, OrgId]),
     ok.
 
 all_ids_from_name_id_dict(NameIdDict) ->
@@ -214,7 +218,12 @@ send_direct_to_solr(OrgId, Index, Objects, NameIdDict, SolrUrl) ->
               {Id, IndexEjson} = ejson_for_indexing(Index, OrgId, SO, NameIdDict),
               chef_index_expand:add_item(Ctx, Id, IndexEjson, Index, OrgId)
       end, chef_index_expand:init_items(SolrUrl), Objects),
-    chef_index_expand:send_items(SolrCtx).
+    case chef_index_expand:send_items(SolrCtx) of
+        ok ->
+            ok;
+        {error, Why} ->
+            erlang:error({error, {"chef_index_expand:send_items", Why}})
+    end.
 
 ejson_for_indexing(Index, OrgId, SO, NameIdDict) ->
     PrelimEJson = decompress_and_decode(SO),
