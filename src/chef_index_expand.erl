@@ -122,6 +122,8 @@ send_items(#idx_exp_ctx{to_add = Added, to_del = Deleted, solr_url = Url}) ->
         {[], []} ->
             ok;
         {ToAdd, ToDel} ->
+            error_logger:info_msg("chef_index_expand:send_items adds:~p dels:~p solr:~s~n",
+                                  [length(ToAdd), length(ToDel), Url]),
             Doc = [?XML_HEADER,
                    ?UPDATE_S,
                    ToDel,
