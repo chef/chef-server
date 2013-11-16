@@ -25,7 +25,7 @@ package_data_for_insert_test() ->
   UUID = ?ObjectID,
   ChefDB = ?ChefDB,
   SampleNodeData = {[{name, <<"sample_node">>}, {run_list, []}]},
-  Actual = chef_index_queue:package_for_set(node, UUID, ChefDB, SampleNodeData),
+  Actual = chef_index_queue:package_for_set(node, UUID, ChefDB, SampleNodeData, undefined),
   {[{action, add}, {payload, InnerEnvelope}]} = Actual,
   {[{type, node},
     {id, ?ObjectID},
@@ -37,7 +37,7 @@ package_data_for_insert_test() ->
 package_data_for_delete_test() ->
   UUID = ?ObjectID,
   ChefDB = ?ChefDB,
-  Actual = chef_index_queue:package_for_delete(node, UUID, ChefDB),
+  Actual = chef_index_queue:package_for_delete(node, UUID, ChefDB, undefined),
   {[{action, delete}, {payload, InnerEnvelope}]} = Actual,
   {[{type, node},
     {id, ?ObjectID},
@@ -72,6 +72,28 @@ send_data_to_amqp_test_() ->
             end,
             meck:expect(bunnyc, publish, AssertPublishDataCorrect),
             chef_index_queue:set(node, ?ObjectID, ?ChefDB, SampleNodeData)
+        end},
+
+     {"add an item to the index with custom solr URL",
+        fun() ->
+                SampleNodeData = {[{<<"name">>, <<"sample_node">>}, {<<"run_list">>, []}]},
+                %% Kinda lame to stuff all this in the function stub, but this lets
+                %% us use pattern matching to check small pieces at a time
+                SolrUrl = "http://custom-solr",
+                AssertPublishDataCorrect =
+                    fun(_ServerName, RoutingKey, Data) ->
+                            ?assertEqual(<<"vnode-257">>, RoutingKey),
+                            {DecodedData} = jiffy:decode(Data),
+                            {Payload} = proplists:get_value(<<"payload">>, DecodedData),
+                            ?assertEqual(<<"node">>, proplists:get_value(<<"type">>, Payload)),
+                            ?assertEqual(?ObjectID, proplists:get_value(<<"id">>, Payload)),
+                            ?assertEqual(?ChefDB, proplists:get_value(<<"database">>, Payload)),
+                            ?assertEqual(list_to_binary(SolrUrl), proplists:get_value(<<"solr_url">>, Payload)),
+                            ?assertEqual(SampleNodeData, proplists:get_value(<<"item">>, Payload)),
+                            ?assert(is_integer(proplists:get_value(<<"enqueued_at">>, Payload)))
+            end,
+            meck:expect(bunnyc, publish, AssertPublishDataCorrect),
+            chef_index_queue:set(node, ?ObjectID, ?ChefDB, SampleNodeData, SolrUrl)
         end},
 
      {"delete an item from the index",
