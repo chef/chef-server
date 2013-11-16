@@ -151,11 +151,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
     %% 500 and client can retry. If we succeed and the db call fails or conflicts, we can
     %% safely send a delete to solr since this is a new data_bag_item with a unique ID unknown to the
     %% world.
-    #chef_data_bag_item{id = Id} = DataBagItem,
-    ok = chef_index_queue:set(data_bag_item, Id,
-                              chef_otto:dbname(OrgId),
-                              chef_object:ejson_for_indexing(DataBagItem, ItemData)),
-
+    ok = chef_object_db:add_to_solr(DataBagItem, ItemData, Darklaunch),
     case chef_db:create(DataBagItem, DbContext, ActorId) of
         {conflict, _} ->
             LogMsg = {data_bag_name_conflict, DataBagName},
