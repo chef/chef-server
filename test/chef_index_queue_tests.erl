@@ -59,18 +59,35 @@ send_data_to_amqp_test_() ->
             SampleNodeData = {[{<<"name">>, <<"sample_node">>}, {<<"run_list">>, []}]},
             %% Kinda lame to stuff all this in the function stub, but this lets
             %% us use pattern matching to check small pieces at a time
-            AssertPublishDataCorrect = fun(_ServerName, RoutingKey, Data) ->
-                ?assertEqual(<<"vnode-257">>, RoutingKey),
-                DecodedData = jiffy:decode(Data),
-                {[{<<"action">>, <<"add">>}, {<<"payload">>, InnerEnvelope}]} = DecodedData,
-                {[{<<"type">>, <<"node">>},
-                  {<<"id">>, ?ObjectID},
-                  {<<"database">>, ?ChefDB},
-                  {<<"item">>, Item},
-                  {<<"enqueued_at">>, _Time}]} = InnerEnvelope,
-                ?assertEqual(SampleNodeData, Item)
+            AssertPublishDataCorrect =
+                    fun(_ServerName, RoutingKey, Data) ->
+                            ?assertEqual(<<"vnode-257">>, RoutingKey),
+                            {DecodedData} = jiffy:decode(Data),
+                            {Payload} = proplists:get_value(<<"payload">>, DecodedData),
+                            ?assertEqual(<<"node">>, proplists:get_value(<<"type">>, Payload)),
+                            ?assertEqual(?ObjectID, proplists:get_value(<<"id">>, Payload)),
+                            ?assertEqual(?ChefDB, proplists:get_value(<<"database">>, Payload)),
+                            ?assertEqual(SampleNodeData, proplists:get_value(<<"item">>, Payload)),
+                            ?assert(is_integer(proplists:get_value(<<"enqueued_at">>, Payload)))
             end,
             meck:expect(bunnyc, publish, AssertPublishDataCorrect),
             chef_index_queue:set(node, ?ObjectID, ?ChefDB, SampleNodeData)
+        end},
+
+     {"delete an item from the index",
+        fun() ->
+                AssertPublishDataCorrect =
+                    fun(_ServerName, RoutingKey, Data) ->
+                            ?assertEqual(<<"vnode-257">>, RoutingKey),
+                            {DecodedData} = jiffy:decode(Data),
+                            {Payload} = proplists:get_value(<<"payload">>, DecodedData),
+                            ?assertEqual(<<"node">>, proplists:get_value(<<"type">>, Payload)),
+                            ?assertEqual(?ObjectID, proplists:get_value(<<"id">>, Payload)),
+                            ?assertEqual(?ChefDB, proplists:get_value(<<"database">>, Payload)),
+                            ?assertEqual({[]}, proplists:get_value(<<"item">>, Payload)),
+                            ?assert(is_integer(proplists:get_value(<<"enqueued_at">>, Payload)))
+                    end,
+                meck:expect(bunnyc, publish, AssertPublishDataCorrect),
+                chef_index_queue:delete(node, ?ObjectID, ?ChefDB)
         end}
     ]}.
