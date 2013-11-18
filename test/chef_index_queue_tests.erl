@@ -60,7 +60,8 @@ send_data_to_amqp_test_() ->
             %% Kinda lame to stuff all this in the function stub, but this lets
             %% us use pattern matching to check small pieces at a time
             AssertPublishDataCorrect =
-                    fun(_ServerName, RoutingKey, Data) ->
+                    fun(ServerName, RoutingKey, Data) ->
+                            ?assertEqual('chef_index_queue/chef', ServerName),
                             ?assertEqual(<<"vnode-257">>, RoutingKey),
                             {DecodedData} = jiffy:decode(Data),
                             {Payload} = proplists:get_value(<<"payload">>, DecodedData),
@@ -71,7 +72,7 @@ send_data_to_amqp_test_() ->
                             ?assert(is_integer(proplists:get_value(<<"enqueued_at">>, Payload)))
             end,
             meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-            chef_index_queue:set(node, ?ObjectID, ?ChefDB, SampleNodeData)
+            chef_index_queue:set(<<"/chef">>, node, ?ObjectID, ?ChefDB, SampleNodeData)
         end},
 
      {"add an item to the index with custom solr URL",
@@ -93,7 +94,7 @@ send_data_to_amqp_test_() ->
                             ?assert(is_integer(proplists:get_value(<<"enqueued_at">>, Payload)))
             end,
             meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-            chef_index_queue:set(node, ?ObjectID, ?ChefDB, SampleNodeData, SolrUrl)
+            chef_index_queue:set(<<"/chef">>, node, ?ObjectID, ?ChefDB, SampleNodeData, SolrUrl)
         end},
 
      {"delete an item from the index",
@@ -110,6 +111,6 @@ send_data_to_amqp_test_() ->
                             ?assert(is_integer(proplists:get_value(<<"enqueued_at">>, Payload)))
                     end,
                 meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-                chef_index_queue:delete(node, ?ObjectID, ?ChefDB)
+                chef_index_queue:delete(<<"/chef">>, node, ?ObjectID, ?ChefDB)
         end}
     ]}.

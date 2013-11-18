@@ -26,13 +26,19 @@
 -include_lib("amqp_client/include/amqp_client.hrl").
 
 %% API
--export([start_link/0]).
+-export([
+         server_for_vhost/1,
+         start_link/0
+        ]).
 
 %% Supervisor callbacks
 -export([init/1]).
 
--define(SERVER, ?MODULE).
+-ifdef(TEST).
+-compile([export_all]).
+-endif.
 
+-define(SERVER, ?MODULE).
 
 %% @doc Start the chef_index_sup indicating the application name under which the rabbitmq
 %% config is located.
@@ -44,6 +50,9 @@ init([]) ->
     Children = amqp_child_spec(),
     {ok, {{one_for_one, 60, 10}, Children}}.
 
+%% Return a spec for a bunnyc gen_server for each vhost in {chef_index, rabbitmq_vhosts}. If
+%% no such list of vhosts is found, check for key rabbitmq_vhost. Each vhost induces a
+%% locally registered bunnyc server with name `chef_index_queue$VHOST'.
 amqp_child_spec() ->
     %% Lookup AMQP connection info
     case envy:get(chef_index, disable_rabbitmq, false, boolean) of
@@ -56,13 +65,45 @@ amqp_child_spec() ->
             Port = envy:get(chef_index,rabbitmq_port, non_neg_integer),
             User = envy:get(chef_index,rabbitmq_user, binary),
             Password = envy:get(chef_index,rabbitmq_password, binary),
-            VHost = envy:get(chef_index,rabbitmq_vhost, binary),
-            ExchgName = envy:get(chef_index,rabbitmq_exchange, binary),
-            Exchange = {#'exchange.declare'{exchange=ExchgName, durable=true}},
-            Network = {network, Host, Port, {User, Password}, VHost},
-            error_logger:info_msg("Connecting to Rabbit at ~p:~p~s (exchange: ~p)~n",
-                                  [Host, Port, VHost, ExchgName]),
-            IndexDesc = {chef_index_queue, {bunnyc, start_link, [chef_index_queue, Network, Exchange, []]},
-                         permanent, 5000, worker, dynamic},
-            [IndexDesc]
+            ExchangeName = envy:get(chef_index,rabbitmq_exchange, binary),
+            VHosts = vhost_config(),
+
+            VHostExchange = [ {V, ExchangeName} || V <- VHosts ],
+            error_logger:info_msg("Connecting to Rabbit at ~p:~p ~p~n",
+                                  [Host, Port, VHostExchange]),
+
+            [ bunnyc_spec(V, Host, Port, User, Password, ExchangeName) || V <- VHosts ]
     end.
+
+bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName) ->
+    Exchange = {#'exchange.declare'{exchange=ExchangeName, durable=true}},
+    Network = {network, Host, Port, {User, Password}, VHost},
+    Name = server_for_vhost(VHost),
+    {Name, {bunnyc, start_link, [Name, Network, Exchange, []]},
+     permanent, 5000, worker, dynamic}.
+
+vhost_config() ->
+    case envy:get(chef_index, rabbitmq_vhosts, [], fun is_list_of_binary/1) of
+        [] ->
+            %% vhosts unset, default to old-style single vhost config
+            [envy:get(chef_index, rabbitmq_vhost, binary)];
+        VHosts ->
+            VHosts
+    end.
+
+%% Given a rabbitmq `VHost' binary, return the atom that identifies the registered bunnyc
+%% server for that vhost.
+server_for_vhost(VHost) ->
+    Bin = erlang:iolist_to_binary([<<"chef_index_queue">>, VHost]),
+    erlang:binary_to_atom(Bin, utf8).
+  
+is_list_of_binary(List) ->
+    BadItems = [ E || E <- List, not is_binary(E) ],
+    case BadItems of
+        [] ->
+            true;
+        _ ->
+            {non_binary_items, BadItems}
+    end.
+
+    

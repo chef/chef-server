@@ -18,17 +18,15 @@
 -module(chef_index_queue).
 
 -export([
-         delete/3,
          delete/4,
-         set/4,
-         set/5
+         delete/5,
+         set/5,
+         set/6
         ]).
 
 -ifdef(TEST).
 -compile([export_all]).
 -endif.
-
--define(SERVER, ?MODULE).
 
 -include("chef_index.hrl").
 
@@ -36,52 +34,55 @@
 -type chef_db_name() :: binary().
 -type ejson() :: {maybe_improper_list()}. %% Is an ejson object, but the type defn for that is recursive.
 -type solr_url() :: [byte()] | binary() | undefined.
+-type vhost() :: binary().
 
 %%%%
 %% Public API
 %%%%
 
--spec set(chef_indexable_type(), uuid_binary(), chef_db_name(), ejson()) -> ok.
+-spec set(vhost(), chef_indexable_type(), uuid_binary(), chef_db_name(), ejson()) -> ok.
 %% @doc Insert or update an object in Solr.
-set(Type, ID, DatabaseName, Item) ->
-    set(Type, ID, DatabaseName, Item, undefined).
+set(VHost, Type, ID, DatabaseName, Item) ->
+    set(VHost, Type, ID, DatabaseName, Item, undefined).
 
--spec set(chef_indexable_type(), uuid_binary(), chef_db_name(), ejson(), solr_url()) -> ok.
+-spec set(vhost(), chef_indexable_type(), uuid_binary(),
+          chef_db_name(), ejson(), solr_url()) -> ok.
 %% @doc Insert or update an object in Solr. If `SolrUrl' is provided,
 %% it will be embedded in the payload under key `"solr_url"'. The
 %% expander can then make use of that for routing the request. If
 %% `SolrUrl' is `undefined', then the `"solr_url"' payload key is
 %% omitted. In this case, we expect expander to use its configured
 %% solr url value.
-set(Type, ID, DatabaseName, Item, SolrUrl) ->
+set(VHost, Type, ID, DatabaseName, Item, SolrUrl) ->
   PackagedData = package_for_set(Type, ID, DatabaseName, Item, SolrUrl),
-  publish(PackagedData, routing_key(ID)).
+  publish(VHost, PackagedData, routing_key(ID)).
 
--spec delete(chef_indexable_type(), uuid_binary(), chef_db_name()) -> ok.
+-spec delete(vhost(), chef_indexable_type(), uuid_binary(), chef_db_name()) -> ok.
 %% @doc Delete an object from Solr.
 %% @end
 %%
 %% Note that the guard for this function recapitulates the chef_indexable_type()
 %% custom type.  This is done out of an abundance of caution and
 %% paranoia :)
-delete(Type, ID, DatabaseName) ->
-    delete(Type, ID, DatabaseName, undefined).
+delete(VHost, Type, ID, DatabaseName) ->
+    delete(VHost, Type, ID, DatabaseName, undefined).
 
--spec delete(chef_indexable_type(), uuid_binary(), chef_db_name(), solr_url()) -> ok.
+-spec delete(vhost(), chef_indexable_type(), uuid_binary(),
+             chef_db_name(), solr_url()) -> ok.
 %% @doc Delete an object from Solr.
 %% @end
 %%
 %% Note that the guard for this function recapitulates the chef_indexable_type()
 %% custom type.  This is done out of an abundance of caution and
 %% paranoia :)
-delete(Type, ID, DatabaseName, SolrUrl) when Type =:= 'client';
-                                             Type =:= 'data_bag';
-                                             Type =:= 'data_bag_item';
-                                             Type =:= 'environment';
-                                             Type =:= 'node';
-                                             Type =:= 'role' ->
+delete(VHost, Type, ID, DatabaseName, SolrUrl) when Type =:= 'client';
+                                                    Type =:= 'data_bag';
+                                                    Type =:= 'data_bag_item';
+                                                    Type =:= 'environment';
+                                                    Type =:= 'node';
+                                                    Type =:= 'role' ->
     PackagedData = package_for_delete(Type, ID, DatabaseName, SolrUrl),
-    publish(PackagedData, routing_key(ID)).
+    publish(VHost, PackagedData, routing_key(ID)).
 
 %%%%
 %% Public for eunit
@@ -127,8 +128,8 @@ maybe_solr_url(undefined) ->
 maybe_solr_url(Url) ->
     [{solr_url, erlang:iolist_to_binary(Url)}].
 
--spec publish({[{_, _}, ...]}, binary()) -> ok.
-publish(Data, RoutingKey) ->
+-spec publish(vhost(), {[{_, _}, ...]}, binary()) -> ok.
+publish(VHost, Data, RoutingKey) ->
   %% Calls stack until return values are docco'd:
   %% bunnyc:publish
   %%    gen_server:call(name, {publish ..})
@@ -137,8 +138,10 @@ publish(Data, RoutingKey) ->
   %% blocked or closing count as errors to us, and letting errors bubble up
   %% seems fine.
 
-  %% Jiffy may return an iolist, but publish only takes binaries.
-  ok = bunnyc:publish(?SERVER, RoutingKey, erlang:iolist_to_binary(jiffy:encode(Data))).
+    %% Jiffy may return an iolist, but publish only takes binaries.
+    Bin = erlang:iolist_to_binary(jiffy:encode(Data)),
+    Server = chef_index_sup:server_for_vhost(VHost),
+    ok = bunnyc:publish(Server, RoutingKey, Bin).
 
 -spec routing_key(uuid_binary()) -> binary().
 routing_key(ObjectID) ->
