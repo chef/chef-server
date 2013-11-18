@@ -18,7 +18,8 @@
 ## Increase maximum IO ports from default (65536) to 196608
 ## This change helps bookshelf cope with bursty
 ## concurrent load
-+Q 196608
+## Once we are on R16, we should use: +Q 196608
+-env ERL_MAX_PORTS 196608
 
 ## Increase maximum concurrent Erlang process from
 ## default (262144) to 524288
