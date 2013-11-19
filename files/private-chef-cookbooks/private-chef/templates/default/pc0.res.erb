@@ -7,13 +7,21 @@ resource pc0 {
     device <%= @device %>;
     disk <%= @disk %>;
     flexible-meta-disk  <%= @flexible_meta_disk %>;
-    address <%= @ipv6_on ? "ipv6" : "ipv4" %> <%= @primary['ip'] %>:<%= @primary['port'] %>;
+    <% if @ipv6_on %>
+    address ipv6 [<%= @primary['ip'] %>]:<%= @primary['port'] %>;
+    <% else %>
+    address <%= @primary['ip'] %>:<%= @primary['port'] %>;
+    <% end %>
   }
 
   on <%= @secondary['fqdn'] %> {
     device <%= @device %>;
     disk <%= @disk %>;
     flexible-meta-disk  <%= @flexible_meta_disk %>;
-    address <%= @ipv6_on ? "ipv6" : "ipv4" %> <%= @secondary['ip'] %>:<%= @secondary['port'] %>;
+    <% if @ipv6_on %>
+    address ipv6 [<%= @secondary['ip'] %>]:<%= @secondary['port'] %>;
+    <% else %>
+    address <%= @secondary['ip'] %>:<%= @secondary['port'] %>;
+    <% end %>
   }
 }
