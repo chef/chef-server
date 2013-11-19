@@ -247,6 +247,7 @@ module PrivateChef
       PrivateChef["postgresql"]["data_dir"] ||= "/var/opt/opscode/drbd/data/postgresql_#{node['private_chef']['postgresql']['version']}"
 
       PrivateChef["drbd"]["enable"] ||= true
+      PrivateChef["drbd"]["ipv6_on"] = PrivateChef["use_ipv6"]
       # Need old path for cookbook migration
       PrivateChef['opscode_chef']['checksum_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/checksum"
       drbd_role = "primary"
