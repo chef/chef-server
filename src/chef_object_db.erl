@@ -124,48 +124,59 @@ handle_delete_from_db(_Result) ->
     ok.
 
 index_queue_add(TypeName, Id, DbName, IndexEjson, Darklaunch) ->
-    SendToSolr4 = fun() ->
-                          error_logger:info_msg("STUB: sending to solr4~n"),
-                          ok
-                  end,
-    with_darklaunch(<<"send_to_solr4">>, Darklaunch, SendToSolr4, ok),
+    default_index_queue_add(TypeName, Id, DbName, IndexEjson, Darklaunch),
+    aux_index_queue_add(TypeName, Id, DbName, IndexEjson, Darklaunch),
+    ok.
 
-    SendToRabbit = fun() ->
-                           chef_index_queue:set(TypeName, Id, DbName, IndexEjson)
-                   end,
-    with_darklaunch(<<"disable_send_to_rabbit">>, Darklaunch,
-                    fun() ->
-                            error_logger:info_msg("send to rabbit DISABLED by darklaunch~n"),
-                            ok
-                    end,
-                    SendToRabbit).
+default_index_queue_add(TypeName, Id, DbName, IndexEjson, Darklaunch) ->
+    case chef_wm_darklaunch:is_enabled(<<"disable_rabbit_vhost_chef">>, Darklaunch) of
+        true ->
+            error_logger:info_msg("send to rabbit DISABLED by darklaunch "
+                                  "'disable_rabbit_vhost_chef=true'~n"),
+            ok;
+        false ->
+            %% hard-coded default rabbitmq vhost for chef search indexing
+            DefaultVHost = <<"/chef">>,
+            chef_index_queue:set(DefaultVHost, TypeName, Id, DbName, IndexEjson)
+    end,
+    ok.
+
+aux_index_queue_add(TypeName, Id, DbName, IndexEjson, Darklaunch) ->
+    case chef_wm_darklaunch:is_enabled(<<"rabbit_vhost_chef_solr4">>, Darklaunch) of
+        true ->
+            %% hard-coded vhost approach
+            VHost = <<"/chef-solr4">>,
+            chef_index_queue:set(VHost, TypeName, Id, DbName, IndexEjson);
+        false ->
+            ok
+    end,
+    ok.
 
 index_queue_delete(TypeName, Id, DbName, Darklaunch) ->
-    with_darklaunch(<<"send_to_solr4">>, Darklaunch,
-                    fun() ->
-                            error_logger:info_msg("STUB: send delete to solr4~n"),
-                            ok
-                    end,
-                    ok),
+    default_index_queue_delete(TypeName, Id, DbName, Darklaunch),
+    aux_index_queue_delete(TypeName, Id, DbName, Darklaunch),
+    ok.
 
-    with_darklaunch(<<"disable_send_to_rabbit">>, Darklaunch,
-                    fun() ->
-                            error_logger:info_msg("delete to rabbit DISABLED by darklaunch~n"),
-                            ok
-                    end,
-                    fun() ->
-                            chef_index_queue:delete(TypeName, Id, DbName)
-                    end).
-
-with_darklaunch(Key, Darklaunch, True, False) ->
-    case chef_wm_darklaunch:is_enabled(Key, Darklaunch) of
-        true when is_function(True) ->
-            True();
+default_index_queue_delete(TypeName, Id, DbName, Darklaunch) ->
+    case chef_wm_darklaunch:is_enabled(<<"disable_rabbit_vhost_chef">>, Darklaunch) of
         true ->
-            True;
-        false when is_function(False) ->
-            False();
+            error_logger:info_msg("send to rabbit DISABLED by darklaunch "
+                                  "'disable_rabbit_vhost_chef=true'~n"),
+            ok;
         false ->
-            False
-    end.
+            %% hard-coded default rabbitmq vhost for chef search indexing
+            DefaultVHost = <<"/chef">>,
+            chef_index_queue:delete(DefaultVHost, TypeName, Id, DbName)
+    end,
+    ok.
 
+aux_index_queue_delete(TypeName, Id, DbName, Darklaunch) ->
+    case chef_wm_darklaunch:is_enabled(<<"rabbit_vhost_chef_solr4">>, Darklaunch) of
+        true ->
+            %% hard-coded vhost approach
+            VHost = <<"/chef-solr4">>,
+            chef_index_queue:delete(VHost, TypeName, Id, DbName);
+        false ->
+            ok
+    end,
+    ok.
