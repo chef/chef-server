@@ -30,6 +30,7 @@
          make_query_from_params/4,
          ping/0,
          search/1,
+         search/2,
          solr_commit/0
         ]).
 
@@ -64,10 +65,18 @@ add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery},
                     {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
                     {error, {solr_400, string()}} |
                     {error, {solr_500, string()}}.
-search(#chef_solr_query{}=Query) ->
+search(Query) ->
     SolrUrl = envy:get(chef_index, solr_url, string),
+    search(Query, SolrUrl).
+
+
+-spec search(#chef_solr_query{}, string()) ->
+                    {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
+                    {error, {solr_400, string()}} |
+                    {error, {solr_500, string()}}.
+search(#chef_solr_query{} = Query, SolrUrl) ->
+    %% FIXME: error handling
     Url = SolrUrl ++ make_solr_query_url(Query),
-    % FIXME: error handling
     {ok, Code, _Head, Body} = ibrowse:send_req(Url, [], get),
     case Code of
         "200" ->
