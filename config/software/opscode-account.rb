@@ -1,5 +1,8 @@
 name "opscode-account"
-version "hh/ipv6"
+version 'ipv6/rel-1.34.1'
+# This is a branch of the last opscode-account release for EC11. Any further revisions
+# incldues a number of changes we don't want to incorporate into the next patch version
+# of EC11.
 
 dependency "ruby"
 dependency "bundler"
