@@ -6,9 +6,9 @@
 -mixin([{bifrost_wm_base, [create_path/2]}]).
 
 -export([
-    post_is_create/2,
-    process_post/2
-    ]).
+         process_post/2,
+         post_is_create/2
+        ]).
 
 init(Config) ->
     bifrost_wm_base:init(?MODULE, Config).
