@@ -1,6 +1,42 @@
 require 'mixlib/shellout'
 
 class OmnibusHelper
+  attr_reader :node
+
+  def initialize(node)
+    @node = node
+  end
+
+  # Normalizes hosts. If the host part is an ipv6 literal, then it
+  # needs to be quoted with []
+  def self.normalize_host(host_part)
+    # Make this simple: if ':' is detected at all, it is assumed
+    # to be a valid ipv6 address. We don't do data validation at this
+    # point, and ':' is only valid in an URL if it is quoted by brackets.
+    if host_part =~ /:/
+      "[#{host_part}]"
+    else
+      host_part
+    end
+  end
+
+  def normalize_host(host_part)
+    self.class.normalize_host(host_part)
+  end
+
+  def vip_for_uri(service)
+    normalize_host(node['private_chef'][service]['vip'])
+  end
+
+  def db_connection_uri
+    db_protocol = "postgres"
+    db_user     = node['private_chef']['postgresql']['sql_user']
+    db_password = node['private_chef']['postgresql']['sql_password']
+    db_vip      = vip_for_uri('postgresql')
+    db_name     = "opscode_chef"
+
+    "#{db_protocol}://#{db_user}:#{db_password}@#{db_vip}/#{db_name}"
+  end
 
   # This file is touched once initial bootstrapping of the system is
   # done.
@@ -121,6 +157,10 @@ EOKEY
     else
       "undefined"
     end
+  end
+
+  def erl_atom_or_string(term)
+    self.class.erl_atom_or_string(term)
   end
 end
 

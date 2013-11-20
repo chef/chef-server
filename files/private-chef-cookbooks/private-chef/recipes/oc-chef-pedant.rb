@@ -21,6 +21,7 @@ pedant_log_dir = node['private_chef']['oc-chef-pedant']['log_directory']
 end
 
 pedant_config = File.join(pedant_etc_dir, "pedant_config.rb")
+helper = OmnibusHelper.new(node)
 
 template pedant_config do
   owner "root"
@@ -28,6 +29,6 @@ template pedant_config do
   mode  "0755"
   variables({
     :api_url  => node['private_chef']['nginx']['url'],
-    :solr_url => "http://#{node['private_chef']['opscode-solr']['vip']}:#{node['private_chef']['opscode-solr']['port']}"
+    :solr_url => "http://#{helper.vip_for_uri('opscode-solr')}:#{node['private_chef']['opscode-solr']['port']}"
   }.merge(node['private_chef']['oc-chef-pedant'].to_hash))
 end
