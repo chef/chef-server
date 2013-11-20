@@ -28,6 +28,9 @@ Merb::Config.use do |c|
 end
 
 
+# TODO DELETE ME after ipv6 is better - but a useful aid to track down where requests are failing.
+RestClient.log = "/tmp/rest.log"
+
 # Bunny time!
 Chef::Config.amqp_host '<%= node['private_chef']['rabbitmq']['vip'] %>'
 Chef::Config.amqp_port '<%= node['private_chef']['rabbitmq']['node_port'] %>'
@@ -38,13 +41,20 @@ Chef::Config.amqp_identity ''
 Chef::Config.amqp_consumer_id '<%= node['private_chef']['rabbitmq']['consumer_id'] %>'
 
 # Couchdb time!
-couchdb_uri = '<%= node['private_chef']['couchdb']['vip'] %>:<%= node['private_chef']['couchdb']['port'] %>'
+couchdb_uri = '[<%= node['private_chef']['couchdb']['vip'] %>]:<%= node['private_chef']['couchdb']['port'] %>'
 account_database = 'opscode_account'
 internal_database = 'opscode_account_internal'
 webui_public_key = OpenSSL::PKey::RSA.new(File.read('/etc/opscode/webui_pub.pem'))
-authorization_service_uri = 'http://<%= node['private_chef']['oc_bifrost']['vip'] %>:<%= node['private_chef']['oc_bifrost']['port'] %>'
-certificate_service_uri = 'http://<%= node['private_chef']['opscode-certificate']['vip'] %>:<%= node['private_chef']['opscode-certificate']['port'] %>'
+# TODO
+# We'll want to a way to resolve this effectively - we can't make assumptions in config files
+# about address types, so we'll want a helper that says :
+# if value is ipv6 and not already in brackets, put it in brackets
+# if ipv4 do not put in brackets
 
+# TODO This one is ipv4
+authorization_service_uri = 'http://<%= node['private_chef']['oc_bifrost']['vip'] %>:<%= node['private_chef']['oc_bifrost']['port'] %>'
+# TODO This one is ipv6
+certificate_service_uri = 'http://[<%= node['private_chef']['opscode-certificate']['vip'] %>]:<%= node['private_chef']['opscode-certificate']['port'] %>'
 couchrest = CouchRest.new(couchdb_uri)
 couchrest.database!(account_database)
 couchrest.default_database = account_database
