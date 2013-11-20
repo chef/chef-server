@@ -1,5 +1,5 @@
 name "oc_bifrost"
-version "1.3.1"
+version "mp/ipv6_compat"
 
 dependencies ["erlang", "rebar", "rsync", "sqitch"]
 
