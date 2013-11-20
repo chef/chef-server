@@ -2,8 +2,8 @@ Chef::Config[:chargify_api_secret] = ''
 Chef::Config[:chargify_site]       = 'opscode-preprod'
 
 Chef::Config[:dark_launch_config_filename] = '/etc/opscode/dark_launch_features.json'
-Chef::Config[:account_service_uri]   = 'http://<%= node['private_chef']['lb_internal']['vip'] %>:<%= node['private_chef']['lb_internal']['account_port'] %>'
-Chef::Config[:chef_server_host_uri]  = 'http://<%= node['private_chef']['lb_internal']['vip'] %>:<%= node['private_chef']['lb_internal']['chef_port'] %>'
+Chef::Config[:account_service_uri]   = 'http://<%= @helper.normalize_host(node['private_chef']['lb_internal']['vip']) %>:<%= node['private_chef']['lb_internal']['account_port'] %>'
+Chef::Config[:chef_server_host_uri]  = 'http://<%= @helper.normalize_host(node['private_chef']['lb_internal']['vip']) %>:<%= node['private_chef']['lb_internal']['chef_port'] %>'
 Chef::Config[:web_ui_proxy_user] = '<%= @proxy_user %>'
 Chef::Config[:web_ui_private_key]    = '/etc/opscode/webui_priv.pem'
 
@@ -41,7 +41,7 @@ Chef::Config.amqp_identity ''
 Chef::Config.amqp_consumer_id '<%= node['private_chef']['rabbitmq']['consumer_id'] %>'
 
 # Couchdb time!
-couchdb_uri = '[<%= node['private_chef']['couchdb']['vip'] %>]:<%= node['private_chef']['couchdb']['port'] %>'
+couchdb_uri = '<%= @helper.normalize_host(node['private_chef']['couchdb']['vip']) %>:<%= node['private_chef']['couchdb']['port'] %>'
 account_database = 'opscode_account'
 internal_database = 'opscode_account_internal'
 webui_public_key = OpenSSL::PKey::RSA.new(File.read('/etc/opscode/webui_pub.pem'))
@@ -52,9 +52,9 @@ webui_public_key = OpenSSL::PKey::RSA.new(File.read('/etc/opscode/webui_pub.pem'
 # if ipv4 do not put in brackets
 
 # TODO This one is ipv4
-authorization_service_uri = 'http://<%= node['private_chef']['oc_bifrost']['vip'] %>:<%= node['private_chef']['oc_bifrost']['port'] %>'
+authorization_service_uri = 'http://<%= @helper.normalize_host(node['private_chef']['oc_bifrost']['vip']) %>:<%= node['private_chef']['oc_bifrost']['port'] %>'
 # TODO This one is ipv6
-certificate_service_uri = 'http://[<%= node['private_chef']['opscode-certificate']['vip'] %>]:<%= node['private_chef']['opscode-certificate']['port'] %>'
+certificate_service_uri = 'http://[<%= @helper.normalize_host(node['private_chef']['opscode-certificate']['vip']) %>:<%= node['private_chef']['opscode-certificate']['port'] %>'
 couchrest = CouchRest.new(couchdb_uri)
 couchrest.database!(account_database)
 couchrest.default_database = account_database
@@ -70,7 +70,7 @@ Mixlib::Authorization::Config.web_ui_public_key = webui_public_key
 Mixlib::Authorization::Config.authorization_service_uri = authorization_service_uri
 Mixlib::Authorization::Config.certificate_service_uri = certificate_service_uri
 
-Opscode::Mappers.connection_string = 'postgres://<%= node['private_chef']['postgresql']['sql_user'] %>:<%= node['private_chef']['postgresql']['sql_password'] %>@<%= node['private_chef']['postgresql']['vip'] %>/opscode_chef'
+Opscode::Mappers.connection_string = 'postgres://<%= node['private_chef']['postgresql']['sql_user'] %>:<%= node['private_chef']['postgresql']['sql_password'] %>@<%= @helper.normalize_host(node['private_chef']['postgresql']['vip']) %>/opscode_chef'
 
 <% if @ldap_enabled -%>
 # LDAP Authentication Enabled

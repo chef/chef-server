@@ -2,6 +2,19 @@ require 'mixlib/shellout'
 
 class OmnibusHelper
 
+  # Normalizes hosts. If the host part is an ipv6 literal, then it
+  # needs to be quoted with []
+  def self.normalize_host(host_part)
+    # Make this simple: if ':' is detected at all, it is assumed
+    # to be a valid ipv6 address. We don't do data validation at this
+    # point, and ':' is only valid in an URL if it is quoted by brackets.
+    if host_part =~ /:/
+      "[#{host_part}]"
+    else
+      host_part
+    end
+  end
+
   # This file is touched once initial bootstrapping of the system is
   # done.
   def self.bootstrap_sentinel_file

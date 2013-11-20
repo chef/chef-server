@@ -41,7 +41,7 @@ template env_config do
   owner "root"
   group "root"
   mode "0644"
-  variables(node['private_chef']['opscode-account'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?))
+  variables(node['private_chef']['opscode-account'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?, :helper => OmnibusHelper))
   notifies :restart, 'runit_service[opscode-account]' unless backend_secondary?
 end
 
