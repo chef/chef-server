@@ -300,10 +300,10 @@ module PrivateChef
       PrivateChef["nginx"]["enable_ipv6"] = PrivateChef["use_ipv6"]
       PrivateChef["opscode_solr"]["ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
-      PrivateChef["postgresql"]["listen_address"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
 
       authaddr = []
-      authaddr << "0.0.0.0/0" if PrivateChef["use_ipv4"]
+      authaddr << "0.0.0.0/0" # if PrivateChef["use_ipv4"]
       authaddr << "::/0" if PrivateChef["use_ipv6"]
       PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= authaddr
       PrivateChef["opscode_account"]["worker_processes"] ||= 4
