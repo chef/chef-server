@@ -50,7 +50,7 @@ http {
         include <%= @chef_http_config %>;
       <%- else -%>
           server {
-            listen <%= @helper.listen_port('http') %>;
+            <%= @helper.listen_port('http') %>
             access_log /var/log/opscode/nginx/rewrite-port-80.log;
             return 301 https://$host$request_uri;
           }
@@ -64,7 +64,7 @@ http {
   # internal lb config for Chef API Services
   <%- if node['private_chef']['lb_internal']['enable'] -%>
   server {
-    listen <%= @helper.listen_port(node['private_chef']['lb_internal']['chef_port']) %>;
+    <%= @helper.listen_port(node['private_chef']['lb_internal']['chef_port']) %>
     # The name doesn't matter; this is the only listener on this port
     server_name <%= node['fqdn'] %>;
 
@@ -108,7 +108,7 @@ http {
 
   # internal service access for opscode-account
   server {
-    listen <%= @helper.listen_port(node['private_chef']['lb_internal']['account_port']) %>;
+    <%= @helper.listen_port(node['private_chef']['lb_internal']['account_port']) %>
     # The name doesn't matter; this is the only listener on this port
     server_name <%= node['fqdn'] %>;
 
@@ -138,7 +138,7 @@ http {
 
   # internal service access for oc_bifrost
   server {
-    listen <%= @helper.listen_port(node['private_chef']['lb_internal']['oc_bifrost_port']) %>;
+    <%= @helper.listen_port(node['private_chef']['lb_internal']['oc_bifrost_port']) %>
     server_name <%= node['fqdn'] %>;
 
     client_max_body_size <%= @client_max_body_size %>;
@@ -160,7 +160,35 @@ http {
       proxy_pass http://oc_bifrost;
     }
   }
-  <%- end -%>
+  # internal service access for opscode-certificate, temporary until we modify the code to
+  # allow us to specify listening address more easily.
+  # This is ipv6-specific and is not required for ipv4.
+  <% if node['private_chef']['nginx']['enable_ipv6'] %>
+  server {
+  <%= @helper.listen_port(node['private_chef']['opscode-certificate']['port'], :ipv6_only  => true ) %>
+    server_name <%= node['fqdn'] %>;
+
+    client_max_body_size <%= @client_max_body_size %>;
+    # We cannot tell the upstream where we reall came from because
+    # he'll go all to pieces if he sees an ipv6 address.
+    # As a result, we'll explicitly set a Host header value
+    # and will not pass along any headers that webmachine may use to identify the real host.
+    proxy_set_header        Host            "127.0.0.1";
+    proxy_set_header        X-Forwarded-Proto http;
+
+    proxy_connect_timeout   90;
+    proxy_send_timeout      90;
+    proxy_read_timeout      90;
+
+    access_log /var/log/opscode/nginx/internal-certificate.access.log opscode;
+    error_log  /var/log/opscode/nginx/internal-certificaet.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
+
+    location / {
+      proxy_pass http://opscode_certificate;
+    }
+  }
+  <%- end -%> # provide cert int if ipv6 only
+  <%- end -%> # if enable lb int
 
   include <%= node['private_chef']['nginx']['dir'] %>/etc/nginx.d/*.conf;
 }

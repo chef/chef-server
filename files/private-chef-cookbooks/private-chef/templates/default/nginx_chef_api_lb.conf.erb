@@ -1,5 +1,5 @@
   server {
-    listen <%= @helper.listen_port(@server_proto) %>;
+    <%= @helper.listen_port(@server_proto) %>
     server_name <%= @server_name %>;
 
     access_log <%= @helper.access_log(@server_proto) %> opscode;
