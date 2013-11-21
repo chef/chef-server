@@ -51,7 +51,8 @@ amqp_child_spec() ->
             error_logger:info_msg("RabbitMQ config disabled. Indexing for search is disabled.~n"),
             [];
         false ->
-            Host = envy:get(chef_index, rabbitmq_host, string),
+            %% This uses the key 'ip_mode' in chef_index to decide how to parse the address
+            Host = envy_parse:host_to_ip(chef_index, rabbitmq_host),
             Port = envy:get(chef_index,rabbitmq_port, non_neg_integer),
             User = envy:get(chef_index,rabbitmq_user, binary),
             Password = envy:get(chef_index,rabbitmq_password, binary),
