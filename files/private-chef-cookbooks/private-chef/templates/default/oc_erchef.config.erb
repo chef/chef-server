@@ -56,7 +56,7 @@
                                  {max_connection_duration, <%= node['private_chef']['oc_chef_authz']['http_max_connection_duration'] %>},
                                  {ibrowse_options, <%= node['private_chef']['oc_chef_authz']['ibrowse_options'] %>}
                                  ]},
-                {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
+                {couchdb_host, "<%= @helper.normalize_host(node['private_chef']['couchdb']['vip']) %>"},
                 {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> },
                 {authz_superuser_id, <<"<%= node['private_chef']['oc_bifrost']['superuser_id'] %>">>}
                ]},
@@ -64,7 +64,7 @@
              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
              {cache_defaults, [{max_size, <%= @max_cache_size %> },
                                   {ttl, <%= @cache_ttl %> }]},
-             {couchdb_host, "<%= node['private_chef']['couchdb']['vip'] %>"},
+             {couchdb_host, "<%= @helper.normalize_host(node['private_chef']['couchdb']['vip']) %>"},
              {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
             ]},
   {chef_index, [
