@@ -54,7 +54,7 @@ webui_public_key = OpenSSL::PKey::RSA.new(File.read('/etc/opscode/webui_pub.pem'
 # TODO This one is ipv4
 authorization_service_uri = 'http://<%= @helper.vip_for_uri('oc_bifrost') %>:<%= node['private_chef']['oc_bifrost']['port'] %>'
 # TODO This one is ipv6
-certificate_service_uri = 'http://[<%= @helper.vip_for_uri('opscode-certificate') %>:<%= node['private_chef']['opscode-certificate']['port'] %>'
+certificate_service_uri = 'http://<%= @helper.vip_for_uri('opscode-certificate') %>:<%= node['private_chef']['opscode-certificate']['port'] %>'
 couchrest = CouchRest.new(couchdb_uri)
 couchrest.database!(account_database)
 couchrest.default_database = account_database
