@@ -302,6 +302,8 @@ module PrivateChef
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
       PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
 
+      PrivateChef["opscode_certificate"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+
       authaddr = []
       authaddr << "0.0.0.0/0" # if PrivateChef["use_ipv4"]
       authaddr << "::/0" if PrivateChef["use_ipv6"]
