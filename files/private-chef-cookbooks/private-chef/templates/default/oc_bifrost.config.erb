@@ -81,6 +81,7 @@
               ]},
  {sqerl, [
           {db_type, pgsql},
+          {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
           {db_host, "<%= node['private_chef']['postgresql']['vip'] %>" },
           {db_port, <%= node['private_chef']['postgresql']['port'] %> },
           {db_user, "<%= node['private_chef']['oc_bifrost']['sql_user'] %>" },
