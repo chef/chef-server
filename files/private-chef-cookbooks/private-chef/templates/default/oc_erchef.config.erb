@@ -46,8 +46,8 @@
                 {keyring, [{default, "/etc/opscode/webui_pub.pem"}]}
                ]},
   {oc_chef_authz, [
-                {authz_root_url, "http://<%= node['private_chef']['oc_bifrost']['vip'] %>:<%= node['private_chef']['oc_bifrost']['port'] %>" },
-                {authz_service, [{root_url, "http://<%= node['private_chef']['oc_bifrost']['vip'] %>:<%= node['private_chef']['oc_bifrost']['port'] %>" },
+                {authz_root_url, "http://<%= @helper.vip_for_uri('oc_bifrost') %>:<%= node['private_chef']['oc_bifrost']['port'] %>" },
+                {authz_service, [{root_url, "http://<%= @helper.vip_for_uri('oc_bifrost') %>:<%= node['private_chef']['oc_bifrost']['port'] %>" },
                                  {timeout, 2000},
                                  {init_count, <%= node['private_chef']['oc_chef_authz']['http_init_count'] %>},
                                  {max_count, <%= node['private_chef']['oc_chef_authz']['http_max_count'] %>},
@@ -74,13 +74,13 @@
                 {rabbitmq_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
                 {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['vhost'] %>">>},
                 {rabbitmq_exchange, <<"">>},
-                {solr_url, "http://<%= node['private_chef']['opscode-solr']['vip'] %>:<%= node['private_chef']['opscode-solr']['port'] %>/solr"}
+                {solr_url, "http://<%= @helper.vip_for_uri('opscode-solr') %>:<%= node['private_chef']['opscode-solr']['port'] %>/solr"}
                ]},
   {chef_objects, [
-                  {certificate_root_url, "http://<%= node['private_chef']['opscode-certificate']['vip'] %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificates"},
+                  {certificate_root_url, "http://<%= @helper.vip_for_uri('opscode-certificate') %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificates"},
                   {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
                   {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
-                  {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= node['private_chef']['bookshelf']['vip'] %>"},
+                  {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= @helper.vip_for_uri('bookshelf') %>"},
                   {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
                   {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>},
                   {s3_parallel_ops_timeout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] %>},

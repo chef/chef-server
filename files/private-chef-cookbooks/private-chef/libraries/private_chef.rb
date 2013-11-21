@@ -29,6 +29,7 @@ module PrivateChef
   opscode_chef Mash.new
   opscode_webui Mash.new
   lb Mash.new
+  lb_internal Mash.new
   postgresql Mash.new
   oc_bifrost Mash.new
   opscode_certificate Mash.new
@@ -190,6 +191,7 @@ module PrivateChef
         "opscode_erchef",
         "opscode_webui",
         "lb",
+        "lb_internal",
         "postgresql",
         "oc_bifrost",
         "opscode_certificate",
