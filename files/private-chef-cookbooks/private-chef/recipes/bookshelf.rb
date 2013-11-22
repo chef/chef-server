@@ -19,10 +19,17 @@ template cookbook_migration do
   mode "0755"
 end
 
+directory data_path do
+  action :create
+  recursive true
+  owner owner
+  group owner
+end
+
 execute "cookbook migration" do
   command cookbook_migration
   user owner
-  only_if { File.exist?(checksum_path) && !File.exist?(data_path) }
+  not_if { File.exist?("#{data_path}/_%_BOOKSHELF_DISK_FORMAT") }
 end
 
 bookshelf_dir = node['private_chef']['bookshelf']['dir']

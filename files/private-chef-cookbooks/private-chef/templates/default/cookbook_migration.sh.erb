@@ -1,4 +1,7 @@
-#!/usr/bin/env escript
+#!/opt/opscode/embedded/bin/escript
+
+%% using compiled mode gives more informative error traces
+-mode(compile).
 
 -define(MAGIC_NUMBER, <<16#b00c:16/integer>>).
 -define(OLD_COOKBOOK_PATH, "<%= node['private_chef']['opscode-chef']['checksum_path'] %>/").
@@ -16,11 +19,12 @@ create_destination() ->
     create_directory_if_needed(?NEW_BOOKSHELF_CONTAINER).
 
 create_directory_if_needed(Path) ->
-    case file:read_file_info(Path) of
-        {ok, _} ->
+    DummyPath = filename:join(Path, "for-ensure"),
+    case filelib:ensure_dir(DummyPath) of
+        ok ->
             ok;
-        {error, enoent} ->
-            file:make_dir(Path)
+        Error ->
+            erlang:error(Error)
     end.
 
 move_cookbooks() ->
