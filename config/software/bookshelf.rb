@@ -1,5 +1,5 @@
 name "bookshelf"
-version "1.0.3"
+version "mp/ipv6_compat"
 
 dependency "erlang"
 dependency "rebar"
