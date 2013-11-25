@@ -25,7 +25,9 @@ init(Config0) ->
                               {ibrowse_options, [{connect_timeout, 5000}]}]},
              {couchdb_host, "localhost"},
              {couchdb_port, 6984},
-             {authz_superuser_id, <<"beefbeefbeef">>}]),
+             {authz_superuser_id, <<"beefbeefbeef">>},
+             {cleanup_interval, 60000},
+             {cleanup_batch_size, 100}]),
 
     set_env(sqerl,
             [{db_host, "localhost"},
@@ -131,7 +133,6 @@ delete_all_from_table(TableName) ->
         Error ->
             throw(Error)
     end,
-    error_logger:info_msg("Delete ~p: ~p", [TableName, Result]),
     ok.
 make_id(Prefix) when is_binary(Prefix) ->
     case size(Prefix) of

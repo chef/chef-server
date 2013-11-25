@@ -5,7 +5,7 @@
         ]).
 
 -define(SERVER, ?MODULE).
-
+-include("oc_chef_authz_cleanup.hrl").
 start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
@@ -14,6 +14,13 @@ init([]) ->
     MaxRestarts = 1000,
     MaxSecondsBetweenRestarts = 3600,
 
+    Restart = permanent,
+    Shutdown = ?CLEANUP_TIMEOUT,
+    Type = worker,
+    
     SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
-
-    {ok, {SupFlags, []}}.
+    
+    CleanupWorker = {oc_chef_authz_cleanup, {oc_chef_authz_cleanup, start_link, []},
+            Restart, Shutdown, Type, [oc_chef_authz_cleanup]},
+    
+    {ok, {SupFlags, [CleanupWorker]}}.

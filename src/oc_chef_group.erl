@@ -158,8 +158,12 @@ update(#oc_chef_group{
             UserAuthzIds = find_user_authz_ids(Users, CallbackFun),
             GroupAuthzIds = find_group_authz_ids(Groups, OrgId, CallbackFun),
             UserSideActorsAuthzIds = UserAuthzIds ++ ClientAuthzIds,
-            ActorsToRemove = default_to_empty(AuthSideActors) -- UserSideActorsAuthzIds,
-            GroupsToRemove = default_to_empty(AuthSideGroups) -- GroupAuthzIds,
+            %% Subtract from the Authz returned ids, the list of known good ids.
+            %% The remainder are stale ids in authz that should be removed.
+            %% These stale authz ids were orphaned due to missing cleanup during
+            %% delete.
+            ActorsToRemove = subtract(default_to_empty(AuthSideActors), UserSideActorsAuthzIds),
+            GroupsToRemove = subtract(default_to_empty(AuthSideGroups), GroupAuthzIds),
             Paths = build_paths(GroupAuthzId),
             OpsResults = [
               add_new_authz_ids(Paths, UserSideActorsAuthzIds, GroupAuthzIds, AuthzId),
@@ -168,6 +172,9 @@ update(#oc_chef_group{
        Other  ->
             Other
     end.
+-spec subtract(list(), list()) -> list().
+subtract(List1, List2) ->
+    sets:to_list(sets:subtract(sets:from_list(List1), sets:from_list(List2))).
 
 build_paths(GroupAuthzId) ->
     BasePath = authz_id_path("/groups/", GroupAuthzId),
@@ -231,9 +238,9 @@ fetch(Record, CallbackFun) ->
         #oc_chef_group{authz_id = GroupAuthzId, last_updated_by = LastUpdatedBy} = GroupRecord ->
             {ActorAuthzIds, GroupAuthzIds} = fetch_authz_ids(GroupAuthzId, LastUpdatedBy),
             {ClientNames, RemainingAuthzIds} = find_clients_names(ActorAuthzIds, CallbackFun),
-            {Usernames, DefunctAuthzIds} = find_users_names(RemainingAuthzIds, CallbackFun),
+            {Usernames, DefunctActorAuthzIds} = find_users_names(RemainingAuthzIds, CallbackFun),
             {GroupNames, DefunctGroupAuthzIds} = find_groups_names(GroupAuthzIds, CallbackFun),
-            extra_mile(DefunctAuthzIds ++ DefunctGroupAuthzIds),
+            oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds, DefunctGroupAuthzIds),
             Result = GroupRecord#oc_chef_group{clients = ClientNames, users =  Usernames, groups =  GroupNames, auth_side_actors = ActorAuthzIds, auth_side_groups = GroupAuthzIds},
             Result;
         not_foud ->
@@ -292,9 +299,6 @@ query_and_diff_authz_ids(QueryName, AuthzIds, CallbackFun) ->
             {[], []}
     end.
 
-extra_mile(_AuthzIdsToBeDeleted) ->
-    [].
-
 flatten(#oc_chef_group{id = Id,
           authz_id = AuthzId,
           org_id = OrgId,
@@ -317,7 +321,7 @@ assemble_group_ejson(#oc_chef_group{name = Name, clients = Clients, users = User
      ]}.
 
 delete(ObjectRec = #oc_chef_group{last_updated_by = AuthzId, authz_id = GroupAuthzId}, CallbackFun) ->
-    case oc_chef_authz_http:request("/groups/" ++ binary_to_list(GroupAuthzId), delete, ?DEFAULT_HEADERS, [], AuthzId) of
+    case oc_chef_authz:delete_resource(AuthzId, group, GroupAuthzId) of
         ok ->
             CallbackFun({delete_query(), [id(ObjectRec)]});
         Error ->
