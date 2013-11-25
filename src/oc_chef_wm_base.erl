@@ -19,6 +19,7 @@
          check_cookbook_authz/3,
          delete_object/3,
          object_creation_hook/2,
+         object_creation_error_hook/2,
          stats_hero_label/1,
          stats_hero_upstreams/0]).
 
@@ -543,3 +544,11 @@ client_cleanup(#chef_client{authz_id=ClientAuthzId,
         {error, Error} ->
             {error, Error}
     end.
+
+object_creation_error_hook(#chef_data_bag_item{}, _RequestorId) ->
+    ok;
+object_creation_error_hook(#chef_cookbook_version{}, _RequestorId) ->
+    ok;
+object_creation_error_hook(Object, RequestorId) ->
+    oc_chef_authz:delete_resource(RequestorId, object, chef_object:authz_id(Object)),
+    ok.
