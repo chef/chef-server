@@ -195,7 +195,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                      data_bag_name = DataBagName}
                                 } = State) ->
 
-    ok = chef_object_db:delete(DbContext, DataBag, RequestorId),
+    ok = ?BASE_RESOURCE:delete_object(DbContext, DataBag, RequestorId),
     NakedBag = {[{<<"name">>, DataBagName},
                  {<<"json_class">>, <<"Chef::DataBag">>},
                  {<<"chef_type">>, <<"data_bag">>}]},

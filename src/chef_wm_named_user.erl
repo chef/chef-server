@@ -116,7 +116,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  resource_state = #user_state{
                                    chef_user = User},
                                  organization_name = OrgName} = State) ->
-    ok = chef_object_db:delete(DbContext, User, RequestorId),
+    ok = ?BASE_RESOURCE:delete_object(DbContext, User, RequestorId),
     EJson = chef_user:assemble_user_ejson(User, OrgName),
     Req1 = chef_wm_util:set_json_body(Req, EJson),
     {true, Req1, State}.
