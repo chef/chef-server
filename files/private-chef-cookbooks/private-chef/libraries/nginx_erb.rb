@@ -17,18 +17,20 @@ class NginxErb
                    else
                      proto.to_s
                    end
-    if options[:ipv6_only]
-      listen = ""
-    else
-      listen = "listen #{listen_port};"
-    end
+
     if node['private_chef']['nginx']['enable_ipv6']
-      # We will default to listening on both ipv4 (s/b loopback only) and
-      # ipv6 , for consistency with other services and internal config expectations
-      # at this time.
-      listen << "\n      listen [::]:#{listen_port};"
+      # In some cases, we're serving as a front-end for a service that's already
+      # listening on the same port in ipv4 - this prevents a conflict in that situation.
+      if options[:ipv6_only]
+        "listen [::]:#{listen_port} ipv6only=on;"
+      else
+        # Listen to the same port on both v6 and v4
+        "listen [::]:#{listen_port} ipv6only=off;"
+      end
+    else
+      # default behavior to listen only on v4
+      "listen #{listen_port};"
     end
-    listen
   end
 
   def access_log(proto)
