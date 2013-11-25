@@ -68,7 +68,7 @@
              {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
             ]},
   {chef_index, [
-                {enable_ipv6, <%= PrivateChef['use_ipv6'] ? true : false %> },
+                {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
                 {rabbitmq_host, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
                 {rabbitmq_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
                 {rabbitmq_user, <<"<%= node['private_chef']['rabbitmq']['user'] %>">>},
@@ -98,6 +98,7 @@
            %% The database system you are using (e.g. pgsql)
            {db_type, pgsql },
 
+           {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
            %% Database connection parameters
            {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
            {db_port, 5432},
@@ -105,7 +106,6 @@
            {db_pass, "<%= node['private_chef']['postgresql']['sql_password'] %>"},
            {db_name, "opscode_chef" },
            {idle_check, 10000},
-           {enable_ipv6, <%= PrivateChef['use_ipv6'] ? true : false %> },
            {prepared_statements, {oc_chef_sql, statements, [pgsql]}},
            {column_transforms,
                               [{<<"created_at">>,
