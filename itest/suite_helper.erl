@@ -133,7 +133,6 @@ delete_all_from_table(TableName) ->
         Error ->
             throw(Error)
     end,
-    error_logger:info_msg("Delete ~p: ~p", [TableName, Result]),
     ok.
 make_id(Prefix) when is_binary(Prefix) ->
     case size(Prefix) of

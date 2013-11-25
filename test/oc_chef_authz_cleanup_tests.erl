@@ -1,4 +1,4 @@
--module(oc_chef_authz_cleanup_test).
+-module(oc_chef_authz_cleanup_tests).
 
 -compile([export_all]).
 
@@ -16,6 +16,7 @@ oc_chef_authz_cleanup_test_() ->
              application:set_env(oc_chef_authz, cleanup_interval, ?INTERVAL),
              application:set_env(oc_chef_authz, cleanup_batch_size, ?BATCH_SIZE),
              application:set_env(oc_chef_authz, authz_superuser_id, ?SUPER_USER_AUTHZ_ID),
+             %% Cancel the current timer so we can test state transitions individually
              oc_chef_authz_cleanup:stop(),
              [ meck:new(Mod) || Mod <- Mods]                
      end,
@@ -47,7 +48,7 @@ oc_chef_authz_cleanup_test_() ->
                {ActorsToBeDeleted, ActorsToBeRemaining} = oc_chef_authz_cleanup:prune(?BATCH_SIZE, sets:to_list(StoredActors)),
                expect_delete(ActorsToBeDeleted, ActorsToBeDeleted),
                oc_chef_authz_cleanup:prune(),
-               {ResultingActorSet, ResultingGroupSet, _} = oc_chef_authz_cleanup:get_authz_ids(),
+               {ResultingActorSet, ResultingGroupSet} = oc_chef_authz_cleanup:get_authz_ids(),
                ?assertEqual(ActorsToBeRemaining, sets:to_list(ResultingActorSet)),
                ?assertEqual(ActorsToBeRemaining, sets:to_list(ResultingGroupSet))
        end},
@@ -57,7 +58,7 @@ oc_chef_authz_cleanup_test_() ->
                oc_chef_authz_cleanup:add_authz_ids(to_binary([1]),to_binary([1])),
                expect_delete(to_binary(lists:seq(0, ?BATCH_SIZE-1)), to_binary(lists:seq(0, ?BATCH_SIZE-1))),
                oc_chef_authz_cleanup:prune(),
-               {ResultingActorSet, ResultingGroupSet, _} = oc_chef_authz_cleanup:get_authz_ids(),
+               {ResultingActorSet, ResultingGroupSet} = oc_chef_authz_cleanup:get_authz_ids(),
                ?assertEqual(sets:from_list([]), ResultingActorSet),
                ?assertEqual(sets:from_list([]), ResultingGroupSet)
        end},

@@ -1,11 +1,31 @@
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
 %%%-------------------------------------------------------------------
 %%% @author Oliver Ferrigni <>
-%%% @copyright (C) 2013, Oliver Ferrigni
-%%% @doc
+%%% @doc gen_fsm responsible for cleaning up orphaned authz_ids.  These
+%%% authz ids are detected in oc_chef_group and added to a set of either
+%%% actor or group authz_ids.  On a timer, the authz_ids are deleted
+%%% from authz.
 %%%
 %%% @end
 %%% Created :  6 Nov 2013 by Oliver Ferrigni <>
 %%%-------------------------------------------------------------------
+%% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+
 -module(oc_chef_authz_cleanup).
 
 -behaviour(gen_fsm).
@@ -22,7 +42,11 @@
         ]).
 
 %% gen_fsm callbacks
--export([init/1,handle_event/3, handle_sync_event/4, handle_info/3, terminate/3,
+-export([
+         init/1,
+         handle_event/3,
+         handle_sync_event/4,
+         handle_info/3, terminate/3,
          code_change/4]).
 
 %% FSM states
@@ -32,13 +56,13 @@
         ]).
 
 -define(SERVER, ?MODULE).
--define(TIMEOUT, 10000).
--define(DEFAULT_BATCH_SIZE, 100).
--define(DEFAULT_INTERVAL, 2000).
 
-%%%===================================================================
-%%% API
-%%%===================================================================
+-define(DEFAULT_BATCH_SIZE, 2500).
+-define(DEFAULT_INTERVAL, 1000).
+
+-include("oc_chef_authz.hrl").
+-include("oc_chef_authz_cleanup.hrl").
+
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -52,11 +76,13 @@
 start_link() ->
     gen_fsm:start_link({local, ?SERVER}, ?MODULE, [], []).
 
+-spec add_authz_ids([oc_authz_id()], [oc_authz_id()]) -> ok.
 add_authz_ids(Actors, Groups) ->
     gen_fsm:send_all_state_event(?MODULE, {add, Actors, Groups}).
 
+-spec get_authz_ids() -> {[oc_authz_id()], [oc_authz_id()]}.
 get_authz_ids() ->
-    gen_fsm:sync_send_all_state_event(?MODULE, get_authz_ids, ?TIMEOUT).
+    gen_fsm:sync_send_all_state_event(?MODULE, get_authz_ids, ?CLEANUP_TIMEOUT).
 
 start() ->
     gen_fsm:send_event(?MODULE, start).
@@ -84,7 +110,7 @@ prune() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
-    {ok, started, create_timer({sets:new(), sets:new()})}.
+    {ok, started, create_timer(#state{})}.
 
 stopped(stop, State) ->
     {next_state, stopped, State};
@@ -143,7 +169,7 @@ handle_event({add, Actors, Groups}, StateName, State) ->
 %% @end
 %%--------------------------------------------------------------------
 handle_sync_event(get_authz_ids, _From, StateName, State) ->
-    {reply, State, StateName, State};
+    {reply, State#state.authz_ids, StateName, State};
 handle_sync_event(_Event, _From, StateName, State) ->
     Reply = ok,
     {reply, Reply, StateName, State}.
@@ -161,8 +187,7 @@ handle_sync_event(_Event, _From, StateName, State) ->
 %%                   {stop, Reason, NewState}
 %% @end
 %%--------------------------------------------------------------------
-handle_info(Info, StateName, State) ->
-    io:format("info ~p ~p ~p", [ Info, StateName, State]),
+handle_info(_Info, StateName, State) ->
     {next_state, StateName, State}.
 
 %%--------------------------------------------------------------------
@@ -196,34 +221,43 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %%%===================================================================
 
 
-process_batch({ActorSet, GroupSet}) ->
+process_batch(State = #state{authz_ids = {ActorSet, GroupSet}}) ->
     {ActorAuthzIdsToRemove, RemainingActors} = prune(sets:to_list(ActorSet)),
     {GroupAuthzIdsToRemove, RemainingGroups} = prune(sets:to_list(GroupSet)),
-    case {length(ActorAuthzIdsToRemove),length(RemainingActors), length(GroupAuthzIdsToRemove), length(RemainingGroups)} of
+    case {
+      length(ActorAuthzIdsToRemove),
+      length(RemainingActors),
+      length(GroupAuthzIdsToRemove),
+      length(RemainingGroups)
+     } of
         {0,0,0,0} ->
             ok;
         {LengthActors, LengthRemainingActors, LengthGroups, LengthRemainingGroups} ->
-            error_logger:info_msg("oc_chef_authz_cleanup:process_batch actors_removed ~p/~p groups_removed ~p/~p~n", [ LengthActors, check_for_zero(LengthRemainingActors, LengthActors),LengthGroups, check_for_zero(LengthRemainingGroups, LengthGroups)])
+            error_logger:info_msg(
+              "oc_chef_authz_cleanup:process_batch actors_removed ~p/~p groups_removed ~p/~p~n",
+              [LengthActors,
+               check_for_zero(LengthRemainingActors, LengthActors),
+               LengthGroups,
+               check_for_zero(LengthRemainingGroups, LengthGroups)])
     end,
     SuperUserAuthzId = envy:get(oc_chef_authz, authz_superuser_id, binary),
     delete_authz_ids(SuperUserAuthzId, actor, ActorAuthzIdsToRemove),
     delete_authz_ids(SuperUserAuthzId, group, GroupAuthzIdsToRemove),
-    create_timer({sets:from_list(RemainingActors), sets:from_list(RemainingGroups)});
-process_batch({ActorSet, GroupSet, _}) ->
-    process_batch({ActorSet, GroupSet}).
+    create_timer(State#state{authz_ids = {sets:from_list(RemainingActors), sets:from_list(RemainingGroups)}}).
 
 prune(List) ->
     prune(envy:get(oc_chef_authz, cleanup_batch_size, ?DEFAULT_BATCH_SIZE, integer), List).
 
 prune(Count, List) ->
-    Length = length(List),
-    case Length > Count of
-        true ->
-            lists:split(Count, List);
-        false ->
+    try
+        lists:split(Count, List)
+    catch
+        error:badarg ->
             {List, []}
     end.
 
+delete_authz_ids(_, _, []) ->
+    ok;
 delete_authz_ids(SuperUserAuthzId, Type, AuthzIdsToRemove) ->
     [oc_chef_authz:delete_resource(SuperUserAuthzId, Type, AuthzIdToRemove) || AuthzIdToRemove <- AuthzIdsToRemove].
 
@@ -232,20 +266,17 @@ check_for_zero(0, Default) ->
 check_for_zero(Val, _Default) ->
     Val.
 
+update_state(Actors, Groups, #state{authz_ids = {ActorSet, GroupSet}} = State) ->
+    State#state{authz_ids =
+                    {sets:union(sets:from_list(Actors), ActorSet),
+     sets:union(sets:from_list(Groups), GroupSet)}}.
 
-update_state(Actors, Groups, {ActorSet, GroupSet}) ->
-    {sets:union(sets:from_list(Actors), ActorSet),
-     sets:union(sets:from_list(Groups), GroupSet)};
-update_state(Actors, Groups, {ActorSet, GroupSet, Timer}) ->
-    {sets:union(sets:from_list(Actors), ActorSet),
-     sets:union(sets:from_list(Groups), GroupSet), Timer}.
-
-create_timer({ActorSet, GroupSet}) ->
+create_timer(State) ->
     Timeout = envy:get(oc_chef_authz, cleanup_interval, ?DEFAULT_INTERVAL, integer),
-    {ActorSet, GroupSet, gen_fsm:start_timer(Timeout, prune)}.
+    State#state{timer_ref = gen_fsm:start_timer(Timeout, prune)}.
 
-cancel_timer({_, _} = State) ->
+cancel_timer( State = #state{timer_ref = inactive}) ->
     State;
-cancel_timer({ActorSet, GroupSet, Timer}) ->
-    gen_fsm:cancel_timer(Timer),
-    {ActorSet, GroupSet}.
+cancel_timer(State = #state{timer_ref = TimerRef}) ->
+    gen_fsm:cancel_timer(TimerRef),
+    State#state{timer_ref = inactive}.

@@ -259,7 +259,7 @@ get_should_cleanup_orphaned_authz(_Config) ->
     expect_get_group(RootGroupAuthzId, ActorAzId, GroupAzId, ActorAzId, GroupAzId),
     Group = chef_sql:fetch(#oc_chef_group{org_id = OrgId,name = GroupName, last_updated_by = ?AUTHZ}),
     ?assertMatch(#oc_chef_group{org_id = OrgId, name = GroupName}, Group),
-    {ResultActorSet, ResultGroupSet, _} = oc_chef_authz_cleanup:get_authz_ids(),
+    {ResultActorSet, ResultGroupSet} = oc_chef_authz_cleanup:get_authz_ids(),
     ?assertEqual(sets:from_list(ActorAzId), ResultActorSet),
     ?assertEqual(sets:from_list(GroupAzId), ResultGroupSet),
     ok.

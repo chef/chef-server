@@ -158,6 +158,10 @@ update(#oc_chef_group{
             UserAuthzIds = find_user_authz_ids(Users, CallbackFun),
             GroupAuthzIds = find_group_authz_ids(Groups, OrgId, CallbackFun),
             UserSideActorsAuthzIds = UserAuthzIds ++ ClientAuthzIds,
+            %% Subtract from the Authz returned ids, the list of known good ids.
+            %% The remainder are stale ids in authz that should be removed.
+            %% These stale authz ids were orphaned due to missing cleanup during
+            %% delete.
             ActorsToRemove = subtract(default_to_empty(AuthSideActors), UserSideActorsAuthzIds),
             GroupsToRemove = subtract(default_to_empty(AuthSideGroups), GroupAuthzIds),
             Paths = build_paths(GroupAuthzId),
