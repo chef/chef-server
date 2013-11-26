@@ -13,7 +13,7 @@
 
 
 execute "sysctl-reload" do
-  command "/sbin/sysctl -p /etc/sysctl.conf"
+  command "/sbin/sysctl -p /etc/sysctl.conf || true"
   action :nothing
 end
 
