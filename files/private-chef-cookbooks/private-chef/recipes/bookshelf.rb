@@ -19,36 +19,33 @@ template cookbook_migration do
   mode "0755"
 end
 
-directory data_path do
-  action :create
-  recursive true
-  owner owner
-  group owner
+#
+# We need to create all of these directories up front 
+# Note that data_path will not be a subdir of bookshelf_dir in HA configurations
+#
+bookshelf_dir = node['private_chef']['bookshelf']['dir']
+bookshelf_etc_dir = File.join(bookshelf_dir, "etc")
+bookshelf_log_dir = node['private_chef']['bookshelf']['log_directory']
+bookshelf_sasl_log_dir = File.join(bookshelf_log_dir, "sasl")
+[
+  bookshelf_dir,
+  bookshelf_etc_dir,
+  bookshelf_log_dir,
+  bookshelf_sasl_log_dir,
+  data_path
+].each do |dir_name|
+  directory dir_name do
+    owner owner
+    group owner
+    mode '0700'
+    recursive true
+  end
 end
 
 execute "cookbook migration" do
   command cookbook_migration
   user owner
   not_if { File.exist?("#{data_path}/_%_BOOKSHELF_DISK_FORMAT") }
-end
-
-bookshelf_dir = node['private_chef']['bookshelf']['dir']
-bookshelf_etc_dir = File.join(bookshelf_dir, "etc")
-bookshelf_log_dir = node['private_chef']['bookshelf']['log_directory']
-bookshelf_sasl_log_dir = File.join(bookshelf_log_dir, "sasl")
-bookshelf_data_dir = node['private_chef']['bookshelf']['data_dir']
-[
-  bookshelf_dir,
-  bookshelf_etc_dir,
-  bookshelf_log_dir,
-  bookshelf_sasl_log_dir,
-  bookshelf_data_dir,
-].each do |dir_name|
-  directory dir_name do
-    owner node['private_chef']['user']['username']
-    mode '0700'
-    recursive true
-  end
 end
 
 link "/opt/opscode/embedded/service/bookshelf/log" do
