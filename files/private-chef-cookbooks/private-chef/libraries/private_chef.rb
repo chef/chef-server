@@ -336,7 +336,7 @@ module PrivateChef
       PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["lb"]["cache_cookbook_files"] ||= true
       PrivateChef["lb"]["upstream"] = Mash.new
-      if PrivateChef["use_ipv6"]
+      if PrivateChef["use_ipv6"] && PrivateChef["backend_vips"]["ipaddress"].include?(':')
         PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ "[#{PrivateChef["backend_vips"]["ipaddress"]}]" ]
       else
         PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ PrivateChef["backend_vips"]["ipaddress"] ]
@@ -378,13 +378,16 @@ module PrivateChef
     def generate_config(node_name)
       generate_secrets(node_name)
 
-      PrivateChef["default_listen_address"] = "127.0.0.1"
+      # Under ipv4 default to 0.0.0.0 in order to ensure that
+      # any service that needs to listen externally on back-end
+      # does so.
+      PrivateChef["default_listen_address"] = "0.0.0.0"
       # 'ipv4, ipv6, maybe add both
       case PrivateChef['ip_version']
       when 'ipv4', nil
         PrivateChef["use_ipv4"] = true
         PrivateChef["use_ipv6"] = false
-        PrivateChef["default_listen_address"] = "127.0.0.1"
+        PrivateChef["default_listen_address"] = "0.0.0.0"
       when 'ipv6'
         PrivateChef["use_ipv4"] = false
         PrivateChef["use_ipv6"] = true
