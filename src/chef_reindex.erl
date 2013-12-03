@@ -33,7 +33,9 @@
          ez_name_id_dict/2,
          ez_reindex_by_id/3,
          ez_reindex_by_name/3,
-         ez_reindex_direct/3,
+         ez_reindex_direct/2,
+         ez_reindex_direct_from_file/2,
+         ez_reindex_direct_from_list/2,
          ez_reindex_from_file/1,
          make_context/0,
          reindex/2,
@@ -48,11 +50,14 @@
 -spec reindex(Ctx :: chef_db:db_context(),
               OrgInfo :: org_info()) -> ok.
 reindex(Ctx, {OrgId, _OrgName}=OrgInfo) ->
-    BuiltInIndexes = [node, role, environment, client],
-    DataBags = chef_db:list(#chef_data_bag{org_id = OrgId}, Ctx),
-    AllIndexes = BuiltInIndexes ++ DataBags,
+    AllIndexes = fetch_org_indexes(Ctx, OrgId),
     [ reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
     ok.
+
+fetch_org_indexes(Ctx, OrgId) ->
+    BuiltInIndexes = [node, role, environment, client],
+    DataBags = chef_db:list(#chef_data_bag{org_id = OrgId}, Ctx),
+    BuiltInIndexes ++ DataBags.
 
 %% A note about our approach to reindexing:
 %%
@@ -163,24 +168,48 @@ ez_reindex_by_id(OrgName, Index, Ids) ->
 %% batch of objects to `bulk_get' from the db and the size of the multi-doc POSTs sent to
 %% solr. Parallelization of flatten/expand is the responsibility of `chef_index_expand' and
 %% is not a concern of this code.
--spec ez_reindex_direct(binary(), index(), string()) -> ok.
-ez_reindex_direct(OrgName, Index, SolrUrl) ->
+-spec ez_reindex_direct('open-source-chef' | binary(), string()) -> ok.
+ez_reindex_direct(OrgName, SolrUrl) ->
     DbCtx = make_context(),
     OrgId = chef_db:fetch_org_id(DbCtx, OrgName),
-    NameIdDict = chef_db:create_name_id_dict(DbCtx, Index, OrgId),
-    AllIds = all_ids_from_name_id_dict(NameIdDict),
-    error_logger:info_msg("ez_reindex_direct: start ~p ~p ~p ~p",
-                          [OrgName, OrgId, Index, length(AllIds)]),
-    BatchSize = envy:get(chef_wm, bulk_fetch_batch_size, pos_integer),
-    ObjType = chef_object_type(Index),
-    DoBatch = fun(Batch, _Acc) ->
-                      Objects = chef_db:bulk_get(DbCtx, OrgName, ObjType, Batch),
-                      send_direct_to_solr(OrgId, Index, Objects, NameIdDict, SolrUrl)
-              end,
-    chefp:batch_fold(DoBatch, AllIds, ok, BatchSize),
-    error_logger:info_msg("ez_reindex_direct: complete ~p ~p",
-                          [OrgName, OrgId]),
-    ok.
+    AllIndexes = fetch_org_indexes(DbCtx, OrgId),
+    [ begin
+          NameIdDict = chef_db:create_name_id_dict(DbCtx, Idx, OrgId),
+          AllIds = all_ids_from_name_id_dict(NameIdDict),
+          error_logger:info_msg("ez_reindex_direct: start ~p ~p ~p ~p",
+                                [OrgName, OrgId, Idx, length(AllIds)]),
+          BatchSize = envy:get(chef_wm, bulk_fetch_batch_size, pos_integer),
+          ObjType = chef_object_type(Idx),
+          DoBatch = fun(Batch, _Acc) ->
+                            Objects = chef_db:bulk_get(DbCtx, OrgName, ObjType, Batch),
+                            send_direct_to_solr(OrgId, Idx, Objects, NameIdDict, SolrUrl)
+                    end,
+          chefp:batch_fold(DoBatch, AllIds, ok, BatchSize),
+          error_logger:info_msg("ez_reindex_direct: complete ~p ~p ~p",
+                                [OrgName, OrgId, Idx]),
+          ok
+      end || Idx <- AllIndexes ].
+
+ez_reindex_direct_from_file(FileName, SolrUrl) ->
+    {ok, OrgFile} = file:open(FileName, [read, raw, binary, {read_ahead, 1024}]),
+    OrgNames = read_org_file(OrgFile, []),
+    ez_reindex_direct_from_list(OrgNames, SolrUrl).
+
+ez_reindex_direct_from_list(OrgNames, SolrUrl) ->
+    [ begin
+          ez_reindex_direct(OrgName, SolrUrl)
+      end || OrgName  <- OrgNames ].
+
+read_org_file(OrgFile, OrgNames) ->
+    case file:read_line(OrgFile) of
+        {ok, OrgLine} ->
+            OrgName = binary:replace(OrgLine, <<"\n">>, <<"">>),
+            read_org_file(OrgFile, [OrgName | OrgNames]);
+        eof ->
+            OrgNames;
+        {error, Reason} ->
+            {error, Reason}
+    end.
 
 all_ids_from_name_id_dict(NameIdDict) ->
     dict:fold(fun(_K, V, Acc) -> [V|Acc] end,
