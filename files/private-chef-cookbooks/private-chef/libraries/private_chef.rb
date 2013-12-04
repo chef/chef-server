@@ -316,7 +316,7 @@ module PrivateChef
 
     def gen_frontend
       PrivateChef[:role] = "frontend"
-      PrivateChef["nginx"]["enable_ipv6"] = PrivateChef["use_ipv6"]
+      PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
       PrivateChef["bookshelf"]["enable"] ||= false
       PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["couchdb"]["enable"] ||= false
