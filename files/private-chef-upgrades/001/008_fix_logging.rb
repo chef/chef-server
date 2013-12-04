@@ -37,8 +37,8 @@ define_upgrade do
       run_command("chown opscode:opscode /var/log/opscode/#{service}/*")
 
       # There could be leftover logs for a service we don't use anymore...
-      # (e.g. authz). So check the service is defined before restartint it.
-      if File.exist?("/opt/opscode/sv/#{service}")
+      # (e.g. authz). So check the service is defined before restarting it.
+      if File.exist?("/opt/opscode/service/#{service}")
         # force svlogd process to reload
         run_command("/opt/opscode/embedded/bin/sv force-restart /opt/opscode/sv/#{service}/log")
       end
