@@ -297,7 +297,7 @@ module PrivateChef
       PrivateChef["bookshelf"]["listen"] ||= PrivateChef["default_listen_address"]
       PrivateChef["couchdb"]["bind_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["nginx"]["enable_ipv6"] = PrivateChef["use_ipv6"]
+      PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
       PrivateChef["opscode_solr"]["ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
       PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
