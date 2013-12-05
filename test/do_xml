@@ -9,8 +9,14 @@
 -compile([export_all]).
 
 -include_lib("xmerl/include/xmerl.hrl").
+-define(XML_HEADER, <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>">>).
+-define(UPDATE_S, <<"<update>">>).
+-define(UPDATE_E, <<"</update>">>).
+-define(ADD_S, <<"<add>">>).
+-define(ADD_E, <<"</add>">>).
 
 main(Files) ->
+    application:start(jiffy),
     [ process_file(F) || F <- Files ],
     ok.
 
@@ -18,7 +24,18 @@ process_file(File) ->
     {ok, Bin} = file:read_file(File),
     Node = jiffy:decode(Bin),
     Cmd = chef_index_expand:make_command(add, node, <<"beef123">>, <<"db123">>, Node),
-    Doc = chef_index_expand:handle_command(Cmd),
+    {ToAdd,ToDel} = chef_index_expand:handle_commands([Cmd]),
+     Doc = [?XML_HEADER,
+                   ?UPDATE_S,
+                   ToDel,
+                   value_or_empty(ToAdd, [?ADD_S, ToAdd, ?ADD_E]),
+                   ?UPDATE_E],
+
     OutFile = File ++ ".xml.erlang",
-    file:write_file(OutFile, [<<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>">>, Doc]),
+    file:write_file(OutFile, [Doc]),
     ok.
+
+value_or_empty([], _V) ->
+    [];
+value_or_empty([_|_], V) ->
+    V.
