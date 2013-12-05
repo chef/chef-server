@@ -7,8 +7,14 @@
 
 main(Dir) ->
     Files = filelib:wildcard(Dir ++ "/*.merged"),
-    [ process_file(File) || File <- Files ],
+    case lists:usort([ process_file(File) || File <- Files ]) of
+        [ok] ->
+            io:format("All passed~n");
+        _ ->
+            io:format("Failed~")
+    end,
     ok.
+
 
 process_file(File) ->
     Ruby = File ++ ".xml.ruby.lines",
@@ -17,8 +23,9 @@ process_file(File) ->
     Ans = os:cmd(DiffCmd),
     case Ans of
         [] ->
-            io:format("OK === ~p ===~n", [File]);
+            io:format("OK === ~p ===~n", [File]),
+            ok;
         _ ->
-            io:format("=== ~p ===~n~s~n~n", [File, Ans])
-    end,
-    ok.
+            io:format("=== ~p ===~n~s~n~n", [File, Ans]),
+            error
+    end.
