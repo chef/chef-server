@@ -111,25 +111,33 @@ create_path(Req, #base_state{resource_state = #client_state{client_data = Client
 
 %% @doc We generate a new public/private key pair, insert the public key into the DB
 %% and return the private key as part of the response
-from_json(Req, #base_state{reqid = RequestId,
-                           resource_state = #client_state{client_data = ClientData,
-                                                          client_authz_id = AuthzId}} = State) ->
-    Name = ej:get({<<"name">>}, ClientData),
-    {PublicKey, PrivateKey} = case chef_object_base:cert_or_key(ClientData) of
-        {undefined, _} ->
-            chef_wm_util:generate_keypair(Name, RequestId);
-        {PubKey, _PubKeyVersion} ->
-            {PubKey, undefined}
-    end,
+from_json(Req, #base_state{resource_state =
+                               #client_state{client_data = ClientData}} = State) ->
+    KeyData = case chef_object_base:cert_or_key(ClientData) of
+                  {undefined, _} ->
+                      chef_keygen_cache:get_key_pair();
+                  {PubKey, _PubKeyVersion} ->
+                      {PubKey, undefined}
+              end,
+    handle_client_create(KeyData, Req, State).
+
+handle_client_create(keygen_timeout, Req, State) ->
+    {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
+handle_client_create({PublicKey, PrivateKey}, Req,
+                     #base_state{resource_state =
+                                     #client_state{client_data = ClientData,
+                                                   client_authz_id = AuthzId}} = State) ->
     ClientData1 = chef_object_base:set_public_key(ClientData, PublicKey),
     case chef_wm_base:create_from_json(Req, State, chef_client, {authz_id, AuthzId}, ClientData1) of
         {true, Req1, State1} ->
             %% create_from_json by default sets the response to a json body
             %% containing only a uri key. Here we want to add the generated key
             %% pair so we replace the response.
+            Name = ej:get({<<"name">>}, ClientData),
             URI = ?BASE_ROUTES:route(client, Req1, [{name, Name}]),
             EJSON = chef_object_base:set_key_pair({[{<<"uri">>, URI}]},
-                        {public_key, PublicKey}, {private_key, PrivateKey}),
+                                                  {public_key, PublicKey},
+                                                  {private_key, PrivateKey}),
             {true, chef_wm_util:set_json_body(Req1, EJSON), State1};
         Else ->
             Else
