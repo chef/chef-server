@@ -186,7 +186,7 @@ solr_query(Query, ReqId, Darklaunch) ->
                                          undefined ->
                                              chef_solr:search(Query);
                                          Url ->
-                                             chef_solr:search(Url, Query)
+                                             chef_solr:search(Query, Url)
                                      end
                              end)
     end.
