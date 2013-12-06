@@ -6,12 +6,13 @@
 -compile([export_all]).
 
 main(Dir) ->
-    Files = filelib:wildcard(Dir ++ "/*.merged"),
+    Files = filelib:wildcard(Dir ++ "/**.merged") ++ filelib:wildcard(Dir ++ "/**/**.merged"),
+    io:format("Results for ~p~n", [Dir]),
     case lists:usort([ process_file(File) || File <- Files ]) of
         [ok] ->
             io:format("All passed~n");
         _ ->
-            io:format("Failed~")
+            io:format("Failed~n")
     end,
     ok.
 
@@ -23,9 +24,9 @@ process_file(File) ->
     Ans = os:cmd(DiffCmd),
     case Ans of
         [] ->
-            io:format("OK === ~p ===~n", [File]),
+            %io:format("OK === ~p ===~n", [File]),
             ok;
         _ ->
-            io:format("=== ~p ===~n~s~n~n", [File, Ans]),
+            %io:format("=== ~p ===~n~s~n~n", [File, Ans]),
             error
     end.

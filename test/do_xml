@@ -15,7 +15,8 @@
 -define(ADD_S, <<"<add>">>).
 -define(ADD_E, <<"</add>">>).
 
-main(Files) ->
+main(Dir) ->
+    Files = filelib:wildcard(Dir ++ "/**.merged") ++ filelib:wildcard(Dir ++ "/**/**.merged"),
     application:start(jiffy),
     [ process_file(F) || F <- Files ],
     ok.

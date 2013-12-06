@@ -7,7 +7,8 @@
 
 -include_lib("xmerl/include/xmerl.hrl").
 
-main(Files) ->
+main(Dir) ->
+    Files = filelib:wildcard(Dir ++ "/**.xml.*") ++ filelib:wildcard(Dir ++ "/**/**.xml.*"),
     run(Files),
     ok.
 
