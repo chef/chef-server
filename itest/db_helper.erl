@@ -7,6 +7,8 @@
 
 -include_lib("common_test/include/ct.hrl").
 
+-compile([{parse_transform, lager_transform}]).
+
 -export([
          start_db/1,
          stop_db/1
@@ -34,8 +36,9 @@ start_db(Config) ->
             ["cd", ECSchema, "&& sqitch --engine pg --db-name", DbName,
              "--db-port", PortString, "deploy"]
            ],
+    CmdsResult = run_cmds(CMDS),
 
-    error_logger:info_msg("db_start:~n~s~n", [run_cmds(CMDS)]),
+    lager:info("db_start:~n~s~n", [CmdsResult]),
 
     [{db_name, DbName},
      {db_port, DbPort},
@@ -48,7 +51,8 @@ stop_db(Config) ->
     CMDS = [
             ["pg_ctl -D", DbDataDir, "-m fast", "stop"]
            ],
-    error_logger:info_msg("db_stop:~n~s~n", [run_cmds(CMDS)]),
+    CmdsResult = run_cmds(CMDS),
+    lager:info("db_stop:~n~s~n", [CmdsResult]),
     ok.
 
 %%

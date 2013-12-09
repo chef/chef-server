@@ -15,7 +15,6 @@
 -define(REQUIRED_APPS, [sasl,
                         crypto,
                         stats_hero,
-                        fast_log,
                         pooler,
                         public_key,
                         ssl,
@@ -32,6 +31,10 @@
                         rabbit_common,
                         amqp_client,
                         gen_bunny,
+                        compiler,
+                        syntax_tools,
+                        goldrush,
+                        lager,
                         couchbeam,
                         chef_index,
                         oc_chef_authz,
@@ -44,6 +47,8 @@ start_server(Config) ->
     DbDataDir = ?config(db_port, DbConfig),
     DbUser = ?config(db_user, DbConfig),
     DbPass = ?config(db_pass, DbConfig),
+
+    application:set_env(lager, error_logger_redirect, false),
 
     application:set_env(stats_hero, udp_socket_pool_size, 200),
     application:set_env(stats_hero, estatsd_host, "127.0.0.1"),
