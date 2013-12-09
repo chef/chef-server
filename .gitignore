@@ -4,6 +4,5 @@ omnibus.rb
 .bundle
 bin/*
 files/private-chef-cookbooks/cache/
-Berksfile.lock
 vendor/bundle
 vendor/cookbooks
