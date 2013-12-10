@@ -1,4 +1,4 @@
-#
+
 # Author:: Adam Jacob (<adam@opscode.com>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
@@ -199,6 +199,37 @@ default['private_chef']['oc-chef-pedant']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['oc-chef-pedant']['debug_org_creation'] = false
 
 ###
+# Redis
+###
+default['private_chef']['redis']['enable'] = true
+default['private_chef']['redis']['ha'] = false
+default['private_chef']['redis']['dir'] = "/var/opt/opscode/redis-lb"
+default['private_chef']['redis']['data_dir'] = "/var/opt/opscode/redis-lb/data"
+default['private_chef']['redis']['log_directory'] = "/var/log/opscode/redis-lb"
+default['private_chef']['redis']['log_rotation']['file_maxbytes'] = 1000000
+default['private_chef']['redis']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['redis']['port'] = "16379"
+default['private_chef']['redis']['bind'] = "127.0.0.1"
+default['private_chef']['redis']['vip'] = "127.0.0.1"
+default['private_chef']['redis']['keepalive'] = "60"
+default['private_chef']['redis']['timeout'] = "300"
+default['private_chef']['redis']['loglevel'] = "notice"
+default['private_chef']['redis']['databases'] = "16"
+default['private_chef']['redis']['appendonly'] = "no"
+default['private_chef']['redis']['appendfsync'] = "always"
+default['private_chef']['redis']['activerehashing'] = "no"
+default['private_chef']['redis']['aof_rewrite_percent'] = "50"
+default['private_chef']['redis']['aof_rewrite_min_size'] = "16mb"
+default['private_chef']['redis']['maxmemory'] = "8m"
+default['private_chef']['redis']['maxmemory_policy'] = "noeviction"
+
+default['private_chef']['redis']['save_frequency'] = {
+  "900" => "1",
+  "300" => "10",
+  "60" => "1000"
+}
+
+###
 # Load Balancer
 ###
 default['private_chef']['lb']['enable'] = true
@@ -234,6 +265,7 @@ default['private_chef']['nginx']['non_ssl_port'] = 80
 default['private_chef']['nginx']['x_forwarded_proto'] = 'https'
 default['private_chef']['nginx']['server_name'] = node['fqdn']
 default['private_chef']['nginx']['url'] = "https://#{node['fqdn']}"
+
 # HIGHEST SECURITY AT ALL COSTS: TLSv1 only to prevent BEAST, can also turn off RC4/MEDIUM/MD5 to really favor security over speed/comptability
 #default['private_chef']['nginx']['ssl_protocols'] = "-ALL +TLSv1"
 #default['private_chef']['nginx']['ssl_ciphers'] = "RC4-SHA:RC4-MD5:RC4:RSA:HIGH:MEDIUM:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK"
@@ -504,6 +536,7 @@ default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_bind'] = node[
 default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_peer'] = nil
 default['private_chef']['keepalived']['vrrp_instance_preempt_delay'] = 30
 default['private_chef']['keepalived']['vrrp_instance_nopreempt'] = true
+
 default['private_chef']['keepalived']['service_posthooks'] = {
     "rabbitmq" => "/opt/opscode/bin/wait-for-rabbit"
 }
