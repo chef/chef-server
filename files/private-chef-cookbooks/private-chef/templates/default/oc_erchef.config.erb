@@ -40,6 +40,7 @@
              {server_version, "<%= node['private_chef']['version'] %>"},
              {health_ping_timeout, 400},
              {health_ping_modules, [oc_chef_authz, chef_otto, chef_sql, chef_solr]},
+             {base_resource_url, <%= @helper.erl_atom_or_string(node['private_chef']['opscode-erchef']['base_resource_url']) %>},
              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>}
             ]},
   {chef_authn, [
@@ -81,6 +82,7 @@
                   {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
                   {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
                   {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= node['private_chef']['bookshelf']['vip'] %>"},
+                  {s3_external_url, <%= @helper.erl_atom_or_string(node['private_chef']['bookshelf']['external_url']) %>},
                   {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
                   {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>},
                   {s3_parallel_ops_timeout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] %>},
