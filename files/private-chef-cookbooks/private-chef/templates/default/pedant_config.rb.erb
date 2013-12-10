@@ -139,6 +139,9 @@ ruby_role_endpoint?        false
 ruby_cookbook_endpoint?    false
 ruby_client_endpoint?      false
 ruby_users_endpoint?       <%= !node['private_chef']['dark_launch']['erlang_user_endpoint'] %>
+ruby_container_endpoint?   true
+ruby_container_endpoint_in_sql?  false
+ruby_group_endpoint?      true
 
 old_runlists_and_search true
 
