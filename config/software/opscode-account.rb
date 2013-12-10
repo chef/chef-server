@@ -1,5 +1,5 @@
 name "opscode-account"
-version "rel-1.38.0"
+version "rel-1.39.0"
 
 dependency "ruby"
 dependency "bundler"
