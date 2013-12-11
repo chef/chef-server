@@ -14,7 +14,7 @@
                   otto_connection,
                   darklaunch = undefined}).
 
--compile(export_all).
+-compile([export_all, {parse_transform, lager_transform}]).
 
 -define(ORG_ID, <<"00000000000000000000000000000000">>).
 -define(AUTHZ_ID, <<"00000000000000000000000000000001">>).
@@ -64,7 +64,7 @@ delete_all_containers() ->
         Error ->
             throw(Error)
     end,
-    error_logger:info_msg("Delete containers: ~p", [Result]),
+    lager:info("Delete containers: ~p", [Result]),
     ok.
 
 list_when_no_containers(_) ->

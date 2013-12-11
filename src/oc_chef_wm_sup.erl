@@ -73,7 +73,7 @@ load_ibrowse_config() ->
     %% FIXME: location of the ibrowse.config should be itself configurable. Also need to
     %% revisit what's in that config to ensure it is as useful as possible.
     ConfigFile = filename:absname(filename:join(["etc", "ibrowse", "ibrowse.config"])),
-    error_logger:info_msg("Loading ibrowse configuration from ~s~n", [ConfigFile]),
+    lager:info("Loading ibrowse configuration from ~s~n", [ConfigFile]),
     ok = ibrowse:rescan_config(ConfigFile),
     ok.
 
@@ -81,10 +81,10 @@ enable_org_cache() ->
     %% FIXME: should this config live at the oc_chef_wm level?
     case envy:get(chef_db, cache_defaults, undefined, any) of
         undefined ->
-            error_logger:info_msg("Org guid cache disabled~n");
+            lager:info("Org guid cache disabled~n");
         _Defaults ->
             chef_cache:init(org_guid),
-            error_logger:info_msg("Org guid cache enabled~n")
+            lager:info("Org guid cache enabled~n")
     end,
     ok.
 

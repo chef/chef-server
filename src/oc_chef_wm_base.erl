@@ -88,7 +88,7 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
                 {Error, {AuthzObjectType, AuthzId, Permission}} ->
                     #base_state{requestor_id=RequestorId} = State1,
                     %% TODO: Extract this logging message, as it is used elsewhere, too
-                    error_logger:error_msg("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
+                    lager:error("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
                                            [Permission, {AuthzObjectType, AuthzId}, RequestorId, Error]),
                     {{halt, 500}, Req, State1#base_state{log_msg={error, is_authorized_on_resource}}}
             end;
@@ -250,7 +250,7 @@ check_permission(AuthzObjectType, AuthzId, Req,
             {Req1, State1} = set_forbidden_msg(Req, State),
             {false, Req1, State1};
         Error ->
-            error_logger:error_msg("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
+            lager:error("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
                                    [Perm, {AuthzObjectType, AuthzId}, RequestorId, Error]),
             {{halt, 500}, Req, State#base_state{log_msg={error, is_authorized_on_resource}}}
     end.
@@ -434,7 +434,7 @@ check_cookbook_authz(Cookbooks, _Req, #base_state{reqid = ReqId,
         true -> ok;
         {error, Why} ->
             Report = {check_cookbook_authz, {Why, ReqId}},
-            error_logger:error_report(Report),
+            lager:error("~p", [Report]),
             error(Report);
         {false, NoAuthzList} ->
             {error, {[{<<"message">>, <<"Read permission is not granted for one or more cookbooks">>},
