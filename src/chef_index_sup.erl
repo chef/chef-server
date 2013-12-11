@@ -60,7 +60,7 @@ amqp_child_spec() ->
             ExchgName = envy:get(chef_index,rabbitmq_exchange, binary),
             Exchange = {#'exchange.declare'{exchange=ExchgName, durable=true}},
             Network = {network, Host, Port, {User, Password}, VHost},
-            error_logger:info_msg("Connecting to Rabbit at ~s:~p~s (exchange: ~p)~n",
+            error_logger:info_msg("Connecting to Rabbit at ~p:~p~s (exchange: ~p)~n",
                                   [Host, Port, VHost, ExchgName]),
             IndexDesc = {chef_index_queue, {bunnyc, start_link, [chef_index_queue, Network, Exchange, []]},
                          permanent, 5000, worker, dynamic},
