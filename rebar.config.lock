@@ -2,9 +2,12 @@
 
 {require_otp_vsn,"R1[56]B.*"}.
 {erl_dep_retries,10}.
-{deps,[{eper,".*",
+{deps,[{envy,".*",
+             {git,"git://github.com/manderson26/envy.git",
+                  "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
+       {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "35636bc4de07bc803ea4fc9731fab005d0378c2b"}},
+                  "1bd0d0212a563c1249fb66e9acd5760be30ff438"}},
        {erlsom,".*",
                {git,"git://github.com/opscode/erlsom.git",
                     "c5ca9fca1257f563d78b048e35ac60832ec80584"}},
@@ -25,22 +28,22 @@
                    "169cffd94759e99e2e8870b125861a91e3c1482a"}},
        {mini_s3,".*",
                 {git,"git://github.com/opscode/mini_s3.git",
-                     "ddeaa30687918706eb70f2b380ecbc2d7fbe53d2"}},
+                     "ed42875aefe598e8a31145d1482ac08827c2e9f6"}},
        {mixer,".*",
               {git,"git://github.com/opscode/mixer.git",
                    "58ded93d5c47675899d8e5e1589270f340ea66c5"}},
        {mochiweb,".*",
-                 {git,"git://github.com/basho/mochiweb",
-                      "05b5b7eb7b830afbd9ba349a40bf40ba0462aa11"}},
+                 {git,"git://github.com/basho/mochiweb.git",
+                      "5e6e3e688dc9987a97e261431256e29671555c0b"}},
        {opscoderl_wm,".*",
                      {git,"git://github.com/opscode/opscoderl_wm.git",
-                          "bbfa553114d28e1f2936f71e911209242b3da429"}},
+                          "3b476ef251637ad41c7187f24e011f0a52bd0215"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
                                     "758d1cf4cc79483e1fbaf2ea59ed9e9f76b4a012"}},
        {webmachine,".*",
-                   {git,"git://github.com/basho/webmachine",
-                        "4c441d0f0ca9e343601eb39c8dd2e2117b781dfc"}}]}.
+                   {git,"git://github.com/opscode/webmachine",
+                        "6ce70393009446191af4771671712ffa0f1c83eb"}}]}.
 {erl_opts,[debug_info,warnings_as_errors]}.
 {xref_checks,[exports_not_used,undefined_function_calls]}.
 {plugins,[rebar_lock_deps_plugin]}.
