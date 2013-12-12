@@ -93,8 +93,8 @@
               {git,"git://github.com/opscode/mixer.git",
                    "58ded93d5c47675899d8e5e1589270f340ea66c5"}},
        {mochiweb,".*",
-                 {git,"git://github.com/basho/mochiweb",
-                      "05b5b7eb7b830afbd9ba349a40bf40ba0462aa11"}},
+                 {git,"git://github.com/basho/mochiweb.git",
+                      "5e6e3e688dc9987a97e261431256e29671555c0b"}},
        {oauth,".*",
               {git,"git://github.com/opscode/erlang-oauth.git",
                    "2b796ea7973c0f38aad569bf2506bd8026eca004"}},
@@ -112,7 +112,7 @@
                              "6952d62c58d9671ebfad28e1e106fb78501d6065"}},
        {opscoderl_wm,".*",
                      {git,"git@github.com:opscode/opscoderl_wm.git",
-                          "5f4bec5510acf8be3e11b9e31f2539d6ba73753a"}},
+                          "3b476ef251637ad41c7187f24e011f0a52bd0215"}},
        {pooler,".*",
                {git,"git://github.com/seth/pooler.git",
                     "37da392e5de1d8b9bfa277e2e13238b6610a1cd7"}},
@@ -132,8 +132,8 @@
                    {git,"git@github.com:opscode/stats_hero.git",
                         "e3e3e9b5ee7e82cda0774529cba5d00b47fb0aca"}},
        {webmachine,".*",
-                   {git,"git://github.com/basho/webmachine",
-                        "4c441d0f0ca9e343601eb39c8dd2e2117b781dfc"}}]}.
+                   {git,"git://github.com/opscode/webmachine",
+                        "6ce70393009446191af4771671712ffa0f1c83eb"}}]}.
 {plugins,[rebar_lock_deps_plugin]}.
 {cover_enabled,true}.
 {erl_opts,[{d,'OC_CHEF'},
