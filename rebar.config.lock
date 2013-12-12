@@ -2,7 +2,7 @@
 
 {sub_dirs,["rel","apps/bifrost"]}.
 {erl_opts,[{debug_info}]}.
-{deps,[{meck,"0.8.1",{git,"git://github.com/basho/meck.git",{tag,"0.8.1"}}},
+{deps,[{meck,".*",{git,"git://github.com/eproxus/meck.git",{branch,"master"}}},
        {edown,".*",
               {git,"git://github.com/seth/edown.git",
                    "30a9f7867d615af45783235faa52742d11a9348e"}},
@@ -21,9 +21,6 @@
        {goldrush,".*",
                  {git,"git://github.com/DeadZen/goldrush.git",
                       "879c69874a555b2c13498aa4a3da6f6bbbb6a031"}},
-       {ibrowse,".*",
-                {git,"git://github.com/cmullaparthi/ibrowse.git",
-                     "9b8b042fb7d37b90994ef6b6615c92dd2769328e"}},
        {jiffy,".*",
               {git,"git://github.com/davisp/jiffy.git",
                    "3b6a1327d418f7594ecb23aa8d7874c3986f433e"}},
@@ -50,7 +47,7 @@
                         "e3e3e9b5ee7e82cda0774529cba5d00b47fb0aca"}},
        {webmachine,".*",
                    {git,"git://github.com/opscode/webmachine",
-                        "31c2413fa5f80204e2da2a9527c7fd53cd7b18e9"}}]}.
+                        "6ce70393009446191af4771671712ffa0f1c83eb"}}]}.
 {eunit_opts,[verbose,{report,{eunit_surefire,[{dir,"."}]}}]}.
 {cover_enabled,true}.
 {plugins,[rebar_lock_deps_plugin]}.
