@@ -5,6 +5,9 @@
 ### private-chef-cookbooks
 * [OC-9213] Provide default value for jetty log path to prevent deletion of files in ``/root``.
 
+### opscode-omnibus
+* argument validation fix in private-chef-ctl to allow ``private-chef-ctl password`` to work.
+
 ## 1.4.8 (2014-02-28)
 
 ### private-chef-cookbooks
