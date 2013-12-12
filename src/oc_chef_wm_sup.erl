@@ -63,11 +63,23 @@ init([]) ->
                {chef_keyring, start_link, []},
                permanent, brutal_kill, worker, [chef_keyring]},
 
+    KeyGenWorkerSup = {chef_keygen_worker_sup,
+                       {chef_keygen_worker_sup, start_link, []},
+                       permanent, 5000, supervisor, [chef_keygen_worker_sup]},
+
+    KeyCache = {chef_keygen_cache,
+                {chef_keygen_cache, start_link, []},
+                permanent, 5000, worker, [chef_keygen_cache]},
+
     Index = {chef_index_sup,
              {chef_index_sup, start_link, []},
              permanent, 5000, supervisor, [chef_index_sup]},
 
-    {ok, { {one_for_one, 10, 10}, maybe_start_action(Action, [KeyRing, Index, Web])} }.
+    {ok, { {one_for_one, 10, 10}, maybe_start_action(Action, [KeyRing,
+                                                              Index,
+                                                              KeyGenWorkerSup,
+                                                              KeyCache,
+                                                              Web])}}.
 
 maybe_start_action(true, Workers) ->
     [{oc_chef_action_sup,
