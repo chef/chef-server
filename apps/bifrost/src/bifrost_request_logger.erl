@@ -18,7 +18,7 @@
 %% external API Functions
 -export([log_access/1]).
 
--include_lib("webmachine/src/webmachine_logger.hrl").
+-include_lib("webmachine/include/webmachine_logger.hrl").
 
 -compile([{parse_transform, lager_transform}]).
 
