@@ -192,13 +192,17 @@ solr_query(Query, ReqId, Darklaunch) ->
     end.
 
 gather_solr_queries(Pids) ->
-    [ receive
+    log_differences([ receive
           {Pid, Result} ->
               Result
       after 20000 ->
               erlang:error({solr_query_timeout, Pid})
       end
-      || Pid <- Pids ].
+      || Pid <- Pids ]).
+
+log_differences([_OldSolr, _NewSolr] = Results) ->
+    lager:log(debug, [{solr_diff, ?MODULE}], "~p", [Results]),
+    Results.
 
 spawn_solr_query(Label, Url, Query, ReqId) ->
     Parent = self(),
