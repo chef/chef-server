@@ -39,7 +39,9 @@
          set_json_body/2,
          set_uri_of_created_resource/2,
          with_error_body/2,
-         generate_keypair/2]).
+         generate_keypair/2,
+         lists_diff/2
+        ]).
 
 -include("chef_wm.hrl").
 -include_lib("chef_certgen/include/chef_certgen.hrl").
@@ -351,3 +353,16 @@ validate_local_key_gen({true, _Bits}) ->
     true;
 validate_local_key_gen(Val) ->
     {invalid_value, Val, "Should be a tuple of {true, Bits}"}.
+
+-spec lists_diff(list(), list()) -> {list(), list()}.
+lists_diff(FirstList, SecondList) ->
+    lists_diff_sorted(lists:sort(FirstList), lists:sort(SecondList)).
+lists_diff_sorted(List, List) ->
+    {[], []};
+lists_diff_sorted(FirstList, SecondList) ->
+    FirstSet = sets:from_list(FirstList),
+    SecondSet = sets:from_list(SecondList),
+    {lists:sort(sets:to_list(sets:subtract(FirstSet, SecondSet))),
+     lists:sort(sets:to_list(sets:subtract(SecondSet, FirstSet)))}.
+
+    

@@ -119,7 +119,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                          darklaunch = Darklaunch} = State) ->
     BatchSize = batch_size(),
     Query = SearchState#search_state.solr_query,
-    case solr_query(Query, ReqId, Darklaunch) of
+    case solr_query(Query, ReqId, Darklaunch, OrgName) of
         {ok, Start, SolrNumFound, Ids} ->
             IndexType = Query#chef_solr_query.index,
             Paths = SearchState#search_state.partial_paths,
@@ -162,7 +162,7 @@ batch_size() ->
 search_log_msg(SolrNumFound, NumIds, DbNumFound) ->
     {search, SolrNumFound, NumIds, DbNumFound}.
 
-solr_query(Query, ReqId, Darklaunch) ->
+solr_query(Query, ReqId, Darklaunch, OrgName) ->
     %% solr_urls should be a proplist with keys 'default' and 'aux' each mapping to a Solr
     %% root URL.
     SolrUrls = envy:get(chef_wm, solr_urls, [], list),
@@ -176,7 +176,7 @@ solr_query(Query, ReqId, Darklaunch) ->
             %% default URL goes first and that's the only result we capture
             Pids = [ spawn_solr_query(Label, Url, Query, ReqId) ||
                        {Label, Url} <- [{search, DefaultUrl}, {search_aux, AuxUrl}] ],
-            hd(gather_solr_queries(Pids));
+            hd(gather_solr_queries(Pids, Query, OrgName));
         false ->
             stats_hero:ctime(ReqId, {chef_solr, search},
                              fun() ->
@@ -191,17 +191,25 @@ solr_query(Query, ReqId, Darklaunch) ->
                              end)
     end.
 
-gather_solr_queries(Pids) ->
+gather_solr_queries(Pids, Query, OrgName) ->
     log_differences([ receive
           {Pid, Result} ->
               Result
       after 20000 ->
               erlang:error({solr_query_timeout, Pid})
       end
-      || Pid <- Pids ]).
+      || Pid <- Pids ], Query, OrgName).
 
-log_differences([_OldSolr, _NewSolr] = Results) ->
-    lager:log(debug, [{solr_diff, ?MODULE}], "~p", [Results]),
+log_differences([{_,_,_,OldSolrResults}, {_,_,_,NewSolrResults}] = Results, Query, OrgName) ->
+    case chef_wm_util:lists_diff(OldSolrResults, NewSolrResults) of
+        {[], []} ->
+            ok;
+        {DiffFirstSecond, DiffSecondFirst} ->
+            lager:log(debug, [{solr_diff, ?MODULE}], "~p", [{{'query', Query},
+                                                             {orgname, OrgName},
+                                                             {solr1, DiffFirstSecond},
+                                                             {solr4, DiffSecondFirst}}])
+    end,
     Results.
 
 spawn_solr_query(Label, Url, Query, ReqId) ->

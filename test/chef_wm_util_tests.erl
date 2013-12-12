@@ -89,5 +89,19 @@ base_uri_test_() ->
     ].
 
 
+lists_diff_test_() ->
+    [
+     {"When lists equal returns {[],[]}",
+      ?_assertEqual({[],[]}, chef_wm_util:lists_diff(lists:seq(0,10),lists:seq(0,10)))},
+     {"When lists equal different order returns {[],[]}",
+      ?_assertEqual({[],[]}, chef_wm_util:lists_diff(lists:seq(0,10),lists:reverse(lists:seq(0,10))))},
+     {"When first list longer than second returns diff, []",
+      ?_assertEqual({lists:seq(0,5), []}, chef_wm_util:lists_diff(lists:seq(0,10), lists:seq(6,10)))},
+     {"When second list longer than first returns [], diff",
+      ?_assertEqual({[], lists:seq(0,5)}, chef_wm_util:lists_diff(lists:seq(6,10), lists:seq(0,10)))},
+     {"When differences in middle, returns diff, diff",
+      ?_assertEqual({[1,3,5,7,8,9,10], [2,4,6,11,12,13]}, chef_wm_util:lists_diff([1,3,5,7,8,9,10], [2,4,6,11,12,13]))},
+     {"When differences and different order, returns diff, diff",
+      ?_assertEqual({[1,3,5,7,8,9], [2,4,6,11,12,13]}, chef_wm_util:lists_diff([1,3,5,7,8,9,10], lists:reverse([10,2,4,6,11,12,13])))}
 
-
+    ].
