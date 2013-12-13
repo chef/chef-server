@@ -88,7 +88,7 @@
           {db_name, "bifrost" },
           {idle_check, 10000},
           {prepared_statements, {bifrost_db, statements, []} },
-          {column_transforms, undefined}
+          {column_transforms, []}
          ]},
  {stats_hero, [
                 {udp_socket_pool_size, <%= node['private_chef']['postgresql']['max_connections'] %> },
