@@ -1,5 +1,5 @@
 name "oc_erchef"
-version "mp/ipv6_compat"
+version "sf/ipv6_compat"
 
 dependency "erlang"
 dependency "rebar"
