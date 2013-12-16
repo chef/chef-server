@@ -1,4 +1,5 @@
 name "oc_erchef"
+# updated for webmachine 1.10.5.3
 version "sf/ipv6_compat"
 
 dependency "erlang"
