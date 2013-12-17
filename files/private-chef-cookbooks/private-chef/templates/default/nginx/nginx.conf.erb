@@ -27,6 +27,22 @@ http {
 
   include /opt/opscode/embedded/conf/mime.types;
 
+  lua_package_path "<%=@script_path %>/?.lua;$prefix/?.lua;;";
+  lua_shared_dict maint_data 1m;
+  lua_shared_dict banned_ips 1m;
+
+  # Preload some shared modules globally
+  init_by_lua '
+    redis = require("resty/redis")
+    config = require("config")
+    routes = require("routes")
+    resolver = require("resolver")
+    route_checks = require("route_checks")
+
+    config.set_maint_refresh_interval(<%=@maint_refresh_interval%>)
+    config.set_ban_refresh_interval(<%=@ban_refresh_interval%>)
+  ';
+
   <%- node['private_chef']['lb']['upstream'].each do |uname, servers| -%>
   upstream <%= uname.sub(/-/, '_') %> {
     <%- servers.each do |server| -%>
@@ -82,27 +98,16 @@ http {
     access_log /var/log/opscode/nginx/internal-chef.access.log opscode;
     error_log  /var/log/opscode/nginx/internal-chef.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
 
-    # search requests
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/.+$") %>
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/(?:search)/?$") %>
-
-    # erchef
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/nodes/{0,1}.*$") %>
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/[^/]+/nodes$") %>
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/roles/{0,1}.*$") %>
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/data/{0,1}.*$") %>
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/environments/{0,1}.*$") %>
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/cookbooks/{0,1}.*$") %>
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/sandboxes/{0,1}.*$") %>
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/principals/{0,1}.*$") %>
-
     # Include internal routes for addons
     include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_internal.conf;
 
-    location / {
-      proxy_redirect http://opscode_erchef /;
-      proxy_pass http://opscode_erchef;
+    location "/" {
+      set $upstream "";
+      set $mode "internal_chef";
+      rewrite_by_lua_file '<%=@script_path%>/dispatch.lua';
+
+      proxy_redirect http://$upstream /;
+      proxy_pass http://$upstream;
     }
   }
 
@@ -126,13 +131,13 @@ http {
     access_log /var/log/opscode/nginx/internal-account.access.log opscode;
     error_log  /var/log/opscode/nginx/internal-account.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
 
-    # This is currently needed ONLY for webui 1.  It issues calls
-    # directly to opscode_account for for retrieving and interacting
-    # with clients, but this is now handled by erchef.
-    <%= @helper.chef_api("^/organizations/[a-z0-9\-_]+?/clients/{0,1}.*$") %>
-
     location / {
-      proxy_pass http://opscode_account;
+      set $upstream "";
+      set $mode "internal_acct";
+      rewrite_by_lua_file '<%=@script_path%>/dispatch.lua';
+
+      proxy_redirect http://$upstream /;
+      proxy_pass http://$upstream;
     }
   }
 
@@ -160,7 +165,9 @@ http {
       proxy_pass http://oc_bifrost;
     }
   }
-  <%- end  # if enable lb int -%>
+  <%- end -%>
 
   include <%= node['private_chef']['nginx']['dir'] %>/etc/nginx.d/*.conf;
 }
+
+
