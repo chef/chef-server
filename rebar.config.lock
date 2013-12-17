@@ -47,7 +47,7 @@
                         "e3e3e9b5ee7e82cda0774529cba5d00b47fb0aca"}},
        {webmachine,".*",
                    {git,"git://github.com/opscode/webmachine",
-                        "6ce70393009446191af4771671712ffa0f1c83eb"}}]}.
+                        "7cd6ddf592a2e050544891d151944dd3017dc517"}}]}.
 {eunit_opts,[verbose,{report,{eunit_surefire,[{dir,"."}]}}]}.
 {cover_enabled,true}.
 {plugins,[rebar_lock_deps_plugin]}.
