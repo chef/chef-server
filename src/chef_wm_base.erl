@@ -408,7 +408,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
     end.
 
 -spec delete_object(chef_db:db_context(),
-                    chef_object() | #chef_cookbook_version{},
+                    chef_object() | #chef_cookbook_version{} | #chef_user{},
                     object_id(),
                     any()) -> ok.
 delete_object(DbContext, Object, RequestId, Darklaunch) ->

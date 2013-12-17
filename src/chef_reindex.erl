@@ -168,7 +168,7 @@ ez_reindex_by_id(OrgName, Index, Ids) ->
 %% batch of objects to `bulk_get' from the db and the size of the multi-doc POSTs sent to
 %% solr. Parallelization of flatten/expand is the responsibility of `chef_index_expand' and
 %% is not a concern of this code.
--spec ez_reindex_direct('open-source-chef' | binary(), string()) -> ok.
+-spec ez_reindex_direct('open-source-chef' | binary(), string()) -> [ok].
 ez_reindex_direct(OrgName, SolrUrl) ->
     DbCtx = make_context(),
     OrgId = chef_db:fetch_org_id(DbCtx, OrgName),
