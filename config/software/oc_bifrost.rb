@@ -1,6 +1,7 @@
 name "oc_bifrost"
 version "1.4.2"
 
+
 dependencies ["erlang", "rebar", "rsync", "sqitch"]
 
 source :git => "git@github.com:opscode/oc_bifrost"

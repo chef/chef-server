@@ -6,9 +6,9 @@ class NginxErb
     @node = node
   end
 
-  def listen_port(proto)
+
+  def listen_port(proto, options = {})
     listen_port = ""
-    listen_port << "[::]:" if node['private_chef']['nginx']['enable_ipv6']
     listen_port << case proto
                    when "http"
                      node['private_chef']['nginx']['non_ssl_port'].to_s || "80"
@@ -17,7 +17,20 @@ class NginxErb
                    else
                      proto.to_s
                    end
-    listen_port
+
+    if node['private_chef']['nginx']['enable_ipv6']
+      # In some cases, we're serving as a front-end for a service that's already
+      # listening on the same port in ipv4 - this prevents a conflict in that situation.
+      if options[:ipv6_only]
+        "listen [::]:#{listen_port} ipv6only=on;"
+      else
+        # Listen to the same port on both v6 and v4
+        "listen [::]:#{listen_port} ipv6only=off;"
+      end
+    else
+      # default behavior to listen only on v4
+      "listen #{listen_port};"
+    end
   end
 
   def access_log(proto)

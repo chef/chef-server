@@ -1,6 +1,6 @@
 #
-# Author:: Adam Jacob (<adam@opscode.com>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
+# Author:: Adam Jacob (<adam@opscode.com>)
 #
 
 require 'uuidtools'
@@ -140,6 +140,7 @@ directory "/var/opt/opscode" do
 end
 
 include_recipe "enterprise::runit"
+include_recipe "private-chef::sysctl-updates"
 
 # Configure Services
 [

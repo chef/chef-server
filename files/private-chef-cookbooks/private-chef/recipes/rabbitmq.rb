@@ -70,7 +70,7 @@ end
 
 component_runit_service "rabbitmq"
 
-if node['private_chef']['bootstrap']['enable']
+if is_data_master?
   rmq_ctl = "/opt/opscode/embedded/bin/rabbitmqctl"
   opc_ctl = "/opt/opscode/bin/private-chef-ctl"
   opc_username = node["private_chef"]["user"]["username"]
