@@ -112,7 +112,7 @@
                              "6952d62c58d9671ebfad28e1e106fb78501d6065"}},
        {opscoderl_wm,".*",
                      {git,"git@github.com:opscode/opscoderl_wm.git",
-                          "3b476ef251637ad41c7187f24e011f0a52bd0215"}},
+                          "f641746037f7a24fbf74c2951345019324335aa2"}},
        {pooler,".*",
                {git,"git://github.com/seth/pooler.git",
                     "37da392e5de1d8b9bfa277e2e13238b6610a1cd7"}},
@@ -133,7 +133,7 @@
                         "e3e3e9b5ee7e82cda0774529cba5d00b47fb0aca"}},
        {webmachine,".*",
                    {git,"git://github.com/opscode/webmachine",
-                        "6ce70393009446191af4771671712ffa0f1c83eb"}}]}.
+                        "7cd6ddf592a2e050544891d151944dd3017dc517"}}]}.
 {plugins,[rebar_lock_deps_plugin]}.
 {cover_enabled,true}.
 {erl_opts,[{d,'OC_CHEF'},
