@@ -303,8 +303,7 @@ module PrivateChef
       PrivateChef["opscode_solr"]["ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
       PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
-
-      PrivateChef["opscode_certificate"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["opscode_certificate"]["vip"] ||= '127.0.0.1'
 
       authaddr = []
       authaddr << "0.0.0.0/0" # if PrivateChef["use_ipv4"]
@@ -326,9 +325,9 @@ module PrivateChef
       PrivateChef["rabbitmq"]["enable"] ||= false
       PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
 
-      PrivateChef["opscode_certificate"]["enable"] ||= false
-      # Why is this even needed?
-      PrivateChef["opscode_certificate"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      # move certgen back to front ends; the backend canna handle the load
+      PrivateChef["opscode_certificate"]["enable"] ||= true
+      PrivateChef["opscode_certificate"]["vip"] ||= '127.0.0.1'
 
       PrivateChef["opscode_solr"]["enable"] ||= false
       PrivateChef["opscode_solr"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
