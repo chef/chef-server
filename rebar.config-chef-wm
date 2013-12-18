@@ -8,6 +8,9 @@
   %% Note that opscoderl_wm (webmachine) needs to come before chef_index
   %% to ensure we get mochiweb as specified by webmachine and not the
   %% one from gen_bunny.
+  {lager, ".*",
+   {git, "https://github.com/basho/lager.git", {tag, "2.0.1"}}},
+
   {opscoderl_wm, ".*",
    {git, "git://github.com/opscode/opscoderl_wm.git", {branch, "master"}}},
 
@@ -54,3 +57,6 @@
 %% {erl_opts, [debug_info]}.
 
 {cover_enabled, true}.
+
+{erl_opts, [debug_info,
+            {parse_transform,lager_transform}]}.
