@@ -164,8 +164,8 @@ aux_index_queue_delete(VHost, TypeName, Id, DbName, Darklaunch) ->
 default_and_aux() ->
     %% rabbitmq_vhosts is a proplist with keys 'default' and 'aux' mapping to the
     %% appropriate rabbitmq vhosts.
-    VHosts = envy:get(chef_wm, rabbitmq_vhosts, list),
-    {default, DefaultVHost} = lists:keyfind(default, 1, VHosts),
-    {aux, AuxVHost} = lists:keyfind(aux, 1, VHosts),
+    VHosts = envy:get(chef_wm, rabbitmq_vhosts, [{default, envy:get(chef_index, rabbitmq_vhost, binary)}], list),
+    DefaultVHost = proplists:get_value(default, VHosts),
+    AuxVHost = proplists:get_value(aux, VHosts),
     {DefaultVHost, AuxVHost}.
 
