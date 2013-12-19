@@ -375,6 +375,9 @@ default['private_chef']['oc_bifrost']['sql_user'] = "bifrost"
 default['private_chef']['oc_bifrost']['sql_password'] = "challengeaccepted"
 default['private_chef']['oc_bifrost']['sql_ro_user'] = "bifrost_ro"
 default['private_chef']['oc_bifrost']['sql_ro_password'] = "foreveralone"
+# Enable extended performance logging data for bifrost.  Setting this to false
+# will cut bifrost request log size approximately in half.
+default['private_chef']['oc_bifrost']['extended_perf_log'] = true
 
 ####
 # Authz
