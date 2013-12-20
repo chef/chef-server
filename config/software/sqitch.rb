@@ -10,17 +10,20 @@ source :url => "http://www.cpan.org/authors/id/D/DW/DWHEELER/App-Sqitch-#{versio
 relative_path "App-Sqitch-#{version}"
 
 env = {
-  "PATH" => "#{install_dir}/embedded/bin:#{ENV["PATH"]}",
+  "PATH" => "#{install_dir}/embedded/bin:#{ENV["PATH"]}"
 }
+
+# Ensure we install with the properly configured embedded `cpan` client
+omnibus_cpan_client = "#{install_dir}/embedded/bin/cpan -j #{cache_dir}/cpan/OmnibusConfig.pm"
 
 # See https://github.com/theory/sqitch for more
 build do
   command "perl Build.PL", :env => env
-  command "./Build installdeps", :env => env
+  command "./Build installdeps --cpan_client '#{omnibus_cpan_client}'", :env => env
   command "./Build", :env => env
   command "./Build test", :env => env
   command "./Build install", :env => env
 
   # We're using PostgreSQL as our database engine, so we need the right driver
-  command "yes | cpan DBD::Pg", :env => env
+  command "yes | #{omnibus_cpan_client} DBD::Pg", :env => env
 end
