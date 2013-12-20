@@ -357,8 +357,6 @@ validate_local_key_gen(Val) ->
 -spec lists_diff(list(), list()) -> {list(), list()}.
 lists_diff(FirstList, SecondList) ->
     lists_diff_sorted(lists:sort(FirstList), lists:sort(SecondList)).
-lists_diff_sorted(List, List) ->
-    {[], []};
 lists_diff_sorted(FirstList, SecondList) ->
     FirstSet = sets:from_list(FirstList),
     SecondSet = sets:from_list(SecondList),

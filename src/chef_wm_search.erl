@@ -195,7 +195,7 @@ gather_solr_queries(Pids, Query, OrgName) ->
     log_differences([ receive
           {Pid, Result} ->
               Result
-      after 20000 ->
+      after envy:get(chef_wm, solr_timeout, 30000, pos_int) ->
               erlang:error({solr_query_timeout, Pid})
       end
       || Pid <- Pids ], Query, OrgName).
