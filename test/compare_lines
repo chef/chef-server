@@ -24,9 +24,7 @@ process_file(File) ->
     Ans = os:cmd(DiffCmd),
     case Ans of
         [] ->
-            %io:format("OK === ~p ===~n", [File]),
             ok;
         _ ->
-            %io:format("=== ~p ===~n~s~n~n", [File, Ans]),
             error
     end.
