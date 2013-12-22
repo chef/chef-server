@@ -260,8 +260,8 @@ default['private_chef']['lb']['chef_max_version'] = 11
 # Load balancer route configuration
 ###
 default['private_chef']['lb']['xdl_defaults']['503_mode'] = false
-default['private_chef']['lb']['xdl_defaults']['couchdb_containers'] = false
-default['private_chef']['lb']['xdl_defaults']['couchdb_groups'] = false
+default['private_chef']['lb']['xdl_defaults']['couchdb_containers'] = true
+default['private_chef']['lb']['xdl_defaults']['couchdb_groups'] = true
 
 ####
 # Nginx
