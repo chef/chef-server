@@ -1,0 +1,120 @@
+#!/usr/bin/env escript
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil;fill-column: 92 -*-
+%% %% ex: ts=4 sw=4 et ft=erlang
+%%! -hidden
+%%
+%% Copyright(c) 2013 Opscode, Inc
+%% All Rights Reserved
+%%
+%% @doc Migrate all users, one at a time, and output the summary results to stdout
+%% in the form:
+%%
+%% `
+%% Successfully Migrated: org-name-list
+%%     Failed to Migrate: org-name-list
+%%         Not Attempted: org-name-list
+%% '
+%%
+%% <b>Important</b>: this must be run as root or connect will fail.
+%% If an error occurs, it will also be displayed on the console.
+%% If any org encounters errors in migrating or resetting state,
+%% the script will exit with exit code 1. Otherwise it will exit
+%% with exit code0, including if there are no orgs to migrate.
+
+
+
+-define(SELF, 'migrate-bcrypt-script@127.0.0.1').
+-define(MOVER, 'mover@127.0.0.1').
+-define(MOVER_COOKIE, 'mover').
+-define(MOVER_MOD, 'mover_manager').
+-define(WORKERS, 6).
+-define(SUCCESS_EXIT, 0).
+-define(FAILURE_EXIT, 1).
+
+
+main([]) ->
+    main(normal);
+main(["silent"]) ->
+    main(silent);
+main(Other) when is_list(Other) ->
+    io:fwrite("Unknown argument(s): ~p.~nUsage: migrate [silent]~n", [Other]),
+    halt(?FAILURE_EXIT);
+main(NoiseLevel) when is_atom(NoiseLevel) ->
+    {ExitCode, Message} = try
+        init_network(),
+        Results = migrate(),
+        %$ TODO: Add proper reporting
+        {0, exit_code_message(0)}
+        %% parse_and_format(NoiseLevel, Results)
+    catch
+        error:{error, HaltWith} ->
+            {?FAILURE_EXIT, HaltWith};
+        _:_ ->
+            {?FAILURE_EXIT, "An unknown error has occurred."}
+    end,
+    io:fwrite("~n~s~n~n", [Message]),
+    halt(ExitCode).
+
+init_network() ->
+    net_kernel:start([?SELF]),
+    erlang:set_cookie(?MOVER, ?MOVER_COOKIE),
+    verify_ping(net_adm:ping(?MOVER), "Could not connect to mover service"),
+    R = try
+            rpc:call(?MOVER, ?MOVER_MOD, ping, [])
+        catch
+            _M:_R  ->
+               pang
+        end,
+    verify_ping(R, "RPC to mover service failed").
+
+migrate() ->
+%[{status,complete},
+%       {successful_orgs,["org1"]},
+%       {failed_orgs,["org2"]},
+%       {reset_failed,["org3", "org4"]}].
+% mover_manager:migrate_user_password_storage(all, 6)
+    rpc:call(?MOVER, ?MOVER_MOD, migrate_user_password_storage, [all, ?WORKERS]).
+
+parse_and_format(NoiseLevel, Results) ->
+    C0 = status_to_exit_code(proplists:get_value(status, Results)),
+    {C1, Success} = list_to_exit_code(successful_orgs, Results, ?SUCCESS_EXIT),
+    {C2, Failed} = list_to_exit_code(failed_orgs, Results, ?FAILURE_EXIT),
+    {C3, ResetFail} = list_to_exit_code(reset_failed, Results, ?FAILURE_EXIT),
+    write_org_list(NoiseLevel, "Successfully Migrated", Success),
+    write_org_list(NoiseLevel, "    Failed to Migrate", Failed),
+    write_org_list(NoiseLevel, "        Not Attempted", ResetFail),
+    Exit = C0 bor C1 bor C2 bor C3,
+    {Exit, exit_code_message(Exit)}.
+
+status_to_exit_code(complete) -> ?SUCCESS_EXIT;
+status_to_exit_code(aborted) -> ?FAILURE_EXIT.
+
+exit_code_message(?FAILURE_EXIT) ->
+    "Errors or warnings occurred.";
+exit_code_message(?SUCCESS_EXIT) ->
+    "Migrations completed successfully.".
+
+list_to_exit_code(Key, Results, ResponseCode) ->
+    List = proplists:get_value(Key, Results),
+    Code = case length(List) of
+        0 -> 0;
+        _ -> ResponseCode
+    end,
+    {Code, List}.
+
+write_org_list(silent, _, _) -> ok;
+write_org_list(_, Subject, []) ->
+    io:fwrite("  ~s: none~n", [Subject]);
+write_org_list(_, Subject, Orgs) ->
+    io:fwrite("  ~s: ~s~n", [Subject, string:join(Orgs, ", ")]).
+
+
+verify_ping(pong, _HaltWith) -> ok;
+verify_ping(_Other, HaltWith) ->
+    % Doing a halt from here will not actual set exit code, presumably
+    % because trhere's additional program flow following this call.
+    % Throw an error instead.
+    error({error, HaltWith}).
+
+
+

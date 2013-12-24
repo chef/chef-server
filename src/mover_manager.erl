@@ -57,7 +57,8 @@
 -compile([{parse_transform, lager_transform}]).
 
 % API Exports
--export([ start_link/0,
+-export([ ping/0,
+          start_link/0,
           migrate/2,
           migrate_next/0,
           migrate_user_password_storage/2,
@@ -125,6 +126,9 @@
 %%
 %% API
 %%
+
+ping() ->
+    pong.
 
 start_link() ->
     gen_fsm:start_link({local, ?SERVER}, ?MODULE, [], []).
