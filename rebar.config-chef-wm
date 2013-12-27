@@ -57,6 +57,3 @@
 %% {erl_opts, [debug_info]}.
 
 {cover_enabled, true}.
-
-{erl_opts, [debug_info,
-            {parse_transform,lager_transform}]}.
