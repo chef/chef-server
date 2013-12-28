@@ -54,6 +54,5 @@
 %% overriding these if the subordinate project does not itself set an
 %% erl_opts option in its config.
 %%
-%% {erl_opts, [debug_info]}.
-
+{erl_opts, [{parse_transform, lager_transform}]}.
 {cover_enabled, true}.
