@@ -27,9 +27,11 @@
 -define(MOVER, 'mover@127.0.0.1').
 -define(MOVER_COOKIE, 'mover').
 -define(MOVER_MOD, 'mover_manager').
--define(WORKERS, 6).
 -define(SUCCESS_EXIT, 0).
 -define(FAILURE_EXIT, 1).
+
+%% TODO: Pull this number from mover's bcrypt worker thread setting
+-define(WORKERS, 5).
 
 
 main([]) ->
