@@ -31,7 +31,7 @@ module PrivateChef
   lb Mash.new
   lb_internal Mash.new
   postgresql Mash.new
-  redis Mash.new
+  redis_lb Mash.new
   oc_bifrost Mash.new
   opscode_certificate Mash.new
   opscode_org_creator Mash.new
@@ -186,7 +186,7 @@ module PrivateChef
       results = { "private_chef" => {} }
       [
         "opscode_chef",
-        "redis",
+        "redis_lb",
         "couchdb",
         "rabbitmq",
         "opscode_solr",
@@ -212,7 +212,7 @@ module PrivateChef
       ].each do |key|
         # @todo: Just pick a naming convention and adhere to it
         # consistently
-        rkey = if key =~ /^oc_/
+        rkey = if key =~ /^oc_/ || key == "redis_lb"
                  key # leave oc_* keys as is
                else
                  key.gsub('_', '-')
@@ -246,7 +246,7 @@ module PrivateChef
       PrivateChef['bookshelf']['data_dir'] = "/var/opt/opscode/drbd/data/bookshelf"
       PrivateChef["rabbitmq"]["data_dir"] ||= "/var/opt/opscode/drbd/data/rabbitmq"
       PrivateChef["opscode_solr"]["data_dir"] ||= "/var/opt/opscode/drbd/data/opscode-solr"
-      PrivateChef["redis"]["data_dir"] ||= "/var/opt/opscode/drbd/data/redis-lb"
+      PrivateChef["redis_lb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/redis_lb"
 
       # The postgresql data directory is scoped to the current version;
       # changes in the directory trigger upgrades from an old PostgreSQL
@@ -290,7 +290,7 @@ module PrivateChef
       PrivateChef["opscode_webui"]["ha"] ||= true
       PrivateChef["lb"]["ha"] ||= true
       PrivateChef["postgresql"]["ha"] ||= true
-      PrivateChef["redis"]["ha"] ||= true
+      PrivateChef["redis_lb"]["ha"] ||= true
       PrivateChef["oc_bifrost"]["ha"] ||= true
       PrivateChef["opscode_certificate"]["ha"] ||= true
       PrivateChef["opscode_org_creator"]["ha"] ||= true
@@ -303,7 +303,7 @@ module PrivateChef
       PrivateChef["bookshelf"]["listen"] ||= PrivateChef["default_listen_address"]
       PrivateChef["couchdb"]["bind_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["redis"]["listen"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
       PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
       PrivateChef["opscode_solr"]["ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
@@ -329,8 +329,8 @@ module PrivateChef
       PrivateChef["couchdb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["rabbitmq"]["enable"] ||= false
       PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["redis"]["enable"] ||= false
-      PrivateChef["redis"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["redis_lb"]["enable"] ||= false
+      PrivateChef["redis_lb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
 
       # move certgen back to front ends; the backend canna handle the load
       PrivateChef["opscode_certificate"]["enable"] ||= true

@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-runit_service "redis" do
+runit_service "redis_lb" do
   action :disable
 end
 

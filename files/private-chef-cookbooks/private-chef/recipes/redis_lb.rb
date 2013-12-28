@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-redis = node['private_chef']['redis']
+redis = node['private_chef']['redis_lb']
 redis_dir = redis['dir']
 redis_etc_dir = File.join(redis_dir, "etc")
 redis_data_dir = redis['data_dir']
@@ -45,18 +45,18 @@ end
 
 redis_data = redis
 template redis_config do
-  source "redis.conf.erb"
+  source "redis_lb.conf.erb"
   owner "root"
   group "root"
   mode "0644"
   variables(redis_data.to_hash)
-  notifies :restart, 'service[redis]' if is_data_master?
+  notifies :restart, 'service[redis_lb]' if is_data_master?
 end
 
-component_runit_service "redis"
+component_runit_service "redis_lb"
 
 # log rotation
-template "/etc/opscode/logrotate.d/redis" do
+template "/etc/opscode/logrotate.d/redis_lb" do
   source "logrotate.erb"
   owner "root"
   group "root"
