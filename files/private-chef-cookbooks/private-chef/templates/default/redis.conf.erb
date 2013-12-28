@@ -2,7 +2,9 @@ daemonize no
 pidfile <%=@dir%>/lb-redis.pid
 
 port <%= @port %>
+<% if (@listen != "0.0.0.0") && (@listen != "::") %>
 bind <%= @bind %> <%= @listen == @bind ? "" : @listen %>
+<% end %>
 
 tcp-keepalive <%= @keepalive %>
 timeout <%= @timeout %>
