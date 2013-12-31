@@ -6,21 +6,21 @@
 %% Copyright(c) 2013 Opscode, Inc
 %% All Rights Reserved
 %%
-%% @doc Migrate all users, one at a time, and output the summary results to stdout
+%% @doc Migrate all users, and output the summary results to stdout
 %% in the form:
 %%
 %% `
-%% Successfully Migrated: org-name-list
-%%     Failed to Migrate: org-name-list
-%%         Not Attempted: org-name-list
+%% Total number of users: <number of users>
+%%     Unconverted users: <number of unconverted users>
 %% '
+%%
+%% The exit status is set to the number of unconverted users.
 %%
 %% <b>Important</b>: this must be run as root or connect will fail.
 %% If an error occurs, it will also be displayed on the console.
 %% If any org encounters errors in migrating or resetting state,
 %% the script will exit with exit code 1. Otherwise it will exit
 %% with exit code0, including if there are no orgs to migrate.
-
 
 
 -define(SELF, 'migrate-bcrypt-script@127.0.0.1').
@@ -44,10 +44,8 @@ main(Other) when is_list(Other) ->
 main(NoiseLevel) when is_atom(NoiseLevel) ->
     {ExitCode, Message} = try
         init_network(),
-        Results = migrate(),
-        %$ TODO: Add proper reporting
-        {0, exit_code_message(0)}
-        %% parse_and_format(NoiseLevel, Results)
+        migrate(),
+        parse_and_format(NoiseLevel, conversion_status())
     catch
         error:{error, HaltWith} ->
             {?FAILURE_EXIT, HaltWith};
@@ -70,46 +68,31 @@ init_network() ->
     verify_ping(R, "RPC to mover service failed").
 
 migrate() ->
-%[{status,complete},
-%       {successful_orgs,["org1"]},
-%       {failed_orgs,["org2"]},
-%       {reset_failed,["org3", "org4"]}].
-% mover_manager:migrate_user_password_storage(all, 6)
+    %% Call mover_manager:migrate_user_password_storage(all, 5)
     rpc:call(?MOVER, ?MOVER_MOD, migrate_user_password_storage, [all, ?WORKERS]).
 
-parse_and_format(NoiseLevel, Results) ->
-    C0 = status_to_exit_code(proplists:get_value(status, Results)),
-    {C1, Success} = list_to_exit_code(successful_orgs, Results, ?SUCCESS_EXIT),
-    {C2, Failed} = list_to_exit_code(failed_orgs, Results, ?FAILURE_EXIT),
-    {C3, ResetFail} = list_to_exit_code(reset_failed, Results, ?FAILURE_EXIT),
-    write_org_list(NoiseLevel, "Successfully Migrated", Success),
-    write_org_list(NoiseLevel, "    Failed to Migrate", Failed),
-    write_org_list(NoiseLevel, "        Not Attempted", ResetFail),
-    Exit = C0 bor C1 bor C2 bor C3,
-    {Exit, exit_code_message(Exit)}.
+conversion_status() ->
+    { rpc:call(?MOVER, mover_user_hash_converter, all_unconverted_users_count, []),
+      rpc:call(?MOVER, mover_user_hash_converter, all_users_count, []) }.
 
-status_to_exit_code(complete) -> ?SUCCESS_EXIT;
-status_to_exit_code(aborted) -> ?FAILURE_EXIT.
+parse_and_format(NoiseLevel, {UnconvertedUsers, UserTotal}) ->
+    report(NoiseLevel, "Total number of users: ~p", [UserTotal]),
+    report(NoiseLevel, "    Unconverted users: ~p", [UnconvertedUsers]),
 
-exit_code_message(?FAILURE_EXIT) ->
-    "Errors or warnings occurred.";
-exit_code_message(?SUCCESS_EXIT) ->
-    "Migrations completed successfully.".
+    %% If there are no more unconverted users (meaning, the conversion is successful),
+    %% it will exit with 0. Otherwise, the exit code reflects the number of users
+    %% still left to be converted.
 
-list_to_exit_code(Key, Results, ResponseCode) ->
-    List = proplists:get_value(Key, Results),
-    Code = case length(List) of
-        0 -> 0;
-        _ -> ResponseCode
-    end,
-    {Code, List}.
+    {UnconvertedUsers, exit_code_message(UnconvertedUsers)}.
 
-write_org_list(silent, _, _) -> ok;
-write_org_list(_, Subject, []) ->
-    io:fwrite("  ~s: none~n", [Subject]);
-write_org_list(_, Subject, Orgs) ->
-    io:fwrite("  ~s: ~s~n", [Subject, string:join(Orgs, ", ")]).
+exit_code_message(0) ->
+    "SHA1-Bcrypt user migrations completed successfully.";
+exit_code_message(S) when is_integer(S) ->
+    "Errors or warnings occurred.".
 
+report(silent, _, _) -> ok;
+report(_, Subject, Params) ->
+    io:fwrite(Subject, Params).
 
 verify_ping(pong, _HaltWith) -> ok;
 verify_ping(_Other, HaltWith) ->
@@ -117,6 +100,3 @@ verify_ping(_Other, HaltWith) ->
     % because trhere's additional program flow following this call.
     % Throw an error instead.
     error({error, HaltWith}).
-
-
-

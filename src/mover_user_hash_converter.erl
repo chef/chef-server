@@ -13,7 +13,9 @@
 
 -export([remaining_user_ids/0,
          convert_user/1,
-         start_bcrypt_pool/0]).
+         start_bcrypt_pool/0,
+         all_unconverted_users_count/0,
+         all_users_count/0]).
 
 -record(tiny_user, {
         'username',         %% capture for debugging purposes.
@@ -118,10 +120,32 @@ user_update_sql() ->
           SET hash_type = $2, hashed_password = $3, salt = $4, serialized_object = $5
         WHERE id = $1">>.
 
+all_unconverted_users_count() ->
+    get_count(all_unconverted_users_count_sql()).
+
+all_users_count() ->
+    get_count(all_users_count_sql()).
+
+get_count(Statement) ->
+    case sqerl:select(Statement, [], first_as_scalar, [count]) of
+        {error, {Code, Message}} ->
+            {error, {sqerl_pgsql_errors:translate_code(Code), Message}};
+        {ok, Count} ->
+            Count;
+        Other ->
+            Other
+    end.
 
 %%
 %% SQL Statements
 %%
 all_unconverted_users_sql() ->
     <<"SELECT id FROM users WHERE hashed_password is null ORDER BY created_at">>.
+
+all_unconverted_users_count_sql() ->
+    <<"SELECT count(id) FROM users WHERE hashed_password is null">>.
+
+all_users_count_sql() ->
+    <<"SELECT count(id) FROM users">>.
+
 
