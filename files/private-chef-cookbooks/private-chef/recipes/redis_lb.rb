@@ -65,9 +65,15 @@ template "/etc/opscode/logrotate.d/redis_lb" do
 end
 
 #
-# This should be guarded by a test that redis is running
+# This should be guarded by a test that redis is running. 
 #
+# For the time being we retry a few times. This avoids a race
+# condition where the server is still starting and the port isn't
+# bound. The redis gem does not retry on ECONNREFUSED, and we fail.
+# 
 ruby_block "set_lb_redis_values" do
+  retries 5
+  retry_delay 1
   block do
     require "redis"
     redis = Redis.new(:host => redis_data.vip, :port => redis_data.port)
