@@ -199,31 +199,31 @@ default['private_chef']['oc-chef-pedant']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['oc-chef-pedant']['debug_org_creation'] = false
 
 ###
-# Redis
+# redis_lb
 ###
-default['private_chef']['redis']['enable'] = true
-default['private_chef']['redis']['ha'] = false
-default['private_chef']['redis']['dir'] = "/var/opt/opscode/redis-lb"
-default['private_chef']['redis']['data_dir'] = "/var/opt/opscode/redis-lb/data"
-default['private_chef']['redis']['log_directory'] = "/var/log/opscode/redis-lb"
-default['private_chef']['redis']['log_rotation']['file_maxbytes'] = 1000000
-default['private_chef']['redis']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['redis']['port'] = "16379"
-default['private_chef']['redis']['bind'] = "127.0.0.1"
-default['private_chef']['redis']['vip'] = "127.0.0.1"
-default['private_chef']['redis']['keepalive'] = "60"
-default['private_chef']['redis']['timeout'] = "300"
-default['private_chef']['redis']['loglevel'] = "notice"
-default['private_chef']['redis']['databases'] = "16"
-default['private_chef']['redis']['appendonly'] = "no"
-default['private_chef']['redis']['appendfsync'] = "always"
-default['private_chef']['redis']['activerehashing'] = "no"
-default['private_chef']['redis']['aof_rewrite_percent'] = "50"
-default['private_chef']['redis']['aof_rewrite_min_size'] = "16mb"
-default['private_chef']['redis']['maxmemory'] = "8m"
-default['private_chef']['redis']['maxmemory_policy'] = "noeviction"
+default['private_chef']['redis_lb']['enable'] = true
+default['private_chef']['redis_lb']['ha'] = false
+default['private_chef']['redis_lb']['dir'] = "/var/opt/opscode/redis_lb"
+default['private_chef']['redis_lb']['data_dir'] = "/var/opt/opscode/redis_lb/data"
+default['private_chef']['redis_lb']['log_directory'] = "/var/log/opscode/redis_lb"
+default['private_chef']['redis_lb']['log_rotation']['file_maxbytes'] = 1000000
+default['private_chef']['redis_lb']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['redis_lb']['port'] = "16379"
+default['private_chef']['redis_lb']['bind'] = "127.0.0.1"
+default['private_chef']['redis_lb']['vip'] = "127.0.0.1"
+default['private_chef']['redis_lb']['keepalive'] = "60"
+default['private_chef']['redis_lb']['timeout'] = "300"
+default['private_chef']['redis_lb']['loglevel'] = "notice"
+default['private_chef']['redis_lb']['databases'] = "16"
+default['private_chef']['redis_lb']['appendonly'] = "no"
+default['private_chef']['redis_lb']['appendfsync'] = "always"
+default['private_chef']['redis_lb']['activerehashing'] = "no"
+default['private_chef']['redis_lb']['aof_rewrite_percent'] = "50"
+default['private_chef']['redis_lb']['aof_rewrite_min_size'] = "16mb"
+default['private_chef']['redis_lb']['maxmemory'] = "8m"
+default['private_chef']['redis_lb']['maxmemory_policy'] = "noeviction"
 
-default['private_chef']['redis']['save_frequency'] = {
+default['private_chef']['redis_lb']['save_frequency'] = {
   "900" => "1",
   "300" => "10",
   "60" => "1000"

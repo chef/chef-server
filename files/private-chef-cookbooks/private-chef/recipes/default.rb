@@ -159,7 +159,7 @@ include_recipe "private-chef::sysctl-updates"
   "bootstrap",
   "opscode-webui",
   "opscode-chef-mover",
-  "redis",
+  "redis_lb",
   "nginx",
   "keepalived"
 ].each do |service|
