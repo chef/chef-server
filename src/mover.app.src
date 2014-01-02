@@ -12,6 +12,7 @@
                   lager,
                   gen_bunny,
                   bcrypt,
-                  chef_index]},
+                  chef_index,
+                  chef_reindex]},
   {mod, {mover_app, []}}
  ]}.
