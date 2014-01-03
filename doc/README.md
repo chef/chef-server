@@ -7,7 +7,6 @@
 
 
 <table width="100%" border="0" summary="list of modules">
-<tr><td><a href="chef_index_expand.md" class="module">chef_index_expand</a></td></tr>
 <tr><td><a href="chef_index_queue.md" class="module">chef_index_queue</a></td></tr>
 <tr><td><a href="chef_index_sup.md" class="module">chef_index_sup</a></td></tr>
 <tr><td><a href="chef_lucene.md" class="module">chef_lucene</a></td></tr>
