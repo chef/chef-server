@@ -28,7 +28,6 @@ init([]) ->
                 ?CHILD_SUP(mover_org_dep_validator_sup, []),
                 ?CHILD_SUP(mover_transient_worker_sup, []),
                 ?CHILD_SUP(mover_transient_migration_queue_sup, []),
-                ?CHILD_SUP(chef_index_sup, []),
                 ?CHILD(mover_chef_couch_removal_worker, [], 5000)
             ],
     % Don't launch the eredis sup (whose client process requires
