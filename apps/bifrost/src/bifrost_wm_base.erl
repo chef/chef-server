@@ -112,24 +112,24 @@ finish_request(Req, #base_state{reqid=ReqId,
                                 requestor_id=RequestorId,
                                 module=Module}=State) ->
     Code = wrq:response_code(Req),
-
     %% Grab the stats for lager before we kill the stats_hero process
     PerfStats = stats_hero:snapshot(ReqId, no_agg),
-
     stats_hero:report_metrics(ReqId, Code),
     stats_hero:stop_worker(ReqId),
 
-    %% TODO: Sanitize 500s?
-    %% TODO: Any use for API info headers?
-
+    %% Filter out extended perf data if necessary - this data approximately doubles
+    %% size of access logs. Allowing this to be configured will allow for simple
+    %% remediation if it becomes an issue.
+    PerfStats1 = case envy:get(bifrost, enable_extended_perf_log, true, boolean) of
+        true -> PerfStats;
+        false ->
+            [ Element || {<<"req_time">>,_} = Element <- PerfStats ]
+    end,
     %% Add additional notes for the logger
-    Req0 = lists:foldl(fun({K,V},R) -> wrq:add_note(K,V,R) end,
-                       Req,
-                       [{reqid, ReqId},
-                        {requestor_id, RequestorId},
-                        {module, Module},
-                        {perf_stats, PerfStats}
-                       ]),
+    Req0 = oc_wm_request:add_notes([{reqid, ReqId},
+                                    {requestor_id, RequestorId},
+                                    {module, Module},
+                                    {perf_stats, PerfStats1}], Req),
     {true, Req0, State}.
 
 %% @doc Generates a new, unique request ID that we can use to attach
