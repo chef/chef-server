@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 name "redis-rb"
-version "3.0.4"
+version "3.0.6"
 
 dependency "ruby"
 dependency "rubygems"

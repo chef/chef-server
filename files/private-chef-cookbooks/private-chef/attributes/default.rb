@@ -249,6 +249,19 @@ default['private_chef']['lb_internal']['vip'] = "127.0.0.1"
 default['private_chef']['lb_internal']['chef_port'] = 9680
 default['private_chef']['lb_internal']['account_port'] = 9685
 default['private_chef']['lb_internal']['oc_bifrost_port'] = 9683
+default['private_chef']['lb']['redis_connection_timeout'] = 60
+default['private_chef']['lb']['redis_connection_pool_size'] = 250
+default['private_chef']['lb']['maint_refresh_interval'] = 600
+default['private_chef']['lb']['ban_refresh_interval'] = 600
+default['private_chef']['lb']['chef_min_version'] = 10
+default['private_chef']['lb']['chef_max_version'] = 11
+
+###
+# Load balancer route configuration
+###
+default['private_chef']['lb']['xdl_defaults']['503_mode'] = false
+default['private_chef']['lb']['xdl_defaults']['couchdb_containers'] = true
+default['private_chef']['lb']['xdl_defaults']['couchdb_groups'] = true
 
 ####
 # Nginx
