@@ -7,7 +7,8 @@
 -module(mover_batch_migrator).
 
 -export([ping/0,
-         migrate_all/0]).
+         migrate_all/0,
+         wait_for_status/0]).
 
 -define(POLL_SLEEP_MS, 500).
 

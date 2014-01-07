@@ -45,6 +45,7 @@ main(NoiseLevel) when is_atom(NoiseLevel) ->
     {ExitCode, Message} = try
         init_network(),
         migrate(),
+        sleep_until_migration_finished(),
         parse_and_format(NoiseLevel, conversion_status())
     catch
         error:{error, HaltWith} ->
@@ -70,6 +71,9 @@ init_network() ->
 migrate() ->
     %% Call mover_manager:migrate_user_password_storage(all, 5)
     rpc:call(?MOVER, ?MOVER_MOD, migrate_user_password_storage, [all, ?WORKERS]).
+
+sleep_until_migration_finished() ->
+    rpc:call(?MOVER, mover_batch_migrator, wait_for_status, []).
 
 conversion_status() ->
     { rpc:call(?MOVER, mover_user_hash_converter, all_unconverted_users_count, []),
