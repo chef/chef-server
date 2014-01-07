@@ -37,6 +37,7 @@ local p_org = P"organizations"
 local p_org_base = P"/organizations"
 local p_verify_password = P"verify_password"
 local p_auth_user = P"authenticate_user"
+local p_system_recovery = P"system_recovery"
 local p_acl = P"/_acl"
 local p_search = P"search"
 local p_nodes = P"nodes"
@@ -116,7 +117,7 @@ local p_acct_users = (p_sep * Cendpoint(p_users) * (p_sep * c_identifier)^-1 * p
 -- including routes that would otherwise go to erchef.
 local p_acl_endpoint = p_named_org_prefix * p_all_until_acl * Cendpoint(p_acl) * (p_sep + p_eol)
 local p_acct_direct = Cendpoint(p_users + p_association_requests) * (p_sep + p_eol)
-local p_acct = (p_sep * Cendpoint(p_verify_password + p_auth_user) * p_eol) +
+local p_acct = (p_sep * Cendpoint(p_verify_password + p_auth_user + p_system_recovery) * p_eol) +
                (p_named_org_prefix * p_acct_direct) +
                (p_sep * Cendpoint(p_org) * (p_sep * Cg(p_org_identifier, "org_name"))^-1 * p_trailing_sep) +
                p_acct_users
