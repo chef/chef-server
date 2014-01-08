@@ -25,9 +25,10 @@
 %% the script will exit with exit code 1. Otherwise it will exit
 %% with exit code0, including if there are no orgs to migrate.
 
-
+% TODO: Define these via chef template
 -define(SELF, 'migrate-bcrypt-script@127.0.0.1').
 -define(MOVER, 'mover@127.0.0.1').
+
 -define(MOVER_COOKIE, 'mover').
 -define(MOVER_MOD, 'mover_manager').
 -define(SUCCESS_EXIT, 0).
