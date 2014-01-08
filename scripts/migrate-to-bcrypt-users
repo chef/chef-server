@@ -71,18 +71,31 @@ init_network() ->
         end,
     verify_ping(R, "RPC to mover service failed").
 
+%% RPC calls %%
 migrate() ->
     rpc:call(?MOVER, ?MOVER_MOD, migrate_user_password_storage, [all, bcrypt_workers_count_config()]).
 
 bcrypt_workers_count_config() ->
     rpc:call(?MOVER, mover_user_hash_converter, bcrypt_workers_count_config, []).
 
+all_unconverted_users_count() ->
+    rpc:call(?MOVER, mover_user_hash_converter, all_unconverted_users_count, []).
+
+all_users_count() ->
+      rpc:call(?MOVER, mover_user_hash_converter, all_users_count, []).
+
 sleep_until_migration_finished() ->
     rpc:call(?MOVER, mover_batch_migrator, wait_for_status, []).
 
+%% Reporting and exit status %%
+
+estimated_time() ->
+    %% The 0.75 factor assumes standard bcrypt rounds and a machine similar in performance
+    %% to our HEC migration node, circa 2013.
+    ((all_unconverted_users_count() / bcrypt_workers_count_config()) * 0.75).
+
 conversion_status() ->
-    { rpc:call(?MOVER, mover_user_hash_converter, all_unconverted_users_count, []),
-      rpc:call(?MOVER, mover_user_hash_converter, all_users_count, []) }.
+    { all_unconverted_users_count(), all_users_count() }.
 
 parse_and_format(NoiseLevel, {UnconvertedUsers, UserTotal}) ->
     report(NoiseLevel, "Total number of users: ~p", [UserTotal]),
