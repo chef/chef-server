@@ -80,12 +80,12 @@ conversion_status() ->
 parse_and_format(NoiseLevel, {UnconvertedUsers, UserTotal}) ->
     report(NoiseLevel, "Total number of users: ~p", [UserTotal]),
     report(NoiseLevel, "    Unconverted users: ~p", [UnconvertedUsers]),
+    {exit_code(UnconvertedUsers), exit_code_message(UnconvertedUsers)}.
 
-    %% If there are no more unconverted users (meaning, the conversion is successful),
-    %% it will exit with 0. Otherwise, the exit code reflects the number of users
-    %% still left to be converted.
-
-    {UnconvertedUsers, exit_code_message(UnconvertedUsers)}.
+exit_code(0) ->
+    ?SUCCESS_EXIT;
+exit_code(S) when is_integer(S) ->
+    ?FAILURE_EXIT.
 
 exit_code_message(0) ->
     "SHA1-Bcrypt user migrations completed successfully.";
