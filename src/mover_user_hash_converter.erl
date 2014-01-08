@@ -115,11 +115,6 @@ all_unconverted_users() ->
             XF(Rows)
     end.
 
-user_update_sql() ->
-    <<"UPDATE users
-          SET hash_type = $2, hashed_password = $3, salt = $4, serialized_object = $5
-        WHERE id = $1">>.
-
 all_unconverted_users_count() ->
     get_count(all_unconverted_users_count_sql()).
 
@@ -139,13 +134,18 @@ get_count(Statement) ->
 %%
 %% SQL Statements
 %%
+user_update_sql() ->
+    <<"UPDATE users
+          SET hash_type = $2, hashed_password = $3, salt = $4, serialized_object = $5
+        WHERE id = $1">>.
+
 all_unconverted_users_sql() ->
     <<"SELECT id FROM users WHERE hashed_password is null ORDER BY created_at">>.
 
 all_unconverted_users_count_sql() ->
-    <<"SELECT count(id) FROM users WHERE hashed_password is null">>.
+    <<"SELECT count(*) FROM users WHERE hashed_password is null">>.
 
 all_users_count_sql() ->
-    <<"SELECT count(id) FROM users">>.
+    <<"SELECT count(*) FROM users">>.
 
 
