@@ -14,6 +14,7 @@
 -export([remaining_user_ids/0,
          convert_user/1,
          start_bcrypt_pool/0,
+         bcrypt_workers_count_config/0,
          all_unconverted_users_count/0,
          all_users_count/0]).
 
@@ -33,8 +34,8 @@ remaining_user_ids() ->
 start_bcrypt_pool() ->
     pooler:rm_pool(bcrypt),
     pooler:new_pool([{name, bcrypt},
-                     {init_count, envy:get(mover, bcrypt_worker_count, integer)},
-                     {max_count, envy:get(mover, bcrypt_worker_count, integer)},
+                     {init_count, bcrypt_workers_count_config()},
+                     {max_count, bcrypt_workers_count_config()},
                      % We will start the worker directly via gen_server, since
                      % the start_link included in bcrypt_nif_worker will create only
                      % a single named worker
@@ -49,6 +50,9 @@ convert_user(Id) ->
     {Type, NewSalt, NewHash} = convert_password_hash(SHA1Hash, Salt),
     Encoded = chef_json:encode(Json3),
     update_user_record(Id, Type, NewHash, NewSalt, Encoded).
+
+bcrypt_workers_count_config() ->
+    envy:get(mover, bcrypt_worker_count, integer).
 
 %%
 %% Internal

@@ -30,10 +30,6 @@
 -define(SUCCESS_EXIT, 0).
 -define(FAILURE_EXIT, 1).
 
-%% TODO: Pull this number from mover's bcrypt worker thread setting
--define(WORKERS, 5).
-
-
 main([]) ->
     main(normal);
 main(["silent"]) ->
@@ -69,8 +65,10 @@ init_network() ->
     verify_ping(R, "RPC to mover service failed").
 
 migrate() ->
-    %% Call mover_manager:migrate_user_password_storage(all, 5)
-    rpc:call(?MOVER, ?MOVER_MOD, migrate_user_password_storage, [all, ?WORKERS]).
+    rpc:call(?MOVER, ?MOVER_MOD, migrate_user_password_storage, [all, bcrypt_workers_count_config()]).
+
+bcrypt_workers_count_config() ->
+    rpc:call(?MOVER, mover_user_hash_converter, bcrypt_workers_count_config, []).
 
 sleep_until_migration_finished() ->
     rpc:call(?MOVER, mover_batch_migrator, wait_for_status, []).
