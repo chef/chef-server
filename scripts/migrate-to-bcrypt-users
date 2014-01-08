@@ -45,13 +45,15 @@ main(Other) when is_list(Other) ->
 main(NoiseLevel) when is_atom(NoiseLevel) ->
     {ExitCode, Message} = try
         init_network(),
+        report(NoiseLevel, "~nKicking off migration. This might take a while.~nEstimated time: ~ps~n", [estimated_time()]),
         migrate(),
         sleep_until_migration_finished(),
         parse_and_format(NoiseLevel, conversion_status())
     catch
         error:{error, HaltWith} ->
             {?FAILURE_EXIT, HaltWith};
-        _:_ ->
+        E:Why ->
+            error_logger:error_report({E, Why}),
             {?FAILURE_EXIT, "An unknown error has occurred."}
     end,
     io:fwrite("~n~s~n~n", [Message]),
