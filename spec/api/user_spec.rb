@@ -19,6 +19,10 @@ describe "users", :users do
     /^-----BEGIN (RSA )?PRIVATE KEY-----/
   end
 
+  let(:private_key_regex) do
+    /^-----BEGIN RSA PRIVATE KEY-----/
+  end
+
   # Pedant has configurable test users.
   # Selects Pedant users that are marked as associated
   let(:default_pedant_user_names) { platform.users.select(&:associate).map(&:name).sort }
@@ -856,7 +860,7 @@ describe "users", :users do
       end
 
       before :each do
-        post("#{platform.server}/users", platform.superuser,
+        response = post("#{platform.server}/users", platform.superuser,
           :payload => {
             "username" => username,
             "email" => "#{username}@opscode.com",
@@ -864,13 +868,20 @@ describe "users", :users do
             "last_name" => username,
             "display_name" => username,
             "password" => "badger badger"
-          }).should look_like({
-            :status => 201
-            })
+          })
+        response.should look_like({
+            :status => 201,
+            :body_exact => {
+              "uri" => "#{platform.server}/users/#{username}",
+              "private_key" => private_key_regex
+            }})
+
+        @original_private_key = JSON.parse(response.body)["private_key"]
       end
 
       after :each do
         delete("#{platform.server}/users/#{username}", platform.superuser)
+        @original_private_key = nil
       end
 
       context "superuser" do
@@ -1208,6 +1219,93 @@ describe "users", :users do
                 :status => 200,
                 :body => modified_user
               })
+          end
+        end
+
+        context "with private_key = true" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@opscode.com",
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => "new name",
+              "password" => "badger badger",
+              "private_key" => true
+            }
+          end
+
+          it "returns a new private key, changes the public key" do
+            original_response = get(request_url, platform.superuser)
+            original_public_key = JSON.parse(original_response.body)["public_key"]
+
+            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response.should look_like({
+                                            :status => 200,
+                                            :body_exact => {
+                                              "uri" => request_url,
+                                              "private_key" => private_key_regex
+                                            },
+                                          })
+
+            new_private_key = JSON.parse(put_response.body)["private_key"]
+            new_private_key.should_not eq(@original_private_key)
+
+            new_response = get(request_url, platform.superuser)
+            new_public_key = JSON.parse(new_response.body)["public_key"]
+            new_public_key.should_not eq(original_public_key)
+          end
+        end
+
+        context "with private_key = true and a public_key" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@opscode.com",
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => "new name",
+              "password" => "badger badger",
+              "private_key" => true,
+              "public_key" => input_public_key
+            }
+          end
+
+          let(:input_public_key) do
+            <<EOF
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+h5g/r/qaFH6OdYOG0OO
+2/WpLb9qik7SPFmcOvujqZzLO2yv4kXwuvncx/ADHdkobaoFn3FE84uzIVCoSeaj
+xTMeuTcPr5y+wsVqCYMkwIJpPezbwcrErt14BvD9BPN0UDyOJZW43ZN4iIw5xW8y
+lQKuZtTNsm7FoznG+WsmRryTM3OjOrtDYjN/JHwDfrZZtVu7pT8FYnnz0O8j2zEf
+9NALhpS7oDCf+VSo6UUk/w5m4/LpouDxT2dKBwQOuA8pzXd5jHP6rYdbHkroOUqx
+Iy391UeSCiPVHcAN82sYV7R2MnUYj6b9Fev+62FKrQ6v9QYZcyljh6hldmcbmABy
+EQIDAQAB
+-----END PUBLIC KEY-----
+EOF
+          end
+
+          it "returns a new private key, changes the public key" do
+            original_response = get(request_url, platform.superuser)
+            original_public_key = JSON.parse(original_response.body)["public_key"]
+
+            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response.should look_like({
+                                            :status => 200,
+                                            :body_exact => {
+                                              "uri" => request_url,
+                                              "private_key" => private_key_regex
+                                            },
+                                          })
+
+            new_private_key = JSON.parse(put_response.body)["private_key"]
+            new_private_key.should_not eq(@original_private_key)
+
+            new_response = get(request_url, platform.superuser)
+            new_public_key = JSON.parse(new_response.body)["public_key"]
+
+            new_public_key.should_not eq(original_public_key)
+            new_public_key.should_not eq(input_public_key)
           end
         end
       end # context modifying users
