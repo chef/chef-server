@@ -42,7 +42,7 @@
 start_link(Config) ->
     gen_fsm:start_link(?MODULE, Config, []).
 
-init({OrgName, AcctInfo}) ->
+init({OrgName, AcctInfo, _ProcessorFun}) ->
     State = #state{org_name = OrgName, acct_info = AcctInfo},
     case moser_state_tracker:migration_started(OrgName) of
         ok ->
