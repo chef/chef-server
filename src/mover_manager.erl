@@ -99,7 +99,9 @@
                             %% object to run through worker
                             next_object_generator :: object_generator_fun(),
                             %% Processor function for generic workers
-                            processor_fun :: object_processor_fun() }).
+                            processor_fun :: object_processor_fun(),
+                            %% Callback module for a given migration
+                            callback_module :: atom()}).
 
 -record(state, { %% Number of active workers
                  live_worker_count = 0  :: non_neg_integer(),
@@ -145,7 +147,8 @@ migrate(all, NumWorkers) ->
 migrate(NumOrgs, NumWorkers) ->
     Worker = #migration_worker{supervisor = mover_org_migrator_sup,
                                migration_type = org_data_from_couch_phase_1,
-                               next_object_generator = fun moser_state_tracker:next_ready_org/0},
+                               next_object_generator = fun moser_state_tracker:next_ready_org/0,
+                               callback_module = mover_phase_1_migrator_callback},
     gen_fsm:sync_send_event(?SERVER, {start, NumOrgs, NumWorkers, Worker}).
 
 %% Validate dependencies of a migrated through depsolver. Deprecated
@@ -163,21 +166,15 @@ validate_deps(NumOrgs, NumWorkers) ->
 migrate_user_password_storage(all, NumWorkers) ->
     migrate_user_password_storage(-1, NumWorkers);
 migrate_user_password_storage(NumUsers, NumWorkers) ->
-    status_check(),
-    mover_transient_migration_queue:initialize_queue(mover_user_hash_converter:remaining_user_ids()),
-    mover_user_hash_converter:start_bcrypt_pool(),
     Worker = #migration_worker{supervisor = mover_transient_worker_sup,
                                migration_type = users_password_storage,
                                next_object_generator = fun mover_transient_migration_queue:next/0,
-                               processor_fun = fun mover_user_hash_converter:convert_user/1},
+                               processor_fun = fun mover_user_hash_converter:convert_user/1,
+                               callback_module = mover_user_hash_converter_callback},
     gen_fsm:sync_send_event(?SERVER, {start, NumUsers, NumWorkers, Worker}).
 
 %% Ensure nothing is active - that indicates it's safe to reset
 %% the transient queue, even if it has contents left from a previous run.
-status_check() ->
-	{ok, Status} = mover_manager:status(),
-    ready = proplists:get_value(state, Status),
-    mover_transient_migration_queue:initialize_queue([]).
 
 status() ->
     gen_fsm:sync_send_all_state_event(?SERVER, status).
@@ -231,6 +228,7 @@ ready({start, NumObjects, NumWorkers, Worker}, _From, CurrentState) ->
                    objects_requested = NumObjects,
                    objects_remaining = NumObjects,
                    worker = Worker},
+    call_if_exported(CurrentState, migration_init, [], fun no_op/0),
     {reply, {ok, burning_couches}, working, State, 0};
 ready(create_account_dets, _From, State = #state{ acct_info = Acct} ) ->
     NewAccount = create_dets_files(Acct),
@@ -248,12 +246,13 @@ working(timeout, #state {max_worker_count = Count,
 working(timeout, #state {max_worker_count = MW,
                          live_worker_count = LW,
                          worker = #migration_worker{next_object_generator = Next,
-                                                    supervisor = SupMod}}
+                                                    supervisor = SupMod,
+                                                    callback_module = Mod}}
                          = State) when LW < MW ->
 
     %% We have fewer workers than requested, start another one
     %% asl ong as there is work to do
-    case Next() of
+    case call_if_exported(Mod, next_object, [], Next) of
         {ok, no_more_orgs} -> % no more orgs to migrate
             {next_state, halting, State#state {objects_remaining = 0}, 0};
         {ok, no_more} ->      % no more anything else to do
@@ -273,8 +272,10 @@ start_worker(SupMod, Object, #state{live_worker_count = LW,
                                      objects_remaining = OR,
                                      acct_info = AcctInfo,
                                      worker = #migration_worker{supervisor = SupMod,
-                                                                processor_fun = Fun}} = State) ->
-    case SupMod:start_worker({Object, AcctInfo, Fun}) of
+                                                                processor_fun = Fun,
+                                                                callback_module = Mod}} = State) ->
+    InitialState = call_if_exported(Mod,migration_start_worker_args,[Object, AcctInfo, Fun],  fun default_worker_args/3),
+    case apply(SupMod, start_worker, [Mod | InitialState]) of
         {ok, Pid} ->
             monitor(process, Pid),
             {next_state, working, State#state{live_worker_count = (LW + 1),
@@ -283,6 +284,9 @@ start_worker(SupMod, Object, #state{live_worker_count = LW,
             lager:error("Failed to start worker for ~p - halting remaining workers! Error: ~p", [Object, Error]),
             {next_state, halting, State#state {fatal_stop = true}, 0}
     end.
+
+default_worker_args(Object, AcctInfo, Fun) ->
+    [Object, AcctInfo, Fun].
 
 halting(timeout, #state{live_worker_count = 0} = State) ->
     %% All workers stopped - we're ready to accept a new request for
@@ -360,3 +364,21 @@ create_dets_files(undefined) ->
 create_dets_files(Acct) ->
     moser_acct_processor:close_account(Acct),
     create_dets_files(undefined).
+
+call_if_exported(undefined, FunName, Args, DefaultFun) ->
+    erlang:apply(DefaultFun, Args);
+call_if_exported(#state{worker = Worker}, FunName, Args, DefaultFun) ->
+    call_if_exported(Worker, FunName, Args, DefaultFun);
+call_if_exported(#migration_worker{callback_module = Mod}, FunName, Args, DefaultFun) ->
+    call_if_exported(Mod, FunName, Args, DefaultFun);
+call_if_exported(Mod, FunName, Args, DefaultFun) ->
+    code:ensure_loaded(Mod),
+    case erlang:function_exported(Mod, FunName, length(Args)) of
+        true ->
+            erlang:apply(Mod, FunName, Args);
+        false  ->
+            erlang:apply(DefaultFun, Args)
+    end.
+
+no_op() ->
+    no_op.

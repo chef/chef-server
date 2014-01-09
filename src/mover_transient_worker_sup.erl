@@ -11,7 +11,7 @@
 
 -export([init/1,
          start_link/0,
-         start_worker/1]).
+         start_worker/3]).
 
 -define(SERVER, ?MODULE).
 start_link() ->
@@ -22,5 +22,5 @@ init([]) ->
                  temporary, 10000, worker, [mover_transient_worker]},
     {ok, {{simple_one_for_one, 10, 10}, [Spec]}}.
 
-start_worker({ObjectId, _AcctInfo, MigratorFun}) ->
+start_worker(_CallbackModule, ObjectId, MigratorFun) ->
     supervisor:start_child(?SERVER, [{ObjectId, MigratorFun}]).
