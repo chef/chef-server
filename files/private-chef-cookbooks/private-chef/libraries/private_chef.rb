@@ -97,6 +97,20 @@ module PrivateChef
         opts.each do |k,v|
           PrivateChef['backend_vips'][k] = v
         end
+        
+        # Keepalived needs an address with network to properly configure an IPv6 vip
+        if PrivateChef['backend_vips']['ipaddress'] =~ /(.*)\/(\d+)/
+          # If we have an address of the form addr/mask, split it out
+          PrivateChef['backend_vips']['ipaddress'] = $1
+          PrivateChef['backend_vips']['ipaddress_with_netmask'] = "#{$1}/#{$2}"
+        elsif PrivateChef['backend_vips']['ipaddress'] =~ /\:/
+          # IPv6 addresses must have the mask
+          Chef::Log.fatal("backend_vip ipaddress field appears to be a IPv6 address without a netmask  (e.g /64, /48)") 
+          exit 66
+        else
+          # bare addresses (IPv4) can not have a mask (to preserve backwards compatibility)
+          PrivateChef['backend_vips']['ipaddress_with_netmask'] = PrivateChef['backend_vips']['ipaddress']
+        end
       end
       PrivateChef['backend_vips']
     end
@@ -276,7 +290,7 @@ module PrivateChef
       end
       PrivateChef["keepalived"]["enable"] ||= true
       PrivateChef["keepalived"]["vrrp_instance_interface"] = backend_vip["device"]
-      PrivateChef["keepalived"]["vrrp_instance_ipaddress"] = backend_vip["ipaddress"]
+      PrivateChef["keepalived"]["vrrp_instance_ipaddress"] = backend_vip["ipaddress_with_netmask"]
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
       PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_bind"] = PrivateChef['servers'][node_name]['ipaddress']
       PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef['servers'][node_name]['peer_ipaddress']
