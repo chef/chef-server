@@ -13,9 +13,6 @@
                  results :: term()
                }).
 
-%% Comment this out for VIM syntax check/compiles to work.
--compile([{parse_transform, lager_transform}]).
-
 %% gen_fsm callbacks
 -export([init/1,
          handle_event/3,

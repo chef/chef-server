@@ -2,9 +2,6 @@
 
 -behaviour(gen_fsm).
 
-%% Comment this out for VIM syntax check/compiles to work.
--compile([{parse_transform, lager_transform}]).
-
 %% API
 -export([
     start_link/0,

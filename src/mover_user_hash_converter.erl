@@ -7,10 +7,6 @@
 
 -module(mover_user_hash_converter).
 
-%% Comment this out for VIM syntax check/compiles to work.
--compile([{parse_transform, lager_transform}]).
-
-
 -export([remaining_user_ids/0,
          convert_user/1,
          start_bcrypt_pool/0,

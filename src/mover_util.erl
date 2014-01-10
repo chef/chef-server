@@ -17,8 +17,6 @@
 
 -include("mover.hrl").
 
--compile([{parse_transform, lager_transform}]).
-
 %% @doc Get a list of unmigrated orgs from migration_state_table
 %% and set the xdarklaunch flags
 populate_xdl_with_unmigrated_orgs() ->

@@ -14,8 +14,6 @@
 
 -include_lib("moser/include/moser.hrl").
 
--compile([{parse_transform, lager_transform}]).
-
 ping() ->
     pong.
 

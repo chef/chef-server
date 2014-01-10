@@ -53,9 +53,6 @@
 
 -module(mover_manager).
 
-%% Comment this out for VIM syntax check/compiles to work.
--compile([{parse_transform, lager_transform}]).
-
 % API Exports
 -export([ ping/0,
           start_link/0,
