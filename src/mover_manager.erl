@@ -57,7 +57,9 @@
 -export([ ping/0,
           start_link/0,
           migrate/2,
+          migrate/3,
           migrate_next/0,
+          migrate_next/1,
           migrate_user_password_storage/2,
           status/0,
           halt_actions/0,
@@ -83,9 +85,7 @@
 -type object_generator_fun() :: fun(() -> binary()).
 -type object_processor_fun() :: fun((binary()) -> term()).
 
--record(migration_worker, { %% Supervisor module that knows how to start workers
-                            supervisor :: atom(),
-                            %% fun that retrieves identifier for next
+-record(migration_worker, { %% fun that retrieves identifier for next
                             %% object to run through worker
                             next_object_generator :: object_generator_fun(),
                             %% Processor function for generic workers
@@ -129,14 +129,17 @@ start_link() ->
 migrate_next() ->
     migrate(1, 1).
 
+migrate_next(CallbackModule) ->
+    migrate(1, 1, CallbackModule).
+
 %% Start phase 1 org migration: clients, cookbooks, etc from couch to sql
 migrate(all, NumWorkers) ->
     migrate(-1, NumWorkers);
 migrate(NumOrgs, NumWorkers) ->
-    Worker = #migration_worker{supervisor = mover_org_migrator_sup,
-                               callback_module = mover_phase_1_migrator_callback},
-    gen_fsm:sync_send_event(?SERVER, {start, NumOrgs, NumWorkers, Worker}).
+    migrate(NumOrgs, NumWorkers, mover_phase_1_migrator_callback).
 
+migrate(NumOrgs, NumWorkers, CallbackModule) ->
+    Worker = #migration_worker{callback_module = CallbackModule},
     gen_fsm:sync_send_event(?SERVER, {start, NumOrgs, NumWorkers, Worker}).
 
 %% Migrate user password hash from sha1 embedded in json to dedicated fields
@@ -144,7 +147,7 @@ migrate(NumOrgs, NumWorkers) ->
 migrate_user_password_storage(all, NumWorkers) ->
     migrate_user_password_storage(-1, NumWorkers);
 migrate_user_password_storage(NumUsers, NumWorkers) ->
-    Worker = #migration_worker{supervisor = mover_transient_worker_sup,
+    Worker = #migration_worker{
                                processor_fun = fun mover_user_hash_converter:convert_user/1,
                                callback_module = mover_user_hash_converter_callback},
     gen_fsm:sync_send_event(?SERVER, {start, NumUsers, NumWorkers, Worker}).
@@ -216,7 +219,6 @@ working(timeout, #state {max_worker_count = Count,
 working(timeout, #state {max_worker_count = MW,
                          live_worker_count = LW,
                          worker = #migration_worker{next_object_generator = Next,
-                                                    supervisor = SupMod,
                                                     callback_module = Mod}}
                          = State) when LW < MW ->
 
@@ -229,20 +231,19 @@ working(timeout, #state {max_worker_count = MW,
             %% Stop and wait for workers to end.
             {next_state, halting, State#state {objects_remaining = 0}, 0};
         [Object] ->
-            start_worker(SupMod, Object, State);
+            start_worker(Object, State);
         Object ->
-            start_worker(SupMod, Object, State)
+            start_worker(Object, State)
     end.
 
 working({start, _, _, _, _}, _From, State) ->
     {reply, {error, busy_now}, halting, State}.
 
 
-start_worker(SupMod, Object, #state{live_worker_count = LW,
+start_worker(Object, #state{live_worker_count = LW,
                                      objects_remaining = OR,
                                      acct_info = AcctInfo,
-                                     worker = #migration_worker{supervisor = SupMod,
-                                                                processor_fun = Fun,
+                                     worker = #migration_worker{processor_fun = Fun,
                                                                 callback_module = Mod}} = State) ->
     InitialState = call_if_exported(Mod,migration_start_worker_args,[Object, AcctInfo, Fun],  fun default_worker_args/3),
     case apply(Mod:supervisor(), start_worker, [Mod | InitialState]) of
