@@ -46,7 +46,9 @@ main(NoiseLevel) when is_atom(NoiseLevel) ->
     catch
         error:{error, HaltWith} ->
             {?FAILURE_EXIT, HaltWith};
-        _:_ ->
+        E:Why ->
+            error_logger:error_report({E, Why}),
+            io:fwrite("Unknown error ~p ~n Unknown reason ~p ~n", [E, Why]),
             {?FAILURE_EXIT, "An unknown error has occurred."}
     end,
     io:fwrite("~n~s~n~n", [Message]),
