@@ -12,7 +12,8 @@
 -export([populate_xdl_with_unmigrated_orgs/0,
          reset_org/1,
          reset_orgs/1,
-         reset_orgs_from_file/1]).
+         reset_orgs_from_file/1,
+         call_if_exported/4]).
 
 -include("mover.hrl").
 
@@ -88,4 +89,20 @@ process_lines(Dev, Processor, LineNo) ->
         Line ->
             Processor(string:strip(Line, right, $\n), LineNo),
             process_lines(Dev, Processor, LineNo + 1)
+    end.
+
+call_if_exported(undefined, _FunName, Args, DefaultFun) ->
+    erlang:apply(DefaultFun, Args);
+call_if_exported(Mod, FunName, Args, DefaultFun) ->
+    %% Modules that haven't been called are lazily loaded in the node
+    %% This results in function_exported returning false even if the
+    %% function is exported with correct arity.  code:ensure_loaded
+    %% will load the module and return a bad match if the module is
+    %% missing.
+    {module, _} = code:ensure_loaded(Mod),
+    case erlang:function_exported(Mod, FunName, length(Args)) of
+        true ->
+            erlang:apply(Mod, FunName, Args);
+        false  ->
+            erlang:apply(DefaultFun, Args)
     end.

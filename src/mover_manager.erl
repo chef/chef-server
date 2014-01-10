@@ -90,11 +90,6 @@
 
 -record(migration_worker, { %% Supervisor module that knows how to start workers
                             supervisor :: atom(),
-                            %% this can be used to match a pattern on
-                            %% worker_down messages in handle_info , to determine whether
-                            %% the lost worker should cause operations to halt based on the
-                            %% type of operation being performed.
-                            migration_type :: atom(),
                             %% fun that retrieves identifier for next
                             %% object to run through worker
                             next_object_generator :: object_generator_fun(),
@@ -146,8 +141,6 @@ migrate(all, NumWorkers) ->
     migrate(-1, NumWorkers);
 migrate(NumOrgs, NumWorkers) ->
     Worker = #migration_worker{supervisor = mover_org_migrator_sup,
-                               migration_type = org_data_from_couch_phase_1,
-                               next_object_generator = fun moser_state_tracker:next_ready_org/0,
                                callback_module = mover_phase_1_migrator_callback},
     gen_fsm:sync_send_event(?SERVER, {start, NumOrgs, NumWorkers, Worker}).
 
@@ -157,7 +150,6 @@ validate_deps(all, NumWorkers) ->
     validate_deps(-1, NumWorkers);
 validate_deps(NumOrgs, NumWorkers) ->
     Worker = #migration_worker{supervisor = mover_org_dep_validator_sup,
-                               migration_type = org_data_from_couch_phase_1_validation,
                                next_object_generator = fun moser_state_tracker:next_validation_ready_org/0},
     gen_fsm:sync_send_event(?SERVER, {start, NumOrgs, NumWorkers, Worker}).
 
@@ -167,8 +159,6 @@ migrate_user_password_storage(all, NumWorkers) ->
     migrate_user_password_storage(-1, NumWorkers);
 migrate_user_password_storage(NumUsers, NumWorkers) ->
     Worker = #migration_worker{supervisor = mover_transient_worker_sup,
-                               migration_type = users_password_storage,
-                               next_object_generator = fun mover_transient_migration_queue:next/0,
                                processor_fun = fun mover_user_hash_converter:convert_user/1,
                                callback_module = mover_user_hash_converter_callback},
     gen_fsm:sync_send_event(?SERVER, {start, NumUsers, NumWorkers, Worker}).
@@ -194,15 +184,9 @@ init([]) ->
                        Result
                catch
                    error:{badmatch, {error, {file_error, _, enoent}}} ->
-                       error_logger:warning_report({dets_file_not_found,
-                                                   mover_manager,
-                                                   "Dets files not found."}),
                        undefined;
 
                    error:{badmatch, {error, {not_closed, _}}} ->
-                       error_logger:warning_report({dets_files_not_closed,
-                                                    mover_manager,
-                                                    "Dets files not closed properly."}),
                        undefined
                end,
     {ok, ready, #state{acct_info = AcctInfo}}.
@@ -275,7 +259,7 @@ start_worker(SupMod, Object, #state{live_worker_count = LW,
                                                                 processor_fun = Fun,
                                                                 callback_module = Mod}} = State) ->
     InitialState = call_if_exported(Mod,migration_start_worker_args,[Object, AcctInfo, Fun],  fun default_worker_args/3),
-    case apply(SupMod, start_worker, [Mod | InitialState]) of
+    case apply(Mod:supervisor(), start_worker, [Mod | InitialState]) of
         {ok, Pid} ->
             monitor(process, Pid),
             {next_state, working, State#state{live_worker_count = (LW + 1),
@@ -310,16 +294,19 @@ worker_down({migration_error, _Detail}, StateName, #state{error_count = EC} = St
     {next_state, StateName, State#state{error_count = (EC + 1)}, 0};
 worker_down(normal, StateName, State) ->
     {next_state, StateName, State, 0};
-worker_down(Reason, StateName, #state{ worker = #migration_worker { migration_type = org_data_from_couch_phase_1_validation },
+worker_down(Reason, StateName, #state{ worker = #migration_worker { callback_module = Mod },
                                        error_count = EC} = State) ->
-    %% Errors in validation are not fatal to running additional
-    %% validations, so we won't halt operations
-    lager:error("in ~p: Worker down with unexpected error while validating.  Continuing validations. ~p",
-                [StateName, Reason]),
-    {next_state, StateName, State#state{error_count = (EC + 1)}, 0};
-worker_down(Reason, StateName, State) ->
-    lager:error("in ~p: Worker down with unexpected error. Halting new workers. ~p", [StateName, Reason]),
-    {next_state, halting, State#state{fatal_stop = true}, 0}.
+    case Mod:error_halts_migration() of
+        false ->
+            %% Errors in validation are not fatal to running additional
+            %% validations, so we won't halt operations
+            lager:error("in ~p: Worker down with unexpected error while validating.  Continuing validations. ~p",
+                        [StateName, Reason]),
+            {next_state, StateName, State#state{error_count = (EC + 1)}, 0};
+        true ->
+            lager:error("in ~p: Worker down with unexpected error. Halting new workers. ~p", [StateName, Reason]),
+            {next_state, halting, State#state{fatal_stop = true}, 0}
+    end.
 
 handle_event(_Event, StateName, State) ->
     {next_state, StateName, State}.
@@ -365,20 +352,12 @@ create_dets_files(Acct) ->
     moser_acct_processor:close_account(Acct),
     create_dets_files(undefined).
 
-call_if_exported(undefined, FunName, Args, DefaultFun) ->
-    erlang:apply(DefaultFun, Args);
 call_if_exported(#state{worker = Worker}, FunName, Args, DefaultFun) ->
     call_if_exported(Worker, FunName, Args, DefaultFun);
 call_if_exported(#migration_worker{callback_module = Mod}, FunName, Args, DefaultFun) ->
     call_if_exported(Mod, FunName, Args, DefaultFun);
 call_if_exported(Mod, FunName, Args, DefaultFun) ->
-    code:ensure_loaded(Mod),
-    case erlang:function_exported(Mod, FunName, length(Args)) of
-        true ->
-            erlang:apply(Mod, FunName, Args);
-        false  ->
-            erlang:apply(DefaultFun, Args)
-    end.
+    mover_util:call_if_exported(Mod, FunName, Args, DefaultFun).
 
 no_op() ->
     no_op.

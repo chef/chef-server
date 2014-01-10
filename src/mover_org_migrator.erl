@@ -35,30 +35,35 @@
 
 -record(state, {
           org_name :: string(),     %% The org we are migrating
-          acct_info
+          acct_info,
+          migration_type,
+          callback_module
          }).
 
 
 start_link(Config) ->
     gen_fsm:start_link(?MODULE, Config, []).
 
-init({OrgName, AcctInfo, _ProcessorFun}) ->
-    State = #state{org_name = OrgName, acct_info = AcctInfo},
-    case moser_state_tracker:migration_started(OrgName) of
+init({CallbackModule, OrgName, AcctInfo}) ->
+    MigrationType = CallbackModule:migration_type(),
+    State = #state{org_name = OrgName, acct_info = AcctInfo, callback_module = CallbackModule, migration_type = MigrationType},
+
+    case moser_state_tracker:migration_started(OrgName, MigrationType) of
         ok ->
-            lager:info([{org_name, OrgName}], "Starting migration."),
+            lager:info([{org_name, OrgName}], "Starting migration ~p.", [MigrationType]),
             {ok, disable_org_access, State, 0};
         Error ->
             stop_with_failure(State, Error, init)
     end.
 
-disable_org_access(timeout, #state{org_name = OrgName} = State) ->
-    case mover_org_darklaunch:disable_org(OrgName) of
+disable_org_access(timeout, #state{org_name = OrgName, callback_module = CallbackModule} = State) ->
+    case mover_util:call_if_exported(CallbackModule, disable_object, [OrgName], fun mover_org_darklaunch:disable_org/1) of
         ok ->
             {next_state, sleep, State, 0};
         {error, Error} ->
             stop_with_failure(State, Error, disable_org_access)
     end.
+
 
 %% The sleep state is configured to add a wait period immediately
 %% after placing an org in 503 (downtime) mode. This wait period
@@ -71,8 +76,8 @@ sleep(timeout, #state{} = State) ->
     timer:sleep(envy:get(mover, sleep_time, integer)),
     {next_state, migrate_org, State, 0}.
 
-migrate_org(timeout, #state{org_name = OrgName, acct_info = AcctInfo} = State) ->
-    try moser_converter:convert_org(OrgName, AcctInfo) of
+migrate_org(timeout, #state{org_name = OrgName, acct_info = AcctInfo, callback_module = CallbackModule} = State) ->
+    try CallbackModule:migration_action(OrgName, AcctInfo) of
         [{ok, _}] ->
             {next_state, verify_org, State, 0};
         Error ->
@@ -111,12 +116,12 @@ handle_sync_event(_Event, _From, StateName, State) ->
 handle_info(_Info, StateName, State) ->
     {next_state, StateName, State}.
 
-terminate(normal, _StateName, #state{org_name = OrgName}) ->
+terminate(normal, _StateName, #state{org_name = OrgName, migration_type = MigrationType}) ->
     lager:info([{org_name, OrgName}], "Terminating after successful migration"),
-    moser_state_tracker:migration_successful(OrgName);
-terminate(_Other, StateName, #state{org_name = OrgName}) ->
+    moser_state_tracker:migration_successful(OrgName, MigrationType);
+terminate(_Other, StateName, #state{org_name = OrgName, migration_type = MigrationType}) ->
     lager:info([{org_name, OrgName}], "Terminating after failed migration"),
-    moser_state_tracker:migration_failed(OrgName, StateName).
+    moser_state_tracker:migration_failed(OrgName, StateName, MigrationType).
 
 code_change(_OldVsn, StateName, State, _Extra) ->
     {ok, StateName, State}.

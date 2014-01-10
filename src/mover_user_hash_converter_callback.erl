@@ -4,7 +4,10 @@
          migration_init/0,
          migration_start_worker_args/3,
          migration_action/2,
-         next_object/0
+         next_object/0,
+         migration_type/0,
+         supervisor/0,
+         error_halts_migration/0
          ]).
 
 migration_init() ->
@@ -13,7 +16,7 @@ migration_init() ->
     mover_user_hash_converter:start_bcrypt_pool().
 
 
-migration_start_worker_args(Object, AcctInfo, ProcessorFun) ->
+migration_start_worker_args(Object, _AcctInfo, ProcessorFun) ->
     [Object, ProcessorFun].
 
 migration_action(_, _) ->
@@ -26,3 +29,12 @@ status_check() ->
 
 next_object() ->
     mover_transient_migration_queue:next().
+
+supervisor() ->
+    mover_transient_worker_sup.
+
+migration_type() ->
+    <<"user_hash_converter">>.
+
+error_halts_migration() ->
+    true.
