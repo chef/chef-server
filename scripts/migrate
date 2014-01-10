@@ -5,7 +5,10 @@
 %%
 %% Copyright(c) 2013 Opscode, Inc
 %% All Rights Reserved
-%%
+
+%% using compiled mode gives more informative error traces
+-mode(compile).
+
 %% @doc Migrate all orgs, one at a time, and output the summary results to stdout
 %% in the form:
 %%
