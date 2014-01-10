@@ -32,7 +32,7 @@
 
 -record(state, {
           org_name :: string(),     %% The org we are migrating
-          acct_info,
+          migration_args,
           migration_type,
           callback_module
          }).
@@ -41,13 +41,13 @@
 start_link(Config) ->
     gen_fsm:start_link(?MODULE, Config, []).
 
-init({CallbackModule, OrgName, AcctInfo}) ->
+init({CallbackModule, OrgName, MigrationArgs}) ->
     MigrationType = CallbackModule:migration_type(),
-    State = #state{org_name = OrgName, acct_info = AcctInfo, callback_module = CallbackModule, migration_type = MigrationType},
+    State = #state{org_name = OrgName, migration_args = MigrationArgs, callback_module = CallbackModule},
 
     case moser_state_tracker:migration_started(OrgName, MigrationType) of
         ok ->
-            lager:info([{org_name, OrgName}], "Starting migration ~p.", [MigrationType]),
+            lager:info([{org_name, OrgName}], "Starting migration ~s.", [CallbackModule:migration_type()]),
             {ok, disable_org_access, State, 0};
         Error ->
             stop_with_failure(State, Error, init)
@@ -73,8 +73,9 @@ sleep(timeout, #state{} = State) ->
     timer:sleep(envy:get(mover, sleep_time, integer)),
     {next_state, migrate_org, State, 0}.
 
-migrate_org(timeout, #state{org_name = OrgName, acct_info = AcctInfo, callback_module = CallbackModule} = State) ->
-    try CallbackModule:migration_action(OrgName, AcctInfo) of
+migrate_org(timeout, #state{migration_args = MigrationArgs, callback_module = CallbackModule} = State) ->
+    lager:info([], "Migration args are ~p", [MigrationArgs]),
+    try erlang:apply(CallbackModule, migration_action, MigrationArgs) of
         [{ok, _}] ->
             {next_state, verify_org, State, 0};
         Error ->
@@ -88,8 +89,9 @@ verify_org(timeout, #state{org_name = _OrgName} = State) ->
     %% Placeholder: verification is currently external.
     {next_state, set_org_to_sql, State, 0}.
 
-set_org_to_sql(timeout, #state{org_name = OrgName} = State) ->
-    case mover_org_darklaunch:org_to_sql(OrgName, ?PHASE_2_MIGRATION_COMPONENTS) of
+set_org_to_sql(timeout, #state{org_name = OrgName, migration_args = MigrationArgs, callback_module = CallbackModule} = State) ->
+    DefaultFun = fun () -> mover_org_darklaunch:org_to_sql(OrgName, ?PHASE_2_MIGRATION_COMPONENTS) end,
+    case mover_util:call_if_exported(CallbackModule, reconfigure_object, MigrationArgs, DefaultFun) of
         ok ->
             {next_state, enable_org_access, State, 0};
         {error, Error} ->
@@ -113,12 +115,12 @@ handle_sync_event(_Event, _From, StateName, State) ->
 handle_info(_Info, StateName, State) ->
     {next_state, StateName, State}.
 
-terminate(normal, _StateName, #state{org_name = OrgName, migration_type = MigrationType}) ->
+terminate(normal, _StateName, #state{org_name = OrgName, callback_module = CallbackModule}) ->
     lager:info([{org_name, OrgName}], "Terminating after successful migration"),
-    moser_state_tracker:migration_successful(OrgName, MigrationType);
-terminate(_Other, StateName, #state{org_name = OrgName, migration_type = MigrationType}) ->
+    moser_state_tracker:migration_successful(OrgName, CallbackModule:migration_type());
+terminate(_Other, StateName, #state{org_name = OrgName, callback_module = CallbackModule}) ->
     lager:info([{org_name, OrgName}], "Terminating after failed migration"),
-    moser_state_tracker:migration_failed(OrgName, StateName, MigrationType).
+    moser_state_tracker:migration_failed(OrgName, StateName, CallbackModule:migration_type()).
 
 code_change(_OldVsn, StateName, State, _Extra) ->
     {ok, StateName, State}.

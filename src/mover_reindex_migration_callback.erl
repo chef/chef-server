@@ -1,26 +1,25 @@
 -module(mover_reindex_migration_callback).
 
 -export([
-         next_object/0,
-         migration_start_worker_args/3,
-         migration_action/2,
+         migration_start_worker_args/2,
+         migration_action/1,
          migration_type/0,
          supervisor/0,
-         error_halts_migration/0
+         error_halts_migration/0,
+         reconfigure_object/1
          ]).
 
 -include_lib("moser/include/moser.hrl").
 
-next_object() ->
-    moser_state_tracker:next_ready_org(<<"reindex">>).
-
 %Return any initial state not related to the object id
-migration_start_worker_args(Object, AcctInfo, _ProcessorFun) ->
+migration_start_worker_args(Object, AcctInfo) ->
     Org = moser_acct_processor:expand_org_info(#org_info{org_name = Object, account_info = AcctInfo}),
     [Org].
 
-migration_action(OrgName, AcctInfo) ->
-    moser_converter:convert_org(OrgName, AcctInfo).
+migration_action(#org_info{org_id = OrgId, org_name = OrgName}) ->
+    IndexStateResults = chef_ez_reindex_direct:reindex(OrgName, OrgId, "http://localhost:8983/solr/update"),
+    [ok = Result || Result <- IndexStateResults],
+    [{ok, reindex_successful}].
 
 migration_type() ->
     <<"reindex">>.
@@ -30,3 +29,6 @@ supervisor() ->
 
 error_halts_migration() ->
     true.
+
+reconfigure_object(_OrgInfo) ->
+    ok.

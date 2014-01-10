@@ -2,8 +2,8 @@
 
 -export([
          migration_init/0,
-         migration_start_worker_args/3,
-         migration_action/2,
+         migration_start_worker_args/2,
+         migration_action/1,
          next_object/0,
          migration_type/0,
          supervisor/0,
@@ -16,11 +16,11 @@ migration_init() ->
     mover_user_hash_converter:start_bcrypt_pool().
 
 
-migration_start_worker_args(Object, _AcctInfo, ProcessorFun) ->
-    [Object, ProcessorFun].
+migration_start_worker_args(Object, _AcctInfo) ->
+    [Object].
 
-migration_action(_, _) ->
-    ok.
+migration_action(Object) ->
+    mover_user_has_converter:convert_user(Object).
 
 status_check() ->
     {ok, Status} = mover_manager:status(),

@@ -82,14 +82,7 @@
 
 -define(SERVER, ?MODULE).
 
--type object_generator_fun() :: fun(() -> binary()).
--type object_processor_fun() :: fun((binary()) -> term()).
-
--record(migration_worker, { %% fun that retrieves identifier for next
-                            %% object to run through worker
-                            next_object_generator :: object_generator_fun(),
-                            %% Processor function for generic workers
-                            processor_fun :: object_processor_fun(),
+-record(migration_worker, {
                             %% Callback module for a given migration
                             callback_module :: atom()}).
 
@@ -148,7 +141,6 @@ migrate_user_password_storage(all, NumWorkers) ->
     migrate_user_password_storage(-1, NumWorkers);
 migrate_user_password_storage(NumUsers, NumWorkers) ->
     Worker = #migration_worker{
-                               processor_fun = fun mover_user_hash_converter:convert_user/1,
                                callback_module = mover_user_hash_converter_callback},
     gen_fsm:sync_send_event(?SERVER, {start, NumUsers, NumWorkers, Worker}).
 
@@ -218,10 +210,9 @@ working(timeout, #state {max_worker_count = Count,
     {next_state, working, State};
 working(timeout, #state {max_worker_count = MW,
                          live_worker_count = LW,
-                         worker = #migration_worker{next_object_generator = Next,
-                                                    callback_module = Mod}}
+                         worker = #migration_worker{callback_module = Mod}}
                          = State) when LW < MW ->
-
+    Next = fun() -> moser_state_tracker:next_ready_org(Mod:migration_type()) end,
     %% We have fewer workers than requested, start another one
     %% asl ong as there is work to do
     case call_if_exported(Mod, next_object, [], Next) of
@@ -243,10 +234,9 @@ working({start, _, _, _, _}, _From, State) ->
 start_worker(Object, #state{live_worker_count = LW,
                                      objects_remaining = OR,
                                      acct_info = AcctInfo,
-                                     worker = #migration_worker{processor_fun = Fun,
-                                                                callback_module = Mod}} = State) ->
-    InitialState = call_if_exported(Mod,migration_start_worker_args,[Object, AcctInfo, Fun],  fun default_worker_args/3),
-    case apply(Mod:supervisor(), start_worker, [Mod | InitialState]) of
+                                     worker = #migration_worker{callback_module = Mod}} = State) ->
+    MigrationArgs = call_if_exported(Mod,migration_start_worker_args,[Object, AcctInfo],  fun default_worker_args/2),
+    case apply(Mod:supervisor(), start_worker, [Mod, Object, MigrationArgs]) of
         {ok, Pid} ->
             monitor(process, Pid),
             {next_state, working, State#state{live_worker_count = (LW + 1),
@@ -256,8 +246,8 @@ start_worker(Object, #state{live_worker_count = LW,
             {next_state, halting, State#state {fatal_stop = true}, 0}
     end.
 
-default_worker_args(Object, AcctInfo, Fun) ->
-    [Object, AcctInfo, Fun].
+default_worker_args(Object, AcctInfo) ->
+    [Object, AcctInfo].
 
 halting(timeout, #state{live_worker_count = 0} = State) ->
     %% All workers stopped - we're ready to accept a new request for

@@ -23,6 +23,6 @@ init([]) ->
                  temporary, 10000, worker, [mover_org_migrator]},
     {ok, {{simple_one_for_one, 10, 10}, [Spec]}}.
 
-start_worker(CallbackModule, OrgName, AcctInfo) ->
-    supervisor:start_child(?SERVER, [{CallbackModule, OrgName, AcctInfo}]).
+start_worker(CallbackModule, Object, MigrationArgs) ->
+    supervisor:start_child(?SERVER, [{CallbackModule, Object, MigrationArgs}]).
 
