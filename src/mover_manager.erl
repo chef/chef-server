@@ -62,8 +62,6 @@
           migrate/2,
           migrate_next/0,
           migrate_user_password_storage/2,
-          validate_deps/2,
-          validate_deps_next/0,
           status/0,
           halt_actions/0,
           create_account_dets/0,
@@ -133,8 +131,6 @@ start_link() ->
 %% Helper functions to launch a single migration
 migrate_next() ->
     migrate(1, 1).
-validate_deps_next() ->
-    validate_deps(1, 1).
 
 %% Start phase 1 org migration: clients, cookbooks, etc from couch to sql
 migrate(all, NumWorkers) ->
@@ -144,13 +140,6 @@ migrate(NumOrgs, NumWorkers) ->
                                callback_module = mover_phase_1_migrator_callback},
     gen_fsm:sync_send_event(?SERVER, {start, NumOrgs, NumWorkers, Worker}).
 
-%% Validate dependencies of a migrated through depsolver. Deprecated
-%% with use of depselector.
-validate_deps(all, NumWorkers) ->
-    validate_deps(-1, NumWorkers);
-validate_deps(NumOrgs, NumWorkers) ->
-    Worker = #migration_worker{supervisor = mover_org_dep_validator_sup,
-                               next_object_generator = fun moser_state_tracker:next_validation_ready_org/0},
     gen_fsm:sync_send_event(?SERVER, {start, NumOrgs, NumWorkers, Worker}).
 
 %% Migrate user password hash from sha1 embedded in json to dedicated fields
