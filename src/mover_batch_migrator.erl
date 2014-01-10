@@ -12,16 +12,7 @@
 
 -define(POLL_SLEEP_MS, 500).
 
-% Stolen from moser/src/moser.hrl
--record(org_info,
-        { org_name = undefined,
-          org_id = undefined,
-          db_name = undefined,
-          is_precreated = false,
-          chef_ets,
-          auth_ets,
-          account_info = undefined,
-          start_time}).
+-include_lib("moser/include/moser.hrl").
 
 -compile([{parse_transform, lager_transform}]).
 
