@@ -1,5 +1,5 @@
 name "bookshelf"
-version "1.0.3"
+version "1.1.1"
 
 dependency "erlang"
 dependency "rebar"

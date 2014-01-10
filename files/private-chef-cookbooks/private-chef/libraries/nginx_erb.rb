@@ -6,9 +6,9 @@ class NginxErb
     @node = node
   end
 
-  def listen_port(proto)
+
+  def listen_port(proto, options = {})
     listen_port = ""
-    listen_port << "[::]:" if node['private_chef']['nginx']['enable_ipv6']
     listen_port << case proto
                    when "http"
                      node['private_chef']['nginx']['non_ssl_port'].to_s || "80"
@@ -17,7 +17,20 @@ class NginxErb
                    else
                      proto.to_s
                    end
-    listen_port
+
+    if node['private_chef']['nginx']['enable_ipv6']
+      # In some cases, we're serving as a front-end for a service that's already
+      # listening on the same port in ipv4 - this prevents a conflict in that situation.
+      if options[:ipv6_only]
+        "listen [::]:#{listen_port} ipv6only=on;"
+      else
+        # Listen to the same port on both v6 and v4
+        "listen [::]:#{listen_port} ipv6only=off;"
+      end
+    else
+      # default behavior to listen only on v4
+      "listen #{listen_port};"
+    end
   end
 
   def access_log(proto)
@@ -53,24 +66,17 @@ class NginxErb
     make_location(path, choose_account_upstream(key), alternative, proto)
   end
 
-  ### NOTE: X-Ops-Darklaunch Header Setting - 2013/08/29 ###
-  # This will clear X-Ops-Darklaunch headers set by the client
-  # on their way to the chef server. The chef server should
-  # not respond to darklaunch headers set by the client. Since
-  # we're no longer using the darklaunch sub-request to set
-  # these headers, we'll do it the simple way here.
+  ### NOTE: X-Ops-Darklaunch Header Setting
+  # Temporarily set users, containers, and groups based on xdarklaunch settings
   #
   # In the near future, the load balancer routing logic
   # will be re-written in lua and this block of code will
-  # be removed. It is not expected that we will need to
-  # darklaunch endpoints before that happens. If we do,
-  # we should use the built-in darklaunch sub-request mechanism
-  # that's in the nginx config.
+  # be removed.
   #
   def make_location(path, upstream, alternative, proto)
     <<EOS
 location ~ "#{path}" {
-    \tmore_set_input_headers 'X-Ops-Darklaunch:';
+    \tmore_set_input_headers "X-Ops-Darklaunch: #{xdarklaunch_header}";
     \tset $my_upstream #{upstream};
     \tif ($http_x_ops_userid = "") {
     \t\tset $my_upstream #{alternative};
@@ -79,6 +85,16 @@ location ~ "#{path}" {
     \tproxy_pass #{proto}://$my_upstream;
     }
 EOS
+  end
+
+  def xdarklaunch_couchdb?(resource)
+    node['private_chef']['dark_launch']["couchdb_#{resource}"]
+  end
+
+  def xdarklaunch_header
+    %w(containers groups).map do |resource|
+      "couchdb_#{resource}=#{xdarklaunch_couchdb?(resource) ? 1 : 0}"
+    end.join(';')
   end
 
   def select_upstream(upstream, alternative, proto)

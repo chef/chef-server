@@ -7,7 +7,10 @@ if Vagrant::VERSION < '1.2.1'
   raise 'The Omnibus Build Lab is only compatible with Vagrant 1.2.1+'
 end
 
-host_project_path = File.expand_path('..', __FILE__)
+cpu_count = ENV['ob_cpu_count'] || 2
+memory = ENV['ob_mem'] || 2048
+
+host_project_path = File.expand_path("..", __FILE__)
 guest_project_path = "/home/vagrant/#{File.basename(host_project_path)}"
 project_name = 'private-chef'
 
@@ -33,9 +36,9 @@ Vagrant.configure('2') do |config|
   config.vm.provider :virtualbox do |vb|
     # Give enough horsepower to build without taking all day.
     vb.customize [
-      'modifyvm', :id,
-      '--memory', '1536',
-      '--cpus', '2'
+      "modifyvm", :id,
+      "--memory", "#{memory}",
+      "--cpus", "#{cpu_count}",
     ]
   end
 

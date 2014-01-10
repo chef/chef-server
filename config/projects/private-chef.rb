@@ -20,6 +20,8 @@ dependency "private-chef-scripts" # assorted scripts used by installed instance
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 dependency "private-chef-administration"
 dependency "openresty"
+dependency "redis-rb" # gem for interacting with redis
+dependency "openresty-lpeg"  # lua-based routing
 dependency "runit"
 dependency "unicorn"
 
@@ -27,6 +29,7 @@ dependency "unicorn"
 dependency "couchdb"
 dependency "postgresql92"
 dependency "rabbitmq"
+dependency "redis" # dynamic routing controls
 dependency "opscode-solr"
 dependency "opscode-expander"
 

@@ -1,4 +1,4 @@
-#
+
 # Author:: Adam Jacob (<adam@opscode.com>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
@@ -146,6 +146,8 @@ default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = '20'
 default['private_chef']['opscode-erchef']['couchdb_max_conn'] = '100'
 default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
+# Default: generate signed URLs based upon Host: header. Override with a url, "http:// ..."
+default['private_chef']['opscode-erchef']['base_resource_url'] = :host_header
 default['private_chef']['opscode-erchef']['s3_bucket'] = 'bookshelf'
 default['private_chef']['opscode-erchef']['s3_url_ttl'] = 900
 default['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] = 5000
@@ -194,6 +196,38 @@ default['private_chef']['oc-chef-pedant']['log_directory'] = "/var/log/opscode/o
 default['private_chef']['oc-chef-pedant']['log_http_requests'] = true
 default['private_chef']['oc-chef-pedant']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['oc-chef-pedant']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['oc-chef-pedant']['debug_org_creation'] = false
+
+###
+# redis_lb
+###
+default['private_chef']['redis_lb']['enable'] = true
+default['private_chef']['redis_lb']['ha'] = false
+default['private_chef']['redis_lb']['dir'] = "/var/opt/opscode/redis_lb"
+default['private_chef']['redis_lb']['data_dir'] = "/var/opt/opscode/redis_lb/data"
+default['private_chef']['redis_lb']['log_directory'] = "/var/log/opscode/redis_lb"
+default['private_chef']['redis_lb']['log_rotation']['file_maxbytes'] = 1000000
+default['private_chef']['redis_lb']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['redis_lb']['port'] = "16379"
+default['private_chef']['redis_lb']['bind'] = "127.0.0.1"
+default['private_chef']['redis_lb']['vip'] = "127.0.0.1"
+default['private_chef']['redis_lb']['keepalive'] = "60"
+default['private_chef']['redis_lb']['timeout'] = "300"
+default['private_chef']['redis_lb']['loglevel'] = "notice"
+default['private_chef']['redis_lb']['databases'] = "16"
+default['private_chef']['redis_lb']['appendonly'] = "no"
+default['private_chef']['redis_lb']['appendfsync'] = "always"
+default['private_chef']['redis_lb']['activerehashing'] = "no"
+default['private_chef']['redis_lb']['aof_rewrite_percent'] = "50"
+default['private_chef']['redis_lb']['aof_rewrite_min_size'] = "16mb"
+default['private_chef']['redis_lb']['maxmemory'] = "8m"
+default['private_chef']['redis_lb']['maxmemory_policy'] = "noeviction"
+
+default['private_chef']['redis_lb']['save_frequency'] = {
+  "900" => "1",
+  "300" => "10",
+  "60" => "1000"
+}
 
 ###
 # Load Balancer
@@ -215,6 +249,19 @@ default['private_chef']['lb_internal']['vip'] = "127.0.0.1"
 default['private_chef']['lb_internal']['chef_port'] = 9680
 default['private_chef']['lb_internal']['account_port'] = 9685
 default['private_chef']['lb_internal']['oc_bifrost_port'] = 9683
+default['private_chef']['lb']['redis_connection_timeout'] = 60
+default['private_chef']['lb']['redis_connection_pool_size'] = 250
+default['private_chef']['lb']['maint_refresh_interval'] = 600
+default['private_chef']['lb']['ban_refresh_interval'] = 600
+default['private_chef']['lb']['chef_min_version'] = 10
+default['private_chef']['lb']['chef_max_version'] = 11
+
+###
+# Load balancer route configuration
+###
+default['private_chef']['lb']['xdl_defaults']['503_mode'] = false
+default['private_chef']['lb']['xdl_defaults']['couchdb_containers'] = true
+default['private_chef']['lb']['xdl_defaults']['couchdb_groups'] = true
 
 ####
 # Nginx
@@ -231,6 +278,7 @@ default['private_chef']['nginx']['non_ssl_port'] = 80
 default['private_chef']['nginx']['x_forwarded_proto'] = 'https'
 default['private_chef']['nginx']['server_name'] = node['fqdn']
 default['private_chef']['nginx']['url'] = "https://#{node['fqdn']}"
+
 # HIGHEST SECURITY AT ALL COSTS: TLSv1 only to prevent BEAST, can also turn off RC4/MEDIUM/MD5 to really favor security over speed/comptability
 #default['private_chef']['nginx']['ssl_protocols'] = "-ALL +TLSv1"
 #default['private_chef']['nginx']['ssl_ciphers'] = "RC4-SHA:RC4-MD5:RC4:RSA:HIGH:MEDIUM:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK"
@@ -327,6 +375,9 @@ default['private_chef']['oc_bifrost']['sql_user'] = "bifrost"
 default['private_chef']['oc_bifrost']['sql_password'] = "challengeaccepted"
 default['private_chef']['oc_bifrost']['sql_ro_user'] = "bifrost_ro"
 default['private_chef']['oc_bifrost']['sql_ro_password'] = "foreveralone"
+# Enable extended performance logging data for bifrost.  Setting this to false
+# will cut bifrost request log size approximately in half.
+default['private_chef']['oc_bifrost']['extended_perf_log'] = true
 
 ####
 # Authz
@@ -354,6 +405,8 @@ default['private_chef']['bookshelf']['port'] = 4321
 default['private_chef']['bookshelf']['stream_download'] = true
 default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
 default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
+# Default: set to Host: header. Override to hardcode a url, "http://..."
+default['private_chef']['bookshelf']['external_url'] = :host_header
 
 ###
 # Opscode Certificate
@@ -391,6 +444,8 @@ default['private_chef']['dark_launch']["quick_start"] = false
 default['private_chef']['dark_launch']["new_theme"] = true
 default['private_chef']['dark_launch']["private-chef"] = true
 default['private_chef']['dark_launch']["sql_users"] = true
+default['private_chef']['dark_launch']["couchdb_containers"] = true
+default['private_chef']['dark_launch']["couchdb_groups"] = true
 default['private_chef']['dark_launch']["add_type_and_bag_to_items"] = true
 default['private_chef']['dark_launch']["erlang_user_endpoint"] = false
 default['private_chef']['dark_launch']["reporting"] = true
@@ -497,6 +552,7 @@ default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_bind'] = node[
 default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_peer'] = nil
 default['private_chef']['keepalived']['vrrp_instance_preempt_delay'] = 30
 default['private_chef']['keepalived']['vrrp_instance_nopreempt'] = true
+
 default['private_chef']['keepalived']['service_posthooks'] = {
     "rabbitmq" => "/opt/opscode/bin/wait-for-rabbit"
 }

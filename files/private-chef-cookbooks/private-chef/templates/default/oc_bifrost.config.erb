@@ -77,10 +77,18 @@
           {error_logger_hwm, 1000}
         ]},
  {webmachine, [
-               {webmachine_logger_module, bifrost_request_logger}
-              ]},
+          {log_handlers, [
+               {oc_wm_request_logger, [
+                       {file, "<%= File.join(@log_directory, 'requests.log') %>"},
+                       {file_size, <%= (@log_rotation['file_maxbytes'].to_f/1024/1024).round %>},  %% Size in MB
+                       {files, <%= @log_rotation['num_to_keep'] %>},
+                         {annotations, [requestor_id, created_authz_id, perf_stats, msg]}
+                       ]
+                      }]}]
+ },
  {sqerl, [
           {db_type, pgsql},
+          {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
           {db_host, "<%= node['private_chef']['postgresql']['vip'] %>" },
           {db_port, <%= node['private_chef']['postgresql']['port'] %> },
           {db_user, "<%= node['private_chef']['oc_bifrost']['sql_user'] %>" },
@@ -88,7 +96,7 @@
           {db_name, "bifrost" },
           {idle_check, 10000},
           {prepared_statements, {bifrost_db, statements, []} },
-          {column_transforms, undefined}
+          {column_transforms, []}
          ]},
  {stats_hero, [
                 {udp_socket_pool_size, <%= node['private_chef']['postgresql']['max_connections'] %> },
@@ -106,6 +114,7 @@
              {ip, "<%= @listen %>" },
              {port, <%= @port %> },
              {superuser_id, "<%= @superuser_id %>"},
-             {root_metric_key, "bifrost"}
+             {root_metric_key, "bifrost"},
+             {enable_extended_perf_log, <%= @extended_perf_log %>}
             ]}
 ].

@@ -13,7 +13,8 @@ end
 # Sqitch metadata info in your database.
 execute "chef-server-schema" do
   command "sqitch --db-name opscode_chef deploy --verify"
-  cwd "/opt/opscode/embedded/service/chef-server-schema"
+  # OSC schema is a dependency of the EC schema, and managed by it
+  cwd "/opt/opscode/embedded/service/enterprise-chef-server-schema/deps/chef-server-schema"
   user node['private_chef']['postgresql']['username']
   returns [0,1]
   action :nothing

@@ -17,6 +17,9 @@ module PrivateChef
   # options are 'standalone', 'manual', 'ha', and 'tier'
   topology "standalone"
 
+  # options are 'ipv4' 'ipv6'
+  ip_version "ipv4"
+
   couchdb Mash.new
   rabbitmq Mash.new
   opscode_solr Mash.new
@@ -26,7 +29,9 @@ module PrivateChef
   opscode_chef Mash.new
   opscode_webui Mash.new
   lb Mash.new
+  lb_internal Mash.new
   postgresql Mash.new
+  redis_lb Mash.new
   oc_bifrost Mash.new
   opscode_certificate Mash.new
   opscode_org_creator Mash.new
@@ -41,6 +46,7 @@ module PrivateChef
   log_rotation Mash.new
   dark_launch Mash.new
   opscode_chef_mover Mash.new
+  oc_chef_pedant Mash.new
 
   servers Mash.new
   backend_vips Mash.new
@@ -50,6 +56,7 @@ module PrivateChef
   notification_email nil
   from_email nil
   role nil
+
   user Mash.new
 
   ldap Mash.new
@@ -179,6 +186,7 @@ module PrivateChef
       results = { "private_chef" => {} }
       [
         "opscode_chef",
+        "redis_lb",
         "couchdb",
         "rabbitmq",
         "opscode_solr",
@@ -186,6 +194,7 @@ module PrivateChef
         "opscode_erchef",
         "opscode_webui",
         "lb",
+        "lb_internal",
         "postgresql",
         "oc_bifrost",
         "opscode_certificate",
@@ -203,13 +212,14 @@ module PrivateChef
       ].each do |key|
         # @todo: Just pick a naming convention and adhere to it
         # consistently
-        rkey = if key =~ /^oc_/
+        rkey = if key =~ /^oc_/ || key == "redis_lb"
                  key # leave oc_* keys as is
                else
                  key.gsub('_', '-')
                end
         results['private_chef'][rkey] = PrivateChef[key]
       end
+      results['private_chef']['oc-chef-pedant'] = PrivateChef['oc_chef_pedant']
       results['private_chef']['notification_email'] = PrivateChef['notification_email']
       results['private_chef']['from_email'] = PrivateChef['from_email']
       results['private_chef']['role'] = PrivateChef['role']
@@ -236,6 +246,7 @@ module PrivateChef
       PrivateChef['bookshelf']['data_dir'] = "/var/opt/opscode/drbd/data/bookshelf"
       PrivateChef["rabbitmq"]["data_dir"] ||= "/var/opt/opscode/drbd/data/rabbitmq"
       PrivateChef["opscode_solr"]["data_dir"] ||= "/var/opt/opscode/drbd/data/opscode-solr"
+      PrivateChef["redis_lb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/redis_lb"
 
       # The postgresql data directory is scoped to the current version;
       # changes in the directory trigger upgrades from an old PostgreSQL
@@ -243,6 +254,7 @@ module PrivateChef
       PrivateChef["postgresql"]["data_dir"] ||= "/var/opt/opscode/drbd/data/postgresql_#{node['private_chef']['postgresql']['version']}"
 
       PrivateChef["drbd"]["enable"] ||= true
+      PrivateChef["drbd"]["ipv6_on"] = PrivateChef["use_ipv6"]
       # Need old path for cookbook migration
       PrivateChef['opscode_chef']['checksum_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/checksum"
       drbd_role = "primary"
@@ -278,6 +290,7 @@ module PrivateChef
       PrivateChef["opscode_webui"]["ha"] ||= true
       PrivateChef["lb"]["ha"] ||= true
       PrivateChef["postgresql"]["ha"] ||= true
+      PrivateChef["redis_lb"]["ha"] ||= true
       PrivateChef["oc_bifrost"]["ha"] ||= true
       PrivateChef["opscode_certificate"]["ha"] ||= true
       PrivateChef["opscode_org_creator"]["ha"] ||= true
@@ -287,13 +300,20 @@ module PrivateChef
 
     def gen_backend(bootstrap=false)
       PrivateChef[:role] = "backend" #mixlib-config wants a symbol :(
-      PrivateChef["bookshelf"]["listen"] ||= "0.0.0.0"
-      PrivateChef["couchdb"]["bind_address"] ||= "0.0.0.0"
-      PrivateChef["rabbitmq"]["node_ip_address"] ||= "0.0.0.0"
-      PrivateChef["opscode_solr"]["ip_address"] ||= "0.0.0.0"
+      PrivateChef["bookshelf"]["listen"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["couchdb"]["bind_address"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
+      PrivateChef["opscode_solr"]["ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
-      PrivateChef["postgresql"]["listen_address"] ||= "0.0.0.0"
-      PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= ["0.0.0.0/0", "::0/0"]
+      PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
+      PrivateChef["opscode_certificate"]["vip"] ||= '127.0.0.1'
+
+      authaddr = []
+      authaddr << "0.0.0.0/0" # if PrivateChef["use_ipv4"]
+      authaddr << "::/0" if PrivateChef["use_ipv6"]
+      PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= authaddr
       PrivateChef["opscode_account"]["worker_processes"] ||= 4
 
       PrivateChef["opscode_chef_mover"]["enable"] = !!bootstrap
@@ -302,16 +322,19 @@ module PrivateChef
 
     def gen_frontend
       PrivateChef[:role] = "frontend"
+      PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
       PrivateChef["bookshelf"]["enable"] ||= false
       PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["couchdb"]["enable"] ||= false
       PrivateChef["couchdb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["rabbitmq"]["enable"] ||= false
       PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["redis_lb"]["enable"] ||= false
+      PrivateChef["redis_lb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
 
-      PrivateChef["opscode_certificate"]["enable"] ||= false
-      # Why is this even needed?
-      PrivateChef["opscode_certificate"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      # move certgen back to front ends; the backend canna handle the load
+      PrivateChef["opscode_certificate"]["enable"] ||= true
+      PrivateChef["opscode_certificate"]["vip"] ||= '127.0.0.1'
 
       PrivateChef["opscode_solr"]["enable"] ||= false
       PrivateChef["opscode_solr"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
@@ -321,7 +344,11 @@ module PrivateChef
       PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["lb"]["cache_cookbook_files"] ||= true
       PrivateChef["lb"]["upstream"] = Mash.new
-      PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ PrivateChef["backend_vips"]["ipaddress"] ]
+      if PrivateChef["use_ipv6"] && PrivateChef["backend_vips"]["ipaddress"].include?(':')
+        PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ "[#{PrivateChef["backend_vips"]["ipaddress"]}]" ]
+      else
+        PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ PrivateChef["backend_vips"]["ipaddress"] ]
+      end
       PrivateChef["opscode_chef_mover"]["enable"] = false
       PrivateChef["bootstrap"]["enable"] = false
     end
@@ -358,6 +385,22 @@ module PrivateChef
 
     def generate_config(node_name)
       generate_secrets(node_name)
+
+      # Under ipv4 default to 0.0.0.0 in order to ensure that
+      # any service that needs to listen externally on back-end
+      # does so.
+      PrivateChef["default_listen_address"] = "0.0.0.0"
+      # 'ipv4, ipv6, maybe add both
+      case PrivateChef['ip_version']
+      when 'ipv4', nil
+        PrivateChef["use_ipv4"] = true
+        PrivateChef["use_ipv6"] = false
+        PrivateChef["default_listen_address"] = "0.0.0.0"
+      when 'ipv6'
+        PrivateChef["use_ipv4"] = false
+        PrivateChef["use_ipv6"] = true
+        PrivateChef["default_listen_address"] = "::"
+      end
 
       case PrivateChef['topology']
       when "standalone","manual"

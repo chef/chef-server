@@ -39,7 +39,7 @@ erchef_config = File.join(opscode_erchef_etc_dir, "app.config")
 template erchef_config do
   source "oc_erchef.config.erb"
   mode "644"
-  variables(node['private_chef']['opscode-erchef'].to_hash)
+  variables(node['private_chef']['opscode-erchef'].to_hash.merge({:helper => OmnibusHelper.new(node)}))
   notifies :run, 'execute[remove_erchef_siz_files]', :immediately
   notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
 end
