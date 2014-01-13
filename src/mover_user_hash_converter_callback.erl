@@ -7,7 +7,8 @@
          next_object/0,
          migration_type/0,
          supervisor/0,
-         error_halts_migration/0
+         error_halts_migration/0,
+         reconfigure_object/2
          ]).
 
 migration_init() ->
@@ -38,3 +39,6 @@ migration_type() ->
 
 error_halts_migration() ->
     true.
+
+reconfigure_object(_, _) ->
+    no_op.

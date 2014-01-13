@@ -90,8 +90,7 @@ verify_org(timeout, #state{org_name = _OrgName} = State) ->
     {next_state, set_org_to_sql, State, 0}.
 
 set_org_to_sql(timeout, #state{org_name = OrgName, migration_args = MigrationArgs, callback_module = CallbackModule} = State) ->
-    DefaultFun = fun () -> mover_org_darklaunch:org_to_sql(OrgName, ?PHASE_2_MIGRATION_COMPONENTS) end,
-    case mover_util:call_if_exported(CallbackModule, reconfigure_object, MigrationArgs, DefaultFun) of
+    case erlang:apply(CallbackModule, reconfigure_object, MigrationArgs) of
         ok ->
             {next_state, enable_org_access, State, 0};
         {error, Error} ->

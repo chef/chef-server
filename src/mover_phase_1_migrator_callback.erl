@@ -5,8 +5,11 @@
          migration_action/2,
          migration_type/0,
          supervisor/0,
-         error_halts_migration/0
+         error_halts_migration/0,
+         reconfigure_object/2
          ]).
+
+-include("mover.hrl").
 
 %Return any initial state not related to the object id
 migration_start_worker_args(Object, AcctInfo) ->
@@ -23,3 +26,6 @@ supervisor() ->
 
 error_halts_migration() ->
     true.
+
+reconfigure_object(ObjectId, _AcctInfo) ->
+    mover_org_darklaunch:org_to_sql(ObjectId, ?PHASE_2_MIGRATION_COMPONENTS).
