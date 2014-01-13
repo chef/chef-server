@@ -115,7 +115,9 @@ local p_acct_users = (p_sep * Cendpoint(p_users) * (p_sep * c_identifier)^-1 * p
 -- account endpoints
 -- note that the acl endpoint is a special case because it supercedes all others
 -- including routes that would otherwise go to erchef.
-local p_acl_endpoint = p_named_org_prefix * p_all_until_acl * Cendpoint(p_acl) * (p_sep + p_eol)
+local p_acl_endpoint = ((p_named_org_prefix * p_all_until_acl) +
+                        (p_sep * p_users * p_sep * c_identifier))
+                            * Cendpoint(p_acl) * (p_sep + p_eol)
 local p_acct_direct = Cendpoint(p_users + p_association_requests) * (p_sep + p_eol)
 local p_acct = (p_sep * Cendpoint(p_verify_password + p_auth_user + p_system_recovery) * p_eol) +
                (p_named_org_prefix * p_acct_direct) +
