@@ -142,9 +142,7 @@ default_resource_init() ->
     [{ServerName, ServerVersion, _, _}] = release_handler:which_releases(permanent),
 
     Defaults = [{auth_skew, envy:get(oc_chef_wm, auth_skew, non_neg_integer)},
-                {db_type, envy:get(sqerl, db_type, atom)},
                 {reqid_header_name, envy:get(oc_chef_wm, reqid_header_name, string)},
-
                 %% These will be used to generate the X-Ops-API-Info header
                 {otp_info, {ServerName, ServerVersion}},
                 {server_flavor, envy:get(oc_chef_wm, server_flavor, string)},
