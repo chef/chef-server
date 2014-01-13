@@ -87,7 +87,7 @@
                       }]}]
  },
  {sqerl, [
-          {db_type, pgsql},
+          {db_driver_mod, sqerl_pgsql_client},
           {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
           {db_host, "<%= node['private_chef']['postgresql']['vip'] %>" },
           {db_port, <%= node['private_chef']['postgresql']['port'] %> },
