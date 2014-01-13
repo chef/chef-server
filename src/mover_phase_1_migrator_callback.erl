@@ -16,7 +16,7 @@ migration_action(OrgName, AcctInfo) ->
     moser_converter:convert_org(OrgName, AcctInfo).
 
 migration_type() ->
-    <<"phase_1">>.
+    <<"phase_1_migration">>.
 
 supervisor() ->
     mover_org_migrator_sup.

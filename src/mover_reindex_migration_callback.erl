@@ -22,7 +22,7 @@ migration_action(#org_info{org_id = OrgId, org_name = OrgName}) ->
     [{ok, reindex_successful}].
 
 migration_type() ->
-    <<"reindex">>.
+    <<"solr4_migration">>.
 
 supervisor() ->
     mover_org_migrator_sup.
