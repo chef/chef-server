@@ -166,30 +166,39 @@ solr_query(Query, ReqId, Darklaunch, OrgName) ->
     %% solr_urls should be a proplist with keys 'default' and 'aux' each mapping to a Solr
     %% root URL.
     SolrUrls = envy:get(chef_wm, solr_urls, [], list),
-    case chef_wm_darklaunch:is_enabled(<<"query_aux_solr">>, Darklaunch) of
+    case chef_wm_darklaunch:is_enabled(<<"solr4">>, Darklaunch) of
         true ->
-            %% Send the query to the default and aux solr. Execute the solr requests in
-            %% parallel and await both results. Return the result from the default solr.
-            %% This is intended for use in evaluating new (aux) solr infrastructure.
-            {default, DefaultUrl} = lists:keyfind(default, 1, SolrUrls),
-            {aux, AuxUrl} = lists:keyfind(aux, 1, SolrUrls),
-            %% default URL goes first and that's the only result we capture
-            Pids = [ spawn_solr_query(Label, Url, Query, ReqId) ||
-                       {Label, Url} <- [{search, DefaultUrl}, {search_aux, AuxUrl}] ],
-            hd(gather_solr_queries(Pids, Query, OrgName));
+            execute_solr_query(ReqId, aux, Query, SolrUrls);
         false ->
-            stats_hero:ctime(ReqId, {chef_solr, search},
-                             fun() ->
-                                     %% Fallback to chef_solr:search/1 if solr_urls did not
-                                     %% contain a default.
-                                     case proplists:get_value(default, SolrUrls) of
-                                         undefined ->
-                                             chef_solr:search(Query);
-                                         Url ->
-                                             chef_solr:search(Query, Url)
-                                     end
-                             end)
+            case chef_wm_darklaunch:is_enabled(<<"query_aux_solr">>, Darklaunch) of
+                true ->
+                    %% Send the query to the default and aux solr. Execute the solr requests in
+                    %% parallel and await both results. Return the result from the default solr.
+                    %% This is intended for use in evaluating new (aux) solr infrastructure.
+                    {default, DefaultUrl} = lists:keyfind(default, 1, SolrUrls),
+                    {aux, AuxUrl} = lists:keyfind(aux, 1, SolrUrls),
+                    %% default URL goes first and that's the only result we capture
+                    Pids = [ spawn_solr_query(Label, Url, Query, ReqId) ||
+                               {Label, Url} <- [{search, DefaultUrl}, {search_aux, AuxUrl}] ],
+                    hd(gather_solr_queries(Pids, Query, OrgName));
+                false ->
+                    execute_solr_query(ReqId, default, Query, SolrUrls)
+            end
     end.
+
+execute_solr_query(ReqId, UrlKey,Query, SolrUrls) ->
+    stats_hero:ctime(ReqId, {chef_solr, search},
+                     fun() ->
+                             %% Fallback to chef_solr:search/1 if solr_urls did not
+                             %% contain UrlKey.
+                             case proplists:get_value(UrlKey, SolrUrls) of
+                                 undefined ->
+                                     chef_solr:search(Query);
+                                 Url ->
+                                     chef_solr:search(Query, Url)
+                             end
+                     end).
+
 
 gather_solr_queries(Pids, Query, OrgName) ->
     log_differences([ receive

@@ -125,39 +125,31 @@ handle_delete_from_db(_Result) ->
 
 index_queue_add(TypeName, Id, DbName, IndexEjson, Darklaunch) ->
     {DefaultVHost, AuxVHost} = default_and_aux(),
-    default_index_queue_add(DefaultVHost, TypeName, Id, DbName, IndexEjson, Darklaunch),
-    aux_index_queue_add(AuxVHost, TypeName, Id, DbName, IndexEjson, Darklaunch),
-    ok.
-
-default_index_queue_add(VHost, TypeName, Id, DbName, IndexEjson, Darklaunch) ->
-    ok = chef_index_queue:set(VHost, TypeName, Id, DbName, IndexEjson),
-    ok.
-
-aux_index_queue_add(VHost, TypeName, Id, DbName, IndexEjson, Darklaunch) ->
-    case chef_wm_darklaunch:is_enabled(<<"rabbit_aux_vhost">>, Darklaunch) of
-        true ->
-            ok = chef_index_queue:set(VHost, TypeName, Id, DbName, IndexEjson);
-        false ->
-            ok
+    case solr4_and_aux(Darklaunch) of
+        {true, _ } ->
+            ok = chef_index_queue:set(AuxVHost, TypeName, Id, DbName, IndexEjson);
+        {false, true } ->
+            ok = chef_index_queue:set(DefaultVHost, TypeName, Id, DbName, IndexEjson),
+            ok = chef_index_queue:set(AuxVHost, TypeName, Id, DbName, IndexEjson);
+        {false, false } ->
+            ok = chef_index_queue:set(DefaultVHost, TypeName, Id, DbName, IndexEjson)
     end,
     ok.
 
+solr4_and_aux(Darklaunch) ->
+    {chef_wm_darklaunch:is_enabled(<<"solr4">>, Darklaunch),
+     chef_wm_darklaunch:is_enabled(<<"rabbit_aux_vhost">>, Darklaunch)}.
+
 index_queue_delete(TypeName, Id, DbName, Darklaunch) ->
     {DefaultVHost, AuxVHost} = default_and_aux(),
-    default_index_queue_delete(DefaultVHost, TypeName, Id, DbName, Darklaunch),
-    aux_index_queue_delete(AuxVHost, TypeName, Id, DbName, Darklaunch),
-    ok.
-
-default_index_queue_delete(VHost, TypeName, Id, DbName, Darklaunch) ->
-    ok = chef_index_queue:delete(VHost, TypeName, Id, DbName),
-    ok.
-
-aux_index_queue_delete(VHost, TypeName, Id, DbName, Darklaunch) ->
-    case chef_wm_darklaunch:is_enabled(<<"rabbit_aux_vhost">>, Darklaunch) of
-        true ->
-            ok = chef_index_queue:delete(VHost, TypeName, Id, DbName);
-        false ->
-            ok
+    case solr4_and_aux(Darklaunch) of
+        {true, _ } ->
+            ok = chef_index_queue:delete(AuxVHost, TypeName, Id, DbName);
+        {false, true } ->
+            ok = chef_index_queue:delete(DefaultVHost, TypeName, Id, DbName),
+            ok = chef_index_queue:delete(AuxVHost, TypeName, Id, DbName);
+        {false, false } ->
+            ok = chef_index_queue:delete(DefaultVHost, TypeName, Id, DbName)
     end,
     ok.
 
