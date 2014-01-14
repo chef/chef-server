@@ -123,6 +123,10 @@ handle_delete_from_db({error, _}=Error) ->
 handle_delete_from_db(_Result) ->
     ok.
 
+%% If solr4 is on, then rabbit_aux_vhost is on by definition
+%% and default is off. If solr4 is off, then rabbit_aux_vhost
+%% can still be on, in which case send to both. If both are
+%% off, send to the default url.
 index_queue_add(TypeName, Id, DbName, IndexEjson, Darklaunch) ->
     {DefaultVHost, AuxVHost} = default_and_aux(),
     case solr4_and_aux(Darklaunch) of
@@ -136,10 +140,15 @@ index_queue_add(TypeName, Id, DbName, IndexEjson, Darklaunch) ->
     end,
     ok.
 
+%% Return curent solr4, rabbit_aux_vhost configuration
 solr4_and_aux(Darklaunch) ->
     {chef_wm_darklaunch:is_enabled(<<"solr4">>, Darklaunch),
      chef_wm_darklaunch:is_enabled(<<"rabbit_aux_vhost">>, Darklaunch)}.
 
+%% If solr4 is on, then rabbit_aux_vhost is on by definition
+%% and default is off. If solr4 is off, then rabbit_aux_vhost
+%% can still be on, in which case send to both. If both are
+%% off, send to the default url.
 index_queue_delete(TypeName, Id, DbName, Darklaunch) ->
     {DefaultVHost, AuxVHost} = default_and_aux(),
     case solr4_and_aux(Darklaunch) of
