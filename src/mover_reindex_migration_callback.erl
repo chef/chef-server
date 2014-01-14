@@ -30,5 +30,5 @@ supervisor() ->
 error_halts_migration() ->
     true.
 
-reconfigure_object(_OrgInfo) ->
-    ok.
+reconfigure_object(#org_info{org_name = OrgName}) ->
+    mover_org_darklaunch:enable_solr4(OrgName).
