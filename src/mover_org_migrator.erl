@@ -89,7 +89,7 @@ verify_org(timeout, #state{org_name = _OrgName} = State) ->
     %% Placeholder: verification is currently external.
     {next_state, set_org_to_sql, State, 0}.
 
-set_org_to_sql(timeout, #state{org_name = OrgName, migration_args = MigrationArgs, callback_module = CallbackModule} = State) ->
+set_org_to_sql(timeout, #state{migration_args = MigrationArgs, callback_module = CallbackModule} = State) ->
     case erlang:apply(CallbackModule, reconfigure_object, MigrationArgs) of
         ok ->
             {next_state, enable_org_access, State, 0};
