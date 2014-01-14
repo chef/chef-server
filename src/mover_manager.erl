@@ -131,6 +131,8 @@ migrate(all, NumWorkers) ->
 migrate(NumOrgs, NumWorkers) ->
     migrate(NumOrgs, NumWorkers, mover_phase_1_migrator_callback).
 
+migrate(all, NumWorkers, CallbackModule) ->
+    migrate(-1, NumWorkers, CallbackModule);
 migrate(NumOrgs, NumWorkers, CallbackModule) ->
     Worker = #migration_worker{callback_module = CallbackModule},
     gen_fsm:sync_send_event(?SERVER, {start, NumOrgs, NumWorkers, Worker}).
