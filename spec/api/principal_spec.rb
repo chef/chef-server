@@ -97,8 +97,8 @@ describe "Principals API Endpoint", :principals do
             admin_user) do |response|
           response.
             should look_like({
-                               :status => 404
-                             })
+              :status => 404
+            })
         end
       end
       it 'returns a 404 ("Not Found") for normal user' do
@@ -106,8 +106,8 @@ describe "Principals API Endpoint", :principals do
             normal_user) do |response|
           response.
             should look_like({
-                               :status => 404
-                             })
+              :status => 404
+            })
         end
       end
       it 'returns a 404 ("Not Found") for invalid user' do
@@ -115,8 +115,8 @@ describe "Principals API Endpoint", :principals do
             invalid_user) do |response|
           response.
             should look_like({
-                               :status => 404
-                             })
+              :status => 404
+            })
         end
       end
 
@@ -124,8 +124,8 @@ describe "Principals API Endpoint", :principals do
         get(api_url("/principals/"),
             outside_user) do |response|
           response.should look_like({
-                                      :status => 404
-                                    })
+              :status => 404
+            })
         end
       end
     end
@@ -136,9 +136,9 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_client_name}"),
               admin_user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => client_body
-                                      })
+                :status => 200,
+                :body_exact => client_body
+              })
           end
         end
 
@@ -146,9 +146,9 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_client_name}"),
               normal_user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => client_body
-                                      })
+                :status => 200,
+                :body_exact => client_body
+              })
           end
         end
 
@@ -159,9 +159,9 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_client_name}"),
               invalid_user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => client_body
-                                      })
+                :status => 200,
+                :body_exact => client_body
+              })
           end
         end
 
@@ -169,9 +169,9 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_client_name}"),
               outside_user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => client_body
-                                      })
+                :status => 200,
+                :body_exact => client_body
+              })
           end
         end
       end
@@ -181,9 +181,9 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_user_name}"),
               admin_user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => user_body
-                                      })
+                :status => 200,
+                :body_exact => user_body
+              })
           end
         end
 
@@ -191,9 +191,9 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_user_name}"),
               normal_user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => user_body
-                                      })
+                :status => 200,
+                :body_exact => user_body
+              })
           end
         end
 
@@ -201,9 +201,9 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_user_name}"),
               invalid_user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => user_body
-                                      })
+                :status => 200,
+                :body_exact => user_body
+              })
           end
         end
 
@@ -211,9 +211,9 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_user_name}"),
               outside_user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => user_body
-                                      })
+                :status => 200,
+                :body_exact => user_body
+              })
           end
         end
       end
@@ -233,9 +233,9 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_user_name}"),
               admin_user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => user_body
-                                      })
+                :status => 200,
+                :body_exact => user_body
+              })
           end
         end
 
@@ -243,9 +243,9 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_user_name}"),
               normal_user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => user_body
-                                      })
+                :status => 200,
+                :body_exact => user_body
+              })
           end
         end
 
@@ -253,9 +253,9 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_user_name}"),
               invalid_user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => user_body
-                                      })
+                :status => 200,
+                :body_exact => user_body
+              })
           end
         end
 
@@ -263,9 +263,9 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_user_name}"),
               outside_user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => user_body
-                                      })
+                :status => 200,
+                :body_exact => user_body
+              })
           end
         end
       end
