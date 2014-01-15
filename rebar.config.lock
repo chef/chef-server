@@ -7,7 +7,7 @@
                       "1d883423ac360b3536ca52dc733a0164bacf3109"}},
        {lager,".*",
               {git,"git://github.com/basho/lager.git",
-                   "2a2d5f95e8776c206636fe347fe95a98106e9f03"}},
+                   "d65b91a6bc7f49879a8b38d67f8fd7a2bf30b698"}},
        {envy,".*",
              {git,"git@github.com:manderson26/envy.git",
                   "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
