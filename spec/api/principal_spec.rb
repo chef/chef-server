@@ -37,9 +37,9 @@ describe "Principals API Endpoint", :principals do
   let(:outside_user_not_associated_msg) {
     ["'pedant-nobody' not associated with organization '#{org}'"] }
   let(:cannot_load_nonexistent_msg) { 
-    ["Cannot load client #{non_existent_principal_name}"] }
+    "Cannot find principal #{non_existent_principal_name}" }
   let(:cannot_load_org_msg) { 
-    ["organization '#{non_existent_org}' does not exist."] }
+    "Cannot find org #{non_existent_org}" }
   let(:client_body) {
     {
       "name" => principal_client_name,
@@ -270,10 +270,10 @@ describe "Principals API Endpoint", :principals do
         end
       end
 
-      context 'when requesting an bad client' do
+      context 'when requesting a bad client' do
         let(:principal_client_name) { platform.bad_client.name }
         let(:cannot_load_nonexistent_msg) { 
-          ["Cannot load client #{principal_client_name}"] }
+          "Cannot find principal #{principal_client_name}" }
 
         it 'returns a 404 ("Not Found") for admin' do
           get(api_url("/principals/#{principal_client_name}"),
