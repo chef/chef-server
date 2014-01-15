@@ -17,7 +17,7 @@
 %%     Unconverted users: <number of unconverted users>
 %% '
 %%
-%% The exit status is set to the number of unconverted users.
+%% Exit status is 0 on success, 1 if any conversion fails.
 %%
 %% <b>Important</b>: this must be run as root or connect will fail.
 %% If an error occurs, it will also be displayed on the console.
