@@ -59,28 +59,41 @@ describe "Principals API Endpoint", :principals do
     } }
 
   describe 'access control' do
-    context 'GET /principals', :pending do
-      it 'returns a 401 ("Unauthorized") for invalid user' do
-        get(api_url("/principals"),
+    context 'GET /principals' do
+      # No client suppled = 404
+      it 'returns a 404 ("Not Found") for admin' do
+        get(api_url("/principals/"),
+            admin_user) do |response|
+          response.
+            should look_like({
+                               :status => 404
+                             })
+        end
+      end
+      it 'returns a 404 ("Not Found") for normal user' do
+        get(api_url("/principals/"),
+            normal_user) do |response|
+          response.
+            should look_like({
+                               :status => 404
+                             })
+        end
+      end
+      it 'returns a 404 ("Not Found") for invalid user' do
+        get(api_url("/principals/"),
             invalid_user) do |response|
           response.
             should look_like({
-                               :status => 401,
-                               :body_exact => {
-                                 "error" => failed_to_authenticate_as_invalid_msg
-                               }
+                               :status => 404
                              })
         end
       end
 
-      it 'returns a 403 ("Forbidden") for outside user' do
-        get(api_url("/principals"),
+      it 'returns a 404 ("Not Found") for outside user' do
+        get(api_url("/principals/"),
             outside_user) do |response|
           response.should look_like({
-                                      :status => 403,
-                                      :body_exact => {
-                                        "error" => outside_user_not_associated_msg
-                                      }
+                                      :status => 404
                                     })
         end
       end
