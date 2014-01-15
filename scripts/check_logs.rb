@@ -99,18 +99,28 @@ end
 
 UnknownOrg = "-UnknownOrg-"
 
-IgnoredMessages = {
-  "Application inets started on node 'mover@127.0.0.1'" => true,
-  "Application lager started on node 'mover@127.0.0.1'" => true,
-  "Application moser started on node 'mover@127.0.0.1'" => true,
-  "Application mover started on node 'mover@127.0.0.1'" => true,
-  "Deprecated lager_file_backend config detected, please consider updating it" => true,
-  "RabbitMQ config missing. Indexing for search is disabled." => true,
-  "Starting mosernormal []" => true,
-  "starting chef_index_sup" => true
-}
+IgnoredMessages = [
+  /Application \S+ started on node 'mover@127.0.0.1'/,
+  "Deprecated lager_file_backend config detected, please consider updating it",
+  "Connecting to Rabbit at {127,0,0,1}:5672/chef (exchange: <<>>)",
+  /Negotiated maximums: \(Channel = \d+, Frame = \d+, Heartbeat = \d+\)/,
+  "RabbitMQ config missing. Indexing for search is disabled.",
+  "Starting mosernormal []",
+  "starting chef_index_sup"
+]
 
 OkSkips = {}
+
+def ignore_msg?(log_line)
+  IgnoredMessages.any? do |matcher|
+    case matcher
+    when String then
+      matcher == log_line
+    when Regexp
+      matcher.match log_line
+    end
+  end
+end
 
 def process_org_msg(orgname, details, desc, stats, output)
   return if desc.match(/Fallback lookup of user-side id/)
@@ -414,7 +424,7 @@ def process_file(file, stats, output)
       if matches = l.match( /^(\S+)\s+(\S+)\s+\[(\S+)\]\s+\d{15,}(.*)$/)
         date, time, type, msg = matches.captures
         # ignore noise from tool
-        next if (IgnoredMessages.has_key?(msg))
+        next if ignore_msg?(msg)
 
         if matches = msg.match( /org_not_found Failed to find org:\s+\[<<\"([a-z0-9_\-]*)\">>\]\s*$/ )
           orgname = matches.captures[0]

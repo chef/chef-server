@@ -7,7 +7,8 @@
 -module(mover_batch_migrator).
 
 -export([ping/0,
-         migrate_all/0]).
+         migrate_all/0,
+         wait_for_status/0]).
 
 -define(POLL_SLEEP_MS, 500).
 
@@ -118,10 +119,10 @@ do_migrate(Org, Remaining, Acc) ->
             {error, {migrations_halted, fatal_error}, Acc};
         false ->
             % A specific org may still fail, but that's not fatal - check for that results here.
-            Result = case lists:keysearch(orgs_failed, 1, Status) of
-                {value, {orgs_failed, 1}} ->
+            Result = case lists:keysearch(objects_failed, 1, Status) of
+                {value, {objects_failed, 1}} ->
                     {Org, migration_failure};
-                {value, {orgs_failed, 0}} ->
+                {value, {objects_failed, 0}} ->
                     {Org, migration_success}
             end,
             % In any case, capture the result and keep going.
