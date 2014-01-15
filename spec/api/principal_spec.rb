@@ -30,6 +30,7 @@ describe "Principals API Endpoint", :principals do
   let(:principal_client_name) { platform.non_admin_client.name }
   let(:principal_user_name) { normal_user.name }
   let(:non_existent_principal_name) { 'not_a_number' }
+  let(:non_existent_org) { 'bogus-org' }
 
   let(:failed_to_authenticate_as_invalid_msg) {
     ["Failed to authenticate as 'invalid'. Ensure that your node_name and client key are correct."] }
@@ -37,6 +38,8 @@ describe "Principals API Endpoint", :principals do
     ["'pedant-nobody' not associated with organization '#{org}'"] }
   let(:cannot_load_nonexistent_msg) { 
     ["Cannot load client #{non_existent_principal_name}"] }
+  let(:cannot_load_org_msg) { 
+    ["organization '#{non_existent_org}' does not exist."] }
   let(:client_body) {
     {
       "name" => principal_client_name,
@@ -59,6 +62,34 @@ describe "Principals API Endpoint", :principals do
     } }
 
   describe 'access control' do
+    context 'with bogus org' do
+      it 'returns a 404 ("Not Found") for admin' do
+        get("#{server}/organizations/#{non_existent_org}/principals/#{principal_client_name}",
+            admin_user) do |response|
+          response.
+            should look_like({
+              :status => 404,
+              :body => {
+                "error" => cannot_load_org_msg,
+                "not_found" => "org"}
+            })
+        end
+      end
+      it 'returns a 404 ("Not Found") for normal user' do
+        get("#{server}/organizations/#{non_existent_org}/principals/#{principal_client_name}",
+            normal_user) do |response|
+          response.
+            should look_like({
+              :status => 404,
+              :body => {
+                "error" => cannot_load_org_msg,
+                "not_found" => "org"
+              }
+            })
+        end
+      end
+    end
+
     context 'GET /principals' do
       # No client suppled = 404
       it 'returns a 404 ("Not Found") for admin' do
@@ -248,11 +279,12 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_client_name}"),
               admin_user) do |response|
             response.should look_like({
-                                        :status => 404,
-                                        :body_exact => {
-                                          "error" => cannot_load_nonexistent_msg
-                                        }
-                                      })
+                :status => 404,
+                :body_exact => {
+                  "error" => cannot_load_nonexistent_msg,
+                  "not_found" => "principal"
+                }
+              })
           end
         end
 
@@ -260,11 +292,12 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_client_name}"),
               normal_user) do |response|
             response.should look_like({
-                                        :status => 404,
-                                        :body_exact => {
-                                          "error" => cannot_load_nonexistent_msg
-                                        }
-                                      })
+                :status => 404,
+                :body_exact => {
+                  "error" => cannot_load_nonexistent_msg,
+                  "not_found" => "principal"
+                }
+              })
           end
         end
 
@@ -272,11 +305,12 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_client_name}"),
               invalid_user) do |response|
             response.should look_like({
-                                        :status => 404,
-                                        :body_exact => {
-                                          "error" => cannot_load_nonexistent_msg
-                                        }
-                                      })
+                :status => 404,
+                :body_exact => {
+                  "error" => cannot_load_nonexistent_msg,
+                  "not_found" => "principal"
+                }
+              })
           end
         end
 
@@ -284,11 +318,12 @@ describe "Principals API Endpoint", :principals do
           get(api_url("/principals/#{principal_client_name}"),
               outside_user) do |response|
             response.should look_like({
-                                        :status => 404,
-                                        :body_exact => {
-                                          "error" => cannot_load_nonexistent_msg
-                                        }
-                                      })
+                :status => 404,
+                :body_exact => {
+                  "error" => cannot_load_nonexistent_msg,
+                  "not_found" => "principal"
+                }
+              })
           end
         end
       end
@@ -297,11 +332,12 @@ describe "Principals API Endpoint", :principals do
         get(api_url("/principals/#{non_existent_principal_name}"),
             admin_user) do |response|
           response.should look_like({
-                                      :status => 404,
-                                      :body_exact => {
-                                        "error" => cannot_load_nonexistent_msg
-                                      }
-                                    })
+              :status => 404,
+              :body_exact => {
+                "error" => cannot_load_nonexistent_msg,
+                "not_found" => "principal"
+              }
+            })
         end
       end
 
@@ -310,11 +346,12 @@ describe "Principals API Endpoint", :principals do
         get(api_url("/principals/#{non_existent_principal_name}"),
             normal_user) do |response|
           response.should look_like({
-                                      :status => 404,
-                                      :body_exact => {
-                                        "error" => cannot_load_nonexistent_msg
-                                      }
-                                    })
+              :status => 404,
+              :body_exact => {
+                "error" => cannot_load_nonexistent_msg,
+                "not_found" => "principal"
+              }
+            })
         end
       end
     end
