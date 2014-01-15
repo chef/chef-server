@@ -1,6 +1,269 @@
 require 'pedant/rspec/common'
 
 describe "ACL API", :acl do
+
+
+  context "/users/<name>/_acl endpoint" do
+    let(:username) { platform.admin_user.name }
+    let(:request_url) { "#{platform.server}/users/#{username}/_acl" }
+
+    let(:global_admins) { platform.test_org.name + "_global_admins"}
+    let(:read_groups) { [global_admins] }
+
+    context "GET /users/<user>/_acl"  do
+
+      let(:actors) { ["pivotal", username] }
+      let(:groups) { [] }
+
+      let(:acl_body) {{
+          "create" => {"actors" => actors, "groups" => groups},
+          "read" => {"actors" => actors, "groups" => read_groups},
+          "update" => {"actors" => actors, "groups" => groups},
+          "delete" => {"actors" => actors, "groups" => groups},
+          "grant" => {"actors" => actors, "groups" => groups}
+        }}
+
+      context "superuser" do
+        it "can get user acl" do
+
+          get(request_url, platform.superuser).should look_like({
+             :status => 200,
+             :body_exact => acl_body
+          })
+        end
+      end
+      context "admin user" do
+        it "can get user acl" do
+          get(request_url, platform.admin_user).should look_like({
+             :status => 200,
+             :body_exact => acl_body
+          })
+        end
+      end
+    end
+
+
+    ["create", "read", "update", "delete", "grant"].each do |permission|
+      context "/users/<user>/_acl/#{permission} endpoint" do
+        if (permission == "read")
+          smoketest = :smoke
+        else
+          smoketest = :notsmoke
+        end
+        let(:acl_url) { "#{platform.server}/users/#{username}/_acl" }
+        let(:request_url)  { "#{platform.server}/users/#{username}/_acl/#{permission}" }
+
+        context "PUT /users/<user>/_acl/#{permission}" do
+          let(:actors) { ["pivotal", username] }
+          let(:groups) { [] }
+          let(:default_body) {{
+              "create" => {"actors" => actors, "groups" => groups},
+              "read" => {"actors" => actors, "groups" => read_groups},
+              "update" => {"actors" => actors, "groups" => groups},
+              "delete" => {"actors" => actors, "groups" => groups},
+              "grant" => {"actors" => actors, "groups" => groups}
+            }}
+
+          let(:request_body) {{
+              permission => {
+                "actors" => ["pivotal", platform.admin_user.name,
+                             platform.non_admin_user.name],
+                "groups" => groups
+              }
+            }}
+
+          after :each do
+            reset_body = {permission => default_body[permission]}
+            put(request_url, platform.admin_user,
+                :payload => reset_body).should look_like({
+                                                           :status => 200
+                                                         })
+            # Make sure everything's the same again -- this could really screw up the
+            # rest of the test suite if the permissions aren't right
+            get(acl_url, platform.admin_user).should look_like({
+                                                                 :status => 200,
+                                                                 :body_exact => default_body
+                                                               })
+          end
+
+          context "admin user", smoketest do
+            it "can modify ACL" do
+              put(request_url, platform.admin_user,
+                  :payload => request_body).should look_like({
+                                                               :status => 200
+                                                             })
+              modified_body = default_body.dup;
+              modified_body[permission] = request_body[permission]
+              get(acl_url, platform.admin_user).should look_like({
+                                                                   :status => 200,
+                                                                   :body_exact => modified_body
+                                                                 })
+            end
+          end
+
+          context "default normal user", smoketest do
+            it "returns 403" do
+              put(request_url, platform.non_admin_user,
+                  :payload => request_body).should look_like({
+                                                               :status => 403
+                                                             })
+              get(acl_url, platform.admin_user).should look_like({
+                                                                   :status => 200,
+                                                                   :body_exact => default_body
+                                                                 })
+            end
+          end
+
+          context "default normal client" do
+            it "returns 401" do
+              put(request_url, platform.non_admin_client,
+                  :payload => request_body).should look_like({
+                                                               :status => 401
+                                                             })
+              get(acl_url, platform.admin_user).should look_like({
+                                                                   :status => 200,
+                                                                   :body_exact => default_body
+                                                                 })
+            end
+          end
+
+          context "outside user" do
+            it "returns 403" do
+              put(request_url, outside_user,
+                  :payload => request_body).should look_like({
+                                                               :status => 403
+                                                             })
+              get(acl_url, platform.admin_user).should look_like({
+                                                                   :status => 200,
+                                                                   :body_exact => default_body
+                                                                 })
+            end
+          end
+
+          context "invalid user" do
+            it "returns 401" do
+              put(request_url, invalid_user,
+                  :payload => request_body).should look_like({
+                                                               :status => 401
+                                                             })
+              get(acl_url, platform.admin_user).should look_like({
+                                                                   :status => 200,
+                                                                   :body_exact => default_body
+                                                                 })
+            end
+          end
+
+          #
+          # Nonexistent users are just dropped (perhaps this should be a 400, to match
+          # organizations/<object>/_acl
+          context "malformed requests" do
+            context "invalid actor" do
+              let(:request_body) {{
+                  permission => {
+                    "actors" => ["pivotal", "bogus", platform.admin_user.name],
+                    "groups" => permission == "read" ? read_groups : groups
+                  }
+                }}
+              it "returns 200" do
+                put(request_url, platform.admin_user,
+                    :payload => request_body).should look_like({
+                                                                 :status => 200
+                                                               })
+                get(acl_url, platform.admin_user).should look_like({
+                                                                     :status => 200,
+                                                                     :body_exact => default_body
+                                                                   })
+              end
+            end
+
+            context "invalid group" do
+              let(:request_body) {{
+                  permission => {
+                    "actors" => ["pivotal", platform.admin_user.name,
+                                 platform.non_admin_user.name],
+                    "groups" => ["admins", "bogus"]
+                  }
+                }}
+
+              it "returns 400" do
+                put(request_url, platform.admin_user,
+                    :payload => request_body).should look_like({
+                                                                 :status => 400
+                                                               })
+                get(acl_url, platform.admin_user).should look_like({
+                                                                     :status => 200,
+                                                                     :body_exact => default_body
+                                                                   })
+              end
+            end
+
+            context "missing actors" do
+              let(:request_body) {{
+                  permission => {
+                    "groups" => groups
+                  }
+                }}
+
+              it "returns 400" do
+                put(request_url, platform.admin_user,
+                    :payload => request_body).should look_like({
+                                                                 :status => 400
+                                                               })
+                get(acl_url, platform.admin_user).should look_like({
+                                                                     :status => 200,
+                                                                     :body_exact => default_body
+                                                                   })
+              end
+            end
+
+            context "missing groups" do
+              let(:request_body) {{
+                  permission => {
+                    "actors" => ["pivotal", "bogus", platform.admin_user.name,
+                                 platform.non_admin_user.name]
+                  }
+                }}
+
+              it "returns 400" do
+                put(request_url, platform.admin_user,
+                    :payload => request_body).should look_like({
+                                                                 :status => 400
+                                                               })
+                get(acl_url, platform.admin_user).should look_like({
+                                                                     :status => 200,
+                                                                     :body_exact => default_body
+                                                                   })
+              end
+            end
+
+            context "empty body" do
+              let(:request_body) { {} }
+
+              it "returns 400" do
+                put(request_url, platform.admin_user,
+                    :payload => request_body).should look_like({
+                                                                 :status => 400
+                                                               })
+                get(acl_url, platform.admin_user).should look_like({
+                                                                     :status => 200,
+                                                                     :body_exact => default_body
+                                                                   })
+              end
+            end
+          end # context malformed requests
+        end
+
+      end
+
+      #
+      # There's a clause 'with modified acls' for organization objects below that should be extended
+      # here, but some of the semantics around what they should be are unclear to me
+      #
+
+
+    end
+  end
+
   context "/organization/_acl endpoint" do
     let(:request_url) { api_url("organization/_acl") }
 
@@ -383,7 +646,7 @@ describe "ACL API", :acl do
 
           context "when normal user granted all permissions except GRANT" do
             # We only run the smoke tests for read permission (set above)
-            it "returns 403", smoketest do
+            it "returns 403" do
               restrict_permissions_to("organization",
                 platform.non_admin_user => ['create', 'read', 'update', 'delete'])
               put(request_url, platform.non_admin_user,
