@@ -127,7 +127,7 @@
                       "bbb614ae6fea9e9b07268f0bfded648024cb53d9"}},
        {chef_wm,".*",
                 {git,"git@github.com:opscode/chef_wm.git",
-                     "60a7ed2297a9c79dcb80f63fdbb812ef87796ea5"}},
+                     "47ee4e00773fc997dbd426294a457c95566fe8f2"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
                         "a4bde814e4b0bde9c0bff82120264ca9635ebe6b"}},
