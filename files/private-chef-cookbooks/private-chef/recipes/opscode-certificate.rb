@@ -30,7 +30,7 @@ template certificate_config do
   source "certgen_web.config.erb"
   mode "644"
   variables(node['private_chef']['opscode-certificate'].to_hash)
-  notifies :restart, 'runit_service[opscode-certificate]' if is_data_master?
+  notifies :restart, 'runit_service[opscode-certificate]'
 end
 
 link "/opt/opscode/embedded/service/opscode-certificate/priv/certgen_web.config" do
