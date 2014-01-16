@@ -1,5 +1,5 @@
 name "oc_erchef"
-version "0.22.2"
+version "0.23.0"
 
 dependency "erlang"
 dependency "rebar"
