@@ -75,8 +75,7 @@ malformed_request(Req, #base_state{}=State) ->
         {false, Req, State#base_state{organization_guid = OrgId}}
     catch
         throw:{org_not_found, Org} ->
-            Msg = iolist_to_binary([<<"organization '">>, Org, <<"' does not exist.">>]),
-            Req3 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Msg]}]}), Req),
+            Req3 = chef_wm_util:set_json_body(Req, not_found_ejson(<<"org">>, Org)),
             {{halt, 404}, Req3, State#base_state{log_msg = org_not_found}};
         throw:Why ->
             Msg =  chef_wm_malformed:malformed_request_message(Why, Req, State),
@@ -90,8 +89,12 @@ resource_exists(Req, #base_state{chef_db_context = DbContext,
     Name = chef_wm_util:object_name(principal, Req),
     case chef_db:fetch_requestor(DbContext, OrgId, Name) of
         {not_found, client} ->
-            Message = chef_wm_util:not_found_message(client, Name),
-            Req1 = chef_wm_util:set_json_body(Req, Message),
+            %% Note: this actually is returned if either a client OR a user cannot be found.
+            %% This is in need of further refactoring :(
+            %%
+            %% However, for the purposes of the principals endpoint, we're not so concerned
+            %% about that, since we need to create a custom return message anyway.
+            Req1 = chef_wm_util:set_json_body(Req, not_found_ejson(<<"principal">>, Name)),
             {false, Req1, State#base_state{log_msg = client_not_found}};
         #chef_client{name = Name, public_key = PublicKey, authz_id = AuthzId} = Client ->
             State1 = ResourceState#principal_state{name = Name,
@@ -122,3 +125,6 @@ to_json(Req, #base_state{resource_state = Principal, chef_db_context = DbContext
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
+not_found_ejson(Type, Name) when is_binary(Type), is_binary(Name) ->
+    {[{<<"not_found">>, Type},
+      {<<"error">>, iolist_to_binary(["Cannot find ", Type, " ", Name])}]}.
