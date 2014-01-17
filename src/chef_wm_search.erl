@@ -30,6 +30,10 @@
 -include_lib("chef_index/include/chef_solr.hrl").
 
 -define(DEFAULT_BATCH_SIZE, 5).
+-define(LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName), {{'query', Query},
+                {orgname, OrgName},
+                {solr1, Solr1},
+                {solr4, Solr4}}).
 
 %% We chose to *not* mixin chef_wm_base:post_is_create/2 as a POST in
 %% this resource is purely for processing...not resource creation.
@@ -209,15 +213,23 @@ gather_solr_queries(Pids, Query, OrgName) ->
       end
       || Pid <- Pids ], Query, OrgName).
 
+log_differences([{error, _} = Solr1, {_,_,_,Solr4}] = Results, Query, OrgName) ->
+    lager:log(debug, [{solr_diff, ?MODULE}], "~p",
+              [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)]),
+    Results;
+log_differences([{_,_,_,Solr1}, {error, _} = Solr4] = Results, Query, OrgName) ->
+    lager:log(debug, [{solr_diff, ?MODULE}], "~p",
+              [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)]),
+    Results;
+log_differences([{error, _}, {error, _}] = Results, _Query, _OrgName) ->
+    Results;
 log_differences([{_,_,_,OldSolrResults}, {_,_,_,NewSolrResults}] = Results, Query, OrgName) ->
     case chef_wm_util:lists_diff(OldSolrResults, NewSolrResults) of
         {[], []} ->
             ok;
-        {DiffFirstSecond, DiffSecondFirst} ->
-            lager:log(debug, [{solr_diff, ?MODULE}], "~p", [{{'query', Query},
-                                                             {orgname, OrgName},
-                                                             {solr1, DiffFirstSecond},
-                                                             {solr4, DiffSecondFirst}}])
+        {Solr1, Solr4} ->
+            lager:log(debug, [{solr_diff, ?MODULE}], "~p",
+                                    [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)])
     end,
     Results.
 
