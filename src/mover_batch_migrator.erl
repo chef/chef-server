@@ -61,7 +61,7 @@ partition({Org, {error, org_reset_failed}}, {RF, MF, S}) ->
     {[binary_to_list(Org) | RF], MF, S}.
 
 org_list() ->
-    org_list(moser_state_tracker:unmigrated_orgs()).
+    org_list(moser_state_tracker:unmigrated_orgs(mover_phase_1_migrator_callback:migration_type())).
 
 org_list(no_orgs_in_state) ->
     [];
@@ -151,7 +151,7 @@ capture_org_state() ->
 insert_orgs([], Acc) ->
     Acc;
 insert_orgs([#org_info{org_name = OrgName, org_id = OrgId} = Org | Rest], Acc) ->
-    case moser_state_tracker:insert_one_org(Org) of
+    case moser_state_tracker:insert_one_org(Org, mover_phase_1_migration_callback:migration_type()) of
         ok ->
             insert_orgs(Rest, [{OrgName, ok} | Acc]);
         {error, {error, error, <<"23505">>, _Msg, _Detail}} ->

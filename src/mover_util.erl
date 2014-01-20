@@ -20,7 +20,7 @@
 %% @doc Get a list of unmigrated orgs from migration_state_table
 %% and set the xdarklaunch flags
 populate_xdl_with_unmigrated_orgs() ->
-    Orgnames = moser_state_tracker:unmigrated_orgs(),
+    Orgnames = moser_state_tracker:unmigrated_orgs(mover_phase_1_migrator_callback:migration_type()),
     [mover_org_darklaunch:init_org_to_couch(Orgname, ?PHASE_2_MIGRATION_COMPONENTS) || Orgname <- Orgnames].
 
 %% @doc delete any SQL data for the named org and reset its state
@@ -33,7 +33,7 @@ reset_org(OrgName) ->
 reset_org(OrgName, Line) when is_list(OrgName) ->
     reset_org(iolist_to_binary(OrgName), Line);
 reset_org(OrgName, Line) when is_binary(OrgName) ->
-    case moser_state_tracker:ready_migration(OrgName) of
+    case moser_state_tracker:ready_migration(OrgName, mover_phase_1_migrator_callback:migration_type()) of
         ok ->
             Acct = moser_acct_processor:open_account(),
             case moser_acct_processor:get_org_guid_by_name(OrgName, Acct) of
@@ -49,12 +49,12 @@ reset_org(OrgName, Line) when is_binary(OrgName) ->
 org_reset_error(OrgName, Line, Reason) ->
     log_org_reset_error(OrgName, Line, Reason),
     % Advance state if possible, so that we can mark as failed.
-    ok = case moser_state_tracker:migration_started(OrgName) of
+    ok = case moser_state_tracker:migration_started(OrgName, mover_phase_1_migrator_callback:migration_type()) of
         ok -> ok;
         {error, not_in_expected_state, _} -> ok;
         Error -> Error
     end,
-    ok = case moser_state_tracker:migration_failed(OrgName, reset_org) of
+    ok = case moser_state_tracker:migration_failed(OrgName, reset_org, mover_phase_1_migrator_callback:migration_type()) of
         ok -> ok;
         {error, not_in_expected_state, State} ->
             log_org_reset_error(OrgName, Line, "Org state could not be set to failed."),

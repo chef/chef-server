@@ -56,7 +56,6 @@
 % API Exports
 -export([ ping/0,
           start_link/0,
-          migrate/2,
           migrate/3,
           migrate_next/0,
           migrate_next/1,
@@ -120,16 +119,10 @@ start_link() ->
 
 %% Helper functions to launch a single migration
 migrate_next() ->
-    migrate(1, 1).
+    migrate(1, 1, mover_phase_1_migrator_callback).
 
 migrate_next(CallbackModule) ->
     migrate(1, 1, CallbackModule).
-
-%% Start phase 1 org migration: clients, cookbooks, etc from couch to sql
-migrate(all, NumWorkers) ->
-    migrate(-1, NumWorkers);
-migrate(NumOrgs, NumWorkers) ->
-    migrate(NumOrgs, NumWorkers, mover_phase_1_migrator_callback).
 
 migrate(all, NumWorkers, CallbackModule) ->
     migrate(-1, NumWorkers, CallbackModule);
