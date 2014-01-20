@@ -28,9 +28,6 @@ Merb::Config.use do |c|
 end
 
 
-# TODO DELETE ME after ipv6 is better - but a useful aid to track down where requests are failing.
-RestClient.log = "/tmp/rest.log"
-
 # Bunny time!
 Chef::Config.amqp_host '<%= node['private_chef']['rabbitmq']['vip'] %>'
 Chef::Config.amqp_port '<%= node['private_chef']['rabbitmq']['node_port'] %>'
