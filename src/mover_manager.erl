@@ -270,8 +270,6 @@ worker_down(Reason, StateName, #state{ worker = #migration_worker { callback_mod
                                        error_count = EC} = State) ->
     case Mod:error_halts_migration() of
         false ->
-            %% Errors in validation are not fatal to running additional
-            %% validations, so we won't halt operations
             lager:error("in ~p: Worker down with unexpected error while validating.  Continuing validations. ~p",
                         [StateName, Reason]),
             {next_state, StateName, State#state{error_count = (EC + 1)}, 0};
