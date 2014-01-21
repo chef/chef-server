@@ -140,26 +140,4 @@ wait_for_status() ->
 %% table after org creation was cut over to sql in production.
 capture_org_state() ->
     Info = mover_manager:get_account_dets(),
-    AllOrgs = moser_acct_processor:all_orgs(Info),
-    case insert_orgs(AllOrgs, []) of
-       {error, Reason} ->
-           {error, Reason};
-       Result when is_list(Result) ->
-           {ok, Result}
-    end.
-
-insert_orgs([], Acc) ->
-    Acc;
-insert_orgs([#org_info{org_name = OrgName, org_id = OrgId} = Org | Rest], Acc) ->
-    case moser_state_tracker:insert_one_org(Org, mover_phase_1_migration_callback:migration_type()) of
-        ok ->
-            insert_orgs(Rest, [{OrgName, ok} | Acc]);
-        {error, {error, error, <<"23505">>, _Msg, _Detail}} ->
-            lager:warning([{org_name,OrgName}, {org_id, OrgId}], "org already exists, ignoring"),
-            insert_orgs(Rest, [{OrgName, duplicate} | Acc]);
-        {error, Reason} ->
-            lager:error([{org_name,OrgName}, {org_id, OrgId}],
-                        "stopping - failed to capture state because: ~p", [Reason]),
-            {error, {org_state_load_failed, Reason}}
-    end.
-
+    moser_state_tracker:capture_full_org_state_list(Info, mover_phase_1_migration_callback:migration_type()).
