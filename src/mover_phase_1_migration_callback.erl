@@ -1,4 +1,4 @@
--module(mover_phase_1_migrator_callback).
+-module(mover_phase_1_migration_callback).
 
 -export([
          migration_start_worker_args/2,

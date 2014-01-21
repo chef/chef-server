@@ -61,7 +61,7 @@ partition({Org, {error, org_reset_failed}}, {RF, MF, S}) ->
     {[binary_to_list(Org) | RF], MF, S}.
 
 org_list() ->
-    org_list(moser_state_tracker:unmigrated_orgs(mover_phase_1_migrator_callback:migration_type())).
+    org_list(moser_state_tracker:unmigrated_orgs(mover_phase_1_migration_callback:migration_type())).
 
 org_list(no_orgs_in_state) ->
     [];

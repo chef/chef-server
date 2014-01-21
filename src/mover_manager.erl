@@ -119,7 +119,7 @@ start_link() ->
 
 %% Helper functions to launch a single migration
 migrate_next() ->
-    migrate(1, 1, mover_phase_1_migrator_callback).
+    migrate(1, 1, mover_phase_1_migration_callback).
 
 migrate_next(CallbackModule) ->
     migrate(1, 1, CallbackModule).
