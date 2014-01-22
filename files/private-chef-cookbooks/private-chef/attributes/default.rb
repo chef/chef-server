@@ -533,6 +533,7 @@ end
 ##
 default['private_chef']['keepalived']['enable'] = false
 default['private_chef']['keepalived']['dir'] = "/var/opt/opscode/keepalived"
+default['private_chef']['keepalived']['ipv6_on'] = false
 default['private_chef']['keepalived']['log_directory'] = "/var/log/opscode/keepalived"
 default['private_chef']['keepalived']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['keepalived']['log_rotation']['num_to_keep'] = 10
