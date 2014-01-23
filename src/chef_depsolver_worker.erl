@@ -40,7 +40,7 @@
 
 -define(SERVER, chef_depsolver).
 
--record(state, {port}).
+-record(state, {port, os_pid}).
 
 -include_lib("eunit/include/eunit.hrl"). %% TODO: remove
 
@@ -76,9 +76,9 @@ solve_dependencies(AllVersions, EnvConstraints, Cookbooks, Timeout) ->
         Pid ->
             case gen_server:call(Pid, {solve, AllVersions, EnvConstraints, Cookbooks, Timeout}, infinity) of
                 {error, resolution_timeout} ->
-                    %% testing has shown that returning the worker to the pool
-                    %% with 'fail' will reliably stop the ruby sub-process
-                    %% and not leave zombie processes consuming system resources.
+                    %% At this point we've already force-killed the Ruby
+                    %% sub-process. Returning fail to pooler will clean
+                    %% up the worker process and provision a new one.
                     pooler:return_member(chef_depsolver, Pid, fail),
                     {error, resolution_timeout};
                 Result ->
@@ -110,7 +110,16 @@ init([]) ->
     %% already captured in stats_hero and logs.
     Port = open_port({spawn, "ruby " ++ RubyExecutable ++ " 2> /dev/null"},
                      [{packet, 4}, nouse_stdio, exit_status, binary]),
-    {ok, #state{port=Port}}.
+
+
+    %% In order to effectively kill the Ruby process if it hangs solving a really hard problem,
+    %% we're going to need to get the OS-level PID of the ruby process. The :get_pid command
+    %% on the Ruby side will return Process.pid back to the Erlang side. We capture this
+    %% info on startup so that we can use it in the event of a timeout. Hard-killing the process
+    %% handles the failure case where the Ruby process gets hung and can no longer respond to
+    %% STDOUT closing, which would typically cause the process to exit.
+    {os_pid, Pid} = erlang:port_info(Port, os_pid),
+    {ok, #state{port=Port, os_pid=Pid}}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -126,12 +135,14 @@ init([]) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_call({solve, AllVersions, EnvConstraints, Cookbooks, Timeout}, _From, #state{port=Port} = State) ->
+handle_call({solve, AllVersions, EnvConstraints, Cookbooks, Timeout},
+            _From,
+            #state{port=Port, os_pid=Pid} = State) ->
     Payload = term_to_binary({solve, [{environment_constraints, EnvConstraints},
                                       {all_versions, AllVersions},
                                       {run_list, Cookbooks},
                                       {timeout_ms, Timeout}]}),
-    port_command(Port, Payload),
+    erlang:port_command(Port, Payload),
 
     %% The underlying ruby code has the potential to reach nearly 2x the
     %% timeout value passed in. The timeout value is applied first on the
@@ -140,6 +151,14 @@ handle_call({solve, AllVersions, EnvConstraints, Cookbooks, Timeout}, _From, #st
     %% worst case scenario, we will double the receive timeout and add a
     %% small buffer of 50ms to account for inter-process communication
     %% time.
+    %%
+    %% If we do reach the Erlang-level receive timeout, then we want to
+    %% force-kill the ruby process. We handle the erlang timeout with
+    %% a force-kill because there is a chance that the ruby process is
+    %% hung and will not be able to respond to stdout closing and clean
+    %% itself up. If, instead, the ruby process returns the timeout message,
+    %% we know that it remains in a state to respond to further requests
+    %% and therefore will be able to clean up after itself.
     ReceiveTimeout = (Timeout * 2) + 50,
 
     Reply = receive
@@ -147,6 +166,7 @@ handle_call({solve, AllVersions, EnvConstraints, Cookbooks, Timeout}, _From, #st
                     binary_to_term(Data)
             after
                 ReceiveTimeout ->
+                    os:cmd("kill -9 " ++ integer_to_list(Pid)),
                     {error, resolution_timeout}
             end,
     {reply, Reply, State}.
