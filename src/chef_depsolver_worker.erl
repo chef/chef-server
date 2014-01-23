@@ -118,13 +118,7 @@ init([]) ->
     %% info on startup so that we can use it in the event of a timeout. Hard-killing the process
     %% handles the failure case where the Ruby process gets hung and can no longer respond to
     %% STDOUT closing, which would typically cause the process to exit.
-    Payload = term_to_binary({get_pid}),
-    erlang:port_command(Port, Payload),
-    Pid = receive
-              {Port, {data, Data}} ->
-                  binary_to_term(Data)
-          end,
-
+    {os_pid, Pid} = erlang:port_info(Port, os_pid),
     {ok, #state{port=Port, os_pid=Pid}}.
 
 %%--------------------------------------------------------------------
@@ -160,7 +154,7 @@ handle_call({solve, AllVersions, EnvConstraints, Cookbooks, Timeout},
     %%
     %% If we do reach the Erlang-level receive timeout, then we want to
     %% force-kill the ruby process. We handle the erlang timeout with
-    %% a forve-kill because there is a chance that the ruby process is
+    %% a force-kill because there is a chance that the ruby process is
     %% hung and will not be able to respond to stdout closing and clean
     %% itself up. If, instead, the ruby process returns the timeout message,
     %% we know that it remains in a state to respond to further requests
