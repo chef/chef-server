@@ -4,7 +4,7 @@
 {deps,[{meck,".*",{git,"git://github.com/esl/meck.git","master"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
-                                    "c190c077deb3dce235ea5f282c99b0dec6f3c4e2"}},
+                                    "911481ee8a20f59fc9092e370e2b0d116bec19df"}},
        {goldrush,".*",
                  {git,"git://github.com/DeadZen/goldrush.git",
                       "1d883423ac360b3536ca52dc733a0164bacf3109"}},
@@ -91,7 +91,7 @@
                    "58ded93d5c47675899d8e5e1589270f340ea66c5"}},
        {chef_objects,".*",
                      {git,"git@github.com:opscode/chef_objects.git",
-                          "b8c8ce2d499b4de4a31dde109633ec58ac41e591"}},
+                          "ca9419a09816c07a205307cc6c828ca1fed7f9ec"}},
        {depsolver,".*",
                   {git,"git://github.com/opscode/depsolver.git",
                        "62f07401f56ac22d699c7c2d062af11b396c85b9"}},
@@ -133,7 +133,7 @@
                         "a4bde814e4b0bde9c0bff82120264ca9635ebe6b"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "f12c23120ec17c1abdc75a136aacf91fe0813d13"}}]}.
+                  "aa2b872d08ea93e5bfd58c4609081579e40a90b2"}}]}.
 {plugins,[rebar_lock_deps_plugin]}.
 {cover_enabled,true}.
 {erl_opts,[{d,'OC_CHEF'},
