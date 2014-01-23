@@ -17,7 +17,7 @@ migration_start_worker_args(Object, AcctInfo) ->
     [Org].
 
 migration_action(#org_info{org_id = OrgId, org_name = OrgName}) ->
-    IndexStateResults = chef_ez_reindex_direct:reindex(OrgName, OrgId, "http://localhost:8983/solr/update"),
+    IndexStateResults = chef_ez_reindex_direct:reindex(OrgName, OrgId, envy:get(chef_reindex, solr_update_url, string)),
     [ok = Result || Result <- IndexStateResults],
     [{ok, reindex_successful}].
 
