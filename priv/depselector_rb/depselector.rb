@@ -31,6 +31,11 @@ def constraint_to_str(constraint, constraint_version)
 end
 
 receive do |m|
+  m.when([:get_pid]) do
+    m.send!(Process.pid)
+    m.receive_loop
+  end
+
   m.when([:solve, Erl.hash]) do |data|
     begin
       # create dependency graph from cookbooks
