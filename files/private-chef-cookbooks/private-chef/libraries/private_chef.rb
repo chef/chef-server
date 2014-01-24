@@ -289,6 +289,7 @@ module PrivateChef
         PrivateChef['servers'][node_name]['peer_ipaddress'] = v['ipaddress']
       end
       PrivateChef["keepalived"]["enable"] ||= true
+      PrivateChef["keepalived"]["ipv6_on"] ||= PrivateChef["use_ipv6"]
       PrivateChef["keepalived"]["vrrp_instance_interface"] = backend_vip["device"]
       PrivateChef["keepalived"]["vrrp_instance_ipaddress"] = backend_vip["ipaddress_with_netmask"]
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
