@@ -84,7 +84,7 @@ if is_data_master?
     retries 10
   end
 
-  [ rabbitmq['vhost'], rabbitmq['reindexer_vhost'], rabbitmq['jobs_vhost'] ].each do |vhost|
+  [ rabbitmq['vhost'], rabbitmq['reindexer_vhost'], rabbitmq['jobs_vhost'], rabbitmq['actionlog_vhost'] ].each do |vhost|
     execute "#{rmq_ctl} add_vhost #{vhost}" do
       user opc_username
       not_if "#{rmq_ctl_chpost} list_vhosts| grep #{vhost}"
@@ -101,6 +101,12 @@ if is_data_master?
   execute "#{rmq_ctl} add_user #{rabbitmq['jobs_user']} #{rabbitmq['jobs_password']}" do
     user opc_username
     not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['jobs_user']}"
+    retries 10
+  end
+
+  execute "#{rmq_ctl} add_user #{rabbitmq['actionlog_user']} #{rabbitmq['actionlog_password']}" do
+    user opc_username
+    not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['actionlog_user']}"
     retries 10
   end
 
@@ -124,6 +130,12 @@ if is_data_master?
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['jobs_vhost']} #{rabbitmq['jobs_user']} \".*\" \".*\" \".*\"" do
     user opc_username
     not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['jobs_user']}|grep #{rabbitmq['jobs_vhost']}"
+    retries 10
+  end
+
+  execute "#{rmq_ctl} set_permissions -p #{rabbitmq['actionlog_vhost']} #{rabbitmq['actionlog_user']} \".*\" \".*\" \".*\"" do
+    user opc_username
+    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['actionlog_user']}|grep #{rabbitmq['actionlog_vhost']}"
     retries 10
   end
 end

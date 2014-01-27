@@ -97,7 +97,7 @@ module PrivateChef
         opts.each do |k,v|
           PrivateChef['backend_vips'][k] = v
         end
-        
+
         # Keepalived needs an address with network to properly configure an IPv6 vip
         if PrivateChef['backend_vips']['ipaddress'] =~ /(.*)\/(\d+)/
           # If we have an address of the form addr/mask, split it out
@@ -105,7 +105,7 @@ module PrivateChef
           PrivateChef['backend_vips']['ipaddress_with_netmask'] = "#{$1}/#{$2}"
         elsif PrivateChef['backend_vips']['ipaddress'] =~ /\:/
           # IPv6 addresses must have the mask
-          Chef::Log.fatal("backend_vip ipaddress field appears to be a IPv6 address without a netmask  (e.g /64, /48)") 
+          Chef::Log.fatal("backend_vip ipaddress field appears to be a IPv6 address without a netmask  (e.g /64, /48)")
           exit 66
         else
           # bare addresses (IPv4) can not have a mask (to preserve backwards compatibility)
@@ -144,6 +144,7 @@ module PrivateChef
 
       PrivateChef['rabbitmq']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['rabbitmq']['jobs_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['rabbitmq']['actionlog_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['opscode_webui']['cookie_secret'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
@@ -163,6 +164,7 @@ module PrivateChef
               'rabbitmq' => {
                 'password' => PrivateChef['rabbitmq']['password'],
                 'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
+                'actionlog_password' => PrivateChef['rabbitmq']['actionlog_password'],
               },
               'opscode_webui' => {
                 'cookie_secret' => PrivateChef['opscode_webui']['cookie_secret'],

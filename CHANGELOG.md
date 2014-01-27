@@ -1,6 +1,7 @@
 # Enterprise Chef Changelog
 
 * Add ossp-uuid extension to Postgres 9.2
+* Configuring oc\_actionlog in oc\_erchef and rabbit
 
 ## 11.1.1 (2014-02-17)
 
