@@ -1,0 +1,9 @@
+ebin/*
+*.beam
+deps/*
+rel/bookshelf_bench
+.concrete/DEV_MODE
+deps.plt
+.eunit
+tests/*
+bookshelf_bench.config

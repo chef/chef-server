@@ -1,0 +1,93 @@
+%%
+%% Configurable Values:
+%%
+
+%% 'mode' - controls the rate at which the drivers invoke the http requests.
+%% There are two possible values:
+%% - {max}
+%% - {rate, N} where N is the requests per second
+{mode, max}.
+
+%% 'duration' - the duration of the test, in minutes.
+{duration, 1}.
+
+%% 'concurrent' - the number of concurrent worker processes.
+%% Each worker process will run at the rate configured in 'mode', so
+%% 10 worker processes running at {rate, 10} would result in 100 requests
+%% per second.
+{concurrent, 200}.
+
+%% 'bookshelf_data_profile' - description of the on-disk bookshelf data
+%% for the benchmark. This file is contains frequency data for unique file
+%% sizes in the bookshelf data directory. One is included as an example, but
+%% can be recreated by running the following commands on an Enterprise Chef
+%% server (can also be tweaked for OSC):
+%%
+%% ```
+%% cd /var/opt/opscode/bookshelf
+%% find data -name 'organization*' | xargs ls -l | awk '{print $5}' | sort -n | uniq -c
+%% ```
+%%
+%% The format of the file is:
+%%
+%% <<EOF
+%% 1 123123
+%% 2 42
+%% 1 9999
+%% 1 98765
+%% EOF
+%%
+%% Each line can be interpreted as "$frequency $size_in_bytes"
+%%
+{bookshelf_data_profile, "../../data/bs_distro.txt"}.
+
+%%
+%% S3 Config Values:
+%%
+%% The secret keys that bookshelf is configured with are determined from the
+%% bookshelf configuration on the node on which it is running. You can find this
+%% information in the following file on an Enterprise Chef server:
+%%
+%% /etc/opscode/private-chef-secrets.json
+%%
+{s3_bucket, "bookshelf"}.
+{s3_access_key_id, "ACCESS_KEY_HERE"}.
+{s3_secret_access_key, "SECRET_ACCESS_KEY_HERE"}.
+{s3_host, "http://localhost:4321"}.
+
+%%
+%% Expert `basho_bench` Config:
+%%
+%% The easiest values to tune here are the frequency numbers. These numbers
+%% adjust the distribution of GETs and PUTs to the bookshelf server.
+%%
+%% For a more detailed example of how the below HTTP operations relate to the
+%% configurable value generators in the below section, take a look at
+%% https://github.com/basho/basho_bench/blob/master/examples/http.config
+%%
+{operations, [
+              {{get, get_uri_t}, 9},
+              {{put, put_uri_t, random_data_v}, 1}
+             ]}.
+
+%%
+%% Non-Configurable Values
+%%
+
+{driver, basho_bench_driver_http}.
+{pre_hook, {bookshelf_bench, start_link}}.
+{key_generator, {uniform_int, 100000}}.
+{generators, [
+              {random_get_url_g, {value_generator, {function, bookshelf_bench, random_get, []}}},
+              {random_put_url_g, {value_generator, {function, bookshelf_bench, random_put, []}}},
+              {random_data_g, {value_generator, {function, bookshelf_bench, random_data, []}}}
+             ]}.
+{headers, []}.
+{values, [
+          {random_data_v, random_data_g}
+         ]}.
+{targets, [
+           {get_uri_t, {"localhost", 4321, {"/bookshelf/~s", [random_get_url_g]}}},
+           {put_uri_t, {"localhost", 4321, {"/bookshelf/~s", [random_put_url_g]}}}
+          ]}.
+{code_paths, ["."]}.
