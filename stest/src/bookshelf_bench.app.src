@@ -1,0 +1,15 @@
+%% -*- mode: erlang -*-
+{application, bookshelf_bench,
+ [
+  {description, "Fill in description of project here."},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  %% uncomment if this is an active application
+  %% {mod, { bookshelf_bench_app, []}},
+  {env, []}
+ ]}.
+%% vim: set filetype=erlang tabstop=2
