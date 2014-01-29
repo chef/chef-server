@@ -22,6 +22,7 @@ dependency "zlib"
 dependency "openssl"
 dependency "libedit"
 dependency "ncurses"
+dependency "libossp-uuid"
 
 source :url => "http://ftp.postgresql.org/pub/source/v9.2.4/postgresql-9.2.4.tar.bz2",
        :md5 => "6ee5bb53b97da7c6ad9cb0825d3300dd"
@@ -39,6 +40,7 @@ build do
            "--prefix=#{install_dir}/embedded/postgresql/9.2",
            "--with-libedit-preferred",
            "--with-openssl",
+           "--with-ossp-uuid",
            "--with-includes=#{install_dir}/embedded/include",
            "--with-libraries=#{install_dir}/embedded/lib"].join(" "), :env => configure_env
   command "make world -j #{max_build_jobs}", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
