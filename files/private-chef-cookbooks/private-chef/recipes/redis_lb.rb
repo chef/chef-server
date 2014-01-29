@@ -74,6 +74,7 @@ end
 ruby_block "set_lb_redis_values" do
   retries 5
   retry_delay 1
+  only_if { is_data_master? }
   block do
     require "redis"
     redis = Redis.new(:host => redis_data.vip, :port => redis_data.port)
