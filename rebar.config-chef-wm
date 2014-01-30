@@ -26,6 +26,9 @@
   {chef_index, ".*",
    {git, "git://github.com/opscode/chef_index.git", {branch, "master"}}},
 
+  {chef_reindex, ".*",
+   {git, "git@github.com:opscode/chef_reindex.git", {branch, "master"}}},
+
   {chef_objects, ".*",
    {git, "git://github.com/opscode/chef_objects.git", {branch, "master"}}},
 
