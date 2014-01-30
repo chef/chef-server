@@ -29,14 +29,6 @@
 -type org_info() :: {object_id(), binary()}.
 
 -export([
-         ez_all_ids/2,
-         ez_name_id_dict/2,
-         ez_reindex_by_id/3,
-         ez_reindex_by_name/3,
-         ez_reindex_direct/2,
-         ez_reindex_direct_from_file/2,
-         ez_reindex_direct_from_list/2,
-         ez_reindex_from_file/1,
          make_context/0,
          reindex/2,
          reindex_by_id/4,
@@ -145,88 +137,10 @@ reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
     {ok, BatchSize} = application:get_env(chef_wm, bulk_fetch_batch_size),
     batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict).
 
--spec ez_reindex_by_name(binary(), index(), [binary()]) -> ok.
-ez_reindex_by_name(OrgName, Index, Names) ->
-    Ctx = make_context(),
-    OrgId = chef_db:fetch_org_id(Ctx, OrgName),
-    OrgInfo = {OrgId, OrgName},
-    reindex_by_name(Ctx, OrgInfo, Index, Names).
-
--spec ez_reindex_by_id(binary(), index(), [<<_:256>>]) -> ok.
-ez_reindex_by_id(OrgName, Index, Ids) ->
-    Ctx = make_context(),
-    OrgId = chef_db:fetch_org_id(Ctx, OrgName),
-    OrgInfo = {OrgId, OrgName},
-    reindex_by_id(Ctx, OrgInfo, Index, Ids).
-
-%% @doc Reindex the specified `Index' in `OrgName'. This function avoids use of rabbitmq and
-%% POSTs updates directly to `SolrUrl'. Flatten/expand is handled by `chef_index_expand'
-%% which also takes care of POSTing the data to solr. When this function returns, all
-%% objects in the specified index will have been reindexed and received by solr.
-%%
-%% The `chef_wm' app's `bulk_fetch_batch_size' is used to determine both the size of the
-%% batch of objects to `bulk_get' from the db and the size of the multi-doc POSTs sent to
-%% solr. Parallelization of flatten/expand is the responsibility of `chef_index_expand' and
-%% is not a concern of this code.
--spec ez_reindex_direct('open-source-chef' | binary(), string()) -> [ok].
-ez_reindex_direct(OrgName, SolrUrl) ->
-    DbCtx = make_context(),
-    OrgId = chef_db:fetch_org_id(DbCtx, OrgName),
-    AllIndexes = fetch_org_indexes(DbCtx, OrgId),
-    [ begin
-          NameIdDict = chef_db:create_name_id_dict(DbCtx, Idx, OrgId),
-          AllIds = all_ids_from_name_id_dict(NameIdDict),
-          error_logger:info_msg("ez_reindex_direct: start ~p ~p ~p ~p",
-                                [OrgName, OrgId, Idx, length(AllIds)]),
-          BatchSize = envy:get(chef_wm, bulk_fetch_batch_size, pos_integer),
-          ObjType = chef_object_type(Idx),
-          DoBatch = fun(Batch, _Acc) ->
-                            Objects = chef_db:bulk_get(DbCtx, OrgName, ObjType, Batch),
-                            send_direct_to_solr(OrgId, Idx, Objects, NameIdDict, SolrUrl)
-                    end,
-          chefp:batch_fold(DoBatch, AllIds, ok, BatchSize),
-          error_logger:info_msg("ez_reindex_direct: complete ~p ~p ~p",
-                                [OrgName, OrgId, Idx]),
-          ok
-      end || Idx <- AllIndexes ].
-
-ez_reindex_direct_from_file(FileName, SolrUrl) ->
-    {ok, OrgFile} = file:open(FileName, [read, raw, binary, {read_ahead, 1024}]),
-    OrgNames = read_org_file(OrgFile, []),
-    ez_reindex_direct_from_list(OrgNames, SolrUrl).
-
-ez_reindex_direct_from_list(OrgNames, SolrUrl) ->
-    [ begin
-          ez_reindex_direct(OrgName, SolrUrl)
-      end || OrgName  <- OrgNames ].
-
-read_org_file(OrgFile, OrgNames) ->
-    case file:read_line(OrgFile) of
-        {ok, OrgLine} ->
-            OrgName = binary:replace(OrgLine, <<"\n">>, <<"">>),
-            read_org_file(OrgFile, [OrgName | OrgNames]);
-        eof ->
-            OrgNames;
-        {error, Reason} ->
-            {error, Reason}
-    end.
-
 all_ids_from_name_id_dict(NameIdDict) ->
     dict:fold(fun(_K, V, Acc) -> [V|Acc] end,
               [],
               NameIdDict).
-
--spec ez_name_id_dict(binary(), index()) -> dict().
-ez_name_id_dict(OrgName, Index) ->
-    Ctx = make_context(),
-    OrgId = chef_db:fetch_org_id(Ctx, OrgName),
-    chef_db:create_name_id_dict(Ctx, Index, OrgId).
-
--spec ez_all_ids(binary(), index()) -> [binary()].
-ez_all_ids(OrgName, Index) ->
-    NameIdDict = ez_name_id_dict(OrgName, Index),
-    dict:fold(fun(_K, V, Acc) -> [V | Acc] end,
-              [], NameIdDict).
 
 make_context() ->
     Time = string:join([ integer_to_list(I) || I <- tuple_to_list(os:timestamp())], "-"),
@@ -235,33 +149,6 @@ make_context() ->
                                      Time
                                     ]),
     chef_db:make_context(ReqId).
-
-send_direct_to_solr(_, _, {error, _} = Error, _, _) ->
-    %% handle error from chef_db:bulk_get
-    erlang:error(Error);
-send_direct_to_solr(OrgId, Index, Objects, NameIdDict, SolrUrl) ->
-    %% NOTE: we could handle the mapping of Object to Id in the caller and pass in here a
-    %% list of {Id, Object} tuples. This might be better?
-    SolrCtx = lists:foldl(
-      fun(SO, Ctx) ->
-              {Id, IndexEjson} = ejson_for_indexing(Index, OrgId, SO, NameIdDict),
-              chef_index_expand:add_item(Ctx, Id, IndexEjson, Index, OrgId)
-      end, chef_index_expand:init_items(SolrUrl), Objects),
-    case chef_index_expand:send_items(SolrCtx) of
-        ok ->
-            ok;
-        {error, Why} ->
-            erlang:error({error, {"chef_index_expand:send_items", Why}})
-    end.
-
-ejson_for_indexing(Index, OrgId, SO, NameIdDict) ->
-    PrelimEJson = decompress_and_decode(SO),
-    NameKey = name_key(chef_object_type(Index)),
-    ItemName = ej:get({NameKey}, PrelimEJson),
-    {ok, ObjectId} = dict:find(ItemName, NameIdDict),
-    StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PrelimEJson),
-    IndexEjson = chef_object:ejson_for_indexing(StubRec, PrelimEJson),
-    {ObjectId, IndexEjson}.
 
 %% All object types are returned from chef_db:bulk_get/4 as
 %% binaries (compressed or not) EXCEPT for clients, which are
@@ -272,89 +159,6 @@ decompress_and_decode(Bin) when is_binary(Bin) ->
     chef_db_compression:decompress_and_decode(Bin);
 decompress_and_decode(Object) ->
     Object.
-
-
-%% @doc Reindex objects listed in file `File'.
-%%
-%% `File' should be the path to a text file with the following format:
-%%  ```
-%%      OrgName\tIndex\tBagName\tObjectId\n
-%%  '''
-%%
-%% Where `OrgName' is the name of the organization, `Index' is one of `client',
-%% `environment', `node', `role', or `data_bag'. The value of `BagName' is ignored for all
-%% index types except for `data_bag' where the value provided is used as the data bag
-%% name. This is required so that we can distinguish between the `node' index and a data bag
-%% named `"node"'.
-%%
-%% The parser expects tab delimited lines and only reads the first four fields. This means
-%% that files contain additional columns and those columns will be ignored. This is useful
-%% if you'd like the file to contain the object name. The file is read into memory,
-%% processed into a per org per index structure and then executed. This is not meant for
-%% enormous input files.
-%%
-ez_reindex_from_file(File) ->
-    {ok, Bin} = file:read_file(File),
-    Lines = re:split(Bin, <<"\n">>),
-    LinesWithNum = lists:zip(Lines, lists:seq(1, length(Lines))),
-    OrgDict = parse_lines(LinesWithNum),
-    error_logger:info_msg("reindexing data for ~p orgs~n", [dict:size(OrgDict)]),
-    dict:map(
-      fun(OrgName, IndexDict) ->
-              error_logger:info_msg("processing org: ~s~n", [OrgName]),
-              Ctx = make_context(),
-              OrgId = chef_db:fetch_org_id(Ctx, OrgName),
-              OrgInfo = {OrgId, OrgName},
-              dict:map(
-                fun(RealIndex, Ids) ->
-                        error_logger:info_msg("org: ~s, index: ~p (~p items)~n", [OrgName, RealIndex, length(Ids)]),
-                        reindex_by_id(Ctx, OrgInfo, RealIndex, Ids)
-                end, IndexDict),
-              error_logger:info_msg("completed org: ~s~n", [OrgName])
-      end, OrgDict),
-    ok.
-
-parse_lines(LinesWithNum) ->
-    OrgDict = lists:foldl(
-                fun(LineInfo, OrgDict) ->
-                        case parse_line(LineInfo) of
-                            skip ->
-                                OrgDict;
-                        {OrgName, Index, Id} ->
-                                dict:append(OrgName, {Index, Id}, OrgDict)
-                        end
-                end, dict:new(), LinesWithNum),
-    %% OrgDict now maps OrgName to [{Index, Id}], so now we take a second pass to convert
-    %% those lists to dicts mapping Index to [Id].
-    dict:from_list(
-      [ {OrgName,
-       lists:foldl(fun({Index, Id}, IndexDict) ->
-                           dict:append(Index, Id, IndexDict)
-                   end, dict:new(), IndexIds)}
-        || {OrgName, IndexIds} <- dict:to_list(OrgDict) ]).
-
-parse_line({<<>>, _Num}) ->
-    skip;
-parse_line({Line, Num}) ->
-    try
-        [OrgName, Index, BagName, Id | _ ] = re:split(Line, <<"\t">>),
-        RealIndex = normalize_index(Index, BagName),
-        {OrgName, RealIndex, Id}
-    catch
-        error:_Why ->
-            erlang:error({parse_error, {line, Num}, Line})
-    end.
-
-normalize_index(<<"data_bag">>, BagName) ->
-    BagName;
-normalize_index(Index, _) when Index == <<"client">>;
-                               Index == <<"environment">>;
-                               Index == <<"node">>;
-                               Index == <<"role">> ->
-    erlang:binary_to_atom(Index, utf8);
-normalize_index(Index, _) ->
-    erlang:error({bad_index, Index}).
-
 
 %% @doc Recursively batch-process a list of database IDs by retrieving
 %% the serialized_object data from the database, processing them as
