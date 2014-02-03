@@ -134,7 +134,7 @@ entry_exists(Bucket, Path) ->
 open_for_write(Bucket, Entry) ->
     FileName = bksw_io_names:write_path(Bucket, Entry),
     filelib:ensure_dir(FileName),
-    case file:open(FileName, [exclusive, write, binary]) of
+    case file:open(FileName, [exclusive, write, binary, raw]) of
         {ok, Fd} ->
             ?LOG_DEBUG("open_for_write ~p ~p at ~p", [Bucket, Entry, FileName]),
             %% Magic number to guard against file corruption
@@ -159,7 +159,7 @@ open_for_write(Bucket, Entry) ->
 -spec open_for_read(binary(), binary()) -> {ok, #entryref{}} | {error, term()}.
 open_for_read(Bucket, Entry) ->
     FileName = bksw_io_names:entry_path(Bucket, Entry),
-    case file:open(FileName, [read, binary]) of
+    case file:open(FileName, [read, binary, raw]) of
         {ok, Fd} ->
             ?LOG_DEBUG("open_for_read entry ~p ~p at ~p",
                        [Bucket, Entry, FileName]),
