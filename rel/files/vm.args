@@ -26,3 +26,10 @@
 ## NOTE: This value MUST be a power of 2
 ## N band (N - 1) == 0
 +P 524288
+
+## Increase async worker thread pool size from
+## R15 default of 0 to R16 default of 10.
+## Async workers prevents IO from blocking the
+## schedulers and increases performance of IO-heavy
+## apps, like bookshelf.
++A 10
