@@ -161,7 +161,7 @@ default_resource_init() ->
                   {stats_hero_upstreams, ?BASE_RESOURCE:stats_hero_upstreams()},
                   {stats_hero_label_fun, {?BASE_RESOURCE, stats_hero_label}}]}
                ],
-    case envy:get(chef_wm, request_tracing, boolean, Defaults) of
+    case envy:get(chef_wm, request_tracing, Defaults, boolean) of
         true ->
             [{trace, true} | Defaults];
         Defaults ->
