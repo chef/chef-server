@@ -10,8 +10,8 @@
                   inets,
                   ibrowse,
                   lager,
-                  gen_bunny,
                   bcrypt,
-                  chef_index]},
+                  chef_reindex,
+                  stats_hero]},
   {mod, {mover_app, []}}
  ]}.

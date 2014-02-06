@@ -12,16 +12,15 @@
 -export([populate_xdl_with_unmigrated_orgs/0,
          reset_org/1,
          reset_orgs/1,
-         reset_orgs_from_file/1]).
+         reset_orgs_from_file/1,
+         call_if_exported/4]).
 
 -include("mover.hrl").
-
--compile([{parse_transform, lager_transform}]).
 
 %% @doc Get a list of unmigrated orgs from migration_state_table
 %% and set the xdarklaunch flags
 populate_xdl_with_unmigrated_orgs() ->
-    Orgnames = moser_state_tracker:unmigrated_orgs(),
+    Orgnames = moser_state_tracker:unmigrated_orgs(mover_phase_1_migration_callback:migration_type()),
     [mover_org_darklaunch:init_org_to_couch(Orgname, ?PHASE_2_MIGRATION_COMPONENTS) || Orgname <- Orgnames].
 
 %% @doc delete any SQL data for the named org and reset its state
@@ -34,7 +33,7 @@ reset_org(OrgName) ->
 reset_org(OrgName, Line) when is_list(OrgName) ->
     reset_org(iolist_to_binary(OrgName), Line);
 reset_org(OrgName, Line) when is_binary(OrgName) ->
-    case moser_state_tracker:ready_migration(OrgName) of
+    case moser_state_tracker:ready_migration(OrgName, mover_phase_1_migration_callback:migration_type()) of
         ok ->
             Acct = moser_acct_processor:open_account(),
             case moser_acct_processor:get_org_guid_by_name(OrgName, Acct) of
@@ -50,12 +49,12 @@ reset_org(OrgName, Line) when is_binary(OrgName) ->
 org_reset_error(OrgName, Line, Reason) ->
     log_org_reset_error(OrgName, Line, Reason),
     % Advance state if possible, so that we can mark as failed.
-    ok = case moser_state_tracker:migration_started(OrgName) of
+    ok = case moser_state_tracker:migration_started(OrgName, mover_phase_1_migration_callback:migration_type()) of
         ok -> ok;
         {error, not_in_expected_state, _} -> ok;
         Error -> Error
     end,
-    ok = case moser_state_tracker:migration_failed(OrgName, reset_org) of
+    ok = case moser_state_tracker:migration_failed(OrgName, reset_org, mover_phase_1_migration_callback:migration_type()) of
         ok -> ok;
         {error, not_in_expected_state, State} ->
             log_org_reset_error(OrgName, Line, "Org state could not be set to failed."),
@@ -88,4 +87,20 @@ process_lines(Dev, Processor, LineNo) ->
         Line ->
             Processor(string:strip(Line, right, $\n), LineNo),
             process_lines(Dev, Processor, LineNo + 1)
+    end.
+
+call_if_exported(undefined, _FunName, Args, DefaultFun) ->
+    erlang:apply(DefaultFun, Args);
+call_if_exported(Mod, FunName, Args, DefaultFun) ->
+    %% Modules that haven't been called are lazily loaded in the node
+    %% This results in function_exported returning false even if the
+    %% function is exported with correct arity.  code:ensure_loaded
+    %% will load the module and return a bad match if the module is
+    %% missing.
+    {module, _} = code:ensure_loaded(Mod),
+    case erlang:function_exported(Mod, FunName, length(Args)) of
+        true ->
+            erlang:apply(Mod, FunName, Args);
+        false  ->
+            erlang:apply(DefaultFun, Args)
     end.

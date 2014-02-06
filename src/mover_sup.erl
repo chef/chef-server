@@ -13,8 +13,6 @@
 -export([init/1]).
 
 -define(SERVER, ?MODULE).
--define(CHILD(Module, Args, Shutdown), {Module, {Module, start_link, Args}, permanent,
-                                        Shutdown, worker, [Module]}).
 -define(CHILD_SUP(Module, Args),
         {Module, {Module, start_link, Args}, permanent,
          infinity, supervisor, [Module]}).
@@ -25,11 +23,8 @@ start_link() ->
 init([]) ->
     mover_manager:start_link(),
     Children = [?CHILD_SUP(mover_org_migrator_sup, []),
-                ?CHILD_SUP(mover_org_dep_validator_sup, []),
                 ?CHILD_SUP(mover_transient_worker_sup, []),
-                ?CHILD_SUP(mover_transient_migration_queue_sup, []),
-                ?CHILD_SUP(chef_index_sup, []),
-                ?CHILD(mover_chef_couch_removal_worker, [], 5000)
+                ?CHILD_SUP(mover_transient_migration_queue_sup, [])
             ],
     % Don't launch the eredis sup (whose client process requires
     % a valid redis instance) if we won't be using redis.

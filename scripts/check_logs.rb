@@ -106,7 +106,6 @@ IgnoredMessages = [
   /Negotiated maximums: \(Channel = \d+, Frame = \d+, Heartbeat = \d+\)/,
   "RabbitMQ config missing. Indexing for search is disabled.",
   "Starting mosernormal []",
-  "starting chef_index_sup"
 ]
 
 OkSkips = {}

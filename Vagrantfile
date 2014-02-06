@@ -14,7 +14,9 @@ Vagrant.configure("2") do |config|
    end
 
   config.vm.synced_folder "../moser", "/mnt/moser"
-	config.vm.synced_folder "../decouch", "/mnt/decouch"
+  config.vm.synced_folder "../decouch", "/mnt/decouch"
+  config.vm.synced_folder "../chef_reindex", "/mnt/chef_reindex"
+  config.vm.synced_folder "../enterprise-chef-server-schema", "/mnt/enterprise-chef-server-schema"
 
   config.ssh.max_tries = 40
   config.ssh.timeout   = 120
@@ -33,7 +35,9 @@ Vagrant.configure("2") do |config|
                    "enable_demigrate" => false,
                    "schema_rev" => "master" },
       "munin" => { "stub" => true },
-      "sqitch" => { "engine" => "pg" }
+      "sqitch" => { "engine" => "pg" },
+      :app_environment => "dev",
+      :tags => [ 'xdl_redis_standalone' ]
     }
     chef.data_bags_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/data_bags"
     chef.roles_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/roles"
@@ -42,7 +46,8 @@ Vagrant.configure("2") do |config|
       "recipe[opscode-chef-mover::dev]",
       "recipe[opscode-chef-mover::default]",
       "recipe[opscode-xdarklaunch::dev]",
-      "recipe[opscode-xdarklaunch::default]"
+      "recipe[opscode-xdarklaunch::default]",
+      "recipe[opscode-solr4]"
     ]
-  end
+   end
 end
