@@ -38,10 +38,12 @@ upgrade() ->
     ok.
 
 %% @spec init([]) -> SupervisorTree
-%% @doc supervisor callback.
+%% @doc ervisor callback.
 init([]) ->
     ok = load_ibrowse_config(),
     ok = enable_org_cache(),
+    Action = envy:get(oc_chef_wm, enable_actionlog, false, boolean),
+
     Ip = envy:get(oc_chef_wm, ip, string),
     Port = envy:get(oc_chef_wm, port, pos_integer),
     {ok, Dispatch} = file:consult(filename:join(
@@ -65,9 +67,15 @@ init([]) ->
              {chef_index_sup, start_link, []},
              permanent, 5000, supervisor, [chef_index_sup]},
 
-    Processes = [KeyRing, Index, Web],
-    {ok, { {one_for_one, 10, 10}, Processes} }.
+    {ok, { {one_for_one, 10, 10}, maybe_start_action(Action, [KeyRing, Index, Web])} }.
 
+maybe_start_action(true, Workers) ->
+    [{oc_chef_action_sup,
+      {oc_chef_action_sup, start_link, []},
+      permanent, 5000, supervisor, [oc_chef_action_sup]} | Workers];
+maybe_start_action(false, Workers) ->
+    lager:info("Not starting Actionlog supervisor since actionlog is disabled."),
+    Workers.
 
 load_ibrowse_config() ->
     %% FIXME: location of the ibrowse.config should be itself configurable. Also need to
