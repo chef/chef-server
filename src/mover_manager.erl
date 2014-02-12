@@ -57,7 +57,6 @@
 -export([ ping/0,
           start_link/0,
           migrate/3,
-          migrate_next/0,
           migrate_next/1,
           migrate_user_password_storage/2,
           status/0,
@@ -116,10 +115,6 @@ ping() ->
 
 start_link() ->
     gen_fsm:start_link({local, ?SERVER}, ?MODULE, [], []).
-
-%% Helper functions to launch a single migration
-migrate_next() ->
-    migrate(1, 1, mover_phase_1_migration_callback).
 
 migrate_next(CallbackModule) ->
     migrate(1, 1, CallbackModule).
