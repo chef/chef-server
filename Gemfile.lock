@@ -1,17 +1,4 @@
 GIT
-  remote: git://github.com/opscode/omnibus-ruby.git
-  revision: 9cb9ab8d9a6e4e47398d9afd9f7947c88a0995f3
-  branch: master
-  specs:
-    omnibus (0.5.3)
-      fpm (= 0.3.11)
-      mixlib-shellout (~> 1.0)
-      ohai (>= 0.6.12)
-      rake (>= 0.9)
-      thor (= 0.17.0)
-      uber-s3
-
-GIT
   remote: git://github.com/opscode/omnibus-software.git
   revision: 280ba8579ba883c853136c884423622337242689
   branch: master
@@ -19,55 +6,65 @@ GIT
     omnibus-software (0.0.1)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
-    archive-tar-minitar (0.5.2)
-    childprocess (0.3.7)
-      ffi (~> 1.0, >= 1.0.6)
-    erubis (2.7.0)
-    ffi (1.3.1)
-    fpm (0.3.11)
-      json
-    i18n (0.6.1)
+    addressable (2.3.5)
+    arr-pm (0.0.9)
+      cabin (> 0)
+    backports (3.5.0)
+    cabin (0.6.1)
+    childprocess (0.4.0)
+      ffi (~> 1.0, >= 1.0.11)
+    clamp (0.6.3)
+    ffi (1.9.3)
+    fpm (1.0.2)
+      arr-pm (~> 0.0.8)
+      backports (>= 2.6.2)
+      cabin (>= 0.6.0)
+      childprocess
+      clamp (~> 0.6)
+      ffi
+      ftw (~> 0.0.30)
+      json (>= 1.7.7)
+    ftw (0.0.39)
+      addressable
+      backports (>= 2.6.2)
+      cabin (> 0)
+      http_parser.rb (= 0.5.3)
+    http_parser.rb (0.5.3)
     ipaddress (0.8.0)
-    json (1.5.4)
-    log4r (1.1.10)
-    mime-types (1.19)
-    mixlib-cli (1.3.0)
-    mixlib-config (1.1.2)
-    mixlib-log (1.4.1)
-    mixlib-shellout (1.1.0)
-    net-scp (1.0.4)
-      net-ssh (>= 1.99.1)
-    net-ssh (2.2.2)
-    ohai (6.16.0)
+    json (1.8.1)
+    mime-types (1.25.1)
+    mixlib-cli (1.4.0)
+    mixlib-config (2.1.0)
+    mixlib-log (1.6.0)
+    mixlib-shellout (1.3.0)
+    ohai (6.20.0)
       ipaddress
       mixlib-cli
       mixlib-config
       mixlib-log
       mixlib-shellout
-      systemu
+      systemu (~> 2.5.2)
       yajl-ruby
-    rake (10.0.3)
+    omnibus (1.3.0)
+      fpm (~> 1.0.0)
+      mixlib-config (~> 2.1.0)
+      mixlib-shellout (~> 1.3.0)
+      ohai (>= 0.6.12)
+      rake (>= 0.9)
+      thor (>= 0.16.0)
+      uber-s3
+    rake (10.1.1)
     systemu (2.5.2)
-    thor (0.17.0)
+    thor (0.18.1)
     uber-s3 (0.2.4)
       mime-types (~> 1.17)
-    vagrant (1.0.6)
-      archive-tar-minitar (= 0.5.2)
-      childprocess (~> 0.3.1)
-      erubis (~> 2.7.0)
-      i18n (~> 0.6.0)
-      json (~> 1.5.1)
-      log4r (~> 1.1.9)
-      net-scp (~> 1.0.4)
-      net-ssh (~> 2.2.2)
-    yajl-ruby (1.1.0)
+    yajl-ruby (1.2.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  omnibus!
+  omnibus (~> 1.3.0)
   omnibus-software!
-  vagrant (~> 1.0)
