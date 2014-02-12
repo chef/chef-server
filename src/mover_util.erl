@@ -21,7 +21,7 @@
 %% and set the xdarklaunch flags
 populate_xdl_with_unmigrated_orgs() ->
     Orgnames = moser_state_tracker:unmigrated_orgs(mover_phase_1_migration_callback:migration_type()),
-    [mover_org_darklaunch:init_org_to_couch(Orgname, ?PHASE_2_MIGRATION_COMPONENTS) || Orgname <- Orgnames].
+    [mover_org_darklaunch:init_org_to_couch(Orgname, ?PHASE_1_MIGRATION_COMPONENTS) || Orgname <- Orgnames].
 
 %% @doc delete any SQL data for the named org and reset its state
 %% to indicate it's ready to migrate.

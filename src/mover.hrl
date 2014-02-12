@@ -17,6 +17,6 @@
 %% @copyright (C) 2013, Opscode Inc.
 %%
 
--define(PHASE_2_MIGRATION_COMPONENTS,
+-define(PHASE_1_MIGRATION_COMPONENTS,
             [checksums, sandboxes, cookbooks, environments, roles, data, clients]).
 

@@ -18,8 +18,6 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../chef_reindex", "/mnt/chef_reindex"
   config.vm.synced_folder "../enterprise-chef-server-schema", "/mnt/enterprise-chef-server-schema"
 
-  config.ssh.max_tries = 40
-  config.ssh.timeout   = 120
   config.ssh.forward_agent = true
   config.berkshelf.enabled = true
   config.omnibus.chef_version = ENV['OMNIBUS_CHEF_VERSION'] || :latest
@@ -37,7 +35,10 @@ Vagrant.configure("2") do |config|
       "munin" => { "stub" => true },
       "sqitch" => { "engine" => "pg" },
       :app_environment => "dev",
-      :tags => [ 'xdl_redis_standalone' ]
+      :tags => [ 'xdl_redis_standalone' ],
+      "java" => {
+        "jdk_version" => "7"
+      }
     }
     chef.data_bags_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/data_bags"
     chef.roles_path = "#{ENV['OPSCODE_PLATFORM_REPO']}/roles"

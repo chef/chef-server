@@ -28,4 +28,4 @@ error_halts_migration() ->
     true.
 
 reconfigure_object(ObjectId, _AcctInfo) ->
-    mover_org_darklaunch:org_to_sql(ObjectId, ?PHASE_2_MIGRATION_COMPONENTS).
+    mover_org_darklaunch:org_to_sql(ObjectId, ?PHASE_1_MIGRATION_COMPONENTS).
