@@ -1,4 +1,6 @@
 name "private-chef"
+maintainer 'Opscode, Inc.'
+homepage 'http://www.opscode.com'
 
 replaces        "private-chef-full"
 install_path    "/opt/opscode"
@@ -9,8 +11,8 @@ build_iteration "1"
 deps = []
 
 # global
-deps << "chef-gem" # for embedded chef-solo
 deps << "preparation" # creates required build directories
+deps << "chef-gem" # for embedded chef-solo
 deps << "private-chef-cookbooks" # used by private-chef-ctl reconfigure
 deps << "private-chef-scripts" # assorted scripts used by installed instance
 deps << "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
