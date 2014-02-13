@@ -20,3 +20,5 @@
 -define(PHASE_1_MIGRATION_COMPONENTS,
             [checksums, sandboxes, cookbooks, environments, roles, data, clients]).
 
+-define(PHASE_2_MIGRATION_COMPONENTS,
+            [groups, containers]).
