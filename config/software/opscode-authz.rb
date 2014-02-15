@@ -3,7 +3,8 @@ version "pc-rel-0.3.4"
 
 dependencies ["erlang", "rsync"]
 
-source :git => "git@github.com:opscode/opscode-authz"
+source :url => "http://there-is-no-url.file-only-in-cache.org/opscode-authz-#{version}.tar.gz",
+       :md5 => "5499cd5e54c686c97d117f29265960d8"
 
 relative_path "opscode-authz"
 
@@ -14,7 +15,6 @@ env = {
 }
 
 build do
-  command "make distclean", :env => env
   command "make rel", :env => env
   command "mkdir -p #{install_dir}/embedded/service/opscode-authz"
   command "#{install_dir}/embedded/bin/rsync -a ./ #{install_dir}/embedded/service/opscode-authz/"
