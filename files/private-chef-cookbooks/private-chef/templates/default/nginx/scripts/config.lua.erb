@@ -118,9 +118,7 @@ end
 function config.is_in_maint_mode_for_addr(remote_addr)
   local maint = ngx.shared.maint_data
   refresh_expiring_set(maint, "maint_data", maint_refresh_interval)
-  return maint:get("maint_mode") and not
-         (maint:get(string.match(remote_addr, "%d+.%d+.%d+")) or
-          maint:get(remote_addr))
+  return maint:get("maint_mode")
 end
 
 -- This does not attempt to refresh the maintenance mode data, as it's
@@ -138,24 +136,12 @@ end
 -- return true if the given address is maintenance mode
 -- whitelist
 function config.is_addr_whitelisted(component, remote_addr)
-  local maint = ngx.shared.maint_data
-  refresh_expiring_set(maint, "maint_data", maint_refresh_interval)
-  return maint:get(string.match(component .. "-" .. remote_addr, "%d+.%d+.%d+")) or
-         maint:get(remote_addr)
+  return false
 end
 
--- return true if the remote address has been banned
--- will refresh the ban ip list from redis periodically.
-function config.is_addr_banned(remote_addr)
-  local banned = ngx.shared.banned_ips
-  refresh_expiring_set(banned, "banned_ips", ban_refresh_interval)
 
-  -- Allow for blocking of /24 subnets by first checking for matches against
-  -- partial address before checking the specific address.
-  -- For example, the block_ip set could contain a value '192.168.1' which would
-  -- block 192.168.1.0/24
-  return banned:get(string.match(remote_addr, "%d+.%d+.%d+")) or
-         banned:get(remote_addr)
+function config.is_addr_banned(remote_addr)
+  return false
 end
 
 -- Get 'raw' org configuration - nested array of darklaunch rules
