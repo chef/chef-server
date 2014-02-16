@@ -1,0 +1,12 @@
+diff -ur postgresql-9.1.9/configure postgresql-9.1.9.fixed/configure
+--- postgresql-9.1.9/configure	2013-04-01 11:23:05.000000000 -0700
++++ postgresql-9.1.9.fixed/configure	2014-02-15 19:09:48.000000000 -0800
+@@ -8391,7 +8391,7 @@
+ else	READLINE_ORDER="-ledit -lreadline"
+ fi
+ for pgac_rllib in $READLINE_ORDER ; do
+-  for pgac_lib in "" " -ltermcap" " -lncurses" " -lcurses" ; do
++  for pgac_lib in "" " -ltermcap" " -lcurses" ; do
+     LIBS="${pgac_rllib}${pgac_lib} $pgac_save_LIBS"
+     cat >conftest.$ac_ext <<_ACEOF
+ /* confdefs.h.  */
