@@ -1,5 +1,12 @@
 # Enterprise Chef Changelog
 
+## 11.1.1 (2014-02-17)
+
+### private-chef-cookbooks
+
+#### BUGFIXES
+* remove banned/whitelist IP checking from OpenResty Lua config that breaks ipv6 clients
+
 ## 11.1.0 (2014-02-06)
 
 ### omnibus-ruby 1.3.0
