@@ -17,7 +17,9 @@ migration_start_worker_args(Object, AcctInfo) ->
     [Org].
 
 migration_action(#org_info{org_id = OrgId, org_name = OrgName}) ->
-    IndexStateResults = chef_ez_reindex_direct:reindex(OrgName, OrgId, envy:get(chef_reindex, solr_update_url, string)),
+    SolrUrl = envy:get(chef_reindex, solr_update_url, string),
+    delete_existing_db(SolrUrl, OrgId),
+    IndexStateResults = chef_ez_reindex_direct:reindex(OrgName, OrgId, SolrUrl),
     [ok = Result || Result <- IndexStateResults],
     [{ok, reindex_successful}].
 
@@ -32,3 +34,18 @@ error_halts_migration() ->
 
 reconfigure_object(#org_info{org_name = OrgName}) ->
     mover_org_darklaunch:enable_solr4(OrgName).
+
+delete_existing_db(SolrUrl, OrgId) ->
+    Doc = [<<"<?xml version='1.0' encoding='UTF-8'?><delete><query>">>,
+           <<"X_CHEF_database_CHEF_X:chef_">>,
+           OrgId,
+           <<"</query></delete>">>],
+    DocBin = iolist_to_binary(Doc),
+    Headers = [{"Content-Type","text/xml"}],
+    {ok, Code, _Head, Body} = ibrowse:send_req(SolrUrl, Headers, post, DocBin),
+    case Code of
+        "2" ++ _Rest ->
+            ok;
+        _  ->
+            {error, {Code, Body}}
+    end.
