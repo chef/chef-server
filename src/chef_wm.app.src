@@ -26,7 +26,7 @@
                   crypto,
                   bcrypt,
                   stats_hero,
-                  fast_log,
+                  lager,
                   sqerl,
                   gen_bunny,
                   ibrowse,

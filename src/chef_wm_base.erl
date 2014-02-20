@@ -140,7 +140,7 @@ malformed_request(Req, #base_state{resource_mod=Mod,
             Req3 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
             {{halt, 400}, Req3, State1#base_state{log_msg = bad_sign_desc}};
         throw:{too_big, Msg} ->
-            error_logger:info_msg("json too large (~p)", [Msg]),
+            lager:info("json too large (~p)", [Msg]),
             Req3 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, Msg}]}), Req),
             {{halt, 413}, Req3, State1#base_state{log_msg = too_big}};
         throw:Why ->
@@ -207,7 +207,7 @@ finish_request(Req, #base_state{reqid = ReqId,
         end
     catch
         X:Y ->
-            error_logger:error_report({X, Y, erlang:get_stacktrace()})
+            lager:error({X, Y, erlang:get_stacktrace()})
     end.
 
 create_500_response(Req, State) ->
@@ -495,7 +495,7 @@ spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
         {ok, _} ->
             ok;
         {error, Reason} ->
-            error_logger:error_msg("FAILED stats_hero_worker_sup:new_worker: ~p~n",
+            lager:error("FAILED stats_hero_worker_sup:new_worker: ~p~n",
                                    [Reason]),
             ok
     end.
@@ -556,7 +556,7 @@ select_user_or_webui_key(Req, Requestor) ->
                             %% The proplist for webui_pub_key_list has been parsed, so the
                             %% key should exist as an atom
                             throw:badarg ->
-                                error_logger:error_report({"unknown webkey tag", Tag,
+                                lager:error({"unknown webkey tag", Tag,
                                                            erlang:get_stacktrace()}),
                                 %% alternately, we could just use the default key instead of failing;
                                 %% but I prefer noisy errors
@@ -571,7 +571,7 @@ select_user_or_webui_key(Req, Requestor) ->
                     PublicKey;
                 {error, unknown_key} ->
                     Msg = io_lib:format("Failed finding key ~w", [WebKeyTag]),
-                    error_logger:error_report({no_such_key, Msg, erlang:get_stacktrace()}),
+                    lager:error({no_such_key, Msg, erlang:get_stacktrace()}),
                     throw({no_such_key, WebKeyTag})
             end;
         _Else ->
