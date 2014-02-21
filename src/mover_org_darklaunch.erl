@@ -14,7 +14,8 @@
          org_to_couch/2,
          org_to_sql/2,
          enable_solr4/1,
-         enable_both_solrs/1]).
+         enable_both_solrs/1,
+         enable_solr1/1]).
 
 disable_org(OrgName) ->
     OrgKey = iolist_to_binary(["dl_org_", OrgName]),
@@ -48,6 +49,10 @@ enable_solr4(OrgName) ->
 enable_both_solrs(OrgName) ->
     OrgKey = iolist_to_binary(["dl_org_", OrgName]),
     send_eredis_q(["HMSET", OrgKey, "solr4", "false", "query_aux_solr", "true", "rabbit_aux_vhost", "true"]).
+
+enable_solr1(OrgName) ->
+    OrgKey = iolist_to_binary(["dl_org_", OrgName]),
+    send_eredis_q(["HMSET", OrgKey, "solr4", "false", "query_aux_solr", "false", "rabbit_aux_vhost", "false"]).
 
 send_eredis_q(Command) ->
     %% if we're configured for- dry_run mode, don't send the commands to redis

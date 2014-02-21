@@ -187,8 +187,8 @@ ready({start, NumObjects, NumWorkers, Worker}, _From, CurrentState) ->
     State = CurrentState#state{max_worker_count = NumWorkers,
                    objects_requested = NumObjects,
                    objects_remaining = NumObjects,
-                   worker = Worker},
-    call_if_exported(CurrentState, migration_init, [], fun no_op/0),
+                   worker = #migration_worker{callback_module = CallbackMod } = Worker},
+    call_if_exported(CallbackMod, migration_init, [], fun no_op/0),
     {reply, {ok, burning_couches}, working, State, 0};
 ready(create_account_dets, _From, State = #state{ acct_info = Acct} ) ->
     NewAccount = create_dets_files(Acct),
@@ -244,9 +244,10 @@ start_worker(Object, #state{live_worker_count = LW,
 default_worker_args(Object, AcctInfo) ->
     [Object, AcctInfo].
 
-halting(timeout, #state{live_worker_count = 0} = State) ->
+halting(timeout, #state{live_worker_count = 0,worker = #migration_worker { callback_module = Mod }} = State) ->
     %% All workers stopped - we're ready to accept a new request for
     %% migrations.  Hold onto State so that results can be queried via status/0
+    mover_util:call_if_exported(Mod, migration_complete, [], fun no_op/0),
     {next_state, ready, State};
 halting(timeout, #state{} = State) ->
     %% Workers remainin, we stay 'halting' until there are none.
