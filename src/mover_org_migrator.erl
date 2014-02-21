@@ -42,10 +42,9 @@ start_link(Config) ->
     gen_fsm:start_link(?MODULE, Config, []).
 
 init({CallbackModule, OrgName, MigrationArgs}) ->
-    MigrationType = CallbackModule:migration_type(),
     State = #state{org_name = OrgName, migration_args = MigrationArgs, callback_module = CallbackModule},
 
-    case migration_started(CallbackModule, OrgName, MigrationType) of
+    case migration_started(CallbackModule, OrgName) of
         ok ->
             lager:info([{org_name, OrgName}], "Starting migration ~s.", [CallbackModule:migration_type()]),
             {ok, disable_org_access, State, 0};
@@ -116,10 +115,10 @@ handle_info(_Info, StateName, State) ->
 
 terminate(normal, _StateName, #state{org_name = OrgName, callback_module = CallbackModule}) ->
     lager:info([{org_name, OrgName}], "Terminating after successful migration"),
-    migration_successful(CallbackModule, OrgName, CallbackModule:migration_type());
+    migration_successful(CallbackModule, OrgName);
 terminate(_Other, StateName, #state{org_name = OrgName, callback_module = CallbackModule}) ->
     lager:info([{org_name, OrgName}], "Terminating after failed migration"),
-    migration_failed(CallbackModule, OrgName, StateName, CallbackModule:migration_type()).
+    migration_failed(CallbackModule, OrgName, StateName).
 
 code_change(_OldVsn, StateName, State, _Extra) ->
     {ok, StateName, State}.
@@ -135,12 +134,12 @@ stop_with_migration_error(#state{org_name = OrgName} = State, Error) ->
     lager:error([{org_name, OrgName}], "Error in converting org data, skipping:  ~p", [Error]),
     {stop, {migration_error, Error}, State}.
 
-migration_started(CallbackMod, OrgName, MigrationType) ->
-    mover_util:call_if_exported(CallbackMod, migration_started, [OrgName, MigrationType], fun moser_state_tracker:migration_started/2).
+migration_started(CallbackMod, OrgName) ->
+    mover_util:call_if_exported(CallbackMod, migration_started, [OrgName, CallbackMod:migration_type()], fun moser_state_tracker:migration_started/2).
 
-migration_successful(CallbackMod, OrgName, MigrationType) ->
-    mover_util:call_if_exported(CallbackMod, migration_successful, [OrgName, MigrationType], fun moser_state_tracker:migration_successful/2).
+migration_successful(CallbackMod, OrgName) ->
+    mover_util:call_if_exported(CallbackMod, migration_successful, [OrgName, CallbackMod:migration_type()], fun moser_state_tracker:migration_successful/2).
 
-migration_failed(CallbackMod, OrgName, StateName, MigrationType) ->
-    mover_util:call_if_exported(CallbackMod, migration_failed, [OrgName,StateName, MigrationType], fun moser_state_tracker:migration_failed/3).
+migration_failed(CallbackMod, OrgName, StateName) ->
+    mover_util:call_if_exported(CallbackMod, migration_failed, [OrgName,StateName, CallbackMod:migration_type()], fun moser_state_tracker:migration_failed/3).
 
