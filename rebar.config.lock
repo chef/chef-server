@@ -2,15 +2,15 @@
 
 {sub_dirs,["rel"]}.
 {deps,[{meck,".*",{git,"git://github.com/esl/meck.git","master"}},
-       {rebar_lock_deps_plugin,".*",
-                               {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
-                                    "911481ee8a20f59fc9092e370e2b0d116bec19df"}},
        {goldrush,".*",
                  {git,"git://github.com/DeadZen/goldrush.git",
                       "1d883423ac360b3536ca52dc733a0164bacf3109"}},
        {lager,".*",
               {git,"https://github.com/basho/lager.git",
                    "ad400896af5b1ad8b4f7a4d34e609b5a990640bb"}},
+       {rebar_lock_deps_plugin,".*",
+                               {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
+                                    "911481ee8a20f59fc9092e370e2b0d116bec19df"}},
        {mochiweb,".*",
                  {git,"git://github.com/basho/mochiweb.git",
                       "5e6e3e688dc9987a97e261431256e29671555c0b"}},
@@ -67,10 +67,10 @@
                              "6952d62c58d9671ebfad28e1e106fb78501d6065"}},
        {rebar_vsn_plugin,".*",
                          {git,"https://github.com/erlware/rebar_vsn_plugin.git",
-                              "0d954d923275305c62a81e9c2bf60a60977a9d29"}},
+                              "fd40c960c7912193631d948fe962e1162a8d1334"}},
        {erlware_commons,".*",
                         {git,"git://github.com/erlware/erlware_commons.git",
-                             "96cdc0e6237bfc834d144750e7fbef09016be084"}},
+                             "b125ce055e8dd7df20b5a30c190f1a4c42a90b92"}},
        {mini_s3,".*",
                 {git,"git://github.com/opscode/mini_s3.git",
                      "ed42875aefe598e8a31145d1482ac08827c2e9f6"}},
@@ -97,10 +97,10 @@
                        "62f07401f56ac22d699c7c2d062af11b396c85b9"}},
        {chef_db,".*",
                 {git,"git@github.com:opscode/chef_db.git",
-                     "cb53b19bf20b2b7e699316b86b02a706cf825631"}},
+                     "a1b69c1e36986b1a26e2e1098ca675698abf61ae"}},
        {oc_chef_authz,".*",
                       {git,"git@github.com:opscode/oc_chef_authz.git",
-                           "c34fcf70549b21650f967986fb9f2bbfbf51d2a4"}},
+                           "9de453c1e4ed1584e374f972db5b1c4dcfc30fcc"}},
        {gen_server2,".*",
                     {git,"git://github.com/mdaguete/gen_server2.git",
                          "992650004c81ee921183488cb8115de4777e7bd9"}},
@@ -115,7 +115,7 @@
                        "9091b7791abb6580c2481e1898b53767a698a86a"}},
        {chef_index,".*",
                    {git,"git@github.com:opscode/chef_index.git",
-                        "7bbcc31e3239372ce2257c1ea6e268fdee14ffc2"}},
+                        "6f44357842bb89f5993be2bc907a3c3328ca0c22"}},
        {chef_certgen,".*",
                      {git,"git://github.com/opscode/chef_certgen.git",
                           "d7c99d216e397e149de1c5c189ad84cd05b18212"}},
@@ -127,13 +127,13 @@
                       "bbb614ae6fea9e9b07268f0bfded648024cb53d9"}},
        {chef_wm,".*",
                 {git,"git@github.com:opscode/chef_wm.git",
-                     "47ee4e00773fc997dbd426294a457c95566fe8f2"}},
+                     "a36554d98e9edbf8ef3ef8494707883502790853"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
-                        "a4bde814e4b0bde9c0bff82120264ca9635ebe6b"}},
+                        "8d1b9e8c0e5d771b6eaee75725fefcff96675e99"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "aa2b872d08ea93e5bfd58c4609081579e40a90b2"}}]}.
+                  "8a74f4e2161500eb26bdd490c2d5440e386216ad"}}]}.
 {plugins,[rebar_lock_deps_plugin]}.
 {cover_enabled,true}.
 {erl_opts,[{d,'OC_CHEF'},
@@ -141,5 +141,6 @@
            {d,'BASE_ROUTES',oc_chef_wm_routes},
            {d,'CHEF_DB_DARKLAUNCH',xdarklaunch_req},
            {d,'CHEF_WM_DARKLAUNCH',xdarklaunch_req},
-           {d,'SEARCH_CACHE',oc_chef_wm_search_cache}]}.
+           {d,'SEARCH_CACHE',oc_chef_wm_search_cache},
+           {parse_transform,lager_transform}]}.
 
