@@ -13,7 +13,7 @@
 
 migration_init() ->
     status_check(),
-    mover_transient_migration_queue:initialize_queue(mover_user_hash_converter:remaining_user_ids()),
+    mover_transient_migration_queue:initialize_queue(?MODULE, mover_user_hash_converter:remaining_user_ids()),
     mover_user_hash_converter:start_bcrypt_pool().
 
 
@@ -26,10 +26,10 @@ migration_action(Object) ->
 status_check() ->
     {ok, Status} = mover_manager:status(),
     ready = proplists:get_value(state, Status),
-    mover_transient_migration_queue:initialize_queue([]).
+    mover_transient_migration_queue:initialize_queue(?MODULE, []).
 
 next_object() ->
-    mover_transient_migration_queue:next().
+    mover_transient_migration_queue:next(?MODULE).
 
 supervisor() ->
     mover_transient_worker_sup.
