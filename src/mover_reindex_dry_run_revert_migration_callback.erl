@@ -1,7 +1,5 @@
 -module(mover_reindex_dry_run_revert_migration_callback).
 
--behaviour(gen_server).
-
 -export([
          migration_init/0,
          migration_complete/0,
@@ -18,21 +16,13 @@
          disable_object/1
          ]).
 
-%% gen_server callbacks
--export([init/1,
-         handle_call/3,
-         handle_cast/2,
-         handle_info/2,
-         terminate/2,
-         code_change/3]).
-
 -include_lib("moser/include/moser.hrl").
 
 migration_init() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+    mover_transient_migration_queue:initialize_queue(?MODULE, moser_state_tracker:migrated_orgs(mover_reindex_dry_run_migration_callback:migration_type())).
 
 migration_complete() ->
-    gen_server:cast(?MODULE, stop).
+    ok.
 
 migration_started(_, _) ->
     ok.
@@ -44,7 +34,8 @@ migration_failed(_, _, _) ->
     ok.
 
 next_object() ->
-    gen_server:call(?MODULE, next).
+    mover_transient_migration_queue:next(?MODULE).
+
 %Return any initial state not related to the object id
 migration_start_worker_args(Object, _AcctInfo) ->
     [Object].
@@ -67,24 +58,3 @@ reconfigure_object(OrgName) ->
 
 disable_object(_) ->
     ok.
-
-init(_Args) ->
-    {ok, moser_state_tracker:migrated_orgs(mover_reindex_dry_run_migration_callback:migration_type())}.
-handle_call(next, _From, []) ->
-    {reply, {ok, no_more_orgs}, []};
-handle_call(next, _From, [Next | State]) ->
-    {reply, Next, State};
-handle_call(stop, _From, State) ->
-    {stop, normal, State};
-handle_call(_Message, _From, State) ->
-    {reply, ok, State}.
-handle_cast(stop, State) ->
-    {stop, normal, State};
-handle_cast(_Message, State) ->
-    {noreply, State}.
-handle_info(_Message, State) ->
-    {noreply, State}.
-terminate(_Reason, _State) ->
-    ok.
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
