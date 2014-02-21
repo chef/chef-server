@@ -11,3 +11,4 @@ doc/*.html
 /doc/stylesheet.css
 /deps.plt
 /.concrete
+test/*.out
