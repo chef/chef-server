@@ -30,6 +30,10 @@
 -include_lib("chef_index/include/chef_solr.hrl").
 
 -define(DEFAULT_BATCH_SIZE, 5).
+-define(LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName), {{'query', Query},
+                {orgname, OrgName},
+                {solr1, Solr1},
+                {solr4, Solr4}}).
 
 %% We chose to *not* mixin chef_wm_base:post_is_create/2 as a POST in
 %% this resource is purely for processing...not resource creation.
@@ -115,10 +119,11 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                          resource_state = SearchState,
                          organization_name = OrgName,
                          organization_guid = OrgId,
-                         reqid = ReqId} = State) ->
+                         reqid = ReqId,
+                         darklaunch = Darklaunch} = State) ->
     BatchSize = batch_size(),
     Query = SearchState#search_state.solr_query,
-    case ?SH_TIME(ReqId, chef_solr, search, (Query)) of
+    case solr_query(Query, ReqId, Darklaunch, OrgName) of
         {ok, Start, SolrNumFound, Ids} ->
             IndexType = Query#chef_solr_query.index,
             Paths = SearchState#search_state.partial_paths,
@@ -160,6 +165,84 @@ batch_size() ->
 
 search_log_msg(SolrNumFound, NumIds, DbNumFound) ->
     {search, SolrNumFound, NumIds, DbNumFound}.
+
+solr_query(Query, ReqId, Darklaunch, OrgName) ->
+    %% solr_urls should be a proplist with keys 'default' and 'aux' each mapping to a Solr
+    %% root URL.
+    SolrUrls = envy:get(chef_wm, solr_urls, [], list),
+    case chef_wm_darklaunch:is_enabled(<<"solr4">>, Darklaunch) of
+        true ->
+            execute_solr_query(ReqId, aux, Query, SolrUrls);
+        false ->
+            case chef_wm_darklaunch:is_enabled(<<"query_aux_solr">>, Darklaunch) of
+                true ->
+                    %% Send the query to the default and aux solr. Execute the solr requests in
+                    %% parallel and await both results. Return the result from the default solr.
+                    %% This is intended for use in evaluating new (aux) solr infrastructure.
+                    {default, DefaultUrl} = lists:keyfind(default, 1, SolrUrls),
+                    {aux, AuxUrl} = lists:keyfind(aux, 1, SolrUrls),
+                    %% default URL goes first and that's the only result we capture
+                    Pids = [ spawn_solr_query(Label, Url, Query, ReqId) ||
+                               {Label, Url} <- [{search, DefaultUrl}, {search_aux, AuxUrl}] ],
+                    hd(gather_solr_queries(Pids, Query, OrgName));
+                false ->
+                    execute_solr_query(ReqId, default, Query, SolrUrls)
+            end
+    end.
+
+execute_solr_query(ReqId, UrlKey,Query, SolrUrls) ->
+    stats_hero:ctime(ReqId, {chef_solr, search},
+                     fun() ->
+                             %% Fallback to chef_solr:search/1 if solr_urls did not
+                             %% contain UrlKey.
+                             case proplists:get_value(UrlKey, SolrUrls) of
+                                 undefined ->
+                                     chef_solr:search(Query);
+                                 Url ->
+                                     chef_solr:search(Query, Url)
+                             end
+                     end).
+
+
+gather_solr_queries(Pids, Query, OrgName) ->
+    log_differences([ receive
+          {Pid, Result} ->
+              Result
+      after envy:get(chef_wm, solr_timeout, 30000, pos_integer) ->
+              erlang:error({solr_query_timeout, Pid})
+      end
+      || Pid <- Pids ], Query, OrgName).
+
+log_differences([{error, _} = Solr1, {_,_,_,Solr4}] = Results, Query, OrgName) ->
+    lager:log(debug, [{solr_diff, ?MODULE}], "~p",
+              [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)]),
+    Results;
+log_differences([{_,_,_,Solr1}, {error, _} = Solr4] = Results, Query, OrgName) ->
+    lager:log(debug, [{solr_diff, ?MODULE}], "~p",
+              [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)]),
+    Results;
+log_differences([{error, _}, {error, _}] = Results, _Query, _OrgName) ->
+    Results;
+log_differences([{_,_,_,OldSolrResults}, {_,_,_,NewSolrResults}] = Results, Query, OrgName) ->
+    case chef_wm_util:lists_diff(OldSolrResults, NewSolrResults) of
+        {[], []} ->
+            ok;
+        {Solr1, Solr4} ->
+            lager:log(debug, [{solr_diff, ?MODULE}], "~p",
+                                    [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)])
+    end,
+    Results.
+
+spawn_solr_query(Label, Url, Query, ReqId) ->
+    Parent = self(),
+    proc_lib:spawn_link(
+      fun() ->
+              Result = stats_hero:ctime(ReqId, {chef_solr, Label},
+                                        fun() ->
+                                                chef_solr:search(Query, Url)
+                                        end),
+              Parent ! {self(), Result}
+      end).
 
 %% POST to /search represents a partial search request
 %% The posted request body should be of the form:

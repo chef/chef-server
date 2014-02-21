@@ -8,6 +8,9 @@
   %% Note that opscoderl_wm (webmachine) needs to come before chef_index
   %% to ensure we get mochiweb as specified by webmachine and not the
   %% one from gen_bunny.
+  {lager, ".*",
+   {git, "https://github.com/basho/lager.git", {tag, "2.0.1"}}},
+
   {opscoderl_wm, ".*",
    {git, "git://github.com/opscode/opscoderl_wm.git", {branch, "master"}}},
 
@@ -46,11 +49,5 @@
 
  ]}.
 
-%% We want projects that depend on chef_wm to be able to set the
-%% BASE_RESOURCE and BASE_ROUTES macros. Currently, rebar only allows
-%% overriding these if the subordinate project does not itself set an
-%% erl_opts option in its config.
-%%
-%% {erl_opts, [debug_info]}.
-
+{erl_opts, [{parse_transform, lager_transform}]}.
 {cover_enabled, true}.

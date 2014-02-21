@@ -150,10 +150,11 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  resource_state = #data_state{
                                      data_bag_name = BagName,
                                      data_bag_item_name = ItemName,
-                                     chef_data_bag_item = Item}
+                                     chef_data_bag_item = Item},
+                                 darklaunch = Darklaunch
                                 }=State) ->
 
-    ok = ?BASE_RESOURCE:delete_object(DbContext, Item, RequestorId),
+    ok = ?BASE_RESOURCE:delete_object(DbContext, Item, RequestorId, Darklaunch),
     Json = chef_db_compression:decompress(Item#chef_data_bag_item.serialized_object),
     EjsonItem = chef_json:decode(Json),
     WrappedItem = chef_data_bag_item:wrap_item(BagName, ItemName, EjsonItem),

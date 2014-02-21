@@ -29,11 +29,6 @@
 -type org_info() :: {object_id(), binary()}.
 
 -export([
-         ez_all_ids/2,
-         ez_name_id_dict/2,
-         ez_reindex_by_id/3,
-         ez_reindex_by_name/3,
-         ez_reindex_from_file/1,
          make_context/0,
          reindex/2,
          reindex_by_id/4,
@@ -47,11 +42,14 @@
 -spec reindex(Ctx :: chef_db:db_context(),
               OrgInfo :: org_info()) -> ok.
 reindex(Ctx, {OrgId, _OrgName}=OrgInfo) ->
-    BuiltInIndexes = [node, role, environment, client],
-    DataBags = chef_db:list(#chef_data_bag{org_id = OrgId}, Ctx),
-    AllIndexes = BuiltInIndexes ++ DataBags,
+    AllIndexes = fetch_org_indexes(Ctx, OrgId),
     [ reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
     ok.
+
+fetch_org_indexes(Ctx, OrgId) ->
+    BuiltInIndexes = [node, role, environment, client],
+    DataBags = chef_db:list(#chef_data_bag{org_id = OrgId}, Ctx),
+    BuiltInIndexes ++ DataBags.
 
 %% A note about our approach to reindexing:
 %%
@@ -105,9 +103,7 @@ reindex(Ctx, {OrgId, _OrgName}=OrgInfo) ->
 reindex(Ctx, {OrgId, _OrgName}=OrgInfo, Index) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
     %% Grab all the database IDs to do batch retrieval on
-    AllIds = dict:fold(fun(_K, V, Acc) -> [V|Acc] end,
-                       [],
-                       NameIdDict), %% All dict values will be unique anyway
+    AllIds = all_ids_from_name_id_dict(NameIdDict),
     BatchSize = envy:get(chef_wm, bulk_fetch_batch_size, pos_integer),
     batch_reindex(Ctx, AllIds, BatchSize, OrgInfo, Index, NameIdDict).
 
@@ -115,7 +111,7 @@ reindex(Ctx, {OrgId, _OrgName}=OrgInfo, Index) ->
 -spec reindex_by_id(DbContext :: chef_db:db_context(),
                     OrgInfo :: org_info(),
                     Index :: index(),
-                    Ids :: [binary()]) -> ok.
+                    Ids :: [<<_:256>>]) -> ok.
 reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
     %% This is overkill, but workable until we have more robust reindexing
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
@@ -141,31 +137,10 @@ reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
     {ok, BatchSize} = application:get_env(chef_wm, bulk_fetch_batch_size),
     batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict).
 
--spec ez_reindex_by_name(binary(), index(), [binary()]) -> ok.
-ez_reindex_by_name(OrgName, Index, Names) ->
-    Ctx = make_context(),
-    OrgId = chef_db:fetch_org_id(Ctx, OrgName),
-    OrgInfo = {OrgId, OrgName},
-    reindex_by_name(Ctx, OrgInfo, Index, Names).
-
--spec ez_reindex_by_id(binary(), index(), [<<_:256>>]) -> ok.
-ez_reindex_by_id(OrgName, Index, Ids) ->
-    Ctx = make_context(),
-    OrgId = chef_db:fetch_org_id(Ctx, OrgName),
-    OrgInfo = {OrgId, OrgName},
-    reindex_by_id(Ctx, OrgInfo, Index, Ids).
-
--spec ez_name_id_dict(binary(), index()) -> dict().
-ez_name_id_dict(OrgName, Index) ->
-    Ctx = make_context(),
-    OrgId = chef_db:fetch_org_id(Ctx, OrgName),
-    chef_db:create_name_id_dict(Ctx, Index, OrgId).
-
--spec ez_all_ids(binary(), index()) -> [binary()].
-ez_all_ids(OrgName, Index) ->
-    NameIdDict = ez_name_id_dict(OrgName, Index),
-    dict:fold(fun(_K, V, Acc) -> [V | Acc] end,
-              [], NameIdDict).
+all_ids_from_name_id_dict(NameIdDict) ->
+    dict:fold(fun(_K, V, Acc) -> [V|Acc] end,
+              [],
+              NameIdDict).
 
 make_context() ->
     Time = string:join([ integer_to_list(I) || I <- tuple_to_list(os:timestamp())], "-"),
@@ -175,87 +150,15 @@ make_context() ->
                                     ]),
     chef_db:make_context(ReqId).
 
-%% @doc Reindex objects listed in file `File'.
-%%
-%% `File' should be the path to a text file with the following format:
-%%  ```
-%%      OrgName\tIndex\tBagName\tObjectId\n
-%%  '''
-%%
-%% Where `OrgName' is the name of the organization, `Index' is one of `client',
-%% `environment', `node', `role', or `data_bag'. The value of `BagName' is ignored for all
-%% index types except for `data_bag' where the value provided is used as the data bag
-%% name. This is required so that we can distinguish between the `node' index and a data bag
-%% named `"node"'.
-%%
-%% The parser expects tab delimited lines and only reads the first four fields. This means
-%% that files contain additional columns and those columns will be ignored. This is useful
-%% if you'd like the file to contain the object name. The file is read into memory,
-%% processed into a per org per index structure and then executed. This is not meant for
-%% enormous input files.
-%%
-ez_reindex_from_file(File) ->
-    {ok, Bin} = file:read_file(File),
-    Lines = re:split(Bin, <<"\n">>),
-    LinesWithNum = lists:zip(Lines, lists:seq(1, length(Lines))),
-    OrgDict = parse_lines(LinesWithNum),
-    error_logger:info_msg("reindexing data for ~p orgs~n", [dict:size(OrgDict)]),
-    dict:map(
-      fun(OrgName, IndexDict) ->
-              error_logger:info_msg("processing org: ~s~n", [OrgName]),
-              Ctx = make_context(),
-              OrgId = chef_db:fetch_org_id(Ctx, OrgName),
-              OrgInfo = {OrgId, OrgName},
-              dict:map(
-                fun(RealIndex, Ids) ->
-                        error_logger:info_msg("org: ~s, index: ~p (~p items)~n", [OrgName, RealIndex, length(Ids)]),
-                        reindex_by_id(Ctx, OrgInfo, RealIndex, Ids)
-                end, IndexDict),
-              error_logger:info_msg("completed org: ~s~n", [OrgName])
-      end, OrgDict),
-    ok.
-
-parse_lines(LinesWithNum) ->
-    OrgDict = lists:foldl(
-                fun(LineInfo, OrgDict) ->
-                        case parse_line(LineInfo) of
-                            skip ->
-                                OrgDict;
-                        {OrgName, Index, Id} ->
-                                dict:append(OrgName, {Index, Id}, OrgDict)
-                        end
-                end, dict:new(), LinesWithNum),
-    %% OrgDict now maps OrgName to [{Index, Id}], so now we take a second pass to convert
-    %% those lists to dicts mapping Index to [Id].
-    dict:from_list(
-      [ {OrgName,
-       lists:foldl(fun({Index, Id}, IndexDict) ->
-                           dict:append(Index, Id, IndexDict)
-                   end, dict:new(), IndexIds)}
-        || {OrgName, IndexIds} <- dict:to_list(OrgDict) ]).
-
-parse_line({<<>>, _Num}) ->
-    skip;
-parse_line({Line, Num}) ->
-    try
-        [OrgName, Index, BagName, Id | _ ] = re:split(Line, <<"\t">>),
-        RealIndex = normalize_index(Index, BagName),
-        {OrgName, RealIndex, Id}
-    catch
-        error:_Why ->
-            erlang:error({parse_error, {line, Num}, Line})
-    end.
-
-normalize_index(<<"data_bag">>, BagName) ->
-    BagName;
-normalize_index(Index, _) when Index == <<"client">>;
-                               Index == <<"environment">>;
-                               Index == <<"node">>;
-                               Index == <<"role">> ->
-    erlang:binary_to_atom(Index, utf8);
-normalize_index(Index, _) ->
-    erlang:error({bad_index, Index}).
-
+%% All object types are returned from chef_db:bulk_get/4 as
+%% binaries (compressed or not) EXCEPT for clients, which are
+%% returned as EJson directly, because none of their
+%% information is actually stored as a JSON "blob" in the
+%% database.
+decompress_and_decode(Bin) when is_binary(Bin) ->
+    chef_db_compression:decompress_and_decode(Bin);
+decompress_and_decode(Object) ->
+    Object.
 
 %% @doc Recursively batch-process a list of database IDs by retrieving
 %% the serialized_object data from the database, processing them as
@@ -267,17 +170,12 @@ normalize_index(Index, _) ->
                     OrgInfo :: org_info(),
                     Index :: index(),
                     NameIdDict :: dict()) -> ok.
-batch_reindex(_, [], _, _, _, _) ->
-    %% Nothing to process!
-    ok;
 batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids) ->
-    batch_reindex(Ctx, safe_split(BatchSize, Ids), BatchSize, OrgInfo, Index, NameIdDict);
-batch_reindex(Ctx, {LastBatch, []}, _BatchSize, OrgInfo, Index, NameIdDict) ->
-    ok = index_a_batch(Ctx, LastBatch, OrgInfo, Index, NameIdDict),
-    ok;
-batch_reindex(Ctx, {CurrentBatch, Rest}, BatchSize, OrgInfo, Index, NameIdDict) ->
-    ok = index_a_batch(Ctx, CurrentBatch, OrgInfo, Index, NameIdDict),
-    batch_reindex(Ctx, safe_split(BatchSize, Rest), BatchSize, OrgInfo, Index, NameIdDict).
+    DoBatch = fun(Batch, _Acc) ->
+                      ok = index_a_batch(Ctx, Batch, OrgInfo, Index, NameIdDict),
+                      ok
+                 end,
+    chefp:batch_fold(DoBatch, Ids, ok, BatchSize).
 
 %% @doc Helper function to retrieve and index objects for a single
 %% batch of database IDs.
@@ -310,19 +208,14 @@ send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict) ->
     %% returned as EJson directly, because none of their
     %% information is actually stored as a JSON "blob" in the
     %% database.
-    PreliminaryEJson = case is_binary(SO) of
-                           true ->
-                               chef_db_compression:decompress_and_decode(SO);
-                           false ->
-                                    SO
-                       end,
+    PreliminaryEJson = decompress_and_decode(SO),
     NameKey = name_key(chef_object_type(Index)),
     ItemName = ej:get({NameKey}, PreliminaryEJson),
     {ok, ObjectId} = dict:find(ItemName, NameIdDict),
     StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PreliminaryEJson),
     %% Since we get here via valid `Index', we don't have to check that the objects are
     %% indexable.
-    ok = chef_object_db:add_to_solr(StubRec, PreliminaryEJson),
+    ok = chef_object_db:add_to_solr(StubRec, PreliminaryEJson, no_header),
     send_to_index_queue(OrgId, Index, Rest, NameIdDict).
 
 %% @doc Determine the proper key to use to retrieve the unique name of
@@ -348,12 +241,3 @@ stub_record(DataBagName, OrgId, Id, _Name, EJson) ->
     #chef_data_bag_item{org_id = OrgId, id = Id,
                         data_bag_name = DataBagName,
                         item_name = ItemName}.
-
-% TODO: Create a chef_common module for this stuff
-safe_split(N, L) ->
-    try
-        lists:split(N, L)
-    catch
-        error:badarg ->
-            {L, []}
-    end.

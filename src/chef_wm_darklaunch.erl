@@ -26,6 +26,12 @@
 -ifndef(CHEF_WM_DARKLAUNCH).
 is_enabled(<<"couchdb_", _Rest/binary>>, _) ->
     false;
+is_enabled(<<"rabbit_aux_", _Rest/binary>>, _) ->
+    false;
+is_enabled(<<"query_aux_", _Rest/binary>>, _) ->
+    false;
+is_enabled(<<"solr4">>, _) ->
+    false;
 is_enabled(_, _) ->
     true.
 

@@ -113,10 +113,10 @@ from_json(Req, #base_state{resource_state =
 delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  requestor_id = RequestorId,
                                  resource_state = #environment_state{
-                                     chef_environment = Environment}
-                                } = State) ->
+                                                     chef_environment = Environment},
+                                 darklaunch = Darklaunch} = State) ->
 
-    ok = ?BASE_RESOURCE:delete_object(DbContext, Environment, RequestorId),
+    ok = ?BASE_RESOURCE:delete_object(DbContext, Environment, RequestorId, Darklaunch),
     Json = chef_db_compression:decompress(Environment#chef_environment.serialized_object),
     {true, wrq:set_resp_body(Json, Req), State}.
 

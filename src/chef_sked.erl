@@ -95,19 +95,20 @@ create_from_json(RecType, ObjectEjson) ->
     %% We send the object data to solr for indexing *first*. If it fails, we'll error out on
     %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
-    %% the world.
-    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
+    %% the world.  Setting the darklaunch headers to no_header will default the darklaunch
+    %% values to the correct OSC values.
+    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson, no_header),
 
     case chef_db:create(ObjectRec, DbContext, ?CHEF_SKED_AUTHZ_ID) of
         {conflict, Msg} ->
             %% ignore return value of solr delete, this is best effort.
-            chef_object_db:delete_from_solr(ObjectRec),
+            chef_object_db:delete_from_solr(ObjectRec, no_header),
             {conflict, Msg};
         ok ->
             ok;
         What ->
             %% ignore return value of solr delete, this is best effort.
-            chef_object_db:delete_from_solr(ObjectRec),
+            chef_object_db:delete_from_solr(ObjectRec, no_header),
             What
     end.
 
