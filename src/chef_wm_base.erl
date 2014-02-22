@@ -50,7 +50,8 @@
          object_creation_hook/2,
          object_creation_error_hook/2,
          stats_hero_label/1,
-         stats_hero_upstreams/0]).
+         stats_hero_upstreams/0,
+         log_action/2]).
 
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
@@ -194,6 +195,7 @@ finish_request(Req, #base_state{reqid = ReqId,
         AnnotatedReq = maybe_annotate_org_specific(OrgName, Darklaunch, Req1),
         stats_hero:report_metrics(ReqId, Code),
         stats_hero:stop_worker(ReqId),
+        ?BASE_RESOURCE:log_action(Req, State),
         case Code of
             500 ->
                 % Sanitize response body
@@ -865,6 +867,11 @@ stats_hero_label({BadPrefix, Fun}) ->
 %% request.
 stats_hero_upstreams() ->
     [<<"depsolver">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
+
+%% @doc A hook to allow for logging the action that happened on the chef server. The
+%% default is to do nothing
+log_action(_Req, _State) ->
+    ok.
 
 %% @doc Webmachine content producing callback (that can be wired into
 %% content_types_provided) that returns a JSON map of object names to object URLs. This
