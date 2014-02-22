@@ -21,7 +21,8 @@
          object_creation_hook/2,
          object_creation_error_hook/2,
          stats_hero_label/1,
-         stats_hero_upstreams/0]).
+         stats_hero_upstreams/0,
+         log_action/2]).
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
 %% contains a function definition.
@@ -501,7 +502,14 @@ stats_hero_upstreams() ->
     [<<"authz">>, <<"couchdb">>, <<"depsolver">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
 
 
+log_action(Req, State)->
+    Action = envy:get(oc_chef_wm, enable_actionlog, false, boolean),
+    maybe_log_action(Action, Req, State).
 
+maybe_log_action(true, Req, State) ->
+    oc_chef_action:log_action(Req, State);
+maybe_log_action(false, _Req, _State) ->
+    ok.
 
 object_creation_hook(#chef_client{}=Client,
                      #base_state{chef_authz_context=AuthContext,
