@@ -10,12 +10,17 @@
          ]).
 
 -include("mover.hrl").
+-include_lib("moser/include/moser.hrl").
 
 migration_start_worker_args(Object, AcctInfo) ->
     [Object, AcctInfo].
 
-migration_action(OrgName, _AcctInfo) ->
-    io:fwrite("I have pretended to migrate stuff for ~p~n", [OrgName]),
+migration_action(OrgName, AcctInfo) ->
+    OrgInfo = moser_acct_processor:expand_org_info(#org_info{org_name = OrgName, account_info = AcctInfo}),
+    moser_utils:load_process_org(OrgInfo,
+                     fun moser_group_converter:insert/1,
+                     fun moser_chef_processor:cleanup_org_info/1,
+                     "READ"),
     [{ok, done}].
 
 migration_type() ->
