@@ -52,7 +52,14 @@
           %% opscode-chef-mover, FWIW.
           {error_logger_hwm, 1000}
         ]},
-
+ {oc_chef_action, [
+              {actionlog_host, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
+              {actionlog_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
+              {actionlog_user, <<"<%= node['private_chef']['rabbitmq']['actionlog_user'] %>">>},
+              {actionlog_password, <<"<%= node['private_chef']['rabbitmq']['actionlog_password'] %>">>},
+              {actionlog_vhost, <<"<%= node['private_chef']['rabbitmq']['actionlog_vhost'] %>">>},
+              {actionlog_exchange, <<"action">>}
+             ]},
  {oc_chef_wm, [
               {api_version, "<%= node['private_chef']['api_version'] %>"},
               {server_flavor, "<%= node['private_chef']['flavor'] %>"},
@@ -70,7 +77,9 @@
               {root_metric_key, "<%= @root_metric_key %>"},
 
               {authz_timeout, <%= node['private_chef']['opscode-erchef']['authz_timeout'] %>},
-              {authz_fanout, <%= node['private_chef']['opscode-erchef']['authz_fanout'] %>}
+              {authz_fanout, <%= node['private_chef']['opscode-erchef']['authz_fanout'] %>},
+
+              {enable_actionlog, <%= node['private_chef']['opscode-erchef']['enable_actionlog'] %>}
              ]},
   {chef_wm, [
              {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},

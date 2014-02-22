@@ -71,6 +71,9 @@ default['private_chef']['rabbitmq']['reindexer_vhost'] = '/reindexer'
 default['private_chef']['rabbitmq']['jobs_vhost'] = '/jobs'
 default['private_chef']['rabbitmq']['jobs_user'] = 'jobs'
 default['private_chef']['rabbitmq']['jobs_password'] = 'workcomplete'
+default['private_chef']['rabbitmq']['actionlog_vhost'] = '/actionlog'
+default['private_chef']['rabbitmq']['actionlog_user'] = 'actionlog'
+default['private_chef']['rabbitmq']['actionlog_password'] = 'changeme'
 default['private_chef']['rabbitmq']['node_ip_address'] = '127.0.0.1'
 default['private_chef']['rabbitmq']['node_port'] = '5672'
 default['private_chef']['rabbitmq']['nodename'] = 'rabbit@localhost'
@@ -158,6 +161,7 @@ default['private_chef']['opscode-erchef']['root_metric_key'] = "chefAPI"
 default['private_chef']['opscode-erchef']['depsolver_worker_count'] = 5
 default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
 default['private_chef']['opscode-erchef']['max_request_size'] = 1000000
+default['private_chef']['opscode-erchef']['enable_actionlog'] = false
 
 ###
 # Legacy path (required for cookbok migration)
