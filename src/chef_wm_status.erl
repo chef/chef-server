@@ -74,7 +74,7 @@ overall_status(Pings) ->
 -spec log_failure(fail | pong, [{binary(), <<_:32>>}]) -> ok.
 log_failure(fail, Pings) ->
     FailureData = {{status, fail}, {upstreams, {Pings}}},
-    error_logger:error_msg("/_status~n~p~n", [FailureData]),
+    lager:error("/_status~n~p~n", [FailureData]),
     ok;
 log_failure(_,_) ->
     ok.
@@ -144,7 +144,7 @@ gather_health_workers([{{Pid, _}, Mod} | Rest] = List, Acc) ->
         %% crash. But to avoid the possibility of blocking with a bare receive, we set the
         %% timeout and return early.
         Timeout ->
-            error_logger:error_report({Mod, ping, hard_fail}),
+            lager:error({Mod, ping, hard_fail}),
             [ {?A2B(Mod), <<"fail">>} | Acc ]
     end;
 gather_health_workers([], Acc) ->

@@ -130,7 +130,7 @@ reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
                         {ok, Id} ->
                             [Id | Acc];
                         error ->
-                            error_logger:warning_msg("skipping: no id found for name ~p", [Name]),
+                            lager:warning("skipping: no id found for name ~p", [Name]),
                             Acc
                     end
             end, [], Names),

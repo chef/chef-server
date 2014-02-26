@@ -111,7 +111,7 @@ process_post(Req, #base_state{reqid = ReqId,
     EnvConstraints = chef_object_base:depsolver_constraints(Env),
     case chef_db:fetch_all_cookbook_version_dependencies(DbContext, OrgName) of
         {error, Error} ->
-            error_logger:error_msg("Dependency retrieval failure for org ~p with environment ~p: ~p~n",
+            lager:error("Dependency retrieval failure for org ~p with environment ~p: ~p~n",
                                    [OrgName, EnvName, Error]),
             server_error(Req, State, <<"Dependency retrieval failed">>, dep_retrieval_failure);
         AllVersions ->
@@ -235,7 +235,7 @@ handle_depsolver_results(ok, {error, no_depsolver_workers}, Req, State) ->
             no_depsolver_workers);
 %% log the exception and return a 500
 handle_depsolver_results(ok, {error, exception, Message, Backtrace}, Req, State) ->
-    error_logger:error_report([{module, ?MODULE},
+    lager:error([{module, ?MODULE},
                                {error_type, depsolver_ruby_exception},
                                {message, Message},
                                {backtrace, Backtrace}]),

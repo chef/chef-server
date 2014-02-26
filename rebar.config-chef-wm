@@ -32,9 +32,6 @@
   {bcrypt, ".*",
    {git, "git://github.com/opscode/erlang-bcrypt.git", {tag, "0.5.0.3"}}},
 
-  {fast_log, ".*",
-   {git, "git://github.com/opscode/fast-log-erlang.git", {branch, "master"}}},
-
   {mixer, ".*",
    {git, "git://github.com/opscode/mixer.git", {tag, "0.1.1"}}},
 
@@ -43,11 +40,17 @@
 
   {folsom, ".*",
    {git, "git://github.com/boundary/folsom.git", {tag, "0.7.2"}}},
-  
+
   {envy, ".*",
    {git, "git://github.com/manderson26/envy.git", {branch, "master"}}}
 
  ]}.
 
+%% rebar.config.script is used by rebar to merge these erl_opts with
+%% subordinate projects so that subordinate projects can set BASE_RESOURCE
+%% and BASE_ROUTES macros, if needed, since rebar only allows overriding these
+%% if the subordinate project does not itself set an erl_opts option in its
+%% config
 {erl_opts, [{parse_transform, lager_transform}]}.
+
 {cover_enabled, true}.
