@@ -58,7 +58,8 @@ OpscodeWebui::Application.configure do
   config.middleware.use ExceptionNotifier,
     :email_prefix => "[Exception] <%= @environment %>: ",
     :sender_address => %{ <%= node['private_chef']['from_email'] %> },
-    :exception_recipients => %w{ <%= node['private_chef']['notification_email'] %> }
+    :exception_recipients => %w{ <%= node['private_chef']['notification_email'] %> },
+    :sections => %w{ request backtrace }
 
   config.action_mailer.default_url_options = {
     :host => "<%= node['private_chef']['lb']['web_ui_fqdn'] %>",
