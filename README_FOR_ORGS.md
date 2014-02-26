@@ -7,12 +7,25 @@
 * start console as described in README.md
 
 ### Migration Setup
-* For a migration to run, it must have a state record present.
-  Initialize states for all orgs in mover console.  At present you will
-  see duplicate errors which can be ignored:
+* Before you do anything, you need to load up the account file from couch:
 
 ```
+moser_acct_processor:process_account_file().
+```
+
+* After you load the account file, you must restart the mover console to pick up the data.
+
+* For a migration to run, it must have a state record present.
+  Initialize states for all orgs in mover console. At present you will
+  see duplicate errors which can be ignored:
+
+  * For a phase 1 migration:
+```
 moser_state_tracker:capture_full_org_state_list().
+```
+  * For a phase 2 migration:
+```
+moser_state_tracker:capture_full_org_state_list(mover_manager:get_account_dets(), <<"phase_2_migration">>).
 ```
 
 * By default, orgs are marked as 'holding' - they must be explicitly
