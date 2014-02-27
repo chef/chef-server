@@ -1,7 +1,15 @@
 # Enterprise Chef Changelog
 
+## 11.1.2
+
+### posgresql
 * Add ossp-uuid extension to Postgres 9.2
-* Configuring oc\_actionlog in oc\_erchef and rabbit
+
+### libossp-uuid 1.6.3
+* Add libossp-uuid library for Postgres
+
+### private-chef-cookbooks
+* configure oc_actionlog in oc_erchef and rabbit
 
 ## 11.1.1 (2014-02-17)
 
