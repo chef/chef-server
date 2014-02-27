@@ -1,5 +1,10 @@
 # Enterprise Chef Changelog
 
+## 1.4.8
+
+## private-chef-cookbooks
+* Remove :session and :environment from webui exception emails
+
 ## 1.4.7 (2014-02-17)
 
 ### libyaml 0.1.5
