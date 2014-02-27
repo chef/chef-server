@@ -20,8 +20,7 @@ migration_action(OrgName, AcctInfo) ->
     moser_utils:load_process_org(OrgInfo,
                      fun moser_group_converter:insert/1,
                      fun moser_chef_processor:cleanup_org_info/1,
-                     "READ"),
-    [{ok, done}].
+                     "READ").
 
 migration_type() ->
     <<"phase_2_migration">>.
