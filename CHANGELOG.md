@@ -9,7 +9,8 @@
 * Add libossp-uuid library for Postgres
 
 ### private-chef-cookbooks
-* configure oc_actionlog in oc_erchef and rabbit
+* Configure oc_actionlog in oc_erchef and rabbit
+* Remove :session and :environment from webui exception emails
 
 ## 11.1.1 (2014-02-17)
 
