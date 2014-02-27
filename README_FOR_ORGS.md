@@ -17,11 +17,10 @@ moser_acct_processor:process_account_file().
 
 * For a migration to run, it must have a state record present.
   Initialize states for all orgs in mover console. At present you will
-  see duplicate errors which can be ignored. Replace x, where x equals
-  the phase of migration you want:
+  see duplicate errors which can be ignored:
 
 ```
-moser_state_tracker:capture_full_org_state_list(mover_manager:get_account_dets(), <<"phase_x_migration">>).
+moser_state_tracker:capture_full_org_state_list(mover_manager:get_account_dets(), *_migration_callback:migration_type()).
 ```
 
 * By default, orgs are marked as 'holding' - they must be explicitly
