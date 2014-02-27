@@ -17,10 +17,11 @@ migration_start_worker_args(Object, AcctInfo) ->
 
 migration_action(OrgName, AcctInfo) ->
     OrgInfo = moser_acct_processor:expand_org_info(#org_info{org_name = OrgName, account_info = AcctInfo}),
-    moser_utils:load_process_org(OrgInfo,
+    {ok, _} = moser_utils:load_process_org(OrgInfo,
                      fun moser_group_converter:insert/1,
                      fun moser_chef_processor:cleanup_org_info/1,
-                     "READ").
+                     "READ"),
+    [{ok, done}].
 
 migration_type() ->
     <<"phase_2_migration">>.
