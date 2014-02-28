@@ -1,6 +1,6 @@
 # Enterprise Chef Changelog
 
-## 1.4.8
+## 1.4.8 (2014-02-28)
 
 ## private-chef-cookbooks
 * Remove :session and :environment from webui exception emails
