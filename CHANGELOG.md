@@ -2,6 +2,9 @@
 
 ## 11.1.2
 
+### oc_erchef
+* oc\_erchef 0.24.0 - add oc\_chef\_action to oc\_erchef
+
 ### posgresql
 * Add ossp-uuid extension to Postgres 9.2
 
