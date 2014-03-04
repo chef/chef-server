@@ -1,6 +1,6 @@
 # Enterprise Chef Release Notes
 
-## 11.1.2
+## 11.1.2 (2014-02-28)
 
 ### Security Fixes:
 

@@ -1,9 +1,11 @@
 # Enterprise Chef Changelog
 
-## 11.1.2
+## 11.1.3
 
 ### oc_erchef
-* oc\_erchef 0.24.0 - add oc\_chef\_action to oc\_erchef
+* oc_erchef 0.24.0 - add oc_chef_action to oc_erchef
+
+## 11.1.2 (2014-02-28)
 
 ### posgresql
 * Add ossp-uuid extension to Postgres 9.2
