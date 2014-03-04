@@ -1,6 +1,6 @@
 # Enterprise Chef Changelog
 
-## 11.1.3
+## 11.1.3 (Unreleased)
 
 ### oc_erchef
 * oc_erchef 0.24.0 - add oc_chef_action to oc_erchef
