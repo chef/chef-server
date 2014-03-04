@@ -131,7 +131,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
             {DbNumFound, Ans} = make_search_results(BulkGetFun, Ids, BatchSize,
                                                     Start, SolrNumFound),
             State1 = State#base_state{log_msg = search_log_msg(SolrNumFound,
-                                                               length(Ids), DbNumFound)},
+                                                               solr_ids_length(Ids), DbNumFound)},
             case IndexType of
                 {data_bag, BagName} when DbNumFound =:= 0 ->
                     case chef_db:data_bag_exists(DbContext, OrgId, BagName) of
@@ -159,6 +159,11 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                 State#base_state{log_msg=Why}}
     end.
 
+solr_ids_length({Solr1Ids, _}) ->
+    length(Solr1Ids);
+solr_ids_length(Solr1Ids) ->
+    length(Solr1Ids).
+
 %% Return current app config value for batch size, defaulting if absent.
 batch_size() ->
     envy:get(chef_wm, bulk_fetch_batch_size, ?DEFAULT_BATCH_SIZE, positive_integer).
@@ -184,7 +189,7 @@ solr_query(Query, ReqId, Darklaunch, OrgName) ->
                     %% default URL goes first and that's the only result we capture
                     Pids = [ spawn_solr_query(Label, Url, Query, ReqId) ||
                                {Label, Url} <- [{search, DefaultUrl}, {search_aux, AuxUrl}] ],
-                    hd(gather_solr_queries(Pids, Query, OrgName));
+                    gather_solr_queries(Pids, Query, OrgName);
                 false ->
                     execute_solr_query(ReqId, default, Query, SolrUrls)
             end
@@ -203,35 +208,48 @@ execute_solr_query(ReqId, UrlKey,Query, SolrUrls) ->
                              end
                      end).
 
-
+-spec gather_solr_queries([pid()], #chef_solr_query{}, binary()) ->
+                                 {ok, non_neg_integer(), non_neg_integer(), {[binary()], {[binary()], #chef_solr_query{}, binary()}}}.
 gather_solr_queries(Pids, Query, OrgName) ->
-    log_differences([ receive
-          {Pid, Result} ->
-              Result
-      after envy:get(chef_wm, solr_timeout, 30000, pos_integer) ->
-              erlang:error({solr_query_timeout, Pid})
-      end
-      || Pid <- Pids ], Query, OrgName).
+    [Solr1,Solr4] = [ receive
+                          {Pid, Result} ->
+                              Result
+                      after envy:get(chef_wm, solr_timeout, 30000, pos_integer) ->
+                              erlang:error({solr_query_timeout, Pid})
+                      end
+                      || Pid <- Pids ],
+    log_error_differences(Solr1, Solr4, Query, OrgName),
+    combine_results(Solr1, Solr4, Query, OrgName).
 
-log_differences([{error, _} = Solr1, {_,_,_,Solr4}] = Results, Query, OrgName) ->
+combine_results({error, _} = Solr1, _, _, _) ->
+    Solr1;
+combine_results(Solr1, {error, _}, _, _) ->
+    Solr1;
+combine_results({Resp,Start,Count,Solr1Results}, {_,_,_,Solr4Results}, Query, OrgName) ->
+    {Resp, Start, Count, {Solr1Results, {Solr4Results, Query, OrgName}}}.
+
+log_error_differences({error, _} = Solr1, {_,_,_,Solr4}, Query, OrgName) ->
     lager:log(debug, [{solr_diff, ?MODULE}], "~p",
-              [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)]),
-    Results;
-log_differences([{_,_,_,Solr1}, {error, _} = Solr4] = Results, Query, OrgName) ->
+              [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)]);
+log_error_differences({_,_,_,Solr1}, {error, _} = Solr4, Query, OrgName) ->
     lager:log(debug, [{solr_diff, ?MODULE}], "~p",
-              [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)]),
-    Results;
-log_differences([{error, _}, {error, _}] = Results, _Query, _OrgName) ->
-    Results;
-log_differences([{_,_,_,OldSolrResults}, {_,_,_,NewSolrResults}] = Results, Query, OrgName) ->
-    case chef_wm_util:lists_diff(OldSolrResults, NewSolrResults) of
-        {[], []} ->
+              [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)]);
+log_error_differences(_NotAnErrorCondition, _Solr4, _Query, _OrgName) ->
+    ok.
+
+log_differences(DbHitCount, OldSolrResults,{NewSolrResults, Query, OrgName}) ->
+    case DbHitCount =:= length(NewSolrResults) of
+        true ->
             ok;
-        {Solr1, Solr4} ->
-            lager:log(debug, [{solr_diff, ?MODULE}], "~p",
-                                    [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)])
-    end,
-    Results.
+        false ->
+            case chef_wm_util:lists_diff(OldSolrResults, NewSolrResults) of
+                {[], []} ->
+                    ok;
+                {Solr1, Solr4} ->
+                    lager:log(debug, [{solr_diff, ?MODULE}], "~p",
+                              [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)])
+            end
+    end.
 
 spawn_solr_query(Label, Url, Query, ReqId) ->
     Parent = self(),
@@ -386,6 +404,11 @@ extract_path(_Item, []) ->
 extract_path(Item, Path) ->
     ej:get(list_to_tuple(Path), Item, null).
 
+make_search_results(BulkGetFun, {Ids, Solr4Info}, BatchSize, Start, NumFound) ->
+    {DbHits, Results} = make_search_results(BulkGetFun, Ids, BatchSize, Start, NumFound),
+    log_differences(DbHits, Ids, Solr4Info),
+    {DbHits, Results};
+    
 make_search_results(BulkGetFun, Ids, BatchSize, Start, NumFound) ->
     Ans0 = search_result_start(Start, NumFound),
     {N, Ans1} = fetch_result_rows(Ids, BatchSize, BulkGetFun, {0, Ans0}),
