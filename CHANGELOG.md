@@ -5,6 +5,9 @@
 ### oc_erchef
 * oc_erchef 0.24.0 - add oc_chef_action to oc_erchef
 
+### opscode-webui
+* opscode-webui 3.8.13 - Ruby on Rails security updates
+
 ## 11.1.2 (2014-02-28)
 
 ### posgresql

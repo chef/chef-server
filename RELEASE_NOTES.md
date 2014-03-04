@@ -15,6 +15,10 @@ The following items are the set of bug fixes that have been applied since Enterp
 The following items are the set of security fixes that have been
 applied since Enterprise Chef 11.1.2:
 
+* [opscode-webui] Patch for Denial of Service Vulnerability in Action View when using render :text (CVE-2014-0082)
+* [opscode-webui] Patch for Denial of Service Vulnerability in Action View (CVE-2013-6414)
+* [opscode-webui] Patch for Reflective XSS Vulnerability in Ruby on Rails (CVE-2013-4491)
+
 ## 11.1.2 (2014-02-28)
 
 ### Security Fixes:
