@@ -5,62 +5,86 @@ module OmniAuth
     class Chef
       include OmniAuth::Strategy
 
-      option :fields, :name
-      option :uid,    :name
-
-      def request_phase
-        form = OmniAuth::Form.new title: 'Authenticate', url: callback_path
-
-        form.text_field     'Username', 'username'
-        form.password_field 'Password', 'password'
-
-        form.button 'Authenticate'
-
-        form.to_response
-      end
+      option :endpoint,     'https://api.opscode.piab'
+      option :fields,       [:name, :password]
+      option :headers,      { }
+      option :organization, nil
+      option :resource,     'authenticate_user'
+      option :source,       'web'
+      option :superuser,    'pivotal'
+      option :uid,          :name
 
       def callback_phase
-        @user = authenticate request['username'], request['password']
+        @user = authenticated_user
 
-        if authenticated? @user
-          uid do
-            request['username']
-          end
-
-          extra do
-            { }
-          end
-        else
-          fail! :invalid_credentials
-        end
+        authenticated? ? super : fail!(:invalid_credentials)
       end
 
-      def authenticate username, password
+      uid do
+        @user['username']
+      end
+
+      info do
+        {
+          email:      @user['email'],
+          first_name: @user['first_name'],
+          last_name:  @user['last_name'],
+          name:       @user['display_name']
+        }
+      end
+
+      extra do
+        { raw_info: @user }
+      end
+
+      protected
+
+      def authenticated_user
         begin
-          chef('pivotal').post_rest('authenticate_user', username: username, password: password)
+          chef.post_rest(resource, username: username, password: password)['user']
         rescue Net::HTTPServerException
-          nil
+
         end
       end
 
-      def authenticated? user
-        user['status'] ? true : false
+      def authenticated?
+        @user ? true : false
       end
 
-      def chef user, organization = nil
-        ::Chef::REST.new endpoint(organization), user, nil, headers: request_source, raw_key: key
+      def chef
+        ::Chef::REST.new endpoint, options.superuser, nil, parameters
       end
 
-      def endpoint organization = nil
-        "https://api.opscode.piab#{organization}"
+      def endpoint
+        organization ? "#{options.endpoint}/#{organization}" : options.endpoint
       end
 
-      def key path = 'config/webui_priv.pem'
-        IO.read(File.expand_path "../../../../#{path}", __FILE__).strip
+      def headers
+        options.headers.merge({ 'x-ops-request-source' => options.source })
       end
 
-      def request_source
-        { 'x-ops-request-source' => 'web' }
+      def key
+        IO.read(File.expand_path('../../../../config/webui_priv.pem', __FILE__)).strip
+      end
+
+      def organization
+        options.organization
+      end
+
+      def parameters
+        { headers: headers, raw_key: key }
+      end
+
+      def password
+        options.password ? options.password : request[:password]
+      end
+
+      def resource
+        options.resource
+      end
+
+      def username
+        options.username ? options.username : request[:username]
       end
     end
   end
