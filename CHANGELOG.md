@@ -1,8 +1,13 @@
 # Enterprise Chef Changelog
 
+## 1.4.9 (2014-03-??)
+
+### private-chef-cookbooks
+* [OC-9213] Provide default value for jetty log path to prevent deletion of files in ``/root``.
+
 ## 1.4.8 (2014-02-28)
 
-## private-chef-cookbooks
+### private-chef-cookbooks
 * Remove :session and :environment from webui exception emails
 
 ## 1.4.7 (2014-02-17)
