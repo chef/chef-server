@@ -6,7 +6,7 @@
 
 The following bug fixes have been applied since Enterprise Chef 1.4.8:
 
-* [private-chef-cookbooks] provide default value for jetty log path to fix dotfile deletion bug
+* [private-chef-cookbooks] Provide default value for jetty log path to fix dotfile deletion bug.
 
 ## 1.4.8 (2014-02-28)
 
