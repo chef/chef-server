@@ -3,7 +3,7 @@
 ## 1.4.9 (2014-03-??)
 
 ### private-chef-cookbooks
-* [OC-9213] provide default value for jetty log path to prevent deletion of files in ``/root``
+* [OC-9213] Provide default value for jetty log path to prevent deletion of files in ``/root``.
 
 ## 1.4.8 (2014-02-28)
 
