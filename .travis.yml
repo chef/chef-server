@@ -1,0 +1,17 @@
+language: erlang
+
+otp_release:
+  - R15B03
+
+branches:
+  only:
+    - master
+
+before_script: sudo apt-get install libgecode-dev
+script: make test
+
+notifications:
+  hipchat:
+    rooms:
+      # Build Statuses
+      - secure: eeJpEToSEE/ex2bABfLS9w4moT4UPTeVP7Du5NcK+QcBRwoUSK1im0vQfkXcXrRcGjEt/H60PVS0nFmlXuF+4db29mKPGXwzmmgfnBd43u9EbW/8gtW+MZvfpyt5oq6HusRQcxkRAZnLPk/LPUzz5QKtm+/BwfJ7OSx9RMisnz0=
