@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chef Identity Service</title>
+  <%= stylesheet_link_tag "application", media: "all", "data-turbolinks-track" => true %>
+  <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+  <header class="navbar navbar-default" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <%= link_to root_path, :class => "navbar-brand" do %>
+          <%= image_tag 'logo.svg' %>
+        <% end %>
+      </div>
+      <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <% if signed_in? %>
+            <li><a>Signed in as: <%= current_user.username %></a></li>
+            <li><%= link_to "Sign Out", signout_path, method: "delete" %></li>
+          <% else %>
+            <li><%= link_to "Sign In", signin_path %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </header>
+  <div class="container">
+    <% flash.each do |key, value| %>
+      <p class="alert alert-<%= key %>"><%= value %></p>
+    <% end %>
+    <%= yield %>
+    <footer>
+      &copy; 2014 Chef Software, Inc.
+    </footer>
+  </div>
+</body>
+</html>
