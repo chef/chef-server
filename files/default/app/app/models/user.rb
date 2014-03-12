@@ -18,9 +18,8 @@ class User
     username
   end
 
-  def self.authenticate(username, password)
-    user = fake_chef_auth(username, password)
-    new(user) if user
+  def self.find(params)
+    find_by_username(params[:uid])
   end
 
   def self.find_by_username(username)
@@ -29,10 +28,6 @@ class User
   end
 
   private
-
-    def self.fake_chef_auth(username, password)
-      fake_user if username == fake_user[:username] && password == fake_user[:password]
-    end
 
     def self.fake_chef_user(username)
       fake_user if username == fake_user[:username]
