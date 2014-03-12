@@ -1,4 +1,5 @@
 require 'chef'
+require 'omniauth'
 
 module OmniAuth
   module Strategies
