@@ -22,5 +22,5 @@ init([]) ->
                  temporary, 10000, worker, [mover_transient_worker]},
     {ok, {{simple_one_for_one, 10, 10}, [Spec]}}.
 
-start_worker(_CallbackModule, ObjectId, MigratorFun) ->
-    supervisor:start_child(?SERVER, [{ObjectId, MigratorFun}]).
+start_worker(CallbackModule, ObjectId, MigratorArgs) ->
+    supervisor:start_child(?SERVER, [{CallbackModule, ObjectId, MigratorArgs}]).
