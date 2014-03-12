@@ -41,8 +41,7 @@ delete_existing_db(SolrUrl, OrgId) ->
            OrgId,
            <<"</query></delete>">>],
     DocBin = iolist_to_binary(Doc),
-    Headers = [{"Content-Type","text/xml"}],
-    {ok, Code, _Head, Body} = ibrowse:send_req(SolrUrl, Headers, post, DocBin),
+    {ok, Code, _Head, Body} = chef_reindex_http:request("update",post, DocBin),
     case Code of
         "2" ++ _Rest ->
             ok;
