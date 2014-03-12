@@ -9,8 +9,9 @@
 
 -record(state, {
                  object_id :: fun(),
-                 processor_fun :: fun(),
-                 results :: term()
+                 processor_args,
+                 results :: term(),
+                 callback_module
                }).
 
 %% gen_fsm callbacks
@@ -33,16 +34,19 @@
 start_link(Config) ->
     gen_fsm:start_link(?MODULE, Config, []).
 
-init({ObjectId, ProcessorFun}) ->
-    State = #state{object_id = ObjectId, processor_fun = ProcessorFun},
+init({CallbackModule, ObjectId, ProcessorArgs}) ->
+    State = #state{object_id = ObjectId, processor_args = ProcessorArgs, callback_module = CallbackModule},
     {ok, migrate, State, 0}.
 
-migrate(timeout, #state{object_id = ObjectId, processor_fun = ProcessorFun} = State) ->
-    case ProcessorFun(ObjectId) of
+migrate(timeout, #state{object_id = ObjectId, processor_args = ProcessorArgs, callback_module = CallbackModule} = State) ->
+    try erlang:apply(CallbackModule, migration_action, ProcessorArgs) of
         ok ->
             {next_state, complete, State#state{results = ok}, 0};
         Error ->
             stop_with_failure(State#state{results = Error}, Error, migrate)
+    catch
+        _ErrorType:Reason ->
+            stop_with_failure(State#state{results = Reason}, Reason, migrate)
     end.
 
 complete(timeout, State) ->
