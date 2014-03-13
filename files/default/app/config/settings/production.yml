@@ -1,5 +1,5 @@
 chef:
   endpoint: https://api.opscode.us
   superuser: pivotal
-  key_path: <%= Rails.root %>/config/webui_priv.pem
+  key_path: /etc/opscode/webui_priv.pem
   

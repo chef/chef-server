@@ -27,20 +27,20 @@ If you happen to be greeted (as I was) with a Rails usage doc instead of a runni
 
     Options:
       -r, [--ruby=PATH]              # Path to the Ruby binary of your choice
-    .
-    .
-    .
+    ...
 
 ...then try this ([referenced here](http://stackoverflow.com/questions/14841575/rails-4-doesnt-detect-application)):
 
     rake rails:update:bin     
 
-That'll give you a running server at http://localhost:3000.  Sign in using the only (hard-coded!) credentials that work right now:
+That'll give you a running server at http://localhost:3000.  Sign in using a valid Chef server account:
 
     applejack
     applejack
 
-Well done!  Now you need an app.  Visit http://localhost:3000/oauth/applications and click **New Application**.  (This is wide open now, but we'll restrict it at some point, of course.)  Add a name and a callback URL (in the form 'http://your-hostname/some-path').  Save.
+(By default, we point to dev-vm at [https://api.opscode.piab](https://api.opscode.piab); you can customize your configuration settings in config/settings/*.yml as needed.  See below for instructions on integrating with Enterprise Chef.)
+
+Well done!  Now you need an app.  Visit [http://localhost:3000/oauth/applications](http://localhost:3000/oauth/applications) and click **New Application**.  (This is wide open now, but we'll restrict it at some point, of course.)  Add a name and a callback URL (in the form 'http://your-hostname/some-path').  Save.
 
 Now it's time to authorize your app!  As a shortcut, click that **Authorize** link.  It'll open a new tab.  Then **note the value** of the ``code`` parameter and open a Terminal tab; we're going to use the [oauth2 gem](https://github.com/intridea/oauth2) to simulate a three-legged OAuth flow.  To do that:
 
@@ -66,6 +66,49 @@ Lots more work to be done here, but it's a start.
     bundle install
     bundle exec rake test:prepare
     bundle exec rspec
+
+## Using oc-id with Enterprise Chef
+
+To authenticate with oc-id against a Vagrant-managed Private Chef instance...
+
+  1. Set up a new Vagrant box.  Heres's a minimal Vagrantfile that should suffice:
+
+        # -*- mode: ruby -*-
+        # vi: set ft=ruby :
+
+        Vagrant.configure("2") do |config|
+          config.vm.box = 'opscode-ubuntu-12.04'
+          config.vm.box_url = 'https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_provisionerless.box'
+          config.vm.hostname = 'ec-11'
+          config.vm.network 'private_network', :ip => '33.33.33.11'
+          config.vm.provider 'virtualbox' do |v|
+            v.memory = 4096  
+            v.cpus = 4
+          end
+        end
+
+  1. Inside the vm, download, install and configure Private Chef:
+
+        $ wget http://path.to/private-chef_11.1.2-1.ubuntu.12.04_amd64.deb
+        $ sudo sudo dpkg -i private-chef_11.1.2-1.ubuntu.12.04_amd64.deb
+        $ sudo private-chef-ctl reconfigure
+
+  1. Copy the ``webui_priv.pem`` key from /etc/opscode/webui_priv.pem to your local (host) machine, then exit:
+
+        $ cp /etc/opscode/webui_priv.pem /vagrant
+        $ exit
+
+  1. Copy the key into the Rails project &mdash; e.g.:
+
+        $ cp webui_priv.pem ../oc-id/files/default/app/config/
+
+  1. Open management console, which should now be available at https://33.33.33.11, as configured in our sample Vagrantfile, and click **Sign Up** to create a new user.  (I use applejack/applejack here as well, since it's what the tests will be looking for.)
+
+  1. Back in your Rails root, you should now be able to run the tests (assuming you ran ``test:prepare`` as described in the previous section):
+
+        bundle exec rspec
+
+You should now be able to sign in with oc-id with your newly created Enterprise Chef user as well.
 
 ## Author
 
