@@ -56,6 +56,7 @@
 % API Exports
 -export([ ping/0,
           start_link/0,
+          set_concurrency/1,
           migrate/3,
           migrate_next/1,
           migrate_user_password_storage/2,
@@ -139,6 +140,12 @@ migrate_user_password_storage(NumUsers, NumWorkers) ->
 
 status() ->
     gen_fsm:sync_send_all_state_event(?SERVER, status).
+
+
+set_concurrency(NewConcurrency) when is_integer(NewConcurrency) and NewConcurrency > 0->
+    gen_fsm:sync_send_all_state_event(?SERVER, {set_concurrency, NewConcurrency});
+set_concurrency(_BadValue) ->
+    lager:error("Concurrency must be numeric and greater than 0.").
 
 halt_actions() ->
     gen_fsm:sync_send_all_state_event(?SERVER, halt).
@@ -295,7 +302,12 @@ handle_sync_event(status, _From, StateName, #state{live_worker_count = LW,
                {objects_failed, EC},
                {fatal_stop, FS}],
     {reply, {ok, Summary}, StateName, State};
-
+handle_sync_event({set_concurrency, Value}, _From, working, {max_worker_count = Value} = State) ->
+    {reply, {ok, no_change}, working, State};
+handle_sync_event({set_concurrency, Value}, _From, working, {max_worker_count = OldValue} = State) ->
+    {reply, {ok, modified, OldValue}, working, State#state{max_worker_count = Value} };
+handle_sync_event(set_concurrency, _From, StateName, State) ->
+    {reply, {error, bad_state}, StateName, State};
 handle_sync_event(get_account_dets, _From, StateName, State = #state{ acct_info = AcctInfo }) ->
     {reply, AcctInfo, StateName, State};
 handle_sync_event(_Event, _From, StateName, State) -> {next_state, StateName, State}.
