@@ -5,7 +5,7 @@ Doorkeeper.configure do
 
   # This block will be called to check whether the resource owner is authenticated or not.
   resource_owner_authenticator do
-    User.find_by_username(session[:username]) || redirect_to(signin_path(:return_to => request.fullpath))
+    User.find(session[:username]) || redirect_to(signin_path(return_to: request.fullpath))
   end
 
   # If you want to restrict access to the web interface for adding oauth authorized applications, you need to declare the block below.
@@ -63,5 +63,5 @@ Doorkeeper.configure do
   # end
 
   # WWW-Authenticate Realm (default "Doorkeeper").
-  # realm "Doorkeeper"
+  realm "Chef-ID"
 end

@@ -1,7 +1,7 @@
 class SessionsController < ApplicationController
 
   def create
-    sign_in User.find(session_parameters)
+    sign_in User.find(session_parameters[:uid])
     redirect_to oauth_authorized_applications_path
   end 
 

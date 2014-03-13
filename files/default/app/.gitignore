@@ -9,3 +9,7 @@
 
 lib/omniauth-chef/Gemfile.lock
 lib/omniauth-chef/config/webui_priv.pem
+
+config/settings.local.yml
+config/settings/*.local.yml
+config/environments/*.local.yml

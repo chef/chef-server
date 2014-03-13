@@ -1,55 +1,46 @@
 class User 
   extend ActiveModel::Naming
   include ActiveModel::AttributeMethods
+  include ChefResource
 
   attr_accessor :username, :password, :first_name, :last_name, :email, :public_key
 
-  def initialize(args={})
-    args.each do |k,v|
+  def initialize(attrs={})
+    attrs.each do |k,v|
       instance_variable_set("@#{k}", v) unless v.nil?
     end
   end
 
   def id
-    to_param
+    username
   end
 
   def to_param
     username
   end
 
-  def self.find(params)
-    find_by_username(params[:uid])
+  def url
+    "users/#{username}"
   end
 
-  def self.find_by_username(username)
-    user = fake_chef_user(username)
-    new(user) if user
+  def assign_attributes(resource)
+    @first_name = resource['first_name']
+    @last_name = resource['last_name']
+    @public_key = resource['public_key']
+    @email = resource['email']
   end
 
-  private
+  def update_attributes(attrs)
+    assign_attributes(attrs) # And then save
+  end
 
-    def self.fake_chef_user(username)
-      fake_user if username == fake_user[:username]
+  class << self
+    def find(username)
+      begin
+        user = new(username: username).get
+      rescue Net::HTTPServerException
+
+      end
     end
-
-    def self.fake_user
-      { 
-        :username => 'applejack',
-        :password => 'applejack',
-        :first_name => 'Apple',
-        :last_name => 'Jack',
-        :email => 'applejack@ponyville.com',
-        :public_key => %Q{-----BEGIN PUBLIC KEY-----
-  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv8QZxdp5XQVGnpHgPdRn
-  MeHghbzDW/D6oAcXT6spfqN+5T7W/TruYpJbL+9cDfrIoNW8YOvHhDp0yoHl/YNl
-  ZX0bYltdgZer10/Yv9PoB2U4TAzajBcd3DF3TxiB1sBPxqLvcF30CkmPpq4lmsNs
-  n/L6OlcrGk26TMEhZwxw9tx8sl50DVlWm9GfefvVeZHfk1d1c5Yi/YfMiX688zRI
-  SzQ2i3KSq450nfaX0p4dnRq5cq7/qW+Yr11lRByTIq6j8qEwPJNIXsUwIDWab8fr
-  F6dutenFO3xjG+s12x8iU8MQLzsBMtFa9V1hr189xqUwAW0DBoiKBXjkQ20DKC/T
-  SQIDAQAB
-  -----END PUBLIC KEY-----}
-      }
-    end
-
+  end
 end

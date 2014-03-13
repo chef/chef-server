@@ -33,5 +33,12 @@ module OcId
       Doorkeeper::AuthorizationsController.layout 'application'
       Doorkeeper::AuthorizedApplicationsController.layout 'application'
     end
+
+    config.autoload_paths += %W(#{config.root}/lib)
+
+    # If you want to use the rails_config Settings object here in application.rb, uncomment below. 
+    # config.before_initialize do
+    #   puts Settings.yay.me
+    # end
   end
 end

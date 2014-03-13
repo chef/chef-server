@@ -13,6 +13,7 @@ module OmniAuth
       option :resource,     'authenticate_user'
       option :source,       'web'
       option :superuser,    'pivotal'
+      option :key_path,     '../../../../config/webui_priv.pem'
       option :uid,          :name
 
       def callback_phase
@@ -65,7 +66,7 @@ module OmniAuth
       end
 
       def key
-        IO.read(File.expand_path('../../../../config/webui_priv.pem', __FILE__)).strip
+        IO.read(File.expand_path(options.key_path, __FILE__)).strip
       end
 
       def organization

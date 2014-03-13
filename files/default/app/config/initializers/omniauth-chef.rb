@@ -1,5 +1,5 @@
 Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :chef
+  provider :chef, endpoint: Settings.chef.endpoint, superuser: Settings.chef.superuser, key_path: Settings.chef.key_path
   provider :developer unless Rails.env.production?
 end
 
