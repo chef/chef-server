@@ -107,7 +107,7 @@
                    "41e68a4ea0b7d4bff4f4cc101a6db4cfc884ee57"}},
        {chef_reindex,".*",
                      {git,"git@github.com:opscode/chef_reindex.git",
-                          "729485a71e3eb3b439b3e018b1b762434495238a"}},
+                          "492b55e23859c0aa94762f0d2f17df63cec13b56"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
                                     "911481ee8a20f59fc9092e370e2b0d116bec19df"}},
