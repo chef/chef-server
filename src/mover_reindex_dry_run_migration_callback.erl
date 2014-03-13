@@ -18,7 +18,7 @@ migration_start_worker_args(Object, AcctInfo) ->
     [Org].
 
 migration_action(#org_info{org_id = OrgId, org_name = OrgName}) ->
-    SolrUrl = envy:get(chef_reindex, solr_update_url, string),
+    SolrUrl = proplists:get_value(root_url, envy:get(chef_reindex, solr_service, list)) ++ "/update",
     delete_existing_db(SolrUrl, OrgId),
     IndexStateResults = chef_ez_reindex_direct:reindex(OrgName, OrgId, SolrUrl),
     [ok = Result || Result <- IndexStateResults],
@@ -42,8 +42,7 @@ delete_existing_db(SolrUrl, OrgId) ->
            OrgId,
            <<"</query></delete>">>],
     DocBin = iolist_to_binary(Doc),
-    Headers = [{"Content-Type","text/xml"}],
-    {ok, Code, _Head, Body} = ibrowse:send_req(SolrUrl, Headers, post, DocBin),
+    {ok, Code, _Head, Body} = chef_reindex_http:request("update", post, DocBin),
     case Code of
         "2" ++ _Rest ->
             ok;
