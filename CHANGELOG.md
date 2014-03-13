@@ -8,6 +8,11 @@
 ### opscode-omnibus
 * argument validation fix in private-chef-ctl to allow ``private-chef-ctl password`` to work.
 
+### opscode-webui
+* [CVE-2014-0082] - Denial of Service Vulnerability in Action View when using render :text
+* [CVE-2013-6414] - Denial of Service Vulnerability in Action View
+* [CVE-2013-4389] - Possible DoS Vulnerability in Action Mailer
+
 ## 1.4.8 (2014-02-28)
 
 ### private-chef-cookbooks
