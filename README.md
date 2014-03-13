@@ -69,7 +69,7 @@ Lots more work to be done here, but it's a start.
 
 ## Using oc-id with Enterprise Chef
 
-To authenticate with oc-id against a Vagrant-managed Private Chef instance...
+To authenticate with oc-id against a Vagrant-managed Enterprise Chef instance...
 
   1. Set up a new Vagrant box.  Heres's a minimal Vagrantfile that should suffice:
 
@@ -87,7 +87,7 @@ To authenticate with oc-id against a Vagrant-managed Private Chef instance...
           end
         end
 
-  1. Inside the vm, download, install and configure Private Chef:
+  1. Inside the vm, download, install and configure Enterprise Chef:
 
         $ wget http://path.to/private-chef_11.1.2-1.ubuntu.12.04_amd64.deb
         $ sudo sudo dpkg -i private-chef_11.1.2-1.ubuntu.12.04_amd64.deb
