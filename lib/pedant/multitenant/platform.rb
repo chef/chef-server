@@ -295,8 +295,8 @@ module Pedant
         create_org(name)
       else
         key = org[:validator_key]
-        Pedant::Organization.new(name, key)
         puts "Using pre-created org. Skipping org creation validation tests."
+        Pedant::Organization.new(name, key)
       end
     end
 

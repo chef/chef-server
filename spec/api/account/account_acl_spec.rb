@@ -753,7 +753,7 @@ describe "ACL API", :acl do
         # default ACLs are different on almost every different types -- so these are
         # the defaults of defaults, which are overridden below for the different
         # types:
-        let(:actors) { ["pivotal", "pedant_admin_user"] }
+        let(:actors) { ["pivotal", platform.admin_user.name] }
         let(:groups) { ["admins"] }
         let(:read_groups) { groups }
         let(:update_groups) { groups }
@@ -790,7 +790,7 @@ describe "ACL API", :acl do
               "id" => new_object,
               "containerpath" => "/"
             }}
-          let(:actors) { ["pedant_admin_user"] }
+          let(:actors) { [platform.admin_user.name] }
           let(:groups) { [] }
           let(:grant_groups) { [] }
         when "data"
