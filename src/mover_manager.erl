@@ -306,7 +306,7 @@ handle_sync_event({set_concurrency, Value}, _From, working, {max_worker_count = 
     {reply, {ok, no_change}, working, State};
 handle_sync_event({set_concurrency, Value}, _From, working, {max_worker_count = OldValue} = State) ->
     {reply, {ok, modified, OldValue}, working, State#state{max_worker_count = Value} };
-handle_sync_event(set_concurrency, _From, StateName, State) ->
+handle_sync_event({set_concurrency, _}, _From, StateName, State) ->
     {reply, {error, bad_state}, StateName, State};
 handle_sync_event(get_account_dets, _From, StateName, State = #state{ acct_info = AcctInfo }) ->
     {reply, AcctInfo, StateName, State};
