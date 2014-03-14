@@ -51,6 +51,18 @@ describe 'Authentication' do
     end
   end
 
+  # describe 'authorization' do
+  #   let(:user) { FactoryGirl.create(:user) }
 
+  #   describe 'for signed-out users' do
+
+  #     describe 'visiting the authorization page' do
+  #       before { visit oauth_authorization_path }
+  #       it { should have_content 'Please Sign In' }
+  #     end
+
+  #   end
+    
+  # end
 
 end

@@ -37,7 +37,7 @@ class User
   class << self
     def find(username)
       begin
-        user = new(username: username).get
+        new(username: username).get unless username.nil?
       rescue Net::HTTPServerException
 
       end
