@@ -28,7 +28,10 @@
   </header>
   <div class="container">
     <% flash.each do |key, value| %>
-      <p class="alert alert-<%= key %>"><%= value %></p>
+      <div class="alert <%= bootstrap_class_for(key) %>">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <%= value %>
+      </div>
     <% end %>
     <%= yield %>
     <footer>

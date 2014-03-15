@@ -1,4 +1,5 @@
 class SessionsController < ApplicationController
+  rescue_from ActionController::InvalidAuthenticityToken, with: :destroy
 
   def new
     redirect_to oauth_authorized_applications_path if signed_in?
@@ -10,7 +11,7 @@ class SessionsController < ApplicationController
   end 
 
   def retry
-    flash.now[:danger] = 'Oops! Try again.'
+    flash.now[:error] = 'Oops! Try again.'
     render :new
   end
 
