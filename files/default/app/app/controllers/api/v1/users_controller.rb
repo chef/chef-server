@@ -1,13 +1,18 @@
 module Api
   module V1
+
     class UsersController < ApplicationController
-      doorkeeper_for :all
+      doorkeeper_for :all, except: :show
       respond_to :json
 
       def show
+        app = Doorkeeper::Application.find_by_uid(params[:app_id])
+        head :unauthorized and return unless app
+
         @user = User.find(params[:id])
-        respond_with({ message: 'Resource not found' }, status: 404) and return if @user.nil?
-        respond_with @user
+        head :not_found and return unless @user
+
+        respond_with @user.public
       end
 
       def me
@@ -16,5 +21,6 @@ module Api
       end
 
     end
+
   end
 end

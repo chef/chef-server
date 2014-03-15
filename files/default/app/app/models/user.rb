@@ -19,6 +19,14 @@ class User
     username
   end
 
+  def public
+    {
+      username: username,
+      first_name: first_name,
+      last_name: last_name
+    }
+  end
+
   def url
     "users/#{username}"
   end
