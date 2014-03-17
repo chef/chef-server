@@ -15,7 +15,7 @@ I'm still ironing out the Vagrant and Test Kitchen workflows here, but if you're
 If you're outside of said walls, provided you're running Rails 4, you should be able to start the app by:
 
     cd files/default/app
-    bundle install --binstubs
+    bundle install
     bin/rake db:migrate    # We're still on SQLite, here
     bin/rails server 
 
@@ -49,7 +49,7 @@ Lots more work to be done here, but it's a start.
 ## Running the Tests
 
     cd files/default/app
-    bundle install --binstubs
+    bundle install
     bin/rake test:prepare
     bin/rspec
 
