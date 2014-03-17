@@ -16,22 +16,8 @@ If you're outside of said walls, provided you're running Rails 4, you should be 
 
     cd files/default/app
     bundle install
-    bundle exec rake db:migrate    # We're still on SQLite, here
-    bundle exec rails server
-
-If you happen to be greeted (as I was) with a Rails usage doc instead of a running server:
-
-    $ bundle exec rails server
-    Usage:
-      rails new APP_PATH [options]
-
-    Options:
-      -r, [--ruby=PATH]              # Path to the Ruby binary of your choice
-    ...
-
-...then try this ([referenced here](http://stackoverflow.com/questions/14841575/rails-4-doesnt-detect-application)):
-
-    rake rails:update:bin     
+    bin/rake db:migrate    # We're still on SQLite, here
+    bin/rails server 
 
 That'll give you a running server at http://localhost:3000.  Sign in using a valid Chef server account:
 
@@ -64,8 +50,8 @@ Lots more work to be done here, but it's a start.
 
     cd files/default/app
     bundle install
-    bundle exec rake test:prepare
-    bundle exec rspec
+    bin/rake test:prepare
+    bin/rspec
 
 ## Using oc-id with Enterprise Chef
 

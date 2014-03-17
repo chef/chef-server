@@ -1,5 +1,0 @@
-chef:
-  endpoint: https://api.opscode.piab
-  superuser: pivotal
-  key_path: <%= Rails.root %>/config/webui_priv.pem
-  

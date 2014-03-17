@@ -5,7 +5,6 @@
 /db/*.sqlite3-journal
 /log/*.log
 /tmp
-/bin
 
 lib/omniauth-chef/Gemfile.lock
 lib/omniauth-chef/config/webui_priv.pem
