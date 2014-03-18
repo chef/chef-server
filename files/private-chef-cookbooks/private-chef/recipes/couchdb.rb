@@ -39,7 +39,7 @@ component_runit_service "couchdb"
 # Cron may not be installed in a minimal install:
 case node["platform_family"]
 when "debian"
-when "rhel"
+when "rhel", "fedora"
   case node["platform"]
   when "amazon", "fedora"
     # we only support RHEL6-like fedora/amazon
@@ -70,30 +70,30 @@ template "/etc/cron.d/couchdb_compact" do
   source "compact-cron-entry.erb"
   mode "0600"
   variables(
-            :cron_email => cron_email,
-            :cron_name => "compact couchdb",
-            :cron_shell => "/bin/bash",
-            :cron_home => couchdb_dir,
-            :cron_schedule => "17 1,9,17 * * *",
-            :cron_user => node['private_chef']['user']['username'],
-            :cron_path => "/usr/bin:/usr/sbin:/bin:/opt/opscode/embedded/bin",
-            :cron_command => cron_cmd
-            )
+    :cron_email => cron_email,
+    :cron_name => "compact couchdb",
+    :cron_shell => "/bin/bash",
+    :cron_home => couchdb_dir,
+    :cron_schedule => "17 1,9,17 * * *",
+    :cron_user => node['private_chef']['user']['username'],
+    :cron_path => "/usr/bin:/usr/sbin:/bin:/opt/opscode/embedded/bin",
+    :cron_command => cron_cmd
+  )
 end
 
 template "/etc/cron.d/couchdb_compact_major_offenders" do
   source "compact-cron-entry.erb"
   mode "0600"
   variables(
-            :cron_email => cron_email,
-            :cron_name => "compact couchdb major offenders",
-            :cron_shell => "/bin/bash",
-            :cron_home => couchdb_dir,
-            :cron_schedule => "17 3,5,7,11,13,15,19,21,23 * * *",
-            :cron_user => node['private_chef']['user']['username'],
-            :cron_path => "/usr/bin:/usr/sbin:/bin:/opt/opscode/embedded/bin",
-            :cron_command => cron_cmd_major_offenders
-            )
+    :cron_email => cron_email,
+    :cron_name => "compact couchdb major offenders",
+    :cron_shell => "/bin/bash",
+    :cron_home => couchdb_dir,
+    :cron_schedule => "17 3,5,7,11,13,15,19,21,23 * * *",
+    :cron_user => node['private_chef']['user']['username'],
+    :cron_path => "/usr/bin:/usr/sbin:/bin:/opt/opscode/embedded/bin",
+    :cron_command => cron_cmd_major_offenders
+  )
 end
 
 template "/etc/cron.d/couchdb_bounce" do

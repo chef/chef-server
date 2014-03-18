@@ -45,7 +45,7 @@ ruby_block "check_for_drbd_mount" do
     while true
       Chef::Log.warn("To install DRBD on #{node['platform']} #{node['platform_version']}:")
       case node["platform_family"]
-      when "rhel"
+      when "rhel", "fedora"
         if %w{amazon fedora}.include?(node["platform"]) ||
           node["platform_version"] =~ /^6/
           puts <<-EOH
