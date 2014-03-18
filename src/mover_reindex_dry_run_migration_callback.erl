@@ -20,7 +20,7 @@ migration_start_worker_args(Object, AcctInfo) ->
 migration_action(#org_info{org_id = OrgId, org_name = OrgName}) ->
     SolrUrl = proplists:get_value(root_url, envy:get(chef_reindex, solr_service, list)) ++ "/update",
     delete_existing_db(SolrUrl, OrgId),
-    IndexStateResults = chef_ez_reindex_direct:reindex(OrgName, OrgId, SolrUrl),
+    IndexStateResults = chef_ez_reindex_direct:reindex(OrgName, OrgId),
     [ok = Result || Result <- IndexStateResults],
     [{ok, reindex_successful}].
 
