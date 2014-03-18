@@ -37,13 +37,19 @@ end
 component_runit_service "couchdb"
 
 # Cron may not be installed in a minimal install:
-case node["platform"]
-when "ubuntu"
-when "centos", "redhat", "scientific"
-  if node["platform_version"] =~ /^5/
-    package "vixie-cron"
-  else
+case node["platform_family"]
+when "debian"
+when "rhel"
+  case node["platform"]
+  when "amazon", "fedora"
+    # we only support RHEL6-like fedora/amazon
     package "cronie"
+  else
+    if node["platform_version"] =~ /^5/
+      package "vixie-cron"
+    else
+      package "cronie"
+    end
   end
 end
 
