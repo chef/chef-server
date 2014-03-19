@@ -12,7 +12,7 @@
   * CVE-2014-0138
   * CVE-2014-0139
   * CVE-2014-1263
-	* CVE-2014-2522
+  * CVE-2014-2522
 
 ### chef
 * upgrade to version 11.10.4
@@ -55,6 +55,7 @@
 ### private-chef-cookbooks
 * Configure oc_actionlog in oc_erchef and rabbit
 * Remove :session and :environment from webui exception emails
+* Add internal /_routes endpoint to load balancer
 
 ## 11.1.1 (2014-02-17)
 

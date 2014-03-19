@@ -103,21 +103,25 @@ local p_erchef_direct = (Cendpoint(p_erchef_endpoint) * ((p_sep * c_identifier) 
 -- Everything that gets sent to erchef
 local p_erchef = p_named_org_prefix * p_erchef_direct
 
--- /users endpoints for account
+-- erchef routing rules for chef_internal, which includes an additional
+-- principals endpoint not exposed via the api rules
+local p_erchef_int = p_erchef +
+                    (p_named_org_prefix * Cendpoint(p_principals) * p_maybe_sep)
+
+-- /users endpoints for account:
+local p_named_user = (p_sep * p_users * p_sep * c_identifier)
 local p_acct_users = (p_sep * Cendpoint(p_users) * (p_sep * c_identifier)^-1 * p_trailing_sep) +
-                     (p_sep * p_users * p_sep * c_identifier) *
+                      p_named_user *
                           -- below rule for backwards compatibility with original:
                           -- /users/BLAH/{0,1}/association_requests
                           -- which permits: /users/BLAH//association_requests
                           ( (p_sep * p_maybe_sep * Cendpoint(p_association_requests) * (p_sep + p_eol)) +
-                          (p_sep * Cendpoint(p_org) * p_trailing_sep) )
-
+                            (p_sep * Cendpoint(p_org) * p_trailing_sep) )
 -- account endpoints
 -- note that the acl endpoint is a special case because it supercedes all others
 -- including routes that would otherwise go to erchef.
-local p_acl_endpoint = ((p_named_org_prefix * p_all_until_acl) +
-                        (p_sep * p_users * p_sep * c_identifier))
-                            * Cendpoint(p_acl) * (p_sep + p_eol)
+local p_acl_endpoint = (p_named_org_prefix * p_all_until_acl * Cendpoint(p_acl) * (p_sep + p_eol)) +
+                       (p_named_user * Cendpoint(p_acl) * (p_sep + p_eol))
 local p_acct_direct = Cendpoint(p_users + p_association_requests) * (p_sep + p_eol)
 local p_acct = (p_sep * Cendpoint(p_verify_password + p_auth_user + p_system_recovery) * p_eol) +
                (p_named_org_prefix * p_acct_direct) +
@@ -127,18 +131,8 @@ local p_acct = (p_sep * Cendpoint(p_verify_password + p_auth_user + p_system_rec
 --
 -- darklaunch endpoints - these need to capture the endpoint name itself for darklaunch resolution
 --
--- NOTE: this is held here as a placeholder.  As we begin phase 3 migrations,
--- we will need to enable it by moving migrated endpoints into it.
--- Migration Phase 3: uncomment and add one or more endpoints by name as
--- they are migrated to erchef, for example replace p_clients with p_users
-local c_dl_acct_erchef_endpoint = Cendpoint(p_containers) + Cendpoint(p_groups)
+local c_dl_acct_erchef_endpoint = Cendpoint(p_groups + p_containers)
 local p_dl_acct_erchef = p_named_org_prefix * c_dl_acct_erchef_endpoint * c_maybe_identifier
-
--- As components complete migration from acct, we will  move them to this
--- expression. Used further down, it will ensure that requests routed to 'account internal'
--- will still end up in erchef.  Once webui1 is retired, these rules are no longer
--- necessary
-local p_migrated_erchef_from_acct = p_clients
 
 local uri_resolvers = {
   -- Retain ordering to ensure proper eval:
@@ -146,28 +140,29 @@ local uri_resolvers = {
   -- over any other identifiers which may be in the url.
   api = (p_acl_endpoint * c_acct) +
         (p_erchef * c_erchef) +
-        -- (p_dl_acct_erchef * c_acct) +
-        -- Enable below and remove above if we need to have redis configuration
-        -- flags determine routing between acct/erchef.
-        -- Make the same change to internal_acct,, below.
-        (p_dl_acct_erchef * c_acct_erchef) +
+        (p_acct * c_acct) +
+        (p_dl_acct_erchef * c_acct_erchef),
 
-        (p_acct * c_acct),
 
   -- This one is easy - everything passes through, though we'll still need to capture components
   -- (org name, object name, endpoint name) where we can, so that post-route hooks can be applied.
-  internal_acct = -- (p_dl_acct_erchef * c_acct) +
-                  (p_dl_acct_erchef * c_acct_erchef) +
+  internal_acct =
+                  -- as in API, acls come first so that we can ensure webui requests for
+                  -- acls get routed correctly to account, even when the underlying object is
+                  -- darklaunched to erchef.
                   (p_acl_endpoint * c_acct) +
-                  -- As described above, w eneed to keep routes of migrated components in place so that
-                  -- webui1 requests sent directly to internal acct land in the right place.
-                  ((p_named_org_prefix * Cendpoint(p_migrated_erchef_from_acct) * c_maybe_identifier) * c_erchef) +
+
+                  -- Special case: webui1 will still send requests for clients over to us, so
+                  -- we have to be able to route migrated endpoints (that used to be acct) to erchef.
+                  -- we will need to continue to add migrated acct->erchef endpoints here
+                  -- until we either correct or retire webui 1
+                  (p_dl_acct_erchef * c_acct_erchef) +
+                  ((p_named_org_prefix * Cendpoint(p_clients) * c_maybe_identifier) * c_erchef) +
                   ((p_acct +
                    (p_named_org + p_sep)) * c_acct),
 
-   -- Anything that routes to erchef is handled here.  In EC, this is the same
-   -- as API chef routing
-  internal_chef = c_erchef
+  -- Anything that routes to erchef or reporting is handled here.
+  internal_chef = (p_erchef_int * c_erchef)
 }
 
 -- caller should bypass this client version check if caller is internal lb

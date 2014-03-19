@@ -113,18 +113,23 @@ lbconf = node['private_chef']['lb'].to_hash.merge(nginx_vars).merge({
   :omnihelper => OmnibusHelper.new(node)
 })
 
-["config.lua", "dispatch.lua", "resolver.lua", "route_checks.lua", "routes.lua"].each do |script|
-     template File.join(nginx_scripts_dir, script) do
-       source "nginx/scripts/#{script}.erb"
-       owner "root"
-       group "root"
-       mode "0644"
-       variables lbconf
-       # Note that due to JIT compile of lua resources, any
-       # changes to them will require a full restart to be picked up.
-       # This includes any embedded lua.
-       notifies :restart, 'runit_service[nginx]' if is_data_master?
-     end
+["config.lua",
+ "dispatch.lua",
+ "resolver.lua",
+ "route_checks.lua",
+ "routes.lua",
+ "dispatch_route.lua"].each do |script|
+  template File.join(nginx_scripts_dir, script) do
+    source "nginx/scripts/#{script}.erb"
+    owner "root"
+    group "root"
+    mode "0644"
+    variables lbconf
+    # Note that due to JIT compile of lua resources, any
+    # changes to them will require a full restart to be picked up.
+    # This includes any embedded lua.
+    notifies :restart, 'runit_service[nginx]' if is_data_master?
+  end
 end
 
 ["https", "http"].each do |server_proto|
