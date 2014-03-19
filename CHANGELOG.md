@@ -8,6 +8,9 @@
 ### opscode-webui
 * opscode-webui 3.8.13 - Ruby on Rails security updates
 
+### private-chef-cookbooks
+* Increase postgresql max_connections to 350 to handle 4 node cluster
+
 ## 11.1.2 (2014-02-28)
 
 ### posgresql
