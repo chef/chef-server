@@ -12,6 +12,7 @@ The following items are the set of bug fixes that have been applied since Enterp
 
 * [opscode-omnibus] Increased postgresql max_connections to a default of 350 to handle 4 node clusters.
 * [opscode-account] Fix for LDAP user creation failure.
+* [opscode-omnibus] Manage /var/log/opscode permissions even with non 0022 umask.
 
 ### Security Fixes:
 
