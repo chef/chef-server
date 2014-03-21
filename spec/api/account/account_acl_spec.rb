@@ -2,8 +2,8 @@ require 'pedant/rspec/common'
 
 describe "ACL API", :acl do
 
-
-  context "/users/<name>/_acl endpoint" do
+  # (temporarily?) deprecating /users/*/_acl endpoint due to its broken state and lack of usefulness
+  pending "/users/<name>/_acl endpoint" do
     let(:username) { platform.admin_user.name }
     let(:request_url) { "#{platform.server}/users/#{username}/_acl" }
 
