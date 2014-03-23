@@ -11,5 +11,4 @@ if File.exists?("/etc/opscode/private-chef.rb")
 end
 config = PrivateChef.generate_config(node['fqdn'])
 
-puts "Topology: #{PrivateChef['topology']}"
 puts Chef::JSONCompat.to_json_pretty(config)
