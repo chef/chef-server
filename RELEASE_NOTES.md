@@ -14,6 +14,7 @@ The following components have been upgraded since 11.1.2:
 * [core] Erlang r15b03-01 w/ multiple stability and bug fixes
 * [core] Chef 11.10.4 (was 11.6.0)
 * [core] PostgreSQL 9.2.8 (was 9.2.4)
+* [oc_erchef] Added hooks for opscode-analytics actions service
 
 ### Bug Fixes:
 

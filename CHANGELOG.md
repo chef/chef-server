@@ -23,8 +23,9 @@
 ### nokigiri
 * upgrade to nokigiri 1.6.1
 
-### oc_erchef 0.24.0
-* add oc_chef_action to oc_erchef
+### oc_erchef 0.24.2
+* add oc_chef_action to oc_erchef (support for opscode-analytics actions
+  package)
 
 ### opscode-account 1.46.0
 * speed up internal org-creation by removing Couchdb _all_dbs call
