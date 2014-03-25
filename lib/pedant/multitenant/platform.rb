@@ -5,11 +5,12 @@ module Pedant
 
     GLOBAL_OBJECTS = ['users', 'organizations']
 
-    attr_reader :test_org, :test_org_owner, :validate_org
+    attr_reader :test_org, :test_org_owner, :validate_org, :internal_account_url
 
     def initialize(server, superuser_key_file, super_user_name='pivotal')
       super(server, superuser_key_file, super_user_name)
       @test_org = org_from_config
+      @internal_account_url = Pedant::Config[:internal_account_url]
     end
 
     # Intelligently construct a complete API URL based on the

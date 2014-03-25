@@ -32,4 +32,15 @@ VM is configured to mount your local chef-pedant checkout into the VM
 when loading `oc-chef-pedant`. See the [dev VM config](https://github.com/opscode/opscode-dev-vm/blob/master/config/projects.json)
 for details.
 
+## Running Non-default Tests
+
+There are some tests that only make sense to run in certain environments or that don't make sense to run by default.
+
+#### Account Tests That Talk Via Internal Ports
+
+The opscode-account endpoint for internal org creation and updating (```/internal-organizations```) communicates via the internal account port. That endpoint is not exposed via the external-lb. Therefore, they will fail when kicking off the tests from a point external to the lb (say, developer's laptop hitting hosted for pedant). However, they are useful in validating that these endpoint are still functioning, so if you are running pedant somewhere with access to the internal-lb, simply run
+
+```private-chef-ctl test --only-internal-orgs``` or ```private-chef-ctl test --include-internal-orgs```
+
+to execute these tests.
 
