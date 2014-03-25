@@ -1,0 +1,13 @@
+#!/bin/sh
+
+<%
+  app_dir = "#{@options['install_dir']}/current"
+  rails_env = @options['rails_env']
+%>
+
+cd <%= app_dir %>
+exec 2>&1
+
+exec chpst -u<%= @options['user'] %> /usr/bin/env\
+  PATH=/usr/local/bin:$PATH\
+  bundle exec unicorn -E <%= rails_env %> -c /etc/unicorn/oc-id.rb config.ru

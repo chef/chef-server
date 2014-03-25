@@ -1,0 +1,25 @@
+---
+driver:
+  name: vagrant
+  network:
+    - ['private_network', { ip: '33.33.33.185' }]
+  synced_folders:
+    - [<%= File.expand_path("#{File.dirname(__FILE__)}/../../..") %>, '/tmp/oc-id']
+
+provisioner:
+  name: chef_solo
+  require_chef_omnibus: true
+
+platforms:
+  - name: ubuntu-12.04
+    driver_config:
+      box: opscode-ubuntu-12.04
+      box_url: https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_provisionerless.box
+
+suites:
+  - name: default
+    run_list:
+      - recipe[opscode-dev-shim]
+      - recipe[oc-id]
+    data_bags_path: <%= ENV['OPSCODE_PLATFORM_REPO'] || '~/oc/opscode-platform-cookbooks' %>/data_bags
+    roles_path: <%= ENV['OPSCODE_PLATFORM_REPO'] || '~/oc/opscode-platform-cookbooks' %>/roles
