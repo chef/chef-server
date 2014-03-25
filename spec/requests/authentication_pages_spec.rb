@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'Authentication', type: :feature do
+describe 'Authentication' do
   subject { page }
 
   describe 'sign-in' do
