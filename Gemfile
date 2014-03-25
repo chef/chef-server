@@ -20,11 +20,8 @@ gem 'doorkeeper', github: 'applicake/doorkeeper', ref: 'master'
 gem 'sqlite3', '~> 1.3.9'
 
 group :development, :test do
-  gem 'rspec-rails'
-end
-
-group :development, :test do
   gem 'jazz_hands', '~> 0.5.1'
+  gem 'rspec-rails'
 end
 
 group :development do
