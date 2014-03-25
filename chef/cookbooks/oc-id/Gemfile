@@ -8,4 +8,5 @@ group :test do
   gem 'busser-serverspec', '~> 0.2.6'
   gem 'kitchen-vagrant', '~> 0.14.0'
   gem 'test-kitchen', '~> 1.2.1'
+  gem 'thor', '~> 0.18.0'
 end

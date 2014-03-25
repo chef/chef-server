@@ -16,10 +16,13 @@ gem 'omniauth-chef', path: 'lib/omniauth-chef'
 # Don't judge me. I'm just waiting for a release that includes a recent Bootstrap 3 merge.
 gem 'doorkeeper', github: 'applicake/doorkeeper', ref: 'master'
 
+# Temporary, of course; will be PG
+gem 'sqlite3', '~> 1.3.9'
+
 group :development do
-  gem 'sqlite3', '~> 1.3.9'
   gem 'rspec-rails', '2.13.1'
   gem 'jazz_hands', '~> 0.5.1'
+  gem 'thor', '~> 0.18.0'
 end
 
 group :test do

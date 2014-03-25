@@ -13,20 +13,20 @@ Once that's set up, you should be able to run the app in development mode using 
     $ bin/rake db:migrate
     $ bin/rails server
 
-Verified with:
+Verified with Berkshelf 2.0.14, Vagrant 1.4.3 and Test Kitchen version 1.2.1.
 
-  * Berkshelf (2.0.14)
-  * Vagrant 1.4.3
-  * Test Kitchen version 1.2.1
-
-## Running the Tests
+## Tests
 
 ### Application Tests
+
+These assume the presence of a Chef server at 33.33.33.100 (configured at config/settings.yml).
 
     $ bin/rake db:test:prepare
     $ bin/rspec
 
 ### Cookbook Tests
+
+See the oc-id cookbook (at chef/cookbooks/oc-id) and the Kitchen configuration file (chef/cookbooks/oc-id/.kitchen.yml) for details.  
 
     $ cd chef/cookbooks/oc-id
     $ bundle install
@@ -45,7 +45,7 @@ To authenticate with oc-id against a Vagrant-managed Enterprise Chef instance:
           config.vm.box = 'opscode-ubuntu-12.04'
           config.vm.box_url = 'https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_provisionerless.box'
           config.vm.hostname = 'ec-11'
-          config.vm.network 'private_network', :ip => '33.33.33.11'
+          config.vm.network 'private_network', :ip => '33.33.33.100'
           config.vm.provider 'virtualbox' do |v|
             v.memory = 4096
             v.cpus = 4
@@ -58,23 +58,23 @@ To authenticate with oc-id against a Vagrant-managed Enterprise Chef instance:
         $ sudo sudo dpkg -i private-chef_11.1.2-1.ubuntu.12.04_amd64.deb
         $ sudo private-chef-ctl reconfigure
 
-  1. Still inside then VM, copy the ``webui_priv.pem`` key from /etc/opscode/webui_priv.pem to your local (host) machine, then exit:
+  1. Still inside the VM, copy the ``webui_priv.pem`` key from /etc/opscode/webui_priv.pem to your local (host) machine, then exit:
 
         $ cp /etc/opscode/webui_priv.pem /vagrant
         $ exit
 
-  1. You should now see ``webui_priv.pem`` alongside your Vagrantfile.  Now move that file into to your oc-id project, where the Rails app can read it:
+  1. You should now see ``webui_priv.pem`` alongside your Vagrantfile.  Now move that file into to the oc-id Rails project (a convention is to put it into ``#{Rails.root}/config)``) so the Rails app can read it:
 
         $ mv ./webui_priv.pem {your-oc-id-project-root}/config/
 
-  1. Open management console (which should now be available at https://33.33.33.11, as configured in our sample Vagrantfile) and click **Sign Up** to create a new user.  (I use **applejack**/**applejack** here as well, since it's what the tests will be looking for.)
+  1. Open management console (which should now be available at https://33.33.33.100, as configured in our sample Vagrantfile) and click **Sign Up** to create a new user.  (I use **applejack**/**applejack** here as well, since it's what the tests will be looking for.)
 
   1. And now in your oc-id (Rails) root, you should be able to run the tests:
 
         $ bin/rake db:test:prepare
         $ bin/rspec
 
-You should now be able to sign in with oc-id with your newly created Enterprise Chef user as well.
+You should now be able to sign into oc-id with your newly created Chef user as well.
 
 ## Author
 

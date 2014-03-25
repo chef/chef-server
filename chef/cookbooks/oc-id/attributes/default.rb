@@ -6,6 +6,7 @@
 #
 
 node.default['oc-id']['install_dir'] = '/srv/oc-id'
+node.default['oc-id']['rails_env'] = 'production'
 node.default['oc-id']['group'] = 'opscode'
 node.default['oc-id']['user'] = 'opscode'
 node.default['oc-id']['port'] = 4060
