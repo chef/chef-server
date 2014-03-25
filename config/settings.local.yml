@@ -1,0 +1,3 @@
+chef:
+  endpoint: https://api.opscode.piab
+

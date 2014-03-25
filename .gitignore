@@ -14,7 +14,11 @@
 .chef
 node_modules/
 .DS_Store
-bin/*
 tmp/
 vendor/gems
 vendor/ruby
+
+# Ignore local settings files
+config/settings.local.yml
+config/settings/*.local.yml
+config/environments/*.local.yml# RailsConfig ignores

@@ -19,10 +19,18 @@ gem 'doorkeeper', github: 'applicake/doorkeeper', ref: 'master'
 # Temporary, of course; will be PG
 gem 'sqlite3', '~> 1.3.9'
 
-group :development do
-  gem 'rspec-rails', '2.13.1'
+group :development, :test do
+  gem 'rspec-rails'
+end
+
+group :development, :test do
   gem 'jazz_hands', '~> 0.5.1'
+end
+
+group :development do
   gem 'thor', '~> 0.18.0'
+  gem 'spring' # App preloading
+  gem 'spring-commands-rspec'
 end
 
 group :test do
