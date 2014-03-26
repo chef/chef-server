@@ -33,4 +33,7 @@ OcId::Application.configure do
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
+
+  # Disable logging in test environment
+  config.log_level = :unknown
 end
