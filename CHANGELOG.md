@@ -7,6 +7,7 @@
 
 ### opscode-omnibus
 * argument validation fix in private-chef-ctl to allow ``private-chef-ctl password`` to work.
+* Manage permissions for /var/log/opscode for non 0022 umasks
 
 ### opscode-webui
 * [CVE-2014-0082] - Denial of Service Vulnerability in Action View when using render :text

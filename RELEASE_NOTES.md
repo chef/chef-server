@@ -8,6 +8,7 @@ The following bug fixes have been applied since Enterprise Chef 1.4.8:
 
 * [private-chef-cookbooks] Provide default value for jetty log path to fix dotfile deletion bug.
 * [private-chef-ctl] ``private-chef-ctl password`` fixed to work correctly after a regression introduced in EC 1.4.6.
+* [private-chef-cookbooks] Manage /var/log/opscode permissions even with non 0022 umask.
 
 ### Security Fixes
 
