@@ -1,4 +1,11 @@
+require 'omniauth-chef'
+
 Rails.application.config.middleware.use OmniAuth::Builder do
+
+  configure do |config|
+    config.path_prefix = '/id/auth'
+  end
+
   provider :chef, endpoint: Settings.chef.endpoint, superuser: Settings.chef.superuser, key_path: Settings.chef.key_path
   provider :developer unless Rails.env.production?
 end

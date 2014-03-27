@@ -2,7 +2,7 @@
 driver:
   name: vagrant
   network:
-    - ['private_network', { ip: '33.33.33.185' }]
+    - ['private_network', { ip: '33.33.33.190' }]
   synced_folders:
     - [<%= File.expand_path("#{File.dirname(__FILE__)}/../../..") %>, '/tmp/oc-id']
 
@@ -11,13 +11,16 @@ provisioner:
   require_chef_omnibus: true
 
 platforms:
-  - name: ubuntu-12.04
+  - name: app
     driver_config:
       box: opscode-ubuntu-12.04
       box_url: https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_provisionerless.box
+      customize:
+        memory: 2048
+        cpus: 2
 
 suites:
-  - name: default
+  - name: oc-id
     run_list:
       - recipe[opscode-dev-shim]
       - recipe[oc-id]

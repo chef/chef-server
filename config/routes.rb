@@ -1,16 +1,18 @@
 OcId::Application.routes.draw do
-  use_doorkeeper
   root 'home#index'
+  get 'id', to: 'home#index'
 
-  get 'signin', to: 'sessions#new'
-  delete 'signout', to: 'sessions#destroy'
+  scope :id do
+    use_doorkeeper
 
-  post '/auth/chef/callback', to: 'sessions#create'
-  get '/auth/failure', to: 'sessions#retry'
+    get 'signin', to: 'sessions#new'
+    delete 'signout', to: 'sessions#destroy'
 
-  resources :sessions, only: [ :new, :create, :destroy ]
+    post '/auth/chef/callback', to: 'sessions#create'
+    get '/auth/failure', to: 'sessions#retry'
 
-  namespace :api do
+    resources :sessions, only: [ :new, :create, :destroy ]
+
     namespace :v1 do
       resources :users, only: :show
       get 'me', to: 'users#me'
