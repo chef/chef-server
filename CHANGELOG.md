@@ -2,11 +2,16 @@
 
 ## 11.1.3 (Unreleased)
 
-### oc_erchef
-* oc_erchef 0.24.0 - add oc_chef_action to oc_erchef
+### oc_erchef 0.24.0
+* add oc_chef_action to oc_erchef
 
-### opscode-webui
-* opscode-webui 3.8.13 - Ruby on Rails security updates
+### opscode-account 1.46.0
+* speed up internal org-creation by removing Couchdb _all_dbs call
+* check org _route endpoint for groups darklaunch during org creation
+* fix shema constraint bug during LDAP user creation
+
+### opscode-webui 3.8.13
+* Ruby on Rails security updates
 
 ### private-chef-cookbooks
 * Increase postgresql max_connections to 350 to handle 4 node cluster
