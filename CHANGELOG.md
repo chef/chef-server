@@ -30,10 +30,13 @@
 ### openssl 1.0.1g
 * CVE-2014-0160: heartbeat extension allows remote attackers to obtain sensitive information from process memory
 
-### opscode-account 1.46.0
+### opscode-account 1.48.0
+* fix USAG and organization creation for sql
+* fix bug where billing-admins creation crashed for sql
+* gracefully fail association request if org is in 504 mode
 * speed up internal org-creation by removing Couchdb _all_dbs call
 * check org _route endpoint for groups darklaunch during org creation
-* fix shema constraint bug during LDAP user creation
+* fix schema constraint bug during LDAP user creation
 
 ### opscode-webui 3.8.13
 * Ruby on Rails security updates
@@ -47,6 +50,15 @@
 
 ### private-chef-ctl
 * Remove incorrect mention of `heartbeat_device` from `ha-status` output.
+
+### chef-pedant 1.0.27
+* added CLI options for running /internal-organization endpoint tests
+* added tag for running organization tests
+* add association tests to tags list
+
+### oc-chef-pedant 1.0.28
+* added test coverage for /organization and /internal-organization endpoints
+* added association framework and tests
 
 ## 11.1.2 (2014-02-28)
 
