@@ -100,7 +100,7 @@ add_command "ha-status", "Show the status of high availability services.", 1 do
   if has_vrrp_instance_interface
     puts "[OK] found VRRP communications interface #{vrrp_instance_interface}"
   else
-    puts "[ERROR] VRRP communications interface #{vrrp_instance_interface} not found, is heartbeat_device set correctly in private-chef.rb?"
+    puts "[ERROR] VRRP communications interface #{vrrp_instance_interface} not found."
     error_exit = 8
   end
 
