@@ -11,6 +11,7 @@ The following items are new for Enterprise Chef 11.1.3 and/or are changes from p
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.1.2:
 
 * [opscode-omnibus] Increased postgresql max_connections to a default of 350 to handle 4 node clusters.
+* [opscode-account] Fix for LDAP user creation failure.
 
 ### Security Fixes:
 
