@@ -1,5 +1,5 @@
 name "opscode-certificate"
-version "rel-0.1.4"
+default_version "rel-0.1.4"
 
 dependency "erlang"
 dependency "rsync"

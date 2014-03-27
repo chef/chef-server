@@ -1,5 +1,5 @@
 name "sqitch"
-version "0.973"
+default_version "0.973"
 
 dependency "perl"
 dependency "postgresql92" # only because we're compiling DBD::Pg here, too.
