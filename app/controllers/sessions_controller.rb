@@ -8,7 +8,7 @@ class SessionsController < ApplicationController
   def create
     sign_in User.find(session_parameters[:uid])
     redirect_back_or oauth_authorized_applications_path
-  end 
+  end
 
   def retry
     flash.now[:error] = 'Oops! Try again.'
@@ -17,7 +17,7 @@ class SessionsController < ApplicationController
 
   def destroy
     sign_out
-    redirect_to root_path
+    redirect_to signin_path
   end
 
   private

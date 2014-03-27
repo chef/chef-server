@@ -19,7 +19,7 @@ Verified with Berkshelf 2.0.14, Vagrant 1.4.3 and Test Kitchen version 1.2.1.
 
 ### Application Tests
 
-These assume the presence of a Chef server at 33.33.33.100 (configured at config/settings.yml).
+These assume the presence of a Chef server at 33.33.33.10 (configured at config/settings.yml).
 
     $ bin/rake db:test:prepare
     $ bin/rspec
@@ -30,49 +30,32 @@ See the oc-id cookbook (at chef/cookbooks/oc-id) and the Kitchen configuration f
 
     $ cd chef/cookbooks/oc-id
     $ bundle install
-    $ kitchen test
+    $ kitchen converge
+    $ kitchen verify
 
 ## Using oc-id with Enterprise Chef
 
-To authenticate with oc-id against a Vagrant-managed Enterprise Chef instance:
+To work on the oc-id app, you'll need a running Chef server; either dev-vm or a clean EC install should be fine, as long as the Rails app finds a ``webui_priv.pem`` key at ./config.  Here are some instructions for setting up anew:
 
-  1. Set up a Vagrant box for Enterprise Chef.  Heres's a minimal Vagrantfile that should suffice:
+  1. A Vagrantfile for privisioning an EC install is included with this project.  To use it, first get an EC download URL (e.g., [from the support site](http://support.opscode.us/releases)), then:
 
-        # -*- mode: ruby -*-
-        # vi: set ft=ruby :
+        $ cd chef/cookbooks/oc-id
+        $ EC_URL="http://path.to.a/private-chef...deb" vagrant up ec
 
-        Vagrant.configure("2") do |config|
-          config.vm.box = 'opscode-ubuntu-12.04'
-          config.vm.box_url = 'https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_provisionerless.box'
-          config.vm.hostname = 'ec-11'
-          config.vm.network 'private_network', :ip => '33.33.33.100'
-          config.vm.provider 'virtualbox' do |v|
-            v.memory = 4096
-            v.cpus = 4
-          end
-        end
+  1. When provisioning completes, you should see a ``webui_priv.pem`` key alongside the Vagrantfile.  Move that file into to the oc-id Rails project (a convention is to put it into ``#{Rails.root}/config)``) so the Rails app can read it:
 
-  1. Inside the vm, download, install and configure Enterprise Chef:
+        $ mv ./webui_priv.pem ../../../config/
 
-        $ wget http://path.to/private-chef_11.1.2-1.ubuntu.12.04_amd64.deb
-        $ sudo sudo dpkg -i private-chef_11.1.2-1.ubuntu.12.04_amd64.deb
-        $ sudo private-chef-ctl reconfigure
-
-  1. Still inside the VM, copy the ``webui_priv.pem`` key from /etc/opscode/webui_priv.pem to your local (host) machine, then exit:
-
-        $ cp /etc/opscode/webui_priv.pem /vagrant
-        $ exit
-
-  1. You should now see ``webui_priv.pem`` alongside your Vagrantfile.  Now move that file into to the oc-id Rails project (a convention is to put it into ``#{Rails.root}/config)``) so the Rails app can read it:
-
-        $ mv ./webui_priv.pem {your-oc-id-project-root}/config/
-
-  1. Open management console (which should now be available at https://33.33.33.100, as configured in our sample Vagrantfile) and click **Sign Up** to create a new user.  (I use **applejack**/**applejack** here as well, since it's what the tests will be looking for.)
+  1. Open management console (which should now be available at [https://33.33.33.10](https://33.33.33.10)) and click **Sign Up** to create a new user.  (I use **applejack**/**applejack** here as well, since it's what the tests will be looking for.)
 
   1. And now in your oc-id (Rails) root, you should be able to run the tests:
 
         $ bin/rake db:test:prepare
         $ bin/rspec
+
+  1. ... or just run the Rails app:
+
+        $ bin/rails server
 
 You should now be able to sign into oc-id with your newly created Chef user as well.
 
