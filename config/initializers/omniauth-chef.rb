@@ -1,3 +1,5 @@
+require 'omniauth-chef'
+
 Rails.application.config.middleware.use OmniAuth::Builder do
 
   configure do |config|
