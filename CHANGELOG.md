@@ -17,6 +17,9 @@
 * Increase postgresql max_connections to 350 to handle 4 node cluster
 * Manage permissions for /var/log/opscode for non 0022 umasks
 
+### private-chef-ctl
+* Remove incorrect mention of `heartbeat_device` from `ha-status` output.
+
 ## 11.1.2 (2014-02-28)
 
 ### posgresql
