@@ -280,7 +280,7 @@ describe "users", :users do
           # There are other users, but these are ours, so they should always be
           # somewhere in the userspace soup.
           "pivotal" => "#{request_url}/pivotal",
-          "pedant-nobody" => "#{request_url}/pedant-nobody",
+          platform.bad_user.name => "#{request_url}/#{platform.bad_user.name}",
           platform.admin_user.name => "#{request_url}/#{platform.admin_user.name}",
           platform.non_admin_user.name => "#{request_url}/#{platform.non_admin_user.name}"
         }
@@ -373,7 +373,7 @@ describe "users", :users do
           # There are other users, but these are ours, so they should always be
           # somewhere in the userspace soup:
           "pivotal" => "#{request_url}/pivotal",
-          "pedant-nobody" => "#{request_url}/pedant-nobody",
+          platform.bad_user.name => "#{request_url}/#{platform.bad_user.name}",
           platform.admin_user.name => "#{request_url}/#{platform.admin_user.name}",
           platform.non_admin_user.name => "#{request_url}/#{platform.non_admin_user.name}",
           # As should our test user:
