@@ -1,6 +1,7 @@
 Chef::Config[:chargify_api_secret] = ''
 Chef::Config[:chargify_site]       = 'opscode-preprod'
 
+Chef::Config[:internal_lb_url] = 'http://<%=@helper.vip_for_uri('lb_internal') %>:<%=node['private_chef']['nginx']['non_ssl_port']%>'
 Chef::Config[:dark_launch_config_filename] = '/etc/opscode/dark_launch_features.json'
 Chef::Config[:account_service_uri]   = 'http://<%= @helper.vip_for_uri('lb_internal') %>:<%= node['private_chef']['lb_internal']['account_port'] %>'
 Chef::Config[:chef_server_host_uri]  = 'http://<%= @helper.vip_for_uri('lb_internal') %>:<%= node['private_chef']['lb_internal']['chef_port'] %>'
