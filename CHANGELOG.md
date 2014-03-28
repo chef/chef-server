@@ -15,6 +15,7 @@
 
 ### private-chef-cookbooks
 * Increase postgresql max_connections to 350 to handle 4 node cluster
+* Manage permissions for /var/log/opscode for non 0022 umasks
 
 ## 11.1.2 (2014-02-28)
 

@@ -139,6 +139,13 @@ directory "/var/opt/opscode" do
   action :create
 end
 
+directory "/var/log/opscode" do
+  owner "opscode"
+  group "opscode"
+  mode "0755"
+  action :create
+end
+
 include_recipe "enterprise::runit"
 include_recipe "private-chef::sysctl-updates"
 
