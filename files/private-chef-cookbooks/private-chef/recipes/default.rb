@@ -109,6 +109,13 @@ directory "/var/opt/opscode" do
   action :create
 end
 
+directory "/var/log/opscode" do
+  owner "root"
+  group "root"
+  mode "0755"
+  action :create
+end
+
 # Install our runit instance
 include_recipe "runit"
 
