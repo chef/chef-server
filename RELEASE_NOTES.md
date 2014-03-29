@@ -6,6 +6,15 @@
 
 The following items are new for Enterprise Chef 11.1.3 and/or are changes from previous versions:
 
+
+### New and Updated Components
+
+The following components have been upgraded since 11.1.2:
+
+* [core] erlang r15b03-01 w/ multiple stability and bug fixes
+* [core] chef 11.10.4 (was 11.6.0)
+* [core] postgresql 9.2.8 (was 9.2.4)
+
 ### Bug Fixes:
 
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.1.2:
