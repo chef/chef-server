@@ -28,7 +28,7 @@ install_dir = node_attrs['install_dir']
 group_name = node_attrs['group']
 user_name = node_attrs['user']
 rails_env = node_attrs['rails_env'] || 'production'
-revision = env['oc-id-revision'] || 'master'
+revision = env['oc-id']['revision'] || 'master'
 remote = env['default-remote'] || 'opscode'
 
 dev = node.chef_environment == 'dev'
