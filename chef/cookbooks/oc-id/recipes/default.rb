@@ -15,144 +15,136 @@ include_recipe 'opscode-github'
 include_recipe 'runit'
 include_recipe 'unicorn'
 
+package 'sqlite3'
+package 'sqlite3-doc'
+package 'libsqlite3-dev'
+
 hostnames = data_bag_item('hostnames', node.chef_environment)
+vips = data_bag_item('vips', node.chef_environment)
+env = data_bag_item('environments', node.chef_environment)
 
 node_attrs = node['oc-id']
 install_dir = node_attrs['install_dir']
 group_name = node_attrs['group']
 user_name = node_attrs['user']
 rails_env = node_attrs['rails_env'] || 'production'
-release_dir = "#{install_dir}/current"
+revision = env['oc-id-revision'] || 'master'
+remote = env['default-remote'] || 'opscode'
 
-directory install_dir do
-  owner user_name
-  group group_name
-  mode 0755
-  recursive true
-end
+dev = node.chef_environment == 'dev'
+local = node['oc-id']['source'] == 'local'
 
-if node.chef_environment == 'dev'
-
-  package 'sqlite3'
-  package 'sqlite3-doc'
-  package 'libsqlite3-dev'
-
+if dev
+  
   execute 'replace key' do
     user 'root'
     group 'root'
     command 'chmod 644 /tmp/oc-id/config/webui_priv.pem && rm /etc/opscode/webui_priv.pem && cp /tmp/oc-id/config/webui_priv.pem /etc/opscode/webui_priv.pem'
-    notifies :run, 'execute[deploy local]', :immediately
+    notifies :run, 'execute[deploy]', :immediately if local
   end
 
-  execute 'deploy local' do
-    user user_name
-    group group_name
-    command "rm -rf #{release_dir} && mkdir -p #{release_dir} && cp -R /tmp/oc-id/* #{release_dir}"
-    notifies :run, 'execute[install]', :immediately
-    action :nothing
+  if local
+
+    release_dir = "#{install_dir}/current"
+
+    directory release_dir do
+      owner user_name
+      group group_name
+      mode 0755
+      recursive true
+    end
+
+    execute 'install' do
+      user user_name
+      group group_name
+      cwd release_dir
+      environment({ 'RAILS_ENV' => rails_env })
+      command "bundle install --path ../bundle #{'--without test development' if rails_env == 'production'}"
+      notifies :run, 'execute[precompile]', :immediately
+      action :nothing
+    end
+
+    execute 'precompile' do
+      user user_name
+      group group_name
+      cwd release_dir
+      environment({ 'RAILS_ENV' => rails_env })
+      command 'bundle exec rake assets:precompile'
+      notifies :run, 'execute[migrate]', :immediately
+      action :nothing
+    end
+
+    execute 'migrate' do
+      user user_name
+      group group_name
+      cwd release_dir
+      environment({ 'RAILS_ENV' => rails_env })
+      command 'bundle exec rake db:migrate'
+      notifies :restart, 'service[oc-id]'
+      action :nothing
+    end
+
+    execute 'deploy' do
+      user user_name
+      group group_name
+      command "rm -rf #{release_dir} && mkdir -p #{release_dir} && cp -R /tmp/oc-id/* #{release_dir}"
+      notifies :run, 'execute[install]', :immediately
+      action :nothing
+    end
   end
+end
 
-  execute 'install' do
-    user user_name
-    group group_name
-    cwd release_dir
-    environment({ 'RAILS_ENV' => rails_env })
-    command "bundle install --path ../bundle #{'--without test development' if rails_env == 'production'}"
-    notifies :run, 'execute[precompile]', :immediately
-    action :nothing
-  end
-
-  execute 'precompile' do
-    user user_name
-    group group_name
-    cwd release_dir
-    environment({ 'RAILS_ENV' => rails_env })
-    command 'bundle exec rake assets:precompile'
-    notifies :run, 'execute[migrate]', :immediately
-    not_if
-    action :nothing
-  end
-
-  execute 'migrate' do
-    user user_name
-    group group_name
-    cwd release_dir
-    environment({ 'RAILS_ENV' => rails_env })
-    command 'bundle exec rake db:migrate'
-    notifies :restart, 'service[oc-id]'
-    action :nothing
-  end
-
-else
-
-  # wip
+if !local
 
   deploy_revision('oc-id') do
-    repo 'git@github.com:opscode/oc-id.git'
-    remote 'opscode'
-    revision 'master'
-    environment({ 'RAILS_ENV' => rails_env })
     user user_name
     group group_name
+    repo "git@github.com:#{remote}/oc-id.git"
+    revision revision
+    remote remote
     deploy_to install_dir
-    migration_command 'rake db:migrate --trace'
+    migration_command 'bundle exec rake db:migrate'
     migrate true
 
-    symlink_before_migrate({
-      'config/database.yml' => 'config/database.yml',
-      "config/settings/#{rails_env}.yml" => "config/settings/#{rails_env}.yml"
+    environment({
+      'LC_CTYPE' => 'en_US.UTF-8',
+      'LANG' => 'en_US.UTF-8',
+      'PATH' => "/usr/local/bin:#{ENV['PATH']}",
+      'RAILS_ENV' => rails_env
     })
 
-    symlinks({
-      'assets' => 'public/assets'
-    })
+    symlink_before_migrate({})
+    symlinks({'tmp' => 'tmp', 'log' => 'log'})
 
-    before_symlink do
+    before_migrate do
 
-      template "#{release_dir}/config/settings/#{rails_env}.yml" do
+      template "#{release_path}/config/settings/#{rails_env}.yml" do
         user user_name
         group group_name
         source 'settings.yml.erb'
         mode 0644
         variables node_attrs.merge({
-
+          :hostnames => hostnames
         }).to_hash
       end
 
+      run 'bundle install --deployment --without test development'
     end
 
-    before_migrate do
-
-      execute 'bundle install' do
-        user user_name
-        group group_name
-        cwd install_dir
-        command 'bundle install --path ../bundle --without test development'
-      end
-
-      execute 'bundle install' do
-        user user_name
-        group group_name
-        cwd install_dir
-        command 'bundle exec rake assets:precompile'
-      end
-
+    before_restart do
+      run 'bundle exec rake assets:precompile'
     end
 
-    action :deploy
+    action dev ? :force_deploy : :deploy
     notifies :restart, 'service[oc-id]'
   end
 
-end
-
-template "#{release_dir}/config/settings/#{rails_env}.yml" do
-  user user_name
-  group group_name
-  source 'settings.yml.erb'
-  mode 0644
-  variables node_attrs.merge({
-    :hostnames => hostnames
-  }).to_hash
+  deployment_notification 'deploy_revision[oc-id]' do
+    app_environment node.chef_environment
+    service_name 'oc-id'
+    estatsd_host vips['estatsd_host']
+    hipchat_key env['hipchat_key']
+  end
 end
 
 unicorn_config '/etc/unicorn/oc-id.rb' do
@@ -169,9 +161,7 @@ end
 runit_service 'oc-id' do
   action :enable
   control(['t'])
-  options node_attrs.merge({
-    
-  })
+  options node_attrs.merge({})
 end
 
 service('oc-id') do
@@ -192,10 +182,3 @@ template '/etc/logrotate.d/oc-id' do
   group 'root'
   mode 0644
 end
-
-# deployment_notification 'deploy_revision[oc-id]' do
-#   app_environment node.chef_environment
-#   service_name 'oc-id'
-#   estatsd_host vips['estatsd_host']
-#   hipchat_key env['hipchat_key']
-# end

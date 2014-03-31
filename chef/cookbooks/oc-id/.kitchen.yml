@@ -11,7 +11,7 @@ provisioner:
   require_chef_omnibus: true
 
 platforms:
-  - name: app
+  - name: ubuntu-12.04
     driver_config:
       box: opscode-ubuntu-12.04
       box_url: https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_provisionerless.box
@@ -20,9 +20,12 @@ platforms:
         cpus: 2
 
 suites:
-  - name: oc-id
+  - name: default
     run_list:
       - recipe[opscode-dev-shim]
       - recipe[oc-id]
     data_bags_path: <%= ENV['OPSCODE_PLATFORM_REPO'] || '~/oc/opscode-platform-cookbooks' %>/data_bags
     roles_path: <%= ENV['OPSCODE_PLATFORM_REPO'] || '~/oc/opscode-platform-cookbooks' %>/roles
+    attributes:
+      oc-id:
+        source: <%= ENV['SOURCE'] || 'remote' %>
