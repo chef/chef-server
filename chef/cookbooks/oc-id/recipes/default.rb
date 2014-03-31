@@ -96,6 +96,14 @@ end
 
 if !local
 
+  %w{shared shared/system shared/config shared/pids shared/log shared/vendor}.each do |dir|
+    directory "#{install_dir}/#{dir}" do
+      owner user_name
+      group group_name
+      mode 02775
+    end
+  end
+
   deploy_revision('oc-id') do
     user user_name
     group group_name
@@ -114,7 +122,7 @@ if !local
     })
 
     symlink_before_migrate({})
-    symlinks({'tmp' => 'tmp', 'log' => 'log'})
+    symlinks('system' => 'public/system', 'pids' => 'tmp/pids', 'log' => 'log', 'bundle' => 'vendor/bundle')
 
     before_migrate do
 
