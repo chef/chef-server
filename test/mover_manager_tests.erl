@@ -5,6 +5,10 @@
 
 -compile(export_all).
 
+%% HOAX_FIXTURE(fun Setup/0, fun Teardown/1) injects a new test generator named
+%% hoax_fixture_tests_.  This fixture will include all zero arity functions in
+%% the test module as tests.  The fixture is a foreach test where each test is
+%% run within the context of setup/teardown.
 ?HOAX_FIXTURE(fun() -> mover_manager:start_link() end,
               fun(_Pid) -> mover_manager:stop() end).
 

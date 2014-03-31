@@ -305,14 +305,12 @@ handle_sync_event(halt, _From, working, State) ->
     {reply, {ok, halting}, halting, State, 0};
 handle_sync_event(halt, _From, StateName, State) ->
     {reply, {error, not_now_dear}, StateName, State};
-%-ifdef(TEST).
 handle_sync_event(stop, _From, _StateName, State) ->
     {stop, normal, ok, State};
 handle_sync_event({set_state, NewState}, _From, _StateName, State) ->
     {reply, ok, NewState, State};
 handle_sync_event(get_state, _From, StateName, State) ->
     {reply, StateName, StateName, State};
-%-endif.
 handle_sync_event(status, _From, StateName, #state{live_worker_count = LW,
                                                   objects_done = OD,
                                                   objects_remaining = OR,
