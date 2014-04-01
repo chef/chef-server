@@ -79,6 +79,11 @@
       proxy_cache_valid 404 1m;
     }
 
+    location /_route/ {
+      default_type 'application/json';
+      content_by_lua_file '<%= @script_path %>/dispatch_route.lua';
+    }
+
     location / {
       satisfy any;
       <% if @allowed_webui_subnets && !@allowed_webui_subnets.empty? %>

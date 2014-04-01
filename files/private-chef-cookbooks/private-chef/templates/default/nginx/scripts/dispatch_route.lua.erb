@@ -3,11 +3,6 @@ local cjson = require("cjson")
 cjson.encode_keep_buffer(false)
 args = ngx.req.get_uri_args()
 
--- Anybody coming here must in the maintenance mode IP whitelist.
-if not config.is_addr_whitelisted(ngx.var.remote_addr) then
-    ngx.exit(ngx.HTTP_NOT_FOUND)
-end
-
 -- Let's go ahead pull the meat out of the url - easy, since we're guaranteed that our URI
 -- is prefixed with "/_route/"
 local uri = string.sub(ngx.var.uri, 8)
