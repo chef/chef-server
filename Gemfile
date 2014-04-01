@@ -14,7 +14,7 @@ gem 'turbolinks', '~> 2.2.1'
 gem 'uglifier', '~> 2.4.0'
 gem 'unicorn-rails', '~> 1.1.0'
 gem 'omniauth', '~> 1.2.1'
-gem 'omniauth-chef', '~> 0.1.1'
+gem 'omniauth-chef', github: 'opscode/omniauth-chef', ref: '0388f58f2ce8b4560ccacba3faee24b4928e7880'
 
 # Don't judge me. I'm just waiting for a release that includes a recent Bootstrap 3 merge.
 gem 'doorkeeper', github: 'applicake/doorkeeper', ref: 'master'

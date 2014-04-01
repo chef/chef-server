@@ -24,15 +24,24 @@ vips = data_bag_item('vips', node.chef_environment)
 env = data_bag_item('environments', node.chef_environment)
 
 node_attrs = node['oc-id']
+env_attrs = env['oc-id'] || {}
+
 install_dir = node_attrs['install_dir']
 group_name = node_attrs['group']
 user_name = node_attrs['user']
 rails_env = node_attrs['rails_env'] || 'production'
-revision = env['oc-id']['revision'] || 'master'
+revision = env_attrs['revision'] || 'master'
 remote = env['default-remote'] || 'opscode'
 
 dev = node.chef_environment == 'dev'
 local = node['oc-id']['source'] == 'local'
+
+directory install_dir do
+  owner user_name
+  group group_name
+  mode 0755
+  recursive true
+end
 
 if dev
   
