@@ -20,10 +20,10 @@
                               "fd40c960c7912193631d948fe962e1162a8d1334"}},
        {erlware_commons,".*",
                         {git,"git://github.com/erlware/erlware_commons.git",
-                             "b125ce055e8dd7df20b5a30c190f1a4c42a90b92"}},
+                             "4c97d4a96229359929419c7d716c5324c35d8d5f"}},
        {meck,".*",
              {git,"git://github.com/eproxus/meck.git",
-                  "ea4ff6ed6a60780478aa1ac86e37c239715b19bf"}},
+                  "638e699fd99cb4d0fc97601d218486eed6c7fa9e"}},
        {jiffy,".*",
               {git,"git://github.com/davisp/jiffy.git",
                    "3b6a1327d418f7594ecb23aa8d7874c3986f433e"}},
@@ -101,7 +101,7 @@
                            "9de453c1e4ed1584e374f972db5b1c4dcfc30fcc"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "8a74f4e2161500eb26bdd490c2d5440e386216ad"}},
+                  "7c7d0f76900b7aa6b85c3920baf60bb3092b8996"}},
        {moser,".*",
               {git,"git@github.com:opscode/moser.git",
                    "41e68a4ea0b7d4bff4f4cc101a6db4cfc884ee57"}},
@@ -113,7 +113,7 @@
                                     "911481ee8a20f59fc9092e370e2b0d116bec19df"}},
        {eredis,".*",
                {git,"git://github.com/wooga/eredis.git",
-                    "d0f8c7f4d3ab4cc6ebb01539b8a2d6e32004f82a"}},
+                    "f701d6536e4204bef5cc9502ba944b40074e8f21"}},
        {webmachine,".*",
                    {git,"git://github.com/opscode/webmachine",
                         "7cd6ddf592a2e050544891d151944dd3017dc517"}},
@@ -149,6 +149,9 @@
                             "98624ac791c842e30db4e40d2483fc572de3b156"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
-                        "8e84fb3b2f33b4dabc879459f0572720feba9aaf"}}]}.
+                        "8e84fb3b2f33b4dabc879459f0572720feba9aaf"}},
+       {hoax,".*",
+             {git,"https://github.com/xenolinguist/hoax.git",
+                  "fba8e797d01e30b4b6f2c414507f32f30ea40ee3"}}]}.
 {erl_opts,[debug_info,{parse_transform,lager_transform}]}.
 
