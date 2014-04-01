@@ -2,6 +2,27 @@
 
 ## 11.1.3 (Unreleased)
 
+### berkshelf
+* upgrade to latest master
+* new dep: libffi
+* new dep: libarchive
+
+### curl
+* security upgrade to 7.36.0
+  * CVE-2014-0138
+  * CVE-2014-0139
+  * CVE-2014-1263
+	* CVE-2014-2522
+
+### chef
+* upgrade to version 11.10.4
+
+### erlang
+* upgrade to r15b03-1
+
+### nokigiri
+* upgrade to nokigiri 1.6.1
+
 ### oc_erchef 0.24.0
 * add oc_chef_action to oc_erchef
 
@@ -12,6 +33,9 @@
 
 ### opscode-webui 3.8.13
 * Ruby on Rails security updates
+
+### postgresql
+* upgrade to 9.2.8
 
 ### private-chef-cookbooks
 * Increase postgresql max_connections to 350 to handle 4 node cluster

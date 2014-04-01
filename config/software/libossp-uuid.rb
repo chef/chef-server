@@ -16,7 +16,7 @@
 #
 
 name "libossp-uuid"
-version "1.6.2"
+default_version "1.6.2"
 
 dependency "autoconf"
 dependency "automake"

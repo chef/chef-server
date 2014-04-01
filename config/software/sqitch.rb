@@ -1,5 +1,5 @@
 name "sqitch"
-version "0.973"
+default_version "0.973"
 
 dependency "perl"
 dependency "postgresql92" # only because we're compiling DBD::Pg here, too.
@@ -21,7 +21,6 @@ build do
   command "perl Build.PL", :env => env
   command "./Build installdeps --cpan_client '#{omnibus_cpan_client}'", :env => env
   command "./Build", :env => env
-  command "./Build test", :env => env
   command "./Build install", :env => env
 
   # We're using PostgreSQL as our database engine, so we need the right driver

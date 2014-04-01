@@ -1,5 +1,5 @@
 name "openresty-lpeg"
-version "0.12"
+default_version "0.12"
 
 dependency "openresty"
 
