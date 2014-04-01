@@ -7,13 +7,13 @@
 The following items are new for Enterprise Chef 11.1.3 and/or are changes from previous versions:
 
 
-### New and Updated Components
+### New and Updated Components:
 
 The following components have been upgraded since 11.1.2:
 
-* [core] erlang r15b03-01 w/ multiple stability and bug fixes
-* [core] chef 11.10.4 (was 11.6.0)
-* [core] postgresql 9.2.8 (was 9.2.4)
+* [core] Erlang r15b03-01 w/ multiple stability and bug fixes
+* [core] Chef 11.10.4 (was 11.6.0)
+* [core] PostgreSQL 9.2.8 (was 9.2.4)
 
 ### Bug Fixes:
 
@@ -31,6 +31,10 @@ applied since Enterprise Chef 11.1.2:
 * [opscode-webui] Patch for Denial of Service Vulnerability in Action View when using render :text (CVE-2014-0082)
 * [opscode-webui] Patch for Denial of Service Vulnerability in Action View (CVE-2013-6414)
 * [opscode-webui] Patch for Reflective XSS Vulnerability in Ruby on Rails (CVE-2013-4491)
+* [libcurl] Patch for wrong re-use of connections (CVE-2014-0138)
+* [libcurl] Patch for address wildcard certificate validation (CVE-2014-0139)
+* [libcurl] Patch for not verifying certs for TLS to IP address / Darwinssl (CVE-2014-1563)
+* [libcurl] Patch for not verifying certs for TLS to IP address / Winssl (CVE-2014-2522)
 
 ## 11.1.2 (2014-02-28)
 

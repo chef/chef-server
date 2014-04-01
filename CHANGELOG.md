@@ -8,7 +8,11 @@
 * new dep: libarchive
 
 ### curl
-* upgrade to 7.23.1
+* security upgrade to 7.36.0
+  * CVE-2014-0138
+  * CVE-2014-0139
+  * CVE-2014-1263
+	* CVE-2014-2522
 
 ### chef
 * upgrade to version 11.10.4
