@@ -1,10 +1,19 @@
 GIT
   remote: git://github.com/applicake/doorkeeper.git
-  revision: a76a846f01b1a453df7a63bb4e6d74b5e2eeca10
+  revision: cc9fa8a1b1b74ab50d542db186e9501e92d479b4
   ref: master
   specs:
-    doorkeeper (1.0.0)
+    doorkeeper (1.1.0)
       railties (>= 3.1)
+
+GIT
+  remote: git://github.com/opscode/omniauth-chef.git
+  revision: 0388f58f2ce8b4560ccacba3faee24b4928e7880
+  ref: 0388f58f2ce8b4560ccacba3faee24b4928e7880
+  specs:
+    omniauth-chef (0.1.1)
+      chef (~> 11)
+      omniauth (~> 1.2)
 
 GEM
   remote: https://rubygems.org/
@@ -165,9 +174,6 @@ GEM
     omniauth (1.2.1)
       hashie (>= 1.2, < 3)
       rack (~> 1.0)
-    omniauth-chef (0.1.1)
-      chef (~> 11)
-      omniauth (~> 1.2)
     polyglot (0.3.4)
     posix-spawn (0.3.8)
     pry (0.9.12.6)
@@ -215,7 +221,7 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     raindrops (0.13.0)
-    rake (10.2.1)
+    rake (10.2.2)
     rb-readline (0.4.2)
     rdoc (4.1.1)
       json (~> 1.4)
@@ -303,7 +309,7 @@ DEPENDENCIES
   jbuilder (~> 1.2)
   jquery-rails (~> 3.1.0)
   omniauth (~> 1.2.1)
-  omniauth-chef (~> 0.1.1)
+  omniauth-chef!
   quiet_assets
   rails (= 4.0.3)
   rails_config (~> 0.3.3)
