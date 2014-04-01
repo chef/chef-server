@@ -65,6 +65,14 @@
           create_account_dets/0,
           get_account_dets/0]).
 
+-ifdef(TEST).
+-export([
+         stop/0,
+         set_state/1,
+         get_state/0
+         ]).
+-endif.
+
 %% gen_fsm callbacks
 -export([ init/1,
           handle_event/3,
@@ -116,6 +124,14 @@ ping() ->
 
 start_link() ->
     gen_fsm:start_link({local, ?SERVER}, ?MODULE, [], []).
+-ifdef(TEST).
+stop() ->
+    gen_fsm:sync_send_all_state_event(?SERVER, stop).
+set_state(StateName) ->
+    gen_fsm:sync_send_all_state_event(?SERVER, {set_state, StateName}).
+get_state() ->
+    gen_fsm:sync_send_all_state_event(?SERVER, get_state).
+-endif.
 
 migrate_next(CallbackModule) ->
     migrate(1, 1, CallbackModule).
@@ -142,10 +158,11 @@ status() ->
     gen_fsm:sync_send_all_state_event(?SERVER, status).
 
 
-set_concurrency(NewConcurrency) when is_integer(NewConcurrency) and NewConcurrency > 0->
+set_concurrency(NewConcurrency) when is_integer(NewConcurrency) and (NewConcurrency > 0) ->
     gen_fsm:sync_send_all_state_event(?SERVER, {set_concurrency, NewConcurrency});
-set_concurrency(_BadValue) ->
-    lager:error("Concurrency must be numeric and greater than 0.").
+set_concurrency(BadValue) ->
+    lager:error("Concurrency must be numeric and greater than 0."),
+    {error, {badarg, BadValue}}.
 
 halt_actions() ->
     gen_fsm:sync_send_all_state_event(?SERVER, halt).
@@ -288,6 +305,12 @@ handle_sync_event(halt, _From, working, State) ->
     {reply, {ok, halting}, halting, State, 0};
 handle_sync_event(halt, _From, StateName, State) ->
     {reply, {error, not_now_dear}, StateName, State};
+handle_sync_event(stop, _From, _StateName, State) ->
+    {stop, normal, ok, State};
+handle_sync_event({set_state, NewState}, _From, _StateName, State) ->
+    {reply, ok, NewState, State};
+handle_sync_event(get_state, _From, StateName, State) ->
+    {reply, StateName, StateName, State};
 handle_sync_event(status, _From, StateName, #state{live_worker_count = LW,
                                                   objects_done = OD,
                                                   objects_remaining = OR,
@@ -302,9 +325,9 @@ handle_sync_event(status, _From, StateName, #state{live_worker_count = LW,
                {objects_failed, EC},
                {fatal_stop, FS}],
     {reply, {ok, Summary}, StateName, State};
-handle_sync_event({set_concurrency, Value}, _From, working, {max_worker_count = Value} = State) ->
+handle_sync_event({set_concurrency, Value}, _From, working, #state{max_worker_count = Value} = State) ->
     {reply, {ok, no_change}, working, State};
-handle_sync_event({set_concurrency, Value}, _From, working, {max_worker_count = OldValue} = State) ->
+handle_sync_event({set_concurrency, Value}, _From, working, #state{max_worker_count = OldValue} = State) ->
     {reply, {ok, modified, OldValue}, working, State#state{max_worker_count = Value} };
 handle_sync_event({set_concurrency, _}, _From, StateName, State) ->
     {reply, {error, bad_state}, StateName, State};
