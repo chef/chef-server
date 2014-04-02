@@ -3,7 +3,7 @@ maintainer       'Christian Nunciato'
 maintainer_email 'cnunciato@getchef.com'
 license          'All rights reserved'
 description      'Installs/Configures oc-id, an OAuth 2 provider for Chef.'
-version          '0.1.0'
+version          '0.1.1'
 
 supports 'ubuntu'
 
