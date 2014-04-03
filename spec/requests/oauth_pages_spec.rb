@@ -1,8 +1,10 @@
 require 'spec_helper'
 
 describe 'OAuth' do
+
   subject { page }
-  
+  before { Settings.stub_chain(:doorkeeper, :administrators).and_return(['rainbowdash']) }
+
   describe 'applications list' do
 
     before do
