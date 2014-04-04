@@ -154,9 +154,13 @@ from_json(Req, #base_state{chef_db_context = DbContext,
     ok = chef_object_db:add_to_solr(DataBagItem, ItemData, Darklaunch),
     case chef_db:create(DataBagItem, DbContext, ActorId) of
         {conflict, _} ->
+            %% ignore return value of solr delete, this is best effort.
+            chef_object_db:delete_from_solr(DataBagItem, Darklaunch),
+            ?BASE_RESOURCE:object_creation_error_hook(DataBagItem, ActorId),
+            %% FIXME: created authz_id is leaked for this case, cleanup?
             LogMsg = {data_bag_name_conflict, DataBagName},
-            {{halt, 409}, chef_wm_util:set_json_body(Req,
-                                                       conflict_message(data_bag_item, ItemName, DataBagName)),
+            ConflictMsg = conflict_message(data_bag_item, ItemName, DataBagName),
+            {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
              State#base_state{log_msg = LogMsg}};
         ok ->
             LogMsg = {created, DataBagName},
@@ -179,6 +183,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
         What ->
             %% ignore return value of solr delete, this is best effort.
             chef_object_db:delete_from_solr(DataBagItem, Darklaunch),
+            ?BASE_RESOURCE:object_creation_error_hook(DataBagItem, ActorId),
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
