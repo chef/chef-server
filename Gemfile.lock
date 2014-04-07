@@ -1,7 +1,7 @@
 GIT
   remote: git://github.com/opscode/chef-pedant.git
-  revision: 734c287bc15d08f91cf9f1ba6b62eeae04296fe0
-  tag: 1.0.25
+  revision: ca3b8ea51e3b3f3c4f41ea168fef9a48d00719e3
+  tag: 1.0.26
   specs:
     chef-pedant (1.0.25)
       activesupport (~> 3.2.8)
@@ -27,7 +27,7 @@ GIT
 PATH
   remote: .
   specs:
-    oc-chef-pedant (1.0.23)
+    oc-chef-pedant (1.0.26)
       chef-pedant (>= 1.0.0)
 
 GEM
