@@ -56,12 +56,6 @@ describe 'The web app' do
     it { should be_running }
   end
 
-  describe service('postgresql') do
-    pending do
-      it { should be_running }
-    end
-  end
-
   describe port(4060) do
     it { should be_listening }
   end
