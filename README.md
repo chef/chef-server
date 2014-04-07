@@ -46,4 +46,4 @@ to execute these tests.
 
 If you want to run all the tests without the internal organization tests run
 
-```private-chef-ctl test --all```
+```private-chef-ctl test --all --exclude-internal-orgs```
