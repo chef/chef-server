@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2013 Opscode, Inc.
+# Copyright:: Copyright (c) 2013-2014 Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 name "python"
 version "2.7.5"
 
+dependency "gdbm"
 dependency "ncurses"
 dependency "zlib"
 dependency "openssl"
@@ -36,7 +37,8 @@ env = {
 build do
   command ["./configure",
            "--prefix=#{install_dir}/embedded",
-           "--enable-shared"].join(" "), :env => env
+           "--enable-shared",
+           "--with-dbmliborder=gdbm"].join(" "), :env => env
   command "make", :env => env
   command "make install", :env => env
 
