@@ -16,6 +16,12 @@ The following items are the set of security fixes that have been applied
 since Enterprise Chef 1.4.8
 
 * [opscode-webui] Incorporate atches to address several identified potential Denial of Service vulnerabilities in the Rails framework.
+* [libcurl] Patch for wrong re-use of connections (CVE-2014-0138)
+* [libcurl] Patch for address wildcard certificate validation (CVE-2014-0139)
+* [libcurl] Patch for not verifying certs for TLS to IP address / Darwinssl (CVE-2014-1563)
+* [libcurl] Patch for not verifying certs for TLS to IP address / Winssl (CVE-2014-2522)
+* [openssl] Patch for heartbeat extension exposing process memory (CVE-2014-0160)
+* [libyaml] Patch for arbitrary code execution vulnerability (CVE-2014-2525)
 
 ## 1.4.8 (2014-02-28)
 

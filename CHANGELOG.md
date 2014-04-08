@@ -2,8 +2,21 @@
 
 ## 1.4.9 (2014-03-??)
 
+### curl
+* security upgrade to 7.36.0
+  * CVE-2014-0138
+  * CVE-2014-0139
+  * CVE-2014-1263
+  * CVE-2014-2522
+
+### libyaml 0.1.6
+* CVE-2014-2525: Heap-based buffer overflow allows context-dependent attackers to execute arbitrary code
+
 ### private-chef-cookbooks
 * [OC-9213] Provide default value for jetty log path to prevent deletion of files in ``/root``.
+
+### openssl 1.0.1f
+* CVE-2014-0160: heartbeat extension allows remote attackers to obtain sensitive information from process memory
 
 ### opscode-omnibus
 * argument validation fix in private-chef-ctl to allow ``private-chef-ctl password`` to work.
