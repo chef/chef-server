@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2012 Opscode, Inc.
+# Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,7 @@ name "openssl"
 dependency "zlib"
 dependency "cacerts"
 dependency "libgcc"
+dependency "makedepend"
 
 
 if platform == "aix"
@@ -29,9 +30,9 @@ if platform == "aix"
   source :url => "http://www.openssl.org/source/openssl-1.0.1c.tar.gz",
          :md5 => "ae412727c8c15b67880aef7bd2999b2e"
 else
-  version "1.0.1f"
-  source :url => "http://www.openssl.org/source/openssl-1.0.1f.tar.gz",
-         :md5 => "f26b09c028a0541cab33da697d522b25"
+  version "1.0.1g"
+  source :url => "http://www.openssl.org/source/openssl-1.0.1g.tar.gz",
+         :md5 => "de62b43dfcd858e66a74bee1c834e959"
 end
 
 relative_path "openssl-#{version}"
@@ -135,6 +136,9 @@ build do
                         "-I#{install_dir}/embedded/include",
                         "-Wl,-rpath,#{install_dir}/embedded/lib"].join(" ")
                       end
+
+  # openssl build process uses a `makedepend` tool that we build inside the bundle.
+  env["PATH"] = "#{install_dir}/embedded/bin" + File::PATH_SEPARATOR + ENV["PATH"]
 
   # @todo: move into omnibus-ruby
   has_gmake = system("gmake --version")
