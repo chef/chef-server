@@ -12,6 +12,7 @@ OcId::Application.routes.draw do
     get '/auth/failure', to: 'sessions#retry'
 
     resources :sessions, only: [ :new, :create, :destroy ]
+    resources :errors, only: :show
 
     namespace :v1 do
       resources :users, only: :show
