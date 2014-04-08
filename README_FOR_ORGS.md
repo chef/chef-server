@@ -28,18 +28,18 @@ marked as ready for migration. The options below will do this, and will also
   delete any SQL records that exist for the org:
 
 ```
-mover_util:reset_org(OrgName).
+mover_util:reset_org(OrgName, *_migration_callback:migration_type()).
 
 ```
 * To prepare multiple orgs:
 
 ```
-mover_util:reset_orgs([Org1, Org2, ... OrgN]).
+mover_util:reset_orgs([Org1, Org2, ... OrgN], *_migration_callback:migration_type()).
 ```
 * To prepare orgs listed in a file (single line per org):
 
 ```
-mover_util:reset_orgs_from_file("/path/to/file").
+mover_util:reset_orgs_from_file("/path/to/file", *_migration_callback:migration_type()).
 ```
 * If you need to mark an org as ready for migration without deleting
   existing SQL records, you can do so as follows:

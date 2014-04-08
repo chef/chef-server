@@ -18,6 +18,15 @@
 %%         Not Attempted: org-name-list
 %% '
 %%
+%% Usage:
+%%  migrate:
+%%    will run with mover_phase_1_migration_callback and normal noise level
+%%  migrate silent:
+%%    will run with mover_phase_1_migration_callback and silent noise level
+%%  migrate <migration_callback> <noise_level>:
+%%    will run a migration on any valid <migration_callback> and noise level
+%%    where <noise_level> is "normal" or "silent"
+%%
 %% <b>Important</b>: this must be run as root or connect will fail.
 %% If an error occurs, it will also be displayed on the console.
 %% If any org encounters errors in migrating or resetting state,
@@ -35,16 +44,25 @@
 
 
 main([]) ->
-    main(normal);
+    main(mover_phase_1_migration_callback, normal);
 main(["silent"]) ->
-    main(silent);
-main(Other) when is_list(Other) ->
-    io:fwrite("Unknown argument(s): ~p.~nUsage: migrate [silent]~n", [Other]),
-    halt(?FAILURE_EXIT);
-main(NoiseLevel) when is_atom(NoiseLevel) ->
+    main(mover_phase_1_migration_callback, silent);
+main([Other]) ->
+    bad_noise_argument(Other);
+main([MigrationType, NoiseLevel]) ->
+    case NoiseLevel of
+        "silent" ->
+            main(list_to_atom(MigrationType), silent);
+        "normal" ->
+            main(list_to_atom(MigrationType), normal);
+        _ ->
+            bad_noise_argument(NoiseLevel)
+    end.
+
+main(MigrationType, NoiseLevel) ->
     {ExitCode, Message} = try
         init_network(),
-        Results = migrate(),
+        Results = migrate(MigrationType),
         parse_and_format(NoiseLevel, Results)
     catch
         error:{error, HaltWith} ->
@@ -56,6 +74,10 @@ main(NoiseLevel) when is_atom(NoiseLevel) ->
     end,
     io:fwrite("~n~s~n~n", [Message]),
     halt(ExitCode).
+
+bad_noise_argument(Argument) ->
+    io:fwrite("Unknown argument(s): ~p.~nUsage: migrate [silent] or migrate [migration_type] [silent|normal]~n", [Argument]),
+    halt(?FAILURE_EXIT).
 
 init_network() ->
     net_kernel:start([?SELF]),
@@ -69,12 +91,12 @@ init_network() ->
         end,
     verify_ping(R, "RPC to mover service failed").
 
-migrate() ->
+migrate(MigrationType) ->
 %[{status,complete},
 %       {successful_orgs,["org1"]},
 %       {failed_orgs,["org2"]},
 %       {reset_failed,["org3", "org4"]}].
-    rpc:call(?MOVER, ?MOVER_MOD, migrate_all, []).
+    rpc:call(?MOVER, ?MOVER_MOD, migrate_all, [MigrationType]).
 
 parse_and_format(NoiseLevel, Results) ->
     C0 = status_to_exit_code(proplists:get_value(status, Results)),
