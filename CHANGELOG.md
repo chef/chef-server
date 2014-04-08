@@ -23,9 +23,14 @@
 ### nokigiri
 * upgrade to nokigiri 1.6.1
 
+### libyaml 0.1.6
+* CVE-2014-2525: Heap-based buffer overflow allows context-dependent attackers to execute arbitrary code
+
 ### oc_erchef 0.24.2
-* add oc_chef_action to oc_erchef (support for opscode-analytics actions
-  package)
+* add oc_chef_action to oc_erchef (support for opscode-analytics actions package)
+
+### openssl 1.0.1f
+* CVE-2014-0160: heartbeat extension allows remote attackers to obtain sensitive information from process memory
 
 ### opscode-account 1.46.0
 * speed up internal org-creation by removing Couchdb _all_dbs call

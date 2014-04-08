@@ -36,6 +36,8 @@ applied since Enterprise Chef 11.1.2:
 * [libcurl] Patch for address wildcard certificate validation (CVE-2014-0139)
 * [libcurl] Patch for not verifying certs for TLS to IP address / Darwinssl (CVE-2014-1563)
 * [libcurl] Patch for not verifying certs for TLS to IP address / Winssl (CVE-2014-2522)
+* [openssl] Patch for heartbeat extension exposing process memory (CVE-2014-0160)
+* [libyaml] Patch for arbitrary code execution vulnerability (CVE-2014-2525)
 
 ## 11.1.2 (2014-02-28)
 
