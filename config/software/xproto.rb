@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
+# Copyright:: Copyright (c) 2014 Chef, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,13 @@
 # limitations under the License.
 #
 
-name "libyaml"
-version '0.1.6'
+name "xproto"
+version "7.0.25"
 
-source :url => "http://pyyaml.org/download/libyaml/yaml-#{version}.tar.gz",
-       :md5 => '5fe00cda18ca5daeb43762b80c38e06e'
+source :url => 'http://xorg.freedesktop.org/releases/individual/proto/xproto-7.0.25.tar.gz',
+  :md5 => 'a47db46cb117805bd6947aa5928a7436'
 
-relative_path "yaml-#{version}"
+relative_path 'xproto-7.0.25'
 
 configure_env =
   case platform
@@ -46,7 +46,7 @@ configure_env =
   when "solaris2"
     {
       "LDFLAGS" => "-R#{install_dir}/embedded/lib -L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include -static-libgcc",
-      "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include -DNO_VIZ"
+      "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include"
     }
   else
     {

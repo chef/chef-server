@@ -24,7 +24,7 @@ dependency "libedit"
 dependency "openssl"
 dependency "libyaml"
 dependency "libiconv"
-dependency "gdbm" if (platform == "mac_os_x" or platform == "freebsd" or platform == "aix")
+dependency "gdbm"
 dependency "libgcc" if (platform == "solaris2" and Omnibus.config.solaris_compiler == "gcc")
 
 source :url => "http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-#{version}.tar.gz",
@@ -100,7 +100,7 @@ env =
 build do
   configure_command = ["./configure",
                        "--prefix=#{install_dir}/embedded",
-                       "--with-out-ext=fiddle",
+                       "--with-out-ext=fiddle,dbm",
                        "--enable-shared",
                        "--enable-libedit",
                        "--with-ext=psych",

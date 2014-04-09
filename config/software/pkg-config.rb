@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
+# Copyright:: Copyright (c) 2014 Chef, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,15 @@
 # limitations under the License.
 #
 
-name "libyaml"
-version '0.1.6'
+name "pkg-config"
+version "0.28"
 
-source :url => "http://pyyaml.org/download/libyaml/yaml-#{version}.tar.gz",
-       :md5 => '5fe00cda18ca5daeb43762b80c38e06e'
+dependency "libiconv" if platform == "freebsd"
 
-relative_path "yaml-#{version}"
+source :url => 'http://pkgconfig.freedesktop.org/releases/pkg-config-0.28.tar.gz',
+  :md5 => 'aa3c86e67551adc3ac865160e34a2a0d'
+
+relative_path 'pkg-config-0.28'
 
 configure_env =
   case platform
@@ -46,7 +48,7 @@ configure_env =
   when "solaris2"
     {
       "LDFLAGS" => "-R#{install_dir}/embedded/lib -L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include -static-libgcc",
-      "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include -DNO_VIZ"
+      "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include"
     }
   else
     {
@@ -55,8 +57,10 @@ configure_env =
     }
   end
 
+paths = [ "#{install_dir}/embedded/bin/pkgconfig" ]
+
 build do
-  command "./configure --prefix=#{install_dir}/embedded", :env => configure_env
+  command "./configure --prefix=#{install_dir}/embedded --disable-debug --disable-host-tool --with-internal-glib --with-pc-path=#{paths*':'}", :env => configure_env
   command "make -j #{max_build_jobs}", :env => configure_env
   command "make -j #{max_build_jobs} install", :env => configure_env
 end

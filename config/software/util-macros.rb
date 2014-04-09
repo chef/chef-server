@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
+# Copyright:: Copyright (c) 2014 Chef, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,13 @@
 # limitations under the License.
 #
 
-name "libyaml"
-version '0.1.6'
+name "util-macros"
+version "1.18.0"
 
-source :url => "http://pyyaml.org/download/libyaml/yaml-#{version}.tar.gz",
-       :md5 => '5fe00cda18ca5daeb43762b80c38e06e'
+source :url => 'http://xorg.freedesktop.org/releases/individual/util/util-macros-1.18.0.tar.gz',
+  :md5 => 'fd0ba21b3179703c071bbb4c3e5fb0f4'
 
-relative_path "yaml-#{version}"
+relative_path 'util-macros-1.18.0'
 
 configure_env =
   case platform
@@ -46,7 +46,7 @@ configure_env =
   when "solaris2"
     {
       "LDFLAGS" => "-R#{install_dir}/embedded/lib -L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include -static-libgcc",
-      "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include -DNO_VIZ"
+      "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include"
     }
   else
     {

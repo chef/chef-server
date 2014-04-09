@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
+# Copyright:: Copyright (c) 2014 Chef, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,17 @@
 # limitations under the License.
 #
 
-name "libyaml"
-version '0.1.6'
+name "makedepend"
+version "1.0.5"
 
-source :url => "http://pyyaml.org/download/libyaml/yaml-#{version}.tar.gz",
-       :md5 => '5fe00cda18ca5daeb43762b80c38e06e'
+source :url => 'http://xorg.freedesktop.org/releases/individual/util/makedepend-1.0.5.tar.gz',
+       :md5 => 'efb2d7c7e22840947863efaedc175747'
 
-relative_path "yaml-#{version}"
+relative_path 'makedepend-1.0.5'
+
+dependency "xproto"
+dependency 'util-macros'
+dependency 'pkg-config'
 
 configure_env =
   case platform
@@ -46,7 +50,7 @@ configure_env =
   when "solaris2"
     {
       "LDFLAGS" => "-R#{install_dir}/embedded/lib -L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include -static-libgcc",
-      "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include -DNO_VIZ"
+      "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include"
     }
   else
     {
@@ -54,6 +58,13 @@ configure_env =
       "CFLAGS" => "-I#{install_dir}/embedded/include -L#{install_dir}/embedded/lib"
     }
   end
+
+configure_env["PKG_CONFIG_PATH"] = "#{install_dir}/embedded/lib/pkgconfig" +
+  File::PATH_SEPARATOR +
+  "#{install_dir}/embedded/share/pkgconfig"
+
+# For pkg-config
+configure_env["PATH"] = "#{install_dir}/embedded/bin" + File::PATH_SEPARATOR + ENV["PATH"]
 
 build do
   command "./configure --prefix=#{install_dir}/embedded", :env => configure_env

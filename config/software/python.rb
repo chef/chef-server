@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2013 Opscode, Inc.
+# Copyright:: Copyright (c) 2013-2014 Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 name "python"
 version "2.7.5"
 
+dependency "gdbm"
 dependency "ncurses"
 dependency "zlib"
 dependency "openssl"
@@ -36,12 +37,15 @@ env = {
 build do
   command ["./configure",
            "--prefix=#{install_dir}/embedded",
-           "--enable-shared"].join(" "), :env => env
+           "--enable-shared",
+           "--with-dbmliborder=gdbm"].join(" "), :env => env
   command "make", :env => env
   command "make install", :env => env
 
-  # There exists no configure flag to tell Python to not compile readline support :(
   block do
+    # There exists no configure flag to tell Python to not compile readline support :(
     FileUtils.rm_f(Dir.glob("#{install_dir}/embedded/lib/python2.7/lib-dynload/readline.*"))
+    # Remove unused extension which is known to make health checks fail on CentOS 6.
+    FileUtils.rm_f(Dir.glob("#{install_dir}/embedded/lib/python2.7/lib-dynload/_bsddb.*"))
   end
 end
