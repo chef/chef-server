@@ -27,7 +27,7 @@
 ### oc_erchef 0.24.2
 * add oc_chef_action to oc_erchef (support for opscode-analytics actions package)
 
-### openssl 1.0.1f
+### openssl 1.0.1g
 * CVE-2014-0160: heartbeat extension allows remote attackers to obtain sensitive information from process memory
 
 ### opscode-account 1.46.0
