@@ -1,6 +1,6 @@
 # Enterprise Chef Release Notes
 
-## 1.4.9 (2014-03-??)
+## 1.4.9 (2014-04-09)
 
 ### Bug Fixes:
 
