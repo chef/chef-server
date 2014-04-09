@@ -42,8 +42,10 @@ build do
   command "make", :env => env
   command "make install", :env => env
 
-  # There exists no configure flag to tell Python to not compile readline support :(
   block do
+    # There exists no configure flag to tell Python to not compile readline support :(
     FileUtils.rm_f(Dir.glob("#{install_dir}/embedded/lib/python2.7/lib-dynload/readline.*"))
+    # Remove unused extension which is known to make health checks fail on CentOS 6.
+    FileUtils.rm_f(Dir.glob("#{install_dir}/embedded/lib/python2.7/lib-dynload/_bsddb.*"))
   end
 end
