@@ -2,3 +2,7 @@ chef:
   endpoint: https://33.33.33.10
   superuser: pivotal
   key_path: <%= Rails.root %>/config/webui_priv.pem
+doorkeeper:
+  administrators:
+    - rainbowdash
+    
