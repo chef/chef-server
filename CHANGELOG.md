@@ -1,18 +1,16 @@
 # Enterprise Chef Changelog
 
-## 11.1.3 (Unreleased)
+## 11.1.3 (2014-04-09)
 
 ### berkshelf
-* upgrade to latest master
 * new dep: libffi
 * new dep: libarchive
 
-### curl
-* security upgrade to 7.36.0
-  * CVE-2014-0138
-  * CVE-2014-0139
-  * CVE-2014-1263
-  * CVE-2014-2522
+### curl 7.36.0
+* CVE-2014-0138: libcurl can in some circumstances re-use the wrong connection when asked to do transfers using other protocols than HTTP and FTP
+* CVE-2014-0139: libcurl incorrectly validates wildcard SSL certificates containing literal IP addresses when built to use OpenSSL
+* CVE-2014-1263: When asked to do a TLS connection (HTTPS, FTPS, IMAPS, etc) to a URL specified with an IP address instead of a name, libcurl built to use Darwinssl would wrongly not verify the server's name in the certificate
+* CVE-2014-2522: When asked to do a TLS connection (HTTPS, FTPS, IMAPS, etc) to a URL specified with an IP address instead of a name, libcurl built to use Winssl would wrongly not verify the server's name in the certificate
 
 ### chef
 * upgrade to version 11.10.4

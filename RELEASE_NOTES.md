@@ -1,15 +1,10 @@
 # Enterprise Chef Release Notes
 
-## 11.1.3 (Unreleased)
+## 11.1.3 (2014-04-09)
 
 ### What's New:
 
 The following items are new for Enterprise Chef 11.1.3 and/or are changes from previous versions:
-
-
-### New and Updated Components:
-
-The following components have been upgraded since 11.1.2:
 
 * [core] Erlang r15b03-01 w/ multiple stability and bug fixes
 * [core] Chef 11.10.4 (was 11.6.0)
