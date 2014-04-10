@@ -76,7 +76,7 @@ add_command "ha-status", "Show the status of high availability services.", 1 do
 
   vrrp_instance_ipaddress = running_config['private_chef']['keepalived']['vrrp_instance_ipaddress']
   vrrp_instance_ipaddress_dev = running_config['private_chef']['keepalived']['vrrp_instance_ipaddress_dev']
-  has_vrrp_addr = `ip a show dev #{vrrp_instance_ipaddress_dev}` =~ /#{vrrp_instance_ipaddress}/
+  has_vrrp_addr = `ip a show dev #{vrrp_instance_ipaddress_dev}` =~ /inet6? #{Regexp.escape(vrrp_instance_ipaddress)}/
 
   if has_vrrp_addr
     if current_cluster_status == "master"
