@@ -40,7 +40,10 @@ There are some tests that only make sense to run in certain environments or that
 
 The opscode-account endpoint for internal org creation and updating (```/internal-organizations```) communicates via the internal account port. That endpoint is not exposed via the external-lb. Therefore, they will fail when kicking off the tests from a point external to the lb (say, developer's laptop hitting hosted for pedant). However, they are useful in validating that these endpoint are still functioning, so if you are running pedant somewhere with access to the internal-lb, simply run
 
-```private-chef-ctl test --only-internal-orgs``` or ```private-chef-ctl test --include-internal-orgs```
+```private-chef-ctl test --all``` or ```private-chef-ctl test --only-internal-orgs```
 
 to execute these tests.
 
+If you want to run all the tests without the internal organization tests run
+
+```private-chef-ctl test --all --exclude-internal-orgs```

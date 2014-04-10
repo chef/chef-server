@@ -194,7 +194,7 @@ describe "/organizations", :organizations do
             },
             :status => 201
         )
-        request.should have_key("uri")
+        JSON.parse(request).should have_key("uri")
       end
     end
 
@@ -246,7 +246,7 @@ describe "/organizations", :organizations do
         # best tests I can think of
         request = authenticated_request(:PUT,"#{platform.internal_account_url}/internal-organizations/#{orgname}",          superuser, :payload => put_request_body)
         request.should look_like(:status => 200)
-        request.should have_key("uri")
+        JSON.parse(request).should have_key("uri")
 
         get("#{platform.server}/organizations/ponyville", superuser).should look_like(
           :body => {
