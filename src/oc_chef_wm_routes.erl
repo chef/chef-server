@@ -9,6 +9,7 @@
          bulk_route_fun/2,
          bulk_route_fun/3,
          route/3,
+         org_name/1,
          url_for_search_item_fun/3
         ]).
 
@@ -29,10 +30,16 @@ render_template(Template, BaseURI, Args) when is_list(BaseURI) ->
 render_template(Template, Req, Args) ->
     render_template(Template, chef_wm_util:base_uri(Req), Args).
 
-%% @doc Extract the organization name from the Request's path.  Depends on us always using
-%% the atom `organization_id' in our dispatch rules for the organization name.
-org_name(Req) ->
-    list_to_binary(wrq:path_info(organization_id, Req)).
+%% @doc Extract the organization name from the Request's path.  If organization name is
+%% present it must be captured as the atom `organization_id' in our dispatch rules
+%% for the organization name. If no organization is in the URI it will return
+%% undefined
+org_name(#wm_reqdata{} = Req) ->
+    org_name(wrq:path_info(organization_id, Req));
+org_name(undefined) ->
+    undefined;
+org_name(Name) ->
+    list_to_binary(Name).
 
 %% @doc Generate a search URL.  Expects `Args' to be a proplist with a `search_index' key
 %% (the value of which can be either a binary or string).  The organization in the URL will
@@ -50,6 +57,7 @@ route(organization_search, Req, Args) ->
 %% Create a url for an individual role.  Requires a 'role_name' argument
 route(node, Req, Args) -> route_organization_rest_object("nodes", Req, Args);
 route(role, Req, Args) -> route_organization_rest_object("roles", Req, Args);
+route(user, Req, Args) -> route_rest_object("users", Req, Args);
 route(data_bag, Req, Args) -> route_organization_rest_object("data", Req, Args);
 route(data_bag_item, Req, [{name, {DataBagName, _}}]) -> route(data_bag, Req, [{name, DataBagName}]);
 route(environment, Req, Args) -> route_organization_rest_object("environments", Req, Args);
@@ -66,8 +74,6 @@ route(sandbox, Req, Args) ->
 route(cookbook_version, Req, Args) ->
     Org = org_name(Req),
     {name, Name} = lists:keyfind(name, 1, Args),
-    %% FIXME: maybe just pull out name and version from req
-    %% FIXME: this is wrong, but need something here
     Template = "/organizations/~s/cookbooks/~s",
     TemplateArgs = [Org, Name],
     {name, Name} = lists:keyfind(name, 1, Args),
@@ -80,6 +86,11 @@ route_organization_rest_object(ParentName, Req, Args) ->
     TemplateArgs = [Org, ParentName, Name],
     render_template(Template, Req, TemplateArgs).
 
+route_rest_object(ParentName, Req, Args) ->
+    {name, Name} = lists:keyfind(name, 1, Args),
+    Template = "/~s/~s",
+    TemplateArgs = [ParentName, Name],
+    render_template(Template, Req, TemplateArgs).
 
 %% @doc Extract various bits of information from a Webmachine request.
 %%
@@ -105,10 +116,19 @@ bulk_route_fun(Type, Req) when Type =:= role;
                                Type =:= data_bag_item;
                                Type =:= container;
                                Type =:= group ->
+
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(Type),
     fun(Name) ->
             render_template(Template, BaseURI, [Org, Name])
+    end;
+
+bulk_route_fun(user, Req) ->
+
+    BaseURI = chef_wm_util:base_uri(Req),
+    Template = template_for_type(user),
+    fun(Name) ->
+            render_template(Template, BaseURI, [Name])
     end;
 %% Need to use this fun head instead of bulk_route_fun/3 for cookbook_versions in the case
 %% that you need to generate URLs for versions of lots of different cookbooks at once,
@@ -152,7 +172,9 @@ template_for_type({data_bag, _}) ->
 template_for_type(container) ->
     "/organizations/~s/containers/~s";
 template_for_type(group) ->
-    "/organizations/~s/groups/~s".
+    "/organizations/~s/groups/~s";
+template_for_type(user) ->
+    "/users/~s".
 
 
 %% This is extracted from search, needs more cleanup

@@ -43,9 +43,7 @@
 %% Also initializes chef_db_context and reqid fields of base_state.
 %% And handle other base_state init that depends on `Req'.
 service_available(Req, State) ->
-    %% TODO: query overload here and send 503 also can consult
-    %% config/darklaunch to determine if we are in maint mode.
-    OrgName = list_to_binary(wrq:path_info(organization_id, Req)),
+    OrgName = oc_chef_wm_routes:org_name(Req),
     State0 = set_req_contexts(Req, State),
     State1 = State0#base_state{organization_name = OrgName},
     spawn_stats_hero_worker(Req, State1),
@@ -273,11 +271,17 @@ is_authorized(Req, State) ->
             {"X-Ops-Sign version=\"1.0\" version=\"1.1\"", ReqOther, StateOther}
     end.
 
-%% Clients are inherently a member of the org, but users are not.  If
-%% we add a user to the org, and then disassociate them, there will be
+%% Clients are inherently a member of the org, but users are not.  For purposes of acl checks,
+%% requests that have no org (/users, /verify_password, etc) will be considered automatically valid/
+%% part of the (nonexistant) org, leaving it up to checks of individual resources to make
+%% further determinations.
+%%
+%% If we add a user to the org, and then disassociate them, there will be
 %% acls left behind granting permissions on the org objects, so we
 %% must check user association and permissions
 authorized_by_org_membership_check(Req, #base_state{requestor=#chef_client{}}=State) ->
+    {true, Req, State};
+authorized_by_org_membership_check(Req, #base_state{organization_name = undefined} = State) ->
     {true, Req, State};
 authorized_by_org_membership_check(Req, State = #base_state{organization_name = OrgName,
                                                             chef_db_context = DbContext}) ->
@@ -330,8 +334,8 @@ forbidden_message(unverified_org_membership, User, Org) ->
                     #oc_chef_group{},
                     object_id(),
                     any()) -> ok.
-delete_object(DbContext, Object, RequestId, Darklaunch) ->
-    oc_chef_object_db:delete(DbContext, Object, RequestId, Darklaunch).
+delete_object(DbContext, Object, RequestorId, Darklaunch) ->
+    oc_chef_object_db:delete(DbContext, Object, RequestorId, Darklaunch).
 
 set_req_contexts(Req, #base_state{reqid_header_name = HeaderName} = State) ->
     ReqId = read_req_id(HeaderName, Req),
@@ -405,7 +409,9 @@ set_authz_id(Id, #data_state{}=D) ->
 set_authz_id(Id, #container_state{} = C) ->
     C#container_state{container_authz_id = Id};
 set_authz_id(Id, #group_state{} = G) ->
-    G#group_state{group_authz_id = Id}.
+    G#group_state{group_authz_id = Id};
+set_authz_id(Id, #user_state{} = U) ->
+    U#user_state{user_authz_id = Id}.
 
 
 
@@ -521,6 +527,7 @@ object_creation_hook(#chef_client{}=Client,
 object_creation_hook(Object, _State) ->
     %% Everything else passes through unaffected
     Object.
+
 
 %% @doc Perform needed post-creation cleanup on Client objects.
 %% Clients must be added to the clients group, and newly-created
