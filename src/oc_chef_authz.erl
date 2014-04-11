@@ -74,7 +74,8 @@
                                  'node' |
                                  'role' |
                                  'sandboxes' |
-                                 'search'.
+                                 'search' |
+                                 'user'.
 
 -spec ping() -> pong | pang.
 ping() ->
@@ -485,7 +486,8 @@ object_type_to_container_name(group)       -> <<"groups">>;
 object_type_to_container_name(node)        -> <<"nodes">>;
 object_type_to_container_name(role)        -> <<"roles">>;
 object_type_to_container_name(sandbox)     -> <<"sandboxes">>;
-object_type_to_container_name(search)      -> <<"search">>.
+object_type_to_container_name(search)      -> <<"search">>;
+object_type_to_container_name(user)        -> <<"users">>.
 
 %% @doc When creating a new Authz entity in a given container, we need to ensure we're
 %% creating the correct kind.
