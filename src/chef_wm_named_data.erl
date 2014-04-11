@@ -61,7 +61,8 @@
          init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
-         validate_request/3
+         validate_request/3,
+         conflict_message/1
         ]).
 
 -export([
@@ -132,43 +133,12 @@ create_path(Req, #base_state{resource_state = #data_state{
                                data_bag_item_name = ItemName}}=State) ->
     {binary_to_list(ItemName), Req, State}.
 
-from_json(Req, #base_state{chef_db_context = DbContext,
-                           requestor_id = ActorId,
+from_json(Req, #base_state{
                            resource_state = #data_state{data_bag_name = DataBagName,
-                                                        data_bag_item_name = ItemName,
-                                                        data_bag_item_ejson = ItemData},
-                           organization_guid = OrgId,
-                           darklaunch = Darklaunch} = State) ->
-
-    %% Note: potential race condition.  If we don't have perms, the create will fail.
-    %% Although we checked rights above, they could have changed.
-
-    %% the 'unset' atom is where an AuthzId would typically go. Since chef_data_bag_item
-    %% objects do not have their own AuthzId, we hard-code the placeholder.
-    DataBagItem = chef_object:new_record(chef_data_bag_item, OrgId, unset,
-                                         {DataBagName, ItemData}),
-    %% We send the data_bag_item data to solr for indexing *first*. If it fails, we'll error out on a
-    %% 500 and client can retry. If we succeed and the db call fails or conflicts, we can
-    %% safely send a delete to solr since this is a new data_bag_item with a unique ID unknown to the
-    %% world.
-    ok = chef_object_db:add_to_solr(DataBagItem, ItemData, Darklaunch),
-    case chef_db:create(DataBagItem, DbContext, ActorId) of
-        {conflict, _} ->
-            %% ignore return value of solr delete, this is best effort.
-            chef_object_db:delete_from_solr(DataBagItem, Darklaunch),
-            ?BASE_RESOURCE:object_creation_error_hook(DataBagItem, ActorId),
-            %% FIXME: created authz_id is leaked for this case, cleanup?
-            LogMsg = {data_bag_name_conflict, DataBagName},
-            ConflictMsg = conflict_message(data_bag_item, ItemName, DataBagName),
-            {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
-             State#base_state{log_msg = LogMsg}};
-        ok ->
-            LogMsg = {created, DataBagName},
-            Uri = ?BASE_ROUTES:route(data_bag, Req, [{name, DataBagName}]),
-            %% set the Location header to return a 201 Created response. Don't use
-            %% set_uri_of_created_resource since we want the body to be the data_bag_item
-            %% data.
-            Req1 = wrq:set_resp_header("Location", binary_to_list(Uri), Req),
+                                                        data_bag_item_ejson = ItemData}
+                          } = State) ->
+    case chef_wm_base:create_from_json(Req, State, chef_data_bag_item, {authz_id,undefined}, {DataBagName, ItemData}) of
+        {true, _, NewState} = BaseCreateResult ->
             %% The Ruby API returns created items as-is, but with added chef_type and
             %% data_bag fields. If those fields are present in the request, they are put
             %% into the raw item data, but the values are overwritten for the return. When
@@ -178,13 +148,10 @@ from_json(Req, #base_state{chef_db_context = DbContext,
             %% sane. It is very confusing that you can specify bogus values, that look like
             %% they are ignored, but actually end up in the item data.
             ItemDataWithCruft = chef_data_bag_item:add_type_and_bag(DataBagName, ItemData),
-            Req2 = chef_wm_util:set_json_body(Req1, ItemDataWithCruft),
-            {true, Req2, State#base_state{log_msg = LogMsg}};
-        What ->
-            %% ignore return value of solr delete, this is best effort.
-            chef_object_db:delete_from_solr(DataBagItem, Darklaunch),
-            ?BASE_RESOURCE:object_creation_error_hook(DataBagItem, ActorId),
-            {{halt, 500}, Req, State#base_state{log_msg = What}}
+            Req1 = chef_wm_util:set_json_body(Req, ItemDataWithCruft),
+            {true, Req1, NewState};
+        AnyOtherCase ->
+            AnyOtherCase
     end.
 
 to_json(Req, State) ->
@@ -218,7 +185,7 @@ items_for_data_bag(Req, #base_state{chef_db_context = DbContext,
     UriMap = [ {Name, RouteFun(Name)}  || Name <- ItemNames ],
     chef_json:encode({UriMap}).
 
-conflict_message(data_bag_item, ItemName, BagName) ->
+conflict_message({BagName, ItemName}) ->
     Msg = <<"Data Bag Item '", ItemName/binary, "' already exists in Data Bag '",
             BagName/binary, "'.">>,
     {[{<<"error">>, [Msg]}]}.
