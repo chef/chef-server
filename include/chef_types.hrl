@@ -185,16 +185,17 @@
         'username',                         %% username
         'email',                            %% email - left null
         'public_key',                       %% public key - might be null
+        'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION, %% public key version
         'hashed_password',                  %% password
         'salt',                             %% password salt
         'hash_type',                        %% hash used to scramble password
         'last_updated_by',                  %% authz guid of last actor to update object -
-                                            %% it is  a place holder in this case
         'created_at',                       %% time created at
         'updated_at',                       %% time updated at
         'external_authentication_uid',      %% External UID, such as LDAP - nullable
-        'recovery_authentication_enabled',  %% not used, will be null
-        'admin'                             %% if the user is an admin
+        'recovery_authentication_enabled',  %%
+        'admin',                            %% if the user is an admin
+        'serialized_object'                 %%
        }).
 
 %% These types are just convenient shorthands for subsets of our
@@ -205,7 +206,8 @@
                        #chef_environment{} |
                        #chef_client{} |
                        #chef_role{} |
-                       #chef_node{} .
+                       #chef_node{} |
+                       #chef_user{}.
 
 -type chef_indexable_object() :: #chef_environment{} |
                                  #chef_data_bag_item{} |
