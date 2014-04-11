@@ -66,9 +66,7 @@
          to_json/2]).
 
 -ifdef(TEST).
--export([
-        spawn_solr_query/4         
-        ]).
+-compile([export_all]).
 -endif.
 
 init(Config) ->
