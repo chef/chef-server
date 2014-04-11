@@ -276,16 +276,18 @@ client_record_to_authz_id(_Context, ClientRecord) ->
                       binary()) -> #chef_client{} | #chef_user{} |
                                    %% TODO: fix chef_wm so we can just return 'not_found'
                                    {'not_found', 'client'}.
-fetch_requestor(Context, OrgId, ClientName) ->
-    case fetch(#chef_client{org_id = OrgId, name = ClientName}, Context) of
-        not_found ->
-            case fetch(#chef_user{username = ClientName}, Context) of
+fetch_requestor(Context, undefined, UserName) ->
+            case fetch(#chef_user{username = UserName}, Context) of
                 not_found ->
                     %% back compat for now until we update chef_wm
                     {not_found, client};
                 #chef_user{} = User ->
                     User
             end;
+fetch_requestor(Context, OrgId, ClientName) ->
+    case fetch(#chef_client{org_id = OrgId, name = ClientName}, Context) of
+        not_found ->
+            fetch_requestor(Context, undefined, ClientName);
         #chef_client{} = Client ->
             Client
     end.
