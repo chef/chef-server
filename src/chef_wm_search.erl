@@ -65,6 +65,10 @@
          resource_exists/2,
          to_json/2]).
 
+-ifdef(TEST).
+-compile([export_all]).
+-endif.
+
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
@@ -255,10 +259,16 @@ spawn_solr_query(Label, Url, Query, ReqId) ->
     Parent = self(),
     proc_lib:spawn_link(
       fun() ->
-              Result = stats_hero:ctime(ReqId, {chef_solr, Label},
-                                        fun() ->
-                                                chef_solr:search(Query, Url)
-                                        end),
+              Result =
+                  try
+                      stats_hero:ctime(ReqId, {chef_solr, Label},
+                                       fun() ->
+                                               chef_solr:search(Query, Url)
+                                       end)
+                  catch
+                      Error:Reason ->
+                          {Error, Reason}
+                  end,
               Parent ! {self(), Result}
       end).
 
