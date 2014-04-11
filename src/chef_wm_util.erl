@@ -94,6 +94,8 @@ get_header_fun(Req, State = #base_state{header_fun = HFun})
 get_header_fun(_Req, State) ->
     {State#base_state.header_fun, State}.
 
+fetch_org_guid(#base_state{organization_name = undefined}) ->
+    undefined;
 fetch_org_guid(#base_state{organization_guid = Id}) when is_binary(Id) ->
     Id;
 fetch_org_guid(#base_state{organization_guid = undefined,
@@ -363,4 +365,4 @@ lists_diff_sorted(FirstList, SecondList) ->
     {lists:sort(sets:to_list(sets:subtract(FirstSet, SecondSet))),
      lists:sort(sets:to_list(sets:subtract(SecondSet, FirstSet)))}.
 
-    
+
