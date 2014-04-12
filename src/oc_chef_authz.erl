@@ -145,7 +145,7 @@ get_container_aid_for_object(Context, OrgId, ObjectType) ->
                                        ContainerAId::object_id(),
                                        ObjectType :: 'client' | 'container' |
                                                      'cookbook' | 'data' | 'environment' |
-                                                     'group' | 'node' | 'role' | 'search'
+                                                     'group' | 'node' | 'role' | 'search' | 'user'
                                                      ) -> {ok, object_id()} | {error, forbidden}.
 create_entity_with_container_acl(RequestorId, ContainerAId, ObjectType) ->
 
@@ -494,6 +494,7 @@ object_type_to_container_name(user)        -> <<"users">>.
 authz_type_from_container(client)    -> 'actor';
 authz_type_from_container(container) -> 'container';
 authz_type_from_container(group)     -> 'group';
+authz_type_from_container(user)     -> 'actor';
 authz_type_from_container(_)         -> 'object'.
 
 %
