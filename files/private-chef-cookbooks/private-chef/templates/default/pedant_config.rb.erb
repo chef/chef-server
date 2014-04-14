@@ -26,6 +26,9 @@ org({:name => "pedant-testorg-#{Process.pid}",
 # org({:name => "existing_org",
 #      :validator_key => "/etc/opscode/existing_org-validator.pem"})
 
+# account internal URL
+internal_account_url "http://<%= @opscode_account_internal_url %>:<%= @opscode_account_internal_port %>"
+
 # If you want Pedant to delete the testing organization when it is
 # done, use this parameter.  Note that this only has an effect if
 # Pedant also created the testing organization.
