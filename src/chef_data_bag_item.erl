@@ -119,13 +119,16 @@ set_updated(#chef_data_bag_item{} = Object, ActorId) ->
 is_indexed() ->
     true.
 
--spec ejson_for_indexing(#chef_data_bag_item{}, ejson_term()) -> ejson_term().
+-spec ejson_for_indexing(#chef_data_bag_item{}, {binary, ejson_term()} | ejson_term()) -> ejson_term().
+ejson_for_indexing(#chef_data_bag_item{} = BagItem, {_BagName, Item}) when is_binary(_BagName) ->
+    ejson_for_indexing(BagItem, Item);
 ejson_for_indexing(#chef_data_bag_item{data_bag_name = BagName,
                                        item_name = ItemName}, Item) ->
     %% See Chef::DataBagItem#to_hash
     %% We basically set data_bag and chef_type key against the original data bag item.
     ItemName = ej:get({<<"id">>}, Item),
     ej:set({<<"data_bag">>}, ej:set({<<"chef_type">>}, Item, <<"data_bag_item">>), BagName).
+
 
 -spec update_from_ejson(#chef_data_bag_item{}, ejson_term()) -> #chef_data_bag_item{}.
 update_from_ejson(#chef_data_bag_item{} = DataBagItem, DataBagItemData) ->
