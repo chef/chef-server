@@ -51,6 +51,7 @@ route(organization_search, Req, Args) ->
 route(node, Req, Args) -> route_organization_rest_object("nodes", Req, Args);
 route(role, Req, Args) -> route_organization_rest_object("roles", Req, Args);
 route(data_bag, Req, Args) -> route_organization_rest_object("data", Req, Args);
+route(data_bag_item, Req, [{name, {DataBagName, _}}]) -> route(data_bag, Req, [{name, DataBagName}]);
 route(environment, Req, Args) -> route_organization_rest_object("environments", Req, Args);
 route(principal, Req, Args) -> route_organization_rest_object("principals", Req, Args);
 route(client, Req, Args) -> route_organization_rest_object("clients", Req, Args);
