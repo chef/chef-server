@@ -66,6 +66,18 @@ ejson_for_indexing_test() ->
     Got = chef_object:ejson_for_indexing(Item, RawItem),
     ?assertEqual(Expected, Got).
 
+ejson_for_indexing_api_conformance_test() ->
+    RawItem = {[{<<"id">>, <<"the_item_name">>},
+                {<<"a_key">>, <<"a_value">>}]},
+    Item = #chef_data_bag_item{data_bag_name = <<"the_bag_name">>,
+                               item_name = <<"the_item_name">>},
+    Expected = {[{<<"id">>, <<"the_item_name">>},
+                 {<<"a_key">>, <<"a_value">>},
+                 {<<"chef_type">>, <<"data_bag_item">>},
+                 {<<"data_bag">>, <<"the_bag_name">>}]},
+    Got = chef_object:ejson_for_indexing(Item, {<<"the_bag_name">>, RawItem}),
+    ?assertEqual(Expected, Got).
+
 update_from_ejson_test_() ->
     RawItem = {[{<<"id">>, <<"the_item_name">>},
                 {<<"a_key">>, <<"a_value">>}]},
