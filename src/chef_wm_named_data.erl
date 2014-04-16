@@ -138,7 +138,7 @@ from_json(Req, #base_state{
                                                         data_bag_item_ejson = ItemData}
                           } = State) ->
     case chef_wm_base:create_from_json(Req, State, chef_data_bag_item, {authz_id,undefined}, {DataBagName, ItemData}) of
-        {true, _, NewState} = BaseCreateResult ->
+        {true, _, NewState} ->
             %% The Ruby API returns created items as-is, but with added chef_type and
             %% data_bag fields. If those fields are present in the request, they are put
             %% into the raw item data, but the values are overwritten for the return. When
