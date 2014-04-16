@@ -374,6 +374,7 @@ describe "users", :users do
           "private_key" => private_key_regex
         }
       end
+
       let(:users_with_new_user) do
         {
           # There are other users, but these are ours, so they should always be
