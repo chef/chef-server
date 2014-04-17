@@ -133,8 +133,10 @@ make_context(ReqId, Darklaunch) when is_binary(ReqId) ->
                                            not_found |
                                            {error, _}.
 fetch_container(#oc_chef_authz_context{otto_connection = Server},
-                OrgId, users) ->
-    fetch_container_couchdb(Server, OrgId, users);
+                undefined, ContainerName) ->
+    % Containers with no org are global containers - these have not yet been migrated
+    % so force them to couch regardless of darklaunch.
+    fetch_container_couchdb(Server, undefined, ContainerName);
 fetch_container(#oc_chef_authz_context{otto_connection=Server,
                                        darklaunch = Darklaunch} = Ctx,
                 OrgId, ContainerName) ->

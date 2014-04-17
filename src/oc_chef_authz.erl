@@ -494,7 +494,7 @@ object_type_to_container_name(user)        -> <<"users">>.
 authz_type_from_container(client)    -> 'actor';
 authz_type_from_container(container) -> 'container';
 authz_type_from_container(group)     -> 'group';
-authz_type_from_container(user)     -> 'actor';
+authz_type_from_container(user)      -> 'actor';
 authz_type_from_container(_)         -> 'object'.
 
 %
