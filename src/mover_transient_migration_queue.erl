@@ -45,7 +45,7 @@ handle_call({init_queue,Key, Items}, _From, #state{q = Q} = State) ->
 handle_call({length,Key}, _From, #state{q = Q} = State) ->
     case lists:keyfind(Key,1, Q) of
         {Key, List} when is_list(List) ->
-            {reply, erlang:length(Q), State};
+            {reply, erlang:length(List), State};
         _ ->
             {reply, 0, State}
     end;
