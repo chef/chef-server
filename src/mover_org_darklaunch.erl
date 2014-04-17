@@ -16,6 +16,7 @@
          init_org_to_couch/2,
          org_to_couch/2,
          org_to_sql/2,
+         enable_solr4/0,
          enable_solr4/1,
          enable_both_solrs/1,
          enable_solr1/1]).
@@ -48,6 +49,9 @@ org_to_sql(OrgName, Components) ->
     OrgKey = iolist_to_binary(["dl_org_", OrgName]),
     PropKVs = lists:foldl(fun(X, Accum) -> ["couchdb_" ++ atom_to_list(X), "false" | Accum] end, [], Components),
     send_eredis_q(["HMSET", OrgKey] ++ PropKVs).
+
+enable_solr4() ->
+    send_eredis_q(["HSET", "dl_default", "solr4", "true"]).
 
 %% Enables solr4 and disables the paired sending to solr1.4 and solr4.
 enable_solr4(OrgName) ->

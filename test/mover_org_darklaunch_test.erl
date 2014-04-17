@@ -44,3 +44,10 @@ enable_org_creation_when_error_should_return_query_result() ->
                                        ]),
                         ?andReturn({error, some_reason}))),
     ?assertEqual({error, some_reason}, mover_org_darklaunch:enable_org_creation()).
+
+enable_solr4_should_default_solr4() ->
+    mock(eredis, ?expect(q, ?withArgs([mover_eredis_client,
+                                       ["HSET", "dl_default", "solr4", "true"]
+                                       ]),
+                        ?andReturn({ok, val}))),
+    ?assertEqual(ok, mover_org_darklaunch:enable_solr4()).
