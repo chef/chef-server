@@ -8,11 +8,9 @@
 
 
 ?HOAX_FIXTURE(fun() ->
-                  application:start(lager),
                   mover_transient_migration_queue:start_link()
               end,
               fun(Pid) ->
-                  application:stop(lager),
                   Pid
               end).
 
@@ -63,7 +61,7 @@ migration_action_should_insert_org_return_error_on_other_error() ->
                                                                            other_error}))),
     ?assertEqual(other_error, mover_reindex_prep_migration_callback:migration_action(org_name, account_info)).
 
-next_object_returns_next_from_migration_qyueue() ->
+next_object_returns_next_from_migration_queue() ->
     mover_transient_migration_queue:start_link(),
     mover_transient_migration_queue:initialize_queue(mover_reindex_prep_migration_callback, [org1, org2]),
 
@@ -79,4 +77,3 @@ migration_complete_should_default_to_solr4_and_enable_org_creation() ->
     mock(mover_org_darklaunch, ?expect(enable_solr4, ?withArgs([]), ?andReturn(ignored))),
     mock(mover_org_darklaunch, ?expect(enable_org_creation, ?withArgs([]), ?andReturn(ignored))),
     mover_reindex_prep_migration_callback:migration_complete().
-    
