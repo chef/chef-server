@@ -18,8 +18,7 @@ migration_start_worker_args(Object, AcctInfo) ->
     [Org].
 
 migration_action(#org_info{org_id = OrgId, org_name = OrgName}) ->
-    SolrUrl = proplists:get_value(root_url, envy:get(chef_reindex, solr_service, list)) ++ "/update",
-    delete_existing_db(SolrUrl, OrgId),
+    delete_existing_db(OrgId),
     IndexStateResults = chef_ez_reindex_direct:reindex(OrgName, OrgId),
     [ok = Result || Result <- IndexStateResults],
     [{ok, reindex_successful}].
@@ -36,7 +35,7 @@ error_halts_migration() ->
 reconfigure_object(#org_info{org_name = OrgName}) ->
     mover_org_darklaunch:enable_both_solrs(OrgName).
 
-delete_existing_db(SolrUrl, OrgId) ->
+delete_existing_db(OrgId) ->
     Doc = [<<"<?xml version='1.0' encoding='UTF-8'?><delete><query>">>,
            <<"X_CHEF_database_CHEF_X:chef_">>,
            OrgId,

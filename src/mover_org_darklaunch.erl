@@ -8,14 +8,24 @@
 %%
 -module(mover_org_darklaunch).
 
--export([disable_org/1,
+-export([
+         disable_org_creation/0,
+         enable_org_creation/0,
+         disable_org/1,
          enable_org/1,
          init_org_to_couch/2,
          org_to_couch/2,
          org_to_sql/2,
+         enable_solr4/0,
          enable_solr4/1,
          enable_both_solrs/1,
          enable_solr1/1]).
+
+disable_org_creation() ->
+    send_eredis_q(["HMSET", "dl_org__OC_INTERNAL_NO_ORG", "disable_new_orgs", "true"]).
+
+enable_org_creation() ->
+    send_eredis_q(["HDEL", "dl_org__OC_INTERNAL_NO_ORG", "disable_new_orgs"]).
 
 disable_org(OrgName) ->
     OrgKey = iolist_to_binary(["dl_org_", OrgName]),
@@ -39,6 +49,9 @@ org_to_sql(OrgName, Components) ->
     OrgKey = iolist_to_binary(["dl_org_", OrgName]),
     PropKVs = lists:foldl(fun(X, Accum) -> ["couchdb_" ++ atom_to_list(X), "false" | Accum] end, [], Components),
     send_eredis_q(["HMSET", OrgKey] ++ PropKVs).
+
+enable_solr4() ->
+    send_eredis_q(["HSET", "dl_default", "solr4", "true"]).
 
 %% Enables solr4 and disables the paired sending to solr1.4 and solr4.
 enable_solr4(OrgName) ->
