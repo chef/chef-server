@@ -14,7 +14,6 @@
 
 -include("mover.hrl").
 -include_lib("moser/include/moser.hrl").
--include_lib("eunit/include/eunit.hrl").
 
 migration_init() ->
     % make sure we aren't in dry_run because otherwise
