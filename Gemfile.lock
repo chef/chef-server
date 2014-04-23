@@ -310,7 +310,7 @@ DEPENDENCIES
   nokogiri (~> 1.6.2)
   omniauth (~> 1.2.1)
   omniauth-chef!
-  pg
+  pg (~> 0.17.1)
   quiet_assets
   rails (= 4.0.5)
   rails_config (~> 0.3.3)

@@ -20,7 +20,7 @@ gem 'nokogiri', '~> 1.6.2'
 gem 'doorkeeper', github: 'applicake/doorkeeper', ref: 'cc9fa8a1b1b74ab50d542db186e9501e92d479b4'
 
 group :production do
-  gem 'pg'
+  gem 'pg', '~> 0.17.1'
 end
 
 group :development, :test do
