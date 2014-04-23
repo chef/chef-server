@@ -13,18 +13,14 @@ gem 'turbolinks', '~> 2.2.1'
 gem 'uglifier', '~> 2.4.0'
 gem 'unicorn-rails', '~> 1.1.0'
 gem 'omniauth', '~> 1.2.1'
-gem 'omniauth-chef', github: 'opscode/omniauth-chef', ref: '0388f58f2ce8b4560ccacba3faee24b4928e7880'
+gem 'omniauth-chef', github: 'opscode/omniauth-chef', branch: 'master'
 gem 'nokogiri', '~> 1.6.2'
+gem 'pg'
 
 # Still waiting for a release that includes a recent Bootstrap 3 merge.
 gem 'doorkeeper', github: 'applicake/doorkeeper', ref: 'cc9fa8a1b1b74ab50d542db186e9501e92d479b4'
 
-group :production do
-  gem 'pg', '~> 0.17.1'
-end
-
 group :development, :test do
-  gem 'sqlite3', '~> 1.3.9'
   gem 'jazz_hands', '~> 0.5.1'
   gem 'rspec-rails'
 end
