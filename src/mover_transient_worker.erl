@@ -38,7 +38,7 @@ init({CallbackModule, ObjectId, ProcessorArgs}) ->
     State = #state{object_id = ObjectId, processor_args = ProcessorArgs, callback_module = CallbackModule},
     {ok, migrate, State, 0}.
 
-migrate(timeout, #state{object_id = ObjectId, processor_args = ProcessorArgs, callback_module = CallbackModule} = State) ->
+migrate(timeout, #state{processor_args = ProcessorArgs, callback_module = CallbackModule} = State) ->
     try erlang:apply(CallbackModule, migration_action, ProcessorArgs) of
         ok ->
             {next_state, complete, State#state{results = ok}, 0};
