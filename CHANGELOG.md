@@ -38,6 +38,10 @@
 * check org _route endpoint for groups darklaunch during org creation
 * fix schema constraint bug during LDAP user creation
 
+### opscode-platform-debug rel-0.4.6
+* Remove legacy chargify code
+* Updated knifetests to work with the latest reporting API
+
 ### opscode-webui 3.8.13
 * Ruby on Rails security updates
 
