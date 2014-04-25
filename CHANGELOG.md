@@ -1,5 +1,11 @@
 # Enterprise Chef Changelog
 
+## 11.1.4 (Unreleased)
+
+### opscode-platform-debug rel-0.4.6
+* Remove legacy chargify code
+* Updated knifetests to work with the latest reporting API
+
 ## 11.1.3 (2014-04-09)
 
 ### berkshelf
@@ -37,10 +43,6 @@
 * speed up internal org-creation by removing Couchdb _all_dbs call
 * check org _route endpoint for groups darklaunch during org creation
 * fix schema constraint bug during LDAP user creation
-
-### opscode-platform-debug rel-0.4.6
-* Remove legacy chargify code
-* Updated knifetests to work with the latest reporting API
 
 ### opscode-webui 3.8.13
 * Ruby on Rails security updates
