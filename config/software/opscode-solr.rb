@@ -1,5 +1,5 @@
 name "opscode-solr"
-version "0.10.8"
+default_version "0.10.8"
 
 dependencies ["rsync", "jre"]
 
