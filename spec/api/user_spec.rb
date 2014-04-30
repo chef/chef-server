@@ -5,10 +5,14 @@ describe "users", :users do
   def self.ruby?
     Pedant::Config.ruby_users_endpoint?
   end
+
+  def self.ruby_org_assoc?
+    true
+  end
   let(:public_key_regex) do
     # Because of a difference in the OpenSSL library between ruby 1.8.7
     # (actually 1.9.2) and 1.9.3, we have to accept multiple patterns here:
-    /^-----BEGIN (RSA PUBLIC|PUBLIC) KEY-----/
+    /^-----BEGIN ((RSA )?PUBLIC KEY)|CERTIFICATE-----/
   end
   let(:private_key_regex) do
     /^-----BEGIN (RSA)? PRIVATE KEY-----/
@@ -73,10 +77,9 @@ describe "users", :users do
 
     context "PUT /organizations/<org>/users" do
       context "admin user" do
-        # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           put(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => ruby_org_assoc? ? 404 : 405
             })
         end
       end
@@ -85,9 +88,9 @@ describe "users", :users do
     context "POST /organizations/<org>/users" do
       context "admin user" do
         # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           post(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => ruby_org_assoc? ? 404 : 405
             })
         end
       end
@@ -96,9 +99,9 @@ describe "users", :users do
     context "DELETE /organizations/<org>/users" do
       context "admin user" do
         # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           delete(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => ruby_org_assoc? ? 404 : 405
             })
         end
       end
@@ -185,9 +188,9 @@ describe "users", :users do
     context "PUT /organizations/<org>/users/<name>" do
       context "admin user" do
         # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           put(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => ruby_org_assoc? ? 404 : 405
             })
         end
       end
@@ -196,9 +199,9 @@ describe "users", :users do
     context "POST /organizations/<org>/users/<name>" do
       context "admin user" do
         # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           post(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => ruby_org_assoc? ? 404 : 405
             })
         end
       end
@@ -344,7 +347,7 @@ describe "users", :users do
     context "PUT /users" do
       context "admin user" do
         # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           put(request_url, platform.admin_user).should look_like({
               :status => ruby? ? 404 : 405
             })
@@ -746,8 +749,7 @@ describe "users", :users do
 
     context "DELETE /users" do
       context "admin user" do
-        # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           delete(request_url, platform.admin_user).should look_like({
               :status => ruby? ? 404 : 405
             })
@@ -846,12 +848,6 @@ describe "users", :users do
         }
       end
 
-      let(:response_body) do
-        {
-          "uri" => "#{platform.server}/users/#{username}"
-        }
-      end
-
       let(:modified_user) do
         {
           "username" => username,
@@ -873,12 +869,8 @@ describe "users", :users do
             "display_name" => username,
             "password" => "badger badger"
           }).should look_like({
-            :status => 201,
-            :body_exact => {
-              "uri" => "#{platform.server}/users/#{username}",
-              "certificate" => certificate_regex,
-              "private_key" => private_key_regex
-            }})
+            :status => 201
+            })
       end
 
       after :each do
@@ -889,8 +881,7 @@ describe "users", :users do
         it "can modify user", :smoke do
           put(request_url, platform.superuser,
             :payload => request_body).should look_like({
-              :status => 200,
-              :body_exact => response_body
+              :status => 200
             })
           get(request_url, platform.superuser).should look_like({
               :status => 200,
@@ -1259,7 +1250,7 @@ describe "users", :users do
           it "renames user" do
             put(request_url, platform.superuser,
               :payload => request_body).should look_like({
-                :status => 201
+                :status => ruby? ? 201 : 200
               })
             get(request_url, platform.superuser).should look_like({
                 :status => 404
@@ -1286,18 +1277,14 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-              get(request_url, platform.superuser).should look_like({
-                  :status => 200
-                })
-              get(new_request_url, platform.superuser).should look_like({
-                  :status => 404
-                })
-            end
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 400
+              })
+              # TODO this is not a valid part of a test of the 400 response?
+            get(request_url, platform.superuser).should look_like({
+                :status => 200
+              })
           end
         end
 
@@ -1316,18 +1303,18 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-              get(request_url, platform.superuser).should look_like({
-                  :status => 200
-                })
-              get(new_request_url, platform.superuser).should look_like({
-                  :status => 404
-                })
-            end
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 400
+              })
+              # TODO is this really a valid part of a 400 PUT test ?
+            get(request_url, platform.superuser).should look_like({
+                :status => 200
+              })
+            # No, we can't do this because we havent encoded it to start with...
+            #get(new_request_url, platform.superuser).should look_like({
+            #    :status => 404
+            #  })
           end
         end
 
@@ -1383,16 +1370,15 @@ describe "users", :users do
           end
 
           it "returns 409" do
-            pending "actually returns 500" do
               put(request_url, platform.superuser,
                 :payload => request_body).should look_like({
                   :status => 409
                 })
+              # TODO is this really part of a valid PUT test?
               get(request_url, platform.superuser).should look_like({
                   :status => 200,
                   :body_exact => unmodified_user
                 })
-            end
           end
         end
       end # context renaming users
@@ -1401,7 +1387,7 @@ describe "users", :users do
     context "POST /users/<name>" do
       context "admin user" do
         # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           post(request_url, platform.admin_user).should look_like({
               :status => ruby? ? 404 : 405
             })
