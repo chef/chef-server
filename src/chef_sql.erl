@@ -91,7 +91,9 @@
 
          sql_now/0,
          ping/0,
-         statements/0
+         statements/0,
+
+         select_rows/1
         ]).
 
 -include_lib("sqerl/include/sqerl.hrl").
