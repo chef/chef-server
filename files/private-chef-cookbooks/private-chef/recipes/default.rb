@@ -67,11 +67,18 @@ end
 # Create the Chef User
 include_recipe "private-chef::users"
 
+# merge xdarklaunch values into the disk-based darklaunch
+# so that we have a single source of truth for xdl-related
+# values
+darklaunch_values = node['private_chef']['dark_launch']
+  .merge(node['private_chef']['lb']['xdl_defaults'])
+  .to_hash
+
 file "/etc/opscode/dark_launch_features.json" do
   owner node["private_chef"]["user"]["username"]
   group "root"
   mode "0644"
-  content Chef::JSONCompat.to_json_pretty(node['private_chef']['dark_launch'].to_hash)
+  content Chef::JSONCompat.to_json_pretty(darklaunch_values)
 end
 
 webui_key = OpenSSL::PKey::RSA.generate(2048) unless File.exists?('/etc/opscode/webui_pub.pem')
