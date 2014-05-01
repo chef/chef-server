@@ -6,19 +6,17 @@ describe "users", :users do
     Pedant::Config.ruby_users_endpoint?
   end
 
-  def self.ruby_org_assoc?
+  def ruby_org_assoc?
     true
   end
+
   let(:public_key_regex) do
     # Because of a difference in the OpenSSL library between ruby 1.8.7
     # (actually 1.9.2) and 1.9.3, we have to accept multiple patterns here:
-    /^-----BEGIN ((RSA )?PUBLIC KEY)|CERTIFICATE-----/
+    /^-----BEGIN (RSA )?PUBLIC KEY-----/
   end
   let(:private_key_regex) do
-    /^-----BEGIN (RSA)? PRIVATE KEY-----/
-  end
-  let(:certificate_regex) do
-    /^-----BEGIN CERTIFICATE----/
+    /^-----BEGIN (RSA )?PRIVATE KEY-----/
   end
 
   # Pedant has configurable test users.
@@ -372,8 +370,6 @@ describe "users", :users do
       let(:response_body) do
         {
           "uri" => "#{platform.server}/users/#{username}",
-          # TODO erlang only.. ?!. Is this correct?
-          "certificate" => certificate_regex,
           "private_key" => private_key_regex
         }
       end
@@ -1411,7 +1407,6 @@ describe "users", :users do
             :status => 201,
             :body_exact => {
               "uri" => "#{platform.server}/users/#{username}",
-              "certificate" => certificate_regex,
               "private_key" => private_key_regex
             }})
       end
