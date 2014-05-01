@@ -1243,18 +1243,29 @@ describe "users", :users do
             delete("#{platform.server}/users/#{new_name}", platform.superuser)
           end
 
-          it "renames user" do
-            put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => ruby? ? 201 : 200
-              })
-            get(request_url, platform.superuser).should look_like({
-                :status => 404
-              })
-            get(new_request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body_exact => modified_user
-              })
+          context "and the username is valid" do
+            # Ideally these would be discrete tests: can we put it and get the correct response?
+            # after doing so is the old resource 404 and the new 200?
+            # But the top-level PUT /users/:id context causes us some problems with it's before :each
+            # behavior of recreating users.
+            it "updates the user to the new name and provides a new uri" do
+              put(request_url, platform.superuser,
+                :payload => request_body).should look_like({
+                  :status => ruby? ? 201 : 200,
+                  :body => { "uri" => new_request_url },
+                  :headers => [ "Location" => new_request_url ]
+                })
+
+              # it "makes the user unavailable at the old URI"
+              get(request_url, platform.superuser).should look_like({
+                  :status => 404
+                })
+              # it "makes the user available at the new URI"
+              get(new_request_url, platform.superuser).should look_like({
+                  :status => 200,
+                  :body_exact => modified_user
+                })
+            end
           end
         end
 
@@ -1272,12 +1283,13 @@ describe "users", :users do
             }
           end
 
+
           it "returns 400" do
             put(request_url, platform.superuser,
               :payload => request_body).should look_like({
                 :status => 400
               })
-              # TODO this is not a valid part of a test of the 400 response?
+            # it "does not process any change to username" do
             get(request_url, platform.superuser).should look_like({
                 :status => 200
               })
@@ -1299,18 +1311,13 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
+            put(request_url, platform.superuser, :payload => request_body).should look_like({
                 :status => 400
               })
-              # TODO is this really a valid part of a 400 PUT test ?
+            # it "does not process any change to username" do
             get(request_url, platform.superuser).should look_like({
                 :status => 200
               })
-            # No, we can't do this because we havent encoded it to start with...
-            #get(new_request_url, platform.superuser).should look_like({
-            #    :status => 404
-            #  })
           end
         end
 
@@ -1333,14 +1340,13 @@ describe "users", :users do
               :payload => request_body).should look_like({
                 :status => 400
               })
+            # it "does not process any change to username" do
             get(request_url, platform.superuser).should look_like({
                 :status => 200
               })
-            get(new_request_url, platform.superuser).should look_like({
-                :status => 404
-              })
           end
         end
+
 
         context "new name already exists" do
           let(:request_body) do
@@ -1420,11 +1426,14 @@ describe "users", :users do
           delete(request_url, platform.superuser).should look_like({
               :status => 200
             })
-          get("#{platform.server}/users/#{username}",
-            platform.admin_user).should look_like({
+          # Similar to rename, the existing before :each interferese with making this into a separate test
+          # because it recreates the user.
+          # it "did delete the user"
+          get(request_url, platform.superuser).should look_like({
               :status => 404
-            })
+          })
         end
+
       end
 
       context "admin user" do
@@ -1432,6 +1441,7 @@ describe "users", :users do
           delete(request_url, platform.admin_user).should look_like({
               :status => 403
             })
+          # it "did not delete user" do
           get("#{platform.server}/users/#{username}",
             platform.superuser).should look_like({
               :status => 200
@@ -1444,6 +1454,7 @@ describe "users", :users do
           delete(request_url, platform.non_admin_client).should look_like({
               :status => 401
             })
+          # it "did not delete user" do
           get("#{platform.server}/users/#{username}",
             platform.superuser).should look_like({
               :status => 200
