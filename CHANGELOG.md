@@ -2,6 +2,9 @@
 
 ## 11.1.4 (Unreleased)
 
+### private-chef-cookbooks
+* platform_family fixes to couchdb and drbd cookbooks
+
 ### opscode-platform-debug rel-0.4.6
 * Remove legacy chargify code
 * Updated knifetests to work with the latest reporting API
