@@ -1,17 +1,21 @@
+postgres: &postgres
+  adapter:  postgresql
+  encoding: unicode
+  password:
+  pool: 16
+  template: template0
+
 development:
-  adapter: sqlite3
-  database: db/development.sqlite3
-  pool: 5
-  timeout: 5000
+  <<: *postgres
+  database: oc_id_development
+  username: oc_id
 
 test:
-  adapter: sqlite3
-  database: db/test.sqlite3
-  pool: 5
-  timeout: 5000
+  <<: *postgres
+  database: oc_id_test
+  username: postgres
 
 production:
-  adapter: sqlite3
-  database: db/production.sqlite3
-  pool: 5
-  timeout: 5000
+  <<: *postgres
+  database: oc_id
+  username: oc_id
