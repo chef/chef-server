@@ -5,6 +5,8 @@
 # All Rights Reserved
 #
 
+require 'securerandom'
+
 opscode_test_dir = "/opt/opscode/embedded/service/opscode-test"
 opscode_test_config_dir = "/opt/opscode/embedded/service/opscode-test/bootstrapper-config"
 
@@ -15,14 +17,17 @@ template File.join(opscode_test_config_dir, "config.rb") do
   mode "0600"
 end
 
-template File.join(opscode_test_config_dir, "script.rb") do
+bootstrap_script = File.join(opscode_test_config_dir, "script.rb")
+bootstrap_status_file = "/var/opt/opscode/bootstrapped"
+
+template bootstrap_script do
   source "bootstrap-script.rb.erb"
   owner "root"
   group "root"
   mode "0600"
+  variables({:admin_password => SecureRandom.hex(24)})
+  not_if { File.exists?(bootstrap_status_file) }
 end
-
-bootstrap_status_file = "/var/opt/opscode/bootstrapped"
 
 execute "boostrap-platform" do
   command "bash -c 'echo y | /opt/opscode/embedded/bin/bundle exec ./bin/bootstrap-platform -c ./bootstrapper-config/config.rb -s ./bootstrapper-config/script.rb'"
@@ -31,7 +36,21 @@ execute "boostrap-platform" do
   notifies :restart, 'service[opscode-erchef]'
 end
 
-file bootstrap_status_file do 
+#
+# Once we've bootstrapped the Enterprise Chef server
+# we can delete the bootstrap script that contains
+# the superuser password. Although this password cannot
+# be used to authenticate with the API, it should
+# nevertheless be deleted. We have elected not to
+# trigger the delete from the execute resource immediately
+# above so that we can ensure that bootstrap scripts from
+# previous installs are also cleaned up.
+#
+template bootstrap_script do
+  action :delete
+end
+
+file bootstrap_status_file do
   owner "root"
   group "root"
   mode "0600"

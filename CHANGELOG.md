@@ -1,5 +1,13 @@
 # Enterprise Chef Changelog
 
+## 1.4.10 (Unreleased)
+
+### opscode-account 1.30.7.1
+* Prevent password authentication for pivotal superuser
+
+### private-chef-cookbooks
+* Set random initial password for pivotal user on bootstrap
+
 ## 1.4.9 (2014-04-09)
 
 ### curl 7.36.0
