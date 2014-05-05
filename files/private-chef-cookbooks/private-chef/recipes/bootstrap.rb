@@ -24,7 +24,7 @@ template bootstrap_script do
   owner "root"
   group "root"
   mode "0600"
-  variables {admin_password: SecureRandom.hex(24)}
+  variables({:admin_password => SecureRandom.hex(24)})
   not_if { OmnibusHelper.has_been_bootstrapped? }
 end
 

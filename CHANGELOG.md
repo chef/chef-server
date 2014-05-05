@@ -2,13 +2,19 @@
 
 ## 11.1.4 (Unreleased)
 
-### private-chef-cookbooks
-* platform_family fixes to couchdb and drbd cookbooks
-* Set random initial password for pivotal user on bootstrap
+### oc-chef-pedant 1.0.29
+* Add tests for superuser password authentication
+
+### opscode-account rel-1.49.0
+* Prevent password authentication for pivotal superuser
 
 ### opscode-platform-debug rel-0.4.6
 * Remove legacy chargify code
 * Updated knifetests to work with the latest reporting API
+
+### private-chef-cookbooks
+* platform_family fixes to couchdb and drbd cookbooks
+* Set random initial password for pivotal user on bootstrap
 
 ## 11.1.3 (2014-04-09)
 
