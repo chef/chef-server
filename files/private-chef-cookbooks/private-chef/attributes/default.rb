@@ -25,12 +25,6 @@ default['private_chef']['user']['shell'] = "/bin/sh"
 # The home directory for the chef services user
 default['private_chef']['user']['home'] = "/opt/opscode/embedded"
 
-###
-# bootstrap
-###
-default['private_chef']['bootstrap']['admin_email'] = "kryptonite@opscode.com"
-default['private_chef']['bootstrap']['admin_password'] = "kryptonite"
-
 ####
 # CouchDB
 ####

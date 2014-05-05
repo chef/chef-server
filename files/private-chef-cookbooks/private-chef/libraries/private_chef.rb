@@ -142,7 +142,6 @@ module PrivateChef
       me = PrivateChef["servers"][node_name]
       ha_guard = PrivateChef['topology'] == "ha" && !me['bootstrap']
 
-      PrivateChef['bootstrap']['admin_password'] ||= generate_hex_if_bootstrap(24, ha_guard)
       PrivateChef['rabbitmq']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['rabbitmq']['jobs_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['rabbitmq']['actionlog_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
@@ -162,9 +161,6 @@ module PrivateChef
         File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
           f.puts(
             Chef::JSONCompat.to_json_pretty({
-              'bootstrap' => {
-                'admin_password' => PrivateChef['bootstrap']['admin_password']
-              },
               'rabbitmq' => {
                 'password' => PrivateChef['rabbitmq']['password'],
                 'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],

@@ -2,11 +2,9 @@
 
 ## 11.1.4 (Unreleased)
 
-### bootstrap
-* Set initial password for pivotal user
-
 ### private-chef-cookbooks
 * platform_family fixes to couchdb and drbd cookbooks
+* Set random initial password for pivotal user on bootstrap
 
 ### opscode-platform-debug rel-0.4.6
 * Remove legacy chargify code
