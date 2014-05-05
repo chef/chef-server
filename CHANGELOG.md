@@ -2,6 +2,9 @@
 
 ## 11.1.4 (Unreleased)
 
+### bootstrap
+* Set initial password for pivotal user
+
 ### private-chef-cookbooks
 * platform_family fixes to couchdb and drbd cookbooks
 

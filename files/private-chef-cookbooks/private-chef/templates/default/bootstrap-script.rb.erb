@@ -7,10 +7,10 @@ su_authz_id = superuser do |u|
   u.first_name = 'Clark'
   u.last_name = 'Kent'
   u.display_name = ' Clark Kent'
-  u.email = 'kryptonite@opscode.com'
-  u.password = 'kryptonite'
+  u.email = '<%= @admin_email %>'
+  u.password = '<%= @admin_password %>'
   u.certificate = superuser_cert
 end
 
 create_global_containers(su_authz_id)
-                                         
+

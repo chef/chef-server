@@ -1,5 +1,7 @@
 # Enterprise Chef Release Notes
 
+* [bootstrap] Set initial admin password for pivotal user
+
 ## 11.1.3 (2014-04-09)
 
 ### What's New:

@@ -20,6 +20,7 @@ template File.join(opscode_test_config_dir, "script.rb") do
   owner "root"
   group "root"
   mode "0600"
+  variables(node['private_chef']['bootstrap'].to_hash)
 end
 
 execute "/opt/opscode/bin/private-chef-ctl start" do
