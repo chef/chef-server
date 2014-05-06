@@ -15,12 +15,9 @@ describe "users", :users do
     # (actually 1.9.2) and 1.9.3, we have to accept multiple patterns here:
     /^-----BEGIN (RSA )?PUBLIC KEY-----/
   end
-  let(:private_key_regex) do
-    /^-----BEGIN (RSA )?PRIVATE KEY-----/
-  end
 
   let(:private_key_regex) do
-    /^-----BEGIN RSA PRIVATE KEY-----/
+    /^-----BEGIN (RSA )?PRIVATE KEY-----/
   end
 
   # Pedant has configurable test users.
@@ -280,7 +277,6 @@ describe "users", :users do
       end
     end # context DELETE /organizations/<org>/users/<name>
   end # context /organizations/<org>/users/<name>
-
   context "/users endpoint" do
     let(:request_url) { "#{platform.server}/users" }
 
@@ -858,6 +854,20 @@ describe "users", :users do
           "public_key" => public_key_regex
         }
       end
+      let(:input_public_key) do
+        <<EOF
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+h5g/r/qaFH6OdYOG0OO
+2/WpLb9qik7SPFmcOvujqZzLO2yv4kXwuvncx/ADHdkobaoFn3FE84uzIVCoSeaj
+xTMeuTcPr5y+wsVqCYMkwIJpPezbwcrErt14BvD9BPN0UDyOJZW43ZN4iIw5xW8y
+lQKuZtTNsm7FoznG+WsmRryTM3OjOrtDYjN/JHwDfrZZtVu7pT8FYnnz0O8j2zEf
+9NALhpS7oDCf+VSo6UUk/w5m4/LpouDxT2dKBwQOuA8pzXd5jHP6rYdbHkroOUqx
+Iy391UeSCiPVHcAN82sYV7R2MnUYj6b9Fev+62FKrQ6v9QYZcyljh6hldmcbmABy
+EQIDAQAB
+-----END PUBLIC KEY-----
+EOF
+          end
+
 
       before :each do
         response = post("#{platform.server}/users", platform.superuser,
@@ -1222,6 +1232,53 @@ describe "users", :users do
           end
         end
 
+        context "with new password provided" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@opscode.com",
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => "new name",
+              "password" => "bidgerbidger"
+            }
+          end
+          it "changes the password" do
+            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response.should look_like({ :status => 200 })
+
+            response = post("#{platform.server}/verify_password", platform.superuser,
+                            :payload => { 'user_id_to_verify' => username, 'password' => 'bidgerbidger' })
+            JSON.parse(response.body)["password_is_correct"].should eq(true)
+
+          end
+        end
+
+        context "with public key provided" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@opscode.com",
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => "new name",
+              "password" => "badger badger",
+              "public_key" => input_public_key
+            }
+          end
+          it "accepts the public key and subsequently responds with it" do
+            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response.should look_like({
+                                            :status => 200,
+                                            :body=> {
+                                              "uri" => request_url
+                                            },
+                                          })
+            get_response = get(request_url, platform.superuser)
+            new_public_key = JSON.parse(get_response.body)["public_key"]
+            new_public_key.should eq(input_public_key)
+          end
+        end
         context "with private_key = true" do
           let(:request_body) do
             {
@@ -1271,20 +1328,6 @@ describe "users", :users do
             }
           end
 
-          let(:input_public_key) do
-            <<EOF
------BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+h5g/r/qaFH6OdYOG0OO
-2/WpLb9qik7SPFmcOvujqZzLO2yv4kXwuvncx/ADHdkobaoFn3FE84uzIVCoSeaj
-xTMeuTcPr5y+wsVqCYMkwIJpPezbwcrErt14BvD9BPN0UDyOJZW43ZN4iIw5xW8y
-lQKuZtTNsm7FoznG+WsmRryTM3OjOrtDYjN/JHwDfrZZtVu7pT8FYnnz0O8j2zEf
-9NALhpS7oDCf+VSo6UUk/w5m4/LpouDxT2dKBwQOuA8pzXd5jHP6rYdbHkroOUqx
-Iy391UeSCiPVHcAN82sYV7R2MnUYj6b9Fev+62FKrQ6v9QYZcyljh6hldmcbmABy
-EQIDAQAB
------END PUBLIC KEY-----
-EOF
-          end
-
           it "returns a new private key, changes the public key" do
             original_response = get(request_url, platform.superuser)
             original_public_key = JSON.parse(original_response.body)["public_key"]
@@ -1304,8 +1347,8 @@ EOF
             new_response = get(request_url, platform.superuser)
             new_public_key = JSON.parse(new_response.body)["public_key"]
 
-            new_public_key.should_not eq(original_public_key)
             new_public_key.should_not eq(input_public_key)
+            new_public_key.should_not eq(original_public_key)
           end
         end
       end # context modifying users
@@ -1343,14 +1386,14 @@ EOF
 
           context "and the username is valid" do
             # Ideally these would be discrete tests: can we put it and get the correct response?
-            # after doing so is the old resource 404 and the new 200?
             # But the top-level PUT /users/:id context causes us some problems with it's before :each
             # behavior of recreating users.
             it "updates the user to the new name and provides a new uri" do
               put(request_url, platform.superuser,
                 :payload => request_body).should look_like({
-                  :status => ruby? ? 201 : 200,
-                  :body => { "uri" => new_request_url },
+                  :status => 201, # Some debate re proper response 201/200, but
+                                  # webmachine says if a Location header is present, it's 201
+                  :body_exact => { "uri" => new_request_url },
                   :headers => [ "Location" => new_request_url ]
                 })
 
@@ -1380,7 +1423,6 @@ EOF
               "password" => "badger badger"
             }
           end
-
 
           it "returns 400" do
             put(request_url, platform.superuser,
