@@ -1,6 +1,6 @@
 # Enterprise Chef Changelog
 
-## 11.1.4 (Unreleased)
+## 11.1.4 (2014-05-07)
 
 ### oc-chef-pedant 1.0.29
 * Add tests for superuser password authentication
