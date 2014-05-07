@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '4.0.3'
+gem 'rails', '4.0.5'
 
 gem 'bootstrap-sass', '~> 3.1.1'
 gem 'chef', '~> 11.10.4'
