@@ -1391,8 +1391,7 @@ EOF
             it "updates the user to the new name and provides a new uri" do
               put(request_url, platform.superuser,
                 :payload => request_body).should look_like({
-                  :status => 201, # Some debate re proper response 201/200, but
-                                  # webmachine says if a Location header is present, it's 201
+                  :status => 201,
                   :body_exact => { "uri" => new_request_url },
                   :headers => [ "Location" => new_request_url ]
                 })
@@ -1516,7 +1515,6 @@ EOF
                 :payload => request_body).should look_like({
                   :status => 409
                 })
-              # TODO is this really part of a valid PUT test?
               get(request_url, platform.superuser).should look_like({
                   :status => 200,
                   :body_exact => unmodified_user
