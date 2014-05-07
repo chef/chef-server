@@ -1,6 +1,6 @@
 # Enterprise Chef Release Notes
 
-## 1.4.10 (Unreleased)
+## 1.4.10 (2014-05-07)
 
 ### Security Fixes:
 

@@ -1,6 +1,6 @@
 # Enterprise Chef Changelog
 
-## 1.4.10 (Unreleased)
+## 1.4.10 (2014-05-07)
 
 ### opscode-account 1.30.7.1
 * Prevent password authentication for pivotal superuser
