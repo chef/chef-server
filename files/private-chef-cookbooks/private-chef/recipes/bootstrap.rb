@@ -5,6 +5,8 @@
 # All Rights Reserved
 #
 
+require 'securerandom'
+
 opscode_test_dir = "/opt/opscode/embedded/service/opscode-test"
 opscode_test_config_dir = "/opt/opscode/embedded/service/opscode-test/bootstrapper-config"
 
@@ -15,11 +17,15 @@ template File.join(opscode_test_config_dir, "config.rb") do
   mode "0600"
 end
 
-template File.join(opscode_test_config_dir, "script.rb") do
+bootstrap_script = File.join(opscode_test_config_dir, "script.rb")
+
+template bootstrap_script do
   source "bootstrap-script.rb.erb"
   owner "root"
   group "root"
   mode "0600"
+  variables({:admin_password => SecureRandom.hex(24)})
+  not_if { OmnibusHelper.has_been_bootstrapped? }
 end
 
 execute "/opt/opscode/bin/private-chef-ctl start" do
@@ -32,6 +38,20 @@ execute "bootstrap-platform" do
   cwd opscode_test_dir
   not_if { OmnibusHelper.has_been_bootstrapped? }
   notifies :restart, 'service[opscode-erchef]'
+end
+
+#
+# Once we've bootstrapped the Enterprise Chef server
+# we can delete the bootstrap script that contains
+# the superuser password. Although this password cannot
+# be used to authenticate with the API, it should
+# nevertheless be deleted. We have elected not to
+# trigger the delete from the execute resource immediately
+# above so that we can ensure that bootstrap scripts from
+# previous installs are also cleaned up.
+#
+template bootstrap_script do
+  action :delete
 end
 
 file OmnibusHelper.bootstrap_sentinel_file do

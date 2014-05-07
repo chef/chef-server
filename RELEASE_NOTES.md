@@ -1,5 +1,15 @@
 # Enterprise Chef Release Notes
 
+## 11.1.4 (Unreleased)
+
+### Security Fixes:
+
+The following items are the set of security fixes that have been
+applied since Enterprise Chef 11.1.3:
+
+* [bootstrap] Set random initial password for pivotal superuser on bootstrap
+# [opscode-account] Prevent password authentication for pivotal superuser
+
 ## 11.1.3 (2014-04-09)
 
 ### What's New:
