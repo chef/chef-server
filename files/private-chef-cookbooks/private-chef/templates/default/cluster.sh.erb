@@ -33,24 +33,30 @@ function transition
   log_me "Transitioning to $1"
   case "$1" in
     master)
-      # 10 * SVWAIT
-      try=300
-      while true; do
-        log_me "Attempting DRBD primary takeover - attempts left ${try}"
-        drbdadm primary pc0 && break
-        let "--try" || error_exit "Cannot become drbd primary!"
-        last_requested_state=`echo -n $(cat $requested_state_file)`
-        if [ "$last_requested_state" != "master" ]; then
-          log_me "Requested state transition to backup, aborting trying to aquire DRBD primary"
-          return
-        fi
-        sleep 1
-      done
+      if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_storage' ]; then
+          log_me "Attempting CUSTOM BACKEND primary takeover"
+          output=`/var/opt/opscode/keepalived/bin/custom_backend_storage attach` || error_exit "CUSTOM BACKEND attach failed: ${output}"
+          log_me "CUSTOM BACKEND primary attach SUCCESS: ${output}"
+      else
+        # 10 * SVWAIT
+        try=300
+        while true; do
+          log_me "Attempting DRBD primary takeover - attempts left ${try}"
+          drbdadm primary pc0 && break
+          let "--try" || error_exit "Cannot become drbd primary!"
+          last_requested_state=`echo -n $(cat $requested_state_file)`
+          if [ "$last_requested_state" != "master" ]; then
+            log_me "Requested state transition to backup, aborting trying to aquire DRBD primary"
+            return
+          fi
+          sleep 1
+        done
 
-      log_me "DRBD primary takeover successful"
+        log_me "DRBD primary takeover successful"
 
-      log_me "Mounting <%= node['private_chef']['drbd']['device'] %> at <%= node['private_chef']['drbd']['data_dir'] %>"
-      mount <%= node['private_chef']['drbd']['device'] %> <%= node['private_chef']['drbd']['data_dir'] %> || true
+        log_me "Mounting <%= node['private_chef']['drbd']['device'] %> at <%= node['private_chef']['drbd']['data_dir'] %>"
+        mount <%= node['private_chef']['drbd']['device'] %> <%= node['private_chef']['drbd']['data_dir'] %> || true
+      fi
 
 <%- keepalive_services.each do |service| -%>
       log_me "Starting service <%= service %>"
@@ -61,6 +67,12 @@ function transition
       <%- end -%>
 <%- end -%>
 
+      if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_ip' ]; then
+          log_me "Attempting CUSTOM BACKEND IP primary takeover"
+          output=`/var/opt/opscode/keepalived/bin/custom_backend_ip attach` || error_exit "CUSTOM BACKEND IP attach failed: ${output}"
+          log_me "CUSTOM BACKEND IP primary attach SUCCESS: ${output}"
+      fi
+
       ;;
     backup)
 <%- keepalive_services.reverse.each do |service| -%>
@@ -68,16 +80,28 @@ function transition
       /opt/opscode/bin/private-chef-ctl graceful-kill <%= service %> || error_exit "Cannot kill <%= service %>"
 <%- end -%>
 
-      # 10 * SVWAIT
-      try=300
-      while true; do
-        log_me "Attempting to become DRBD secondary - attempts left ${try}"
-        mountpoint <%= node['private_chef']['drbd']['data_dir'] %> && fuser -km <%= node['private_chef']['drbd']['data_dir'] %>
-        umount -f <%= node['private_chef']['drbd']['data_dir'] %> || true
-        drbdadm secondary pc0 && break
-        let "--try" || error_exit "Cannot become DRBD secondary"
-        sleep 1
-      done
+      if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_storage' ]; then
+          log_me "Attempting CUSTOM BACKEND to go standby"
+          output=`/var/opt/opscode/keepalived/bin/custom_backend_storage detach` || error_exit "CUSTOM BACKEND detach failed: ${output}"
+          log_me "CUSTOM BACKEND standby SUCCESS: ${output}"
+      else
+        # 10 * SVWAIT
+        try=300
+        while true; do
+          log_me "Attempting to become DRBD secondary - attempts left ${try}"
+          mountpoint <%= node['private_chef']['drbd']['data_dir'] %> && fuser -km <%= node['private_chef']['drbd']['data_dir'] %>
+          umount -f <%= node['private_chef']['drbd']['data_dir'] %> || true
+          drbdadm secondary pc0 && break
+          let "--try" || error_exit "Cannot become DRBD secondary"
+          sleep 1
+        done
+      fi
+
+      if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_ip' ]; then
+          log_me "Attempting CUSTOM BACKEND IP to go standby"
+          output=`/var/opt/opscode/keepalived/bin/custom_backend_ip detach` || error_exit "CUSTOM BACKEND IP detach failed: ${output}"
+          log_me "CUSTOM BACKEND IP detach SUCCESS: ${output}"
+      fi
       ;;
     fault)
       # Um... we are on the way elsewhere
