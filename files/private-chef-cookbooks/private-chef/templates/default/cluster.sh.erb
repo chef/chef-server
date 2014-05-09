@@ -34,9 +34,13 @@ function transition
   case "$1" in
     master)
       if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_storage' ]; then
-          log_me "Attempting CUSTOM BACKEND primary takeover"
-          output=`/var/opt/opscode/keepalived/bin/custom_backend_storage attach` || error_exit "CUSTOM BACKEND attach failed: ${output}"
-          log_me "CUSTOM BACKEND primary attach SUCCESS: ${output}"
+          log_me "Attempting CUSTOM BACKEND STORAGE takeover"
+          /var/opt/opscode/keepalived/bin/custom_backend_storage attach >> $LOGNAME 2>&1
+          if [ $? -gt 0 ]; then
+            error_exit "CUSTOM BACKEND STORAGE attach failed"
+          else
+            log_me "CUSTOM BACKEND STORAGE attach success"
+          fi
       else
         # 10 * SVWAIT
         try=300
@@ -69,8 +73,12 @@ function transition
 
       if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_ip' ]; then
           log_me "Attempting CUSTOM BACKEND IP primary takeover"
-          output=`/var/opt/opscode/keepalived/bin/custom_backend_ip attach` || error_exit "CUSTOM BACKEND IP attach failed: ${output}"
-          log_me "CUSTOM BACKEND IP primary attach SUCCESS: ${output}"
+          /var/opt/opscode/keepalived/bin/custom_backend_ip attach >> $LOGNAME 2>&1
+          if [ $? -gt 0 ]; then
+            error_exit "CUSTOM BACKEND IP attach failed"
+          else
+            log_me "CUSTOM BACKEND IP attach success"
+          fi
       fi
 
       ;;
@@ -81,9 +89,13 @@ function transition
 <%- end -%>
 
       if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_storage' ]; then
-          log_me "Attempting CUSTOM BACKEND to go standby"
-          output=`/var/opt/opscode/keepalived/bin/custom_backend_storage detach` || error_exit "CUSTOM BACKEND detach failed: ${output}"
-          log_me "CUSTOM BACKEND standby SUCCESS: ${output}"
+          log_me "Attempting CUSTOM BACKEND STORAGE detach"
+          /var/opt/opscode/keepalived/bin/custom_backend_storage detach >> $LOGNAME 2>&1
+          if [ $? -gt 0 ]; then
+            error_exit "CUSTOM BACKEND STORAGE detach failed"
+          else
+            log_me "CUSTOM BACKEND STORAGE detach success"
+          fi
       else
         # 10 * SVWAIT
         try=300
@@ -99,9 +111,14 @@ function transition
 
       if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_ip' ]; then
           log_me "Attempting CUSTOM BACKEND IP to go standby"
-          output=`/var/opt/opscode/keepalived/bin/custom_backend_ip detach` || error_exit "CUSTOM BACKEND IP detach failed: ${output}"
-          log_me "CUSTOM BACKEND IP detach SUCCESS: ${output}"
+          /var/opt/opscode/keepalived/bin/custom_backend_ip detach >> $LOGNAME 2>&1
+          if [ $? -gt 0 ]; then
+            error_exit "CUSTOM BACKEND IP detach failed"
+          else
+            log_me "CUSTOM BACKEND IP detach success"
+          fi
       fi
+
       ;;
     fault)
       # Um... we are on the way elsewhere
