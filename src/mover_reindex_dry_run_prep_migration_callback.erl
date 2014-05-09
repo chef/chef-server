@@ -66,4 +66,4 @@ reconfigure_object(_ObjectId, _AcctInfo) ->
     no_op.
 
 migration_complete() ->
-    mover_org_darklaunch:enable_solr4().
+    no_op.

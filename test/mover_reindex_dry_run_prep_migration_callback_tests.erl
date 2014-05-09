@@ -74,6 +74,5 @@ supervisor_should_be_transient_worker_sup() ->
 reconfigure_object_is_a_no_op() ->
     ?assertEqual(no_op, mover_reindex_dry_run_prep_migration_callback:reconfigure_object(org, acct)).
 
-migration_complete_should_default_to_solr4_and_enable_org_creation() ->
-    mock(mover_org_darklaunch, ?expect(enable_solr4, ?withArgs([]), ?andReturn(ignored))),
-    mover_reindex_dry_run_prep_migration_callback:migration_complete().
+migration_complete_is_a_no_op_because_this_is_dry_run() ->
+    ?assertEqual(no_op, mover_reindex_dry_run_prep_migration_callback:migration_complete()).
