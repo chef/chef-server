@@ -162,6 +162,15 @@ EOKEY
   def erl_atom_or_string(term)
     self.class.erl_atom_or_string(term)
   end
+
+  # OC-11540, fallback to ssl_port if non_ssl_port is disabled
+  def internal_lb_url
+    if node['private_chef']['nginx']['non_ssl_port'] == false
+      "https://#{vip_for_uri('lb_internal')}:#{node['private_chef']['nginx']['ssl_port']}"
+    else
+      "http://#{vip_for_uri('lb_internal')}:#{node['private_chef']['nginx']['non_ssl_port']}"
+    end
+  end
 end
 
 class Chef::Resource::Template
