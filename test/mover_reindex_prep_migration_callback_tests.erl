@@ -41,6 +41,7 @@ migration_start_worker_args_include_both_org_and_account_info_in_list() ->
 migration_action_should_insert_org_return_ok_on_successful_insert() ->
     mock(moser_acct_processor, ?expect(expand_org_info, ?withArgs([?ORG]),
                                        ?andReturn(?EXPANDED_ORG))),
+    mock(mover_org_darklaunch, ?expect(enable_solr1, ?withArgs([org_name]), ?andReturn(ok))),
     mock(moser_state_tracker, ?expect(insert_one_org, ?withArgs([?EXPANDED_ORG, <<"solr4_migration">>]),
                                                                 ?andReturn(ok))),
     ?assertEqual(ok, mover_reindex_prep_migration_callback:migration_action(org_name, account_info)).
@@ -48,6 +49,7 @@ migration_action_should_insert_org_return_ok_on_successful_insert() ->
 migration_action_should_insert_org_return_ok_on_duplicate_key() ->
     mock(moser_acct_processor, ?expect(expand_org_info, ?withArgs([?ORG]),
                                        ?andReturn(?EXPANDED_ORG))),
+    mock(mover_org_darklaunch, ?expect(enable_solr1, ?withArgs([org_name]), ?andReturn(ok))),
     mock(moser_state_tracker, ?expect(insert_one_org, ?withArgs([?EXPANDED_ORG, <<"solr4_migration">>]),
                                                                 ?andReturn({error,
                                                                            {error, error, <<"23505">>, msg, detail}}))),
@@ -56,6 +58,7 @@ migration_action_should_insert_org_return_ok_on_duplicate_key() ->
 migration_action_should_insert_org_return_error_on_other_error() ->
     mock(moser_acct_processor, ?expect(expand_org_info, ?withArgs([?ORG]),
                                        ?andReturn(?EXPANDED_ORG))),
+    mock(mover_org_darklaunch, ?expect(enable_solr1, ?withArgs([org_name]), ?andReturn(ok))),
     mock(moser_state_tracker, ?expect(insert_one_org, ?withArgs([?EXPANDED_ORG, <<"solr4_migration">>]),
                                                                 ?andReturn({error,
                                                                            other_error}))),
