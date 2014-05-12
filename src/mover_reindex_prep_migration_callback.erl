@@ -33,7 +33,7 @@ migration_start_worker_args(Object, AcctInfo) ->
 migration_action(OrgName, AcctInfo) ->
     OrgInfo = moser_acct_processor:expand_org_info(#org_info{org_name = OrgName, account_info = AcctInfo}),
     OrgId = OrgInfo#org_info.org_id,
-
+    ok = mover_org_darklaunch:enable_solr1(OrgName),
     case moser_state_tracker:insert_one_org(OrgInfo, mover_reindex_migration_callback:migration_type()) of
 	% org did not have phase_2_migration set in state table,
         % darklaunch it and set phase_2_migration to holding

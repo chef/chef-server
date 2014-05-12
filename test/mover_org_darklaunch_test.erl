@@ -51,3 +51,15 @@ enable_solr4_should_default_solr4() ->
                                        ]),
                         ?andReturn({ok, val}))),
     ?assertEqual(ok, mover_org_darklaunch:enable_solr4()).
+
+enable_solr1_should_set_solr4_false() ->
+    mock(eredis, ?expect(q, ?withArgs([mover_eredis_client,
+                                       ["HMSET", <<"dl_org_name">>, "solr4", "false"]
+                                       ]),
+                        ?andReturn({ok, val}))),
+    mock(eredis, ?expect(q, ?withArgs([mover_eredis_client,
+                                       ["HDEL", <<"dl_org_name">>, "query_aux_solr", "rabbit_aux_vhost"]
+                                       ]),
+                        ?andReturn({ok, val}))),
+
+    ?assertEqual(ok, mover_org_darklaunch:enable_solr1("name")).
