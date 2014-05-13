@@ -2,7 +2,7 @@ name "opscode-nagios-plugins"
 
 dependencies ["rsync"]
 
-version "pc-rel-1.0.0"
+default_version "pc-rel-1.0.0"
 
 source :git => "git@github.com:opscode/opscode-nagios-plugins"
 

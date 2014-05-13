@@ -1,5 +1,5 @@
 name "opscode-test"
-version "pc-rel-0.2.0.1"
+default_version "pc-rel-0.2.0.1"
 
 dependencies ["ruby", "libxml2", "rsync", "bundler"]
 

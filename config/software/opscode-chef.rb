@@ -1,5 +1,5 @@
 name "opscode-chef"
-version "rel-2.8.7"
+default_version "rel-2.8.7"
 
 dependencies ["ruby",
               "bundler",

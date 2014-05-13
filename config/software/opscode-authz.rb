@@ -1,9 +1,9 @@
 name "opscode-authz"
-version "pc-rel-0.3.4"
+default_version "pc-rel-0.3.4"
 
 dependencies ["erlang", "rsync"]
 
-source :url => "http://there-is-no-url.file-only-in-cache.org/opscode-authz-#{version}.tar.gz",
+source :url => "http://there-is-no-url.file-only-in-cache.org/opscode-authz-#{default_version}.tar.gz",
        :md5 => "5499cd5e54c686c97d117f29265960d8"
 
 relative_path "opscode-authz"

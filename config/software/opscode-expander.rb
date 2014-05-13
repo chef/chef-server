@@ -1,5 +1,5 @@
 name "opscode-expander"
-version "pc-rel-1.0.0.1"
+default_version "pc-rel-1.0.0.1"
 
 dependencies ["ruby", "bundler", "rsync"]
 

@@ -1,5 +1,5 @@
 name "private-chef-administration"
-version "rel-1.4.0"
+default_version "rel-1.4.0"
 
 dependency "sphinx"
 dependency "pygments"
