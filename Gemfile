@@ -1,7 +1,6 @@
 source 'https://rubygems.org'
 
 gem 'rails', '4.0.5'
-
 gem 'bootstrap-sass', '~> 3.1.1'
 gem 'chef', '~> 11.10.4'
 gem 'coffee-rails', '~> 4.0.0'
@@ -15,14 +14,17 @@ gem 'uglifier', '~> 2.4.0'
 gem 'unicorn-rails', '~> 1.1.0'
 gem 'omniauth', '~> 1.2.1'
 gem 'omniauth-chef', github: 'opscode/omniauth-chef', ref: '0388f58f2ce8b4560ccacba3faee24b4928e7880'
+gem 'nokogiri', '~> 1.6.2'
 
-# Don't judge me. I'm just waiting for a release that includes a recent Bootstrap 3 merge.
-gem 'doorkeeper', github: 'applicake/doorkeeper', ref: 'master'
+# Still waiting for a release that includes a recent Bootstrap 3 merge.
+gem 'doorkeeper', github: 'applicake/doorkeeper', ref: 'cc9fa8a1b1b74ab50d542db186e9501e92d479b4'
 
-# Temporary, of course; will be PG
-gem 'sqlite3', '~> 1.3.9'
+group :production do
+  gem 'pg'
+end
 
 group :development, :test do
+  gem 'sqlite3', '~> 1.3.9'
   gem 'jazz_hands', '~> 0.5.1'
   gem 'rspec-rails'
 end
