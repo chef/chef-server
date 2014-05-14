@@ -1,5 +1,7 @@
 # Enterprise Chef Changelog
 
+* rename oc_actionlog to actions
+
 ## 11.1.4 (2014-05-07)
 
 ### oc-chef-pedant 1.0.29
