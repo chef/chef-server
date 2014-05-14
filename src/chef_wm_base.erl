@@ -292,6 +292,12 @@ verify_request_signature(Req,
 %% (e.g. `chef_node'). `ContainerId' is the AuthzID of the container for the object being
 %% created (e.g. node container authz ID for creating a node). The `ObjectEjson' is the
 %% validated and normalized EJSON that was parsed from the request body.
+create_from_json(#wm_reqdata{} = Req, #base_state{organization_guid = undefined} = State,
+                                                  RecType, AuthzData, ObjectEJson) ->
+    % For objects that are not a member of an org, we just need to provide a valid ID
+    % for guid generation.
+    create_from_json(Req, State#base_state{organization_guid = ?OSC_ORG_ID},
+                     RecType, AuthzData, ObjectEJson);
 create_from_json(#wm_reqdata{} = Req,
                  #base_state{chef_db_context = DbContext,
                              organization_guid = OrgId,
