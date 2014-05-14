@@ -32,5 +32,3 @@ components being migrated affect pre-created orgs.
    ``ready`` singly or in groups before ``mover_manager:migrate`` will
     see them.
 
-
-
