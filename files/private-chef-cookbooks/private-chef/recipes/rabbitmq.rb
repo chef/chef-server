@@ -133,6 +133,12 @@ if is_data_master?
     retries 10
   end
 
+  execute "#{rmq_ctl} set_permissions -p #{rabbitmq['actions_vhost']} #{rabbitmq['user']} \".*\" \".*\" \".*\"" do
+    user opc_username
+    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['actions_vhost']}"
+    retries 10
+  end
+
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['actions_vhost']} #{rabbitmq['actions_user']} \".*\" \".*\" \".*\"" do
     user opc_username
     not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['actions_user']}|grep #{rabbitmq['actions_vhost']}"

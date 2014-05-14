@@ -55,10 +55,10 @@
  {oc_chef_action, [
               {actions_host, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
               {actions_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
-              {actions_user, <<"<%= node['private_chef']['rabbitmq']['actions_user'] %>">>},
-              {actions_password, <<"<%= node['private_chef']['rabbitmq']['actions_password'] %>">>},
+              {actions_user, <<"<%= node['private_chef']['rabbitmq']['user'] %>">>},
+              {actions_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
               {actions_vhost, <<"<%= node['private_chef']['rabbitmq']['actions_vhost'] %>">>},
-              {actions_exchange, <<"action">>}
+              {actions_exchange, <<"<%= node['private_chef']['rabbitmq']['actions_exchange'] %>">>}
              ]},
  {oc_chef_wm, [
               {api_version, "<%= node['private_chef']['api_version'] %>"},

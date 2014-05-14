@@ -17,6 +17,7 @@ if is_data_master?
         rabbitmq_host:      node['private_chef']['rabbitmq']['vip'],
         rabbitmq_port:      node['private_chef']['rabbitmq']['node_port'],
         rabbitmq_vhost:     node['private_chef']['rabbitmq']['actions_vhost'],
+        rabbitmq_exchange:  node['private_chef']['rabbitmq']['actions_exchange'],
         rabbitmq_user:      node['private_chef']['rabbitmq']['actions_user'],
         rabbitmq_password:  node['private_chef']['rabbitmq']['actions_password']
       }
