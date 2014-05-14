@@ -91,7 +91,7 @@
            {db_pass, "<%= node['private_chef']['postgresql']['sql_password'] %>"},
            {db_name, "opscode_chef" },
            {idle_check, 10000},
-           {prepared_statements, {chef_sql, opc_statements, [pgsql]}},
+           {prepared_statements, {oc_chef_sql, statements, [pgsql]}},
            {column_transforms,
                               [{<<"created_at">>,
                                 {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
@@ -139,5 +139,16 @@
           % If dry_run is true, eredis host and port will be ignored.
           {eredis_host, "127.0.0.1"},
           {eredis_port, 16379}
+         ]},
+ {chef_reindex, [
+          {solr_service, [{root_url, "<%= node['private_chef']['opscode-solr']['url'] %>"},
+                          {timeout, <%= @solr_timeout %>},
+                          {init_count, <%= @solr_http_init_count %>},
+                          {max_count, <%= @solr_http_max_count %>},
+                          {cull_interval, <%= @solr_http_cull_interval %>},
+                          {max_age, <%= @solr_http_max_age %>},
+                          {max_connection_duration, <%= @solr_http_max_connection_duration %>},
+                          {ibrowse_options, <%= @solr_ibrowse_options %>}]
+          }
          ]}
 ].

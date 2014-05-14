@@ -162,6 +162,7 @@ default['private_chef']['opscode-erchef']['root_metric_key'] = "chefAPI"
 default['private_chef']['opscode-erchef']['depsolver_worker_count'] = 5
 default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
 default['private_chef']['opscode-erchef']['max_request_size'] = 1000000
+default['private_chef']['opscode-erchef']['cleanup_batch_size'] = 0
 
 ###
 # Legacy path (required for cookbok migration)
@@ -264,8 +265,8 @@ default['private_chef']['lb']['chef_max_version'] = 11
 # Load balancer route configuration
 ###
 default['private_chef']['lb']['xdl_defaults']['503_mode'] = false
-default['private_chef']['lb']['xdl_defaults']['couchdb_containers'] = true
-default['private_chef']['lb']['xdl_defaults']['couchdb_groups'] = true
+default['private_chef']['lb']['xdl_defaults']['couchdb_containers'] = false
+default['private_chef']['lb']['xdl_defaults']['couchdb_groups'] = false
 
 ####
 # Nginx
@@ -491,6 +492,14 @@ default['private_chef']['opscode-chef-mover']['cache_ttl'] = '3600'
 default['private_chef']['opscode-chef-mover']['db_pool_size'] = '5'
 default['private_chef']['opscode-chef-mover']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-chef-mover']['ibrowse_max_pipeline_size'] = 1
+default['private_chef']['opscode-chef-mover']['solr_timeout'] = 30000
+default['private_chef']['opscode-chef-mover']['solr_http_init_count'] = 25
+default['private_chef']['opscode-chef-mover']['solr_http_max_count'] = 100
+default['private_chef']['opscode-chef-mover']['solr_http_cull_interval'] = "{1, min}"
+default['private_chef']['opscode-chef-mover']['solr_http_max_age'] = "{70, sec}"
+default['private_chef']['opscode-chef-mover']['solr_http_max_connection_duration'] = "{70,sec}"
+default['private_chef']['opscode-chef-mover']['solr_ibrowse_options'] = "[{connect_timeout, 10000}]"
+
 
 ###
 # Opscode Test

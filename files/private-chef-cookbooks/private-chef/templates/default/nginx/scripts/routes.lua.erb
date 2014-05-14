@@ -91,7 +91,8 @@ local c_identifier = Cg(p_identifier, "object_name")
 local c_maybe_identifier = (p_sep * c_identifier)^-1
 
 local p_erchef_endpoint = p_cookbooks + p_data + p_roles + p_sandboxes +
-                          p_environments + p_clients + p_nodes + p_principals
+                          p_environments + p_clients + p_nodes + p_principals +
+			   p_groups + p_containers
 
 -- endpoints that map directly to erchef
 -- If an object identifier is present - as identified with /IDENTIFIER - then
@@ -128,20 +129,13 @@ local p_acct = (p_sep * Cendpoint(p_verify_password + p_auth_user + p_system_rec
                (p_sep * Cendpoint(p_org) * (p_sep * Cg(p_org_identifier, "org_name"))^-1 * p_trailing_sep) +
                p_acct_users
 
---
--- darklaunch endpoints - these need to capture the endpoint name itself for darklaunch resolution
---
-local c_dl_acct_erchef_endpoint = Cendpoint(p_groups + p_containers)
-local p_dl_acct_erchef = p_named_org_prefix * c_dl_acct_erchef_endpoint * c_maybe_identifier
-
 local uri_resolvers = {
   -- Retain ordering to ensure proper eval:
   -- p_acl_endpont must come firs tbecause a trailing _acl takes precedence
   -- over any other identifiers which may be in the url.
   api = (p_acl_endpoint * c_acct) +
         (p_erchef * c_erchef) +
-        (p_acct * c_acct) +
-        (p_dl_acct_erchef * c_acct_erchef),
+        (p_acct * c_acct),
 
 
   -- This one is easy - everything passes through, though we'll still need to capture components
@@ -156,7 +150,6 @@ local uri_resolvers = {
                   -- we have to be able to route migrated endpoints (that used to be acct) to erchef.
                   -- we will need to continue to add migrated acct->erchef endpoints here
                   -- until we either correct or retire webui 1
-                  (p_dl_acct_erchef * c_acct_erchef) +
                   ((p_named_org_prefix * Cendpoint(p_clients) * c_maybe_identifier) * c_erchef) +
                   ((p_acct +
                    (p_named_org + p_sep)) * c_acct),

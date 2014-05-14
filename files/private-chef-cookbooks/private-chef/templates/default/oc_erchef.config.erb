@@ -105,7 +105,8 @@
                                  ]},
                 {couchdb_host, "<%= @helper.normalize_host(node['private_chef']['couchdb']['vip']) %>"},
                 {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> },
-                {authz_superuser_id, <<"<%= node['private_chef']['oc_bifrost']['superuser_id'] %>">>}
+                {authz_superuser_id, <<"<%= node['private_chef']['oc_bifrost']['superuser_id'] %>">>},
+                {cleanup_batch_size, <%= node['private_chef']['opscode-erchef']['cleanup_batch_size'] %>}
                ]},
   {chef_db, [
              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
