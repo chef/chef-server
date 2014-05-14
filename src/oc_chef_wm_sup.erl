@@ -42,7 +42,7 @@ upgrade() ->
 init([]) ->
     ok = load_ibrowse_config(),
     ok = enable_org_cache(),
-    Action = envy:get(oc_chef_wm, enable_actionlog, false, boolean),
+    Action = envy:get(oc_chef_wm, enable_actions, false, boolean),
 
     Ip = envy:get(oc_chef_wm, ip, string),
     Port = envy:get(oc_chef_wm, port, pos_integer),
