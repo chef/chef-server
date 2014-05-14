@@ -8,10 +8,10 @@ GIT
 
 GIT
   remote: git://github.com/opscode/omniauth-chef.git
-  revision: 0388f58f2ce8b4560ccacba3faee24b4928e7880
+  revision: 994af13a91eca707e7b8b4934167c6b4331cacac
   branch: master
   specs:
-    omniauth-chef (0.1.1)
+    omniauth-chef (0.1.2)
       chef (~> 11)
       omniauth (~> 1.2)
 
