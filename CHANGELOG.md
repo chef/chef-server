@@ -5,6 +5,7 @@
 ### private-chef-cookbooks
 * Allow ['lb']['upstream'] to have a custom setting
 * Use SSL port for lb_internal if non-SSL is disabled
+* Restart redis_lb immediately during reconfigure
 
 ## 11.1.5 (2014-05-14)
 
