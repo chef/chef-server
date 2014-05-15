@@ -503,7 +503,7 @@ stats_hero_upstreams() ->
 
 
 log_action(Req, State)->
-    Action = envy:get(oc_chef_wm, enable_actionlog, false, boolean),
+    Action = envy:get(oc_chef_wm, enable_actions, false, boolean),
     maybe_log_action(Action, Req, State).
 
 maybe_log_action(true, Req, State) ->
