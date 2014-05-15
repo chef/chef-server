@@ -161,7 +161,6 @@ default['private_chef']['opscode-erchef']['root_metric_key'] = "chefAPI"
 default['private_chef']['opscode-erchef']['depsolver_worker_count'] = 5
 default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
 default['private_chef']['opscode-erchef']['max_request_size'] = 1000000
-default['private_chef']['opscode-erchef']['enable_actions'] = false
 
 ###
 # Legacy path (required for cookbok migration)
@@ -450,6 +449,7 @@ default['private_chef']['dark_launch']["private-chef"] = true
 default['private_chef']['dark_launch']["sql_users"] = true
 default['private_chef']['dark_launch']["add_type_and_bag_to_items"] = true
 default['private_chef']['dark_launch']["reporting"] = true
+default['private_chef']['dark_launch']["actions"] = false
 
 ###
 # Opscode Account
