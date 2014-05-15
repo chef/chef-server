@@ -1,5 +1,10 @@
 # Enterprise Chef Release Notes
 
+## 11.1.5 (2014-05-14)
+
+### What's New:
+* [oc_erchef] First release with full compatibility for Chef Actions service
+
 ## 11.1.4 (2014-05-07)
 
 ### Security Fixes:

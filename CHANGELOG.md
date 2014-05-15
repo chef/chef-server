@@ -1,6 +1,13 @@
 # Enterprise Chef Changelog
 
+## 11.1.5 (2014-05-14)
+
+### oc_erchef 0.24.6
 * rename oc_actionlog to actions
+
+## private-chef-cookbooks
+* Use dark launch to enable Chef Actions (default: off)
+* Write out Actions configuration file for use by opscode-analytics
 
 ## 11.1.4 (2014-05-07)
 
