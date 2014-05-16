@@ -211,6 +211,8 @@ include_recipe "private-chef::sysctl-updates"
   end
 end
 
+include_recipe "private-chef::actions" if darklaunch_values["actions"]
+
 include_recipe "private-chef::orgmapper"
 include_recipe "private-chef::oc-chef-pedant"
 include_recipe "private-chef::log_cleanup"

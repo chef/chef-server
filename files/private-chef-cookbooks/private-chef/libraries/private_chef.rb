@@ -144,7 +144,7 @@ module PrivateChef
 
       PrivateChef['rabbitmq']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['rabbitmq']['jobs_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['rabbitmq']['actionlog_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['rabbitmq']['actions_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['opscode_webui']['cookie_secret'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
@@ -164,7 +164,7 @@ module PrivateChef
               'rabbitmq' => {
                 'password' => PrivateChef['rabbitmq']['password'],
                 'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
-                'actionlog_password' => PrivateChef['rabbitmq']['actionlog_password'],
+                'actions_password' => PrivateChef['rabbitmq']['actions_password'],
               },
               'opscode_webui' => {
                 'cookie_secret' => PrivateChef['opscode_webui']['cookie_secret'],

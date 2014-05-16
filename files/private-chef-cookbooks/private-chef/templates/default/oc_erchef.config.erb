@@ -53,12 +53,12 @@
           {error_logger_hwm, 1000}
         ]},
  {oc_chef_action, [
-              {actionlog_host, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
-              {actionlog_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
-              {actionlog_user, <<"<%= node['private_chef']['rabbitmq']['actionlog_user'] %>">>},
-              {actionlog_password, <<"<%= node['private_chef']['rabbitmq']['actionlog_password'] %>">>},
-              {actionlog_vhost, <<"<%= node['private_chef']['rabbitmq']['actionlog_vhost'] %>">>},
-              {actionlog_exchange, <<"action">>}
+              {actions_host, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
+              {actions_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
+              {actions_user, <<"<%= node['private_chef']['rabbitmq']['user'] %>">>},
+              {actions_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
+              {actions_vhost, <<"<%= node['private_chef']['rabbitmq']['actions_vhost'] %>">>},
+              {actions_exchange, <<"<%= node['private_chef']['rabbitmq']['actions_exchange'] %>">>}
              ]},
  {oc_chef_wm, [
               {api_version, "<%= node['private_chef']['api_version'] %>"},
@@ -79,7 +79,7 @@
               {authz_timeout, <%= node['private_chef']['opscode-erchef']['authz_timeout'] %>},
               {authz_fanout, <%= node['private_chef']['opscode-erchef']['authz_fanout'] %>},
 
-              {enable_actionlog, <%= node['private_chef']['opscode-erchef']['enable_actionlog'] %>}
+              {enable_actions, <%= node['private_chef']['dark_launch']['actions'] %>}
              ]},
   {chef_wm, [
              {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},
