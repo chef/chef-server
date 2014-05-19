@@ -14,7 +14,7 @@ require 'securerandom'
 module PrivateChef
   extend(Mixlib::Config)
 
-  # options are 'standalone', 'manual', 'ha', and 'tier'
+  # options are 'standalone', 'manual', 'ha', 'customha' and 'tier'
   topology "standalone"
 
   # options are 'ipv4' 'ipv6'
@@ -137,7 +137,7 @@ module PrivateChef
       end
 
       me = PrivateChef["servers"][node_name]
-      ha_guard = PrivateChef['topology'] == "ha" && !me['bootstrap']
+      ha_guard = ['ha', 'customha'].include?(PrivateChef['topology']) && !me['bootstrap']
 
       PrivateChef['rabbitmq']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['rabbitmq']['jobs_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
@@ -360,14 +360,14 @@ module PrivateChef
       PrivateChef["bootstrap"]["enable"] = false
     end
 
-    def gen_redundant(node_name, ha=false)
+    def gen_redundant(node_name, topology)
       raise "Please add a server section for #{node_name} to /etc/opscode/private-chef.rb!" unless PrivateChef['servers'].has_key?(node_name)
       me = PrivateChef["servers"][node_name]
       case me["role"]
       when "backend"
         gen_backend(me['bootstrap'])
-        gen_drbd if ha
-        gen_keepalived(node_name) if ha
+        gen_drbd if topology == 'ha'
+        gen_keepalived(node_name) if ['ha', 'customha'].include?(topology)
         gen_api_fqdn
       when "frontend"
         gen_frontend
@@ -413,12 +413,10 @@ module PrivateChef
       when "standalone","manual"
         PrivateChef[:api_fqdn] ||= node_name
         gen_api_fqdn
-      when "ha"
-        gen_redundant(node_name, true)
-      when "tier"
-        gen_redundant(node_name, false)
+      when "ha", "tier", "customha"
+        gen_redundant(node_name, PrivateChef['topology'])
       else
-        Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha or tier.")
+        Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha, customha or tier.")
         exit 55
       end
 
