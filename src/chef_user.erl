@@ -252,14 +252,13 @@ validate_user_name(User) ->
   UserNameSpec = {[ {<<"username">>, {string_match, RE}} ]},
   NameSpec = {[ {<<"name">>, {string_match, RE}} ]},
   case ej:valid(UserNameSpec, User) of
-    ok ->
-      ok;
+    ok -> ok;
     #ej_invalid{type = missing} ->
       case ej:valid(NameSpec, User) of
         ok ->
           ok;
         BadSpec ->
-          throw(BadSpec)
+          throw(BadSpec#ej_invalid{key = <<"username">>})
       end;
     BadSpec ->
       throw(BadSpec)
