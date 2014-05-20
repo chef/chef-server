@@ -175,7 +175,7 @@ add_command "ha-status", "Show the status of high availability services.", 1 do
   custom_backend = "/var/opt/opscode/keepalived/bin/custom_backend_"
   ['storage', 'ip'].each do |t|
     if File.executable?("#{custom_backend}#{t}")
-      custom_status = `#{custom_backend}#{t} status`
+      custom_status = `#{custom_backend}#{t} status`.chomp
       if custom_status == current_cluster_status
         puts "[OK] #{t} backend status matches my status: #{custom_status}"
       else
