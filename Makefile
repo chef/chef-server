@@ -8,7 +8,6 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
                 deps/chef_objects/ebin \
                 deps/chef_wm/ebin \
                 deps/ej/ebin \
-                deps/fast_log/ebin \
                 deps/mini_s3/ebin \
                 deps/pooler/ebin \
                 deps/sqerl/ebin \
@@ -25,23 +24,25 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
 DEPS_PLT = chef_wm.plt
 EC_SCHEMA_VERSION = 2.2.0
 
+REBAR = REBAR_PARENT=$(CURDIR)/rebar.config rebar
+
 all: compile eunit dialyzer
 
 clean:
-	@rebar clean
+	@$(REBAR) clean
 
 compile: $(DEPS)
-	@rebar compile
+	@$(REBAR) compile
 
 $(DEPS):
-	@rebar get-deps
+	@$(REBAR) get-deps
 
 distclean:
 	@rm -rf deps $(DEPS_PLT)
-	@rebar skip_deps=true clean
+	@$(REBAR) skip_deps=true clean
 
 eunit:
-	@rebar skip_deps=true eunit
+	@$(REBAR) skip_deps=true eunit
 
 test: eunit
 
@@ -63,4 +64,4 @@ itest_deps: $(ITEST_DEPS)/enterprise-chef-server-schema
 
 itest: test itest_deps
 	@erlc -pa 'deps/*/ebin' -pa ebin -I 'deps' -o itest/mocks/ itest/mocks/*.erl
-	@rebar skip_deps=true ct
+	@$(REBAR) skip_deps=true ct
