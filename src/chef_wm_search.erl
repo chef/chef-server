@@ -30,10 +30,6 @@
 -include_lib("chef_index/include/chef_solr.hrl").
 
 -define(DEFAULT_BATCH_SIZE, 5).
--define(LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName), {{'query', Query},
-                {orgname, OrgName},
-                {solr1, Solr1},
-                {solr4, Solr4}}).
 
 %% We chose to *not* mixin chef_wm_base:post_is_create/2 as a POST in
 %% this resource is purely for processing...not resource creation.
