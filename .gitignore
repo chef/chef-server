@@ -13,3 +13,4 @@ doc/*.html
 /chef_wm.plt
 ct_logs
 *_data
+.rebar
