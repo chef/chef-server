@@ -123,11 +123,10 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                          resource_state = SearchState,
                          organization_name = OrgName,
                          organization_guid = OrgId,
-                         reqid = ReqId,
-                         darklaunch = Darklaunch} = State) ->
+                         reqid = ReqId} = State) ->
     BatchSize = batch_size(),
     Query = SearchState#search_state.solr_query,
-    case solr_query(Query, ReqId, Darklaunch, OrgName) of
+    case solr_query(Query, ReqId) of
         {ok, Start, SolrNumFound, Ids} ->
             IndexType = Query#chef_solr_query.index,
             Paths = SearchState#search_state.partial_paths,
@@ -175,102 +174,19 @@ batch_size() ->
 search_log_msg(SolrNumFound, NumIds, DbNumFound) ->
     {search, SolrNumFound, NumIds, DbNumFound}.
 
-solr_query(Query, ReqId, Darklaunch, OrgName) ->
-    %% solr_urls should be a proplist with keys 'default' and 'aux' each mapping to a Solr
-    %% root URL.
-    SolrUrls = envy:get(chef_wm, solr_urls, [], list),
-    case chef_wm_darklaunch:is_enabled(<<"solr4">>, Darklaunch) of
-        true ->
-            execute_solr_query(ReqId, aux, Query, SolrUrls);
-        false ->
-            case chef_wm_darklaunch:is_enabled(<<"query_aux_solr">>, Darklaunch) of
-                true ->
-                    %% Send the query to the default and aux solr. Execute the solr requests in
-                    %% parallel and await both results. Return the result from the default solr.
-                    %% This is intended for use in evaluating new (aux) solr infrastructure.
-                    {default, DefaultUrl} = lists:keyfind(default, 1, SolrUrls),
-                    {aux, AuxUrl} = lists:keyfind(aux, 1, SolrUrls),
-                    %% default URL goes first and that's the only result we capture
-                    Pids = [ spawn_solr_query(Label, Url, Query, ReqId) ||
-                               {Label, Url} <- [{search, DefaultUrl}, {search_aux, AuxUrl}] ],
-                    gather_solr_queries(Pids, Query, OrgName);
-                false ->
-                    execute_solr_query(ReqId, default, Query, SolrUrls)
-            end
-    end.
-
-execute_solr_query(ReqId, UrlKey,Query, SolrUrls) ->
-    stats_hero:ctime(ReqId, {chef_solr, search},
+solr_query(Query, ReqId) ->
+        stats_hero:ctime(ReqId, {chef_solr, search},
                      fun() ->
-                             %% Fallback to chef_solr:search/1 if solr_urls did not
-                             %% contain UrlKey.
-                             case proplists:get_value(UrlKey, SolrUrls) of
-                                 undefined ->
-                                     chef_solr:search(Query);
-                                 Url ->
-                                     chef_solr:search(Query, Url)
-                             end
+                             solr_search(Query)
                      end).
 
--spec gather_solr_queries([pid()], #chef_solr_query{}, binary()) ->
-                                 {ok, non_neg_integer(), non_neg_integer(), {[binary()], {[binary()], #chef_solr_query{}, binary()}}}.
-gather_solr_queries(Pids, Query, OrgName) ->
-    [Solr1,Solr4] = [ receive
-                          {Pid, Result} ->
-                              Result
-                      after envy:get(chef_wm, solr_timeout, 30000, pos_integer) ->
-                              erlang:error({solr_query_timeout, Pid})
-                      end
-                      || Pid <- Pids ],
-    log_error_differences(Solr1, Solr4, Query, OrgName),
-    combine_results(Solr1, Solr4, Query, OrgName).
-
-combine_results({error, _} = Solr1, _, _, _) ->
-    Solr1;
-combine_results(Solr1, {error, _}, _, _) ->
-    Solr1;
-combine_results({Resp,Start,Count,Solr1Results}, {_,_,_,Solr4Results}, Query, OrgName) ->
-    {Resp, Start, Count, {Solr1Results, {Solr4Results, Query, OrgName}}}.
-
-log_error_differences({error, _} = Solr1, {_,_,_,Solr4}, Query, OrgName) ->
-    lager:log(debug, [{solr_diff, ?MODULE}], "~p",
-              [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)]);
-log_error_differences({_,_,_,Solr1}, {error, _} = Solr4, Query, OrgName) ->
-    lager:log(debug, [{solr_diff, ?MODULE}], "~p",
-              [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)]);
-log_error_differences(_NotAnErrorCondition, _Solr4, _Query, _OrgName) ->
-    ok.
-
-log_differences(DbHitCount, OldSolrResults,{NewSolrResults, Query, OrgName}) ->
-    case DbHitCount =:= length(NewSolrResults) of
-        true ->
-            ok;
-        false ->
-            case chef_wm_util:lists_diff(OldSolrResults, NewSolrResults) of
-                {[], []} ->
-                    ok;
-                {Solr1, Solr4} ->
-                    lager:log(debug, [{solr_diff, ?MODULE}], "~p",
-                              [?LOG_DIFF_TUPLE(Solr1, Solr4, Query, OrgName)])
-            end
+solr_search(Query) ->
+    try
+        chef_solr:search(Query)
+    catch
+        Error:Reason ->
+            {Error, Reason}
     end.
-
-spawn_solr_query(Label, Url, Query, ReqId) ->
-    Parent = self(),
-    proc_lib:spawn_link(
-      fun() ->
-              Result =
-                  try
-                      stats_hero:ctime(ReqId, {chef_solr, Label},
-                                       fun() ->
-                                               chef_solr:search(Query, Url)
-                                       end)
-                  catch
-                      Error:Reason ->
-                          {Error, Reason}
-                  end,
-              Parent ! {self(), Result}
-      end).
 
 %% POST to /search represents a partial search request
 %% The posted request body should be of the form:
@@ -414,11 +330,6 @@ extract_path(_Item, []) ->
 extract_path(Item, Path) ->
     ej:get(list_to_tuple(Path), Item, null).
 
-make_search_results(BulkGetFun, {Ids, Solr4Info}, BatchSize, Start, NumFound) ->
-    {DbHits, Results} = make_search_results(BulkGetFun, Ids, BatchSize, Start, NumFound),
-    log_differences(DbHits, Ids, Solr4Info),
-    {DbHits, Results};
-    
 make_search_results(BulkGetFun, Ids, BatchSize, Start, NumFound) ->
     Ans0 = search_result_start(Start, NumFound),
     {N, Ans1} = fetch_result_rows(Ids, BatchSize, BulkGetFun, {0, Ans0}),
