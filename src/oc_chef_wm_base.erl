@@ -17,7 +17,7 @@
 %% "Grab Bag" functions that will also need to be implemented by other base resources
 -export([assemble_principal_ejson/3,
          check_cookbook_authz/3,
-         delete_object/4,
+         delete_object/3,
          object_creation_hook/2,
          object_creation_error_hook/2,
          stats_hero_label/1,
@@ -346,10 +346,9 @@ forbidden_message(unverified_org_membership, User, Org) ->
                     #chef_cookbook_version{} |
                     #oc_chef_container{} |
                     #oc_chef_group{},
-                    object_id(),
-                    any()) -> ok.
-delete_object(DbContext, Object, RequestorId, Darklaunch) ->
-    oc_chef_object_db:delete(DbContext, Object, RequestorId, Darklaunch).
+                    object_id()) -> ok.
+delete_object(DbContext, Object, RequestorId) ->
+    oc_chef_object_db:delete(DbContext, Object, RequestorId).
 
 set_req_contexts(Req, #base_state{reqid_header_name = HeaderName} = State) ->
     ReqId = read_req_id(HeaderName, Req),

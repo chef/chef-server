@@ -7,7 +7,7 @@
 %% @doc Helper functions that tie together operations across chef_db and chef_index
 -module(oc_chef_object_db).
 
--export([delete/4]).
+-export([delete/3]).
 
 -include_lib("chef_objects/include/chef_types.hrl").
 -include_lib("oc_chef_authz/include/oc_chef_types.hrl").
@@ -27,12 +27,10 @@
               #chef_cookbook_version{checksums::'undefined' | [binary()]} |
               #oc_chef_container{} |
               #oc_chef_group{},
-              object_id(),
-              any()) -> ok.
+              object_id()) -> ok.
 delete(DbContext, #chef_data_bag{org_id = OrgId,
                                  name = DataBagName}=DataBag,
-       RequestorId,
-       Darklaunch) ->
+       RequestorId) ->
     %% This is a special case, because of the hierarchical relationship between Data Bag
     %% Items and Data Bags.  We need to get the ids of all the data bag's items so that we
     %% can remove them from Solr as well; a cascade-on-delete foreign key takes care of the
@@ -50,15 +48,15 @@ delete(DbContext, #chef_data_bag{org_id = OrgId,
     %% Remove data bag items from Solr now; directly calling chef_index_queue:delete since
     %% we've just got ids, and not proper data bag item records required for
     %% chef_object_db:delete_from_solr
-    chef_object_db:bulk_delete_from_solr(data_bag_item, DataBagItemIds, OrgId, Darklaunch),
+    chef_object_db:bulk_delete_from_solr(data_bag_item, DataBagItemIds, OrgId),
     ok;
-delete(DbContext, Object, RequestorId, Darklaunch) ->
+delete(DbContext, Object, RequestorId) ->
     %% All other object deletion is relatively sane :)
     %% Note that this will throw if an error is encountered
     delete_from_db(DbContext, RequestorId, Object),
     %% This is fire and forget as well. If we're here, we've already deleted the db record
     %% and won't be able to get back here for a retry.
-    chef_object_db:delete_from_solr(Object, Darklaunch),
+    chef_object_db:delete_from_solr(Object),
     ok.
 
 -spec delete_from_db(chef_db:db_context(),
