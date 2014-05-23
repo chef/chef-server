@@ -116,6 +116,7 @@ statements(pgsql) ->
 -define(environment_design, "environments").
 -define(node_design, "nodes").
 -define(role_design, "roles").
+-define(user_design, "users").
 
 -spec make_context(binary(), term()) -> #oc_chef_authz_context{}.
 make_context(ReqId, Darklaunch) when is_binary(ReqId) ->
@@ -131,6 +132,11 @@ make_context(ReqId, Darklaunch) when is_binary(ReqId) ->
                       container_name()) -> #chef_container{} |
                                            not_found |
                                            {error, _}.
+fetch_container(#oc_chef_authz_context{otto_connection = Server},
+                undefined, ContainerName) ->
+    % Containers with no org are global containers - these have not yet been migrated
+    % so force them to couch regardless of darklaunch.
+    fetch_container_couchdb(Server, undefined, ContainerName);
 fetch_container(#oc_chef_authz_context{otto_connection=Server,
                                        darklaunch = Darklaunch} = Ctx,
                 OrgId, ContainerName) ->
@@ -203,9 +209,10 @@ container_record_to_authz_id(#oc_chef_authz_context{}, #chef_container{authz_id 
 %%
 fetch_by_name(_Server, not_found, _Name, _Type) ->
     {not_found, org};
-fetch_by_name(Server, OrgId, Name, Type) when is_list(Name), is_binary(OrgId) ->
+fetch_by_name(Server, OrgId, Name, Type) when is_list(Name) ->
     fetch_by_name(Server, OrgId, list_to_binary(Name), Type);
-fetch_by_name(Server, OrgId, Name, Type) when is_binary(Name), is_binary(OrgId) ->
+fetch_by_name(Server, OrgId, Name, Type) when is_binary(Name) andalso (is_binary(OrgId)
+                                                                       orelse OrgId =:= undefined) ->
     {Design, ViewName} = design_and_view_for_type(Type),
     ChefDb = dbname(OrgId),
     {ok, Db} = couchbeam:open_db(Server, ChefDb, []),
@@ -274,7 +281,10 @@ design_and_view_for_type(authz_group) ->
 %% design_and_view_for_app_type(chef_role) ->
 %%     {?role_design, "all_id"}.
 
--spec dbname(binary()) -> <<_:40,_:_*8>>.
+-spec dbname(binary()|undefined) -> binary().
+% If org id is not provided, then the DB returned is the account db.
+dbname(undefined) ->
+    <<"opscode_account">>;
 dbname(OrgId) ->
     <<"chef_", OrgId/binary>>.
 

@@ -74,7 +74,8 @@
                                  'node' |
                                  'role' |
                                  'sandboxes' |
-                                 'search'.
+                                 'search' |
+                                 'user'.
 
 -spec ping() -> pong | pang.
 ping() ->
@@ -144,7 +145,7 @@ get_container_aid_for_object(Context, OrgId, ObjectType) ->
                                        ContainerAId::object_id(),
                                        ObjectType :: 'client' | 'container' |
                                                      'cookbook' | 'data' | 'environment' |
-                                                     'group' | 'node' | 'role' | 'search'
+                                                     'group' | 'node' | 'role' | 'search' | 'user'
                                                      ) -> {ok, object_id()} | {error, forbidden}.
 create_entity_with_container_acl(RequestorId, ContainerAId, ObjectType) ->
 
@@ -485,13 +486,15 @@ object_type_to_container_name(group)       -> <<"groups">>;
 object_type_to_container_name(node)        -> <<"nodes">>;
 object_type_to_container_name(role)        -> <<"roles">>;
 object_type_to_container_name(sandbox)     -> <<"sandboxes">>;
-object_type_to_container_name(search)      -> <<"search">>.
+object_type_to_container_name(search)      -> <<"search">>;
+object_type_to_container_name(user)        -> <<"users">>.
 
 %% @doc When creating a new Authz entity in a given container, we need to ensure we're
 %% creating the correct kind.
 authz_type_from_container(client)    -> 'actor';
 authz_type_from_container(container) -> 'container';
 authz_type_from_container(group)     -> 'group';
+authz_type_from_container(user)      -> 'actor';
 authz_type_from_container(_)         -> 'object'.
 
 %
