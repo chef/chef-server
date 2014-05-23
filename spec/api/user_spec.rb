@@ -6,10 +6,18 @@ describe "users", :users do
     Pedant::Config.ruby_users_endpoint?
   end
 
+  def ruby_org_assoc?
+    true
+  end
+
   let(:public_key_regex) do
     # Because of a difference in the OpenSSL library between ruby 1.8.7
     # (actually 1.9.2) and 1.9.3, we have to accept multiple patterns here:
-    /^-----BEGIN (RSA PUBLIC|PUBLIC) KEY-----/
+    /^-----BEGIN (RSA )?PUBLIC KEY-----/
+  end
+
+  let(:private_key_regex) do
+    /^-----BEGIN (RSA )?PRIVATE KEY-----/
   end
 
   # Pedant has configurable test users.
@@ -68,10 +76,9 @@ describe "users", :users do
 
     context "PUT /organizations/<org>/users" do
       context "admin user" do
-        # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           put(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => ruby_org_assoc? ? 404 : 405
             })
         end
       end
@@ -80,9 +87,9 @@ describe "users", :users do
     context "POST /organizations/<org>/users" do
       context "admin user" do
         # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           post(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => ruby_org_assoc? ? 404 : 405
             })
         end
       end
@@ -91,9 +98,9 @@ describe "users", :users do
     context "DELETE /organizations/<org>/users" do
       context "admin user" do
         # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           delete(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => ruby_org_assoc? ? 404 : 405
             })
         end
       end
@@ -180,9 +187,9 @@ describe "users", :users do
     context "PUT /organizations/<org>/users/<name>" do
       context "admin user" do
         # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           put(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => ruby_org_assoc? ? 404 : 405
             })
         end
       end
@@ -191,9 +198,9 @@ describe "users", :users do
     context "POST /organizations/<org>/users/<name>" do
       context "admin user" do
         # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           post(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => ruby_org_assoc? ? 404 : 405
             })
         end
       end
@@ -270,7 +277,6 @@ describe "users", :users do
       end
     end # context DELETE /organizations/<org>/users/<name>
   end # context /organizations/<org>/users/<name>
-
   context "/users endpoint" do
     let(:request_url) { "#{platform.server}/users" }
 
@@ -339,7 +345,7 @@ describe "users", :users do
     context "PUT /users" do
       context "admin user" do
         # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           put(request_url, platform.admin_user).should look_like({
               :status => ruby? ? 404 : 405
             })
@@ -364,7 +370,7 @@ describe "users", :users do
       let(:response_body) do
         {
           "uri" => "#{platform.server}/users/#{username}",
-          "private_key" => /^-----BEGIN RSA PRIVATE KEY-----/
+          "private_key" => private_key_regex
         }
       end
 
@@ -739,8 +745,7 @@ describe "users", :users do
 
     context "DELETE /users" do
       context "admin user" do
-        # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           delete(request_url, platform.admin_user).should look_like({
               :status => ruby? ? 404 : 405
             })
@@ -839,12 +844,6 @@ describe "users", :users do
         }
       end
 
-      let(:response_body) do
-        {
-          "uri" => "#{platform.server}/users/#{username}"
-        }
-      end
-
       let(:modified_user) do
         {
           "username" => username,
@@ -855,9 +854,23 @@ describe "users", :users do
           "public_key" => public_key_regex
         }
       end
+      let(:input_public_key) do
+        <<EOF
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+h5g/r/qaFH6OdYOG0OO
+2/WpLb9qik7SPFmcOvujqZzLO2yv4kXwuvncx/ADHdkobaoFn3FE84uzIVCoSeaj
+xTMeuTcPr5y+wsVqCYMkwIJpPezbwcrErt14BvD9BPN0UDyOJZW43ZN4iIw5xW8y
+lQKuZtTNsm7FoznG+WsmRryTM3OjOrtDYjN/JHwDfrZZtVu7pT8FYnnz0O8j2zEf
+9NALhpS7oDCf+VSo6UUk/w5m4/LpouDxT2dKBwQOuA8pzXd5jHP6rYdbHkroOUqx
+Iy391UeSCiPVHcAN82sYV7R2MnUYj6b9Fev+62FKrQ6v9QYZcyljh6hldmcbmABy
+EQIDAQAB
+-----END PUBLIC KEY-----
+EOF
+          end
+
 
       before :each do
-        post("#{platform.server}/users", platform.superuser,
+        response = post("#{platform.server}/users", platform.superuser,
           :payload => {
             "username" => username,
             "email" => "#{username}@opscode.com",
@@ -865,24 +878,27 @@ describe "users", :users do
             "last_name" => username,
             "display_name" => username,
             "password" => "badger badger"
-          }).should look_like({
+          })
+        response.should look_like({
             :status => 201,
             :body_exact => {
               "uri" => "#{platform.server}/users/#{username}",
-              "private_key" => /^-----BEGIN RSA PRIVATE KEY-----/
+              "private_key" => private_key_regex
             }})
+
+        @original_private_key = JSON.parse(response.body)["private_key"]
       end
 
       after :each do
         delete("#{platform.server}/users/#{username}", platform.superuser)
+        @original_private_key = nil
       end
 
       context "superuser" do
         it "can modify user", :smoke do
           put(request_url, platform.superuser,
             :payload => request_body).should look_like({
-              :status => 200,
-              :body_exact => response_body
+              :status => 200
             })
           get(request_url, platform.superuser).should look_like({
               :status => 200,
@@ -1215,6 +1231,126 @@ describe "users", :users do
               })
           end
         end
+
+        context "with new password provided" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@opscode.com",
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => "new name",
+              "password" => "bidgerbidger"
+            }
+          end
+          it "changes the password" do
+            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response.should look_like({ :status => 200 })
+
+            response = post("#{platform.server}/verify_password", platform.superuser,
+                            :payload => { 'user_id_to_verify' => username, 'password' => 'bidgerbidger' })
+            JSON.parse(response.body)["password_is_correct"].should eq(true)
+
+          end
+        end
+
+        context "with public key provided" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@opscode.com",
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => "new name",
+              "password" => "badger badger",
+              "public_key" => input_public_key
+            }
+          end
+          it "accepts the public key and subsequently responds with it" do
+            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response.should look_like({
+                                            :status => 200,
+                                            :body=> {
+                                              "uri" => request_url
+                                            },
+                                          })
+            get_response = get(request_url, platform.superuser)
+            new_public_key = JSON.parse(get_response.body)["public_key"]
+            new_public_key.should eq(input_public_key)
+          end
+        end
+        context "with private_key = true" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@opscode.com",
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => "new name",
+              "password" => "badger badger",
+              "private_key" => true
+            }
+          end
+
+          it "returns a new private key, changes the public key" do
+            original_response = get(request_url, platform.superuser)
+            original_public_key = JSON.parse(original_response.body)["public_key"]
+
+            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response.should look_like({
+                                            :status => 200,
+                                            :body_exact => {
+                                              "uri" => request_url,
+                                              "private_key" => private_key_regex
+                                            },
+                                          })
+
+            new_private_key = JSON.parse(put_response.body)["private_key"]
+            new_private_key.should_not eq(@original_private_key)
+
+            new_response = get(request_url, platform.superuser)
+            new_public_key = JSON.parse(new_response.body)["public_key"]
+            new_public_key.should_not eq(original_public_key)
+          end
+        end
+
+        context "with private_key = true and a public_key" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@opscode.com",
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => "new name",
+              "password" => "badger badger",
+              "private_key" => true,
+              "public_key" => input_public_key
+            }
+          end
+
+          it "returns a new private key, changes the public key" do
+            original_response = get(request_url, platform.superuser)
+            original_public_key = JSON.parse(original_response.body)["public_key"]
+
+            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response.should look_like({
+                                            :status => 200,
+                                            :body_exact => {
+                                              "uri" => request_url,
+                                              "private_key" => private_key_regex
+                                            },
+                                          })
+
+            new_private_key = JSON.parse(put_response.body)["private_key"]
+            new_private_key.should_not eq(@original_private_key)
+
+            new_response = get(request_url, platform.superuser)
+            new_public_key = JSON.parse(new_response.body)["public_key"]
+
+            new_public_key.should_not eq(input_public_key)
+            new_public_key.should_not eq(original_public_key)
+          end
+        end
       end # context modifying users
 
       context "renaming users" do
@@ -1248,18 +1384,28 @@ describe "users", :users do
             delete("#{platform.server}/users/#{new_name}", platform.superuser)
           end
 
-          it "renames user" do
-            put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 201
-              })
-            get(request_url, platform.superuser).should look_like({
-                :status => 404
-              })
-            get(new_request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body_exact => modified_user
-              })
+          context "and the username is valid" do
+            # Ideally these would be discrete tests: can we put it and get the correct response?
+            # But the top-level PUT /users/:id context causes us some problems with it's before :each
+            # behavior of recreating users.
+            it "updates the user to the new name and provides a new uri" do
+              put(request_url, platform.superuser,
+                :payload => request_body).should look_like({
+                  :status => 201,
+                  :body_exact => { "uri" => new_request_url },
+                  :headers => [ "Location" => new_request_url ]
+                })
+
+              # it "makes the user unavailable at the old URI"
+              get(request_url, platform.superuser).should look_like({
+                  :status => 404
+                })
+              # it "makes the user available at the new URI"
+              get(new_request_url, platform.superuser).should look_like({
+                  :status => 200,
+                  :body_exact => modified_user
+                })
+            end
           end
         end
 
@@ -1278,18 +1424,14 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-              get(request_url, platform.superuser).should look_like({
-                  :status => 200
-                })
-              get(new_request_url, platform.superuser).should look_like({
-                  :status => 404
-                })
-            end
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 400
+              })
+            # it "does not process any change to username" do
+            get(request_url, platform.superuser).should look_like({
+                :status => 200
+              })
           end
         end
 
@@ -1308,18 +1450,13 @@ describe "users", :users do
           end
 
           it "returns 400" do
-            pending "actually returns 500" do
-              put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 400
-                })
-              get(request_url, platform.superuser).should look_like({
-                  :status => 200
-                })
-              get(new_request_url, platform.superuser).should look_like({
-                  :status => 404
-                })
-            end
+            put(request_url, platform.superuser, :payload => request_body).should look_like({
+                :status => 400
+              })
+            # it "does not process any change to username" do
+            get(request_url, platform.superuser).should look_like({
+                :status => 200
+              })
           end
         end
 
@@ -1342,14 +1479,13 @@ describe "users", :users do
               :payload => request_body).should look_like({
                 :status => 400
               })
+            # it "does not process any change to username" do
             get(request_url, platform.superuser).should look_like({
                 :status => 200
               })
-            get(new_request_url, platform.superuser).should look_like({
-                :status => 404
-              })
           end
         end
+
 
         context "new name already exists" do
           let(:request_body) do
@@ -1375,7 +1511,6 @@ describe "users", :users do
           end
 
           it "returns 409" do
-            pending "actually returns 500" do
               put(request_url, platform.superuser,
                 :payload => request_body).should look_like({
                   :status => 409
@@ -1384,7 +1519,6 @@ describe "users", :users do
                   :status => 200,
                   :body_exact => unmodified_user
                 })
-            end
           end
         end
       end # context renaming users
@@ -1393,7 +1527,7 @@ describe "users", :users do
     context "POST /users/<name>" do
       context "admin user" do
         # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns 404 (or 405?)" do
+        it "returns  404[ruby]/405[erlang]" do
           post(request_url, platform.admin_user).should look_like({
               :status => ruby? ? 404 : 405
             })
@@ -1417,7 +1551,7 @@ describe "users", :users do
             :status => 201,
             :body_exact => {
               "uri" => "#{platform.server}/users/#{username}",
-              "private_key" => /^-----BEGIN RSA PRIVATE KEY-----/
+              "private_key" => private_key_regex
             }})
       end
 
@@ -1430,11 +1564,14 @@ describe "users", :users do
           delete(request_url, platform.superuser).should look_like({
               :status => 200
             })
-          get("#{platform.server}/users/#{username}",
-            platform.admin_user).should look_like({
+          # Similar to rename, the existing before :each interferese with making this into a separate test
+          # because it recreates the user.
+          # it "did delete the user"
+          get(request_url, platform.superuser).should look_like({
               :status => 404
-            })
+          })
         end
+
       end
 
       context "admin user" do
@@ -1442,6 +1579,7 @@ describe "users", :users do
           delete(request_url, platform.admin_user).should look_like({
               :status => 403
             })
+          # it "did not delete user" do
           get("#{platform.server}/users/#{username}",
             platform.superuser).should look_like({
               :status => 200
@@ -1454,6 +1592,7 @@ describe "users", :users do
           delete(request_url, platform.non_admin_client).should look_like({
               :status => 401
             })
+          # it "did not delete user" do
           get("#{platform.server}/users/#{username}",
             platform.superuser).should look_like({
               :status => 200
