@@ -42,6 +42,7 @@ link redis_data_dir_symlink do
   not_if { redis_data_dir_symlink == redis_data_dir }
 end
 
+component_runit_service "redis_lb"
 
 redis_data = redis
 template redis_config do
@@ -52,8 +53,6 @@ template redis_config do
   variables(redis_data.to_hash)
   notifies :restart, 'service[redis_lb]', :immediately if is_data_master?
 end
-
-component_runit_service "redis_lb"
 
 # log rotation
 template "/etc/opscode/logrotate.d/redis_lb" do
