@@ -27,8 +27,13 @@
 -compile([export_all]).
 -endif.
 
--define(DEFAULT_HASH_TYPE, <<"erlang-bcrypt-0.5.0">>).
--define(MIGRATION_HASH_TYPE, <<"sha1+bcrypt">>).
+-ifndef(DEFAULT_HASH_TYPE).
+-define(DEFAULT_HASH_TYPE, 'erlang-bcrypt-0.5.0').
+-endif.
+
+-ifndef(MIGRATION_HASH_TYPE).
+-define(MIGRATION_HASH_TYPE, 'sha1+bcrypt"').
+-endif.
 
 -type str_or_bin() :: string() | binary().
 

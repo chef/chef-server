@@ -30,7 +30,6 @@
          get_header_fun/2,
          fetch_org_guid/1,
          malformed_request_message/3,
-         admin_field_is_false/1,
          base_mods/0,
          not_found_message/2,
          num_versions/1,
@@ -94,6 +93,8 @@ get_header_fun(Req, State = #base_state{header_fun = HFun})
 get_header_fun(_Req, State) ->
     {State#base_state.header_fun, State}.
 
+fetch_org_guid(#base_state{organization_name = undefined}) ->
+    undefined;
 fetch_org_guid(#base_state{organization_guid = Id}) when is_binary(Id) ->
     Id;
 fetch_org_guid(#base_state{organization_guid = undefined,
@@ -270,10 +271,6 @@ malformed_request_message(#ej_invalid{type = object_value, key = Object, found =
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
-admin_field_is_false(#chef_user{admin = Admin}) when Admin =:= false ->
-  true;
-admin_field_is_false(#chef_user{}) ->
-  false.
 
 %% @doc Utility function to process the `num_versions' parameter that is common to several
 %% cookbook-related resources
@@ -363,4 +360,4 @@ lists_diff_sorted(FirstList, SecondList) ->
     {lists:sort(sets:to_list(sets:subtract(FirstSet, SecondSet))),
      lists:sort(sets:to_list(sets:subtract(SecondSet, FirstSet)))}.
 
-    
+
