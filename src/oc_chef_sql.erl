@@ -39,19 +39,11 @@ statements(DbType) ->
     Merged = dict:merge(fun(_K, _V1, V2) -> V2 end,
                         dict:from_list(BaseStatements),
                         dict:from_list(OPCStatements)),
-
-    %% A few queries are currently only used on Open Source and should
-    %% not even be prepared on Private Chef
-    StatementsToRemove = [insert_user,
-                          delete_user_by_username,
-                          list_users,
-                          count_user_admins,
-                          update_user_by_id],
-
-    AuthzStatements = oc_chef_authz_db:statements(pgsql),
+    %% count_user_admins is not used in EC
     ChefStatements = dict:to_list(lists:foldl(fun dict:erase/2,
                                               Merged,
-                                              StatementsToRemove)),
+                                              [count_user_admins])),
+    AuthzStatements = oc_chef_authz_db:statements(pgsql),
     AuthzStatements ++ ChefStatements.
 
 %% @doc Return a proplist of the parameterized SQL queries needed for
