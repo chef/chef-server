@@ -1,7 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 et
-%% @author Mark Mzyk <mmzyk@opscode.com
-%% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+%% @author Mark Mzyk <mmzyk@getchef.com>
+%% @author Marc Paradise <marc@getchef.com>
+%% Copyright 2011-2014 Chef, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -28,6 +29,7 @@
          id/1,
          is_indexed/0,
          name/1,
+         username_from_ejson/1,
          org_id/1,
          new_record/3,
          parse_binary_json/1,
@@ -62,17 +64,7 @@
          ]).
 
 -include("chef_types.hrl").
-
-%% fields:
- %% username/name - in webui, name has _ inserted for , (periods) so should check that there are no periods in the name here
- %% password - no default -
- %%   cannot be blank, must be 6 chars
- %% admin - default is false
-
--define(DEFAULT_FIELD_VALUES,
-        [
-          {<<"admin">>, false}
-        ]).
+-include_lib("ej/include/ej.hrl").
 
 
 -behaviour(chef_object).
@@ -92,124 +84,158 @@ id(#chef_user{id = Id}) ->
 org_id(#chef_user{}) ->
     error(not_valid_for_chef_user).
 
-%% TODO: this doesn't need an argument
 type_name(#chef_user{}) ->
     user.
 
+-spec username_from_ejson(ejson_term()) -> binary().
+username_from_ejson(UserData) ->
+    case ej:get({<<"name">>}, UserData) of
+        undefined ->
+            ej:get({<<"username">>}, UserData);
+        Name ->
+            Name
+    end.
+
 -spec new_record(object_id(), object_id(), {ejson_term(), {binary(), binary(), binary()}}) -> #chef_user{}.
-    %% This only works for Open Source Users currently
 new_record(OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
-Name = ej:get({<<"name">>}, UserData),
+    Name = username_from_ejson(UserData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Email = value_or_null({<<"email">>}, UserData),
-    Admin = ej:get({<<"admin">>}, UserData) =:= true,
-    {PublicKey, _PubkeyVersion} = cert_or_key(UserData),
+    ExtAuthUid = value_or_null({<<"external_authentication_uid">>}, UserData),
+    EnableRecovery = ej:get({"<<recovery_authentication_enabled>>"}, UserData) =:= true,
+    {PublicKey, PubkeyVersion} = chef_object_base:cert_or_key(UserData),
+    SerializedObject = { whitelisted_values(UserData) },
     #chef_user{id = Id,
                authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                username = Name,
                email = Email,
+               pubkey_version = PubkeyVersion,
                public_key = PublicKey,
                hashed_password = HashPass,
                salt = Salt,
                hash_type = HashType,
-               external_authentication_uid = null, %% Not used in open source user
-               recovery_authentication_enabled = false, %% Not used in open source user
-               admin = Admin
+               external_authentication_uid = ExtAuthUid,
+               recovery_authentication_enabled = EnableRecovery,
+               admin = false,
+               serialized_object = chef_json:encode(SerializedObject)
     }.
 
 value_or_null(Key, Data) ->
- Value = ej:get(Key, Data),
-  case Value of
-    undefined ->
-      null;
-    _ ->
-      Value
-  end.
-
-cert_or_key(Payload) ->
-    %% Some consumers of the API, such as webui, will generate a
-    %% JSON { public_key: null } to mean, "do not change it". By
-    %% default, null is treated as a defined, and will erase the
-    %% public_key in the database. We use value_or_undefined() to
-    %% convert all null into undefined.
-    Cert = value_or_undefined({<<"certificate">>}, Payload),
-    PublicKey = value_or_undefined({<<"public_key">>}, Payload),
-    %% Take certificate first, then public_key
-    case Cert of
+    Value = ej:get(Key, Data),
+    case Value of
         undefined ->
-            {PublicKey, ?KEY_VERSION};
+            null;
         _ ->
-            {Cert, ?CERT_VERSION}
+            Value
     end.
 
-value_or_undefined(Key, Data) ->
-  case ej:get(Key, Data) of
-    null ->
-      undefined;
-    Value ->
-      Value
-  end.
+password_validator() ->
+    {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}.
 
+user_spec(common) ->
+    {[
+        {<<"display_name">>, string}, %% FIXME as an always-required field this belongs in the schema
+        {<<"email">>,            {fun_match, {fun valid_email/1, string, <<"email must be valid">>}}},
+        {{opt,<<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string,
+                                              <<"Public Key must be a valid key.">>}}},
+        {{opt,<<"first_name">>},  string},  %% Note that remaining fields are serialized via serialized_object and
+        {{opt,<<"last_name">>},   string} , %% are/were used by other Chef components.
+        {{opt,<<"middle_name">>}, string},  %% FIXME these should be retained by the components that need them
+        {{opt,<<"twitter_account">>}, string},
+        {{opt,<<"city">>}, string},
+        {{opt,<<"country">>}, string}
+    ]};
 user_spec(create) ->
-  {[
-    {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
-    {<<"password">>, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
-    {{opt,<<"admin">>}, boolean},
-    {{opt,<<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
-   ]};
+   {[ {<<"password">>, password_validator()} ]};
 user_spec(update) ->
-  {[
-    {<<"name">>, {string_match, chef_regex:regex_for(user_name)}},
-    {{opt,<<"password">>}, {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}},
-    {{opt,<<"private_key">>}, boolean},
-    {{opt,<<"admin">>}, boolean},
-    {{opt,<<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
-   ]}.
+    {[ {{opt,<<"password">>},  password_validator()},
+       {{opt,<<"private_key">>}, boolean } ]}.
+
+%% Whitelist of fields we will persist to serialized_objects.  Fields not in this list and not part of the
+%% schema will cause updates to be rejected.
+-define(JSON_SERIALIZABLE, [<<"display_name">>,
+                            <<"first_name">>,
+                            <<"last_name">>,
+                            <<"middle_name">>,
+                            <<"city">>,
+                            <<"country">>,
+                            <<"twitter_account">>]).
+
+
+valid_email(EMail) when is_binary(EMail) ->
+    valid_email(binary_to_list(EMail));
+valid_email(EMail) ->
+    %% * Not compiling/caching this because updating users is a fairly infrequent operatoin.
+    %% * This will allow most valid emails. It will fail in some valid cases, such as if someone
+    %%   submitted: me+"my address"@somehost.com - which is technically valid.
+    RE = "^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*" ++
+         "|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]" ++
+         "|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")" ++
+         "@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?" ++
+         "|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}" ++
+         "(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:" ++
+         "(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]" ++
+         "|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)" ++
+         "\\])$",
+    case re:run(EMail, RE) of
+        {match, _} ->
+            ok;
+        nomatch ->
+            error
+    end.
 
 valid_password(Password) when is_binary(Password) andalso byte_size(Password) >= 6 ->
-  ok;
+    ok;
 valid_password(_Password) ->
-  error.
+    error.
 
-
-
+%% Returns the subset of permitted fields that are
+%% present in JSON_SERIALIZABLE
+whitelisted_values(EJ) ->
+    [{X, ej:get({X}, EJ) } || X <- ?JSON_SERIALIZABLE, ej:get({X}, EJ)  =/= undefined ].
 assemble_user_ejson(#chef_user{username = Name,
-                               public_key = PubKey,
-                               admin = Admin},
+                               public_key = KeyOrCert,
+                               email = Email,
+                               serialized_object = SerializedObject},
                     _OrgId) ->
-    {[{<<"name">>, Name},
-      {<<"public_key">>, PubKey},
-      {<<"admin">>, Admin}]}.
+    EJ = chef_json:decode(SerializedObject),
+    % public_key can mean either public key or cert.
+    % if it's a cert, we need to extract the public key -
+    % we don't want to hand the cert back on user GET.
+    RealPubKey = real_pub_key(KeyOrCert),
+    User1 = [{<<"username">>, Name},
+             {<<"public_key">>, RealPubKey},
+             {<<"email">>, Email}],
+    User2 = whitelisted_values(EJ),
+    { User1 ++ User2 }.
+
+
+real_pub_key(Data) ->
+    case chef_object_base:key_version(Data) of
+        ?KEY_VERSION ->
+            Data;
+        ?CERT_VERSION ->
+            chef_authn:extract_pem_encoded_public_key(Data)
+    end.
 
 %% @doc Convert a binary JSON string representing a Chef User into an
 %% EJson-encoded Erlang data structure.
 -spec parse_binary_json(binary()) -> {ok, ej:json_object()}. % or throw
 parse_binary_json(Bin) ->
-    parse_binary_json(Bin, create).
+  parse_binary_json(Bin, create).
 
 -spec parse_binary_json(binary(), create | update) -> {ok, ej:json_object()}. % or throw
 parse_binary_json(Bin, Operation) ->
   User = chef_object_base:delete_null_public_key(chef_json:decode(Bin)),
   %% If user is invalid, an error is thown
+  validate_user(User, user_spec(common)),
   validate_user(User, user_spec(Operation)),
-  %% Set default values after validating input, so admin can be set to false
-  %% if it is not present
-  User1 = set_default_values(User, ?DEFAULT_FIELD_VALUES),
-  {ok, User1}.
-
-set_default_values(User, Defaults) ->
-  lists:foldl(fun({Key, Default}, Current) ->
-                case ej:get({Key}, Current) of
-                    undefined ->
-                      ej:set({Key}, Current, Default);
-                    _ -> Current
-                end
-              end,
-              User,
-              Defaults).
+  %% Note that if the json contains extra fields they will be silently ignored.
+  {ok, User}.
 
 %%-spec validate_user(ejson_term(), ejson_term()) -> {ok, ejson_term()}. % or throw
 validate_user(User, Spec) ->
+  validate_user_name(User),
   case ej:valid(Spec, User) of
     ok ->
       {ok, User};
@@ -217,6 +243,26 @@ validate_user(User, Spec) ->
       throw(BadSpec)
   end.
 
+% Our user spec does not include 'username' because one of
+% 'name'|'username' may be present. Check for either/or here,
+% and use the ej:valid function to ensure consistent error
+% formatting in case of problem.
+validate_user_name(User) ->
+  RE = chef_regex:regex_for(user_name),
+  UserNameSpec = {[ {<<"username">>, {string_match, RE}} ]},
+  NameSpec = {[ {<<"name">>, {string_match, RE}} ]},
+  case ej:valid(UserNameSpec, User) of
+    ok -> ok;
+    #ej_invalid{type = missing} ->
+      case ej:valid(NameSpec, User) of
+        ok ->
+          ok;
+        BadSpec ->
+          throw(BadSpec#ej_invalid{key = <<"username">>})
+      end;
+    BadSpec ->
+      throw(BadSpec)
+ end.
 
 password_data(#chef_user{hashed_password = HashedPassword,
                                          salt = Salt,
@@ -229,26 +275,48 @@ set_password_data(#chef_user{}=User, {HashedPassword, Salt, HashType}) ->
                        hash_type = HashType}.
 
 %% TODO: This is transient code and will be deprecated/removed in the future
--spec update_from_ejson(#chef_user{}, {ejson_term(), {binary(), binary(), binary()}}) -> #chef_user{}.
+-spec update_from_ejson(#chef_user{}, ejson_term()) -> #chef_user{}.
 %% @doc Return a new `chef_user()' record updated according to the specified EJSON
 %% terms. This provides behavior similar to chef_objects:update_from_ejson()
-update_from_ejson(#chef_user{} = User, {UserData, PasswordData}) ->
-    Name = ej:get({<<"name">>}, UserData),
-    IsAdmin = ej:get({<<"admin">>}, UserData) =:= true,
+update_from_ejson(#chef_user{} = User, UserEJson) ->
+    Name = username_from_ejson(UserEJson),
+    Email = ej:get({<<"email">>}, UserEJson),
+    ExternalAuthenticationUid = ej:get({<<"external_authentication_uid">>}, UserEJson),
+    RecoveryAuthenticationEnabled = ej:get({<<"recovery_authentication_enabled">>}, UserEJson),
+    {Key, Version} = chef_object_base:cert_or_key(UserEJson),
 
-    {Key, _Version} = chef_object_base:cert_or_key(UserData),
-    UserWithPassword = chef_user:set_password_data(User, PasswordData),
-    case Key of
+    User1 = case Key of
         undefined ->
-            UserWithPassword#chef_user{username = Name,
-                admin = IsAdmin
-            };
+            User;
         _ ->
-            UserWithPassword#chef_user{username = Name,
-                admin = IsAdmin,
+            User#chef_user{
+                pubkey_version= Version,
+                % Note: public_key is now potentially a certificate...
                 public_key = Key
             }
-    end.
+    end,
+    SerializedObject0 = { whitelisted_values(UserEJson) },
+    SerializedObject1 = merge_user_data(chef_json:decode(User#chef_user.serialized_object),
+                                        SerializedObject0),
+    User1#chef_user{username = Name,
+                    email = Email,
+                    external_authentication_uid = ExternalAuthenticationUid,
+                    recovery_authentication_enabled = RecoveryAuthenticationEnabled,
+                    serialized_object = SerializedObject1}.
+
+merge_user_data(User, {ModData}) ->
+    % If value in ModData is null, delete from user, otherwise replace or insert the value.
+    lists:foldl(fun({Key,null}, AccIn) ->
+                        ej:delete({Key}, AccIn);
+                   ({_Key, undefined}, AccIn) ->
+                        % Shouldn't happen, but just in case - don't insert value 'undefined'
+                        % it's not valid.
+                          AccIn;
+                   ({Key, Value}, AccIn) ->
+                        ej:set({Key}, AccIn, Value)
+                end,
+                User, ModData).
+
 
 -spec set_created(#chef_user{}, object_id()) -> #chef_user{}.
 set_created(#chef_user{} = Object, ActorId) ->
@@ -286,13 +354,19 @@ ejson_for_indexing(#chef_user{}, _) ->
 
 fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
                              updated_at      = UpdatedAt,
-                             admin           = IsAdmin,
+                             pubkey_version  = PublicKeyVersion,
                              public_key      = PublicKey,
                              hashed_password = HashedPassword,
                              salt            = Salt,
                              hash_type       = HashType,
+                             serialized_object = SerializedObject,
+                             external_authentication_uid = ExternalAuthenticationUid,
+                             recovery_authentication_enabled = RecoveryAuthEnabled,
+                             email           = Email,
+                             username        = UserName,
                              id              = Id }) ->
-    [IsAdmin =:= true, PublicKey, HashedPassword, Salt, HashType, LastUpdatedBy, UpdatedAt, Id].
+     [false, PublicKeyVersion, PublicKey, HashedPassword, Salt, HashType, chef_json:encode(SerializedObject),
+     ExternalAuthenticationUid, RecoveryAuthEnabled =:= true, Email, UserName,  LastUpdatedBy, UpdatedAt, Id].
 
 fields_for_fetch(#chef_user{username = UserName}) ->
     [UserName].
