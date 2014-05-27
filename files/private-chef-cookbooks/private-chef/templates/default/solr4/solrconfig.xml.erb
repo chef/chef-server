@@ -186,8 +186,8 @@
          If both ramBufferSizeMB and maxBufferedDocs is set, then
          Lucene will flush based on whichever limit is hit first.
          The default is 100 MB.  -->
-    <!-- <ramBufferSizeMB>100</ramBufferSizeMB> -->
-    <!-- <maxBufferedDocs>1000</maxBufferedDocs> -->
+    <ramBufferSizeMB><%= @ram_buffer_size %></ramBufferSizeMB>
+    <maxBufferedDocs><%= @max_commit_docs %></maxBufferedDocs>
 
     <!-- Expert: Merge Policy 
          The Merge Policy in Lucene controls how merging of segments is done.
@@ -210,10 +210,7 @@
          will be allowed before they are merged into one.
          Default is 10 for both merge policies.
       -->
-    <!-- 
-    <mergeFactor>10</mergeFactor>
-      -->
-
+    <mergeFactor><%= @merge_factor %></mergeFactor>
     <!-- Expert: Merge Scheduler
          The Merge Scheduler in Lucene controls how merges are
          performed.  The ConcurrentMergeScheduler (Lucene 2.3 default)
@@ -367,8 +364,9 @@
          If the updateLog is enabled, then it's highly recommended to
          have some sort of hard autoCommit to limit the log size.
       -->
-     <autoCommit> 
-       <maxTime>${solr.autoCommit.maxTime:15000}</maxTime> 
+     <autoCommit>
+       <maxTime><%= @commit_interval %></maxTime>
+       <maxDocs><%= @max_commit_docs %></maxDocs>
        <openSearcher>false</openSearcher> 
      </autoCommit>
 
@@ -379,7 +377,7 @@
       -->
 
      <autoSoftCommit> 
-       <maxTime>1</maxTime>
+       <maxTime><%= @auto_soft_commit %></maxTime>
      </autoSoftCommit>
 
     <!-- Update Related Event Listeners
@@ -817,7 +815,7 @@
      <lst name="defaults">
        <str name="echoParams">explicit</str>
        <int name="rows">10</int>
-       <str name="df">text</str>
+       <str name="df">content</str>
      </lst>
     <!-- In addition to defaults, "appends" params can be specified
          to identify values which should be appended to the list of
