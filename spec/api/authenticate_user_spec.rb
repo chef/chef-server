@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
 
-describe 'authenticate_user', :focus do
+describe 'authenticate_user' do
   def self.ruby?
     true
   end
@@ -70,7 +70,7 @@ describe 'authenticate_user', :focus do
 
   context 'POST /authenticate_user' do
 
-    context 'with correct credentials' do
+    context 'with correct credentials', :smoke do
       it 'superuser user returns 200 ("OK")' do
         post(request_url, superuser, :payload => body).should look_like({
             :status => 200
@@ -363,4 +363,33 @@ describe 'authenticate_user', :focus do
       end
     end
   end # context 'POST /authenticate_user'
+
+  context 'DELETE /authenticate_user' do
+    # This should do nothing0
+
+    it 'returns 404 ("Not Found") for superuser' do
+      delete(request_url, superuser).should look_like({
+          :status => 404
+        })
+    end
+
+    it 'returns 404 ("Not Found") for admin/different user' do
+      delete(request_url, platform.admin_user).should look_like({
+          :status => 404
+        })
+    end
+
+    it 'returns 404 ("Not Found") for non-admin/same user' do
+      delete(request_url, platform.non_admin_user).should look_like({
+          :status => 404
+        })
+    end
+
+    it 'returns 404 ("Not Found") for invalid user' do
+      delete(request_url, invalid_user).should look_like({
+          :status => 404
+        })
+    end
+      
+  end # 'DELETE /authenticate_user'
 end # describe 'authenticate_user'
