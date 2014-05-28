@@ -72,7 +72,7 @@ upgrade_schema_to 11
 restart_service 'opscode-chef'
 restart_service 'opscode-erchef'
 restart_service 'opscode-webui'
-restart_service 'opscode-solr'
+restart_service 'opscode-solr4'
 restart_service 'couchdb'
 ```
 

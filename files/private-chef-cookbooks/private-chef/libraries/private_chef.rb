@@ -22,7 +22,7 @@ module PrivateChef
 
   couchdb Mash.new
   rabbitmq Mash.new
-  opscode_solr Mash.new
+  opscode_solr4 Mash.new
   opscode_expander Mash.new
   opscode_erchef Mash.new
   # Need old path for cookbook migration:
@@ -202,7 +202,7 @@ module PrivateChef
         "redis_lb",
         "couchdb",
         "rabbitmq",
-        "opscode_solr",
+        "opscode_solr4",
         "opscode_expander",
         "opscode_erchef",
         "lb",
@@ -257,7 +257,7 @@ module PrivateChef
       PrivateChef["couchdb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/couchdb"
       PrivateChef['bookshelf']['data_dir'] = "/var/opt/opscode/drbd/data/bookshelf"
       PrivateChef["rabbitmq"]["data_dir"] ||= "/var/opt/opscode/drbd/data/rabbitmq"
-      PrivateChef["opscode_solr"]["data_dir"] ||= "/var/opt/opscode/drbd/data/opscode-solr"
+      PrivateChef["opscode_solr4"]["data_dir"] ||= "/var/opt/opscode/drbd/data/opscode-solr4"
       PrivateChef["redis_lb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/redis_lb"
 
       # The postgresql data directory is scoped to the current version;
@@ -297,7 +297,7 @@ module PrivateChef
       PrivateChef["bookshelf"]["ha"] ||= true
       PrivateChef["couchdb"]["ha"] ||= true
       PrivateChef["rabbitmq"]["ha"] ||= true
-      PrivateChef["opscode_solr"]["ha"] ||= true
+      PrivateChef["opscode_solr4"]["ha"] ||= true
       PrivateChef["opscode_expander"]["ha"] ||= true
       PrivateChef["opscode_erchef"]["ha"] ||= true
       PrivateChef["lb"]["ha"] ||= true
@@ -317,7 +317,7 @@ module PrivateChef
       PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
       PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
-      PrivateChef["opscode_solr"]["ip_address"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["opscode_solr4"]["ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
       PrivateChef["opscode_certificate"]["vip"] ||= '127.0.0.1'
 
@@ -347,8 +347,8 @@ module PrivateChef
       PrivateChef["opscode_certificate"]["enable"] ||= true
       PrivateChef["opscode_certificate"]["vip"] ||= '127.0.0.1'
 
-      PrivateChef["opscode_solr"]["enable"] ||= false
-      PrivateChef["opscode_solr"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["opscode_solr4"]["enable"] ||= false
+      PrivateChef["opscode_solr4"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["opscode_expander"]["enable"] ||= false
       PrivateChef["opscode_org_creator"]["enable"] ||= false
       PrivateChef["postgresql"]["enable"] ||= false

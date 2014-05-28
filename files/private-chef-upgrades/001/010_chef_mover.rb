@@ -31,7 +31,7 @@ define_upgrade do
                      'opscode-erchef',
                      'opscode-expander',
                      'opscode-expander-reindexer',
-                     'opscode-solr',
+                     'opscode-solr4',
                      'opscode-rabbitmq']
 
     # Shut down everything but couch & postgres

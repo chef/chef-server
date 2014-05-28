@@ -6,6 +6,6 @@ Chef::Config.amqp_vhost '<%= node['private_chef']['rabbitmq']['reindexer_vhost']
 Chef::Config.amqp_identity ''
 Chef::Config.amqp_consumer_id '<%= node['private_chef']['rabbitmq']['consumer_id'] %>'
 Chef::Config[:couchdb_url] = "http://<%= node['private_chef']['couchdb']['vip'] %>:<%= node['private_chef']['couchdb']['port'] %>"
-Chef::Config[:solr_url] = "http://<%= node['private_chef']['opscode-solr']['vip'] %>:<%= node['private_chef']['opscode-solr']['port'] %>"
+Chef::Config[:solr_url] = "http://<%= node['private_chef']['opscode-solr4']['vip'] %>:<%= node['private_chef']['opscode-solr4']['port'] %>"
 
 

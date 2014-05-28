@@ -84,37 +84,10 @@ default['private_chef']['rabbitmq']['consumer_id'] = 'hotsauce'
 ####
 # Jetty dummy for logs
 ####
-# Should always be enable = false, we control Jetty+Solr through opscode-solr
+# Should always be enable = false, we control Jetty+Solr through opscode-solr4
 default['private_chef']['jetty']['enable'] = false
 default['private_chef']['jetty']['ha'] = false
-default['private_chef']['jetty']['log_directory'] = "/var/opt/opscode/opscode-solr/jetty/logs"
-
-####
-# Chef Solr
-####
-default['private_chef']['opscode-solr']['enable'] = false
-default['private_chef']['opscode-solr']['ha'] = false
-default['private_chef']['opscode-solr']['dir'] = "/var/opt/opscode/opscode-solr"
-default['private_chef']['opscode-solr']['data_dir'] = "/var/opt/opscode/opscode-solr/data"
-default['private_chef']['opscode-solr']['log_directory'] = "/var/log/opscode/opscode-solr"
-default['private_chef']['opscode-solr']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['opscode-solr']['log_rotation']['num_to_keep'] = 10
-# defaults for heap size and new generation size are computed in the chef-solr
-# recipe based on node memory
-default['private_chef']['opscode-solr']['heap_size'] = nil
-default['private_chef']['opscode-solr']['new_size'] = nil
-default['private_chef']['opscode-solr']['java_opts'] = ""
-default['private_chef']['opscode-solr']['url'] = "http://localhost:8983"
-default['private_chef']['opscode-solr']['ip_address'] = '127.0.0.1'
-default['private_chef']['opscode-solr']['vip'] = '127.0.0.1'
-default['private_chef']['opscode-solr']['port'] = 8983
-default['private_chef']['opscode-solr']['ram_buffer_size'] = 200
-default['private_chef']['opscode-solr']['merge_factor'] = 25
-default['private_chef']['opscode-solr']['max_merge_docs'] = 2147483647
-default['private_chef']['opscode-solr']['max_field_length'] = 100000
-default['private_chef']['opscode-solr']['max_commit_docs'] = 1000
-default['private_chef']['opscode-solr']['commit_interval'] = 60000 # in ms
-default['private_chef']['opscode-solr']['poll_seconds'] = 20 # slave -> master poll interval in seconds, max of 60 (see solrconfig.xml.erb)
+default['private_chef']['jetty']['log_directory'] = "/var/opt/opscode/opscode-solr4/jetty/logs"
 
 ####
 # Chef Solr 4
@@ -255,7 +228,7 @@ default['private_chef']['lb']['debug'] = false
 default['private_chef']['lb']['upstream']['opscode-erchef'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-account'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['oc_bifrost'] = [ "127.0.0.1" ]
-default['private_chef']['lb']['upstream']['opscode-solr'] = [ "127.0.0.1" ]
+default['private_chef']['lb']['upstream']['opscode-solr4'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['bookshelf'] = [ "127.0.0.1" ]
 default['private_chef']['lb_internal']['enable'] = true
 default['private_chef']['lb_internal']['vip'] = "127.0.0.1"

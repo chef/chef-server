@@ -165,7 +165,6 @@ include_recipe "private-chef::sysctl-updates"
   "oc_bifrost",
   "opscode-certificate",
   "opscode-account",
-  "opscode-solr",
   "opscode-solr4",
   "opscode-expander",
   "bookshelf",

@@ -138,7 +138,7 @@
                 {rabbitmq_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
                 {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['vhost'] %>">>},
                 {rabbitmq_exchange, <<"">>},
-                {solr_url, "http://<%= @helper.vip_for_uri('opscode-solr') %>:<%= node['private_chef']['opscode-solr']['port'] %>/solr"}
+                {solr_url, "http://<%= @helper.vip_for_uri('opscode-solr4') %>:<%= node['private_chef']['opscode-solr4']['port'] %>/solr"}
                ]},
   {chef_objects, [
                   {certificate_root_url, "http://<%= @helper.vip_for_uri('opscode-certificate') %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificates"},

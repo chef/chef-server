@@ -12,7 +12,7 @@ define_upgrade do
   %w{
     couchdb
     rabbitmq
-    opscode-solr
+    opscode-solr4
     opscode-expander
     opscode-expander-reindexer
     opscode-erchef

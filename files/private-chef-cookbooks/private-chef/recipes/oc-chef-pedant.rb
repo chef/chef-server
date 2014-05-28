@@ -29,7 +29,7 @@ template pedant_config do
   mode  "0755"
   variables({
     :api_url  => node['private_chef']['nginx']['url'],
-    :solr_url => "http://#{helper.vip_for_uri('opscode-solr')}:#{node['private_chef']['opscode-solr']['port']}",
+    :solr_url => "http://#{helper.vip_for_uri('opscode-solr4')}:#{node['private_chef']['opscode-solr4']['port']}",
     :opscode_account_internal_url => node['private_chef']['lb_internal']['vip'],
     :opscode_account_internal_port => node['private_chef']['lb_internal']['account_port']
   }.merge(node['private_chef']['oc-chef-pedant'].to_hash))
