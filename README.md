@@ -1,30 +1,31 @@
-# private-chef Omnibus project
+private-chef Omnibus project
+============================
+This project creates full-stack platform-specific packages for
+`private-chef`!
 
-This project creates full-stack platform-specific packages for `private-chef`!
-
-## Installation
-
-We'll assume you have Ruby 1.9+ and Bundler installed. First ensure all
-required gems are installed and ready to use:
+Installation
+------------
+You must have a sane Ruby 1.9+ environment with Bundler installed. Ensure all
+the required gems are installed:
 
 ```shell
 $ bundle install --binstubs
 ```
 
-## Usage
-
+Usage
+-----
 ### Build
 
 You create a platform-specific package using the `build project` command:
 
 ```shell
-$ bin/omnibus build project private-chef
+$ bin/omnibus build private-chef
 ```
 
 The platform/architecture type of the package created will match the platform
-where the `build project` command is invoked. So running this command on say a
-MacBook Pro will generate a Mac OS X specific package. After the build
-completes packages will be available in `pkg/`.
+where the `build project` command is invoked. For example, running this command
+on a MacBook Pro will generate a Mac OS X package. After the build completes
+packages will be available in the `pkg/` folder.
 
 ### Clean
 
@@ -32,29 +33,15 @@ You can clean up all temporary files generated during the build process with
 the `clean` command:
 
 ```shell
-$ bin/omnibus clean
+$ bin/omnibus clean private-chef
 ```
 
 Adding the `--purge` purge option removes __ALL__ files generated during the
-build including the project install directory (`/opt/opscode`) and
+build including the project install directory (`/opt/private-chef`) and
 the package cache directory (`/var/cache/omnibus/pkg`):
 
 ```shell
-$ bin/omnibus clean --purge
-```
-
-### Cache
-
-Lists source packages that are required but not yet cached:
-
-```shell
-$ bin/omnibus cache missing
-```
-
-Populate the S3 Cache:
-
-```shell
-$ bin/omnibus cache populate
+$ bin/omnibus clean private-chef --purge
 ```
 
 ### Help
@@ -66,69 +53,44 @@ Full help for the Omnibus command line interface can be accessed with the
 $ bin/omnibus help
 ```
 
-## Vagrant-based Virtualized Build Lab
-
+Kitchen-based Build Environment
+-------------------------------
 Every Omnibus project ships will a project-specific
-[Berksfile](http://berkshelf.com/) and [Vagrantfile](http://www.vagrantup.com/)
-that will allow you to build your projects on the following platforms:
+[Berksfile](http://berkshelf.com/) that will allow you to build your omnibus projects on all of the projects listed
+in the `.kitchen.yml`. You can add/remove additional platforms as needed by
+changing the list found in the `.kitchen.yml` `platforms` YAML stanza.
 
-* CentOS 5 64-bit
-* CentOS 6 64-bit
-* Ubuntu 10.04 64-bit
-* Ubuntu 11.04 64-bit
-* Ubuntu 12.04 64-bit
+This build environment is designed to get you up-and-running quickly. However,
+there is nothing that restricts you to building on other platforms. Simply use
+the [omnibus cookbook](https://github.com/opscode-cookbooks/omnibus) to setup
+your desired platform and execute the build steps listed above.
 
-Please note this build-lab is only meant to get you up and running quickly;
-there's nothing inherent in Omnibus that restricts you to just building CentOS
-or Ubuntu packages. See the Vagrantfile to add new platforms to your build lab.
+The default build environment requires Test Kitchen and VirtualBox for local
+development. Test Kitchen also exposes the ability to provision instances using
+various cloud providers like AWS, DigitalOcean, or OpenStack. For more
+information, please see the [Test Kitchen documentation](http://kitchen.ci).
 
-The only requirements for standing up this virtualized build lab are:
+Once you have tweaked your `.kitchen.yml` (or `.kitchen.local.yml`) to your
+liking, you can bring up an individual build environment using the `kitchen`
+command.
 
-* VirtualBox - native packages exist for most platforms and can be downloaded
-from the [VirtualBox downloads page](https://www.virtualbox.org/wiki/Downloads).
-* Vagrant 1.2.1+ - native packages exist for most platforms and can be downloaded
-from the [Vagrant downloads page](http://downloads.vagrantup.com/).
-
-The [vagrant-berkshelf](https://github.com/RiotGames/vagrant-berkshelf) and
-[vagrant-omnibus](https://github.com/schisamo/vagrant-omnibus) Vagrant plugins
-are also required and can be installed easily with the following commands:
+**NOTE:** Test kitchen shoud be installed external to the local Ruby bundle.
+Please either use ChefDK or install the latest test-kitchen from Rubygems.
 
 ```shell
-$ vagrant plugin install vagrant-berkshelf
-$ vagrant plugin install vagrant-omnibus
+$ kitchen converge ubuntu-12.04
 ```
 
-Once the pre-requisites are installed you can build your package across all
-platforms with the following command:
+Then login to the instance and build the project as described in the Usage
+section:
 
 ```shell
-$ vagrant up
+$ kitchen login ubuntu-12.04
+[vagrant@ubuntu...] $ cd private-chef
+[vagrant@ubuntu...] $ bundle install
+[vagrant@ubuntu...] $ ...
+[vagrant@ubuntu...] $ bin/omnibus build private-chef
 ```
 
-If you would like to build a package for a single platform the command looks like this:
-
-```shell
-$ vagrant up PLATFORM
-```
-
-The complete list of valid platform names can be viewed with the
-`vagrant status` command.
-
-## License
-
-See the LICENSE file for details.
-
-Copyright (c) 2012 Opscode, Inc.
-License: Apache License, Version 2.0
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+For a complete list of all commands and platforms, run `kitchen list` or
+`kitchen help`.
