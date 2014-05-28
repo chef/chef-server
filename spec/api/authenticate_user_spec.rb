@@ -102,7 +102,7 @@ describe 'authenticate_user' do
 
       let (:username) { "kneelbeforezod" }
 
-      it 'superuser returns 401 ("Unauthorized")' do
+      it 'superuser returns 401 ("Unauthorized")', :smoke do
         post(request_url, superuser, :payload => body).should look_like({
             :status => 401
           })
@@ -125,7 +125,7 @@ describe 'authenticate_user' do
 
       let (:password) { "badger badger" }
 
-      it 'superuser returns 401 ("Unauthorized")' do
+      it 'superuser returns 401 ("Unauthorized")', :smoke do
         post(request_url, superuser, :payload => body).should look_like({
             :status => 401
           })
