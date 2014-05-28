@@ -1,5 +1,10 @@
 # Enterprise Chef Changelog
 
+## 11.1.6 (Unreleased)
+
+### private-chef-cookbooks
+* Allow ['lb']['upstream'] to have a custom setting
+
 ## 11.1.5 (2014-05-14)
 
 ### oc_erchef 0.24.6
