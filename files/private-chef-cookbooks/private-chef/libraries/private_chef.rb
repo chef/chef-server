@@ -416,7 +416,7 @@ module PrivateChef
       when "ha", "tier", "customha"
         gen_redundant(node_name, PrivateChef['topology'])
       else
-        Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha, customha or tier.")
+        Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha, customha, or tier.")
         exit 55
       end
 
