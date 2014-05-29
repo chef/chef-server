@@ -10,6 +10,24 @@ describe 'authenticate_user' do
   let (:password) { 'foobar' }
   let (:request_url) { "#{platform.server}/authenticate_user" }
 
+  # For testing against LDAP, I made the following changes:
+  #
+  # changed :username above to my AD samAccountName (i.e., my login name)
+  # changed :password above to my current AD password
+  #
+  # The following were all added to the private-chef.rb (run a pcc reconfigure after,
+  # and change out the <abstracted> bits since those don't need to be made public
+  # (no password for yuo, and if you need it, you should be able to get the IP):
+  #
+  # ldap['base_dn'] = 'dc=opscodecorp,dc=com'
+  # ldap['bind_dn'] = 'CN=<full name>,OU=Employees,OU=Domain users,DC=opscodecorp,DC=com'
+  # ldap['bind_password'] = '<same password as above>'
+  # ldap['host'] = '<host IP address>'
+  #
+  # This is good enough for quick ad-hoc testing, it will authenticate against my
+  # username/password in the tests, but more robust LDAP testing is desirable in
+  # the future.
+
   let (:body) { { 'username' => username, 'password' => password } }
 
   context 'GET /authenticate_user' do
