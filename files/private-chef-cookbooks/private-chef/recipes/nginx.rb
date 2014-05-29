@@ -109,6 +109,7 @@ nginx_vars = nginx_vars.merge({ :helper => NginxErb.new(node) })
 lbconf = node['private_chef']['lb'].to_hash.merge(nginx_vars).merge({
   :redis_host => node['private_chef']['redis_lb']['vip'],
   :redis_port => node['private_chef']['redis_lb']['port'],
+  :default_orgname => node['private_chef']['default_orgname'],
   :omnihelper => OmnibusHelper.new(node)
 })
 

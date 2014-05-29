@@ -12,6 +12,10 @@ local Ct = lpeg.Ct
 local Cg = lpeg.Cg
 local Cc = lpeg.Cc
 
+<%- if @default_orgname %>
+local default_org = "<%= @default_orgname %>"
+<%- end %>
+
 -- create a capture that maps the value of 'name' to capture group "route_id"
 local function Crt(name)
   return Cg(Cc(name), "route_id")
@@ -145,6 +149,11 @@ local p_acct = (p_named_org_prefix * p_acct_direct) +
                (p_sep * Cendpoint(p_verify_password + p_system_recovery) * p_trailing_sep) +
                p_acct_users
 
+-- Default org endpoints. This is to help with migrating from OSC 11 to Chef Server 12
+-- TODO: Not sure if p_runs + p_principals are needed below. The purpose is for
+-- OSC chef-clients to be able to run against this. Are groups and containers necessary?
+local p_default_org_endpoints = p_search + p_nodes + p_cookbooks + p_data + p_roles + p_sandboxes + p_environments + p_clients
+
 local uri_resolvers = {
   -- Retain ordering to ensure proper eval:
   -- p_acl_endpont must come firs tbecause a trailing _acl takes precedence
@@ -174,6 +183,11 @@ local uri_resolvers = {
   internal_chef = (p_erchef_int * c_erchef)
 }
 
+-- Checks if the request is for default orgs
+local function needs_default_org(uri)
+  match(p_sep * p_default_org_endpoints, uri)
+end
+
 -- caller should bypass this client version check if caller is internal lb
 function routes.is_client_version_valid(version, min, max)
   local res = match(Ct(p_chef_version), version)
@@ -198,6 +212,11 @@ end
 -- endpoint (nil if not found)
 -- object_name (nil if not found)
 function routes.resolve_uri(mode, uri)
+  <%- if @default_orgname %>
+  if needs_default_org(uri) then
+    uri = '/organizations/' .. default_org .. uri
+  end
+  <%- end %>
   route = match(Ct(uri_resolvers[mode]), uri)
   if not route then
     route = {}
