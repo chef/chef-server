@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
 
-describe 'authenticate_user' do
+describe 'authenticate_user', :focus do
   def self.ruby?
     true
   end
@@ -29,6 +29,17 @@ describe 'authenticate_user' do
   # the future.
 
   let (:body) { { 'username' => username, 'password' => password } }
+  let (:response_body) { {
+      'status' => 'linked',
+      'user' => {
+        'first_name' => platform.non_admin_user.name,
+        'last_name' => platform.non_admin_user.name,
+        'display_name' => platform.non_admin_user.name,
+        'email' => platform.non_admin_user.name + "@opscode.com",
+        'username' => platform.non_admin_user.name
+      }} }
+  let (:authentication_error_msg) {
+    "Failed to authenticate: Username and password incorrect" }
 
   context 'GET /authenticate_user' do
 
@@ -91,7 +102,8 @@ describe 'authenticate_user' do
     context 'with correct credentials', :smoke do
       it 'superuser user returns 200 ("OK")' do
         post(request_url, superuser, :payload => body).should look_like({
-            :status => 200
+            :status => 200,
+            :body_exact => response_body
           })
       end
 
@@ -122,7 +134,8 @@ describe 'authenticate_user' do
 
       it 'superuser returns 401 ("Unauthorized")', :smoke do
         post(request_url, superuser, :payload => body).should look_like({
-            :status => 401
+            :status => 401,
+            :body_exact => {'error' => authentication_error_msg}
           })
       end
 
@@ -358,7 +371,8 @@ describe 'authenticate_user' do
 
       it 'superuser returns 200 ("Ok")' do
         post(request_url, superuser, :payload => body).should look_like({
-            :status => 200
+            :status => 200,
+            :body_exact => response_body
           })
       end
 
