@@ -35,7 +35,8 @@ migrate_all(CallbackMod) ->
     process_results(R).
 
 proceed_migration(CallbackMod) ->
-    proceed_migration(capture_org_state(CallbackMod), CallbackMod).
+    MigrationType = CallbackMod:migration_type(),
+    proceed_migration(capture_org_state(MigrationType), CallbackMod).
 
 proceed_migration({ok, _}, CallbackMod) ->
     migrate(CallbackMod);
@@ -117,8 +118,6 @@ do_migrate(Org, Remaining, Acc, CallbackMod) ->
             migrate_next(Remaining, [Result | Acc], CallbackMod)
     end.
 
-
-
 %% poll mover_manager:status until it indicates that it's completed.
 wait_for_status() ->
 	{ok, Status} = mover_manager:status(),
@@ -137,6 +136,6 @@ wait_for_status() ->
 %% This functionality used to be in moser_state_tracker but was removed
 %% in order to avoid any inadvertent possibility of rebuilding org state
 %% table after org creation was cut over to sql in production.
-capture_org_state(CallbackMod) ->
+capture_org_state(MigrationType) ->
     Info = mover_manager:get_account_dets(),
-    moser_state_tracker:capture_full_org_state_list(Info, CallbackMod).
+    moser_state_tracker:capture_full_org_state_list(Info, MigrationType).

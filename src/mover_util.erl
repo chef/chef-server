@@ -10,9 +10,9 @@
 -module(mover_util).
 
 -export([populate_xdl_with_unmigrated_orgs/0,
-         reset_org/1,
-         reset_orgs/1,
-         reset_orgs_from_file/1,
+         reset_org/2,
+         reset_orgs/2,
+         reset_orgs_from_file/2,
          call_if_exported/4]).
 
 -include("mover.hrl").
@@ -26,35 +26,37 @@ populate_xdl_with_unmigrated_orgs() ->
 %% @doc delete any SQL data for the named org and reset its state
 %% to indicate it's ready to migrate.
 %%
+reset_org(OrgName, MigrationType) ->
+    reset_org(OrgName, not_applicable, MigrationType).
 
-reset_org(OrgName) ->
-    reset_org(OrgName, not_applicable).
-
-reset_org(OrgName, Line) when is_list(OrgName) ->
-    reset_org(iolist_to_binary(OrgName), Line);
-reset_org(OrgName, Line) when is_binary(OrgName) ->
-    case moser_state_tracker:ready_migration(OrgName, mover_phase_1_migration_callback:migration_type()) of
+reset_org(OrgName, Line, MigrationType) when is_list(OrgName) ->
+    reset_org(iolist_to_binary(OrgName), Line, MigrationType);
+reset_org(OrgName, Line, MigrationType) when is_binary(OrgName) ->
+    case moser_state_tracker:ready_migration(OrgName, MigrationType) of
         ok ->
+	    % Check if GUID can be found from OrgName and log an error if it doesn't.
+	    % Vestigial code from when the GUID was actually needed but it doesn't hurt to
+	    % check this very rare error case still.
             Acct = moser_acct_processor:open_account(),
             case moser_acct_processor:get_org_guid_by_name(OrgName, Acct) of
                 not_found ->
-                    org_reset_error(OrgName, Line, "org does not exist in account table");
+                    org_reset_error(OrgName, Line, "org does not exist in account table", MigrationType);
                 _GUID ->
                     ok
             end;
         Other ->
-            org_reset_error(OrgName, Line, Other)
+            org_reset_error(OrgName, Line, Other, MigrationType)
     end.
 
-org_reset_error(OrgName, Line, Reason) ->
+org_reset_error(OrgName, Line, Reason, MigrationType) ->
     log_org_reset_error(OrgName, Line, Reason),
     % Advance state if possible, so that we can mark as failed.
-    ok = case moser_state_tracker:migration_started(OrgName, mover_phase_1_migration_callback:migration_type()) of
+    ok = case moser_state_tracker:migration_started(OrgName, MigrationType) of
         ok -> ok;
         {error, not_in_expected_state, _} -> ok;
         Error -> Error
     end,
-    ok = case moser_state_tracker:migration_failed(OrgName, reset_org, mover_phase_1_migration_callback:migration_type()) of
+    ok = case moser_state_tracker:migration_failed(OrgName, reset_org, MigrationType) of
         ok -> ok;
         {error, not_in_expected_state, State} ->
             log_org_reset_error(OrgName, Line, "Org state could not be set to failed."),
@@ -68,25 +70,25 @@ log_org_reset_error(OrgName, Line, Error) ->
     lager:error([{org_name, OrgName}], "Error on line ~p while resetting org: ~p", [Line, Error]).
 
 %% @doc Reset each org in the provided list of orgs.
-reset_orgs(Orgs) when is_list(Orgs) ->
-    [ reset_org(X) || X <- Orgs ].
+reset_orgs(Orgs, MigrationType) when is_list(Orgs) ->
+    [ reset_org(X, MigrationType) || X <- Orgs ].
 
 %% @doc Reset each org in the provided file, which must contain
 %% one org per line.
-reset_orgs_from_file(FileName) ->
+reset_orgs_from_file(FileName, MigrationType) ->
     {ok, Dev} = file:open(FileName, [read]),
-    process_lines(Dev, fun reset_org/2, 1).
+    process_lines(Dev, MigrationType, fun reset_org/2, 1).
 
-process_lines(Dev, Processor, LineNo) ->
+process_lines(Dev, MigrationType, Processor, LineNo) ->
     case io:get_line(Dev, "") of
         eof ->
             file:close(Dev),
             ok;
         "\n" ->
-            process_lines(Dev, Processor, LineNo + 1);
+            process_lines(Dev, MigrationType, Processor, LineNo + 1);
         Line ->
-            Processor(string:strip(Line, right, $\n), LineNo),
-            process_lines(Dev, Processor, LineNo + 1)
+            Processor(string:strip(Line, right, $\n), LineNo, MigrationType),
+            process_lines(Dev, MigrationType, Processor, LineNo + 1)
     end.
 
 call_if_exported(undefined, _FunName, Args, DefaultFun) ->
