@@ -19,6 +19,11 @@
   CVE-2014-3470 https://www.openssl.org/news/secadv_20140605.txt
   return code
 
+### private-chef-cookbooks
+* Allow ['lb']['upstream'] to have a custom setting
+* Use SSL port for lb_internal if non-SSL is disabled
+* Restart redis_lb immediately during reconfigure
+
 ## 11.1.5 (2014-05-14)
 
 ### oc_erchef 0.24.6
