@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ZendesksHelper do
   describe 'zendesk_enabled?' do
-    let(:zendesk_enabled?) { helper.zendesk_enabled? }
+    subject(:zendesk_enabled?) { helper.zendesk_enabled? }
 
     context 'when both Settings.zendesk.shared_secret and Settings.zendesk.subdomain are present' do
       it 'is true' do

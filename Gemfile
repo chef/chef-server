@@ -6,6 +6,7 @@ gem 'chef', '~> 11.10.4'
 gem 'coffee-rails', '~> 4.0.0'
 gem 'jbuilder', '~> 1.2'
 gem 'jquery-rails', '~> 3.1.0'
+gem 'jwt' # For Zendesk SSO
 gem 'rails_config', '~> 0.3.3'
 gem 'rb-readline', '~> 0.4.2', require: false
 gem 'sass-rails', '~> 4.0.0'
