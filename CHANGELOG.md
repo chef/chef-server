@@ -7,6 +7,16 @@
 * Use SSL port for lb_internal if non-SSL is disabled
 * Restart redis_lb immediately during reconfigure
 
+### chef-mover 2.2.4
+* Containers and groups migration from couchDB to postgreSQL
+* Solr4 migration
+* Generalized migrate scripts and other code to be migration_type agnostic
+
+### enterprise-chef-server-schema 2.2.5
+* Updates org_migration_state table with migration_type and verification
+* Cleans up reporting schema info table
+* Clean up Makefile to preserve PATH variable
+
 ## 11.1.5 (2014-05-14)
 
 ### oc_erchef 0.24.6
