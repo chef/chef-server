@@ -7,6 +7,11 @@
 * [OC-3107] Ensure CouchDB compaction cron job does not run on passive
   backend.
 
+### openssl 1.0.1h
+* Allow ['lb']['upstream'] to have a custom setting
+* Use SSL port for lb_internal if non-SSL is disabled
+* Restart redis_lb immediately during reconfigure
+
 ## 11.1.6 (2014-06-05)
 
 ### openssl 1.0.1h

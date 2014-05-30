@@ -42,6 +42,7 @@ link redis_data_dir_symlink do
   not_if { redis_data_dir_symlink == redis_data_dir }
 end
 
+component_runit_service "redis_lb"
 
 redis_data = redis
 template redis_config do
@@ -50,10 +51,8 @@ template redis_config do
   group "root"
   mode "0644"
   variables(redis_data.to_hash)
-  notifies :restart, 'service[redis_lb]' if is_data_master?
+  notifies :restart, 'service[redis_lb]', :immediately if is_data_master?
 end
-
-component_runit_service "redis_lb"
 
 # log rotation
 template "/etc/opscode/logrotate.d/redis_lb" do
@@ -65,12 +64,12 @@ template "/etc/opscode/logrotate.d/redis_lb" do
 end
 
 #
-# This should be guarded by a test that redis is running. 
+# This should be guarded by a test that redis is running.
 #
 # For the time being we retry a few times. This avoids a race
 # condition where the server is still starting and the port isn't
 # bound. The redis gem does not retry on ECONNREFUSED, and we fail.
-# 
+#
 ruby_block "set_lb_redis_values" do
   retries 5
   retry_delay 1
