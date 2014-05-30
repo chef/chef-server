@@ -6,6 +6,10 @@ describe 'authenticate_user', :focus do
     true
   end
 
+  def invalid_verb_response_code
+    ruby? ? 404 : 405
+  end
+
   let (:username) { platform.non_admin_user.name }
   let (:password) { 'foobar' }
   let (:request_url) { "#{platform.server}/authenticate_user" }
@@ -45,25 +49,25 @@ describe 'authenticate_user', :focus do
 
     it 'returns 404 ("Not Found") for superuser' do
       get(request_url, superuser).should look_like({
-          :status => 404
+          :status => invalid_verb_response_code
         })
     end
 
     it 'returns 404 ("Not Found") for admin/different user' do
       get(request_url, platform.admin_user).should look_like({
-          :status => 404
+          :status => invalid_verb_response_code
         })
     end
 
     it 'returns 404 ("Not Found") for non-admin/same user' do
       get(request_url, platform.non_admin_user).should look_like({
-          :status => 404
+          :status => invalid_verb_response_code
         })
     end
 
     it 'returns 404 ("Not Found") for invalid user' do
       get(request_url, invalid_user).should look_like({
-          :status => 404
+          :status => invalid_verb_response_code
         })
     end
       
@@ -73,25 +77,25 @@ describe 'authenticate_user', :focus do
       
     it 'returns 404 ("Not Found") for superuser' do
       put(request_url, superuser, :payload => body).should look_like({
-          :status => 404
+          :status => invalid_verb_response_code
         })
     end
 
     it 'returns 404 ("Not Found") for admin/different user' do
       put(request_url, platform.admin_user, :payload => body).should look_like({
-          :status => 404
+          :status => invalid_verb_response_code
         })
     end
 
     it 'returns 404 ("Not Found") for non-admin/same user' do
       put(request_url, platform.non_admin_user, :payload => body).should look_like({
-          :status => 404
+          :status => invalid_verb_response_code
         })
     end
 
     it 'returns 404 ("Not Found") for invalid user' do
       put(request_url, invalid_user, :payload => body).should look_like({
-          :status => 404
+          :status => invalid_verb_response_code
         })
     end
 
@@ -401,25 +405,25 @@ describe 'authenticate_user', :focus do
 
     it 'returns 404 ("Not Found") for superuser' do
       delete(request_url, superuser).should look_like({
-          :status => 404
+          :status => invalid_verb_response_code
         })
     end
 
     it 'returns 404 ("Not Found") for admin/different user' do
       delete(request_url, platform.admin_user).should look_like({
-          :status => 404
+          :status => invalid_verb_response_code
         })
     end
 
     it 'returns 404 ("Not Found") for non-admin/same user' do
       delete(request_url, platform.non_admin_user).should look_like({
-          :status => 404
+          :status => invalid_verb_response_code
         })
     end
 
     it 'returns 404 ("Not Found") for invalid user' do
       delete(request_url, invalid_user).should look_like({
-          :status => 404
+          :status => invalid_verb_response_code
         })
     end
       
