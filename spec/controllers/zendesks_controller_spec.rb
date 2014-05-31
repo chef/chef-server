@@ -50,4 +50,30 @@ describe ZendesksController do
       end
     end
   end
+
+  describe '#signout' do
+    context 'when Zendesk is enabled' do
+      before :each do
+        controller.stub(:zendesk_enabled?).and_return true
+      end
+
+      it 'signs out' do
+        expect(controller).to receive(:sign_out)
+        get 'signout'
+      end
+
+      it 'redirects to the zendesk_path' do
+        get 'signout'
+        expect(response).to redirect_to zendesk_path
+      end
+    end
+
+    context 'when Zendesk is disabled' do
+      it 'renders a 404' do
+        controller.stub(:zendesk_enabled?).and_return false
+        get 'signout'
+        expect(response.status).to eq 404
+      end
+    end
+  end
 end

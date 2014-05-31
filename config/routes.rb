@@ -12,7 +12,10 @@ OcId::Application.routes.draw do
     get '/auth/failure', to: 'sessions#retry'
 
     resources :sessions, only: [:new, :create, :destroy]
-    resource :zendesk, only: [:show]
+
+    resource :zendesk, only: [:show] do
+      get 'signout', to: 'zendesks#signout'
+    end
 
     namespace :v1 do
       resources :users, only: :show
