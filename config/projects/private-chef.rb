@@ -52,7 +52,6 @@ dependency "opscode-chef-mover"
 # the front-end services
 dependency "oc_erchef"
 dependency "opscode-account"
-dependency "opscode-webui"
 dependency "oc_bifrost"
 dependency "opscode-org-creator"
 dependency "opscode-certificate"

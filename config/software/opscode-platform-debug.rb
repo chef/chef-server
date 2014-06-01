@@ -19,9 +19,15 @@ env = {
   'PATH' => "#{install_dir}/embedded/bin:#{ENV['PATH']}"
 }
 
+bundle_path = "#{install_dir}/embedded/service/gem"
+
 build do
   # bundle install orgmapper
-  bundle "install --path=/opt/opscode/embedded/service/gem", :cwd => orgmapper_dir, :env => env
+  bundle "install --path=#{bundle_path}", :cwd => orgmapper_dir, :env => env
   command "mkdir -p #{install_dir}/embedded/service/opscode-platform-debug"
   command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./ #{install_dir}/embedded/service/opscode-platform-debug/"
+
+  # cleanup the .git directories in the bundle path before commiting
+  # them as submodules to the git cache
+  command "find #{bundle_path} -type d -name .git | xargs rm -rf"
 end
