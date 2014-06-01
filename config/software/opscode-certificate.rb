@@ -21,5 +21,5 @@ build do
   command "make clean", :env => env
   command "make", :env => env
   command "mkdir -p #{install_dir}/embedded/service/opscode-certificate"
-  command "#{install_dir}/embedded/bin/rsync -a ./ #{install_dir}/embedded/service/opscode-certificate/"
+  command "#{install_dir}/embedded/bin/rsync -a --exclude=.git/*** --exclude=.gitignore ./ #{install_dir}/embedded/service/opscode-certificate/"
 end
