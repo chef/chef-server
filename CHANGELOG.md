@@ -2,15 +2,11 @@
 
 ## 11.1.6 (Unreleased)
 
-### private-chef-cookbooks
-* Allow ['lb']['upstream'] to have a custom setting
-* Use SSL port for lb_internal if non-SSL is disabled
-* Restart redis_lb immediately during reconfigure
-* Separate redis_keepalive_timeout from redis_connection_timeout and
-  increase their default values from 60ms to 1000 and 2000ms,
-  respectively.
-* [OC-11581] private-chef-ctl test command should return the pedant
-  return code
+### cacerts 2014.04.22
+* Update to latest cacerts as of 2014-04-22
+
+### chef 11.12.2
+* Update embedded chef gem to 11.12.2
 
 ### chef-mover 2.2.4
 * Containers and groups migration from couchDB to postgreSQL
@@ -21,6 +17,22 @@
 * Updates org_migration_state table with migration_type and verification
 * Cleans up reporting schema info table
 * Clean up Makefile to preserve PATH variable
+
+### logrotate
+* Fixed build configuration that was causing logrotate to not be installed
+
+### opscode-webui
+* Removed. WebUI usage should now come via the Manage extension.
+
+### private-chef-cookbooks
+* Allow ['lb']['upstream'] to have a custom setting
+* Use SSL port for lb_internal if non-SSL is disabled
+* Restart redis_lb immediately during reconfigure
+* Separate redis_keepalive_timeout from redis_connection_timeout and
+  increase their default values from 60ms to 1000 and 2000ms,
+  respectively.
+* [OC-11581] private-chef-ctl test command should return the pedant
+  return code
 
 ## 11.1.5 (2014-05-14)
 
