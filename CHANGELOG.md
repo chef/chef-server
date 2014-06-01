@@ -6,6 +6,9 @@
 * Allow ['lb']['upstream'] to have a custom setting
 * Use SSL port for lb_internal if non-SSL is disabled
 * Restart redis_lb immediately during reconfigure
+* Separate redis_keepalive_timeout from redis_connection_timeout and
+  increase their default values from 60ms to 1000 and 2000ms,
+  respectively.
 
 ### chef-mover 2.2.4
 * Containers and groups migration from couchDB to postgreSQL

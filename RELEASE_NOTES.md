@@ -34,6 +34,9 @@ The following items are the set of bug fixes that have been applied since Enterp
 * [opscode-account] Fix for LDAP user creation failure.
 * [opscode-omnibus] Manage /var/log/opscode permissions even with non 0022 umask.
 
+* [opscode-omnibus] Separate redis_keepalive_timeout from redis_connection_timeout and increase their
+  default values from 60ms to 1000 and 2000ms, respectively.
+
 ### Security Fixes:
 
 The following items are the set of security fixes that have been

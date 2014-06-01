@@ -47,7 +47,7 @@ local function connect_redis()
 end
 
 local function close_redis(red)
-  local ok, err = red:set_keepalive(<%=@redis_connection_timeout%>, <%=@redis_connection_pool_size%>)
+  local ok, err = red:set_keepalive(<%=@redis_keepalive_timeout%>, <%=@redis_connection_pool_size%>)
   if not ok then
     ngx.log(ngx.ERR, "Failed to set keepalive: " .. err)
   end
@@ -175,4 +175,3 @@ end
 function set_maint_refresh_interval(interval)
   maint_refresh_interval = interval
 end
-
