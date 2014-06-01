@@ -18,5 +18,5 @@ build do
   command "make distclean", :env => env
   command "make compile", :env => env
   command "mkdir -p #{install_dir}/embedded/service/oc_authz_migrator"
-  command "#{install_dir}/embedded/bin/rsync -a --delete . #{install_dir}/embedded/service/oc_authz_migrator/"
+  command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore . #{install_dir}/embedded/service/oc_authz_migrator/"
 end
