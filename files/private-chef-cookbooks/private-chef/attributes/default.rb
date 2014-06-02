@@ -170,28 +170,9 @@ default['private_chef']['opscode-erchef']['cleanup_batch_size'] = 0
 default['private_chef']['opscode-chef']['checksum_path'] = "/var/opt/opscode/opscode-chef/checksum"
 
 ####
-# Chef Server WebUI
+# Chef Server WebUI (legacy required for manage install to work)
 ####
-default['private_chef']['opscode-webui']['enable'] = true
-default['private_chef']['opscode-webui']['ha'] = false
-default['private_chef']['opscode-webui']['dir'] = "/var/opt/opscode/opscode-webui"
-default['private_chef']['opscode-webui']['log_directory'] = "/var/log/opscode/opscode-webui"
-default['private_chef']['opscode-webui']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['opscode-webui']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-webui']['environment'] = 'privatechef'
-default['private_chef']['opscode-webui']['url'] = "http://127.0.0.1:9462"
-default['private_chef']['opscode-webui']['listen'] = '127.0.0.1:9462'
-default['private_chef']['opscode-webui']['vip'] = '127.0.0.1'
-default['private_chef']['opscode-webui']['port'] = 9462
-default['private_chef']['opscode-webui']['backlog'] = 1024
-default['private_chef']['opscode-webui']['tcp_nodelay'] = true
-default['private_chef']['opscode-webui']['worker_timeout'] = 3600
-default['private_chef']['opscode-webui']['validation_client_name'] = "chef"
-default['private_chef']['opscode-webui']['umask'] = "0022"
-default['private_chef']['opscode-webui']['worker_processes'] = node["cpu"]["total"].to_i
-default['private_chef']['opscode-webui']['session_key'] = "_sandbox_session"
-default['private_chef']['opscode-webui']['cookie_domain'] = "all"
-default['private_chef']['opscode-webui']['cookie_secret'] = "47b3b8d95dea455baf32155e95d1e64e"
+default['private_chef']['opscode-webui']['enable'] = false
 
 ####
 # Chef Pedant
@@ -245,7 +226,6 @@ default['private_chef']['lb']['cache_cookbook_files'] = false
 default['private_chef']['lb']['debug'] = false
 default['private_chef']['lb']['upstream']['opscode-erchef'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-account'] = [ "127.0.0.1" ]
-default['private_chef']['lb']['upstream']['opscode-webui'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['oc_bifrost'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-solr'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['bookshelf'] = [ "127.0.0.1" ]

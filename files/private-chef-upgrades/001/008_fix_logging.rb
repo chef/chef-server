@@ -15,9 +15,7 @@ define_upgrade do
     opscode-solr
     opscode-expander
     opscode-expander-reindexer
-    opscode-chef
     opscode-erchef
-    opscode-webui
     nginx
     postgresql
     redis

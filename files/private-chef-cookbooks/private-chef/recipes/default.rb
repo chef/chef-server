@@ -171,7 +171,6 @@ include_recipe "private-chef::sysctl-updates"
   "opscode-org-creator",
   "opscode-erchef",
   "bootstrap",
-  "opscode-webui",
   "opscode-chef-mover",
   "redis_lb",
   "nginx",
