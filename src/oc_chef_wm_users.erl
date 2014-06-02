@@ -102,7 +102,12 @@ from_json(Req, #base_state{reqid = RequestId,
     end.
 
 to_json(Req, State) ->
-    chef_wm_base:list_objects_json(Req, State#base_state{resource_state = #chef_user{}}).
+    EMail = case wrq:get_qs_value("email", Req) of
+        undefined -> undefined;
+        Value -> Value
+    end,
+    chef_wm_base:list_objects_json(Req, State#base_state{resource_state =
+                                                         #chef_user{email = EMail} }).
 
 
 
