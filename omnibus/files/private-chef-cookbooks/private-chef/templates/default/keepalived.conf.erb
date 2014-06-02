@@ -15,6 +15,15 @@ vrrp_sync_group <%= @vrrp_sync_group %> {
   }
 }
 
+#Enter FAULT status if any condition is false
+# TODO: We should check the log area and /var/opt/opscode. If close to full, FAULT
+vrrp_script chk_df {
+       script "[ `df -h | perl -lane 'print substr($F[-2], 0, -1) if m|/$|'` -lt 80 ]"
+       interval 10
+       fall 2   # Two intervals to die
+       rise 2   # Two intervals to live
+}
+
 vrrp_instance <%= @vrrp_sync_instance %> {
     state <%= @vrrp_instance_state %>
     preempt_delay <%= @vrrp_instance_preempt_delay %>
@@ -37,6 +46,10 @@ vrrp_instance <%= @vrrp_sync_instance %> {
     }
 <% end %>
     advert_int <%= @vrrp_instance_advert_int %>
+    track_script {
+      chk_df
+   }
+
 		notify_backup "/var/opt/opscode/keepalived/bin/cluster.sh backup"
 		notify_master "/var/opt/opscode/keepalived/bin/cluster.sh master"
 		notify_fault  "/var/opt/opscode/keepalived/bin/cluster.sh fault"
