@@ -141,7 +141,7 @@
           {eredis_port, 16379}
          ]},
  {chef_reindex, [
-          {solr_service, [{root_url, "<%= node['private_chef']['opscode-solr']['url'] %>"},
+          {solr_service, [{root_url, "<%= node['private_chef']['opscode-solr4']['url'] %>"},
                           {timeout, <%= @solr_timeout %>},
                           {init_count, <%= @solr_http_init_count %>},
                           {max_count, <%= @solr_http_max_count %>},

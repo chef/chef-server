@@ -18,7 +18,7 @@ define_upgrade do
                      'opscode-erchef',
                      'opscode-expander',
                      'opscode-expander-reindexer',
-                     'opscode-solr',
+                     'opscode-solr4',
                      'opscode-rabbitmq']
 
     down_services.each{|s| run_command("private-chef-ctl stop #{s}")}
