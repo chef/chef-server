@@ -288,6 +288,14 @@ describe "users", :users do
           "pivotal" => "#{request_url}/pivotal",
           platform.bad_user.name => "#{request_url}/#{platform.bad_user.name}",
           platform.admin_user.name => "#{request_url}/#{platform.admin_user.name}",
+          platform.non_admin_user.name => "#{request_url}/#{platform.non_admin_user.name}",
+        }
+      end
+      let(:empty_users_body) do
+        {}
+      end
+      let(:filtered_users_body) do
+        {
           platform.non_admin_user.name => "#{request_url}/#{platform.non_admin_user.name}"
         }
       end
@@ -297,6 +305,23 @@ describe "users", :users do
           get(request_url, platform.superuser).should look_like({
               :status => 200,
               :body => users_body
+            })
+        end
+
+        it "returns no users when filtering by non-existing email", :smoke do
+          get("#{request_url}?email=somenonexistingemail@somewhere.com", platform.superuser).should look_like({
+              :status => 200,
+              :body_exact => empty_users_body
+            })
+        end
+
+        it "returns a single user when filtering by that user's email address", :smoke do
+          # Let's get a known user and mail address.
+          response = get("#{request_url}/#{platform.non_admin_user.name}", platform.superuser)
+          email = JSON.parse(response)["email"]
+          get("#{request_url}?email=#{email}", platform.superuser).should look_like({
+              :status => 200,
+              :body_exact => filtered_users_body
             })
         end
       end
