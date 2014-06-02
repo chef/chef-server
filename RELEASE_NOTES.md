@@ -1,5 +1,11 @@
 # Enterprise Chef Release Notes
 
+## 1.1.6 (Unreleased)
+
+### Bug Fixes:
+
+* [opscode-omnibus] private-chef-ctl test command should provide pedant return code.
+
 ## 11.1.5 (2014-05-14)
 
 ### What's New:

@@ -9,6 +9,8 @@
 * Separate redis_keepalive_timeout from redis_connection_timeout and
   increase their default values from 60ms to 1000 and 2000ms,
   respectively.
+* [OC-11581] private-chef-ctl test command should return the pedant
+  return code
 
 ### chef-mover 2.2.4
 * Containers and groups migration from couchDB to postgreSQL
