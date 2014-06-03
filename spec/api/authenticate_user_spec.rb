@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
 
-describe 'authenticate_user', :focus do
+describe 'authenticate_user' do
   def self.ruby?
     true
   end
@@ -46,6 +46,9 @@ describe 'authenticate_user', :focus do
     "Failed to authenticate: Username and password incorrect" }
 
   context 'GET /authenticate_user' do
+
+    # We'd just loop this, but unfortunately, superuser et al aren't available outside
+    # of test scope, so easier just to do multiple similar tests
 
     it 'returns 404 ("Not Found") for superuser' do
       get(request_url, superuser).should look_like({
@@ -178,6 +181,10 @@ describe 'authenticate_user', :focus do
           })
       end
     end
+
+    # Again, we'd just loop a lot of these, but unfortunately, superuser et al
+    # aren't available outside of test scope, so easier just to do multiple similar
+    # tests
 
     context 'with missing username' do
 
