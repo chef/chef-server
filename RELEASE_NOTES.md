@@ -13,7 +13,8 @@ The following items are new for Enterprise Chef 11.1.5 and/or are changes from p
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.1.5:
 
 * [opscode-omnibus] private-chef-ctl test command should provide pedant return code.
-* [opscode-omnibus] Use stricter regular expression for IP check in ha-status
+* [opscode-omnibus] Use more strict regular expression for IP check in ha-status
+* [opscode-omnibus] Ensure CouchDB compaction cron job does not run on passive backend.
 
 ## 11.1.5 (2014-05-14)
 

@@ -33,7 +33,9 @@
   respectively.
 * [OC-11581] private-chef-ctl test command should return the pedant
   return code
-* [OC-11499] Use stricter regular expression for IP check in ha-status
+* [OC-11499] Use more strict regular expression for IP check in ha-status
+* [OC-3107] Ensure CouchDB compaction cron job does not run on passive
+  backend.
 
 ## 11.1.5 (2014-05-14)
 
