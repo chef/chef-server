@@ -24,7 +24,35 @@ require 'rubygems'
 require 'json'
 require 'getoptlong'
 
-def uri_x(v) 
+# Returns true if we are running on a tier/standalone or if
+# we are the master in an HA pair.
+def should_run?
+  if is_ha?
+    is_keepalive_master?
+  else
+    true
+  end
+end
+
+def running_config
+  @running_config ||= begin
+                        JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
+                      end
+end
+
+def is_ha?
+  running_config['private_chef']['topology'] == "ha"
+end
+
+def is_keepalive_master?
+  begin
+    File.read("<%= node['private_chef']['keepalived']['dir'] %>/current_cluster_status").chomp == "master"
+  rescue Errno::ENOENT
+    false
+  end
+end
+
+def uri_x(v)
   URI.escape(v.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
 end
 
@@ -444,7 +472,12 @@ end
 
 if __FILE__ == $0
   begin
-    run
+    if should_run?
+      run
+    else
+      puts "Not running compaction. I'm the backup."
+      exit 0
+    end
   end
 else
   @@srv = "http://localhost:5984"

@@ -1,17 +1,25 @@
 # Enterprise Chef Changelog
 
+## 11.1.7
+
+### private-chef-cookbooks
+* [OC-11499] Use more strict regular expression for IP check in ha-status
+* [OC-3107] Ensure CouchDB compaction cron job does not run on passive
+  backend.
+
 ## 11.1.6 (2014-06-05)
 
 ### openssl 1.0.1h
 * Address vulnerabilities CVE-2014-0224, CVE-2014-0221, CVE-2014-0195,
   CVE-2014-3470 https://www.openssl.org/news/secadv_20140605.txt
+  return code
 
 ## 11.1.5 (2014-05-14)
 
 ### oc_erchef 0.24.6
 * rename oc_actionlog to actions
 
-## private-chef-cookbooks
+### private-chef-cookbooks
 * Use dark launch to enable Chef Actions (default: off)
 * Write out Actions configuration file for use by opscode-analytics
 

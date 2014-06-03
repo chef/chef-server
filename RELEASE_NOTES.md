@@ -1,5 +1,11 @@
 # Enterprise Chef Release Notes
 
+## 11.1.7
+
+* [opscode-omnibus] private-chef-ctl test command should provide pedant return code.
+* [opscode-omnibus] Use more strict regular expression for IP check in ha-status
+* [opscode-omnibus] Ensure CouchDB compaction cron job does not run on passive backend.
+
 ## 11.1.6 (2014-06-05)
 
 ### Security Fixes:
