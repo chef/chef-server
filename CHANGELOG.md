@@ -33,6 +33,7 @@
   respectively.
 * [OC-11581] private-chef-ctl test command should return the pedant
   return code
+* [OC-11499] Use stricter regular expression for IP check in ha-status
 
 ## 11.1.5 (2014-05-14)
 
