@@ -27,7 +27,6 @@ module PrivateChef
   opscode_erchef Mash.new
   # Need old path for cookbook migration:
   opscode_chef Mash.new
-  opscode_webui Mash.new
   lb Mash.new
   lb_internal Mash.new
   postgresql Mash.new
@@ -60,8 +59,6 @@ module PrivateChef
   user Mash.new
 
   ldap Mash.new
-
-  allowed_webui_subnets []
 
   class << self
 
@@ -145,7 +142,6 @@ module PrivateChef
       PrivateChef['rabbitmq']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['rabbitmq']['jobs_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['rabbitmq']['actions_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['opscode_webui']['cookie_secret'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['opscode_account']['session_secret_key'] ||= generate_hex_if_bootstrap(50, ha_guard)
@@ -165,9 +161,6 @@ module PrivateChef
                 'password' => PrivateChef['rabbitmq']['password'],
                 'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
                 'actions_password' => PrivateChef['rabbitmq']['actions_password'],
-              },
-              'opscode_webui' => {
-                'cookie_secret' => PrivateChef['opscode_webui']['cookie_secret'],
               },
               'postgresql' => {
                 'sql_password' => PrivateChef['postgresql']['sql_password'],
@@ -208,7 +201,6 @@ module PrivateChef
         "opscode_solr",
         "opscode_expander",
         "opscode_erchef",
-        "opscode_webui",
         "lb",
         "lb_internal",
         "postgresql",
@@ -304,7 +296,6 @@ module PrivateChef
       PrivateChef["opscode_solr"]["ha"] ||= true
       PrivateChef["opscode_expander"]["ha"] ||= true
       PrivateChef["opscode_erchef"]["ha"] ||= true
-      PrivateChef["opscode_webui"]["ha"] ||= true
       PrivateChef["lb"]["ha"] ||= true
       PrivateChef["postgresql"]["ha"] ||= true
       PrivateChef["redis_lb"]["ha"] ||= true
@@ -323,7 +314,6 @@ module PrivateChef
       PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
       PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
       PrivateChef["opscode_solr"]["ip_address"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["opscode_webui"]["worker_processes"] ||= 2
       PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
       PrivateChef["opscode_certificate"]["vip"] ||= '127.0.0.1'
 

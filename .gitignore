@@ -6,3 +6,4 @@ bin/*
 files/private-chef-cookbooks/cache/
 vendor/bundle
 vendor/cookbooks
+.kitchen

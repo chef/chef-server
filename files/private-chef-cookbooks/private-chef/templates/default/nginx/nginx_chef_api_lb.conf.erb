@@ -59,26 +59,6 @@
     # Include external routes for addons
     include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_external.conf;
 
-    location ~ "^/(?:stylesheets|javascripts|images|facebox|css|favicon|robots|humans)/{0,1}.*$" {
-      if ($http_x_chef_version ~* "^(\d+\.\d+?)\..+$") {
-        error_page 400 =400 /400-chef_client_manage.json;
-        return 400;
-      }
-
-      <% if @allowed_webui_subnets && !@allowed_webui_subnets.empty? %>
-        <% @allowed_webui_subnets.each do |subnet| %>
-      allow <%= subnet %>;
-        <% end %>
-      deny all;
-      <% end %>
-
-      proxy_pass http://opscode_webui;
-      proxy_pass_request_headers off;
-      proxy_cache webui-cache;
-      proxy_cache_valid 200 302 300m;
-      proxy_cache_valid 404 1m;
-    }
-
     location /_route/ {
       default_type 'application/json';
       content_by_lua_file '<%= @script_path %>/dispatch_route.lua';
@@ -86,12 +66,7 @@
 
     location / {
       satisfy any;
-      <% if @allowed_webui_subnets && !@allowed_webui_subnets.empty? %>
-        <% @allowed_webui_subnets.each do |subnet| %>
-      allow <%= subnet %>;
-        <% end %>
-      deny all;
-      <% end %>
+
       access_by_lua '
         if ngx.var.http_x_ops_userid then
           -- we will pass this access check since this is to be treated
@@ -103,7 +78,7 @@
           -- also evaluate the subnets above because either this access
           -- check must pass, OR the allow/deny must pass due to "satisfy any"
           -- We are effectively saying here: "ok, this request is going to go
-          -- to webui, so apply those other access rules first."
+          -- to manage, so apply those other access rules first."
           ngx.exit(ngx.DECLINED)
         end
       ';

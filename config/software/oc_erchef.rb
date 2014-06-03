@@ -34,7 +34,7 @@ build do
   # currently set bundler environment variables. BUNDLER BUSTER does this.
   command "make rel", :env => env.merge(Omnibus::Builder::BUNDLER_BUSTER)
   command "mkdir -p #{install_dir}/embedded/service/opscode-erchef"
-  command "#{install_dir}/embedded/bin/rsync -a --delete ./rel/oc_erchef/ #{install_dir}/embedded/service/opscode-erchef/"
+  command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./rel/oc_erchef/ #{install_dir}/embedded/service/opscode-erchef/"
   # TODO: git cleanup in opscode-erchef service directory
   command "rm -rf #{install_dir}/embedded/service/opscode-erchef/log"
 end

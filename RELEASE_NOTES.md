@@ -1,8 +1,16 @@
 # Enterprise Chef Release Notes
 
-## 1.1.6 (Unreleased)
+## 11.1.6 (Unreleased)
+
+### What's New:
+
+The following items are new for Enterprise Chef 11.1.5 and/or are changes from previous versions:
+
+* [opscode-webui] Opscode WebUI has been removed in favor of the Manage Console add-on.
 
 ### Bug Fixes:
+
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.1.5:
 
 * [opscode-omnibus] private-chef-ctl test command should provide pedant return code.
 

@@ -18,22 +18,12 @@ if config.is_addr_banned(remote_addr) then
 end
 
 -- If chef-user is missing then it's presumably not a chef client.
--- send them over to webui.
 local userid = ngx.var.http_x_ops_userid or ""
 local uri = ngx.var.uri
-
 
 -- A couple of early-exit validations that are specific
 -- to an api vhost:
 if mode == "api" then
-  -- For EC the same LB supports both webui and
-  -- api - if user id is not present, then treat
-  -- this as a webui request.
-  if userid == "" then
-     ngx.var.upstream = "opscode_webui"
-    return
-  end
-
   -- Internal API does not validate chef version
   if not internal then
     -- Exit early: If they don't have the right chef version, send them packing.

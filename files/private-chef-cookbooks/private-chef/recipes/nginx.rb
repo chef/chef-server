@@ -103,8 +103,7 @@ chef_lb_configs = {
 }
 
 nginx_vars = node['private_chef']['nginx'].to_hash
-nginx_vars = nginx_vars.merge({ :helper => NginxErb.new(node),
-                                :allowed_webui_subnets => PrivateChef.allowed_webui_subnets})
+nginx_vars = nginx_vars.merge({ :helper => NginxErb.new(node) })
 
 # Chef API lb config for HTTPS and HTTP
 lbconf = node['private_chef']['lb'].to_hash.merge(nginx_vars).merge({
