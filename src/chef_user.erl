@@ -374,5 +374,7 @@ fields_for_fetch(#chef_user{username = UserName}) ->
 record_fields() ->
     record_info(fields, chef_user).
 
-list(#chef_user{}, CallbackFun) ->
-    CallbackFun({list_query(), [], [username]}).
+list(#chef_user{email = undefined}, CallbackFun) ->
+    CallbackFun({list_query(), [], [username]});
+list(#chef_user{email = EMail}, CallbackFun) ->
+    CallbackFun({list_users_by_email, [EMail], [username]}).
