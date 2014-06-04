@@ -324,6 +324,18 @@ describe "users", :users do
               :body_exact => filtered_users_body
             })
         end
+
+        it "returns a verbose list of users upon request", :focus do
+          body = JSON.parse(get("#{request_url}?verbose=true", platform.superuser))
+          [ platform.non_admin_user.name, platform.admin_user.name, platform.superuser.name ].each do |name|
+            data = body[name]
+            data.should_not be nil
+            data.key?("first_name").should be true
+            data.key?("last_name").should be true
+            data.key?("email").should be true
+          end
+        end
+
       end
 
       context "admin user" do
