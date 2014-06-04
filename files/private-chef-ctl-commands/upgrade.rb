@@ -8,7 +8,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   reconfigure(false)
   Dir.chdir(File.join(base_path, "embedded", "service", "partybus"))
   bundle = File.join(base_path, "embedded", "bin", "bundle")
-  status = run_command("#{bundle} exec ./bin/partybus upgrade")
+  status = run_command("echo 'Sleeping for 2 minutes before migration' ; sleep 120 ; #{bundle} exec ./bin/partybus upgrade")
   if status.success?
     puts "Chef Server Upgraded!"
     exit 0
