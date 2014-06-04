@@ -102,12 +102,33 @@ from_json(Req, #base_state{reqid = RequestId,
     end.
 
 to_json(Req, State) ->
-    EMail = case wrq:get_qs_value("email", Req) of
-        undefined -> undefined;
-        Value -> Value
-    end,
-    chef_wm_base:list_objects_json(Req, State#base_state{resource_state =
-                                                         #chef_user{email = EMail} }).
+    %% In the case of verbose, we cannot  use standard chef_wm_base behavior -
+    %% the client expects the fields email, first_name, last_name - while
+    %% the standard response tries to give us a URI.
+    %% Secondary note: the original interface in opscode-account supported the combination of
+    %% both email filter and verbose option, but this was unused
+    %% and it adds further complication. It is not supported here now.
+    case wrq:get_qs_value("verbose", Req) of
+        "true" ->
+            {chef_json:encode(verbose_users_as_ejson()), Req, State};
+        _ ->
+            chef_wm_base:list_objects_json(Req, State#base_state{resource_state =
+                                                                 #chef_user{email = wrq:get_qs_value("email", Req)} })
+    end.
+
+verbose_users_as_ejson() ->
+    case sqerl:select(list_users_verbose, [], {rows_as_records, [chef_user, record_info(fields, chef_user)]}) of
+        {ok, none} ->
+            {[{}]};
+        {ok, Records} ->
+            {[ verbose_user(User) || User  <- Records]}
+    end.
+
+verbose_user(#chef_user{username = UserName, email = EMail, serialized_object = SerializedObject }) ->
+    EJ = chef_json:decode(SerializedObject),
+    {UserName, {[ {<<"email">>, EMail},
+                  {<<"first_name">>, ej:get({<<"first_name">>}, EJ, "")},
+                  {<<"last_name">>, ej:get({<<"last_name">>}, EJ, "")} ]} }.
 
 
 
