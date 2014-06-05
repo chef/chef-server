@@ -36,6 +36,7 @@
 * [OC-11499] Use more strict regular expression for IP check in ha-status
 * [OC-3107] Ensure CouchDB compaction cron job does not run on passive
   backend.
+* Introduce pluggable HA architecture as an alternative to DRBD
 
 ## 11.1.5 (2014-05-14)
 
