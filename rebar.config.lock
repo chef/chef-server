@@ -31,7 +31,7 @@
                   "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
        {sqerl,".*",
               {git,"git://github.com/opscode/sqerl.git",
-                   "c9509d2aecc755f10bd8d4b3e1cda247aa810e50"}},
+                   "219301ae784276396e7302d3927eb038aba6bd82"}},
        {edown,".*",
               {git,"git://github.com/seth/edown.git",
                    "30a9f7867d615af45783235faa52742d11a9348e"}},
@@ -130,7 +130,7 @@
                             "5364f8d425f7b7c1a9ccf58e3aaae93e9e76fe01"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
-                        "c31eb0514fdf3e83acad3c45c043ea832280c10f"}},
+                        "6411f554f3f4dcd0b54c3004734f2902e28dd950"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
                   "fad438c8fe20e0b3728ce2f2b6a886c2f15a3c30"}}]}.
