@@ -19,6 +19,7 @@ override :libpng, version: "1.5.13"
 override "omnibus-ctl", version: "0.0.6"
 override :preparation, version: "1.4.9"
 override :redis, version: "2.4.7"
+override :rebar, version: "2.0.0"
 
 # global
 dependency "preparation" # creates required build directories
