@@ -5,4 +5,5 @@ chef:
 doorkeeper:
   administrators:
     - rainbowdash
-    
+zendesk:
+  subdomain: getchef

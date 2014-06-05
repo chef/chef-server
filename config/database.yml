@@ -1,19 +1,17 @@
 postgres: &postgres
   adapter:  postgresql
   encoding: unicode
-  password:
   pool: 16
   template: template0
+  host: localhost
 
 development:
   <<: *postgres
   database: oc_id_development
-  username: oc_id
 
 test:
   <<: *postgres
   database: oc_id_test
-  username: postgres
 
 production:
   <<: *postgres

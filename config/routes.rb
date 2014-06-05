@@ -11,7 +11,11 @@ OcId::Application.routes.draw do
     post '/auth/chef/callback', to: 'sessions#create'
     get '/auth/failure', to: 'sessions#retry'
 
-    resources :sessions, only: [ :new, :create, :destroy ]
+    resources :sessions, only: [:new, :create, :destroy]
+
+    resource :zendesk, only: [:show] do
+      get 'signout', to: 'zendesks#signout'
+    end
 
     namespace :v1 do
       resources :users, only: :show
