@@ -1,5 +1,15 @@
 # Enterprise Chef Release Notes
 
+## 1.4.11 (2014-06-05)
+
+### Security Fixes:
+
+The following items are the set of security fixes that have been
+applied since Enterprise Chef 1.4.10:
+
+* Address vulnerabilities CVE-2014-0224, CVE-2014-0221, CVE-2014-0195,
+  CVE-2014-3470 https://www.openssl.org/news/secadv_20140605.txt
+
 ## 1.4.10 (2014-05-07)
 
 ### Security Fixes:

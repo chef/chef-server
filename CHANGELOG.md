@@ -1,5 +1,11 @@
 # Enterprise Chef Changelog
 
+## 1.4.11 (2014-06-05)
+
+### openssl 1.0.1h
+* Address vulnerabilities CVE-2014-0224, CVE-2014-0221, CVE-2014-0195,
+  CVE-2014-3470 https://www.openssl.org/news/secadv_20140605.txt
+
 ## 1.4.10 (2014-05-07)
 
 ### opscode-account 1.30.7.1
