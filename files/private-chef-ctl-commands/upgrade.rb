@@ -102,9 +102,9 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   chef_server_root = "https://api.opscode.piab" # hard coded to dev-vm, needs to point to EC
   # let's use the pivotal user, shall we?
   chef_rest = Chef::REST.new(chef_server_root, 'pivotal', '/etc/opscode/pivotal.pem')
- org_short_name = 'minitrue'
+  org_name = 'minitrue' # this is the org short name
   org_full_name = 'MinistryOfTruth'
-  org_args = {:name => org_short_name , :full_name => org_full_name, :org_type => 'Business'}
+  org_args = {:name => org_name , :full_name => org_full_name, :org_type => 'Business'}
   private_key = chef_rest.post('organizations/', org_args)
 
   # result of post will be the private key. Should probably stick that somewhere.
@@ -121,7 +121,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
 
   # put in place the org name structure
   Dir.mkdir("#{new_data_dir}/organizations") unless File.directory?("#{new_data_dir}/organizations")
-  org_dir = "#{new_data_dir}/organizations/#{org_short_name}"
+  org_dir = "#{new_data_dir}/organizations/#{org_name}"
   Dir.mkdir(org_dir, 0777) unless File.directory?(org_dir)
 
   # users still live at the top level, so let's copy them over
@@ -137,6 +137,94 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   # what is missing at this point? At the top level next to organizations and users, user_acls is missing.
   # At the org level, next to the dirs of clients, et al. we're missing dirs for acls, containers, and groups
 
+  # * user transform needed: add display_name, email; change name to user name
+  # need to add org.json under organizations/#{org_name}
+  # email is important, as it will be needed for password resets, since if we use knife ec backup
+  # it doesn't move passwords
+  #
+
+  puts 'Transforming users'
+
+  # * org.json needs: name, at the bare minimum (leaving the rest of it out, what will break?
+  # doesn't cause an error if you only stick name in it)
+
+  # * need invitations.json under organizations/#{org_name} (can be an empty array/object and work [])
+
+  # * need members.json under organizations/#{org_name}. Should be an array/object with hashes for the
+  # users in the org
+  #
+  # Members.json looks like this
+  # (hmm, where do we specify the admins? Am I missing that and it goes here?):
+  #
+  # [
+  #  {
+  #   "user": { "username": "users's username"}
+  #  },
+  #  {
+  #   "user": { "username": "users's username"}
+  #  }
+  # ]
+  #
+  # Under organizations/#{org_name}/groups, an admins.json and billing-admins.json is needed.
+  # Will need to determine the users that go into both. admins should include the pivotal user.
+  # pivotal does not need to go into billing-admins (does it matter who is in billing admins?
+  # What happens to the admin user from OSC? (the base admin user, which is OSC's pivotal)
+  #
+  # Will need acl files - in a top level folder next to organizations/ and users/, called
+  # user_acls/ and in it it has a #{username}.json file for each user to be imported
+  #
+  # For this POC, I copied a user_acl json file from a dev-vm user and replaced the user name.
+  # Need to ensure the group is right for the read acl - it should be #{orgname}_global_admins
+  # What effect will this have on the permissions of the system?
+  # What would be sensible defaults to set here? Give everyone the world and then tell them to restrict it?
+  #
+
+  # access the data pulled from OSC
+  Dir.glob("#{data_dir}/users/*") do |file|
+    user = Chef::JSONCompat.from_json(IO.read(file), :create_additions => false)
+    users << user['name'] # user's names are needed several times later
+    user['username'] = user['name']
+    # the email address will need to be configurable in someway so that password resets work
+    user['email'] = "#{user['username']}@example.com"
+    user['display_name'] = user['username']
+    user.delete('name')
+    File.open("#{new_data_dir}/users/#{File.basename(file)}", "w"){ |new_file| new_file.write(Chef::JSONCompat.to_json_pretty(user)) }
+  end
+
+    org_json = { "name" => org_name }
+    File.open("#{org_dir}/org.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(org_json)) }
+
+    File.open("#{org_dir}/invitations.json", "w"){ |file| file.write([])}
+
+    members_json = []
+    users.each do |name|
+      user_json= {"user" => name}
+      members_json << user_json
+    end
+
+    File.open("#{org_dir}/members.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(members_json)) }
+
+
+   Dir.mkdir("#{org_dir}/groups") unless File.directory?("#{org_dir}/groups")
+
+   admin_users = users.clone
+   admin_users << 'pivotal'
+   admins_json = { "name" => "admins", "users" => admin_users }
+   File.open("#{org_dir}/groups/admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(admins_json)) }
+
+  billing_admins_json = { "name" => "billing-admins", "users" => users}
+  File.open("#{org_dir}/groups/billing-admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(billing_admins_json)) }
+
+  Dir.mkdir("#{new_data_dir}/user_acls") unless File.directory?("#{new_data_dir}/user_acls")
+  users.each do |name|
+    actors = ['pivotal', name]
+    group1 = { "actors" => actors, "groups" => [] }
+    group2 = { "actors" => actors, "groups" => ["#{org_name}_global_admins"] }
+    acl_json = { "create" => group1, "read" => group2, "update" => group1, "delete" => group1, "grant" => group1 }
+    File.open("#{new_data_dir}/user_acls/#{name}.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(acl_json ))}
+end
+
+
   # will need to use knife ec restore to push the data to the server (knife upload won't do the trick, since it is for OSC)
   # or else mimic what knife ec restore is doing (this is all part of the knife-ec-backup gem)
 
@@ -146,6 +234,8 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   puts "Installing knife ec backup"
   # probably need to check if this is installed first before trying to install
   result = run_command("/opt/opscode/embedded/bin/gem install --no-ri --no-rdoc knife-ec-backup")
+
+  #knife ec backup contains knife ec restore, which is what we need
 
   #note that the default gem install on a dev-vm at this point appears to be the OSC embedded gem. Check if this flips over to EC 
   #once OSC is removed
@@ -162,7 +252,13 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   puts "Writing knife ec backup config to /tmp/knife-ec-backup-config.rb" 
   File.open("/tmp/knife-ec-backup-config.rb", "w"){ |file| file.write(config)}
  
+  ec_restore = "/opt/opscode/embedded/bin/knife ec restore -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
+  migration_result = run_command(ec_restore)
 
+  puts migration_result
+
+  puts "It wasn't pretty, but Bob's your uncle. (https://en.wikipedia.org/wiki/Microsoft_Bob)"
+  puts "(Migration is done)"
 
   # Original EC add_command
   #reconfigure(false)
