@@ -67,7 +67,7 @@ EOF
       raise message
     end
   end
-  not_if 'ls /var/opt/opscode/upgrades/migration-level'
+  not_if 'test -f /var/opt/opscode/upgrades/migration-level'
   action :nothing
   subscribes :run, 'private-chef_pg_upgrade[upgrade_if_necessary]', :delayed
 end
