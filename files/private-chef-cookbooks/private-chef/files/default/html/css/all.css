@@ -1,15 +1,17 @@
 body {
 	margin:0;
-	font:12px Arial, Helvetica, sans-serif;
-	background:url(../images/bg-body.gif) repeat-x;
-	color:#6e6e6e;
+	font:14px "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 1em;
+	color:#666;
+        background-color:#212c35;
+        -webkit-font-smoothing: antialiased;
 }
 a {
 	text-decoration:none;
-	color:#99b504;
+	color:#4d97c6;
 }
 a:hover {
-	text-decoration:underline;
+        color: #f18a20;
 }
 input,
 textarea,
@@ -26,18 +28,23 @@ img {
 	border:0;
 }
 #wrapper {
-	width:940px;
-	margin:0 auto;
 	position:relative;
-	padding:119px 0 0;
+	padding: 20px 0 100px 0px;
+        background-color: #fff;
 }
+
+.header-block {
+	margin: 0;
+	background-color:#212c35 ;
+	width:100%;
+	min-width:940px;
+}
+
 #header {
-	position:absolute;
-	top:0;
-	left:0;
+	margin:0 auto;
 	width:940px;
-	height:100px;
-	background:url(../images/hd-header.gif) no-repeat;
+	padding:0;
+        
 }
 #header:after {
 	content:"";
@@ -46,13 +53,15 @@ img {
 }
 .logo {
 	float:left;
-	margin:20px 0 0 21px;
+	margin:10px 0 12px 10px;
 }
 .logo a {
 	display:block;
-	width:125px;
-	height:67px;
-	background:url(../images/logo.gif) no-repeat;	
+        width: 128px;
+        height: 30px;
+        background-image:  url('../images/logo.png');
+        background-image:  url('../images/logo.svg'), none;
+        background-size: 100% 100%;
 	text-indent:-9999px;
 	overflow:hidden;
 }
@@ -256,6 +265,7 @@ img {
 }
 #main {
 	width:940px;
+	margin:0 auto;
 }
 .main-t {
 	background:#f6f4f1 url(../images/bg-main-t.gif) no-repeat;
@@ -286,7 +296,7 @@ img {
 	float:left;
 }
 .content h1 {
-	font-size:32px;
+	font-size: 38.5px;
 	margin:19px 0 0;
 	font-weight:normal;
 }
@@ -387,9 +397,9 @@ img {
 	margin:10px 0 0;
 	padding:0 40px 0 0;
 }
-.footer-block {
-	margin:18px 0 0;
-	background:#656565 url(../images/bg-footer.gif) repeat-x;
+.footer-block{
+	margin:0;
+	background-color:#212c35 ;
 	width:100%;
 	min-width:940px;
 }
@@ -491,10 +501,10 @@ img {
 	color:#99b504;
 }
 #footer .footer-bottom {
-	text-align:center;
+        padding-left: 10px;
 	font-size:11px;
 	color:#a1a1a1;
-	margin:36px 0 0;
+	margin:0;
 }
 #footer .footer-bottom ul {
 	margin:0;
@@ -517,13 +527,12 @@ img {
 }
 /*inner1 page*/
 #content {
-	width:633px;
+
 	float:left;
 	padding:0 41px 0 11px;
 	background:#fff;
 }
 #content h1 {
-	font-size:30px;
 	padding:5px 0 0;
 	margin:15px 0 0;
 	font-weight:normal;
