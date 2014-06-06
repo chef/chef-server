@@ -7,14 +7,28 @@ bifrost_attrs = node['private_chef']['oc_bifrost']
 # create users
 private_chef_pg_user bifrost_attrs['sql_user'] do
   password bifrost_attrs['sql_password']
+  superuser false
 end
 
 private_chef_pg_user bifrost_attrs['sql_ro_user'] do
   password bifrost_attrs['sql_ro_password']
+  superuser false
 end
 
-private_chef_pg_database "bifrost" do
+private_chef_pg_database 'bifrost' do
   owner bifrost_attrs['sql_user']
+end
+
+private_chef_pg_user_table_access bifrost_attrs['sql_user'] do
+  database 'bifrost'
+  schema 'public'
+  access %w(SELECT INSERT UPDATE DELETE)
+end
+
+private_chef_pg_user_table_access bifrost_attrs['sql_ro_user'] do
+  database 'bifrost'
+  schema 'public'
+  access 'SELECT'
 end
 
 execute "bifrost_schema" do

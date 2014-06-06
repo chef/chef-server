@@ -10,32 +10,43 @@ end
 use_inline_resources
 
 action :create do
-  execute "create_postgres_user_#{new_resource.username}" do
-    command "psql --dbname template1 --command \"#{create_user_query}\""
-    user node['private_chef']['postgresql']['username']
-    not_if {user_exist?}
-    retries 30
+  EcPostgres.with_connection(node) do |connection|
+
+    user_info = connection.exec('select usesuper, passwd from pg_shadow where usename = $1', [ new_resource.username ])[0]
+    if user_info
+      changes = [ "Update Postgres user #{new_resource.username}" ]
+      sql = ''
+      sql_params = []
+      if user_info['usesuper'] != (new_resource.superuser ? 't' : 'f')
+        changes << "  Set superuser to #{!!new_resource.superuser}"
+        sql << (new_resource.superuser ? ' SUPERUSER' : ' NOSUPERUSER')
+      end
+      if new_resource.password && user_info['passwd'] != ::PGconn.encrypt_password(new_resource.password, new_resource.username)
+        changes << '  Update password'
+        sql << ' ENCRYPTED PASSWORD $1'
+        sql_params << new_resource.password
+      end
+      if changes.size > 1
+        converge_by changes do
+          connection.exec("ALTER ROLE #{new_resource.username}#{sql}", sql_params)
+        end
+      end
+    else
+      changes = [ "Create Postgres user #{new_resource.username}" ]
+      sql = ''
+      sql_params = []
+      if new_resource.superuser
+        changes << "  Set superuser to #{!!new_resource.superuser}"
+        sql << (new_resource.superuser ? ' SUPERUSER' : ' NOSUPERUSER')
+      end
+      if new_resource.password
+        changes << '  Update password'
+        sql << ' ENCRYPTED PASSWORD $1'
+        sql_params << new_resource.password
+      end
+      converge_by changes do
+        connection.exec("CREATE ROLE #{new_resource.username}#{sql}", sql_params)
+      end
+    end
   end
-end
-
-def create_user_query
-  q = ["CREATE USER #{new_resource.username} WITH"]
-  q << "SUPERUSER" if new_resource.superuser
-  q << "ENCRYPTED PASSWORD '#{new_resource.password}'"
-  q << ";"
-  q.join(" ")
-end
-
-def user_exist?
-  command = <<-EOM.gsub(/\s+/," ").strip!
-    psql --dbname template1
-         --tuples-only
-         --command "SELECT rolname FROM pg_roles WHERE rolname='#{new_resource.username}';"
-    | grep #{new_resource.username}
-  EOM
-
-  s = Mixlib::ShellOut.new(command,
-                           :user => node['private_chef']['postgresql']['username'])
-  s.run_command
-  s.exitstatus == 0
 end

@@ -18,6 +18,8 @@
 
 include_recipe "private-chef::old_postgres_cleanup"
 
+chef_gem 'pg'
+
 postgresql_dir = node['private_chef']['postgresql']['dir']
 postgresql_data_dir = node['private_chef']['postgresql']['data_dir']
 postgresql_data_dir_symlink = File.join(postgresql_dir, "data")
@@ -121,6 +123,8 @@ if is_data_master?
   execute "/opt/opscode/bin/private-chef-ctl start postgresql" do
     retries 20
   end
+  # Set up a database for the opscode-pgsql user to log into automatically
+  private_chef_pg_database "opscode-pgsql"
   include_recipe "private-chef::erchef_database"
   include_recipe "private-chef::bifrost_database"
 end
