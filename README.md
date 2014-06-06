@@ -36,6 +36,17 @@ for details.
 
 There are some tests that only make sense to run in certain environments or that don't make sense to run by default.
 
+#### LDAP Testing
+
+WARNING: Do not perform this testing on a production environment as it interacts with actual LDAP credentials.
+
+You will need LDAP running on your EC test server with a valid LDAP user. Follow the instructions here to get LDAP running with EC http://docs.opscode.com/server_ldap.html.
+
+Please update the entries in multitenant_config.rb. Set `ldap_testing` to true,
+and fill in ldap({}) with your LDAP credentials a user on the test server you pointed EC at above.
+
+This is good enough for quick ad-hoc testing, but we should develop better LDAP integration tests in the future.
+
 #### Account Tests That Talk Via Internal Ports
 
 The opscode-account endpoint for internal org creation and updating (```/internal-organizations```) communicates via the internal account port. That endpoint is not exposed via the external-lb. Therefore, they will fail when kicking off the tests from a point external to the lb (say, developer's laptop hitting hosted for pedant). However, they are useful in validating that these endpoint are still functioning, so if you are running pedant somewhere with access to the internal-lb, simply run
