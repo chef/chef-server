@@ -31,7 +31,7 @@
                   "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
        {sqerl,".*",
               {git,"git://github.com/opscode/sqerl.git",
-                   "219301ae784276396e7302d3927eb038aba6bd82"}},
+                   "b7cfafa34d311585900b9d2ca32d6e7da5f061e1"}},
        {edown,".*",
               {git,"git://github.com/seth/edown.git",
                    "30a9f7867d615af45783235faa52742d11a9348e"}},
