@@ -1,6 +1,6 @@
 # Enterprise Chef Release Notes
 
-## 11.1.6 (Unreleased)
+## 12.0.0 (Unreleased)
 
 ### What's New:
 
@@ -16,6 +16,14 @@ The following items are the set of bug fixes that have been applied since Enterp
 * [opscode-omnibus] private-chef-ctl test command should provide pedant return code.
 * [opscode-omnibus] Use more strict regular expression for IP check in ha-status
 * [opscode-omnibus] Ensure CouchDB compaction cron job does not run on passive backend.
+
+## 11.1.6 (2014-06-05)
+
+### Security Fixes:
+
+The following items are the set of security fixes that have been applied since Enterprise Chef 11.1.5:
+
+* Address vulnerabilities CVE-2014-0224, CVE-2014-0221, CVE-2014-0195, CVE-2014-3470 https://www.openssl.org/news/secadv_20140605.txt
 
 ## 11.1.5 (2014-05-14)
 

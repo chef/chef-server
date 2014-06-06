@@ -1,6 +1,6 @@
 # Enterprise Chef Changelog
 
-## 11.1.6 (Unreleased)
+## 12.0.0 (Unreleased)
 
 ### cacerts 2014.04.22
 * Update to latest cacerts as of 2014-04-22
@@ -37,6 +37,12 @@
 * [OC-3107] Ensure CouchDB compaction cron job does not run on passive
   backend.
 * Introduce pluggable HA architecture as an alternative to DRBD
+
+## 11.1.6 (2014-06-05)
+
+### openssl 1.0.1h
+* Address vulnerabilities CVE-2014-0224, CVE-2014-0221, CVE-2014-0195,
+  CVE-2014-3470 https://www.openssl.org/news/secadv_20140605.txt
 
 ## 11.1.5 (2014-05-14)
 
