@@ -64,6 +64,9 @@
 %% Username validation regex
 -define(USERNAME_REGEX, "[a-z0-9\-_]+").
 
+%% Non-blank string regex
+-define(NON_BLANK_REGEX, ".+").
+
 %% Recipes can be cookbook-qualified; if not, the name is taken to be
 %% the cookbook, and the recipe is implicitly assumed to be "default".
 -define(COOKBOOK_PREFIX_REGEX, "(?:" ++ ?NAME_REGEX ++ "::)?").
@@ -127,5 +130,8 @@ regex_for(unqualified_recipe) ->
 
 regex_for(user_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?USERNAME_REGEX),
-                            <<"Malformed user name. Must only contain a-z, 0-9, _, or -">>).
+                            <<"Malformed user name. Must only contain a-z, 0-9, _, or -">>);
+regex_for(non_blank_string) ->
+   generate_regex_msg_tuple(?ANCHOR_REGEX(?NON_BLANK_REGEX), <<"Field must have a non-empty string value">>).
+
 
