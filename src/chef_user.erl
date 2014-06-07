@@ -40,7 +40,8 @@
          set_password_data/2,
          set_updated/2,
          type_name/1,
-         update_from_ejson/2
+         update_from_ejson/2,
+         validate_user_name/1
         ]).
 
 %% database named queries
@@ -373,7 +374,8 @@ fields_for_fetch(#chef_user{username = UserName}) ->
 
 record_fields() ->
     record_info(fields, chef_user).
-
+list(#chef_user{external_authentication_uid = ExtAuthUid}, CallbackFun) when ExtAuthUid =/= undefined ->
+    CallbackFun({list_users_by_ext_auth_uid, [ExtAuthUid], [username]});
 list(#chef_user{email = undefined}, CallbackFun) ->
     CallbackFun({list_query(), [], [username]});
 list(#chef_user{email = EMail}, CallbackFun) ->
