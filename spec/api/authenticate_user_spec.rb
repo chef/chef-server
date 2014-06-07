@@ -2,16 +2,16 @@
 require 'pedant/rspec/common'
 require 'json'
 
-describe 'authenticate_user' do
+describe 'authenticate_user', :focus do
   def self.ruby?
-    true
+    false
   end
 
   def invalid_verb_response_code
     ruby? ? 404 : 405
   end
 
-  let (:username) {
+  let(:username) {
     if platform.ldap_testing
       platform.ldap[:account_name]
     else
@@ -19,7 +19,7 @@ describe 'authenticate_user' do
     end
   }
 
-  let (:password) {
+  let(:password) {
     if platform.ldap_testing
       platform.ldap[:account_password]
     else
@@ -27,9 +27,9 @@ describe 'authenticate_user' do
     end
   }
 
-  let (:request_url) { "#{platform.server}/authenticate_user" }
-  let (:body) { { 'username' => username, 'password' => password } }
-  let (:response_body) do
+  let(:request_url) { "#{platform.server}/authenticate_user" }
+  let(:body) { { 'username' => username, 'password' => password } }
+  let(:response_body) do
     if platform.ldap_testing
       {
         'status' => platform.ldap[:status],
@@ -59,8 +59,22 @@ describe 'authenticate_user' do
     end
   end
 
-  let (:authentication_error_msg) {
-    "Failed to authenticate: Username and password incorrect"
+  let(:body) { { 'username' => username, 'password' => password } }
+  let(:response_body) { {
+      'status' => 'linked',
+      'user' => {
+        'first_name' => platform.non_admin_user.name,
+        'last_name' => platform.non_admin_user.name,
+        'display_name' => platform.non_admin_user.name,
+        'email' => platform.non_admin_user.name + "@opscode.com",
+        'username' => platform.non_admin_user.name
+      }} }
+  let(:authentication_error_msg) {
+    if ruby?
+      "Failed to authenticate: Username and password incorrect"
+    else
+      ["Failed to authenticate: Username and password incorrect"]
+    end
   }
 
   context 'GET /authenticate_user' do
@@ -155,7 +169,7 @@ describe 'authenticate_user' do
 
     context 'with invalid username' do
 
-      let (:username) { "kneelbeforezod" }
+      let(:username) { "kneelbeforezod" }
 
       it 'superuser returns 401 ("Unauthorized")', :smoke do
         # the exact error is very dependant on how LDAP is configured, so its hard to test
@@ -190,7 +204,7 @@ describe 'authenticate_user' do
 
     context 'with incorrect password' do
 
-      let (:password) { "badger badger" }
+      let(:password) { "badger badger" }
 
       it 'superuser returns 401 ("Unauthorized")', :smoke do
         post(request_url, superuser, :payload => body).should look_like({
@@ -217,7 +231,7 @@ describe 'authenticate_user' do
 
     context 'with missing username' do
 
-      let (:body) { { 'password' => password } }
+      let(:body) { { 'password' => password } }
 
       it 'superuser returns 400 ("Bad Request")' do
         post(request_url, superuser, :payload => body).should look_like({
@@ -240,7 +254,7 @@ describe 'authenticate_user' do
 
     context 'with missing password' do
 
-      let (:body) { { 'username' => username } }
+      let(:body) { { 'username' => username } }
 
       it 'superuser returns 400 ("Bad Request")' do
         post(request_url, superuser, :payload => body).should look_like({
@@ -262,7 +276,7 @@ describe 'authenticate_user' do
     end
 
     context 'with empty username' do
-      let (:username) { "" }
+      let(:username) { "" }
 
       it 'superuser returns 400 ("Bad Request")' do
         post(request_url, superuser, :payload => body).should look_like({
@@ -284,7 +298,7 @@ describe 'authenticate_user' do
     end
 
     context 'with empty password' do
-      let (:password) { "" }
+      let(:password) { "" }
 
       it 'superuser returns 400 ("Bad Request")' do
         post(request_url, superuser, :payload => body).should look_like({
@@ -307,7 +321,7 @@ describe 'authenticate_user' do
 
     context 'with username = user' do
 
-      let (:body) { { 'user' => username, 'password' => password } }
+      let(:body) { { 'user' => username, 'password' => password } }
 
       it 'superuser returns 400 ("Bad Request")' do
         post(request_url, superuser, :payload => body).should look_like({
@@ -330,7 +344,7 @@ describe 'authenticate_user' do
 
     context 'with password = pass' do
 
-      let (:body) { { 'username' => username, 'pass' => password } }
+      let(:body) { { 'username' => username, 'pass' => password } }
 
       it 'superuser returns 400 ("Bad Request")' do
         post(request_url, superuser, :payload => body).should look_like({
@@ -353,7 +367,7 @@ describe 'authenticate_user' do
 
     context 'with empty body' do
 
-      let (:body) { {} }
+      let(:body) { {} }
 
       it 'superuser returns 400 ("Bad Request")' do
         post(request_url, superuser, :payload => body).should look_like({
@@ -376,12 +390,9 @@ describe 'authenticate_user' do
 
     context 'with no body' do
       it 'superuser returns 400 ("Bad Request")' do
-        pending "returns 200 instead" do
-          # TODO: Why???
-          post(request_url, superuser, :payload => body).should look_like({
+          post(request_url, superuser).should look_like({
               :status => 400
             })
-        end
       end
 
       it 'admin/different user returns 400 ("Bad Request")' do
@@ -396,9 +407,9 @@ describe 'authenticate_user' do
           })
       end
 
-      it 'invalid user returns 401 ("Unauthorized")' do
+      it 'invalid user returns 401 ("Unauthorized") (ruby) or 400 ("Bad Request") (erlang)' do
         post(request_url, invalid_user).should look_like({
-            :status => 401
+            :status => ruby? ? 401 : 400
           })
       end
     end
@@ -406,7 +417,7 @@ describe 'authenticate_user' do
     context 'with extra junk in body' do
       # Not sure we should actually ignore extra junk, but, well, meh
 
-      let (:body) { { 'username' => username, 'password' => password,
+      let(:body) { { 'username' => username, 'password' => password,
           'junk' => 'extra' } }
 
       it 'superuser returns 200 ("Ok")' do
@@ -434,6 +445,31 @@ describe 'authenticate_user' do
           })
       end
     end
+
+
+    let(:request_url) { "#{platform.server}/authenticate_user" }
+
+    context "when the webui superuser is specified as the target user" do
+      let(:requestor) { superuser }
+
+      let(:request_body) do
+        {
+          username: superuser.name,
+          password: "DOES_NOT_MATTER_FOR_TEST",
+        }
+      end
+
+      it "should return Forbidden" do
+
+        # Under ruby we should expect:
+        #     "error" => "Password authentication as the superuser is prohibited."
+        # But the oc_chef_wm_base framework doesn't support customized error messages
+        # when a 403 occurs during forbidden check.
+        post(request_url, superuser, :payload => request_body).should look_like(
+          :status => 403
+        )
+      end
+    end # context when the webui superuser is specified as the user
   end # context 'POST /authenticate_user'
 
   context 'DELETE /authenticate_user' do
@@ -464,4 +500,5 @@ describe 'authenticate_user' do
     end
 
   end # 'DELETE /authenticate_user'
+
 end # describe 'authenticate_user'

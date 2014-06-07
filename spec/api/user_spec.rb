@@ -1677,28 +1677,4 @@ EOF
     end # context when the webui superuser is specified as the user
   end # context POST /verify_password
 
-  context "POST /authenticate_user" do
-    let(:request_url) { "#{platform.server}/authenticate_user" }
-
-    context "when the webui superuser is specified as the user" do
-      let(:requestor) { superuser }
-
-      let(:request_body) do
-        {
-          username: superuser.name,
-          password: "DOES_NOT_MATTER_FOR_TEST",
-        }
-      end
-
-      it "should return Forbidden" do
-        post(request_url, superuser, :payload => request_body).should look_like(
-          :body => {
-            "error" => "Password authentication as the superuser is prohibited."
-          },
-          :status => 403
-        )
-      end
-
-    end # context when the webui superuser is specified as the user
-  end # context POST /authenticate_user
 end # describe users
