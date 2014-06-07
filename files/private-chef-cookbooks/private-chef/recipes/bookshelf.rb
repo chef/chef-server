@@ -36,8 +36,8 @@ bookshelf_sasl_log_dir = File.join(bookshelf_log_dir, "sasl")
 ].each do |dir_name|
   directory dir_name do
     owner owner
-    group owner
-    mode '0700'
+    group group
+    mode "0700"
     recursive true
   end
 end
@@ -54,8 +54,8 @@ end
 
 template "/opt/opscode/embedded/service/bookshelf/bin/bookshelf" do
   source "bookshelf.erb"
-  owner "root"
-  group "root"
+  owner owner
+  group group
   mode "0755"
   variables(node['private_chef']['bookshelf'].to_hash)
   notifies :restart, 'runit_service[bookshelf]' if is_data_master?
@@ -65,6 +65,8 @@ bookshelf_config = File.join(bookshelf_etc_dir, "app.config")
 
 template bookshelf_config do
   source "bookshelf.config.erb"
+  owner owner
+  group group
   mode "644"
   variables(node['private_chef']['bookshelf'].to_hash)
   notifies :restart, 'runit_service[bookshelf]' if is_data_master?
