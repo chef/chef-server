@@ -67,8 +67,19 @@
 -include("chef_types.hrl").
 -include_lib("ej/include/ej.hrl").
 
-
 -behaviour(chef_object).
+
+
+%% Whitelist of fields we will persist to serialized_object.  Fields not in the list
+%% will not be persisted in create and update operations.
+-define(JSON_SERIALIZABLE, [<<"display_name">>,
+                            <<"first_name">>,
+                            <<"last_name">>,
+                            <<"middle_name">>,
+                            <<"city">>,
+                            <<"country">>,
+                            <<"twitter_account">>,
+                            <<"image_file_name">>]).
 
 -spec authz_id(#chef_user{}) -> object_id().
 authz_id(#chef_user{authz_id = AuthzId}) ->
@@ -105,7 +116,7 @@ new_record(OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
     ExtAuthUid = value_or_null({<<"external_authentication_uid">>}, UserData),
     EnableRecovery = ej:get({"<<recovery_authentication_enabled>>"}, UserData) =:= true,
     {PublicKey, PubkeyVersion} = chef_object_base:cert_or_key(UserData),
-    SerializedObject = { whitelisted_values(UserData) },
+    SerializedObject = { whitelisted_values(UserData, ?JSON_SERIALIZABLE) },
     #chef_user{id = Id,
                authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                username = Name,
@@ -144,24 +155,15 @@ user_spec(common) ->
         {{opt,<<"middle_name">>}, string},  %% FIXME these should be retained by the components that need them
         {{opt,<<"twitter_account">>}, string},
         {{opt,<<"city">>}, string},
-        {{opt,<<"country">>}, string}
+        {{opt,<<"country">>}, string},
+        {{opt,<<"external_authentication_uid">>}, string }
     ]};
 user_spec(create) ->
    {[ {<<"password">>, password_validator()} ]};
 user_spec(update) ->
     {[ {{opt,<<"password">>},  password_validator()},
+       {{opt,<<"recovery_authentication_enabled">>}, boolean },
        {{opt,<<"private_key">>}, boolean } ]}.
-
-%% Whitelist of fields we will persist to serialized_objects.  Fields not in this list and not part of the
-%% schema will cause updates to be rejected.
--define(JSON_SERIALIZABLE, [<<"display_name">>,
-                            <<"first_name">>,
-                            <<"last_name">>,
-                            <<"middle_name">>,
-                            <<"city">>,
-                            <<"country">>,
-                            <<"twitter_account">>]).
-
 
 valid_email(EMail) when is_binary(EMail) ->
     valid_email(binary_to_list(EMail));
@@ -190,16 +192,16 @@ valid_password(Password) when is_binary(Password) andalso byte_size(Password) >=
 valid_password(_Password) ->
     error.
 
-%% Returns the subset of permitted fields that are
-%% present in JSON_SERIALIZABLE
-whitelisted_values(EJ) ->
-    [{X, ej:get({X}, EJ) } || X <- ?JSON_SERIALIZABLE, ej:get({X}, EJ)  =/= undefined ].
+%% Returns the subset of permitted fields that are present in in the request.
+whitelisted_values(EJ, Permitted) ->
+    [{X, ej:get({X}, EJ) } || X <- Permitted, ej:get({X}, EJ)  =/= undefined ].
+
 assemble_user_ejson(#chef_user{username = Name,
                                public_key = KeyOrCert,
                                email = Email,
                                serialized_object = SerializedObject},
                     _OrgId) ->
-    EJ = chef_json:decode(SerializedObject),
+    EJ = chef_json:decode(SerializedObject ),
     % public_key can mean either public key or cert.
     % if it's a cert, we need to extract the public key -
     % we don't want to hand the cert back on user GET.
@@ -207,7 +209,9 @@ assemble_user_ejson(#chef_user{username = Name,
     User1 = [{<<"username">>, Name},
              {<<"public_key">>, RealPubKey},
              {<<"email">>, Email}],
-    User2 = whitelisted_values(EJ),
+    User2 = whitelisted_values(EJ, ?JSON_SERIALIZABLE ++
+                               [ <<"recovery_authentication_enabled">>, <<"external_authentication_uid">>] ),
+
     { User1 ++ User2 }.
 
 
@@ -296,7 +300,7 @@ update_from_ejson(#chef_user{} = User, UserEJson) ->
                 public_key = Key
             }
     end,
-    SerializedObject0 = { whitelisted_values(UserEJson) },
+    SerializedObject0 = { whitelisted_values(UserEJson, ?JSON_SERIALIZABLE) },
     SerializedObject1 = merge_user_data(chef_json:decode(User#chef_user.serialized_object),
                                         SerializedObject0),
     User1#chef_user{username = Name,
