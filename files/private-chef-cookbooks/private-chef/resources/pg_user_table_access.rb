@@ -14,6 +14,6 @@ attribute :schema,
 :kind_of => String,
 :required => true
 
-attribute :access,
-:kind_of => [String, Array],
+attribute :access_profile,
+:equal_to => [:write, :read],
 :required => true

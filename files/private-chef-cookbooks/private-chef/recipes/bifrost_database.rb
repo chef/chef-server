@@ -22,13 +22,13 @@ end
 private_chef_pg_user_table_access bifrost_attrs['sql_user'] do
   database 'bifrost'
   schema 'public'
-  access %w(SELECT INSERT UPDATE DELETE)
+  access_profile :write
 end
 
 private_chef_pg_user_table_access bifrost_attrs['sql_ro_user'] do
   database 'bifrost'
   schema 'public'
-  access 'SELECT'
+  access_profile :read
 end
 
 execute "bifrost_schema" do
