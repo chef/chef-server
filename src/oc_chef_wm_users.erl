@@ -89,10 +89,15 @@ from_json(Req, #base_state{reqid = RequestId,
             {PubKey, undefined}
     end,
     UserWithKey = chef_object_base:set_public_key(UserData, PublicKey),
-    PasswordData = chef_wm_password:encrypt(ej:get({<<"password">>}, UserWithKey)),
+    UserFinal = case ej:get({<<"external_authentication_uid">>}, UserData) of
+        undefined ->
+            {UserWithKey, chef_wm_password:encrypt(ej:get({<<"password">>}, UserWithKey))};
+        _ ->
+            UserWithKey
+    end,
     case chef_wm_base:create_from_json(Req, State, chef_user,
                                        {authz_id, AuthzId},
-                                       {UserWithKey, PasswordData}) of
+                                       UserFinal) of
         {true, Req1, State1} ->
             Uri = ?BASE_ROUTES:route(user, Req1, [{name, Name}]),
             Ejson = ej:set({<<"private_key">>}, {[{<<"uri">>, Uri}]}, PrivateKey),
