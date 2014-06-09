@@ -2,9 +2,11 @@ driver:
   name: vagrant
   customize:
     cpus: 4
-    memory: 2048
+    memory: 4098
   synced_folders:
     - ['.', '/home/vagrant/opscode-omnibus']
+    - ['../omnibus-ruby', '/home/vagrant/omnibus-ruby']
+    - ['../omnibus-software', '/home/vagrant/omnibus-software']
 
 provisioner:
   name: chef_zero
