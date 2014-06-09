@@ -881,6 +881,30 @@ describe "users", :users do
         }
       end
 
+      let(:request_body_with_ext_id) do
+        {
+          "username" => username,
+          "email" => "#{username}@opscode.com",
+          "first_name" => username,
+          "last_name" => username,
+          "display_name" => "new name",
+          "password" => "badger badger",
+          "external_authentication_uid" => "bob"
+        }
+      end
+
+      let(:request_body_with_recovery) do
+        {
+          "username" => username,
+          "email" => "#{username}@opscode.com",
+          "first_name" => username,
+          "last_name" => username,
+          "display_name" => "new name",
+          "password" => "badger badger",
+          "recovery_authentication_enabled" => true
+        }
+      end
+
       let(:modified_user) do
         {
           "username" => username,
@@ -942,12 +966,61 @@ EOF
               :body_exact => modified_user
             })
         end
+        it "can enable recovery" do
+          put(request_url, platform.superuser,
+            :payload => request_body_with_recovery).should look_like({
+              :status => 200
+            })
+
+        end
+        it "can set external id" do
+          put(request_url, platform.superuser,
+            :payload => request_body_with_ext_id).should look_like({
+              :status => 200
+            })
+        end
       end
 
       context "admin user" do
         it "returns 403", :smoke do
           put(request_url, platform.admin_user,
             :payload => request_body).should look_like({
+              :status => 403
+            })
+        end
+        it "cannot enable recovery" do
+          put(request_url, platform.admin_user,
+            :payload => request_body_with_recovery).should look_like({
+              :status => 403
+            })
+
+        end
+        it "cannot set external id" do
+          put(request_url, platform.admin_user,
+            :payload => request_body_with_ext_id).should look_like({
+              :status => 403
+            })
+        end
+      end
+      context "owning user" do
+
+        it "can modify its own account" do
+          put(request_url, platform.non_admin_user,
+            :payload => request_body).should look_like({
+              :status => 403
+            })
+
+        end
+        it "cannot enable recovery" do
+          put(request_url, platform.non_admin_user,
+            :payload => request_body_with_recovery).should look_like({
+              :status => 403
+            })
+
+        end
+        it "cannot set external id" do
+          put(request_url, platform.non_admin_user,
+            :payload => request_body_with_ext_id).should look_like({
               :status => 403
             })
         end
