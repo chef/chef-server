@@ -5,20 +5,17 @@
 
 add_command "upgrade", "Upgrade your private chef installation.", 1 do
 
-  # Detect if OSC is present
-  # Ask user if they want to upgrade (and then ignore them and just upgrade in this POC)
+  # Detect if OSC is present - if not, then skip to and continue with EC upgrade
+  # Ask user if they want to upgrade
   if File.directory?("/opt/chef-server")
     puts "Open Source Chef server detected. Would you like to upgrade? [Yn]"
-    
-    # using gets fails with: No such file or directory - opscode
 
+    # using gets fails with: No such file or directory - opscode
     #answer = gets.chomp
     #if answer == 'Y'
       puts "Upgrade from Open Source Chef"
     #else
-    #  puts "Not upgrading"
-      # Just bail out for now
-    #  exit 0
+    #  exit 0 "What do we want to do if the user says no?
     #end
   end
 
@@ -180,6 +177,8 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   #
 
   # access the data pulled from OSC
+  users = []
+
   Dir.glob("#{data_dir}/users/*") do |file|
     user = Chef::JSONCompat.from_json(IO.read(file), :create_additions => false)
     users << user['name'] # user's names are needed several times later
@@ -198,7 +197,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
 
     members_json = []
     users.each do |name|
-      user_json= {"user" => name}
+      user_json= {"user" => {"username" => name}}
       members_json << user_json
     end
 
@@ -224,7 +223,6 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
     File.open("#{new_data_dir}/user_acls/#{name}.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(acl_json ))}
 end
 
-
   # will need to use knife ec restore to push the data to the server (knife upload won't do the trick, since it is for OSC)
   # or else mimic what knife ec restore is doing (this is all part of the knife-ec-backup gem)
 
@@ -237,7 +235,7 @@ end
 
   #knife ec backup contains knife ec restore, which is what we need
 
-  #note that the default gem install on a dev-vm at this point appears to be the OSC embedded gem. Check if this flips over to EC 
+  #note that the default gem install on a dev-vm at this point appears to be the OSC embedded gem. Check if this flips over to EC
   #once OSC is removed
 
   puts result
@@ -249,16 +247,18 @@ end
   client_key '/etc/opscode/pivotal.pem'
   EOH
 
-  puts "Writing knife ec backup config to /tmp/knife-ec-backup-config.rb" 
+  puts "Writing knife ec backup config to /tmp/knife-ec-backup-config.rb"
   File.open("/tmp/knife-ec-backup-config.rb", "w"){ |file| file.write(config)}
- 
+
+  puts "Running data migration"
   ec_restore = "/opt/opscode/embedded/bin/knife ec restore -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
   migration_result = run_command(ec_restore)
 
+  puts "The migration result is:"
   puts migration_result
 
   puts "It wasn't pretty, but Bob's your uncle. (https://en.wikipedia.org/wiki/Microsoft_Bob)"
-  puts "(Migration is done)"
+  puts "Migration is complete"
 
   # Original EC add_command
   #reconfigure(false)
