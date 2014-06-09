@@ -75,8 +75,11 @@ validate_request('PUT', Req, #base_state{resource_state = UserState} = State) ->
     {ok, User} = chef_user:parse_binary_json(Body, update),
     {Req, State#base_state{resource_state = UserState#user_state{user_data = User}}}.
 
-auth_info(Req, #base_state{chef_db_context = DbContext,
-                           resource_state = UserState}=State) ->
+auth_info(Req, State) ->
+    auth_info(wrq:method(Req), Req, State).
+
+auth_info(Method, Req, #base_state{chef_db_context = DbContext,
+                                   resource_state = #user_state{} = UserState}=State) ->
     UserName = chef_wm_util:object_name(user, Req),
     case chef_db:fetch(#chef_user{username = UserName}, DbContext) of
         not_found ->
@@ -86,9 +89,20 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
         #chef_user{authz_id = AuthzId} = User ->
             UserState1 = UserState#user_state{chef_user = User},
             State1 = State#base_state{resource_state = UserState1},
-            {{actor, AuthzId}, Req, State1}
+            {auth_type(Method, AuthzId, State1), Req, State1}
     end.
 
+auth_type('PUT', AuthzId, #user_state{user_data = UserData}) ->
+    ExtId = ej:get({<<"external_authentication_uid">>}, UserData),
+    Recovery = ej:get({<<"recovery_authentication_enabled">>}, UserData),
+    case {ExtId, Recovery} of
+        {undefined, undefined} ->
+            {actor, AuthzId};
+        _ ->
+            superuser_only
+    end;
+auth_type(_, AuthzId, _State) ->
+    {actor, AuthzId}.
 
 from_json(Req, #base_state{reqid = RequestId,
                            resource_state = #user_state{
