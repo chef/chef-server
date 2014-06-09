@@ -2,7 +2,7 @@
 require 'pedant/rspec/common'
 require 'json'
 
-describe 'authenticate_user', :focus do
+describe 'authenticate_user' do
   def self.ruby?
     false
   end
