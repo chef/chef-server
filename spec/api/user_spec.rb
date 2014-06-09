@@ -480,6 +480,25 @@ describe "users", :users do
                  })
           end
         end
+        context "without password but with external auth enabled" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@opscode.com",
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => username,
+              "external_authentication_uid" => username
+            }
+          end
+
+          it "returns 201" do
+            post(request_url, platform.superuser,
+                 :payload => request_body).should look_like({
+                   :status => 201
+                 })
+          end
+        end
 
         context "without display_name" do
           let(:request_body) do
@@ -541,7 +560,25 @@ describe "users", :users do
                  })
           end
         end
+        context "without email but with external auth enabled" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => username,
+              "password" => "badger badger",
+              "external_authentication_uid" => username
+            }
+          end
 
+          it "returns 201" do
+            post(request_url, platform.superuser,
+                 :payload => request_body).should look_like({
+                   :status => 201
+                 })
+          end
+        end
         context "without username" do
           let(:request_body) do
             {
@@ -868,6 +905,54 @@ describe "users", :users do
       end
     end # context GET /users/<name>
 
+    context "PUT /users/<name> when user created w/ external auth enabled" do
+      let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:request_body) do
+        {
+          "username" => username,
+          "email" => "#{username}@opscode.com",
+          "first_name" => username,
+          "last_name" => username,
+          "display_name" => "new name",
+          "external_authentication_uid" => username
+        }
+      end
+      before :each do
+        response = post("#{platform.server}/users", platform.superuser,
+          :payload => {
+            "username" => username,
+            "first_name" => username,
+            "last_name" => username,
+            "display_name" => username,
+            "external_authentication_uid" => username
+          })
+        response.should look_like({ :status => 201 })
+      end
+
+      after :each do
+        delete("#{platform.server}/users/#{username}", platform.superuser)
+      end
+
+
+      context "without email and without specifying external auth uid" do
+        let(:request_body) do
+          {
+            "username" => username,
+            "display_name" => username
+          }
+        end
+
+        it "returns 200" do
+          pending "returns 400 because erchef cannot load the full object prior to validating" do
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 200
+              })
+          end
+        end
+      end
+
+    end
     context "PUT /users/<name>" do
       let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
       let(:request_body) do
@@ -1163,6 +1248,21 @@ EOF
           end
         end
 
+        context "without email but with external auth enabled" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "display_name" => username,
+              "external_authentication_uid" => username
+            }
+          end
+          it "returns 200" do
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 200
+              })
+          end
+        end
         context "without username" do
           let(:request_body) do
             {
