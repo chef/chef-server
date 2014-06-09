@@ -30,8 +30,8 @@
          is_indexed/0,
          name/1,
          username_from_ejson/1,
-         org_id/1,
          new_record/3,
+         org_id/1,
          parse_binary_json/1,
          parse_binary_json/2,
          password_data/1,
@@ -63,8 +63,8 @@
 -export([
          list/2
          ]).
-
 -include("chef_types.hrl").
+
 -include_lib("ej/include/ej.hrl").
 
 -behaviour(chef_object).
@@ -108,7 +108,7 @@ username_from_ejson(UserData) ->
             Name
     end.
 
--spec new_record(object_id(), object_id(), {ejson_term(), {binary(), binary(), binary()}}) -> #chef_user{}.
+-spec new_record(object_id(), object_id(), ejson_term() | {ejson_term(), {binary(), binary(), binary()}}) -> #chef_user{}.
 new_record(OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
     Name = username_from_ejson(UserData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
@@ -130,7 +130,9 @@ new_record(OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
                recovery_authentication_enabled = EnableRecovery,
                admin = false,
                serialized_object = chef_json:encode(SerializedObject)
-    }.
+    };
+new_record(OrgId, AuthzId, UserData)  ->
+    new_record(OrgId, AuthzId, {UserData, {null, null, null}}).
 
 value_or_null(Key, Data) ->
     Value = ej:get(Key, Data),
@@ -147,7 +149,6 @@ password_validator() ->
 user_spec(common) ->
     {[
         {<<"display_name">>, string}, %% FIXME as an always-required field this belongs in the schema
-        {<<"email">>,            {fun_match, {fun valid_email/1, string, <<"email must be valid">>}}},
         {{opt,<<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string,
                                               <<"Public Key must be a valid key.">>}}},
         {{opt,<<"first_name">>},  string},  %% Note that remaining fields are serialized via serialized_object and
@@ -159,11 +160,20 @@ user_spec(common) ->
         {{opt,<<"external_authentication_uid">>}, string }
     ]};
 user_spec(create) ->
-   {[ {<<"password">>, password_validator()} ]};
+   {[ ]};
 user_spec(update) ->
     {[ {{opt,<<"password">>},  password_validator()},
        {{opt,<<"recovery_authentication_enabled">>}, boolean },
        {{opt,<<"private_key">>}, boolean } ]}.
+
+local_auth_user_spec(common) ->
+    {[{<<"email">>,            {fun_match, {fun valid_email/1, string, <<"email must be valid">>}}}]};
+local_auth_user_spec(create) ->
+    {[ {<<"password">>, password_validator()} ]};
+local_auth_user_spec(update) ->
+    {[ {{opt,<<"password">>},  password_validator()} ]}.
+
+
 
 valid_email(EMail) when is_binary(EMail) ->
     valid_email(binary_to_list(EMail));
@@ -206,9 +216,16 @@ assemble_user_ejson(#chef_user{username = Name,
     % if it's a cert, we need to extract the public key -
     % we don't want to hand the cert back on user GET.
     RealPubKey = real_pub_key(KeyOrCert),
+    % Where external auth is enable, email may be null/undefined
+    Email2 = case Email of
+        undefined -> <<"">>;
+        null -> <<"">>;
+        _ -> Email
+    end,
+
     User1 = [{<<"username">>, Name},
              {<<"public_key">>, RealPubKey},
-             {<<"email">>, Email}],
+             {<<"email">>, Email2}],
     User2 = whitelisted_values(EJ, ?JSON_SERIALIZABLE ++
                                [ <<"recovery_authentication_enabled">>, <<"external_authentication_uid">>] ),
 
@@ -235,7 +252,15 @@ parse_binary_json(Bin, Operation) ->
   %% If user is invalid, an error is thown
   validate_user(User, user_spec(common)),
   validate_user(User, user_spec(Operation)),
-  %% Note that if the json contains extra fields they will be silently ignored.
+  %% IF user is internally validated, some additional fields
+  %% (command to both ops) %% are required.
+  case ej:get({<<"external_authentication_uid">>}, User) of
+    undefined ->
+      validate_user(User, local_auth_user_spec(common)),
+      validate_user(User, local_auth_user_spec(Operation));
+    _ ->
+      ok
+  end,
   {ok, User}.
 
 %%-spec validate_user(ejson_term(), ejson_term()) -> {ok, ejson_term()}. % or throw
