@@ -19,6 +19,8 @@ end
 
 template File.join(keepalived_etc_dir, "keepalived.conf") do
   source "keepalived.conf.erb"
+  owner "root"
+  group "root"
   mode "0644"
   variables(node['private_chef']['keepalived'].to_hash)
   notifies :restart, 'runit_service[keepalived]'
@@ -26,6 +28,8 @@ end
 
 template File.join(keepalived_bin_dir, "cluster.sh") do
   source "cluster.sh.erb"
+  owner "root"
+  group "root"
   mode "0755"
   variables(node['private_chef']['keepalived'].to_hash)
   notifies :restart, 'runit_service[keepalived]'

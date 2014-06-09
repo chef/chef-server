@@ -22,12 +22,16 @@ end
 
 template File.join(drbd_etc_dir, "drbd.conf") do
   source "drbd.conf.erb"
+  owner "root"
+  group "root"
   mode "0655"
   variables(node['private_chef']['drbd'].to_hash)
 end
 
 template File.join(drbd_etc_dir, "pc0.res") do
   source "pc0.res.erb"
+  owner "root"
+  group "root"
   mode "0655"
   variables(node['private_chef']['drbd'].to_hash)
 end
