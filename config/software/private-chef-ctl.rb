@@ -16,6 +16,8 @@ build do
 # All Rights Reserved
 #
 
+export SVWAIT=30
+
 # Ensure the calling environment (disapproval look Bundler) does not infect our
 # Ruby environment if private-chef-ctl is called from a Ruby script.
 for ruby_env_var in RUBYOPT \\
