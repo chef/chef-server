@@ -54,6 +54,11 @@ template redis_config do
   notifies :restart, 'service[redis_lb]', :immediately if is_data_master?
 end
 
+service "redis_lb" do
+  action :start
+  only_if { is_data_master? }
+end
+
 # log rotation
 template "/etc/opscode/logrotate.d/redis_lb" do
   source "logrotate.erb"
