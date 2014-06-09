@@ -10,11 +10,18 @@ keepalived_etc_dir = File.join(keepalived_dir, "etc")
 keepalived_bin_dir = File.join(keepalived_dir, "bin")
 keepalived_log_dir = node['private_chef']['keepalived']['log_directory']
 
-[ keepalived_dir, keepalived_etc_dir, keepalived_bin_dir, keepalived_log_dir ].each do |dir|
+[ keepalived_dir, keepalived_etc_dir, keepalived_bin_dir ].each do |dir|
   directory dir do
+    owner "root"
     recursive true
     mode "0755"
   end
+end
+
+directory keepalived_log_dir do
+  owner node['private_chef']['user']['username']
+  recursive true
+  mode "0700"
 end
 
 template File.join(keepalived_etc_dir, "keepalived.conf") do
