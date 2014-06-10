@@ -12,8 +12,9 @@ use_inline_resources
 action :create do
   EcPostgres.with_connection(node) do |connection|
 
-    user_info = connection.exec('select usesuper, passwd from pg_shadow where usename = $1', [ new_resource.username ])[0]
-    if user_info
+    user_info = connection.exec('select usesuper, passwd from pg_shadow where usename = $1', [ new_resource.username ])
+    if user_info.ntuples > 0
+      user_info = user_info[0]
       changes = [ "Update Postgres user #{new_resource.username}" ]
       sql = ''
       sql_params = []
