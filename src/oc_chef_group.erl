@@ -233,25 +233,44 @@ all_errors(Results) ->
 parse_binary_json(Bin) ->
     {ok, chef_json:decode_body(Bin)}.
 
-fetch(Record, CallbackFun) ->
+fetch(#oc_chef_group{for_requestor_id = RequestorId} = Record, CallbackFun) ->
     case chef_object:default_fetch(Record, CallbackFun) of
-        #oc_chef_group{authz_id = GroupAuthzId, last_updated_by = LastUpdatedBy} = GroupRecord ->
-            {ActorAuthzIds, GroupAuthzIds} = fetch_authz_ids(GroupAuthzId, LastUpdatedBy),
-            {ClientNames, RemainingAuthzIds} = find_clients_names(ActorAuthzIds, CallbackFun),
-            {Usernames, DefunctActorAuthzIds} = find_users_names(RemainingAuthzIds, CallbackFun),
-            {GroupNames, DefunctGroupAuthzIds} = find_groups_names(GroupAuthzIds, CallbackFun),
-            oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds, DefunctGroupAuthzIds),
-            Result = GroupRecord#oc_chef_group{clients = ClientNames, users =  Usernames, groups =  GroupNames, auth_side_actors = ActorAuthzIds, auth_side_groups = GroupAuthzIds},
-            Result;
+        #oc_chef_group{authz_id = GroupAuthzId} = GroupRecord ->
+            case fetch_authz_ids(GroupAuthzId, RequestorId) of
+                forbidden ->
+                    forbidden;
+                {ActorAuthzIds, GroupAuthzIds} ->
+                    {ClientNames, RemainingAuthzIds} = find_clients_names(ActorAuthzIds,
+                                                                          CallbackFun),
+                    {Usernames, DefunctActorAuthzIds} = find_users_names(RemainingAuthzIds,
+                                                                         CallbackFun),
+                    {GroupNames, DefunctGroupAuthzIds} = find_groups_names(GroupAuthzIds,
+                                                                           CallbackFun),
+                    oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds,
+                                                        DefunctGroupAuthzIds),
+                    Result = GroupRecord#oc_chef_group{clients = ClientNames,
+                                                       users =  Usernames,
+                                                       groups =  GroupNames,
+                                                       auth_side_actors = ActorAuthzIds,
+                                                       auth_side_groups = GroupAuthzIds},
+                    Result
+            end;
         not_foud ->
             not_found;
         Other ->
             Other
     end.
 
-fetch_authz_ids(GroupAuthzId, LastUpdatedBy) ->
-    {ok,  DecodedJson} = oc_chef_authz_http:request("/groups/" ++ binary_to_list(GroupAuthzId), get, ?DEFAULT_HEADERS, [], LastUpdatedBy),
-    {ej:get({<<"actors">>}, DecodedJson), ej:get({<<"groups">>}, DecodedJson)}.
+fetch_authz_ids(GroupAuthzId, RequestorId) ->
+    Result = oc_chef_authz_http:request("/groups/" ++ binary_to_list(GroupAuthzId), get, ?DEFAULT_HEADERS, [], RequestorId),
+    case Result of
+        {ok, DecodedJson} ->
+            {ej:get({<<"actors">>}, DecodedJson), ej:get({<<"groups">>}, DecodedJson)};
+        {error, forbidden} ->
+            forbidden;
+        Other ->
+            Other
+    end.
 
 find_clients_names(ActorsAuthzIds, CallbackFun) ->
     query_and_diff_authz_ids(find_client_name_in_authz_ids, ActorsAuthzIds, CallbackFun).

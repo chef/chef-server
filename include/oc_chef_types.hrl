@@ -15,6 +15,7 @@
 
 -record(oc_chef_group, {
           id,
+          for_requestor_id,
           authz_id,
           org_id,
           name,
