@@ -7,8 +7,6 @@ def whyrun_supported?
   true
 end
 
-use_inline_resources
-
 action :create do
   EcPostgres.with_connection(node) do |connection|
 
@@ -29,7 +27,7 @@ action :create do
       end
       if changes.size > 1
         converge_by changes do
-          connection.exec("ALTER ROLE #{new_resource.username}#{sql}", sql_params)
+          connection.exec("ALTER USER #{new_resource.username}#{sql}", sql_params)
         end
       end
     else
@@ -46,7 +44,7 @@ action :create do
         sql_params << new_resource.password
       end
       converge_by changes do
-        connection.exec("CREATE ROLE #{new_resource.username}#{sql}", sql_params)
+        connection.exec("CREATE USER #{new_resource.username}#{sql}", sql_params)
       end
     end
   end
