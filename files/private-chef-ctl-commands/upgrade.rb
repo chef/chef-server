@@ -70,6 +70,8 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
 
   # Need to ensure all of OSC is stopped
   # By default, pkill sends TERM, which will cause runsv,runsvdir, and svlogd to shutdown
+  # Doing this will completely hose OSC so that a start command won't restart it, if needed
+  # If we're going to make this process as idempotent as possible, we'll need to work around this
   puts "Ensuring all the runit processes associated with the Open Source Server are stopped"
   run_command("pkill runsv")
   run_command("pkill runsvdir")
@@ -108,19 +110,19 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
 
   require 'chef'
 
-  chef_server_root = "https://api.opscode.piab" # hard coded to dev-vm, needs to point to EC
-  # let's use the pivotal user, shall we?
-  # What do we want the default org to be called? A 1984 reference probably isn't best
-  chef_rest = Chef::REST.new(chef_server_root, 'pivotal', '/etc/opscode/pivotal.pem')
-  org_name = 'minitrue' # this is the org short name
-  org_full_name = 'MinistryOfTruth'
-  org_args = {:name => org_name , :full_name => org_full_name, :org_type => 'Business'}
-  private_key = chef_rest.post('organizations/', org_args)
-
-  # result of post will be the private key. Should probably stick that somewhere.
-  private_key_path = "/tmp/private_key.pem"
-  File.open(private_key_path, "w"){ |file| file.write(private_key)}
-  puts "Default enterprise organizations private key saved to: #{private_key_path}"
+#  chef_server_root = "https://api.opscode.piab" # hard coded to dev-vm, needs to point to EC
+#  # let's use the pivotal user, shall we?
+#  # What do we want the default org to be called? A 1984 reference probably isn't best
+#  chef_rest = Chef::REST.new(chef_server_root, 'pivotal', '/etc/opscode/pivotal.pem')
+#  org_name = 'minitrue' # this is the org short name
+#  org_full_name = 'MinistryOfTruth'
+#  org_args = {:name => org_name , :full_name => org_full_name, :org_type => 'Business'}
+#  private_key = chef_rest.post('organizations/', org_args)
+#
+#  # result of post will be the private key. Should probably stick that somewhere.
+#  private_key_path = "/tmp/private_key.pem"
+#  File.open(private_key_path, "w"){ |file| file.write(private_key)}
+#  puts "Default enterprise organizations private key saved to: #{private_key_path}"
 
   # let's move around some data to start the transform from OSC to EC
   # manipulation of files as needed can come later
@@ -131,10 +133,22 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   new_data_dir = "/tmp/new-chef-server-data"
   Dir.mkdir(new_data_dir, 0777) unless File.directory?(new_data_dir)
 
+  # we need a default org name
+  org_name = 'minitrue'
+  org_full_name = "MinistryOfTruth"
+  org_type = "Business"
+
   # put in place the org name structure
   Dir.mkdir("#{new_data_dir}/organizations") unless File.directory?("#{new_data_dir}/organizations")
   org_dir = "#{new_data_dir}/organizations/#{org_name}"
   Dir.mkdir(org_dir, 0777) unless File.directory?(org_dir)
+
+  # We need to fill out the info for the default org and place it in
+  # org.json under organizations/#{org_name}
+  # Not clear if/how the private key is retrieved in this case
+  org_json = {"name" => org_name, "full_name" => org_full_name, "org_type" => org_type}
+  File.open("#{org_dir}/org.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(org_json)) }
+
 
   # users still live at the top level, so let's copy them over
   FileUtils.cp_r("#{osc_data_dir}/users", "#{new_data_dir}/users")
@@ -148,16 +162,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   # what is missing at this point? At the top level next to organizations and users, user_acls is missing.
   # At the org level, next to the dirs of clients, et al. we're missing dirs for acls, containers, and groups
 
-  # * user transform needed: add display_name, email; change name to user name
-  # need to add org.json under organizations/#{org_name}
-  # email is important, as it will be needed for password resets, since if we use knife ec backup
-  # it doesn't move passwords
-  #
-
   puts 'Transforming users'
-
-  # * org.json needs: name, at the bare minimum (leaving the rest of it out, what will break?
-  # doesn't cause an error if you only stick name in it)
 
   # * need invitations.json under organizations/#{org_name} (can be an empty array/object and work [])
 
@@ -193,6 +198,9 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   # access the data pulled from OSC
   users = []
 
+  # user transform needed: add display_name, email; change name to user name
+  # email is important, as it will be needed for password resets, since if we use knife ec backup
+  # it doesn't move passwords
   Dir.glob("#{osc_data_dir}/users/*") do |file|
     user = Chef::JSONCompat.from_json(IO.read(file), :create_additions => false)
     users << user['name'] # user's names are needed several times later
@@ -204,16 +212,17 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
     File.open("#{new_data_dir}/users/#{File.basename(file)}", "w"){ |new_file| new_file.write(Chef::JSONCompat.to_json_pretty(user)) }
   end
 
-    org_json = { "name" => org_name }
-    File.open("#{org_dir}/org.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(org_json)) }
+#  # need to add org.json under organizations/#{org_name}
+#  org_json = { "name" => org_name }
+#  File.open("#{org_dir}/org.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(org_json)) }
 
-    File.open("#{org_dir}/invitations.json", "w"){ |file| file.write([])}
+  File.open("#{org_dir}/invitations.json", "w"){ |file| file.write([])}
 
-    members_json = []
-    users.each do |name|
-      user_json= {"user" => {"username" => name}}
-      members_json << user_json
-    end
+  members_json = []
+  users.each do |name|
+    user_json= {"user" => {"username" => name}}
+    members_json << user_json
+  end
 
     File.open("#{org_dir}/members.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(members_json)) }
 
@@ -268,6 +277,7 @@ end
   ec_restore = "/opt/opscode/embedded/bin/knife ec restore -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
   migration_result = run_command(ec_restore)
 
+  # Need to capture better output/bail if this isn't successful
   puts "The migration result is:"
   puts migration_result
 
