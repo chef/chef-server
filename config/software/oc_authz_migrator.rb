@@ -1,5 +1,5 @@
 name "oc_authz_migrator"
-default_version "0.0.1"
+default_version "0.0.2"
 
 dependencies ["erlang", "rebar", "rsync"]
 
