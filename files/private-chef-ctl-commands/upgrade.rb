@@ -103,10 +103,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
     exit 1
   end
 #
-  sleep(30) # it takes a bit for the services to come up; sleep before hitting them with an org request
-
-  # Now we need an org
-  puts "Creating a default Enterprise Chef organization to associate the data with"
+  sleep(30) # it takes a bit for the services to come up; sleep before hitting them with requests
 
   require 'chef'
 
@@ -124,16 +121,16 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
 #  File.open(private_key_path, "w"){ |file| file.write(private_key)}
 #  puts "Default enterprise organizations private key saved to: #{private_key_path}"
 
-  # let's move around some data to start the transform from OSC to EC
-  # manipulation of files as needed can come later
-
-  puts "Transforming Data"
+  puts "Transforming Open Source server downloaded Data for upload to Enterprise Chef server"
 
   # let's have a new top level dir
   new_data_dir = "/tmp/new-chef-server-data"
   Dir.mkdir(new_data_dir, 0777) unless File.directory?(new_data_dir)
 
+  puts "Creating a default Enterprise Chef organization to associate the data with"
   # we need a default org name
+  # will need to either pick a sensible default, or somehow let the user specify this
+  # or possibly even both
   org_name = 'minitrue'
   org_full_name = "MinistryOfTruth"
   org_type = "Business"
@@ -149,6 +146,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   org_json = {"name" => org_name, "full_name" => org_full_name, "org_type" => org_type}
   File.open("#{org_dir}/org.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(org_json)) }
 
+  puts "Moving Open Source server data over to an Enterprise Chef server structure"
 
   # users still live at the top level, so let's copy them over
   FileUtils.cp_r("#{osc_data_dir}/users", "#{new_data_dir}/users")
@@ -159,41 +157,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
     FileUtils.cp_r("#{osc_data_dir}/#{name}", "#{org_dir}/#{name}")
   end
 
-  # what is missing at this point? At the top level next to organizations and users, user_acls is missing.
-  # At the org level, next to the dirs of clients, et al. we're missing dirs for acls, containers, and groups
-
-  puts 'Transforming users'
-
-  # * need invitations.json under organizations/#{org_name} (can be an empty array/object and work [])
-
-  # * need members.json under organizations/#{org_name}. Should be an array/object with hashes for the
-  # users in the org
-  #
-  # Members.json looks like this
-  # (hmm, where do we specify the admins? Am I missing that and it goes here?):
-  #
-  # [
-  #  {
-  #   "user": { "username": "users's username"}
-  #  },
-  #  {
-  #   "user": { "username": "users's username"}
-  #  }
-  # ]
-  #
-  # Under organizations/#{org_name}/groups, an admins.json and billing-admins.json is needed.
-  # Will need to determine the users that go into both. admins should include the pivotal user.
-  # pivotal does not need to go into billing-admins (does it matter who is in billing admins?
-  # What happens to the admin user from OSC? (the base admin user, which is OSC's pivotal)
-  #
-  # Will need acl files - in a top level folder next to organizations/ and users/, called
-  # user_acls/ and in it it has a #{username}.json file for each user to be imported
-  #
-  # For this POC, I copied a user_acl json file from a dev-vm user and replaced the user name.
-  # Need to ensure the group is right for the read acl - it should be #{orgname}_global_admins
-  # What effect will this have on the permissions of the system?
-  # What would be sensible defaults to set here? Give everyone the world and then tell them to restrict it?
-  #
+  puts 'Transforming Open Source server user data to Enterprise Chef server format'
 
   # access the data pulled from OSC
   users = []
@@ -212,30 +176,69 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
     File.open("#{new_data_dir}/users/#{File.basename(file)}", "w"){ |new_file| new_file.write(Chef::JSONCompat.to_json_pretty(user)) }
   end
 
-#  # need to add org.json under organizations/#{org_name}
-#  org_json = { "name" => org_name }
-#  File.open("#{org_dir}/org.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(org_json)) }
+  puts 'Creating an empty invitation list for the Enterprise Chef server'
 
+  # need invitations.json under organizations/#{org_name} (can be an empty array/object and work [])
   File.open("#{org_dir}/invitations.json", "w"){ |file| file.write([])}
 
+  puts 'Creating a members list for the Enterprise Chef server'
+
+  # need members.json under organizations/#{org_name}. Should be an array/object with hashes for the
+  # users in the org
+  #
+  # Members.json looks like this
+  #
+  # [
+  #  {
+  #   "user": { "username": "users's username"}
+  #  },
+  #  {
+  #   "user": { "username": "users's username"}
+  #  }
+  # ]
+  #
   members_json = []
   users.each do |name|
     user_json= {"user" => {"username" => name}}
     members_json << user_json
   end
 
-    File.open("#{org_dir}/members.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(members_json)) }
+  File.open("#{org_dir}/members.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(members_json)) }
 
+  puts 'Creating groups for the Enterpise Chef server'
 
-   Dir.mkdir("#{org_dir}/groups") unless File.directory?("#{org_dir}/groups")
+  # Under organizations/#{org_name}/groups, an admins.json and billing-admins.json is needed.
+  # Will need to determine the users that go into both. admins should include the pivotal user.
+  # pivotal does not need to go into billing-admins (does it matter who is in billing admins?
+  # Any admins from OSC need to go into the admins group, as that is how it is determined that
+  # a user is an admin in EC
+  Dir.mkdir("#{org_dir}/groups") unless File.directory?("#{org_dir}/groups")
 
-   admin_users = users.clone
-   admin_users << 'pivotal'
-   admins_json = { "name" => "admins", "users" => admin_users }
-   File.open("#{org_dir}/groups/admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(admins_json)) }
+  puts 'Creating admins group'
+
+  admin_users = users.clone
+  admin_users << 'pivotal'
+  admins_json = { "name" => "admins", "users" => admin_users }
+  File.open("#{org_dir}/groups/admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(admins_json)) }
+
+  puts 'Creating billing_admins group'
 
   billing_admins_json = { "name" => "billing-admins", "users" => users}
   File.open("#{org_dir}/groups/billing-admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(billing_admins_json)) }
+
+  # Will need acl files - in a top level folder next to organizations/ and users/, called
+  # user_acls/ and in it it has a #{username}.json file for each user to be imported
+  #
+  # For this POC, I copied a user_acl json file from a dev-vm user and replaced the user name.
+  # Need to ensure the group is right for the read acl - it should be #{orgname}_global_admins
+  # What effect will this have on the permissions of the system?
+  # What would be sensible defaults to set here? Give everyone the world and then tell them to restrict it?
+  #
+  # It might be possible to skip this and use the knife ec restore option --skip-useracl
+  # and then the user's get the default acls. This route shoudl be fine in the case of an
+  # OSC to EC migration
+
+  puts 'Creating user_acls'
 
   Dir.mkdir("#{new_data_dir}/user_acls") unless File.directory?("#{new_data_dir}/user_acls")
   users.each do |name|
@@ -246,22 +249,16 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
     File.open("#{new_data_dir}/user_acls/#{name}.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(acl_json ))}
 end
 
-  # will need to use knife ec restore to push the data to the server (knife upload won't do the trick, since it is for OSC)
-  # or else mimic what knife ec restore is doing (this is all part of the knife-ec-backup gem)
-
-  # For the sake of speed, let's just install knife ec backup.
-  # Probably can't rely on doing this for this actually install, but if need be we can shove it in omnibus or
-  # rip out the guts and put them here
+  # Use knife ec backup to put the data into the Enterprise Chef server
+  # (Specificly knife ec restore, which is in the knife ec backup gem)
+  # This should be included in the opscode-omnibus install, not downloaded from net
+  # as it is in this POC
   puts "Installing knife ec backup"
-  # probably need to check if this is installed first before trying to install
   result = run_command("/opt/opscode/embedded/bin/gem install --no-ri --no-rdoc knife-ec-backup")
-
-  #knife ec backup contains knife ec restore, which is what we need
-
-  #note that the default gem install on a dev-vm at this point appears to be the OSC embedded gem. Check if this flips over to EC
-  #once OSC is removed
-
   puts result
+
+  # The default gem install on a dev-vm at this point appears to be the OSC embedded gem.
+  # Check if this flips over to EC once OSC is removed
 
   # Knife ec backup config, hard code values that maybe dev-vm specific
   config = <<-EOH
@@ -273,6 +270,7 @@ end
   puts "Writing knife ec backup config to /tmp/knife-ec-backup-config.rb"
   File.open("/tmp/knife-ec-backup-config.rb", "w"){ |file| file.write(config)}
 
+  puts "Uploading transformed Open Source server data to Enterprise Chef server"
   puts "Running data migration"
   ec_restore = "/opt/opscode/embedded/bin/knife ec restore -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
   migration_result = run_command(ec_restore)
@@ -280,9 +278,12 @@ end
   # Need to capture better output/bail if this isn't successful
   puts "The migration result is:"
   puts migration_result
-
   puts "It wasn't pretty, but Bob's your uncle. (https://en.wikipedia.org/wiki/Microsoft_Bob)"
   puts "Migration is complete"
+  puts "Open Source chef server upgraded to an Enterprise Chef server"
+
+  # The OSC bits still live on the system - do we delete them here?
+
 
   # Original EC add_command
   #reconfigure(false)
