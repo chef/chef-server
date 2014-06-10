@@ -253,8 +253,9 @@ end
   # (Specificly knife ec restore, which is in the knife ec backup gem)
   # This should be included in the opscode-omnibus install, not downloaded from net
   # as it is in this POC
+  # For now, download the beta release, to get all the latest goodness
   puts "Installing knife ec backup"
-  result = run_command("/opt/opscode/embedded/bin/gem install --no-ri --no-rdoc knife-ec-backup")
+  result = run_command("/opt/opscode/embedded/bin/gem install --pre --no-ri --no-rdoc knife-ec-backup")
   puts result
 
   # The default gem install on a dev-vm at this point appears to be the OSC embedded gem.
@@ -283,6 +284,8 @@ end
   puts "Open Source chef server upgraded to an Enterprise Chef server"
 
   # The OSC bits still live on the system - do we delete them here?
+  # For example, /opt/chef-server is still in the path, but /opt/opscode is not
+  # on dev-vm testing
 
 
   # Original EC add_command
