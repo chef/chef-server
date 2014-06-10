@@ -17,6 +17,7 @@
 
 name "postgresql92"
 default_version "9.2.4"
+pg_gem_version = '0.17.1'
 
 dependency "zlib"
 dependency "openssl"
@@ -57,4 +58,5 @@ build do
   # variable interpolation, such that the value of $BIN in each
   # iteration of the loop is the last file in the directory.
  command "sh -c 'for BIN in #{install_dir}/embedded/postgresql/9.2/bin/*; do ln -s ${BIN} #{install_dir}/embedded/bin/$(basename ${BIN}); done'"
+ gem "fetch pg --version #{pg_gem_version}", :cwd => "#{install_dir}/embedded/service/gem/ruby/1.9.1/cache"
 end
