@@ -325,7 +325,7 @@ describe "users", :users do
             })
         end
 
-        it "returns a verbose list of users upon request", :focus do
+        it "returns a verbose list of users upon request" do
           body = JSON.parse(get("#{request_url}?verbose=true", platform.superuser))
           [ platform.non_admin_user.name, platform.admin_user.name, platform.superuser.name ].each do |name|
             data = body[name]
