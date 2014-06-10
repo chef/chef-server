@@ -7,13 +7,13 @@
 require 'highline/import'
 
 add_command "password", "Set a user's password or System Recovery Password.", 2 do
-  unless ARGV.length == 2 || (ARGV.length == 3 && ARGV[2] == "--disable")
+  unless ARGV.length == 4 || (ARGV.length == 5 && ARGV[4] == "--disable")
     STDERR.puts "Usage: private-chef-ctl password <username> [--disable]"
     exit 1
   end
 
-  load_running_config
-  username = ARGV[1]
+  running_config
+  username = ARGV[3]
   superuser = running_config['private_chef']['opscode-account']['proxy_user']
   command = [
     'bundle', 'exec', 'bin/updateobjecttool',
@@ -23,7 +23,8 @@ add_command "password", "Set a user's password or System Recovery Password.", 2 
     '-w', 'user',
     '-n', username
   ]
-  if ARGV.length == 2
+
+  if ARGV.length == 4
     password = HighLine.ask("Enter the new password:  " ) { |q| q.echo = "*" }
     password2 = HighLine.ask("Enter the new password again:  " ) { |q| q.echo = "*" }
     if password != password2
@@ -31,7 +32,8 @@ add_command "password", "Set a user's password or System Recovery Password.", 2 
       exit 1
     end
     if password == '' && ldap_authentication_enabled?
-      STDERR.puts "Password may not be blank.  Did you mean 'private-chef-ctl password #{username} --disable'?"
+      example_cmd = "'private-chef-ctl password #{username} --disable'"
+      STDERR.puts "Password may not be blank. Did you mean #{example_cmd}?"
       exit 1
     end
 
@@ -53,9 +55,11 @@ add_command "password", "Set a user's password or System Recovery Password.", 2 
     end
   end
 
+command = command.join(' ')
+
   ENV["PATH"] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
   Dir.chdir("/opt/opscode/embedded/service/opscode-account")
-  if !run_command(*command)
+  if !run_command(command)
     STDERR.puts "FAILED"
     exit $?.exitstatus
   end
