@@ -8,12 +8,15 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   # Detect if OSC is present - if not, then skip to and continue with EC upgrade
   # Ask user if they want to upgrade
   if File.directory?("/opt/chef-server")
-    puts "Open Source Chef server detected. Would you like to upgrade? [Yn]"
+    # Do we want to refer to it as the open source chef server, since the new
+    # server is open source too, even if it is based on enterprise chef?
+    puts "Open Source Chef server detected."
 
+    #puts "Would you like to upgrade? [Yn]"
     # using gets fails with: No such file or directory - opscode
     #answer = gets.chomp
     #if answer == 'Y'
-      puts "Upgrade from Open Source Chef"
+      puts "Upgrading the Open Source Chef server"
     #else
     #  exit 0 "What do we want to do if the user says no?
     #end
@@ -30,16 +33,12 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
 
   sleep(10) # start command can return faster than the services are ready; resulting in 502 gateway
 
-  # knife download the data from the running OSC server
-  # It downloads to whatever the current working dir is, so may need to switch to another dir
-  # before running and then switch back
-  # Or a directory to store the data can be specified in the config
-  # Does it matter if the knife embedded with OSC or EC is used?
+  puts "Preparing knife to download data from the Open Source Chef server"
 
-  puts 'Making /tmp/chef-server-data as a location to save the open source server data'
-  # Should tighten up permissions
- data_dir = "/tmp/chef-server-data"
- Dir.mkdir(data_dir, 0777) unless File.directory?(data_dir)
+  puts 'Making /tmp/chef-server-data as the location to save the server data'
+  osc_data_dir = "/tmp/chef-server-data"
+  # Are the permissions good enough?
+  Dir.mkdir(osc_data_dir, 0644) unless File.directory?(osc_data_dir)
 
   # Hardcoded path to key (stole idea to use from pedant), but the path is in attributes
   # Obviously a hard coded path to a server located at dev-vm isn't going to work in prod
@@ -52,14 +51,15 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   chef_repo_path '/tmp/chef-server-data'
   EOH
 
-  puts "Writing knife config to /tmp/knife-config.rb for use in saving data"
+  puts "Writing knife config to /tmp/knife-config.rb for use in downloading the data"
   File.open("/tmp/knife-config.rb", "w"){ |file| file.write(config)}
   puts "Running knife download"
   status = run_command("/opt/chef-server/embedded/bin/knife download -c /tmp/knife-config.rb /")
   if !status.success?
-    puts "knife download failed with #{status}; bailing"
+    puts "knife download failed with #{status}"
     exit 1
   end
+  puts "Finished downloading data from the Open Source Chef server"
 
   puts 'Ensuring the Open Source Chef server is stopped'
   status = run_command("chef-server-ctl stop")
@@ -67,6 +67,15 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
     puts "Unable to stop Open Source Chef server, which is needed to complete the upgrade"
     exit 1
   end
+
+  # Need to ensure all of OSC is stopped
+  # By default, pkill sends TERM, which will cause runsv,runsvdir, and svlogd to shutdown
+  puts "Ensuring all the runit processes associated with the Open Source Server are stopped"
+  run_command("pkill runsv")
+  run_command("pkill runsvdir")
+  run_command("pkill svlogd")
+  # epmd lives outside of runit, but a pkill will do just fine here too
+  run_command("pkill epmd")
 
   # A note: bad things happen if the migration has to be run again after EC has been
   # configured on the box. Even if EC is stopped, conflicts will still occur around postgres
@@ -81,23 +90,27 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   # The reconfigure command was failing, due to missing cookbook dependencies. I assume this
   # was a quirk of the way I loaded in opscode-omnibus without it being on a vm already running EC.
   # After I dropped in the cookbooks by hand, all worked. Something to look out for later.
+  puts "Now configuring the Enterprise Chef server for use"
   reconfigure(false)
 
-  # I think the reconfigure starts all the services, but let's be sure
+  # Let's ensure all the services are started
+  puts "Ensuring all the Enterprise Chef server components are started"
   status = run_command("private-chef-ctl start")
   if !status.success?
     puts "Unable to start Enterprise Chef, which is needed to complete the upgrade"
     exit 1
   end
 #
-  sleep(10) # it takes a bit for the services to come up; sleep before hitting them with an org request 
+  sleep(30) # it takes a bit for the services to come up; sleep before hitting them with an org request
 
   # Now we need an org
-  puts "Creating org"
+  puts "Creating a default Enterprise Chef organization to associate the data with"
+
   require 'chef'
 
   chef_server_root = "https://api.opscode.piab" # hard coded to dev-vm, needs to point to EC
   # let's use the pivotal user, shall we?
+  # What do we want the default org to be called? A 1984 reference probably isn't best
   chef_rest = Chef::REST.new(chef_server_root, 'pivotal', '/etc/opscode/pivotal.pem')
   org_name = 'minitrue' # this is the org short name
   org_full_name = 'MinistryOfTruth'
@@ -105,7 +118,9 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   private_key = chef_rest.post('organizations/', org_args)
 
   # result of post will be the private key. Should probably stick that somewhere.
-  File.open("/tmp/privatekey.pem", "w"){ |file| file.write(private_key)}
+  private_key_path = "/tmp/private_key.pem"
+  File.open(private_key_path, "w"){ |file| file.write(private_key)}
+  puts "Default enterprise organizations private key saved to: #{private_key_path}"
 
   # let's move around some data to start the transform from OSC to EC
   # manipulation of files as needed can come later
@@ -122,13 +137,12 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   Dir.mkdir(org_dir, 0777) unless File.directory?(org_dir)
 
   # users still live at the top level, so let's copy them over
-  # data_dir is the original location the knife download data was saved
-  FileUtils.cp_r("#{data_dir}/users", "#{new_data_dir}/users")
+  FileUtils.cp_r("#{osc_data_dir}/users", "#{new_data_dir}/users")
 
   # now we need to copy over clients, cookbooks, data_bags, environments, nodes, roles to their new home
   # under the organization structure
   %w{clients cookbooks data_bags environments nodes roles}.each do |name|
-    FileUtils.cp_r("#{data_dir}/#{name}", "#{org_dir}/#{name}")
+    FileUtils.cp_r("#{osc_data_dir}/#{name}", "#{org_dir}/#{name}")
   end
 
   # what is missing at this point? At the top level next to organizations and users, user_acls is missing.
@@ -179,7 +193,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   # access the data pulled from OSC
   users = []
 
-  Dir.glob("#{data_dir}/users/*") do |file|
+  Dir.glob("#{osc_data_dir}/users/*") do |file|
     user = Chef::JSONCompat.from_json(IO.read(file), :create_additions => false)
     users << user['name'] # user's names are needed several times later
     user['username'] = user['name']
