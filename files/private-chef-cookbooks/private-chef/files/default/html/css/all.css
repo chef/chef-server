@@ -59,8 +59,8 @@ img {
 	display:block;
         width: 128px;
         height: 30px;
-        background-image:  url('../images/logo.png');
-        background-image:  url('../images/logo.svg'), none;
+        background-image:  url('//api.opscode.com/images/logo.png');
+        background-image:  url('//api.opscode.com/images/logo.svg'), none;
         background-size: 100% 100%;
 	text-indent:-9999px;
 	overflow:hidden;
