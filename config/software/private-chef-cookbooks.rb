@@ -1,6 +1,6 @@
 name "private-chef-cookbooks"
 
-dependency "berkshelf"
+dependency "berkshelf2"
 
 project_name = project.name
 
