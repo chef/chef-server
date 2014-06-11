@@ -35,13 +35,19 @@ if mode == "api" then
   -- Internal API does not validate chef version
   if not internal then
     -- Exit early: If they don't have the right chef version, send them packing.
-    local version = ngx.var.http_x_chef_version or "unknown"
-    if not routes.is_client_version_valid(version, min_version, max_version) then
-      ngx.status = ngx.HTTP_BAD_REQUEST
-      ngx.say('{"error": "400 - Bad Request: Chef Client version between ' ..
-              min_version .. ' and  ' .. max_version ..
-              '" required. Your version of Chef is ' .. version .. '."}')
-      ngx.exit(ngx.HTTP_OK)
+    local version = ngx.var.http_x_chef_version
+    if version then
+      if not routes.is_client_version_valid(version, min_version, max_version) then
+        ngx.status = ngx.HTTP_BAD_REQUEST
+        ngx.say('{"error": "400 - Bad Request: Chef Client version between ' ..
+                min_version .. ' and  ' .. max_version ..
+                '" required. Your version of Chef is ' .. version .. '."}')
+        ngx.exit(ngx.HTTP_OK)
+      end
+    else
+      -- the request did not originate with a chef client, we'll give something
+      -- more friendly to web browsers.
+      return ngx.exec("/index.html")
     end
   end
 
