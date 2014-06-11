@@ -82,9 +82,8 @@ process_post(Req, #base_state{chef_db_context = Ctx,
     Password = ej:get({<<"password">>}, UserData),
     User = chef_db:fetch(#chef_user{username = Name}, Ctx),
     case verify_user(Password, User, Ctx) of
-        false ->
-
-            {{halt, 401}, chef_wm_util:set_json_body(Req, auth_fail_message()), State};
+        {false, Code} ->
+            {{halt, Code}, chef_wm_util:set_json_body(Req, auth_fail_message(Code)), State};
         EJson ->
             {true, chef_wm_util:set_json_body(Req, EJson), State}
     end.
@@ -97,30 +96,40 @@ verify_user(Password, #chef_user{external_authentication_uid = null,
         true ->
             user_json(<<"linked">>, User);
         false ->
-            false
+            {false, 401}
     end;
-verify_user(_Password, #chef_user{external_authentication_uid = ExtAuthUid} = User, Ctx) ->
-    % TODO #{true, chef_user{}} = external_auth(ExtAuthUid, Password)
-    case chef_db:fetch(#chef_user{external_authentication_uid = ExtAuthUid}, Ctx) of
-        Result when is_list(Result) andalso length(Result) > 0 ->
-            user_json(<<"linked">>, User);
-        _ ->
-            user_json(<<"unlinked">>, User)
+verify_user(Password, #chef_user{username = UserName, external_authentication_uid = ExtAuthUid} = User, Ctx) ->
+    case oc_chef_wm_authn_ldap:authenticate(UserName, Password) of
+        {error, connection} ->
+            {false, 502};
+        {error, unauthorized} ->
+            {false, 401};
+        AuthUserEJ->
+            case chef_db:fetch(#chef_user{external_authentication_uid = ExtAuthUid}, Ctx) of
+                Result when is_list(Result) andalso length(Result) > 0 ->
+                    user_json(<<"linked">>, User);
+                _ ->
+                    user_json(<<"unlinked">>, AuthUserEJ)
+            end
     end;
 verify_user(_Password, _Other, _Ctx) ->
-    false.
+    {false, 401}.
 
-user_json(Status, User) ->
+user_json(Status, #chef_user{} = User) ->
     UserEJ0 = chef_user:assemble_user_ejson(User, undefined),
     UserEJ1 = ej:delete({<<"public_key">>}, UserEJ0),
+    user_json(Status, UserEJ1);
+user_json(Status, UserEJ) ->
     {[{<<"status">>, Status},
-      {<<"user">>, UserEJ1}]}.
+      {<<"user">>, UserEJ}]}.
 
 malformed_request_message({error, missing_body}, _Req, _State) ->
     chef_wm_util:error_message_envelope(<<"invalid user authentication request">>);
 malformed_request_message(#ej_invalid{}, _Req, _State) ->
     chef_wm_util:error_message_envelope(<<"invalid user authentication request">>).
 
-auth_fail_message() ->
-    chef_wm_util:error_message_envelope(<<"Failed to authenticate: Username and password incorrect">>).
+auth_fail_message(401) ->
+    chef_wm_util:error_message_envelope(<<"Failed to authenticate: Username and password incorrect">>);
+auth_fail_message(502) ->
+    chef_wm_util:error_message_envelope(<<"Authentication server is unavailable.">>).
 
