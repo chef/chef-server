@@ -1304,16 +1304,18 @@ EOF
             }
           end
           it "accepts the public key and subsequently responds with it" do
-            put_response = put(request_url, platform.superuser, :payload => request_body)
-            put_response.should look_like({
-                                            :status => 200,
-                                            :body=> {
-                                              "uri" => request_url
-                                            },
-                                          })
-            get_response = get(request_url, platform.superuser)
-            new_public_key = JSON.parse(get_response.body)["public_key"]
-            new_public_key.should eq(input_public_key)
+            pending("Pending in ruby", :if => ruby?) do
+              put_response = put(request_url, platform.superuser, :payload => request_body)
+              put_response.should look_like({
+                                              :status => 200,
+                                              :body=> {
+                                                "uri" => request_url
+                                              },
+                                            })
+              get_response = get(request_url, platform.superuser)
+              new_public_key = JSON.parse(get_response.body)["public_key"]
+              new_public_key.should eq(input_public_key)
+            end
           end
         end
         context "with private_key = true" do
