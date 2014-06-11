@@ -107,20 +107,6 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
 
   require 'chef'
 
-#  chef_server_root = "https://api.opscode.piab" # hard coded to dev-vm, needs to point to EC
-#  # let's use the pivotal user, shall we?
-#  # What do we want the default org to be called? A 1984 reference probably isn't best
-#  chef_rest = Chef::REST.new(chef_server_root, 'pivotal', '/etc/opscode/pivotal.pem')
-#  org_name = 'minitrue' # this is the org short name
-#  org_full_name = 'MinistryOfTruth'
-#  org_args = {:name => org_name , :full_name => org_full_name, :org_type => 'Business'}
-#  private_key = chef_rest.post('organizations/', org_args)
-#
-#  # result of post will be the private key. Should probably stick that somewhere.
-#  private_key_path = "/tmp/private_key.pem"
-#  File.open(private_key_path, "w"){ |file| file.write(private_key)}
-#  puts "Default enterprise organizations private key saved to: #{private_key_path}"
-
   puts "Transforming Open Source server downloaded Data for upload to Enterprise Chef server"
 
   # let's have a new top level dir
@@ -226,29 +212,6 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   billing_admins_json = { "name" => "billing-admins", "users" => users}
   File.open("#{org_dir}/groups/billing-admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(billing_admins_json)) }
 
-  # Will need acl files - in a top level folder next to organizations/ and users/, called
-  # user_acls/ and in it it has a #{username}.json file for each user to be imported
-  #
-  # For this POC, I copied a user_acl json file from a dev-vm user and replaced the user name.
-  # Need to ensure the group is right for the read acl - it should be #{orgname}_global_admins
-  # What effect will this have on the permissions of the system?
-  # What would be sensible defaults to set here? Give everyone the world and then tell them to restrict it?
-  #
-  # It might be possible to skip this and use the knife ec restore option --skip-useracl
-  # and then the user's get the default acls. This route shoudl be fine in the case of an
-  # OSC to EC migration
-
-  puts 'Creating user_acls'
-
-  Dir.mkdir("#{new_data_dir}/user_acls") unless File.directory?("#{new_data_dir}/user_acls")
-  users.each do |name|
-    actors = ['pivotal', name]
-    group1 = { "actors" => actors, "groups" => [] }
-    group2 = { "actors" => actors, "groups" => ["#{org_name}_global_admins"] }
-    acl_json = { "create" => group1, "read" => group2, "update" => group1, "delete" => group1, "grant" => group1 }
-    File.open("#{new_data_dir}/user_acls/#{name}.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(acl_json ))}
-end
-
   # Use knife ec backup to put the data into the Enterprise Chef server
   # (Specificly knife ec restore, which is in the knife ec backup gem)
   # This should be included in the opscode-omnibus install, not downloaded from net
@@ -257,9 +220,6 @@ end
   puts "Installing knife ec backup"
   result = run_command("/opt/opscode/embedded/bin/gem install --pre --no-ri --no-rdoc knife-ec-backup")
   puts result
-
-  # The default gem install on a dev-vm at this point appears to be the OSC embedded gem.
-  # Check if this flips over to EC once OSC is removed
 
   # Knife ec backup config, hard code values that maybe dev-vm specific
   config = <<-EOH
@@ -273,7 +233,11 @@ end
 
   puts "Uploading transformed Open Source server data to Enterprise Chef server"
   puts "Running data migration"
-  ec_restore = "/opt/opscode/embedded/bin/knife ec restore -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
+
+  # --skip-useracl skip importing user acls, which will just give the user's default acls. This is the
+  # desired state anway
+  # --with-user-sql pull data across from the database, so we can get passwords
+  ec_restore = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
   migration_result = run_command(ec_restore)
 
   # Need to capture better output/bail if this isn't successful
@@ -286,6 +250,7 @@ end
   # The OSC bits still live on the system - do we delete them here?
   # For example, /opt/chef-server is still in the path, but /opt/opscode is not
   # on dev-vm testing
+  # This has the effect of making the default knife, gem, etc the chef-server versions
 
 
   # Original EC add_command
