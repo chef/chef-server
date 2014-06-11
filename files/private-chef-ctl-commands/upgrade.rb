@@ -12,14 +12,15 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
     # server is open source too, even if it is based on enterprise chef?
     puts "Open Source Chef server detected."
 
-    #puts "Would you like to upgrade? [Yn]"
-    # using gets fails with: No such file or directory - opscode
-    #answer = gets.chomp
-    #if answer == 'Y'
-      puts "Upgrading the Open Source Chef server"
-    #else
-    #  exit 0 "What do we want to do if the user says no?
-    #end
+    puts "Would you like to upgrade? [Yn]"
+    answer = STDIN.gets.chomp
+    if answer == 'Y' || answer == 'y'
+      puts "Upgrading the Open Source Chef server."
+    else
+      puts "Aborting upgrade, because you told me to or I don't understand the input."
+      puts "You answered #{answer}"
+      exit 0 # What do we want to do if the user says no?
+    end
   end
 
   # Start OSC (this assume EC isn't running , b/c if we detected OSC, then EC is assumed
@@ -243,7 +244,11 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   # --with-user-sql pull data across from the database, so we can get passwords
   # --concurrency 1 so that it doesn't try concurrent cookbook uploads; there appears to be a bug
   # around concurrent uploads
-  ec_restore = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency 1 -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
+  #ec_restore = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency 1 -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
+
+  # For --with-user-sql to work, a key_dump.json file needs to be created first with the
+  # needed data
+  ec_restore = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --concurrency 1 -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
   migration_result = run_command(ec_restore)
 
   # Need to capture better output/bail if this isn't successful
