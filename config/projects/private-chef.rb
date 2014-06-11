@@ -35,6 +35,7 @@ dependency "rabbitmq"
 dependency "redis" # dynamic routing controls
 dependency "opscode-solr"
 dependency "opscode-expander"
+dependency "pg-gem" # used by private-chef-ctl reconfigure
 
 # We are transitioning away from Sequel toward Sqitch for managing
 # Erchef's schema.  We still need the old code ('chef-sql-schema') for
