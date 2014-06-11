@@ -24,6 +24,9 @@
 ### opscode-webui
 * Removed. WebUI usage should now come via the Manage extension.
 
+### private-chef-administration
+* Removed. Docs can be found at docs.opscode.com
+
 ### private-chef-cookbooks
 * Allow ['lb']['upstream'] to have a custom setting
 * Use SSL port for lb_internal if non-SSL is disabled

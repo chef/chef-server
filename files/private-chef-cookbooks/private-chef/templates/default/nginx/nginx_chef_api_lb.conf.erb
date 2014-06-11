@@ -39,11 +39,6 @@
       alias /opt/opscode/version-manifest.txt;
     }
 
-    location /docs {
-      index index.html ;
-      alias /opt/opscode/docs;
-    }
-
     # bookshelf
     location ~ "/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/{0,1}.*$" {
       proxy_pass http://bookshelf;
