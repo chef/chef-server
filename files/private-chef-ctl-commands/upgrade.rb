@@ -218,7 +218,11 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   # as it is in this POC
   # For now, download the beta release, to get all the latest goodness
   puts "Installing knife ec backup"
-  result = run_command("/opt/opscode/embedded/bin/gem install --pre --no-ri --no-rdoc knife-ec-backup")
+  # knife ec backup uses the pg gem. The --with-pg-config option gets passed through
+  # to the pg gem here so it can use the option when building a native extension,
+  # this way it can talk to the Chef db. This enables knife-ec-backup to pull across
+  # db items, such as passwords
+  result = run_command("/opt/opscode/embedded/bin/gem install --pre --no-ri --no-rdoc knife-ec-backup -- --with-pg-config=/opt/opscode/embedded/postgresql/9.2/bin/pg_config")
   puts result
 
   # Knife ec backup config, hard code values that maybe dev-vm specific
