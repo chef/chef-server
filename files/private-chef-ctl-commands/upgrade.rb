@@ -237,7 +237,9 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   # --skip-useracl skip importing user acls, which will just give the user's default acls. This is the
   # desired state anway
   # --with-user-sql pull data across from the database, so we can get passwords
-  ec_restore = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
+  # --concurrency 1 so that it doesn't try concurrent cookbook uploads; there appears to be a bug
+  # around concurrent uploads
+  ec_restore = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency 1 -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
   migration_result = run_command(ec_restore)
 
   # Need to capture better output/bail if this isn't successful
