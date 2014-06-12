@@ -32,33 +32,24 @@ end
 
 # Create Database Users
 
-# TODO: Originally these users were created WITH SUPERUSER... is that still necessary?
 private_chef_pg_user node['private_chef']['postgresql']['sql_user'] do
   password node['private_chef']['postgresql']['sql_password']
-  superuser true
-  notifies :run, "execute[grant opscode_chef privileges]", :immediately
+  superuser false
 end
 
-execute "grant opscode_chef privileges" do
-  command <<-EOM.gsub(/\s+/," ").strip!
-    psql --dbname opscode_chef
-         --command "GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_user']};"
-  EOM
-  user node['private_chef']['postgresql']['username']
-  action :nothing
+private_chef_pg_user_table_access node['private_chef']['postgresql']['sql_user'] do
+  database 'opscode_chef'
+  schema 'public'
+  access_profile :write
 end
 
 private_chef_pg_user node['private_chef']['postgresql']['sql_ro_user'] do
   password node['private_chef']['postgresql']['sql_ro_password']
-  superuser true
-  notifies :run, "execute[grant opscode_chef_ro privileges]", :immediately
+  superuser false
 end
 
-execute "grant opscode_chef_ro privileges" do
-  command <<-EOM.gsub(/\s+/," ").strip!
-    psql --dbname opscode_chef
-         --command "GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_ro_user']};"
-  EOM
-  user node['private_chef']['postgresql']['username']
-  action :nothing
+private_chef_pg_user_table_access node['private_chef']['postgresql']['sql_ro_user'] do
+  database 'opscode_chef'
+  schema 'public'
+  access_profile :read
 end
