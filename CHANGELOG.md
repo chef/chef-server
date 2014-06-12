@@ -13,10 +13,11 @@
 * Solr4 migration
 * Generalized migrate scripts and other code to be migration_type agnostic
 
-### enterprise-chef-server-schema 2.2.5
+### enterprise-chef-server-schema 2.3.0
 * Updates org_migration_state table with migration_type and verification
 * Cleans up reporting schema info table
 * Clean up Makefile to preserve PATH variable
+* Add tables for organizations, org_user_associations, and org_user_invites
 
 ### logrotate
 * Fixed build configuration that was causing logrotate to not be installed
