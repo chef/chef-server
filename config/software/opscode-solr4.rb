@@ -1,5 +1,5 @@
 name "opscode-solr4"
-version "4.5.1"
+default_version "4.5.1"
 
 dependency "rsync"
 dependency "server-jre"
