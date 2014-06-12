@@ -171,30 +171,26 @@ if node['private_chef']['bootstrap']['enable']
     action :nothing
   end
 
-  execute "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"CREATE USER #{node['private_chef']['postgresql']['sql_user']} WITH SUPERUSER ENCRYPTED PASSWORD '#{node['private_chef']['postgresql']['sql_password']}'\"" do
-    cwd "/opt/opscode/embedded/service/chef-sql-schema"
-    user node['private_chef']['postgresql']['username']
-    notifies :run, "execute[grant opscode_chef privileges]", :immediately
-    not_if user_exists
+  private_chef_pg_user node['private_chef']['postgresql']['sql_user'] do
+    superuser false
+    password node['private_chef']['postgresql']['sql_password']
   end
 
-  execute "grant opscode_chef privileges" do
-    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_user']}\""
-    user node['private_chef']['postgresql']['username']
-    action :nothing
+  private_chef_pg_user_table_access node['private_chef']['postgresql']['sql_user'] do
+    database 'opscode_chef'
+    schema 'public'
+    access_profile :write
   end
 
-  execute "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"CREATE USER #{node['private_chef']['postgresql']['sql_ro_user']} WITH SUPERUSER ENCRYPTED PASSWORD '#{node['private_chef']['postgresql']['sql_ro_password']}'\"" do
-    cwd "/opt/opscode/embedded/service/chef-sql-schema"
-    user node['private_chef']['postgresql']['username']
-    notifies :run, "execute[grant opscode_chef_ro privileges]", :immediately
-    not_if ro_user_exists
+  private_chef_pg_user node['private_chef']['postgresql']['sql_ro_user'] do
+    superuser false
+    password node['private_chef']['postgresql']['sql_ro_password']
   end
 
-  execute "grant opscode_chef_ro privileges" do
-    command "/opt/opscode/embedded/bin/psql -d 'opscode_chef' -c \"GRANT ALL PRIVILEGES ON DATABASE opscode_chef TO #{node['private_chef']['postgresql']['sql_ro_user']}\""
-    user node['private_chef']['postgresql']['username']
-    action :nothing
+  private_chef_pg_user_table_access node['private_chef']['postgresql']['sql_ro_user'] do
+    database 'opscode_chef'
+    schema 'public'
+    access_profile :read
   end
 end
 

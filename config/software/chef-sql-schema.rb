@@ -1,5 +1,5 @@
 name "chef-sql-schema"
-default_version "pc-rel-1.13.0"
+default_version "pc-rel-1.13.1"
 
 dependencies ["ruby",
               "bundler",

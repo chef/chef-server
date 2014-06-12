@@ -42,6 +42,7 @@ dependency "opscode-expander"
 dependency "chef-sql-schema" # needed to migrate the DB.
 dependency "keepalived"
 dependency "bookshelf"
+dependency "pg-gem" # used by private-chef-ctl reconfigure
 
 # the front-end services
 dependency "oc_erchef"
