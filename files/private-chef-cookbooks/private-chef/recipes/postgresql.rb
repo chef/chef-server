@@ -121,6 +121,8 @@ if is_data_master?
   execute "/opt/opscode/bin/private-chef-ctl start postgresql" do
     retries 20
   end
+  # Set up a database for the opscode-pgsql user to log into automatically
+  private_chef_pg_database "opscode-pgsql"
   include_recipe "private-chef::erchef_database"
   include_recipe "private-chef::bifrost_database"
   include_recipe "private-chef::oc_id_database"
