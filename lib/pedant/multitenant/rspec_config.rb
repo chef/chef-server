@@ -8,7 +8,7 @@ module Pedant
       ::RSpec.configure do |c|
         puts "Configuring RSpec for Multi-Tenant Tests"
         c.run_all_when_everything_filtered = true
-        c.filter_run_excluding :platform => :open_source
+        c.filter_run_excluding :platform => :open_source, :intermittent_failure => true
 
         c.include Pedant::MultiTenant::ResponseBodies
         c.include Pedant::MultiTenant::OrgInfo
