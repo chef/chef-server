@@ -36,13 +36,14 @@ authenticate(User, Password) ->
     Port = proplists:get_value(port, Config, 389),
 
     Connection = eldap:open([Host], [{port, Port}, {timeout, Timeout}]),
-    try
+    Result = try
         find_and_authenticate_user(Connection, User, Password, Timeout, Config)
     catch
         _Class:_Reason ->
             {error, connection}
     end,
-    close(Connection).
+    close(Connection),
+    Result.
 
 
 find_and_authenticate_user({ok, Session}, User, Password, Timeout, Config) ->
