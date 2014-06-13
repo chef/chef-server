@@ -93,6 +93,8 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
     exit 1
   end
 
+  Gem.clear_paths # force ruby gems to reload from scratch, so it picks up that sequel is available
+
   # this code shamelessly pulled from knife ec backup and adapted
   puts "Pulling needed db credintials"
   if ! File.exists?("/etc/chef-server/chef-server-running.json")
