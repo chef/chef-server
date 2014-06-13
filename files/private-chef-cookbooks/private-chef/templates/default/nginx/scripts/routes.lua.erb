@@ -185,7 +185,7 @@ local uri_resolvers = {
 
 -- Checks if the request is for default orgs
 local function needs_default_org(uri)
-  match(p_sep * p_default_org_endpoints, uri)
+  return match(p_sep * p_default_org_endpoints, uri)
 end
 
 -- caller should bypass this client version check if caller is internal lb
@@ -215,6 +215,9 @@ function routes.resolve_uri(mode, uri)
   <%- if @default_orgname %>
   if needs_default_org(uri) then
     uri = '/organizations/' .. default_org .. uri
+    -- Deliberately do not rewrite uri here, and pass the
+    -- original to erchef.
+    -- ngx.req.set_uri(uri, false)
   end
   <%- end %>
   route = match(Ct(uri_resolvers[mode]), uri)

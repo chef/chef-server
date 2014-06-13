@@ -38,31 +38,6 @@ unavailable_config["503_mode"] = 1
 --    expected = EXPECTED_HTTP_RESPONSE_CODE
 --
 
-table.insert(tests, { route_id = "reports",
-                      endpoint = "runs",
-                      method = "GET",
-                      ngx_vars = { } ,
-                      expected = 0} )
-table.insert(tests, { route_id = "reports",
-                      endpoint = "runs",
-                      method = "GET",
-                      ngx_vars = { http_x_ops_reporting_protocol_version = "" } ,
-                      expected = 0 } )
-table.insert(tests, { route_id = "reports",
-                      endpoint = "runs",
-                      method = "GET",
-                      ngx_vars = { http_x_ops_reporting_protocol_version = "1" } ,
-                      expected = 0 } )
-table.insert(tests, { route_id = "reports",
-                      endpoint = "runs",
-                      method = "POST",
-                      ngx_vars = { http_x_ops_reporting_protocol_version = "" } ,
-                      expected = 404 } )
-table.insert(tests, { route_id = "reports",
-                      endpoint = "runs",
-                      method = "POST",
-                      ngx_vars = { http_x_ops_reporting_protocol_version = "1" } ,
-                      expected = 0 } )
 
 table.insert(tests, { org_config = {disable_new_orgs = 1},
                       route_id = "acct",
