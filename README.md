@@ -16,6 +16,10 @@ Usage
 -----
 ### Build
 
+You'll need to create an omnibus.rb file based on the
+omnibus.rb.example.rb.  Please grab credentials from teampass.
+
+
 You create a platform-specific package using the `build project` command:
 
 ```shell
@@ -86,7 +90,7 @@ section:
 
 ```shell
 $ kitchen login ubuntu-12.04
-[vagrant@ubuntu...] $ cd private-chef
+[vagrant@ubuntu...] $ cd opscode-omnibus
 [vagrant@ubuntu...] $ bundle install
 [vagrant@ubuntu...] $ ...
 [vagrant@ubuntu...] $ bin/omnibus build private-chef
