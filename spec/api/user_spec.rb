@@ -480,7 +480,7 @@ describe "users", :users do
                  })
           end
         end
-        context "without password but with external auth enabled" do
+        context "with external auth enabled" do
           let(:request_body) do
             {
               "username" => username,
@@ -492,9 +492,14 @@ describe "users", :users do
             }
           end
 
-          it "returns 201" do
-            post(request_url, platform.superuser,
-                 :payload => request_body).should look_like({
+          it "returns 201 when password is not provided" do
+            post(request_url, platform.superuser, :payload => request_body).should look_like({
+                   :status => 201
+                 })
+          end
+          it "returns 201 when password is provided" do
+            final_body = request_body.merge( { "password" => "foo bar"} )
+            post(request_url, platform.superuser, :payload => final_body).should look_like({
                    :status => 201
                  })
           end
