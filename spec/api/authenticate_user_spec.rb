@@ -167,6 +167,53 @@ describe 'authenticate_user' do
       end
     end
 
+    context 'and user has external authentication enabled' do
+      context 'but local bypass parameter is used' do
+        let(:password) { "badger badger" }
+        let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
+        let(:create_body) do
+          {
+            "username" => username,
+            "email" => "#{username}@opscode.com",
+            "first_name" => username,
+            "last_name" => username,
+            "display_name" => username,
+            "external_authentication_uid" => username,
+            "password" =>  password
+          }
+        end
+        let(:update_body) do
+          {
+            "username" => username,
+            "display_name" => username,
+            "email" => "#{username}@opscode.com",
+            "external_authentication_uid" => username
+          }
+        end
+        before :each  do
+          # Create our user and separately update him with ext auth uid:
+          # the presence of ext auth uid in initial create will prevent
+          # password from being captured.
+          # NOTE: once ldap testing is integrated, this user will need to be generated
+          # with a different password in ldap. Currently it is safe as there is no ldap
+          # locally, and so any ldap login attempt will fail.
+          post("#{platform.server}/users", platform.superuser,
+            :payload => create_body).should look_like({ :status => 201 })
+          put("#{platform.server}/users/#{username}", platform.superuser,
+            :payload => update_body).should look_like({ :status => 200 })
+        end
+        after :each do
+          delete("#{platform.server}/users/#{username}", platform.superuser)
+        end
+
+        it "allows authentication with correct password and no ldap" do
+          post("#{request_url}?local=true", platform.superuser,
+            :payload => body).should look_like({
+              :status => 200
+            })
+        end
+      end
+    end
     context 'with invalid username' do
 
       let(:username) { "kneelbeforezod" }
