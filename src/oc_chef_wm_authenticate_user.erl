@@ -81,7 +81,13 @@ process_post(Req, #base_state{chef_db_context = Ctx,
     Name = chef_user:username_from_ejson(UserData),
     Password = ej:get({<<"password">>}, UserData),
     User = chef_db:fetch(#chef_user{username = Name}, Ctx),
-    case verify_user(Password, User, Ctx) of
+
+    % Under opscode-account, we checked only for any value here, not for a specific value.
+    User1 = case wrq:get_qs_value("local", Req) of
+        undefined -> User;
+        _ -> User#chef_user{external_authentication_uid = null}
+    end,
+    case verify_user(Password, User1, Ctx) of
         {false, Code} ->
             {{halt, Code}, chef_wm_util:set_json_body(Req, auth_fail_message(Code)), State};
         EJson ->
