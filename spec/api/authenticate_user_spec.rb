@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
+require 'json'
 
 describe 'authenticate_user' do
   def self.ruby?
@@ -10,40 +11,57 @@ describe 'authenticate_user' do
     ruby? ? 404 : 405
   end
 
-  let (:username) { platform.non_admin_user.name }
-  let (:password) { 'foobar' }
+  let (:username) {
+    if platform.ldap_testing
+      platform.ldap[:account_name]
+    else
+      platform.non_admin_user.name
+    end
+  }
+
+  let (:password) {
+    if platform.ldap_testing
+      platform.ldap[:account_password]
+    else
+      'foobar'
+    end
+  }
+
   let (:request_url) { "#{platform.server}/authenticate_user" }
-
-  # For testing against LDAP, I made the following changes:
-  #
-  # changed :username above to my AD samAccountName (i.e., my login name)
-  # changed :password above to my current AD password
-  #
-  # The following were all added to the private-chef.rb (run a pcc reconfigure after,
-  # and change out the <abstracted> bits since those don't need to be made public
-  # (no password for yuo, and if you need it, you should be able to get the IP):
-  #
-  # ldap['base_dn'] = 'dc=opscodecorp,dc=com'
-  # ldap['bind_dn'] = 'CN=<full name>,OU=Employees,OU=Domain users,DC=opscodecorp,DC=com'
-  # ldap['bind_password'] = '<same password as above>'
-  # ldap['host'] = '<host IP address>'
-  #
-  # This is good enough for quick ad-hoc testing, it will authenticate against my
-  # username/password in the tests, but more robust LDAP testing is desirable in
-  # the future.
-
   let (:body) { { 'username' => username, 'password' => password } }
-  let (:response_body) { {
-      'status' => 'linked',
-      'user' => {
-        'first_name' => platform.non_admin_user.name,
-        'last_name' => platform.non_admin_user.name,
-        'display_name' => platform.non_admin_user.name,
-        'email' => platform.non_admin_user.name + "@opscode.com",
-        'username' => platform.non_admin_user.name
-      }} }
+  let (:response_body) do
+    if platform.ldap_testing
+      {
+        'status' => platform.ldap[:status],
+        'user' => {
+          'first_name' => platform.ldap[:first_name],
+          'last_name' => platform.ldap[:last_name],
+          'display_name' => platform.ldap[:display_name],
+          'email' => platform.ldap[:email],
+          'username' => platform.ldap[:account_name],
+          'city' => platform.ldap[:city],
+          'country' => platform.ldap[:country],
+          'external_authentication_uid' => platform.ldap[:account_name],
+          'recovery_authentication_enabled' => platform.ldap[:recovery_authentication_enabled],
+        }
+      }
+    else
+      {
+        'status' => 'linked',
+        'user' => {
+          'first_name' => platform.non_admin_user.name,
+          'last_name' => platform.non_admin_user.name,
+          'display_name' => platform.non_admin_user.name,
+          'email' => platform.non_admin_user.name + "@opscode.com",
+          'username' => platform.non_admin_user.name
+        }
+      }
+    end
+  end
+
   let (:authentication_error_msg) {
-    "Failed to authenticate: Username and password incorrect" }
+    "Failed to authenticate: Username and password incorrect"
+  }
 
   context 'GET /authenticate_user' do
 
@@ -73,11 +91,11 @@ describe 'authenticate_user' do
           :status => invalid_verb_response_code
         })
     end
-      
+
   end # 'GET /authenticate_user'
 
   context 'PUT /authenticate_user' do
-      
+
     it 'returns 404 ("Not Found") for superuser' do
       put(request_url, superuser, :payload => body).should look_like({
           :status => invalid_verb_response_code
@@ -140,10 +158,21 @@ describe 'authenticate_user' do
       let (:username) { "kneelbeforezod" }
 
       it 'superuser returns 401 ("Unauthorized")', :smoke do
-        post(request_url, superuser, :payload => body).should look_like({
+        # the exact error is very dependant on how LDAP is configured, so its hard to test
+        # for something exact
+        if platform.ldap_testing
+          response = post(request_url, superuser, :payload => body)
+          response.should look_like({
+            :status => 401
+          })
+          /^Failed to authenticate: Could not locate a record with distinguished name/.should match(JSON.parse(response)["error"])
+        else
+          response = post(request_url, superuser, :payload => body)
+          response.should look_like({
             :status => 401,
             :body_exact => {'error' => authentication_error_msg}
           })
+        end
       end
 
       it 'admin/different user returns 403 ("Forbidden")' do
@@ -256,7 +285,7 @@ describe 'authenticate_user' do
 
     context 'with empty password' do
       let (:password) { "" }
- 
+
       it 'superuser returns 400 ("Bad Request")' do
         post(request_url, superuser, :payload => body).should look_like({
             :status => 400
@@ -433,6 +462,6 @@ describe 'authenticate_user' do
           :status => invalid_verb_response_code
         })
     end
-      
+
   end # 'DELETE /authenticate_user'
 end # describe 'authenticate_user'

@@ -70,6 +70,39 @@ maximum_search_time 65
 # value.
 include_internal false
 
+##########################################################
+# LDAP Testing, see the README.md for additional details #
+##########################################################
+
+# Set to true if you wish do LDAP testing on authenticate_user and system_recovery tests
+ldap_testing false
+
+# Fill in the following with correct values for your AD user if ldap_testing is true (directly above)
+# Put :key => nil if there is no value
+ldap({
+       # Change this to your AD samAccountName (i.e., my login name) for your test server
+       :account_name => "your_ldap_account_name",
+       # Change this to your current AD password for your test server
+       :account_password => "your_ldap_password!",
+       # Your first name in AD
+       :first_name => "Firsname",
+       # Your last name in AD
+       :last_name => "Lastname",
+       # Your display name in AD, likely "Firstname Lastname"
+       :display_name => "Firstname Lastname",
+       # Your email in AD
+       :email => "your@email.com",
+       # Likely nil
+       :city => nil,
+       # Likely nil
+       :country => nil,
+       # Set to "linked" or "unlinked" depending on the status of your account in AD
+       :status => "unlinked",
+       # Set to true or false, depending on your user state in Chef itself
+       :recovery_authentication_enabled => false
+     })
+
+
 # Test users.  The five users specified below are required; their
 # names (:user, :non_org_user, etc.) are indicative of their role
 # within the tests.  All users must have a ':name' key.  If they have
