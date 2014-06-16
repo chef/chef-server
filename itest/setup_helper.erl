@@ -37,6 +37,7 @@
                         lager,
                         couchbeam,
                         chef_index,
+                        bcrypt,
                         oc_chef_authz,
                         oc_chef_wm]).
 
