@@ -160,7 +160,7 @@ user_spec(common) ->
         {{opt,<<"external_authentication_uid">>}, string }
     ]};
 user_spec(create) ->
-   {[ ]};
+    {[ {{opt,<<"password">>},  password_validator()} ]};
 user_spec(update) ->
     {[ {{opt,<<"password">>},  password_validator()},
        {{opt,<<"recovery_authentication_enabled">>}, boolean },
@@ -249,7 +249,7 @@ parse_binary_json(Bin) ->
 -spec parse_binary_json(binary(), create | update) -> {ok, ej:json_object()}. % or throw
 parse_binary_json(Bin, Operation) ->
   User = chef_object_base:delete_null_public_key(chef_json:decode(Bin)),
-  %% If user is invalid, an error is thown
+  %% If user is invalid, an error is thrown
   validate_user(User, user_spec(common)),
   validate_user(User, user_spec(Operation)),
   %% IF user is internally validated, some additional fields
