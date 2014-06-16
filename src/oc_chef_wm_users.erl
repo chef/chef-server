@@ -89,11 +89,16 @@ from_json(Req, #base_state{reqid = RequestId,
             {PubKey, undefined}
     end,
     UserWithKey = chef_object_base:set_public_key(UserData, PublicKey),
-    UserFinal = case ej:get({<<"external_authentication_uid">>}, UserData) of
+
+    % If password is present, encrypt it regardless- a user may be created with a password
+    % to have a fallback in case of unavailability of a backing external auth system.
+    % Note that if it is required and not present
+    % validation rules would already have prevented us from reaching this point.
+    UserFinal = case ej:get({<<"password">>}, UserData) of
         undefined ->
-            {UserWithKey, chef_wm_password:encrypt(ej:get({<<"password">>}, UserWithKey))};
-        _ ->
-            UserWithKey
+            UserWithKey;
+        Password ->
+            {UserWithKey, chef_wm_password:encrypt(Password)}
     end,
     case chef_wm_base:create_from_json(Req, State, chef_user,
                                        {authz_id, AuthzId},
