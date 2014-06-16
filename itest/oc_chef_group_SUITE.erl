@@ -342,7 +342,7 @@ insert_user(Username) ->
     UserRecord = chef_user_record(Username, suite_helper:make_az_id(Username), true),
     [_| Values] = tuple_to_list(UserRecord),
     FieldNames = record_info(fields, chef_user),
-    Input = [{pubkey_version,1} | lists:zip(FieldNames, Values)],
+    Input = lists:zip(FieldNames, Values),
     ?assertEqual({ok, 1}, sqerl:adhoc_insert(users, [Input])).        
 
 insert_client(OrgId, Clientname) ->
@@ -384,6 +384,7 @@ chef_user_record(Username, AzId, Admin) ->
 	      "ULjr3gvfg49onHxr/kTKbhc78GBOfKSH1ftECCoWnidadW7/lfKbAZ3xiSjLsIxS"
 	      "KxavHMeCuSgyReDZpsFOn2Saie26jvLxWrGyn870yIh36wMvCvWKwUQPnluSnstJ"
 	      "xwIDAQAB">>,
+    pubkey_version = 1,
     hashed_password = <<"secretHaxorz">>,
     salt = <<"kosher">>,
     hash_type = <<"bcrypt">>,
