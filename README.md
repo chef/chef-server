@@ -94,7 +94,7 @@ $ kitchen converge ubuntu-1204
 ```
 
 Test Kitchen uses a regex syntax to match on plaforms, so for example ubuntu 10.04
-will be specificed as ubuntu-1004, or even just ubuntu-10, since 10.04 is the
+will be specificed as ubuntu-1004, or even just ubuntu-10, if 10.04 is the
 only 10 series specified in the `.kitchen.yml`.
 
 Then login to the instance and build the project as described in the Usage
