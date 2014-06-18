@@ -67,30 +67,36 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
-validate_request(Method, Req, State) when Method == 'GET';
-                                          Method == 'DELETE' ->
-    {Req, State};
-validate_request('PUT', Req, #base_state{resource_state = UserState} = State) ->
-    Body = wrq:req_body(Req),
-    {ok, User} = chef_user:parse_binary_json(Body, update),
-    {Req, State#base_state{resource_state = UserState#user_state{user_data = User}}}.
 
+validate_request(Method, Req, #base_state{chef_db_context = DbContext,
+                                          resource_state = UserState} = State) when Method == 'GET';
+                                                                                    Method == 'DELETE' ->
+    User = fetch_user_data(DbContext, Req),
+    UserState1 = UserState#user_state{chef_user = User},
+    {Req, State#base_state{resource_state = UserState1}};
+validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
+                                         resource_state = UserState} = State) ->
+    Body = wrq:req_body(Req),
+    User = fetch_user_data(DbContext, Req),
+    {ok, EJson} = chef_user:parse_binary_json(Body, update, User),
+    UserState1 = UserState#user_state{chef_user = User, user_data = EJson},
+    {Req, State#base_state{resource_state = UserState1}}.
+
+fetch_user_data(DbContext, Req) ->
+    UserName = chef_wm_util:object_name(user, Req),
+    chef_db:fetch(#chef_user{username = UserName}, DbContext).
+
+auth_info(Req, #base_state{resource_state = #user_state{ chef_user = not_found } } = State) ->
+    UserName = chef_wm_util:object_name(user, Req),
+    Message = chef_wm_util:not_found_message(user, UserName),
+    Req1 = chef_wm_util:set_json_body(Req, Message),
+    {{halt, 404}, Req1, State#base_state{log_msg = user_not_found}};
 auth_info(Req, State) ->
     auth_info(wrq:method(Req), Req, State).
 
-auth_info(Method, Req, #base_state{chef_db_context = DbContext,
-                                   resource_state = #user_state{} = UserState}=State) ->
-    UserName = chef_wm_util:object_name(user, Req),
-    case chef_db:fetch(#chef_user{username = UserName}, DbContext) of
-        not_found ->
-            Message = chef_wm_util:not_found_message(user, UserName),
-            Req1 = chef_wm_util:set_json_body(Req, Message),
-            {{halt, 404}, Req1, State#base_state{log_msg = user_not_found}};
-        #chef_user{authz_id = AuthzId} = User ->
-            UserState1 = UserState#user_state{chef_user = User},
-            State1 = State#base_state{resource_state = UserState1},
-            {auth_type(Method, AuthzId, State1), Req, State1}
-    end.
+auth_info(Method, Req, #base_state{resource_state = #user_state{chef_user = User}} = State) ->
+    #chef_user{authz_id = AuthzId} = User,
+    {auth_type(Method, AuthzId, State), Req, State}.
 
 auth_type('PUT', AuthzId, #user_state{user_data = UserData}) ->
     ExtId = ej:get({<<"external_authentication_uid">>}, UserData),
