@@ -1,24 +1,6 @@
 
 def run_osc_upgrade
 
-#  # Detect if OSC is present - if not, then skip to and continue with EC upgrade
-#  # Ask user if they want to upgrade
-#  if File.directory?("/opt/chef-server")
-#    # Do we want to refer to it as the open source chef server, since the new
-#    # server is open source too, even if it is based on enterprise chef?
-#    puts "Open Source Chef server detected."
-#
-#    puts "Would you like to upgrade? [Yn]"
-#    answer = STDIN.gets.chomp
-#    if answer == 'Y' || answer == 'y'
-#      puts "Upgrading the Open Source Chef server."
-#    else
-#      puts "Aborting upgrade, because you told me to or I don't understand the input."
-#      puts "You answered #{answer}"
-#      exit 0 # What do we want to do if the user says no?
-#    end
-#  end
-
   # Start OSC (this assume EC isn't running , b/c if we detected OSC, then EC is assumed
   # not to be present)
   puts 'Ensuring the Open Source Chef server is started'
