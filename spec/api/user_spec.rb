@@ -948,12 +948,10 @@ describe "users", :users do
         end
 
         it "returns 200" do
-          pending "returns 400 because erchef cannot load the full object prior to validating" do
-            put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 200
-              })
-          end
+          put(request_url, platform.superuser,
+            :payload => request_body).should look_like({
+              :status => 200
+            })
         end
       end
 
@@ -1030,12 +1028,11 @@ EOF
             "display_name" => username,
             "password" => "badger badger"
           })
+
+        # Verify required preconditions are in place
         response.should look_like({
             :status => 201,
-            :body_exact => {
-              "uri" => "#{platform.server}/users/#{username}",
-              "private_key" => private_key_regex
-            }})
+            :body => { "private_key" => private_key_regex }})
 
         @original_private_key = JSON.parse(response.body)["private_key"]
       end
