@@ -69,6 +69,9 @@ dependency "partybus"
 dependency "private-chef-upgrades"
 dependency "oc_authz_migrator" # migrate authz to bifrost
 
+# used in osc to ec upgrade path
+dependency "knife-ec-backup"
+
 # version manifest file
 dependency "version-manifest"
 
