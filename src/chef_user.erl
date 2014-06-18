@@ -33,7 +33,7 @@
          new_record/3,
          org_id/1,
          parse_binary_json/1,
-         parse_binary_json/2,
+         parse_binary_json/3,
          password_data/1,
          record_fields/0,
          set_created/2,
@@ -244,24 +244,41 @@ real_pub_key(Data) ->
 %% EJson-encoded Erlang data structure.
 -spec parse_binary_json(binary()) -> {ok, ej:json_object()}. % or throw
 parse_binary_json(Bin) ->
-  parse_binary_json(Bin, create).
+    parse_binary_json(Bin, create, undefined).
 
--spec parse_binary_json(binary(), create | update) -> {ok, ej:json_object()}. % or throw
-parse_binary_json(Bin, Operation) ->
-  User = chef_object_base:delete_null_public_key(chef_json:decode(Bin)),
-  %% If user is invalid, an error is thrown
-  validate_user(User, user_spec(common)),
-  validate_user(User, user_spec(Operation)),
-  %% IF user is internally validated, some additional fields
-  %% (command to both ops) %% are required.
-  case ej:get({<<"external_authentication_uid">>}, User) of
-    undefined ->
-      validate_user(User, local_auth_user_spec(common)),
-      validate_user(User, local_auth_user_spec(Operation));
-    _ ->
-      ok
-  end,
-  {ok, User}.
+-spec parse_binary_json(binary(), create | update, #chef_user{} | undefined) -> {ok, ej:json_object()}. % or throw
+parse_binary_json(Bin, Operation, User) ->
+    EJson = chef_object_base:delete_null_public_key(chef_json:decode(Bin)),
+    %% If user is invalid, an error is thrown
+    validate_user(EJson, user_spec(common)),
+    validate_user(EJson, user_spec(Operation)),
+
+    %% IF user is internally authenticated, some additional fields
+    %% (common to both ops) are required. In the case where
+    %% external auth id is not provided in the ejson/request,
+    %% we'll use the existing data in the user record itself.
+    case external_auth_uid(EJson, User) of
+        undefined ->
+            validate_user(EJson, local_auth_user_spec(common)),
+            validate_user(EJson, local_auth_user_spec(Operation));
+         _ ->
+            ok
+    end,
+    {ok, EJson}.
+
+external_auth_uid(EJson, #chef_user{external_authentication_uid = ExtAuthUid}) ->
+    case ej:get({<<"external_authentication_uid">>}, EJson) of
+        undefined ->
+            undefined_or_value(ExtAuthUid);
+        Value ->
+            Value
+    end;
+external_auth_uid(EJson, _) ->
+    ej:get({<<"external_authentication_uid">>}, EJson).
+
+
+undefined_or_value(null) -> undefined;
+undefined_or_value(Value) -> Value.
 
 %%-spec validate_user(ejson_term(), ejson_term()) -> {ok, ejson_term()}. % or throw
 validate_user(User, Spec) ->
