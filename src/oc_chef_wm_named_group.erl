@@ -76,18 +76,25 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
         _ ->
             validate_group(OrgId, GroupName, DbContext, Req, State, GroupState)
     end.
-validate_group(OrgId, GroupName, DbContext, Req, State, GroupState) ->
-            case chef_db:fetch(#oc_chef_group{org_id = OrgId, name = GroupName}, DbContext) of
-                not_found ->
-                    Message = chef_wm_util:error_message_envelope(iolist_to_binary(["Cannot load group ",
-                                                                                    GroupName])),
-                    Req1 = chef_wm_util:set_json_body(Req, Message),
-                    {{halt, 404}, Req1, State#base_state{log_msg = group_not_found}};
-                #oc_chef_group{authz_id = AuthzId} = Group ->
-                    GroupState1 = GroupState#group_state{oc_chef_group = Group},
-                    State1 = State#base_state{resource_state = GroupState1},
-                    {{group_id, AuthzId}, Req, State1}
-            end.
+validate_group(OrgId, GroupName, DbContext, Req,
+               #base_state{requestor_id = RequestorId} = State, GroupState) ->
+    case chef_db:fetch(#oc_chef_group{org_id = OrgId, name = GroupName,
+                                      for_requestor_id = RequestorId}, DbContext) of
+        not_found ->
+            Message = chef_wm_util:error_message_envelope(iolist_to_binary(["Cannot load group ",
+                                                                            GroupName])),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 404}, Req1, State#base_state{log_msg = group_not_found}};
+        forbidden ->
+            Message = chef_wm_util:error_message_envelope(iolist_to_binary(["No permission for group ",
+                                                                            GroupName])),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 403}, Req1, State#base_state{log_msg = group_not_found}};
+        #oc_chef_group{authz_id = AuthzId} = Group ->
+            GroupState1 = GroupState#group_state{oc_chef_group = Group},
+            State1 = State#base_state{resource_state = GroupState1},
+            {{group_id, AuthzId}, Req, State1}
+    end.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
