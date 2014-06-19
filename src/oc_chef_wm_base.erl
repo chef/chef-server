@@ -44,12 +44,17 @@
 %% Also initializes chef_db_context and reqid fields of base_state.
 %% And handle other base_state init that depends on `Req'.
 service_available(Req, State) ->
-    OrgName = oc_chef_wm_routes:org_name(Req),
+    OrgName = maybe_default_org(Req, State),
     State0 = set_req_contexts(Req, State),
     State1 = State0#base_state{organization_name = OrgName},
     spawn_stats_hero_worker(Req, State1),
     {_GetHeader, State2} = chef_wm_util:get_header_fun(Req, State1),
     {true, Req, State2}.
+
+maybe_default_org(_Req, #base_state{organization_name = default_org, default_orgname = DefaultOrgname}) ->
+    DefaultOrgname;
+maybe_default_org(Req, #base_state{organization_name = undefined}) ->
+    oc_chef_wm_routes:org_name(Req).
 
 forbidden(Req, #base_state{resource_mod = Mod} = State) ->
     case Mod:auth_info(Req, State) of
