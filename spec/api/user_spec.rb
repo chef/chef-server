@@ -480,6 +480,30 @@ describe "users", :users do
                  })
           end
         end
+        context "with external auth enabled" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@opscode.com",
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => username,
+              "external_authentication_uid" => username
+            }
+          end
+
+          it "returns 201 when password is not provided" do
+            post(request_url, platform.superuser, :payload => request_body).should look_like({
+                   :status => 201
+                 })
+          end
+          it "returns 201 when password is provided" do
+            final_body = request_body.merge( { "password" => "foo bar"} )
+            post(request_url, platform.superuser, :payload => final_body).should look_like({
+                   :status => 201
+                 })
+          end
+        end
 
         context "without display_name" do
           let(:request_body) do
@@ -541,7 +565,25 @@ describe "users", :users do
                  })
           end
         end
+        context "without email but with external auth enabled" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => username,
+              "password" => "badger badger",
+              "external_authentication_uid" => username
+            }
+          end
 
+          it "returns 201" do
+            post(request_url, platform.superuser,
+                 :payload => request_body).should look_like({
+                   :status => 201
+                 })
+          end
+        end
         context "without username" do
           let(:request_body) do
             {
@@ -868,6 +910,52 @@ describe "users", :users do
       end
     end # context GET /users/<name>
 
+    context "PUT /users/<name> when user created w/ external auth enabled" do
+      let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:request_body) do
+        {
+          "username" => username,
+          "email" => "#{username}@opscode.com",
+          "first_name" => username,
+          "last_name" => username,
+          "display_name" => "new name",
+          "external_authentication_uid" => username
+        }
+      end
+      before :each do
+        response = post("#{platform.server}/users", platform.superuser,
+          :payload => {
+            "username" => username,
+            "first_name" => username,
+            "last_name" => username,
+            "display_name" => username,
+            "external_authentication_uid" => username
+          })
+        response.should look_like({ :status => 201 })
+      end
+
+      after :each do
+        delete("#{platform.server}/users/#{username}", platform.superuser)
+      end
+
+
+      context "without email and without specifying external auth uid" do
+        let(:request_body) do
+          {
+            "username" => username,
+            "display_name" => username
+          }
+        end
+
+        it "returns 200" do
+          put(request_url, platform.superuser,
+            :payload => request_body).should look_like({
+              :status => 200
+            })
+        end
+      end
+
+    end
     context "PUT /users/<name>" do
       let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
       let(:request_body) do
@@ -878,6 +966,30 @@ describe "users", :users do
           "last_name" => username,
           "display_name" => "new name",
           "password" => "badger badger"
+        }
+      end
+
+      let(:request_body_with_ext_id) do
+        {
+          "username" => username,
+          "email" => "#{username}@opscode.com",
+          "first_name" => username,
+          "last_name" => username,
+          "display_name" => "new name",
+          "password" => "badger badger",
+          "external_authentication_uid" => "bob"
+        }
+      end
+
+      let(:request_body_with_recovery) do
+        {
+          "username" => username,
+          "email" => "#{username}@opscode.com",
+          "first_name" => username,
+          "last_name" => username,
+          "display_name" => "new name",
+          "password" => "badger badger",
+          "recovery_authentication_enabled" => true
         }
       end
 
@@ -916,12 +1028,11 @@ EOF
             "display_name" => username,
             "password" => "badger badger"
           })
+
+        # Verify required preconditions are in place
         response.should look_like({
             :status => 201,
-            :body_exact => {
-              "uri" => "#{platform.server}/users/#{username}",
-              "private_key" => private_key_regex
-            }})
+            :body => { "private_key" => private_key_regex }})
 
         @original_private_key = JSON.parse(response.body)["private_key"]
       end
@@ -942,12 +1053,61 @@ EOF
               :body_exact => modified_user
             })
         end
+        it "can enable recovery" do
+          put(request_url, platform.superuser,
+            :payload => request_body_with_recovery).should look_like({
+              :status => 200
+            })
+
+        end
+        it "can set external id" do
+          put(request_url, platform.superuser,
+            :payload => request_body_with_ext_id).should look_like({
+              :status => 200
+            })
+        end
       end
 
       context "admin user" do
         it "returns 403", :smoke do
           put(request_url, platform.admin_user,
             :payload => request_body).should look_like({
+              :status => 403
+            })
+        end
+        it "cannot enable recovery" do
+          put(request_url, platform.admin_user,
+            :payload => request_body_with_recovery).should look_like({
+              :status => 403
+            })
+
+        end
+        it "cannot set external id" do
+          put(request_url, platform.admin_user,
+            :payload => request_body_with_ext_id).should look_like({
+              :status => 403
+            })
+        end
+      end
+      context "owning user" do
+
+        it "can modify its own account" do
+          put(request_url, platform.non_admin_user,
+            :payload => request_body).should look_like({
+              :status => 403
+            })
+
+        end
+        it "cannot enable recovery" do
+          put(request_url, platform.non_admin_user,
+            :payload => request_body_with_recovery).should look_like({
+              :status => 403
+            })
+
+        end
+        it "cannot set external id" do
+          put(request_url, platform.non_admin_user,
+            :payload => request_body_with_ext_id).should look_like({
               :status => 403
             })
         end
@@ -1090,6 +1250,21 @@ EOF
           end
         end
 
+        context "without email but with external auth enabled" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "display_name" => username,
+              "external_authentication_uid" => username
+            }
+          end
+          it "returns 200" do
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 200
+              })
+          end
+        end
         context "without username" do
           let(:request_body) do
             {
@@ -1549,8 +1724,8 @@ EOF
             }
           end
 
-          it "returns 409" do
-            pending "actually returns 403" do
+          it "returns 409", :focus do
+            pending("actually returns 403", :if => ruby?) do
               put(request_url, platform.superuser,
                 :payload => request_body).should look_like({
                   :status => 409
@@ -1677,28 +1852,4 @@ EOF
     end # context when the webui superuser is specified as the user
   end # context POST /verify_password
 
-  context "POST /authenticate_user" do
-    let(:request_url) { "#{platform.server}/authenticate_user" }
-
-    context "when the webui superuser is specified as the user" do
-      let(:requestor) { superuser }
-
-      let(:request_body) do
-        {
-          username: superuser.name,
-          password: "DOES_NOT_MATTER_FOR_TEST",
-        }
-      end
-
-      it "should return Forbidden" do
-        post(request_url, superuser, :payload => request_body).should look_like(
-          :body => {
-            "error" => "Password authentication as the superuser is prohibited."
-          },
-          :status => 403
-        )
-      end
-
-    end # context when the webui superuser is specified as the user
-  end # context POST /authenticate_user
 end # describe users
