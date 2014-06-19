@@ -100,7 +100,7 @@
                      "d00f03ff6b2c1866f3e3001102c8ba16309a7217"}},
        {oc_chef_authz,".*",
                       {git,"git@github.com:opscode/oc_chef_authz.git",
-                           "de3f375dd331ada86f451b1608ad9b3d12bf2fbd"}},
+                           "3d284acbc9486e8cc33fe0f989eb6fbb229d890e"}},
        {gen_server2,".*",
                     {git,"git://github.com/mdaguete/gen_server2.git",
                          "992650004c81ee921183488cb8115de4777e7bd9"}},
@@ -130,7 +130,7 @@
                             "5364f8d425f7b7c1a9ccf58e3aaae93e9e76fe01"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
-                        "fb1247da29ba89833bb011cf23a98458c2336f84"}},
+                        "aaf7b98bf10752824bce6f16f2ecc19228d2b390"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
                   "fad438c8fe20e0b3728ce2f2b6a886c2f15a3c30"}}]}.
