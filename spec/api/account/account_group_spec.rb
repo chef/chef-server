@@ -459,6 +459,40 @@ describe "opscode-account groups", :groups do
         end
       end
 
+      context "normal user without read ACE returns 403" do
+        it "can't read group" do
+          put(api_url("groups/#{test_group}/_acl/read"), platform.admin_user,
+            :payload => {"read" => {
+                "actors" => [platform.admin_user.name],
+                "groups" => []
+              }}).should look_like({
+              :status => 200
+            })
+
+          get(request_url, platform.non_admin_user).should look_like({
+              :status => 403
+            })
+        end
+      end
+
+      context "normal user without any ACE returns 403" do
+        it "can't read group" do
+          ["read", "grant", "update", "create", "delete"].each do |permission|
+            put(api_url("groups/#{test_group}/_acl/#{permission}"), platform.admin_user,
+              :payload => {permission => {
+                  "actors" => [platform.admin_user.name],
+                  "groups" => []
+                }}).should look_like({
+                :status => 200
+              })
+          end
+
+          get(request_url, platform.non_admin_user).should look_like({
+              :status => 403
+            })
+        end
+      end
+
       context "client" do
         # Is this actually right?  Seems like this should be 200
         it "returns 403" do
@@ -575,6 +609,50 @@ describe "opscode-account groups", :groups do
           end
         end
 
+        context "admin user cannot remove self from group" do
+          let(:initial_group_payload) {{
+              "groupname" => test_group,
+              "actors" => {"clients" => [platform.non_admin_client.name],
+                "users" => [platform.admin_user.name],
+                "groups" => ["users"]}
+            }}
+          
+          let(:initial_group_body) {{
+              "actors" => [platform.admin_user.name, platform.non_admin_client.name],
+              "users" => [platform.admin_user.name],
+              "clients" => [platform.non_admin_client.name],
+              "groups" => ["users"],
+              "orgname" => org,
+              "name" => test_group,
+              "groupname" => test_group
+            }}
+
+          it "can update group" do
+            pending "pending discussion" do
+              # Created this test to check for this, but it has been decided to
+              # table this for now; it's uncertain under what conditions we
+              # would prevent users from removing themselves (or perhaps the
+              # last user in a group), so this may not be used at all
+              put(request_url, platform.admin_user,
+                :payload => initial_group_payload).should look_like({
+                  :status => 200
+                })
+              get(request_url, platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => initial_group_body
+                })
+              put(request_url, platform.admin_user,
+                :payload => new_group_payload).should look_like({
+                  :status => 400
+                })
+              get(request_url, platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => initial_group_body
+                })
+            end
+          end
+        end
+
         context "normal user with update ACE" do
           it "can update group", :smoke do
             put(api_url("groups/#{test_group}/_acl/update"), platform.admin_user,
@@ -594,6 +672,49 @@ describe "opscode-account groups", :groups do
                 :status => 200,
                 :body_exact => modified_group_body
               })
+          end
+        end
+
+        context "normal user with update ACE cannot remove self" do
+          let(:removed_from_group_payload) {{
+              "groupname" => test_group,
+              "actors" => {"clients" => [platform.non_admin_client.name],
+                "users" => [platform.admin_user.name],
+                "groups" => []}
+            }}
+          
+          it "can update group" do
+            pending "pending discussion" do
+              # Created this test to check for this, but it has been decided to
+              # table this for now; it's uncertain under what conditions we
+              # would prevent users from removing themselves (or perhaps the
+              # last user in a group), so this may not be used at all
+              put(api_url("groups/#{test_group}/_acl/update"), platform.admin_user,
+                :payload => {"update" => {
+                    "actors" => [platform.non_admin_user.name,
+                      platform.admin_user.name, "pivotal"],
+                    "groups" => ["admins"]
+                  }}).should look_like({
+                  :status => 200
+                })
+
+              put(request_url, platform.non_admin_user,
+                :payload => new_group_payload).should look_like({
+                  :status => 200
+                })
+              get(request_url, platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => modified_group_body
+                })
+              put(request_url, platform.non_admin_user,
+                :payload => removed_from_group_payload).should look_like({
+                  :status => 400
+                })
+              get(request_url, platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => modified_group_body
+                })
+            end
           end
         end
 
