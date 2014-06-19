@@ -60,7 +60,9 @@ encrypt(Password) ->
       Password :: str_or_bin(),
       HashedPass :: str_or_bin(),
       Salt :: str_or_bin(),
-      HashType :: str_or_bin().
+      HashType :: str_or_bin() | atom().
+verify(Password, {HashedPass, Salt, HashType}) when is_binary(HashType) ->
+    verify(Password, {HashedPass, Salt, binary_to_atom(HashType, utf8)});
 verify(Password, {HashedPass, Salt, ?DEFAULT_HASH_TYPE}) ->
     {ok, ThisHashedPass} = bcrypt:hashpw(to_str(Password), to_str(Salt)),
     slow_compare(ThisHashedPass, to_str(HashedPass));
