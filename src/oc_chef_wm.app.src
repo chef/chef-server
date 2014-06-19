@@ -23,7 +23,8 @@
                   compiler,
                   syntax_tools,
                   goldrush,
-                  lager
+                  lager,
+                  eldap
                  ]},
   {mod, {oc_chef_wm_app, []}},
   {env, []}

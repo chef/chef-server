@@ -22,7 +22,8 @@
          object_creation_error_hook/2,
          stats_hero_label/1,
          stats_hero_upstreams/0,
-         log_action/2]).
+         log_action/2,
+         is_superuser/1]).
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
 %% contains a function definition.
@@ -71,6 +72,19 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
         {{Type, ObjectId}, Req1, State1} when Type =:= object;
                                               Type =:= actor ->
             invert_perm(check_permission(Type, ObjectId, Req1, State1));
+        %% Several use cases around users and user auth are only
+        %% available through the webui, eg superuser
+        {superuser_only, Req1, State1} ->
+            %% force superuser_bypasses_checks temporarily true so that get_user
+            %% gives us an honest response as to whether the requestor is actually
+            %% the superuser.
+            case get_user(Req, State#base_state{superuser_bypasses_checks = true}) of
+                {_, true} ->
+                    {false, Req, State};
+                _ ->
+                    {Req2, State2} = set_forbidden_msg(Req1, State1),
+                    {true, Req2, State2}
+            end;
         {AuthTuples, Req1, State1} when is_list(AuthTuples)->
             %% NOTE: multi_auth_check does not handle create_in_container yet, and expects
             %% each auth tuple to have a permission.  This code path is currently only used
