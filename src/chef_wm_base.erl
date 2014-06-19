@@ -82,6 +82,10 @@ init_base_state(ResourceMod, InitParams) ->
     #base_state{reqid_header_name = ?gv(reqid_header_name, InitParams),
                 auth_skew = ?gv(auth_skew, InitParams),
 
+                %% default orgname support
+                organization_name = ?gv(organization_name, InitParams),
+                default_orgname = ?gv(default_orgname, InitParams),
+
                 otp_info = ?gv(otp_info, InitParams),
                 server_flavor = ?gv(server_flavor, InitParams),
                 api_version = ?gv(api_version, InitParams),
