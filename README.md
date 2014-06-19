@@ -74,14 +74,6 @@ development. Test Kitchen also exposes the ability to provision instances using
 various cloud providers like AWS, DigitalOcean, or OpenStack. For more
 information, please see the [Test Kitchen documentation](http://kitchen.ci).
 
-Test Kitchen will use your local SSH config for ssh-forwarding.
-This is not setup automatically, so you'll need to ensure this is added to your
-SSH config (generally found at ~/.ssh/config):
-```
-Host *
-  ForwardAgent yes
-```
-
 Once you have tweaked your `.kitchen.yml` (or `.kitchen.local.yml`) to your
 liking, you can bring up an individual build environment using the `kitchen`
 command.
