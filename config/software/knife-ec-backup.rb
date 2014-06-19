@@ -16,14 +16,17 @@
 #
 
 name "knife-ec-backup"
-default_version "--pre"
+# git shaw from June 18th, 2014. Latest at time of this coding
+default_version "6f721811234699838f4920720aea1eea05ba32db"
 
-dependency "ruby"
-dependency "rubygems"
+dependency "rsync"
 
-# For now install the prereleased gem, but we should either cut a new
-# version, or install from a known git tag and built it ourselves
+source :git => "git@github.com:opscode/knife-ec-backup.git"
 
+# put knife-ec-backup on the system but don't install it.
+# It will need to be built and installed at runtime during an upgrade
+# from OSC to ensure we can link against the OSC postgres install
 build do
-  gem "install knife-ec-backup -n #{install_dir}/embedded/bin --no-rdoc --no-ri -v #{version}"
+  command "mkdir -p #{install_dir}/embedded/lib/knife-ec-backup"
+  command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./ #{install_dir}/embedded/lib/knife-ec-backup"
 end
