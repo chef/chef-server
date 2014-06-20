@@ -1,5 +1,5 @@
 name "oc-chef-pedant"
-default_version "1.0.41"
+default_version "1.0.42"
 
 dependency "ruby"
 dependency "bundler"
