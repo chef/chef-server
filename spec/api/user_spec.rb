@@ -1724,7 +1724,7 @@ EOF
             }
           end
 
-          it "returns 409", :focus do
+          it "returns 409", do
             pending("actually returns 403", :if => ruby?) do
               put(request_url, platform.superuser,
                 :payload => request_body).should look_like({
