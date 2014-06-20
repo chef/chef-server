@@ -2,9 +2,9 @@
 require 'pedant/rspec/common'
 require 'json'
 
-describe 'authenticate_user' do
+describe 'authenticate_user', :users do
   def self.ruby?
-    false
+    Pedant::Config.ruby_users_endpoint?
   end
 
   def invalid_verb_response_code
