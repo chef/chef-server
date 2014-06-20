@@ -894,8 +894,11 @@ create_object(QueryName, Record) when is_atom(QueryName) ->
 
 -spec cookbook_version_fields_for_insert(CbFields:: list()) -> list().
 cookbook_version_fields_for_insert(CbFields) ->
-   %% We drop the last record field - checksums
-   lists:reverse(tl(lists:reverse(CbFields))).
+    %% We drop the last record field - checksums
+    CBFields1 = lists:reverse(tl(lists:reverse(CbFields))),
+    %% Drop the authz_id field as it is not needed in the WHERE clause
+    Length = length(CBFields2),
+    lists:sublist(CBFields1, Length - 3) ++ lists:nthtail(Length - 2, CBFields1).
 
 %% @doc Inserts FK references to checksums into the database
 %%
