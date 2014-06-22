@@ -27,6 +27,10 @@ module PrivateChef
   opscode_erchef Mash.new
   # Need old path for cookbook migration:
   opscode_chef Mash.new
+  # This is here so legacy private-chef.rb config files that contain settings
+  # like `opscode_webui['enable'] = false` do not break the reconfigure. It is
+  # not used for anything else.
+  opscode_webui Mash.new
   lb Mash.new
   lb_internal Mash.new
   postgresql Mash.new
