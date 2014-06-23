@@ -27,13 +27,8 @@
 -compile([export_all]).
 -endif.
 
--ifndef(DEFAULT_HASH_TYPE).
--define(DEFAULT_HASH_TYPE, 'erlang-bcrypt-0.5.0').
--endif.
-
--ifndef(MIGRATION_HASH_TYPE).
--define(MIGRATION_HASH_TYPE, 'sha1+bcrypt"').
--endif.
+-define(DEFAULT_HASH_TYPE, <<"bcrypt">>).
+-define(MIGRATION_HASH_TYPE, <<"SHA1-bcrypt">>).
 
 -type str_or_bin() :: string() | binary().
 
@@ -61,8 +56,6 @@ encrypt(Password) ->
       HashedPass :: str_or_bin(),
       Salt :: str_or_bin(),
       HashType :: str_or_bin() | atom().
-verify(Password, {HashedPass, Salt, HashType}) when is_binary(HashType) ->
-    verify(Password, {HashedPass, Salt, binary_to_atom(HashType, utf8)});
 verify(Password, {HashedPass,<<"">>, ?DEFAULT_HASH_TYPE}) ->
     % the bcrypt library will automatically use the salt portion of the hashed password
     % string, so pass the entire thing as the salt value.
