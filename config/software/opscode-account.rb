@@ -17,8 +17,14 @@ env = {
   'PATH' => "#{install_dir}/embedded/bin:#{ENV['PATH']}"
 }
 
+bundle_path = "#{install_dir}/embedded/service/gem"
+
 build do
-  bundle "install --without test --path=/opt/opscode/embedded/service/gem", :env => env
+  bundle "install --without test --path=#{bundle_path}", :env => env
   command "mkdir -p #{install_dir}/embedded/service/opscode-account"
   command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./ #{install_dir}/embedded/service/opscode-account/"
+
+  # cleanup the .git directories in the bundle path before commiting
+  # them as submodules to the git cache
+  command "find #{bundle_path} -type d -name .git | xargs rm -rf"
 end
