@@ -66,6 +66,13 @@ bcrypt_round_trip_test_() ->
                  || {P, Data} <- PassData ]
        end},
 
+      {"salt not specified roundtrip",
+       fun() ->
+               P = "a long password",
+               {Hash, _, Type} = chef_wm_password:encrypt(P),
+               ?assertEqual(true, chef_wm_password:verify(P, {Hash, <<>>, Type}))
+       end},
+
       {"wrong password is wrong",
        fun() ->
                ?assertEqual(false,
@@ -74,7 +81,7 @@ bcrypt_round_trip_test_() ->
        end}
 
      ]}.
-    
+
 
 
 %% Example data generated with the Ruby code found at the bottom of
