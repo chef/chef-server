@@ -31,7 +31,7 @@
                   "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
        {sqerl,".*",
               {git,"git://github.com/opscode/sqerl.git",
-                   "b7cfafa34d311585900b9d2ca32d6e7da5f061e1"}},
+                   "48b50d2ccc47bfb7c34248eda321464501e36bc7"}},
        {edown,".*",
               {git,"git://github.com/seth/edown.git",
                    "30a9f7867d615af45783235faa52742d11a9348e"}},
@@ -124,21 +124,19 @@
                     "820283b0d329368f298afd22038340c888689a39"}},
        {chef_wm,".*",
                 {git,"git@github.com:opscode/chef_wm.git",
-                     "af9c6e723e6243ddf7100c70edf1081afd8db5bb"}},
+                     "09cfc3718d2b5b5b967b7f1aed0c8da55a39a3fb"}},
        {oc_chef_action,".*",
                        {git,"git@github.com:opscode/oc_chef_action.git",
-                            "5364f8d425f7b7c1a9ccf58e3aaae93e9e76fe01"}},
+                            "961d0cc94b6ff0386de676e35eb9af2fa5a1e23d"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
                         "aaf7b98bf10752824bce6f16f2ecc19228d2b390"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "fad438c8fe20e0b3728ce2f2b6a886c2f15a3c30"}}]}.
+                  "066c9251e6e51dd6fd56be1546906becafd1f5b8"}}]}.
 {plugins,[rebar_lock_deps_plugin]}.
 {cover_enabled,true}.
 {erl_opts,[{d,'OC_CHEF'},
-           {d,'DEFAULT_HASH_TYPE',bcrypt},
-           {d,'MIGRATION_HASH_TYPE','SHA1-bcrypt'},
            {d,'BASE_RESOURCE',oc_chef_wm_base},
            {d,'BASE_ROUTES',oc_chef_wm_routes},
            {d,'CHEF_DB_DARKLAUNCH',xdarklaunch_req},
