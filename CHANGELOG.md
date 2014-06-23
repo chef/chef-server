@@ -19,6 +19,7 @@
 
 ### private-chef-cookbooks
 * [OC-11673] Tune PostgreSQL keepalive timeouts
+* [OC-11668] enable ipv6 in standalone mode
 
 ## 11.1.8 (2014-06-26)
 
