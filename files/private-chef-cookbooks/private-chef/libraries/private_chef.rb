@@ -316,7 +316,6 @@ module PrivateChef
       PrivateChef["couchdb"]["bind_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
       PrivateChef["opscode_solr4"]["ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
       PrivateChef["opscode_certificate"]["vip"] ||= '127.0.0.1'
@@ -333,7 +332,6 @@ module PrivateChef
 
     def gen_frontend
       PrivateChef[:role] = "frontend"
-      PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
       PrivateChef["bookshelf"]["enable"] ||= false
       PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["couchdb"]["enable"] ||= false
@@ -412,6 +410,8 @@ module PrivateChef
         PrivateChef["use_ipv6"] = true
         PrivateChef["default_listen_address"] = "::"
       end
+
+      PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
 
       case PrivateChef['topology']
       when "standalone","manual"
