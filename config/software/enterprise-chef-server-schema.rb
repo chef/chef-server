@@ -4,6 +4,7 @@ default_version "2.2.3"
 source :git => "git@github.com:opscode/enterprise-chef-server-schema.git"
 
 dependency "sqitch"
+dependency "perl_pg_driver"
 
 build do
   command "make install"
