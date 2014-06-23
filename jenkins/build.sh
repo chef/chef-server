@@ -20,7 +20,7 @@ then
     PACKAGE=${PROJ_NAME}-${VERSION}.tar.gz
     cd rel
     tar zcvf $PACKAGE $PROJ_NAME/
-    s3cmd put --progress $PACKAGE s3://$ARTIFACT_BASE/$PACKAGE
+    s3cmd put $PACKAGE s3://$ARTIFACT_BASE/$PACKAGE
 else
     REL_VERSION=`cat rel/reltool.config|grep '{rel,.*"oc_erchef"'|cut -d ',' -f 3|sed 's/"//g'`
     GIT_SHA=`git rev-parse --short HEAD`
@@ -28,5 +28,5 @@ else
     PACKAGE=${PROJ_NAME}-${VERSION}.tar.gz
     cd rel
     tar zcvf $PACKAGE $PROJ_NAME/
-    s3cmd put --progress $PACKAGE s3://$ARTIFACT_BASE/$PACKAGE
+    s3cmd put $PACKAGE s3://$ARTIFACT_BASE/$PACKAGE
 fi
