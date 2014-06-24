@@ -5,6 +5,7 @@ action :create do
   keepalived_etc_dir = ::File.join(keepalived_dir, "etc")
   keepalived_log_dir = node['private_chef']['keepalived']['log_directory']
 
+  # Needed because of OC-11490
   directory keepalived_log_dir do
     owner node['private_chef']['user']['username']
     recursive true
