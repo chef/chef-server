@@ -2,7 +2,8 @@
 
 define_upgrade do
 
-  if Partybus.config.is_data_master
+  if Partybus.config.bootstrap_server
+    must_be_data_master
 
     down_services = ['nginx',
                      'opscode-org-creator',
