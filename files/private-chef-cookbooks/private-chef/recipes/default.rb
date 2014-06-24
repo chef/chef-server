@@ -153,6 +153,12 @@ directory "/var/log/opscode" do
   action :create
 end
 
+# Put keepalived into a safe state before proceeding with
+# the opscode-runsvdir -> opscode-private-chef transition
+private_chef_keepalived_safemode 'warmfuzzy' do
+  only_if 'initctl status opscode-runsvdir | grep start'
+end
+
 include_recipe "enterprise::runit"
 include_recipe "private-chef::sysctl-updates"
 
