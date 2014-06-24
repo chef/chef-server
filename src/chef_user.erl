@@ -114,7 +114,7 @@ new_record(OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Email = value_or_null({<<"email">>}, UserData),
     ExtAuthUid = value_or_null({<<"external_authentication_uid">>}, UserData),
-    EnableRecovery = ej:get({"<<recovery_authentication_enabled>>"}, UserData) =:= true,
+    EnableRecovery = ej:get({<<"recovery_authentication_enabled">>}, UserData) =:= true,
     {PublicKey, PubkeyVersion} = chef_object_base:cert_or_key(UserData),
     SerializedObject = { whitelisted_values(UserData, ?JSON_SERIALIZABLE) },
     #chef_user{id = Id,
