@@ -16,17 +16,15 @@
 #
 
 name "knife-ec-backup"
-# git shaw from June 18th, 2014. Latest at time of this coding
-default_version "6f721811234699838f4920720aea1eea05ba32db"
+default_version "2.0.0.beta.1"
 
-dependency "rsync"
+dependency "pg-gem"
+dependency "sequel-gem"
 
-source :git => "git@github.com:opscode/knife-ec-backup.git"
-
-# put knife-ec-backup on the system but don't install it.
-# It will need to be built and installed at runtime during an upgrade
-# from OSC to ensure we can link against the OSC postgres install
+# Ignore dependencies, since they are already installed on the system by omnibus
+# (see dependencies above)
+# This ensures we can properly link the pg to the needed headers without needing
+# to pass options through knife-ec-backup
 build do
-  command "mkdir -p #{install_dir}/embedded/lib/knife-ec-backup"
-  command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./ #{install_dir}/embedded/lib/knife-ec-backup"
+  gem "install knife-ec-backup -n #{install_dir}/embedded/bin --no-rdoc --no-ri -v #{version} --ignore-dependencies"
 end
