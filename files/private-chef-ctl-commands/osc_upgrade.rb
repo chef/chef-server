@@ -146,6 +146,11 @@ def run_osc_upgrade
   # By default, pkill sends TERM, which will cause runsv,runsvdir, and svlogd to shutdown
   # Doing this will completely hose OSC so that a start command won't restart it, if needed
   # If we're going to make this process as idempotent as possible, we'll need to work around this
+  # Maybe it's best to do this at the end ... or do we let the user manually remove OSC
+  # with a package uninstall?
+  # Once we do this we lose most hope at being idempotent
+  # Maybe prompt the user before doing this and off to give them steps to do this
+  # manually if they don't want this done automatically?
   puts "Ensuring all the runit processes associated with the Open Source Server are stopped"
   run_command("pkill runsv")
   run_command("pkill runsvdir")
