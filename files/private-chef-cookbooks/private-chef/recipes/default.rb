@@ -156,6 +156,7 @@ end
 # Put keepalived into a safe state before proceeding with
 # the opscode-runsvdir -> opscode-private-chef transition
 private_chef_keepalived_safemode 'warmfuzzy' do
+  only_if { is_data_master? }
   only_if 'initctl status opscode-runsvdir | grep start'
 end
 
