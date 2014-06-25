@@ -7,22 +7,14 @@ require "/opt/opscode/embedded/service/omnibus-ctl/osc_upgrade"
 
 add_command "upgrade", "Upgrade your private chef installation.", 1 do
 
-  # Detect if OSC is present - if not, then skip to and continue with EC upgrade
-  # Ask user if they want to upgrade
-  if File.directory?("/opt/chef-server")
-    # Do we want to refer to it as the open source chef server, since the new
-    # server is open source too, even if it is based on enterprise chef?
-    puts "Open Source Chef server detected."
-
-    puts "Would you like to upgrade? [Yn]"
-    answer = STDIN.gets.chomp
-    if answer == 'Y' || answer == 'y'
+  if detect_osc
+    puts "Open Source Chef 11 or older server detected."
+    if upgrade?
       puts "Upgrading the Open Source Chef server."
       run_osc_upgrade
     else
-      puts "Aborting upgrade, because you told me to or I don't understand the input."
-      puts "You answered #{answer}"
-      exit 0 # What do we want to do if the user says no?
+      puts "Aborting upgrade."
+      exit 0
     end
   end
 
@@ -38,4 +30,25 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   else
     exit 1
   end
+
+def detect_osc
+  if File.directory?("/opt/chef-server")
+    true
+  else
+    false
+  end
+end
+
+def upgrade?
+    # This needs to handle a passed in flag so user input is not needed
+    puts "Would you like to upgrade? [Yn]"
+
+    answer = STDIN.gets.chomp
+    if answer == 'Y' || answer == 'y'
+      true
+          else
+      false
+    end
+end
+
 end
