@@ -1,5 +1,10 @@
 
 # This action should only be called during HA upgrades on the bootstrap
+# Explanation: During the PC1.4 -> EC11 upgrade, the opscode-runsvdir upstart
+# service is stopped and removed (replaced by private-chef-runsvdir).  This
+# causes a restart of keepalived into a bad state until the end of the reconfigure.
+# The goal of this LWRP is to put keepalived into a good state first, so we
+# don't experience an unexpected cluster state transition during reconfigure.
 action :create do
 
   if ha? && is_data_master?
@@ -31,9 +36,15 @@ action :create do
     # NOTE: keepalived restart happens here, but it *should* not transition to backup
     component_runit_service "keepalived"
 
+    # The previous resource will bounce keepalived, causing a transition from
+    # master -> backup.  It will then attempt to transition back to master but
+    # cannot succeed until reconfigure has finished.
+    # The goal here is to wait until 'requested_cluster_status' has changed back
+    # to 'master', meaning keepalived wants to be master, and it has at least
+    # successfully mounted the DRBD volume.
     ruby_block 'wait_for_drbd_mount' do
       block do
-        requested_cluster_status_file = ::File.join(node['private-chef']['keepalived']['dir'],
+        requested_cluster_status_file = ::File.join(node['private_chef']['keepalived']['dir'],
           'requested_cluster_status')
 
         puts 'keepalived restarted, waiting for DRBD mount to return'
