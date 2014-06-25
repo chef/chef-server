@@ -16,12 +16,18 @@ def run_osc_upgrade
 
   start_osc
 
-  puts "Preparing knife to download data from the Open Source Chef server"
-
-  puts 'Making /tmp/chef-server-data as the location to save the server data'
+  # As a precaution, likely want to use mkstemp to create this dir so
+  # the location varies. Then will need to save the value to a read protected
+  # file so it can be read from if a resume is needed
   osc_data_dir = "/tmp/chef-server-data"
+
+  puts "Preparing knife to download data from the Open Source Chef server"
+  puts 'Making /tmp/chef-server-data as the location to save the server data'
+
+
   # Are the permissions good enough?
-  Dir.mkdir(osc_data_dir, 0644) unless File.directory?(osc_data_dir)
+  permissions = 0644
+  make_dir(osc_data_dir, permissions)
 
   write_knife_config
 
@@ -72,6 +78,11 @@ def run_osc_upgrade
     msg = "knife download failed with #{status}"
     check_status(status, msg)
   end
+
+  def make_dir(dir, permissions)
+    Dir.mkdir(dir, permissions) unless File.directory?(dir)
+  end
+
 
   # this code shamelessly pulled from knife ec backup and adapted
   puts "Pulling needed db credintials"
