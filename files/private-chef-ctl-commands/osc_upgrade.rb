@@ -1,16 +1,7 @@
 
 def run_osc_upgrade
 
-  # Start OSC (this assume EC isn't running , b/c if we detected OSC, then EC is assumed
-  # not to be present)
-  puts 'Ensuring the Open Source Chef server is started'
-  status = run_command("chef-server-ctl start")
-  if !status.success?
-    puts "Unable to start Open Source Chef server, which is needed to complete the upgrade"
-    exit 1
-  end
-
-  sleep(10) # start command can return faster than the services are ready; resulting in 502 gateway
+  start_osc
 
   puts "Preparing knife to download data from the Open Source Chef server"
 
@@ -19,25 +10,46 @@ def run_osc_upgrade
   # Are the permissions good enough?
   Dir.mkdir(osc_data_dir, 0644) unless File.directory?(osc_data_dir)
 
-  # Hardcoded path to key (stole idea to use from pedant), but the path is in attributes
-  # Obviously a hard coded path to a server located at dev-vm isn't going to work in prod
-  config = <<-EOH
-  chef_server_url 'https://api.opscode.piab'
-  node_name 'admin'
-  client_key '/etc/chef-server/admin.pem'
-  repo_mode 'everything'
-  versioned_cookbooks true
-  chef_repo_path '/tmp/chef-server-data'
-  EOH
+  write_knife_config
 
-  puts "Writing knife config to /tmp/knife-config.rb for use in downloading the data"
-  File.open("/tmp/knife-config.rb", "w"){ |file| file.write(config)}
+  def start_osc
+    # Assumption is EC isn't running, since we detected OSC on the system
+    puts 'Ensuring the Open Source Chef server is started'
+    status = run_command("chef-server-ctl start")
+    msg = "Unable to start Open Source Chef server, which is needed to complete the upgrade"
+    check_status(status, msg)
+    # start command can return faster than the services are ready; resulting in 502 gateway
+    sleep(10)
+  end
+
+  def check_status(status, msg)
+    if !status.success?
+      puts msg
+      exit 1
+    end
+  end
+
+  def write_knife_config
+    # Hard coded path to key (stole idea to use from pedant), but the path is in attributes
+    # Obviously a hard coded path to a server located at dev-vm isn't going to work in prod
+    # Should request user input here
+    config = <<-EOH
+      chef_server_url 'https://api.opscode.piab'
+      node_name 'admin'
+      client_key '/etc/chef-server/admin.pem'
+      repo_mode 'everything'
+      versioned_cookbooks true
+      chef_repo_path '/tmp/chef-server-data'
+    EOH
+
+    puts "Writing knife config to /tmp/knife-config.rb for use in downloading the data"
+    File.open("/tmp/knife-config.rb", "w"){ |file| file.write(config)}
+  end
+
   puts "Running knife download"
   status = run_command("/opt/chef-server/embedded/bin/knife download -c /tmp/knife-config.rb /")
-  if !status.success?
-    puts "knife download failed with #{status}"
-    exit 1
-  end
+  msg = "knife download failed with #{status}"
+  check_status(status, msg)
 
   # this code shamelessly pulled from knife ec backup and adapted
   puts "Pulling needed db credintials"
