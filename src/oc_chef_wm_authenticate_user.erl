@@ -126,8 +126,8 @@ maybe_upgrade_password(Password, User, #base_state{requestor_id = Requestor, che
         PasswordData ->
             ok;
         NewPasswordData ->
-            User2 = chef_user:set_password_data(NewPasswordData),
-            chef_db:update_object(User2, Ctx, Requestor)
+            User2 = chef_user:set_password_data(User, NewPasswordData),
+            chef_db:update(User2, Ctx, Requestor)
     end.
 
 user_json(Status, #chef_user{} = User) ->
