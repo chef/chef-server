@@ -1,6 +1,19 @@
 
 def run_osc_upgrade
 
+  # General comments:
+  #
+  # How can these actions be made idempotent as best as possible?
+  #
+  # A way should be provided to either suppress all output, or else
+  # have it suppressed by default and then made available if a verbose
+  # flag is set (what do the other commands do by default? Can their
+  # output be tuned to this level?)
+  #
+  # All points where user input can be requested needs to have a way that
+  # it can be set via a flag so it is scriptable
+  #
+
   start_osc
 
   puts "Preparing knife to download data from the Open Source Chef server"
