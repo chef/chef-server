@@ -22,6 +22,11 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-define(OSC_DEFAULT_HASH_TYPE, <<"erlang-bcrypt-0.5.0">>).
+-define(OSC_MIGRATION_HASH_TYPE, <<"sha1+bcrypt">>).
+-define(DEFAULT_HASH_TYPE, <<"bcrypt">>).
+-define(MIGRATION_HASH_TYPE, <<"SHA1-bcrypt">>).
+
 setup() ->
     %% turn the number of rounds way down so that running the tests
     %% doesn't take too long.
@@ -82,38 +87,39 @@ bcrypt_round_trip_test_() ->
 
      ]}.
 
+cross_type_test_() ->
+    {setup,
+     fun setup/0,
+     fun cleanup/1,
+     [
+      {"treats a OSC_DEFAULT_HASH_TYPE as a DEFAULT_HASH_TYPE",
+       fun() ->
+            {Hash, Salt, ?DEFAULT_HASH_TYPE} = chef_wm_password:encrypt("a password for me"),
+            ?assertEqual(true, chef_wm_password:verify("a password for me",
+                                                       {Hash, Salt, ?OSC_DEFAULT_HASH_TYPE}))
+       end}
+     ]}.
 
-
-%% Example data generated with the Ruby code found at the bottom of
-%% this file. Format is {Password, HashedPass, Salt}.
-ruby_examples() ->
-    [
-     {<<"a">>, <<"7a9589e57fd63d1d9a222ef46ec5533335dcf17b">>,
-      <<"2012-09-13 16:26:31 -0700wBSQfHuJwXMUprGBS5DB1I7oiE5h4p">>},
-
-     {<<"b">>, <<"10eb130a8c7e69426c7e5e27a149b1989c2263a3">>,
-      <<"2012-09-13 16:26:31 -0700HzvX3eKpiXrUmlhcqQUjAgl00TZeBn">>},
-
-     {<<"fizzbuz">>, <<"746999ea6212e1527d6d8df02244974460fb1f24">>,
-      <<"2012-09-13 16:26:31 -0700VRnaEjCwvgGKzpJFHGYkjWu0xc7QS8">>},
-
-     {<<"sesame">>, <<"e73cdca4fa427ce949ef0a4f55b09e008b38f1fe">>,
-      <<"2012-09-13 16:26:31 -0700I6Dx1b5qO7b8S8C62uTNVJWaP4VSpG">>},
-
-     {<<"apple">>, <<"e30e7ac9bd7ba12b04601bccc3cb5e219aa67f76">>,
-      <<"2012-09-13 16:26:31 -0700sofGiQFCSs42teEg0nfl2QLnc2Ar7r">>}].
-
-%% Generate post-migration data. Note that the bcrypt application must
-%% be running in order for this call to succeed.
-migrated_examples() ->
-    [ {Pass, chef_wm_password:migrate_sha1(SHA, OrigSalt)}
-      || {Pass, SHA, OrigSalt} <- ruby_examples() ].
-
-migration_round_trip_test_() ->
+unmigrated_round_trip_test_() ->
     {setup,
      fun() ->
              setup(),
-             migrated_examples()
+             osc_sha1_examples() ++ ec_sha1_examples()
+     end,
+     fun cleanup/1,
+     fun(Examples) ->
+             [
+
+              [ ?_assertEqual(true, chef_wm_password:verify(Pass, {Hash, Salt, null}))
+                || {Pass, Hash, Salt} <- Examples]
+              ]
+     end}.
+
+migrated_round_trip_test_() ->
+    {setup,
+     fun() ->
+            setup(),
+            osc_migrated_examples() ++ ec_migrated_examples()
      end,
      fun cleanup/1,
      fun(MigratedExamples) ->
@@ -129,8 +135,27 @@ migration_round_trip_test_() ->
                end}
               ]
      end}.
-     %%  end},
-     %% ]}.
+
+upgrade_test_() ->
+    {setup,
+     fun setup/0,
+     fun cleanup/1,
+     [
+       {"upgrades password data when current form is sha1", generator,
+       fun() ->
+            Data = [hd(osc_sha1_examples())] ++ [hd(ec_sha1_examples())],
+            [ ?_assertMatch({_, _, ?DEFAULT_HASH_TYPE}, chef_wm_password:upgrade(Password, {Hash, Salt, null})) ||
+                             {Password, Hash, Salt} <- Data ]
+
+       end},
+       {"does not upgrade a password when current form is bcrypt",
+       fun() ->
+            Password = "a password for me",
+            Original = chef_wm_password:encrypt(Password),
+            ?assertEqual(Original, chef_wm_password:upgrade(Password, Original))
+       end}
+     ]}.
+
 
 slow_compare_test_() ->
     Tests = [
@@ -150,6 +175,53 @@ slow_compare_test_() ->
     [ ?_assertEqual(Expect, chef_wm_password:slow_compare(A, B))
       || {{A, B}, Expect} <- Tests ].
 
+%% Example data generated with password_gen.rb
+%% Format is {Password, HashedPass, Salt}.
+osc_sha1_examples() ->
+    [
+        {<<"a">>, <<"af75371eb751df0016370c3d28d2ad74670d5e52">>, <<"2014-06-25 11:43:48 -0400SFaNUO5tJTntDSilxtw0slOcoVgmFg">>},
+        {<<"b">>, <<"076e95e29e26ba631c862a8281aba6049b6ec920">>, <<"2014-06-25 11:43:48 -04004nADNlKYncv6iBBEsISgV7iPvMuQbk">>},
+        {<<"fizzbuz">>, <<"e49b70947b5e6358111b17be0f5c37d34d2afbe6">>, <<"2014-06-25 11:43:48 -0400m7acRVNa3P6Yg4qpnDisCFvA8bEqSm">>},
+        {<<"sesame">>, <<"537abd120fcc28e5be3b2faa2aeafe5f47d0171d">>, <<"2014-06-25 11:43:48 -0400FjzotYDqRB2o4IFbcHKMX30x8iIZsM">>},
+        {<<"apple">>, <<"7dd7b5cc04a7b3f59098356fa582c17834ba98a8">>, <<"2014-06-25 11:43:48 -04002ZMgJTBxbCVPCiXhlvVKpuTA2J6YLq">>}
+    ].
+ec_sha1_examples() ->
+    [
+        {<<"a">>, <<"8975d201890516f658ff92f4df9068027707a03f">>, <<"2014-06-25 11:43:48 -0400fpk83jDbAOc0OBcV4ogF653GVVOMRn">>},
+        {<<"b">>, <<"17ee8561bf7397150e71174517ab974cdd65b82e">>, <<"2014-06-25 11:43:48 -0400jQVVx4gq6Ehk2DbZ4vaY8nOh5FY5cx">>},
+        {<<"fizzbuz">>, <<"3da5133e640f88d230aa5e7eccb6d416496e1552">>, <<"2014-06-25 11:43:48 -04006gpZ4GsmEeFPFBhQ0KgnIEWzB8HwPF">>},
+        {<<"sesame">>, <<"29540420f534f6542b344e3ef861ac3cfc0bf497">>, <<"2014-06-25 11:43:48 -0400BnDpBdHxSehr7t8evqsuhATbhQpZbT">>},
+        {<<"apple">>, <<"602f9c8cbec7f723205957e5ab79aa384a97c76c">>, <<"2014-06-25 11:43:48 -0400WhloJNsMAmlIHDXrOIUmLVPc3y0T3M">>}
+    ].
+
+%% migration data generators
+osc_migrated_examples() ->
+    [ {Password, do_osc_migration(SHA1, Salt)} || {Password, SHA1, Salt} <- osc_sha1_examples()  ].
+
+
+ec_migrated_examples() ->
+    [ {Password, do_ec_migration(SHA1, Salt)} || {Password, SHA1, Salt} <- ec_sha1_examples()  ].
+
+% Perform midway migration to sha+bcrypt for OSC
+% this function only existed in chef_wm_password for purpsoses
+% of testing, so it is moved here
+do_osc_migration(SHA, Salt) ->
+    {ok, BcryptSalt} = bcrypt:gen_salt(),
+    {ok, HashedPass} = bcrypt:hashpw(SHA, BcryptSalt),
+    CompoundSalt = iolist_to_binary([BcryptSalt, <<"\t">>, Salt]),
+    {list_to_binary(HashedPass), CompoundSalt, ?OSC_MIGRATION_HASH_TYPE}.
+
+
+% Perform midway migration to sha+bcrypt for EC
+% this currently exists in chef_mover/src/mover_user_hash_converter.erl
+% and is executed during the user password migration phase of an EC upgrade.
+% Very similar to OSC migration, but does not store compound salt - instead
+% stores the original salt, because bcrypt salt is part of the bcrypt hash itself.
+do_ec_migration(SHA, Salt) ->
+    {ok, BcryptSalt} = bcrypt:gen_salt(),
+    {ok, HashedPass} = bcrypt:hashpw(SHA, BcryptSalt),
+    {list_to_binary(HashedPass), Salt, ?MIGRATION_HASH_TYPE}.
+
 ensure_start(App) ->
     case application:start(App) of
         ok ->
@@ -160,27 +232,4 @@ ensure_start(App) ->
             error(Error)
     end.
 
-%% ## Ruby class used for generating sample data
-%% class ShaHasher
-%%   def self.generate_salt
-%%     salt = Time.now.to_s
-%%     chars = ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a
-%%     1.upto(30) { |i| salt << chars[rand(chars.size-1)] }
-%%     salt
-%%   end
-%%
-%%   def self.encrypt_password(password, salt)
-%%     Digest::SHA1.hexdigest("--#{salt}--#{password}--")
-%%   end
-%%
-%%   def self.make_examples(words)
-%%     words.each do |w|
-%%       s = self.generate_salt
-%%       puts self.fmt_entry(w, self.encrypt_password(w, s), s)
-%%     end
-%%   end
-%%
-%%   def self.fmt_entry(pass, hash, salt)
-%%     '{<<"%s">>, <<"%s">>, <<"%s">>}' % [pass, hash, salt]
-%%   end
-%% end
+%% ## Ruby class used for generating sample data can be found in password_gen.rb
