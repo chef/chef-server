@@ -14,24 +14,7 @@ def run_osc_upgrade
   # it can be set via a flag so it is scriptable
   #
 
-  start_osc
-
-  # As a precaution, likely want to use mkstemp to create this dir so
-  # the location varies. Then will need to save the value to a read protected
-  # file so it can be read from if a resume is needed
-  osc_data_dir = "/tmp/chef-server-data"
-
-  puts "Preparing knife to download data from the Open Source Chef server"
-  puts 'Making /tmp/chef-server-data as the location to save the server data'
-
-
-  # Are the permissions good enough?
-  permissions = 0644
-  make_dir(osc_data_dir, permissions)
-
-  write_knife_config
-
-  run_knife_download
+  # Since this is evaled, methods have to be first so they can be found
 
   def start_osc
     # Assumption is EC isn't running, since we detected OSC on the system
@@ -83,6 +66,28 @@ def run_osc_upgrade
     Dir.mkdir(dir, permissions) unless File.directory?(dir)
   end
 
+  ###
+  # Upgrade logic starts here
+  ###
+
+  start_osc
+
+  # As a precaution, likely want to use mkstemp to create this dir so
+  # the location varies. Then will need to save the value to a read protected
+  # file so it can be read from if a resume is needed
+  osc_data_dir = "/tmp/chef-server-data"
+
+  puts "Preparing knife to download data from the Open Source Chef server"
+  puts 'Making /tmp/chef-server-data as the location to save the server data'
+
+
+  # Are the permissions good enough?
+  permissions = 0644
+  make_dir(osc_data_dir, permissions)
+
+  write_knife_config
+
+  run_knife_download
 
   # this code shamelessly pulled from knife ec backup and adapted
   puts "Pulling needed db credintials"
@@ -179,19 +184,21 @@ def run_osc_upgrade
 
   puts "Transforming Open Source server downloaded Data for upload to Enterprise Chef server"
 
-  # let's have a new top level dir
   new_data_dir = "/tmp/new-chef-server-data"
-  Dir.mkdir(new_data_dir, 0777) unless File.directory?(new_data_dir)
+  # These permissions are very likely too permissive
+  # Should likely make this 0644 by default, possibly even more restrictive
+  permissions = 0777
+  make_dir(new_data_dir, permissions)
 
   puts "Creating a default Enterprise Chef organization to associate the data with"
-  # we need a default org name
-  # will need to either pick a sensible default, or somehow let the user specify this
-  # or possibly even both
+  # A default org name is needed; the user should specify this
   org_name = 'minitrue'
   org_full_name = "MinistryOfTruth"
   org_type = "Business"
 
   # put in place the org name structure
+  # The permissions were left off here - what are the defaults? 
+  # In any case, they should be specified
   Dir.mkdir("#{new_data_dir}/organizations") unless File.directory?("#{new_data_dir}/organizations")
   org_dir = "#{new_data_dir}/organizations/#{org_name}"
   Dir.mkdir(org_dir, 0777) unless File.directory?(org_dir)
