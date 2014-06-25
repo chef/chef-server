@@ -349,7 +349,7 @@ update_from_ejson(#chef_user{} = User, UserEJson) ->
                     email = Email,
                     external_authentication_uid = ExternalAuthenticationUid,
                     recovery_authentication_enabled = RecoveryAuthenticationEnabled,
-                    serialized_object = SerializedObject1}.
+                    serialized_object = chef_json:encode(SerializedObject1)}.
 
 merge_user_data(User, {ModData}) ->
     % If value in ModData is null, delete from user, otherwise replace or insert the value.
@@ -412,7 +412,7 @@ fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
                              email           = Email,
                              username        = UserName,
                              id              = Id }) ->
-     [false, PublicKeyVersion, PublicKey, HashedPassword, Salt, HashType, chef_json:encode(SerializedObject),
+     [false, PublicKeyVersion, PublicKey, HashedPassword, Salt, HashType, SerializedObject,
      ExternalAuthenticationUid, RecoveryAuthEnabled =:= true, Email, UserName,  LastUpdatedBy, UpdatedAt, Id].
 
 fields_for_fetch(#chef_user{username = UserName}) ->
