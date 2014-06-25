@@ -66,9 +66,53 @@ def run_osc_upgrade
     Dir.mkdir(dir, permissions) unless File.directory?(dir)
   end
 
+  def pull_osc_db_credentials
+    # This code pulled from knife-ec-backup and adapted
+    puts "Pulling needed db credintials"
+    if !File.exists?("/etc/chef-server/chef-server-running.json")
+      puts "Failed to find /etc/chef-server/chef-server-running.json"
+      exit 1
+    else
+      running_config = JSON.parse(File.read("/etc/chef-server/chef-server-running.json"))
+      sql_user = running_config['chef_server']['postgresql']['sql_user']
+      sql_password = running_config['chef_server']['postgresql']['sql_password']
+    end
+      [sql_user, sql_password]
+  end
+
+  def create_osc_key_file(key_file)
+    sql_user, sql_password = pull_osc_db_credentials
+
+    # These are the defaults, but they should be configurable
+    sql_host = "localhost"
+    sql_port = 5432
+
+    server_string = "#{sql_user}:#{sql_password}@#{sql_host}:#{sql_port}/opscode_chef"
+    db = ::Sequel.connect("postgres://#{server_string}")
+
+    # OSC doesn't have pubkey_version - what should this be filled in as?
+    # EC uses an enum for hash_type that OSC doesn't use.
+    # Need to determine the appropriate values and adjust the data accordingly.
+    sql_user_data = db.select(:username, :id, :public_key, :hashed_password, :salt, :hash_type).from(:osc_users)
+    sql_users_json =  sql_user_data.all.to_json
+    sql_users = JSON.parse(sql_users_json)
+    sql_users.each do |user|
+      # Assuming bcrypt for now, but there are very likely incompatibilities and edge cases here
+      # This needs more work
+      user["hash_type"] = 'bcrypt'
+      # Set pubkey_version as 0 and not 1 (1 means we a cert was used - it needs to be verified
+      # this was never an option in OSC)
+      user["pubkey_version"] = 0
+    end
+    File.open(key_file, 'w') { |file| file.write(Chef::JSONCompat.to_json_pretty(sql_users))}
+  end
+
   ###
   # Upgrade logic starts here
   ###
+
+  require 'chef'
+  require 'sequel'
 
   start_osc
 
@@ -80,7 +124,6 @@ def run_osc_upgrade
   puts "Preparing knife to download data from the Open Source Chef server"
   puts 'Making /tmp/chef-server-data as the location to save the server data'
 
-
   # Are the permissions good enough?
   permissions = 0644
   make_dir(osc_data_dir, permissions)
@@ -89,61 +132,15 @@ def run_osc_upgrade
 
   run_knife_download
 
-  # this code shamelessly pulled from knife ec backup and adapted
-  puts "Pulling needed db credintials"
-  if ! File.exists?("/etc/chef-server/chef-server-running.json")
-    puts "Failed to find /etc/chef-server/chef-server-running.json"
-    exit 1
-  else
-    running_config = JSON.parse(File.read("/etc/chef-server/chef-server-running.json"))
-    sql_user = running_config['chef_server']['postgresql']['sql_user']
-    sql_password = running_config['chef_server']['postgresql']['sql_password']
-  end
-
-  # defaults - might want to make these configurable
-  sql_host = "localhost"
-  sql_port = 5432
-
-  require 'chef'
-  require 'sequel'
-
-  server_string = "#{sql_user}:#{sql_password}@#{sql_host}:#{sql_port}/opscode_chef"
-  db = ::Sequel.connect("postgres://#{server_string}")
-
   key_file = "#{osc_data_dir}/key_dump.json"
-  # osc doesn't have pubkey_version - what should this be filled in as?
-  # EC uses an enum for hash_type that OSC doesn't use, of course.
-  # Need to determine the equivalency and adjust the data accordingly.
-  sql_user_data = db.select(:username, :id, :public_key, :hashed_password, :salt, :hash_type).from(:osc_users)
-  sql_users_json =  sql_user_data.all.to_json
-  sql_users = JSON.parse(sql_users_json)
-  sql_users.each do |user|
-    user["hash_type"] = 'bcrypt' # taking liberties here in assuming brcypt as only option
-    user["pubkey_version"] = 0   # and that pubkey_version is only 0 and not 1 (for cert)
-    # need to verify these are okay defaults, or how to determine otherwise
-  end
-  puts sql_users
-  File.open(key_file, 'w') { |file| file.write(Chef::JSONCompat.to_json_pretty(sql_users))}
-
-#  This would work, except the table name is hard coded in ec key export
-#  and it is of course different in OSC from EC.
-#
-#  puts "Using knife ec key export to extract key data"
-#  key_file = "#{osc_data_dir}/key_dump.json"
-#  status = run_command("/opt/chef-server/embedded/bin/knife ec key export --sql-user #{sql_user} --sql-password #{sql_password} -c /tmp/knife-config.rb #{key_file}")
-#  if !status.success?
-#    puts "Running knife ec key export failed with #{status}"
-#    exit 1
-#  end
+  create_osc_key_file(key_file)
 
   puts "Finished downloading data from the Open Source Chef server"
 
   puts 'Ensuring the Open Source Chef server is stopped'
+  msg = "Unable to stop Open Source Chef server, which is needed to complete the upgrade"
   status = run_command("chef-server-ctl stop")
-  if !status.success?
-    puts "Unable to stop Open Source Chef server, which is needed to complete the upgrade"
-    exit 1
-  end
+  check_status(status, msg)
 
   # Need to ensure all of OSC is stopped
   # By default, pkill sends TERM, which will cause runsv,runsvdir, and svlogd to shutdown
