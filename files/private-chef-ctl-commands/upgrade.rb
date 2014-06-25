@@ -7,6 +7,28 @@ require "/opt/opscode/embedded/service/omnibus-ctl/osc_upgrade"
 
 add_command "upgrade", "Upgrade your private chef installation.", 1 do
 
+  # Since this is evaled, need to have methods first so they can be picked up
+
+  def detect_osc
+    if File.directory?("/opt/chef-server")
+      true
+    else
+      false
+    end
+  end
+
+  def upgrade?
+    # This needs to handle a passed in flag so user input is not needed
+    puts "Would you like to upgrade? [Yn]"
+
+    answer = STDIN.gets.chomp
+    if answer == 'Y' || answer == 'y'
+      true
+          else
+      false
+    end
+  end
+
   if detect_osc
     puts "Open Source Chef 11 or older server detected."
     if upgrade?
@@ -30,25 +52,5 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   else
     exit 1
   end
-
-def detect_osc
-  if File.directory?("/opt/chef-server")
-    true
-  else
-    false
-  end
-end
-
-def upgrade?
-    # This needs to handle a passed in flag so user input is not needed
-    puts "Would you like to upgrade? [Yn]"
-
-    answer = STDIN.gets.chomp
-    if answer == 'Y' || answer == 'y'
-      true
-          else
-      false
-    end
-end
 
 end
