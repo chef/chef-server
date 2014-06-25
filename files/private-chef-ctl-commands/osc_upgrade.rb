@@ -12,10 +12,13 @@ def run_osc_upgrade
 
   write_knife_config
 
+  run_knife_download
+
   def start_osc
     # Assumption is EC isn't running, since we detected OSC on the system
     puts 'Ensuring the Open Source Chef server is started'
-    status = run_command("chef-server-ctl start")
+    cmd = "chef-server-ctl start"
+    status = run_command(cmd)
     msg = "Unable to start Open Source Chef server, which is needed to complete the upgrade"
     check_status(status, msg)
     # start command can return faster than the services are ready; resulting in 502 gateway
@@ -32,7 +35,9 @@ def run_osc_upgrade
   def write_knife_config
     # Hard coded path to key (stole idea to use from pedant), but the path is in attributes
     # Obviously a hard coded path to a server located at dev-vm isn't going to work in prod
-    # Should request user input here
+    # Need to ensure we have a valid path to the key here
+    # Should request user input here on the location of chef_server_url
+    # and otherwise default to localhost
     config = <<-EOH
       chef_server_url 'https://api.opscode.piab'
       node_name 'admin'
@@ -43,13 +48,17 @@ def run_osc_upgrade
     EOH
 
     puts "Writing knife config to /tmp/knife-config.rb for use in downloading the data"
+    # An exception will be raised if this fails. Catch it and try to die gracefully?
     File.open("/tmp/knife-config.rb", "w"){ |file| file.write(config)}
   end
 
-  puts "Running knife download"
-  status = run_command("/opt/chef-server/embedded/bin/knife download -c /tmp/knife-config.rb /")
-  msg = "knife download failed with #{status}"
-  check_status(status, msg)
+  def run_knife_download
+    puts "Running knife download"
+    cmd = "/opt/chef-server/embedded/bin/knife download -c /tmp/knife-config.rb /"
+    status = run_command(cmd)
+    msg = "knife download failed with #{status}"
+    check_status(status, msg)
+  end
 
   # this code shamelessly pulled from knife ec backup and adapted
   puts "Pulling needed db credintials"
