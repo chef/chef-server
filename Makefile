@@ -1,6 +1,6 @@
 DEPS = $(CURDIR)/deps
 
-DIALYZER_OPTS = -Wunderspecs
+DIALYZER_OPTS =
 
 DIALYZER_DEPS = deps/chef_authn/ebin \
                 deps/ej/ebin \
