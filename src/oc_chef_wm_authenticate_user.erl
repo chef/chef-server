@@ -91,14 +91,13 @@ process_post(Req, #base_state{chef_db_context = Ctx,
         {false, Code} ->
             {{halt, Code}, chef_wm_util:set_json_body(Req, auth_fail_message(Code)), State};
         EJson ->
+            maybe_upgrade_password(Password, User, State),
             {true, chef_wm_util:set_json_body(Req, EJson), State}
     end.
 
-verify_user(Password, #chef_user{external_authentication_uid = null,
-                                 hashed_password = HashedPass,
-                                 salt = Salt,
-                                 hash_type = HashType} = User, _Ctx) ->
-    case chef_wm_password:verify(Password, {HashedPass, Salt, HashType}) of
+verify_user(Password, #chef_user{external_authentication_uid = null} = User, _Ctx) ->
+    PasswordData = chef_user:password_data(User),
+    case chef_wm_password:verify(Password, PasswordData) of
         true ->
             user_json(<<"linked">>, User);
         false ->
@@ -120,6 +119,16 @@ verify_user(Password, #chef_user{username = UserName, external_authentication_ui
     end;
 verify_user(_Password, _Other, _Ctx) ->
     {false, 401}.
+
+maybe_upgrade_password(Password, User, #base_state{requestor_id = Requestor, chef_db_context = Ctx}) ->
+    PasswordData = chef_user:password_data(User),
+    case chef_wm_password:upgrade(Password, PasswordData) of
+        PasswordData ->
+            ok;
+        NewPasswordData ->
+            User2 = chef_user:set_password_data(NewPasswordData),
+            chef_db:update_object(User2, Ctx, Requestor)
+    end.
 
 user_json(Status, #chef_user{} = User) ->
     UserEJ0 = chef_user:assemble_user_ejson(User, undefined),
