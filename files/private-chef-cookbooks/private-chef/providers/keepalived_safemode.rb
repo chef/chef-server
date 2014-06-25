@@ -1,4 +1,5 @@
 
+# This action should only be called during HA upgrades
 action :create do
 
   keepalived_dir = node['private_chef']['keepalived']['dir']
@@ -27,5 +28,22 @@ action :create do
   # rewrite the sv/keepalived/run file to have the correct flags before a restart
   # NOTE: keepalived restart happens here, but it *should* not transition to backup
   component_runit_service "keepalived"
+
+  ruby_block 'wait_for_drbd_mount' do
+    block do
+      puts 'keepalived restarted, waiting for DRBD mount to return'
+      STDOUT.sync = true
+      (0..120).each do |attempt|
+        break if ::File.read('/proc/mounts').include?(node['private_chef']['drbd']['data_dir'])
+
+        if attempt == 120
+            raise 'ERROR: Timeout waiting for DRBD mount to return'
+        end
+        print '.'
+        sleep 1
+      end
+      puts 'DRBD mount has returned, proceeding'
+    end
+  end
 
 end
