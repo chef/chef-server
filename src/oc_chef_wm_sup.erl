@@ -169,7 +169,7 @@ default_resource_init() ->
                 {api_version, envy:get(oc_chef_wm, api_version, string)},
 
                 %% This is set if default_orgname mode is enabled
-                {default_orgname, envy:get(oc_chef_wm, default_orgname, fun is_valid_default_orgname/1)},
+                {default_orgname, oc_chef_wm_routes:default_orgname()},
 
                 %% metrics and stats_hero config. We organize these into a proplist which
                 %% will end up in the base_state record rather than having a key for each of
@@ -190,8 +190,3 @@ default_resource_init() ->
             Defaults
     end.
 
-%% Validates the default_orgname setting. It can be either undefined or binary
-is_valid_default_orgname(S) when is_binary(S) ->
-    true;
-is_valid_default_orgname(undefined) ->
-    true.

@@ -8,6 +8,7 @@
 -export([
          bulk_route_fun/2,
          bulk_route_fun/3,
+         default_orgname/0,
          route/3,
          org_name/1,
          url_for_search_item_fun/3
@@ -32,14 +33,24 @@ render_template(Template, Req, Args) ->
 
 %% @doc Extract the organization name from the Request's path.  If organization name is
 %% present it must be captured as the atom `organization_id' in our dispatch rules
-%% for the organization name. If no organization is in the URI it will return
-%% undefined
+%% for the organization name.
+%% If no organization is in the URI it will return the configured default orgname
 org_name(#wm_reqdata{} = Req) ->
     org_name(wrq:path_info(organization_id, Req));
 org_name(undefined) ->
-    undefined;
+    default_orgname();
 org_name(Name) ->
     list_to_binary(Name).
+
+%% @doc Gets the configured default orgname.
+default_orgname() ->
+    envy:get(oc_chef_wm, default_orgname, fun is_valid_default_orgname/1).
+
+%% @doc Validates the default_orgname setting. It can be either undefined or binary
+is_valid_default_orgname(S) when is_binary(S) ->
+    true;
+is_valid_default_orgname(undefined) ->
+    true.
 
 %% @doc Generate a search URL.  Expects `Args' to be a proplist with a `search_index' key
 %% (the value of which can be either a binary or string).  The organization in the URL will
