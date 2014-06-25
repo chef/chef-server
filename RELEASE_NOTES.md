@@ -1,5 +1,13 @@
 # Enterprise Chef Release Notes
 
+## 1.4.13 (2014-06-26)
+
+### Security Fixes:
+
+The following items are the set of security fixes that have been appied since Enterprise Chef 1.4.11:
+
+* Address a PostgreSQL configuration error. The defect allows any local user on the system hosting the Chef Server’s PostgreSQL components full access to databases.
+
 ## 1.4.11 (2014-06-05)
 
 ### Security Fixes:

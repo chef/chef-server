@@ -1,5 +1,11 @@
 # Enterprise Chef Changelog
 
+## 1.4.13 (2014-06-26)
+
+### private-chef-cokbooks
+
+* Address a PostgreSQL configuration error. The defect allows any local user on the system hosting the Chef Server’s PostgreSQL components full access to databases.
+
 ## 1.4.11 (2014-06-05)
 
 ### openssl 1.0.1h
