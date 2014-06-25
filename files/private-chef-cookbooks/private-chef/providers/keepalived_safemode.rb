@@ -2,7 +2,7 @@
 # This action should only be called during HA upgrades on the bootstrap
 action :create do
 
-  if node['private_chef']['topology'] == 'ha' && is_data_master?
+  if ha? && is_data_master?
 
     keepalived_dir = node['private_chef']['keepalived']['dir']
     keepalived_etc_dir = ::File.join(keepalived_dir, "etc")
