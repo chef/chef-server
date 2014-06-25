@@ -33,10 +33,16 @@ action :create do
 
     ruby_block 'wait_for_drbd_mount' do
       block do
+        requested_cluster_status_file = ::File.join(node['private-chef']['keepalived']['dir'],
+          'requested_cluster_status')
+
         puts 'keepalived restarted, waiting for DRBD mount to return'
         STDOUT.sync = true
         (0..120).each do |attempt|
-          break if ::File.read('/proc/mounts').include?(node['private_chef']['drbd']['data_dir'])
+          break if
+            ::File.read('/proc/mounts').include?(node['private_chef']['drbd']['data_dir']) &&
+            ::File.exists?(requested_cluster_status_file) &&
+            ::File.open(requested_cluster_status_file).read.chomp == 'master'
 
           if attempt == 120
               raise 'ERROR: Timeout waiting for DRBD mount to return'
