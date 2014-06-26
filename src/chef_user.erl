@@ -108,7 +108,8 @@ username_from_ejson(UserData) ->
             Name
     end.
 
--spec new_record(object_id(), object_id(), ejson_term() | {ejson_term(), {binary(), binary(), binary()}}) -> #chef_user{}.
+-spec new_record(object_id(), object_id(),
+        ejson_term() | {ejson_term(), {binary() | null, binary() | null, binary() | null}}) -> #chef_user{}.
 new_record(OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
     Name = username_from_ejson(UserData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
