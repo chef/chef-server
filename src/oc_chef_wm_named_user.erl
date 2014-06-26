@@ -114,22 +114,15 @@ from_json(Req, #base_state{reqid = RequestId,
                            resource_state = #user_state{
                            chef_user = User,
                            user_data = UserData}} = State) ->
-    PasswordData = case ej:get({<<"password">>}, UserData) of
-        NewPassword when is_binary(NewPassword) ->
-            chef_wm_password:encrypt(NewPassword);
-        _ ->
-            chef_user:password_data(User)
-    end,
-    User1 = chef_user:set_password_data(User, PasswordData),
-    UserDataWithoutPassword = ej:delete({<<"password">>}, UserData),
-    UserDataWithKeys = maybe_generate_key_pair(UserDataWithoutPassword, RequestId),
+    UserDataWithKeys = maybe_generate_key_pair(UserData, RequestId),
+
     % Custom json body needed to maintain compatibility with opscode-account behavior.
     % chef_wm_base:update_from_json will reply with the complete object, but
     % clients currently expect only a URI, and a private key if the key is new.
     %
     % However, we will retain the returned Request since Location header wil have been
     % correctly set if the username changed.
-    case chef_wm_base:update_from_json(Req, State, User1, UserDataWithKeys) of
+    case chef_wm_base:update_from_json(Req, State, User, UserDataWithKeys) of
         {true, Req1, State1} ->
             {true, make_update_response(Req1, UserDataWithKeys), State1};
         Other ->
