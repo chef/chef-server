@@ -91,7 +91,7 @@
                    "58ded93d5c47675899d8e5e1589270f340ea66c5"}},
        {chef_objects,".*",
                      {git,"git@github.com:opscode/chef_objects.git",
-                          "bfcfde86af4d7033df04a2a0e51f8246d5aee436"}},
+                          "cfdb4dbfdb7de10ebd70643b73adb03af8d8b80b"}},
        {depsolver,".*",
                   {git,"git://github.com/opscode/depsolver.git",
                        "62f07401f56ac22d699c7c2d062af11b396c85b9"}},
