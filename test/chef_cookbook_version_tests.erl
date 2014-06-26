@@ -229,13 +229,10 @@ version_to_binary_test() ->
     ?assertEqual(<<"0.0.1">>, chef_cookbook_version:version_to_binary({0,0,1})).
 
 parse_version_test_() ->
-    GoodVersions = [{<<"0">>, {0, 0, 0}},
-                    {<<"1">>, {1, 0, 0}},
-                    {<<"1.2">>, {1, 2, 0}},
+    GoodVersions = [{<<"1.2">>, {1, 2, 0}},
                     {<<"1.2.3">>, {1, 2, 3}},
                     {<<"1.2.", ?MAX_GOOD_VERSION>>, {1,2, ?MAX_GOOD_VERSION_INT}},
                     {<<"1.", ?MAX_GOOD_VERSION>>, {1, ?MAX_GOOD_VERSION_INT, 0}},
-                    {<<?MAX_GOOD_VERSION>>, {?MAX_GOOD_VERSION_INT, 0, 0}},
                     {<<?MAX_GOOD_VERSION, ".0">>, {?MAX_GOOD_VERSION_INT, 0, 0}},
                     {<<"0.",?MAX_GOOD_VERSION,".0">>, {0, ?MAX_GOOD_VERSION_INT, 0}},
                     {<<"0.0.0">>, {0, 0, 0}},
@@ -245,6 +242,9 @@ parse_version_test_() ->
 
 parse_version_badversion_test_() ->
     BadVersions = [
+                   <<"0">>,
+                   <<"1">>,
+                   <<?MAX_GOOD_VERSION>>,
                    <<"">>,
                    <<"A">>,
                    <<"1.2.a">>,
