@@ -94,6 +94,9 @@ describe "/organizations", :organizations do
         )
       end
 
+# Note:
+# Currently excluded because it fails intermittently.
+# To re-enable, please remove ', :intermittent_failure => true'
       it "should respond with data containing a valid private key",  :intermittent_failure => true do
         result = JSON.parse(post("#{platform.server}/organizations", superuser, :payload => request_body))
         /-----BEGIN RSA PRIVATE KEY-----/.should match(result["private_key"])
