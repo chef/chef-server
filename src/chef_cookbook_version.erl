@@ -343,7 +343,7 @@ is_valid_version(Version) ->
 %% @doc Given a binary parse it to a valid cookbook version tuple {Major, Minor, Patch} or
 %% raise a `badarg' error. Each of `Major', `Minor', and `Patch' must be non-negative
 %% integer values less than 2147483647 (max size of value in pg int column). It is
-%% acceptable to provide a value with zero, one, or two dots (1 is the same as 1.0.0). More
+%% acceptable to provide a value with one or two dots (1 is the same as 1.0.0). More
 %% than two dots is an error.
 %%
 %% @end
@@ -364,8 +364,7 @@ parse_version(Version) when is_binary(Version) ->
             error(badarg)
     end.
 
-normalize_version([X]) ->
-    [X, 0, 0];
+
 normalize_version([X, Y]) ->
     [X, Y, 0];
 normalize_version([_, _, _] = V) ->
