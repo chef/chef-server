@@ -580,7 +580,7 @@ describe "users", :users do
           end
 
           it "returns 201" do
-            pending "work in flight on users endpoint" do            
+            pending "work in flight on users endpoint" do
               post(request_url, platform.superuser,
                    :payload => request_body).should look_like({
                      :status => 201
@@ -915,7 +915,7 @@ describe "users", :users do
     end # context GET /users/<name>
 
     context "PUT /users/<name> when user created w/ external auth enabled" do
-      pending "work in flight on users endpoint" do  
+      pending "work in flight on users endpoint" do
         let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
         let(:request_body) do
           {
@@ -963,6 +963,8 @@ describe "users", :users do
     end
     context "PUT /users/<name>" do
       let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:password) { "badger badger" }
+
       let(:request_body) do
         {
           "username" => username,
@@ -970,7 +972,7 @@ describe "users", :users do
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
-          "password" => "badger badger"
+          "password" => password
         }
       end
 
@@ -981,7 +983,6 @@ describe "users", :users do
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
-          "password" => "badger badger",
           "external_authentication_uid" => "bob"
         }
       end
@@ -993,7 +994,6 @@ describe "users", :users do
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
-          "password" => "badger badger",
           "recovery_authentication_enabled" => true
         }
       end
@@ -1058,6 +1058,42 @@ EOF
               :body_exact => modified_user
             })
         end
+
+        context "authenticating after updates" do
+          let(:auth_url) { "#{platform.server}/authenticate_user" }
+          context "when password is unchanged" do
+            it "can authenticate as the modified user when password has not been changed.", :smoke do
+              put(request_url, platform.superuser, :payload => request_body).should look_like({ :status => 200 })
+              post(auth_url, superuser, :payload => { 'username' => username,
+                                                      'password' => password }).should look_like({
+                  :status => 200
+              })
+            end
+          end
+
+          context "when password is updated" do
+            let(:password) { "bidger bidger"}
+            it "can authenticate as the modified user when password has been changed" do
+              put(request_url, platform.superuser, :payload => request_body).should look_like({ :status => 200 })
+
+              post(auth_url, superuser, :payload => { 'username' => username,
+                                                      'password' => password }).should look_like({
+                  :status => 200
+              })
+
+            end
+            it "fails to authenticate as the modified user using the old password" do
+              put(request_url, platform.superuser, :payload => request_body).should look_like({ :status => 200 })
+
+              post(auth_url, superuser, :payload => { 'username' => username,
+                                                      'password' => 'badger badger' }).should look_like({
+                  :status => 200
+              })
+                          end
+
+          end
+        end
+
         it "can enable recovery" do
           put(request_url, platform.superuser,
             :payload => request_body_with_recovery).should look_like({
