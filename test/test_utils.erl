@@ -24,6 +24,8 @@
          mock/1,
          mock/2,
          unmock/1,
+         bcrypt_setup/0,
+         bcrypt_cleanup/1,
          validate_modules/1
         ]).
 
@@ -50,3 +52,22 @@ unmock(Modules) ->
 validate_modules(Modules) ->
     [?assert(meck:validate(M)) || M <- Modules].
 
+bcrypt_setup() ->
+    application:set_env(bcrypt, default_log_rounds, 4),
+    [ ensure_start(App) || App <- [crypto, bcrypt] ],
+    ok.
+
+bcrypt_cleanup(_) ->
+    error_logger:tty(false),
+    application:stop(bcrypt),
+    error_logger:tty(true).
+
+ensure_start(App) ->
+    case application:start(App) of
+        ok ->
+            ok;
+        {error, {already_started, App}} ->
+            ok;
+        Error ->
+            error(Error)
+    end.

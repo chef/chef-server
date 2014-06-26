@@ -27,6 +27,9 @@
 
 
 assemble_user_ejson_test_() ->
+    {setup,
+     fun test_utils:bcrypt_setup/0,
+     fun test_utils:bcrypt_cleanup/1,
     [{"obtain expected EJSON",
       fun() ->
               User = make_valid_user_record(),
@@ -54,12 +57,20 @@ assemble_user_ejson_test_() ->
               ExpectedData = base_user_record_as_ejson() ++  persisted_serializable_fields(),
               ?assertEqual(lists:sort(ExpectedData), lists:sort(GotList))
       end}
-    ].
+    ]}.
 
 parse_binary_json_test_() ->
     [{"Can create user when all required fields are present",
       fun() ->
                 MinValid = make_min_valid_create_user_ejson(),
+                UserJson = chef_json:encode({MinValid}),
+                {ok, {GotData}} = chef_user:parse_binary_json(UserJson, create, undefined),
+                ?assertEqual(lists:sort(MinValid), lists:sort(GotData))
+      end
+     },
+     {"Can create user when external auth uid is present",
+      fun() ->
+                MinValid = make_external_auth_create_user_ejson(),
                 UserJson = chef_json:encode({MinValid}),
                 {ok, {GotData}} = chef_user:parse_binary_json(UserJson, create, undefined),
                 ?assertEqual(lists:sort(MinValid), lists:sort(GotData))
@@ -172,60 +183,127 @@ parse_binary_json_test_() ->
     ].
 
 
-update_record_test() ->
-    SerializedAsEJson = {base_user_record_as_ejson() ++ persisted_serializable_fields()},
-    User = make_valid_user_record(chef_json:encode(SerializedAsEJson)),
-     UpdateAsEJson = {[ {<<"username">>, <<"martha">>},
-                        {<<"email">>, <<"new_email">>},
+update_record_test_() ->
+    {setup,
+     fun() ->
+        test_utils:bcrypt_setup(),
+        SerializedAsEJson = {base_user_record_as_ejson() ++
+                             persisted_serializable_fields() },
+        make_valid_user_record(chef_json:encode(SerializedAsEJson))
+     end,
+     fun test_utils:bcrypt_cleanup/1,
+     fun(User) ->
+        UpdateAsEJson = {[ {<<"username">>, <<"martha">>},
+                        {<<"email">>, <<"new_email@somewhere.com">>},
+                        {<<"garbage">>, <<"be gone">>},
                         {<<"display_name">>, <<"martha stewart pony">>},
-                        {<<"some_extra_field">>, <<"irrelevant">>},
-                        {<<"public_key">>, public_key_data()} ]},
-    NewUser = chef_user:update_from_ejson(User,  UpdateAsEJson),
-    ?assertMatch(#chef_user{}, NewUser),
-    ?assertEqual(<<"martha">>, chef_user:name(NewUser)),
-    ?assertEqual(null, NewUser#chef_user.external_authentication_uid),
-    ?assertEqual(false, NewUser#chef_user.recovery_authentication_enabled).
+                        {<<"public_key">>, public_key_data()},
+                        {<<"city">>, undefined},
+                        {<<"twitter_account">>, null }]},
+        UpdatePassword = {[ {<<"password">>, <<"a new password">>} ]},
+        ExtAuthUpdate = [{<<"external_authentication_uid">>, <<"bob">>},
+                          {<<"recovery_authentication_enabled">>, true}],
+        User1 = chef_user:update_from_ejson(User, UpdateAsEJson),
+        User2 = chef_user:update_from_ejson(User, UpdatePassword),
+        User3 = chef_user:update_from_ejson(User, ExtAuthUpdate),
+        [{"changed values are changed",
+           fun() ->
+                ?assertEqual(<<"new_email@somewhere.com">>, User1#chef_user.email),
+                ?assertEqual(<<"martha">>, User1#chef_user.username)
+           end
+        },
+        {"nulled serialized values are deleted from the serialized object",
+           fun() ->
+                % implicit test here that data has been serialized.
+                Data = chef_json:decode(User1#chef_user.serialized_object),
 
-update_record_with_valid_ext_auth_data_test() ->
-    SerializedAsEJson = {base_user_record_as_ejson() ++ persisted_serializable_fields()},
-    User = make_valid_user_record(chef_json:encode(SerializedAsEJson)),
-    UserData = {[ {<<"username">>, <<"martha">>},
-                  {<<"email">>, <<"new_email">>},
-                  {<<"display_name">>, <<"martha stewart pony">>},
-                  {<<"external_authentication_uid">>, <<"bob">>},
-                  {<<"recovery_authentication_enabled">>, true}
-    ]},
-    NewUser = chef_user:update_from_ejson(User,  UserData),
-    ?assertEqual(<<"bob">>, NewUser#chef_user.external_authentication_uid),
-    ?assertEqual(true, NewUser#chef_user.recovery_authentication_enabled).
+                ?assertEqual(ej:get({<<"twitter_account">>}, Data), undefined)
+           end
+        },
+        {"serialized values specified as atom undefined are ignored in the serialized object",
+           fun() ->
+                % implicit test here that data has been serialized.
+                Data = chef_json:decode(User1#chef_user.serialized_object),
+                ?assertEqual(ej:get({<<"city">>}, Data), <<"hereville">>)
+           end
+        },
+        {"updated serialized values are updated within the serialized object",
+           fun() ->
+                % implicit test here that data has been serialized.
+                Data = chef_json:decode(User1#chef_user.serialized_object),
+                ?assertEqual(ej:get({<<"display_name">>}, Data), <<"martha stewart pony">>)
+           end
+        },
+        {"garbage values are not retained",
+           fun() ->
+                Data = chef_json:decode(User1#chef_user.serialized_object),
+                ?assertEqual(ej:get({<<"garbage">>}, Data), undefined)
+           end
+        },
+        {"unchanged password has no side effects",
+           fun() ->
+                ?assertEqual(User#chef_user.hashed_password, User#chef_user.hashed_password),
+                ?assertEqual(User#chef_user.salt, User#chef_user.salt)
+           end
+        },
+        {"password updates related fields",
+           fun() ->
+                ?assertNotEqual(User#chef_user.hashed_password, User2#chef_user.hashed_password),
+                ?assertNotEqual(User#chef_user.salt, User2#chef_user.salt)
+           end
+        },
+        {"external authentication data is not when it should not be",
+           fun() ->
+                ?assertEqual(null, User1#chef_user.external_authentication_uid),
+                ?assertEqual(false, User1#chef_user.recovery_authentication_enabled)
+           end
+        },
+        {"external authentication data is updated when it should be",
+           fun() ->
+                ?assertEqual(<<"bob">>, User3#chef_user.external_authentication_uid),
+                ?assertEqual(true, User3#chef_user.recovery_authentication_enabled)
+           end
+        }]
+      end
+    }.
 
 new_record_test() ->
+    test_utils:bcrypt_setup(),
     UserData = {[
                  {<<"name">>, <<"bob">>},
                  {<<"password">>, <<"top secret 123456">>}
                 ]},
-    OrgId = ?OSC_ORG_ID,
-    AuthzId = <<"00000000000000000000000011111111">>,
-    Hashed = <<"blahblah">>,
-    Salt = <<"nacl">>,
-    HashType = <<"bogus">>,
-    Password = {Hashed, Salt, HashType},
-    User = chef_user:new_record(OrgId, AuthzId, {UserData, Password}),
+    User = chef_user:new_record(?OSC_ORG_ID ,<<"00000000000000000000000011111111">>, UserData),
     ?assertMatch(#chef_user{}, User),
     ?assertEqual(<<"bob">>, chef_user:name(User)),
     ?assertEqual(null, User#chef_user.external_authentication_uid),
-    ?assertEqual(false, User#chef_user.recovery_authentication_enabled).
+    ?assertEqual(false, User#chef_user.recovery_authentication_enabled),
+    test_utils:bcrypt_cleanup(ignore).
 
+new_record_no_password_test() ->
+    UserData = {[ {<<"name">>, <<"bob">>} ]},
+    User = chef_user:new_record(?OSC_ORG_ID ,<<"00000000000000000000000011111111">>, UserData),
+    ?assertEqual(null, User#chef_user.hashed_password),
+    ?assertEqual(null, User#chef_user.salt),
+    ?assertEqual(null, User#chef_user.hash_type).
+
+
+% Misc exports that were untested
+% set_created(#chef_user{}, ActorId}
 public_key_data() ->
     <<"-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCyVPW9YXa5PR0rgEW1updSxygB\nwmVpDnHurgQ7/gbh+PmY49EZsfrZSbKgSKy+rxdsVoSoU+krYtHvYIwVfr2tk0FP\nnhAWJaFH654KpuCNG6x6iMLtzGO1Ma/VzHnFqoOeSCKHXDhmHwJAjGDTPAgCJQiI\neau6cDNJRiJ7j0/xBwIDAQAB\n-----END PUBLIC KEY-----">>.
 
 make_valid_user_record() ->
     make_valid_user_record(<<"{}">>).
 make_valid_user_record(SerializedObject) ->
+    {HashedPassword, Salt ,Type} = chef_password:encrypt("a password"),
     #chef_user{username = <<"alice">>,
                email = <<"test@test.com">>,
                authz_id = <<"1234">>,
                public_key = public_key_data(),
+               hashed_password = HashedPassword,
+               salt = Salt,
+               hash_type = Type,
                serialized_object = SerializedObject}.
 
 make_min_valid_create_user_ejson() ->
@@ -234,10 +312,18 @@ make_min_valid_create_user_ejson() ->
      {<<"password">>, <<"some good pass">>},
      {<<"display_name">>, <<"alice bobson">>}].
 
+make_external_auth_create_user_ejson() ->
+    [{<<"username">>, <<"alice">>},
+     {<<"email">>, <<"test@test.com">>},
+     {<<"password">>, <<"some good pass">>},
+     {<<"external_authentication_uid">>, <<"alice">>},
+     {<<"display_name">>, <<"alice bobson">>}].
+
 base_user_record_as_ejson() ->
     [{<<"public_key">>, public_key_data()},
      {<<"username">>, <<"alice">>},
      {<<"email">>, <<"test@test.com">>}].
+
 
 persisted_serializable_fields() ->
     [{<<"display_name">>, <<"alice bobson">>},

@@ -6,6 +6,7 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
                 deps/ej/ebin \
                 deps/jiffy/ebin \
                 deps/ibrowse/ebin \
+                deps/bcrypt/ebin \
                 deps/mini_s3/ebin
 
 DEPS_PLT = chef_objects.plt
