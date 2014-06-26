@@ -182,8 +182,22 @@ update_record_test() ->
                         {<<"public_key">>, public_key_data()} ]},
     NewUser = chef_user:update_from_ejson(User,  UpdateAsEJson),
     ?assertMatch(#chef_user{}, NewUser),
-    ?assertEqual(<<"martha">>, chef_user:name(NewUser)).
+    ?assertEqual(<<"martha">>, chef_user:name(NewUser)),
+    ?assertEqual(null, NewUser#chef_user.external_authentication_uid),
+    ?assertEqual(false, NewUser#chef_user.recovery_authentication_enabled).
 
+update_record_with_valid_ext_auth_data_test() ->
+    SerializedAsEJson = {base_user_record_as_ejson() ++ persisted_serializable_fields()},
+    User = make_valid_user_record(chef_json:encode(SerializedAsEJson)),
+    UserData = {[ {<<"username">>, <<"martha">>},
+                  {<<"email">>, <<"new_email">>},
+                  {<<"display_name">>, <<"martha stewart pony">>},
+                  {<<"external_authentication_uid">>, <<"bob">>},
+                  {<<"recovery_authentication_enabled">>, true}
+    ]},
+    NewUser = chef_user:update_from_ejson(User,  UserData),
+    ?assertEqual(<<"bob">>, NewUser#chef_user.external_authentication_uid),
+    ?assertEqual(true, NewUser#chef_user.recovery_authentication_enabled).
 
 new_record_test() ->
     UserData = {[
@@ -198,7 +212,9 @@ new_record_test() ->
     Password = {Hashed, Salt, HashType},
     User = chef_user:new_record(OrgId, AuthzId, {UserData, Password}),
     ?assertMatch(#chef_user{}, User),
-    ?assertEqual(<<"bob">>, chef_user:name(User)).
+    ?assertEqual(<<"bob">>, chef_user:name(User)),
+    ?assertEqual(null, User#chef_user.external_authentication_uid),
+    ?assertEqual(false, User#chef_user.recovery_authentication_enabled).
 
 public_key_data() ->
     <<"-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCyVPW9YXa5PR0rgEW1updSxygB\nwmVpDnHurgQ7/gbh+PmY49EZsfrZSbKgSKy+rxdsVoSoU+krYtHvYIwVfr2tk0FP\nnhAWJaFH654KpuCNG6x6iMLtzGO1Ma/VzHnFqoOeSCKHXDhmHwJAjGDTPAgCJQiI\neau6cDNJRiJ7j0/xBwIDAQAB\n-----END PUBLIC KEY-----">>.
