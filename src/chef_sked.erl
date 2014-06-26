@@ -68,7 +68,7 @@ create_user(Name, Password, IsAdmin, create_key) ->
   end;
 
 create_user(Name, Password, IsAdmin, PublicKey) ->
-    PasswordData = chef_wm_password:encrypt(Password),
+    PasswordData = chef_password:encrypt(Password),
     Ejson = {[{<<"name">>, Name},
               {<<"admin">>, IsAdmin =:= true},
               {<<"public_key">>, PublicKey}]},
