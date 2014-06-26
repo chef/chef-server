@@ -107,12 +107,46 @@ def run_osc_upgrade
     File.open(key_file, 'w') { |file| file.write(Chef::JSONCompat.to_json_pretty(sql_users))}
   end
 
+  def start_ec
+    puts "Ensuring all the Enterprise Chef server components are started"
+    msg = "Unable to start Enterprise Chef, which is needed to complete the upgrade"
+    status = run_command("private-chef-ctl start")
+    check_status(status, msg)
+    # Wait for services to come up.
+    # This is longer than for OSC because we need the org system to be provisioned
+    # It might be more ideal to rely on the service retry logic (just take this sleep out)
+    # or to build in some kind of retry logic here.
+    # In testing, the commands begin working on the 4th retry of 5, but that might not
+    # be true on slower systems
+    sleep(30)
+  end
+
+  def stop_ec
+    puts 'Ensuring the Enterprise Chef server is stopped'
+    msg = "Unable to stop the Enterprise Chef server, which is needed to complete the upgrade"
+    status = run_command("private-chef-ctl stop")
+    check_status(status, msg)
+  end
+
+  def stop_osc
+    puts 'Ensuring the Open Source Chef server is stopped'
+    msg = "Unable to stop Open Source Chef server, which is needed to complete the upgrade"
+    status = run_command("chef-server-ctl stop")
+    check_status(status, msg)
+  end
+
   ###
   # Upgrade logic starts here
   ###
 
   require 'chef'
   require 'sequel'
+
+  # This is to help make this process idempotent, but currently if EC has
+  # been started at all OSC won't come up properly. ctl will report EC as
+  # stopped and OSC up, but any attempt to access OSC will result in a 502
+  # This issue will have to be solved for this process to be idempotent
+  stop_ec
 
   start_osc
 
@@ -137,10 +171,7 @@ def run_osc_upgrade
 
   puts "Finished downloading data from the Open Source Chef server"
 
-  puts 'Ensuring the Open Source Chef server is stopped'
-  msg = "Unable to stop Open Source Chef server, which is needed to complete the upgrade"
-  status = run_command("chef-server-ctl stop")
-  check_status(status, msg)
+  stop_osc
 
   # Need to ensure all of OSC is stopped
   # By default, pkill sends TERM, which will cause runsv,runsvdir, and svlogd to shutdown
@@ -151,38 +182,22 @@ def run_osc_upgrade
   # Once we do this we lose most hope at being idempotent
   # Maybe prompt the user before doing this and off to give them steps to do this
   # manually if they don't want this done automatically?
-  puts "Ensuring all the runit processes associated with the Open Source Server are stopped"
-  run_command("pkill runsv")
-  run_command("pkill runsvdir")
-  run_command("pkill svlogd")
+#  puts "Ensuring all the runit processes associated with the Open Source Server are stopped"
+#  run_command("pkill runsv")
+#  run_command("pkill runsvdir")
+#  run_command("pkill svlogd")
   # epmd lives outside of runit, but a pkill will do just fine here too
-  run_command("pkill epmd")
+#  run_command("pkill epmd")
 
-  # A note: bad things happen if the migration has to be run again after EC has been
-  # configured on the box. Even if EC is stopped, conflicts will still occur around postgres
-  # and the users on the system if it is attempted to run OSC again
+  # This could all be run at the end, so that OSC could be brought back up if
+  # needed, but then this would also kill EC. This code will need to be re-worked
+  # so it only removes OSC and leaves EC in place, or else the user needs to
+  # be directed on how to do this.
 
-  # OSC is down, time to bring up EC
-
-  # In testing on a dev-vm, with OSC installed and running, then dpkg installed EC,
-  # then loaded in opscode-omnibus to get this code w/ doing a full build, runninb
-  # p-c-c upgrade without having first reconfigured EC caused the upgrade command to fail,
-  # saying it couldn't find the enterprise cookbook
-  # The reconfigure command was failing, due to missing cookbook dependencies. I assume this
-  # was a quirk of the way I loaded in opscode-omnibus without it being on a vm already running EC.
-  # After I dropped in the cookbooks by hand, all worked. Something to look out for later.
-  puts "Now configuring the Enterprise Chef server for use"
+  puts "Configuring the Enterprise Chef server for use"
   reconfigure(false)
 
-  # Let's ensure all the services are started
-  puts "Ensuring all the Enterprise Chef server components are started"
-  status = run_command("private-chef-ctl start")
-  if !status.success?
-    puts "Unable to start Enterprise Chef, which is needed to complete the upgrade"
-    exit 1
-  end
-#
-  sleep(30) # it takes a bit for the services to come up; sleep before hitting them with requests
+  start_ec
 
   puts "Transforming Open Source server downloaded Data for upload to Enterprise Chef server"
 
