@@ -328,8 +328,8 @@ set_password_data(#chef_user{}=User, {HashedPassword, Salt, HashType}) ->
 update_from_ejson(#chef_user{} = User, UserEJson) ->
     Name = username_from_ejson(UserEJson),
     Email = ej:get({<<"email">>}, UserEJson),
-    ExternalAuthenticationUid = ej:get({<<"external_authentication_uid">>}, UserEJson),
-    RecoveryAuthenticationEnabled = ej:get({<<"recovery_authentication_enabled">>}, UserEJson),
+    ExternalAuthenticationUid = value_or_null({<<"external_authentication_uid">>}, UserEJson),
+    RecoveryAuthenticationEnabled = ej:get({<<"recovery_authentication_enabled">>}, UserEJson) =:= true,
     {Key, Version} = chef_object_base:cert_or_key(UserEJson),
 
     User1 = case Key of
