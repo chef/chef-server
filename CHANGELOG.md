@@ -1,16 +1,27 @@
 # Enterprise Chef Changelog
 
-## 11.1.7
+## 11.1.8 (2014-06-26)
+
+### oc_authz_migrator 0.0.2
+* exit immediately on errors
 
 ### private-chef-cookbooks
 * [OC-11499] Use more strict regular expression for IP check in ha-status
 * [OC-3107] Ensure CouchDB compaction cron job does not run on passive
   backend.
+* [OC-11601] Allow ['lb']['upstream'] to have a custom setting
+* [OC-11601] Use SSL port for lb_internal if non-SSL is disabled
+* [OC-11601] Restart redis_lb immediately during reconfigure
+* [OC-11490] Explicitly set keepalived directory ownership
+* [OC-11297] EC 11 fresh install not saving migration state
+* [OC-11656] Set explicit owner and group for services without them
+* Address a PostgreSQL configuration error. The defect allows any local user on the system hosting the Chef Server’s PostgreSQL components full access to databases.
+* Separate redis_keepalive_timeout from redis_connection_timeout and increase their default values from 60ms to 1000 and 2000ms, respectively.
 
-### openssl 1.0.1h
-* Allow ['lb']['upstream'] to have a custom setting
-* Use SSL port for lb_internal if non-SSL is disabled
-* Restart redis_lb immediately during reconfigure
+### private-chef-ctl
+* [OC-11657] Bump default svwait timeout of 7 seconds to 30 seconds
+* [OC-11382] keepalived restart interferes with upgrades
+* [OC-8881] private-chef-ctl password does not work
 
 ## 11.1.6 (2014-06-05)
 
