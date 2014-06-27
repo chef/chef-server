@@ -18,6 +18,6 @@ build do
   # or do we?
   command "make rel", :env => env
   command "mkdir -p #{install_dir}/embedded/service/opscode-org-creator"
-  command "#{install_dir}/embedded/bin/rsync -a ./ #{install_dir}/embedded/service/opscode-org-creator/"
+  command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./ #{install_dir}/embedded/service/opscode-org-creator/"
   command "rm -rf #{install_dir}/embedded/service/opscode-org-creator/rel/org_app/log"
 end

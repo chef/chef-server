@@ -18,7 +18,7 @@ build do
   command "make distclean", :env => env
   command "make rel", :env => env
   command "mkdir -p #{install_dir}/embedded/service/opscode-erchef"
-  command "#{install_dir}/embedded/bin/rsync -a --delete ./rel/oc_erchef/ #{install_dir}/embedded/service/opscode-erchef/"
+  command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./rel/oc_erchef/ #{install_dir}/embedded/service/opscode-erchef/"
   # TODO: git cleanup in opscode-erchef service directory
   command "rm -rf #{install_dir}/embedded/service/opscode-erchef/log"
 end
