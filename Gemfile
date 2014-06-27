@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'omnibus', github: 'opscode/omnibus-ruby', branch: '2.0-stable'
+# Install omnibus software
+gem 'omnibus', github: 'opscode/omnibus-ruby'
 gem 'omnibus-software', github: 'opscode/omnibus-software'

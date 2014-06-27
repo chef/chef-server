@@ -1,9 +1,20 @@
 # Enterprise Chef Changelog
 
+## 11.1.9 (unreleased)
+
+### cacerts 2014.04.22
+* Update to latest cacerts as of 2014-04-22
+
+### chef 11.12.2
+* Update embedded chef gem to 11.12.2
+
 ## 11.1.8 (2014-06-26)
 
 ### oc_authz_migrator 0.0.2
 * exit immediately on errors
+
+
+## 11.1.7
 
 ### private-chef-cookbooks
 * [OC-11499] Use more strict regular expression for IP check in ha-status
@@ -34,6 +45,11 @@
 * Allow ['lb']['upstream'] to have a custom setting
 * Use SSL port for lb_internal if non-SSL is disabled
 * Restart redis_lb immediately during reconfigure
+* Separate redis_keepalive_timeout from redis_connection_timeout and
+  increase their default values from 60ms to 1000 and 2000ms,
+  respectively.
+* [OC-11581] private-chef-ctl test command should return the pedant
+  return code
 
 ## 11.1.5 (2014-05-14)
 
