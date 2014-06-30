@@ -69,14 +69,13 @@ upgrade(Password, {_OldHash, _OldSalt, _AnyType}) ->
 %% pure bcrypt.  It is expected that clients will call 'upgrade' upon successful
 %% authentication and save the resulting password hash data if it has changed.
 -spec verify(str_or_bin(), password_data()) -> boolean().
-verify(Password, {HashedPass,<<"">>, ?DEFAULT_HASH_TYPE}) ->
-    % the bcrypt library will automatically use the salt portion of the hashed password
-    % string, so pass the entire thing as the salt value.
-    verify(Password, {HashedPass, HashedPass, ?DEFAULT_HASH_TYPE});
 verify(Password, {HashedPass, Salt, ?OSC_DEFAULT_HASH_TYPE}) ->
     verify(Password, {HashedPass, Salt, ?DEFAULT_HASH_TYPE});
-verify(Password, {HashedPass, Salt, ?DEFAULT_HASH_TYPE}) ->
-    {ok, ThisHashedPass} = bcrypt:hashpw(to_str(Password), to_str(Salt)),
+verify(Password, {HashedPass, _, ?DEFAULT_HASH_TYPE}) ->
+    % the bcrypt library will automatically use the salt portion of the hashed password
+    % string, so for bcrypt-encoded passwords we will provided the hashed password as the
+    % salt value as well.
+    {ok, ThisHashedPass} = bcrypt:hashpw(to_str(Password), to_str(HashedPass)),
     slow_compare(ThisHashedPass, to_str(HashedPass));
 verify(Password, {HashedPass, Salt, ?MIGRATION_HASH_TYPE}) ->
     InterimPass = sha1(Salt, Password, ec),
