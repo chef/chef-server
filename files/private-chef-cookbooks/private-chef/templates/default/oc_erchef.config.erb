@@ -58,7 +58,8 @@
               {actions_user, <<"<%= node['private_chef']['rabbitmq']['user'] %>">>},
               {actions_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
               {actions_vhost, <<"<%= node['private_chef']['rabbitmq']['actions_vhost'] %>">>},
-              {actions_exchange, <<"<%= node['private_chef']['rabbitmq']['actions_exchange'] %>">>}
+              {actions_exchange, <<"<%= node['private_chef']['rabbitmq']['actions_exchange'] %>">>},
+              {actions_fqdn, <<" <%= node['private_chef']['lb']['api_fqdn'] %> ">>}
              ]},
  {oc_chef_wm, [
               {api_version, "<%= node['private_chef']['api_version'] %>"},
