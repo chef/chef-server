@@ -23,6 +23,8 @@
   {applications, [
                   kernel,
                   stdlib,
+                  crypto,
+                  bcrypt,
                   ibrowse,
                   folsom,
                   pooler

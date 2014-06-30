@@ -108,9 +108,15 @@ username_from_ejson(UserData) ->
             Name
     end.
 
--spec new_record(object_id(), object_id(),
-        ejson_term() | {ejson_term(), {binary() | null, binary() | null, binary() | null}}) -> #chef_user{}.
-new_record(OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
+-spec new_record(object_id(), object_id(), ejson_term()) -> #chef_user{}.
+new_record(OrgId, AuthzId, Data) ->
+    {HashPass, Salt, HashType} = case ej:get({<<"password">>}, Data) of
+        undefined ->
+            {null, null, null};
+        Password ->
+            chef_password:encrypt(Password)
+    end,
+    UserData = ej:delete({<<"password">>}, Data),
     Name = username_from_ejson(UserData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Email = value_or_null({<<"email">>}, UserData),
@@ -131,9 +137,7 @@ new_record(OrgId, AuthzId, {UserData, {HashPass, Salt, HashType}}) ->
                recovery_authentication_enabled = EnableRecovery,
                admin = false,
                serialized_object = chef_json:encode(SerializedObject)
-    };
-new_record(OrgId, AuthzId, UserData)  ->
-    new_record(OrgId, AuthzId, {UserData, {null, null, null}}).
+    }.
 
 value_or_null(Key, Data) ->
     Value = ej:get(Key, Data),
@@ -277,7 +281,6 @@ external_auth_uid(EJson, #chef_user{external_authentication_uid = ExtAuthUid}) -
 external_auth_uid(EJson, _) ->
     ej:get({<<"external_authentication_uid">>}, EJson).
 
-
 undefined_or_value(null) -> undefined;
 undefined_or_value(Value) -> Value.
 
@@ -322,31 +325,36 @@ set_password_data(#chef_user{}=User, {HashedPassword, Salt, HashType}) ->
                        salt = Salt,
                        hash_type = HashType}.
 
-%% TODO: This is transient code and will be deprecated/removed in the future
--spec update_from_ejson(#chef_user{}, ejson_term()) -> #chef_user{}.
 %% @doc Return a new `chef_user()' record updated according to the specified EJSON
 %% terms. This provides behavior similar to chef_objects:update_from_ejson()
+-spec update_from_ejson(#chef_user{}, ejson_term()) -> #chef_user{}.
 update_from_ejson(#chef_user{} = User, UserEJson) ->
+    User1 = case ej:get({<<"password">>}, UserEJson) of
+        NewPassword when is_binary(NewPassword) ->
+            chef_user:set_password_data(User, chef_password:encrypt(NewPassword));
+        _ ->
+            User
+    end,
     Name = username_from_ejson(UserEJson),
     Email = ej:get({<<"email">>}, UserEJson),
     ExternalAuthenticationUid = value_or_null({<<"external_authentication_uid">>}, UserEJson),
     RecoveryAuthenticationEnabled = ej:get({<<"recovery_authentication_enabled">>}, UserEJson) =:= true,
     {Key, Version} = chef_object_base:cert_or_key(UserEJson),
 
-    User1 = case Key of
+    User2 = case Key of
         undefined ->
-            User;
+            User1;
         _ ->
-            User#chef_user{
+            User1#chef_user{
                 pubkey_version= Version,
                 % Note: public_key is now potentially a certificate...
                 public_key = Key
             }
     end,
     SerializedObject0 = { whitelisted_values(UserEJson, ?JSON_SERIALIZABLE) },
-    SerializedObject1 = merge_user_data(chef_json:decode(User#chef_user.serialized_object),
+    SerializedObject1 = merge_user_data(chef_json:decode(User2#chef_user.serialized_object),
                                         SerializedObject0),
-    User1#chef_user{username = Name,
+    User2#chef_user{username = Name,
                     email = Email,
                     external_authentication_uid = ExternalAuthenticationUid,
                     recovery_authentication_enabled = RecoveryAuthenticationEnabled,
