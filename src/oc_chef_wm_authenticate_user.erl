@@ -97,7 +97,7 @@ process_post(Req, #base_state{chef_db_context = Ctx,
 
 verify_user(Password, #chef_user{external_authentication_uid = null} = User, _Ctx) ->
     PasswordData = chef_user:password_data(User),
-    case chef_wm_password:verify(Password, PasswordData) of
+    case chef_password:verify(Password, PasswordData) of
         true ->
             user_json(<<"linked">>, User);
         false ->
@@ -122,7 +122,7 @@ verify_user(_Password, _Other, _Ctx) ->
 
 maybe_upgrade_password(Password, User, #base_state{requestor_id = Requestor, chef_db_context = Ctx}) ->
     PasswordData = chef_user:password_data(User),
-    case chef_wm_password:upgrade(Password, PasswordData) of
+    case chef_password:upgrade(Password, PasswordData) of
         PasswordData ->
             ok;
         NewPasswordData ->
