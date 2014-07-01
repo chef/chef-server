@@ -49,7 +49,8 @@ validate_request('POST', Req, #base_state{resource_state = UserState} = State) -
           throw({error, missing_body});
       Body ->
           UserData = ejson:decode(Body),
-          chef_user:validate_user_name(UserData),
+          % This change on hold until our front-end components expect it
+          % chef_user:validate_user_name(UserData),
           case ej:valid(valid_user_data(), UserData) of
               ok ->
                   UserState1 = UserState#user_state{user_data = UserData},
@@ -60,7 +61,8 @@ validate_request('POST', Req, #base_state{resource_state = UserState} = State) -
   end.
 
 valid_user_data() ->
-    {[{<<"password">>, {string_match, chef_regex:regex_for(non_blank_string)}} ]}.
+    {[{<<"password">>, {string_match, chef_regex:regex_for(non_blank_string)}},
+      {<<"username">>, {string_match, chef_regex:regex_for(non_blank_string)}}]}.
 
 auth_info(Req, #base_state{ resource_state = #user_state{user_data = UserData}} = State) ->
     %% Disallow any attempts to authenticate with credentials of
