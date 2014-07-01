@@ -74,22 +74,35 @@ Once you have tweaked your `.kitchen.yml` (or `.kitchen.local.yml`) to your
 liking, you can bring up an individual build environment using the `kitchen`
 command.
 
-**NOTE:** Test kitchen shoud be installed external to the local Ruby bundle.
+**NOTE:** Test Kitchen shoud be installed external to the local Ruby bundle.
 Please either use ChefDK or install the latest test-kitchen from Rubygems.
 
 ```shell
-$ kitchen converge ubuntu-12.04
+$ kitchen converge ubuntu-1204
 ```
+
+Test Kitchen uses a regex syntax to match on plaforms, so for example ubuntu 10.04
+will be specificed as ubuntu-1004, or even just ubuntu-10, if 10.04 is the
+only 10 series specified in the `.kitchen.yml`.
 
 Then login to the instance and build the project as described in the Usage
 section:
 
 ```shell
-$ kitchen login ubuntu-12.04
-[vagrant@ubuntu...] $ cd private-chef
-[vagrant@ubuntu...] $ bundle install
+$ kitchen login ubuntu-1204
+[vagrant@ubuntu...] $ cd opscode-omnibus
+[vagrant@ubuntu...] $ bundle install --binstubs
 [vagrant@ubuntu...] $ ...
 [vagrant@ubuntu...] $ bin/omnibus build private-chef
+```
+or if you prefer not to use binstubs and to use bundle exec instead:
+
+```shell
+$ kitchen login ubuntu-1204
+[vagrant@ubuntu...] $ cd opscode-omnibus
+[vagrant@ubuntu...] $ bundle install
+[vagrant@ubuntu...] $ ...
+[vagrant@ubuntu...] $ bundle exec omnibus build private-chef
 ```
 
 For a complete list of all commands and platforms, run `kitchen list` or

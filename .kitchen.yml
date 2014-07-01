@@ -1,5 +1,6 @@
 driver:
   name: vagrant
+  forward_agent: yes
   customize:
     cpus: 4
     memory: 2048
