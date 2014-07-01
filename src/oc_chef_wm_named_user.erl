@@ -110,23 +110,25 @@ auth_type('PUT', AuthzId, #user_state{user_data = UserData}) ->
 auth_type(_, AuthzId, _State) ->
     {actor, AuthzId}.
 
-from_json(Req, #base_state{reqid = RequestId,
-                           resource_state = #user_state{
+from_json(Req, #base_state{resource_state = #user_state{
                            chef_user = User,
                            user_data = UserData}} = State) ->
-    UserDataWithKeys = maybe_generate_key_pair(UserData, RequestId),
-
-    % Custom json body needed to maintain compatibility with opscode-account behavior.
-    % chef_wm_base:update_from_json will reply with the complete object, but
-    % clients currently expect only a URI, and a private key if the key is new.
-    %
-    % However, we will retain the returned Request since Location header wil have been
-    % correctly set if the username changed.
-    case chef_wm_base:update_from_json(Req, State, User, UserDataWithKeys) of
-        {true, Req1, State1} ->
-            {true, make_update_response(Req1, UserDataWithKeys), State1};
-        Other ->
-            Other
+    case chef_wm_util:maybe_generate_key_pair(UserData) of
+        keygen_timeout ->
+            {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
+        UserDataWithKeys ->
+            %% Custom json body needed to maintain compatibility with opscode-account behavior.
+            %% chef_wm_base:update_from_json will reply with the complete object, but
+            %% clients currently expect only a URI, and a private key if the key is new.
+            %%
+            %% However, we will retain the returned Request since Location header wil have been
+            %% correctly set if the username changed.
+            case chef_wm_base:update_from_json(Req, State, User, UserDataWithKeys) of
+                {true, Req1, State1} ->
+                    {true, make_update_response(Req1, UserDataWithKeys), State1};
+                Other ->
+                    Other
+            end
     end.
 
 to_json(Req, #base_state{resource_state = #user_state{chef_user = User},
@@ -143,23 +145,6 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
     EJson = chef_user:assemble_user_ejson(User, OrgName),
     Req1 = chef_wm_util:set_json_body(Req, EJson),
     {true, Req1, State}.
-
-%% If the request contains "private_key":true, then we will generate a new key pair. In
-%% this case, we'll add the new public and private keys into the EJSON since
-%% update_from_json will use it to set the response.
-maybe_generate_key_pair(UserData, RequestorId) ->
-    Name = chef_user:username_from_ejson(UserData),
-    case ej:get({<<"private_key">>}, UserData) of
-        true ->
-            %% in this context: private_key is generated to return to the client
-            %% in our json response. public_key (whether it be a cert or actual public key)
-            %% is what we're capturing in the DB.
-            {CertOrKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestorId),
-            UserData1 = ej:set({<<"private_key">>}, UserData, PrivateKey),
-            chef_object_base:set_public_key(UserData1, CertOrKey);
-        _ ->
-            UserData
-    end.
 
 error_message(Msg) when is_list(Msg) ->
     error_message(iolist_to_binary(Msg));

@@ -78,16 +78,22 @@ create_path(Req, #base_state{resource_state = #user_state{user_data = UserData}}
   Name = chef_user:username_from_ejson(UserData),
   {binary_to_list(Name), Req, State}.
 
-from_json(Req, #base_state{reqid = RequestId,
-                           resource_state = #user_state{user_data = UserData,
-                           user_authz_id = AuthzId}} = State) ->
+from_json(Req, #base_state{resource_state = #user_state{user_data = UserData}} = State) ->
+    KeyData = case chef_object_base:cert_or_key(UserData) of
+                  {undefined, _} ->
+                      chef_keygen_cache:get_key_pair();
+                  {PubKey, _PubKeyVersion} ->
+                      {PubKey, undefined}
+              end,
+    handle_user_create(KeyData, Req, State).
+
+handle_user_create(keygen_timeout, Req, State) ->
+    {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
+handle_user_create({PublicKey, PrivateKey}, Req,
+                   #base_state{resource_state =
+                                   #user_state{user_data = UserData,
+                                               user_authz_id = AuthzId}} = State) ->
     Name = chef_user:username_from_ejson(UserData),
-    {PublicKey, PrivateKey} = case chef_object_base:cert_or_key(UserData) of
-        {undefined, _} ->
-            chef_wm_util:generate_keypair(Name, RequestId);
-        {PubKey, _PubKeyVersion} ->
-            {PubKey, undefined}
-    end,
     UserWithKey = chef_object_base:set_public_key(UserData, PublicKey),
 
     case chef_wm_base:create_from_json(Req, State, chef_user, {authz_id, AuthzId}, UserWithKey) of
