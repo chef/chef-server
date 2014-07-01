@@ -67,6 +67,7 @@
 * [OC-3107] Ensure CouchDB compaction cron job does not run on passive
   backend.
 * Introduce pluggable HA architecture as an alternative to DRBD
+* [OC-11673] Tune PostgreSQL keepalive timeouts
 
 ### openssl 1.0.1h
 * Allow ['lb']['upstream'] to have a custom setting
