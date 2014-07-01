@@ -15,19 +15,10 @@ end
 #
 # ha-status
 #  - check keepalived is actually enabled in the config
-#  - If we're supposed to be using drbd
-#    - check drbd is actually enabled in the config
-#    - check that someone created the underlying block device drbd will use
-#    - check that the drbd device itself exists (i.e. kernel module configured+loaded)
 #  - check that the current state matches requested state of master or backup
 #  - check that the VRRP IP address state is correct based on our state
-#  - If we're supposed to be using drbd
-#    - check that the DRBD state is correct based on our state
-#    - check that the DRBD drive is correctly (un)mounted based on our state
-#    - check that the DRBD primary+secondary replication IP are both pingable
-#  - If we're using custom HA scripts
-#    - Check that the custom VIP state is correct based on our state
-#    - Check that the block device state is correct based on our state
+#  - Check that the custom VIP state is correct based on our state
+#  - Check that the block device state is correct based on our state
 #  - check that the runit service status is correct based on our state
 #
 
@@ -46,37 +37,6 @@ add_command "ha-status", "Show the status of high availability services.", 1 do
     exit 1
   end
 
-
-  ha = (running_config['private_chef']['topology'] == 'ha')
-  customha = (running_config['private_chef']['topology'] == 'customha')
-
-  if ha
-    # We're using regular DRBD HA, perform DRBD checks
-    if running_config['private_chef']['drbd']['enable']
-      puts "[OK] DRBD disk replication enabled."
-    else
-      puts "[ERROR] DRBD disk replication services not enabled, please configure DRBD according to documentation."
-      exit 1
-    end
-
-    drbd_disk = running_config['private_chef']['drbd']['disk']
-    if File.exists?(drbd_disk)
-      puts "[OK] DRBD partition #{drbd_disk} found."
-    else
-      puts "[ERROR] DRBD partition #{drbd_disk} not found, please FIXME."
-      exit 1
-    end
-
-    drbd_device = running_config['private_chef']['drbd']['device']
-    if File.exists?(drbd_device)
-      puts "[OK] DRBD device #{drbd_device} found."
-    else
-      puts "[ERROR] DRBD device #{drbd_device} not found, please FIXME."
-      exit 1
-    end
-  elsif customha
-    # Check custom HA stuff
-  end
 
   requested_cluster_status = File.read("/var/opt/opscode/keepalived/requested_cluster_status").chomp
   current_cluster_status = File.read("/var/opt/opscode/keepalived/current_cluster_status").chomp
@@ -116,60 +76,6 @@ add_command "ha-status", "Show the status of high availability services.", 1 do
   else
     puts "[ERROR] VRRP communications interface #{vrrp_instance_interface} not found."
     error_exit = 8
-  end
-
-  if ha
-    drbd_status = `cat /proc/drbd | egrep cs:`.chomp
-    if current_cluster_status == "master"
-      if drbd_status =~ /cs:Connected ro:Primary\/Secondary ds:UpToDate\/UpToDate/
-        puts "[OK] my DRBD status is Connected/Primary/UpToDate and I am master"
-      else
-        puts "[ERROR] my DRBD status is: #{drbd_status}"
-        error_exit = 4
-      end
-    else
-      if drbd_status =~ /cs:Connected ro:Secondary\/Primary ds:UpToDate\/UpToDate/
-        puts "[OK] my DRBD status is Connected/Secondary/UpToDate and I am not master"
-      else
-        puts "[ERROR] my DRBD status is #{drbd_status}"
-        error_exit = 4
-      end
-    end
-
-    drbd_mountpoint = running_config['private_chef']['drbd']['data_dir']
-    mps = []
-    File.read("/proc/mounts").each_line { |l| mps << l.split(/\s+/)[1] }
-    if current_cluster_status == "master"
-      if mps.include?(drbd_mountpoint)
-        puts "[OK] my DRBD partition is mounted and I am master"
-      else
-        puts "[ERROR] my DRBD partition is not mounted and I am master"
-        error_exit = 5
-      end
-    else
-      if mps.include?(drbd_mountpoint)
-        puts "[ERROR] my DRBD partition is mounted and I am not master"
-        error_exit = 5
-      else
-        puts "[OK] my DRBD partition is not mounted and I am not master"
-      end
-    end
-
-    drbd_primary_ip = running_config['private_chef']['drbd']['primary']['ip']
-    if system("ping -c 1 -W 1 #{drbd_primary_ip} >/dev/null 2>&1")
-      puts "[OK] DRBD primary IP address pings"
-    else
-      puts "[ERROR] DRBD primary IP address does not ping"
-      error_exit = 6
-    end
-
-    drbd_secondary_ip = running_config['private_chef']['drbd']['secondary']['ip']
-    if system("ping -c 1 -W 1 #{drbd_secondary_ip} >/dev/null 2>&1")
-      puts "[OK] DRBD secondary IP address pings"
-    else
-      puts "[ERROR] DRBD secondary IP address does not ping"
-      error_exit = 6
-    end
   end
 
   custom_backend = "/var/opt/opscode/keepalived/bin/custom_backend_"

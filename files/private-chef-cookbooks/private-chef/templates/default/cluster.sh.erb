@@ -34,32 +34,13 @@ function transition
   case "$1" in
     master)
       if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_storage' ]; then
-          log_me "Attempting CUSTOM BACKEND STORAGE takeover"
-          /var/opt/opscode/keepalived/bin/custom_backend_storage attach >> $LOGNAME 2>&1
-          if [ $? -gt 0 ]; then
-            error_exit "CUSTOM BACKEND STORAGE attach failed"
-          else
-            log_me "CUSTOM BACKEND STORAGE attach success"
-          fi
-      else
-        # 10 * SVWAIT
-        try=300
-        while true; do
-          log_me "Attempting DRBD primary takeover - attempts left ${try}"
-          drbdadm primary pc0 && break
-          let "--try" || error_exit "Cannot become drbd primary!"
-          last_requested_state=`echo -n $(cat $requested_state_file)`
-          if [ "$last_requested_state" != "master" ]; then
-            log_me "Requested state transition to backup, aborting trying to aquire DRBD primary"
-            return
-          fi
-          sleep 1
-        done
-
-        log_me "DRBD primary takeover successful"
-
-        log_me "Mounting <%= node['private_chef']['drbd']['device'] %> at <%= node['private_chef']['drbd']['data_dir'] %>"
-        mount <%= node['private_chef']['drbd']['device'] %> <%= node['private_chef']['drbd']['data_dir'] %> || true
+        log_me "Attempting HA storage takeover"
+        /var/opt/opscode/keepalived/bin/custom_backend_storage attach >> $LOGNAME 2>&1
+        if [ $? -gt 0 ]; then
+          error_exit "HA storage attach failed"
+        else
+          log_me "HA storage attach success"
+        fi
       fi
 
 <%- keepalive_services.each do |service| -%>
@@ -89,24 +70,13 @@ function transition
 <%- end -%>
 
       if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_storage' ]; then
-          log_me "Attempting CUSTOM BACKEND STORAGE detach"
-          /var/opt/opscode/keepalived/bin/custom_backend_storage detach >> $LOGNAME 2>&1
-          if [ $? -gt 0 ]; then
-            error_exit "CUSTOM BACKEND STORAGE detach failed"
-          else
-            log_me "CUSTOM BACKEND STORAGE detach success"
-          fi
-      else
-        # 10 * SVWAIT
-        try=300
-        while true; do
-          log_me "Attempting to become DRBD secondary - attempts left ${try}"
-          mountpoint <%= node['private_chef']['drbd']['data_dir'] %> && fuser -km <%= node['private_chef']['drbd']['data_dir'] %>
-          umount -f <%= node['private_chef']['drbd']['data_dir'] %> || true
-          drbdadm secondary pc0 && break
-          let "--try" || error_exit "Cannot become DRBD secondary"
-          sleep 1
-        done
+        log_me "Attempting HA storage detach"
+        /var/opt/opscode/keepalived/bin/custom_backend_storage detach >> $LOGNAME 2>&1
+        if [ $? -gt 0 ]; then
+          error_exit "HA storage detach failed"
+        else
+          log_me "HA storage detach success"
+        fi
       fi
 
       if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_ip' ]; then

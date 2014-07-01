@@ -14,7 +14,7 @@ require 'securerandom'
 module PrivateChef
   extend(Mixlib::Config)
 
-  # options are 'standalone', 'manual', 'ha', 'customha' and 'tier'
+  # options are 'standalone', 'manual', 'ha', and 'tier'
   topology "standalone"
 
   # options are 'ipv4' 'ipv6'
@@ -45,7 +45,6 @@ module PrivateChef
   opscode_account Mash.new
   bookshelf Mash.new
   bootstrap Mash.new
-  drbd Mash.new
   keepalived Mash.new
   estatsd Mash.new
   nginx Mash.new
@@ -57,6 +56,7 @@ module PrivateChef
 
   servers Mash.new
   backend_vips Mash.new
+  ha Mash.new
   api_fqdn nil
   node nil
 
@@ -145,7 +145,7 @@ module PrivateChef
       end
 
       me = PrivateChef["servers"][node_name]
-      ha_guard = ['ha', 'customha'].include?(PrivateChef['topology']) && !me['bootstrap']
+      ha_guard = PrivateChef['topology'] == 'ha' && !me['bootstrap']
 
       PrivateChef['rabbitmq']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['rabbitmq']['jobs_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
@@ -153,7 +153,6 @@ module PrivateChef
       PrivateChef['postgresql']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['opscode_account']['session_secret_key'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['oc_bifrost']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
       PrivateChef['oc_bifrost']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
@@ -182,9 +181,6 @@ module PrivateChef
               },
               'opscode_account' => {
                 'session_secret_key' => PrivateChef['opscode_account']['session_secret_key']
-              },
-              'drbd' => {
-                'shared_secret' => PrivateChef['drbd']['shared_secret']
               },
               'keepalived' => {
                 'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
@@ -226,7 +222,6 @@ module PrivateChef
         "opscode_account",
         "bookshelf",
         "bootstrap",
-        "drbd",
         "keepalived",
         "estatsd",
         "nginx",
@@ -265,31 +260,21 @@ module PrivateChef
       PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
     end
 
-    def gen_drbd
-      PrivateChef["couchdb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/couchdb"
-      PrivateChef['bookshelf']['data_dir'] = "/var/opt/opscode/drbd/data/bookshelf"
-      PrivateChef["rabbitmq"]["data_dir"] ||= "/var/opt/opscode/drbd/data/rabbitmq"
-      PrivateChef["opscode_solr4"]["data_dir"] ||= "/var/opt/opscode/drbd/data/opscode-solr4"
-      PrivateChef["redis_lb"]["data_dir"] ||= "/var/opt/opscode/drbd/data/redis_lb"
+    def gen_hapaths
+      PrivateChef["ha"]["path"] ||= "/var/opt/opscode/drbd/data"
+      PrivateChef["couchdb"]["data_dir"] ||= "#{hapath}/couchdb"
+      PrivateChef['bookshelf']['data_dir'] = "#{hapath}/bookshelf"
+      PrivateChef["rabbitmq"]["data_dir"] ||= "#{hapath}/rabbitmq"
+      PrivateChef["opscode_solr4"]["data_dir"] ||= "#{hapath}/opscode-solr4"
+      PrivateChef["redis_lb"]["data_dir"] ||= "#{hapath}/redis_lb"
 
       # The postgresql data directory is scoped to the current version;
       # changes in the directory trigger upgrades from an old PostgreSQL
       # version to a newer one
-      PrivateChef["postgresql"]["data_dir"] ||= "/var/opt/opscode/drbd/data/postgresql_#{node['private_chef']['postgresql']['version']}"
+      PrivateChef["postgresql"]["data_dir"] ||= "#{hapath}/postgresql_#{node['private_chef']['postgresql']['version']}"
 
-      PrivateChef["drbd"]["enable"] ||= true
-      PrivateChef["drbd"]["ipv6_on"] = PrivateChef["use_ipv6"]
       # Need old path for cookbook migration
-      PrivateChef['opscode_chef']['checksum_path'] ||= "/var/opt/opscode/drbd/data/opscode-chef/checksum"
-      drbd_role = "primary"
-      PrivateChef['servers'].each do |k, v|
-        next unless v['role'] == "backend"
-        PrivateChef["drbd"][drbd_role] ||= {
-          "fqdn" => k,
-          "ip" => v['cluster_ipaddress'] || v["ipaddress"]
-        }
-        drbd_role = "secondary"
-      end
+      PrivateChef['opscode_chef']['checksum_path'] ||= "#{hapath}/opscode-chef/checksum"
     end
 
     def gen_keepalived(node_name)
@@ -380,8 +365,8 @@ module PrivateChef
       case me["role"]
       when "backend"
         gen_backend(me['bootstrap'])
-        gen_drbd if topology == 'ha'
-        gen_keepalived(node_name) if ['ha', 'customha'].include?(topology)
+        gen_hapaths if topology == 'ha'
+        gen_keepalived(node_name) toplogy == 'ha'
         gen_api_fqdn
       when "frontend"
         gen_frontend
@@ -429,10 +414,10 @@ module PrivateChef
       when "standalone","manual"
         PrivateChef[:api_fqdn] ||= node_name
         gen_api_fqdn
-      when "ha", "tier", "customha"
+      when "ha", "tier"
         gen_redundant(node_name, PrivateChef['topology'])
       else
-        Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha, customha, or tier.")
+        Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha, or tier.")
         exit 55
       end
 

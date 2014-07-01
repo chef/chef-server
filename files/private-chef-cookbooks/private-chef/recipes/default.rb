@@ -158,7 +158,6 @@ include_recipe "private-chef::sysctl-updates"
 
 # Configure Services
 [
-  "drbd",
   "couchdb",
   "rabbitmq",
   "postgresql",
@@ -183,9 +182,9 @@ include_recipe "private-chef::sysctl-updates"
     # All non-enabled services get disabled; couchdb and
     # opscode-expander get additional special treatment
     #
-    # drbd and bootstrap aren't really services, though, so there's
+    # bootstrap isn't really a service, though, so there's
     # nothing to disable, really.
-    unless ["drbd", "bootstrap"].include?(service)
+    unless service == 'bootstrap'
 
       runit_service service do
         action :disable
