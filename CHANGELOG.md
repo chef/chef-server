@@ -17,6 +17,9 @@
 ### chef 11.12.2
 * Update embedded chef gem to 11.12.2
 
+### private-chef-cookbooks
+* [OC-11673] Tune PostgreSQL keepalive timeouts
+
 ## 11.1.8 (2014-06-26)
 
 ### oc_authz_migrator 0.0.2

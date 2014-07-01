@@ -92,12 +92,14 @@ max_connections = <%= node['private_chef']['postgresql']['max_connections'] %>		
 # - TCP Keepalives -
 # see "man 7 tcp" for details
 
-#tcp_keepalives_idle = 0		# TCP_KEEPIDLE, in seconds;
-					# 0 selects the system default
-#tcp_keepalives_interval = 0		# TCP_KEEPINTVL, in seconds;
-					# 0 selects the system default
-#tcp_keepalives_count = 0		# TCP_KEEPCNT;
-					# 0 selects the system default
+# TCP_KEEPIDLE, in seconds; 0 selects the system default
+tcp_keepalives_idle = <% node['private_chef']['postgresql']['keepalives_idle'] %>
+
+# TCP_KEEPINTERVAL, in seconds; 0 selects the system default
+tcp_keepalives_interval = <% node['private_chef']['postgresql']['keepalives_interval'] %>
+
+# TCP_KEEPCNT, in seconds; 0 selects the system default
+tcp_keepalives_count = <% node['private_chef']['postgresql']['keepalives_count'] %>
 
 
 #------------------------------------------------------------------------------
