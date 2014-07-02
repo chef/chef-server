@@ -86,10 +86,9 @@ from_json(Req, #base_state{resource_state = #container_state{
 delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  requestor_id = RequestorId,
                                  resource_state = #container_state{
-                                                     oc_chef_container = Container},
-                                 darklaunch = Darklaunch
+                                                     oc_chef_container = Container}
                                 } = State) ->
-    ok = oc_chef_wm_base:delete_object(DbContext, Container, RequestorId, Darklaunch),
+    ok = oc_chef_wm_base:delete_object(DbContext, Container, RequestorId),
     Ejson = oc_chef_container:assemble_container_ejson(Container),
     {true, chef_wm_util:set_json_body(Req, Ejson), State}.
 

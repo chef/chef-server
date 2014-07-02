@@ -125,11 +125,10 @@ delete_resource(Req, #base_state{
                         chef_db_context = DbContext,
                         requestor_id = RequestorId,
                         resource_state = #group_state{
-                                            oc_chef_group = InputGroup },
-                        darklaunch = Darklaunch
+                                            oc_chef_group = InputGroup }
                        } = State) ->
     Group = InputGroup#oc_chef_group{last_updated_by = RequestorId},
-    ok = oc_chef_wm_base:delete_object(DbContext, Group, RequestorId, Darklaunch),
+    ok = oc_chef_wm_base:delete_object(DbContext, Group, RequestorId),
     Ejson = oc_chef_group:assemble_group_ejson(Group, OrgName),
     {true, chef_wm_util:set_json_body(Req, Ejson), State}.
 
