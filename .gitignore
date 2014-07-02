@@ -12,3 +12,4 @@ doc/*.html
 /deps.plt
 /.concrete
 test/*.out
+.rebar

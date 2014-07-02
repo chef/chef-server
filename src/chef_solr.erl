@@ -273,7 +273,7 @@ solr_update(Body) ->
         SolrUrl = envy:get(chef_index, solr_url, string),
         %% FIXME: solr will barf on doubled '/'s so SolrUrl must not end with a trailing slash
         Url = SolrUrl ++ "/update",
-        Headers = [],
+        Headers = [{"Content-Type", "text/xml"}],
         case ibrowse:send_req(Url, Headers, post, Body) of
             %% FIXME: verify that solr returns non-200 if something is wrong and not "status":"ERROR".
             {ok, "200", _Head, _Body} -> ok;

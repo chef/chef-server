@@ -66,13 +66,12 @@ amqp_child_spec() ->
             User = envy:get(chef_index,rabbitmq_user, binary),
             Password = envy:get(chef_index,rabbitmq_password, binary),
             ExchangeName = envy:get(chef_index,rabbitmq_exchange, binary),
-            VHosts = vhost_config(),
+            VHost = envy:get(chef_index, rabbitmq_vhost, binary),
 
-            VHostExchange = [ {V, ExchangeName} || V <- VHosts ],
             error_logger:info_msg("Connecting to Rabbit at ~p:~p ~p~n",
-                                  [Host, Port, VHostExchange]),
+                                  [Host, Port, {VHost, ExchangeName}]),
 
-            [ bunnyc_spec(V, Host, Port, User, Password, ExchangeName) || V <- VHosts ]
+            [bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName)]
     end.
 
 bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName) ->
@@ -82,28 +81,9 @@ bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName) ->
     {Name, {bunnyc, start_link, [Name, Network, Exchange, []]},
      permanent, 5000, worker, dynamic}.
 
-vhost_config() ->
-    case envy:get(chef_index, rabbitmq_vhosts, [], fun is_list_of_binary/1) of
-        [] ->
-            %% vhosts unset, default to old-style single vhost config
-            [envy:get(chef_index, rabbitmq_vhost, binary)];
-        VHosts ->
-            VHosts
-    end.
-
 %% Given a rabbitmq `VHost' binary, return the atom that identifies the registered bunnyc
 %% server for that vhost.
 server_for_vhost(VHost) ->
     Bin = erlang:iolist_to_binary([<<"chef_index_queue">>, VHost]),
     erlang:binary_to_atom(Bin, utf8).
-  
-is_list_of_binary(List) ->
-    BadItems = [ E || E <- List, not is_binary(E) ],
-    case BadItems of
-        [] ->
-            true;
-        _ ->
-            {non_binary_items, BadItems}
-    end.
-
     

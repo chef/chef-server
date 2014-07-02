@@ -20,18 +20,6 @@
 -include_lib("eunit/include/eunit.hrl").
 -include("../include/chef_solr.hrl").
 
-is_list_of_binary_test_() ->
-    AllBin = [<<"a">>, <<"b">>, <<"c">>, <<>>],
-    BadLists = [
-                {[<<"a">>, <<"b">>, nope], [nope]},
-                {[<<"a">>, nope, <<"c">>], [nope]},
-                {[nope, <<"b">>, <<"c">>], [nope]},
-                {[nope1, <<"b">>, nope3], [nope1, nope3]},
-                {[nope1, nope2, nope3], [nope1, nope2, nope3]}
-               ],
-    [?_assertEqual(true, chef_index_sup:is_list_of_binary(AllBin))]
-        ++ [ ?_assertEqual({non_binary_items, Expect}, chef_index_sup:is_list_of_binary(In))
-             || {In, Expect} <- BadLists ].
      
 server_for_vhost_test() ->
     ?assertEqual('chef_index_queue/chef',
