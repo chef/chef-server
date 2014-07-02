@@ -836,8 +836,7 @@ bulk_get_objects(Type, Ids) ->
 %% and insert into the DB as appropriate.  Note this depends
 %% on the stability of the record order!
 create_object(#chef_cookbook_version{checksums = Checksums}=CookbookVersion) ->
-    Fields0 = flatten_record(CookbookVersion),
-    Fields = cookbook_version_fields_for_insert(Fields0),
+    Fields = cookbook_version_fields_for_insert(CookbookVersion),
     case create_object(insert_cookbook_version, Fields) of
         {ok, 1} ->
             case insert_cookbook_checksums(Checksums,
@@ -892,13 +891,39 @@ create_object(QueryName, Record) when is_atom(QueryName) ->
     List = flatten_record(Record),
     create_object(QueryName, List).
 
--spec cookbook_version_fields_for_insert(CbFields:: list()) -> list().
-cookbook_version_fields_for_insert(CbFields) ->
-    %% We drop the last record field - checksums
-    CBFields1 = lists:reverse(tl(lists:reverse(CbFields))),
-    %% Drop the authz_id field as it is not needed in the WHERE clause
-    Length = length(CBFields2),
-    lists:sublist(CBFields1, Length - 3) ++ lists:nthtail(Length - 2, CBFields1).
+-spec cookbook_version_fields_for_insert(CookbookVersion::#chef_cookbook_version{}) -> list().
+cookbook_version_fields_for_insert(#chef_cookbook_version{
+                                      'id' = Id,
+                                      'major' = Major,
+                                      'minor' = Minor,
+                                      'patch' = Patch,
+                                      'frozen' = Frozen,
+                                      'meta_attributes' = MetaAttributes,
+                                      'meta_deps' = MetaDeps,
+                                      'meta_long_desc' = MetaLongDesc,
+                                      'metadata' = Metadata,
+                                      'serialized_object' = SerializedObject,
+                                      'last_updated_by' = LastUpdatedBy,
+                                      'created_at' = CreatedAt,
+                                      'updated_at' = UpdatedAt,
+                                      'org_id' = OrgId,
+                                      'name' = Name
+                                     }) ->
+    [Id,
+     Major,
+     Minor,
+     Patch,
+     Frozen,
+     MetaAttributes,
+     MetaDeps,
+     MetaLongDesc,
+     Metadata,
+     SerializedObject,
+     LastUpdatedBy,
+     CreatedAt,
+     UpdatedAt,
+     OrgId,
+     Name].
 
 %% @doc Inserts FK references to checksums into the database
 %%
