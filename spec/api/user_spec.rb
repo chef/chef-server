@@ -1608,6 +1608,65 @@ EOF
             new_public_key.should_not eq(original_public_key)
           end
         end
+
+        context "with private_key = true and a certificate as public_key" do
+          let(:input_certificate) do
+            <<EOF
+-----BEGIN CERTIFICATE-----
+MIIDNjCCAp+gAwIBAgIBATANBgkqhkiG9w0BAQUFADCBnjELMAkGA1UEBhMCVVM
+EzARBgNVBAgMCldhc2hpbmd0b24xEDAOBgNVBAcMB1NlYXR0bGUxFjAUBgNVBAo
+DU9wc2NvZGUsIEluYy4xHDAaBgNVBAsME0NlcnRpZmljYXRlIFNlcnZpY2UxMjA
+BgNVBAMMKW9wc2NvZGUuY29tL2VtYWlsQWRkcmVzcz1hdXRoQG9wc2NvZGUuY29
+GIBBERISHGIBBERISHGIBBERISHGIBBERISHGIBBERISHGIBBERISHGIBBERISH
+44XkW6yWRQbShOQImeop9ODWTkZ4mR1p8+0YBIN9nJaVEQsq112w9SF84I23clE
+YAl2yCI8v2GiDgeJbC4MheYITeBUpqquacSNYya7jWSEPuP3Hq4r0A9O7yZk+F9
+cF4OxBcyrMVFaUaLLNzuYjom8Oe5rZIJqE2Je8ujOMMrWJQpCLrZNY6ZNivQQBf
+tjl8Dbe7xvWWTtD/HdY0LL+UT5MUi/rUx0zfKPHgvsERM+r4sod6E6GhbMesP0i
++ewJb/FRGbyF6VDB5xYshHJ28MWpQ8KsW2An+tVwqRtaHWOGWXLXHaLkG3EOgv0
+70sCAwEAATANBgkqhkiG9w0BAQUFAAOBgQAj+j4oxrg0Q6L3sEhDfxDy8dV+P/4
+ik9R4ZgC1xooGZcEumJZgT/GhWBsCe97BZXntArgt1zKM2Ad30pElgbWoqbtGLX
+B4ybSWTCCW3xnQw+bSDiSP/nZjo5RlxWk6bqLjA9+wTMsxotaMd4Sd5P64lZZrS
+eXXVMgVGvcGheA==
+-----END CERTIFICATE-----
+EOF
+          end
+
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@opscode.com",
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => "new name",
+              "password" => "badger badger",
+              "private_key" => true,
+              "public_key" => input_certificate
+            }
+          end
+
+          it "returns a new private key, ignores the certificate" do
+            original_response = get(request_url, platform.superuser)
+            original_public_key = JSON.parse(original_response.body)["public_key"]
+
+            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response.should look_like({
+                                            :status => 200,
+                                            :body_exact => {
+                                              "uri" => request_url,
+                                              "private_key" => private_key_regex
+                                            },
+                                          })
+
+            new_private_key = JSON.parse(put_response.body)["private_key"]
+            new_private_key.should_not eq(@original_private_key)
+
+            new_response = get(request_url, platform.superuser)
+            new_public_key = JSON.parse(new_response.body)["public_key"]
+
+            new_public_key.should_not eq(input_certificate)
+            new_public_key.should_not eq(original_public_key)
+          end
+        end
       end # context modifying users
 
       context "renaming users" do
