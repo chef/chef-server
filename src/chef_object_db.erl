@@ -24,38 +24,36 @@
 -module(chef_object_db).
 
 -export([
-         add_to_solr/3,
-         bulk_delete_from_solr/4,
-         delete/4,
-         delete_from_solr/2]).
+         add_to_solr/2,
+         bulk_delete_from_solr/3,
+         delete/3,
+         delete_from_solr/1]).
 
 -include_lib("chef_objects/include/chef_types.hrl").
 
--type darklaunch() :: any().
-
--spec add_to_solr(tuple(), ejson_term() | {ejson_term(), _}, darklaunch()) -> ok.
-add_to_solr(ObjectRec, ObjectEjson, Darklaunch) ->
+-spec add_to_solr(tuple(), ejson_term() | {ejson_term(), _}) -> ok.
+add_to_solr(ObjectRec, ObjectEjson) ->
     case chef_object:is_indexed(ObjectRec) of
         true ->
             IndexEjson = chef_object:ejson_for_indexing(ObjectRec, ObjectEjson),
             DbName = chef_otto:dbname(chef_object:org_id(ObjectRec)),
             Id = chef_object:id(ObjectRec),
             TypeName = chef_object:type_name(ObjectRec),
-            index_queue_add(TypeName, Id, DbName, IndexEjson, Darklaunch);
+            index_queue_add(TypeName, Id, DbName, IndexEjson);
         false ->
             ok
     end.
 
 %% @doc Helper function to easily delete an object from Solr, instead
 %% of calling chef_index_queue directly.
--spec delete_from_solr(tuple(), darklaunch()) -> ok.
-delete_from_solr(ObjectRec, Darklaunch) ->
+-spec delete_from_solr(tuple()) -> ok.
+delete_from_solr(ObjectRec) ->
     case chef_object:is_indexed(ObjectRec) of
         true ->
             Id = chef_object:id(ObjectRec),
             DbName = chef_otto:dbname(chef_object:org_id(ObjectRec)),
             TypeName = chef_object:type_name(ObjectRec),
-            index_queue_delete(TypeName, Id, DbName, Darklaunch);
+            index_queue_delete(TypeName, Id, DbName);
         false ->
             ok
     end.
@@ -69,10 +67,10 @@ delete_from_solr(ObjectRec, Darklaunch) ->
 %% pulled out of the db so it will be as if the data was correctly deleted. If we deleted
 %% the solr data when a db error was encountered, we could have data in the db that could
 %% not be findable via search.
--spec delete(chef_db:db_context(), tuple(), object_id(), darklaunch()) -> ok.
+-spec delete(chef_db:db_context(), tuple(), object_id()) -> ok.
 delete(DbContext, #chef_data_bag{org_id = OrgId,
                                  name = DataBagName}=DataBag,
-       _RequestorId, Darklaunch) ->
+       _RequestorId) ->
     %% This is a special case, because of the hierarchical relationship between Data Bag
     %% Items and Data Bags.  We need to get the ids of all the data bag's items so that we
     %% can remove them from Solr as well; a cascade-on-delete foreign key takes care of the
@@ -86,36 +84,36 @@ delete(DbContext, #chef_data_bag{org_id = OrgId,
 
     %% Remove data bag from database; no need to remove from Solr, since they're not indexed
     %% anyway (what's there to index, after all?)
-    delete_from_db(DbContext, DataBag, Darklaunch), % throws on error
+    delete_from_db(DbContext, DataBag), % throws on error
     %% Remove data bag items from Solr now; directly calling chef_index_queue:delete since
     %% we've just got ids, and not proper data bag item records required for
     %% chef_object_db:delete_from_solr
-    bulk_delete_from_solr(data_bag_item, DataBagItemIds, OrgId, Darklaunch),
+    bulk_delete_from_solr(data_bag_item, DataBagItemIds, OrgId),
     ok;
-delete(DbContext, ObjectRec, _RequestorId, Darklaunch) ->
+delete(DbContext, ObjectRec, _RequestorId) ->
     %% All other object deletion is relatively sane :)
     %% Note that this will throw if an error is encountered
-    delete_from_db(DbContext, ObjectRec, Darklaunch),
+    delete_from_db(DbContext, ObjectRec),
     %% This is fire and forget as well. If we're here, we've already deleted the db record
     %% and won't be able to get back here for a retry.
-    delete_from_solr(ObjectRec, Darklaunch),
+    delete_from_solr(ObjectRec),
     ok.
 
 %% @doc Given an object type and a list of ids, delete the corresponding search index data
 %% from solr. The delete is achieved by putting a delete message on the indexing queue
 %% (rabbitmq). The delete happens asynchronously (best effort) and this function returns
 %% immediately.
--spec bulk_delete_from_solr(atom(), [binary()], binary(), any()) -> ok.
-bulk_delete_from_solr(Type, Ids, OrgId, Darklaunch) ->
-    [ index_queue_delete(Type, Id, OrgId, Darklaunch) || Id <- Ids ],
+-spec bulk_delete_from_solr(atom(), [binary()], binary()) -> ok.
+bulk_delete_from_solr(Type, Ids, OrgId) ->
+    [ index_queue_delete(Type, Id, OrgId) || Id <- Ids ],
     ok.
 
--spec delete_from_db(chef_db:db_context(), tuple(), darklaunch()) -> ok.
+-spec delete_from_db(chef_db:db_context(), tuple()) -> ok.
 %% @doc Delete an object from the database.  Provides pattern-matching sugar over chef_db
 %% delete functions, making the `delete` function in this module very simple. Throws if the
 %% database call returns an error, otherwise returns `ok' ignoring specific return value
 %% from the chef_db module.
-delete_from_db(DbContext, ObjectRec, _Darklaunch) ->
+delete_from_db(DbContext, ObjectRec) ->
     handle_delete_from_db(chef_db:delete(ObjectRec, DbContext)).
 
 handle_delete_from_db({error, _}=Error) ->
@@ -123,50 +121,8 @@ handle_delete_from_db({error, _}=Error) ->
 handle_delete_from_db(_Result) ->
     ok.
 
-%% If solr4 is on, then rabbit_aux_vhost is on by definition
-%% and default is off. If solr4 is off, then rabbit_aux_vhost
-%% can still be on, in which case send to both. If both are
-%% off, send to the default url.
-index_queue_add(TypeName, Id, DbName, IndexEjson, Darklaunch) ->
-    {DefaultVHost, AuxVHost} = default_and_aux(),
-    case solr4_and_aux(Darklaunch) of
-        {true, _ } ->
-            ok = chef_index_queue:set(AuxVHost, TypeName, Id, DbName, IndexEjson);
-        {false, true } ->
-            ok = chef_index_queue:set(DefaultVHost, TypeName, Id, DbName, IndexEjson),
-            ok = chef_index_queue:set(AuxVHost, TypeName, Id, DbName, IndexEjson);
-        {false, false } ->
-            ok = chef_index_queue:set(DefaultVHost, TypeName, Id, DbName, IndexEjson)
-    end,
-    ok.
+index_queue_add(TypeName, Id, DbName, IndexEjson) ->
+    ok = chef_index_queue:set(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName, IndexEjson).
 
-%% Return curent solr4, rabbit_aux_vhost configuration
-solr4_and_aux(Darklaunch) ->
-    {chef_wm_darklaunch:is_enabled(<<"solr4">>, Darklaunch),
-     chef_wm_darklaunch:is_enabled(<<"rabbit_aux_vhost">>, Darklaunch)}.
-
-%% If solr4 is on, then rabbit_aux_vhost is on by definition
-%% and default is off. If solr4 is off, then rabbit_aux_vhost
-%% can still be on, in which case send to both. If both are
-%% off, send to the default url.
-index_queue_delete(TypeName, Id, DbName, Darklaunch) ->
-    {DefaultVHost, AuxVHost} = default_and_aux(),
-    case solr4_and_aux(Darklaunch) of
-        {true, _ } ->
-            ok = chef_index_queue:delete(AuxVHost, TypeName, Id, DbName);
-        {false, true } ->
-            ok = chef_index_queue:delete(DefaultVHost, TypeName, Id, DbName),
-            ok = chef_index_queue:delete(AuxVHost, TypeName, Id, DbName);
-        {false, false } ->
-            ok = chef_index_queue:delete(DefaultVHost, TypeName, Id, DbName)
-    end,
-    ok.
-
-default_and_aux() ->
-    %% rabbitmq_vhosts is a proplist with keys 'default' and 'aux' mapping to the
-    %% appropriate rabbitmq vhosts.
-    VHosts = envy:get(chef_wm, rabbitmq_vhosts, [{default, envy:get(chef_index, rabbitmq_vhost, binary)}], list),
-    DefaultVHost = proplists:get_value(default, VHosts),
-    AuxVHost = proplists:get_value(aux, VHosts),
-    {DefaultVHost, AuxVHost}.
-
+index_queue_delete(TypeName, Id, DbName) ->
+    ok = chef_index_queue:delete(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName).

@@ -132,9 +132,8 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  requestor_id = RequestorId,
                                  resource_state = #client_state{
                                    chef_client = Client},
-                                 organization_name = OrgName,
-                                 darklaunch = Darklaunch} = State) ->
-    ok = ?BASE_RESOURCE:delete_object(DbContext, Client, RequestorId, Darklaunch),
+                                 organization_name = OrgName} = State) ->
+    ok = ?BASE_RESOURCE:delete_object(DbContext, Client, RequestorId),
     EJson = chef_client:assemble_client_ejson(Client, OrgName),
     Req1 = chef_wm_util:set_json_body(Req, EJson),
     {true, Req1, State}.

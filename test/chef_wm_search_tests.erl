@@ -20,55 +20,48 @@ search_test_() ->
       {"Catch exception and return",
        fun() ->
                meck:expect(chef_solr, search,
-                           fun(solr_query, url) ->
+                           fun(solr_query) ->
                                    erlang:error(any_error)
                            end
                           ),
 
-               ?assertMatch({_, {error, any_error}},exec_chef_solr())
+               ?assertMatch({error, any_error},exec_chef_solr())
        end},
        {"Catch throw and return",
        fun() ->
                meck:expect(chef_solr, search,
-                           fun(solr_query, url) ->
+                           fun(solr_query) ->
                                    erlang:throw({other, any_error})
                            end
                           ),
 
-               ?assertMatch({_, {throw, {other, any_error}}},exec_chef_solr())
+               ?assertMatch({throw, {other, any_error}},exec_chef_solr())
        end},
        {"Catch exit and return",
        fun() ->
                meck:expect(chef_solr, search,
-                           fun(solr_query, url) ->
+                           fun(solr_query) ->
                                    erlang:exit(any_error)
                            end
                           ),
 
-               ?assertMatch({_, {exit, any_error}},exec_chef_solr())
+               ?assertMatch({exit, any_error},exec_chef_solr())
        end},
 
       {"Return result when no error",
        fun() ->
                meck:expect(chef_solr, search,
-                           fun(solr_query, url) ->
+                           fun(solr_query) ->
                                    result
                            end
                           ),
                meck:expect(stats_hero, ctime, fun(_, _, Fun) ->
                                                       Fun()
                                               end),
-               ?assertMatch({_, result},exec_chef_solr())
+               ?assertMatch(result,exec_chef_solr())
 
        end}
      ]}.
 
 exec_chef_solr() ->
-    begin
-        chef_wm_search:spawn_solr_query(label, url, solr_query, req_id),
-        receive
-            Val ->
-                Val
-        end
-    end.
-    
+    chef_wm_search:solr_search(solr_query).
