@@ -1,12 +1,21 @@
-<h1>Please Sign In</h1>
-<%= form_tag(auth_chef_callback_path, :method => :post) do %>
-  <div class="form-group">
-    <%= label_tag :username %>
-    <%= text_field_tag :username, nil, :class => 'form-control', :autofocus => true %>
-  </div>
-  <div class="form-group">
-    <%= label_tag :password %>
-    <%= password_field_tag :password, nil, :class => 'form-control' %>
-  </div>
-  <%= submit_tag "Sign In", class: "btn btn-large btn-primary" %>
-<% end %>
+<div class="page-header">
+  <h1>Sign In</h1>
+</div>
+<div> 
+  <%= form_tag(auth_chef_callback_path, :method => :post, :class => 'sign-in') do %>
+    <div class="form-group">
+      <%= label_tag :username %>
+      <%= text_field_tag :username, nil, :class => 'form-control', :autofocus => true %>
+    </div>
+    <div class="form-group">
+      <%= label_tag :password %>
+      <%= password_field_tag :password, nil, :class => 'form-control' %>
+    </div>
+    <div class="form-group">
+      <%= submit_tag "Sign In", class: "btn btn-large btn-primary" %>
+    </div>
+    <div class="form-group">
+      <%= link_to "Forgot your password?", 'https://www.getchef.com/account/password_resets/new', target: '_blank' %>
+    </div>
+  <% end %>
+</div>

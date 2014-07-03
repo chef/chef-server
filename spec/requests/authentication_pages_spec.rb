@@ -6,11 +6,13 @@ describe 'Authentication' do
   describe 'sign-in' do
     before { visit signin_path }
 
-    it { should have_content 'Please Sign In' }
+    it { should have_content 'Sign In' }
     it { should have_field 'Username' }
     it { should have_field 'Password' }
     it { should have_button 'Sign In' }
-
+    it { should have_link 'Forgot your password?' }
+    it { should have_link 'Sign Up' }
+    
     describe 'success' do
       let(:user) { FactoryGirl.build(:user) }
 
@@ -21,12 +23,15 @@ describe 'Authentication' do
       end
 
       it { should have_link 'Sign Out', :href => signout_path }
-      it { should_not have_link 'Sign In', :href => signin_path }
-      it { should have_content 'Your Authorized Applications' }
+      it { should_not have_link 'Sign In' }
+      it { should_not have_link 'Sign Up' }
+      it { should have_content 'Authorized Applications' }
 
       describe 'and then sign out' do
         before { click_link 'Sign Out' }
-        it { should have_link 'Sign In', :href => signin_path }
+        it { should have_button 'Sign In' }
+        it { should have_link 'Sign Up' }
+        it { should have_link 'Forgot your password?' }
       end
     end
 
@@ -39,13 +44,14 @@ describe 'Authentication' do
         click_button 'Sign In'
       end
 
-      it { should have_link 'Sign In', :href => signin_path }
+      it { should have_link 'Forgot your password?' }
+      it { should have_link 'Sign Up' }
       it { should_not have_link 'Sign Out', :href => signout_path }
       it { should have_button 'Sign In' }
       it { should have_selector('.alert.alert-danger') }
 
       describe 'and then visiting another page' do
-        before { click_link 'Sign In' }
+        before { click_on 'logo' }
         it { should_not have_selector('.alert.alert-danger') }
       end
     end

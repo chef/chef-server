@@ -10,7 +10,7 @@
   <header class="navbar navbar-default" role="navigation">
     <div class="container">
       <div class="navbar-header">
-        <%= link_to root_path, :class => "navbar-brand" do %>
+        <%= link_to root_path, :id => "logo", :class => "navbar-brand logo" do %>
           <%= image_tag 'logo.svg' %>
         <% end %>
       </div>
@@ -19,6 +19,8 @@
           <% if signed_in? %>
             <li><a>Signed in as: <%= current_user.username %></a></li>
             <li><%= link_to "Sign Out", signout_path, method: "delete" %></li>
+          <% elsif controller.controller_name == 'sessions' %>
+            <li><%= link_to "Sign Up", 'https://manage.opscode.com/signup?ref=community', target: '_blank' %></li>
           <% else %>
             <li><%= link_to "Sign In", signin_path %></li>
           <% end %>

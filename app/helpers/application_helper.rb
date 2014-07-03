@@ -9,7 +9,7 @@ module ApplicationHelper
       notice:   'alert-info'
     }
 
-    classes[flash_type] || flash_type.to_s
+    classes[flash_type.to_sym] || flash_type.to_s
   end
   
 end

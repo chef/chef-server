@@ -11,7 +11,7 @@ class SessionsController < ApplicationController
   end
 
   def retry
-    flash.now[:error] = 'Oops! Try again.'
+    flash.now[:error] = "Sorry, that username or password was incorrect. Please try again."
     render :new
   end
 
