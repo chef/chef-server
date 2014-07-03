@@ -60,7 +60,11 @@ check_health() ->
     Pings = spawn_health_checks(),
     Status = overall_status(Pings),
     log_failure(Status, Pings),
-    {Status, chef_json:encode({[{<<"status">>, ?A2B(Status)}, {<<"upstreams">>, {Pings}}]})}.
+    KeyGen = chef_keygen_cache:status(),
+    {Status, chef_json:encode({[{<<"status">>, ?A2B(Status)},
+                                {<<"upstreams">>, {Pings}},
+                                {<<"keygen">>, {KeyGen} }
+                               ]})}.
 
 overall_status(Pings) ->
     case [ Pang || {_, <<"fail">>}=Pang <- Pings ] of
