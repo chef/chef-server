@@ -1646,7 +1646,7 @@ EOF
             }
           end
 
-          it "returns a new private key, ignores the certificate", :focus do
+          it "returns a new private key, ignores the certificate" do
             original_response = get(request_url, platform.superuser)
             original_public_key = JSON.parse(original_response.body)["public_key"]
 
@@ -1683,7 +1683,7 @@ EOF
             }
           end
 
-          it "returns 400", :focus do
+          it "returns 400" do
             pending("ruby returns 200", :if => ruby?)
             response = put(request_url, platform.superuser, :payload => request_body)
             response.should look_like({
