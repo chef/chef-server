@@ -2,6 +2,11 @@
 
 ## 12.0.0 (Unreleased)
 
+### oc_erchef updated to 0.25.14
+* Update to latest of oc_chef_action to get hostname from fqdn instead
+  of inet
+* Setting the CHEF_ACTIONS_MESSAGE_VERSION to 0.1.0
+
 ### cacerts 2014.04.22
 * Update to latest cacerts as of 2014-04-22
 
