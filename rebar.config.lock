@@ -100,7 +100,7 @@
                        "62f07401f56ac22d699c7c2d062af11b396c85b9"}},
        {chef_db,".*",
                 {git,"git@github.com:opscode/chef_db.git",
-                     "d00f03ff6b2c1866f3e3001102c8ba16309a7217"}},
+                     "f75644f51de159a5e08cda6f71c8501bb9841ffd"}},
        {oc_chef_authz,".*",
                       {git,"git@github.com:opscode/oc_chef_authz.git",
                            "3d284acbc9486e8cc33fe0f989eb6fbb229d890e"}},
