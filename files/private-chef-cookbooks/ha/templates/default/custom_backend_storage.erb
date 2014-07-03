@@ -1,0 +1,47 @@
+#!/bin/bash
+# vim: sw=2 sts=2 et ts=8:
+LOGNAME=/var/log/opscode/keepalived/cluster.log
+function log_me
+{
+  echo $1
+  echo "$(date -R): ${1}" >> $LOGNAME
+}
+
+# 10 * SVWAIT
+try=300
+
+ACTION="$1"
+
+case $ACTION in
+  attach)
+    while true; do
+      log_me "Attempting DRBD primary takeover - attempts left ${try}"
+      drbdadm primary pc0 && break
+      let "--try" || error_exit "Cannot become drbd primary!"
+      last_requested_state=`echo -n $(cat $requested_state_file)`
+      if [ "$last_requested_state" != "master" ]; then
+        log_me "Requested state transition to backup, aborting trying to aquire DRBD primary"
+        return
+      fi
+      sleep 1
+    done
+
+    log_me "DRBD primary takeover successful"
+    log_me "Mounting <%= node['private_chef']['drbd']['device'] %> at <%= node['private_chef']['drbd']['data_dir'] %>"
+    mount <%= node['private_chef']['drbd']['device'] %> <%= node['private_chef']['drbd']['data_dir'] %> || true
+    ;;
+  detach)
+    while true; do
+      log_me "Attempting to become DRBD secondary - attempts left ${try}"
+      mountpoint <%= node['private_chef']['drbd']['data_dir'] %> && \
+        fuser -km <%= node['private_chef']['drbd']['data_dir'] %>
+      umount -f <%= node['private_chef']['drbd']['data_dir'] %> || true
+      drbdadm secondary pc0 && break
+      let "--try" || error_exit "Cannot become DRBD secondary"
+      sleep 1
+    done
+    ;;
+  status)
+    echo "Everything is awesome" # Everything isn't always awesome
+    ;;
+esac

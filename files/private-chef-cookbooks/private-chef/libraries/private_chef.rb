@@ -45,6 +45,7 @@ module PrivateChef
   opscode_account Mash.new
   bookshelf Mash.new
   bootstrap Mash.new
+  drbd Mash.new # For DRBD specific settings
   keepalived Mash.new
   estatsd Mash.new
   nginx Mash.new
@@ -56,7 +57,7 @@ module PrivateChef
 
   servers Mash.new
   backend_vips Mash.new
-  ha Mash.new
+  ha Mash.new # For all other HA settings
   api_fqdn nil
   node nil
 
@@ -153,6 +154,7 @@ module PrivateChef
       PrivateChef['postgresql']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['opscode_account']['session_secret_key'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['oc_bifrost']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
       PrivateChef['oc_bifrost']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
@@ -181,6 +183,9 @@ module PrivateChef
               },
               'opscode_account' => {
                 'session_secret_key' => PrivateChef['opscode_account']['session_secret_key']
+              },
+              'drbd' => {
+                'shared_secret' => PrivateChef['drbd']['shared_secret']
               },
               'keepalived' => {
                 'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
@@ -222,11 +227,13 @@ module PrivateChef
         "opscode_account",
         "bookshelf",
         "bootstrap",
+        "drbd",
         "keepalived",
         "estatsd",
         "nginx",
         "ldap",
-        "user"
+        "user",
+        "ha"
       ].each do |key|
         # @todo: Just pick a naming convention and adhere to it
         # consistently

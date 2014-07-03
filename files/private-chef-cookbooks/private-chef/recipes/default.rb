@@ -210,6 +210,8 @@ include_recipe "private-chef::sysctl-updates"
   end
 end
 
+include_recipe "ha"
+
 include_recipe "private-chef::actions" if darklaunch_values["actions"]
 
 include_recipe "private-chef::orgmapper"
