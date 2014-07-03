@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-describe "status endpoint", :focus do
+describe "status endpoint" do
 
   # TODO: this is hardcoded; this should be configured in the pedant config
   let(:request_url) { "http://127.0.0.1:8000/_status" }
@@ -29,7 +29,7 @@ describe "status endpoint", :focus do
         }
       }}
 
-    context "superuser" do
+    context "superuser", :smoke do
       it "can get status" do
         get(request_url, platform.superuser, :auth_headers => {}).should look_like({
             :status => 200,
