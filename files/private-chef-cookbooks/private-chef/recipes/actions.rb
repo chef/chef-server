@@ -6,8 +6,16 @@ if is_data_master?
     recursive true
   end
 
-  # Write out the config file for actions to load in order to interface with this EC
+  # Write out the config files for actions to load in order to interface with this EC
   # instance
+  #
+  file "/etc/opscode-analytics/webui_priv.pem" do
+    owner node["private_chef"]["user"]["username"]
+    group "root"
+    mode "0600"
+    content ::File.open('/etc/opscode/webui_priv.pem')
+  end
+
   file "/etc/opscode-analytics/actions-source.json" do
     owner 'root'
     mode '0600'
