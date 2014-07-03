@@ -2,6 +2,11 @@
 
 ## 11.1.9 (unreleased)
 
+### oc_chef_actions 2014.07.03
+* Update to latest of oc_chef_action to get hostname from fqdn instead
+  of inet
+* Setting the CHEF_ACTIONS_MESSAGE_VERSION to 0.1.0
+
 ### cacerts 2014.04.22
 * Update to latest cacerts as of 2014-04-22
 
