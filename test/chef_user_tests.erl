@@ -179,7 +179,26 @@ parse_binary_json_test_() ->
              [ ?_assertThrow(#ej_invalid{key = <<"public_key">>},
                              chef_user:parse_binary_json(chef_json:encode(ej:set({<<"public_key">>}, Body, Bad)), update, #chef_user{}))
                 || Bad <- BadKeys ]
-      end}
+      end},
+     {"A valid public key is removed when private_key = true",
+      fun() ->
+              UserEJson = make_min_valid_create_user_ejson() ++ [{<<"public_key">>, public_key_data()},
+                                                                 {<<"private_key">>, true}],
+              Body = chef_json:encode({UserEJson}),
+              {ok, Got1} = chef_user:parse_binary_json(Body, create, undefined),
+              ?assertEqual(undefined, ej:get({"public_key"}, Got1))
+      end
+     },
+    {"An invalid public key is removed from the object when private_key = true (key not validated)",
+      fun() ->
+             UserEJson = make_min_valid_create_user_ejson() ++ [{<<"public_key">>, <<"a bad key">>},
+                                                                {<<"private_key">>, true}],
+              Body = chef_json:encode({UserEJson}),
+
+              {ok, Got1} = chef_user:parse_binary_json(Body, create, undefined),
+              ?assertEqual(undefined, ej:get({"public_key"}, Got1))
+      end
+    }
     ].
 
 

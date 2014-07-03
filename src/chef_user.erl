@@ -151,11 +151,13 @@ value_or_null(Key, Data) ->
 password_validator() ->
     {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}.
 
+public_key_spec() ->
+    {[
+        {{opt,<<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string,
+                                              <<"Public Key must be a valid key.">>}}} ]}.
 user_spec(common) ->
     {[
         {<<"display_name">>, string}, %% FIXME as an always-required field this belongs in the schema
-        {{opt,<<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string,
-                                              <<"Public Key must be a valid key.">>}}},
         {{opt,<<"first_name">>},  string},  %% Note that remaining fields are serialized via serialized_object and
         {{opt,<<"last_name">>},   string} , %% are/were used by other Chef components.
         {{opt,<<"middle_name">>}, string},  %% FIXME these should be retained by the components that need them
@@ -253,7 +255,15 @@ parse_binary_json(Bin) ->
 
 -spec parse_binary_json(binary(), create | update, #chef_user{} | undefined) -> {ok, ej:json_object()}. % or throw
 parse_binary_json(Bin, Operation, User) ->
-    EJson = chef_object_base:delete_null_public_key(chef_json:decode(Bin)),
+    EJ = chef_object_base:delete_null_public_key(chef_json:decode(Bin)),
+    EJson = case ej:get({<<"private_key">>}, EJ) of
+        true ->
+            ej:delete({<<"public_key">>}, EJ);
+        _ ->
+            validate_user(EJ, public_key_spec()),
+            EJ
+    end,
+
     %% If user is invalid, an error is thrown
     validate_user(EJson, user_spec(common)),
     validate_user(EJson, user_spec(Operation)),
