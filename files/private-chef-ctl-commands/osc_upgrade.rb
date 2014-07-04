@@ -121,7 +121,9 @@ def run_osc_upgrade
     # or to build in some kind of retry logic here.
     # In testing, the commands begin working on the 4th retry of 5, but that might not
     # be true on slower systems
-    sleep(30)
+    # TODO: Replace this with logic that pings the _status endpoint to see if
+    # the services are up, or retries an operation until it succeeds
+    sleep(120)
   end
 
   def stop_ec
@@ -230,11 +232,13 @@ def run_osc_upgrade
 
   def run_knife_ec_restore(ec_data_dir)
     # --skip-useracl skip importing user acls, which will just give the user's default acls. This is the
-    # desired state anway
+    # desired state anyway
     # --with-user-sql pull data across from the database, so we can get passwords
     # --concurrency 1 so that it doesn't try concurrent cookbook uploads; there appears to be a bug
     # around concurrent uploads
     cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency 1 -c /tmp/knife-ec-backup-config.rb #{ec_data_dir}"
+    #cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --concurrency 1 -c /tmp/knife-ec-backup-config.rb #{ec_data_dir}"
+    #cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency 1 -c /tmp/knife-ec-backup-config.rb -VV #{ec_data_dir}"
     status = run_command(cmd)
     msg = "Uploading transformed data to the Enterprise Chef server failed"
     check_status(status, msg)
@@ -266,7 +270,7 @@ def run_osc_upgrade
 
   write_knife_config(osc_data_dir)
 
-  puts "Downloading data from teh Open Source Chef server"
+  puts "Downloading data from the Open Source Chef server"
 
   run_knife_download
 
