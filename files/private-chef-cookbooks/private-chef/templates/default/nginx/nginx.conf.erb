@@ -41,6 +41,7 @@ http {
 
     config.set_maint_refresh_interval(<%=@maint_refresh_interval%>)
     config.set_ban_refresh_interval(<%=@ban_refresh_interval%>)
+    config.set_default_org(<%= @helper.default_orgname %>)
   ';
 
   <%- node['private_chef']['lb']['upstream'].each do |uname, servers| -%>

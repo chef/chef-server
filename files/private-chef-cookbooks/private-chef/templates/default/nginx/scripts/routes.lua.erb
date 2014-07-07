@@ -12,10 +12,6 @@ local Ct = lpeg.Ct
 local Cg = lpeg.Cg
 local Cc = lpeg.Cc
 
-<%- if @default_orgname %>
-local default_org = "<%= @default_orgname %>"
-<%- end %>
-
 -- create a capture that maps the value of 'name' to capture group "route_id"
 local function Crt(name)
   return Cg(Cc(name), "route_id")
@@ -212,14 +208,12 @@ end
 -- endpoint (nil if not found)
 -- object_name (nil if not found)
 function routes.resolve_uri(mode, uri)
-  <%- if @default_orgname %>
-  if needs_default_org(uri) then
-    uri = '/organizations/' .. default_org .. uri
+  if config.default_org and needs_default_org(uri) then
+    uri = '/organizations/' .. config.default_org .. uri
     -- Deliberately do not rewrite uri here, and pass the
-    -- original to erchef.
+    -- original to erchef. Client requests are checksummed
     -- ngx.req.set_uri(uri, false)
   end
-  <%- end %>
   route = match(Ct(uri_resolvers[mode]), uri)
   if not route then
     route = {}
