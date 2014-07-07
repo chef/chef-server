@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '4.0.5'
+gem 'rails', '4.1.4'
 gem 'bootstrap-sass', '~> 3.1.1'
 gem 'chef', '~> 11.10.4'
 gem 'coffee-rails', '~> 4.0.0'
@@ -23,7 +23,7 @@ gem 'doorkeeper', github: 'applicake/doorkeeper', ref: 'cc9fa8a1b1b74ab50d542db1
 
 group :development, :test do
   gem 'jazz_hands', '~> 0.5.1'
-  gem 'rspec-rails'
+  gem 'rspec-rails', '~> 2.14.2'
 end
 
 group :development do
@@ -38,7 +38,7 @@ group :doc do
 end
 
 group :test do
-  gem 'capybara', '2.1.0'
+  gem 'capybara', '~> 2.1.0'
   gem 'factory_girl_rails', '~> 4.4.0'
   gem 'selenium-webdriver', '2.35.1'
 end

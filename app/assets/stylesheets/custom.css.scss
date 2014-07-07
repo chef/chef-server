@@ -18,3 +18,18 @@ footer {
   font-size: 12px;
   color: #ccc;
 }
+
+.btn.btn-primary {
+  background: linear-gradient(#fd8340, #ee5705);
+  border: solid 1px #ee5705;
+}
+
+label {
+  font-weight: normal;
+}
+
+form.sign-in {
+  input[type='text'], input[type='password'] {
+    max-width: 260px;
+  }
+}
