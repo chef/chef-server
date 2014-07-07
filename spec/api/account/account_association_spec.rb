@@ -7,10 +7,8 @@ require 'pedant/rspec/common'
 # * multiple live invites in org work and are distinct (Low value for now)
 # * multiple live invites for user work and are distinct (Low value for now)
 # * Disassociation cleans up groups (needs better group fetch instrumentation)
-# * Currently excluded because it fails intermittently if orgs are unavailable
-# * To re-enable, please remove ', :intermittent_failure => true'
 
-describe "opscode-account user association", :association, :intermittent_failure => true do
+describe "opscode-account user association", :association do
   let(:users_url) { "#{platform.server}/users" }
   let(:org_assoc_url) { api_url("association_requests") }
 
