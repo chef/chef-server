@@ -1108,9 +1108,9 @@ EOF
 
               post(auth_url, superuser, :payload => { 'username' => username,
                                                       'password' => 'badger badger' }).should look_like({
-                  :status => 200
+                  :status => 401
               })
-                          end
+            end
 
           end
         end
@@ -1320,8 +1320,8 @@ EOF
               "external_authentication_uid" => username
             }
           end
-          it "returns 200" do
-            pending("work in flight on users endpoint - ruby incompat", :if => ruby?) do
+          it "returns 200", :focus do
+            pending("work in flight on users endpoint") do
               put(request_url, platform.superuser,
                 :payload => request_body).should look_like({
                   :status => 200
