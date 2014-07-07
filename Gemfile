@@ -14,7 +14,7 @@ gem 'turbolinks', '~> 2.2.1'
 gem 'uglifier', '~> 2.4.0'
 gem 'unicorn-rails', '~> 1.1.0'
 gem 'omniauth', '~> 1.2.1'
-gem 'omniauth-chef', github: 'opscode/omniauth-chef', ref: 'master'
+gem 'omniauth-chef', github: 'opscode/omniauth-chef', branch: 'master'
 gem 'nokogiri', '~> 1.6.2'
 gem 'pg'
 
