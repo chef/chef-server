@@ -5,6 +5,7 @@ module Pedant
 
     GLOBAL_OBJECTS = ['users', 'organizations']
     MAX_ATTEMPTS = 5
+    HTTP_TIMEOUT_IN_SECS = 15
 
     attr_reader :test_org, :test_org_owner, :validate_org, :internal_account_url
 
@@ -199,8 +200,8 @@ module Pedant
         "org_type" => "Business"
       }
 
-      Timeout::timeout(15) do
-        (0..MAX_ATTEMPTS).each do |attempt|
+      Timeout.timeout(HTTP_TIMEOUT_IN_SECS) do
+        MAX_ATTEMPTS.times do |attempt|
           r = post("#{@server}/organizations", superuser, :payload => payload)
 
           if r.code == 409
