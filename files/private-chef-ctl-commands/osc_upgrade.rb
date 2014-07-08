@@ -1,24 +1,6 @@
 
 def run_osc_upgrade
 
-#  # Detect if OSC is present - if not, then skip to and continue with EC upgrade
-#  # Ask user if they want to upgrade
-#  if File.directory?("/opt/chef-server")
-#    # Do we want to refer to it as the open source chef server, since the new
-#    # server is open source too, even if it is based on enterprise chef?
-#    puts "Open Source Chef server detected."
-#
-#    puts "Would you like to upgrade? [Yn]"
-#    answer = STDIN.gets.chomp
-#    if answer == 'Y' || answer == 'y'
-#      puts "Upgrading the Open Source Chef server."
-#    else
-#      puts "Aborting upgrade, because you told me to or I don't understand the input."
-#      puts "You answered #{answer}"
-#      exit 0 # What do we want to do if the user says no?
-#    end
-#  end
-
   # Start OSC (this assume EC isn't running , b/c if we detected OSC, then EC is assumed
   # not to be present)
   puts 'Ensuring the Open Source Chef server is started'
@@ -57,40 +39,6 @@ def run_osc_upgrade
     exit 1
   end
 
-#  puts "Installing knife ec backup to use ec key export with OSC"
-#  status = run_command("/opt/chef-server/embedded/bin/gem install --pre --no-ri --no-rdoc knife-ec-backup -- --with-pg-config=/opt/chef-server/embedded/bin/pg_config")
-#  if !status.success?
-#    puts "Installing knife ec backup failed with #{status}"
-#    exit 1
-#  end
-
-  puts "Installing knife ec backup"
-  # Installing here to pull along the sequal and pg gems, instead of installing them
-  # seperatly. Knife ec backup will make an appearance again later
-  # Note this is installed in the /opt/opscode location, that way the sequal
-  # gem can be required directly in this file.
-  result = run_command("/opt/opscode/embedded/bin/gem install --pre --no-ri --no-rdoc knife-ec-backup -- --with-pg-config=/opt/opscode/embedded/postgresql/9.2/bin/pg_config")
-  if !status.success?
-    puts "Installing knife ec backup grem failed with #{status}"
-    exit 1
-  end
-
-  puts "Installing sequel gem"
-  # this is so it can be required in this file (note it is installed to the
-  # /opt/opscode path and not /opt/chef-server path)
-  # this same result can likely be accomplished by installing knife ec backup
-  # early in the process, since it should bring the sequel gem along for the ride
-  #
-  # Even with installing knife ec backup, sometimes there is still failures loading
-  # the sequel gem (not sure why), so just install it seperatly for now)
-  status = run_command("/opt/opscode/embedded/bin/gem install --no-ri --no-rdoc sequel")
-  if !status.success?
-    puts "Installing sequel gem failed with #{status}"
-    exit 1
-  end
-
-  Gem.clear_paths # force ruby gems to reload from scratch, so it picks up that sequel is available
-
   # this code shamelessly pulled from knife ec backup and adapted
   puts "Pulling needed db credintials"
   if ! File.exists?("/etc/chef-server/chef-server-running.json")
@@ -107,10 +55,8 @@ def run_osc_upgrade
   sql_port = 5432
 
   require 'chef'
-
-  # the first time sequel is required on a vm it always fails, but then works the second
-  # time - why is that?
   require 'sequel'
+
   server_string = "#{sql_user}:#{sql_password}@#{sql_host}:#{sql_port}/opscode_chef"
   db = ::Sequel.connect("postgres://#{server_string}")
 
@@ -128,8 +74,6 @@ def run_osc_upgrade
   end
   puts sql_users
   File.open(key_file, 'w') { |file| file.write(Chef::JSONCompat.to_json_pretty(sql_users))}
-
-#exit 1 # lol, debugging
 
 #  This would work, except the table name is hard coded in ec key export
 #  and it is of course different in OSC from EC.
@@ -187,8 +131,6 @@ def run_osc_upgrade
   end
 #
   sleep(30) # it takes a bit for the services to come up; sleep before hitting them with requests
-
-  require 'chef'
 
   puts "Transforming Open Source server downloaded Data for upload to Enterprise Chef server"
 
@@ -298,19 +240,6 @@ def run_osc_upgrade
   billing_admins_json = { "name" => "billing-admins", "users" => users}
   File.open("#{org_dir}/groups/billing-admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(billing_admins_json)) }
 
-  # Use knife ec backup to put the data into the Enterprise Chef server
-  # (Specificly knife ec restore, which is in the knife ec backup gem)
-  # This should be included in the opscode-omnibus install, not downloaded from net
-  # as it is in this POC
-  # For now, download the beta release, to get all the latest goodness
-  puts "Installing knife ec backup"
-  # knife ec backup uses the pg gem. The --with-pg-config option gets passed through
-  # to the pg gem here so it can use the option when building a native extension,
-  # this way it can talk to the Chef db. This enables knife-ec-backup to pull across
-  # db items, such as passwords
-  result = run_command("/opt/opscode/embedded/bin/gem install --pre --no-ri --no-rdoc knife-ec-backup -- --with-pg-config=/opt/opscode/embedded/postgresql/9.2/bin/pg_config")
-  puts result
-
   # Knife ec backup config, hard code values that maybe dev-vm specific
   config = <<-EOH
   chef_server_root 'https://api.opscode.piab'
@@ -320,14 +249,6 @@ def run_osc_upgrade
 
   puts "Writing knife ec backup config to /tmp/knife-ec-backup-config.rb"
   File.open("/tmp/knife-ec-backup-config.rb", "w"){ |file| file.write(config)}
-
-  puts "Running key export"
-  # This is needed so --with-user-sql will work
-  # I *believe* this is pulling from the EC database, which isn't desired, so
-  # might need to run this earlier and figure out how to run against the OSC database
-#  key_file = "#{new_data_dir}/key_dump.json"
-#  key_result = run_command("/opt/opscode/embedded/bin/knife ec key export -c /tmp/knife-ec-backup-config.rb #{key_file}")
-#  puts key_result
 
   puts "Uploading transformed Open Source server data to Enterprise Chef server"
   puts "Running data migration"
@@ -339,11 +260,9 @@ def run_osc_upgrade
   # around concurrent uploads
   ec_restore = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency 1 -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
 
-  # For --with-user-sql to work, a key_dump.json file needs to be created first with the
-  # needed data
-  #ec_restore = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --concurrency 1 -c /tmp/knife-ec-backup-config.rb #{new_data_dir}"
   migration_result = run_command(ec_restore)
 
+  # Need to check the status here of this and bail if it fails - or maybe retry?
   # Need to capture better output/bail if this isn't successful
   puts "The migration result is:"
   puts migration_result

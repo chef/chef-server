@@ -26,8 +26,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
     end
   end
 
-  # Original EC add_command
-  # Run this in all cases
+  # Original EC upgrade path
   reconfigure(false)
   Dir.chdir(File.join(base_path, "embedded", "service", "partybus"))
   bundle = File.join(base_path, "embedded", "bin", "bundle")
