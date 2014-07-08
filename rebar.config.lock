@@ -113,7 +113,7 @@
                                     "9711549b8a84b065eb2edc22f8eb6ff85e3c94e8"}},
        {eredis,".*",
                {git,"git://github.com/wooga/eredis.git",
-                    "471dd471060daa1d98391cb69ae006f8ba79a042"}},
+                    "e223e9e1496dcf1ec9e16f3f23b13db122748839"}},
        {webmachine,".*",
                    {git,"git://github.com/opscode/webmachine",
                         "7cd6ddf592a2e050544891d151944dd3017dc517"}},
