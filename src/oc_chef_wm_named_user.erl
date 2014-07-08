@@ -138,9 +138,8 @@ to_json(Req, #base_state{resource_state = #user_state{chef_user = User},
 delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  requestor_id = RequestorId,
                                  resource_state = #user_state{ chef_user = User},
-                                 organization_name = OrgName,
-                                 darklaunch = Darklaunch} = State) ->
-    ok = oc_chef_wm_base:delete_object(DbContext, User, RequestorId, Darklaunch),
+                                 organization_name = OrgName } = State) ->
+    ok = oc_chef_wm_base:delete_object(DbContext, User, RequestorId),
     EJson = chef_user:assemble_user_ejson(User, OrgName),
     Req1 = chef_wm_util:set_json_body(Req, EJson),
     {true, Req1, State}.
