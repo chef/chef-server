@@ -1320,7 +1320,7 @@ EOF
               "external_authentication_uid" => username
             }
           end
-          it "returns 200", :focus do
+          it "returns 200" do
             pending("work in flight on users endpoint") do
               put(request_url, platform.superuser,
                 :payload => request_body).should look_like({
