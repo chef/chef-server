@@ -493,7 +493,7 @@ describe "users", :users do
           end
 
           it "returns 201 when password is not provided" do
-            pending "work in flight on users endpoint" do
+            pending("work in flight on users endpoint - ruby incompat", :if => ruby?) do
               post(request_url, platform.superuser, :payload => request_body).should look_like({
                      :status => 201
                    })
@@ -580,7 +580,7 @@ describe "users", :users do
           end
 
           it "returns 201" do
-            pending "work in flight on users endpoint" do
+            pending("work in flight on users endpoint - ruby incompat", :if => ruby?) do
               post(request_url, platform.superuser,
                    :payload => request_body).should look_like({
                      :status => 201
@@ -915,7 +915,7 @@ describe "users", :users do
     end # context GET /users/<name>
 
     context "PUT /users/<name> when user created w/ external auth enabled" do
-      pending "work in flight on users endpoint" do
+      pending("work in flight on users endpoint - ruby incompat", :if => ruby?) do
         let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
         let(:request_body) do
           {
@@ -1108,9 +1108,9 @@ EOF
 
               post(auth_url, superuser, :payload => { 'username' => username,
                                                       'password' => 'badger badger' }).should look_like({
-                  :status => 200
+                  :status => 401
               })
-                          end
+            end
 
           end
         end
@@ -1321,7 +1321,7 @@ EOF
             }
           end
           it "returns 200" do
-            pending "work in flight on users endpoint" do
+            pending("work in flight on users endpoint") do
               put(request_url, platform.superuser,
                 :payload => request_body).should look_like({
                   :status => 200
