@@ -21,6 +21,13 @@ Erchef/PgSQL using moser and darklaunch.
 1. Your github ssh key must be in your keychain - you can add it via
    ssh-add prior to starting the VM.
 
+### TODO: Out of date upstream changes ###
+
+We are currently pinning to commit `e223e9e1496dcf1ec9e16f3f23b13db122748839` of eredis because
+they introduced a breaking change to the API. We should update our code to be compatible with
+the new API, but until we have time to do so, make sure to pin to this commit in the lock file
+after you update it (via `make prepare_release` or other methods).
+
 ### Running mover in a vm for dev work ###
 
 Assuming you following the above setup instructions, the following
