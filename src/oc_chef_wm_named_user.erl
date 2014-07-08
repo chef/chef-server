@@ -156,7 +156,7 @@ maybe_generate_key_pair(UserData, RequestorId) ->
             %% is what we're capturing in the DB.
             {CertOrKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestorId),
             UserData1 = ej:set({<<"private_key">>}, UserData, PrivateKey),
-            ej:set({<<"public_key">>}, UserData1, CertOrKey);
+            chef_object_base:set_public_key(UserData1, CertOrKey);
         _ ->
             UserData
     end.
