@@ -8,6 +8,7 @@ build_version   Omnibus::BuildVersion.new.semver
 build_iteration 1
 
 override :rebar, version: "2.0.0"
+override :berkshelf2, version: "2.0.18"
 
 # creates required build directories
 dependency "preparation"
