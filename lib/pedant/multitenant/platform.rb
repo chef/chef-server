@@ -5,7 +5,6 @@ module Pedant
 
     GLOBAL_OBJECTS = ['users', 'organizations']
     MAX_ATTEMPTS = 5
-    HTTP_TIMEOUT_IN_SECS = 15
 
     attr_reader :test_org, :test_org_owner, :validate_org, :internal_account_url, :ldap, :ldap_testing
 
@@ -202,33 +201,31 @@ module Pedant
         "org_type" => "Business"
       }
 
-      Timeout.timeout(HTTP_TIMEOUT_IN_SECS) do
-        MAX_ATTEMPTS.times do |attempt|
-          r = post("#{@server}/organizations", superuser, :payload => payload)
+      MAX_ATTEMPTS.times do |attempt|
+        r = post("#{@server}/organizations", superuser, :payload => payload)
 
-          if r.code == 409
-            puts "The organization already exists!  Regenerating validator key ..."
-            r = post("#{Pedant::Config.account_server}/organizations/#{orgname}/_validator_key", superuser, {})
-            raise "Bad error code #{r.code} from regenerating validator key: #{r}" unless r.code == 200
-          end
-
-          if r.code == 201
-            parsed = parse(r)
-            validator_name = parsed["clientname"]
-            validator_key = parsed["private_key"]
-
-            validator = Pedant::Client.new(validator_name, validator_key)
-
-            return Pedant::Organization.new(orgname, validator)
-          end
-
-          elsif r.code != 503
-            raise "Bad error code #{r.code} from create org: #{r}"
-          end
-
-          # Got a 503.  Retry if there are attempts left
-          puts "Failed attempting to contact #{@server} (#{attempt}/#{MAX_ATTEMPTS})"
+        if r.code == 409
+          puts "The organization already exists!  Regenerating validator key ..."
+          r = post("#{Pedant::Config.account_server}/organizations/#{orgname}/_validator_key", superuser, {})
+          raise "Bad error code #{r.code} from regenerating validator key: #{r}" unless r.code == 200
         end
+
+        case r.code
+        when 201 || 200
+          parsed = parse(r)
+          validator_name = parsed["clientname"]
+          validator_key = parsed["private_key"]
+
+          validator = Pedant::Client.new(validator_name, validator_key)
+
+          return Pedant::Organization.new(orgname, validator)
+        when 503
+          # Continue attempting by allowing the loop to continue
+          puts "Failed attempting to contact #{@server} (#{attempt}/#{MAX_ATTEMPTS})"
+        else
+          raise "Bad error code #{r.code} from create org: #{r}"
+        end
+
       end
       raise "Failed attempting to contact #{@server} #{MAX_ATTEMPTS} times"
     end
