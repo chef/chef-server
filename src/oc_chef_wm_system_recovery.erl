@@ -49,7 +49,6 @@ validate_request('POST', Req, #base_state{resource_state = UserState} = State) -
           throw({error, missing_body});
       Body ->
           UserData = ejson:decode(Body),
-          chef_user:validate_user_name(UserData),
           case ej:valid(valid_user_data(), UserData) of
               ok ->
                   UserState1 = UserState#user_state{user_data = UserData},
@@ -60,7 +59,8 @@ validate_request('POST', Req, #base_state{resource_state = UserState} = State) -
   end.
 
 valid_user_data() ->
-    {[{<<"password">>, {string_match, chef_regex:regex_for(non_blank_string)}} ]}.
+    {[{<<"username">>, {string_match, chef_regex:regex_for(non_blank_string)}},
+      {<<"password">>, {string_match, chef_regex:regex_for(non_blank_string)}}]}.
 
 auth_info(Req, #base_state{ resource_state = #user_state{user_data = UserData}} = State) ->
     %% Disallow any attempts to authenticate with credentials of
@@ -94,39 +94,21 @@ process_post(Req, #base_state{chef_db_context = Ctx,
             {true, chef_wm_util:set_json_body(Req, EJson), State}
     end.
 
-verify_user(Password, #chef_user{external_authentication_uid = null,
-                                 hashed_password = HashedPass,
-                                 salt = Salt,
-                                 hash_type = HashType} = User, _Ctx) ->
-    case chef_wm_password:verify(Password, {HashedPass, Salt, HashType}) of
+verify_user(Password, #chef_user{recovery_authentication_enabled = true} = User, _Ctx) ->
+    PasswordData = chef_user:password_data(User),
+    case chef_password:verify(Password, PasswordData) of
         true ->
             user_json(User);
         false ->
             {false, 401}
     end;
-verify_user(Password, #chef_user{username = UserName, external_authentication_uid = ExtAuthUid} = User, Ctx) ->
-    case oc_chef_wm_authn_ldap:authenticate(UserName, Password) of
-        {error, connection} ->
-            {false, 502};
-        {error, unauthorized} ->
-            {false, 401};
-        AuthUserEJ ->
-            case chef_db:fetch(#chef_user{external_authentication_uid = ExtAuthUid}, Ctx) of
-                Result when is_list(Result) andalso length(Result) > 0 ->
-                    user_json(User);
-                _ ->
-                    user_json(AuthUserEJ)
-            end
-    end;
 verify_user(_Password, _Other, _Ctx) ->
-    {false, 401}.
+    {false, 403}.
 
-user_json(#chef_user{recovery_authentication_enabled = false}) ->
-    {false, 403};
-user_json(#chef_user{recovery_authentication_enabled = RecoveryEnabled} = User) ->
+user_json(User) ->
     UserEJ0 = chef_user:assemble_user_ejson(User, undefined),
     UserEJ1 = ej:delete({<<"public_key">>}, UserEJ0),
-    UserEJ2 = ej:set({<<"recovery_authentication_enabled">>}, UserEJ1, RecoveryEnabled),
+    UserEJ2 = ej:set({<<"recovery_authentication_enabled">>}, UserEJ1, true),
     UserEJ2.
 
 malformed_request_message({error, missing_body}, _Req, _State) ->
