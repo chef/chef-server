@@ -16,7 +16,7 @@
 #
 
 name "knife-ec-backup"
-default_version "2.0.0.beta.1"
+default_version "2.0.0.beta.2"
 
 dependency "pg-gem"
 dependency "sequel-gem"
