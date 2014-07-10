@@ -29,7 +29,7 @@ module Pedant
     end
 
     def map_to_default_orgname?(path_fragment)
-      return false unless Pedant::Config.default_orgname # Don't even bother unless we are in default_orgname mode
+      return false unless Pedant::Config.use_default_org # Don't even bother unless we are in default_orgname mode
       return false if path_fragment =~ /_acl/            # False if _acl appears anywhere
       return true  if path_fragment =~ /^\/?(search|nodes|cookbooks|data|roles|sandboxes|environments|clients)/
       return false                                       # Default to false
@@ -310,10 +310,14 @@ module Pedant
     #
     ################################################################################
 
+    def pedant_orgname
+      Pedant::Config.use_default_org ? Pedant::Config.default_orgname : org[:name]
+    end
+
     def org_from_config()
       org = Pedant::Config[:org]
       # If default_orgname is set, override the settings for org
-      name = Pedant::Config.default_orgname || org[:name]
+      name = pedant_orgname
       if org[:create_me] || Pedant::Config.default_orgname
         @validate_org = true
         create_org(name)
@@ -326,7 +330,7 @@ module Pedant
 
     def delete_org_from_config
       if Pedant.config[:org][:create_me] && Pedant.config[:delete_org]
-        delete_org(Pedant.config.default_orgname || Pedant.config[:org][:name])
+        delete_org(pedant_orgname)
       else
         puts "Pedant did not create the org, so will it not delete it"
       end
