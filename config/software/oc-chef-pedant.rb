@@ -9,6 +9,15 @@ source :git => "git@github.com:opscode/oc-chef-pedant.git"
 
 relative_path "oc-chef-pedant"
 
+required_files = [
+                  'HEAD',
+                  'description',
+                  'hooks',
+                  'info',
+                  'objects',
+                  'refs',
+                  ]
+
 bundle_path = "#{install_dir}/embedded/service/gem"
 
 build do
@@ -18,5 +27,11 @@ build do
 
   # cleanup the .git directories in the bundle path before commiting
   # them as submodules to the git cache
-  command "find #{bundle_path} -type d -name .git | xargs rm -rf"
+  Dir.glob("#{install_dir}/**/config").reject{ |path|
+    required_files.any? { |required_file|
+      !File.exists? File.join(File.dirname(path), required_file)
+    }
+  }.each { |path|
+    FileUtils.rm_rf File.dirname(path)
+  }
 end
