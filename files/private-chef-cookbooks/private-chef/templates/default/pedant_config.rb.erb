@@ -38,6 +38,11 @@ delete_org true
 # sent to.  Only specify protocol, hostname, and port.
 chef_server "<%= @api_url %>"
 
+# This configration specifies the default orgname. Note that it does *not*
+# mean that Pedant will test things with default org urls. To do that,
+# pass --use-default-org on the command line
+default_orgname <%= @default_orgname ? "\"#{@default_orgname}\"" : "nil" %>
+
 # If you are doing development testing, you can specify the address of
 # the Solr server.  The presence of this parameter will enable tests
 # to force commits to Solr, greatly decreasing the amout of time
