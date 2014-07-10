@@ -1321,7 +1321,7 @@ EOF
             }
           end
           it "returns 200" do
-            pending("work in flight on users endpoint") do
+            pending("ruby returns 400 - pended", :if => ruby?) do
               put(request_url, platform.superuser,
                 :payload => request_body).should look_like({
                   :status => 200
