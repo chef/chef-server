@@ -21,6 +21,13 @@
 -include_lib("chef_wm.hrl").
 
 -define(CHECK_MODS, [chef_otto, chef_sql, chef_solr]).
+
+%% totally made up data, used for mocks
+-define(KEYGEN_STATUS, [{keys, 10}, {max, 10},
+                        {max_workers, 10}, {cur_max_workers, 10},
+                        {inflight, 0}, {avail_workers, 10},
+                        {start_size, 10}]).
+
 -define(PING_TIMEOUT, 50).
 -define(SLOW_CHECK_SLEEP, 100).
 
@@ -41,10 +48,13 @@ check_health_all_ok_test_() ->
              [ begin
                    meck:new(Mod),
                    meck:expect(Mod, ping, fun() -> pong end)
-               end || Mod <- ?CHECK_MODS ]
+               end || Mod <- ?CHECK_MODS ],
+             meck:new(chef_keygen_cache),
+             meck:expect(chef_keygen_cache, status, fun() -> ?KEYGEN_STATUS end)
      end,
      fun(_) ->
              [ meck:unload(Mod) || Mod <- ?CHECK_MODS ],
+             meck:unload(chef_keygen_cache),
              cleanup_env()
      end,
      [
@@ -61,10 +71,14 @@ check_health_one_crash_no_module_test_() ->
     {setup,
      fun() ->
              setup_env(),
-             application:set_env(chef_wm, health_ping_modules, [bad_module_no_exist])
+             application:set_env(chef_wm, health_ping_modules, [bad_module_no_exist]),
+             meck:new(chef_keygen_cache),
+             meck:expect(chef_keygen_cache, status, fun() -> ?KEYGEN_STATUS end)
+
      end,
      fun(_) ->
-             cleanup_env()
+             cleanup_env(),
+             meck:unload(chef_keygen_cache)
      end,
      [
       fun() ->
@@ -93,10 +107,13 @@ check_health_mod_fails(BadMod, How) ->
                      meck:expect(BadMod, ping, fun() -> pang end);
                  timeout ->
                      meck:expect(BadMod, ping, fun() -> timer:sleep(?SLOW_CHECK_SLEEP) end)
-             end
+             end,
+             meck:new(chef_keygen_cache),
+             meck:expect(chef_keygen_cache, status, fun() -> ?KEYGEN_STATUS end)
      end,
      fun(_) ->
              [ meck:unload(Mod) || Mod <- ?CHECK_MODS ],
+             meck:unload(chef_keygen_cache),
              cleanup_env()
      end,
      [{"handles failure of " ++ a2s(BadMod),
