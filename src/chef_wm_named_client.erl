@@ -114,12 +114,15 @@ auth_info(Req, #base_state{resource_state =
     State1 = State#base_state{resource_state = ClientState1},
     {{actor, AuthzId}, Req, State1}.
 
-from_json(Req, #base_state{reqid = RequestId,
-                           resource_state =
+from_json(Req, #base_state{resource_state =
                                #client_state{chef_client = Client,
                                              client_data = ClientData}} = State) ->
-    ClientData1 = maybe_generate_key_pair(ClientData, RequestId),
-    chef_wm_base:update_from_json(Req, State, Client, ClientData1).
+    case chef_wm_util:maybe_generate_key_pair(ClientData) of
+        keygen_timeout ->
+            {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
+        ClientData1 ->
+            chef_wm_base:update_from_json(Req, State, Client, ClientData1)
+    end.
 
 to_json(Req, #base_state{resource_state =
                              #client_state{chef_client = Client},
@@ -137,21 +140,6 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
     EJson = chef_client:assemble_client_ejson(Client, OrgName),
     Req1 = chef_wm_util:set_json_body(Req, EJson),
     {true, Req1, State}.
-
-%% If the request contains "private_key":true, then we will generate a new key pair. In
-%% this case, we'll add the new public and private keys into the EJSON since
-%% update_from_json will use it to set the response.
-maybe_generate_key_pair(ClientData, RequestId) ->
-    Name = ej:get({<<"name">>}, ClientData),
-    case ej:get({<<"private_key">>}, ClientData) of
-        true ->
-            {PublicKey, PrivateKey} = chef_wm_util:generate_keypair(Name, RequestId),
-            chef_object_base:set_key_pair(ClientData,
-                                     {public_key, PublicKey},
-                                     {private_key, PrivateKey});
-        _ ->
-            ClientData
-    end.
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

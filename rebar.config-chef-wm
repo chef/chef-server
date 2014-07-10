@@ -17,9 +17,6 @@
   {chef_authn, ".*",
    {git, "git://github.com/opscode/chef_authn.git", {branch, "master"}}},
 
-  {chef_certgen, ".*",
-   {git, "git://github.com/opscode/chef_certgen.git", {branch, "master"}}},
-
   {chef_db, ".*",
    {git, "git://github.com/opscode/chef_db.git", {branch, "master"}}},
 

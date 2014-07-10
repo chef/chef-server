@@ -31,6 +31,7 @@
          fetch_org_guid/1,
          malformed_request_message/3,
          base_mods/0,
+         maybe_generate_key_pair/1,
          not_found_message/2,
          num_versions/1,
          num_versions/2,
@@ -38,12 +39,10 @@
          set_json_body/2,
          set_uri_of_created_resource/2,
          with_error_body/2,
-         generate_keypair/2,
          lists_diff/2
         ]).
 
 -include("chef_wm.hrl").
--include_lib("chef_certgen/include/chef_certgen.hrl").
 
 %% TODO: These types are just placeholders until we get all the types cleaned up
 -type ejson() :: {[tuple()]}.
@@ -331,25 +330,25 @@ port_string(Default) when Default =:= 80; Default =:= 443 ->
 port_string(Port) ->
     [$:|erlang:integer_to_list(Port)].
 
-%% Helper function to abstract out our two ways of creating keys - either locally or
-%% through an external helper service for OPC
+%% @doc Conditionally generate and add key pair data.
 %%
-%% Return either a public key or a public key wrapped in a certificate along
-%% with the corresponding private key.
-generate_keypair(Name, RequestId) ->
-    case envy:get(chef_wm, local_key_gen, false, fun validate_local_key_gen/1) of
-       {true, Bits} ->
-            KeyPair = chef_certgen:rsa_generate_keypair(Bits),
-            #rsa_key_pair{public_key = PublicKey, private_key = PrivateKey} = KeyPair,
-            {PublicKey, PrivateKey};
-        false ->
-            chef_cert_http:gen_cert(Name, RequestId)
+%% If the request data contains "private_key":true, then we will generate a new key pair. In
+%% this case, we'll add the new public and private keys into the EJSON since
+%% update_from_json will use it to set the response.
+maybe_generate_key_pair(Data) ->
+    case ej:get({<<"private_key">>}, Data) of
+        true ->
+            case chef_keygen_cache:get_key_pair() of
+                {PublicKey, PrivateKey} ->
+                    chef_object_base:set_key_pair(Data,
+                                                  {public_key, PublicKey},
+                                                  {private_key, PrivateKey});
+                keygen_timeout ->
+                    keygen_timeout
+            end;
+        _ ->
+            Data
     end.
-
-validate_local_key_gen({true, _Bits}) ->
-    true;
-validate_local_key_gen(Val) ->
-    {invalid_value, Val, "Should be a tuple of {true, Bits}"}.
 
 -spec lists_diff(list(), list()) -> {list(), list()}.
 lists_diff(FirstList, SecondList) ->
@@ -359,5 +358,4 @@ lists_diff_sorted(FirstList, SecondList) ->
     SecondSet = sets:from_list(SecondList),
     {lists:sort(sets:to_list(sets:subtract(FirstSet, SecondSet))),
      lists:sort(sets:to_list(sets:subtract(SecondSet, FirstSet)))}.
-
 

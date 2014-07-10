@@ -81,11 +81,19 @@ init([]) ->
                {chef_keyring, start_link, []},
                permanent, brutal_kill, worker, [chef_keyring]},
 
+    KeyGenWorkerSup = {chef_keygen_worker_sup,
+                       {chef_keygen_worker_sup, start_link, []},
+                       permanent, 5000, supervisor, [chef_keygen_worker_sup]},
+
+    KeyCache = {chef_keygen_cache,
+                {chef_keygen_cache, start_link, []},
+                permanent, 5000, worker, [chef_keygen_cache]},
+
     Index = {chef_index_sup,
              {chef_index_sup, start_link, []},
              permanent, 5000, supervisor, [chef_index_sup]},
 
-    Processes = [Folsom, KeyRing, Web, Index],
+    Processes = [Folsom, KeyRing, Index, KeyGenWorkerSup, KeyCache, Web],
     {ok, { {one_for_one, 10, 10}, Processes} }.
 
 add_custom_settings(Dispatch) ->

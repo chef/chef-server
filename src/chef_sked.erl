@@ -25,7 +25,6 @@
 
 -module(chef_sked).
 
--include_lib("chef_certgen/include/chef_certgen.hrl").
 -include("chef_wm.hrl").
 
 -export([create_client/4,
@@ -42,11 +41,10 @@
 %% @doc Create a client generating a new RSA key pair and return the
 %% private key.
 create_client(Name, IsValidator, IsAdmin, create_key) ->
-    KeyPair = chef_certgen:rsa_generate_keypair(?KEY_BITS),
-    case create_client(Name, IsValidator, IsAdmin,
-                       KeyPair#rsa_key_pair.public_key) of
+    {PubKey, PrivKey} = generate_key_pair(),
+    case create_client(Name, IsValidator, IsAdmin, PubKey) of
         ok ->
-            {ok, KeyPair#rsa_key_pair.private_key};
+            {ok, PrivKey};
         Error ->
             Error
     end;
@@ -59,13 +57,13 @@ create_client(Name, IsValidator, IsAdmin, PublicKey) ->
     create_from_json(chef_client, Ejson).
 
 create_user(Name, Password, IsAdmin, create_key) ->
-  KeyPair = chef_certgen:rsa_generate_keypair(?KEY_BITS),
-  case create_user(Name, Password, IsAdmin, KeyPair#rsa_key_pair.public_key) of
-      ok ->
-        {ok, KeyPair#rsa_key_pair.private_key};
-      Error ->
-        Error
-  end;
+    {PubKey, PrivKey} = generate_key_pair(),
+    case create_user(Name, Password, IsAdmin, PubKey) of
+        ok ->
+            {ok, PrivKey};
+        Error ->
+            Error
+    end;
 
 create_user(Name, Password, IsAdmin, PublicKey) ->
     PasswordData = chef_password:encrypt(Password),
@@ -121,3 +119,11 @@ make_req_id() ->
                                     Year, Month, Day,
                                     Hour, Minute, Second,
                                     Rand])).
+
+generate_key_pair() ->
+    case chef_keygen_cache:get_key_pair() of
+        keygen_timeout ->
+            erlang:error({chef_sked, "unable to generate key pair", keygen_timeout});
+        {PubKey, PrivKey} ->
+            {PubKey, PrivKey}
+    end.
