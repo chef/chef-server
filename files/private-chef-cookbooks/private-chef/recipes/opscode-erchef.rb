@@ -44,7 +44,7 @@ template erchef_config do
   owner owner
   group group
   mode "644"
-  variables(node['private_chef']['opscode-erchef'].to_hash.merge({:helper => OmnibusHelper.new(node)}))
+  variables(node['private_chef']['opscode-erchef'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?, :helper => OmnibusHelper.new(node)))
   notifies :run, 'execute[remove_erchef_siz_files]', :immediately
   notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
 end

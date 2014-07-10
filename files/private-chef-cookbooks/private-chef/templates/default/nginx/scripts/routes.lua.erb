@@ -101,8 +101,19 @@ local p_erchef_endpoint = p_cookbooks + p_data + p_roles + p_sandboxes +
 local p_erchef_direct = (Cendpoint(p_erchef_endpoint) * ((p_sep * c_identifier) + (p_maybe_sep * p_eol))) +
                         Cendpoint(p_search)
 
+-- users endpoint is currently split between erchef and account.
+-- /users, /users/USERNAME/ -> erchef
+-- /verify_password, /authenticate_user, and /system_recover go toaccount, soon to be erchef.
+-- /users/USERNAME/organizations, /users/USERNAME/association_requests go to account
+local p_erchef_users = (p_sep * Cendpoint(p_users) * p_trailing_sep) +
+                       (p_sep * Cendpoint(p_users) * (p_sep * c_identifier)^-1 * p_trailing_sep) +
+                       (p_sep * Cendpoint(p_auth_user) * p_trailing_sep)
+-- TODO future: +
+--        (p_sep * Cendpoint(p_verify_password + p_auth_user + p_system_recovery) * p_trailing_sep)
+
 -- Everything that gets sent to erchef
-local p_erchef = p_named_org_prefix * p_erchef_direct
+local p_erchef = (p_named_org_prefix * p_erchef_direct) +
+                 p_erchef_users
 
 -- erchef routing rules for chef_internal, which includes an additional
 -- principals endpoint not exposed via the api rules
@@ -111,7 +122,8 @@ local p_erchef_int = p_erchef +
 
 -- /users endpoints for account:
 local p_named_user = (p_sep * p_users * p_sep * c_identifier)
-local p_acct_users = (p_sep * Cendpoint(p_users) * (p_sep * c_identifier)^-1 * p_trailing_sep) +
+local p_acct_users = (p_named_org_prefix * Cendpoint(p_users) * (p_sep + p_eol)) +
+                     (p_sep * Cendpoint(p_users) * (p_sep * c_identifier)^-1 * p_trailing_sep) +
                       p_named_user *
                           -- below rule for backwards compatibility with original:
                           -- /users/BLAH/{0,1}/association_requests
@@ -124,9 +136,9 @@ local p_acct_users = (p_sep * Cendpoint(p_users) * (p_sep * c_identifier)^-1 * p
 local p_acl_endpoint = (p_named_org_prefix * p_all_until_acl * Cendpoint(p_acl) * (p_sep + p_eol)) +
                        (p_named_user * Cendpoint(p_acl) * (p_sep + p_eol))
 local p_acct_direct = Cendpoint(p_users + p_association_requests) * (p_sep + p_eol)
-local p_acct = (p_sep * Cendpoint(p_verify_password + p_auth_user + p_system_recovery) * p_eol) +
-               (p_named_org_prefix * p_acct_direct) +
+local p_acct = (p_named_org_prefix * p_acct_direct) +
                (p_sep * Cendpoint(p_org) * (p_sep * Cg(p_org_identifier, "org_name"))^-1 * p_trailing_sep) +
+               (p_sep * Cendpoint(p_verify_password + p_system_recovery) * p_trailing_sep) +
                p_acct_users
 
 local uri_resolvers = {
@@ -136,7 +148,6 @@ local uri_resolvers = {
   api = (p_acl_endpoint * c_acct) +
         (p_erchef * c_erchef) +
         (p_acct * c_acct),
-
 
   -- This one is easy - everything passes through, though we'll still need to capture components
   -- (org name, object name, endpoint name) where we can, so that post-route hooks can be applied.
@@ -151,6 +162,7 @@ local uri_resolvers = {
                   -- we will need to continue to add migrated acct->erchef endpoints here
                   -- until we either correct or retire webui 1
                   ((p_named_org_prefix * Cendpoint(p_clients) * c_maybe_identifier) * c_erchef) +
+                  (p_erchef_users * c_erchef) +
                   ((p_acct +
                    (p_named_org + p_sep)) * c_acct),
 

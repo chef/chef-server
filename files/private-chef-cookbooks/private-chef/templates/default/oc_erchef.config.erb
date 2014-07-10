@@ -73,15 +73,29 @@
               %% how many nodes are deserialized at a time in
               %% preparing a response.
               {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
-	      {superusers, [<<"pivotal">>]},
+	          {superusers, [<<"pivotal">>]},
               %% metrics config
               {root_metric_key, "<%= @root_metric_key %>"},
 
               {authz_timeout, <%= node['private_chef']['opscode-erchef']['authz_timeout'] %>},
               {authz_fanout, <%= node['private_chef']['opscode-erchef']['authz_fanout'] %>},
 
-              {enable_actions, <%= node['private_chef']['dark_launch']['actions'] %>}
-             ]},
+              {enable_actions, <%= node['private_chef']['dark_launch']['actions'] %>},
+              <% if @ldap_enabled -%>
+              {ldap, [{enabled, <%= @ldap_enabled %>},
+                      {host, "<%=node['private_chef']['ldap']['host'] || "localhost" %>"},
+                      {port, <%= node['private_chef']['ldap']['port'] || "389" %> },
+                      {timeout, <%= node['private_chef']['ldap']['timeout'] || "60000" %> },
+                      {bind_dn, "<%= node['private_chef']['ldap']['bind_dn'] || "" %>" },
+                      {bind_password, "<%= node['private_chef']['ldap']['bind_password'] || "" %>" },
+                      {base_dn, "<%= node['private_chef']['ldap']['base_dn'] || "" %>" },
+                      {login_attribute, "<%= node['private_chef']['ldap']['login_attribute'] || "samaccountname" %>" },
+                      {encryption, <%= node['private_chef']['ldap']['ssl_enabled'] || false %> }
+              ]}
+              <% else -%>
+              {ldap, []}
+              <% end -%>
+            ]},
   {chef_wm, [
              {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},
              {server_version, "<%= node['private_chef']['version'] %>"},
