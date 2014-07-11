@@ -2,6 +2,9 @@
 
 ## 12.0.0 (Unreleased)
 
+### ruby updated to 1.9.3-p547
+* Update is from 1.9.3-p484
+
 ### oc_erchef updated to 0.25.18
 * Replace usage of cert generation service with erchef internal key
   generation cache. 
