@@ -1,5 +1,5 @@
 name "oc-chef-pedant"
-default_version "dt/system-recovery2"
+default_version "1.0.47"
 
 dependency "ruby"
 dependency "bundler"
