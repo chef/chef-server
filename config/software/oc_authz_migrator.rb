@@ -1,7 +1,9 @@
 name "oc_authz_migrator"
 default_version "0.0.2"
 
-dependencies ["erlang", "rebar", "rsync"]
+dependency "erlang"
+dependency "rebar"
+dependency "rsync"
 
 source :git => "git@github.com:opscode/oc_authz_migrator"
 

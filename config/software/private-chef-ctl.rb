@@ -3,7 +3,7 @@ name "private-chef-ctl"
 dependency "rsync"
 dependency "omnibus-ctl"
 
-source :path => File.expand_path("files/private-chef-ctl-commands", Omnibus.project_root)
+source :path => File.expand_path("files/private-chef-ctl-commands", Config.project_root)
 
 build do
   block do

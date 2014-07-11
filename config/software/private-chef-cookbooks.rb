@@ -4,7 +4,7 @@ dependency "berkshelf2"
 
 project_name = project.name
 
-source :path => File.expand_path("files/#{project_name}-cookbooks/#{project_name}", Omnibus.project_root)
+source :path => File.expand_path("files/#{project_name}-cookbooks/#{project_name}", Config.project_root)
 
 build do
   gem "install uuidtools --no-rdoc --no-ri -v 2.1.3"

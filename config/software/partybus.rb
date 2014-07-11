@@ -4,7 +4,7 @@ dependency "rsync"
 dependency "bundler"
 dependency "postgresql92"
 
-source :path => File.expand_path("partybus", Omnibus.project_root)
+source :path => File.expand_path("partybus", Config.project_root)
 
 # Since this project pulls in the pg gem (or depends on something that
 # does) we need to have the pg_config binary on the PATH so the
