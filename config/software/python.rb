@@ -16,7 +16,7 @@
 #
 
 name "python"
-version "2.7.5"
+default_version "2.7.5"
 
 dependency "gdbm"
 dependency "ncurses"
