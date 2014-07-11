@@ -18,10 +18,10 @@
 #
 # Basically what I'm saying is we should have integration testing and
 # that pedant is the wrong place to do such an infrastructure / service-interactive test.
-describe 'system_recovery' do
+describe 'system_recovery', :focus do
 
   def self.ruby?
-    false
+    Pedant::Config.ruby_system_recovery_endpoint?
   end
 
   let(:external_auth_id) {
