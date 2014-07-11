@@ -1,7 +1,10 @@
 name "oc_bifrost"
 default_version "1.4.4"
 
-dependencies ["erlang", "rebar", "rsync", "sqitch"]
+dependency "erlang"
+dependency "rebar"
+dependency "rsync"
+dependency "sqitch"
 
 source :git => "git@github.com:opscode/oc_bifrost"
 
