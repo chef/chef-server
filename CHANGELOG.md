@@ -2,6 +2,20 @@
 
 ## 12.0.0 (Unreleased)
 
+### oc_erchef updated to 0.25.18
+* Replace usage of cert generation service with erchef internal key
+  generation cache. 
+
+### oc_erchef updated to 0.25.17
+* Add global placeholder org macro.
+* System recovery endpoint work: Fix so recovery_authentication_enabled is correct for new users
+
+### oc_erchef updated to 0.25.16
+* Bugfix to not force user key type on regeneration
+
+### oc_erchef updated to 0.25.15
+* Bugfix for concurrent cookbook uploads
+
 ### oc_erchef updated to 0.25.14
 * Update to latest of oc_chef_action to get hostname from fqdn instead
   of inet
