@@ -18,7 +18,11 @@
 #
 # Basically what I'm saying is we should have integration testing and
 # that pedant is the wrong place to do such an infrastructure / service-interactive test.
-describe 'system_recovery' do
+describe 'system_recovery', :focus do
+
+  def self.ruby?
+    Pedant::Config.ruby_system_recovery_endpoint?
+  end
 
   let(:external_auth_id) {
     "#{Time.now.to_i}-#{Process.pid}"  }
@@ -62,9 +66,7 @@ describe 'system_recovery' do
   end
 
   describe "POST /system_recovery" do
-
     context "when a user has recovery_authentication_enabled == true is requested" do
-
       context "when the superuser is the requestor" do
 
         it "should return the user body" do
@@ -80,24 +82,26 @@ describe 'system_recovery' do
         end # should return the user body
       end # when the superuser is the requestor
 
-      context "when the pasword passed is incorrect" do
+      context "when the password passed is incorrect" do
         let (:wrong_pw_user_body) {
           { 'username' => username,
             'password' => "wrong_password"
           }
         }
 
-        # TODO: opscode-account currently returns "Failed to authenticate: ".
-        # It is executing "Failed to authenticate: #{$!}", so it is intending to
-        # print the exception here, but we should have a more meanful message, see
-        # below for an example:
-        #
-        # Failed to authenticated as #{username}. Password passed is incorrect.
+        if (ruby?)
+          let (:error_message) {
+            "Failed to authenticate: "
+          }
+        else
+          let (:error_message) {
+            ["Failed to authenticate: Username and password incorrect"]
+          }
+        end
+
         it "should return 401 with an error message" do
           post(request_url, superuser, :payload => wrong_pw_user_body).should look_like(
-            :body => {
-              "error" => "Failed to authenticate: "
-            },
+            :body => { "error" => error_message },
             :status => 401
           )
         end # should return 403 with an error message
@@ -105,13 +109,21 @@ describe 'system_recovery' do
 
       context "when a non-superuser is the requestor" do
 
+        if (ruby?)
+          let (:error_message) {
+            "#{username} not authorized for verify_password"
+          }
+        else
+          let (:error_message) {
+            ["missing create permission"]
+          }
+        end
+
         # TODO: the error string from opscode-account returns
         # the user in the body and not the requestor user
         it "should return 403 with an error explaining non-superuser is not authorized" do
           post(request_url, platform.admin_user, :payload => user_body).should look_like(
-            :body => {
-              "error" => "#{username} not authorized for verify_password"
-            },
+            :body => { "error" => error_message },
             :status => 403
           )
         end # should return 403 with an error explaining non-superuser is not authorized
@@ -142,6 +154,16 @@ describe 'system_recovery' do
         }
       }
 
+      if (ruby?)
+        let (:error_message) {
+          "User is not allowed to take this action"
+        }
+      else
+        let (:error_message) {
+          ["System recovery disabled for this user"]
+        }
+      end
+
       # create a new recovery_authentication_enabled:false user
       before :each do
         post("#{platform.server}/users", superuser, :payload => unrecoverable_user_create_body)
@@ -157,7 +179,7 @@ describe 'system_recovery' do
           # TODO: this error isn't quite terrible enough to mark test as pending,
           # but it should be "Requestor" not "User"
           :body => {
-            "error" => "User is not allowed to take this action"
+            "error" => error_message
           },
           :status => 403
         )
@@ -173,12 +195,22 @@ describe 'system_recovery' do
         }
       }
 
+      if (ruby?)
+        let (:error_message) {
+          "User is not found in the system"
+        }
+      else
+        let (:error_message) {
+          ["System recovery disabled for this user"]
+        }
+      end
+
       it "should return 404 with an error message" do
         post(request_url, superuser, :payload => user_body).should look_like(
           :body => {
-            "error" => "User is not found in the system"
+            "error" => error_message
           },
-          :status => 404
+          :status => ruby? ? 404 : 403
         )
       end # should return 404 with an error message
     end # when a user that does not exist is requested by the superuser
@@ -186,16 +218,22 @@ describe 'system_recovery' do
     context "when the request is missing the username field" do
 
       let (:missing_username_body) {
-        {
-          'password' => "foobar"
-        }
+        { 'password' => "foobar" }
       }
+
+      if (ruby?)
+        let (:error_body) {{
+            "error" => "username and password are required"
+          }}
+      else
+        let (:error_body) {{
+            "error" => ["Field 'username' missing"]
+          }}
+      end
 
       it "should return 400 with an error message" do
         post(request_url, superuser, :payload => missing_username_body).should look_like(
-          :body => {
-            "error" => "username and password are required"
-          },
+          :body => error_body,
           :status => 400
         )
       end # should return 400 with an error message
@@ -204,16 +242,22 @@ describe 'system_recovery' do
     context "when the request is missing the password field" do
 
       let (:missing_username_body) {
-        {
-          "username" => username
-        }
+        { "username" => username }
       }
+
+      if (ruby?)
+        let (:error_body) {{
+            "error" => "username and password are required"
+          }}
+      else
+        let (:error_body) {{
+            "error" => ["Field 'password' missing"]
+          }}
+      end
 
       it "should return 400 with an error message" do
         post(request_url, superuser, :payload => missing_username_body).should look_like(
-          :body => {
-            "error" => "username and password are required"
-          },
+          :body => error_body,
           :status => 400
         )
       end # should return 400 with an error message
