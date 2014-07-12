@@ -60,7 +60,7 @@ check_health() ->
     Pings = spawn_health_checks(),
     Status = overall_status(Pings),
     log_failure(Status, Pings),
-    KeyGen = chef_keygen_cache:status(),
+    KeyGen = chef_keygen_cache:status_for_json(),
     {Status, chef_json:encode({[{<<"status">>, ?A2B(Status)},
                                 {<<"upstreams">>, {Pings}},
                                 {<<"keygen">>, {KeyGen} }
