@@ -34,11 +34,10 @@ render_template(Template, Req, Args) ->
 %% @doc Extract the organization name from the Request's path.  If organization name is
 %% present it must be captured as the atom `organization_id' in our dispatch rules
 %% for the organization name.
-%% If no organization is in the URI it will return the configured default orgname
 org_name(#wm_reqdata{} = Req) ->
     org_name(wrq:path_info(organization_id, Req));
 org_name(undefined) ->
-    default_orgname();
+    undefined;
 org_name(Name) ->
     list_to_binary(Name).
 
