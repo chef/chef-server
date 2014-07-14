@@ -202,6 +202,7 @@ module Pedant
       MAX_ATTEMPTS.times do |attempt|
         r = post("#{@server}/organizations", superuser, :payload => payload)
 
+        # This re-assigns the variable 'r' and therefore can't be part of the case statement below
         if r.code == 409
           puts "The organization already exists!  Regenerating validator key ..."
           r = post("#{Pedant::Config.account_server}/organizations/#{orgname}/_validator_key", superuser, {})
@@ -209,9 +210,10 @@ module Pedant
         end
 
         case r.code
-        when 201 || 200
+        when 201, 200
           parsed = parse(r)
-          validator_name = parsed["clientname"]
+          # If we came here through the 409 codepath there won't be a client name so we're hardcoding it.
+          validator_name = parsed["clientname"] || "#{orgname}-validator"
           validator_key = parsed["private_key"]
 
           validator = Pedant::Client.new(validator_name, validator_key)
