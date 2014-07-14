@@ -17,8 +17,6 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     # Define defaults
     @options.interactive = false
     @options.chef_server_url = "localhost"
-    @options.sql_host = "localhost"
-    @options.sql_port = 5432
 
     # overrides for testing:
     #@options.chef_server_url = 'https://api.opscode.piab'
@@ -47,14 +45,6 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
       # Should this be chef-server-host to match sql-host?
       opts.on("--chef-server-url", "The url of the chef server.  Defaults to #{@options.chef_server_url}") do |u|
          @options.chef_server_url = u
-      end
-
-      opts.on("--sql_host", "The url of the sql server.  Defaults to #{@options.sql_host}") do |h|
-        @options.sql_host = h
-      end
-
-      opts.on("--sql_port", "The port of the sql server.  Defaults to #{@options.sql_port}") do |p|
-        @options.sql_port = p
       end
 
       # TODO(jmink) Make this work without the --

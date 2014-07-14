@@ -192,24 +192,27 @@ def run_osc_upgrade
     Dir.mkdir(dir, permissions) unless File.directory?(dir)
   end
 
+  # TODO(jmink) Add error handling
   def pull_osc_db_credentials
     # This code pulled from knife-ec-backup and adapted
     log "Pulling needed db credintials"
     if !File.exists?("/etc/chef-server/chef-server-running.json")
       log "Failed to find /etc/chef-server/chef-server-running.json"
       exit 1
-    else
-      running_config = JSON.parse(File.read("/etc/chef-server/chef-server-running.json"))
-      sql_user = running_config['chef_server']['postgresql']['sql_user']
-      sql_password = running_config['chef_server']['postgresql']['sql_password']
     end
-      [sql_user, sql_password]
+
+    running_config = JSON.parse(File.read("/etc/chef-server/chef-server-running.json"))
+    sql_host = running_config['chef_server']['postgresql']['vip']
+    sql_port = running_config['chef_server']['postgresql']['port']
+    sql_user = running_config['chef_server']['postgresql']['sql_user']
+    sql_password = running_config['chef_server']['postgresql']['sql_password']
+    [sql_host, sql_port, sql_user, sql_password]
   end
 
   def create_osc_key_file(key_file)
-    sql_user, sql_password = pull_osc_db_credentials
+    sql_host, sql_port, sql_user, sql_password = pull_osc_db_credentials
 
-    server_string = "#{sql_user}:#{sql_password}@#{@options.sql_host}:#{@options.sql_port}/opscode_chef"
+    server_string = "#{sql_user}:#{sql_password}@#{sql_host}:#{sql_port}/opscode_chef"
     db = ::Sequel.connect("postgres://#{server_string}")
 
     # OSC doesn't have pubkey_version - what should this be filled in as?
