@@ -7,3 +7,6 @@ ebin_dialyzer/
 /itest/*.beam
 /variables-ct@*
 /itest/*_data/
+\#*
+.#*
+*~
