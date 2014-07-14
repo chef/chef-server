@@ -28,6 +28,11 @@ module Pedant
       "#{server}#{path_prefix}#{slash}#{path_fragment}"
     end
 
+    # Override org_name that is defined in the base platform
+    def org_name
+      test_org.name
+    end
+
     def map_to_default_orgname?(path_fragment)
       return false unless Pedant::Config.use_default_org # Don't even bother unless we are in default_orgname mode
       return false if path_fragment =~ /_acl/            # False if _acl appears anywhere
@@ -311,7 +316,7 @@ module Pedant
     ################################################################################
 
     def pedant_orgname
-      Pedant::Config.use_default_org ? Pedant::Config.default_orgname : org[:name]
+      Pedant::Config.use_default_org ? Pedant::Config.default_orgname : Pedant::Config[:org][:name]
     end
 
     def org_from_config()
