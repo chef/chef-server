@@ -50,7 +50,7 @@ check_health_all_ok_test_() ->
                    meck:expect(Mod, ping, fun() -> pong end)
                end || Mod <- ?CHECK_MODS ],
              meck:new(chef_keygen_cache),
-             meck:expect(chef_keygen_cache, status, fun() -> ?KEYGEN_STATUS end)
+             meck:expect(chef_keygen_cache, status_for_json, fun() -> ?KEYGEN_STATUS end)
      end,
      fun(_) ->
              [ meck:unload(Mod) || Mod <- ?CHECK_MODS ],
@@ -73,7 +73,7 @@ check_health_one_crash_no_module_test_() ->
              setup_env(),
              application:set_env(chef_wm, health_ping_modules, [bad_module_no_exist]),
              meck:new(chef_keygen_cache),
-             meck:expect(chef_keygen_cache, status, fun() -> ?KEYGEN_STATUS end)
+             meck:expect(chef_keygen_cache, status_for_json, fun() -> ?KEYGEN_STATUS end)
 
      end,
      fun(_) ->
@@ -109,7 +109,7 @@ check_health_mod_fails(BadMod, How) ->
                      meck:expect(BadMod, ping, fun() -> timer:sleep(?SLOW_CHECK_SLEEP) end)
              end,
              meck:new(chef_keygen_cache),
-             meck:expect(chef_keygen_cache, status, fun() -> ?KEYGEN_STATUS end)
+             meck:expect(chef_keygen_cache, status_for_json, fun() -> ?KEYGEN_STATUS end)
      end,
      fun(_) ->
              [ meck:unload(Mod) || Mod <- ?CHECK_MODS ],
