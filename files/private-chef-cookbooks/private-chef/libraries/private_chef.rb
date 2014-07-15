@@ -373,7 +373,7 @@ module PrivateChef
       when "backend"
         gen_backend(me['bootstrap'])
         gen_hapaths if topology == 'ha'
-        gen_keepalived(node_name) toplogy == 'ha'
+        gen_keepalived(node_name) if topology == 'ha'
         gen_api_fqdn
       when "frontend"
         gen_frontend
