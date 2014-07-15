@@ -263,12 +263,9 @@ def run_osc_upgrade
   end
 
   def determine_org_name
-    return [@options.org_name, @options.full_org_name, @options.org_type] unless @options.interactive
-
-    org_name = ask("Chef Organization Name? ")
-    org_full_name = ask("The full Chef Organization Name? ")
-    # Is there an enum we can restrict this to?
-    org_type = ask("The type of the organization (ie Business) ")
+    org_name = @options.org_name || ask("Chef Organization Name? ")
+    org_full_name = @options.full_org_name || ask("The full Chef Organization Name? ")
+    org_type = 'Business'
 
     [org_name, org_full_name, org_type]
   end

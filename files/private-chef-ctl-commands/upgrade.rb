@@ -15,7 +15,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     @options = OpenStruct.new
 
     # Define defaults
-    @options.interactive = false
+    @options.skip_confirmation = false
     @options.chef_server_url = "localhost"
 
     # overrides for testing:
@@ -25,21 +25,16 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     #@options.org_type = "Business"
 
     opt_parser = OptionParser.new do |opts|
-      opts.on("-i", "--interactive", "Run interactively, as opposed to requiring all arguments from the command line") do |i|
-        @options.interactive = i
+      opts.on("-y", "--yes", "Skip confirmation") do |y|
+        @options.skip_confirmation = y
       end
 
-      opts.on("--org-name", "The name of the Chef organization (Required for non-interactive mode)") do |n|
+      opts.on("--org-name", "The name of the Chef organization (Will ask interactively if not passed)") do |n|
         @options.org_name = n
       end
 
-      opts.on("--full-org-name", "The full name of the Chef organization (Required for non-interactive mode)") do |n|
+      opts.on("--full-org-name", "The full name of the Chef organization (Will ask interactively if not passed)") do |n|
         @options.full_org_name = n
-      end
-
-      # TODO(jmink) restrict with same enum as in determine_org_name
-      opts.on("--org-type","The type of the Chef organization for example Buisness (Required for non-interactive mode)") do |t|
-        @options.org_type = t
       end
 
       # Should this be chef-server-host to match sql-host?
@@ -47,22 +42,13 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
          @options.chef_server_url = u
       end
 
-      # TODO(jmink) Make this work without the --
+      # TODO(jmink) Make this work without the '--'
       opts.on("-h", "--help", "Show this message") do
         puts opts
         exit
       end
     end
     opt_parser.parse!(args)
-
-    unless @options.interactive
-      if @options.org_name.nil? || @options.full_org_name.nil? || @options.org_type.nil?
-        log "org-name, full-org-name and org-type are all required unless --interactive is used.  Run --help for more information"
-        # Do we want to exit 0 for instances where the server wasn't upgraded?
-        exit 0
-      end
-    end
-    @options
   end
 
   def detect_osc
@@ -71,16 +57,15 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
   end
 
   def upgrade?
-    if @options.interactive
-      log "Would you like to upgrade? [yN]"
-
-      answer = STDIN.gets.chomp
-      return answer == 'Y' || answer == 'y'
-    else
-      # TODO(jmink) Do we want a sleep here?
+    if @options.skip_confirmation
       log "Performing upgrade"
       return true
     end
+
+    log "Would you like to upgrade? [yN]"
+
+    answer = STDIN.gets.chomp
+    return answer == 'Y' || answer == 'y'
   end
 
   ### Start script ###
