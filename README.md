@@ -3,6 +3,16 @@
 **Internal Repo**
 
 This is the pedant test suite for Opscode Private Chef.
+## Setting up precommit hooks
+
+It's strongly advised that you link the included pre-commit.sh in as
+a precommit hook, in order to prevent accidentally committing code
+containing a :focus tag.
+
+To do so:
+
+    $ cd .git/hooks
+    $ ln -s ../../pre-commit.sh pre-commit
 
 ## Running the Tests in Development
 
