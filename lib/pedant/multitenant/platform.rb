@@ -4,6 +4,7 @@ module Pedant
   class MultiTenantPlatform < Platform
 
     GLOBAL_OBJECTS = ['users', 'organizations']
+    MAX_ATTEMPTS = 5
 
     attr_reader :test_org, :test_org_owner, :validate_org, :internal_account_url, :ldap, :ldap_testing
 
@@ -199,25 +200,36 @@ module Pedant
         "full_name" => orgname,
         "org_type" => "Business"
       }
-      r = post("#{@server}/organizations", superuser, :payload => payload)
 
-      if r.code == 409
-        puts "The organization already exists!  Regenerating validator key ..."
-        r = post("#{Pedant::Config.account_server}/organizations/#{orgname}/_validator_key", superuser, {})
-        if r.code != 200
-          raise "Bad error code #{r.code} from regenerating validator key: #{r}"
+      MAX_ATTEMPTS.times do |attempt|
+        r = post("#{@server}/organizations", superuser, :payload => payload)
+
+        # This re-assigns the variable 'r' and therefore can't be part of the case statement below
+        if r.code == 409
+          puts "The organization already exists!  Regenerating validator key ..."
+          r = post("#{Pedant::Config.account_server}/organizations/#{orgname}/_validator_key", superuser, {})
+          raise "Bad error code #{r.code} from regenerating validator key: #{r}" unless r.code == 200
         end
-      elsif r.code != 201
-        raise "Bad error code #{r.code} from create org: #{r}"
+
+        case r.code
+        when 201, 200
+          parsed = parse(r)
+          # If we came here through the 409 codepath there won't be a client name so we're hardcoding it.
+          validator_name = parsed["clientname"] || "#{orgname}-validator"
+          validator_key = parsed["private_key"]
+
+          validator = Pedant::Client.new(validator_name, validator_key)
+
+          return Pedant::Organization.new(orgname, validator)
+        when 503
+          # Continue attempting by allowing the loop to continue
+          puts "Failed attempting to contact #{@server} (#{attempt}/#{MAX_ATTEMPTS})"
+        else
+          raise "Bad error code #{r.code} from create org: #{r}"
+        end
+
       end
-
-      parsed = parse(r)
-      validator_name = parsed["clientname"]
-      validator_key = parsed["private_key"]
-
-      validator = Pedant::Client.new(validator_name, validator_key)
-
-      Pedant::Organization.new(orgname, validator)
+      raise "Failed attempting to contact #{@server} #{MAX_ATTEMPTS} times"
     end
 
     def delete_org(orgname)
