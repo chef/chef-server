@@ -1,5 +1,5 @@
 name "oc-chef-pedant"
-default_version "1.0.47.1"
+default_version "dt/remove_focus"
 
 dependency "ruby"
 dependency "bundler"
