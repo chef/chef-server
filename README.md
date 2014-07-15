@@ -14,6 +14,12 @@ To do so:
     $ cd .git/hooks
     $ ln -s ../../pre-commit.sh pre-commit
 
+If you ever need to skip this commit hook ( such as when using :focus in
+documentation) you can use:
+
+    $ git commit -n
+
+
 ## Running the Tests in Development
 
 The easiest way to run tests when hacking on either private chef

@@ -1,12 +1,17 @@
 #!/bin/sh
 
-# I would prefer to use git diff --cached -S":focus" here
-# but -S will return a positive result if items are either
-# removed or added. We don't want to stop someone removing a :focus,
-# so we'll rely on the diff output format instead
-if git diff --cached|egrep "^\\+.*:focus" > /dev/null 2>&1
+# We'll use the git built-in only to perform this diff, beacuse
+# can't rely on external tools such as regex greps. This means we can't
+# determine if the word :focus has been added or removed. The best we can
+# do is include some instruction on how to bypass when it's appropriate.
+git --no-pager diff --cached -S":focus"
+if [ $? -ne 0 ]
 then
-  echo "Remove :focus tag(s) before committing."
+  echo "**"
+  echo "** Remove :focus tag(s) before committing, or use -n option if ."
+  echo "** this commit is either removing such a tag, or is adding it for"
+  echo "** documentation purposes"
+  echo "**"
   exit 1
 fi
 exit 0
