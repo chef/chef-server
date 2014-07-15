@@ -1,6 +1,6 @@
 name "private-chef"
-maintainer 'Opscode, Inc.'
-homepage 'http://www.opscode.com'
+maintainer "Chef Software, Inc."
+homepage   "http://www.getchef.com"
 
 replaces        "private-chef-full"
 install_path    "/opt/opscode"
