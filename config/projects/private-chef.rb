@@ -50,6 +50,7 @@ dependency "opscode-org-creator"
 dependency "opscode-certificate"
 dependency "opscode-platform-debug"
 dependency "opscode-test"
+dependency "oc_id"
 
 # log management
 dependency "logrotate"

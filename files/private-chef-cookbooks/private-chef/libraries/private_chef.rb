@@ -36,6 +36,7 @@ module PrivateChef
   postgresql Mash.new
   redis_lb Mash.new
   oc_bifrost Mash.new
+  oc_id Mash.new
   opscode_certificate Mash.new
   opscode_org_creator Mash.new
   opscode_account Mash.new
@@ -154,6 +155,8 @@ module PrivateChef
       PrivateChef['oc_bifrost']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
       PrivateChef['oc_bifrost']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['oc_bifrost']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['oc_id']['secret_key_base'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['oc_id']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['bookshelf']['access_key_id'] ||= generate_hex_if_bootstrap(20, ha_guard)
       PrivateChef['bookshelf']['secret_access_key'] ||= generate_hex_if_bootstrap(40, ha_guard)
 
@@ -169,6 +172,10 @@ module PrivateChef
               'postgresql' => {
                 'sql_password' => PrivateChef['postgresql']['sql_password'],
                 'sql_ro_password' => PrivateChef['postgresql']['sql_ro_password']
+              },
+              'oc_id' => {
+                'sql_password' => PrivateChef['oc_id']['sql_password'],
+                'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
               },
               'opscode_account' => {
                 'session_secret_key' => PrivateChef['opscode_account']['session_secret_key']
@@ -209,6 +216,7 @@ module PrivateChef
         "lb_internal",
         "postgresql",
         "oc_bifrost",
+        "oc_id",
         "opscode_certificate",
         "opscode_org_creator",
         "opscode_chef_mover",
