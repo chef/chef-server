@@ -16,29 +16,28 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
 
     # Define defaults
     @options.skip_confirmation = false
-    @options.chef_server_url = "localhost"
+    @options.chef_server_url = "https://localhost"
 
     # overrides for testing:
     #@options.chef_server_url = 'https://api.opscode.piab'
     #@options.org_name = 'minitrue'
     #@options.full_org_name = "MinistryOfTruth"
-    #@options.org_type = "Business"
 
     opt_parser = OptionParser.new do |opts|
       opts.on("-y", "--yes", "Skip confirmation") do |y|
         @options.skip_confirmation = y
       end
 
-      opts.on("--org-name", "The name of the Chef organization (Will ask interactively if not passed)") do |n|
+      opts.on("--org-name [name]", String, "The name of the Chef organization (Will ask interactively if not passed)") do |n|
         @options.org_name = n
       end
 
-      opts.on("--full-org-name", "The full name of the Chef organization (Will ask interactively if not passed)") do |n|
+      opts.on("--full-org-name [name]", String, "The full name of the Chef organization (Will ask interactively if not passed)") do |n|
         @options.full_org_name = n
       end
 
       # Should this be chef-server-host to match sql-host?
-      opts.on("--chef-server-url", "The url of the chef server.  Defaults to #{@options.chef_server_url}") do |u|
+      opts.on("--chef-server-url [url]", String, "The url of the chef server.  Defaults to #{@options.chef_server_url}") do |u|
          @options.chef_server_url = u
       end
 
@@ -49,6 +48,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
       end
     end
     opt_parser.parse!(args)
+    log "Upgrading with options #{@options.inspect}"
   end
 
   def detect_osc

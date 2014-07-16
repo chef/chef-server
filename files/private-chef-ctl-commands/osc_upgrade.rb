@@ -26,15 +26,13 @@ def run_osc_upgrade
 
     log "Preparing knife to download data from the Open Source Chef server"
 
-    # As a precaution, likely want to use mkstemp to create this dir so
-    # the location varies. Then will need to save the value to a read protected
-    # file so it can be read from if a resume is needed
-    osc_data_dir = "/tmp/osc-chef-server-data"
-
-    log "Making #{osc_data_dir} as the location to save the server datar"
-
-    # Are the permissions good enough?
-    make_dir(osc_data_dir, 0644)
+    # As a precaution, we want the location to vary. TODO: We need to save
+    # the value to a read protected file so it can be read from if a resume
+    # is needed
+    # Do we want to delete the directory on failure or leave it for debugging?
+    # Are the permissions good enough? (0700)
+    osc_data_dir = Dir.mktmpdir('osc-chef-server-data')
+    log "Making #{osc_data_dir} as the location to save the server data"
 
     write_knife_config(osc_data_dir)
 
@@ -64,11 +62,9 @@ def run_osc_upgrade
 
     org_name, org_full_name, org_type = determine_org_name
 
-    # Likely want to use mkstemp here as well (see additional note above)
-    ec_data_dir = "/tmp/ec-chef-server-data"
+    # See note above on osc_data_dir
+    ec_data_dir = Dir.mktmpdir('ec-chef-server-data')
     org_dir = "#{ec_data_dir}/organizations/#{org_name}"
-
-    make_dir(ec_data_dir, 0644)
     make_dir("#{ec_data_dir}/organizations", 0644)
     org_dir = "#{ec_data_dir}/organizations/#{org_name}"
     make_dir(org_dir, 0644)
@@ -184,8 +180,7 @@ def run_osc_upgrade
     log "Running knife download"
     cmd = "/opt/chef-server/embedded/bin/knife download -c /tmp/knife-config.rb /"
     status = run_command(cmd)
-    msg = "knife download failed with #{status}"
-    check_status(status, msg)
+    check_status(status, "knife download failed with #{status}")
   end
 
   def make_dir(dir, permissions)
@@ -342,7 +337,7 @@ def run_osc_upgrade
     # The server root is likely the same as was set for the knife config
     # used by knife download
     config = <<-EOH
-    chef_server_root 'https://api.opscode.piab'
+    chef_server_root '#{@options.chef_server_url}'
     node_name 'pivotal'
     client_key '/etc/opscode/pivotal.pem'
     EOH
