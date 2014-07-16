@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/opscode/omnibus-ruby.git
-  revision: 1fd1840f48c98d29e86314b40c66d720c3de7c8e
+  revision: 3636296864a88d35e1fc090b4028bf6e3c85dd14
   specs:
     omnibus (3.2.0.rc.1)
       chef-sugar (~> 1.2)
@@ -12,7 +12,7 @@ GIT
 
 GIT
   remote: git://github.com/opscode/omnibus-software.git
-  revision: f0af853857dead79c9ac221f2ba352bbb6298ef4
+  revision: 5b48447e80aba4a57bcfaa03928a730d3528a0e7
   specs:
     omnibus-software (0.0.1)
 
