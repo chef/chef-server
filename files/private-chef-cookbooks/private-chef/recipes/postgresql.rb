@@ -125,4 +125,5 @@ if is_data_master?
   private_chef_pg_database "opscode-pgsql"
   include_recipe "private-chef::erchef_database"
   include_recipe "private-chef::bifrost_database"
+  include_recipe "private-chef::oc_id_database"
 end

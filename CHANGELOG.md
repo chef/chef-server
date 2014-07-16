@@ -52,6 +52,9 @@
 * [OC-11382] keepalived restart interferes with upgrades
 * [OC-8881] private-chef-ctl password does not work
 
+### oc-id 0.3.3
+* Add Chef Identity Service (oc-id)
+
 ## 11.1.6 (2014-06-05)
 
 ### openssl 1.0.1h
