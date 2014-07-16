@@ -8,9 +8,9 @@ git --no-pager diff --cached -S":focus"
 if [ $? -ne 0 ]
 then
   echo "**"
-  echo "** Remove :focus tag(s) before committing, or use -n option if ."
-  echo "** this commit is either removing such a tag, or is adding it for"
-  echo "** documentation purposes"
+  echo "** Remove :focus tag(s) before committing, or use git commit -n"
+  echo "** if this commit is either removing such a tag, or is adding "
+  echo "** it for documentation purposes."
   echo "**"
   exit 1
 fi
