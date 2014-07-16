@@ -24,6 +24,14 @@ local uri = ngx.var.uri
 -- A couple of early-exit validations that are specific
 -- to an api vhost:
 if mode == "api" then
+  -- If we've defined an override upstream and we don't have a userid, use
+  -- the override upstream.
+  local override_upstream = ngx.var.add_on_override_upstream
+  if userid == "" and override_upstream ~= "" then
+    ngx.var.upstream = override_upstream
+    return
+  end
+
   -- Internal API does not validate chef version
   if not internal then
     -- Exit early: If they don't have the right chef version, send them packing.
