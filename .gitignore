@@ -7,3 +7,4 @@ files/private-chef-cookbooks/cache/
 vendor/bundle
 vendor/cookbooks
 .kitchen
+*_git_cache
