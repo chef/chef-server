@@ -185,7 +185,9 @@ local_auth_user_spec(update) ->
 valid_email(EMail) when is_binary(EMail) ->
     valid_email(binary_to_list(EMail));
 valid_email(EMail) ->
-    %% * Not compiling/caching this because updating users is a fairly infrequent operatoin.
+    %% * We are not caching this because updating users is a fairly infrequent operation.
+    %%   Note that we are compiling it, since the 'caseless' option is only available to a
+    %%   compiled regex.
     %% * This will allow most valid emails. It will fail in some valid cases, such as if someone
     %%   submitted: me+"my address"@somehost.com - which is technically valid.
     RE = "^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*" ++
@@ -197,7 +199,8 @@ valid_email(EMail) ->
          "(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]" ++
          "|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)" ++
          "\\])$",
-    case re:run(EMail, RE) of
+    {ok, MP} = re:compile(RE, [caseless]),
+    case re:run(EMail, MP) of
         {match, _} ->
             ok;
         nomatch ->
