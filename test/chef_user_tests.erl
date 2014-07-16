@@ -106,6 +106,7 @@ parse_binary_json_test_() ->
       fun() ->
               GoodEmail = [<<"me@here.com">>, <<"me@here.com.com.au.zebra">>,
                            <<"me+you@here.com">>,
+                           <<"MyMixedCaseEmail@here.com">>,
                            <<"me.you@here.com">>],
               UserEJson = {make_min_valid_create_user_ejson()},
                     [ ?_assertMatch({ok, _},
