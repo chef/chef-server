@@ -16,3 +16,6 @@ OLD
 /moser-data
 /sys.config
 /log
+\#*
+.#*
+*~

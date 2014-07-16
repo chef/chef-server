@@ -140,7 +140,8 @@ migrate(all, NumWorkers, CallbackModule) ->
     migrate(-1, NumWorkers, CallbackModule);
 migrate(NumOrgs, NumWorkers, CallbackModule) ->
     Worker = #migration_worker{callback_module = CallbackModule},
-    gen_fsm:sync_send_event(?SERVER, {start, NumOrgs, NumWorkers, Worker}).
+    % give 10 second timeout since loading migration queues can take awhile
+    gen_fsm:sync_send_event(?SERVER, {start, NumOrgs, NumWorkers, Worker}, 10000).
 
 %% Migrate user password hash from sha1 embedded in json to dedicated fields
 %% using bcrypt.
@@ -155,7 +156,7 @@ migrate_user_password_storage(NumUsers, NumWorkers) ->
 %% the transient queue, even if it has contents left from a previous run.
 
 status() ->
-    gen_fsm:sync_send_all_state_event(?SERVER, status).
+    gen_fsm:sync_send_all_state_event(?SERVER, status, 30000).
 
 
 set_concurrency(NewConcurrency) when is_integer(NewConcurrency) and (NewConcurrency > 0) ->
