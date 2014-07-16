@@ -6,6 +6,20 @@ class NginxErb
     @node = node
   end
 
+  # Sets up the variable used for the host header. If we're running on a
+  # non-standard port (80 for http; 443 for https), we need to include the
+  # port number in the host header, or redirects will not work because we will
+  # lose the port number on the redirect.
+  def host_header_var(proto)
+    if proto == 'http'
+      standard_port = 80
+      port = node['private_chef']['nginx']['non_ssl_port'] || standard_port
+    elsif proto == 'https'
+      standard_port = 443
+      port = node['private_chef']['nginx']['ssl_port'] || standard_port
+    end
+    "$host#{':$server_port' if port != standard_port}"
+  end
 
   def listen_port(proto, options = {})
     listen_port = ""
