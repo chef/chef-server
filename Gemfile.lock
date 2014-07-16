@@ -1,8 +1,8 @@
 GIT
   remote: git://github.com/opscode/omnibus-ruby.git
-  revision: 7e199776e5ca47423f390ad694a1b0725a7b475c
+  revision: 1fd1840f48c98d29e86314b40c66d720c3de7c8e
   specs:
-    omnibus (3.1.1)
+    omnibus (3.2.0.rc.1)
       chef-sugar (~> 1.2)
       fpm (~> 0.4)
       mixlib-shellout (~> 1.4)
@@ -12,7 +12,7 @@ GIT
 
 GIT
   remote: git://github.com/opscode/omnibus-software.git
-  revision: 90a08ec6ca0639e8a3c8bc29bf25bef4d907a238
+  revision: f0af853857dead79c9ac221f2ba352bbb6298ef4
   specs:
     omnibus-software (0.0.1)
 
@@ -29,7 +29,7 @@ GEM
       ffi (~> 1.0, >= 1.0.11)
     clamp (0.6.3)
     ffi (1.9.3)
-    ffi-yajl (0.2.0)
+    ffi-yajl (0.2.1)
       ffi (~> 1.5)
       libyajl2
     fpm (0.4.42)
@@ -48,7 +48,7 @@ GEM
     http_parser.rb (0.5.3)
     ipaddress (0.8.0)
     json (1.8.1)
-    libyajl2 (0.1.17)
+    libyajl2 (0.1.18)
     mime-types (1.25.1)
     mixlib-cli (1.5.0)
     mixlib-config (2.1.0)
