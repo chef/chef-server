@@ -1559,6 +1559,39 @@ EOF
           end
         end
 
+        context "when a new private key is requested" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@opscode.com",
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => "new name",
+              "password" => "badger badger",
+              "private_key" => true
+            }
+          end
+
+          it "can be used to successfully authenticate request" do
+            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response.should look_like({
+                                            :status => 200,
+                                            :body_exact => {
+                                              "uri" => request_url,
+                                              "private_key" => private_key_regex
+                                            },
+                                          })
+
+            new_private_key = JSON.parse(put_response.body)["private_key"]
+            org_user = Pedant::User.new(username, new_private_key, {:associate => true,
+                                                                    :preexisting => true })
+            platform.make_user(org_user, platform.test_org)
+            get(api_url("users"), org_user).should look_like({
+                :status => 200
+            })
+          end
+        end
+
         context "with private_key = true" do
           let(:request_body) do
             {
@@ -1594,7 +1627,9 @@ EOF
           end
         end
 
-        context "with private_key = true and a public_key" do
+
+
+        context "and a public_key is present" do
           let(:request_body) do
             {
               "username" => username,
@@ -1632,7 +1667,7 @@ EOF
           end
         end
 
-        context "with private_key = true and a certificate as public_key" do
+        context "and public key is present containing a certificate" do
           let(:request_body) do
             {
               "username" => username,
