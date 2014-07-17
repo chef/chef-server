@@ -28,8 +28,10 @@
 -include_lib("ej/include/ej.hrl").
 
 -export([
+         cert_or_key/1,
          delete_null_public_key/1,
          depsolver_constraints/1,
+         extract_public_key/1,
          key_version/1,
          make_org_prefix_id/1,
          make_org_prefix_id/2,
@@ -43,8 +45,7 @@
          strictly_valid/3,
          sql_date/1,
          throw_invalid_fun_match/1,
-         valid_public_key/1,
-         cert_or_key/1
+         valid_public_key/1
         ]).
 
 %% In order to fully test things
@@ -239,6 +240,14 @@ cert_or_key(Payload) ->
             {PublicKey, ?KEY_VERSION};
         _ ->
             {Cert, ?CERT_VERSION}
+    end.
+
+extract_public_key(Data) ->
+    case key_version(Data) of
+        ?KEY_VERSION ->
+            Data;
+        ?CERT_VERSION ->
+            chef_authn:extract_pem_encoded_public_key(Data)
     end.
 
 %% Hack to get null public_key accepted as undefined
