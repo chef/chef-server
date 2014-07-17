@@ -45,7 +45,6 @@ GEM
       backports (>= 2.6.2)
       cabin (> 0)
       http_parser.rb (= 0.5.3)
-    highline (1.6.21)
     http_parser.rb (0.5.3)
     ipaddress (0.8.0)
     json (1.8.1)
@@ -76,6 +75,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  highline
   omnibus!
   omnibus-software!
