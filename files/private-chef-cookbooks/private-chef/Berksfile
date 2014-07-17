@@ -3,3 +3,5 @@ site :opscode
 metadata
 
 cookbook 'enterprise', :git => 'git@github.com:opscode-cookbooks/enterprise-chef-common.git', :tag => '0.4.4'
+
+cookbook 'ha', :path => '../ha'
