@@ -43,9 +43,9 @@ end
 execute "set initial migration level" do
   action :nothing
   command "cd /opt/opscode/embedded/service/partybus && ./bin/partybus init"
-  subscribes :run, resources(:directory => "/var/opt/opscode"), :delayed
+  subscribes :run, "directory[/var/opt/opscode]", :delayed
   if node_role == 'backend'
-    subscribes :run, resources(:directory => "/var/opt/opscode/postgresql"), :delayed
+    subscribes :run, "directory[/var/opt/opscode/postgresql]", :delayed
   end
 end
 
