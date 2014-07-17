@@ -1,50 +1,169 @@
+require 'chef'
+require 'sequel'
+require 'highline/import'
+
+
+# General comments:
+#
+# How can these actions be made idempotent as best as possible?
+#
+# A way should be provided to either suppress all output, or else
+# have it suppressed by default and then made available if a verbose
+# flag is set (what do the other commands do by default? Can their
+# output be tuned to this level?)
 
 def run_osc_upgrade
 
-  # General comments:
-  #
-  # How can these actions be made idempotent as best as possible?
-  #
-  # A way should be provided to either suppress all output, or else
-  # have it suppressed by default and then made available if a verbose
-  # flag is set (what do the other commands do by default? Can their
-  # output be tuned to this level?)
-  #
-  # All points where user input can be requested needs to have a way that
-  # it can be set via a flag so it is scriptable
-  #
+  # Main function
+  def run_upgrade
+    # This is to help make this process idempotent, but currently if EC has
+    # been started at all OSC won't come up properly. ctl will report EC as
+    # stopped and OSC up, but any attempt to access OSC will result in a 502
+    # This issue will have to be solved for this process to be idempotent
+    stop_ec
 
-  require 'chef'
-  require 'sequel'
+    start_osc
 
-  # Since this is evaled, methods have to be first so they can be found
+    log "Preparing knife to download data from the Open Source Chef server"
+
+    # As a precaution, we want the location to vary. TODO: We need to save
+    # the value to a read protected file so it can be read from if a resume
+    # is needed
+    # Do we want to delete the directory on failure or leave it for debugging?
+    # Are the permissions good enough? (0700)
+    osc_data_dir = Dir.mktmpdir('osc-chef-server-data')
+    log "Making #{osc_data_dir} as the location to save the server data"
+
+    write_knife_config(osc_data_dir)
+
+    log "Downloading data from the Open Source Chef server"
+
+    run_knife_download
+
+    key_file = "#{osc_data_dir}/key_dump.json"
+    create_osc_key_file(key_file)
+
+    log "Finished downloading data from the Open Source Chef server"
+
+    stop_osc
+
+    log "Configuring the Enterprise Chef server for use"
+
+    reconfigure(false)
+
+    start_ec
+
+    log "Transforming Open Source server data for upload to Enterprise Chef server"
+
+    # To prepare the downloaded OSC data for upload to the EC server
+    # it is put into a file structure that knife-ec-backup expects
+    # and then knife-ec-backup restore functionality is used to upload it to the
+    # new Chef server.
+
+    org_name, org_full_name, org_type = determine_org_name
+
+    # See note above on osc_data_dir
+    ec_data_dir = Dir.mktmpdir('ec-chef-server-data')
+    org_dir = "#{ec_data_dir}/organizations/#{org_name}"
+    make_dir("#{ec_data_dir}/organizations", 0644)
+    org_dir = "#{ec_data_dir}/organizations/#{org_name}"
+    make_dir(org_dir, 0644)
+
+    create_org_json(org_dir, org_name, org_full_name, org_type)
+
+    # Copy over the key_dump.json file
+    FileUtils.cp(key_file, "#{ec_data_dir}/key_dump.json")
+
+    # Copy over users
+    FileUtils.cp_r("#{osc_data_dir}/users", "#{ec_data_dir}/users")
+
+    # Copy over clients, cookbooks, data_bags, environments, nodes, roles
+    %w{clients cookbooks data_bags environments nodes roles}.each do |name|
+      FileUtils.cp_r("#{osc_data_dir}/#{name}", "#{org_dir}/#{name}")
+    end
+
+    users = transform_osc_user_data(osc_data_dir, ec_data_dir)
+
+    create_invitations_json(org_dir)
+
+    create_members_json(users, org_dir)
+
+    groups_dir = "#{org_dir}/groups"
+    make_dir(groups_dir, 0644)
+
+    # Under organizations/#{org_name}/groups, an admins.json and billing-admins.json is needed.
+    # Will need to determine the users that go into both. admins should include the pivotal user.
+    # pivotal does not need to go into billing-admins (does it matter who is in billing admins?
+    # Any admins from OSC need to go into the admins group, as that is how it is determined that
+    # a user is an admin in EC
+
+    create_admins_json(users, groups_dir)
+
+    create_billing_admins_json(users, groups_dir)
+
+    write_knife_ec_backup_config
+
+    log "Uploading transformed Open Source server data to Enterprise Chef server"
+
+    run_knife_ec_restore(ec_data_dir)
+
+    log "Open Source chef server upgraded to an Enterprise Chef server"
+
+    # Need to ensure all of OSC is stopped
+    # By default, pkill sends TERM, which will cause runsv,runsvdir, and svlogd to shutdown
+    # Doing this will completely hose OSC so that a start command won't restart it, if needed
+    # If we're going to make this process as idempotent as possible, we'll need to work around this
+    # Maybe it's best to do this at the end ... or do we let the user manually remove OSC
+    # with a package uninstall?
+    # Once we do this we lose most hope at being idempotent
+    # Maybe prompt the user before doing this and off to give them steps to do this
+    # manually if they don't want this done automatically?
+  #  log "Ensuring all the runit processes associated with the Open Source Server are stopped"
+  #  run_command("pkill runsv")
+  #  run_command("pkill runsvdir")
+  #  run_command("pkill svlogd")
+    # epmd lives outside of runit, but a pkill will do just fine here too
+  #  run_command("pkill epmd")
+
+    # This could all be run at the end, so that OSC could be brought back up if
+    # needed, but then this would also kill EC. This code will need to be re-worked
+    # so it only removes OSC and leaves EC in place, or else the user needs to
+    # be directed on how to do this.
+
+    # The OSC bits still live on the system - do we delete them here?
+    # For example, /opt/chef-server is still in the path, but /opt/opscode is not
+    # on dev-vm testing
+    # This has the effect of making the default knife, gem, etc the chef-server versions
+
+    # The migration data still lives on the system - it is probably worth while
+    # to include an optional step to delete it, if the user specifies this, other
+    # wise leave it on the system
+  end
+
 
   def start_osc
     # Assumption is EC isn't running, since we detected OSC on the system
-    puts 'Ensuring the Open Source Chef server is started'
-    cmd = "chef-server-ctl start"
-    status = run_command(cmd)
+    log 'Ensuring the Open Source Chef server is started'
     msg = "Unable to start Open Source Chef server, which is needed to complete the upgrade"
-    check_status(status, msg)
+    check_status(run_command("chef-server-ctl start"), msg)
     # start command can return faster than the services are ready; resulting in 502 gateway
     sleep(10)
   end
 
   def check_status(status, msg)
-    if !status.success?
-      puts msg
+    unless status.success?
+      log msg
       exit 1
     end
   end
 
   def write_knife_config(osc_data_dir)
     # Hard coded path to key (stole idea to use from pedant), but the path is in attributes
-    # Obviously a hard coded path to a server located at dev-vm isn't going to work in prod
     # Need to ensure we have a valid path to the key here
-    # Should request user input here on the location of chef_server_url
-    # and otherwise default to localhost
+
+    # Do the rest of these need to be arguments?
     config = <<-EOH
-      chef_server_url 'https://api.opscode.piab'
+      chef_server_url "#{@options.chef_server_url}"
       node_name 'admin'
       client_key '/etc/chef-server/admin.pem'
       repo_mode 'everything'
@@ -52,43 +171,41 @@ def run_osc_upgrade
       chef_repo_path "#{osc_data_dir}"
     EOH
 
-    puts "Writing knife config to /tmp/knife-config.rb for use in downloading the data"
+    log "Writing knife config to /tmp/knife-config.rb for use in downloading the data"
     # An exception will be raised if this fails. Catch it and try to die gracefully?
     File.open("/tmp/knife-config.rb", "w"){ |file| file.write(config)}
   end
 
   def run_knife_download
-    puts "Running knife download"
+    log "Running knife download"
     cmd = "/opt/chef-server/embedded/bin/knife download -c /tmp/knife-config.rb /"
     status = run_command(cmd)
-    msg = "knife download failed with #{status}"
-    check_status(status, msg)
+    check_status(status, "knife download failed with #{status}")
   end
 
   def make_dir(dir, permissions)
     Dir.mkdir(dir, permissions) unless File.directory?(dir)
   end
 
+  # TODO(jmink) Add error handling
   def pull_osc_db_credentials
     # This code pulled from knife-ec-backup and adapted
-    puts "Pulling needed db credintials"
+    log "Pulling needed db credintials"
     if !File.exists?("/etc/chef-server/chef-server-running.json")
-      puts "Failed to find /etc/chef-server/chef-server-running.json"
+      log "Failed to find /etc/chef-server/chef-server-running.json"
       exit 1
-    else
-      running_config = JSON.parse(File.read("/etc/chef-server/chef-server-running.json"))
-      sql_user = running_config['chef_server']['postgresql']['sql_user']
-      sql_password = running_config['chef_server']['postgresql']['sql_password']
     end
-      [sql_user, sql_password]
+
+    running_config = JSON.parse(File.read("/etc/chef-server/chef-server-running.json"))
+    sql_host = running_config['chef_server']['postgresql']['vip']
+    sql_port = running_config['chef_server']['postgresql']['port']
+    sql_user = running_config['chef_server']['postgresql']['sql_user']
+    sql_password = running_config['chef_server']['postgresql']['sql_password']
+    [sql_host, sql_port, sql_user, sql_password]
   end
 
   def create_osc_key_file(key_file)
-    sql_user, sql_password = pull_osc_db_credentials
-
-    # These are the defaults, but they should be configurable
-    sql_host = "localhost"
-    sql_port = 5432
+    sql_host, sql_port, sql_user, sql_password = pull_osc_db_credentials
 
     server_string = "#{sql_user}:#{sql_password}@#{sql_host}:#{sql_port}/opscode_chef"
     db = ::Sequel.connect("postgres://#{server_string}")
@@ -111,7 +228,7 @@ def run_osc_upgrade
   end
 
   def start_ec
-    puts "Ensuring all the Enterprise Chef server components are started"
+    log "Ensuring all the Enterprise Chef server components are started"
     msg = "Unable to start Enterprise Chef, which is needed to complete the upgrade"
     status = run_command("private-chef-ctl start")
     check_status(status, msg)
@@ -127,25 +244,24 @@ def run_osc_upgrade
   end
 
   def stop_ec
-    puts 'Ensuring the Enterprise Chef server is stopped'
+    log 'Ensuring the Enterprise Chef server is stopped'
     msg = "Unable to stop the Enterprise Chef server, which is needed to complete the upgrade"
     status = run_command("private-chef-ctl stop")
     check_status(status, msg)
   end
 
   def stop_osc
-    puts 'Ensuring the Open Source Chef server is stopped'
+    log 'Ensuring the Open Source Chef server is stopped'
     msg = "Unable to stop Open Source Chef server, which is needed to complete the upgrade"
     status = run_command("chef-server-ctl stop")
     check_status(status, msg)
   end
 
   def determine_org_name
-    puts "Creating a default Enterprise Chef organization to associate the data with"
-    # A default org name is needed; the user should specify this
-    org_name = 'minitrue'
-    org_full_name = "MinistryOfTruth"
-    org_type = "Business"
+    org_name = @options.org_name || ask("Chef Organization Name? ")
+    org_full_name = @options.full_org_name || ask("The full Chef Organization Name? ")
+    org_type = 'Business'
+
     [org_name, org_full_name, org_type]
   end
 
@@ -221,12 +337,12 @@ def run_osc_upgrade
     # The server root is likely the same as was set for the knife config
     # used by knife download
     config = <<-EOH
-    chef_server_root 'https://api.opscode.piab'
+    chef_server_root '#{@options.chef_server_url}'
     node_name 'pivotal'
     client_key '/etc/opscode/pivotal.pem'
     EOH
 
-    puts "Writing knife-ec-backup config to /tmp/knife-ec-backup-config.rb"
+    log "Writing knife-ec-backup config to /tmp/knife-ec-backup-config.rb"
     File.open("/tmp/knife-ec-backup-config.rb", "w"){ |file| file.write(config)}
   end
 
@@ -244,135 +360,5 @@ def run_osc_upgrade
     check_status(status, msg)
   end
 
-  ###
-  # Upgrade logic starts here
-  ###
-
-  # This is to help make this process idempotent, but currently if EC has
-  # been started at all OSC won't come up properly. ctl will report EC as
-  # stopped and OSC up, but any attempt to access OSC will result in a 502
-  # This issue will have to be solved for this process to be idempotent
-  stop_ec
-
-  start_osc
-
-  puts "Preparing knife to download data from the Open Source Chef server"
-
-  # As a precaution, likely want to use mkstemp to create this dir so
-  # the location varies. Then will need to save the value to a read protected
-  # file so it can be read from if a resume is needed
-  osc_data_dir = "/tmp/osc-chef-server-data"
-
-  puts "Making #{osc_data_dir} as the location to save the server datar"
-
-  # Are the permissions good enough?
-  make_dir(osc_data_dir, 0644)
-
-  write_knife_config(osc_data_dir)
-
-  puts "Downloading data from the Open Source Chef server"
-
-  run_knife_download
-
-  key_file = "#{osc_data_dir}/key_dump.json"
-  create_osc_key_file(key_file)
-
-  puts "Finished downloading data from the Open Source Chef server"
-
-  stop_osc
-
-  puts "Configuring the Enterprise Chef server for use"
-
-  reconfigure(false)
-
-  start_ec
-
-  puts "Transforming Open Source server data for upload to Enterprise Chef server"
-
-  # To prepare the downloaded OSC data for upload to the EC server
-  # it is put into a file structure that knife-ec-backup expects
-  # and then knife-ec-backup restore functionality is used to upload it to the
-  # new Chef server.
-
-  org_name, org_full_name, org_type = determine_org_name
-
-  # Likely want to use mkstemp here as well (see additional note above)
-  ec_data_dir = "/tmp/ec-chef-server-data"
-  org_dir = "#{ec_data_dir}/organizations/#{org_name}"
-
-  make_dir(ec_data_dir, 0644)
-  make_dir("#{ec_data_dir}/organizations", 0644)
-  org_dir = "#{ec_data_dir}/organizations/#{org_name}"
-  make_dir(org_dir, 0644)
-
-  create_org_json(org_dir, org_name, org_full_name, org_type)
-
-  # Copy over the key_dump.json file
-  FileUtils.cp(key_file, "#{ec_data_dir}/key_dump.json")
-
-  # Copy over users
-  FileUtils.cp_r("#{osc_data_dir}/users", "#{ec_data_dir}/users")
-
-  # Copy over clients, cookbooks, data_bags, environments, nodes, roles
-  %w{clients cookbooks data_bags environments nodes roles}.each do |name|
-    FileUtils.cp_r("#{osc_data_dir}/#{name}", "#{org_dir}/#{name}")
-  end
-
-  users = transform_osc_user_data(osc_data_dir, ec_data_dir)
-
-  create_invitations_json(org_dir)
-
-  create_members_json(users, org_dir)
-
-  groups_dir = "#{org_dir}/groups"
-  make_dir(groups_dir, 0644)
-
-  # Under organizations/#{org_name}/groups, an admins.json and billing-admins.json is needed.
-  # Will need to determine the users that go into both. admins should include the pivotal user.
-  # pivotal does not need to go into billing-admins (does it matter who is in billing admins?
-  # Any admins from OSC need to go into the admins group, as that is how it is determined that
-  # a user is an admin in EC
-
-  create_admins_json(users, groups_dir)
-
-  create_billing_admins_json(users, groups_dir)
-
-  write_knife_ec_backup_config
-
-  puts "Uploading transformed Open Source server data to Enterprise Chef server"
-
-  run_knife_ec_restore(ec_data_dir)
-
-  puts "Open Source chef server upgraded to an Enterprise Chef server"
-
-  # Need to ensure all of OSC is stopped
-  # By default, pkill sends TERM, which will cause runsv,runsvdir, and svlogd to shutdown
-  # Doing this will completely hose OSC so that a start command won't restart it, if needed
-  # If we're going to make this process as idempotent as possible, we'll need to work around this
-  # Maybe it's best to do this at the end ... or do we let the user manually remove OSC
-  # with a package uninstall?
-  # Once we do this we lose most hope at being idempotent
-  # Maybe prompt the user before doing this and off to give them steps to do this
-  # manually if they don't want this done automatically?
-#  puts "Ensuring all the runit processes associated with the Open Source Server are stopped"
-#  run_command("pkill runsv")
-#  run_command("pkill runsvdir")
-#  run_command("pkill svlogd")
-  # epmd lives outside of runit, but a pkill will do just fine here too
-#  run_command("pkill epmd")
-
-  # This could all be run at the end, so that OSC could be brought back up if
-  # needed, but then this would also kill EC. This code will need to be re-worked
-  # so it only removes OSC and leaves EC in place, or else the user needs to
-  # be directed on how to do this.
-
-  # The OSC bits still live on the system - do we delete them here?
-  # For example, /opt/chef-server is still in the path, but /opt/opscode is not
-  # on dev-vm testing
-  # This has the effect of making the default knife, gem, etc the chef-server versions
-
-  # The migration data still lives on the system - it is probably worth while
-  # to include an optional step to delete it, if the user specifies this, other
-  # wise leave it on the system
-
+  run_upgrade()
 end
