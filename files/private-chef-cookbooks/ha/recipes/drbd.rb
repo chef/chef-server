@@ -16,9 +16,10 @@ drbd_data_dir = node['private_chef']['drbd']['data_dir']
 drbd_role = "primary"
 PrivateChef['servers'].each do |k, v|
   next unless v['role'] == "backend"
-  node.set['drbd'][drbd_role]["fqdn"] ||= k
-  node.set['drbd'][drbd_role]["fqdn"] ||= v['cluster_ipaddress']
-  node.set['drbd'][drbd_role]["fqdn"] ||= v['ipaddress']
+  node.set['private_chef']['drbd'][drbd_role]["fqdn"] = k
+  node.set['private_chef']['drbd'][drbd_role]["ip"] = \
+    v['cluster_ipaddress'] || v['ipaddress']
+  break if drbd_role == "secondary"
   drbd_role = "secondary"
 end
 

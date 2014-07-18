@@ -14,7 +14,7 @@ default['private_chef']['drbd']['primary']['port'] = 7788
 default['private_chef']['drbd']['secondary']['fqdn'] = node['fqdn']
 default['private_chef']['drbd']['secondary']['ip'] = node['ipaddress']
 default['private_chef']['drbd']['secondary']['port'] = 7788
-default['private_chef']['drbd']['ipv6_on'] = default['private_chef']['use_ipv6']
+default['private_chef']['drbd']['ipv6_on'] = PrivateChef['use_ipv6']
 if File.exists?("/sbin/drbdadm")
   default['private_chef']['drbd']['version'] = `drbdadm --version | \
     grep DRBDADM_VERSION= | cut -d "=" -f 2`.chomp!
