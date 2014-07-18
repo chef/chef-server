@@ -3,7 +3,7 @@
 %% @author Marc Paradise <marc@getchef.com>
 %% @copyright 2014 Chef Software Inc
 
-%% @doc Resource module for erchef users endpoint
+%% @doc Endpoint used by webui for user authentication
 
 -module(oc_chef_wm_authenticate_user).
 
@@ -38,7 +38,7 @@ init_resource_state(_Config) ->
   {ok, #user_state{}}.
 
 request_type() ->
-  "users".
+  "authenticate_user".
 
 allowed_methods(Req, State) ->
   {['POST'], Req, State}.
