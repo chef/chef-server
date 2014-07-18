@@ -225,7 +225,7 @@ assemble_user_ejson(#chef_user{username = Name,
     % public_key can mean either public key or cert.
     % if it's a cert, we need to extract the public key -
     % we don't want to hand the cert back on user GET.
-    RealPubKey = real_pub_key(KeyOrCert),
+    RealPubKey = chef_object_base:extract_public_key(KeyOrCert),
     % Where external auth is enable, email may be null/undefined
     Email2 = case Email of
         undefined -> <<"">>;
@@ -241,14 +241,6 @@ assemble_user_ejson(#chef_user{username = Name,
 
     { User1 ++ User2 }.
 
-
-real_pub_key(Data) ->
-    case chef_object_base:key_version(Data) of
-        ?KEY_VERSION ->
-            Data;
-        ?CERT_VERSION ->
-            chef_authn:extract_pem_encoded_public_key(Data)
-    end.
 
 %% @doc Convert a binary JSON string representing a Chef User into an
 %% EJson-encoded Erlang data structure.

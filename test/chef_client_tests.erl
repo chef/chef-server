@@ -27,14 +27,65 @@
 -include_lib("ej/include/ej.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
+%% remove trailing whitespace from a string
+chomp(In) ->
+    re:replace(In, "\\s+$", "", [{return, binary}]).
 
+chomp_key_in_json_list(List) ->
+    lists:map(fun({<<"public_key">>, KeyData}) ->
+                      {<<"public_key">>, chomp(KeyData)};
+                 (Other) ->
+                      Other
+              end, List).
+
+%% the public key data here is derived from the certificate in
+%% cert_data/1
 public_key_data() ->
     {ok, Bin} = file:read_file("../test/spki_public.pem"),
-    Bin.
+    chomp(Bin).
 
 cert_data() ->
     {ok, Bin} = file:read_file("../test/cert.pem"),
-    Bin.
+    chomp(Bin).
+
+oc_assemble_client_ejson_test_() ->
+    [{"obtain expected EJSON",
+      fun() ->
+              Client = #chef_client{name = <<"alice">>,
+                                    admin = true,
+                                    validator = false,
+                                    public_key = public_key_data()},
+              {GotList} = chef_client:oc_assemble_client_ejson(Client, <<"ponyville">>),
+              FilteredList = chomp_key_in_json_list(GotList),
+              ExpectedData = [{<<"json_class">>, <<"Chef::ApiClient">>},
+                              {<<"chef_type">>, <<"client">>},
+                              {<<"public_key">>, public_key_data()},
+                              {<<"validator">>, false},
+                              {<<"name">>, <<"alice">>},
+                              {<<"clientname">>, <<"alice">>},
+                              {<<"orgname">>, <<"ponyville">>}
+                             ],
+              ?assertEqual(lists:sort(ExpectedData), lists:sort(FilteredList))
+      end},
+     {"converts certificate to public key",
+      fun() ->
+              Client = #chef_client{name = <<"alice">>,
+                                    admin = true,
+                                    validator = false,
+                                    public_key = cert_data()},
+              {GotList} = chef_client:oc_assemble_client_ejson(Client, <<"ponyville">>),
+              FilteredList = chomp_key_in_json_list(GotList),
+              ExpectedData = [{<<"json_class">>, <<"Chef::ApiClient">>},
+                              {<<"chef_type">>, <<"client">>},
+                              {<<"public_key">>, public_key_data()},
+                              {<<"validator">>, false},
+                              {<<"name">>, <<"alice">>},
+                              {<<"clientname">>, <<"alice">>},
+                              {<<"orgname">>, <<"ponyville">>}
+                             ],
+              ?assertEqual(lists:sort(ExpectedData), lists:sort(FilteredList))
+      end}
+    ].
 
 osc_assemble_client_ejson_test_() ->
     [{"obtain expected EJSON",

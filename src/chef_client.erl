@@ -80,6 +80,8 @@
         ]).
 
 -define(OC_DEFAULT_FIELD_VALUES, [
+                                  {<<"json_class">>, <<"Chef::ApiClient">>},
+                                  {<<"chef_type">>, <<"client">>},
                                   {<<"validator">>, false},
                                   {<<"private_key">>, false}
                                  ]).
@@ -127,7 +129,7 @@ update_from_ejson(#chef_client{} = Client, ClientData) ->
     Name = ej:get({<<"name">>}, ClientData),
     IsAdmin = ej:get({<<"admin">>}, ClientData) =:= true,
     IsValidator = ej:get({<<"validator">>}, ClientData) =:= true,
-    %% Take certificate first, then public_key
+    %% Take public_key first, then certificate
     {Key, Version} = cert_or_key(ClientData),
     case Key of
         undefined ->
@@ -232,17 +234,14 @@ oc_assemble_client_ejson(#chef_client{name = Name, validator = Validator,
     Values = [{<<"name">>, value_or_default(Name, <<"">>)},
               {<<"clientname">>, value_or_default(Name, <<"">>)},
               {<<"validator">>, Validator =:= true},
-              {<<"orgname">>, OrgName}],
+              {<<"orgname">>, OrgName},
+              {<<"json_class">>, <<"Chef::ApiClient">>},
+              {<<"chef_type">>, <<"client">>}],
     case PublicKey of
         undefined ->
             {Values};
         _ ->
-            case chef_object_base:key_version(PublicKey) of
-                0 ->
-                    {[{<<"public_key">>, PublicKey} | Values]};
-                1 ->
-                    {[{<<"certificate">>, PublicKey} | Values]}
-            end
+            {[{<<"public_key">>, chef_object_base:extract_public_key(PublicKey)} | Values]}
     end.
 
 %% @doc creates the json body for clients
@@ -443,11 +442,11 @@ cert_or_key(Payload) ->
     Cert = value_or_undefined({<<"certificate">>}, Payload),
     PublicKey = value_or_undefined({<<"public_key">>}, Payload),
     %% Take certificate first, then public_key
-    case Cert of
+    case PublicKey of
         undefined ->
-            {PublicKey, ?KEY_VERSION};
+            {Cert, ?CERT_VERSION};
         _ ->
-            {Cert, ?CERT_VERSION}
+            {PublicKey, ?KEY_VERSION}
     end.
 
 value_or_undefined(Key, Data) ->
