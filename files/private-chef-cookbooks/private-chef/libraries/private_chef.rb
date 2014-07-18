@@ -270,6 +270,7 @@ module PrivateChef
     def gen_hapaths
       PrivateChef["ha"]["provider"] ||= "drbd" # Use drbd by default for HA
       PrivateChef["ha"]["path"] ||= "/var/opt/opscode/drbd/data"
+      hapath = PrivateChef["ha"]["path"]
       PrivateChef["couchdb"]["data_dir"] ||= "#{hapath}/couchdb"
       PrivateChef['bookshelf']['data_dir'] = "#{hapath}/bookshelf"
       PrivateChef["rabbitmq"]["data_dir"] ||= "#{hapath}/rabbitmq"
