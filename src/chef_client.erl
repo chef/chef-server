@@ -80,6 +80,8 @@
         ]).
 
 -define(OC_DEFAULT_FIELD_VALUES, [
+                                  {<<"json_class">>, <<"Chef::ApiClient">>},
+                                  {<<"chef_type">>, <<"client">>},
                                   {<<"validator">>, false},
                                   {<<"private_key">>, false}
                                  ]).
