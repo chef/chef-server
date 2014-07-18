@@ -127,7 +127,7 @@ update_from_ejson(#chef_client{} = Client, ClientData) ->
     Name = ej:get({<<"name">>}, ClientData),
     IsAdmin = ej:get({<<"admin">>}, ClientData) =:= true,
     IsValidator = ej:get({<<"validator">>}, ClientData) =:= true,
-    %% Take certificate first, then public_key
+    %% Take public_key first, then certificate
     {Key, Version} = cert_or_key(ClientData),
     case Key of
         undefined ->
@@ -440,11 +440,11 @@ cert_or_key(Payload) ->
     Cert = value_or_undefined({<<"certificate">>}, Payload),
     PublicKey = value_or_undefined({<<"public_key">>}, Payload),
     %% Take certificate first, then public_key
-    case Cert of
+    case PublicKey of
         undefined ->
-            {PublicKey, ?KEY_VERSION};
+            {Cert, ?CERT_VERSION};
         _ ->
-            {Cert, ?CERT_VERSION}
+            {PublicKey, ?KEY_VERSION}
     end.
 
 value_or_undefined(Key, Data) ->
