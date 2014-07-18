@@ -380,9 +380,11 @@ set_key_pair(UserEjson, {public_key, PublicKey}, {private_key, PrivateKey}) ->
 set_public_key(UserEjson, PublicKey) ->
   case key_version(PublicKey) of
         ?KEY_VERSION ->
-            ej:set({<<"public_key">>}, UserEjson, PublicKey);
+          UserEjson1 = ej:set({<<"public_key">>}, UserEjson, PublicKey),
+          ej:delete({<<"certificate">>}, UserEjson1);
         ?CERT_VERSION ->
-            ej:set({<<"certificate">>}, UserEjson, PublicKey)
+          UserEjson1 = ej:set({<<"certificate">>}, UserEjson, PublicKey),
+          ej:delete({<<"public_key">>}, UserEjson1)
     end.
 
 
