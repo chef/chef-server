@@ -350,9 +350,9 @@ def run_osc_upgrade
     # --skip-useracl skip importing user acls, which will just give the user's default acls. This is the
     # desired state anyway
     # --with-user-sql pull data across from the database, so we can get passwords
-    # --concurrency 1 so that it doesn't try concurrent cookbook uploads; there appears to be a bug
-    # around concurrent uploads
-    cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency 1 -c /tmp/knife-ec-backup-config.rb #{ec_data_dir}"
+    # --concurrency sets the number of threads to use for concurrent cookbook uploads. Default to 10, but the user can adjust if they desire.
+
+    cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency #{@options.upload_threads} -c /tmp/knife-ec-backup-config.rb #{ec_data_dir}"
     #cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --concurrency 1 -c /tmp/knife-ec-backup-config.rb #{ec_data_dir}"
     #cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency 1 -c /tmp/knife-ec-backup-config.rb -VV #{ec_data_dir}"
     status = run_command(cmd)

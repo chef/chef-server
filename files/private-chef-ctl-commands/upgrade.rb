@@ -17,6 +17,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     # Define defaults
     @options.skip_confirmation = false
     @options.chef_server_url = "https://localhost"
+    @options.upload_threads = 10
 
     opt_parser = OptionParser.new do |opts|
       opts.on("-y", "--yes", "Skip confirmation") do |y|
@@ -34,6 +35,10 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
       # Should this be chef-server-host to match sql-host?
       opts.on("--chef-server-url [url]", String, "The url of the chef server.  Defaults to #{@options.chef_server_url}") do |u|
          @options.chef_server_url = u
+      end
+
+      opts.on("--upload-threads [number]", Integer, "The number of threads to use when migrating cookbooks to the new server. Defaults to #{@options.upload_threads}") do |n|
+        @options.upload_threads = n
       end
 
       # TODO(jmink) Make this work without the '--'
