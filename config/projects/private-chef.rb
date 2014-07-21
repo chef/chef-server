@@ -3,7 +3,7 @@ maintainer "Chef Software, Inc."
 homepage   "http://www.getchef.com"
 
 replaces        "private-chef-full"
-install_path    "/opt/opscode"
+install_dir    "/opt/opscode"
 build_version   Omnibus::BuildVersion.new.semver
 build_iteration 1
 

@@ -1,7 +1,10 @@
 name "opscode-test"
 default_version "pc-rel-0.2.0.1"
 
-dependencies ["ruby", "libxml2", "rsync", "bundler"]
+dependency 'ruby'
+dependency 'libxml2'
+dependency 'rsync'
+dependency 'bundler'
 
 source :git => "git@github.com:opscode/opscode-test"
 

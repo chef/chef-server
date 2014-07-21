@@ -1,7 +1,8 @@
 name "opscode-certificate"
 default_version "rel-0.1.2"
 
-dependencies ["erlang", "rsync"]
+dependency 'erlang'
+dependency 'rsync'
 
 source :git => "git@github.com:opscode/opscode-cert-erlang"
 

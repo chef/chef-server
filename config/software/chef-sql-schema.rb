@@ -1,10 +1,10 @@
 name "chef-sql-schema"
 default_version "pc-rel-1.13.1"
 
-dependencies ["ruby",
-              "bundler",
-              "postgresql",
-              "rsync"]
+dependency 'ruby'
+dependency 'bundler'
+dependency 'postgresql'
+dependency 'rsync'
 
 source :git => "git@github.com:opscode/chef-sql-schema.git"
 
