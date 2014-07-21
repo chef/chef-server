@@ -2,6 +2,10 @@
 
 ## 11.1.9 (unreleased)
 
+### enterprise-chef-common 2014.07.21
+* [OC-11575] Don't start services by default in HA topology
+* Update to 0.4.4
+
 ### oc_chef_actions 2014.07.03
 * Update to latest of oc_chef_action to get hostname from fqdn instead
   of inet
