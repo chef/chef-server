@@ -177,17 +177,7 @@ parse_binary_json(Bin, Action) ->
 %% sane default values.
 -spec set_default_values( ejson_term() ) -> ejson_term().
 set_default_values(Role) ->
-    set_default_values(Role, ?DEFAULT_FIELD_VALUES).
-set_default_values(Role, Defaults) ->
-    lists:foldl(fun({Key, Default}, Current) ->
-                        case ej:get({Key}, Current) of
-                            undefined ->
-                                ej:set({Key}, Current, Default);
-                            _ -> Current
-                        end
-                end,
-                Role,
-                Defaults).
+    chef_object_base:set_default_values(Role, ?DEFAULT_FIELD_VALUES).
 
 -spec validate(ej:ejson_object()) -> {ok, ej:ejson_object()}.
 validate(Role) ->

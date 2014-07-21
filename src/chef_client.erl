@@ -278,7 +278,7 @@ osc_parse_binary_json(Bin, ReqName) ->
 %% @end
 osc_parse_binary_json(Bin, ReqName, CurrentClient) ->
     Client = osc_set_values_from_current_client(chef_object_base:delete_null_public_key(chef_json:decode_body(Bin)), CurrentClient),
-    Client1 = set_default_values(Client, ?DEFAULT_FIELD_VALUES),
+    Client1 = chef_object_base:set_default_values(Client, ?DEFAULT_FIELD_VALUES),
     {Name, FinalClient} = osc_destination_name(Client1, ReqName),
     valid_name(Name),
     validate_client(FinalClient, Name, osc).
@@ -293,7 +293,7 @@ oc_parse_binary_json(Bin, ReqName) ->
 %% @end
 oc_parse_binary_json(Bin, ReqName, CurrentClient) ->
     Client = oc_set_values_from_current_client(chef_json:decode_body(Bin), CurrentClient),
-    Client1 = set_default_values(Client, ?OC_DEFAULT_FIELD_VALUES),
+    Client1 = chef_object_base:set_default_values(Client, ?OC_DEFAULT_FIELD_VALUES),
     {Name, FinalClient} = oc_destination_name(Client1, ReqName),
     valid_name(Name),
     validate_client(FinalClient, Name, oc).
@@ -326,8 +326,8 @@ osc_set_values_from_current_client(Client, not_found) ->
 osc_set_values_from_current_client(Client, #chef_client{admin = IsAdmin,
                                                         validator = IsValidator,
                                                         public_key = PublicKey}) ->
-    C = set_default_values(Client, [{<<"admin">>, IsAdmin},
-                                    {<<"validator">>, IsValidator}]),
+    C = chef_object_base:set_default_values(Client, [{<<"admin">>, IsAdmin},
+                                                     {<<"validator">>, IsValidator}]),
     case chef_object_base:cert_or_key(C) of
         {undefined, _} ->
             chef_object_base:set_public_key(C, PublicKey);
@@ -339,22 +339,13 @@ oc_set_values_from_current_client(Client, not_found) ->
     Client;
 oc_set_values_from_current_client(Client, #chef_client{validator = IsValidator,
                                                        public_key = Cert}) ->
-    C = set_default_values(Client, [{<<"validator">>, IsValidator}]),
+    C = chef_object_base:set_default_values(Client, [{<<"validator">>, IsValidator}]),
     case chef_object_base:cert_or_key(C) of
         {undefined, _} ->
             chef_object_base:set_public_key(C, Cert);
         {_NewPublicKey, _} ->
             C
     end.
-
-set_default_values(Client, Defaults) ->
-    lists:foldl(fun({Key, Default}, Current) ->
-                        case ej:get({Key}, Current) of
-                            undefined -> ej:set({Key}, Current, Default);
-                            _ -> Current
-                        end
-                end,
-                Client, Defaults).
 
 osc_client_spec(Name) ->
     {[

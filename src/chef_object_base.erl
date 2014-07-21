@@ -45,7 +45,8 @@
          strictly_valid/3,
          sql_date/1,
          throw_invalid_fun_match/1,
-         valid_public_key/1
+         valid_public_key/1,
+         set_default_values/2
         ]).
 
 %% In order to fully test things
@@ -432,3 +433,19 @@ valid_public_key(PublicKey) ->
 -spec throw_invalid_fun_match(binary()) -> none().
 throw_invalid_fun_match(Message) ->
     throw(#ej_invalid{type = fun_match, msg = Message}).
+
+
+
+%% Walks through ejson term and set default values
+%% Factored out from monkey copied code in most objects
+-spec set_default_values( ejson_term(), list({binary(), any()}) ) -> ejson_term().
+set_default_values(Object, Defaults) ->
+    lists:foldl(fun({Key, Default}, Current) ->
+                        case ej:get({Key}, Current) of
+                            undefined ->
+                                ej:set({Key}, Current, Default);
+                            _ -> Current
+                        end
+                end,
+                Object,
+                Defaults).
