@@ -53,6 +53,40 @@ Full help for the Omnibus command line interface can be accessed with the
 $ bin/omnibus help
 ```
 
+Makefile instructions
+---------------------
+Top level make targets:
+
+`$ make dev` converges the dev platform (ubuntu 1004)
+
+`$ make dev-login` logs into the dev platform (ubuntu 1004)
+
+`$ make dev-build` will execute an omnibus build in the dev platform (ubuntu 1004)
+
+`$ make dev-destroy` will destroy the current dev platform (ubuntu 1004)
+
+`$ make dev-suspend` will suspend the current dev platform (ubuntu 1004)
+
+`$ make dev-resume` will resume the current dev platform (ubuntu 1004)
+
+`$ make update` will update omnibus and omnibus-software
+
+`$ make extract_dev_cache` will copy the git cache to the current directory
+
+`$ make deploy_dev_cache` will copy a local git cache into the current build environment
+
+There is some additional tooling in the makefile to cleanup stale
+builds for long running environments.  This will prevent builds from
+eating disk space.
+
+
+The usual practice would be something like
+
+`$ make update dev dev-build`
+
+That would update omnibus, omnibus-software, converge a build
+environment and then build the package.
+
 Kitchen-based Build Environment
 -------------------------------
 Every Omnibus project ships will a project-specific
