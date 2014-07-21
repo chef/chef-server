@@ -42,6 +42,78 @@ case $ACTION in
     done
     ;;
   status)
-    echo "Everything is awesome" # Everything isn't always awesome
+    STATUS=0 # exit status
+    CURRENT_STATE="$2"
+    DRBD_DISK="<%= node['private_chef']['drbd']['disk'] %>"
+    DRBD_DEVICE="<%= node['private_chef']['drbd']['device'] %>"
+    DRBD_MOUNT="<%= node['private_chef']['drbd']['data_dir'] %>"
+    DRBD_PRIMARY_IP="<%= node['private_chef']['drbd']['primary']['ip'] %>"
+    DRBD_SECONDARY_IP="<%= node['private_chef']['drbd']['secondary']['ip'] %>"
+    if [[ -z $CURRENT_STATE ]]; then
+      echo "[ERROR] You must pass the current cluster state to this command"
+      exit 1
+    fi
+    if [[ -e $DRBD_DISK ]]; then
+      echo "[OK] DRBD partition $DRBD_DISK found."
+    else
+      echo "[ERROR] DRBD partition $DRBD_DISK not found. Please fix."
+      exit 1
+    fi
+    if [[ -e $DRBD_DEVICE ]]; then
+      echo "[OK] DRBD device $DRBD_DEVICE found."
+    else
+      echo "[ERROR] DRBD device $DRBD_DEVICE not found. Please fix."
+      exit 1
+    fi
+
+    DRBD_STATUS=$(cat /proc/drbd | egrep cs:)
+    if [[ $CURRENT_STATE == "master" ]]; then
+      if [[ $DRBD_STATUS =~ "cs:Connected ro:Primary/Secondary ds:UpToDate/UpToDate" ]]; then
+        echo "[OK] my DRBD status is Connected/Primary/UpToDate and I am master"
+      else
+        echo "[ERROR] my DRBD status is: $DRBD_STATUS"
+        STATUS=1
+      fi
+    else
+      if [[ $DRBD_STATUS =~ "cs:Connected ro:Secondary/Primary ds:UpToDate/UpToDate" ]]; then
+        echo "[OK] my DRBD status is Connected/Secondary/UpToDate and I am not master"
+      else
+        echo "[ERROR] my DRBD status is: $DRBD_STATUS"
+        STATUS=1
+      fi
+    fi
+
+    MOUNTED=$(awk "\$2 == \"$DRBD_MOUNT\" { print \$2 }" /proc/mounts)
+    if [[ $CURRENT_STATE == "master" ]]; then
+      if [[ -n $MOUNTED ]]; then
+        echo "[OK] my DRBD partition is mounted and I am master"
+      else
+        echo "[ERROR] my DRBD partition is not mounted and I am master"
+        STATUS=1
+      fi
+    else
+      if [[ -z $MOUNTED ]]; then
+        echo "[OK] my DRBD partition is not mounted and I am not master"
+      else
+        echo "[ERROR] my DRBD partition is mounted and I am not master"
+        STATUS=1
+      fi
+    fi
+
+    if ping -c 1 -W 1 $DRBD_PRIMARY_IP >/dev/null 2>&1; then
+      echo "[OK] DRBD primary IP address pings"
+    else
+      echo "[ERROR] DRBD primary IP address does not ping"
+      STATUS=1
+    fi
+
+    if ping -c 1 -W 1 $DRBD_SECONDARY_IP >/dev/null 2>&1; then
+      echo "[OK] DRBD secondary IP address pings"
+    else
+      echo "[ERROR] DRBD secondary IP address does not ping"
+      STATUS=1
+    fi
+
+    exit $STATUS
     ;;
 esac
