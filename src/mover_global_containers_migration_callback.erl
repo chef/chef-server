@@ -24,7 +24,7 @@ migration_start_worker_args(Object, AcctInfo) ->
 next_object() ->
     mover_transient_migration_queue:next(?MODULE).
 
-migration_action(Object, AcctInfo) ->
+migration_action(Object, _AcctInfo) ->
     {Guid, AuthzId, RequesterId, ContainerName, Data} = Object,
     moser_global_container_converter:insert(Guid, AuthzId, RequesterId, ContainerName, Data).
 
