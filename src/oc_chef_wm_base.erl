@@ -54,7 +54,7 @@ service_available(Req, State) ->
 maybe_default_org(_Req, #base_state{organization_name = default_org, default_orgname = DefaultOrgname}) ->
     DefaultOrgname;
 maybe_default_org(Req, #base_state{organization_name = undefined}) ->
-    oc_chef_wm_routes:org_name(Req).
+    oc_chef_wm_routes:maybe_org_name(Req).
 
 forbidden(Req, #base_state{resource_mod = Mod} = State) ->
     case Mod:auth_info(Req, State) of

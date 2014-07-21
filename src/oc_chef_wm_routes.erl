@@ -10,6 +10,7 @@
          bulk_route_fun/3,
          default_orgname/0,
          route/3,
+         maybe_org_name/1,
          org_name/1,
          url_for_search_item_fun/3
         ]).
@@ -34,12 +35,21 @@ render_template(Template, Req, Args) ->
 %% @doc Extract the organization name from the Request's path.  If organization name is
 %% present it must be captured as the atom `organization_id' in our dispatch rules
 %% for the organization name.
-org_name(#wm_reqdata{} = Req) ->
-    org_name(wrq:path_info(organization_id, Req));
-org_name(undefined) ->
+maybe_org_name(#wm_reqdata{} = Req) ->
+    maybe_org_name(wrq:path_info(organization_id, Req));
+maybe_org_name(undefined) ->
     undefined;
-org_name(Name) ->
+maybe_org_name(Name) ->
     list_to_binary(Name).
+
+%% @doc Extract the organization name from the Request's path.  If organization name is
+%% present it must be captured as the atom `organization_id' in our dispatch rules
+%% for the organization name. Get the orgname from envy if org is undefined
+org_name(#wm_reqdata{} = Req) ->
+    case maybe_org_name(Req) of
+        undefined -> default_orgname();
+        R         -> R
+    end.
 
 %% @doc Gets the configured default orgname.
 default_orgname() ->
@@ -53,8 +63,29 @@ is_valid_default_orgname(undefined) ->
 
 %% @doc Generate a search URL.  Expects `Args' to be a proplist with a `search_index' key
 %% (the value of which can be either a binary or string).  The organization in the URL will
-%% be determined from the Webmachine request.
-route(organization_search, Req, Args) ->
+%% be determined from the Webmachine request. If organization does not exist in the request
+%% information, and the endpoint is an OSC endpoint, it will call the OSC route/3 function
+%% to generate URLs without an organization
+route(Type, Req, Args) when Type =:= role;
+                            Type =:= node;
+                            Type =:= cookbook;
+                            Type =:= environment;
+                            Type =:= principal;
+                            Type =:= client;
+                            Type =:= data_bag;
+                            Type =:= data_bag_item;
+                            Type =:= cookbook_version;
+                            Type =:= sandbox;
+                            Type =:= organization_search ->
+    case maybe_org_name(Req) of
+        undefined -> chef_wm_routes:route(Type, Req, Args);
+        _         -> org_route(Type, Req, Args)
+    end;
+route(Type, Req, Args) ->
+    org_route(Type, Req, Args).
+
+%% Internal route function that generates routes with orgname
+org_route(organization_search, Req, Args) ->
     %% Using pattern matching with lists:keyfind instead of just proplists:get_value just
     %% for extra sanity check
     Org = org_name(Req),
@@ -65,23 +96,23 @@ route(organization_search, Req, Args) ->
     render_template(Template, Req, TemplateArgs);
 
 %% Create a url for an individual role.  Requires a 'role_name' argument
-route(node, Req, Args) -> route_organization_rest_object("nodes", Req, Args);
-route(role, Req, Args) -> route_organization_rest_object("roles", Req, Args);
-route(user, Req, Args) -> route_rest_object("users", Req, Args);
-route(data_bag, Req, Args) -> route_organization_rest_object("data", Req, Args);
-route(data_bag_item, Req, [{name, {DataBagName, _}}]) -> route(data_bag, Req, [{name, DataBagName}]);
-route(environment, Req, Args) -> route_organization_rest_object("environments", Req, Args);
-route(principal, Req, Args) -> route_organization_rest_object("principals", Req, Args);
-route(client, Req, Args) -> route_organization_rest_object("clients", Req, Args);
-route(container, Req, Args) -> route_organization_rest_object("containers", Req, Args);
-route(group, Req, Args) -> route_organization_rest_object("groups", Req, Args);
-route(sandbox, Req, Args) ->
+org_route(node, Req, Args) -> route_organization_rest_object("nodes", Req, Args);
+org_route(role, Req, Args) -> route_organization_rest_object("roles", Req, Args);
+org_route(user, Req, Args) -> route_rest_object("users", Req, Args);
+org_route(data_bag, Req, Args) -> route_organization_rest_object("data", Req, Args);
+org_route(data_bag_item, Req, [{name, {DataBagName, _}}]) -> route(data_bag, Req, [{name, DataBagName}]);
+org_route(environment, Req, Args) -> route_organization_rest_object("environments", Req, Args);
+org_route(principal, Req, Args) -> route_organization_rest_object("principals", Req, Args);
+org_route(client, Req, Args) -> route_organization_rest_object("clients", Req, Args);
+org_route(container, Req, Args) -> route_organization_rest_object("containers", Req, Args);
+org_route(group, Req, Args) -> route_organization_rest_object("groups", Req, Args);
+org_route(sandbox, Req, Args) ->
     Org = org_name(Req),
     {id, Id} = lists:keyfind(id, 1, Args),
     Template = "/organizations/~s/sandboxes/~s",
     TemplateArgs = [Org, Id],
     render_template(Template, Req, TemplateArgs);
-route(cookbook_version, Req, Args) ->
+org_route(cookbook_version, Req, Args) ->
     Org = org_name(Req),
     {name, Name} = lists:keyfind(name, 1, Args),
     Template = "/organizations/~s/cookbooks/~s",
@@ -124,8 +155,28 @@ bulk_route_fun(Type, Req) when Type =:= role;
                                Type =:= client;
                                Type =:= data_bag;
                                Type =:= data_bag_item;
-                               Type =:= container;
-                               Type =:= group ->
+                               Type =:= cookbook_version ->
+    %% Do we have an org? If orgname is not defined in the request,
+    %% then call the chef_wm_routes functions and render an OSC-compatible
+    %% URL. This is only applicable to OSC endpoints
+    case maybe_org_name(Req) of
+        undefined -> chef_wm_routes:bulk_route_fun(Type, Req);
+        _         -> org_bulk_route_fun(Type, Req)
+    end;
+bulk_route_fun(Type, Req) ->
+    org_bulk_route_fun(Type, Req).
+
+%% Internal bulk_route_fun that renders URLs with orgname
+org_bulk_route_fun(Type, Req) when Type =:= role;
+                                   Type =:= node;
+                                   Type =:= cookbook;
+                                   Type =:= environment;
+                                   Type =:= principal;
+                                   Type =:= client;
+                                   Type =:= data_bag;
+                                   Type =:= data_bag_item;
+                                   Type =:= container;
+                                   Type =:= group ->
 
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(Type),
@@ -133,7 +184,7 @@ bulk_route_fun(Type, Req) when Type =:= role;
             render_template(Template, BaseURI, [Org, Name])
     end;
 
-bulk_route_fun(user, Req) ->
+org_bulk_route_fun(user, Req) ->
 
     BaseURI = chef_wm_util:base_uri(Req),
     Template = template_for_type(user),
@@ -143,7 +194,7 @@ bulk_route_fun(user, Req) ->
 %% Need to use this fun head instead of bulk_route_fun/3 for cookbook_versions in the case
 %% that you need to generate URLs for versions of lots of different cookbooks at once,
 %% instead of just for one cookbook.
-bulk_route_fun(cookbook_version, Req) ->
+org_bulk_route_fun(cookbook_version, Req) ->
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(cookbook_version),
     fun(CookbookName, VersionString) ->
@@ -152,10 +203,15 @@ bulk_route_fun(cookbook_version, Req) ->
 
 bulk_route_fun(Type, Name, Req) when Type =:= data_bag_item;
                                      Type =:= cookbook_version ->
-    {BaseURI, Org} = extract_from_req(Req),
-    Template = template_for_type(Type),
-    fun(SubName) ->
-            render_template(Template, BaseURI, [Org, Name, SubName])
+    case maybe_org_name(Req) of
+        undefined ->
+            chef_wm_routes:bulk_route_fun(Type, Name, Req);
+        _ ->
+            {BaseURI, Org} = extract_from_req(Req),
+            Template = template_for_type(Type),
+            fun(SubName) ->
+                    render_template(Template, BaseURI, [Org, Name, SubName])
+            end
     end.
 
 template_for_type(node) ->
@@ -189,11 +245,16 @@ template_for_type(user) ->
 
 %% This is extracted from search, needs more cleanup
 url_for_search_item_fun(Req, Type, OrgName) ->
-    BaseURI = chef_wm_util:base_uri(Req),
-    Template = template_for_type(Type),
-    fun(ItemEjson) ->
-            Args = make_args(ItemEjson, Type, OrgName),
-            render_template(Template, BaseURI, Args)
+    case maybe_org_name(Req) of
+        undefined ->
+            chef_wm_routes:url_for_search_item_fun(Req, Type, undefined);
+        _ ->
+            BaseURI = chef_wm_util:base_uri(Req),
+            Template = template_for_type(Type),
+            fun(ItemEjson) ->
+                    Args = make_args(ItemEjson, Type, OrgName),
+                    render_template(Template, BaseURI, Args)
+            end
     end.
 
 make_args(Item, {data_bag, Bag}, OrgName) ->
