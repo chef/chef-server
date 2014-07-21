@@ -17,8 +17,7 @@ end
 #  - check keepalived is actually enabled in the config
 #  - check that the current state matches requested state of master or backup
 #  - check that the VRRP IP address state is correct based on our state
-#  - Check that the custom VIP state is correct based on our state
-#  - Check that the block device state is correct based on our state
+#  - run a custom script to check any custom block device/vip state
 #  - check that the runit service status is correct based on our state
 #
 
@@ -81,12 +80,11 @@ add_command "ha-status", "Show the status of high availability services.", 1 do
   custom_backend = "/var/opt/opscode/keepalived/bin/custom_backend_"
   ['storage', 'ip'].each do |t|
     if File.executable?("#{custom_backend}#{t}")
-      custom_status = `#{custom_backend}#{t} status`.chomp
-      if custom_status == current_cluster_status
-        puts "[OK] #{t} backend status matches my status: #{custom_status}"
+      if system("#{custom_backend}#{t} status #{current_cluster_status}")
+        puts "[OK] #{t} backend status is OK"
       else
-        puts "[ERROR] #{t} backend status doesn't match my status: #{custom_status} (I am #{current_cluster_status})"
-        error_exit = 8
+        puts "[ERROR] #{t} backend status is not OK"
+        error_exit = 4
       end
     end
   end
