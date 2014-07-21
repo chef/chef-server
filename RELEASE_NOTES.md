@@ -1,6 +1,16 @@
 # Enterprise Chef Release Notes
 
-## 11.1.7
+## 11.1.9 (unreleased)
+
+### Bug Fixes:
+
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.1.8:
+
+* [OC-11575][enterprise-chef-common] Don't start services by default in HA topology
+* [OC-11601] - Correct another case where redis_lb was not started before attempting to reconfigure it
+
+
+## 11.1.8 (2014-06-26)
 
 ### Bug Fixes:
 
