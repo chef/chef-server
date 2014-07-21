@@ -24,15 +24,7 @@ env = {
 
 build do
   command "make distclean", :env => env
-  ## RUBY DEPSOLVER - REMOVE BUNDLER_BUSTER FOR ROLLBACK ##
-  # Omnibus is run from within bunlder. Applications running from within
-  # bundler have environment variables set that effect the sub-execution
-  # of ruby code, especially instances of bundler. To install the ruby
-  # based depsolver, the oc_erchef Makefile executes bundler to package
-  # the application and its dependencies. For this not to effect the
-  # ruby environment from which we run omnbius, we must clear the
-  # currently set bundler environment variables. BUNDLER BUSTER does this.
-  command "make rel", :env => env.merge(Omnibus::Builder::BUNDLER_BUSTER)
+  command "make rel", :env => env
   command "mkdir -p #{install_dir}/embedded/service/opscode-erchef"
   command "#{install_dir}/embedded/bin/rsync -a --delete --exclude=.git/*** --exclude=.gitignore ./rel/oc_erchef/ #{install_dir}/embedded/service/opscode-erchef/"
   # TODO: git cleanup in opscode-erchef service directory

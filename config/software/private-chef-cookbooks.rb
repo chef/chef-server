@@ -9,12 +9,7 @@ source :path => File.expand_path("files/#{project_name}-cookbooks/#{project_name
 build do
   gem "install uuidtools --no-rdoc --no-ri -v 2.1.3"
   command "mkdir -p #{install_dir}/embedded/cookbooks"
-  command "#{install_dir}/embedded/bin/berks install --berksfile=./Berksfile --path=#{install_dir}/embedded/cookbooks",
-          :env => { "RUBYOPT"         => nil,
-                    "BUNDLE_BIN_PATH" => nil,
-                    "BUNDLE_GEMFILE"  => nil,
-                    "GEM_PATH"        => nil,
-                    "GEM_HOME"        => nil }
+  command "#{install_dir}/embedded/bin/berks install --berksfile=./Berksfile --path=#{install_dir}/embedded/cookbooks"
   block do
     File.open("#{install_dir}/embedded/cookbooks/dna.json", "w") do |f|
       f.puts "{\"run_list\": [ \"recipe[#{project_name}]\" ]}"
