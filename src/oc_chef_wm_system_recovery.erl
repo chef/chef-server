@@ -1,9 +1,9 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Marc Paradise <marc@getchef.com>
+%% @author Douglas Triggs <doug@getchef.com>
 %% @copyright 2014 Chef Software Inc
 
-%% @doc Resource module for erchef users endpoint
+%% @doc System recovery endpoint
 
 -module(oc_chef_wm_system_recovery).
 
@@ -38,7 +38,7 @@ init_resource_state(_Config) ->
   {ok, #user_state{}}.
 
 request_type() ->
-  "users".
+  "system_recovery".
 
 allowed_methods(Req, State) ->
   {['POST'], Req, State}.
