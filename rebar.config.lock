@@ -107,7 +107,7 @@
                   "56206a0bc7f15870f9aa4013de3f9808893347db"}},
        {moser,".*",
               {git,"git@github.com:opscode/moser.git",
-                   "9588088f200c653e8db82b4657c694d9b37fc912"}},
+                   "4f3bec367556459dbfc91c6ec4409fef5acdbd40"}},
        {chef_reindex,".*",
                      {git,"git@github.com:opscode/chef_reindex.git",
                           "0e2a4bc56c9ffaf15c5647b7c5dc349315d942fe"}},
@@ -143,12 +143,12 @@
                      "2206dca28f6d536e2607c8ef76e52e4f85b39359"}},
        {oc_chef_action,".*",
                        {git,"git@github.com:opscode/oc_chef_action.git",
-                            "52dbe835a222d8c702d0b3fa983e6e8eccf8249f"}},
+                            "398e5e8b668d9826251fed9eb8278abd9f197481"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
                         "3719363e4a29dc4cc72ac8f5d34f25d3f3baa22d"}},
        {hoax,".*",
              {git,"https://github.com/xenolinguist/hoax.git",
                   "093d2afc2e4ca2d7ab9779aeb3e09dd427a964f2"}}]}.
-{erl_opts,[debug_info,warnings_as_errors,{parse_transform,lager_transform}]}.
+{erl_opts,[debug_info,{parse_transform,lager_transform}]}.
 
