@@ -89,8 +89,7 @@ service drbd start
   not_if { File.exists?(File.join(drbd_dir, "drbd_ready")) }
 end
 
-# TODO - the path here should be a variable
-template "/var/opt/opscode/keepalived/bin/custom_backend_storage" do
+template "#{node['private_chef']['keepalived']['dir']}/bin/custom_backend_storage" do
   source "custom_backend_storage.erb"
   owner "root"
   group "root"
