@@ -99,8 +99,6 @@ def run_osc_upgrade
 
     create_admins_json(admin_users, groups_dir)
 
-    create_billing_admins_json(admin_users, groups_dir)
-
     write_knife_ec_backup_config
 
     log "Uploading transformed Open Source server data to Enterprise Chef server"
@@ -284,14 +282,17 @@ def run_osc_upgrade
       # Do a try catch for each file.  Write users that failed to a errored user file?
       # If any failed should we stop the upgrade process?
       user = Chef::JSONCompat.from_json(IO.read(file), :create_additions => false)
+      user_names << user['name']
+      admin_user_names << user['name'] if user['admin']
+      user.delete('admin')
+
+      # EC chef expects username not name
       user['username'] = user['name']
+      user['display_name'] = user['username']
+      user.delete('name')
+
       # Take in a default email domain?
       user['email'] = "#{user['username']}@example.com"
-      user['display_name'] = user['username']
-      user_names << user['name']
-      admin_user_names << user['username'] if user['admin']
-      user.delete('name')
-      user.delete('admin')
       File.open("#{ec_data_dir}/users/#{File.basename(file)}", "w"){ |new_file| new_file.write(Chef::JSONCompat.to_json_pretty(user)) }
     end
     [user_names, admin_user_names]
@@ -326,13 +327,10 @@ def run_osc_upgrade
   end
 
   def create_admins_json(users, groups_dir)
-    admin_users = users.clone
-    admins_json = { "name" => "admins", "users" => admin_users.push('pivotal')}
+    admins_json = { "name" => "admins", "users" => users }
     File.open("#{groups_dir}/admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(admins_json)) }
-  end
 
-  def create_billing_admins_json(users, groups_dir)
-    billing_admins_json = { "name" => "billing-admins", "users" => users}
+    billing_admins_json = { "name" => "billing-admins", "users" => users }
     File.open("#{groups_dir}/billing-admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(billing_admins_json)) }
   end
 
