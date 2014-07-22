@@ -463,6 +463,7 @@ default['private_chef']['opscode-account']['worker_timeout'] = 3600
 default['private_chef']['opscode-account']['validation_client_name'] = "chef"
 default['private_chef']['opscode-account']['umask'] = "0022"
 default['private_chef']['opscode-account']['worker_processes'] = node['cpu']['total'].to_i
+default['private_chef']['opscode-account']['enable_code_coverage'] = false
 
 ###
 # Chef Mover

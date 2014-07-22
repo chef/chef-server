@@ -26,7 +26,7 @@ end
 rebuild_config = File.join(private_chef_account_etc_dir, "rebuild.conf.rb")
 env_config = File.join(private_chef_account_etc_dir, "#{node['private_chef']['opscode-account']['environment']}.rb")
 statsd_config = File.join(private_chef_account_etc_dir, "statsd_config.rb")
-
+coverband_config = File.join(private_chef_account_etc_dir, "coverband.rb")
 
 template rebuild_config do
   source "rebuild.conf.rb.erb"
@@ -60,6 +60,18 @@ end
 
 link "/opt/opscode/embedded/service/opscode-account/statsd_config.rb" do
   to statsd_config
+end
+
+template coverband_config do
+  source "account_coverband_config.rb.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  notifies :restart, 'runit_service[opscode-account]' unless backend_secondary?
+end
+
+link "/opt/opscode/embedded/service/opscode-account/config/coverband.rb" do
+  to coverband_config
 end
 
 unicorn_config File.join(private_chef_account_etc_dir, "unicorn.rb") do
