@@ -26,4 +26,4 @@ init([]) ->
     {ok, {{one_for_one, 60, 10}, Child}}.
 
 eredis_start_link(Host, Port) ->
-    gen_server:start_link({local, mover_eredis_client}, eredis_client, [Host, Port, 0, "", 100], []).
+    gen_server:start_link({local, mover_eredis_client}, eredis_client, [Host, Port, 0, "", 100, 2000], []).
