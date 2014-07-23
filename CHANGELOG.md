@@ -11,7 +11,7 @@
 
 ### oc_erchef updated to 0.25.18
 * Replace usage of cert generation service with erchef internal key
-  generation cache. 
+  generation cache.
 
 ### oc_erchef updated to 0.25.17
 * Add global placeholder org macro.
@@ -70,6 +70,11 @@
 * [OC-11673] Tune PostgreSQL keepalive timeouts
 * [OC-10117] opscode-solr4 accepts Java-like memory attributes
 * [OC-11668] enable ipv6 in standalone mode
+
+### private-chef-ctl
+
+* Add a gather-logs command to create a tarball of important logs and
+  system information for Chef Support
 
 ### openssl 1.0.1h
 * Allow ['lb']['upstream'] to have a custom setting
