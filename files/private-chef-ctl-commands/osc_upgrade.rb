@@ -82,24 +82,22 @@ def run_osc_upgrade
       FileUtils.cp_r("#{osc_data_dir}/#{name}", "#{org_dir}/#{name}")
     end
 
-    users = transform_osc_user_data(osc_data_dir, ec_data_dir)
+    user_names, admin_users = transform_osc_user_data(osc_data_dir, ec_data_dir)
 
     create_invitations_json(org_dir)
 
-    create_members_json(users, org_dir)
+    create_members_json(user_names, org_dir)
 
     groups_dir = "#{org_dir}/groups"
     make_dir(groups_dir, 0644)
 
     # Under organizations/#{org_name}/groups, an admins.json and billing-admins.json is needed.
-    # Will need to determine the users that go into both. admins should include the pivotal user.
-    # pivotal does not need to go into billing-admins (does it matter who is in billing admins?
     # Any admins from OSC need to go into the admins group, as that is how it is determined that
     # a user is an admin in EC
+    # All admins will be billing admins due to lack of a better selection criteria
 
-    create_admins_json(users, groups_dir)
-
-    create_billing_admins_json(users, groups_dir)
+    create_admins_json(admin_users, groups_dir)
+    create_billing_admins(admin_users, groups_dir)
 
     write_knife_ec_backup_config
 
@@ -278,17 +276,26 @@ def run_osc_upgrade
     # Or give the user a tool that they can go in and update after the update
     # information like email addresses?
     # Password resets won't work until a valid email is put into place
-    users = []
+    user_names = []
+    admin_user_names = []
     Dir.glob("#{osc_data_dir}/users/*") do |file|
+      # Do a try catch for each file.  Write users that failed to a errored user file?
+      # If any failed should we stop the upgrade process?
       user = Chef::JSONCompat.from_json(IO.read(file), :create_additions => false)
-      users << user['name']
+      user_names << user['name']
+      admin_user_names << user['name'] if user['admin']
+      user.delete('admin')
+
+      # EC chef expects username not name
       user['username'] = user['name']
-      user['email'] = "#{user['username']}@example.com"
       user['display_name'] = user['username']
       user.delete('name')
+
+      # Take in a default email domain?
+      user['email'] = "#{user['username']}@example.com"
       File.open("#{ec_data_dir}/users/#{File.basename(file)}", "w"){ |new_file| new_file.write(Chef::JSONCompat.to_json_pretty(user)) }
     end
-    users
+    [user_names, admin_user_names]
   end
 
   def create_invitations_json(org_dir)
@@ -320,14 +327,12 @@ def run_osc_upgrade
   end
 
   def create_admins_json(users, groups_dir)
-    admin_users = users.clone
-    admin_users << 'pivotal'
-    admins_json = { "name" => "admins", "users" => admin_users }
+    admins_json = { "name" => "admins", "users" => users }
     File.open("#{groups_dir}/admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(admins_json)) }
   end
 
-  def create_billing_admins_json(users, groups_dir)
-    billing_admins_json = { "name" => "billing-admins", "users" => users}
+  def create_billing_admins(users, groups_dir)
+    billing_admins_json = { "name" => "billing-admins", "users" => users }
     File.open("#{groups_dir}/billing-admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(billing_admins_json)) }
   end
 
