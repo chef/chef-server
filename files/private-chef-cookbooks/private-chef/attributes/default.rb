@@ -6,10 +6,16 @@
 #
 
 ###
+# Set a project-name for the enterprise-chef-common cookbook
+###
+default['enterprise']['name'] = "private_chef"
+
+###
 # High level options
 ###
 default['private_chef']['api_version'] = "11.1.0"
 default['private_chef']['flavor'] = "ec"
+default['private_chef']['install_path'] = "/opt/opscode"
 
 default['private_chef']['notification_email'] = "pc-default@opscode.com"
 default['private_chef']['from_email'] = '"Opscode" <donotreply@opscode.com>'
