@@ -2,6 +2,10 @@
 
 ## 12.0.0 (Unreleased)
 
+### enterprise-chef-common 2014.07.21
+* [OC-11575] Don't start services by default in HA topology
+* * Update to 0.4.4
+
 ### ruby updated to 1.9.3-p547
 * Update is from 1.9.3-p484
 
