@@ -117,21 +117,22 @@ maybe_add_default_org_routes(Dispatch) ->
     case oc_chef_wm_routes:default_orgname() of
        DefaultOrgName when is_binary(DefaultOrgName),
                            byte_size(DefaultOrgName) > 0->
-           add_default_org_routes(Dispatch);
+           add_default_org_routes(Dispatch,DefaultOrgName);
        _ ->
            Dispatch
     end.
 
-add_default_org_routes(OrigDispatch) ->
-    [Y || Y <- [map_to_default_org_route(X) || X <- OrigDispatch], Y =/= undefined] ++ OrigDispatch.
+add_default_org_routes(OrigDispatch, DefaultOrgName) ->
+    [Y || Y <- [map_to_default_org_route(X, DefaultOrgName) || X <- OrigDispatch], Y =/= undefined] ++ OrigDispatch.
 
 %% Munges the matching routes into the default org equivalent.
-map_to_default_org_route({["organizations", organization_id, Resource | R], Module, Args}) when is_list(Resource) ->
+map_to_default_org_route({["organizations", organization_id, Resource | R], Module, Args}, DefaultOrgName)
+    when is_list(Resource) ->
     case lists:member(Resource, ?OSC11_COMPAT_RESOURCES) of
-        true -> {[Resource] ++ R, Module, Args ++ [{organization_name, default_org}]};
+        true -> {[Resource] ++ R, Module, Args ++ [{organization_name, DefaultOrgName}]};
            _ -> undefined
     end;
-map_to_default_org_route(_) ->
+map_to_default_org_route(_, _) ->
     undefined.
 
 add_custom_settings(Dispatch) ->
