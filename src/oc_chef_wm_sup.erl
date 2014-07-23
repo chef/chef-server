@@ -13,6 +13,8 @@
 %% supervisor callbacks
 -export([init/1]).
 
+-include_lib("oc_chef_wm.hrl").
+
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.
 start_link() ->
@@ -46,14 +48,11 @@ init([]) ->
 
     Ip = envy:get(oc_chef_wm, ip, string),
     Port = envy:get(oc_chef_wm, port, pos_integer),
-    {ok, Dispatch} = file:consult(filename:join(
-                         [filename:dirname(code:which(?MODULE)),
-                          "..", "priv", "dispatch.conf"])),
     WebConfig = [
                  {ip, Ip},
                  {port, Port},
                  {log_dir, "priv/log"},
-                 {dispatch, add_custom_settings(Dispatch)}],
+                 {dispatch, dispatch_table()}],
 
     Web = {webmachine_mochiweb,
            {webmachine_mochiweb, start, [WebConfig]},
@@ -107,6 +106,33 @@ enable_org_cache() ->
             lager:info("Org guid cache enabled~n")
     end,
     ok.
+
+dispatch_table() ->
+    {ok, Dispatch} = file:consult(filename:join(
+            [filename:dirname(code:which(?MODULE)),
+                "..", "priv", "dispatch.conf"])),
+    add_custom_settings(maybe_add_default_org_routes(Dispatch)).
+
+maybe_add_default_org_routes(Dispatch) ->
+    case oc_chef_wm_routes:default_orgname() of
+       DefaultOrgName when is_binary(DefaultOrgName),
+                           byte_size(DefaultOrgName) > 0->
+           add_default_org_routes(Dispatch);
+       _ ->
+           Dispatch
+    end.
+
+add_default_org_routes(OrigDispatch) ->
+    [Y || Y <- [map_to_default_org_route(X) || X <- OrigDispatch], Y =/= undefined] ++ OrigDispatch.
+
+%% Munges the matching routes into the default org equivalent.
+map_to_default_org_route({["organizations", organization_id, Resource | R], Module, Args}) when is_list(Resource) ->
+    case lists:member(Resource, ?OSC11_COMPAT_RESOURCES) of
+        true -> {[Resource] ++ R, Module, Args ++ [{organization_name, default_org}]};
+           _ -> undefined
+    end;
+map_to_default_org_route(_) ->
+    undefined.
 
 add_custom_settings(Dispatch) ->
     Dispatch1 = add_resource_init(Dispatch),
