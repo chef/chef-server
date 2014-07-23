@@ -92,12 +92,12 @@ def run_osc_upgrade
     make_dir(groups_dir, 0644)
 
     # Under organizations/#{org_name}/groups, an admins.json and billing-admins.json is needed.
-    # Will need to determine the users that go into both. admins should include the pivotal user.
-    # pivotal does not need to go into billing-admins (does it matter who is in billing admins?
     # Any admins from OSC need to go into the admins group, as that is how it is determined that
     # a user is an admin in EC
+    # All admins will be billing admins due to lack of a better selection criteria
 
     create_admins_json(admin_users, groups_dir)
+    create_billing_admins(admin_users, groups_dir)
 
     write_knife_ec_backup_config
 
@@ -329,7 +329,9 @@ def run_osc_upgrade
   def create_admins_json(users, groups_dir)
     admins_json = { "name" => "admins", "users" => users }
     File.open("#{groups_dir}/admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(admins_json)) }
+  end
 
+  def create_billing_admins(users, groups_dir)
     billing_admins_json = { "name" => "billing-admins", "users" => users }
     File.open("#{groups_dir}/billing-admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(billing_admins_json)) }
   end
