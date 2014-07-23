@@ -22,6 +22,8 @@ def run_osc_upgrade
     # This issue will have to be solved for this process to be idempotent
     stop_ec
 
+    fix_rabbit_wait_script
+
     start_osc
 
     log "Preparing knife to download data from the Open Source Chef server"
@@ -138,6 +140,28 @@ def run_osc_upgrade
     # wise leave it on the system
   end
 
+  def fix_rabbit_wait_script
+    # This is an existing file, but the desire is just to overwrite it
+    # so it becomes a no-op. Due to a mistake, it was supposed to look for
+    # rabbit on an open source system, but it looks for rabbit on an enterprise
+    # system instead. It has a bail option if it doesn't find enterprise chef
+    # server installed, so this hasn't affected open source systems, until now,
+    # since the upgrade process puts both on the same system.
+    # The assumption has to be that this file will be wrong on any system
+    # undergoing an upgrade, because even if fixed, it can't be assumed that the
+    # system will have the fix applied.
+    # (The best fix would be to fix the erronious file in omnibus-chef-server)
+    #
+    # If the open source server is reconfigured it will restore the bad script
+    # and this fix will need to re-applied.
+    # If the bad script is on the system, the symptom that shows up is that
+    # erchef will log that it is waiting for rabbit to start. This will only
+    # happen if enterprise chef has been installed and configured on the system,
+    # because the script will look for the enterprise rabbit install.
+    # The script is kicked off when the open source server tries to start erchef,
+    # as the script is hooked into the runit start process for erchef.
+    File.open("/opt/chef-server/bin/wait-for-rabbit", "w"){}
+  end
 
   def start_osc
     # Assumption is EC isn't running, since we detected OSC on the system
