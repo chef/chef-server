@@ -84,7 +84,6 @@ init_base_state(ResourceMod, InitParams) ->
 
                 %% default orgname support
                 organization_name = ?gv(organization_name, InitParams),
-                default_orgname = ?gv(default_orgname, InitParams),
 
                 otp_info = ?gv(otp_info, InitParams),
                 server_flavor = ?gv(server_flavor, InitParams),

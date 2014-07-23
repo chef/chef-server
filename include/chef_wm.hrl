@@ -108,10 +108,6 @@
           %% Set by chef_rest_wm:service_available.
           organization_name :: binary() | ?OSC_ORG_NAME,
 
-          %% Default orgname. If this is set to a binary, then default
-          %% endpoints become available
-          default_orgname :: binary() | undefined,
-
           %% Run time configurable dark launch info
           %% Set by chef_rest_wm:service_available.
           %% In open source chef this is left undefined
