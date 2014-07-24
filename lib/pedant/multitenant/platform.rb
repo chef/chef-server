@@ -36,7 +36,7 @@ module Pedant
     def map_to_default_orgname?(path_fragment)
       return false unless Pedant::Config.use_default_org # Don't even bother unless we are in default_orgname mode
       return false if path_fragment =~ /_acl/            # False if _acl appears anywhere
-      return true  if path_fragment =~ /^\/?(search|nodes|cookbooks|data|roles|sandboxes|environments|clients)/
+      return true  if path_fragment =~ /^\/?(search|nodes|cookbooks|data|roles|sandboxes|environments|clients|principals|runs)/
       return false                                       # Default to false
     end
 
