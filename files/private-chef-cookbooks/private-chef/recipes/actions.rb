@@ -13,7 +13,7 @@ if is_data_master?
     owner node["private_chef"]["user"]["username"]
     group "root"
     mode "0600"
-    content ::File.open('/etc/opscode/webui_priv.pem')
+    content lazy {::File.open('/etc/opscode/webui_priv.pem').read}
   end
 
   file "/etc/opscode-analytics/actions-source.json" do
