@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+#
+# Authors:: Chef Support Team <support-team@getchef.com>
+#
+modified_within_last_x_minutes=180
+tail_lines=10000
+
+type='EC'
+if [[ -n $1 ]];
+then
+    type=$1
+fi
+
+if [[ $type == 'EC' ]];
+then
+    path='opscode'
+    ctl_cmd='private-chef-ctl'
+    config_name='private-chef.rb'
+    ha=$(egrep -qs 'topology\s+.*ha' /etc/opscode/private-chef.rb)$?
+
+    if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
+    then
+	echo "ERROR: Enterprise Chef server may not be installed."
+	exit 1
+    fi
+
+    echo "Gathering logs from Enterprise Chef server."
+elif [[ $type == 'OSC' ]];
+then
+    path='chef-server'
+    ctl_cmd='chef-server-ctl'
+    config_name='chef-server.rb'
+
+    if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
+    then
+	echo "ERROR: Open Source Chef server may not be installed."
+	exit 1
+    fi
+
+    echo "Gathering logs from Open Source Chef server."
+else
+    echo "Usage: gather-logs [ EC | OSC ]"
+    echo "EC - Enterprise Chef server (default)"
+    echo "OSC - Open Source Chef server"
+    exit 1
+fi
+
+hostname=$(hostname)
+timestamp=$(date +%F_%H.%M.%S-%Z)
+tmpdir="$(mktemp -d)/$hostname/$timestamp"
+#RHEL5 has ip and other tools here
+PATH=$PATH:/bin:/sbin
+
+mkdir -p "$tmpdir"
+
+for i in /opt/$path*/version-manifest.txt \
+    /opt/$path/pc-version.txt \
+    /etc/$path/$config_name \
+    /etc/$path/chef-server-running.json \
+    /var/log/syslog \
+    /var/log/messages; do
+    if [[ -e "$i" ]]; then
+	mkdir -p "$tmpdir/`dirname ${i:1}`"
+	tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
+    fi
+done
+
+for i in `find /var/log/$path*/ -type f -mmin -"$modified_within_last_x_minutes"`; do
+    if [[ -e "$i" ]]; then
+	mkdir -p "$tmpdir/`dirname ${i:1}`"
+	tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
+    fi
+done
+
+$ctl_cmd status > "$tmpdir/$ctl_cmd"_status.txt
+
+if [[ ($type == 'EC') && ($ha == 0) ]]; then
+    for i in /var/log/$path/keepalived/cluster.log /proc/drbd; do
+	if [[ -e "$i" ]]; then
+	    mkdir -p "$tmpdir/`dirname ${i:1}`"
+	    tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
+	fi
+    done
+
+    $ctl_cmd ha-status > "$tmpdir/$ctl_cmd"_ha-status.txt
+fi
+
+/opt/$path/embedded/bin/psql -U opscode-pgsql opscode_chef -c "SELECT CURRENT_TIMESTAMP;" > "$tmpdir/pg_stat_activity.txt"
+/opt/$path/embedded/bin/psql -U opscode-pgsql opscode_chef -c "SELECT * FROM pg_stat_activity;" >> "$tmpdir/pg_stat_activity.txt"
+
+# Retrieve Platform and Platform Version
+if [[ -f "/etc/lsb-release" ]] && grep -q DISTRIB_ID /etc/lsb-release;
+then
+    cp "/etc/lsb-release" "$tmpdir/platform_version.txt"
+elif [[ -f "/etc/redhat-release" ]];
+then
+    cp "/etc/redhat-release" "$tmpdir/platform_version.txt"
+else
+    echo "Platform and version are unknown." > "$tmpdir/platform_version.txt"
+fi
+
+uptime > "$tmpdir/uptime.txt"
+
+cp "/proc/cpuinfo" "$tmpdir/cpuinfo.txt"
+
+cp "/proc/meminfo" "$tmpdir/meminfo.txt"
+
+free -m > "$tmpdir/free-m.txt"
+
+ps fauxww > "$tmpdir/ps_fauxww.txt"
+
+df -h >  "$tmpdir/df_h.txt"
+
+ip addr show > "$tmpdir/ip_addr_show.txt"
+
+# ss(8) is the command for socket statistics that replaces netstat
+#RHEL5 only has netstat
+if which ss > /dev/null 2>&1
+then
+  ss -ontap > "$tmpdir/ss_ontap.txt"
+else
+  netstat -alntp > "$tmpdir/netstat_alntp.txt"
+fi
+
+sysctl -a > "$tmpdir/sysctl_a.txt"
+
+dmesg > "$tmpdir/dmesg.txt"
+
+function add_footer (){
+  echo "---" >> "$1"
+  echo ""    >> "$1"
+}
+
+name_resolution_file="$tmpdir/name-resolution.txt"
+
+echo '## dig hostname -f' > "$name_resolution_file"
+dig `hostname -f` >> "$name_resolution_file"
+add_footer "$name_resolution_file"
+
+echo '## /etc/resolv.conf' >> "$name_resolution_file"
+cat /etc/resolv.conf >> "$name_resolution_file"
+add_footer "$name_resolution_file"
+
+echo '## ping hostname' >> "$name_resolution_file"
+ping -c 2 `hostname` >> "$name_resolution_file"
+add_footer "$name_resolution_file"
+
+echo '## ping hostname -f' >> "$name_resolution_file"
+ping -c 2 `hostname -f` >> "$name_resolution_file"
+add_footer "$name_resolution_file"
+
+echo '## /etc/hosts' >> "$name_resolution_file"
+cat /etc/hosts >> "$name_resolution_file"
+add_footer "$name_resolution_file"
+
+tar -C "${tmpdir%/*/*}" -cjf "$hostname-$timestamp.tbz2" "$hostname/$timestamp/"
+
+rm -rf "${tmpdir%/*/*}"
+
+echo "Logs gathered in $hostname-$timestamp.tbz2"

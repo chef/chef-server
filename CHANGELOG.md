@@ -21,6 +21,11 @@
 * [OC-11673] Tune PostgreSQL keepalive timeouts
 * [OC-11668] enable ipv6 in standalone mode
 
+### private-chef-ctl
+
+* Add a gather-logs command to create a tarball of important logs and
+  system information for Chef Support
+
 ## 11.1.8 (2014-06-26)
 
 ### oc_authz_migrator 0.0.2

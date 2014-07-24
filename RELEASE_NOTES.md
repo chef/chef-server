@@ -2,6 +2,14 @@
 
 ## 11.1.9 (unreleased)
 
+### What's New
+
+The following items are new for Enterprise Chef 11.1.9 and/or are
+changes from previous versions:
+
+* [private-chef-ctl] Add a gather-logs command to create a tarball of
+  important logs and system information.
+
 ### Bug Fixes:
 
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.1.8:
