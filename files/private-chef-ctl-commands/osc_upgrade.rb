@@ -141,16 +141,18 @@ def run_osc_upgrade
   end
 
   def fix_rabbit_wait_script
-    # This is an existing file, but the desire is just to overwrite it
-    # so it becomes a no-op. Due to a mistake, it was supposed to look for
-    # rabbit on an open source system, but it looks for rabbit on an enterprise
-    # system instead. It has a bail option if it doesn't find enterprise chef
-    # server installed, so this hasn't affected open source systems, until now,
-    # since the upgrade process puts both on the same system.
+    # The wait-for-rabbit script is an open source chef server script that was
+    # supposed to wait for rabbitmq to start before starting erchef.
+    # It was supposed to look for rabbitmq on an open source system, but due to
+    # a mistake looks for rabbit on an enterprise system instead. It has a bail
+    # option if it doesn't find enterprise chef server installed, so this hasn't
+    # affected open source systems, until now, since the upgrade process puts
+    # both the open source and enterprise chef servers on the same system.
+    #
     # The assumption has to be that this file will be wrong on any system
     # undergoing an upgrade, because even if fixed, it can't be assumed that the
-    # system will have the fix applied.
-    # (The best fix would be to fix the erronious file in omnibus-chef-server)
+    # system will be running an up-to-date open source chef server with the fix
+    # applied.
     #
     # If the open source server is reconfigured it will restore the bad script
     # and this fix will need to re-applied.
@@ -160,7 +162,14 @@ def run_osc_upgrade
     # because the script will look for the enterprise rabbit install.
     # The script is kicked off when the open source server tries to start erchef,
     # as the script is hooked into the runit start process for erchef.
-    File.open("/opt/chef-server/bin/wait-for-rabbit", "w"){}
+    #
+    # This sed command was written to be as portable as possible and to leave no
+    # tmp file behind. See:
+    # https://stackoverflow.com/questions/5171901/sed-command-find-and-replace-in-file-and-overwrite-file-doesnt-work-it-empties
+    script = "/opt/chef-server/bin/wait-for-rabbit"
+    sed = "sed 's/opscode/chef-server/g' #{script} > #{script}.tmp && mv #{script}.tmp #{script}"
+    msg = "Failed to write fix to wait-for-rabbit script"
+    check_status(run_command(sed), msg)
   end
 
   def start_osc
