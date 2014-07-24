@@ -17,7 +17,7 @@ describe 'license' do
       "limit_exceeded" => (node_count > 25) ? true : false,
       "node_license" => 25,
       "node_count" => node_count,
-      "upgrade_url" => "http://example.com"
+      "upgrade_url" => /^http\:\/\.*/
     }}
 
   context "GET /license" do
@@ -86,7 +86,7 @@ describe 'license' do
         end
       end # with one node
 
-      context "with twenty-five nodes" do
+      context "with twenty-five nodes (license not exceeded)" do
         let(:node_count) { 25 }
 
         it "should return correct body for license status" do
@@ -97,7 +97,7 @@ describe 'license' do
         end
       end # with twenty nodes
 
-      context "with twenty-six nodes" do
+      context "with twenty-six nodes (license exceeded)" do
         let(:node_count) { 26 }
 
         it "should return correct body for license status" do
