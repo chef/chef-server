@@ -148,7 +148,7 @@ local p_acct = (p_named_org_prefix * p_acct_direct) +
 -- Default org endpoints. This is to help with migrating from OSC 11 to Chef Server 12
 -- TODO: Not sure if p_runs + p_principals are needed below. The purpose is for
 -- OSC chef-clients to be able to run against this. Are groups and containers necessary?
-local p_default_org_endpoints = p_search + p_nodes + p_cookbooks + p_data + p_roles + p_sandboxes + p_environments + p_clients
+local p_default_org_endpoints = p_search + p_nodes + p_cookbooks + p_data + p_roles + p_sandboxes + p_environments + p_clients +p_runs + p_principals
 
 local uri_resolvers = {
   -- Retain ordering to ensure proper eval:
