@@ -166,8 +166,9 @@ def run_osc_upgrade
     # This sed command was written to be as portable as possible and to leave no
     # tmp file behind. See:
     # https://stackoverflow.com/questions/5171901/sed-command-find-and-replace-in-file-and-overwrite-file-doesnt-work-it-empties
+    # The copy is done to ensure we keep the permissions of the original file
     script = "/opt/chef-server/bin/wait-for-rabbit"
-    sed = "sed 's/opscode/chef-server/g' #{script} > #{script}.tmp && mv #{script}.tmp #{script}"
+    sed = "sed 's/opscode/chef-server/g' #{script} > #{script}.tmp && cp --no-preserve=mode,ownership #{script}.tmp #{script} && rm #{script}.tmp"
     msg = "Failed to write fix to wait-for-rabbit script"
     check_status(run_command(sed), msg)
   end
