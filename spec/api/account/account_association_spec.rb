@@ -11,6 +11,18 @@ require 'pedant/rspec/common'
 describe "opscode-account user association", :association do
   let(:users_url) { "#{platform.server}/users" }
   let(:org_assoc_url) { api_url("association_requests") }
+  let(:default_users_body)        { default_pedant_user_names.map { |user| {"user" => {"username" => user} } } }
+  let(:default_pedant_user_names) { platform.users.select(&:associate).map(&:name).sort }
+
+  def ruby_org_assoc?
+    true
+  end
+
+  let(:public_key_regex) do
+    # Because of a difference in the OpenSSL library between ruby 1.8.7
+    # (actually 1.9.2) and 1.9.3, we have to accept multiple patterns here:
+    /^-----BEGIN (RSA )?PUBLIC KEY-----/
+  end
 
 
   # This embodies some assumptions around how multitenant config is done. Specifically, the normal
@@ -54,20 +66,22 @@ describe "opscode-account user association", :association do
 
   # todo this should be able to handle multiple outstanding invites
   def check_invite_for_user(user, invite_id)
-    get(user_assoc_url, user).should look_like({
-                                                 :status => 200,
-                                                 :body_exact=> [{
-                                                                  "id"=>invite_id,
-                                                                  "orgname"=>platform.test_org.name
-                                                                }]
-                                               })
-    get(org_assoc_url, platform.admin_user).should look_like({
-                                                               :status => 200,
-                                                               :body_exact=> [{
-                                                                                "id"=>invite_id,
-                                                                                "username"=>user.name
-                                                                              }]
-                                                             })
+    get(user_assoc_url, user).should look_like(
+      {
+         :status => 200,
+         :body_exact=> [{
+                          "id"=>invite_id,
+                          "orgname"=>platform.test_org.name
+                        }]
+       })
+    get(org_assoc_url, platform.admin_user).should look_like(
+      {
+         :status => 200,
+         :body_exact=> [{
+                          "id"=>invite_id,
+                          "username"=>user.name
+                        }]
+       })
 
   end
 
@@ -150,8 +164,11 @@ describe "opscode-account user association", :association do
     let(:user_assoc_url) { "#{users_url}/#{platform.non_admin_user.name}/association_requests" }
     it "cannot be invited" do
 
-      post(org_assoc_url, platform.non_admin_user, :payload=>make_invite_payload(platform.non_admin_user)).should look_like({
-                                                                                                                              :status => 403 })
+      post(org_assoc_url, platform.admin_user,
+           :payload=>make_invite_payload(platform.non_admin_user)).should look_like( {
+
+
+        :status => 409 })
 
       no_invites_for_user(platform.non_admin_user)
 
@@ -174,7 +191,7 @@ describe "opscode-account user association", :association do
       cleanup_requests_for_org
     end
 
-    it "cannot invite itself to an org" do
+    it "cannot invite itself to that org" do
       post(org_assoc_url, platform.bad_user, :payload=>make_invite_payload(bad_user)).should look_like({
                                                                                           :status => 403 })
 
@@ -277,9 +294,12 @@ describe "opscode-account user association", :association do
                                                                                 :status=> 200,
                                                                                 :body => {} })
 
+        # TODO - split this out. Testing for acceptance into an org is unrelated to testing for
+        # removal from an org .
         delete(api_url("users/#{bad_user}"), platform.admin_user).should look_like({
                                                                                      :status=> 200 })
 
+        # TODO Wrong test here with wrong atuh user - we want to make sure that the user is no longer in the org!
         get(api_url("users/#{bad_user}"), platform.bad_user).should look_like({
                                                                                 :status=> 403,
                                                                                 :body => {} })
@@ -340,9 +360,9 @@ describe "opscode-account user association", :association do
 
           no_invites_for_user(platform.bad_user)
 
-          get(api_url("users/#{bad_user}"), platform.bad_user).should look_like({
-                                                                                  :status=> 200,
-                                                                                  :body => {"username"=>bad_user} })
+          get(api_url("users/#{bad_user}"), platform.bad_user).should
+            look_like({ :status=> 200,
+                        :body => {"username"=>bad_user} })
 
 
           delete(api_url("users/#{bad_user}"), platform.admin_user).should look_like({
@@ -359,4 +379,259 @@ describe "opscode-account user association", :association do
       end
     end
   end
+  context "/organizations/<org>/users endpoint" do
+    let(:request_url) { api_url("users") }
+
+    context "GET /organizations/<org>/users" do
+      let(:users_body) { default_users_body }
+
+      context "admin user" do
+        it "can get org users", :smoke do
+          get(request_url, platform.admin_user).should look_like({
+              :status => 200,
+              :body_exact => users_body
+            })
+        end
+      end
+
+      context "default normal user" do
+        it "can get org users", :smoke do
+          get(request_url, platform.non_admin_user).should look_like({
+              :status => 200,
+              :body_exact => users_body
+            })
+        end
+      end
+
+      context "default client" do
+        it "returns 403" do
+          get(request_url, platform.non_admin_client).should look_like({
+              :status => 403
+            })
+        end
+      end
+
+      context "outside user" do
+        it "returns 403" do
+          get(request_url, outside_user).should look_like({
+              :status => 403
+            })
+        end
+      end
+
+      context "invalid user" do
+        it "returns 401" do
+          get(request_url, invalid_user).should look_like({
+              :status => 401
+            })
+        end
+      end
+    end # context GET /organizations/<org>/users
+
+    context "PUT /organizations/<org>/users" do
+      context "admin user" do
+        it "returns  404[ruby]/405[erlang]" do
+          put(request_url, platform.admin_user).should look_like({
+              :status => ruby_org_assoc? ? 404 : 405
+            })
+        end
+      end
+    end # context PUT /organizations/<org>/users
+
+    context "POST /organizations/<org>/users" do
+      context "admin user" do
+        # A 405 here would be fine (and is no doubt coming with erlang)
+        it "returns  404[ruby]/405[erlang]" do
+          post(request_url, platform.admin_user).should look_like({
+              :status => ruby_org_assoc? ? 404 : 405
+            })
+        end
+      end
+    end # context POST /organizations/<org>/users
+
+    context "DELETE /organizations/<org>/users" do
+      context "admin user" do
+        # A 405 here would be fine (and is no doubt coming with erlang)
+        it "returns  404[ruby]/405[erlang]" do
+          delete(request_url, platform.admin_user).should look_like({
+              :status => ruby_org_assoc? ? 404 : 405
+            })
+        end
+      end
+    end # context DELETE /organizations/<org>/users
+  end # context /organizations/<org>/users endpoint
+
+  context "/organizations/<org>/users/<name>" do
+    let(:username) { platform.non_admin_user.name }
+    let(:request_url) { api_url("users/#{username}") }
+
+    context "GET /organizations/<org>/users/<name>" do
+      let(:user_body) do
+        {
+          "first_name" => username,
+          "last_name" => username,
+          "display_name" => username,
+          "email" => "#{username}@opscode.com",
+          "username" => username,
+          "public_key" => public_key_regex
+        }
+      end
+
+      context "superuser" do
+        it "can get user" do
+          get(request_url, platform.superuser).should look_like({
+              :status => 200,
+              :body_exact => user_body
+            })
+        end
+      end
+
+      context "admin user" do
+        it "can get user", :smoke do
+          get(request_url, platform.admin_user).should look_like({
+              :status => 200,
+              :body_exact => user_body
+            })
+        end
+      end
+
+      context "default normal user" do
+        it "can get self", :smoke do
+          get(request_url, platform.non_admin_user).should look_like({
+              :status => 200,
+              :body_exact => user_body
+            })
+        end
+      end
+
+      context "default client" do
+        it "returns 403" do
+          get(request_url, platform.non_admin_client).should look_like({
+              :status => 403
+            })
+        end
+      end
+
+      context "outside user" do
+        it "returns 403" do
+          get(request_url, outside_user).should look_like({
+              :status => 403
+            })
+        end
+      end
+
+      context "invalid user" do
+        it "returns 401" do
+          get(request_url, invalid_user).should look_like({
+              :status => 401
+            })
+        end
+      end
+
+      context "when requesting user that doesn't exist" do
+        let(:username) { "bogus" }
+        it "returns 404" do
+          get(request_url, platform.admin_user).should look_like({
+              :status => 404
+            })
+        end
+      end
+    end # context GET /organizations/<org>/users/<name>
+
+    context "PUT /organizations/<org>/users/<name>" do
+      context "admin user" do
+        # A 405 here would be fine (and is no doubt coming with erlang)
+        it "returns  404[ruby]/405[erlang]" do
+          put(request_url, platform.admin_user).should look_like({
+              :status => ruby_org_assoc? ? 404 : 405
+            })
+        end
+      end
+    end # context PUT /organizations/<org>/users/<name>
+
+    context "POST /organizations/<org>/users/<name>" do
+      context "admin user" do
+        # TODO this will be acceptable, but we must test for:
+        #   - only superuser
+        #   - user is associated if requested by superuser.
+        # A 405 here would be fine (and is no doubt coming with erlang)
+        it "returns  404[ruby]/405[erlang]" do
+          post(request_url, platform.admin_user).should look_like({
+              :status => ruby_org_assoc? ? 404 : 405
+            })
+        end
+      end
+    end # context POST /organizations/<org>/users/<name>
+
+    context "DELETE /organizations/<org>/users/<name>" do
+      let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:test_user) { platform.create_user(username) }
+
+      before :each do
+        platform.associate_user_with_org(org, test_user)
+        platform.add_user_to_group(org, test_user, "users")
+      end
+
+      after :each do
+        delete("#{platform.server}/users/#{username}", platform.superuser)
+      end
+
+      context "admin user" do
+        it "can delete user", :smoke do
+          delete(request_url, platform.admin_user).should look_like({
+              :status => 200
+            })
+          get(api_url("users"), platform.admin_user).should look_like({
+              :status => 200,
+              :body_exact => default_users_body })
+        end
+      end
+
+      context "non-admin user" do
+        it "returns 403" do
+          pending "actually returns 400" do # Wut?
+            delete(request_url, platform.non_admin_user).should look_like({
+                :status => 403
+              })
+            get(api_url("users"), platform.admin_user).should look_like({
+                :status => 200,
+                :body_exact => [
+                  {"user" => {"username" => platform.admin_user.name}},
+                  {"user" => {"username" => platform.non_admin_user.name}},
+                  {"user" => {"username" => username}}
+                ]})
+          end
+        end
+      end
+
+      context "default client" do
+        it "returns 403" do
+          pending "actually returns 400" do # Wut?
+            delete(request_url, platform.non_admin_client).should look_like({
+                :status => 403
+              })
+            get(api_url("users"), platform.admin_user).should look_like({
+                :status => 200,
+                :body_exact => [
+                  {"user" => {"username" => platform.admin_user.name}},
+                  {"user" => {"username" => platform.non_admin_user.name}},
+                  {"user" => {"username" => username}}
+                ]})
+          end
+        end
+      end
+
+      context "when user doesn't exist" do
+        let(:request_url) { api_url("users/bogus") }
+        it "returns 404" do
+          delete(request_url, platform.non_admin_client).should look_like({
+              :status => 404
+            })
+          get(api_url("users"), platform.admin_user).should look_like({
+              :status => 200,
+              :body_exact => default_users_body + [ {"user" => {"username" => username}} ]})
+        end
+      end
+    end # context DELETE /organizations/<org>/users/<name>
+  end # context /organizations/<org>/users/<name>
 end
