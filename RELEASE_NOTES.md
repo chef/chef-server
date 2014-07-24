@@ -8,6 +8,8 @@ The following items are new for Enterprise Chef 11.1.5 and/or are changes from p
 
 * [opscode-webui] Opscode WebUI has been removed in favor of the Manage Console add-on.
 * [private-chef-cookbooks] Introduce pluggable HA architecture as alternative to DRBD.
+* [private-chef-ctl] Add a gather-logs command to create a tarball of
+  important logs and system information.
 
 ### Bug Fixes:
 
