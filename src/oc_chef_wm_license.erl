@@ -48,24 +48,22 @@ validate_request('GET', Req, State) ->
 auth_info(Req, State) ->
     {authorized, Req, State}.
 
-to_json(Req, #base_state{resource_state = NodeState}= State) ->
-    {chef_json:encode(license_body(Req, State)), Req, State}.
+to_json(Req, State) ->
+    {chef_json:encode(license_body(State)), Req, State}.
 
 %% internal functions
 
-license_body(Req, State) ->
-    % TODO: retrieve actual number -- where does this come from?
-    License = 25,
-    Count = node_count(Req, State),
+license_body(State) ->
+    License = envy:get(oc_chef_wm, node_license, pos_integer),
+    Count = node_count(State),
     Exceeded = Count > License,
-    % TODO: retrieve actual URL -- where does this come from?
-    UpgradeURL = <<"http://example.com">>,
+    UpgradeURL = envy:get(oc_chef_wm, upgrade_url, binary),
     {[ {<<"limit_exceeded">>, Exceeded},
        {<<"node_license">>, License},
        {<<"node_count">>, Count},
        {<<"upgrade_url">>, UpgradeURL} ]}.
 
-node_count(Req, #base_state{chef_db_context = DbContext}=State) ->
+node_count(#base_state{chef_db_context = DbContext}) ->
     chef_db:count_nodes(DbContext).
 
 %% error message functions
