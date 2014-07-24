@@ -20,6 +20,8 @@ default['private_chef']['install_path'] = "/opt/opscode"
 default['private_chef']['notification_email'] = "pc-default@opscode.com"
 default['private_chef']['from_email'] = '"Opscode" <donotreply@opscode.com>'
 default['private_chef']['role'] = "standalone"
+default['private_chef']['license']['nodes'] = 25
+default['private_chef']['license']['upgrade_url'] = "http://example.com"
 
 ####
 # The Chef User that services run as
