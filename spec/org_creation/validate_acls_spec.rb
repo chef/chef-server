@@ -48,9 +48,9 @@ describe "Org Creation", :org_creation do
 
   context "when validating default acls" do
 
-    def self.should_have_default_acls_for(endpoint, &additional_examples)
+    def self.should_have_default_acls_for(endpoint, *tags, &additional_examples)
       _url = "#{endpoint}/_acl"
-      context "for /ORG#{_url}" do
+      context "for /ORG#{_url}", *tags do
         let(:request_url) { api_url(_url) }
 
         instance_eval(&additional_examples) if additional_examples

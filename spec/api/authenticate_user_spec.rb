@@ -146,21 +146,21 @@ describe 'authenticate_user', :users do
           })
       end
 
-      it 'admin/different user returns 403 ("Forbidden")' do
+      it 'admin/different user returns 403 ("Forbidden")', :authorization do
         # This doubles as a test of a non-superuser checking a different user
         post(request_url, platform.admin_user, :payload => body).should look_like({
             :status => 403
           })
       end
 
-      it 'non-admin/same user returns 403 ("Forbidden")' do
+      it 'non-admin/same user returns 403 ("Forbidden")', :authorization do
         # This doubles as a test of a the same non-superuser checking themselves
         post(request_url, platform.non_admin_user, :payload => body).should look_like({
             :status => 403
           })
       end
 
-      it 'invalid user returns 401 ("Unauthorized")' do
+      it 'invalid user returns 401 ("Unauthorized")', :authorization do
         post(request_url, invalid_user, :payload => body).should look_like({
             :status => 401
           })
@@ -218,7 +218,7 @@ describe 'authenticate_user', :users do
 
       let(:username) { "kneelbeforezod" }
 
-      it 'superuser returns 401 ("Unauthorized")', :smoke do
+      it 'superuser returns 401 ("Unauthorized")', :smoke, :authentication do
         # the exact error is very dependant on how LDAP is configured, so its hard to test
         # for something exact
         if platform.ldap_testing
@@ -236,13 +236,13 @@ describe 'authenticate_user', :users do
         end
       end
 
-      it 'admin/different user returns 403 ("Forbidden")' do
+      it 'admin/different user returns 403 ("Forbidden")', :authorization do
         post(request_url, platform.admin_user, :payload => body).should look_like({
             :status => 403
           })
       end
 
-      it 'non-admin/same user returns 403 ("Forbidden")' do
+      it 'non-admin/same user returns 403 ("Forbidden")', :authorization do
         post(request_url, platform.non_admin_user, :payload => body).should look_like({
             :status => 403
           })
@@ -253,19 +253,19 @@ describe 'authenticate_user', :users do
 
       let(:password) { "badger badger" }
 
-      it 'superuser returns 401 ("Unauthorized")', :smoke do
+      it 'superuser returns 401 ("Unauthorized")', :smoke, :authentication do
         post(request_url, superuser, :payload => body).should look_like({
             :status => 401
           })
       end
 
-      it 'admin/different user returns 403 ("Forbidden")' do
+      it 'admin/different user returns 403 ("Forbidden")', :authorization do
         post(request_url, platform.admin_user, :payload => body).should look_like({
             :status => 403
           })
       end
 
-      it 'non-admin/same user returns 403 ("Forbidden")' do
+      it 'non-admin/same user returns 403 ("Forbidden")', :authorization do
         post(request_url, platform.non_admin_user, :payload => body).should look_like({
             :status => 403
           })
@@ -276,7 +276,7 @@ describe 'authenticate_user', :users do
     # aren't available outside of test scope, so easier just to do multiple similar
     # tests
 
-    context 'with missing username' do
+    context 'with missing username', :validation do
 
       let(:body) { { 'password' => password } }
 
@@ -299,7 +299,7 @@ describe 'authenticate_user', :users do
       end
     end
 
-    context 'with missing password' do
+    context 'with missing password', :validation do
 
       let(:body) { { 'username' => username } }
 
@@ -322,7 +322,7 @@ describe 'authenticate_user', :users do
       end
     end
 
-    context 'with empty username' do
+    context 'with empty username', :validation do
       let(:username) { "" }
 
       it 'superuser returns 400 ("Bad Request")' do
@@ -344,7 +344,7 @@ describe 'authenticate_user', :users do
       end
     end
 
-    context 'with empty password' do
+    context 'with empty password', :validation do
       let(:password) { "" }
 
       it 'superuser returns 400 ("Bad Request")' do
@@ -366,7 +366,7 @@ describe 'authenticate_user', :users do
       end
     end
 
-    context 'with username = user' do
+    context 'with username = user', :validation do
 
       let(:body) { { 'user' => username, 'password' => password } }
 
@@ -389,7 +389,7 @@ describe 'authenticate_user', :users do
       end
     end
 
-    context 'with password = pass' do
+    context 'with password = pass', :validation do
 
       let(:body) { { 'username' => username, 'pass' => password } }
 
@@ -412,7 +412,7 @@ describe 'authenticate_user', :users do
       end
     end
 
-    context 'with empty body' do
+    context 'with empty body', :validation do
 
       let(:body) { {} }
 
@@ -435,7 +435,7 @@ describe 'authenticate_user', :users do
       end
     end
 
-    context 'with no body' do
+    context 'with no body', :validation do
       it 'superuser returns 400 ("Bad Request")' do
           post(request_url, superuser).should look_like({
               :status => 400
@@ -454,7 +454,7 @@ describe 'authenticate_user', :users do
           })
       end
 
-      it 'invalid user returns 401 ("Unauthorized") (ruby) or 400 ("Bad Request") (erlang)' do
+      it 'invalid user returns 401 ("Unauthorized") (ruby) or 400 ("Bad Request") (erlang)', :authentication, :validation do
         post(request_url, invalid_user).should look_like({
             :status => ruby? ? 401 : 400
           })
@@ -474,19 +474,19 @@ describe 'authenticate_user', :users do
           })
       end
 
-      it 'admin/different user returns 403 ("Forbidden")' do
+      it 'admin/different user returns 403 ("Forbidden")', :authorization do
         post(request_url, platform.admin_user, :payload => body).should look_like({
             :status => 403
           })
       end
 
-      it 'non-admin/same user returns 403 ("Forbidden")' do
+      it 'non-admin/same user returns 403 ("Forbidden")', :authorization do
         post(request_url, platform.non_admin_user, :payload => body).should look_like({
             :status => 403
           })
       end
 
-      it 'invalid user returns 401 ("Unauthorized")' do
+      it 'invalid user returns 401 ("Unauthorized")', :authentication do
         post(request_url, invalid_user, :payload => body).should look_like({
             :status => 401
           })

@@ -387,6 +387,10 @@ module Pedant
       make_owner(self.test_org_owner, org)
 
       ::RSpec.configure do |c|
+        # If you just want to run one (or a few) tests in development,
+        # add :focus metadata
+        c.filter_run :focus => true
+        c.run_all_when_everything_filtered = true
         c.treat_symbols_as_metadata_keys_with_true_values = true
         c.include Pedant::RSpec::Common
       end
@@ -396,9 +400,12 @@ module Pedant
              else
                []
              end
+      if Pedant.config[:tags]
+        args.concat(Pedant.config[:tags].map { |tag| ['-t', tag.to_s] } )
+      end
       args.concat(Pedant::Gem.test_directories("org_creation"))
 
-      if ::RSpec::Core::Runner.run(args) > 0
+      if ::RSpec::Core::Runner.run(args.flatten) > 0
         delete_org_from_config
         delete_user(test_org_owner)
         puts "Error: unable to validate testing org"

@@ -89,7 +89,7 @@ describe "Org Creation", :org_creation do
       # if the USAG in the users group is the one created for the owner,
       # we're just going to check for the presence of group names with
       # hexdecimals.
-      it 'should have a USAG' do
+      it 'should have a USAG', :usags do
         member_groups.select { |g| g =~ /^[0-9a-f]+$/ }.should_not be_empty
       end
     end
