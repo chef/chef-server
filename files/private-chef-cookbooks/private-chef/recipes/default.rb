@@ -163,6 +163,7 @@ include_recipe "private-chef::sysctl-updates"
   "rabbitmq",
   "postgresql",
   "oc_bifrost",
+  "oc_id",
   "opscode-certificate",
   "opscode-account",
   "opscode-solr4",

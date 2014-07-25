@@ -1,0 +1,7 @@
+#
+# Opscode Identity upstream definition
+#
+upstream oc_id {
+    server <%= node['private_chef']['oc_id']['vip'] %>:<%= node['private_chef']['oc_id']['port'] %>;
+}
+

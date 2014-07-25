@@ -123,4 +123,5 @@ if is_data_master?
   end
   include_recipe "private-chef::erchef_database"
   include_recipe "private-chef::bifrost_database"
+  include_recipe "private-chef::oc_id_database"
 end

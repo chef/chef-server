@@ -434,6 +434,25 @@ default['private_chef']['opscode-org-creator']['create_splay_ms'] = 25000
 default['private_chef']['opscode-org-creator']['port'] = 4369
 
 ###
+# Opscode Identity
+###
+
+default['private_chef']['oc_id']['enable'] = true
+default['private_chef']['oc_id']['ha'] = false
+default['private_chef']['oc_id']['dir'] = "/var/opt/opscode/oc_id"
+default['private_chef']['oc_id']['log_directory'] = "/var/log/opscode/oc_id"
+default['private_chef']['oc_id']['log_rotation']['file_maxbytes'] = 104857600
+default['private_chef']['oc_id']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['oc_id']['vip'] = "127.0.0.1"
+default['private_chef']['oc_id']['port'] = 9090
+default['private_chef']['oc_id']['sql_database'] = "oc_id"
+default['private_chef']['oc_id']['sql_user'] = "oc_id"
+default['private_chef']['oc_id']['sql_password'] = "snakepliskin"
+default['private_chef']['oc_id']['db_pool_size'] = '20'
+
+default['private_chef']['oc_id']['administrators'] = []
+
+###
 # Dark Launch
 ###
 default['private_chef']['dark_launch']["quick_start"] = false
