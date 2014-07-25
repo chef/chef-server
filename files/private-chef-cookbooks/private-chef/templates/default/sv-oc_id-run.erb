@@ -1,0 +1,9 @@
+#!/bin/sh
+exec 2>&1
+
+DIR=/opt/opscode/embedded/service/oc_id
+export RAILS_ENV=production
+export PATH=/opt/opscode/embedded/bin:$PATH
+export LD_LIBRARY_PATH=/opt/opscode/embedded/lib
+cd $DIR
+exec chpst -P -u <%= node['private_chef']['user']['username'] %> -U <%= node['private_chef']['user']['username'] %> /opt/opscode/embedded/bin/bundle exec rails server -p <%= node['private_chef']['oc_id']['port'] %>

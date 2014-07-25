@@ -26,6 +26,9 @@
 * Add a gather-logs command to create a tarball of important logs and
   system information for Chef Support
 
+### oc-id 0.3.3
+* Add Chef Identity Service (oc-id)
+
 ## 11.1.8 (2014-06-26)
 
 ### oc_authz_migrator 0.0.2
