@@ -91,10 +91,16 @@
                       {base_dn, "<%= node['private_chef']['ldap']['base_dn'] || "" %>" },
                       {login_attribute, "<%= node['private_chef']['ldap']['login_attribute'] || "samaccountname" %>" },
                       {encryption, <%= node['private_chef']['ldap']['ssl_enabled'] || false %> }
-              ]}
+              ]},
               <% else -%>
-              {ldap, []}
+              {ldap, []},
               <% end -%>
+              %% these are used for reporting on license status on the
+              %% license endpoint; it would have been nice to give these
+              %% their own logical section, but erlang requires these to
+              %% be part of a loaded application
+              {node_license, <%= node['private_chef']['license']['nodes'] %>},
+              {upgrade_url, <<"<%= node['private_chef']['license']['upgrade_url'] %>">>}
             ]},
   {chef_wm, [
              {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},
