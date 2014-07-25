@@ -89,6 +89,9 @@
          create_sandbox/1,
          delete_sandbox/1,
 
+         %% for license
+         count_nodes/0,
+
          sql_now/0,
          ping/0,
          statements/0,
@@ -125,13 +128,22 @@ ping() ->
     end.
 
 %%
+%% for license
+%%
+
+-spec count_nodes() -> {ok, none} | {ok, integer()} | {error, _}.
+%% Return a node count
+count_nodes() ->
+    sqerl:select(count_nodes, [], first_as_scalar, [count]).
+
+%%
 %% chef user ops
 %%
 
 -spec count_user_admins() -> {ok, none} | {ok, integer()} | {error, _}.
 %% Return a count of the user admins
 count_user_admins() ->
-  sqerl:select(count_user_admins, [], first_as_scalar, [count]).
+    sqerl:select(count_user_admins, [], first_as_scalar, [count]).
 
 %%
 %% node ops

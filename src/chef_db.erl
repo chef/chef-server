@@ -73,6 +73,8 @@
          make_sandbox/4,
          commit_sandbox/2,
 
+         %% for license
+         count_nodes/1,
 
          is_user_in_org/3,
          connect/0,
@@ -578,6 +580,20 @@ mark_checksums_as_uploaded(#context{reqid=ReqId}, OrgId, Checksums) ->
 -spec node_record_to_authz_id(any(), any()) -> id().
 node_record_to_authz_id(_Context, NodeRecord) ->
     NodeRecord#chef_node.authz_id.
+
+-spec count_nodes(#context{}) -> integer() | {error, _}.
+count_nodes(#context{reqid = ReqId} = _Ctx) ->
+    case stats_hero:ctime(ReqId, {chef_sql, count_nodes},
+                          fun() ->
+                                  chef_sql:count_nodes()
+                          end) of
+        {ok, none} ->
+            0;
+        {ok, Number} ->
+            Number;
+        {error, Error} ->
+            {error, Error}
+    end.
 
 -spec is_user_in_org(#context{}, binary(), binary()) -> boolean() | {error, _}.
 is_user_in_org(#context{reqid = ReqId, otto_connection = S}=Ctx, User, OrgName) ->
