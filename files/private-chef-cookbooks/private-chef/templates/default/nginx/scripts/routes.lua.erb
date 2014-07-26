@@ -202,6 +202,12 @@ function routes.resolve_uri(mode, uri)
   if not route then
     route = {}
   end
+
+  -- normalize /_acl endpoint to acls
+  if route.endpoint == "/_acl" then
+    route.endpoint = "acls"
+  end
+
   return route
 end
 
