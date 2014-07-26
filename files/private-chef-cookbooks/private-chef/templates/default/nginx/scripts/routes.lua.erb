@@ -149,7 +149,7 @@ local uri_resolvers = {
   -- Retain ordering to ensure proper eval:
   -- p_acl_endpont must come firs tbecause a trailing _acl takes precedence
   -- over any other identifiers which may be in the url.
-  api = (p_acl_endpoint * c_acct) +
+  api = (p_acl_endpoint * c_acct_erchef) +
         (p_erchef * c_erchef) +
         (p_acct * c_acct),
 
@@ -159,7 +159,7 @@ local uri_resolvers = {
                   -- as in API, acls come first so that we can ensure webui requests for
                   -- acls get routed correctly to account, even when the underlying object is
                   -- darklaunched to erchef.
-                  (p_acl_endpoint * c_acct) +
+                  (p_acl_endpoint * c_acct_erchef) +
 
                   -- Special case: webui1 will still send requests for clients over to us, so
                   -- we have to be able to route migrated endpoints (that used to be acct) to erchef.
