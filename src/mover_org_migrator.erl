@@ -131,7 +131,7 @@ stop_with_failure(#state{org_name = OrgName} = State, Error, LastState) ->
     {stop, {error, Error, LastState}, State}.
 
 stop_with_migration_error(#state{org_name = OrgName} = State, Error) ->
-    lager:error([{org_name, OrgName}], "Error in converting org data, skipping:  ~p", [Error]),
+    lager:error([{org_name, OrgName}], "Error in converting org data, skipping: ~p", [Error]),
     {stop, {migration_error, Error}, State}.
 
 migration_started(CallbackMod, OrgName) ->
