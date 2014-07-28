@@ -22,7 +22,11 @@ gem 'pg'
 gem 'doorkeeper', github: 'applicake/doorkeeper', ref: 'cc9fa8a1b1b74ab50d542db186e9501e92d479b4'
 
 group :development, :test do
-  gem 'jazz_hands', '~> 0.5.1'
+  # Loading it this way makes it work with Ruby 2.1.2. See
+  # https://github.com/nixme/jazz_hands/issues/25
+  gem 'jazz_hands', github: 'nixme/jazz_hands', branch: 'bring-your-own-debugger'
+  gem 'pry-byebug'
+
   gem 'rspec-rails', '~> 2.14.2'
 end
 
