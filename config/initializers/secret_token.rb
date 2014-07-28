@@ -9,4 +9,4 @@
 
 # Make sure your secret_key_base is kept private
 # if you're sharing your code publicly.
-OcId::Application.config.secret_key_base = 'ffb98b046ca6e2c9989fb6738d7fd7b1550496cdb3b810a54035263674ec27dbd62c379b39f76d7173b9c313e8f3c16b7f1167618da5300082e2d47e767df62b'
+OcId::Application.config.secret_key_base = Settings.secret_key_base
