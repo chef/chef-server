@@ -28,3 +28,31 @@
           auth_side_actors = [],
           auth_side_groups = []
           }).
+
+-record(oc_chef_organization, {
+          id,
+          authz_id,
+          name,
+          full_name,
+          assigned_at,
+          last_updated_by,
+          created_at,
+          updated_at
+         }).
+
+-record(oc_chef_org_user_association, {
+          id,
+          user_id,
+          last_updated_by,
+          created_at,
+          updated_at
+         }).
+
+-record(oc_chef_org_user_invite, {
+          id,
+          org_id,
+          user_id,
+          last_updated_by,
+          created_at,
+          updated_at
+         }).

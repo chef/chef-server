@@ -40,6 +40,37 @@
 
 statements(pgsql) ->
     [
+     {insert_org_user_invite,
+      <<"INSERT INTO org_user_invites (id, org_id, user_id, last_updated_by, created_at, updated_at)"
+        " VALUES ($1, $2, $3, $4, $5, $6)">>},
+     {delete_org_user_invite_by_id,
+      <<"DELETE FROM org_user_invites WHERE id= $1">>},
+     {find_org_user_invite_by_id,
+      <<"SELECT id, org_id, user_id, last_updated_by, created_at, updated_at FROM user_org_invites"
+        " WHERE id= $1 LIMIT 1">>},
+     {list_org_user_invites, <<"SELECT id FROM user_org_invites">>},
+     {insert_org_user_association,
+      <<"INSERT INTO org_user_associations (org_id, user_id, last_updated_by, created_at, updated_at)"
+        " VALUES ($1, $2, $3, $4, $5)">>},
+     {delete_org_user_association_by_ids,
+      <<"DELETE FROM org_user_associations WHERE org_id= $1 AND user_id= $2">>},
+     {find_org_user_association_by_ids,
+      <<"SELECT org_id, user_id, last_updated_by, created_at, updated_at FROM user_org_associations"
+        " WHERE org_id= $1 AND user_id= $2 LIMIT 1">>},
+     {list_org_user_associations, <<"SELECT org_id, user_id FROM user_org_associations">>},
+     {insert_organization,
+      <<"INSERT INTO orgs (id, authz_id, name, full_name,"
+        " assigned_at, last_updated_by, created_at, updated_at) VALUES"
+        " ($1, $2, $3, $4, $5, $6, $7, $8)">>},
+     {update_organization_by_id,
+      <<"UPDATE orgs SET last_updated_by= $1, updated_at= $2, name= $3, full_name= $4"
+        "WHERE id= $5">>},
+     {delete_organization_by_id, <<"DELETE FROM orgs WHERE id= $1">>},
+     {find_organization_by_id,
+      <<"SELECT id, authz_id, name, full_name, assigned_at, last_updated_by, created_at, updated_at"
+        " FROM orgs "
+        " WHERE id= $1 LIMIT 1">>},
+     {list_organizations, <<"SELECT name FROM orgs">>},
      {find_container_by_orgid_name,
       <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
         " FROM containers "
