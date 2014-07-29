@@ -146,9 +146,7 @@ local p_acct = (p_named_org_prefix * p_acct_direct) +
                p_acct_users
 
 -- Default org endpoints. This is to help with migrating from OSC 11 to Chef Server 12
--- TODO: Not sure if p_runs + p_principals are needed below. The purpose is for
--- OSC chef-clients to be able to run against this. Are groups and containers necessary?
-local p_default_org_endpoints = p_search + p_nodes + p_cookbooks + p_data + p_roles + p_sandboxes + p_environments + p_clients +p_runs + p_principals
+local p_default_org_endpoints = p_search + p_nodes + p_cookbooks + p_data + p_roles + p_sandboxes + p_environments + p_clients +p_runs + p_principals + p_groups + p_containers
 
 local uri_resolvers = {
   -- Retain ordering to ensure proper eval:
@@ -212,7 +210,6 @@ function routes.resolve_uri(mode, uri)
     uri = '/organizations/' .. config.default_org .. uri
     -- Deliberately do not rewrite uri here, and pass the
     -- original to erchef. Client requests are checksummed
-    -- ngx.req.set_uri(uri, false)
   end
   route = match(Ct(uri_resolvers[mode]), uri)
   if not route then
