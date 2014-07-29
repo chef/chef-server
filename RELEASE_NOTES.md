@@ -20,6 +20,7 @@ The following items are the set of bug fixes that have been applied since Enterp
 * [opscode-omnibus] Ensure CouchDB compaction cron job does not run on passive backend.
 * [OC-11575][enterprise-chef-common] Don't start services by default in HA topology
 * [OC-11601] - Correct another case where redis_lb was not started before attempting to reconfigure it
+* [OC-11672] Upgrade PostgreSQL to 9.2.9
 
 ## 11.1.6 (2014-06-05)
 

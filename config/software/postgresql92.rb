@@ -16,7 +16,7 @@
 #
 
 name "postgresql92"
-default_version "9.2.4"
+default_version "9.2.9"
 
 dependency "zlib"
 dependency "openssl"
@@ -24,10 +24,10 @@ dependency "libedit"
 dependency "ncurses"
 dependency "libossp-uuid"
 
-source :url => "http://ftp.postgresql.org/pub/source/v9.2.4/postgresql-9.2.4.tar.bz2",
-       :md5 => "6ee5bb53b97da7c6ad9cb0825d3300dd"
+source :url => "http://ftp.postgresql.org/pub/source/v9.2.9/postgresql-9.2.9.tar.bz2",
+       :md5 => "38b0937c86d537d5044c599273066cfc"
 
-relative_path "postgresql-9.2.4"
+relative_path "postgresql-9.2.9"
 
 configure_env = {
   "LDFLAGS" => "-Wl,-rpath,#{install_dir}/embedded/lib,-rpath,#{install_dir}/embedded/postgresql/9.2/lib -L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
