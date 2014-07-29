@@ -2,6 +2,9 @@
 
 ## 11.1.9 (unreleased)
 
+### postgresql 2014.07.29
+* [OC-11672] Upgrade PostgreSQL to 9.2.9
+
 ### enterprise-chef-common 2014.07.21
 * [OC-11575] Don't start services by default in HA topology
 * Update to 0.4.4
