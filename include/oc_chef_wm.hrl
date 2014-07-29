@@ -36,6 +36,8 @@
         "roles",
         "sandboxes",
         "search",
-        "runs"
+        "runs",
+        "groups",    %% Not technically OSC, but it was decided to route these too
+        "containers"
     ]
 ).

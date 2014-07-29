@@ -64,8 +64,7 @@ is_valid_default_orgname(undefined) ->
 %% @doc Generate a search URL.  Expects `Args' to be a proplist with a `search_index' key
 %% (the value of which can be either a binary or string).  The organization in the URL will
 %% be determined from the Webmachine request. If organization does not exist in the request
-%% information, and the endpoint is an OSC endpoint, it will call the OSC route/3 function
-%% to generate URLs without an organization
+%% information, it will call the OSC route/3 function to generate URLs without an organization
 route(Type, Req, Args) when Type =:= role;
                             Type =:= node;
                             Type =:= cookbook;
@@ -76,7 +75,9 @@ route(Type, Req, Args) when Type =:= role;
                             Type =:= data_bag_item;
                             Type =:= cookbook_version;
                             Type =:= sandbox;
-                            Type =:= organization_search ->
+                            Type =:= organization_search;
+                            Type =:= group;
+                            Type =:= container ->
     case maybe_org_name(Req) of
         undefined -> chef_wm_routes:route(Type, Req, Args);
         _         -> org_route(Type, Req, Args)
@@ -155,7 +156,9 @@ bulk_route_fun(Type, Req) when Type =:= role;
                                Type =:= client;
                                Type =:= data_bag;
                                Type =:= data_bag_item;
-                               Type =:= cookbook_version ->
+                               Type =:= cookbook_version;
+                               Type =:= group;
+                               Type =:= container ->
     %% Do we have an org? If orgname is not defined in the request,
     %% then call the chef_wm_routes functions and render an OSC-compatible
     %% URL. This is only applicable to OSC endpoints
