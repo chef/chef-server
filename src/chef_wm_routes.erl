@@ -44,7 +44,9 @@ bulk_route_fun(Type, Req) when Type =:= role;
                                Type =:= client;
                                Type =:= data_bag;
                                Type =:= data_bag_item;
-                               Type =:= user ->
+                               Type =:= user;
+                               Type =:= group;
+                               Type =:= container ->
     BaseURI = chef_wm_util:base_uri(Req),
     Template = template_for_type(Type),
     fun(Name) ->
@@ -100,7 +102,9 @@ route(cookbook_version, Req, Args) ->
     Template = "/cookbooks/~s",
     TemplateArgs = [Name],
     {name, Name} = lists:keyfind(name, 1, Args),
-    render_template(Template, Req, TemplateArgs).
+    render_template(Template, Req, TemplateArgs);
+route(group, Req, Args) -> route_rest_object("groups", Req, Args);
+route(container, Req, Args) -> route_rest_object("containers", Req, Args).
 
 %% @doc utility method for generating a binary from a template and arguments.  The protocol
 %% and host are derived from the Webmachine request via our own magic in `chef_wm_util',
@@ -143,7 +147,11 @@ template_for_type({data_bag, _}) ->
     %% another way of asking for data_bag_item
     "/data/~s/~s";
 template_for_type(user) ->
-    "/users/~s".
+    "/users/~s";
+template_for_type(container) ->
+    "/containers/~s";
+template_for_type(group) ->
+    "/groups/~s".
 
 %% This is extracted from search, needs more cleanup
 url_for_search_item_fun(Req, Type, _OrgName) ->
