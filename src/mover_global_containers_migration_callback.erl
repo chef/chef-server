@@ -26,7 +26,7 @@ next_object() ->
 
 migration_action(Object, _AcctInfo) ->
     {Guid, AuthzId, RequesterId, ContainerName, Data} = Object,
-    moser_global_container_converter:insert(Guid, AuthzId, RequesterId, ContainerName, Data).
+    moser_global_object_converter:insert_container(Guid, AuthzId, RequesterId, ContainerName, Data).
 
 migration_type() ->
     <<"global_container_migration">>.
