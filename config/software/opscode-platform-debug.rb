@@ -1,5 +1,5 @@
 name "opscode-platform-debug"
-default_version "rel-0.4.6"
+default_version "rel-0.5.0"
 
 dependency "ruby"
 dependency "bundler"
