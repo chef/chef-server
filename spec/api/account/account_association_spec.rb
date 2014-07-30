@@ -7,7 +7,14 @@ require 'pedant/rspec/common'
 # * multiple live invites in org work and are distinct (Low value for now)
 # * multiple live invites for user work and are distinct (Low value for now)
 # * Disassociation cleans up groups (needs better group fetch instrumentation)
-
+#
+# TODO
+#  * time allowing, let's modify the association tests to use temporary users,
+#  instead of platform.bad_user, so that if something fails in disassociating
+#  we don't get false results based on platform.bad_user being given access
+#  to something it shouldn't have
+#  Use of platform.bad_user can also be a source of pain in concurrent runs
+#
 describe "opscode-account user association", :association do
   def self.ruby?
     true
@@ -158,6 +165,54 @@ describe "opscode-account user association", :association do
     end
   end
 
+  context "attempting to get association requests for a user that does not exist" do
+    let(:user_assoc_url) { "#{users_url}/flappy/association_requests" }
+    it "cannot find association list" do
+      response = get(user_assoc_url, platform.superuser)
+      response.should look_like({ :status => 404,
+                                  :body_exact => { "error"=>"Could not find user flappy"} })
+    end
+    it "cannot found association count" do
+      response = get("#{user_assoc_url}/count", platform.superuser)
+      response.should look_like({ :status => 404,
+                                  :body_exact => { "error"=>"Could not find user flappy"} })
+    end
+  end
+
+  context "when org admin is attempting to view user associations" do
+    let(:user_assoc_url) { "#{users_url}/#{platform.bad_user.name}/association_requests" }
+    it "does not permit admin to view associations" do
+      response = get(user_assoc_url, platform.admin_user)
+      response.should look_like({ :status => 403,
+                                  :body_exact => { "error"=>"You are not allowed to view association requests for #{platform.bad_user.name}"} })
+
+    end
+    it "does not permit admin to view association count" do
+      response = get("#{user_assoc_url}/count", platform.admin_user)
+      response.should look_like({ :status => 403,
+                                  :body_exact => { "error"=>"You are not allowed to view association requests for #{platform.bad_user.name}"} })
+
+    end
+  end
+
+  context "when the organization does not exist" do
+    it "listing association requests replies with org not found" do
+      pending("ruby incorrectly fails this with a 400", :if => ruby?) do
+        response = get("/organizations/bad_org/association_requests", platform.superuser)
+        response.should look_like({ :status => 404,
+                                    :body_exact => { "error"=>"Organization bad_org not found."} })
+      end
+    end
+    it "creating a new association request replies org not found" do
+      pending("ruby incorrectly fails this with a 400", :if => ruby?) do
+        response = post("/organizations/bad_org/association_requests", platform.superuser,
+                        :payload=>make_invite_payload(platform.bad_user.name))
+        response.should look_like({ :status => 404,
+                                    :body_exact => { "error"=>"Organization bad_org not found."} })
+      end
+    end
+  end
+
   context "listing association requests" do
     let(:user_assoc_url) { "#{users_url}/#{platform.bad_user.name}/association_requests" }
     let(:user_assoc_count_url) { "#{users_url}/#{platform.bad_user.name}/association_requests/count" }
@@ -237,6 +292,7 @@ describe "opscode-account user association", :association do
       response = get(user_assoc_url, platform.bad_user)
       response.should look_like({ :status => 200, :body_exact=> [] })
     end
+
     context "can be invited to the org by an admin", :smoke do
       let(:accept_response_body) do
         { "organization" => { "name" => platform.test_org.name }  }
@@ -258,7 +314,6 @@ describe "opscode-account user association", :association do
         response.should look_like({ :status=> 200 })
       end
 
-
       it "and the invite can be rescinded" do
         invite_id = invite_user(platform.test_org.name, bad_user, platform.admin_user)
         check_invite_for_user(platform.bad_user, invite_id)
@@ -269,7 +324,7 @@ describe "opscode-account user association", :association do
       it "and a rescinded invite can't be rescinded again" do
         invite_id = invite_user(platform.test_org.name, bad_user, platform.admin_user)
         delete("#{org_assoc_url}/#{invite_id}", platform.admin_user).should look_like({ :status => 200 })
-        response = delete("#{org_assoc_url}/#{invite_id}", platform.admin_user).
+        response = delete("#{org_assoc_url}/#{invite_id}", platform.admin_user)
         response.should look_like({ :status => 404, :body => {"error" => "Cannot find association request: #{invite_id}" } })
       end
 
@@ -375,7 +430,7 @@ describe "opscode-account user association", :association do
 
         end
         it "an org admin no longer sees them in the org" do
-          pending("ruby incorrectly fails this with a 403 - pended", :if => ruby?) do
+          pending("ruby incorrectly fails this with a 403", :if => ruby?) do
             result = get(api_url("users/#{bad_user}"), platform.admin_user)
             result.should look_like({ :status=> 404,
                                       :body_exact => { "error" => "Cannot find a user #{bad_user} in organization #{platform.test_org.name}" } })
@@ -426,6 +481,57 @@ describe "opscode-account user association", :association do
 
         delete(api_url("users/#{bad_user}"), platform.admin_user).should look_like({ :status=> 200 })
 
+      end
+      context "when admin is deleted" do
+        let(:bad_user) { platform.bad_user.name }
+        let(:org) { platform.test_org.name }
+        let(:admin_username) { "test-admin-#{Time.now.to_i}-#{Process.pid}" }
+        let(:test_admin_user) { platform.create_user(admin_username) }
+        let(:test_username) { "test-user-#{Time.now.to_i}-#{Process.pid}" }
+        let(:test_user) { platform.create_user(test_username) }
+        let(:invalid_invite_msg) {
+          "This invitation is no longer valid.  Please notify an adminstrator and request to be re-invited to the organization"
+        }
+
+        before :each do
+          platform.associate_user_with_org(org, test_admin_user)
+          platform.add_user_to_group(org, test_admin_user, "users")
+          platform.add_user_to_group(org, test_admin_user, "admins")
+          invite_id = invite_user(org, test_user.name, test_admin_user)
+          @user_invite_url = make_user_assoc_url_id(test_user.name, invite_id)
+        end
+
+        after :each do
+          # User may have already been disassociated and/or deleted depending on the test,
+          # but clean up here just in case.
+          delete(api_url("users/#{test_user.name}"), platform.admin_user)
+          delete(api_url("users/#{test_admin_user.name}"), platform.admin_user)
+
+          delete("/users/#{test_admin_user.name}", platform.superuser)
+          delete("/users/#{test_user.name}", platform.superuser)
+        end
+
+        it "from the org, invites issued by that admin cannot be accepted" do
+          pending("unclear why this is presently passing w/ 200 on ruby, should not be", :if => ruby?) do
+            delete(api_url("users/#{admin_username}"), platform.admin_user).should look_like({ :status=> 200 })
+            response = put(@user_invite_url, test_user, :payload=>{:response=>"accept"})
+            response.should look_like({ :status => 403,
+                                        :body_exact => { "error" => invalid_invite_msg } })
+            # Ensure invite was deleted
+            no_invites_for_user(test_user)
+          end
+        end
+
+        it "from the system, invites issued by that admin can't by accepted" do
+          pending "Known failure: passes w/ 200 b/c no USAG cleanup performed for deleted user" do
+            delete("/users/#{admin_username}", platform.superuser).should look_like({ :status => 200} )
+            response = put(@user_invite_url, test_user, :payload=>{:response=>"accept"})
+            response.should look_like({ :status => 403,
+                                        :body_exact => { "error" => invalid_invite_msg } })
+            # Ensure invite was deleted
+            no_invites_for_user(test_user)
+          end
+        end
       end
 
       #
@@ -682,7 +788,7 @@ describe "opscode-account user association", :association do
             platform.add_user_to_group(org, test_user, "admins")
           end
           it "cannot delete" do
-            pending("new constraint in erchef- ruby returns 200 - pended", :if => ruby?) do
+            pending("new constraint in erchef- ruby returns 200", :if => ruby?) do
               delete(request_url, test_user).should look_like({
                   :status => 403,
                   :body_exact => {"error" => "" }
