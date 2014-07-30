@@ -89,8 +89,8 @@ service drbd start
   not_if { File.exists?(File.join(drbd_dir, "drbd_ready")) }
 end
 
-template "#{node['private_chef']['keepalived']['dir']}/bin/custom_backend_storage" do
-  source "custom_backend_storage.erb"
+template "#{node['private_chef']['keepalived']['dir']}/bin/ha_backend_storage" do
+  source "ha_backend_storage.erb"
   owner "root"
   group "root"
   mode "0755"

@@ -33,9 +33,9 @@ function transition
   log_me "Transitioning to $1"
   case "$1" in
     master)
-      if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_storage' ]; then
+      if [ -x '/var/opt/opscode/keepalived/bin/ha_backend_storage' ]; then
         log_me "Attempting HA storage takeover"
-        /var/opt/opscode/keepalived/bin/custom_backend_storage attach >> $LOGNAME 2>&1
+        /var/opt/opscode/keepalived/bin/ha_backend_storage attach >> $LOGNAME 2>&1
         if [ $? -gt 0 ]; then
           error_exit "HA storage attach failed"
         else
@@ -52,13 +52,13 @@ function transition
       <%- end -%>
 <%- end -%>
 
-      if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_ip' ]; then
-          log_me "Attempting CUSTOM BACKEND IP primary takeover"
-          /var/opt/opscode/keepalived/bin/custom_backend_ip attach >> $LOGNAME 2>&1
+      if [ -x '/var/opt/opscode/keepalived/bin/ha_backend_ip' ]; then
+          log_me "Attempting HA BACKEND IP primary takeover"
+          /var/opt/opscode/keepalived/bin/ha_backend_ip attach >> $LOGNAME 2>&1
           if [ $? -gt 0 ]; then
-            error_exit "CUSTOM BACKEND IP attach failed"
+            error_exit "HA BACKEND IP attach failed"
           else
-            log_me "CUSTOM BACKEND IP attach success"
+            log_me "HA BACKEND IP attach success"
           fi
       fi
 
@@ -69,9 +69,9 @@ function transition
       /opt/opscode/bin/private-chef-ctl graceful-kill <%= service %> || error_exit "Cannot kill <%= service %>"
 <%- end -%>
 
-      if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_storage' ]; then
+      if [ -x '/var/opt/opscode/keepalived/bin/ha_backend_storage' ]; then
         log_me "Attempting HA storage detach"
-        /var/opt/opscode/keepalived/bin/custom_backend_storage detach >> $LOGNAME 2>&1
+        /var/opt/opscode/keepalived/bin/ha_backend_storage detach >> $LOGNAME 2>&1
         if [ $? -gt 0 ]; then
           error_exit "HA storage detach failed"
         else
@@ -79,13 +79,13 @@ function transition
         fi
       fi
 
-      if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_ip' ]; then
-          log_me "Attempting CUSTOM BACKEND IP to go standby"
-          /var/opt/opscode/keepalived/bin/custom_backend_ip detach >> $LOGNAME 2>&1
+      if [ -x '/var/opt/opscode/keepalived/bin/ha_backend_ip' ]; then
+          log_me "Attempting HA BACKEND IP to go standby"
+          /var/opt/opscode/keepalived/bin/ha_backend_ip detach >> $LOGNAME 2>&1
           if [ $? -gt 0 ]; then
-            error_exit "CUSTOM BACKEND IP detach failed"
+            error_exit "HA BACKEND IP detach failed"
           else
-            log_me "CUSTOM BACKEND IP detach success"
+            log_me "HA BACKEND IP detach success"
           fi
       fi
 
