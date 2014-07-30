@@ -4,6 +4,7 @@ require 'rspec/rails'
 require 'rspec/autorun'
 
 Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
+ActiveRecord::Migration.maintain_test_schema!
 ActiveRecord::Migration.check_pending! if defined?(ActiveRecord::Migration)
 
 RSpec.configure do |config|
