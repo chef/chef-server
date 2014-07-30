@@ -107,7 +107,7 @@
                   "56206a0bc7f15870f9aa4013de3f9808893347db"}},
        {moser,".*",
               {git,"git@github.com:opscode/moser.git",
-                   "9778d9d55ee6d0b64cb8f7e1c1e8826ff0f2afe5"}},
+                   "b69e2042338960509f693a7e7486700ef9ac1efc"}},
        {chef_reindex,".*",
                      {git,"git@github.com:opscode/chef_reindex.git",
                           "0e2a4bc56c9ffaf15c5647b7c5dc349315d942fe"}},
