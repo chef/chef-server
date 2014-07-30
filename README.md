@@ -24,6 +24,15 @@ where ENV is the environment in which the application is running.
 
 The database is configured in config/database.yml.
 
+### Configuring Administrators
+
+Normal users can only manage their own authorized applications. Administrators
+can create and manage applications that users can authorize against.
+
+The `doorkeeper.administrators` array in the settings is a list of usernames
+(on the Chef server) that have administrative access. This is loaded when
+the application starts.
+
 ## Development
 
 If you have all the requirements ready, you should be able to run the app in
