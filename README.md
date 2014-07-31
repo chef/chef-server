@@ -33,6 +33,15 @@ The `doorkeeper.administrators` array in the settings is a list of usernames
 (on the Chef server) that have administrative access. This is loaded when
 the application starts.
 
+### Configuring Applications
+
+Applications that can be authorize against oc-id can be managed by
+administrators by going to /id/oauth/applications.
+
+The redirect URL is for applications using
+[omniauth-chef-oauth2](https://github.com/opscode/omniauth-chef-oauth2) is
+usually something like `https://host:port/auth/chef_oauth2/callback`.
+
 ## Development
 
 If you have all the requirements ready, you should be able to run the app in
