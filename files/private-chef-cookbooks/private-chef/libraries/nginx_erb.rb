@@ -21,6 +21,15 @@ class NginxErb
     "$host#{':$server_port' if port != standard_port}"
   end
 
+  def default_orgname
+    default_orgname = node['private_chef']['default_orgname']
+    if default_orgname
+      "\"#{default_orgname}\""
+    else
+      "false"
+    end
+  end
+
   def listen_port(proto, options = {})
     listen_port = ""
     listen_port << case proto

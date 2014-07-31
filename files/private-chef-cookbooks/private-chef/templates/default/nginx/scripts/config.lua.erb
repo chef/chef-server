@@ -14,6 +14,7 @@ failsafe_config["dl_default"][2] = true
 -- and set_maint_refresh_interval.
 maint_refresh_interval = nil
 ban_refresh_interval = nil
+default_org = false
 
 local function b_to_i(v)
   -- these values are coming back as a string from redis. Handle both scenarios
@@ -174,4 +175,8 @@ end
 
 function set_maint_refresh_interval(interval)
   maint_refresh_interval = interval
+end
+
+function set_default_org(org)
+  default_org = org
 end

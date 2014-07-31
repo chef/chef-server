@@ -65,6 +65,8 @@
               {api_version, "<%= node['private_chef']['api_version'] %>"},
               {server_flavor, "<%= node['private_chef']['flavor'] %>"},
 
+              {default_orgname, <%= node['private_chef']['default_orgname'] ? "<<\"#{node['private_chef']['default_orgname']}\">>" : "undefined" %> },
+
               {ip, "<%= @listen %>"},
               {port, <%= @port %>},
               {reqid_header_name, "X-Request-Id"},

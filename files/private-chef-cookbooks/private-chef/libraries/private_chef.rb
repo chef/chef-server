@@ -20,6 +20,9 @@ module PrivateChef
   # options are 'ipv4' 'ipv6'
   ip_version "ipv4"
 
+  # Set this for default org mode
+  default_orgname nil
+
   couchdb Mash.new
   rabbitmq Mash.new
   opscode_solr4 Mash.new
@@ -239,6 +242,7 @@ module PrivateChef
                end
         results['private_chef'][rkey] = PrivateChef[key]
       end
+      results['private_chef']['default_orgname'] = PrivateChef['default_orgname']
       results['private_chef']['oc-chef-pedant'] = PrivateChef['oc_chef_pedant']
       results['private_chef']['notification_email'] = PrivateChef['notification_email']
       results['private_chef']['from_email'] = PrivateChef['from_email']

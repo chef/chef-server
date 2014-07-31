@@ -23,6 +23,8 @@ default['private_chef']['role'] = "standalone"
 default['private_chef']['license']['nodes'] = 25
 default['private_chef']['license']['upgrade_url'] = "http://example.com"
 
+default['private_chef']['default_orgname'] = nil
+
 ####
 # The Chef User that services run as
 ####
