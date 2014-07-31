@@ -17,3 +17,27 @@
           oc_chef_group :: #oc_chef_group{}
          }).
 
+%% Since CS12, we have a default-org mode. Under this mode,
+%% certain endpoints can be routed from
+%% /ENDPOINT -> /organizations/DEFAULT_ORG/ENDPOINT
+%% This is intended for backwards compatibility with
+%% Open Source Chef 11 and earlier, and is not intended to
+%% be carried forward. These are used to match on the strings
+%% defined in dispatch.conf
+%% NOTE: /users is specifically excluded from this list
+-define(OSC11_COMPAT_RESOURCES,
+    [
+        "cookbooks",
+        "clients",
+        "data",
+        "environments",
+        "nodes",
+        "principals",
+        "roles",
+        "sandboxes",
+        "search",
+        "runs",
+        "groups",    %% Not technically OSC, but it was decided to route these too
+        "containers"
+    ]
+).

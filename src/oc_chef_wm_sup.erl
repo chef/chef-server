@@ -13,6 +13,8 @@
 %% supervisor callbacks
 -export([init/1]).
 
+-include_lib("oc_chef_wm.hrl").
+
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.
 start_link() ->
@@ -46,14 +48,11 @@ init([]) ->
 
     Ip = envy:get(oc_chef_wm, ip, string),
     Port = envy:get(oc_chef_wm, port, pos_integer),
-    {ok, Dispatch} = file:consult(filename:join(
-                         [filename:dirname(code:which(?MODULE)),
-                          "..", "priv", "dispatch.conf"])),
     WebConfig = [
                  {ip, Ip},
                  {port, Port},
                  {log_dir, "priv/log"},
-                 {dispatch, add_custom_settings(Dispatch)}],
+                 {dispatch, dispatch_table()}],
 
     Web = {webmachine_mochiweb,
            {webmachine_mochiweb, start, [WebConfig]},
@@ -107,6 +106,34 @@ enable_org_cache() ->
             lager:info("Org guid cache enabled~n")
     end,
     ok.
+
+dispatch_table() ->
+    {ok, Dispatch} = file:consult(filename:join(
+            [filename:dirname(code:which(?MODULE)),
+                "..", "priv", "dispatch.conf"])),
+    add_custom_settings(maybe_add_default_org_routes(Dispatch)).
+
+maybe_add_default_org_routes(Dispatch) ->
+    case oc_chef_wm_routes:default_orgname() of
+       DefaultOrgName when is_binary(DefaultOrgName),
+                           byte_size(DefaultOrgName) > 0->
+           add_default_org_routes(Dispatch,DefaultOrgName);
+       _ ->
+           Dispatch
+    end.
+
+add_default_org_routes(OrigDispatch, DefaultOrgName) ->
+    [Y || Y <- [map_to_default_org_route(X, DefaultOrgName) || X <- OrigDispatch], Y =/= undefined] ++ OrigDispatch.
+
+%% Munges the matching routes into the default org equivalent.
+map_to_default_org_route({["organizations", organization_id, Resource | R], Module, Args}, DefaultOrgName)
+    when is_list(Resource) ->
+    case lists:member(Resource, ?OSC11_COMPAT_RESOURCES) of
+        true -> {[Resource] ++ R, Module, Args ++ [{organization_name, DefaultOrgName}]};
+           _ -> undefined
+    end;
+map_to_default_org_route(_, _) ->
+    undefined.
 
 add_custom_settings(Dispatch) ->
     Dispatch1 = add_resource_init(Dispatch),
@@ -167,6 +194,10 @@ default_resource_init() ->
                 {otp_info, {ServerName, ServerVersion}},
                 {server_flavor, envy:get(oc_chef_wm, server_flavor, string)},
                 {api_version, envy:get(oc_chef_wm, api_version, string)},
+
+                %% This is set if default_orgname mode is enabled
+                {default_orgname, oc_chef_wm_routes:default_orgname()},
+
                 %% metrics and stats_hero config. We organize these into a proplist which
                 %% will end up in the base_state record rather than having a key for each of
                 %% these in base state.
