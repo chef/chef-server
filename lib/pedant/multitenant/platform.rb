@@ -23,9 +23,23 @@ module Pedant
     # single-tenant targeted URLs (i.e., Open Source Chef and Private
     # Chef) do not.
     def api_url(path_fragment = '/', org=test_org)
-      path_prefix = "/organizations/#{org.name}"
+      path_prefix = (map_to_default_orgname?(path_fragment) ? '' : "/organizations/#{org.name}")
       slash = path_fragment.start_with?('/') ? '' : '/'
       "#{server}#{path_prefix}#{slash}#{path_fragment}"
+    end
+
+    # Override org_name that is defined in the base platform
+    def org_name
+      test_org.name
+    end
+
+
+    DEFAULT_ORG_REWRITE = /^\/?(search|nodes|cookbooks|data|roles|sandboxes|environments|clients|principals|runs|groups|containers)/
+    def map_to_default_orgname?(path_fragment)
+      return false unless Pedant::Config.use_default_org # Don't even bother unless we are in default_orgname mode
+      return false if path_fragment =~ /_acl/            # False if _acl appears anywhere
+      return true  if path_fragment =~ DEFAULT_ORG_REWRITE
+      return false                                       # Default to false
     end
 
     def setup(requestors=Pedant::Config.requestors)
@@ -200,6 +214,7 @@ module Pedant
         "full_name" => orgname,
         "org_type" => "Business"
       }
+      puts "Creating org #{orgname}"
 
       MAX_ATTEMPTS.times do |attempt|
         r = post("#{@server}/organizations", superuser, :payload => payload)
@@ -302,10 +317,15 @@ module Pedant
     #
     ################################################################################
 
+    def pedant_orgname
+      Pedant::Config.use_default_org ? Pedant::Config.default_orgname : Pedant::Config[:org][:name]
+    end
+
     def org_from_config()
       org = Pedant::Config[:org]
-      name = org[:name]
-      if org[:create_me]
+      # If default_orgname is set, override the settings for org
+      name = pedant_orgname
+      if org[:create_me] || Pedant::Config.default_orgname
         @validate_org = true
         create_org(name)
       else
@@ -317,7 +337,7 @@ module Pedant
 
     def delete_org_from_config
       if Pedant.config[:org][:create_me] && Pedant.config[:delete_org]
-        delete_org(Pedant.config[:org][:name])
+        delete_org(pedant_orgname)
       else
         puts "Pedant did not create the org, so will it not delete it"
       end
