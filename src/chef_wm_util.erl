@@ -200,7 +200,7 @@ set_uri_of_created_resource(Uri, Req0) when is_binary(Uri) ->
 %% TODO: Currently we only use this for nodes and roles; when we clean up our custom types,
 %% the spec will be updated
 -spec object_name(cookbook | node | role | data_bag | data_bag_item |
-                  environment | principal | sandbox | client | user,
+                  environment | principal | sandbox | group | client | user,
                   Request :: #wm_reqdata{}) -> binary() | undefined.
 object_name(node, Req) ->
     extract_from_path(node_name, Req);
@@ -218,6 +218,8 @@ object_name(principal, Req) ->
     extract_from_path(principal_name, Req);
 object_name(cookbook, Req) ->
     extract_from_path(cookbook_name, Req);
+object_name(group, Req) ->
+    extract_from_path(group_name, Req);
 object_name(client, Req) ->
     extract_from_path(client_name, Req);
 object_name(user, Req) ->
