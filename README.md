@@ -3,62 +3,105 @@ oc-id
 
 Chef Identity: An [OAuth 2](http://oauth.net/2/) provider for Chef.
 
-## Getting Started
+## System Requirements
 
-See below for instructions for Enterprise Chef (or dev-vm); you'll need a Chef server endpoint, an associated **webui** key at ``config/webui_priv.pem``, and the appropriate configuration overrides at ``config/settings.local.yml``.
+To run this app you'll need:
 
-Once that's set up, you should be able to run the app in development mode using the usual Rails workflow:
+* Ruby >= 2.0
+* Node.js (if you're compiling assets to run in production)
+* The `bundler` gem
+* A Postgres database instance
+* A reachable Enterprise Chef 11 server URL
+* A privileged key for that Chef server (usually stored in
+  /etc/opscode/webui_priv.pem on the Chef server)
 
-    $ bundle install
-    $ bin/rake db:migrate
-    $ bin/rails server
+## Configuration
 
-Verified with Berkshelf 2.0.14, Vagrant 1.4.3 and Test Kitchen version 1.2.1.
+[RailsConfig](https://github.com/railsconfig/rails_config) is used for
+application configuration. The defaults are in config/settings.yml. You can
+override any key in config/settings.local.yml or config/settings/ENV.yml,
+where ENV is the environment in which the application is running.
 
-## Tests
+The database is configured in config/database.yml.
 
-### Application Tests
+### Configuring Administrators
 
-These assume the presence of a Chef server at 33.33.33.10 (configured at config/settings.yml).
+Normal users can only manage their own authorized applications. Administrators
+can create and manage applications that users can authorize against.
 
-    $ bin/rake db:test:prepare
-    $ bin/rspec
+The `doorkeeper.administrators` array in the settings is a list of usernames
+(on the Chef server) that have administrative access. This is loaded when
+the application starts.
 
-### Cookbook Tests
+### Configuring Applications
 
-See the oc-id cookbook (at chef/cookbooks/oc-id) and the Kitchen configuration file (chef/cookbooks/oc-id/.kitchen.yml) for details.  
+Applications that can be authorize against oc-id can be managed by
+administrators by going to /id/oauth/applications.
 
-    $ cd chef/cookbooks/oc-id
-    $ bundle install
-    $ kitchen converge
-    $ kitchen verify
+The redirect URL is for applications using
+[omniauth-chef-oauth2](https://github.com/opscode/omniauth-chef-oauth2) is
+usually something like `https://host:port/auth/chef_oauth2/callback`.
 
-## Using oc-id with Enterprise Chef
+## Development
 
-To work on the oc-id app, you'll need a running Chef server; either dev-vm or a clean EC install should be fine, as long as the Rails app finds a ``webui_priv.pem`` key at ./config.  Here are some instructions for setting up anew:
+If you have all the requirements ready, you should be able to run the app in
+development mode using the usual Rails workflow:
 
-  1. A Vagrantfile for privisioning an EC install is included with this project.  To use it, first get an EC download URL (e.g., [from the support site](http://support.opscode.us/releases)), then:
+    bundle install
+    bin/rake db:create
+    bin/rake db:migrate
+    bin/rails server
 
-        $ cd chef/cookbooks/oc-id
-        $ EC_URL="http://path.to.a/private-chef...deb" vagrant up ec
+## Test
 
-  1. When provisioning completes, you should see a ``webui_priv.pem`` key alongside the Vagrantfile.  Move that file into to the oc-id Rails project (a convention is to put it into ``#{Rails.root}/config)``) so the Rails app can read it:
+To run the tests:
 
-        $ mv ./webui_priv.pem ../../../config/
+    bin/rspec
 
-  1. Open management console (which should now be available at [https://33.33.33.10](https://33.33.33.10)) and click **Sign Up** to create a new user.  (I use **applejack**/**applejack** here as well, since it's what the tests will be looking for.)
+The specs in spec/requests require a running and configured Chef server.
 
-  1. And now in your oc-id (Rails) root, you should be able to run the tests:
+## Production
 
-        $ bin/rake db:test:prepare
-        $ bin/rspec
+To run in production you'll need to:
 
-  1. ... or just run the Rails app:
+* Configure your app settings in config/settings/production.yml (don't forget the
+`secret_key_base`)
+* Configure your database under `production` in config/database.yml
 
-        $ bin/rails server
+To set everything up:
 
-You should now be able to sign into oc-id with your newly created Chef user as well.
+    rake assets:precompile
+    RAILS_ENV=production rake db:create
+    RAILS_ENV=production rake db:migrate
 
-## Author
+To run the server:
 
-Chris Nunciato <cnunciato@getchef.com>
+    unicorn -E production
+
+In a real production environment you're going to want to run this behind a load
+balancer with SSL, configure process monitoring, logging, etc.
+
+We currently do not provide any public cookbooks or other configuration for
+this.
+
+## License
+
+Chef Identity
+
+|                      |                                          |
+|:---------------------|:-----------------------------------------|
+| **Author:**          | Chris Nunciato <cnunciato@getchef.com>
+| **Copyright:**       | Copyright (c) 2014 Chef Software, Inc.
+| **License:**         | Apache License, Version 2.0
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
