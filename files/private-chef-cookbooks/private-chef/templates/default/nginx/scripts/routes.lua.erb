@@ -22,6 +22,15 @@ local function Cendpoint(exp)
   return Cg(exp, "endpoint")
 end
 
+-- match the first argument and set the endpoint to the second argument.
+-- useful for when you want to set a route to an endpoint whose name
+-- is not contained in the route.
+-- for example:
+--   Cmatch_and_assign_endpoint(p_users, "associations") * p_sep * p_eol
+-- would match /users(/) and set its endpoint to "associations"
+local function Cmatch_and_assign_endpoint(p_to_match, endpoint_string)
+   return p_to_match * Cendpoint(Cc(endpoint_string))
+end
 
 -- Basic identifiers
 local p_eol = P(-1)
@@ -35,7 +44,6 @@ local p_dot = P"."
 -- Route Components
 local p_org = P"organizations"
 local p_org_base = P"/organizations"
-local p_verify_password = P"verify_password"
 local p_auth_user = P"authenticate_user"
 local p_system_recovery = P"system_recovery"
 local p_license = P"license"
@@ -54,6 +62,7 @@ local p_association_requests = P"association_requests"
 local p_clients = P"clients"
 local p_runs = P"runs"
 local p_principals = P"principals"
+local p_internal_organizations_base = P"/internal-organizations"
 
 -- Composite patterns
 local p_maybe_sep = p_sep^-1
@@ -93,7 +102,7 @@ local c_maybe_identifier = (p_sep * c_identifier)^-1
 
 local p_erchef_endpoint = p_cookbooks + p_data + p_roles + p_sandboxes +
                           p_environments + p_clients + p_nodes + p_principals +
-			   p_groups + p_containers
+                          p_groups + p_containers
 
 -- endpoints that map directly to erchef
 -- If an object identifier is present - as identified with /IDENTIFIER - then
@@ -123,33 +132,47 @@ local p_erchef_int = p_erchef +
 
 -- /users endpoints for account:
 local p_named_user = (p_sep * p_users * p_sep * c_identifier)
-local p_acct_users = (p_named_org_prefix * Cendpoint(p_users) * (p_sep + p_eol)) +
-                     (p_sep * Cendpoint(p_users) * (p_sep * c_identifier)^-1 * p_trailing_sep) +
-                      p_named_user *
-                          -- below rule for backwards compatibility with original:
-                          -- /users/BLAH/{0,1}/association_requests
-                          -- which permits: /users/BLAH//association_requests
-                          ( (p_sep * p_maybe_sep * Cendpoint(p_association_requests) * (p_sep + p_eol)) +
-                            (p_sep * Cendpoint(p_org) * p_trailing_sep) )
+
+
+                     -- /organizations/:orgname/association_requests(/), custom endpoint for darklaunch
+local p_acct_users = (p_named_org_prefix * Cendpoint(p_association_requests) * (p_sep + p_eol)) +
+                     -- /organizations/:orgname/users/:username(/), endpoint "associations" for darklaunch
+                     (p_named_org_prefix * Cmatch_and_assign_endpoint(p_users, "associations") * p_sep * c_identifier * (p_sep + p_eol)) +
+                     -- /organizations/:orgname/users(/)
+                     (p_named_org_prefix * Cmatch_and_assign_endpoint(p_users, "associations") * (p_sep + p_eol)) +
+                     -- /users/:username/(/)association_requets(/) OR /users/:username/organiztaions(/)
+                     p_named_user *
+                       -- below rule for backwards compatibility with original:
+                       -- /users/BLAH/{0,1}/association_requests
+                       -- which permits: /users/BLAH//association_requests
+                       ((p_sep * p_maybe_sep * Cendpoint(p_association_requests) * (p_sep + p_eol)) +
+                       -- set /users/:username/organiztaions(/) to endpoint "associations" so we
+                       -- can darklaunch it
+                       (p_sep * Cmatch_and_assign_endpoint(p_org, "associations") * p_trailing_sep) )
+
+
+-- /organizations(/:orgname/)
+local p_org_endpoint = (p_sep * Cendpoint(p_org) * (p_sep * Cg(p_org_identifier, "org_name"))^-1 * p_trailing_sep)
+
 -- account endpoints
 -- note that the acl endpoint is a special case because it supercedes all others
 -- including routes that would otherwise go to erchef.
 local p_acl_endpoint = (p_named_org_prefix * p_all_until_acl * Cendpoint(p_acl) * (p_sep + p_eol)) +
                        (p_named_user * Cendpoint(p_acl) * (p_sep + p_eol))
-local p_acct_direct = Cendpoint(p_users + p_association_requests) * (p_sep + p_eol)
-local p_acct = (p_named_org_prefix * p_acct_direct) +
-               (p_sep * Cendpoint(p_org) * (p_sep * Cg(p_org_identifier, "org_name"))^-1 * p_trailing_sep) +
-               (p_sep * Cendpoint(p_verify_password + p_system_recovery) * p_trailing_sep) +
-               p_acct_users
+
+local p_acct = (p_sep * Cendpoint(p_system_recovery) * p_trailing_sep)
 
 -- Default org endpoints. This is to help with migrating from OSC 11 to Chef Server 12
-local p_default_org_endpoints = p_search + p_nodes + p_cookbooks + p_data + p_roles + p_sandboxes + p_environments + p_clients +p_runs + p_principals + p_groups + p_containers
+local p_default_org_endpoints = p_search + p_nodes + p_cookbooks + p_data + p_roles + p_sandboxes + p_environments + p_clients + p_runs + p_principals + p_groups + p_containers
+
+-- acct_erchef endpoints that are also routed to internal_acct
+local p_internal_acct_erchef_endpoints = p_acct_users + p_org_endpoint
 
 local uri_resolvers = {
   -- Retain ordering to ensure proper eval:
-  -- p_acl_endpont must come firs tbecause a trailing _acl takes precedence
+  -- p_acl_endpont must come first because a trailing _acl takes precedence
   -- over any other identifiers which may be in the url.
-  api = (p_acl_endpoint * c_acct_erchef) +
+  api = ((p_acl_endpoint + p_internal_acct_erchef_endpoints) * c_acct_erchef) +
         (p_erchef * c_erchef) +
         (p_acct * c_acct),
 
@@ -167,8 +190,8 @@ local uri_resolvers = {
                   -- until we either correct or retire webui 1
                   ((p_named_org_prefix * Cendpoint(p_clients) * c_maybe_identifier) * c_erchef) +
                   (p_erchef_users * c_erchef) +
-                  ((p_acct +
-                   (p_named_org + p_sep)) * c_acct),
+                  (p_internal_acct_erchef_endpoints * c_acct_erchef) +
+                  ((p_acct + p_internal_organizations_base) * c_acct),
 
   -- Anything that routes to erchef or reporting is handled here.
   internal_chef = (p_erchef_int * c_erchef)

@@ -2,6 +2,9 @@
 
 ## 12.0.0 (Unreleased)
 
+### oc-chef-pedant 1.0.53
+* Remove /system-recovery endpoint tests
+
 ### postgresql 2014.07.29
 * [OC-11672] Upgrade PostgreSQL to 9.2.9
 
