@@ -31,6 +31,12 @@
           user_name
          }).
 
+-record(organization_state, {
+          organization_data,
+          organization_authz_id,
+          oc_chef_organization :: #oc_chef_organization{}
+         }).
+
 %% Since CS12, we have a default-org mode. Under this mode,
 %% certain endpoints can be routed from
 %% /ENDPOINT -> /organizations/DEFAULT_ORG/ENDPOINT
@@ -52,6 +58,7 @@
         "search",
         "runs",
         "groups",    %% Not technically OSC, but it was decided to route these too
-        "containers"
+        "containers",
+        "organizations"
     ]
 ).
