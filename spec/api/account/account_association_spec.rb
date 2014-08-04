@@ -40,7 +40,7 @@ describe "opscode-account user association", :association do
   # multitenant org setup process creates an org named 'pedant-testorg-PID'. Other variants (those
   # expecting a precreated org) would need a second org for the purpose, but that needs a bunch of
   # other work as well
-  let(:other_org) { "pedant-otherorg-#{Process.pid}" }
+  shared(:other_org) { "pedant-otherorg-#{Process.pid}" }
   before(:all) do
     puts "Creating organization #{other_org} as part of association tests"
     platform.create_org(other_org)
