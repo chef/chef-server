@@ -220,6 +220,8 @@ object_name(cookbook, Req) ->
     extract_from_path(cookbook_name, Req);
 object_name(group, Req) ->
     extract_from_path(group_name, Req);
+object_name(container, Req) ->
+    extract_from_path(container_name, Req);
 object_name(client, Req) ->
     extract_from_path(client_name, Req);
 object_name(user, Req) ->
