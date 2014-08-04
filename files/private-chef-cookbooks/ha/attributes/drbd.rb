@@ -16,7 +16,7 @@ default['private_chef']['drbd']['secondary']['ip'] = node['ipaddress']
 default['private_chef']['drbd']['secondary']['port'] = 7788
 default['private_chef']['drbd']['ipv6_on'] = PrivateChef['use_ipv6']
 if File.exists?("/sbin/drbdadm")
-  default['private_chef']['drbd']['version'] = `drbdadm --version | \
+  default['private_chef']['drbd']['version'] = `/sbin/drbdadm --version | \
     grep DRBDADM_VERSION= | cut -d "=" -f 2`.chomp!
 else
   Chef::Log.debug("No DRBD version available!")
