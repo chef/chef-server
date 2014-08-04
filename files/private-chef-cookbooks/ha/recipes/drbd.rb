@@ -90,7 +90,7 @@ service drbd start
 end
 
 template "#{node['private_chef']['keepalived']['dir']}/bin/ha_backend_storage" do
-  source "ha_backend_storage.erb"
+  source "ha_backend_storage_drbd.erb"
   owner "root"
   group "root"
   mode "0755"
