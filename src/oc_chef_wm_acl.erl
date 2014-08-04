@@ -23,6 +23,11 @@
 -include_lib("chef_wm/include/chef_wm.hrl").
 -include_lib("oc_chef_wm.hrl").
 
+% For getting out the ReqId for stats_hero:
+-record(context, {reqid :: binary(),
+                  otto_connection,
+                  darklaunch = undefined}).
+
 -mixin([{chef_wm_base, [content_types_accepted/2,
                         content_types_provided/2,
                         finish_request/2,
@@ -51,6 +56,8 @@
          to_json/2
         ]).
 
+-define(DEFAULT_HEADERS, []).
+
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
@@ -65,20 +72,29 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'PUT'], Req, State}.
 
-validate_request(Method, Req, #base_state{chef_db_context = DbContext,
-                                          requestor_id = RequestorId,
-                                          organization_guid = OrgId,
-                                          organization_name = OrgName,
-                                          resource_state = #acl_state{type = Type} = 
-                                              AclState} = State) when Method == 'GET';
-                                                                      Method == 'PUT' ->
-    io:format("---val ~p~n", [Method]),
+validate_request('GET', Req, #base_state{chef_db_context = DbContext,
+                                         organization_guid = OrgId,
+                                         organization_name = OrgName,
+                                         resource_state = #acl_state{type = Type} = 
+                                             AclState} = State) ->
+    io:format("---val ~p~n", ['GET']),
+    validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext);
+validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
+                                         organization_guid = OrgId,
+                                         organization_name = OrgName,
+                                         resource_state = #acl_state{type = Type} = 
+                                             AclState} = State) ->
+    io:format("---val ~p~n", ['PUT']),
+    Body = wrq:req_body(Req),
+    {ok, Acl} = parse_binary_json(Body),
+    validate_authz_id(Req, State, AclState#acl_state{acl_data = Acl}, Type, OrgId,
+                      OrgName, DbContext).
+
+validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
     Name = chef_wm_util:object_name(Type, Req),
     io:format("---val got name: ~p~n", [Name]),
     try
         AuthzId = case Type of
-                      group ->
-                          fetch_group_id(DbContext, Name, OrgId, RequestorId);
                       cookbook ->
                           fetch_cookbook_id(DbContext, Name, OrgName);
                       Other ->
@@ -86,21 +102,23 @@ validate_request(Method, Req, #base_state{chef_db_context = DbContext,
                   end,
         io:format("---val got authzId: ~p~n", [AuthzId]),
         AclState1 = AclState#acl_state{authz_id = AuthzId},
-        {Req, State#base_state{resource_state = AclState1}}
+        % TODO: check on this: I'm not sure this is what we really want; IIRC,
+        % access is controlled by the ACLs so that (1) superuser will not
+        % always have access and (2) I think access for ordinary users is not
+        % limited to orgs.  This might work in practice, though, if ReqId is
+        % passed through?
+        {Req, State#base_state{resource_state = AclState1,
+                               superuser_bypasses_checks = true}}
     catch
         throw:{not_found, Name} ->
             Message = chef_wm_util:not_found_message(Type, Name),
             Req1 = chef_wm_util:set_json_body(Req, Message),
-            {{halt, 404}, Req1, State#base_state{log_msg = user_not_found}};
-        throw:{forbidden, Name} ->
-            % TODO: do a proper forbidden error message
-            {{halt, 403}, Req, State}
+            {{halt, 404}, Req1, State#base_state{log_msg = acl_not_found}}
     end.
 
-% TODO: don't like this; we only need the authz id, so grabbing complete objects
-% is wastefull (particularly in the case of groups, where I believe all sorts of
-% extra work is done for the subgroups and actors).  Also, this might be more
-% suited to be moved to oc_chef_wm_util or something
+% TODO: don't like this; we only need the authz id, so grabbing complete
+% objects is wasteful.  Also, this might be more suited to be moved to
+% oc_chef_wm_util or something
 fetch_id(user, DbContext, Name, _OrgId) ->
     case chef_db:fetch(#chef_user{username = Name}, DbContext) of
         not_found ->
@@ -143,6 +161,24 @@ fetch_id(role, DbContext, Name, OrgId) ->
         #chef_node{authz_id = AuthzId} ->
             AuthzId
     end;
+
+fetch_id(group, #context{reqid = ReqId}, Name, OrgId) ->
+    % Yes, this is ugly, but functionally it's identical to the internal logic
+    % of a regular group fetch, minus expanding the group members and such.
+    % And the regular group fetch was breaking for some reason I couldn't
+    % figure out, and at least this avoids that and doesn't spent time on
+    % extra requests
+    case stats_hero:ctime(ReqId, {chef_sql, fetch},
+                          fun() ->
+                                  chef_object:default_fetch(#oc_chef_group{org_id = OrgId,
+                                                                           name = Name},
+                                                            fun chef_sql:select_rows/1)
+                          end) of
+        not_found ->
+            throw({not_found, Name});
+        #oc_chef_group{authz_id = AuthzId} ->
+            AuthzId
+    end;
 fetch_id(environment, DbContext, Name, OrgId) ->
     case chef_db:fetch(#chef_environment{org_id = OrgId, name = Name}, DbContext) of
         not_found ->
@@ -154,32 +190,17 @@ fetch_id(organization, _DbContext, _Name, _OrgId) ->
     % TODO: implement; this is different than all the others
     error(not_implemented).
 
-% TODO: Don't like this, either, bespoke code
-fetch_group_id(DbContext, Name, OrgId, RequestorId) ->
-    % TODO: either pass the requestor, or do this somewhere else
-    % nothing else will work until this does: needed for setting up the tests in pedant
-    % I think this will fail for some cases, pretty sure superuser can be removed
-    % from group ACL, but doing this for the moment until decision made
-    case chef_db:fetch(#oc_chef_group{org_id = OrgId, name = Name,
-                                      for_requestor_id = RequestorId}, DbContext) of
-        not_found ->
-            throw({not_found, Name});
-        forbidden ->
-            throw({forbidden, Name});
-        #oc_chef_group{authz_id = AuthzId} ->
-            AuthzId
-    end.
-
-% TODO: and more bespoke code; cookbooks retrieval is by orgname instead of ID
+% TODO: bespoke code; cookbooks retrieval is by orgname instead of ID
 fetch_cookbook_id(DbContext, Name, OrgName) ->
     % cookbook endpoint pattern is utterly different from the others, generic
-    % doen not handle cookbooks (and, well, versioning)
+    % fetch does not handle cookbooks (and, well, versioning)
     case chef_db:fetch_latest_cookbook_version(DbContext, OrgName, Name) of
         not_found ->
             throw({not_found, Name});
         {cookbook_exists, AuthzId} ->
-            % unclear when this can happen; I assume for wrong version but won't
-            % happen with 'latest' version?   But still checking for it here.
+            % unclear when this can happen; I assume for wrong version but
+            % won't happen with 'latest' version?  But still checking for it
+            % here.
             AuthzId;
         #chef_cookbook_version{authz_id = AuthzId} ->
             AuthzId
@@ -187,21 +208,90 @@ fetch_cookbook_id(DbContext, Name, OrgName) ->
 
 auth_info(Req, State) ->
     io:format("---auth info~n", []),
-    % Don't fail yet; we only want to fetch the information once, so we'll check for
-    % permission when we return/update the data
-    % TODO: do we want to do it that way, or do we want to fetch the data now, check
-    % and save it in the state instead?
+    % Don't fail yet; we only want to fetch the information once, so we'll
+    % check for permission when we return/update the data
+
+    % TODO: do we want to do it that way, or do we want to fetch the data now,
+    % check and save it in the state instead?
     {authorized, Req, State}.
 
-from_json(Req, State) ->
+from_json(Req, #base_state{requestor_id = RequestorId,
+                           resource_state = AclState} = State) ->
     io:format("---from json~n", []),
-    % TODO parse and update
-    {true, Req, State}.
+    case update_from_json(AclState, RequestorId) of
+        forbidden ->
+            {{halt, 403}, Req, State#base_state{log_msg = acl_not_found}};
+        _Other ->
+            {true, Req, State}
+    end.
 
-to_json(Req, State) ->
+to_json(Req, #base_state{requestor_id = RequestorId,
+                         resource_state = AclState} = State) ->
     io:format("---to json~n", []),
-    % TODO return data
-    {chef_json:encode({[]}), Req, State}.
+    case fetch(AclState, RequestorId) of
+        forbidden ->
+            {{halt, 403}, Req, State#base_state{log_msg = acl_not_found}};
+        Ejson ->
+            Json = chef_json:encode(Ejson),
+            {Json, Req, State}
+    end.
+
+parse_binary_json(Body) ->
+    {ok, chef_json:decode_body(Body)}.
+
+acl_path(Type, AuthzId) ->
+    "/" ++ atom_to_list(Type) ++ "s/" ++ binary_to_list(AuthzId) ++ "/acl".
+
+fetch(#acl_state{type = Type, authz_id = AuthzId}, RequestorId) ->
+    Path = acl_path(Type, AuthzId),
+    io:format("---path: ~p~n", [Path]),
+    Result = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], RequestorId),
+    io:format("---acl data: ~p~n", [Result]),
+    case Result of 
+        {ok, Record} ->
+            ids_to_names(Record);
+        {error, forbidden} ->
+            forbidden;
+        Other ->
+            Other
+    end.
+
+convert_group_ids_to_names(Ids) ->
+    % TODO: implement this
+    [].
+
+convert_actor_ids_to_names(Ids) ->
+    % TODO: implement this
+    [].
+
+process_part(Part, Record) ->
+    Members = ej:get({Part}, Record),
+    Actors = ej:get({<<"actors">>}, Members),
+    Groups = ej:get({<<"groups">>}, Members),
+    Members1 = ej:set({<<"actors">>}, Members, convert_actor_ids_to_names(Actors)),
+    Members2 = ej:set({<<"groups">>}, Members1, convert_group_ids_to_names(Groups)),
+    ej:set({Part}, Record, Members2).
+
+ids_to_names(Record) ->
+    Record1 = process_part(<<"create">>, Record),
+    Record2 = process_part(<<"read">>, Record1),
+    Record3 = process_part(<<"write">>, Record2),
+    Record4 = process_part(<<"delete">>, Record3),
+    process_part(<<"grant">>, Record4).
+
+update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
+                 RequestorId) ->
+    Path = acl_path(Type, AuthzId),
+    % This will fail; PUT is only per type of acl, i.e., ".../acl/create" etc.
+    % Also need to convert all of the names to AuthzIds
+    % ...I can imagine that users/clients could easily conflict.
+    Result = oc_chef_authz_http:request(Path, put, ?DEFAULT_HEADERS, Data, RequestorId),
+    case Result of
+        {error, forbidden} ->
+            forbidden;
+        Other ->
+            Other
+    end.
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
