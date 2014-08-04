@@ -235,7 +235,8 @@
 
 -record(acl_state, {
           type,
-          authz_id
+          authz_id,
+          acl_data
          }).
 
 -define(gv(X,L), proplists:get_value(X, L)).
