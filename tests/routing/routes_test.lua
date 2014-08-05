@@ -23,7 +23,7 @@ table.insert(shared_acct_tests, {"/organizations/",                           { 
 table.insert(shared_acct_tests, {"/organizations/testorg",                    { TEST_ORG, "acct", "organizations" }})
 table.insert(shared_acct_tests, {"/organizations/testorg/",                   { TEST_ORG, "acct", "organizations" }})
 
-for _k, val in pairs{ "groups", "users" ,"containers", "association_requests"} do
+for _k, val in pairs{"users", "association_requests"} do
 table.insert(shared_acct_tests, {"/organizations/testorg/" .. val,            { TEST_ORG, "acct", val, nil}})
 table.insert(shared_acct_tests, {"/organizations/testorg/" .. val .. "/",     { TEST_ORG, "acct", val, nil}})
 table.insert(shared_acct_tests, {"/organizations/testorg/" .. val .."/any",   { TEST_ORG, "acct", val, nil}})
@@ -32,28 +32,29 @@ end
 -- note that the actual endpoint is "/_acl" with support for /_acl/create|update|delete|grant - however our original expression specified
 -- our original endpoint accepted "/_acl.*"; we have made it slightly more strict in that it must be
 -- /_acl or /_acl/.*
-table.insert(shared_acct_tests, {"/organizations/testorg/nodes/mynode/_acl",  { TEST_ORG, "acct", "/_acl"}})
-table.insert(shared_acct_tests, {"/organizations/testorg/nodes/mynode/_acl/",  { TEST_ORG, "acct", "/_acl"}})
-table.insert(shared_acct_tests, {"/organizations/testorg/nodes/mynode/_acl/test",  { TEST_ORG, "acct", "/_acl"}})
-table.insert(shared_acct_tests, {"/organizations/testorg/nodes/_acl",         { TEST_ORG, "acct", "/_acl"}})
-table.insert(shared_acct_tests, {"/organizations/testorg/roles/_acl",         { TEST_ORG, "acct", "/_acl"}})
+-- alcs are currently darklaunched so their upstream is "acct_erchef"
+table.insert(shared_acct_tests, {"/organizations/testorg/nodes/mynode/_acl",  { TEST_ORG, "acct_erchef", "acls"}})
+table.insert(shared_acct_tests, {"/organizations/testorg/nodes/mynode/_acl/",  { TEST_ORG, "acct_erchef", "acls"}})
+table.insert(shared_acct_tests, {"/organizations/testorg/nodes/mynode/_acl/test",  { TEST_ORG, "acct_erchef", "acls"}})
+table.insert(shared_acct_tests, {"/organizations/testorg/nodes/_acl",         { TEST_ORG, "acct_erchef", "acls"}})
+table.insert(shared_acct_tests, {"/organizations/testorg/roles/_acl",         { TEST_ORG, "acct_erchef", "acls"}})
 -- This goes to account not because _aclextra is valid, but because EVERYTHING is accepted into account for acct internal
 table.insert(int_acct_tests, {"/organizations/testorg/nodes/mynode/_aclextra",  { TEST_ORG, "acct", nil}})
 -- _aclextra isn't valid, so the correct erchef route should take priority.
 table.insert(api_tests, {"/organizations/testorg/nodes/mynode/_aclextra",  { TEST_ORG, "erchef", "nodes", "mynode"}})
 
 -- accounts via /users
-table.insert(shared_acct_tests, {"/users",                                    {DEF_ORG, "acct", "users"}})
-table.insert(shared_acct_tests, {"/users/",                                   {DEF_ORG, "acct", "users"}})
-table.insert(shared_acct_tests, {"/users/borg",                               {DEF_ORG, "acct", "users", "borg"}})
-table.insert(shared_acct_tests, {"/users/borg/",                              {DEF_ORG, "acct", "users", "borg"}})
+table.insert(shared_chef_tests, {"/users",                                    {DEF_ORG, "erchef", "users"}})
+table.insert(shared_chef_tests, {"/users/",                                   {DEF_ORG, "erchef", "users"}})
+table.insert(shared_chef_tests, {"/users/borg",                               {DEF_ORG, "erchef", "users", "borg"}})
+table.insert(shared_chef_tests, {"/users/borg/",                              {DEF_ORG, "erchef", "users", "borg"}})
 table.insert(shared_acct_tests, {"/users/borg/association_requests",          {DEF_ORG, "acct", "association_requests", "borg"}})
 table.insert(shared_acct_tests, {"/users/borg/association_requests/",         {DEF_ORG, "acct", "association_requests", "borg"}})
 table.insert(shared_acct_tests, {"/users/borg/association_requests/abc",      {DEF_ORG, "acct", "association_requests", "borg"}})
 table.insert(shared_acct_tests, {"/users/borg//association_requests",         {DEF_ORG, "acct", "association_requests", "borg"}})
 table.insert(shared_acct_tests, {"/users/borg//association_requests/",        {DEF_ORG, "acct", "association_requests", "borg"}})
 table.insert(shared_acct_tests, {"/users/borg//association_requests/abc",     {DEF_ORG, "acct", "association_requests", "borg"}})
-table.insert(shared_acct_tests, {"/users/borg/organizations",     {DEF_ORG, "acct", "organizations", "borg"}})
+table.insert(shared_acct_tests, {"/users/borg/organizations",                 {DEF_ORG, "acct", "organizations", "borg"}})
 
 -- Different behavior between int-acct and api here, because int-acct will take anything
 -- while api requires a valid destiniation. This differs slightly from original behavior, in
@@ -64,10 +65,8 @@ table.insert(int_acct_tests, {"/users/borg//association_requests0abc",     {nil,
 table.insert(int_acct_tests, {"/users/borg/association_requests0abc",      {nil, "acct"}})
 
 -- other accounts
-table.insert(shared_acct_tests, {"/verify_password",                          {DEF_ORG, "acct", "verify_password"}})
-table.insert(shared_acct_tests, {"/authenticate_user",                        {DEF_ORG, "acct", "authenticate_user"}})
-table.insert(api_tests, {"/authenticate_user/",                       {nil}})
-table.insert(api_tests, {"/verify_password/",                         {nil}})
+table.insert(shared_chef_tests, {"/authenticate_user",  {DEF_ORG, "erchef", "authenticate_user"}})
+table.insert(shared_chef_tests, {"/authenticate_user/", {DEF_ORG, "erchef", "authenticate_user"}})
 
 -- These are requests that - for now - account internal is expected to route
 -- correctly to erchef, because webui1 hasn't learned not to send requests for
@@ -80,18 +79,27 @@ for _k, val in pairs{ "clients" } do
 table.insert(int_acct_tests, {"/organizations/testorg/" .. val,           {TEST_ORG, "erchef", val}})
 table.insert(int_acct_tests, {"/organizations/testorg/" .. val .. "/",    {TEST_ORG, "erchef", val}})
 table.insert(int_acct_tests, {"/organizations/testorg/" .. val .. "/abc", {TEST_ORG, "erchef", val, "abc"}})
-table.insert(int_acct_tests, {"/organizations/testorg/" .. val .. "/_acl", {TEST_ORG, "acct", "/_acl"}})
+table.insert(int_acct_tests, {"/organizations/testorg/" .. val .. "/_acl", {TEST_ORG, "acct_erchef", "acls"}})
 end
-
--- Let's just make sure
--- Remember, acct takes everything in the end:
-table.insert(int_acct_tests, {"/authenticate_user/",                       {DEF_ORG, "acct"}})
-table.insert(int_acct_tests, {"/verify_password/",                         {DEF_ORG, "acct"}})
 
 -- darklaunch account or erchef
 -- (none at this time, in Migration Phase 3 we'll have some)
 
 -- erchef
+for _k, val in pairs{ "groups", "containers"} do
+table.insert(shared_chef_tests, {"/organizations/testorg/" .. val,            { TEST_ORG, "erchef", val, nil}})
+table.insert(shared_chef_tests, {"/organizations/testorg/" .. val .. "/",     { TEST_ORG, "erchef", val, nil}})
+table.insert(shared_chef_tests, {"/organizations/testorg/" .. val .."/any",   { TEST_ORG, "erchef", val, "any"}})
+end
+
+table.insert(shared_chef_tests, {"/license", {DEF_ORG, "erchef", "license"}})
+
+table.insert(shared_chef_tests, {"/organizations/testorg/principals",                  {TEST_ORG, "erchef", "principals"}})
+table.insert(shared_chef_tests, {"/organizations/testorg/principals/",                 {TEST_ORG, "erchef", "principals"}})
+table.insert(shared_chef_tests, {"/organizations/testorg/principals/asd",              {TEST_ORG, "erchef", "principals", "asd"}})
+table.insert(shared_chef_tests, {"/organizations/testorg/principels",                  {nil}})
+table.insert(shared_chef_tests, {"/organizations/testorg/nodes/mynode/_identifiers",   {TEST_ORG, "erchef", "nodes", "mynode"}})
+
 table.insert(shared_chef_tests, {"/organizations/testorg/nodes",                      {TEST_ORG, "erchef", "nodes"}})
 table.insert(shared_chef_tests, {"/organizations/testorg/nodes/",                     {TEST_ORG, "erchef", "nodes"}})
 table.insert(shared_chef_tests, {"/organizations/testorg/environments/envname/nodes",     {TEST_ORG, "erchef", "environments", "envname"}})
@@ -112,26 +120,26 @@ table.insert(shared_chef_tests, {"/organizations/testorg/" .. val .. "/b@d!dent"
 end
 
 -- Default Org
-table.insert(shared_chef_tests, {"/nodes",                      {TEST_ORG, "erchef", "nodes"}})
-table.insert(shared_chef_tests, {"/nodes/",                     {TEST_ORG, "erchef", "nodes"}})
-table.insert(shared_chef_tests, {"/environments/envname/nodes",     {TEST_ORG, "erchef", "environments", "envname"}})
-table.insert(shared_chef_tests, {"/environments/envname/nodes/",     {TEST_ORG, "erchef", "environments", "envname"}})
-table.insert(shared_chef_tests, {"/environments/envname/node",      {TEST_ORG, "erchef", "environments", "envname"}})
-table.insert(shared_chef_tests, {"/environments/envname/nodesbad",  {TEST_ORG, "erchef", "environments", "envname"}})
-table.insert(shared_chef_tests, {"/search",                     {TEST_ORG, "erchef", "search"}})
-table.insert(shared_chef_tests, {"/search/",                    {TEST_ORG, "erchef", "search"}})
-table.insert(shared_chef_tests, {"/search/blah",                {TEST_ORG, "erchef", "search"}})
-table.insert(shared_chef_tests, {"/search?x=1",                 {TEST_ORG, "erchef", "search"}})
+-- table.insert(shared_chef_tests, {"/nodes",                      {TEST_ORG, "erchef", "nodes"}})
+-- table.insert(shared_chef_tests, {"/nodes/",                     {TEST_ORG, "erchef", "nodes"}})
+-- table.insert(shared_chef_tests, {"/environments/envname/nodes",     {TEST_ORG, "erchef", "environments", "envname"}})
+-- table.insert(shared_chef_tests, {"/environments/envname/nodes/",     {TEST_ORG, "erchef", "environments", "envname"}})
+-- table.insert(shared_chef_tests, {"/environments/envname/node",      {TEST_ORG, "erchef", "environments", "envname"}})
+-- table.insert(shared_chef_tests, {"/environments/envname/nodesbad",  {TEST_ORG, "erchef", "environments", "envname"}})
+-- table.insert(shared_chef_tests, {"/search",                     {TEST_ORG, "erchef", "search"}})
+-- table.insert(shared_chef_tests, {"/search/",                    {TEST_ORG, "erchef", "search"}})
+-- table.insert(shared_chef_tests, {"/search/blah",                {TEST_ORG, "erchef", "search"}})
+-- table.insert(shared_chef_tests, {"/search?x=1",                 {TEST_ORG, "erchef", "search"}})
 
-for _k, val in pairs{ "cookbooks", "data" ,"roles", "sandboxes", "environments", "clients", "nodes" } do
-table.insert(shared_chef_tests, {"/" .. val,           {TEST_ORG, "erchef", val}})
-table.insert(shared_chef_tests, {"/" .. val .. "/",    {TEST_ORG, "erchef", val}})
-table.insert(shared_chef_tests, {"/" .. val .. "/abc", {TEST_ORG, "erchef", val, "abc"}})
-table.insert(shared_chef_tests, {"/" .. val .. "/abc/subcomponent", {TEST_ORG, "erchef", val, "abc"}})
-table.insert(shared_chef_tests, {"/" .. val .. "/b@d!dent", {TEST_ORG, "erchef", val, "b@d!dent"}})
-end
+-- for _k, val in pairs{ "cookbooks", "data" ,"roles", "sandboxes", "environments", "clients", "nodes" } do
+-- table.insert(shared_chef_tests, {"/" .. val,           {TEST_ORG, "erchef", val}})
+-- table.insert(shared_chef_tests, {"/" .. val .. "/",    {TEST_ORG, "erchef", val}})
+-- table.insert(shared_chef_tests, {"/" .. val .. "/abc", {TEST_ORG, "erchef", val, "abc"}})
+-- table.insert(shared_chef_tests, {"/" .. val .. "/abc/subcomponent", {TEST_ORG, "erchef", val, "abc"}})
+-- table.insert(shared_chef_tests, {"/" .. val .. "/b@d!dent", {TEST_ORG, "erchef", val, "b@d!dent"}})
+-- end
 
-table.insert(api_tests, {"/organizations/testorg/nodes/_acl",        {TEST_ORG, "acct", "/_acl", nil}})
+table.insert(api_tests, {"/organizations/testorg/nodes/_acl",        {TEST_ORG, "acct_erchef", "acls", nil}})
 
 -- Used to return 'erchef' with 'nodes' and 'abc' fo rconsistency with original
 -- lb behavior, but fixed it to behave correctly.
@@ -158,15 +166,7 @@ table.insert(api_tests, {"/organizations/TestOrg/",                   {nil}})
 table.insert(api_tests, {"/organizations/TestOrg/abc",                {nil}})
 table.insert(api_tests, {"/bad/path1",                                {nil}})
 table.insert(api_tests, {"/organizations/BadOrg/",                    {nil}})
-table.insert(api_tests, {"/authenticate_user/",                       {nil}})
 table.insert(api_tests, {"/authenticate_user/bad",                    {nil}})
-table.insert(api_tests, {"/verify_password/",                         {nil}})
-table.insert(api_tests, {"/verify_password/bad",                      {nil}})
-
--- These are valid but ONLY available via internal chef
-table.insert(api_tests, {"/organizations/testorg/principals",                  {nil}})
-table.insert(api_tests, {"/organizations/testorg/principals/",                 {nil}})
-table.insert(api_tests, {"/organizations/testorg/principals/asd",              {nil}})
 
 -- NOTE: This SHOULD fail, however, the rule (in both original and current routing) is that
 -- nodes/+ANYTHING goes to erchef - which means we're exposing _identifiers externally today
@@ -181,20 +181,12 @@ end
 -- A couple of sanity checks to ensure we're not going to accept things that shoudl go to acct
 -- in chef-internal.  These same uris are valid for acct and external.
 table.insert(int_chef_tests, {"/organizations/testorg",             {nil}})
-table.insert(int_chef_tests, {"/users/testuser",                    {nil}})
 
 -- Note here that we're specifically testing this against 'chef-int' - the  internal
 -- chef LB doesn't know about the _acl endpoint and if it receives a rqeuest
 -- containing one it will route it as if it weren't present.
 table.insert(int_chef_tests, {"/organizations/testorg/nodes/_acl",                 {TEST_ORG, "erchef", "nodes", "_acl"}})
 table.insert(int_chef_tests, {"/organizations/testorg/nodes_acl",                  {nil}})
-
--- Internal-only endpoints
-table.insert(int_chef_tests, {"/organizations/testorg/principals",                  {TEST_ORG, "erchef", "principals"}})
-table.insert(int_chef_tests, {"/organizations/testorg/principals/",                 {TEST_ORG, "erchef", "principals"}})
-table.insert(int_chef_tests, {"/organizations/testorg/principals/asd",              {TEST_ORG, "erchef", "principals"}})
-table.insert(int_chef_tests, {"/organizations/testorg/principels",                  {nil}})
-table.insert(int_chef_tests, {"/organizations/testorg/nodes/mynode/_identifiers",   {TEST_ORG, "erchef", "nodes", "mynode"}})
 
 -------------------------
 -- Internal Account Tests
@@ -250,16 +242,16 @@ function test_uri_resolver(mode)
     local route = routes.resolve_uri(mode, uri)
     errors = ""
     if not (expected_org == route.org_name) then
-      errors = errors .. "org: " .. s_v(expected_org) .. "/" .. s_v(route.org_name) .. " "
+      errors = errors .. "org: " .. s_v(expected_org) .. "-" .. s_v(route.org_name) .. " "
     end
     if not (expected_route == route.route_id) then
-      errors = errors .. "route: " .. s_v(expected_route) .. "/" .. s_v(route.route_id) .. " "
+      errors = errors .. "route: " .. s_v(expected_route) .. "-" .. s_v(route.route_id) .. " "
     end
     if not (expected_endpoint == route.endpoint) then
-      errors = errors .. "endpoint: " .. s_v(expected_endpoint) .. "/" .. s_v(route.endpoint) .. " "
+      errors = errors .. "endpoint: " .. s_v(expected_endpoint) .. "-" .. s_v(route.endpoint) .. " "
     end
     if not (expected_name == route.object_name) then
-      errors = errors .. "object name: " .. s_v(expected_name) .. "/" .. s_v(route.object_name) .. " "
+      errors = errors .. "object name: " .. s_v(expected_name) .. "-" .. s_v(route.object_name) .. " "
     end
     if not (errors == "") then
       failcount = failcount + 1

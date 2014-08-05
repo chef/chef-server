@@ -58,9 +58,6 @@ table.insert(upstream_tests, { route_id = "acct",
                                org_config = {couchdb_test = 0},
                                expected = acct_upstream })
 
--- Make sure reporting gives us back something
-table.insert(upstream_tests, { route_id = "reports", org_config = {}, expected = reporting_upstream})
-
 table.insert(upstream_tests, { route_id = "badvalue", org_config = {}, expected = nil})
 
 function test_resolve_upstream()
