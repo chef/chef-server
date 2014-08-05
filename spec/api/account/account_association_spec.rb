@@ -495,7 +495,6 @@ describe "opscode-account user association", :association do
 
         before :each do
           platform.associate_user_with_org(org, test_admin_user)
-          platform.add_user_to_group(org, test_admin_user, "users")
           platform.add_user_to_group(org, test_admin_user, "admins")
           invite_id = invite_user(org, test_user.name, test_admin_user)
           @user_invite_url = make_user_assoc_url_id(test_user.name, invite_id)
@@ -507,8 +506,8 @@ describe "opscode-account user association", :association do
           delete(api_url("users/#{test_user.name}"), platform.admin_user)
           delete(api_url("users/#{test_admin_user.name}"), platform.admin_user)
 
-          delete("/users/#{test_admin_user.name}", platform.superuser)
-          delete("/users/#{test_user.name}", platform.superuser)
+          delete("#{platform.server}/users/#{test_admin_user.name}", platform.superuser)
+          delete("#{platform.server}/users/#{test_user.name}", platform.superuser)
         end
 
         it "from the org, invites issued by that admin cannot be accepted" do
