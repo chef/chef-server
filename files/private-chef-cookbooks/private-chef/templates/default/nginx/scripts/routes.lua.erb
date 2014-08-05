@@ -103,14 +103,11 @@ local p_erchef_direct = (Cendpoint(p_erchef_endpoint) * ((p_sep * c_identifier) 
                         Cendpoint(p_search)
 
 -- users endpoint is currently split between erchef and account.
--- /users, /users/USERNAME/ -> erchef
--- /verify_password, /authenticate_user, and /system_recover go toaccount, soon to be erchef.
+-- /users, /users/USERNAME/, /authenticate_user, and /system_recover -> erchef
 -- /users/USERNAME/organizations, /users/USERNAME/association_requests go to account
 local p_erchef_users = (p_sep * Cendpoint(p_users) * p_trailing_sep) +
                        (p_sep * Cendpoint(p_users) * (p_sep * c_identifier)^-1 * p_trailing_sep) +
                        (p_sep * Cendpoint(p_auth_user) * p_trailing_sep)
--- TODO future: +
---        (p_sep * Cendpoint(p_verify_password + p_auth_user + p_system_recovery) * p_trailing_sep)
 
 local p_license_route = (p_sep * Cendpoint(p_license) * p_trailing_sep)
 
@@ -223,4 +220,3 @@ function routes.resolve_uri(mode, uri)
 
   return route
 end
-
