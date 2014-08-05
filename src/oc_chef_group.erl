@@ -47,6 +47,16 @@
          fetch/2
         ]).
 
+% TODO: move these somewhere generic; also used by oc_chef_wm_acl
+-export([
+         find_clients_names/2,
+         find_client_authz_ids/3,
+         find_groups_names/2,
+         find_group_authz_ids/3,
+         find_users_names/2,
+         find_user_authz_ids/2
+        ]).
+
 name(#oc_chef_group{name = Name}) ->
     Name.
 
