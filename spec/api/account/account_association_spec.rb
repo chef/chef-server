@@ -533,6 +533,48 @@ describe "opscode-account user association", :association do
         end
       end
 
+      context "OC-11708 - when last updator of users group is dissociated" do
+        let(:org) { platform.test_org.name }
+        let(:admin_username) { "test-admin-#{Time.now.to_i}-#{Process.pid}" }
+        let(:test_admin_user) { platform.create_user(admin_username) }
+        let(:test_username) { "test-user-#{Time.now.to_i}-#{Process.pid}" }
+        let(:test_user) { platform.create_user(test_username) }
+
+        before(:each) do
+          # add a test admin user to the org
+          platform.associate_user_with_org(org, test_admin_user)
+          platform.add_user_to_group(org, test_admin_user, "admins")
+
+          # add and remove user from users group as the admin to ensure that the
+          # last_updated_by field of the group record belongs to the admin user
+          platform.add_user_to_group(org, test_admin_user, "users", test_admin_user)
+          platform.remove_user_from_group(org, test_admin_user, "users", test_admin_user)
+
+          # dissociate test-admin from the org, ensuring that the user no longer
+          # has rights on the users group that they just updated
+          # also, delete the user for safe measure and remove them from the admins
+          # group
+          platform.remove_user_from_group(org, test_admin_user, "admins", platform.superuser)
+          delete(api_url("users/#{test_admin_user.name}"), platform.admin_user)
+          delete("#{platform.server}/users/#{test_admin_user.name}", platform.superuser)
+
+          # invite the user to the org, any admin / superuser is fine
+          @invite_id = invite_user(org, test_user.name, platform.superuser)
+        end
+
+        after(:each) do
+          # cleanup the users that we've created in the org
+          delete(api_url("users/#{test_user.name}"), platform.admin_user)
+          delete("#{platform.server}/users/#{test_user.name}", platform.superuser)
+        end
+
+        it "can accept the invite" do
+          # the accept invite method validates the status and content of the
+          # response
+          accept_invite(test_user, org, @invite_id)
+        end
+      end
+
       #
       # Sometimes invites only fail when the user is already in an org. This can happen if we we
       # can't reverse-map global-admins in authz. Adding another global admin to the user read ace
@@ -555,6 +597,7 @@ describe "opscode-account user association", :association do
           response.should look_like({ :status=> 200, :body => {"username"=>bad_user} })
 
           response = delete(api_url("users/#{bad_user}"), platform.admin_user)
+
           response.should look_like({ :status => 200 } )
         end
 
@@ -783,9 +826,9 @@ describe "opscode-account user association", :association do
 
       context "user acting on self" do
         context "when actor is also an org admin" do
-          before do
-            platform.add_user_to_group(org, test_user, "admins")
-          end
+          before { platform.add_user_to_group(org, test_user, "admins") }
+          after  { platform.remove_user_from_group(org, test_user, "admins") }
+
           it "cannot delete" do
             pending("new constraint in erchef- ruby returns 200", :if => ruby?) do
               delete(request_url, test_user).should look_like({
@@ -847,6 +890,45 @@ describe "opscode-account user association", :association do
           get(api_url("users"), platform.admin_user).should look_like({
               :status => 200,
               :body_exact => default_users_body + [ {"user" => {"username" => username}} ]})
+        end
+      end
+
+      context "OC-11708 - when last updator of users group is dissociated" do
+        let(:admin_username) { "test-admin-#{Time.now.to_i}-#{Process.pid}" }
+        let(:test_admin_user) { platform.create_user(admin_username) }
+
+        before(:each) do
+          platform.associate_user_with_org(org, test_admin_user)
+          platform.add_user_to_group(org, test_admin_user, "admins")
+
+          # add and remove user from users group as the admin to ensure that the
+          # last_updated_by field of the group record belongs to the admin user
+          platform.add_user_to_group(org, test_admin_user, "users", test_admin_user)
+          platform.remove_user_from_group(org, test_admin_user, "users", test_admin_user)
+
+          # dissociate test-admin from the org, ensuring that the user no longer
+          # has rights on the users group that they just updated
+          # also, delete the user for safe measure and remove them from the admins
+          # group
+          platform.remove_user_from_group(org, test_admin_user, "admins", platform.superuser)
+          delete(api_url("users/#{test_admin_user.name}"), platform.admin_user)
+          delete("#{platform.server}/users/#{test_admin_user.name}", platform.superuser)
+        end
+
+        context "as an admin user" do
+          it "can delete" do
+            delete(request_url, platform.admin_user).should look_like({
+                                                              :status => 200
+                                                            })
+          end
+        end
+
+        context "as a user acting on self" do
+          it "can delete" do
+            delete(request_url, test_user).should look_like({
+                                                              :status => 200
+                                                            })
+          end
         end
       end
     end # context DELETE /organizations/<org>/users/<name>
