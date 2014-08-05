@@ -622,14 +622,19 @@ count_nodes(#context{reqid = ReqId} = _Ctx) ->
     end.
 
 -spec is_user_in_org(#context{}, binary(), binary()) -> boolean() | {error, _}.
-is_user_in_org(#context{reqid = ReqId, otto_connection = S}=Ctx, User, OrgName) ->
-    case fetch(#chef_user{username = User}, Ctx) of
-        #chef_user{id = UserId} ->
-            ?SH_TIME(ReqId, chef_otto, is_user_in_org, (S, UserId, OrgName));
+is_user_in_org(#context{reqid = ReqId}=Ctx, User, OrgName) ->
+    case fetch_org_id(Ctx, OrgName) of
         not_found ->
             false;
-        {error, Why} ->
-            {error, Why}
+        OrgId ->
+            case ?SH_TIME(ReqId, chef_sql, is_user_in_org, (User, OrgId)) of
+                {ok, 0} ->
+                    false;
+                {ok, Number} ->
+                    true;
+                {error, _} = Error ->
+                    Error
+            end
     end.
 
 connect() ->

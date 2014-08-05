@@ -95,6 +95,9 @@
          %% for orgs
          fetch_org_metadata/1,
 
+         %% user-org ops
+         is_user_in_org_by_orgid/2,
+
          sql_now/0,
          ping/0,
          statements/0,
@@ -157,6 +160,14 @@ fetch_org_metadata(OrgName) ->
         {error, Error} ->
             {error, Error}
     end.
+
+%%
+%% user-org membership ops
+%% see also: oc_chef_authz/oc_chef_user_org_association
+%%           oc_chef_authz/oc_chef_db
+%%
+is_user_in_org_by_orgid(UserName, OrgId) ->
+    sqerl:select(is_user_in_org, [UserName, OrgId], first_as_scalar, [count]).
 
 %%
 %% chef user ops
@@ -575,7 +586,7 @@ fetch_latest_cookbook_version(OrgId, CookbookName) ->
 -spec create_cookbook_version(#chef_cookbook_version{}) ->
     {ok, non_neg_integer()} | {error, term()}.
 create_cookbook_version(CookbookVersion) ->
-    
+
     case create_cookbook_if_needed(CookbookVersion) of
         ok ->
             create_object(CookbookVersion);
@@ -724,7 +735,7 @@ fetch(Record) ->
 -spec select_rows(
         {QueryName, BindParameters } |
         {QueryName, BindParameters, ReturnTransform} |
-        {QueryName, BindParameters, ReturnFieldNames}         
+        {QueryName, BindParameters, ReturnFieldNames}
      ) ->
                          chef_object:select_return()  when
       QueryName ::atom(),
