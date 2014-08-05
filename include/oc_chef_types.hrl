@@ -41,8 +41,9 @@
          }).
 
 -record(oc_chef_org_user_association, {
-          id,
+          org_id,
           user_id,
+          user_name, % Not part of the table but retrieved via join
           last_updated_by,
           created_at,
           updated_at

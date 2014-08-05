@@ -75,6 +75,11 @@ find_query() ->
 list_query() ->
     erlang:error(not_implemented).
 
+list_query(by_org) ->
+    list_org_user_invites;
+list_query(by_user) ->
+    list_user_org_invites.
+
 bulk_get_query() ->
     erlang:error(not_implemented).
 
@@ -87,8 +92,10 @@ fields_for_fetch(#oc_chef_org_user_invite{id = Id}) ->
 record_fields() ->
     record_info(fields, oc_chef_org_user_invite).
 
-list(#oc_chef_org_user_invite{id = Id}, CallbackFun) ->
-    CallbackFun({list_query(), [Id], [name]}).
+list(#oc_chef_org_user_invite{org_id = Id, user_id = undefined}, CallbackFun) ->
+    CallbackFun({list_query(by_org), [Id], [id]});
+list(#oc_chef_org_user_invite{user_id = Id, org_id = undefined}, CallbackFun) ->
+    CallbackFun({list_query(by_user), [Id], [id]}).
 
 new_record(OrgId, _AuthzId, Data) ->
     Id = chef_object_base:make_org_prefix_id(OrgId),
