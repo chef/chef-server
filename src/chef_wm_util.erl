@@ -138,6 +138,8 @@ not_found_message(sandbox, SandboxId) ->
                                              <<"'.">>]));
 not_found_message(environment, Name) ->
     error_message_envelope(iolist_to_binary(["Cannot load environment ", Name]));
+not_found_message(organization, Name) ->
+    error_message_envelope(iolist_to_binary(["Cannot load organiztion ", Name]));
 not_found_message(cookbook, Name) when is_binary(Name) ->
     error_message_envelope(iolist_to_binary(["Cannot find a cookbook named ", Name]));
 not_found_message(cookbook_version, {Name, Version}) when is_binary(Version) -> %% NOT a parsed {Major, Minor, Patch} tuple!!
