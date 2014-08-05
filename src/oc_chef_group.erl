@@ -289,7 +289,7 @@ fetch(#oc_chef_group{for_requestor_id = RequestorId} = Record, CallbackFun) ->
                                                        auth_side_groups = GroupAuthzIds},
                     Result
             end;
-        not_foud ->
+        not_found ->
             not_found;
         Other ->
             Other
