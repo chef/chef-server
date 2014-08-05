@@ -46,6 +46,9 @@ table.insert(shared_acct_tests, {"/organizations/testorg/nodes/mynode/_acl/test"
 table.insert(shared_acct_tests, {"/organizations/testorg/nodes/_acl",         { TEST_ORG, "acct_erchef", "acls"}})
 table.insert(shared_acct_tests, {"/organizations/testorg/roles/_acl",         { TEST_ORG, "acct_erchef", "acls"}})
 
+-- until orgs are in SQL / Erchef, we'll route the orgs acl to account
+table.insert(shared_acct_tests, {"/organizations/testorg/organizations/_acl", { TEST_ORG, "acct", "acls"}})
+
 -- Verify that _aclextra is not being routed to _acl; it should simply not be routed as it is not valid.
 table.insert(int_acct_tests, {"/organizations/testorg/nodes/mynode/_aclextra",  { DEF_ORG, nil, nil}})
 -- _aclextra isn't valid, so the correct erchef route should take priority.
