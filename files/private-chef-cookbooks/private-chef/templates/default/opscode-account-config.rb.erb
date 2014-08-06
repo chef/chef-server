@@ -8,6 +8,8 @@ Chef::Config[:chef_server_host_uri]  = 'http://<%= @helper.vip_for_uri('lb_inter
 Chef::Config[:web_ui_proxy_user] = '<%= @proxy_user %>'
 Chef::Config[:web_ui_private_key]    = '/etc/opscode/webui_priv.pem'
 
+Chef::Config[:superuser_authz_id] = '<%= node['private_chef']['oc_bifrost']['superuser_id'] %>'
+
 Merb::Config.use do |c|
   # Sets up a custom session id key which is used for the session persistence
   # cookie name.  If not specified, defaults to '_session_id'.
