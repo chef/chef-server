@@ -18,10 +18,10 @@
 -module(oc_chef_action_tests).
 
 -include_lib("chef_wm/include/chef_wm.hrl").
--include_lib("eunit/include/eunit.hrl").
 
 msg() ->
-    {[{<<"message_version">>, <<"0.1.0">>},
+    {[{<<"message_type">>, <<"action">>},
+      {<<"message_version">>, <<"0.1.0">>},
       {<<"organization_name">>, <<"cmwest">>},
       {<<"service_hostname">>, <<"hostname.example.com">>},
       {<<"recorded_at">>, <<"2011-07-03T13:21:50Z">>},
@@ -36,20 +36,21 @@ msg() ->
      ]}.
 
 msg_with_payload() ->
-  {[{<<"message_version">>, <<"0.1.0">>},
-      {<<"organization_name">>, <<"cmwest">>},
-      {<<"service_hostname">>, <<"hostname.example.com">>},
-      {<<"recorded_at">>, <<"2011-07-03T13:21:50Z">>},
-      {<<"remote_hostname">>, <<"127.0.0.1">>},
-      {<<"request_id">>, <<"Xfh5mCQvjRgWDdlevrdyGt8M4lecXmN3gpGXrKKiUYqKdeD3">>},
-      {<<"requestor_name">>, <<"rob">>},
-      {<<"requestor_type">>, <<"user">>},
-      {<<"user_agent">>, <<"knife 11.10.0">>},
-      {<<"task">>, <<"create">>},
-      {<<"entity_type">>, <<"node">>},
-      {<<"entity_name">>, <<"db">>},
-      {<<"data">>, {[{<<"name">>,<<"db">>}]}}
-     ]}.
+  {[{<<"message_type">>, <<"action">>},
+    {<<"message_version">>, <<"0.1.0">>},
+    {<<"organization_name">>, <<"cmwest">>},
+    {<<"service_hostname">>, <<"hostname.example.com">>},
+    {<<"recorded_at">>, <<"2011-07-03T13:21:50Z">>},
+    {<<"remote_hostname">>, <<"127.0.0.1">>},
+    {<<"request_id">>, <<"Xfh5mCQvjRgWDdlevrdyGt8M4lecXmN3gpGXrKKiUYqKdeD3">>},
+    {<<"requestor_name">>, <<"rob">>},
+    {<<"requestor_type">>, <<"user">>},
+    {<<"user_agent">>, <<"knife 11.10.0">>},
+    {<<"task">>, <<"create">>},
+    {<<"entity_type">>, <<"node">>},
+    {<<"entity_name">>, <<"db">>},
+    {<<"data">>, {[{<<"name">>,<<"db">>}]}}
+   ]}.
 
 oc_chef_action_test_() ->
     MockedModules = [bunnyc],
@@ -264,7 +265,7 @@ routing_key_test() ->
 
 hostname_test_() ->
   HostFQDN = <<"hostname.example.com">>,
-  ok = application:set_env(oc_chef_action, actions_fqdn, HostFQDN),
+  ok = application:set_env(oc_chef_wm, actions_fqdn, HostFQDN),
   [{"gets fqdn correctly",
     fun()-> Ret = oc_chef_action:hostname(),
           ?assertEqual(<<"hostname.example.com">>, Ret)
@@ -297,7 +298,7 @@ end_to_end_test_() ->
                         reqid = <<"Xfh5mCQvjRgWDdlevrdyGt8M4lecXmN3gpGXrKKiUYqKdeD3">>,
                         organization_name = <<"cmwest">>,
                         resource_state=#node_state{node_data = {[{<<"name">>,<<"db">>}]} }},
-    ok = application:set_env(oc_chef_action, actions_fqdn, HostFQDN),
+    ok = application:set_env(oc_chef_wm, actions_fqdn, HostFQDN),
     {foreach,
      fun() -> test_util:setup(MockedModules),
               meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
@@ -324,6 +325,7 @@ end_to_end_test_() ->
                        ok
                    end,
                meck:expect(bunnyc, publish, AssertPublishDataCorrect),
+               application:set_env(oc_chef_wm, enable_actions_body, false),
                Ret = oc_chef_action:log_action(req, State),
                ?assertEqual(ok, Ret)
        end
@@ -337,7 +339,7 @@ end_to_end_test_() ->
                         ok
                     end,
                 meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-                application:set_env(oc_chef_action, enable_actions, true),
+                application:set_env(oc_chef_wm, enable_actions_body, true),
                 Ret = oc_chef_action:log_action(req, State),
                 ?assertEqual(ok, Ret)
         end

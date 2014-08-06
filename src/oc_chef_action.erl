@@ -80,9 +80,9 @@ log_action(_Req, _State) ->
 -spec  log_action0(Req :: wm_req(),
                    State :: #base_state{}) -> ok.
 log_action0(Req, #base_state{resource_state = ResourceState} = State) ->
-    Actions = envy:get(oc_chef_action, enable_actions, false, boolean),
+    ShouldSendBody = envy:get(oc_chef_wm, enable_actions_body, true, boolean),
     {FullActionPayload, EntityType, EntitySpecificPayload} = extract_entity_info(Req, ResourceState),
-    Payload = case Actions of
+    Payload = case ShouldSendBody of
                   true -> FullActionPayload;
                   false -> []
               end,
