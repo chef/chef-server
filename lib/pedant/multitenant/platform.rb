@@ -254,10 +254,14 @@ module Pedant
       end
     end
 
-    def add_user_to_group(orgname, user, groupname)
+    def add_user_to_group(orgname, user, groupname, actor=nil)
+      # since we can't set the default param to an attr_accessor, this will have
+      # to suffice
+      actor ||= superuser
+
       # Get the group information so we can fill in the POST with mostly existing information
       group_url = "#{@server}/organizations/#{orgname}/groups/#{groupname}"
-      r = get(group_url, superuser)
+      r = get(group_url, actor)
       group = parse(r)
 
       # Insert the user into the given group
@@ -268,7 +272,29 @@ module Pedant
         payload = {:groupname=> groupname, :actors=>{"users"=> group["actors"], "groups" => group["groups"]}}
         payload[:actors]['users'].unshift(user.name)
 
-        put(group_url, superuser, :payload => payload)
+        put(group_url, actor, :payload => payload)
+      end
+    end
+
+    def remove_user_from_group(orgname, user, groupname, actor=nil)
+      # since we can't set the default param to an attr_accessor, this will have
+      # to suffice
+      actor ||= superuser
+
+      # Get the group information so we can fill in the POST with mostly existing information
+      group_url = "#{@server}/organizations/#{orgname}/groups/#{groupname}"
+      r = get(group_url, actor)
+      group = parse(r)
+
+      # Remove the user from the given group
+      unless group["actors"].include?(user.name)
+        puts "User #{user.name} does not exist in group #{orgname}/#{groupname}."
+      else
+        puts "Removing user #{user.name} from group #{orgname}/#{groupname} ..."
+        payload = {:groupname=> groupname, :actors=>{"users"=> group["actors"], "groups" => group["groups"]}}
+        payload[:actors]['users'].delete(user.name)
+
+        put(group_url, actor, :payload => payload)
       end
     end
 
