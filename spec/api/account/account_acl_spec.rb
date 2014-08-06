@@ -2,6 +2,18 @@ require 'pedant/rspec/common'
 
 describe "ACL API", :acl do
 
+  def self.ruby?
+    Pedant::Config.ruby_acl_endpoint?
+  end
+
+  let(:unsupported_method_status) {
+    if (ruby?)
+      404
+    else
+      405
+    end
+  }
+
   # (temporarily?) deprecating /users/*/_acl endpoint due to its broken state and lack of usefulness
   pending "/users/<name>/_acl endpoint" do
     let(:username) { platform.admin_user.name }
@@ -383,10 +395,9 @@ describe "ACL API", :acl do
 
     context "PUT /organization/_acl" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        it "returns 405" do
           put(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => unsupported_method_status
             })
         end
       end
@@ -394,10 +405,9 @@ describe "ACL API", :acl do
 
     context "POST /organization/_acl" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        it "returns 405" do
           post(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => unsupported_method_status
             })
         end
       end
@@ -405,10 +415,9 @@ describe "ACL API", :acl do
 
     context "DELETE /organization/_acl" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        it "returns 405" do
           delete(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => unsupported_method_status
             })
         end
       end
@@ -696,10 +705,9 @@ describe "ACL API", :acl do
 
       context "GET /organization/_acl/#{permission}" do
         context "admin user" do
-          # A 405 here would be fine (better, even)
-          it "returns 404" do
+          it "returns 405" do
             get(request_url, platform.admin_user).should look_like({
-                :status => 404
+                :status => unsupported_method_status
               })
           end
         end
@@ -707,10 +715,9 @@ describe "ACL API", :acl do
 
       context "POST /organization/_acl/#{permission}" do
         context "admin user" do
-          # A 405 here would be fine (better, even)
-          it "returns 404" do
+          it "returns 405" do
             post(request_url, platform.admin_user).should look_like({
-                :status => 404
+                :status => unsupported_method_status
               })
           end
         end
@@ -718,10 +725,9 @@ describe "ACL API", :acl do
 
       context "DELETE /organization/_acl/#{permission}" do
         context "admin user" do
-          # A 405 here would be fine (better, even)
-          it "returns 404" do
+          it "returns 405" do
             delete(request_url, platform.admin_user).should look_like({
-                :status => 404
+                :status => unsupported_method_status
               })
           end
         end
@@ -1007,10 +1013,9 @@ describe "ACL API", :acl do
 
         context "PUT /#{type}/<name>/_acl" do
           context "admin user" do
-            # A 405 here would be fine (better, even)
-            it "returns 404" do
+            it "returns 405" do
               put(request_url, platform.admin_user).should look_like({
-                  :status => 404
+                  :status => unsupported_method_status
                 })
             end
           end
@@ -1018,10 +1023,9 @@ describe "ACL API", :acl do
 
         context "POST /#{type}/<name>/_acl" do
           context "admin user" do
-            # A 405 here would be fine (better, even)
-            it "returns 404" do
+            it "returns 405" do
               post(request_url, platform.admin_user).should look_like({
-                  :status => 404
+                  :status => unsupported_method_status
                 })
             end
           end
@@ -1029,10 +1033,9 @@ describe "ACL API", :acl do
 
         context "DELETE /#{type}/<name>/_acl" do
           context "admin user" do
-            # A 405 here would be fine (better, even)
-            it "returns 404" do
+            it "returns 405" do
               delete(request_url, platform.admin_user).should look_like({
-                  :status => 404
+                  :status => unsupported_method_status
                 })
             end
           end
@@ -1053,10 +1056,9 @@ describe "ACL API", :acl do
 
             context "GET /#{type}/<name>/_acl/#{permission}" do
               context "admin user" do
-                # A 405 here would be fine (better, even)
-                it "returns 404" do
+                it "returns 405" do
                   get(permission_request_url, platform.admin_user).should look_like({
-                      :status => 404
+                      :status => unsupported_method_status
                     })
                 end
               end
@@ -1320,10 +1322,9 @@ describe "ACL API", :acl do
 
             context "POST /#{type}/<name>/_acl/#{permission}" do
               context "admin user" do
-                # A 405 here would be fine (better, even)
-                it "returns 404" do
+                it "returns 405" do
                   post(permission_request_url, platform.admin_user).should look_like({
-                      :status => 404
+                      :status => unsupported_method_status
                     })
                 end
               end
@@ -1331,10 +1332,9 @@ describe "ACL API", :acl do
 
             context "DELETE /#{type}/<name>/_acl/#{permission}" do
               context "admin user" do
-                # A 405 here would be fine (better, even)
-                it "returns 404" do
+                it "returns 405" do
                   delete(permission_request_url, platform.admin_user).should look_like({
-                      :status => 404
+                      :status => unsupported_method_status
                     })
                 end
               end
