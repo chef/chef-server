@@ -286,9 +286,9 @@ module Pedant
       r = get(group_url, actor)
       group = parse(r)
 
-      # Insert the user into the given group
+      # Remove the user from the given group
       unless group["actors"].include?(user.name)
-        puts "User #{user.name} is does not exits in group #{orgname}/#{groupname}."
+        puts "User #{user.name} does not exist in group #{orgname}/#{groupname}."
       else
         puts "Removing user #{user.name} from group #{orgname}/#{groupname} ..."
         payload = {:groupname=> groupname, :actors=>{"users"=> group["actors"], "groups" => group["groups"]}}
