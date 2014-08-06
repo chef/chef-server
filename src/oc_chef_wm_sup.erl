@@ -7,6 +7,8 @@
 
 -behaviour(supervisor).
 
+-include_lib("amqp_client/include/amqp_client.hrl").
+
 %% External exports
 -export([start_link/0, upgrade/0]).
 
@@ -44,6 +46,7 @@ upgrade() ->
 init([]) ->
     ok = load_ibrowse_config(),
     ok = enable_org_cache(),
+
     Action = envy:get(oc_chef_wm, enable_actions, false, boolean),
 
     Ip = envy:get(oc_chef_wm, ip, string),
@@ -81,9 +84,8 @@ init([]) ->
                                                               Web])}}.
 
 maybe_start_action(true, Workers) ->
-    [{oc_chef_action_sup,
-      {oc_chef_action_sup, start_link, []},
-      permanent, 5000, supervisor, [oc_chef_action_sup]} | Workers];
+    lager:info("Starting oc_chef_action", []),
+    [amqp_child_spec() | Workers];
 maybe_start_action(false, Workers) ->
     lager:info("Not starting Actionlog supervisor since actionlog is disabled."),
     Workers.
@@ -217,3 +219,19 @@ default_resource_init() ->
             Defaults
     end.
 
+amqp_child_spec() ->
+    Host = envy:get(oc_chef_wm, actions_host, string),
+    Port = envy:get(oc_chef_wm, actions_port, non_neg_integer),
+    User = envy:get(oc_chef_wm, actions_user, binary),
+    Password = envy:get(oc_chef_wm, actions_password, binary),
+    VHost = envy:get(oc_chef_wm, actions_vhost, binary),
+    ExchgName = envy:get(oc_chef_wm, actions_exchange, binary),
+    Exchange = {#'exchange.declare'{exchange=ExchgName,
+                                    type= <<"topic">>,
+                                    durable=true
+                                   }
+               },
+    Network = {network, Host, Port, {User, Password}, VHost},
+    lager:info("Chef Actions: Connecting to RabbitMQ at ~s:~p~s (exchange: ~p)", [Host, Port, VHost, ExchgName]),
+    {oc_chef_action_queue, {bunnyc, start_link, [oc_chef_action_queue, Network, Exchange, []]},
+      permanent, 5000, worker, dynamic}.
