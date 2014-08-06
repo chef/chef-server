@@ -13,6 +13,16 @@ drbd_dir = node['private_chef']['drbd']['dir']
 drbd_etc_dir =  File.join(node['private_chef']['drbd']['dir'], "etc")
 drbd_data_dir = node['private_chef']['drbd']['data_dir']
 
+drbd_role = "primary"
+PrivateChef['servers'].each do |k, v|
+  next unless v['role'] == "backend"
+  node.set['private_chef']['drbd'][drbd_role]["fqdn"] = k
+  node.set['private_chef']['drbd'][drbd_role]["ip"] = \
+    v['cluster_ipaddress'] || v['ipaddress']
+  break if drbd_role == "secondary"
+  drbd_role = "secondary"
+end
+
 [ drbd_dir, drbd_etc_dir, drbd_data_dir ].each do |dir|
   directory dir do
     recursive true
@@ -77,4 +87,12 @@ service drbd start
     end
   end
   not_if { File.exists?(File.join(drbd_dir, "drbd_ready")) }
+end
+
+template "#{node['private_chef']['keepalived']['dir']}/bin/ha_backend_storage" do
+  source "ha_backend_storage_drbd.erb"
+  owner "root"
+  group "root"
+  mode "0755"
+  variables(node['private_chef']['drbd'].to_hash)
 end
