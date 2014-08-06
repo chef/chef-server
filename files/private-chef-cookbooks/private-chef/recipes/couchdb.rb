@@ -63,8 +63,8 @@ end
 
 # Add it to cron
 cron_email = node['private_chef']['notification_email']
-cron_cmd = "#{compact_script_command} 2>&1 > #{couchdb_log_dir}/compact-`date \"+\\%Y\\%m\\%d\\%H\\%M\\%S\"`.log"
-cron_cmd_major_offenders = "#{compact_script_command} --max-dbs=50 2>&1 > #{couchdb_log_dir}/compact-`date \"+\\%Y\\%m\\%d\\%H\\%M\\%S\"`.log"
+cron_cmd = "#{compact_script_command} 2>&1 >> #{couchdb_log_dir}/compact.log"
+cron_cmd_major_offenders = "#{compact_script_command} --max-dbs=50 2>&1 >> #{couchdb_log_dir}/compact.log"
 
 template "/etc/cron.d/couchdb_compact" do
   source "compact-cron-entry.erb"
@@ -107,5 +107,7 @@ template "/etc/opscode/logrotate.d/couchdb" do
   owner "root"
   group "root"
   mode "0644"
-  variables(node['private_chef']['couchdb'].to_hash)
+  variables(node['private_chef']['couchdb'].to_hash.merge(
+    'copytruncate' => true
+  ))
 end
