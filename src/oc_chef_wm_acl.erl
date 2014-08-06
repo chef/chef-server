@@ -52,8 +52,8 @@
 
 -export([
          allowed_methods/2,
-         from_json/2,
-         to_json/2
+         to_json/2,
+         validate_authz_id/7
         ]).
 
 -define(DEFAULT_HEADERS, []).
@@ -70,7 +70,7 @@ request_type() ->
     "acl".
 
 allowed_methods(Req, State) ->
-    {['GET', 'PUT'], Req, State}.
+    {['GET'], Req, State}.
 
 validate_request('GET', Req, #base_state{chef_db_context = DbContext,
                                          organization_guid = OrgId,
@@ -78,17 +78,29 @@ validate_request('GET', Req, #base_state{chef_db_context = DbContext,
                                          resource_state = #acl_state{type = Type} = 
                                              AclState} = State) ->
     io:format("---val ~p~n", ['GET']),
-    validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext);
-validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
-                                         organization_guid = OrgId,
-                                         organization_name = OrgName,
-                                         resource_state = #acl_state{type = Type} = 
-                                             AclState} = State) ->
-    io:format("---val ~p~n", ['PUT']),
-    Body = wrq:req_body(Req),
-    {ok, Acl} = parse_binary_json(Body),
-    validate_authz_id(Req, State, AclState#acl_state{acl_data = Acl}, Type, OrgId,
-                      OrgName, DbContext).
+    validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext).
+
+auth_info(Req, State) ->
+    io:format("---auth info~n", []),
+    % Don't fail yet; we only want to fetch the information once, so we'll
+    % check for permission when we return/update the data
+
+    % TODO: do we want to do it that way, or do we want to fetch the data now,
+    % check and save it in the state instead?
+    {authorized, Req, State}.
+
+to_json(Req, #base_state{requestor_id = RequestorId,
+                         resource_state = AclState} = State) ->
+    io:format("---to json~n", []),
+    case fetch(AclState, RequestorId) of
+        forbidden ->
+            {{halt, 403}, Req, State#base_state{log_msg = acl_not_found}};
+        Ejson ->
+            Json = chef_json:encode(Ejson),
+            {Json, Req, State}
+    end.
+
+%% Also used by oc_chef_wm_acl_permission
 
 validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
     Name = case Type of
@@ -120,6 +132,8 @@ validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
             Req1 = chef_wm_util:set_json_body(Req, Message),
             {{halt, 404}, Req1, State#base_state{log_msg = acl_not_found}}
     end.
+
+%% Internal functions
 
 % TODO: don't like this; we only need the authz id, so grabbing complete
 % objects is wasteful.  Also, this might be more suited to be moved to
@@ -212,29 +226,6 @@ fetch_cookbook_id(DbContext, Name, OrgName) ->
             AuthzId
     end.
 
-auth_info(Req, State) ->
-    io:format("---auth info~n", []),
-    % Don't fail yet; we only want to fetch the information once, so we'll
-    % check for permission when we return/update the data
-
-    % TODO: do we want to do it that way, or do we want to fetch the data now,
-    % check and save it in the state instead?
-    {authorized, Req, State}.
-
-to_json(Req, #base_state{requestor_id = RequestorId,
-                         resource_state = AclState} = State) ->
-    io:format("---to json~n", []),
-    case fetch(AclState, RequestorId) of
-        forbidden ->
-            {{halt, 403}, Req, State#base_state{log_msg = acl_not_found}};
-        Ejson ->
-            Json = chef_json:encode(Ejson),
-            {Json, Req, State}
-    end.
-
-parse_binary_json(Body) ->
-    {ok, chef_json:decode_body(Body)}.
-
 % Translate types; in ACLs, everything is an object, actor, group, or container
 acl_path(node, AuthzId) ->
     acl_path(object, AuthzId);
@@ -298,63 +289,6 @@ ids_to_names(Record) ->
     Record3 = process_part(<<"update">>, Record2),
     Record4 = process_part(<<"delete">>, Record3),
     process_part(<<"grant">>, Record4).
-
-from_json(Req, #base_state{requestor_id = RequestorId,
-                           organization_guid = OrgId,
-                           resource_state = AclState} = State) ->
-    io:format("---from json~n", []),
-    case update_from_json(AclState, OrgId, RequestorId) of
-        forbidden ->
-            {{halt, 403}, Req, State#base_state{log_msg = acl_not_found}};
-        _Other ->
-            {true, Req, State}
-    end.
-
-update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data}, OrgId,
-                 RequestorId) ->
-    % This is probably dangerous (in that one type of permission could be
-    % updated, and a future type could fail); however, I'm not sure what can
-    % be really done about it.  It theoretically shouldn't happen in practice,
-    % but you know what they say about theory and practice
-    try
-        update_part(<<"create">>, Data, Type, AuthzId, OrgId, RequestorId),
-        update_part(<<"read">>, Data, Type, AuthzId, OrgId, RequestorId),
-        update_part(<<"delete">>, Data, Type, AuthzId, OrgId, RequestorId),
-        update_part(<<"update">>, Data, Type, AuthzId, OrgId, RequestorId),
-        update_part(<<"grant">>, Data, Type, AuthzId, OrgId, RequestorId)
-    catch
-        throw:forbidden ->
-            forbidden
-    end.
-
-convert_group_names_to_ids(GroupNames, OrgId) ->
-    oc_chef_group:find_group_authz_ids(GroupNames, OrgId, fun chef_sql:select_rows/1).
-
-convert_actor_names_to_ids(Names, OrgId) ->
-    ClientIds = oc_chef_group:find_client_authz_ids(Names, OrgId,
-                                                    fun chef_sql:select_rows/1),
-    UserIds = oc_chef_group:find_user_authz_ids(Names, fun chef_sql:select_rows/1),
-    ClientIds ++ UserIds.
-
-names_to_ids(Ace, OrgId) ->
-    ActorNames = ej:get({<<"actors">>}, Ace),
-    GroupNames = ej:get({<<"groups">>}, Ace),
-    ActorIds = convert_actor_names_to_ids(ActorNames, OrgId),
-    GroupIds = convert_group_names_to_ids(GroupNames, OrgId),
-    Ace1 = ej:set({<<"actors">>}, Ace, ActorIds),
-    ej:set({<<"groups">>}, Ace1, GroupIds).
-
-update_part(Part, AclRecord, Type, AuthzId, OrgId, RequestorId) ->
-    io:format("---update part: ~p~n", [Part]),
-    Slice = names_to_ids(ej:get({Part}, AclRecord), OrgId),
-    Path = acl_path(Type, AuthzId) ++ "/" ++ Part,
-    Result = oc_chef_authz_http:request(Path, put, ?DEFAULT_HEADERS, Slice, RequestorId),
-    case Result of
-        {error, forbidden} ->
-            throw(forbidden);
-        Other ->
-            Other
-    end.
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
