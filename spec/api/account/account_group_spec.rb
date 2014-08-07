@@ -517,6 +517,24 @@ describe "opscode-account groups", :groups do
             })
         end
       end
+
+      context "OC-11702 - when a containing a missing group" do
+        let(:missing_group) { "missing-group" }
+
+        before(:each) do
+          post(api_url("groups"), platform.admin_user,
+                :payload => {"id" => missing_group}).should look_like({:status => 201})
+          platform.add_group_to_group(org, missing_group, test_group, platform.admin_user)
+          delete(api_url("groups/#{missing_group}"), platform.admin_user)
+        end
+
+        it "can get group" do
+          get(request_url, platform.admin_user).should look_like({
+              :status => 200,
+              :body_exact => default_group_body
+            })
+        end
+      end
     end # context GET /groups/<name>
 
     context "DELETE /groups/<name>" do
