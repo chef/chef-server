@@ -292,6 +292,8 @@ module Pedant
     end
 
     def alter_group(orgname, groupname, action, object_type, object_name, actor=nil)
+      # since we can't set the default param to an attr_accessor, this will have
+      # to suffice
       actor ||= superuser
 
       type_map = { :user => :users, :group => :groups }
