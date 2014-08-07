@@ -33,6 +33,12 @@
 ### oc-id 0.3.3
 * Add Chef Identity Service (oc-id)
 
+### opscode-account rel-1.51.0
+* [OC-11702] - fails to expand ACLs and groups when they contain
+  groups that no longer exist
+* [OC-11708] - fixes user association bug that relied on permissions
+  of the last updater of the users group
+
 ## 11.1.8 (2014-06-26)
 
 ### oc_authz_migrator 0.0.2
