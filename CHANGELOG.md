@@ -51,6 +51,12 @@
 ### logrotate
 * Fixed build configuration that was causing logrotate to not be installed
 
+### opscode-account rel-1.51.0
+* [OC-11702] - fails to expand ACLs and groups when they contain
+  groups that no longer exist
+* [OC-11708] - fixes user association bug that relied on permissions
+  of the last updater of the users group
+
 ### opscode-webui
 * Removed. WebUI usage should now come via the Manage extension.
 
