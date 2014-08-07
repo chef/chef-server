@@ -972,6 +972,37 @@ describe "ACL API", :acl do
                 })
             end
           end
+
+          context "OC-1702 - when containing a missing group" do
+            let(:missing_group)  { "missing-group" }
+            let(:updated_read)   { {"actors" => actors, "groups" => [missing_group] + read_groups} }
+
+            before(:each) do
+              # create the groups
+              post(api_url("groups"), platform.admin_user,
+                    :payload => {"id" => missing_group}).should look_like({:status => 201})
+
+              # add the group to the read ace
+              payload = { "read" => updated_read }
+              put("#{request_url}/read",
+                  platform.admin_user,
+                  :payload => { "read" => updated_read }).should look_like(:status => 200)
+
+              # delete the group
+              delete(api_url("groups/#{missing_group}"), platform.admin_user)
+            end
+
+            after(:each) do
+              delete(api_url("groups/#{missing_group}"), platform.admin_user)
+            end
+
+            it "should return the acl" do
+              get(request_url, platform.admin_user).should look_like({
+                :status => 200,
+                :body_exact => acl_body
+              })
+            end
+          end
         end # context GET /<type>/<name>/_acl
 
         context "PUT /#{type}/<name>/_acl" do
