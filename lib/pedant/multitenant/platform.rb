@@ -271,48 +271,51 @@ module Pedant
       end
     end
 
+    # the following set of methods could benefit from some
+    # metaprogramming magic, but I think a refactor of the
+    # user calls to accept just a username instead of a user
+    # object would be in order.
     def add_user_to_group(orgname, user, groupname, actor=nil)
-      # since we can't set the default param to an attr_accessor, this will have
-      # to suffice
-      actor ||= superuser
-
-      # Get the group information so we can fill in the POST with mostly existing information
-      group_url = "#{@server}/organizations/#{orgname}/groups/#{groupname}"
-      r = get(group_url, actor)
-      group = parse(r)
-
-      # Insert the user into the given group
-      if group["actors"].include?(user.name)
-        puts "User #{user.name} is already in group #{orgname}/#{groupname}."
-      else
-        puts "Adding user #{user.name} to group #{orgname}/#{groupname} ..."
-        payload = {:groupname=> groupname, :actors=>{"users"=> group["actors"], "groups" => group["groups"]}}
-        payload[:actors]['users'].unshift(user.name)
-
-        put(group_url, actor, :payload => payload)
-      end
+      alter_group(orgname, groupname, :add, :user, user.name, actor)
     end
 
     def remove_user_from_group(orgname, user, groupname, actor=nil)
-      # since we can't set the default param to an attr_accessor, this will have
-      # to suffice
+      alter_group(orgname, groupname, :remove, :user, user.name, actor)
+    end
+
+    def add_group_to_group(orgname, object_name, groupname, actor=nil)
+      alter_group(orgname, groupname, :add, :group, object_name, actor)
+    end
+
+    def remove_group_from_group(orgname, object_name, groupname, actor=nil)
+      alter_group(orgname, groupname, :remove, :group, object_name, actor)
+    end
+
+    def alter_group(orgname, groupname, action, object_type, object_name, actor=nil)
       actor ||= superuser
 
-      # Get the group information so we can fill in the POST with mostly existing information
+      type_map = { :user => :users, :group => :groups }
+
       group_url = "#{@server}/organizations/#{orgname}/groups/#{groupname}"
       r = get(group_url, actor)
       group = parse(r)
 
-      # Remove the user from the given group
-      unless group["actors"].include?(user.name)
-        puts "User #{user.name} does not exist in group #{orgname}/#{groupname}."
-      else
-        puts "Removing user #{user.name} from group #{orgname}/#{groupname} ..."
-        payload = {:groupname=> groupname, :actors=>{"users"=> group["actors"], "groups" => group["groups"]}}
-        payload[:actors]['users'].delete(user.name)
+      payload = {
+        :groupname => groupname,
+        :actors => {
+          :users => group["actors"],
+          :groups => group["groups"]
+        }
+      }
 
-        put(group_url, actor, :payload => payload)
+      case action
+      when :add
+        payload[:actors][type_map[object_type]].unshift(object_name)
+      when :remove
+        payload[:actors][type_map[object_type]].delete(object_name)
       end
+
+      put(group_url, actor, :payload => payload)
     end
 
     # As though +user+ had created +org+ themselves
