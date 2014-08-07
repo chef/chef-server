@@ -1,4 +1,10 @@
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
+%% @author Mark Anderson <mark@opscode.com>
+%% @author Marc Paradise <marc@getchef.com>
+%% @doc authorization - Interface to the opscode authorization servize
+%%
+%% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -21,6 +27,7 @@
 
 -export([container_record_to_authz_id/2,
          fetch_container/3,
+         fetch_global_group_authz_id/3,
          fetch_group_authz_id/3,
          make_context/2,
          statements/1
@@ -119,9 +126,9 @@ statements(pgsql) ->
      {find_group_authz_id_in_names,
       <<"SELECT authz_id FROM groups WHERE org_id = $1 AND name = ANY($2)">>}
     ].
-                                                %
-                                                % Opscode Chef_views.
-                                                %
+%
+% Opscode Chef_views.
+%
 -define(mixlib_auth_client_design,
         "Mixlib::Authorization::Models::Client-fec21b157b76e08b86e92ef7cbc2be81").
 
@@ -187,6 +194,12 @@ fetch_container(#oc_chef_authz_context{otto_connection=Server,
             fetch_container_sql(Ctx, OrgId, ContainerName)
     end.
 
+
+fetch_global_group_authz_id(#oc_chef_authz_context{otto_connection=Server, darklaunch = _Darklaunch} = _C,
+                   OrgName, GroupName) ->
+    RealGroupName = lists:flatten(io_lib:format("~s_~s", [OrgName, GroupName])),
+    fetch_group_authz_id_couchdb(Server, undefined, RealGroupName).
+
 fetch_container_couchdb(Server, OrgId, ContainerName) ->
     case fetch_by_name(Server, OrgId, ContainerName, authz_container) of
         {ok, Container} ->
@@ -213,7 +226,7 @@ fetch_container_couchdb(Server, OrgId, ContainerName) ->
 %% to retrieve the clients group, so that we may add newly-created
 %% clients to it (we could also start deleting clients from it, too).
 -spec fetch_group_authz_id(Context :: oc_chef_authz_context(),
-                           OrgId :: binary(),
+                           OrgId :: binary() | undefined,
                            GroupName :: binary()) ->  object_id() |
                                                       {not_found, authz_group}.
 fetch_group_authz_id(#oc_chef_authz_context{otto_connection=Server,
@@ -293,12 +306,6 @@ fetch_auth_join_id(Server, Id, Direction) when is_binary(Id) ->
 %%     {?mixlib_auth_client_design, "by_clientname"};
 design_and_view_for_type(authz_container) ->
     {?mixlib_auth_container_design, "by_containername"};
-%% design_and_view_for_type(authz_cookbook) ->
-%%     {?mixlib_auth_container_design, "by_display_name"};
-%% design_and_view_for_type(authz_data_bag) ->
-%%     {?mixlib_auth_data_bag_design, "by_name"};
-%% design_and_view_for_type(authz_environment) ->
-%%     {?mixlib_auth_environment_design, "all_id"};
 design_and_view_for_type(authz_group) ->
     {?mixlib_auth_group_design, "by_groupname"}.
 %% design_and_view_for_type(authz_node) ->
