@@ -92,17 +92,17 @@ fields_for_fetch(#oc_chef_org_user_invite{id = Id}) ->
 record_fields() ->
     record_info(fields, oc_chef_org_user_invite).
 
-list(#oc_chef_org_user_invite{org_id = Id, user_id = undefined}, CallbackFun) ->
-    CallbackFun({list_query(by_org), [Id], [id]});
-list(#oc_chef_org_user_invite{user_id = Id, org_id = undefined}, CallbackFun) ->
-    CallbackFun({list_query(by_user), [Id], [id]}).
+list(#oc_chef_org_user_invite{org_id = OrgId, user_id = undefined}, CallbackFun) ->
+    CallbackFun({list_query(by_org), [OrgId], [id]});
+list(#oc_chef_org_user_invite{user_id = UserId, org_id = undefined}, CallbackFun) ->
+    CallbackFun({list_query(by_user), [UserId], [id]}).
 
-new_record(OrgId, _AuthzId, Data) ->
-    Id = chef_object_base:make_org_prefix_id(OrgId),
-    UserId = ej:get({<<"user">>}, Data),
-    #oc_chef_org_user_invite{id = Id,
-                             org_id = OrgId,
-                             user_id = UserId}.
+new_record(orgid, _authzid, data) ->
+    id = chef_object_base:make_org_prefix_id(orgid),
+    userid = ej:get({<<"user">>}, data),
+    #oc_chef_org_user_invite{id = id,
+                             org_id = orgid,
+                             user_id = userid}.
 
 name(#oc_chef_org_user_invite{}) ->
     erlang:error(not_implemented).

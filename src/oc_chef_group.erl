@@ -17,7 +17,13 @@
          flatten/1,
          assemble_group_ejson/2,
          delete/2,
-         handle_error_for_update_ops/2
+         handle_error_for_update_ops/2,
+         create_record/3,
+         add_user_member/2,
+         remove_user_member/2,
+         add_group_member/2,
+         remove_group_member/2
+
         ]).
 
 %% chef_object behaviour callbacks
@@ -58,8 +64,8 @@
         ]).
 
 name(#oc_chef_group{name = Name}) ->
-    Name.
 
+    Name.
 id(#oc_chef_group{id = Id}) ->
     Id.
 
@@ -71,6 +77,18 @@ authz_id(#oc_chef_group{authz_id = AuthzId}) ->
 
 org_id(#oc_chef_group{org_id = OrgId}) ->
     OrgId.
+
+add_user_member(#oc_chef_group{users = Users} = Group, NewUser) ->
+    Group#oc_chef_group{users = [NewUser] ++ Users}.
+
+remove_user_member(#oc_chef_group{users = Users} = Group, UserToDelete) ->
+    Group#oc_chef_group{users =  lists:delete(UserToDelete, Users)}.
+
+add_group_member(#oc_chef_group{groups = Groups} = Group, NewGroup) ->
+    Group#oc_chef_group{groups = [NewGroup] ++ Groups}.
+
+remove_group_member(#oc_chef_group{groups = Groups} = Group, GroupToDelete) ->
+    Group#oc_chef_group{groups = lists:delete(GroupToDelete, Groups)}.
 
 create_query() ->
     insert_group.
@@ -98,6 +116,12 @@ new_record(OrgId, AuthzId, GroupData) ->
                        authz_id = AuthzId,
                        org_id = OrgId,
                        name = Name}.
+
+create_record(OrgId, Name, RequestingActorId) ->
+    Group = #oc_chef_group{id =chef_object_base:make_org_prefix_id(OrgId, Name),
+                           org_id = OrgId,
+                           name = Name},
+    set_created(Group, RequestingActorId).
 
 set_created(#oc_chef_group{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
@@ -195,8 +219,8 @@ build_paths(GroupAuthzId) ->
 remove_deleted_authz_ids({ActorsPath, GroupsPath}, ActorsToRemove, GroupsToRemove, AuthzId) ->
     [delete_authz_ids(ActorsPath, ActorsToRemove, AuthzId),
      delete_authz_ids(GroupsPath, GroupsToRemove, AuthzId)].
-    
-    
+
+
 add_new_authz_ids({ActorsPath, GroupsPath}, UserSideActorsAuthzIds, GroupAuthzIds, AuthzId) ->
     [put_authz_ids(ActorsPath, UserSideActorsAuthzIds, AuthzId),
      put_authz_ids(GroupsPath, GroupAuthzIds, AuthzId)].
