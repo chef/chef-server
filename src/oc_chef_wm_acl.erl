@@ -53,7 +53,9 @@
 -export([
          allowed_methods/2,
          to_json/2,
-         validate_authz_id/7
+         % Also used by oc_chef_wm_acl_permission:
+         validate_authz_id/7,
+         check_acl_auth/2
         ]).
 
 -define(DEFAULT_HEADERS, []).
@@ -82,17 +84,11 @@ validate_request('GET', Req, #base_state{chef_db_context = DbContext,
 
 auth_info(Req, State) ->
     io:format("---auth info~n", []),
-    % Don't fail yet; we only want to fetch the information once, so we'll
-    % check for permission when we return/update the data
+    check_acl_auth(Req, State).
 
-    % TODO: do we want to do it that way, or do we want to fetch the data now,
-    % check and save it in the state instead?
-    {authorized, Req, State}.
-
-to_json(Req, #base_state{requestor_id = RequestorId,
-                         resource_state = AclState} = State) ->
+to_json(Req, #base_state{resource_state = AclState} = State) ->
     io:format("---to json~n", []),
-    case fetch(AclState, RequestorId) of
+    case fetch(AclState) of
         forbidden ->
             {{halt, 403}, Req, State#base_state{log_msg = acl_not_found}};
         Ejson ->
@@ -103,12 +99,7 @@ to_json(Req, #base_state{requestor_id = RequestorId,
 %% Also used by oc_chef_wm_acl_permission
 
 validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
-    Name = case Type of
-               organization ->
-                   <<"organizations">>;
-               NotOrganization ->
-                   chef_wm_util:object_name(NotOrganization, Req)
-           end,
+    Name = chef_wm_util:object_name(Type, Req),
     io:format("---val got name: ~p~n", [Name]),
     try
         AuthzId = case Type of
@@ -138,10 +129,10 @@ validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
 % TODO: don't like this; we only need the authz id, so grabbing complete
 % objects is wasteful.  Also, this might be more suited to be moved to
 % oc_chef_wm_util or something
-fetch_id(organization, DbContext, Name, _OrgId) ->
-    % This is actually a request for the default org container
-    % TODO: (Or is it?  This is failing still)
-    fetch_id(container, DbContext, Name, <<"00000000000000000000000000000000">>);
+fetch_id(organization, _DbContext, _Name, _OrgId) ->
+    % TODO: This needs to be implemented; orgs not in SQL yet
+    % Will require additional changes elsewhere to work
+    throw(not_implemented);
 fetch_id(user, DbContext, Name, _OrgId) ->
     case chef_db:fetch(#chef_user{username = Name}, DbContext) of
         not_found ->
@@ -178,13 +169,12 @@ fetch_id(node, DbContext, Name, OrgId) ->
             AuthzId
     end;
 fetch_id(role, DbContext, Name, OrgId) ->
-    case chef_db:fetch(#chef_node{org_id = OrgId, name = Name}, DbContext) of
+    case chef_db:fetch(#chef_role{org_id = OrgId, name = Name}, DbContext) of
         not_found ->
             throw({not_found, Name});
-        #chef_node{authz_id = AuthzId} ->
+        #chef_role{authz_id = AuthzId} ->
             AuthzId
     end;
-
 fetch_id(group, #context{reqid = ReqId}, Name, OrgId) ->
     % Yes, this is ugly, but functionally it's identical to the internal logic
     % of a regular group fetch, minus expanding the group members and such.
@@ -246,10 +236,12 @@ acl_path(organization, AuthzId) ->
 acl_path(Type, AuthzId) ->
     "/" ++ atom_to_list(Type) ++ "s/" ++ binary_to_list(AuthzId) ++ "/acl".
 
-fetch(#acl_state{type = Type, authz_id = AuthzId}, RequestorId) ->
+fetch(#acl_state{type = Type, authz_id = AuthzId}) ->
     Path = acl_path(Type, AuthzId),
     io:format("---path: ~p~n", [Path]),
-    Result = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], RequestorId),
+    SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
+    io:format("---superuser: ~p~n", [SuperuserId]),
+    Result = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], SuperuserId),
     io:format("---acl data: ~p~n", [Result]),
     case Result of 
         {ok, Record} ->
@@ -259,6 +251,28 @@ fetch(#acl_state{type = Type, authz_id = AuthzId}, RequestorId) ->
         Other ->
             Other
     end.
+
+acl_auth_path(Type, AuthzId, RequestorId) ->
+    acl_path(Type, AuthzId) ++ "/grant/actors/" ++ binary_to_list(RequestorId).
+
+check_acl_auth(Req, #base_state{requestor_id = RequestorId,
+                                resource_state = #acl_state{type = Type,
+                                                            authz_id = AuthzId}} = State) ->
+    Path = acl_auth_path(Type, AuthzId, RequestorId),
+    io:format("---acl auth path: ~p~n", [Path]),
+    SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
+    io:format("---superuser: ~p~n", [SuperuserId]),
+    Check = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], SuperuserId),
+    io:format("---check: ~p~n", [Check]),
+    case Check of
+        ok ->
+            {authorized, Req, State};
+        {error, not_found} ->
+            {{halt, 403}, Req, State};
+        Other ->
+            Other
+    end.
+
 
 convert_group_ids_to_names(AuthzIds) ->
     oc_chef_group:find_groups_names(AuthzIds, fun chef_sql:select_rows/1).

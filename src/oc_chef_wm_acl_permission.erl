@@ -89,21 +89,28 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
 
 auth_info(Req, State) ->
     io:format("---auth info~n", []),
-    % Don't fail yet; we only want to fetch the information once, so we'll
-    % check for permission when we return/update the data
+    oc_chef_wm_acl:check_acl_auth(Req, State).
 
-    % TODO: do we want to do it that way, or do we want to fetch the data now,
-    % check and save it in the state instead?
-    {authorized, Req, State}.
-
-from_json(Req, #base_state{requestor_id = RequestorId,
-                           organization_guid = OrgId,
+from_json(Req, #base_state{organization_guid = OrgId,
                            resource_state = AclState} = State) ->
     io:format("---from json~n", []),
     Part = wrq:path_info(acl_permission, Req),
-    case update_from_json(AclState, Part, OrgId, RequestorId) of
+    case update_from_json(AclState, Part, OrgId) of
         forbidden ->
-            {{halt, 403}, Req, State#base_state{log_msg = acl_not_found}};
+            {{halt, 400}, Req, State};
+        bad_actor ->
+            % We don't actually know which one, so can't use a more specific
+            % message; we only get back a list of Ids that has a different
+            % length than the list of names we started with
+            Msg = <<"Invalid/missing actor in request body">>,
+            Msg1 = {[{<<"error">>, [Msg]}]},
+            Req1 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
+            {{halt, 400}, Req1, State#base_state{log_msg = bad_actor}};
+        bad_group ->
+            Msg = <<"Invalid/missing group in request body">>,
+            Msg1 = {[{<<"error">>, [Msg]}]},
+            Req1 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
+            {{halt, 400}, Req1, State#base_state{log_msg = bad_group}};
         _Other ->
             % So we return 200 instead of 204, for backwards compatibility:
             Req1 = wrq:set_resp_body(<<"{}">>, Req),
@@ -142,15 +149,19 @@ acl_path(Type, AuthzId, Part) ->
     "/" ++ atom_to_list(Type) ++ "s/" ++ binary_to_list(AuthzId) ++ "/acl/" ++ Part.
 
 update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
-                 Part, OrgId, RequestorId) ->
+                 Part, OrgId) ->
     % This is probably dangerous (in that one type of permission could be
     % updated, and a future type could fail); however, I'm not sure what can
     % be really done about it.  It theoretically shouldn't happen in practice,
     % but you know what they say about theory and practice
     try
-        update_part(Part, Data, Type, AuthzId, OrgId, RequestorId)
+        update_part(Part, Data, Type, AuthzId, OrgId)
     catch
         throw:forbidden ->
+            forbidden;
+        throw:bad_actor ->
+            forbidden;
+        throw:bad_group ->
             forbidden
     end.
 
@@ -172,19 +183,35 @@ names_to_ids(Ace, OrgId) ->
     io:format("---groups: ~p~n", [GroupNames]),
     ActorIds = convert_actor_names_to_ids(ActorNames, OrgId),
     io:format("---actor ids: ~p~n", [ActorIds]),
-    GroupIds = convert_group_names_to_ids(GroupNames, OrgId),
-    io:format("---group ids: ~p~n", [GroupIds]),
-    Ace1 = ej:set({<<"actors">>}, Ace, ActorIds),
-    ej:set({<<"groups">>}, Ace1, GroupIds).
+    % Check to make sure everything got converted; if something is missing, there
+    % was a bad input
+    case length(ActorNames) == length(ActorIds) of
+        false ->
+            throw(bad_actor);
+        _ ->
+            GroupIds = convert_group_names_to_ids(GroupNames, OrgId),
+            io:format("---group ids: ~p~n", [GroupIds]),
+            case length(GroupNames) == length(GroupIds) of
+                false ->
+                    throw(bad_group);
+                _ ->
+                    Ace1 = ej:set({<<"actors">>}, Ace, ActorIds),
+                    ej:set({<<"groups">>}, Ace1, GroupIds)
+            end
+    end.
 
-update_part(Part, AceRecord, Type, AuthzId, OrgId, RequestorId) ->
+update_part(Part, AceRecord, Type, AuthzId, OrgId) ->
     io:format("---update part: ~p~n", [Part]),
     io:format("---convert: ~p~n", [AceRecord]),
-    Data = names_to_ids(ej:get({Part}, AceRecord), OrgId),
-    io:format("---to ids: ~p~n", [Data]),
+    Ids = names_to_ids(ej:get({Part}, AceRecord), OrgId),
+    io:format("---ids: ~p~n", [Ids]),
+    Data = ejson:encode(Ids),
+    io:format("---data: ~p~n", [Data]),
     Path = acl_path(Type, AuthzId, Part),
     io:format("---path ~p~n", [Path]),
-    Result = oc_chef_authz_http:request(Path, put, ?DEFAULT_HEADERS, Data, RequestorId),
+    SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
+    io:format("---superuser: ~p~n", [SuperuserId]),
+    Result = oc_chef_authz_http:request(Path, put, ?DEFAULT_HEADERS, Data, SuperuserId),
     case Result of
         {error, forbidden} ->
             throw(forbidden);
