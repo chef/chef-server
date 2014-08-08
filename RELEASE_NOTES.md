@@ -20,6 +20,7 @@ The following items are the set of bug fixes that have been applied since Enterp
 * [OC-11710] Fix couchdb compaction log rotation
 * [OC-11702] Fix bug that prevents ACL and group expansion when containing group that no longer exists
 * [OC-11708] Fix user association bug when last updater of users group is no longer associated
+* [OC-11540] Fix invalid opscode-account config when forcing SSL
 
 
 ## 11.1.8 (2014-06-26)
