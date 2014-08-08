@@ -64,7 +64,6 @@ init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(Config) ->
-    io:format("~n---init~n", []),
     AclType = ?gv(acl_object_type, Config),
     {ok, #acl_state{type = AclType}}.
 
@@ -79,15 +78,12 @@ validate_request('GET', Req, #base_state{chef_db_context = DbContext,
                                          organization_name = OrgName,
                                          resource_state = #acl_state{type = Type} = 
                                              AclState} = State) ->
-    io:format("---val ~p~n", ['GET']),
     validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext).
 
 auth_info(Req, State) ->
-    io:format("---auth info~n", []),
     check_acl_auth(Req, State).
 
 to_json(Req, #base_state{resource_state = AclState} = State) ->
-    io:format("---to json~n", []),
     case fetch(AclState) of
         forbidden ->
             {{halt, 403}, Req, State#base_state{log_msg = acl_not_found}};
@@ -100,7 +96,6 @@ to_json(Req, #base_state{resource_state = AclState} = State) ->
 
 validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
     Name = chef_wm_util:object_name(Type, Req),
-    io:format("---val got name: ~p~n", [Name]),
     try
         AuthzId = case Type of
                       cookbook ->
@@ -108,13 +103,9 @@ validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
                       NotCookbook ->
                           fetch_id(NotCookbook, DbContext, Name, OrgId)
                   end,
-        io:format("---val got authzId: ~p~n", [AuthzId]),
         AclState1 = AclState#acl_state{authz_id = AuthzId},
-        % TODO: check on this: I'm not sure this is what we really want; IIRC,
-        % access is controlled by the ACLs so that (1) superuser will not
-        % always have access and (2) I think access for ordinary users is not
-        % limited to orgs.  This might work in practice, though, if ReqId is
-        % passed through?
+        % We're doing our own checks, so don't fail on superuser (also, not
+        % doing this results in spurious auth failures):
         {Req, State#base_state{resource_state = AclState1,
                                superuser_bypasses_checks = true}}
     catch
@@ -124,14 +115,29 @@ validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
             {{halt, 404}, Req1, State#base_state{log_msg = acl_not_found}}
     end.
 
+check_acl_auth(Req, #base_state{requestor_id = RequestorId,
+                                resource_state = #acl_state{type = Type,
+                                                            authz_id = AuthzId}} = State) ->
+    Path = acl_auth_path(Type, AuthzId, RequestorId),
+    SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
+    Check = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], SuperuserId),
+    case Check of
+        ok ->
+            {authorized, Req, State};
+        {error, not_found} ->
+            {{halt, 403}, Req, State};
+        Other ->
+            Other
+    end.
+
 %% Internal functions
 
-% TODO: don't like this; we only need the authz id, so grabbing complete
-% objects is wasteful.  Also, this might be more suited to be moved to
-% oc_chef_wm_util or something
+% TODO: we only need the authz id, so grabbing complete objects is wasteful.
+% Also, this might be more suited to be moved to oc_chef_wm_util or
+% something. In the meantime, this gets us up and running.
 fetch_id(organization, _DbContext, _Name, _OrgId) ->
-    % TODO: This needs to be implemented; orgs not in SQL yet
-    % Will require additional changes elsewhere to work
+    % TODO: This needs to be implemented; orgs not in SQL yet.  Will also
+    % require additional changes elsewhere to work
     throw(not_implemented);
 fetch_id(user, DbContext, Name, _OrgId) ->
     case chef_db:fetch(#chef_user{username = Name}, DbContext) of
@@ -216,7 +222,7 @@ fetch_cookbook_id(DbContext, Name, OrgName) ->
             AuthzId
     end.
 
-% Translate types; in ACLs, everything is an object, actor, group, or container
+% Translate types; in authz, everything is an object, actor, group, or container
 acl_path(node, AuthzId) ->
     acl_path(object, AuthzId);
 acl_path(role, AuthzId) ->
@@ -238,11 +244,8 @@ acl_path(Type, AuthzId) ->
 
 fetch(#acl_state{type = Type, authz_id = AuthzId}) ->
     Path = acl_path(Type, AuthzId),
-    io:format("---path: ~p~n", [Path]),
     SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
-    io:format("---superuser: ~p~n", [SuperuserId]),
     Result = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], SuperuserId),
-    io:format("---acl data: ~p~n", [Result]),
     case Result of 
         {ok, Record} ->
             ids_to_names(Record);
@@ -255,25 +258,6 @@ fetch(#acl_state{type = Type, authz_id = AuthzId}) ->
 acl_auth_path(Type, AuthzId, RequestorId) ->
     acl_path(Type, AuthzId) ++ "/grant/actors/" ++ binary_to_list(RequestorId).
 
-check_acl_auth(Req, #base_state{requestor_id = RequestorId,
-                                resource_state = #acl_state{type = Type,
-                                                            authz_id = AuthzId}} = State) ->
-    Path = acl_auth_path(Type, AuthzId, RequestorId),
-    io:format("---acl auth path: ~p~n", [Path]),
-    SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
-    io:format("---superuser: ~p~n", [SuperuserId]),
-    Check = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], SuperuserId),
-    io:format("---check: ~p~n", [Check]),
-    case Check of
-        ok ->
-            {authorized, Req, State};
-        {error, not_found} ->
-            {{halt, 403}, Req, State};
-        Other ->
-            Other
-    end.
-
-
 convert_group_ids_to_names(AuthzIds) ->
     oc_chef_group:find_groups_names(AuthzIds, fun chef_sql:select_rows/1).
 
@@ -285,7 +269,6 @@ convert_actor_ids_to_names(AuthzIds) ->
     {ClientNames ++ UserNames, DefunctActorAuthzIds}.
 
 process_part(Part, Record) ->
-    io:format("---part: ~p~n", [Part]),
     Members = ej:get({Part}, Record),
     ActorIds = ej:get({<<"actors">>}, Members),
     GroupIds = ej:get({<<"groups">>}, Members),

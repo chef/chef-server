@@ -56,7 +56,6 @@ init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(Config) ->
-    io:format("~n---init perm~n", []),
     AclType = ?gv(acl_object_type, Config),
     {ok, #acl_state{type = AclType}}.
 
@@ -71,13 +70,9 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
                                          organization_name = OrgName,
                                          resource_state = #acl_state{type = Type} = 
                                              AclState} = State) ->
-    io:format("---val ~p~n", ['PUT']),
     Body = wrq:req_body(Req),
-    io:format("---body ~p~n", [Body]),
     Ace = chef_json:decode_body(Body),
-    io:format("---ace ~p~n", [Ace]),
     Part = list_to_binary(wrq:path_info(acl_permission, Req)),
-    io:format("---part ~p~n", [Part]),
     case chef_object_base:strictly_valid(acl_spec(Part), [Part], Ace) of
         ok ->
             oc_chef_wm_acl:validate_authz_id(Req, State,
@@ -88,20 +83,19 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
     end.
 
 auth_info(Req, State) ->
-    io:format("---auth info~n", []),
     oc_chef_wm_acl:check_acl_auth(Req, State).
 
 from_json(Req, #base_state{organization_guid = OrgId,
                            resource_state = AclState} = State) ->
-    io:format("---from json~n", []),
     Part = wrq:path_info(acl_permission, Req),
     case update_from_json(AclState, Part, OrgId) of
         forbidden ->
             {{halt, 400}, Req, State};
         bad_actor ->
             % We don't actually know which one, so can't use a more specific
-            % message; we only get back a list of Ids that has a different
-            % length than the list of names we started with
+            % message without checking every single object (which we don't yet
+            % do efficiently); we only get back a list of Ids that has a
+            % different length than the list of names we started with.
             Msg = <<"Invalid/missing actor in request body">>,
             Msg1 = {[{<<"error">>, [Msg]}]},
             Req1 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
@@ -150,10 +144,6 @@ acl_path(Type, AuthzId, Part) ->
 
 update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
                  Part, OrgId) ->
-    % This is probably dangerous (in that one type of permission could be
-    % updated, and a future type could fail); however, I'm not sure what can
-    % be really done about it.  It theoretically shouldn't happen in practice,
-    % but you know what they say about theory and practice
     try
         update_part(Part, Data, Type, AuthzId, OrgId)
     catch
@@ -166,11 +156,9 @@ update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
     end.
 
 convert_group_names_to_ids(GroupNames, OrgId) ->
-    io:format("---converting groups~n", []),
     oc_chef_group:find_group_authz_ids(GroupNames, OrgId, fun chef_sql:select_rows/1).
 
 convert_actor_names_to_ids(Names, OrgId) ->
-    io:format("---converting actors~n", []),
     ClientIds = oc_chef_group:find_client_authz_ids(Names, OrgId,
                                                     fun chef_sql:select_rows/1),
     UserIds = oc_chef_group:find_user_authz_ids(Names, fun chef_sql:select_rows/1),
@@ -178,19 +166,15 @@ convert_actor_names_to_ids(Names, OrgId) ->
 
 names_to_ids(Ace, OrgId) ->
     ActorNames = ej:get({<<"actors">>}, Ace),
-    io:format("---actors: ~p~n", [ActorNames]),
     GroupNames = ej:get({<<"groups">>}, Ace),
-    io:format("---groups: ~p~n", [GroupNames]),
     ActorIds = convert_actor_names_to_ids(ActorNames, OrgId),
-    io:format("---actor ids: ~p~n", [ActorIds]),
-    % Check to make sure everything got converted; if something is missing, there
-    % was a bad input
+    % Check to make sure everything got converted; if something is missing,
+    % there was an invalid actor or group name in the request body
     case length(ActorNames) == length(ActorIds) of
         false ->
             throw(bad_actor);
         _ ->
             GroupIds = convert_group_names_to_ids(GroupNames, OrgId),
-            io:format("---group ids: ~p~n", [GroupIds]),
             case length(GroupNames) == length(GroupIds) of
                 false ->
                     throw(bad_group);
@@ -201,16 +185,10 @@ names_to_ids(Ace, OrgId) ->
     end.
 
 update_part(Part, AceRecord, Type, AuthzId, OrgId) ->
-    io:format("---update part: ~p~n", [Part]),
-    io:format("---convert: ~p~n", [AceRecord]),
     Ids = names_to_ids(ej:get({Part}, AceRecord), OrgId),
-    io:format("---ids: ~p~n", [Ids]),
     Data = ejson:encode(Ids),
-    io:format("---data: ~p~n", [Data]),
     Path = acl_path(Type, AuthzId, Part),
-    io:format("---path ~p~n", [Path]),
     SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
-    io:format("---superuser: ~p~n", [SuperuserId]),
     Result = oc_chef_authz_http:request(Path, put, ?DEFAULT_HEADERS, Data, SuperuserId),
     case Result of
         {error, forbidden} ->
