@@ -1272,9 +1272,9 @@ EOF
             put_response = put(request_url, platform.superuser, :payload => request_body)
             put_response.should look_like({ :status => 200 })
 
-            response = post("#{platform.server}/verify_password", platform.superuser,
-                            :payload => { 'user_id_to_verify' => username, 'password' => 'bidgerbidger' })
-            JSON.parse(response.body)["password_is_correct"].should eq(true)
+            response = post("#{platform.server}/authenticate_user", platform.superuser,
+                            :payload => { 'username' => username, 'password' => 'bidgerbidger' })
+            JSON.parse(response.body)["status"].should eq("linked")
 
           end
         end
@@ -1736,30 +1736,4 @@ EOF
       end
     end # context DELETE /users/<name>
   end # context /users/<name> endpoint
-
-  context "POST /verify_password" do
-    let(:request_url) { "#{platform.server}/verify_password" }
-
-    context "when the webui superuser is specified as the user" do
-      let(:requestor) { superuser }
-
-      let(:request_body) do
-        {
-          user_id_to_verify: superuser.name,
-          password: "DOES_NOT_MATTER_FOR_TEST",
-        }
-      end
-
-      it "should return Forbidden" do
-        post(request_url, superuser, :payload => request_body).should look_like(
-          :body => {
-            "error" => "Password authentication as the superuser is prohibited."
-          },
-          :status => 403
-        )
-      end
-
-    end # context when the webui superuser is specified as the user
-  end # context POST /verify_password
-
 end # describe users
