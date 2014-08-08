@@ -1,11 +1,12 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Mark Anderson <mark@opscode.com>
+%% @author Marc Paradise <marc@getchef.com>
 %% @doc authorization - Interface to the opscode authorization servize
 %%
 %% This module is an Erlang port of the mixlib-authorization Ruby gem.
 %%
-%% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -40,7 +41,9 @@
          make_context/2,
          is_authorized_on_resource/6,
          ping/0,
-         remove_actor_from_actor_acl/2
+         remove_actor_from_actor_acl/2,
+         remove_ace_for_entity/6,
+         add_ace_for_entity/6
         ]).
 
 -ifdef(TEST).
@@ -209,16 +212,14 @@ merge_acl_from_container(RequestorId, ContainerId, AuthzType, ObjectId) ->
             {error, container_acl}
     end.
 
-%% @doc Set the ACL of the entity to the given ACL, one ACE at a time.  As currently coded,
-%% it expects to only operate on actors or objects, since these are the only Authz entities
-%% that Erchef currently creates.
+%% @doc Set the ACL of the entity to the given ACL, one ACE at a time.
 %%
 %% Returns 'ok' if all ACEs are successfully set, and {error, Reason} at the first failure.
 %%
 %% No, this is not transactional in any sense, but then again, neither is CouchDB.  In any
 %% case, this will change dramatically once we move to SQL.
 -spec set_acl(requestor_id(),
-              AuthzType :: 'actor' | 'object',
+              AuthzType :: 'actor' | 'object' | 'container' | 'group',
               ObjectId :: object_id(),
               NewAcl :: authz_acl()) -> ok | {error, any()}.
 set_acl(_RequestorId, _AuthzType, _ObjectId, []) ->
@@ -359,17 +360,82 @@ delete_resource(RequestorId, ResourceType, Id) ->
         {error, Error} -> {error, Error}
     end.
 
+%% Give a resource access to an entity by adding the resource
+%% to the entity's ACE
+-spec add_ace_for_entity(requestor_id(), group|actor, object_id(),
+                         resource_type(), object_id(), access_method()) ->
+    ok | {error, forbidden|not_found|server_error}.
+
+add_ace_for_entity(RequestorId, ResourceType, ResourceId,
+                   EntityType, EntityId, Method) ->
+    update_ace_for_entity(RequestorId, ResourceType, ResourceId,
+                          EntityType, EntityId, Method,
+                          fun add_if_missing/2).
+
+%% Deny a resource access to an entity by adding the resource
+%% to the entity's ACE. Note that if the resource has the access to the
+%% same entity via another means, this will not change
+-spec remove_ace_for_entity(requestor_id(), group|actor, object_id(),
+                         resource_type(), object_id(), access_method()) ->
+    ok | {error, forbidden|not_found|server_error}.
+remove_ace_for_entity(RequestorId, ResourceType, ResourceId,
+                      EntityType, EntityId, Method) ->
+    update_ace_for_entity(RequestorId, ResourceType, ResourceId,
+                          EntityType, EntityId, Method,
+                          fun lists:delete/2).
+
+update_ace_for_entity(RequestorId, ResourceType, ResourceId,
+                      EntityType, EntityId, Method, UpdateFun) ->
+    case get_ace_for_entity(RequestorId, EntityType, EntityId, Method) of
+        {ok, ACE} ->
+            Members = case ResourceType of
+                          group ->
+                              ACE#authz_ace.groups;
+                          actor ->
+                              ACE#authz_ace.actors
+                      end,
+            NewMembers = UpdateFun(ResourceId, Members),
+            NewACE = case ResourceType of
+                         group ->
+                             ACE#authz_ace{groups = NewMembers};
+                         actor ->
+                             ACE#authz_ace{actors = NewMembers}
+                     end,
+            set_ace_for_entity(RequestorId, EntityType, EntityId, Method, NewACE);
+        {error, Error} ->
+            {error, Error}
+    end.
+
+add_if_missing(Item, List) ->
+    case lists:member(Item, List) of
+        true ->
+            List;
+        false ->
+            [Item] ++ List
+    end.
+
 %
 % Get acl from an entity
 % GET {objects|groups|actors|containers}/:id/acl
 %
--spec get_acl_for_resource(requestor_id(), resource_type(), binary()) -> {ok, authz_acl()}|{error, any()}.
+-spec get_acl_for_resource(requestor_id(), resource_type(), binary()) ->
+    {ok, authz_acl()}|{error, any()}.
 get_acl_for_resource(RequestorId, ResourceType, Id) ->
     Url = make_url([pluralize_resource(ResourceType), Id, acl]),
     case oc_chef_authz_http:request(Url, get, [], [], RequestorId) of
         {ok, Data} ->
             Acl=extract_acl(Data),
             {ok, Acl};
+        %% Expected errors are forbidden, not_found, server_error
+        {error, Error} -> {error, Error}
+    end.
+
+get_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod) ->
+    Url = make_url([pluralize_resource(AuthzType), Id, acl, AccessMethod]),
+    case oc_chef_authz_http:request(Url, get, [], [], RequestorId) of
+        {ok, Data} ->
+            ACE = extract_ace(Data),
+            {ok, ACE};
         %% Expected errors are forbidden, not_found, server_error
         {error, Error} -> {error, Error}
     end.
@@ -384,7 +450,8 @@ get_acl_for_resource(RequestorId, ResourceType, Id) ->
                          access_method(),
                          authz_ace()) -> ok |
                                          {error, any()}.
-set_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
+set_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod,
+                   #authz_ace{actors=Actors, groups=Groups}) ->
     Url = make_url([pluralize_resource(AuthzType), Id, acl, AccessMethod]),
     %% jiffy:encode can return an iolist which breaks the http code. This has only been
     %% observed with floats, but may occur elsewhere.
