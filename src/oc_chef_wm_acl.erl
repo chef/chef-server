@@ -96,38 +96,39 @@ to_json(Req, #base_state{resource_state = AclState} = State) ->
 
 validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
     Name = chef_wm_util:object_name(Type, Req),
-    try
-        AuthzId = case Type of
-                      cookbook ->
-                          fetch_cookbook_id(DbContext, Name, OrgName);
-                      NotCookbook ->
-                          fetch_id(NotCookbook, DbContext, Name, OrgId)
-                  end,
-        AclState1 = AclState#acl_state{authz_id = AuthzId},
-        % We're doing our own checks, so don't fail on superuser (also, not
-        % doing this results in spurious auth failures):
-        {Req, State#base_state{resource_state = AclState1,
-                               superuser_bypasses_checks = true}}
-    catch
-        throw:{not_found, Name} ->
-            Message = chef_wm_util:not_found_message(Type, Name),
-            Req1 = chef_wm_util:set_json_body(Req, Message),
-            {{halt, 404}, Req1, State#base_state{log_msg = acl_not_found}}
-    end.
+    AuthzId = case Type of
+                  cookbook ->
+                      fetch_cookbook_id(DbContext, Name, OrgName);
+                  NotCookbook ->
+                      fetch_id(NotCookbook, DbContext, Name, OrgId)
+              end,
+    AclState1 = AclState#acl_state{authz_id = AuthzId},
+    % We're doing our own checks, so don't fail on superuser (also, not
+    % doing this results in spurious auth failures):
+    {Req, State#base_state{resource_state = AclState1, superuser_bypasses_checks = true}}.
 
 check_acl_auth(Req, #base_state{requestor_id = RequestorId,
                                 resource_state = #acl_state{type = Type,
                                                             authz_id = AuthzId}} = State) ->
-    Path = acl_auth_path(Type, AuthzId, RequestorId),
-    SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
-    Check = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], SuperuserId),
-    case Check of
-        ok ->
-            {authorized, Req, State};
-        {error, not_found} ->
-            {{halt, 403}, Req, State};
-        Other ->
-            Other
+    case AuthzId of
+        not_found ->
+            Name = chef_wm_util:object_name(Type, Req),
+            Message = chef_wm_util:not_found_message(Type, Name),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 404}, Req1, State#base_state{log_msg = acl_not_found}};
+        Id ->
+            Path = acl_auth_path(Type, Id, RequestorId),
+            SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
+            Check = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [],
+                                               SuperuserId),
+            case Check of
+                ok ->
+                    {authorized, Req, State};
+                {error, not_found} ->
+                    {{halt, 403}, Req, State};
+                Other ->
+                    Other
+            end
     end.
 
 %% Internal functions
@@ -142,42 +143,42 @@ fetch_id(organization, _DbContext, _Name, _OrgId) ->
 fetch_id(user, DbContext, Name, _OrgId) ->
     case chef_db:fetch(#chef_user{username = Name}, DbContext) of
         not_found ->
-            throw({not_found, Name});
+            not_found;
         #chef_user{authz_id = AuthzId} ->
             AuthzId
     end;
 fetch_id(client, DbContext, Name, OrgId) ->
     case chef_db:fetch(#chef_client{org_id = OrgId, name = Name}, DbContext) of
         not_found ->
-            throw({not_found, Name});
+            not_found;
         #chef_client{authz_id = AuthzId} ->
             AuthzId
     end;
 fetch_id(container, DbContext, Name, OrgId) ->
     case chef_db:fetch(#oc_chef_container{org_id = OrgId, name = Name}, DbContext) of
         not_found ->
-            throw({not_found, Name});
+            not_found;
         #oc_chef_container{authz_id = AuthzId} ->
             AuthzId
     end;
 fetch_id(data_bag, DbContext, Name, OrgId) ->
     case chef_db:fetch(#chef_data_bag{org_id = OrgId, name = Name}, DbContext) of
         not_found ->
-            throw({not_found, Name});
+            not_found;
         #chef_data_bag{authz_id = AuthzId} ->
             AuthzId
     end;
 fetch_id(node, DbContext, Name, OrgId) ->
     case chef_db:fetch(#chef_node{org_id = OrgId, name = Name}, DbContext) of
         not_found ->
-            throw({not_found, Name});
+            not_found;
         #chef_node{authz_id = AuthzId} ->
             AuthzId
     end;
 fetch_id(role, DbContext, Name, OrgId) ->
     case chef_db:fetch(#chef_role{org_id = OrgId, name = Name}, DbContext) of
         not_found ->
-            throw({not_found, Name});
+            not_found;
         #chef_role{authz_id = AuthzId} ->
             AuthzId
     end;
@@ -194,14 +195,14 @@ fetch_id(group, #context{reqid = ReqId}, Name, OrgId) ->
                                                             fun chef_sql:select_rows/1)
                           end) of
         not_found ->
-            throw({not_found, Name});
+            not_found;
         #oc_chef_group{authz_id = AuthzId} ->
             AuthzId
     end;
 fetch_id(environment, DbContext, Name, OrgId) ->
     case chef_db:fetch(#chef_environment{org_id = OrgId, name = Name}, DbContext) of
         not_found ->
-            throw({not_found, Name});
+            not_found;
         #chef_environment{authz_id = AuthzId} ->
             AuthzId
     end.
@@ -212,7 +213,7 @@ fetch_cookbook_id(DbContext, Name, OrgName) ->
     % fetch does not handle cookbooks (and, well, versioning)
     case chef_db:fetch_latest_cookbook_version(DbContext, OrgName, Name) of
         not_found ->
-            throw({not_found, Name});
+            not_found;
         {cookbook_exists, AuthzId} ->
             % unclear when this can happen; I assume for wrong version but
             % won't happen with 'latest' version?  But still checking for it
