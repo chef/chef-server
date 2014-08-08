@@ -2,6 +2,9 @@
 
 ## 11.1.9 (unreleased)
 
+### adding actions_payload 2014.08.15
+* [CA-555] Update 11.1-stable oc_erchef with latest oc_chef_action
+
 ### postgresql 2014.07.29
 * [OC-11672] Upgrade PostgreSQL to 9.2.9
 
