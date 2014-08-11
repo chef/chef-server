@@ -18,16 +18,23 @@ local int_acct_tests = endpoint_tests.internal_acct
 local int_chef_tests = endpoint_tests.internal_chef
 
 -- accounts via organization
-table.insert(shared_acct_tests, {"/organizations",                            { DEF_ORG, "acct", "organizations" }})
-table.insert(shared_acct_tests, {"/organizations/",                           { DEF_ORG, "acct", "organizations" }})
-table.insert(shared_acct_tests, {"/organizations/testorg",                    { TEST_ORG, "acct", "organizations" }})
-table.insert(shared_acct_tests, {"/organizations/testorg/",                   { TEST_ORG, "acct", "organizations" }})
+table.insert(shared_acct_tests, {"/organizations",                            { DEF_ORG, "acct_erchef", "organizations" }})
+table.insert(shared_acct_tests, {"/organizations/",                           { DEF_ORG, "acct_erchef", "organizations" }})
+table.insert(shared_acct_tests, {"/organizations/testorg",                    { TEST_ORG, "acct_erchef", "organizations" }})
+table.insert(shared_acct_tests, {"/organizations/testorg/",                   { TEST_ORG, "acct_erchef", "organizations" }})
 
-for _k, val in pairs{"users", "association_requests"} do
-table.insert(shared_acct_tests, {"/organizations/testorg/" .. val,            { TEST_ORG, "acct", val, nil}})
-table.insert(shared_acct_tests, {"/organizations/testorg/" .. val .. "/",     { TEST_ORG, "acct", val, nil}})
-table.insert(shared_acct_tests, {"/organizations/testorg/" .. val .."/any",   { TEST_ORG, "acct", val, nil}})
+for _k, val in pairs{"users"} do
+table.insert(shared_acct_tests, {"/organizations/testorg/" .. val,            { TEST_ORG, "acct_erchef", "associations", nil}})
+table.insert(shared_acct_tests, {"/organizations/testorg/" .. val .. "/",     { TEST_ORG, "acct_erchef", "associations", nil}})
 end
+
+for _k, val in pairs{"association_requests"} do
+table.insert(shared_acct_tests, {"/organizations/testorg/" .. val,            { TEST_ORG, "acct_erchef", val, nil}})
+table.insert(shared_acct_tests, {"/organizations/testorg/" .. val .. "/",     { TEST_ORG, "acct_erchef", val, nil}})
+end
+
+table.insert(shared_acct_tests, {"/organizations/testorg/users/any",   { TEST_ORG, "acct_erchef", "associations", "any"}})
+table.insert(shared_acct_tests, {"/users/any/organizations",   { nil, "acct_erchef", "associations", "any"}})
 
 -- note that the actual endpoint is "/_acl" with support for /_acl/create|update|delete|grant - however our original expression specified
 -- our original endpoint accepted "/_acl.*"; we have made it slightly more strict in that it must be
@@ -38,8 +45,9 @@ table.insert(shared_acct_tests, {"/organizations/testorg/nodes/mynode/_acl/",  {
 table.insert(shared_acct_tests, {"/organizations/testorg/nodes/mynode/_acl/test",  { TEST_ORG, "acct_erchef", "acls"}})
 table.insert(shared_acct_tests, {"/organizations/testorg/nodes/_acl",         { TEST_ORG, "acct_erchef", "acls"}})
 table.insert(shared_acct_tests, {"/organizations/testorg/roles/_acl",         { TEST_ORG, "acct_erchef", "acls"}})
--- This goes to account not because _aclextra is valid, but because EVERYTHING is accepted into account for acct internal
-table.insert(int_acct_tests, {"/organizations/testorg/nodes/mynode/_aclextra",  { TEST_ORG, "acct", nil}})
+
+-- Verify that _aclextra is not being routed to _acl; it should simply not be routed as it is not valid.
+table.insert(int_acct_tests, {"/organizations/testorg/nodes/mynode/_aclextra",  { DEF_ORG, nil, nil}})
 -- _aclextra isn't valid, so the correct erchef route should take priority.
 table.insert(api_tests, {"/organizations/testorg/nodes/mynode/_aclextra",  { TEST_ORG, "erchef", "nodes", "mynode"}})
 
@@ -48,21 +56,20 @@ table.insert(shared_chef_tests, {"/users",                                    {D
 table.insert(shared_chef_tests, {"/users/",                                   {DEF_ORG, "erchef", "users"}})
 table.insert(shared_chef_tests, {"/users/borg",                               {DEF_ORG, "erchef", "users", "borg"}})
 table.insert(shared_chef_tests, {"/users/borg/",                              {DEF_ORG, "erchef", "users", "borg"}})
-table.insert(shared_acct_tests, {"/users/borg/association_requests",          {DEF_ORG, "acct", "association_requests", "borg"}})
-table.insert(shared_acct_tests, {"/users/borg/association_requests/",         {DEF_ORG, "acct", "association_requests", "borg"}})
-table.insert(shared_acct_tests, {"/users/borg/association_requests/abc",      {DEF_ORG, "acct", "association_requests", "borg"}})
-table.insert(shared_acct_tests, {"/users/borg//association_requests",         {DEF_ORG, "acct", "association_requests", "borg"}})
-table.insert(shared_acct_tests, {"/users/borg//association_requests/",        {DEF_ORG, "acct", "association_requests", "borg"}})
-table.insert(shared_acct_tests, {"/users/borg//association_requests/abc",     {DEF_ORG, "acct", "association_requests", "borg"}})
-table.insert(shared_acct_tests, {"/users/borg/organizations",                 {DEF_ORG, "acct", "organizations", "borg"}})
+table.insert(shared_acct_tests, {"/users/borg/association_requests",          {DEF_ORG, "acct_erchef", "association_requests", "borg"}})
+table.insert(shared_acct_tests, {"/users/borg/association_requests/",         {DEF_ORG, "acct_erchef", "association_requests", "borg"}})
+table.insert(shared_acct_tests, {"/users/borg/association_requests/abc",      {DEF_ORG, "acct_erchef", "association_requests", "borg"}})
+table.insert(shared_acct_tests, {"/users/borg//association_requests",         {DEF_ORG, "acct_erchef", "association_requests", "borg"}})
+table.insert(shared_acct_tests, {"/users/borg//association_requests/",        {DEF_ORG, "acct_erchef", "association_requests", "borg"}})
+table.insert(shared_acct_tests, {"/users/borg//association_requests/abc",     {DEF_ORG, "acct_erchef", "association_requests", "borg"}})
+table.insert(shared_acct_tests, {"/users/borg/organizations",                 {DEF_ORG, "acct_erchef", "associations", "borg"}})
 
--- Different behavior between int-acct and api here, because int-acct will take anything
--- while api requires a valid destiniation. This differs slightly from original behavior, in
--- which api accepted association_requests + 'anythign' without a separator in between
-table.insert(api_tests, {"/users/borg//association_requests0abc",     {nil} })
-table.insert(api_tests, {"/users/borg/association_requests0abc",      {nil} })
-table.insert(int_acct_tests, {"/users/borg//association_requests0abc",     {nil, "acct"} })
-table.insert(int_acct_tests, {"/users/borg/association_requests0abc",      {nil, "acct"}})
+-- Verify that association_requests + junk is not being improperly routed to association_requests
+-- endpoint or account. Its invalid and should not route anywhere at all.
+table.insert(api_tests, {"/users/borg//association_requests0abc", {nil} })
+table.insert(api_tests, {"/users/borg/association_requests0abc",  {nil} })
+table.insert(int_acct_tests, {"/users/borg//association_requests0abc", {nil, nil} })
+table.insert(int_acct_tests, {"/users/borg/association_requests0abc",  {nil, nil}})
 
 -- other accounts
 table.insert(shared_chef_tests, {"/authenticate_user",  {DEF_ORG, "erchef", "authenticate_user"}})
@@ -81,6 +88,12 @@ table.insert(int_acct_tests, {"/organizations/testorg/" .. val .. "/",    {TEST_
 table.insert(int_acct_tests, {"/organizations/testorg/" .. val .. "/abc", {TEST_ORG, "erchef", val, "abc"}})
 table.insert(int_acct_tests, {"/organizations/testorg/" .. val .. "/_acl", {TEST_ORG, "acct_erchef", "acls"}})
 end
+
+-- Verify that /organizations endpoint is properly routed internally
+table.insert(int_acct_tests, {"/organizations",          {DEF_ORG, "acct_erchef", "organizations"}})
+table.insert(int_acct_tests, {"/organizations/",         {DEF_ORG, "acct_erchef", "organizations"}})
+table.insert(int_acct_tests, {"/organizations/testorg",  {TEST_ORG, "acct_erchef", "organizations"}})
+table.insert(int_acct_tests, {"/organizations/testorg/", {TEST_ORG, "acct_erchef", "organizations"}})
 
 -- darklaunch account or erchef
 -- (none at this time, in Migration Phase 3 we'll have some)
@@ -130,8 +143,11 @@ table.insert(shared_chef_tests, {"/organizations/testorg/nodesabc", {nil}})
 -- However these should return  both the org name and the correct upstream (but still no known endpoint),
 table.insert(api_tests, {"/organizations/testorg/association_requestsdef",  {nil}})
 
--- since internal acct accepts everything and should parse what it can
-table.insert(int_acct_tests, {"/organizations/testorg/association_requestsdef",  {TEST_ORG, "acct"}})
+-- This route is invalid in general and should also not be routed internally to anything.
+table.insert(int_acct_tests, {"/organizations/testorg/association_requestsdef",  {DEF_ORG, nil}})
+
+-- Verify that root "/" doesn't go anywhere, it is an invalid route.
+table.insert(int_acct_tests, {"/",  {nil, nil}})
 
 -- Bad matches should never return a route:
 table.insert(shared_chef_tests, {"/organizations/testorg/nOdes/abc/",         {nil}})
@@ -177,16 +193,18 @@ for k,v in pairs(shared_acct_tests) do
   table.insert(int_acct_tests, k, v)
 end
 
--- For internal acct , we accept pretty much everything and route it along - only thing
--- we're really conerned with here is capturing org name and endpoint names.
--- Let's just make sure w're not picking up org name when we shouldn't...
-table.insert(int_acct_tests, {"/organizations/TestOrg",                    {DEF_ORG, "acct"}})
-table.insert(int_acct_tests, {"/organizations/TestOrg/",                   {DEF_ORG, "acct"}})
-table.insert(int_acct_tests, {"/organizations/TestOrg/abc",                {DEF_ORG, "acct"}})
+-- Org names that do not match our requirements should not route be routed anywhere,
+-- in this case, there are capital letters which are illegal.
+-- Also note that the "matched org" should be the default_org since TestOrg should not get picked
+-- up as an org.
+table.insert(int_acct_tests, {"/organizations/TestOrg",                    {DEF_ORG, nil}})
+table.insert(int_acct_tests, {"/organizations/TestOrg/",                   {DEF_ORG, nil}})
+table.insert(int_acct_tests, {"/organizations/TestOrg/abc",                {DEF_ORG, nil}})
 
--- And make sure that these get consumed correctly:
-table.insert(int_acct_tests, {"/organization",                             {DEF_ORG, "acct"}})
-table.insert(int_acct_tests, {"/internal-organization",                    {DEF_ORG, "acct"}})
+-- /organization is not a valid route and shouldn't route anywhere
+table.insert(int_acct_tests, {"/organization", {DEF_ORG, nil}})
+
+table.insert(int_acct_tests, {"/internal-organizations", {DEF_ORG, "acct"}})
 
 version_tests = {}
 table.insert(version_tests, {"10.0.0",  true})
