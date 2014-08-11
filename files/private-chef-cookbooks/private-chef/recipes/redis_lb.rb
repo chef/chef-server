@@ -42,20 +42,45 @@ link redis_data_dir_symlink do
   not_if { redis_data_dir_symlink == redis_data_dir }
 end
 
-component_runit_service "redis_lb"
-
 redis_data = redis
+
+# == redis service and config ==
+# Because we need a running redis service into which we can load
+# XDarkLaunch presets, we need to be very careful about how we
+# generate configs and trigger restarts. This is the procedure:
+#
+# 1. Write the Redis config first.
+#    This allows redis to come up cleanly on first boot. In
+#    previous versions of this cookbook, we wrote the config
+#    after defining the redis_lb service, causing the service
+#    to fail on initial boot and requiring an immediate restart
+#    of the service once the config was generated. By generating
+#    the config beforehand, we can avoid this scenario.
+#
+# 2. Define the redis_lb runit service.
+#
+# 3. Restart the redis_lb runit service.
+#    This step takes the place of the config notifying the service
+#    to restart. Since we _ALWAYS_ need the redis_lb service
+#    running during a reconfigure, we shold always ensure that the
+#    service is running right before we set the XDarkLaunch
+#    presets. Restart will start services that are stopped.
+
+# Write the Redis config
 template redis_config do
   source "redis_lb.conf.erb"
   owner "root"
   group "root"
   mode "0644"
   variables(redis_data.to_hash)
-  notifies :restart, 'service[redis_lb]', :immediately if is_data_master?
 end
 
+# Define the redis_lb runit service.
+component_runit_service "redis_lb"
+
+# Restart the redis_lb runit service.
 runit_service "redis_lb" do
-  action :start
+  action :restart
   only_if { is_data_master? }
 end
 
