@@ -627,7 +627,7 @@ is_user_in_org(#context{reqid = ReqId}=Ctx, User, OrgName) ->
         not_found ->
             false;
         OrgId ->
-            case ?SH_TIME(ReqId, chef_sql, is_user_in_org, (User, OrgId)) of
+            case ?SH_TIME(ReqId, chef_sql, is_user_in_org_by_orgid, (User, OrgId)) of
                 {ok, 0} ->
                     false;
                 {ok, Number} ->
