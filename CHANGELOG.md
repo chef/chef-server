@@ -25,6 +25,7 @@
 * [OC-11668] enable ipv6 in standalone mode
 * [OC-11710] Fix couchdb compaction log rotation
 * [OC-11540] Fix invalid opscode-account config when forcing SSL
+* [OC-11297] tweak partybus migration-level subscribes for a more reliable workaround
 
 ### private-chef-ctl
 

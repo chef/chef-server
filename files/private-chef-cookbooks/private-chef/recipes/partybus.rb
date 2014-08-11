@@ -45,10 +45,7 @@ end
 execute "set initial migration level" do
   action :nothing
   command "cd /opt/opscode/embedded/service/partybus && ./bin/partybus init"
-  subscribes :run, resources(:directory => "/var/opt/opscode"), :delayed
-  if node_role == 'backend'
-    subscribes :run, resources(:directory => "/var/opt/opscode/postgresql"), :delayed
-  end
+  subscribes :run, "file[#{OmnibusHelper.bootstrap_sentinel_file}]", :delayed
 end
 
 ruby_block 'migration-level file sanity check' do
@@ -73,5 +70,9 @@ EOF
   end
   not_if 'test -f /var/opt/opscode/upgrades/migration-level'
   action :nothing
-  subscribes :run, 'private-chef_pg_upgrade[upgrade_if_necessary]', :delayed
+  if OmnibusHelper.has_been_bootstrapped?
+    subscribes :run, 'private-chef_pg_upgrade[upgrade_if_necessary]', :delayed
+  else
+    subscribes :run, 'execute[set initial migration level]', :immediately
+  end
 end
