@@ -152,13 +152,28 @@ def run_osc_upgrade
     check_status(run_command(sed), msg)
   end
 
+  def wait_for_ready_server(server_version)
+    1.upto(120) do |count|
+      begin
+        server_status = JSON.parse(open('http://localhost:8000/_status').read)
+        fail unless server_status['status'] == 'pong'
+      # Catch exceptions because if the server isn't yet up trying to open the status endpoint throws one
+      rescue Exception => e
+        sleep 1
+        if count == 120
+          log "Timeout waiting for #{server_version} server to start. Received expection #{e.message}"
+          exit 1
+        end
+      end
+    end
+  end
+
   def start_osc
     # Assumption is EC isn't running, since we detected OSC on the system
     log 'Ensuring the Open Source Chef server is started'
     msg = "Unable to start Open Source Chef server, which is needed to complete the upgrade"
     check_status(run_command("chef-server-ctl start"), msg)
-    # start command can return faster than the services are ready; resulting in 502 gateway
-    sleep(10)
+    wait_for_ready_server("Open Source Chef")
   end
 
   def check_status(status, msg)
@@ -243,15 +258,7 @@ def run_osc_upgrade
     msg = "Unable to start Enterprise Chef, which is needed to complete the upgrade"
     status = run_command("private-chef-ctl start")
     check_status(status, msg)
-    # Wait for services to come up.
-    # This is longer than for OSC because we need the org system to be provisioned
-    # It might be more ideal to rely on the service retry logic (just take this sleep out)
-    # or to build in some kind of retry logic here.
-    # In testing, the commands begin working on the 4th retry of 5, but that might not
-    # be true on slower systems
-    # TODO: Replace this with logic that pings the _status endpoint to see if
-    # the services are up, or retries an operation until it succeeds
-    sleep(120)
+    wait_for_ready_server("Enterprise Chef")
   end
 
   def stop_ec
