@@ -57,6 +57,17 @@
 ### logrotate
 * Fixed build configuration that was causing logrotate to not be installed
 
+### openssl 1.0.1i
+* Fix for CVE-2014-3512
+* Fix for CVE-2014-3511
+* Fix for CVE-2014-3510
+* Fix for CVE-2014-3507
+* Fix for CVE-2014-3506
+* Fix for CVE-2014-3505
+* Fix for CVE-2014-3509
+* Fix for CVE-2014-5139
+* Fix for CVE-2014-3508
+
 ### opscode-account rel-1.51.0
 * [OC-11702] - fails to expand ACLs and groups when they contain
   groups that no longer exist

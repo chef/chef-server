@@ -28,6 +28,12 @@ The following items are the set of bug fixes that have been applied since Enterp
 * [OC-11708] Fix user association bug when last updater of users group is no longer associated
 * [OC-11297] tweak partybus migration-level subscribes for a more reliable workaround
 
+### Security Fixes:
+
+The following items are the set of security fixes that have been applied since Enterprise Chef 11.1.5:
+
+* OpenSSL 1.0.1i addresses CVE-2014-3512, CVE-2014-3511, CVE-2014-3510, CVE-2014-3507, CVE-2014-3506, CVE-2014-3505, CVE-2014-3509, CVE-2014-5139, and CVE-2014-3508.
+
 ## 11.1.6 (2014-06-05)
 
 ### Security Fixes:
