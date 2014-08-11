@@ -1,12 +1,13 @@
 %% ex: ts=4 sw=4 et
-%% @author Seth Falcon <seth@opscode.com>
-%% @author Mark Anderson <mark@opscode.com>
-%% @author Christopher Maier <cm@opscode.com>
-%% @author James Casey <james@opscode.com>
-%% @author Mark Mzyk <mmzyk@opscode.com>
-%% @author Seth Chisamore <schisamo@opscode.com>
-%% @author Ho-Sheng <hosh@opscode.com>
-%% Copyright 2011-2013 Opscode, Inc. All Rights Reserved.
+%% @author Seth Falcon <seth@getchef.com>
+%% @author Mark Anderson <mark@getchef.com>
+%% @author Christopher Maier <cm@getchef.com>
+%% @author James Casey <james@getchef.com>
+%% @author Mark Mzyk <mmzyk@getchef.com>
+%% @author Seth Chisamore <schisamo@getchef.com>
+%% @author Ho-Sheng <hosh@getchef.com>
+%% @author Marc Pardise <marc@getchef.com>
+%% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -166,8 +167,15 @@ fetch_org_metadata(OrgName) ->
 %% see also: oc_chef_authz/oc_chef_user_org_association
 %%           oc_chef_authz/oc_chef_db
 %%
+%% *************************************************************
+%%                         NOT FOR RELEASE!
+%% Temporary hack - required until org creation knows about sql associations
+%%                         NOT FOR RELEASE!
+%% *************************************************************
+is_user_in_org_by_orgid(<<"pivotal">>, _) ->
+    {ok, 1};
 is_user_in_org_by_orgid(UserName, OrgId) ->
-    sqerl:select(is_user_in_org, [UserName, OrgId], first_as_scalar, [count]).
+    sqerl:select(user_in_org, [UserName, OrgId], first_as_scalar, [count]).
 
 %%
 %% chef user ops
