@@ -151,7 +151,14 @@ validate_checksums_uploaded(ReqId, #chef_sandbox{id = _BoxId, checksums = Checks
 %% all record of the sandbox from the database (it has served its purpose and is no longer
 %% of any use).
 commit_sandbox(Ctx, #chef_sandbox{org_id = OrgId, checksums = Checksums}=Sandbox) ->
-    chef_db:mark_checksums_as_uploaded(Ctx, OrgId, [ C || {C, _} <- Checksums ]),
+    %% mark_checksums_as_uploaded creates checksum records in the database for
+    %% the org_id, checksum combination. The checksums list in a #chef_sandbox
+    %% record is a list of {checksum, is_uploaded}, where is_uploaded is derived from
+    %% the existence of the org_id, checksum row in the checksums table. Therefore,
+    %% we do not need to mark a checksum as uploaded if is_uploaded is true. This will
+    %% prevent us from generating conflicts and error messages on the database.
+    ChecksumsToCommit = [ C || {C, false} <- Checksums ],
+    chef_db:mark_checksums_as_uploaded(Ctx, OrgId, ChecksumsToCommit),
     chef_db:commit_sandbox(Ctx, Sandbox).
 
 sandbox_to_ejson(#chef_sandbox{id = Id, checksums = Checksums}) ->
