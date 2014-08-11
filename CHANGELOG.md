@@ -24,6 +24,7 @@
 * [OC-11673] Tune PostgreSQL keepalive timeouts
 * [OC-11668] enable ipv6 in standalone mode
 * [OC-11710] Fix couchdb compaction log rotation
+* [OC-11540] Fix invalid opscode-account config when forcing SSL
 
 ### private-chef-ctl
 
