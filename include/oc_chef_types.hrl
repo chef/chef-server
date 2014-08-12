@@ -2,6 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Stephen Delano <stephen@opscode.com>
 %% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%% Copyright 2014 Chef, Inc. All Rights Reserved.
 
 -record(oc_chef_container, {
           id,
