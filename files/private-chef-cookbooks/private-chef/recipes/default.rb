@@ -58,6 +58,16 @@ else
   node.consume_attributes(PrivateChef.generate_config(node['fqdn']))
 end
 
+# Warn about deprecated opscode_webui settings
+opscode_webui_deprecation_notice = OpscodeWebuiDeprecationNotice.new(
+  PrivateChef['opscode_webui']
+)
+log 'opscode_webui deprecation notice' do
+  message opscode_webui_deprecation_notice.message
+  level :warn
+  only_if { opscode_webui_deprecation_notice.applicable? }
+end
+
 # @todo: This seems like it might belong in the PrivateChef helper;
 #   many other attributes like are set automatically there as well.
 if OmnibusHelper.has_been_bootstrapped?
