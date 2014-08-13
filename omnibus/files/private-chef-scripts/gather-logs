@@ -170,6 +170,12 @@ echo '## /etc/hosts' >> "$name_resolution_file"
 cat /etc/hosts >> "$name_resolution_file"
 add_footer "$name_resolution_file"
 
+for fileperms in \
+  /var/opt/opscode \
+  /var/log/opscode; do
+  ls -altuhR $fileperms > "$tmpdir/perms.txt"
+done
+
 tar -C "${tmpdir%/*/*}" -cjf "$hostname-$timestamp.tbz2" "$hostname/$timestamp/"
 
 rm -rf "${tmpdir%/*/*}"
