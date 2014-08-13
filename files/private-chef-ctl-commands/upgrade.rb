@@ -68,6 +68,22 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     return answer == 'Y' || answer == 'y'
   end
 
+  def wait_for_ready_server(server_version)
+    1.upto(120) do |count|
+      begin
+        server_status = JSON.parse(open('http://localhost:8000/_status').read)
+        fail unless server_status['status'] == 'pong'
+      # Catch exceptions because if the server isn't yet up trying to open the status endpoint throws one
+      rescue Exception => e
+        sleep 1
+        if count == 120
+          log "Timeout waiting for #{server_version} server to start. Received expection #{e.message}"
+          exit 1
+        end
+      end
+    end
+  end
+
   ### Start script ###
 
   parse(ARGV)
@@ -87,7 +103,8 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
   reconfigure(false)
   Dir.chdir(File.join(base_path, "embedded", "service", "partybus"))
   bundle = File.join(base_path, "embedded", "bin", "bundle")
-  status = run_command("echo 'Sleeping for 2 minutes before migration' ; sleep 120 ; #{bundle} exec ./bin/partybus upgrade")
+  wait_for_ready_server("Enterprise Chef")
+  status = run_command("#{bundle} exec ./bin/partybus upgrade")
   if status.success?
     puts "Chef Server Upgraded!"
     exit 0

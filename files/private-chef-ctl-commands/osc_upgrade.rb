@@ -109,27 +109,6 @@ def run_osc_upgrade
 
     log "Open Source chef server upgraded to an Enterprise Chef server"
 
-    # Need to ensure all of OSC is stopped
-    # By default, pkill sends TERM, which will cause runsv,runsvdir, and svlogd to shutdown
-    # Doing this will completely hose OSC so that a start command won't restart it, if needed
-    # If we're going to make this process as idempotent as possible, we'll need to work around this
-    # Maybe it's best to do this at the end ... or do we let the user manually remove OSC
-    # with a package uninstall?
-    # Once we do this we lose most hope at being idempotent
-    # Maybe prompt the user before doing this and off to give them steps to do this
-    # manually if they don't want this done automatically?
-  #  log "Ensuring all the runit processes associated with the Open Source Server are stopped"
-  #  run_command("pkill runsv")
-  #  run_command("pkill runsvdir")
-  #  run_command("pkill svlogd")
-    # epmd lives outside of runit, but a pkill will do just fine here too
-  #  run_command("pkill epmd")
-
-    # This could all be run at the end, so that OSC could be brought back up if
-    # needed, but then this would also kill EC. This code will need to be re-worked
-    # so it only removes OSC and leaves EC in place, or else the user needs to
-    # be directed on how to do this.
-
     # The OSC bits still live on the system - do we delete them here?
     # For example, /opt/chef-server is still in the path, but /opt/opscode is not
     # on dev-vm testing
@@ -178,8 +157,7 @@ def run_osc_upgrade
     log 'Ensuring the Open Source Chef server is started'
     msg = "Unable to start Open Source Chef server, which is needed to complete the upgrade"
     check_status(run_command("chef-server-ctl start"), msg)
-    # start command can return faster than the services are ready; resulting in 502 gateway
-    sleep(10)
+    wait_for_ready_server("Open Source Chef")
   end
 
   def check_status(status, msg)
@@ -264,15 +242,7 @@ def run_osc_upgrade
     msg = "Unable to start Enterprise Chef, which is needed to complete the upgrade"
     status = run_command("private-chef-ctl start")
     check_status(status, msg)
-    # Wait for services to come up.
-    # This is longer than for OSC because we need the org system to be provisioned
-    # It might be more ideal to rely on the service retry logic (just take this sleep out)
-    # or to build in some kind of retry logic here.
-    # In testing, the commands begin working on the 4th retry of 5, but that might not
-    # be true on slower systems
-    # TODO: Replace this with logic that pings the _status endpoint to see if
-    # the services are up, or retries an operation until it succeeds
-    sleep(120)
+    wait_for_ready_server("Enterprise Chef")
   end
 
   def stop_ec
