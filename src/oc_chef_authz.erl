@@ -43,7 +43,8 @@
          ping/0,
          remove_actor_from_actor_acl/2,
          remove_ace_for_entity/6,
-         add_ace_for_entity/6
+         add_ace_for_entity/6,
+         superuser_id/0
         ]).
 
 -ifdef(TEST).
@@ -88,6 +89,10 @@ ping() ->
 make_context(ReqId, Darklaunch)  ->
     oc_chef_authz_db:make_context(ReqId, Darklaunch).
 
+-spec superuser_id() -> oc_authz_id().
+superuser_id() ->
+    envy:get(oc_chef_authz, authz_superuser_id, binary).
+
 %% @doc Creates a new Authz entity, if the requestor has the necessary permissions.
 %%
 %% `Creator' either a requestor ID or the atom 'superuser'.  It should only be the superuser
@@ -113,7 +118,7 @@ make_context(ReqId, Darklaunch)  ->
                                          {error, forbidden}.
 create_entity_if_authorized(Context, OrgId, superuser, ObjectType) ->
     ContainerAId = get_container_aid_for_object(Context, OrgId, ObjectType),
-    AuthzSuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
+    AuthzSuperuserId = superuser_id(),
     create_entity_with_container_acl(AuthzSuperuserId, ContainerAId, ObjectType);
 create_entity_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
     ContainerAId = get_container_aid_for_object(Context, OrgId, ObjectType),
