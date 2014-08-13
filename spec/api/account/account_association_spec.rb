@@ -334,10 +334,7 @@ describe "opscode-account user association", :association do
       end
 
       it "unless the user is already in the org" do
-        invite_id = invite_user(platform.test_org.name, bad_user, platform.admin_user)
-        check_invite_for_user(platform.bad_user, invite_id)
-        user_invite_url = make_user_assoc_url_id(bad_user, invite_id)
-        response = put(user_invite_url, platform.bad_user, :payload=>{:response=>"accept"})
+        platform.associate_user_with_org(platform.test_org.name, platform.bad_user)
         response = post(api_url("association_requests"),
                            platform.admin_user, :payload=>make_invite_payload(bad_user))
 
@@ -449,10 +446,7 @@ describe "opscode-account user association", :association do
 
       context "after a user is deleted from an org" do
         before :each do
-          invite_id = invite_user(platform.test_org.name, bad_user, platform.admin_user)
-          user_invite_url = make_user_assoc_url_id(bad_user, invite_id)
-          response = put(user_invite_url, platform.bad_user, :payload=>{:response=>"accept"})
-          response.should look_like({ :status => 200, :body => accept_response_body })
+          platform.associate_user_with_org(platform.test_org.name, platform.bad_user)
           response = delete(api_url("users/#{bad_user}"), platform.admin_user)
           response.should look_like({ :status=> 200 })
         end
@@ -611,8 +605,7 @@ describe "opscode-account user association", :association do
       describe "belonging to another org as well" do
         it "can accept an invite, even when they belong to another org" do
 
-          invite_id = invite_user(other_org, platform.bad_user.name, platform.superuser)
-          accept_invite(platform.bad_user, other_org, invite_id)
+          platform.associate_user_with_org(platform.test_org.name, platform.bad_user)
 
           invite_id_2 = invite_user(platform.test_org.name, platform.bad_user.name, platform.admin_user)
           accept_invite(platform.bad_user, platform.test_org.name, invite_id_2)
