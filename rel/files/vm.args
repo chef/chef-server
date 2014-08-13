@@ -4,6 +4,12 @@
 ## Cookie for distributed erlang
 -setcookie erchef
 
+## Enable SMP even on single-core machines
+## The Erchef keygen cache feature uses
+## enif_send, which does not work on single-
+## core machines unless SMP is enabled.
+-smp enable
+
 ## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
 ## (Disabled by default..use with caution!)
 ##-heart
