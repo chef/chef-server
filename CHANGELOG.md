@@ -89,6 +89,9 @@
 * [OC-11297] tweak partybus migration-level subscribes for a more reliable workaround
 * Add bifrost_sql_database uri to orgmapper.conf
 
+### opscode-platform-debug
+* Upgrade to rel-0.5.1
+
 ### private-chef-ctl
 
 * Add a gather-logs command to create a tarball of important logs and
