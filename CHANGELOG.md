@@ -44,6 +44,7 @@
 * [OC-11668] Enable ipv6 in standalone mode
 * [OC-11673] Tune PostgreSQL keepalive timeouts
 * [OC-11710] Fix couchdb compaction log rotation
+* Add bifrost_sql_database uri to orgmapper.conf
 
 ### private-chef-ctl
 
