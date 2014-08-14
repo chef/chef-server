@@ -31,7 +31,7 @@
                   "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
        {sqerl,".*",
               {git,"git://github.com/opscode/sqerl.git",
-                   "f49e97558ae8b54d773607fd1256ac96216e0d30"}},
+                   "4cfcff821b036939be46ca366fc514775962fdf4"}},
        {edown,".*",
               {git,"git://github.com/seth/edown.git",
                    "30a9f7867d615af45783235faa52742d11a9348e"}},
@@ -122,15 +122,12 @@
        {chef_wm,".*",
                 {git,"git@github.com:opscode/chef_wm.git",
                      "3df33223bf89dfcf96a4c013f0e7ab24c0f62b6a"}},
-       {oc_chef_action,".*",
-                       {git,"git@github.com:opscode/oc_chef_action.git",
-                            "398e5e8b668d9826251fed9eb8278abd9f197481"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
-                        "063583071b94a17ea20934062bf6b4aac252c877"}},
+                        "3fb282bedecdc935ed7afee55de1248ce311d204"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "56206a0bc7f15870f9aa4013de3f9808893347db"}}]}.
+                  "8a2e0ba5d21cd9d0aace52a7fb875948497aac48"}}]}.
 {plugins,[rebar_lock_deps_plugin]}.
 {cover_enabled,true}.
 {erl_opts,[{d,'OC_CHEF'},
