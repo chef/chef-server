@@ -27,7 +27,7 @@
 ### chef 11.12.2
 * Update embedded chef gem to 11.12.2
 
-### opscode-platform-debug rel-0.5.0
+### opscode-platform-debug rel-0.5.1
 * Add authz API support
 
 ### opscode-software

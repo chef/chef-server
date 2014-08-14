@@ -8,6 +8,7 @@ The following items are new for Enterprise Chef 11.2.0 and/or are
 changes from previous versions:
 
 * [private-chef-cookbooks] Add bifrost_sql_database uri to orgmapper.conf
+* [opscode-platform-debug] Upgrade to rel-0.5.1
 * [private-chef-ctl] Add a gather-logs command to create a tarball of
   important logs and system information.
 * [oc-id] Add Chef Identity Service.  This enables Supermaket authentication
