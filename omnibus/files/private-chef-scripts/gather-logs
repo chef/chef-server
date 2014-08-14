@@ -20,7 +20,7 @@ then
     path='opscode'
     ctl_cmd='private-chef-ctl'
     config_name='chef-server.rb'
-    ha=$(egrep -qs 'topology\s+.*ha' /etc/opscode/chef-server.rb)$?
+    ha=$(egrep -qs 'topology[[:space:]]+.*ha' /etc/opscode/chef-server.rb)$?
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then
