@@ -7,6 +7,7 @@ OrgMapper.configure do |mapper|
   mapper.chargify_site = ''
   mapper.chargify_api_secret = ''
   mapper.sql_database = '<%= @helper.db_connection_uri %>'
+  mapper.bifrost_sql_database = '<%= @helper.bifrost_db_connection_uri %>'
 end
 
 Chef::Config[:persistent_queue] = true

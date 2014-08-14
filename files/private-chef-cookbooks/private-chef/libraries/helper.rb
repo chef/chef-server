@@ -38,6 +38,16 @@ class OmnibusHelper
     "#{db_protocol}://#{db_user}:#{db_password}@#{db_vip}/#{db_name}"
   end
 
+  def bifrost_db_connection_uri
+    db_protocol = "postgres"
+    db_user     = node['private_chef']['oc_bifrost']['sql_user']
+    db_password = node['private_chef']['oc_bifrost']['sql_password']
+    db_vip      = vip_for_uri('oc_bifrost')
+    db_name     = "bifrost"
+
+    "#{db_protocol}://#{db_user}:#{db_password}@#{db_vip}/#{db_name}"
+  end
+
   # This file is touched once initial bootstrapping of the system is
   # done.
   def self.bootstrap_sentinel_file
