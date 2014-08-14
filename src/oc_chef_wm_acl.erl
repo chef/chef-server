@@ -91,9 +91,9 @@ validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
     Name = chef_wm_util:object_name(Type, Req),
     AuthzId = case Type of
                   cookbook ->
-                      oc_chef_authz:fetch_cookbook_id(DbContext, Name, OrgName);
+                      oc_chef_authz_acl:fetch_cookbook_id(DbContext, Name, OrgName);
                   NotCookbook ->
-                      oc_chef_authz:fetch_id(NotCookbook, DbContext, Name, OrgId)
+                      oc_chef_authz_acl:fetch_id(NotCookbook, DbContext, Name, OrgId)
               end,
     AclState1 = AclState#acl_state{authz_id = AuthzId},
     % We're doing our own checks, so don't fail on superuser (also, not
@@ -110,7 +110,7 @@ check_acl_auth(Req, #base_state{requestor_id = RequestorId,
             Req1 = chef_wm_util:set_json_body(Req, Message),
             {{halt, 404}, Req1, State#base_state{log_msg = acl_not_found}};
         Id ->
-            Result = oc_chef_authz:has_grant_on(Type, Id, RequestorId),
+            Result = oc_chef_authz_acl:has_grant_on(Type, Id, RequestorId),
             case Result of
                 true ->
                     {authorized, Req, State};
