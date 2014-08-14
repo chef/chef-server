@@ -44,20 +44,20 @@ rabbitmq_service_dir = "/opt/opscode/embedded/service/rabbitmq"
 # we do the symlinking in the build, but we're just making sure that
 # the links are still there in the cookbook
 ######################################################################
-%w[rabbitmqctl rabbitmq-env rabbitmq-multi rabbitmq-server].each do |cmd|
+%w[rabbitmqctl rabbitmq-defaults rabbitmq-env rabbitmq-plugins rabbitmq-server].each do |cmd|
   link "/opt/opscode/embedded/bin/#{cmd}" do
     to File.join(rabbitmq_service_dir, "sbin", cmd)
   end
 end
 
-config_file = File.join(rabbitmq['dir'], "etc", "rabbitmq.conf")
+config_file = File.join(rabbitmq_etc_dir, "rabbitmq.conf")
 
-template "#{rabbitmq_service_dir}/sbin/rabbitmq-env" do
+template "#{rabbitmq_service_dir}/sbin/rabbitmq-defaults" do
   owner "root"
   group "root"
   mode "0755"
-  variables( :config_file => config_file )
-  source "rabbitmq-env.erb"
+  variables( :rabbitmq_dir => rabbitmq_dir,
+             :config_file => config_file )
 end
 
 template config_file do

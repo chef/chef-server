@@ -2,6 +2,9 @@
 
 ## 12.0.0 (Unreleased)
 
+## rabbitmq 3.3.4
+* Upgrade to RabbitMQ 3.3.4
+
 ### oc-chef-pedant 1.0.53
 * Remove /system-recovery endpoint tests
 
