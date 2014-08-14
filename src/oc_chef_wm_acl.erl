@@ -91,7 +91,7 @@ validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
     Name = chef_wm_util:object_name(Type, Req),
     AuthzId = case Type of
                   cookbook ->
-                      fetch_cookbook_id(DbContext, Name, OrgName);
+                      oc_chef_authz:fetch_cookbook_id(DbContext, Name, OrgName);
                   NotCookbook ->
                       oc_chef_authz:fetch_id(NotCookbook, DbContext, Name, OrgId)
               end,
