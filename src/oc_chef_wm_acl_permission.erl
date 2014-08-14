@@ -50,8 +50,6 @@
          from_json/2
         ]).
 
--define(DEFAULT_HEADERS, []).
-
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
@@ -122,30 +120,11 @@ acl_spec(Part) ->
         ]}}
      ]}.
 
-% Translate types; in ACLs, everything is an object, actor, group, or container
-acl_path(node, AuthzId, Part) ->
-    acl_path(object, AuthzId, Part);
-acl_path(role, AuthzId, Part) ->
-    acl_path(object, AuthzId, Part);
-acl_path(data_bag, AuthzId, Part) ->
-    acl_path(object, AuthzId, Part);
-acl_path(environment, AuthzId, Part) ->
-    acl_path(object, AuthzId, Part);
-acl_path(cookbook, AuthzId, Part) ->
-    acl_path(object, AuthzId, Part);
-acl_path(client, AuthzId, Part) ->
-    acl_path(actor, AuthzId, Part);
-acl_path(user, AuthzId, Part) ->
-    acl_path(actor, AuthzId, Part);
-acl_path(organization, AuthzId, Part) ->
-    acl_path(container, AuthzId, Part);
-acl_path(Type, AuthzId, Part) ->
-    "/" ++ atom_to_list(Type) ++ "s/" ++ binary_to_list(AuthzId) ++ "/acl/" ++ Part.
 
 update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
                  Part, OrgId) ->
     try
-        update_part(Part, Data, Type, AuthzId, OrgId)
+        oc_chef_authz_acl:update_part(Part, Data, Type, AuthzId, OrgId)
     catch
         throw:forbidden ->
             forbidden;
@@ -155,47 +134,6 @@ update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
             forbidden
     end.
 
-convert_group_names_to_ids(GroupNames, OrgId) ->
-    oc_chef_group:find_group_authz_ids(GroupNames, OrgId, fun chef_sql:select_rows/1).
-
-convert_actor_names_to_ids(Names, OrgId) ->
-    ClientIds = oc_chef_group:find_client_authz_ids(Names, OrgId,
-                                                    fun chef_sql:select_rows/1),
-    UserIds = oc_chef_group:find_user_authz_ids(Names, fun chef_sql:select_rows/1),
-    ClientIds ++ UserIds.
-
-names_to_ids(Ace, OrgId) ->
-    ActorNames = ej:get({<<"actors">>}, Ace),
-    GroupNames = ej:get({<<"groups">>}, Ace),
-    ActorIds = convert_actor_names_to_ids(ActorNames, OrgId),
-    % Check to make sure everything got converted; if something is missing,
-    % there was an invalid actor or group name in the request body
-    case length(ActorNames) == length(ActorIds) of
-        false ->
-            throw(bad_actor);
-        _ ->
-            GroupIds = convert_group_names_to_ids(GroupNames, OrgId),
-            case length(GroupNames) == length(GroupIds) of
-                false ->
-                    throw(bad_group);
-                _ ->
-                    Ace1 = ej:set({<<"actors">>}, Ace, ActorIds),
-                    ej:set({<<"groups">>}, Ace1, GroupIds)
-            end
-    end.
-
-update_part(Part, AceRecord, Type, AuthzId, OrgId) ->
-    Ids = names_to_ids(ej:get({Part}, AceRecord), OrgId),
-    Data = ejson:encode(Ids),
-    Path = acl_path(Type, AuthzId, Part),
-    SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
-    Result = oc_chef_authz_http:request(Path, put, ?DEFAULT_HEADERS, Data, SuperuserId),
-    case Result of
-        {error, forbidden} ->
-            throw(forbidden);
-        Other ->
-            Other
-    end.
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
