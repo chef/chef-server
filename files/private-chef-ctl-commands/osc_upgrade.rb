@@ -220,21 +220,9 @@ def run_osc_upgrade
     server_string = "#{sql_user}:#{sql_password}@#{sql_host}:#{sql_port}/opscode_chef"
     db = ::Sequel.connect("postgres://#{server_string}")
 
-    # OSC doesn't have pubkey_version - what should this be filled in as?
-    # EC uses an enum for hash_type that OSC doesn't use.
-    # Need to determine the appropriate values and adjust the data accordingly.
     sql_user_data = db.select(:username, :id, :public_key, :hashed_password, :salt, :hash_type).from(:osc_users)
     sql_users_json =  sql_user_data.all.to_json
-    sql_users = JSON.parse(sql_users_json)
-    sql_users.each do |user|
-      # Assuming bcrypt for now, but there are very likely incompatibilities and edge cases here
-      # This needs more work
-      user["hash_type"] = 'bcrypt'
-      # Set pubkey_version as 0 and not 1 (1 means we a cert was used - it needs to be verified
-      # this was never an option in OSC)
-      user["pubkey_version"] = 0
-    end
-    File.open(key_file, 'w') { |file| file.write(Chef::JSONCompat.to_json_pretty(sql_users))}
+    File.open(key_file, 'w') { |file| file.write(sql_users_json)}
   end
 
   def start_ec
