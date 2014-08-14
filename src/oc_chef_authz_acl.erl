@@ -15,6 +15,7 @@
          acl_path/3,
          acl_auth_path/3,
          fetch_id/4,
+         fetch_cookbook_id/3,
          fetch/2,
          has_grant_on/3,
          update_part/5]).
