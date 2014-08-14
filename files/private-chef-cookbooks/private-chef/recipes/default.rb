@@ -220,7 +220,7 @@ include_recipe "private-chef::sysctl-updates"
   end
 end
 
-include_recipe "ha"
+include_recipe "ha-#{PrivateChef['ha']['provider']}" # default is drdb
 
 include_recipe "private-chef::actions" if darklaunch_values["actions"]
 
