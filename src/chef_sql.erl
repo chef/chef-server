@@ -92,6 +92,10 @@
          %% for license
          count_nodes/0,
 
+         %% for orgs
+         fetch_org_id/1,
+         fetch_org_id_and_authz/1,
+
          sql_now/0,
          ping/0,
          statements/0,
@@ -135,6 +139,32 @@ ping() ->
 %% Return a node count
 count_nodes() ->
     sqerl:select(count_nodes, [], first_as_scalar, [count]).
+
+%% for organization id (only for enterprise chef)
+%%
+fetch_org_id(OrgName) ->
+    case sqerl:select(find_org_id_by_name, [OrgName], first_as_scalar, [id]) of
+        {ok, L} when is_binary(L) ->
+            {ok, L};
+        {ok, none} ->
+            {ok, []};
+        {error, Error} ->
+            {error, Error}
+    end.
+
+%% @doc Return the org GUID and authz_id for a given organization name (enterprise chef only)
+fetch_org_id_and_authz(OrgName) ->
+    %% This would be neater if we had first_as_tuple or first_as_array
+    case sqerl:select(find_org_id_and_authz_by_name, [OrgName], first, []) of
+        {ok, none} ->
+            {ok, []};
+        {ok, L} when is_list(L) ->
+            Guid = proplists:get_value(<<"id">>,L),
+            AuthzId = proplists:get_value(<<"authz_id">>, L),
+            {ok, Guid, AuthzId};
+        {error, Error} ->
+            {error, Error}
+    end.
 
 %%
 %% chef user ops

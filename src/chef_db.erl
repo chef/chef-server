@@ -37,6 +37,7 @@
          user_record_to_authz_id/2,
          %% fetch_org/2,
          fetch_org_id/2,
+         fetch_org_id_and_authz/2,
          client_record_to_authz_id/2,
 
          fetch_requestor/3,
@@ -226,6 +227,10 @@ update(ObjectRec, #context{reqid = ReqId}, ActorId) ->
 darklaunch_from_context(#context{darklaunch = Darklaunch}) ->
     Darklaunch.
 
+%% TODO: Fix this up in a cleaner form and check that 'organizations' is right key
+darklaunch_orgs(#context{darklaunch = Darklaunch}) ->
+    chef_db_darklaunch:is_enabled(organizations, Darklaunch).
+
 -spec count_user_admins(#context{}) -> integer() | {error, term()}.
 count_user_admins(#context{reqid = ReqId}) ->
   case stats_hero:ctime(ReqId, {chef_sql, count_user_admins},
@@ -245,10 +250,17 @@ user_record_to_authz_id(#context{}, not_found) ->
 fetch_org_id(_, ?OSC_ORG_NAME) ->
     ?OSC_ORG_ID;
 fetch_org_id(#context{reqid = ReqId,
-                      otto_connection = Server}, OrgName) when is_binary(OrgName) ->
+                      otto_connection = Server} = Context, OrgName) when is_binary(OrgName) ->
     case chef_cache:get(org_guid, OrgName) of
         Error when Error =:= not_found orelse Error =:= no_cache ->
-            case ?SH_TIME(ReqId, chef_otto, fetch_org_id, (Server, OrgName)) of
+            Result =
+                case darklaunch_orgs(Context) of
+                    true ->
+                        ?SH_TIME(ReqId, chef_sql, fetch_org_id, (OrgName));
+                    false ->
+                        ?SH_TIME(ReqId, chef_otto, fetch_org_id, (Server, OrgName))
+                end,
+            case Result of
                 not_found ->
                     not_found;
                 Guid ->
@@ -258,6 +270,27 @@ fetch_org_id(#context{reqid = ReqId,
         {ok, Guid} ->
             Guid
     end.
+
+-spec fetch_org_id_and_authz(#context{}, binary() | ?OSC_ORG_NAME) -> not_found | {binary(), binary()}.
+fetch_org_id_and_authz(_, ?OSC_ORG_NAME) ->
+    ?OSC_ORG_ID;
+fetch_org_id_and_authz(#context{reqid = ReqId,
+                                otto_connection = Server} = Context, OrgName) when is_binary(OrgName) ->
+    Result =
+        case darklaunch_orgs(Context) of
+            true ->
+                ?SH_TIME(ReqId, chef_sql, fetch_org_id_and_authz, (OrgName));
+            false ->
+                ?SH_TIME(ReqId, chef_otto, fetch_org_id_and_authz, (Server, OrgName))
+        end,
+    case Result of
+        not_found ->
+            not_found;
+        {ok, Guid, AuthzId} ->
+            chef_cache:put(org_guid, OrgName, Guid),
+            {Guid, AuthzId}
+    end.
+
 
 client_record_to_authz_id(_Context, ClientRecord) ->
     ClientRecord#chef_client.authz_id.
