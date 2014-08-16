@@ -64,7 +64,6 @@ module PrivateChef
   notification_email nil
   from_email nil
   role nil
-
   user Mash.new
 
   ldap Mash.new
@@ -257,6 +256,9 @@ module PrivateChef
       results['private_chef']['logs']['log_rotation'] = PrivateChef['log_rotation']
       results['private_chef']['dark_launch'] = PrivateChef['dark_launch']
       results['private_chef']['opscode-erchef']['max_request_size'] = PrivateChef["opscode_erchef"]["max_request_size"]
+      results['private_chef']['plugins'] = {}
+      results['private_chef']['plugins']['enabled'] = PrivateChef['active_plugins']
+      results['private_chef']['plugins']['disabled'] = PrivateChef['inactive_plugins']
       results
     end
 
@@ -398,6 +400,41 @@ module PrivateChef
       end
     end
 
+    def gen_plugins
+      plugins_with_cookbooks = Dir.glob('/opt/*/embedded/cookbooks')
+      installed_plugins = plugins_with_cookbooks.map{|plugin| plugin.split('/')[-3] }
+
+      PrivateChef["plugins"] =|| []
+
+      PrivateChef["installed_plugins"] = installed_plugins
+      PrivateChef["active_plugins"] = []
+      PrivateChef["inactive_plugins"] = []
+      PrivateChef["ignored_plugins"] = []
+
+      if PrivateChef['topology'] == "ha"
+        PrivateChef["active_plugins"] << "chef-ha"
+      end
+
+      configured_plugins = installed_plugins | PrivateChef["plugins"]
+
+      all_plugins.each do |plugin|
+        case
+        # Installed and enabled
+        when configured_plugins.include?(plugin) AND installed_plugins.include?(plugin)
+          PrivateChef["active_plugins"] << plugin
+
+        # Installed but not enabled
+        when NOT configured_plugins.include?(plugin) AND installed_plugins.include?(plugin)
+          PrivateChef["inactive_plugins"] << plugin
+
+        # Enabled but not installed
+        when configured_plugins.include?(plugin) AND NOT installed_plugins.include?(plugin)
+          Chef::Log.warn("The #{plugin} is not currently installed and will be ignored.")
+          PrivateChef["ignored_plugins"] << plugin
+        end
+      end
+    end
+
     def generate_config(node_name)
       generate_secrets(node_name)
 
@@ -433,6 +470,8 @@ module PrivateChef
       unless PrivateChef["ldap"].nil? || PrivateChef["ldap"].empty?
         gen_ldap
       end
+
+      gen_plugins
 
       generate_hash
     end

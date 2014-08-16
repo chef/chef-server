@@ -220,6 +220,7 @@ include_recipe "private-chef::sysctl-updates"
   end
 end
 
+include_recipe "private-chef::plugins"
 
 include_recipe "private-chef::actions" if darklaunch_values["actions"]
 

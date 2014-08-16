@@ -12,3 +12,7 @@ recipe            "chef-server", "Configures the Chef Server from Omnibus"
 end
 
 depends          'enterprise' # grabbed via Berkshelf + Git
+
+PrivateChef["installed_plugins"].each do |plugin|
+  depends plugin
+end
