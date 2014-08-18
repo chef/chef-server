@@ -2,6 +2,19 @@ require 'pedant/rspec/common'
 
 describe "ACL API", :acl do
 
+  def self.ruby?
+    Pedant::Config.ruby_acl_endpoint?
+  end
+
+  let(:unsupported_method_status) {
+    # Organizations don't use this yet, still routed to opscode-account
+    if (ruby?)
+      404
+    else
+      405
+    end
+  }
+
   # (temporarily?) deprecating /users/*/_acl endpoint due to its broken state and lack of usefulness
   pending "/users/<name>/_acl endpoint" do
     let(:username) { platform.admin_user.name }
@@ -256,7 +269,7 @@ describe "ACL API", :acl do
       end
 
       #
-      # There's a clause 'with modified acls' for organization objects below that should be extended
+      # There's a clause 'with modified acls' for organizations objects below that should be extended
       # here, but some of the semantics around what they should be are unclear to me
       #
 
@@ -264,10 +277,10 @@ describe "ACL API", :acl do
     end
   end
 
-  context "/organization/_acl endpoint" do
-    let(:request_url) { api_url("organization/_acl") }
+  context "/organizations/_acl endpoint" do
+    let(:request_url) { api_url("organizations/_acl") }
 
-    context "GET /organization/_acl" do
+    context "GET /organizations/_acl" do
       let(:actors) { ["pivotal"] }
       let(:groups) { ["admins"] }
       let(:read_groups) { ["admins", "users"] }
@@ -341,7 +354,7 @@ describe "ACL API", :acl do
 
         context "when normal user granted all permissions except GRANT" do
           it "returns 403" do
-            restrict_permissions_to("organization",
+            restrict_permissions_to("organizations",
               platform.non_admin_user => ['create', 'read', 'update', 'delete'])
             get(request_url, platform.non_admin_user).should look_like({
                 :status => 403
@@ -351,7 +364,7 @@ describe "ACL API", :acl do
 
         context "when normal client granted all permisions except GRANT" do
           it "returns 403", :smoke do
-            restrict_permissions_to("organization",
+            restrict_permissions_to("organizations",
               platform.non_admin_client => ['create', 'read', 'update', 'delete'])
             get(request_url, platform.non_admin_client).should look_like({
                 :status => 403
@@ -361,7 +374,7 @@ describe "ACL API", :acl do
 
         context "when normal user granted GRANT permission" do
           it "can get ACL" do
-            restrict_permissions_to("organization",
+            restrict_permissions_to("organizations",
               platform.non_admin_user => ['grant'])
             get(request_url, platform.non_admin_user).should look_like({
                 :status => 200
@@ -371,7 +384,7 @@ describe "ACL API", :acl do
 
         context "when normal client granted GRANT permision" do
           it "can get ACL", :smoke do
-            restrict_permissions_to("organization",
+            restrict_permissions_to("organizations",
               platform.non_admin_client => ['grant'])
             get(request_url, platform.non_admin_client).should look_like({
                 :status => 200
@@ -379,44 +392,41 @@ describe "ACL API", :acl do
           end
         end
       end # context with modified ACLs
-    end # context GET /organization/_acl
+    end # context GET /organizations/_acl
 
-    context "PUT /organization/_acl" do
+    context "PUT /organizations/_acl" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        it "returns 405" do
           put(request_url, platform.admin_user).should look_like({
               :status => 404
             })
         end
       end
-    end # context PUT /organization/_acl
+    end # context PUT /organizations/_acl
 
-    context "POST /organization/_acl" do
+    context "POST /organizations/_acl" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        it "returns 405" do
           post(request_url, platform.admin_user).should look_like({
               :status => 404
             })
         end
       end
-    end # context POST /organization/_acl
+    end # context POST /organizations/_acl
 
-    context "DELETE /organization/_acl" do
+    context "DELETE /organizations/_acl" do
       context "admin user" do
-        # A 405 here would be fine (better, even)
-        it "returns 404" do
+        it "returns 405" do
           delete(request_url, platform.admin_user).should look_like({
               :status => 404
             })
         end
       end
-    end # context DELETE /organization/_acl
-  end # context /organization/_acl endpoint
+    end # context DELETE /organizations/_acl
+  end # context /organizations/_acl endpoint
 
   ["create", "read", "update", "delete", "grant"].each do |permission|
-    context "/organization/_acl/#{permission} endpoint" do
+    context "/organizations/_acl/#{permission} endpoint" do
       # Don't run a smoke test test for every permission (to keep the smoke test count
       # from being unnecessarily repetetive)
       if (permission == "read")
@@ -425,10 +435,10 @@ describe "ACL API", :acl do
         smoketest = :notsmoke
       end
 
-      let(:acl_url) { api_url("organization/_acl") }
-      let(:request_url) { api_url("organization/_acl/#{permission}") }
+      let(:acl_url) { api_url("organizations/_acl") }
+      let(:request_url) { api_url("organizations/_acl/#{permission}") }
 
-      context "PUT /organization/_acl/#{permission}" do
+      context "PUT /organizations/_acl/#{permission}" do
         let(:actors) { ["pivotal"] }
         let(:groups) { ["admins"] }
         let(:read_groups) { ["admins", "users"] }
@@ -647,7 +657,7 @@ describe "ACL API", :acl do
           context "when normal user granted all permissions except GRANT" do
             # We only run the smoke tests for read permission (set above)
             it "returns 403" do
-              restrict_permissions_to("organization",
+              restrict_permissions_to("organizations",
                 platform.non_admin_user => ['create', 'read', 'update', 'delete'])
               put(request_url, platform.non_admin_user,
                 :payload => request_body).should look_like({
@@ -659,7 +669,7 @@ describe "ACL API", :acl do
           context "when normal client granted all permisions except GRANT" do
             # We only run the smoke tests for read permission (set above)
             it "returns 403" do
-              restrict_permissions_to("organization",
+              restrict_permissions_to("organizations",
                 platform.non_admin_client => ['create', 'read', 'update', 'delete'])
               put(request_url, platform.non_admin_client,
                 :payload => request_body).should look_like({
@@ -671,7 +681,7 @@ describe "ACL API", :acl do
           context "when normal user granted GRANT permission" do
             # We only run the smoke tests for read permission (set above)
             it "can modify ACL", smoketest do
-              restrict_permissions_to("organization",
+              restrict_permissions_to("organizations",
                 platform.non_admin_user => ['grant'])
               put(request_url, platform.non_admin_user,
                 :payload => request_body).should look_like({
@@ -683,7 +693,7 @@ describe "ACL API", :acl do
           context "when normal client granted GRANT permision" do
             # We only run the smoke tests for read permission (set above)
             it "can modify ACL" do
-              restrict_permissions_to("organization",
+              restrict_permissions_to("organizations",
                 platform.non_admin_client => ['grant'])
               put(request_url, platform.non_admin_client,
                 :payload => request_body).should look_like({
@@ -692,40 +702,37 @@ describe "ACL API", :acl do
             end
           end
         end # context with modified ACLs
-      end # context PUT /organization/_acl/<permission>
+      end # context PUT /organizations/_acl/<permission>
 
-      context "GET /organization/_acl/#{permission}" do
+      context "GET /organizations/_acl/#{permission}" do
         context "admin user" do
-          # A 405 here would be fine (better, even)
-          it "returns 404" do
+          it "returns 405" do
             get(request_url, platform.admin_user).should look_like({
                 :status => 404
               })
           end
         end
-      end # context GET /organization/_acl/<permission>
+      end # context GET /organizations/_acl/<permission>
 
-      context "POST /organization/_acl/#{permission}" do
+      context "POST /organizations/_acl/#{permission}" do
         context "admin user" do
-          # A 405 here would be fine (better, even)
-          it "returns 404" do
+          it "returns 405" do
             post(request_url, platform.admin_user).should look_like({
                 :status => 404
               })
           end
         end
-      end # context POST /organization/_acl/<permission>
+      end # context POST /organizations/_acl/<permission>
 
-      context "DELETE /organization/_acl/#{permission}" do
+      context "DELETE /organizations/_acl/#{permission}" do
         context "admin user" do
-          # A 405 here would be fine (better, even)
-          it "returns 404" do
+          it "returns 405" do
             delete(request_url, platform.admin_user).should look_like({
                 :status => 404
               })
           end
         end
-      end # context DELETE /organization/_acl/<permission>
+      end # context DELETE /organizations/_acl/<permission>
     end # context /organizations/_acl/<permission> endpoint
   end # loop (each) over permissions
 
@@ -1007,10 +1014,9 @@ describe "ACL API", :acl do
 
         context "PUT /#{type}/<name>/_acl" do
           context "admin user" do
-            # A 405 here would be fine (better, even)
-            it "returns 404" do
+            it "returns 405" do
               put(request_url, platform.admin_user).should look_like({
-                  :status => 404
+                  :status => unsupported_method_status
                 })
             end
           end
@@ -1018,10 +1024,9 @@ describe "ACL API", :acl do
 
         context "POST /#{type}/<name>/_acl" do
           context "admin user" do
-            # A 405 here would be fine (better, even)
-            it "returns 404" do
+            it "returns 405" do
               post(request_url, platform.admin_user).should look_like({
-                  :status => 404
+                  :status => unsupported_method_status
                 })
             end
           end
@@ -1029,10 +1034,9 @@ describe "ACL API", :acl do
 
         context "DELETE /#{type}/<name>/_acl" do
           context "admin user" do
-            # A 405 here would be fine (better, even)
-            it "returns 404" do
+            it "returns 405" do
               delete(request_url, platform.admin_user).should look_like({
-                  :status => 404
+                  :status => unsupported_method_status
                 })
             end
           end
@@ -1053,10 +1057,9 @@ describe "ACL API", :acl do
 
             context "GET /#{type}/<name>/_acl/#{permission}" do
               context "admin user" do
-                # A 405 here would be fine (better, even)
-                it "returns 404" do
+                it "returns 405" do
                   get(permission_request_url, platform.admin_user).should look_like({
-                      :status => 404
+                      :status => unsupported_method_status
                     })
                 end
               end
@@ -1320,10 +1323,9 @@ describe "ACL API", :acl do
 
             context "POST /#{type}/<name>/_acl/#{permission}" do
               context "admin user" do
-                # A 405 here would be fine (better, even)
-                it "returns 404" do
+                it "returns 405" do
                   post(permission_request_url, platform.admin_user).should look_like({
-                      :status => 404
+                      :status => unsupported_method_status
                     })
                 end
               end
@@ -1331,10 +1333,9 @@ describe "ACL API", :acl do
 
             context "DELETE /#{type}/<name>/_acl/#{permission}" do
               context "admin user" do
-                # A 405 here would be fine (better, even)
-                it "returns 404" do
+                it "returns 405" do
                   delete(permission_request_url, platform.admin_user).should look_like({
-                      :status => 404
+                      :status => unsupported_method_status
                     })
                 end
               end
