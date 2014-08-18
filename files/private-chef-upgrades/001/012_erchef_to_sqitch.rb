@@ -4,6 +4,8 @@ define_upgrade do
 
     must_be_data_master
 
+    start_service('postgresql')
+
     # This command ensures Sqitch has all the metadata for changes to
     # the core schema up to version 1.0.1.  All these changes are
     # already in the schema.
@@ -22,6 +24,8 @@ define_upgrade do
     # existing schema, so it is '--log-only'.
     run_command("sqitch --db-user opscode-pgsql deploy --log-only --to-target @2.0.0",
                 :cwd => "/opt/opscode/embedded/service/enterprise-chef-server-schema")
+
+    stop_service('postgresql')
 
   end
 end

@@ -8,25 +8,18 @@ define_upgrade do
 
     must_be_data_master
 
-    # Shut down everything but couch & postgres
-    down_services = ['nginx',
-                     'opscode-org-creator',
-                     'bookshelf',
-                     'oc_bifrost',
-                     'opscode-account',
-                     'opscode-certificate',
-                     'opscode-erchef',
-                     'opscode-expander',
-                     'opscode-expander-reindexer',
-                     'opscode-solr4',
-                     'opscode-rabbitmq']
+    # Make sure API is down
+    stop_services(["nginx", "opscode-erchef"])
 
-    down_services.each{|s| run_command("private-chef-ctl stop #{s}")}
+    # start postgres, as well as opscode-account and couchdb
+    # we can delete pre-created orgs (will shut the latter two
+    # down after we delete pre-created orgs).
+    start_services(['postgresql', 'opscode-account', 'couchdb'])
 
-    # delete pre-created orgs
     run_command("/opt/opscode/embedded/bin/ruby scripts/delete-pre-created-orgs.rb /etc/opscode/orgmapper.conf all",
                 :cwd => "/opt/opscode/embedded/service/opscode-platform-debug/orgmapper",
                 :env => {"RUBYOPT" => "-I/opt/opscode/embedded/lib/ruby/gems/1.9.1/gems/bundler-1.1.5/lib"})
+    stop_services(['opscode-account', 'couchdb'])
 
     # Move any mover log files from a previous run, if they exist.
     # The log message parser requires a "clean slate".
@@ -69,9 +62,7 @@ define_upgrade do
     run_command("find /var/opt/opscode/couchdb/db -name 'chef_*.couch' | xargs rm")
     run_command("rm -rf /var/opt/opscode/couchdb/db/.chef_*_design")
 
-    # Bring everything back up
-    log "Restarting chef services..."
-    down_services.reverse.each{|s| run_command("private-chef-ctl start #{s}")}
+    stop_service('postgresql')
 
     log "Containers and groups migration complete!"
   end

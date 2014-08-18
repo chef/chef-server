@@ -1,5 +1,5 @@
 require 'partybus/schema_migrator'
-require 'partybus/service_restarter'
+require 'partybus/service_manager'
 require 'partybus/command_runner'
 require 'partybus/migration_api/v1'
 
@@ -59,8 +59,34 @@ EOF
 
       def restart_service(service_name)
         log("\tRestarting Service #{service_name}")
-        restarter = Partybus::ServiceRestarter.new
-        restarter.restart_service(service_name)
+        service_manager = Partybus::ServiceManager.new
+        service_manager.restart_service(service_name)
+      end
+
+      def start_service(service_name)
+        log("\tStarting Service #{service_name}")
+        service_manager = Partybus::ServiceManager.new
+        # 100 seconds sleep time by default
+        service_manager.start_service(service_name, 60)
+      end
+
+      def start_services(service_array)
+        log("\tStarting Services #{service_array}")
+        service_manager = Partybus::ServiceManager.new
+        # 100 seconds sleep time by default
+        service_manager.start_services(service_array, 60)
+      end
+
+      def stop_service(service_name)
+        log("\tStopping Service #{service_name}")
+        service_manager = Partybus::ServiceManager.new
+        service_manager.stop_service(service_name, 30)
+      end
+
+      def stop_services(service_array)
+        log("\tStopping Services #{service_array}")
+        service_manager = Partybus::ServiceManager.new
+        service_manager.stop_services(service_array, 60)
       end
 
       def run_command(command, options={})
