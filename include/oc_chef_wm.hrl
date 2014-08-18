@@ -17,6 +17,12 @@
           oc_chef_group :: #oc_chef_group{}
          }).
 
+-record(acl_state, {
+          type,
+          authz_id,
+          acl_data
+         }).
+
 %% Since CS12, we have a default-org mode. Under this mode,
 %% certain endpoints can be routed from
 %% /ENDPOINT -> /organizations/DEFAULT_ORG/ENDPOINT
