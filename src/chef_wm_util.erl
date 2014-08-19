@@ -147,7 +147,9 @@ not_found_message(cookbook_version, {Name, Version}) when is_binary(Version) -> 
 not_found_message(client, Name) ->
     error_message_envelope(iolist_to_binary(["Cannot load client ", Name]));
 not_found_message(user, Name) ->
-    error_message_envelope(iolist_to_binary(["user '", Name, "' not found"])).
+    error_message_envelope(iolist_to_binary(["user '", Name, "' not found"]));
+not_found_message(association, Name) ->
+    error_message_envelope(iolist_to_binary(["user '", Name, "' is not associated with that organization"])).
 
 
 %% "Cannot load data bag item not_really_there for data bag sack"
@@ -203,7 +205,7 @@ set_uri_of_created_resource(Uri, Req0) when is_binary(Uri) ->
 %% the spec will be updated
 -spec object_name(cookbook | node | role | data_bag | data_bag_item |
                   environment | principal | sandbox | client | user |
-                  group | container,
+                  group | container | organization,
                   Request :: #wm_reqdata{}) -> binary() | undefined.
 object_name(node, Req) ->
     extract_from_path(node_name, Req);
@@ -228,7 +230,9 @@ object_name(container, Req) ->
 object_name(client, Req) ->
     extract_from_path(client_name, Req);
 object_name(user, Req) ->
-    extract_from_path(user_name, Req).
+    extract_from_path(user_name, Req);
+object_name(organization, Req) ->
+    extract_from_path(organization_id, Req).
 
 %% @doc Private utility function to extract a path element as a binary.  Returns the atom
 %% `undefined' if no such value exists.
