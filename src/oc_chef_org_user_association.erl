@@ -12,6 +12,7 @@
 -behaviour(chef_object).
 
 -export([
+         parse_binary_json/1,
          authz_id/1,
          is_indexed/0,
          ejson_for_indexing/2,
@@ -25,6 +26,7 @@
          delete_query/0,
          find_query/0,
          list_query/0,
+         ejson_from_list/1,
          bulk_get_query/0,
          fields_for_update/1,
          fields_for_fetch/1,
@@ -34,8 +36,7 @@
          name/1,
          id/1,
          org_id/1,
-         type_name/1,
-         org_user_association_spec/0
+         type_name/1
         ]).
 
 -mixin([
@@ -87,8 +88,12 @@ list_query() ->
 
 list_query(by_org) ->
     list_org_user_associations;
-list_query(by_id) ->
+list_query(by_user) ->
     list_user_org_associations.
+
+ejson_from_list(Associations) ->
+   [ {[{ <<"user">>, {[{<<"username">>, Name}]} }]} || Name <- Associations ].
+
 
 flatten(#oc_chef_org_user_association{ org_id = OrgId, user_id = UserId,
                                        last_updated_by = LastUpdatedBy,
@@ -99,12 +104,21 @@ flatten(#oc_chef_org_user_association{ org_id = OrgId, user_id = UserId,
 bulk_get_query() ->
     erlang:error(not_implemented).
 
+parse_binary_json(Bin) ->
+    EJ = chef_json:decode(Bin),
+    case ej:valid(org_user_association_spec(), EJ) of
+        ok ->
+            {ok, EJ};
+    BadSpec ->
+          throw(BadSpec)
+    end.
+
 fields_for_update(#oc_chef_org_user_association{}) ->
     % An association cannot be updated.
     erlang:error(not_implemented).
 
-fields_for_fetch(#oc_chef_org_user_association{org_id = OrgId, user_id = UserId, user_name = UserName}) ->
-    [OrgId, UserId, UserName].
+fields_for_fetch(#oc_chef_org_user_association{org_id = OrgId, user_id = UserId}) ->
+    [OrgId, UserId].
 
 record_fields() ->
     record_info(fields, oc_chef_org_user_association).
@@ -112,7 +126,7 @@ record_fields() ->
 list(#oc_chef_org_user_association{org_id = OrgId, user_id = undefined}, CallbackFun) ->
     CallbackFun({list_query(by_org), [OrgId], [user_name]});
 list(#oc_chef_org_user_association{user_id = UserId, org_id = undefined}, CallbackFun) ->
-    CallbackFun({list_query(by_user), [UserId], [org_id]}).
+    CallbackFun({list_query(by_user), [UserId],  rows}).
 
 
 % Minor hack, will revisit - not an authz id:

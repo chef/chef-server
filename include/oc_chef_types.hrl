@@ -52,7 +52,9 @@
 -record(oc_chef_org_user_invite, {
           id,
           org_id,
+          org_name,  % Not  part of table - retrieved via join
           user_id,
+          user_name, % Not  part of table - retrieved via join
           last_updated_by,
           created_at,
           updated_at
