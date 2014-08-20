@@ -53,7 +53,7 @@ entry_path_sha(Path) ->
     filename:join([[D11, D12], [D21, D22], [D31, D32], [D41, D42], EncodedPath]).
 
 sha_str(X) ->
-    sha_to_hex_str(crypto:sha(X)).
+    sha_to_hex_str(crypto:hash(sha, X)).
 
 sha_to_hex_str(<<SHA:160/big-unsigned-integer>>) ->
     lists:flatten(io_lib:format("~40.16.0b", [SHA])).

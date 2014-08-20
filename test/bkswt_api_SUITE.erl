@@ -270,7 +270,7 @@ signed_url(Config) when is_list(Config) ->
     Content = "<x>Super Foo</x>",
     Headers = [{"content-type", "text/xml"},
                {"content-md5",
-                erlang:binary_to_list(base64:encode(crypto:md5(Content)))}],
+                erlang:binary_to_list(base64:encode(crypto:hash(md5, Content)))}],
     SignedUrl = mini_s3:s3_url('put', Bucket, "foo", 1000,
                                Headers,
                                S3Conf),
@@ -282,7 +282,7 @@ signed_url(Config) when is_list(Config) ->
                                    [{"content-type", "text/xml"},
                                     {"content-md5",
                                      erlang:binary_to_list(base64:encode(
-                                                             crypto:md5("Something Else")))}],
+                                                             crypto:hash(md5, "Something Else")))}],
                                     "text/xml", Content}, [], []),
   ?assertMatch({ok,{{"HTTP/1.1",403,"Forbidden"}, _, _}},
                Response2).
@@ -298,7 +298,7 @@ signed_url_fail(Config) when is_list(Config) ->
     Content = "<x>Super Foo</x>",
     Headers = [{"content-type", "text/xml"},
                {"content-md5",
-                erlang:binary_to_list(base64:encode(crypto:md5(Content)))}],
+                erlang:binary_to_list(base64:encode(crypto:hash(md5, Content)))}],
     SignedUrl = mini_s3:s3_url('put', Bucket, "foo", -1,
                                Headers,
                                S3Conf),
