@@ -1,6 +1,9 @@
 # Enterprise Chef Changelog
 
-## 11.1.9 (unreleased)
+## 11.2.0 (unreleased)
+
+### Makefile
+* Add Makefile for automating builds
 
 ### adding actions_payload 2014.08.15
 * [CA-555] Update 11.1-stable oc_erchef with latest oc_chef_action
@@ -16,6 +19,7 @@
 * Update to latest of oc_chef_action to get hostname from fqdn instead
   of inet
 * Setting the CHEF_ACTIONS_MESSAGE_VERSION to 0.1.0
+* Sets ['dark_launch']['actions'] = true
 
 ### cacerts 2014.04.22
 * Update to latest cacerts as of 2014-04-22
@@ -23,12 +27,21 @@
 ### chef 11.12.2
 * Update embedded chef gem to 11.12.2
 
+### opscode-platform-debug rel-0.5.0
+* Add authz API support
+
+### opscode-software
+* Refactor PERL Postgres driver installation
+
 ### private-chef-cookbooks
-* [OC-11673] Tune PostgreSQL keepalive timeouts
-* [OC-11668] enable ipv6 in standalone mode
-* [OC-11710] Fix couchdb compaction log rotation
+* [analytics] Copy webui_priv into opscode-analytics if actions is enabled
+* [OC-11297] Tweak partybus migration-level subscribes for a more reliable workaround
+* [OC-11459] Allow opscode-manage to easily be moved off of 443
 * [OC-11540] Fix invalid opscode-account config when forcing SSL
-* [OC-11297] tweak partybus migration-level subscribes for a more reliable workaround
+* [OC-11601] Fix a race condition that sometimes
+* [OC-11668] Enable ipv6 in standalone mode
+* [OC-11673] Tune PostgreSQL keepalive timeouts
+* [OC-11710] Fix couchdb compaction log rotation
 
 ### private-chef-ctl
 
