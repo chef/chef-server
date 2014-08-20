@@ -27,7 +27,8 @@
 %%                          API functions
 %% ===================================================================
 -define(APPS,
-        [crypto,
+        [asn1,
+         crypto,
          public_key,
          ssl,
          inets,
