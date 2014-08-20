@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-name "erlang"
+name "erlang_r15"
 default_version "R15B03-1"
 
 dependency "zlib"
@@ -40,20 +40,20 @@ end
 source :url => "http://www.erlang.org/download/otp_src_#{version}.tar.gz"
 
 env = {
-  "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/erlang/include",
+  "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/erlang_r15/include",
   "LDFLAGS" => "-Wl,-rpath #{install_dir}/embedded/lib -L#{install_dir}/embedded/lib -I#{install_dir}/embedded/erlang/include"
 }
 
 build do
   # set up the erlang include dir
-  command "mkdir -p #{install_dir}/embedded/erlang/include"
+  command "mkdir -p #{install_dir}/embedded/erlang_r15/include"
   %w{ncurses openssl zlib.h zconf.h}.each do |link|
-    command "ln -fs #{install_dir}/embedded/include/#{link} #{install_dir}/embedded/erlang/include/#{link}"
+    command "ln -fs #{install_dir}/embedded/include/#{link} #{install_dir}/embedded/erlang_r15/include/#{link}"
   end
 
   # TODO: build cross-platform. this is for linux
   command(["./configure",
-           "--prefix=#{install_dir}/embedded",
+           "--prefix=#{install_dir}/embedded/erlang_r15",
            "--enable-threads",
            "--enable-smp-support",
            "--enable-kernel-poll",
