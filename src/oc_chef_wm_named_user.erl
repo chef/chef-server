@@ -57,29 +57,28 @@
 
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
-
 init_resource_state(_Config) ->
     {ok, #user_state{}}.
 
 request_type() ->
   "users".
 
+allowed_methods(Req, #base_state{resource_args = list_orgs} = State) ->
+    {['GET'], Req, State};
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
-
-validate_request(Method, Req, #base_state{chef_db_context = DbContext,
-                                          resource_state = UserState} = State) when Method == 'GET';
-                                                                                    Method == 'DELETE' ->
-    User = fetch_user_data(DbContext, Req),
-    UserState1 = UserState#user_state{chef_user = User},
-    {Req, State#base_state{resource_state = UserState1}};
 validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
                                          resource_state = UserState} = State) ->
     Body = wrq:req_body(Req),
     User = fetch_user_data(DbContext, Req),
     {ok, EJson} = chef_user:parse_binary_json(Body, update, User),
     UserState1 = UserState#user_state{chef_user = User, user_data = EJson},
+    {Req, State#base_state{resource_state = UserState1}};
+validate_request(_Method, Req, #base_state{chef_db_context = DbContext,
+                                          resource_state = UserState} = State) ->
+    User = fetch_user_data(DbContext, Req),
+    UserState1 = UserState#user_state{chef_user = User},
     {Req, State#base_state{resource_state = UserState1}}.
 
 fetch_user_data(DbContext, Req) ->
@@ -94,9 +93,13 @@ auth_info(Req, #base_state{resource_state = #user_state{ chef_user = not_found }
 auth_info(Req, State) ->
     auth_info(wrq:method(Req), Req, State).
 
-auth_info(Method, Req, #base_state{resource_state = #user_state{chef_user = User}} = State) ->
-    #chef_user{authz_id = AuthzId} = User,
+auth_info(Method, Req, #base_state{resource_args = undefined, resource_state = #user_state{chef_user = User}} = State) ->
+    #chef_user{authz_id = AuthzId} =   User,
     {auth_type(Method, AuthzId, State), Req, State}.
+auth_info(Method, Req, #base_state{resource_args = associations,
+
+                                   resource_state = #user_state{chef_user = User}} = State) ->
+    case
 
 auth_type('PUT', AuthzId, #user_state{user_data = UserData}) ->
     ExtId = ej:get({<<"external_authentication_uid">>}, UserData),
@@ -131,11 +134,24 @@ from_json(Req, #base_state{resource_state = #user_state{
             end
     end.
 
-to_json(Req, #base_state{resource_state = #user_state{chef_user = User},
+to_json(Req, #base_state{resource_args = undefined,
+                         resource_state = #user_state{chef_user = User},
                          organization_name = OrgName} = State) ->
     EJson = chef_user:assemble_user_ejson(User, OrgName),
     Json = chef_json:encode(EJson),
-    {Json, Req, State}.
+    {Json, Req, State};
+
+to_json(Req, #base_state{ resource_args = org_list,
+                          resource_state = #user_state{chef_user = User }, chef_db_context = DbContext } = State) ->
+
+    case chef_db:list(#oc_chef_org_user_association{user_id = User#chef_user.id}, DbContext) of
+        Names when is_list(Names) ->
+            EJson = [ {[{ <<"organization">>, {[{<<"name">>, ShortName}, {<<"full_name">>, FullName}]} }]} || [ShortName, FullName] <- Names ],
+            {chef_json:encode(EJson), Req, State};
+        Error ->
+            {{halt, 500}, Req, State#base_state{log_msg = Error }}
+    end.
+
 
 delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  requestor_id = RequestorId,
