@@ -1,7 +1,7 @@
 name "oc_authz_migrator"
 default_version "0.0.2"
 
-dependency "erlang"
+dependency "erlang_r15"
 dependency "rebar"
 dependency "rsync"
 
@@ -10,7 +10,7 @@ source :git => "git@github.com:opscode/oc_authz_migrator"
 relative_path "oc_authz_migrator"
 
 env = {
-  "PATH" => "#{install_dir}/embedded/bin:#{ENV["PATH"]}",
+  "PATH" => "#{install_dir}/embedded/erlang_r15/bin:#{install_dir}/embedded/bin:#{ENV["PATH"]}",
   "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
   "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
   "LD_RUN_PATH" => "#{install_dir}/embedded/lib"
