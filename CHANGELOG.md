@@ -45,6 +45,7 @@
 * [OC-11673] Tune PostgreSQL keepalive timeouts
 * [OC-11710] Fix couchdb compaction log rotation
 * Add bifrost_sql_database uri to orgmapper.conf
+* Allow ['lb']['upstream'] to have a custom setting
 
 ### private-chef-ctl
 
