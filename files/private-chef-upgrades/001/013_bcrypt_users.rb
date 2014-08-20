@@ -4,6 +4,8 @@ define_upgrade do
 
     must_be_data_master
 
+    start_service('postgresql')
+
     # Dependent OSS schema
     run_command("sqitch --db-user opscode-pgsql deploy --to-target @1.0.4",
                 :cwd => "/opt/opscode/embedded/service/enterprise-chef-server-schema/deps/chef-server-schema")
@@ -14,7 +16,6 @@ define_upgrade do
     run_command("sqitch --db-user opscode-pgsql deploy --to-target @2.2.3",
                 :cwd => "/opt/opscode/embedded/service/enterprise-chef-server-schema")
 
-
-    ## Add chef-mover upgrade here
+    stop_service('postgresql')
   end
 end

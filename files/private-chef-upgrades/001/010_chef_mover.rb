@@ -1,10 +1,17 @@
 
 define_upgrade do
+  start_service('postgresql')
   upgrade_schema_to 32
+  stop_service('postgresql')
 
   if Partybus.config.bootstrap_server
 
     must_be_data_master
+
+    # Only starting opscode-account and couchdb so that we can
+    # delete pre-created orgs. Those two are stopped right after
+    # pre-created orgs are deleted.
+    start_services(['postgresql', 'opscode-account', 'couchdb'])
 
     # Need to remove any existing pre-created orgs, since chef-mover
     # doesn't migrate them.  Otherwise, the next handful of orgs that
@@ -23,6 +30,7 @@ define_upgrade do
                 :env => {"RUBYOPT" => "-I/opt/opscode/embedded/lib/ruby/gems/1.9.1/gems/bundler-1.1.5/lib"})
 
     down_services = ['nginx',
+                     'couchdb',
                      'opscode-org-creator',
                      'bookshelf',
                      'oc_bifrost',
@@ -57,8 +65,7 @@ define_upgrade do
     # We don't need chef-mover anymore
     run_command("private-chef-ctl stop opscode-chef-mover")
 
-    # Bring everything back up
-    down_services.reverse.each{|s| run_command("private-chef-ctl start #{s}")}
+    stop_service('postgresql')
   end
 
 end
