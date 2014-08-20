@@ -21,7 +21,7 @@ default_version "1.0.3"
 dependency "spidermonkey"
 dependency "icu"
 dependency "curl"
-dependency "erlang"
+dependency "erlang_r15"
 
 source :url => "http://archive.apache.org/dist/couchdb/#{version}/apache-couchdb-#{version}.tar.gz",
        :md5 => "cfdc2ab751bf18049c5ef7866602d8ed"
@@ -32,11 +32,11 @@ build_env = {
   "RPATH" => "#{install_dir}/embedded/lib",
   "CURL_CONFIG" => "#{install_dir}/embedded/bin/curl-config",
   "ICU_CONFIG" => "#{install_dir}/embedded/bin/icu-config",
-  "ERL" => "#{install_dir}/embedded/bin/erl",
-  "ERLC" => "#{install_dir}/embedded/bin/erlc",
+  "ERL" => "#{install_dir}/embedded/erlang_r15/bin/erl",
+  "ERLC" => "#{install_dir}/embedded/erlang_r15/bin/erlc",
   "LD_RUN_PATH" => "#{install_dir}/embedded/lib",
   "CFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
-  "PATH" => "#{install_dir}/embedded/bin:#{ENV["PATH"]}"
+  "PATH" => "#{install_dir}/embedded/erlang_r15/bin:#{install_dir}/embedded/bin:#{ENV["PATH"]}"
 }
 
 build do
@@ -45,7 +45,7 @@ build do
            "--prefix=#{install_dir}/embedded",
            "--disable-init",
            "--disable-launchd",
-           "--with-erlang=#{install_dir}/embedded/lib/erlang/usr/include",
+           "--with-erlang=#{install_dir}/embedded/erlang_r15/lib/erlang/usr/include",
            "--with-js-include=#{install_dir}/embedded/include",
            "--with-js-lib=#{install_dir}/embedded/lib"].join(" "), :env => build_env
   command "make -j #{max_build_jobs}", :env => build_env

@@ -1,7 +1,7 @@
 name "opscode-certificate"
 default_version "rel-0.1.4"
 
-dependency "erlang"
+dependency "erlang_r15"
 dependency "rsync"
 
 source :git => "git@github.com:opscode/opscode-cert-erlang"
@@ -9,7 +9,7 @@ source :git => "git@github.com:opscode/opscode-cert-erlang"
 relative_path "opscode-certificate"
 
 env = {
-  "PATH" => "#{install_dir}/embedded/bin:#{ENV["PATH"]}",
+  "PATH" => "#{install_dir}/embedded/erlang_r15/bin:#{install_dir}/embedded/bin:#{ENV["PATH"]}",
   "LDFLAGS" => "-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include",
   "CFLAGS" => "-I#{install_dir}/embedded/include",
   "LD_RUN_PATH" => "#{install_dir}/embedded/lib"
