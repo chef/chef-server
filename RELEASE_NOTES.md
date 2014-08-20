@@ -1,6 +1,6 @@
 # Enterprise Chef Release Notes
 
-## 11.1.9 (unreleased)
+## 11.2.0 (unreleased)
 
 ### What's New
 
@@ -9,19 +9,35 @@ changes from previous versions:
 
 * [private-chef-ctl] Add a gather-logs command to create a tarball of
   important logs and system information.
+* [oc-id] Add Chef Identity Service.  This enables Supermaket authentication
+  with the Chef Server.
+* [opscode-analytics]
+  * `dark_launch['actions']` defaults to true.  You no longer
+  need to manually set this in the private-chef.rb
+  * Copy webui_priv into opscode-analytics if actions is enabled
+  * This change adds a new 'oc-id' key to the private-chef-secrets.json.
+* [orgmapper] Bump orgmapper to a new minor revision.  This enables support for
+  the bifrost/authz API and fixes several bugs.
+
 
 ### Bug Fixes:
 
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.1.8:
 
-* [OC-11575][enterprise-chef-common] Don't start services by default in HA topology
-* [OC-11601] - Correct another case where redis_lb was not started before attempting to reconfigure it
+* [OC-11297] tweak partybus migration-level subscribes for a more reliable workaround
+* [OC-11459] Allow opscode-manage to easily be moved off of 443
+* [OC-11540] Fix invalid opscode-account config when forcing SSL
+* [OC-11575] Don't start services by default in HA topology
+* [OC-11601] Fix a race condition that sometimes
+  caused redis_lb to attempt to reconfigure itself before it was restarted.
+  * This causes redis_lb to restart during every reconfigure.  This restart can
+    cause a short period of 500 errors on the on the FE nodes.
+* [OC-11668] enable ipv6 in standalone mode
 * [OC-11672] Upgrade PostgreSQL to 9.2.9
-* [OC-11710] Fix couchdb compaction log rotation
+* [OC-11673] Tune PostgreSQL keepalive timeouts
 * [OC-11702] Fix bug that prevents ACL and group expansion when containing group that no longer exists
 * [OC-11708] Fix user association bug when last updater of users group is no longer associated
-* [OC-11540] Fix invalid opscode-account config when forcing SSL
-* [OC-11297] tweak partybus migration-level subscribes for a more reliable workaround
+* [OC-11710] Fix couchdb compaction log rotation
 
 ### Security Fixes:
 
