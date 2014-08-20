@@ -1,6 +1,5 @@
 #
-# Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
-# License:: Apache License, Version 2.0
+# Copyright 2012-2014 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,10 +20,16 @@ default_version "2.0.0.beta.2"
 dependency "pg-gem"
 dependency "sequel-gem"
 
-# Ignore dependencies, since they are already installed on the system by omnibus
-# (see dependencies above)
-# This ensures we can properly link the pg to the needed headers without needing
-# to pass options through knife-ec-backup
 build do
-  gem "install knife-ec-backup -n #{install_dir}/embedded/bin --no-rdoc --no-ri -v #{version} --ignore-dependencies"
+  env = with_standard_compiler_flags(with_embedded_path)
+
+  # Ignore dependencies, since they are already installed on the system by
+  # omnibus from one of the dependencies. This ensures we can properly link the
+  # pg to the needed headers without needing to pass options through
+  # knife-ec-backup.
+  gem "install knife-ec-backup" \
+      " --version '#{version}'" \
+      " --bindir '#{install_dir}/embedded/bin'" \
+      " --ignore-dependencies" \
+      " --no-ri --no-rdoc", env: env
 end
