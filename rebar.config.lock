@@ -16,7 +16,7 @@
                         "7cd6ddf592a2e050544891d151944dd3017dc517"}},
        {opscoderl_wm,".*",
                      {git,"git://github.com/opscode/opscoderl_wm.git",
-                          "f641746037f7a24fbf74c2951345019324335aa2"}},
+                          "9514d527b3a712958dbf75de2c9430fc23fb76ac"}},
        {erlsom,".*",
                {git,"git://github.com/opscode/erlsom.git",
                     "c5ca9fca1257f563d78b048e35ac60832ec80584"}},
@@ -37,13 +37,13 @@
                   "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
        {mini_s3,".*",
                 {git,"git://github.com/opscode/mini_s3.git",
-                     "ed42875aefe598e8a31145d1482ac08827c2e9f6"}},
+                     "b32b9e92d3cc00def658e3c45231f00d5b7aaf55"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "aa2b872d08ea93e5bfd58c4609081579e40a90b2"}},
+                  "5b167c9ed7ffbb2c81d9d21fd5984bbcd97141e0"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
-                                    "911481ee8a20f59fc9092e370e2b0d116bec19df"}}]}.
+                                    "9711549b8a84b065eb2edc22f8eb6ff85e3c94e8"}}]}.
 {erl_opts,[debug_info,warnings_as_errors]}.
 {xref_checks,[exports_not_used,undefined_function_calls]}.
 {plugins,[rebar_lock_deps_plugin]}.
