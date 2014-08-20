@@ -35,10 +35,12 @@
 
 ### private-chef-cookbooks
 * [analytics] Copy webui_priv into opscode-analytics if actions is enabled
-* [OC-11297] Tweak partybus migration-level subscribes for a more reliable workaround
+* [OC-11297] Tweak partybus migration-level subscribes for a more reliable
+  workaround
 * [OC-11459] Allow opscode-manage to easily be moved off of 443
 * [OC-11540] Fix invalid opscode-account config when forcing SSL
-* [OC-11601] Fix a race condition that sometimes
+* [OC-11601] Fix a race condition that sometimes caused redis_lb to attempt to
+  reconfigure itself before it was restarted.
 * [OC-11668] Enable ipv6 in standalone mode
 * [OC-11673] Tune PostgreSQL keepalive timeouts
 * [OC-11710] Fix couchdb compaction log rotation

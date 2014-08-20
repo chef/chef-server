@@ -4,7 +4,7 @@
 
 ### What's New
 
-The following items are new for Enterprise Chef 11.1.9 and/or are
+The following items are new for Enterprise Chef 11.2.0 and/or are
 changes from previous versions:
 
 * [private-chef-ctl] Add a gather-logs command to create a tarball of
