@@ -752,7 +752,8 @@ fetch(Record) ->
       ReturnTransform :: tuple().
 select_rows({Query, BindParameters}) ->
     match_result(sqerl:select(Query, BindParameters));
-select_rows({Query, BindParameters, Transform}) when is_tuple(Transform) ->
+select_rows({Query, BindParameters, Transform}) when is_tuple(Transform);
+                                                     Transform == rows ->
     match_result(sqerl:select(Query, BindParameters, Transform));
 select_rows({Query, BindParameters, Fields = [_|_]}) ->
     match_result(sqerl:select(Query, BindParameters, rows_as_scalars, Fields)).
