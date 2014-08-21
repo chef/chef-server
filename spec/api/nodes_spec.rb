@@ -34,7 +34,7 @@ describe "Private Chef Nodes API endpoint", :nodes do
       delete_node(admin_user, node_name)
     end
 
-    context 'attempting to change node name on update' do
+    context 'attempting to change node name on update', :validation do
       let(:node_update_name_mismatch_response) {
         {
           :status => 400,

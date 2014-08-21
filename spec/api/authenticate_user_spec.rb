@@ -506,7 +506,7 @@ describe 'authenticate_user', :users do
         }
       end
 
-      it "should return Forbidden" do
+      it "should return Forbidden", :authorization do
 
         # Under ruby we should expect:
         #     "error" => "Password authentication as the superuser is prohibited."

@@ -193,7 +193,7 @@ describe "opscode-account endpoint", :clients => true do
     context "by a non-validator client" do
       let(:requestor) { platform.non_admin_client }
 
-      it "cannot create a client" do
+      it "cannot create a client", :authorization do
         post(api_url("/clients"), requestor,
           :payload => {"name" => new_client_name}).should have_status_code(403)
       end
@@ -212,7 +212,7 @@ describe "opscode-account endpoint", :clients => true do
           })
       end
 
-      it "cannot create a new validator client" do
+      it "cannot create a new validator client", :authorization do
         post(api_url("/clients"), requestor,
              :payload => {"name" => new_client_name, "validator" => true}).should have_status_code(403)
       end

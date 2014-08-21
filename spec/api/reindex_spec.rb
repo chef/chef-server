@@ -15,7 +15,7 @@ describe "Server-side reindexing" do
   shared(:admin_requestor){admin_user}
   shared(:requestor){admin_requestor}
 
-  context "reindexing OPC" do
+  context "reindexing OPC", :omnibus => true do
     it_should_behave_like "Reindexing" do
       let(:executable){"/opt/opscode/embedded/service/opscode-erchef/bin/reindex-opc-organization"}
       let(:reindex_args){[platform.test_org.name]}

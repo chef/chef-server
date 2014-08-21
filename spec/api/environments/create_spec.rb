@@ -103,7 +103,7 @@ describe "Environments API Endpoint", :environments do
             let(:request_payload)   { new_environment(new_environment_name) }
             let(:expected_response) { forbidden_response }
 
-            it 'returns 403' do
+            it 'returns 403', :authorization do
               restrict_permissions_to('/containers/environments',
                                       normal_user => %w(read update delete grant))
               response.should look_like expected_response

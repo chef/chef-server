@@ -33,7 +33,7 @@ describe "Environments API Endpoint", :environments do
 
   describe 'access control' do
     context 'GET /environments' do
-      it 'returns a 401 ("Unauthorized") for invalid user' do
+      it 'returns a 401 ("Unauthorized") for invalid user', :authentication do
         get(api_url("/environments"),
             invalid_user) do |response|
           response.
@@ -46,7 +46,7 @@ describe "Environments API Endpoint", :environments do
         end
       end
 
-      it 'returns a 403 ("Forbidden") for outside user' do
+      it 'returns a 403 ("Forbidden") for outside user', :authorization do
         get(api_url("/environments"),
             outside_user) do |response|
           response.should look_like({
@@ -89,7 +89,7 @@ describe "Environments API Endpoint", :environments do
         end
       end
 
-      it 'returns a 401 ("Unauthorized") for invalid user' do
+      it 'returns a 401 ("Unauthorized") for invalid user', :authentication do
         get(api_url("/environments/#{new_environment_name}"),
             invalid_user) do |response|
           response.should look_like({
@@ -101,7 +101,7 @@ describe "Environments API Endpoint", :environments do
         end
       end
 
-      it 'returns a 403 ("Forbidden") for outside user' do
+      it 'returns a 403 ("Forbidden") for outside user', :authorization do
         get(api_url("/environments/#{new_environment_name}"),
             outside_user) do |response|
           response.should look_like({
@@ -145,7 +145,7 @@ describe "Environments API Endpoint", :environments do
         delete(api_url("/environments/#{new_environment_name}"), admin_user)
       end
 
-      it 'returns a 401 ("Unauthorized") for invalid user' do
+      it 'returns a 401 ("Unauthorized") for invalid user', :authentication do
         post(api_url("/environments"), invalid_user,
              :payload => new_environment(new_environment_name)) do |response|
           response.should look_like({
@@ -181,7 +181,7 @@ describe "Environments API Endpoint", :environments do
         end
       end
 
-      it 'returns a 403 ("Forbidden") for outside user' do
+      it 'returns a 403 ("Forbidden") for outside user', :authorization do
         post(api_url("/environments"), outside_user,
              :payload => new_environment(new_environment_name)) do |response|
           response.should look_like({
@@ -255,7 +255,7 @@ describe "Environments API Endpoint", :environments do
         end
       end
 
-      it 'returns a 401 ("Unauthorized") for invalid user' do
+      it 'returns a 401 ("Unauthorized") for invalid user', :authentication do
         update = full_environment(new_environment_name)
         update['description'] = 'something different'
 
@@ -291,7 +291,7 @@ describe "Environments API Endpoint", :environments do
         end
       end
 
-      it 'returns a 403 ("Forbidden") for outside user' do
+      it 'returns a 403 ("Forbidden") for outside user', :authorization do
         update = full_environment(new_environment_name)
         update['description'] = 'something different'
 
@@ -360,7 +360,7 @@ describe "Environments API Endpoint", :environments do
         end
       end
 
-      it 'returns a 401 ("Unauthorized") for invalid user' do
+      it 'returns a 401 ("Unauthorized") for invalid user', :authentication do
         delete(api_url("/environments/#{new_environment_name}"),
                invalid_user) do |response|
           response.should look_like({
@@ -382,7 +382,7 @@ describe "Environments API Endpoint", :environments do
         end
       end
 
-      it 'returns a 403 ("Forbidden") for outside user' do
+      it 'returns a 403 ("Forbidden") for outside user', :authorization do
         delete(api_url("/environments/#{new_environment_name}"),
                outside_user) do |response|
           response.should look_like({

@@ -51,7 +51,7 @@ describe "opscode-account containers", :containers do
 
       context "client" do
         # Is this actually right?  Seems like this should be 200
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, platform.non_admin_client).should look_like({
               :status => 403
             })
@@ -59,7 +59,7 @@ describe "opscode-account containers", :containers do
       end
 
       context "outside user" do
-        it "returns 403", :smoke do
+        it "returns 403", :authorization, :smoke do
           get(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -67,7 +67,7 @@ describe "opscode-account containers", :containers do
       end
 
       context "invalid user" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           get(request_url, invalid_user).should look_like({
               :status => 401
             })
@@ -144,7 +144,7 @@ describe "opscode-account containers", :containers do
         end
 
         context "normal user" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             post(request_url, platform.non_admin_user,
               :payload => request_body).should look_like({
                 :status => 403
@@ -160,7 +160,7 @@ describe "opscode-account containers", :containers do
         end
 
         context "client" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             post(request_url, platform.non_admin_client,
               :payload => request_body).should look_like({
                 :status => 403
@@ -176,7 +176,7 @@ describe "opscode-account containers", :containers do
         end
 
         context "outside user" do
-          it "returns 403", :smoke do
+          it "returns 403", :authorization, :smoke do
             post(request_url, outside_user,
               :payload => request_body).should look_like({
                 :status => 403
@@ -193,7 +193,7 @@ describe "opscode-account containers", :containers do
         end
 
         context "invalid user" do
-          it "returns 401" do
+          it "returns 401", :authentication do
             post(request_url, invalid_user,
               :payload => request_body).should look_like({
                 :status => 401
@@ -240,7 +240,7 @@ describe "opscode-account containers", :containers do
               "containerpath" => "/"
             }}
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 400
@@ -261,7 +261,7 @@ describe "opscode-account containers", :containers do
               "containerpath" => "/"
             }}
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 400
@@ -347,7 +347,7 @@ describe "opscode-account containers", :containers do
         context "with empty container name" do
           let(:new_container) { "" }
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 400
@@ -362,7 +362,7 @@ describe "opscode-account containers", :containers do
         context "with space in container name" do
           let(:new_container) { "new container" }
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 400
@@ -378,7 +378,7 @@ describe "opscode-account containers", :containers do
           let(:new_container) { "グループ" }
 
           it "can create container" do
-            pending "returns 400" do
+            pending "returns 400", :validation do
               post(request_url, platform.admin_user,
                 :payload => request_body).should look_like({
                   :status => 201,
@@ -413,7 +413,7 @@ describe "opscode-account containers", :containers do
               "containerpath" => in_sql? ? new_container : "/"
             }}
 
-          it "ignores them" do
+          it "ignores them", :validation do
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 201,
@@ -512,7 +512,7 @@ describe "opscode-account containers", :containers do
       end
 
       context "normal user" do
-        it "can get container" do
+        it "returns 403", :authorization do
           get(request_url, platform.non_admin_user).should look_like({
               :status => 403
             })
@@ -520,7 +520,7 @@ describe "opscode-account containers", :containers do
       end
 
       context "client" do
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, platform.non_admin_client).should look_like({
               :status => 403
             })
@@ -528,7 +528,7 @@ describe "opscode-account containers", :containers do
       end
 
       context "outside user" do
-        it "returns 403", :smoke do
+        it "returns 403", :authorization, :smoke do
           get(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -536,7 +536,7 @@ describe "opscode-account containers", :containers do
       end
 
       context "invalid user" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           get(request_url, invalid_user).should look_like({
               :status => 401
             })
@@ -557,7 +557,7 @@ describe "opscode-account containers", :containers do
       end
 
       context "normal user" do
-        it "returns 403" do
+        it "returns 403", :authorization do
           delete(request_url, platform.non_admin_user).should look_like({
               :status => 403
             })
@@ -569,7 +569,7 @@ describe "opscode-account containers", :containers do
 
       context "client" do
         # Is this actually right?  Seems like this should be 200
-        it "returns 403" do
+        it "returns 403", :authorization do
           delete(request_url, platform.non_admin_client).should look_like({
               :status => 403
             })
@@ -580,7 +580,7 @@ describe "opscode-account containers", :containers do
       end
 
       context "outside user" do
-        it "returns 403", :smoke do
+        it "returns 403", :authorization, :smoke do
           delete(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -591,7 +591,7 @@ describe "opscode-account containers", :containers do
       end
 
       context "invalid user" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           delete(request_url, invalid_user).should look_like({
               :status => 401
             })

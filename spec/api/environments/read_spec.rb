@@ -144,7 +144,7 @@ describe "Environments API Endpoint", :environments do
             include_context 'successfully GETs'
           end
           context 'with a user with all permissions EXCEPT read' do
-            it 'returns 403' do
+            it 'returns 403', :authorization do
               restrict_permissions_to('/containers/environments',
                                       normal_user => %w(create update delete grant))
               response = get(api_url("/environments"), normal_user)
@@ -158,7 +158,7 @@ describe "Environments API Endpoint", :environments do
           context 'with an outside user (admin of another org)' do
             # TODO we really should make this person admin of another org, for maximum
             # effectiveness.
-            it 'returns 403' do
+            it 'returns 403', :authorization do
               response = get(api_url("/environments"), outside_user)
               response.should look_like({:status => 403})
             end
@@ -201,7 +201,7 @@ describe "Environments API Endpoint", :environments do
           end
 
           context 'with a user with all permissions EXCEPT read' do
-            it 'returns 403' do
+            it 'returns 403', :authorization do
               restrict_permissions_to("/environments/#{new_environment_name}",
                                       normal_user => %w(create update delete grant))
                                       response = get(api_url("/environments/#{new_environment_name}"), normal_user)
@@ -241,4 +241,3 @@ describe "Environments API Endpoint", :environments do
 
   end # GET
 end # Environments API endpoint
-
