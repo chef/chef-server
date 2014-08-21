@@ -165,7 +165,8 @@ end
 
 include_recipe "enterprise::runit"
 include_recipe "private-chef::sysctl-updates"
-
+# Run plugins first, mostly for ha
+include_recipe "private-chef::plugins"
 # Configure Services
 [
   "couchdb",
@@ -220,7 +221,7 @@ include_recipe "private-chef::sysctl-updates"
   end
 end
 
-include_recipe "private-chef::plugins"
+
 
 include_recipe "private-chef::actions" if darklaunch_values["actions"]
 
