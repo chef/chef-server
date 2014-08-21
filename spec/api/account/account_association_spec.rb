@@ -331,6 +331,10 @@ describe "opscode-account user association", :association do
         { "organization" => { "name" => platform.test_org.name }  }
       end
 
+      after :each do
+        delete(api_url("users/#{bad_user}"), platform.admin_user)
+      end
+
       it "unless the user is already in the org" do
         invite_id = invite_user(platform.test_org.name, bad_user, platform.admin_user)
         check_invite_for_user(platform.bad_user, invite_id)
@@ -342,9 +346,6 @@ describe "opscode-account user association", :association do
         response.should look_like( { :status => 409,
                                      :body_exact => { "error" => "The association already exists." } })
         no_invites_for_user(platform.non_admin_user)
-        # Clean up
-        response = delete(api_url("users/#{bad_user}"), platform.admin_user)
-        response.should look_like({ :status=> 200 })
       end
 
       it "and the invite can be rescinded" do

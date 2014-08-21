@@ -1,6 +1,6 @@
 require 'pedant/rspec/common'
 
-describe "ACL API", :focus, :acl do
+describe "ACL API", :acl do
 
   def self.ruby?
     Pedant::Config.ruby_acl_endpoint?
