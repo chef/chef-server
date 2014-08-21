@@ -34,7 +34,9 @@
 
 -export([
          add_client_to_clients_group/4,
+         add_to_group/4,
          bulk_actor_is_authorized/5,
+         create_resource/2,
          delete_resource/3,
          create_entity_if_authorized/4,
          get_container_aid_for_object/3,
@@ -44,6 +46,7 @@
          remove_actor_from_actor_acl/2,
          remove_ace_for_entity/6,
          add_ace_for_entity/6,
+         set_ace_for_entity/5,
          superuser_id/0
         ]).
 
@@ -93,6 +96,12 @@ make_context(ReqId, Darklaunch)  ->
 superuser_id() ->
     envy:get(oc_chef_authz, authz_superuser_id, binary).
 
+-spec requestor_or_superuser(object_id() | superuser) -> oc_authz_id().
+requestor_or_superuser(superuser) ->
+    superuser_id();
+requestor_or_superuser(ObjectId) ->
+    ObjectId.
+
 %% @doc Creates a new Authz entity, if the requestor has the necessary permissions.
 %%
 %% `Creator' either a requestor ID or the atom 'superuser'.  It should only be the superuser
@@ -119,6 +128,7 @@ superuser_id() ->
 create_entity_if_authorized(Context, OrgId, superuser, ObjectType) ->
     ContainerAId = get_container_aid_for_object(Context, OrgId, ObjectType),
     AuthzSuperuserId = superuser_id(),
+    %% We skip is_authorized_on_resource check as an optimization
     create_entity_with_container_acl(AuthzSuperuserId, ContainerAId, ObjectType);
 create_entity_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
     ContainerAId = get_container_aid_for_object(Context, OrgId, ObjectType),
@@ -358,8 +368,9 @@ create_resource(RequestorId, ResourceType) ->
 -spec delete_resource(requestor_id(), 'actor'|'group'|'object', object_id())
                      ->  ok | {error, forbidden|not_found|server_error}.
 delete_resource(RequestorId, ResourceType, Id) ->
+    EffectiveRequestorId = requestor_or_superuser(RequestorId),
     Url = make_url([pluralize_resource(ResourceType), Id]),
-    case oc_chef_authz_http:request(Url, delete, [], [], RequestorId) of
+    case oc_chef_authz_http:request(Url, delete, [], [], EffectiveRequestorId) of
         ok -> ok;
         %% Expected errors are forbidden, not_found, server_error
         {error, Error} -> {error, Error}
@@ -457,11 +468,12 @@ get_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod) ->
                                          {error, any()}.
 set_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod,
                    #authz_ace{actors=Actors, groups=Groups}) ->
+    EffectiveRequestorId = requestor_or_superuser(RequestorId),
     Url = make_url([pluralize_resource(AuthzType), Id, acl, AccessMethod]),
     %% jiffy:encode can return an iolist which breaks the http code. This has only been
     %% observed with floats, but may occur elsewhere.
     Body = iolist_to_binary(jiffy:encode({[{<<"actors">>, Actors}, {<<"groups">>, Groups}]})),
-    case oc_chef_authz_http:request(Url, put, [], Body, RequestorId) of
+    case oc_chef_authz_http:request(Url, put, [], Body, EffectiveRequestorId) of
         ok -> ok;
         %% Expected errors are forbidden, not_found, server_error
         {error, Error} -> {error, Error}
@@ -473,9 +485,6 @@ set_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod,
 %% `RequestorId' can be the atom `superuser'; in that case, the underlying Authz requests
 %% will be made by the Authz superuser.  If it is a normal ID, that requestor will make the
 %% Authz requests.
-%%
-%% Taking this approach instead of a more general "add_to_group" approach since this client
-%% operation is the only instance.
 -spec add_client_to_clients_group(#oc_chef_authz_context{},
                                  OrgId :: object_id(),
                                  ClientAuthzId :: object_id(),
@@ -484,20 +493,32 @@ set_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod,
 add_client_to_clients_group(Context, OrgId, ClientAuthzId, RequestorId) ->
     %% We need the superuser ID here because when a validator creates a client, the won't
     %% have the permissions required to add that new client to the clients group.
-
-    EffectiveRequestorId = case RequestorId of
-                               superuser ->
-                                   envy:get(oc_chef_authz, authz_superuser_id, binary);
-                               RequestorId ->
-                                   RequestorId
-                           end,
-
     ClientGroupAuthzId = oc_chef_authz_db:fetch_group_authz_id(Context, OrgId, <<"clients">>),
-    Url = make_url([<<"groups">>, ClientGroupAuthzId, <<"actors">>, ClientAuthzId]),
+    add_to_group(ClientGroupAuthzId, actor, ClientAuthzId, RequestorId).
+
+%% @doc Add actor or group to group.
+%%
+%% `RequestorId' can be the atom `superuser'; in that case, the underlying Authz requests
+%% will be made by the Authz superuser.  If it is a normal ID, that requestor will make the
+%% Authz requests.
+%%
+
+-spec add_to_group(GroupId :: object_id(),
+                   Type :: actor | group,
+                   AuthzId :: object_id(),
+                   RequestorId :: superuser | object_id()) ->
+                          ok | {error, term()}.
+add_to_group(GroupAuthzId, Type, AuthzId, RequestorId) ->
+    %% Refactor maybe?
+    EffectiveRequestorId = requestor_or_superuser(RequestorId),
+    PType = pluralize_resource(Type),
+    Url = make_url([<<"groups">>, GroupAuthzId, PType, AuthzId]),
     case oc_chef_authz_http:request(Url, put, [], [], EffectiveRequestorId) of
         ok             -> ok;
         {error, Error} -> {error, Error}
     end.
+
+
 
 %% @doc As a given actor (`TargetActorId'), remove another actor (`ActorIdToRemove')
 %% completely from its ACL.
