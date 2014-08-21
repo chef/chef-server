@@ -7,7 +7,7 @@ describe "users", :users do
   end
 
   def ruby_org_assoc?
-    true
+    Pedant::Config.ruby_org_assoc?
   end
 
   let(:public_key_regex) do
@@ -24,7 +24,6 @@ describe "users", :users do
   # Selects Pedant users that are marked as associated
   let(:default_pedant_user_names) { platform.users.select(&:associate).map(&:name).sort }
   let(:default_users_body)        { default_pedant_user_names.map { |user| {"user" => {"username" => user} } } }
-
 
   context "/users endpoint" do
     let(:request_url) { "#{platform.server}/users" }
@@ -88,7 +87,7 @@ describe "users", :users do
       end
 
       context "admin user" do
-        it "returns 403", :smoke do
+        it "returns 403", :authorization, :smoke do
           get(request_url, platform.admin_user).should look_like({
               :status => 403
             })
@@ -96,7 +95,7 @@ describe "users", :users do
       end
 
       context "default normal user" do
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, platform.non_admin_user).should look_like({
               :status => 403
             })
@@ -104,7 +103,7 @@ describe "users", :users do
       end
 
       context "default client" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           get(request_url, platform.non_admin_client).should look_like({
               :status => 401
             })
@@ -112,7 +111,7 @@ describe "users", :users do
       end
 
       context "outside user" do
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -120,7 +119,7 @@ describe "users", :users do
       end
 
       context "invalid user" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           get(request_url, invalid_user).should look_like({
               :status => 401
             })
@@ -140,7 +139,7 @@ describe "users", :users do
     end # context PUT /users
 
     context "POST /users" do
-      let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:username) { "test-#{Process.pid}" }
       let(:user_url) { "#{request_url}/#{username}" }
       let(:request_body) do
         {
@@ -199,7 +198,7 @@ describe "users", :users do
       end
 
       context "admin user" do
-        it "returns 403", :smoke do
+        it "returns 403", :authorization, :smoke do
           post(request_url, platform.admin_user,
             :payload => request_body).should look_like({
               :status => 403
@@ -222,7 +221,7 @@ describe "users", :users do
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.superuser,
                  :payload => request_body).should look_like({
                    :status => 400
@@ -267,7 +266,7 @@ describe "users", :users do
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.superuser,
                  :payload => request_body).should look_like({
                    :status => 400
@@ -309,7 +308,7 @@ describe "users", :users do
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.superuser,
                  :payload => request_body).should look_like({
                    :status => 400
@@ -348,7 +347,7 @@ describe "users", :users do
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.superuser,
                  :payload => request_body).should look_like({
                    :status => 400
@@ -368,7 +367,7 @@ describe "users", :users do
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.superuser,
               :payload => request_body).should look_like({
                 :status => 400
@@ -503,7 +502,7 @@ describe "users", :users do
         end
 
         context "with capitalized username" do
-          let(:username) { "Test-#{Time.now.to_i}-#{Process.pid}" }
+          let(:username) { "Test-#{Process.pid}" }
           let(:request_body) do
             {
               "username" => username,
@@ -515,7 +514,7 @@ describe "users", :users do
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.superuser,
                  :payload => request_body).should look_like({
                    :status => 400
@@ -536,7 +535,7 @@ describe "users", :users do
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.superuser,
                  :payload => request_body).should look_like({
                    :status => 400
@@ -630,7 +629,7 @@ describe "users", :users do
       end
 
       context "default client" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           get(request_url, platform.non_admin_client).should look_like({
               :status => 401
             })
@@ -638,7 +637,7 @@ describe "users", :users do
       end
 
       context "outside user" do
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -646,7 +645,7 @@ describe "users", :users do
       end
 
       context "invalid user" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           get(request_url, invalid_user).should look_like({
               :status => 401
             })
@@ -665,7 +664,7 @@ describe "users", :users do
 
     context "PUT /users/<name> when user created w/ external auth enabled" do
       pending("work in flight on users endpoint - ruby incompat", :if => ruby?) do
-        let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
+        let(:username) { "test-#{Process.pid}" }
         let(:request_body) do
           {
             "username" => username,
@@ -711,7 +710,7 @@ describe "users", :users do
       end
     end
     context "PUT /users/<name>" do
-      let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:username) { "test-#{Process.pid}" }
       let(:password) { "badger badger" }
 
       let(:request_body) do
@@ -880,20 +879,20 @@ EOF
       end
 
       context "admin user" do
-        it "returns 403", :smoke do
+        it "returns 403", :authorization, :smoke do
           put(request_url, platform.admin_user,
             :payload => request_body).should look_like({
               :status => 403
             })
         end
-        it "cannot enable recovery" do
+        it "cannot enable recovery", :authorization do
           put(request_url, platform.admin_user,
             :payload => request_body_with_recovery).should look_like({
               :status => 403
             })
 
         end
-        it "cannot set external id" do
+        it "cannot set external id", :authorization do
           put(request_url, platform.admin_user,
             :payload => request_body_with_ext_id).should look_like({
               :status => 403
@@ -902,21 +901,21 @@ EOF
       end
       context "owning user" do
 
-        it "can modify its own account" do
+        it "can modify its own account", :authorization do
           put(request_url, platform.non_admin_user,
             :payload => request_body).should look_like({
               :status => 403
             })
 
         end
-        it "cannot enable recovery" do
+        it "cannot enable recovery", :authorization do
           put(request_url, platform.non_admin_user,
             :payload => request_body_with_recovery).should look_like({
               :status => 403
             })
 
         end
-        it "cannot set external id" do
+        it "cannot set external id", :authorization do
           put(request_url, platform.non_admin_user,
             :payload => request_body_with_ext_id).should look_like({
               :status => 403
@@ -925,7 +924,7 @@ EOF
       end
 
       context "default client" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           put(request_url, platform.non_admin_client,
             :payload => request_body).should look_like({
               :status => 401
@@ -980,7 +979,7 @@ EOF
             }
           end
 
-          it "can modify user" do
+          it "can modify user", :validation do
             put(request_url, platform.superuser,
               :payload => request_body).should look_like({
                 :status => 200
@@ -1003,7 +1002,7 @@ EOF
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             put(request_url, platform.superuser,
               :payload => request_body).should look_like({
                 :status => 400
@@ -1053,7 +1052,7 @@ EOF
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             put(request_url, platform.superuser,
               :payload => request_body).should look_like({
                 :status => 400
@@ -1089,7 +1088,7 @@ EOF
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             put(request_url, platform.superuser,
               :payload => request_body).should look_like({
                 :status => 400
@@ -1109,7 +1108,7 @@ EOF
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             put(request_url, platform.superuser,
               :payload => request_body).should look_like({
                 :status => 400
@@ -1467,7 +1466,7 @@ EOF
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             pending("ruby returns 200", :if => ruby?)
             response = put(request_url, platform.superuser, :payload => request_body)
             response.should look_like({
@@ -1547,7 +1546,7 @@ EOF
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             put(request_url, platform.superuser,
               :payload => request_body).should look_like({
                 :status => 400
@@ -1573,7 +1572,7 @@ EOF
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             put(request_url, platform.superuser, :payload => request_body).should look_like({
                 :status => 400
               })
@@ -1585,7 +1584,7 @@ EOF
         end
 
         context "changing username with capital letters" do
-          let(:new_name) { "Test-#{Time.now.to_i}-#{Process.pid}" }
+          let(:new_name) { "Test-#{Process.pid}" }
 
           let(:request_body) do
             {
@@ -1598,7 +1597,7 @@ EOF
             }
           end
 
-          it "returns 400" do
+          it "returns 400", :validation do
             put(request_url, platform.superuser,
               :payload => request_body).should look_like({
                 :status => 400
@@ -1662,7 +1661,7 @@ EOF
     end # context POST /users/<name>
 
     context "DELETE /users/<name>" do
-      let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:username) { "test-#{Process.pid}" }
 
       before :each do
         post("#{platform.server}/users", platform.superuser,
@@ -1701,7 +1700,7 @@ EOF
       end
 
       context "admin user" do
-        it "returns 403" do
+        it "returns 403", :authorization do
           delete(request_url, platform.admin_user).should look_like({
               :status => 403
             })
@@ -1714,7 +1713,7 @@ EOF
       end
 
       context "default client" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           delete(request_url, platform.non_admin_client).should look_like({
               :status => 401
             })
