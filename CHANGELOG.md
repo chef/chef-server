@@ -37,8 +37,8 @@
   of inet
 * Setting the CHEF_ACTIONS_MESSAGE_VERSION to 0.1.0
 
-### cacerts 2014.04.22
-* Update to latest cacerts as of 2014-04-22
+### cacerts 2014.08.20
+* Update to latest cacerts as of 2014-08-20
 
 ### chef 11.12.2
 * Update embedded chef gem to 11.12.2
