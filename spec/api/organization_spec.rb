@@ -56,13 +56,13 @@ describe "/organizations", :organizations do
         parsed_response["guid"].should have(32).characters
       end
 
-      it "should return a valid assigned_at field of the format YYYY/MM/DD HH:MM:SS +TTTT" do
+      it "should return a valid assigned_at field of the format YYYY/MM/DD HH:MM:SS [+-]TTTT" do
         parsed_response = JSON.parse(get(request_url, requestor))
         parts = parsed_response["assigned_at"].split
 
         /^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}$/.should match(parts[0])
         /^(\d{2}):(\d{2}):(\d{2})$/.should match(parts[1])
-        /^\+\d\d\d\d$/.should match(parts[2])
+        /^[+-]\d\d\d\d$/.should match(parts[2])
       end
     end
 
@@ -123,7 +123,7 @@ describe "/organizations", :organizations do
       delete("#{platform.server}/organizations/#{orgname}", superuser)
     end
 
-    context "when the user updates organization object fields with valid info" do
+    context "when the user renames the organization object with modifications", :rename_org do
       let(:new_orgname) { "test-#{Time.now.to_i*3}-#{Process.pid}" }
 
       after :each do
@@ -153,7 +153,31 @@ describe "/organizations", :organizations do
       end
     end
 
-    context "when the user tries to post a private_key" do
+    context "when the user updates fields in the organization with valid data" do
+      it "should update the organization object" do
+        # TODO: we don't validate org_type at all
+        payload = {
+          name: orgname,
+          org_type: "Pleasure",
+          full_name: orgname
+        }
+        put("#{platform.server}/organizations/#{orgname}", superuser, :payload => payload).should look_like(
+          :status => 200,
+          :body => {"uri" => "#{platform.server}/organizations/#{orgname}"}
+        )
+
+        get("#{platform.server}/organizations/#{orgname}", superuser).should look_like(
+          :status => 200,
+          :body => {
+            "name" => orgname,
+            "full_name" => orgname,
+            "org_type" => "Pleasure"
+          }
+        )
+      end
+    end
+
+    context "when the user tries to post a private_key", :validation do
       it "throws an error related to no longer supporting PUT for key updating" do
         request = put("#{platform.server}/organizations/#{orgname}", superuser,
                       :payload => {private_key: "some_unused_key"})
