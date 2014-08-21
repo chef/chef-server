@@ -63,29 +63,45 @@ init_resource_state(_Config) ->
 request_type() ->
   "users".
 
-allowed_methods(Req, #base_state{resource_args = list_orgs} = State) ->
+allowed_methods(Req, #base_state{resource_args = Args} = State) when Args == invitations;
+                                                                     Args == invitation_count ->
     {['GET'], Req, State};
+allowed_methods(Req, #base_state{resource_args = invitation_response} = State) ->
+    {['PUT'], Req, State};
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
-validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
-                                         resource_state = UserState} = State) ->
-    Body = wrq:req_body(Req),
-    User = fetch_user_data(DbContext, Req),
-    {ok, EJson} = chef_user:parse_binary_json(Body, update, User),
-    UserState1 = UserState#user_state{chef_user = User, user_data = EJson},
-    {Req, State#base_state{resource_state = UserState1}};
+validate_request('PUT', Req, #base_state{resource_args = invitation_response} = State) ->
+    validate_put_request_response(fun(Body, _User) ->
+                                          oc_chef_org_user_invite:parse_binary_json(Body, response)
+                                  end,
+                                  Req, State);
+validate_request('PUT', Req, State) ->
+    validate_put_request_response(fun(Body, User) ->
+                                          chef_user:parse_binary_json(Body, update, User)
+                                  end,
+                                  Req, State);
 validate_request(_Method, Req, #base_state{chef_db_context = DbContext,
                                           resource_state = UserState} = State) ->
     User = fetch_user_data(DbContext, Req),
     UserState1 = UserState#user_state{chef_user = User},
     {Req, State#base_state{resource_state = UserState1}}.
 
+validate_put_request_response(ParseBinaryJSON, Req, #base_state{chef_db_context = DbContext,
+                                                                resource_state = UserState} = State) ->
+    Body = wrq:req_body(Req),
+    User = fetch_user_data(DbContext, Req),
+    {ok, EJ} = ParseBinaryJSON(Body, User),
+    UserState1 = UserState#user_state{chef_user = User, user_data = EJ},
+    {Req, State#base_state{resource_state = UserState1}}.
+
 fetch_user_data(DbContext, Req) ->
     UserName = chef_wm_util:object_name(user, Req),
     chef_db:fetch(#chef_user{username = UserName}, DbContext).
 
-auth_info(Req, #base_state{resource_state = #user_state{ chef_user = not_found } } = State) ->
+% No matter what we're doing next, we must have a user since we're the
+% 'named user' endpoint - fail early if we don't.
+auth_info(Req, #base_state{resource_state = #user_state{chef_user = not_found}} = State) ->
     UserName = chef_wm_util:object_name(user, Req),
     Message = chef_wm_util:not_found_message(user, UserName),
     Req1 = chef_wm_util:set_json_body(Req, Message),
@@ -93,13 +109,29 @@ auth_info(Req, #base_state{resource_state = #user_state{ chef_user = not_found }
 auth_info(Req, State) ->
     auth_info(wrq:method(Req), Req, State).
 
-auth_info(Method, Req, #base_state{resource_args = undefined, resource_state = #user_state{chef_user = User}} = State) ->
+auth_info(_, Req, #base_state{resource_args = Args,
+                              requestor_id = RequestorAuthzId,
+                              resource_state = #user_state{chef_user = User}} = State) when Args == invitations;
+                                                                                            Args == invitation_response;
+                                                                                            Args == invitation_count ->
+    #chef_user{authz_id = AuthzId} = User,
+    % Only superuser and the user may view his or her own invitations and invitation count.
+    Auth  = case RequestorAuthzId of
+        AuthzId ->
+            authorized;
+        _ ->
+            access_for(Args)
+    end,
+    {Auth, Req, State};
+auth_info(Method, Req, #base_state{resource_state = #user_state{chef_user = User}} = State) ->
     #chef_user{authz_id = AuthzId} =   User,
     {auth_type(Method, AuthzId, State), Req, State}.
-auth_info(Method, Req, #base_state{resource_args = associations,
 
-                                   resource_state = #user_state{chef_user = User}} = State) ->
-    case
+
+access_for(invitations) -> superuser_only;
+access_for(invitation_count) -> superuser_only;
+access_for(invitation_response) -> {halt, 403}.
+
 
 auth_type('PUT', AuthzId, #user_state{user_data = UserData}) ->
     ExtId = ej:get({<<"external_authentication_uid">>}, UserData),
@@ -113,9 +145,44 @@ auth_type('PUT', AuthzId, #user_state{user_data = UserData}) ->
 auth_type(_, AuthzId, _State) ->
     {actor, AuthzId}.
 
-from_json(Req, #base_state{resource_state = #user_state{
-                           chef_user = User,
-                           user_data = UserData}} = State) ->
+from_json(Req, #base_state{resource_args = invitation_response,
+                           chef_db_context = DbContext,
+                           requestor_id = RequestorId,
+                           resource_state = #user_state{ chef_user = User, user_data = EJ}} = State) ->
+    Id = chef_wm_util:object_name(invitation, Req),
+    case chef_db:fetch(#oc_chef_org_user_invite{id = Id}, DbContext) of
+        not_found ->
+            Message = chef_wm_util:not_found_message(invitation, Id),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 404}, Req1, State#base_state{log_msg = invite_not_found}};
+        #oc_chef_org_user_invite{id = Id, org_id = OrgId, org_name = OrgName,
+                                 last_updated_by = OriginalRequestorAuthzId} = Invitation ->
+            Result = case ej:get({<<"response">>}, EJ) of
+                <<"accept">> ->
+                    NewState = State#base_state{organization_name = OrgName,
+                                                organization_guid = OrgId,
+                                                resource_state = #association_state{user = User, data = EJ}},
+                    io:fwrite("~n* * * REQUESTOR * * * ~p ~p ~n", [OriginalRequestorAuthzId, Invitation]),
+                    oc_chef_associations:wm_associate_user(Req, NewState, OriginalRequestorAuthzId);
+                <<"decline">> ->
+                    {true, Req, State#base_state{log_msg = {invite_declined, Id}}}
+            end,
+            case Result of
+                {{halt, 500}, _, _} ->
+                    Result;
+                {{halt, _}, _, _} ->
+                    % Any other error means this invite is no good, so nuke it and preserve the response
+                    % we've been given.
+                    oc_chef_object_db:safe_delete(DbContext, Invitation,  RequestorId),
+                    Result;
+                {true, Req1, State1} ->
+                    % A successful result means we give back our serialized invite record.
+                    oc_chef_object_db:safe_delete(DbContext, Invitation,  RequestorId),
+                    EJResponse = oc_chef_org_user_invite:to_ejson(Invitation),
+                    {true, chef_wm_util:set_json_body(Req1, EJResponse), State1}
+            end
+    end;
+from_json(Req, #base_state{resource_state = #user_state{ chef_user = User, user_data = UserData}} = State) ->
     case chef_wm_util:maybe_generate_key_pair(UserData) of
         keygen_timeout ->
             {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
@@ -140,7 +207,23 @@ to_json(Req, #base_state{resource_args = undefined,
     EJson = chef_user:assemble_user_ejson(User, OrgName),
     Json = chef_json:encode(EJson),
     {Json, Req, State};
+to_json(Req, #base_state{ resource_args = Args,
+                          resource_state = #user_state{chef_user = User },
+                          chef_db_context = DbContext } = State) when Args == invitations;
+                                                                      Args == invitation_count ->
 
+    case chef_db:list(#oc_chef_org_user_invite{user_id = User#chef_user.id}, DbContext) of
+        Invitations when is_list(Invitations) ->
+            EJson = case Args of
+                invitation_count ->
+                    {[{<<"value">>, length(Invitations)}]};
+                invitations ->
+                    oc_chef_org_user_invite:ejson_from_list(Invitations, <<"orgname">>)
+            end,
+            {chef_json:encode(EJson), Req, State};
+        Error ->
+            {{halt, 500}, Req, State#base_state{log_msg = Error }}
+    end;
 to_json(Req, #base_state{ resource_args = org_list,
                           resource_state = #user_state{chef_user = User }, chef_db_context = DbContext } = State) ->
 
@@ -162,40 +245,6 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
     Req1 = chef_wm_util:set_json_body(Req, EJson),
     {true, Req1, State}.
 
-error_message(Msg) when is_list(Msg) ->
-    error_message(iolist_to_binary(Msg));
-error_message(Msg) when is_binary(Msg) ->
-    {[{<<"error">>, [Msg]}]}.
-
-malformed_request_message(#ej_invalid{type = json_type, key = Key}, _Req, _State) ->
-    case Key of
-        undefined -> error_message([<<"Incorrect JSON type for request body">>]);
-        _ ->error_message([<<"Incorrect JSON type for ">>, Key])
-    end;
-malformed_request_message(#ej_invalid{type = missing, key = Key}, _Req, _State) ->
-    error_message([<<"Required value for ">>, Key, <<" is missing">>]);
-malformed_request_message({invalid_key, Key}, _Req, _State) ->
-    error_message([<<"Invalid key ">>, Key, <<" in request body">>]);
-malformed_request_message(invalid_json_body, _Req, _State) ->
-    error_message([<<"Incorrect JSON type for request body">>]);
-malformed_request_message(#ej_invalid{type = exact, key = Key, msg = Expected},
-                          _Req, _State) ->
-    error_message([Key, <<" must equal ">>, Expected]);
-malformed_request_message(#ej_invalid{type = string_match, msg = Error},
-                          _Req, _State) ->
-    error_message([Error]);
-malformed_request_message(#ej_invalid{type = object_key, key = Object, found = Key},
-                          _Req, _State) ->
-    error_message([<<"Invalid key '">>, Key, <<"' for ">>, Object]);
-malformed_request_message(#ej_invalid{type = object_value, key = Object, found = Val},
-                          _Req, _State) when is_binary(Val) ->
-    error_message([<<"Invalid value '">>, Val, <<"' for ">>, Object]);
-malformed_request_message(#ej_invalid{type = object_value, key = Object, found = Val},
-                          _Req, _State) ->
-    error_message([<<"Invalid value '">>, io_lib:format("~p", [Val]),
-                   <<"' for ">>, Object]);
-malformed_request_message(Any, _Req, _State) ->
-    error({unexpected_malformed_request_message, Any}).
 
 %% Expected update response for users is currently just
 %% "uri" and (if regenerated) "privat_key" - this function will override
@@ -216,7 +265,9 @@ make_update_response(Request, OrigEJson) ->
              end,
     chef_wm_util:set_json_body(Request, EJson2).
 
-
 conflict_message(Name) ->
     Msg = iolist_to_binary([<<"User '">>, Name, <<"' already exists">>]),
     {[{<<"error">>, [Msg]}]}.
+
+malformed_request_message(Any, _Req, _state) ->
+    error({unexpected_malformed_request_message, Any}).
