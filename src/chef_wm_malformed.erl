@@ -116,6 +116,7 @@ malformed_request_message(#ej_invalid{type=Type,
                                       key=Key
                                      }, _Req, _State) when Type =:= exact ;
                                                            Type =:= string_match ->
+    % TODO msg is provided here - we should use it if it is.
     error_envelope([<<"Field '", Key/binary, "' invalid">>]);
 
 %% Things that should be hashes, but aren't.
@@ -142,6 +143,7 @@ malformed_request_message(#ej_invalid{type=json_type,
     error_envelope([<<"Field '", Key/binary, "' contains invalid run lists">>]);
 
 %% All other json_type failures
+%% beee
 malformed_request_message(#ej_invalid{type=json_type,
                                       key=Key
                                      }, _Req, _State) ->

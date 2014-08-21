@@ -1,10 +1,10 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Christopher Brown <cb@opscode.com>
-%% @author Christopher Maier <cm@opscode.com>
-%% @author Seth Falcon <seth@opscode.com>
-%% @author Ho-Sheng Hsiao <hosh@opscode.com>
-%% Copyright 2011-2013 Opscode, Inc. All Rights Reserved.
+%% @author Christopher Brown <cb@getchef.com>
+%% @author Christopher Maier <cm@getchef.com>
+%% @author Seth Falcon <seth@getchef.com>
+%% @author Ho-Sheng Hsiao <hosh@getchef.com>
+%% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -149,7 +149,9 @@ not_found_message(client, Name) ->
 not_found_message(user, Name) ->
     error_message_envelope(iolist_to_binary(["user '", Name, "' not found"]));
 not_found_message(association, Name) ->
-    error_message_envelope(iolist_to_binary(["user '", Name, "' is not associated with that organization"])).
+    error_message_envelope(iolist_to_binary(["user '", Name, "' is not associated with that organization"]));
+not_found_message(invitation, Id) ->
+    error_message_envelope(iolist_to_binary(["Cannot find association request: ", Id])).
 
 
 %% "Cannot load data bag item not_really_there for data bag sack"
@@ -205,7 +207,7 @@ set_uri_of_created_resource(Uri, Req0) when is_binary(Uri) ->
 %% the spec will be updated
 -spec object_name(cookbook | node | role | data_bag | data_bag_item |
                   environment | principal | sandbox | client | user |
-                  group | container | organization,
+                  group | container | organization | invitation,
                   Request :: #wm_reqdata{}) -> binary() | undefined.
 object_name(node, Req) ->
     extract_from_path(node_name, Req);
@@ -232,7 +234,9 @@ object_name(client, Req) ->
 object_name(user, Req) ->
     extract_from_path(user_name, Req);
 object_name(organization, Req) ->
-    extract_from_path(organization_id, Req).
+    extract_from_path(organization_id, Req);
+object_name(invitation, Req) ->
+    extract_from_path(invitation_id, Req).
 
 %% @doc Private utility function to extract a path element as a binary.  Returns the atom
 %% `undefined' if no such value exists.
