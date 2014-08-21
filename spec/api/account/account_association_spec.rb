@@ -744,6 +744,8 @@ describe "opscode-account user association", :association do
         end
       end
 
+      # !!TODO default normal user cannot get somebody else!
+      #
       context "default normal user" do
         it "can get self", :smoke do
           get(request_url, platform.non_admin_user).should look_like({
@@ -799,24 +801,19 @@ describe "opscode-account user association", :association do
     end # context PUT /organizations/<org>/users/<name>
 
     context "POST /organizations/<org>/users/<name>" do
-      let(:request_url) { api_url("users/#{platform.bad_user.name}") }
-      after :each do
-        delete(request_url, platform.superuser)
-      end
-
-      it "as superuser returns  404 in ruby and 200 in erlang" do
+      it "as superuser returns  404 in ruby and 405 in erlang" do
         post(request_url, platform.superuser).should look_like({
-            :status => ruby_org_assoc? ? 404 : 200
+            :status => ruby_org_assoc? ? 404 : 405
           })
       end
-      it "as org admin user returns 404 in ruby and 403 in erlang", :authorization do
+      it "as org admin user returns 404 in ruby and 405 in erlang" do
         post(request_url, platform.admin_user).should look_like({
-            :status => ruby_org_assoc? ? 404 : 403
+            :status => ruby_org_assoc? ? 404 : 405
           })
       end
-      it "as non-admin org user returns  404 in ruby and 200 in erlang" do
+      it "as non-admin org user returns  404 in ruby and 405 in erlang" do
         post(request_url, platform.non_admin_user).should look_like({
-            :status => ruby_org_assoc? ? 404 : 200
+            :status => ruby_org_assoc? ? 404 : 405
           })
       end
     end # context POST /organizations/<org>/users/<name>
