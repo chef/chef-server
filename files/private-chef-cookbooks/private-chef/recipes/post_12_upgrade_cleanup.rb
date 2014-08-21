@@ -13,3 +13,9 @@ private_chef_package_cleaner "opscode-webui" do
                "/var/log/opscode/opscode-webui",
                "/opt/opscode/embedded/service/opscode-webui"]
 end
+
+private_chef_package_cleaner "opscode-solr" do
+  directories ["/var/opt/opscode/opscode-solr",
+               "/var/log/opscode/opscode-solr"]
+  files ["/etc/opscode/logrotate.d/opscode-solr"]
+end
