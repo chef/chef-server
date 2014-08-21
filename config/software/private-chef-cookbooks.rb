@@ -25,11 +25,8 @@ JSON
     end
     File.open("#{install_dir}/embedded/cookbooks/solo.rb", "w") do |f|
       f.puts "CURRENT_PATH = File.expand_path(File.dirname(__FILE__))"
-      f.puts "COOKBOOKS_D = Dir.glob('/opt/*/embedded/cookbooks')"
       f.puts "file_cache_path \"\#\{CURRENT_PATH\}/cache\""
-      f.puts "cookbook_paths = [CURRENT_PATH]"
-      f.puts "cookbook_paths.concat(COOKBOOKS_D)"
-      f.puts "cookbook_path cookbook_paths"
+      f.puts "cookbook_path [CURRENT_PATH]"
       f.puts "verbose_logging true"
     end
   end

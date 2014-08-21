@@ -1,10 +1,14 @@
-
-# Disable the specified plugins
-node['private_chef']['plugins']['disabled'].each do |plugin|
-  include_recipe "#{plugin}::disable"
+plugins = EnterprisePluginCollection.from_glob("/opt/*/chef-server-plugin.rb")
+plugins.each do |p|
+  next if !p.parent_plugin.nil?
+  p.enabled true if node['private_chef']['enabled-plugins']
+  p.enabled false if node['private_chef']['disabled-plugins']
 end
 
-# Enable the specified plugins
-node['private_chef']['plugins']['enabled'].each do |plugin|
-  include_recipe "#{plugin}::enable"
+plugins.each do |plugin|
+  next if !plugin.parent_plugin.nil?
+  chef_run plugin.run_list do
+    cookbook_path plugin.cookbook_path
+    included_attrs ["private_chef"]
+  end
 end
