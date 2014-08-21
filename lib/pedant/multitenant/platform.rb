@@ -264,10 +264,18 @@ module Pedant
       if r.code == 201 # Created
         association_id = parse(r)["uri"].split("/").last
         r = put("#{@server}/users/#{user.name}/association_requests/#{association_id}", user, :payload => { "response" => "accept" })
+        if r.code != 200
+          raise "Bad response #{r.code} from PUT /users/#{user.name}/association_requests/#{association_id}: #{r}"
+        end
+        # Check that the user was really added, because we're paranoid like that.
+        r = get("#{@server}/organizations/#{orgname}/users", superuser)
+        if r.code != 200 || !parse(r).any? { |u| u['user']['username'] == user.name }
+          raise "Organization invite process did not work for #{orgname} + #{user.name}!  Response: #{r}"
+        end
       elsif r.code == 409 && parse(r)["error"] == "The association already exists."
         # No problem!
       else
-        raise "Bad response #{r.code} from association_requests: #{r}"
+        raise "Bad response #{r.code} from POST /organizations/#{orgname}/association_requests: #{r}"
       end
     end
 
