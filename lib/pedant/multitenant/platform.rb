@@ -234,7 +234,8 @@ module Pedant
           validator_key = parsed["private_key"]
 
           validator = Pedant::Client.new(validator_name, validator_key)
-
+          # Now for some ugly: set up org valus in sql for join purposes.
+          r = post("#{@server}/add-an-org/#{orgname}", superuser, {})
           return Pedant::Organization.new(orgname, validator)
         when 503
           # Continue attempting by allowing the loop to continue
@@ -250,6 +251,7 @@ module Pedant
     def delete_org(orgname)
       puts "Deleting organization #{orgname} ..."
       r = delete("#{@server}/organizations/#{orgname}", superuser)
+      r = delete("#{@server}/add-an-org/#{orgname}", superuser)
       if r.code != 200
         puts "Unexpected response #{r.code}: #{r}"
       end
