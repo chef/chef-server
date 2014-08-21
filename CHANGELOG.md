@@ -57,6 +57,10 @@
 ### logrotate
 * Fixed build configuration that was causing logrotate to not be installed
 
+### omnibus-ctl 0.1.1
+* [OC-10470] Allow private-chef-ctl status to ignore disabled services
+* [OC-11574] private-chef-ctl service commands should be HA-aware
+
 ### openssl 1.0.1i
 * Fix for CVE-2014-3512
 * Fix for CVE-2014-3511
