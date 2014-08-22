@@ -1,21 +1,17 @@
 class EnterprisePluginCollection
 
-  extend Forwardable
-
   attr_reader :plugins
   def initialize
     @plugins = []
   end
 
   def plugin(name, &block)
-    puts "Found plugin #{name}"
     p = EnterprisePlugin.new(name)
     p.instance_eval &block
     @plugins << p
   end
 
   def load_from_file(filename)
-    puts "Loading config from #{filename}"	
     nc = EnterprisePluginCollection.new
     nc.instance_eval(::File.read(filename))
     nc.plugins.each do |p|
@@ -23,7 +19,6 @@ class EnterprisePluginCollection
     end
     @plugins += nc.plugins
   end
-
 
   # it is a bit gross that we just return
   # the array rather than the real object

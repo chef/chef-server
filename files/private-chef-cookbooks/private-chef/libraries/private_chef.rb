@@ -235,7 +235,7 @@ module PrivateChef
         "ldap",
         "user",
         "ha",
-	"disabled_plugins",
+        "disabled_plugins",
         "enabled_plugins"
       ].each do |key|
         # @todo: Just pick a naming convention and adhere to it
