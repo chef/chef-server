@@ -356,8 +356,6 @@ def run_osc_upgrade
     # --concurrency sets the number of threads to use for concurrent cookbook uploads. Default to 10, but the user can adjust if they desire.
 
     cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency #{@options.upload_threads} -c /tmp/knife-ec-backup-config.rb #{ec_data_dir}"
-    #cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --concurrency 1 -c /tmp/knife-ec-backup-config.rb #{ec_data_dir}"
-    #cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency 1 -c /tmp/knife-ec-backup-config.rb -VV #{ec_data_dir}"
     status = run_command(cmd)
     msg = "Uploading transformed data to the Enterprise Chef server failed"
     check_status(status, msg)
