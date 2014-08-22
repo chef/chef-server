@@ -17,7 +17,7 @@ require 'pedant/rspec/common'
 #
 describe "opscode-account user association", :association do
   def self.ruby?
-    true
+    Pedant::Config.ruby_org_assoc?
   end
 
   let(:users_url) { "#{platform.server}/users" }
@@ -26,7 +26,7 @@ describe "opscode-account user association", :association do
   let(:default_pedant_user_names) { platform.users.select(&:associate).map(&:name).sort }
 
   def ruby_org_assoc?
-    true
+    Pedant::Config.ruby_org_assoc?
   end
 
   let(:public_key_regex) do
@@ -231,14 +231,14 @@ describe "opscode-account user association", :association do
   context "when the organization does not exist" do
     it "listing association requests replies with org not found" do
       pending("ruby incorrectly fails this with a 400", :if => ruby?) do
-        response = get("/organizations/bad_org/association_requests", platform.superuser)
+        response = get("#{platform.server}/organizations/bad_org/association_requests", platform.superuser)
         response.should look_like({ :status => 404,
                                     :body_exact => { "error"=>"Organization bad_org not found."} })
       end
     end
     it "creating a new association request replies org not found" do
       pending("ruby incorrectly fails this with a 400", :if => ruby?) do
-        response = post("/organizations/bad_org/association_requests", platform.superuser,
+        response = post("#{platform.server}/organizations/bad_org/association_requests", platform.superuser,
                         :payload=>make_invite_payload(platform.bad_user.name))
         response.should look_like({ :status => 404,
                                     :body_exact => { "error"=>"Organization bad_org not found."} })
