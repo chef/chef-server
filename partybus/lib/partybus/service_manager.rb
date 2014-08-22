@@ -14,6 +14,20 @@ class Partybus::ServiceManager
     end
   end
 
+  # the above method only restarts if the service is up,
+  # this will always restart a service.
+  def force_restart_service(service_name, sleep_time)
+    system("private-chef-ctl restart #{service_name}")
+    if not system("private-chef-ctl status #{service_name}")
+      log "Error: Failed to bring service #{service_name} back online after restart..."
+      exit 1
+    end
+    if sleep_time != 0
+      log "Sleeping for #{sleep_time} seconds while service #{service_name} comes back online..."
+    end
+    sleep sleep_time
+  end
+
   # function that will as properly as possible
   # bring up a service that is needed by an upgrade
   def start_service(service_name, sleep_time)
