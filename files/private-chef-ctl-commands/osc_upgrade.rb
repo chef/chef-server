@@ -167,6 +167,15 @@ def run_osc_upgrade
     end
   end
 
+  def file_open(file, mode, &block)
+    begin
+      File.open(file, mode, &block)
+    rescue Exception => e
+      log "Received exception #{e.message} when trying to open file #{file}"
+      exit 1
+    end
+  end
+
   def write_knife_config(osc_data_dir)
     # Hard coded path to key (stole idea to use from pedant), but the path is in attributes
     # Need to ensure we have a valid path to the key here
@@ -182,8 +191,7 @@ def run_osc_upgrade
     EOH
 
     log "Writing knife config to /tmp/knife-config.rb for use in downloading the data"
-    # An exception will be raised if this fails. Catch it and try to die gracefully?
-    File.open("/tmp/knife-config.rb", "w"){ |file| file.write(config)}
+    file_open("/tmp/knife-config.rb", "w"){ |file| file.write(config)}
   end
 
   def run_knife_download
@@ -222,7 +230,7 @@ def run_osc_upgrade
 
     sql_user_data = db.select(:username, :id, :public_key, :hashed_password, :salt, :hash_type).from(:osc_users)
     sql_users_json =  sql_user_data.all.to_json
-    File.open(key_file, 'w') { |file| file.write(sql_users_json)}
+    file_open(key_file, 'w') { |file| file.write(sql_users_json)}
   end
 
   def start_ec
@@ -258,8 +266,7 @@ def run_osc_upgrade
   def create_org_json(org_dir, org_name, org_full_name, org_type)
     # How is the private key returned to the user creating the org in this way?
     org_json = {"name" => org_name, "full_name" => org_full_name, "org_type" => org_type}
-    # An exception will be raised if this fails. Catch it and try to die gracefully?
-    File.open("#{org_dir}/org.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(org_json)) }
+    file_open("#{org_dir}/org.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(org_json)) }
   end
 
   def transform_osc_user_data(osc_data_dir, ec_data_dir)
@@ -285,15 +292,14 @@ def run_osc_upgrade
 
       # Take in a default email domain?
       user['email'] = "#{user['username']}@example.com"
-      File.open("#{ec_data_dir}/users/#{File.basename(file)}", "w"){ |new_file| new_file.write(Chef::JSONCompat.to_json_pretty(user)) }
+      file_open("#{ec_data_dir}/users/#{File.basename(file)}", "w"){ |new_file| new_file.write(Chef::JSONCompat.to_json_pretty(user)) }
     end
     [user_names, admin_user_names]
   end
 
   def create_invitations_json(org_dir)
     # OSC doesn't have the concept of invitations, so this is empty
-    # An exception will be raised if this fails. Catch it and try to die gracefully?
-    File.open("#{org_dir}/invitations.json", "w"){ |file| file.write([])}
+    file_open("#{org_dir}/invitations.json", "w"){ |file| file.write([])}
   end
 
   def create_members_json(users, org_dir)
@@ -315,17 +321,17 @@ def run_osc_upgrade
         members_json << user_json
       end
 
-      File.open("#{org_dir}/members.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(members_json)) }
+      file_open("#{org_dir}/members.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(members_json)) }
   end
 
   def create_admins_json(users, groups_dir)
     admins_json = { "name" => "admins", "users" => users }
-    File.open("#{groups_dir}/admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(admins_json)) }
+    file_open("#{groups_dir}/admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(admins_json)) }
   end
 
   def create_billing_admins(users, groups_dir)
     billing_admins_json = { "name" => "billing-admins", "users" => users }
-    File.open("#{groups_dir}/billing-admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(billing_admins_json)) }
+    file_open("#{groups_dir}/billing-admins.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(billing_admins_json)) }
   end
 
   def write_knife_ec_backup_config
@@ -340,7 +346,7 @@ def run_osc_upgrade
     EOH
 
     log "Writing knife-ec-backup config to /tmp/knife-ec-backup-config.rb"
-    File.open("/tmp/knife-ec-backup-config.rb", "w"){ |file| file.write(config)}
+    file_open("/tmp/knife-ec-backup-config.rb", "w"){ |file| file.write(config)}
   end
 
   def run_knife_ec_restore(ec_data_dir)
