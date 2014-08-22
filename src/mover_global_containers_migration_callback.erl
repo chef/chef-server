@@ -25,8 +25,8 @@ next_object() ->
     mover_transient_migration_queue:next(?MODULE).
 
 migration_action(Object, _AcctInfo) ->
-    {Guid, AuthzId, RequesterId, ContainerName, Data} = Object,
-    moser_global_object_converter:insert_container(Guid, AuthzId, RequesterId, ContainerName, Data).
+    {Guid, AuthzId, RequesterId, Data} = Object,
+    moser_global_object_converter:insert_container(Guid, AuthzId, RequesterId, Data).
 
 migration_type() ->
     <<"global_container_migration">>.

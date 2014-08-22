@@ -3,7 +3,7 @@
 %% %% ex: ts=4 sw=4 et ft=erlang
 %%! -hidden
 %%
-%% Copyright(c) 2013 Opscode, Inc
+%% Copyright(c) 2014 Chef, Inc
 %% All Rights Reserved
 
 %% using compiled mode gives more informative error traces
@@ -21,11 +21,19 @@
 %% Usage:
 %%  migrate:
 %%    will run with mover_phase_1_migration_callback and normal noise level
+%%    with default ?MOVER_MOD migration processor
 %%  migrate silent:
 %%    will run with mover_phase_1_migration_callback and silent noise level
+%%    with default ?MOVER_MOD migration processor
 %%  migrate <migration_callback> <noise_level>:
 %%    will run a migration on any valid <migration_callback> and noise level
 %%    where <noise_level> is "normal" or "silent"
+%%    with default ?MOVER_MOD migration processor
+%%  migrate <migration_callback> <noise_level> <migration_processor>:
+%%    will run a migration on any valid <migration_callback> and noise level
+%%    where <noise_level> is "normal" or "silent", and <migration_processor>
+%%    is a valid migration processor (e.g. 'mover_batch_migrator' or
+%%    'mover_non_org_batch_migrator')
 %%
 %% <b>Important</b>: this must be run as root or connect will fail.
 %% If an error occurs, it will also be displayed on the console.
@@ -38,32 +46,41 @@
 -define(SELF, 'migrate-script@127.0.0.1').
 -define(MOVER, 'mover@127.0.0.1').
 -define(MOVER_COOKIE, 'mover').
--define(MOVER_MOD, 'mover_batch_migrator').
+-define(MOVER_MOD, "mover_batch_migrator").
 -define(SUCCESS_EXIT, 0).
 -define(FAILURE_EXIT, 1).
 
 
 main([]) ->
-    main(mover_phase_1_migration_callback, normal);
+    main(mover_phase_1_migration_callback, normal, ?MOVER_MOD);
 main(["silent"]) ->
-    main(mover_phase_1_migration_callback, silent);
+    main(mover_phase_1_migration_callback, silent, ?MOVER_MOD);
 main([Other]) ->
     bad_noise_argument(Other);
 main([MigrationType, NoiseLevel]) ->
+    main([MigrationType, NoiseLevel, ?MOVER_MOD]);
+main([MigrationType, NoiseLevel, MigrationProcessor]) ->
     case NoiseLevel of
         "silent" ->
-            main(list_to_atom(MigrationType), silent);
+            main(list_to_atom(MigrationType), silent, list_to_atom(MigrationProcessor));
         "normal" ->
-            main(list_to_atom(MigrationType), normal);
+            main(list_to_atom(MigrationType), normal, list_to_atom(MigrationProcessor));
         _ ->
             bad_noise_argument(NoiseLevel)
     end.
 
-main(MigrationType, NoiseLevel) ->
+main(MigrationType, NoiseLevel, MigrationProcessor) ->
     {ExitCode, Message} = try
-        init_network(),
-        Results = migrate(MigrationType),
-        parse_and_format(NoiseLevel, Results)
+        init_network(MigrationProcessor),
+        Results = migrate(MigrationType, MigrationProcessor),
+        % if successful_org is undefined in the results proplist
+        % then do a simple parse and format (likely transient queue migration).
+        case proplists:is_defined(successful_orgs, Results) of
+            false ->
+                simple_parse_and_format(Results);
+            _ ->
+                parse_and_format(NoiseLevel, Results)
+        end
     catch
         error:{error, HaltWith} ->
             {?FAILURE_EXIT, HaltWith};
@@ -79,24 +96,31 @@ bad_noise_argument(Argument) ->
     io:fwrite("Unknown argument(s): ~p.~nUsage: migrate [silent] or migrate [migration_type] [silent|normal]~n", [Argument]),
     halt(?FAILURE_EXIT).
 
-init_network() ->
+init_network(MigrationProcessor) ->
     net_kernel:start([?SELF]),
     erlang:set_cookie(?MOVER, ?MOVER_COOKIE),
     verify_ping(net_adm:ping(?MOVER), "Could not connect to mover service"),
     R = try
-            rpc:call(?MOVER, ?MOVER_MOD, ping, [])
+            rpc:call(?MOVER, MigrationProcessor, ping, [])
         catch
             _M:_R  ->
                pang
         end,
     verify_ping(R, "RPC to mover service failed").
 
-migrate(MigrationType) ->
+migrate(MigrationType, MigrationProcessor) ->
+% Orgs migrationc case:
 %[{status,complete},
 %       {successful_orgs,["org1"]},
 %       {failed_orgs,["org2"]},
 %       {reset_failed,["org3", "org4"]}].
-    rpc:call(?MOVER, ?MOVER_MOD, migrate_all, [MigrationType]).
+% Transient queue migration case:
+% [{status, complete}]
+    rpc:call(?MOVER, MigrationProcessor, migrate_all, [MigrationType]).
+
+simple_parse_and_format(Results) ->
+    Exit = status_to_exit_code(proplists:get_value(status, Results)),
+    {Exit, exit_code_message(Exit)}.
 
 parse_and_format(NoiseLevel, Results) ->
     C0 = status_to_exit_code(proplists:get_value(status, Results)),

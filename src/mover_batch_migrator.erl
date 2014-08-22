@@ -1,17 +1,17 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil;fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Marc A. Paradise <marc@opscode.com>
-%% @copyright 2013 Opscode, Inc.
+%% @author Marc A. Paradise <marc@getchef.com>
+%% @author Tyler Cloke <tyler@getchef.com>
+%% @copyright 2013-2014 Chef, Inc.
 %%
 
 -module(mover_batch_migrator).
 
--export([ping/0,
+-export([
+         ping/0,
          migrate_all/0,
-         migrate_all/1,
-         wait_for_status/0]).
-
--define(POLL_SLEEP_MS, 500).
+         migrate_all/1
+        ]).
 
 -include_lib("moser/include/moser.hrl").
 
@@ -101,7 +101,7 @@ reset_org(OrgName, CallbackMod) ->
 do_migrate(Org, Remaining, Acc, CallbackMod) ->
     % Crash if mover manager fsm isn't in the expected state
     {ok, burning_couches} = mover_manager:migrate_next(CallbackMod),
-    Status = wait_for_status(),
+    Status = mover_util:wait_for_status(),
     case proplists:get_value(fatal_stop, Status) of
         true ->
             % as with all errors, we will have captured error details in the log
@@ -116,17 +116,6 @@ do_migrate(Org, Remaining, Acc, CallbackMod) ->
             end,
             % In any case, capture the result and keep going.
             migrate_next(Remaining, [Result | Acc], CallbackMod)
-    end.
-
-%% poll mover_manager:status until it indicates that it's completed.
-wait_for_status() ->
-	{ok, Status} = mover_manager:status(),
-    case proplists:get_value(state, Status) of
-        ready ->
-            Status;
-        _ ->
-            timer:sleep(?POLL_SLEEP_MS),
-            wait_for_status()
     end.
 
 %% Populate the org state table.  If it encounters an org that is
