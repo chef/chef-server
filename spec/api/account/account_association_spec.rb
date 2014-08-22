@@ -461,14 +461,14 @@ describe "opscode-account user association", :association do
           response.should look_like({ :status=> 200 })
         end
 
-        it "they do not have access to view members of that org" do
+        it "they do not have access to view members of that org", :authorization do
           result = get(api_url("users"), platform.bad_user)
           result.should look_like({ :status=> 403,
                                     :body_exact => { "error" => "'#{bad_user}' not associated with organization '#{platform.test_org.name}'"} })
 
         end
 
-        it "they do not have access to attempt to view themselves in an org" do
+        it "they do not have access to attempt to view themselves in an org", :authorization do
           result = get(api_url("users/#{bad_user}"), platform.bad_user)
           result.should look_like({ :status=> 403,
                                     :body_exact => { "error" => "'#{bad_user}' not associated with organization '#{platform.test_org.name}'"} })
@@ -540,7 +540,7 @@ describe "opscode-account user association", :association do
           delete("#{platform.server}/users/#{test_user.name}", platform.superuser)
         end
 
-        it "from the org, invites issued by that admin cannot be accepted" do
+        it "from the org, invites issued by that admin cannot be accepted", :authorization do
           pending("unclear why this is presently passing w/ 200 on ruby, should not be", :if => ruby?) do
             delete(api_url("users/#{admin_username}"), platform.admin_user).should look_like({ :status=> 200 })
             response = put(@user_invite_url, test_user, :payload=>{:response=>"accept"})
@@ -551,7 +551,7 @@ describe "opscode-account user association", :association do
           end
         end
 
-        it "from the system, invites issued by that admin can't by accepted" do
+        it "from the system, invites issued by that admin can't by accepted", :authorization do
           pending "Known failure: passes w/ 200 b/c no USAG cleanup performed for deleted user" do
             delete("/users/#{admin_username}", platform.superuser).should look_like({ :status => 200} )
             response = put(@user_invite_url, test_user, :payload=>{:response=>"accept"})
@@ -663,7 +663,7 @@ describe "opscode-account user association", :association do
         end
       end
 
-      context "default client" do
+      context "default client", :authorization do
         it "returns 403" do
           get(request_url, platform.non_admin_client).should look_like({
               :status => 403
@@ -671,7 +671,7 @@ describe "opscode-account user association", :association do
         end
       end
 
-      context "outside user" do
+      context "outside user", :authorization do
         it "returns 403" do
           get(request_url, outside_user).should look_like({
               :status => 403
@@ -679,7 +679,7 @@ describe "opscode-account user association", :association do
         end
       end
 
-      context "invalid user" do
+      context "invalid user", :authentication do
         it "returns 401" do
           get(request_url, invalid_user).should look_like({
               :status => 401
@@ -765,7 +765,7 @@ describe "opscode-account user association", :association do
       end
 
       context "default client" do
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, platform.non_admin_client).should look_like({
               :status => 403
             })
@@ -773,14 +773,14 @@ describe "opscode-account user association", :association do
       end
 
       context "outside user" do
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, outside_user).should look_like({
               :status => 403
             })
         end
       end
 
-      context "invalid user" do
+      context "invalid user", :authentication do
         it "returns 401" do
           get(request_url, invalid_user).should look_like({
               :status => 401
@@ -856,7 +856,7 @@ describe "opscode-account user association", :association do
           before { platform.add_user_to_group(org, test_user, "admins") }
           after  { platform.remove_user_from_group(org, test_user, "admins") }
 
-          it "cannot delete" do
+          it "cannot delete", :authorization do
             pending("new constraint in erchef- ruby returns 200", :if => ruby?) do
               delete(request_url, test_user).should look_like({
                   :status => 403,

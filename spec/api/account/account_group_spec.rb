@@ -528,7 +528,7 @@ describe "opscode-account groups", :groups do
           delete(api_url("groups/#{missing_group}"), platform.admin_user)
         end
 
-        it "can get group" do
+        it "can get group", :validation do
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
               :body_exact => default_group_body
