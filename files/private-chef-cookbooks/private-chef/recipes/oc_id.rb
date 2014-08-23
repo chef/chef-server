@@ -58,7 +58,7 @@ file "#{oc_id_config_dir}/production.yml" do
   group node['private_chef']['user']['username']
   mode '640'
   content mutable_hash.to_yaml
-  notifies :restart, 'runit_service[oc_id]' if frontend?
+  notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
 end
 
 #
@@ -78,7 +78,7 @@ template "#{oc_id_config_dir}/secret_token.rb" do
   user node['private_chef']['user']['username']
   group node['private_chef']['user']['username']
   mode '640'
-  notifies :restart, 'runit_service[oc_id]' if frontend?
+  notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
 end
 secrets_file = "/opt/opscode/embedded/service/oc_id/config/initializers/secret_token.rb"
 file secrets_file do
@@ -94,7 +94,7 @@ template "#{oc_id_config_dir}/database.yml" do
   user node['private_chef']['user']['username']
   group node['private_chef']['user']['username']
   mode '640'
-  notifies :restart, 'runit_service[oc_id]' if frontend?
+  notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
 end
 database_file = "/opt/opscode/embedded/service/oc_id/config/database.yml"
 file database_file do
@@ -110,6 +110,7 @@ execute "oc_id_schema" do
   path ["/opt/opscode/embedded/bin"]
   cwd "/opt/opscode/embedded/service/oc_id"
   environment({"RAILS_ENV" => "production"})
+  only_if { is_data_master? }
 end
 
 component_runit_service "oc_id" do
@@ -140,6 +141,6 @@ end
     owner "root"
     group "root"
     mode "0644"
-    notifies :restart, 'runit_service[nginx]' if frontend?
+    notifies :restart, 'runit_service[nginx]' unless backend_secondary?
   end
 end
