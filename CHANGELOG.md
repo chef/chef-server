@@ -51,6 +51,8 @@
 
 * Add a gather-logs command to create a tarball of important logs and
   system information for Chef Support
+* [OC-9877] Fix bug that included binary files and archives when using
+  'private-chef-ctl tail'
 
 ### oc-id 0.3.3
 * Add Chef Identity Service (oc-id)
