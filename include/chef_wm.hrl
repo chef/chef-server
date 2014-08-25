@@ -100,13 +100,16 @@
           auth_skew = 900 :: non_neg_integer(),
 
           %% The GUID for the organization name that appears in the
-          %% request URL.  This gets set in chef_rest_wm:is_authorized
-          %% if a client is making the request.
+          %% request URL.  This gets set in chef_wm_base:malformed_request
           organization_guid :: object_id(),
 
           %% The name of the organization parsed from the request URL.
           %% Set by chef_rest_wm:service_available.
           organization_name :: binary() | ?OSC_ORG_NAME,
+
+          %% The authz identifier of the org, populated based on the presence
+          %% of an organization name in the request url
+          organization_authz_id :: object_id(),
 
           %% Run time configurable dark launch info
           %% Set by chef_rest_wm:service_available.
