@@ -117,7 +117,8 @@ auth_info(Req, State) ->
 post_is_create(Req, State) ->
     {true, Req, State}.
 
-malformed_request(Req, #base_state{resource_mod=Mod,
+malformed_request(Req, #base_state{organization_name = OrgName,
+                                   resource_mod=Mod,
                                    auth_skew=AuthSkew}=State) ->
     {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
     try
@@ -154,6 +155,27 @@ malformed_request(Req, #base_state{resource_mod=Mod,
             NewReq = wrq:set_resp_body(chef_json:encode(Msg), Req),
             {true, NewReq, State1#base_state{log_msg = Why}}
     end.
+
+
+%%%%%%%%%%
+%%% TEMPORARY - DELETE once authz id and org id are fetched in a join.
+%%%%%%%%%%
+fetch_org_authz_id(undefined) ->
+    undefined;
+fetch_org_authz_id(?OSC_ORG_NAME) ->
+    undefined;
+fetch_org_authz_id(OrgName) ->
+    Server = chef_otto:connect(),
+    case chef_otto:fetch_org(Server, OrgName) of
+        {org_not_found, not_in_view} ->
+            undefined;
+        OrgDoc ->
+           OrgDocId = proplists:get_value(<<"_id">>, OrgDoc),
+           chef_otto:fetch_auth_join_id(Server, OrgDocId, user_to_auth)
+    end.
+%%%%%%%%%%
+%%% TEMPORARY - DELETE once authz id and org id are fetched in a join.
+%%%%%%%%%%
 
 forbidden(Req, #base_state{resource_mod=Mod}=State) ->
     %% For now we call auth_info because currently need the side-effect of looking up the
