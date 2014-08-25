@@ -4,3 +4,5 @@ metadata
 
 cookbook 'enterprise', :git => 'git@github.com:opscode-cookbooks/enterprise-chef-common.git', :tag => '0.4.4'
 cookbook 'chef-ha-drbd', :path => '../chef-ha-drbd'
+cookbook 'apt', :git => 'git@github.com:opscode-cookbooks/apt.git', :tag => '2.5.3'
+# yum is included via runit
