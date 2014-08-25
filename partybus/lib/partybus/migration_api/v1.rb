@@ -1,5 +1,6 @@
 require 'partybus/schema_migrator'
 require 'partybus/service_manager'
+require 'partybus/migration_util'
 require 'partybus/command_runner'
 require 'partybus/migration_api/v1'
 
@@ -63,6 +64,12 @@ EOF
         service_manager.restart_service(service_name)
       end
 
+      def force_restart_service(service_name)
+        log("\tRestarting Service #{service_name}")
+        service_manager = Partybus::ServiceManager.new
+        service_manager.force_restart_service(service_name, 60)
+      end
+
       def start_service(service_name)
         log("\tStarting Service #{service_name}")
         service_manager = Partybus::ServiceManager.new
@@ -93,6 +100,12 @@ EOF
         log("\tRunning Command: #{command} with options #{options.inspect}")
         runner = Partybus::CommandRunner.new
         runner.run_command(command, options)
+      end
+
+      def clean_mover_logs
+        log("\tCleaning migration related logs to prep for new migration")
+        migration_util = Partybus::MigrationUtil.new
+        migration_util.clean_mover_logs
       end
 
       def must_be_data_master

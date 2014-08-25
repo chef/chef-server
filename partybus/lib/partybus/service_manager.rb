@@ -14,6 +14,20 @@ class Partybus::ServiceManager
     end
   end
 
+  # calls a pcc restart with sleep time after to ensure that it is up
+  def force_restart_service(service_name, sleep_time)
+    system("private-chef-ctl restart #{service_name}")
+    if sleep_time != 0
+      log "Sleeping for #{sleep_time} seconds while service #{service_name} comes back online..."
+    end
+    sleep sleep_time
+
+    if not system("private-chef-ctl status #{service_name}")
+      log "Error: Failed to bring service #{service_name} back online after restart..."
+      exit 1
+    end
+  end
+
   # function that will as properly as possible
   # bring up a service that is needed by an upgrade
   def start_service(service_name, sleep_time)
@@ -23,10 +37,6 @@ class Partybus::ServiceManager
 
     if exit_status == 3 # service is down
       system("private-chef-ctl start #{service_name}")
-      if not system("private-chef-ctl status #{service_name}")
-        log "Error: Failed to bring service #{service_name} back online..."
-        exit 1
-      end
       # mildly hacky, but pcc restart and status can't tell if the service is
       # actually ready to accept requests, but only if its up, sleep to ensure
       # service has time to actually be ready to accept requests
@@ -34,6 +44,11 @@ class Partybus::ServiceManager
         log "Sleeping for #{sleep_time} seconds while service #{service_name} comes online..."
       end
       sleep sleep_time
+
+      if not system("private-chef-ctl status #{service_name}")
+        log "Error: Failed to bring service #{service_name} back online..."
+        exit 1
+      end
     end
   end
 

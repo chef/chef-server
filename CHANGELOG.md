@@ -43,10 +43,11 @@
 ### chef 11.12.2
 * Update embedded chef gem to 11.12.2
 
-### chef-mover 2.2.4
-* Containers and groups migration from couchDB to postgreSQL
+### chef-mover 2.2.11
+* Containers, groups, and global containers migrations from couchDB to postgreSQL
 * Solr4 migration
 * Generalized migrate scripts and other code to be migration_type agnostic
+* Code supporting organization and global group related migrations
 
 ### enterprise-chef-server-schema 2.3.0
 * Updates org_migration_state table with migration_type and verification
