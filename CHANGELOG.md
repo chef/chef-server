@@ -45,7 +45,7 @@
 * [OC-11673] Tune PostgreSQL keepalive timeouts
 * [OC-11710] Fix couchdb compaction log rotation
 * Add bifrost_sql_database uri to orgmapper.conf
-* Allow ['lb']['upstream'] to have a custom setting
+* [OC-11585] Allow ['lb']['upstream'] to have a custom setting
 
 ### private-chef-ctl
 
@@ -86,14 +86,12 @@
 * [OC-11499] Use more strict regular expression for IP check in ha-status
 * [OC-3107] Ensure CouchDB compaction cron job does not run on passive
   backend.
-* [OC-11601] Allow ['lb']['upstream'] to have a custom setting
-* [OC-11601] Use SSL port for lb_internal if non-SSL is disabled
 * [OC-11601] Restart redis_lb immediately during reconfigure
 * [OC-11490] Explicitly set keepalived directory ownership
 * [OC-11297] EC 11 fresh install not saving migration state
 * [OC-11656] Set explicit owner and group for services without them
 * Address a PostgreSQL configuration error. The defect allows any local user on the system hosting the Chef Server’s PostgreSQL components full access to databases.
-* Separate redis_keepalive_timeout from redis_connection_timeout and increase their default values from 60ms to 1000 and 2000ms, respectively.
+* [OC-11662] Separate redis_keepalive_timeout from redis_connection_timeout and increase their default values from 60ms to 1000 and 2000ms, respectively.
 
 ### private-chef-ctl
 * [OC-11657] Bump default svwait timeout of 7 seconds to 30 seconds
@@ -108,12 +106,6 @@
   return code
 
 ### private-chef-cookbooks
-* Allow ['lb']['upstream'] to have a custom setting
-* Use SSL port for lb_internal if non-SSL is disabled
-* Restart redis_lb immediately during reconfigure
-* Separate redis_keepalive_timeout from redis_connection_timeout and
-  increase their default values from 60ms to 1000 and 2000ms,
-  respectively.
 * [OC-11581] private-chef-ctl test command should return the pedant
   return code
 
