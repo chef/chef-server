@@ -230,7 +230,7 @@ process_batch(State = #state{authz_ids = {ActorSet, GroupSet}}) ->
       length(GroupAuthzIdsToRemove),
       length(RemainingGroups)
      } of
-        {0,0,0,0} ->
+        {0,_,0,_} ->
             ok;
         {LengthActors, LengthRemainingActors, LengthGroups, LengthRemainingGroups} ->
             error_logger:info_msg(
