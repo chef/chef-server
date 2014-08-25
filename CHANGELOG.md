@@ -85,10 +85,10 @@
 * Removed. Docs can be found at docs.opscode.com
 
 ### private-chef-cookbooks
-* Allow ['lb']['upstream'] to have a custom setting
-* Use SSL port for lb_internal if non-SSL is disabled
-* Restart redis_lb immediately during reconfigure
-* Separate redis_keepalive_timeout from redis_connection_timeout and
+* [OC-11585] Allow ['lb']['upstream'] to have a custom setting
+* [OC-11540] Fix invalid opscode-account config when forcing SSL
+* [OC-11601] Restart redis_lb immediately during reconfigure
+* [OC-11662] Separate redis_keepalive_timeout from redis_connection_timeout and
   increase their default values from 60ms to 1000 and 2000ms,
   respectively.
 * [OC-11581] private-chef-ctl test command should return the pedant
@@ -111,11 +111,6 @@
 
 * Add a gather-logs command to create a tarball of important logs and
   system information for Chef Support
-
-### openssl 1.0.1h
-* Allow ['lb']['upstream'] to have a custom setting
-* Use SSL port for lb_internal if non-SSL is disabled
-* Restart redis_lb immediately during reconfigure
 
 ### oc-id 0.3.3
 * Add Chef Identity Service (oc-id)
