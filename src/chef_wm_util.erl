@@ -139,7 +139,7 @@ not_found_message(sandbox, SandboxId) ->
 not_found_message(environment, Name) ->
     error_message_envelope(iolist_to_binary(["Cannot load environment ", Name]));
 not_found_message(organization, Name) ->
-    error_message_envelope(iolist_to_binary(["Cannot load organiztion ", Name]));
+    error_message_envelope(iolist_to_binary(["Cannot load organization ", Name]));
 not_found_message(cookbook, Name) when is_binary(Name) ->
     error_message_envelope(iolist_to_binary(["Cannot find a cookbook named ", Name]));
 not_found_message(cookbook_version, {Name, Version}) when is_binary(Version) -> %% NOT a parsed {Major, Minor, Patch} tuple!!
@@ -147,11 +147,14 @@ not_found_message(cookbook_version, {Name, Version}) when is_binary(Version) -> 
 not_found_message(client, Name) ->
     error_message_envelope(iolist_to_binary(["Cannot load client ", Name]));
 not_found_message(user, Name) ->
-    error_message_envelope(iolist_to_binary(["user '", Name, "' not found"]));
-not_found_message(association, Name) ->
-    error_message_envelope(iolist_to_binary(["user '", Name, "' is not associated with that organization"]));
+    %error_message_envelope(iolist_to_binary(["user '", Name, "' not found"]));
+%TODO - verify this does not break other tests which require specific wording - otherwise
+    %we'll needd to update associated test in oc-chef-pedant:associations_spec
+    {[{<<"error">>, iolist_to_binary(["Could not find user ", Name])}]};
+not_found_message(association, {Name, OrgName} ) ->
+    {[{<<"error">>, iolist_to_binary(["Cannot find a user ", Name, " in organization ", OrgName])}]};
 not_found_message(invitation, Id) ->
-    error_message_envelope(iolist_to_binary(["Cannot find association request: ", Id])).
+    {[{<<"error">>, iolist_to_binary(["Cannot find association request: ", Id])}]}.
 
 
 %% "Cannot load data bag item not_really_there for data bag sack"
