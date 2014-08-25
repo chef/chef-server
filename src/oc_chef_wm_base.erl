@@ -11,19 +11,22 @@
          is_authorized/2,
          service_available/2]).
 
-%% Helpers for webmachine callbacks
+%% Helpers for i
 -export([authorized_by_org_membership_check/2]).
 
-%% "Grab Bag" functions that will also need to be implemented by other base resources
+%% "Grab Bag" functions that may also need to be implemented by other base resources
 -export([assemble_principal_ejson/3,
          check_cookbook_authz/3,
          delete_object/3,
          object_creation_hook/2,
-         object_creation_error_hook/2,
-         stats_hero_label/1,
+         object_creation_error_hook/2]).
+
+%% shared functions
+-export([stats_hero_label/1,
          stats_hero_upstreams/0,
          log_action/2,
-         is_superuser/1]).
+         is_superuser/1,
+         user_in_group/3]).
 
 %% Can't use callback specs to generate behaviour_info because webmachine.hrl
 %% contains a function definition.
@@ -60,6 +63,11 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
         {{halt, 403}, Req1, State1} ->
             {Req2, State2} = set_forbidden_msg(Req1, State1),
             {true, Req2, State2};
+        {{halt, 403, Message}, Req1, State1} ->
+            JsonMsg = chef_json:encode({[{<<"error">>, Message}]}),
+            Req2 = wrq:set_resp_body(JsonMsg, Req1),
+            State2 = State1#base_state{log_msg = {http_method_to_authz_perm(Req), forbidden}},
+            {true, Req2, State2};
         {{halt, Code}, Req1, State1} ->
             {{halt, Code}, Req1, State1};
         {{create_in_container, Container}, Req1, State1} ->
@@ -73,6 +81,9 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
             invert_perm(check_permission(group, AuthzId, Req1, State1));
         {{group_id, AuthzId}, Req1, State1} ->
             invert_perm(check_permission(group, AuthzId, Req1, State1));
+        {{Type, ObjectId, Permission}, Req1, State1} when Type =:= object;
+                                                          Type =:= actor ->
+            invert_perm(check_permission(Permission, Type, ObjectId, Req1, State1));
         {{Type, ObjectId}, Req1, State1} when Type =:= object;
                                               Type =:= actor ->
             invert_perm(check_permission(Type, ObjectId, Req1, State1));
@@ -152,7 +163,9 @@ auth_check({container, Container, Permission}, Req, State) ->
     ContainerId = fetch_container_id(Container, Req, State),
     has_permission(container, ContainerId, Permission, Req, State);
 auth_check({object, ObjectId, Permission}, Req, State) ->
-    has_permission(object, ObjectId, Permission, Req, State).
+    has_permission(object, ObjectId, Permission, Req, State);
+auth_check({actor, ObjectId, Permission}, Req, State) ->
+    has_permission(actor, ObjectId, Permission, Req, State).
 
 %% Called by forbidden/2 when the resource module wants to create a
 %% new Chef Object within the container specified by the return value
@@ -187,7 +200,7 @@ create_in_container(client=Container, Req,
     %% going to loop back through later and fix up that situation.  Having extra "noise" in
     %% the ACLs is confusing anyway, and this is an area of our API where we should not be
     %% confusing.
-    %%
+    %
     %% TODO: we really should differentiate between "container permissions" and "permission
     %% templates".  We'll take a look at this in an upcoming version of Bifrost.
     %%
@@ -257,9 +270,11 @@ has_permission(AuthzObjectType, AuthzId, Permission, _Req,
              (RequestorId, AuthzObjectType, AuthzId, actor, RequestorId, Permission)).
 
 %% NOTE: derives the permission check from the HTTP verb of the Request
-check_permission(AuthzObjectType, AuthzId, Req,
-                 #base_state{requestor_id=RequestorId}=State) ->
+check_permission(AuthzObjectType, AuthzId, Req, State) ->
     Perm = http_method_to_authz_perm(Req),
+    check_permission(Perm, AuthzObjectType, AuthzId, Req, State).
+
+check_permission(Perm, AuthzObjectType, AuthzId, Req, #base_state{requestor_id=RequestorId}=State) ->
     case has_permission(AuthzObjectType, AuthzId, Perm, Req, State) of
         true ->
             {true, Req, State};
@@ -336,14 +351,11 @@ set_forbidden_msg(Req, State) ->
     set_forbidden_msg(Perm, Req, State).
 
 forbidden_message(not_member_of_org, User, Org) ->
-    Msg = iolist_to_binary([<<"'">>, User, <<"' not associated with organization '">>,
-                            Org, <<"'">>]),
-    {[{<<"error">>, [Msg]}]};
+    Msg = iolist_to_binary([<<"'">>, User, <<"' not associated with organization '">>, Org, <<"'">>]),
+    {[{<<"error">>, Msg}]};
 forbidden_message(unverified_org_membership, User, Org) ->
-    Msg = iolist_to_binary([<<"Failed to verify user '">>, User,
-                            <<"' as a member of organization '">>,
-                            Org, <<"'">>]),
-    {[{<<"error">>, [Msg]}]}.
+    Msg = iolist_to_binary([<<"Failed to verify user '">>, User, <<"' as a member of organization '">>, Org, <<"'">>]),
+    {[{<<"error">>, Msg}]}.
 
 -spec delete_object(chef_db:db_context(),
                     chef_object() |
@@ -587,3 +599,18 @@ object_creation_error_hook(#chef_cookbook_version{}, _RequestorId) ->
 object_creation_error_hook(Object, RequestorId) ->
     oc_chef_authz:delete_resource(RequestorId, object, chef_object:authz_id(Object)),
     ok.
+
+%% Evaluates if user is a direct member of a group
+user_in_group(#base_state{organization_guid = OrgId, chef_db_context = DbContext},
+              UserName, GroupName) ->
+    case chef_db:fetch(#oc_chef_group{org_id = OrgId, for_requestor_id = oc_chef_authz:superuser_id(), name = GroupName}, DbContext) of
+        #oc_chef_group{users = Users} ->
+            lists:member(UserName, Users);
+        not_found ->
+            not_found
+    end.
+
+
+
+
+

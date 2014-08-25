@@ -27,7 +27,7 @@
 -type deprovision_warning_tuple() :: {warning, [ deprovision_warning_msg(), ... ] }.
 -type deprovision_response() ::  ok | deprovision_warning_tuple() | deprovision_error_tuple().
 
--type provision_error() :: usag_authz_creation_failed | usag_creation_failed |
+-type provision_error() :: usag_authz_creation_failed | usag_creation_failed |fetch_org_users_group_failed |
                            usag_update_failed | add_usag_to_org_users_group_failed | add_user_to_usag_failed.
 -type provision_warning() :: fetch_org_admins_failed | add_read_ace_for_admins_failed.
 -type provision_error_tuple() :: {error, { provision_error(), term()}}.
@@ -49,13 +49,68 @@
                    msg = [],
                    usag} ).
 
+wm_associate_user(Req, #base_state{organization_guid = OrgId,
+                                   chef_db_context = DbContext,
+                                   resource_state = #association_state{user = #chef_user{id = UserId,
+                                                                                         username = UserName},
+                                                                       data = ReqData}} = State,
+                  RequestorId) ->
+    ObjectRec = chef_object:new_record(oc_chef_org_user_association, OrgId, {authz_id, UserId}, ReqData),
+    case chef_db:create(ObjectRec, DbContext, RequestorId) of
+        {conflict, _} ->
+            wm_conflict_response(Req, State, user_already_in_org, UserName);
+        ok ->
+            add_user_to_org(Req, State, ObjectRec, RequestorId);
+        What ->
+            {{halt, 500}, Req, State#base_state{log_msg = What}}
+    end.
+
+add_user_to_org(Req, #base_state{organization_guid = OrgId,
+                                          organization_name = OrgName,
+                                          chef_db_context = DbContext,
+                                          resource_state = #association_state{user = #chef_user{id = UserId,
+                                                                                                username = UserName} = User }} = State,
+                         ObjectRec, RequestorId) ->
+    TypeName = chef_object:type_name(ObjectRec),
+    Name = chef_object:name(ObjectRec),
+    Uri = ?BASE_ROUTES:route(TypeName, Req, [{name, Name}]),
+    DeleteRecord = #oc_chef_org_user_association{org_id = OrgId, user_id = UserId},
+    case provision_associated_user(State, User, RequestorId) of
+        {error, {Step, Detail}} ->
+            oc_chef_object_db:safe_delete(DbContext, DeleteRecord, RequestorId),
+            wm_provision_failed(Req, State, {Step, Detail});
+        {warning, Warnings} ->
+            LogMsg = [{added, UserName, to, OrgName}, {warnings, Warnings}],
+            {true,  Req, State#base_state{log_msg = LogMsg}};
+        ok ->
+            LogMsg = {added, UserName, to, OrgName},
+            Uri = ?BASE_ROUTES:route(TypeName, Req, [{name, Name}]),
+            {true, Req, State#base_state{log_msg = LogMsg}}
+    end.
+
+% A special case in which the requestor provided does not have permissions
+% to create the USAG - this would happen if the inviting user had been removed from
+% org admins group.
+wm_provision_failed(Req, State, {usag_authz_creation_failed, {error, forbidden}}) ->
+    {{halt, 403}, chef_wm_util:set_json_body(Req, invite_invalid_message()),
+     State#base_state{log_msg = {inviting_admin_not_permitted}}};
+wm_provision_failed(Req, State, {Step, Detail}) ->
+    {{halt, 500}, Req, State#base_state{log_msg = {Step, Detail}}}.
+
+%% Conflict responses are common/similar across invite creation,
+%% invite acceptance, and association creation
+wm_conflict_response(Req, State, ConflictType, UserName) ->
+    LogMsg = {oc_chef_associations, ConflictType, UserName},
+    ConflictMsg = conflict_message(ConflictType),
+    {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg), State#base_state{log_msg = LogMsg}}.
+
 %% Given a user whose record has been removed from an organization,
 %% remove all permissions related to that org, for that user.
-%% -  fetch usag
-%% 0. fetch org users
-%% 1. remove USAG from org users
-%% 2. delete USAG
-%% 3. remove admin from user read ACE
+%% 1. fetch usag
+%% 2. fetch org users
+%% 3. remove USAG from org users
+%% 4. delete USAG
+%% 5. remove admin from user read ACE
 -spec deprovision_removed_user(#base_state{}, #chef_user{}, oc_authz_id()) ->
     deprovision_response().
 deprovision_removed_user(State, User, RequestorAuthzId) ->
@@ -107,7 +162,7 @@ deprovision_fetch_org_global_admins(Error, Context) ->
 
 deprovision_remove_global_org_admin_ace(OrgGlobalAdminsAuthzId,
                                         #context{ user_authz_id = UserAuthzId,
-                                                  real_requestor_authz_id = RequestorAuthzId } = Context)  when is_binary(OrgGlobalAdminsAuthzId) ->
+                                                  requestor_authz_id = RequestorAuthzId } = Context)  when is_binary(OrgGlobalAdminsAuthzId) ->
     %We're spoofing the requesting actor for this next operation to be the actual user
     % who is being removed.  This is because the actor will need to have update access
     % to that user's record - and the originator of this request may not.
@@ -128,86 +183,33 @@ deprovision_removed_user_done(ok, #context{msg = Msg}) ->
 deprovision_removed_user_done(Error, #context{msg = Msg} = Context) ->
     deprovision_removed_user_done(ok, Context#context{msg = [{org_admin_ace_removal_failed, Error}] ++ Msg}).
 
-wm_associate_user(Req, #base_state{organization_guid = OrgId,
-                                   chef_db_context = DbContext,
-                                   resource_state = #association_state{user = #chef_user{id = UserId,
-                                                                                         username = UserName},
-                                                                       data = ReqData}} = State,
-                  RequestorId) ->
-    ObjectRec = chef_object:new_record(oc_chef_org_user_association, OrgId, {authz_id, UserId}, ReqData),
-    case chef_db:create(ObjectRec, DbContext, RequestorId) of
-        {conflict, _} ->
-            wm_conflict_response(Req, State, user_already_in_org, UserName);
-        ok ->
-            wm_provision_user_in_org(Req, State, ObjectRec, RequestorId);
-        What ->
-            {{halt, 500}, Req, State#base_state{log_msg = What}}
-    end.
-
-wm_provision_user_in_org(Req, #base_state{organization_guid = OrgId,
-                                          organization_name = OrgName,
-                                          chef_db_context = DbContext,
-                                          resource_state = #association_state{user = #chef_user{id = UserId,
-                                                                                                username = UserName} = User }} = State,
-                         ObjectRec, RequestorId) ->
-    TypeName = chef_object:type_name(ObjectRec),
-    Name = chef_object:name(ObjectRec),
-    Uri = ?BASE_ROUTES:route(TypeName, Req, [{name, Name}]),
-    DeleteRecord = #oc_chef_org_user_association{org_id = OrgId, user_id = UserId},
-    case provision_associated_user(State, User, RequestorId) of
-        {error, {Step, Detail}} ->
-            oc_chef_object_db:safe_delete(DbContext, DeleteRecord, RequestorId),
-            wm_provision_failed(Req, State, {Step, Detail});
-        {warning, Warnings} ->
-            LogMsg = [{added, UserName, to, OrgName}, {warnings, Warnings}],
-            {true, chef_wm_util:set_uri_of_created_resource(Uri, Req), State#base_state{log_msg = LogMsg}};
-        ok ->
-            LogMsg = {added, UserName, to, OrgName},
-            Uri = ?BASE_ROUTES:route(TypeName, Req, [{name, Name}]),
-            {true, chef_wm_util:set_uri_of_created_resource(Uri, Req), State#base_state{log_msg = LogMsg}}
-    end.
-
-% A special case in which the requestor provided does not have permissions
-% to create the USAG - this would happen if the inviting user had been removed from
-% org admins group.
-wm_provision_failed(Req, State, {usag_authz_creation_failed, {error, forbidden}}) ->
-    {{halt, 403}, chef_wm_util:set_json_body(Req, invite_invalid_message()),
-     State#base_state{log_msg = {inviting_admin_not_permitted}}};
-wm_provision_failed(Req, State, {Step, Detail}) ->
-    {{halt, 500}, Req, State#base_state{log_msg = {Step, Detail}}}.
-
-%% Conflict responses are common/similar across invite creation,
-%% invite acceptance, and association creation
-wm_conflict_response(Req, State, ConflictType, UserName) ->
-    LogMsg = {oc_chef_associations, ConflictType, UserName},
-    ConflictMsg = conflict_message(ConflictType),
-    {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg), State#base_state{log_msg = LogMsg}}.
-
-invite_invalid_message() ->
-    {[{<<"error">>, [<<"This invitation is no longer valid. Please notify an administrator and request to be re-invited to the organization.">>]}]}.
-
-conflict_message(user_already_invited) ->
-    {[{<<"error">>, [<<"The invitation already exists">>]}]};
-conflict_message(user_already_in_org) ->
-    {[{<<"error">>, [<<"The association already exists">>]}]}.
 
 
 %% Given a user who has a record within an organization,
 %% provision that user with proper permissions. These steps are broken out
 %% below as follows:
-%% 0. create USAG authzid
-%% 1. create and save USAG record (in 'groups')
-%% 2. update USAG to contain user
-%% 3. add USAG to org
-%% 4. set org admin read ACL on user (not usag)
+%% 1. create USAG authzid
+%% 2. create and save USAG record (in 'groups')
+%% 3. update USAG to contain user
+%% 4. add USAG to org
+%% 5. set org admin read ACL on user (not usag)
 -spec provision_associated_user(#base_state{}, #chef_user{}, binary()) -> provision_response().
 provision_associated_user(State, #chef_user{id = UserId} = User, RequestorAuthzId) ->
+    Requestor2 = case oc_chef_authz:superuser_id() of
+                     RequestorAuthzId ->
+                         superuser;
+                     _ ->
+                         RequestorAuthzId
+                 end,
     Context = association_context(State, User, RequestorAuthzId),
     OrgId = Context#context.org_id,
     USAG0 = oc_chef_group:create_record(OrgId, UserId, RequestorAuthzId),
+    % By forcing superuser here, this means we expect that the
+    % calling resource has verified that the caller does have update org permissions
+    % before invoking this.
     Result = oc_chef_authz:create_entity_if_authorized(Context#context.authz_context,
                                                        OrgId,
-                                                       Context#context.real_requestor_authz_id,
+                                                       Requestor2,
                                                        group),
     provision_create_usag(Result, Context#context{usag = USAG0}).
 
@@ -226,17 +228,23 @@ provision_set_usag_members(ok, #context{usag = USAG,
                                         db_context = DbContext} = Context) ->
     USAG0 = oc_chef_group:add_user_member(USAG, UserName),
     Result = chef_db:update(USAG0, DbContext, RequestorAuthzId),
-    provision_add_usag_to_org_users(Result, Context#context{usag = USAG0});
+    provision_fetch_org_users_group(Result, Context#context{usag = USAG0});
 provision_set_usag_members(Error, _Context) ->
     {error, {usag_creation_failed, Error}}.
 
-provision_add_usag_to_org_users(ok, #context{usag = USAG,
-                                            org_id = OrgId,
-                                            requestor_authz_id = RequestorAuthzId,
-                                            db_context = DbContext} = Context) ->
-    % TODO split out this failure case: #oc_chef_group | atom()
-    OrgUsersGroup = chef_db:fetch(#oc_chef_group{org_id = OrgId, name = "users",
-                                                 for_requestor_id = RequestorAuthzId}, DbContext),
+provision_fetch_org_users_group(ok, #context{org_id = OrgId,
+                                             requestor_authz_id = RequestorAuthzId,
+                                             db_context = DbContext} = Context) ->
+    Result = chef_db:fetch(#oc_chef_group{org_id = OrgId, name = "users",
+                                          for_requestor_id = RequestorAuthzId}, DbContext),
+    provision_add_usag_to_org_users(Result, Context);
+provision_fetch_org_users_group(Error, _Context) ->
+    {error, {update_usag_members_failed, Error}}.
+
+provision_add_usag_to_org_users(#oc_chef_group{} = OrgUsersGroup,
+                                #context{usag = USAG,
+                                         requestor_authz_id = RequestorAuthzId,
+                                         db_context = DbContext} = Context) ->
     OrgUsersGroup0 = oc_chef_group:add_group_member(OrgUsersGroup, USAG#oc_chef_group.name),
     Result = chef_db:update(OrgUsersGroup0, DbContext, RequestorAuthzId),
     provision_fetch_org_global_admins(Result, Context);
@@ -292,3 +300,10 @@ association_context(#base_state{ organization_name = OrgName,
               real_requestor_authz_id = RealRequestor,
               requestor_authz_id = RequestorAuthzId}.
 
+invite_invalid_message() ->
+    {[{<<"error">>, <<"This invitation is no longer valid. Please notify an administrator and request to be re-invited to the organization.">>}]}.
+
+conflict_message(user_already_invited) ->
+    {[{<<"error">>, <<"The invite already exists.">>}]};
+conflict_message(user_already_in_org) ->
+    {[{<<"error">>, <<"The association already exists.">>}]}.

@@ -50,7 +50,7 @@ init_resource_state(_Config) ->
     {ok, #association_state{}}.
 
 request_type() ->
-    "invitation".
+    "invite".
 
 allowed_methods(Req, #base_state{resource_args = invitations} = State) ->
     {['GET', 'POST'], Req, State};
@@ -76,24 +76,20 @@ validate_request('POST', Req, #base_state{chef_db_context = DbContext} = State) 
                                                                    data = EJ}}}
     end.
 
-% TODO proper auth info
 auth_info(Req, #base_state{resource_state = #association_state{org_user_invite = not_found}} = State) ->
     Id = chef_wm_util:object_name(invitation, Req),
     Message = chef_wm_util:not_found_message(invitation, Id),
     Req1 = chef_wm_util:set_json_body(Req, Message),
     {{halt, 404}, Req1, State#base_state{log_msg = user_not_found}};
-
 auth_info(Req, #base_state{organization_name = OrgName,
+                           organization_authz_id = OrgAuthzId,
                            resource_state = #association_state{org_user_invite = #oc_chef_org_user_invite{org_name = OrgName}}} = State) ->
-    % OrgName matches, we're good to go
-    % TODO - update ACE on org
-    {authorized, Req, State};
+    %% org name matches - any valid op on a specific existing invite requires org update
+    {{object, OrgAuthzId, update}, Req, State};
 auth_info(Req, #base_state{organization_name = OrgName,
                            resource_state = #association_state{org_user_invite = #oc_chef_org_user_invite{org_name = BadOrgName}}} = State) ->
 
-    % TODO missing pedant test.
-    Message = chef_wm_util:error_message_envelope(iolist_to_binary(["Organization ", OrgName,
-                                                                    " does not match ", BadOrgName, " in association request"])),
+    Message = org_name_mismatch_message(OrgName, BadOrgName),
     Req1 = chef_wm_util:set_json_body(Req, Message),
     {{halt, 400}, Req1, State#base_state{log_msg = {org_name_mismatch, OrgName, BadOrgName}}};
 auth_info(Req, #base_state{resource_state = #association_state{user = not_found,
@@ -101,9 +97,15 @@ auth_info(Req, #base_state{resource_state = #association_state{user = not_found,
     Message = chef_wm_util:not_found_message(user, UserName),
     Req1 = chef_wm_util:set_json_body(Req, Message),
     {{halt, 404}, Req1, State#base_state{log_msg = user_not_found}};
-auth_info(Req, State) ->
-    % TODO
-    {authorized, Req, State}.
+auth_info(Req, #base_state{organization_authz_id = OrgAuthzId} = State) ->
+    case wrq:method(Req) of
+        'GET' ->
+            {{object, OrgAuthzId}, Req, State};
+         _ ->
+            %% Any other method will change org attributes
+            %% and requires update.
+            {{object, OrgAuthzId, update}, Req, State}
+    end.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
@@ -195,3 +197,5 @@ invitation_response(Req, #base_state{ organization_name = OrgName,
 malformed_request_message(Any, _Req, _state) ->
     error({unexpected_malformed_request_message, Any}).
 
+org_name_mismatch_message(OrgName, BadOrgName) ->
+    {[{<<"error">>, iolist_to_binary(["Organization ", OrgName, " does not match ", BadOrgName, " in association request"])}]}.

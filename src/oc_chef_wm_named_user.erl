@@ -64,7 +64,8 @@ request_type() ->
   "users".
 
 allowed_methods(Req, #base_state{resource_args = Args} = State) when Args == invitations;
-                                                                     Args == invitation_count ->
+                                                                     Args == invitation_count;
+                                                                     Args == org_list ->
     {['GET'], Req, State};
 allowed_methods(Req, #base_state{resource_args = invitation_response} = State) ->
     {['PUT'], Req, State};
@@ -127,11 +128,9 @@ auth_info(Method, Req, #base_state{resource_state = #user_state{chef_user = User
     #chef_user{authz_id = AuthzId} =   User,
     {auth_type(Method, AuthzId, State), Req, State}.
 
-
 access_for(invitations) -> superuser_only;
 access_for(invitation_count) -> superuser_only;
 access_for(invitation_response) -> {halt, 403}.
-
 
 auth_type('PUT', AuthzId, #user_state{user_data = UserData}) ->
     ExtId = ej:get({<<"external_authentication_uid">>}, UserData),
@@ -162,10 +161,9 @@ from_json(Req, #base_state{resource_args = invitation_response,
                     NewState = State#base_state{organization_name = OrgName,
                                                 organization_guid = OrgId,
                                                 resource_state = #association_state{user = User, data = EJ}},
-                    io:fwrite("~n* * * REQUESTOR * * * ~p ~p ~n", [OriginalRequestorAuthzId, Invitation]),
                     oc_chef_associations:wm_associate_user(Req, NewState, OriginalRequestorAuthzId);
-                <<"decline">> ->
-                    {true, Req, State#base_state{log_msg = {invite_declined, Id}}}
+                <<"reject">> ->
+                    {true, Req, State#base_state{log_msg = {invite_rejected, Id}}}
             end,
             case Result of
                 {{halt, 500}, _, _} ->
