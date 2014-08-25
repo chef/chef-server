@@ -13,9 +13,24 @@
          reset_org/2,
          reset_orgs/2,
          reset_orgs_from_file/2,
-         call_if_exported/4]).
+         call_if_exported/4,
+         wait_for_status/0
+        ]).
 
 -include("mover.hrl").
+
+-define(POLL_SLEEP_MS, 500).
+
+%% @doc poll mover_manager:status until it indicates that it's completed.
+wait_for_status() ->
+	{ok, Status} = mover_manager:status(),
+    case proplists:get_value(state, Status) of
+        ready ->
+            Status;
+        _ ->
+            timer:sleep(?POLL_SLEEP_MS),
+            wait_for_status()
+    end.
 
 %% @doc Get a list of unmigrated orgs from migration_state_table
 %% and set the xdarklaunch flags

@@ -85,7 +85,7 @@ all_users_count() ->
       rpc:call(?MOVER, mover_user_hash_converter, all_users_count, []).
 
 sleep_until_migration_finished() ->
-    rpc:call(?MOVER, mover_batch_migrator, wait_for_status, []).
+    rpc:call(?MOVER, mover_util, wait_for_status, []).
 
 %% Reporting and exit status %%
 
