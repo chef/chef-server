@@ -1,11 +1,4 @@
 GIT
-  remote: git://github.com/opscode/omnibus-software.git
-  revision: 376a3c994d8a019a1d21ce2bff7f7885c4f7cdd0
-  branch: omnibus/3.2-stable
-  specs:
-    omnibus-software (3.0.0)
-
-GIT
   remote: git://github.com/opscode/omnibus-ruby.git
   revision: d9e6cb9f488f6cc24b525a47e0b7bb2f7def94f4
   branch: 3.0-stable
@@ -17,6 +10,13 @@ GIT
       ohai (~> 7.2)
       thor (~> 0.18)
       uber-s3
+
+GIT
+  remote: git://github.com/opscode/omnibus-software.git
+  revision: a974609f94b190a4c99ce13ac3857f0b027b0994
+  branch: omnibus/3.2-stable
+  specs:
+    omnibus-software (3.0.0)
 
 GEM
   remote: https://rubygems.org/
