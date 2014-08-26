@@ -152,6 +152,22 @@ def run_osc_upgrade
     check_status(run_command(sed), msg)
   end
 
+  def wait_for_ready_server(server_version)
+    1.upto(120) do |count|
+      begin
+        server_status = JSON.parse(open('http://localhost:8000/_status').read)
+        fail unless server_status['status'] == 'pong'
+      # Catch exceptions because if the server isn't yet up trying to open the status endpoint throws one
+      rescue Exception => e
+        sleep 1
+        if count == 120
+          log "Timeout waiting for #{server_version} server to start. Received expection #{e.message}"
+          exit 1
+        end
+      end
+    end
+  end
+
   def start_osc
     # Assumption is EC isn't running, since we detected OSC on the system
     log 'Ensuring the Open Source Chef server is started'

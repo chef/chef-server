@@ -72,22 +72,6 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     return answer == 'Y' || answer == 'y'
   end
 
-  def wait_for_ready_server(server_version)
-    1.upto(120) do |count|
-      begin
-        server_status = JSON.parse(open('http://localhost:8000/_status').read)
-        fail unless server_status['status'] == 'pong'
-      # Catch exceptions because if the server isn't yet up trying to open the status endpoint throws one
-      rescue Exception => e
-        sleep 1
-        if count == 120
-          log "Timeout waiting for #{server_version} server to start. Received expection #{e.message}"
-          exit 1
-        end
-      end
-    end
-  end
-
   ### Start script ###
 
   parse(ARGV)
