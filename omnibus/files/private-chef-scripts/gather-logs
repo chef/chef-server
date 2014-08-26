@@ -126,6 +126,11 @@ ps fauxww > "$tmpdir/ps_fauxww.txt"
 
 df -h >  "$tmpdir/df_h.txt"
 
+df -i >  "$tmpdir/df_i.txt"
+
+sudo -u opscode -i ulimit -a > "$tmpdir/ulimit_a_opscode.txt"
+sudo -u opscode-pgsql -i ulimit -a > "$tmpdir/ulimit_a_opscode-pgsql.txt"
+
 ip addr show > "$tmpdir/ip_addr_show.txt"
 
 # ss(8) is the command for socket statistics that replaces netstat
