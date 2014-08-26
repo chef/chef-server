@@ -10,6 +10,11 @@
 ###
 default['enterprise']['name'] = "private_chef"
 
+default['private_chef']['removed_services'] = %w{
+opscode-webui
+opscode-solr
+}
+
 ###
 # High level options
 ###

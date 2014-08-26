@@ -29,6 +29,7 @@ The following items are the set of bug fixes that have been applied since Enterp
 * [OC-11297] tweak partybus migration-level subscribes for a more reliable workaround
 * [OC-10470] Allow private-chef-ctl status to ignore disabled services
 * [OC-11574] private-chef-ctl service commands should be HA-aware
+* [OC-9877] Exclude binary files and archives from 'omnibus-ctl tail'
 
 ### Security Fixes:
 
