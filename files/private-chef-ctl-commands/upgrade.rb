@@ -20,24 +20,28 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     @options.upload_threads = 10
 
     opt_parser = OptionParser.new do |opts|
+      opts.banner = "Usage: private-chef-ctl upgrade [options]"
+      opts.banner = opts.banner << "\n Options only apply to open source Chef 11 server to Chef 12 server upgrades."
+      opts.banner = opts.banner << "\n If upgrading from Enterprise Chef 11 server to Chef 12 server no options are needed."
+
       opts.on("-y", "--yes", "Skip confirmation") do |y|
         @options.skip_confirmation = y
       end
 
-      opts.on("--org-name [name]", String, "The name of the Chef organization (Will ask interactively if not passed)") do |n|
+      opts.on("-o", "--org-name [name]", String, "The name of the Chef organization (Will ask interactively if not passed)") do |n|
         @options.org_name = n
       end
 
-      opts.on("--full-org-name [name]", String, "The full name of the Chef organization (Will ask interactively if not passed)") do |n|
+      opts.on("-f", "--full-org-name [name]", String, "The full name of the Chef organization (Will ask interactively if not passed)") do |n|
         @options.full_org_name = n
       end
 
       # Should this be chef-server-host to match sql-host?
-      opts.on("--chef-server-url [url]", String, "The url of the chef server.  Defaults to #{@options.chef_server_url}") do |u|
+      opts.on("-c", "--chef-server-url [url]", String, "The url of the chef server.  Defaults to #{@options.chef_server_url}") do |u|
          @options.chef_server_url = u
       end
 
-      opts.on("--upload-threads [number]", Integer, "The number of threads to use when migrating cookbooks to the new server. Defaults to #{@options.upload_threads}") do |n|
+      opts.on("-u", "--upload-threads [number]", Integer, "The number of threads to use when migrating cookbooks to the new server. Defaults to #{@options.upload_threads}") do |n|
         @options.upload_threads = n
       end
 
