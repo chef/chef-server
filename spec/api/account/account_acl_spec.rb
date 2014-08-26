@@ -308,7 +308,7 @@ describe "ACL API", :acl do
         end
       end
 
-      context "default normal user", :authorization do
+      context "default normal user" do
         it "returns 403", :authorization do
           get(request_url, platform.non_admin_user).should look_like({
               :status => 403
@@ -316,7 +316,7 @@ describe "ACL API", :acl do
         end
       end
 
-      context "default client", :authorization do
+      context "default client" do
         it "returns 403", :authorization do
           get(request_url, platform.non_admin_client).should look_like({
               :status => 403
@@ -324,7 +324,7 @@ describe "ACL API", :acl do
         end
       end
 
-      context "outside user", :authorization do
+      context "outside user" do
         it "returns 403", :authorization do
           get(request_url, outside_user).should look_like({
               :status => 403
@@ -332,7 +332,7 @@ describe "ACL API", :acl do
         end
       end
 
-      context "invalid user", :authorization do
+      context "invalid user" do
         it "returns 401", :authentication do
           get(request_url, invalid_user).should look_like({
               :status => 401
