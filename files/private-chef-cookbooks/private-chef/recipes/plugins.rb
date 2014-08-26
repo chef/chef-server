@@ -1,8 +1,8 @@
 plugins = EnterprisePluginCollection.from_glob("/opt/*/chef-server-plugin.rb")
 plugins.each do |p|
   next if !p.parent_plugin.nil?
-  p.enabled true if node['private_chef']['enabled-plugins']
-  p.enabled false if node['private_chef']['disabled-plugins']
+  p.enabled true if node['private_chef']['enabled-plugins'].include?(p.name)
+  p.enabled false if node['private_chef']['disabled-plugins'].include?(p.name)
 end
 
 plugins.each do |plugin|

@@ -8,10 +8,10 @@ class EnterprisePlugin
   def set_or_return(name, value=nil)
     if value
       instance_variable_set("@#{name}", value)
-    else 
+    else
       instance_variable_get("@#{name}")
     end
-  end	
+  end
 
   def name(value=nil)
     set_or_return(:name, value)
