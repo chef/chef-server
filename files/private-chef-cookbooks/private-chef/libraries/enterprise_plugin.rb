@@ -6,7 +6,7 @@ class EnterprisePlugin
   end
 
   def set_or_return(name, value=nil)
-    if value
+    if !value.nil?
       instance_variable_set("@#{name}", value)
     else
       instance_variable_get("@#{name}")
