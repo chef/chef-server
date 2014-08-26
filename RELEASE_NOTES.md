@@ -27,6 +27,7 @@ changes from previous versions:
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.1.8:
 
 * [OC-11297] tweak partybus migration-level subscribes for a more reliable workaround
+* [OC-11585] Allow ['lb']['upstream'] to have a custom setting
 * [OC-11459] Allow opscode-manage to easily be moved off of 443
 * [OC-11540] Fix invalid opscode-account config when forcing SSL
 * [OC-11575] Don't start services by default in HA topology
@@ -58,8 +59,6 @@ The following items are the set of bug fixes that have been applied since Enterp
 * [opscode-omnibus] Ensure CouchDB compaction cron job does not run on passive backend.
 * [OC-11499] Use more strict regular expression for IP check in ha-status
 * [OC-3107] Ensure CouchDB compaction cron job does not run on passive backend.
-* [OC-11601] Allow ['lb']['upstream'] to have a custom setting
-* [OC-11601] Use SSL port for lb_internal if non-SSL is disabled
 * [OC-11601] Restart redis_lb immediately during reconfigure
 * [OC-11490] Explicitly set keepalived directory ownership
 * [OC-11297] EC 11 fresh install not saving migration state in HA topology
