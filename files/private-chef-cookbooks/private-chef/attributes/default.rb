@@ -30,6 +30,16 @@ default['private_chef']['license']['upgrade_url'] = "http://example.com"
 
 default['private_chef']['default_orgname'] = nil
 
+###
+# Options for installing addons
+###
+default['private_chef']['install_addons'] = true
+default['private_chef']['install_addons_from_path'] = false
+default['private_chef']['install_analytics_path'] = nil
+default['private_chef']['install_manage_path'] = nil
+default['private_chef']['install_push_jobs_path'] = nil
+default['private_chef']['install_reporting_path'] = nil
+
 ####
 # The Chef User that services run as
 ####

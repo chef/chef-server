@@ -13,4 +13,4 @@ end
 
 depends          'enterprise' # grabbed via Berkshelf + Git
 depends          'apt'
-depends          'yum'
+depends          'yum', '~> 3.0'

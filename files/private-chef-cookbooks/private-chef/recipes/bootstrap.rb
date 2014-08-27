@@ -60,62 +60,72 @@ file OmnibusHelper.bootstrap_sentinel_file do
   content "You've been bootstrapped, punk. Delete me if you feel lucky. Do ya, Punk?"
 end
 
-# TODO: way to override versions?
-packages = [["opscode-analytics", "1.0.0-1"],
-  ["opscode-push-jobs-server", "1.1.2-1"],
-  ["opscode-reporting", "1.1.5-1"],
-  ["opscode-manage", "1.5.4-1"]]
+if (node['private_chef']['install_addons'] == true)
+  if (node['private_chef']['install_addons_from_path'] == true)
 
-case node['platform_family']
-when 'debian'
-
-  packages.each do |package_params|
-
-    name = package_params[0]
-    file = "#{name}_#{package_params[1]}_amd64.deb"
-
-    # TODO: file installation fallback?
-    # TODO: file installation directory parameter?
-    apt_repository name do
-      # TODO: is there a better URI for this?
-      uri "https://packagecloud.io/chef/test-stable/#{file}"
-#      key 'http://apt.opscode.com/packages@opscode.com.gpg.key'
-      distribution node['lsb']['codename']
-#      deb_src true
-      trusted true
-      components %w( main )
-      not_if { OmnibusHelper.has_been_bootstrapped? }
+    addon_path = node['private_chef']['install_push_jobs_path']
+    if (addon_path)
+      package 'opscode-push-jobs-server' do
+        source addon_path
+      end
     end
-  end
 
-  # Performs an apt-get update
-  include_recipe 'apt::default'
- 
-when 'rhel'
- 
-  packages.each do |package_params|
-
-    name = package_params[0]
-    # TODO: replace el5 with correct version:
-    file = "#{name}-#{package_params[1]}.el5.x86_64.rpm"
-
-    # TODO: file installation fallback?
-    # TODO: file installation directory parameter?
-    yum_repository name do
-      description name
-      baseurl 'https://packagecloud.io/chef/test-stable/#{file}'
-#      gpgkey 'http://apt.opscode.com/packages@opscode.com.gpg.key'
-      sslverify true
-#      gpgcheck true
-      action :create
-      not_if { OmnibusHelper.has_been_bootstrapped? }
+    addon_path = node['private_chef']['install_reporting_path']
+    if (addon_path)
+      package 'opscode-reporting' do
+        source addon_path
+      end
     end
-  end
 
-else
-  # TODO: probably don't want to fail?  Say, on any platform where this would have
-  # to be done manually.
-  raise "I don't know how to install addons for platform family: #{node['platform_family']}"
+    addon_path = node['private_chef']['install_manage_path']
+    if (addon_path)
+      package 'opscode-manage' do
+        source addon_path
+      end
+    end
+
+    addon_path = node['private_chef']['install_analytics_path']
+    if (addon_path)
+      package 'opscode-analytics' do
+        source addon_path
+      end
+    end
+  else
+    case node['platform_family']
+    when 'debian'
+
+      apt_repository 'chef-stable' do
+        uri "https://packagecloud.io/chef/test-stable/ubuntu/"
+        key 'https://packagecloud.io/gpg.key'
+        distribution node['lsb']['codename']
+        deb_src true
+        trusted true
+        components %w( main )
+      end
+
+      # Performs an apt-get update
+      include_recipe 'apt::default'
+
+    when 'rhel'
+
+      yum_repository 'chef-stable' do
+        description 'Chef Stable Repo'
+        baseurl 'https://packagecloud.io/chef/test-stable/el/$releasever/$basearch'
+        gpgkey 'https://packagecloud.io/gpg.key'
+        sslverify true
+        gpgcheck true
+        action :create
+      end
+
+    else
+      # TODO: probably don't actually want to fail out?  Say, on any platform where
+      # this would have to be done manually.
+      raise "I don't know how to install addons for platform family: #{node['platform_family']}"
+    end
+
+    package 'opscode-push-jobs-server'
+    package 'opscode-reporting'
+    package 'opscode-manage'
+    package 'opscode-analytics'
+  end
 end
- 
-package 'opscode-manage'

@@ -23,6 +23,18 @@ module PrivateChef
   # Set this for default org mode
   default_orgname nil
 
+  # Unset this to disable addons (i.e., manage, analytics, reporting, push-jobs)
+  install_addons true
+
+  # Configure addon path if installing from packages on disk; this needs to be full
+  # path and filename of the package to install; any packages without defined paths
+  # will be skipped.
+  install_addons_from_path false
+  install_analytics_path nil
+  install_manage_path nil
+  install_push_jobs_path nil
+  install_reporting_path nil
+
   couchdb Mash.new
   rabbitmq Mash.new
   opscode_solr4 Mash.new
@@ -248,6 +260,12 @@ module PrivateChef
         results['private_chef'][rkey] = PrivateChef[key]
       end
       results['private_chef']['default_orgname'] = PrivateChef['default_orgname']
+      results['private_chef']['install_addons'] = PrivateChef['install_addons']
+      results['private_chef']['install_addons_from_path'] = PrivateChef['install_addons_from_path']
+      results['private_chef']['install_analytics_path'] = PrivateChef['install_analytics_path']
+      results['private_chef']['install_manage_path'] = PrivateChef['install_manage_path']
+      results['private_chef']['install_push_jobs_path'] = PrivateChef['install_push_jobs_path']
+      results['private_chef']['install_reporting_path'] = PrivateChef['install_reporting_path']
       results['private_chef']['oc-chef-pedant'] = PrivateChef['oc_chef_pedant']
       results['private_chef']['notification_email'] = PrivateChef['notification_email']
       results['private_chef']['from_email'] = PrivateChef['from_email']
