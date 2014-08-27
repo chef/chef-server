@@ -45,6 +45,7 @@ bulk_route_fun(Type, Req) when Type =:= role;
                                Type =:= data_bag;
                                Type =:= data_bag_item;
                                Type =:= user;
+                               Type =:= organization;
                                Type =:= group;
                                Type =:= container ->
     BaseURI = chef_wm_util:base_uri(Req),
@@ -103,6 +104,7 @@ route(cookbook_version, Req, Args) ->
     TemplateArgs = [Name],
     {name, Name} = lists:keyfind(name, 1, Args),
     render_template(Template, Req, TemplateArgs);
+route(organization, Req, Args) -> route_rest_object("organizations", Req, Args);
 route(group, Req, Args) -> route_rest_object("groups", Req, Args);
 route(container, Req, Args) -> route_rest_object("containers", Req, Args).
 
@@ -148,6 +150,8 @@ template_for_type({data_bag, _}) ->
     "/data/~s/~s";
 template_for_type(user) ->
     "/users/~s";
+template_for_type(organization) ->
+    "/organizations/~s";
 template_for_type(container) ->
     "/containers/~s";
 template_for_type(group) ->
