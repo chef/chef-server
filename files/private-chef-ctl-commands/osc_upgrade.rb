@@ -192,8 +192,8 @@ class OscUpgrade
       begin
         server_status = JSON.parse(open('http://localhost:8000/_status').read)
         fail unless server_status['status'] == 'pong'
-      # Catch exceptions because if the server isn't yet up trying to open the status endpoint throws one
-      rescue Exception => e
+      # If the server isn't up trying to open the status endpoint throws an error
+      rescue StandardError => e
         sleep 1
         if count == 120
           log "Timeout waiting for #{server_version} server to start. Received expection #{e.message}"
