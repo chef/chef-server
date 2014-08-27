@@ -85,8 +85,10 @@ if [[ ($type == 'EC') && ($ha == 0) ]]; then
     $ctl_cmd ha-status > "$tmpdir/$ctl_cmd"_ha-status.txt
 fi
 
-/opt/$path/embedded/bin/psql -U opscode-pgsql opscode_chef -c "SELECT CURRENT_TIMESTAMP;" > "$tmpdir/pg_stat_activity.txt"
-/opt/$path/embedded/bin/psql -U opscode-pgsql opscode_chef -c "SELECT * FROM pg_stat_activity;" >> "$tmpdir/pg_stat_activity.txt"
+if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
+    su - opscode-pgsql -c "/opt/$path/embedded/bin/psql opscode_chef -c 'SELECT CURRENT_TIMESTAMP;'" > "$tmpdir/pg_stat_activity.txt"
+    su - opscode-pgsql -c "/opt/$path/embedded/bin/psql opscode_chef -c 'SELECT * FROM pg_stat_activity;'" >> "$tmpdir/pg_stat_activity.txt"
+fi
 
 # Retrieve Platform and Platform Version
 if [[ -f "/etc/lsb-release" ]] && grep -q DISTRIB_ID /etc/lsb-release;
