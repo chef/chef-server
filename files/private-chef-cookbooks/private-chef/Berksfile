@@ -4,5 +4,5 @@ metadata
 
 cookbook 'enterprise', :git => 'git@github.com:opscode-cookbooks/enterprise-chef-common.git', :tag => '0.4.4'
 cookbook 'chef-ha-drbd', :path => '../chef-ha-drbd'
-cookbook 'apt', :git => 'git@github.com:opscode-cookbooks/apt.git', :tag => '2.5.3'
-cookbook 'yum', :git => 'git@github.com:opscode-cookbooks/apt.git', :tag => '3.2.4'
+cookbook 'apt', '~> 2.0'
+cookbook 'yum', '~> 3.0'
