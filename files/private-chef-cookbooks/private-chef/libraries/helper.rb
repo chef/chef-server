@@ -42,7 +42,7 @@ class OmnibusHelper
     db_protocol = "postgres"
     db_user     = node['private_chef']['oc_bifrost']['sql_user']
     db_password = node['private_chef']['oc_bifrost']['sql_password']
-    db_vip      = vip_for_uri('oc_bifrost')
+    db_vip      = vip_for_uri('postgresql')
     db_name     = "bifrost"
 
     "#{db_protocol}://#{db_user}:#{db_password}@#{db_vip}/#{db_name}"
