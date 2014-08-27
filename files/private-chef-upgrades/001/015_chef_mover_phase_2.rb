@@ -1,8 +1,6 @@
 # This is the chef-mover `phase_2_prep_migration` and `phase_2_migration`
 # that migrates containers and groups from couchDB to postgreSQL
 
-require 'time'
-
 define_upgrade do
   if Partybus.config.bootstrap_server
 
