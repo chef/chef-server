@@ -8,7 +8,7 @@ require "/opt/opscode/embedded/service/omnibus-ctl/osc_upgrade"
 require 'optparse'
 require 'ostruct'
 
-add_command "chef12-upgrade-data-transform", "Transfrom data from a Chef 11 server for upload to an Chef 12 server.", 2 do
+add_command "chef12-upgrade-data-transform", "Transfrom data from an open source Chef 11 server for upload to an Chef 12 server.", 2 do
 
    def parse(args)
     @options = OpenStruct.new
@@ -19,7 +19,7 @@ add_command "chef12-upgrade-data-transform", "Transfrom data from a Chef 11 serv
     opt_parser = OptionParser.new do |opts|
       opts.banner = "Usage: private-chef-ctl chef12-upgrade-data-transform [options]"
 
-      opts.on("-d", "--data-dir [directory]", "Directory of Chef 11 data. (Will ask interactively if not passed)") do |chef11_dir|
+      opts.on("-d", "--data-dir [directory]", "Directory of open source Chef 11 server data. (Will ask interactively if not passed)") do |chef11_dir|
         @options.chef11_data_dir = chef11_dir
       end
 
@@ -48,7 +48,7 @@ add_command "chef12-upgrade-data-transform", "Transfrom data from a Chef 11 serv
     if @options.chef12_data_dir
       @options.chef12_data_dir
     else
-      chef12_dir = Dir.mktmpdir('ec-chef-server-data')
+      chef12_dir = Dir.mktmpdir('chef12-server-data')
       log "Created #{chef12_dir} as the location to save the tranformed data"
       chef12_dir
     end
@@ -60,7 +60,7 @@ add_command "chef12-upgrade-data-transform", "Transfrom data from a Chef 11 serv
   parse(ARGV)
 
   # Check if this is a valid directory and bail if it isn't
-  chef11_data_dir = @options.chef11_data_dir || ask("Location of Chef 11 server data? ")
+  chef11_data_dir = @options.chef11_data_dir || ask("Location of open source Chef 11 server data? ")
   key_file = "#{chef11_data_dir}/key_dump.json"
   chef12_data_dir = determine_chef12_data_dir
 
