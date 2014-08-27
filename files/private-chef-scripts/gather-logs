@@ -135,8 +135,10 @@ function add_footer (){
 
 name_resolution_file="$tmpdir/name-resolution.txt"
 
-echo '## dig hostname -f' > "$name_resolution_file"
-dig `hostname -f` >> "$name_resolution_file"
+if which dig > /dev/null 2>&1; then
+    echo '## dig hostname -f' > "$name_resolution_file"
+    dig `hostname -f` >> "$name_resolution_file"
+fi
 add_footer "$name_resolution_file"
 
 echo '## /etc/resolv.conf' >> "$name_resolution_file"
