@@ -124,7 +124,7 @@ else
   netstat -alntp > "$tmpdir/netstat_alntp.txt"
 fi
 
-sysctl -a > "$tmpdir/sysctl_a.txt"
+sysctl -a > "$tmpdir/sysctl_a.txt" > 2>&1
 
 dmesg > "$tmpdir/dmesg.txt"
 
