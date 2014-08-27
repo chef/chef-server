@@ -84,26 +84,25 @@ describe "opscode-account user association", :association do
   end
 
   def user_should_not_be_in_org(user)
-    url = api_url("users/#{user.name}")
-    response = get(api_url("users/#{user.name}"), user)
-    puts "#{url} response: #{response}" if response.code != 404
-    response.should look_like({ :status=> 404 })
+    response = get(api_url("users"), platform.admin_user)
+    response.code.should == 200
+    !parse(response).any? { |u| u['user']['username'] == user }
   end
 
   def user_should_be_in_group(user, group)
-    is_user_in_group?(user, group).should be_true
+    is_user_in_group?(user, group).should be true
   end
 
   def is_user_in_group?(user, group)
     # check that they are in the users group. This isn't pretty because of USAGS
     # so we iterate through all groups in the users group to find the group containing only the
     # user
-    groups = parse(get(api_url("groups/#{group}"), platform.admin_user))
-    result = groups['actors'].include?(user.name)
+    group = parse(get(api_url("groups/#{group}"), platform.admin_user))
+    result = group['actors'].include?(user.name)
     if !result
-      result = groups["groups"].any? { is_user_in_group(user, group) }
+      result = group["groups"].any? { |child| is_user_in_group?(user, child) }
     end
-    result.should be_true
+    result
   end
 
   # todo this should be able to handle multiple outstanding invites
@@ -437,8 +436,6 @@ describe "opscode-account user association", :association do
         put(user_invite_url, platform.bad_user, :payload=>{:response=>"reject"}).should look_like({ :status => 200 })
 
         no_invites_for_user(platform.bad_user)
-        response = get(api_url("users/#{bad_user}"), platform.bad_user)
-        response.should look_like({ :status=> 200, :body => {} })
 
         #can't accept after rejecting
         response = put(user_invite_url, platform.bad_user, :payload=>{:response=>"accept"})
