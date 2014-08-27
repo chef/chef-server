@@ -308,6 +308,7 @@ module PrivateChef
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
       PrivateChef["bookshelf"]["ha"] ||= true
       PrivateChef["couchdb"]["ha"] ||= true
+      PrivateChef["oc_id"]["ha"] ||= true
       PrivateChef["rabbitmq"]["ha"] ||= true
       PrivateChef["opscode_solr"]["ha"] ||= true
       PrivateChef["opscode_expander"]["ha"] ||= true
