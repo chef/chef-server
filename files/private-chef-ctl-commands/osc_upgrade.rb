@@ -44,13 +44,13 @@ class OscUpgrade
     # Do we want to delete the directory on failure or leave it for debugging?
     # Are the permissions good enough? (0700)
     osc_data_dir = Dir.mktmpdir('chef11-server-data')
-    log "Making #{osc_data_dir} as the location to save the Chef 11 server data"
+    log "Making #{osc_data_dir} as the location to save the open source Chef 11 server data"
 
     key_file = "#{osc_data_dir}/key_dump.json"
 
     download_osc_data(osc_data_dir, key_file)
 
-    log "Chef 11 server data downloaded to #{osc_data_dir}"
+    log "Open source Chef 11 server data downloaded to #{osc_data_dir}"
 
     # See note above on osc_data_dir
     ec_data_dir = Dir.mktmpdir('chef12-server-data')
@@ -77,24 +77,24 @@ class OscUpgrade
 
     start_osc
 
-    log "Preparing knife to download data from the Chef 11 server"
+    log "Preparing knife to download data from the open source Chef 11 server"
 
     write_knife_config(osc_data_dir)
 
-    log "Downloading data from the Chef 11 server"
+    log "Downloading data from the open source Chef 11 server"
 
     run_knife_download
 
     create_osc_key_file(key_file)
 
-    log "Finished downloading data from the Chef 11 server"
+    log "Finished downloading data from the open source Chef 11 server"
 
     stop_osc
   end
 
   def transform_osc_data(osc_data_dir, key_file, ec_data_dir)
 
-    log "Transforming Open Source server data for upload to Chef 12 server"
+    log "Transforming open source Chef 11 server data for upload to Chef 12 server"
 
     # To prepare the downloaded OSC data for upload to the EC server
     # it is put into a file structure that knife-ec-backup expects
@@ -147,11 +147,11 @@ class OscUpgrade
 
     write_knife_ec_backup_config
 
-    log "Uploading transformed Chef 11 server data to Chef 12 server"
+    log "Uploading transformed open source Chef 11 server data to Chef 12 server"
 
     run_knife_ec_restore(ec_data_dir)
 
-    log "Chef 11 server upgraded to a Chef 12 server"
+    log "Open source Chef 11 server upgraded to a Chef 12 server"
   end
 
   def fix_rabbit_wait_script
@@ -205,8 +205,8 @@ class OscUpgrade
 
   def start_osc
     # Assumption is EC isn't running, since we detected OSC on the system
-    log 'Ensuring the Chef 11 server is started'
-    msg = "Unable to start Chef 11 server, which is needed to complete the upgrade"
+    log 'Ensuring the open source Chef 11 server is started'
+    msg = "Unable to start the open source Chef 11 server, which is needed to complete the upgrade"
     check_status(run_command("chef-server-ctl start"), msg)
     wait_for_ready_server("Chef 11")
   end
@@ -241,7 +241,7 @@ class OscUpgrade
       chef_repo_path "#{osc_data_dir}"
     EOH
 
-    log "Writing knife config to /tmp/knife-config.rb for use in downloading the data"
+    log "Writing knife config to /tmp/knife-config.rb for use in downloading open source Chef 11 server data"
     file_open("/tmp/knife-config.rb", "w"){ |file| file.write(config)}
   end
 
@@ -259,7 +259,7 @@ class OscUpgrade
   # TODO(jmink) Add error handling
   def pull_osc_db_credentials
     # This code pulled from knife-ec-backup and adapted
-    log "Pulling needed db credintials"
+    log "Pulling open source Chef 11 database credintials"
     if !File.exists?("/etc/chef-server/chef-server-running.json")
       log "Failed to find /etc/chef-server/chef-server-running.json"
       exit 1
@@ -285,7 +285,7 @@ class OscUpgrade
   end
 
   def start_ec
-    log "Ensuring all the Chef 12 server components are started"
+    log "Ensuring Chef 12 server components are started"
     msg = "Unable to start Chef 12 server, which is needed to complete the upgrade"
     status = run_command("private-chef-ctl start")
     check_status(status, msg)
@@ -293,15 +293,15 @@ class OscUpgrade
   end
 
   def stop_ec
-    log 'Ensuring the Chef 12 server is stopped'
+    log 'Ensuring Chef 12 server is stopped'
     msg = "Unable to stop the Chef 12 server, which is needed to complete the upgrade"
     status = run_command("private-chef-ctl stop")
     check_status(status, msg)
   end
 
   def stop_osc
-    log 'Ensuring the Chef 11 server is stopped'
-    msg = "Unable to stop Chef 11 server, which is needed to complete the upgrade"
+    log 'Ensuring open source Chef 11 server is stopped'
+    msg = "Unable to stop open souce Chef 11 server, which is needed to complete the upgrade"
     status = run_command("chef-server-ctl stop")
     check_status(status, msg)
   end
@@ -336,7 +336,7 @@ class OscUpgrade
       admin_user_names << user['name'] if user['admin']
       user.delete('admin')
 
-      # EC chef expects username not name
+      # Chef 12 expects username not name
       user['username'] = user['name']
       user['display_name'] = user['username']
       user.delete('name')
@@ -408,7 +408,7 @@ class OscUpgrade
 
     cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency #{@options.upload_threads} -c /tmp/knife-ec-backup-config.rb #{ec_data_dir}"
     status = run_command(cmd)
-    msg = "Uploading transformed data to the Chef 12 server failed"
+    msg = "Failed uploading transformed data to the Chef 12 server"
     check_status(status, msg)
   end
 
