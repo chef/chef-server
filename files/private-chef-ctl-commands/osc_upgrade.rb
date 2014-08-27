@@ -1,3 +1,9 @@
+#
+# Copyright:: Copyright (c) 2014 Chef Software, Inc.
+#
+# All Rights Reserved
+#
+
 require 'chef'
 require 'sequel'
 require 'highline/import'
@@ -12,50 +18,83 @@ require 'highline/import'
 # flag is set (what do the other commands do by default? Can their
 # output be tuned to this level?)
 
-def run_osc_upgrade
+class OscUpgrade
+
+  def initialize(options, ctlContext)
+    @options = options
+    @ctlContext = ctlContext
+  end
+
+  # User method_missing to catch calls to methods that are
+  # defined outside this class in the omnibus-ctl context
+  def method_missing(method_sym, *args, &block)
+    if @ctlContext.respond_to?(method_sym)
+      @ctlContext.send(method_sym, *args, &block)
+    else
+      super
+    end
+  end
 
   # Main function
   def run_upgrade
-    # This is to help make this process idempotent, but currently if EC has
-    # been started at all OSC won't come up properly. ctl will report EC as
-    # stopped and OSC up, but any attempt to access OSC will result in a 502
-    # This issue will have to be solved for this process to be idempotent
-    stop_ec
-
-    fix_rabbit_wait_script
-
-    start_osc
-
-    log "Preparing knife to download data from the Open Source Chef server"
 
     # As a precaution, we want the location to vary. TODO: We need to save
     # the value to a read protected file so it can be read from if a resume
     # is needed
     # Do we want to delete the directory on failure or leave it for debugging?
     # Are the permissions good enough? (0700)
-    osc_data_dir = Dir.mktmpdir('osc-chef-server-data')
-    log "Making #{osc_data_dir} as the location to save the server data"
+    osc_data_dir = Dir.mktmpdir('chef11-server-data')
+    log "Making #{osc_data_dir} as the location to save the Chef 11 server data"
+
+    key_file = "#{osc_data_dir}/key_dump.json"
+
+    download_osc_data(osc_data_dir, key_file)
+
+    log "Chef 11 server data downloaded to #{osc_data_dir}"
+
+    # See note above on osc_data_dir
+    ec_data_dir = Dir.mktmpdir('chef12-server-data')
+
+    transform_osc_data(osc_data_dir, key_file, ec_data_dir)
+
+    upload_transformed_data(ec_data_dir)
+
+    # The OSC bits still live on the system - do we delete them here?
+    # For example, /opt/chef-server is still in the path, but /opt/opscode is not
+    # on dev-vm testing
+    # This has the effect of making the default knife, gem, etc the chef-server versions
+
+    # The migration data still lives on the system - it is probably worth while
+    # to include an optional step to delete it, if the user specifies this, other
+    # wise leave it on the system
+  end
+
+  def download_osc_data(osc_data_dir, key_file)
+
+    stop_ec
+
+    fix_rabbit_wait_script
+
+    start_osc
+
+    log "Preparing knife to download data from the Chef 11 server"
 
     write_knife_config(osc_data_dir)
 
-    log "Downloading data from the Open Source Chef server"
+    log "Downloading data from the Chef 11 server"
 
     run_knife_download
 
-    key_file = "#{osc_data_dir}/key_dump.json"
     create_osc_key_file(key_file)
 
-    log "Finished downloading data from the Open Source Chef server"
+    log "Finished downloading data from the Chef 11 server"
 
     stop_osc
+  end
 
-    log "Configuring the Enterprise Chef server for use"
+  def transform_osc_data(osc_data_dir, key_file, ec_data_dir)
 
-    reconfigure(false)
-
-    start_ec
-
-    log "Transforming Open Source server data for upload to Enterprise Chef server"
+    log "Transforming Open Source server data for upload to Chef 12 server"
 
     # To prepare the downloaded OSC data for upload to the EC server
     # it is put into a file structure that knife-ec-backup expects
@@ -64,12 +103,11 @@ def run_osc_upgrade
 
     org_name, org_full_name, org_type = determine_org_name
 
-    # See note above on osc_data_dir
-    ec_data_dir = Dir.mktmpdir('ec-chef-server-data')
-    org_dir = "#{ec_data_dir}/organizations/#{org_name}"
     make_dir("#{ec_data_dir}/organizations", 0644)
     org_dir = "#{ec_data_dir}/organizations/#{org_name}"
     make_dir(org_dir, 0644)
+    groups_dir = "#{org_dir}/groups"
+    make_dir(groups_dir, 0644)
 
     create_org_json(org_dir, org_name, org_full_name, org_type)
 
@@ -90,33 +128,30 @@ def run_osc_upgrade
 
     create_members_json(user_names, org_dir)
 
-    groups_dir = "#{org_dir}/groups"
-    make_dir(groups_dir, 0644)
-
     # Under organizations/#{org_name}/groups, an admins.json and billing-admins.json is needed.
     # Any admins from OSC need to go into the admins group, as that is how it is determined that
     # a user is an admin in EC
     # All admins will be billing admins due to lack of a better selection criteria
 
     create_admins_json(admin_users, groups_dir)
+
     create_billing_admins(admin_users, groups_dir)
+  end
+
+  def upload_transformed_data(ec_data_dir)
+    log "Configuring the Chef 12 server for use"
+
+    reconfigure(false)
+
+    start_ec
 
     write_knife_ec_backup_config
 
-    log "Uploading transformed Open Source server data to Enterprise Chef server"
+    log "Uploading transformed Chef 11 server data to Chef 12 server"
 
     run_knife_ec_restore(ec_data_dir)
 
-    log "Open Source chef server upgraded to an Enterprise Chef server"
-
-    # The OSC bits still live on the system - do we delete them here?
-    # For example, /opt/chef-server is still in the path, but /opt/opscode is not
-    # on dev-vm testing
-    # This has the effect of making the default knife, gem, etc the chef-server versions
-
-    # The migration data still lives on the system - it is probably worth while
-    # to include an optional step to delete it, if the user specifies this, other
-    # wise leave it on the system
+    log "Chef 11 server upgraded to a Chef 12 server"
   end
 
   def fix_rabbit_wait_script
@@ -170,10 +205,10 @@ def run_osc_upgrade
 
   def start_osc
     # Assumption is EC isn't running, since we detected OSC on the system
-    log 'Ensuring the Open Source Chef server is started'
-    msg = "Unable to start Open Source Chef server, which is needed to complete the upgrade"
+    log 'Ensuring the Chef 11 server is started'
+    msg = "Unable to start Chef 11 server, which is needed to complete the upgrade"
     check_status(run_command("chef-server-ctl start"), msg)
-    wait_for_ready_server("Open Source Chef")
+    wait_for_ready_server("Chef 11")
   end
 
   def check_status(status, msg)
@@ -250,23 +285,23 @@ def run_osc_upgrade
   end
 
   def start_ec
-    log "Ensuring all the Enterprise Chef server components are started"
-    msg = "Unable to start Enterprise Chef, which is needed to complete the upgrade"
+    log "Ensuring all the Chef 12 server components are started"
+    msg = "Unable to start Chef 12 server, which is needed to complete the upgrade"
     status = run_command("private-chef-ctl start")
     check_status(status, msg)
-    wait_for_ready_server("Enterprise Chef")
+    wait_for_ready_server("Chef 12")
   end
 
   def stop_ec
-    log 'Ensuring the Enterprise Chef server is stopped'
-    msg = "Unable to stop the Enterprise Chef server, which is needed to complete the upgrade"
+    log 'Ensuring the Chef 12 server is stopped'
+    msg = "Unable to stop the Chef 12 server, which is needed to complete the upgrade"
     status = run_command("private-chef-ctl stop")
     check_status(status, msg)
   end
 
   def stop_osc
-    log 'Ensuring the Open Source Chef server is stopped'
-    msg = "Unable to stop Open Source Chef server, which is needed to complete the upgrade"
+    log 'Ensuring the Chef 11 server is stopped'
+    msg = "Unable to stop Chef 11 server, which is needed to complete the upgrade"
     status = run_command("chef-server-ctl stop")
     check_status(status, msg)
   end
@@ -373,9 +408,8 @@ def run_osc_upgrade
 
     cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency #{@options.upload_threads} -c /tmp/knife-ec-backup-config.rb #{ec_data_dir}"
     status = run_command(cmd)
-    msg = "Uploading transformed data to the Enterprise Chef server failed"
+    msg = "Uploading transformed data to the Chef 12 server failed"
     check_status(status, msg)
   end
 
-  run_upgrade()
 end

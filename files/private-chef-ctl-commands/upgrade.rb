@@ -77,10 +77,11 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
   parse(ARGV)
 
   if detect_osc
-    log "Open Source Chef 11 or older server detected."
+    log "Open Source Chef 11 server detected."
     if upgrade?
-      log "Upgrading the Open Source Chef server."
-      run_osc_upgrade
+      log "Upgrading the Open Source Chef 11 server."
+      osc_upgrade = OscUpgrade.new(@options, self)
+      osc_upgrade.run_upgrade
     else
       puts "Aborting upgrade."
       exit 0
