@@ -99,7 +99,7 @@ fetch_org_guid_and_authz(#base_state{organization_guid = Id, organization_authz_
 fetch_org_guid_and_authz(#base_state{organization_guid = undefined,
                                      organization_name = OrgName,
                                      chef_db_context = DbContext}) ->
-    case chef_db:fetch_org_id(DbContext, OrgName) of
+    case chef_db:fetch_org_id_and_authz(DbContext, OrgName) of
         not_found -> throw({org_not_found, OrgName});
         {Guid, AuthzId} -> {Guid, AuthzId}
     end.
