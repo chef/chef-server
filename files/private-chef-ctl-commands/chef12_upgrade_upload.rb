@@ -24,7 +24,7 @@ add_command "chef12-upgrade-upload", "Upload transformed Chef 11 data to a Chef 
           @options.ec_data_dir = ec_dir
         end
 
-        opts.on("-c", "--chef-server-url [url]", String, "The url of the Chef 12 server.  Defaults to #{@options.chef_server_url}") do |u|
+        opts.on("-s", "--chef-server-url [url]", String, "The url of the Chef 12 server.  Defaults to #{@options.chef_server_url}") do |u|
           @options.chef_server_url = u
         end
 

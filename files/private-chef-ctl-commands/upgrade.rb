@@ -37,7 +37,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
       end
 
       # Should this be chef-server-host to match sql-host?
-      opts.on("-c", "--chef-server-url [url]", String, "The url of the chef server.  Defaults to #{@options.chef_server_url}") do |u|
+      opts.on("-s", "--chef-server-url [url]", String, "The url of the chef server.  Defaults to #{@options.chef_server_url}") do |u|
          @options.chef_server_url = u
       end
 

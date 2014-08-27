@@ -23,7 +23,7 @@ add_command "chef12-upgrade-download", "Download data from a Chef 11 server.", 2
         @options.osc_data_dir = dir
       end
 
-      opts.on("-c", "--chef-server-url [url]", String, "The url of the Chef 11 server.  Defaults to #{@options.chef_server_url}") do |u|
+      opts.on("-s", "--chef-server-url [url]", String, "The url of the Chef 11 server.  Defaults to #{@options.chef_server_url}") do |u|
          @options.chef_server_url = u
       end
 
