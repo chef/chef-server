@@ -256,9 +256,9 @@ fetch_org_id(#context{reqid = ReqId,
             Result =
                 case darklaunch_orgs(Context) of
                     true ->
-                        ?SH_TIME(ReqId, chef_sql, fetch_org_id, (OrgName));
+                        ?SH_TIME(ReqId, chef_otto, fetch_org_id, (Server, OrgName));
                     false ->
-                        ?SH_TIME(ReqId, chef_otto, fetch_org_id, (Server, OrgName))
+                        ?SH_TIME(ReqId, chef_sql, fetch_org_id, (OrgName))
                 end,
             case Result of
                 not_found ->
@@ -279,9 +279,9 @@ fetch_org_id_and_authz(#context{reqid = ReqId,
     Result =
         case darklaunch_orgs(Context) of
             true ->
-                ?SH_TIME(ReqId, chef_sql, fetch_org_id_and_authz, (OrgName));
+                ?SH_TIME(ReqId, chef_otto, fetch_org_id_and_authz, (Server, OrgName));
             false ->
-                ?SH_TIME(ReqId, chef_otto, fetch_org_id_and_authz, (Server, OrgName))
+                ?SH_TIME(ReqId, chef_sql, fetch_org_id_and_authz, (OrgName))
         end,
     case Result of
         not_found ->
