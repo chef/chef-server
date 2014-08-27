@@ -19,8 +19,8 @@ add_command "chef12-upgrade-download", "Download data from a Chef 11 server.", 2
     opt_parser = OptionParser.new do |opts|
       opts.banner = "Usage: private-chef-ctl chef12-upgrade-download [options]"
 
-      opts.on("-d", "--data-dir [directory]", "Directory to store Chef 11 data. Defaults to a created tmp dir.") do |dir|
-        @options.osc_data_dir = dir
+      opts.on("-d", "--data-dir [directory]", "Directory to store Chef 11 data. Defaults to a created tmp dir.") do |chef11_dir|
+        @options.chef11_data_dir = chef11_dir
       end
 
       opts.on("-s", "--chef-server-url [url]", String, "The url of the Chef 11 server.  Defaults to #{@options.chef_server_url}") do |u|
@@ -37,13 +37,13 @@ add_command "chef12-upgrade-download", "Download data from a Chef 11 server.", 2
     log "Proceeding with options #{@options.inspect}"
    end
 
-   def data_dir
-    if @options.osc_data_dir
-      @options.osc_data_dir
+   def determine_chef11_data_dir
+    if @options.chef11_data_dir
+      @options.chef11_data_dir
     else
-      osc_data_dir = Dir.mktmpdir('osc-chef-server-data')
-      log "Creating #{osc_data_dir} as the location to save the Chef 11 server data"
-      osc_data_dir
+      chef11_data_dir = Dir.mktmpdir('chef11-chef-server-data')
+      log "Creating #{chef11_data_dir} as the location to save the Chef 11 server data"
+      chef11_data_dir
     end
    end
 
@@ -51,11 +51,11 @@ add_command "chef12-upgrade-download", "Download data from a Chef 11 server.", 2
 
   parse(ARGV)
 
-  osc_data_dir = data_dir
-  key_file = "#{osc_data_dir}/key_dump.json"
+  chef11_data_dir = determine_chef11_data_dir
+  key_file = "#{chef11_data_dir}/key_dump.json"
 
   osc_upgrade = OscUpgrade.new(@options, self)
-  osc_upgrade.download_osc_data(osc_data_dir, key_file)
+  osc_upgrade.download_osc_data(chef11_data_dir, key_file)
 
-  log "Chef 11 server data downloaded to #{osc_data_dir}"
+  log "Chef 11 server data downloaded to #{chef11_data_dir}"
 end

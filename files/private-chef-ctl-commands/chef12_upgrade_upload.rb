@@ -20,8 +20,8 @@ add_command "chef12-upgrade-upload", "Upload transformed Chef 11 data to a Chef 
       opt_parser = OptionParser.new do |opts|
         opts.banner = "Usage: private-chef-ctl chef12-upgrade-upload [options]"
 
-        opts.on("-t", "--transformed-data-dir [directory]", "Directory where data for upload to the Chef 12 server is located (Will ask interactively if not passed)") do |ec_dir|
-          @options.ec_data_dir = ec_dir
+        opts.on("-t", "--transformed-data-dir [directory]", "Directory where data for upload to the Chef 12 server is located (Will ask interactively if not passed)") do |chef12_dir|
+          @options.chef12_data_dir = chef12_dir
         end
 
         opts.on("-s", "--chef-server-url [url]", String, "The url of the Chef 12 server.  Defaults to #{@options.chef_server_url}") do |u|
@@ -45,9 +45,9 @@ add_command "chef12-upgrade-upload", "Upload transformed Chef 11 data to a Chef 
 
   parse(ARGV)
 
-  ec_data_dir = @options.ec_data_dir || ask("Location of data to upload to Chef 12 server?")
+  chef12_data_dir = @options.chef12_data_dir || ask("Location of data to upload to Chef 12 server?")
 
   osc_upgrade = OscUpgrade.new(@options, self)
-  osc_upgrade.upload_transformed_data(ec_data_dir)
+  osc_upgrade.upload_transformed_data(chef12_data_dir)
 
 end

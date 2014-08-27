@@ -19,12 +19,12 @@ add_command "chef12-upgrade-data-transform", "Transfrom data from a Chef 11 serv
     opt_parser = OptionParser.new do |opts|
       opts.banner = "Usage: private-chef-ctl chef12-upgrade-data-transform [options]"
 
-      opts.on("-d", "--data-dir [directory]", "Directory of Chef 11 data. (Will ask interactively if not passed)") do |dir|
-        @options.osc_data_dir = dir
+      opts.on("-d", "--data-dir [directory]", "Directory of Chef 11 data. (Will ask interactively if not passed)") do |chef11_dir|
+        @options.chef11_data_dir = chef11_dir
       end
 
-      opts.on("-t", "--transformed-data-dir [directory]", "Directory to place transformed data. Defaults to a tmp dir.") do |ec_dir|
-        @options.ec_data_dir = ec_dir
+      opts.on("-t", "--transformed-data-dir [directory]", "Directory to place transformed data. Defaults to a tmp dir.") do |chef12_dir|
+        @options.chef12_data_dir = chef12_dir
       end
 
       opts.on("-o", "--org-name [name]", String, "The name of the Chef organization (Will ask interactively if not passed)") do |n|
@@ -44,13 +44,13 @@ add_command "chef12-upgrade-data-transform", "Transfrom data from a Chef 11 serv
     opt_parser.parse!(args)
    end
 
-   def data_dir
-    if @options.ec_data_dir
-      @options.ec_data_dir
+   def determine_chef12_data_dir
+    if @options.chef12_data_dir
+      @options.chef12_data_dir
     else
-      ec_dir = Dir.mktmpdir('ec-chef-server-data')
-      log "Created #{ec_dir} as the location to save the tranformed data"
-      ec_dir
+      chef12_dir = Dir.mktmpdir('ec-chef-server-data')
+      log "Created #{chef12_dir} as the location to save the tranformed data"
+      chef12_dir
     end
    end
 
@@ -60,12 +60,12 @@ add_command "chef12-upgrade-data-transform", "Transfrom data from a Chef 11 serv
   parse(ARGV)
 
   # Check if this is a valid directory and bail if it isn't
-  osc_data_dir = @options.osc_data_dir || ask("Location of Chef 11 server data? ")
-  key_file = "#{osc_data_dir}/key_dump.json"
-  ec_data_dir = data_dir
+  chef11_data_dir = @options.chef11_data_dir || ask("Location of Chef 11 server data? ")
+  key_file = "#{chef11_data_dir}/key_dump.json"
+  chef12_data_dir = determine_chef12_data_dir
 
   osc_upgrade = OscUpgrade.new(@options, self)
-  osc_upgrade.transform_osc_data(osc_data_dir, key_file, ec_data_dir)
+  osc_upgrade.transform_osc_data(chef11_data_dir, key_file, chef12_data_dir)
 
-  log "Data transformed and saved to #{ec_data_dir}"
+  log "Data transformed and saved to #{chef12_data_dir}"
 end
