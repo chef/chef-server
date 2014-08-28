@@ -5,6 +5,11 @@ plugins.each do |p|
   p.enabled false if node['private_chef']['disabled-plugins'].include?(p.name)
 end
 
+missing_plugins = node['private_chef']['enabled-plugins'] - (plugins.map {|p| p.name })
+if !missing_plugins.empty?
+  raise "could not find plugins: #{missing_plugins}"
+end
+
 plugins.each do |plugin|
   next if !plugin.parent_plugin.nil?
   chef_run plugin.run_list do
