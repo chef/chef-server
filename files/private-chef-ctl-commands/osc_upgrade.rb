@@ -188,14 +188,15 @@ class OscUpgrade
   end
 
   def wait_for_ready_server(server_version)
-    1.upto(120) do |count|
+    max_count = 120
+    1.upto(max_count) do |count|
       begin
         server_status = JSON.parse(open('http://localhost:8000/_status').read)
         fail unless server_status['status'] == 'pong'
       # If the server isn't up trying to open the status endpoint throws an error
       rescue StandardError => e
         sleep 1
-        if count == 120
+        if count == max_count
           log "Timeout waiting for #{server_version} server to start. Received expection #{e.message}"
           exit 1
         end
