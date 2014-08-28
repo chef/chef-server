@@ -33,6 +33,7 @@
          depsolver_constraints/1,
          extract_public_key/1,
          key_version/1,
+         make_guid/0,
          make_org_prefix_id/1,
          make_org_prefix_id/2,
          maybe_stub_authz_id/2,
@@ -220,6 +221,11 @@ make_org_prefix_id(OrgId, Name) ->
     Bin = iolist_to_binary([OrgId, Name, crypto:rand_bytes(6)]),
     <<ObjectPart:80, _/binary>> = crypto:md5(Bin),
     iolist_to_binary(io_lib:format("~s~20.16.0b", [OrgSuffix, ObjectPart])).
+
+make_guid() ->
+    Raw = crypto:rand_bytes(16),
+    <<Guid:128>> = Raw,
+    iolist_to_binary(io_lib:format("~32.16.0b", [Guid])). %% 128 bits/16 bytes/32 hex chars
 
 %% If the incoming authz id is the atom 'unset', use the object's id as ersatz authz id.
 maybe_stub_authz_id(unset, ObjectId) ->
