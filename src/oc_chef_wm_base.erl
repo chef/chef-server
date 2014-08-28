@@ -441,6 +441,8 @@ set_authz_id(Id, #container_state{} = C) ->
     C#container_state{container_authz_id = Id};
 set_authz_id(Id, #group_state{} = G) ->
     G#group_state{group_authz_id = Id};
+set_authz_id(Id, #organization_state{} = O) ->
+    O#organization_state{organization_authz_id = Id};
 set_authz_id(Id, #user_state{} = U) ->
     U#user_state{user_authz_id = Id}.
 
