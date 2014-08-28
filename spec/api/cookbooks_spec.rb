@@ -48,7 +48,7 @@ describe "Cookbooks API endpoint", :cookbooks do
         end
 
 
-        it "should respond with 403 (\"Forbidden\")" do
+        it "should respond with 403 (\"Forbidden\")", :authorization do
           restrict_permissions!
 
           should look_like expected_response

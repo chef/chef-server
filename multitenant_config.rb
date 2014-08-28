@@ -202,4 +202,5 @@ requestors({
 # message formatting between the two implementations.
 #
 ruby_users_endpoint? true
-
+ruby_org_assoc? true
+ruby_org_acl_endpoint? true

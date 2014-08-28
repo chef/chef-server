@@ -121,7 +121,7 @@ describe 'system_recovery' do
 
         # TODO: the error string from opscode-account returns
         # the user in the body and not the requestor user
-        it "should return 403 with an error explaining non-superuser is not authorized" do
+        it "should return 403 with an error explaining non-superuser is not authorized", :authorization do
           post(request_url, platform.admin_user, :payload => user_body).should look_like(
             :body => { "error" => error_message },
             :status => 403
@@ -231,7 +231,7 @@ describe 'system_recovery' do
           }}
       end
 
-      it "should return 400 with an error message" do
+      it "should return 400 with an error message", :validation do
         post(request_url, superuser, :payload => missing_username_body).should look_like(
           :body => error_body,
           :status => 400
@@ -255,7 +255,7 @@ describe 'system_recovery' do
           }}
       end
 
-      it "should return 400 with an error message" do
+      it "should return 400 with an error message", :validation do
         post(request_url, superuser, :payload => missing_username_body).should look_like(
           :body => error_body,
           :status => 400

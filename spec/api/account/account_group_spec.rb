@@ -2,7 +2,7 @@
 require 'pedant/rspec/common'
 
 describe "opscode-account groups", :groups do
-  
+
   def self.ruby?
     Pedant::Config.ruby_group_endpoint?
   end
@@ -40,7 +40,7 @@ describe "opscode-account groups", :groups do
 
       context "client" do
         # Is this actually right?  Seems like this should be 200
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, platform.non_admin_client).should look_like({
               :status => 403
             })
@@ -48,7 +48,7 @@ describe "opscode-account groups", :groups do
       end
 
       context "outside user" do
-        it "returns 403", :smoke do
+        it "returns 403", :authorization, :smoke do
           get(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -56,7 +56,7 @@ describe "opscode-account groups", :groups do
       end
 
       context "invalid user" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           get(request_url, invalid_user).should look_like({
               :status => 401
             })
@@ -121,7 +121,7 @@ describe "opscode-account groups", :groups do
         end
 
         context "normal user" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             post(request_url, platform.non_admin_user,
               :payload => request_body).should look_like({
                 :status => 403
@@ -137,7 +137,7 @@ describe "opscode-account groups", :groups do
         end
 
         context "client" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             post(request_url, platform.non_admin_client,
               :payload => request_body).should look_like({
                 :status => 403
@@ -153,7 +153,7 @@ describe "opscode-account groups", :groups do
         end
 
         context "outside user" do
-          it "returns 403", :smoke do
+          it "returns 403", :authorization, :smoke do
             post(request_url, outside_user,
               :payload => request_body).should look_like({
                 :status => 403
@@ -170,7 +170,7 @@ describe "opscode-account groups", :groups do
         end
 
         context "invalid user" do
-          it "returns 401" do
+          it "returns 401", :authentication do
             post(request_url, invalid_user,
               :payload => request_body).should look_like({
                 :status => 401
@@ -208,7 +208,7 @@ describe "opscode-account groups", :groups do
         context "with no group name" do
           let(:request_body) { {} }
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 400
@@ -228,7 +228,7 @@ describe "opscode-account groups", :groups do
               "name" => new_group
             }}
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 400
@@ -311,7 +311,7 @@ describe "opscode-account groups", :groups do
         context "with empty group name" do
           let(:new_group) { "" }
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 400
@@ -326,7 +326,7 @@ describe "opscode-account groups", :groups do
         context "with space in group name" do
           let(:new_group) { "new group" }
 
-          it "returns 400" do
+          it "returns 400", :validation do
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 400
@@ -342,7 +342,7 @@ describe "opscode-account groups", :groups do
           let(:new_group) { "グループ" }
 
           it "can create group" do
-            pending "returns 400" do
+            pending "returns 400", :validation do
               post(request_url, platform.admin_user,
                 :payload => request_body).should look_like({
                   :status => 201,
@@ -377,7 +377,7 @@ describe "opscode-account groups", :groups do
               "groupname" => new_group
             }}
 
-          it "ignores them" do
+          it "ignores them", :validation do
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 201,
@@ -459,7 +459,7 @@ describe "opscode-account groups", :groups do
         end
       end
 
-      context "normal user without read ACE returns 403" do
+      context "normal user without read ACE returns 403", :authorization do
         it "can't read group" do
           put(api_url("groups/#{test_group}/_acl/read"), platform.admin_user,
             :payload => {"read" => {
@@ -475,7 +475,7 @@ describe "opscode-account groups", :groups do
         end
       end
 
-      context "normal user without any ACE returns 403" do
+      context "normal user without any ACE returns 403", :authorization do
         it "can't read group" do
           ["read", "grant", "update", "create", "delete"].each do |permission|
             put(api_url("groups/#{test_group}/_acl/#{permission}"), platform.admin_user,
@@ -495,7 +495,7 @@ describe "opscode-account groups", :groups do
 
       context "client" do
         # Is this actually right?  Seems like this should be 200
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, platform.non_admin_client).should look_like({
               :status => 403
             })
@@ -503,7 +503,7 @@ describe "opscode-account groups", :groups do
       end
 
       context "outside user", :smoke do
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -511,7 +511,7 @@ describe "opscode-account groups", :groups do
       end
 
       context "invalid user" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           get(request_url, invalid_user).should look_like({
               :status => 401
             })
@@ -528,7 +528,7 @@ describe "opscode-account groups", :groups do
           delete(api_url("groups/#{missing_group}"), platform.admin_user)
         end
 
-        it "can get group" do
+        it "can get group", :validation do
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
               :body_exact => default_group_body
@@ -550,7 +550,7 @@ describe "opscode-account groups", :groups do
       end
 
       context "normal user" do
-        it "returns 403" do
+        it "returns 403", :authorization do
           delete(request_url, platform.non_admin_user).should look_like({
               :status => 403
             })
@@ -562,7 +562,7 @@ describe "opscode-account groups", :groups do
 
       context "client" do
         # Is this actually right?  Seems like this should be 200
-        it "returns 403" do
+        it "returns 403", :authorization do
           delete(request_url, platform.non_admin_client).should look_like({
               :status => 403
             })
@@ -573,7 +573,7 @@ describe "opscode-account groups", :groups do
       end
 
       context "outside user", :smoke do
-        it "returns 403" do
+        it "returns 403", :authorization do
           delete(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -584,7 +584,7 @@ describe "opscode-account groups", :groups do
       end
 
       context "invalid user" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           delete(request_url, invalid_user).should look_like({
               :status => 401
             })
@@ -634,7 +634,7 @@ describe "opscode-account groups", :groups do
                 "users" => [platform.admin_user.name],
                 "groups" => ["users"]}
             }}
-          
+
           let(:initial_group_body) {{
               "actors" => [platform.admin_user.name, platform.non_admin_client.name],
               "users" => [platform.admin_user.name],
@@ -700,7 +700,7 @@ describe "opscode-account groups", :groups do
                 "users" => [platform.admin_user.name],
                 "groups" => []}
             }}
-          
+
           it "can update group" do
             pending "pending discussion" do
               # Created this test to check for this, but it has been decided to
@@ -737,7 +737,7 @@ describe "opscode-account groups", :groups do
         end
 
         context "normal user without update ACE" do
-          it "returns 403", :smoke do
+          it "returns 403", :authorization, :smoke do
             put(request_url, platform.non_admin_user,
               :payload => new_group_payload).should look_like({
                 :status => 403
@@ -751,7 +751,7 @@ describe "opscode-account groups", :groups do
 
         context "client" do
           # Is this actually right?  Seems like this should be 200
-          it "returns 403" do
+          it "returns 403", :authorization do
             put(request_url, platform.non_admin_client,
               :payload => new_group_payload).should look_like({
                 :status => 403
@@ -764,7 +764,7 @@ describe "opscode-account groups", :groups do
         end
 
         context "outside user" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             put(request_url, outside_user,
               :payload => new_group_payload).should look_like({
                 :status => 403
@@ -777,7 +777,7 @@ describe "opscode-account groups", :groups do
         end
 
         context "invalid user" do
-          it "returns 401" do
+          it "returns 401", :authentication do
             put(request_url, invalid_user,
               :payload => new_group_payload).should look_like({
                 :status => 401
@@ -969,7 +969,7 @@ describe "opscode-account groups", :groups do
           end
         end # context without groupname
 
-        context "with bogus id instead of groupname" do
+        context "with bogus id instead of groupname", :validation do
           let(:new_group_payload) {{
               "id" => "foo",
               "actors" => {"clients" => [platform.non_admin_client.name],
@@ -989,7 +989,7 @@ describe "opscode-account groups", :groups do
           end
         end # context with bogus id instead of groupname
 
-        context "with random bogus value" do
+        context "with random bogus value", :validation do
           let(:new_group_payload) {{
               "bogus" => "random",
               "actors" => {"clients" => [platform.non_admin_client.name],
@@ -1017,7 +1017,7 @@ describe "opscode-account groups", :groups do
                 "groups" => ["users"]}
             }}
 
-          it "returns 400" do
+          it "returns 400", :validation do
             put(request_url, platform.admin_user,
               :payload => new_group_payload).should look_like({
                 :status => 400
@@ -1037,7 +1037,7 @@ describe "opscode-account groups", :groups do
                 "groups" => ["users"]}
             }}
 
-          it "returns 400" do
+          it "returns 400", :validation do
             pending "returns 500 instead" do
               put(request_url, platform.admin_user,
                 :payload => new_group_payload).should look_like({
@@ -1059,7 +1059,7 @@ describe "opscode-account groups", :groups do
                 "groups" => ["users"]}
             }}
 
-          it "returns 400" do
+          it "returns 400", :validation do
             pending "returns 500 instead" do
               put(request_url, platform.admin_user,
                 :payload => new_group_payload).should look_like({
@@ -1081,7 +1081,7 @@ describe "opscode-account groups", :groups do
                 "groups" => ["bogus"]}
             }}
 
-          it "returns 400" do
+          it "returns 400", :validation do
             pending "returns 500 instead" do
               put(request_url, platform.admin_user,
                 :payload => new_group_payload).should look_like({
@@ -1136,7 +1136,7 @@ describe "opscode-account groups", :groups do
               "actors" => "bogus"
             }}
 
-          it "returns 400" do
+          it "returns 400", :validation do
             pending "returns 200(!) instead (but it doesn't actually change anything)" do
               put(request_url, platform.admin_user,
                 :payload => new_group_payload).should look_like({

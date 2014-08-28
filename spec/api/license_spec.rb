@@ -44,13 +44,13 @@ describe 'license' do
           )
       end
 
-      it "returns 401 for invalid user" do
+      it "returns 401 for invalid user", :authentication do
         get(request_url, invalid_user).should look_like(
           :status => 401
           )
       end
 
-      it "returns 401 for client" do
+      it "returns 401 for client", :authentication do
         get(request_url, platform.non_admin_client).should look_like(
           :status => 401
           )

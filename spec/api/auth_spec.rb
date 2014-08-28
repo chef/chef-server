@@ -98,7 +98,7 @@ describe "private chef authorization checks" do
         end # context "with a user with minimal permissions to create resource"
 
         context "with a user with all permissions EXCEPT create" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             restrict_permissions_to("/containers/#{resource_type}",
                                     normal_user => %w(read update delete grant))
             response = post(api_url("/#{resource_type}"),
@@ -109,7 +109,7 @@ describe "private chef authorization checks" do
         end # context "with a user with all permissions EXCEPT create"
 
         context "with a client", :pending do
-          it "returns 403" do
+          it "returns 403", :authorization do
             response = post(api_url("/#{resource_type}/"),
                             client,
                             :payload => new_resource)
@@ -120,7 +120,7 @@ describe "private chef authorization checks" do
         context "with an outside user (admin of another org)" do
           # TODO we really should make this person admin of another org, for maximum
           # effectiveness.
-          it "returns 403" do
+          it "returns 403", :authorization do
             response = post(api_url("/#{resource_type}/"),
                             outside_user,
                             :payload => new_resource)
@@ -186,7 +186,7 @@ describe "private chef authorization checks" do
         end # context "with a user with minimal permissions to update a resource"
 
         context "with a user with all permissions EXCEPT update" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             restrict_permissions_to("/#{resource_type}/#{new_name}",
                                     normal_user => %w(create read delete grant))
             response = put(api_url("/#{resource_type}/#{new_name}"), normal_user,
@@ -196,7 +196,7 @@ describe "private chef authorization checks" do
         end # context "with a user with all permissions EXCEPT update"
 
         context "with a client", :pending do
-          it "returns 403" do
+          it "returns 403", :authorization do
             response = put(api_url("/#{resource_type}/#{new_name}"),
                            client,
                            :payload => modified_resource)
@@ -207,7 +207,7 @@ describe "private chef authorization checks" do
         context "with an outside user (admin of another org)" do
           # TODO we really should make this person admin of another org, for maximum
           # effectiveness.
-          it "returns 403" do
+          it "returns 403", :authorization do
             response = put(api_url("/#{resource_type}/#{new_name}"), outside_user,
                            :payload => modified_resource)
             response.should look_like({:status => 403})
@@ -249,7 +249,7 @@ describe "private chef authorization checks" do
         end # context "with a user with minimal permissions to delete a resource"
 
         context "with a user with all permissions EXCEPT delete" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             restrict_permissions_to("/#{resource_type}/#{new_name}",
                                     normal_user => %w(create read update grant))
             response = delete(api_url("/#{resource_type}/#{new_name}"),
@@ -259,7 +259,7 @@ describe "private chef authorization checks" do
         end # context "with a user with all permissions EXCEPT delete"
 
         context "with a client", :pending do
-          it "returns 403" do
+          it "returns 403", :authorization do
             response = delete(api_url("/#{resource_type}/#{new_name}"),
                               client)
             response.should look_like({:status => 403})
@@ -269,7 +269,7 @@ describe "private chef authorization checks" do
         context "with an outside user (admin of another org)" do
           # TODO we really should make this person admin of another org, for maximum
           # effectiveness.
-          it "returns 403" do
+          it "returns 403", :authorization do
             response = delete(api_url("/#{resource_type}/#{new_name}"),
                               outside_user)
             response.should look_like({:status => 403})
@@ -336,7 +336,7 @@ describe "private chef authorization checks" do
         end # context "with a user with minimal permissions to read resource"
 
         context "with a user with all permissions EXCEPT read" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             restrict_permissions_to("/containers/#{resource_type}",
                                     normal_user => %w(create update delete grant))
             response = get(api_url("/#{resource_type}"), normal_user)
@@ -352,7 +352,7 @@ describe "private chef authorization checks" do
         context "with an outside user (admin of another org)" do
           # TODO we really should make this person admin of another org, for maximum
           # effectiveness.
-          it "returns 403" do
+          it "returns 403", :authorization do
             response = get(api_url("/#{resource_type}"), outside_user)
             response.should look_like({:status => 403})
           end
@@ -390,7 +390,7 @@ describe "private chef authorization checks" do
         end # context "with a user with minimal permissions to read resource"
 
         context "with a user with all permissions EXCEPT read" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             restrict_permissions_to("/#{resource_type}/#{new_name}",
                                     normal_user => %w(create update delete grant))
             response = get(api_url("/#{resource_type}/#{new_name}"), normal_user)
@@ -406,7 +406,7 @@ describe "private chef authorization checks" do
         context "with an outside user (admin of another org)" do
           # TODO we really should make this person admin of another org, for maximum
           # effectiveness.
-          it "returns 403" do
+          it "returns 403", :authorization do
             response = get(api_url("/#{resource_type}/#{new_name}"), outside_user)
             response.should look_like({:status => 403})
           end

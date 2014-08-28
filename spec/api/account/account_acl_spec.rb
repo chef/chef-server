@@ -15,6 +15,14 @@ describe "ACL API", :acl do
     end
   }
 
+  let(:org_unsupported_method_status) {
+    if Pedant::Config.ruby_org_acl_endpoint?
+      404
+    else
+      405
+    end
+  }
+
   # (temporarily?) deprecating /users/*/_acl endpoint due to its broken state and lack of usefulness
   pending "/users/<name>/_acl endpoint" do
     let(:username) { platform.admin_user.name }
@@ -38,7 +46,6 @@ describe "ACL API", :acl do
 
       context "superuser" do
         it "can get user acl" do
-
           get(request_url, platform.superuser).should look_like({
              :status => 200,
              :body_exact => acl_body
@@ -56,7 +63,7 @@ describe "ACL API", :acl do
     end
 
 
-    ["create", "read", "update", "delete", "grant"].each do |permission|
+    %w(create read update delete grant).each do |permission|
       context "/users/<user>/_acl/#{permission} endpoint" do
         if (permission == "read")
           smoketest = :smoke
@@ -115,7 +122,7 @@ describe "ACL API", :acl do
           end
 
           context "default normal user", smoketest do
-            it "returns 403" do
+            it "returns 403", :authorization do
               put(request_url, platform.non_admin_user,
                   :payload => request_body).should look_like({
                                                                :status => 403
@@ -128,7 +135,7 @@ describe "ACL API", :acl do
           end
 
           context "default normal client" do
-            it "returns 401" do
+            it "returns 401", :authentication do
               put(request_url, platform.non_admin_client,
                   :payload => request_body).should look_like({
                                                                :status => 401
@@ -141,7 +148,7 @@ describe "ACL API", :acl do
           end
 
           context "outside user" do
-            it "returns 403" do
+            it "returns 403", :authorization do
               put(request_url, outside_user,
                   :payload => request_body).should look_like({
                                                                :status => 403
@@ -154,7 +161,7 @@ describe "ACL API", :acl do
           end
 
           context "invalid user" do
-            it "returns 401" do
+            it "returns 401", :authentication do
               put(request_url, invalid_user,
                   :payload => request_body).should look_like({
                                                                :status => 401
@@ -189,7 +196,7 @@ describe "ACL API", :acl do
               end
             end
 
-            context "invalid group" do
+            context "invalid group", :validation do
               let(:request_body) {{
                   permission => {
                     "actors" => ["pivotal", platform.admin_user.name,
@@ -198,7 +205,7 @@ describe "ACL API", :acl do
                   }
                 }}
 
-              it "returns 400" do
+              it "returns 400", :validation do
                 put(request_url, platform.admin_user,
                     :payload => request_body).should look_like({
                                                                  :status => 400
@@ -210,14 +217,14 @@ describe "ACL API", :acl do
               end
             end
 
-            context "missing actors" do
+            context "missing actors", :validation do
               let(:request_body) {{
                   permission => {
                     "groups" => groups
                   }
                 }}
 
-              it "returns 400" do
+              it "returns 400", :validation do
                 put(request_url, platform.admin_user,
                     :payload => request_body).should look_like({
                                                                  :status => 400
@@ -229,7 +236,7 @@ describe "ACL API", :acl do
               end
             end
 
-            context "missing groups" do
+            context "missing groups", :validation do
               let(:request_body) {{
                   permission => {
                     "actors" => ["pivotal", "bogus", platform.admin_user.name,
@@ -237,7 +244,7 @@ describe "ACL API", :acl do
                   }
                 }}
 
-              it "returns 400" do
+              it "returns 400", :validation do
                 put(request_url, platform.admin_user,
                     :payload => request_body).should look_like({
                                                                  :status => 400
@@ -249,10 +256,10 @@ describe "ACL API", :acl do
               end
             end
 
-            context "empty body" do
+            context "empty body", :validation do
               let(:request_body) { {} }
 
-              it "returns 400" do
+              it "returns 400", :validation do
                 put(request_url, platform.admin_user,
                     :payload => request_body).should look_like({
                                                                  :status => 400
@@ -302,7 +309,7 @@ describe "ACL API", :acl do
       end
 
       context "default normal user" do
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, platform.non_admin_user).should look_like({
               :status => 403
             })
@@ -310,7 +317,7 @@ describe "ACL API", :acl do
       end
 
       context "default client" do
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, platform.non_admin_client).should look_like({
               :status => 403
             })
@@ -318,7 +325,7 @@ describe "ACL API", :acl do
       end
 
       context "outside user" do
-        it "returns 403" do
+        it "returns 403", :authorization do
           get(request_url, outside_user).should look_like({
               :status => 403
             })
@@ -326,7 +333,7 @@ describe "ACL API", :acl do
       end
 
       context "invalid user" do
-        it "returns 401" do
+        it "returns 401", :authentication do
           get(request_url, invalid_user).should look_like({
               :status => 401
             })
@@ -335,7 +342,7 @@ describe "ACL API", :acl do
 
       context "with modified ACLs" do
         after :each do
-          ["create", "read", "update", "delete", "grant"].each do |perm|
+          %w(create read update delete grant).each do |perm|
             reset_body = { perm => acl_body[perm] }
             put("#{request_url}/#{perm}", superuser,
               :payload => reset_body).should look_like({
@@ -352,8 +359,8 @@ describe "ACL API", :acl do
             })
         end
 
-        context "when normal user granted all permissions except GRANT" do
-          it "returns 403" do
+        context "when normal user granted all permissions except GRANT", :authorization do
+          it "returns 403", :authorization do
             restrict_permissions_to("organizations",
               platform.non_admin_user => ['create', 'read', 'update', 'delete'])
             get(request_url, platform.non_admin_user).should look_like({
@@ -362,8 +369,8 @@ describe "ACL API", :acl do
           end
         end
 
-        context "when normal client granted all permisions except GRANT" do
-          it "returns 403", :smoke do
+        context "when normal client granted all permissions except GRANT", :authorization do
+          it "returns 403", :authorization, :smoke do
             restrict_permissions_to("organizations",
               platform.non_admin_client => ['create', 'read', 'update', 'delete'])
             get(request_url, platform.non_admin_client).should look_like({
@@ -382,7 +389,7 @@ describe "ACL API", :acl do
           end
         end
 
-        context "when normal client granted GRANT permision" do
+        context "when normal client granted GRANT permission" do
           it "can get ACL", :smoke do
             restrict_permissions_to("organizations",
               platform.non_admin_client => ['grant'])
@@ -398,7 +405,7 @@ describe "ACL API", :acl do
       context "admin user" do
         it "returns 405" do
           put(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => org_unsupported_method_status
             })
         end
       end
@@ -408,7 +415,7 @@ describe "ACL API", :acl do
       context "admin user" do
         it "returns 405" do
           post(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => org_unsupported_method_status
             })
         end
       end
@@ -418,14 +425,14 @@ describe "ACL API", :acl do
       context "admin user" do
         it "returns 405" do
           delete(request_url, platform.admin_user).should look_like({
-              :status => 404
+              :status => org_unsupported_method_status
             })
         end
       end
     end # context DELETE /organizations/_acl
   end # context /organizations/_acl endpoint
 
-  ["create", "read", "update", "delete", "grant"].each do |permission|
+  %w(create read update delete grant).each do |permission|
     context "/organizations/_acl/#{permission} endpoint" do
       # Don't run a smoke test test for every permission (to keep the smoke test count
       # from being unnecessarily repetetive)
@@ -488,7 +495,7 @@ describe "ACL API", :acl do
         end
 
         context "default normal user" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             put(request_url, platform.non_admin_user,
               :payload => request_body).should look_like({
                 :status => 403
@@ -501,7 +508,7 @@ describe "ACL API", :acl do
         end
 
         context "default normal client" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             put(request_url, platform.non_admin_client,
               :payload => request_body).should look_like({
                 :status => 403
@@ -514,7 +521,7 @@ describe "ACL API", :acl do
         end
 
         context "outside user" do
-          it "returns 403" do
+          it "returns 403", :authorization do
             put(request_url, outside_user,
               :payload => request_body).should look_like({
                 :status => 403
@@ -527,7 +534,7 @@ describe "ACL API", :acl do
         end
 
         context "invalid user" do
-          it "returns 401" do
+          it "returns 401", :authentication do
             put(request_url, invalid_user,
               :payload => request_body).should look_like({
                 :status => 401
@@ -549,7 +556,7 @@ describe "ACL API", :acl do
                 }
               }}
 
-            it "returns 400" do
+            it "returns 400", :validation do
               put(request_url, platform.admin_user,
                 :payload => request_body).should look_like({
                   :status => 400
@@ -570,7 +577,7 @@ describe "ACL API", :acl do
                 }
               }}
 
-            it "returns 400" do
+            it "returns 400", :validation do
               put(request_url, platform.admin_user,
                 :payload => request_body).should look_like({
                   :status => 400
@@ -589,7 +596,7 @@ describe "ACL API", :acl do
                 }
               }}
 
-            it "returns 400" do
+            it "returns 400", :validation do
               put(request_url, platform.admin_user,
                 :payload => request_body).should look_like({
                   :status => 400
@@ -609,7 +616,7 @@ describe "ACL API", :acl do
                 }
               }}
 
-            it "returns 400" do
+            it "returns 400", :validation do
               put(request_url, platform.admin_user,
                 :payload => request_body).should look_like({
                   :status => 400
@@ -624,7 +631,7 @@ describe "ACL API", :acl do
           context "empty body" do
             let(:request_body) { {} }
 
-            it "returns 400" do
+            it "returns 400", :validation do
               put(request_url, platform.admin_user,
                 :payload => request_body).should look_like({
                   :status => 400
@@ -639,7 +646,7 @@ describe "ACL API", :acl do
 
         context "with modified ACLs" do
           after :each do
-            ["create", "read", "update", "delete", "grant"].each do |perm|
+            %w(create read update delete grant).each do |perm|
                 reset_body = { perm => default_body[perm] }
               put("#{acl_url}/#{perm}", superuser,
                 :payload => reset_body).should look_like({
@@ -656,7 +663,7 @@ describe "ACL API", :acl do
 
           context "when normal user granted all permissions except GRANT" do
             # We only run the smoke tests for read permission (set above)
-            it "returns 403" do
+            it "returns 403", :authorization do
               restrict_permissions_to("organizations",
                 platform.non_admin_user => ['create', 'read', 'update', 'delete'])
               put(request_url, platform.non_admin_user,
@@ -666,9 +673,9 @@ describe "ACL API", :acl do
             end
           end
 
-          context "when normal client granted all permisions except GRANT" do
+          context "when normal client granted all permissions except GRANT" do
             # We only run the smoke tests for read permission (set above)
-            it "returns 403" do
+            it "returns 403", :authorization do
               restrict_permissions_to("organizations",
                 platform.non_admin_client => ['create', 'read', 'update', 'delete'])
               put(request_url, platform.non_admin_client,
@@ -690,7 +697,7 @@ describe "ACL API", :acl do
             end
           end
 
-          context "when normal client granted GRANT permision" do
+          context "when normal client granted GRANT permission" do
             # We only run the smoke tests for read permission (set above)
             it "can modify ACL" do
               restrict_permissions_to("organizations",
@@ -708,7 +715,7 @@ describe "ACL API", :acl do
         context "admin user" do
           it "returns 405" do
             get(request_url, platform.admin_user).should look_like({
-                :status => 404
+                :status => org_unsupported_method_status
               })
           end
         end
@@ -718,7 +725,7 @@ describe "ACL API", :acl do
         context "admin user" do
           it "returns 405" do
             post(request_url, platform.admin_user).should look_like({
-                :status => 404
+                :status => org_unsupported_method_status
               })
           end
         end
@@ -728,7 +735,7 @@ describe "ACL API", :acl do
         context "admin user" do
           it "returns 405" do
             delete(request_url, platform.admin_user).should look_like({
-                :status => 404
+                :status => org_unsupported_method_status
               })
           end
         end
@@ -740,8 +747,8 @@ describe "ACL API", :acl do
 
     # TODO: Sanity check: users don't seem to have any ACLs, or at least, nothing is
     # accessible from external API as far as I can tell:
-    ["clients", "groups", "containers", "data", "nodes", "roles", "environments",
-      "cookbooks"].each do |type|
+    # - [jkeiser] Users have ACLs, but they are at /users/NAME/_acl
+    %w(clients groups containers data nodes roles environments cookbooks).each do |type|
       context "for #{type} type" do
 
         let(:new_object) { "new-object" }
@@ -766,7 +773,7 @@ describe "ACL API", :acl do
         let(:update_groups) { groups }
         let(:delete_groups) { groups }
         # Usually still ["admins"] even when the other groups aren't:
-        let(:grant_groups) { ["admins"] } 
+        let(:grant_groups) { ["admins"] }
         let(:acl_body) {{
             "create" => {"actors" => actors, "groups" => groups},
             "read" => {"actors" => actors, "groups" => read_groups},
@@ -810,7 +817,7 @@ describe "ACL API", :acl do
           let(:creation_body) {{
               "name" => new_object,
               "json_class" => "Chef::Role"
-            }} 
+            }}
           let(:groups) { ["users", "admins"] }
           let(:read_groups) { ["users", "clients", "admins"] }
        when "environments"
@@ -881,7 +888,7 @@ describe "ACL API", :acl do
           end
 
           context "default normal user" do
-            it "returns 403" do
+            it "returns 403", :authorization do
               get(request_url, platform.non_admin_user).should look_like({
                   :status => 403
                 })
@@ -889,7 +896,7 @@ describe "ACL API", :acl do
           end
 
           context "default client" do
-            it "returns 403" do
+            it "returns 403", :authorization do
               get(request_url, platform.non_admin_client).should look_like({
                   :status => 403
                 })
@@ -897,7 +904,7 @@ describe "ACL API", :acl do
           end
 
           context "outside user" do
-            it "returns 403" do
+            it "returns 403", :authorization do
               get(request_url, outside_user).should look_like({
                   :status => 403
                 })
@@ -905,7 +912,7 @@ describe "ACL API", :acl do
           end
 
           context "invalid user" do
-            it "returns 401" do
+            it "returns 401", :authentication do
               get(request_url, invalid_user).should look_like({
                   :status => 401
                 })
@@ -913,7 +920,7 @@ describe "ACL API", :acl do
           end
 
           context "when normal user granted all permissions except GRANT" do
-            it "returns 403" do
+            it "returns 403", :authorization do
               ["create", "read", "update", "delete"].each do |perm|
                 put("#{request_url}/#{perm}", platform.admin_user,
                   :payload => {perm => {
@@ -930,8 +937,8 @@ describe "ACL API", :acl do
             end
           end
 
-          context "when normal client granted all permisions except GRANT" do
-            it "returns 403" do
+          context "when normal client granted all permissions except GRANT" do
+            it "returns 403", :authorization do
               ["create", "read", "update", "delete"].each do |perm|
                 put("#{request_url}/#{perm}", platform.admin_user,
                   :payload => {perm => {
@@ -964,7 +971,7 @@ describe "ACL API", :acl do
             end
           end
 
-          context "when normal client granted GRANT permision" do
+          context "when normal client granted GRANT permission" do
             it "can get object ACL" do
               put("#{request_url}/grant", platform.admin_user,
                 :payload => {"grant" => {
@@ -1003,7 +1010,7 @@ describe "ACL API", :acl do
               delete(api_url("groups/#{missing_group}"), platform.admin_user)
             end
 
-            it "should return the acl" do
+            it "should return the acl", :validation do
               get(request_url, platform.admin_user).should look_like({
                 :status => 200,
                 :body_exact => acl_body
@@ -1042,7 +1049,7 @@ describe "ACL API", :acl do
           end
         end # context DELETE /<type>/<name>/_acl
 
-        ["create", "read", "update", "delete", "grant"].each do |permission|
+        %w(create read update delete grant).each do |permission|
           context "/#{type}/<name>/_acl/#{permission} endpoint" do
             # Don't run a smoke test test for every permission (to keep the smoke
             # test count from being unnecessarily repetetive). Also avoid minor
@@ -1093,7 +1100,7 @@ describe "ACL API", :acl do
               end
 
               context "default normal user" do
-                it "returns 403" do
+                it "returns 403", :authorization do
                   put(permission_request_url, platform.non_admin_user,
                     :payload => update_body).should look_like({
                       :status => 403
@@ -1106,7 +1113,7 @@ describe "ACL API", :acl do
               end
 
               context "default client" do
-                it "returns 403" do
+                it "returns 403", :authorization do
                   put(permission_request_url, platform.non_admin_client,
                     :payload => update_body).should look_like({
                       :status => 403
@@ -1119,7 +1126,7 @@ describe "ACL API", :acl do
               end
 
               context "outside user" do
-                it "returns 403" do
+                it "returns 403", :authorization do
                   put(permission_request_url, outside_user,
                     :payload => update_body).should look_like({
                       :status => 403
@@ -1132,7 +1139,7 @@ describe "ACL API", :acl do
               end
 
               context "invalid user" do
-                it "returns 401" do
+                it "returns 401", :authentication do
                   put(permission_request_url, invalid_user,
                     :payload => update_body).should look_like({
                       :status => 401
@@ -1144,7 +1151,7 @@ describe "ACL API", :acl do
                 end
               end
 
-              context "malformed requests" do
+              context "malformed requests", :validation do
                 context "invalid actor" do
                   let(:update_body) {{
                       permission => {
@@ -1154,7 +1161,7 @@ describe "ACL API", :acl do
                       }
                     }}
 
-                  it "returns 400" do
+                  it "returns 400", :validation do
                     put(permission_request_url, platform.admin_user,
                       :payload => update_body).should look_like({
                         :status => 400
@@ -1175,7 +1182,7 @@ describe "ACL API", :acl do
                       }
                     }}
 
-                  it "returns 400" do
+                  it "returns 400", :validation do
                     put(permission_request_url, platform.admin_user,
                       :payload => update_body).should look_like({
                         :status => 400
@@ -1194,7 +1201,7 @@ describe "ACL API", :acl do
                       }
                     }}
 
-                  it "returns 400" do
+                  it "returns 400", :validation do
                     put(permission_request_url, platform.admin_user,
                       :payload => update_body).should look_like({
                         :status => 400
@@ -1214,7 +1221,7 @@ describe "ACL API", :acl do
                       }
                     }}
 
-                  it "returns 400" do
+                  it "returns 400", :validation do
                     put(permission_request_url, platform.admin_user,
                       :payload => update_body).should look_like({
                         :status => 400
@@ -1229,7 +1236,7 @@ describe "ACL API", :acl do
                 context "empty body" do
                   let(:update_body) { {} }
 
-                  it "returns 400" do
+                  it "returns 400", :validation do
                     put(permission_request_url, platform.admin_user,
                       :payload => update_body).should look_like({
                         :status => 400
@@ -1242,7 +1249,7 @@ describe "ACL API", :acl do
                 end
               end # context malformed requests
 
-              context "normal user with all permissions except GRANT" do
+              context "normal user with all permissions except GRANT", :authorization do
                 # We only run the smoke tests for read permission (set above)
                 it "returns 403", smoketest do
                   ["create", "read", "update", "delete"].each do |perm|
@@ -1282,8 +1289,8 @@ describe "ACL API", :acl do
                 end
               end
 
-              context "normal client with all permissions except GRANT" do
-                it "returns 403" do
+              context "normal client with all permissions except GRANT", :authorization do
+                it "returns 403", :authorization do
                   ["create", "read", "update", "delete"].each do |perm|
                     put("#{request_url}/#{perm}", platform.admin_user,
                       :payload => {perm => {

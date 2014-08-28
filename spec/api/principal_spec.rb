@@ -36,9 +36,9 @@ describe "Principals API Endpoint", :principals do
     ["Failed to authenticate as 'invalid'. Ensure that your node_name and client key are correct."] }
   let(:outside_user_not_associated_msg) {
     ["'pedant-nobody' not associated with organization '#{org}'"] }
-  let(:cannot_load_nonexistent_msg) { 
+  let(:cannot_load_nonexistent_msg) {
     "Cannot find principal #{non_existent_principal_name}" }
-  let(:cannot_load_org_msg) { 
+  let(:cannot_load_org_msg) {
     "Cannot find org #{non_existent_org}" }
   let(:client_body) {
     {
@@ -272,7 +272,7 @@ describe "Principals API Endpoint", :principals do
 
       context 'when requesting a bad client' do
         let(:principal_client_name) { platform.bad_client.name }
-        let(:cannot_load_nonexistent_msg) { 
+        let(:cannot_load_nonexistent_msg) {
           "Cannot find principal #{principal_client_name}" }
 
         it 'returns a 404 ("Not Found") for admin' do

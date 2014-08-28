@@ -104,7 +104,7 @@ describe "Environments API Endpoint", :environments do
           end
         end
         context 'with a user with all permissions EXCEPT update' do
-          it 'returns 403' do
+          it 'returns 403', :authorization do
             restrict_permissions_to("/environments/#{new_environment_name}",
                                     normal_user => %w(create read delete grant))
             response = put(api_url("/environments/#{new_environment_name}"), normal_user,
@@ -113,7 +113,7 @@ describe "Environments API Endpoint", :environments do
           end
         end
         context 'with a client' do
-          it 'returns 403' do
+          it 'returns 403', :authorization do
             response = put(api_url("/environments/#{new_environment_name}"),
                            platform.non_admin_client,
                            :payload => modified_env)
@@ -123,7 +123,7 @@ describe "Environments API Endpoint", :environments do
         context 'with an outside user (admin of another org)' do
           # TODO we really should make this person admin of another org, for maximum
           # effectiveness.
-          it 'returns 403' do
+          it 'returns 403', :authorization do
             response = put(api_url("/environments/#{new_environment_name}"), outside_user,
                            :payload => modified_env)
             response.should look_like({:status => 403})
