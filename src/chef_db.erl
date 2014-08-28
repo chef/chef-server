@@ -35,9 +35,8 @@
          create_name_id_dict/3,
 
          user_record_to_authz_id/2,
-         %% fetch_org/2,
          fetch_org_id/2,
-         fetch_org_id_and_authz/2,
+         fetch_org_metadata/2,
          client_record_to_authz_id/2,
 
          fetch_requestor/3,
@@ -227,10 +226,6 @@ update(ObjectRec, #context{reqid = ReqId}, ActorId) ->
 darklaunch_from_context(#context{darklaunch = Darklaunch}) ->
     Darklaunch.
 
-%% TODO: Fix this up in a cleaner form and check that 'organizations' is right key
-darklaunch_orgs(#context{darklaunch = Darklaunch}) ->
-    chef_db_darklaunch:is_enabled(organizations, Darklaunch).
-
 -spec count_user_admins(#context{}) -> integer() | {error, term()}.
 count_user_admins(#context{reqid = ReqId}) ->
   case stats_hero:ctime(ReqId, {chef_sql, count_user_admins},
@@ -246,51 +241,43 @@ user_record_to_authz_id(#context{}, not_found) ->
     %% FIXME: is this what we want here?
     erlang:error({error, not_found}).
 
--spec fetch_org_id(#context{}, binary() | ?OSC_ORG_NAME) -> not_found | binary().
-fetch_org_id(_, ?OSC_ORG_NAME) ->
-    ?OSC_ORG_ID;
-fetch_org_id(#context{reqid = ReqId,
-                      otto_connection = Server} = Context, OrgName) when is_binary(OrgName) ->
-    case chef_cache:get(org_guid, OrgName) of
+-spec fetch_org_id(#context{}, binary()) -> not_found | binary().
+fetch_org_id(Context, OrgName) ->
+    case fetch_org_metadata(Context, OrgName) of
+        not_found -> not_found;
+        {OrgId, _OrgAuthzId} -> OrgId
+    end.
+
+%% Fetch the id and authz_id for a given organization name
+-spec fetch_org_metadata(#context{}, binary() | ?OSC_ORG_NAME) -> not_found | {binary(), binary()}.
+fetch_org_metadata(_, ?OSC_ORG_NAME) ->
+    {?OSC_ORG_ID, ?OSC_REQUESTOR_ID};
+fetch_org_metadata(#context{darklaunch = Darklaunch} = Context, OrgName) ->
+    case chef_db_darklaunch:is_enabled(<<"couchdb_organizations">>, Darklaunch) of
+        true ->
+            cdb_fetch_org_metadata(Context, OrgName);
+        false ->
+            sql_fetch_org_metadata(Context, OrgName)
+    end.
+
+%% For couchdb-based orgs, fetch information from the orgname -> metadata cache
+cdb_fetch_org_metadata(#context{reqid = ReqId,
+                                otto_connection = Server}, OrgName) ->
+    case chef_cache:get(org_metadata, OrgName) of
         Error when Error =:= not_found orelse Error =:= no_cache ->
-            Result =
-                case darklaunch_orgs(Context) of
-                    true ->
-                        ?SH_TIME(ReqId, chef_otto, fetch_org_id, (Server, OrgName));
-                    false ->
-                        ?SH_TIME(ReqId, chef_sql, fetch_org_id, (OrgName))
-                end,
-            case Result of
+            case ?SH_TIME(ReqId, chef_otto, fetch_org_metadata, (Server, OrgName)) of
                 not_found ->
                     not_found;
-                Guid ->
-                    chef_cache:put(org_guid, OrgName, Guid),
-                    Guid
+                {OrgGuid, OrgAuthzId} ->
+                    chef_cache:put(org_metadata, OrgName, {OrgGuid, OrgAuthzId}),
+                    {OrgGuid, OrgAuthzId}
             end;
-        {ok, Guid} ->
-            Guid
+        {ok, {OrgGuid, OrgAuthzId}} ->
+            {OrgGuid, OrgAuthzId}
     end.
 
--spec fetch_org_id_and_authz(#context{}, binary() | ?OSC_ORG_NAME) -> not_found | {binary(), binary()}.
-fetch_org_id_and_authz(_, ?OSC_ORG_NAME) ->
-    ?OSC_ORG_ID;
-fetch_org_id_and_authz(#context{reqid = ReqId,
-                                otto_connection = Server} = Context, OrgName) when is_binary(OrgName) ->
-    Result =
-        case darklaunch_orgs(Context) of
-            true ->
-                ?SH_TIME(ReqId, chef_otto, fetch_org_id_and_authz, (Server, OrgName));
-            false ->
-                ?SH_TIME(ReqId, chef_sql, fetch_org_id_and_authz, (OrgName))
-        end,
-    case Result of
-        not_found ->
-            not_found;
-        {ok, Guid, AuthzId} ->
-            chef_cache:put(org_guid, OrgName, Guid),
-            {Guid, AuthzId}
-    end.
-
+sql_fetch_org_metadata(#context{reqid = ReqId}, OrgName) ->
+    ?SH_TIME(ReqId, chef_sql, fetch_org_metadata, (OrgName)).
 
 client_record_to_authz_id(_Context, ClientRecord) ->
     ClientRecord#chef_client.authz_id.
@@ -307,7 +294,7 @@ client_record_to_authz_id(_Context, ClientRecord) ->
 %% certificates and have only a public key.  For these cases, we return the key tagged with
 %% 'key' instead of 'cert'.
 -spec fetch_requestor(#context{},
-                      binary(),
+                      binary() | undefined,
                       binary()) -> #chef_client{} | #chef_user{} |
                                    %% TODO: fix chef_wm so we can just return 'not_found'
                                    {'not_found', 'client'}.

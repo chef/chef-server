@@ -26,8 +26,7 @@
 
 -export([
          fetch_org/2,
-         fetch_org_id/2,
-         fetch_org_id_and_authz/2,
+         fetch_org_metadata/2,
          fetch_orgs/1,
          fetch_assigned_orgs/1,
          %% chef object fetching
@@ -184,24 +183,16 @@ is_unassigned(Row) ->
     Name = ej:get({<<"doc">>, <<"name">>}, Row),
     FullName =:= <<"Pre-created">> andalso byte_size(Name) =:= 20.
 
--spec fetch_org_id(couch_server(), binary()) -> binary() | not_found.
-%% @doc Return the org GUID for a given organization name.
-fetch_org_id(Server, OrgName) when is_binary(OrgName) ->
-    case fetch_org(Server, OrgName) of
-        {org_not_found, _} -> not_found;
-        Org when is_list(Org) -> ?gv(<<"guid">>, Org)
-    end.
-
--spec fetch_org_id_and_authz(couch_server(), binary()) -> binary() | not_found.
+-spec fetch_org_metadata(couch_server(), binary()) -> {binary(), binary()} | not_found.
 %% @doc Return the org GUID and authz_id for a given organization name.
-fetch_org_id_and_authz(Server, OrgName) when is_binary(OrgName) ->
+fetch_org_metadata(Server, OrgName) when is_binary(OrgName) ->
     case fetch_org(Server, OrgName) of
         {org_not_found, _} -> not_found;
         Org when is_list(Org) ->
             Guid = ?gv(<<"guid">>, Org),
             DocId = ?gv(<<"_id">>, Org),
             AuthzId = fetch_auth_join_id(Server, DocId, user_to_auth),
-            {ok, Guid, AuthzId}
+            {Guid, AuthzId}
     end.
 
 -spec fetch_org(couch_server(), binary()) ->
