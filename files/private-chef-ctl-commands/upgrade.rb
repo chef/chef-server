@@ -55,7 +55,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     log "Upgrading with options #{@options.inspect}"
   end
 
-  def detect_osc
+  def detect_chef11
     # Is this reliable enough?
     File.directory?("/opt/chef-server")
   end
@@ -76,19 +76,19 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
 
   parse(ARGV)
 
-  if detect_osc
+  if detect_chef11
     log "Open source Chef 11 server detected."
     if upgrade?
       log "Upgrading the open source Chef 11 server."
-      osc_upgrade = OscUpgrade.new(@options, self)
-      osc_upgrade.run_upgrade
+      chef11_upgrade = OpenSourceChef11Upgrade.new(@options, self)
+      chef11_upgrade.run_upgrade
     else
       puts "Aborting upgrade."
       exit 0
     end
   end
 
-  # Original EC upgrade path
+  # Original Enterprise Chef upgrade path
   reconfigure(false)
   # Put everything in a down state before we upgrade things.
   # How upgrades should handle services:

@@ -64,8 +64,8 @@ add_command "chef12-upgrade-data-transform", "Transfrom data from an open source
   key_file = "#{chef11_data_dir}/key_dump.json"
   chef12_data_dir = determine_chef12_data_dir
 
-  osc_upgrade = OscUpgrade.new(@options, self)
-  osc_upgrade.transform_osc_data(chef11_data_dir, key_file, chef12_data_dir)
+  chef11_upgrade = OpenSourceChef11Upgrade.new(@options, self)
+  chef11_upgrade.transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir)
 
   log "Data transformed and saved to #{chef12_data_dir}"
 end

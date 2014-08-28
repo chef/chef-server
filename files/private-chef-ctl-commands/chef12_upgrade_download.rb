@@ -54,8 +54,8 @@ add_command "chef12-upgrade-download", "Download data from a ope source Chef 11 
   chef11_data_dir = determine_chef11_data_dir
   key_file = "#{chef11_data_dir}/key_dump.json"
 
-  osc_upgrade = OscUpgrade.new(@options, self)
-  osc_upgrade.download_osc_data(chef11_data_dir, key_file)
+  chef11_upgrade = OpenSourceChef11Upgrade.new(@options, self)
+  chef11_upgrade.download_chef11_data(chef11_data_dir, key_file)
 
   log "Open source Chef 11 server data downloaded to #{chef11_data_dir}"
 end

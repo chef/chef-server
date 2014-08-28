@@ -18,7 +18,7 @@ require 'highline/import'
 # flag is set (what do the other commands do by default? Can their
 # output be tuned to this level?)
 
-class OscUpgrade
+class OpenSourceChef11Upgrade
 
   def initialize(options, ctlContext)
     @options = options
@@ -43,21 +43,21 @@ class OscUpgrade
     # is needed
     # Do we want to delete the directory on failure or leave it for debugging?
     # Are the permissions good enough? (0700)
-    osc_data_dir = Dir.mktmpdir('chef11-server-data')
-    log "Making #{osc_data_dir} as the location to save the open source Chef 11 server data"
+    chef11_data_dir = Dir.mktmpdir('chef11-server-data')
+    log "Making #{chef11_data_dir} as the location to save the open source Chef 11 server data"
 
-    key_file = "#{osc_data_dir}/key_dump.json"
+    key_file = "#{chef11_data_dir}/key_dump.json"
 
-    download_osc_data(osc_data_dir, key_file)
+    download_chef11_data(chef11_data_dir, key_file)
 
-    log "Open source Chef 11 server data downloaded to #{osc_data_dir}"
+    log "Open source Chef 11 server data downloaded to #{chef11_data_dir}"
 
-    # See note above on osc_data_dir
-    ec_data_dir = Dir.mktmpdir('chef12-server-data')
+    # See note above on chef11_data_dir
+    chef12_data_dir = Dir.mktmpdir('chef12-server-data')
 
-    transform_osc_data(osc_data_dir, key_file, ec_data_dir)
+    transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir)
 
-    upload_transformed_data(ec_data_dir)
+    upload_transformed_data(chef12_data_dir)
 
     # The OSC bits still live on the system - do we delete them here?
     # For example, /opt/chef-server is still in the path, but /opt/opscode is not
@@ -69,42 +69,42 @@ class OscUpgrade
     # wise leave it on the system
   end
 
-  def download_osc_data(osc_data_dir, key_file)
+  def download_chef11_data(chef11_data_dir, key_file)
 
-    stop_ec
+    stop_chef12
 
     fix_rabbit_wait_script
 
-    start_osc
+    start_chef11
 
     log "Preparing knife to download data from the open source Chef 11 server"
 
-    write_knife_config(osc_data_dir)
+    write_knife_config(chef11_data_dir)
 
     log "Downloading data from the open source Chef 11 server"
 
     run_knife_download
 
-    create_osc_key_file(key_file)
+    create_chef11_key_file(key_file)
 
     log "Finished downloading data from the open source Chef 11 server"
 
-    stop_osc
+    stop_chef11
   end
 
-  def transform_osc_data(osc_data_dir, key_file, ec_data_dir)
+  def transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir)
 
     log "Transforming open source Chef 11 server data for upload to Chef 12 server"
 
-    # To prepare the downloaded OSC data for upload to the EC server
-    # it is put into a file structure that knife-ec-backup expects
+    # To prepare the downloaded open source Chef 11 data for upload to the
+    # Chef 12 server it is put into a file structure that knife-ec-backup expects
     # and then knife-ec-backup restore functionality is used to upload it to the
-    # new Chef server.
+    # new Chef 12 server.
 
     org_name, org_full_name, org_type = determine_org_name
 
-    make_dir("#{ec_data_dir}/organizations", 0644)
-    org_dir = "#{ec_data_dir}/organizations/#{org_name}"
+    make_dir("#{chef12_data_dir}/organizations", 0644)
+    org_dir = "#{chef12_data_dir}/organizations/#{org_name}"
     make_dir(org_dir, 0644)
     groups_dir = "#{org_dir}/groups"
     make_dir(groups_dir, 0644)
@@ -112,17 +112,17 @@ class OscUpgrade
     create_org_json(org_dir, org_name, org_full_name, org_type)
 
     # Copy over the key_dump.json file
-    FileUtils.cp(key_file, "#{ec_data_dir}/key_dump.json")
+    FileUtils.cp(key_file, "#{chef12_data_dir}/key_dump.json")
 
     # Copy over users
-    FileUtils.cp_r("#{osc_data_dir}/users", "#{ec_data_dir}/users")
+    FileUtils.cp_r("#{chef11_data_dir}/users", "#{chef12_data_dir}/users")
 
     # Copy over clients, cookbooks, data_bags, environments, nodes, roles
     %w{clients cookbooks data_bags environments nodes roles}.each do |name|
-      FileUtils.cp_r("#{osc_data_dir}/#{name}", "#{org_dir}/#{name}")
+      FileUtils.cp_r("#{chef11_data_dir}/#{name}", "#{org_dir}/#{name}")
     end
 
-    user_names, admin_users = transform_osc_user_data(osc_data_dir, ec_data_dir)
+    user_names, admin_users = transform_chef11_user_data(chef11_data_dir, chef12_data_dir)
 
     create_invitations_json(org_dir)
 
@@ -138,18 +138,18 @@ class OscUpgrade
     create_billing_admins(admin_users, groups_dir)
   end
 
-  def upload_transformed_data(ec_data_dir)
+  def upload_transformed_data(chef12_data_dir)
     log "Configuring the Chef 12 server for use"
 
     reconfigure(false)
 
-    start_ec
+    start_chef12
 
     write_knife_ec_backup_config
 
     log "Uploading transformed open source Chef 11 server data to Chef 12 server"
 
-    run_knife_ec_restore(ec_data_dir)
+    run_knife_ec_restore(chef12_data_dir)
 
     log "Open source Chef 11 server upgraded to a Chef 12 server"
   end
@@ -204,8 +204,8 @@ class OscUpgrade
     end
   end
 
-  def start_osc
-    # Assumption is EC isn't running, since we detected OSC on the system
+  def start_chef11
+    # Assumption is Chef 12 isn't running, since we detected open source Chef 11 on the system
     log 'Ensuring the open source Chef 11 server is started'
     msg = "Unable to start the open source Chef 11 server, which is needed to complete the upgrade"
     check_status(run_command("chef-server-ctl start"), msg)
@@ -228,7 +228,7 @@ class OscUpgrade
     end
   end
 
-  def write_knife_config(osc_data_dir)
+  def write_knife_config(chef11_data_dir)
     # Hard coded path to key (stole idea to use from pedant), but the path is in attributes
     # Need to ensure we have a valid path to the key here
 
@@ -239,7 +239,7 @@ class OscUpgrade
       client_key '/etc/chef-server/admin.pem'
       repo_mode 'everything'
       versioned_cookbooks true
-      chef_repo_path "#{osc_data_dir}"
+      chef_repo_path "#{chef11_data_dir}"
     EOH
 
     log "Writing knife config to /tmp/knife-config.rb for use in downloading open source Chef 11 server data"
@@ -258,9 +258,9 @@ class OscUpgrade
   end
 
   # TODO(jmink) Add error handling
-  def pull_osc_db_credentials
+  def pull_chef11_db_credentials
     # This code pulled from knife-ec-backup and adapted
-    log "Pulling open source Chef 11 database credintials"
+    log "Pulling open source Chef 11 database credentials"
     if !File.exists?("/etc/chef-server/chef-server-running.json")
       log "Failed to find /etc/chef-server/chef-server-running.json"
       exit 1
@@ -274,8 +274,8 @@ class OscUpgrade
     [sql_host, sql_port, sql_user, sql_password]
   end
 
-  def create_osc_key_file(key_file)
-    sql_host, sql_port, sql_user, sql_password = pull_osc_db_credentials
+  def create_chef11_key_file(key_file)
+    sql_host, sql_port, sql_user, sql_password = pull_chef11_db_credentials
 
     server_string = "#{sql_user}:#{sql_password}@#{sql_host}:#{sql_port}/opscode_chef"
     db = ::Sequel.connect("postgres://#{server_string}")
@@ -285,7 +285,7 @@ class OscUpgrade
     file_open(key_file, 'w') { |file| file.write(sql_users_json)}
   end
 
-  def start_ec
+  def start_chef12
     log "Ensuring Chef 12 server components are started"
     msg = "Unable to start Chef 12 server, which is needed to complete the upgrade"
     status = run_command("private-chef-ctl start")
@@ -293,14 +293,14 @@ class OscUpgrade
     wait_for_ready_server("Chef 12")
   end
 
-  def stop_ec
+  def stop_chef12
     log 'Ensuring Chef 12 server is stopped'
     msg = "Unable to stop the Chef 12 server, which is needed to complete the upgrade"
     status = run_command("private-chef-ctl stop")
     check_status(status, msg)
   end
 
-  def stop_osc
+  def stop_chef11
     log 'Ensuring open source Chef 11 server is stopped'
     msg = "Unable to stop open souce Chef 11 server, which is needed to complete the upgrade"
     status = run_command("chef-server-ctl stop")
@@ -321,7 +321,7 @@ class OscUpgrade
     file_open("#{org_dir}/org.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(org_json)) }
   end
 
-  def transform_osc_user_data(osc_data_dir, ec_data_dir)
+  def transform_chef11_user_data(chef11_data_dir, chef12_data_dir)
     # User transform needed: add display_name, email; change name to user name
     # Need to inform the user they will have to change some of this information,
     # Or give the user a tool that they can go in and update after the update
@@ -329,7 +329,7 @@ class OscUpgrade
     # Password resets won't work until a valid email is put into place
     user_names = []
     admin_user_names = []
-    Dir.glob("#{osc_data_dir}/users/*") do |file|
+    Dir.glob("#{chef11_data_dir}/users/*") do |file|
       # Do a try catch for each file.  Write users that failed to a errored user file?
       # If any failed should we stop the upgrade process?
       user = Chef::JSONCompat.from_json(IO.read(file), :create_additions => false)
@@ -344,7 +344,7 @@ class OscUpgrade
 
       # Take in a default email domain?
       user['email'] = "#{user['username']}@example.com"
-      file_open("#{ec_data_dir}/users/#{File.basename(file)}", "w"){ |new_file| new_file.write(Chef::JSONCompat.to_json_pretty(user)) }
+      file_open("#{chef12_data_dir}/users/#{File.basename(file)}", "w"){ |new_file| new_file.write(Chef::JSONCompat.to_json_pretty(user)) }
     end
     [user_names, admin_user_names]
   end
@@ -401,13 +401,13 @@ class OscUpgrade
     file_open("/tmp/knife-ec-backup-config.rb", "w"){ |file| file.write(config)}
   end
 
-  def run_knife_ec_restore(ec_data_dir)
+  def run_knife_ec_restore(chef12_data_dir)
     # --skip-useracl skip importing user acls, which will just give the user's default acls. This is the
     # desired state anyway
     # --with-user-sql pull data across from the database, so we can get passwords
     # --concurrency sets the number of threads to use for concurrent cookbook uploads. Default to 10, but the user can adjust if they desire.
 
-    cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency #{@options.upload_threads} -c /tmp/knife-ec-backup-config.rb #{ec_data_dir}"
+    cmd = "/opt/opscode/embedded/bin/knife ec restore --skip-useracl --with-user-sql --concurrency #{@options.upload_threads} -c /tmp/knife-ec-backup-config.rb #{chef12_data_dir}"
     status = run_command(cmd)
     msg = "Failed uploading transformed data to the Chef 12 server"
     check_status(status, msg)
