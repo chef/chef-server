@@ -3,7 +3,7 @@
 # All Rights Reserved
 #
 
-require "/opt/opscode/embedded/service/omnibus-ctl/osc_upgrade"
+require "/opt/opscode/embedded/service/omnibus-ctl/open_source_chef12_upgrade"
 require 'optparse'
 require 'ostruct'
 
@@ -20,24 +20,28 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     @options.upload_threads = 10
 
     opt_parser = OptionParser.new do |opts|
+      opts.banner = "Usage: private-chef-ctl upgrade [options]"
+      opts.banner = opts.banner << "\n Options only apply to open source Chef 11 server to Chef 12 server upgrades."
+      opts.banner = opts.banner << "\n If upgrading from Enterprise Chef 11 server to Chef 12 server no options are needed."
+
       opts.on("-y", "--yes", "Skip confirmation") do |y|
         @options.skip_confirmation = y
       end
 
-      opts.on("--org-name [name]", String, "The name of the Chef organization (Will ask interactively if not passed)") do |n|
+      opts.on("-o", "--org-name [name]", String, "The name of the Chef organization (Will ask interactively if not passed)") do |n|
         @options.org_name = n
       end
 
-      opts.on("--full-org-name [name]", String, "The full name of the Chef organization (Will ask interactively if not passed)") do |n|
+      opts.on("-f", "--full-org-name [name]", String, "The full name of the Chef organization (Will ask interactively if not passed)") do |n|
         @options.full_org_name = n
       end
 
       # Should this be chef-server-host to match sql-host?
-      opts.on("--chef-server-url [url]", String, "The url of the chef server.  Defaults to #{@options.chef_server_url}") do |u|
+      opts.on("-s", "--chef-server-url [url]", String, "The url of the chef server.  Defaults to #{@options.chef_server_url}") do |u|
          @options.chef_server_url = u
       end
 
-      opts.on("--upload-threads [number]", Integer, "The number of threads to use when migrating cookbooks to the new server. Defaults to #{@options.upload_threads}") do |n|
+      opts.on("-u", "--upload-threads [number]", Integer, "The number of threads to use when migrating cookbooks to the new server. Defaults to #{@options.upload_threads}") do |n|
         @options.upload_threads = n
       end
 
@@ -51,7 +55,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     log "Upgrading with options #{@options.inspect}"
   end
 
-  def detect_osc
+  def detect_chef11
     # Is this reliable enough?
     File.directory?("/opt/chef-server")
   end
@@ -68,38 +72,23 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     return answer == 'Y' || answer == 'y'
   end
 
-  def wait_for_ready_server(server_version)
-    1.upto(120) do |count|
-      begin
-        server_status = JSON.parse(open('http://localhost:8000/_status').read)
-        fail unless server_status['status'] == 'pong'
-      # Catch exceptions because if the server isn't yet up trying to open the status endpoint throws one
-      rescue Exception => e
-        sleep 1
-        if count == 120
-          log "Timeout waiting for #{server_version} server to start. Received expection #{e.message}"
-          exit 1
-        end
-      end
-    end
-  end
-
   ### Start script ###
 
   parse(ARGV)
 
-  if detect_osc
-    log "Open Source Chef 11 or older server detected."
+  if detect_chef11
+    log "Open source Chef 11 server detected."
     if upgrade?
-      log "Upgrading the Open Source Chef server."
-      run_osc_upgrade
+      log "Upgrading the open source Chef 11 server."
+      chef11_upgrade = OpenSourceChef11Upgrade.new(@options, self)
+      chef11_upgrade.run_upgrade
     else
       puts "Aborting upgrade."
       exit 0
     end
   end
 
-  # Original EC upgrade path
+  # Original Enterprise Chef upgrade path
   reconfigure(false)
   # Put everything in a down state before we upgrade things.
   # How upgrades should handle services:
