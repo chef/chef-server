@@ -27,24 +27,15 @@ define_upgrade do
                 "/opt/opscode/embedded/service/opscode-chef-mover/scripts/migrate " \
                 "mover_org_migration_callback normal mover_transient_queue_batch_migrator")
 
-    # Currently, mover will crash if you try to run moser_acct_processor:open_account() multiple
-    # times in the same console session. To get around this, reboot mover. Time willing, we should
-    # track down this issue.
-    force_restart_service("opscode-chef-mover")
-
     log "Migrating organization user associations..."
     run_command("/opt/opscode/embedded/bin/escript " \
                 "/opt/opscode/embedded/service/opscode-chef-mover/scripts/migrate " \
                 "mover_org_user_association_migration_callback normal mover_transient_queue_batch_migrator")
 
-    force_restart_service("opscode-chef-mover")
-
     log "Migrating organization association requests..."
     run_command("/opt/opscode/embedded/bin/escript " \
                 "/opt/opscode/embedded/service/opscode-chef-mover/scripts/migrate " \
                 "mover_org_user_invites_migration_callback normal mover_transient_queue_batch_migrator")
-
-    force_restart_service("opscode-chef-mover")
 
     log "Migrating global groups..."
     run_command("/opt/opscode/embedded/bin/escript " \
