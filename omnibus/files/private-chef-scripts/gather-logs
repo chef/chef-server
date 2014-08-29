@@ -129,9 +129,9 @@ df -h >  "$tmpdir/df_h.txt"
 
 df -i >  "$tmpdir/df_i.txt"
 
-if which opscode-manage-ctl &>/dev/null;
+if [[ -e /opt/opscode-manage/bin/opscode-manage-ctl ]];
 then
-   opscode-manage-ctl status > "$tmpdir/opscode-manage-ctl_status.txt"
+   /opt/opscode-manage/bin/opscode-manage-ctl status > "$tmpdir/opscode-manage-ctl_status.txt"
 fi
 
 sudo -u opscode -i ulimit -a > "$tmpdir/ulimit_a_opscode.txt"
