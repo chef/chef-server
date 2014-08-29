@@ -64,10 +64,11 @@ module PrivateChef
   notification_email nil
   from_email nil
   role nil
-
   user Mash.new
 
   ldap Mash.new
+  disabled_plugins []
+  enabled_plugins []
 
   class << self
 
@@ -233,7 +234,9 @@ module PrivateChef
         "nginx",
         "ldap",
         "user",
-        "ha"
+        "ha",
+        "disabled_plugins",
+        "enabled_plugins"
       ].each do |key|
         # @todo: Just pick a naming convention and adhere to it
         # consistently
@@ -269,6 +272,7 @@ module PrivateChef
 
     def gen_hapaths
       PrivateChef["ha"]["provider"] ||= "drbd" # Use drbd by default for HA
+      PrivateChef["enabled_plugins"] << "chef-ha-#{PrivateChef["ha"]["provider"]}"
       PrivateChef["ha"]["path"] ||= "/var/opt/opscode/drbd/data"
       hapath = PrivateChef["ha"]["path"]
       PrivateChef["couchdb"]["data_dir"] ||= "#{hapath}/couchdb"
