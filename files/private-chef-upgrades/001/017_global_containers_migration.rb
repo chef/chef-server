@@ -8,8 +8,6 @@ define_upgrade do
 
     start_service("postgresql")
 
-    clean_mover_logs
-
     # migrate global containers
     force_restart_service("opscode-chef-mover")
 

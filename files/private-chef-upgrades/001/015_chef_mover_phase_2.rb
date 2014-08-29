@@ -1,8 +1,6 @@
 # This is the chef-mover `phase_2_prep_migration` and `phase_2_migration`
 # that migrates containers and groups from couchDB to postgreSQL
 
-require 'time'
-
 define_upgrade do
   if Partybus.config.bootstrap_server
 
@@ -11,15 +9,7 @@ define_upgrade do
     # Make sure API is down
     stop_services(["nginx", "opscode-erchef"])
 
-    # start postgres, as well as opscode-account and couchdb
-    # we can delete pre-created orgs (will shut the latter two
-    # down after we delete pre-created orgs).
-    start_services(['postgresql', 'opscode-account', 'couchdb'])
-
-    run_command("/opt/opscode/embedded/bin/ruby scripts/delete-pre-created-orgs.rb /etc/opscode/orgmapper.conf all",
-                :cwd => "/opt/opscode/embedded/service/opscode-platform-debug/orgmapper",
-                :env => {"RUBYOPT" => "-I/opt/opscode/embedded/lib/ruby/gems/1.9.1/gems/bundler-1.1.5/lib"})
-    stop_services(['opscode-account', 'couchdb'])
+    start_service('postgresql')
 
     clean_mover_logs
 
@@ -36,11 +26,6 @@ define_upgrade do
                 "/opt/opscode/embedded/service/opscode-chef-mover/scripts/migrate mover_phase_2_migration_callback normal")
 
     stop_service("opscode-chef-mover")
-
-    # Clean up chef_*.couch files, we don't need them anymore! (should already be backed up too)
-    log "Cleaning up containers and groups from couchDB..."
-    run_command("find /var/opt/opscode/couchdb/db -name 'chef_*.couch' | xargs rm")
-    run_command("rm -rf /var/opt/opscode/couchdb/db/.chef_*_design")
 
     stop_service('postgresql')
 
