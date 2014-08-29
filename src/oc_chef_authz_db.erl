@@ -70,6 +70,10 @@ statements(pgsql) ->
       <<"SELECT id, authz_id, name, full_name, assigned_at, last_updated_by, created_at, updated_at"
         " FROM orgs "
         " WHERE id= $1 LIMIT 1">>},
+     {find_organization_by_name,
+      <<"SELECT id, authz_id, name, full_name, assigned_at, last_updated_by, created_at, updated_at"
+        " FROM orgs "
+        " WHERE name= $1 LIMIT 1">>},
      {list_organizations, <<"SELECT name FROM orgs">>},
      {find_container_by_orgid_name,
       <<"SELECT id, authz_id, org_id, name, last_updated_by, created_at, updated_at"
