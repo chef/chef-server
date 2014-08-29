@@ -113,7 +113,8 @@ if (node['private_chef']['install_addons'] == true)
         baseurl 'https://packagecloud.io/chef/test-stable/el/$releasever/$basearch'
         gpgkey 'https://packagecloud.io/gpg.key'
         sslverify true
-        gpgcheck true
+        sslcacert '/etc/pki/tls/certs/ca-bundle.crt'
+        gpgcheck false
         action :create
       end
 
