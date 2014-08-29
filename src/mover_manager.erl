@@ -325,7 +325,17 @@ handle_sync_event(status, _From, StateName, #state{live_worker_count = LW,
                {objects_in_progress, LW},
                {objects_failed, EC},
                {fatal_stop, FS}],
-    {reply, {ok, Summary}, StateName, State};
+    case StateName of
+        % Fixed a race condition that prevents the gen_fsm from transitioning
+        % from the halting state to the ready state when looping over status.
+        %
+        % The zero timeout prevents a status call from clearing the gen_fsm timeout,
+        % and the halting -> ready transition is dependant on a timeout to occur.
+        halting ->
+            {reply, {ok, Summary}, StateName, State, 0};
+        _ ->
+            {reply, {ok, Summary}, StateName, State}
+    end;
 handle_sync_event({set_concurrency, Value}, _From, working, #state{max_worker_count = Value} = State) ->
     {reply, {ok, no_change}, working, State};
 handle_sync_event({set_concurrency, Value}, _From, working, #state{max_worker_count = OldValue} = State) ->
