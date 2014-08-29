@@ -121,7 +121,7 @@ malformed_request(Req, #base_state{resource_mod=Mod,
     try
         chef_authn:validate_headers(GetHeader, AuthSkew),
         Req1 = chef_wm_enforce:max_size(Req),
-        {OrgId, OrgAuthzId} = chef_wm_util:fetch_org_guid_and_authz(State1),
+        {OrgId, OrgAuthzId} = chef_wm_util:fetch_org_metadata(State1),
         {Req2, State2} = Mod:validate_request(wrq:method(Req1), Req1,
                                               State1#base_state{organization_guid = OrgId,
                                                                 organization_authz_id = OrgAuthzId}),
