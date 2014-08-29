@@ -71,7 +71,7 @@ principal_type(#chef_user{}) ->
 %% consider moving this into a mixin
 malformed_request(Req, #base_state{}=State) ->
     try
-        OrgId = chef_wm_util:fetch_org_guid(State),
+        {OrgId, _OrgAuthzId} = chef_wm_util:fetch_org_metadata(State),
         {false, Req, State#base_state{organization_guid = OrgId}}
     catch
         throw:{org_not_found, Org} ->

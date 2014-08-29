@@ -18,7 +18,7 @@
    {git, "git://github.com/opscode/chef_authn.git", {branch, "master"}}},
 
   {chef_db, ".*",
-   {git, "git://github.com/opscode/chef_db.git", {branch, "master"}}},
+   {git, "git://github.com/opscode/chef_db.git", {branch, "ma/fetch_org_authz"}}},
 
   {chef_index, ".*",
    {git, "git://github.com/opscode/chef_index.git", {branch, "master"}}},

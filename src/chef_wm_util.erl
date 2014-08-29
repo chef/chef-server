@@ -28,7 +28,7 @@
          error_message_envelope/1,
          extract_from_path/2,
          get_header_fun/2,
-         fetch_org_guid/1,
+         fetch_org_metadata/1,
          malformed_request_message/3,
          base_mods/0,
          maybe_generate_key_pair/1,
@@ -92,16 +92,16 @@ get_header_fun(Req, State = #base_state{header_fun = HFun})
 get_header_fun(_Req, State) ->
     {State#base_state.header_fun, State}.
 
-fetch_org_guid(#base_state{organization_name = undefined}) ->
-    undefined;
-fetch_org_guid(#base_state{organization_guid = Id}) when is_binary(Id) ->
-    Id;
-fetch_org_guid(#base_state{organization_guid = undefined,
-                           organization_name = OrgName,
-                           chef_db_context = DbContext}) ->
-    case chef_db:fetch_org_id(DbContext, OrgName) of
+fetch_org_metadata(#base_state{organization_name = undefined}) ->
+    {undefined, undefined};
+fetch_org_metadata(#base_state{organization_guid = Id, organization_authz_id=AuthzId}) when is_binary(Id) ->
+    {Id, AuthzId};
+fetch_org_metadata(#base_state{organization_guid = undefined,
+                               organization_name = OrgName,
+                               chef_db_context = DbContext}) ->
+    case chef_db:fetch_org_metadata(DbContext, OrgName) of
         not_found -> throw({org_not_found, OrgName});
-        Guid -> Guid
+        {Guid, AuthzId} -> {Guid, AuthzId}
     end.
 
 -spec environment_not_found_message( bin_or_string() ) -> ejson().

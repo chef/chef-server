@@ -121,9 +121,10 @@ malformed_request(Req, #base_state{resource_mod=Mod,
     try
         chef_authn:validate_headers(GetHeader, AuthSkew),
         Req1 = chef_wm_enforce:max_size(Req),
-        OrgId = chef_wm_util:fetch_org_guid(State1),
+        {OrgId, OrgAuthzId} = chef_wm_util:fetch_org_metadata(State1),
         {Req2, State2} = Mod:validate_request(wrq:method(Req1), Req1,
-                                              State1#base_state{organization_guid = OrgId}),
+                                              State1#base_state{organization_guid = OrgId,
+                                                                organization_authz_id = OrgAuthzId}),
         {false, Req2, State2}
     catch
         throw:{org_not_found, Org} ->
@@ -898,3 +899,5 @@ list_objects_json(Req, #base_state{chef_db_context = DbContext,
 %% @doc Nothing else to do in open source
 object_creation_error_hook(_ObjectRec, _ActorId) ->
     ok.
+
+
