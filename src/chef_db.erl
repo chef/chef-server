@@ -37,6 +37,12 @@
          user_record_to_authz_id/2,
          fetch_org_id/2,
          fetch_org_metadata/2,
+
+         %% temporary hack for reindex script until
+         %% orgs are migrated
+         cdb_fetch_org_metadata/2,
+         sql_fetch_org_metadata/2,
+
          client_record_to_authz_id/2,
 
          fetch_requestor/3,
