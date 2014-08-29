@@ -37,11 +37,14 @@ fetch_requestor_test_() ->
       {"a user is found SQL",
        fun() ->
                meck:expect(chef_db_darklaunch, is_enabled,
-                           fun(<<"couchdb_clients">>, _) -> false end),
+                           fun(<<"couchdb_clients">>, _) -> false;
+                              (<<"couchdb_organizations">>, _) -> true
+                           end),
 
                meck:expect(chef_otto, connect, fun() -> otto_connect end),
-               meck:expect(chef_otto, fetch_org_id,
-                           fun(_, <<"mock-org">>) -> <<"mock-org-id-123">> end),
+
+               %%meck:expect(chef_otto, fetch_org_id,
+               %%            fun(_, <<"mock-org">>) -> <<"mock-org-id-123">> end),
 
                User = #chef_user{id = <<"a1">>,
                                  authz_id = <<"b2">>,
@@ -74,10 +77,10 @@ fetch_requestor_test_() ->
       {"a client is found SQL cert",
        fun() ->
                meck:expect(chef_otto, connect, fun() -> otto_connect end),
-               meck:expect(chef_otto, fetch_org_id,
-                           fun(_, <<"mock-org">>) ->
-                                   <<"mock-org-id-123">>
-                           end),
+               %%meck:expect(chef_otto, fetch_org_id,
+               %%            fun(_, <<"mock-org">>) ->
+               %%                    <<"mock-org-id-123">>
+               %%            end),
                Client = #chef_client{id = <<"mock-client-id">>,
                                      authz_id = <<"mock-client-authz-id">>,
                                      org_id = <<"org-id-123">>,
@@ -96,10 +99,10 @@ fetch_requestor_test_() ->
       {"a client is found SQL key",
        fun() ->
                meck:expect(chef_otto, connect, fun() -> otto_connect end),
-               meck:expect(chef_otto, fetch_org_id,
-                           fun(_, <<"mock-org">>) ->
-                                   <<"mock-org-id-123">>
-                           end),
+               %% meck:expect(chef_otto, fetch_org_id,
+               %%             fun(_, <<"mock-org">>) ->
+               %%                     <<"mock-org-id-123">>
+               %%             end),
                meck:expect(chef_db_darklaunch, is_enabled,
                            fun(<<"sql_users">>, _) -> true end),
                Client = #chef_client{id = <<"mock-client-id">>,
@@ -132,10 +135,13 @@ fetch_cookbook_versions_test_() ->
      fun() ->
              meck:new(chef_sql),
              meck:new(chef_otto),
+             meck:new(chef_db_darklaunch),
              meck:expect(chef_otto, connect, fun() -> otto_connect end),
-             meck:expect(chef_otto, fetch_org_id,
+             meck:expect(chef_db_darklaunch, is_enabled,
+                         fun(<<"couchdb_organizations">>, _) -> true end),
+             meck:expect(chef_otto, fetch_org_metadata,
                          fun(_, <<"mock-org">>) ->
-                                <<"mock-org-id-123">>
+                                 {<<"mock-org-id-123">>, <<"mock-org-authz-123">>}
                          end),
              set_app_env()
      end,
@@ -164,8 +170,8 @@ fetch_cookbook_versions_test_() ->
              ExpectKeys = [<<"req_time">>,
                            <<"rdbms.chef_sql.fetch_cookbook_versions_time">>,
                            <<"rdbms.chef_sql.fetch_cookbook_versions_count">>,
-                           <<"couchdb.chef_otto.fetch_org_id_time">>,
-                           <<"couchdb.chef_otto.fetch_org_id_count">>,
+                           <<"couchdb.chef_otto.fetch_org_metadata_time">>,
+                           <<"couchdb.chef_otto.fetch_org_metadata_count">>,
                            <<"couchdb_count">>,
                            <<"couchdb_time">>,
                            <<"rdbms_time">>,

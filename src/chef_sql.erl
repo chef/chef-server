@@ -92,6 +92,9 @@
          %% for license
          count_nodes/0,
 
+         %% for orgs
+         fetch_org_metadata/1,
+
          sql_now/0,
          ping/0,
          statements/0,
@@ -135,6 +138,25 @@ ping() ->
 %% Return a node count
 count_nodes() ->
     sqerl:select(count_nodes, [], first_as_scalar, [count]).
+
+%%
+%% chef organization ops
+%%
+
+%% @doc Return the org GUID and authz_id for a given organization name (enterprise chef conly)
+-spec fetch_org_metadata(binary()) -> {binary(), binary()} | not_found | {error, term()}.
+fetch_org_metadata(OrgName) ->
+    %% This would be neater if we had first_as_tuple or first_as_array
+    case sqerl:select(find_organization_by_name, [OrgName], first, []) of
+        {ok, none} ->
+            not_found;
+        {ok, L} when is_list(L) ->
+            Guid = proplists:get_value(<<"id">>,L),
+            AuthzId = proplists:get_value(<<"authz_id">>, L),
+            {Guid, AuthzId};
+        {error, Error} ->
+            {error, Error}
+    end.
 
 %%
 %% chef user ops
