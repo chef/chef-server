@@ -108,9 +108,11 @@ if (node['private_chef']['install_addons'] == true)
 
     when 'rhel'
 
+      major_version = node['platform_version'].split('.').first
+
       yum_repository 'chef-stable' do
         description 'Chef Stable Repo'
-        baseurl 'https://packagecloud.io/chef/test-stable/el/$releasever/$basearch'
+        baseurl "https://packagecloud.io/chef/test-stable/el/#{major_version}/$basearch"
         gpgkey 'https://packagecloud.io/gpg.key'
         sslverify true
         sslcacert '/etc/pki/tls/certs/ca-bundle.crt'
