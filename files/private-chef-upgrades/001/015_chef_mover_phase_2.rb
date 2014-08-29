@@ -27,11 +27,6 @@ define_upgrade do
 
     stop_service("opscode-chef-mover")
 
-    # Clean up chef_*.couch files, we don't need them anymore! (should already be backed up too)
-    log "Cleaning up containers and groups from couchDB..."
-    run_command("find /var/opt/opscode/couchdb/db -name 'chef_*.couch' | xargs rm")
-    run_command("rm -rf /var/opt/opscode/couchdb/db/.chef_*_design")
-
     stop_service('postgresql')
 
     log "Containers and groups migration complete!"
