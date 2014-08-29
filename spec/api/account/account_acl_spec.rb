@@ -359,7 +359,7 @@ describe "ACL API", :acl do
             })
         end
 
-        context "when normal user granted all permissions except GRANT", :authorization do
+        context "when normal user granted all permissions except GRANT" do
           it "returns 403", :authorization do
             restrict_permissions_to("organizations",
               platform.non_admin_user => ['create', 'read', 'update', 'delete'])
@@ -369,7 +369,7 @@ describe "ACL API", :acl do
           end
         end
 
-        context "when normal client granted all permissions except GRANT", :authorization do
+        context "when normal client granted all permissions except GRANT" do
           it "returns 403", :authorization, :smoke do
             restrict_permissions_to("organizations",
               platform.non_admin_client => ['create', 'read', 'update', 'delete'])
