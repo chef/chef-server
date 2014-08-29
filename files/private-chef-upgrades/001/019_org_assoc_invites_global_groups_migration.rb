@@ -6,19 +6,7 @@ define_upgrade do
     # Make sure API is down
     stop_services(["nginx", "opscode-erchef"])
 
-    # start postgres, as well as opscode-account and couchdb
-    # we can delete pre-created orgs (will shut the latter two
-    # down after we delete pre-created orgs).
-    start_services(['postgresql', 'opscode-account', 'couchdb'])
-
-    # delete pre-created orgs
-    run_command("/opt/opscode/embedded/bin/ruby scripts/delete-pre-created-orgs.rb /etc/opscode/orgmapper.conf all",
-                :cwd => "/opt/opscode/embedded/service/opscode-platform-debug/orgmapper",
-                :env => {"RUBYOPT" => "-I/opt/opscode/embedded/lib/ruby/gems/1.9.1/gems/bundler-1.1.5/lib"})
-    stop_services(['opscode-account', 'couchdb'])
-
-    # clean logs pre-migration
-    clean_mover_logs
+    start_service('postgresql')
 
     force_restart_service("opscode-chef-mover")
 
