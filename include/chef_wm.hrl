@@ -139,7 +139,12 @@
           superuser_bypasses_checks = false :: true | false,
 
           %% A proplist of config for metric reporting and stats_hero integration.
-          metrics_config :: [{atom(), term()}]
+          metrics_config :: [{atom(), term()}],
+
+          %% list of resource arguments passed in on init of each resource by webmachine
+          %% This will be set to 'Value' of a tuple in the resource argument list in
+          %% dispatch.conf matching the form {resource_args, Value}
+          resource_args :: list()
          }).
 
 -record(client_state, {

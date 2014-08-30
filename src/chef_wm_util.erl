@@ -1,10 +1,10 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Christopher Brown <cb@opscode.com>
-%% @author Christopher Maier <cm@opscode.com>
-%% @author Seth Falcon <seth@opscode.com>
-%% @author Ho-Sheng Hsiao <hosh@opscode.com>
-%% Copyright 2011-2013 Opscode, Inc. All Rights Reserved.
+%% @author Christopher Brown <cb@getchef.com>
+%% @author Christopher Maier <cm@getchef.com>
+%% @author Seth Falcon <seth@getchef.com>
+%% @author Ho-Sheng Hsiao <hosh@getchef.com>
+%% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -139,7 +139,7 @@ not_found_message(sandbox, SandboxId) ->
 not_found_message(environment, Name) ->
     error_message_envelope(iolist_to_binary(["Cannot load environment ", Name]));
 not_found_message(organization, Name) ->
-    error_message_envelope(iolist_to_binary(["Cannot load organiztion ", Name]));
+    error_message_envelope(iolist_to_binary(["Cannot load organization ", Name]));
 not_found_message(cookbook, Name) when is_binary(Name) ->
     error_message_envelope(iolist_to_binary(["Cannot find a cookbook named ", Name]));
 not_found_message(cookbook_version, {Name, Version}) when is_binary(Version) -> %% NOT a parsed {Major, Minor, Patch} tuple!!
@@ -147,7 +147,14 @@ not_found_message(cookbook_version, {Name, Version}) when is_binary(Version) -> 
 not_found_message(client, Name) ->
     error_message_envelope(iolist_to_binary(["Cannot load client ", Name]));
 not_found_message(user, Name) ->
-    error_message_envelope(iolist_to_binary(["user '", Name, "' not found"])).
+    %error_message_envelope(iolist_to_binary(["user '", Name, "' not found"]));
+%TODO - verify this does not break other tests which require specific wording - otherwise
+    %we'll needd to update associated test in oc-chef-pedant:associations_spec
+    {[{<<"error">>, iolist_to_binary(["Could not find user ", Name])}]};
+not_found_message(association, {Name, OrgName} ) ->
+    {[{<<"error">>, iolist_to_binary(["Cannot find a user ", Name, " in organization ", OrgName])}]};
+not_found_message(invitation, Id) ->
+    {[{<<"error">>, iolist_to_binary(["Cannot find association request: ", Id])}]}.
 
 
 %% "Cannot load data bag item not_really_there for data bag sack"
@@ -203,7 +210,7 @@ set_uri_of_created_resource(Uri, Req0) when is_binary(Uri) ->
 %% the spec will be updated
 -spec object_name(cookbook | node | role | data_bag | data_bag_item |
                   environment | principal | sandbox | client | user |
-                  group | container,
+                  group | container | organization | invitation,
                   Request :: #wm_reqdata{}) -> binary() | undefined.
 object_name(node, Req) ->
     extract_from_path(node_name, Req);
@@ -228,7 +235,11 @@ object_name(container, Req) ->
 object_name(client, Req) ->
     extract_from_path(client_name, Req);
 object_name(user, Req) ->
-    extract_from_path(user_name, Req).
+    extract_from_path(user_name, Req);
+object_name(organization, Req) ->
+    extract_from_path(organization_id, Req);
+object_name(invitation, Req) ->
+    extract_from_path(invitation_id, Req).
 
 %% @doc Private utility function to extract a path element as a binary.  Returns the atom
 %% `undefined' if no such value exists.
