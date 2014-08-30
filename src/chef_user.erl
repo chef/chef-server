@@ -41,7 +41,8 @@
          set_updated/2,
          type_name/1,
          update_from_ejson/2,
-         validate_user_name/1
+         validate_user_name/1,
+         serialized_field_value/2
         ]).
 
 %% database named queries
@@ -107,6 +108,14 @@ username_from_ejson(UserData) ->
         Name ->
             Name
     end.
+
+serialized_field_value(FieldName, User) when is_list(FieldName) ->
+    serialized_field_value(list_to_binary(FieldName), User);
+serialized_field_value(FieldName, User) when is_atom(FieldName) ->
+    serialized_field_value(atom_to_binary(FieldName, utf8), User);
+serialized_field_value(FieldName, #chef_user{serialized_object = SerializedObject}) ->
+    EJ = chef_json:decode(SerializedObject),
+    ej:get({FieldName}, EJ).
 
 -spec new_record(object_id(), object_id(), ejson_term()) -> #chef_user{}.
 new_record(OrgId, AuthzId, Data) ->
