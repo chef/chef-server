@@ -97,7 +97,7 @@
          fetch_org_metadata/1,
 
          %% user-org ops
-         is_user_in_org_by_orgid/2,
+         is_user_in_org/2,
 
          sql_now/0,
          ping/0,
@@ -172,10 +172,18 @@ fetch_org_metadata(OrgName) ->
 %% Temporary hack - required until org creation knows about sql associations
 %%                         NOT FOR RELEASE!
 %% *************************************************************
-is_user_in_org_by_orgid(<<"pivotal">>, _) ->
+-spec is_user_in_org(binary(), binary()) -> boolean() | {error, _}.
+is_user_in_org(<<"pivotal">>, _) ->
     {ok, 1};
-is_user_in_org_by_orgid(UserName, OrgId) ->
-    sqerl:select(user_in_org, [UserName, OrgId], first_as_scalar, [count]).
+is_user_in_org(UserName, OrgName) ->
+    case sqerl:select(user_in_org, [UserName, OrgName], first_as_scalar, [count]) of
+        {ok, none} ->
+            false;
+        {ok, N} when is_integer(N) ->
+            true;
+        {error, Error} ->
+            {error, Error}
+    end.
 
 %%
 %% chef user ops
