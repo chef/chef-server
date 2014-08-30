@@ -622,7 +622,15 @@ count_nodes(#context{reqid = ReqId} = _Ctx) ->
     end.
 
 -spec is_user_in_org(#context{}, binary(), binary()) -> boolean() | {error, _}.
-is_user_in_org(#context{reqid = ReqId, otto_connection = S}=Ctx, User, OrgName) ->
+is_user_in_org(#context{darklaunch = Darklaunch} = Ctx, User, OrgName) ->
+    case chef_db_darklaunch:is_enabled(<<"couchdb_associations">>, Darklaunch) of
+        true ->
+            cdb_is_user_in_org(Ctx, User, OrgName);
+        false ->
+            sql_is_user_in_org(Ctx, User, OrgName)
+    end.
+
+cdb_is_user_in_org(#context{reqid = ReqId, otto_connection = S}=Ctx, User, OrgName) ->
     case fetch(#chef_user{username = User}, Ctx) of
         #chef_user{id = UserId} ->
             ?SH_TIME(ReqId, chef_otto, is_user_in_org, (S, UserId, OrgName));
@@ -631,6 +639,9 @@ is_user_in_org(#context{reqid = ReqId, otto_connection = S}=Ctx, User, OrgName) 
         {error, Why} ->
             {error, Why}
     end.
+
+sql_is_user_in_org(#context{reqid = ReqId}, UserName, OrgName) ->
+    ?SH_TIME(ReqId, chef_sql, is_user_in_org, (UserName, OrgName)).
 
 connect() ->
     chef_otto:connect().
