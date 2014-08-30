@@ -86,7 +86,11 @@ to_json(Req, #base_state{resource_state = AclState} = State) ->
     end.
 
 %% Also used by oc_chef_wm_acl_permission
-
+validate_authz_id(Req,
+                  #base_state{organization_authz_id = AuthzId} = State,
+                  AclState, organization, OrgId, OrgName, DbContext) ->
+    AclState1 = AclState#acl_state{authz_id = AuthzId},
+    {Req, State#base_state{resource_state = AclState1, superuser_bypasses_checks = true}};
 validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
     Name = chef_wm_util:object_name(Type, Req),
     AuthzId = case Type of
