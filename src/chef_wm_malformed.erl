@@ -143,7 +143,6 @@ malformed_request_message(#ej_invalid{type=json_type,
     error_envelope([<<"Field '", Key/binary, "' contains invalid run lists">>]);
 
 %% All other json_type failures
-%% beee
 malformed_request_message(#ej_invalid{type=json_type,
                                       key=Key
                                      }, _Req, _State) ->
