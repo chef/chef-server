@@ -177,7 +177,7 @@ is_user_in_org(<<"pivotal">>, _) ->
     {ok, 1};
 is_user_in_org(UserName, OrgName) ->
     case sqerl:select(user_in_org, [UserName, OrgName], first_as_scalar, [count]) of
-        {ok, none} ->
+        {ok, 0} ->
             false;
         {ok, N} when is_integer(N) ->
             true;
