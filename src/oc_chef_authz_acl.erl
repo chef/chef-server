@@ -249,7 +249,7 @@ acl_path(client, AuthzId) ->
 acl_path(user, AuthzId) ->
     acl_path(actor, AuthzId);
 acl_path(organization, AuthzId) ->
-    acl_path(container, AuthzId);
+    acl_path(object, AuthzId);
 acl_path(Type, AuthzId) ->
     "/" ++ type_to_resource(Type) ++ "/" ++ binary_to_list(AuthzId) ++ "/acl".
 
