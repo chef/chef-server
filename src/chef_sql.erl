@@ -602,7 +602,6 @@ fetch_latest_cookbook_version(OrgId, CookbookName) ->
 -spec create_cookbook_version(#chef_cookbook_version{}) ->
     {ok, non_neg_integer()} | {error, term()}.
 create_cookbook_version(CookbookVersion) ->
-
     case create_cookbook_if_needed(CookbookVersion) of
         ok ->
             create_object(CookbookVersion);
