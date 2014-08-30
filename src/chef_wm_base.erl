@@ -156,27 +156,6 @@ malformed_request(Req, #base_state{organization_name = OrgName,
             {true, NewReq, State1#base_state{log_msg = Why}}
     end.
 
-
-%%%%%%%%%%
-%%% TEMPORARY - DELETE once authz id and org id are fetched in a join.
-%%%%%%%%%%
-fetch_org_authz_id(undefined) ->
-    undefined;
-fetch_org_authz_id(?OSC_ORG_NAME) ->
-    undefined;
-fetch_org_authz_id(OrgName) ->
-    Server = chef_otto:connect(),
-    case chef_otto:fetch_org(Server, OrgName) of
-        {org_not_found, not_in_view} ->
-            undefined;
-        OrgDoc ->
-           OrgDocId = proplists:get_value(<<"_id">>, OrgDoc),
-           chef_otto:fetch_auth_join_id(Server, OrgDocId, user_to_auth)
-    end.
-%%%%%%%%%%
-%%% TEMPORARY - DELETE once authz id and org id are fetched in a join.
-%%%%%%%%%%
-
 forbidden(Req, #base_state{resource_mod=Mod}=State) ->
     %% For now we call auth_info because currently need the side-effect of looking up the
     %% record and returning 404.
