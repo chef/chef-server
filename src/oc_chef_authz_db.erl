@@ -168,7 +168,7 @@ make_context(ReqId, Darklaunch) when is_binary(ReqId) ->
                            darklaunch = Darklaunch}.
 
 -spec fetch_container(oc_chef_authz_context(),
-                      object_id(),
+                      object_id() | undefined,
                       container_name()) -> #chef_container{} |
                                            not_found |
                                            {error, _}.
@@ -241,7 +241,7 @@ container_record_to_authz_id(#oc_chef_authz_context{}, #chef_container{authz_id 
     Id.
 
 -spec fetch_by_name(couchbeam:server(),
-                    binary() | 'not_found',
+                    binary() | 'not_found' | undefined,
                     binary() | string(),
                     authz_type() | atom()) ->
                            {ok, [{binary(), _}]} | {'not_found', atom() | 'org'}.
@@ -321,7 +321,7 @@ design_and_view_for_type(authz_group) ->
 %% design_and_view_for_app_type(chef_role) ->
 %%     {?role_design, "all_id"}.
 
--spec dbname(binary()|undefined) -> binary().
+-spec dbname(binary()|undefined) -> <<_:40,_:_*8>>.
 % If org id is not provided, then the DB returned is the account db.
 dbname(undefined) ->
     <<"opscode_account">>;
