@@ -117,8 +117,7 @@ auth_info(Req, State) ->
 post_is_create(Req, State) ->
     {true, Req, State}.
 
-malformed_request(Req, #base_state{organization_name = OrgName,
-                                   resource_mod=Mod,
+malformed_request(Req, #base_state{resource_mod=Mod,
                                    auth_skew=AuthSkew}=State) ->
     {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
     try
