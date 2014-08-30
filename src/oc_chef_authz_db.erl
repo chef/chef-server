@@ -40,6 +40,11 @@
 
 statements(pgsql) ->
     [
+     {user_in_org,
+      <<"SELECT count(*)"
+        "  FROM users u, org_user_associations assoc, orgs o"
+        " WHERE u.id = assoc.user_id AND o.id = assoc.org_id"
+        "   AND u.username = $1 AND o.name = $2;">>},
      {insert_org_user_invite,
       <<"INSERT INTO org_user_invites (id, org_id, user_id, last_updated_by, created_at, updated_at)"
         " VALUES ($1, $2, $3, $4, $5, $6)">>},
