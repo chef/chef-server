@@ -179,6 +179,7 @@ module PrivateChef
                 'sql_ro_password' => PrivateChef['postgresql']['sql_ro_password']
               },
               'oc_id' => {
+                'applications' => PrivateChef['oc_id']['applications'],
                 'sql_password' => PrivateChef['oc_id']['sql_password'],
                 'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
               },

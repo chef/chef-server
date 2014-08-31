@@ -22,6 +22,7 @@ if is_data_master?
     content Chef::JSONCompat.to_json_pretty({
       private_chef: {
         api_fqdn:           node['private_chef']['lb']['api_fqdn'],
+        oc_id_application:  node['private_chef']['oc_id']['applications']['analytics'],
         rabbitmq_host:      node['private_chef']['rabbitmq']['vip'],
         rabbitmq_port:      node['private_chef']['rabbitmq']['node_port'],
         rabbitmq_vhost:     node['private_chef']['rabbitmq']['actions_vhost'],

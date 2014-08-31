@@ -123,6 +123,15 @@ if node['private_chef']['bootstrap']['enable']
   end
 end
 
+# Take the existing oc_id.applications (with only a redirect_uri), ensure they
+# exist in the database, and add their additional attributes (uid and secret) to
+# the node attributes.
+node.consume_attributes('private_chef' => { 'oc_id' => { 'applications' =>
+  node['private_chef']['oc_id']['applications'].map do |name, app|
+    { name => OCIDApplication.new(name, app).create.attributes }
+  end.reduce({}, :merge)
+} })
+
 nginx_dir = node['private_chef']['nginx']['dir']
 nginx_etc_dir = File.join(nginx_dir, "etc")
 nginx_addon_dir = File.join(nginx_etc_dir, "addon.d")
