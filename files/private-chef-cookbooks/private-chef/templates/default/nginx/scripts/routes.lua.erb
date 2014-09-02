@@ -104,6 +104,7 @@ local p_erchef_endpoint = p_cookbooks + p_data + p_roles + p_sandboxes +
                           p_environments + p_clients + p_nodes + p_principals +
                           p_groups + p_containers
 
+
 -- endpoints that map directly to erchef
 -- If an object identifier is present - as identified with /IDENTIFIER - then
 -- capture it. Otherwise -- require end-of-line (in other words, avoid the case
@@ -120,9 +121,12 @@ local p_erchef_users = (p_sep * Cendpoint(p_users) * p_trailing_sep) +
 
 local p_license_route = (p_sep * Cendpoint(p_license) * p_trailing_sep)
 
+local p_add_org = P"add-an-org"
+local p_create_org = p_sep * Cendpoint(p_add_org) * p_sep  * Cg(p_org_identifier, "org_name")
 -- Everything that gets sent to erchef
 local p_erchef = (p_named_org_prefix * p_erchef_direct) +
                  p_erchef_users +
+                 p_create_org +
                  p_license_route
 
 -- erchef routing rules for chef_internal, which includes an additional
