@@ -57,7 +57,6 @@ dependency "logrotate"
 
 # partybus and upgrade scripts
 dependency "partybus"
-dependency "oc_authz_migrator" # migrate authz to bifrost
 
 # used in osc to ec upgrade path
 dependency "knife-ec-backup-gem"
