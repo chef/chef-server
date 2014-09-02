@@ -1,4 +1,4 @@
-name "private-chef"
+name "chef-server-core"
 maintainer "Chef Software, Inc."
 homepage   "http://www.getchef.com"
 

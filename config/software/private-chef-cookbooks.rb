@@ -2,7 +2,7 @@ name "private-chef-cookbooks"
 
 dependency "berkshelf2"
 
-project_name = project.name
+project_name = "private-chef"
 
 source :path => File.expand_path("files/#{project_name}-cookbooks", Config.project_root)
 
