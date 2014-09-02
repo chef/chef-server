@@ -190,7 +190,6 @@ include_recipe "private-chef::plugins"
   "opscode-solr4",
   "opscode-expander",
   "bookshelf",
-  "opscode-org-creator",
   "opscode-erchef",
   "bootstrap",
   "opscode-chef-mover",

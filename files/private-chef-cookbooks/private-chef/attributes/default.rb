@@ -15,6 +15,7 @@ opscode-webui
 opscode-solr
 couchdb
 opscode-account
+opscode-org-creator
 }
 
 ###
@@ -413,21 +414,6 @@ default['private_chef']['opscode-certificate']['port'] = 5140
 default['private_chef']['opscode-certificate']['vip'] = '127.0.0.1'
 default['private_chef']['opscode-certificate']['num_workers'] = '2'
 default['private_chef']['opscode-certificate']['num_certificates_per_worker'] = '50'
-
-###
-# Opscode Organization Creator
-###
-default['private_chef']['opscode-org-creator']['enable'] = true
-default['private_chef']['opscode-org-creator']['ha'] = false
-default['private_chef']['opscode-org-creator']['dir'] = "/var/opt/opscode/opscode-org-creator"
-default['private_chef']['opscode-org-creator']['log_directory'] = "/var/log/opscode/opscode-org-creator"
-default['private_chef']['opscode-org-creator']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['opscode-org-creator']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-org-creator']['ready_org_depth'] = 10
-default['private_chef']['opscode-org-creator']['max_workers'] = 1
-default['private_chef']['opscode-org-creator']['create_wait_ms'] = 30000
-default['private_chef']['opscode-org-creator']['create_splay_ms'] = 25000
-default['private_chef']['opscode-org-creator']['port'] = 4369
 
 ###
 # Chef Identity

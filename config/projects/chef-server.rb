@@ -48,7 +48,6 @@ dependency "bookshelf"
 
 # the front-end services
 dependency "oc_bifrost"
-dependency "opscode-org-creator"
 dependency "opscode-certificate"
 dependency "opscode-platform-debug"
 dependency "opscode-test"
