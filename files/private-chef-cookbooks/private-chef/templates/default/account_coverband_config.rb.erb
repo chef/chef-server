@@ -1,7 +1,0 @@
-Coverband.configure do |config|
-  config.root       = "/opt/opscode/embedded/service/opscode-account"
-  config.redis      = Redis.new({:host => "<%= node['private_chef']['redis_lb']['vip'] %>",
-                                 :port => <%= node['private_chef']['redis_lb']['port'] %>,
-                                 :db => '2'})
-  config.percentage = 100.0
-end

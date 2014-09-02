@@ -1,7 +1,0 @@
-#!/bin/sh
-
-/opt/opscode/bin/wait-for-rabbit
-
-exec 2>&1
-cd /opt/opscode/embedded/service/opscode-account
-exec chpst -P -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> env HOME="<%= node['private_chef']['opscode-account']['dir'] %>" <%= node['private_chef']['opscode-account']['enable_code_coverage'] ? "COVERBAND=true" : nil %> PATH=/opt/opscode/embedded/bin:$PATH bundle exec unicorn -E <%= node['private_chef']['opscode-account']['environment'] %> -c <%= File.join(node['private_chef']['opscode-account']['dir'], 'etc', 'unicorn.rb') %> /opt/opscode/embedded/service/opscode-account/config.ru

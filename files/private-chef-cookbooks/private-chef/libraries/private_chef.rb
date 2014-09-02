@@ -39,7 +39,6 @@ module PrivateChef
   oc_id Mash.new
   opscode_certificate Mash.new
   opscode_org_creator Mash.new
-  opscode_account Mash.new
   bookshelf Mash.new
   bootstrap Mash.new
   drbd Mash.new # For DRBD specific settings
@@ -74,6 +73,7 @@ module PrivateChef
   opscode_webui Mash.new
   opscode_solr Mash.new
   couchdb Mash.new
+  opscode_account Mash.new
 
   class << self
 
@@ -159,7 +159,6 @@ module PrivateChef
       PrivateChef['rabbitmq']['actions_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['opscode_account']['session_secret_key'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['oc_bifrost']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
@@ -186,9 +185,6 @@ module PrivateChef
               'oc_id' => {
                 'sql_password' => PrivateChef['oc_id']['sql_password'],
                 'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
-              },
-              'opscode_account' => {
-                'session_secret_key' => PrivateChef['opscode_account']['session_secret_key']
               },
               'drbd' => {
                 'shared_secret' => PrivateChef['drbd']['shared_secret']
@@ -230,7 +226,6 @@ module PrivateChef
         "opscode_certificate",
         "opscode_org_creator",
         "opscode_chef_mover",
-        "opscode_account",
         "bookshelf",
         "bootstrap",
         "drbd",
@@ -320,7 +315,6 @@ module PrivateChef
       PrivateChef["oc_bifrost"]["ha"] ||= true
       PrivateChef["opscode_certificate"]["ha"] ||= true
       PrivateChef["opscode_org_creator"]["ha"] ||= true
-      PrivateChef["opscode_account"]["ha"] ||= true
       PrivateChef["nginx"]["ha"] ||= true
     end
 
@@ -337,7 +331,6 @@ module PrivateChef
       authaddr << "0.0.0.0/0" # if PrivateChef["use_ipv4"]
       authaddr << "::/0" if PrivateChef["use_ipv6"]
       PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= authaddr
-      PrivateChef["opscode_account"]["worker_processes"] ||= 4
 
       PrivateChef["opscode_chef_mover"]["enable"] = !!bootstrap
       PrivateChef["bootstrap"]["enable"] = !!bootstrap

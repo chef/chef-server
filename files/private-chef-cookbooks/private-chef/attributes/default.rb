@@ -14,6 +14,7 @@ default['private_chef']['removed_services'] = %w{
 opscode-webui
 opscode-solr
 couchdb
+opscode-account
 }
 
 ###
@@ -224,7 +225,6 @@ default['private_chef']['lb']['web_ui_fqdn'] = node['fqdn']
 default['private_chef']['lb']['cache_cookbook_files'] = false
 default['private_chef']['lb']['debug'] = false
 default['private_chef']['lb']['upstream']['opscode-erchef'] = [ "127.0.0.1" ]
-default['private_chef']['lb']['upstream']['opscode-account'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['oc_bifrost'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-solr4'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['bookshelf'] = [ "127.0.0.1" ]
@@ -474,30 +474,6 @@ default['private_chef']['dark_launch']["sql_users"] = true
 default['private_chef']['dark_launch']["add_type_and_bag_to_items"] = true
 default['private_chef']['dark_launch']["reporting"] = true
 default['private_chef']['dark_launch']["actions"] = true
-
-###
-# Opscode Account
-###
-default['private_chef']['opscode-account']['enable'] = true
-default['private_chef']['opscode-account']['ha'] = false
-default['private_chef']['opscode-account']['dir'] = "/var/opt/opscode/opscode-account"
-default['private_chef']['opscode-account']['log_directory'] = "/var/log/opscode/opscode-account"
-default['private_chef']['opscode-account']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['opscode-account']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-account']['proxy_user'] = "pivotal"
-default['private_chef']['opscode-account']['session_secret_key'] = 'change-by-default'
-default['private_chef']['opscode-account']['environment'] = 'privatechef'
-default['private_chef']['opscode-account']['vip'] = '127.0.0.1'
-default['private_chef']['opscode-account']['port'] = 9465
-default['private_chef']['opscode-account']['url'] = "http://127.0.0.1:9465"
-default['private_chef']['opscode-account']['listen'] = '127.0.0.1:9465'
-default['private_chef']['opscode-account']['backlog'] = 1024
-default['private_chef']['opscode-account']['tcp_nodelay'] = true
-default['private_chef']['opscode-account']['worker_timeout'] = 3600
-default['private_chef']['opscode-account']['validation_client_name'] = "chef"
-default['private_chef']['opscode-account']['umask'] = "0022"
-default['private_chef']['opscode-account']['worker_processes'] = node['cpu']['total'].to_i
-default['private_chef']['opscode-account']['enable_code_coverage'] = false
 
 ###
 # Chef Mover

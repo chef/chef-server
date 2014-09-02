@@ -47,7 +47,6 @@ dependency "keepalived"
 dependency "bookshelf"
 
 # the front-end services
-dependency "opscode-account"
 dependency "oc_bifrost"
 dependency "opscode-org-creator"
 dependency "opscode-certificate"

@@ -159,8 +159,6 @@ local p_org_endpoint = (p_sep * Cendpoint(p_org) * (p_sep * Cg(p_org_identifier,
 -- account endpoints
 -- org_acl endpoint: matches /organizations/:orgname/organizations/_acl
 -- and returns the acl for the specific org
--- this needs to be matched even before the /_acls endpoint and needs to
--- route to opscode-account until the organizations endpoint has been migrated
 local p_org_acl_endpoint = (p_named_org_prefix * p_org * Cendpoint(p_acl) * (p_sep + p_eol))
 
 -- note that the acl endpoint is a special case because it supercedes all others
