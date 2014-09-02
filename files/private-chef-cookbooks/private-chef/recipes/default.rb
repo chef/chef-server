@@ -49,11 +49,18 @@ directory "/etc/opscode/logrotate.d" do
 end.run_action(:create)
 
 if File.exists?("/etc/opscode/chef-server.json")
-  Chef::Log.warn("Please move to /etc/opscode/private-chef.rb for configuration - /etc/opscode/chef-server.json is deprecated.")
+  Chef::Log.warn("Please move to /etc/opscode/chef-server.rb for configuration - /etc/opscode/chef-server.json is deprecated.")
 else
   PrivateChef[:node] = node
-  if File.exists?("/etc/opscode/private-chef.rb")
-    PrivateChef.from_file("/etc/opscode/private-chef.rb")
+  private_chef_path = "/etc/opscode/private-chef.rb"
+  chef_server_path = "/etc/opscode/chef-server.rb"
+  if File.exists?(private_chef_path) && !File.symlink?(private_chef_path)
+    Chef::Log.warn("Moving to /etc/opscode/chef-server.rb for configuration - /etc/opscode/private-chef.rb is deprecated.")
+    FileUtils.mv(private_chef_path, chef_server_path)
+    FileUtils.ln_s(chef_server_path, private_chef_path)
+  end
+  if File.exists?(chef_server_path)
+    PrivateChef.from_file(chef_server_path)
   end
   node.consume_attributes(PrivateChef.generate_config(node['fqdn']))
 end
