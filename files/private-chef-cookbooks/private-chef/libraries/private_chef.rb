@@ -24,17 +24,13 @@ module PrivateChef
   default_orgname nil
 
   addons Mash.new
-  couchdb Mash.new
   rabbitmq Mash.new
   opscode_solr4 Mash.new
   opscode_expander Mash.new
   opscode_erchef Mash.new
   # Need old path for cookbook migration:
   opscode_chef Mash.new
-  # This is here so legacy private-chef.rb config files that contain settings
-  # like `opscode_webui['enable'] = false` do not break the reconfigure. It is
-  # not used for anything else.
-  opscode_webui Mash.new
+
   lb Mash.new
   lb_internal Mash.new
   postgresql Mash.new
@@ -70,6 +66,14 @@ module PrivateChef
   ldap Mash.new
   disabled_plugins []
   enabled_plugins []
+
+  # - legacy config mashes -
+  # these config values are here so that if any config has been previously
+  # set for these projects in an older version of private-chef/chef-server.rb
+  # then we do not error out during the reconfigure
+  opscode_webui Mash.new
+  opscode_solr Mash.new
+  couchdb Mash.new
 
   class << self
 
@@ -213,7 +217,6 @@ module PrivateChef
       [
         "opscode_chef",
         "redis_lb",
-        "couchdb",
         "addons",
         "rabbitmq",
         "opscode_solr4",
@@ -277,7 +280,6 @@ module PrivateChef
       PrivateChef["enabled_plugins"] << "chef-ha-#{PrivateChef["ha"]["provider"]}"
       PrivateChef["ha"]["path"] ||= "/var/opt/opscode/drbd/data"
       hapath = PrivateChef["ha"]["path"]
-      PrivateChef["couchdb"]["data_dir"] ||= "#{hapath}/couchdb"
       PrivateChef['bookshelf']['data_dir'] = "#{hapath}/bookshelf"
       PrivateChef["rabbitmq"]["data_dir"] ||= "#{hapath}/rabbitmq"
       PrivateChef["opscode_solr4"]["data_dir"] ||= "#{hapath}/opscode-solr4"
@@ -307,7 +309,6 @@ module PrivateChef
       PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef['servers'][node_name]['peer_ipaddress']
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
       PrivateChef["bookshelf"]["ha"] ||= true
-      PrivateChef["couchdb"]["ha"] ||= true
       PrivateChef["oc_id"]["ha"] ||= true
       PrivateChef["rabbitmq"]["ha"] ||= true
       PrivateChef["opscode_solr4"]["ha"] ||= true
@@ -326,7 +327,6 @@ module PrivateChef
     def gen_backend(bootstrap=false)
       PrivateChef[:role] = "backend" #mixlib-config wants a symbol :(
       PrivateChef["bookshelf"]["listen"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["couchdb"]["bind_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
       PrivateChef["opscode_solr4"]["ip_address"] ||= PrivateChef["default_listen_address"]
@@ -347,8 +347,6 @@ module PrivateChef
       PrivateChef[:role] = "frontend"
       PrivateChef["bookshelf"]["enable"] ||= false
       PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["couchdb"]["enable"] ||= false
-      PrivateChef["couchdb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["rabbitmq"]["enable"] ||= false
       PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["redis_lb"]["enable"] ||= false

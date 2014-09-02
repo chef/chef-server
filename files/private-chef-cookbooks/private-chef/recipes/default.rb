@@ -182,7 +182,6 @@ include_recipe "private-chef::sysctl-updates"
 include_recipe "private-chef::plugins"
 # Configure Services
 [
-  "couchdb",
   "rabbitmq",
   "postgresql",
   "oc_bifrost",
@@ -203,8 +202,8 @@ include_recipe "private-chef::plugins"
   if node["private_chef"][service]["enable"]
     include_recipe "private-chef::#{service}"
   else
-    # All non-enabled services get disabled; couchdb and
-    # opscode-expander get additional special treatment
+    # All non-enabled services get disabled; 
+    # opscode-expander gets additional special treatment
     #
     # bootstrap isn't really a service, though, so there's
     # nothing to disable, really.
@@ -215,12 +214,6 @@ include_recipe "private-chef::plugins"
       end
 
       case service
-      when "couchdb"
-        %w[couchdb_bounce couchdb_compact couchdb_compact_major_offenders].each do |file_name|
-          file File.join("/etc/cron.d/", file_name) do
-            action :delete
-          end
-        end
       when "opscode-expander"
         runit_service "opscode-expander-reindexer" do
           action :disable

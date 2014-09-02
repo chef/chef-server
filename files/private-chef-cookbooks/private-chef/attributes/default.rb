@@ -13,6 +13,7 @@ default['enterprise']['name'] = "private_chef"
 default['private_chef']['removed_services'] = %w{
 opscode-webui
 opscode-solr
+couchdb
 }
 
 ###
@@ -50,35 +51,6 @@ default['private_chef']['user']['username'] = "opscode"
 default['private_chef']['user']['shell'] = "/bin/sh"
 # The home directory for the chef services user
 default['private_chef']['user']['home'] = "/opt/opscode/embedded"
-
-####
-# CouchDB
-####
-# Enable/disable the CouchDB service
-default['private_chef']['couchdb']['enable'] = true
-default['private_chef']['couchdb']['ha'] = false
-# The directory for CouchDB data
-default['private_chef']['couchdb']['dir'] = "/var/opt/opscode/couchdb"
-default['private_chef']['couchdb']['data_dir'] = "/var/opt/opscode/couchdb/db"
-default['private_chef']['couchdb']['log_directory'] = "/var/log/opscode/couchdb"
-default['private_chef']['couchdb']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['couchdb']['log_rotation']['num_to_keep'] = 10
-
-# The port to listen on
-default['private_chef']['couchdb']['port'] = 5984
-# The IP Address to bind on - use 0.0.0.0 for everything
-default['private_chef']['couchdb']['bind_address'] = '127.0.0.1'
-# The VIP
-default['private_chef']['couchdb']['vip'] = "127.0.0.1"
-default['private_chef']['couchdb']['max_document_size'] = '4294967296'
-default['private_chef']['couchdb']['max_attachment_chunk_size'] = '4294967296'
-default['private_chef']['couchdb']['os_process_timeout'] = '300000'
-default['private_chef']['couchdb']['max_dbs_open'] = 104857600
-default['private_chef']['couchdb']['delayed_commits'] = 'true'
-default['private_chef']['couchdb']['batch_save_size'] = 1000
-default['private_chef']['couchdb']['batch_save_interval'] = 1000
-default['private_chef']['couchdb']['log_level'] = 'error'
-default['private_chef']['couchdb']['reduce_limit'] = 'false'
 
 ####
 # RabbitMQ
