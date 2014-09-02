@@ -37,7 +37,6 @@ module PrivateChef
   redis_lb Mash.new
   oc_bifrost Mash.new
   oc_id Mash.new
-  opscode_certificate Mash.new
   bookshelf Mash.new
   bootstrap Mash.new
   drbd Mash.new # For DRBD specific settings
@@ -74,6 +73,7 @@ module PrivateChef
   couchdb Mash.new
   opscode_account Mash.new
   opscode_org_creator Mash.new
+  opscode_certificate Mash.new
 
   class << self
 
@@ -223,7 +223,6 @@ module PrivateChef
         "postgresql",
         "oc_bifrost",
         "oc_id",
-        "opscode_certificate",
         "opscode_chef_mover",
         "bookshelf",
         "bootstrap",
@@ -312,7 +311,6 @@ module PrivateChef
       PrivateChef["postgresql"]["ha"] ||= true
       PrivateChef["redis_lb"]["ha"] ||= true
       PrivateChef["oc_bifrost"]["ha"] ||= true
-      PrivateChef["opscode_certificate"]["ha"] ||= true
       PrivateChef["nginx"]["ha"] ||= true
     end
 
@@ -323,7 +321,6 @@ module PrivateChef
       PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
       PrivateChef["opscode_solr4"]["ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
-      PrivateChef["opscode_certificate"]["vip"] ||= '127.0.0.1'
 
       authaddr = []
       authaddr << "0.0.0.0/0" # if PrivateChef["use_ipv4"]
@@ -342,11 +339,6 @@ module PrivateChef
       PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["redis_lb"]["enable"] ||= false
       PrivateChef["redis_lb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-
-      # move certgen back to front ends; the backend canna handle the load
-      PrivateChef["opscode_certificate"]["enable"] ||= true
-      PrivateChef["opscode_certificate"]["vip"] ||= '127.0.0.1'
-
       PrivateChef["opscode_solr4"]["enable"] ||= false
       PrivateChef["opscode_solr4"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["opscode_expander"]["enable"] ||= false
