@@ -1,8 +1,9 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author Christopher Maier <cm@opscode.com>
-%% @author Seth Falcon <seth@opscode.com>
-%% @copyright 2011-2012 Opscode, Inc.
+%% @author Christopher Maier <cm@getchef.com>
+%% @author Seth Falcon <seth@getchef.com>
+%% @author Marc Paradise <marc@getchef.com>
+%% @copyright 2011-2014 Chef Software, Inc
 -module(oc_chef_wm_routes).
 
 -export([
@@ -76,6 +77,7 @@ route(Type, Req, Args) when Type =:= role;
                             Type =:= cookbook_version;
                             Type =:= sandbox;
                             Type =:= organization_search;
+                            Type =:= associations;
                             Type =:= group;
                             Type =:= container ->
     case maybe_org_name(Req) of
@@ -107,6 +109,7 @@ org_route(principal, Req, Args) -> route_organization_rest_object("principals", 
 org_route(client, Req, Args) -> route_organization_rest_object("clients", Req, Args);
 org_route(container, Req, Args) -> route_organization_rest_object("containers", Req, Args);
 org_route(group, Req, Args) -> route_organization_rest_object("groups", Req, Args);
+org_route(association, Req, Args) -> route_organization_rest_object("users", Req, Args);
 org_route(sandbox, Req, Args) ->
     Org = org_name(Req),
     {id, Id} = lists:keyfind(id, 1, Args),
@@ -119,6 +122,11 @@ org_route(cookbook_version, Req, Args) ->
     Template = "/organizations/~s/cookbooks/~s",
     TemplateArgs = [Org, Name],
     {name, Name} = lists:keyfind(name, 1, Args),
+    render_template(Template, Req, TemplateArgs);
+org_route(organization, Req, Args) ->
+    {name, Name} = lists:keyfind(name, 1, Args),
+    Template = "/organizations/~s",
+    TemplateArgs = [Name],
     render_template(Template, Req, TemplateArgs).
 
 route_organization_rest_object(ParentName, Req, Args) ->
@@ -158,6 +166,7 @@ bulk_route_fun(Type, Req) when Type =:= role;
                                Type =:= data_bag_item;
                                Type =:= cookbook_version;
                                Type =:= group;
+                               Type =:= association;
                                Type =:= container ->
     %% Do we have an org? If orgname is not defined in the request,
     %% then call the chef_wm_routes functions and render an OSC-compatible
@@ -179,6 +188,7 @@ org_bulk_route_fun(Type, Req) when Type =:= role;
                                    Type =:= data_bag;
                                    Type =:= data_bag_item;
                                    Type =:= container;
+                                   Type =:= assocation;
                                    Type =:= group ->
 
     {BaseURI, Org} = extract_from_req(Req),
@@ -186,9 +196,19 @@ org_bulk_route_fun(Type, Req) when Type =:= role;
     fun(Name) ->
             render_template(Template, BaseURI, [Org, Name])
     end;
-
+org_bulk_route_fun(association, Req) ->
+    BaseURI = chef_wm_util:base_uri(Req),
+    Template = template_for_type(user),
+    fun(Name) ->
+            render_template(Template, BaseURI, [Name])
+    end;
+org_bulk_route_fun(organization, Req) ->
+    BaseURI = chef_wm_util:base_uri(Req),
+    Template = template_for_type(organization),
+    fun(Name) ->
+            render_template(Template, BaseURI, [Name])
+    end;
 org_bulk_route_fun(user, Req) ->
-
     BaseURI = chef_wm_util:base_uri(Req),
     Template = template_for_type(user),
     fun(Name) ->
@@ -242,6 +262,10 @@ template_for_type(container) ->
     "/organizations/~s/containers/~s";
 template_for_type(group) ->
     "/organizations/~s/groups/~s";
+template_for_type(association) ->
+    "/organizations/~s/users/~s";
+template_for_type(organization) ->
+    "/organizations/~s";
 template_for_type(user) ->
     "/users/~s".
 
