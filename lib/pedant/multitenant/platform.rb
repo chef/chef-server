@@ -261,7 +261,7 @@ module Pedant
       # TODO under ruby, we need to use the old invite/accept method,
       # while under erchef we will need to use the new POST method.
       puts "Associating user #{user.name} with org #{orgname} ..."
-      payload = { "username" => user.name }
+      payload = { "user" => user.name }
       # TODO under erlang, we now support superuser direct POST of { username: "user" } to /organizations/X/users
       # which means we don't need to do the multi-part create-and-accept process.
       association_requests_url = "#{@server}/organizations/#{orgname}/association_requests"
