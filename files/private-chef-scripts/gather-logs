@@ -28,7 +28,7 @@ then
 elif [[ $type == 'OSC' ]];
 then
     path='chef-server'
-    ctl_cmd='chef-server-ctl'
+    ctl_cmd='/opt/chef-server/bin/chef-server-ctl'
     config_name='chef-server.rb'
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];

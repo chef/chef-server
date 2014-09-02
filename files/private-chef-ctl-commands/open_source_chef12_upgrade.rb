@@ -208,7 +208,7 @@ class OpenSourceChef11Upgrade
     # Assumption is Chef 12 isn't running, since we detected open source Chef 11 on the system
     log 'Ensuring the open source Chef 11 server is started'
     msg = "Unable to start the open source Chef 11 server, which is needed to complete the upgrade"
-    check_status(run_command("chef-server-ctl start"), msg)
+    check_status(run_command("/opt/chef-server/bin/chef-server-ctl start"), msg)
     wait_for_ready_server("Chef 11")
   end
 
@@ -303,7 +303,7 @@ class OpenSourceChef11Upgrade
   def stop_chef11
     log 'Ensuring open source Chef 11 server is stopped'
     msg = "Unable to stop open souce Chef 11 server, which is needed to complete the upgrade"
-    status = run_command("chef-server-ctl stop")
+    status = run_command("/opt/chef-server/bin/chef-server-ctl stop")
     check_status(status, msg)
   end
 

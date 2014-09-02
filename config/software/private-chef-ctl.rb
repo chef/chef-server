@@ -36,7 +36,7 @@ done
   end
 
   command "chmod 755 #{install_dir}/bin/private-chef-ctl"
-
+  command "ln -s #{install_dir}/bin/private-chef-ctl #{install_dir}/bin/chef-server-ctl"
   # additional omnibus-ctl commands
   command "#{install_dir}/embedded/bin/rsync -a ./ #{install_dir}/embedded/service/omnibus-ctl/"
 end
