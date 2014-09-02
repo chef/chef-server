@@ -27,8 +27,10 @@
 
 -export([container_record_to_authz_id/2,
          fetch_container/3,
+         make_global_admin_group_name/1,
          fetch_global_group_authz_id/3,
          fetch_group_authz_id/3,
+         fetch_group_sql/3,
          make_context/2,
          statements/1
         ]).
@@ -40,6 +42,12 @@
 -include("oc_chef_authz.hrl").
 -include("oc_chef_authz_db.hrl").
 -include_lib("sqerl/include/sqerl.hrl").
+
+%% TODO Fix:
+%% -include_lib("chef_objects/include/chef_types.hrl").
+%% can't include this because it also defines object_id
+%% So copied this over for the short term.
+-define(GLOBAL_PLACEHOLDER_ORG_ID, <<"00000000000000000000000000000000">>).
 
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
 -define(user_db, "opscode_account").
@@ -221,11 +229,21 @@ fetch_container(#oc_chef_authz_context{otto_connection=Server,
             fetch_container_sql(Ctx, OrgId, ContainerName)
     end.
 
+make_global_admin_group_name(OrgName) ->
+  lists:flatten(io_lib:format("~s_global_admins", [OrgName])).
 
-fetch_global_group_authz_id(#oc_chef_authz_context{otto_connection=Server, darklaunch = _Darklaunch} = _C,
-                   OrgName, GroupName) ->
+%% TODO: the only global groups are global admins groups and this should only be used for those
+fetch_global_group_authz_id(#oc_chef_authz_context{otto_connection=Server, darklaunch = Darklaunch} = Ctx,
+                            OrgName, GroupName) ->
     RealGroupName = lists:flatten(io_lib:format("~s_~s", [OrgName, GroupName])),
-    fetch_group_authz_id_couchdb(Server, undefined, RealGroupName).
+    %% global admins are strictly related to organizations, so we'll trigger
+    %% whether the global admins group is in sql depending on where the org is
+    case xdarklaunch_req:is_enabled(<<"couchdb_organizations">>, Darklaunch) of
+        true ->
+            fetch_group_authz_id_couchdb(Server, undefined, RealGroupName);
+        false ->
+            fetch_group_authz_id_sql(Ctx, ?GLOBAL_PLACEHOLDER_ORG_ID, RealGroupName)
+    end.
 
 fetch_container_couchdb(Server, OrgId, ContainerName) ->
     case fetch_by_name(Server, OrgId, ContainerName, authz_container) of
@@ -397,6 +415,43 @@ fetch_group_authz_id_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
                           end) of
         #oc_chef_group{authz_id = AuthzId} ->
             AuthzId;
+        not_found ->
+            {not_found, authz_group};
+        {error, _} = Error ->
+            Error
+    end.
+
+
+%% TODO: refactor, clean this up
+%% We need a clean api for fetching a group w/o expansion of members
+%% We need a clean api for fetching the global admins group, but we may not need to be able to do
+%% it from couchdb.
+%% Look
+%%  * in oc_chef_wm_associations and invites
+%%  * in oc_chef_authz_groups
+%%  * in oc_chef_organization_policy
+%%
+fetch_global_admins(#oc_chef_authz_context{otto_connection=_Server,
+                                           darklaunch = Darklaunch} = Ctx,
+                    OrgName) ->
+    GlobalGroupName = make_global_admin_group_name(OrgName),
+    case xdarklaunch_req:is_enabled(<<"couchdb_groups">>, Darklaunch) of
+        true ->
+            throw({not_implemented, fetch_global_admins_couch});
+        false ->
+            fetch_group_sql(Ctx, ?GLOBAL_PLACEHOLDER_ORG_ID, GlobalGroupName)
+    end.
+
+fetch_group_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
+    case stats_hero:ctime(ReqId, {chef_sql, fetch},
+                          fun() ->
+                                  chef_object:default_fetch(#oc_chef_group{
+                                                               org_id = OrgId,
+                                                               name = Name},
+                                                            fun chef_sql:select_rows/1)
+                          end) of
+        #oc_chef_group{} = Group ->
+            Group;
         not_found ->
             {not_found, authz_group};
         {error, _} = Error ->
