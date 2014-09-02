@@ -55,6 +55,7 @@
 
 % TODO: move these somewhere generic; also used by oc_chef_wm_acl
 -export([
+         fetch_bare/2,
          find_clients_names/2,
          find_client_authz_ids/3,
          find_groups_names/2,
@@ -267,6 +268,45 @@ all_errors(Results) ->
 parse_binary_json(Bin) ->
     {ok, chef_json:decode_body(Bin)}.
 
+
+fetch_base(#oc_chef_group{}=Record, TransformFun, CallbackFun) ->
+    case chef_object:default_fetch(Record, CallbackFun) of
+        #oc_chef_group{} = GroupRecord ->
+            TransformFun(GroupRecord);
+        not_found ->
+            not_found;
+        Other ->
+            Other
+    end.
+
+fetch_bare(Record, CallBackFun) ->
+    fetch_base(Record, fun(x) -> x end, CallBackFun).
+
+fetch_new(#oc_chef_group{for_requestor_id = RequestorId} = Record, CallbackFun) ->
+    FetchMembers =
+        fun(#oc_chef_group{authz_id = GroupAuthzId} = GroupRecord) ->
+                case fetch_authz_ids(GroupAuthzId, RequestorId) of
+                    forbidden ->
+                        forbidden;
+                    {ActorAuthzIds, GroupAuthzIds} ->
+                        {ClientNames, RemainingAuthzIds} = find_clients_names(ActorAuthzIds,
+                                                                              CallbackFun),
+                        {Usernames, DefunctActorAuthzIds} = find_users_names(RemainingAuthzIds,
+                                                                             CallbackFun),
+                        {GroupNames, DefunctGroupAuthzIds} = find_groups_names(GroupAuthzIds,
+                                                                               CallbackFun),
+                        oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds,
+                                                        DefunctGroupAuthzIds),
+                        Result = GroupRecord#oc_chef_group{clients = ClientNames,
+                                                           users =  Usernames,
+                                                           groups =  GroupNames,
+                                                           auth_side_actors = ActorAuthzIds,
+                                                           auth_side_groups = GroupAuthzIds},
+                        Result
+                end
+        end,
+    fetch_base(Record, FetchMembers, CallbackFun).
+
 fetch(#oc_chef_group{for_requestor_id = RequestorId} = Record, CallbackFun) ->
     case chef_object:default_fetch(Record, CallbackFun) of
         #oc_chef_group{authz_id = GroupAuthzId} = GroupRecord ->
@@ -294,6 +334,7 @@ fetch(#oc_chef_group{for_requestor_id = RequestorId} = Record, CallbackFun) ->
         Other ->
             Other
     end.
+
 
 fetch_authz_ids(GroupAuthzId, RequestorId) ->
     Result = oc_chef_authz_http:request("/groups/" ++ binary_to_list(GroupAuthzId), get, ?DEFAULT_HEADERS, [], RequestorId),
