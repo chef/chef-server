@@ -82,6 +82,7 @@ module PrivateChef
   enabled_plugins []
 
   backup Mash.new
+  backup['strategy'] = 'tar'
 
   # - legacy config mashes -
   # these config values are here so that if any config has been previously
