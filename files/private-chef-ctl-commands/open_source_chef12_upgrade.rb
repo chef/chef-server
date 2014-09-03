@@ -38,6 +38,10 @@ class OpenSourceChef11Upgrade
   # Main function
   def run_upgrade
 
+    org_name, org_full_name = determine_org_name
+
+    validate_org_names(org_name, org_full_name)
+
     chef11_data_dir = determine_chef11_data_dir
 
     key_file = "#{chef11_data_dir}/key_dump.json"
@@ -46,7 +50,7 @@ class OpenSourceChef11Upgrade
 
     chef12_data_dir = determine_chef12_data_dir
 
-    transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir)
+    transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir, org_name, org_full_name)
 
     upload_transformed_data(chef12_data_dir)
 
@@ -90,7 +94,7 @@ class OpenSourceChef11Upgrade
     log "Open source Chef 11 server data downloaded to #{chef11_data_dir}"
   end
 
-  def transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir)
+  def transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir, org_name, org_full_name)
 
     log "Transforming open source Chef 11 server data for upload to Chef 12 server"
 
@@ -99,7 +103,6 @@ class OpenSourceChef11Upgrade
     # and then knife-ec-backup restore functionality is used to upload it to the
     # new Chef 12 server.
 
-    org_name, org_full_name, org_type = determine_org_name
 
     make_dir("#{chef12_data_dir}/organizations", 0644)
     org_dir = "#{chef12_data_dir}/organizations/#{org_name}"
@@ -107,7 +110,7 @@ class OpenSourceChef11Upgrade
     groups_dir = "#{org_dir}/groups"
     make_dir(groups_dir, 0644)
 
-    create_org_json(org_dir, org_name, org_full_name, org_type)
+    create_org_json(org_dir, org_name, org_full_name)
 
     # Copy over the key_dump.json file
     FileUtils.cp(key_file, "#{chef12_data_dir}/key_dump.json")
@@ -332,15 +335,43 @@ class OpenSourceChef11Upgrade
   end
 
   def determine_org_name
-    org_name = @options.org_name || ask("Chef Organization Name? ")
-    org_full_name = @options.full_org_name || ask("The full Chef Organization Name? ")
-    org_type = 'Business'
+    org_name = @options.org_name || ask("Chef 12 short organization name? ")
+    org_full_name = @options.full_org_name || ask("Chef 12 full organization name? ")
 
-    [org_name, org_full_name, org_type]
+    [org_name, org_full_name]
   end
 
-  def create_org_json(org_dir, org_name, org_full_name, org_type)
+  def validate_org_names(org_name, org_full_name)
+    validate_org_name(org_name)
+    validate_org_full_name(org_full_name)
+  end
+
+  def validate_org_name(org_name)
+    # Must begin with a lower case letter or digit; can only have lower case letters
+    # digits, hyphens, and underscores. Must be between 1 and 255 characters long.
+    org_name_regex = /^[a-z0-9][a-z0-9_-]{0,254}$/
+    unless org_name =~ org_name_regex
+      log "The Chef 12 short organization name #{org_name} failed validation."
+      log "The Chef 12 short organizaiton name must begin with a lower case letter or digit; can only have lower case letters digits, hyphens, and underscores and must be between 1 and 255 characters long."
+      exit 1
+    end
+  end
+
+  def validate_org_full_name(org_full_name)
+    # Must begin with a non-what space. Must be between 1 and 1023 characters long.
+    org_full_name_regex = /^\S.{0,1022}$/
+    unless org_full_name =~ org_full_name_regex
+      log "The Chef 12 full organization name #{org_full_name} failed validation."
+      log "The Chef 12 full organization name must begin with a non-white space and must be between 1 and 1023 characters long."
+      exit 1
+    end
+  end
+
+  def create_org_json(org_dir, org_name, org_full_name)
     # How is the private key returned to the user creating the org in this way?
+
+    # There is only one org type, so it's always the same
+    org_type = 'Business'
     org_json = {"name" => org_name, "full_name" => org_full_name, "org_type" => org_type}
     file_open("#{org_dir}/org.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(org_json)) }
   end
