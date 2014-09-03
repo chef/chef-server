@@ -53,9 +53,9 @@ template bootstrap_script do
   action :delete
 end
 
-if (!OmnibusHelper.has_been_bootstrapped? && node['private_chef']['topology'] != "ha" &&
+if (!OmnibusHelper.has_been_bootstrapped? &&
+    node['private_chef']['topology'] == "standalone" &&
     node['private_chef']['add_ons']['install'])
-  # TODO: do to do for tier and manual topologies?  Install or not?
   if (node['private_chef']['add_ons']['path'])
     include_recipe "private-chef::add_ons_local"
   else
