@@ -287,17 +287,15 @@ describe "/organizations", :organizations do
     end
 
     context "when the user tries to PUT to the organization with a private_key", :validation do
-      pending("erlang will not respond with 410 based on body content", :if => !ruby?) do
-        it "throws an error related to no longer supporting PUT for key updating" do
-          request = put("#{platform.server}/organizations/#{orgname}", superuser,
-                        :payload => {private_key: "some_unused_key"})
-
-          request.should look_like(
-           :status => 410
-          )
-
-          JSON.parse(request).should have_key("error")
-        end
+      it "throws an error related to no longer supporting PUT for key updating" do
+        request = put("#{platform.server}/organizations/#{orgname}", superuser,
+                      :payload => {private_key: "some_unused_key"})
+        
+        request.should look_like(
+                                 :status => ruby? ? 410 : 400
+                                 )
+        
+        JSON.parse(request).should have_key("error")
       end
     end
 
