@@ -214,6 +214,7 @@ module PrivateChef
         "opscode_chef",
         "redis_lb",
         "addons",
+        "couchdb",
         "rabbitmq",
         "opscode_solr4",
         "opscode_expander",
@@ -273,6 +274,7 @@ module PrivateChef
       PrivateChef["enabled_plugins"] << "chef-ha-#{PrivateChef["ha"]["provider"]}"
       PrivateChef["ha"]["path"] ||= "/var/opt/opscode/drbd/data"
       hapath = PrivateChef["ha"]["path"]
+      PrivateChef["couchdb"]["data_dir"] ||= "#{hapath}/couchdb"
       PrivateChef['bookshelf']['data_dir'] = "#{hapath}/bookshelf"
       PrivateChef["rabbitmq"]["data_dir"] ||= "#{hapath}/rabbitmq"
       PrivateChef["opscode_solr4"]["data_dir"] ||= "#{hapath}/opscode-solr4"

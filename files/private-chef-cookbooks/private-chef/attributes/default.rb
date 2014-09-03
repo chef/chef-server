@@ -56,6 +56,11 @@ default['private_chef']['user']['shell'] = "/bin/sh"
 default['private_chef']['user']['home'] = "/opt/opscode/embedded"
 
 ####
+# CouchDB (legacy required for upgrades to work)
+####
+default['private_chef']['couchdb']['data_dir'] = "/var/opt/opscode/couchdb/db"
+
+####
 # RabbitMQ
 ####
 default['private_chef']['rabbitmq']['enable'] = true
