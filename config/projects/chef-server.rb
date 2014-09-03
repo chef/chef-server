@@ -17,9 +17,6 @@ override :'omnibus-ctl', version: "0.2.0"
 # creates required build directories
 dependency "preparation"
 
-# needs to be before postgresql, otherwise build problems...
-dependency "postgresql91" # for pg_upgrade
-
 # global
 dependency "chef-gem" # for embedded chef-solo
 dependency "private-chef-scripts" # assorted scripts used by installed instance
