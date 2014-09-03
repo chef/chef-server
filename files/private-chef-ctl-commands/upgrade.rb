@@ -16,8 +16,11 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
 
     # Define defaults
     @options.skip_confirmation = false
-    @options.chef_server_url = "https://localhost"
+    @options.chef11_server_url = "https://localhost"
+    @options.chef12_server_url = "https://localhost"
     @options.upload_threads = 10
+    @options.chef11_admin_client_name = "admin"
+    @options.chef11_admin_client_key = "/etc/chef-server/admin.pem"
 
     opt_parser = OptionParser.new do |opts|
       opts.banner = "Usage: private-chef-ctl upgrade [options]"
@@ -28,20 +31,42 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
         @options.skip_confirmation = y
       end
 
-      opts.on("-o", "--org-name [name]", String, "The name of the Chef organization (Will ask interactively if not passed)") do |n|
+      opts.on("-o", "--org-name [name]", String, "The name of the Chef 12 organization to be created (Will ask interactively if not passed)") do |n|
         @options.org_name = n
       end
 
-      opts.on("-f", "--full-org-name [name]", String, "The full name of the Chef organization (Will ask interactively if not passed)") do |n|
+      opts.on("-f", "--full-org-name [name]", String, "The full name of the Chef 12 organization to be created (Will ask interactively if not passed)") do |n|
         @options.full_org_name = n
       end
 
-      # Should this be chef-server-host to match sql-host?
-      opts.on("-s", "--chef-server-url [url]", String, "The url of the chef server.  Defaults to #{@options.chef_server_url}") do |u|
-         @options.chef_server_url = u
+      # This option matches the knife -s option
+      opts.on("-s", "--chef11-server-url [url]", String, "The url of the Chef 11 server.  Defaults to #{@options.chef11_server_url}") do |url|
+         @options.chef11_server_url = url
       end
 
-      opts.on("-u", "--upload-threads [number]", Integer, "The number of threads to use when migrating cookbooks to the new server. Defaults to #{@options.upload_threads}") do |n|
+      opts.on("-x", "--chef12-server-url [url]", String, "The url of the Chef 12 server.  Defaults to #{@options.chef12_server_url}") do |url|
+         @options.chef12_server_url = url
+      end
+
+      # This option matches the knife -u option
+      opts.on("-u", "--user", String, "Chef 11 API client user. This is the admin user who will be used to download the Chef 11 data. Should match with the key specified.") do |user|
+        @options.chef11_admin_client_name = user
+      end
+
+      # This option matches the knife -k option
+      opts.on("-k", "--key", String, "Chef 11 API client key. This is the admin key that will be sued to download the Chef 11 data. Should match with the user specified.") do |key|
+        @options.chef11_admin_client_key = key
+      end
+
+      opts.on("-d", "--chef11-data-dir [directory]", "Directory to store open source Chef 11 server data. Defaults to a created tmp dir.") do |chef11_dir|
+        @options.chef11_data_dir = chef11_dir
+      end
+
+      opts.on("-e", "--chef12-data-dir [directory]", "Directory where data for upload to the Chef 12 server is located (Will ask interactively if not passed)") do |chef12_dir|
+        @options.chef12_data_dir = chef12_dir
+      end
+
+      opts.on("-t", "--upload-threads [number]", Integer, "The number of threads to use when migrating cookbooks to the new server. Defaults to #{@options.upload_threads}") do |n|
         @options.upload_threads = n
       end
 

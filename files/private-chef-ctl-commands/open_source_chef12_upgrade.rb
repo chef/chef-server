@@ -229,14 +229,10 @@ class OpenSourceChef11Upgrade
   end
 
   def write_knife_config(chef11_data_dir)
-    # Hard coded path to key (stole idea to use from pedant), but the path is in attributes
-    # Need to ensure we have a valid path to the key here
-
-    # Do the rest of these need to be arguments?
     config = <<-EOH
-      chef_server_url "#{@options.chef_server_url}"
-      node_name 'admin'
-      client_key '/etc/chef-server/admin.pem'
+      chef_server_url "#{@options.chef11_server_url}"
+      node name "#{@options.chef11_admin_client_name}"
+      client_key "#{@options.chef11_admin_client_key}"
       repo_mode 'everything'
       versioned_cookbooks true
       chef_repo_path "#{chef11_data_dir}"
@@ -392,7 +388,7 @@ class OpenSourceChef11Upgrade
     # The server root is likely the same as was set for the knife config
     # used by knife download
     config = <<-EOH
-    chef_server_root '#{@options.chef_server_url}'
+    chef_server_root '#{@options.chef12_server_url}'
     node_name 'pivotal'
     client_key '/etc/opscode/pivotal.pem'
     EOH
