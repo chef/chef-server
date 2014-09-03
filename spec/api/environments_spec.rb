@@ -26,7 +26,7 @@ describe "Environments API Endpoint", :environments do
   # Deal with subtly different error messages/codes in one place
 
   let(:outside_user_not_associated_msg) {
-    ["'#{outside_user.name}' not associated with organization '#{org}'"] }
+    "'#{outside_user.name}' not associated with organization '#{org}'" }
 
   let(:new_environment_name) { 'pedant_testing_environment' }
   let(:non_existent_environment_name) { 'pedant_dummy_environment' }

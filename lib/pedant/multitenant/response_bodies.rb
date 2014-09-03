@@ -16,7 +16,7 @@ module Pedant
         let(:multi_tenant_user_not_associated_response) do
           {
             status: 403,
-            body_exact: { "error" => ["'#{outside_user.name}' not associated with organization '#{org}'"] }
+            body_exact: { "error" => "'#{outside_user.name}' not associated with organization '#{org}'" }
           }
         end
 
