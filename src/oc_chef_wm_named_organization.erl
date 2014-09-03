@@ -26,6 +26,7 @@
          init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
+         conflict_message/1,
          validate_request/3]).
 
 -export([allowed_methods/2,
@@ -150,6 +151,9 @@ delete_global_admins(_Req, #base_state{chef_db_context = DbContext,
             ok
     end.
 
+-spec conflict_message(binary()) -> ejson_term().
+conflict_message(_Name) ->
+    {[{<<"error">>, <<"Organization already exists">>}]}.
 
 malformed_request_message(Any, _Req, _state) ->
     error({unexpected_malformed_request_message, Any}).

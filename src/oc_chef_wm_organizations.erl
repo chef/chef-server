@@ -183,4 +183,5 @@ malformed_request_message(Any, _Req, _State) ->
 
 -spec conflict_message(binary()) -> ejson_term().
 conflict_message(_Name) ->
-    {[{<<"error">>, [<<"Organization already exists">>]}]}.
+    {[{<<"error">>, <<"Organization already exists">>}]}.
+
