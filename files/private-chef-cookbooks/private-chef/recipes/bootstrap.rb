@@ -55,8 +55,8 @@ end
 
 if (!OmnibusHelper.has_been_bootstrapped? &&
     node['private_chef']['topology'] == "standalone" &&
-    node['private_chef']['add_ons']['install'])
-  if (node['private_chef']['add_ons']['path'])
+    node['private_chef']['addons']['install'])
+  if (node['private_chef']['addons']['path'])
     include_recipe "private-chef::add_ons_local"
   else
     include_recipe "private-chef::add_ons_remote"

@@ -23,7 +23,7 @@ module PrivateChef
   # Set this for default org mode
   default_orgname nil
 
-  add_ons Mash.new
+  addons Mash.new
   couchdb Mash.new
   rabbitmq Mash.new
   opscode_solr4 Mash.new
@@ -214,7 +214,7 @@ module PrivateChef
         "opscode_chef",
         "redis_lb",
         "couchdb",
-        "add_ons",
+        "addons",
         "rabbitmq",
         "opscode_solr4",
         "opscode_expander",

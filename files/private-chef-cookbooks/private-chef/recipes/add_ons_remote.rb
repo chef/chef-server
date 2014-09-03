@@ -40,6 +40,6 @@ else
   raise "I don't know how to install addons for platform family: #{node['platform_family']}"
 end
 
-node['private_chef']['add_ons']['packages'].each do |pkg|
+node['private_chef']['addons']['packages'].each do |pkg|
   package pkg
 end
