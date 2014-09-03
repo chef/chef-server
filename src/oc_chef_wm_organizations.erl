@@ -131,11 +131,50 @@ create_from_json(#wm_reqdata{} = Req,
 
 
 maybe_create_org({true, Req,
-                  #base_state{resource_state = #organization_state{oc_chef_organization = OrganizationData},
-                              requestor=User } = State}) ->
+                  #base_state{
+                     resource_state = #organization_state{
+                                         oc_chef_organization = #oc_chef_organization{
+                                                                   id = OrgId,
+                                                                   name = OrgName
+                                                                  } = OrganizationData},
+                     requestor = User,
+                     chef_authz_context = AuthzCtx} = State}) ->
     %% TODO error check here?
-    oc_chef_authz_org_creator:create_org(OrganizationData, User),
-    {ok, Req, State};
+    ok = oc_chef_authz_org_creator:create_org(OrganizationData, User),
+
+    %% create the authzid for the for the validator client
+    %% TODO: handle failures for this (ala chef_wm_clients:handle_client_create)
+    {PubKey, PrivKey} = chef_keygen_cache:get_key_pair(),
+
+    {ok, ClientAuthzId} = oc_chef_authz:create_entity_if_authorized(AuthzCtx, OrgId, superuser, client),
+    ClientName = <<OrgName/binary,"-validator">>,
+    ClientEJson = chef_object_base:set_public_key({[{<<"name">>, ClientName},
+                                                    {<<"validator">>, true}]},
+                                                  PubKey),
+    {ok, EnvAuthzId} = oc_chef_authz:create_entity_if_authorized(AuthzCtx, OrgId, superuser, environment),
+    EnvEJson = chef_environment:set_default_values({[{<<"name">>, <<"_default">>},
+                                                     {<<"description">>, <<"The default Chef environment">>}]}),
+
+    EnvState = State#base_state{resource_mod = chef_wm_environments,
+                                organization_guid = OrgId,
+                                organization_name = OrgName},
+    ClientState = State#base_state{resource_mod = chef_wm_clients,
+                                   organization_guid = OrgId,
+                                   organization_name = OrgName},
+
+    case chef_wm_base:create_from_json(Req, EnvState, chef_environment, {authz_id, EnvAuthzId}, EnvEJson) of
+        {{halt, _Code}, _Req, _State} = Response -> Response;
+        {true, _Req, _State} ->
+            case chef_wm_base:create_from_json(Req, ClientState, chef_client, {authz_id, ClientAuthzId}, ClientEJson) of
+                {{halt, _Code1}, _Req1, _State1} = Response1 -> Response1;
+                {true, _Req1, _State1} ->
+                    URI = ?BASE_ROUTES:route(organization, Req, [{name, OrgName}]),
+                    EJson = {[{<<"uri">>, URI},
+                              {<<"clientname">>, ClientName},
+                              {<<"private_key">>, PrivKey}]},
+                    {true, chef_wm_util:set_json_body(Req, EJson), State}
+            end
+    end;
 maybe_create_org(Other) ->
     Other.
 
