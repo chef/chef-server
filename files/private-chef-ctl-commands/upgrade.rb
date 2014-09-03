@@ -97,6 +97,28 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     return answer == 'Y' || answer == 'y'
   end
 
+  def partybus_upgrade
+    # Original Enterprise Chef upgrade path
+    reconfigure(false)
+    # Put everything in a down state before we upgrade things.
+    # How upgrades should handle services:
+    #  + It should expect services to be down, but turn off services
+    #    if its important that they be off for the upgrade.
+    #  + It should start any services it needed, and turn them off
+    #    at the end of a migration.
+    run_command("private-chef-ctl stop")
+    Dir.chdir(File.join(base_path, "embedded", "service", "partybus"))
+    bundle = File.join(base_path, "embedded", "bin", "bundle")
+    status = run_command("#{bundle} exec ./bin/partybus upgrade")
+    if status.success?
+      puts "Chef Server Upgraded!"
+      exit 0
+    else
+      exit 1
+    end
+  end
+
+
   ### Start script ###
 
   parse(ARGV)
@@ -111,25 +133,9 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
       puts "Aborting upgrade."
       exit 0
     end
-  end
-
-  # Original Enterprise Chef upgrade path
-  reconfigure(false)
-  # Put everything in a down state before we upgrade things.
-  # How upgrades should handle services:
-  #  + It should expect services to be down, but turn off services
-  #    if its important that they be off for the upgrade.
-  #  + It should start any services it needed, and turn them off
-  #    at the end of a migration.
-  run_command("private-chef-ctl stop")
-  Dir.chdir(File.join(base_path, "embedded", "service", "partybus"))
-  bundle = File.join(base_path, "embedded", "bin", "bundle")
-  status = run_command("#{bundle} exec ./bin/partybus upgrade")
-  if status.success?
-    puts "Chef Server Upgraded!"
-    exit 0
   else
-    exit 1
+    # Open source Chef 11 isn't on the system, must be a partybus upgrade
+    partybus_upgrade
   end
 
 end

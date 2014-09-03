@@ -55,6 +55,8 @@ class OpenSourceChef11Upgrade
 
   def upgrade_success_message(chef11_data_dir, chef12_data_dir)
 
+    # Ensure a new line is present to make this message stand out more
+    log ""
     log "Open source Chef 11 server successfully upgrade to Chef 11."
     log "Download Chef 11 data is still on disk, located at #{chef11_data_dir}."
     log "Transformed data upload to Chef 12 server is still on disk, located at #{chef12_data_dir}."
