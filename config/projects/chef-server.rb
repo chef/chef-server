@@ -25,7 +25,6 @@ dependency "openresty"
 dependency "redis-rb" # gem for interacting with redis
 dependency "openresty-lpeg"  # lua-based routing
 dependency "runit"
-dependency "unicorn"
 
 # the backend
 dependency "postgresql92"
