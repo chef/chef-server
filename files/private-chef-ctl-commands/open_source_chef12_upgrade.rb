@@ -50,14 +50,17 @@ class OpenSourceChef11Upgrade
 
     upload_transformed_data(chef12_data_dir)
 
-    # The OSC bits still live on the system - do we delete them here?
-    # For example, /opt/chef-server is still in the path, but /opt/opscode is not
-    # on dev-vm testing
-    # This has the effect of making the default knife, gem, etc the chef-server versions
+    upgrade_success_message(chef11_data_dir, chef12_data_dir)
+  end
 
-    # The migration data still lives on the system - it is probably worth while
-    # to include an optional step to delete it, if the user specifies this, other
-    # wise leave it on the system
+  def upgrade_success_message(chef11_data_dir, chef12_data_dir)
+
+    log "Open source Chef 11 server successfully upgrade to Chef 11."
+    log "Download Chef 11 data is still on disk, located at #{chef11_data_dir}."
+    log "Transformed data upload to Chef 12 server is still on disk, located at #{chef12_data_dir}."
+    log "These directories can be backed up or removed as desired."
+    log "The Chef 11 server package is still present on the system. It can now be safely removed."
+
   end
 
   def download_chef11_data(chef11_data_dir, key_file)
@@ -146,7 +149,7 @@ class OpenSourceChef11Upgrade
 
     run_knife_ec_restore(chef12_data_dir)
 
-    log "Open source Chef 11 server upgraded to a Chef 12 server"
+    log "Open source Chef 11 server data successfully uploaded to Chef 12 server"
   end
 
   def determine_chef11_data_dir
