@@ -38,22 +38,13 @@ class OpenSourceChef11Upgrade
   # Main function
   def run_upgrade
 
-    # As a precaution, we want the location to vary. TODO: We need to save
-    # the value to a read protected file so it can be read from if a resume
-    # is needed
-    # Do we want to delete the directory on failure or leave it for debugging?
-    # Are the permissions good enough? (0700)
-    chef11_data_dir = Dir.mktmpdir('chef11-server-data')
-    log "Making #{chef11_data_dir} as the location to save the open source Chef 11 server data"
+    chef11_data_dir = determine_chef11_data_dir
 
     key_file = "#{chef11_data_dir}/key_dump.json"
 
     download_chef11_data(chef11_data_dir, key_file)
 
-    log "Open source Chef 11 server data downloaded to #{chef11_data_dir}"
-
-    # See note above on chef11_data_dir
-    chef12_data_dir = Dir.mktmpdir('chef12-server-data')
+    chef12_data_dir = determine_chef12_data_dir
 
     transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir)
 
@@ -90,6 +81,8 @@ class OpenSourceChef11Upgrade
     log "Finished downloading data from the open source Chef 11 server"
 
     stop_chef11
+
+    log "Open source Chef 11 server data downloaded to #{chef11_data_dir}"
   end
 
   def transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir)
@@ -136,6 +129,8 @@ class OpenSourceChef11Upgrade
     create_admins_json(admin_users, groups_dir)
 
     create_billing_admins(admin_users, groups_dir)
+
+    log "Data transformed and saved to #{chef12_data_dir}"
   end
 
   def upload_transformed_data(chef12_data_dir)
@@ -152,6 +147,34 @@ class OpenSourceChef11Upgrade
     run_knife_ec_restore(chef12_data_dir)
 
     log "Open source Chef 11 server upgraded to a Chef 12 server"
+  end
+
+  def determine_chef11_data_dir
+    # As a precaution, we want the location to vary if the user did not specify
+    # the location
+    # TODO: Save the value to a read protected file so it can be read from if
+    # a resume is needed
+    # Do we want to delete the directory on failure or leave it for debugging?
+    # Are the permissions good enough? (0700)
+
+    if @options.chef11_data_dir
+      @options.chef11_data_dir
+    else
+      chef11_data_dir = Dir.mktmpdir('chef11-server-data')
+      log "Creating #{chef11_data_dir} as the location to save the open source Chef 11 server data"
+      chef11_data_dir
+    end
+  end
+
+  def determine_chef12_data_dir
+    # See note in determine_chef11_data_dir
+    if @options.chef12_data_dir
+      @options.chef12_data_dir
+    else
+      chef12_dir = Dir.mktmpdir('chef12-server-data')
+      log "Created #{chef12_dir} as the location to save the tranformed data"
+      chef12_dir
+    end
   end
 
   def fix_rabbit_wait_script
