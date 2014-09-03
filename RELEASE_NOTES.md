@@ -1,6 +1,14 @@
 # Enterprise Chef Release Notes
 
-## 11.2.0 (unreleased)
+## 11.2.1
+
+### Bug Fixes:
+
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.0:
+
+* Fix issue where 'private-chef' was being changed to 'private_chef' unexectedly in upstart/runit files
+
+## 11.2.0 (2014-08-29)
 
 ### What's New
 

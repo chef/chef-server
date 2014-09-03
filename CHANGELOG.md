@@ -1,6 +1,11 @@
 # Enterprise Chef Changelog
 
-## 11.2.0 (unreleased)
+## 11.2.1
+### enterprise-chef-common
+* Update to 0.4.5
+* Fix issue where 'private-chef' was being changed to 'private_chef' unexectedly in upstart/runit files
+
+## 11.2.0 (2014-08-29)
 
 ### Makefile
 * Add Makefile for automating builds
