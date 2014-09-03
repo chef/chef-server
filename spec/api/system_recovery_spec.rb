@@ -18,7 +18,7 @@
 #
 # Basically what I'm saying is we should have integration testing and
 # that pedant is the wrong place to do such an infrastructure / service-interactive test.
-describe 'system_recovery' do
+describe 'system_recovery', :users do
 
   def self.ruby?
     Pedant::Config.ruby_system_recovery_endpoint?
@@ -46,14 +46,14 @@ describe 'system_recovery' do
     }
   end
 
-  let (:user_body) {
+  let(:user_body) {
     {
       'username' => username,
       'password' => password
     }
   }
 
-  let (:request_url) { "#{platform.server}/system_recovery" }
+  let(:request_url) { "#{platform.server}/system_recovery" }
 
   # create a new recovery_authentication_enabled:true user
   before :each do
@@ -83,18 +83,18 @@ describe 'system_recovery' do
       end # when the superuser is the requestor
 
       context "when the password passed is incorrect" do
-        let (:wrong_pw_user_body) {
+        let(:wrong_pw_user_body) {
           { 'username' => username,
             'password' => "wrong_password"
           }
         }
 
         if (ruby?)
-          let (:error_message) {
+          let(:error_message) {
             "Failed to authenticate: "
           }
         else
-          let (:error_message) {
+          let(:error_message) {
             ["Failed to authenticate: Username and password incorrect"]
           }
         end
@@ -110,11 +110,11 @@ describe 'system_recovery' do
       context "when a non-superuser is the requestor" do
 
         if (ruby?)
-          let (:error_message) {
+          let(:error_message) {
             "#{username} not authorized for verify_password"
           }
         else
-          let (:error_message) {
+          let(:error_message) {
             ["missing create permission"]
           }
         end
@@ -148,18 +148,18 @@ describe 'system_recovery' do
         }
       end
 
-      let (:unrecoverable_user_body) {
+      let(:unrecoverable_user_body) {
         { 'username' => unrecoverable_username,
           'password' => "foobar"
         }
       }
 
       if (ruby?)
-        let (:error_message) {
+        let(:error_message) {
           "User is not allowed to take this action"
         }
       else
-        let (:error_message) {
+        let(:error_message) {
           ["System recovery disabled for this user"]
         }
       end
@@ -188,7 +188,7 @@ describe 'system_recovery' do
 
     context "when a user that does not exist is requested by the superuser" do
 
-      let (:user_body) {
+      let(:user_body) {
         {
           'username' => 'this_user_does_not_exist-#{Time.now.to_i}-#{Process.pid}',
           'password' => password
@@ -196,11 +196,11 @@ describe 'system_recovery' do
       }
 
       if (ruby?)
-        let (:error_message) {
+        let(:error_message) {
           "User is not found in the system"
         }
       else
-        let (:error_message) {
+        let(:error_message) {
           ["System recovery disabled for this user"]
         }
       end
@@ -217,16 +217,16 @@ describe 'system_recovery' do
 
     context "when the request is missing the username field" do
 
-      let (:missing_username_body) {
+      let(:missing_username_body) {
         { 'password' => "foobar" }
       }
 
       if (ruby?)
-        let (:error_body) {{
+        let(:error_body) {{
             "error" => "username and password are required"
           }}
       else
-        let (:error_body) {{
+        let(:error_body) {{
             "error" => ["Field 'username' missing"]
           }}
       end
@@ -241,16 +241,16 @@ describe 'system_recovery' do
 
     context "when the request is missing the password field" do
 
-      let (:missing_username_body) {
+      let(:missing_username_body) {
         { "username" => username }
       }
 
       if (ruby?)
-        let (:error_body) {{
+        let(:error_body) {{
             "error" => "username and password are required"
           }}
       else
-        let (:error_body) {{
+        let(:error_body) {{
             "error" => ["Field 'password' missing"]
           }}
       end
