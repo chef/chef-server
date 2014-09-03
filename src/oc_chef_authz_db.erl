@@ -214,11 +214,18 @@ make_context(ReqId, Darklaunch) when is_binary(ReqId) ->
                       container_name()) -> #chef_container{} |
                                            not_found |
                                            {error, _}.
-fetch_container(#oc_chef_authz_context{otto_connection = Server},
+fetch_container(#oc_chef_authz_context{otto_connection = Server,
+                                       darklaunch = Darklaunch} = Ctx,
                 undefined, ContainerName) ->
-    % Containers with no org are global containers - these have not yet been migrated
-    % so force them to couch regardless of darklaunch.
-    fetch_container_couchdb(Server, undefined, ContainerName);
+    %% Containers withm no org are global containers -
+    %% global containers are related to organizations, so we'll trigger
+    %% whether the global containersa are in sql depending on where the orgs are
+    case xdarklaunch_req:is_enabled(<<"coucndb_organizations">>, Darklaunch) of
+        true ->
+            fetch_container_couchdb(Server, undefined, ContainerName);
+        false ->
+            fetch_container_sql(Ctx, ?GLOBAL_PLACEHOLDER_ORG_ID, ContainerName)
+    end;
 fetch_container(#oc_chef_authz_context{otto_connection=Server,
                                        darklaunch = Darklaunch} = Ctx,
                 OrgId, ContainerName) ->
