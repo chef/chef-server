@@ -174,7 +174,7 @@ fetch_org_metadata(OrgName) ->
 %% *************************************************************
 -spec is_user_in_org(binary(), binary()) -> boolean() | {error, _}.
 is_user_in_org(<<"pivotal">>, _) ->
-    {ok, 1};
+    true;
 is_user_in_org(UserName, OrgName) ->
     case sqerl:select(user_in_org, [UserName, OrgName], first_as_scalar, [count]) of
         {ok, 0} ->
