@@ -128,6 +128,7 @@ end
 node['private_chef']['oc_id']['applications'].each do |name, app|
   oc_id_application name do
     redirect_uri app['redirect_uri']
+    only_if { is_data_master? }
   end
 end
 

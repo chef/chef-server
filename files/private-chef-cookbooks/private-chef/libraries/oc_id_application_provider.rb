@@ -8,24 +8,20 @@ class Chef
       use_inline_resources if defined?(:use_inlined_resources)
 
       action :create do
-        unless exists?
-          converge_by "create oc-id application '#{new_resource.name}'" do
-            attributes = create!
+        converge_by "create oc-id application '#{new_resource.name}'" do
+          attributes = create!
 
-            directory '/etc/opscode/oc-id-applications' do
-              owner 'root'
-              group 'root'
-              mode '0755'
-            end
+          directory '/etc/opscode/oc-id-applications' do
+            owner 'root'
+            group 'root'
+            mode '0755'
+          end
 
-            file "/etc/opscode/oc-id-applications/#{new_resource.name}.json" do
-              content Chef::JSONCompat.to_json_pretty(attributes)
-              owner 'root'
-              group 'root'
-              mode '0600'
-            end
-
-            new_resource.updated_by_last_action true
+          file "/etc/opscode/oc-id-applications/#{new_resource.name}.json" do
+            content Chef::JSONCompat.to_json_pretty(attributes)
+            owner 'root'
+            group 'root'
+            mode '0600'
           end
         end
       end
@@ -45,14 +41,6 @@ class Chef
       def command(text)
         shell_out!("bin/rails runner -e production '#{text}'",
                    :cwd => '/opt/opscode/embedded/service/oc_id').stdout.chomp
-      end
-
-      def exists?
-        @exists ||= command(
-          "puts Doorkeeper::Application.where(\
-             :name => \"#{new_resource.name}\",\
-             :redirect_uri => \"#{new_resource.redirect_uri}\").any?"
-        ) == 'true'
       end
     end
   end
