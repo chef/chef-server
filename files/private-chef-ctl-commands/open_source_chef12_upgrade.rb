@@ -8,10 +8,7 @@ require 'chef'
 require 'sequel'
 require 'highline/import'
 
-
 # General comments:
-#
-# How can these actions be made idempotent as best as possible?
 #
 # A way should be provided to either suppress all output, or else
 # have it suppressed by default and then made available if a verbose
@@ -20,19 +17,13 @@ require 'highline/import'
 
 class OpenSourceChef11Upgrade
 
+# Explicitly public methods to mark the intended API
+# Public methods are in use by one or more ctl commands
+public
+
   def initialize(options, ctlContext)
     @options = options
     @ctlContext = ctlContext
-  end
-
-  # User method_missing to catch calls to methods that are
-  # defined outside this class in the omnibus-ctl context
-  def method_missing(method_sym, *args, &block)
-    if @ctlContext.respond_to?(method_sym)
-      @ctlContext.send(method_sym, *args, &block)
-    else
-      super
-    end
   end
 
   # Main function
@@ -55,18 +46,6 @@ class OpenSourceChef11Upgrade
     upload_transformed_data(chef12_data_dir)
 
     upgrade_success_message(chef11_data_dir, chef12_data_dir)
-  end
-
-  def upgrade_success_message(chef11_data_dir, chef12_data_dir)
-
-    # Ensure a new line is present to make this message stand out more
-    log ""
-    log "Open source Chef 11 server successfully upgrade to Chef 11."
-    log "Download Chef 11 data is still on disk, located at #{chef11_data_dir}."
-    log "Transformed data upload to Chef 12 server is still on disk, located at #{chef12_data_dir}."
-    log "These directories can be backed up or removed as desired."
-    log "The Chef 11 server package is still present on the system. It can now be safely removed."
-
   end
 
   def download_chef11_data(chef11_data_dir, key_file)
@@ -102,7 +81,6 @@ class OpenSourceChef11Upgrade
     # Chef 12 server it is put into a file structure that knife-ec-backup expects
     # and then knife-ec-backup restore functionality is used to upload it to the
     # new Chef 12 server.
-
 
     make_dir("#{chef12_data_dir}/organizations", 0644)
     org_dir = "#{chef12_data_dir}/organizations/#{org_name}"
@@ -182,6 +160,32 @@ class OpenSourceChef11Upgrade
       chef12_dir = Dir.mktmpdir('chef12-server-data')
       log "Created #{chef12_dir} as the location to save the tranformed data"
       chef12_dir
+    end
+  end
+
+  def determine_org_name
+    org_name = @options.org_name || ask("Chef 12 short organization name? ")
+    org_full_name = @options.full_org_name || ask("Chef 12 full organization name? ")
+
+    [org_name, org_full_name]
+  end
+
+  def validate_org_names(org_name, org_full_name)
+    validate_org_name(org_name)
+    validate_org_full_name(org_full_name)
+  end
+
+
+# Private methods intended to only be accessed through the public interface
+private
+
+  # User method_missing to catch calls to methods that are
+  # defined outside this class in the omnibus-ctl context
+  def method_missing(method_sym, *args, &block)
+    if @ctlContext.respond_to?(method_sym)
+      @ctlContext.send(method_sym, *args, &block)
+    else
+      super
     end
   end
 
@@ -334,18 +338,6 @@ class OpenSourceChef11Upgrade
     check_status(status, msg)
   end
 
-  def determine_org_name
-    org_name = @options.org_name || ask("Chef 12 short organization name? ")
-    org_full_name = @options.full_org_name || ask("Chef 12 full organization name? ")
-
-    [org_name, org_full_name]
-  end
-
-  def validate_org_names(org_name, org_full_name)
-    validate_org_name(org_name)
-    validate_org_full_name(org_full_name)
-  end
-
   def validate_org_name(org_name)
     # Must begin with a lower case letter or digit; can only have lower case letters
     # digits, hyphens, and underscores. Must be between 1 and 255 characters long.
@@ -466,6 +458,17 @@ class OpenSourceChef11Upgrade
     status = run_command(cmd)
     msg = "Failed uploading transformed data to the Chef 12 server"
     check_status(status, msg)
+  end
+
+  def upgrade_success_message(chef11_data_dir, chef12_data_dir)
+
+    # Ensure a new line is present to make this message stand out more
+    log ""
+    log "Open source Chef 11 server successfully upgrade to Chef 11."
+    log "Download Chef 11 data is still on disk, located at #{chef11_data_dir}."
+    log "Transformed data upload to Chef 12 server is still on disk, located at #{chef12_data_dir}."
+    log "These directories can be backed up or removed as desired."
+    log "The Chef 11 server package is still present on the system. It can now be safely removed."
   end
 
 end
