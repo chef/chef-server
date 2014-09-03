@@ -107,8 +107,22 @@ describe "/organizations", :organizations do
         )
       end
 
+      context "but an organization of the same name already exists" do
+        before :each do
+          post("#{platform.server}/organizations", superuser, :payload => request_body)
+        end
+
+        after :each do
+          delete("#{platform.server}/organizations/#{orgname}", superuser)
+        end
+
+        it "it rejects the new org as conflicting:" do
+          post("#{platform.server}/organizations", superuser, :payload => request_body).should look_like( :status => 409)
+        end
+      end
+
 # Note:
-# Currently excluded because it fails intermittently.
+      # Currently excluded because it fails intermittently.
 # To re-enable, please remove ', :intermittent_failure => true'
       it "should respond with data containing a valid private key",  :intermittent_failure => true do
         result = JSON.parse(post("#{platform.server}/organizations", superuser, :payload => request_body))
@@ -127,6 +141,9 @@ describe "/organizations", :organizations do
         org_type: "Business"
       }
     end
+    let(:org_with_no_name) { { 'full_name' => "Test This Org" } }
+    let(:org_with_no_full_name) { { 'name' => "test123" } }
+    let(:org_with_bad_name ) { { 'name' => "@!## !@#($@" } }
 
     before :each do
       post("#{platform.server}/organizations", superuser, :payload => post_request_body)
@@ -178,8 +195,57 @@ describe "/organizations", :organizations do
           :body => get_response_body
         )
       end
+
+      context "and the organization is renamed to an existing org name" do
+        before :each do
+          dup_payload = payload.dup
+          dup_payload["org_name"] = new_orgname
+          post("#{platform.server}/organizations", superuser, :payload => dup_payload)
+        end
+
+        after :each do
+          delete("#{platform.server}/organizations/#{new_orgname}", superuser)
+        end
+        it "it rejects the update as conflicting" do
+          put("#{platform.server}/organizations/#{orgname}", superuser, :payload => payload).should look_like( :status => 409)
+        end
+      end
     end
 
+    context "when the user attempts to create a new org with invalid data" do
+      it "it should fail when 'name' is missing" do
+        post("#{platform.server}/organizations", superuser, :payload => org_with_no_name ).should look_like(
+          :status => 400
+        )
+      end
+      it "it should fail when 'full_name' is missing" do
+        post("#{platform.server}/organizations", superuser, :payload => org_with_no_full_name ).should look_like(
+          :status => 400
+        )
+      end
+      it "it should fail when 'name' is invalid" do
+        post("#{platform.server}/organizations", superuser, :payload => org_with_bad_name).should look_like(
+          :status => 400
+        )
+      end
+    end
+    context "when the user attempts to update a field in the org with invalid data" do
+      it "it should fail when 'name' is missing" do
+        put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_name ).should look_like(
+          :status => 400
+        )
+      end
+      it "it should fail when 'full_name' is missing" do
+        put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_full_name ).should look_like(
+          :status => 400
+        )
+      end
+      it "it should fail when 'name' is invalid" do
+        put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_bad_name ).should look_like(
+          :status => 400
+        )
+      end
+    end
     context "when the user updates fields in the organization with valid data" do
       let(:payload) do
         payload = {
@@ -203,6 +269,7 @@ describe "/organizations", :organizations do
         resp = payload.dup
         resp.delete('org_type') unless ruby?
         resp
+
       end
 
       it "should update the organization object" do
@@ -219,16 +286,18 @@ describe "/organizations", :organizations do
       end
     end
 
-    context "when the user tries to post a private_key", :validation do
-      it "throws an error related to no longer supporting PUT for key updating" do
-        request = put("#{platform.server}/organizations/#{orgname}", superuser,
-                      :payload => {private_key: "some_unused_key"})
+    context "when the user tries to PUT to the organization with a private_key", :validation do
+      pending("erlang will not respond with 410 based on body content", :if => !ruby?) do
+        it "throws an error related to no longer supporting PUT for key updating" do
+          request = put("#{platform.server}/organizations/#{orgname}", superuser,
+                        :payload => {private_key: "some_unused_key"})
 
-        request.should look_like(
-         :status => 410
-        )
+          request.should look_like(
+           :status => 410
+          )
 
-        JSON.parse(request).should have_key("error")
+          JSON.parse(request).should have_key("error")
+        end
       end
     end
 
