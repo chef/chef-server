@@ -21,7 +21,7 @@ add_command "chef12-upgrade-download", "Download data from a open source Chef 11
     opt_parser = OptionParser.new do |opts|
       opts.banner = "Usage: private-chef-ctl chef12-upgrade-download [options]"
 
-      opts.on("-d", "--chef11-data-dir [directory]", "Directory to store open source Chef 11 server data. Defaults to a created tmp dir.") do |chef11_dir|
+      opts.on("-d", "--chef11-data-dir [directory]", String, "Directory to store open source Chef 11 server data. Defaults to a created tmp dir.") do |chef11_dir|
         @options.chef11_data_dir = chef11_dir
       end
 
@@ -31,12 +31,12 @@ add_command "chef12-upgrade-download", "Download data from a open source Chef 11
       end
 
       # This option matches the knife -u option
-      opts.on("-u", "--user", String, "Chef 11 API client user. This is the admin user who will be used to download the Chef 11 data. Should match with the key specified.") do |user|
+      opts.on("-u", "--user [user]", String, "Chef 11 API client user. This is the admin user who will be used to download the Chef 11 data. Should match with the key specified. Defaults to #{@options.chef11_admin_client_name}") do |user|
         @options.chef11_admin_client_name = user
       end
 
       # This option matches the knife -k option
-      opts.on("-k", "--key", String, "Chef 11 API client key. This is the admin key that will be sued to download the Chef 11 data. Should match with the user specified.") do |key|
+      opts.on("-k", "--key [key]", String, "Chef 11 API client key. This is the admin key that will be sued to download the Chef 11 data. Should match with the user specified. Defaults to #{@options.chef11_admin_client_key}") do |key|
         @options.chef11_admin_client_key = key
       end
 

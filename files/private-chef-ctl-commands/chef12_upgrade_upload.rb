@@ -20,7 +20,7 @@ add_command "chef12-upgrade-upload", "Upload transformed open source Chef 11 dat
       opt_parser = OptionParser.new do |opts|
         opts.banner = "Usage: private-chef-ctl chef12-upgrade-upload [options]"
 
-        opts.on("-e", "--chef12-data-dir [directory]", "Directory where data for upload to the Chef 12 server is located (Will ask interactively if not passed)") do |chef12_dir|
+        opts.on("-e", "--chef12-data-dir [directory]", String, "Directory where data for upload to the Chef 12 server is located (Will ask interactively if not passed)") do |chef12_dir|
           @options.chef12_data_dir = chef12_dir
         end
 

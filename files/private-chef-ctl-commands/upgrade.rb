@@ -49,20 +49,20 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
       end
 
       # This option matches the knife -u option
-      opts.on("-u", "--user", String, "Chef 11 API client user. This is the admin user who will be used to download the Chef 11 data. Should match with the key specified.") do |user|
+      opts.on("-u", "--user [user]", String, "Chef 11 API client user. This is the admin user who will be used to download the Chef 11 data. Should match with the key specified. Defaults to #{@options.chef11_admin_client_name}") do |user|
         @options.chef11_admin_client_name = user
       end
 
       # This option matches the knife -k option
-      opts.on("-k", "--key", String, "Chef 11 API client key. This is the admin key that will be sued to download the Chef 11 data. Should match with the user specified.") do |key|
+      opts.on("-k", "--key [key]", String, "Chef 11 API client key. This is the admin key that will be used to download the Chef 11 data. Should match with the user specified. Defaults to #{@options.chef11_admin_client_key}") do |key|
         @options.chef11_admin_client_key = key
       end
 
-      opts.on("-d", "--chef11-data-dir [directory]", "Directory to store open source Chef 11 server data. Defaults to a created tmp dir.") do |chef11_dir|
+      opts.on("-d", "--chef11-data-dir [directory]", String, "Directory to store open source Chef 11 server data. Defaults to a created tmp dir.") do |chef11_dir|
         @options.chef11_data_dir = chef11_dir
       end
 
-      opts.on("-e", "--chef12-data-dir [directory]", "Directory where data for upload to the Chef 12 server is located (Will ask interactively if not passed)") do |chef12_dir|
+      opts.on("-e", "--chef12-data-dir [directory]", String, "Directory where data for upload to the Chef 12 server is located. Defaults to a created tmp dir.") do |chef12_dir|
         @options.chef12_data_dir = chef12_dir
       end
 

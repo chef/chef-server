@@ -254,7 +254,7 @@ class OpenSourceChef11Upgrade
   def write_knife_config(chef11_data_dir)
     config = <<-EOH
       chef_server_url "#{@options.chef11_server_url}"
-      node name "#{@options.chef11_admin_client_name}"
+      node_name "#{@options.chef11_admin_client_name}"
       client_key "#{@options.chef11_admin_client_key}"
       repo_mode 'everything'
       versioned_cookbooks true
