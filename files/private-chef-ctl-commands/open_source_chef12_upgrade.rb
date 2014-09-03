@@ -344,7 +344,7 @@ private
     org_name_regex = /^[a-z0-9][a-z0-9_-]{0,254}$/
     unless org_name =~ org_name_regex
       log "The Chef 12 short organization name #{org_name} failed validation."
-      log "The Chef 12 short organizaiton name must begin with a lower case letter or digit; can only have lower case letters digits, hyphens, and underscores and must be between 1 and 255 characters long."
+      log "The Chef 12 short organizaiton name must begin with a lower case letter or digit; can only have lower case letters, digits, hyphens, and underscores and must be between 1 and 255 characters long."
       exit 1
     end
   end
