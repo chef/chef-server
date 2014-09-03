@@ -105,14 +105,7 @@ make_context() ->
 %% organization.  Returns the organization's ID if so; 'not_found' otherwise.
 -spec get_org_id(Context :: term(), OrgName :: binary()) -> OrgId::binary() | not_found.
 get_org_id(Context, OrgName) ->
-    %% HACK: since we don't have a good and clean way to pass in darklaunch data
-    %% to fetch_org_id, we'll go a layer or 2 underneath it to fetch the id directly
-    %% from the cdb metadata call. We'll have to update this shortly when orgs are
-    %% in SQL
-    case rpc:call(?ERCHEF, chef_db, cdb_fetch_org_metadata, [Context, OrgName]) of
-        not_found -> not_found;
-        {OrgId, _OrgAuthzId} -> OrgId
-    end.
+    rpc:call(?ERCHEF, chef_db, fetch_org_id, [Context, OrgName]).
 
 %% @doc Connect to the node actually running Erchef.  Kind of hard to do RPC calls
 %% otherwise....
