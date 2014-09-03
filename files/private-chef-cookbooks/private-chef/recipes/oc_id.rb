@@ -123,6 +123,15 @@ if node['private_chef']['bootstrap']['enable']
   end
 end
 
+# Take the existing oc_id.applications (with only a redirect_uri), ensure they
+# exist in the database, and dump their data to /etc/opscode/oc-id-applications.
+node['private_chef']['oc_id']['applications'].each do |name, app|
+  oc_id_application name do
+    redirect_uri app['redirect_uri']
+    only_if { is_data_master? }
+  end
+end
+
 nginx_dir = node['private_chef']['nginx']['dir']
 nginx_etc_dir = File.join(nginx_dir, "etc")
 nginx_addon_dir = File.join(nginx_etc_dir, "addon.d")
