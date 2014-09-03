@@ -117,16 +117,14 @@ local p_erchef_direct = (Cendpoint(p_erchef_endpoint) * ((p_sep * c_identifier) 
 -- /users/USERNAME/organizations, /users/USERNAME/association_requests go to account
 local p_erchef_users = (p_sep * Cendpoint(p_users) * p_trailing_sep) +
                        (p_sep * Cendpoint(p_users) * (p_sep * c_identifier)^-1 * p_trailing_sep) +
-                       (p_sep * Cendpoint(p_auth_user) * p_trailing_sep)
+                       (p_sep * Cendpoint(p_auth_user) * p_trailing_sep) +
+                       (p_sep * Cendpoint(p_system_recovery) * p_trailing_sep)
 
 local p_license_route = (p_sep * Cendpoint(p_license) * p_trailing_sep)
 
-local p_add_org = P"add-an-org"
-local p_create_org = p_sep * Cendpoint(p_add_org) * p_sep  * Cg(p_org_identifier, "org_name")
 -- Everything that gets sent to erchef
 local p_erchef = (p_named_org_prefix * p_erchef_direct) +
                  p_erchef_users +
-                 p_create_org +
                  p_license_route
 
 -- erchef routing rules for chef_internal, which includes an additional
@@ -150,7 +148,7 @@ local p_acct_users = (p_named_org_prefix * Cendpoint(p_association_requests) * (
                        -- /users/BLAH/{0,1}/association_requests
                        -- which permits: /users/BLAH//association_requests
                        ((p_sep * p_maybe_sep * Cendpoint(p_association_requests) * (p_sep + p_eol)) +
-                       -- set /users/:username/organiztaions(/) to endpoint "associations" so we
+                       -- set /users/:username/organizations(/) to endpoint "associations" so we
                        -- can darklaunch it
                        (p_sep * Cmatch_and_assign_endpoint(p_org, "associations") * p_trailing_sep) )
 
@@ -170,7 +168,6 @@ local p_org_acl_endpoint = (p_named_org_prefix * p_org * Cendpoint(p_acl) * (p_s
 local p_acl_endpoint = (p_named_org_prefix * p_all_until_acl * Cendpoint(p_acl) * (p_sep + p_eol)) +
                        (p_named_user * Cendpoint(p_acl) * (p_sep + p_eol))
 
-local p_acct = (p_sep * Cendpoint(p_system_recovery) * p_trailing_sep)
 
 -- Default org endpoints. This is to help with migrating from OSC 11 to Chef Server 12
 local p_default_org_endpoints = p_search + p_nodes + p_cookbooks + p_data + p_roles + p_sandboxes + p_environments + p_clients + p_runs + p_principals + p_groups + p_containers
@@ -185,8 +182,7 @@ local uri_resolvers = {
 
   api = (p_org_acl_endpoint * c_acct_erchef) +
         ((p_acl_endpoint + p_internal_acct_erchef_endpoints) * c_acct_erchef) +
-        (p_erchef * c_erchef) +
-        (p_acct * c_acct),
+        (p_erchef * c_erchef),
 
   -- This one is easy - everything passes through, though we'll still need to capture components
   -- (org name, object name, endpoint name) where we can, so that post-route hooks can be applied.
@@ -197,6 +193,7 @@ local uri_resolvers = {
                   (p_org_acl_endpoint * c_acct_erchef) +
                   (p_acl_endpoint * c_acct_erchef) +
 
+                  -- TODO confirm - this should no longer be required.
                   -- Special case: webui1 will still send requests for clients over to us, so
                   -- we have to be able to route migrated endpoints (that used to be acct) to erchef.
                   -- we will need to continue to add migrated acct->erchef endpoints here
@@ -204,7 +201,7 @@ local uri_resolvers = {
                   ((p_named_org_prefix * Cendpoint(p_clients) * c_maybe_identifier) * c_erchef) +
                   (p_erchef_users * c_erchef) +
                   (p_internal_acct_erchef_endpoints * c_acct_erchef) +
-                  ((p_acct + p_internal_organizations_base) * c_acct),
+                  (p_internal_organizations_base * c_acct),
 
   -- Anything that routes to erchef or reporting is handled here.
   internal_chef = (p_erchef_int * c_erchef)
