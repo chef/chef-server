@@ -33,12 +33,10 @@ default['private_chef']['default_orgname'] = nil
 ###
 # Options for installing addons
 ###
-default['private_chef']['install_addons'] = true
-default['private_chef']['install_addons_from_path'] = false
-default['private_chef']['install_analytics_path'] = nil
-default['private_chef']['install_manage_path'] = nil
-default['private_chef']['install_push_jobs_path'] = nil
-default['private_chef']['install_reporting_path'] = nil
+default['private_chef']['add_ons']['install'] = true
+default['private_chef']['add_ons']['path'] = false
+default['private_chef']['add_ons']['packages'] =
+  %w{opscode-push-jobs-server opscode-reporting opscode-manage opscode-analytics}
 
 ####
 # The Chef User that services run as
