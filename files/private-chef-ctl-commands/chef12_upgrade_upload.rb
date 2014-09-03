@@ -14,7 +14,7 @@ add_command "chef12-upgrade-upload", "Upload transformed open source Chef 11 dat
       @options = OpenStruct.new
 
       # Define defaults
-      @options.chef_server_url = "https://localhost"
+      @options.chef12_server_url = "https://localhost"
       @options.upload_threads = 10
 
       opt_parser = OptionParser.new do |opts|
@@ -24,8 +24,8 @@ add_command "chef12-upgrade-upload", "Upload transformed open source Chef 11 dat
           @options.chef12_data_dir = chef12_dir
         end
 
-        opts.on("-s", "--chef-server-url [url]", String, "The url of the Chef 12 server.  Defaults to #{@options.chef_server_url}") do |u|
-          @options.chef_server_url = u
+        opts.on("-x", "--chef12-server-url [url]", String, "The url of the Chef 12 server.  Defaults to #{@options.chef12_server_url}") do |url|
+          @options.chef12_server_url = url
         end
 
         opts.on("-u", "--upload-threads [number]", Integer, "The number of threads to use when migrating cookbooks to the new server. Defaults to #{@options.upload_threads}") do |n|
