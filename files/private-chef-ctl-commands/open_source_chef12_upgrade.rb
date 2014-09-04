@@ -232,7 +232,7 @@ private
       rescue StandardError => e
         sleep 1
         if count == max_count
-          log "Timeout waiting for #{server_version} server to start. Received expection #{e.message}"
+          log "Timeout waiting for #{server_version} server to start. Received exception #{e.message}"
           exit 1
         end
       end
