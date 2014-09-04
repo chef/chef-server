@@ -362,9 +362,7 @@ private
   def create_org_json(org_dir, org_name, org_full_name)
     # How is the private key returned to the user creating the org in this way?
 
-    # There is only one org type, so it's always the same
-    org_type = 'Business'
-    org_json = {"name" => org_name, "full_name" => org_full_name, "org_type" => org_type}
+    org_json = {"name" => org_name, "full_name" => org_full_name}
     file_open("#{org_dir}/org.json", "w"){ |file| file.write(Chef::JSONCompat.to_json_pretty(org_json)) }
   end
 
