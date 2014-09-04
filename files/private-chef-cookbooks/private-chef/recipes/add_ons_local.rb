@@ -24,7 +24,7 @@ node['private_chef']['addons']['packages'].each do |pkg|
     when 'debian'
       provider Chef::Provider::Package::Dpkg
     when 'rhel'
-      provider Chef::Privider::Package::Rpm
+      provider Chef::Provider::Package::Rpm
     end
     source pkg_file
   end
