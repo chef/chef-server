@@ -13,6 +13,9 @@ describe "/organizations", :organizations do
     Pedant::Config.ruby_organizations_endpoint?
   end
 
+  let(:org_with_no_name) { { 'full_name' => "Test This Org" } }
+  let(:org_with_no_full_name) { { 'name' => "test123" } }
+  let(:org_with_bad_name ) { { 'name' => "@!## !@#($@" } }
   describe "GET /organizations" do
     let(:request_url)    { "#{platform.server}/organizations" }
     let(:requestor)      { superuser }
@@ -116,7 +119,7 @@ describe "/organizations", :organizations do
           delete("#{platform.server}/organizations/#{orgname}", superuser)
         end
 
-        it "it rejects the new org as conflicting:" do
+        it "it rejects the new org as conflicting" do
           post("#{platform.server}/organizations", superuser, :payload => request_body).should look_like( :status => 409)
         end
       end
@@ -127,6 +130,23 @@ describe "/organizations", :organizations do
       it "should respond with data containing a valid private key",  :intermittent_failure => true do
         result = JSON.parse(post("#{platform.server}/organizations", superuser, :payload => request_body))
         /-----BEGIN RSA PRIVATE KEY-----/.should match(result["private_key"])
+      end
+    end
+    context "when the user attempts to create a new org with invalid data" do
+      it "it should fail when 'name' is missing" do
+        post("#{platform.server}/organizations", superuser, :payload => org_with_no_name ).should look_like(
+          :status => 400
+        )
+      end
+      it "it should fail when 'full_name' is missing" do
+        post("#{platform.server}/organizations", superuser, :payload => org_with_no_full_name ).should look_like(
+          :status => 400
+        )
+      end
+      it "it should fail when 'name' is invalid" do
+        post("#{platform.server}/organizations", superuser, :payload => org_with_bad_name).should look_like(
+          :status => 400
+        )
       end
     end
 
@@ -141,9 +161,6 @@ describe "/organizations", :organizations do
         org_type: "Business"
       }
     end
-    let(:org_with_no_name) { { 'full_name' => "Test This Org" } }
-    let(:org_with_no_full_name) { { 'name' => "test123" } }
-    let(:org_with_bad_name ) { { 'name' => "@!## !@#($@" } }
 
     before :each do
       post("#{platform.server}/organizations", superuser, :payload => post_request_body)
@@ -153,8 +170,8 @@ describe "/organizations", :organizations do
       delete("#{platform.server}/organizations/#{orgname}", superuser)
     end
 
-    context "when the user renames the organization object with modifications", :rename_org do
-      let(:new_orgname) { "test-#{Time.now.to_i*3}-#{Process.pid}" }
+    context "when the user updates the organization object", :focus do
+      let(:new_orgname) { "update-to-#{Time.now.to_i*3}-#{Process.pid}" }
       let(:payload) do
         {
           'name' => new_orgname,
@@ -179,57 +196,12 @@ describe "/organizations", :organizations do
         resp
       end
 
-      after :each do
-        delete("#{platform.server}/organizations/#{new_orgname}", superuser)
-      end
-
-      it "should update the organization object" do
-        # TODO: we don't validate org_type at all
+      it "should fail to update the organization object if the name is changed" do
         put("#{platform.server}/organizations/#{orgname}", superuser, :payload => payload).should look_like(
-          :status => ruby? ? 200 : 201,
-          :body => update_response_body
-        )
-
-        get("#{platform.server}/organizations/#{new_orgname}", superuser).should look_like(
-          :status => 200,
-          :body => get_response_body
+          :status => ruby? ? 200 : 400,
+          :body => ruby? ? update_response_body : { "error" => ["Field 'name' invalid"] }
         )
       end
-
-      context "and the organization is renamed to an existing org name" do
-        before :each do
-          dup_payload = payload.dup
-          dup_payload["org_name"] = new_orgname
-          post("#{platform.server}/organizations", superuser, :payload => dup_payload)
-        end
-
-        after :each do
-          delete("#{platform.server}/organizations/#{new_orgname}", superuser)
-        end
-        it "it rejects the update as conflicting" do
-          put("#{platform.server}/organizations/#{orgname}", superuser, :payload => payload).should look_like( :status => 409)
-        end
-      end
-    end
-
-    context "when the user attempts to create a new org with invalid data" do
-      it "it should fail when 'name' is missing" do
-        post("#{platform.server}/organizations", superuser, :payload => org_with_no_name ).should look_like(
-          :status => 400
-        )
-      end
-      it "it should fail when 'full_name' is missing" do
-        post("#{platform.server}/organizations", superuser, :payload => org_with_no_full_name ).should look_like(
-          :status => 400
-        )
-      end
-      it "it should fail when 'name' is invalid" do
-        post("#{platform.server}/organizations", superuser, :payload => org_with_bad_name).should look_like(
-          :status => 400
-        )
-      end
-    end
-    context "when the user attempts to update a field in the org with invalid data" do
       it "it should fail when 'name' is missing" do
         put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_name ).should look_like(
           :status => 400
@@ -245,13 +217,15 @@ describe "/organizations", :organizations do
           :status => 400
         )
       end
+
     end
+
     context "when the user updates fields in the organization with valid data" do
       let(:payload) do
         payload = {
           'name' => orgname,
           'org_type' => "Pleasure",
-          'full_name' => orgname
+          'full_name' => "A Real Org Name"
         }
       end
 
