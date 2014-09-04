@@ -116,21 +116,23 @@ auth_info(_, Req, #base_state{resource_args = Args,
                                                                                             Args == invitation_response;
                                                                                             Args == invitation_count ->
     #chef_user{authz_id = AuthzId} = User,
-    % Only superuser and the user may view his or her own invitations and invitation count.
     Auth  = case RequestorAuthzId of
         AuthzId ->
+            % In case permissions are in any way incorrect, don't require that the user
+            % have any permissions to her own object - her identity is sufficent
             authorized;
         _ ->
-            access_for(Args)
+            invite_access_for(Args, AuthzId)
     end,
     {Auth, Req, State};
 auth_info(Method, Req, #base_state{resource_state = #user_state{chef_user = User}} = State) ->
     #chef_user{authz_id = AuthzId} =   User,
     {auth_type(Method, AuthzId, State), Req, State}.
 
-access_for(invitations) -> superuser_only;
-access_for(invitation_count) -> superuser_only;
-access_for(invitation_response) -> {halt, 403}.
+invite_access_for(invitations, _) -> superuser_only;
+invite_access_for(invitation_count, _) -> superuser_only;
+invite_access_for(invitation_response, AuthzId) -> {actor, AuthzId, grant}.
+
 
 auth_type('PUT', AuthzId, #user_state{user_data = UserData}) ->
     ExtId = ej:get({<<"external_authentication_uid">>}, UserData),
