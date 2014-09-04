@@ -26,7 +26,6 @@
          init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
-         conflict_message/1,
          validate_request/3]).
 
 -export([allowed_methods/2,
@@ -50,15 +49,16 @@ allowed_methods(Req, State) ->
 validate_request(Method, Req, State = #base_state{organization_guid = OrgId}) when Method == 'GET';
                                                                                    Method == 'DELETE' ->
     {Req, State#base_state{superuser_bypasses_checks = true, resource_state = #organization_state{oc_chef_organization = #oc_chef_organization{id = OrgId}}}};
-validate_request('PUT', Req, #base_state{organization_guid = OrgId, resource_state = OrgState} = State) ->
+validate_request('PUT', Req, #base_state{organization_name = OrgName,
+                                         organization_guid = OrgId,
+                                         resource_state = OrgState} = State) ->
     Body = wrq:req_body(Req),
-    {ok, Org} = oc_chef_organization:parse_binary_json(Body),
+    {ok, Org} = oc_chef_organization:parse_binary_json({Body, OrgName}),
     {Req, State#base_state{
             superuser_bypasses_checks = true,
             resource_state = OrgState#organization_state{
                                oc_chef_organization = #oc_chef_organization{id = OrgId},
                                organization_data = Org}}}.
-
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = OrgState,
@@ -66,6 +66,7 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
                            organization_name = OrgName} = State) ->
     %% TODO: This fetch might be sensibly merged into the org GUID fetch code, but it is
     %% simpler now to just get the org fresh, fewer yaks to shave
+
     case chef_db:fetch(#oc_chef_organization{id = OrgId, name = OrgName}, DbContext) of
         not_found ->
             Message = chef_wm_util:error_message_envelope(iolist_to_binary(["Cannot load Organization ",
@@ -114,7 +115,6 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                                      oc_chef_organization = Organization}
                                 } = State) ->
     delete_global_admins(Req, State),
-
     ok = oc_chef_wm_base:delete_object(DbContext, Organization, RequestorId),
     Ejson = oc_chef_organization:assemble_organization_ejson(Organization),
     {true, chef_wm_util:set_json_body(Req, Ejson), State}.
@@ -144,16 +144,12 @@ delete_global_admins(_Req, #base_state{chef_db_context = DbContext,
             %% redbug:start("oc_chef_authz:delete_resource->stack,return").
             %%
             oc_chef_object_db:safe_delete(DbContext, GlobalAdmins, RequestorId);
-        not_found ->
-            lager:error("Could not find global admins for org ~s", [OrgName]),
+        {not_found, authz_group} ->
             %% Ignoring this error lets us retry the whole deletion process if it fails part
             %% of the way through
+            lager:error("Could not find global admins for org ~s", [OrgName]),
             ok
     end.
-
--spec conflict_message(binary()) -> ejson_term().
-conflict_message(_Name) ->
-    {[{<<"error">>, <<"Organization already exists">>}]}.
 
 malformed_request_message(Any, _Req, _state) ->
     error({unexpected_malformed_request_message, Any}).
