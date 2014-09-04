@@ -186,7 +186,7 @@ describe "opscode-account user association", :association do
       response.should look_like({ :status => 404,
                                   :body_exact => { "error"=>"Could not find user flappy"} })
     end
-    it "cannot found association count" do
+    it "cannot find association count" do
       response = get("#{user_assoc_url}/count", platform.superuser)
       response.should look_like({ :status => 404,
                                   :body_exact => { "error"=>"Could not find user flappy"} })
@@ -204,6 +204,7 @@ describe "opscode-account user association", :association do
       end
     end
   end
+
   context "when org admin is attempting to view user associations" do
     let(:user_assoc_url) { "#{users_url}/#{platform.bad_user.name}/association_requests" }
     let(:read_fail_message) { ruby? ? "You are not allowed to view association requests for #{platform.bad_user.name}" : ["missing read permission"] }
@@ -509,6 +510,33 @@ describe "opscode-account user association", :association do
         delete(api_url("users/#{bad_user}"), platform.admin_user).should look_like({ :status=> 200 })
         user_should_not_be_in_org(platform.bad_user)
       end
+
+      context "and a valid invite is issued" do
+        let(:org) { platform.test_org.name }
+        let(:invited_user_name) { "test-user-#{Time.now.to_i}-#{Process.pid}" }
+        let(:invited_user) { platform.create_user(invited_user_name) }
+
+        before :each do
+          @invite_id = invite_user(org, invited_user.name, platform.admin_user)
+          @user_invite_url = make_user_assoc_url_id(invited_user.name, @invite_id)
+        end
+        after :each do
+          cleanup_requests_for_org(org)
+          delete(api_url("users/#{invited_user_name}"), platform.superuser)
+          delete("#{platform.server}/users/#{invited_user_name}", platform.superuser)
+        end
+
+        it "an org admin cannot accept that invite on behalf of the user", :authorization do
+          response = put(@user_invite_url, platform.admin_user, :payload=>{:response=>"accept"})
+          response.should look_like({ :status => 403 })
+        end
+
+        it "the global superuser can accept the invite on behalf of the user", :authorization do
+          response = put(@user_invite_url, platform.superuser, :payload=>{:response=>"accept"})
+          response.should look_like({ :status => 200})
+        end
+      end
+
       context "when the inviting admin" do
         let(:bad_user) { platform.bad_user.name }
         let(:org) { platform.test_org.name }
