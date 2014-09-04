@@ -1,7 +1,7 @@
-private-chef Omnibus project
+chef-server Omnibus project
 ============================
 This project creates full-stack platform-specific packages for
-`private-chef`!
+`chef-server`!
 
 Installation
 ------------
@@ -23,7 +23,7 @@ omnibus.rb.example.rb.  Please grab credentials from teampass.
 You create a platform-specific package using the `build project` command:
 
 ```shell
-$ bin/omnibus build private-chef
+$ bin/omnibus build chef-server
 ```
 
 The platform/architecture type of the package created will match the platform
@@ -37,15 +37,15 @@ You can clean up all temporary files generated during the build process with
 the `clean` command:
 
 ```shell
-$ bin/omnibus clean private-chef
+$ bin/omnibus clean chef-server
 ```
 
 Adding the `--purge` purge option removes __ALL__ files generated during the
-build including the project install directory (`/opt/private-chef`) and
+build including the project install directory (`/opt/opscode`) and
 the package cache directory (`/var/cache/omnibus/pkg`):
 
 ```shell
-$ bin/omnibus clean private-chef --purge
+$ bin/omnibus clean chef-server --purge
 ```
 
 ### Help
@@ -137,7 +137,7 @@ $ kitchen login ubuntu-1204
 [vagrant@ubuntu...] $ cd opscode-omnibus
 [vagrant@ubuntu...] $ bundle install --binstubs
 [vagrant@ubuntu...] $ ...
-[vagrant@ubuntu...] $ bin/omnibus build private-chef
+[vagrant@ubuntu...] $ bin/omnibus build chef-server
 ```
 or if you prefer not to use binstubs and to use bundle exec instead:
 
@@ -146,7 +146,7 @@ $ kitchen login ubuntu-1204
 [vagrant@ubuntu...] $ cd opscode-omnibus
 [vagrant@ubuntu...] $ bundle install
 [vagrant@ubuntu...] $ ...
-[vagrant@ubuntu...] $ bundle exec omnibus build private-chef
+[vagrant@ubuntu...] $ bundle exec omnibus build chef-server
 ```
 
 For a complete list of all commands and platforms, run `kitchen list` or
