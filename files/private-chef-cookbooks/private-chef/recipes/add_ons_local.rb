@@ -18,8 +18,14 @@ end
 addon_path = node['private_chef']['addons']['path']
 node['private_chef']['addons']['packages'].each do |pkg|
   # find the newest package of each name
-  pkg_file = Dir["#{addon_path}/#{pkg}*.#{package_suffix}"].sort_by{ |f| File.mtime(f) }.first
+  pkg_file = Dir["#{addon_path}/#{pkg}*.#{package_suffix}"].sort_by{ |f| File.mtime(f) }.last
   package pkg do
+    case node['platform_family']
+    when 'debian'
+      provider Chef::Provider::Package::Dpkg
+    when 'rhel'
+      provider Chef::Privider::Package::Rpm
+    end
     source pkg_file
   end
 end
