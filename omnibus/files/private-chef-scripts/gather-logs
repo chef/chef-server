@@ -134,6 +134,11 @@ then
    /opt/opscode-manage/bin/opscode-manage-ctl status > "$tmpdir/opscode-manage-ctl_status.txt"
 fi
 
+if [[ -e /opt/opscode-reporting/bin/opscode-reporting-ctl ]];
+then
+   /opt/opscode-reporting/bin/opscode-reporting-ctl status > "$tmpdir/opscode-reporting-ctl_status.txt"
+fi
+
 sudo -u opscode -i ulimit -a > "$tmpdir/ulimit_a_opscode.txt"
 
 ip addr show > "$tmpdir/ip_addr_show.txt"
