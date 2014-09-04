@@ -55,7 +55,7 @@ else
   private_chef_path = "/etc/opscode/private-chef.rb"
   chef_server_path = "/etc/opscode/chef-server.rb"
   private_chef_rb_exists = File.exists?(private_chef_path)
-  private_chef_rb_not_symlink = File.symlink?(private_chef_path)
+  private_chef_rb_not_symlink = !File.symlink?(private_chef_path)
   chef_server_rb_exists = File.exists?(chef_server_path)
   if private_chef_rb_exists && private_chef_rb_not_symlink && chef_server_rb_exists
     Chef::Log.warn("/etc/opscode/private-chef.rb is deprecated and should be removed. Using /etc/opscode/chef-server.rb")
