@@ -106,7 +106,7 @@
              {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},
              {server_version, "<%= node['private_chef']['version'] %>"},
              {health_ping_timeout, 400},
-             {health_ping_modules, [oc_chef_authz, chef_otto, chef_sql, chef_solr]},
+             {health_ping_modules, [oc_chef_authz, chef_sql, chef_solr]},
              {base_resource_url, <%= @helper.erl_atom_or_string(node['private_chef']['opscode-erchef']['base_resource_url']) %>},
              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>}
             ]},
