@@ -170,7 +170,7 @@ describe "/organizations", :organizations do
       delete("#{platform.server}/organizations/#{orgname}", superuser)
     end
 
-    context "when the user updates the organization object", :focus do
+    context "when the user updates the organization object" do
       let(:new_orgname) { "update-to-#{Time.now.to_i*3}-#{Process.pid}" }
       let(:payload) do
         {
@@ -267,11 +267,11 @@ describe "/organizations", :organizations do
                         'name' => orgname,
                         'private_key' => "some_unused_key"
                       })
-        
+
         request.should look_like(
                                  :status => ruby? ? 410 : 400
                                  )
-        
+
         JSON.parse(request).should have_key("error")
       end
     end
