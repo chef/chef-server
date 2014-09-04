@@ -23,7 +23,7 @@
 % returns not_found if the object doesn't exist; and returns an error tuple
 % if an error occurs, instead of throwing on failure.
 safe_delete(_DbContext, #chef_data_bag{}, _RequestorId) ->
-    % If you need to use delete_with_care with a data bag,
+    % If you need to use safe_delete with a data bag,
     % ensure that you add add proper recursive/bulk delete support
     throw({error, unsupported});
 safe_delete(DbContext, Object, RequestorId) ->
@@ -123,8 +123,8 @@ maybe_delete_authz_id_or_error({ok, 2}, #chef_cookbook_version{} = CBV, Requesto
 maybe_delete_authz_id_or_error(1, #chef_client{} = Object, RequestorId) ->
     oc_chef_authz:delete_resource(RequestorId, actor, chef_object:authz_id(Object)),
     ok;
-maybe_delete_authz_id_or_error(1, #oc_chef_group{} = Object, RequestorId) ->
-    oc_chef_authz:delete_resource(RequestorId, group, chef_object:authz_id(Object)),
+maybe_delete_authz_id_or_error(1, #oc_chef_group{}, _RequestorId) ->
+    % oc_chef_group cleans up after itself on delete. Don't attempt to delete
     ok;
 maybe_delete_authz_id_or_error(1, Object, RequestorId) ->
     %% for all other object types, successful delete of 1 record means we should delete authz id

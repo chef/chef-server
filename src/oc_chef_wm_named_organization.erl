@@ -139,10 +139,6 @@ delete_global_admins(_Req, #base_state{chef_db_context = DbContext,
         #oc_chef_group{} = GlobalAdmins ->
             %% This could be done as superuser, because we've already checked our org's
             %% permissions, and those should take precedence over those on global_admins.
-            %% FIXME: There is a
-            %% weird double delete of the authz id here; you will see it you run.
-            %% redbug:start("oc_chef_authz:delete_resource->stack,return").
-            %%
             oc_chef_object_db:safe_delete(DbContext, GlobalAdmins, RequestorId);
         {not_found, authz_group} ->
             %% Ignoring this error lets us retry the whole deletion process if it fails part
