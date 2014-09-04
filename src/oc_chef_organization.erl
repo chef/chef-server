@@ -52,14 +52,17 @@
 -define(NAME_FIELD, <<"name">>).
 -define(FULL_NAME_FIELD, <<"full_name">>).
 
--define(VALIDATION_CONSTRAINTS,
-        {[ {?NAME_FIELD, {string_match, regex_for(org_name)}},
-           {?FULL_NAME_FIELD,  {string_match, regex_for(org_full_name) }}
-         ]}).
-
 -define(VALID_KEYS, [?NAME_FIELD, ?FULL_NAME_FIELD]).
 
-
+validation_constraints(undefined) ->
+    {[ {?NAME_FIELD, {string_match, regex_for(org_name)} },
+       {?FULL_NAME_FIELD,  {string_match, regex_for(org_full_name)} }
+     ]};
+validation_constraints(OrgNameMatch) ->
+    %% Note that this message appears to be overridden by a generic "field 'name' is invalid " response down the line.
+    {[ {?NAME_FIELD, {string_match, {OrgNameMatch, <<"Invalid organization name. Organization name must match existing name.">>}} },
+       {?FULL_NAME_FIELD,  {string_match, regex_for(org_full_name)} }
+     ]}.
 
 authz_id(#oc_chef_organization{authz_id = AuthzId}) ->
     AuthzId.
@@ -118,13 +121,18 @@ record_fields() ->
 list(#oc_chef_organization{}, CallbackFun) ->
     CallbackFun({list_query(), [], [name]}).
 
+parse_binary_json({Bin, OrgName}) ->
+    parse_binary_json(Bin, OrgName);
 parse_binary_json(Bin) ->
+    parse_binary_json(Bin, undefined).
+
+parse_binary_json(Bin, OrgName) ->
     Org0 = chef_json:decode_body(Bin),
     Org = chef_object_base:set_default_values(Org0, ?DEFAULT_FIELD_VALUES),
-    validate_org(Org). %% TODO need action specific version?
+    validate_org(Org, OrgName). %% TODO need action specific version?
 
-validate_org(Org) ->
-    case ej:valid(?VALIDATION_CONSTRAINTS, Org) of
+validate_org(Org, OrgName) ->
+    case ej:valid(validation_constraints(OrgName), Org) of
         ok -> {ok, Org};
         Bad -> throw(Bad)
     end.
@@ -183,7 +191,7 @@ type_name(#oc_chef_organization{}) ->
 %%
 %% Full name is free text, except that it must start with nonspace.
 %%
--define(FULL_NAME_REGEX, "\\S.{0,1022}"). 
+-define(FULL_NAME_REGEX, "\\S.{0,1022}").
 -define(ANCHOR_REGEX(Regex), "^" ++ Regex ++ "$").
 
 generate_regex(Pattern) ->
