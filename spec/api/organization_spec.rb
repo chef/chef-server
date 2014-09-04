@@ -289,7 +289,10 @@ describe "/organizations", :organizations do
     context "when the user tries to PUT to the organization with a private_key", :validation do
       it "throws an error related to no longer supporting PUT for key updating" do
         request = put("#{platform.server}/organizations/#{orgname}", superuser,
-                      :payload => {private_key: "some_unused_key"})
+                      :payload => {
+                        'name' => orgname,
+                        'private_key' => "some_unused_key"
+                      })
         
         request.should look_like(
                                  :status => ruby? ? 410 : 400
