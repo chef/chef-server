@@ -1,9 +1,10 @@
-name "private-chef"
+name "chef-server"
 maintainer "Chef Software, Inc."
 homepage   "http://www.getchef.com"
 
-replaces        "private-chef-full"
-install_dir    "/opt/opscode"
+package_name    "chef-server-core"
+replaces        "private-chef"
+install_dir     "/opt/opscode"
 build_version   Omnibus::BuildVersion.new.semver
 build_iteration 1
 
