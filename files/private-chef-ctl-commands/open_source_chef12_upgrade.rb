@@ -354,7 +354,7 @@ private
     org_full_name_regex = /^\S.{0,1022}$/
     unless org_full_name =~ org_full_name_regex
       log "The Chef 12 full organization name #{org_full_name} failed validation."
-      log "The Chef 12 full organization name must begin with a non-white space and must be between 1 and 1023 characters long."
+      log "The Chef 12 full organization name must begin with a non-white space character and must be between 1 and 1023 characters long."
       exit 1
     end
   end
