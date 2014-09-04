@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Perform necessary private-chef setup steps after package is installed.
+# Perform necessary chef-server setup steps after package is installed.
 #
 
 PROGNAME=$(basename $0)
@@ -17,23 +17,23 @@ mkdir -p /var/opt/opscode/plugins
 ln -sf /opt/opscode/chef-server-plugin.rb /var/opt/opscode/plugins/chef-ha-drbd.rb || error_exit "Cannot link chef-ha-drbd.rb in /var/opt/opscode/plugins"
 
 if [ -e /etc/opscode/chef-server-running.json ]; then
-  echo -e "\033[1mYou have upgraded Private Chef!\033[0m"
+  echo -e "\033[1mYou have upgraded Chef Server!\033[0m"
   echo
   echo "The next step in the upgrade process is to run:"
   echo
-  echo -e "\033[1;31mprivate-chef-ctl upgrade\033[0m"
+  echo -e "\033[1;31mchef-server-ctl upgrade\033[0m"
   echo
   echo "Then, to remove configuration files, logs, directories,"
   echo "users, etc. that were used by internal services that"
-  echo "have been removed from this version of Private Chef,"
+  echo "have been removed from this version of Chef Server,"
   echo "please run:"
   echo
-  echo -e "\033[1;31mprivate-chef-ctl cleanup\033[0m"
+  echo -e "\033[1;31mchef-server-ctl cleanup\033[0m"
   echo
   echo "(Add the '--no-op' option to see what would be removed by"
   echo "this command)"
 else
-  echo -e "\033[1mThank you for installing Private Chef!\033[0m"
+  echo -e "\033[1mThank you for installing Chef Server!\033[0m"
 fi
 
 exit 0
