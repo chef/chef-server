@@ -9,7 +9,7 @@ case node['platform_family']
 when 'debian'
 
   apt_repository 'chef-stable' do
-    uri "https://packagecloud.io/chef/test-stable/ubuntu/"
+    uri "https://packagecloud.io/chef/stable/ubuntu/"
     key 'https://packagecloud.io/gpg.key'
     distribution node['lsb']['codename']
     deb_src true
@@ -26,7 +26,7 @@ when 'rhel'
 
   yum_repository 'chef-stable' do
     description 'Chef Stable Repo'
-    baseurl "https://packagecloud.io/chef/test-stable/el/#{major_version}/$basearch"
+    baseurl "https://packagecloud.io/chef/stable/el/#{major_version}/$basearch"
     gpgkey 'https://packagecloud.io/gpg.key'
     sslverify true
     sslcacert '/etc/pki/tls/certs/ca-bundle.crt'
