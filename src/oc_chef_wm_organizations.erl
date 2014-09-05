@@ -77,6 +77,24 @@ create_path(Req, #base_state{resource_state = #organization_state{organization_d
     Name = ej:get({<<"name">>}, OrganizationData),
     {binary_to_list(Name), Req, State}.
 
+%%
+%% Org creation is a multi-step process, where we create
+%%
+%% * organization record in SQL
+%% * organization policy (groups, containers) which can be a bit time consuming
+%% * a default environment
+%% * a validator client, with a keypair
+%%
+%% We then return the client name and private key.
+%%
+%% This process can fail at any point, and we need to be able to clean up and recover when it happens
+%% The key thing is to be able to allow the user to retry and not be blocked, so we must
+%% delete the global admins group and the org record, because otherwise they'd have trouble using the same
+%% name.
+%%
+%% We don't have to clean up org local data (clients/environments/containers/groups) because
+%% that's tied to the guid and won't block re-creation.
+%%
 from_json(Req, #base_state{resource_state = #organization_state{organization_data = OrganizationData,
                                                                 organization_authz_id = AuthzId}
                           } = State) ->
@@ -116,7 +134,7 @@ create_from_json(#wm_reqdata{} = Req,
             LogMsg = {RecType, name_conflict, Name},
             ConflictMsg = ResourceMod:conflict_message(Name),
             {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
-             State#base_state{log_msg = LogMsg}};
+             State#base_state{log_msg = LogMsg, resource_state = ResourceState1}};
         ok ->
             LogMsg = {created, Name},
             Uri = ?BASE_ROUTES:route(TypeName, Req, [{name, Name}]),
@@ -126,57 +144,145 @@ create_from_json(#wm_reqdata{} = Req,
         What ->
             %% FIXME: created authz_id is leaked for this case, cleanup?
             ?BASE_RESOURCE:object_creation_error_hook(ObjectRec, ActorId),
-            {{halt, 500}, Req, State#base_state{log_msg = What}}
+            {{halt, 500}, Req, State#base_state{log_msg = What, resource_state = ResourceState1}}
     end.
 
 
 maybe_create_org({true, Req,
                   #base_state{
                      resource_state = #organization_state{
-                                         oc_chef_organization = #oc_chef_organization{
-                                                                   id = OrgId,
-                                                                   name = OrgName
-                                                                  } = OrganizationData},
-                     requestor = User,
-                     chef_authz_context = AuthzCtx} = State}) ->
-    %% TODO error check here?
-    ok = oc_chef_authz_org_creator:create_org(OrganizationData, User),
+                                         oc_chef_organization = OrganizationData},
+                     requestor = User} = State}) ->
+    Result = oc_chef_authz_org_creator:create_org(OrganizationData, User),
+    maybe_create_environment(Result, Req, State);
+maybe_create_org({_Error, _Body, #base_state{}} = Result) ->
+    %% Note: We don't handle the case where the org create failed yet somehow created an org
+    %% record. The most common way for this to fail is for there already to be a org with
+    %% that name, and we don't want to blow that away.
+    Result.
 
-    %% create the authzid for the for the validator client
-    %% TODO: handle failures for this (ala chef_wm_clients:handle_client_create)
-    {PubKey, PrivKey} = chef_keygen_cache:get_key_pair(),
+maybe_create_environment({error, Error}, Req, State) ->
+    %% TODO: Verify we provide useful logging for this.
+    cleanup_org({{error, Error}, Req, State});
+maybe_create_environment(ok, Req,
+                         #base_state{
+                            resource_state = #organization_state{
+                                                oc_chef_organization = #oc_chef_organization{
+                                                                          id = OrgId,
+                                                                          name = OrgName
+                                                                         }}} = State) ->
+    EnvEJson = chef_environment:set_default_values(
+                 {[{<<"name">>, <<"_default">>},
+                   {<<"description">>, <<"The default Chef environment">>}]}),
 
-    {ok, ClientAuthzId} = oc_chef_authz:create_entity_if_authorized(AuthzCtx, OrgId, superuser, client),
-    ClientName = <<OrgName/binary,"-validator">>,
-    ClientEJson = chef_object_base:set_public_key({[{<<"name">>, ClientName},
-                                                    {<<"validator">>, true}]},
-                                                  PubKey),
-    {ok, EnvAuthzId} = oc_chef_authz:create_entity_if_authorized(AuthzCtx, OrgId, superuser, environment),
-    EnvEJson = chef_environment:set_default_values({[{<<"name">>, <<"_default">>},
-                                                     {<<"description">>, <<"The default Chef environment">>}]}),
-
+    %% We have to fake up a a base state record for the environment create, but don't want
+    %% it when we are done
     EnvState = State#base_state{resource_mod = chef_wm_environments,
                                 organization_guid = OrgId,
                                 organization_name = OrgName},
+    AfterEnvCreate = fun({Status, Rec, _EnvState}) ->
+                             %% The state record we give to create_object_with_acl can be
+                             %% thrown away, since it only is updated on errors
+                             maybe_create_client_key({Status, Rec, State})
+                     end,
+    create_object_with_acl(EnvEJson, environment, Req, EnvState, AfterEnvCreate).
+
+maybe_create_client_key({true, Req, #base_state{} = State}) ->
+    %% create the authzid for the for the validator client
+    KeyPair = chef_keygen_cache:get_key_pair(),
+    maybe_create_client(KeyPair, Req, State);
+maybe_create_client_key({_Error, _Req, _State}=R) ->
+    cleanup_org(R).
+
+maybe_create_client(keygen_timeout, Req, State) ->
+    cleanup_org({{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}});
+maybe_create_client({PublicKey, PrivateKey}, Req,
+                    #base_state{
+                       resource_state = #organization_state{
+                                           oc_chef_organization = #oc_chef_organization{
+                                                                     id = OrgId,
+                                                                     name = OrgName
+                                                                    }} = ResourceState} = State) ->
+    ClientName = <<OrgName/binary,"-validator">>,
+    ClientEJson = chef_object_base:set_public_key({[{<<"name">>, ClientName},
+                                                    {<<"validator">>, true}]},
+                                                  PublicKey),
+
+    %% Update the return state
+    OrgEJson =  {[{<<"uri">>, ?BASE_ROUTES:route(organization, Req, [{name, OrgName}])},
+                  {<<"clientname">>, ClientName},
+                  {<<"private_key">>, PrivateKey}]},
+
+    State1 = State#base_state{resource_state= ResourceState#organization_state{organization_data = OrgEJson}},
+
+    %% We have to fake up a a base state record for the client create, but don't want
+    %% it when we are done
     ClientState = State#base_state{resource_mod = chef_wm_clients,
                                    organization_guid = OrgId,
                                    organization_name = OrgName},
+    AfterClientCreate = fun(X) -> finish_org_create(X, OrgEJson, State1) end,
+    create_object_with_acl(ClientEJson, client, Req, ClientState, AfterClientCreate).
 
-    case chef_wm_base:create_from_json(Req, EnvState, chef_environment, {authz_id, EnvAuthzId}, EnvEJson) of
-        {{halt, _Code}, _Req, _State} = Response -> Response;
-        {true, _Req, _State} ->
-            case chef_wm_base:create_from_json(Req, ClientState, chef_client, {authz_id, ClientAuthzId}, ClientEJson) of
-                {{halt, _Code1}, _Req1, _State1} = Response1 -> Response1;
-                {true, _Req1, _State1} ->
-                    URI = ?BASE_ROUTES:route(organization, Req, [{name, OrgName}]),
-                    EJson = {[{<<"uri">>, URI},
-                              {<<"clientname">>, ClientName},
-                              {<<"private_key">>, PrivKey}]},
-                    {true, chef_wm_util:set_json_body(Req, EJson), State}
-            end
-    end;
-maybe_create_org(Other) ->
-    Other.
+%%
+%% TODO: This maybe should be combined/refactored with oc_chef_wm_base:create_in_container
+%%
+-spec create_object_with_acl(ObjectJson :: {[tuple()]}, Type :: atom(),
+                             Req :: wm_req(), State :: #base_state{},
+                             ContinuationFn :: fun((tuple()) -> tuple()) ) ->
+                                    tuple().
+create_object_with_acl(ObjectJson, Type, Req,
+                       #base_state{
+                       resource_state = #organization_state{
+                                           oc_chef_organization = #oc_chef_organization{
+                                                                     id = OrgId,
+                                                                     name = OrgName
+                                                                    } },
+                       chef_authz_context = AuthzCtx} = State,
+                       ContinuationFn) ->
+    {ChefType, ResourceMod} = create_type_helper(Type),
+    ObjState = State#base_state{resource_mod = ResourceMod,
+                                organization_guid = OrgId,
+                                organization_name = OrgName},
+    case oc_chef_authz:create_entity_if_authorized(AuthzCtx, OrgId, superuser, Type) of
+        {ok, AuthzId} ->
+            Result = chef_wm_base:create_from_json(Req, ObjState, ChefType, {authz_id, AuthzId}, ObjectJson),
+            ContinuationFn(Result);
+        {error, forbidden} ->
+            {Req1, State1} = oc_chef_wm_base:set_forbidden_msg(create, Req, State),
+            {{halt, 503}, Req1, State1};
+        {error, Error} ->
+            {Req1, State1} = set_error_msg(Error, Req, State),
+            {{halt, 503}, Req1, State1}
+    end.
+
+finish_org_create({true, Req, _ClientState}, OrgEJson, State) ->
+    %% The state record we give to create_object_with_acl can be
+    %% thrown away, since it only is updated on errors
+    {true, chef_wm_util:set_json_body(Req, OrgEJson), State};
+finish_org_create(Result, _, _) ->
+    cleanup_org(Result).
+
+create_type_helper(environment) ->
+    {chef_environment, chef_wm_environments};
+create_type_helper(client) ->
+    {chef_client, chef_wm_clients}.
+
+
+%%
+%% We at mininimum need to clean up the org and the global_admins group
+%% We will orphan some org-local information (groups, containers, validator client, and default environment)
+%% But that's no worse than any org deletion right now, and is sufficient to allow retry of org creation.
+%%
+cleanup_org({_Error, _Body,
+             #base_state{
+                chef_db_context = DbContext,
+                chef_authz_context=AuthzContext,
+                requestor_id = RequestorId,
+                organization_name = OrgName,
+                resource_state = #organization_state{oc_chef_organization = Organization}}} = Result) ->
+    oc_chef_wm_named_organization:delete_global_admins(DbContext, AuthzContext, OrgName, RequestorId),
+    oc_chef_wm_base:delete_object(DbContext, Organization, RequestorId),
+    Result.
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
@@ -185,3 +291,7 @@ malformed_request_message(Any, _Req, _State) ->
 conflict_message(_Name) ->
     {[{<<"error">>, <<"Organization already exists">>}]}.
 
+set_error_msg(Error, Req, State) ->
+    JsonMsg = chef_json:encode({[{<<"error">>, [Error]}]}),
+    Req1 = wrq:set_resp_body(JsonMsg, Req),
+    {Req1, State#base_state{log_msg = Error } }.

@@ -34,6 +34,8 @@
          resource_exists/2,
          to_json/2]).
 
+-export([delete_global_admins/4]).
+
 init(Config) ->
     chef_wm_base:init(?MODULE, Config).
 
@@ -98,17 +100,30 @@ from_json(Req, #base_state{resource_state = #organization_state{
                           } = State) ->
     chef_wm_base:update_from_json(Req, State, Organization, OrganizationData).
 
-%% TODO:
-%% Verify we have tests for double delete, proper permissions
-%%
-
 %% NOTE: This is really only partially implemented
-%% A proper org deletion should
-%% 1) disassociate all users
-%% 2) Clean up <ORGNAME>_global_admins
-%% Up to here, is essentially what we had in the ruby version
-%% However, we don't
-%% 3) Clean up all org objects in sql and authz.
+%% Org deletion needs to:
+%% 1) Disassociate all users
+%%    We don't directly disassociate users. Instead, we rely on two consistiency properties
+%%    * Deleting the org deletes the associations and invites via foreign key constraints.
+%%    * Deleting the global admins group removes it from the users read ACE.
+%%
+%%    This has the advantage of removing users last, since we delete the org record as the
+%%    last step. If we disasociated users sooner a failure during the delete could leave us
+%%    in a state where where there's no one left with the privs to retry the delete.
+%%
+%%    We will need to be cleverer if we move to a world where more cleanup is required for
+%%    associations.
+%%
+%% 2) Delete <ORGNAME>_global_admins
+%%    Bifrost will remove that any ACLs and groups where it appears.
+%%
+%% 3) TODO: Clean up all org objects in sql and authz.
+%%    We leave a lot of records behind in sql and authz. (nodes, etc) This is likely to be
+%%    expensive to remove, as there are a lot of objects to delete in authz. One possiblity
+%%    would be to do that part of the cleanup offline
+%%
+%% TODO: verify we have tests for double delete, permissions, and org membership.
+%%
 delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  requestor_id = RequestorId,
                                  resource_state = #organization_state{
@@ -125,13 +140,13 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
 %% we rely on bifrost to maintain consistiency when the group is deleted.
 %%
 %% TODO: Make sure tests explicitly test for global admins removal on org deletion
-%% TODO: Come up with a strategy for transient failures; once we start, it's really hard to
-%%       go back, and we might not be able to repeat.
-%% Is there an order that's safe?
 delete_global_admins(_Req, #base_state{chef_db_context = DbContext,
                                        organization_name = OrgName,
-                                       chef_authz_context=AuthzContext,
+                                       chef_authz_context = AuthzContext,
                                        requestor_id = RequestorId} = _State) ->
+    delete_global_admins(DbContext, AuthzContext, OrgName, RequestorId).
+
+delete_global_admins(DbContext, AuthzContext, OrgName, RequestorId) ->
     %% TODO
     %% Refactor the fetch of global admins, along with that in oc_chef_wm_association
     %% we use this low-level api because we don't want to expand the users/groups from authz.
@@ -143,7 +158,7 @@ delete_global_admins(_Req, #base_state{chef_db_context = DbContext,
         {not_found, authz_group} ->
             %% Ignoring this error lets us retry the whole deletion process if it fails part
             %% of the way through
-            lager:error("Could not find global admins for org ~s", [OrgName]),
+            lager:error("Could not find global admins when deleting org ~s", [OrgName]),
             ok
     end.
 
