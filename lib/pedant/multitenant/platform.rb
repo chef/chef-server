@@ -234,7 +234,6 @@ module Pedant
           validator_key = parsed["private_key"]
 
           validator = Pedant::Client.new(validator_name, validator_key)
-
           return Pedant::Organization.new(orgname, validator)
         when 503
           # Continue attempting by allowing the loop to continue
@@ -256,11 +255,14 @@ module Pedant
     end
 
     def associate_user_with_org(orgname, user)
+      # TODO under ruby, we need to use the old invite/accept method,
+      # while under erchef we will need to use the new POST method.
       puts "Associating user #{user.name} with org #{orgname} ..."
       payload = { "user" => user.name }
+      # TODO under erlang, we now support superuser direct POST of { username: "user" } to /organizations/X/users
+      # which means we don't need to do the multi-part create-and-accept process.
       association_requests_url = "#{@server}/organizations/#{orgname}/association_requests"
       r = post("#{association_requests_url}",  superuser, :payload => payload)
-
       if r.code == 201 # Created
         association_id = parse(r)["uri"].split("/").last
         r = put("#{@server}/users/#{user.name}/association_requests/#{association_id}", user, :payload => { "response" => "accept" })
