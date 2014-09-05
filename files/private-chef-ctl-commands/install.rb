@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Opscode, Inc.
+# Copyright (c) 2014 Chef Software, Inc.
 # All Rights Reserved
 
 add_command "install", "Install addon package by name, with optional --path supplied", 2 do
