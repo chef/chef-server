@@ -99,9 +99,9 @@ verify(Password, {HashedPass, Salt, _}) ->
     end.
 
 sha1(Salt, Password, osc) ->
-    hexstring(crypto:sha(["--", Salt, "--", Password, "--"]));
+    hexstring(crypto:hash(sha, ["--", Salt, "--", Password, "--"]));
 sha1(Salt, Password, ec) ->
-    hexstring(crypto:sha([Salt, "--", Password, "--"])).
+    hexstring(crypto:hash(sha, [Salt, "--", Password, "--"])).
 
 hexstring(<<X:160/big-unsigned-integer>>) ->
     lists:flatten(io_lib:format("~40.16.0b", [X])).

@@ -201,17 +201,7 @@ parse_binary_json(Bin, {UrlName, UrlVersion}) ->
 %% sane default values.
 -spec set_default_values(ejson_term()) -> ejson_term().
 set_default_values(Cookbook) ->
-    set_default_values(Cookbook, ?DEFAULT_FIELD_VALUES).
-set_default_values(Cookbook, Defaults) ->
-    lists:foldl(fun({Key, Default}, Current) ->
-                        case ej:get({Key}, Current) of
-                            undefined ->
-                                ej:set({Key}, Current, Default);
-                            _ -> Current
-                        end
-                end,
-                Cookbook,
-                Defaults).
+    chef_object_base:set_default_values(Cookbook, ?DEFAULT_FIELD_VALUES).
 
 -spec validate_cookbook(Cookbook :: ej:json_object(),
                         {UrlName :: binary(),

@@ -117,17 +117,7 @@ environment_spec() ->
 %% sane default values.
 -spec set_default_values( ejson_term() ) -> ejson_term().
 set_default_values(Environment) ->
-    set_default_values(Environment, ?DEFAULT_FIELD_VALUES).
-set_default_values(Environment, Defaults) ->
-    lists:foldl(fun({Key, Default}, Current) ->
-                        case ej:get({Key}, Current) of
-                            undefined ->
-                                ej:set({Key}, Current, Default);
-                            _ -> Current
-                        end
-                end,
-                Environment,
-                Defaults).
+    chef_object_base:set_default_values(Environment, ?DEFAULT_FIELD_VALUES).
 
 %% @doc Convert a binary JSON string representing a Chef Environment into an
 %% EJson-encoded Erlang data structure

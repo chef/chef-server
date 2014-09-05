@@ -90,11 +90,7 @@ parse_binary_json(Bin) ->
 %% run_list
 -spec set_default_values( ejson_term() ) -> ejson_term().
 set_default_values(Bin) ->
-    case ej:get({<<"run_list">>}, Bin) of
-        undefined ->
-            ej:set({<<"run_list">>}, Bin, []);
-        _ -> Bin
-    end.
+    chef_object_base:set_default_values(Bin, [{<<"run_list">>, []}]).
 
 -spec validate_body(ej:json_object()) -> {ok, ej:json_object()}.
 validate_body(Body) ->
