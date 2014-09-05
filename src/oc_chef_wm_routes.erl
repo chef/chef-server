@@ -77,7 +77,6 @@ route(Type, Req, Args) when Type =:= role;
                             Type =:= cookbook_version;
                             Type =:= sandbox;
                             Type =:= organization_search;
-                            Type =:= associations;
                             Type =:= group;
                             Type =:= container ->
     case maybe_org_name(Req) of
@@ -110,6 +109,7 @@ org_route(client, Req, Args) -> route_organization_rest_object("clients", Req, A
 org_route(container, Req, Args) -> route_organization_rest_object("containers", Req, Args);
 org_route(group, Req, Args) -> route_organization_rest_object("groups", Req, Args);
 org_route(association, Req, Args) -> route_organization_rest_object("users", Req, Args);
+org_route(invite, Req, Args) -> route_organization_rest_object("association_requests", Req, Args);
 org_route(sandbox, Req, Args) ->
     Org = org_name(Req),
     {id, Id} = lists:keyfind(id, 1, Args),
