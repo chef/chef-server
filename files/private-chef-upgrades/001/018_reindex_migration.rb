@@ -6,7 +6,7 @@ define_upgrade do
     # Make sure API is down
     stop_services(["nginx", "opscode-erchef"])
 
-    start_services(["postgresql", "rabbitmq", "opscode-solr4"])
+    start_services(["rabbitmq", "opscode-solr4"])
 
     force_restart_service("opscode-chef-mover")
 
@@ -15,7 +15,7 @@ define_upgrade do
                 "/opt/opscode/embedded/service/opscode-chef-mover/scripts/migrate " \
                 "mover_reindex_migration_callback normal")
 
-    stop_services(["opscode-chef-mover", "postgresql", "opscode-solr4", "rabbitmq"])
+    stop_services(["opscode-chef-mover", "opscode-solr4", "rabbitmq"])
 
   end
 end

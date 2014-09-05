@@ -4,8 +4,6 @@ define_upgrade do
 
     must_be_data_master
 
-    start_service('postgresql')
-
     sqitch = "sudo -u #{Partybus.config.database_unix_user} PATH=/opt/opscode/embedded/bin:/sbin:/usr/sbin:/bin:/usr/bin /opt/opscode/embedded/bin/sqitch"
 
     # Dependent OSS schema
@@ -17,7 +15,5 @@ define_upgrade do
     # so we'll go ahead and upgrade thos as well.
     run_command("#{sqitch} deploy --to-target @2.2.3",
                 :cwd => "/opt/opscode/embedded/service/enterprise-chef-server-schema")
-
-    stop_service('postgresql')
   end
 end

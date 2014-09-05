@@ -11,7 +11,7 @@ define_upgrade do
     # Only starting opscode-account and couchdb so that we can
     # delete pre-created orgs. Those two are stopped right after
     # pre-created orgs are deleted.
-    start_services(['postgresql', 'opscode-account', 'couchdb'])
+    start_services(['opscode-account', 'couchdb'])
 
     # Need to remove any existing pre-created orgs, since chef-mover
     # doesn't migrate them.  Otherwise, the next handful of orgs that
@@ -64,8 +64,6 @@ define_upgrade do
 
     # We don't need chef-mover anymore
     run_command("private-chef-ctl stop opscode-chef-mover")
-
-    stop_service('postgresql')
   end
 
 end

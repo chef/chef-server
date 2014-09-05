@@ -100,13 +100,17 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
   def partybus_upgrade
     # Original Enterprise Chef upgrade path
     reconfigure(false)
-    # Put everything in a down state before we upgrade things.
+    # Put everything in a down state except postgres before we upgrade things.
     # How upgrades should handle services:
     #  + It should expect services to be down, but turn off services
     #    if its important that they be off for the upgrade.
     #  + It should start any services it needed, and turn them off
     #    at the end of a migration.
+    # with postgres being the exception to those rules. We are leaving
+    # postgres up atm to avoid having to constantly restart it.
     run_command("private-chef-ctl stop")
+    run_command("private-chef-ctl start postgresql")
+    sleep 15
     Dir.chdir(File.join(base_path, "embedded", "service", "partybus"))
     bundle = File.join(base_path, "embedded", "bin", "bundle")
     status = run_command("#{bundle} exec ./bin/partybus upgrade")

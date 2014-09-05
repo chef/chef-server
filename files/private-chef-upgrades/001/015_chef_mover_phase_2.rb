@@ -9,8 +9,6 @@ define_upgrade do
     # Make sure API is down
     stop_services(["nginx", "opscode-erchef"])
 
-    start_service('postgresql')
-
     clean_mover_logs
 
     ####
@@ -26,8 +24,6 @@ define_upgrade do
                 "/opt/opscode/embedded/service/opscode-chef-mover/scripts/migrate mover_phase_2_migration_callback normal")
 
     stop_service("opscode-chef-mover")
-
-    stop_service('postgresql')
 
     log "Containers and groups migration complete!"
   end

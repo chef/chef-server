@@ -55,6 +55,40 @@ define_upgrade 'its_a_futurama_party', :api_version => 2 do
 end
 ```
 
+## Chef Server Services
+
+### How To Handle Services In Your Partybus Upgrade
+
+At the start of an upgrade, partybus puts everything in a down state EXCEPT for postgresql.
+This is to avoid contanst starting and stopping of postgresql (which makes upgrades drag on due to
+sleep time added in start stop methods, see below).
+
+Since `private-chef-ctl status` can't actually tell if a service is up or down, we have implemented methods
+that have a small sleep at the end to give services time to come online / go offline. In the future, we should
+implement actually valid status checks for each service, but this will service for now.
+
+THE FOLLOWING IS HOW YOU SHOULD APPROACH STARTING AND STOPPING SERVICES IN A PARTYBUS UPGRADE:
+  + It should expect services to be down, but turn off services
+    if its important that they be off for the upgrade, i.e. nginx during
+    a migration the API needs to be down for.
+  + It should start any services it needs, and turn them off
+    at the end of a migration.
+Postgres is the exception to those rules. We are leaving
+postgres up even at the start currently to avoid having
+to constantly restart it, since a lot of upgrades need it
+and none currently need it to be down.
+
+### Service Hanlding Methods In Partybus DSL
+
+Multiple methods have been added to help you start, stop, and restart services:
+
++ `force_restart_service("service")` will attempt a restart and then a force-restart, then sleep for 15 seconds.
++ `start_service("service")` will start a service, and then sleep for 15 seconds.
++ `start_services(["service1", "services2", ...])` will start multiple services, and then sleep for 15 seconds.
++ `stop_service("service")` will stop a service, and then sleep for 10 seconds.
++ `stop_services(["service1", "service2", ...])` will stop multiple services, and then sleep for 10 seconds.
+
+
 ## Schema Upgrades
 
 ### Example
@@ -62,18 +96,6 @@ end
 ```ruby
 upgrade_schema_to 10
 upgrade_schema_to 11
-```
-
-## Service Restarts
-
-### Example
-
-```ruby
-restart_service 'opscode-chef'
-restart_service 'opscode-erchef'
-restart_service 'opscode-webui'
-restart_service 'opscode-solr4'
-restart_service 'couchdb'
 ```
 
 ### Implementation Details
