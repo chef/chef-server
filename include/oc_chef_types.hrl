@@ -2,6 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Stephen Delano <stephen@opscode.com>
 %% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%% Copyright 2014 Chef, Inc. All Rights Reserved.
 
 -record(oc_chef_container, {
           id,
@@ -41,8 +42,9 @@
          }).
 
 -record(oc_chef_org_user_association, {
-          id,
+          org_id,
           user_id,
+          user_name, % Not part of the table but retrieved via join
           last_updated_by,
           created_at,
           updated_at
@@ -51,7 +53,9 @@
 -record(oc_chef_org_user_invite, {
           id,
           org_id,
+          org_name,  % Not  part of table - retrieved via join
           user_id,
+          user_name, % Not  part of table - retrieved via join
           last_updated_by,
           created_at,
           updated_at

@@ -1,11 +1,12 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Mark Anderson <mark@opscode.com>
+%% @author Marc Paradise <marc@getchef.com>
 %% @doc authorization - Interface to the opscode authorization servize
 %%
 %% This module is an Erlang port of the mixlib-authorization Ruby gem.
 %%
-%% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -33,14 +34,22 @@
 
 -export([
          add_client_to_clients_group/4,
+         add_to_group/4,
          bulk_actor_is_authorized/5,
+         create_resource/2,
          delete_resource/3,
          create_entity_if_authorized/4,
          get_container_aid_for_object/3,
          make_context/2,
          is_authorized_on_resource/6,
          ping/0,
-         remove_actor_from_actor_acl/2
+         remove_actor_from_actor_acl/2,
+         remove_ace_for_entity/6,
+         add_ace_for_entity/6,
+         set_ace_for_entity/5,
+         superuser_id/0,
+         object_type_to_resource/1,
+         pluralize_resource/1
         ]).
 
 -ifdef(TEST).
@@ -85,6 +94,16 @@ ping() ->
 make_context(ReqId, Darklaunch)  ->
     oc_chef_authz_db:make_context(ReqId, Darklaunch).
 
+-spec superuser_id() -> oc_authz_id().
+superuser_id() ->
+    envy:get(oc_chef_authz, authz_superuser_id, binary).
+
+-spec requestor_or_superuser(object_id() | superuser) -> oc_authz_id().
+requestor_or_superuser(superuser) ->
+    superuser_id();
+requestor_or_superuser(ObjectId) ->
+    ObjectId.
+
 %% @doc Creates a new Authz entity, if the requestor has the necessary permissions.
 %%
 %% `Creator' either a requestor ID or the atom 'superuser'.  It should only be the superuser
@@ -110,7 +129,8 @@ make_context(ReqId, Darklaunch)  ->
                                          {error, forbidden}.
 create_entity_if_authorized(Context, OrgId, superuser, ObjectType) ->
     ContainerAId = get_container_aid_for_object(Context, OrgId, ObjectType),
-    AuthzSuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
+    AuthzSuperuserId = superuser_id(),
+    %% We skip is_authorized_on_resource check as an optimization
     create_entity_with_container_acl(AuthzSuperuserId, ContainerAId, ObjectType);
 create_entity_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
     ContainerAId = get_container_aid_for_object(Context, OrgId, ObjectType),
@@ -150,7 +170,7 @@ get_container_aid_for_object(Context, OrgId, ObjectType) ->
 create_entity_with_container_acl(RequestorId, ContainerAId, ObjectType) ->
 
     %% Create the entity
-    AuthzType = authz_type_from_container(ObjectType),
+    AuthzType = object_type_to_resource(ObjectType),
     {ok, Id} = create_resource(RequestorId, AuthzType),
 
     %% Ensure it inherits the ACL of its container
@@ -209,16 +229,14 @@ merge_acl_from_container(RequestorId, ContainerId, AuthzType, ObjectId) ->
             {error, container_acl}
     end.
 
-%% @doc Set the ACL of the entity to the given ACL, one ACE at a time.  As currently coded,
-%% it expects to only operate on actors or objects, since these are the only Authz entities
-%% that Erchef currently creates.
+%% @doc Set the ACL of the entity to the given ACL, one ACE at a time.
 %%
 %% Returns 'ok' if all ACEs are successfully set, and {error, Reason} at the first failure.
 %%
 %% No, this is not transactional in any sense, but then again, neither is CouchDB.  In any
 %% case, this will change dramatically once we move to SQL.
 -spec set_acl(requestor_id(),
-              AuthzType :: 'actor' | 'object',
+              AuthzType :: 'actor' | 'object' | 'container' | 'group',
               ObjectId :: object_id(),
               NewAcl :: authz_acl()) -> ok | {error, any()}.
 set_acl(_RequestorId, _AuthzType, _ObjectId, []) ->
@@ -352,24 +370,90 @@ create_resource(RequestorId, ResourceType) ->
 -spec delete_resource(requestor_id(), 'actor'|'group'|'object', object_id())
                      ->  ok | {error, forbidden|not_found|server_error}.
 delete_resource(RequestorId, ResourceType, Id) ->
+    EffectiveRequestorId = requestor_or_superuser(RequestorId),
     Url = make_url([pluralize_resource(ResourceType), Id]),
-    case oc_chef_authz_http:request(Url, delete, [], [], RequestorId) of
+    case oc_chef_authz_http:request(Url, delete, [], [], EffectiveRequestorId) of
         ok -> ok;
         %% Expected errors are forbidden, not_found, server_error
         {error, Error} -> {error, Error}
+    end.
+
+%% Give a resource access to an entity by adding the resource
+%% to the entity's ACE
+-spec add_ace_for_entity(requestor_id(), group|actor, object_id(),
+                         resource_type(), object_id(), access_method()) ->
+    ok | {error, forbidden|not_found|server_error}.
+
+add_ace_for_entity(RequestorId, ResourceType, ResourceId,
+                   EntityType, EntityId, Method) ->
+    update_ace_for_entity(RequestorId, ResourceType, ResourceId,
+                          EntityType, EntityId, Method,
+                          fun add_if_missing/2).
+
+%% Deny a resource access to an entity by adding the resource
+%% to the entity's ACE. Note that if the resource has the access to the
+%% same entity via another means, this will not change
+-spec remove_ace_for_entity(requestor_id(), group|actor, object_id(),
+                         resource_type(), object_id(), access_method()) ->
+    ok | {error, forbidden|not_found|server_error}.
+remove_ace_for_entity(RequestorId, ResourceType, ResourceId,
+                      EntityType, EntityId, Method) ->
+    update_ace_for_entity(RequestorId, ResourceType, ResourceId,
+                          EntityType, EntityId, Method,
+                          fun lists:delete/2).
+
+update_ace_for_entity(RequestorId, ResourceType, ResourceId,
+                      EntityType, EntityId, Method, UpdateFun) ->
+    case get_ace_for_entity(RequestorId, EntityType, EntityId, Method) of
+        {ok, ACE} ->
+            Members = case ResourceType of
+                          group ->
+                              ACE#authz_ace.groups;
+                          actor ->
+                              ACE#authz_ace.actors
+                      end,
+            NewMembers = UpdateFun(ResourceId, Members),
+            NewACE = case ResourceType of
+                         group ->
+                             ACE#authz_ace{groups = NewMembers};
+                         actor ->
+                             ACE#authz_ace{actors = NewMembers}
+                     end,
+            set_ace_for_entity(RequestorId, EntityType, EntityId, Method, NewACE);
+        {error, Error} ->
+            {error, Error}
+    end.
+
+add_if_missing(Item, List) ->
+    case lists:member(Item, List) of
+        true ->
+            List;
+        false ->
+            [Item] ++ List
     end.
 
 %
 % Get acl from an entity
 % GET {objects|groups|actors|containers}/:id/acl
 %
--spec get_acl_for_resource(requestor_id(), resource_type(), binary()) -> {ok, authz_acl()}|{error, any()}.
+-spec get_acl_for_resource(requestor_id(), resource_type(), binary()) ->
+    {ok, authz_acl()}|{error, any()}.
 get_acl_for_resource(RequestorId, ResourceType, Id) ->
     Url = make_url([pluralize_resource(ResourceType), Id, acl]),
     case oc_chef_authz_http:request(Url, get, [], [], RequestorId) of
         {ok, Data} ->
             Acl=extract_acl(Data),
             {ok, Acl};
+        %% Expected errors are forbidden, not_found, server_error
+        {error, Error} -> {error, Error}
+    end.
+
+get_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod) ->
+    Url = make_url([pluralize_resource(AuthzType), Id, acl, AccessMethod]),
+    case oc_chef_authz_http:request(Url, get, [], [], RequestorId) of
+        {ok, Data} ->
+            ACE = extract_ace(Data),
+            {ok, ACE};
         %% Expected errors are forbidden, not_found, server_error
         {error, Error} -> {error, Error}
     end.
@@ -384,12 +468,14 @@ get_acl_for_resource(RequestorId, ResourceType, Id) ->
                          access_method(),
                          authz_ace()) -> ok |
                                          {error, any()}.
-set_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod, #authz_ace{actors=Actors, groups=Groups}) ->
+set_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod,
+                   #authz_ace{actors=Actors, groups=Groups}) ->
+    EffectiveRequestorId = requestor_or_superuser(RequestorId),
     Url = make_url([pluralize_resource(AuthzType), Id, acl, AccessMethod]),
     %% jiffy:encode can return an iolist which breaks the http code. This has only been
     %% observed with floats, but may occur elsewhere.
     Body = iolist_to_binary(jiffy:encode({[{<<"actors">>, Actors}, {<<"groups">>, Groups}]})),
-    case oc_chef_authz_http:request(Url, put, [], Body, RequestorId) of
+    case oc_chef_authz_http:request(Url, put, [], Body, EffectiveRequestorId) of
         ok -> ok;
         %% Expected errors are forbidden, not_found, server_error
         {error, Error} -> {error, Error}
@@ -401,9 +487,6 @@ set_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod, #authz_ace{actors=A
 %% `RequestorId' can be the atom `superuser'; in that case, the underlying Authz requests
 %% will be made by the Authz superuser.  If it is a normal ID, that requestor will make the
 %% Authz requests.
-%%
-%% Taking this approach instead of a more general "add_to_group" approach since this client
-%% operation is the only instance.
 -spec add_client_to_clients_group(#oc_chef_authz_context{},
                                  OrgId :: object_id(),
                                  ClientAuthzId :: object_id(),
@@ -412,20 +495,32 @@ set_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod, #authz_ace{actors=A
 add_client_to_clients_group(Context, OrgId, ClientAuthzId, RequestorId) ->
     %% We need the superuser ID here because when a validator creates a client, the won't
     %% have the permissions required to add that new client to the clients group.
-
-    EffectiveRequestorId = case RequestorId of
-                               superuser ->
-                                   envy:get(oc_chef_authz, authz_superuser_id, binary);
-                               RequestorId ->
-                                   RequestorId
-                           end,
-
     ClientGroupAuthzId = oc_chef_authz_db:fetch_group_authz_id(Context, OrgId, <<"clients">>),
-    Url = make_url([<<"groups">>, ClientGroupAuthzId, <<"actors">>, ClientAuthzId]),
+    add_to_group(ClientGroupAuthzId, actor, ClientAuthzId, RequestorId).
+
+%% @doc Add actor or group to group.
+%%
+%% `RequestorId' can be the atom `superuser'; in that case, the underlying Authz requests
+%% will be made by the Authz superuser.  If it is a normal ID, that requestor will make the
+%% Authz requests.
+%%
+
+-spec add_to_group(GroupId :: object_id(),
+                   Type :: actor | group,
+                   AuthzId :: object_id(),
+                   RequestorId :: superuser | object_id()) ->
+                          ok | {error, term()}.
+add_to_group(GroupAuthzId, Type, AuthzId, RequestorId) ->
+    %% Refactor maybe?
+    EffectiveRequestorId = requestor_or_superuser(RequestorId),
+    PType = pluralize_resource(Type),
+    Url = make_url([<<"groups">>, GroupAuthzId, PType, AuthzId]),
     case oc_chef_authz_http:request(Url, put, [], [], EffectiveRequestorId) of
         ok             -> ok;
         {error, Error} -> {error, Error}
     end.
+
+
 
 %% @doc As a given actor (`TargetActorId'), remove another actor (`ActorIdToRemove')
 %% completely from its ACL.
@@ -484,18 +579,23 @@ object_type_to_container_name(data)        -> <<"data">>; % breaks the simple at
 object_type_to_container_name(environment) -> <<"environments">>;
 object_type_to_container_name(group)       -> <<"groups">>;
 object_type_to_container_name(node)        -> <<"nodes">>;
+object_type_to_container_name(organization) -> <<"organizations">>;
 object_type_to_container_name(role)        -> <<"roles">>;
 object_type_to_container_name(sandbox)     -> <<"sandboxes">>;
 object_type_to_container_name(search)      -> <<"search">>;
 object_type_to_container_name(user)        -> <<"users">>.
 
-%% @doc When creating a new Authz entity in a given container, we need to ensure we're
-%% creating the correct kind.
-authz_type_from_container(client)    -> 'actor';
-authz_type_from_container(container) -> 'container';
-authz_type_from_container(group)     -> 'group';
-authz_type_from_container(user)      -> 'actor';
-authz_type_from_container(_)         -> 'object'.
+%% @doc The authz system needs to know the resource type as part of the API. This maps chef
+%% object types into their appropriate authz resource types.
+%%
+%% When creating a new Authz entity in a given container, we need to ensure we're creating
+%% the correct kind.
+-spec object_type_to_resource(contained_object_name()) -> atom().
+object_type_to_resource(client)    -> 'actor';
+object_type_to_resource(container) -> 'container';
+object_type_to_resource(group)     -> 'group';
+object_type_to_resource(user)      -> 'actor';
+object_type_to_resource(_)         -> 'object'.
 
 %
 % This exists for testing and debugging; it's too expensive for day to day use.

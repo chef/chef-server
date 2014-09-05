@@ -230,7 +230,7 @@ process_batch(State = #state{authz_ids = {ActorSet, GroupSet}}) ->
       length(GroupAuthzIdsToRemove),
       length(RemainingGroups)
      } of
-        {0,0,0,0} ->
+        {0,_,0,_} ->
             ok;
         {LengthActors, LengthRemainingActors, LengthGroups, LengthRemainingGroups} ->
             error_logger:info_msg(
@@ -240,7 +240,7 @@ process_batch(State = #state{authz_ids = {ActorSet, GroupSet}}) ->
                LengthGroups,
                check_for_zero(LengthRemainingGroups, LengthGroups)])
     end,
-    SuperUserAuthzId = envy:get(oc_chef_authz, authz_superuser_id, binary),
+    SuperUserAuthzId = oc_chef_authz:superuser_id(),
     delete_authz_ids(SuperUserAuthzId, actor, ActorAuthzIdsToRemove),
     delete_authz_ids(SuperUserAuthzId, group, GroupAuthzIdsToRemove),
     create_timer(State#state{authz_ids = {sets:from_list(RemainingActors), sets:from_list(RemainingGroups)}}).

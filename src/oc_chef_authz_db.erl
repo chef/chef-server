@@ -1,4 +1,10 @@
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
+%% @author Mark Anderson <mark@opscode.com>
+%% @author Marc Paradise <marc@getchef.com>
+%% @doc authorization - Interface to the opscode authorization servize
+%%
+%% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -21,18 +27,27 @@
 
 -export([container_record_to_authz_id/2,
          fetch_container/3,
+         make_global_admin_group_name/1,
+         fetch_global_group_authz_id/3,
          fetch_group_authz_id/3,
+         fetch_group_sql/3,
          make_context/2,
          statements/1
         ]).
 
--ifdef(TEST).
+%-ifdef(TEST).
 -compile([export_all]).
--endif.
+%-endif.
 
 -include("oc_chef_authz.hrl").
 -include("oc_chef_authz_db.hrl").
 -include_lib("sqerl/include/sqerl.hrl").
+
+%% TODO Fix:
+%% -include_lib("chef_objects/include/chef_types.hrl").
+%% can't include this because it also defines object_id
+%% So copied this over for the short term.
+-define(GLOBAL_PLACEHOLDER_ORG_ID, <<"00000000000000000000000000000000">>).
 
 -define(gv(Key, PList), proplists:get_value(Key, PList)).
 -define(user_db, "opscode_account").
@@ -45,24 +60,51 @@ statements(pgsql) ->
         "  FROM users u, org_user_associations assoc, orgs o"
         " WHERE u.id = assoc.user_id AND o.id = assoc.org_id"
         "   AND u.username = $1 AND o.name = $2;">>},
+
+     % Org-user invites
      {insert_org_user_invite,
       <<"INSERT INTO org_user_invites (id, org_id, user_id, last_updated_by, created_at, updated_at)"
         " VALUES ($1, $2, $3, $4, $5, $6)">>},
-     {delete_org_user_invite_by_id,
-      <<"DELETE FROM org_user_invites WHERE id= $1">>},
-     {find_org_user_invite_by_id,
-      <<"SELECT id, org_id, user_id, last_updated_by, created_at, updated_at FROM user_org_invites"
-        " WHERE id= $1 LIMIT 1">>},
-     {list_org_user_invites, <<"SELECT id FROM user_org_invites">>},
+     {delete_org_user_invite_by_id, <<"DELETE FROM org_user_invites WHERE id= $1">>},
+     {find_org_user_invite_by_id, <<"SELECT i.id id, o.id as org_id, o.name as org_name, u.id as user_id, u.username as user_name, i.last_updated_by, i.created_at, i.updated_at "
+                                    "  FROM org_user_invites i, orgs o, users u "
+                                    " WHERE i.id = $1 "
+                                    "   AND user_id = u.id "
+                                    "   AND org_id = o.id ">>},
+     {list_org_user_invites , <<"SELECT i.id as id, u.username as user_name "
+                                "  FROM org_user_invites i, users u "
+                                " WHERE i.org_id = $1 "
+                                "   AND i.user_id = u.id "
+                                " ORDER BY user_name">>},
+     {list_user_org_invites, <<"SELECT i.id as id, o.name as org_name "
+                                "  FROM org_user_invites i, orgs o, users u "
+                                " WHERE i.user_id = $1 "
+                                "   AND i.org_id = o.id "
+                                "   AND u.id = i.user_id "
+                                " ORDER BY org_name">>},
+     % Org-user associations
      {insert_org_user_association,
       <<"INSERT INTO org_user_associations (org_id, user_id, last_updated_by, created_at, updated_at)"
         " VALUES ($1, $2, $3, $4, $5)">>},
      {delete_org_user_association_by_ids,
       <<"DELETE FROM org_user_associations WHERE org_id= $1 AND user_id= $2">>},
      {find_org_user_association_by_ids,
-      <<"SELECT org_id, user_id, last_updated_by, created_at, updated_at FROM user_org_associations"
-        " WHERE org_id= $1 AND user_id= $2 LIMIT 1">>},
-     {list_org_user_associations, <<"SELECT org_id, user_id FROM user_org_associations">>},
+      <<"SELECT org_id, user_id, username as user_name, a.last_updated_by, a.created_at, a.updated_at"
+        "  FROM org_user_associations a, users u"
+        " WHERE org_id= $1 AND user_id= $2 AND a.user_id = u.id">>},
+
+     {list_user_org_associations, <<"SELECT o.name as name, o.full_name as full_name "
+                                    "  FROM org_user_associations a, orgs o"
+                                    " WHERE a.org_id = o.id "
+                                    "   AND user_id = $1">>},
+
+     % Note here that because an org association isn't an 'object' per se, the form is different -
+     % we just need a list of names.
+     {list_org_user_associations, <<"   SELECT username as user_name"
+                                    "     FROM org_user_associations a, users u"
+                                    "    WHERE org_id = $1 AND a.user_id = u.id"
+                                    " ORDER BY user_name">>},
+
      {insert_organization,
       <<"INSERT INTO orgs (id, authz_id, name, full_name,"
         " assigned_at, last_updated_by, created_at, updated_at) VALUES"
@@ -119,9 +161,9 @@ statements(pgsql) ->
      {find_group_authz_id_in_names,
       <<"SELECT authz_id FROM groups WHERE org_id = $1 AND name = ANY($2)">>}
     ].
-                                                %
-                                                % Opscode Chef_views.
-                                                %
+%
+% Opscode Chef_views.
+%
 -define(mixlib_auth_client_design,
         "Mixlib::Authorization::Models::Client-fec21b157b76e08b86e92ef7cbc2be81").
 
@@ -172,11 +214,18 @@ make_context(ReqId, Darklaunch) when is_binary(ReqId) ->
                       container_name()) -> #chef_container{} |
                                            not_found |
                                            {error, _}.
-fetch_container(#oc_chef_authz_context{otto_connection = Server},
+fetch_container(#oc_chef_authz_context{otto_connection = Server,
+                                       darklaunch = Darklaunch} = Ctx,
                 undefined, ContainerName) ->
-    % Containers with no org are global containers - these have not yet been migrated
-    % so force them to couch regardless of darklaunch.
-    fetch_container_couchdb(Server, undefined, ContainerName);
+    %% Containers withm no org are global containers -
+    %% global containers are related to organizations, so we'll trigger
+    %% whether the global containersa are in sql depending on where the orgs are
+    case xdarklaunch_req:is_enabled(<<"coucndb_organizations">>, Darklaunch) of
+        true ->
+            fetch_container_couchdb(Server, undefined, ContainerName);
+        false ->
+            fetch_container_sql(Ctx, ?GLOBAL_PLACEHOLDER_ORG_ID, ContainerName)
+    end;
 fetch_container(#oc_chef_authz_context{otto_connection=Server,
                                        darklaunch = Darklaunch} = Ctx,
                 OrgId, ContainerName) ->
@@ -185,6 +234,22 @@ fetch_container(#oc_chef_authz_context{otto_connection=Server,
             fetch_container_couchdb(Server, OrgId, ContainerName);
         false ->
             fetch_container_sql(Ctx, OrgId, ContainerName)
+    end.
+
+make_global_admin_group_name(OrgName) ->
+  lists:flatten(io_lib:format("~s_global_admins", [OrgName])).
+
+%% TODO: the only global groups are global admins groups and this should only be used for those
+fetch_global_group_authz_id(#oc_chef_authz_context{otto_connection=Server, darklaunch = Darklaunch} = Ctx,
+                            OrgName, GroupName) ->
+    RealGroupName = lists:flatten(io_lib:format("~s_~s", [OrgName, GroupName])),
+    %% global admins are strictly related to organizations, so we'll trigger
+    %% whether the global admins group is in sql depending on where the org is
+    case xdarklaunch_req:is_enabled(<<"couchdb_organizations">>, Darklaunch) of
+        true ->
+            fetch_group_authz_id_couchdb(Server, undefined, RealGroupName);
+        false ->
+            fetch_group_authz_id_sql(Ctx, ?GLOBAL_PLACEHOLDER_ORG_ID, RealGroupName)
     end.
 
 fetch_container_couchdb(Server, OrgId, ContainerName) ->
@@ -213,7 +278,7 @@ fetch_container_couchdb(Server, OrgId, ContainerName) ->
 %% to retrieve the clients group, so that we may add newly-created
 %% clients to it (we could also start deleting clients from it, too).
 -spec fetch_group_authz_id(Context :: oc_chef_authz_context(),
-                           OrgId :: binary(),
+                           OrgId :: binary() | undefined,
                            GroupName :: binary()) ->  object_id() |
                                                       {not_found, authz_group}.
 fetch_group_authz_id(#oc_chef_authz_context{otto_connection=Server,
@@ -293,12 +358,6 @@ fetch_auth_join_id(Server, Id, Direction) when is_binary(Id) ->
 %%     {?mixlib_auth_client_design, "by_clientname"};
 design_and_view_for_type(authz_container) ->
     {?mixlib_auth_container_design, "by_containername"};
-%% design_and_view_for_type(authz_cookbook) ->
-%%     {?mixlib_auth_container_design, "by_display_name"};
-%% design_and_view_for_type(authz_data_bag) ->
-%%     {?mixlib_auth_data_bag_design, "by_name"};
-%% design_and_view_for_type(authz_environment) ->
-%%     {?mixlib_auth_environment_design, "all_id"};
 design_and_view_for_type(authz_group) ->
     {?mixlib_auth_group_design, "by_groupname"}.
 %% design_and_view_for_type(authz_node) ->
@@ -363,6 +422,43 @@ fetch_group_authz_id_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
                           end) of
         #oc_chef_group{authz_id = AuthzId} ->
             AuthzId;
+        not_found ->
+            {not_found, authz_group};
+        {error, _} = Error ->
+            Error
+    end.
+
+
+%% TODO: refactor, clean this up
+%% We need a clean api for fetching a group w/o expansion of members
+%% We need a clean api for fetching the global admins group, but we may not need to be able to do
+%% it from couchdb.
+%% Look
+%%  * in oc_chef_wm_associations and invites
+%%  * in oc_chef_authz_groups
+%%  * in oc_chef_organization_policy
+%%
+fetch_global_admins(#oc_chef_authz_context{otto_connection=_Server,
+                                           darklaunch = Darklaunch} = Ctx,
+                    OrgName) ->
+    GlobalGroupName = make_global_admin_group_name(OrgName),
+    case xdarklaunch_req:is_enabled(<<"couchdb_groups">>, Darklaunch) of
+        true ->
+            throw({not_implemented, fetch_global_admins_couch});
+        false ->
+            fetch_group_sql(Ctx, ?GLOBAL_PLACEHOLDER_ORG_ID, GlobalGroupName)
+    end.
+
+fetch_group_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
+    case stats_hero:ctime(ReqId, {chef_sql, fetch},
+                          fun() ->
+                                  chef_object:default_fetch(#oc_chef_group{
+                                                               org_id = OrgId,
+                                                               name = Name},
+                                                            fun chef_sql:select_rows/1)
+                          end) of
+        #oc_chef_group{} = Group ->
+            Group;
         not_found ->
             {not_found, authz_group};
         {error, _} = Error ->

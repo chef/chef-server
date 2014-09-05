@@ -1,7 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Tyler Cloke <tyler@getchef.com>
-%% Copyright 2014 Opscode, Inc. All Rights Reserved.
+%% @author Marc Paradise <marc@getchef.com>
+%% Copyright 2014 Chef Software, Inc. All Rights Reserved.
 
 -module(oc_chef_org_user_invite).
 
@@ -12,22 +13,26 @@
 -behaviour(chef_object).
 
 -export([
+         parse_binary_json/2,
          authz_id/1,
          is_indexed/0,
          ejson_for_indexing/2,
          update_from_ejson/2,
          set_created/2,
-         set_updated/2,
          create_query/0,
+         set_updated/2,
          update_query/0,
          delete_query/0,
          find_query/0,
          list_query/0,
+         ejson_from_list/2,
+         to_ejson/1,
          bulk_get_query/0,
-         fields_for_update/1,
          fields_for_fetch/1,
+         fields_for_update/1,
          record_fields/0,
          list/2,
+         flatten/1,
          new_record/3,
          name/1,
          id/1,
@@ -43,8 +48,34 @@
 authz_id(#oc_chef_org_user_invite{}) ->
     erlang:error(not_implemented).
 
+valid_response(Response) when is_list(Response) ->
+    valid_response(list_to_binary(Response));
+valid_response(Response) when Response == <<"accept">>;
+                              Response == <<"reject">> ->
+    ok;
+valid_response(_) ->
+    error.
+
 is_indexed() ->
     false.
+
+ejson_from_list(Invitations, DescFieldName) ->
+    [   {[{<<"id">>, InviteId}, {DescFieldName, DescFieldValue}]}  || [InviteId, DescFieldValue] <- Invitations].
+
+
+% NOTE: this is not compatible with the old record, which returned a
+% complete org object include all internals, the authz id of the user
+% and the authz id of the inviting admin.
+to_ejson(#oc_chef_org_user_invite{id = Id, user_name = UserName, org_name = OrgName}) ->
+    {[{<<"id">>, Id},
+      % Replacements for what we're removing, this is the data
+      % we are OK exposiing
+      {<<"orgname">>, OrgName},
+      {<<"username">>, UserName},
+      % Notify that none of these values are here anymore
+      {<<"organization">>, {[{<<"deprecated">>, true}, {<<"name">>, OrgName}]}},
+      {<<"user">>, <<"deprecated">>},
+      {<<"organization_admin_actor_id">>, <<"deprecated">>}]}.
 
 ejson_for_indexing(#oc_chef_org_user_invite{}, _EjsonTerm) ->
    erlang:error(not_indexed).
@@ -75,24 +106,57 @@ find_query() ->
 list_query() ->
     erlang:error(not_implemented).
 
+list_query(by_org) ->
+    list_org_user_invites;
+list_query(by_user) ->
+    list_user_org_invites.
+
 bulk_get_query() ->
     erlang:error(not_implemented).
 
+parse_binary_json(Bin, Type) ->
+    EJ = chef_json:decode(Bin),
+    case ej:valid(validation_spec(Type), EJ) of
+        ok ->
+            {ok, EJ};
+    BadSpec ->
+          throw(BadSpec)
+    end.
+
+validation_spec(create) ->
+    {[ {<<"user">>, string} ]};
+validation_spec(response) ->
+    {[
+        {<<"response">>,{fun_match, {fun valid_response/1, string, <<"Param response must be either 'accept' or 'reject'">>}}}
+    ]}.
+
 fields_for_update(#oc_chef_org_user_invite{}) ->
+    % invitations cannot be updated.
     erlang:error(not_implemented).
 
 fields_for_fetch(#oc_chef_org_user_invite{id = Id}) ->
     [Id].
 
+flatten(#oc_chef_org_user_invite{ id = Id,
+                                  org_id = OrgId,
+                                  user_id = UserId,
+                                  last_updated_by = LastUpdatedBy,
+                                  created_at = CreatedAt,
+                                  updated_at = UpdatedAt} ) ->
+    [Id, OrgId, UserId, LastUpdatedBy, CreatedAt, UpdatedAt].
+
 record_fields() ->
     record_info(fields, oc_chef_org_user_invite).
 
-list(#oc_chef_org_user_invite{id = Id}, CallbackFun) ->
-    CallbackFun({list_query(), [Id], [name]}).
+list(#oc_chef_org_user_invite{org_id = OrgId, user_id = undefined}, CallbackFun) ->
+    CallbackFun({list_query(by_org), [OrgId], rows});
+list(#oc_chef_org_user_invite{user_id = UserId, org_id = undefined}, CallbackFun) ->
+    CallbackFun({list_query(by_user), [UserId], rows}).
 
-new_record(OrgId, _AuthzId, Data) ->
+new_record(OrgId, undefined, Data) ->
+    new_record(OrgId, {authz_id, ej:get({<<"user">>}, Data)}, Data);
+new_record(OrgId, {authz_id, UserId}, _Data) ->
     Id = chef_object_base:make_org_prefix_id(OrgId),
-    UserId = ej:get({<<"user">>}, Data),
     #oc_chef_org_user_invite{id = Id,
                              org_id = OrgId,
                              user_id = UserId}.
@@ -107,4 +171,4 @@ org_id(#oc_chef_org_user_invite{org_id = OrgId}) ->
     OrgId.
 
 type_name(#oc_chef_org_user_invite{}) ->
-    org_user_invite.
+    invite.

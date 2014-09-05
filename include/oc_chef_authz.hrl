@@ -52,5 +52,3 @@
           'last_updated_by' % authz guid of last actor to update object
          }).
 
--record(context, {reqid,
-                  otto_connection}).
