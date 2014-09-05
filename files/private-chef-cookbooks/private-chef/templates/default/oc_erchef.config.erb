@@ -124,8 +124,10 @@
                                  {max_connection_duration, <%= node['private_chef']['oc_chef_authz']['http_max_connection_duration'] %>},
                                  {ibrowse_options, <%= node['private_chef']['oc_chef_authz']['ibrowse_options'] %>}
                                  ]},
-                {couchdb_host, "<%= @helper.normalize_host(node['private_chef']['couchdb']['vip']) %>"},
-                {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> },
+                %% COUCHDB REMOVE THESE
+                {couchdb_host, "127.0.0.1"},
+                {couchdb_port, 5987 },
+                %% END COUCHDB REMOVE THESE
                 {authz_superuser_id, <<"<%= node['private_chef']['oc_bifrost']['superuser_id'] %>">>},
                 {cleanup_batch_size, <%= node['private_chef']['opscode-erchef']['cleanup_batch_size'] %>}
                ]},
@@ -133,8 +135,10 @@
              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
              {cache_defaults, [{max_size, <%= @max_cache_size %> },
                                   {ttl, <%= @cache_ttl %> }]},
-             {couchdb_host, "<%= @helper.normalize_host(node['private_chef']['couchdb']['vip']) %>"},
-             {couchdb_port, <%= node['private_chef']['couchdb']['port'] %> }
+             %% COUCHDB REMOVE THESE
+             {couchdb_host, "127.0.0.1"},
+             {couchdb_port, 5987 }
+             %% END COUCHDB REMOVE THESE
             ]},
   {chef_index, [
                 {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
@@ -147,7 +151,6 @@
                 {solr_url, "http://<%= @helper.vip_for_uri('opscode-solr4') %>:<%= node['private_chef']['opscode-solr4']['port'] %>/solr"}
                ]},
   {chef_objects, [
-                  {certificate_root_url, "http://<%= @helper.vip_for_uri('opscode-certificate') %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificates"},
                   {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
                   {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
                   {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= @helper.vip_for_uri('bookshelf') %>"},

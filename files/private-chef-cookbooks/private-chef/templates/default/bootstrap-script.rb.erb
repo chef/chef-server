@@ -1,7 +1,3 @@
-delete_couchdb_databases
-
-create_couchdb_databases
-
 su_authz_id = superuser do |u|
   u.name = 'pivotal'
   u.first_name = 'Clark'
@@ -13,4 +9,3 @@ su_authz_id = superuser do |u|
 end
 
 create_global_containers(su_authz_id)
-

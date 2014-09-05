@@ -13,6 +13,10 @@ default['enterprise']['name'] = "private_chef"
 default['private_chef']['removed_services'] = %w{
 opscode-webui
 opscode-solr
+couchdb
+opscode-account
+opscode-org-creator
+opscode-certificate
 }
 
 ###
@@ -52,33 +56,9 @@ default['private_chef']['user']['shell'] = "/bin/sh"
 default['private_chef']['user']['home'] = "/opt/opscode/embedded"
 
 ####
-# CouchDB
+# CouchDB (legacy required for upgrades to work)
 ####
-# Enable/disable the CouchDB service
-default['private_chef']['couchdb']['enable'] = true
-default['private_chef']['couchdb']['ha'] = false
-# The directory for CouchDB data
-default['private_chef']['couchdb']['dir'] = "/var/opt/opscode/couchdb"
 default['private_chef']['couchdb']['data_dir'] = "/var/opt/opscode/couchdb/db"
-default['private_chef']['couchdb']['log_directory'] = "/var/log/opscode/couchdb"
-default['private_chef']['couchdb']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['couchdb']['log_rotation']['num_to_keep'] = 10
-
-# The port to listen on
-default['private_chef']['couchdb']['port'] = 5984
-# The IP Address to bind on - use 0.0.0.0 for everything
-default['private_chef']['couchdb']['bind_address'] = '127.0.0.1'
-# The VIP
-default['private_chef']['couchdb']['vip'] = "127.0.0.1"
-default['private_chef']['couchdb']['max_document_size'] = '4294967296'
-default['private_chef']['couchdb']['max_attachment_chunk_size'] = '4294967296'
-default['private_chef']['couchdb']['os_process_timeout'] = '300000'
-default['private_chef']['couchdb']['max_dbs_open'] = 104857600
-default['private_chef']['couchdb']['delayed_commits'] = 'true'
-default['private_chef']['couchdb']['batch_save_size'] = 1000
-default['private_chef']['couchdb']['batch_save_interval'] = 1000
-default['private_chef']['couchdb']['log_level'] = 'error'
-default['private_chef']['couchdb']['reduce_limit'] = 'false'
 
 ####
 # RabbitMQ
@@ -252,7 +232,6 @@ default['private_chef']['lb']['web_ui_fqdn'] = node['fqdn']
 default['private_chef']['lb']['cache_cookbook_files'] = false
 default['private_chef']['lb']['debug'] = false
 default['private_chef']['lb']['upstream']['opscode-erchef'] = [ "127.0.0.1" ]
-default['private_chef']['lb']['upstream']['opscode-account'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['oc_bifrost'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-solr4'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['bookshelf'] = [ "127.0.0.1" ]
@@ -429,35 +408,6 @@ default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-defaul
 default['private_chef']['bookshelf']['external_url'] = :host_header
 
 ###
-# Opscode Certificate
-###
-default['private_chef']['opscode-certificate']['enable'] = true
-default['private_chef']['opscode-certificate']['ha'] = false
-default['private_chef']['opscode-certificate']['dir'] = "/var/opt/opscode/opscode-certificate"
-default['private_chef']['opscode-certificate']['log_directory'] = "/var/log/opscode/opscode-certificate"
-default['private_chef']['opscode-certificate']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['opscode-certificate']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-certificate']['port'] = 5140
-default['private_chef']['opscode-certificate']['vip'] = '127.0.0.1'
-default['private_chef']['opscode-certificate']['num_workers'] = '2'
-default['private_chef']['opscode-certificate']['num_certificates_per_worker'] = '50'
-
-###
-# Opscode Organization Creator
-###
-default['private_chef']['opscode-org-creator']['enable'] = true
-default['private_chef']['opscode-org-creator']['ha'] = false
-default['private_chef']['opscode-org-creator']['dir'] = "/var/opt/opscode/opscode-org-creator"
-default['private_chef']['opscode-org-creator']['log_directory'] = "/var/log/opscode/opscode-org-creator"
-default['private_chef']['opscode-org-creator']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['opscode-org-creator']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-org-creator']['ready_org_depth'] = 10
-default['private_chef']['opscode-org-creator']['max_workers'] = 1
-default['private_chef']['opscode-org-creator']['create_wait_ms'] = 30000
-default['private_chef']['opscode-org-creator']['create_splay_ms'] = 25000
-default['private_chef']['opscode-org-creator']['port'] = 4369
-
-###
 # Chef Identity
 ###
 
@@ -502,30 +452,6 @@ default['private_chef']['dark_launch']["sql_users"] = true
 default['private_chef']['dark_launch']["add_type_and_bag_to_items"] = true
 default['private_chef']['dark_launch']["reporting"] = true
 default['private_chef']['dark_launch']["actions"] = true
-
-###
-# Opscode Account
-###
-default['private_chef']['opscode-account']['enable'] = true
-default['private_chef']['opscode-account']['ha'] = false
-default['private_chef']['opscode-account']['dir'] = "/var/opt/opscode/opscode-account"
-default['private_chef']['opscode-account']['log_directory'] = "/var/log/opscode/opscode-account"
-default['private_chef']['opscode-account']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['opscode-account']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-account']['proxy_user'] = "pivotal"
-default['private_chef']['opscode-account']['session_secret_key'] = 'change-by-default'
-default['private_chef']['opscode-account']['environment'] = 'privatechef'
-default['private_chef']['opscode-account']['vip'] = '127.0.0.1'
-default['private_chef']['opscode-account']['port'] = 9465
-default['private_chef']['opscode-account']['url'] = "http://127.0.0.1:9465"
-default['private_chef']['opscode-account']['listen'] = '127.0.0.1:9465'
-default['private_chef']['opscode-account']['backlog'] = 1024
-default['private_chef']['opscode-account']['tcp_nodelay'] = true
-default['private_chef']['opscode-account']['worker_timeout'] = 3600
-default['private_chef']['opscode-account']['validation_client_name'] = "chef"
-default['private_chef']['opscode-account']['umask'] = "0022"
-default['private_chef']['opscode-account']['worker_processes'] = node['cpu']['total'].to_i
-default['private_chef']['opscode-account']['enable_code_coverage'] = false
 
 ###
 # Chef Mover

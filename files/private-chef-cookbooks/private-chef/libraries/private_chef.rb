@@ -24,26 +24,19 @@ module PrivateChef
   default_orgname nil
 
   addons Mash.new
-  couchdb Mash.new
   rabbitmq Mash.new
   opscode_solr4 Mash.new
   opscode_expander Mash.new
   opscode_erchef Mash.new
   # Need old path for cookbook migration:
   opscode_chef Mash.new
-  # This is here so legacy private-chef.rb config files that contain settings
-  # like `opscode_webui['enable'] = false` do not break the reconfigure. It is
-  # not used for anything else.
-  opscode_webui Mash.new
+
   lb Mash.new
   lb_internal Mash.new
   postgresql Mash.new
   redis_lb Mash.new
   oc_bifrost Mash.new
   oc_id Mash.new
-  opscode_certificate Mash.new
-  opscode_org_creator Mash.new
-  opscode_account Mash.new
   bookshelf Mash.new
   bootstrap Mash.new
   drbd Mash.new # For DRBD specific settings
@@ -70,6 +63,17 @@ module PrivateChef
   ldap Mash.new
   disabled_plugins []
   enabled_plugins []
+
+  # - legacy config mashes -
+  # these config values are here so that if any config has been previously
+  # set for these projects in an older version of private-chef/chef-server.rb
+  # then we do not error out during the reconfigure
+  opscode_webui Mash.new
+  opscode_solr Mash.new
+  couchdb Mash.new
+  opscode_account Mash.new
+  opscode_org_creator Mash.new
+  opscode_certificate Mash.new
 
   class << self
 
@@ -155,7 +159,6 @@ module PrivateChef
       PrivateChef['rabbitmq']['actions_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['postgresql']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['opscode_account']['session_secret_key'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['oc_bifrost']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
@@ -182,9 +185,6 @@ module PrivateChef
               'oc_id' => {
                 'sql_password' => PrivateChef['oc_id']['sql_password'],
                 'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
-              },
-              'opscode_account' => {
-                'session_secret_key' => PrivateChef['opscode_account']['session_secret_key']
               },
               'drbd' => {
                 'shared_secret' => PrivateChef['drbd']['shared_secret']
@@ -213,8 +213,8 @@ module PrivateChef
       [
         "opscode_chef",
         "redis_lb",
-        "couchdb",
         "addons",
+        "couchdb",
         "rabbitmq",
         "opscode_solr4",
         "opscode_expander",
@@ -224,10 +224,7 @@ module PrivateChef
         "postgresql",
         "oc_bifrost",
         "oc_id",
-        "opscode_certificate",
-        "opscode_org_creator",
         "opscode_chef_mover",
-        "opscode_account",
         "bookshelf",
         "bootstrap",
         "drbd",
@@ -307,7 +304,6 @@ module PrivateChef
       PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef['servers'][node_name]['peer_ipaddress']
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
       PrivateChef["bookshelf"]["ha"] ||= true
-      PrivateChef["couchdb"]["ha"] ||= true
       PrivateChef["oc_id"]["ha"] ||= true
       PrivateChef["rabbitmq"]["ha"] ||= true
       PrivateChef["opscode_solr4"]["ha"] ||= true
@@ -317,27 +313,21 @@ module PrivateChef
       PrivateChef["postgresql"]["ha"] ||= true
       PrivateChef["redis_lb"]["ha"] ||= true
       PrivateChef["oc_bifrost"]["ha"] ||= true
-      PrivateChef["opscode_certificate"]["ha"] ||= true
-      PrivateChef["opscode_org_creator"]["ha"] ||= true
-      PrivateChef["opscode_account"]["ha"] ||= true
       PrivateChef["nginx"]["ha"] ||= true
     end
 
     def gen_backend(bootstrap=false)
       PrivateChef[:role] = "backend" #mixlib-config wants a symbol :(
       PrivateChef["bookshelf"]["listen"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["couchdb"]["bind_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
       PrivateChef["opscode_solr4"]["ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
-      PrivateChef["opscode_certificate"]["vip"] ||= '127.0.0.1'
 
       authaddr = []
       authaddr << "0.0.0.0/0" # if PrivateChef["use_ipv4"]
       authaddr << "::/0" if PrivateChef["use_ipv6"]
       PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= authaddr
-      PrivateChef["opscode_account"]["worker_processes"] ||= 4
 
       PrivateChef["opscode_chef_mover"]["enable"] = !!bootstrap
       PrivateChef["bootstrap"]["enable"] = !!bootstrap
@@ -347,21 +337,13 @@ module PrivateChef
       PrivateChef[:role] = "frontend"
       PrivateChef["bookshelf"]["enable"] ||= false
       PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["couchdb"]["enable"] ||= false
-      PrivateChef["couchdb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["rabbitmq"]["enable"] ||= false
       PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["redis_lb"]["enable"] ||= false
       PrivateChef["redis_lb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-
-      # move certgen back to front ends; the backend canna handle the load
-      PrivateChef["opscode_certificate"]["enable"] ||= true
-      PrivateChef["opscode_certificate"]["vip"] ||= '127.0.0.1'
-
       PrivateChef["opscode_solr4"]["enable"] ||= false
       PrivateChef["opscode_solr4"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["opscode_expander"]["enable"] ||= false
-      PrivateChef["opscode_org_creator"]["enable"] ||= false
       PrivateChef["postgresql"]["enable"] ||= false
       PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["lb"]["cache_cookbook_files"] ||= true

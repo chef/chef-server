@@ -5,9 +5,6 @@ self.db_host = '<%= node['private_chef']['postgresql']['vip'] %>'
 self.db_user = '<%= node['private_chef']['postgresql']['sql_user'] %>'
 self.db_password = '<%= node['private_chef']['postgresql']['sql_password'] %>'
 
-self.couchdb_host = '<%= node['private_chef']['couchdb']['vip'] %>'
-self.couchdb_port = '<%= node['private_chef']['couchdb']['port'] %>'
-
 self.bifrost_host = '<%= node['private_chef']['oc_bifrost']['vip'] %>'
 self.bifrost_port = '<%= node['private_chef']['oc_bifrost']['port'] %>'
 self.bifrost_superuser_id = '<%= node['private_chef']['oc_bifrost']['superuser_id'] %>'
