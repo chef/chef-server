@@ -56,11 +56,7 @@ end
 if (!OmnibusHelper.has_been_bootstrapped? &&
     node['private_chef']['topology'] == "standalone" &&
     node['private_chef']['addons']['install'])
-  if (node['private_chef']['addons']['path'])
-    include_recipe "private-chef::add_ons_local"
-  else
-    include_recipe "private-chef::add_ons_remote"
-  end
+  include_recipe "private-chef::add_ons_wrapper"
 end
 
 file OmnibusHelper.bootstrap_sentinel_file do
