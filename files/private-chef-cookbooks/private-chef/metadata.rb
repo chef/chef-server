@@ -12,3 +12,5 @@ recipe            "chef-server", "Configures the Chef Server from Omnibus"
 end
 
 depends          'enterprise' # grabbed via Berkshelf + Git
+depends          'apt'
+depends          'yum', '~> 3.0'

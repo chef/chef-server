@@ -6,7 +6,6 @@
 #
 
 require 'securerandom'
-
 opscode_test_dir = "/opt/opscode/embedded/service/opscode-test"
 opscode_test_config_dir = "/opt/opscode/embedded/service/opscode-test/bootstrapper-config"
 
@@ -52,6 +51,16 @@ end
 #
 template bootstrap_script do
   action :delete
+end
+
+if (!OmnibusHelper.has_been_bootstrapped? &&
+    node['private_chef']['topology'] == "standalone" &&
+    node['private_chef']['addons']['install'])
+  if (node['private_chef']['addons']['path'])
+    include_recipe "private-chef::add_ons_local"
+  else
+    include_recipe "private-chef::add_ons_remote"
+  end
 end
 
 file OmnibusHelper.bootstrap_sentinel_file do
