@@ -31,7 +31,7 @@
 -compile([export_all]).
 -endif.
 
--define(CHEF_ACTIONS_MESSAGE_VERSION, <<"0.1.0">>).
+-define(CHEF_ACTIONS_MESSAGE_VERSION, <<"0.1.1">>).
 
 -spec log_action(Req :: wm_req(),
                  State :: #base_state{}) -> ok.
@@ -73,9 +73,13 @@ log_action(Req, #base_state{resource_state = ResourceState} = State) when
                     ok
             end
     end;
-log_action(_Req, _State) ->
-    %% unknown state
-    ok.
+log_action(Req, #base_state{resource_state = ResourceState} = State) ->
+    ShouldLogUnEnabledActions = envy:get(oc_chef_wm, log_unenabled_actions, false, boolean),
+    case ShouldLogUnEnabledActions of
+      true -> Task = task(Req, State),
+              lager:info("Action ~p not enabled for ~p\n", [Task, ResourceState]);
+      false -> ok
+    end.
 
 -spec  log_action0(Req :: wm_req(),
                    State :: #base_state{}) -> ok.
@@ -141,6 +145,8 @@ publish(RoutingKey, Msg)->
 
 maybe_add_data(Msg, []) ->
     Msg;
+maybe_add_data(Msg, undefined) ->
+    ej:set({<<"data">>}, Msg, {[]});
 maybe_add_data(Msg, FullActionPayload) ->
     ej:set({<<"data">>}, Msg, FullActionPayload).
 
