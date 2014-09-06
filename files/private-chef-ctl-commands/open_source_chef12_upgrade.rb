@@ -467,6 +467,8 @@ private
     log "Transformed data upload to Chef 12 server is still on disk, located at #{chef12_data_dir}."
     log "These directories can be backed up or removed as desired."
     log "The Chef 11 server package is still present on the system. It can now be safely removed."
+    log "The package that can be removed is named chef-server, not chef-server-core."
+    log "Do not remove the chef-server-core package or else you will remove Chef 12."
   end
 
 end
