@@ -19,3 +19,42 @@ private_chef_package_cleaner "opscode-solr" do
                "/var/log/opscode/opscode-solr"]
   files ["/etc/opscode/logrotate.d/opscode-solr"]
 end
+
+private_chef_package_cleaner "couchdb" do
+  directories ["/var/opt/opscode/couchdb",
+               "/var/log/opscode/couchdb"]
+  files ["/etc/cron.d/couchdb_compact",
+         "/etc/cron.d/couchdb_bounce",
+         "/etc/cron.d/couchdb_compact_major_offenders",
+         "/etc/opscode/logrotate.d/couchdb"]
+end
+
+private_chef_package_cleaner "opscode-account" do
+  directories ["/opt/opscode/embedded/service/opscode-account",
+               "/var/log/opscode/opscode-account",
+               "/var/opt/opscode/opscode-account"]
+end
+
+private_chef_package_cleaner "opscode-org-creator" do
+  directories ["/opt/opscode/embedded/service/opscode-org-creator",
+               "/var/log/opscode/opscode-org-creator",
+               "/var/opt/opscode/opscode-org-creator"]
+end
+
+private_chef_package_cleaner "opscode-certificate" do
+  directories ["/opt/opscode/embedded/service/opscode-certificate",
+               "/var/log/opscode/opscode-certificate",
+               "/var/opt/opscode/opscode-certificate"]
+end
+
+# private_chef_package_cleaner "opscode-account" do
+
+# end
+
+# private_chef_package_cleaner "opscode-certificate" do
+
+# end
+
+# pricate_chef_package_cleaner "opscode-org-creator" do
+
+# end
