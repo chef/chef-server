@@ -245,7 +245,16 @@ file "/etc/opscode/chef-server-running.json" do
   owner node["private_chef"]["user"]["username"]
   group "root"
   mode "0600"
-  content Chef::JSONCompat.to_json_pretty({ "private_chef" => node['private_chef'].to_hash,
-                                            "run_list" => node.run_list,
-                                            "runit" => node['runit'].to_hash})
+
+  file_content = {
+    "private_chef" => node['private_chef'].to_hash,
+    "run_list" => node.run_list,
+    "runit" => node['runit'].to_hash
+  }
+  # back-compat fixes for opscode-reporting
+  # reporting uses the opscode-solr key for determining the location of the solr host,
+  # so we'll copy the contents over from opscode-solr4
+  file_content['private_chef']['opscode-solr'] = file_content['private_chef']['opscode-solr4']
+
+  content Chef::JSONCompat.to_json_pretty(file_content)
 end
