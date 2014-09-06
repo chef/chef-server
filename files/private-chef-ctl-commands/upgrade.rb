@@ -23,7 +23,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     @options.chef11_admin_client_key = "/etc/chef-server/admin.pem"
 
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: private-chef-ctl upgrade [options]"
+      opts.banner = "Usage: chef-server-ctl upgrade [options]"
       opts.banner = opts.banner << "\n Options only apply to open source Chef 11 server to Chef 12 server upgrades."
       opts.banner = opts.banner << "\n If upgrading from Enterprise Chef 11 server to Chef 12 server no options are needed."
 
@@ -35,7 +35,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
         @options.org_name = n
       end
 
-      opts.on("-f", "--full-org-name [name]", String, "The full name of the Chef 12 organization to be created. It must begin with a non-white space and must be between 1 and 1023 characters long (Will ask interactively if not passed).") do |n|
+      opts.on("-f", "--full-org-name [name]", String, "The full name of the Chef 12 organization to be created. It must begin with a non-white space character and must be between 1 and 1023 characters long (Will ask interactively if not passed).") do |n|
         @options.full_org_name = n
       end
 

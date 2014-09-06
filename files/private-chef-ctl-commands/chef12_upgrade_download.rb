@@ -19,7 +19,7 @@ add_command "chef12-upgrade-download", "Download data from a open source Chef 11
     @options.chef11_admin_client_key = "/etc/chef-server/admin.pem"
 
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: private-chef-ctl chef12-upgrade-download [options]"
+      opts.banner = "Usage: chef-server-ctl chef12-upgrade-download [options]"
 
       opts.on("-d", "--chef11-data-dir [directory]", String, "Directory to store open source Chef 11 server data. Defaults to a created tmp dir.") do |chef11_dir|
         @options.chef11_data_dir = chef11_dir
@@ -36,7 +36,7 @@ add_command "chef12-upgrade-download", "Download data from a open source Chef 11
       end
 
       # This option matches the knife -k option
-      opts.on("-k", "--key [key]", String, "Chef 11 API client key. This is the admin key that will be sued to download the Chef 11 data. Should match with the user specified. Defaults to #{@options.chef11_admin_client_key}") do |key|
+      opts.on("-k", "--key [key]", String, "Chef 11 API client key. This is the admin key that will be used to download the Chef 11 data. Should match with the user specified. Defaults to #{@options.chef11_admin_client_key}") do |key|
         @options.chef11_admin_client_key = key
       end
 

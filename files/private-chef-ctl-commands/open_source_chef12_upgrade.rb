@@ -43,6 +43,8 @@ public
 
     transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir, org_name, org_full_name)
 
+    set_chef12_default_orgname(org_name)
+
     upload_transformed_data(chef12_data_dir)
 
     upgrade_success_message(chef11_data_dir, chef12_data_dir)
@@ -232,7 +234,7 @@ private
       rescue StandardError => e
         sleep 1
         if count == max_count
-          log "Timeout waiting for #{server_version} server to start. Received expection #{e.message}"
+          log "Timeout waiting for #{server_version} server to start. Received exception #{e.message}"
           exit 1
         end
       end
@@ -316,6 +318,15 @@ private
     file_open(key_file, 'w') { |file| file.write(sql_users_json)}
   end
 
+  def set_chef12_default_orgname(org_name)
+    # Wrap the option in new lines to ensure it is on a line by itself
+    option = "\ndefault_orgname \"#{org_name}\"\n"
+
+    # Open in append mode. The file shouldn't exist yet, but if it does don't
+    # overwrite what is there. This will also create the file if it doesn't exist.
+    file_open("/etc/opscode/chef-server.rb", "a"){ |file| file.write(option) }
+  end
+
   def start_chef12
     log "Ensuring Chef 12 server components are started"
     msg = "Unable to start Chef 12 server, which is needed to complete the upgrade"
@@ -354,7 +365,7 @@ private
     org_full_name_regex = /^\S.{0,1022}$/
     unless org_full_name =~ org_full_name_regex
       log "The Chef 12 full organization name #{org_full_name} failed validation."
-      log "The Chef 12 full organization name must begin with a non-white space and must be between 1 and 1023 characters long."
+      log "The Chef 12 full organization name must begin with a non-white space character and must be between 1 and 1023 characters long."
       exit 1
     end
   end
@@ -462,11 +473,12 @@ private
 
     # Ensure a new line is present to make this message stand out more
     log ""
-    log "Open source Chef 11 server successfully upgrade to Chef 11."
-    log "Download Chef 11 data is still on disk, located at #{chef11_data_dir}."
-    log "Transformed data upload to Chef 12 server is still on disk, located at #{chef12_data_dir}."
+    log "Open source Chef 11 server successfully upgraded to Chef 12."
+    log "The Chef 12 server package (chef-server-core) has been successfully setup."
+    log "The Chef 11 server package (chef-server) is still present on the system and can now be safely removed."
+    log "Downloaded Chef 11 data is still on disk, located at #{chef11_data_dir}."
+    log "Transformed data uploaded to Chef 12 server is still on disk, located at #{chef12_data_dir}."
     log "These directories can be backed up or removed as desired."
-    log "The Chef 11 server package is still present on the system. It can now be safely removed."
   end
 
 end
