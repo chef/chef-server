@@ -43,6 +43,8 @@ public
 
     transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir, org_name, org_full_name)
 
+    set_chef12_default_orgname(org_name)
+
     upload_transformed_data(chef12_data_dir)
 
     upgrade_success_message(chef11_data_dir, chef12_data_dir)
@@ -314,6 +316,15 @@ private
     sql_user_data = db.select(:username, :id, :public_key, :hashed_password, :salt, :hash_type).from(:osc_users)
     sql_users_json =  sql_user_data.all.to_json
     file_open(key_file, 'w') { |file| file.write(sql_users_json)}
+  end
+
+  def set_chef12_default_orgname(org_name)
+    # Wrap the option in new lines to ensure it is on a line by itself
+    option = "\ndefault_orgname \"#{org_name}\"\n"
+
+    # Open in append mode. The file shouldn't exist yet, but if it does don't
+    # overwrite what is there. This will also create the file if it doesn't exist.
+    file_open("/etc/opscode/chef-server.rb", "a"){ |file| file.write(option) }
   end
 
   def start_chef12
