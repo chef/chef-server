@@ -473,13 +473,12 @@ private
 
     # Ensure a new line is present to make this message stand out more
     log ""
-    log "Open source Chef 11 server successfully upgrade to Chef 11."
-    log "Download Chef 11 data is still on disk, located at #{chef11_data_dir}."
-    log "Transformed data upload to Chef 12 server is still on disk, located at #{chef12_data_dir}."
+    log "Open source Chef 11 server successfully upgraded to Chef 12."
+    log "The Chef 12 server package (chef-server-core) has been successfully setup."
+    log "The Chef 11 server package (chef-server) is still present on the system and can now be safely removed."
+    log "Downloaded Chef 11 data is still on disk, located at #{chef11_data_dir}."
+    log "Transformed data uploaded to Chef 12 server is still on disk, located at #{chef12_data_dir}."
     log "These directories can be backed up or removed as desired."
-    log "The Chef 11 server package is still present on the system. It can now be safely removed."
-    log "The package that can be removed is named chef-server, not chef-server-core."
-    log "Do not remove the chef-server-core package or else you will remove Chef 12."
   end
 
 end
