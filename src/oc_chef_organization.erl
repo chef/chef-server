@@ -49,6 +49,7 @@
 %% {<<"json_class">>, <<"Chef::Organization">>},
 %% {<<"chef_type">>, <<"organization">>},
 -define(DEFAULT_FIELD_VALUES, [ ]).
+-define(GUID_FIELD, <<"guid">>).
 -define(NAME_FIELD, <<"name">>).
 -define(FULL_NAME_FIELD, <<"full_name">>).
 
@@ -141,10 +142,12 @@ validate_org(Org, OrgName) ->
 %% Open question: We don't expose json_class and chef_type fields currently, and the client doesn't have objects for them.
 %% Is it worth sending at least chef_type fields?
 %%
-assemble_organization_ejson(#oc_chef_organization{name = Name,
-                                                  full_name = FullName}) ->
+assemble_organization_ejson(#oc_chef_organization{id = Guid,
+                                                  name = Name,
+                                                  full_name = FullName }) ->
     Org = {[{?NAME_FIELD, Name},
-            {?FULL_NAME_FIELD, FullName} ]},
+            {?FULL_NAME_FIELD, FullName},
+            {?GUID_FIELD, Guid} ]},
     chef_object_base:set_default_values(Org, ?DEFAULT_FIELD_VALUES).
 
 new_record(_OrgId, AuthzId, OrganizationData) ->
