@@ -23,7 +23,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 2 do
     @options.chef11_admin_client_key = "/etc/chef-server/admin.pem"
 
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: private-chef-ctl upgrade [options]"
+      opts.banner = "Usage: chef-server-ctl upgrade [options]"
       opts.banner = opts.banner << "\n Options only apply to open source Chef 11 server to Chef 12 server upgrades."
       opts.banner = opts.banner << "\n If upgrading from Enterprise Chef 11 server to Chef 12 server no options are needed."
 

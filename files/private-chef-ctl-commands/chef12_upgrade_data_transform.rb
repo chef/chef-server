@@ -14,7 +14,7 @@ add_command "chef12-upgrade-data-transform", "Transfrom data from an open source
     @options = OpenStruct.new
 
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: private-chef-ctl chef12-upgrade-data-transform [options]"
+      opts.banner = "Usage: chef-server-ctl chef12-upgrade-data-transform [options]"
 
       opts.on("-d", "--chef11-data-dir [directory]", String, "Directory of open source Chef 11 server data. (Will ask interactively if not passed)") do |chef11_dir|
         @options.chef11_data_dir = chef11_dir
