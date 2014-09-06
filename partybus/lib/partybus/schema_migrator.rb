@@ -4,10 +4,6 @@ require 'logger'
 
 class Partybus::SchemaMigrator
 
-  def initialize(options={})
-    @db = options[:db] || database_from_config
-  end
-
   def self.config
     Partybus.config
   end
@@ -18,7 +14,9 @@ class Partybus::SchemaMigrator
 
   def migrate_to(version)
     if version > current_schema_version
-      Sequel::Migrator.apply(@db, config.database_migration_directory, version)
+      with_database do |db|
+        Sequel::Migrator.apply(db, config.database_migration_directory, version)
+      end
     else
       # TODO: log something
     end
@@ -26,7 +24,9 @@ class Partybus::SchemaMigrator
 
   def current_schema_version
     begin
-      @db[:schema_info].first[:version]
+      with_database do |db|
+        db[:schema_info].first[:version]
+      end
     rescue # TODO: Sequel::DatabaseError
       0
     end
@@ -34,8 +34,28 @@ class Partybus::SchemaMigrator
 
   private
 
-  def database_from_config
-    Sequel.connect(config.database_connection_string, :loggers => [Logger.new(STDOUT)])
+  def as_user(user)
+    if user
+      # Find the user in the password database.
+      u = (user.is_a? Integer) ? Etc.getpwuid(user) : Etc.getpwnam(user)
+
+      old_process_euid = Process.euid
+      Process::UID.eid = u.uid
+      begin
+        yield
+      ensure
+        Process::UID.eid = old_process_euid
+      end
+    else
+      yield
+    end
+  end
+
+  def with_database
+    as_user(config.database_unix_user) do
+      db = Sequel.connect(config.database_connection_string, :loggers => [Logger.new(STDOUT)])
+      yield db
+    end
   end
 
 end
