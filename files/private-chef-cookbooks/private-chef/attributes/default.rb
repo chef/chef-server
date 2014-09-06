@@ -59,6 +59,8 @@ default['private_chef']['user']['home'] = "/opt/opscode/embedded"
 # CouchDB (legacy required for upgrades to work)
 ####
 default['private_chef']['couchdb']['data_dir'] = "/var/opt/opscode/couchdb/db"
+default['private_chef']['couchdb']['vip'] = "127.0.0.1"
+default['private_chef']['couchdb']['port'] = 5984
 
 ####
 # RabbitMQ
