@@ -100,6 +100,9 @@ fi
 if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
     echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/pg_stat_activity.txt"
 
+    echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/opscode_chef_sqitch_tags.txt"
+    echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql bifrost' > "$tmpdir/bifrost_sqitch_tags.txt"
+
     sudo -u opscode-pgsql -i ulimit -a > "$tmpdir/ulimit_a_opscode-pgsql.txt"
 fi
 
