@@ -40,7 +40,6 @@ dependency "bookshelf"
 
 # the front-end services
 dependency "oc_bifrost"
-dependency "opscode-platform-debug"
 dependency "opscode-test"
 dependency "oc_id"
 

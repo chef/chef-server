@@ -48,14 +48,6 @@ private_chef_package_cleaner "opscode-certificate" do
                "/var/opt/opscode/opscode-certificate"]
 end
 
-# private_chef_package_cleaner "opscode-account" do
-
-# end
-
-# private_chef_package_cleaner "opscode-certificate" do
-
-# end
-
-# pricate_chef_package_cleaner "opscode-org-creator" do
-
-# end
+private_chef_package_cleaner "orgmapper" do
+  files ["/etc/opscode/orgmapper.conf"]
+end
