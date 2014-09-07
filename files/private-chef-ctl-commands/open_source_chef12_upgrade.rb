@@ -178,6 +178,36 @@ public
     validate_org_full_name(org_full_name)
   end
 
+  def validate_org_name(org_name)
+    # Must begin with a lower case letter or digit; can only have lower case letters
+    # digits, hyphens, and underscores. Must be between 1 and 255 characters long.
+    org_name_regex = /^[a-z0-9][a-z0-9_-]{0,254}$/
+    unless org_name =~ org_name_regex
+      log "The Chef 12 short organization name #{org_name} failed validation."
+      log "The Chef 12 short organizaiton name must begin with a lower case letter or digit; can only have lower case letters, digits, hyphens, and underscores and must be between 1 and 255 characters long."
+      exit 1
+    end
+  end
+
+  def set_default_chef12_config(org_name)
+    # pre-create the /etc/opscode dir so that we don't need to wait for a reconfigure
+    FileUtils.mkdir_p("/etc/opscode")
+
+    # Wrap the option in new lines to ensure it is on a line by itself
+    content = <<EOF
+
+default_orgname "#{org_name}"
+addons['install'] = false
+EOF
+
+    # Open in append mode. The file shouldn't exist yet, but if it does don't
+    # overwrite what is there. This will also create the file if it doesn't exist.
+    file_open("/etc/opscode/chef-server.rb", "a"){ |file| file.write(content) }
+
+    # This is applied with the next reconfigure, which in a normal
+    # run will happen i upload_transformed_data
+    log "Applying default_orgname with orgname #{org_name}."
+  end
 
 # Private methods intended to only be accessed through the public interface
 private
@@ -319,27 +349,6 @@ private
     file_open(key_file, 'w') { |file| file.write(sql_users_json)}
   end
 
-  def set_default_chef12_config(org_name)
-    # pre-create the /etc/opscode dir so that we don't need to wait for a reconfigure
-    FileUtils.mkdir_p("/etc/opscode")
-
-    # Wrap the option in new lines to ensure it is on a line by itself
-    content = <<EOF
-
-default_orgname "#{org_name}"
-addons['install'] = false
-EOF
-
-    # Open in append mode. The file shouldn't exist yet, but if it does don't
-    # overwrite what is there. This will also create the file if it doesn't exist.
-    file_open("/etc/opscode/chef-server.rb", "a"){ |file| file.write(content) }
-
-    log "Applying default_orgname with orgname #{org_name}."
-
-    # After applying the default orgname to /etc/opscode/chef-server.rb, have to apply it
-    reconfigure(false)
-  end
-
   def start_chef12
     log "Ensuring Chef 12 server components are started"
     msg = "Unable to start Chef 12 server, which is needed to complete the upgrade"
@@ -360,17 +369,6 @@ EOF
     msg = "Unable to stop open souce Chef 11 server, which is needed to complete the upgrade"
     status = run_command("/opt/chef-server/bin/chef-server-ctl stop")
     check_status(status, msg)
-  end
-
-  def validate_org_name(org_name)
-    # Must begin with a lower case letter or digit; can only have lower case letters
-    # digits, hyphens, and underscores. Must be between 1 and 255 characters long.
-    org_name_regex = /^[a-z0-9][a-z0-9_-]{0,254}$/
-    unless org_name =~ org_name_regex
-      log "The Chef 12 short organization name #{org_name} failed validation."
-      log "The Chef 12 short organizaiton name must begin with a lower case letter or digit; can only have lower case letters, digits, hyphens, and underscores and must be between 1 and 255 characters long."
-      exit 1
-    end
   end
 
   def validate_org_full_name(org_full_name)

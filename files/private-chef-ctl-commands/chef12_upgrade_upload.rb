@@ -32,6 +32,10 @@ add_command "chef12-upgrade-upload", "Upload transformed open source Chef 11 dat
           @options.upload_threads = n
         end
 
+        opts.on("-o", "--org-name [name]", String, "The name of the default Chef 12 organization to be applied. This is needed so existing users and clients will continue to work. This should be the same as the org name supplied when migrating data. (Will ask interactively if not passed).") do |n|
+        @options.org_name = n
+      end
+
         opts.on("-h", "--help", "Show this message") do
           puts opts
           exit
@@ -46,8 +50,11 @@ add_command "chef12-upgrade-upload", "Upload transformed open source Chef 11 dat
   parse(ARGV)
 
   chef12_data_dir = @options.chef12_data_dir || ask("Location of data to upload to Chef 12 server?")
+  org_name = @options.org_name || ask("Chef 12 short organization name? ")
 
   chef11_upgrade = OpenSourceChef11Upgrade.new(@options, self)
+  chef11_upgrade.validate_org_name(org_name)
+  chef11_upgrade.set_default_chef12_config(org_name)
   chef11_upgrade.upload_transformed_data(chef12_data_dir)
 
 end
