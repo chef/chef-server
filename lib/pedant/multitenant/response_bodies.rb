@@ -12,11 +12,11 @@ module Pedant
         let(:unauthorized_access_credential_response) { multi_tenant_user_not_associated_response }
         let(:invalid_credential_error_message) { ["Failed to authenticate as 'invalid'. Ensure that your node_name and client key are correct."] }
         let(:forbidden_action_error_message) { ["missing delete permission"] }
-
+        let(:multi_tenant_user_not_associated_text) { "'#{outside_user.name}' not associated with organization '#{org}'" }
         let(:multi_tenant_user_not_associated_response) do
           {
             status: 403,
-            body_exact: { "error" => "'#{outside_user.name}' not associated with organization '#{org}'" }
+            body_exact: { "error" => Pedant::Config.ruby_org_assoc? ? [multi_tenant_user_not_associated_text] : multi_tenant_user_not_associated_text }
           }
         end
 

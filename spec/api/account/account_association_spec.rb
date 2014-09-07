@@ -231,7 +231,7 @@ describe "opscode-account user association", :association do
   end
 
   context "when the organization does not exist" do
-    let(:error_msg) { ruby? ? "Organization bad_org not found." : ["organization 'bad_org' does not exist."]}
+    let(:error_msg) { ruby? ? "Cannot find organization bad_org" : ["organization 'bad_org' does not exist."]}
     it "listing association requests replies with org not found" do
         response = get("#{platform.server}/organizations/bad_org/association_requests", platform.superuser)
         response.should look_like({ :status => 404,
@@ -386,10 +386,10 @@ describe "opscode-account user association", :association do
       it "and can't be invited twice" do
         invite_id = invite_user(platform.test_org.name, bad_user, platform.admin_user)
         check_invite_for_user(platform.bad_user, invite_id)
-
+        msg = ruby? ? "The association request already exists." : "The invite already exists."
         post("#{platform.server}/organizations/#{platform.test_org.name}/association_requests", platform.admin_user,
              :payload=>make_invite_payload(bad_user)).should look_like({ :status => 409,
-                                                                         :body_exact => { "error" => "The invite already exists." } })
+                                                                         :body_exact => { "error" => msg } })
 
         delete("#{org_assoc_url}/#{invite_id}", platform.admin_user).should look_like({ :status => 200 })
         no_invites_for_user(platform.bad_user)
@@ -451,6 +451,7 @@ describe "opscode-account user association", :association do
       context "after a user is deleted from an org" do
         let(:requestor_not_in_org) { "'#{bad_user}' not associated with organization '#{platform.test_org.name}'"}
         let(:target_not_found_in_org) { "Cannot find a user #{bad_user} in organization #{platform.test_org.name}" }
+        let(:general_ruby_failure) { "Failed to disassociate user #{bad_user}" }
         before :each do
           platform.associate_user_with_org(platform.test_org.name, platform.bad_user)
           response = delete(api_url("users/#{bad_user}"), platform.admin_user)
@@ -477,10 +478,10 @@ describe "opscode-account user association", :association do
                                       :body_exact => { "error" => target_not_found_in_org} })
           end
         end
-        it "admin attempting to delete this user from the org results in a 404" do
+        it "admin attempting to delete this user from the org results in a 400(r)/404(e)" do
             result = delete(api_url("users/#{bad_user}"), platform.admin_user)
-            result.should look_like({ :status=> 404,
-                                      :body_exact => { "error" => target_not_found_in_org } })
+            result.should look_like({ :status=> ruby? ? 400 : 404,
+                                      :body_exact => { "error" => ruby? ? general_ruby_failure : target_not_found_in_org } })
         end
       end
 
@@ -545,7 +546,12 @@ describe "opscode-account user association", :association do
         let(:test_username) { "test-user-#{Time.now.to_i}-#{Process.pid}" }
         let(:test_user) { platform.create_user(test_username) }
         let(:invalid_invite_msg) {
-          "This invitation is no longer valid. Please notify an administrator and request to be re-invited to the organization."
+          if ruby?
+            "Merb::ControllerExceptions::Forbidden"
+          else
+            "This invitation is no longer valid. Please notify an administrator and request to be re-invited to the organization."
+          end
+
         }
 
         before :each do
@@ -576,7 +582,7 @@ describe "opscode-account user association", :association do
             response.should look_like({ :status => 403,
                                         :body_exact => { "error" => invalid_invite_msg } })
             # Ensure invite was deleted
-            no_invites_for_user(test_user)
+            no_invites_for_user(test_user) unless ruby?
         end
 
         it "is removed from the org, invites issued by that admin cannot be accepted", :authorization do
@@ -911,15 +917,15 @@ describe "opscode-account user association", :association do
         end
       end
 
-      context "non-admin user" do
-        it "returns 403" do
-            delete(request_url, platform.non_admin_user).should look_like({ :status => 403 })
+      context "non-admin user", :authorization do
+        it "returns 403 (400 ruby - general fail)" do
+            delete(request_url, platform.non_admin_user).should look_like({ :status => ruby? ? 400 : 403 })
         end
       end
 
-      context "default client" do
-        it "returns 403" do
-            delete(request_url, platform.non_admin_client).should look_like({ :status => 403 })
+      context "default client", :authorization do
+        it "returns 403 (400 ruby - general fail)" do
+            delete(request_url, platform.non_admin_client).should look_like({ :status => ruby? ? 400 : 403 })
         end
       end
 
