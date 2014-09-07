@@ -2,6 +2,9 @@
 
 ## 12.0.0 (Unreleased)
 
+### enterprise-chef-common updated to 0.4.5
+* Fix issue where 'private-chef' was being changed to 'private_chef' unexectedly in upstart/runit files
+
 ## rabbitmq 3.3.4
 * Upgrade to RabbitMQ 3.3.4
 
