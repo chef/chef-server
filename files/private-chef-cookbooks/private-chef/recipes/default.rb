@@ -6,6 +6,15 @@
 require 'uuidtools'
 require 'openssl'
 
+# Because these symlinks get removed during the postrm
+# of the chef-server and private-chef packages, we should
+# ensure that they're always here.
+%w{private-chef-ctl chef-server-ctl}.each do |bin|
+  link "/usr/bin/#{bin}" do
+    to "/opt/opscode/bin/#{bin}"
+  end
+end
+
 # Ensure that all our Omnibus-ed binaries are the ones that get used;
 # much better than having to specify this on each resource!
 ENV['PATH'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:#{ENV['PATH']}"
