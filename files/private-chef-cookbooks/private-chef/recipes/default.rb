@@ -254,7 +254,10 @@ file "/etc/opscode/chef-server-running.json" do
   # back-compat fixes for opscode-reporting
   # reporting uses the opscode-solr key for determining the location of the solr host,
   # so we'll copy the contents over from opscode-solr4
-  file_content['private_chef']['opscode-solr'] = file_content['private_chef']['opscode-solr4']
+  file_content['private_chef']['opscode-solr'] ||= {}
+  %w{vip port}.each do |key|
+    file_content['private_chef']['opscode-solr'][key] = file_content['private_chef']['opscode-solr4'][key]
+  end
 
   content Chef::JSONCompat.to_json_pretty(file_content)
 end
