@@ -214,7 +214,6 @@ module PrivateChef
         "opscode_chef",
         "redis_lb",
         "addons",
-        "couchdb",
         "rabbitmq",
         "opscode_solr4",
         "opscode_expander",
@@ -235,7 +234,11 @@ module PrivateChef
         "user",
         "ha",
         "disabled_plugins",
-        "enabled_plugins"
+        "enabled_plugins",
+
+        # keys for cleanup and back-compat
+        "couchdb",
+        "opscode_solr"
       ].each do |key|
         # @todo: Just pick a naming convention and adhere to it
         # consistently
@@ -274,11 +277,17 @@ module PrivateChef
       PrivateChef["enabled_plugins"] << "chef-ha-#{PrivateChef["ha"]["provider"]}"
       PrivateChef["ha"]["path"] ||= "/var/opt/opscode/drbd/data"
       hapath = PrivateChef["ha"]["path"]
-      PrivateChef["couchdb"]["data_dir"] ||= "#{hapath}/couchdb"
       PrivateChef['bookshelf']['data_dir'] = "#{hapath}/bookshelf"
       PrivateChef["rabbitmq"]["data_dir"] ||= "#{hapath}/rabbitmq"
       PrivateChef["opscode_solr4"]["data_dir"] ||= "#{hapath}/opscode-solr4"
       PrivateChef["redis_lb"]["data_dir"] ||= "#{hapath}/redis_lb"
+
+      # cleanup back-compat
+      # in order to delete the data directories for opscode-solr and couchdb
+      # after installing Chef Server 12, we need to have access to the configuration
+      # data as if it were configured for Enterprise Chef 11.
+      PrivateChef['couchdb']['data_dir'] = "#{hapath}/couchdb"
+      PrivateChef['opscode_solr']['data_dir'] = "#{hapath}/opscode-solr"
 
       # The postgresql data directory is scoped to the current version;
       # changes in the directory trigger upgrades from an old PostgreSQL

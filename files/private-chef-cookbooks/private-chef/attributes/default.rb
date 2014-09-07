@@ -63,6 +63,11 @@ default['private_chef']['couchdb']['vip'] = "127.0.0.1"
 default['private_chef']['couchdb']['port'] = 5984
 
 ####
+# Opscode Solr (legacy required for upgrade cleanup to work)
+####
+default['private_chef']['opscode-solr']['data_dir'] = "/var/opt/opscode/opscode-solr/data"
+
+####
 # RabbitMQ
 ####
 default['private_chef']['rabbitmq']['enable'] = true

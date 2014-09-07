@@ -15,13 +15,14 @@ private_chef_package_cleaner "opscode-webui" do
 end
 
 private_chef_package_cleaner "opscode-solr" do
-  directories ["/var/opt/opscode/opscode-solr",
+  directories ["/var/opt/opscode/opscode-solr",                  # solr app binaries here
+               node['private_chef']['opscode-solr']['data_dir'], # solr data here
                "/var/log/opscode/opscode-solr"]
   files ["/etc/opscode/logrotate.d/opscode-solr"]
 end
 
 private_chef_package_cleaner "couchdb" do
-  directories ["/var/opt/opscode/couchdb",
+  directories [node['private_chef']['couchdb']['data_dir'],
                "/var/log/opscode/couchdb"]
   files ["/etc/cron.d/couchdb_compact",
          "/etc/cron.d/couchdb_bounce",
