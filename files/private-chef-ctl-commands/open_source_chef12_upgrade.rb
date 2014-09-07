@@ -43,9 +43,9 @@ public
 
     transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir, org_name, org_full_name)
 
-    set_chef12_default_orgname(org_name)
-
     upload_transformed_data(chef12_data_dir)
+
+    set_chef12_default_orgname(org_name)
 
     upgrade_success_message(chef11_data_dir, chef12_data_dir)
   end
@@ -319,12 +319,23 @@ private
   end
 
   def set_chef12_default_orgname(org_name)
+    # Has to be run after an initial reconfigure (happens in upload_transformed_data)
+    # so that the /etc/opscode directory exists
+
     # Wrap the option in new lines to ensure it is on a line by itself
     option = "\ndefault_orgname \"#{org_name}\"\n"
 
     # Open in append mode. The file shouldn't exist yet, but if it does don't
     # overwrite what is there. This will also create the file if it doesn't exist.
     file_open("/etc/opscode/chef-server.rb", "a"){ |file| file.write(option) }
+
+    log "Applying default_orgname with orgname #{org_name}."
+
+    # After applying the default orgname to /etc/opscode/chef-server.rb, have to apply it
+    reconfigure(false)
+
+    # Let's make sure everything is good to go
+    start_chef12
   end
 
   def start_chef12
