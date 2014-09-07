@@ -98,9 +98,8 @@ fi
 # would be cool, but my sense is that this is OK for now.
 
 if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
-    # su - $USER -c "psql -c 'SQL STATEMEENT'" > "$log"
-    su - $POSTGRESQL_UNIX_USER -c "/opt/$path/embedded/bin/psql opscode_chef -c 'SELECT CURRENT_TIMESTAMP;'" > "$tmpdir/pg_stat_activity.txt"
-    su - $POSTGRESQL_UNIX_USER -c "/opt/$path/embedded/bin/psql opscode_chef -c 'SELECT * FROM pg_stat_activity;'" >> "$tmpdir/pg_stat_activity.txt"
+    echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/pg_stat_activity.txt"
+
     sudo -u opscode-pgsql -i ulimit -a > "$tmpdir/ulimit_a_opscode-pgsql.txt"
 fi
 
