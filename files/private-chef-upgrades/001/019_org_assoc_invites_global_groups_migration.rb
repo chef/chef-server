@@ -6,8 +6,6 @@ define_upgrade do
     # Make sure API is down
     stop_services(["nginx", "opscode-erchef"])
 
-    start_service('postgresql')
-
     force_restart_service("opscode-chef-mover")
 
     log "Migrating organizations..."
@@ -32,7 +30,7 @@ define_upgrade do
 
     # TODO: add log parsing to ensure migration succeeded
 
-    stop_services(["opscode-chef-mover", "postgresql"])
+    stop_service("opscode-chef-mover")
 
   end
 end

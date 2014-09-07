@@ -5,8 +5,6 @@ define_upgrade do
   if Partybus.config.bootstrap_server
     must_be_data_master
 
-    start_service('postgresql')
-
     down_services = ['nginx',
                      'opscode-org-creator',
                      'bookshelf',
@@ -25,7 +23,6 @@ define_upgrade do
     migrate_script = "/opt/opscode/embedded/service/oc_authz_migrator/scripts/opc-run.sh"
     run_command("#{migrate_script} #{Partybus.config.couchdb_data_dir}/authorization.couch")
 
-    stop_service('postgresql')
   end
 
 end

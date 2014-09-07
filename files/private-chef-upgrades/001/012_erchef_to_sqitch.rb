@@ -4,8 +4,6 @@ define_upgrade do
 
     must_be_data_master
 
-    start_service('postgresql')
-
     sqitch = "sudo -u #{Partybus.config.database_unix_user} PATH=/opt/opscode/embedded/bin:/sbin:/usr/sbin:/bin:/usr/bin /opt/opscode/embedded/bin/sqitch"
 
     # This command ensures Sqitch has all the metadata for changes to
@@ -26,8 +24,6 @@ define_upgrade do
     # existing schema, so it is '--log-only'.
     run_command("#{sqitch} deploy --log-only --to-target @2.0.0",
                 :cwd => "/opt/opscode/embedded/service/enterprise-chef-server-schema")
-
-    stop_service('postgresql')
 
   end
 end

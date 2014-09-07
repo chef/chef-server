@@ -67,33 +67,33 @@ EOF
       def force_restart_service(service_name)
         log("\tRestarting Service #{service_name}")
         service_manager = Partybus::ServiceManager.new
-        service_manager.force_restart_service(service_name, 60)
+        service_manager.force_restart_service(service_name, 15)
       end
 
       def start_service(service_name)
         log("\tStarting Service #{service_name}")
         service_manager = Partybus::ServiceManager.new
         # 100 seconds sleep time by default
-        service_manager.start_service(service_name, 60)
+        service_manager.start_service(service_name, 15)
       end
 
       def start_services(service_array)
         log("\tStarting Services #{service_array}")
         service_manager = Partybus::ServiceManager.new
         # 100 seconds sleep time by default
-        service_manager.start_services(service_array, 60)
+        service_manager.start_services(service_array, 15)
       end
 
       def stop_service(service_name)
         log("\tStopping Service #{service_name}")
         service_manager = Partybus::ServiceManager.new
-        service_manager.stop_service(service_name, 30)
+        service_manager.stop_service(service_name, 10)
       end
 
       def stop_services(service_array)
         log("\tStopping Services #{service_array}")
         service_manager = Partybus::ServiceManager.new
-        service_manager.stop_services(service_array, 60)
+        service_manager.stop_services(service_array, 10)
       end
 
       def run_command(command, options={})
