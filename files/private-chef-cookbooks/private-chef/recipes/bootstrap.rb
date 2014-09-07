@@ -6,6 +6,17 @@
 #
 
 require 'securerandom'
+
+# Enterprise Addon Install
+# On a new install, download and install all of the Chef
+# addons from package repositories. Only perform this
+# action during a fresh install, and not during an upgrade.
+if (!OmnibusHelper.has_been_bootstrapped? &&
+    node['private_chef']['topology'] == "standalone" &&
+    node['private_chef']['addons']['install'])
+  include_recipe "private-chef::add_ons_wrapper"
+end
+
 opscode_test_dir = "/opt/opscode/embedded/service/opscode-test"
 opscode_test_config_dir = "/opt/opscode/embedded/service/opscode-test/bootstrapper-config"
 
@@ -51,12 +62,6 @@ end
 #
 template bootstrap_script do
   action :delete
-end
-
-if (!OmnibusHelper.has_been_bootstrapped? &&
-    node['private_chef']['topology'] == "standalone" &&
-    node['private_chef']['addons']['install'])
-  include_recipe "private-chef::add_ons_wrapper"
 end
 
 file OmnibusHelper.bootstrap_sentinel_file do
