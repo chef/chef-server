@@ -51,9 +51,9 @@ add_command "chef12-upgrade-upload", "Upload transformed open source Chef 11 dat
 
   chef12_data_dir = @options.chef12_data_dir || ask("Location of data to upload to Chef 12 server?")
   org_name = @options.org_name || ask("Chef 12 short organization name? ")
-  validate_org_name(org_name)
 
   chef11_upgrade = OpenSourceChef11Upgrade.new(@options, self)
+  chef11_upgrade.validate_org_name(org_name)
   chef11_upgrade.set_default_chef12_config(org_name)
   chef11_upgrade.upload_transformed_data(chef12_data_dir)
 
