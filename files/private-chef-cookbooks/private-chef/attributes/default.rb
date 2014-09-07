@@ -37,7 +37,7 @@ default['private_chef']['default_orgname'] = nil
 ###
 # Options for installing addons
 ###
-default['private_chef']['addons']['install'] = true
+default['private_chef']['addons']['install'] = false
 default['private_chef']['addons']['path'] = nil
 default['private_chef']['addons']['packages'] =
   %w{opscode-reporting opscode-manage opscode-analytics}
