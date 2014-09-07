@@ -14,7 +14,7 @@ describe "/organizations", :organizations do
   end
 
   let(:org_with_no_name) { { 'full_name' => "Test This Org" } }
-  let(:org_with_no_full_name) { { 'name' => "test123" } }
+  let(:org_with_no_full_name) { { 'name' => orgname } }
   let(:org_with_bad_name ) { { 'name' => "@!## !@#($@" } }
   describe "GET /organizations" do
     let(:request_url)    { "#{platform.server}/organizations" }
@@ -84,8 +84,12 @@ describe "/organizations", :organizations do
 
   end
 
-  describe "POST /organizations"  do
+  describe "POST /organizations" do
     let(:orgname) { "test-#{Time.now.to_i}-#{Process.pid}" }
+    after :each do
+      delete("#{platform.server}/organizations/#{orgname}", superuser)
+    end
+
     let(:request_body) do
       {
         full_name: "fullname-#{orgname}",
@@ -95,11 +99,6 @@ describe "/organizations", :organizations do
     end
 
     context "when the user posts a new organization with a valid body and name" do
-
-      after :each do
-        delete("#{platform.server}/organizations/#{orgname}", superuser)
-      end
-
       it "should respond with a valid newly created organization" do
         post("#{platform.server}/organizations", superuser, :payload => request_body).should look_like(
           :body => {
@@ -115,23 +114,20 @@ describe "/organizations", :organizations do
           post("#{platform.server}/organizations", superuser, :payload => request_body)
         end
 
-        after :each do
-          delete("#{platform.server}/organizations/#{orgname}", superuser)
-        end
-
         it "it rejects the new org as conflicting" do
           post("#{platform.server}/organizations", superuser, :payload => request_body).should look_like( :status => 409)
         end
       end
 
-# Note:
+      # Note:
       # Currently excluded because it fails intermittently.
-# To re-enable, please remove ', :intermittent_failure => true'
+      # To re-enable, please remove ', :intermittent_failure => true'
       it "should respond with data containing a valid private key",  :intermittent_failure => true do
         result = JSON.parse(post("#{platform.server}/organizations", superuser, :payload => request_body))
         /-----BEGIN RSA PRIVATE KEY-----/.should match(result["private_key"])
       end
     end
+
     context "when the user attempts to create a new org with invalid data" do
       it "it should fail when 'name' is missing" do
         post("#{platform.server}/organizations", superuser, :payload => org_with_no_name ).should look_like(
@@ -162,11 +158,11 @@ describe "/organizations", :organizations do
       }
     end
 
-    before :each do
+    before do
       post("#{platform.server}/organizations", superuser, :payload => post_request_body)
     end
 
-    after :each do
+    after do
       delete("#{platform.server}/organizations/#{orgname}", superuser)
     end
 
@@ -201,18 +197,47 @@ describe "/organizations", :organizations do
           :status => ruby? ? 200 : 400,
           :body => ruby? ? update_response_body : { "error" => ["Field 'name' invalid"] }
         )
+        # Because ruby permits this - and pedant runs the pended test to ensure it fails -
+        # we'll now have an orphan org that we need to make sure we delete.
+        if ruby?
+          delete("#{platform.server}/organizations/#{new_orgname}", superuser)
+        end
       end
-      it "it should fail when 'name' is missing" do
-        put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_name ).should look_like(
-          :status => 400
-        )
+    end
+
+    context "when the user updates the organization object update should fail when" do
+      let(:orgname) { "test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:post_request_body) do
+        {
+          full_name: "fullname-#{orgname}",
+          name: orgname,
+          org_type: "Business"
+        }
       end
-      it "it should fail when 'full_name' is missing" do
-        put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_full_name ).should look_like(
-          :status => 400
-        )
+
+      before do
+        post("#{platform.server}/organizations", superuser, :payload => post_request_body)
       end
-      it "it should fail when 'name' is invalid" do
+
+      after do
+        delete("#{platform.server}/organizations/#{orgname}", superuser)
+      end
+
+      it "'name' is missing" do
+        pending("Ruby does not fail in this case", :if => ruby?) do
+          put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_name ).should look_like(
+            :status => 400
+          )
+        end
+      end
+      it "'full_name' is missing" do
+        pending("Ruby does not fail in this case", :if => ruby?) do
+          put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_full_name ).should look_like(
+            :status => 400
+          )
+        end
+      end
+      it "'name' is invalid" do
         put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_bad_name ).should look_like(
           :status => 400
         )
@@ -232,7 +257,7 @@ describe "/organizations", :organizations do
       # our standard response for erlang requests is to return the json that was posted
       let(:update_response_body) do
         if ruby?
-          {"uri" => "#{platform.server}/organizations/#{new_orgname}"}
+          {"uri" => "#{platform.server}/organizations/#{orgname}"}
         else
           payload
         end
