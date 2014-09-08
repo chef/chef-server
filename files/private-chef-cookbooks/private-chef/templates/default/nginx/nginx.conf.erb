@@ -9,7 +9,7 @@ events {
 }
 
 http {
-<% if ['private_chef']['nginx']['log_x_forwarded_for'] -%>
+<% if node['private_chef']['nginx']['log_x_forwarded_for'] -%>
   log_format opscode '$http_x_forwarded_for - $remote_user [$time_local]  '
 <% else -%>
   log_format opscode '$remote_addr - $remote_user [$time_local]  '
