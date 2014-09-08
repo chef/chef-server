@@ -34,6 +34,10 @@ dependency "redis" # dynamic routing controls
 dependency "opscode-solr4"
 dependency "opscode-expander"
 dependency "pg-gem" # used by private-chef-ctl reconfigure
+
+# Pull in knife-opc which is wrapped by chef-server-ctl to
+# allow user to create users and orgs, and handle org associations
+# without manage installed.
 dependency "knife-opc-gem"
 
 dependency "keepalived"
