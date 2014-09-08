@@ -16,11 +16,21 @@
 #
 
 name "knife-opc"
-default_version "0.1.0"
+default_version "0.1.1"
 
 dependency "ruby"
 dependency "rubygems"
+dependency "bundler"
+
+source :git => "git://github.com/opscode/knife-opc.git"
+
+relative_path "knife-opc"
 
 build do
-  gem "install #{name} --no-rdoc --no-ri -v #{version}"
+  # Remove existing built gems if they exist in the current dir.
+  # Add -f in case the file doesn't exist yet.
+  command "rm -f knife-opc-*.gem"
+  gem "build knife-opc.gemspec"
+
+  gem "install knife-opc-*.gem"
 end
