@@ -34,6 +34,7 @@ dependency "redis" # dynamic routing controls
 dependency "opscode-solr4"
 dependency "opscode-expander"
 dependency "pg-gem" # used by private-chef-ctl reconfigure
+dependency "knife-opc-gem"
 
 dependency "keepalived"
 dependency "bookshelf"
