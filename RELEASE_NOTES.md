@@ -20,6 +20,10 @@
     rotation. API support will follow in a subsequent release. This is
     considered a beta feature at this time.
 
+* opscode-omnibus
+  * Use X-Forwarded-For header instead of remote address in nginx logs
+    when topology is set to 'ha' or 'tier'
+
 ## 12.0.2 (2015-01-27)
 
 The following items are the set of bug fixes that have been applied since Chef Server 12.0.1:
