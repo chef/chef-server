@@ -1,42 +1,124 @@
 # Enterprise Chef Release Notes
 
-## 12.0.0 (Unreleased)
+## 12.0.0 
 
 ### What's New:
 
-The following items are new for Enterprise Chef 11.1.5 and/or are changes from previous versions:
+The following items are new since Enterprise Chef 11.2.1 and/or are changes from previous versions:
 
+* [couchdb] has been removed
+* [oc_erchef] 
+  *  All endpoints that formerly were in opscode-account are now in erchef and the data
+  resides in SQL. This includes containers, groups, organizations, org associations and invites.  
+  * Key generation is now in erchef.
+  * 
+
+* [opscode-account] has been removed
+* [opscode-certificate] has been removed
+* [opscode-org-creator] has been removed
+* [orgmapper] has been removed
 * [opscode-webui] Opscode WebUI has been removed in favor of the Manage Console add-on.
 * [private-chef-cookbooks] Introduce pluggable HA architecture as alternative to DRBD.
+* [private-chef-cookbooks] Add bifrost_sql_database uri to orgmapper.conf
+* [private-chef-ctl] Add a gather-logs command to create a tarball of
+  important logs and system information.
+* [solr] has been upgraded to Solr 4
+
+
+### Bug Fixes:
+
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.1:
+
+* [OC-11703] Fix bug that prevents ACL and group expansion when containing group that no longer exists
+* [OC-10470] Allow private-chef-ctl status to ignore disabled services
+* [OC-11574] private-chef-ctl service commands should be HA-aware
+* [OC-9877] Exclude binary files and archives from 'omnibus-ctl tail'
+
+## 11.2.1
+
+### Bug Fixes:
+
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.0:
+
+* Fix issue where 'private-chef' was being changed to 'private_chef' unexectedly in upstart/runit files
+
+## 11.2.0 (2014-08-29)
+
+### What's New
+
+The following items are new for Enterprise Chef 11.2.0 and/or are
+changes from previous versions:
+
 * [private-chef-cookbooks] Add bifrost_sql_database uri to orgmapper.conf
 * [opscode-platform-debug] Upgrade to rel-0.5.1
 * [private-chef-ctl] Add a gather-logs command to create a tarball of
   important logs and system information.
+* [oc-id] Add Chef Identity Service.  This enables Supermaket authentication
+  with the Chef Server.
+* [opscode-analytics]
+  * `dark_launch['actions']` defaults to true.  You no longer
+  need to manually set this in the private-chef.rb
+  * Copy webui_priv into opscode-analytics if actions is enabled
+  * This change adds a new 'oc-id' key to the private-chef-secrets.json.
+* [orgmapper] Bump orgmapper to a new minor revision.  This enables support for
+  the bifrost/authz API and fixes several bugs.
+
 
 ### Bug Fixes:
 
-The following items are the set of bug fixes that have been applied since Enterprise Chef 11.1.5:
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.1.8:
+
+* [OC-11297] tweak partybus migration-level subscribes for a more reliable workaround
+* [OC-11585] Allow ['lb']['upstream'] to have a custom setting
+* [OC-11459] Allow opscode-manage to easily be moved off of 443
+* [OC-11540] Fix invalid opscode-account config when forcing SSL
+* [OC-11575] Don't start services by default in HA topology
+* [OC-11601] Fix a race condition that sometimes
+  caused redis_lb to attempt to reconfigure itself before it was restarted.
+  * This causes redis_lb to restart during every reconfigure.  This restart can
+    cause a short period of 500 errors on the on the FE nodes.
+* [OC-11668] enable ipv6 in standalone mode
+* [OC-11672] Upgrade PostgreSQL to 9.2.9
+* [OC-11673] Tune PostgreSQL keepalive timeouts
+* [OC-11702] Fix bug that prevents ACL and group expansion when containing group that no longer exists
+* [OC-11708] Fix user association bug when last updater of users group is no longer associated
+* [OC-11710] Fix couchdb compaction log rotation
+
+### Security Fixes:
+
+The following items are the set of security fixes that have been applied since Enterprise Chef 11.1.8:
+
+* OpenSSL 1.0.1i addresses CVE-2014-3512, CVE-2014-3511, CVE-2014-3510, CVE-2014-3507, CVE-2014-3506, CVE-2014-3
+
+## 11.1.8 (2014-06-26)
+
+### Bug Fixes:
+
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.1.6:
 
 * [opscode-omnibus] private-chef-ctl test command should provide pedant return code.
 * [opscode-omnibus] Use more strict regular expression for IP check in ha-status
 * [opscode-omnibus] Ensure CouchDB compaction cron job does not run on passive backend.
-* [OC-11575][enterprise-chef-common] Don't start services by default in HA topology
-* [OC-11601] - Correct another case where redis_lb was not started before attempting to reconfigure it
-* [OC-11672] Upgrade PostgreSQL to 9.2.9
-* [OC-11710] Fix couchdb compaction log rotation
-* [OC-11703] Fix bug that prevents ACL and group expansion when containing group that no longer exists
-* [OC-11708] Fix user association bug when last updater of users group is no longer associated
-* [OC-11297] tweak partybus migration-level subscribes for a more reliable workaround
-* [OC-10470] Allow private-chef-ctl status to ignore disabled services
-* [OC-11574] private-chef-ctl service commands should be HA-aware
-* [OC-9877] Exclude binary files and archives from 'omnibus-ctl tail'
-* Fix issue where 'private-chef' was being changed to 'private_chef' unexectedly in upstart/runit files
+* [OC-11499] Use more strict regular expression for IP check in ha-status
+* [OC-3107] Ensure CouchDB compaction cron job does not run on passive backend.
+* [OC-11601] Restart redis_lb immediately during reconfigure
+* [OC-11490] Explicitly set keepalived directory ownership
+* [OC-11297] EC 11 fresh install not saving migration state in HA topology
+* [OC-11656] Set explicit owner and group for services without them
+* [OC-11657] Bump default svwait timeout of 7 seconds to 30 seconds
+* [OC-11382] keepalived restart interferes with upgrades
+* [OC-8881] private-chef-ctl password does not work
 
 ### Security Fixes:
 
-The following items are the set of security fixes that have been applied since Enterprise Chef 11.1.5:
+The following items are the set of security fixes that have been applied since Enterprise Chef 11.1.6:
 
-* OpenSSL 1.0.1i addresses CVE-2014-3512, CVE-2014-3511, CVE-2014-3510, CVE-2014-3507, CVE-2014-3506, CVE-2014-3505, CVE-2014-3509, CVE-2014-5139, and CVE-2014-3508.
+* Address a PostgreSQL configuration error. The defect allows any local user on the system hosting the Chef Serv
+
+
+
+
+
 
 ## 11.1.6 (2014-06-05)
 
