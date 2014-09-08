@@ -248,6 +248,7 @@ include_recipe "private-chef::actions" if darklaunch_values["actions"]
 include_recipe "private-chef::oc-chef-pedant"
 include_recipe "private-chef::log_cleanup"
 include_recipe "private-chef::partybus"
+include_recipe "private-chef::ctl_config"
 
 file "/etc/opscode/chef-server-running.json" do
   owner node["private_chef"]["user"]["username"]
