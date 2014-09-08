@@ -31,6 +31,7 @@ msg(Task) ->
       {<<"requestor_name">>, <<"rob">>},
       {<<"requestor_type">>, <<"user">>},
       {<<"user_agent">>, <<"knife 11.10.0">>},
+      {<<"uuid">>, <<"11111111-1111-1111-1111-111111111111">>},
       {<<"task">>, Task},
       {<<"entity_type">>, <<"node">>},
       {<<"entity_name">>, <<"db">>}
@@ -47,6 +48,7 @@ msg_with_payload(Task) ->
     {<<"requestor_name">>, <<"rob">>},
     {<<"requestor_type">>, <<"user">>},
     {<<"user_agent">>, <<"knife 11.10.0">>},
+    {<<"uuid">>, <<"11111111-1111-1111-1111-111111111111">>},
     {<<"task">>, Task},
     {<<"entity_type">>, <<"node">>},
     {<<"entity_name">>, <<"db">>},
@@ -245,21 +247,21 @@ extract_entity_info_test_() ->
       fun() -> State = #node_state{node_data = {[{<<"name">>,<<"node-foo">> }]} },
                meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
                Ret = oc_chef_action:extract_entity_info(req, State),
-            Expected = entity({[{<<"name">>, <<"node-foo">>}]}, <<"node">>, <<"node-foo">>),
+               Expected = entity({[{<<"name">>, <<"node-foo">>}]}, <<"node">>, <<"node-foo">>),
                ?assertEqual(Expected, Ret)
              end},
      {"role entity info",
       fun() -> State = #role_state{role_data = {[{<<"name">>,<<"webserver">> }]} },
                meck:expect(chef_wm_util,object_name, fun(role, req) -> undefined end),
                Ret = oc_chef_action:extract_entity_info(req, State),
-            Expected = entity({[{<<"name">>, <<"webserver">>}]}, <<"role">>, <<"webserver">>),
+               Expected = entity({[{<<"name">>, <<"webserver">>}]}, <<"role">>, <<"webserver">>),
                ?assertEqual(Expected, Ret)
              end},
      {"user entity info",
       fun() -> State = #user_state{user_data = {[{<<"name">>,<<"webserver">> }]} },
                meck:expect(chef_wm_util,object_name, fun(user, req) -> undefined end),
                Ret = oc_chef_action:extract_entity_info(req, State),
-            Expected = entity({[{<<"name">>, <<"webserver">>}]}, <<"user">>, <<"webserver">>),
+               Expected = entity({[{<<"name">>, <<"webserver">>}]}, <<"user">>, <<"webserver">>),
                ?assertEqual(Expected, Ret)
              end}
      ]
@@ -312,6 +314,8 @@ end_to_end_test_() ->
               meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
               meck:expect(wrq, response_code, fun(req) -> 201 end),
               meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
+           %   meck:expect(uuid, get_v4, fun() -> undefined end),
+              meck:expect(uuid, uuid_to_string, fun(_UUID) -> <<"11111111-1111-1111-1111-111111111111">> end),
               meck:expect(wrq, get_req_header,
                           fun(Field, req) ->
                               case Field of
@@ -373,7 +377,7 @@ end_to_end_test_() ->
                 meck:expect(wrq, method, fun(req) -> 'DELETE' end),
                 AssertPublishDataCorrect =
                     fun(_ServerName, RoutingKey, Message) ->
-                        ?assertEqual(<<"erchef.node.create">>, RoutingKey),
+                        ?assertEqual(<<"erchef.node.delete">>, RoutingKey),
                         ?assertEqual(ExpectedMsg, chef_json:decode(Message)),
                         ok
                     end,
