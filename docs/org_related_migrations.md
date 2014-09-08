@@ -20,7 +20,7 @@
    + Start mover console via `/srv/chef_mover/current/bin$ sudo ./mover console`
 1. Put orgs in 503 mode:
    + DOWNTIME STARTS ON PUT, POST, DELETE ON ORGS / ASSOCS / INVITES AS SOON AS YOU RUN THE BELOW COMMAND!
-   + `knife ssh role:mysql-master '/opt/redis/bin/redis-cli HSET dl_default orgs_503_mode true'`
+   + Mover console: `mover_org_darklaunch:orgs_503_endpoint_mode("true").`
    + Verify that expected POST, PUT, DELETE requests return 503
 2. Now that there are no new org requests coming in, update the dets:
    + Mover console: `mover_manager:create_account_dets().`
@@ -36,14 +36,14 @@
 8. Run global_groups migration.
    + Mover console: `mover_manager:migrate(all, 20, mover_global_groups_migration_callback).`
 9. If all has gone well, flip API over to SQL:
-   + `knife ssh role:mysql-master '/opt/redis/bin/redis-cli HMSET dl_default couchdb_association_requests false couchdb_organizations false couchdb_associations false'`
+   + Mover console: `mover_org_darklaunch:org_related_endpoints_to_couch("false").`
 10. Turn orgs 503 mode off.
-    + `knife ssh role:mysql-master '/opt/redis/bin/redis-cli HSET dl_default orgs_503_mode false'`
+    + Mover console: `mover_org_darklaunch:orgs_503_endpoint_mode("false").`
 
 ### Resolution
 + Make sure there are no 500s and requests coming into erchef for org related endpoints.
 + If all goes to hell, run command to flip orgs back to couch:
-  + `knife ssh role:mysql-master '/opt/redis/bin/redis-cli HMSET dl_default couchdb_association_requests true couchdb_organizations true couchdb_associations true'`
+  + Mover console: `mover_org_darklaunch:org_related_endpoints_to_couch("true").`
 
 ### Misc
 
