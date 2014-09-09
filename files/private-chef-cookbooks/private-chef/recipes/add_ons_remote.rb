@@ -41,5 +41,7 @@ else
 end
 
 node['private_chef']['addons']['packages'].each do |pkg|
-  package pkg
+  package pkg do
+    notifies :create, "ruby_block[addon_install_notification_#{pkg}]", :immediate
+  end
 end
