@@ -56,5 +56,6 @@ add_command "chef12-upgrade-upload", "Upload transformed open source Chef 11 dat
   chef11_upgrade.validate_org_name(org_name)
   chef11_upgrade.set_default_chef12_config(org_name)
   chef11_upgrade.upload_transformed_data(chef12_data_dir)
+  chef11_upgrade.adjust_permissions()
 
 end

@@ -18,9 +18,9 @@ require 'highline/import'
 
 class OpenSourceChef11Upgrade
 
-# Explicitly public methods to mark the intended API
-# Public methods are in use by one or more ctl commands
-public
+  # Explicitly public methods to mark the intended API
+  # Public methods are in use by one or more ctl commands
+  public
 
   def initialize(options, ctlContext)
     @options = options
@@ -47,6 +47,8 @@ public
     set_default_chef12_config(org_name)
 
     upload_transformed_data(chef12_data_dir)
+
+    adjust_permissions()
 
     upgrade_success_message(chef11_data_dir, chef12_data_dir)
   end
@@ -205,12 +207,27 @@ EOF
     file_open("/etc/opscode/chef-server.rb", "a"){ |file| file.write(content) }
 
     # This is applied with the next reconfigure, which in a normal
-    # run will happen i upload_transformed_data
+    # run will happen during upload_transformed_data
     log "Applying default_orgname with orgname #{org_name}."
   end
 
-# Private methods intended to only be accessed through the public interface
-private
+  def adjust_permissions
+    # Use the knife-ec-backup config that was written earlier, since it will work
+    # and has all the needed data
+    # With default_orgname routing enabled, this all just works
+    cmd = ["/opt/opscode/embedded/bin/knife",
+           "exec",
+           "-V", # enable info logging
+           "-c /tmp/knife-ec-backup-config.rb",
+           "/opt/opscode/embedded/service/omnibus-ctl/knife/fix_permissions.knife"
+          ].join(" ")
+    status = run_command(cmd)
+    msg = "Failed to update permissions for migrated organization."
+    check_status(status, msg)
+  end
+
+  # Private methods intended to only be accessed through the public interface
+  private
 
   # User method_missing to catch calls to methods that are
   # defined outside this class in the omnibus-ctl context
