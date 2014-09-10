@@ -18,9 +18,9 @@ require 'highline/import'
 
 class OpenSourceChef11Upgrade
 
-# Explicitly public methods to mark the intended API
-# Public methods are in use by one or more ctl commands
-public
+  # Explicitly public methods to mark the intended API
+  # Public methods are in use by one or more ctl commands
+  public
 
   def initialize(options, ctlContext)
     @options = options
@@ -48,7 +48,7 @@ public
 
     upload_transformed_data(chef12_data_dir)
 
-    adjust_node_permissions(chef12_data_dir)
+    adjust_permissions()
 
     upgrade_success_message(chef11_data_dir, chef12_data_dir)
   end
@@ -211,26 +211,23 @@ EOF
     log "Applying default_orgname with orgname #{org_name}."
   end
 
-  def adjust_node_permissions(chef12_data_dir)
-    org_dir = "#{chef12_data_dir}/organizations/#{org_name}"
-    # Create a default permissions document for every node
-    # that has a client of the same name.
-    Dir.glob("#{org_dir}/nodes/*.json").each do |node_file|
-      node_name = File.basename(node_file).gsub(/.json$/, "")
-      if File.exists?("#{org_dir}/clients/#{node_name}.json")
-       # Pass node name as the client name as well, because
-       # this scenario is fixing permission where the client and node
-       # have the same name
-       grant_cilent_full_node_permissions(node_name, node_name)
-      else
-        log "Node #{node_name} has no related client, not creating permissions document."
-      end
-    end
+  def adjust_permissions
+    # Use the knife-ec-backup config that was written earlier, since it will work
+    # and has all the needed data
+    # With default_orgname routing enabled, this all just works
+    cmd = ["/opt/opscode/embedded/bin/knife",
+           "exec",
+           "-V", # enable info logging
+           "-c /tmp/knife-ec-backup-config.rb",
+           "/opt/opscode/embedded/service/omnibus-ctl/knife/fix_permissions.knife"
+          ].join(" ")
+    status = run_command(cmd)
+    msg = "Failed to update permissions for migrated organization."
+    check_status(status, msg)
   end
 
-
-# Private methods intended to only be accessed through the public interface
-private
+  # Private methods intended to only be accessed through the public interface
+  private
 
   # User method_missing to catch calls to methods that are
   # defined outside this class in the omnibus-ctl context
@@ -498,19 +495,6 @@ private
     status = run_command(cmd)
     msg = "Failed uploading transformed data to the Chef 12 server"
     check_status(status, msg)
-  end
-
-  def grant_client_full_node_permissions(node_name, client_name)
-    # Use the knife-ec-backup config that was written earlier, since it will work
-    # and has all the needed data
-    # With default_orgname routing enabled, this all just works
-
-    %{create, update, read, delete, grant}.each do |perm|
-      cmd = "/opt/opscode/embedded/bin/knife acl add #{node_name} #{perm} client #{client_name} -c /tmp/knife-ec-backup-config.rb"
-      status = run_command(cmd)
-      msg = "Failed updating permissions for node #{node_name} and #{client_name} for permission #{perm}"
-      check_statue(status, msg)
-    end
   end
 
   def upgrade_success_message(chef11_data_dir, chef12_data_dir)
