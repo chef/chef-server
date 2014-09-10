@@ -1,6 +1,15 @@
 # Copyright (c) 2014 Chef Software, Inc.
 # All Rights Reserved
 
+KNOWN_ADDONS = %w(
+  chef-ha
+  chef-sync
+  opscode-analytics
+  opscode-manage
+  opscode-push-jobs-server
+  opscode-reporting
+)
+
 add_command "install", "Install addon package by name, with optional --path supplied", 2 do
   package = ARGV[3]
   path_arg = "--path"
@@ -14,7 +23,14 @@ add_command "install", "Install addon package by name, with optional --path supp
     "--json-attributes #{attributes_path}",
     "--log_level fatal"]
 
-  raise "must supply package name" if (package.nil?)
+  if package.nil?
+    STDERR.puts "You must supply an addon name. Valid names include: #{KNOWN_ADDONS.join(', ')}."
+    exit 1
+  elsif !KNOWN_ADDONS.include?(package)
+    STDERR.puts  "#{package} does not appear to be a valid addon name. Valid names include: #{KNOWN_ADDONS.join(', ')}."
+    exit 1
+  end
+
   json_src = { "run_list" => ["recipe[private-chef::add_ons_wrapper]"],
     "private_chef" => { "addons"=> {
         "install" => true,
