@@ -31,7 +31,7 @@ msg(Task) ->
       {<<"requestor_name">>, <<"rob">>},
       {<<"requestor_type">>, <<"user">>},
       {<<"user_agent">>, <<"knife 11.10.0">>},
-      {<<"uuid">>, <<"11111111-1111-1111-1111-111111111111">>},
+      {<<"id">>, <<"11111111-1111-1111-1111-111111111111">>},
       {<<"task">>, Task},
       {<<"entity_type">>, <<"node">>},
       {<<"entity_name">>, <<"db">>}
@@ -48,7 +48,7 @@ msg_with_payload(Task) ->
     {<<"requestor_name">>, <<"rob">>},
     {<<"requestor_type">>, <<"user">>},
     {<<"user_agent">>, <<"knife 11.10.0">>},
-    {<<"uuid">>, <<"11111111-1111-1111-1111-111111111111">>},
+    {<<"id">>, <<"11111111-1111-1111-1111-111111111111">>},
     {<<"task">>, Task},
     {<<"entity_type">>, <<"node">>},
     {<<"entity_name">>, <<"db">>},
@@ -314,8 +314,7 @@ end_to_end_test_() ->
               meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
               meck:expect(wrq, response_code, fun(req) -> 201 end),
               meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
-           %   meck:expect(uuid, get_v4, fun() -> undefined end),
-              meck:expect(uuid, uuid_to_string, fun(_UUID) -> <<"11111111-1111-1111-1111-111111111111">> end),
+              meck:expect(uuid, uuid_to_string, fun(_UUID) -> "11111111-1111-1111-1111-111111111111" end),
               meck:expect(wrq, get_req_header,
                           fun(Field, req) ->
                               case Field of

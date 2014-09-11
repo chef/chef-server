@@ -120,7 +120,7 @@ construct_payload(FullActionPayload, Task,
             {<<"requestor_name">>, requestor_name(Requestor)},
             {<<"requestor_type">>, requestor_type(Requestor)},
             {<<"user_agent">>, req_header("user-agent", Req)},
-            {<<"uuid">>, uuid:uuid_to_string(uuid:get_v4())},
+            {<<"id">>, list_to_binary(uuid:uuid_to_string(uuid:get_v4()))},
             %% Entity Level Info
             {<<"task">>, Task}
             | EntitySpecificPayload
