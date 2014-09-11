@@ -27,5 +27,6 @@ node['private_chef']['addons']['packages'].each do |pkg|
       provider Chef::Provider::Package::Rpm
     end
     source pkg_file
+    notifies :create, "ruby_block[addon_install_notification_#{pkg}]", :immediate
   end
 end
