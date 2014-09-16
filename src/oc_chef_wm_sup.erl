@@ -220,7 +220,7 @@ default_resource_init() ->
     end.
 
 amqp_child_spec() ->
-    Host = envy:get(oc_chef_wm, actions_host, string),
+    Host = envy_parse:host_to_ip(oc_chef_wm, actions_host),
     Port = envy:get(oc_chef_wm, actions_port, non_neg_integer),
     User = envy:get(oc_chef_wm, actions_user, binary),
     Password = envy:get(oc_chef_wm, actions_password, binary),
