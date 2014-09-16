@@ -64,12 +64,16 @@ oc_chef_action_test_() ->
       {"add a msg to the queue",
        fun() ->
             %% format is always: expected, actual
-            AssertPublishDataCorrect = fun(_ServerName, RoutingKey, Data) ->
-                ?assertEqual(<<"erchef.node.create">>, RoutingKey),
-                ?assertEqual(msg(<<"create">>), Data)
+            AssertPublishDataCorrect = fun(_ServerName, RoutingKey, _Data) ->
+                ?assertEqual(<<"erchef.node.create">>, RoutingKey)
             end,
+            meck:expect(bunny_util, new_message, fun(Data) ->
+                  ?assertEqual(msg(<<"create">>), chef_json:decode(Data)),
+                  msg
+              end),
+            meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end),
             meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-            oc_chef_action_queue:publish(<<"erchef.node.create">>, msg(<<"create">>))
+            oc_chef_action_queue:publish(<<"erchef.node.create">>, iolist_to_binary(chef_json:encode(msg(<<"create">>))))
        end
       }
       ]}.
@@ -330,11 +334,15 @@ end_to_end_test_() ->
        fun() -> ExpectedMsg = msg(<<"create">>),
                 meck:expect(wrq, method, fun(req) -> 'POST' end),
                 AssertPublishDataCorrect =
-                   fun(_ServerName, RoutingKey, Message) ->
+                   fun(_ServerName, RoutingKey, _Message) ->
                        ?assertEqual(<<"erchef.node.create">>, RoutingKey),
-                       ?assertEqual(ExpectedMsg, chef_json:decode(Message)),
                        ok
                    end,
+               meck:expect(bunny_util, new_message, fun(Data) ->
+                  ?assertEqual(ExpectedMsg, chef_json:decode(Data)),
+                  msg
+               end),
+               meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end),
                meck:expect(bunnyc, publish, AssertPublishDataCorrect),
                application:set_env(oc_chef_wm, enable_actions_body, false),
                Ret = oc_chef_action:log_action(req, State),
@@ -342,14 +350,18 @@ end_to_end_test_() ->
        end
      },
      {"end to end client test, action create with payload",
-      fun() -> ExpectedMsg = msg_with_payload(<<"create">>),
-               meck:expect(wrq, method, fun(req) -> 'POST' end),
-               AssertPublishDataCorrect =
-                    fun(_ServerName, RoutingKey, Message) ->
+       fun() -> ExpectedMsg = msg_with_payload(<<"create">>),
+                meck:expect(wrq, method, fun(req) -> 'POST' end),
+                AssertPublishDataCorrect =
+                    fun(_ServerName, RoutingKey, _Message) ->
                         ?assertEqual(<<"erchef.node.create">>, RoutingKey),
-                        ?assertEqual(ExpectedMsg, chef_json:decode(Message)),
                         ok
                     end,
+                meck:expect(bunny_util, new_message, fun(Data) ->
+                  ?assertEqual(ExpectedMsg, chef_json:decode(Data)),
+                  msg
+                end),
+                meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end ),
                 meck:expect(bunnyc, publish, AssertPublishDataCorrect),
                 application:set_env(oc_chef_wm, enable_actions_body, true),
                 Ret = oc_chef_action:log_action(req, State),
@@ -362,9 +374,13 @@ end_to_end_test_() ->
                 AssertPublishDataCorrect =
                    fun(_ServerName, RoutingKey, Message) ->
                        ?assertEqual(<<"erchef.node.delete">>, RoutingKey),
-                       ?assertEqual(ExpectedMsg, chef_json:decode(Message)),
                        ok
                    end,
+                meck:expect(bunny_util, new_message, fun(Data) ->
+                  ?assertEqual(ExpectedMsg, chef_json:decode(Data)),
+                  msg
+                end),
+               meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end ),
                meck:expect(bunnyc, publish, AssertPublishDataCorrect),
                application:set_env(oc_chef_wm, enable_actions_body, false),
                Ret = oc_chef_action:log_action(req, State),
@@ -377,9 +393,13 @@ end_to_end_test_() ->
                 AssertPublishDataCorrect =
                     fun(_ServerName, RoutingKey, Message) ->
                         ?assertEqual(<<"erchef.node.delete">>, RoutingKey),
-                        ?assertEqual(ExpectedMsg, chef_json:decode(Message)),
                         ok
                     end,
+                 meck:expect(bunny_util, new_message, fun(Data) ->
+                  ?assertEqual(ExpectedMsg, chef_json:decode(Data)),
+                  msg
+                end),
+                meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end ),
                 meck:expect(bunnyc, publish, AssertPublishDataCorrect),
                 application:set_env(oc_chef_wm, enable_actions_body, true),
                 Ret = oc_chef_action:log_action(req, State),
