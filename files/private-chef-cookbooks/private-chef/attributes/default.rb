@@ -19,6 +19,10 @@ opscode-org-creator
 opscode-certificate
 }
 
+default['private_chef']['hidden_services'] = %w{
+opscode-chef-mover
+}
+
 ###
 # High level options
 ###
