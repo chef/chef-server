@@ -253,7 +253,7 @@ default['private_chef']['lb']['redis_connection_pool_size'] = 250
 default['private_chef']['lb']['maint_refresh_interval'] = 600
 default['private_chef']['lb']['ban_refresh_interval'] = 600
 default['private_chef']['lb']['chef_min_version'] = 10
-default['private_chef']['lb']['chef_max_version'] = 11
+default['private_chef']['lb']['chef_max_version'] = 12
 
 ###
 # Load balancer route configuration
@@ -482,7 +482,6 @@ default['private_chef']['opscode-chef-mover']['solr_http_cull_interval'] = "{1, 
 default['private_chef']['opscode-chef-mover']['solr_http_max_age'] = "{70, sec}"
 default['private_chef']['opscode-chef-mover']['solr_http_max_connection_duration'] = "{70,sec}"
 default['private_chef']['opscode-chef-mover']['solr_ibrowse_options'] = "[{connect_timeout, 10000}]"
-
 
 ###
 # Opscode Test
