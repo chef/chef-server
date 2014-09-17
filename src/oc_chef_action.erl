@@ -53,32 +53,40 @@ log_action(_Req, #base_state{resource_state = ResourceState}) when
     %% TODO - chef_wm_environments endpoint puts a chef_environment{} directly
     %% into the resource_state record
     ok;
-log_action(Req, #base_state{resource_state = ResourceState} = State) when
+log_action(Req, #base_state{resource_state = ResourceState,
+                            resource_mod = ResourceMod} = State) when
+        is_record(ResourceState, association_state);
         is_record(ResourceState, client_state);
         is_record(ResourceState, cookbook_state);
         is_record(ResourceState, data_state);
         is_record(ResourceState, environment_state);
+        is_record(ResourceState, group_state);
+        is_record(ResourceState, organization_state);
         is_record(ResourceState, node_state);
         is_record(ResourceState, role_state);
-        is_record(ResourceState, user_state);
-        is_record(ResourceState, group_state) ->
+        is_record(ResourceState, user_state) ->
     case wrq:method(Req) of
         'GET' ->
             ok;
         _ElseMethod -> %% POST, PUT, DELETE
-            case wrq:response_code(Req) of
-                Code when Code =:= 200; Code =:= 201 ->
-                    log_action0(Req, State);
-                _ElseStatus ->
-                    ok
+            case ResourceMod of
+                oc_chef_wm_authenticate_user ->  %% POST to authenticate_user should not be an action.
+                    ok;
+                _ElseMod ->
+                    case wrq:response_code(Req) of
+                        Code when Code =:= 200; Code =:= 201 ->
+                            log_action0(Req, State);
+                        _ElseStatus ->
+                            ok
+                    end
             end
     end;
 log_action(Req, #base_state{resource_state = ResourceState} = State) ->
     ShouldLogUnEnabledActions = envy:get(oc_chef_wm, log_unenabled_actions, false, boolean),
     case ShouldLogUnEnabledActions of
-      true -> Task = task(Req, State),
-              lager:info("Action ~p not enabled for ~p\n", [Task, ResourceState]);
-      false -> ok
+        true -> Task = task(Req, State),
+            lager:info("Action ~p not enabled for ~p\n", [Task, ResourceState]);
+        false -> ok
     end.
 
 -spec  log_action0(Req :: wm_req(),
@@ -87,9 +95,9 @@ log_action0(Req, #base_state{resource_state = ResourceState} = State) ->
     ShouldSendBody = envy:get(oc_chef_wm, enable_actions_body, true, boolean),
     {FullActionPayload, EntityType, EntitySpecificPayload} = extract_entity_info(Req, ResourceState),
     Payload = case ShouldSendBody of
-                  true -> FullActionPayload;
-                  false -> []
-              end,
+        true -> FullActionPayload;
+        false -> []
+    end,
     Task = task(Req, State),
     MsgType = routing_key(EntityType, Task),
     Msg = construct_payload(Payload, Task, Req, State, EntitySpecificPayload),
@@ -111,7 +119,7 @@ construct_payload(FullActionPayload, Task,
                   EntitySpecificPayload) ->
     Msg = {[{<<"message_type">>, <<"action">>},
             {<<"message_version">>, ?CHEF_ACTIONS_MESSAGE_VERSION},
-            {<<"organization_name">>, OrgName},
+            {<<"organization_name">>, get_org_name(OrgName)},
             %% Request Level Info
             {<<"service_hostname">>, hostname()},
             {<<"recorded_at">>, req_header("x-ops-timestamp", Req)},
@@ -125,15 +133,19 @@ construct_payload(FullActionPayload, Task,
             {<<"task">>, Task}
             | EntitySpecificPayload
            ]},
-
     Msg0 = maybe_add_remote_request_id(Msg, req_header("x-remote-request-id", Req)),
     Msg1 = maybe_add_data(Msg0, FullActionPayload),
     iolist_to_binary(chef_json:encode(Msg1)).
 
+get_org_name(undefined) ->
+    null;
+get_org_name(OrgName) ->
+    OrgName.
+
 maybe_add_remote_request_id(Msg, undefined) ->
-  Msg;
+    Msg;
 maybe_add_remote_request_id(Msg, RemoteRequestId) ->
-  ej:set({<<"remote_request_id">>}, Msg, RemoteRequestId).
+    ej:set({<<"remote_request_id">>}, Msg, RemoteRequestId).
 
 -spec routing_key(EntityType :: <<_:32,_:_*8>>, Method :: <<_:48>>) -> binary().
 routing_key(EntityType, Method) ->
@@ -151,6 +163,21 @@ maybe_add_data(Msg, undefined) ->
 maybe_add_data(Msg, FullActionPayload) ->
     ej:set({<<"data">>}, Msg, FullActionPayload).
 
+%%TODO Put the right data into the state for the association related endpoints
+%% Currently #chef_user.username is populated for Accept, Dissociate and Invite
+%% #org_user_invite.user_name is populated for Reject
+%% Associaion data is populated for Accept.
+extract_entity_info(_Req, #association_state{data = FullActionPayload,
+                                             user = UserData,
+                                             org_user_invite = OrgUserInvite}) ->
+    Name = case UserData of
+        % Cannot pattern match in header since the record can be undefined for some cases.
+        undefined -> OrgUserInvite#oc_chef_org_user_invite.user_name;
+        #chef_user{username = Username} -> Username
+    end,
+    {FullActionPayload, <<"user">>, [{<<"entity_type">>, <<"user">>},
+                                     {<<"entity_name">>, Name}
+                                    ]};
 extract_entity_info(Req, #client_state{client_data = FullActionPayload}) ->
     Name = req_or_data_name(chef_wm_util:object_name(client, Req), FullActionPayload),
     {FullActionPayload, <<"client">>, [{<<"entity_type">>, <<"client">>},
@@ -184,11 +211,22 @@ extract_entity_info(Req, #environment_state{environment_data = FullActionPayload
     {FullActionPayload, <<"environment">>, [{<<"entity_type">>, <<"environment">>},
                                             {<<"entity_name">>, Name}
                                            ]};
+extract_entity_info(Req, #group_state{group_data = FullActionPayload}) ->
+    Name = req_or_data_name(chef_wm_util:extract_from_path(group_name, Req), FullActionPayload),
+    CorrectedName = get_corrected_name(Name, "groupname", FullActionPayload),
+    {FullActionPayload, <<"group">>, [{<<"entity_type">>, <<"group">>},
+                                      {<<"entity_name">>, CorrectedName}
+                                     ]};
 extract_entity_info(Req, #node_state{node_data = FullActionPayload}) ->
     Name = req_or_data_name(chef_wm_util:object_name(node, Req), FullActionPayload),
     {FullActionPayload, <<"node">>, [{<<"entity_type">>, <<"node">>},
                                      {<<"entity_name">>, Name}
                                     ]};
+extract_entity_info(_Req, #organization_state{organization_data = FullActionPayload,
+                                              oc_chef_organization = #oc_chef_organization{name = Name}}) ->
+    {FullActionPayload, <<"organization">>, [{<<"entity_type">>, <<"organization">>},
+                                             {<<"entity_name">>, Name}
+                                            ]};
 extract_entity_info(Req, #role_state{role_data = FullActionPayload}) ->
     Name = req_or_data_name(chef_wm_util:object_name(role, Req), FullActionPayload),
     {FullActionPayload, <<"role">>, [{<<"entity_type">>, <<"role">>},
@@ -196,14 +234,15 @@ extract_entity_info(Req, #role_state{role_data = FullActionPayload}) ->
                                     ]};
 extract_entity_info(Req, #user_state{user_data = FullActionPayload}) ->
     Name = req_or_data_name(chef_wm_util:object_name(user, Req), FullActionPayload),
+    CorrectedName = get_corrected_name(Name, "username", FullActionPayload),
     {FullActionPayload, <<"user">>, [{<<"entity_type">>, <<"user">>},
-                                     {<<"entity_name">>, Name}
-                                    ]};
-extract_entity_info(Req, #group_state{group_data = FullActionPayload}) ->
-    Name = req_or_data_name(chef_wm_util:extract_from_path(group_name, Req), FullActionPayload),
-    {FullActionPayload, <<"group">>, [{<<"entity_type">>, <<"group">>},
-                                     {<<"entity_name">>, Name}
+                                     {<<"entity_name">>, CorrectedName}
                                     ]}.
+
+get_corrected_name(undefined, NameKey, FullActionPayload) ->
+    ej:get({NameKey}, FullActionPayload);
+get_corrected_name(Name, _NameKey, _FullActionPayload) ->
+    Name.
 
 -spec requestor_name(Requestor:: #chef_client{} | #chef_user{}) -> binary().
 requestor_name(#chef_client{name = Name}) ->
@@ -235,16 +274,30 @@ task(Req, #base_state{resource_state=#cookbook_state{}}) ->
         Else ->
             key_for_method(Else)
     end;
+%'DELETE' request could mean both dissociate or reject,
+%hence we look into the log message to identify.
+task(Req, #base_state{resource_state=#association_state{}, log_msg = LogMsg}) ->
+    case wrq:method(Req) of
+        'POST' ->
+            <<"invite">>;
+        'PUT' ->
+            <<"associate">>;
+        'DELETE' ->
+            case element(1, LogMsg) of
+                removed -> <<"dissociate">>;
+                invite_deleted -> <<"reject">>
+            end
+    end;
 task(Req, _State)->
     key_for_method(wrq:method(Req)).
 
 -spec key_for_method('POST'|'PUT'|'DELETE') -> <<_:48>>.
+key_for_method('DELETE') ->
+    <<"delete">>;
 key_for_method('POST') ->
     <<"create">>;
 key_for_method('PUT') ->
-    <<"update">>;
-key_for_method('DELETE') ->
-    <<"delete">>.
+    <<"update">>.
 
 req_or_data_name(undefined, Data) ->
     ej:get({<<"name">>}, Data);
@@ -253,17 +306,17 @@ req_or_data_name(Name, _Data) when is_binary(Name) ->
 
 -spec hostname() -> binary().
 hostname() ->
-   envy:get(oc_chef_wm, actions_fqdn, binary).
+    envy:get(oc_chef_wm, actions_fqdn, binary).
 
 
 get_cookbook_version({Major, Minor, Patch} = Version) when Major >=0, Minor >=0, Patch >=0 ->
-   chef_cookbook_version:version_to_binary(Version).
+    chef_cookbook_version:version_to_binary(Version).
 
 req_header(Name, Req) ->
-  case wrq:get_req_header(Name, Req) of
-     undefined ->
-         undefined;
-     Header ->
-         iolist_to_binary(Header)
-  end.
+    case wrq:get_req_header(Name, Req) of
+        undefined ->
+            undefined;
+        Header ->
+            iolist_to_binary(Header)
+    end.
 
