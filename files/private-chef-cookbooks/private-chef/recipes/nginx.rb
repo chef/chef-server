@@ -9,6 +9,7 @@ nginx_dir = node['private_chef']['nginx']['dir']
 nginx_etc_dir = File.join(nginx_dir, "etc")
 nginx_cache_dir = File.join(nginx_dir, "cache")
 nginx_cache_tmp_dir = File.join(nginx_dir, "cache-tmp")
+nginx_tempfile_dir = File.join(nginx_dir, "tmp")
 nginx_html_dir = File.join(nginx_dir, "html")
 nginx_scripts_dir = File.join(nginx_etc_dir, "scripts")
 nginx_ca_dir = File.join(nginx_dir, "ca")
@@ -27,6 +28,7 @@ nginx_addon_dir = File.join(nginx_etc_dir, "addon.d")
   nginx_log_dir,
   nginx_d_dir,
   nginx_addon_dir,
+  nginx_tempfile_dir
 ].each do |dir_name|
   directory dir_name do
     owner node['private_chef']['user']['username']
@@ -141,7 +143,7 @@ end
     group "root"
     mode "0644"
     variables(lbconf.merge({:server_proto => server_proto,
-                            :script_path => nginx_scripts_dir}))
+                            :script_path => nginx_scripts_dir }))
     notifies :restart, 'runit_service[nginx]' unless backend_secondary?
   end
 end
@@ -152,7 +154,7 @@ template nginx_config do
   owner "root"
   group "root"
   mode "0644"
-  variables(lbconf.merge(chef_lb_configs))
+  variables(lbconf.merge(chef_lb_configs).merge({:temp_dir => nginx_tempfile_dir}))
   notifies :restart, 'service[nginx]' unless backend_secondary?
 end
 
