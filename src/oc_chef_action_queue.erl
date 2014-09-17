@@ -31,4 +31,6 @@ publish(RoutingKey, Data) ->
     %% blocked or closing count as errors to us, and letting errors bubble up
     %% seems fine.
 
-    ok = bunnyc:publish(?SERVER, RoutingKey, Data).
+    AMQPMsg = bunny_util:new_message(Data),
+    PersistentData = bunny_util:set_delivery_mode(AMQPMsg, 2),
+    ok = bunnyc:publish(?SERVER, RoutingKey, PersistentData).
