@@ -7,6 +7,10 @@ install_dir    "/opt/opscode"
 build_version   Omnibus::BuildVersion.new.semver
 build_iteration 1
 
+# All package file should be owned by root
+package_user  'root'
+package_group 'root'
+
 # overrides
 override :libxml2, version: "2.7.8"
 override :libxslt, version: "1.1.26"
