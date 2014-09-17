@@ -18,10 +18,11 @@
 -module(oc_chef_action_tests).
 
 -include_lib("chef_wm/include/chef_wm.hrl").
+-include_lib("oc_chef_wm.hrl").
 
-msg() ->
+msg(Task) ->
     {[{<<"message_type">>, <<"action">>},
-      {<<"message_version">>, <<"0.1.0">>},
+      {<<"message_version">>, <<"0.1.1">>},
       {<<"organization_name">>, <<"cmwest">>},
       {<<"service_hostname">>, <<"hostname.example.com">>},
       {<<"recorded_at">>, <<"2011-07-03T13:21:50Z">>},
@@ -30,14 +31,15 @@ msg() ->
       {<<"requestor_name">>, <<"rob">>},
       {<<"requestor_type">>, <<"user">>},
       {<<"user_agent">>, <<"knife 11.10.0">>},
-      {<<"task">>, <<"create">>},
+      {<<"id">>, <<"11111111-1111-1111-1111-111111111111">>},
+      {<<"task">>, Task},
       {<<"entity_type">>, <<"node">>},
       {<<"entity_name">>, <<"db">>}
      ]}.
 
-msg_with_payload() ->
+msg_with_payload(Task) ->
   {[{<<"message_type">>, <<"action">>},
-    {<<"message_version">>, <<"0.1.0">>},
+    {<<"message_version">>, <<"0.1.1">>},
     {<<"organization_name">>, <<"cmwest">>},
     {<<"service_hostname">>, <<"hostname.example.com">>},
     {<<"recorded_at">>, <<"2011-07-03T13:21:50Z">>},
@@ -46,7 +48,8 @@ msg_with_payload() ->
     {<<"requestor_name">>, <<"rob">>},
     {<<"requestor_type">>, <<"user">>},
     {<<"user_agent">>, <<"knife 11.10.0">>},
-    {<<"task">>, <<"create">>},
+    {<<"id">>, <<"11111111-1111-1111-1111-111111111111">>},
+    {<<"task">>, Task},
     {<<"entity_type">>, <<"node">>},
     {<<"entity_name">>, <<"db">>},
     {<<"data">>, {[{<<"name">>,<<"db">>}]}}
@@ -63,10 +66,10 @@ oc_chef_action_test_() ->
             %% format is always: expected, actual
             AssertPublishDataCorrect = fun(_ServerName, RoutingKey, Data) ->
                 ?assertEqual(<<"erchef.node.create">>, RoutingKey),
-                ?assertEqual(msg(), Data)
+                ?assertEqual(msg(<<"create">>), Data)
             end,
             meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-            oc_chef_action_queue:publish(<<"erchef.node.create">>, msg())
+            oc_chef_action_queue:publish(<<"erchef.node.create">>, msg(<<"create">>))
        end
       }
       ]}.
@@ -233,25 +236,32 @@ extract_entity_info_test_() ->
                Expected = entity({[{<<"name">>, <<"production">>}]}, <<"environment">>, <<"production">>),
                ?assertEqual(Expected, Ret)
              end},
+     {"group entity info",
+      fun() -> State = #group_state{group_data = {[{<<"name">>,<<"sysadmins">> }]} },
+               meck:expect(chef_wm_util,extract_from_path, fun(group_name, req) -> undefined end),
+               Ret = oc_chef_action:extract_entity_info(req, State),
+               Expected = entity({[{<<"name">>, <<"sysadmins">>}]}, <<"group">>, <<"sysadmins">>),
+               ?assertEqual(Expected, Ret)
+             end},
      {"node entity info",
       fun() -> State = #node_state{node_data = {[{<<"name">>,<<"node-foo">> }]} },
                meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
                Ret = oc_chef_action:extract_entity_info(req, State),
-            Expected = entity({[{<<"name">>, <<"node-foo">>}]}, <<"node">>, <<"node-foo">>),
+               Expected = entity({[{<<"name">>, <<"node-foo">>}]}, <<"node">>, <<"node-foo">>),
                ?assertEqual(Expected, Ret)
              end},
      {"role entity info",
       fun() -> State = #role_state{role_data = {[{<<"name">>,<<"webserver">> }]} },
                meck:expect(chef_wm_util,object_name, fun(role, req) -> undefined end),
                Ret = oc_chef_action:extract_entity_info(req, State),
-            Expected = entity({[{<<"name">>, <<"webserver">>}]}, <<"role">>, <<"webserver">>),
+               Expected = entity({[{<<"name">>, <<"webserver">>}]}, <<"role">>, <<"webserver">>),
                ?assertEqual(Expected, Ret)
              end},
      {"user entity info",
       fun() -> State = #user_state{user_data = {[{<<"name">>,<<"webserver">> }]} },
                meck:expect(chef_wm_util,object_name, fun(user, req) -> undefined end),
                Ret = oc_chef_action:extract_entity_info(req, State),
-            Expected = entity({[{<<"name">>, <<"webserver">>}]}, <<"user">>, <<"webserver">>),
+               Expected = entity({[{<<"name">>, <<"webserver">>}]}, <<"user">>, <<"webserver">>),
                ?assertEqual(Expected, Ret)
              end}
      ]
@@ -275,7 +285,7 @@ hostname_test_() ->
 
 maybe_add_remote_request_id_test_() ->
     [{"no remote request added when null",
-      fun() -> Msg = msg(),
+      fun() -> Msg = msg(<<"create">>),
                Ret = oc_chef_action:maybe_add_remote_request_id(Msg, undefined),
                ?assertEqual(Msg, Ret)
       end
@@ -302,9 +312,9 @@ end_to_end_test_() ->
     {foreach,
      fun() -> test_util:setup(MockedModules),
               meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
-              meck:expect(wrq, method, fun(req) -> 'POST' end),
               meck:expect(wrq, response_code, fun(req) -> 201 end),
               meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
+              meck:expect(uuid, uuid_to_string, fun(_UUID) -> "11111111-1111-1111-1111-111111111111" end),
               meck:expect(wrq, get_req_header,
                           fun(Field, req) ->
                               case Field of
@@ -316,9 +326,10 @@ end_to_end_test_() ->
                           end)
      end,
      fun(_) -> test_util:cleanup(MockedModules) end,
-     [{"end to end client test with no payload",
-      fun() -> ExpectedMsg = msg(),
-               AssertPublishDataCorrect =
+     [{"end to end client test, action create with no payload",
+       fun() -> ExpectedMsg = msg(<<"create">>),
+                meck:expect(wrq, method, fun(req) -> 'POST' end),
+                AssertPublishDataCorrect =
                    fun(_ServerName, RoutingKey, Message) ->
                        ?assertEqual(<<"erchef.node.create">>, RoutingKey),
                        ?assertEqual(ExpectedMsg, chef_json:decode(Message)),
@@ -330,11 +341,42 @@ end_to_end_test_() ->
                ?assertEqual(ok, Ret)
        end
      },
-     {"end to end client test with payload",
-       fun() -> ExpectedMsg = msg_with_payload(),
-                AssertPublishDataCorrect =
+     {"end to end client test, action create with payload",
+      fun() -> ExpectedMsg = msg_with_payload(<<"create">>),
+               meck:expect(wrq, method, fun(req) -> 'POST' end),
+               AssertPublishDataCorrect =
                     fun(_ServerName, RoutingKey, Message) ->
                         ?assertEqual(<<"erchef.node.create">>, RoutingKey),
+                        ?assertEqual(ExpectedMsg, chef_json:decode(Message)),
+                        ok
+                    end,
+                meck:expect(bunnyc, publish, AssertPublishDataCorrect),
+                application:set_env(oc_chef_wm, enable_actions_body, true),
+                Ret = oc_chef_action:log_action(req, State),
+                ?assertEqual(ok, Ret)
+        end
+      },
+      {"end to end client test, action delete with no payload",
+       fun() -> ExpectedMsg = msg(<<"delete">>),
+                meck:expect(wrq, method, fun(req) -> 'DELETE' end),
+                AssertPublishDataCorrect =
+                   fun(_ServerName, RoutingKey, Message) ->
+                       ?assertEqual(<<"erchef.node.delete">>, RoutingKey),
+                       ?assertEqual(ExpectedMsg, chef_json:decode(Message)),
+                       ok
+                   end,
+               meck:expect(bunnyc, publish, AssertPublishDataCorrect),
+               application:set_env(oc_chef_wm, enable_actions_body, false),
+               Ret = oc_chef_action:log_action(req, State),
+               ?assertEqual(ok, Ret)
+        end
+       },
+      {"end to end client test, action delete with data",
+       fun() -> ExpectedMsg = msg_with_payload(<<"delete">>),
+                meck:expect(wrq, method, fun(req) -> 'DELETE' end),
+                AssertPublishDataCorrect =
+                    fun(_ServerName, RoutingKey, Message) ->
+                        ?assertEqual(<<"erchef.node.delete">>, RoutingKey),
                         ?assertEqual(ExpectedMsg, chef_json:decode(Message)),
                         ok
                     end,
