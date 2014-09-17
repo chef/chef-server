@@ -12,7 +12,12 @@ function error_exit
 }
 
 ln -sf /opt/opscode/bin/private-chef-ctl /usr/bin || error_exit "Cannot link private-chef-ctl in /usr/bin"
-  
+
+# Ensure all files/directories in $INSTALLER_DIR are owned by root. This
+# has been fixed on new installs but upgrades from old installs need to
+# be manually fixed.
+chown -Rh 0:0 /opt/opscode
+
 if [ -e /etc/opscode/chef-server-running.json ]; then
   echo -e "\033[1mYou have upgraded Private Chef!\033[0m"
   echo
