@@ -1,7 +1,15 @@
 # Enterprise Chef Changelog
 
-## 12.0.0 
-	
+## Unreleased
+
+### omnibus-ctl 0.2.2
+
+* Added concept of hidden services that hides certain services from those listed in `chef-server-ctl status`.
+* Any service (even hidden ones) can still be status checked via `chef-server-ctl status <service>`.
+* opscode-chef-mover was added as a hidden service.
+
+## 12.0.0
+
 ### Renamed chef server core instead of Private Chef or Enterprise Chef.
 
 ### bookshelf 1.1.4
