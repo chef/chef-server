@@ -38,6 +38,11 @@ http {
   # Include upstream definitions for addons
   include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_upstreams.conf;
 
+  fastcgi_temp_path "<%= @temp_dir %>/fastcgi";
+  client_body_temp_path "<%= @temp_dir %>/client_body";
+  uwsgi_temp_path "<%= @temp_dir %>/uwsgi";
+  scgi_temp_path "<%= @temp_dir %>/scgi";
+
   # external lb config for Chef API
   <%- if node['private_chef']['lb']['enable'] -%>
     proxy_cache_path  <%= File.join(@dir, "cache") %> levels=1:2 keys_zone=webui-cache:50m max_size=<%= @cache_max_size %> inactive=600m;
