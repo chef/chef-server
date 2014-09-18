@@ -100,7 +100,7 @@
               {actions_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
               {actions_vhost, <<"<%= node['private_chef']['rabbitmq']['actions_vhost'] %>">>},
               {actions_exchange, <<"<%= node['private_chef']['rabbitmq']['actions_exchange'] %>">>},
-              {actions_fqdn, <<" <%= node['private_chef']['lb']['api_fqdn'] %> ">>}
+              {actions_fqdn, <<"<%= node['private_chef']['lb']['api_fqdn'] %>">>}
             ]},
   {chef_wm, [
              {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},
