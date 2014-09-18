@@ -44,7 +44,7 @@ default['private_chef']['default_orgname'] = nil
 default['private_chef']['addons']['install'] = false
 default['private_chef']['addons']['path'] = nil
 default['private_chef']['addons']['packages'] =
-  %w{opscode-reporting opscode-manage opscode-analytics}
+  %w{opscode-reporting opscode-manage opscode-analytics opscode-push-jobs-server}
 # TODO: push jobs server currently failing dependency check; replace above with
 # below once that's fixed and a new version is available
 #  %w{opscode-push-jobs-server opscode-reporting opscode-manage opscode-analytics}
