@@ -7,6 +7,10 @@ install_path    "/opt/opscode"
 build_version   Omnibus::BuildVersion.new.semver
 build_iteration 1
 
+# All package file should be owned by root
+package_user  'root'
+package_group 'root'
+
 override :rebar, version: "2.0.0"
 override :berkshelf2, version: "2.0.18"
 override :'omnibus-ctl', version: "0.0.8"
