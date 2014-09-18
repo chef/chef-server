@@ -7,7 +7,7 @@ require "/opt/opscode/embedded/service/omnibus-ctl/open_source_chef12_upgrade"
 require 'optparse'
 require 'ostruct'
 
-add_command "upgrade", "Upgrade your private chef installation.", 2 do
+add_command_under_category "upgrade", "general", "Upgrade your private chef installation.", 2 do
 
   # Since this is evaled, need to have methods first so they can be picked up
 

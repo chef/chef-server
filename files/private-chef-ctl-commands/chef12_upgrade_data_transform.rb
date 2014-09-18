@@ -8,7 +8,7 @@ require "/opt/opscode/embedded/service/omnibus-ctl/open_source_chef12_upgrade"
 require 'optparse'
 require 'ostruct'
 
-add_command "chef12-upgrade-data-transform", "Transfrom data from an open source Chef 11 server for upload to an Chef 12 server.", 2 do
+add_command_under_category "chef12-upgrade-data-transform", "open-source-upgrade", "Transfrom data from an open source Chef 11 server for upload to an Chef 12 server.", 2 do
 
    def parse(args)
     @options = OpenStruct.new

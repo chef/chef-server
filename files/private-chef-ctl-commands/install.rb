@@ -10,7 +10,7 @@ KNOWN_ADDONS = %w(
   opscode-reporting
 )
 
-add_command "install", "Install addon package by name, with optional --path parameter indicating directory containing packages", 2 do
+add_command_under_category "install", "general", "Install addon package by name, with optional --path parameter indicating directory containing packages", 2 do
   package = ARGV[3]
   path_arg = "--path"
   if (ARGV.include?(path_arg))

@@ -4,7 +4,7 @@
 # All Rights Reserved
 #
 
-add_command "test", "Run the API test suite against localhost.", 2 do
+add_command_under_category "test", "general", "Run the API test suite against localhost.", 2 do
   pedant_args = ARGV[3..-1]
   pedant_args = ["--smoke"] unless pedant_args.any?
   Dir.chdir(File.join(base_path, "embedded", "service", "oc-chef-pedant"))

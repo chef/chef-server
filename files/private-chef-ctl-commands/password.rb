@@ -6,7 +6,7 @@
 
 require 'highline/import'
 
-add_command "password", "Set a user's password or System Recovery Password.", 2 do
+add_command_under_category "password", "organization-and-user-management", "Set a user's password or System Recovery Password.", 2 do
   unless ARGV.length == 4 || (ARGV.length == 5 && ARGV[4] == "--disable")
     STDERR.puts "Usage: private-chef-ctl password <username> [--disable]"
     exit 1

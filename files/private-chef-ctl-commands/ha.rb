@@ -4,11 +4,11 @@
 # All Rights Reserved
 #
 
-add_command "master-recover", "Set this server to HA master state, ignoring VRRP.", 1 do
+add_command_under_category "master-recover", "high-avalibality", "Set this server to HA master state, ignoring VRRP.", 1 do
   exec "/var/opt/opscode/keepalived/bin/cluster.sh master"
 end
 
-add_command "backup-recover", "Set this server to HA backup state, ignoring VRRP", 1 do
+add_command_under_category "backup-recover", "high-avalibality", "Set this server to HA backup state, ignoring VRRP", 1 do
   exec "/var/opt/opscode/keepalived/bin/cluster.sh backup"
 end
 
@@ -21,7 +21,7 @@ end
 #  - check that the runit service status is correct based on our state
 #
 
-add_command "ha-status", "Show the status of high availability services.", 1 do
+add_command_under_category "ha-status", "high-avalibality", "Show the status of high availability services.", 1 do
   if running_config.nil?
     puts "[ERROR] cannot check HA status if you haven't completed a reconfigure"
     exit 1
