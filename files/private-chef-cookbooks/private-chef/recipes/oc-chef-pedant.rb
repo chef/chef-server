@@ -32,6 +32,7 @@ template pedant_config do
     :solr_url => "http://#{helper.vip_for_uri('opscode-solr4')}:#{node['private_chef']['opscode-solr4']['port']}",
     :opscode_account_internal_url => node['private_chef']['lb_internal']['vip'],
     :opscode_account_internal_port => node['private_chef']['lb_internal']['account_port'],
-    :default_orgname => node['private_chef']['default_orgname']
+    :default_orgname => node['private_chef']['default_orgname'],
+    :hostname => node['hostname']
   }.merge(node['private_chef']['oc-chef-pedant'].to_hash))
 end

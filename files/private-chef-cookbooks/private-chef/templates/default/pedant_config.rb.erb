@@ -5,22 +5,29 @@
 
 ################################################################################
 
+# A unique identification string used to create orgs and users specific
+# to a each single chef server's nodes' OS. Simply using "Process.pid"
+# proved to not be unique enough when running pedant simultaneously
+# on multiple nodes of the same chef server when the generated pedant
+# config file could have been copied across during the setup of that
+# chef server. 
+chef_server_uid = "<%= @hostname %>_#{Process.pid}"
+
 # Specify a testing organization if you are testing a multi-tenant
 # instance of a Chef Server (e.g., Private Chef, Hosted Chef).  If you
 # are testing a single-tenant instance (i.e. Open Source Chef Server),
 # DO NOT include this parameter
 #
 # Due to how the current org cache operates, it is best to use a
-# randomized name for your testing organization (hence the embedded
-# Process.pid).  If you do not use a randomized name and run tests
-# several times (destroying the organization between runs) you will
-# likely get inconsistent results.
+# unique name for your testing organization. If you do not use a
+# unique name and run tests several times (destroying the organization
+# between runs) you will likely get inconsistent results.
 #
 # If you wish Pedant to create the organization for you at test time,
 # include the `:create_me => true` pair.  If you wish to use an
 # existing organization for tests, you should supply a `:validator_key
 # => "/full/path/to/key.pem"` pair
-org({:name => "pedant-testorg-#{Process.pid}",
+org({:name => "pedant_testorg_#{chef_server_uid}",
      :create_me => true})
 
 # org({:name => "existing_org",
@@ -90,18 +97,18 @@ webui_key '/etc/opscode/webui_priv.pem'
 requestors({
              :clients => {
                :admin => {
-                 :name => "pedant_admin_client",
+                 :name => "pedant_admin_client_#{chef_server_uid}",
                  :create_me => true,
                  :create_knife => true,
                  :admin => true
                },
                :non_admin => {
-                 :name => 'pedant_client',
+                 :name => "pedant_client_#{chef_server_uid}",
                  :create_me => true,
                  :create_knife => true,
                },
                :bad => {
-                 :name => 'bad_client',
+                 :name => "bad_client_#{chef_server_uid}",
                  :create_me => true,
                  :bogus => true
                }
@@ -110,14 +117,14 @@ requestors({
              :users => {
                # An administrator in the testing organization
                :admin => {
-                 :name => "pedant_admin_user",
+                 :name => "pedant_admin_user_#{chef_server_uid}",
                  :create_me => true,
                  :create_knife => true,
                  :admin => true
                },
 
                :non_admin => {
-                 :name => "pedant_user",
+                 :name => "pedant_user_#{chef_server_uid}",
                  :create_me => true,
                  :create_knife => true,
                  :admin => false
@@ -125,7 +132,7 @@ requestors({
 
                # A user that is not a member of the testing organization
                :bad => {
-                 :name => "pedant-nobody",
+                 :name => "pedant_nobody_#{chef_server_uid}",
                  :create_me => true,
                  :create_knife => true,
                  :associate => false
