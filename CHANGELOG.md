@@ -1,13 +1,14 @@
 # Enterprise Chef Changelog
 
+## 11.2.3 (unreleased)
+### private-chef-cookbooks
+* [OC-11581] private-chef-ctl test command should return the pedant
+  return code
+
 ## 11.2.1
 ### enterprise-chef-common
 * Update to 0.4.5
 * Fix issue where 'private-chef' was being changed to 'private_chef' unexectedly in upstart/runit files
-
-### private-chef-cookbooks
-* [OC-11581] private-chef-ctl test command should return the pedant
-  return code
 
 ### 11.2.0 (2014-08-29)
 
