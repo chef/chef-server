@@ -19,7 +19,6 @@
                           is_authorized/2,
                           service_available/2]}]).
 
-
 -behavior(chef_wm).
 -export([auth_info/2,
          init/1,
@@ -83,44 +82,46 @@ process_post(Req, #base_state{chef_db_context = Ctx,
     Name = chef_user:username_from_ejson(UserData),
     Password = ej:get({<<"password">>}, UserData),
     User = chef_db:fetch(#chef_user{username = Name}, Ctx),
-
-    % Under opscode-account, we checked only for any value here, not for a specific value.
-    User1 = case wrq:get_qs_value("local", Req) of
-        undefined -> User;
-        _ -> User#chef_user{external_authentication_uid = null}
-    end,
-    case verify_user(Password, User1, Ctx) of
+    AuthType = oc_chef_wm_authn_ldap:auth_method(Req),
+    case verify_user(Name, Password, AuthType, User, State) of
         {false, Code} ->
             {{halt, Code}, chef_wm_util:set_json_body(Req, auth_fail_message(Code)), State};
         EJson ->
-            maybe_upgrade_password(Password, User, State),
             {true, chef_wm_util:set_json_body(Req, EJson), State}
     end.
 
-verify_user(Password, #chef_user{external_authentication_uid = null} = User, _Ctx) ->
+verify_user(_UserName, _Password, local, not_found,  _State) ->
+    % Don't reveal that the user isn't found, only that we can't auth.
+    {false, 401};
+verify_user(_UserName, Password, local, User, State) ->
     PasswordData = chef_user:password_data(User),
     case chef_password:verify(Password, PasswordData) of
         true ->
+            maybe_upgrade_password(Password, User, State),
             user_json(<<"linked">>, User);
         false ->
             {false, 401}
     end;
-verify_user(Password, #chef_user{username = UserName, external_authentication_uid = ExtAuthUid} = User, Ctx) ->
+verify_user(UserName, Password, ldap, _, #base_state{chef_db_context = Ctx}) ->
     case oc_chef_wm_authn_ldap:authenticate(UserName, Password) of
         {error, connection} ->
-            {false, 502};
+            {false, 504};
         {error, unauthorized} ->
             {false, 401};
-        AuthUserEJ->
-            case chef_db:fetch(#chef_user{external_authentication_uid = ExtAuthUid}, Ctx) of
-                Result when is_list(Result) andalso length(Result) > 0 ->
-                    user_json(<<"linked">>, User);
-                _ ->
-                    user_json(<<"unlinked">>, AuthUserEJ)
+        {ExtAuthUid, AuthUserEJ} ->
+            case chef_db:fetch(#chef_user{external_authentication_uid = ext_auth_id(ExtAuthUid)}, Ctx) of
+                not_found ->
+                    user_json(<<"unlinked">>, AuthUserEJ);
+                User = #chef_user{} ->
+                    user_json(<<"linked">>, User)
             end
-    end;
-verify_user(_Password, _Other, _Ctx) ->
-    {false, 401}.
+    end.
+
+ext_auth_id(Id) when Id == undefined;
+                     Id == null ->
+    <<"">>;
+ext_auth_id(Id) ->
+    Id.
 
 maybe_upgrade_password(Password, User, #base_state{requestor_id = Requestor, chef_db_context = Ctx}) ->
     PasswordData = chef_user:password_data(User),
@@ -147,6 +148,6 @@ malformed_request_message(#ej_invalid{}, _Req, _State) ->
 
 auth_fail_message(401) ->
     chef_wm_util:error_message_envelope(<<"Failed to authenticate: Username and password incorrect">>);
-auth_fail_message(502) ->
+auth_fail_message(504) ->
     chef_wm_util:error_message_envelope(<<"Authentication server is unavailable.">>).
 
