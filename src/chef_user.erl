@@ -24,6 +24,7 @@
          assemble_user_ejson/2,
          authz_id/1,
          ejson_for_indexing/2,
+         fetch/2,
          fields_for_fetch/1,
          fields_for_update/1,
          id/1,
@@ -55,21 +56,16 @@
          update_query/0
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                      {default_fetch/2, fetch},
-                      {default_update/2, update}
-                     ]}]).
+-export([ list/2 ]).
 
--export([
-         list/2
-         ]).
+-include_lib("mixer/include/mixer.hrl").
+-mixin([{chef_object,[ {default_update/2, update} ]}]).
+
 -include("chef_types.hrl").
 
 -include_lib("ej/include/ej.hrl").
 
 -behaviour(chef_object).
-
 
 %% Whitelist of fields we will persist to serialized_object.  Fields not in the list
 %% will not be persisted in create and update operations.
@@ -408,7 +404,7 @@ delete_query() ->
     delete_user_by_id.
 
 find_query() ->
-    find_user_by_username.
+    error(unsupported).
 
 list_query() ->
     list_users.
@@ -419,8 +415,20 @@ bulk_get_query() ->
 is_indexed() ->
     false.
 
+fetch(#chef_user{username = undefined, external_authentication_uid = AuthUid}, CallbackFun) ->
+    fetch_user(find_user_by_external_authentication_uid, AuthUid, CallbackFun);
+fetch(#chef_user{username = UserName}, CallbackFun) ->
+    fetch_user(find_user_by_username, UserName, CallbackFun).
+
+fetch_user(Query, KeyValue, CallbackFun) ->
+    CallbackFun({Query, [KeyValue],
+                 {first_as_record, [chef_user, record_fields()]}}).
+
 ejson_for_indexing(#chef_user{}, _) ->
     error(not_indexed).
+
+fields_for_fetch(_) ->
+    error(unsupported).
 
 fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
                              updated_at      = UpdatedAt,
@@ -438,11 +446,9 @@ fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
      [false, PublicKeyVersion, PublicKey, HashedPassword, Salt, HashType, SerializedObject,
      ExternalAuthenticationUid, RecoveryAuthEnabled =:= true, Email, UserName,  LastUpdatedBy, UpdatedAt, Id].
 
-fields_for_fetch(#chef_user{username = UserName}) ->
-    [UserName].
-
 record_fields() ->
     record_info(fields, chef_user).
+
 list(#chef_user{external_authentication_uid = ExtAuthUid}, CallbackFun) when ExtAuthUid =/= undefined ->
     CallbackFun({list_users_by_ext_auth_uid, [ExtAuthUid], [username]});
 list(#chef_user{email = undefined}, CallbackFun) ->
