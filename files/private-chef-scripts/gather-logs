@@ -32,7 +32,7 @@ then
 elif [[ $type == 'OSC' ]];
 then
     path='chef-server'
-    ctl_cmd='/opt/chef-server/bin/chef-server-ctl'
+    ctl_cmd='chef-server-ctl'
     config_name='chef-server.rb'
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
@@ -93,8 +93,8 @@ fi
 # There are two cases in which this could fail:
 # 1) We've configure postgresql to listen on a different local socket. Most users don't do this, but it is possible.
 # 2) Postgresql isn't running.
-# Since the general goal of this script is to collect whatever we can for support but not present confusing errors to 
-# the user, we went for a test that covered (2) easily. If we can do something smart that would account for (1) that 
+# Since the general goal of this script is to collect whatever we can for support but not present confusing errors to
+# the user, we went for a test that covered (2) easily. If we can do something smart that would account for (1) that
 # would be cool, but my sense is that this is OK for now.
 
 if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
