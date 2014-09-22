@@ -216,7 +216,7 @@ include_recipe "private-chef::plugins"
   if node["private_chef"][service]["enable"]
     include_recipe "private-chef::#{service}"
   else
-    # All non-enabled services get disabled; 
+    # All non-enabled services get disabled;
     # opscode-expander gets additional special treatment
     #
     # bootstrap isn't really a service, though, so there's
@@ -245,6 +245,7 @@ end
 
 include_recipe "private-chef::actions" if darklaunch_values["actions"]
 
+include_recipe "private-chef::private-chef-sh"
 include_recipe "private-chef::oc-chef-pedant"
 include_recipe "private-chef::log_cleanup"
 include_recipe "private-chef::partybus"
