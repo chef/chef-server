@@ -214,7 +214,11 @@ finish_request(Req, #base_state{reqid = ReqId,
     catch
         X:Y ->
             lager:error({X, Y, erlang:get_stacktrace()})
-    end.
+    end;
+%% If finish_request() does not pattern match above, log the error
+%% One of the functions in the request chain is not returning #base_state{}
+finish_request(_Req, Anything) ->
+    lager:error("chef_wm:finish_request/2 did not receive #base_state{}~nGot: ~p~n", [Anything]).
 
 create_500_response(Req, State) ->
     %% sanitize response body
