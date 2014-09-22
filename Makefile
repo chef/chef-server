@@ -61,7 +61,7 @@ unlocked_compile:
 	@rebar -C rebar.config compile
 
 update_locked_config:
-	@rebar lock-deps ignore=meck skip_deps=true
+	@rebar lock-deps skip_deps=true
 
 rel: rel/oc_erchef
 
