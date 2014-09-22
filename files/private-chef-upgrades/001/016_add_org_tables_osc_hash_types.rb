@@ -8,7 +8,7 @@ define_upgrade do
     # and adding the OSC password hash types to the password_hash_type_enum
     run_command("make deploy",
                 :cwd => "/opt/opscode/embedded/service/enterprise-chef-server-schema",
-                :env => {"EC_TARGET" => "@2.4.0", "OSC_TARGET" => "@1.0.4", "DB_USER" => "opscode-pgsql"}
+                :env => {"EC_TARGET" => "@2.4.0", "OSC_TARGET" => "@1.0.4",  "DB_USER" => Partybus.config.database_unix_user}
                 )
 
   end

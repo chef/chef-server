@@ -7,7 +7,7 @@ define_upgrade do
     # run 2.2.4 migration which includes schema upgrade for migration state
     run_command("make deploy",
                 :cwd => "/opt/opscode/embedded/service/enterprise-chef-server-schema",
-                :env => {"EC_TARGET" => "@2.2.4", "OSC_TARGET" => "@1.0.4", "DB_USER" => "opscode-pgsql"}
+                :env => {"EC_TARGET" => "@2.2.4", "OSC_TARGET" => "@1.0.4", "DB_USER" => Partybus.config.database_unix_user}
                 )
   end
 end

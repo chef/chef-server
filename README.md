@@ -37,7 +37,7 @@ Usage
 -----
 ### Build
 
-You'll need to create an omnibus.rb file based on the
+You'll need to **create an omnibus.rb** file based on the
 omnibus.rb.example.rb.  Please grab credentials from teampass.
 
 
@@ -145,8 +145,8 @@ will be specificed as ubuntu-1004, or even just ubuntu-10, if 10.04 is the
 only 10 series specified in the `.kitchen.yml`.
 
 If you skipped down to this section without reading the rest of the
-README, note that you'll need to copy omnibus.rb.example to omnibus.rb
-in the opscode-omnibus directory (either before running kichen or from
+README, note that you'll need to **copy omnibus.rb.example to omnibus.rb
+in the opscode-omnibus directory** (either before running kichen or from
 the opscode-omnibus directory once logged into the VM, which is the
 same directory mounted into it).
 
