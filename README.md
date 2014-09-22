@@ -1,7 +1,28 @@
-private-chef Omnibus project
+chef-server Omnibus project
 ============================
 This project creates full-stack platform-specific packages for
-`private-chef`!
+`chef-server`!
+
+## License
+
+All files in the repository are licensed under the Apache 2.0 license. If any
+file is missing the License header it should assume the following is attached;
+
+```
+Copyright 2014 Chef Software Inc
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
 
 Installation
 ------------
@@ -16,10 +37,14 @@ Usage
 -----
 ### Build
 
+You'll need to **create an omnibus.rb** file based on the
+omnibus.rb.example.rb.  Please grab credentials from teampass.
+
+
 You create a platform-specific package using the `build project` command:
 
 ```shell
-$ bin/omnibus build private-chef
+$ bin/omnibus build chef-server
 ```
 
 The platform/architecture type of the package created will match the platform
@@ -33,15 +58,15 @@ You can clean up all temporary files generated during the build process with
 the `clean` command:
 
 ```shell
-$ bin/omnibus clean private-chef
+$ bin/omnibus clean chef-server
 ```
 
 Adding the `--purge` purge option removes __ALL__ files generated during the
-build including the project install directory (`/opt/private-chef`) and
+build including the project install directory (`/opt/opscode`) and
 the package cache directory (`/var/cache/omnibus/pkg`):
 
 ```shell
-$ bin/omnibus clean private-chef --purge
+$ bin/omnibus clean chef-server --purge
 ```
 
 ### Help
@@ -119,6 +144,12 @@ Test Kitchen uses a regex syntax to match on plaforms, so for example ubuntu 10.
 will be specificed as ubuntu-1004, or even just ubuntu-10, if 10.04 is the
 only 10 series specified in the `.kitchen.yml`.
 
+If you skipped down to this section without reading the rest of the
+README, note that you'll need to **copy omnibus.rb.example to omnibus.rb
+in the opscode-omnibus directory** (either before running kichen or from
+the opscode-omnibus directory once logged into the VM, which is the
+same directory mounted into it).
+
 Then login to the instance and build the project as described in the Usage
 section:
 
@@ -127,7 +158,7 @@ $ kitchen login ubuntu-1204
 [vagrant@ubuntu...] $ cd opscode-omnibus
 [vagrant@ubuntu...] $ bundle install --binstubs
 [vagrant@ubuntu...] $ ...
-[vagrant@ubuntu...] $ bin/omnibus build private-chef
+[vagrant@ubuntu...] $ bin/omnibus build chef-server
 ```
 or if you prefer not to use binstubs and to use bundle exec instead:
 
@@ -136,7 +167,7 @@ $ kitchen login ubuntu-1204
 [vagrant@ubuntu...] $ cd opscode-omnibus
 [vagrant@ubuntu...] $ bundle install
 [vagrant@ubuntu...] $ ...
-[vagrant@ubuntu...] $ bundle exec omnibus build private-chef
+[vagrant@ubuntu...] $ bundle exec omnibus build chef-server
 ```
 
 For a complete list of all commands and platforms, run `kitchen list` or
