@@ -103,22 +103,28 @@ bind(Session, BindDN, BindPassword) ->
     case eldap:simple_bind(Session, BindDN, BindPassword) of
         ok -> ok;
         {error, Error} ->
-            lager:error("Could not bind as ~p, please check private-chef.rb for correct ldap['bind_dn'] and ldap['bind_password']", [BindDN]),
+            lager:error("Could not bind as ~p, please check private-chef.rb for correct ldap['bind_dn'] and ldap['bind_password'] because ~p", [BindDN, Error]),
             {error, Error}
     end.
 
 encrypt_session(false, _, _) ->
     ok;
-encrypt_session(true, _Session, _Timeout) ->
-    %case eldap:start_tls(Session, [], Timeout) of
-    %    {error, tls_already_started} -> ok; % connection secure
-    %    {error, {response, _Any}} -> ok; % connection is still good but not secure.
-    %    ok -> ok;
-    %    _ -> {error, connection}
-    %end.
-    % R16B03 introduces TLS upgrade, otherwise they
-    % should be connecting initially to a secure port.
-    {error, encryption_not_supported}.
+encrypt_session(true, Session, Timeout) ->
+    case eldap:start_tls(Session, [], Timeout) of
+        {error, {response, Reason}} ->  % Connection is still good, but is not made secure.
+            % Because we're configured to require secure connection,  we'll fail here.
+            lager:error("start_tls on ldap session failed during request phase"),
+            {error, {secure_connection_aborted, Reason}};
+        {error, tls_already_started} ->
+            lager:warning("start_tls on ldap session ignored request, tls already started"),
+            ok; % connection is already secure
+        {error, Other} ->
+            lager:error("start_tls on ldap session failed during upgrade phase: ~p", [Other]),
+            {error, {secure_connection_failed, Other}};
+        ok -> % secure upgrade completed
+            lager:error("we're ok!"),
+            ok
+    end.
 
 
 
