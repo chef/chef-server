@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-### omnibus-ctl 0.2.2
+### omnibus-ctl 0.3.0
 
+* Extended API with `add_command_under_category`, that allows ctl projects to group commands under categories, resulting in more logical help output.
 * Added concept of hidden services that hides certain services from those listed in `chef-server-ctl status`.
 * Any service (even hidden ones) can still be status checked via `chef-server-ctl status <service>`.
 * opscode-chef-mover was added as a hidden service.
