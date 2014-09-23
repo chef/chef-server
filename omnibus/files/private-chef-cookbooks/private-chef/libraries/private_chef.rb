@@ -81,6 +81,8 @@ module PrivateChef
   disabled_plugins []
   enabled_plugins []
 
+  backup Mash.new
+
   # - legacy config mashes -
   # these config values are here so that if any config has been previously
   # set for these projects in an older version of private-chef/chef-server.rb
@@ -277,6 +279,7 @@ module PrivateChef
         "disabled_plugins",
         "enabled_plugins",
         "license",
+        "backup",
 
         # keys for cleanup and back-compat
         "couchdb",
