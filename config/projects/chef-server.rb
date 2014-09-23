@@ -13,7 +13,7 @@ override :rebar, version: "2.0.0"
 override :berkshelf2, version: "2.0.18"
 override :rabbitmq, version: "3.3.4"
 override :erlang, version: "R16B03-1"
-override :'omnibus-ctl', version: "0.2.2"
+override :'omnibus-ctl', version: "0.3.0"
 
 # creates required build directories
 dependency "preparation"

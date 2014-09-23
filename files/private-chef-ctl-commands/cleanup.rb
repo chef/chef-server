@@ -1,7 +1,7 @@
 # Copyright (c) 2013 Opscode, Inc.
 # All Rights Reserved
 
-add_command "cleanup", "Perform post-upgrade removal of now-obsolete data, configuration files, logs, etc.  Add the '--no-op' flag to see what *would* be removed.", 2 do
+add_command_under_category "cleanup", "general", "Perform post-upgrade removal of now-obsolete data, configuration files, logs, etc.  Add the '--no-op' flag to see what *would* be removed.", 2 do
   use_why_run_mode = ARGV.include?("--no-op")
 
   # Our cleanup process is really just a special chef run
