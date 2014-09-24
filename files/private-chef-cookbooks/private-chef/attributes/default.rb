@@ -27,7 +27,7 @@ opscode-chef-mover
 # High level options
 ###
 default['private_chef']['api_version'] = "12.0.0"
-default['private_chef']['flavor'] = "ec"
+default['private_chef']['flavor'] = "cs"
 default['private_chef']['install_path'] = "/opt/opscode"
 
 default['private_chef']['notification_email'] = "pc-default@opscode.com"
