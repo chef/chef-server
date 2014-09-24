@@ -1,5 +1,5 @@
 name "oc_erchef"
-default_version "mp/ldap_updates"
+default_version "0.27.4"
 
 dependency "erlang"
 dependency "rebar"

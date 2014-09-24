@@ -1,17 +1,28 @@
 # Enterprise Chef Changelog
 
-## Unreleased
+## 12.0.0.rc5
 
-### Bump the chef_max_version, which is the max chef client version the Chef server accepts, to be 12.
+### opscode-omnibus
+* properly configure ldap under erchef, and add some safeguards
+  against incorrect encryption configuration.
+* oc_erchef updated to 0.27.4
+* Bump the chef_max_version to 12 (this is the max chef client version that Chef Server will accept)
+
+### oc_erchef 0.27.4
+* ldap start_tls support
+* ldap simple_tls support
+* support for correctly looking up users by external auth id
+* fix for GET of org users not returning correct state record, resulting
+  in requests not properly terminating
+
+### oc_erchef 0.27.3
+* Fix meck dependency locking issue.
 
 ### rest server API
 * updated server flavor from 'ec' to 'cs' (Chef Server) now that servers have been merged
 
 ### chef-server-ctl
-* Restricted chef-server-ctl install to known Chef packages 
-
-### oc_erchef 0.27.3
-* Fix mech dependency locking issue.
+* Restricted chef-server-ctl install to known Chef packages
 
 ### omnibus-ctl 0.3.0
 

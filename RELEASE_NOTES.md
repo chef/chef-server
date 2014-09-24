@@ -1,17 +1,18 @@
 # Enterprise Chef Release Notes
 
-## 12.0.0 
+## 12.0.0
 
 ### What's New:
 
 The following items are new since Enterprise Chef 11.2.1 and/or are changes from previous versions:
 
-* [opscode-omnibus] The chef_max_version has been bumped to 12, so that Chef clients up to 12 can connect to the server.  
+* [opscode-omnibus] The chef_max_version has been bumped to 12, so that Chef clients up to 12 can connect to the server.
 * [couchdb] has been removed
-* [oc_erchef] 
-  *  All endpoints that formerly were in opscode-account are now in erchef and the data
-  resides in SQL. This includes containers, groups, organizations, org associations and invites.  
+* [oc_erchef]
+  * All endpoints that formerly were in opscode-account are now in erchef and the data
+    resides in SQL. This includes containers, groups, organizations, org associations and invites.
   * Key generation is now in erchef.
+  * Server flavor returned from REST calls is now "sc"
 
 * [opscode-account] has been removed
 * [opscode-certificate] has been removed

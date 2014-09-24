@@ -535,6 +535,19 @@ default['private_chef']['keepalived']['service_posthooks'] = {
 # LDAP Authentication Integration
 ##
 default['private_chef']['ldap'] = nil
+# default['private_chef']['ldap']['host'] = "ldap-server-host"
+# default['private_chef']['ldap']['bind_dn'] = "CN=user_who_can_search,OU=Employees,OU=Domain users,DC=example,DC=com"
+# default['private_chef']['ldap']['bind_password'] = "plaintext password for binding w/ bind_dn"
+# default['private_chef']['ldap']['base_dn'] = "OU=Employees,OU=Domain users,DC=example,DC=com"
+# default['private_chef']['ldap']['timeout'] = 60000
+#
+# # Ensure that if you are using ssl-enabled ldap that you set port
+# # correctly (usually  636) AND that you set encryption to simple_tls
+# default['private_chef']['ldap']['port'] = 636
+#
+# Supported values: :none (or nil), :simple_tls, :start_tls
+# Default: :none
+# default['private_chef']['ldap']['encryption'] = :simple_tls
 
 ##
 # Upgrades/Partybus
