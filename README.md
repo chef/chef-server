@@ -81,8 +81,9 @@ To run the server:
 In a real production environment you're going to want to run this behind a load
 balancer with SSL, configure process monitoring, logging, etc.
 
-We currently do not provide any public cookbooks or other configuration for
-this.
+A [community cookbook for Chef identity](https://supermarket.getchef.com/cookbooks/oc-id)
+is available on Supermarket. It is not created by or maintained by Chef
+Software, but should work for running the app.
 
 ## License
 
