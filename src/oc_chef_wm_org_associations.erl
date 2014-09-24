@@ -144,7 +144,7 @@ create_path(Req, #base_state{resource_state = #association_state{user = #chef_us
 
 to_json(Req, #base_state{organization_guid = OrgId,
                          chef_db_context = DbContext,
-                         resource_state = #association_state{user = undefined} = State} ) ->
+                         resource_state = #association_state{user = undefined}} = State ) ->
     % Because we're not using the standard form of "[a,b,c]"  in our response in order to
     % keep compatible, using chef_wm_base:list_object_json does more than we can use -
     % instead capture the result directly here.
