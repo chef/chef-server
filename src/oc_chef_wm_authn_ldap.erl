@@ -44,44 +44,54 @@ auth_method_for_request(_HostValue, Req) ->
 
 %% Open a direct connection to a configure LDAP server and authenticate the user
 %% with credentials provided. Note that it connects to the LDAP server at time of request
-%% and does not maintain an open connection. This is the same method used by opsocde-acocunt,
-%% and is something we might wish to revisit.
+%% and does not maintain an open connection. This is the same method used previously
+%% by opscode-account and is something we might wish to revisit.
 -spec authenticate(string(), string()) -> {ok, term()} |
                                           {error, connection} |
                                           {error, unauthorized}.
-
 authenticate(User, Password) ->
     Config = envy:get(oc_chef_wm, ldap, list),
     Host = proplists:get_value(host, Config),
     Timeout = proplists:get_value(timeout, Config, 60000),
     Port = proplists:get_value(port, Config, 389),
-    Connection = eldap:open([Host], [{port, Port}, {timeout, Timeout}]),
+
+    Options = [{port, Port}, {timeout, Timeout}],
+    Encryption = proplists:get_value(encryption, Config),
+    Options2 = maybe_ssl_options(Encryption, Options),
+    Connection = eldap:open([Host], Options2),
+
+    % There are several possible failure paths that will get logged but then
+    % fail internally on badmatch.  Current expectation is that all of these
+    % be treated as a connection failure.
     Result = try
-        find_and_authenticate_user(Connection, User, Password, Timeout, Config)
+        {ok, Session} = maybe_encrypt_session(Encryption, Connection, Timeout),
+        find_and_authenticate_user(Session, User, Password, Config)
     catch
-        _Class:_Reason ->
-            {error, connection}
+        _Module:_Reason ->
+           {error, connection}
     end,
     close(Connection),
     Result.
 
+maybe_ssl_options(simple_tls, Options) ->
+    Options ++ [{ssl, true}];
+maybe_ssl_options(_, Options) ->
+    Options.
 
-find_and_authenticate_user({ok, Session}, User, Password, Timeout, Config) ->
+
+find_and_authenticate_user(Session, User, Password, Config) ->
     BindDN = proplists:get_value(bind_dn, Config),
     BindPass = proplists:get_value(bind_password, Config),
     BaseDN = proplists:get_value(base_dn, Config),
     LoginAttr = proplists:get_value(login_attribute, Config, "samaccountname"),
-    Encryption = proplists:get_value(encryption, Config, false),
     Base = {base, BaseDN},
     Filter = {filter, eldap:equalityMatch(LoginAttr, User)},
-
-    ok = encrypt_session(Encryption, Session, Timeout),
 
     % Auth so we can search for the user
     ok = bind(Session, BindDN, BindPass),
 
     % And then search
-    {ok, {eldap_search_result, Result, _}} = eldap:search(Session, [Base, Filter]),
+    {ok, Result} = search_result(eldap:search(Session, [Base, Filter])),
     case result_to_user_ejson(LoginAttr, User, Result) of
         {error, Reason} ->
             {error, Reason};
@@ -90,45 +100,53 @@ find_and_authenticate_user({ok, Session}, User, Password, Timeout, Config) ->
             % see if we can authorize as that user, using the provided password.
             case eldap:simple_bind(Session, CN, Password) of
                 ok -> {UserName, Data};
-                Error ->
-                    lager:info("ldap authentication failed for ~p/~p: ~p", [User, UserName, Error]),
+                {error, Error} ->
+                    lager:info("ldap authentication failed for ~p: ~p", [User, Error]),
                     {error, unauthorized}
             end
-    end;
-find_and_authenticate_user(Data,_,_,_,_) ->
-    lager:error("ldap connection failed: ~p", [Data]),
-    {error, connection}.
+    end.
+
+search_result({ok, {eldap_search_result, Result, _}}) ->
+    {ok, Result};
+search_result({error, Reason}) ->
+    % An error response means some kind of failure occurred - no matching results
+    % would not result in an error tuple, but rather an empty result set.
+    lager:error("LDAP search failed unexpectedly: ~p", [Reason]),
+    error.
 
 bind(Session, BindDN, BindPassword) ->
     case eldap:simple_bind(Session, BindDN, BindPassword) of
         ok -> ok;
         {error, Error} ->
-            lager:error("Could not bind as ~p, please check private-chef.rb for correct ldap['bind_dn'] and ldap['bind_password'] because ~p", [BindDN, Error]),
+            lager:error("Could not bind as ~p, please check private-chef.rb for correct bind_dn, bind_password, host, port and encrpytion values. Error: ", [BindDN, Error]),
             {error, Error}
     end.
 
-encrypt_session(false, _, _) ->
-    ok;
-encrypt_session(true, Session, Timeout) ->
+maybe_encrypt_session(_Encryption, {error, Error}, _Timeout) ->
+    lager:error("Failed to connect to ldap host or an error occurred during connection setup. Please check private-chef.rb for correct host, port, and encryption values: ~p", [Error]),
+    error;
+maybe_encrypt_session(start_tls, {ok, Session}, Timeout) ->
     case eldap:start_tls(Session, [], Timeout) of
-        {error, {response, Reason}} ->  % Connection is still good, but is not made secure.
-            % Because we're configured to require secure connection,  we'll fail here.
-            lager:error("start_tls on ldap session failed during request phase"),
-            {error, {secure_connection_aborted, Reason}};
+        ok -> % secure upgrade completed
+            {ok, Session};
         {error, tls_already_started} ->
             lager:warning("start_tls on ldap session ignored request, tls already started"),
-            ok; % connection is already secure
+            {ok, Session}; % connection is already secure
+        {error, {response, Reason}} ->  % Connection is still good, but is not made secure.
+            % Because we're configured to require secure connection,  we'll fail here.
+            lager:error("start_tls on ldap session failed during request phase: ~p", [Reason]),
+            error;
         {error, Other} ->
             lager:error("start_tls on ldap session failed during upgrade phase: ~p", [Other]),
-            {error, {secure_connection_failed, Other}};
-        ok -> % secure upgrade completed
-            lager:error("we're ok!"),
-            ok
-    end.
+            error;
+        Other ->
+            lager:error("start_tls on ldap session failed because ~p", [Other])
+    end;
+maybe_encrypt_session(_, {ok, Session}, _) ->
+    {ok, Session}.
 
 
 
-% plus: username, external_authentication_uid, recovery_authentication_enabled=false
 result_to_user_ejson(_, UserName, []) ->
     lager:info("User ~p not found in LDAP", [UserName]),
     {error, unauthorized};
@@ -140,7 +158,7 @@ result_to_user_ejson(LoginAttr, _, [{eldap_entry, CN, DataIn}|_]) ->
     % loginattr was used to find this record, so we know it must exist
     [UserName0] = proplists:get_value(LoginAttr, Data),
     UserName1 = string:to_lower(UserName0),
-    UserName2 = re:replace(UserName1, "[^0-z0-9_-]", "_", [{return ,list}, global]),
+    UserName2 = re:replace(UserName1, "[^0-z0-9_-]", "_", [{return, list}, global]),
     UserName = characters_to_binary(UserName2),
 
     % If you are debugging an issue where a new user has authenticated successfully
