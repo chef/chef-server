@@ -1,7 +1,7 @@
 oc-id
 =====
 
-Chef Identity: An [OAuth 2](http://oauth.net/2/) provider for Chef.
+Chef identity: An [OAuth 2](http://oauth.net/2/) provider for Chef.
 
 ## System Requirements
 
@@ -87,7 +87,7 @@ Software, but should work for running the app.
 
 ## License
 
-Chef Identity
+Chef identity
 
 |                      |                                          |
 |:---------------------|:-----------------------------------------|
