@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+### Bump the chef_max_version, which is the max chef client version the Chef server accepts, to be 12.
+
 ### rest server API
 * updated server flavor from 'ec' to 'cs' (Chef Server) now that servers have been merged
 
