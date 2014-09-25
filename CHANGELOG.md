@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### oc_erchef 0.27.3
+
+* Fix mech dependency locking issue.
+
 ### omnibus-ctl 0.3.0
 
 * Extended API with `add_command_under_category`, that allows ctl projects to group commands under categories, resulting in more logical help output.
