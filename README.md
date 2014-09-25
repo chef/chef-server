@@ -24,6 +24,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ```
 
+Contribution
+------------
+
+Please follow the [contribution guidelines](CONTRIBUTING.md) when submitting pull requests. Specifically, any significant change should be accompanied by an update to either the changelog or release notes. PRs should not be merged without either such an update or verification that this change is small enough to not need to update the changelog or release notes.
+
 Installation
 ------------
 You must have a sane Ruby 1.9+ environment with Bundler installed. Ensure all
