@@ -11,6 +11,11 @@
 ### opscode-chef-mover 1.1.3.1
 * Fixes rebuild issues due to missing source dependencies
 
+## 11.2.2 (2014-09-17)
+
+### opscode-omnibus
+* Ensure contents of install dir (`/opt/opscode`) are owned by root.
+
 ## 11.2.1
 ### enterprise-chef-common
 * Update to 0.4.5
