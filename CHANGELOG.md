@@ -1,5 +1,10 @@
 # Enterprise Chef Changelog
 
+## 1.4.14 (2014-09-17)
+
+### opscode-omnibus
+* Ensure contents of install dir (`/opt/opscode`) are owned by root.
+
 ## 1.4.13 (2014-06-26)
 
 ### private-chef-cokbooks
