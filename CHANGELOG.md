@@ -2,8 +2,13 @@
 
 ## Unreleased
 
-### oc_erchef 0.27.3
+### rest server API
+* updated server flavor from 'ec' to 'cs' (Chef Server) now that servers have been merged
 
+### chef-server-ctl
+* Restricted chef-server-ctl install to known Chef packages 
+
+### oc_erchef 0.27.3
 * Fix mech dependency locking issue.
 
 ### omnibus-ctl 0.3.0
@@ -138,6 +143,7 @@
 * Renamed from private-chef-ctl
 * Added chef-server-ctl upgrade command to support migrations from the open source chef 11 server
 * Added tooling to manage users and orgs from the command line via knife-opc
+* Added chef-server-ctl install command to install chef add-on packages (via web or local file)
 
 ### omnibus-ctl
 * [OC-10470] Allow private-chef-ctl status to ignore disabled services.
