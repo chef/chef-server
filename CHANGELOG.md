@@ -5,6 +5,9 @@
 * [OC-11581] private-chef-ctl test command should return the pedant
   return code
 
+### opscode-chef-mover 1.1.3.1
+* Fixes rebuild issues due to missing source dependencies
+
 ## 11.2.1
 ### enterprise-chef-common
 * Update to 0.4.5
