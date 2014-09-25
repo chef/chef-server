@@ -1,5 +1,10 @@
 # Enterprise Chef Release Notes
 
+## 12.0.0.rc4 (2014-09-17)
+
+### Security Fixes
+* [opscode-omnibus] Ensure contents of install dir (/opt/opscode) are owned by root.
+
 ## 12.0.0
 
 ### What's New:
