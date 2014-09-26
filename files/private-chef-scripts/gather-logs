@@ -19,8 +19,8 @@ if [[ $type == 'EC' ]];
 then
     path='opscode'
     ctl_cmd='private-chef-ctl'
-    config_name='private-chef.rb'
-    ha=$(egrep -qs 'topology\s+.*ha' /etc/opscode/private-chef.rb)$?
+    config_name='chef-server.rb'
+    ha=$(egrep -qs 'topology\s+.*ha' /etc/opscode/chef-server.rb)$?
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then

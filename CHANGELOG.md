@@ -9,6 +9,7 @@
 * Bump the chef_max_version to 12 (this is the max chef client version that Chef Server will accept)
 * expose license configuration options
 * Add man page for chef-server-ctl.
+* Correct gather-logs to point to chef-server.rb
 
 ### oc_erchef 0.27.4
 * ldap start_tls support
