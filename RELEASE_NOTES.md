@@ -8,6 +8,11 @@ The following items are the set of bug fixes that have been applied since Enterp
 
 * [opscode-omnibus] private-chef-ctl test command should provide pedant return code.
 
+## 11.2.2 (2014-09-17)
+
+### Security Fixes
+* [opscode-omnibus] Ensure contents of install dir (/opt/opscode) are owned by root.
+
 ## 11.2.1
 
 ### Bug Fixes:
