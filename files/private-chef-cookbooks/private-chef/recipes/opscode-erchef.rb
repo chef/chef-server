@@ -39,12 +39,15 @@ end
 
 erchef_config = File.join(opscode_erchef_etc_dir, "app.config")
 
+ldap_encryption = node['private_chef']['ldap']['encryption']
+ldap_encryption = ldap_encryption.nil? ? "none" : ldap_encryption.to_s
+
 template erchef_config do
   source "oc_erchef.config.erb"
   owner owner
   group group
   mode "644"
-  variables(node['private_chef']['opscode-erchef'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?, :helper => OmnibusHelper.new(node)))
+  variables(node['private_chef']['opscode-erchef'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?, :ldap_encryption => ldap_encryption, :helper => OmnibusHelper.new(node)))
   notifies :run, 'execute[remove_erchef_siz_files]', :immediately
   notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
 end
