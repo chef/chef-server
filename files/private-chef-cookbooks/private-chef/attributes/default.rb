@@ -257,7 +257,6 @@ default['private_chef']['lb']['redis_connection_pool_size'] = 250
 default['private_chef']['lb']['maint_refresh_interval'] = 600
 default['private_chef']['lb']['ban_refresh_interval'] = 600
 default['private_chef']['lb']['chef_min_version'] = 10
-default['private_chef']['lb']['chef_max_version'] = 12
 
 ###
 # Load balancer route configuration
