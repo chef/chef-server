@@ -164,6 +164,7 @@
 * Added chef-server-ctl upgrade command to support migrations from the open source chef 11 server
 * Added tooling to manage users and orgs from the command line via knife-opc
 * Added chef-server-ctl install command to install chef add-on packages (via web or local file)
+* Clarify the use of the --path options for the `install` subcommand
 
 ### omnibus-ctl
 * [OC-10470] Allow private-chef-ctl status to ignore disabled services.
