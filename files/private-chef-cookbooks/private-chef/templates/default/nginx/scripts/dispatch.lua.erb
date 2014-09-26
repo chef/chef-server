@@ -7,7 +7,6 @@
 local mode = ngx.var.mode
 local internal = <%= @internal_lb ? true : false %>
 local min_version = <%= @chef_min_version %>
-local max_version = <%= @chef_max_version %>
 
 local remote_addr = ngx.var.remote_addr
 
@@ -37,11 +36,11 @@ if mode == "api" then
     -- Exit early: If they don't have the right chef version, send them packing.
     local version = ngx.var.http_x_chef_version
     if version then
-      if not routes.is_client_version_valid(version, min_version, max_version) then
+      if not routes.is_client_version_valid(version, min_version) then
         ngx.status = ngx.HTTP_BAD_REQUEST
-        ngx.say('{"error": "400 - Bad Request: Chef Client version between ' ..
-                min_version .. ' and  ' .. max_version ..
-                '" required. Your version of Chef is ' .. version .. '."}')
+        ngx.say('{"error": "400 - Bad Request: Chef Client version ' ..
+                min_version .. ' or higher required. Your version of Chef is ' ..
+                version .. '."}')
         ngx.exit(ngx.HTTP_OK)
       end
     else
