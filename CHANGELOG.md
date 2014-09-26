@@ -34,6 +34,10 @@
 * Any service (even hidden ones) can still be status checked via `chef-server-ctl status <service>`.
 * opscode-chef-mover was added as a hidden service.
 
+### oc-chef-pedant 1.0.59
+* Fix rspec deprecations
+* Remove test of curl
+
 ## 12.0.0.rc4 (2014-09-17)
 
 ### opscode-omnibus
