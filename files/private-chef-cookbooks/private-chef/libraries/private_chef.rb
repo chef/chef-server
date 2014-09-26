@@ -49,6 +49,8 @@ module PrivateChef
   opscode_chef_mover Mash.new
   oc_chef_pedant Mash.new
 
+  license Mash.new
+
   servers Mash.new
   backend_vips Mash.new
   ha Mash.new # For all other HA settings
@@ -235,6 +237,7 @@ module PrivateChef
         "ha",
         "disabled_plugins",
         "enabled_plugins",
+        "license",
 
         # keys for cleanup and back-compat
         "couchdb",
