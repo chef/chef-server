@@ -32,6 +32,11 @@
 * Any service (even hidden ones) can still be status checked via `chef-server-ctl status <service>`.
 * opscode-chef-mover was added as a hidden service.
 
+## 12.0.0.rc4 (2014-09-17)
+
+### opscode-omnibus
+* Ensure contents of install dir (`/opt/opscode`) are owned by root.
+
 ## 12.0.0
 
 ### Renamed chef server core instead of Private Chef or Enterprise Chef.
@@ -163,6 +168,11 @@
 * [OC-10470] Allow private-chef-ctl status to ignore disabled services.
 * [OC-11574] private-chef-ctl service commands should be HA aware
 * [OC-9877] exclude binary files and archives from *-ctl tail
+
+## 11.2.2 (2014-09-17)
+
+### opscode-omnibus
+* Ensure contents of install dir (`/opt/opscode`) are owned by root.
 
 ## 11.2.1 (2014-08-29)
 ### enterprise-chef-common
