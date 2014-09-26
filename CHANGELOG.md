@@ -21,6 +21,7 @@
 * Fix meck dependency locking issue.
 
 ### rest server API
+* removed check for maximum client version (only checks for minimum, i.e., <10)
 * updated server flavor from 'ec' to 'cs' (Chef Server) now that servers have been merged
 
 ### chef-server-ctl
