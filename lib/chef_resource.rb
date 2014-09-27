@@ -16,11 +16,11 @@ module ChefResource
     raise NotImplementedError, 'A Chef resource URL (e.g., "users/applejack") is required.'
   end
 
-  private 
+  def chef
+    ::Chef::REST.new endpoint, Settings.chef.superuser, nil, parameters
+  end
 
-    def chef
-      ::Chef::REST.new endpoint, Settings.chef.superuser, nil, parameters
-    end
+  private 
 
     def endpoint
       Settings.chef.endpoint

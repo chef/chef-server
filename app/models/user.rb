@@ -43,11 +43,20 @@ class User
   end
 
   class << self
+
     def find(username)
       begin
         new(username: username).get unless username.nil?
       rescue Net::HTTPServerException
 
+      end
+    end
+
+    def authenticate(username, password)
+      begin
+        self.find(username) if self.new.chef.post_rest('authenticate_user', { username: username, password: password })
+      rescue Net::HTTPServerException
+        
       end
     end
   end
