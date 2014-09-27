@@ -18,8 +18,7 @@ gem 'omniauth-chef', github: 'opscode/omniauth-chef', branch: 'master'
 gem 'nokogiri', '~> 1.6.2'
 gem 'pg'
 
-# Still waiting for a release that includes a recent Bootstrap 3 merge.
-gem 'doorkeeper', github: 'applicake/doorkeeper', ref: 'cc9fa8a1b1b74ab50d542db186e9501e92d479b4'
+gem 'doorkeeper', '~> 1.4.0'
 
 group :development, :test do
   # Loading it this way makes it work with Ruby 2.1.2. See

@@ -1,12 +1,4 @@
 GIT
-  remote: git://github.com/applicake/doorkeeper.git
-  revision: cc9fa8a1b1b74ab50d542db186e9501e92d479b4
-  ref: cc9fa8a1b1b74ab50d542db186e9501e92d479b4
-  specs:
-    doorkeeper (1.1.0)
-      railties (>= 3.1)
-
-GIT
   remote: git://github.com/nixme/jazz_hands.git
   revision: 5e4b48f145883ecb14b55bf04eacc28ac9662676
   branch: bring-your-own-debugger
@@ -118,6 +110,8 @@ GEM
     debugger-linecache (1.2.0)
     diff-lcs (1.2.5)
     diffy (3.0.6)
+    doorkeeper (1.4.0)
+      railties (>= 3.1)
     erubis (2.7.0)
     execjs (2.0.2)
     factory_girl (4.4.0)
@@ -134,7 +128,7 @@ GEM
     highline (1.6.21)
     hike (1.2.3)
     hirb (0.7.2)
-    i18n (0.6.9)
+    i18n (0.6.11)
     ipaddress (0.8.0)
     jbuilder (1.5.3)
       activesupport (>= 3.0.0)
@@ -152,7 +146,7 @@ GEM
     method_source (0.8.2)
     mime-types (1.25.1)
     mini_portile (0.6.0)
-    minitest (5.3.5)
+    minitest (5.4.1)
     mixlib-authentication (1.3.0)
       mixlib-log
     mixlib-cli (1.5.0)
@@ -285,7 +279,7 @@ GEM
       polyglot (>= 0.3.1)
     turbolinks (2.2.2)
       coffee-rails
-    tzinfo (1.2.1)
+    tzinfo (1.2.2)
       thread_safe (~> 0.1)
     uglifier (2.4.0)
       execjs (>= 0.3.0)
@@ -311,7 +305,7 @@ DEPENDENCIES
   capybara (~> 2.1.0)
   chef (~> 11.10.4)
   coffee-rails (~> 4.0.0)
-  doorkeeper!
+  doorkeeper (~> 1.4.0)
   factory_girl_rails (~> 4.4.0)
   jazz_hands!
   jbuilder (~> 1.2)
