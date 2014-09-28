@@ -21,6 +21,10 @@
 ### oc_erchef 0.27.3
 * Fix meck dependency locking issue.
 
+## oc_id 0.4.1
+* Update doorkeeper gem to 1.4.0
+* Add support for Resource Owner Password Credentials flow
+
 ### rest server API
 * removed check for maximum client version (only checks for minimum, i.e., <10)
 * updated server flavor from 'ec' to 'cs' (Chef Server) now that servers have been merged
