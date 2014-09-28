@@ -232,6 +232,6 @@ amqp_child_spec() ->
                                    }
                },
     Network = {network, Host, Port, {User, Password}, VHost},
-    lager:info("Chef Actions: Connecting to RabbitMQ at ~s:~p~s (exchange: ~p)", [Host, Port, VHost, ExchgName]),
+    lager:info("Chef Actions: Connecting to RabbitMQ at ~p:~p~s (exchange: ~p)", [Host, Port, VHost, ExchgName]),
     {oc_chef_action_queue, {bunnyc, start_link, [oc_chef_action_queue, Network, Exchange, []]},
       permanent, 5000, worker, dynamic}.
