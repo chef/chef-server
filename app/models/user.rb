@@ -1,3 +1,5 @@
+require 'mixlib/authentication/signatureverification'
+
 class User 
   extend ActiveModel::Naming
   include ActiveModel::AttributeMethods
@@ -56,7 +58,26 @@ class User
       begin
         self.find(username) if self.new.chef.post_rest('authenticate_user', { username: username, password: password })
       rescue Net::HTTPServerException
-        
+
+      end
+    end
+
+    # Take a request object and verify the user is valid based on the signed
+    # request and the X-Ops-UserId header.
+    #
+    # Returns the user if it is valid, or nil if not.
+    def authenticate_from_signed_request(request)
+      user = User.find(request.headers['x-ops-userid'])
+      if user
+        #verifier = Mixlib::Authentication::SignatureVerification.new(request)
+        #public_key = OpenSSL::PKey::RSA.new user.public_key
+        #if verifier.authenticate_request(public_key)
+          #user
+        #else
+          #nil
+        #end
+      else
+        nil
       end
     end
   end

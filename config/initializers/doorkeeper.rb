@@ -1,5 +1,3 @@
-require 'mixlib/authentication/signatureverification'
-
 Doorkeeper.configure do
   # Change the ORM that doorkeeper will use.
   # Currently supported options are :active_record, :mongoid2, :mongoid3, :mongo_mapper
@@ -29,19 +27,11 @@ Doorkeeper.configure do
     Settings.doorkeeper.administrators.include?(session[:username]) || (render template: 'errors/404', status: :not_found)
   end
 
-  resource_owner_from_credentials do |routes|
-    user = User.find(request.headers['x-ops-userid'])
-    if user
-      verifier = Mixlib::Authentication::SignatureVerification.new(request)
-      public_key = OpenSSL::PKey::RSA.new user.public_key
-      if verifier.authenticate_request(public_key)
-        user
-      else
-        nil
-      end
-    else
-      nil
-    end
+  # When requesting /id/oauth/token?grant_type=password with a signed request,
+  # use the Resource Owner Password Credentials Grant flow
+  # (http://oauthlib.readthedocs.org/en/latest/oauth2/grants/password.html)
+  resource_owner_from_credentials do
+    User.authenticate_from_signed_request(request)
   end
 
   # Authorization Code expiration time (default 10 minutes).
