@@ -28,6 +28,7 @@ JSON
       f.puts "file_cache_path \"\#\{CURRENT_PATH\}/cache\""
       f.puts "cookbook_path CURRENT_PATH"
       f.puts "verbose_logging true"
+      f.puts "client_fork false"
     end
   end
 end

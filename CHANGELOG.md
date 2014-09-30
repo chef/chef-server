@@ -33,6 +33,7 @@
 * Restricted chef-server-ctl install to known Chef packages
 * Correct show-config command/recipe to point at chef-server.rb instead of private-chef.rb
 * Updated knife-opc config so that user / org / association commands now work if non-default ports are used.
+* re-enable ctrl+c for chef-server-ctl commands by setting "client_fork false" in solo.rb
 
 ### omnibus-ctl 0.3.0
 
