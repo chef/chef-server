@@ -399,8 +399,8 @@ module PrivateChef
         end
       end
       encryption = PrivateChef["ldap"]["encryption"]
-      if encryption and not required_ldap_config_values.include? encryption
-        raise "Valid values of LDAP 'encryption' setting are #{allowed_encryption_values.join(', ')}. '#{encryption}' is not valid."
+      if encryption and not allowed_encryption_values.include? encryption
+        raise "Valid values of LDAP 'encryption' setting are :#{allowed_encryption_values.join(', :')}. '#{encryption}' is not valid."
       end
     end
 
