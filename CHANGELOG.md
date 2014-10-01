@@ -31,6 +31,10 @@ Never released due to a regression discovered after tagging.
 * Backport of support for specifying SSL version as a configuration
   option
 
+### private-chef-ctl
+
+* `private-chef-ctl password` - put quotes around the password so special characters can be used
+
 ### oc_erchef 0.25.14.2
 * Fixes rebuild issues due to missing source dependencies
 

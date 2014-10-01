@@ -42,6 +42,7 @@ Never released due to a regression discovered after tagging.
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.2:
 
 * [opscode-omnibus] private-chef-ctl test command should provide pedant return code.
+* [private-chef-ctl] password subcommand - put quotes around the password so special characters can be used
 
 ### Security Fixes
 
