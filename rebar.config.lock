@@ -25,7 +25,7 @@
                     "6ceff57e8b32b6554728a082db52584f1f65bd7e"}},
        {pooler,".*",
                {git,"git://github.com/seth/pooler.git",
-                    "37da392e5de1d8b9bfa277e2e13238b6610a1cd7"}},
+                    "3fa1c3fb4dab925b3e11b0d3ecf18d9e648195e8"}},
        {envy,".*",
              {git,"git://github.com/manderson26/envy.git",
                   "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
