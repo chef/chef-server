@@ -1,7 +1,7 @@
 %% THIS FILE IS GENERATED. DO NOT EDIT IT MANUALLY %%
 
 {sub_dirs,["rel"]}.
-{deps,[{meck,".*",{git,"git://github.com/esl/meck.git","master"}},
+{deps,[
        {goldrush,".*",
                  {git,"git://github.com/DeadZen/goldrush.git",
                       "1d883423ac360b3536ca52dc733a0164bacf3109"}},
@@ -125,6 +125,7 @@
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
                         "f739400be7006c5aadf82df048290b0675a9c6d5"}},
+       {meck,".*", {git,"git://github.com/eproxus/meck.git", "b1f313b4cecc3df05a477a93641bf0a24d858590"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
                   "5b167c9ed7ffbb2c81d9d21fd5984bbcd97141e0"}}]}.
