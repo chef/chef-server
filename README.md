@@ -41,9 +41,9 @@ Chef server.
 * Nginx (openresty with openresty-lpeg)
 * Runit for service supervision
 
-If you're looking to contribute to the Chef server, familiarity with the following related tools is also beneficial.
+If you're looking to contribute to certain parts of the Chef server, familiarity with the following related tools is also beneficial, depending on the area.
 
-* rebar
-* keepalived
-* sqitch
-* lua
+* rebar (used for dependency management in Erlang)
+* keepalived (used for HA setups in the server)
+* sqitch (database migrations)
+* lua (routing rules in openresty)
