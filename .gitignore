@@ -22,3 +22,11 @@ vendor/ruby
 config/settings.local.yml
 config/settings/*.local.yml
 config/environments/*.local.yml# RailsConfig ignores
+
+*.dev_vm_backup
+
+vendor/bundle/
+
+public/id/
+
+.ruby-version

@@ -1,7 +1,8 @@
 require 'mixlib/authentication/signatureverification'
 
-class User 
+class User
   extend ActiveModel::Naming
+
   include ActiveModel::AttributeMethods
   include ChefResource
 
@@ -40,12 +41,19 @@ class User
     @email = resource['email']
   end
 
+  def organizations
+    chef.get("users/#{username}/organizations").map do |organizations|
+      organizations['organization']
+    end
+  rescue Net::HTTPServerException
+
+  end
+
   def update_attributes(attrs)
     assign_attributes(attrs) # And then save
   end
 
   class << self
-
     def find(username)
       begin
         new(username: username).get unless username.nil?

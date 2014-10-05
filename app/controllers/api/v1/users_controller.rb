@@ -1,7 +1,7 @@
 module V1
-
   class UsersController < ApplicationController
     doorkeeper_for :all, except: :show
+
     respond_to :json
 
     def show
@@ -16,9 +16,14 @@ module V1
 
     def me
       @user = User.find(doorkeeper_token.resource_owner_id)
+
       respond_with @user
     end
 
-  end
+    def organizations
+      @user = User.find(doorkeeper_token.resource_owner_id)
 
+      respond_with @user.organizations
+    end
+  end
 end

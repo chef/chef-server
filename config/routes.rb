@@ -19,7 +19,9 @@ OcId::Application.routes.draw do
 
     namespace :v1 do
       resources :users, only: :show
+
       get 'me', to: 'users#me'
+      get 'me/organizations', to: 'users#organizations'
     end
   end
 end
