@@ -17,8 +17,8 @@ Chef server.
 
 * [bookshelf](http://github.com/opscode/bookshelf), the S3-compatible engine for storing cookbook data
 * [erchef](http://github.com/opscode/erchef), the main Chef server core
-* [oc_bifrost](http://github.com/opscode/oc_bifrost), the authentication service
-* [oc_id](http://github.com/opscode/oc_id), the OAuth2 provider for extensions like Analytics or Supermarket
+* [bifrost](http://github.com/opscode/oc_bifrost), the authorization service
+* [oc-id](http://github.com/opscode/oc-id), the OAuth2 provider for extensions like Analytics or Supermarket
 
 ### Less-Commonly-Modified Components
 
