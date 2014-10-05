@@ -1,9 +1,14 @@
 oc-id
 =====
 
-Chef Identity: An [OAuth 2](http://oauth.net/2/) provider for Chef.
+Chef identity: An [OAuth 2](http://oauth.net/2/) provider for Chef.
+
 
 ## System Requirements
+
+Chef identity is included with Chef server ≥ 12 and Enterprise Chef server ≥
+11.2. If you're running either of these you already have it running at
+https://your-chef-server-url/id.
 
 To run this app you'll need:
 
@@ -16,6 +21,10 @@ To run this app you'll need:
   /etc/opscode/webui_priv.pem on the Chef server)
 
 ## Configuration
+
+For instructions on configuring the Chef identity that is included with Chef
+server, see the
+[chef-server.rb Settings documentation](https://docs.getchef.com/config_rb_server.html#oc-id).
 
 [RailsConfig](https://github.com/railsconfig/rails_config) is used for
 application configuration. The defaults are in config/settings.yml. You can
@@ -81,12 +90,13 @@ To run the server:
 In a real production environment you're going to want to run this behind a load
 balancer with SSL, configure process monitoring, logging, etc.
 
-We currently do not provide any public cookbooks or other configuration for
-this.
+A [community cookbook for Chef identity](https://supermarket.getchef.com/cookbooks/oc-id)
+is available on Supermarket. It is not created by or maintained by Chef
+Software, but should work for running the app.
 
 ## License
 
-Chef Identity
+Chef identity
 
 |                      |                                          |
 |:---------------------|:-----------------------------------------|
