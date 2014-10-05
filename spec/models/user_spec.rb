@@ -13,37 +13,41 @@ describe User do
       described_class.from_signed_request(request)
     end
 
-    let(:request) { double }
-
     context 'when userid header is missing' do
-      xit 'is nil' do
-        expect(from_signed_request).to be_nil
-      end
+      let(:request) { double(:headers => {}) }
+
+      it { eq nil }
     end
 
     context 'when userid header is present' do
       let(:request) { double(:headers => { 'x-ops-userid' => 'testuser' }) }
+      let(:authenticated?) { false }
+      let(:verifier) { double(:authenticate_request => authenticated?) }
+      let(:user) { double(:public_key => double) }
 
-      context 'when signature is verified' do
-        context 'when the signature is authenticated' do
-          let(:user) { double(:username => 'testuser') }
-
-          xit 'is the user object' do
-            expect(from_signed_request).to eq(user)
-          end
-        end
-
-        context 'when the signature is not authenticated' do
-          xit 'is nil' do
-            expect(from_signed_request).to be_nil
-          end
-        end
+      before :each do
+        allow(Mixlib::Authentication::SignatureVerification).to receive(:new)
+          .and_return(verifier)
+        allow(OpenSSL::PKey::RSA).to receive(:new).and_return(double)
+        allow(User).to receive(:find).and_return(user)
       end
 
-      context 'when signature is not verified' do
-        xit 'is nil' do
-          expect(from_signed_request).to be_nil
-        end
+      context 'when the user does not exist' do
+        let(:user) { nil }
+
+        it { eq nil }
+      end
+
+      context 'when the signature is authenticated' do
+        let(:authenticated?) { true }
+
+        it { eq user }
+      end
+
+      context 'when the signature is not authenticated' do
+        let(:authenticated?) { false }
+
+        it { eq nil }
       end
     end
   end

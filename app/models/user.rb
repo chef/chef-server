@@ -69,13 +69,13 @@ class User
     def from_signed_request(request)
       user = User.find(request.headers['x-ops-userid'])
       if user
-        #verifier = Mixlib::Authentication::SignatureVerification.new(request)
-        #public_key = OpenSSL::PKey::RSA.new user.public_key
-        #if verifier.authenticate_request(public_key)
-          #user
-        #else
-          #nil
-        #end
+        verifier = Mixlib::Authentication::SignatureVerification.new(request)
+        public_key = OpenSSL::PKey::RSA.new user.public_key
+        if verifier.authenticate_request(public_key)
+          user
+        else
+          nil
+        end
       else
         nil
       end
