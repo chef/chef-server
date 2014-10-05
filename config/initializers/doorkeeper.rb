@@ -15,9 +15,19 @@ Doorkeeper.configure do
     user
   end
 
+  # When requesting /id/oauth/token?grant_type=password with a signed request,
+  # use the Resource Owner Password Credentials Grant flow
+  # (http://oauthlib.readthedocs.org/en/latest/oauth2/grants/password.html)
+  #
+  # oc-id supports either a username and password, passed in as parameters
+  # or a standard Chef signed message, using a user certificate
   resource_owner_from_credentials do |routes|
-    User.authenticate(params[:username], params[:password])
-  end 
+    if request.headers['x-ops-userid'].nil?
+      User.authenticate(params[:username], params[:password])
+    else
+      User.from_signed_request(request)
+    end
+  end
 
   # If you want to restrict access to the web interface for adding oauth authorized applications, you need to declare the block below.
   admin_authenticator do
@@ -26,11 +36,6 @@ Doorkeeper.configure do
     # Admin.find_by_id(session[:admin_id]) || redirect_to(new_admin_session_url)
     Settings.doorkeeper.administrators.include?(session[:username]) || (render template: 'errors/404', status: :not_found)
   end
-
-  # When requesting /id/oauth/token?grant_type=password with a signed request,
-  # use the Resource Owner Password Credentials Grant flow
-  # (http://oauthlib.readthedocs.org/en/latest/oauth2/grants/password.html)
-  resource_owner_from_credentials { User.from_signed_request(request) }
 
   # Authorization Code expiration time (default 10 minutes).
   # authorization_code_expires_in 10.minutes
