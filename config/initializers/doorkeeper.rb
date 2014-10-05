@@ -11,13 +11,23 @@ Doorkeeper.configure do
       session[:return_to] = request.fullpath
       redirect_to(signin_path)
     end
-    
+
     user
   end
 
+  # When requesting /id/oauth/token?grant_type=password with a signed request,
+  # use the Resource Owner Password Credentials Grant flow
+  # (http://oauthlib.readthedocs.org/en/latest/oauth2/grants/password.html)
+  #
+  # oc-id supports either a username and password, passed in as parameters
+  # or a standard Chef signed message, using a user certificate
   resource_owner_from_credentials do |routes|
-    User.authenticate(params[:username], params[:password])
-  end 
+    if request.headers['x-ops-userid'].nil?
+      User.authenticate(params[:username], params[:password])
+    else
+      User.from_signed_request(request)
+    end
+  end
 
   # If you want to restrict access to the web interface for adding oauth authorized applications, you need to declare the block below.
   admin_authenticator do
