@@ -8,4 +8,42 @@ code is spread out across several repositories.
 The purpose of this repository is to server as a central place to report
 Chef server issues and to outline how to contribute to the Chef Server.
 
+## Components of the Chef Server
 
+The following list links to all the individual projects that make up the
+Chef server.
+
+### Commonly-Modified Components
+
+* [bookshelf](http://github.com/opscode/bookshelf), the S3-compatible engine for storing cookbook data
+* [erchef](http://github.com/opscode/erchef), the main Chef server core
+* [oc_bifrost](http://github.com/opscode/oc_bifrost), the authentication service
+* [oc_id](http://github.com/opscode/oc_id), the OAuth2 provider for extensions like Analytics or Supermarket
+
+### Less-Commonly-Modified Components
+
+* [chef-mover](http://github.com/opscode/chef-mover), the migration orchestrator from CouchDB to PostgreSQL (used only in upgrades)
+* [chef-pedant](http://github.com/opscode/oc-chef-pedant), the test suite for Chef Server
+* [knife-ec-backup](http://github.com/opscode/knife-ec-backup), used to ease migrations from Open Source Chef Server 11 (and below)
+* [knife-opc](http://github.com/opscode/knife-opc), used to provide administrative command-line control to the Chef Server from the console
+
+### Packaging:
+
+* [opscode-omnibus](http://github.com/opscode/opscode-omnibus): [Omnibus](http://github.com/opscode/omnibus) project definition for building the Chef server package.
+
+## Major Technologies used in Chef Server
+
+* Erlang
+* PostgreSQL
+* RabbitMQ
+* Redis
+* Solr4
+* Nginx (openresty with openresty-lpeg)
+* Runit for service supervision
+
+If you're looking to contribute to the Chef server, familiarity with the following related tools is also beneficial.
+
+* rebar
+* keepalived
+* sqitch
+* lua
