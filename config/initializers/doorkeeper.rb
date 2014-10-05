@@ -30,9 +30,7 @@ Doorkeeper.configure do
   # When requesting /id/oauth/token?grant_type=password with a signed request,
   # use the Resource Owner Password Credentials Grant flow
   # (http://oauthlib.readthedocs.org/en/latest/oauth2/grants/password.html)
-  resource_owner_from_credentials do
-    User.authenticate_from_signed_request(request)
-  end
+  resource_owner_from_credentials { User.from_signed_request(request) }
 
   # Authorization Code expiration time (default 10 minutes).
   # authorization_code_expires_in 10.minutes

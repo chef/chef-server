@@ -66,7 +66,7 @@ class User
     # request and the X-Ops-UserId header.
     #
     # Returns the user if it is valid, or nil if not.
-    def authenticate_from_signed_request(request)
+    def from_signed_request(request)
       user = User.find(request.headers['x-ops-userid'])
       if user
         #verifier = Mixlib::Authentication::SignatureVerification.new(request)
