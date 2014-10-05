@@ -21,7 +21,11 @@
 ### oc_erchef 0.27.3
 * Fix meck dependency locking issue.
 
-## oc_id 0.4.1
+## oc_id 0.4.2
+* Add support for Chef signed headers in Resource Owner Password
+  Credentials flow
+* Add new endpoint (/v1/me/organizations) to get the list of
+  organizations for the user represented by a Bearer token
 * Update doorkeeper gem to 1.4.0
 * Add support for Resource Owner Password Credentials flow
 
