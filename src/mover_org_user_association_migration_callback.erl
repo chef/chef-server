@@ -29,11 +29,19 @@ migration_start_worker_args(Object, AcctInfo) ->
 migration_action(Object, AcctInfo) ->
     {UserGuid, OrgGuid, LastUpdatedBy, UserBody} = Object,
     try
-	moser_org_converter:insert_org_user_association(UserGuid, OrgGuid, LastUpdatedBy, UserBody)
+        moser_org_converter:insert_org_user_association(UserGuid, OrgGuid, LastUpdatedBy, UserBody)
     catch
-	Exception:Reason ->
-	    lager:error("org_user_association_failure org_id: ~p user_id: ~p Exception: ~p Reason: ~p Stacktrace: ~p ~n",
-			[OrgGuid, UserGuid, Exception, Reason, erlang:get_stacktrace()])
+        Exception:Reason ->
+            % only warn when foreign_key is thrown, this just means either the user_id or org_id cannot be found,
+            % meaning this is an invite for a user or org that no longer exists, so we can safely ignore it.
+            case Reason of
+                {chef_sql,{{foreign_key, _}, _, _}} ->
+                    lager:warning("org_user_association_warning Foreign key constraint missing, meaning either the org: ~p or user: ~p no longer exists. Ignoring this association as it is no longer valid. Exception Info: ~p ~n",
+                                  [OrgGuid, UserGuid, Reason]);
+                _ ->
+                    lager:error("org_user_association_failure org_id: ~p user_id: ~p Exception: ~p Reason: ~p Stacktrace: ~p ~n",
+                                [OrgGuid, UserGuid, Exception, Reason, erlang:get_stacktrace()])
+            end
     end,
     ok.
 
