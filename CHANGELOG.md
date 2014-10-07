@@ -1,6 +1,6 @@
 # Enterprise Chef Changelog
 
-## 12.0.0.rc5
+## 12.0.0.rc5 (unreleased)
 
 ### opscode-omnibus
 * properly configure ldap under erchef, and add some safeguards
@@ -24,6 +24,10 @@
 ## oc_id 0.4.1
 * Update doorkeeper gem to 1.4.0
 * Add support for Resource Owner Password Credentials flow
+
+### opscode-chef-mover 2.2.15
+* Clean up error handling for org user associations and invites migrations
+* Fix backwards compatibility issues with oc_chef_authz intergration
 
 ### rest server API
 * removed check for maximum client version (only checks for minimum, i.e., <10)
