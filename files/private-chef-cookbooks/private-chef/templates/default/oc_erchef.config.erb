@@ -180,6 +180,7 @@
            {db_pass, "<%= node['private_chef']['postgresql']['sql_password'] %>"},
            {db_name, "opscode_chef" },
            {idle_check, 10000},
+           {pooler_timeout, 2000},
            {prepared_statements, {oc_chef_sql, statements, [pgsql]}},
            {column_transforms,
                               [{<<"created_at">>,
@@ -206,11 +207,12 @@
            {pools, [[{name, sqerl},
                      {max_count, <%= @db_pool_size %>},
                      {init_count, <%= @db_pool_size %>},
-                     {start_mfa, {sqerl_client, start_link, []}}],
+                     {start_mfa, {sqerl_client, start_link, []},
+                     {queue_max, <%= @db_pool_queue_max %>}],
                     [{name, chef_depsolver},
                      {max_count, <%= @depsolver_worker_count %>},
                      {init_count, <%= @depsolver_worker_count %>},
-                     {start_mfa, {chef_depsolver_worker, start_link, []}}]]},
+                     {start_mfa, {chef_depsolver_worker, start_link, []}}]]}
            {metrics_module, folsom_metrics}
           ]}
 
