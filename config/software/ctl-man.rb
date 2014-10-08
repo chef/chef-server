@@ -1,6 +1,6 @@
 # Copyright:: Copyright (c) 2014 Chef, Inc.
 # License:: Apache License, Version 2.0
-# Author:: Tyler Cloke <tyler@getchef.com>
+# Author:: Douglas Triggs <doug@getchef.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,17 +15,16 @@
 # limitations under the License.
 #
 
-# Make sure the man directories exist (they should but best not to assume).
-%w[ /man /man/man8 ].each do |path|
-  directory "#{node['private_chef']['user']['home']}/#{path}" do
-    owner "root"
-    group "root"
-    action :create
-  end
-end
+name "ctl-man"
+default_version "0.1.0"
 
-remote_file "#{node['private_chef']['user']['home']}/man/man8/chef-server-ctl.8" do
-  source "https://github.com/opscode/chef-docs/raw/master/misc/chef-server-ctl.8"
-  group "root"
-  owner "root"
+dependency "private-chef-ctl"
+
+source :git => "git@github.com:opscode/chef-docs"
+
+relative_path "chef-docs"
+
+build do
+  command "mkdir -p #{install_dir}/embedded/man/man8"
+  command "cp misc/chef-server-ctl.8 #{install_dir}/embedded/man/man8"
 end
