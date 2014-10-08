@@ -74,7 +74,7 @@ prune_%:
 	ls -1t pkg/*.$*.metadata.json | tail -n+2 | xargs rm -v
 
 
-# Bundle install and build private-chef
+# Bundle install and build chef-server
 dev-build: clear_pkg_cache prune
 	cd .kitchen/kitchen-vagrant/default-$(DEV_PLATFORM) && \
-	    vagrant ssh --command "cd opscode-omnibus && bundle install && time ./bin/omnibus build private-chef"
+	    vagrant ssh --command "cd opscode-omnibus && bundle install && time ./bin/omnibus build chef-server"
