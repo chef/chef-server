@@ -11,6 +11,15 @@
 * Add man page for chef-server-ctl.
 * Correct gather-logs to point to chef-server.rb
 
+### oc_erchef 0.27.7
+* Improve error handling in org creation and deletion.
+
+### oc_erchef 0.27.6
+* Fixed pooler bug with regard to timed out pool member starts
+
+### oc_erchef 0.27.5
+* Add org info to actions
+
 ### oc_erchef 0.27.4
 * ldap start_tls support
 * ldap simple_tls support
