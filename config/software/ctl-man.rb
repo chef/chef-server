@@ -16,7 +16,7 @@
 #
 
 name "ctl-man"
-default_version "0.1.0"
+default_version "master"
 
 dependency "private-chef-ctl"
 
