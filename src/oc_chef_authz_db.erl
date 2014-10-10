@@ -220,7 +220,7 @@ fetch_container(#oc_chef_authz_context{otto_connection = Server,
     %% Containers withm no org are global containers -
     %% global containers are related to organizations, so we'll trigger
     %% whether the global containersa are in sql depending on where the orgs are
-    case xdarklaunch_req:is_enabled(<<"coucndb_organizations">>, Darklaunch) of
+    case xdarklaunch_req:is_enabled(<<"couchdb_organizations">>, Darklaunch) of
         true ->
             fetch_container_couchdb(Server, undefined, ContainerName);
         false ->
