@@ -52,18 +52,11 @@
           %% opscode-chef-mover, FWIW.
           {error_logger_hwm, 1000}
         ]},
- {oc_chef_action, [
-              {actions_host, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
-              {actions_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
-              {actions_user, <<"<%= node['private_chef']['rabbitmq']['user'] %>">>},
-              {actions_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
-              {actions_vhost, <<"<%= node['private_chef']['rabbitmq']['actions_vhost'] %>">>},
-              {actions_exchange, <<"<%= node['private_chef']['rabbitmq']['actions_exchange'] %>">>},
-              {actions_fqdn, <<" <%= node['private_chef']['lb']['api_fqdn'] %> ">>}
-             ]},
  {oc_chef_wm, [
               {api_version, "<%= node['private_chef']['api_version'] %>"},
               {server_flavor, "<%= node['private_chef']['flavor'] %>"},
+
+              {default_orgname, <%= node['private_chef']['default_orgname'] ? "<<\"#{node['private_chef']['default_orgname']}\">>" : "undefined" %> },
 
               {ip, "<%= @listen %>"},
               {port, <%= @port %>},
@@ -73,15 +66,29 @@
               %% how many nodes are deserialized at a time in
               %% preparing a response.
               {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
-	      {superusers, [<<"pivotal">>]},
+	          {superusers, [<<"pivotal">>]},
               %% metrics config
               {root_metric_key, "<%= @root_metric_key %>"},
 
               {authz_timeout, <%= node['private_chef']['opscode-erchef']['authz_timeout'] %>},
               {authz_fanout, <%= node['private_chef']['opscode-erchef']['authz_fanout'] %>},
 
-              {enable_actions, <%= node['private_chef']['dark_launch']['actions'] %>}
-             ]},
+              {enable_actions, <%= node['private_chef']['dark_launch']['actions'] %>},
+              {ldap, []},
+              %% these are used for reporting on license status on the
+              %% license endpoint; it would have been nice to give these
+              %% their own logical section, but erlang requires these to
+              %% be part of a loaded application
+              {node_license, <%= node['private_chef']['license']['nodes'] %>},
+              {upgrade_url, <<"<%= node['private_chef']['license']['upgrade_url'] %>">>},
+              {actions_host, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
+              {actions_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
+              {actions_user, <<"<%= node['private_chef']['rabbitmq']['user'] %>">>},
+              {actions_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
+              {actions_vhost, <<"<%= node['private_chef']['rabbitmq']['actions_vhost'] %>">>},
+              {actions_exchange, <<"<%= node['private_chef']['rabbitmq']['actions_exchange'] %>">>},
+              {actions_fqdn, <<"<%= node['private_chef']['lb']['api_fqdn'] %>">>}
+            ]},
   {chef_wm, [
              {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},
              {server_version, "<%= node['private_chef']['version'] %>"},
@@ -126,7 +133,6 @@
                 {solr_url, "http://<%= @helper.vip_for_uri('opscode-solr') %>:<%= node['private_chef']['opscode-solr']['port'] %>/solr"}
                ]},
   {chef_objects, [
-                  {certificate_root_url, "http://<%= @helper.vip_for_uri('opscode-certificate') %>:<%= node['private_chef']['opscode-certificate']['port'] %>/certificates"},
                   {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
                   {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
                   {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= @helper.vip_for_uri('bookshelf') %>"},
