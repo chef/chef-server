@@ -53,6 +53,10 @@
 -define(CHECKSUM_SIZE_BYTES, 16).
 -define(TOTAL_HEADER_SIZE_BYTES, ?MAGIC_NUMBER_SIZE_BYTES + ?CHECKSUM_SIZE_BYTES).
 
+%% The bottom level directory shouldn't be cleaned up; there are so few we might as well save the
+%% work of deleting them when probabilistic ally they will just be recreated a moment later.
+-define(DIRECTORY_CLEANUP_DEPTH, 3).
+
 %% Matches file names without "._bkwbuf_" in the name
 %%-define(DISCARD_WRITE_BUFS, "^(?:.(?<!\\._bkwbuf_))*$").
 -define(WRITE_BUFS, ". [0-9][0-9][0-9]_bkwbuf$").
@@ -115,11 +119,52 @@ entry_delete(FullPath) ->
     case file:delete(FullPath) of
         ok ->
             ?LOG_DEBUG("deleted bucket entry: ~p", [FullPath]),
-            true;
+            entry_dir_delete(FullPath);
         Error ->
             error_logger:error_msg("Error deleting bucket entry ~p: ~p~n", [FullPath, Error]),
             false
     end.
+
+%%
+%% We potentially create a directory for every file we store in bookshelf. This can grow pretty
+%% large (4 levels deep, with 256 entries per level, so 2^32 + 2^24 + 2^16 + 2^8 > 4 billion). If we
+%% never delete them we will blow out the inode table, and consume considerable disk space. For
+%% example ext4 will most likely allocate a full block (default 4KiB) for each directory we create
+%% due to the long file names for the files we store
+%% (https://ext4.wiki.kernel.org/index.php/Ext4_Disk_Layout)
+%%
+%% The depth parameter controls how aggressive we are. A good value would be 3, leaving the upper
+%% level intact. If we were willing to sacrifice an extra 64k directories, '2' could be chosen
+%% instead for some minor performance gain.
+entry_dir_delete(FullPath) -> entry_dir_delete(FullPath, ?DIRECTORY_CLEANUP_DEPTH).
+
+entry_dir_delete(FullPath, 0) ->
+    true;
+entry_dir_delete(FullPath, Depth) ->
+    DirName = filename:dirname(FullPath),
+    %% Speculatively delete the directory, expecting it to fail if it's not empty.
+    case file:del_dir(DirName) of
+        true ->
+            %% Succeeded, let's go try the next directory up.
+            ?LOG_DEBUG("deleted directory entry: ~p", [DirName]),
+            entry_dir_delete(DirName, Depth-1);
+        {error, eexist} ->
+            %% Not empty, which can reasonably happen, so just quit
+            true;
+        {error, enoent} ->
+            %% We might have deleted this on another request and racily deleted.
+            true;
+        {error, Error} ->
+            error_logger:error_msg("Error deleting directory entry ~p: ~p~n", [DirName, Error]),
+            false
+    end.
+
+-spec entry_exists(binary(), binary()) -> boolean().
+entry_exists(Bucket, Path) ->
+    FullPath = bksw_io_names:entry_path(Bucket, Path),
+    Ans = filelib:is_regular(FullPath),
+    ?LOG_DEBUG("entry_exists ~p ~p ~p", [Bucket, Path, Ans]),
+    Ans.
 
 -spec open_for_write(binary(), binary()) -> {ok, #entryref{}} | {error, term()}.
 open_for_write(Bucket, Entry) ->
