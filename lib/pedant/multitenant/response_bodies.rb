@@ -16,7 +16,7 @@ module Pedant
         let(:multi_tenant_user_not_associated_response) do
           {
             status: 403,
-            body_exact: { "error" => Pedant::Config.ruby_org_assoc? ? [multi_tenant_user_not_associated_text] : multi_tenant_user_not_associated_text }
+            body_exact: { "error" => Pedant::Config.ruby_org_assoc? ? multi_tenant_user_not_associated_text : [multi_tenant_user_not_associated_text] }
           }
         end
 
