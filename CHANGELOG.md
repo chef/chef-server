@@ -136,6 +136,7 @@
 ### opscode-chef-mover 2.2.14
 * Organizations, user-org association, and user-org invite migrations from couchdb to SQL
 * Migration of global containers and global groups from couchdb to SQL
+* Backwards incompatible API change: Group creation (POST) ignores users and clients
 * Containers and groups migration from couchDB to postgreSQL
 * Bcrypt user migrations
 * Solr4 migration
