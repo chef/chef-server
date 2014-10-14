@@ -46,6 +46,8 @@ class OpenSourceChef11Upgrade
 
     set_default_chef12_config(org_name)
 
+    set_server_state_for_upload
+
     upload_transformed_data(chef12_data_dir)
 
     adjust_permissions()
@@ -54,12 +56,22 @@ class OpenSourceChef11Upgrade
   end
 
   def download_chef11_data(chef11_data_dir, key_file)
+    download_chef11_data_setup unless @options.skip_setup
+    download_chef11_data_download(chef11_data_dir, key_file) unless @options.skip_download
+    download_chef11_data_cleanup(chef11_data_dir) unless @options.skip_cleanup
+  end
 
+  def download_chef11_data_setup
     stop_chef12
 
     fix_rabbit_wait_script
 
     start_chef11
+  end
+
+  def download_chef11_data_download(chef11_data_dir, key_file)
+
+    wait_for_ready_server("Chef 11")
 
     log "Preparing knife to download data from the open source Chef 11 server"
 
@@ -72,11 +84,14 @@ class OpenSourceChef11Upgrade
     create_chef11_key_file(key_file)
 
     log "Finished downloading data from the open source Chef 11 server"
+  end
 
+  def download_chef11_data_cleanup(chef11_data_dir)
     stop_chef11
 
     log "Open source Chef 11 server data downloaded to #{chef11_data_dir}"
   end
+
 
   def transform_chef11_data(chef11_data_dir, key_file, chef12_data_dir, org_name, org_full_name)
 
@@ -124,20 +139,26 @@ class OpenSourceChef11Upgrade
     log "Data transformed and saved to #{chef12_data_dir}"
   end
 
+  def set_server_state_for_upload
+      log "Configuring the Chef 12 server for use"
+
+      reconfigure(false)
+
+      start_chef12
+
+      log "Chef 12 server started"
+  end
+
   def upload_transformed_data(chef12_data_dir)
-    log "Configuring the Chef 12 server for use"
+      wait_for_ready_server("Chef 12")
 
-    reconfigure(false)
+      write_knife_ec_backup_config
 
-    start_chef12
+      log "Uploading transformed open source Chef 11 server data to Chef 12 server"
 
-    write_knife_ec_backup_config
+      run_knife_ec_restore(chef12_data_dir)
 
-    log "Uploading transformed open source Chef 11 server data to Chef 12 server"
-
-    run_knife_ec_restore(chef12_data_dir)
-
-    log "Open source Chef 11 server data successfully uploaded to Chef 12 server"
+      log "Open source Chef 11 server data successfully uploaded to Chef 12 server"
   end
 
   def determine_chef11_data_dir
@@ -207,7 +228,7 @@ EOF
     file_open("/etc/opscode/chef-server.rb", "a"){ |file| file.write(content) }
 
     # This is applied with the next reconfigure, which in a normal
-    # run will happen during upload_transformed_data
+    # run will happen during set_server_state_for_upload
     log "Applying default_orgname with orgname #{org_name}."
   end
 
