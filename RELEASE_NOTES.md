@@ -16,6 +16,7 @@ The following items are new since Enterprise Chef 11.2.1 and/or are changes from
 * [oc_erchef]
   * All endpoints that formerly were in opscode-account are now in erchef and the data
     resides in SQL. This includes containers, groups, organizations, org associations and invites.
+    * The API around group creation (POST) now ignores users and clients
   * Key generation is now in erchef.
   * Server flavor returned from REST calls is now "sc"
 
