@@ -55,6 +55,7 @@ log_action(_Req, #base_state{resource_state = ResourceState}) when
     ok;
 log_action(Req, #base_state{resource_state = ResourceState,
                             resource_mod = ResourceMod} = State) when
+        is_record(ResourceState, acl_state);
         is_record(ResourceState, association_state);
         is_record(ResourceState, client_state);
         is_record(ResourceState, cookbook_state);
@@ -163,6 +164,20 @@ maybe_add_data(Msg, undefined) ->
 maybe_add_data(Msg, FullActionPayload) ->
     ej:set({<<"data">>}, Msg, FullActionPayload).
 
+%%Example of a permission object
+%entity_name: grant,
+%entity_type: permission,
+%parent_name: pedant_testorg_private-chef_1072,
+%parent_type: organization
+
+extract_entity_info(Req, #acl_state{acl_data = {[{AceName, _}]} = FullActionPayload,
+                                    type = ParentType}) ->
+    ParentName = req_or_data_name(chef_wm_util:object_name(ParentType, Req), FullActionPayload),
+    {FullActionPayload, <<"permission">>, [{<<"entity_type">>, <<"permission">>},
+                                           {<<"entity_name">>, AceName},
+                                           {<<"parent_name">>, ParentName},
+                                           {<<"parent_type">>, parent_type(ParentType)}
+                                          ]};
 %%TODO Put the right data into the state for the association related endpoints
 %% Currently #chef_user.username is populated for Accept, Dissociate and Invite
 %% #org_user_invite.user_name is populated for Reject
@@ -243,6 +258,12 @@ get_corrected_name(undefined, NameKey, FullActionPayload) ->
     ej:get({NameKey}, FullActionPayload);
 get_corrected_name(Name, _NameKey, _FullActionPayload) ->
     Name.
+
+-spec parent_type(ParentType :: atom()) -> binary().
+parent_type(data_bag) ->
+  <<"bag">>;
+parent_type(ParentType) ->
+  list_to_binary(atom_to_list(ParentType)).
 
 -spec requestor_name(Requestor:: #chef_client{} | #chef_user{}) -> binary().
 requestor_name(#chef_client{name = Name}) ->
