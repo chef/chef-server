@@ -27,10 +27,10 @@ when 'rhel'
   yum_repository 'chef-stable' do
     description 'Chef Stable Repo'
     baseurl "https://packagecloud.io/chef/stable/el/#{major_version}/$basearch"
-    gpgkey 'https://packagecloud.io/gpg.key'
+    gpgkey 'https://downloads.getchef.com/chef.gpg.key'
     sslverify true
     sslcacert '/etc/pki/tls/certs/ca-bundle.crt'
-    gpgcheck false
+    gpgcheck true
     action :create
   end
 
