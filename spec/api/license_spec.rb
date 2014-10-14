@@ -20,7 +20,7 @@ describe 'license' do
       "upgrade_url" => /^http\:\/\.*/
     }}
 
-  if (Pedant::Config.license_endpoint?)
+  if (Pedant::Config.chef_12?)
     context "GET /license" do
       context "with no nodes" do
 
