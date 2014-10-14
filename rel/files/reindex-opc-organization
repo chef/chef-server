@@ -42,8 +42,7 @@
 %%
 main(Args) ->
     init_network(),
-    Context = make_context(),
-    [Command, OrgInfo] = validate_args(Context, Args),
+    [Command, OrgInfo, Context] = validate_args(Args),
     perform(Command, Context, OrgInfo).
 
 %% @doc Ensure that the arguments are all valid, meaning a recognized action is specified,
@@ -52,20 +51,21 @@ main(Args) ->
 %% proper type conversions performed.
 %%
 %% If the arguments are invalid for any reason, print a message and halt.
-validate_args(_, []) ->
+validate_args([]) ->
     io:format("You didn't specify a command!  Use either 'drop', 'reindex', or 'complete'"),
     halt(1);
-validate_args(_, [Command]) when Command =:= "reindex";
+validate_args([Command]) when Command =:= "reindex";
                               Command =:= "drop";
                               Command =:= "complete" ->
     io:format("Must supply an organization name for this command~n"),
     halt(1);
-validate_args(_Context, [Command]) ->
+validate_args([Command]) ->
     io:format("Unrecognized command '~s'~n", [Command]),
     halt(1);
-validate_args(Context, [Command, OrgName]) when Command =:= "reindex";
+validate_args([Command, OrgName]) when Command =:= "reindex";
                                        Command =:= "drop";
                                        Command =:= "complete" ->
+    Context = make_context(OrgName),
     OrgBin = list_to_binary(OrgName), %% We use binaries around here...
 
     %% Some operations require the organization's ID.  This also serves as a convenient
@@ -74,11 +74,14 @@ validate_args(Context, [Command, OrgName]) when Command =:= "reindex";
         not_found ->
             io:format("Could not find an organization named '~s'~n", [OrgBin]),
             halt(2);
-        OrgId ->
+        OrgId when is_binary(OrgId)->
             %% Everything checks out!  Let's do some reindexing!
-            [list_to_atom(Command), {OrgId, OrgBin}]
+            [list_to_atom(Command), {OrgId, OrgBin}, Context];
+        OtherError ->
+            io:format("Other error occured ~p~n", [OtherError]),
+            halt(3)
     end;
-validate_args(_Context, [Command, _OrgName]) ->
+validate_args([Command, _OrgName]) ->
     io:format("Unrecognized command ~p~n", [Command]),
     halt(1).
 
@@ -97,9 +100,9 @@ perform(complete, Context, OrgInfo) ->
     perform(drop, Context, OrgInfo),
     perform(reindex, Context, OrgInfo).
 
-make_context() ->
+make_context(OrgName) ->
     ReqId = base64:encode(crypto:md5(term_to_binary(make_ref()))),
-    rpc:call(?ERCHEF, chef_db, make_context, [ReqId, no_header]).
+    rpc:call(?ERCHEF, chef_db, make_context, [ReqId, find_dl_headers(OrgName)]).
 
 %% @doc Verify that the given `OrgName' actually corresponds to a real
 %% organization.  Returns the organization's ID if so; 'not_found' otherwise.
@@ -113,3 +116,13 @@ init_network() ->
     net_kernel:start([?SELF, longnames]),
     erlang:set_cookie(node(), ?ERCHEF_COOKIE),
     pong = net_adm:ping(?ERCHEF).
+
+find_dl_headers(OrgNameBin) when is_binary(OrgNameBin) ->
+    find_dl_headers(binary_to_list(OrgNameBin));
+find_dl_headers(OrgName) when is_list(OrgName) ->
+    {ok, "200", _Headers, Body} = rpc:call(?ERCHEF, ibrowse,send_req, ["https://127.0.0.1/_route/organizations/" ++ OrgName, [], get]),
+    Json = rpc:call(?ERCHEF, jiffy, decode, [Body]),
+    SubJson = rpc:call(?ERCHEF, ej, get, [{<<"config">>, <<"merged">>}, Json]),
+    {KVList} = SubJson,
+    Headers = string:join(lists:map(fun({Key, Val}) -> binary_to_list(Key) ++ "=" ++ integer_to_list(Val) end, KVList), ";"),
+    rpc:call(?ERCHEF, xdarklaunch_req,parse_header, [ fun(_) -> Headers end]).
