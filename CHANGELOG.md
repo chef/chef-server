@@ -4,6 +4,11 @@
 ### private-chef-cookbooks
 * [OC-11581] private-chef-ctl test command should return the pedant
   return code
+* Specify ssl protocol version in oc-chef-pedant configuration
+
+### oc-chef-pedant 1.0.29.4
+* Backport of support for specifying SSL version as a configuration
+  option
 
 ### oc_erchef 0.25.14.2
 * Fixes rebuild issues due to missing source dependencies
