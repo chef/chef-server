@@ -284,21 +284,15 @@ default['private_chef']['nginx']['non_ssl_port'] = 80
 default['private_chef']['nginx']['x_forwarded_proto'] = 'https'
 default['private_chef']['nginx']['server_name'] = node['fqdn']
 default['private_chef']['nginx']['url'] = "https://#{node['fqdn']}"
-
-# HIGHEST SECURITY AT ALL COSTS: TLSv1 only to prevent BEAST, can also turn off RC4/MEDIUM/MD5 to really favor security over speed/comptability
-#default['private_chef']['nginx']['ssl_protocols'] = "-ALL +TLSv1"
-#default['private_chef']['nginx']['ssl_ciphers'] = "RC4-SHA:RC4-MD5:RC4:RSA:HIGH:MEDIUM:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK"
-# HIGHEST SECURITY THAT IS COMPTATIBLE AND FAST: SSLv3 for compatibility, but RC4 only to definitively block BEAST
-#default['private_chef']['nginx']['ssl_protocols'] = "-ALL +SSLv3 +TLSv1"
-#default['private_chef']['nginx']['ssl_ciphers'] = "RC4-SHA:RC4-MD5:RC4:RSA:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK"
-# HIGHEST SECURITY ON PAPER: Favors only HIGH security ciphers, still compatible with non-TLSv1 browsers, slow, vulnerable to BEAST on all ciphers over SSLv3
-#default['private_chef']['nginx']['ssl_protocols'] = "-ALL +SSLv3 +TLSv1"
-#default['private_chef']['nginx']['ssl_ciphers'] = "HIGH:!MEDIUM:!LOW:!ADH:!kEDH:!aNULL:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK"
-# FAST/COMPTATIBLE/AUDITABLE: Favors performance and compatibility, default is not vulnerable to BEAST attacks, uses RC4/MEDIUM, allows MD5
-default['private_chef']['nginx']['ssl_protocols'] = "SSLv3 TLSv1"
-default['private_chef']['nginx']['ssl_ciphers'] = "RC4-SHA:RC4-MD5:RC4:RSA:HIGH:MEDIUM:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK"
-# For any of the above:  drop the "RC4-SHA:RC4-MD5:RC4:RSA" prefix and you should wind up favoring AES256 with ECDHE forward security if you want that and don't
-# care about speed.
+# Based off of the Mozilla recommended cipher suite
+# https://wiki.mozilla.org/Security/Server_Side_TLS#Recommended_Ciphersuite
+#
+# SSLV3 was removed because of the poodle attack. (https://www.openssl.org/~bodo/ssl-poodle.pdf)
+#
+# If your infrastructure still has requirements for the vulnerable/venerable SSLV3, you can add
+# "SSLv3" to the below line.
+default['chef_server']['nginx']['ssl_protocols'] = "TLSv1 TLSv1.1 TLSv1.2"
+default['chef_server']['nginx']['ssl_ciphers'] = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:ECDHE-RSA-RC4-SHA:ECDHE-ECDSA-RC4-SHA:AES128:AES256:RC4-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!3DES:!MD5:!PSK"
 default['private_chef']['nginx']['ssl_certificate'] = nil
 default['private_chef']['nginx']['ssl_certificate_key'] = nil
 default['private_chef']['nginx']['ssl_country_name'] = "US"
