@@ -38,6 +38,9 @@ migration_action(Object, AcctInfo) ->
                 {chef_sql,{{foreign_key, _}, _, _}} ->
                     lager:warning("org_user_association_warning Foreign key constraint missing, meaning either the org: ~p or user: ~p no longer exists. Ignoring this association as it is no longer valid. Exception Info: ~p ~n",
                                   [OrgGuid, UserGuid, Reason]);
+                {chef_sql,{{conflict, _}, _, _}} ->
+                    lager:warning("org_user_association_warning Association already exists for org: ~p and user: ~p. Can safely ignore duplicate association. Exception Info: ~p ~n",
+                                  [OrgGuid, UserGuid, Reason]);
                 _ ->
                     lager:error("org_user_association_failure org_id: ~p user_id: ~p Exception: ~p Reason: ~p Stacktrace: ~p ~n",
                                 [OrgGuid, UserGuid, Exception, Reason, erlang:get_stacktrace()])
