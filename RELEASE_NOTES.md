@@ -3,6 +3,7 @@
 ## 1.4.14 (2014-09-17)
 
 ### Security Fixes
+* [opscode-omnibus] Drop SSLv3 support to avoid the POODLE vulnerability
 * [opscode-omnibus] Ensure contents of install dir (/opt/opscode) are owned by root.
 
 ## 1.4.13 (2014-06-26)
