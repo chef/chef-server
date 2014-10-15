@@ -59,6 +59,9 @@
 * Any service (even hidden ones) can still be status checked via `chef-server-ctl status <service>`.
 * opscode-chef-mover was added as a hidden service.
 
+### oc-chef-pedant 1.0.60
+* add support for ssl version configuration
+
 ### oc-chef-pedant 1.0.59
 * Fix rspec deprecations
 * Remove test of curl
@@ -67,6 +70,7 @@
 
 ### opscode-omnibus
 * Ensure contents of install dir (`/opt/opscode`) are owned by root.
+* Configure oc-chef-pedant ssl version to match nginx
 
 ## 12.0.0
 
