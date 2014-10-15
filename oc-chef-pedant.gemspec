@@ -1,13 +1,13 @@
 Gem::Specification.new do |s|
   s.name          = 'oc-chef-pedant'
-  s.version       = '1.0.29.3'
-  s.date          = '2014-08-07'
+  s.version       = '1.0.29.4'
+  s.date          = '2014-10-15'
   s.summary       = "Opscode Private Chef API Testing Framework"
-  s.authors       = ["Opscode Software Engineering"]
-  s.email         = 'dev@opscode.com'
+  s.authors       = ["Chef Software Engineering"]
+  s.email         = 'dev@getchef.com'
   s.require_paths = ['lib', 'spec']
   s.files         = Dir['lib/**/*.rb'] + Dir['spec/**/*_spec.rb']
-  s.homepage      = 'http://opscode.com'
+  s.homepage      = 'http://getchef.com'
 
   s.bindir        = 'bin'
   s.executables   = ['oc-chef-pedant']
