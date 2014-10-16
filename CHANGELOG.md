@@ -130,9 +130,6 @@
 * [OC-11382] keepalived restart interferes with upgrades
 * [OC-8881] private-chef-ctl password does not work
 
-### configurable postgresql unix user
-* Update gather-logs and migration scripts to honor postsgresql['username']
-
 ## 11.1.6 (2014-06-05)
 
 ### openssl 1.0.1h

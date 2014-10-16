@@ -222,7 +222,6 @@ end
 
 include_recipe "private-chef::actions" if darklaunch_values["actions"]
 
-include_recipe "private-chef::private-chef-sh.rb"
 include_recipe "private-chef::orgmapper"
 include_recipe "private-chef::oc-chef-pedant"
 include_recipe "private-chef::log_cleanup"
