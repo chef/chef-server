@@ -1,4 +1,10 @@
 # Enterprise Chef Changelog
+## 1.4.15
+
+### openssl - 1.0.1j
+- SRTP Memory Leak (CVE-2014-3513)
+- Session Ticket Memory Leak (CVE-2014-3567)
+- Build option no-ssl3 is incomplete (CVE-2014-3568)
 
 ## 1.4.14 (2014-09-17)
 
