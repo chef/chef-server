@@ -5,6 +5,7 @@
 * [OC-11581] private-chef-ctl test command should return the pedant
   return code
 * Specify ssl protocol version in oc-chef-pedant configuration
+* remove sslv3  support from default nginx configuration, and update cipher list
 
 ### oc-chef-pedant 1.0.29.4
 * Backport of support for specifying SSL version as a configuration
