@@ -1,6 +1,7 @@
 # Enterprise Chef Changelog
 
 ## 11.2.3 (unreleased)
+
 ### private-chef-cookbooks
 * [OC-11581] private-chef-ctl test command should return the pedant
   return code
@@ -13,6 +14,10 @@
 
 ### oc_erchef 0.25.14.2
 * Fixes rebuild issues due to missing source dependencies
+
+### opscode-account 1.51.1
+* Ensure opscode-account REST calls into load balancer use TLSv1 instead of
+  the default SSLv3
 
 ### opscode-chef-mover 1.1.3.1
 * Fixes rebuild issues due to missing source dependencies
