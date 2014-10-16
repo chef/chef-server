@@ -1,5 +1,12 @@
 # Enterprise Chef Release Notes
 
+## 1.4.15
+
+### Security Fixes
+
+ * [openssl] openssl has been updated to 1.0.1j to address
+   CVE-2014-3513, CVE-2014-3567, and CVE-2014-3568
+
 ## 1.4.14 (2014-09-17)
 
 ### Security Fixes
