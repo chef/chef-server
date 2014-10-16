@@ -8,6 +8,11 @@ The following items are the set of bug fixes that have been applied since Enterp
 
 * [opscode-omnibus] private-chef-ctl test command should provide pedant return code.
 
+### Security Fixes
+
+ * [openssl] openssl has been updated to 1.0.1j to address
+   CVE-2014-3513, CVE-2014-3567, and CVE-2014-3568
+
 ## 11.2.2 (2014-09-17)
 
 ### Security Fixes
