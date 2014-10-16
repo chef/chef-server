@@ -23,6 +23,19 @@ end
 pedant_config = File.join(pedant_etc_dir, "pedant_config.rb")
 helper = OmnibusHelper.new(node)
 
+
+# Snag the first supported protocol version by our ruby installation
+ssl_protocols = node['private_chef']['nginx']['ssl_protocols']
+supported_versions = OpenSSL::SSL::SSLContext::METHODS
+allowed_versions = ssl_protocols.split(/ /).select do |proto|
+  supported_versions.include? proto.gsub(".", "_").to_sym
+end
+
+# In a healthy installation, we should be able to count on
+# at least one shared protocol version. Leaving failure unhandled here,
+# since it means that a pedant run is not possible.
+ssl_version = allowed_versions.first.gsub(".", "_").to_sym
+
 template pedant_config do
   owner "root"
   group "root"
@@ -31,6 +44,7 @@ template pedant_config do
     :api_url  => node['private_chef']['nginx']['url'],
     :solr_url => "http://#{helper.vip_for_uri('opscode-solr')}:#{node['private_chef']['opscode-solr']['port']}",
     :opscode_account_internal_url => node['private_chef']['lb_internal']['vip'],
-    :opscode_account_internal_port => node['private_chef']['lb_internal']['account_port']
+    :opscode_account_internal_port => node['private_chef']['lb_internal']['account_port'],
+    :ssl_version =>  ssl_version
   }.merge(node['private_chef']['oc-chef-pedant'].to_hash))
 end

@@ -70,6 +70,10 @@ maximum_search_time 65
 # value.
 include_internal false
 
+# SSL protocol version to use for secure communications
+# with the load balancer
+ssl_version :<%= @ssl_version %>
+
 # Test users.  The five users specified below are required; their
 # names (:user, :non_org_user, etc.) are indicative of their role
 # within the tests.  All users must have a ':name' key.  If they have
