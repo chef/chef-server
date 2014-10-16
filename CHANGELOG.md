@@ -4,6 +4,7 @@
 
 ### opscode-omnibus
 * Ensure contents of install dir (`/opt/opscode`) are owned by root.
+* Drop support for SSLv3 due to POODLE
 
 ## 1.4.13 (2014-06-26)
 
