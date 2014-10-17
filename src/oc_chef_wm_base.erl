@@ -352,10 +352,10 @@ set_forbidden_msg(Req, State) ->
 
 forbidden_message(not_member_of_org, User, Org) ->
     Msg = iolist_to_binary([<<"'">>, User, <<"' not associated with organization '">>, Org, <<"'">>]),
-    {[{<<"error">>, Msg}]};
+    {[{<<"error">>, [Msg]}]};
 forbidden_message(unverified_org_membership, User, Org) ->
     Msg = iolist_to_binary([<<"Failed to verify user '">>, User, <<"' as a member of organization '">>, Org, <<"'">>]),
-    {[{<<"error">>, Msg}]}.
+    {[{<<"error">>, [Msg]}]}.
 
 -spec delete_object(chef_db:db_context(),
                     chef_object() |
