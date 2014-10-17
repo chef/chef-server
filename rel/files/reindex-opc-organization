@@ -122,7 +122,7 @@ init_network() ->
     pong = net_adm:ping(?ERCHEF).
 
 find_dl_headers(OrgNameBin, IntLB) when is_binary(OrgNameBin) ->
-    find_dl_headers(binary_to_list(OrgNameBin));
+    find_dl_headers(binary_to_list(OrgNameBin), IntLB);
 find_dl_headers(OrgName, IntLB) when is_list(OrgName) ->
     {ok, "200", _Headers, Body} = rpc:call(?ERCHEF, ibrowse,send_req, [IntLB ++ "/_route/organizations/" ++ OrgName, [], get]),
     Json = rpc:call(?ERCHEF, jiffy, decode, [Body]),
