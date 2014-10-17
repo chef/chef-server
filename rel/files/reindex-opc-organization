@@ -63,9 +63,13 @@ validate_args([Command]) ->
     io:format("Unrecognized command '~s'~n", [Command]),
     halt(1);
 validate_args([Command, OrgName]) when Command =:= "reindex";
+                                Command =:= "drop";
+                                Command =:= "complete" ->
+    validate_args([Command, OrgName, "https://127.0.0.1"]);
+validate_args([Command, OrgName, IntLB]) when Command =:= "reindex";
                                        Command =:= "drop";
                                        Command =:= "complete" ->
-    Context = make_context(OrgName),
+    Context = make_context(OrgName, IntLB),
     OrgBin = list_to_binary(OrgName), %% We use binaries around here...
 
     %% Some operations require the organization's ID.  This also serves as a convenient
@@ -100,9 +104,9 @@ perform(complete, Context, OrgInfo) ->
     perform(drop, Context, OrgInfo),
     perform(reindex, Context, OrgInfo).
 
-make_context(OrgName) ->
+make_context(OrgName, IntLB) ->
     ReqId = base64:encode(crypto:md5(term_to_binary(make_ref()))),
-    rpc:call(?ERCHEF, chef_db, make_context, [ReqId, find_dl_headers(OrgName)]).
+    rpc:call(?ERCHEF, chef_db, make_context, [ReqId, find_dl_headers(OrgName, IntLB)]).
 
 %% @doc Verify that the given `OrgName' actually corresponds to a real
 %% organization.  Returns the organization's ID if so; 'not_found' otherwise.
@@ -117,10 +121,10 @@ init_network() ->
     erlang:set_cookie(node(), ?ERCHEF_COOKIE),
     pong = net_adm:ping(?ERCHEF).
 
-find_dl_headers(OrgNameBin) when is_binary(OrgNameBin) ->
+find_dl_headers(OrgNameBin, IntLB) when is_binary(OrgNameBin) ->
     find_dl_headers(binary_to_list(OrgNameBin));
-find_dl_headers(OrgName) when is_list(OrgName) ->
-    {ok, "200", _Headers, Body} = rpc:call(?ERCHEF, ibrowse,send_req, ["https://127.0.0.1/_route/organizations/" ++ OrgName, [], get]),
+find_dl_headers(OrgName, IntLB) when is_list(OrgName) ->
+    {ok, "200", _Headers, Body} = rpc:call(?ERCHEF, ibrowse,send_req, [IntLB ++ "/_route/organizations/" ++ OrgName, [], get]),
     Json = rpc:call(?ERCHEF, jiffy, decode, [Body]),
     SubJson = rpc:call(?ERCHEF, ej, get, [{<<"config">>, <<"merged">>}, Json]),
     {KVList} = SubJson,
