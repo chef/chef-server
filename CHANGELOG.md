@@ -1,6 +1,8 @@
 # Enterprise Chef Changelog
 
-## 12.0.0.rc5 (unreleased)
+## 12.0.0.rc6 (unreleased)
+
+## 12.0.0.rc5 (2014-10-17)
 
 ### openssl - 1.0.1j
 - SRTP Memory Leak (CVE-2014-3513)
