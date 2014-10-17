@@ -25,10 +25,7 @@ describe "Environments API Endpoint", :environments do
 
   # Deal with subtly different error messages/codes in one place
 
-  let(:multi_tenant_user_not_associated_text) { "'#{outside_user.name}' not associated with organization '#{org}'" }
-  let(:outside_user_not_associated_msg) {
-    Pedant::Config.ruby_org_assoc? ? [multi_tenant_user_not_associated_text] : multi_tenant_user_not_associated_text
-  }
+  let(:outside_user_not_associated_msg) { ["'#{outside_user.name}' not associated with organization '#{org}'"] }
 
   let(:new_environment_name) { 'pedant_testing_environment' }
   let(:non_existent_environment_name) { 'pedant_dummy_environment' }

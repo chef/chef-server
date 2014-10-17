@@ -35,6 +35,14 @@ describe "opscode-account user association", :association do
     /^-----BEGIN (RSA )?PUBLIC KEY-----/
   end
 
+  # Because in Chef 11 this is a string, but a list in Chef 12:
+  let(:org_association_error) {
+    if (Pedant::Config.ruby_org_assoc?)
+      "'#{bad_user}' not associated with organization '#{platform.test_org.name}'"
+    else
+      ["'#{bad_user}' not associated with organization '#{platform.test_org.name}'"]
+    end
+  }
 
   # This embodies some assumptions around how multitenant config is done. Specifically, the normal
   # multitenant org setup process creates an org named 'pedant-testorg-PID'. Other variants (those
@@ -314,7 +322,7 @@ describe "opscode-account user association", :association do
 
     it "cannot invite itself to that org", :authorization do
       response = post(org_assoc_url, platform.bad_user, :payload=>make_invite_payload(bad_user))
-      response.should look_like({ :status => 403, :body_exact => { "error" => "'#{bad_user}' not associated with organization '#{platform.test_org.name}'" }  })
+      response.should look_like({ :status => 403, :body_exact => { "error" => org_association_error }  })
       no_invites_for_user(platform.bad_user)
     end
 
@@ -445,11 +453,11 @@ describe "opscode-account user association", :association do
         user_should_not_be_in_org(platform.bad_user)
 
         response = get(api_url("users/#{bad_user}"), platform.bad_user)
-        response.should look_like({ :status=> 403, :body => {"error"=> "'#{bad_user}' not associated with organization '#{platform.test_org.name}'"} })
+        response.should look_like({ :status=> 403, :body => {"error"=> org_association_error} })
       end
 
       context "after a user is deleted from an org" do
-        let(:requestor_not_in_org) { "'#{bad_user}' not associated with organization '#{platform.test_org.name}'"}
+        let(:requestor_not_in_org) { org_association_error }
         let(:target_not_found_in_org) { "Cannot find a user #{bad_user} in organization #{platform.test_org.name}" }
         let(:general_ruby_failure) { "Failed to disassociate user #{bad_user}" }
         before :each do

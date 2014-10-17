@@ -17,7 +17,8 @@ describe "Headers" do
     let (:high_version_headers) { {"X-Chef-Version" => "999.0.0" } }
     let (:low_version_headers) { {"X-Chef-Version" => "9.0.1" } }
 
-    it "Accepts High Version" do
+    it "Accepts High Version", :pending => !Pedant::Config.chef_12? do
+      #Pended until backport into 11
       get(request_url, requestor, :headers => high_version_headers).should look_like({
           :status => 200
         })
