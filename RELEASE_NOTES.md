@@ -1,6 +1,14 @@
 # Enterprise Chef Release Notes
 
-## 11.2.3 (unreleased)
+## 11.2.4 (unreleased)
+
+### Bug Fixes:
+
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.3:
+
+* [OC-11769] make oc_chef_authz a tunable in private-chef.rb
+
+## 11.2.3 (2014-10-17)
 
 ### Bug Fixes:
 

@@ -1,6 +1,11 @@
 # Enterprise Chef Changelog
 
-## 11.2.3 (unreleased)
+## 11.2.4 (unreleased)
+
+### private-chef-cookbooks
+* [OC-11769] make oc_chef_authz a tunable in private-chef.rb
+
+## 11.2.3 (2014-10-17)
 
 ### private-chef-cookbooks
 * [OC-11581] private-chef-ctl test command should return the pedant
