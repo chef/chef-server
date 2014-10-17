@@ -33,7 +33,7 @@
                    "a76c711e7a7ddb5b2df71c75ddc2fda62ff8fb85"}},
        {meck,".*",
              {git,"git://github.com/eproxus/meck.git",
-                  "b1f313b4cecc3df05a477a93641bf0a24d858590"}},
+                  "04d67d2aad5e0268f2fcfcc715fce7ad87249b3f"}},
        {edown,".*",
               {git,"git://github.com/seth/edown.git",
                    "30a9f7867d615af45783235faa52742d11a9348e"}},
@@ -132,7 +132,7 @@
                   "f7c141c8359cd690faba0d2684b449a07db8e915"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
-                        "df475b3db990fecf42504ea016c75e222ca9b957"}},
+                        "bba19f25f7fd0f584636fc45f93cff1ae79653e1"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
                   "5d4c3e9c91bd96b67a92cbdac4601c43340e1d88"}}]}.
