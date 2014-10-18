@@ -96,27 +96,35 @@ Again, `dups` should have zero elements, if that is not the case, run the cleanu
      - `sudo rm /srv/moser-data/{association_requests,global_containers,global_groups,org_id_to_guid,orgname_to_guid,orgs_by_guid,org_user_associations,user_to_authz,account_db,authz_to_user}`
    + Update env databag with latest chef-mover and ccr `role:couchdb`
    + Start mover console via `/srv/chef_mover/current/bin$ sudo ./mover console`
-1. Put orgs in 503 mode:
+1. Turn off org creator:
+   + Mover console: `mover_org_darklaunch:disable_org_creation().` 
+2. Put orgs in 503 mode:
    + DOWNTIME STARTS ON PUT, POST, DELETE ON ORGS / ASSOCS / INVITES AS SOON AS YOU RUN THE BELOW COMMAND!
    + Mover console: `mover_org_darklaunch:orgs_503_endpoint_mode("true").`
    + Verify that expected POST, PUT, DELETE requests return 503
-2. Now that there are no new org requests coming in, update the dets:
+3. Now that there are no new org requests coming in, update the dets:
    + Mover console: `mover_manager:create_account_dets().`
-3. Restart mover console after dets have loaded.
-4. Set sleep_time to zero since orgs API is down.
+4. Restart mover console after dets have loaded.
+5. Set sleep_time to zero since orgs API is down.
    + `application:set_env(mover, sleep_time, 0).`
-5. Run orgs migration.
+6. Run orgs migration.
    + Mover console: `mover_manager:migrate(all, 20, mover_org_migration_callback).`
-6. Run org_user_association migration.
+7. Run org_user_association migration.
    + Mover console: `mover_manager:migrate(all, 20, mover_org_user_association_migration_callback).`
-7. Run org_user_invites migration.
+8. Run org_user_invites migration.
    + Mover console: `mover_manager:migrate(all, 20, mover_org_user_invites_migration_callback).`
-8. Run global_groups migration.
+9. Run global_groups migration.
    + Mover console: `mover_manager:migrate(all, 20, mover_global_groups_migration_callback).`
-9. If all has gone well, flip API over to SQL:
+10. If all has gone well, flip API over to SQL:
    + Mover console: `mover_org_darklaunch:org_related_endpoints_to_couch("false").`
-10. hEC should now be reading from SQL! Watch traffic in read only mode for awhile while in SQL to make sure things are functional and running smoothy. This is our last chance to turn back to couch without data loss (see resolution on how to flip back to couch if worst comes to worst). Once we are confident that read only is working well in SQL, turn orgs 503 mode off.
-    + Mover console: `mover_org_darklaunch:orgs_503_endpoint_mode("false").`
+11. hEC should now be reading from SQL! Watch traffic in read only mode for awhile while in SQL to make sure things are functional and running smoothy. This is our last chance to turn back to couch without data loss (see resolution on how to flip back to couch if worst comes to worst). Once we are confident that read only is working well in SQL, turn orgs 503 mode off.
+    + First, for a few minutes, make sure that requests to SQL read only for orgs are working and there is no increase in 500s. Validate that you can read orgs / invites / assocs.
+    + Turn off opscode-account and verify that things still work.
+      - `knife ssh role:opscode-account 'sudo /etc/init.d/opscode-account stop'`
+    + Turn off couchdb and verify that things still work.
+      - TODO: Investigate how to take down HA couch.
+    + Once we are confident that org / users / assoc reads are going well out of SQL, turn on write again. This is the LAST POINT of turning back so be confident :)
+      - Mover console: `mover_org_darklaunch:orgs_503_endpoint_mode("false").`
 
 ### Resolution
 + Make sure there are no 500s and requests coming into erchef for org related endpoints.
