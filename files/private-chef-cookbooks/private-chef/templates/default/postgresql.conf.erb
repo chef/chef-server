@@ -362,7 +362,7 @@ effective_cache_size = <%= node['private_chef']['postgresql']['effective_cache_s
 					# and their durations, > 0 logs only
 					# statements running at least this number
 					# of milliseconds
-
+log_min_duration_statement = <%= node['private_chef']['postgresql']['log_min_duration_statement'] %>
 
 # - What to Log -
 
