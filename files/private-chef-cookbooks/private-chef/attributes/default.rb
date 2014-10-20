@@ -340,6 +340,7 @@ default['private_chef']['postgresql']['ha'] = false
 default['private_chef']['postgresql']['dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
 default['private_chef']['postgresql']['data_dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}/data"
 default['private_chef']['postgresql']['log_directory'] = "/var/log/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
+default['private_chef']['postgresql']['log_min_duration_statement'] = -1
 default['private_chef']['postgresql']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['postgresql']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['postgresql']['username'] = "opscode-pgsql"
