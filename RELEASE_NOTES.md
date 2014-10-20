@@ -2,6 +2,13 @@
 
 ## 11.2.4 (unreleased)
 
+### What's New
+
+The following items are new for Enterprise Chef 11.2.3 and/or are
+changes from previous versions:
+
+* [private-chef-cookbooks] Make postgresql slow query logging configurable
+
 ### Bug Fixes:
 
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.3:
