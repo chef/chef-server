@@ -2,6 +2,9 @@
 
 ## 12.0.0.rc6 (unreleased)
 
+### private-chef-cookbooks
+* [OC-11769] make oc_chef_authz a tunable in private-chef.rb
+
 ## 12.0.0.rc5 (2014-10-17)
 
 ### openssl - 1.0.1j
