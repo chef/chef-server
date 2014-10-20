@@ -28,6 +28,7 @@ module PrivateChef
   opscode_solr4 Mash.new
   opscode_expander Mash.new
   opscode_erchef Mash.new
+  oc_chef_authz Mash.new
   # Need old path for cookbook migration:
   opscode_chef Mash.new
 
@@ -220,6 +221,7 @@ module PrivateChef
         "opscode_solr4",
         "opscode_expander",
         "opscode_erchef",
+        "oc_chef_authz",
         "lb",
         "lb_internal",
         "postgresql",

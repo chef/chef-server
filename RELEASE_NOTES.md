@@ -1,5 +1,8 @@
 # Enterprise Chef Release Notes
 
+## 12.0.0.rc6 (unreleased)
+* [OC-11769] make oc_chef_authz a tunable in private-chef.rb
+
 ## 12.0.0.rc5 (2014-10-17)
  * [openssl] openssl has been updated to 1.0.1j to address
    CVE-2014-3513, CVE-2014-3567, and CVE-2014-3568
