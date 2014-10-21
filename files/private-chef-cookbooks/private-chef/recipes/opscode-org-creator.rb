@@ -19,7 +19,7 @@ opscode_org_creator_log_sasl_dir = File.join(node['private_chef']['opscode-org-c
 ].each do |dir_name|
   directory dir_name do
     owner owner
-    mode "0700"
+    mode node['private_chef']['service_dir_perms']
     recursive true
   end
 end

@@ -21,7 +21,7 @@ end
 directory keepalived_log_dir do
   owner node['private_chef']['user']['username']
   recursive true
-  mode "0700"
+  mode node['private_chef']['service_dir_perms']
 end
 
 template File.join(keepalived_etc_dir, "keepalived.conf") do

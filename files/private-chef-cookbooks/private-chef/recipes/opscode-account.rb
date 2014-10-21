@@ -18,7 +18,7 @@ private_chef_account_log_dir = node['private_chef']['opscode-account']['log_dire
 ].each do |dir_name|
   directory dir_name do
     owner node['private_chef']['user']['username']
-    mode '0700'
+    mode node['private_chef']['service_dir_perms']
     recursive true
   end
 end

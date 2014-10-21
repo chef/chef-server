@@ -27,7 +27,7 @@ rabbitmq_log_dir = rabbitmq['log_directory']
 [ rabbitmq_dir, rabbitmq_etc_dir, rabbitmq_data_dir, rabbitmq_log_dir ].each do |dir_name|
   directory dir_name do
     owner node['private_chef']['user']['username']
-    mode '0700'
+    mode node['private_chef']['service_dir_perms']
     recursive true
   end
 end

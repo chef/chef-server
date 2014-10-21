@@ -14,7 +14,7 @@ couchdb_log_dir = node['private_chef']['couchdb']['log_directory']
 # Create the CouchDB directories
 [ couchdb_dir, couchdb_etc_dir, couchdb_data_dir, couchdb_log_dir ].each do |dir_name|
   directory dir_name do
-    mode "0700"
+    mode node['private_chef']['service_dir_perms']
     recursive true
     owner node['private_chef']['user']['username']
   end

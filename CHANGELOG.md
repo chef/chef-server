@@ -1,6 +1,8 @@
 # Enterprise Chef Changelog
 
 ## 11.2.6 (Unreleased)
+* Adjust perms to 0750 for all service's log dir
+* Add and use new perms attribute
 
 ### private-chef-cookbooks
 * Fixed the default value for Postgres effective_cache_size
