@@ -26,6 +26,8 @@
 * Make postgresql slow query logging configurable
 * Fix missing resources on API HTML pages
 * Fixed the default value for Postgres effective_cache_size
+* Adjust perms to 0750 for all service's log dir
+* Add and use new perms attribute
 
 ### chef-server-ctl
 * Partition server start/stop in upgrade process

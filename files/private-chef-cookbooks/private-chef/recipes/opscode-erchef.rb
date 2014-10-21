@@ -19,7 +19,7 @@ opscode_erchef_sasl_log_dir = File.join(opscode_erchef_log_dir, "sasl")
 ].each do |dir_name|
   directory dir_name do
     owner owner
-    mode "0700"
+    mode node['private_chef']['service_dir_perms']
     recursive true
   end
 end
