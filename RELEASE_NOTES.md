@@ -1,4 +1,4 @@
-# Enterprise Chef Release Notes
+# Chef Server Release Notes
 
 ## 12.0.0.rc6 (unreleased)
 * [OC-11769] make oc_chef_authz a tunable in private-chef.rb
