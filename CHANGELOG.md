@@ -1,4 +1,4 @@
-# Enterprise Chef Changelog
+# Chef Server Changelog
 
 ## 12.0.0.rc6 (unreleased)
 

@@ -1,4 +1,4 @@
-chef-server Omnibus project
+Chef Server Omnibus Project
 ============================
 This project creates full-stack platform-specific packages for
 `chef-server`!
