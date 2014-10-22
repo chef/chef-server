@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name          = 'oc-chef-pedant'
-  s.version       = '1.0.29.4'
-  s.date          = '2014-10-15'
+  s.version       = '1.0.29.5'
+  s.date          = '2014-10-22'
   s.summary       = "Opscode Private Chef API Testing Framework"
   s.authors       = ["Chef Software Engineering"]
   s.email         = 'dev@getchef.com'
