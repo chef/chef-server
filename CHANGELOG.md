@@ -6,6 +6,7 @@
 * [OC-11769] make oc_chef_authz a tunable in private-chef.rb
 * Fix oc_chef_authz timeout tunable
 * Make postgresql slow query logging configurable
+* Remove max Client Version limit
 
 ## 11.2.3 (2014-10-17)
 

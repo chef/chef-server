@@ -8,6 +8,7 @@ The following items are new for Enterprise Chef 11.2.3 and/or are
 changes from previous versions:
 
 * [private-chef-cookbooks] Make postgresql slow query logging configurable
+* [nginx] Remove client version limit so Chef 12 can be used
 
 ### Bug Fixes:
 
