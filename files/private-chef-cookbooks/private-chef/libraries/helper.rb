@@ -7,6 +7,13 @@ class OmnibusHelper
     @node = node
   end
 
+  def ownership
+    owner = node['private_chef']['user']['username']
+    group = owner
+
+    {"owner" => owner, "group" => group}
+  end
+
   # Normalizes hosts. If the host part is an ipv6 literal, then it
   # needs to be quoted with []
   def self.normalize_host(host_part)

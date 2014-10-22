@@ -26,8 +26,8 @@ oc_id_log_dir = node['private_chef']['oc_id']['log_directory']
   oc_id_log_dir,
 ].each do |dir_name|
   directory dir_name do
-    owner owner
-    group group
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode node['private_chef']['service_dir_perms']
     recursive true
   end
@@ -54,8 +54,8 @@ end
 # properly
 mutable_hash = JSON.parse(app_settings.dup.to_json)
 file "#{oc_id_config_dir}/production.yml" do
-  user node['private_chef']['user']['username']
-  group node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode '640'
   content mutable_hash.to_yaml
   notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
@@ -75,8 +75,8 @@ end
 
 template "#{oc_id_config_dir}/secret_token.rb" do
   source "oc_id.secret_token.rb"
-  user node['private_chef']['user']['username']
-  group node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode '640'
   notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
 end
@@ -91,8 +91,8 @@ end
 
 template "#{oc_id_config_dir}/database.yml" do
   source "oc_id.database.yml.erb"
-  user node['private_chef']['user']['username']
-  group node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode '640'
   notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
 end

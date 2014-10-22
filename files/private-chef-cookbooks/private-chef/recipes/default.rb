@@ -114,7 +114,7 @@ darklaunch_values = node['private_chef']['dark_launch']
   .to_hash
 
 file "/etc/opscode/dark_launch_features.json" do
-  owner node["private_chef"]["user"]["username"]
+  owner OmnibusHelper.new(node).ownership['owner']
   group "root"
   mode "0644"
   content Chef::JSONCompat.to_json_pretty(darklaunch_values)
@@ -130,7 +130,7 @@ file "/etc/opscode/webui_pub.pem" do
 end
 
 file "/etc/opscode/webui_priv.pem" do
-  owner node["private_chef"]["user"]["username"]
+  owner OmnibusHelper.new(node).ownership['owner']
   group "root"
   mode "0600"
   content webui_key.to_pem.to_s unless File.exists?('/etc/opscode/webui_pub.pem')
@@ -146,7 +146,7 @@ file "/etc/opscode/worker-public.pem" do
 end
 
 file "/etc/opscode/worker-private.pem" do
-  owner node["private_chef"]["user"]["username"]
+  owner OmnibusHelper.new(node).ownership['owner']
   group "root"
   mode "0600"
   content worker_key.to_pem.to_s unless File.exists?('/etc/opscode/worker-public.pem')
@@ -164,7 +164,7 @@ file "/etc/opscode/pivotal.cert" do
 end
 
 file "/etc/opscode/pivotal.pem" do
-  owner node["private_chef"]["user"]["username"]
+  owner OmnibusHelper.new(node).ownership['owner']
   group "root"
   mode "0600"
   content key.to_pem.to_s unless File.exists?('/etc/opscode/pivotal.pem')
@@ -172,7 +172,7 @@ end
 
 directory "/etc/chef" do
   owner "root"
-  group node['private_chef']['user']['username']
+  group OmnibusHelper.new(node).ownership['group']
   mode "0775"
   action :create
 end
@@ -186,8 +186,8 @@ directory "/var/opt/opscode" do
 end
 
 directory "/var/log/opscode" do
-  owner "opscode"
-  group "opscode"
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode "0755"
   action :create
 end
@@ -259,7 +259,7 @@ include_recipe "private-chef::partybus"
 include_recipe "private-chef::ctl_config"
 
 file "/etc/opscode/chef-server-running.json" do
-  owner node["private_chef"]["user"]["username"]
+  owner OmnibusHelper.new(node).ownership['owner']
   group "root"
   mode "0600"
 

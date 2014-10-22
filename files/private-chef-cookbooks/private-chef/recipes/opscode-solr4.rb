@@ -24,8 +24,8 @@ solr_jetty_dir        = "/opt/opscode/embedded/service/opscode-solr4/jetty"
   solr_conf_dir
 ].each do |dir_name|
   directory dir_name do
-    owner owner
-    group group
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode node['private_chef']['service_dir_perms']
     recursive true
   end
@@ -48,13 +48,15 @@ end
 
 cookbook_file File.join(solr_home_dir, "solr.xml") do
   source "solr4/solr.xml"
-  owner node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode "0644"
   notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
 end
 
 file File.join(solr_collection_dir, "core.properties") do
-  owner node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode "0644"
   notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
   content <<EOF
@@ -64,7 +66,8 @@ end
 
 template File.join(solr_conf_dir, "solrconfig.xml") do
   source "solr4/solrconfig.xml.erb"
-  owner node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode "0644"
   variables(node['private_chef']['opscode-solr4'].to_hash)
   notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
@@ -72,20 +75,22 @@ end
 
 cookbook_file File.join(solr_conf_dir, "schema.xml") do
   source "solr4/schema.xml"
-  owner node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode "0644"
   notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
 end
 
 template File.join(solr_jetty_dir, "etc", "jetty.xml") do
-  owner node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode "0644"
   source "solr4/jetty.xml.erb"
   variables(node['private_chef']['opscode-solr4'].to_hash.merge(node['private_chef']['logs'].to_hash))
   notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
 end
 
-execute "chown -R #{node['private_chef']['user']['username']} #{solr_jetty_dir}"
+execute "chown -R #{OmnibusHelper.new(node).ownership['owner']} #{solr_jetty_dir}"
 
 node.default['private_chef']['opscode-solr4']['command'] =  "java -Xmx#{node['private_chef']['opscode-solr4']['heap_size']} -Xms#{node['private_chef']['opscode-solr4']['heap_size']}"
 # Compute some sane JVM tunings. The user can still override these computed

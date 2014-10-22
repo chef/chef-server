@@ -12,7 +12,8 @@ if is_data_master?
   end
 
   directory "/etc/opscode-analytics" do
-    owner node['private_chef']['user']['username']
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode '0775'
     recursive true
   end
@@ -21,7 +22,7 @@ if is_data_master?
   # instance
   #
   file "/etc/opscode-analytics/webui_priv.pem" do
-    owner node["private_chef"]["user"]["username"]
+    owner OmnibusHelper.new(node).ownership['owner']
     group "root"
     mode "0600"
     content lazy {::File.open('/etc/opscode/webui_priv.pem').read}
