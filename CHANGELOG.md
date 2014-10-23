@@ -6,6 +6,7 @@
 * [OC-11769] make oc_chef_authz a tunable in private-chef.rb
 * Fix oc_chef_authz timeout tunable
 * Make postgresql slow query logging configurable
+* Fix missing resources on API HTML pages
 
 ## 12.0.0.rc5 (2014-10-17)
 
