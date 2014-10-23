@@ -42,10 +42,9 @@ img {
 
 #header {
 	margin:0 auto;
-	width:940px;
 	padding:0;
-        
 }
+
 #header:after {
 	content:"";
 	clear:both;
@@ -59,8 +58,8 @@ img {
 	display:block;
         width: 128px;
         height: 30px;
-        background-image:  url('//api.opscode.com/images/logo.png');
-        background-image:  url('//api.opscode.com/images/logo.svg'), none;
+        background-image:  url('/images/logo.png');
+        background-image:  url('/images/logo.svg'), none;
         background-size: 100% 100%;
 	text-indent:-9999px;
 	overflow:hidden;
@@ -264,7 +263,7 @@ img {
 	display:inline !important;
 }
 #main {
-	width:940px;
+	max-width: 940px;
 	margin:0 auto;
 }
 .main-t {
@@ -280,7 +279,7 @@ img {
 	overflow:hidden;
 }
 #main .mybox {
-	width:940px;
+	max-width: 940px;
 	overflow:hidden;
 }
 .visual {
