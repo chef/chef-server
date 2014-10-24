@@ -104,7 +104,7 @@ enable_org_cache() ->
         undefined ->
             lager:info("Org guid cache disabled~n");
         _Defaults ->
-            chef_cache:init(org_guid),
+            chef_cache:init(org_metadata),
             lager:info("Org guid cache enabled~n")
     end,
     ok.
