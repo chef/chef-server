@@ -2,6 +2,14 @@
 
 ## 12.0.0.rc6 (unreleased)
 
+### oc-chef-pedant 1.0.62
+* Fix for consistent return values in oc_erchef
+
+### oc_erchef 0.28.3
+* Org support in postgres
+* Reindexing support to check redis flags
+* Fix typo in darklaunch interrogation
+
 ### private-chef-cookbooks
 * [OC-11769] make oc_chef_authz a tunable in private-chef.rb
 * Fix oc_chef_authz timeout tunable
