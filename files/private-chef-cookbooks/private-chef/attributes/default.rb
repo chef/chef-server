@@ -45,9 +45,11 @@ default['private_chef']['addons']['install'] = false
 default['private_chef']['addons']['path'] = nil
 default['private_chef']['addons']['packages'] =
   %w{opscode-reporting opscode-manage opscode-analytics opscode-push-jobs-server}
-# TODO: push jobs server currently failing dependency check; replace above with
-# below once that's fixed and a new version is available
-#  %w{opscode-push-jobs-server opscode-reporting opscode-manage opscode-analytics}
+default['private_chef']['addons']['ubuntu_supported_codenames'] =
+  %w{lucid natty precise}
+default['private_chef']['addons']['ubuntu_distribution'] =
+  node['private_chef']['addons']['ubuntu_supported_codenames'].include?(node['lsb']['codename']) ?
+  node['lsb']['codename'] : 'lucid'
 
 ####
 # The Chef User that services run as
