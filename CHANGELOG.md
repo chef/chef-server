@@ -1,6 +1,6 @@
 # Enterprise Chef Changelog
 
-## 11.2.4 (unreleased)
+## 11.2.4 (2014-10-27)
 
 ### oc-chef-pedant 1.0.62
 * Fix for consistent return values in oc_erchef
