@@ -135,7 +135,10 @@
                         "2af99bc486f74e2277d3fde90e36fbd90eef1ca0"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "5d4c3e9c91bd96b67a92cbdac4601c43340e1d88"}}]}.
+                  "5d4c3e9c91bd96b67a92cbdac4601c43340e1d88"}},
+       {folsom_graphite,".*",
+                        {git,"git://github.com/opscode/folsom_graphite.git",
+                             "0bf3d47e52178d8cf24ad9acdf5f37f4fb46a6b1"}}]}.
 {plugins,[rebar_lock_deps_plugin]}.
 {cover_enabled,true}.
 {erl_opts,[{d,'OC_CHEF'},
