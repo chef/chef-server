@@ -16,6 +16,7 @@ The following items are the set of bug fixes that have been applied since Enterp
 
 * [OC-11769] make oc_chef_authz a tunable in private-chef.rb
 * Fix oc_chef_authz timeout tunable
+* The 'gather-logs' script now obeys the attribute for postsgresql['username'] 
 
 ## 11.2.3 (2014-10-17)
 
