@@ -10,6 +10,9 @@
 * Reindexing support to check redis flags
 * Fix typo in darklaunch interrogation
 
+### opscode-omnibus
+* changes to addon installs to default to lucid when current ubuntu codename isn't in the accepted list (to support installs on 14)
+
 ### private-chef-cookbooks
 * [OC-11769] make oc_chef_authz a tunable in private-chef.rb
 * Fix oc_chef_authz timeout tunable

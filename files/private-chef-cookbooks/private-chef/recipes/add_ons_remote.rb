@@ -11,7 +11,7 @@ when 'debian'
   apt_repository 'chef-stable' do
     uri "https://packagecloud.io/chef/stable/ubuntu/"
     key 'https://packagecloud.io/gpg.key'
-    distribution node['lsb']['codename']
+    distribution node['private_chef']['addons']['ubuntu_distribution']
     deb_src true
     trusted true
     components %w( main )
