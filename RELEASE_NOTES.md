@@ -6,8 +6,6 @@
 
 ### Bug Fixes:
 
-* Backfill release notes for 11.2.4
-
 ## 11.2.4 (2014-10-27)
 
 ### What's New
