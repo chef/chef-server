@@ -1,5 +1,13 @@
 # Enterprise Chef Release Notes
 
+## 11.2.5 (Unreleased)
+
+### What's New
+
+### Bug Fixes:
+
+* Backfill release notes for 11.2.4
+
 ## 11.2.4 (2014-10-27)
 
 ### What's New
