@@ -10,6 +10,10 @@
 * Reindexing support to check redis flags
 * Fix typo in darklaunch interrogation
 
+### oc_id
+* Set `VERSION` environment variable on database migrations to avoid conflict
+  during upgrades
+
 ### opscode-omnibus
 * changes to addon installs to default to lucid when current ubuntu codename isn't in the accepted list (to support installs on 14)
 
