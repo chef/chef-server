@@ -8,6 +8,8 @@
 case node['platform_family']
 when 'debian'
 
+  package "apt-transport-https"
+
   apt_repository 'chef-stable' do
     uri "https://packagecloud.io/chef/stable/ubuntu/"
     key 'https://packagecloud.io/gpg.key'
