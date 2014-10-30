@@ -24,6 +24,7 @@
 * Fix oc_chef_authz timeout tunable
 * Make postgresql slow query logging configurable
 * Fix missing resources on API HTML pages
+* Fixed the default value for Postgres effective_cache_size
 
 ### chef-server-ctl
 * Partition server start/stop in upgrade process
