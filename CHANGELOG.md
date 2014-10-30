@@ -24,6 +24,9 @@
 * Make postgresql slow query logging configurable
 * Fix missing resources on API HTML pages
 
+### chef-server-ctl
+* Partition server start/stop in upgrade process
+
 ## 12.0.0.rc5 (2014-10-17)
 
 ### openssl - 1.0.1j
@@ -40,6 +43,7 @@
 * Add man page for chef-server-ctl.
 * Correct gather-logs to point to chef-server.rb
 * Disable SSLv3 support in nginx
+* Added command line options to open-source-to-chef-server-12 upgrade for finer-grained control of migration process
 
 ### oc_erchef 0.27.7
 * Improve error handling in org creation and deletion.

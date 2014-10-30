@@ -14,6 +14,9 @@ add_command_under_category "chef12-upgrade-download", "open-source-upgrade", "Do
     @options = OpenStruct.new
 
     # Define defaults
+    @options.skip_setup = false
+    @options.skip_download = false
+    @options.skip_cleanup = false
     @options.chef11_server_url = "https://localhost"
     @options.chef11_admin_client_name = "admin"
     @options.chef11_admin_client_key = "/etc/chef-server/admin.pem"
@@ -38,6 +41,27 @@ add_command_under_category "chef12-upgrade-download", "open-source-upgrade", "Do
       # This option matches the knife -k option
       opts.on("-k", "--key [key]", String, "Chef 11 API client key. This is the admin key that will be used to download the Chef 11 data. Should match with the user specified. Defaults to #{@options.chef11_admin_client_key}") do |key|
         @options.chef11_admin_client_key = key
+      end
+
+      opts.on("-S", "--setup-only", "Stop any Chef 12 servers and Start the Chef 11 server in preperation for downloading the data.  Do not download the data or do any clean up steps") do |setup_only|
+        if setup_only
+          @options.skip_download = true
+          @options.skip_cleanup = true
+        end
+      end
+
+      opts.on("-d", "--download-only", "Do not start or stop any servers.  Instead just download the data and create the key file.  Requires Chef 11 to be running.") do |download_only|
+        if download_only
+          @options.skip_setup = true
+          @options.skip_cleanup = true
+        end
+      end
+
+      opts.on("-c", "--cleanup-only", "Stop the Chef 11 server.  Do not start it or download data.") do |cleanup_only|
+        if cleanup_only
+          @options.skip_setup = true
+          @options.skip_download = true
+        end
       end
 
       opts.on("-h", "--help", "Show this message") do
