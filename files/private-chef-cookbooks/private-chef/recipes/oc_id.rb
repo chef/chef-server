@@ -109,9 +109,19 @@ execute "oc_id_schema" do
   command "bundle exec rake db:migrate"
   path ["/opt/opscode/embedded/bin"]
   cwd "/opt/opscode/embedded/service/oc_id"
-  # Setting VERSION to "" here prevents this from failing when other recipes
-  # set this environment variable, like when doing an upgrade.
-  environment "RAILS_ENV" => "production", "VERSION" => ""
+
+  # There are other recipes that depend on having a VERSION environment
+  # variable. If that environment variable is set when we run `rake db:migrate`,
+  # and it is set to something the the migrations do not expect, this will
+  # break.
+  #
+  # We want to migrate to the latest version, which we can get by looking at the
+  # date prefix of the latest file in the db/migrate directory.
+  #
+  # Also set the RAILS_ENV as is needed.
+  environment("RAILS_ENV" => "production",
+              "VERSION" => `ls -1 /opt/opscode/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp)
+
   only_if { is_data_master? }
 end
 
