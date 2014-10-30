@@ -26,6 +26,7 @@
 
 ### chef-server-ctl
 * Partition server start/stop in upgrade process
+* Changed commands org-associate and org-dissociate to org-user-add and org-user-remove, respectively.
 
 ## 12.0.0.rc5 (2014-10-17)
 
