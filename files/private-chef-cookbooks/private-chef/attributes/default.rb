@@ -20,10 +20,6 @@ default['private_chef']['install_path'] = "/opt/opscode"
 default['private_chef']['notification_email'] = "pc-default@opscode.com"
 default['private_chef']['from_email'] = '"Opscode" <donotreply@opscode.com>'
 default['private_chef']['role'] = "standalone"
-default['private_chef']['license']['nodes'] = 25
-default['private_chef']['license']['upgrade_url'] = "http://www.getchef.com/contact/on-premises-simple"
-
-default['private_chef']['default_orgname'] = nil
 
 ####
 # The Chef User that services run as
@@ -163,7 +159,7 @@ default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
 # Default: generate signed URLs based upon Host: header. Override with a url, "http:// ..."
 default['private_chef']['opscode-erchef']['base_resource_url'] = :host_header
 default['private_chef']['opscode-erchef']['s3_bucket'] = 'bookshelf'
-default['private_chef']['opscode-erchef']['s3_url_ttl'] = 28800
+default['private_chef']['opscode-erchef']['s3_url_ttl'] = 900
 default['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] = 5000
 default['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] = 20
 default['private_chef']['opscode-erchef']['authz_timeout'] = 2000
@@ -172,7 +168,6 @@ default['private_chef']['opscode-erchef']['root_metric_key'] = "chefAPI"
 default['private_chef']['opscode-erchef']['depsolver_worker_count'] = 5
 default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
 default['private_chef']['opscode-erchef']['max_request_size'] = 1000000
-default['private_chef']['opscode-erchef']['cleanup_batch_size'] = 0
 
 ###
 # Legacy path (required for cookbok migration)
@@ -277,10 +272,6 @@ default['private_chef']['lb']['chef_min_version'] = 10
 default['private_chef']['lb']['xdl_defaults']['503_mode'] = false
 default['private_chef']['lb']['xdl_defaults']['couchdb_containers'] = true
 default['private_chef']['lb']['xdl_defaults']['couchdb_groups'] = true
-default['private_chef']['lb']['xdl_defaults']['couchdb_associations'] = true
-default['private_chef']['lb']['xdl_defaults']['couchdb_association_requests'] = true
-default['private_chef']['lb']['xdl_defaults']['couchdb_acls'] = true
-default['private_chef']['lb']['xdl_defaults']['couchdb_organizations'] = true
 
 ####
 # Nginx
@@ -526,13 +517,6 @@ default['private_chef']['opscode-chef-mover']['cache_ttl'] = '3600'
 default['private_chef']['opscode-chef-mover']['db_pool_size'] = '5'
 default['private_chef']['opscode-chef-mover']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-chef-mover']['ibrowse_max_pipeline_size'] = 1
-default['private_chef']['opscode-chef-mover']['solr_timeout'] = 30000
-default['private_chef']['opscode-chef-mover']['solr_http_init_count'] = 25
-default['private_chef']['opscode-chef-mover']['solr_http_max_count'] = 100
-default['private_chef']['opscode-chef-mover']['solr_http_cull_interval'] = "{1, min}"
-default['private_chef']['opscode-chef-mover']['solr_http_max_age'] = "{70, sec}"
-default['private_chef']['opscode-chef-mover']['solr_http_max_connection_duration'] = "{70,sec}"
-default['private_chef']['opscode-chef-mover']['solr_ibrowse_options'] = "[{connect_timeout, 10000}]"
 
 ###
 # Opscode Test
