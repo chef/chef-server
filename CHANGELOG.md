@@ -43,6 +43,7 @@
 * Add man page for chef-server-ctl.
 * Correct gather-logs to point to chef-server.rb
 * Disable SSLv3 support in nginx
+* Added command line options to open-source-to-chef-server-12 upgrade for finer-grained control of migration process
 
 ### oc_erchef 0.27.7
 * Improve error handling in org creation and deletion.
