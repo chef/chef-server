@@ -17,6 +17,7 @@
 ### opscode-omnibus
 * changes to addon installs to default to lucid when current ubuntu codename isn't in the accepted list (to support installs on 14)
 * added apt-transport-https package in case it was missing from the system (packagecloud requires it)
+* created chef-server.rb during install to cut down on user confusion
 
 ### private-chef-cookbooks
 * [OC-11769] make oc_chef_authz a tunable in private-chef.rb
