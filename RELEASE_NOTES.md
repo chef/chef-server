@@ -2,11 +2,13 @@
 
 ## 11.2.5 (Unreleased)
 
-### What's New
-
 ### Bug Fixes:
 
 ## 11.2.4 (2014-10-27)
+
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.4:
+
+* oc_erchef 0.25.14.2 - Reverting to previous version for addon compatibility
 
 ### What's New
 

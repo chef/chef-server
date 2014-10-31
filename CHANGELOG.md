@@ -1,5 +1,13 @@
 # Enterprise Chef Changelog
 
+## 11.2.5 (Unreleased)
+
+### oc-chef-pedant 1.0.29.5
+* Revert to 1.0.29.5 for addon compatibility
+
+### oc-erchef 0.25.14.2
+* Revert to 0.25.14.2 for addon compatibility
+
 ## 11.2.4 (2014-10-27)
 
 ### oc-chef-pedant 1.0.62

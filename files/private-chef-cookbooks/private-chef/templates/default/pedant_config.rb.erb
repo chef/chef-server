@@ -5,29 +5,22 @@
 
 ################################################################################
 
-# A unique identification string used to create orgs and users specific
-# to a each single chef server's nodes' OS. Simply using "Process.pid"
-# proved to not be unique enough when running pedant simultaneously
-# on multiple nodes of the same chef server when the generated pedant
-# config file could have been copied across during the setup of that
-# chef server. 
-chef_server_uid = "<%= @hostname %>_#{Process.pid}"
-
 # Specify a testing organization if you are testing a multi-tenant
 # instance of a Chef Server (e.g., Private Chef, Hosted Chef).  If you
 # are testing a single-tenant instance (i.e. Open Source Chef Server),
 # DO NOT include this parameter
 #
 # Due to how the current org cache operates, it is best to use a
-# unique name for your testing organization. If you do not use a
-# unique name and run tests several times (destroying the organization
-# between runs) you will likely get inconsistent results.
+# randomized name for your testing organization (hence the embedded
+# Process.pid).  If you do not use a randomized name and run tests
+# several times (destroying the organization between runs) you will
+# likely get inconsistent results.
 #
 # If you wish Pedant to create the organization for you at test time,
 # include the `:create_me => true` pair.  If you wish to use an
 # existing organization for tests, you should supply a `:validator_key
 # => "/full/path/to/key.pem"` pair
-org({:name => "pedant_testorg_#{chef_server_uid}",
+org({:name => "pedant-testorg-#{Process.pid}",
      :create_me => true})
 
 # org({:name => "existing_org",
@@ -44,11 +37,6 @@ delete_org true
 # You MUST specify the address of the server the API requests will be
 # sent to.  Only specify protocol, hostname, and port.
 chef_server "<%= @api_url %>"
-
-# This configration specifies the default orgname. Note that it does *not*
-# mean that Pedant will test things with default org urls. To do that,
-# pass --use-default-org on the command line
-default_orgname <%= @default_orgname ? "\"#{@default_orgname}\"" : "nil" %>
 
 # If you are doing development testing, you can specify the address of
 # the Solr server.  The presence of this parameter will enable tests
@@ -101,18 +89,18 @@ webui_key '/etc/opscode/webui_priv.pem'
 requestors({
              :clients => {
                :admin => {
-                 :name => "pedant_admin_client_#{chef_server_uid}",
+                 :name => "pedant_admin_client",
                  :create_me => true,
                  :create_knife => true,
                  :admin => true
                },
                :non_admin => {
-                 :name => "pedant_client_#{chef_server_uid}",
+                 :name => 'pedant_client',
                  :create_me => true,
                  :create_knife => true,
                },
                :bad => {
-                 :name => "bad_client_#{chef_server_uid}",
+                 :name => 'bad_client',
                  :create_me => true,
                  :bogus => true
                }
@@ -121,14 +109,14 @@ requestors({
              :users => {
                # An administrator in the testing organization
                :admin => {
-                 :name => "pedant_admin_user_#{chef_server_uid}",
+                 :name => "pedant_admin_user",
                  :create_me => true,
                  :create_knife => true,
                  :admin => true
                },
 
                :non_admin => {
-                 :name => "pedant_user_#{chef_server_uid}",
+                 :name => "pedant_user",
                  :create_me => true,
                  :create_knife => true,
                  :admin => false
@@ -136,7 +124,7 @@ requestors({
 
                # A user that is not a member of the testing organization
                :bad => {
-                 :name => "pedant_nobody_#{chef_server_uid}",
+                 :name => "pedant-nobody",
                  :create_me => true,
                  :create_knife => true,
                  :associate => false
@@ -164,15 +152,9 @@ ruby_role_endpoint?        false
 ruby_cookbook_endpoint?    false
 ruby_client_endpoint?      false
 ruby_users_endpoint?       true
-ruby_container_endpoint?   true
-ruby_container_endpoint_in_sql? false
-ruby_group_endpoint?       true
-ruby_acl_endpoint?         true
-ruby_system_recovery_endpoint? true
-ruby_org_acl_endpoint?     true
-ruby_org_assoc?            true
-ruby_organizations_endpoint? true
-chef_12?                   false
+ruby_container_endpoint?   <%= node['private_chef']['lb']['xdl_defaults']['couchdb_containers'] %>
+ruby_container_endpoint_in_sql?  <%= !node['private_chef']['lb']['xdl_defaults']['couchdb_containers'] %>
+ruby_group_endpoint?       <%= node['private_chef']['lb']['xdl_defaults']['couchdb_groups'] %>
 
 old_runlists_and_search true
 
