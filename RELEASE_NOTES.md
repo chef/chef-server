@@ -1,18 +1,23 @@
 # Enterprise Chef Release Notes
 
-## 11.2.5 (Unreleased)
-
-### Bug Fixes:
-
-## 11.2.4 (2014-10-27)
-
-The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.4:
-
-* oc_erchef 0.25.14.2 - Reverting to previous version for addon compatibility
+## 11.2.6 (Unreleased)
 
 ### What's New
 
-The following items are new for Enterprise Chef 11.2.3 and/or are
+### Bug Fixes:
+
+The following items are new for Enterprise Chef 11.2.6 and/or are
+changes from previous versions:
+
+
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.6:
+
+
+## 11.2.5 (2014-11-03)
+
+### What's New
+
+The following items are new for Enterprise Chef 11.2.5 and/or are
 changes from previous versions:
 
 * [nginx] Remove client version limit so Chef 12 can be used
@@ -25,6 +30,10 @@ The following items are the set of bug fixes that have been applied since Enterp
 * [OC-11769] make oc_chef_authz a tunable in private-chef.rb
 * Fix oc_chef_authz timeout tunable
 * The 'gather-logs' script now obeys the attribute for postsgresql['username'] 
+* oc_erchef 0.25.14.2 - Reverting to previous version for addon compatibility
+
+## 11.2.4 (Never Released)
+Never released due to a regression discovered after tagging.
 
 ## 11.2.3 (2014-10-17)
 

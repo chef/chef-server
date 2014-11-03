@@ -1,28 +1,23 @@
 # Enterprise Chef Changelog
 
-## 11.2.5 (Unreleased)
+## 11.2.6 (Unreleased)
 
-### oc-chef-pedant 1.0.29.5
-* Revert to 1.0.29.5 for addon compatibility
+## 11.2.5 (2013-11-03)
 
-### oc-erchef 0.25.14.2
-* Revert to 0.25.14.2 for addon compatibility
+### oc_erchef
+* Upgrade to 0.28.3 and then revert to 0.25.14.2 for addon compatibility.  The issue was that changing the darklaunch default from couchdb to postgresql changes behavior for addons that don't go through the external LB.  Once the addons have been upgraded to respect the full darklaunch flagset we'll be able to upgrade oc_erchef. 
 
-## 11.2.4 (2014-10-27)
-
-### oc-chef-pedant 1.0.62
-* Fix for consistent return values in oc_erchef
-
-### oc_erchef 0.28.3
-* Org support in postgres
-* Reindexing support to check redis flags
-* Fix typo in darklaunch interrogation
+### oc-chef-pedant
+* Upgrade to 1.0.62, but revert to 1.0.29.5 for addon compatibility
 
 ### private-chef-cookbooks
 * [OC-11769] make oc_chef_authz a tunable in private-chef.rb
 * Fix oc_chef_authz timeout tunable
 * Make postgresql slow query logging configurable
 * Remove max Client Version limit
+
+## 11.2.4 (Never Released)
+Never released due to a regression discovered after tagging.
 
 ## 11.2.3 (2014-10-17)
 
