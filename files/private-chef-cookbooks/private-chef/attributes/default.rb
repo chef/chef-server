@@ -44,7 +44,7 @@ default['private_chef']['default_orgname'] = nil
 default['private_chef']['addons']['install'] = false
 default['private_chef']['addons']['path'] = nil
 default['private_chef']['addons']['packages'] =
-  %w{opscode-reporting opscode-manage opscode-analytics opscode-push-jobs-server}
+  %w{opscode-reporting opscode-manage opscode-analytics opscode-push-jobs-server chef-ha chef-sync}
 default['private_chef']['addons']['ubuntu_supported_codenames'] =
   %w{lucid natty precise}
 default['private_chef']['addons']['ubuntu_distribution'] =
