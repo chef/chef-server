@@ -1,0 +1,153 @@
+GIT
+  remote: git://github.com/opscode/chef.git
+  revision: cbcfa0d666e112e016db5a703370680677d179f9
+  branch: master
+  specs:
+    chef (0.10.2)
+      bunny (>= 0.6.0)
+      erubis
+      highline
+      json (>= 1.4.4, <= 1.5.2)
+      mixlib-authentication (>= 1.1.0)
+      mixlib-cli (>= 1.1.0)
+      mixlib-config (>= 1.1.2)
+      mixlib-log (>= 1.3.0)
+      moneta
+      net-ssh (~> 2.1.3)
+      net-ssh-multi (~> 1.1.0)
+      ohai (>= 0.6.0)
+      rest-client (>= 1.0.4, < 1.7.0)
+      treetop (~> 1.4.9)
+      uuidtools
+
+GIT
+  remote: git://github.com/opscode/couchrest.git
+  revision: 7dc3fa25e678c602641e29908fe9e31fbc7388df
+  specs:
+    couchrest (0.23)
+      json (>= 1.1.2)
+      mime-types (>= 1.15)
+      rest-client (>= 0.5)
+
+GIT
+  remote: git@github.com:opscode/aws-s3.git
+  revision: c2665dba96b203c036d4fe917cc4beb02e94f8ac
+  specs:
+    aws-s3 (0.6.2.1272580952)
+      builder
+      mime-types
+      xml-simple
+
+GIT
+  remote: git@github.com:opscode/mixlib-authentication.git
+  revision: db24a56c6f5b99114998a50942220a7023060229
+  branch: master
+  specs:
+    mixlib-authentication (1.3.0)
+      mixlib-log
+
+GIT
+  remote: git@github.com:opscode/mixlib-authorization.git
+  revision: e5d72434865f4c25bfae3001e1fdc07f7efcdd7f
+  branch: master
+  specs:
+    mixlib-authorization (1.3.0)
+      activemodel (~> 3.2.2)
+      mixlib-authentication
+      mixlib-config
+      mixlib-log
+      rest-client
+      sequel (~> 3.34.1)
+
+GIT
+  remote: git@github.com:opscode/mixlib-localization.git
+  revision: 5dda67137a4dcd74dc3a144e92963509255eeb32
+  specs:
+    mixlib-localization (1.0.1)
+      mixlib-log
+
+GIT
+  remote: git@github.com:opscode/opscode-billing
+  revision: ef20537128e1ca3c2c810988745e401a568c6858
+  specs:
+    opscode-billing (0.1.0)
+
+GIT
+  remote: git@github.com:opscode/opscode-shared
+  revision: fb8b74258efea8b79985c4a5071b2eb14b424191
+  branch: master
+  specs:
+    opscode-dark-launch (0.0.3)
+      chef
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activemodel (3.2.14)
+      activesupport (= 3.2.14)
+      builder (~> 3.0.0)
+    activesupport (3.2.14)
+      i18n (~> 0.6, >= 0.6.4)
+      multi_json (~> 1.0)
+    builder (3.0.4)
+    bunny (0.6.0)
+    coderay (0.9.7)
+    erubis (2.7.0)
+    highline (1.6.2)
+    i18n (0.6.5)
+    json (1.4.6)
+    mime-types (1.24)
+    mixlib-cli (1.2.0)
+    mixlib-config (1.1.2)
+    mixlib-log (1.6.0)
+    moneta (0.6.0)
+    multi_json (1.7.9)
+    net-ssh (2.1.4)
+    net-ssh-gateway (1.1.0)
+      net-ssh (>= 1.99.1)
+    net-ssh-multi (1.1)
+      net-ssh (>= 2.1.4)
+      net-ssh-gateway (>= 0.99.0)
+    ohai (0.6.4)
+      mixlib-cli
+      mixlib-config
+      mixlib-log
+      systemu
+      yajl-ruby
+    pg (0.16.0)
+    polyglot (0.3.1)
+    rake (0.8.7)
+    rb-appscript (0.6.1)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
+    rspec (1.3.0)
+    sequel (3.34.1)
+    systemu (2.2.0)
+    treetop (1.4.9)
+      polyglot (>= 0.3.1)
+    uuidtools (2.1.2)
+    xml-simple (1.1.0)
+    yajl-ruby (0.8.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activemodel
+  aws-s3!
+  chef!
+  coderay
+  couchrest!
+  json (= 1.4.6)
+  mixlib-authentication!
+  mixlib-authorization!
+  mixlib-cli
+  mixlib-localization!
+  opscode-billing!
+  opscode-dark-launch!
+  pg (~> 0.16.0)
+  rake
+  rb-appscript
+  rest-client (~> 1.6.0)
+  rspec (= 1.3.0)
+  sequel (~> 3.34.1)
