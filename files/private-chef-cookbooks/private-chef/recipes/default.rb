@@ -66,7 +66,14 @@ else
   private_chef_rb_exists = File.exists?(private_chef_path)
   private_chef_rb_not_symlink = !File.symlink?(private_chef_path)
   chef_server_rb_exists = File.exists?(chef_server_path)
-  if private_chef_rb_exists && private_chef_rb_not_symlink && chef_server_rb_exists
+  if chef_server_rb_exists
+    chef_server_rb_not_empty = !File.zero?(chef_server_path)
+  end
+  # Things are a bit tricky here, because there are multiple scenarios.  But the
+  # upshot is, if we have a private-chef.rb and don't have (or have an empty)
+  # chef-server.rb, then copy it over and link back.  Otherwise warn.
+  if private_chef_rb_exists && private_chef_rb_not_symlink && chef_server_rb_exists &&
+      chef_server_rb_not_empty
     Chef::Log.warn("/etc/opscode/private-chef.rb is deprecated and should be removed. Using /etc/opscode/chef-server.rb")
   elsif private_chef_rb_exists && private_chef_rb_not_symlink
     Chef::Log.warn("Moving to /etc/opscode/chef-server.rb for configuration - /etc/opscode/private-chef.rb is deprecated.")
