@@ -93,9 +93,9 @@ statements(pgsql) ->
         "  FROM org_user_associations a, users u"
         " WHERE org_id= $1 AND user_id= $2 AND a.user_id = u.id">>},
 
-     {list_user_org_associations, <<"SELECT o.name as name, o.full_name as full_name "
+     {list_user_org_associations, <<"SELECT o.name as name, o.full_name as full_name, o.id as guid"
                                     "  FROM org_user_associations a, orgs o"
-                                    " WHERE a.org_id = o.id "
+                                    " WHERE a.org_id = o.id"
                                     "   AND user_id = $1">>},
 
      % Note here that because an org association isn't an 'object' per se, the form is different -
