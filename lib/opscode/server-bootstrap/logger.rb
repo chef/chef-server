@@ -2,15 +2,15 @@
 # the logger
 ######################################################################
 
-module Chef::ServerBootstrap
+module Opscode::ServerBootstrap
 
   def self.logger
-    @logger ||= Chef::ServerBootstrap::Logger.new
+    @logger ||= Opscode::ServerBootstrap::Logger.new
   end
 
   module Loggable
     def log(*args)
-      Chef::ServerBootstrap.logger.log(*args)
+      Opscode::ServerBootstrap.logger.log(*args)
     end
   end
 

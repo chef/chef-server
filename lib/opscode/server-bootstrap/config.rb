@@ -4,7 +4,7 @@
 
 require 'mixlib/authorization'
 
-module Chef::ServerBootstrap
+module Opscode::ServerBootstrap
 
   def self.config
     @config ||= Config.new
@@ -19,7 +19,7 @@ module Chef::ServerBootstrap
 
   module Configurable
     def config
-      Chef::ServerBootstrap.config
+      Opscode::ServerBootstrap.config
     end
   end
 

@@ -4,9 +4,9 @@
 
 require 'sequel'
 require 'couchrest'
-require 'chef/server-bootstrap/config'
+require 'opscode/server-bootstrap/config'
 
-module Chef::ServerBootstrap
+module Opscode::ServerBootstrap
 
   def self.database_config
     @database_config ||= DatabaseConfig.new

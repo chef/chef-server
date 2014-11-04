@@ -4,7 +4,7 @@
 
 require 'opscode/mappers'
 
-module Chef::ServerBootstrap::Models
+module Opscode::ServerBootstrap::Models
   class User
 
     attr_accessor :name

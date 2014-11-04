@@ -1,0 +1,118 @@
+#! /usr/bin/env ruby
+
+require 'rubygems'
+require 'bundler/setup'
+$:.unshift(File.expand_path('../../lib', __FILE__))
+
+require 'mixlib/cli'
+require 'chef/server-bootstrap'
+require 'chef/server-bootstrap/bootstrapper'
+require 'highline/import'
+
+class BootstrapPlatform
+  include Mixlib::CLI
+
+  option(:config_file,
+         :short => '-c CONFIG',
+         :long => '--config CONFIG',
+         :description => 'Path to the config file [REQUIRED]')
+
+  option(:bootstrap_script,
+         :short => '-s SCRIPT',
+         :long => '--script SCRIPT',
+         :description => 'Path to the bootstrap script [REQUIRED]')
+
+  option(:yes,
+         :short => '-y',
+         :long => '--yes',
+         :description => 'Say yes to all prompts for confirmation')
+
+  def run
+    validate_options!
+    configure
+    confirm!
+    bootstrap
+  end
+
+  def configure
+    Opscode::Test.configure do |c|
+      c.instance_eval(File.read(config[:config_file]))
+    end
+  end
+
+  def confirm!
+    # fancy note: the quotes around the heredoc identifier disables
+    # escaping
+    puts <<-'LOLTIM'
+######################################################################
+                                      _
+            __      ____ _ _ __ _ __ (_)_ __   __ _
+            \ \ /\ / / _` | '__| '_ \| | '_ \ / _` |
+             \ V  V / (_| | |  | | | | | | | | (_| |
+              \_/\_/ \__,_|_|  |_| |_|_|_| |_|\__, |
+                                              |___/
+
+You are about to delete _ALL_ data from this Hosted Chef environment,
+please review the configuration parameters below before proceeding.
+
+######################################################################
+
+LOLTIM
+
+    puts Opscode::Test.config.to_s
+
+    puts <<-FOOTER
+
+######################################################################
+
+FOOTER
+
+    if !config[:yes]
+      answer = ask("Are you sure you would like to proceed? (y/n):")
+      if answer.strip.downcase != 'y'
+        puts 'Aborting. Goodbye!'
+        exit
+      end
+    end
+  end
+
+  def bootstrap
+    Opscode::Test::Bootstrapper.new.bootstrap(config[:bootstrap_script])
+  end
+
+  # check that the config file and bootstrap scripts are specified
+  # and that they exist
+  def validate_options!
+    parse_options
+
+    if config[:config_file]
+      if !File.exists?(config[:config_file])
+        STDERR.puts "ERROR: Config file #{config[:config_file]} does not exist."
+        print_usage_and_exit
+      end
+    else
+      STDERR.puts "ERROR: Please specify a config file."
+      print_usage_and_exit
+    end
+
+    if config[:bootstrap_script]
+      if !File.exists?(config[:bootstrap_script])
+        STDERR.puts "ERROR: Bootstrap script #{config[:bootstrap_script]} does not exist."
+        print_usage_and_exit
+      end
+    else
+      STDERR.puts "ERROR: Please specify a bootstrap script"
+      print_usage_and_exit
+    end
+  end
+
+  def print_usage_and_exit
+    STDERR.puts self.opt_parser
+    exit(1)
+  end
+end
+
+if __FILE__ == $0
+  BootstrapPlatform.new.run
+end
+

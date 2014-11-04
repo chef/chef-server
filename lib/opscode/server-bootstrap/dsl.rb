@@ -5,16 +5,16 @@
 require 'openssl'
 require 'restclient'
 require 'json'
-require 'chef/server-bootstrap/database_helper'
-require 'chef/server-bootstrap/logger'
-require 'chef/server-bootstrap/models/superuser'
+require 'opscode/server-bootstrap/database_helper'
+require 'opscode/server-bootstrap/logger'
+require 'opscode/server-bootstrap/models/superuser'
 
-module Chef::ServerBootstrap
+module Opscode::ServerBootstrap
   module DSL
 
-    include Chef::ServerBootstrap::Configurable
-    include Chef::ServerBootstrap::DatabaseHelper
-    include Chef::ServerBootstrap::Loggable
+    include Opscode::ServerBootstrap::Configurable
+    include Opscode::ServerBootstrap::DatabaseHelper
+    include Opscode::ServerBootstrap::Loggable
 
     GLOBAL_PLACEHOLDER_ORG_ID = "00000000000000000000000000000000"
 
@@ -23,7 +23,7 @@ module Chef::ServerBootstrap
     #
     def superuser
       log "Creating the superuser..."
-      su = Chef::ServerBootstrap::Models::Superuser.new
+      su = Opscode::ServerBootstrap::Models::Superuser.new
       yield su
       su.create
     end
