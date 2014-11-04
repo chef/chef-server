@@ -28,6 +28,7 @@
 ### chef-server-ctl
 * Partition server start/stop in upgrade process
 * Changed commands org-associate and org-dissociate to org-user-add and org-user-remove, respectively.
+* Update password command to use knife-opc so as to work post-removal of mixlib-authorization.
 
 ## 12.0.0.rc5 (2014-10-17)
 
