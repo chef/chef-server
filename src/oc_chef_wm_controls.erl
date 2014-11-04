@@ -106,7 +106,7 @@ create_path(Req, #base_state{resource_state = #control_state{control_data =
 
 from_json(Req, #base_state{resource_state = #control_state{control_data = ControlData,
                                                            control_group_id=Id}} = State) ->
-    RoutingKey = routing_key(<<"control_group">>),
+    RoutingKey = routing_key(),
     Msg = construct_payload(ControlData, Id, Req, State),
     publish(RoutingKey, Msg),
     %% return an empty response so knife raw doesn't throw an exception
@@ -160,9 +160,9 @@ req_header(Name, Req) ->
 publish(RoutingKey, Msg)->
     oc_chef_action_queue:publish(RoutingKey, Msg).
 
--spec routing_key(EntityType :: <<_:32,_:_*8>>) -> binary().
-routing_key(EntityType) ->
-    iolist_to_binary([<<"control_group.">>, EntityType]).
+-spec routing_key() -> binary().
+routing_key() ->
+    iolist_to_binary([<<"control_group">>]).
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
