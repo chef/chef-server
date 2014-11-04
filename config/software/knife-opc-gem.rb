@@ -16,7 +16,7 @@
 #
 
 name "knife-opc"
-default_version "tc/add-password-cmd"
+default_version "0.2.1"
 
 dependency "ruby"
 dependency "rubygems"
