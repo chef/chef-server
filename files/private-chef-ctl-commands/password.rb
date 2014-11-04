@@ -38,7 +38,7 @@ add_command "password", "Set a user's password or System Recovery Password.", 2 
     end
 
     command << '--user-password'
-    command << password
+    command << "'#{password}'"
     if ldap_authentication_enabled?
       command << '--recovery-authentication-enabled'
       verbed = 'enabled for System Recovery'
