@@ -1,13 +1,13 @@
-self.output_directory = '/tmp/opscode-platform-test'
+output_directory: '/tmp/opscode-platform-test'
 
-self.db_driver = "postgres" 
-self.db_host = '<%= node['private_chef']['postgresql']['vip'] %>'
-self.db_user = '<%= node['private_chef']['postgresql']['sql_user'] %>'
-self.db_password = '<%= node['private_chef']['postgresql']['sql_password'] %>'
+db_driver: "postgres"
+db_host: '<%= node['private_chef']['postgresql']['vip'] %>'
+db_user: '<%= node['private_chef']['postgresql']['sql_user'] %>'
+db_password: '<%= node['private_chef']['postgresql']['sql_password'] %>'
 
-self.bifrost_host = '<%= node['private_chef']['oc_bifrost']['vip'] %>'
-self.bifrost_port = '<%= node['private_chef']['oc_bifrost']['port'] %>'
-self.bifrost_superuser_id = '<%= node['private_chef']['oc_bifrost']['superuser_id'] %>'
+bifrost_host: '<%= node['private_chef']['oc_bifrost']['vip'] %>'
+bifrost_port: '<%= node['private_chef']['oc_bifrost']['port'] %>'
+bifrost_superuser_id: '<%= node['private_chef']['oc_bifrost']['superuser_id'] %>'
 
-self.superuser_cert = '/etc/opscode/pivotal.cert'
-self.superuser_key  = '/etc/opscode/pivotal.pem'
+superuser_cert: '/etc/opscode/pivotal.cert'
+superuser_key : '/etc/opscode/pivotal.pem'

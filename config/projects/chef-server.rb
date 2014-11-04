@@ -67,7 +67,7 @@ dependency "bookshelf"
 
 # the front-end services
 dependency "oc_bifrost"
-dependency "opscode-test"
+dependency "chef-server-bootstrap"
 dependency "oc_id"
 
 # log management
