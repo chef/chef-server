@@ -127,6 +127,8 @@ table.insert(shared_chef_tests, {"/organizations/testorg/search/",              
 table.insert(shared_chef_tests, {"/organizations/testorg/search/blah",                {TEST_ORG, "erchef", "search"}})
 table.insert(shared_chef_tests, {"/organizations/testorg/search?x=1",                 {TEST_ORG, "erchef", "search"}})
 
+table.insert(shared_chef_tests, {"/organizations/testorg/controls",                  {TEST_ORG, "erchef", "controls"}})
+
 for _k, val in pairs{ "cookbooks", "data" ,"roles", "sandboxes", "environments", "clients", "nodes" } do
 table.insert(shared_chef_tests, {"/organizations/testorg/" .. val,           {TEST_ORG, "erchef", val}})
 table.insert(shared_chef_tests, {"/organizations/testorg/" .. val .. "/",    {TEST_ORG, "erchef", val}})
