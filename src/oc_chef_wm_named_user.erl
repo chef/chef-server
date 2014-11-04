@@ -226,10 +226,14 @@ to_json(Req, #base_state{ resource_args = Args,
     end;
 to_json(Req, #base_state{ resource_args = org_list,
                           resource_state = #user_state{chef_user = User }, chef_db_context = DbContext } = State) ->
-
     case chef_db:list(#oc_chef_org_user_association{user_id = User#chef_user.id}, DbContext) of
-        Names when is_list(Names) ->
-            EJson = [ {[{ <<"organization">>, {[{<<"name">>, ShortName}, {<<"full_name">>, FullName}]} }]} || [ShortName, FullName] <- Names ],
+        Orgs when is_list(Orgs) ->
+            EJson = [{[
+                       {<<"organization">>, {[
+                                              {<<"name">>, ShortName},
+                                              {<<"full_name">>, FullName},
+                                              {<<"guid">>, Guid}]}}]}
+                     || [ShortName, FullName, Guid] <- Orgs ],
             {chef_json:encode(EJson), Req, State};
         Error ->
             {{halt, 500}, Req, State#base_state{log_msg = Error }}
