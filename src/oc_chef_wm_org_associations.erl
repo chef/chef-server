@@ -170,51 +170,57 @@ to_json(Req, #base_state{organization_name = OrgName,
             {{halt, 404}, Req1, State#base_state{log_msg = user_not_found}}
     end.
 
-
 from_json(Req, State) ->
     oc_chef_associations:wm_associate_user(Req, State, oc_chef_authz:superuser_id()).
 
-delete_resource(Req, #base_state{organization_guid = OrgId,
-                                 chef_db_context = DbContext,
-                                 requestor_id = RequestorId,
-                                 resource_state = #association_state{user = #chef_user{id = UserId }}} = State ) ->
+delete_resource(Req, #base_state{ resource_state = #association_state{user = #chef_user{username = UserName }}} = State ) ->
+    % POLICY NOTE: we explicitly prevent a user who is an admin from self-deletion from the org.
+    % If the user wants to disassociate from the org, it is a two step process: remove self from
+    % admins group, then remove self from the org. Error response reflects this.
+    case oc_chef_wm_base:user_in_group(State, UserName, <<"admins">>) of
+        true ->
+            Text = iolist_to_binary(["Please remove ", UserName, " from this organization's admins group before removing him or her from the organization."]),
+            Message = {[{<<"error">>, Text}]},
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 403}, Req1, State#base_state{log_msg = cannot_dissociate_self_while_admin}};
+        false ->
+            remove_user_from_org(Req, State)
+    end.
 
+remove_user_from_org(Req, #base_state{organization_guid = OrgId,
+                                      chef_db_context = DbContext,
+                                      requestor_id = RequestorId,
+                                      resource_state = #association_state{user = #chef_user{id = UserId}}} = State ) ->
+    % From this point forward the user is not a member of the org - even if subsequent
+    % steps in remove_user fail.
     case oc_chef_object_db:safe_delete(DbContext,
                                        #oc_chef_org_user_association{org_id = OrgId, user_id = UserId},
                                        RequestorId) of
         ok ->
-            remove_user(Req, State);
+            deprovision_user(Req, State);
         not_found ->
-            % Because we pre-checked membership, htis would only occur in a race condition.
+            % Because we pre-checked membership, this would only occur in a race condition.
             {{halt, 404}, Req, State#base_state{log_msg = association_not_found}};
         {error, What} ->
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
-remove_user(Req, #base_state{organization_name = OrgName,
+deprovision_user(Req, #base_state{organization_name = OrgName,
                              resource_state = #association_state{ user = #chef_user{username = UserName} = User}  } = State ) ->
-    case oc_chef_wm_base:user_in_group(State, UserName, <<"admins">>) of
-        true ->
-            Text = <<"Members of an organization's admins group cannot delete themselves. Remove yourself from the admins group, then retry this operation.">>,
-            Message = {[{<<"error">>, Text}]},
-            Req1 = chef_wm_util:set_json_body(Req, Message),
-            {{halt, 403}, Req1, State#base_state{log_msg = cannot_dissociate_self_while_admin}};
-        false ->
 
-            RequestorId = oc_chef_authz:superuser_id(),
-            case oc_chef_associations:deprovision_removed_user(State, User, RequestorId) of
-                ok ->
-                    EJ = chef_user:assemble_user_ejson(User, OrgName),
-                    {true, chef_wm_util:set_json_body(Req, EJ), State#base_state{log_msg = {removed, UserName, from, OrgName}}};
-                {warning, Warnings} ->
-                    lager:error("Warnings in deprovision of ~p from ~p: ~p", [UserName, OrgName, Warnings]),
-                    EJ = chef_user:assemble_user_ejson(User, OrgName),
-                    {true, chef_wm_util:set_json_body(Req, EJ), State#base_state{log_msg = {warning_in_deprovision, Warnings}}};
-                {error, Error} ->
-                    lager:error("Error in deprovision of ~p from ~p: ~p", [UserName, OrgName, Error]),
-                    {{halt, 500}, Req, State#base_state{log_msg = {error_in_deprovision, Error}}}
-             end
-    end.
+    RequestorId = oc_chef_authz:superuser_id(),
+    case oc_chef_associations:deprovision_removed_user(State, User, RequestorId) of
+        ok ->
+            EJ = chef_user:assemble_user_ejson(User, OrgName),
+            {true, chef_wm_util:set_json_body(Req, EJ), State#base_state{log_msg = {removed, UserName, from, OrgName}}};
+        {warning, Warnings} ->
+            lager:error("Warnings in deprovision of ~p from ~p: ~p", [UserName, OrgName, Warnings]),
+            EJ = chef_user:assemble_user_ejson(User, OrgName),
+            {true, chef_wm_util:set_json_body(Req, EJ), State#base_state{log_msg = {warning_in_deprovision, Warnings}}};
+        {error, Error} ->
+            lager:error("Error in deprovision of ~p from ~p: ~p", [UserName, OrgName, Error]),
+            {{halt, 500}, Req, State#base_state{log_msg = {error_in_deprovision, Error}}}
+     end.
 
 malformed_request_message(Any, _Req, _state) ->
     error({unexpected_malformed_request_message, Any}).
