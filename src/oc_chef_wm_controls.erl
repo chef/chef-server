@@ -81,21 +81,21 @@ auth_info(Req, State) ->
 auth_info('POST', Req, #base_state{resource_state = #control_state{control_data = ControlData},
                                    requestor=#chef_client{name = ClientName}} = State) ->
     % schema validates that node_name exist
-    MsgNodeName = ej:get({"node_name"}, ControlData),
-    case ClientName == MsgNodeName of
-        true ->
-            {authorized, Req, State};
-        false ->
-            {{halt, 403}, Req, State}
+    case ej:get({"node_name"}, ControlData) of
+    ClientName ->
+        {authorized, Req, State};
+    _Else ->
+        {{halt, 403}, Req, State}
     end;
+
+
 auth_info('POST', Req, State) ->
     {{halt, 403}, Req, State}.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
 
-create_path(Req, #base_state{resource_state = #control_state{control_data =
-                                                             _ControlData} = ControlGroupState}
+create_path(Req, #base_state{resource_state = #control_state{} = ControlGroupState}
                                                             = State) ->
     %% create the ID and stash it in the state
     %% This path isn't very useful, as we don't provide a way to GET a
