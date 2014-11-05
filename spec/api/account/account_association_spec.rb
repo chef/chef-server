@@ -908,15 +908,29 @@ describe "opscode-account user association", :association do
 
       context "user acting on self" do
         context "when actor is also an org admin" do
-          before { platform.add_user_to_group(org, test_user, "admins") }
-          after  { platform.remove_user_from_group(org, test_user, "admins") }
-
+          before :each do
+            platform.add_user_to_group(org, test_user, "admins")
+          end
+          after :each do
+            platform.remove_user_from_group(org, test_user, "admins")
+          end
           it "cannot delete own org association", :authorization do
-            pending("new constraint in erchef- ruby returns 200", :if => ruby?) do
-              delete(request_url, test_user).should look_like({
-                  :status => 403,
-                  :body_exact => {"error" => "Members of an organization's admins group cannot delete themselves. Remove yourself from the admins group, then retry this operation." }
-                })
+            pending("new constraint in erchef- ruby permits this deletion", :if => ruby?) do
+                delete(request_url, test_user).should look_like({
+                    :status => 403,
+                    :body_exact => {"error" => "Please remove #{test_user.name} from this organization's admins group before removing him or her from the organization." }
+                  })
+            end
+          end
+
+          # Bug/regression check: prior to the fix, the user would be removed from the org member
+          # list, even though other permissions were not modified.
+          it "prevents deletion and does not break the admin org association in the process" do
+            pending("new constraint in erchef- ruby permits this deletion", :if => ruby?) do
+              delete(request_url, test_user)
+              # get users requires org membership to complete, so is a safe litmus to
+              # verify that the user is still in the org
+              get(api_url("users"), test_user).should look_like({ :status => 200 })
             end
           end
         end
