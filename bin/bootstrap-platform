@@ -35,7 +35,7 @@ class BootstrapPlatform
   end
 
   def configure
-    Opscode::Test.configure do |c|
+    Opscode::ServerBootstrap.configure do |c|
       c.instance_eval(File.read(config[:config_file]))
     end
   end
@@ -59,7 +59,7 @@ please review the configuration parameters below before proceeding.
 
 LOLTIM
 
-    puts Opscode::Test.config.to_s
+    puts Opscode::Bootstrap.config.to_s
 
     puts <<-FOOTER
 
@@ -77,7 +77,7 @@ FOOTER
   end
 
   def bootstrap
-    Opscode::Test::Bootstrapper.new.bootstrap(config[:bootstrap_script])
+    Opscode::Bootstrap::Bootstrapper.new.bootstrap(config[:bootstrap_script])
   end
 
   # check that the config file and bootstrap scripts are specified
