@@ -1,9 +1,3 @@
-######################################################################
-# config data
-######################################################################
-
-require 'mixlib/authorization'
-
 module Opscode::ServerBootstrap
 
   def self.config
@@ -12,9 +6,6 @@ module Opscode::ServerBootstrap
 
   def self.configure
     yield config
-
-    Mixlib::Authorization::Config.authorization_service_uri = "http://#{config.bifrost_host}:#{config.bifrost_port}"
-    require 'mixlib/authorization/models'
   end
 
   module Configurable

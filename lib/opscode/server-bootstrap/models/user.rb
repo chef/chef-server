@@ -1,9 +1,3 @@
-######################################################################
-# the user model
-######################################################################
-
-require 'opscode/mappers'
-
 module Opscode::ServerBootstrap::Models
   class User
 

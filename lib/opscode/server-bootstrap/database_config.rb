@@ -3,7 +3,6 @@
 ######################################################################
 
 require 'sequel'
-require 'couchrest'
 require 'opscode/server-bootstrap/config'
 
 module Opscode::ServerBootstrap
