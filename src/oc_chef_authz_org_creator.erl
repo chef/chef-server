@@ -101,7 +101,7 @@
 
            %% clients
            {add_acl, [{container, nodes}], [read, create], [{group, clients}]},
-           {add_acl, [{container, data}], [read, create, update, delete], [{group, clients}]},
+           {add_acl, [{container, data}], [read], [{group, clients}]},
            {add_acl, mk_tl(container, [cookbooks, environments, roles]), [read] , [{group, clients}]}
           ]
          }
