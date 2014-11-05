@@ -113,6 +113,10 @@
 
 ### Renamed chef server core instead of Private Chef or Enterprise Chef.
 
+### opscode-omnibus
+* Change to using /etc/opscode/chef-server.rb from /etc/opscode/private-chef.rb
+* Symlink private-chef.rb to chef-server.rb if private-chef.rb is present
+
 ### bookshelf 1.1.4
 * Erlang R16 support
 

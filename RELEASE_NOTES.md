@@ -15,6 +15,10 @@
 * [opscode-omnibus] Ensure contents of install dir (/opt/opscode) are owned by root.
 
 ## 12.0.0
+* /ect/opscode/chef-server.rb is the new configuration file for the server and /etc/opscode/private-chef.rb is deprecated.
+  If private-chef.rb is found on the system it will be symlinked into place if chef-server.rb is not
+  present on the system or is empty.
+
 
 ### What's New:
 
