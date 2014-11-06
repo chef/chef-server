@@ -9,8 +9,7 @@
 The following items are new for Enterprise Chef 11.2.6 and/or are
 changes from previous versions:
 
-* Adjust perms to 0750 for all service's log dir
-* Add and use new perms attribute
+* [OC-11712] Adjust perms to 0750 for all service's log dirs
 
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.6:
 

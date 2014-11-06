@@ -4,8 +4,6 @@
 #
 # All Rights Reserved
 
-owner = node['private_chef']['user']['username']
-group = owner
 
 opscode_chef_mover_dir = node['private_chef']['opscode-chef-mover']['dir']
 opscode_chef_mover_etc_dir = File.join(opscode_chef_mover_dir, "etc")
@@ -20,7 +18,8 @@ opscode_chef_mover_sasl_log_dir = File.join(opscode_chef_mover_log_dir, "sasl")
   opscode_chef_mover_sasl_log_dir
 ].each do |dir_name|
   directory dir_name do
-    owner owner
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode node['private_chef']['service_dir_perms']
     recursive true
   end
@@ -32,8 +31,8 @@ end
 
 template "/opt/opscode/embedded/service/opscode-chef-mover/bin/mover" do
   source "opscode-chef-mover.erb"
-  owner owner
-  group group
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode "0755"
   variables(node['private_chef']['opscode-chef-mover'].to_hash)
 end
@@ -42,8 +41,8 @@ mover_config = File.join(opscode_chef_mover_etc_dir, "sys.config")
 
 template mover_config do
   source "opscode-chef-mover.config.erb"
-  owner owner
-  group group
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode "644"
   variables(node['private_chef']['opscode-chef-mover'].to_hash.merge({:helper => OmnibusHelper.new(node)}))
 end

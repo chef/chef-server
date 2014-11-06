@@ -9,9 +9,6 @@ cookbook_migration = "/opt/opscode/embedded/bin/cookbook_migration.sh"
 checksum_path = node['private_chef']['opscode-chef']['checksum_path']
 data_path = node['private_chef']['bookshelf']['data_dir']
 
-owner = node['private_chef']['user']['username']
-group = owner
-
 template cookbook_migration do
   source "cookbook_migration.sh.erb"
   owner "root"
@@ -35,8 +32,8 @@ bookshelf_sasl_log_dir = File.join(bookshelf_log_dir, "sasl")
   data_path
 ].each do |dir_name|
   directory dir_name do
-    owner owner
-    group group
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode node['private_chef']['service_dir_perms']
     recursive true
   end
@@ -44,7 +41,7 @@ end
 
 execute "cookbook migration" do
   command cookbook_migration
-  user owner
+  user OmnibusHelper.new(node).ownership['owner']
   not_if { File.exist?("#{data_path}/_%_BOOKSHELF_DISK_FORMAT") }
 end
 
@@ -54,8 +51,8 @@ end
 
 template "/opt/opscode/embedded/service/bookshelf/bin/bookshelf" do
   source "bookshelf.erb"
-  owner owner
-  group group
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode "0755"
   variables(node['private_chef']['bookshelf'].to_hash)
   notifies :restart, 'runit_service[bookshelf]' if is_data_master?
@@ -65,8 +62,8 @@ bookshelf_config = File.join(bookshelf_etc_dir, "app.config")
 
 template bookshelf_config do
   source "bookshelf.config.erb"
-  owner owner
-  group group
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode "644"
   variables(node['private_chef']['bookshelf'].to_hash)
   notifies :restart, 'runit_service[bookshelf]' if is_data_master?

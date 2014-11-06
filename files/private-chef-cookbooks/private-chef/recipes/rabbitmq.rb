@@ -26,7 +26,8 @@ rabbitmq_log_dir = rabbitmq['log_directory']
 
 [ rabbitmq_dir, rabbitmq_etc_dir, rabbitmq_data_dir, rabbitmq_log_dir ].each do |dir_name|
   directory dir_name do
-    owner node['private_chef']['user']['username']
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode node['private_chef']['service_dir_perms']
     recursive true
   end
@@ -73,7 +74,7 @@ component_runit_service "rabbitmq"
 if is_data_master?
   rmq_ctl = "/opt/opscode/embedded/bin/rabbitmqctl"
   opc_ctl = "/opt/opscode/bin/private-chef-ctl"
-  opc_username = node["private_chef"]["user"]["username"]
+  opc_username = OmnibusHelper.new(node).ownership['owner']
   rmq_ctl_chpost = "/opt/opscode/embedded/bin/chpst -u #{opc_username} -U #{opc_username} #{rmq_ctl}"
 
   execute "#{opc_ctl} start rabbitmq" do

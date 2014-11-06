@@ -12,7 +12,8 @@ expander_reindexer_log_dir = node['private_chef']['opscode-expander']['reindexer
 
 [ expander_dir, expander_etc_dir, expander_log_dir, expander_reindexer_log_dir ].each do |dir_name|
   directory dir_name do
-    owner node['private_chef']['user']['username']
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode node['private_chef']['service_dir_perms']
     recursive true
   end

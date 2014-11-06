@@ -19,7 +19,8 @@ keepalived_log_dir = node['private_chef']['keepalived']['log_directory']
 end
 
 directory keepalived_log_dir do
-  owner node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   recursive true
   mode node['private_chef']['service_dir_perms']
 end

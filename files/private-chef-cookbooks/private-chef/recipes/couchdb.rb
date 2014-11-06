@@ -14,9 +14,10 @@ couchdb_log_dir = node['private_chef']['couchdb']['log_directory']
 # Create the CouchDB directories
 [ couchdb_dir, couchdb_etc_dir, couchdb_data_dir, couchdb_log_dir ].each do |dir_name|
   directory dir_name do
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode node['private_chef']['service_dir_perms']
     recursive true
-    owner node['private_chef']['user']['username']
   end
 end
 
@@ -28,7 +29,8 @@ end
 # Drop off the CouchDB configuration file
 template File.join(couchdb_etc_dir, "local.ini") do
   source "local.ini.erb"
-  owner node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode "0600"
   variables(node['private_chef']['couchdb'].to_hash)
   notifies :restart, "runit_service[couchdb]" if is_data_master?
@@ -75,7 +77,7 @@ template "/etc/cron.d/couchdb_compact" do
     :cron_shell => "/bin/bash",
     :cron_home => couchdb_dir,
     :cron_schedule => "17 1,9,17 * * *",
-    :cron_user => node['private_chef']['user']['username'],
+    :cron_user => OmnibusHelper.new(node).ownership['owner'],
     :cron_path => "/usr/bin:/usr/sbin:/bin:/opt/opscode/embedded/bin",
     :cron_command => cron_cmd
   )
@@ -90,7 +92,7 @@ template "/etc/cron.d/couchdb_compact_major_offenders" do
     :cron_shell => "/bin/bash",
     :cron_home => couchdb_dir,
     :cron_schedule => "17 3,5,7,11,13,15,19,21,23 * * *",
-    :cron_user => node['private_chef']['user']['username'],
+    :cron_user => OmnibusHelper.new(node).ownership['owner'],
     :cron_path => "/usr/bin:/usr/sbin:/bin:/opt/opscode/embedded/bin",
     :cron_command => cron_cmd_major_offenders
   )

@@ -31,7 +31,8 @@ nginx_addon_dir = File.join(nginx_etc_dir, "addon.d")
   nginx_tempfile_dir
 ].each do |dir_name|
   directory dir_name do
-    owner node['private_chef']['user']['username']
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode node['private_chef']['service_dir_perms']
     recursive true
   end
@@ -93,7 +94,8 @@ remote_directory nginx_html_dir do
   files_owner "root"
   files_group "root"
   files_mode "0644"
-  owner node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode node['private_chef']['service_dir_perms']
 end
 

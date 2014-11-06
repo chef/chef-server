@@ -1,6 +1,9 @@
 # Enterprise Chef Changelog
 
 ## 11.2.6 (Unreleased)
+* Add an OmnibusHelper method to provide an owner and group hash
+* Reference owner and group for log dirs in recipes where only owner is found
+* Fix other recipe locations referencing node['private_chef']['user']['username'] directly
 * Adjust perms to 0750 for all service's log dir
 * Add and use new perms attribute
 
