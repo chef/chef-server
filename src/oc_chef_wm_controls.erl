@@ -44,7 +44,7 @@
 -define(CHEF_CONTROL_GROUP_MESSAGE_VERSION, <<"0.1.0">>).
 
 -define(CONTROL_GROUP_SCHEMA,
-        {[ {<<"control_group">>, object},
+        {[ {<<"control_groups">>, array},
            {<<"node_name">>, string},
            {<<"run_id">>, string}
          ]}).
@@ -124,19 +124,20 @@ construct_payload(FullControlGroupPayload,
                                    organization_name = OrgName,
                                    requestor = _Requestor}
                                    ) ->
-    Msg = {[{<<"message_type">>, <<"control_group">>},
+    Msg = {[{<<"message_type">>, <<"control_groups">>},
             {<<"message_version">>, ?CHEF_CONTROL_GROUP_MESSAGE_VERSION},
             {<<"organization_name">>, OrgName},
             {<<"chef_server_fqdn">>, hostname()},
             {<<"recorded_at">>, req_header("x-ops-timestamp", Req)},
             {<<"remote_hostname">>, req_header("x-forwarded-for", Req)},
             {<<"request_id">>, RequestId},
+            {<<"node_name">>, ej:get({<<"node_name">>}, FullControlGroupPayload)},
             {<<"id">>, Id},
-            {<<"control_group">>, ej:get({<<"control_group">>}, FullControlGroupPayload)}
+            {<<"run_id">>, ej:get({<<"run_id">>}, FullControlGroupPayload)},
+            {<<"control_groups">>, ej:get({<<"control_groups">>}, FullControlGroupPayload)}
            ]},
     Msg1 = maybe_add_remote_request_id(Msg, req_header("x-remote-request-id", Req)),
     iolist_to_binary(chef_json:encode(Msg1)).
-
 
 maybe_add_remote_request_id(Msg, undefined) ->
     Msg;
