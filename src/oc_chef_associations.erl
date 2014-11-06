@@ -28,7 +28,7 @@
 -type deprovision_response() ::  ok | deprovision_warning_tuple() | deprovision_error_tuple().
 
 -type provision_error() :: usag_authz_creation_failed | usag_creation_failed |fetch_org_users_group_failed |
-                           usag_update_failed | add_usag_to_org_users_group_failed | add_user_to_usag_failed.
+                           usag_update_failed | add_usag_to_org_users_group_failed | fetch_org_users_group_by_name_failed.
 -type provision_warning() :: fetch_org_admins_failed | add_read_ace_for_admins_failed.
 -type provision_error_tuple() :: {error, { provision_error(), term()}}.
 -type provision_warning_msg() :: { provision_warning(), term() }.
@@ -249,7 +249,7 @@ provision_add_usag_to_org_users(#oc_chef_group{} = OrgUsersGroup,
     Result = chef_db:update(OrgUsersGroup0, DbContext, RequestorAuthzId),
     provision_fetch_org_global_admins(Result, Context);
 provision_add_usag_to_org_users(Error, _Context) ->
-    {error, {add_user_to_usag_failed, Error}}.
+    {error, {fetch_org_users_group_by_name_failed, Error}}.
 
 provision_fetch_org_global_admins(ok, #context{org_name = OrgName,
                                         authz_context = AuthzContext } = Context) ->
