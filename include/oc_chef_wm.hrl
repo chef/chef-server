@@ -11,6 +11,12 @@
           oc_chef_container :: #oc_chef_container{}
          }).
 
+
+-record(control_state, {
+          control_data,
+          control_group_id
+         }).
+
 -record(group_state, {
           group_data,
           group_authz_id,
