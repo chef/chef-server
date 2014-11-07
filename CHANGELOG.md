@@ -18,12 +18,14 @@
 * changes to addon installs to default to lucid when current ubuntu codename isn't in the accepted list (to support installs on 14)
 * added apt-transport-https package in case it was missing from the system (packagecloud requires it)
 * created chef-server.rb during install to cut down on user confusion
+* Change postgres effective_cache_size to 50% of available RAM instead of hard coding at 128MB
 
 ### private-chef-cookbooks
 * [OC-11769] make oc_chef_authz a tunable in private-chef.rb
 * Fix oc_chef_authz timeout tunable
 * Make postgresql slow query logging configurable
 * Fix missing resources on API HTML pages
+* Fixed the default value for Postgres effective_cache_size
 
 ### chef-server-ctl
 * Partition server start/stop in upgrade process
