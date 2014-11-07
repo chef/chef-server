@@ -62,6 +62,11 @@ default['private_chef']['user']['shell'] = "/bin/sh"
 default['private_chef']['user']['home'] = "/opt/opscode/embedded"
 
 ####
+# Service data_dir, etc_dir, log_directory perms
+####
+default['private_chef']['service_dir_perms'] = "0750"
+
+####
 # CouchDB (legacy required for upgrades to work)
 ####
 default['private_chef']['couchdb']['data_dir'] = "/var/opt/opscode/couchdb/db"

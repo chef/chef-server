@@ -13,8 +13,9 @@ upgrades_service_dir = "/opt/opscode/embedded/service/partybus"
   upgrades_service_dir
 ].each do |dir_name|
   directory dir_name do
-    owner node['private_chef']['user']['username']
-    mode '0700'
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
+    mode node['private_chef']['service_dir_perms']
     recursive true
   end
 end
@@ -28,7 +29,8 @@ node_role = node['private_chef']['role']
 
 template partybus_config do
   source "partybus_config.rb.erb"
-  owner node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode   "0644"
   variables(:connection_string => "postgres:/opscode_chef",
             :as_user => node['private_chef']['postgresql']['username'],
