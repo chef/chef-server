@@ -182,7 +182,7 @@ delete_resource(Req, #base_state{ resource_state = #association_state{user = #ch
             Text = iolist_to_binary(["Please remove ", UserName, " from this organization's admins group before removing him or her from the organization."]),
             Message = {[{<<"error">>, Text}]},
             Req1 = chef_wm_util:set_json_body(Req, Message),
-            {{halt, 403}, Req1, State#base_state{log_msg = cannot_dissociate_self_while_admin}};
+            {{halt, 403}, Req1, State#base_state{log_msg = admin_user_removal_not_permitted}};
         false ->
             remove_user_from_org(Req, State)
     end.
