@@ -95,10 +95,10 @@ describe "Org Creation", :org_creation do
       end
 
       should_have_default_acls_for "/containers/data" do
-        let(:create_groups) { requestor_groups }
+        let(:create_groups) { user_groups }
         let(:read_groups)   { requestor_groups }
-        let(:update_groups) { requestor_groups }
-        let(:delete_groups) { requestor_groups }
+        let(:update_groups) { user_groups }
+        let(:delete_groups) { user_groups }
         let(:grant_groups)  { admin_groups }
       end
 

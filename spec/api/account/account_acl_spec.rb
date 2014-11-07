@@ -808,7 +808,8 @@ describe "ACL API", :acl do
           let(:groups) { [] }
           let(:grant_groups) { [] }
         when "data"
-          let(:groups) { ["users", "clients", "admins"] }
+          let(:read_groups) { ["users","clients", "admins"] }
+          let(:groups) { ["users","admins"] }
         when "nodes"
           let(:groups) { ["users", "clients", "admins"] }
           let(:update_groups) { ["users", "admins"] }
