@@ -5,6 +5,8 @@
 # All Rights Reserved
 #
 
+BYTES_IN_GIG = 1048576
+
 ###
 # Set a project-name for the enterprise-chef-common cookbook
 ###
@@ -359,7 +361,24 @@ default['private_chef']['postgresql']['keepalives_count'] = 2
 default['private_chef']['postgresql']['md5_auth_cidr_addresses'] = [ '127.0.0.1/32', '::1/128' ]
 default['private_chef']['postgresql']['shmmax'] = 17179869184
 default['private_chef']['postgresql']['shmall'] = 4194304
-default['private_chef']['postgresql']['shared_buffers'] = "#{(node['memory']['total'].to_i / 4) / (1024)}MB"
+
+# Make sure we don't allocate more shared memory than the max.
+# Especailly relevant on large machines. #597
+#
+# This is based on the tuning parameters here:
+#  https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
+# They generally recomend 25% of avalable memory, and we reserve 15% of shared memory for other uses
+# We limit to 2GB less than shmmax as exessive amounts of shared memory is unhelpful.
+quarter_mem = node['memory']['total'].to_i/4
+postgres_max_mem = [0.85*node['private_chef']['postgresql']['shmmax'],
+                    node['private_chef']['postgresql']['shmmax'] - 2*BYTES_IN_GIG].min
+if(quarter_mem > postgres_max_mem)
+  shared_bytes = postgres_max_mem
+else
+  shared_bytes = quarter_mem
+end
+default['private_chef']['postgresql']['shared_buffers'] = "#{shared_bytes/1024}MB"
+
 default['private_chef']['postgresql']['work_mem'] = "8MB"
 default['private_chef']['postgresql']['effective_cache_size'] = "#{(node['memory']['total'].to_i / 2) / (1024)}MB"
 default['private_chef']['postgresql']['checkpoint_segments'] = 3
