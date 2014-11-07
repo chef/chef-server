@@ -9,6 +9,7 @@
 The following items are new for Enterprise Chef 11.2.6 and/or are
 changes from previous versions:
 
+* [OC-11712] Adjust perms to 0750 for all service's log dirs
 
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.6:
 
@@ -22,6 +23,7 @@ changes from previous versions:
 
 * [nginx] Remove client version limit so Chef 12 can be used
 * [private-chef-cookbooks] Make postgresql slow query logging configurable
+* [private-chef-cookbooks] Adjust perms to 0750 for all service's log dir
 
 ### Bug Fixes:
 

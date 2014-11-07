@@ -37,7 +37,7 @@ end
 directory node['private_chef']['postgresql']['home'] do
   owner node['private_chef']['postgresql']['username']
   recursive true
-  mode "0700"
+  mode node['private_chef']['service_dir_perms']
 end
 
 file File.join(node['private_chef']['postgresql']['home'], ".profile") do
@@ -51,14 +51,16 @@ end
 ####
 
 directory postgresql_log_dir do
-  owner node['private_chef']['user']['username']
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   recursive true
+  mode node['private_chef']['service_dir_perms']
 end
 
 directory postgresql_dir do
   owner node['private_chef']['postgresql']['username']
   recursive true
-  mode "0700"
+  mode node['private_chef']['service_dir_perms']
 end
 
 ####

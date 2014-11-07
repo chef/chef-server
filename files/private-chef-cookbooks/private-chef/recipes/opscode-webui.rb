@@ -20,8 +20,9 @@ private_chef_webui_log_dir = node['private_chef']['opscode-webui']['log_director
 
 ].each do |dir_name|
   directory dir_name do
-    owner node['private_chef']['user']['username']
-    mode '0700'
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
+    mode node['private_chef']['service_dir_perms']
     recursive true
   end
 end
@@ -87,6 +88,6 @@ link "/opt/opscode/embedded/service/opscode-webui/tmp" do
   to private_chef_webui_tmp_dir
 end
 
-execute "chown -R #{node['private_chef']['user']['username']} /opt/opscode/embedded/service/opscode-webui/public"
+execute "chown -R #{OmnibusHelper.new(node).ownership['owner']} /opt/opscode/embedded/service/opscode-webui/public"
 
 component_runit_service "opscode-webui"

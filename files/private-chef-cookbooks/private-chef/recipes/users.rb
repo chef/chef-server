@@ -17,12 +17,12 @@
 #
 
 # Create a user for Chef services to run as
-user node['private_chef']['user']['username'] do
+user OmnibusHelper.new(node).ownership['owner'] do
   system true
   shell node['private_chef']['user']['shell'] 
   home node['private_chef']['user']['home']
 end
 
-group node['private_chef']['user']['username'] do
-  members [node['private_chef']['user']['username']]
+group OmnibusHelper.new(node).ownership['group'] do
+  members [OmnibusHelper.new(node).ownership['owner']]
 end
