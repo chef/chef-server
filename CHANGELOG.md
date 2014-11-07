@@ -19,6 +19,7 @@
 * added apt-transport-https package in case it was missing from the system (packagecloud requires it)
 * created chef-server.rb during install to cut down on user confusion
 * Change postgres effective_cache_size to 50% of available RAM instead of hard coding at 128MB
+* [opscode-omnibus-597] Limit postgresql shared memory usage to stay under SHMAX
 
 ### private-chef-cookbooks
 * [OC-11769] make oc_chef_authz a tunable in private-chef.rb

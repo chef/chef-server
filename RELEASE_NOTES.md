@@ -5,6 +5,7 @@
 * Fix oc_chef_authz timeout tunable
 * Make postgresql slow query logging configurable
 * Adjust perms to 0750 for all service's log dir
+* [opcode-omnibus-597] Ensure postgresql is set with shared memory less than SHMAX.
 
 ## 12.0.0.rc5 (2014-10-17)
  * [openssl] openssl has been updated to 1.0.1j to address
