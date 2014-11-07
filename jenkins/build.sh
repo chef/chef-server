@@ -27,6 +27,6 @@ else
     VERSION=${REL_VERSION}-${GIT_SHA}
     PACKAGE=${PROJ_NAME}-${VERSION}.tar.gz
     cd rel
-    tar zcvf $PACKAGE $PROJ_NAME/
+    tar zcf $PACKAGE $PROJ_NAME/
     s3cmd put $PACKAGE s3://$ARTIFACT_BASE/$PACKAGE
 fi
