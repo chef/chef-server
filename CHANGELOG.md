@@ -2,15 +2,50 @@
 
 ## 12.0.0.rc6 (unreleased)
 
-### oc-chef-pedant 1.0.62
-* Fix for consistent return values in oc_erchef
+### oc-chef-pedant 1.0.64
+* Add coverage for /users/USER/organizations endpoint
 
-### oc_erchef 0.28.3
+### oc-chef-pedant 1.0.63
+* additional test for proper behavior when attempting to remove an org's
+  admin.
+* Update tests to reflect that clients no longer have C/U/D permissions
+  on data bags by default.
+
+### oc-chef-pedant 1.0.62
+* Fix for consistent return values in oc\_erchef
+
+### oc\_erchef 0.29.2
+* set default client ACLs for data bags to read-only.  See Release Notes for i
+  important related details.
+* correct message logging in org-user association/disassociation process
+* new /controls endpoint in support of upcoming client features
+
+### oc\_erchef 0.29.1
+* revert functionality change where erchef version of /users/X/organizations
+  endpoint no longer returned "guid" field. This field is used by internal
+  products  in our hosted environment and cannot yet be removed.
+* fix regression in which organization user was partially removed
+  even though removal was disallowed because user is an admin.
+* update actions to support capture of acl activity
+
+### oc\_erchef 0.29.0
+* Internal placeholder we used to indicate our *hosted* product
+  switch from Erlang R15B03-1 to R16B03-1.  Note that R16B03-1 has been
+  included in CS12 since the first RC.
+
+### oc\_erchef 0.28.5
+* update sqerl to use queuing-enabled pooler API
+* update pooler to 1.3.3, which adds queueing support
+
+### oc\_erchef 0.28.4
+* Add folsom-graphite dependency (used for runtime stats gathering)
+
+### oc\_erchef 0.28.3
 * Org support in postgres
 * Reindexing support to check redis flags
 * Fix typo in darklaunch interrogation
 
-### oc_id
+### oc\_id
 * Set `VERSION` environment variable on database migrations to avoid conflict
   during upgrades
 
@@ -18,15 +53,18 @@
 * changes to addon installs to default to lucid when current ubuntu codename isn't in the accepted list (to support installs on 14)
 * added apt-transport-https package in case it was missing from the system (packagecloud requires it)
 * created chef-server.rb during install to cut down on user confusion
-* Change postgres effective_cache_size to 50% of available RAM instead of hard coding at 128MB
 * [opscode-omnibus-597] Limit postgresql shared memory usage to stay under SHMAX
+* Change postgres effective\_cache\_size to 50% of available RAM instead of hard coding at 128MB
+* changelog - fix markdown formatting errors
+* changelog - added this changelog note
+>>>>>>> pedant 1.0.64 and erchef 0.29.2
 
 ### private-chef-cookbooks
-* [OC-11769] make oc_chef_authz a tunable in private-chef.rb
-* Fix oc_chef_authz timeout tunable
+* [OC-11769] make oc\_chef\_authz a tunable in private-chef.rb
+* Fix oc\_chef\_authz timeout tunable
 * Make postgresql slow query logging configurable
 * Fix missing resources on API HTML pages
-* Fixed the default value for Postgres effective_cache_size
+* Fixed the default value for Postgres effective\_cache\_size
 * Adjust perms to 0750 for all service's log dir
 * Add and use new perms attribute
 * Add an OmnibusHelper method to provide an owner and group hash
@@ -46,34 +84,34 @@
 ### opscode-omnibus
 * properly configure ldap under erchef, and add some safeguards
   against incorrect encryption configuration.
-* oc_erchef updated to 0.27.4
-* Bump the chef_max_version to 12 (this is the max chef client version that Chef Server will accept)
+* oc\_erchef updated to 0.27.4
+* Bump the chef\_max\_version to 12 (this is the max chef client version that Chef Server will accept)
 * expose license configuration options
 * Add man page for chef-server-ctl.
 * Correct gather-logs to point to chef-server.rb
 * Disable SSLv3 support in nginx
 * Added command line options to open-source-to-chef-server-12 upgrade for finer-grained control of migration process
 
-### oc_erchef 0.27.7
+### oc\_erchef 0.27.7
 * Improve error handling in org creation and deletion.
 
-### oc_erchef 0.27.6
+### oc\_erchef 0.27.6
 * Fixed pooler bug with regard to timed out pool member starts
 
-### oc_erchef 0.27.5
+### oc\_erchef 0.27.5
 * Add org info to actions
 
-### oc_erchef 0.27.4
-* ldap start_tls support
-* ldap simple_tls support
+### oc\_erchef 0.27.4
+* ldap start\_tls support
+* ldap simple\_tls support
 * support for correctly looking up users by external auth id
 * fix for GET of org users not returning correct state record, resulting
   in requests not properly terminating
 
-### oc_erchef 0.27.3
+### oc\_erchef 0.27.3
 * Fix meck dependency locking issue.
 
-## oc_id 0.4.2
+## oc\_id 0.4.2
 * Add support for Chef signed headers in Resource Owner Password
   Credentials flow
 * Add new endpoint (/v1/me/organizations) to get the list of
@@ -83,7 +121,7 @@
 
 ### opscode-chef-mover 2.2.15
 * Clean up error handling for org user associations and invites migrations
-* Fix backwards compatibility issues with oc_chef_authz intergration
+* Fix backwards compatibility issues with oc\_chef\_authz intergration
 
 ### rest server API
 * removed check for maximum client version (only checks for minimum, i.e., <10)
@@ -93,7 +131,7 @@
 * Restricted chef-server-ctl install to known Chef packages
 * Correct show-config command/recipe to point at chef-server.rb instead of private-chef.rb
 * Updated knife-opc config so that user / org / association commands now work if non-default ports are used.
-* re-enable ctrl+c for chef-server-ctl commands by setting "client_fork false" in solo.rb
+* re-enable ctrl+c for chef-server-ctl commands by setting "client\_fork false" in solo.rb
 
 ### omnibus-ctl 0.3.0
 
@@ -139,13 +177,13 @@
 * We are pleased to announce that we have migrated all data over to sql.
 
 ### enterprise-chef-server-schema 2.4.0
-* Updates org_migration_state table with migration_type and verification
-* Update org_migration _state with support for solr 4 migration
+* Updates org\_migration\_state table with migration\_type and verification
+* Update org\_migration\_state with support for solr 4 migration
 * Cleans up reporting schema info table
 * Clean up Makefile to preserve PATH variable
 * Update password hash type for OSC password hash types
-* Fix constraints for org_user_assocations and org_user_invites
-* Add tables for organizations, org_user_associations, and org_user_invites
+* Fix constraints for org\_user\_assocations and org\_user\_invites
+* Add tables for organizations, org\_user\_associations, and org\_user\_invites
 
 ### erlang R16B03 added
 * Replaced R15, which was only used by the services we removed.
@@ -158,40 +196,40 @@
 * Enhance test coverage for user-org association
 * Update acl, organization and association tests for ruby-erlang differences
 * Add tests for
-  * authenticate_user endpoint
+  * authenticate\_user endpoint
   * users email validation
   * superuser access
   * certs in pubkey field for user
   * default organization rewriting
   * verify-password
 
-### oc_authz_migrator removed
-* oc_authz_migrator is no longer needed
+### oc\_authz\_migrator removed
+* oc\_authz\_migrator is no longer needed
 
-### oc_erchef updated to 0.27.3
+### oc\_erchef updated to 0.27.3
 
-#### oc_erchef 0.27.3
+#### oc\_erchef 0.27.3
 * Organizations in erchef and in sql
 * organization association and invites in erchef and sql
 
-#### oc_erchef 0.26
+#### oc\_erchef 0.26
 * Initial low level work for organizations and associations in SQL
 * Improve reindexing script
 * ACL endpoint in erchef
-* Add chef action data_payloads
+* Add chef action data\_payloads
 
-#### oc_erchef 0.25
+#### oc\_erchef 0.25
 * Add default organization support for OSC compatibility
 * Add license endpoint support
 * Add global placeholder org macro.
-* System recovery endpoint work: Fix so recovery_authentication_enabled is correct for new users
+* System recovery endpoint work: Fix so recovery\_authentication\_enabled is correct for new users
 * Add internal chef keygen cache to replace opscode-certificate service.
 * do not force user key type to public on regeneration
 * Bugfix for concurrent cookbook uploads
 * Automatically upgrade user password salt algorithm on auth
 * Cleanups for user password encryption
 * Groups endpoing in sql and in erchef
-* Update authenticate_endpoint for LDAP
+* Update authenticate\_endpoint for LDAP
 * Update chef users email validation and filtering
 * Add chef users endpoint.
 
@@ -209,7 +247,7 @@
 * Containers and groups migration from couchDB to postgreSQL
 * Bcrypt user migrations
 * Solr4 migration
-* Generalized migrate scripts and other code to be migration_type agnostic
+* Generalized migrate scripts and other code to be migration\_type agnostic
 * Improved support for non-org based migrations
 * Update for Erlang R16
 
@@ -251,7 +289,7 @@
 ### omnibus-ctl
 * [OC-10470] Allow private-chef-ctl status to ignore disabled services.
 * [OC-11574] private-chef-ctl service commands should be HA aware
-* [OC-9877] exclude binary files and archives from *-ctl tail
+* [OC-9877] exclude binary files and archives from \*-ctl tail
 
 ## 11.2.2 (2014-09-17)
 
@@ -261,15 +299,15 @@
 ## 11.2.1 (2014-08-29)
 ### enterprise-chef-common
 * Update to 0.4.5
-* Fix issue where 'private-chef' was being changed to 'private_chef' unexectedly in upstart/runit files
+* Fix issue where 'private-chef' was being changed to 'private\_chef' unexectedly in upstart/runit files
 
 ## 11.2.0 (2014-08-29)
 
 ### Makefile
 * Add Makefile for automating builds
 
-### adding actions_payload 2014.08.15
-* [CA-555] Update 11.1-stable oc_erchef with latest oc_chef_action
+### adding actions\_payload 2014.08.15
+* [CA-555] Update 11.1-stable oc\_erchef with latest oc\_chef\_action
 
 ### postgresql 2014.07.29
 * [OC-11672] Upgrade PostgreSQL to 9.2.9
@@ -278,11 +316,11 @@
 * [OC-11575] Don't start services by default in HA topology
 * Update to 0.4.4
 
-### oc_chef_actions 2014.07.03
-* Update to latest of oc_chef_action to get hostname from fqdn instead
+### oc\_chef\_actions 2014.07.03
+* Update to latest of oc\_chef\_action to get hostname from fqdn instead
   of inet
-* Setting the CHEF_ACTIONS_MESSAGE_VERSION to 0.1.0
-* Sets ['dark_launch']['actions'] = true
+* Setting the CHEF\_ACTIONS\_MESSAGE\_VERSION to 0.1.0
+* Sets ['dark\_launch']['actions'] = true
 
 ### cacerts 2014.04.22
 * Update to latest cacerts as of 2014-04-22
@@ -297,20 +335,20 @@
 * Refactor PERL Postgres driver installation
 
 ### private-chef-cookbooks
-* [analytics] Copy webui_priv into opscode-analytics if actions is enabled
+* [analytics] Copy webui\_priv into opscode-analytics if actions is enabled
 * [OC-11297] Tweak partybus migration-level subscribes for a more reliable
   workaround
 * [OC-11459] Allow opscode-manage to easily be moved off of 443
 * [OC-11540] Fix invalid opscode-account config when forcing SSL
-* [OC-11601] Fix a race condition that sometimes caused redis_lb to attempt to
+* [OC-11601] Fix a race condition that sometimes caused redis\_lb to attempt to
   reconfigure itself before it was restarted.
 * [OC-11668] Enable ipv6 in standalone mode
 * [OC-11673] Tune PostgreSQL keepalive timeouts
 * [OC-11710] Fix couchdb compaction log rotation
-* Add bifrost_sql_database uri to orgmapper.conf
+* Add bifrost\_sql\_database uri to orgmapper.conf
 * [OC-11585] Allow ['lb']['upstream'] to have a custom setting
-* [CHEF-3045] increase s3_url_ttl from 15m to 8h
-* Use SSL port for lb_internal if non-SSL is disabled
+* [CHEF-3045] increase s3\_url\_ttl from 15m to 8h
+* Use SSL port for lb\_internal if non-SSL is disabled
 * Lock down postgresql
 
 ### private-chef-ctl
@@ -345,7 +383,7 @@
 
 ## 11.1.8 (2014-06-26)
 
-### oc_authz_migrator 0.0.2
+### oc\_authz\_migrator 0.0.2
 * exit immediately on errors
 
 
@@ -355,12 +393,12 @@
 * [OC-11499] Use more strict regular expression for IP check in ha-status
 * [OC-3107] Ensure CouchDB compaction cron job does not run on passive
   backend.
-* [OC-11601] Restart redis_lb immediately during reconfigure
+* [OC-11601] Restart redis\_lb immediately during reconfigure
 * [OC-11490] Explicitly set keepalived directory ownership
 * [OC-11297] EC 11 fresh install not saving migration state
 * [OC-11656] Set explicit owner and group for services without them
 * Address a PostgreSQL configuration error. The defect allows any local user on the system hosting the Chef Server’s PostgreSQL components full access to databases.
-* [OC-11662] Separate redis_keepalive_timeout from redis_connection_timeout and increase their default values from 60ms to 1000 and 2000ms, respectively.
+* [OC-11662] Separate redis\_keepalive\_timeout from redis\_connection\_timeout and increase their default values from 60ms to 1000 and 2000ms, respectively.
 
 ### private-chef-ctl
 * [OC-11657] Bump default svwait timeout of 7 seconds to 30 seconds
@@ -374,7 +412,7 @@
 
 ### openssl 1.0.1h
 * Address vulnerabilities CVE-2014-0224, CVE-2014-0221, CVE-2014-0195,
-  CVE-2014-3470 https://www.openssl.org/news/secadv_20140605.txt
+  CVE-2014-3470 https://www.openssl.org/news/secadv\_20140605.txt
   return code
 
 ### private-chef-cookbooks
@@ -383,8 +421,8 @@
 
 ## 11.1.5 (2014-05-14)
 
-### oc_erchef 0.24.6
-* rename oc_actionlog to actions
+### oc\_erchef 0.24.6
+* rename oc\_actionlog to actions
 
 ### private-chef-cookbooks
 * Use dark launch to enable Chef Actions (default: off)
@@ -403,7 +441,7 @@
 * Updated knifetests to work with the latest reporting API
 
 ### private-chef-cookbooks
-* platform_family fixes to couchdb and drbd cookbooks
+* platform\_family fixes to couchdb and drbd cookbooks
 * Set random initial password for pivotal user on bootstrap
 
 ## 11.1.3 (2014-04-09)
@@ -430,8 +468,8 @@
 ### libyaml 0.1.6
 * CVE-2014-2525: Heap-based buffer overflow allows context-dependent attackers to execute arbitrary code
 
-### oc_erchef 0.24.2
-* add oc_chef_action to oc_erchef (support for opscode-analytics actions package)
+### oc\_erchef 0.24.2
+* add oc\_chef\_action to oc_erchef (support for opscode-analytics actions package)
 
 ### openssl 1.0.1g
 * CVE-2014-0160: heartbeat extension allows remote attackers to obtain sensitive information from process memory
@@ -440,8 +478,8 @@
 * fix USAG and organization creation for sql
 * fix bug where billing-admins creation crashed for sql
 * gracefully fail association request if org is in 504 mode
-* speed up internal org-creation by removing Couchdb _all_dbs call
-* check org _route endpoint for groups darklaunch during org creation
+* speed up internal org-creation by removing Couchdb \_all\_dbs call
+* check org \_route endpoint for groups darklaunch during org creation
 * fix schema constraint bug during LDAP user creation
 
 ### opscode-webui 3.8.13
@@ -451,7 +489,7 @@
 * upgrade to 9.2.8
 
 ### private-chef-cookbooks
-* Increase postgresql max_connections to 350 to handle 4 node cluster
+* Increase postgresql max\_connections to 350 to handle 4 node cluster
 * Manage permissions for /var/log/opscode for non 0022 umasks
 
 ### private-chef-ctl
@@ -475,9 +513,9 @@
 * Add libossp-uuid library for Postgres
 
 ### private-chef-cookbooks
-* Configure oc_actionlog in oc_erchef and rabbit
+* Configure oc\_actionlog in oc\_erchef and rabbit
 * Remove :session and :environment from webui exception emails
-* Add internal /_routes endpoint to load balancer
+* Add internal /\_routes endpoint to load balancer
 
 ## 11.1.1 (2014-02-17)
 
@@ -514,7 +552,7 @@
 * Add containers table
 * Add new enum type and columns for user password hash
 * Add groups table
-* Add index for opc_users(customer_id) (improves delete performance)
+* Add index for opc\_users(customer\_id) (improves delete performance)
 
 ### oc-chef-pedant 1.0.25
 * [CHEF-4086] Add tests for cookbook version host header changes
@@ -522,23 +560,23 @@
 * Updates to /containers endpoint tests for ruby / erlang switching
 * Updates to /groups endpoint tests for ruby / erlang switching
 * Use IPV6-compatible rest-client gem for testing IPV6
-* Add tests for /users/:user/_acl endpoint
+* Add tests for /users/:user/\_acl endpoint
 * Update /principals endpoint tests for pushy updates
 
-### oc_bifrost 1.4.4
+### oc\_bifrost 1.4.4
 * Add IPV6 support
-* Use shared opscoderl_wm to pull in webmachine dependency
+* Use shared opscoderl\_wm to pull in webmachine dependency
 
-### oc_erchef 0.23.0
+### oc\_erchef 0.23.0
 * [CHEF-4086] Add configurable host for S3 pre-signed URLs
-* Refactor chef_objects, chef_db, and chef_wm to support non-open-source features
+* Refactor chef\_objects, chef\_db, and chef\_wm to support non-open-source features
 * Add support for SQL/Erlang /containers endpoint (not migrated)
 * Add support for SQL/Erlang /groups endpoint (not migrated)
 * Convert all configuration fetching code to use envy library
 * Remove REST API for darklaunch
-* Add containers API docs to oc_erchef code base
+* Add containers API docs to oc\_erchef code base
 * Remove caching of search-related database responses
-* Remove fast_log and replace with lager
+* Remove fast\_log and replace with lager
 * Add IPV6 support
 * Differentiate between 404s for missing principal vs. missing org
 
@@ -551,7 +589,7 @@
 * BUGFIX: allow non-admin users to leave organizations
 * Remove UPDATE from containers API
 * Add IPV6 support
-* BUGFIX: fix Ace.new method in #update_user_ace
+* BUGFIX: fix Ace.new method in #update\_user\_ace
 * BUGFIX: don't log password changes in plain text
 * BUGFIX: /organizations API can't show billing admins group
 
@@ -560,7 +598,7 @@
 
 ### private-chef-cookbooks
 * [keepalived] Adjust command syntax for 1.2.9
-* [erchef / bookshelf] Add s3_external_url configuration
+* [erchef / bookshelf] Add s3\_external\_url configuration
 * [all] Add IPV6 address support
 * [nginx] Add ipv6only option to listen directive
 * [sysctl] Force net.ipv6.bindonly to 0
@@ -568,10 +606,10 @@
 * [redis] Add redis back into EC build (name redis-lb)
 * [enterprise-chef-server-schema] Add schema upgrade for bcrypt user password support
 * [openresty] Add lua-based upstream routing
-* [oc_bifrost] Use opscoderl_wm logging
-* [oc_erchef] Replace fast_log with lager
-* [oc_erchef] Remove deprecated use of db_type for sqerl config
-* [configuration] Increment api_version for release 11.0.0 -> 11.1.0
+* [oc\_bifrost] Use opscoderl\_wm logging
+* [oc\_erchef] Replace fast\_log with lager
+* [oc\_erchef] Remove deprecated use of db\_type for sqerl config
+* [configuration] Increment api\_version for release 11.0.0 -> 11.1.0
 * [opscode-certificate] Make sure :restart action occurs on all nodes
 * [keepalived] Fixes for keepalived.conf to work with 1.2.9 unicast
 * [bookshelf] Turn off request logging

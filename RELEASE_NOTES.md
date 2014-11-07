@@ -1,11 +1,13 @@
 # Chef Server Release Notes
 
 ## 12.0.0.rc6 (unreleased)
-* [OC-11769] make oc_chef_authz a tunable in private-chef.rb
-* Fix oc_chef_authz timeout tunable
+* [OC-11769] make `oc_chef_authz` a tunable in private-chef.rb
+* Fix `oc_chef_authz` timeout tunable
 * Make postgresql slow query logging configurable
 * Adjust perms to 0750 for all service's log dir
 * [opcode-omnibus-597] Ensure postgresql is set with shared memory less than SHMAX.
+* [policy change] Default client ACLs on data bags in newly created orgs has been changd
+  to read-only. See "Security Updates" below for more detail.
 
 ## 12.0.0.rc5 (2014-10-17)
  * [openssl] openssl has been updated to 1.0.1j to address
@@ -21,31 +23,35 @@
   If private-chef.rb is found on the system it will be symlinked into place if chef-server.rb is not
   present on the system or is empty.
 
-
 ### What's New:
 
 The following items are new since Enterprise Chef 11.2.1 and/or are changes from previous versions:
 
-* [opscode-omnibus] The chef_max_version has been bumped to 12, so that Chef clients up to 12 can connect to the server.
+* [opscode-omnibus] `chef_max_version` has been removed, allowing Chef v12 and later clients can
+  connect to the server. `chef_min_version` is still set to require minimum chef client version of 10.
 * [couchdb] has been removed
-* [oc_erchef]
+* [oc\_erchef]
   * All endpoints that formerly were in opscode-account are now in erchef and the data
     resides in SQL. This includes containers, groups, organizations, org associations and invites.
     * The API around group creation (POST) now ignores users and clients
   * Key generation is now in erchef.
   * Server flavor returned from REST calls is now "sc"
-
 * [opscode-account] has been removed
 * [opscode-certificate] has been removed
 * [opscode-org-creator] has been removed
 * [orgmapper] has been removed
 * [opscode-webui] Opscode WebUI has been removed in favor of the Manage Console add-on.
 * [private-chef-cookbooks] Introduce pluggable HA architecture as alternative to DRBD.
-* [private-chef-cookbooks] Add bifrost_sql_database uri to orgmapper.conf
+* [private-chef-cookbooks] Add `bifrost_sql_database` uri to orgmapper.conf
 * [private-chef-ctl] Add a gather-logs command to create a tarball of
   important logs and system information.
 * [solr] has been upgraded to Solr 4
-
+* [policy change] Before removing a user who is in an organization's "admins"
+  group from that organization, it is now required to remove the user from the "admins"
+  group first.
+* [policy change] Data Bag defaults ACLs have been modified so that clients of new
+  organizations do not have create/update/delete access.   See "Security Update" below for
+  more detail and impacts. (rc6)
 
 ### Bug Fixes:
 
@@ -55,6 +61,41 @@ The following items are the set of bug fixes that have been applied since Enterp
 * [OC-10470] Allow private-chef-ctl status to ignore disabled services
 * [OC-11574] private-chef-ctl service commands should be HA-aware
 * [OC-9877] Exclude binary files and archives from 'omnibus-ctl tail'
+
+### Security Updates
+
+* [oc\_erchef] Default data bag ACL change (rc6) details below.
+* [opscode-omnibus] openssl 1.0.1j (rc5)
+* [opscode-omnibus] disable SSLv3 by default at the load balancers (rc5)
+* [opscode-omnibus] Ensure contents of install dir (/opt/opscode) are owned by root. (rc4)
+
+*Default Data Bag ACL Change*
+Previously, the default permissions of data bags permitted clients
+(nodes) to update them, such as during a chef-client run. This has
+been modified so that in any new orgs created after this update,
+clients will not have write access to data bags.  If you require
+the original behavior in organizations created after this update,
+you can use the knife acl[1] plugin to add permissions as follows:
+
+    knife acl add containers data update group clients
+
+If you have cookbooks that are creating new data bags, or deleting data
+bags, you will also need to add 'create' and 'delete' permissions
+respectively:
+
+    knife acl add containers data create group clients
+    knife acl add containers data delete group clients
+
+Conversely if you want to update your existing organizations to remove
+the ability to modify/create/delete data bags (recommended if you're not
+using this currently):
+
+    knife acl remove containers data update group clients
+    knife acl remove containers data delete group clients
+    knife acl remove containers data create group clients
+
+[1] knife-acl is a plugin to support managing ACLs using knife, instead
+of the opscode-manage interface. It can be found here: https://github.com/opscode/knife-acl
 
 ## 11.2.1
 
