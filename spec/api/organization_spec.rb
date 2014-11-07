@@ -47,7 +47,7 @@ describe "/organizations", :organizations do
           # one we know is there.
           :body => {
             "name"                     => platform.test_org.name,
-            "full_name"                => platform.test_org.name,
+            "full_name"                => platform.test_org.name
             # -- TODO - remove these
             # I'm only commenting them out in case the webui depends on one of these
             # and we determine that we need to come back and re-implement them at some
@@ -63,11 +63,9 @@ describe "/organizations", :organizations do
 
       end
 
-      pending("erlang will not return the guid", :if => !ruby?) do
-        it "should return a organization object that contains a valid guid" do
-          parsed_response = JSON.parse(get(request_url, requestor))
-          parsed_response["guid"].should have(32).characters
-        end
+      it "should return a organization object that contains a valid guid" do
+        parsed_response = JSON.parse(get(request_url, requestor))
+        parsed_response["guid"].should have(32).characters
       end
 
       pending("erlang will not return the assigned_at field", :if => !ruby?) do
@@ -303,118 +301,5 @@ describe "/organizations", :organizations do
 
   end
 
-  ##########################
-  # Internal account tests #
-  ##########################
-
-  # describe "POST /internal-organizations", :internal_orgs do
-  #   let(:orgname)      { "precreated-#{Time.now.to_i}-#{Process.pid}" }
-  #   let(:request_body) do
-  #     {
-  #       full_name: "Pre-created",
-  #       name: orgname,
-  #       org_type: "Business",
-  #     }
-  #   end
-
-  #   after :each do
-  #     delete("#{platform.server}/organizations/#{orgname}", superuser)
-  #   end
-
-  #   context "when creating a new org" do
-  #     it "should respond with a valid newly created organization" do
-  #       request = authenticated_request(:POST, "#{platform.internal_account_url}/internal-organizations",
-  #         superuser, :payload => request_body)
-
-  #       request.should look_like(
-  #           :body => {
-  #             "clientname" => "#{orgname}-validator",
-  #           },
-  #           :status => 201
-  #       )
-  #       JSON.parse(request).should have_key("uri")
-  #     end
-  #   end
-
-  #   context "when attempting to create a new org and that org already exists" do
-  #     it "should respond with a conflict" do
-  #       # seed the org
-  #       authenticated_request(:POST, "#{platform.internal_account_url}/internal-organizations", superuser, :payload => request_body)
-
-  #       authenticated_request(:POST, "#{platform.internal_account_url}/internal-organizations", superuser,
-  #         :payload => request_body).should look_like(
-  #           :status => 409,
-  #           :body => {
-  #             "error" => "Organization already exists."
-  #           }
-  #       )
-  #     end
-  #   end
-
-  # end
-
-  # describe "PUT /internal-organizations", :internal_orgs do
-
-  #   let(:orgname) { "precreated-#{Time.now.to_i}-#{Process.pid}" }
-  #   let(:post_request_body) do
-  #     {
-  #       full_name: "Pre-created",
-  #       name: orgname,
-  #       org_type: "Business",
-  #     }
-  #   end
-
-  #   before :each do
-  #     authenticated_request(:POST, "#{platform.internal_account_url}/internal-organizations", superuser, :payload => post_request_body)
-  #   end
-
-  #   after :each do
-  #     delete("#{platform.server}/organizations/#{orgname}", superuser)
-  #   end
-
-  #   context "when an org is updated to unassigned = true with a PUT" do
-  #     let(:put_request_body) do
-  #       {
-  #         unassigned: true,
-  #       }
-  #     end
-
-  #     it "should update the organization's unassigned field" do
-  #       # since there is no way of actually getting the assigned field back from the API that I know of
-  #       # best tests I can think of
-  #       request = authenticated_request(:PUT,"#{platform.internal_account_url}/internal-organizations/#{orgname}",          superuser, :payload => put_request_body)
-  #       request.should look_like(:status => 200)
-  #       JSON.parse(request).should have_key("uri")
-
-  #       get("#{platform.server}/organizations/ponyville", superuser).should look_like(
-  #         :body => {
-  #           "assigned_at "=> nil
-  #         }
-  #       )
-  #     end
-  #   end
-
-  #   # TODO: PUT only accepts unassigned: true, which I think is interesting behavior
-  #   # for an API. If the only thing it does is set assigned to true, why not not have a
-  #   # payload at all and maybe make the API more explicit like
-  #   # PUT /internal-organizations/unassign/:id/
-  #   context "when an org is updated to unassigned = false with a PUT" do
-  #     let(:put_request_body) do
-  #       {
-  #         unassigned: false,
-  #       }
-  #     end
-
-  #     it "should return a bad request error" do
-  #       authenticated_request(:PUT, "#{platform.internal_account_url}/internal-organizations/#{orgname}",
-  #         superuser, :payload => put_request_body).should look_like(
-  #           :body => {
-  #             "error" => "Cannot assign org #{orgname} - unassigned=true is only allowable operation",
-  #           },
-  #           :status => 400
-  #       )
-  #     end
-  #   end
-  # end
 
 end

@@ -186,7 +186,64 @@ describe "opscode-account user association", :association do
       end
     end
   end
+  context "/users/USER/organizations endpoint" do
+    let(:test_username) { "test-user-#{Time.now.to_i}-#{Process.pid}" }
+    let(:test_user) { platform.create_user(test_username) }
+    let(:user_org_url) { "#{users_url}/#{test_username}/organizations" }
+    before do
+      platform.associate_user_with_org(platform.test_org.name, test_user)
+    end
+    after do
+      delete(api_url("users/#{test_username}"), platform.superuser)
+      delete("#{platform.server}/users/#{test_username}", platform.superuser)
+    end
 
+    context "invoking" do
+      %w{post put delete}.each do |method|
+        it "#{method} fails appopriately" do
+          result = send(method, user_org_url, platform.superuser, {})
+          result.should look_like({ :status => ruby? ?  404 : 405 })
+        end
+      end
+
+      context "GET" do
+        it "returns a proper list of orgs for the user" do
+          result = get(user_org_url, test_user)
+          result.should look_like({ :status => 200 })
+          # we need to split out our field checks here, because
+          # we don't know the value of guid, so we can't include it in
+          # a body check.  however pedant will fail on an unaccounted-for field
+          # in the body response
+          json = JSON.parse(result)
+          json.length.should == 1
+          org = json[0]["organization"]
+          expect(org.nil?).to be_false
+          expect(org["name"]).to eq(platform.test_org.name)
+          expect(org["full_name"]).to eq(platform.test_org.name)
+          expect(org["guid"].nil?).to be_false
+          expect(org["guid"].empty?).to be_false
+        end
+      end
+    end
+
+    context "invoking as " do
+      it "superuser succeeds" do
+        get(user_org_url, platform.superuser).should look_like({:status => 200})
+      end
+      it "the user succeeds" do
+        get(user_org_url, test_user).should look_like({:status => 200})
+      end
+      it "an admin org user succeeds" do
+        get(user_org_url, platform.admin_user).should look_like({:status => 200})
+      end
+      it "another org member fails" do
+        get(user_org_url, platform.non_admin_user).should look_like({:status => 403})
+      end
+      it "some other user fails" do
+        get(user_org_url, platform.bad_user).should look_like({:status => 403})
+      end
+    end
+  end
   context "attempting to get association requests for a user that does not exist" do
     let(:user_assoc_url) { "#{users_url}/flappy/association_requests" }
     it "cannot find association list" do
