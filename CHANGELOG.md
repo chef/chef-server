@@ -2,6 +2,9 @@
 
 ## 11.2.6 (Unreleased)
 
+### private-chef-cookbooks
+* Fixed the default value for Postgres effective_cache_size
+
 ## 11.2.5 (2013-11-03)
 
 ### oc_erchef
