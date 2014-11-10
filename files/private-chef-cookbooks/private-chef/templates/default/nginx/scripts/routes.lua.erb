@@ -157,11 +157,6 @@ local p_acct_users = (p_named_org_prefix * Cendpoint(p_association_requests) * (
 -- /organizations(/:orgname/)
 local p_org_endpoint = (p_sep * Cendpoint(p_org) * (p_sep * Cg(p_org_identifier, "org_name"))^-1 * p_trailing_sep)
 
--- account endpoints
--- org_acl endpoint: matches /organizations/:orgname/organizations/_acl
--- and returns the acl for the specific org
-local p_org_acl_endpoint = (p_named_org_prefix * p_org * Cendpoint(p_acl) * (p_sep + p_eol))
-
 -- note that the acl endpoint is a special case because it supercedes all others
 -- including routes that would otherwise go to erchef.
 local p_acl_endpoint = (p_named_org_prefix * p_all_until_acl * Cendpoint(p_acl) * (p_sep + p_eol)) +
@@ -179,8 +174,7 @@ local uri_resolvers = {
   -- p_acl_endpont must come first because a trailing _acl takes precedence
   -- over any other identifiers which may be in the url.
 
-  api = (p_org_acl_endpoint * c_acct_erchef) +
-        ((p_acl_endpoint + p_internal_acct_erchef_endpoints) * c_acct_erchef) +
+  api = ((p_acl_endpoint + p_internal_acct_erchef_endpoints) * c_acct_erchef) +
         (p_erchef * c_erchef),
 
   -- This one is easy - everything passes through, though we'll still need to capture components
@@ -189,7 +183,6 @@ local uri_resolvers = {
                   -- as in API, acls come first so that we can ensure webui requests for
                   -- acls get routed correctly to account, even when the underlying object is
                   -- darklaunched to erchef.
-                  (p_org_acl_endpoint * c_acct_erchef) +
                   (p_acl_endpoint * c_acct_erchef) +
 
                   -- TODO confirm - this should no longer be required.
