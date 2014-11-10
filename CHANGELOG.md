@@ -2,6 +2,9 @@
 
 ## 12.0.0.rc6 (unreleased)
 
+### oc-chef-pedant 1.0.65
+* Add test for /organizations/:org\_id/ANY/\_acl endpoint
+
 ### oc-chef-pedant 1.0.64
 * Add coverage for /users/USER/organizations endpoint
 
@@ -13,6 +16,9 @@
 
 ### oc-chef-pedant 1.0.62
 * Fix for consistent return values in oc\_erchef
+
+## oc\_erchef 0.29.3
+* route /organizations/:org\_id/ANY/\_acl endpoint
 
 ### oc\_erchef 0.29.2
 * set default client ACLs for data bags to read-only.  See Release Notes for i
