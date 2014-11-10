@@ -6,7 +6,7 @@ driver:
     memory: 4098
   synced_folders:
     - ['.', '/home/vagrant/opscode-omnibus']
-    - ['../omnibus-ruby', '/home/vagrant/omnibus-ruby']
+    - ['../omnibus', '/home/vagrant/omnibus']
     - ['../omnibus-software', '/home/vagrant/omnibus-software']
 
 provisioner:

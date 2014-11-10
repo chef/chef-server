@@ -55,9 +55,9 @@
 * created chef-server.rb during install to cut down on user confusion
 * [opscode-omnibus-597] Limit postgresql shared memory usage to stay under SHMAX
 * Change postgres effective\_cache\_size to 50% of available RAM instead of hard coding at 128MB
+* updated references to omnibus-ruby repo to be omnibus
 * changelog - fix markdown formatting errors
 * changelog - added this changelog note
->>>>>>> pedant 1.0.64 and erchef 0.29.2
 
 ### private-chef-cookbooks
 * [OC-11769] make oc\_chef\_authz a tunable in private-chef.rb
