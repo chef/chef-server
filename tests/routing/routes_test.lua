@@ -46,8 +46,10 @@ table.insert(shared_acct_tests, {"/organizations/testorg/nodes/mynode/_acl/test"
 table.insert(shared_acct_tests, {"/organizations/testorg/nodes/_acl",         { TEST_ORG, "acct_erchef", "acls"}})
 table.insert(shared_acct_tests, {"/organizations/testorg/roles/_acl",         { TEST_ORG, "acct_erchef", "acls"}})
 
--- until orgs are in SQL / Erchef, we'll route the orgs acl to account
-table.insert(shared_acct_tests, {"/organizations/testorg/organizations/_acl", { TEST_ORG, "acct", "acls"}})
+table.insert(shared_acct_tests, {"/organizations/testorg/organizations/_acl", { TEST_ORG, "acct_erchef", "acls"}})
+-- note, we want to deprecate the following in chef 12 and remove in chef 13
+table.insert(shared_acct_tests, {"/organizations/testorg/organization/_acl", { TEST_ORG, "acct_erchef", "acls"}})
+table.insert(shared_acct_tests, {"/organizations/testorg/ANY/_acl", { TEST_ORG, "acct_erchef", "acls"}})
 
 -- Verify that _aclextra is not being routed to _acl; it should simply not be routed as it is not valid.
 table.insert(int_acct_tests, {"/organizations/testorg/nodes/mynode/_aclextra",  { DEF_ORG, nil, nil}})
@@ -214,13 +216,13 @@ table.insert(int_acct_tests, {"/internal-organizations", {DEF_ORG, "acct"}})
 version_tests = {}
 table.insert(version_tests, {"10.0.0",  true})
 table.insert(version_tests, {"11.0.0",  true})
+table.insert(version_tests, {"12.0.0", true})
 table.insert(version_tests, {"0.10.0",  true})
 table.insert(version_tests, {"11.0.", true})
 table.insert(version_tests, {"0.10.anything", true})
 table.insert(version_tests, {"10.0.omething", true})
 table.insert(version_tests, {"9.0.0",  false})
 table.insert(version_tests, {"0.9.0", false})
-table.insert(version_tests, {"12.0.0", false})
 table.insert(version_tests, {"11.0", false})
 
 function test_versions()
