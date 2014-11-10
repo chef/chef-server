@@ -132,7 +132,7 @@
                   "f7c141c8359cd690faba0d2684b449a07db8e915"}},
        {oc_chef_wm,".*",
                    {git,"git@github.com:opscode/oc_chef_wm.git",
-                        "5e77e134668cf8441ac3224670800ceeb76ef97b"}},
+                        "5c52f7365261d5bfba9508d537896f570b8b2a5a"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
                   "5d4c3e9c91bd96b67a92cbdac4601c43340e1d88"}},
