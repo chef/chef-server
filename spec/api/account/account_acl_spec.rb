@@ -284,6 +284,25 @@ describe "ACL API", :acl do
     end
   end
 
+  context "/ANY/_acl" do
+    let(:request_url) {api_url("ANY/_acl")}
+    let(:actors) { ["pivotal"] }
+    let(:groups) { ["admins"] }
+    let(:read_groups) { ["admins", "users"] }
+    let(:acl_body) {{
+        "create" => {"actors" => actors, "groups" => groups},
+        "read" => {"actors" => actors, "groups" => read_groups},
+        "update" => {"actors" => actors, "groups" => groups},
+        "delete" => {"actors" => actors, "groups" => groups},
+        "grant" => {"actors" => actors, "groups" => groups}
+      }}
+    it "can get org acl by default" do
+      get(request_url, platform.admin_user).should look_like({
+              :status => 200,
+              :body_exact => acl_body
+            })
+    end
+  end
   context "/organizations/_acl endpoint" do
     let(:request_url) { api_url("organizations/_acl") }
 
