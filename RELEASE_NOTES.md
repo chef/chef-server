@@ -1,6 +1,6 @@
 # Chef Server Release Notes
 
-## 12.0.0.rc6 (unreleased)
+## 12.0.0.rc6 (2014-11-11)
 * [OC-11769] make `oc_chef_authz` a tunable in private-chef.rb
 * Fix `oc_chef_authz` timeout tunable
 * Make postgresql slow query logging configurable

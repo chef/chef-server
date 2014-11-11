@@ -1,6 +1,6 @@
 # Chef Server Changelog
 
-## 12.0.0.rc6 (unreleased)
+## 12.0.0.rc6 (2014-11-11)
 
 ### oc-chef-pedant 1.0.65
 * Add test for /organizations/:org\_id/ANY/\_acl endpoint
