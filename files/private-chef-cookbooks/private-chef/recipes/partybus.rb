@@ -57,7 +57,7 @@ ruby_block 'migration-level file sanity check' do
     rescue Exception => e
       message = <<-EOF
 ERROR:
-The /var/opt/opscode/upgrades/migration-level file is missing or corrupt!  Please read http://docs.opscode.com/upgrade_server_ha_notes.html#pre-flight-check and correct this file before proceeding
+The /var/opt/opscode/upgrades/migration-level file is missing or corrupt!  Please read http://docs.getchef.com/install_server_pre.html and correct this file before proceeding
 
 * If this is a new installation:
   run: "cd /opt/opscode/embedded/service/partybus ; /opt/opscode/embedded/bin/bundle exec bin/partybus init"
