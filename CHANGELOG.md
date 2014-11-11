@@ -47,6 +47,7 @@
 * Add folsom-graphite dependency (used for runtime stats gathering)
 
 ### oc\_erchef 0.28.3
+* fix regression that broke org caching
 * Org support in postgres
 * Reindexing support to check redis flags
 * Fix typo in darklaunch interrogation
