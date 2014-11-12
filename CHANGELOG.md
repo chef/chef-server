@@ -12,6 +12,9 @@
 
 ### opscode-omnibus
 * Add ability to configure SQL query timeout for Erchef, bifrost and mover.
+* Select appropriate default port for LDAP and LDAPS (when encryption is
+  selected, as previously user had to manually add port to make it work).
+* Provide reasonable default for LDAP and LDAPS ports.
 
 ## 12.0.0.rc6 (2014-11-11)
 
