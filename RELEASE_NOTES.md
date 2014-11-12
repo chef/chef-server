@@ -1,75 +1,86 @@
 # Chef Server Release Notes
 
-## 12.0.0.rc6 (2014-11-11)
-* [OC-11769] make `oc_chef_authz` a tunable in private-chef.rb
-* Fix `oc_chef_authz` timeout tunable
-* Make postgresql slow query logging configurable
-* Adjust perms to 0750 for all service's log dir
-* [opcode-omnibus-597] Ensure postgresql is set with shared memory less than SHMAX.
-* [policy change] Default client ACLs on data bags in newly created orgs has been changd
-  to read-only. See "Security Updates" below for more detail.
-
-## 12.0.0.rc5 (2014-10-17)
- * [openssl] openssl has been updated to 1.0.1j to address
-   CVE-2014-3513, CVE-2014-3567, and CVE-2014-3568
-
-## 12.0.0.rc4 (2014-09-17)
-
-### Security Fixes
-* [opscode-omnibus] Ensure contents of install dir (/opt/opscode) are owned by root.
-
 ## 12.0.0
-* /ect/opscode/chef-server.rb is the new configuration file for the server and /etc/opscode/private-chef.rb is deprecated.
-  If private-chef.rb is found on the system it will be symlinked into place if chef-server.rb is not
-  present on the system or is empty.
 
 ### What's New:
 
-The following items are new since Enterprise Chef 11.2.1 and/or are changes from previous versions:
+The following items are new since Enterprise Chef 11.2.1 and/or are changes from previous versions.
 
-* [opscode-omnibus] `chef_max_version` has been removed, allowing Chef v12 and later clients can
-  connect to the server. `chef_min_version` is still set to require minimum chef client version of 10.
-* [couchdb] has been removed
-* [oc\_erchef]
+* oc\_erchef
   * All endpoints that formerly were in opscode-account are now in erchef and the data
-    resides in SQL. This includes containers, groups, organizations, org associations and invites.
-    * The API around group creation (POST) now ignores users and clients
+    resides in PostgreSQL. This includes containers, groups, organizations, org associations and invites.
   * Key generation is now in erchef.
-  * Server flavor returned from REST calls is now "sc"
-* [opscode-account] has been removed
-* [opscode-certificate] has been removed
-* [opscode-org-creator] has been removed
-* [orgmapper] has been removed
-* [opscode-webui] Opscode WebUI has been removed in favor of the Manage Console add-on.
-* [private-chef-cookbooks] Introduce pluggable HA architecture as alternative to DRBD.
-* [private-chef-cookbooks] Add `bifrost_sql_database` uri to orgmapper.conf
-* [private-chef-ctl] Add a gather-logs command to create a tarball of
-  important logs and system information.
-* [solr] has been upgraded to Solr 4
-* [policy change] Before removing a user who is in an organization's "admins"
-  group from that organization, it is now required to remove the user from the "admins"
-  group first.
-* [policy change] Data Bag defaults ACLs have been modified so that clients of new
-  organizations do not have create/update/delete access.   See "Security Update" below for
-  more detail and impacts. (rc6)
+  * See important API change notes below
+* The following components are no longer used and have been removed:
+  * couchdb
+  * opscode-account
+  * opscode-certificate
+  * opscode-org-creator
+  * opscode-webui - removed in favor of the Manage Console add-on
+  * orgmapper
+* Introduced pluggable HA architecture as alternative to DRBD.
+* Solr has been upgraded to Solr 4
+* For compatibility with Open Source Chef 11, a new configuration option
+  `default_org_name` has been provided.  All org-related requests that are not
+  in the form '/organizations/X/...' will be assumed to have this organization name.
+* `private-chef.rb` and `chef-server.rb`
+  * `private-chef.rb`  has been replaced by `chef-server.rb`
+  * if you are upgrading from EC11 and have a `private-chef.rb` in place,
+    a symlink from `chef-server.rb` to `private-chef.rb` will be created for
+    you when you upgrade.
+  * If you do not have a `private-chef.rb` or `chef-server.rb`, a `chef-server.rb`
+    will be created for you at installation.
+* chef-server-ctl
+  * `chef-server-ctl` replaces `private-chef-ctl` though
+    `private-chef-ctl` will also work in CS12.
+  * Several commands added related to the management of users and
+    organizations, allowing allowing management of organizations without the management console
+    or original webui. You can find information about these commands via `chef-server-ctl help`.
+    and looking under "Organization and User Management Commands".  You can find usage
+    examples at this location: https://docs.getchef.com/install_server.html
+  * new `gather-logs` command to create a tarball of important logs and system information.
+* Org Policy Changes
+  * it is now required that a user be removed from an organization's "admins" group
+    before being removed from the organization.
+  * Data Bag defaults ACLs have been modified so that clients of new
+    organizations do not have create/update/delete access.   See "Organization Policy Changes"
+    below for more detail and impacts.
+* omnibus
+  * `oc_chef_authz` settings are now tuneable
+  * postgesql slow query logging can now be configured
 
 ### Bug Fixes:
 
-The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.1:
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2:
 
 * [OC-11703] Fix bug that prevents ACL and group expansion when containing group that no longer exists
 * [OC-10470] Allow private-chef-ctl status to ignore disabled services
 * [OC-11574] private-chef-ctl service commands should be HA-aware
 * [OC-9877] Exclude binary files and archives from 'omnibus-ctl tail'
+* [opcode-omnibus-597] Ensure postgresql is set with shared memory less than SHMAX.
+* Fix `oc_chef_authz` timeout tunable
 
 ### Security Updates
 
+Following are security-related component updates introduced since
+Enterprise Chef 11.2
+
 * [oc\_erchef] Default data bag ACL change (rc6) details below.
-* [opscode-omnibus] openssl 1.0.1j (rc5)
-* [opscode-omnibus] disable SSLv3 by default at the load balancers (rc5)
-* [opscode-omnibus] Ensure contents of install dir (/opt/opscode) are owned by root. (rc4)
+* [opscode-omnibus] Adjust perms to 0750 for all service log directories
+* [opscode-omnibus] openssl 1.0.1j to address CVE-2014-3513, CVE-2014-3567, and CVE-2014-3568
+* [opscode-omnibus] disable SSLv3 by default at the load balancers
+* [opscode-omnibus] Ensure contents of install dir (/opt/opscode) are owned by root.
+
+### API Changes
+* `POST` to `/organizations/ORGNAME/groups` now ignores any initial list of users
+  and clients provided
+* "flavor" header returned from REST API calls is now "cs"
+* maximum chef client version is no longer checked
+
+### Organization Policy Changes
 
 *Default Data Bag ACL Change*
+
 Previously, the default permissions of data bags permitted clients
 (nodes) to update them, such as during a chef-client run. This has
 been modified so that in any new orgs created after this update,
@@ -86,16 +97,42 @@ respectively:
     knife acl add containers data create group clients
     knife acl add containers data delete group clients
 
-Conversely if you want to update your existing organizations to remove
-the ability to modify/create/delete data bags (recommended if you're not
+If you want to update your existing organizations to remove
+client ability to modify/create/delete new data bags (recommended if you're not
 using this currently):
 
     knife acl remove containers data update group clients
     knife acl remove containers data delete group clients
     knife acl remove containers data create group clients
 
+More information - including examples of modifying permissions for both
+newly created data bags and existing data bags data - can be found here:
+
+https://www.getchef.com/blog/2014/11/10/security-update-hosted-chef/
+
 [1] knife-acl is a plugin to support managing ACLs using knife, instead
 of the opscode-manage interface. It can be found here: https://github.com/opscode/knife-acl
+
+*Admins Cannot be Removed From Organizations*
+
+A significant number of the support-related issues that we've seen stem
+from admins being able to remove themselves from an organization,
+particularly when they are the last admin in the organization (but not
+necessarily limited to this).
+
+To help prevent this class of troubles, Chef Server now enforces that a
+member of an organization's "admins" group cannot be removed from the
+organization without first being removed from the "admins" group.
+
+
+### Release History
+
+* RC6 2014-11-11
+* RC5 2014-10-17
+* RC4 2014-09-18
+* RC3 2014-09-10
+* RC2 2014-09-08 (first public)
+* RC1 2014-09-07 (internal)
 
 ## 11.2.1
 
@@ -103,7 +140,7 @@ of the opscode-manage interface. It can be found here: https://github.com/opscod
 
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.0:
 
-* Fix issue where 'private-chef' was being changed to 'private_chef' unexectedly in upstart/runit files
+* Fix issue where 'private-chef' was being changed to 'private\_chef' unexectedly in upstart/runit files
 
 ## 11.2.0 (2014-08-29)
 
@@ -112,7 +149,7 @@ The following items are the set of bug fixes that have been applied since Enterp
 The following items are new for Enterprise Chef 11.2.0 and/or are
 changes from previous versions:
 
-* [private-chef-cookbooks] Add bifrost_sql_database uri to orgmapper.conf
+* [private-chef-cookbooks] Add bifrost\_sql\_database uri to orgmapper.conf
 * [opscode-platform-debug] Upgrade to rel-0.5.1
 * [private-chef-ctl] Add a gather-logs command to create a tarball of
   important logs and system information.
@@ -121,7 +158,7 @@ changes from previous versions:
 * [opscode-analytics]
   * `dark_launch['actions']` defaults to true.  You no longer
   need to manually set this in the private-chef.rb
-  * Copy webui_priv into opscode-analytics if actions is enabled
+  * Copy webui\_priv into opscode-analytics if actions is enabled
   * This change adds a new 'oc-id' key to the private-chef-secrets.json.
 * [orgmapper] Bump orgmapper to a new minor revision.  This enables support for
   the bifrost/authz API and fixes several bugs.
@@ -137,8 +174,8 @@ The following items are the set of bug fixes that have been applied since Enterp
 * [OC-11540] Fix invalid opscode-account config when forcing SSL
 * [OC-11575] Don't start services by default in HA topology
 * [OC-11601] Fix a race condition that sometimes
-  caused redis_lb to attempt to reconfigure itself before it was restarted.
-  * This causes redis_lb to restart during every reconfigure.  This restart can
+  caused redis\_lb to attempt to reconfigure itself before it was restarted.
+  * This causes redis\_lb to restart during every reconfigure.  This restart can
     cause a short period of 500 errors on the on the FE nodes.
 * [OC-11668] enable ipv6 in standalone mode
 * [OC-11672] Upgrade PostgreSQL to 9.2.9
@@ -164,7 +201,7 @@ The following items are the set of bug fixes that have been applied since Enterp
 * [opscode-omnibus] Ensure CouchDB compaction cron job does not run on passive backend.
 * [OC-11499] Use more strict regular expression for IP check in ha-status
 * [OC-3107] Ensure CouchDB compaction cron job does not run on passive backend.
-* [OC-11601] Restart redis_lb immediately during reconfigure
+* [OC-11601] Restart redis\_lb immediately during reconfigure
 * [OC-11490] Explicitly set keepalived directory ownership
 * [OC-11297] EC 11 fresh install not saving migration state in HA topology
 * [OC-11656] Set explicit owner and group for services without them
@@ -194,7 +231,7 @@ The following items are the set of security fixes that have been applied since E
 ## 11.1.5 (2014-05-14)
 
 ### What's New:
-* [oc_erchef] First release with full compatibility for Chef Actions service
+* [oc\_erchef] First release with full compatibility for Chef Actions service
 
 ## 11.1.4 (2014-05-07)
 
@@ -215,17 +252,17 @@ The following items are new for Enterprise Chef 11.1.3 and/or are changes from p
 * [core] Erlang r15b03-01 w/ multiple stability and bug fixes
 * [core] Chef 11.10.4 (was 11.6.0)
 * [core] PostgreSQL 9.2.8 (was 9.2.4)
-* [oc_erchef] Added hooks for opscode-analytics actions service
+* [oc\_erchef] Added hooks for opscode-analytics actions service
 
 ### Bug Fixes:
 
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.1.2:
 
-* [opscode-omnibus] Increased postgresql max_connections to a default of 350 to handle 4 node clusters.
+* [opscode-omnibus] Increased postgresql max\_connections to a default of 350 to handle 4 node clusters.
 * [opscode-account] Fix for LDAP user creation failure.
 * [opscode-omnibus] Manage /var/log/opscode permissions even with non 0022 umask.
 
-* [opscode-omnibus] Separate redis_keepalive_timeout from redis_connection_timeout and increase their
+* [opscode-omnibus] Separate redis\_keepalive\_timeout from redis\_connection\_timeout and increase their
   default values from 60ms to 1000 and 2000ms, respectively.
 
 ### Security Fixes:
