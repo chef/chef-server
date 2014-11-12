@@ -184,6 +184,7 @@
            {db_name, "opscode_chef" },
            {idle_check, 10000},
            {pooler_timeout, <%= @db_pooler_timeout %>},
+           {db_timeout, <%= node['private_chef']['opscode-erchef']['sql_db_timeout'] %>},
            {prepared_statements, {oc_chef_sql, statements, [pgsql]}},
            {column_transforms,
                               [{<<"created_at">>,

@@ -5,6 +5,13 @@
 ### private-chef-cookbooks
 * Add ip_mode and normalize_host for ipv6 configuration
 * Add configuration for queueing in pooler
+* Expose "db_timeout" for sqerl in Erchef, bifrost and mover as a parameter
+  that can be set in the "/etc/opscode/chef-server.rb" file for convenience.
+  By default there is a hard coded value of 5 seconds (5000ms) as per:
+  https://github.com/opscode/sqerl/blob/master/src/sqerl_client.erl#L134
+
+### opscode-omnibus
+* Add ability to configure SQL query timeout for Erchef, bifrost and mover.
 
 ## 12.0.0.rc6 (2014-11-11)
 
