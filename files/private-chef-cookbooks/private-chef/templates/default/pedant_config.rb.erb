@@ -30,6 +30,8 @@ chef_server_uid = "<%= @hostname %>_#{Process.pid}"
 org({:name => "pedant_testorg_#{chef_server_uid}",
      :create_me => true})
 
+validate_org_creation true
+
 # org({:name => "existing_org",
 #      :validator_key => "/etc/opscode/existing_org-validator.pem"})
 
