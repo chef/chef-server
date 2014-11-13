@@ -57,7 +57,7 @@ The following items are new since Enterprise Chef 11.2.1 and/or are changes from
        command alone provides.
     * Run any of these commands with -h to see the full help menu and all the possible options that can be set.
       In addition, refer to the docs at http://docs.getchef.com/upgrade_server.html#from-chef-server-osc and
-      https://docs.getchef.com/upgrade_server_open_source_notes.html for more information.
+      https://docs.getchef.com/upgrade_server_open_source_notes.html#manual-upgrades for more information.
 
 ### Bug Fixes:
 
