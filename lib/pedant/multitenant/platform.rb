@@ -366,8 +366,11 @@ module Pedant
       org = Pedant::Config[:org]
       # If default_orgname is set, override the settings for org
       name = pedant_orgname
-      if org[:create_me] || Pedant::Config.default_orgname
+      if Pedant::Config.use_default_org
         @validate_org = true
+        create_org(name)
+      elsif org[:create_me]
+        @validate_org = !!Pedant::Config.validate_org_creation
         create_org(name)
       else
         key = org[:validator_key]
