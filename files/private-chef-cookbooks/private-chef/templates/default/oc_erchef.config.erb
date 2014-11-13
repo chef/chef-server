@@ -53,6 +53,7 @@
           {error_logger_hwm, 1000}
         ]},
  {oc_chef_wm, [
+              {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
               {api_version, "<%= node['private_chef']['api_version'] %>"},
               {server_flavor, "<%= node['private_chef']['flavor'] %>"},
 
@@ -75,7 +76,7 @@
 
               {enable_actions, <%= node['private_chef']['dark_launch']['actions'] %>},
               <% if @ldap_enabled -%>
-              {ldap, [{host, "<%=node['private_chef']['ldap']['host'] || "localhost" %>"},
+              {ldap, [{host, "<%= @helper.normalize_host(node['private_chef']['ldap']['host']) || "localhost" %>"},
                       {port, <%= node['private_chef']['ldap']['port'] || "389" %> },
                       {timeout, <%= node['private_chef']['ldap']['timeout'] || "60000" %> },
                       {bind_dn, "<%= node['private_chef']['ldap']['bind_dn'] || "" %>" },
@@ -166,7 +167,7 @@
   {stats_hero, [
                %% Set sender pool size to DB max_connections to avoid contention
                {udp_socket_pool_size, <%= node['private_chef']['postgresql']['max_connections'] %> },
-               {estatsd_host, "<%= node['private_chef']['estatsd']['vip'] %>"},
+               {estatsd_host, "<%= @helper.normalize_host(node['private_chef']['estatsd']['vip']) %>"},
                {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>}
               ]},
   {sqerl, [
