@@ -48,6 +48,16 @@ The following items are new since Enterprise Chef 11.2.1 and/or are changes from
 * omnibus
   * `oc_chef_authz` settings are now tuneable
   * postgesql slow query logging can now be configured
+* Upgrades from Open Source Chef 11.1
+  * The `chef-server-ctl upgrade` command has been augmented to support upgrading from Open Source Chef 11.1
+     or greater.
+    * In addition, three additional chef-server-ctl commands have been added:
+      `chef12-upgrade-download`, `chef12-upgrade-data-transform`, and `chef12-upgrade-upload`, which allow
+       the upgrade process to be broken down into discrete steps if more control is desired than the upgrade
+       command alone provides.
+    * Run any of these commands with -h to see the full help menu and all the possible options that can be set.
+      In addition, refer to the docs at http://docs.getchef.com/upgrade_server.html#from-chef-server-osc and
+      https://docs.getchef.com/upgrade_server_open_source_notes.html#manual-upgrades for more information.
 
 ### Bug Fixes:
 
