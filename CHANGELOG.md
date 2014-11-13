@@ -1,5 +1,10 @@
 # Chef Server Changelog
 
+## 12.0.0.rc7 (unreleased)
+
+### private-chef-cookbooks
+* Add ip_mode and normalize_host for ipv6 configuration
+
 ## 12.0.0.rc6 (2014-11-11)
 
 ### oc-chef-pedant 1.0.65
