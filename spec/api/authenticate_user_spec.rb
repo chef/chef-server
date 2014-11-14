@@ -207,8 +207,10 @@ describe 'authenticate_user', :users do
         end
 
         it "allows authentication with correct password and no ldap" do
-          post("#{request_url}?local=true", platform.superuser,
-            :payload => body).should look_like({
+          local_body = body.clone
+          local_body["local"]  = true
+          post("#{request_url}", platform.superuser,
+            :payload => local_body).should look_like({
               :status => 200
             })
         end
