@@ -26,10 +26,12 @@ when 'rhel'
 
   major_version = node['platform_version'].split('.').first
 
+  gpg_key_path = File.join(node['private_chef']['install_path'], "/embedded/keys/chef.gpg.key")
+
   yum_repository 'chef-stable' do
     description 'Chef Stable Repo'
     baseurl "https://packagecloud.io/chef/stable/el/#{major_version}/$basearch"
-    gpgkey 'https://downloads.getchef.com/chef.gpg.key'
+    gpgkey "file://#{gpg_key_path}"
     sslverify true
     sslcacert '/etc/pki/tls/certs/ca-bundle.crt'
     gpgcheck true

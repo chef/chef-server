@@ -42,6 +42,10 @@ dependency "pg-gem" # used by private-chef-ctl reconfigure
 # without manage installed.
 dependency "knife-opc-gem"
 
+# download the gpg-key beforehand for rhel systems to
+# use when verifying add ons
+dependency "gpg-key"
+
 dependency "keepalived"
 dependency "bookshelf"
 
