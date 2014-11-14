@@ -219,18 +219,10 @@ module Pedant
       MAX_ATTEMPTS.times do |attempt|
         r = post("#{@server}/organizations", superuser, :payload => payload)
 
-        # This re-assigns the variable 'r' and therefore can't be part of the case statement below
-        if r.code == 409
-          puts "The organization already exists!  Regenerating validator key ..."
-          r = post("#{Pedant::Config.account_server}/organizations/#{orgname}/_validator_key", superuser, {})
-          raise "Bad error code #{r.code} from regenerating validator key: #{r}" unless r.code == 200
-        end
-
         case r.code
         when 201, 200
           parsed = parse(r)
-          # If we came here through the 409 codepath there won't be a client name so we're hardcoding it.
-          validator_name = parsed["clientname"] || "#{orgname}-validator"
+          validator_name = parsed["clientname"]
           validator_key = parsed["private_key"]
 
           validator = Pedant::Client.new(validator_name, validator_key)
@@ -366,8 +358,11 @@ module Pedant
       org = Pedant::Config[:org]
       # If default_orgname is set, override the settings for org
       name = pedant_orgname
-      if org[:create_me] || Pedant::Config.default_orgname
+      if Pedant::Config.use_default_org
         @validate_org = true
+        create_org(name)
+      elsif org[:create_me]
+        @validate_org = !!Pedant::Config.validate_org_creation
         create_org(name)
       else
         key = org[:validator_key]
