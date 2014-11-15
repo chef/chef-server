@@ -5,6 +5,17 @@
 ### private-chef-cookbooks
 * Add ip_mode and normalize_host for ipv6 configuration
 
+### oc\_erchef 0.29.4
+* fix issue in which local mode auth was not handled correctly,
+  preventing accounts on an LDAP server from being associated
+  with existing Chef Server accounts when the login name differed.
+
+### oc-chef-pedant 1.0.67
+* Modify test of local mode authentication to be correct
+
+### oc-chef-pedant 1.0.66
+* Turn org creation validation off by default
+
 ## 12.0.0.rc6 (2014-11-11)
 
 ### oc-chef-pedant 1.0.65
@@ -22,7 +33,7 @@
 ### oc-chef-pedant 1.0.62
 * Fix for consistent return values in oc\_erchef
 
-## oc\_erchef 0.29.3
+### oc\_erchef 0.29.3
 * route /organizations/:org\_id/ANY/\_acl endpoint
 
 ### oc\_erchef 0.29.2
