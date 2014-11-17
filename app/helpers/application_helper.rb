@@ -11,5 +11,12 @@ module ApplicationHelper
 
     classes[flash_type.to_sym] || flash_type.to_s
   end
-  
+
+  def chef_domain
+    ENV['CHEF_DOMAIN'] || 'getchef.com'
+  end
+
+  def new_password_reset_url
+    ENV['PASSWORD_RESET_URL'] || "https://#{chef_domain}/account/password_resets/new"
+  end
 end
