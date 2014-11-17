@@ -21,7 +21,7 @@ The following items are new since Enterprise Chef 11.2.1 and/or are changes from
 * Introduced pluggable HA architecture as alternative to DRBD.
 * Solr has been upgraded to Solr 4
 * For compatibility with Open Source Chef 11, a new configuration option
-  `default_org_name` has been provided.  All org-related requests that are not
+  `default_orgname` has been provided.  All org-related requests that are not
   in the form '/organizations/X/...' will be assumed to have this organization name.
 * `private-chef.rb` and `chef-server.rb`
   * `private-chef.rb`  has been replaced by `chef-server.rb`
