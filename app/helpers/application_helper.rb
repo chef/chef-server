@@ -13,7 +13,7 @@ module ApplicationHelper
   end
 
   def chef_domain
-    'getchef.com'
+    ENV['CHEF_DOMAIN'] || 'getchef.com'
   end
 
   def new_password_reset_url
