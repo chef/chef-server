@@ -81,8 +81,9 @@ process_post(Req, #base_state{chef_db_context = Ctx,
                               resource_state = #user_state{user_data = UserData}} = State) ->
     Name = chef_user:username_from_ejson(UserData),
     Password = ej:get({<<"password">>}, UserData),
+    LocalOverride = ej:get({<<"local">>}, UserData),
     User = chef_db:fetch(#chef_user{username = Name}, Ctx),
-    AuthType = oc_chef_wm_authn_ldap:auth_method(Req),
+    AuthType = oc_chef_wm_authn_ldap:auth_method(LocalOverride),
     case verify_user(Name, Password, AuthType, User, State) of
         {false, Code} ->
             {{halt, Code}, chef_wm_util:set_json_body(Req, auth_fail_message(Code)), State};

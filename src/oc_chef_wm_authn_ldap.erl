@@ -25,21 +25,18 @@
 %% Determines auth method to use for this request based on
 %% configuration and any override present in the request data.
 -spec auth_method(term()) -> ldap | local.
-auth_method(Req) ->
-    auth_method(envy:get(oc_chef_wm, ldap, list), Req).
-
-auth_method(undefined, _Req) ->
+auth_method(true) ->
     local;
-auth_method(Config, Req) when is_list(Config) ->
-    auth_method_for_request(proplists:get_value(host, Config), Req).
+auth_method(_LocalOverride) ->
+    auth_method_for_config(envy:get(oc_chef_wm, ldap, list)).
 
-auth_method_for_request(undefined, _Req) ->
-    local;
-auth_method_for_request(_HostValue, Req) ->
-    case wrq:get_qs_value("local", Req) of
-        undefined -> ldap;
-        _X ->        local
-    end.
+auth_method_for_config(Config) when is_list(Config) ->
+    case proplists:get_value(host, Config) of
+        undefined -> local;
+        _ -> ldap
+    end;
+auth_method_for_config(_Other) ->
+    local.
 
 
 %% Open a direct connection to a configure LDAP server and authenticate the user
