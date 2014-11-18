@@ -170,6 +170,9 @@
                {estatsd_host, "<%= @helper.normalize_host(node['private_chef']['estatsd']['vip']) %>"},
                {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>}
               ]},
+  {opscoderl_httpc, [
+                     {pooler_timeout, <%= @authz_pooler_timeout %>}
+                    ]},
   {sqerl, [
            {db_driver_mod, sqerl_pgsql_client},
            {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
@@ -180,6 +183,7 @@
            {db_pass, "<%= node['private_chef']['postgresql']['sql_password'] %>"},
            {db_name, "opscode_chef" },
            {idle_check, 10000},
+           {pooler_timeout, <%= @db_pooler_timeout %>},
            {prepared_statements, {oc_chef_sql, statements, [pgsql]}},
            {column_transforms,
                               [{<<"created_at">>,
@@ -206,7 +210,8 @@
            {pools, [[{name, sqerl},
                      {max_count, <%= @db_pool_size %>},
                      {init_count, <%= @db_pool_size %>},
-                     {start_mfa, {sqerl_client, start_link, []}}],
+                     {start_mfa, {sqerl_client, start_link, []}},
+                     {queue_max, <%= @db_pool_queue_max %>}],
                     [{name, chef_depsolver},
                      {max_count, <%= @depsolver_worker_count %>},
                      {init_count, <%= @depsolver_worker_count %>},

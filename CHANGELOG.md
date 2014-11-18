@@ -4,6 +4,7 @@
 
 ### private-chef-cookbooks
 * Add ip_mode and normalize_host for ipv6 configuration
+* Add configuration for queueing in pooler
 
 ## 12.0.0.rc6 (2014-11-11)
 
