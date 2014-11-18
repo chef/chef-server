@@ -25,9 +25,13 @@ module PrivateChef
 
   addons Mash.new
   rabbitmq Mash.new
+  rabbitmq['log_rotation'] ||= Mash.new
   opscode_solr4 Mash.new
+  opscode_solr4['log_rotation'] ||= Mash.new
   opscode_expander Mash.new
+  opscode_expander['log_rotation'] ||= Mash.new
   opscode_erchef Mash.new
+  opscode_erchef['log_rotation'] ||= Mash.new
   oc_chef_authz Mash.new
   # Need old path for cookbook migration:
   opscode_chef Mash.new
@@ -35,15 +39,21 @@ module PrivateChef
   lb Mash.new
   lb_internal Mash.new
   postgresql Mash.new
+  postgresql['log_rotation'] ||= Mash.new
   redis_lb Mash.new
+  redis_lb['log_rotation'] ||= Mash.new
   oc_bifrost Mash.new
+  oc_bifrost['log_rotation'] ||= Mash.new
   oc_id Mash.new
+  oc_id['log_rotation'] ||= Mash.new
   bookshelf Mash.new
+  bookshelf['log_rotation'] ||= Mash.new
   bootstrap Mash.new
   drbd Mash.new # For DRBD specific settings
   keepalived Mash.new
   estatsd Mash.new
   nginx Mash.new
+  nginx['log_rotation'] ||= Mash.new
   log_retention Mash.new
   log_rotation Mash.new
   dark_launch Mash.new
