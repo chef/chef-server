@@ -297,6 +297,7 @@ default['private_chef']['nginx']['non_ssl_port'] = 80
 default['private_chef']['nginx']['x_forwarded_proto'] = 'https'
 default['private_chef']['nginx']['server_name'] = node['fqdn']
 default['private_chef']['nginx']['url'] = "https://#{node['fqdn']}"
+default['private_chef']['nginx']['proxy_connect_timeout'] = 1
 # Based off of the Mozilla recommended cipher suite
 # https://wiki.mozilla.org/Security/Server_Side_TLS#Recommended_Ciphersuite
 #

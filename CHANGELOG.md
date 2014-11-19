@@ -12,12 +12,16 @@
   that can be set in the "/etc/opscode/chef-server.rb" file for convenience.
   By default there is a hard coded value of 5 seconds (5000ms) as per:
   https://github.com/opscode/sqerl/blob/master/src/sqerl_client.erl#L134
+* Select appropriate default port for LDAP and LDAPS (when encryption is
+  selected, as previously user had to manually add port to make it work).
+* Expose "proxy_connect_timeout" for Nginx when it connects to the backends,
+  so it can be adjused. The hard coded default might not be sufficient in
+  some cases.
 
 ### opscode-omnibus
 * Add ability to configure SQL query timeout for Erchef, bifrost and mover.
-* Select appropriate default port for LDAP and LDAPS (when encryption is
-  selected, as previously user had to manually add port to make it work).
 * Provide reasonable default for LDAP and LDAPS ports.
+* Add ability to configure timeout for connect() when connecting to backends.
 
 ### oc\_erchef 0.29.4
 * fix issue in which local mode auth was not handled correctly,
