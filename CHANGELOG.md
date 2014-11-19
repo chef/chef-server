@@ -2,6 +2,9 @@
 
 ## 12.0.0.rc7 (unreleased)
 
+### omnibus-ctl 0.3.1
+* Exclude gz files from tail
+
 ### private-chef-cookbooks
 * Add ip_mode and normalize_host for ipv6 configuration
 * Add configuration for queueing in pooler
