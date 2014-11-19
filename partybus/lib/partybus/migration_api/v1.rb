@@ -22,10 +22,7 @@ module Partybus
         role = Partybus.config.private_chef_role
         log("\tPrivate Chef Role: #{role}")
         if role == "backend" && Partybus.config.bootstrap_server
-          if db_up?
-            log("\tDatabase Up")
-            perform_schema_upgrade(version)
-          else
+          if !perform_schema_upgrade(version)
             log <<EOF
 ****
 ERROR: Database is not running on bootstrap server.
@@ -40,9 +37,7 @@ EOF
             exit 1
           end
         elsif role == "standalone"
-          if db_up?
-            perform_schema_upgrade(version)
-          else
+          if !perform_schema_upgrade(version)
             log <<EOF
 ****
 ERROR: Database is not running.
@@ -137,12 +132,24 @@ EOF
         exit_status == 0
       end
 
+      def ensure_db_up
+        retries = 0
+        until db_up? || retries == 5
+          log("\tAttempting to start #{Partybus.config.database_service_name}")
+          start_service(Partybus.config.database_service_name)
+          retries += 1
+          sleep retries
+        end
+        db_up?
+      end
+
       def perform_schema_upgrade(version)
+        return false unless ensure_db_up
+
         log("\tUpgrading Schema to Version #{version}")
-        start_service('postgresql')
         migrator = Partybus::SchemaMigrator.new
         migrator.migrate_to(version)
-        stop_service('postgresql')
+        stop_service(Partybus.config.database_service_name)
       end
     end
   end
