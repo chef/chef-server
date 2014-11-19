@@ -259,7 +259,6 @@ default['private_chef']['lb']['upstream']['opscode-erchef'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['oc_bifrost'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['opscode-solr4'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['bookshelf'] = [ "127.0.0.1" ]
-default['private_chef']['lb']['upstream']['proxy_connect_timeout'] = 1
 default['private_chef']['lb_internal']['enable'] = true
 default['private_chef']['lb_internal']['vip'] = "127.0.0.1"
 default['private_chef']['lb_internal']['chef_port'] = 9680
@@ -298,6 +297,7 @@ default['private_chef']['nginx']['non_ssl_port'] = 80
 default['private_chef']['nginx']['x_forwarded_proto'] = 'https'
 default['private_chef']['nginx']['server_name'] = node['fqdn']
 default['private_chef']['nginx']['url'] = "https://#{node['fqdn']}"
+default['private_chef']['nginx']['proxy_connect_timeout'] = 1
 # Based off of the Mozilla recommended cipher suite
 # https://wiki.mozilla.org/Security/Server_Side_TLS#Recommended_Ciphersuite
 #

@@ -22,7 +22,7 @@
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto <%= @x_forwarded_proto %>;
     proxy_pass_request_headers on;
-    proxy_connect_timeout   <%= node['private_chef']['lb']['upstream']['proxy_connect_timeout'] %>;
+    proxy_connect_timeout   <%= node['private_chef']['nginx']['proxy_connect_timeout'] %>;
     proxy_send_timeout      300;
     proxy_read_timeout      300;
 
