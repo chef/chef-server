@@ -2,6 +2,12 @@
 
 ## 12.0.0.rc7 (unreleased)
 
+## enterprise-chef-common 0.4.7
+* Restart logging service on log configuration change
+
+## enterprise-chef-common 0.4.6
+* Make project-ctl configurable by name
+
 ### omnibus-ctl 0.3.1
 * Exclude gz files from tail
 
