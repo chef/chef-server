@@ -139,8 +139,10 @@ EOF
 
       def perform_schema_upgrade(version)
         log("\tUpgrading Schema to Version #{version}")
+        start_service('postgresql')
         migrator = Partybus::SchemaMigrator.new
         migrator.migrate_to(version)
+        stop_service('postgresql')
       end
     end
   end

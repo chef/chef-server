@@ -1,8 +1,6 @@
 
 define_upgrade do
-  start_service('postgresql')
   upgrade_schema_to 32
-  stop_service('postgresql')
 
   if Partybus.config.bootstrap_server
 
