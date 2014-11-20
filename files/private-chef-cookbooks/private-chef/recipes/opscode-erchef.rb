@@ -35,17 +35,22 @@ template "/opt/opscode/embedded/service/opscode-erchef/bin/oc_erchef" do
   notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
 end
 
-erchef_config = File.join(opscode_erchef_etc_dir, "app.config")
+ldap_authentication_enabled = OmnibusHelper.new(node).ldap_authentication_enabled?
+ # These values are validated and managed in libraries/private_chef.rb#gen_ldap
+enable_ssl = ldap_authentication_enabled ? node['private_chef']['ldap']['enable_ssl'] : nil
+ldap_encryption_type = ldap_authentication_enabled ? node['private_chef']['ldap']['encryption_type'] : nil
 
-ldap_encryption = node['private_chef']['ldap']['encryption']
-ldap_encryption = ldap_encryption.nil? ? "none" : ldap_encryption.to_s
+erchef_config = File.join(opscode_erchef_etc_dir, "app.config")
 
 template erchef_config do
   source "oc_erchef.config.erb"
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
-  variables(node['private_chef']['opscode-erchef'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled?, :ldap_encryption => ldap_encryption, :helper => OmnibusHelper.new(node)))
+  variables(node['private_chef']['opscode-erchef'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled,
+                                                                 :enable_ssl =>  enable_ssl,
+                                                                 :ldap_encryption_type => ldap_encryption_type,
+                                                                 :helper => OmnibusHelper.new(node)))
   notifies :run, 'execute[remove_erchef_siz_files]', :immediately
   notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
 end

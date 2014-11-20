@@ -399,7 +399,6 @@ module PrivateChef
     end
 
     def gen_ldap
-      allowed_encryption_values = [ :none, :start_tls, :simple_tls ]
       required_ldap_config_values = %w{ host base_dn }
       # ensure a bind password was provided along with the optional bind_dn
       required_ldap_config_values << "bind_password" if PrivateChef["ldap"].key?("bind_dn")
@@ -410,10 +409,58 @@ module PrivateChef
           raise "Missing required LDAP config value '#{val}'. Required values include [#{required_ldap_config_values.join(', ')}]"
         end
       end
-      encryption = PrivateChef["ldap"]["encryption"]
-      if encryption and not allowed_encryption_values.include? encryption
-        raise "Valid values of LDAP 'encryption' setting are :#{allowed_encryption_values.join(', :')}. '#{encryption}' is not valid."
+      # DEPRECATION ALERT
+      # Under chef 11, there were two ways to enable encryption. First you could
+      # just set ssl_enabled and the proper port.  Second, you could set the proper port,
+      # and set 'encryption' to simple_tls.  We also documented accepting 'start_tls'.
+      # If you set encryption and used ssl_enabled, it was effectively the same as setting
+      # encryption to simple_tls
+      #
+      #
+      # For compatibility, we will accept both methods here, but in the future valid options are
+      # to use either 'ssl_enabled' or 'tls_enabled'. The ability to directly set 'encryption' is
+      # deprecated.
+      #
+      ldap_encryption = PrivateChef['ldap']['encryption']
+      ssl_enabled = PrivateChef['ldap']['ssl_enabled']
+      tls_enabled = PrivateChef['ldap']['tls_enabled']
+
+      # Some edge case checks, tell them if they set more than one value and which one we're using.
+      # This can go away once ldap_encryption support is removed
+      if ldap_encryption
+        if ssl_enabled
+          Chef::Log.warn("Both ldap['encryption'] and ldap['ssl_enabled'] are set. Using ssl_enabled.")
+          ldap_encryption = nil
+        elsif tls_enabled
+          Chef::Log.warn("Both ldap['encryption'] and ldap['tls_enabled'] are set. Using tls_enabled.")
+          ldap_encryption = nil
+        end
       end
+      if ldap_encryption
+        Chef::Log.warn("Please note that the ldap 'encryption' setting is deprecated as of Chef Server 12.0. Use either "\
+                       "ldap['ssl_enabled'] = true or ldap['tls_enabled'] = true.")
+        case ldap_encryption.to_s
+        when "simple_tls"
+          ssl_enabled = true
+        when "start_tls"
+          tls_enabled = true
+        when "none"
+          Chef::Log.info("Configuring ldap without encryption.")
+        else
+          raise "Invalid ldap configuration: unknown value #{ldap_encryption} for deprecated ldap['encryption'] option. "\
+                "Please set ldap['ssl_enabled'] = true or ldap['tls_enabled'] = true instead"
+        end
+      else
+        if ssl_enabled and tls_enabled
+          raise "Invalid ldap configuration: ldap['ssl_enabled'] and ldap['tls_enabled'] are mutually exclusive."
+        end
+      end
+      PrivateChef["ldap"]["ssl_enabled"] = ssl_enabled
+      PrivateChef["ldap"]["tls_enabled"] = tls_enabled
+      PrivateChef["ldap"]["encryption_type"] = ssl_enabled ? "simple_tls" :
+                                               tls_enabled ? "start_tls" :
+                                               "none"
+
     end
 
     def generate_config(node_name)

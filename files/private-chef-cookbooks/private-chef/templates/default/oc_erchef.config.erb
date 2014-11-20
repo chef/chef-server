@@ -77,18 +77,13 @@
               {enable_actions, <%= node['private_chef']['dark_launch']['actions'] %>},
               <% if @ldap_enabled -%>
               {ldap, [{host, "<%= @helper.normalize_host(node['private_chef']['ldap']['host']) || "localhost" %>"},
-                      % The default port for ldap over ssl (simple_tls) is 636.  The standard ldap port without ssl (even
-                      % if upgrading to secure via start_tls) is 389.
-                      {port, <%= node['private_chef']['ldap']['port'] || (@ldap_encryption == "simple_tls" ? 636 : 389) %> },
+                      {port, <%= node['private_chef']['ldap']['port'] || (@ssl_enabled ? 636 : 389) %> },
                       {timeout, <%= node['private_chef']['ldap']['timeout'] || 60000 %> },
                       {bind_dn, "<%= node['private_chef']['ldap']['bind_dn'] || "" %>" },
                       {bind_password, "<%= node['private_chef']['ldap']['bind_password'] || "" %>" },
                       {base_dn, "<%= node['private_chef']['ldap']['base_dn'] || "" %>" },
                       {login_attribute, "<%= node['private_chef']['ldap']['login_attribute'] || "samaccountname" %>" },
-                      % Note that encryption value of simple_tls is required to use ssl - the ssl_enabled configuration
-                      % entry is ignored, as it was under opscode-account. ENsure that port is set correctly if this is
-                      % set to simple_tls.
-                      {encryption, <%= @ldap_encryption %>}
+                      {encryption, <%= @ldap_encryption_type %>}
               ]},
               <% else -%>
               {ldap, []},
