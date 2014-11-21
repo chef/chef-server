@@ -1,5 +1,11 @@
 # Chef Server Changelog
 
+## 12.0.0.rc8 (unreleased)
+
+### private-chef-cookbooks
+* Move Postgres database stop/start out of migrations
+* Gracefullly attempt to start the database during migrations
+
 ## 12.0.0.rc7 (unreleased)
 
 ## enterprise-chef-common 0.4.7
