@@ -29,6 +29,7 @@
 * Expose "proxy_connect_timeout" for Nginx when it connects to the backends,
   so it can be adjused. The hard coded default might not be sufficient in
   some cases.
+* Expose folsom_graphite configuration, default to disabled
 
 ### opscode-omnibus
 * Add ability to configure SQL query timeout for Erchef, bifrost and mover.
