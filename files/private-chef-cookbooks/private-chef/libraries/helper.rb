@@ -221,11 +221,10 @@ EOKEY
       "http://#{vip_for_uri('lb_internal')}:#{node['private_chef']['nginx']['non_ssl_port']}"
     end
   end
-end
 
-class Chef::Resource::Template
   def ldap_authentication_enabled?
     node['private_chef'].attribute?('ldap') &&
       !(node['private_chef']['ldap'].nil? || node['private_chef']['ldap'].empty?)
   end
 end
+

@@ -30,6 +30,11 @@ The following items are new since Enterprise Chef 11.2.1 and/or are changes from
     you when you upgrade.
   * If you do not have a `private-chef.rb` or `chef-server.rb`, a `chef-server.rb`
     will be created for you at installation.
+* LDAP
+  * STARTTLS is now properly supported for LDAP.  If your LDAP server supports it
+    you can enable it via `ldap['start_tls'] = true` in `/etc/opscode/chef-server.rb`.
+  * the `ldap['encryption']` setting is deprecated. (See Deprecations
+    section, below.)
 * chef-server-ctl
   * `chef-server-ctl` replaces `private-chef-ctl` though
     `private-chef-ctl` will also work in CS12.
@@ -134,9 +139,15 @@ To help prevent this class of troubles, Chef Server now enforces that a
 member of an organization's "admins" group cannot be removed from the
 organization without first being removed from the "admins" group.
 
+### Deprecations
+
+* The setting ldap['encryption'] is now deprecated. Instead use
+  `ldap['ssl_enabled'] = true` or `ldap['tls_enabled'] = true` as appropriate
+  to your environment.
 
 ### Release History
 
+* RC7 2014-11-20
 * RC6 2014-11-11
 * RC5 2014-10-17
 * RC4 2014-09-18
