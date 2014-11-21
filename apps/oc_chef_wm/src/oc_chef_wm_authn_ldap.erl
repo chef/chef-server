@@ -85,7 +85,13 @@ find_and_authenticate_user(Session, User, Password, Config) ->
     BaseDN = proplists:get_value(base_dn, Config),
     LoginAttr = proplists:get_value(login_attribute, Config, "samaccountname"),
     Base = {base, BaseDN},
-    Filter = {filter, eldap:equalityMatch(LoginAttr, User)},
+
+    % Add support for an optional group_dn filter
+    GroupDN = proplists:get_value(group_dn, Config, ""),
+    Filter = case GroupDN of
+                 "" -> {filter, eldap:equalityMatch(LoginAttr, User)};
+                 _ -> {filter,eldap:'and'([eldap:equalityMatch(LoginAttr, User), eldap:equalityMatch("memberOf",GroupDN)])}
+             end,
 
     % Auth so we can search for the user
     ok = case {BindDN, BindPass} of
@@ -172,10 +178,14 @@ result_to_user_ejson(LoginAttr, UserName, [{eldap_entry, CN, DataIn}|_]) ->
     % No guarantees on casing, so let's not make assumptions:
     Data = [ { string:to_lower(Key), Value} || {Key, Value} <- DataIn ],
 
+    % Since we just downcased the entire response, we need to downcase
+    % the LoginAttr to ensure it doesn't blow up and throw an exception
+    LCAttr = string:to_lower(LoginAttr),
+
     % loginattr was used to find this record, so we know it must exist;
     % however, multiple LoginAttr fields may exist in the LDAP record, take
     % the first
-    [CanonicalUserName|_] = [ canonical_username(U) || U <- proplists:get_value(LoginAttr, Data) ],
+    [CanonicalUserName|_] = [ canonical_username(U) || U <- proplists:get_value(LCAttr, Data) ],
 
     % If you are debugging an issue where a new user has authenticated successfully
     % via opscode-manage , but received an odd 400 message when trying to create a
