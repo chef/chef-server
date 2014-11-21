@@ -576,3 +576,9 @@ default['private_chef']['ldap'] = nil
 # Upgrades/Partybus
 ##
 default['private_chef']['upgrades']['dir'] = "/var/opt/opscode/upgrades"
+
+##
+# Folsom Graphite
+##
+# Off by default, graphite not included with chef
+default['private_chef']['folsom_graphite']['enabled'] = false
