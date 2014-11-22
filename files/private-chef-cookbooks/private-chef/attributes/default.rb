@@ -581,7 +581,7 @@ default['private_chef']['upgrades']['dir'] = "/var/opt/opscode/upgrades"
 # Folsom Graphite
 ##
 # Off by default, graphite not included with chef. WARNING:If you turn on and
-# graphite is available via tcp, erchef will fail to start.
+# graphite is not available via tcp, erchef will fail to start.
 default['private_chef']['folsom_graphite']['enabled'] = false
 # graphite server host name
 default['private_chef']['folsom_graphite']['host'] = "localhost"
