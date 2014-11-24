@@ -62,6 +62,8 @@ module PrivateChef
 
   license Mash.new
 
+  folsom_graphite Mash.new
+
   servers Mash.new
   backend_vips Mash.new
   ha Mash.new # For all other HA settings
@@ -232,6 +234,7 @@ module PrivateChef
         "opscode_expander",
         "opscode_erchef",
         "oc_chef_authz",
+        "folsom_graphite",
         "lb",
         "lb_internal",
         "postgresql",
@@ -277,6 +280,7 @@ module PrivateChef
       results['private_chef']['logs']['log_rotation'] = PrivateChef['log_rotation']
       results['private_chef']['dark_launch'] = PrivateChef['dark_launch']
       results['private_chef']['opscode-erchef']['max_request_size'] = PrivateChef["opscode_erchef"]["max_request_size"]
+      results['private_chef']['folsom_graphite'] = PrivateChef['folsom_graphite']
       results
     end
 
