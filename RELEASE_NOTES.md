@@ -1,6 +1,6 @@
 # Chef Server Release Notes
 
-## 12.0.0
+## 12.0.0 (2014-11-25)
 
 ### What's New:
 
