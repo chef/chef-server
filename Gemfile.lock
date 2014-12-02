@@ -55,7 +55,7 @@ GEM
     mixlib-cli (1.5.0)
     mixlib-config (2.1.0)
     mixlib-log (1.6.0)
-    mixlib-shellout (1.6.0)
+    mixlib-shellout (1.6.1)
     ohai (7.4.0)
       ffi (~> 1.9)
       ffi-yajl (~> 1.0)
