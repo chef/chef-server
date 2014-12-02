@@ -1,6 +1,11 @@
 oc-id Changelog
 ===============
 
+## 0.4.3 (2014-12-02)
+
+* Update default domain name
+* Add password reset URL helper
+
 ## 0.4.2 (2014-11-05)
 * Add support for Chef signed headers in Resource Owner Password
   Credentials flow
