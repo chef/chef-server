@@ -1,4 +1,11 @@
 # Chef Server Changelog
+## 12.0.1 (unreleased)
+
+### oc-chef-pedant 1.0.68
+* pin mixlib-shellout to 1.6.1
+
+### opscode-omnibus
+* pin mixlib-shellout to 1.6.1
 
 ## 12.0.0 (2014-11-25)
 
