@@ -5,6 +5,8 @@
 # All Rights Reserved
 #
 
+include_recipe "private-chef::runit_setup"
+
 expander_dir = node['private_chef']['opscode-expander']['dir']
 expander_etc_dir = File.join(expander_dir, "etc")
 expander_log_dir = node['private_chef']['opscode-expander']['log_directory']

@@ -1,4 +1,12 @@
-#!/bin/sh
+#!/bin/bash
+
+exec 2>&1
+source 'sv_lib'
+
+ensure_backing_storage
+if [[ $? != 0 ]]; then
+  exit 1
+fi
 
 /opt/opscode/bin/wait-for-rabbit
 

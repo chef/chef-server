@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+include_recipe "private-chef::runit_setup"
+
 redis = node['private_chef']['redis_lb']
 redis_dir = redis['dir']
 redis_etc_dir = File.join(redis_dir, "etc")

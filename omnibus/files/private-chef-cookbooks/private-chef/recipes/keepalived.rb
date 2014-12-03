@@ -5,6 +5,8 @@
 # All Rights Reserved
 #
 
+include_recipe "private-chef::runit_setup"
+
 keepalived_dir = node['private_chef']['keepalived']['dir']
 keepalived_etc_dir = File.join(keepalived_dir, "etc")
 keepalived_bin_dir = File.join(keepalived_dir, "bin")

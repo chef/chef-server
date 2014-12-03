@@ -49,6 +49,16 @@ case $ACTION in
       sleep 1
     done
     ;;
+  mounted)
+    DRBD_STATUS=$(cat /proc/drbd | egrep cs:)
+    if [[ "$DRBD_STATUS" =~ "cs:Connected ro:Primary/Secondary ds:UpToDate/UpToDate" ]]; then
+      echo "[OK] DRDB mounted on this machine"
+      exit 0
+    else
+      echo "[ERROR] DRDB not mounted on this machine ($DRDB_STATUS)"
+      exit 1
+    end
+    ;;
   status)
     STATUS=0 # exit status
     CURRENT_STATE="$2"
