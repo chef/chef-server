@@ -1,5 +1,5 @@
 name "opscode-chef-mover"
-default_version "2.2.15"
+default_version "2.2.17"
 
 dependency "erlang"
 dependency "rebar"
