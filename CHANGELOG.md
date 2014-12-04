@@ -11,6 +11,8 @@
 
 ### opscode-omnibus
 * pin mixlib-shellout to 1.6.1
+* added new `group_dn` ldap attribute to require users to be in the
+  named group.
 * Refactored superuser bootstrap process to use new chef-server-bootstrap
   repository instead of opscode-test, which pulled in a variety of now
   deprecated ruby repositories.
