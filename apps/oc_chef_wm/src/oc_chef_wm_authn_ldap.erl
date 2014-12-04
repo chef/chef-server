@@ -180,12 +180,12 @@ result_to_user_ejson(LoginAttr, UserName, [{eldap_entry, CN, DataIn}|_]) ->
 
     % Since we just downcased the entire response, we need to downcase
     % the LoginAttr to ensure it doesn't blow up and throw an exception
-    LCAttr = string:to_lower(LoginAttr),
+    LCLoginAttr = string:to_lower(LoginAttr),
 
     % loginattr was used to find this record, so we know it must exist;
     % however, multiple LoginAttr fields may exist in the LDAP record, take
     % the first
-    [CanonicalUserName|_] = [ canonical_username(U) || U <- proplists:get_value(LCAttr, Data) ],
+    [CanonicalUserName|_] = [ canonical_username(U) || U <- proplists:get_value(LCLoginAttr, Data) ],
 
     % If you are debugging an issue where a new user has authenticated successfully
     % via opscode-manage , but received an odd 400 message when trying to create a
