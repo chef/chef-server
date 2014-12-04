@@ -160,10 +160,10 @@ result_to_user_ejson(LoginAttr, _, [{eldap_entry, CN, DataIn}|_]) ->
 
     % Since we just downcased the entire response, we need to downcase
     % the LoginAttr to ensure it doesn't blow up and throw an exception
-    LCAttr = string:to_lower(LoginAttr),
+    LCLoginAttr = string:to_lower(LoginAttr),
 
     % loginattr was used to find this record, so we know it must exist
-    [UserName0] = proplists:get_value(LCAttr, Data),
+    [UserName0] = proplists:get_value(LCLoginAttr, Data),
     UserName1 = string:to_lower(UserName0),
     UserName2 = re:replace(UserName1, "[^0-z0-9_-]", "_", [{return, list}, global]),
     UserName = characters_to_binary(UserName2),
