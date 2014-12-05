@@ -1,5 +1,9 @@
 # Enterprise Chef Changelog
 
+## 11.2.8 (Unreleased)
+
+* Ensure nginx restarts on frontends after lua-related changes
+
 ## 11.2.6 (2014-12-17)
 * Add an OmnibusHelper method to provide an owner and group hash
 * Reference owner and group for log dirs in recipes where only owner is found
