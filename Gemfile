@@ -3,7 +3,7 @@ source "https://rubygems.org"
 
 gem "sequel", "~> 3.34.1"
 
-gem "pg", "~> 0.16.0"
+#gem "pg", "~> 0.16.0"
 
 gem "activemodel"
 
@@ -22,3 +22,6 @@ gem "rspec", "1.3.0", :require => "spec"
 group(:dev) do
   gem "rb-appscript"
 end
+
+gem "bcrypt-ruby"
+gem "uuid"

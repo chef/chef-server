@@ -1,7 +1,7 @@
 #! /usr/bin/env ruby
 
 # Usage:
-# ./bootstrap-platform CONFIG_FILE BOOTSTRAP_SCRIPT
+# ./bootstrap-platform CONFIG_FILE USER_CONFIG_FILE
 
 require 'rubygems'
 require 'bundler/setup'
@@ -9,32 +9,145 @@ $:.unshift(File.expand_path('../../lib', __FILE__))
 
 require 'opscode/server-bootstrap'
 require 'opscode/server-bootstrap/bootstrapper'
+require 'restclient'
+require 'json'
+require 'opscode/test/database_helper'
+require 'bcrypt'
+require 'yaml'
+require 'uuid'
+
 
 class BootstrapPlatform
-  def initialize(config_file, bootstrap_script)
-    @config_file, @bootstrap_script = config_file, bootstrap_script
+  def initialize(config_file, user_config_file)
+    @config_file, @user_config_file = config_file, user_config_file
   end
 
   def run
     configure
     bootstrap
+    # TODO: TESTING
+    raise
   end
 
   def configure
     Opscode::ServerBootstrap.configure do |c|
-      c.instance_eval(File.read(config[:config_file]))
+      c.instance_eval(File.read(@config_file))
     end
   end
 
   def bootstrap
-    Opscode::Bootstrap::Bootstrapper.new.bootstrap(config[:bootstrap_script])
+    #################################
+    # create superuser authz object #
+    #################################
+
+    # TODO: make sure this works
+    superuser_authz_id = create_object_in_authz("users", Opscode::ServerBootstrap.config.bifrost_superuser_id)
+
+    ####################
+    # create superuser #
+    ####################
+
+    # load certificate
+    user = YAML.load_file(@user_config_file)
+    user['certificate'] = superuser_cert(Opscode::ServerBootstrap.config.superuser_cert)
+
+    # generate hashed password and salt
+    unhashed_password = user['password']
+    salt = generate_salt(unhashed_password)
+    hashed_password = encrypt(unhashed_password, salt)
+
+    # strangely, these fields are not filled out in the database,
+    # but inserted into the serialized object
+    #user['salt'] = salt
+    #user['hashed_password'] = hashed_password
+
+    # create serialized_object
+    serialized_object = {}
+    ["first_name", "last_name", "display_name"].each do |field|
+      serialized_object[field] = user[field]
+    end
+    serialized_object['salt'] = salt
+    serialized_object['hashed_password'] = hashed_password
+    user['serialized_object'] = JSON.generate(serialized_object)
+
+    # generate / assign IDs
+    user['authz_id'] = superuser_authz_id
+    user['id'] = UUID.new.generate(:compact)
+
+    # create timestamps
+    user_created_time = Time.now.utc
+    user['created_at'] = user_created_time
+    user['updated_at'] = user_created_time
+    user['last_updated_by'] = Opscode::ServerBootstrap.config.bifrost_superuser_id
+
+    # first time public key has been "changed"
+    user['pubkey_version'] = 1
+
+    # not an admin (strangly)
+    user['admin'] = 'f'
+
+    # insert populated user object into the postgres
+    Opscode::ServerBootstrap.database_config.db[:user].insert(user)
+
+    ##############################
+    # create superuser container #
+    ##############################
+    create_global_containers(superuser_authz_id, "00000000000000000000000000000000")
+  end
+
+
+end
+
+def generate_salt(unhashed_password)
+  BCrypt::Engine.generate_salt(12)
+end
+
+def encrypt(unhashed_password, salt)
+  bcrypt_secret = BCrypt::Engine.hash_secret(unhashed_password, bcrypt_salt)
+
+  # The database contains triggers that require hashed_password, salt, and hash_type
+  # to all be non-null if any of the three are non-null.
+  bcrypt_secret
+end
+
+def superuser_cert(cert_path)
+  cert_file = File.read(cert_path)
+  OpenSSL::X509::Certificate.new(cert_file)
+end
+
+def create_object_in_authz(object_name, requester_id)
+  url = "http://#{Opscode::ServerBootstrap.config.bifrost_host}:#{Opscode::ServerBootstrap.config.bifrost_port}/#{object_name}"
+  headers = {
+    :content_type => :json,
+    :accept => :json,
+    'X-Ops-Requesting-Actor-Id' => requester_id
+  }
+
+  result = RestClient.post(url, "{}", headers)
+  JSON.parse(result)["id"]
+end
+
+def create_global_containers(superuser_authz_id, placeholder_id)
+  %w(organizations users).each do |name|
+    authz_id = create_object_in_authz("containers", superuser_authz_id)
+
+    # TODO (not sure this is actually true, need to confirm)
+    # IMPORTANT: We are relying on Mixlib:Auth to make the ACL magic happen, when we replace
+    # that library, we need to make sure that we create the proper ACLs here (since we are just
+    # throwing it into SQL below).
+    #
+    # Create container in SQL also (since the contents will never change
+    # we can create in both places while we migrate off of couchDB. Once
+    # we have finished migrations we can get rid of the couch insert).
+    created_time = Time.now.utc
+    Opscode::ServerBootstrap.database_config.db[:containers].insert(:name => name, :id => authz_id, :org_id => placeholder_id, :last_updated_by => superuser_authz_id, :authz_id => authz_id, :created_at => created_time.to_s[0..18], :updated_at => created_time.to_s[0..18])
   end
 end
 
 if __FILE__ == $0
   if ARGV.length != 2
     puts "You must pass two arguments. Usage:"
-    puts "./bootstrap-platform CONFIG_FILE BOOTSTRAP_SCRIPT"
+    puts "./bootstrap-platform CONFIG_FILE USER_CONFIG_FILE"
     exit 1
   end
   BootstrapPlatform.new(ARGV[0], ARGV[1]).run
