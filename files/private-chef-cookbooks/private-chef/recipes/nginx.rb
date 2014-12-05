@@ -131,7 +131,7 @@ lbconf = node['private_chef']['lb'].to_hash.merge(nginx_vars).merge({
     # Note that due to JIT compile of lua resources, any
     # changes to them will require a full restart to be picked up.
     # This includes any embedded lua.
-    notifies :restart, 'runit_service[nginx]' if is_data_master?
+    notifies :restart, 'runit_service[nginx]'
   end
 end
 
