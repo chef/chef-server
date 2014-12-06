@@ -1,11 +1,8 @@
-.vagrant
-pkg/*
-omnibus.rb
-.bundle
+.bundle/
+.kitchen/
+.vagrant/
 bin/*
 files/private-chef-cookbooks/cache/
-vendor/bundle
-vendor/cookbooks
-.kitchen
-*_git_cache
-/tests/**/*.so
+pkg/*
+vendor/
+tests/**/*.so

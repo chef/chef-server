@@ -149,12 +149,6 @@ Test Kitchen uses a regex syntax to match on plaforms, so for example ubuntu 10.
 will be specificed as ubuntu-1004, or even just ubuntu-10, if 10.04 is the
 only 10 series specified in the `.kitchen.yml`.
 
-If you skipped down to this section without reading the rest of the
-README, note that you'll need to **copy omnibus.rb.example to omnibus.rb
-in the opscode-omnibus directory** (either before running kichen or from
-the opscode-omnibus directory once logged into the VM, which is the
-same directory mounted into it).
-
 Then login to the instance and build the project as described in the Usage
 section:
 
@@ -163,7 +157,7 @@ $ kitchen login ubuntu-1204
 [vagrant@ubuntu...] $ cd opscode-omnibus
 [vagrant@ubuntu...] $ bundle install --binstubs
 [vagrant@ubuntu...] $ ...
-[vagrant@ubuntu...] $ bin/omnibus build chef-server
+[vagrant@ubuntu...] $ bin/omnibus build chef-server -l internal
 ```
 or if you prefer not to use binstubs and to use bundle exec instead:
 
@@ -172,7 +166,7 @@ $ kitchen login ubuntu-1204
 [vagrant@ubuntu...] $ cd opscode-omnibus
 [vagrant@ubuntu...] $ bundle install
 [vagrant@ubuntu...] $ ...
-[vagrant@ubuntu...] $ bundle exec omnibus build chef-server
+[vagrant@ubuntu...] $ bundle exec omnibus build chef-server -l internal
 ```
 
 For a complete list of all commands and platforms, run `kitchen list` or

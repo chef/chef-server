@@ -1,9 +1,25 @@
+#
+# Copyright 2012-2014 Chef Software, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 name "chef-server"
 maintainer "Chef Software, Inc."
-homepage   "http://www.getchef.com"
+homepage   "https://www.chef.io"
 
 package_name    "chef-server-core"
-replaces        "private-chef"
+replace         "private-chef"
 conflict        "private-chef"
 install_dir     "/opt/opscode"
 build_version   Omnibus::BuildVersion.new.semver
@@ -25,7 +41,7 @@ dependency "private-chef-scripts" # assorted scripts used by installed instance
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 dependency "ctl-man" # install man page
 dependency "openresty"
-dependency "redis-rb" # gem for interacting with redis
+dependency "redis-gem" # gem for interacting with redis
 dependency "openresty-lpeg"  # lua-based routing
 dependency "runit"
 
@@ -80,5 +96,9 @@ dependency "chef-ha-plugin-config"
 # version manifest file
 dependency "version-manifest"
 
-exclude "\.git*"
-exclude "bundler\/git"
+package :rpm do
+  signing_passphrase ENV['OMNIBUS_RPM_SIGNING_PASSPHRASE']
+end
+
+exclude "**/.git"
+exclude "**/bundler/git"

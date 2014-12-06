@@ -1,6 +1,5 @@
 #
-# Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
-# License:: Apache License, Version 2.0
+# Copyright 2012-2014 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,19 +17,15 @@
 name "knife-opc"
 default_version "0.2.1"
 
+source git: "git://github.com/opscode/knife-opc.git"
+
 dependency "ruby"
 dependency "rubygems"
 dependency "bundler"
 
-source :git => "git://github.com/opscode/knife-opc.git"
-
-relative_path "knife-opc"
-
 build do
-  # Remove existing built gems if they exist in the current dir.
-  # Add -f in case the file doesn't exist yet.
-  command "rm -f knife-opc-*.gem"
-  gem "build knife-opc.gemspec"
+  env = with_standard_compiler_flags(with_embedded_path)
 
-  gem "install knife-opc-*.gem"
+  gem "build knife-opc.gemspec", env: env
+  gem "install knife-opc-*.gem", env: env
 end
