@@ -1,45 +1,48 @@
 #! /usr/bin/env ruby
-
+#
+# Author:: Tyler Cloke <tyler@chef.io>
+# Copyright:: Copyright (c) 2014 Opscode, Inc.
+# License:: Apache License, Version 2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 # Usage:
 # ./bootstrap-platform CONFIG_FILE USER_CONFIG_FILE
 
 require 'rubygems'
 require 'bundler/setup'
-$:.unshift(File.expand_path('../../lib', __FILE__))
-
-require 'opscode/server-bootstrap'
-require 'opscode/server-bootstrap/bootstrapper'
 require 'restclient'
 require 'json'
-require 'opscode/server-bootstrap/database_helper'
 require 'bcrypt'
 require 'yaml'
 require 'uuid'
-
+require 'sequel'
 
 class BootstrapPlatform
   def initialize(config_file, user_config_file)
     @config_file, @user_config_file = config_file, user_config_file
   end
 
-  def run
-    configure
-    bootstrap
-  end
-
-  def configure
-    Opscode::ServerBootstrap.configure do |c|
-      c.instance_eval(File.read(@config_file))
-    end
-  end
-
   def bootstrap
+    CONFIG = YAML.load_file(@config_file)
+
+    db = Sequel.connect("#{CONFIG['db_driver']}://#{CONFIG['db_user']}:#{CONFIG['db_password']}@#{CONFIG['db_host']}/opscode_chef")
+
     #################################
     # create superuser authz object #
     #################################
 
-    # TODO: make sure this works
-    superuser_authz_id = create_object_in_authz("actors", Opscode::ServerBootstrap.config.bifrost_superuser_id)
+    superuser_authz_id = create_object_in_authz("actors", CONFIG['bifrost_superuser_id'], CONFIG['bifrost_host'], CONFIG['bifrost_post'])
 
     ####################
     # create superuser #
@@ -47,7 +50,7 @@ class BootstrapPlatform
 
     # load certificate
     user = YAML.load_file(@user_config_file)
-    user['public_key'] = superuser_cert(Opscode::ServerBootstrap.config.superuser_cert)
+    user['public_key'] = File.read(CONFIG['superuser_cert'])
 
     # generate hashed password and salt
     unhashed_password = user['password']
@@ -65,7 +68,6 @@ class BootstrapPlatform
     serialized_object['hashed_password'] = hashed_password
     user['serialized_object'] = JSON.generate(serialized_object)
 
-
     # generate / assign IDs
     user['authz_id'] = superuser_authz_id
     user['id'] = UUID.new.generate(:compact)
@@ -74,7 +76,7 @@ class BootstrapPlatform
     user_created_time = Time.now.utc
     user['created_at'] = user_created_time
     user['updated_at'] = user_created_time
-    user['last_updated_by'] = Opscode::ServerBootstrap.config.bifrost_superuser_id
+    user['last_updated_by'] = CONFIG['bifrost_superuser_id']
 
     # first time public key has been "changed"
     user['pubkey_version'] = 1
@@ -87,50 +89,46 @@ class BootstrapPlatform
     user.delete('password')
 
     # insert populated user object into the postgres
-    Opscode::ServerBootstrap.database_config.db[:users].insert(user)
+    db[:users].insert(user)
 
     ##############################
     # create superuser container #
     ##############################
-    create_global_containers(superuser_authz_id, "00000000000000000000000000000000")
+    create_global_containers(superuser_authz_id, "00000000000000000000000000000000", db, CONFIG['bifrost_host'], CONFIG['bifrost_post'])
   end
 
+  private
 
-end
+  def generate_salt(unhashed_password)
+    BCrypt::Engine.generate_salt(12)
+  end
 
-def generate_salt(unhashed_password)
-  BCrypt::Engine.generate_salt(12)
-end
+  def encrypt(unhashed_password, salt)
+    bcrypt_secret = BCrypt::Engine.hash_secret(unhashed_password, salt)
 
-def encrypt(unhashed_password, salt)
-  bcrypt_secret = BCrypt::Engine.hash_secret(unhashed_password, salt)
+    # The database contains triggers that require hashed_password, salt, and hash_type
+    # to all be non-null if any of the three are non-null.
+    bcrypt_secret
+  end
 
-  # The database contains triggers that require hashed_password, salt, and hash_type
-  # to all be non-null if any of the three are non-null.
-  bcrypt_secret
-end
+  def create_object_in_authz(object_name, requester_id, bifrost_host, bifrost_port)
+    url = "http://#{Opscode::ServerBootstrap.config.bifrost_host}:#{Opscode::ServerBootstrap.config.bifrost_port}/#{object_name}"
+    headers = {
+      :content_type => :json,
+      :accept => :json,
+      'X-Ops-Requesting-Actor-Id' => requester_id
+    }
 
-def superuser_cert(cert_path)
-  cert_file = File.read(cert_path)
-end
+    result = RestClient.post(url, "{}", headers)
+    JSON.parse(result)["id"]
+  end
 
-def create_object_in_authz(object_name, requester_id)
-  url = "http://#{Opscode::ServerBootstrap.config.bifrost_host}:#{Opscode::ServerBootstrap.config.bifrost_port}/#{object_name}"
-  headers = {
-    :content_type => :json,
-    :accept => :json,
-    'X-Ops-Requesting-Actor-Id' => requester_id
-  }
-
-  result = RestClient.post(url, "{}", headers)
-  JSON.parse(result)["id"]
-end
-
-def create_global_containers(superuser_authz_id, placeholder_id)
-  %w(organizations users).each do |name|
-    authz_id = create_object_in_authz("containers", superuser_authz_id)
-    created_time = Time.now.utc
-    Opscode::ServerBootstrap.database_config.db[:containers].insert(:name => name, :id => authz_id, :org_id => placeholder_id, :last_updated_by => superuser_authz_id, :authz_id => authz_id, :created_at => created_time.to_s[0..18], :updated_at => created_time.to_s[0..18])
+  def create_global_containers(superuser_authz_id, placeholder_id, db, bifrost_host, bifrost_port)
+    %w(organizations users).each do |name|
+      authz_id = create_object_in_authz("containers", superuser_authz_id, bifrost_host, bifrost_port)
+      created_time = Time.now.utc
+      db[:containers].insert(:name => name, :id => authz_id, :org_id => placeholder_id, :last_updated_by => superuser_authz_id, :authz_id => authz_id, :created_at => created_time.to_s[0..18], :updated_at => created_time.to_s[0..18])
+    end
   end
 end
 
@@ -140,5 +138,5 @@ if __FILE__ == $0
     puts "./bootstrap-platform CONFIG_FILE USER_CONFIG_FILE"
     exit 1
   end
-  BootstrapPlatform.new(ARGV[0], ARGV[1]).run
+  BootstrapPlatform.new(ARGV[0], ARGV[1]).bootstrap
 end
