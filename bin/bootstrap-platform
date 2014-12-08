@@ -108,11 +108,7 @@ class BootstrapPlatform
   end
 
   def encrypt(unhashed_password, salt)
-    bcrypt_secret = BCrypt::Engine.hash_secret(unhashed_password, salt)
-
-    # The database contains triggers that require hashed_password, salt, and hash_type
-    # to all be non-null if any of the three are non-null.
-    bcrypt_secret
+    BCrypt::Engine.hash_secret(unhashed_password, salt)
   end
 
   def create_object_in_authz(object_name, requester_id, bifrost_host, bifrost_port)
