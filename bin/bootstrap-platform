@@ -1,7 +1,7 @@
 #! /usr/bin/env ruby
 #
 # Author:: Tyler Cloke <tyler@chef.io>
-# Copyright:: Copyright (c) 2014 Opscode, Inc.
+# Copyright:: Copyright (c) 2014 Chef, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -81,7 +81,7 @@ class BootstrapPlatform
     # first time public key has been "changed"
     user['pubkey_version'] = 1
 
-    # not an admin (strangly)
+    # not an admin (strangely)
     user['admin'] = 'f'
 
     # not a field in the database, so let's take it out of user object
