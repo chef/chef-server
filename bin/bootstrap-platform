@@ -34,15 +34,15 @@ class BootstrapPlatform
   end
 
   def bootstrap
-    CONFIG = YAML.load_file(@config_file)
+    config = YAML.load_file(@config_file)
 
-    db = Sequel.connect("#{CONFIG['db_driver']}://#{CONFIG['db_user']}:#{CONFIG['db_password']}@#{CONFIG['db_host']}/opscode_chef")
+    db = Sequel.connect("#{config['db_driver']}://#{config['db_user']}:#{config['db_password']}@#{config['db_host']}/opscode_chef")
 
     #################################
     # create superuser authz object #
     #################################
 
-    superuser_authz_id = create_object_in_authz("actors", CONFIG['bifrost_superuser_id'], CONFIG['bifrost_host'], CONFIG['bifrost_post'])
+    superuser_authz_id = create_object_in_authz("actors", config['bifrost_superuser_id'], config['bifrost_host'], config['bifrost_post'])
 
     ####################
     # create superuser #
@@ -50,7 +50,7 @@ class BootstrapPlatform
 
     # load certificate
     user = YAML.load_file(@user_config_file)
-    user['public_key'] = File.read(CONFIG['superuser_cert'])
+    user['public_key'] = File.read(config['superuser_cert'])
 
     # generate hashed password and salt
     unhashed_password = user['password']
@@ -76,7 +76,7 @@ class BootstrapPlatform
     user_created_time = Time.now.utc
     user['created_at'] = user_created_time
     user['updated_at'] = user_created_time
-    user['last_updated_by'] = CONFIG['bifrost_superuser_id']
+    user['last_updated_by'] = config['bifrost_superuser_id']
 
     # first time public key has been "changed"
     user['pubkey_version'] = 1
@@ -94,7 +94,7 @@ class BootstrapPlatform
     ##############################
     # create superuser container #
     ##############################
-    create_global_containers(superuser_authz_id, "00000000000000000000000000000000", db, CONFIG['bifrost_host'], CONFIG['bifrost_post'])
+    create_global_containers(superuser_authz_id, "00000000000000000000000000000000", db, config['bifrost_host'], config['bifrost_post'])
   end
 
   private
