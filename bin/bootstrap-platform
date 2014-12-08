@@ -57,8 +57,9 @@ class BootstrapPlatform
 
     # generate hashed password and salt
     unhashed_password = user['password']
-    salt = generate_salt(unhashed_password)
-    hashed_password = encrypt(unhashed_password, salt)
+    user['salt'] = generate_salt(unhashed_password)
+    user['hashed_password'] = encrypt(unhashed_password, user['salt'])
+    user['hash_type'] = "bcrypt"
 
     # create serialized_object
     serialized_object = {}
@@ -67,8 +68,8 @@ class BootstrapPlatform
       # these aren't database columns, so remove from user object
       user.delete(field)
     end
-    serialized_object['salt'] = salt
-    serialized_object['hashed_password'] = hashed_password
+    serialized_object['salt'] = user['salt']
+    serialized_object['hashed_password'] = user['hashed_password']
     user['serialized_object'] = JSON.generate(serialized_object)
 
     # generate / assign IDs
