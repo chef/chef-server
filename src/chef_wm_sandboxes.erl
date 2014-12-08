@@ -21,19 +21,24 @@
 
 -module(chef_wm_sandboxes).
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2]}]).
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
 
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
+-export([allowed_methods/2,
+         create_path/2,
+         from_json/2 ]).
 
+%% chef_wm behaviour callbacks
 -behaviour(chef_wm).
 -export([auth_info/2,
          init/1,
@@ -42,14 +47,8 @@
          request_type/0,
          validate_request/3]).
 
--export([
-         allowed_methods/2,
-         create_path/2,
-         from_json/2
-        ]).
-
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #sandbox_state{}}.
@@ -106,7 +105,7 @@ checksums_from_sandbox_ejson(SandboxData) ->
 
 sandbox_to_response(Req, #chef_sandbox{id = Id, org_id = OrgId, checksums = ChecksumList}) ->
     Ans = {[{<<"sandbox_id">>, Id},
-            {<<"uri">>, ?BASE_ROUTES:route(sandbox, Req, [{id, Id}])},
+            {<<"uri">>, oc_chef_wm_routes:route(sandbox, Req, [{id, Id}])},
             {<<"checksums">>,
              {
                [ {CSum, checksum_data(CSum, Flag, OrgId, chef_wm_util:base_uri(Req))} || {CSum, Flag} <- ChecksumList ]

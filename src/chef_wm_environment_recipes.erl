@@ -23,35 +23,30 @@
 -module(chef_wm_environment_recipes).
 
 %% chef_wm behaviour callbacks
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 -behaviour(chef_wm).
 -export([auth_info/2,
          init/1,
          init_resource_state/1,
          malformed_request_message/3,
          request_type/0]).
-%% Exporting a no-op version of validate_request/3 from chef_wm_base, below
 
-%% Mix in platform-specific Webmachine callback implementations
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
-
-%% Mix in universal Webmachine callback implementations, common to all
-%% Chef platforms
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        validate_request/3,
-                        ping/2]}]).
+-mixin([{oc_chef_wm_base, [forbidden/2,
+                           is_authorized/2,
+                           service_available/2,
+                           content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           validate_request/3,
+                           ping/2]}]).
 
 %% Webmachine callbacks implented in this module (i.e., not mixed-in)
 -export([allowed_methods/2,
          to_json/2]).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #environment_state{}}.

@@ -19,7 +19,7 @@
 %% @doc A helper module for enforcing constraints on wm
 %% requests. Currently, the only constraint is on request body
 %% size. This gets called by {@link
-%% chef_wm_base:malformed_request/2}. Constraint failures are
+%% oc_chef_wm_base:malformed_request/2}. Constraint failures are
 %% communicated to callers via `throw' and are otherwise expected to
 %% return a possibly modified request data item (`#wm_reqdata{}').
 %%
@@ -30,7 +30,7 @@
          max_size/1
         ]).
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 %% This is the max size allowed for incoming request bodies.
 -define(MAX_SIZE, 1000000).
 

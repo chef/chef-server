@@ -23,7 +23,7 @@
 -module(chef_wm_environment_cookbooks).
 
 %% chef_wm behaviour callbacks
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 -behaviour(chef_wm).
 -export([auth_info/2,
          init/1,
@@ -32,25 +32,21 @@
          request_type/0,
          validate_request/3]).
 
-%% Mix in platform-specific Webmachine callback implementations
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
-
-%% Mix in universal Webmachine callback implementations, common to all
-%% Chef platforms
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2]}]).
+-mixin([{oc_chef_wm_base, [forbidden/2,
+                           is_authorized/2,
+                           service_available/2,
+                           content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2]}]).
 
 %% Webmachine callbacks implented in this module (i.e., not mixed-in)
 -export([allowed_methods/2,
          to_json/2]).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #environment_state{}}.
@@ -194,8 +190,8 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                                  Versions :: [binary()]}],
                                Request :: wm_req()) -> ej:json_object().
 process_filtered_results(Results, Req) ->
-    CookbookUrlFun = ?BASE_ROUTES:bulk_route_fun(cookbook, Req),
-    CookbookVersionUrlFun = ?BASE_ROUTES:bulk_route_fun(cookbook_version, Req),
+    CookbookUrlFun = oc_chef_wm_routes:bulk_route_fun(cookbook, Req),
+    CookbookVersionUrlFun = oc_chef_wm_routes:bulk_route_fun(cookbook_version, Req),
 
     lists:foldl(fun({CookbookName, Versions}, Acc) ->
                         ej:set({CookbookName}, Acc,

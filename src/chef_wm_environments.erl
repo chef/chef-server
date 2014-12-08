@@ -22,20 +22,25 @@
 
 -module(chef_wm_environments).
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2]}]).
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           {list_objects_json/2, to_json},
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
 
--mixin([{chef_wm_base, [{list_objects_json/2, to_json}]}]).
-
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
+-export([allowed_methods/2,
+         conflict_message/1,
+         create_path/2,
+         from_json/2,
+         resource_exists/2]).
 
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
@@ -46,14 +51,8 @@
          request_type/0,
          validate_request/3]).
 
--export([allowed_methods/2,
-         conflict_message/1,
-         create_path/2,
-         from_json/2,
-         resource_exists/2]).
-
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #environment_state{}}.
@@ -103,7 +102,7 @@ from_json(Req, #base_state{resource_state = EnvironmentState}=State) ->
     #environment_state{environment_data = EnvironmentData,
                        environment_authz_id = AuthzId
                       } = EnvironmentState,
-    chef_wm_base:create_from_json(Req, State, chef_environment, {authz_id, AuthzId},
+    oc_chef_wm_base:create_from_json(Req, State, chef_environment, {authz_id, AuthzId},
                                   EnvironmentData).
 
 malformed_request_message(Any, _Req, _State) ->

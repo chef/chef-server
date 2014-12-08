@@ -21,15 +21,14 @@
 
 -module(chef_wm_named_principal).
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        ping/2]}]).
-
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          service_available/2]}]).
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           ping/2,
+                           forbidden/2,
+                           service_available/2]}]).
 
 %% chef_wm behaviour callbacks
 -behaviour(chef_wm).
@@ -50,7 +49,7 @@
        ]).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #principal_state{}}.
@@ -118,9 +117,21 @@ auth_info(Req, State) ->
 
 to_json(Req, #base_state{resource_state = Principal, chef_db_context = DbContext,
                          organization_name = OrgName} = State) ->
-    EJson = ?BASE_RESOURCE:assemble_principal_ejson(Principal, OrgName, DbContext),
+    EJson = assemble_principal_ejson(Principal, OrgName, DbContext),
     Json = ejson:encode(EJson),
     {Json, Req, State}.
+
+assemble_principal_ejson(#principal_state{name = Name,
+                                          public_key = PublicKey,
+                                          type = Type,
+                                          authz_id = AuthzId} = _Principal,
+                         OrgName, DbContext) ->
+    Member = oc_chef_wm_base:is_user_in_org(Type, DbContext, Name, OrgName),
+    {[{<<"name">>, Name},
+      {<<"public_key">>, PublicKey},
+      {<<"type">>, Type},
+      {<<"authz_id">>, AuthzId},
+      {<<"org_member">>, Member}]}.
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

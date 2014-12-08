@@ -36,32 +36,31 @@
 %%
 %% NOTE: only implemented for node objects
 %%
+
 -module(chef_wm_object_identifiers).
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_provided/2,
-                        finish_request/2,
-                        ping/2,
-                        validate_request/3]}]).
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_provided/2,
+                           finish_request/2,
+                           ping/2,
+                           validate_request/3,
+                           service_available/2]}]).
 
--mixin([{?BASE_RESOURCE, [service_available/2]}]).
-
--export([
-         allowed_methods/2,
+-export([allowed_methods/2,
          init/1,
          init_resource_state/1,
          resource_exists/2,
          request_type/0,
-         to_json/2
-         ]).
+         to_json/2]).
 
 -record(object_identifier_state, {id :: object_id(),
                                   authz_id :: object_id(),
                                   org_id :: object_id()}).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #object_identifier_state{}}.

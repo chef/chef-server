@@ -26,26 +26,27 @@
 
 -module(chef_wm_search).
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 -include_lib("chef_index/include/chef_solr.hrl").
 
 -define(DEFAULT_BATCH_SIZE, 5).
 
-%% We chose to *not* mixin chef_wm_base:post_is_create/2 as a POST in
+%% We chose to *not* mixin oc_chef_wm_base:post_is_create/2 as a POST in
 %% this resource is purely for processing...not resource creation.
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2]}]).
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
 
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
 
-%% I think we will end up moving the generic complete wm callbacks like post_is_create,
-%% content_types_* into chef_wm_base and mixing those in here separately so that we only
-%% have to have those defined in one place.
+-export([allowed_methods/2,
+         process_post/2,
+         resource_exists/2,
+         to_json/2]).
 
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
@@ -56,17 +57,9 @@
          request_type/0,
          validate_request/3]).
 
--export([allowed_methods/2,
-         process_post/2,
-         resource_exists/2,
-         to_json/2]).
-
--ifdef(TEST).
--compile([export_all]).
--endif.
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #search_state{}}.
@@ -254,7 +247,7 @@ make_bulk_get_fun(DbContext, OrgName, Type, NamePaths, Req) ->
     %% that will be created if the user has requested partial search.
     fun(Ids) ->
             Items = chef_db:bulk_get(DbContext, OrgName, index_type_to_db_type(Type), Ids),
-            RouteFun = ?BASE_ROUTES:url_for_search_item_fun(Req, Type, OrgName),
+            RouteFun = oc_chef_wm_routes:url_for_search_item_fun(Req, Type, OrgName),
             [ begin
                   EJsonItem = parse_item(Type, Item),
                   Url = RouteFun(EJsonItem),

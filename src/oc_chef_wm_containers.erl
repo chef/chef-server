@@ -5,46 +5,38 @@
 
 -module(oc_chef_wm_containers).
 
--include_lib("chef_wm/include/chef_wm.hrl").
-%%-include_lib("oc_chef_authz/include/oc_chef_types.hrl").
--include_lib("oc_chef_wm.hrl").
--include_lib("eunit/include/eunit.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [
-                        content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2,
-                        {list_objects_json/2, to_json}
-                       ]}]).
-
--mixin([{oc_chef_wm_base, [forbidden/2,
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           forbidden/2,
                            is_authorized/2,
-                           service_available/2]}]).
+                           service_available/2,
+                           {list_objects_json/2, to_json}]}]).
 
+-export([allowed_methods/2,
+         conflict_message/1,
+         create_path/2,
+         from_json/2,
+         resource_exists/2]).
+
+%% chef_wm behavior callbacks
 -behaviour(chef_wm).
 
--export([
-         auth_info/2,
+-export([auth_info/2,
          init/1,
          init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
-         validate_request/3
-        ]).
-
--export([
-         allowed_methods/2,
-         conflict_message/1,
-         create_path/2,
-         from_json/2,
-         resource_exists/2
-        ]).
+         validate_request/3]).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #container_state{}}.
@@ -79,7 +71,7 @@ create_path(Req, #base_state{resource_state = #container_state{container_data = 
 
 from_json(Req, #base_state{resource_state = #container_state{container_data = ContainerData,
                                                              container_authz_id = AuthzId}} = State) ->
-    chef_wm_base:create_from_json(Req, State, oc_chef_container, {authz_id, AuthzId}, ContainerData).
+    oc_chef_wm_base:create_from_json(Req, State, oc_chef_container, {authz_id, AuthzId}, ContainerData).
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

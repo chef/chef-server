@@ -22,41 +22,37 @@
 
 -module(oc_chef_wm_named_user).
 
--include_lib("chef_wm/include/chef_wm.hrl").
--include_lib("oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2]}]).
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
 
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
+-export([allowed_methods/2,
+         delete_resource/2,
+         from_json/2,
+         to_json/2 ]).
 
 %% chef_wm behaviour callbacks
 -behaviour(chef_wm).
--export([
-         auth_info/2,
+-export([auth_info/2,
          init/1,
          init_resource_state/1,
          conflict_message/1,
          malformed_request_message/3,
          request_type/0,
-         validate_request/3
-        ]).
+         validate_request/3 ]).
 
--export([
-         allowed_methods/2,
-         delete_resource/2,
-         from_json/2,
-         to_json/2
-       ]).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 init_resource_state(_Config) ->
     {ok, #user_state{}}.
 
@@ -188,12 +184,12 @@ from_json(Req, #base_state{resource_state = #user_state{ chef_user = User, user_
             {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
         UserDataWithKeys ->
             %% Custom json body needed to maintain compatibility with opscode-account behavior.
-            %% chef_wm_base:update_from_json will reply with the complete object, but
+            %% oc_chef_wm_base:update_from_json will reply with the complete object, but
             %% clients currently expect only a URI, and a private key if the key is new.
             %%
             %% However, we will retain the returned Request since Location header wil have been
             %% correctly set if the username changed.
-            case chef_wm_base:update_from_json(Req, State, User, UserDataWithKeys) of
+            case oc_chef_wm_base:update_from_json(Req, State, User, UserDataWithKeys) of
                 {true, Req1, State1} ->
                     {true, make_update_response(Req1, UserDataWithKeys), State1};
                 Other ->
@@ -252,10 +248,10 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
 
 %% Expected update response for users is currently just
 %% "uri" and (if regenerated) "privat_key" - this function will override
-%% whatever has been set in chef_wm_base:update_from_ejson with these values.
+%% whatever has been set in oc_chef_wm_base:update_from_ejson with these values.
 make_update_response(Request, OrigEJson) ->
     NewName = chef_user:username_from_ejson(OrigEJson),
-    Uri = ?BASE_ROUTES:route(user, Request, [{name, NewName}]),
+    Uri = oc_chef_wm_routes:route(user, Request, [{name, NewName}]),
 
     EJson1 = {[{<<"uri">>, Uri}]},
 

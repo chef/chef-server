@@ -32,22 +32,25 @@
 %%
 -module(chef_wm_nodes).
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2]}]).
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
 
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
-
-%% I think we will end up moving the generic complete wm callbacks like post_is_create,
-%% content_types_* into chef_wm_base and mixing those in here separately so that we only
-%% have to have those defined in one place.
+-export([allowed_methods/2,
+         conflict_message/1,
+         create_path/2,
+         from_json/2,
+         resource_exists/2,
+         to_json/2]).
 
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
@@ -58,15 +61,8 @@
          request_type/0,
          validate_request/3]).
 
--export([allowed_methods/2,
-         conflict_message/1,
-         create_path/2,
-         from_json/2,
-         resource_exists/2,
-         to_json/2]).
-
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #node_state{}}.
@@ -127,7 +123,7 @@ create_path(Req, #base_state{resource_state = NodeState}=State) ->
 
 from_json(Req, #base_state{resource_state = NodeState} = State) ->
     #node_state{node_data = NodeJson, node_authz_id = AuthzId} = NodeState,
-    chef_wm_base:create_from_json(Req, State, chef_node, {authz_id, AuthzId}, NodeJson).
+    oc_chef_wm_base:create_from_json(Req, State, chef_node, {authz_id, AuthzId}, NodeJson).
 
 %% internal functions
 list_nodes(EnvName, Req, #base_state{
@@ -138,7 +134,7 @@ list_nodes(EnvName, Req, #base_state{
     package_node_list(NodeNames, Req, State).
 
 package_node_list(NodeNames, Req, #base_state{}=State) ->
-    RouteFun = ?BASE_ROUTES:bulk_route_fun(node, Req),
+    RouteFun = oc_chef_wm_routes:bulk_route_fun(node, Req),
     NameMap = [ {Name, RouteFun(Name)} || Name <- NodeNames ],
     Json = chef_json:encode({NameMap}),
     {Json, Req, State#base_state{log_msg = {list, length(NodeNames)}}}.

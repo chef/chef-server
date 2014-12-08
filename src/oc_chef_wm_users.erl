@@ -9,20 +9,25 @@
 -module(oc_chef_wm_users).
 
 
--include_lib("chef_wm/include/chef_wm.hrl").
--include_lib("oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2]}]).
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
+-export([allowed_methods/2,
+         create_path/2,
+         from_json/2,
+         resource_exists/2,
+         to_json/2]).
 
--mixin([{oc_chef_wm_base, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
-
+%% chef_wm behavior callbacks
 -behavior(chef_wm).
 -export([auth_info/2,
          init/1,
@@ -32,14 +37,9 @@
          request_type/0,
          validate_request/3]).
 
--export([allowed_methods/2,
-         create_path/2,
-         from_json/2,
-         resource_exists/2,
-         to_json/2]).
 
 init(Config) ->
-  chef_wm_base:init(?MODULE, Config).
+  oc_chef_wm_base:init(?MODULE, Config).
 
 %% Need to add the user_state
 init_resource_state(_Config) ->
@@ -96,9 +96,9 @@ handle_user_create({PublicKey, PrivateKey}, Req,
     Name = chef_user:username_from_ejson(UserData),
     UserWithKey = chef_object_base:set_public_key(UserData, PublicKey),
 
-    case chef_wm_base:create_from_json(Req, State, chef_user, {authz_id, AuthzId}, UserWithKey) of
+    case oc_chef_wm_base:create_from_json(Req, State, chef_user, {authz_id, AuthzId}, UserWithKey) of
         {true, Req1, State1} ->
-            Uri = ?BASE_ROUTES:route(user, Req1, [{name, Name}]),
+            Uri = oc_chef_wm_routes:route(user, Req1, [{name, Name}]),
             Ejson = ej:set({<<"private_key">>}, {[{<<"uri">>, Uri}]}, PrivateKey),
             {true, chef_wm_util:set_json_body(Req1, Ejson), State1};
         Else ->
@@ -116,7 +116,7 @@ to_json(Req, State) ->
         "true" ->
             {chef_json:encode(verbose_users_as_ejson()), Req, State};
         _ ->
-            chef_wm_base:list_objects_json(Req, State#base_state{resource_state =
+            oc_chef_wm_base:list_objects_json(Req, State#base_state{resource_state =
                                                                  #chef_user{email = wrq:get_qs_value("email", Req)} })
     end.
 

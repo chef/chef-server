@@ -42,7 +42,7 @@
          lists_diff/2
         ]).
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
 %% TODO: These types are just placeholders until we get all the types cleaned up
 -type ejson() :: {[tuple()]}.
@@ -50,7 +50,7 @@
 %% @doc Report the names of the "pluggable" modules determined at compile time. Useful for
 %% debugging builds.
 base_mods() ->
-    [{base_resource, ?BASE_RESOURCE}, {base_routes, ?BASE_ROUTES}].
+    [{base_resource, oc_chef_wm}, {base_routes, oc_chef_wm_routes}].
 
 %% @doc Returns the base URI for the server as called by the client as a string.
 %% By default, use the Host: header value, or if configured with the atom 'host_header'

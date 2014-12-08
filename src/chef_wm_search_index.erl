@@ -22,22 +22,20 @@
 
 -module(chef_wm_search_index).
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2]}]).
-
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
-
-%% I think we will end up moving the generic complete wm callbacks like post_is_create,
-%% content_types_* into chef_wm_base and mixing those in here separately so that we only
-%% have to have those defined in one place.
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
+-export([allowed_methods/2,
+         to_json/2]).
 
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
@@ -48,11 +46,8 @@
          request_type/0,
          validate_request/3]).
 
--export([allowed_methods/2,
-         to_json/2]).
-
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #search_state{}}.
@@ -95,7 +90,7 @@ generate_index_list(DBContext, OrgId) ->
 -spec index_map(SearchIndexes::list(binary()), Req::tuple()) ->
                        list({IndexName::binary(), URL::binary()}).
 index_map(SearchIndexes, Req) ->
-    [{Index, ?BASE_ROUTES:route(organization_search, Req, [{search_index, Index}])}
+    [{Index, oc_chef_wm_routes:route(organization_search, Req, [{search_index, Index}])}
      || Index <- SearchIndexes].
 
 to_json(Req, #base_state{chef_db_context = DBContext,

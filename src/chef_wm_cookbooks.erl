@@ -25,17 +25,21 @@
 -compile(export_all).
 -endif.
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2]}]).
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
 
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
+-export([allowed_methods/2,
+         to_json/2 ]).
 
+%% chef_wm behavior callbacks
 -behaviour(chef_wm).
 -export([auth_info/2,
          init/1,
@@ -44,13 +48,8 @@
          request_type/0,
          validate_request/3]).
 
--export([
-         allowed_methods/2,
-         to_json/2
-        ]).
-
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #cookbook_state{}}.
@@ -144,7 +143,7 @@ cookbook_recipes_json(#base_state{chef_db_context = DbContext,
                                Req :: wm_req()) -> [{CookbookName :: binary(),
                                                             LatestURL :: binary()}].
 process_latest_cookbooks(Latest, Req) ->
-    UrlGenerator = ?BASE_ROUTES:bulk_route_fun(cookbook_version, Req),
+    UrlGenerator = oc_chef_wm_routes:bulk_route_fun(cookbook_version, Req),
     [{CookbookName, UrlGenerator(CookbookName, VersionString)}
      || {CookbookName, VersionString} <- Latest ].
 
@@ -188,9 +187,9 @@ make_version_list(CookbookVersionFun, Versions, NumVersions) ->
     list().
 make_cookbook_list(Req, Cookbooks, NumVersions) ->
     [ begin
-          CookbookVersionFun = ?BASE_ROUTES:bulk_route_fun(cookbook_version, Name, Req),
+          CookbookVersionFun = oc_chef_wm_routes:bulk_route_fun(cookbook_version, Name, Req),
           VersionList = make_version_list(CookbookVersionFun, Versions, NumVersions),
-          CookbookFun = ?BASE_ROUTES:bulk_route_fun(cookbook, Req),
+          CookbookFun = oc_chef_wm_routes:bulk_route_fun(cookbook, Req),
           { Name, {[
                      { <<"url">>, CookbookFun(Name)},
                      { <<"versions">>, VersionList }

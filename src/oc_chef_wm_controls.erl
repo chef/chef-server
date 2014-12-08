@@ -5,26 +5,27 @@
 
 -module(oc_chef_wm_controls).
 
--include_lib("chef_wm/include/chef_wm.hrl").
--include_lib("oc_chef_wm.hrl").
--include_lib("eunit/include/eunit.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [
-                        content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2,
-                        {list_objects_json/2, to_json}
-                       ]}]).
-
--mixin([{oc_chef_wm_base, [forbidden/2,
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           {list_objects_json/2, to_json},
+                           forbidden/2,
                            is_authorized/2,
                            service_available/2]}]).
 
--behaviour(chef_wm).
+-export([allowed_methods/2,
+         create_path/2,
+         from_json/2,
+         resource_exists/2]).
 
+%% chef_wm behavior callbacks
+-behaviour(chef_wm).
 -export([
          auth_info/2,
          init/1,
@@ -34,12 +35,6 @@
          validate_request/3
         ]).
 
--export([
-         allowed_methods/2,
-         create_path/2,
-         from_json/2,
-         resource_exists/2
-        ]).
 
 -define(CHEF_CONTROL_GROUP_MESSAGE_VERSION, <<"0.1.0">>).
 
@@ -50,7 +45,7 @@
          ]}).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #control_state{}}.

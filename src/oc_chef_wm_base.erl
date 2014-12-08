@@ -2,45 +2,60 @@
 %% ex: ts=4 sw=4 et
 %% @author Kevin Smith <kevin@opscode.com>
 %% @author Seth Falcon <seth@opscode.com>
-%% @copyright 2012 Opscode, Inc.
+%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
+
 
 -module(oc_chef_wm_base).
 
+-include("oc_chef_wm.hrl").
+-include_lib("public_key/include/public_key.hrl").
+
 %% Complete webmachine callbacks
--export([forbidden/2,
-         is_authorized/2,
-         service_available/2]).
+-export([content_types_accepted/2,
+         content_types_provided/2,
+         finish_request/2,
+         forbidden/2,
+         is_authorized/2,     %% verify request signature and org membership if appropriate
+         malformed_request/2, %% verify request headers and size requirements, call module verify_request
+         ping/2,
+         post_is_create/2,
+         service_available/2, %% initialize the request
+         validate_request/3 %% default implementation always accepts request as valid
+        ]).
 
-%% Helpers for i
--export([authorized_by_org_membership_check/2]).
-
-%% "Grab Bag" functions that may also need to be implemented by other base resources
--export([assemble_principal_ejson/3,
-         check_cookbook_authz/3,
+%% "Grab Bag" common functionality - we may want to consider relocating these
+%% since most aren't core operations of webmachine in chef server
+-export([check_cookbook_authz/3,
          delete_object/3,
          object_creation_hook/2,
-         object_creation_error_hook/2]).
-
-%% shared functions
--export([stats_hero_label/1,
+         object_creation_error_hook/2,
+         stats_hero_label/1,
          stats_hero_upstreams/0,
-         log_action/2,
          is_superuser/1,
+         is_user_in_org/4,
+         set_forbidden_msg/3,
          user_in_group/3]).
 
-%% Can't use callback specs to generate behaviour_info because webmachine.hrl
-%% contains a function definition.
-
-%% -callback validate_request(atom(), #wm_reqdata{}, any()) -> {#wm_reqdata{}, any()}.
-%% -callback malformed_request_message(any(), #wm_reqdata{}, any()) -> {[{binary(), [binary()]}]}.
-%% -callback request_type() -> string().
-%% -callback auth_info(#wm_reqdata{}, any()) -> {not_found | binary(), #wm_reqdata{}, any()}.
-
-%% This is the max size allowed for incoming request bodies.
--define(MAX_SIZE, 1000000).
-
--include_lib("chef_wm/include/chef_wm.hrl").
--include_lib("oc_chef_wm/include/oc_chef_wm.hrl").
+%% Helpers for webmachine callbacks
+-export([create_from_json/5,
+         init/2,
+         list_objects_json/2, % Can also be used in lieu of to_json  in a resource module.
+         update_from_json/4]).
 
 %% @doc Determines if service is available.
 %%
@@ -52,6 +67,24 @@ service_available(Req, State) ->
     spawn_stats_hero_worker(Req, State1),
     {_GetHeader, State2} = chef_wm_util:get_header_fun(Req, State1),
     {true, Req, State2}.
+
+set_req_contexts(Req, #base_state{reqid_header_name = HeaderName} = State) ->
+    ReqId = read_req_id(HeaderName, Req),
+    {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
+    Darklaunch = xdarklaunch_req:parse_header(GetHeader),
+    AuthzContext = oc_chef_authz:make_context(ReqId, Darklaunch),
+    DbContext = chef_db:make_context(ReqId, Darklaunch),
+    State1#base_state{chef_authz_context = AuthzContext,
+                     chef_db_context = DbContext,
+                     darklaunch = Darklaunch,
+                     reqid = ReqId}.
+
+
+content_types_accepted(Req, State) ->
+    {[{"application/json", from_json}], Req, State}.
+
+content_types_provided(Req, State) ->
+    {[{"application/json", to_json}], Req, State}.
 
 maybe_with_default_org(Req, #base_state{organization_name = undefined} = State) ->
     State#base_state{organization_name = oc_chef_wm_routes:maybe_org_name(Req)};
@@ -290,7 +323,7 @@ check_permission(Perm, AuthzObjectType, AuthzId, Req, #base_state{requestor_id=R
 %% part of being authorized is being a member of the org; otherwise we
 %% fail out early.
 is_authorized(Req, State) ->
-    case chef_wm_base:verify_request_signature(Req, State) of
+    case verify_request_signature(Req, State) of
         {true, Req1, State1} ->
             case authorized_by_org_membership_check(Req1,State1) of
                 {false, Req2, State2} ->
@@ -336,6 +369,7 @@ authorized_by_org_membership_check(Req, State = #base_state{organization_name = 
             end
     end.
 
+
 set_forbidden_msg(Perm, Req, State) when is_atom(Perm)->
     Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8), " permission"]),
     JsonMsg = chef_json:encode({[{<<"error">>, [Msg]}]}),
@@ -344,8 +378,6 @@ set_forbidden_msg(Perm, Req, State) when is_atom(Perm)->
 
 %% Assumes the permission can be derived from the HTTP verb of the request; this is the
 %% original behavior of this function, prior to the addition of set_forbidden_msg/3.
-%%
-%% TODO: Reconcile these in a future refactoring.
 set_forbidden_msg(Req, State) ->
     Perm = http_method_to_authz_perm(Req),
     set_forbidden_msg(Perm, Req, State).
@@ -368,17 +400,6 @@ forbidden_message(unverified_org_membership, User, Org) ->
 delete_object(DbContext, Object, RequestorId) ->
     oc_chef_object_db:delete(DbContext, Object, RequestorId).
 
-set_req_contexts(Req, #base_state{reqid_header_name = HeaderName} = State) ->
-    ReqId = read_req_id(HeaderName, Req),
-    {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
-    Darklaunch = xdarklaunch_req:parse_header(GetHeader),
-    AuthzContext = oc_chef_authz:make_context(ReqId, Darklaunch),
-    DbContext = chef_db:make_context(ReqId, Darklaunch),
-    State1#base_state{chef_authz_context = AuthzContext,
-                     chef_db_context = DbContext,
-                     darklaunch = Darklaunch,
-                     reqid = ReqId}.
-
 read_req_id(ReqHeaderName, Req) ->
     case wrq:get_req_header(ReqHeaderName, Req) of
         undefined ->
@@ -399,7 +420,16 @@ spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
               {request_action, atom_to_list(wrq:method(Req))},
               {label_fun, ?gv(stats_hero_label_fun, MetricsConfig)},
               {upstream_prefixes, ?gv(stats_hero_upstreams, MetricsConfig)}],
-    stats_hero_worker_sup:new_worker(Config).
+    %% we don't want to fail if stats_hero is broken, but will log an error message if we
+    %% can't even spawn a worker here.
+    case stats_hero_worker_sup:new_worker(Config) of
+        {ok, _} ->
+            ok;
+        {error, Reason} ->
+            lager:error("FAILED stats_hero_worker_sup:new_worker: ~p~n",
+                                   [Reason]),
+            ok
+    end.
 
 http_method_to_authz_perm(#wm_reqdata{}=Req) ->
     http_method_to_authz_perm(wrq:method(Req));
@@ -454,7 +484,7 @@ set_authz_id(Id, #user_state{} = U) ->
 %%
 %% The following functions require the use of Authz, but in ways that are not currently
 %% amenable to our behaviour / mixin based approach.  The most expedient thing at present is
-%% to export these functions and call them directly via ?BASE_RESOURCE in the endpoints
+%% to export these functions and call them directly via oc_chef_wm in the endpoints
 %% where they are required.
 %%
 %% As such, the Open Source implementation of the base resource will need corresponding
@@ -500,17 +530,6 @@ is_user_in_org(Type, DbContext, Name, OrgName) ->
             end
     end.
 
-assemble_principal_ejson(#principal_state{name = Name,
-                                          public_key = PublicKey,
-                                          type = Type,
-                                          authz_id = AuthzId} = _Principal,
-                         OrgName, DbContext) ->
-    Member = is_user_in_org(Type, DbContext, Name, OrgName),
-    {[{<<"name">>, Name},
-      {<<"public_key">>, PublicKey},
-      {<<"type">>, Type},
-      {<<"authz_id">>, AuthzId},
-      {<<"org_member">>, Member}]}.
 
 %% These are modules that we instrument with stats_hero and aggregate into common prefix via
 %% stats_hero_label.
@@ -526,8 +545,6 @@ stats_hero_label({oc_chef_authz, Fun}) ->
     chef_metrics:label(authz, {oc_chef_authz, Fun});
 stats_hero_label({chef_solr, Fun}) ->
     chef_metrics:label(solr, {chef_solr, Fun});
-stats_hero_label({chef_otto, Fun}) ->
-    chef_metrics:label(couchdb, {chef_otto, Fun});
 stats_hero_label({chef_s3, Fun}) ->
     chef_metrics:label(s3, {chef_s3, Fun});
 stats_hero_label({chef_depsolver, Fun}) ->
@@ -535,20 +552,13 @@ stats_hero_label({chef_depsolver, Fun}) ->
 stats_hero_label({BadPrefix, Fun}) ->
     erlang:error({bad_prefix, {BadPrefix, Fun}}).
 
+
 %% @doc The prefixes that stats_hero should use for aggregating timing data over each
 %% request.
 stats_hero_upstreams() ->
-    [<<"authz">>, <<"couchdb">>, <<"depsolver">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
+    [<<"authz">>, <<"depsolver">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
 
 
-log_action(Req, State)->
-    Action = envy:get(oc_chef_wm, enable_actions, false, boolean),
-    maybe_log_action(Action, Req, State).
-
-maybe_log_action(true, Req, State) ->
-    oc_chef_action:log_action(Req, State);
-maybe_log_action(false, _Req, _State) ->
-    ok.
 
 object_creation_hook(#chef_client{}=Client,
                      #base_state{chef_authz_context=AuthContext,
@@ -612,7 +622,473 @@ user_in_group(#base_state{organization_guid = OrgId, chef_db_context = DbContext
             not_found
     end.
 
+finish_request(Req, #base_state{reqid = ReqId,
+                                organization_name = OrgName,
+                                darklaunch = Darklaunch}=State) ->
+    try
+        Code = wrq:response_code(Req),
+        PerfTuples = stats_hero:snapshot(ReqId, agg),
+        UserId = wrq:get_req_header("x-ops-userid", Req),
+        Req0 = oc_wm_request:add_notes([{req_id, ReqId},
+                                        {user, UserId},
+                                        {perf_stats, PerfTuples}], Req),
+        Req1 = maybe_annotate_log_msg(Req0, State),
+        AnnotatedReq = maybe_annotate_org_specific(OrgName, Darklaunch, Req1),
+        stats_hero:report_metrics(ReqId, Code),
+        stats_hero:stop_worker(ReqId),
+        log_action(Req, State),
+        case Code of
+            500 ->
+                % Sanitize response body
+                ErrReq = create_500_response(AnnotatedReq, State),
+                {true, ErrReq, State};
+            _ ->
+                 AnnotatedReq1 = add_api_info_header(AnnotatedReq, State),
+                 {true, AnnotatedReq1, State}
+        end
+    catch
+        X:Y ->
+            lager:error({X, Y, erlang:get_stacktrace()})
+    end;
+finish_request(_Req, Anything) ->
+    lager:error("chef_wm:finish_request/2 did not receive #base_state{}~nGot: ~p~n", [Anything]).
 
+log_action(Req, State)->
+    Action = envy:get(oc_chef_wm, enable_actions, false, boolean),
+    maybe_log_action(Action, Req, State).
+
+maybe_log_action(true, Req, State) ->
+    oc_chef_action:log_action(Req, State);
+maybe_log_action(false, _Req, _State) ->
+    ok.
+
+init(ResourceMod, Config) ->
+    BaseState = init_base_state(ResourceMod, Config),
+    case ResourceMod:init_resource_state(Config) of
+        {ok, ResourceState} ->
+            maybe_trace(BaseState#base_state{resource_state=ResourceState}, Config);
+        Error ->
+            Error
+    end.
+
+ping(Req, State) ->
+    {pong, Req, State}.
+
+init_base_state(ResourceMod, InitParams) ->
+    #base_state{reqid_header_name = ?gv(reqid_header_name, InitParams),
+                auth_skew = ?gv(auth_skew, InitParams),
+
+                %% default orgname support
+                organization_name = ?gv(organization_name, InitParams),
+
+                otp_info = ?gv(otp_info, InitParams),
+                server_flavor = ?gv(server_flavor, InitParams),
+                api_version = ?gv(api_version, InitParams),
+
+                metrics_config = ?gv(metrics_config, InitParams),
+
+                resource_args = ?gv(resource_args, InitParams),
+                resource_mod = ResourceMod}.
+
+validate_request(_Verb, Req, State) ->
+    {Req, State}.
+
+post_is_create(Req, State) ->
+    {true, Req, State}.
+
+malformed_request(Req, #base_state{resource_mod=Mod,
+                                   auth_skew=AuthSkew}=State) ->
+    {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
+    try
+        chef_authn:validate_headers(GetHeader, AuthSkew),
+        Req1 = chef_wm_enforce:max_size(Req),
+        {OrgId, OrgAuthzId} = chef_wm_util:fetch_org_metadata(State1),
+        {Req2, State2} = Mod:validate_request(wrq:method(Req1), Req1,
+                                              State1#base_state{organization_guid = OrgId,
+                                                                organization_authz_id = OrgAuthzId}),
+        {false, Req2, State2}
+    catch
+        throw:{org_not_found, Org} ->
+            Msg = iolist_to_binary([<<"organization '">>, Org, <<"' does not exist.">>]),
+            Req3 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Msg]}]}), Req),
+            {{halt, 404}, Req3, State1#base_state{log_msg = org_not_found}};
+        throw:bad_clock ->
+            Msg1 = chef_wm_malformed:malformed_request_message(bad_clock, Req, State),
+            Req3 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
+            {{halt, 401}, Req3, State1#base_state{log_msg = bad_clock}};
+        throw:{bad_headers, Headers} ->
+            Msg1 =  chef_wm_malformed:malformed_request_message({bad_headers, Headers}, Req, State),
+            Req3 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
+            {{halt, 401}, Req3, State1#base_state{log_msg = bad_headers}};
+        throw:bad_sign_desc ->
+            Msg1 =  chef_wm_malformed:malformed_request_message(bad_sign_desc, Req, State),
+            Req3 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
+            {{halt, 400}, Req3, State1#base_state{log_msg = bad_sign_desc}};
+        throw:{too_big, Msg} ->
+            lager:info("json too large (~p)", [Msg]),
+            Req3 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, Msg}]}), Req),
+            {{halt, 413}, Req3, State1#base_state{log_msg = too_big}};
+        throw:Why ->
+            Msg =  chef_wm_malformed:malformed_request_message(Why, Req, State),
+            NewReq = wrq:set_resp_body(chef_json:encode(Msg), Req),
+            {true, NewReq, State1#base_state{log_msg = Why}}
+    end.
+
+
+create_500_response(Req, State) ->
+    %% sanitize response body
+    Msg = <<"internal service error">>,
+    Json = chef_json:encode({[{<<"error">>, [Msg]}]}),
+    Req1 = wrq:set_resp_header("Content-Type",
+                               "application/json", Req),
+    Req2 = add_api_info_header(Req1, State),
+    wrq:set_resp_body(Json, Req2).
+
+%% @doc Extract information from `State' needed to generate the X-Ops-API-Info header value.
+api_info(#base_state{api_version = ApiVersion,
+                     otp_info = {ReleaseName, OtpVersion},
+                     server_flavor = ServerFlavor}) ->
+    [{"flavor", ServerFlavor},
+     {"version", ApiVersion},
+     {ReleaseName, OtpVersion}].
+
+%% @doc Generate the value of the X-Ops-API-Info header, which is a semicolon-delimited list
+%% of key=value pairs.
+api_info_header_value(#base_state{}=State) ->
+    string:join([ Key ++ "=" ++ Value ||
+                    {Key, Value} <- api_info(State)],
+                ";").
+
+%% @doc Add the X-Ops-API-Info header to the outgoing response.  This contains server API
+%% version information (useful for maintaining back-compatibility) as well as OTP version
+%% information (more useful for debugging purposes).
+add_api_info_header(Req, State) ->
+    wrq:set_resp_header("X-Ops-API-Info", api_info_header_value(State), Req).
+
+-spec verify_request_signature(#wm_reqdata{}, #base_state{}) ->
+                                      {boolean(), #wm_reqdata{}, #base_state{}}.
+%% @doc Perform request signature verification (authenticate)
+%%
+%% Fetches user or client certificate and uses it verify the signature
+%% on the request.  If the request cannot be verified, then the
+%% returned `#wm_reqdata{}' record will have a response body
+%% explaining why.
+verify_request_signature(Req,
+                         #base_state{organization_name = OrgName,
+                                     organization_guid = OrgId,
+                                     auth_skew = AuthSkew,
+                                     chef_db_context = DbContext}=State) ->
+    UserName = wrq:get_req_header("x-ops-userid", Req),
+    case chef_db:fetch_requestor(DbContext, OrgId, UserName) of
+        {not_found, What} ->
+            NotFoundMsg = verify_request_message({not_found, What},
+                                                 UserName, OrgName),
+            {false, wrq:set_resp_body(chef_json:encode(NotFoundMsg), Req),
+             State#base_state{log_msg = {not_found, What}}};
+        Requestor -> %% This is either #chef_client{} or #chef_user{}
+            %% If the request originated from the webui, we do authn using the webui public
+            %% key, not the user's key.
+            PublicKey = select_user_or_webui_key(Req, Requestor),
+            Body = body_or_default(Req, <<>>),
+            HTTPMethod = method_as_binary(Req),
+            Path = iolist_to_binary(wrq:path(Req)),
+            {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
+            case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
+                                                      Path, Body, PublicKey,
+                                                      AuthSkew) of
+                {name, _} ->
+                    {true, Req, State1#base_state{requestor_id = authz_id(Requestor),
+                                                  requestor = Requestor}};
+                {no_authn, Reason} ->
+                    Msg = verify_request_message(Reason, UserName, OrgName),
+                    Json = chef_json:encode(Msg),
+                    Req1 = wrq:set_resp_body(Json, Req),
+                    {false, Req1, State1#base_state{log_msg = Reason}}
+            end
+    end.
+
+-spec create_from_json(Req :: #wm_reqdata{}, State :: #base_state{},
+                       RecType :: chef_object_name()| chef_cookbook_version,
+                       ContainerId ::object_id() | {authz_id, AuthzId::object_id()},
+                       ObjectEjson :: ejson_term()) ->
+                              {true | {halt, 409 | 500}, #wm_reqdata{}, #base_state{}}.
+%% @doc Implements the from_json callback for POST requests to create Chef
+%% objects. `RecType' is the name of the object record being created
+%% (e.g. `chef_node'). `ContainerId' is the AuthzID of the container for the object being
+%% created (e.g. node container authz ID for creating a node). The `ObjectEjson' is the
+%% validated and normalized EJSON that was parsed from the request body.
+create_from_json(#wm_reqdata{} = Req, #base_state{organization_guid = undefined} = State,
+                                                  RecType, AuthzData, ObjectEJson) ->
+    % For objects that are not a member of an org, we just need to provide a valid ID
+    % for guid generation.
+    create_from_json(Req, State#base_state{organization_guid = ?OSC_ORG_ID},
+                     RecType, AuthzData, ObjectEJson);
+create_from_json(#wm_reqdata{} = Req,
+                 #base_state{chef_db_context = DbContext,
+                             organization_guid = OrgId,
+                             requestor_id = ActorId,
+                             resource_mod = ResourceMod} = State,
+                 RecType, {authz_id, AuthzId}, ObjectEjson) ->
+    %% ObjectEjson should already be normalized. Record creation does minimal work and does
+    %% not add or update any fields.
+    ObjectRec = chef_object:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
+    Name = chef_object:name(ObjectRec),
+    TypeName = chef_object:type_name(ObjectRec),
+
+    %% Perform any additional platform-specific work on the object
+    ObjectRec = object_creation_hook(ObjectRec, State),
+
+    %% We send the object data to solr for indexing *first*. If it fails, we'll error out on
+    %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
+    %% safely send a delete to solr since this is a new object with a unique ID unknown to
+    %% the world.
+    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
+    case chef_db:create(ObjectRec, DbContext, ActorId) of
+        {conflict, _} ->
+            %% ignore return value of solr delete, this is best effort.
+            chef_object_db:delete_from_solr(ObjectRec),
+            object_creation_error_hook(ObjectRec, ActorId),
+            %% FIXME: created authz_id is leaked for this case, cleanup?
+            LogMsg = {RecType, name_conflict, Name},
+            ConflictMsg = ResourceMod:conflict_message(Name),
+            {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
+             State#base_state{log_msg = LogMsg}};
+        ok ->
+            LogMsg = {created, Name},
+            Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, Name}]),
+            {true,
+             chef_wm_util:set_uri_of_created_resource(Uri, Req),
+             State#base_state{log_msg = LogMsg}};
+        What ->
+            %% ignore return value of solr delete, this is best effort.
+            %% FIXME: created authz_id is leaked for this case, cleanup?
+            chef_object_db:delete_from_solr(ObjectRec),
+            object_creation_error_hook(ObjectRec, ActorId),
+            {{halt, 500}, Req, State#base_state{log_msg = What}}
+    end.
+
+-spec update_from_json(#wm_reqdata{},
+                       #base_state{},
+                       chef_updatable_object() | #chef_user{},
+                       ejson_term()) ->
+                              {true, #wm_reqdata{}, #base_state{}} |
+                              {{halt, 400 | 404 | 500}, #wm_reqdata{}, #base_state{}}.
+%% @doc Implements the from_json callback for PUT requests to update Chef
+%% objects. `OrigObjectRec' should be the existing and unmodified `chef_object()'
+%% record. `ObjectEjson' is the parsed EJSON from the request body.
+update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
+                                                  requestor_id = ActorId,
+                                                  resource_mod = ResourceMod} = State,
+                 OrigObjectRec, ObjectEjson) ->
+    ObjectRec = chef_object:update_from_ejson(OrigObjectRec, ObjectEjson),
+
+    %% Send object to solr for indexing *first*. If the update fails, we will have sent
+    %% incorrect data, but that should get corrected when the client retries. This is a
+    %% compromise.
+    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
+
+    %% Ignore updates that don't change anything. If the user PUTs identical data, we skip
+    %% going to the database and skip updating updated_at. This allows us to avoid RDBMS
+    %% specific behavior around updates with unchanged data and race conditions around
+    %% updated_at having resolution only to seconds. It also allows us treat updated_at as
+    %% an indicator of when the data actually changed.
+    case OrigObjectRec =:= ObjectRec of
+        true ->
+            State1 = State#base_state{log_msg = ignore_update_for_duplicate},
+            {true, chef_wm_util:set_json_body(Req, ObjectEjson), State1};
+        false ->
+            case chef_db:update(ObjectRec, DbContext, ActorId) of
+                ok ->
+                    IsRename = chef_object:name(OrigObjectRec) =/= chef_object:name(ObjectRec),
+                    Req1 = handle_rename(ObjectRec, Req, IsRename),
+                    {true, chef_wm_util:set_json_body(Req1, ObjectEjson), State};
+                not_found ->
+                    %% We will get this if no rows were affected by the query. This could
+                    %% happen if the object is deleted in the middle of handling this
+                    %% request. In this case, we return 404 just as we would if the client
+                    %% retried.
+                    State1 = State#base_state{log_msg = not_found},
+                    Msg = chef_wm_util:not_found_message(chef_object:type_name(ObjectRec),
+                                                           chef_object:name(ObjectRec)),
+                    Req1 = chef_wm_util:set_json_body(Req, Msg),
+                    {{halt, 404}, Req1, State1};
+                {conflict, _} ->
+                    Name = chef_object:name(ObjectRec),
+                    RecType = erlang:element(1,ObjectRec),
+                    LogMsg = {RecType, name_conflict, Name},
+                    ConflictMsg = ResourceMod:conflict_message(Name),
+                    {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
+                     State#base_state{log_msg = LogMsg}};
+                {error, {checksum_missing, Checksum}} ->
+                    %% Catches the condition where the user attempts to reference a checksum that
+                    %% as not been uploaded.
+                    %% This leaves it open to be generified
+                    %% Not sure if we want to explicitly assume what is getting passed
+                    %% is chef_cookbook_version
+                    LogMsg = {checksum_missing, Checksum},
+                    ErrorMsg = error_message(checksum_missing, Checksum),
+                    {{halt, 400}, chef_wm_util:set_json_body(Req, ErrorMsg),
+                     State#base_state{log_msg = LogMsg}};
+                Why ->
+                    State1 = State#base_state{log_msg = Why},
+                    {{halt, 500}, Req, State1}
+            end
+    end.
+
+error_message(checksum_missing, Checksum) ->
+    {[{<<"error">>, [iolist_to_binary([<<"Manifest has checksum ">>, Checksum,
+                                       <<" but it hasn't yet been uploaded">>])]}]}.
+
+verify_request_message({not_found, org}, _User, Org) ->
+    Msg = iolist_to_binary([<<"organization '">>, Org, <<"' does not exist.">>]),
+    {[{<<"error">>, [Msg]}]};
+verify_request_message({not_found, _}, User, _Org) ->
+    Msg = iolist_to_binary([<<"Failed to authenticate as '">>, User, <<"'. ">>,
+                            <<"Ensure that your node_name and client key ">>,
+                            <<"are correct.">>]),
+    {[{<<"error">>, [Msg]}]};
+verify_request_message(bad_sig, User, _Org) ->
+    Msg = iolist_to_binary([<<"Invalid signature for user or client '">>,
+                            User,<<"'">>]),
+    {[{<<"error">>, [Msg]}]};
+verify_request_message(ErrorType, User, Org)  when
+      ErrorType =:= not_associated_with_org orelse
+      ErrorType =:= unverified_org_membership ->
+    Msg = iolist_to_binary([<<"'">>, User,
+                            <<"' is not associated with organization '">>,
+                            Org, <<"'">>]),
+    {[{<<"error">>, [Msg]}]}.
+
+body_or_default(Req, Default) ->
+    case wrq:req_body(Req) of
+        undefined -> Default;
+        Body -> Body
+    end.
+
+
+maybe_annotate_org_specific(?OSC_ORG_NAME, _Darklaunch, Req) ->
+    Req;
+maybe_annotate_org_specific(OrgName, Darklaunch, Req) ->
+    %% Generate the darklaunch header in a form that won't break log parsing
+    DLData = chef_wm_darklaunch:get_proplist(Darklaunch),
+    oc_wm_request:add_notes([{org_name, OrgName},
+                             {darklaunch, DLData}], Req).
+
+%% Filters out log_msg that are undefined
+maybe_annotate_log_msg(Req, #base_state{log_msg = undefined}) ->
+    Req;
+maybe_annotate_log_msg(Req, #base_state{log_msg = Msg}) ->
+    oc_wm_request:add_notes([{msg, {raw, Msg}}], Req).
+
+%% If request results in a rename, then set Location header and wm will return with a 201.
+%% When we rename an object, we want to return 201 because the location of the object
+%% has now changed. Setting the location header here to correspond to the new name
+%% will force webmachine to return 201.
+handle_rename(_ObjectRec, Req, false) ->
+    Req;
+handle_rename(ObjectRec, Req, true) ->
+    TypeName = chef_object:type_name(ObjectRec),
+    ObjectName = case chef_object:name(ObjectRec) of
+                     {_ParentName, ObjName} -> ObjName; % ugh, special case for databag items
+                     ObjName -> ObjName
+                 end,
+    Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, ObjectName}]),
+    wrq:set_resp_header("Location", binary_to_list(Uri), Req).
+
+%%% @doc Return appropriate public key based on request source
+%%%
+%%% Requests coming from the webui, marked by the 'X-Ops-Request-Source' header read the
+%%% webui public key and use that for authn. Otherwise this function just passes through the
+%%% "KeyData" arg which is the user or client public key.
+%%%
+%%% The webui public key is fetched from the chef_keyring service. The 'X-Ops-WebKey-Tag'
+%%% header specifies which key id to use, or we use the 'default' key if it is missing.
+%%%
+select_user_or_webui_key(Req, Requestor) ->
+    %% Request origin is determined by the X-Ops-Request-Source header.  This is still secure
+    %% because the request needs to have been signed with the webui private key.
+    case wrq:get_req_header("x-ops-request-source", Req) of
+        "web" ->
+            WebKeyTag =
+                case wrq:get_req_header("x-ops-webkey-tag", Req) of
+                    undefined ->
+                        default;
+                    "" ->
+                        default;
+                    Tag ->
+                        try
+                            list_to_existing_atom(Tag)
+                        catch
+                            %% The proplist for webui_pub_key_list has been parsed, so the
+                            %% key should exist as an atom
+                            throw:badarg ->
+                                lager:error({"unknown webkey tag", Tag,
+                                                           erlang:get_stacktrace()}),
+                                %% alternately, we could just use the default key instead of failing;
+                                %% but I prefer noisy errors
+                                throw({badarg, "unknown webkey tag", Tag})
+                        end
+                end,
+            case chef_keyring:get_key(WebKeyTag) of
+                %% extract the public key from the private key
+                {ok, #'RSAPrivateKey'{modulus=Mod, publicExponent=Exp}} ->
+                    #'RSAPublicKey'{modulus = Mod, publicExponent = Exp};
+                {ok, #'RSAPublicKey'{}=PublicKey} ->
+                    PublicKey;
+                {error, unknown_key} ->
+                    Msg = io_lib:format("Failed finding key ~w", [WebKeyTag]),
+                    lager:error({no_such_key, Msg, erlang:get_stacktrace()}),
+                    throw({no_such_key, WebKeyTag})
+            end;
+        _Else ->
+            public_key(Requestor)
+    end.
+
+method_as_binary(Req) ->
+    iolist_to_binary(atom_to_list(wrq:method(Req))).
+
+maybe_trace(State, Config) ->
+    case lists:keyfind(trace, 1, Config) of
+        {trace, true} ->
+            {{trace, "/tmp"}, State};
+        _ ->
+            {ok, State}
+    end.
+
+maybe_authz_id(undefined) ->
+    unset;
+maybe_authz_id(B) ->
+    B.
+
+
+-spec authz_id(#chef_user{} | #chef_client{}) -> object_id().
+authz_id(#chef_client{authz_id = AuthzId}) ->
+    AuthzId;
+authz_id(#chef_user{authz_id = AuthzId}) ->
+    AuthzId.
+
+-spec public_key(#chef_user{} | #chef_client{}) -> binary().
+public_key(#chef_user{public_key = PublicKey}) ->
+    PublicKey;
+public_key(#chef_client{public_key = PublicKey}) ->
+    PublicKey.
+
+
+%% @doc Webmachine content producing callback (that can be wired into
+%% content_types_provided) that returns a JSON map of object names to object URLs. This
+%% leverages the `chef_object' behavior and relies upon a stub object record with `org_id'
+%% being present in `State#base_state.resource_state'.
+%%
+%% Note that since this module provides {@link content_types_provided/2} with a hard-coded
+%% callback of `to_json', you can make use of this function using mixer and renaming it to
+%% to_json.
+-spec list_objects_json(#wm_reqdata{}, #base_state{}) -> {binary(), #wm_reqdata{}, #base_state{}}.
+list_objects_json(Req, #base_state{chef_db_context = DbContext,
+                                   resource_state = StubRec} = State) ->
+    Names = chef_db:list(StubRec, DbContext),
+    RouteFun = oc_chef_wm_routes:bulk_route_fun(chef_object:type_name(StubRec), Req),
+    UriMap= [{Name, RouteFun(Name)} || Name <- Names],
+    {chef_json:encode({UriMap}), Req, State}.
 
 
 

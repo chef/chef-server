@@ -21,20 +21,19 @@
 
 -module(chef_wm_data).
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2]}]).
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           {list_objects_json/2, to_json},
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
 
--mixin([{chef_wm_base, [{list_objects_json/2, to_json}]}]).
-
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
 
 
 %% chef_wm behaviour callbacks
@@ -57,7 +56,7 @@
        ]).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #data_state{}}.
@@ -97,7 +96,7 @@ create_path(Req, #base_state{resource_state = #data_state{
 from_json(Req, #base_state{resource_state =
                                #data_state{data_bag_name = DataBagName,
                                            data_bag_authz_id = AuthzId}} = State) ->
-    chef_wm_base:create_from_json(Req, State, chef_data_bag, {authz_id, AuthzId}, DataBagName).
+    oc_chef_wm_base:create_from_json(Req, State, chef_data_bag, {authz_id, AuthzId}, DataBagName).
 
 %% error message functions
 

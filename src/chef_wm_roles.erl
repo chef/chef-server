@@ -22,24 +22,25 @@
 
 -module(chef_wm_roles).
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2]}]).
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2,
+                           {list_objects_json/2, to_json}]}]).
 
--mixin([{chef_wm_base, [{list_objects_json/2, to_json}]}]).
-
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
-
-%% I think we will end up moving the generic complete wm callbacks like post_is_create,
-%% content_types_* into chef_wm_base and mixing those in here separately so that we only
-%% have to have those defined in one place.
+-export([allowed_methods/2,
+         conflict_message/1,
+         create_path/2,
+         from_json/2,
+         resource_exists/2]).
 
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
@@ -50,14 +51,9 @@
          request_type/0,
          validate_request/3]).
 
--export([allowed_methods/2,
-         conflict_message/1,
-         create_path/2,
-         from_json/2,
-         resource_exists/2]).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #role_state{}}.
@@ -96,7 +92,7 @@ create_path(Req, #base_state{resource_state = #role_state{role_data = RoleData}}
 from_json(Req, #base_state{resource_state =
                                #role_state{role_data = RoleData,
                                            role_authz_id = AuthzId}} = State) ->
-    chef_wm_base:create_from_json(Req, State, chef_role, {authz_id, AuthzId}, RoleData).
+    oc_chef_wm_base:create_from_json(Req, State, chef_role, {authz_id, AuthzId}, RoleData).
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

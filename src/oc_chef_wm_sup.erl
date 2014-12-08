@@ -205,7 +205,7 @@ default_resource_init() ->
                 %% these in base state.
                 {metrics_config,
                  [{root_metric_key, envy:get(oc_chef_wm, root_metric_key, string)},
-                  %% the following two are hard-coded calls to ?BASE_RESOURCE. These could
+                  %% the following two are hard-coded calls to oc_chef_wm. These could
                   %% be factored out into app config if we wanted ultimate flexibility. At
                   %% that point, we might want a label and upstream function to form a
                   %% behavior defined in stats_hero.

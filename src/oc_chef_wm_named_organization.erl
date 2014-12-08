@@ -5,19 +5,23 @@
 
 -module(oc_chef_wm_named_organization).
 
--include_lib("eunit/include/eunit.hrl").
--include_lib("chef_wm/include/chef_wm.hrl").
 -include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2]}]).
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
 
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
+-export([allowed_methods/2,
+         delete_resource/2,
+         from_json/2,
+         resource_exists/2,
+         to_json/2]).
 
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
@@ -28,16 +32,11 @@
          request_type/0,
          validate_request/3]).
 
--export([allowed_methods/2,
-         delete_resource/2,
-         from_json/2,
-         resource_exists/2,
-         to_json/2]).
 
 -export([delete_global_admins/4]).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #organization_state{}}.
@@ -98,7 +97,7 @@ from_json(Req, #base_state{resource_state = #organization_state{
                                                organization_data = OrganizationData
                                               }
                           } = State) ->
-    chef_wm_base:update_from_json(Req, State, Organization, OrganizationData).
+    oc_chef_wm_base:update_from_json(Req, State, Organization, OrganizationData).
 
 %% NOTE: This is really only partially implemented
 %% Org deletion needs to:

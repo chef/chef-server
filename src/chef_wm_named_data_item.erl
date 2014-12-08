@@ -22,19 +22,25 @@
 
 -module(chef_wm_named_data_item).
 
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2]}]).
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
 
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
-
+-export([allowed_methods/2,
+         conflict_message/1,
+         delete_resource/2,
+         from_json/2,
+         resource_exists/2,
+         to_json/2]).
 
 %% chef_wm behaviour callbacks
 -behaviour(chef_wm).
@@ -47,17 +53,8 @@
          validate_request/3
         ]).
 
--export([
-         allowed_methods/2,
-         conflict_message/1,
-         delete_resource/2,
-         from_json/2,
-         resource_exists/2,
-         to_json/2
-       ]).
-
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #data_state{}}.
@@ -132,7 +129,7 @@ from_json(Req, #base_state{resource_state = #data_state{
                              data_bag_item_ejson = ItemData}} = State) ->
     %% We have to hack the shared update function so we can post-process and add the cruft
     %% fields for back-compatibility.
-    case chef_wm_base:update_from_json(Req, State, Item, ItemData) of
+    case oc_chef_wm_base:update_from_json(Req, State, Item, ItemData) of
         {true, Req1, State1} ->
             CruftItemData = chef_data_bag_item:add_type_and_bag(BagName, ItemData),
             {true, chef_wm_util:set_json_body(Req1, CruftItemData), State1};
@@ -153,7 +150,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                      chef_data_bag_item = Item}
                                 }=State) ->
 
-    ok = ?BASE_RESOURCE:delete_object(DbContext, Item, RequestorId),
+    ok = oc_chef_wm_base:delete_object(DbContext, Item, RequestorId),
     Json = chef_db_compression:decompress(Item#chef_data_bag_item.serialized_object),
     EjsonItem = chef_json:decode(Json),
     WrappedItem = chef_data_bag_item:wrap_item(BagName, ItemName, EjsonItem),

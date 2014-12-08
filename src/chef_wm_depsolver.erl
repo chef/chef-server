@@ -24,7 +24,7 @@
 -module(chef_wm_depsolver).
 
 %% chef_wm behaviour callbacks
--include("chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 -behaviour(chef_wm).
 -export([auth_info/2,
          init/1,
@@ -33,20 +33,15 @@
          request_type/0,
          validate_request/3]).
 
-%% Mix in platform-specific Webmachine callback implementations
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
+-mixin([{oc_chef_wm_base, [forbidden/2,
+                           is_authorized/2,
+                           service_available/2,
+                           content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2]}]).
 
-%% Mix in universal Webmachine callback implementations, common to all
-%% Chef platforms
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2]}]).
-
-%% Webmachine callbacks implented in this module (i.e., not mixed-in)
 -export([allowed_methods/2,
          post_is_create/2,
          process_post/2]).
@@ -55,7 +50,7 @@
 -type cookbook_with_version() :: binary() | {binary(), binary()}.
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #depsolver_state{}}.
@@ -282,7 +277,7 @@ wm_halt(Code, Req, State, ErrorData, LogMsg) ->
 %% removing large fields such as long_description and attributes in
 %% the metadata that are not required by chef-client
 assemble_response(Req, State, CookbookVersions) ->
-    case ?BASE_RESOURCE:check_cookbook_authz(CookbookVersions, Req, State) of
+    case oc_chef_wm_base:check_cookbook_authz(CookbookVersions, Req, State) of
         ok ->
             %% We iterate over the list again since we only want to construct the s3urls
             %% if the authz check has succeeded.  We use a minimal version of the
