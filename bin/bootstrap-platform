@@ -112,7 +112,7 @@ class BootstrapPlatform
   end
 
   def create_object_in_authz(object_name, requester_id, bifrost_host, bifrost_port)
-    url = "http://#{Opscode::ServerBootstrap.config.bifrost_host}:#{Opscode::ServerBootstrap.config.bifrost_port}/#{object_name}"
+    url = "http://#{bifrost_host}:#{bifrost_port}/#{object_name}"
     headers = {
       :content_type => :json,
       :accept => :json,
