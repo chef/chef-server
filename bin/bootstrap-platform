@@ -29,6 +29,9 @@ require 'uuid'
 require 'sequel'
 
 class BootstrapPlatform
+
+  PLACEHOLDER_GLOBAL_ORG_ID = "00000000000000000000000000000000"
+
   def initialize(config_file, user_config_file)
     @config_file, @user_config_file = config_file, user_config_file
   end
@@ -94,7 +97,7 @@ class BootstrapPlatform
     ##############################
     # create superuser container #
     ##############################
-    create_global_containers(superuser_authz_id, "00000000000000000000000000000000", db, config['bifrost_host'], config['bifrost_port'])
+    create_global_containers(superuser_authz_id, PLACEHOLDER_GLOBAL_ORG_ID, db, config['bifrost_host'], config['bifrost_port'])
   end
 
   private
