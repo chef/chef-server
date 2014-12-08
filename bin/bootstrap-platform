@@ -23,7 +23,6 @@ require 'rubygems'
 require 'bundler/setup'
 require 'restclient'
 require 'json'
-require 'bcrypt'
 require 'yaml'
 require 'uuid'
 require 'sequel'
@@ -55,12 +54,6 @@ class BootstrapPlatform
     user = YAML.load_file(@user_config_file)
     user['public_key'] = File.read(config['superuser_cert'])
 
-    # generate hashed password and salt
-    unhashed_password = user['password']
-    user['salt'] = generate_salt(unhashed_password)
-    user['hashed_password'] = encrypt(unhashed_password, user['salt'])
-    user['hash_type'] = "bcrypt"
-
     # create serialized_object
     serialized_object = {}
     ["first_name", "last_name", "display_name"].each do |field|
@@ -68,8 +61,6 @@ class BootstrapPlatform
       # these aren't database columns, so remove from user object
       user.delete(field)
     end
-    serialized_object['salt'] = user['salt']
-    serialized_object['hashed_password'] = user['hashed_password']
     user['serialized_object'] = JSON.generate(serialized_object)
 
     # generate / assign IDs
@@ -88,10 +79,6 @@ class BootstrapPlatform
     # not an admin (strangely)
     user['admin'] = 'f'
 
-    # not a field in the database, so let's take it out of user object
-    # now that we have the hashed version
-    user.delete('password')
-
     # insert populated user object into the postgres
     db[:users].insert(user)
 
@@ -102,14 +89,6 @@ class BootstrapPlatform
   end
 
   private
-
-  def generate_salt(unhashed_password)
-    BCrypt::Engine.generate_salt(12)
-  end
-
-  def encrypt(unhashed_password, salt)
-    BCrypt::Engine.hash_secret(unhashed_password, salt)
-  end
 
   def create_object_in_authz(object_name, requester_id, bifrost_host, bifrost_port)
     url = "http://#{bifrost_host}:#{bifrost_port}/#{object_name}"
