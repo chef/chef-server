@@ -82,8 +82,14 @@ find_and_authenticate_user(Session, User, Password, Config) ->
     BaseDN = proplists:get_value(base_dn, Config),
     LoginAttr = proplists:get_value(login_attribute, Config, "samaccountname"),
     Base = {base, BaseDN},
-    Filter = {filter, eldap:equalityMatch(LoginAttr, User)},
 
+    % Add support for an optional group_dn filter
+    GroupDN = proplists:get_value(group_dn, Config, ""),
+    Filter = case GroupDN of
+        "" -> {filter, eldap:equalityMatch(LoginAttr, User)};
+        _ -> {filter,eldap:'and'([eldap:equalityMatch(LoginAttr, User), eldap:equalityMatch("memberOf",GroupDN)])}
+    end,
+            
     % Auth so we can search for the user
     ok = bind(Session, BindDN, BindPass),
 
@@ -152,8 +158,12 @@ result_to_user_ejson(LoginAttr, _, [{eldap_entry, CN, DataIn}|_]) ->
     % No guarantees on casing, so let's not make assumptions:
     Data = [ { string:to_lower(Key), Value} || {Key, Value} <- DataIn ],
 
+    % Since we just downcased the entire response, we need to downcase
+    % the LoginAttr to ensure it doesn't blow up and throw an exception
+    LCLoginAttr = string:to_lower(LoginAttr),
+
     % loginattr was used to find this record, so we know it must exist
-    [UserName0] = proplists:get_value(LoginAttr, Data),
+    [UserName0] = proplists:get_value(LCLoginAttr, Data),
     UserName1 = string:to_lower(UserName0),
     UserName2 = re:replace(UserName1, "[^0-z0-9_-]", "_", [{return, list}, global]),
     UserName = characters_to_binary(UserName2),
