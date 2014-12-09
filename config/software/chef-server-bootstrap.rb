@@ -1,5 +1,7 @@
 #
-# Copyright 2012-2014 Chef Software, Inc.
+# Author:: Tyler Cloke (<tyler@getchef.com>)
+# Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
+# License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,10 +16,10 @@
 # limitations under the License.
 #
 
-name "opscode-test"
-default_version "0.4.0"
+name "chef-server-bootstrap"
+default_version "1.0.0"
 
-source git: "git@github.com:opscode/opscode-test"
+source git: "git@github.com:opscode/chef-server-bootstrap"
 
 dependency "ruby"
 dependency "libxml2"
@@ -31,5 +33,5 @@ build do
          " --path=#{install_dir}/embedded/service/gem" \
          " --without dev", env: env
 
-  sync project_dir, "#{install_dir}/embedded/service/opscode-test/"
+  sync project_dir, "#{install_dir}/embedded/service/chef-server-bootstrap/"
 end

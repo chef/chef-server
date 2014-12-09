@@ -17,8 +17,8 @@ if (!OmnibusHelper.has_been_bootstrapped? &&
   include_recipe "private-chef::add_ons_wrapper"
 end
 
-opscode_test_dir = "/opt/opscode/embedded/service/opscode-test"
-opscode_test_config_dir = "/opt/opscode/embedded/service/opscode-test/bootstrapper-config"
+opscode_test_dir = "/opt/opscode/embedded/service/chef-server-bootstrap"
+opscode_test_config_dir = "/opt/opscode/embedded/service/chef-server-bootstrap/bootstrapper-config"
 
 template File.join(opscode_test_config_dir, "config.rb") do
   source "bootstrap-config.rb.erb"
@@ -27,14 +27,13 @@ template File.join(opscode_test_config_dir, "config.rb") do
   mode "0600"
 end
 
-bootstrap_script = File.join(opscode_test_config_dir, "script.rb")
+bootstrap_script = File.join(opscode_test_config_dir, "pivotal.yml")
 
 template bootstrap_script do
   source "bootstrap-script.rb.erb"
   owner "root"
   group "root"
   mode "0600"
-  variables({:admin_password => SecureRandom.hex(24)})
   not_if { OmnibusHelper.has_been_bootstrapped? }
 end
 
@@ -44,7 +43,7 @@ execute "/opt/opscode/bin/private-chef-ctl start" do
 end
 
 execute "bootstrap-platform" do
-  command "bash -c 'echo y | /opt/opscode/embedded/bin/bundle exec ./bin/bootstrap-platform -c ./bootstrapper-config/config.rb -s ./bootstrapper-config/script.rb'"
+  command "/opt/opscode/embedded/bin/bundle exec ./bin/bootstrap-platform ./bootstrapper-config/config.rb ./bootstrapper-config/pivotal.yml"
   cwd opscode_test_dir
   not_if { OmnibusHelper.has_been_bootstrapped? }
   notifies :restart, 'service[opscode-erchef]'
