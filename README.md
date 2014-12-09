@@ -28,7 +28,6 @@ The script is fairly simple conceptually, it is basically:
   + This will return the new superuser's (pivotal's) authz id to be used in the next step.
 3. Create the superuser in postgreSQL.
   + Simply populate a valid hash with all the relevant fields (mostly taken from the user config).
-    - Create salt and use bcrypt to hash the password. These will be stored in the `serialized_object`.
     - Various data finagling to ensure that your hash fields match the `users` table fields in postgreSQL.
     - Use the database connection established earlier to post to postgreSQL,
     with the requestor_id being the bifrost_superuser_id, since that is the only thing that makes remote sense.
