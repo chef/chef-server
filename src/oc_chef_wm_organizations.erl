@@ -5,46 +5,38 @@
 
 -module(oc_chef_wm_organizations).
 
--include_lib("chef_wm/include/chef_wm.hrl").
-%%-include_lib("oc_chef_authz/include/oc_chef_types.hrl").
--include_lib("oc_chef_wm.hrl").
--include_lib("eunit/include/eunit.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [
-                        content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2,
-                        {list_objects_json/2, to_json}
-                       ]}]).
-
--mixin([{oc_chef_wm_base, [forbidden/2,
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           forbidden/2,
                            is_authorized/2,
-                           service_available/2]}]).
+                           service_available/2,
+                           {list_objects_json/2, to_json}]}]).
 
+-export([allowed_methods/2,
+         conflict_message/1,
+         create_path/2,
+         from_json/2,
+         resource_exists/2]).
+
+
+%% chef_wm behavior callbacks
 -behaviour(chef_wm).
-
--export([
-         auth_info/2,
+-export([auth_info/2,
          init/1,
          init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
-         validate_request/3
-        ]).
-
--export([
-         allowed_methods/2,
-         conflict_message/1,
-         create_path/2,
-         from_json/2,
-         resource_exists/2
-        ]).
+         validate_request/3]).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #organization_state{}}.
@@ -125,11 +117,11 @@ create_from_json(#wm_reqdata{} = Req,
 
     %% Perform any additional platform-specific work on the object
     %% This is strange; apparently it can't change anything?
-    ObjectRec = ?BASE_RESOURCE:object_creation_hook(ObjectRec, State),
+    ObjectRec = oc_chef_wm_base:object_creation_hook(ObjectRec, State),
 
     case chef_db:create(ObjectRec, DbContext, ActorId) of
         {conflict, _} ->
-            ?BASE_RESOURCE:object_creation_error_hook(ObjectRec, ActorId),
+            oc_chef_wm_base:object_creation_error_hook(ObjectRec, ActorId),
             %% FIXME: created authz_id is leaked for this case, cleanup?
             LogMsg = {RecType, name_conflict, Name},
             ConflictMsg = ResourceMod:conflict_message(Name),
@@ -137,13 +129,13 @@ create_from_json(#wm_reqdata{} = Req,
              State#base_state{log_msg = LogMsg, resource_state = ResourceState1}};
         ok ->
             LogMsg = {created, Name},
-            Uri = ?BASE_ROUTES:route(TypeName, Req, [{name, Name}]),
+            Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, Name}]),
             {true,
              chef_wm_util:set_uri_of_created_resource(Uri, Req),
              State#base_state{log_msg = LogMsg, resource_state = ResourceState1}};
         What ->
             %% FIXME: created authz_id is leaked for this case, cleanup?
-            ?BASE_RESOURCE:object_creation_error_hook(ObjectRec, ActorId),
+            oc_chef_wm_base:object_creation_error_hook(ObjectRec, ActorId),
             {{halt, 500}, Req, State#base_state{log_msg = What, resource_state = ResourceState1}}
     end.
 
@@ -209,7 +201,7 @@ maybe_create_client({PublicKey, PrivateKey}, Req,
                                                   PublicKey),
 
     %% Update the return state
-    OrgEJson =  {[{<<"uri">>, ?BASE_ROUTES:route(organization, Req, [{name, OrgName}])},
+    OrgEJson =  {[{<<"uri">>, oc_chef_wm_routes:route(organization, Req, [{name, OrgName}])},
                   {<<"clientname">>, ClientName},
                   {<<"private_key">>, PrivateKey}]},
 
@@ -245,7 +237,7 @@ create_object_with_acl(ObjectJson, Type, Req,
                                 organization_name = OrgName},
     case oc_chef_authz:create_entity_if_authorized(AuthzCtx, OrgId, superuser, Type) of
         {ok, AuthzId} ->
-            Result = chef_wm_base:create_from_json(Req, ObjState, ChefType, {authz_id, AuthzId}, ObjectJson),
+            Result = oc_chef_wm_base:create_from_json(Req, ObjState, ChefType, {authz_id, AuthzId}, ObjectJson),
             ContinuationFn(Result);
         {error, forbidden} ->
             {Req1, State1} = oc_chef_wm_base:set_forbidden_msg(create, Req, State),

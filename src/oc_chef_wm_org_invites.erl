@@ -11,20 +11,19 @@
 
 -module(oc_chef_wm_org_invites).
 
--include_lib("chef_wm/include/chef_wm.hrl").
 -include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        post_is_create/2,
-                        malformed_request/2,
-                        ping/2]}]).
 
--mixin([{oc_chef_wm_base, [forbidden/2,
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           post_is_create/2,
+                           malformed_request/2,
+                           ping/2,
+                           forbidden/2,
                            is_authorized/2,
                            service_available/2]}]).
-
 
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
@@ -44,7 +43,7 @@
          to_json/2]).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #association_state{}}.
@@ -183,7 +182,7 @@ invitation_response(Req, #base_state{ organization_name = OrgName,
                            requestor = #chef_user{username = RequestorUserName},
                            resource_state = #association_state{user = User}} = State, ObjectRec) ->
     TypeName = chef_object:type_name(ObjectRec),
-    Uri = ?BASE_ROUTES:route(TypeName, Req, [{name, ObjectRec#oc_chef_org_user_invite.id}]),
+    Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, ObjectRec#oc_chef_org_user_invite.id}]),
     OrgUser = {<<"organization_user">>,  {[{<<"username">>, RequestorUserName}]} },
     Org = {<<"organization">>,  {[{<<"name">>, OrgName}]} },
     UserOut = {<<"user">>,  {[{<<"email">>, User#chef_user.email},

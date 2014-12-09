@@ -8,8 +8,7 @@
 
 -module(oc_chef_associations).
 
--include_lib("chef_wm/include/chef_wm.hrl").
--include_lib("oc_chef_wm/include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 -include_lib("oc_chef_authz/include/oc_chef_authz.hrl").
 
 -export([deprovision_removed_user/3,
@@ -73,7 +72,7 @@ add_user_to_org(Req, #base_state{organization_guid = OrgId,
                          ObjectRec, RequestorId) ->
     TypeName = chef_object:type_name(ObjectRec),
     Name = chef_object:name(ObjectRec),
-    Uri = ?BASE_ROUTES:route(TypeName, Req, [{name, Name}]),
+    Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, Name}]),
     DeleteRecord = #oc_chef_org_user_association{org_id = OrgId, user_id = UserId},
     case provision_associated_user(State, User, RequestorId) of
         {error, {Step, Detail}} ->
@@ -84,7 +83,7 @@ add_user_to_org(Req, #base_state{organization_guid = OrgId,
             {true,  Req, State#base_state{log_msg = LogMsg}};
         ok ->
             LogMsg = {added, UserName, to, OrgName},
-            Uri = ?BASE_ROUTES:route(TypeName, Req, [{name, Name}]),
+            Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, Name}]),
             {true, Req, State#base_state{log_msg = LogMsg}}
     end.
 

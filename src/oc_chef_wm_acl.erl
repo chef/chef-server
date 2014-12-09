@@ -20,19 +20,26 @@
 
 -module(oc_chef_wm_acl).
 
--include_lib("chef_wm/include/chef_wm.hrl").
--include_lib("oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2,
-                        post_is_create/2]}]).
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           post_is_create/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
 
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
+-export([
+         allowed_methods/2,
+         to_json/2,
+         check_acl_auth/2
+        ]).
+
+
 
 %% chef_wm behaviour callbacks
 -behaviour(chef_wm).
@@ -45,16 +52,12 @@
          validate_request/3
         ]).
 
--export([
-         allowed_methods/2,
-         to_json/2,
-         % Also used by oc_chef_wm_acl_permission:
-         validate_authz_id/7,
-         check_acl_auth/2
-        ]).
+%% Other
+-export([% Also used by oc_chef_wm_acl_permission:
+         validate_authz_id/7]).
 
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(Config) ->
     AclType = ?gv(acl_object_type, Config),
@@ -69,7 +72,7 @@ allowed_methods(Req, State) ->
 validate_request('GET', Req, #base_state{chef_db_context = DbContext,
                                          organization_guid = OrgId,
                                          organization_name = OrgName,
-                                         resource_state = #acl_state{type = Type} = 
+                                         resource_state = #acl_state{type = Type} =
                                              AclState} = State) ->
     validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext).
 

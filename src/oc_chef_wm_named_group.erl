@@ -5,19 +5,23 @@
 
 -module(oc_chef_wm_named_group).
 
--include_lib("eunit/include/eunit.hrl").
--include_lib("chef_wm/include/chef_wm.hrl").
 -include("oc_chef_wm.hrl").
 
--mixin([{chef_wm_base, [content_types_accepted/2,
-                        content_types_provided/2,
-                        finish_request/2,
-                        malformed_request/2,
-                        ping/2]}]).
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
 
--mixin([{?BASE_RESOURCE, [forbidden/2,
-                          is_authorized/2,
-                          service_available/2]}]).
+-export([allowed_methods/2,
+         delete_resource/2,
+         from_json/2,
+         resource_exists/2,
+         to_json/2]).
 
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
@@ -29,14 +33,8 @@
          validate_request/3,
          conflict_message/1]).
 
--export([allowed_methods/2,
-         delete_resource/2,
-         from_json/2,
-         resource_exists/2,
-         to_json/2]).
-
 init(Config) ->
-    chef_wm_base:init(?MODULE, Config).
+    oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
     {ok, #group_state{}}.
@@ -103,9 +101,9 @@ to_json(Req, #base_state{
                 organization_name = OrgName,
                 resource_state = #group_state{
                                              oc_chef_group = Group
-                                            }} = State) ->   
+                                            }} = State) ->
     Ejson = oc_chef_group:assemble_group_ejson(Group, OrgName),
-    
+
     Json = chef_json:encode(Ejson),
     {Json, Req, State}.
 
@@ -114,11 +112,11 @@ from_json(Req, #base_state{resource_state = #group_state{
                                                group_data = GroupData
                                               }
                           } = State) ->
-    chef_wm_base:update_from_json(Req, State, Group , GroupData).
+    oc_chef_wm_base:update_from_json(Req, State, Group , GroupData).
 
 conflict_message(_Name) ->
     {[{<<"error">>, <<"Group already exists">>}]}.
-        
+
 
 delete_resource(Req, #base_state{
                         organization_name = OrgName,

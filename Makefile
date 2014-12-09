@@ -6,7 +6,6 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
                 deps/chef_db/ebin \
                 deps/chef_index/ebin \
                 deps/chef_objects/ebin \
-                deps/chef_wm/ebin \
                 deps/ej/ebin \
                 deps/mini_s3/ebin \
                 deps/pooler/ebin \
@@ -21,7 +20,7 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
 # dialyzer: Analysis failed with error:
 # ec_gb_trees.erl:72: Polymorphic opaque types not supported yet
 # :'(
-DEPS_PLT = chef_wm.plt
+DEPS_PLT = oc_chef_wm.plt
 EC_SCHEMA_VERSION = 2.2.0
 
 REBAR = REBAR_PARENT=$(CURDIR)/rebar.config rebar
