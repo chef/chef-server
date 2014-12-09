@@ -10,26 +10,27 @@ Chef server issues and to outline how to contribute to the Chef Server.
 
 ## Components of the Chef Server
 
-The following list links to all the individual projects that make up the
-Chef server.
+Following is a list of key components of Chef Server. This is not yet an exhaustive list. 
 
 ### Commonly-Modified Components
 
-* [bookshelf](http://github.com/opscode/bookshelf), the S3-compatible engine for storing cookbook data
-* [erchef](http://github.com/opscode/erchef), the main Chef server core
-* [bifrost](http://github.com/opscode/oc_bifrost), the authorization service
-* [oc-id](http://github.com/opscode/oc-id), the OAuth2 provider for extensions like Analytics or Supermarket
+* [opscode-omnibus](http://github.com/opscode/opscode-omnibus): Configuratoin for the Chef Server installation, nd the [Omnibus](http://github.com/opscode/omnibus) project definition for building it. 
+* [oc_erchef](http://github.com/opscode/oc_erchef), the top-level project that is used to build the Erlang Chef REST API Server. This project has pulls in additional Erlang dependencies. Most commonly modified among these are:
+  * [oc_chef_wm](http://github.com/opscode/oc_chef_wm) - declaration of webmachine resources to support the REST API.
+  * [chef_objects](https://github.com/opscode/chef_objects) - core library of Chef Data types
+  * [oc_chef_authz](http://github.com/opscode/oc_chef_authz) - interface layer for oc_bifrost, as well as containing object definitions of many components that were formerly part of the closed-source Enterprise Chef product. 
+  * [chef_db](http://github.com/opscode/chef_db) - data access layer/mapping for Chef Server 
+* [oc-chef-pedant](http://github.com/opscode/oc-chef-pedant), Chef Server tests specific to formerly closed-source features such as multi-tenancy and RBAC. 
 
 ### Less-Commonly-Modified Components
 
-* [chef-mover](http://github.com/opscode/chef-mover), the migration orchestrator from CouchDB to PostgreSQL (used only in upgrades)
-* [chef-pedant](http://github.com/opscode/oc-chef-pedant), the test suite for Chef Server
+* [bookshelf](http://github.com/opscode/bookshelf), the S3-compatible engine for storing cookbook data
+* [chef-mover](http://github.com/opscode/chef-mover), the data migration orchestrator used in upgrades
+* [chef-pedant](http://github.com/opscode/oc-chef-pedant), the base test suite and testing tools for Chef Server
 * [knife-ec-backup](http://github.com/opscode/knife-ec-backup), used to ease migrations from Open Source Chef Server 11 (and below)
 * [knife-opc](http://github.com/opscode/knife-opc), used to provide administrative command-line control to the Chef Server from the console
-
-### Packaging:
-
-* [opscode-omnibus](http://github.com/opscode/opscode-omnibus): [Omnibus](http://github.com/opscode/omnibus) project definition for building the Chef server package.
+* [oc_bifrost](http://github.com/opscode/oc_bifrost), the authorization service
+* [oc-id](http://github.com/opscode/oc-id), the OAuth2 provider for extensions like Analytics or Supermarket
 
 ## Major Technologies used in Chef Server
 
@@ -38,7 +39,7 @@ Chef server.
 * RabbitMQ
 * Redis
 * Solr4
-* Nginx (openresty with openresty-lpeg)
+* Nginx (openresty with lpeg library addition)
 * Runit for service supervision
 
 If you're looking to contribute to certain parts of the Chef server, familiarity with the following related tools is also beneficial, depending on the area.
