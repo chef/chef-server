@@ -1,5 +1,13 @@
 # Chef Server Release Notes
 
+## 12.0.1 (unreleased)
+
+* The following components are no longer used and have been removed:
++ opscode-test
++ opscode-billing
++ opscode-shared
++ mixlib-authentication
+
 ## 12.0.0 (2014-11-25)
 
 ### What's New:

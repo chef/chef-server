@@ -11,6 +11,13 @@
 
 ### opscode-omnibus
 * pin mixlib-shellout to 1.6.1
+* Refactored superuser bootstrap process to use new chef-server-bootstrap
+  repository instead of opscode-test, which pulled in a variety of now
+  deprecated ruby repositories.
+
+### chef-server-bootstrap 1.0.0
+* Repository that replaces opscode-test, allowing us to deprecate several
+  old ruby repositories.
 
 ## 12.0.0 (2014-11-25)
 
