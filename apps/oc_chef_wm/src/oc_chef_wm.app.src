@@ -1,0 +1,30 @@
+{application, oc_chef_wm,
+ [
+  {description, "Base bits needed to write Web Machine API endpoints"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  crypto,
+                  stats_hero,
+                  sqerl,
+                  gen_bunny,
+                  ibrowse,
+                  couchbeam,
+                  darklaunch,
+                  chef_index,
+                  mochiweb,
+                  webmachine,
+                  oc_chef_authz,
+                  folsom,
+                  chef_objects,
+                  compiler,
+                  syntax_tools,
+                  goldrush,
+                  lager,
+                  eldap
+                 ]},
+  {mod, {oc_chef_wm_app, []}},
+  {env, []}
+ ]}.
