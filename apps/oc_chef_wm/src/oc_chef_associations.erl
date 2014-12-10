@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Marc A. Paradise <marc@getchef.com>
+%% @author Marc A. Paradise <marc@chef.io>
 %% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% Common functions for managing user-org associations.

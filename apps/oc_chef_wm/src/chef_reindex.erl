@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -104,7 +104,7 @@ reindex(Ctx, {OrgId, _OrgName}=OrgInfo, Index) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
     %% Grab all the database IDs to do batch retrieval on
     AllIds = all_ids_from_name_id_dict(NameIdDict),
-    BatchSize = envy:get(chef_wm, bulk_fetch_batch_size, pos_integer),
+    BatchSize = envy:get(oc_chef_wm, bulk_fetch_batch_size, pos_integer),
     batch_reindex(Ctx, AllIds, BatchSize, OrgInfo, Index, NameIdDict).
 
 %% @doc Reindex the objects with the specified `Ids' in the given `Index'.
@@ -115,7 +115,7 @@ reindex(Ctx, {OrgId, _OrgName}=OrgInfo, Index) ->
 reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
     %% This is overkill, but workable until we have more robust reindexing
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
-    {ok, BatchSize} = application:get_env(chef_wm, bulk_fetch_batch_size),
+    {ok, BatchSize} = application:get_env(oc_chef_wm, bulk_fetch_batch_size),
     batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict).
 
 -spec reindex_by_name(DbContext :: chef_db:db_context(),
@@ -134,7 +134,7 @@ reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
                             Acc
                     end
             end, [], Names),
-    {ok, BatchSize} = application:get_env(chef_wm, bulk_fetch_batch_size),
+    {ok, BatchSize} = application:get_env(oc_chef_wm, bulk_fetch_batch_size),
     batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict).
 
 all_ids_from_name_id_dict(NameIdDict) ->
@@ -215,7 +215,7 @@ send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict) ->
     StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PreliminaryEJson),
     %% Since we get here via valid `Index', we don't have to check that the objects are
     %% indexable.
-    ok = chef_object_db:add_to_solr(StubRec, PreliminaryEJson),
+    ok = oc_chef_object_db:add_to_solr(StubRec, PreliminaryEJson),
     send_to_index_queue(OrgId, Index, Rest, NameIdDict).
 
 %% @doc Determine the proper key to use to retrieve the unique name of
@@ -223,7 +223,7 @@ send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict) ->
 name_key(data_bag_item) -> <<"id">>;
 name_key(_Type)         -> <<"name">>.
 
-%% The {@link chef_object_db:add_to_solr} expects a Chef object record and EJSON as
+%% The {@link oc_chef_object_db:add_to_solr} expects a Chef object record and EJSON as
 %% arguments. Since we have only some meta data and the EJSON, we stub out enough of an
 %% object record to work. This is a fragile hack. The reindexing function should retrieve a
 %% list of complete records from the db and process those.

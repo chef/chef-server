@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Mark Mzyk <mmzyk@getchef.com>
-%% @author Marc Paradise <marc@getchef.com>
+%% @author Mark Mzyk <mmzyk@chef.io>
+%% @author Marc Paradise <marc@chef.io>
 %% @copyright 2012-14 Chef Software, Inc.
 
 %% @doc Resource module for Chef users endpoint

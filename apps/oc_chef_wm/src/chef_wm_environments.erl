@@ -1,8 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author John Keiser <jkeiser@opscode.com>
+%% @author John Keiser <jkeiser@chef.io>
 %% @author Douglas Triggs
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file

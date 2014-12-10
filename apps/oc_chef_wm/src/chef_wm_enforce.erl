@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%% Copyright 2013-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -38,8 +38,7 @@
 %% Verify that the request body is not larger than ?MAX_SIZE bytes. Throws `{too_big, Msg}`
 %% if the request body is too large.
 max_size(Req) ->
-    case envy:get(chef_wm, max_request_size, ?MAX_SIZE, fun validate_size/1 )
-    of
+    case envy:get(oc_chef_wm, max_request_size, ?MAX_SIZE, fun validate_size/1 ) of
         disabled ->
             Req;
         TunedMaxSize ->

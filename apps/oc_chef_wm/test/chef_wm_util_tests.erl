@@ -32,7 +32,7 @@ base_uri_test_() ->
         {"When base_resource_url is set to host_header",
             {foreach,
                 fun() ->
-                        application:set_env(chef_wm, base_resource_url, host_header)
+                        application:set_env(oc_chef_wm, base_resource_url, host_header)
                 end,
                 fun(_) ->
                         undefined %% noop
@@ -55,7 +55,7 @@ base_uri_test_() ->
         {"When base_resource_url is not set",
             {foreach,
                 fun() ->
-                        application:unset_env(chef_wm, base_resource_url)
+                        application:unset_env(oc_chef_wm, base_resource_url)
                 end,
                 fun(_) ->
                         undefined %% noop
@@ -78,7 +78,7 @@ base_uri_test_() ->
         {"When base_resource_url is set to something",
             fun() ->
                     ExternalUrl = "https://fake-s3.com",
-                    application:set_env(chef_wm, base_resource_url, ExternalUrl),
+                    application:set_env(oc_chef_wm, base_resource_url, ExternalUrl),
 
                     %% Regardless of request information, base_uri will return whatever
                     %% is set to base_resource_url if it is a string

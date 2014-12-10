@@ -1,9 +1,9 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Christopher Brown <cb@getchef.com>
-%% @author Christopher Maier <cm@getchef.com>
-%% @author Seth Falcon <seth@getchef.com>
-%% @author Ho-Sheng Hsiao <hosh@getchef.com>
+%% @author Christopher Brown <cb@chef.io>
+%% @author Christopher Maier <cm@chef.io>
+%% @author Seth Falcon <seth@chef.io>
+%% @author Ho-Sheng Hsiao
 %% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -56,7 +56,7 @@ base_mods() ->
 %% By default, use the Host: header value, or if configured with the atom 'host_header'
 %% Otherwise, use the configured url.
 base_uri(Req) ->
-    case application:get_env(chef_wm, base_resource_url) of
+    case application:get_env(oc_chef_wm, base_resource_url) of
         undefined         -> scheme(Req) ++ "://" ++ vhost(Req);
         {ok, host_header} -> scheme(Req) ++ "://" ++ vhost(Req);
         {ok, ExternalUrl} -> ExternalUrl

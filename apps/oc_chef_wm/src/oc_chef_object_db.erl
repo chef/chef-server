@@ -1,13 +1,17 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author Christopher Maier <cm@opscode.com>
-%% @author Seth Falcon <seth@opscode.com>
-%% @copyright 2012 Opscode, Inc.
+%% @author Christopher Maier <cm@chef.io>
+%% @author Seth Falcon <seth@chef.io>
+%% @copyright 2012-2014 Chef Software, Inc.
 
 %% @doc Helper functions that tie together operations across chef_db and chef_index
 -module(oc_chef_object_db).
 
--export([safe_delete/3, delete/3]).
+-export([safe_delete/3,
+         delete/3,
+         add_to_solr/2,
+         bulk_delete_from_solr/3,
+         delete_from_solr/1]).
 
 -include("../../include/chef_types.hrl").
 -include("../../include/oc_chef_types.hrl").
@@ -28,7 +32,7 @@ safe_delete(_DbContext, #chef_data_bag{}, _RequestorId) ->
     throw({error, unsupported});
 safe_delete(DbContext, Object, RequestorId) ->
     try
-        chef_object_db:delete_from_solr(Object),
+        oc_chef_object_db:delete_from_solr(Object),
         % Report back the actual result of not_found or ok:
         delete_from_db(DbContext, RequestorId, Object)
     catch
@@ -67,8 +71,8 @@ delete(DbContext, #chef_data_bag{org_id = OrgId,
     delete_from_db(DbContext, RequestorId, DataBag), % throws on error
     %% Remove data bag items from Solr now; directly calling chef_index_queue:delete since
     %% we've just got ids, and not proper data bag item records required for
-    %% chef_object_db:delete_from_solr
-    chef_object_db:bulk_delete_from_solr(data_bag_item, DataBagItemIds, OrgId),
+    %% delete_from_solr
+    bulk_delete_from_solr(data_bag_item, DataBagItemIds, OrgId),
     ok;
 delete(DbContext, Object, RequestorId) ->
     %% All other object deletion is relatively sane :)
@@ -76,7 +80,7 @@ delete(DbContext, Object, RequestorId) ->
     delete_from_db(DbContext, RequestorId, Object),
     %% This is fire and forget as well. If we're here, we've already deleted the db record
     %% and won't be able to get back here for a retry.
-    chef_object_db:delete_from_solr(Object),
+    delete_from_solr(Object),
     ok.
 
 -spec delete_from_db(chef_db:db_context(),
@@ -130,3 +134,46 @@ maybe_delete_authz_id_or_error(1, Object, RequestorId) ->
     %% for all other object types, successful delete of 1 record means we should delete authz id
     oc_chef_authz:delete_resource(RequestorId, object, chef_object:authz_id(Object)),
     ok.
+
+-spec add_to_solr(tuple(), ejson_term() | {ejson_term(), _}) -> ok.
+add_to_solr(ObjectRec, ObjectEjson) ->
+    case chef_object:is_indexed(ObjectRec) of
+        true ->
+            IndexEjson = chef_object:ejson_for_indexing(ObjectRec, ObjectEjson),
+            DbName = chef_otto:dbname(chef_object:org_id(ObjectRec)),
+            Id = chef_object:id(ObjectRec),
+            TypeName = chef_object:type_name(ObjectRec),
+            index_queue_add(TypeName, Id, DbName, IndexEjson);
+        false ->
+            ok
+    end.
+
+%% @doc Helper function to easily delete an object from Solr, instead
+%% of calling chef_index_queue directly.
+-spec delete_from_solr(tuple()) -> ok.
+delete_from_solr(ObjectRec) ->
+    case chef_object:is_indexed(ObjectRec) of
+        true ->
+            Id = chef_object:id(ObjectRec),
+            DbName = chef_otto:dbname(chef_object:org_id(ObjectRec)),
+            TypeName = chef_object:type_name(ObjectRec),
+            index_queue_delete(TypeName, Id, DbName);
+        false ->
+            ok
+    end.
+
+index_queue_add(TypeName, Id, DbName, IndexEjson) ->
+    ok = chef_index_queue:set(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName, IndexEjson).
+
+index_queue_delete(TypeName, Id, DbName) ->
+    ok = chef_index_queue:delete(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName).
+
+%% @doc Given an object type and a list of ids, delete the corresponding search index data
+%% from solr. The delete is achieved by putting a delete message on the indexing queue
+%% (rabbitmq). The delete happens asynchronously (best effort) and this function returns
+%% immediately.
+-spec bulk_delete_from_solr(atom(), [binary()], binary()) -> ok.
+bulk_delete_from_solr(Type, Ids, OrgId) ->
+    [ index_queue_delete(Type, Id, OrgId) || Id <- Ids ],
+    ok.
+

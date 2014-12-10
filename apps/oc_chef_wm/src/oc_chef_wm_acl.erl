@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author Douglas Triggs <doug@getchef.com>
-%% Copyright 2014 Chef, Inc. All Rights Reserved.
+%% @author Douglas Triggs <doug@chef.io>
+%% Copyright 2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -91,7 +91,7 @@ to_json(Req, #base_state{resource_state = AclState} = State) ->
 %% Also used by oc_chef_wm_acl_permission
 validate_authz_id(Req,
                   #base_state{organization_authz_id = AuthzId} = State,
-                  AclState, organization, OrgId, OrgName, DbContext) ->
+                  AclState, organization, _OrgId, _OrgName, _DbContext) ->
     AclState1 = AclState#acl_state{authz_id = AuthzId},
     {Req, State#base_state{resource_state = AclState1, superuser_bypasses_checks = true}};
 validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->

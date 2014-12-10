@@ -32,8 +32,8 @@
 -define(SLOW_CHECK_SLEEP, 100).
 
 setup_env() ->
-    application:set_env(chef_wm, health_ping_timeout, ?PING_TIMEOUT),
-    application:set_env(chef_wm, health_ping_modules, ?CHECK_MODS),
+    application:set_env(oc_chef_wm, health_ping_timeout, ?PING_TIMEOUT),
+    application:set_env(oc_chef_wm, health_ping_modules, ?CHECK_MODS),
     ok.
 
 cleanup_env() ->

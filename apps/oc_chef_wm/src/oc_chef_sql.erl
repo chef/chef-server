@@ -1,12 +1,12 @@
 %% ex: ts=4 sw=4 et
-%% @author Seth Falcon <seth@opscode.com>
-%% @author Mark Anderson <mark@opscode.com>
-%% @author Christopher Maier <cm@opscode.com>
-%% @author James Casey <james@opscode.com>
-%% @author Mark Mzyk <mmzyk@opscode.com>
-%% @author Seth Chisamore <schisamo@opscode.com>
-%% @author Ho-Sheng Hsiao <hosh@opscode.com>
-%% Copyright 2011-2013 Opscode, Inc. All Rights Reserved.
+%% @author Seth Falcon <seth@chef.io>
+%% @author Mark Anderson <mark@chef.io>
+%% @author Christopher Maier <cm@chef.io>
+%% @author James Casey <james@chef.io>
+%% @author Mark Mzyk <mmzyk@chef.io>
+%% @author Seth Chisamore <schisamo@chef.io>
+%% @author Ho-Sheng Hsiao
+%% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file

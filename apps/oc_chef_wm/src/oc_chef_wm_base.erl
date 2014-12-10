@@ -1,8 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author Kevin Smith <kevin@opscode.com>
-%% @author Seth Falcon <seth@opscode.com>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% @author Kevin Smith
+%% @author Seth Falcon <seth@chef.io>
+%% Copyright 2012-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -333,7 +333,7 @@ is_authorized(Req, State) ->
             end;
         {false, ReqOther, StateOther} ->
             %% FIXME: the supported version is determined by the chef_authn application
-            %% also, see: https://wiki.corp.opscode.com/display/CORP/RFC+Authentication+Version+Negotiation
+            %% also, see: https://wiki.corp.chef.io/display/CORP/RFC+Authentication+Version+Negotiation
             {"X-Ops-Sign version=\"1.0\" version=\"1.1\"", ReqOther, StateOther}
     end.
 
@@ -842,11 +842,11 @@ create_from_json(#wm_reqdata{} = Req,
     %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
     %% the world.
-    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
+    ok = oc_chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
     case chef_db:create(ObjectRec, DbContext, ActorId) of
         {conflict, _} ->
             %% ignore return value of solr delete, this is best effort.
-            chef_object_db:delete_from_solr(ObjectRec),
+            oc_chef_object_db:delete_from_solr(ObjectRec),
             object_creation_error_hook(ObjectRec, ActorId),
             %% FIXME: created authz_id is leaked for this case, cleanup?
             LogMsg = {RecType, name_conflict, Name},
@@ -862,7 +862,7 @@ create_from_json(#wm_reqdata{} = Req,
         What ->
             %% ignore return value of solr delete, this is best effort.
             %% FIXME: created authz_id is leaked for this case, cleanup?
-            chef_object_db:delete_from_solr(ObjectRec),
+            oc_chef_object_db:delete_from_solr(ObjectRec),
             object_creation_error_hook(ObjectRec, ActorId),
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
@@ -885,7 +885,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
     %% Send object to solr for indexing *first*. If the update fails, we will have sent
     %% incorrect data, but that should get corrected when the client retries. This is a
     %% compromise.
-    ok = chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
+    ok = oc_chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
 
     %% Ignore updates that don't change anything. If the user PUTs identical data, we skip
     %% going to the database and skip updating updated_at. This allows us to avoid RDBMS

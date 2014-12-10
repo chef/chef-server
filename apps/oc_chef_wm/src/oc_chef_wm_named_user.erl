@@ -1,8 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author Seth Falcon <seth@getchef.com>
-%% @author Marc Paradise <marc@getchef.com>
-%% Copyright 2012-2014 Chef, Inc. All Rights Reserved.
+%% @author Seth Falcon <seth@chef.io>
+%% @author Marc Paradise <marc@chef.io>
+%% Copyright 2012-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file

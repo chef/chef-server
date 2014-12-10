@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Kevin Smith <kevin@opscode.com>
-%% @copyright 2011-2012 Opscode Inc.
+%% @author Kevin Smith
+%% @copyright 2011-2014 Chef Software Inc.
 
 -module(oc_chef_wm_sup).
 

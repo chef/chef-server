@@ -1,12 +1,12 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author Christopher Brown <cb@opscode.com>
-%% @author Seth Falcon <seth@opscode.com>
-%% @author John Keiser <jkeiser@opscode.com>
-%% @author Christopher Maier <cm@opscode.com>
-%% @author Kevin Smith <kevin@opscode.com>
-%% @author Seth Chisamore <schisamo@opscode.com>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% @author Christopher Brown <cb@chef.io>
+%% @author Seth Falcon <seth@chef.io>
+%% @author John Keiser <jkeiser@chef.io>
+%% @author Christopher Maier <cm@chef.io>
+%% @author Kevin Smith
+%% @author Seth Chisamore <schisamo@chef.io>
+%% Copyright 2012-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -158,7 +158,7 @@ solr_ids_length(Solr1Ids) ->
 
 %% Return current app config value for batch size, defaulting if absent.
 batch_size() ->
-    envy:get(chef_wm, bulk_fetch_batch_size, ?DEFAULT_BATCH_SIZE, positive_integer).
+    envy:get(oc_chef_wm, bulk_fetch_batch_size, ?DEFAULT_BATCH_SIZE, positive_integer).
 
 search_log_msg(SolrNumFound, NumIds, DbNumFound) ->
     {search, SolrNumFound, NumIds, DbNumFound}.

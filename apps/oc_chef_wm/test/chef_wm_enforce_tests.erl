@@ -10,7 +10,7 @@ max_size_test_() ->
       {foreach,
        fun() ->
                meck:new(wrq),
-               application:unset_env(chef_wm, max_request_size)
+               application:unset_env(oc_chef_wm, max_request_size)
        end,
        fun(_) ->
                meck:unload(wrq)
@@ -28,11 +28,11 @@ max_size_test_() ->
        fun() ->
 
                meck:new(wrq),
-               application:set_env(chef_wm, max_request_size, TunedValue)
+               application:set_env(oc_chef_wm, max_request_size, TunedValue)
        end,
        fun(_) ->
                meck:unload(wrq),
-               application:unset_env(chef_wm, max_request_size)
+               application:unset_env(oc_chef_wm, max_request_size)
        end,
        [
         ?_test(max_size_success('POST', TunedValue)),
@@ -45,10 +45,10 @@ max_size_test_() ->
      {"Disabled tests",
       {foreach,
        fun() ->
-               application:set_env(chef_wm, max_request_size, disabled)
+               application:set_env(oc_chef_wm, max_request_size, disabled)
        end,
        fun(_) ->
-               application:unset_env(chef_wm, max_request_size)
+               application:unset_env(oc_chef_wm, max_request_size)
        end,
        [
         fun(_) -> ?_test(disabled_max_size()) end
@@ -58,10 +58,10 @@ max_size_test_() ->
      {"Incorrect configuration tests",
       {foreach,
        fun() ->
-               application:unset_env(chef_wm, max_request_size)
+               application:unset_env(oc_chef_wm, max_request_size)
        end,
        fun(_) ->
-               application:unset_env(chef_wm, max_request_size)
+               application:unset_env(oc_chef_wm, max_request_size)
        end,
        [
         ?_test(config_error(0)),
@@ -91,7 +91,7 @@ disabled_max_size() ->
     ?assertEqual(req, chef_wm_enforce:max_size(req)).
 
 config_error(Val) ->
-    application:set_env(chef_wm, max_request_size, Val),
+    application:set_env(oc_chef_wm, max_request_size, Val),
     ?assertError(config_bad_type, chef_wm_enforce:max_size(req)).
 
 max_size_when_get_should_return_req_test() ->
