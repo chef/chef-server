@@ -27,7 +27,7 @@
 
 -module(chef_sql).
 
--include_lib("chef_db/include/chef_db.hrl").
+-include("../../include/chef_db.hrl").
 
 -ifdef(TEST).
 -compile(export_all).
@@ -107,7 +107,7 @@
         ]).
 
 -include_lib("sqerl/include/sqerl.hrl").
--include_lib("chef_objects/include/chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 -type delete_query() :: delete_cookbook_version_by_id |
                         delete_user_by_id |

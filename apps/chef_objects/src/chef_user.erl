@@ -61,7 +61,7 @@
 -include_lib("mixer/include/mixer.hrl").
 -mixin([{chef_object,[ {default_update/2, update} ]}]).
 
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 -include_lib("ej/include/ej.hrl").
 

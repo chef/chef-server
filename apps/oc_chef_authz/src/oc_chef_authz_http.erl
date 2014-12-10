@@ -190,7 +190,7 @@ authz_url_and_timeout() ->
 
 create_pool() ->
     Pools = get_pool_configs(),
-    [oc_httpc:add_pool(PoolNameAtom, Config) || {PoolNameAtom, Config} <- Pools],
+    [oc_httpc:add_pool(PoolNameAtom, Config) || {PoolNameAtom, Config} <- Pools, Config /= []],
     ok.
 
 delete_pool() ->

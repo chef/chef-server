@@ -93,9 +93,9 @@
          data_bag_exists/3,
          environment_exists/3]).
 
--include_lib("chef_db/include/chef_db.hrl").
--include_lib("chef_objects/include/chef_types.hrl").
--include_lib("chef_objects/include/chef_osc_defaults.hrl").
+-include("../../include/chef_db.hrl").
+-include("../../include/chef_types.hrl").
+-include("../../include/chef_osc_defaults.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
 -record(context, {reqid :: binary(),

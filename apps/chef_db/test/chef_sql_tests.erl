@@ -18,7 +18,7 @@
 -module(chef_sql_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("chef_objects/include/chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 %% Used in testing flatten_record
 -record(test_record, {'field1',

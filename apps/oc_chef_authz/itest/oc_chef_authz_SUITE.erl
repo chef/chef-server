@@ -1,8 +1,8 @@
 -module(oc_chef_authz_SUITE).
 
 -include_lib("common_test/include/ct.hrl").
--include_lib("oc_chef_authz/include/oc_chef_authz.hrl").
--include_lib("oc_chef_authz/include/oc_chef_types.hrl").
+-include("../../include/oc_chef_authz.hrl").
+-include("../../include/oc_chef_types.hrl").
 
 -compile([export_all]).
 

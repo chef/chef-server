@@ -20,8 +20,8 @@
 
 -module(chef_user_tests).
 
--include("../include/chef_types.hrl").
--include("../include/chef_osc_defaults.hrl").
+-include("../../include/chef_types.hrl").
+-include("../../include/chef_osc_defaults.hrl").
 -include_lib("ej/include/ej.hrl").
 -include_lib("eunit/include/eunit.hrl").
 

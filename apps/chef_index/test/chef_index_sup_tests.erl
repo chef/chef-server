@@ -18,7 +18,7 @@
 -module(chef_index_sup_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include("../include/chef_solr.hrl").
+-include("../../include/chef_solr.hrl").
 
      
 server_for_vhost_test() ->

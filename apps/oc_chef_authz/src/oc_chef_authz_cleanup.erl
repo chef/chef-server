@@ -60,7 +60,7 @@
 -define(DEFAULT_BATCH_SIZE, 2500).
 -define(DEFAULT_INTERVAL, 1000).
 
--include("oc_chef_authz.hrl").
+-include("../../include/oc_chef_authz.hrl").
 -include("oc_chef_authz_cleanup.hrl").
 
 

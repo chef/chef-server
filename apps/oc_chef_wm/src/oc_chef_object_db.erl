@@ -9,8 +9,8 @@
 
 -export([safe_delete/3, delete/3]).
 
--include_lib("chef_objects/include/chef_types.hrl").
--include_lib("oc_chef_authz/include/oc_chef_types.hrl").
+-include("../../include/chef_types.hrl").
+-include("../../include/oc_chef_types.hrl").
 
 -type delete_type() ::chef_object() |
                     #oc_chef_container{} |

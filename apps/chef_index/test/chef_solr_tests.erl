@@ -18,7 +18,7 @@
 -module(chef_solr_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include("../include/chef_solr.hrl").
+-include("../../include/chef_solr.hrl").
 
 %expect_params(Params) ->
     %meck:expect(wrq, get_qs_value, fun(Key, req_mock) ->

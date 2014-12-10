@@ -29,7 +29,7 @@
 %%          test_setup/0,
 %%          test_cleanup/1]).
 
--include("oc_chef_authz.hrl").
+-include("../../include/oc_chef_authz.hrl").
 
 %-define(setup, oc_chef_authz_tests).
 -define(setup, test_utils).
@@ -387,7 +387,7 @@ random_bogus_port() ->
     Port.
 
 needed_apps() ->
-    [crypto, ibrowse, pooler, stats_hero, public_key, ssl, epgsql, sqerl, oc_chef_authz].
+    [crypto, asn1, ibrowse, pooler, stats_hero, public_key, ssl, epgsql, sqerl, oc_chef_authz].
 
 start_apps() ->
     error_logger:tty(false),

@@ -26,8 +26,8 @@
 
 -module(chef_wm_search).
 
--include("oc_chef_wm.hrl").
--include_lib("chef_index/include/chef_solr.hrl").
+-include("../../include/oc_chef_wm.hrl").
+-include("../../include/chef_solr.hrl").
 
 -define(DEFAULT_BATCH_SIZE, 5).
 

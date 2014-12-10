@@ -23,7 +23,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 -define(MAX_GOOD_VERSION, "9223372036854775807").
 -define(MAX_GOOD_VERSION_INT, list_to_integer(?MAX_GOOD_VERSION)).

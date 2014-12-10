@@ -22,7 +22,7 @@
 
 -module(chef_s3_ops).
 
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 -export([
          delete/2,

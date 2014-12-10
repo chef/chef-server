@@ -1,3 +1,4 @@
+%% B
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -18,7 +19,7 @@
 -module(chef_db_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("chef_objects/include/chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 -define(REQ_ID, <<"req-id-123">>).
 
@@ -31,7 +32,7 @@ fetch_requestor_test_() ->
              set_app_env()
      end,
      fun(_) ->
-             meck:unload()
+             meck:unload([chef_sql, chef_db_darklaunch, chef_otto])
      end,
      [
       {"a user is found SQL",

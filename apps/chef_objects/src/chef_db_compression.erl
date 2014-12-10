@@ -26,7 +26,7 @@
          decompress/1,
          decompress_and_decode/1]).
 
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 -type chef_compressable() :: 'chef_data_bag_item'
                           | 'chef_environment'

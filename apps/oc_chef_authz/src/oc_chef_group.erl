@@ -5,7 +5,7 @@
 
 -module(oc_chef_group).
 
--include("oc_chef_types.hrl").
+-include("../../include/oc_chef_types.hrl").
 -include_lib("mixer/include/mixer.hrl").
 
 -behaviour(chef_object).

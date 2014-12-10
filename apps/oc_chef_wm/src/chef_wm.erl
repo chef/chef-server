@@ -17,7 +17,7 @@
 
 -module(chef_wm).
 
--include("oc_chef_wm.hrl").
+-include("../../include/oc_chef_wm.hrl").
 
 -type error() :: {error, term()}.
 -type http_verb() :: 'GET' | 'PUT' | 'POST' | 'DELETE' | 'HEAD' | 'OPTIONS'.

@@ -65,7 +65,7 @@
 -compile(export_all).
 -endif.
 
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -define(VALIDATION_CONSTRAINTS,

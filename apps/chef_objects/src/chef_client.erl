@@ -68,8 +68,8 @@
          ]).
 
 -include_lib("ej/include/ej.hrl").
--include("chef_types.hrl").
--include("chef_osc_defaults.hrl").
+-include("../../include/chef_types.hrl").
+-include("../../include/chef_osc_defaults.hrl").
 
 -define(DEFAULT_FIELD_VALUES,
         [

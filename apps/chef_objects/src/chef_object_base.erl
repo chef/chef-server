@@ -24,7 +24,7 @@
 %% "Chef Objects", such as nodes, roles, etc.
 -module(chef_object_base).
 
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 -include_lib("ej/include/ej.hrl").
 
 -export([

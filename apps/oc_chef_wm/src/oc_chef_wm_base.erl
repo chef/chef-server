@@ -22,7 +22,7 @@
 
 -module(oc_chef_wm_base).
 
--include("oc_chef_wm.hrl").
+-include("../../include/oc_chef_wm.hrl").
 -include_lib("public_key/include/public_key.hrl").
 
 %% Complete webmachine callbacks

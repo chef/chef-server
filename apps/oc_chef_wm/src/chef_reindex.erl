@@ -19,7 +19,7 @@
 -module(chef_reindex).
 -compile([warnings_as_errors]).
 
--include_lib("chef_objects/include/chef_types.hrl").
+-include("../../include/chef_types.hrl").
 -include_lib("ej/include/ej.hrl").
 
 %% A binary() index is taken to be a data bag name.

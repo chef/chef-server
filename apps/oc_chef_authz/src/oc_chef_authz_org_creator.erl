@@ -20,9 +20,9 @@
 %% Future directions:
 %% We will probably want to make the default starting group of a user configurable
 
--include("oc_chef_authz.hrl").
--include("oc_chef_types.hrl").
--include_lib("chef_objects/include/chef_types.hrl").
+-include("../../include/oc_chef_authz.hrl").
+-include("../../include/oc_chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 %% This is an ACE in human readable form, with chef objects, not
 -record(hr_ace, {clients = [],

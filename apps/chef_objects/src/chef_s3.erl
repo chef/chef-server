@@ -25,7 +25,7 @@
 
 -module(chef_s3).
 
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 -export([
          check_checksums/2,

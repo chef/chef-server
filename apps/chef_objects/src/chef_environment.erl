@@ -61,7 +61,7 @@
          ]).
 -include_lib("ej/include/ej.hrl").
 
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 -define(DEFAULT_FIELD_VALUES,
         [

@@ -56,7 +56,7 @@
 -compile([export_all]).
 -endif.
 
--include("oc_chef_authz.hrl").
+-include("../../include/oc_chef_authz.hrl").
 -include("oc_chef_authz_db.hrl").
 
 -export_type([oc_chef_authz_context/0]).

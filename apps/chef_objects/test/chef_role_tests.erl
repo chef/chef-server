@@ -23,7 +23,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 basic_role() ->
     {[

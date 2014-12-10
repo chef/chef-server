@@ -65,7 +65,7 @@
 -compile(export_all).
 -endif.
 
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 %% Describes the valid structure of a data bag item for use with `ej:valid/2`.
 -define(VALIDATION_CONSTRAINTS,

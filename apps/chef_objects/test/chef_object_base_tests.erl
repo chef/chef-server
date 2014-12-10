@@ -23,7 +23,7 @@
 -module(chef_object_base_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 set_created_test_() ->
     ActorId = <<"12121212121212121212121212121212">>,

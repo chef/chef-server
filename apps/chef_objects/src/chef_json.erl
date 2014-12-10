@@ -27,7 +27,7 @@
          encode/1
         ]).
 
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 decode(Bin) ->
     try

@@ -6,8 +6,8 @@
 
 -module(oc_chef_authz_acl).
 
--include("oc_chef_types.hrl").
--include_lib("chef_objects/include/chef_types.hrl").
+-include("../../include/oc_chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 
 

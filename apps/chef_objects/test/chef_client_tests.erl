@@ -22,8 +22,8 @@
 
 -module(chef_client_tests).
 
--include_lib("chef_objects/include/chef_types.hrl").
--include_lib("chef_objects/include/chef_osc_defaults.hrl").
+-include("../../include/chef_types.hrl").
+-include("../../include/chef_osc_defaults.hrl").
 -include_lib("ej/include/ej.hrl").
 -include_lib("eunit/include/eunit.hrl").
 

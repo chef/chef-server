@@ -72,7 +72,7 @@
 -compile(export_all).
 -endif.
 
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 %% This is the maximum size of an int value in postgres used to store major, minor, and
 %% patch versions.

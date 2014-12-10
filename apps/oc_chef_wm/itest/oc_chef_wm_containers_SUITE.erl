@@ -6,8 +6,8 @@
 -module(oc_chef_wm_containers_SUITE).
 
 -include_lib("common_test/include/ct.hrl").
--include_lib("chef_objects/include/chef_types.hrl").
--include_lib("oc_chef_authz/include/oc_chef_types.hrl").
+-include("../../include/chef_types.hrl").
+-include("../../include/oc_chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -record(context, {reqid :: binary(),

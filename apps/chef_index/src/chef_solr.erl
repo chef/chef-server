@@ -34,7 +34,7 @@
          solr_commit/0
         ]).
 
--include("chef_solr.hrl").
+-include("../../include/chef_solr.hrl").
 
 -spec make_query_from_params(binary()|string(),
                              string() | binary() | undefined,

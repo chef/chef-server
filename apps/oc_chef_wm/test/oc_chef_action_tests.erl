@@ -17,7 +17,7 @@
 
 -module(oc_chef_action_tests).
 
--include_lib("oc_chef_wm.hrl").
+-include("../../include/oc_chef_wm.hrl").
 
 msg(Task) ->
     {[{<<"message_type">>, <<"action">>},

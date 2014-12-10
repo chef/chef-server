@@ -18,7 +18,7 @@
 -module(chef_wm_status_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("oc_chef_wm.hrl").
+-include("../../include/oc_chef_wm.hrl").
 
 -define(CHECK_MODS, [chef_otto, chef_sql, chef_solr]).
 

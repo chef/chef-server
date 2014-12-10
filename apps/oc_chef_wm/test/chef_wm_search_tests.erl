@@ -11,10 +11,10 @@
 search_test_() ->
     {foreach,
      fun() ->
-             meck:new(chef_solr)
+             meck:new([chef_solr, stats_hero])
      end,
      fun(_) ->
-             meck:unload([chef_solr])
+             meck:unload([chef_solr, stats_hero])
      end,
      [
       {"Catch exception and return",

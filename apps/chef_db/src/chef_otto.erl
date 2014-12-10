@@ -71,7 +71,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("couchbeam/include/couchbeam.hrl").
--include_lib("chef_objects/include/chef_types.hrl").
+-include("../../include/chef_types.hrl").
 -include("chef_otto.hrl").
 
 -type couch_server() :: server().               % from couchbeam.hrl

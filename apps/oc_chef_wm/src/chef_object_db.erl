@@ -29,7 +29,7 @@
          delete/3,
          delete_from_solr/1]).
 
--include_lib("chef_objects/include/chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 -spec add_to_solr(tuple(), ejson_term() | {ejson_term(), _}) -> ok.
 add_to_solr(ObjectRec, ObjectEjson) ->

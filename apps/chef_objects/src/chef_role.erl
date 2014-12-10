@@ -63,7 +63,7 @@
 -compile(export_all).
 -endif.
 
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 -behaviour(chef_object).
 

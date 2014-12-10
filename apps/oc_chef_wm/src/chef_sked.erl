@@ -25,7 +25,7 @@
 
 -module(chef_sked).
 
--include("oc_chef_wm.hrl").
+-include("../../include/oc_chef_wm.hrl").
 
 -export([create_client/4,
          create_user/4,

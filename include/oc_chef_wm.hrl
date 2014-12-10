@@ -23,11 +23,11 @@
 %%
 
 -include_lib("webmachine/include/wm_reqdata.hrl").
--include_lib("chef_objects/include/chef_types.hrl").
--include_lib("chef_objects/include/chef_osc_defaults.hrl").
+-include("chef_types.hrl").
+-include("chef_osc_defaults.hrl").
 -include_lib("mixer/include/mixer.hrl").
 -include_lib("ej/include/ej.hrl").
--include_lib("oc_chef_authz/include/oc_chef_types.hrl").
+-include("oc_chef_types.hrl").
 
 -include_lib("stats_hero/include/stats_hero.hrl").
 

@@ -34,8 +34,8 @@
 -compile(export_all).
 -endif.
 
--include("chef_types.hrl").
--include("chef_regex.hrl").
+-include("../../include/chef_types.hrl").
+-include("../../include/chef_regex.hrl").
 
  %% @doc the input into the depsolver is a single run_list
 -define(VALIDATION_CONSTRAINTS,

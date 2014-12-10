@@ -11,8 +11,8 @@
 -compile(export_all).
 
 -include_lib("common_test/include/ct.hrl").
--include_lib("oc_chef_authz/include/oc_chef_types.hrl").
--include_lib("chef_objects/include/chef_types.hrl").
+-include("../../include/oc_chef_types.hrl").
+-include("../../include/chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -define(CTX, {context, <<"req_id">>, otto, undefined}).

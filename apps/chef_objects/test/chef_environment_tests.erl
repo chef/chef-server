@@ -22,7 +22,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
--include("chef_types.hrl").
+-include("../../include/chef_types.hrl").
 
 new_record_test() ->
     OrgId = <<"12345678123456781234567812345678">>,

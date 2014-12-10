@@ -11,7 +11,7 @@
 
 -module(oc_chef_wm_org_invites).
 
--include("oc_chef_wm.hrl").
+-include("../../include/oc_chef_wm.hrl").
 
 
 %% Webmachine resource callbacks

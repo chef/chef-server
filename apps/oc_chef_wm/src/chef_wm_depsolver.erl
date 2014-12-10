@@ -24,7 +24,7 @@
 -module(chef_wm_depsolver).
 
 %% chef_wm behaviour callbacks
--include("oc_chef_wm.hrl").
+-include("../../include/oc_chef_wm.hrl").
 -behaviour(chef_wm).
 -export([auth_info/2,
          init/1,

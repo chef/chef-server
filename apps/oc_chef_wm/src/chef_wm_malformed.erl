@@ -20,7 +20,7 @@
 
 -module(chef_wm_malformed).
 
--include("oc_chef_wm.hrl").
+-include("../../include/oc_chef_wm.hrl").
 
 -export([
          malformed_request_message/3
