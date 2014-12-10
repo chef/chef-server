@@ -3,3 +3,4 @@ deps
 .DS_Store
 TAGS
 .rebar
+ebin
