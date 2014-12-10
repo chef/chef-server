@@ -17,11 +17,23 @@
 -compile([export_all, {parse_transform, lager_transform}]).
 
 -define(ORG_ID, <<"00000000000000000000000000000000">>).
+-define(ORG_AUTHZ_ID, <<"10000000000000000000000000000000">>).
 -define(AUTHZ_ID, <<"00000000000000000000000000000001">>).
 -define(CLIENT_NAME, <<"test-client">>).
 
 init_per_suite(Config) ->
     Config2 = setup_helper:start_server(Config),
+
+    OrganizationRecord = chef_object:new_record(oc_chef_organization,
+                                                ?ORG_ID,
+                                                ?ORG_AUTHZ_ID,
+                                                {[{<<"name">>, <<"org">>},
+                                                  {<<"full_name">>, <<"org">>},
+                                                  {<<"guid">>, <<"d540a2e7743112c732e4bb91ecc1df02">>}]}),
+    Result2 = chef_db:create(OrganizationRecord,
+                   #context{reqid = <<"fake-req-id">>},
+                   <<"00000000000000000000000000000001">>),
+    io:format("Organization Create Result ~p~n", [Result2]),
 
     %% create the test client
     %% {Pubkey, _PrivKey} = chef_wm_util:generate_keypair("name", "reqid"),
@@ -32,9 +44,11 @@ init_per_suite(Config) ->
                                             {<<"validator">>, true},
                                             {<<"admin">>, true},
                                             {<<"public_key">>, <<"stub-pub">>}]}),
-    chef_db:create(ClientRecord,
+    io:format("ClientRecord ~p~n", [ClientRecord]),
+    Result = chef_db:create(ClientRecord,
                    #context{reqid = <<"fake-req-id">>},
                    <<"00000000000000000000000000000001">>),
+    io:format("Client Create Result ~p~n", [Result]),
     Config2.
 
 end_per_suite(Config) ->

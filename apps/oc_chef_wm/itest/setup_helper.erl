@@ -13,6 +13,7 @@
         ]).
 
 -define(REQUIRED_APPS, [sasl,
+                        asn1,
                         crypto,
                         stats_hero,
                         pooler,
@@ -26,6 +27,9 @@
                         mochiweb,
                         webmachine,
                         darklaunch,
+                        gen_server2,
+                        eldap,
+                        bcrypt,
                         folsom,
                         chef_objects,
                         rabbit_common,
@@ -37,7 +41,6 @@
                         lager,
                         couchbeam,
                         chef_index,
-                        bcrypt,
                         oc_chef_authz,
                         oc_chef_wm]).
 
@@ -49,6 +52,12 @@ start_server(Config) ->
     DbUser = ?config(db_user, DbConfig),
     DbPass = ?config(db_pass, DbConfig),
 
+    application:set_env(oc_chef_wm, default_orgname, <<"org">>),
+    application:set_env(oc_chef_authz, couchdb_host, "localhost"),
+    application:set_env(oc_chef_authz, couchdb_port, 6984),
+    application:set_env(chef_db, couchdb_host, "localhost"),
+    application:set_env(chef_db, couchdb_port, 6984),
+    
     application:set_env(lager, error_logger_redirect, false),
 
     application:set_env(stats_hero, udp_socket_pool_size, 200),

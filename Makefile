@@ -67,7 +67,7 @@ rel: rel/oc_erchef
 
 devrel: rel
 	@/bin/echo -n Symlinking deps and apps into release
-	@$(foreach dep,$(wildcard deps/*), /bin/echo -n .;rm -rf rel/oc_erchef/lib/$(shell basename $(dep))-* \
+	@$(foreach dep,$(wildcard deps/* apps/*), /bin/echo -n .;rm -rf rel/oc_erchef/lib/$(shell basename $(dep))-* \
 	   && ln -sf $(abspath $(dep)) rel/oc_erchef/lib;)
 	@/bin/echo done.
 	@/bin/echo  Run \'make update\' to pick up changes in a running VM.
@@ -84,8 +84,8 @@ rel/oc_erchef: compile bundle
 	@/bin/echo '                                       |\  '
 	@/bin/echo '                                       |/  '
 
-bundle: deps/chef_objects
-	@cd deps/chef_objects/priv/depselector_rb; bundle install --deployment --path .bundle
+bundle:
+	@cd apps/chef_objects/priv/depselector_rb; rm -rf .bundle; bundle install --deployment --path .bundle
 
 relclean:
 	@rm -rf rel/oc_erchef
