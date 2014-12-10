@@ -1,0 +1,53 @@
+query <- star_star / (expression / space)*;
+
+star_star <- "*:*";
+
+expression <- operation / group / field_phrase / field / field_range / term / string;
+
+term <- keyword valid_letter+ / !keyword valid_letter+;
+
+field <- name:field_name ":" arg:(fuzzy_op / term / group / string);
+
+field_phrase <- name:field_name ':' '"' str:(term (space term)*) '"';
+
+field_range <- field_name ":" (("[" range_entry " TO " range_entry "]") /
+                               ("{" range_entry " TO " range_entry "}"));
+
+field_name <- !keyword valid_letter+;
+
+range_entry <- "*" / valid_letter+;
+
+group <- '(' group:query ')';
+
+operation <- binary_op / unary_op / fuzzy_op / boost_op;
+
+binary_op <- lhs:(group / field_phrase / field  / field_range / term) space? op:bool_op space? rhs:query;
+
+bool_op <- 'AND' / '&&' / 'OR' / '||';
+
+unary_op <- not_op / required_op / prohibited_op;
+
+not_op <- ((op:'NOT' space) / (op:'!' space?)) arg:(group / field / field_range / term / string);
+
+required_op <- !valid_letter op:'+' arg:(term / string);
+
+prohibited_op <- !valid_letter op:'-' arg:(field / field_range / term / string);
+
+boost_op <- arg:(term / string) '^' param:fuzzy_param;
+
+fuzzy_op <- arg:(term / string) '~' param:fuzzy_param?;
+
+fuzzy_param <- [0-9]+ ('.' [0-9])?;
+
+string <- '"' str:(term (space term)*) '"';
+
+keyword <- "AND" / "OR" / "NOT";
+
+
+valid_letter <- start_letter+ ([a-zA-Z0-9*?@_+./-] / '\\' special_char)*;
+
+start_letter <- [a-zA-Z0-9_.*/] / '\\' special_char;
+
+space <- [ \t]+;
+
+special_char <- '[' / ']' / '\\' / [!(){}^"~*?:];
