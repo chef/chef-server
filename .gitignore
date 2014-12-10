@@ -4,3 +4,4 @@ deps
 TAGS
 .rebar
 ebin
+.eunit

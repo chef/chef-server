@@ -37,8 +37,8 @@ setup_env() ->
     ok.
 
 cleanup_env() ->
-    application:unset_env(chef_wm, health_ping_timeout),
-    application:unset_env(chef_wm, health_ping_modules),
+    application:unset_env(oc_chef_wm, health_ping_timeout),
+    application:unset_env(oc_chef_wm, health_ping_modules),
     ok.
 
 check_health_all_ok_test_() ->
