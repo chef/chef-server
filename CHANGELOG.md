@@ -16,6 +16,7 @@
 * Refactored superuser bootstrap process to use new chef-server-bootstrap
   repository instead of opscode-test, which pulled in a variety of now
   deprecated ruby repositories.
+* Update location/name of Chef’s public GPG key.
 
 ### chef-server-bootstrap 1.0.0
 * Repository that replaces opscode-test, allowing us to deprecate several
