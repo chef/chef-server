@@ -17,6 +17,7 @@
   repository instead of opscode-test, which pulled in a variety of now
   deprecated ruby repositories.
 * Update location/name of Chef’s public GPG key.
+* Fetch chef-server-ctl man page directly from chef-docs repo.
 
 ### chef-server-bootstrap 1.0.0
 * Repository that replaces opscode-test, allowing us to deprecate several
