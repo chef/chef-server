@@ -1,0 +1,12 @@
+{application, oc_erchef,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { oc_erchef_app, []}},
+  {env, []}
+ ]}.
