@@ -16,15 +16,17 @@
 #
 
 name "ctl-man"
-default_version "master"
+default_version "7b25fa4de4d6663dafe2cbe853ada29eee67a6a6"
 
 dependency "private-chef-ctl"
 
-source :git => "git@github.com:opscode/chef-docs"
+version "7b25fa4de4d6663dafe2cbe853ada29eee67a6a6" do
+  source md5: "0c64fd470f8dc780858f9c526dc4ee95"
+end
 
-relative_path "chef-docs"
+source url: "https://raw.githubusercontent.com/opscode/chef-docs/#{version}/misc/chef-server-ctl.8"
 
 build do
-  command "mkdir -p #{install_dir}/embedded/man/man8"
-  command "cp misc/chef-server-ctl.8 #{install_dir}/embedded/man/man8"
+  mkdir "#{install_dir}/embedded/man/man8"
+  copy "#{project_dir}/chef-server-ctl.8", "#{install_dir}/embedded/man/man8/"
 end

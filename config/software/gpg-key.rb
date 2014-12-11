@@ -21,15 +21,15 @@
 # cloudfront uses which is where the gpg key is stored. use remote_file to
 # store the key locally so rhel can use it when verifying add ons
 name "gpg-key"
-default_version "1.0.0"
+default_version "1.0.1"
 
-version "1.0.0" do
-  source md5: "c8f49b137b190707a0c5f5702a147155"
+version "1.0.1" do
+  source md5: "369efc3a19b9118cdf51c7e87a34f266"
 end
 
-source url: "https://downloads.getchef.com/chef.gpg.key"
+source url: "https://downloads.chef.io/packages-chef-io-public.key"
 
 build do
   mkdir "#{install_dir}/embedded/keys"
-  copy "#{project_dir}/chef.gpg.key", "#{install_dir}/embedded/keys/chef.gpg.key"
+  copy "#{project_dir}/packages-chef-io-public.key", "#{install_dir}/embedded/keys/packages-chef-io-public.key"
 end
