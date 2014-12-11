@@ -57,7 +57,7 @@ PATH=$PATH:/bin:/sbin
 
 mkdir -p "$tmpdir"
 
-for i in /opt/$path*/version-manifest.txt \
+for i in /opt/{chef,$path}*/version-manifest.txt \
     /opt/$path/pc-version.txt \
     /etc/$path/$config_name \
     /etc/$path/chef-server-running.json \
