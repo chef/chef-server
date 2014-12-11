@@ -1,11 +1,9 @@
 %% THIS FILE IS GENERATED. DO NOT EDIT IT MANUALLY %%
 
-{sub_dirs,["rel","deps","apps","apps/chef_objects",
-           "apps/oc_chef_authz","apps/chef_index","apps/chef_wm",
-           "apps/oc_chef_wm","apps/chef_db","apps/depsolver"]}.
-{lib_dirs,["deps","apps","apps/chef_objects",
-           "apps/oc_chef_authz","apps/chef_index","apps/chef_wm",
-           "apps/oc_chef_wm","apps/chef_db","apps/depsolver"]}.
+{sub_dirs,["rel","apps/chef_index","apps/chef_objects","apps/chef_db",
+           "apps/oc_chef_authz","apps/oc_chef_wm"]}.
+{lib_dirs,["deps","apps","apps/chef_objects","apps/oc_chef_authz",
+           "apps/chef_index","apps/oc_chef_wm","apps/chef_db"]}.
 {deps,[{goldrush,".*",
                  {git,"git://github.com/DeadZen/goldrush.git",
                       "1d883423ac360b3536ca52dc733a0164bacf3109"}},
@@ -24,15 +22,18 @@
        {opscoderl_wm,".*",
                      {git,"git://github.com/opscode/opscoderl_wm.git",
                           "eace4ed5cfa0df3306fa0397f5c0bab2b22fd465"}},
+       {envy,".*",
+             {git,"git://github.com/manderson26/envy.git",
+                  "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
+       {chef_authn,".*",
+                   {git,"git://github.com/opscode/chef_authn.git",
+                        "f92325bbcd18364f3eaa41d4e84dff5919090e85"}},
        {epgsql,".*",
                {git,"git://github.com/opscode/epgsql.git",
                     "6b016ba7bd932919d57770fcca6cf11c285ef268"}},
        {pooler,".*",
                {git,"git://github.com/seth/pooler.git",
                     "7bb8ab83c6f60475e6ef8867d3d5afa0b1dd4013"}},
-       {envy,".*",
-             {git,"git://github.com/manderson26/envy.git",
-                  "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
        {sqerl,".*",
               {git,"git://github.com/opscode/sqerl.git",
                    "6f163f4b6270a0079a924b155f0cc4c52cddd017"}},
@@ -104,7 +105,7 @@
                               "fd40c960c7912193631d948fe962e1162a8d1334"}},
        {erlware_commons,".*",
                         {git,"git://github.com/erlware/erlware_commons.git",
-                             "ae608d26e16a3e5d64dd044862e9c7898cdd6a8c"}},
+                             "02ab88513f9b0a80607170077938218b1457f6be"}},
        {darklaunch,".*",
                    {git,"git@github.com:opscode/opscode-darklaunch-erlang.git",
                         "23dcf1eea0bd699b118ac56a54f662b66c018704"}},
@@ -124,10 +125,7 @@
 {cover_enabled,true}.
 {cover_print_enabled,true}.
 {erl_opts,[{d,'OC_CHEF'},
-           {d,'BASE_RESOURCE',oc_chef_wm_base},
-           {d,'BASE_ROUTES',oc_chef_wm_routes},
            {d,'CHEF_DB_DARKLAUNCH',xdarklaunch_req},
            {d,'CHEF_WM_DARKLAUNCH',xdarklaunch_req},
-           {d,'SEARCH_CACHE',oc_chef_wm_search_cache},
            {parse_transform,lager_transform}]}.
 
