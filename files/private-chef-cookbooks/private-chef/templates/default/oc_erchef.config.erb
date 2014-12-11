@@ -101,15 +101,14 @@
               {actions_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
               {actions_vhost, <<"<%= node['private_chef']['rabbitmq']['actions_vhost'] %>">>},
               {actions_exchange, <<"<%= node['private_chef']['rabbitmq']['actions_exchange'] %>">>},
-              {actions_fqdn, <<"<%= node['private_chef']['lb']['api_fqdn'] %>">>}
-            ]},
-  {chef_wm, [
-             {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},
-             {server_version, "<%= node['private_chef']['version'] %>"},
-             {health_ping_timeout, 400},
-             {health_ping_modules, [oc_chef_authz, chef_sql, chef_solr]},
-             {base_resource_url, <%= @helper.erl_atom_or_string(node['private_chef']['opscode-erchef']['base_resource_url']) %>},
-             {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>}
+              {actions_fqdn, <<"<%= node['private_chef']['lb']['api_fqdn'] %>">>},
+
+              {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},
+              {server_version, "<%= node['private_chef']['version'] %>"},
+              {health_ping_timeout, 400},
+              {health_ping_modules, [oc_chef_authz, chef_sql, chef_solr]},
+              {base_resource_url, <%= @helper.erl_atom_or_string(node['private_chef']['opscode-erchef']['base_resource_url']) %>},
+              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>}
             ]},
   {chef_authn, [
                 {keyring, [{default, "/etc/opscode/webui_pub.pem"}]}
