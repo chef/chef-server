@@ -55,14 +55,19 @@ tags:
 itest_clean:
 	@rm -rf itest/*.beam itest/ct_logs
 
-itest: compile
-        # recompile, setting TEST define so we can play with
-        # unexported functions.
+itest_util: itest_compile
+	@erlc -pa '../*/ebin' -pa '../../deps/*/ebin' -pa ebin -I '..' -I '../../deps' -o itest/ itest/*.erl
+
+itest_compile:
 	@echo "Recompiling with -DTEST ..."
 	@rebar clean skip_deps=true
 	@rebar compile skip_deps=true -DTEST
+
+itest: itest_compile compile
+        # recompile, setting TEST define so we can play with
+        # unexported functions.
 	@rebar skip_deps=true ct
 	@echo "Review results with: open itest/ct_logs/index.html"
 
 
-.PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest
+.PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest itest_util itest_compile
