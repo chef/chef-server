@@ -9,26 +9,26 @@ POSTGRESQL_UNIX_USER=${POSTGRESQL_UNIX_USER:=opscode-pgsql}
 modified_within_last_x_minutes=180
 tail_lines=10000
 
-type='EC'
+type='CS'
 if [[ -n $1 ]];
 then
     type=$1
 fi
 
-if [[ $type == 'EC' ]];
+if [[ $type == 'CS' ]];
 then
     path='opscode'
     ctl_cmd='private-chef-ctl'
-    config_name='chef-server.rb'
-    ha=$(egrep -qs 'topology[[:space:]]+.*ha' /etc/opscode/chef-server.rb)$?
+    config_name='*chef*.rb'
+    ha=$(egrep -qs 'topology[[:space:]]+.*ha' /etc/opscode/*chef*.rb)$?
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then
-	echo "ERROR: Enterprise Chef server may not be installed."
+	echo "ERROR: Enterprise or Chef server may not be installed."
 	exit 1
     fi
 
-    echo "Gathering logs from Enterprise Chef server."
+    echo "Gathering logs from Enterprise or Chef server."
 elif [[ $type == 'OSC' ]];
 then
     path='chef-server'
@@ -43,8 +43,8 @@ then
 
     echo "Gathering logs from Open Source Chef server."
 else
-    echo "Usage: gather-logs [ EC | OSC ]"
-    echo "EC - Enterprise Chef server (default)"
+    echo "Usage: gather-logs [ CS | OSC ]"
+    echo "CS - Enterprise or Chef server (default)"
     echo "OSC - Open Source Chef server"
     exit 1
 fi
@@ -78,7 +78,7 @@ done
 
 $ctl_cmd status > "$tmpdir/$ctl_cmd"_status.txt
 
-if [[ ($type == 'EC') && ($ha == 0) ]]; then
+if [[ ($type == 'CS') && ($ha == 0) ]]; then
     for i in /var/log/$path/keepalived/cluster.log /proc/drbd; do
 	if [[ -e "$i" ]]; then
 	    mkdir -p "$tmpdir/`dirname ${i:1}`"
