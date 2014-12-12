@@ -1,0 +1,6 @@
+.depsolver_plt
+.eunit
+*.beam
+*.app
+*.plt
+deps/*
