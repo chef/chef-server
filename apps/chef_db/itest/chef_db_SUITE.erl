@@ -3,7 +3,7 @@
 -include_lib("common_test/include/ct.hrl").
 
 -compile([export_all]).
- 
+
 all() -> [node_ops, user_ops, client_ops, data_bag_ops, data_bag_item_ops,
           sandbox_ops, cookbook_ops,
           cookbook_version_ops,
@@ -74,7 +74,7 @@ sandbox_ops(_Config) ->
     chef_sql_sandboxes:fetch_sandbox(),
     chef_sql_sandboxes:delete_sandbox().
 
-cookbook_ops(_Config) ->        
+cookbook_ops(_Config) ->
     chef_sql_cookbook_versions:insert_cookbook_data(),
     chef_sql_cookbook_versions:fetch_cookbook_authz().
 
@@ -150,6 +150,10 @@ setup_chef_db(Config) ->
     ok = application:set_env(pooler, pools, [PoolConfig]),
     [ ensure_started(App) || App <- app_list() ],
     %% error_logger:tty(false),
+    ok = application:start(asn1),
+    ok = application:start(public_key),
+    ok = application:start(ssl),
+    ok = application:start(epgsql),
     ok = application:start(sqerl),
     ok.
     %% error_logger:tty(true).

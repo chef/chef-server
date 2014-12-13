@@ -20,14 +20,14 @@ chef_user_record(AzId, Admin) ->
     authz_id = AzId,
     username = AzId,
     email = AzId,
-    public_key =
-    <<"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwxOFcrbsV7bEbqzOvW5u"
-	      "W5lyB23qsenlUdIGyRttqzGEaki01s7X+PpYy4BLfmVVmA6A6FCbL38CzzTUFX1a"
-	      "p6LYQR2Pb1tYjBjZZMUiVnjEgl12Zd1JF8dsPMj2BgPggx5GaGLvCOsajZ0YCDgW"
-	      "WkoO/HAEbztFIx2jdSCyD0ZH0ep4fSGDjmkN+5XurS0dBH8J5qPeJjriA/s/RzUb"
-	      "ULjr3gvfg49onHxr/kTKbhc78GBOfKSH1ftECCoWnidadW7/lfKbAZ3xiSjLsIxS"
-	      "KxavHMeCuSgyReDZpsFOn2Saie26jvLxWrGyn870yIh36wMvCvWKwUQPnluSnstJ"
-	      "xwIDAQAB">>,
+    public_key = <<"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwxOFcrbsV7bEbqzOvW5u"
+	           "W5lyB23qsenlUdIGyRttqzGEaki01s7X+PpYy4BLfmVVmA6A6FCbL38CzzTUFX1a"
+	           "p6LYQR2Pb1tYjBjZZMUiVnjEgl12Zd1JF8dsPMj2BgPggx5GaGLvCOsajZ0YCDgW"
+	           "WkoO/HAEbztFIx2jdSCyD0ZH0ep4fSGDjmkN+5XurS0dBH8J5qPeJjriA/s/RzUb"
+	           "ULjr3gvfg49onHxr/kTKbhc78GBOfKSH1ftECCoWnidadW7/lfKbAZ3xiSjLsIxS"
+	           "KxavHMeCuSgyReDZpsFOn2Saie26jvLxWrGyn870yIh36wMvCvWKwUQPnluSnstJ"
+	           "xwIDAQAB">>,
+    pubkey_version = 1,
     hashed_password = <<"secretHaxorz">>,
     salt = <<"kosher">>,
     hash_type = <<"bcrypt">>,
@@ -36,7 +36,8 @@ chef_user_record(AzId, Admin) ->
     updated_at = {datetime, {{2011,10,1},{16,47,46}}},
     external_authentication_uid = <<"an open id of some kind">>,
     recovery_authentication_enabled = false,
-    admin = Admin
+    admin = Admin,
+    serialized_object = {}
   }.
 
 %%%======================================================================
