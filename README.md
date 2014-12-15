@@ -60,3 +60,39 @@ Note that you can perform the above steps on a feature branch of this
 repo and push that through CI for testing or pull it into an
 opscode-omnibus build locally (you will need to push your feature
 branch).
+
+Development
+-----------
+
+#### Dependencies
+
+The following should be installed on the development system and in your path.
+
++ erlang   R16B03-1
++ rebar    2.2.0
++ gecode   3.7
++ ruby     1.9.3
++ bundler  1.7.6
++ postgres 9.3.5
++ pg_ctl   9.3.5
+
+If you haven't done so already, make sure you have initialized PostgreSQL on your machine with `initdb`:
+
+`<path_to_postgres_executable> initdb`
+
+#### Compiling
+
+```
+make
+make bundle # this installs dep_selector
+```
+
+#### Running Tests
+
+##### Running itests
+
+`rebar skip_deps=true ct`
+
+##### Running eunit tests
+
+`rebar skip_deps=true eunit`
