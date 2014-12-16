@@ -76,10 +76,6 @@ The following should be installed on the development system and in your path.
 + postgres 9.3.5
 + pg_ctl   9.3.5
 
-If you haven't done so already, make sure you have initialized PostgreSQL on your machine with `initdb`:
-
-`<path_to_postgres_executable> initdb`
-
 #### Compiling
 
 ```
@@ -89,10 +85,14 @@ make bundle # this installs dep_selector
 
 #### Running Tests
 
-##### Running itests
+##### Running Intergration Tests
 
 `rebar skip_deps=true ct`
 
-##### Running eunit tests
+You can see the output of test results by open the itest index files in your browser for the `oc_chef_authz`, `chef_db`, and `oc_chef_wm` apps:
+
+`<path_to_repo>/apps/<app_to_view>/itest/ct_logs/index.html`
+
+##### Running Unit Tests
 
 `rebar skip_deps=true eunit`
