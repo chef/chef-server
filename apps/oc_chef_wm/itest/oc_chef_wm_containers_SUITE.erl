@@ -6,8 +6,8 @@
 -module(oc_chef_wm_containers_SUITE).
 
 -include_lib("common_test/include/ct.hrl").
--include("../../include/chef_types.hrl").
--include("../../include/oc_chef_types.hrl").
+-include("../../../include/chef_types.hrl").
+-include("../../../include/oc_chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -record(context, {reqid :: binary(),
@@ -16,7 +16,6 @@
 
 -compile([export_all, {parse_transform, lager_transform}]).
 
--define(ORG_ID, <<"00000000000000000000000000000000">>).
 -define(ORG_AUTHZ_ID, <<"10000000000000000000000000000000">>).
 -define(AUTHZ_ID, <<"00000000000000000000000000000001">>).
 -define(CLIENT_NAME, <<"test-client">>).
@@ -25,20 +24,27 @@ init_per_suite(Config) ->
     Config2 = setup_helper:start_server(Config),
 
     OrganizationRecord = chef_object:new_record(oc_chef_organization,
-                                                ?ORG_ID,
+                                                nil,
                                                 ?ORG_AUTHZ_ID,
                                                 {[{<<"name">>, <<"org">>},
-                                                  {<<"full_name">>, <<"org">>},
-                                                  {<<"guid">>, <<"d540a2e7743112c732e4bb91ecc1df02">>}]}),
+                                                  {<<"full_name">>, <<"org">>}]}),
     Result2 = chef_db:create(OrganizationRecord,
                    #context{reqid = <<"fake-req-id">>},
                    <<"00000000000000000000000000000001">>),
     io:format("Organization Create Result ~p~n", [Result2]),
 
+    % get the OrgId from the database that was generated during Org object creation
+    % so we can associate the client with the org.
+    {ok, OrgObject} = chef_sql:fetch_object(chef_object:fields_for_fetch(OrganizationRecord),
+                                element(1, OrganizationRecord),
+                                chef_object:find_query(OrganizationRecord),
+                                chef_object:record_fields(OrganizationRecord)
+                               ),
+    OrgId = OrgObject#oc_chef_organization.id,
+
     %% create the test client
-    %% {Pubkey, _PrivKey} = chef_wm_util:generate_keypair("name", "reqid"),
     ClientRecord = chef_object:new_record(chef_client,
-                                          ?ORG_ID,
+                                          OrgId,
                                           ?AUTHZ_ID,
                                           {[{<<"name">>, ?CLIENT_NAME},
                                             {<<"validator">>, true},
@@ -48,6 +54,7 @@ init_per_suite(Config) ->
     Result = chef_db:create(ClientRecord,
                    #context{reqid = <<"fake-req-id">>},
                    <<"00000000000000000000000000000001">>),
+
     io:format("Client Create Result ~p~n", [Result]),
     Config2.
 
@@ -131,7 +138,6 @@ update_container(_) ->
     UpdateJson = {[{<<"containername">>, <<"bar">>},
                    {<<"containerpath">>, <<"foo">>},
                    {<<"extra-data">>, <<"ignored">>}]},
-
     ?assertMatch({ok, "405", _, _}, http_update_container("foo", UpdateJson)),
     ok.
 
@@ -152,7 +158,8 @@ http_create_container(Name) ->
                      [{"x-ops-userid", "test-client"},
                       {"accept", "application/json"},
                       {"content-type", "application/json"}
-                     ],post, ejson:encode({[{<<"containername">>, list_to_binary(Name)}]})).
+                     ],post, ejson:encode({[{<<"containername">>, list_to_binary(Name)}]})
+                    ).
 
 http_delete_container(Name) ->
     ibrowse:send_req("http://localhost:8000/organizations/org/containers/" ++ Name,
