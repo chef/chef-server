@@ -1,5 +1,10 @@
 # Chef Server Changelog
 
+## 12.0.2 (unreleased)
+
+### opscode-chef-mover 2.2.19
+* Updated mover to pull in oc_erchef since some dependencies where moved there.
+
 ## 12.0.1 (2014-12-17)
 
 ### oc-id
