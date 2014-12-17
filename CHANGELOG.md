@@ -1,6 +1,6 @@
 # Chef Server Changelog
 
-## 12.0.1 (unreleased)
+## 12.0.1 (2014-12-17)
 
 ### oc-id
 * Update to version 0.4.4 to patch a doorkeeper CSRF vulnerability
