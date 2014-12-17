@@ -2,6 +2,9 @@
 
 ## 12.0.1 (unreleased)
 
+### oc-id
+* Update to version 0.4.4 to patch a doorkeeper CSRF vulnerability
+
 ### chef-mover
 * update to version 2.2.17, with better failure case handling and
   increased timeouts.
