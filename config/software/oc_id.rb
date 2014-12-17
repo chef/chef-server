@@ -1,5 +1,5 @@
 name "oc_id"
-default_version "0.3.3"
+default_version "0.4.4"
 
 dependency "postgresql92" # for libpq
 dependency "nodejs"
