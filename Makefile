@@ -51,14 +51,12 @@ munge_apps:
 	@mkdir -p rel/apps/mover
 	@ln -sf `pwd`/ebin rel/apps/mover
 	@ln -sf `pwd`/priv rel/apps/mover
-	@cp rebar.config rel
-	@echo '{deps_dir, ["../deps"]}.' >> rel/rebar.config
 endif
 
 generate: munge_apps
 	@/bin/echo 'building OTP release package for mover'
 	@/bin/echo "using rebar as: $(REBAR)"
-	@cd rel;$(REBAR) generate
+	@$(REBAR) skip_deps=true generate
 	@rm -rf rel/apps rel/rebar.config
 	@echo '   \ \  / /      / __ \    ) )  ( (   / ___/  (   __ \   '
 	@echo '   () \/ ()     / /  \ \  ( (    ) ) ( (__     ) (__) )  '
