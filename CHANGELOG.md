@@ -10,6 +10,9 @@
 ### private-chef-cookbooks
 * Fixed the default value for Postgres effective_cache_size
 
+### oc-id
+* Bumps oc-id to 0.4.4 from 0.3.3 to address a doorkeeper CSRF
+
 ## 11.2.5 (2013-11-03)
 
 ### oc_erchef
