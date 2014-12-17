@@ -1,6 +1,11 @@
 oc-id Changelog
 ===============
 
+## 0.4.4 (2014-12-17)
+
+* Update Doorkeeper to 1.4.1
+* Update Rails to 4.1.8 (CVE-2014-7829)
+
 ## 0.4.3 (2014-12-02)
 
 * Update default domain name
