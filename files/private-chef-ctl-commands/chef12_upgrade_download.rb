@@ -50,7 +50,7 @@ add_command_under_category "chef12-upgrade-download", "open-source-upgrade", "Do
         end
       end
 
-      opts.on("-d", "--download-only", "Do not start or stop any servers.  Instead just download the data and create the key file.  Requires Chef 11 to be running.") do |download_only|
+      opts.on("-D", "--download-only", "Do not start or stop any servers.  Instead just download the data and create the key file.  Requires Chef 11 to be running.") do |download_only|
         if download_only
           @options.skip_setup = true
           @options.skip_cleanup = true
