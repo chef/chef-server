@@ -14,9 +14,6 @@ before_script:
 addons:
   postgresql: "9.3"
 script:
-  - ssh-keygen -f id_rsa -t rsa -N ''
-  - eval "$(ssh-agent -s)"
-  - ssh-add id_rsa
   - sudo chmod 777 /var/run/postgresql/
   - make
   - make bundle
