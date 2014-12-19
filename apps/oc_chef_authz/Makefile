@@ -1,6 +1,6 @@
 DEPS = $(CURDIR)/deps
 
-EC_SCHEMA_VERSION = tc/kill-at-git #2.4.0
+EC_SCHEMA_VERSION = 2.4.1
 DIALYZER_OPTS = -Wunderspecs
 ITEST_DEPS = $(CURDIR)/itest/common/deps
 # List dependencies that should be included in a cached dialyzer PLT file.
