@@ -85,7 +85,7 @@ make bundle # this installs dep_selector
 
 #### Running Tests
 
-##### Running Intergration Tests
+##### Running Integration Tests
 
 `rebar skip_deps=true ct`
 
