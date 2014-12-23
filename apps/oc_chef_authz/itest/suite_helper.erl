@@ -48,13 +48,13 @@ statements(pgsql) ->
    ChefDbStatements = chef_sql:statements(),
    AuthzDbStatements = oc_chef_authz_db:statements(pgsql),
     ChefDbStatements ++ AuthzDbStatements.
-    
+
 
 set_env(App, AppConfig) ->
     [ application:set_env(App, Key, Value) || {Key, Value} <- AppConfig ].
 
 needed_apps() ->
-    [ibrowse, pooler, stats_hero, crypto, public_key, ssl, epgsql, sqerl, oc_chef_authz].
+    [ibrowse, pooler, stats_hero, asn1, crypto, public_key, ssl, epgsql, sqerl, oc_chef_authz].
 
 stop(Config) ->
     [ application:stop(A) || A <- lists:reverse(needed_apps()) ],

@@ -1,5 +1,6 @@
 DEPS = $(CURDIR)/deps
 
+EC_SCHEMA_VERSION = 2.4.1
 DIALYZER_OPTS = -Wunderspecs
 ITEST_DEPS = $(CURDIR)/itest/common/deps
 # List dependencies that should be included in a cached dialyzer PLT file.
@@ -88,18 +89,23 @@ $(ITEST_DEPS):
 	mkdir -p $(ITEST_DEPS)
 
 $(ITEST_DEPS)/enterprise-chef-server-schema: $(ITEST_DEPS)
-	cd $(ITEST_DEPS); git clone git@github.com:opscode/enterprise-chef-server-schema.git; cd enterprise-chef-server-schema; git checkout $(EC_SCHEMA_VERSION); $(MAKE) install
+	cd $(ITEST_DEPS); git clone https://github.com/opscode/enterprise-chef-server-schema; cd enterprise-chef-server-schema; git checkout $(EC_SCHEMA_VERSION); $(MAKE) install
 
 
 itest_deps: $(ITEST_DEPS)/enterprise-chef-server-schema
 
-itest: clean itest_deps
+itest_util: itest_compile
+	@erlc -pa '../*/ebin' -pa '../../deps/*/ebin' -pa ebin -I '..' -I '../../deps' -o itest/ itest/*.erl
+
+itest_compile: clean itest_deps
         # recompile, setting TEST define so we can play with
         # unexported functions.
 	@echo "Recompiling with -DTEST ..."
 	@rebar compile -DTEST
 	@mkdir -p itest/ct_logs
+
+itest: itest_compile
 	@ct_run -spec itest/spec.spec -pa deps/*/ebin -pa ebin
 	@echo "Review results with: open itest/ct_logs/index.html"
 
-.PHONY: all compile eunit test dialyzer clean allclean distclean doc ct
+.PHONY: all compile eunit test dialyzer clean allclean distclean doc ct itest_util itest_deps itest_compile itest

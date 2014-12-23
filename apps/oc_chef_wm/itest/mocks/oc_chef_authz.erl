@@ -5,7 +5,7 @@
 
 -module(oc_chef_authz).
 
--include("oc_chef_authz/include/oc_chef_authz.hrl").
+-include("../../../../include/oc_chef_authz.hrl").
 
 -export([
          create_entity_if_authorized/4,

@@ -60,3 +60,39 @@ Note that you can perform the above steps on a feature branch of this
 repo and push that through CI for testing or pull it into an
 opscode-omnibus build locally (you will need to push your feature
 branch).
+
+Development
+-----------
+
+#### Dependencies
+
+The following should be installed on the development system and in your path.
+
++ erlang   R16B03-1
++ rebar    2.2.0
++ gecode   3.7
++ ruby     1.9.3
++ bundler  1.7.6
++ postgres 9.3.5
++ pg_ctl   9.3.5
+
+#### Compiling
+
+```
+make
+make bundle # this installs dep_selector
+```
+
+#### Running Tests
+
+##### Running Integration Tests
+
+`rebar skip_deps=true ct`
+
+You can see the output of test results by open the itest index files in your browser for the `oc_chef_authz`, `chef_db`, and `oc_chef_wm` apps:
+
+`<path_to_repo>/apps/<app_to_view>/itest/ct_logs/index.html`
+
+##### Running Unit Tests
+
+`rebar skip_deps=true eunit`

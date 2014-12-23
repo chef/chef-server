@@ -57,15 +57,16 @@ start_server(Config) ->
     application:set_env(oc_chef_authz, couchdb_port, 6984),
     application:set_env(chef_db, couchdb_host, "localhost"),
     application:set_env(chef_db, couchdb_port, 6984),
-    
+
     application:set_env(lager, error_logger_redirect, false),
 
     application:set_env(stats_hero, udp_socket_pool_size, 200),
     application:set_env(stats_hero, estatsd_host, "127.0.0.1"),
     application:set_env(stats_hero, estatsd_port, 9466),
 
-    application:set_env(oc_chef_wm, api_version, "11.0.0"),
-    application:set_env(oc_chef_wm, server_flavor, "ec"),
+    % TODO: we should automate setting these, if it matters at all
+    application:set_env(oc_chef_wm, api_version, "12.0.0"),
+    application:set_env(oc_chef_wm, server_flavor, "cs"),
     application:set_env(oc_chef_wm, ip, "127.0.0.1"),
     application:set_env(oc_chef_wm, port, 8000),
     application:set_env(oc_chef_wm, reqid_header_name, "X-Request-Id"),
@@ -96,11 +97,8 @@ start_server(Config) ->
                         [[{name, sqerl},
                           {max_count, 1},
                           {init_count, 1},
-                          {start_mfa, {sqerl_client, start_link, []}}],
-                         [{name, chef_depsolver},
-                          {max_count, 5},
-                          {init_count, 5},
-                          {start_mfa, {chef_depsolver_worker, start_link, []}}]]),
+                          {start_mfa, {sqerl_client, start_link, []}}]]
+                       ),
 
     PrivDir = ?config(priv_dir, Config),
     application:set_env(webmachine, log_handlers,

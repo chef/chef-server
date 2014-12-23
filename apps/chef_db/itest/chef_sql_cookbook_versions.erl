@@ -82,7 +82,7 @@ insert_cbv_no_id() ->
       updated_at= {datetime, {{2011,10,1},{16,47,46}}},
       serialized_object= <<"">>,
       checksums = [] },
-    ?assertError({undefined_in_record, CookbookVersion},
+      ?assertError({undefined_in_record, CookbookVersion},
                  chef_sql:create_cookbook_version(CookbookVersion)).
 
 insert_cbv_with_unknown_checksums() ->

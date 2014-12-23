@@ -1,0 +1,22 @@
+branches:
+  only:
+    - master
+cache:
+  bundler: true
+language: erlang
+otp_release:
+  - R16B03-1
+before_script:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y cpanminus perl libgecode-dev libdbd-pg-perl build-essential
+  - sudo cpanm --quiet --notest App::Sqitch
+  - export USE_SYSTEM_GECODE=1
+addons:
+  postgresql: "9.3"
+script:
+  - sudo chmod 777 /var/run/postgresql/
+  - make
+  - make bundle
+  - ./rebar skip_deps=true ct
+  - ./rebar skip_deps=true eunit
+

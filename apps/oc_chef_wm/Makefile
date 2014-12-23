@@ -21,7 +21,7 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
 # ec_gb_trees.erl:72: Polymorphic opaque types not supported yet
 # :'(
 DEPS_PLT = oc_chef_wm.plt
-EC_SCHEMA_VERSION = 2.4.0
+EC_SCHEMA_VERSION = 2.4.1
 
 REBAR = REBAR_PARENT=$(CURDIR)/rebar.config rebar
 
@@ -57,7 +57,7 @@ $(ITEST_DEPS):
 	mkdir -p $(ITEST_DEPS)
 
 $(ITEST_DEPS)/enterprise-chef-server-schema: $(ITEST_DEPS)
-	cd $(ITEST_DEPS); git clone git@github.com:opscode/enterprise-chef-server-schema.git; cd enterprise-chef-server-schema; git checkout $(EC_SCHEMA_VERSION); make install
+	cd $(ITEST_DEPS); git clone https://github.com/opscode/enterprise-chef-server-schema; cd enterprise-chef-server-schema; git checkout $(EC_SCHEMA_VERSION); make install
 
 itest_mocks:
 	@erlc -pa '../*/ebin' -pa '../../deps/*/ebin' -pa ebin -I '..' -I '../../deps' -o itest/mocks/ itest/mocks/*.erl

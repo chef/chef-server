@@ -17,7 +17,7 @@ init_pg_db(Dir, DbName, Schema, Port) ->
             ["initdb -D", PgData],
             ["pg_ctl -D", PgData, "-l", PgLog, "-o \"-p", PortStr, "\" start"],
             %% db start is async, sleep! :(
-            ["sleep 1 && createdb -p", PortStr, DbName],
+            ["sleep 5 && createdb -p", PortStr, DbName],
             ["psql -p", PortStr, DbName, "<", Schema]
            ],
     error_logger:info_msg("init_pg_db:~n~s~n", [run_cmds(CMDS)]),
