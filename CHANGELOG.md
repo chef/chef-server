@@ -2,6 +2,9 @@
 
 ## 12.0.2 (unreleased)
 
+### opscode-omnibus
+* Added key management and rotation commands add-client-key, add-user-key, delete-user-key, delete-client-key, list-client-keys, and list-user-keys.
+
 ### oc\_erchef 1.0.1
 * Pulled repos `chef_db`, `chef_index`, `chef_objects`, `depsolver`, `oc_chef_authz`, and `oc_chef_wm` into apps in `oc_erchef`.
 * Pulled `chef_wm` into `oc_chef_wm`.

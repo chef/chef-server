@@ -19,6 +19,7 @@ name "private-chef-ctl"
 source path: "#{project.files_path}/private-chef-ctl-commands"
 
 dependency "highline-gem"
+dependency "sequel-gem"
 dependency "omnibus-ctl"
 
 build do
