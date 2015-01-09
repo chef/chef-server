@@ -13,13 +13,15 @@ the process, how to become a maintainer, lieutenant, or the project lead.
 
 # Core Components
 
-The core chef REST API server.
+The core chef REST API server, packaging/installation,  and its primary dependencies.
 
 * [opscode-omnibus](http://github.com/opscode/opscode-omnibus): Configuration for the Chef Server installation, and the [Omnibus](http://github.com/opscode/omnibus) project definition for building it.
 * [oc_erchef](http://github.com/opscode/oc_erchef), the Erlang Chef REST API server
 * [oc-chef-pedant](http://github.com/opscode/oc-chef-pedant), Chef Server tests specific to formerly closed-source features such as multi-tenancy and RBAC.
 * [chef-pedant](http://github.com/opscode/chef-pedant), the base test suite and testing tools for Chef Server
 * [oc_bifrost](http://github.com/opscode/oc_bifrost), the authorization service
+* [bookshelf](http://github.com/opscode/bookshelf) is an S3 Compatible engine for storing cookbook data.
+* [chef-mover](http://github.com/opscode/chef-mover) is the data migration orchestrator used in upgrades
 
 ### Lieutenants
 
@@ -27,24 +29,7 @@ The core chef REST API server.
 
 ### Maintainers
 
-
 # Supporting Components
-
-## Bookshelf
-
-[bookshelf](http://github.com/opscode/bookshelf) is an S3 Compatible engine for storing cookbook data.
-
-### Lieutenants
-
-### Maintainers
-
-## Chef Mover
-
-[chef-mover](http://github.com/opscode/chef-mover) is the data migration orchestrator used in upgrades
-
-### Lieutenants
-
-### Maintainers
 
 ## Knife EC Backup
 
@@ -61,5 +46,3 @@ The core chef REST API server.
 ### Lieutenants
 
 ### Maintainers
-
-
