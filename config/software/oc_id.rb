@@ -15,7 +15,7 @@
 #
 
 name "oc_id"
-default_version "0.4.4"
+default_version "master"
 
 source git: "git@github.com:opscode/oc-id"
 

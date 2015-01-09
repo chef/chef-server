@@ -15,7 +15,7 @@
 #
 
 name "opscode-expander"
-default_version "pc-rel-1.0.0.1"
+default_version "master"
 
 source git: "git@github.com:opscode/opscode-expander"
 
