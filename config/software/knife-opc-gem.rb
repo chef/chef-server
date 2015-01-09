@@ -15,7 +15,7 @@
 #
 
 name "knife-opc"
-default_version "master"
+default_version "0.2.1"
 
 source git: "git://github.com/opscode/knife-opc.git"
 

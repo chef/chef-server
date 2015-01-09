@@ -15,7 +15,7 @@
 #
 
 name "bookshelf"
-default_version "master"
+default_version "1.1.4"
 
 source git: "git://github.com/opscode/bookshelf.git"
 

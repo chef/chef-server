@@ -15,7 +15,7 @@
 #
 
 name "opscode-chef-mover"
-default_version "master"
+default_version "2.2.19"
 
 source git: "git@github.com:opscode/chef-mover"
 
