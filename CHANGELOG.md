@@ -2,16 +2,20 @@
 
 ## 12.0.2 (unreleased)
 
-### oc_erchef 1.0.1
-* Pulled repos chef_db, chef_index, chef_objects, depsolver, oc_chef_authz, and oc_chef_wm into apps in oc_erchef.
-* Pulled chef_wm into oc_chef_wm.
+### enterprise-chef-server-schema 2.4.1
+* Use HTTPS instead of GIT to pull down dependencies in Makefile.
+
+### oc\_erchef 1.0.1
+* Pulled repos `chef_db`, `chef_index`, `chef_objects`, depsolver, `oc_chef_authz`, and `oc_chef_wm` into apps in `oc_erchef`.
+* Pulled `chef_wm` into `oc_chef_wm`.
 * Updated integration tests, and got integration and unit tests running in Travis CI.
 
 ### opscode-chef-mover 2.2.19
-* Updated mover to pull in oc_erchef since some dependencies where moved there.
+* Updated mover to pull in `oc_erchef` since some dependencies where moved there.
 
-### enterprise-chef-server-schema 2.4.1
-* Use HTTPS instead of GIT to pull down dependencies in Makefile.
+### opscode-omnibus
+* update software definitions to float git-based components owned by
+  Chef on master, instead of pinning to specific versions.
 
 ## 12.0.1 (2014-12-17)
 
