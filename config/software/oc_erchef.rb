@@ -34,6 +34,6 @@ build do
   make "distclean", env: env
   make "rel", env: env
 
-  sync "#{project_dir}/rel/oc_erchef/", "#{install_dir}/embedded/service/opscode-erchef/"
+  sync "#{project_dir}/rel/oc_erchef/", "#{install_dir}/embedded/service/opscode-erchef/", exclude: ['**/.git', '**/.gitignore']
   delete "#{install_dir}/embedded/service/opscode-erchef/log"
 end
