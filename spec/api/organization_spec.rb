@@ -68,7 +68,7 @@ describe "/organizations", :organizations do
         parsed_response["guid"].should have(32).characters
       end
 
-      pending("erlang will not return the assigned_at field", :if => !ruby?) do
+      skip("erlang will not return the assigned_at field", :if => !ruby?) do
         it "should return a valid assigned_at field of the format YYYY/MM/DD HH:MM:SS [+-]TTTT" do
           parsed_response = JSON.parse(get(request_url, requestor))
           parts = parsed_response["assigned_at"].split
@@ -222,14 +222,14 @@ describe "/organizations", :organizations do
       end
 
       it "'name' is missing" do
-        pending("Ruby does not fail in this case", :if => ruby?) do
+        skip("Ruby does not fail in this case", :if => ruby?) do
           put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_name ).should look_like(
             :status => 400
           )
         end
       end
       it "'full_name' is missing" do
-        pending("Ruby does not fail in this case", :if => ruby?) do
+        skip("Ruby does not fail in this case", :if => ruby?) do
           put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_full_name ).should look_like(
             :status => 400
           )

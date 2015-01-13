@@ -342,7 +342,7 @@ describe "opscode-account groups", :groups do
           let(:new_group) { "グループ" }
 
           it "can create group" do
-            pending "returns 400", :validation do
+            skip "returns 400", :validation do
               post(request_url, platform.admin_user,
                 :payload => request_body).should look_like({
                   :status => 201,
@@ -646,7 +646,7 @@ describe "opscode-account groups", :groups do
             }}
 
           it "can update group" do
-            pending "pending discussion" do
+            skip "pending discussion" do
               # Created this test to check for this, but it has been decided to
               # table this for now; it's uncertain under what conditions we
               # would prevent users from removing themselves (or perhaps the
@@ -702,7 +702,7 @@ describe "opscode-account groups", :groups do
             }}
 
           it "can update group" do
-            pending "pending discussion" do
+            skip "pending discussion" do
               # Created this test to check for this, but it has been decided to
               # table this for now; it's uncertain under what conditions we
               # would prevent users from removing themselves (or perhaps the
@@ -1038,7 +1038,7 @@ describe "opscode-account groups", :groups do
             }}
 
           it "returns 400", :validation do
-            pending "returns 500 instead" do
+            skip "returns 500 instead" do
               put(request_url, platform.admin_user,
                 :payload => new_group_payload).should look_like({
                   :status => 400
@@ -1060,7 +1060,7 @@ describe "opscode-account groups", :groups do
             }}
 
           it "returns 400", :validation do
-            pending "returns 500 instead" do
+            skip "returns 500 instead" do
               put(request_url, platform.admin_user,
                 :payload => new_group_payload).should look_like({
                   :status => 400
@@ -1082,7 +1082,7 @@ describe "opscode-account groups", :groups do
             }}
 
           it "returns 400", :validation do
-            pending "returns 500 instead" do
+            skip "returns 500 instead" do
               put(request_url, platform.admin_user,
                 :payload => new_group_payload).should look_like({
                   :status => 400
@@ -1137,7 +1137,7 @@ describe "opscode-account groups", :groups do
             }}
 
           it "returns 400", :validation do
-            pending "returns 200(!) instead (but it doesn't actually change anything)" do
+            skip "returns 200(!) instead (but it doesn't actually change anything)" do
               put(request_url, platform.admin_user,
                 :payload => new_group_payload).should look_like({
                   :status => 400
