@@ -16,10 +16,6 @@ Following is a list of key components of Chef Server. This is not yet an exhaust
 
 * [opscode-omnibus](http://github.com/opscode/opscode-omnibus): Configuration for the Chef Server installation, nd the [Omnibus](http://github.com/opscode/omnibus) project definition for building it. 
 * [oc_erchef](http://github.com/opscode/oc_erchef), the top-level project that is used to build the Erlang Chef REST API Server. This project has pulls in additional Erlang dependencies. Most commonly modified among these are:
-  * [oc_chef_wm](http://github.com/opscode/oc_chef_wm) - declaration of webmachine resources to support the REST API.
-  * [chef_objects](https://github.com/opscode/chef_objects) - core library of Chef Data types
-  * [oc_chef_authz](http://github.com/opscode/oc_chef_authz) - interface layer for oc_bifrost, as well as containing object definitions of many components that were formerly part of the closed-source Enterprise Chef product. 
-  * [chef_db](http://github.com/opscode/chef_db) - data access layer/mapping for Chef Server 
 * [oc-chef-pedant](http://github.com/opscode/oc-chef-pedant), Chef Server tests specific to formerly closed-source features such as multi-tenancy and RBAC. 
 
 ### Less-Commonly-Modified Components
