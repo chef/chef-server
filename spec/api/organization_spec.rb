@@ -65,7 +65,7 @@ describe "/organizations", :organizations do
 
       it "should return a organization object that contains a valid guid" do
         parsed_response = JSON.parse(get(request_url, requestor))
-        parsed_response["guid"].should have(32).characters
+        parsed_response["guid"].size.should == 32
       end
 
       skip("erlang will not return the assigned_at field", :if => !ruby?) do
