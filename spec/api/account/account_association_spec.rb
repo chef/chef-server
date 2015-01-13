@@ -217,11 +217,11 @@ describe "opscode-account user association", :association do
           json = JSON.parse(result)
           json.length.should == 1
           org = json[0]["organization"]
-          expect(org.nil?).to be_false
+          expect(org.nil?).to be(false)
           expect(org["name"]).to eq(platform.test_org.name)
           expect(org["full_name"]).to eq(platform.test_org.name)
-          expect(org["guid"].nil?).to be_false
-          expect(org["guid"].empty?).to be_false
+          expect(org["guid"].nil?).to be(false)
+          expect(org["guid"].empty?).to be(false)
         end
       end
     end
