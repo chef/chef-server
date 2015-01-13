@@ -1,10 +1,18 @@
 #!/bin/bash
 # vim: sw=2 sts=2 et ts=8:
 LOGNAME=/var/log/opscode/keepalived/cluster.log
+
 function log_me
 {
   echo $1
   echo "$(date -R): ${1}" >> $LOGNAME
+}
+
+function error_exit
+{
+  log_me "$1"
+  echo "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2
+  exit 1
 }
 
 # 10 * SVWAIT
