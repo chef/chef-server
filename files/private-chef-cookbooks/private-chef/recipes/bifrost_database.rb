@@ -44,6 +44,9 @@ execute "bifrost_schema" do
            deploy --verify
   EOM
   user node['private_chef']['postgresql']['username']
+  # Clear PERL5LIB to ensure sqitch only uses omnibus's perl
+  # installation
+  environment "PERL5LIB" => ""
   # If sqitch is deploying the first time, it'll return 0 on
   # success.  If it's running a second time and ends up deploying
   # nothing (since we've already deployed all changesets), it'll
