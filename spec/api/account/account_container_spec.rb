@@ -225,7 +225,7 @@ describe "opscode-account containers", :containers do
             # still seems wrong -- no matter what the permissions are, this should
             # still be a 409
             if ruby?
-              pending "returns 403 instead" do
+              skip "returns 403 instead" do
                 post(request_url, platform.admin_user,
                   :payload => request_body).should look_like({
                     :status => 409
@@ -378,7 +378,7 @@ describe "opscode-account containers", :containers do
           let(:new_container) { "グループ" }
 
           it "can create container" do
-            pending "returns 400", :validation do
+            skip "returns 400", :validation do
               post(request_url, platform.admin_user,
                 :payload => request_body).should look_like({
                   :status => 201,

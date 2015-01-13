@@ -241,7 +241,7 @@ describe "users", :users do
           end
 
           it "returns 201 when password is not provided" do
-            pending("work in flight on users endpoint - ruby incompat", :if => ruby?) do
+            skip("work in flight on users endpoint - ruby incompat", :if => ruby?) do
               post(request_url, platform.superuser, :payload => request_body).should look_like({
                      :status => 201
                    })
@@ -328,7 +328,7 @@ describe "users", :users do
           end
 
           it "returns 201" do
-            pending("work in flight on users endpoint - ruby incompat", :if => ruby?) do
+            skip("work in flight on users endpoint - ruby incompat", :if => ruby?) do
               post(request_url, platform.superuser,
                    :payload => request_body).should look_like({
                      :status => 201
@@ -663,7 +663,7 @@ describe "users", :users do
     end # context GET /users/<name>
 
     context "PUT /users/<name> when user created w/ external auth enabled" do
-      pending("work in flight on users endpoint - ruby incompat", :if => ruby?) do
+      skip("work in flight on users endpoint - ruby incompat", :if => ruby?) do
         let(:username) { "test-#{Process.pid}" }
         let(:request_body) do
           {
@@ -1069,7 +1069,7 @@ EOF
             }
           end
           it "returns 200" do
-            pending("ruby returns 400 - pended", :if => ruby?) do
+            skip("ruby returns 400 - pended", :if => ruby?) do
               put(request_url, platform.superuser,
                 :payload => request_body).should look_like({
                   :status => 200
@@ -1292,7 +1292,7 @@ EOF
           end
 
           it "accepts the public key and subsequently responds with it" do
-            pending("Pending in ruby", :if => ruby?) do
+            skip("Pending in ruby", :if => ruby?) do
               put_response = put(request_url, platform.superuser, :payload => request_body)
               put_response.should look_like({
                                               :status => 200,
@@ -1467,7 +1467,7 @@ EOF
           end
 
           it "returns 400", :validation do
-            pending("ruby returns 200", :if => ruby?)
+            skip("ruby returns 200", :if => ruby?)
             response = put(request_url, platform.superuser, :payload => request_body)
             response.should look_like({
                                         :status => 400,
@@ -1634,7 +1634,7 @@ EOF
           end
 
           it "returns 409" do
-            pending("actually returns 403", :if => ruby?) do
+            skip("actually returns 403", :if => ruby?) do
               put(request_url, platform.superuser,
                 :payload => request_body).should look_like({
                   :status => 409

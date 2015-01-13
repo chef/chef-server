@@ -261,7 +261,7 @@ describe "opscode-account endpoint", :clients => true do
             }})
       end
 
-      pending "a new validator should have read / create permissions on clients container"
+      skip "a new validator should have read / create permissions on clients container"
 
     end
   end

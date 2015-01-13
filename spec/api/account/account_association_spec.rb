@@ -217,11 +217,11 @@ describe "opscode-account user association", :association do
           json = JSON.parse(result)
           json.length.should == 1
           org = json[0]["organization"]
-          expect(org.nil?).to be_false
+          expect(org.nil?).to be(false)
           expect(org["name"]).to eq(platform.test_org.name)
           expect(org["full_name"]).to eq(platform.test_org.name)
-          expect(org["guid"].nil?).to be_false
-          expect(org["guid"].empty?).to be_false
+          expect(org["guid"].nil?).to be(false)
+          expect(org["guid"].empty?).to be(false)
         end
       end
     end
@@ -260,7 +260,7 @@ describe "opscode-account user association", :association do
 
   context "when superuser is attempting to view user associations" do
     let(:user_assoc_url) { "#{users_url}/#{platform.bad_user.name}/association_requests" }
-    pending("ruby does not have this functionality and will respond with 403", :if => ruby?) do
+    skip("ruby does not have this functionality and will respond with 403", :if => ruby?) do
       it "does permit superuser to view associations" do
         expect(get(user_assoc_url, platform.superuser)).to look_like({:status => 200})
       end
@@ -537,7 +537,7 @@ describe "opscode-account user association", :association do
 
         end
         it "an org admin no longer sees them in the org" do
-          pending("ruby incorrectly fails this with a 403", :if => ruby?) do
+          skip("ruby incorrectly fails this with a 403", :if => ruby?) do
             result = get(api_url("users/#{bad_user}"), platform.admin_user)
             result.should look_like({ :status=> 404,
                                       :body_exact => { "error" => target_not_found_in_org} })
@@ -651,7 +651,7 @@ describe "opscode-account user association", :association do
         end
 
         it "is removed from the org, invites issued by that admin cannot be accepted", :authorization do
-          pending "Known failure: passes w/ 200 b/c no USAG cleanup performed for deleted user" do
+          skip "Known failure: passes w/ 200 b/c no USAG cleanup performed for deleted user" do
             delete(api_url("users/#{test_admin_username}"), platform.superuser)
             response = put(@user_invite_url, test_user, :payload=>{:response=>"accept"})
             response.should look_like({ :status => 403,
@@ -660,7 +660,7 @@ describe "opscode-account user association", :association do
           end
         end
         it "is removed from the system, invites issued by that admin can't by accepted", :authorization do
-          pending("Known failure: passes w/ 200 b/c no USAG or other group cleanup performed for deleted user") do
+          skip("Known failure: passes w/ 200 b/c no USAG or other group cleanup performed for deleted user") do
               delete("#{platform.server}/users/#{test_admin_username}", platform.superuser)
               response = put(@user_invite_url, test_user, :payload=>{:response=>"accept"})
               response.should look_like({ :status => 403,
@@ -972,7 +972,7 @@ describe "opscode-account user association", :association do
             platform.remove_user_from_group(org, test_user, "admins")
           end
           it "cannot delete own org association", :authorization do
-            pending("new constraint in erchef- ruby permits this deletion", :if => ruby?) do
+            skip("new constraint in erchef- ruby permits this deletion", :if => ruby?) do
                 delete(request_url, test_user).should look_like({
                     :status => 403,
                     :body_exact => {"error" => "Please remove #{test_user.name} from this organization's admins group before removing him or her from the organization." }
@@ -983,7 +983,7 @@ describe "opscode-account user association", :association do
           # Bug/regression check: prior to the fix, the user would be removed from the org member
           # list, even though other permissions were not modified.
           it "prevents deletion and does not break the admin org association in the process" do
-            pending("new constraint in erchef- ruby permits this deletion", :if => ruby?) do
+            skip("new constraint in erchef- ruby permits this deletion", :if => ruby?) do
               delete(request_url, test_user)
               # get users requires org membership to complete, so is a safe litmus to
               # verify that the user is still in the org

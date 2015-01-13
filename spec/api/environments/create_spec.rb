@@ -130,7 +130,7 @@ describe "Environments API Endpoint", :environments do
           end
         end
 
-        pending 'when handling the payload', :pedantic do
+        skip 'when handling the payload', :pedantic do
           context 'with authentication headers' do
             # Unconverted Auth Header DSL
             let(:method) { request_method }
@@ -163,7 +163,7 @@ describe "Environments API Endpoint", :environments do
             let(:request_headers) { { "Content-Type" => "application/xml" } }
             let(:request_payload) { '<environment name="blah"></environment>' }
 
-            pending "webmachine not sucking" do
+            skip "webmachine not sucking" do
               should_respond_with 415
             end
           end
