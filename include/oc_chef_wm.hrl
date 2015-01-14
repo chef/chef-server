@@ -279,6 +279,13 @@
           oc_chef_group :: #oc_chef_group{}
          }).
 
+-record(policy_state, {
+          policy_data,
+          policy_authz_id,
+          create_policy = false,
+          oc_chef_policy :: #oc_chef_policy{}
+         }).
+
 -record(acl_state, {
           type,
           authz_id,

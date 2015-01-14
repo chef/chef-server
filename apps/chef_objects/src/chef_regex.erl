@@ -75,6 +75,9 @@
 %% Sometimes, recipe names can have version qualifiers as well.
 -define(VERSIONED_RECIPE_REGEX, ?COOKBOOK_QUALIFIED_RECIPE_REGEX ++ ?RECIPE_VERSION_REGEX).
 
+%% A SHA1 hash
+-define(SHA1_HASH_REGEX, "[a-fA-F0-9]{40}").
+
 -spec generate_regex(regex_pattern()) -> re_regex().
 generate_regex(Pattern) ->
   {ok, Regex} = re:compile(Pattern),
@@ -132,6 +135,12 @@ regex_for(user_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?USERNAME_REGEX),
                             <<"Malformed user name. Must only contain a-z, 0-9, _, or -">>);
 regex_for(non_blank_string) ->
-   generate_regex_msg_tuple(?ANCHOR_REGEX(?NON_BLANK_REGEX), <<"Field must have a non-empty string value">>).
+   generate_regex_msg_tuple(?ANCHOR_REGEX(?NON_BLANK_REGEX), <<"Field must have a non-empty string value">>);
 
+regex_for(policy_file_name) ->
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
+                             <<"Malformed policy name. Must be A-Z, a-z, 0-9, _, -, or .">>);
 
+regex_for(policy_identifier) ->
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?SHA1_HASH_REGEX),
+                             <<"Malformed policy identifier. Must be a valid SHA1 signature">>).

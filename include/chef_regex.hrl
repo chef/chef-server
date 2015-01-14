@@ -31,7 +31,9 @@
                       recipe_name |
                       role_name |
                       unqualified_recipe |
-                      user_name.
+                      user_name |
+                      policy_file_name |
+                      policy_identifier.
 
 -type re_regex() :: {re_pattern, integer(), integer(), binary()}.
 %% FIXME: This type is not yet correct

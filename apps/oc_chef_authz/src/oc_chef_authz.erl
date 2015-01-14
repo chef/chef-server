@@ -583,7 +583,8 @@ object_type_to_container_name(organization) -> <<"organizations">>;
 object_type_to_container_name(role)        -> <<"roles">>;
 object_type_to_container_name(sandbox)     -> <<"sandboxes">>;
 object_type_to_container_name(search)      -> <<"search">>;
-object_type_to_container_name(user)        -> <<"users">>.
+object_type_to_container_name(user)        -> <<"users">>;
+object_type_to_container_name(policies)        -> <<"policies">>.
 
 %% @doc The authz system needs to know the resource type as part of the API. This maps chef
 %% object types into their appropriate authz resource types.

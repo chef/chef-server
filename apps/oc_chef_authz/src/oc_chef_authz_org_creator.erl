@@ -34,7 +34,7 @@
 %-endif.
 
 -define(CONTAINERS, [clients, containers, cookbooks, data, environments,
-                     groups, nodes, roles, sandboxes]).
+                     groups, nodes, roles, sandboxes, policies]).
 
 -define(GROUPS, [admins, 'billing-admins', clients, users]).
 
@@ -92,9 +92,9 @@
 
            %% users
            {add_acl,
-            [mk_tl(container, [cookbooks, data, nodes, roles, environments])],
+            [mk_tl(container, [cookbooks, data, nodes, roles, environments, policies])],
             [create, read, update, delete], [{group, users}]},
-
+           {add_acl, [{container, policies}], [read], [{group, clients}]},
            {add_acl, [{container, clients}], [read, delete], [{group, users}]},
            {add_acl, [mk_tl(container, [groups, containers]), {organization}], [read], [{group, users}]},
            {add_acl, [{container, sandboxes}], [create], [{group, users}]},

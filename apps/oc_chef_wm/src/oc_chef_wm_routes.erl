@@ -92,6 +92,7 @@ org_route(environment, Req, Args) -> route_organization_rest_object("environment
 org_route(principal, Req, Args) -> route_organization_rest_object("principals", Req, Args);
 org_route(client, Req, Args) -> route_organization_rest_object("clients", Req, Args);
 org_route(container, Req, Args) -> route_organization_rest_object("containers", Req, Args);
+org_route(policy, Req, Args) -> route_organization_rest_object("policies", Req, Args);
 org_route(group, Req, Args) -> route_organization_rest_object("groups", Req, Args);
 org_route(association, Req, Args) -> route_organization_rest_object("users", Req, Args);
 org_route(invite, Req, Args) -> route_organization_rest_object("association_requests", Req, Args);
@@ -181,6 +182,12 @@ org_bulk_route_fun(cookbook_version, Req) ->
     fun(CookbookName, VersionString) ->
             render_template(Template, BaseURI, [Org, CookbookName, VersionString])
     end;
+org_bulk_route_fun(policy, Req) ->
+    {BaseURI, Org} = extract_from_req(Req),
+    Template = template_for_type(policy),
+    fun([Name, Group]) ->
+            render_template(Template, BaseURI, [Org, Name, Group])
+    end;
 org_bulk_route_fun(Type, Req) ->
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(Type),
@@ -211,6 +218,8 @@ template_for_type(data_bag_item) ->
 template_for_type({data_bag, _}) ->
     %% another way of asking for data_bag_item
     "/organizations/~s/data/~s/~s";
+template_for_type(policy) ->
+    "/organizations/~s/policies/~s/~s";
 template_for_type(container) ->
     "/organizations/~s/containers/~s";
 template_for_type(group) ->
@@ -234,6 +243,8 @@ url_for_search_item_fun(Req, Type, OrgName) ->
 
 make_args(Item, {data_bag, Bag}, OrgName) ->
     [OrgName, Bag, data_bag_item_id(Item)];
+make_args(Item, policies, OrgName) ->
+    [OrgName, ej:get({<<"policy_group">>}, ej:get({<<"name">>}, Item))];
 make_args(Item, client, OrgName) ->
     [OrgName, ej:get({<<"clientname">>}, Item)];
 make_args(Item, _, OrgName) ->

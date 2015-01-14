@@ -212,7 +212,7 @@ update(Rec, ActorId, CallbackFun) ->
 
 delete(Rec, CallbackFun) ->
     call_if_exported(Rec, delete, [Rec, CallbackFun], fun do_delete/2).
-  
+
 %% Return the callback module for a given object record type. We're putting the abstraction
 %% in place in case we need to do something other than the identity mapping of record name
 %% to callback module name that we're doing there. If we needed to swap in something else,
@@ -269,3 +269,4 @@ do_delete(ObjectRec, CallbackFun) ->
     QueryName = delete_query(ObjectRec),
     Id = id(ObjectRec),
     CallbackFun({QueryName, [Id]}).
+
