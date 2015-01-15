@@ -257,6 +257,18 @@ ejson_for_indexing_test_() ->
               assert_ejson_equal(Expect, Got)
       end},
 
+     {"normal_over_default_array_test",
+      fun() ->
+              Defaults = {[{<<"a">>, [1, 3, 5]}, {<<"b">>, [2,4,6]}]},
+              Normal = {[{<<"b">>, [11]}]},
+              Node = merge(basic_node(), {[{<<"default">>, Defaults},
+                                           {<<"normal">>, Normal}]}),
+              Expect = merge(basic_node_index(), {[{<<"a">>, [1,3,5]}, {<<"b">>, [11]}]}),
+              Got = chef_object:ejson_for_indexing(basic_node_record(), Node),
+              assert_ejson_equal(Expect, Got)
+      end},
+
+
      {"override_over_normal_over_default_test",
       fun() ->
               Defaults = {[{<<"a">>, 1}, {<<"b">>, 2}]},
@@ -267,6 +279,20 @@ ejson_for_indexing_test_() ->
                              {<<"override">>, Override}]}),
               Expect = merge(basic_node_index(),
                              {[{<<"a">>, 1}, {<<"b">>, 22}, {<<"c">>, 3}, {<<"d">>, 4}]}),
+              Got = chef_object:ejson_for_indexing(basic_node_record(), Node),
+              assert_ejson_equal(Expect, Got)
+      end},
+
+     {"override_over_normal_over_default_array_test",
+      fun() ->
+              Defaults = {[{<<"a">>, 1}, {<<"b">>, [1,3,5]}]},
+              Normal = {[{<<"b">>, [2,4,6]}, {<<"c">>, 3}]},
+              Override = {[{<<"b">>, [7,9,11]}, {<<"d">>, 4}]},
+              Node = merge(basic_node(),
+                           {[{<<"default">>, Defaults}, {<<"normal">>, Normal},
+                             {<<"override">>, Override}]}),
+              Expect = merge(basic_node_index(),
+                             {[{<<"a">>, 1}, {<<"b">>, [7,9,11]}, {<<"c">>, 3}, {<<"d">>, 4}]}),
               Got = chef_object:ejson_for_indexing(basic_node_record(), Node),
               assert_ejson_equal(Expect, Got)
       end},
@@ -282,6 +308,22 @@ ejson_for_indexing_test_() ->
                              {<<"override">>, Override}, {<<"automatic">>, Automatic}]}),
               Expect = merge(basic_node_index(),
                              {[{<<"a">>, 1}, {<<"b">>, 22}, {<<"c">>, 3}, {<<"d">>, 40},
+                               {<<"e">>, 5}]}),
+              Got = chef_object:ejson_for_indexing(basic_node_record(), Node),
+              assert_ejson_equal(Expect, Got)
+      end},
+
+     {"automatic_over_override_over_normal_over_default_array_test",
+      fun() ->
+              Defaults = {[{<<"a">>, 1}, {<<"b">>, [1,3,5]}]},
+              Normal = {[{<<"b">>, [2,4,6]}, {<<"c">>, 3}]},
+              Override = {[{<<"b">>, [7,9,11]}, {<<"d">>, 4}]},
+              Automatic = {[{<<"b">>, [8,10,12]}, {<<"d">>, 40}, {<<"e">>, 5}]},
+              Node = merge(basic_node(),
+                           {[{<<"default">>, Defaults}, {<<"normal">>, Normal},
+                             {<<"override">>, Override}, {<<"automatic">>, Automatic}]}),
+              Expect = merge(basic_node_index(),
+                             {[{<<"a">>, 1}, {<<"b">>, [8,10,12]}, {<<"c">>, 3}, {<<"d">>, 40},
                                {<<"e">>, 5}]}),
               Got = chef_object:ejson_for_indexing(basic_node_record(), Node),
               assert_ejson_equal(Expect, Got)
