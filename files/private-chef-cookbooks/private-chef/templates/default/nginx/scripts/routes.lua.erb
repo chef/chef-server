@@ -64,8 +64,10 @@ local p_runs = P"runs"
 local p_principals = P"principals"
 local p_internal_organizations_base = P"/internal-organizations"
 local p_controls = P"controls"
+<% if @xdl_defaults['policies'] %>
 local p_policyfile = P"policies"
 local p_cookbook_artifacts = P"cookbook_artifacts"
+<% end %>
 
 -- Composite patterns
 local p_maybe_sep = p_sep^-1
@@ -105,8 +107,10 @@ local c_maybe_identifier = (p_sep * c_identifier)^-1
 
 local p_erchef_endpoint = p_cookbooks + p_data + p_roles + p_sandboxes +
                           p_environments + p_clients + p_nodes + p_principals +
-                          p_groups + p_containers + p_controls + p_policyfile +
-                          p_cookbook_artifacts
+                          p_groups + p_containers + p_controls
+<% if @xdl_defaults['policies'] %>
+  + p_policyfile + p_cookbook_artifacts
+<% end %>
 
 
 -- endpoints that map directly to erchef
