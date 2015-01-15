@@ -37,6 +37,7 @@ module PrivateChef
   opscode_chef Mash.new
 
   lb Mash.new
+  lb['xdl_defaults'] ||= Mash.new
   lb_internal Mash.new
   postgresql Mash.new
   postgresql['log_rotation'] ||= Mash.new
