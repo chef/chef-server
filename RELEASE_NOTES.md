@@ -1,6 +1,13 @@
 # Chef Server Release Notes
 
-## 12.0.1 (unreleased)
+## 12.0.2 (unreleased)
+
+### What's New:
+
+* chef-server-ctl
+  * Added key management and rotation commands add-client-key, add-user-key, delete-user-key, delete-client-key, list-client-keys, and list-user-keys.
+
+## 12.0.1 (2014-12-17)
 
 * The following components are no longer used and have been removed:
 + opscode-test
