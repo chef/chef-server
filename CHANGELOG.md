@@ -2,16 +2,19 @@
 
 ## 12.0.2 (unreleased)
 
-### oc_erchef 1.0.1
-* Pulled repos chef_db, chef_index, chef_objects, depsolver, oc_chef_authz, and oc_chef_wm into apps in oc_erchef.
-* Pulled chef_wm into oc_chef_wm.
+### oc\_erchef 1.0.1
+* Pulled repos `chef_db`, `chef_index`, `chef_objects`, `depsolver`, `oc_chef_authz`, and `oc_chef_wm` into apps in `oc_erchef`.
+* Pulled `chef_wm` into `oc_chef_wm`.
 * Updated integration tests, and got integration and unit tests running in Travis CI.
 
 ### opscode-chef-mover 2.2.19
-* Updated mover to pull in oc_erchef since some dependencies where moved there.
+* Updated mover to pull in oc\_erchef since some dependencies where moved there.
 
 ### enterprise-chef-server-schema 2.4.1
 * Use HTTPS instead of GIT to pull down dependencies in Makefile.
+
+### opscode-omnibus
+* merged `oc_erchef` configuration sections for `chef_wm` into `oc_chef_wm`
 
 ## 12.0.1 (2014-12-17)
 
@@ -39,6 +42,11 @@
 * Repository that replaces opscode-test, allowing us to deprecate several
   old ruby repositories.
 
+### oc\_erchef 0.30.0
+* module `chef_wm` merged into `oc_chef_wm`
+* support for ldap user search including memberOf group,
+  via attribute `group_dn`
+
 ## 12.0.0 (2014-11-25)
 
 ### enterprise-chef-common 0.4.7
@@ -51,18 +59,18 @@
 * Exclude gz files from tail
 
 ### private-chef-cookbooks
-* Add ip_mode and normalize_host for ipv6 configuration
+* Add `ip_mode` and `normalize_host` for ipv6 configuration
 * Add configuration for queueing in pooler
-* Expose "db_timeout" for sqerl in Erchef, bifrost and mover as a parameter
+* Expose `db_timeout` for sqerl in Erchef, bifrost and mover as a parameter
   that can be set in the "/etc/opscode/chef-server.rb" file for convenience.
   By default there is a hard coded value of 5 seconds (5000ms) as per:
-  https://github.com/opscode/sqerl/blob/master/src/sqerl_client.erl#L134
+  [sqerl\_client.erl](https://github.com/opscode/sqerl/blob/master/src/sqerl_client.erl#L134)
 * Select appropriate default port for LDAP and LDAPS (when encryption is
   selected, as previously user had to manually add port to make it work).
-* Expose "proxy_connect_timeout" for Nginx when it connects to the backends,
+* Expose `proxy_connect_timeout` for Nginx when it connects to the backends,
   so it can be adjused. The hard coded default might not be sufficient in
   some cases.
-* Expose folsom_graphite configuration, default to disable
+* Expose `folsom_graphite` configuration, default to disable
 * Move Postgres database stop/start out of migrations
 * Gracefullly attempt to start the database during migrations
 
