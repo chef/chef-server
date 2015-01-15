@@ -16,6 +16,9 @@ execute "chef-server-schema" do
   # OSC schema is a dependency of the EC schema, and managed by it
   cwd "/opt/opscode/embedded/service/enterprise-chef-server-schema/deps/chef-server-schema"
   user node['private_chef']['postgresql']['username']
+  # Clear PERL5LIB to ensure sqitch only uses omnibus's perl
+  # installation
+  environment "PERL5LIB" => ""
   returns [0,1]
   action :nothing
   notifies :run, "execute[enterprise-chef-server-schema]", :immediately
@@ -25,6 +28,9 @@ execute "enterprise-chef-server-schema" do
   command "sqitch --db-name opscode_chef deploy --verify"
   cwd "/opt/opscode/embedded/service/enterprise-chef-server-schema"
   user node['private_chef']['postgresql']['username']
+  # Clear PERL5LIB to ensure sqitch only uses omnibus's perl
+  # installation
+  environment "PERL5LIB" => ""
   returns [0,1]
   action :nothing
 end
