@@ -85,7 +85,15 @@ $ bin/omnibus help
 
 Makefile instructions
 ---------------------
-Top level make targets:
+
+You can change the dev platform (anywhere it says "ubuntu 1004" below)
+to one of your choosing by setting the environment variable
+`DEV_PLATFORM`
+
+**Note:** Any `make` or `kitchen` commands expect `opscode\omnibus`
+  and `opscode\omnibus-software` to be cloned from github in `..`
+
+#### Top level make targets:
 
 `$ make dev` converges the dev platform (ubuntu 1004)
 
