@@ -50,23 +50,6 @@ merge({Mergee}, {Other}) ->
   Merged = dict:merge(fun merge_dict/3, MergeeDict, OtherDict),
   %% make sure to return the merged object in ejson-y format.
   {dict:to_list(Merged)};
-%% Both items are JSON Arrays:
-merge(Mergee, Other) when is_list(Mergee) andalso is_list(Other) ->
-  %% WARNING!
-  %% This implementation will return the merged list in sorted form. This is ok
-  %% for now, because opscode-expander doesn't care about the order of array
-  %% elements. If the results of deep_merge are returned to the user, we should
-  %% fix this.
-
-  %% Also note that we're uniq-ing the lists. This matches the ruby behavior (Array#|):
-  %% a = %w{ a a a a }
-  %%  => ["a", "a", "a", "a"]
-  %% ruby-1.9.2-p180 :002 > a | %w{b}
-  %%  => ["a", "b"]
-
-  SortedMergee = lists:usort(Mergee),
-  SortedOther  = lists:usort(Other),
-  lists:umerge(SortedOther,SortedMergee);
 %% Items are JSON strings or literals (null, true, false), or of incompatible
 %% types:
 merge(_Mergee, Other) ->
@@ -77,4 +60,3 @@ merge(_Mergee, Other) ->
 %% happen.
 merge_dict(_Key, Mergee, Other) ->
   merge(Mergee, Other).
-
