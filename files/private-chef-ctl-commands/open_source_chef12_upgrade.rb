@@ -500,6 +500,7 @@ EOF
     chef_server_root '#{@options.chef12_server_url}'
     node_name 'pivotal'
     client_key '/etc/opscode/pivotal.pem'
+    ssl_verify_mode :verify_none
     EOH
 
     log "Writing knife-ec-backup config to /tmp/knife-ec-backup-config.rb"
