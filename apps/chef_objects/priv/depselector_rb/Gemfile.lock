@@ -1,9 +1,11 @@
 GIT
   remote: git://github.com/opscode/dep-selector
-  revision: 9f97b663e923700070e8fb08f6b94629147a152d
+  revision: 7a75df69ae482768b439a28ab5e237459c6fa263
   branch: master
   specs:
-    dep_selector (0.1.0)
+    dep_selector (1.0.3)
+      dep-selector-libgecode (~> 1.0)
+      ffi (~> 1.9)
 
 GIT
   remote: git://github.com/sdelano/erlectricity
@@ -15,6 +17,8 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
+    dep-selector-libgecode (1.0.2)
+    ffi (1.9.6)
     uuidtools (2.1.4)
 
 PLATFORMS
