@@ -5,10 +5,13 @@
 ### opscode-omnibus
 * Added key management and rotation commands add-client-key, add-user-key, delete-user-key, delete-client-key, list-client-keys, and list-user-keys.
 
-### oc\_erchef 1.0.1
+### oc\_erchef 1.1.0
 * Pulled repos `chef_db`, `chef_index`, `chef_objects`, `depsolver`, `oc_chef_authz`, and `oc_chef_wm` into apps in `oc_erchef`.
 * Pulled `chef_wm` into `oc_chef_wm`.
-* Updated integration tests, and got integration and unit tests running in Travis CI.
+* Updated integration tests, and got integration and unit tests
+  running in Travis CI.
+* Remove array merging in chef_deep_merge, fixing incorrect search
+  results for arrays.
 
 ### opscode-chef-mover 2.2.19
 * Updated mover to pull in oc\_erchef since some dependencies where moved there.
