@@ -5,7 +5,13 @@
 ### What's New:
 
 * chef-server-ctl
-  * Added key management and rotation commands add-client-key, add-user-key, delete-user-key, delete-client-key, list-client-keys, and list-user-keys.
+  * Added key management and rotation commands add-client-key,
+    add-user-key, delete-user-key, delete-client-key,
+    list-client-keys, and list-user-keys.
+
+* oc_erchef
+  * BUG FIX: Search results for arrays previously would match values
+    from all precedence levels.
 
 ## 12.0.1 (2014-12-17)
 
