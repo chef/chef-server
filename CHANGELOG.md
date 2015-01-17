@@ -4,6 +4,7 @@
 
 ### opscode-omnibus
 * Added key management and rotation commands add-client-key, add-user-key, delete-user-key, delete-client-key, list-client-keys, and list-user-keys.
+* Pulled in Chef 11.18.0. This will fix "ffi-yajl and yajl-ruby gems have incompatible C libyajl libs" warning when running chef-server-ctl commands.
 
 ### oc\_erchef 1.1.0
 * Pulled repos `chef_db`, `chef_index`, `chef_objects`, `depsolver`, `oc_chef_authz`, and `oc_chef_wm` into apps in `oc_erchef`.
