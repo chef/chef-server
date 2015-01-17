@@ -4,6 +4,9 @@
 
 ### What's New:
 
+* Chef 11.18.0
+  * Chef 11.18.0 was vendored into the server. This will fix ffi-yajl related warning when running chef-server-ctl commands.
+
 * chef-server-ctl
   * Added key management and rotation commands add-client-key,
     add-user-key, delete-user-key, delete-client-key,
