@@ -15,6 +15,10 @@ function error_exit
   exit 1
 }
 
+is_drbd_mounted() {
+    grep -q '<%= node['private_chef']['drbd']['device'] %> <%= node['private_chef']['drbd']['data_dir'] %> ' /proc/mounts
+}
+
 # 10 * SVWAIT
 try=300
 
@@ -50,8 +54,7 @@ case $ACTION in
     done
     ;;
   mounted)
-    DRBD_STATUS=$(cat /proc/drbd | egrep cs:)
-    if [[ "$DRBD_STATUS" =~ "cs:Connected ro:Primary/Secondary ds:UpToDate/UpToDate" ]]; then
+    if is_drbd_mounted; then
       echo "[OK] DRDB mounted on this machine"
       exit 0
     else
