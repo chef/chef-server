@@ -13,10 +13,10 @@ project lead.
 
 ## Project Lead
 
-[Nathan Smith](https://github.com/smith)
+* [Nathan Smith](https://github.com/smith)
 
 ## Lieutenants
 
-[Joshua Black](https://github.com/raskchanky)
-[Mark Mzyk](https://github.com/mmzyk)
-[Christian Nunciato](https://github.com/cnunciato)
+* [Joshua Black](https://github.com/raskchanky)
+* [Mark Mzyk](https://github.com/mmzyk)
+* [Christian Nunciato](https://github.com/cnunciato)
