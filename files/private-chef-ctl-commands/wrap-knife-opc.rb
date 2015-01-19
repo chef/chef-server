@@ -27,6 +27,7 @@ cmds.each do |cmd, args|
   opc_noun = args[1]
   description = args[2]
   add_command_under_category cmd, "organization-and-user-management", description, 2 do
-    run_command("#{knife_cmd} opc #{opc_noun} #{opc_cmd} #{cmd_args.join(' ')} -c #{knife_config}")
+    status = run_command("#{knife_cmd} opc #{opc_noun} #{opc_cmd} #{cmd_args.join(' ')} -c #{knife_config}")
+    exit status.exitstatus
   end
 end
