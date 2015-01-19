@@ -32,12 +32,6 @@
          name/1,
          org_id/1,
          new_record/3,
-         oc_assemble_client_ejson/2,
-         oc_parse_binary_json/2,
-         oc_parse_binary_json/3,
-         osc_assemble_client_ejson/2,
-         osc_parse_binary_json/2,
-         osc_parse_binary_json/3,
          parse_binary_json/2,
          parse_binary_json/3,
          record_fields/0,
@@ -71,32 +65,15 @@
 -include("../../include/chef_types.hrl").
 -include("../../include/chef_osc_defaults.hrl").
 
--define(DEFAULT_FIELD_VALUES,
-        [
-         {<<"json_class">>, <<"Chef::ApiClient">>},
-         {<<"chef_type">>, <<"client">>},
-         {<<"validator">>, false},
-         {<<"admin">>, false}
-        ]).
+-define(DEFAULT_FIELD_VALUES, [
+                               {<<"json_class">>, <<"Chef::ApiClient">>},
+                               {<<"chef_type">>, <<"client">>},
+                               {<<"validator">>, false},
+                               {<<"private_key">>, false}
+                              ]).
 
--define(OC_DEFAULT_FIELD_VALUES, [
-                                  {<<"json_class">>, <<"Chef::ApiClient">>},
-                                  {<<"chef_type">>, <<"client">>},
-                                  {<<"validator">>, false},
-                                  {<<"private_key">>, false}
-                                 ]).
 
--define(ASSEMBLE_CLIENT, osc_assemble_client_ejson).
 
--define(PARSE_BINARY, osc_parse_binary_json).
-
--ifdef(OC_CHEF).
--undef(ASSEMBLE_CLIENT).
--define(ASSEMBLE_CLIENT, oc_assemble_client_ejson).
-
--undef(PARSE_BINARY).
--define(PARSE_BINARY, oc_parse_binary_json).
--endif.
 
 -behaviour(chef_object).
 
@@ -224,12 +201,7 @@ add_authn_fields(ClientData, PublicKey) ->
 
 %% @doc creates the json body for clients
 -spec assemble_client_ejson(#chef_client{}, binary()) -> ejson_term().
-assemble_client_ejson(Client, OrgName) ->
-    ?ASSEMBLE_CLIENT(Client, OrgName).
-
-%% @doc creates the json body for clients
--spec oc_assemble_client_ejson(#chef_client{}, binary()) -> ejson_term().
-oc_assemble_client_ejson(#chef_client{name = Name, validator = Validator,
+assemble_client_ejson(#chef_client{name = Name, validator = Validator,
                                       public_key = PublicKey}, OrgName) ->
     Values = [{<<"name">>, value_or_default(Name, <<"">>)},
               {<<"clientname">>, value_or_default(Name, <<"">>)},
@@ -244,68 +216,24 @@ oc_assemble_client_ejson(#chef_client{name = Name, validator = Validator,
             {[{<<"public_key">>, chef_object_base:extract_public_key(PublicKey)} | Values]}
     end.
 
-%% @doc creates the json body for clients
--spec osc_assemble_client_ejson(#chef_client{}, binary() | ?OSC_ORG_NAME) -> ejson_term().
-osc_assemble_client_ejson(#chef_client{name = Name,
-                                   admin = IsAdmin,
-                                   validator = IsValidator,
-                                   public_key = PublicKey}, _OrgName) ->
-    Values = [{<<"name">>, value_or_default(Name, <<"">>)},
-              {<<"admin">>, IsAdmin =:= true},
-              {<<"validator">>, IsValidator =:= true},
-              {<<"json_class">>, <<"Chef::ApiClient">>},
-              {<<"chef_type">>, <<"client">>}],
-    case PublicKey of
-        undefined ->
-            {Values};
-        AKey ->
-            {[{<<"public_key">>, AKey} | Values]}
-    end.
 
+%% @doc Convert a binary JSON string representing a Chef Client into an
+%% EJson-encoded Erlang data structure, using passed defaults
+%% @end
 parse_binary_json(Bin, ReqName) ->
-    ?PARSE_BINARY(Bin, ReqName, not_found).
+    parse_binary_json(Bin, ReqName, not_found).
 
+-spec parse_binary_json(binary(), binary() | undefined,
+                        not_found | #chef_client{}) -> {'ok', {[{_, _}]}}. % or throw
 parse_binary_json(Bin, ReqName, CurrentClient) ->
-    ?PARSE_BINARY(Bin, ReqName, CurrentClient).
-
-osc_parse_binary_json(Bin, ReqName) ->
-    osc_parse_binary_json(Bin, ReqName, not_found).
-
--spec osc_parse_binary_json(binary(), binary() | undefined,
-                            not_found | #chef_client{}) -> {'ok', {[{_, _}]}}. % or throw
-%% @doc Convert a binary JSON string representing a Chef Client into an
-%% EJson-encoded Erlang data structure, using passed defaults
-%% @end
-osc_parse_binary_json(Bin, ReqName, CurrentClient) ->
-    Client = osc_set_values_from_current_client(chef_object_base:delete_null_public_key(chef_json:decode_body(Bin)), CurrentClient),
+    Client = set_values_from_current_client(chef_json:decode_body(Bin), CurrentClient),
     Client1 = chef_object_base:set_default_values(Client, ?DEFAULT_FIELD_VALUES),
-    {Name, FinalClient} = osc_destination_name(Client1, ReqName),
+    {Name, FinalClient} = destination_name(Client1, ReqName),
     valid_name(Name),
-    validate_client(FinalClient, Name, osc).
+    validate_client(FinalClient, Name).
 
-oc_parse_binary_json(Bin, ReqName) ->
-    oc_parse_binary_json(Bin, ReqName, not_found).
-
--spec oc_parse_binary_json(binary(), binary() | undefined,
-                           not_found | #chef_client{}) -> {'ok', {[{_, _}]}}. % or throw
-%% @doc Convert a binary JSON string representing a Chef Client into an
-%% EJson-encoded Erlang data structure, using passed defaults
-%% @end
-oc_parse_binary_json(Bin, ReqName, CurrentClient) ->
-    Client = oc_set_values_from_current_client(chef_json:decode_body(Bin), CurrentClient),
-    Client1 = chef_object_base:set_default_values(Client, ?OC_DEFAULT_FIELD_VALUES),
-    {Name, FinalClient} = oc_destination_name(Client1, ReqName),
-    valid_name(Name),
-    validate_client(FinalClient, Name, oc).
-
-validate_client(Client, Name, osc) ->
-    validate_client(Client, osc_client_spec(Name)),
-    validate_admin_xor_validator(Client);
-validate_client(Client, Name, oc) ->
-    validate_client(Client, oc_client_spec(Name)).
-
-validate_client(Client, Spec) ->
-    case ej:valid(Spec, Client) of
+validate_client(Client, Name) ->
+    case ej:valid(client_spec(Name), Client) of
         ok -> {ok, Client};
         Bad -> throw(Bad)
     end.
@@ -321,24 +249,10 @@ validate_admin_xor_validator(Client) ->
             {ok, Client}
     end.
 
-osc_set_values_from_current_client(Client, not_found) ->
+set_values_from_current_client(Client, not_found) ->
     Client;
-osc_set_values_from_current_client(Client, #chef_client{admin = IsAdmin,
-                                                        validator = IsValidator,
-                                                        public_key = PublicKey}) ->
-    C = chef_object_base:set_default_values(Client, [{<<"admin">>, IsAdmin},
-                                                     {<<"validator">>, IsValidator}]),
-    case chef_object_base:cert_or_key(C) of
-        {undefined, _} ->
-            chef_object_base:set_public_key(C, PublicKey);
-        {_NewPublicKey, _} ->
-            C
-    end.
-
-oc_set_values_from_current_client(Client, not_found) ->
-    Client;
-oc_set_values_from_current_client(Client, #chef_client{validator = IsValidator,
-                                                       public_key = Cert}) ->
+set_values_from_current_client(Client, #chef_client{validator = IsValidator,
+                                                    public_key = Cert}) ->
     C = chef_object_base:set_default_values(Client, [{<<"validator">>, IsValidator}]),
     case chef_object_base:cert_or_key(C) of
         {undefined, _} ->
@@ -347,18 +261,7 @@ oc_set_values_from_current_client(Client, #chef_client{validator = IsValidator,
             C
     end.
 
-osc_client_spec(Name) ->
-    {[
-      {{opt, <<"name">>}, Name},
-      {{opt, <<"admin">>}, boolean},
-      {{opt, <<"validator">>}, boolean},
-      {{opt, <<"private_key">>}, boolean},
-      {{opt, <<"json_class">>}, <<"Chef::ApiClient">>},
-      {{opt, <<"chef_type">>}, <<"client">>},
-      {{opt, <<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string, <<"Public Key must be a valid key.">>}}}
-     ]}.
-
-oc_client_spec(Name) ->
+client_spec(Name) ->
     {[
       {<<"name">>, Name},
       {<<"clientname">>, Name},
@@ -366,23 +269,9 @@ oc_client_spec(Name) ->
       {{opt, <<"private_key">>}, boolean}
      ]}.
 
-%% If name is not in JSON, use the name from the URL. Otherwise, use the name in the JSON.
-osc_destination_name(Client, ReqName) ->
-    Name = ej:get({<<"name">>}, Client),
-    case {Name, ReqName} of
-        {undefined, undefined} ->
-            throw({both_missing, <<"name">>, <<"URL-NAME">>});
-        {undefined, _} ->
-            %% If the name is ommitted from the JSON then use what's in the URL
-            {ReqName, ej:set({<<"name">>}, Client, ReqName)};
-        {_, _} ->
-            %% If both are present, leave as-is, because the user may be
-            %% renaming (from name in URL to name in JSON).
-            {Name, Client}
-    end.
 
--spec oc_destination_name(ej:json_object(), binary() | undefined) -> {binary(), ej:json_object()} | no_return().
-oc_destination_name(Client, ReqName) ->
+-spec destination_name(ej:json_object(), binary() | undefined) -> {binary(), ej:json_object()} | no_return().
+destination_name(Client, ReqName) ->
     % Since either name or clientname is required (but not both), if only one is
     % passed, we will use it to set the other one
     Name = ej:get({<<"name">>}, Client),
