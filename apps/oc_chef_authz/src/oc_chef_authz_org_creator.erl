@@ -114,7 +114,7 @@ mk_tl(Type, List) ->
 %%
 %%
 
--spec create_org(#oc_chef_organization{}, #chef_user{}) -> ok | {error, any()}.
+-spec create_org(#oc_chef_organization{}, #chef_requestor{}) -> ok | {error, any()}.
 create_org(Org, CreatingUser) ->
     create_org(Org, CreatingUser, ?DEFAULT_EC_EXPANDED_ORG).
 
@@ -126,7 +126,7 @@ create_org(Org, CreatingUser, Policy) ->
 %%
 
 process_policy(#oc_chef_organization{} = Org,
-               #chef_user{} = User,
+               #chef_requestor{} = User,
                Policy) ->
     process_policy(Policy, Org, User, init_cache(Org, User)).
 
@@ -143,13 +143,13 @@ process_policy([PolicyEntry|Policy], Org, User, Cache) ->
 %% Returns a tuple of updated cache, and expanded steps to process
 %%
 process_policy_step({create_containers, List},
-                    #oc_chef_organization{id=OrgId}, #chef_user{authz_id=RequestorId}, Cache) ->
+                    #oc_chef_organization{id=OrgId}, #chef_requestor{authz_id=RequestorId}, Cache) ->
     {create_object(OrgId, RequestorId, container, List, Cache), []};
 process_policy_step({create_groups, List},
-                    #oc_chef_organization{id=OrgId}, #chef_user{authz_id=RequestorId}, Cache) ->
+                    #oc_chef_organization{id=OrgId}, #chef_requestor{authz_id=RequestorId}, Cache) ->
     {create_object(OrgId, RequestorId, group, List, Cache), []};
 process_policy_step({set_acl_expanded, Object, Acl},
-                    #oc_chef_organization{}, #chef_user{authz_id=_RequestorId}, Cache) ->
+                    #oc_chef_organization{}, #chef_requestor{authz_id=_RequestorId}, Cache) ->
     {ResourceType, AuthzId} = find(Object, Cache),
     Acl1 = [{Action, ace_to_authz(Cache, ACE)} || {Action, ACE} <- Acl],
     %% TODO: Error check authz results
@@ -157,7 +157,7 @@ process_policy_step({set_acl_expanded, Object, Acl},
         {Method, ACE} <- Acl1],
     {Cache, []};
 process_policy_step({add_to_groups, ActorType, Members, Groups},
-                    #oc_chef_organization{}, #chef_user{}, Cache) ->
+                    #oc_chef_organization{}, #chef_requestor{}, Cache) ->
     MemberIds = objectlist_to_authz(Cache, ActorType, Members),
     GroupIds = objectlist_to_authz(Cache, group, Groups),
     %% TODO capture error return
@@ -167,7 +167,7 @@ process_policy_step({add_to_groups, ActorType, Members, Groups},
     {Cache, []};
 process_policy_step({create_org_global_admins},
                     #oc_chef_organization{name=OrgName},
-                    #chef_user{authz_id=RequestorId}, Cache) ->
+                    #chef_requestor{authz_id=RequestorId}, Cache) ->
     GlobalGroupName = oc_chef_authz_db:make_global_admin_group_name(OrgName),
     %% TODO: Fix this to be the global groups org id.
     GlobalOrgId = ?GLOBAL_PLACEHOLDER_ORG_ID,
@@ -315,7 +315,7 @@ add_to_ace(#hr_ace{clients=OClients, users=OUsers, groups=OGroups},
 %% and are mapped to {ResourceType, AuthzId} pairs (e.g. {object, a452dfadsfa} )
 
 init_cache(#oc_chef_organization{authz_id=OrgAuthzId},
-           #chef_user{authz_id=CreatorAuthzId}) ->
+           #chef_requestor{authz_id=CreatorAuthzId}) ->
     %% Notes: we assume the creator is a superuser;
     Elements = [ { {user, creator}, CreatorAuthzId },
                  { {organization}, OrgAuthzId } ],

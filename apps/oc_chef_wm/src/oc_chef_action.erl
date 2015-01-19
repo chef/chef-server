@@ -115,7 +115,7 @@ log_action0(Req, #base_state{resource_state = ResourceState} = State) ->
 construct_payload(FullActionPayload, Task,
                   Req, #base_state{reqid = RequestId,
                                    organization_name = OrgName,
-                                   requestor = Requestor},
+                                   requestor = #chef_requestor{ type = RequestorType, name = RequestorName } },
                   EntitySpecificPayload) ->
     Msg = {[{<<"message_type">>, <<"action">>},
             {<<"message_version">>, ?CHEF_ACTIONS_MESSAGE_VERSION},
@@ -125,8 +125,8 @@ construct_payload(FullActionPayload, Task,
             {<<"recorded_at">>, req_header("x-ops-timestamp", Req)},
             {<<"remote_hostname">>, req_header("x-forwarded-for", Req)},
             {<<"request_id">>, RequestId},
-            {<<"requestor_name">>, requestor_name(Requestor)},
-            {<<"requestor_type">>, requestor_type(Requestor)},
+            {<<"requestor_name">>, RequestorName},
+            {<<"requestor_type">>, RequestorType},
             {<<"user_agent">>, req_header("user-agent", Req)},
             {<<"id">>, list_to_binary(uuid:uuid_to_string(uuid:get_v4()))},
             %% Entity Level Info
@@ -264,17 +264,6 @@ parent_type(data_bag) ->
 parent_type(ParentType) ->
   list_to_binary(atom_to_list(ParentType)).
 
--spec requestor_name(Requestor:: #chef_client{} | #chef_user{}) -> binary().
-requestor_name(#chef_client{name = Name}) ->
-    Name;
-requestor_name(#chef_user{username = Name}) ->
-    Name.
-
--spec requestor_type(Requestor:: #chef_client{} | #chef_user{}) -> <<_:32,_:_*16>>.
-requestor_type(#chef_client{}) ->
-    <<"client">>;
-requestor_type(#chef_user{}) ->
-    <<"user">>.
 
 %% We have to do special casing for cookbook versions since it uses PUT
 %% for both update and create.  We can distinguish between the two by the response

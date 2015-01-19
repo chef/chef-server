@@ -179,7 +179,7 @@ delete_resource(Req, #base_state{ chef_db_context = DbContext,
 % match of #chef_user - but only really screwed up permissions would let them get this far...
 % so let's let that crash
 invitation_response(Req, #base_state{ organization_name = OrgName,
-                           requestor = #chef_user{username = RequestorUserName},
+                           requestor = #chef_requestor{type = <<"user">>, name = RequestorUserName},
                            resource_state = #association_state{user = User}} = State, ObjectRec) ->
     TypeName = chef_object:type_name(ObjectRec),
     Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, ObjectRec#oc_chef_org_user_invite.id}]),

@@ -5,3 +5,4 @@ TAGS
 .rebar
 ebin
 .eunit
+user_default.beam

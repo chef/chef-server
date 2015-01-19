@@ -1,13 +1,5 @@
 %% ex: ts=4 sw=4 et
-%% @author Seth Falcon <seth@getchef.com>
-%% @author Mark Anderson <mark@getchef.com>
-%% @author Christopher Maier <cm@getchef.com>
-%% @author James Casey <james@getchef.com>
-%% @author Mark Mzyk <mmzyk@getchef.com>
-%% @author Seth Chisamore <schisamo@getchef.com>
-%% @author Ho-Sheng <hosh@getchef.com>
-%% @author Marc Pardise <marc@getchef.com>
-%% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
+%% Copyright 2011-2015 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -23,6 +15,14 @@
 %% specific language governing permissions and limitations
 %% under the License.
 %%
+%% @author Seth Falcon <seth@chef.io>
+%% @author Mark Anderson <mark@chef.io>
+%% @author Christopher Maier <cm@chef.io>
+%% @author James Casey <james@chef.io>
+%% @author Mark Mzyk <mmzyk@chef.io>
+%% @author Seth Chisamore <schisamo@chef.io>
+%% @author Ho-Sheng
+%% @author Marc Paradise <marc@chef.io>
 
 
 -module(chef_sql).
@@ -99,11 +99,15 @@
          %% user-org ops
          is_user_in_org/2,
 
+         %% key ops
+         fetch_actors_by_name/2,
+
          sql_now/0,
          ping/0,
          statements/0,
 
          select_rows/1
+
         ]).
 
 -include_lib("sqerl/include/sqerl.hrl").
@@ -167,13 +171,9 @@ fetch_org_metadata(OrgName) ->
 %% see also: oc_chef_authz/oc_chef_user_org_association
 %%           oc_chef_authz/oc_chef_db
 %%
-%% *************************************************************
-%%                         NOT FOR RELEASE!
-%% Temporary hack - required until org creation knows about sql associations
-%%                         NOT FOR RELEASE!
-%% *************************************************************
 -spec is_user_in_org(binary(), binary()) -> boolean() | {error, _}.
 is_user_in_org(<<"pivotal">>, _) ->
+    %% FIXME - pivotal should have proper org membership.
     true;
 is_user_in_org(UserName, OrgName) ->
     case sqerl:select(user_in_org, [UserName, OrgName], first_as_scalar, [count]) of
@@ -193,6 +193,16 @@ is_user_in_org(UserName, OrgName) ->
 %% Return a count of the user admins
 count_user_admins() ->
     sqerl:select(count_user_admins, [], first_as_scalar, [count]).
+
+%%
+%% key ops
+%%
+fetch_actors_by_name(undefined, Name) ->
+    fetch_actors_by_name(global, Name);
+fetch_actors_by_name(OrgId, Name) ->
+    Transform = {rows_as_records, [chef_requestor, record_info(fields, chef_requestor)]},
+    Result = sqerl:select(fetch_requestors_by_name, [OrgId, Name], Transform),
+    match_result(Result).
 
 %%
 %% node ops
