@@ -28,7 +28,8 @@ describe "opscode-account containers", :containers do
           "groups" => "#{request_url}/groups",
           "nodes" => "#{request_url}/nodes",
           "roles" => "#{request_url}/roles",
-          "sandboxes" => "#{request_url}/sandboxes"
+          "sandboxes" => "#{request_url}/sandboxes",
+          "policies" => "#{request_url}/policies"
         }}
 
       context "admin user" do
@@ -99,7 +100,8 @@ describe "opscode-account containers", :containers do
           "groups" => "#{request_url}/groups",
           "nodes" => "#{request_url}/nodes",
           "roles" => "#{request_url}/roles",
-          "sandboxes" => "#{request_url}/sandboxes"
+          "sandboxes" => "#{request_url}/sandboxes",
+          "policies" => "#{request_url}/policies",
         }}
 
       let(:list_of_containers_with_new_container) {{
@@ -112,6 +114,7 @@ describe "opscode-account containers", :containers do
           "nodes" => "#{request_url}/nodes",
           "roles" => "#{request_url}/roles",
           "sandboxes" => "#{request_url}/sandboxes",
+          "policies" => "#{request_url}/policies",
           new_container => "#{request_url}\/#{new_container}",
         }}
 
