@@ -12,7 +12,8 @@
 * Ensure nginx restarts on frontends after lua-related changes
 
 
-### oc\_erchef 1.1.0
+### oc\_erchef 1.1.1
+* Updated `sqerl` version to pull in more current `epgsql` dependency
 * Pulled repos `chef_db`, `chef_index`, `chef_objects`, `depsolver`, `oc_chef_authz`, and `oc_chef_wm` into apps in `oc_erchef`.
 * Pulled `chef_wm` into `oc_chef_wm`.
 * Updated integration tests, and got integration and unit tests
