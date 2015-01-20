@@ -21,7 +21,7 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
 # ec_gb_trees.erl:72: Polymorphic opaque types not supported yet
 # :'(
 DEPS_PLT = oc_chef_wm.plt
-EC_SCHEMA_VERSION = 2.4.1
+EC_SCHEMA_VERSION = 2.5.2
 
 REBAR = REBAR_PARENT=$(CURDIR)/rebar.config rebar
 

@@ -22,7 +22,7 @@ authenticate_user_request(_GetHeader,
                           _Body,
                           _PublicKey,
                           _TimeSkew) ->
-    {name, <<"mock_user">>}.
+    {name, <<"mock_user">>, undefined}.
 
 validate_headers(_GetHeader, _TimeSkew) ->
     [{'algorithm', <<"SHA1">>},

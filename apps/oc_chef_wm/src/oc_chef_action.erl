@@ -112,6 +112,14 @@ log_action0(Req, #base_state{resource_state = ResourceState} = State) ->
                         Req :: wm_req(),
                         State :: #base_state{},
                         EntitySpecificPayload :: [{binary(), binary()},...]) -> binary().
+construct_payload(FullActionPayload, Task, Req,
+                  #base_state{ requestor = #chef_client{name = Name} } = State,
+                  EntitySpecificPayload) ->
+    % There is one special case in which we're required to use a chef_client record instead of chef_requestor;
+    % work around that by forcing the type we expect in construct_payload.
+    construct_payload(FullActionPayload, Task, Req,
+                      State#base_state{requestor = #chef_requestor{type = <<"client">>, name = Name}},
+                      EntitySpecificPayload);
 construct_payload(FullActionPayload, Task,
                   Req, #base_state{reqid = RequestId,
                                    organization_name = OrgName,
