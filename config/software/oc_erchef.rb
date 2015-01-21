@@ -15,7 +15,7 @@
 #
 
 name "oc_erchef"
-default_version "1.1.1"
+default_version "1.1.2"
 
 source git: "git@github.com:opscode/oc_erchef"
 
@@ -30,6 +30,7 @@ dependency "bundler"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+  env['USE_SYSTEM_GECODE'] = "1"
 
   make "distclean", env: env
   make "rel", env: env
