@@ -1,5 +1,5 @@
 # oc-chef-pedant
-This is the pedant test suite for Opscode Private Chef.
+This is the pedant test suite for Chef Server.
 
 ## License
 
