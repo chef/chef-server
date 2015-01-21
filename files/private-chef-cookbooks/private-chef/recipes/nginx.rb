@@ -38,6 +38,14 @@ nginx_addon_dir = File.join(nginx_etc_dir, "addon.d")
   end
 end
 
+%w(access.log error.log current).each do |logfile|
+  file File.join(nginx_log_dir, logfile) do
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
+    mode '0644'
+  end
+end
+
 ssl_keyfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.key")
 ssl_crtfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.crt")
 ssl_signing_conf = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}-ssl.conf")
@@ -177,7 +185,7 @@ template "/etc/opscode/logrotate.d/nginx" do
   mode "0644"
   variables(node['private_chef']['nginx'].to_hash.merge(
     'postrotate' => "/opt/opscode/embedded/sbin/nginx -s reopen",
-    'owner' => 'root',
-    'group' => 'root'
+    'owner' => OmnibusHelper.new(node).ownership['owner'],
+    'group' => OmnibusHelper.new(node).ownership['group']
   ))
 end

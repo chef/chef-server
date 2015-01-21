@@ -10,7 +10,7 @@
   have incompatible C libyajl libs" warning when running
   chef-server-ctl commands.
 * Ensure nginx restarts on frontends after lua-related changes
-
+* Updated nginx's logrotate config with proper log ownership.
 
 ### oc\_erchef 1.1.1
 * Updated `sqerl` version to pull in more current `epgsql` dependency
