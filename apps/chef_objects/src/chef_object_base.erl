@@ -249,6 +249,8 @@ cert_or_key(Payload) ->
             {Cert, ?CERT_VERSION}
     end.
 
+extract_public_key(null) -> null;
+extract_public_key(<<"null">>) -> null;
 extract_public_key(Data) ->
     case key_version(Data) of
         ?KEY_VERSION ->
@@ -383,7 +385,9 @@ set_key_pair(UserEjson, {public_key, PublicKey}, {private_key, PrivateKey}) ->
 
 %% @doc Sets either the `certificate' or `public_key' field of
 %% `UserEjson' depending on the value of `PublicKey'.
--spec set_public_key(ej:json_object(), binary()) -> ej:json_object().
+-spec set_public_key(ej:json_object(), null | binary()) -> ej:json_object().
+set_public_key(UserEjson, null) ->
+    ej:set({<<"public_key">>}, UserEjson, null);
 set_public_key(UserEjson, PublicKey) ->
   case key_version(PublicKey) of
         ?KEY_VERSION ->
