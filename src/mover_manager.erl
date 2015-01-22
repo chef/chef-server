@@ -242,7 +242,7 @@ working(timeout, #state {max_worker_count = MW,
             start_worker(Object, State)
     end.
 
-working({start, _, _, _, _}, _From, State) ->
+working({start, _, _, _}, _From, State) ->
     {reply, {error, busy_now}, halting, State}.
 
 
@@ -273,7 +273,7 @@ halting(timeout, #state{} = State) ->
     %% Workers remainin, we stay 'halting' until there are none.
     {next_state, halting, State}.
 
-halting({start, _, _, _, _}, _From, State) ->
+halting({start, _, _, _}, _From, State) ->
     {reply, {error, halting_operations}, halting, State}.
 
 handle_info({'DOWN', _MRef, process, _Pid, Reason}, StateName,
