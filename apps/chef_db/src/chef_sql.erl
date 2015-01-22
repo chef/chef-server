@@ -172,9 +172,6 @@ fetch_org_metadata(OrgName) ->
 %%           oc_chef_authz/oc_chef_db
 %%
 -spec is_user_in_org(binary(), binary()) -> boolean() | {error, _}.
-is_user_in_org(<<"pivotal">>, _) ->
-    %% FIXME - pivotal should have proper org membership.
-    true;
 is_user_in_org(UserName, OrgName) ->
     case sqerl:select(user_in_org, [UserName, OrgName], first_as_scalar, [count]) of
         {ok, 0} ->

@@ -357,7 +357,7 @@ authorized_by_org_membership_check(Req, #base_state{organization_name = undefine
     {true, Req, State};
 authorized_by_org_membership_check(Req, State = #base_state{organization_name = OrgName,
                                                             chef_db_context = DbContext}) ->
-    {UserName, BypassesChecks} = get_user(Req, State),
+    {UserName, BypassesChecks} = get_user(Req, State#base_state{superuser_bypasses_checks = true}),
     case BypassesChecks of
         true -> {true, Req, State};
         _ ->
