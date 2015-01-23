@@ -48,10 +48,12 @@ user_ops(_Config) ->
     skip.
 
 client_ops(_Config) ->
-    chef_sql_clients:insert_client_data(),
-    chef_sql_clients:fetch_client_data(),
-    chef_sql_clients:bulk_fetch_client_data(),
-    chef_sql_clients:delete_client_data().
+    %% TODO FIXME we need to pull in enterprise-chef-server-schema
+    %% chef_sql_clients:insert_client_data(),
+    %% chef_sql_clients:fetch_client_data(),
+    %% chef_sql_clients:bulk_fetch_client_data(),
+    %% chef_sql_clients:delete_client_data().
+    skip.
 
 data_bag_ops(_Config) ->
     chef_sql_data_bag:insert_data_bag_data(),
