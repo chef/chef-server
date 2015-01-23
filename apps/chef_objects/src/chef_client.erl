@@ -238,17 +238,6 @@ validate_client(Client, Name) ->
         Bad -> throw(Bad)
     end.
 
-% On OSC, clients can either be an admin or a validator, but not both
-validate_admin_xor_validator(Client) ->
-    IsAdmin = ej:get({<<"admin">>}, Client),
-    IsValidator = ej:get({<<"validator">>}, Client),
-    case {IsAdmin, IsValidator} of
-        {true, true} ->
-            chef_object_base:throw_invalid_fun_match(<<"Client can be either an admin or a validator, but not both.">>);
-        {_, _} ->
-            {ok, Client}
-    end.
-
 set_values_from_current_client(Client, not_found) ->
     Client;
 set_values_from_current_client(Client, #chef_client{validator = IsValidator,
