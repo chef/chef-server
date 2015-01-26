@@ -2,6 +2,7 @@
 
 ## 12.0.2 (unreleased)
 
+
 ### opscode-omnibus
 * Added key management and rotation commands add-client-key,
   add-user-key, delete-user-key, delete-client-key, list-client-keys,
@@ -12,13 +13,17 @@
 * Ensure nginx restarts on frontends after lua-related changes
 * Updated nginx's logrotate config with proper log ownership.
 
+### oc\_erchef 1.2.0
+* add basic multikey/key rotation support. THis is not yet exposed via
+  API, but is being used within `oc_erchef` itself.
+
 ### oc\_erchef 1.1.1
 * Updated `sqerl` version to pull in more current `epgsql` dependency
 * Pulled repos `chef_db`, `chef_index`, `chef_objects`, `depsolver`, `oc_chef_authz`, and `oc_chef_wm` into apps in `oc_erchef`.
 * Pulled `chef_wm` into `oc_chef_wm`.
 * Updated integration tests, and got integration and unit tests
   running in Travis CI.
-* Remove array merging in chef_deep_merge, fixing incorrect search
+* Remove array merging in `chef_deep_merge`, fixing incorrect search
   results for arrays.
 
 ### opscode-chef-mover 2.2.19

@@ -10,11 +10,15 @@
 * chef-server-ctl
   * Added key management and rotation commands add-client-key,
     add-user-key, delete-user-key, delete-client-key,
-    list-client-keys, and list-user-keys.
+    list-client-keys, and list-user-keys.  This is considered a beta
+    feature at this time.
 
-* oc_erchef
+* oc\_erchef
   * BUG FIX: Search results for arrays previously would match values
     from all precedence levels.
+  * Preliminary internal support for multiple key authentication and key
+    rotation. API support will follow in a subsequent release. This is
+    considered a beta feature at this time.
 
 ## 12.0.1 (2014-12-17)
 
