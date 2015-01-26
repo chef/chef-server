@@ -207,7 +207,15 @@ auth_check({actor, ObjectId, Permission}, Req, State) ->
 %% permission. Otherwise, the created AuthzId is stored in the
 %% resource_state record using set_authz_id/2 (which knows how to deal
 %% with the different resource_state records).
-create_in_container(client=Container, Req,
+create_in_container(client, Req, #base_state{chef_db_context = Ctx,
+                                             organization_guid = OrgId,
+                                             requestor = #chef_requestor{name = Name, type = <<"client">>}} = State) ->
+    % For creation, we have some special rules that actually require us to fully
+    % load the chef_client record in question. See comment further down for detail.
+    Client = chef_db:fetch(#chef_client{org_id = OrgId, name = Name}, Ctx),
+    create_in_container(client, Req, State#base_state{requestor=Client});
+% TODO another possibility is to pre-load the creating client in client_data?
+create_in_container(client, Req,
                     #base_state{requestor=#chef_client{validator=true},
                                 resource_state=#client_state{client_data=Data}
                                }=State) ->
@@ -242,7 +250,6 @@ create_in_container(client=Container, Req,
     %% client-to-be's data, which is a proplist, and so not very amenable to pattern
     %% matching :(
     CreatingAValidator = ej:get({<<"validator">>}, Data),
-
     case CreatingAValidator of
         true ->
             %% NOT IN MY HOUSE!
@@ -251,8 +258,7 @@ create_in_container(client=Container, Req,
             %% We'll pass the atom 'superuser' as a way to indicate to
             %% downstream code that this should be done by the Authz
             %% superuser (NOT the Chef API platform superuser!)
-
-            do_create_in_container(Container, Req, State, superuser)
+            do_create_in_container(client, Req, State, superuser)
     end;
 create_in_container(Container, Req, #base_state{requestor_id = RequestorId} = State) ->
     %% Here, the requestor isn't a validator client, so they should go through the normal
@@ -307,7 +313,7 @@ check_permission(AuthzObjectType, AuthzId, Req, State) ->
     Perm = http_method_to_authz_perm(Req),
     check_permission(Perm, AuthzObjectType, AuthzId, Req, State).
 
-check_permission(Perm, AuthzObjectType, AuthzId, Req, #base_state{requestor_id=RequestorId}=State) ->
+check_permission(Perm, AuthzObjectType, AuthzId, Req, #base_state{requestor_id=RequestorId, requestor=#chef_requestor{name = Name}}=State) ->
     case has_permission(AuthzObjectType, AuthzId, Perm, Req, State) of
         true ->
             {true, Req, State};
@@ -315,8 +321,8 @@ check_permission(Perm, AuthzObjectType, AuthzId, Req, #base_state{requestor_id=R
             {Req1, State1} = set_forbidden_msg(Req, State),
             {false, Req1, State1};
         Error ->
-            lager:error("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
-                                   [Perm, {AuthzObjectType, AuthzId}, RequestorId, Error]),
+            lager:error("is_authorized_on_resource failed (~p, ~p, ~p, ~p): ~p~n",
+                                   [Perm, {AuthzObjectType, AuthzId}, RequestorId, Name, Error]),
             {{halt, 500}, Req, State#base_state{log_msg={error, is_authorized_on_resource}}}
     end.
 
@@ -345,13 +351,13 @@ is_authorized(Req, State) ->
 %% If we add a user to the org, and then disassociate them, there will be
 %% acls left behind granting permissions on the org objects, so we
 %% must check user association and permissions
-authorized_by_org_membership_check(Req, #base_state{requestor=#chef_client{}}=State) ->
+authorized_by_org_membership_check(Req, #base_state{requestor=#chef_requestor{type = <<"client">>}}=State) ->
     {true, Req, State};
 authorized_by_org_membership_check(Req, #base_state{organization_name = undefined} = State) ->
     {true, Req, State};
 authorized_by_org_membership_check(Req, State = #base_state{organization_name = OrgName,
                                                             chef_db_context = DbContext}) ->
-    {UserName, BypassesChecks} = get_user(Req, State),
+    {UserName, BypassesChecks} = get_user(Req, State#base_state{superuser_bypasses_checks = true}),
     case BypassesChecks of
         true -> {true, Req, State};
         _ ->
@@ -648,7 +654,11 @@ finish_request(Req, #base_state{reqid = ReqId,
         end
     catch
         X:Y ->
-            lager:error({X, Y, erlang:get_stacktrace()})
+            lager:error({X, Y, erlang:get_stacktrace()}),
+            % If a failure occurs anywhere above, the request is completed (and changes
+            % potentially made) but our bookkeeping has failed. Let's not crash the request
+            % resulting in a 500 - which would indicate that the request should be retried.
+            {true, Req, State}
     end;
 finish_request(_Req, Anything) ->
     lager:error("chef_wm:finish_request/2 did not receive #base_state{}~nGot: ~p~n", [Anything]).
@@ -778,17 +788,20 @@ verify_request_signature(Req,
                                      organization_guid = OrgId,
                                      auth_skew = AuthSkew,
                                      chef_db_context = DbContext}=State) ->
-    UserName = wrq:get_req_header("x-ops-userid", Req),
-    case chef_db:fetch_requestor(DbContext, OrgId, UserName) of
-        {not_found, What} ->
-            NotFoundMsg = verify_request_message({not_found, What},
-                                                 UserName, OrgName),
+    Name = wrq:get_req_header("x-ops-userid", Req),
+    case chef_db:fetch_requestors(DbContext, OrgId, Name) of
+        not_found ->
+            NotFoundMsg = verify_request_message(user_or_client_not_found, Name, OrgName),
             {false, wrq:set_resp_body(chef_json:encode(NotFoundMsg), Req),
-             State#base_state{log_msg = {not_found, What}}};
-        Requestor -> %% This is either #chef_client{} or #chef_user{}
+             State#base_state{log_msg = {not_found, user_or_client}}};
+        {error, Error} ->
+            Msg = verify_request_message(error_finding_user_or_client, Name, OrgName),
+            {false, wrq:set_resp_body(chef_json:encode(Msg), Req),
+             State#base_state{log_msg = {error_finding_user_or_client, Error}}};
+        Requestors ->
             %% If the request originated from the webui, we do authn using the webui public
             %% key, not the user's key.
-            PublicKey = select_user_or_webui_key(Req, Requestor),
+            PublicKey = select_user_or_webui_key(Req, Requestors),
             Body = body_or_default(Req, <<>>),
             HTTPMethod = method_as_binary(Req),
             Path = iolist_to_binary(wrq:path(Req)),
@@ -796,11 +809,11 @@ verify_request_signature(Req,
             case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
                                                       Path, Body, PublicKey,
                                                       AuthSkew) of
-                {name, _} ->
+                {name, _UserId, Requestor} ->
                     {true, Req, State1#base_state{requestor_id = authz_id(Requestor),
                                                   requestor = Requestor}};
                 {no_authn, Reason} ->
-                    Msg = verify_request_message(Reason, UserName, OrgName),
+                    Msg = verify_request_message(Reason, Name, OrgName),
                     Json = chef_json:encode(Msg),
                     Req1 = wrq:set_resp_body(Json, Req),
                     {false, Req1, State1#base_state{log_msg = Reason}}
@@ -942,10 +955,14 @@ error_message(checksum_missing, Checksum) ->
 verify_request_message({not_found, org}, _User, Org) ->
     Msg = iolist_to_binary([<<"organization '">>, Org, <<"' does not exist.">>]),
     {[{<<"error">>, [Msg]}]};
-verify_request_message({not_found, _}, User, _Org) ->
+verify_request_message(user_or_client_not_found, User, _Org) ->
     Msg = iolist_to_binary([<<"Failed to authenticate as '">>, User, <<"'. ">>,
                             <<"Ensure that your node_name and client key ">>,
                             <<"are correct.">>]),
+    {[{<<"error">>, [Msg]}]};
+verify_request_message(error_finding_user_or_client, User, _Org) ->
+    Msg = iolist_to_binary([<<"An error occurred while trying to find  '">>, User, <<"'. ">>,
+                            <<"Please contact support.">>]),
     {[{<<"error">>, [Msg]}]};
 verify_request_message(bad_sig, User, _Org) ->
     Msg = iolist_to_binary([<<"Invalid signature for user or client '">>,
@@ -1004,7 +1021,7 @@ handle_rename(ObjectRec, Req, true) ->
 %%% The webui public key is fetched from the chef_keyring service. The 'X-Ops-WebKey-Tag'
 %%% header specifies which key id to use, or we use the 'default' key if it is missing.
 %%%
-select_user_or_webui_key(Req, Requestor) ->
+select_user_or_webui_key(Req, Requestors) ->
     %% Request origin is determined by the X-Ops-Request-Source header.  This is still secure
     %% because the request needs to have been signed with the webui private key.
     case wrq:get_req_header("x-ops-request-source", Req) of
@@ -1029,7 +1046,7 @@ select_user_or_webui_key(Req, Requestor) ->
                                 throw({badarg, "unknown webkey tag", Tag})
                         end
                 end,
-            case chef_keyring:get_key(WebKeyTag) of
+            Key = case chef_keyring:get_key(WebKeyTag) of
                 %% extract the public key from the private key
                 {ok, #'RSAPrivateKey'{modulus=Mod, publicExponent=Exp}} ->
                     #'RSAPublicKey'{modulus = Mod, publicExponent = Exp};
@@ -1039,9 +1056,15 @@ select_user_or_webui_key(Req, Requestor) ->
                     Msg = io_lib:format("Failed finding key ~w", [WebKeyTag]),
                     lager:error({no_such_key, Msg, erlang:get_stacktrace()}),
                     throw({no_such_key, WebKeyTag})
-            end;
-        _Else ->
-            public_key(Requestor)
+            end,
+            % Our query defaults to sorting clients first,
+            % but by definition web requests are user based.  This ensures that our
+            % requestor record is populated with user data (most importantly, requesting authz id)
+            % instead of client, in the event of a client/user name conflict.
+            [Requestor | _] = lists:reverse(Requestors),
+            [{Requestor, Key}];
+        _ ->
+            [{Requestor, Key} || #chef_requestor{public_key = Key} = Requestor <- Requestors]
     end.
 
 method_as_binary(Req) ->
@@ -1061,17 +1084,10 @@ maybe_authz_id(B) ->
     B.
 
 
--spec authz_id(#chef_user{} | #chef_client{}) -> object_id().
-authz_id(#chef_client{authz_id = AuthzId}) ->
-    AuthzId;
-authz_id(#chef_user{authz_id = AuthzId}) ->
-    AuthzId.
-
--spec public_key(#chef_user{} | #chef_client{}) -> binary().
-public_key(#chef_user{public_key = PublicKey}) ->
-    PublicKey;
-public_key(#chef_client{public_key = PublicKey}) ->
-    PublicKey.
+-spec authz_id(#chef_requestor{} | #chef_user{} | #chef_client{}) -> object_id().
+authz_id(#chef_requestor{authz_id = AuthzId}) -> AuthzId;
+authz_id(#chef_client{authz_id = AuthzId}) -> AuthzId;
+authz_id(#chef_user{authz_id = AuthzId}) -> AuthzId.
 
 
 %% @doc Webmachine content producing callback (that can be wired into

@@ -142,10 +142,9 @@ create_from_json(#wm_reqdata{} = Req,
 
 maybe_create_org({true, Req,
                   #base_state{
-                     resource_state = #organization_state{
-                                         oc_chef_organization = OrganizationData},
-                     requestor = User} = State}) ->
-    Result = oc_chef_authz_org_creator:create_org(OrganizationData, User),
+                     resource_state = #organization_state{oc_chef_organization = OrganizationData},
+                     requestor = Requestor} = State}) ->
+    Result = oc_chef_authz_org_creator:create_org(OrganizationData, Requestor),
     maybe_create_environment(Result, Req, State);
 maybe_create_org({_Error, _Body, #base_state{}} = Result) ->
     %% Note: We don't handle the case where the org create failed yet somehow created an org

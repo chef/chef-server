@@ -19,7 +19,7 @@ then
     VERSION=$(git describe --tags --exact-match --match='[0-9]*.[0-9]*.[0-9]*')
     PACKAGE=${PROJ_NAME}-${VERSION}.tar.gz
     cd rel
-    tar zcvf $PACKAGE $PROJ_NAME/
+    tar zcf $PACKAGE $PROJ_NAME/
     s3cmd put $PACKAGE s3://$ARTIFACT_BASE/$PACKAGE
 else
     REL_VERSION=`cat rel/reltool.config|grep '{rel,.*"oc_erchef"'|cut -d ',' -f 3|sed 's/"//g'`

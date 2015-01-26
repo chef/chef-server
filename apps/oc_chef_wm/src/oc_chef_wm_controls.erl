@@ -72,7 +72,7 @@ auth_info(Req, State) ->
     auth_info(wrq:method(Req), Req, State).
 
 auth_info('POST', Req, #base_state{resource_state = #control_state{control_data = ControlData},
-                                   requestor=#chef_client{name = ClientName}} = State) ->
+                                   requestor=#chef_requestor{type = <<"client">>, name = ClientName}} = State) ->
     % schema validates that node_name exist
     case ej:get({"node_name"}, ControlData) of
     ClientName ->
@@ -80,8 +80,6 @@ auth_info('POST', Req, #base_state{resource_state = #control_state{control_data 
     _Else ->
         {{halt, 403}, Req, State}
     end;
-
-
 auth_info('POST', Req, State) ->
     {{halt, 403}, Req, State}.
 

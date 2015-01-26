@@ -28,7 +28,7 @@
                   "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
        {chef_authn,".*",
                    {git,"https://github.com/opscode/chef_authn",
-                        "f92325bbcd18364f3eaa41d4e84dff5919090e85"}},
+                        "e7850d0925b01761d8085ee8b44dafbbe1b297a4"}},
        {epgsql,".*",
                {git,"git://github.com/epgsql/epgsql.git",
                     "f060df99c6c99fcd41dc57c106fae9de69d6f9ad"}},

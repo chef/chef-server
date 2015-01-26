@@ -15,6 +15,9 @@
         ]).
 
 -include_lib("public_key/include/public_key.hrl").
+-include("../../../../include/chef_types.hrl").
+
+-define(AUTHZ_ID, <<"00000000000000000000000000000001">>).
 
 authenticate_user_request(_GetHeader,
                           _Method,
@@ -22,7 +25,7 @@ authenticate_user_request(_GetHeader,
                           _Body,
                           _PublicKey,
                           _TimeSkew) ->
-    {name, <<"mock_user">>}.
+    {name, <<"mock_user">>, #chef_requestor{authz_id = ?AUTHZ_ID, type = <<"client">> }}.
 
 validate_headers(_GetHeader, _TimeSkew) ->
     [{'algorithm', <<"SHA1">>},

@@ -1,12 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Seth Falcon <seth@opscode.com>
-%% @author Daniel Deleo <dan@opscode.com>
-%% @author Mark Anderson <mark@opscode.com>
-%% @author Christopher Maier <cm@opscode.com>
-%% @author Mark Mzyk <mmzyk@opscode.com>
-%% @author Seth Chisamore <schisamo@opscode.com>
-%% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+%%
+%% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -22,6 +17,12 @@
 %% specific language governing permissions and limitations
 %% under the License.
 %%
+%% @author Seth Falcon <seth@opscode.com>
+%% @author Daniel Deleo <dan@opscode.com>
+%% @author Mark Anderson <mark@opscode.com>
+%% @author Christopher Maier <cm@opscode.com>
+%% @author Mark Mzyk <mmzyk@opscode.com>
+%% @author Seth Chisamore <schisamo@opscode.com>
 
 -module(chef_db).
 
@@ -46,6 +47,7 @@
          client_record_to_authz_id/2,
 
          fetch_requestor/3,
+         fetch_requestors/3,
 
          %% Checksum ops
          mark_checksums_as_uploaded/3,
@@ -290,15 +292,17 @@ client_record_to_authz_id(_Context, ClientRecord) ->
 
 %% @doc Given a name and an org, find either a user or a client and return a
 %% #chef_user{} or #chef_client{} record.
-%%
 %% Looks for a client first, then a user. We search for the client first for two reasons: 1)
 %% more API requests come from clients; 2) prevents a DoS attack cleverly chosen user names
 %% in OHC breaking clients with matching names.
 %%
-%% We examine the user/client record and return the certificate containing the actor's
+%% We examine the user/client record and return the actor's certificate(s) or public key(s)
+%%
 %% public key.  Some legacy records are present in the database that do not have
 %% certificates and have only a public key.  For these cases, we return the key tagged with
 %% 'key' instead of 'cert'.
+%% @deprecated  in favor of using fetch_requestors, which will fetch all matching valid requestor/keys
+%% for a given name.
 -spec fetch_requestor(#context{},
                       binary() | undefined,
                       binary()) -> #chef_client{} | #chef_user{} |
@@ -319,6 +323,13 @@ fetch_requestor(Context, OrgId, ClientName) ->
         #chef_client{} = Client ->
             Client
     end.
+
+%% @doc fetches requestor records for all actors matching by name. Note that
+%% if orgid is undefined, it will only retrieve records corresponding to users,
+%% and not clients.
+-spec fetch_requestors(#context{}, binary()|undefined, binary()) -> [#chef_requestor{}] | not_found.
+fetch_requestors(#context{reqid = ReqId}, OrgId, Name) ->
+    ?SH_TIME(ReqId, chef_sql, fetch_actors_by_name, (OrgId, Name)).
 
 %% @doc Saves sandbox information for a new sandbox in the database, and returns a
 %% chef_sandbox record representing the new sandbox.  This is a different pattern from other

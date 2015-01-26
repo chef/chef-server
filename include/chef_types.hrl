@@ -1,4 +1,4 @@
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -202,7 +202,21 @@
         'serialized_object'                 %%
        }).
 
-%% These types are just convenient shorthands for subsets of our
+
+%% Not a true chef object, but corresponds to  the view keys_by_type.
+-record(chef_requestor, {
+          'id' :: object_id(),
+          'org_id' :: object_id() | global,
+          'name',
+          'authz_id',
+          'type' ,
+          'key_name',
+          'public_key',
+          'key_version' :: ?KEY_VERSION | ?CERT_VERSION
+         }
+       ).
+
+%% These types and records are just convenient shorthands for subsets of our
 %% records that are used in the SQL layers.
 
 -type chef_object() :: #chef_data_bag{} |
@@ -220,3 +234,5 @@
                                  #chef_node{}.
 
 -type chef_updatable_object() :: tuple().
+
+

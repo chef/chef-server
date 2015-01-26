@@ -77,23 +77,6 @@ oc_chef_action_test_() ->
       }
       ]}.
 
-requestor_test_() ->
-    Name = <<"foo">>,
-    [{"client has correct name and type",
-      fun() ->
-                    Client = #chef_client{name = Name},
-                    ?assertEqual(Name, oc_chef_action:requestor_name(Client)),
-                    ?assertEqual(<<"client">>, oc_chef_action:requestor_type(Client))
-            end
-     },
-     {"user has correct name and type",
-      fun() ->
-                    User = #chef_user{username = Name},
-                    ?assertEqual(Name, oc_chef_action:requestor_name(User)),
-                    ?assertEqual(<<"user">>, oc_chef_action:requestor_type(User))
-            end
-     }
-    ].
 
 log_action_unsupported_state_test_() ->
     States = [{"search", #search_state{}},
@@ -307,7 +290,7 @@ maybe_add_remote_request_id_test_() ->
 end_to_end_test_() ->
     HostFQDN = <<"hostname.example.com">>,
     MockedModules = [chef_wm_util, wrq, bunnyc],
-    State = #base_state{requestor = #chef_user{username = <<"rob">>},
+    State = #base_state{requestor = #chef_requestor{name = <<"rob">>, type = <<"user">>},
                         reqid = <<"Xfh5mCQvjRgWDdlevrdyGt8M4lecXmN3gpGXrKKiUYqKdeD3">>,
                         organization_name = <<"cmwest">>,
                         resource_state=#node_state{node_data = {[{<<"name">>,<<"db">>}]} }},

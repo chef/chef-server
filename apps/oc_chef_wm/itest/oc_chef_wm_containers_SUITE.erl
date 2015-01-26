@@ -51,11 +51,10 @@ init_per_suite(Config) ->
                                             {<<"admin">>, true},
                                             {<<"public_key">>, <<"stub-pub">>}]}),
     io:format("ClientRecord ~p~n", [ClientRecord]),
-    Result = chef_db:create(ClientRecord,
-                   #context{reqid = <<"fake-req-id">>},
-                   <<"00000000000000000000000000000001">>),
+    ok = chef_db:create(ClientRecord,
+                        #context{reqid = <<"fake-req-id">>},
+                        <<"00000000000000000000000000000001">>),
 
-    io:format("Client Create Result ~p~n", [Result]),
     Config2.
 
 end_per_suite(Config) ->
