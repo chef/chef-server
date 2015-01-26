@@ -152,7 +152,12 @@ work_mem = <%= node['private_chef']['postgresql']['work_mem'] %>				# min 64kB
 
 # - Settings -
 
+<% case node['private_chef']['postgresql']['wal_level'] %>
+<% when "minimal", "archive", "hot_standby" %>
+wal_level = <%= node['private_chef']['postgresql']['wal_level'] %>			# minimal, archive, or hot_standby
+<% else %>
 #wal_level = minimal			# minimal, archive, or hot_standby
+<% end %>
 					# (change requires restart)
 #fsync = on				# turns forced synchronization on or off
 #synchronous_commit = on		# synchronization level; on, off, or local
