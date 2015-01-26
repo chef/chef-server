@@ -8,6 +8,8 @@ code is spread out across several repositories.
 The purpose of this repository is to server as a central place to report
 Chef server issues and to outline how to contribute to the Chef Server.
 
+If you need to file an issue against another Chef project, you can find a list of projects and where to file issues in the [community contributions section](https://docs.chef.io/community_contributions.html#issues-and-bug-reports) of the [Chef docs](https://docs.chef.io).
+
 ## Components of the Chef Server
 
 Following is a list of key components of Chef Server. This is not yet an exhaustive list. 
