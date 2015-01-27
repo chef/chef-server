@@ -1,7 +1,6 @@
 # Chef Server Changelog
 
-## 12.0.2 (unreleased)
-
+## 12.0.3 (unreleased)
 
 ### opscode-omnibus
 * Added key management and rotation commands add-client-key,
@@ -35,6 +34,15 @@
 
 ### opscode-omnibus
 * merged `oc_erchef` configuration sections for `chef_wm` into `oc_chef_wm`
+
+## 12.0.2 (2015-01-27)
+
+### chef-mover 2.2.20
+* Fix bug that can cause long-running migrations to hang indefinitely
+
+### private-chef-cookbooks
+* Expose configurable value for database bulk fetch batch size to
+  use during Solr 4 migrations
 
 ## 12.0.1 (2014-12-17)
 
