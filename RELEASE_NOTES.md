@@ -1,6 +1,6 @@
 # Chef Server Release Notes
 
-## 12.0.2 (unreleased)
+## 12.0.3 (unreleased)
 
 ### What's New:
 
@@ -20,13 +20,19 @@
     rotation. API support will follow in a subsequent release. This is
     considered a beta feature at this time.
 
+## 12.0.2 (2015-01-27)
+
+The following items are the set of bug fixes that have been applied since Chef Server 12.0.1:
+
+* `chef-mover` can hang during long-running migrations of organizations and user associations.
+
 ## 12.0.1 (2014-12-17)
 
-* The following components are no longer used and have been removed:
-+ opscode-test
-+ opscode-billing
-+ opscode-shared
-+ mixlib-authentication
+The following components are no longer used and have been removed:
+* opscode-test
+* opscode-billing
+* opscode-shared
+* mixlib-authentication
 
 ## 12.0.0 (2014-11-25)
 

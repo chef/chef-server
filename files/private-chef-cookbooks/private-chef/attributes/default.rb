@@ -1,4 +1,3 @@
-
 # Author:: Adam Jacob (<adam@opscode.com>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
@@ -514,6 +513,7 @@ default['private_chef']['opscode-chef-mover']['solr_http_cull_interval'] = "{1, 
 default['private_chef']['opscode-chef-mover']['solr_http_max_age'] = "{70, sec}"
 default['private_chef']['opscode-chef-mover']['solr_http_max_connection_duration'] = "{70,sec}"
 default['private_chef']['opscode-chef-mover']['solr_ibrowse_options'] = "[{connect_timeout, 10000}]"
+default['private_chef']['opscode-chef-mover']['bulk_fetch_batch_size'] = 5
 
 ###
 # Opscode Test
