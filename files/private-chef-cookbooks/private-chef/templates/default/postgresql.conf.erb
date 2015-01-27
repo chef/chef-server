@@ -185,10 +185,19 @@ checkpoint_warning = <%= node['private_chef']['postgresql']['checkpoint_warning'
 
 # - Archiving -
 
-#archive_mode = off		# allows archiving to be done
+
+archive_mode = <%= case node['private_chef']['postgresql']['archive_mode'] %>		# allows archiving to be done
 				# (change requires restart)
+<% if node['private_chef']['postgresql']['archive_command'].empty? %>
 #archive_command = ''		# command to use to archive a logfile segment
+<% else %>
+archive_command = '<%= node['private_chef']['postgresql']['archive_command'] %>'   # command to use to archive a logfile segment
+<% end %>
+<% if node['private_chef']['postgresql']['archive_timeout'].is_a? Integer and node['private_chef']['postgresql']['archive_timeout'] > 0 %>
+  archive_timeout = <%= node['private_chef']['postgresql']['archive_timeout'] %>		# force a logfile segment switch after this
+<% else %>
 #archive_timeout = 0		# force a logfile segment switch after this
+<% end %>
 				# number of seconds; 0 disables
 
 

@@ -377,6 +377,9 @@ default['private_chef']['postgresql']['md5_auth_cidr_addresses'] = [ '127.0.0.1/
 default['private_chef']['postgresql']['shmmax'] = 17179869184
 default['private_chef']['postgresql']['shmall'] = 4194304
 default['private_chef']['postgresql']['wal_level'] = "disabled"
+default['private_chef']['postgresql']['archive_mode'] = "off"
+default['private_chef']['postgresql']['archive_command'] = ""
+default['private_chef']['postgresql']['archive_timeout'] = 0 # 0 is disabled.
 
 # Make sure we don't allocate more shared memory than the max.
 # Especailly relevant on large machines. #597
