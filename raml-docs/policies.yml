@@ -1,0 +1,145 @@
+#%RAML 0.8
+---
+title: Policies API
+baseUri: http://chef.example/organizations/:orgname/policies
+version: v0
+mediaType: application/json
+documentation:
+  - title: Policyfile Object API (pre-release)
+    content: |
+      Nodes have a many to one relationship with policies, based on their group
+      and policy. A group is generally named after the functional role a host
+      preforms, such as "appserver", "chatserver", "load balancer", etc. A group
+      defines a set of hosts in a deployment unit, which may map to an
+      organization's environments (e.g., dev, qa, staging, production), or may
+      represent more granular phases (e.g., a change may go to a "canary" group,
+      and then be rolled through various clusters within the production
+      environment, so you'd have "prod-canary", "prod-cluster-1", etc.).
+
+      Groups are ephemeral in the sense that they only exist when there is a
+      policy applied to them.
+
+      The API as described here functions similarly to the Policyfile
+      compatibility mode which uses data bag items to store policies. It may be
+      modified in the future, particularly to provide better support for
+      describing collections of objects.
+
+/{group}/{policy}:
+  description: |
+    At this time there is no collection functionality. All requests directly
+    address a specific policy document, which is located at
+    `/policies/:group/:policy`, relative to the chef server root URL.
+  uriParameters:
+    group:
+      displayName: group - Policy Group Name
+      type: string
+  get:
+    description: |
+      Retrieve the Policy document
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                "name": "jenkins",
+                "run_list": [
+                  "recipe[policyfile_demo::default]"
+                ],
+                "named_run_lists": {
+                  "update_jenkins": [
+                    "recipe[policyfile_demo::other_recipe]"
+                  ]
+                },
+                "cookbook_locks": {
+                  "policyfile_demo": {
+                    "version": "0.1.0",
+                    "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+                    "dotted_decimal_identifier": "67638399371010690.23642238397896298.25512023620585",
+                    "source": "cookbooks/policyfile_demo",
+                    "cache_key": null,
+                    "scm_info": {
+                      "scm": "git",
+                      "remote": "git@github.com:danielsdeleo/policyfile-jenkins-demo.git",
+                      "revision": "edd40c30c4e0ebb3658abde4620597597d2e9c17",
+                      "working_tree_clean": false,
+                      "published": false,
+                      "synchronized_remote_branches": [
+
+                      ]
+                    },
+                    "source_options": {
+                      "path": "cookbooks/policyfile_demo"
+                    }
+                  }
+                },
+                "solution_dependencies": {
+                  "Policyfile": [
+                    [ "policyfile_demo", ">= 0.0.0" ]
+                  ],
+                  "dependencies": {
+                    "policyfile_demo (0.1.0)": []
+                  }
+                }
+              }
+
+  put:
+    description: |
+      Create or update a policy document
+    body:
+      application/json:
+        example: |
+          {
+            "name": "jenkins",
+            "run_list": [
+              "recipe[policyfile_demo::default]"
+            ],
+            "named_run_lists": {
+              "update_jenkins": [
+                "recipe[policyfile_demo::other_recipe]"
+              ]
+            },
+            "cookbook_locks": {
+              "policyfile_demo": {
+                "version": "0.1.0",
+                "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+                "dotted_decimal_identifier": "67638399371010690.23642238397896298.25512023620585",
+                "source": "cookbooks/policyfile_demo",
+                "cache_key": null,
+                "scm_info": {
+                  "scm": "git",
+                  "remote": "git@github.com:danielsdeleo/policyfile-jenkins-demo.git",
+                  "revision": "edd40c30c4e0ebb3658abde4620597597d2e9c17",
+                  "working_tree_clean": false,
+                  "published": false,
+                  "synchronized_remote_branches": [
+
+                  ]
+                },
+                "source_options": {
+                  "path": "cookbooks/policyfile_demo"
+                }
+              }
+            },
+            "solution_dependencies": {
+              "Policyfile": [
+                [ "policyfile_demo", ">= 0.0.0" ]
+              ],
+              "dependencies": {
+                "policyfile_demo (0.1.0)": []
+              }
+            }
+          }
+
+    responses:
+      201:
+        description: |
+          Policy successfully created. Returns the policy document that was created.
+        body:
+          application/json:
+      200:
+        description: |
+          Policy successfully updated. Returns the policy document that was created.
+        body:
+          application/json:
+
