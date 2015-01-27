@@ -11,6 +11,7 @@ class Chef
           mutate_chef_config
           converge
           Chef::Config.restore(old_config)
+          Chef::Cookbook::FileVendor.instance_variable_set(:@initialization_options, Chef::Config[:cookbook_path])
         end
       end
 
