@@ -1,6 +1,15 @@
 # Chef Server Changelog
 
-## 12.0.1 (unreleased)
+## 12.0.2 (2015-01-27)
+
+### chef-mover 2.2.20
+* Fix bug that can cause long-running migrations to hang indefinitely
+
+### private-chef-cookbooks
+* Expose configurable value for database bulk fetch batch size to
+  use during Solr 4 migrations
+
+## 12.0.1 (2014-12-17)
 
 ### oc-id
 * Update to version 0.4.4 to patch a doorkeeper CSRF vulnerability
