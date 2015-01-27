@@ -242,7 +242,7 @@ working(timeout, #state {max_worker_count = MW,
             start_worker(Object, State)
     end.
 
-working({start, _, _, _, _}, _From, State) ->
+working({start, _, _, _}, _From, State) ->
     {reply, {error, busy_now}, halting, State}.
 
 
@@ -273,7 +273,7 @@ halting(timeout, #state{} = State) ->
     %% Workers remainin, we stay 'halting' until there are none.
     {next_state, halting, State}.
 
-halting({start, _, _, _, _}, _From, State) ->
+halting({start, _, _, _}, _From, State) ->
     {reply, {error, halting_operations}, halting, State}.
 
 handle_info({'DOWN', _MRef, process, _Pid, Reason}, StateName,
@@ -325,17 +325,23 @@ handle_sync_event(status, _From, StateName, #state{live_worker_count = LW,
                {objects_in_progress, LW},
                {objects_failed, EC},
                {fatal_stop, FS}],
+
+    %% Fixed a race condition that prevents the gen_fsm from transitioning from the current
+    %% state to the next state when looping over status.
+    %%
+    %% The zero timeout prevents a status call from clearing the gen_fsm timeout, and the
+    %% state transition is dependant on a timeout to occur.
+    %%
+    %% Except the transition FROM `ready`. `ready` does not have a timeout handler, so a zero
+    %% timeout would not have the desired effect
+
     case StateName of
-        % Fixed a race condition that prevents the gen_fsm from transitioning
-        % from the halting state to the ready state when looping over status.
-        %
-        % The zero timeout prevents a status call from clearing the gen_fsm timeout,
-        % and the halting -> ready transition is dependant on a timeout to occur.
-        halting ->
-            {reply, {ok, Summary}, StateName, State, 0};
+        ready ->
+            {reply, {ok, Summary}, StateName, State};
         _ ->
-            {reply, {ok, Summary}, StateName, State}
+            {reply, {ok, Summary}, StateName, State, 0}
     end;
+
 handle_sync_event({set_concurrency, Value}, _From, working, #state{max_worker_count = Value} = State) ->
     {reply, {ok, no_change}, working, State};
 handle_sync_event({set_concurrency, Value}, _From, working, #state{max_worker_count = OldValue} = State) ->

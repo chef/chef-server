@@ -25,21 +25,13 @@
 %% In the case that things get stuck halting, it will try 240 more times
 %% (two minutes at current sleep time).
 wait_for_status() ->
-    wait_for_status(240).
-wait_for_status(HaltingRetries) when HaltingRetries == 0 ->
-    {ok, Status} = mover_manager:status(),
-    Status;
-wait_for_status(HaltingRetries) ->
     {ok, Status} = mover_manager:status(),
     case proplists:get_value(state, Status) of
         ready ->
             Status;
-        halting ->
-            timer:sleep(?POLL_SLEEP_MS),
-            wait_for_status(HaltingRetries - 1);
         _ ->
             timer:sleep(?POLL_SLEEP_MS),
-            wait_for_status(HaltingRetries)
+            wait_for_status()
     end.
 
 %% @doc Get a list of unmigrated orgs from migration_state_table
