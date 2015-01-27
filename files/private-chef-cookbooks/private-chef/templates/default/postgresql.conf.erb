@@ -152,12 +152,7 @@ work_mem = <%= node['private_chef']['postgresql']['work_mem'] %>				# min 64kB
 
 # - Settings -
 
-<% case node['private_chef']['postgresql']['wal_level'] %>
-<% when "minimal", "archive", "hot_standby" %>
 wal_level = <%= node['private_chef']['postgresql']['wal_level'] %>			# minimal, archive, or hot_standby
-<% else %>
-#wal_level = minimal			# minimal, archive, or hot_standby
-<% end %>
 					# (change requires restart)
 #fsync = on				# turns forced synchronization on or off
 #synchronous_commit = on		# synchronization level; on, off, or local
@@ -188,16 +183,8 @@ checkpoint_warning = <%= node['private_chef']['postgresql']['checkpoint_warning'
 
 archive_mode = <%= case node['private_chef']['postgresql']['archive_mode'] %>		# allows archiving to be done
 				# (change requires restart)
-<% if node['private_chef']['postgresql']['archive_command'].empty? %>
-#archive_command = ''		# command to use to archive a logfile segment
-<% else %>
 archive_command = '<%= node['private_chef']['postgresql']['archive_command'] %>'   # command to use to archive a logfile segment
-<% end %>
-<% if node['private_chef']['postgresql']['archive_timeout'].is_a? Integer and node['private_chef']['postgresql']['archive_timeout'] > 0 %>
-  archive_timeout = <%= node['private_chef']['postgresql']['archive_timeout'] %>		# force a logfile segment switch after this
-<% else %>
-#archive_timeout = 0		# force a logfile segment switch after this
-<% end %>
+archive_timeout = <%= node['private_chef']['postgresql']['archive_timeout'] %>		# force a logfile segment switch after this
 				# number of seconds; 0 disables
 
 
