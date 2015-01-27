@@ -1,6 +1,5 @@
 DEPS = $(CURDIR)/deps
-# TODO: move itest deps into a common data dir (need to configure common test)
-ITEST_DEPS = $(CURDIR)/itest/oc_chef_wm_containers_SUITE_data/deps
+
 DIALYZER_DEPS = deps/chef_authn/ebin \
                 deps/oc_chef_authz/ebin \
                 deps/chef_db/ebin \
@@ -23,6 +22,8 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
 DEPS_PLT = oc_chef_wm.plt
 # TODO automate managing this revision
 EC_SCHEMA_VERSION = 2.5.3
+
+ITEST_DEPS = $(CURDIR)/itest/common/deps
 
 REBAR = REBAR_PARENT=$(CURDIR)/rebar.config rebar
 
@@ -52,8 +53,6 @@ dialyzer: $(DEPS_PLT)
 $(DEPS_PLT):
 	@dialyzer --build_plt $(DIALYZER_DEPS) --output_plt $(DEPS_PLT)
 
-.PHONY: check_calls
-
 $(ITEST_DEPS):
 	mkdir -p $(ITEST_DEPS)
 
@@ -67,3 +66,5 @@ itest_deps: $(ITEST_DEPS)/enterprise-chef-server-schema itest_mocks
 
 itest: test itest_deps
 	@$(REBAR) skip_deps=true ct
+
+.PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest_deps itest_mocks itest

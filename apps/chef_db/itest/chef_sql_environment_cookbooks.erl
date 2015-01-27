@@ -43,7 +43,7 @@ environment_cookbooks_test(Description, EnvironmentSpec, NumVersions, Expected) 
     FullEnvironment = environment_from_spec(EnvironmentSpec),
     itest_util:create_record(FullEnvironment),
     {ok, PersistedEnvironment} = itest_util:fetch_record(FullEnvironment),
-    {ok, Actual} = chef_sql:fetch_environment_filtered_cookbook_versions(itest_util:the_org_id(),
+    {ok, Actual} = chef_sql:fetch_environment_filtered_cookbook_versions(chef_test_suite_helper:the_org_id(),
                                                                          PersistedEnvironment, all, NumVersions),
     ?assertEqual(Expected, Actual),
     itest_cookbook_util:remove_all_cookbooks(),
@@ -77,7 +77,7 @@ environment_recipes_test(Description, EnvironmentSpec, Expected) ->
     FullEnvironment = environment_from_spec(EnvironmentSpec),
     itest_util:create_record(FullEnvironment),
     {ok, PersistedEnvironment} = itest_util:fetch_record(FullEnvironment),
-    {ok, Actual} = chef_sql:fetch_environment_filtered_recipes(itest_util:the_org_id(), PersistedEnvironment),
+    {ok, Actual} = chef_sql:fetch_environment_filtered_recipes(chef_test_suite_helper:the_org_id(), PersistedEnvironment),
     ?assertEqual(Expected, Actual),
     itest_cookbook_util:remove_all_cookbooks(),
     itest_util:delete_record(FullEnvironment).
@@ -105,7 +105,7 @@ environment_filtered_cookbooks_test(Description, EnvironmentSpec, ResultsSpec) -
 
     lists:map(fun({CookbookName, NumToVersions}) ->
                       lists:map(fun({NumVersions, Versions}) ->
-                                        {ok, Actual} = chef_sql:fetch_environment_filtered_cookbook_versions(itest_util:the_org_id(),
+                                        {ok, Actual} = chef_sql:fetch_environment_filtered_cookbook_versions(chef_test_suite_helper:the_org_id(),
                                                                                                              PersistedEnvironment, CookbookName,
                                                                                                              NumVersions),
                                         ?assertEqual([{CookbookName, Versions}], Actual)
@@ -334,9 +334,9 @@ environment_from_spec(Prefix) when is_binary(Prefix)->
 
 %% TODO: This doesn't handle the "_default" environment yet
 make_environment(Prefix, Properties) ->
-    AuthzId = itest_util:make_az_id(Prefix),
-    OrgId = itest_util:the_org_id(),
-    Id = itest_util:make_id(Prefix),
+    AuthzId = chef_test_suite_helper:make_az_id(Prefix),
+    OrgId = chef_test_suite_helper:the_org_id(),
+    Id = chef_test_suite_helper:make_id(Prefix),
 
     %% These are the various properties of the Environment's
     %% `serialized_object' field we currently give hooks for
@@ -354,7 +354,7 @@ make_environment(Prefix, Properties) ->
                        authz_id = AuthzId,
                        org_id = OrgId,
                        name = environment_name_from_prefix(Prefix),
-                       last_updated_by = itest_util:actor_id(),
+                       last_updated_by = chef_test_suite_helper:actor_id(),
                        created_at = default_date(),
                        updated_at = default_date(),
                        serialized_object = itest_cookbook_util:encode_and_compress(Object)

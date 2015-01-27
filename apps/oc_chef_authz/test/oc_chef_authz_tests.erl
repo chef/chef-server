@@ -1,10 +1,10 @@
-%% @author Mark Anderson <mark@opscode.com>
-%% @version 0.0.1
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
+%% @author Mark Anderson <mark@chef.io>
+%% @author Tyler Cloke <tyler@chef.io>
 %% @doc authorization - Interface to the opscode authorization servize
 %%
-%% This module is an Erlang port of the mixlib-authorization Ruby gem.
-%%
-%% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2011-2015 Chef, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -49,13 +49,6 @@
                                                     ".config"])).
 
 -include_lib("eunit/include/eunit.hrl").
-
-%% user_lookup_test() ->
-%%     test_utils:test_setup(),                    % starts stats_hero
-%%     automeck:mocks(?AUTOMECK_FILE(user_lookup)),
-%%     Context = chef_db:make_context(<<"testing">>), % req_id must be a binary
-%%     ?assert(is_authz_id(oc_chef_authz:username_to_auth_id(Context, ?SUPERUSER))),
-%%     meck:unload().
 
 resource_test_() ->
     {foreach,
@@ -380,42 +373,26 @@ create_entity_if_authorized_test_() ->
               end}
      end]}.
 
-random_bogus_port() ->
-    {ok, S} = gen_udp:open(0, [binary, {active, once}]),
-    {ok, Port} = inet:port(S),
-    gen_udp:close(S),
-    Port.
-
 needed_apps() ->
     [crypto, asn1, ibrowse, pooler, stats_hero, public_key, ssl, epgsql, sqerl, oc_chef_authz].
 
 start_apps() ->
     error_logger:tty(false),
+
+    chef_test_suite_helper:set_app_env(stats_hero),
+
     application:set_env(oc_chef_authz, cleanup_batch_size, 100),
     application:set_env(oc_chef_authz, authz_superuser_id, <<"superuser">>),
     application:set_env(oc_chef_authz, cleanup_interval, 5000),
-    application:set_env(stats_hero, estatsd_host, "localhost"),
-    application:set_env(stats_hero, estatsd_port, random_bogus_port()),
-    application:set_env(stats_hero, udp_socket_pool_size, 1),
     application:set_env(oc_chef_authz, authz_service,
                         [{root_url, "http://test-authz-service:2323"},
                          {timeout, 200}, {init_count, 5}, {max_count, 6}]),
-    [ ok = ensure_started(A) || A <- needed_apps() ],
+    [ ok = chef_test_suite_helper:ensure_started(A) || A <- needed_apps() ],
     ok.
 
 stop_apps() ->
     [ application:stop(A) || A <- lists:reverse(needed_apps()) ],
     ok.
-
-ensure_started(App) ->
-    case application:start(App) of
-        ok ->
-            ok;
-        {error, {already_started, App}} ->
-            ok;
-        E ->
-            E
-    end.
 
 ping_test_() ->
     {foreach,

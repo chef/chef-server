@@ -29,20 +29,20 @@ handle_error_test_() ->
         { "When all requests are successful",
             fun() ->
                     OpsResults = [
-                        {ok, test_utils:make_az_id("client-01")},
-                        {ok, test_utils:make_az_id("client-02")},
-                        {ok, test_utils:make_az_id("client-03")}
+                        {ok, chef_test_suite_helper:make_az_id("client-01")},
+                        {ok, chef_test_suite_helper:make_az_id("client-02")},
+                        {ok, chef_test_suite_helper:make_az_id("client-03")}
                     ],
                     ?assertEqual(4, oc_chef_group:handle_error_for_update_ops(OpsResults, 1))
             end
         },
         { "When one result is forbidden",
             fun() ->
-                    ForbiddenAuthzId = test_utils:make_az_id("forbidden-01"),
+                    ForbiddenAuthzId = chef_test_suite_helper:make_az_id("forbidden-01"),
                     OpsResults = [
-                        {ok, test_utils:make_az_id("client-01")},
+                        {ok, chef_test_suite_helper:make_az_id("client-01")},
                         {error, forbidden, ForbiddenAuthzId},
-                        {ok, test_utils:make_az_id("client-03")}
+                        {ok, chef_test_suite_helper:make_az_id("client-03")}
                     ],
                     Expected = {error, error_in_bifrost},
                     ?assertEqual(Expected, oc_chef_group:handle_error_for_update_ops(OpsResults, 1))
@@ -50,10 +50,10 @@ handle_error_test_() ->
         },
         { "When two results is forbidden",
             fun() ->
-                    ForbiddenAuthzId1 = test_utils:make_az_id("forbidden-01"),
-                    ForbiddenAuthzId2 = test_utils:make_az_id("forbidden-02"),
+                    ForbiddenAuthzId1 = chef_test_suite_helper:make_az_id("forbidden-01"),
+                    ForbiddenAuthzId2 = chef_test_suite_helper:make_az_id("forbidden-02"),
                     OpsResults = [
-                        {ok, test_utils:make_az_id("client-01")},
+                        {ok, chef_test_suite_helper:make_az_id("client-01")},
                         {error, forbidden, ForbiddenAuthzId1},
                         {error, forbidden, ForbiddenAuthzId2}
                     ],
@@ -63,11 +63,11 @@ handle_error_test_() ->
         },
         { "When one results is forbidden, another is server error",
             fun() ->
-                    ForbiddenAuthzId = test_utils:make_az_id("forbidden-01"),
+                    ForbiddenAuthzId = chef_test_suite_helper:make_az_id("forbidden-01"),
                     OpsResults = [
-                        {ok, test_utils:make_az_id("client-01")},
+                        {ok, chef_test_suite_helper:make_az_id("client-01")},
                         {error, forbidden, ForbiddenAuthzId},
-                        {error, server_error, test_utils:make_az_id("client-03")}
+                        {error, server_error, chef_test_suite_helper:make_az_id("client-03")}
                     ],
                     Expected = {error, error_in_bifrost},
                     ?assertEqual(Expected, oc_chef_group:handle_error_for_update_ops(OpsResults, 1))
@@ -75,11 +75,11 @@ handle_error_test_() ->
         },
         { "When one result is server error",
             fun() ->
-                    ServerErrAuthzId = test_utils:make_az_id("serverr-01"),
+                    ServerErrAuthzId = chef_test_suite_helper:make_az_id("serverr-01"),
                     OpsResults = [
-                        {ok, test_utils:make_az_id("client-01")},
+                        {ok, chef_test_suite_helper:make_az_id("client-01")},
                         {error, server_error, ServerErrAuthzId},
-                        {ok, test_utils:make_az_id("client-03")}
+                        {ok, chef_test_suite_helper:make_az_id("client-03")}
                     ],
                     Expected = {error, error_in_bifrost},
                     ?assertEqual(Expected, oc_chef_group:handle_error_for_update_ops(OpsResults, 1))
@@ -87,10 +87,10 @@ handle_error_test_() ->
         },
         { "When two results are server errors",
             fun() ->
-                    ServerErrAuthzId1 = test_utils:make_az_id("serverr-01"),
-                    ServerErrAuthzId2 = test_utils:make_az_id("serverr-02"),
+                    ServerErrAuthzId1 = chef_test_suite_helper:make_az_id("serverr-01"),
+                    ServerErrAuthzId2 = chef_test_suite_helper:make_az_id("serverr-02"),
                     OpsResults = [
-                        {ok, test_utils:make_az_id("client-01")},
+                        {ok, chef_test_suite_helper:make_az_id("client-01")},
                         {error, server_error, ServerErrAuthzId1},
                         {error, server_error, ServerErrAuthzId2}
                     ],
