@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/opscode/chef-pedant.git
-  revision: 685d536ec3b247e2fef7dadb3db6f9a8e62a1a6d
+  revision: 185112e1fa32d0ba8de9575111f2a3eeb19ea95a
   branch: pedant-rspec-3
   specs:
     chef-pedant (1.0.40)
