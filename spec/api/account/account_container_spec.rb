@@ -224,14 +224,12 @@ describe "opscode-account containers", :containers do
             # This sort of makes sense (default container perms are empty), but
             # still seems wrong -- no matter what the permissions are, this should
             # still be a 409
-            if ruby?
-              skip "returns 403 instead" do
-                post(request_url, platform.admin_user,
-                  :payload => request_body).should look_like({
-                    :status => 409
-                  })
-              end
-            end
+            skip "returns 403 instead" if ruby?
+
+            post(request_url, platform.admin_user,
+              :payload => request_body).should look_like({
+                :status => 409
+              })
           end
         end
 
@@ -377,21 +375,21 @@ describe "opscode-account containers", :containers do
         context "with unicode in container name" do
           let(:new_container) { "グループ" }
 
-          it "can create container" do
-            skip "returns 400", :validation do
-              post(request_url, platform.admin_user,
-                :payload => request_body).should look_like({
-                  :status => 201,
-                  :body_exact => response_body
-                })
-              get(request_url, platform.admin_user).should look_like({
-                  :status => 200,
-                  :body_exact => list_of_containers_with_new_container
-                })
-              get("#{request_url}/#{new_container}", platform.admin_user).should look_like({
-                  :status => 200
-                })
-            end
+          it "can create container", :validation do
+            skip "returns 400"
+
+            post(request_url, platform.admin_user,
+              :payload => request_body).should look_like({
+                :status => 201,
+                :body_exact => response_body
+              })
+            get(request_url, platform.admin_user).should look_like({
+                :status => 200,
+                :body_exact => list_of_containers_with_new_container
+              })
+            get("#{request_url}/#{new_container}", platform.admin_user).should look_like({
+                :status => 200
+              })
           end
         end
 

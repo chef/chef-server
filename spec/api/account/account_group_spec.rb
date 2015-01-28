@@ -341,21 +341,20 @@ describe "opscode-account groups", :groups do
         context "with unicode in group name" do
           let(:new_group) { "グループ" }
 
-          it "can create group" do
-            skip "returns 400", :validation do
-              post(request_url, platform.admin_user,
-                :payload => request_body).should look_like({
-                  :status => 201,
-                  :body_exact => response_body
-                })
-              get(request_url, platform.admin_user).should look_like({
-                  :status => 200,
-                  :body => list_of_groups_with_new_group
-                })
-              get("#{request_url}/#{new_group}", platform.admin_user).should look_like({
-                  :status => 200
-                })
-            end
+          it "can create group", :validation do
+            skip "returns 400"
+            post(request_url, platform.admin_user,
+              :payload => request_body).should look_like({
+                :status => 201,
+                :body_exact => response_body
+              })
+            get(request_url, platform.admin_user).should look_like({
+                :status => 200,
+                :body => list_of_groups_with_new_group
+              })
+            get("#{request_url}/#{new_group}", platform.admin_user).should look_like({
+                :status => 200
+              })
           end
         end
 
