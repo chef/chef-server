@@ -241,11 +241,11 @@ describe "users", :users do
           end
 
           it "returns 201 when password is not provided" do
-            skip("work in flight on users endpoint - ruby incompat", :if => ruby?) do
-              post(request_url, platform.superuser, :payload => request_body).should look_like({
-                     :status => 201
-                   })
-            end
+            skip("work in flight on users endpoint - ruby incompat") if ruby?
+
+            post(request_url, platform.superuser, :payload => request_body).should look_like({
+                   :status => 201
+                 })
           end
           it "returns 201 when password is provided" do
             final_body = request_body.merge( { "password" => "foo bar"} )
@@ -328,12 +328,11 @@ describe "users", :users do
           end
 
           it "returns 201" do
-            skip("work in flight on users endpoint - ruby incompat", :if => ruby?) do
-              post(request_url, platform.superuser,
-                   :payload => request_body).should look_like({
-                     :status => 201
-                   })
-            end
+            skip("work in flight on users endpoint - ruby incompat") if ruby?
+            post(request_url, platform.superuser,
+                 :payload => request_body).should look_like({
+                   :status => 201
+                 })
           end
         end
         context "without username" do
@@ -1069,12 +1068,12 @@ EOF
             }
           end
           it "returns 200" do
-            skip("ruby returns 400 - pended", :if => ruby?) do
-              put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 200
-                })
-            end
+            skip("ruby returns 400 - pended") if ruby?
+
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 200
+              })
           end
         end
         context "without username" do
@@ -1292,18 +1291,18 @@ EOF
           end
 
           it "accepts the public key and subsequently responds with it" do
-            skip("Pending in ruby", :if => ruby?) do
-              put_response = put(request_url, platform.superuser, :payload => request_body)
-              put_response.should look_like({
-                                              :status => 200,
-                                              :body=> {
-                                                "uri" => request_url
-                                              },
-                                            })
-              get_response = get(request_url, platform.superuser)
-              new_public_key = JSON.parse(get_response.body)["public_key"]
-              new_public_key.should eq(input_public_key)
-            end
+            skip("Pending in ruby") if ruby?
+
+            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response.should look_like({
+                                            :status => 200,
+                                            :body=> {
+                                              "uri" => request_url
+                                            },
+                                          })
+            get_response = get(request_url, platform.superuser)
+            new_public_key = JSON.parse(get_response.body)["public_key"]
+            new_public_key.should eq(input_public_key)
           end
         end
 
@@ -1467,7 +1466,8 @@ EOF
           end
 
           it "returns 400", :validation do
-            skip("ruby returns 200", :if => ruby?)
+            skip("ruby returns 200") if ruby?
+
             response = put(request_url, platform.superuser, :payload => request_body)
             response.should look_like({
                                         :status => 400,
@@ -1634,16 +1634,16 @@ EOF
           end
 
           it "returns 409" do
-            skip("actually returns 403", :if => ruby?) do
-              put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 409
-                })
-              get(request_url, platform.superuser).should look_like({
-                  :status => 200,
-                  :body_exact => unmodified_user
-                })
-            end
+            skip("actually returns 403") if ruby?
+
+            put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 409
+              })
+            get(request_url, platform.superuser).should look_like({
+                :status => 200,
+                :body_exact => unmodified_user
+              })
           end
         end
       end # context renaming users

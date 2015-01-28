@@ -222,18 +222,18 @@ describe "/organizations", :organizations do
       end
 
       it "'name' is missing" do
-        skip("Ruby does not fail in this case", :if => ruby?) do
-          put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_name ).should look_like(
-            :status => 400
-          )
-        end
+        skip("Ruby does not fail in this case") if ruby?
+
+        put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_name ).should look_like(
+          :status => 400
+        )
       end
       it "'full_name' is missing" do
-        skip("Ruby does not fail in this case", :if => ruby?) do
-          put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_full_name ).should look_like(
-            :status => 400
-          )
-        end
+        skip("Ruby does not fail in this case") if ruby?
+
+        put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_no_full_name ).should look_like(
+          :status => 400
+        )
       end
       it "'name' is invalid" do
         put("#{platform.server}/organizations/#{orgname}", superuser, :payload => org_with_bad_name ).should look_like(

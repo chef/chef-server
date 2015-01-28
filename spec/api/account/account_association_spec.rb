@@ -537,11 +537,10 @@ describe "opscode-account user association", :association do
 
         end
         it "an org admin no longer sees them in the org" do
-          skip("ruby incorrectly fails this with a 403", :if => ruby?) do
-            result = get(api_url("users/#{bad_user}"), platform.admin_user)
-            result.should look_like({ :status=> 404,
-                                      :body_exact => { "error" => target_not_found_in_org} })
-          end
+          skip("ruby incorrectly fails this with a 403") if ruby?
+          result = get(api_url("users/#{bad_user}"), platform.admin_user)
+          result.should look_like({ :status=> 404,
+                                    :body_exact => { "error" => target_not_found_in_org} })
         end
         it "admin attempting to delete this user from the org results in a 400(r)/404(e)" do
             result = delete(api_url("users/#{bad_user}"), platform.admin_user)
@@ -651,22 +650,22 @@ describe "opscode-account user association", :association do
         end
 
         it "is removed from the org, invites issued by that admin cannot be accepted", :authorization do
-          skip "Known failure: passes w/ 200 b/c no USAG cleanup performed for deleted user" do
-            delete(api_url("users/#{test_admin_username}"), platform.superuser)
-            response = put(@user_invite_url, test_user, :payload=>{:response=>"accept"})
-            response.should look_like({ :status => 403,
-                                        :body_exact => { "error" => invalid_invite_msg } })
-            no_invites_for_user(test_user)
-          end
+          skip "Known failure: passes w/ 200 b/c no USAG cleanup performed for deleted user"
+
+          delete(api_url("users/#{test_admin_username}"), platform.superuser)
+          response = put(@user_invite_url, test_user, :payload=>{:response=>"accept"})
+          response.should look_like({ :status => 403,
+                                      :body_exact => { "error" => invalid_invite_msg } })
+          no_invites_for_user(test_user)
         end
         it "is removed from the system, invites issued by that admin can't by accepted", :authorization do
-          skip("Known failure: passes w/ 200 b/c no USAG or other group cleanup performed for deleted user") do
-              delete("#{platform.server}/users/#{test_admin_username}", platform.superuser)
-              response = put(@user_invite_url, test_user, :payload=>{:response=>"accept"})
-              response.should look_like({ :status => 403,
-                                          :body_exact => { "error" => invalid_invite_msg } })
-              no_invites_for_user(test_user)
-          end
+          skip("Known failure: passes w/ 200 b/c no USAG or other group cleanup performed for deleted user")
+
+          delete("#{platform.server}/users/#{test_admin_username}", platform.superuser)
+          response = put(@user_invite_url, test_user, :payload=>{:response=>"accept"})
+          response.should look_like({ :status => 403,
+                                      :body_exact => { "error" => invalid_invite_msg } })
+          no_invites_for_user(test_user)
         end
       end
 
@@ -972,23 +971,23 @@ describe "opscode-account user association", :association do
             platform.remove_user_from_group(org, test_user, "admins")
           end
           it "cannot delete own org association", :authorization do
-            skip("new constraint in erchef- ruby permits this deletion", :if => ruby?) do
-                delete(request_url, test_user).should look_like({
-                    :status => 403,
-                    :body_exact => {"error" => "Please remove #{test_user.name} from this organization's admins group before removing him or her from the organization." }
-                  })
-            end
+            skip("new constraint in erchef- ruby permits this deletion") if ruby?
+
+            delete(request_url, test_user).should look_like({
+                :status => 403,
+                :body_exact => {"error" => "Please remove #{test_user.name} from this organization's admins group before removing him or her from the organization." }
+              })
           end
 
           # Bug/regression check: prior to the fix, the user would be removed from the org member
           # list, even though other permissions were not modified.
           it "prevents deletion and does not break the admin org association in the process" do
-            skip("new constraint in erchef- ruby permits this deletion", :if => ruby?) do
-              delete(request_url, test_user)
-              # get users requires org membership to complete, so is a safe litmus to
-              # verify that the user is still in the org
-              get(api_url("users"), test_user).should look_like({ :status => 200 })
-            end
+            skip("new constraint in erchef- ruby permits this deletion") if ruby?
+
+            delete(request_url, test_user)
+            # get users requires org membership to complete, so is a safe litmus to
+            # verify that the user is still in the org
+            get(api_url("users"), test_user).should look_like({ :status => 200 })
           end
         end
         it "when the actor is not an org admin, user can delete own association" do
