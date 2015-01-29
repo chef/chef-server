@@ -57,7 +57,6 @@ init_per_suite(LastConfig) ->
     start_server(Config).
 
 start_server(Config) ->
-    %% TODO factor this out of chef_db eunit tests
     chef_test_suite_helper:set_app_env(stats_hero),
     chef_test_suite_helper:set_app_env(pooler),
 
@@ -80,15 +79,12 @@ user_ops(_Config) ->
     %% Always run fetch user list first, so no users
     %% yet exist in DB, so results are predictable,
     %% since we don't clean up after every test
-
-    %% TODO: fix
-    %%chef_sql_users:fetch_user_list(),
-    %%chef_sql_users:insert_user_data(),
-    %%chef_sql_users:fetch_user_data(),
-    %%chef_sql_users:update_user_data(),
-    %%chef_sql_users:delete_user_data(),
-    %%chef_sql_users:count_admin_users().
-    skip.
+    chef_sql_users:fetch_user_list(),
+    chef_sql_users:insert_user_data(),
+    chef_sql_users:fetch_user_data(),
+    chef_sql_users:update_user_data(),
+    chef_sql_users:delete_user_data(),
+    chef_sql_users:count_admin_users().
 
 client_ops(_Config) ->
     chef_sql_clients:insert_client_data(),
@@ -126,8 +122,6 @@ cookbook_ops(_Config) ->
 cookbook_version_ops(_Config) ->
     chef_sql_cookbook_versions:insert_cookbook_version_data(),
     chef_sql_cookbook_versions:insert_cbv_null_id(),
-    %% TODO: fix
-    %%chef_sql_cookbook_versions:insert_cbv_no_id(),
     chef_sql_cookbook_versions:insert_cbv_with_unknown_checksums(),
     chef_sql_cookbook_versions:insert_cbv_with_frozen(),
     chef_sql_cookbook_versions:fetch_cookbook_version_not_exist(),

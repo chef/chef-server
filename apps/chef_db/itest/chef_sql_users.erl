@@ -137,4 +137,3 @@ count_admin_users() ->
     ?assertEqual({ok, 1}, itest_util:create_record(User)),
     User2 = make_admin_user(<<"user09">>),
     ?assertEqual({ok, 1}, itest_util:create_record(User2)).
-

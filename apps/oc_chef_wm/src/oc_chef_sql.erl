@@ -36,13 +36,10 @@ statements(DbType) ->
 
     %% Queries from the OPC statements file will override any
     %% identically-named queries used on the Open Source server
-    Merged = dict:merge(fun(_K, _V1, V2) -> V2 end,
-                        dict:from_list(BaseStatements),
-                        dict:from_list(OPCStatements)),
-    %% count_user_admins is not used in EC
-    ChefStatements = dict:to_list(lists:foldl(fun dict:erase/2,
-                                              Merged,
-                                              [count_user_admins])),
+    ChefStatements = dict:to_list(dict:merge(fun(_K, _V1, V2) -> V2 end,
+				     dict:from_list(BaseStatements),
+				     dict:from_list(OPCStatements))),
+
     AuthzStatements = oc_chef_authz_db:statements(pgsql),
     AuthzStatements ++ ChefStatements.
 

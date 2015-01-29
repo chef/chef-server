@@ -65,26 +65,6 @@ insert_cbv_null_id() ->
     {error, Reason} = chef_sql:create_cookbook_version(CookbookVersion),
     Reason.
 
-insert_cbv_no_id() ->
-    {AuthzId, OrgId, Name} = itest_cookbook_util:make_cookbook(<<"insert_invalid">>),
-    %% This record is missing an 'id' field
-    CookbookVersion = #chef_cookbook_version{
-      authz_id=AuthzId,
-      org_id=OrgId,
-      name=Name,
-      major=0, minor=0, patch=0, frozen=false,
-      meta_attributes= <<"">>,
-      meta_deps= <<"">>,
-      meta_long_desc= <<"">>,
-      metadata= <<"">>,
-      last_updated_by= chef_test_suite_helper:actor_id(),
-      created_at= {datetime, {{2011,10,1},{16,47,46}}},
-      updated_at= {datetime, {{2011,10,1},{16,47,46}}},
-      serialized_object= <<"">>,
-      checksums = [] },
-      ?assertError({undefined_in_record, CookbookVersion},
-                 chef_sql:create_cookbook_version(CookbookVersion)).
-
 insert_cbv_with_unknown_checksums() ->
     Cookbook = itest_cookbook_util:make_cookbook(<<"insert_unknown">>),
     CookbookVersion = itest_cookbook_util:make_cookbook_version(<<"001insert_unknown">>, 0, Cookbook),
