@@ -2,7 +2,7 @@ site :opscode
 
 metadata
 
-cookbook 'enterprise', :git => 'git@github.com:opscode-cookbooks/enterprise-chef-common.git', :tag => '0.4.7'
+cookbook 'enterprise', :git => 'git@github.com:opscode-cookbooks/enterprise-chef-common.git', :tag => '0.5.1'
 cookbook 'chef-ha-drbd', :path => '../chef-ha-drbd'
 cookbook 'apt', '~> 2.0'
 cookbook 'yum', '~> 3.0'

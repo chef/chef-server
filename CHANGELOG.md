@@ -2,6 +2,12 @@
 
 ## 12.0.3 (unreleased)
 
+### enterprise-chef-common 0.5.1
+* Add preliminary systemd support
+
+### enterprise-chef-common 0.5.0
+* Make it possible to pass arbitrary attrs to runit resources
+
 ### opscode-omnibus
 * Added key management and rotation commands add-client-key,
   add-user-key, delete-user-key, delete-client-key, list-client-keys,
