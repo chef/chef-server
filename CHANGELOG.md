@@ -8,6 +8,11 @@
 ### enterprise-chef-common 0.5.0
 * Make it possible to pass arbitrary attrs to runit resources
 
+### chef-pedant and oc-chef-pedant
+* Updated chef-pedant to 1.0.41, oc-chef-pedant to 1.0.73. These
+  versions have been updated to use RSpec 3.
+>>>>>>> Update changelog for pedant version bump
+
 ### opscode-omnibus
 * Added key management and rotation commands add-client-key,
   add-user-key, delete-user-key, delete-client-key, list-client-keys,
