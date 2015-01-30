@@ -22,7 +22,7 @@
 
 * opscode-omnibus
   * Use X-Forwarded-For header instead of remote address in nginx logs
-    when topology is set to 'ha' or 'tier'
+    when nginx['log_x_forwarded_for'] is set to true
 
 ## 12.0.2 (2015-01-27)
 

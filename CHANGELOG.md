@@ -21,10 +21,8 @@
   chef-server-ctl commands.
 * Ensure nginx restarts on frontends after lua-related changes
 * Updated nginx's logrotate config with proper log ownership.
-* in the nginx logs, use $http_x_forwarded_for instead of $remote_addr
-  if node['private_chef']['log_x_forwarded_for'] is true. The attribute
-  defaults to true if 'topology' is set to 'ha' or 'tier' and false
-  otherwise
+* Nginx logs $http_x_forwarded_for instead of $remote_addr if
+  nginx['log_x_forwarded_for'] is true. The default is false
 
 ### oc\_erchef 1.2.0
 * add basic multikey/key rotation support. This is not yet exposed via
