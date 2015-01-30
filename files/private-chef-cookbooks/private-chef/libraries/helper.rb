@@ -213,6 +213,17 @@ EOKEY
     self.class.erl_atom_or_string(term)
   end
 
+  def s3_url_caching(setting)
+    case setting.to_s
+    when "off"
+      "off"
+    when /m$/
+      "{#{setting.chop}, minutes}"
+    when /%$/
+      "{#{setting.chop}, percent}"
+    end
+  end
+
   # OC-11540, fallback to ssl_port if non_ssl_port is disabled
   def internal_lb_url
     if node['private_chef']['nginx']['non_ssl_port'] == false
